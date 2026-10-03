@@ -92,7 +92,7 @@ def test_control_plane_service_access_reexports_resource_owner_seams() -> None:
 
 
 def test_control_plane_service_access_reexports_workflow_owner_seams() -> None:
-    from bioetl.composition.factories.services._workflow_services import (
+    from bioetl.composition.factories.services.workflow_services import (
         get_workflow_execution_service,
         get_workflow_inspection_service,
         get_workflow_runner_service,

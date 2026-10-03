@@ -281,7 +281,7 @@ family_freeze_rules:
         path: src/bioetl/application/composite/runner_pkg/runner.py
         issue: "#3443"
         owner: "@bioetl-architecture"
-        expires_on: "2026-12-31"
+        expires_on: "2026-10-15"
         removal_step: Remove freeze exception once composite canonical alias family rule is retired.
         reason: Canonical composite runner facade.
       - symbol: CompositePreflightValidationService

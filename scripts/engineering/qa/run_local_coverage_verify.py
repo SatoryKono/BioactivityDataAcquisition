@@ -18,11 +18,16 @@ import sys
 import tempfile
 import time
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from xml.etree import ElementTree
 
 from scripts.engineering.qa.report_module_coverage_inventory import (
     compute_source_tree_sha256,
+)
+from scripts.engineering.ci.local_test_telemetry import junit_telemetry_sha256
+from scripts.engineering.ci.update_test_telemetry_baseline import (
+    compute_test_telemetry_source_tree_sha256,
 )
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -284,13 +289,23 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if _git(
-        "status", "--porcelain", "--", "src/bioetl", "tests", "scripts/engineering/qa"
+        "status",
+        "--porcelain",
+        "--",
+        "src/bioetl",
+        "tests",
+        "scripts/engineering/qa",
+        "scripts/engineering/ci",
+        "pyproject.toml",
+        "configs/quality/test_matrix.yaml",
+        ".github/workflows/tests.yml",
     ):
         raise RuntimeError(
             "Source, tests, and coverage runner must be committed before measurement"
         )
     head = _git("rev-parse", "HEAD")
     source_sha = compute_source_tree_sha256(repo_root=ROOT)
+    test_sha = compute_test_telemetry_source_tree_sha256(repo_root=ROOT)
     if args.scratch_dir:
         scratch = args.scratch_dir.resolve()
         scratch.mkdir(parents=True, exist_ok=False)
@@ -306,7 +321,10 @@ def main(argv: list[str] | None = None) -> int:
         "schema_version": 1,
         "producer": "run_local_coverage_verify.py",
         "head": head,
+        "source_branch": _git("rev-parse", "--abbrev-ref", "HEAD"),
         "source_tree_sha256": source_sha,
+        "test_tree_sha256": test_sha,
+        "started_at_utc": datetime.now(UTC).isoformat(),
         "python": sys.version.split()[0],
         "scratch_dir": str(scratch),
         "required_shards": [shard.name for shard in SHARDS],
@@ -366,6 +384,9 @@ def main(argv: list[str] | None = None) -> int:
                 else None
             ),
             "junit_file": str(junit) if junit.is_file() else None,
+            "junit_telemetry_sha256": junit_telemetry_sha256(junit)
+            if junit.is_file()
+            else None,
             "log_file": str(log),
         }
         assert isinstance(manifest["shards"], list)
@@ -376,8 +397,22 @@ def main(argv: list[str] | None = None) -> int:
             flush=True,
         )
 
-    if compute_source_tree_sha256(repo_root=ROOT) != source_sha or _git(
-        "status", "--porcelain", "--", "src/bioetl", "tests", "scripts/engineering/qa"
+    if (
+        _git("rev-parse", "HEAD") != head
+        or (compute_test_telemetry_source_tree_sha256(repo_root=ROOT) != test_sha)
+        or compute_source_tree_sha256(repo_root=ROOT) != source_sha
+        or _git(
+            "status",
+            "--porcelain",
+            "--",
+            "src/bioetl",
+            "tests",
+            "scripts/engineering/qa",
+            "scripts/engineering/ci",
+            "pyproject.toml",
+            "configs/quality/test_matrix.yaml",
+            ".github/workflows/tests.yml",
+        )
     ):
         print(
             "[local-coverage] source or test tree changed during measurement",
@@ -450,6 +485,7 @@ def main(argv: list[str] | None = None) -> int:
             "line_gate_exit_code": line_exit,
             "branch_gate_exit_code": branch_exit,
             "complete": line_exit == 0 and branch_exit == 0,
+            "finished_at_utc": datetime.now(UTC).isoformat(),
         }
     )
     _write_manifest(manifest_path, manifest)

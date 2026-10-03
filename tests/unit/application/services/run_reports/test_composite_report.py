@@ -22,7 +22,7 @@ from bioetl.infrastructure.storage.run_report_store_adapter import (
 from bioetl.infrastructure.time import SystemClock
 
 
-pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
+pytestmark = pytest.mark.unit
 
 
 @pytest.mark.asyncio

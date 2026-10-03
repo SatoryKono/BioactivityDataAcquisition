@@ -23,7 +23,7 @@ _DYNAMIC_IMPORT_NAMES = frozenset({"import_module", "__import__"})
 _ALLOWED_DYNAMIC_IMPORT_FILES = frozenset(
     {
         "src/bioetl/composition/_service_registry.py",
-        "src/bioetl/composition/factories/services/_workflow_services.py",
+        "src/bioetl/composition/factories/services/workflow_services.py",
         "src/bioetl/composition/bootstrap/__init__.py",
         "src/bioetl/composition/bootstrap/cli/__init__.py",
         "src/bioetl/composition/bootstrap/runtime/__init__.py",

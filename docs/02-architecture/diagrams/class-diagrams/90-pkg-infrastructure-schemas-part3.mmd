@@ -1,13 +1,23 @@
 %% Title: Package Family: infrastructure/schemas (Part 3/4)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 3/4; modules: dq_report_config, source_config, _composite_config_merge_schema, composite_config_base, filter_config, dq_config.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 3/4; modules: pipeline_config_common, dq_report_config, source_config, _composite_config_merge_schema, composite_config_base.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-09-02
+%% @date    2026-10-04
 %% @level   Package Family / Inventory Slice
 %% @nodes   29
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
+
+    namespace pipeline_config_common {
+        class CircuitBreakerYamlConfig
+        class ConditionalValidationConfig
+        class CrossFieldValidationConfig
+        class CsvExportConfig
+        class DQReportYamlConfig
+        class DQYamlConfig
+        class FieldValidationConfig
+    }
 
     namespace dq_report_config {
         class BronzeDQReportConfig
@@ -42,17 +52,3 @@ classDiagram
         class EnricherSchema
         class SeedSchema
     }
-
-    namespace filter_config {
-        class FilterConfigFile
-        class GoldFiltersFileConfig
-        class InputFilterFileConfig
-        class SilverFiltersFileConfig
-    }
-
-    namespace dq_config {
-        class DQConfigFile
-        class KeyNullabilityRuleConfig
-        class ThresholdsConfig
-    }
-

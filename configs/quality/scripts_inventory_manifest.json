@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-03T21:44:40.099042+00:00",
+  "generated_at": "2026-10-03T22:51:05.359671+00:00",
   "summary": {
-    "total_scripts": 636,
+    "total_scripts": 637,
     "status_counts": {
-      "active": 337,
-      "supporting": 299
+      "active": 336,
+      "supporting": 301
     },
     "reference_group_coverage": {
       "agents": 10,
@@ -13,9 +13,9 @@
       "ci": 86,
       "docs": 259,
       "other": 48,
-      "scripts": 532,
+      "scripts": 534,
       "skills": 12,
-      "tests": 447
+      "tests": 448
     }
   },
   "scripts": [
@@ -10053,6 +10053,37 @@
       ]
     },
     {
+      "path": "scripts/engineering/ci/local_test_telemetry.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
+          "line": 761,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.ci.local_test_telemetry import build_local_baseline"
+        },
+        {
+          "path": "scripts/engineering/qa/run_local_coverage_verify.py",
+          "line": 28,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.ci.local_test_telemetry import junit_telemetry_sha256"
+        },
+        {
+          "path": "tests/unit/scripts/ci/test_local_test_telemetry.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.local_test_telemetry import ("
+        }
+      ],
+      "owner": "@bioetl-quality",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Internal evidence-validation functions imported by the canonical telemetry updater and local coverage producer; no CLI, main, or direct invocation exists. Retain as supporting code and expose operations only through those existing entrypoints."
+    },
+    {
       "path": "scripts/engineering/ci/pr_gate.py",
       "type": "py",
       "status": "supporting",
@@ -10309,13 +10340,25 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
           "line": 46,
           "source_group": "docs",
           "text": "`scripts/engineering/ci/update_test_telemetry_baseline.py`: LF-normalized"
+        },
+        {
+          "path": "scripts/engineering/ci/local_test_telemetry.py",
+          "line": 143,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.ci.update_test_telemetry_baseline import ("
+        },
+        {
+          "path": "scripts/engineering/qa/run_local_coverage_verify.py",
+          "line": 29,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.ci.update_test_telemetry_baseline import ("
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
@@ -16141,7 +16184,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 17,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
@@ -16160,6 +16203,12 @@
           "line": 177,
           "source_group": "docs",
           "text": "- [Module coverage inventory generator](../../../scripts/engineering/qa/report_module_coverage_inventory.py)"
+        },
+        {
+          "path": "scripts/engineering/ci/local_test_telemetry.py",
+          "line": 147,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa.report_module_coverage_inventory import ("
         },
         {
           "path": "scripts/engineering/qa/README.md",
@@ -16182,12 +16231,6 @@
         {
           "path": "scripts/engineering/qa/debt_governance_gate_evaluators.py",
           "line": 28,
-          "source_group": "scripts",
-          "text": "from scripts.engineering.qa.report_module_coverage_inventory import ("
-        },
-        {
-          "path": "scripts/engineering/qa/report_debt_governance_gates.py",
-          "line": 45,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.report_module_coverage_inventory import ("
         }
@@ -16842,13 +16885,49 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 8,
       "references": [
+        {
+          "path": "scripts/engineering/ci/local_test_telemetry.py",
+          "line": 49,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa.run_local_coverage_verify import SHARDS"
+        },
+        {
+          "path": "scripts/engineering/ci/local_test_telemetry.py",
+          "line": 72,
+          "source_group": "scripts",
+          "text": "payload.get(\"producer\") != \"run_local_coverage_verify.py\""
+        },
+        {
+          "path": "tests/architecture/test_test_telemetry_baseline.py",
+          "line": 49,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.run_local_coverage_verify import SHARDS"
+        },
+        {
+          "path": "tests/architecture/test_test_telemetry_baseline.py",
+          "line": 54,
+          "source_group": "tests",
+          "text": "assert provenance[\"producer\"] == \"run_local_coverage_verify.py\""
+        },
         {
           "path": "tests/unit/repo_backed/scripts/engineering/dev/test_setup_env_wsl_branches.py",
           "line": 12,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.run_local_coverage_verify import _windows_bash"
+        },
+        {
+          "path": "tests/unit/scripts/ci/test_local_test_telemetry.py",
+          "line": 17,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.run_local_coverage_verify import SHARDS"
+        },
+        {
+          "path": "tests/unit/scripts/ci/test_local_test_telemetry.py",
+          "line": 51,
+          "source_group": "tests",
+          "text": "\"producer\": \"run_local_coverage_verify.py\","
         },
         {
           "path": "tests/unit/scripts/qa/test_run_local_coverage_verify.py",
@@ -16948,7 +17027,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -16964,13 +17043,19 @@
         },
         {
           "path": "scripts/engineering/qa/refresh_governance_artifacts.py",
-          "line": 527,
+          "line": 33,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.technical_debt_audit_registry import ("
         },
         {
           "path": "scripts/engineering/qa/refresh_governance_artifacts.py",
-          "line": 563,
+          "line": 541,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa.technical_debt_audit_registry import ("
+        },
+        {
+          "path": "scripts/engineering/qa/refresh_governance_artifacts.py",
+          "line": 585,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.technical_debt_audit_registry import ("
         },
@@ -20352,7 +20437,7 @@
     {
       "path": "scripts/ops/observability/grafana/_run_explorer_columns.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -20368,7 +20453,11 @@
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana._run_explorer_columns import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-observability",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Standalone main/--check CLI retired in #11854 after reference audit found only two imports from render_nav_bus and no invocation. Retain the actual column/title transformations as an internal helper of the canonical render_nav_bus entrypoint; do not restore a standalone CLI."
     },
     {
       "path": "scripts/ops/observability/grafana/_selected_run_panels.py",
@@ -21188,7 +21277,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 20,
+      "reference_count": 19,
       "references": [
         {
           "path": ".github/ISSUES/DS2-2026-07-28-DASHBOARD-SYSTEM-2-REFACTOR-ISSUE-PACK.md",

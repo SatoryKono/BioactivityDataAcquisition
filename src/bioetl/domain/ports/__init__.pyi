@@ -84,6 +84,9 @@ from bioetl.domain.ports.data_source import (
 from bioetl.domain.ports.data_source import (
     FilterableDataSourcePort as FilterableDataSourcePort,
 )
+from bioetl.domain.ports.data_source import (
+    PublicationTermEnrichmentPort as PublicationTermEnrichmentPort,
+)
 from bioetl.domain.ports.delta_reader import DeltaReaderPort as DeltaReaderPort
 from bioetl.domain.ports.export import (
     DebugExportPort as DebugExportPort,

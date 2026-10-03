@@ -27,8 +27,7 @@ from bioetl.domain.types import BronzeRecord
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import DataSourcePort
-    from bioetl.domain.ports.data_source import PublicationTermEnrichmentPort
+    from bioetl.domain.ports import DataSourcePort, PublicationTermEnrichmentPort
 
 
 class PublicationTermDataSource(

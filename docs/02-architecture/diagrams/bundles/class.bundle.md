@@ -1,6 +1,6 @@
 # BioETL Class Diagrams Bundle
 
-- Generated: 2026-09-26T15:13:19+00:00
+- Generated: 2026-10-01T18:28:04+00:00
 - Diagram count: 146
 
 ## Table of Contents
@@ -545,7 +545,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `7`
 
 \newpage
@@ -564,7 +564,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `12`
 
 \newpage
@@ -583,7 +583,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `30`
 
 \newpage
@@ -602,7 +602,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
+- Дата: `2026-10-04`
 - Узлы (metadata): `22`
 
 \newpage
@@ -621,7 +621,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `17`
 
 \newpage
@@ -640,7 +640,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `15`
 
 \newpage
@@ -659,7 +659,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
+- Дата: `2026-10-04`
 - Узлы (metadata): `5`
 
 \newpage
@@ -678,7 +678,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `22`
 
 \newpage
@@ -697,7 +697,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `18`
 
 \newpage
@@ -716,7 +716,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `5`
 
 \newpage
@@ -735,7 +735,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
+- Дата: `2026-10-04`
 - Узлы (metadata): `5`
 
 \newpage
@@ -754,7 +754,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
+- Дата: `2026-10-04`
 - Узлы (metadata): `20`
 
 \newpage
@@ -773,7 +773,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `30`
 
 \newpage
@@ -792,7 +792,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `4`
 
 \newpage
@@ -811,7 +811,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `11`
 
 \newpage
@@ -830,7 +830,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `6`
 
 \newpage
@@ -849,7 +849,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `10`
 
 \newpage
@@ -868,7 +868,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `8`
 
 \newpage
@@ -887,7 +887,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `4`
 
 \newpage
@@ -906,7 +906,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `26`
 
 \newpage
@@ -925,7 +925,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `24`
 
 \newpage
@@ -944,7 +944,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `7`
 
 \newpage
@@ -963,7 +963,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `8`
 
 \newpage
@@ -977,13 +977,13 @@
 ![90-pkg-application-services-control-plane-ledger](../class-diagrams/svg/90-pkg-application-services-control-plane-ledger.svg)
 
 ### Описание
-Диаграмма «Package Family: application/services/control_plane/ledger» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/application/services/control_plane/ledger; modules: core_events, entry_diagnostic_details, entry_support, rich_events, service.. Схема имеет плотность порядка 9 узлов и 3 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: core events, entry diagnostic details, entry support, rich events, service. Показательные узлы для быстрого чтения: _RunLedgerCoreEventAppender, _RunLedgerCorrelationFields, RunLedgerCorrelationFieldsProtocol, _RunLedgerDiagnosticRequest, RunLedgerEntryRequest, _RunLedgerServiceEntryProtocol. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: application/services/control_plane/ledger» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/application/services/control_plane/ledger; modules: core_events, entry_diagnostic_details, entry_support, rich_events, input_snapshot_recording, service.. Схема имеет плотность порядка 10 узлов и 3 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: core events, entry diagnostic details, entry support, rich events, input snapshot recording, service. Показательные узлы для быстрого чтения: _RunLedgerCoreEventAppender, _RunLedgerCorrelationFields, RunLedgerCorrelationFieldsProtocol, _RunLedgerDiagnosticRequest, RunLedgerEntryRequest, _RunLedgerServiceEntryProtocol. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
-- Узлы (metadata): `9`
+- Дата: `2026-10-04`
+- Узлы (metadata): `10`
 
 \newpage
 
@@ -996,13 +996,13 @@
 ![90-pkg-application-services-control-plane-manifest-diagnostics](../class-diagrams/svg/90-pkg-application-services-control-plane-manifest-diagnostics.svg)
 
 ### Описание
-Диаграмма «Package Family: application/services/control_plane/manifest/diagnostics» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/application/services/control_plane/manifest/diagnostics; modules: replay_refresh_types, finalization, summary, base_replay_context, composite_projection, dq_details.. Схема имеет плотность порядка 14 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: replay refresh types, finalization, summary, base replay context, composite projection, dq details. Показательные узлы для быстрого чтения: _ReplayRefreshContext, _ReplayRefreshProjection, _ReplayRefreshSummaryUpdate, _LedgerEnrichedSummary, _ProcessedLedgerDiagnostics, _FinalSummaryRequest. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: application/services/control_plane/manifest/diagnostics» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/application/services/control_plane/manifest/diagnostics; modules: replay_refresh_types, finalization, summary, base_replay_context, composite_projection, dq_details.. Схема имеет плотность порядка 15 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: replay refresh types, finalization, summary, base replay context, composite projection, dq details. Показательные узлы для быстрого чтения: _ReplayRefreshContext, _ReplayRefreshProjection, _ReplayRefreshSummaryUpdate, _LedgerEnrichedSummary, _ProcessedLedgerDiagnostics, _FinalSummaryRequest. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
-- Узлы (metadata): `14`
+- Дата: `2026-10-04`
+- Узлы (metadata): `15`
 
 \newpage
 
@@ -1020,7 +1020,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
+- Дата: `2026-10-04`
 - Узлы (metadata): `21`
 
 \newpage
@@ -1039,7 +1039,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
+- Дата: `2026-10-04`
 - Узлы (metadata): `29`
 
 \newpage
@@ -1058,7 +1058,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `5`
 
 \newpage
@@ -1072,13 +1072,13 @@
 ![90-pkg-application-services-dq](../class-diagrams/svg/90-pkg-application-services-dq.svg)
 
 ### Описание
-Диаграмма «Package Family: application/services/dq» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/application/services/dq; modules: bronze_analyzer, dq_report_builders, gold_analyzer, silver_analyzer, silver_check_executor, silver_statistics.. Схема имеет плотность порядка 7 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: bronze analyzer, dq report builders, gold analyzer, silver analyzer, silver check executor, silver statistics. Показательные узлы для быстрого чтения: BronzeDQAnalyzer, _HasDQStatus, GoldDQAnalyzer, SilverDQAnalyzer, SilverCheckExecutor, SilverStatisticsCalculator. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: application/services/dq» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/application/services/dq; modules: bronze_analyzer, disabled_gold_filter, dq_report_assembly, gold_analyzer, silver_analyzer, silver_check_executor.. Схема имеет плотность порядка 8 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: bronze analyzer, disabled gold filter, dq report assembly, gold analyzer, silver analyzer, silver check executor. Показательные узлы для быстрого чтения: BronzeDQAnalyzer, DisabledGoldFilterService, _HasDQStatus, GoldDQAnalyzer, SilverDQAnalyzer, SilverCheckExecutor. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
-- Узлы (metadata): `7`
+- Дата: `2026-10-04`
+- Узлы (metadata): `8`
 
 \newpage
 
@@ -1096,7 +1096,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `20`
 
 \newpage
@@ -1115,7 +1115,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `26`
 
 \newpage
@@ -1134,7 +1134,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `12`
 
 \newpage
@@ -1148,13 +1148,13 @@
 ![90-pkg-application-services-medallion](../class-diagrams/svg/90-pkg-application-services-medallion.svg)
 
 ### Описание
-Диаграмма «Package Family: application/services/medallion» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/application/services/medallion; modules: medallion_lifecycle, medallion_types, medallion_maintenance_mixin.. Схема имеет плотность порядка 8 узлов и 3 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: medallion lifecycle, medallion types, medallion maintenance mixin. Показательные узлы для быстрого чтения: MedallionLifecycleService, MedallionStorageProtocol, _MedallionClearMixin, _MedallionRunLifecycleMixin, ClearResult, PrepareResult. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: application/services/medallion» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/application/services/medallion; modules: medallion_lifecycle, medallion_types, medallion_maintenance_mixin.. Схема имеет плотность порядка 9 узлов и 3 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: medallion lifecycle, medallion types, medallion maintenance mixin. Показательные узлы для быстрого чтения: MedallionLifecycleService, MedallionStorageProtocol, _MedallionClearMixin, _MedallionLifecycleHostProtocol, _MedallionRunLifecycleMixin, ClearResult. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
-- Узлы (metadata): `8`
+- Дата: `2026-10-04`
+- Узлы (metadata): `9`
 
 \newpage
 
@@ -1172,7 +1172,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
+- Дата: `2026-10-04`
 - Узлы (metadata): `27`
 
 \newpage
@@ -1191,7 +1191,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
+- Дата: `2026-10-04`
 - Узлы (metadata): `17`
 
 \newpage
@@ -1210,7 +1210,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `4`
 
 \newpage
@@ -1224,13 +1224,13 @@
 ![90-pkg-application-services-quality](../class-diagrams/svg/90-pkg-application-services-quality.svg)
 
 ### Описание
-Диаграмма «Package Family: application/services/quality» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/application/services/quality; modules: config_dq_service, data_quality_anomalies, _quarantine_service_async_mixin, _quarantine_service_filtered_mixin, dq_report_models, _dq_report_layer_flows.. Схема имеет плотность порядка 24 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: config dq service, data quality anomalies, quarantine service async mixin, quarantine service filtered mixin, dq report models, dq report layer flows. Показательные узлы для быстрого чтения: ConfigDQService, ConfigSourceRefProviderProtocol, DQConfigLoaderProtocol, PipelineYamlConfigGetterProtocol, DataQualityAnomalyMixin, DataQualityMetricsHost. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: application/services/quality» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/application/services/quality; modules: config_dq_service, data_quality_anomalies, dq_report_models, _quarantine_service_async_mixin, _quarantine_service_filtered_mixin, _dq_report_layer_flows.. Схема имеет плотность порядка 25 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: config dq service, data quality anomalies, dq report models, quarantine service async mixin, quarantine service filtered mixin, dq report layer flows. Показательные узлы для быстрого чтения: ConfigDQService, ConfigSourceRefProviderProtocol, DQConfigLoaderProtocol, PipelineYamlConfigGetterProtocol, DataQualityAnomalyMixin, DataQualityMetricsHost. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
-- Узлы (metadata): `24`
+- Дата: `2026-10-04`
+- Узлы (metadata): `25`
 
 \newpage
 
@@ -1243,13 +1243,13 @@
 ![90-pkg-application-services-run-reports](../class-diagrams/svg/90-pkg-application-services-run-reports.svg)
 
 ### Описание
-Диаграмма «Package Family: application/services/run_reports» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/application/services/run_reports; modules: source_identity, control_plane_snapshot, paths, query, writer.. Схема имеет плотность порядка 6 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: source identity, control plane snapshot, paths, query, writer. Показательные узлы для быстрого чтения: RuntimeSourceIdentityComparisonResult, RuntimeSourceIdentityResolutionResult, CaptureControlPlaneSnapshot, IdentityIndexPreview, ReportIndexEntry, RunReportWriteResult. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: application/services/run_reports» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/application/services/run_reports; modules: source_identity, composite, control_plane_snapshot, paths, query, writer.. Схема имеет плотность порядка 7 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: source identity, composite, control plane snapshot, paths, query, writer. Показательные узлы для быстрого чтения: RuntimeSourceIdentityComparisonResult, RuntimeSourceIdentityResolutionResult, CompositeRunReportService, CaptureControlPlaneSnapshot, IdentityIndexPreview, ReportIndexEntry. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
-- Узлы (metadata): `6`
+- Дата: `2026-10-04`
+- Узлы (metadata): `7`
 
 \newpage
 
@@ -1267,7 +1267,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `5`
 
 \newpage
@@ -1286,7 +1286,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `17`
 
 \newpage
@@ -1300,13 +1300,13 @@
 ![90-pkg-composition-bootstrap-assembly](../class-diagrams/svg/90-pkg-composition-bootstrap-assembly.svg)
 
 ### Описание
-Диаграмма «Package Family: composition/bootstrap/assembly» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/composition/bootstrap/assembly; modules: health_server, health_service.. Схема имеет плотность порядка 4 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: health server, health service. Показательные узлы для быстрого чтения: HealthServerDependencies, _ReadOnlyHealthMonitor, _RunManifestPorts, _HealthCheckDataSourceFactory. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: composition/bootstrap/assembly» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/composition/bootstrap/assembly; modules: health_server, health_service, workflow_transforms.. Схема имеет плотность порядка 5 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: health server, health service, workflow transforms. Показательные узлы для быстрого чтения: HealthServerDependencies, _ReadOnlyHealthMonitor, _RunManifestPorts, _HealthCheckDataSourceFactory, WorkflowCohortResolver. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
-- Узлы (metadata): `4`
+- Дата: `2026-10-04`
+- Узлы (metadata): `5`
 
 \newpage
 
@@ -1319,12 +1319,12 @@
 ![90-pkg-composition-bootstrap-runtime](../class-diagrams/svg/90-pkg-composition-bootstrap-runtime.svg)
 
 ### Описание
-Диаграмма «Package Family: composition/bootstrap/runtime» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/composition/bootstrap/runtime; modules: _observability_bundle_support, composite_support_services_factory, runner_factory_builder_service, _composite_control_plane_builder_support, _composite_plan_runtime_support, _composite_plan_support.. Схема имеет плотность порядка 17 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: observability bundle support, composite support services factory, runner factory builder service, composite control plane builder support, composite plan runtime support, composite plan support. Показательные узлы для быстрого чтения: ObservabilityBootstrappers, ObservabilityComponents, CompositeSupportServices, CompositeSupportServicesFactory, BronzeRunOptions, RunnerFactoryBuilder. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: composition/bootstrap/runtime» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/composition/bootstrap/runtime; modules: _observability_bundle_support, composite_child_runner, runner_factory_builder_service, _composite_control_plane_builder_support, _composite_plan_runtime_support, _composite_plan_support.. Схема имеет плотность порядка 17 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: observability bundle support, composite child runner, runner factory builder service, composite control plane builder support, composite plan runtime support, composite plan support. Показательные узлы для быстрого чтения: ObservabilityBootstrappers, ObservabilityComponents, ReportedChildRunner, _ChildRunnerFactory, BronzeRunOptions, RunnerFactoryBuilder. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `17`
 
 \newpage
@@ -1338,13 +1338,13 @@
 ![90-pkg-composition-contracts](../class-diagrams/svg/90-pkg-composition-contracts.svg)
 
 ### Описание
-Диаграмма «Package Family: composition/contracts» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/composition/contracts; modules: factories, structural, resources, health.. Схема имеет плотность порядка 23 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: factories, structural, resources, health. Показательные узлы для быстрого чтения: BuildPipelineServicesFn, FactoryLike, HealthServerDependenciesFactoryProtocol, LoggerBindableObservability, ObservabilityApiModule, PipelineRunnerServiceFactoryProtocol. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: composition/contracts» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/composition/contracts; modules: factories, structural, resources, health, providers.. Схема имеет плотность порядка 26 узлов и 1 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: factories, structural, resources, health, providers. Показательные узлы для быстрого чтения: BuildPipelineServicesFn, FactoryLike, HealthServerDependenciesFactoryProtocol, LoggerBindableObservability, ObservabilityApiModule, PipelineRunnerServiceFactoryProtocol. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
-- Узлы (metadata): `23`
+- Дата: `2026-10-04`
+- Узлы (metadata): `26`
 
 \newpage
 
@@ -1362,7 +1362,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `8`
 
 \newpage
@@ -1376,13 +1376,13 @@
 ![90-pkg-composition-factories-services](../class-diagrams/svg/90-pkg-composition-factories-services.svg)
 
 ### Описание
-Диаграмма «Package Family: composition/factories/services» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/composition/factories/services; modules: common_service_wiring, _bundle_support, _builder_record_processor_support, _pipeline_batch_executor_types, builder, bundle.. Схема имеет плотность порядка 12 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: common service wiring, bundle support, builder record processor support, pipeline batch executor types, builder, bundle. Показательные узлы для быстрого чтения: CommonServicePorts, CommonServicePortsRequest, _LazyStorageFactory, ServiceBundleDependencies, _PipelineCreationIdentity, _RecordProcessorBuildRequest. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: composition/factories/services» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/composition/factories/services; modules: common_service_wiring, _bundle_support, composite_support_services_factory, _builder_record_processor_support, builder, bundle.. Схема имеет плотность порядка 14 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: common service wiring, bundle support, composite support services factory, builder record processor support, builder, bundle. Показательные узлы для быстрого чтения: CommonServicePorts, CommonServicePortsRequest, _LazyStorageFactory, ServiceBundleDependencies, _PipelineCreationIdentity, CompositeSupportServices. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
-- Узлы (metadata): `12`
+- Дата: `2026-10-04`
+- Узлы (metadata): `14`
 
 \newpage
 
@@ -1400,7 +1400,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `11`
 
 \newpage
@@ -1414,13 +1414,13 @@
 ![90-pkg-composition-providers](../class-diagrams/svg/90-pkg-composition-providers.svg)
 
 ### Описание
-Диаграмма «Package Family: composition/providers» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/composition/providers; modules: _default_registry, _registration_biblio_profiles, _creation, _registration_contracts, _chembl_target_protein_classification_data_source, _models.. Схема имеет плотность порядка 17 узлов и 1 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: default registry, registration biblio profiles, creation, registration contracts, chembl target protein classification data source, models. Показательные узлы для быстрого чтения: DefaultRegistryMethod, ProvidersDescriptor, SupportsDefaultRegistry, SupportsProviderRegistryStore, SupportsProviderStore, MailtoBatchProfile. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: composition/providers» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/composition/providers; modules: _registration_biblio_profiles, _creation, _default_registry, _registration_contracts, _chembl_target_protein_classification_data_source, _models.. Схема имеет плотность порядка 15 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: registration biblio profiles, creation, default registry, registration contracts, chembl target protein classification data source, models. Показательные узлы для быстрого чтения: MailtoBatchProfile, OpenAlexRequestProfile, PubMedRequestProfile, SemanticScholarRequestProfile, ProviderCreator, ProviderDataSourceCreationRequest. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
-- Узлы (metadata): `17`
+- Дата: `2026-10-04`
+- Узлы (metadata): `15`
 
 \newpage
 
@@ -1433,13 +1433,13 @@
 ![90-pkg-composition-runtime-builders](../class-diagrams/svg/90-pkg-composition-runtime-builders.svg)
 
 ### Описание
-Диаграмма «Package Family: composition/runtime_builders» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/composition/runtime_builders; modules: runner_builder_wiring, _manifest_publication_context_support, _runner_input_preparation, inputs_extraction_preflight, _run_manifest_builder_policy, _run_manifest_context_updates.. Схема имеет плотность порядка 24 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: runner builder wiring, manifest publication context support, runner input preparation, inputs extraction preflight, run manifest builder policy, run manifest context updates. Показательные узлы для быстрого чтения: LegacyRunnerBuilderOverrides, RunnerBuilderWiring, RunnerFactoryWiring, RunnerInputWiring, ManifestPublicationIdentityKwargs, ResolvedManifestPublicationContext. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: composition/runtime_builders» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/composition/runtime_builders; modules: runner_builder_wiring, _manifest_publication_context_support, _runner_input_preparation, inputs_extraction_preflight, _run_manifest_builder_policy, _run_manifest_context_updates.. Схема имеет плотность порядка 23 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: runner builder wiring, manifest publication context support, runner input preparation, inputs extraction preflight, run manifest builder policy, run manifest context updates. Показательные узлы для быстрого чтения: LegacyRunnerBuilderOverrides, RunnerBuilderWiring, RunnerFactoryWiring, RunnerInputWiring, ManifestPublicationIdentityKwargs, ResolvedManifestPublicationContext. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
-- Узлы (metadata): `24`
+- Дата: `2026-10-04`
+- Узлы (metadata): `23`
 
 \newpage
 
@@ -1457,7 +1457,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
+- Дата: `2026-10-04`
 - Узлы (metadata): `18`
 
 \newpage
@@ -1476,7 +1476,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-10`
+- Дата: `2026-10-04`
 - Узлы (metadata): `28`
 
 \newpage
@@ -1495,7 +1495,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `30`
 
 \newpage
@@ -1514,7 +1514,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `12`
 
 \newpage
@@ -1533,7 +1533,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `27`
 
 \newpage
@@ -1552,7 +1552,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `30`
 
 \newpage
@@ -1571,7 +1571,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `4`
 
 \newpage
@@ -1590,7 +1590,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `30`
 
 \newpage
@@ -1609,7 +1609,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `1`
 
 \newpage
@@ -1628,7 +1628,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `30`
 
 \newpage
@@ -1647,7 +1647,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `20`
 
 \newpage
@@ -1666,7 +1666,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `10`
 
 \newpage
@@ -1685,7 +1685,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `12`
 
 \newpage
@@ -1704,7 +1704,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `12`
 
 \newpage
@@ -1723,7 +1723,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `9`
 
 \newpage
@@ -1742,7 +1742,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `13`
 
 \newpage
@@ -1761,7 +1761,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `24`
 
 \newpage
@@ -1780,7 +1780,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `9`
 
 \newpage
@@ -1799,7 +1799,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `18`
 
 \newpage
@@ -1818,7 +1818,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `11`
 
 \newpage
@@ -1837,7 +1837,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `30`
 
 \newpage
@@ -1856,7 +1856,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `1`
 
 \newpage
@@ -1875,7 +1875,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `7`
 
 \newpage
@@ -1894,7 +1894,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `11`
 
 \newpage
@@ -1913,7 +1913,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `6`
 
 \newpage
@@ -1932,7 +1932,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `10`
 
 \newpage
@@ -1951,7 +1951,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `11`
 
 \newpage
@@ -1970,7 +1970,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `16`
 
 \newpage
@@ -1989,7 +1989,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `26`
 
 \newpage
@@ -2008,7 +2008,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `7`
 
 \newpage
@@ -2027,7 +2027,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `4`
 
 \newpage
@@ -2041,12 +2041,12 @@
 ![90-pkg-domain-run-reports](../class-diagrams/svg/90-pkg-domain-run-reports.svg)
 
 ### Описание
-Диаграмма «Package Family: domain/run_reports» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/domain/run_reports; modules: models, reason_catalog, workflow_builder, _stage_bucket, accounting, accounting_snapshots.. Схема имеет плотность порядка 18 узлов и 1 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: models, reason catalog, workflow builder, stage bucket, accounting, accounting snapshots. Показательные узлы для быстрого чтения: BalanceStatus, LayerCounts, PipelineRunReport, ReasonRemoval, RemovalOutcome, StageFunnelRow. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: domain/run_reports» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/domain/run_reports; modules: models, reason_catalog_data, workflow_report_assembly, _stage_bucket, accounting, accounting_snapshots.. Схема имеет плотность порядка 18 узлов и 1 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: models, reason catalog data, workflow report assembly, stage bucket, accounting, accounting snapshots. Показательные узлы для быстрого чтения: BalanceStatus, LayerCounts, PipelineRunReport, ReasonRemoval, RemovalOutcome, StageFunnelRow. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
+- Дата: `2026-10-04`
 - Узлы (metadata): `18`
 
 \newpage
@@ -2065,7 +2065,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `15`
 
 \newpage
@@ -2084,7 +2084,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `5`
 
 \newpage
@@ -2103,7 +2103,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `6`
 
 \newpage
@@ -2117,13 +2117,13 @@
 ![90-pkg-domain-workflow](../class-diagrams/svg/90-pkg-domain-workflow.svg)
 
 ### Описание
-Диаграмма «Package Family: domain/workflow» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/domain/workflow; modules: config, dag, foreign_key_reconciliation_models, _run_options_config, step_transition, transform_spec.. Схема имеет плотность порядка 10 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: config, dag, foreign key reconciliation models, run options config, step transition, transform spec. Показательные узлы для быстрого чтения: TransformStepConfig, WorkflowConfig, WorkflowStepConfig, WorkflowDagValidationError, _WorkflowStepLike, ForeignKeyReconciliationRequest. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: domain/workflow» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/domain/workflow; modules: config, dag, foreign_key_reconciliation_models, _run_options_config, step_transition, transform_spec.. Схема имеет плотность порядка 11 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: config, dag, foreign key reconciliation models, run options config, step transition, transform spec. Показательные узлы для быстрого чтения: TransformStepConfig, WorkflowConfig, WorkflowReferenceCohort, WorkflowStepConfig, WorkflowDagValidationError, _WorkflowStepLike. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
-- Узлы (metadata): `10`
+- Дата: `2026-10-04`
+- Узлы (metadata): `11`
 
 \newpage
 
@@ -2136,12 +2136,12 @@
 ![90-pkg-infrastructure-adapters-chembl-part1](../class-diagrams/svg/90-pkg-infrastructure-adapters-chembl-part1.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/adapters/chembl (Part 1/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/chembl; part 1/2; modules: models_additional, models_common, models_compound, _models_common_extra, models_activity, _fetch_paging_filtered.. Схема имеет плотность порядка 30 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: models additional, models common, models compound, models common extra, models activity, fetch paging filtered. Показательные узлы для быстрого чтения: ChemblCompoundRecordApiRecord, ChemblCompoundRecordResponse, ChemblProteinClassApiRecord, ChemblProteinClassResponse, ChemblPublicationSimilarityApiRecord, ChemblPublicationSimilarityResponse. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/adapters/chembl (Part 1/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/chembl; part 1/2; modules: models_additional, models_common, models_compound, _models_common_extra, models_activity, target_protein_classification_loading_mixin.. Схема имеет плотность порядка 30 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: models additional, models common, models compound, models common extra, models activity, target protein classification loading mixin. Показательные узлы для быстрого чтения: ChemblCompoundRecordApiRecord, ChemblCompoundRecordResponse, ChemblProteinClassApiRecord, ChemblProteinClassResponse, ChemblPublicationSimilarityApiRecord, ChemblPublicationSimilarityResponse. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `30`
 
 \newpage
@@ -2155,13 +2155,13 @@
 ![90-pkg-infrastructure-adapters-chembl-part2](../class-diagrams/svg/90-pkg-infrastructure-adapters-chembl-part2.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/adapters/chembl (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/chembl; part 2/2; modules: _models_common_page, _protein_classification_node, client, entity_mapper, fetch_adapter_mixin, fetch_multi_filter_mixin.. Схема имеет плотность порядка 11 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: models common page, protein classification node, client, entity mapper, fetch adapter mixin, fetch multi filter mixin. Показательные узлы для быстрого чтения: ChemblPageMeta, ProteinClassificationNode, ChemblAdapter, ChemblEntityMapper, ChemblFetchAdapterMixin, ChemblFetchMultiFilterMixin. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/adapters/chembl (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/chembl; part 2/2; modules: _fetch_paging_filtered, _fetch_resilience_error, _models_common_page, _protein_classification_node, client, entity_mapper.. Схема имеет плотность порядка 14 узлов и 7 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: fetch paging filtered, fetch resilience error, models common page, protein classification node, client, entity mapper. Показательные узлы для быстрого чтения: _ChemblFetchPagingFilteredMixin, ChemblErrorHost, ChemblPageMeta, ProteinClassificationNode, ChemblAdapter, ChemblEntityMapper. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
-- Узлы (metadata): `11`
+- Дата: `2026-10-04`
+- Узлы (metadata): `14`
 
 \newpage
 
@@ -2179,7 +2179,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `19`
 
 \newpage
@@ -2198,7 +2198,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `29`
 
 \newpage
@@ -2212,13 +2212,13 @@
 ![90-pkg-infrastructure-adapters-http](../class-diagrams/svg/90-pkg-infrastructure-adapters-http.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/adapters/http» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/http; modules: _client_retry_flow, client_retry_observability, _health_monitor_models, _client_retry_models, client_request_methods_mixin, health_monitor.. Схема имеет плотность порядка 28 узлов и 4 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: client retry flow, client retry observability, health monitor models, client retry models, client request methods mixin, health monitor. Показательные узлы для быстрого чтения: _CanRetryCheck, _RetryBudgetRecorder, _RetryDelayHandler, _RetryLogger, _RetryableErrorCheck, _StatusCodeResolver. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: infrastructure/adapters/http» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/http; modules: _client_retry_flow, client_retry_observability, _client_retry_models, _health_monitor_models, client_request_methods_mixin, health_monitor.. Схема имеет плотность порядка 30 узлов и 5 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: client retry flow, client retry observability, client retry models, health monitor models, client request methods mixin, health monitor. Показательные узлы для быстрого чтения: _CanRetryCheck, _RetryBudgetRecorder, _RetryDelayHandler, _RetryLogger, _RetryableErrorCheck, _StatusCodeResolver. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
-- Узлы (metadata): `28`
+- Дата: `2026-10-04`
+- Узлы (metadata): `30`
 
 \newpage
 
@@ -2236,7 +2236,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `17`
 
 \newpage
@@ -2255,7 +2255,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `15`
 
 \newpage
@@ -2274,7 +2274,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
+- Дата: `2026-10-04`
 - Узлы (metadata): `23`
 
 \newpage
@@ -2293,7 +2293,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `14`
 
 \newpage
@@ -2312,7 +2312,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `30`
 
 \newpage
@@ -2331,7 +2331,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
+- Дата: `2026-10-04`
 - Узлы (metadata): `12`
 
 \newpage
@@ -2350,7 +2350,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
+- Дата: `2026-10-04`
 - Узлы (metadata): `30`
 
 \newpage
@@ -2364,13 +2364,13 @@
 ![90-pkg-infrastructure-config-part2](../class-diagrams/svg/90-pkg-infrastructure-config-part2.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/config (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/config; part 2/2; modules: publication_controlled_vocabulary_loader, publication_type_classification_loader, semantic_field_registry_loader, source_config_loader.. Схема имеет плотность порядка 4 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: publication controlled vocabulary loader, publication type classification loader, semantic field registry loader, source config loader. Показательные узлы для быстрого чтения: PublicationControlledVocabularyLoader, PublicationTypeClassificationLoader, SemanticFieldRegistryLoader, _CachedSourceConfigLoader. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/config (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/config; part 2/2; modules: protein_class_target_type_loader, publication_controlled_vocabulary_loader, publication_type_classification_loader, semantic_field_registry_loader, source_config_loader.. Схема имеет плотность порядка 5 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: protein class target type loader, publication controlled vocabulary loader, publication type classification loader, semantic field registry loader, source config loader. Показательные узлы для быстрого чтения: ProteinClassTargetTypeMappingLoader, PublicationControlledVocabularyLoader, PublicationTypeClassificationLoader, SemanticFieldRegistryLoader, _CachedSourceConfigLoader. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
-- Узлы (metadata): `4`
+- Дата: `2026-10-04`
+- Узлы (metadata): `5`
 
 \newpage
 
@@ -2388,7 +2388,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
+- Дата: `2026-10-04`
 - Узлы (metadata): `30`
 
 \newpage
@@ -2402,13 +2402,13 @@
 ![90-pkg-infrastructure-control-plane-part2](../class-diagrams/svg/90-pkg-infrastructure-control-plane-part2.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/control_plane (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/control_plane; part 2/2; modules: file_contract_evidence_recorder, file_lineage_store, file_run_ledger_store, file_workflow_execution_state_store, file_workflow_ledger_store, file_workflow_manifest_store.. Схема имеет плотность порядка 8 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: file contract evidence recorder, file lineage store, file run ledger store, file workflow execution state store, file workflow ledger store, file workflow manifest store. Показательные узлы для быстрого чтения: FileContractEvidenceRecorder, FileLineageStore, FileRunLedgerStore, FileWorkflowExecutionStateStore, FileWorkflowLedgerStore, FileWorkflowManifestStore. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/control_plane (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/control_plane; part 2/2; modules: file_contract_evidence_recorder, file_lineage_store, file_run_ledger_store, file_workflow_execution_state_store, file_workflow_ledger_store, file_workflow_manifest_store.. Схема имеет плотность порядка 9 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: file contract evidence recorder, file lineage store, file run ledger store, file workflow execution state store, file workflow ledger store, file workflow manifest store. Показательные узлы для быстрого чтения: FileContractEvidenceRecorder, FileLineageStore, FileRunLedgerStore, FileWorkflowExecutionStateStore, FileWorkflowLedgerStore, FileWorkflowManifestStore. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
-- Узлы (metadata): `8`
+- Дата: `2026-10-04`
+- Узлы (metadata): `9`
 
 \newpage
 
@@ -2426,7 +2426,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `6`
 
 \newpage
@@ -2445,7 +2445,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `4`
 
 \newpage
@@ -2464,7 +2464,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `8`
 
 \newpage
@@ -2483,7 +2483,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `29`
 
 \newpage
@@ -2497,13 +2497,13 @@
 ![90-pkg-infrastructure-schemas-part2](../class-diagrams/svg/90-pkg-infrastructure-schemas-part2.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/schemas (Part 2/4)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 2/4; modules: composite_validation, workflow_config, base_schemas_pubchem, pipeline_config_common.. Схема имеет плотность порядка 30 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: composite validation, workflow config, base schemas pubchem, pipeline config common. Показательные узлы для быстрого чтения: CompositeDQSchema, CrossValidationSchema, DQOverrideSchema, EnricherFieldPairingSchema, ExecutionSchema, FieldComparisonSpecSchema. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/schemas (Part 2/4)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 2/4; modules: workflow_config, composite_validation, base_schemas_pubchem.. Схема имеет плотность порядка 24 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: workflow config, composite validation, base schemas pubchem. Показательные узлы для быстрого чтения: WorkflowConfigFileSchema, WorkflowConfigSchema, WorkflowDefaultsSchema, WorkflowPipelineStepSchema, WorkflowReconcileForeignKeysConfigSchema, WorkflowReconcileRowsConfigSchema. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
-- Узлы (metadata): `30`
+- Дата: `2026-10-04`
+- Узлы (metadata): `24`
 
 \newpage
 
@@ -2516,12 +2516,12 @@
 ![90-pkg-infrastructure-schemas-part3](../class-diagrams/svg/90-pkg-infrastructure-schemas-part3.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/schemas (Part 3/4)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 3/4; modules: dq_report_config, source_config, _composite_config_merge_schema, composite_config_base, filter_config, dq_config.. Схема имеет плотность порядка 29 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: dq report config, source config, composite config merge schema, composite config base, filter config, dq config. Показательные узлы для быстрого чтения: BronzeDQReportConfig, BronzeSinkConfig, GoldDQReportConfig, GoldSinkConfig, SilverDQReportConfig, SilverSinkConfig. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/schemas (Part 3/4)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 3/4; modules: pipeline_config_common, dq_report_config, source_config, _composite_config_merge_schema, composite_config_base.. Схема имеет плотность порядка 29 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: pipeline config common, dq report config, source config, composite config merge schema, composite config base. Показательные узлы для быстрого чтения: CircuitBreakerYamlConfig, ConditionalValidationConfig, CrossFieldValidationConfig, CsvExportConfig, DQReportYamlConfig, DQYamlConfig. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `29`
 
 \newpage
@@ -2535,13 +2535,13 @@
 ![90-pkg-infrastructure-schemas-part4](../class-diagrams/svg/90-pkg-infrastructure-schemas-part4.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/schemas (Part 4/4)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 4/4; modules: composite_config, pipeline_config, pipeline_config_provider, pipeline_contract_policy, source_profile_config.. Схема имеет плотность порядка 9 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: composite config, pipeline config, pipeline config provider, pipeline contract policy, source profile config. Показательные узлы для быстрого чтения: CompositeConfigFileSchema, CompositeConfigSchema, FieldPolicyConfigSchema, PipelineYamlConfig, ApiConfig, SourceConfig. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/schemas (Part 4/4)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 4/4; modules: filter_config, dq_config, composite_config, pipeline_config, pipeline_config_provider, pipeline_contract_policy.. Схема имеет плотность порядка 16 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: filter config, dq config, composite config, pipeline config, pipeline config provider, pipeline contract policy. Показательные узлы для быстрого чтения: FilterConfigFile, GoldFiltersFileConfig, InputFilterFileConfig, SilverFiltersFileConfig, DQConfigFile, KeyNullabilityRuleConfig. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
-- Узлы (metadata): `9`
+- Дата: `2026-10-04`
+- Узлы (metadata): `16`
 
 \newpage
 
@@ -2554,12 +2554,12 @@
 ![90-pkg-infrastructure-storage-bronze](../class-diagrams/svg/90-pkg-infrastructure-storage-bronze.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/storage/bronze» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/storage/bronze; modules: pipeline_helpers, metadata_operations, metadata_builders, metrics_mixin, reporting_helpers, facade_contracts.. Схема имеет плотность порядка 22 узлов и 1 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: pipeline helpers, metadata operations, metadata builders, metrics mixin, reporting helpers, facade contracts. Показательные узлы для быстрого чтения: BronzeWriteArtifacts, BronzeWritePostwriteContext, BronzeWritePrepared, BronzeWriteRequest, _BronzeWritePreparationHostProtocol, BronzeMetadataWriteRequest. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: infrastructure/storage/bronze» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/storage/bronze; modules: pipeline_helpers, metadata_operations, metadata_assembly, metrics_mixin, reporting_helpers, facade_contracts.. Схема имеет плотность порядка 22 узлов и 1 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: pipeline helpers, metadata operations, metadata assembly, metrics mixin, reporting helpers, facade contracts. Показательные узлы для быстрого чтения: BronzeWriteArtifacts, BronzeWritePostwriteContext, BronzeWritePrepared, BronzeWriteRequest, _BronzeWritePreparationHostProtocol, BronzeMetadataWriteRequest. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `22`
 
 \newpage
@@ -2578,7 +2578,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `4`
 
 \newpage
@@ -2592,13 +2592,13 @@
 ![90-pkg-infrastructure-storage-gold-part1](../class-diagrams/svg/90-pkg-infrastructure-storage-gold-part1.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/storage/gold (Part 1/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/gold; part 1/2; modules: pipeline_helpers, io_delta_protocols, metadata_operations, io_delta_mixins, io_delta_runtime, io_protocols.. Схема имеет плотность порядка 30 узлов и 8 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: pipeline helpers, io delta protocols, metadata operations, io delta mixins, io delta runtime, io protocols. Показательные узлы для быстрого чтения: GoldWriteDispatchContext, GoldWritePostwriteContext, GoldWriteRequest, PreparedGoldWriteContext, _GoldWritePostwriteHostProtocol, _GoldWritePreparationHostProtocol. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/storage/gold (Part 1/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/gold; part 1/2; modules: pipeline_helpers, io_delta_protocols, metadata_operations, writer_protocols, io_delta_mixins, io_delta_runtime.. Схема имеет плотность порядка 29 узлов и 4 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: pipeline helpers, io delta protocols, metadata operations, writer protocols, io delta mixins, io delta runtime. Показательные узлы для быстрого чтения: GoldWriteDispatchContext, GoldWritePostwriteContext, GoldWriteRequest, PreparedGoldWriteContext, _GoldWritePostwriteHostProtocol, _GoldWritePreparationHostProtocol. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
-- Узлы (metadata): `30`
+- Дата: `2026-10-04`
+- Узлы (metadata): `29`
 
 \newpage
 
@@ -2611,13 +2611,13 @@
 ![90-pkg-infrastructure-storage-gold-part2](../class-diagrams/svg/90-pkg-infrastructure-storage-gold-part2.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/storage/gold (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/gold; part 2/2; modules: io_preparation, metadata_audit, validation_mixin, io_helpers, metadata_mixin, read_cleanup_mixin.. Схема имеет плотность порядка 10 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: io preparation, metadata audit, validation mixin, io helpers, metadata mixin, read cleanup mixin. Показательные узлы для быстрого чтения: _GoldMergedWriteRequest, _PreparedGoldMergedWrite, _GoldAuditWriteRequest, _GoldMetadataAuditHostProtocol, GoldWriterValidationMixin, _RunInExecutorHost. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/storage/gold (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/gold; part 2/2; modules: io_mixin, io_preparation, metadata_audit, validation_mixin, io_helpers, metadata_mixin.. Схема имеет плотность порядка 12 узлов и 2 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: io mixin, io preparation, metadata audit, validation mixin, io helpers, metadata mixin. Показательные узлы для быстрого чтения: GoldWriterIOMixin, _GoldWriterMergedDispatchMixin, _GoldMergedWriteRequest, _PreparedGoldMergedWrite, _GoldAuditWriteRequest, _GoldMetadataAuditHostProtocol. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
-- Узлы (metadata): `10`
+- Дата: `2026-10-04`
+- Узлы (metadata): `12`
 
 \newpage
 
@@ -2635,7 +2635,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `8`
 
 \newpage
@@ -2649,12 +2649,12 @@
 ![90-pkg-infrastructure-storage-silver-operations-part1](../class-diagrams/svg/90-pkg-infrastructure-storage-silver-operations-part1.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/storage/silver/operations (Part 1/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/silver/operations; part 1/2; modules: postwrite_protocols, metadata_runtime_support, metadata_write_support, validation_operations, delta_operations, merged_operations.. Схема имеет плотность порядка 30 узлов и 3 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: postwrite protocols, metadata runtime support, metadata write support, validation operations, delta operations, merged operations. Показательные узлы для быстрого чтения: _SilverMaintenancePostwriteOps, _SilverMetadataPostwriteOps, _SilverPostwriteExecutorProtocol, _SilverPostwriteFinalizerProtocol, _SilverPostwriteHostProtocol, _SilverWritePostwriteContext. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/storage/silver/operations (Part 1/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/silver/operations; part 1/2; modules: postwrite_protocols, metadata_runtime_support, metadata_write_support, validation_operations, delta_operations, merged_operations.. Схема имеет плотность порядка 30 узлов и 4 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: postwrite protocols, metadata runtime support, metadata write support, validation operations, delta operations, merged operations. Показательные узлы для быстрого чтения: _SilverMaintenancePostwriteOps, _SilverMetadataPostwriteOps, _SilverPostwriteExecutorProtocol, _SilverPostwriteFinalizerProtocol, _SilverPostwriteHostProtocol, _SilverWritePostwriteContext. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `30`
 
 \newpage
@@ -2668,13 +2668,13 @@
 ![90-pkg-infrastructure-storage-silver-operations-part2](../class-diagrams/svg/90-pkg-infrastructure-storage-silver-operations-part2.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/storage/silver/operations (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/silver/operations; part 2/2; modules: metadata_context_facade, metadata_finalization_operations, metadata_finalization_support, metadata_operations, metadata_write_facade, metadata_write_operations.. Схема имеет плотность порядка 7 узлов и 2 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: metadata context facade, metadata finalization operations, metadata finalization support, metadata operations, metadata write facade, metadata write operations. Показательные узлы для быстрого чтения: _SilverMetadataContextFacade, _SilverMetadataFinalizationOps, _MetadataFinalizationOps, SilverMetadataOperations, _SilverMetadataWriteFacade, _SilverMetadataWriteOps. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/storage/silver/operations (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/silver/operations; part 2/2; modules: maintenance_operations, metadata_audit_operations, metadata_finalization_operations, metadata_finalization_support, metadata_operations, metadata_write_facade.. Схема имеет плотность порядка 8 узлов и 1 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: maintenance operations, metadata audit operations, metadata finalization operations, metadata finalization support, metadata operations, metadata write facade. Показательные узлы для быстрого чтения: SilverMaintenanceOperations, _SilverMetadataAuditOps, _SilverMetadataFinalizationOps, _MetadataFinalizationOps, SilverMetadataOperations, _SilverMetadataWriteFacade. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
-- Узлы (metadata): `7`
+- Дата: `2026-10-04`
+- Узлы (metadata): `8`
 
 \newpage
 
@@ -2692,7 +2692,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `30`
 
 \newpage
@@ -2711,7 +2711,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `19`
 
 \newpage
@@ -2730,7 +2730,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `6`
 
 \newpage
@@ -2749,7 +2749,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `6`
 
 \newpage
@@ -2768,7 +2768,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
+- Дата: `2026-10-04`
 - Узлы (metadata): `9`
 
 \newpage
@@ -2787,7 +2787,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `6`
 
 \newpage
@@ -2806,7 +2806,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `21`
 
 \newpage
@@ -2825,7 +2825,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `8`
 
 \newpage
@@ -2844,7 +2844,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `5`
 
 \newpage
@@ -2858,13 +2858,13 @@
 ![90-pkg-interfaces-cli-commands](../class-diagrams/svg/90-pkg-interfaces-cli-commands.svg)
 
 ### Описание
-Диаграмма «Package Family: interfaces/cli/commands» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/interfaces/cli/commands; modules: _workflow_run_support, __init__, _workflow_command_options, _workflow_command_runtime, export_support.. Схема имеет плотность порядка 6 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: workflow run support, init, workflow command options, workflow command runtime, export support. Показательные узлы для быстрого чтения: _MetricsPublisher, _WorkflowExecutionServiceResolver, _CommandsModule, WorkflowCommandOptions, _WorkflowExecutionKwargs, _ExportCommandService. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: interfaces/cli/commands» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/interfaces/cli/commands; modules: _workflow_run_support, __init__, _workflow_command_options, _workflow_command_runtime, export_support, report.. Схема имеет плотность порядка 7 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: workflow run support, init, workflow command options, workflow command runtime, export support, report. Показательные узлы для быстрого чтения: _MetricsPublisher, _WorkflowExecutionServiceResolver, _CommandsModule, WorkflowCommandOptions, _WorkflowExecutionKwargs, _ExportCommandService. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
-- Узлы (metadata): `6`
+- Дата: `2026-10-04`
+- Узлы (metadata): `7`
 
 \newpage
 
@@ -2882,7 +2882,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-02`
+- Дата: `2026-10-04`
 - Узлы (metadata): `6`
 
 \newpage
@@ -2896,12 +2896,12 @@
 ![90-pkg-interfaces-http-part1](../class-diagrams/svg/90-pkg-interfaces-http-part1.svg)
 
 ### Описание
-Диаграмма «Package Family: interfaces/http (Part 1/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/interfaces/http; part 1/2; modules: _health_server_control_plane_scope, _health_server_observability_protocols, health_server, _control_plane_selector_records, _health_server_checkpoint_lookup, _health_server_quarantine_routing.. Схема имеет плотность порядка 30 узлов и 2 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: health server control plane scope, health server observability protocols, health server, control plane selector records, health server checkpoint lookup, health server quarantine routing. Показательные узлы для быстрого чтения: _ControlPlaneScopeHost, _IdentityScope, _RunManifestLookupPort, _HealthObservabilityRoutingHost, health_server_observability_protocols__HealthResponseSupport, _RunLedgerLookup. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: interfaces/http (Part 1/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/interfaces/http; part 1/2; modules: _health_server_observability_protocols, _health_server_control_plane_scope, _control_plane_selector_records, _health_server_checkpoint_lookup, _health_server_quarantine_routing, _health_server_readiness.. Схема имеет плотность порядка 30 узлов и 1 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: health server observability protocols, health server control plane scope, control plane selector records, health server checkpoint lookup, health server quarantine routing, health server readiness. Показательные узлы для быстрого чтения: HealthServerControlPlaneDeps, _HealthObservabilityRoutingHost, health_server_observability_protocols__HealthResponseSupport, _HealthRoutingHost, _RunLedgerLookup, _ControlPlaneScopeHost. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
+- Дата: `2026-10-04`
 - Узлы (metadata): `30`
 
 \newpage
@@ -2915,10 +2915,10 @@
 ![90-pkg-interfaces-http-part2](../class-diagrams/svg/90-pkg-interfaces-http-part2.svg)
 
 ### Описание
-Диаграмма «Package Family: interfaces/http (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/interfaces/http; part 2/2; modules: control_plane_selector_context, health_server_routing_mixin, health_server_state_mixin, types.. Схема имеет плотность порядка 4 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: control plane selector context, health server routing mixin, health server state mixin, types. Показательные узлы для быстрого чтения: RunIdOptionPolicy, HealthServerRoutingMixin, HealthServerStateMixin, HealthResponse. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: interfaces/http (Part 2/2)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/interfaces/http; part 2/2; modules: _health_server_control_plane_metrics_refresh, _processed_records_http, _processed_records_table_support, _selector_catalog, control_plane_selector_context, health_server.. Схема имеет плотность порядка 9 узлов и 2 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: health server control plane metrics refresh, processed records http, processed records table support, selector catalog, control plane selector context, health server. Показательные узлы для быстрого чтения: ControlPlaneMetricsRefresher, _UrlResponse, ProcessedRecordRowSpec, SelectorCatalog, RunIdOptionPolicy, HealthServer. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-09-25`
-- Узлы (metadata): `4`
+- Дата: `2026-10-04`
+- Узлы (metadata): `9`

@@ -14,7 +14,7 @@ from bioetl.application.core.publication_term_runtime import (
     create_term_record,
     extract_terms_from_publication,
 )
-from bioetl.domain.ports.data_source import PublicationTermEnrichmentPort
+from bioetl.domain.ports import PublicationTermEnrichmentPort
 from bioetl.domain.types import BronzeRecord
 
 if TYPE_CHECKING:

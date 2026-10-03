@@ -58,6 +58,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "DataSourceFactoryPort",
         "DataSourcePort",
         "FilterableDataSourcePort",
+        "PublicationTermEnrichmentPort",
     ),
     "bioetl.domain.ports.delta_reader": ("DeltaReaderPort",),
     "bioetl.domain.ports.export": (

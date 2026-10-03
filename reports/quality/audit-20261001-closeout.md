@@ -144,3 +144,33 @@ Every merged commit below is present in this local branch. CLOSED describes the 
 Run complete `python -m pytest tests/architecture`, the complete 17-group coverage producer, strict docs verification, canonical debt/governance freshness checks and full-tree guard on one final committed tree. Record terminating exits and JUnit, then assemble and verify normalized proof receipts. The initial 133-failure architecture run and interrupted producers remain historical diagnostics, not acceptance. No budgets, thresholds, exemptions or exclusions are increased. All 161 files lost from tracking by the earlier index-isolation defect were restored with their original blobs; the affected temporary-Git fixture and coverage producer now isolate inherited `GIT_*` configuration.
 
 Billing lock remains `CI=BLOCKED_EXTERNAL_PERMANENT`. Local execution is not CI PASS. `local_single_host` evidence can qualify only as DEGRADED under the existing proof policy; required ADMIT cannot be replaced by fabricated independent attestation. Publication/integration and the applicable lifecycle acceptance are separate requirements. Runtime mirror parity is N/A because Codex/Junie runtime sources were unchanged. The original shared checkout and all `.env` files are preserved.
+
+
+## Architecture remainder repair checkpoint — 2026-10-04
+
+The complete architecture run on `d20319c66039dc30ff6bf0a2807159a079912212`
+finished with 4864 passed, 20 failed, 76 skipped and zero errors. This is a
+failed diagnostic, not final acceptance. Repairs follow the actual owners of
+workflow assembly and FSM transitions, merge the internal batch request into
+its builder, export the publication-term port consistently for runtime and
+typing, and shorten one naming-debt expiry from 2026-12-31 to 2026-10-15.
+No debt caps, thresholds or exception counts are increased.
+
+Focused product ownership checks passed 145 tests before source-manifest
+refresh, and 52 telemetry/tooling plus 43 dashboard-tooling/classification
+tests passed. Strict typing passed for nine affected product modules and five
+affected telemetry/governance modules. Full architecture and a new complete
+17-group producer remain required on the committed repair tree. The accepted
+module inventory is retained until that fresh measurement can be compared
+and adopted through the canonical nonregressing reporter.
+
+Live verification of historical Tests run `36202183545` found `push` on
+`main` at `9f71c644417551222e489ec08c6b358e7c0b64b2`, conclusion `failure`;
+it does not attest the former local-branch telemetry binding. The updated
+telemetry producer validates a complete canonical local manifest, matching
+source and test trees, reachable commit, coverage XML and JUnit telemetry
+digests, completion timestamps, zero failed shards and both 85% gates. It
+derives local identity and all measurement inputs; historical CI bindings
+are preserved explicitly as unverified history. Local evidence retains
+`local_single_host` trust and `CI=BLOCKED_EXTERNAL_PERMANENT`, without a
+GitHub run URL, CI PASS claim or lifecycle ADMIT.

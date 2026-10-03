@@ -1,4 +1,7 @@
-"""Workflow transform registry assembly (extracted from _workflow_services)."""
+"""Assemble generic workflow reconciliation storage and its transform registry.
+
+This workflow bootstrap is separate from validated entity-pipeline factories.
+"""
 
 from __future__ import annotations
 

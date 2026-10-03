@@ -1830,7 +1830,7 @@
     },
     {
       "path": "src/bioetl/composition/factories/services/pipeline_batch_executor_builder.py",
-      "line": 197,
+      "line": 235,
       "layer": "composition",
       "category": "unjustified",
       "justified": false,

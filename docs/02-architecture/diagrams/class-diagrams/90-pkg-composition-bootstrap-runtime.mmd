@@ -1,9 +1,9 @@
 %% Title: Package Family: composition/bootstrap/runtime
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/bootstrap/runtime; modules: _observability_bundle_support, composite_support_services_factory, runner_factory_builder_service, _composite_control_plane_builder_support, _composite_plan_runtime_support, _composite_plan_support.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/bootstrap/runtime; modules: _observability_bundle_support, composite_child_runner, runner_factory_builder_service, _composite_control_plane_builder_support, _composite_plan_runtime_support, _composite_plan_support.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-09-02
+%% @date    2026-10-04
 %% @level   Package Family / Inventory Slice
 %% @nodes   17
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
@@ -14,9 +14,9 @@ classDiagram
         class ObservabilityComponents
     }
 
-    namespace composite_support_services_factory {
-        class CompositeSupportServices
-        class CompositeSupportServicesFactory
+    namespace composite_child_runner {
+        class ReportedChildRunner
+        class _ChildRunnerFactory
     }
 
     namespace runner_factory_builder_service {
@@ -67,4 +67,3 @@ classDiagram
     namespace composite_support_runtime_context {
         class CompositeSupportRuntimeContext
     }
-

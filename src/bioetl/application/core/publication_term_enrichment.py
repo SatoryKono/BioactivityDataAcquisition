@@ -6,7 +6,7 @@ from collections.abc import AsyncIterator, Awaitable, Callable
 
 from bioetl.application.core.derived_scan_budget import bounded_source_records
 from bioetl.application.core.publication_term_runtime import publication_pubmed_id
-from bioetl.domain.ports.data_source import PublicationTermEnrichmentPort
+from bioetl.domain.ports import PublicationTermEnrichmentPort
 from bioetl.domain.types import BronzeRecord
 
 __all__ = [
