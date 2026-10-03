@@ -23,8 +23,8 @@ def exclusion_quality_expression() -> str:
     mapping = json.dumps(limits, separators=(",", ":"))
     return (
         f"($limits := {mapping}; "
-        "$limit := $lookup($limits, identity.pipeline_name); "
-        "$s := funnel[stage_id in ['bronze','silver','gold']]; "
+        "$limit := $lookup($limits, quality_evidence.pipeline); "
+        "$s := quality_evidence.funnel[stage_id in ['bronze','silver','gold']]; "
         "$r := $s.removals[outcome='excluded_by_contract']; "
         "$base := $s[stage_id='bronze'].records_out; "
         "$known := $count($distinct($s.stage_id)) = 3 and $count($s) = 3 "
@@ -36,8 +36,8 @@ def exclusion_quality_expression() -> str:
         "$n := $known ? $sum($append([0], $r.count)) : null; "
         "$known := $known and $n <= $base; "
         "$rate := $known ? ($base=0 ? 0 : $n/$base) : null; "
-        "$status := $known ? ($rate >= $limit[1] ? 'ERROR' : "
+        "$status := verdict='SELECT RUN' ? 'SELECT RUN' : $known ? ($rate >= $limit[1] ? 'ERROR' : "
         "$rate >= $limit[0] ? 'WARN' : 'OK') : 'UNKNOWN'; "
-        "[{'status': $status, 'detail': ($known ? 'excluded ' & $string($round($rate*100,2)) & '%' "
+        "[{'status': $status, 'detail': (verdict='SELECT RUN' ? 'Choose a run' : $known ? 'excluded ' & $string($round($rate*100,2)) & '%' "
         ": 'excluded UNKNOWN')}])"
     )

@@ -51,7 +51,7 @@ _COLUMNS = {
     "run_label": ("Run ID", 90, 50),
     "started_at": ("Started", 115, 50),
     "duration_display": ("Duration", 75, 50),
-    "status": ("Overview", 85, 50),
+    "status": ("Overview", 180, 180),
     "saved_evidence_status": ("Saved Evidence", None, 90),
     "data_quality_status": ("Data Quality", None, 90),
     "replay_readiness_status": ("Replay Readiness", 125, 90),
