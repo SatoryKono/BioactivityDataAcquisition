@@ -38,9 +38,9 @@ def test_private_host_delivery_binds_source_and_survives_data_volume() -> None:
     manifest = json.loads((owner / "host-image.json").read_text(encoding="utf-8"))
     assert (
         manifest["image"]
-        == yaml.safe_load((owner / "compose.acceptance.yml").read_text(encoding="utf-8"))[
-            "services"
-        ]["grafana"]["image"]
+        == yaml.safe_load(
+            (owner / "compose.acceptance.yml").read_text(encoding="utf-8")
+        )["services"]["grafana"]["image"]
     )
     assert manifest["grafana_version"] == "13.2.3"
     assert manifest["router_version"] == "7.18.4"
@@ -57,22 +57,31 @@ def test_private_host_delivery_binds_source_and_survives_data_volume() -> None:
         if line.lstrip().upper().startswith("COPY ")
     ]
     assert (
-        "COPY", "--chown=root:root", "host-build/", "/usr/share/grafana/public/build/"
+        "COPY",
+        "--chown=root:root",
+        "host-build/",
+        "/usr/share/grafana/public/build/",
     ) in copies
     active = [
         tuple(shlex.split(line, comments=True))
         for line in recipe.replace("\\\n", " ").splitlines()
         if line.lstrip().upper().startswith(("RUN ", "COPY "))
     ]
-    assert active.index(("RUN", "rm", "-rf", "/usr/share/grafana/public/build")) < active.index(
+    assert active.index(
+        ("RUN", "rm", "-rf", "/usr/share/grafana/public/build")
+    ) < active.index(
         ("COPY", "--chown=root:root", "host-build/", "/usr/share/grafana/public/build/")
     )
     for plugin in ("bioetl-scenes-app", "bioetl-selectorshell-panel"):
-        metadata = json.loads(Path(f"grafana/plugins/{plugin}/src/plugin.json").read_text())
+        metadata = json.loads(
+            Path(f"grafana/plugins/{plugin}/src/plugin.json").read_text()
+        )
         assert metadata["info"]["updated"] == manifest["plugin_release_date"]
 
         assert (
-            "COPY", "--chown=root:root", plugin + "/",
+            "COPY",
+            "--chown=root:root",
+            plugin + "/",
             "/usr/share/grafana/data/plugins-bundled/" + plugin + "/",
         ) in copies
 
