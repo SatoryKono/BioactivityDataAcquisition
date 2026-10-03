@@ -27,7 +27,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 from __future__ import annotations
 
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 import pytest
 
@@ -44,6 +44,21 @@ from bioetl.infrastructure.config.config_root import (
 
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize(
+    ("explicit_path", "expected"),
+    [
+        (Path("configs"), False),
+        (Path("/tmp/bioetl-configs"), True),
+        (PureWindowsPath(r"\\configs"), True),
+    ],
+)
+def test_rooted_explicit_path_detection_is_platform_independent(
+    explicit_path: Path | PureWindowsPath,
+    expected: bool,
+) -> None:
+    assert ConfigRootResolver._is_rooted_explicit_path(explicit_path) is expected
 
 
 def test_resolve_configs_root_defaults_to_repo_configs_directory() -> None:
