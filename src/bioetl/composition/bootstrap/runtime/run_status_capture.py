@@ -7,21 +7,15 @@ from pathlib import Path
 from bioetl.application.observability.control_plane_archive import (
     resolve_control_plane_archive_root,
 )
-from bioetl.application.observability.control_plane_evidence import (
-    ControlPlaneEvidenceService,
-)
-from bioetl.application.services.run_reports.control_plane_snapshot import (
-    CaptureControlPlaneSnapshot,
-)
+from bioetl.application.observability import control_plane_evidence
+from bioetl.application.services.run_reports import control_plane_snapshot
 from bioetl.infrastructure.control_plane.file_artifact_lifecycle_store import (
     FileControlPlaneArtifactLifecycleStore,
 )
 from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageStore
 from bioetl.infrastructure.control_plane.file_run_ledger_store import FileRunLedgerStore
 from bioetl.infrastructure.control_plane.file_archive_store import FileArchiveStore
-from bioetl.infrastructure.control_plane.file_run_manifest_store import (
-    FileRunManifestStore,
-)
+import bioetl.infrastructure.control_plane.file_run_manifest_store as manifest_store
 
 
 def create_run_status_capture(
@@ -29,14 +23,14 @@ def create_run_status_capture(
     *,
     archive_root: Path | None = None,
     report_root: Path | None = None,
-) -> CaptureControlPlaneSnapshot:
+) -> control_plane_snapshot.CaptureControlPlaneSnapshot:
     """Bind historical capture to the same local control-plane root as execution."""
     root = Path(data_root) / "output" / "control"
-    manifests = FileRunManifestStore(base_path=root / "run_manifest")
+    manifests = manifest_store.FileRunManifestStore(base_path=root / "run_manifest")
     resolved_archive = resolve_control_plane_archive_root(archive_root)
-    return CaptureControlPlaneSnapshot(
+    return control_plane_snapshot.CaptureControlPlaneSnapshot(
         manifests=manifests,
-        evidence=ControlPlaneEvidenceService(
+        evidence=control_plane_evidence.ControlPlaneEvidenceService(
             ledger_port=FileRunLedgerStore(base_path=root / "run_ledger"),
             lineage_store=FileLineageStore(base_path=root / "lineage"),
             manifest_inspector=manifests,

@@ -1573,10 +1573,10 @@
         "src/bioetl/composition/bootstrap/runtime/"
       ],
       "duplication_clusters": 0,
-      "files": 49,
-      "total_loc": 6131,
+      "files": 50,
+      "total_loc": 6173,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.299,
+      "helper_function_ratio": 0.298,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.tracing_bootstrap",
       "bounded_growth_budgets": {
@@ -1586,7 +1586,7 @@
       "internal_fan_in_census": {
         "distribution": {
           "0": 6,
-          "1": 28,
+          "1": 29,
           "2": 15
         },
         "modules": [
@@ -1891,6 +1891,13 @@
             "runtime_importers": [
               "bioetl.composition.bootstrap.runtime._runner_assembly_support",
               "bioetl.composition.bootstrap.runtime.runner"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.run_status_capture",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.run_status"
             ]
           },
           {
