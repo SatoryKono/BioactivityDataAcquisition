@@ -44,6 +44,13 @@ jobs:
         run: node verify-packed-bridge.mjs
       - name: Test bridge behavior and security boundaries
         run: npm test
+      - name: Test host probe observes committed navigation
+        run: node --test runtime-probe/module.test.mjs
+      - name: Test image identity and artifact parity guard
+        run: node --test verify-host-image.test.mjs
+      - name: Test trusted rootfs timestamp normalization
+        working-directory: grafana/tooling/router-v7-bridge
+        run: /usr/bin/python3 fingerprint-rootfs.test.py
       - name: Check exported TypeScript API
         run: npm run typecheck
       - name: Build browser candidate
@@ -82,8 +89,38 @@ jobs:
         run: npm run test:ci
       - name: Build plugin
         run: npm run build
+      - name: Verify built bundle against shipped host manifest
+        env:
+          BIOETL_PLUGIN: ${{ matrix.plugin }}
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ["GITHUB_WORKSPACE"])
+          plugin = os.environ["BIOETL_PLUGIN"]
+          assert plugin in ("bioetl-scenes-app", "bioetl-selectorshell-panel"), plugin
+          relative = f"grafana/plugins/{plugin}/dist/module.js"
+          bundle = root / relative
+          assert bundle.is_file(), f"Missing built bundle: {relative}"
+          manifest = json.loads((root / "grafana/tooling/router-v7-bridge/host-image.json").read_text())
+          expected = manifest["artifact_sha256"][relative]
+          actual = hashlib.sha256(bundle.read_bytes()).hexdigest()
+          assert actual == expected, f"Bundle SHA-256 mismatch: {relative}: {actual} != {expected}"
+          print(f"Verified {relative}: {actual}")
+          PY
+      - name: Transfer verified plugin output
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: host-plugin-${{ matrix.plugin }}
+          path: grafana/plugins/${{ matrix.plugin }}/dist/
+          if-no-files-found: error
+          retention-days: 7
 
   host-build:
+    needs: plugin-tests
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -107,16 +144,39 @@ jobs:
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: "24"
+      - name: Download verified Scenes output
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: host-plugin-bioetl-scenes-app
+          path: reports/qa/router-v7-image-context/bioetl-scenes-app
+      - name: Download verified SelectorShell output
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: host-plugin-bioetl-selectorshell-panel
+          path: reports/qa/router-v7-image-context/bioetl-selectorshell-panel
       - name: Apply migration to pristine upstream source
         working-directory: reports/qa/router-v7-grafana-host
         run: |
           git -c core.autocrlf=false apply --check "$GITHUB_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-v13.2.3.patch"
           git -c core.autocrlf=false apply "$GITHUB_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-v13.2.3.patch"
+          git -c core.autocrlf=false apply --check "$GITHUB_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-canvas-query-error.patch"
+          git -c core.autocrlf=false apply "$GITHUB_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-canvas-query-error.patch"
+          git -c core.autocrlf=false apply --check "$GITHUB_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-router-jest-esm.patch"
+          git -c core.autocrlf=false apply "$GITHUB_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-router-jest-esm.patch"
           cmp packages/bioetl-router-v7-bridge/index.mjs "$GITHUB_WORKSPACE/grafana/tooling/router-v7-bridge/index.mjs"
           cmp packages/bioetl-router-v7-bridge/index.d.ts "$GITHUB_WORKSPACE/grafana/tooling/router-v7-bridge/index.d.ts"
+      - name: Verify host exposes the probe ReactDOM client dependency
+        working-directory: reports/qa/router-v7-grafana-host
+        run: |
+          grep -F "'react-dom/client': () => import('react-dom/client')" public/app/features/plugins/loader/sharedDependencies.ts
       - name: Install immutable upstream dependency graph
         working-directory: reports/qa/router-v7-grafana-host
         run: node .yarn/releases/yarn-4.17.1.cjs install --immutable --mode=skip-build
+      - name: Test Canvas query failure and recovery
+        working-directory: reports/qa/router-v7-grafana-host
+        env:
+          NODE_ENV: test
+        run: node node_modules/jest/bin/jest.js public/app/plugins/panel/canvas/CanvasPanel.integration.test.tsx --runInBand --watch=false --testNamePattern="query error"
       - name: Build production frontend and Swagger with bounded workers
         working-directory: reports/qa/router-v7-grafana-host
         run: |
@@ -135,3 +195,26 @@ jobs:
           };
           EOF
           node node_modules/webpack-cli/bin/cli.js --config scripts/webpack/webpack.router-security.mjs
+      - name: Build complete host image from verified outputs
+        run: |
+          cp -a reports/qa/router-v7-grafana-host/public/build reports/qa/router-v7-image-context/host-build
+          docker buildx build --platform linux/amd64 --load --provenance=false \
+            --metadata-file reports/qa/router-v7-image-build.json \
+            -f grafana/tooling/router-v7-bridge/Dockerfile.host \
+            -t bioetl-router-host:acceptance reports/qa/router-v7-image-context
+      - name: Verify built image against declared delivery image
+        run: |
+          image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').image")
+          docker pull "$image"
+          node grafana/tooling/router-v7-bridge/verify-host-image.mjs \
+            bioetl-router-host:acceptance
+      - name: Preserve image build and parity receipts
+        if: ${{ !cancelled() && always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: router-v7-host-image-receipts
+          path: |
+            reports/qa/router-v7-image-build.json
+            reports/qa/router-v7-image-parity.json
+          if-no-files-found: warn
+          retention-days: 7

@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "fe6c50a1ea474d29d3329a9fa8e41520a0827c8472e4b864ae5dc953adbe5226",
-      "limit": "fe6c50a1ea474d29d3329a9fa8e41520a0827c8472e4b864ae5dc953adbe5226",
+      "current": "e9dcb44dcb3bf3faf1401c932b22df13084672e2343b2b4bb81c9d51815b4d3c",
+      "limit": "e9dcb44dcb3bf3faf1401c932b22df13084672e2343b2b4bb81c9d51815b4d3c",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -57,13 +57,13 @@
     {
       "current": {
         "source_module_count": 2563,
-        "source_tree_sha256": "fe6c50a1ea474d29d3329a9fa8e41520a0827c8472e4b864ae5dc953adbe5226",
+        "source_tree_sha256": "e9dcb44dcb3bf3faf1401c932b22df13084672e2343b2b4bb81c9d51815b4d3c",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2563,
-        "source_tree_sha256": "fe6c50a1ea474d29d3329a9fa8e41520a0827c8472e4b864ae5dc953adbe5226",
+        "source_tree_sha256": "e9dcb44dcb3bf3faf1401c932b22df13084672e2343b2b4bb81c9d51815b4d3c",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -421,7 +421,7 @@
       "name": "remote_main_architecture_debt_baseline",
       "remediation": "Fetch origin/main and regenerate the remote-main architecture debt baseline.",
       "source_artifact": "reports/quality/architecture-debt-remote-main-baseline.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": {
@@ -467,18 +467,20 @@
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 0,
-    "pass": 46,
+    "fail": 1,
+    "pass": 45,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 9.47,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 0,
-    "failing_gates": [],
+    "fail_count": 1,
+    "failing_gates": [
+      "remote_main_architecture_debt_baseline"
+    ],
     "gate_count": 46,
-    "pass_count": 46,
-    "release_gate_status": "passing",
+    "pass_count": 45,
+    "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
   }

@@ -42,6 +42,54 @@ Current blockers are tracked in #11888, #11889 and #11895. A billing-blocked CI 
 unpatched braces advisory, or failed governance gate is not successful acceptance.
 Do not change .env, raise budgets, or suppress advisories to make the candidate pass.
 
-The checked Actions integration is also supplied as workflow-canvas-acceptance.patch.
-It is not active until applied by a workflow-authorized publisher; existing local
-credentials were insufficient. Its absence is an acceptance blocker.
+The Actions integration applies all three patches and runs the focused Canvas
+failure/recovery tests before the production build. The historical proposed
+change remains in workflow-canvas-acceptance.patch for provenance.
+
+Each plugin matrix job verifies its bundle and uploads the complete dist tree.
+The host job downloads those exact outputs, builds Dockerfile.host with the
+newly compiled frontend, and records the produced image-config digest. It pulls
+the registry digest from host-image.json and requires matching frontend/plugin
+bytes, filenames, owners, modes, symlink targets and runtime configuration.
+Registry-manifest and image-config digests identify different objects; receipt
+fields keep them separate. Creation timestamps are excluded from artifact parity.
+Any artifact/configuration mismatch blocks delivery. CI preserves build metadata
+and the parity receipt; an absent receipt does not establish acceptance.
+
+Dockerfile.host packages the compiled frontend and both owned plugins against
+the pinned official 13.2.3 base. Plugins use Grafana's bundled-plugin directory;
+the managed data volume therefore cannot mask them. host-image.json binds the
+delivered digest to patch, lock and bundle hashes. The default monitoring compose
+retains the accepted 12.2.5 image and does not install or enable the Scenes shadow
+app. Explicitly layer compose.acceptance.yml on a separate acceptance host and
+database to select the candidate and allow the two owned unsigned plugins.
+Enable Scenes manually for shadow review; this does not authorize a cutover.
+The acceptance-only runtime-probe is never shipped in the image.
+
+The runtime-probe plugin executes navigation and hydration fixtures through
+Grafana's shared react-router external. Install it only on the acceptance host,
+run its explicit button, preserve the rendered receipt and remove it afterward.
+Its temporary hydration data and harmless constructor are restored in finally.
+Pinned Grafana 13.2.3 already maps react-dom/client in
+public/app/features/plugins/loader/sharedDependencies.ts. The host workflow
+verifies that mapping before compiling. Node probe tests verify fixture behavior;
+they do not replace the real host's module-loading/browser acceptance.
+
+On the already prepared separate acceptance host, restart Grafana with the
+temporary probe mount and exact unsigned-ID override (run from the repo root):
+
+```bash
+docker compose -f docker-compose.monitoring.yml -f grafana/tooling/router-v7-bridge/compose.acceptance.yml -f grafana/tooling/router-v7-bridge/compose.probe.yml up -d --no-deps --force-recreate grafana
+```
+
+Create an acceptance-only panel of type `bioetl-router-security-probe`, run
+`Run host security acceptance`, and preserve its rendered receipt. Remove that
+panel/dashboard, then recreate Grafana without the probe layer:
+
+```bash
+docker compose -f docker-compose.monitoring.yml -f grafana/tooling/router-v7-bridge/compose.acceptance.yml up -d --no-deps --force-recreate grafana
+```
+
+This removes both the probe mount and its unsigned allowlist entry. Do not add
+the probe to `.env` or the default compose. Keep the candidate opt-in isolated
+until acceptance, SBOM, backup/rollback and proof gates admit managed rollout.

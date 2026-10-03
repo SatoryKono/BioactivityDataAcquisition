@@ -1,0 +1,13 @@
+{
+  "type": "panel",
+  "name": "BioETL host security acceptance",
+  "id": "bioetl-router-security-probe",
+  "info": {
+    "description": "Acceptance-only fixtures using the running Grafana shared router.",
+    "author": { "name": "BioETL" },
+    "keywords": ["acceptance"],
+    "logos": { "small": "logo.svg", "large": "logo.svg" },
+    "links": [], "screenshots": [], "version": "1.0.0", "updated": "2026-10-03"
+  },
+  "dependencies": { "grafanaDependency": ">=13.2.3", "plugins": [] }
+}

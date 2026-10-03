@@ -22,6 +22,9 @@ from bioetl.infrastructure.storage.run_report_store_adapter import (
 from bioetl.infrastructure.time import SystemClock
 
 
+pytestmark = pytest.mark.integration
+
+
 @pytest.mark.asyncio
 @pytest.mark.parametrize("outcome", ["success", "error", "cancel"])
 @pytest.mark.parametrize("child_verdict", ["OK", "WARN"])
