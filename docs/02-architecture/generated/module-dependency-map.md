@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `2552`
-- Internal import edges (raw): `8086`
+- Scanned modules: `2553`
+- Internal import edges (raw): `8090`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `347`
@@ -21,7 +21,7 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1593 OK| application
+    application -->|1594 OK| application
     application -->|1075 OK| domain
     composition -->|221 OK| application
     composition -->|646 OK| composition
@@ -30,17 +30,17 @@ flowchart LR
     domain -->|1281 OK| domain
     infrastructure -->|782 OK| domain
     infrastructure -->|1251 OK| infrastructure
-    interfaces -->|72 OK| application
+    interfaces -->|73 OK| application
     interfaces -->|58 OK| composition
     interfaces -->|85 OK| domain
-    interfaces -->|450 OK| interfaces
+    interfaces -->|452 OK| interfaces
 ```
 
 ## Layer Edge Table
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1593 | allowed |
+| `application`    | `application`    |    1594 | allowed |
 | `application`    | `domain`         |    1075 | allowed |
 | `composition`    | `application`    |     221 | allowed |
 | `composition`    | `composition`    |     646 | allowed |
@@ -49,10 +49,10 @@ flowchart LR
 | `domain`         | `domain`         |    1281 | allowed |
 | `infrastructure` | `domain`         |     782 | allowed |
 | `infrastructure` | `infrastructure` |    1251 | allowed |
-| `interfaces`     | `application`    |      72 | allowed |
+| `interfaces`     | `application`    |      73 | allowed |
 | `interfaces`     | `composition`    |      58 | allowed |
 | `interfaces`     | `domain`         |      85 | allowed |
-| `interfaces`     | `interfaces`     |     450 | allowed |
+| `interfaces`     | `interfaces`     |     452 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
 
@@ -112,7 +112,7 @@ flowchart LR
 | `infrastructure.control_plane` | `domain.types`                             |      15 |
 | `infrastructure.quality`       | `domain.types`                             |      15 |
 | `infrastructure.storage`       | `domain.exceptions`                        |      15 |
-| `application.services`         | `domain.workflow`                          |      14 |
+| `interfaces.http`              | `application.services`                     |      15 |
 
 ## Policy Violations
 

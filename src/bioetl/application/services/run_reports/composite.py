@@ -14,6 +14,9 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
     RunResult,
 )
+from bioetl.application.services.run_reports.artifact_digest import (
+    canonical_report_sha256,
+)
 from bioetl.application.services.run_reports.observations import (
     bind_run_observations,
     record_run_observation,
@@ -41,6 +44,25 @@ def record_composite_child(result: RunResult) -> None:
     children = _children.get()
     if children is not None:
         children.append(result)
+
+
+def _child_artifact(child: RunResult, store: RunReportStorePort) -> dict[str, object]:
+    """Persist portable child references and bind available evidence by digest."""
+    artifact: dict[str, object] = {
+        "kind": "composite_child_run_report",
+        "ref": str(child.run_report_json_path).replace("\\", "/"),
+        "run_id": child.run_id,
+        "pipeline_name": child.pipeline_name,
+        "manifest_id": child.manifest_id,
+    }
+    try:
+        payload = json.loads(store.read_text(str(child.run_report_json_path)))
+        if isinstance(payload, dict):
+            artifact["sha256"] = canonical_report_sha256(payload)
+    except (OSError, ValueError, TypeError):
+        # Preserve the reference: readers must expose missing/invalid evidence.
+        pass
+    return artifact
 
 
 @dataclass(frozen=True)
@@ -131,13 +153,7 @@ class CompositeRunReportService:
             tracking_coverage=TrackingCoverage.PARTIAL,
             reason_catalog_version=default_reason_catalog().version,
             artifacts=tuple(
-                {
-                    "kind": "composite_child_run_report",
-                    "ref": child.run_report_json_path,
-                    "run_id": child.run_id,
-                    "pipeline_name": child.pipeline_name,
-                    "manifest_id": child.manifest_id,
-                }
+                _child_artifact(child, self.store)
                 for child in children
                 if child.run_report_json_path
             ),

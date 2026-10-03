@@ -16,8 +16,6 @@ from bioetl.domain.workflow.foreign_key_reconciliation_models import (
 )
 from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_reads import (
     filter_current_rows,
-)
-from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support import (
     filter_source_rows_to_current_run,
 )
 
