@@ -1,5 +1,5 @@
 {
-  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:c281e24ee74f37215e2eaca28b9cb4c1c8b7c002cc3d7e77bc871d39ffd141b2",
+  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:6b06ed07d91d3dee737f9a2d7bb2f5bf933e21d4eef00525584bc81f4afdaa69",
   "grafana_version": "13.2.3",
   "upstream_sha": "6193dc03311b631b9727b560d24369e683dc396e",
   "base_image": "grafana/grafana@sha256:d84563330dc9d2fd2bc096d0fb96021b5319c75bf6ed555566709998e823dec4",
@@ -12,15 +12,18 @@
     "grafana/tooling/router-v7-bridge/index.mjs": "eb4c404b42c0af3f3d1715ad4b191bd9e73564873b0fb650ba807c56ab580c3c",
     "grafana/tooling/router-v7-bridge/package-lock.json": "01a8eaf5b0e18140f2f79a9146124a2b4826f729f04ababc2ca9f41c08343bde",
     "grafana/tooling/router-v7-bridge/Dockerfile.host": "72133efc2b4e64b20730131a7da8597bca90d59bef964025e3ab9a9011f95812",
-    "grafana/plugins/bioetl-scenes-app/package-lock.json": "e086743153b13e780dd7adc3b4327a84095be61318ed6f1aac961da2f8063f14",
-    "grafana/plugins/bioetl-scenes-app/dist/module.js": "e2de531920743355b25abe89c68d12c224ce3b14ff51e331a6b2fa0e4a020b2f",
+    "grafana/plugins/bioetl-scenes-app/package-lock.json": "ec1f91b45ee994c94212a652dcccbd31f3d22a597d3fe25ab855a4c5dc9771e4",
+    "grafana/plugins/bioetl-scenes-app/dist/module.js": "a9b13553615755f90297c7ba050301cf0991d4f8ddb623bbf6ab015f7e156925",
     "grafana/plugins/bioetl-selectorshell-panel/package-lock.json": "da40dad1e7f6c8f4f0ccd7225bedb6728ad2ba69d9c8b757986ab7ba1315bc07",
     "grafana/plugins/bioetl-selectorshell-panel/dist/module.js": "147c463a1c3d1707a8db6f78064d1607cd5cf6bb80934b5050f8121338c48464",
     "grafana/plugins/bioetl-scenes-app/src/plugin.json": "459150fe22d8fd0adbe3e02fa7db7c6c417a17ea674199b69b4a2f7098b7e623",
     "grafana/plugins/bioetl-selectorshell-panel/src/plugin.json": "4ec6a2e5d73f919bdd3ce543b9ce4bbd2c95aba7cd5350700b61aa49e96bde00",
-    "grafana/plugins/bioetl-scenes-app/dist/plugin.json": "c21bd253ccea044b50db6ae158ac197fbdcf7ced0efa1eaf5820154cb2e76b6a",
-    "grafana/plugins/bioetl-selectorshell-panel/dist/plugin.json": "cadaf15135983ccad433d307c1e673aae38b422a0926ffc1318756322245b0a4"
+    "grafana/plugins/bioetl-scenes-app/dist/plugin.json": "6dfc46337a182a2849e766491c88e839817ff558509168342a1177ba70a2e583",
+    "grafana/plugins/bioetl-selectorshell-panel/dist/plugin.json": "cadaf15135983ccad433d307c1e673aae38b422a0926ffc1318756322245b0a4",
+    "grafana/plugins/bioetl-scenes-app/package.json": "43d4658c9f064d8b7be2722a241faf2e75a4437e2167ef5390c16af315868c47",
+    "grafana/plugins/bioetl-scenes-app/src/kernel/contracts.ts": "608e41ad10a3ab888d9f9e497d2cfcf268f295892eae0e672e847eac8de28a95",
+    "grafana/plugins/bioetl-scenes-app/src/kernel/presentation.ts": "fe580f9e01efd8e4a0e94a4fc7c94b0b793c4016aad2d8b13ef0a86de7928d5c"
   },
-  "acceptance": "Candidate security fixtures PASS; managed post-merge acceptance required.",
+  "acceptance": "Scenes 0.1.2 scope-repair candidate; fresh complete acceptance and trust-tier ADMIT required before managed rollout.",
   "plugin_release_date": "2026-10-03"
 }
