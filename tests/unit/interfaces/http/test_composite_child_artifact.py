@@ -12,7 +12,7 @@ from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
 from bioetl.infrastructure.storage.run_report_store_adapter import (
     FileRunReportStoreAdapter,
 )
-from bioetl.interfaces.http._composite_child_artifact import probe_child_artifact
+from bioetl.interfaces.http._selected_run_artifact_probes import probe_child_artifact
 from bioetl.interfaces.http._selected_run_artifact_probes import _artifact_probes
 from bioetl.interfaces.http._recent_run_presentation import _evidence_status
 

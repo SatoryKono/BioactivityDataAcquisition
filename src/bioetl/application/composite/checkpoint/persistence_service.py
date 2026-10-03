@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from hashlib import sha256
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.checkpoint._checkpoint_runtime import (
@@ -54,9 +55,11 @@ class CompositeCheckpointPersistenceService:
     def save(self, state: CompositeCheckpointState) -> None:
         """Save checkpoint state to JSON atomically."""
         try:
+            content = json.dumps(state.to_dict(), indent=2)
+            self._save_history(state, content)
             self._storage.write_atomic(
                 self._checkpoint_filename,
-                json.dumps(state.to_dict(), indent=2),
+                content,
             )
             self._logger.debug(
                 "Saved checkpoint",
@@ -84,6 +87,34 @@ class CompositeCheckpointPersistenceService:
                 reason_code="unexpected_bioetl_error",
             )
             raise
+
+    def _save_history(self, state: CompositeCheckpointState, content: str) -> None:
+        """Keep manifest-bound evidence after the mutable resume file is deleted."""
+        if not state.manifest_id:
+            return
+        for component in (state.composite_name, state.run_id, state.manifest_id):
+            if (
+                not component
+                or component in {".", ".."}
+                or any(char in component for char in "/\\:")
+            ):
+                raise ValueError("Invalid composite checkpoint history identity")
+        digest = sha256(content.encode("utf-8")).hexdigest()
+        history_path = (
+            f".history/by_pipeline/{state.composite_name}/{state.run_id}/{digest}.json"
+        )
+        self._storage.write_atomic(history_path, content)
+        self._storage.write_atomic(
+            f".history/by_manifest/{state.manifest_id}.json",
+            json.dumps(
+                {
+                    "manifest_id": state.manifest_id,
+                    "pipeline": state.composite_name,
+                    "run_id": state.run_id,
+                    "history_path": history_path,
+                }
+            ),
+        )
 
     def delete(self) -> None:
         """Delete checkpoint file after successful completion."""

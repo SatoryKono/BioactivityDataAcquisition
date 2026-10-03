@@ -1,16 +1,25 @@
-# Pilot config — CircleCI migration v2, phase 1 (03.10.2026)
+# CircleCI config v2 — PR gates port (phase 2, 03.10.2026)
 # Repo: SatoryKono/BioactivityDataAcquisition
-# Purpose: verify that CircleCI builds run and post commit statuses to the
-# billing-locked GitHub account; measure credit consumption of one lane.
-# Install: copy this file to <repo>/.circleci/config.yml, commit, push.
-# CircleCI auto-detects it on push.
+# Mirrors .github/workflows/pr-required.yml: the `classify` job runs the repo's own
+# decision-matrix classifier (scripts/engineering/ci pr-gate classify); each gate job
+# reads the matrix from the workspace and halts early when not_applicable.
+# 8 gates are always_required in the catalog; 4 are path_scoped (docker,
+# generated-artifacts, commit-governance, docs-governance).
+# NOT ported (GitHub-native): codeql, dependency-review, labeler, stale.
+# Deploy: replace .circleci/config.yml at repo root, commit, push.
 version: 2.1
 
-# Port of .github/actions/setup-python-uv (simplified for the pilot):
-# Python 3.12 baseline, uv 0.11.26, uv cache, `uv sync --frozen` with dev extras.
 commands:
+  # Port of .github/actions/setup-python-uv (uv 0.11.26, uv cache, uv sync).
   setup-python-uv:
     description: "Install uv, restore cache, sync deps (port of GH composite action)"
+    parameters:
+      python-version:
+        type: string
+        default: "3.12"
+      extras:
+        type: string
+        default: "dev tracing"
     steps:
       - run:
           name: Install uv 0.11.26
@@ -21,20 +30,95 @@ commands:
       - restore_cache:
           name: Restore uv cache
           keys:
-            - uv-v1-{{ checksum "uv.lock" }}-py312
+            - uv-v1-{{ checksum "uv.lock" }}-py<< parameters.python-version >>
       - run:
-          name: Sync dependencies (uv sync --frozen --extra dev --extra tracing)
+          name: Sync dependencies
           command: |
             export PATH="$HOME/.local/bin:$PATH"
             export UV_CACHE_DIR="$HOME/.cache/uv"
-            uv sync --frozen --extra dev --extra tracing
+            CMD="uv sync --frozen"
+            for extra in << parameters.extras >>; do CMD="$CMD --extra $extra"; done
+            echo "Running: $CMD"
+            $CMD
       - save_cache:
           name: Save uv cache
-          key: uv-v1-{{ checksum "uv.lock" }}-py312
+          key: uv-v1-{{ checksum "uv.lock" }}-py<< parameters.python-version >>
           paths:
             - ~/.cache/uv
 
+  # Reads the decision matrix produced by `classify`; ends the job as success
+  # without running the gate when the catalog says not_applicable.
+  check-gate:
+    description: "Halt job early when the gate decision is not_applicable"
+    parameters:
+      gate:
+        type: string
+    steps:
+      - attach_workspace:
+          at: /tmp/cci-ws
+      - run:
+          name: Check gate decision (<< parameters.gate >>)
+          command: |
+            DECISION=$(python3 -c "import json; print(json.load(open('/tmp/cci-ws/pr-gate-decisions.json'))['decisions']['<< parameters.gate >>']['decision'])")
+            echo "gate << parameters.gate >> decision: $DECISION"
+            if [ "$DECISION" != "required" ]; then
+              echo "Gate not applicable for this change set — skipping."
+              circleci-agent step halt
+            fi
+
 jobs:
+  # Mirrors pr-required.yml `classify-changes`: runs the repo's own classifier
+  # against the canonical catalog. On main/master pushes all gates are required
+  # (fail-closed); on branches the matrix is computed from merge-base...HEAD.
+  classify:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: Classify changes (decision matrix)
+          command: |
+            export PATH="$HOME/.local/bin:$PATH"
+            HEAD_SHA="$CIRCLE_SHA1"
+            if [ "$CIRCLE_BRANCH" = "main" ] || [ "$CIRCLE_BRANCH" = "master" ]; then
+              echo "Default-branch push: all gates required (fail-closed)."
+              python3 - "$HEAD_SHA" <<'EOF' > /tmp/pr-gate-decisions.json
+            import json, sys
+            head = sys.argv[1]
+            gates = ["lint-arch","tests","type-checking","security","codeql","docker",
+                     "duplication","root-hygiene","generated-artifacts","compiled-artifacts",
+                     "commit-governance","docs-governance"]
+            print(json.dumps({"schema_version": 1, "config_version": 2, "head_sha": head,
+                              "decisions": {g: {"decision": "required", "reason": "default_branch_push"} for g in gates},
+                              "changed_files": [], "unclassified_files": []}, indent=2))
+            EOF
+            else
+              git fetch --no-tags origin main:refs/remotes/origin/main
+              BASE_SHA="$(git merge-base origin/main "$HEAD_SHA")"
+              echo "Classifying $BASE_SHA...$HEAD_SHA"
+              uv run --frozen --no-build python -m scripts.engineering.ci pr-gate classify \
+                --catalog configs/quality/github_required_checks.yaml \
+                --event-name pull_request \
+                --base-sha "$BASE_SHA" \
+                --head-sha "$HEAD_SHA" \
+                --artifact /tmp/pr-gate-decisions.json
+            fi
+            cp /tmp/pr-gate-decisions.json ./pr-gate-decisions.json
+            python3 -c "
+            import json
+            d = json.load(open('/tmp/pr-gate-decisions.json'))
+            for k, v in d['decisions'].items(): print(f'{k} = {v[\"decision\"]} ({v[\"reason\"]})')"
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - pr-gate-decisions.json
+      - store_artifacts:
+          path: pr-gate-decisions.json
+
+  # --- Gate: lint-arch (always_required) -------------------------------------
+  # Mirrors import-linter.yml `lint` (ruff staged profiles + format + isort).
   lint-ruff:
     docker:
       - image: cimg/python:3.12
@@ -43,12 +127,12 @@ jobs:
       - checkout
       - setup-python-uv
       - run:
-          name: ruff check (mirrors `make lint` / pr-required lint-arch)
+          name: "ruff check (Makefile gate: src tests scripts)"
           command: |
             export PATH="$HOME/.local/bin:$PATH"
             uv run --frozen ruff check src tests scripts
 
-  pytest-fast:
+  lint-arch:
     docker:
       - image: cimg/python:3.12
     resource_class: small
@@ -56,22 +140,462 @@ jobs:
       - checkout
       - setup-python-uv
       - run:
-          name: pytest unit-domain fast lane (mirrors tests.yml test-fast)
+          name: ruff staged profiles + format + isort
+          command: |
+            export PATH="$HOME/.local/bin:$PATH"
+            uv run --frozen --no-build ruff check src/bioetl/domain --output-format=github
+            uv run --frozen --no-build ruff check src/bioetl/application --output-format=github
+            uv run --frozen --no-build ruff check src/bioetl/infrastructure --output-format=github
+            uv run --frozen --no-build ruff format --check src tests
+            uv run --frozen --no-build ruff check --select I src tests --output-format=github
+
+  # Mirrors import-linter.yml `arch-tests` (canonical selector from catalog).
+  arch-tests:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: architecture tests
           command: |
             export PATH="$HOME/.local/bin:$PATH"
             mkdir -p reports/test-telemetry
             HYPOTHESIS_PROFILE=fast \
-            uv run --frozen --no-build pytest tests/unit/domain/ \
-              -m "not fs_contract and not repo_backed and not subprocess_backed and not slow and not benchmark and not memory" \
-              -p no:xdist \
+            uv run --frozen --no-build pytest tests/architecture \
+              -m not-slow-not-benchmark-not-memory \
               -q --tb=short \
-              --junitxml=reports/test-telemetry/junit-fast.unit-domain.xml
+              --junitxml=reports/test-telemetry/junit-arch.xml
       - store_test_results:
           path: reports/test-telemetry
 
+  # --- Gate: type-checking (always_required) ----------------------------------
+  # Mirrors type-checking.yml `type-check` (mypy --strict, 30m budget).
+  mypy:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    no_output_timeout: 35m
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: mypy strict gate (src/bioetl + src/memory)
+          command: |
+            export PATH="$HOME/.local/bin:$PATH"
+            mkdir -p reports
+            rm -rf .mypy_cache
+            set +e
+            timeout --signal=TERM --kill-after=30s 30m \
+              uv run --frozen --no-build mypy --config-file pyproject.toml --strict --no-incremental src/bioetl src/memory \
+              2>&1 | tee reports/mypy_strict.log
+            status=${PIPESTATUS[0]}
+            set -e
+            if [ "$status" -eq 124 ]; then echo "mypy strict gate timed out after 30 minutes"; exit 1; fi
+            exit "$status"
+      - store_artifacts:
+          path: reports/mypy_strict.log
+
+  # --- Gate: tests (always_required) ------------------------------------------
+  dependency-lock:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: uv lock --check (no drift)
+          command: |
+            export PATH="$HOME/.local/bin:$PATH"
+            uv lock --check
+
+  # Mirrors tests.yml `test-fast` (4 unit groups, fast markers, no xdist).
+  # NOTE: CircleCI matrix is a cartesian product, so name+path are packed into
+  # one parameter and split in the step.
+  test-fast:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    parameters:
+      test-group:
+        type: string
+        default: "unit-domain|tests/unit/domain/"
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: pytest fast lane (<< parameters.test-group >>)
+          command: |
+            export PATH="$HOME/.local/bin:$PATH"
+            GROUP="<< parameters.test-group >>"
+            NAME="${GROUP%%|*}"; PATHS="${GROUP#*|}"
+            mkdir -p reports/test-telemetry
+            HYPOTHESIS_PROFILE=fast \
+            uv run --frozen --no-build pytest $PATHS \
+              -m "not fs_contract and not repo_backed and not subprocess_backed and not slow and not benchmark and not memory" \
+              -p no:xdist \
+              -q --tb=short \
+              --junitxml="reports/test-telemetry/junit-fast.${NAME}.xml"
+      - store_test_results:
+          path: reports/test-telemetry
+
+  # Mirrors tests.yml `test-matrix` (6 groups; unit groups with xdist, integration serial).
+  test-integration:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    parameters:
+      test-group:
+        type: string
+        default: "integration|tests/integration/|-p no:xdist"
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+      - run:
+          name: pytest matrix lane (<< parameters.test-group >>)
+          command: |
+            export PATH="$HOME/.local/bin:$PATH"
+            GROUP="<< parameters.test-group >>"
+            NAME="${GROUP%%|*}"; REST="${GROUP#*|}"
+            PATHS="${REST%%|*}"; XDIST="${REST#*|}"
+            mkdir -p reports/test-telemetry
+            uv run --frozen --no-build pytest $PATHS \
+              -m "not serial and not memory and not fs_contract and not subprocess_backed" \
+              $XDIST \
+              -q --tb=short \
+              --junitxml="reports/test-telemetry/junit.${NAME}.xml"
+      - store_test_results:
+          path: reports/test-telemetry
+
+  # Mirrors tests.yml `dq-consistency-gate`.
+  dq-consistency:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: DQ consistency validation
+          command: |
+            export PATH="$HOME/.local/bin:$PATH"
+            uv run --frozen --no-build python -m scripts.engineering.qa validate-dq-consistency
+
+  # --- Gate: root-hygiene (always_required) ------------------------------------
+  # Mirrors root-hygiene.yml `root-hygiene` (essential checks).
+  root-hygiene:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: root allowlist + governance checks
+          command: |
+            export PATH="$HOME/.local/bin:$PATH"
+            uv run --frozen --no-build python -m scripts.engineering.repo check-cleanliness --strict-untracked --check-local-forbidden-outputs
+            uv run --frozen --no-build python -m scripts.engineering.repo check-cleanup-governance
+            uv run --frozen --no-build python -m scripts.engineering.repo check-root-governance-docs
+            uv run --frozen --no-build python -m scripts.engineering.repo check-root-review-registry
+
+  # --- Gate: compiled-artifacts (always_required) -------------------------------
+  # Mirrors compiled-artifacts-block.yml `no-pyc-check`.
+  compiled-artifacts:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: no tracked compiled artifacts
+          command: |
+            export PATH="$HOME/.local/bin:$PATH"
+            set -e
+            if git ls-files | grep -E '\.pyc$|__pycache__/' ; then
+              echo "ERROR: tracked compiled Python artifacts found"; exit 1
+            fi
+            echo "No tracked .pyc / __pycache__ entries."
+            uv run --frozen --no-build python -m scripts.engineering.repo check-cleanliness
+
+  # --- Gate: security (always_required) -----------------------------------------
+  # Mirrors security.yml (detect-secrets, pip-audit, bandit, gitleaks, osv-scanner).
+  security-scans:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: detect-secrets (no hardcoded secrets)
+          command: |
+            export PATH="$HOME/.local/bin:$PATH"
+            uv run --frozen --no-build pytest tests/architecture/test_antipatterns.py::test_no_hardcoded_secrets -q
+      - run:
+          name: pip-audit (strict)
+          command: |
+            export PATH="$HOME/.local/bin:$PATH"
+            export UV_CACHE_DIR=/tmp/.uv-cache
+            uv export --frozen --no-hashes --no-emit-project --all-extras > /tmp/pip-audit-requirements.txt
+            uv run --frozen --no-build pip-audit --strict \
+              -r /tmp/pip-audit-requirements.txt --cache-dir /tmp/.pip-audit-cache
+      - run:
+          name: bandit (src/bioetl)
+          command: |
+            export PATH="$HOME/.local/bin:$PATH"
+            uv run --frozen --no-build bandit -c pyproject.toml -r src/bioetl
+      - run:
+          name: gitleaks (binary v8.30.1)
+          command: |
+            curl -fsSL --proto '=https' --tlsv1.2 \
+              https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz \
+              -o /tmp/gitleaks.tar.gz
+            mkdir -p "$HOME/.local/bin" && tar -xzf /tmp/gitleaks.tar.gz -C "$HOME/.local/bin" gitleaks
+            "$HOME/.local/bin/gitleaks" detect --config .gitleaks.toml --no-git -v
+      - run:
+          name: osv-scanner (binary v2.6.0, lockfiles)
+          command: |
+            curl -fsSL --proto '=https' --tlsv1.2 \
+              https://github.com/google/osv-scanner/releases/download/v2.6.0/osv-scanner_linux_amd64 \
+              -o "$HOME/.local/bin/osv-scanner"
+            chmod 0755 "$HOME/.local/bin/osv-scanner"
+            "$HOME/.local/bin/osv-scanner" \
+              --lockfile=uv.lock \
+              --lockfile=package-lock.json \
+              --lockfile=.github/actions/setup-mermaid/package-lock.json \
+              --lockfile=.github/tooling/jscpd/package-lock.json \
+              --lockfile=scripts/ai/gemini/npm-tooling/package-lock.json \
+              --lockfile=grafana/plugins/bioetl-scenes-app/package-lock.json \
+              --lockfile=grafana/plugins/bioetl-selectorshell-panel/package-lock.json \
+              --lockfile=grafana/tooling/router-v7-bridge/package-lock.json \
+              --format=json --output-file=osv-results.json || true
+            export PATH="$HOME/.local/bin:$PATH"
+            uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json
+      - store_artifacts:
+          path: osv-results.json
+
+  # --- Gate: duplication (always_required) ---------------------------------------
+  # Mirrors duplication-complexity.yml (radon + jscpd).
+  duplication:
+    docker:
+      - image: cimg/python:3.12-node
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: radon complexity (CC <= 10; domain <= 5)
+          command: |
+            export PATH="$HOME/.local/bin:$PATH"
+            mkdir -p reports
+            uv run --frozen --no-build radon cc src tests -a -s > reports/radon_cc.txt
+            uv run --frozen --no-build python -m scripts.engineering.qa check-duplication-complexity-exemptions
+      - run:
+          name: jscpd duplication detection
+          command: |
+            set -euo pipefail
+            mkdir -p reports/jscpd
+            npm ci --ignore-scripts --no-fund --no-audit --prefix "$PWD/.github/tooling/jscpd"
+            "$PWD/.github/tooling/jscpd/node_modules/.bin/jscpd" \
+              "$PWD/src" "$PWD/tests" \
+              --config "$PWD/.jscpd.json" \
+              --threshold 10 --format python \
+              --output "$PWD/reports/jscpd"
+
+  # --- Gate: generated-artifacts (path_scoped) ------------------------------------
+  # Mirrors schema-governance.yml (generated schema artifacts + parity).
+  schema-governance:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv
+      - check-gate:
+          gate: generated-artifacts
+      - run:
+          name: schema artifacts + parity
+          command: |
+            export PATH="$HOME/.local/bin:$PATH"
+            uv run --frozen --no-build python -m scripts.schema generate-artifacts --check
+            uv run --frozen --no-build python -m scripts.schema verify-schema-parity --mode blocking
+
+  # --- Gate: commit-governance (path_scoped) ---------------------------------------
+  # Mirrors commit-lint.yml (conventional commits on the PR range).
+  commit-lint:
+    docker:
+      - image: cimg/python:3.12-node
+    resource_class: small
+    steps:
+      - checkout
+      - check-gate:
+          gate: commit-governance
+      - run:
+          name: commitlint on PR range
+          command: |
+            git fetch --no-tags origin main:refs/remotes/origin/main
+            BASE="$(git merge-base origin/main HEAD)"
+            npx --yes @commitlint/cli --config commitlint.config.mjs \
+              --from "$BASE" --to HEAD --verbose
+
+  # --- Gate: docs-governance (path_scoped) ------------------------------------------
+  # Mirrors docs.yml (docs-governance + validate-mkdocs essentials).
+  docs-governance:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv
+      - check-gate:
+          gate: docs-governance
+      - run:
+          name: docs governance checks
+          command: |
+            export PATH="$HOME/.local/bin:$PATH"
+            uv run --frozen --no-build python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check
+            uv run --frozen --no-build python -m scripts.docs passports check
+            uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog
+            uv run --frozen --no-build python -m scripts.engineering.qa report-dashboard-inventory --check --json
+            uv run --frozen --no-build python -m scripts.engineering.repo check-versions
+            uv run --frozen --no-build python -m scripts.docs check-links --report-json reports/docs-link-check-report.json
+            uv run --frozen --no-build python -m scripts.docs verify --skip-links
+            uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check
+
+  # --- Gate: docker (path_scoped) ----------------------------------------------------
+  # Mirrors docker.yml validation part only (lint + compose + build). No push, no
+  # Trivy baseline here — image security baseline stays a phase-3 item.
+  docker-build:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - check-gate:
+          gate: docker
+      - setup_remote_docker:
+          version: default
+      - run:
+          name: Install Docker CLI (not bundled in cimg/python)
+          command: |
+            if ! command -v docker >/dev/null 2>&1; then
+              curl -fsSL --proto '=https' --tlsv1.2 \
+                https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz \
+                -o /tmp/docker.tgz
+              tar -xzf /tmp/docker.tgz -C /tmp
+              (sudo mv /tmp/docker/docker /usr/local/bin/ 2>/dev/null || mv /tmp/docker/docker "$HOME/.local/bin/")
+              echo 'export PATH="/usr/local/bin:$HOME/.local/bin:$PATH"' >> "$BASH_ENV"
+            fi
+            docker version
+      - run:
+          name: Install Docker Compose plugin v5.6.0
+          command: |
+            mkdir -p "$HOME/.docker/cli-plugins"
+            curl -fsSL --proto '=https' --tlsv1.2 \
+              https://github.com/docker/compose/releases/download/v5.6.0/docker-compose-linux-x86_64 \
+              -o "$HOME/.docker/cli-plugins/docker-compose"
+            chmod 0755 "$HOME/.docker/cli-plugins/docker-compose"
+            docker compose version
+      - run:
+          name: hadolint (Dockerfile.bioetl)
+          command: |
+            curl -fsSL --proto '=https' --tlsv1.2 \
+              https://github.com/hadolint/hadolint/releases/download/v2.15.1/hadolint-Linux-x86_64 \
+              -o "$HOME/.local/bin/hadolint"
+            chmod 0755 "$HOME/.local/bin/hadolint"
+            "$HOME/.local/bin/hadolint" Dockerfile.bioetl
+      - run:
+          name: docker compose config validation
+          command: |
+            docker compose config > /dev/null
+            docker compose -f docker-compose.monitoring.yml config > /dev/null
+      - run:
+          name: docker build (Dockerfile.bioetl)
+          command: docker build -f Dockerfile.bioetl -t bioetl:ci .
+
+  # --- Aggregator (mirrors pr-gate-complete; stable name for future rulesets) -------
+  pr-gate-complete:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - run:
+          name: PR gate complete
+          command: echo "All required CircleCI gates passed."
+
 workflows:
   version: 2
-  pilot:
+  pr-gate:
     jobs:
-      - lint-ruff
-      - pytest-fast
+      - classify
+      - lint-ruff:
+          requires: [classify]
+      - lint-arch:
+          requires: [classify]
+      - arch-tests:
+          requires: [classify]
+      - mypy:
+          requires: [classify]
+      - dependency-lock:
+          requires: [classify]
+      - test-fast:
+          requires: [classify]
+          matrix:
+            parameters:
+              test-group:
+                - "unit-domain|tests/unit/domain/"
+                - "unit-application|tests/unit/application/"
+                - "unit-infrastructure|tests/unit/infrastructure/"
+                - "unit-other|tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/application/ --ignore=tests/unit/infrastructure/ --ignore=tests/unit/scripts/ --ignore=tests/unit/repo_backed/"
+      - test-integration:
+          requires: [classify]
+          matrix:
+            parameters:
+              test-group:
+                - "unit-domain|tests/unit/domain/|-n auto --dist loadscope"
+                - "unit-application|tests/unit/application/|-n auto --dist loadscope"
+                - "unit-infrastructure|tests/unit/infrastructure/|-n auto --dist loadscope"
+                - "unit-other|tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/application/ --ignore=tests/unit/infrastructure/ --ignore=tests/unit/scripts/ --ignore=tests/unit/repo_backed/|-n auto --dist loadscope"
+                - "integration|tests/integration/|-p no:xdist"
+                - "security|tests/security/|-n auto --dist loadscope"
+      - dq-consistency:
+          requires: [classify]
+      - root-hygiene:
+          requires: [classify]
+      - compiled-artifacts:
+          requires: [classify]
+      - security-scans:
+          requires: [classify]
+      - duplication:
+          requires: [classify]
+      - schema-governance:
+          requires: [classify]
+      - commit-lint:
+          requires: [classify]
+      - docs-governance:
+          requires: [classify]
+      - docker-build:
+          requires: [classify]
+      - pr-gate-complete:
+          requires:
+            - lint-ruff
+            - lint-arch
+            - arch-tests
+            - mypy
+            - dependency-lock
+            - test-fast
+            - test-integration
+            - dq-consistency
+            - root-hygiene
+            - compiled-artifacts
+            - security-scans
+            - duplication
+            - schema-governance
+            - commit-lint
+            - docs-governance
+            - docker-build
