@@ -1,0 +1,141 @@
+{
+  "recorded_at": "2026-10-03T19:40:05.848399+00:00",
+  "source_sha": "352e680ec473cae2074a358ceeb843045af4e496",
+  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:c281e24ee74f37215e2eaca28b9cb4c1c8b7c002cc3d7e77bc871d39ffd141b2",
+  "version": "13.2.3",
+  "router_version": "7.18.4",
+  "origin": "http://127.0.0.1:3016",
+  "container": "bioetl-five-issues-acceptance-20261003",
+  "trust_tier": "local_single_host",
+  "rollout": "NOT_ADMITTED",
+  "browser_security": {
+    "status": "PASS",
+    "assertions": 22,
+    "vectors": [
+      "//example.invalid",
+      "\\\\example.invalid",
+      "/\\example.invalid",
+      "\\/example.invalid"
+    ],
+    "checks_per_vector": [
+      "resolvePath same origin",
+      "InternalLink same origin",
+      "useNavigate rejects and stays on /home after render"
+    ],
+    "internal_routes": [
+      "/detail?run=42#panel",
+      "/%2f%2fexample.invalid",
+      "/%5cexample.invalid"
+    ],
+    "internal_route_checks": [
+      "pathname",
+      "search",
+      "hash",
+      "origin"
+    ],
+    "hydration_subtypes": [
+      "BioETLHarmlessProbe",
+      "constructor",
+      "__proto__",
+      "TypeError"
+    ],
+    "hydration_checks": [
+      "arbitrary constructor is not called",
+      "error remains an Error"
+    ],
+    "module_loading": "Actual unsigned panel instantiated via host react-dom/client and shared react-router mappings"
+  },
+  "browser_canvas": {
+    "status": "PARTIAL_PASS",
+    "no_run": "SELECT RUN / Choose a run",
+    "http_error": "QUERY ERROR with real connection-refused datasource message; no Field not found or stale success",
+    "http_recovery": "SELECT RUN / Choose a run restored",
+    "missing_tree": {
+      "backend_index_state": "tree_missing",
+      "text": "TREE_MISSING",
+      "viewport": [
+        1024,
+        768
+      ],
+      "clientWidth": 103,
+      "scrollWidth": 103,
+      "left": 759,
+      "right": 861.671875
+    },
+    "saved_run": {
+      "pipeline": "chembl_assay",
+      "run_id": "317440c1-dc5c-5575-9103-1e163f460bdf",
+      "rendered": "OK / excluded 0%"
+    },
+    "saved_run_without_quality_funnel": {
+      "pipeline": "composite_target",
+      "run_id": "55413289-ccf0-5375-a9ef-a290c89f4726",
+      "rendered": "UNKNOWN / excluded UNKNOWN"
+    },
+    "limitations": [
+      "This is an isolated acceptance host with a separate fresh database, not the managed production rollout.",
+      "The full six-route Scenes and selector-cancellation matrix has not been repeated on this post-merge image."
+    ]
+  },
+  "tests": {
+    "node_probe": {
+      "passed": 3,
+      "failed": 0
+    },
+    "provisioning_and_wrapper": {
+      "passed": 18,
+      "failed": 0,
+      "skipped": 2,
+      "skip_reason": "POSIX sh unavailable on native Windows"
+    }
+  },
+  "audits": {
+    "bioetl-scenes-app": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 31,
+        "critical": 0,
+        "total": 31
+      },
+      "raw_sha256": "6ca5442a714fedf9a6b592d5387859a30a9b1a5e1a713a385a28820dea105c8b",
+      "braces_advisory": "GHSA-vfj7-8cjw-p6xm",
+      "patched_version": null,
+      "published_sha256": "2a8082e21ef21cb1800ae3dc1e599802bf24152b4e9d22fbb11c7be23ca65c84"
+    },
+    "bioetl-selectorshell-panel": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 31,
+        "critical": 0,
+        "total": 31
+      },
+      "raw_sha256": "18ea6b3e24258ef0f7521242405fe059eaccd3d431d3ecff6ebd7722196b9914",
+      "braces_advisory": "GHSA-vfj7-8cjw-p6xm",
+      "patched_version": null,
+      "published_sha256": "dd4f78d2367a77ad870df99e861759e764b9789c0d0fd986c3c17d0e10996437"
+    }
+  },
+  "blocking": [
+    "Required trust-tier ADMIT is absent; local_single_host is capped at DEGRADED.",
+    "GitHub Actions cannot start because of the account billing lock.",
+    "Plugin audits still fail for GHSA-vfj7-8cjw-p6xm; no published patched braces version.",
+    "Managed rollout, complete host SBOM and verified backup/rollback remain pending."
+  ],
+  "issue_closure": {
+    "11888": "OPEN",
+    "11889": "OPEN",
+    "11895": "OPEN",
+    "11899": "OPEN",
+    "11854": "OPEN"
+  },
+  "artifact_sha256": {
+    "grafana/tooling/router-v7-bridge/runtime-probe/module.js": "cc3ce2bb8669a5f1233d335423e65179196e93990096c357f39f70e943da5aea",
+    "grafana/tooling/router-v7-bridge/host-image.json": "97f4984c87b01f6fe028fde00721a211902dc9efe63eaf7f2e33a44907e1c983",
+    "grafana/dashboards/bioetl-overview-v2.json": "98710653d34931387c65ed8375d95eb031d3fc95fd76193664c94efc888ca446",
+    "grafana/dashboards/bioetl-run-explorer-v1.json": "09b4c578a25c4bc4ce377b8e902047eebae46136e5cc8a97d9b81ae227c3e1ea"
+  }
+}
