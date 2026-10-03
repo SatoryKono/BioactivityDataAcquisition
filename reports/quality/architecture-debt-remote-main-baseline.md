@@ -4,14 +4,14 @@
 
 - evidence_source: `remote_main_git_tree`
 - remote_main_ref: `refs/heads/main`
-- baseline_artifact_fingerprint: `73f563e4f037adf0296efdb2ba711057b3a6ff0044d5a6a17bfd16fc98b8b14e`
-- local_tracking_ref_matches_remote: `True`
+- baseline_artifact_fingerprint: `db481facc9c4e5393c41a1d2cc0585f8c207fe7238e4aa6701ffbba07aebc2c0`
+- local_tracking_ref_matches_remote: `False`
 
 | artifact | blob_sha256 | available | required_on_remote | introduced_after_remote_main |
 | --- | --- | --- | --- | --- |
-| `reports/quality/architecture-quality-scorecard.json` | `50e3aa086bd15763be44b1b8904ed22cba4c8f6496795140685904c9c66da7d3` | `True` | `True` | `False` |
-| `reports/quality/module-coverage-inventory.json` | `d9390616aec413939eb4412d2a318173005f61b5febfcec97c767db2c84b18b1` | `True` | `True` | `False` |
-| `reports/quality/compatibility-importer-census.json` | `f73536c0f78b2d22b54e285a43611268d13793368ce105c525d24ccb61350cb2` | `True` | `True` | `False` |
-| `reports/quality/dead-code-inventory.json` | `18794ec7c2c2881f1531cd9bba04852c776bc31f1c978b99d2b5bbdca841de81` | `True` | `True` | `False` |
-| `reports/quality/contract-registry-diagnostics.json` | `691ae784ed4f90f7835fed4706fbb586e7d7184b8ddc965a7fd5cab6ef3a2dce` | `True` | `True` | `False` |
-| `reports/observability/runtime_cardinality_inventory.json` | `52d0daf576d2eba5c792611da794f3c1af07d3410cb0dde263869d75213076c1` | `True` | `False` | `False` |
+| `reports/quality/architecture-quality-scorecard.json` | `` | `False` | `False` | `True` |
+| `reports/quality/module-coverage-inventory.json` | `` | `False` | `False` | `True` |
+| `reports/quality/compatibility-importer-census.json` | `` | `False` | `False` | `True` |
+| `reports/quality/dead-code-inventory.json` | `` | `False` | `False` | `True` |
+| `reports/quality/contract-registry-diagnostics.json` | `` | `False` | `False` | `True` |
+| `reports/observability/runtime_cardinality_inventory.json` | `` | `False` | `False` | `True` |

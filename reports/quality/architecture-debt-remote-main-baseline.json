@@ -1,88 +1,73 @@
 {
   "artifacts": [
     {
-      "blob_sha256": "50e3aa086bd15763be44b1b8904ed22cba4c8f6496795140685904c9c66da7d3",
-      "introduced_after_remote_main": false,
+      "blob_sha256": null,
+      "introduced_after_remote_main": true,
       "path": "reports/quality/architecture-quality-scorecard.json",
       "required": true,
-      "required_on_remote": true,
-      "source_revision": "1bd03a9f275d6ed0392d398c10a3d31e97fedca9",
+      "required_on_remote": false,
+      "source_revision": "487341474a38b362640b8e897212080455a321c6",
       "summary": {
-        "available": true,
-        "integral_score": 9.47,
-        "schema_version": 2,
-        "weights_sum": 1.0
+        "available": false
       }
     },
     {
-      "blob_sha256": "d9390616aec413939eb4412d2a318173005f61b5febfcec97c767db2c84b18b1",
-      "introduced_after_remote_main": false,
+      "blob_sha256": null,
+      "introduced_after_remote_main": true,
       "path": "reports/quality/module-coverage-inventory.json",
       "required": true,
-      "required_on_remote": true,
-      "source_revision": "1bd03a9f275d6ed0392d398c10a3d31e97fedca9",
+      "required_on_remote": false,
+      "source_revision": "487341474a38b362640b8e897212080455a321c6",
       "summary": {
-        "available": true,
-        "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
-        "schema_version": 1,
-        "snapshot_date": "2026-09-18",
-        "source_module_count": 2563,
-        "source_tree_sha256": "fe6c50a1ea474d29d3329a9fa8e41520a0827c8472e4b864ae5dc953adbe5226",
-        "unmeasured_module_count": 0
+        "available": false
       }
     },
     {
-      "blob_sha256": "f73536c0f78b2d22b54e285a43611268d13793368ce105c525d24ccb61350cb2",
-      "introduced_after_remote_main": false,
+      "blob_sha256": null,
+      "introduced_after_remote_main": true,
       "path": "reports/quality/compatibility-importer-census.json",
       "required": true,
-      "required_on_remote": true,
-      "source_revision": "1bd03a9f275d6ed0392d398c10a3d31e97fedca9",
+      "required_on_remote": false,
+      "source_revision": "487341474a38b362640b8e897212080455a321c6",
       "summary": {
-        "available": true,
-        "retained_entrypoint_count": 12,
-        "snapshot_date": "2026-09-22"
+        "available": false
       }
     },
     {
-      "blob_sha256": "18794ec7c2c2881f1531cd9bba04852c776bc31f1c978b99d2b5bbdca841de81",
-      "introduced_after_remote_main": false,
+      "blob_sha256": null,
+      "introduced_after_remote_main": true,
       "path": "reports/quality/dead-code-inventory.json",
       "required": true,
-      "required_on_remote": true,
-      "source_revision": "1bd03a9f275d6ed0392d398c10a3d31e97fedca9",
+      "required_on_remote": false,
+      "source_revision": "487341474a38b362640b8e897212080455a321c6",
       "summary": {
-        "available": true,
-        "repo_wide_untriaged_zero_import_candidate_count": 0,
-        "snapshot_date": "2026-09-11"
+        "available": false
       }
     },
     {
-      "blob_sha256": "691ae784ed4f90f7835fed4706fbb586e7d7184b8ddc965a7fd5cab6ef3a2dce",
-      "introduced_after_remote_main": false,
+      "blob_sha256": null,
+      "introduced_after_remote_main": true,
       "path": "reports/quality/contract-registry-diagnostics.json",
       "required": true,
-      "required_on_remote": true,
-      "source_revision": "1bd03a9f275d6ed0392d398c10a3d31e97fedca9",
+      "required_on_remote": false,
+      "source_revision": "487341474a38b362640b8e897212080455a321c6",
       "summary": {
-        "available": true,
-        "blocking_issue_count": 0,
-        "valid": true
+        "available": false
       }
     },
     {
-      "blob_sha256": "52d0daf576d2eba5c792611da794f3c1af07d3410cb0dde263869d75213076c1",
-      "introduced_after_remote_main": false,
+      "blob_sha256": null,
+      "introduced_after_remote_main": true,
       "path": "reports/observability/runtime_cardinality_inventory.json",
       "required": false,
       "required_on_remote": false,
-      "source_revision": "1bd03a9f275d6ed0392d398c10a3d31e97fedca9",
+      "source_revision": "487341474a38b362640b8e897212080455a321c6",
       "summary": {
-        "available": true
+        "available": false
       }
     }
   ],
-  "baseline_artifact_fingerprint": "73f563e4f037adf0296efdb2ba711057b3a6ff0044d5a6a17bfd16fc98b8b14e",
+  "baseline_artifact_fingerprint": "db481facc9c4e5393c41a1d2cc0585f8c207fe7238e4aa6701ffbba07aebc2c0",
   "branch": "main",
   "dirty_closeout_guard": {
     "command": "git status --porcelain --untracked-files=no",
@@ -101,10 +86,10 @@
     "python -m scripts.engineering.qa report-debt-governance-gates --check"
   ],
   "local_tracking_ref": "origin/main",
-  "local_tracking_ref_matches_remote": true,
+  "local_tracking_ref_matches_remote": false,
   "local_tracking_ref_sha": "1bd03a9f275d6ed0392d398c10a3d31e97fedca9",
   "remote": "origin",
   "remote_main_ref": "refs/heads/main",
-  "remote_main_sha": "1bd03a9f275d6ed0392d398c10a3d31e97fedca9",
+  "remote_main_sha": "487341474a38b362640b8e897212080455a321c6",
   "schema_version": 1
 }

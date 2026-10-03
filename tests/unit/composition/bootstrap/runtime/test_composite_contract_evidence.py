@@ -9,12 +9,71 @@ import pytest
 from bioetl.application.composite.runner_pkg.runner import CompositePipelineRunner
 from bioetl.composition.bootstrap.runtime.run_status import (
     create_composite_contract_finalizer,
+    create_composite_reporter,
+)
+from bioetl.application.services.execution.pipeline_runner_models import (
+    PipelineRunResult,
+    RunResult,
 )
 
 MODULE = "bioetl.composition.bootstrap.runtime.run_status"
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_missing_composite_manifest_cannot_create_contract_evidence(tmp_path):
+    with patch(
+        f"{MODULE}.get_settings", return_value=SimpleNamespace(data_dir=tmp_path)
+    ):
+        finalize = create_composite_contract_finalizer(
+            pipeline_name="composite_assay", manifest_id="missing-parent"
+        )
+        with pytest.raises(
+            RuntimeError, match="Composite contract manifest is missing"
+        ):
+            finalize("parent-run", False)
+    assert not (
+        tmp_path / "output/control/run_manifest/missing-parent.contract-evidence.json"
+    ).exists()
+
+
+@pytest.mark.parametrize("archive_root_configured", [False, True])
+def test_composite_reporter_archives_parent_identity_in_selected_roots(
+    tmp_path, archive_root_configured
+):
+    settings = SimpleNamespace(
+        data_dir=tmp_path / "data",
+        archive_root=tmp_path / "archive" if archive_root_configured else None,
+        report_root=tmp_path / "reports",
+    )
+    archived = []
+    with (
+        patch(f"{MODULE}.get_settings", return_value=settings),
+        patch(
+            f"{MODULE}.archive_successful_run",
+            side_effect=lambda **kw: archived.append(kw),
+        ),
+    ):
+        reporter = create_composite_reporter(
+            pipeline_name="composite_assay",
+            manifest_id="parent-manifest",
+            logger=MagicMock(),
+        )
+        parent = RunResult(
+            status=PipelineRunResult.SUCCESS,
+            pipeline_name="composite_assay",
+            run_id="parent-run",
+            run_type="composite",
+            manifest_id="parent-manifest",
+        )
+        reporter.archive(parent)
+    assert len(archived) == 1
+    assert archived[0]["result"] is parent
+    assert archived[0]["options"] is None
+    assert archived[0]["data_root"] == settings.data_dir
+    assert archived[0]["archive_root"] == settings.archive_root
+    assert archived[0]["report_root"] == settings.report_root
 
 
 @pytest.mark.parametrize("resume", [False, True])
