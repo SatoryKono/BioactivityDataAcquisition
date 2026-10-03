@@ -137,6 +137,16 @@ class WorkflowRunnerService:
         effective_dry_run = bool(config.defaults.dry_run)
         debug_export_enabled = bool(config.defaults.debug_export_enabled)
         debug_export_dir = config.defaults.debug_export_dir
+        cohort_producers = {
+            producer.reference_cohort.step_id
+            for producer in config.pipeline_steps
+            if producer.reference_cohort is not None
+        }
+        cohort_producers.update(
+            producer.step_id
+            for producer in config.pipeline_steps
+            if producer.reference_cohort is not None
+        )
 
         for step_id in config.topological_step_ids:
             step = config.get_step(step_id)
@@ -156,6 +166,7 @@ class WorkflowRunnerService:
                 manifest_id=manifest_id,
                 debug_export=(debug_export_enabled, debug_export_dir),
                 created_at_factory=created_at_factory,
+                capture_producer_snapshot=step_id in cohort_producers,
             )
             apply_workflow_step_transition(
                 state=state,
@@ -222,6 +233,7 @@ class WorkflowRunnerService:
         manifest_id: str | None,
         debug_export: tuple[bool, str | None],
         created_at_factory: Callable[[], datetime] | None,
+        capture_producer_snapshot: bool = False,
     ) -> ResolvedWorkflowStepTransitionRecord:
         """Resolve whether a step should run, resume-skip, or failure-skip."""
         debug_export_enabled, debug_export_dir = debug_export
@@ -281,6 +293,7 @@ class WorkflowRunnerService:
                 debug_export_enabled=debug_export_enabled,
                 debug_export_dir=debug_export_dir,
                 created_at_factory=created_at_factory,
+                capture_producer_snapshot=capture_producer_snapshot,
             ),
         )
 
@@ -302,12 +315,14 @@ class WorkflowRunnerService:
         debug_export_enabled: bool,
         debug_export_dir: str | None,
         created_at_factory: Callable[[], datetime] | None,
+        capture_producer_snapshot: bool = False,
     ) -> WorkflowStepExecutionResult:
         if isinstance(step, WorkflowStepConfig):
             return await execute_pipeline_step(
                 pipeline_runner=self.pipeline_runner,
                 cohort_resolver=self.cohort_resolver,
                 upstream_outputs=step_outputs,
+                capture_producer_snapshot=capture_producer_snapshot,
                 metrics=self.metrics,
                 monotonic=self.monotonic,
                 workflow_name=workflow_name,

@@ -742,14 +742,19 @@ retain their original reason codes. Rules are unchanged by this diagnostic fix.
 of their successful assay step. The `reference_cohort` binding identifies the
 producer step, table, source column, and target filter field. It is included in
 the workflow manifest so changing the binding changes the execution identity.
-The resolver reads only rows carrying that producer run ID, checks their count
-against the saved run result, and rejects a key set larger than the requested
-record limit. Empty or unavailable cohorts fail closed rather than launching an
-unfiltered reference extraction.
+The resolver validates the producer's pinned Delta version and table identity.
+It selects current rows carrying that producer run ID; analytical Gold tables
+without row-level run IDs use the producer's persisted `entity_id` and
+`content_hash` membership. It checks the selected count against the saved run
+result and rejects a key set larger than the requested record limit. Missing
+ownership evidence, snapshot drift, and empty or unavailable cohorts fail closed
+rather than launching an unfiltered reference extraction.
 
-For these workflows, `require_closed_cohort: true` verifies that every selected
-source row has a matching reference. Missing references fail the step without
+In default `complete-reference` mode, `require_closed_cohort: true` verifies that
+every selected source row has a matching reference. Missing references fail the step without
 mutation. This proves closure of the selected cohort, not completeness of the
 entire provider database. It does not authorize deletion based on independently
 limited extracts. Existing destructive reconciliation still requires its
 reference-completeness evidence when closed-cohort verification is not selected.
+Explicit `selected-snapshot` retains its scoped expiry semantics even with this
+workflow setting; it never labels an unmatched or empty cohort as closed.

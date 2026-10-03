@@ -239,6 +239,7 @@ def _build_request(
     snapshots = (
         selected_snapshot_inputs(upstream_outputs or {})
         if config.get("reconciliation_mode") == "selected-snapshot"
+        or config.get("require_closed_cohort") is True
         else {}
     )
     return ForeignKeyReconciliationRequest(
