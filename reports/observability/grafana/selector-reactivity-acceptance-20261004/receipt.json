@@ -90,7 +90,17 @@
       "exit_code": 1,
       "head_unchanged": true
     },
-    "workflow_provisioning_repair": "39 PASS, 2 Windows POSIX skips on 300db9f1166; clean-artifact assertions enabled"
+    "workflow_provisioning_repair": "39 PASS, 2 Windows POSIX skips on 300db9f1166; clean-artifact assertions enabled",
+    "architecture_integrated": {
+      "source_sha": "a2a706098ded8ad0da79f9489b3db285ae22fe86",
+      "status": "FAIL",
+      "tests": 4960,
+      "passed": 4755,
+      "failures": 129,
+      "skipped": 76,
+      "exit_code": 1,
+      "head_unchanged": true
+    }
   },
   "blockers": [
     "GitHub Actions blocked by account billing",
@@ -145,6 +155,14 @@
     "owned-probe-removal.json": {
       "bytes": 454,
       "sha256": "1ea61439a713b708f38d2f42b19b38b8bbf2edfaf2f0bb0dd6bbd6811f69f88e"
+    },
+    "architecture-integrated-failures.json": {
+      "bytes": 65911,
+      "sha256": "a2934bac44b141519e44cbfc01c294b897d2d684fc4685eab96a11dcc584a5d5"
+    },
+    "architecture-integrated-run.json": {
+      "bytes": 526,
+      "sha256": "30901d7df8f0b7029fa543782e2401e0d71dcc5c175b5c960bd9347feb8a5619"
     }
   },
   "probe_cleanup": "PASS; active host mount and unsigned probe allowlist removed; candidate digest unchanged"

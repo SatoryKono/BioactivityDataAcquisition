@@ -74753,6 +74753,62 @@
       "lifecycle": "working_report",
       "outbound_links": 0,
       "owner": "BioETL Team",
+      "path": "reports/observability/grafana/selector-reactivity-acceptance-20261004/architecture-integrated-failures.json",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".json",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/observability/grafana/selector-reactivity-acceptance-20261004/architecture-integrated-run.json",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".json",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
       "path": "reports/observability/grafana/selector-reactivity-acceptance-20261004/architecture-run.json",
       "recommended_action": "archive-after-migration",
       "root_doc_kind": null,
@@ -97478,11 +97534,11 @@
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 26,
       "reports_workspace_entrypoint": 1,
-      "working_report": 826
+      "working_report": 828
     },
     "by_recommended_action": {
       "archive-after-github-state-check": 338,
-      "archive-after-migration": 858,
+      "archive-after-migration": 860,
       "generate-automatically": 1056,
       "keep": 1192,
       "reconcile-with-github-state": 8
@@ -97509,7 +97565,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 981,
+      "reports": 983,
       "security": 2
     },
     "by_status": {
@@ -97517,17 +97573,17 @@
       "Archived": 276,
       "Canonical": 74,
       "Generated": 1056,
-      "Working": 1299
+      "Working": 1301
     },
     "by_surface_family": {
       "active": 747,
       "archive": 276,
       "canonical": 74,
       "generated": 1056,
-      "working": 1299
+      "working": 1301
     },
     "by_tracking_state": {
-      "tracked": 3452
+      "tracked": 3454
     },
     "docs_reports_local_count": 56,
     "duplicate_group_count": 7,
@@ -97543,8 +97599,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3452,
+    "total_doc_like": 3454,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3452
+    "total_doc_like_tracked": 3454
   }
 }

@@ -1,0 +1,660 @@
+{
+  "source_sha": "a2a706098ded8ad0da79f9489b3db285ae22fe86",
+  "summary": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "129",
+    "skipped": "76",
+    "tests": "4960",
+    "time": "691.671",
+    "timestamp": "2026-10-04T01:14:01.116502+03:00",
+    "hostname": "DESKTOP-AITNV0T"
+  },
+  "failures": [
+    {
+      "file": "tests.architecture.test_arch_s4_s9_gates",
+      "test": "test_s6_source_tree_manifest_is_the_pinned_sha",
+      "message": "AssertionError: assert '8c5757776d30...1ad2927939488' == '6e4f55e3eb32...913732e7d9c40'\n  \n  - 6e4f55e3eb3245e9bb8dff981a6075474f48c151dbbb087f2f5913732e7d9c40\n  + 8c5757776d303a8769df3fc35dc2f75d5191bea8554e438859e1ad2927939488"
+    },
+    {
+      "file": "tests.architecture.test_arch_s4_s9_gates",
+      "test": "test_s8_domain_framework_import_ratchet",
+      "message": "AssertionError: C:/Users/Fedor/.codex/worktrees/grafana-security-ui-final-20261003/BioactivityDataAcquisition/reports/quality/module-coverage-inventory.json source_tree_sha256='6e4f55e3eb3245e9bb8dff981a6075474f48c151dbbb087f2f5913732e7d9c40' does not match manifest '8c5757776d303a8769df3fc35dc2f75d5191bea8554e438859e1ad2927939488'"
+    },
+    {
+      "file": "tests.architecture.test_code_metrics.TestFileSizeLimits",
+      "test": "test_infrastructure_files_under_limit",
+      "message": "AssertionError: Files exceeding LOC limit in infrastructure:\n    - bioetl\\infrastructure\\schemas\\workflow_config.py: 455 LOC (limit: 443)\nassert not ['bioetl\\\\infrastructure\\\\schemas\\\\workflow_config.py: 455 LOC (limit: 443)']"
+    },
+    {
+      "file": "tests.architecture.test_code_metrics.TestFunctionComplexity",
+      "test": "test_domain_complexity",
+      "message": "AssertionError: Functions with CC > 5 in domain:\n    - bioetl\\domain\\run_reports\\workflow_totals.py:66 - _measured_current() CC=10 (max=5)\n    - bioetl\\domain\\workflow\\_delete_orphans_scope.py:122 - _has_bound_reference_cohort() CC=11 (max=5)\n    - bioetl\\domain\\workflow\\_delete_orphans_scope.py:153 - reject_delete_orphans_after_limited_extracts() CC=9 (max=5)\n    - bioetl\\domain\\workflow\\_delete_orphans_scope.py:181 - apply_reconciliation_mode() CC=15 (max=5)\n    - bioetl\\domain\\workflow\\config.py:75 - __post_init__() CC=6 (max=5)\n    - bioetl\\domain\\workflow\\foreign_key_reconciliation_models.py:65 - __post_init__() CC=10 (max=5)\nassert not ['bioetl\\\\domain\\\\run_reports\\\\workflow_totals.py:66 - _measured_current() CC=10 (max=5)', 'bioetl\\\\domain\\\\workflow\\\\..._() CC=6 (max=5)', 'bioetl\\\\domain\\\\workflow\\\\foreign_key_reconciliation_models.py:65 - __post_init__() CC=10 (max=5)']"
+    },
+    {
+      "file": "tests.architecture.test_code_metrics.TestFunctionComplexity",
+      "test": "test_application_complexity",
+      "message": "AssertionError: Functions with CC > 10 in application:\n    - bioetl\\application\\services\\execution\\workflow_runner_step_execution.py:95 - execute_pipeline_step() CC=14 (max=10)\n    - bioetl\\application\\services\\run_reports\\composite.py:69 - CompositeRunReportService() CC=15 (max=10)\n    - bioetl\\application\\services\\run_reports\\composite.py:81 - write() CC=25 (max=10)\n    - bioetl\\application\\services\\run_reports\\composite.py:195 - _record_child_evidence() CC=12 (max=10)\n    - bioetl\\application\\services\\workflow\\control_plane\\execution_recording_state.py:17 - _apply_completed_step_state() CC=11 (max=10)\n    - bioetl\\application\\services\\workflow\\control_plane\\selected_snapshot_resume.py:25 - _restore_producer() CC=25 (max=10)\n    - bioetl\\application\\services\\workflow\\control_plane\\selected_snapshot_resume.py:111 - restore_selected_snapshot_outputs() CC=24 (max=10)\n    - bioetl\\application\\workflow\\transforms\\reconcile_foreign_keys.py:59 - _build_reconcile_payload() CC=11 (max=10)\n    - bioetl\\application\\workflow\\transforms\\selected_snapshot_inputs.py:6 - selected_snapshot_inputs() CC=19 (max=10)\nassert not ['bioetl\\\\application\\\\services\\\\execution\\\\workflow_runner_step_execution.py:95 - execute_pipeline_step() CC=14 (max=...lication\\\\services\\\\workflow\\\\control_plane\\\\selected_snapshot_resume.py:25 - _restore_producer() CC=25 (max=10)', ...]"
+    },
+    {
+      "file": "tests.architecture.test_code_metrics.TestFunctionComplexity",
+      "test": "test_infrastructure_complexity",
+      "message": "AssertionError: Functions with CC > 15 in infrastructure:\n    - bioetl\\infrastructure\\adapters\\chembl\\fetch_multi_filter_mixin.py:136 - fetch_multi_filtered() CC=16 (max=15)\nassert not ['bioetl\\\\infrastructure\\\\adapters\\\\chembl\\\\fetch_multi_filter_mixin.py:136 - fetch_multi_filtered() CC=16 (max=15)']"
+    },
+    {
+      "file": "tests.architecture.test_code_metrics.TestFunctionLength",
+      "test": "test_functions_under_100_lines",
+      "message": "Failed: Too many long functions (1, max=0):\n  - bioetl\\application\\services\\run_reports\\composite.py:81 - write() is 113 lines (max=100)"
+    },
+    {
+      "file": "tests.architecture.test_config_discrepancy_report_drift",
+      "test": "test_config_discrepancy_report_matches_deterministic_generator",
+      "message": "AssertionError: Config comparison matrix/discrepancy report drifted from the generator. Regenerate with: python -m scripts.schema generate-config-matrix --update\nassert 1 == 0\n +  where 1 = main(['--check'])"
+    },
+    {
+      "file": "tests.architecture.test_diagram_drift_and_embed_guards",
+      "test": "test_full_mermaid_matches_foundation_mmd",
+      "message": "AssertionError: Drift in diagram body for foundation\\12-local-deployment-architecture.mmd \u00e2\u2020\u201d C:\\Users\\Fedor\\.codex\\worktrees\\grafana-security-ui-final-20261003\\BioactivityDataAcquisition\\docs\\02-architecture\\diagrams\\views\\12-local-deployment-architecture-full.mermaid\nassert 'flowchart TB...color:#212121' == 'flowchart TB...color:#212121'\n  \n    flowchart TB\n  - ProviderAPIs[\"\ud83c\udf10 Provider APIs<br/>ChEMBL + PubChem + UniProt + PubMed\"]:::size-md\n  ?               --\n  + ProviderAPIs[\"Provider APIs<br/>ChEMBL + PubChem + UniProt + PubMed\"]:::size-md\n    \n    subgraph Local[\"Local Machine (Single Instance)\"]...\n  \n  ...Full output truncated (78 lines hidden), use '-vv' to show"
+    },
+    {
+      "file": "tests.architecture.test_doc_crossref_integrity.TestCanonicalDocCrossrefs",
+      "test": "test_canonical_docs_do_not_link_noncanonical_doc_zones",
+      "message": "AssertionError: Canonical docs reference non-canonical doc zones (reports/exports/generated):\n  docs\\03-guides\\dashboards\\dashboard-v2-updates.md:5 -> ../../reports/dashboard-ux-checks/2026-10-02.md\n  docs\\03-guides\\dashboards\\dashboard-v2-updates.md:20 -> ../../reports/dashboard-ux-checks/2026-10-02.md\nassert not ['docs\\\\03-guides\\\\dashboards\\\\dashboard-v2-updates.md:5 -> ../../reports/dashboard-ux-checks/2026-10-02.md', 'docs\\\\03-guides\\\\dashboards\\\\dashboard-v2-updates.md:20 -> ../../reports/dashboard-ux-checks/2026-10-02.md']"
+    },
+    {
+      "file": "tests.architecture.test_docker_runtime_contracts",
+      "test": "test_pre_change_baseline_captures_all_original_root_causes_without_secrets",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\docker-stability-baseline.json'"
+    },
+    {
+      "file": "tests.architecture.test_domain_purity.TestDomainComplexity",
+      "test": "test_cyclomatic_complexity_domain_layer",
+      "message": "AssertionError: Domain layer has functions with CC > 5:\n  C:\\Users\\Fedor\\.codex\\worktrees\\grafana-security-ui-final-20261003\\BioactivityDataAcquisition\\src\\bioetl\\domain\\run_reports\\workflow_totals.py:66 - _measured_current() has CC=10 (max=5)\n  C:\\Users\\Fedor\\.codex\\worktrees\\grafana-security-ui-final-20261003\\BioactivityDataAcquisition\\src\\bioetl\\domain\\workflow\\_delete_orphans_scope.py:122 - _has_bound_reference_cohort() has CC=11 (max=5)\n  C:\\Users\\Fedor\\.codex\\worktrees\\grafana-security-ui-final-20261003\\BioactivityDataAcquisition\\src\\bioetl\\domain\\workflow\\_delete_orphans_scope.py:153 - reject_delete_orphans_after_limited_extracts() has CC=9 (max=5)\n  C:\\Users\\Fedor\\.codex\\worktrees\\grafana-security-ui-final-20261003\\BioactivityDataAcquisition\\src\\bioetl\\domain\\workflow\\_delete_orphans_scope.py:181 - apply_reconciliation_mode() has CC=15 (max=5)\n  C:\\Users\\Fedor\\.codex\\worktrees\\grafana-security-ui-final-20261003\\BioactivityDataAcquisition\\src\\bioetl\\domain\\workflow\\config.py:75 - __post_init__() has CC=6 (max=5)\n  C:\\Users\\Fedor\\.codex\\worktrees\\grafana-security-ui-final-20261003\\BioactivityDataAcquisition\\src\\bioetl\\domain\\workflow\\foreign_key_reconciliation_models.py:65 - __post_init__() has CC=10 (max=5)\nassert not ['C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\src\\\\bioetl\\\\do...quisition\\\\src\\\\bioetl\\\\domain\\\\workflow\\\\foreign_key_reconciliation_models.py:65 - __post_init__() has CC=10 (max=5)']"
+    },
+    {
+      "file": "tests.architecture.test_duplication_report_governance",
+      "test": "test_specialized_duplication_reports_match_hotspot_baseline_targets",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\control-plane-duplication.json'"
+    },
+    {
+      "file": "tests.architecture.test_duplication_report_governance",
+      "test": "test_specialized_duplication_markdown_matches_json_payload",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\control-plane-duplication.json'"
+    },
+    {
+      "file": "tests.architecture.test_future_annotations_policy",
+      "test": "test_future_annotations_policy_is_enforced",
+      "message": "AssertionError: Modules missing `from __future__ import annotations` outside the sanctioned package-facade exception:\n    - application/services/workflow/control_plane/selected_snapshot_resume.py\n    - application/workflow/transforms/selected_snapshot_inputs.py\n    - composition/bootstrap/runtime/composite_contract_evidence.py\n    - composition/bootstrap/runtime/composite_reporter.py\n    - composition/workflow_cohort.py\n    - composition/workflow_cohort_lineage.py\n    - infrastructure/storage/workflow_producer_ownership.py\nassert not ['application/services/workflow/control_plane/selected_snapshot_resume.py', 'application/workflow/transforms/selected_...tstrap/runtime/composite_reporter.py', 'composition/workflow_cohort.py', 'composition/workflow_cohort_lineage.py', ...]"
+    },
+    {
+      "file": "tests.architecture.test_gha_8618_8619_closeout",
+      "test": "test_ruleset_10267_closeout_evidence_matches_live_contract",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\governance\\\\ruleset-10267-closeout-get-2026-09-10.json'"
+    },
+    {
+      "file": "tests.architecture.test_gold_reject_taxonomy",
+      "test": "test_dq_dashboard_gold_reject_panel_is_not_silver_alias_surface",
+      "message": "assert None is not None"
+    },
+    {
+      "file": "tests.architecture.test_grafana_overview_v2_semantics",
+      "test": "test_overview_v2_semantics_contract",
+      "message": "AssertionError: assert 'Inspect Run Context' in ''"
+    },
+    {
+      "file": "tests.architecture.test_integration_vcr_policy.TestIntegrationVcrPolicy",
+      "test": "test_policy_matches_fixture_governance_and_contract_matrix",
+      "message": "AssertionError: assert 'scheduled' == 'keep-disabled'\n  \n  - keep-disabled\n  + scheduled"
+    },
+    {
+      "file": "tests.architecture.test_issue_10595_composition_util_shrink",
+      "test": "test_issue_10595_composition_util_at_or_below_ceiling",
+      "message": "assert 285 <= 280"
+    },
+    {
+      "file": "tests.architecture.test_issue_5272_application_core_coverage_closeout",
+      "test": "test_issue_5272_closeout_matches_live_module_coverage_inventory",
+      "message": "assert 99.65 == 99.93"
+    },
+    {
+      "file": "tests.architecture.test_issue_5272_application_core_coverage_closeout",
+      "test": "test_issue_5244_parent_epic_stays_open_until_default_floor_is_zero",
+      "message": "assert 12 == 0"
+    },
+    {
+      "file": "tests.architecture.test_layer_aware_suffix_policy",
+      "test": "test_layer_aware_suffix_policy_registers_expected_rule_ids",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_layer_aware_suffix_policy",
+      "test": "test_layer_suffix_matrix_has_no_allowed_forbidden_overlap",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_layer_aware_suffix_policy",
+      "test": "test_canonical_family_registry_paths_resolve_to_public_symbols",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_layer_aware_suffix_policy",
+      "test": "test_canonical_pipeline_execution_family_is_published",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_layer_aware_suffix_policy",
+      "test": "test_canonical_storage_boundary_family_uses_narrow_ports",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_layer_aware_suffix_policy",
+      "test": "test_checkpoint_quarantine_runtime_admin_family_is_role_driven",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_layer_aware_suffix_policy",
+      "test": "test_lock_runtime_admin_family_is_role_driven",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_layer_aware_suffix_policy",
+      "test": "test_composition_bootstrap_port_function_exceptions_are_retired",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_layer_aware_suffix_policy",
+      "test": "test_non_composition_builder_suffix_policy_is_exception_free",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_layer_aware_suffix_policy",
+      "test": "test_non_composition_builder_suffix_rejects_public_application_symbols",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_layer_aware_suffix_policy",
+      "test": "test_non_composition_builder_suffix_allows_composition_builder_symbols",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_layer_aware_suffix_policy",
+      "test": "test_non_composition_builder_suffix_rejects_unregistered_modules",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_layer_aware_suffix_policy",
+      "test": "test_non_composition_builder_suffix_allows_private_modules",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_layer_aware_suffix_policy",
+      "test": "test_non_composition_builder_suffix_rejects_public_application_reexports",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_layer_aware_suffix_policy",
+      "test": "test_column_ordering_family_is_frozen_to_one_canonical_surface_plus_compat",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_layer_aware_suffix_policy",
+      "test": "test_composite_alias_family_is_frozen_to_owner_modules_only",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_layer_aware_suffix_policy",
+      "test": "test_provider_connector_adapter_family_is_owned_by_adapter_modules_only",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_layer_aware_suffix_policy",
+      "test": "test_layer_aware_suffix_policy_stays_clean_on_current_baseline",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_layer_aware_suffix_policy",
+      "test": "test_layer_aware_suffix_policy_exceptions_require_structured_expiry_metadata",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_layer_contract_coverage_matrix",
+      "test": "test_layer_contract_coverage_matrix_covers_every_entity_layer",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\layer-contract-coverage-matrix.json'"
+    },
+    {
+      "file": "tests.architecture.test_layer_contract_coverage_matrix",
+      "test": "test_layer_contract_coverage_matrix_classifies_contract_surfaces",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\layer-contract-coverage-matrix.json'"
+    },
+    {
+      "file": "tests.architecture.test_layer_contract_coverage_matrix",
+      "test": "test_layer_contract_coverage_gold_rows_reuse_canonical_gold_matrix",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\layer-contract-coverage-matrix.json'"
+    },
+    {
+      "file": "tests.architecture.test_low_coverage_targeted_tests_6045",
+      "test": "test_issue_6045_targeted_low_coverage_closeout_is_coherent",
+      "message": "AssertionError: assert '8c5757776d30...1ad2927939488' == '6e4f55e3eb32...913732e7d9c40'\n  \n  - 6e4f55e3eb3245e9bb8dff981a6075474f48c151dbbb087f2f5913732e7d9c40\n  + 8c5757776d303a8769df3fc35dc2f75d5191bea8554e438859e1ad2927939488"
+    },
+    {
+      "file": "tests.architecture.test_memory_rag_manifest_governance",
+      "test": "test_derived_rag_lane_ignores_generated_payloads",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'src\\\\memory\\\\derived\\\\rag\\\\manifests\\\\.gitignore'"
+    },
+    {
+      "file": "tests.architecture.test_module_coverage_inventory_freshness",
+      "test": "test_module_coverage_inventory_covers_every_source_module",
+      "message": "AssertionError: assert {'src/bioetl/...port.py', ...} == {'src/bioetl/...port.py', ...}\n  \n  Extra items in the right set:\n  'src/bioetl/composition/workflow_cohort_lineage.py'\n  Use -v to get more diff"
+    },
+    {
+      "file": "tests.architecture.test_naming_conventions",
+      "test": "test_class_naming_suffixes",
+      "message": "AssertionError: Class naming violations:\n  C:\\Users\\Fedor\\.codex\\worktrees\\grafana-security-ui-final-20261003\\BioactivityDataAcquisition\\src\\bioetl\\application\\core\\publication_term_enrichment.py:24:PublicationTermPayloadEnricher\n  C:\\Users\\Fedor\\.codex\\worktrees\\grafana-security-ui-final-20261003\\BioactivityDataAcquisition\\src\\bioetl\\application\\services\\control_plane\\manifest\\diagnostics\\selected_run_replay_readiness.py:32:ReplayReadinessProjection\n  C:\\Users\\Fedor\\.codex\\worktrees\\grafana-security-ui-final-20261003\\BioactivityDataAcquisition\\src\\bioetl\\application\\services\\dq\\disabled_gold_filter.py:9:DisabledGoldFilter\nassert not ['C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\src\\\\bioetl\\\\ap...003\\\\BioactivityDataAcquisition\\\\src\\\\bioetl\\\\application\\\\services\\\\dq\\\\disabled_gold_filter.py:9:DisabledGoldFilter']"
+    },
+    {
+      "file": "tests.architecture.test_naming_package_consistency_gate",
+      "test": "test_consistency_gate_script_runs_clean_in_check_mode",
+      "message": "AssertionError: Naming/package consistency gate must stay clean on the current baseline.\n  stdout:\n  \n  \n  stderr:\n  Traceback (most recent call last):\n    File \"C:\\Users\\Fedor\\.codex\\worktrees\\grafana-security-ui-final-20261003\\BioactivityDataAcquisition\\scripts\\engineering\\qa\\check_naming_package_consistency.py\", line 1561, in <module>\n      raise SystemExit(main())\n                       ~~~~^^\n    File \"C:\\Users\\Fedor\\.codex\\worktrees\\grafana-security-ui-final-20261003\\BioactivityDataAcquisition\\scripts\\engineering\\qa\\check_naming_package_consistency.py\", line 1541, in main\n      violations = run_checks(repo_root)\n    File \"C:\\Users\\Fedor\\.codex\\worktrees\\grafana-security-ui-final-20261003\\BioactivityDataAcquisition\\scripts\\engineering\\qa\\check_naming_package_consistency.py\", line 1484, in run_checks\n      policy = _load_layer_aware_suffix_policy(repo_root)\n    File \"C:\\Users\\Fedor\\.codex\\worktrees\\grafana-security-ui-final-20261003\\BioactivityDataAcquisition\\scripts\\engineering\\qa\\check_naming_package_consistency.py\", line 711, in _load_layer_aware_suffix_policy\n      _validate_loaded_suffix_rule_metadata(\n      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n          function_rules=function_rules,\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n          suffix_rules=suffix_rules,\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^\n          family_rules=family_rules,\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^\n      )\n      ^\n    File \"C:\\Users\\Fedor\\.codex\\worktrees\\grafana-security-ui-final-20261003\\BioactivityDataAcquisition\\scripts\\engineering\\qa\\check_naming_package_consistency.py\", line 648, in _validate_loaded_suffix_rule_metadata\n      _validate_allowed_module_metadata(rule.rule_id, rule.allowed_modules)\n      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    File \"C:\\Users\\Fedor\\.codex\\worktrees\\grafana-security-ui-final-20261003\\BioactivityDataAcquisition\\scripts\\engineering\\qa\\check_naming_package_consistency.py\", line 630, in _validate_allowed_module_metadata\n      _validate_allowed_metadata(\n      ~~~~~~~~~~~~~~~~~~~~~~~~~~^\n          issue=item.issue,\n          ^^^^^^^^^^^^^^^^^\n      ...<2 lines>...\n          location=f\"{rule_id}:{item.path}\",\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n      )\n      ^\n    File \"C:\\Users\\Fedor\\.codex\\worktrees\\grafana-security-ui-final-20261003\\BioactivityDataAcquisition\\scripts\\engineering\\qa\\check_naming_package_consistency.py\", line 351, in _validate_allowed_metadata\n      raise ValueError(f\"{location} has stale expires_on={expires_on}\")\n  ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30\n  \nassert 1 == 0\n +  where 1 = CompletedProcess(args=['E:\\\\github\\\\BioactivityDataAcquisition\\\\.venv-win\\\\Scripts\\\\python.exe', 'C:\\\\Users\\\\Fedor\\\\.c...builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30\\n').returncode"
+    },
+    {
+      "file": "tests.architecture.test_naming_package_consistency_gate",
+      "test": "test_builder_outside_composition_fails_consistency_gate",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_naming_package_consistency_gate",
+      "test": "test_builder_inside_composition_passes_consistency_gate",
+      "message": "ValueError: non_composition_builder_suffix:src/bioetl/application/composite/dependency_join_context_builders.py has stale expires_on=2026-09-30"
+    },
+    {
+      "file": "tests.architecture.test_observability_dashboard_tooling",
+      "test": "test_observability_dashboard_scripts_do_not_write_dashboard_json",
+      "message": "AssertionError: Observability dashboard tooling must not mutate shipped dashboard JSON:\n  scripts\\ops\\observability\\grafana\\_run_explorer_columns.py: path.write_text\n  scripts\\ops\\observability\\grafana\\generate_prometheus_only_dashboards.py: target.write_text\nassert not ['scripts\\\\ops\\\\observability\\\\grafana\\\\_run_explorer_columns.py: path.write_text', 'scripts\\\\ops\\\\observability\\\\grafana\\\\generate_prometheus_only_dashboards.py: target.write_text']"
+    },
+    {
+      "file": "tests.architecture.test_observability_docs_drift",
+      "test": "test_metrics_catalog_runtime_rows_match_canonical_registry",
+      "message": "AssertionError: assert 19 == 15\n +  where 19 = len({'bioetl_alerts_active_total', 'bioetl_alerts_firing_total', 'bioetl_control_plane_current_status', 'bioetl_control_plane_status', 'bioetl_current_status', 'bioetl_dq_blocked_records', ...})"
+    },
+    {
+      "file": "tests.architecture.test_observability_export_dashboard_rollout_closeout",
+      "test": "test_dashboard_and_rule_promql_do_not_use_forbidden_identifier_labels",
+      "message": "AssertionError: bioetl.workflow_scope_first_action::bioetl_first_action: token=run_id\nassert not ['bioetl.workflow_scope_first_action::bioetl_first_action: token=run_id']"
+    },
+    {
+      "file": "tests.architecture.test_observability_export_dashboard_rollout_closeout",
+      "test": "test_ci_contains_dashboard_rule_and_contract_drift_gates",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\observability-export-dashboard-rollout-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_observability_metric_governance",
+      "test": "test_typed_observability_inventory_is_bidirectional_and_source_specific",
+      "message": "AssertionError: assert ['mismatch:do...ventory.json'] == []\n  \n  Left contains one more item: 'mismatch:docs/03-guides/dashboards/panel-contract-inventory.json'\n  Use -v to get more diff"
+    },
+    {
+      "file": "tests.architecture.test_phase2_p1_tail_guards",
+      "test": "test_broad_exception_handlers_are_limited_to_cli_entrypoints",
+      "message": "AssertionError: Broad exception policy violations:\n  src/bioetl/composition/providers/publication_term_pubmed_enricher.py:225 catches Exception outside CLI allowlist\n  src/bioetl/composition/providers/publication_term_pubmed_enricher.py:165 catches Exception outside CLI allowlist\n  src/bioetl/application/services/execution/pipeline_runner_service.py:213 catches Exception outside CLI allowlist\n  src/bioetl/application/services/run_reports/composite.py:262 catches Exception outside CLI allowlist\n  src/bioetl/application/core/lifecycle/heartbeat.py:111 catches Exception outside CLI allowlist\nassert not ['src/bioetl/composition/providers/publication_term_pubmed_enricher.py:225 catches Exception outside CLI allowlist', '...tside CLI allowlist', 'src/bioetl/application/core/lifecycle/heartbeat.py:111 catches Exception outside CLI allowlist']"
+    },
+    {
+      "file": "tests.architecture.test_private_module_imports",
+      "test": "test_owner_aware_private_module_imports",
+      "message": "AssertionError: New external first-party private-module imports introduced:\n    - bioetl/infrastructure/adapters/pubchem/fetch_flow.py:14 -> bioetl.infrastructure.adapters.http._client_retry_policy\n    - bioetl/infrastructure/schemas/workflow_config.py:408 -> bioetl.domain.workflow._delete_orphans_scope\n    - bioetl/interfaces/cli/commands/_workflow_override_support.py:174 -> bioetl.domain.workflow._delete_orphans_scope\nassert not frozenset({('bioetl/infrastructure/adapters/pubchem/fetch_flow.py', 'bioetl.infrastructure.adapters.http._client_retry...e'), ('bioetl/interfaces/cli/commands/_workflow_override_support.py', 'bioetl.domain.workflow._delete_orphans_scope')})"
+    },
+    {
+      "file": "tests.architecture.test_private_module_imports",
+      "test": "test_private_import_baseline_is_monotonically_non_increasing",
+      "message": "AssertionError: observed_count=14 exceeds shrink-only max_count=12\n  new cross-owner private imports: bioetl/infrastructure/adapters/pubchem/fetch_flow.py -> bioetl.infrastructure.adapters.http._client_retry_policy, bioetl/infrastructure/schemas/workflow_config.py -> bioetl.domain.workflow._delete_orphans_scope, bioetl/interfaces/cli/commands/_workflow_override_support.py -> bioetl.domain.workflow._delete_orphans_scope\n  shrink max_count to the live observed_count (14); remove unused allowlist pairs\nassert not ['observed_count=14 exceeds shrink-only max_count=12', 'new cross-owner private imports: bioetl/infrastructure/adapter...ain.workflow._delete_orphans_scope', 'shrink max_count to the live observed_count (14); remove unused allowlist pairs']"
+    },
+    {
+      "file": "tests.architecture.test_provider_datasource_freeze_guards",
+      "test": "test_internal_composition_entrypoint_module_strings_are_not_used_in_unit_tests[bioetl.composition._resource_management]",
+      "message": "AssertionError: Internal composition entrypoint module gained new string references in unit tests:\n  tests/unit/application/core/test_issue_11221_11222_11226.py:109 mentions bioetl.composition._resource_management\n  tests/unit/application/core/test_issue_11221_11222_11226.py:112 mentions bioetl.composition._resource_management\nassert not ['tests/unit/application/core/test_issue_11221_11222_11226.py:109 mentions bioetl.composition._resource_management', 'tests/unit/application/core/test_issue_11221_11222_11226.py:112 mentions bioetl.composition._resource_management']"
+    },
+    {
+      "file": "tests.architecture.test_public_lazy_facade_inventory",
+      "test": "test_public_lazy_facade_inventory_matches_source_ast",
+      "message": "AssertionError: assert {'src/bioetl/...PORTS'}), ...} == {'src/bioetl/...PORTS'}), ...}\n  \n  Omitting 50 identical items, use -vv to show\n  Right contains 2 more items:\n  {'src/bioetl/composition/runtime_builders/_run_manifest_refs.py': frozenset({'__getattr__'}),\n   'src/bioetl/domain/serialization/__init__.py': frozenset({'__getattr__'})}\n  Use -v to get more diff"
+    },
+    {
+      "file": "tests.architecture.test_pytest_sharded_inventory",
+      "test": "test_architecture_shard_rebalance_manifest_matches_slow_test_telemetry",
+      "message": "AssertionError: assert False\n +  where False = exists()\n +    where exists = WindowsPath('C:/Users/Fedor/.codex/worktrees/grafana-security-ui-final-20261003/BioactivityDataAcquisition/reports/test-telemetry/s7-governance-hotspots.json').exists"
+    },
+    {
+      "file": "tests.architecture.test_removable_complexity_family_ratchets",
+      "test": "test_removable_complexity_family_budgets_hold_reviewed_baseline",
+      "message": "AssertionError: adapter_layer regressed to 3 files >= 250 LOC (budget 0). Rebaseline intentionally or keep the cleanup wave moving.\nassert 3 <= 0"
+    },
+    {
+      "file": "tests.architecture.test_reproducibility_docs_contract_drift",
+      "test": "test_run_manifest_contract_doc_covers_runtime_manifest_schema",
+      "message": "AssertionError: Run manifest contract doc is missing manifest fields: ['objects']\nassert not ['objects']"
+    },
+    {
+      "file": "tests.architecture.test_reproducibility_docs_contract_drift",
+      "test": "test_strict_persistence_profile_set_is_centralized_in_domain_policy",
+      "message": "AssertionError: Strict persistence profile sets must use bioetl.domain.control_plane.reproducibility_policy.STRICT_PERSISTENCE_PROFILES, not local literals: ['src\\\\bioetl\\\\domain\\\\control_plane\\\\_reproducibility_policy_persistence.py:10']\nassert not ['src\\\\bioetl\\\\domain\\\\control_plane\\\\_reproducibility_policy_persistence.py:10']"
+    },
+    {
+      "file": "tests.architecture.test_residual_osv_9853",
+      "test": "test_grafana_plugins_do_not_force_router_or_uuid_majors",
+      "message": "AssertionError: assert 'overrides' not in {'name': 'bioetl-scenes-app', 'version': '0.1.3', 'private': True, 'scripts': {'build': 'webpack -c ./webpack.config.ts --env production', 'test:ci': 'jest --maxWorkers 4', 'typecheck': 'tsc --noEmit', 'lint': 'eslint --cache .'}, ...}"
+    },
+    {
+      "file": "tests.architecture.test_rf014_composition_bootstrap_closeout",
+      "test": "test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/bootstrap/runtime/pipeline.py-106-required_modules1]",
+      "message": "AssertionError: src/bioetl/composition/bootstrap/runtime/pipeline.py regrew to 119 lines (max 106). Keep the RF-014 composition/bootstrap seam narrow and move new logic into helper owners.\nassert 119 <= 106"
+    },
+    {
+      "file": "tests.architecture.test_root_hygiene_review_registry",
+      "test": "test_root_hygiene_review_registry_candidates_are_unique_and_grounded",
+      "message": "AssertionError: Canonical path for .zed does not exist: .zed\nassert False\n +  where False = exists()\n +    where exists = (WindowsPath('C:/Users/Fedor/.codex/worktrees/grafana-security-ui-final-20261003/BioactivityDataAcquisition') / '.zed').exists"
+    },
+    {
+      "file": "tests.architecture.test_scripts_inventory_manifest",
+      "test": "test_scripts_inventory_manifest_drift_check_passes",
+      "message": "AssertionError: Scripts inventory drift check failed.\n  stdout:\n  [FAIL] Scripts inventory drift detected: C:\\Users\\Fedor\\.codex\\worktrees\\grafana-security-ui-final-20261003\\BioactivityDataAcquisition\\configs\\quality\\scripts_inventory_manifest.json\n    - scripts/ops/observability/grafana/recover_renderer.ps1.references: expected=[{'path': 'docs/DOCKER_QUICKSTART.md', 'line': 435, 'source_group': 'docs', 'text': '# .\\\\scripts\\\\ops\\\\observability\\\\grafana\\\\recover_renderer.ps1'}, {'path': 'tests/integration/test_grafana_datasource_provisioning.py', 'line': 294, 'source_group': 'tests', 'text': 'recover_ps1 = Path(\"scripts/ops/observability/grafana/recover_renderer.ps1\")'}] actual=[{'path': 'docs/DOCKER_QUICKSTART.md', 'line': 435, 'source_group': 'docs', 'text': '# .\\\\scripts\\\\ops\\\\observability\\\\grafana\\\\recover_renderer.ps1'}, {'path': 'tests/integration/test_grafana_datasource_provisioning.py', 'line': 303, 'source_group': 'tests', 'text': 'recover_ps1 = Path(\"scripts/ops/observability/grafana/recover_renderer.ps1\")'}]\n    - scripts/ops/observability/grafana/recover_renderer.sh.references: expected=[{'path': 'tests/integration/test_grafana_datasource_provisioning.py', 'line': 295, 'source_group': 'tests', 'text': 'recover_sh = Path(\"scripts/ops/observability/grafana/recover_renderer.sh\")'}] actual=[{'path': 'tests/integration/test_grafana_datasource_provisioning.py', 'line': 304, 'source_group': 'tests', 'text': 'recover_sh = Path(\"scripts/ops/observability/grafana/recover_renderer.sh\")'}]\n    - scripts with field drift: 2\n  Run with --update to refresh manifest.\n  \n  stderr:\n  \n  Run python -m scripts.engineering.repo sync-inventory to refresh manifest.\nassert 1 == 0\n +  where 1 = CompletedProcess(args=['E:\\\\github\\\\BioactivityDataAcquisition\\\\.venv-win\\\\Scripts\\\\python.exe', '-m', 'scripts.engine...afana/recover_renderer.sh\")\\'}]\\n  - scripts with field drift: 2\\nRun with --update to refresh manifest.\\n', stderr='').returncode"
+    },
+    {
+      "file": "tests.architecture.test_security_suppression_registry",
+      "test": "test_every_src_suppression_is_registered",
+      "message": "AssertionError: Bandit suppressions missing from the security registry:\n  src/bioetl/composition/providers/publication_term_pubmed_enricher.py B405\nassert [('src/bioetl....py', 'B405')] == []\n  \n  Left contains one more item: ('src/bioetl/composition/providers/publication_term_pubmed_enricher.py', 'B405')\n  Use -v to get more diff"
+    },
+    {
+      "file": "tests.architecture.test_security_suppression_registry",
+      "test": "test_registry_has_no_stale_entries",
+      "message": "AssertionError: assert ['SUP-YL-001'] == []\n  \n  Left contains one more item: 'SUP-YL-001'\n  Use -v to get more diff"
+    },
+    {
+      "file": "tests.architecture.test_security_suppression_registry",
+      "test": "test_suppression_lines_point_at_registry",
+      "message": "AssertionError: Suppression lines must point at the registry:\n  src/bioetl/composition/providers/publication_term_pubmed_enricher.py B405: import xml.etree.ElementTree as ET  # nosec B405 - parse-error type only\nassert ['src/bioetl/...or type only'] == []\n  \n  Left contains one more item: 'src/bioetl/composition/providers/publication_term_pubmed_enricher.py B405: import xml.etree.ElementTree as ET  # nosec B405 - parse-error type only'\n  Use -v to get more diff"
+    },
+    {
+      "file": "tests.architecture.test_silver_filter_boundary_inventory",
+      "test": "test_inventory_baseline_outputs_match_generator",
+      "message": "AssertionError: ADR-050 inventory baseline drifted from generator output. Run: python scripts/data_quality/inventory_silver_filters_migration.py\n  docs\\filters\\inventory-baseline.csv\n  docs\\filters\\inventory-baseline.json\n  docs\\filters\\inventory-baseline.md\nassert not ['docs\\\\filters\\\\inventory-baseline.csv', 'docs\\\\filters\\\\inventory-baseline.json', 'docs\\\\filters\\\\inventory-baseline.md']"
+    },
+    {
+      "file": "tests.architecture.test_source_test_mapping_policy",
+      "test": "test_thin_package_modules_have_same_path_tests_or_documented_exemption",
+      "message": "AssertionError: Thin-package source modules must have a same-path owner test or a documented exemption.\n  src/bioetl/domain/chembl/target_protein_classification.py -> tests/unit/domain/chembl/test_target_protein_classification.py\n  src/bioetl/domain/runtime/composition_boundary_policy.py -> tests/unit/domain/runtime/test_composition_boundary_policy.py\n  src/bioetl/domain/serialization/snapshot_serialization.py -> tests/unit/domain/serialization/test_snapshot_serialization.py\n  src/bioetl/infrastructure/provenance/code_revision.py -> tests/unit/infrastructure/provenance/test_code_revision.py\nassert not ['src/bioetl/domain/chembl/target_protein_classification.py -> tests/unit/domain/chembl/test_target_protein_classifica... 'src/bioetl/infrastructure/provenance/code_revision.py -> tests/unit/infrastructure/provenance/test_code_revision.py']"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issue_6062_closeout",
+      "test": "test_issue_6062_closeout_inventory_matches_live_gold_writer",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issue-6062-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5387_5394_closeout",
+      "test": "test_issue_5389_control_plane_use_case_seams_remain_explicit",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\control-plane-duplication.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5387_5394_closeout",
+      "test": "test_issue_5392_coverage_tail_reduction_matches_live_inventory",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5387-5394-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5395_5401_closeout",
+      "test": "test_issue_5398_layer_matrix_has_bronze_silver_gold_rows",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\layer-contract-coverage-matrix.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5553_5558_closeout",
+      "test": "test_issue_5553_governance_artifacts_are_aligned_to_committed_inventory",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5553-5558-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5553_5558_closeout",
+      "test": "test_issue_5558_tracker_closeout_metrics_stay_green",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5553-5558-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5559_5563_closeout",
+      "test": "test_issue_5561_config_duplication_clusters_are_owner_addressable",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5559-5563-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5565_5569_closeout",
+      "test": "test_issue_5566_semantic_seams_have_roles_and_no_new_src_callers",
+      "message": "AssertionError: bioetl.application.core.batch_operation_errors src importers drifted beyond the reviewed role guard. Expected ['src/bioetl/application/core/_batch_write_support.py', 'src/bioetl/application/core/batch_shared_operation_errors.py', 'src/bioetl/application/core/runner_execution_flow.py', 'src/bioetl/application/core/runner_flow.py'], got ['src/bioetl/application/core/_batch_write_events.py', 'src/bioetl/application/core/batch_shared_operation_errors.py', 'src/bioetl/application/core/runner_execution_flow.py', 'src/bioetl/application/core/runner_flow.py']\nassert {'src/bioetl/...nner_flow.py'} == {'src/bioetl/...nner_flow.py'}\n  \n  Extra items in the left set:\n  'src/bioetl/application/core/_batch_write_events.py'\n  Extra items in the right set:\n  'src/bioetl/application/core/_batch_write_support.py'\n  Use -v to get more diff"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5565_5569_closeout",
+      "test": "test_issue_5568_non_composite_config_duplication_is_explicitly_governed",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5565-5569-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5570_5578_closeout",
+      "test": "test_issue_5574_observability_allowlist_is_reviewed_and_drift_free",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\observability\\\\runtime_cardinality_allowlist_review_5574.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5570_5578_closeout",
+      "test": "test_issue_5575_hotspot_coverage_tails_have_owner_tests",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\hotspot-coverage-tail-owner-map.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5570_5578_closeout",
+      "test": "test_issue_5578_umbrella_has_all_child_evidence",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5570-5578-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5639_5644_closeout",
+      "test": "test_issue_5639_architecture_debt_planner_tracks_live_artifact_backlog",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tasks_architecture_metric_exemptions_2026-06-26-15-51.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5677_5685_closeout",
+      "test": "test_issues_5679_5680_5685_duplication_ratchets_are_lower",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5677-5685-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5790_5796_closeout",
+      "test": "test_issue_5795_runtime_basics_has_committed_targeted_coverage_proof",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\coverage\\\\runtime-basics-targeted-5795.xml'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5790_5796_closeout",
+      "test": "test_issue_5796_zero_reference_supporting_scripts_have_owner_or_removal_governance",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\scripts_deprecation_backlog.md'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5834_5838_closeout",
+      "test": "test_issue_5834_live_baseline_cleanup_and_owner_review_artifacts_are_current",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\root-hygiene-review-evidence.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5834_5838_closeout",
+      "test": "test_issue_5835_tolerated_local_only_root_clutter_is_reviewed_without_promoting_it",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\root-hygiene-review-evidence.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5834_5838_closeout",
+      "test": "test_issue_5836_root_env_surfaces_remain_security_review_only",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\root-hygiene-review-evidence.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5834_5838_closeout",
+      "test": "test_issue_5837_root_codex_wsl_shims_are_retired_and_owner_anchored",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\root-hygiene-review-evidence.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5834_5838_closeout",
+      "test": "test_issue_5838_root_docker_adjuncts_are_reviewed_and_evidence_backed",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\root-hygiene-review-evidence.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5839_5845_closeout",
+      "test": "test_issue_5844_runtime_tail_has_targeted_behavioral_coverage_evidence",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\hotspot-coverage-tail-owner-map.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5839_5845_closeout",
+      "test": "test_issue_5845_zero_reference_supporting_scripts_have_owner_or_removal_metadata",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\scripts_deprecation_backlog.md'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5847_5852_closeout",
+      "test": "test_issue_5847_root_baseline_is_reduced_without_new_root_directory",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5847-5852-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5847_5852_closeout",
+      "test": "test_issue_5848_root_local_clutter_cleanup_command_is_bounded",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5847-5852-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5847_5852_closeout",
+      "test": "test_issue_5849_legacy_codex_root_aliases_are_retired",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5847-5852-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5847_5852_closeout",
+      "test": "test_issue_5850_compose_adjuncts_are_rehomed_and_contract_backed",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5847-5852-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5847_5852_closeout",
+      "test": "test_issue_5851_helper_images_and_grafana_provisioning_are_rehomed",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5847-5852-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5847_5852_closeout",
+      "test": "test_issue_5852_review_class_root_files_have_exact_filename_contracts",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5847-5852-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5933_5944_closeout",
+      "test": "test_issue_5933_governance_artifacts_are_rebaselined",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5933-5944-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5956_5961_closeout",
+      "test": "test_duplication_burndown_ratchets_are_lowered_for_5956_and_5961",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5956-5961-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5956_5961_closeout",
+      "test": "test_compatibility_and_config_facades_are_frozen_for_5957_and_5958",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5956-5961-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5956_5961_closeout",
+      "test": "test_scripts_and_root_hygiene_burndown_for_5959_and_5960",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5956-5961-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5974_5977_closeout",
+      "test": "test_issue_5974_time_seam_guards_are_extended",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5974-5977-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5974_5977_closeout",
+      "test": "test_issue_5975_slow_governance_hotspots_are_budgeted",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5974-5977-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5974_5977_closeout",
+      "test": "test_issue_5976_duplicate_name_inventory_consolidated",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5974-5977-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5974_5977_closeout",
+      "test": "test_issue_5977_compatibility_sunset_ledger_created",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5974-5977-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5974_5977_closeout",
+      "test": "test_closeout_governance_gates_are_passing",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5974-5977-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5978_closeout",
+      "test": "test_issue_5978_branch_coverage_is_promoted_to_hard_gate",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5978-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5978_closeout",
+      "test": "test_issue_5978_coverage_tail_status_documented",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5978-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5978_closeout",
+      "test": "test_issue_5978_module_coverage_gates_policy_aligned",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5978-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5978_closeout",
+      "test": "test_issue_5978_evidence_paths_exist",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-5978-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_5978_closeout",
+      "test": "test_issue_5983_branch_gate_promotion_evidence_is_current",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\branch-coverage-gate-evidence.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_6011_6020_closeout",
+      "test": "test_issue_6019_duplication_triage_matches_current_baselines",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\duplication-baseline.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_6022_6028_closeout",
+      "test": "test_issue_6023_dependency_map_has_runtime_headroom",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-6022-6028-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_6022_6028_closeout",
+      "test": "test_issue_6024_runtime_builder_hotspot_fan_in_has_headroom",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-6022-6028-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_6022_6028_closeout",
+      "test": "test_issue_6025_duplication_baseline_distinguishes_raw_and_actionable_counts",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-6022-6028-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_6022_6028_closeout",
+      "test": "test_issue_6027_pandera_and_topology_docs_match_current_runtime",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\docs\\\\reports\\\\evidence\\\\project-package-topology\\\\SUMMARY.md'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_6022_6028_closeout",
+      "test": "test_issue_6028_test_governance_duplicate_names_are_zero",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\grafana-security-ui-final-20261003\\\\BioactivityDataAcquisition\\\\reports\\\\quality\\\\tech-debt-issues-6022-6028-closeout.json'"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_6159_6169_closeout",
+      "test": "test_issues_6159_6169_closeout_scope_is_explicit",
+      "message": "AssertionError: reports/quality/tasks_architecture_metric_exemptions_2026-07-12-12-33.json\nassert False\n +  where False = exists()\n +    where exists = (WindowsPath('C:/Users/Fedor/.codex/worktrees/grafana-security-ui-final-20261003/BioactivityDataAcquisition') / 'reports/quality/tasks_architecture_metric_exemptions_2026-07-12-12-33.json').exists"
+    },
+    {
+      "file": "tests.architecture.test_tech_debt_issues_6220_6229_closeout",
+      "test": "test_issue_6220_public_lazy_facades_are_fully_classified",
+      "message": "assert 52 == 51"
+    },
+    {
+      "file": "tests.architecture.test_test_infrastructure_refactor_closeout_6042_6044",
+      "test": "test_issue_6042_bootstrap_profile_blocks_unproven_scope_widening",
+      "message": "AssertionError: assert 44 == 47\n +  where 47 = len([WindowsPath('C:/Users/Fedor/.codex/worktrees/grafana-security-ui-final-20261003/BioactivityDataAcquisition/tests/unit...final-20261003/BioactivityDataAcquisition/tests/unit/composition/bootstrap/test_control_plane_store_builders.py'), ...])\n +    where [WindowsPath('C:/Users/Fedor/.codex/worktrees/grafana-security-ui-final-20261003/BioactivityDataAcquisition/tests/unit...final-20261003/BioactivityDataAcquisition/tests/unit/composition/bootstrap/test_control_plane_store_builders.py'), ...] = list(<map object at 0x000001CC25D24940>)\n +      where <map object at 0x000001CC25D24940> = rglob('test_*.py')\n +        where rglob = WindowsPath('C:/Users/Fedor/.codex/worktrees/grafana-security-ui-final-20261003/BioactivityDataAcquisition/tests/unit/composition/bootstrap').rglob"
+    },
+    {
+      "file": "tests.architecture.test_test_skip_inventory",
+      "test": "test_test_skip_inventory_tracks_current_live_skip_surfaces",
+      "message": "AssertionError: Test skip inventory is stale. Regenerate reviewed rows for:\n  tests/integration/test_grafana_variable_reference.py\n  tests/integration/test_live_green_acceptance.py\nassert {'tests/contr...ract.py', ...} == {'tests/contr...ract.py', ...}\n  \n  Extra items in the left set:\n  'tests/integration/test_grafana_variable_reference.py'\n  Extra items in the right set:\n  'tests/integration/test_live_green_acceptance.py'\n  Use -v to get more diff"
+    },
+    {
+      "file": "tests.architecture.test_test_telemetry_governance",
+      "test": "test_committed_test_telemetry_baseline_is_populated",
+      "message": "AssertionError: Committed telemetry source_tree_sha256 drifted from the audited test tree. Refresh with: python -m scripts.engineering.ci.update_test_telemetry_baseline --source-commit <sha> --source-run-id <run-id> (see docs/05-engineering/test-telemetry-baseline.md)\nassert 'cfb80acd6d5e...206bb4e5290ac' == 'c91bcde77426...3f06a8c0eae8c'\n  \n  - c91bcde77426ef4fcfcd1ca9337a609e5fd0e81dc643cb564713f06a8c0eae8c\n  + cfb80acd6d5efdf0e029dd0f044a3b9190e74cea7c022a17d73206bb4e5290ac"
+    },
+    {
+      "file": "tests.architecture.test_test_telemetry_governance",
+      "test": "test_committed_test_telemetry_branch_accurate_source_identity",
+      "message": "AssertionError: Branch-accurate telemetry requires source_tree_sha256 to match the audited HEAD test tree. Refresh with: python -m scripts.engineering.ci.update_test_telemetry_baseline --source-commit <sha> --source-run-id <run-id> (see docs/05-engineering/test-telemetry-baseline.md)\nassert 'cfb80acd6d5e...206bb4e5290ac' == 'c91bcde77426...3f06a8c0eae8c'\n  \n  - c91bcde77426ef4fcfcd1ca9337a609e5fd0e81dc643cb564713f06a8c0eae8c\n  + cfb80acd6d5efdf0e029dd0f044a3b9190e74cea7c022a17d73206bb4e5290ac"
+    }
+  ]
+}

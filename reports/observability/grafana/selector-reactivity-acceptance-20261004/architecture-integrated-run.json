@@ -1,0 +1,17 @@
+{
+  "command": [
+    "E:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "tests/architecture",
+    "-q",
+    "--no-cov",
+    "--junitxml=reports/qa/architecture-integrated-a2a70609.xml"
+  ],
+  "head_before": "a2a706098ded8ad0da79f9489b3db285ae22fe86",
+  "head_after": "a2a706098ded8ad0da79f9489b3db285ae22fe86",
+  "head_unchanged": true,
+  "exit_code": 1,
+  "duration_seconds": 694.98,
+  "scope": "complete tests/architecture after integration with main; local_single_host"
+}

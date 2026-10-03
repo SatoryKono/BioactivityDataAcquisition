@@ -176,12 +176,12 @@ jobs:
     docker:
       - image: cimg/python:3.12
     resource_class: small
-    no_output_timeout: 35m
     steps:
       - checkout
       - setup-python-uv
       - run:
           name: mypy strict gate (src/bioetl + src/memory)
+          no_output_timeout: 35m
           command: |
             export PATH="$HOME/.local/bin:$PATH"
             mkdir -p reports
