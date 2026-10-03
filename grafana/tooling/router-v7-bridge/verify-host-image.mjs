@@ -55,6 +55,12 @@ export function verifyImages(built, manifest, inspect, fingerprint) {
   for (const key of ['Architecture', 'Os', 'Config']) {
     assert.deepEqual(actual[key], expected[key], `Image configuration mismatch: ${key}`);
   }
+  // Docker verifies layer digests on pull. Compare the complete ordered diff-ID
+  // chain before running any executable from either image, including hash tools.
+  assert.equal(actual.RootFS?.Type, 'layers', 'Built image must expose layer digests');
+  assert.ok(actual.RootFS.Layers?.length > 0, 'Built image layers must not be empty');
+  for (const layer of actual.RootFS.Layers) assert.match(layer, /^sha256:[0-9a-f]{64}$/);
+  assert.deepEqual(actual.RootFS, expected.RootFS, 'Complete image RootFS mismatch');
   const artifacts = {};
   for (const scope of scopes) {
     const produced = fingerprint(built, scope);
@@ -70,7 +76,7 @@ export function verifyImages(built, manifest, inspect, fingerprint) {
   return {
     status: 'PASS', built_image_config_digest: actual.Id,
     declared_image: manifest.image, declared_image_config_digest: expected.Id,
-    artifacts,
+    rootfs: actual.RootFS, artifacts,
   };
 }
 

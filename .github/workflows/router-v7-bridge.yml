@@ -114,6 +114,7 @@ jobs:
           name: host-plugin-${{ matrix.plugin }}
           path: grafana/plugins/${{ matrix.plugin }}/dist/
           if-no-files-found: error
+          retention-days: 7
 
   host-build:
     needs: plugin-tests
@@ -205,7 +206,7 @@ jobs:
           node grafana/tooling/router-v7-bridge/verify-host-image.mjs \
             bioetl-router-host:acceptance
       - name: Preserve image build and parity receipts
-        if: always()
+        if: ${{ !cancelled() && always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: router-v7-host-image-receipts
@@ -213,3 +214,4 @@ jobs:
             reports/qa/router-v7-image-build.json
             reports/qa/router-v7-image-parity.json
           if-no-files-found: warn
+          retention-days: 7

@@ -12,6 +12,7 @@ const inspect = (image) => ({
   Id: 'sha256:' + (image === 'bioetl-router-host:acceptance' ? 'b' : 'c').repeat(64),
   RepoDigests: [manifest.image], Architecture: 'amd64', Os: 'linux',
   Config: { User: 'grafana', Entrypoint: ['/run.sh'] },
+  RootFS: { Type: 'layers', Layers: ['sha256:' + digest] },
 });
 const fingerprint = () => ({ tree_sha256: digest, module_sha256: digest });
 
@@ -63,4 +64,21 @@ test('manifest argument injection is rejected before invoking Docker callbacks',
   assert.throws(() => verifyImages('bioetl-router-host:acceptance', {
     ...manifest, image: '--format=@sha256:' + digest,
   }, () => assert.fail('Docker must not execute'), fingerprint), /Unsupported image reference/);
+});
+
+
+test('changed backend, entrypoint or system-library layers fail before image tools execute', () => {
+  for (const file of ['/usr/share/grafana/bin/grafana', '/run.sh', '/lib/libc.so']) {
+    assert.throws(() => verifyImages('bioetl-router-host:acceptance', manifest, (image) => ({
+      ...inspect(image),
+      RootFS: { Type: 'layers', Layers: ['sha256:' + (image === manifest.image ? 'd' : 'a').repeat(64)] },
+    }), () => assert.fail('Unverified image tools must not execute: ' + file)), /Complete image RootFS mismatch/);
+  }
+});
+
+test('missing or empty rootfs evidence cannot pass', () => {
+  for (const RootFS of [undefined, { Type: 'layers', Layers: [] }]) {
+    assert.throws(() => verifyImages('bioetl-router-host:acceptance', manifest,
+      (image) => ({ ...inspect(image), RootFS }), fingerprint), /layer/);
+  }
 });
