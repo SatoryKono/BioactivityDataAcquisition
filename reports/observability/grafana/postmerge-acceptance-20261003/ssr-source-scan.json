@@ -1,0 +1,29 @@
+{
+  "upstream_sha": "6193dc03311b631b9727b560d24369e683dc396e",
+  "source_container": "bioetl-router-v7-canvas-build-v5-20261003",
+  "scopes": [
+    {
+      "scope": "public/app",
+      "runtime_files": 4612,
+      "selected_source_sha256": "29b9da183b9fbf12f6b89b06d331e525dd2b155da5599e9429fe1aef10b8f971",
+      "marker_hits": []
+    },
+    {
+      "scope": "pkg/api",
+      "runtime_files": 96,
+      "selected_source_sha256": "9b2d0c738cb2ac99bd15238290988f87d782ffc8e88d822fb9ef9d5b3e9f054b",
+      "marker_hits": []
+    },
+    {
+      "scope": "pkg/web",
+      "runtime_files": 10,
+      "selected_source_sha256": "1c22b1fbd813de033d2e96b2751d2b81a23037ce1c53e35d8fb717cb8971a455",
+      "marker_hits": []
+    }
+  ],
+  "complete_scoped_scan": true,
+  "limitations": [
+    "Build-container source scan is scoped to public/app, pkg/api and pkg/web; third-party dependencies and other server packages are not exhaustively assessed.",
+    "The live browser probe explicitly reaches the shared createBrowserRouter hydration branch and verifies constructor rejection. This scan does not claim universal SSR unreachability."
+  ]
+}
