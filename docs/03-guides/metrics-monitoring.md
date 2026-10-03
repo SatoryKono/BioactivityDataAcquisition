@@ -595,7 +595,7 @@ bioetl run --pipeline chembl_activity --no-health-server
 Для отдельного мониторинга без запуска пайплайна:
 
 ```bash
-bioetl health server --host 0.0.0.0 --port 8081
+bioetl health server --host 127.0.0.1 --port 8081
 ```
 
 ### CLI Health Check

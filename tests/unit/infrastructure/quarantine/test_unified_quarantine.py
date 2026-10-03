@@ -337,7 +337,7 @@ class TestUnifiedQuarantineInspect:
     @pytest.mark.asyncio
     async def test_inspect_returns_empty_when_table_not_found(
         self, quarantine, mock_delta_table
-    ):
+    ) -> None:
         """Test inspect returns empty list when table doesn't exist."""
         from deltalake.exceptions import TableNotFoundError
 
@@ -417,7 +417,7 @@ class TestUnifiedQuarantineReplay:
 
     def test_replay_returns_empty_when_table_not_found(
         self, quarantine, mock_delta_table
-    ):
+    ) -> None:
         """Test replay returns empty iterator when table doesn't exist."""
         from deltalake.exceptions import TableNotFoundError
 
@@ -632,7 +632,7 @@ class TestUnifiedQuarantineGetStats:
     @pytest.mark.asyncio
     async def test_get_stats_builds_silver_filter_breakdown(
         self, quarantine, mock_delta_table
-    ):
+    ) -> None:
         """Test get_stats derives structured Silver reject aggregations."""
         silver_reject_details = (
             '{"reason_code":"missing_required_field","rule_type":"required_fields",'
@@ -673,7 +673,7 @@ class TestUnifiedQuarantineGetStats:
     @pytest.mark.asyncio
     async def test_get_stats_honors_error_code_filter(
         self, quarantine, mock_delta_table
-    ):
+    ) -> None:
         """Test get_stats scopes statistics when one error code is requested."""
         mock_table = MagicMock()
         filtered_table = MagicMock()
@@ -821,6 +821,51 @@ class TestUnifiedQuarantineFilteredExplorer:
         assert result is None
 
     @pytest.mark.asyncio
+    async def test_get_filtered_record_returns_preview_without_raw_payload(
+        self, quarantine, mock_delta_table
+    ) -> None:
+        """Detail endpoint should not expose the quarantined raw payload."""
+        mock_table = MagicMock()
+        mock_arrow_table = MagicMock()
+        mock_arrow_table.to_pylist.return_value = [
+            {
+                "ingestion_ts": "2026-04-05T10:00:00Z",
+                "pipeline": "test",
+                "error_code": "FILTERED_OUT_SILVER",
+                "payload": (
+                    '{"id": 1, "patient_email": "alice.private@example.test", '
+                    '"canonical_smiles": ""}'
+                ),
+                "payload_hash": "sha256:1",
+                "error_details": (
+                    '{"message":"Required field missing",'
+                    '"reason_code":"missing_required_field",'
+                    '"rule_type":"required_fields",'
+                    '"field":"canonical_smiles",'
+                    '"operator":"required"}'
+                ),
+                "dq_status": "new",
+                "run_id": "run-1",
+            }
+        ]
+        mock_table.to_pyarrow_table.return_value = mock_arrow_table
+        mock_delta_table.return_value = mock_table
+
+        result = await quarantine.get_filtered_record(
+            payload_hash="sha256:1",
+            pipeline="test",
+        )
+
+        assert result is not None
+        assert "payload" not in result
+        assert result["payload_preview"] == {
+            "id": 1,
+            "patient_email": "alice.private@example.test",
+            "canonical_smiles": "",
+        }
+        assert result["payload_hash"] == "sha256:1"
+
+    @pytest.mark.asyncio
     async def test_get_filtered_filter_options(self, quarantine, mock_delta_table):
         """Filter options endpoint should return distinct scoped values."""
         mock_table = MagicMock()
@@ -900,7 +945,7 @@ class TestUnifiedQuarantineFilteredExplorer:
     @pytest.mark.asyncio
     async def test_list_filtered_records_requires_scoped_pipeline(
         self, quarantine, mock_delta_table
-    ):
+    ) -> None:
         """List endpoint should reject unscoped or multi-pipeline reads."""
         mock_table = MagicMock()
         mock_arrow_table = MagicMock()
@@ -941,7 +986,7 @@ class TestUnifiedQuarantineFilteredExplorer:
     @pytest.mark.asyncio
     async def test_list_filtered_records_rejects_grafana_all_scope_tokens(
         self, quarantine, mock_delta_table
-    ):
+    ) -> None:
         """Grafana $__all markers should not bypass scoped pipeline enforcement."""
         mock_table = MagicMock()
         mock_arrow_table = MagicMock()
@@ -993,7 +1038,7 @@ class TestUnifiedQuarantineFilteredExplorer:
     @pytest.mark.asyncio
     async def test_get_filtered_filter_options_requires_pipeline_scope(
         self, quarantine, mock_delta_table
-    ):
+    ) -> None:
         """Filter options should reject unscoped pipeline reads."""
         mock_table = MagicMock()
         mock_arrow_table = MagicMock()

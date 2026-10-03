@@ -24,11 +24,11 @@ scrape_configs:
       - targets: ['host.docker.internal:8000']
     metrics_path: /metrics
 
-  # Quarantine Explorer (bioetl quarantine serve). Host-published :8081 via compose service or manual ensure.
+  # Quarantine Explorer (bioetl quarantine serve). Internal compose service by default.
   - job_name: 'quarantine-explorer'
     metrics_path: /health/live
     static_configs:
-      - targets: ['host.docker.internal:8081']
+      - targets: ['quarantine-explorer:8081']
 
   - job_name: 'prometheus'
     static_configs:

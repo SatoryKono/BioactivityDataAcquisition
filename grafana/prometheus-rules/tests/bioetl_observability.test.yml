@@ -94,7 +94,7 @@ tests:
   - name: quarantine-explorer-unavailable
     interval: 1m
     input_series:
-      - series: 'up{job="quarantine-explorer",instance="host.docker.internal:8081"}'
+      - series: 'up{job="quarantine-explorer",instance="quarantine-explorer:8081"}'
         values: '0 0 0 0 0 0 0'
     alert_rule_test:
       - eval_time: 3m
@@ -103,7 +103,7 @@ tests:
           - exp_labels:
               severity: critical
               job: quarantine-explorer
-              instance: host.docker.internal:8081
+              instance: quarantine-explorer:8081
             exp_annotations:
               summary: Quarantine Explorer API is unavailable
               description: Prometheus could not scrape the Quarantine Explorer endpoint on :8081. Dashboard panels (ID, Processed Records, Silver Reject Explorer) will show no data.

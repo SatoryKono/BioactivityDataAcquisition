@@ -158,7 +158,7 @@ bioetl workflow status chembl_core --format json
 
 `workflow run`, `run`, `run-all` и `run-composite` по умолчанию также
 используют `--ensure-observability-backend`, то есть пытаются автоматически
-запустить detached `bioetl quarantine serve --host 0.0.0.0 --port 8081` для
+запустить detached `bioetl quarantine serve --host 127.0.0.1 --port 8081` для
 Grafana `ID`/detail panels. Для отключения используйте
 `--no-ensure-observability-backend`.
 
@@ -1143,10 +1143,10 @@ ______________________________________________________________________
 bioetl health server [--host 127.0.0.1] [--port 8081]
 ```
 
-Для Grafana `5. Silver Reject Explorer` используйте:
+Для локальной проверки `5. Silver Reject Explorer` используйте loopback-only backend:
 
 ```bash
-bioetl health server --host 0.0.0.0 --port 8081
+bioetl health server --host 127.0.0.1 --port 8081
 ```
 
 **Endpoints:**
