@@ -48,7 +48,7 @@ _COLUMNS = {
     "workflow_id": ("Workflow", None, 100),
     "pipeline": ("Pipeline", None, 80),
     "provider": ("Provider", 85, 50),
-    "run_label": ("Run ID", 90, 50),
+    "run_label": ("Run ID", 60, 50),
     "started_at": ("Started", 115, 50),
     "duration_display": ("Duration", 75, 50),
     "status": ("Overview", 180, 180),
