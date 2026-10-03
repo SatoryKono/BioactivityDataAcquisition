@@ -153,10 +153,11 @@ def test_ambiguous_producer_lineage_rejected(candidate):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("bound_cohort", [False, True])
-async def test_pipeline_captures_version_and_limits_before_completion(bound_cohort):
-    selected = apply_cli_overrides(
-        config(), reconciliation_mode="selected-snapshot", limit=1000
-    )
+@pytest.mark.parametrize("mode", ["selected-snapshot", "complete-reference"])
+async def test_pipeline_captures_version_and_limits_before_completion(
+    bound_cohort, mode
+):
+    selected = apply_cli_overrides(config(), reconciliation_mode=mode, limit=1000)
     result = RunResult(
         PipelineRunResult.SUCCESS,
         "chembl_assay",
@@ -192,12 +193,14 @@ async def test_pipeline_captures_version_and_limits_before_completion(bound_coho
         snapshot_reader=capture,
         cohort_resolver=resolver,
         upstream_outputs=upstream,
+        capture_producer_snapshot=mode == "complete-reference",
     )
     assert completed.status == "success"
     capture.assert_has_awaits(
         [call("chembl_assay", ""), call("chembl_assay", "producer")]
     )
     assert completed.payload.selected_snapshots["gold:chembl.assay"]["limit"] == 1000
+    assert producer.run_options.reconciliation_mode == mode
     if bound_cohort:
         resolver.assert_awaited_once_with(producer, upstream)
         assert runner.run.await_args.kwargs["options"].filter_ids == ["selected-target"]

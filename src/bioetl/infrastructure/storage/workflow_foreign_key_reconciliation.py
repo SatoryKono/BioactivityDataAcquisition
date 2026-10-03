@@ -119,7 +119,10 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             )
         log_reconciliation_started(self, request)
 
-        if request.reconciliation_mode == "selected-snapshot":
+        if (
+            request.reconciliation_mode == "selected-snapshot"
+            or request.require_closed_cohort
+        ):
             return await self._reconcile_selected_snapshots(request)
 
         source_rows = await read_source_rows(self, request)

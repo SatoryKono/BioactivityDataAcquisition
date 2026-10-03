@@ -119,7 +119,10 @@ async def validate_snapshot_versions(
     host: SelectedSnapshotHost, request: ForeignKeyReconciliationRequest
 ) -> None:
     """Reject source or reference changes instead of silently selecting latest."""
-    if request.reconciliation_mode != "selected-snapshot":
+    if (
+        request.reconciliation_mode != "selected-snapshot"
+        and not request.require_closed_cohort
+    ):
         return
     for layer, name in (
         (request.source_layer, request.source_table),
