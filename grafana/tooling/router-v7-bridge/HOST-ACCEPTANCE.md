@@ -46,6 +46,16 @@ The Actions integration applies all three patches and runs the focused Canvas
 failure/recovery tests before the production build. The historical proposed
 change remains in workflow-canvas-acceptance.patch for provenance.
 
+Each plugin matrix job verifies its bundle and uploads the complete dist tree.
+The host job downloads those exact outputs, builds Dockerfile.host with the
+newly compiled frontend, and records the produced image-config digest. It pulls
+the registry digest from host-image.json and requires matching frontend/plugin
+bytes, filenames, owners, modes, symlink targets and runtime configuration.
+Registry-manifest and image-config digests identify different objects; receipt
+fields keep them separate. Creation timestamps are excluded from artifact parity.
+Any artifact/configuration mismatch blocks delivery. CI preserves build metadata
+and the parity receipt; an absent receipt does not establish acceptance.
+
 Dockerfile.host packages the compiled frontend and both owned plugins against
 the pinned official 13.2.3 base. Plugins use Grafana's bundled-plugin directory;
 the managed data volume therefore cannot mask them. host-image.json binds the
@@ -60,6 +70,10 @@ The runtime-probe plugin executes navigation and hydration fixtures through
 Grafana's shared react-router external. Install it only on the acceptance host,
 run its explicit button, preserve the rendered receipt and remove it afterward.
 Its temporary hydration data and harmless constructor are restored in finally.
+Pinned Grafana 13.2.3 already maps react-dom/client in
+public/app/features/plugins/loader/sharedDependencies.ts. The host workflow
+verifies that mapping before compiling. Node probe tests verify fixture behavior;
+they do not replace the real host's module-loading/browser acceptance.
 
 On the already prepared separate acceptance host, restart Grafana with the
 temporary probe mount and exact unsigned-ID override (run from the repo root):
