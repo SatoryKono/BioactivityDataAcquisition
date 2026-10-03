@@ -2,7 +2,7 @@
 
 Refresh note (2026-10-03): source binding for the local #11854 / #11899 repair branch. This identifies the retained inventory, not a fresh coverage measurement. Full 17-group measurement and adoption remain pending. Historical notes below remain historical.
 
-`source_tree_sha256=124e2cce22ff31ef8cd086a8a7149b3b40c641ae338341c9f30a083637ccec67`
+`source_tree_sha256=c5d5b54b7202d8295fbfdef61687b70543c305f8da38465b0e239fb73a64e6c4`
 
 `source_module_count=2533`
 
