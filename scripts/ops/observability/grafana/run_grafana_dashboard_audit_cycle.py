@@ -295,7 +295,7 @@ def _start_managed_observability_backend(
                 "quarantine",
                 "serve",
                 "--host",
-                "0.0.0.0",
+                "127.0.0.1",
                 "--port",
                 str(port),
             ],
