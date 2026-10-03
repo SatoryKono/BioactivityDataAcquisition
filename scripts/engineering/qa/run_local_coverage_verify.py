@@ -140,6 +140,19 @@ SHARDS = (
 )
 
 
+def _measurement_environment() -> dict[str, str]:
+    """Keep temporary Git fixtures independent of the caller's repository."""
+    env = {
+        key: value for key, value in os.environ.items() if not key.startswith("GIT_")
+    }
+    env["WSLENV"] = ":".join(
+        entry
+        for entry in env.get("WSLENV", "").split(":")
+        if entry and not entry.split("/")[0].startswith("GIT_")
+    )
+    return env
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -305,7 +318,7 @@ def main(argv: list[str] | None = None) -> int:
         f"[local-coverage] HEAD={head} source={source_sha} scratch={scratch}",
         flush=True,
     )
-    env = os.environ.copy()
+    env = _measurement_environment()
     env.update(
         {
             # MSYS bash resolves forward-slash drive paths; backslashes in
@@ -320,9 +333,7 @@ def main(argv: list[str] | None = None) -> int:
     # When shards run through the WSL launcher only variables named in WSLENV
     # cross the boundary; plain Windows env vars are dropped, which previously
     # made every shard write a throwaway `.coverage` in the checkout root.
-    wslenv_entries = [
-        entry for entry in os.environ.get("WSLENV", "").split(":") if entry
-    ]
+    wslenv_entries = [entry for entry in env.get("WSLENV", "").split(":") if entry]
     for entry in (
         "COVERAGE_FILE",
         "BIOETL_SKIP_PREFLIGHT",
