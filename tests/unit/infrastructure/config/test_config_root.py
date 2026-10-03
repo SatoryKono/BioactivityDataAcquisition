@@ -24,7 +24,7 @@
 # pyright: reportFunctionMemberAccess=false
 # pyright: reportConstantRedefinition=false
 # pyright: reportInvalidTypeForm=false
-# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+# PD5 test mock/fixture surface â€” product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 from __future__ import annotations
 
 from pathlib import Path, PureWindowsPath
@@ -249,3 +249,51 @@ def test_get_pipeline_config_uses_explicit_configs_root(
 
     assert config.provider == "tmp"
     assert config.entity_type == "pipeline"
+
+
+@pytest.mark.parametrize("marker", [None, "pyproject.toml", "AGENTS.md"])
+def test_repo_root_search_skips_unmarked_configs_and_preserves_layout_fallback(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    marker: str | None,
+) -> None:
+    """Ignore configs-only ancestors and retain the installed-layout fallback."""
+    import bioetl.infrastructure.config.config_root as config_root_module
+
+    layout_root = tmp_path / "isolated-layout"
+    source = (
+        layout_root / "src" / "bioetl" / "infrastructure" / "config" / "config_root.py"
+    )
+    source.parent.mkdir(parents=True)
+    source.write_text("# isolated source location\n", encoding="utf-8")
+    # A closer configs directory is insufficient without either root marker.
+    (source.parent / "configs").mkdir()
+    if marker is not None:
+        (layout_root / "configs").mkdir()
+        (layout_root / marker).write_text("# root marker\n", encoding="utf-8")
+    monkeypatch.setattr(config_root_module, "__file__", str(source))
+
+    assert get_default_repo_root() == layout_root
+    assert source.resolve().parents[4] == layout_root
+
+
+def test_prefer_cwd_without_configs_uses_repository_configs(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Opting into cwd discovery does not require a configs directory there."""
+    repo_root = get_default_repo_root()
+    monkeypatch.chdir(tmp_path)
+
+    assert not (tmp_path / "configs").exists()
+    assert (
+        resolve_configs_root(prefer_cwd_configs=True)
+        == (repo_root / "configs").resolve()
+    )
+
+
+def test_resolve_config_subdir_preserves_absolute_directory(tmp_path: Path) -> None:
+    """An absolute subdirectory bypasses repository config-root discovery."""
+    explicit = tmp_path / "external-configs"
+
+    assert resolve_config_subdir(explicit) == explicit
