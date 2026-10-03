@@ -21,7 +21,7 @@
       "run_ledger": true,
       "run_manifest": true
     },
-    "effective_config_hash": "sha256:9a390ca4feeed55e0ded549e8dcfb01e81934702295bdb93875264d1327b48f9",
+    "effective_config_hash": "sha256:776144d047afba8536ca263e6d6526c3465c1a312aec21ba1dc1ce22ab834361",
     "projection_profiles": [
       "async_mapping",
       "batch",
@@ -77,7 +77,7 @@
       {
         "description": "IDs from data/input/target.csv column target_chembl_id; CLI may override the input CSV",
         "name": "target_id",
-        "required": false,
+        "required": true,
         "source": "cli"
       }
     ],
@@ -271,8 +271,8 @@
   "passport_schema_version": "1.0.0",
   "provenance": {
     "projector_version": "1.1.0",
-    "semantic_content_hash": "sha256:a8db847fe2f5676055fed8634b92ed0303ecb06dc4439f0e2441e565d1dd84ff",
-    "source_revision": "11e60d87cb1659c2ff918c8a01ae87b702ef937d"
+    "semantic_content_hash": "sha256:4ad542c11693fda0f74e588de289300334d5fc7639f470235514f27c00a8f036",
+    "source_revision": "8254c925d2cbb4e6cf14f927cb651593924fb3f3"
   },
   "silver": {
     "column_projection": {

@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:chembl_publication_term`
 - Schema: `1.0.0`
-- Source revision: `11e60d87cb1659c2ff918c8a01ae87b702ef937d`
+- Source revision: `8254c925d2cbb4e6cf14f927cb651593924fb3f3`
 
 ## Evidence
 
@@ -75,7 +75,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:33f64f63cd6ea3b9d7689a48dfa1a992ff235035c7fae8009564dbe2cb4c53c0",
-    "source_revision": "11e60d87cb1659c2ff918c8a01ae87b702ef937d"
+    "source_revision": "8254c925d2cbb4e6cf14f927cb651593924fb3f3"
   },
   "source_references": [
     {

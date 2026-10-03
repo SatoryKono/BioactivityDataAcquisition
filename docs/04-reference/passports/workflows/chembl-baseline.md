@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:chembl_baseline`
 - Schema: `1.0.0`
-- Source revision: `11e60d87cb1659c2ff918c8a01ae87b702ef937d`
+- Source revision: `8254c925d2cbb4e6cf14f927cb651593924fb3f3`
 
 ## Evidence
 
@@ -26,7 +26,7 @@
     "workflow_manifest": true
   },
   "dag": {
-    "edge_count": 8,
+    "edge_count": 9,
     "edges": [
       {
         "from": "reconcile_assay_publication_orphans",
@@ -46,6 +46,10 @@
       },
       {
         "from": "run_chembl_assay",
+        "to": "run_chembl_publication"
+      },
+      {
+        "from": "run_chembl_assay",
         "to": "run_chembl_target"
       },
       {
@@ -61,7 +65,7 @@
         "to": "run_chembl_publication"
       }
     ],
-    "mermaid": "flowchart TD\n  reconcile_assay_publication_orphans[\"reconcile_foreign_keys\"]\n  reconcile_assay_target_orphans[\"reconcile_foreign_keys\"]\n  reconcile_publication_assay_orphans[\"reconcile_foreign_keys\"]\n  reconcile_target_assay_orphans[\"reconcile_foreign_keys\"]\n  run_chembl_assay[\"chembl_assay\"]\n  run_chembl_publication[\"chembl_publication\"]\n  run_chembl_target[\"chembl_target\"]\n  reconcile_assay_publication_orphans --> reconcile_target_assay_orphans\n  reconcile_assay_target_orphans --> reconcile_assay_publication_orphans\n  reconcile_target_assay_orphans --> reconcile_publication_assay_orphans\n  run_chembl_assay --> reconcile_assay_target_orphans\n  run_chembl_assay --> run_chembl_target\n  run_chembl_publication --> reconcile_assay_publication_orphans\n  run_chembl_target --> reconcile_assay_target_orphans\n  run_chembl_target --> run_chembl_publication\n",
+    "mermaid": "flowchart TD\n  reconcile_assay_publication_orphans[\"reconcile_foreign_keys\"]\n  reconcile_assay_target_orphans[\"reconcile_foreign_keys\"]\n  reconcile_publication_assay_orphans[\"reconcile_foreign_keys\"]\n  reconcile_target_assay_orphans[\"reconcile_foreign_keys\"]\n  run_chembl_assay[\"chembl_assay\"]\n  run_chembl_publication[\"chembl_publication\"]\n  run_chembl_target[\"chembl_target\"]\n  reconcile_assay_publication_orphans --> reconcile_target_assay_orphans\n  reconcile_assay_target_orphans --> reconcile_assay_publication_orphans\n  reconcile_target_assay_orphans --> reconcile_publication_assay_orphans\n  run_chembl_assay --> reconcile_assay_target_orphans\n  run_chembl_assay --> run_chembl_publication\n  run_chembl_assay --> run_chembl_target\n  run_chembl_publication --> reconcile_assay_publication_orphans\n  run_chembl_target --> reconcile_assay_target_orphans\n  run_chembl_target --> run_chembl_publication\n",
     "step_count": 7,
     "steps": [
       {
@@ -75,14 +79,27 @@
         ],
         "kind": "pipeline",
         "pipeline_name": "chembl_target",
+        "reference_cohort": {
+          "column": "target_id",
+          "filter_field": "target_id",
+          "step_id": "run_chembl_assay",
+          "table": "chembl.assay"
+        },
         "step_id": "run_chembl_target"
       },
       {
         "depends_on": [
-          "run_chembl_target"
+          "run_chembl_target",
+          "run_chembl_assay"
         ],
         "kind": "pipeline",
         "pipeline_name": "chembl_publication",
+        "reference_cohort": {
+          "column": "publication_id",
+          "filter_field": "publication_id",
+          "step_id": "run_chembl_assay",
+          "table": "chembl.assay"
+        },
         "step_id": "run_chembl_publication"
       },
       {
@@ -96,6 +113,7 @@
           "reference_key": "target_id",
           "reference_layer": "gold",
           "reference_table": "chembl.target",
+          "require_closed_cohort": true,
           "source_key": "target_id",
           "source_layer": "gold",
           "source_table": "chembl.assay"
@@ -119,6 +137,7 @@
           "reference_key": "publication_id",
           "reference_layer": "gold",
           "reference_table": "chembl.publication",
+          "require_closed_cohort": true,
           "source_key": "publication_id",
           "source_layer": "gold",
           "source_table": "chembl.assay"
@@ -142,6 +161,7 @@
           "reference_key": "target_id",
           "reference_layer": "gold",
           "reference_table": "chembl.assay",
+          "require_closed_cohort": true,
           "source_key": "target_id",
           "source_layer": "gold",
           "source_table": "chembl.target"
@@ -164,6 +184,7 @@
           "reference_key": "publication_id",
           "reference_layer": "gold",
           "reference_table": "chembl.assay",
+          "require_closed_cohort": true,
           "source_key": "publication_id",
           "source_layer": "gold",
           "source_table": "chembl.publication"
@@ -204,6 +225,7 @@
         "reference_key": "target_id",
         "reference_layer": "gold",
         "reference_table": "chembl.target",
+        "require_closed_cohort": true,
         "source_key": "target_id",
         "source_layer": "gold",
         "source_table": "chembl.assay"
@@ -227,6 +249,7 @@
         "reference_key": "publication_id",
         "reference_layer": "gold",
         "reference_table": "chembl.publication",
+        "require_closed_cohort": true,
         "source_key": "publication_id",
         "source_layer": "gold",
         "source_table": "chembl.assay"
@@ -250,6 +273,7 @@
         "reference_key": "target_id",
         "reference_layer": "gold",
         "reference_table": "chembl.assay",
+        "require_closed_cohort": true,
         "source_key": "target_id",
         "source_layer": "gold",
         "source_table": "chembl.target"
@@ -273,6 +297,7 @@
         "reference_key": "publication_id",
         "reference_layer": "gold",
         "reference_table": "chembl.assay",
+        "require_closed_cohort": true,
         "source_key": "publication_id",
         "source_layer": "gold",
         "source_table": "chembl.publication"
@@ -312,8 +337,8 @@
   "passport_schema_version": "1.0.0",
   "provenance": {
     "projector_version": "1.0.0",
-    "semantic_content_hash": "sha256:0c4b8bf263380d40361ca35749e64226a7862c11313569d72a65ef08728b0ab6",
-    "source_revision": "11e60d87cb1659c2ff918c8a01ae87b702ef937d"
+    "semantic_content_hash": "sha256:03e308c8350d314af0978c5a1761afedd10916ff3c30b7ca77dc46f05f8ce573",
+    "source_revision": "8254c925d2cbb4e6cf14f927cb651593924fb3f3"
   },
   "source_references": [
     {

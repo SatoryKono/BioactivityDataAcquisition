@@ -161,3 +161,29 @@ def test_contract_generator_removes_superseded_generated_contracts(
     assert active.exists()
     assert retained.exists()
     assert not superseded.exists()
+
+
+@pytest.mark.parametrize(
+    "extra_name, stale",
+    [
+        ("chembl_assay_parameters_v1.0.json", False),
+        ("chembl_publication_similarity_v1.0.json", False),
+        ("unexpected_v1.0.json", True),
+    ],
+)
+def test_check_mode_honors_retained_contract_policy(monkeypatch, extra_name, stale):
+    """Preserve declared legacy contracts while rejecting undeclared extras."""
+    module = _load_module()
+    active = "docs/04-reference/contracts/gold/example_v2.0.json"
+    monkeypatch.setattr(
+        module,
+        "_snapshot_generated_contracts",
+        lambda: {
+            active: "{}\n",
+            f"docs/04-reference/contracts/gold/{extra_name}": "{}\n",
+        },
+    )
+    monkeypatch.setattr(
+        module, "_expected_generated_contracts_snapshot", lambda: {active: "{}\n"}
+    )
+    assert module._run_gold_contract_generation(check=True) is stale
