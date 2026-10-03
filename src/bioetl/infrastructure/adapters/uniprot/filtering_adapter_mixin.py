@@ -18,7 +18,9 @@ from bioetl.infrastructure.adapters.uniprot.fallback_policy import (
     UniProtFallbackPolicy,
 )
 from bioetl.infrastructure.adapters.uniprot.fallback_resolver import (
-    extract_uniprot_accession,
+    extract_uniprot_accession as extract_uniprot_accession,
+)
+from bioetl.infrastructure.adapters.uniprot.fallback_resolver import (
     iter_uniprot_fallback_records,
     resolve_uniprot_missing_ids,
 )

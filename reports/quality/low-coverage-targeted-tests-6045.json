@@ -10,7 +10,7 @@
   },
   "debt_budget_policy": "flat_or_decreasing_only",
   "issue": 6045,
-  "module_coverage_inventory_source_tree_sha256": "3e5fbcba34bbe5a32daf70f9aa53d95f277513e4ebf0f130a910de2650216362",
+  "module_coverage_inventory_source_tree_sha256": "3b2e81219500a0aa6a5c796addb7772d66cff70704e8a85a690ad04726693a75",
   "reviewed_on": "2026-07-20",
   "schema_version": "low-coverage-targeted-tests-6045-v1",
   "targeted_modules": [
@@ -93,5 +93,17 @@
       "reason": "Local pytest-cov collection hit deltalake/pandas import instability: numpy cannot load module more than once per process. Functional targeted tests pass and the canonical full-suite coverage inventory remains the authoritative coverage source.",
       "status": "not_recorded"
     }
-  ]
+  ],
+  "source_binding_refresh": {
+    "previous_source_tree_sha256": "3e5fbcba34bbe5a32daf70f9aa53d95f277513e4ebf0f130a910de2650216362",
+    "measured_head": "24f569369ce169cf971fd19691158f7e78edf806",
+    "source_tree_sha256": "3b2e81219500a0aa6a5c796addb7772d66cff70704e8a85a690ad04726693a75",
+    "evidence": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-28/manifest.json",
+    "semantics": "Current accepted inventory may retain historical nonregressing rows; raw measured candidate remains separate.",
+    "historical_reviewed_on": "2026-07-20",
+    "historical_validation_preserved": true,
+    "previous_current_source_tree_sha256": "57404f9168a198c9f4398b1cd519f397d3d90e901588e8ecc6469b41af57d203",
+    "measured_source_tree_sha256": "57404f9168a198c9f4398b1cd519f397d3d90e901588e8ecc6469b41af57d203",
+    "source_only_rebind_note": "Explicit re-export preserves the existing UniProt helper API. Current accepted source binding differs from the earlier raw measurement; a fresh final full producer remains required."
+  }
 }

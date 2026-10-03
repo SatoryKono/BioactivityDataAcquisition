@@ -1,10 +1,10 @@
 # Сводка evidence: project-package-topology
 
-Refresh note (2026-10-03): source binding for the local #11854 / #11899 repair branch. This identifies the retained inventory, not a fresh coverage measurement. Full 17-group measurement and adoption remain pending. Historical notes below remain historical.
+Refresh note (2026-10-04): accepted inventory after the complete 17-group local measurement on `24f569369ce169cf971fd19691158f7e78edf806` and canonical nonregressing adoption. The raw comparison retains 67 visible module regressions. Retained historical values are not fresh measurements. Historical notes below remain historical. Current accepted source binding: `3b2e81219500a0aa6a5c796addb7772d66cff70704e8a85a690ad04726693a75`; raw measurement source binding: `57404f9168a198c9f4398b1cd519f397d3d90e901588e8ecc6469b41af57d203`. The later source-only rebind does not relabel historical coverage as a new measurement.
 
-`source_tree_sha256=57404f9168a198c9f4398b1cd519f397d3d90e901588e8ecc6469b41af57d203`
+`source_tree_sha256=3b2e81219500a0aa6a5c796addb7772d66cff70704e8a85a690ad04726693a75`
 
-`source_module_count=2533`
+`source_module_count=2546`
 
 Refresh note (2026-09-24): hash-only reconcile after arch-guard landing. Counts and the source fingerprint below come from `reports/quality/module-coverage-inventory.json`. Historical notes remain historical.
 

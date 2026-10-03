@@ -112,3 +112,35 @@ The live mapping used here is:
 - `tests.integration.test_dashboard_requirement_coverage::test_dash_copy_001_fails_closed_without_empty_state_copy`
 - `tests.integration.test_dashboard_required_panel_links::test_overview_dashboard_required_panel_links`
 - `tests.integration.test_dashboard_required_panel_links::test_workflow_overview_required_panel_links`
+
+
+## Architecture program and config-root measurement checkpoint — 2026-10-04
+
+This checkpoint preserves the earlier audit results above. It records local implementation and measurement; the source-bound final acceptance receipts remain the authority for completion.
+
+Branch: `codex/architecture-coverage-closeout-11854-11899`. Complete 17-group producer measurement commit: `24f569369ce169cf971fd19691158f7e78edf806`; measured production source SHA-256: `57404f9168a198c9f4398b1cd519f397d3d90e901588e8ecc6469b41af57d203`. All 17 groups exited 0: 32,330 passed, 179 skipped, 0 failures, 0 errors; producer exit 0. Global measured coverage: 99.74% lines and 94.43% branches. Config-root coverage is a fresh 40/40 executable lines and 18/18 branches, including fallback line 32; production config-root behavior is unchanged.
+
+Current accepted inventory contains 2546 paths with no unmeasured/uncovered modules and none below 85%. Canonical nonregressing adoption preserves historical rows. The separate direct raw-candidate comparison failed with 67 remaining module regressions; global fresh measured nonregression is not claimed. Thirteen new paths were measured and adopted. Raw XML, shard hashes/JUnit, raw candidate, baseline copy and retained-row ledger are in the local `reports/quality/proof-or-stop/architecture-coverage-11854-11899/` evidence directory under distinct wave identities.
+
+After this measurement, an explicit UniProt helper re-export preserved its existing API and removed the one introduced strict type diagnostic. The current accepted source-only binding is `3b2e81219500a0aa6a5c796addb7772d66cff70704e8a85a690ad04726693a75`. This later rebind does not relabel the earlier raw measurement; final validation must run on the resulting committed tree. Full strict Mypy remains a failed diagnostic: 108 errors versus 157 in the complete baseline source/scripts snapshot, with zero added diagnostics and 49 removed. It is not reported as a full type-check pass.
+
+### Eight-stage merged/evidence matrix
+
+Every merged commit below is present in this local branch. CLOSED describes the verified child issue state and does not substitute for current contract execution. Their current contracts are included in the full architecture acceptance suite.
+
+| Child | Historical merged SHA | Ancestor of branch | Historical evidence |
+| --- | --- | --- | --- |
+| [#11846](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11846) | `d311a17e17c52f2f50b9f1020ed5e4181ff75b36` | yes | [historical evidence 1](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11846#issuecomment-5946567048); [historical evidence 2](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11846#issuecomment-5948670893) |
+| [#11847](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11847) | `8f024f97cb10d87d2d12b31f7a4282aac1cf895c` | yes | [historical evidence 1](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11847#issuecomment-5947798826) |
+| [#11848](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11848) | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | yes | [historical evidence 1](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11848#issuecomment-5953970678) |
+| [#11849](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11849) | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | yes | [historical evidence 1](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11849#issuecomment-5953958374) |
+| [#11850](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11850) | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | yes | [historical evidence 1](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11850#issuecomment-5953960202) |
+| [#11851](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11851) | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | yes | [historical evidence 1](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11851#issuecomment-5953962311) |
+| [#11852](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11852) | `dbc2ee7f257b8f8e7866383e1e05361555faf5de` | yes | [issue record](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11852) |
+| [#11853](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11853) | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | yes | [historical evidence 1](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11853#issuecomment-5951017215); [historical evidence 2](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11853#issuecomment-5953972399) |
+
+### Final acceptance requirements and limits
+
+Run complete `python -m pytest tests/architecture`, the complete 17-group coverage producer, strict docs verification, canonical debt/governance freshness checks and full-tree guard on one final committed tree. Record terminating exits and JUnit, then assemble and verify normalized proof receipts. The initial 133-failure architecture run and interrupted producers remain historical diagnostics, not acceptance. No budgets, thresholds, exemptions or exclusions are increased. All 161 files lost from tracking by the earlier index-isolation defect were restored with their original blobs; the affected temporary-Git fixture and coverage producer now isolate inherited `GIT_*` configuration.
+
+Billing lock remains `CI=BLOCKED_EXTERNAL_PERMANENT`. Local execution is not CI PASS. `local_single_host` evidence can qualify only as DEGRADED under the existing proof policy; required ADMIT cannot be replaced by fabricated independent attestation. Publication/integration and the applicable lifecycle acceptance are separate requirements. Runtime mirror parity is N/A because Codex/Junie runtime sources were unchanged. The original shared checkout and all `.env` files are preserved.
