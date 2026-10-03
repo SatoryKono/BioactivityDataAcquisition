@@ -98,6 +98,7 @@ jobs:
               git fetch --no-tags origin main:refs/remotes/origin/main
               BASE_SHA="$(git merge-base origin/main "$HEAD_SHA")"
               echo "Classifying $BASE_SHA...$HEAD_SHA"
+              export GITHUB_OUTPUT=/tmp/pr-gate-classifier-output
               uv run --frozen --no-build python -m scripts.engineering.ci pr-gate classify \
                 --catalog configs/quality/github_required_checks.yaml \
                 --event-name pull_request \
