@@ -1,0 +1,153 @@
+{
+  "tool": "pretest_guardrails",
+  "mode": "check",
+  "scope": "governance",
+  "strict_docs": false,
+  "status": "ok",
+  "started_at": "2026-10-03T21:59:10Z",
+  "completed_at": "2026-10-03T22:01:04.698973+00:00",
+  "steps": [
+    {
+      "label": "cleanup",
+      "status": "skip",
+      "proof_status": "skip",
+      "duration_seconds": 0.0,
+      "command": "not executed",
+      "skip_reason": "cleanup disabled by option or profile",
+      "follow_up": "rerun without --skip-cleanup when cleanup evidence is required"
+    },
+    {
+      "label": "auto-fix",
+      "status": "skip",
+      "proof_status": "skip",
+      "duration_seconds": 0.0,
+      "command": "not executed",
+      "skip_reason": "write-capable auto-fix is not selected",
+      "follow_up": "rerun with --mode auto only when deterministic refresh is authorized"
+    },
+    {
+      "label": "inventory-check",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 64.479,
+      "command": "E:\\\\github\\\\BioactivityDataAcquisition\\\\.venv-win\\\\Scripts\\\\python.exe -m scripts.engineering.repo check-inventory --check --manifest configs/quality/scripts_inventory_manifest.json --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json",
+      "skip_reason": null,
+      "follow_up": null
+    },
+    {
+      "label": "catalog-check",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 0.383,
+      "command": "E:\\\\github\\\\BioactivityDataAcquisition\\\\.venv-win\\\\Scripts\\\\python.exe -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml",
+      "skip_reason": null,
+      "follow_up": null
+    },
+    {
+      "label": "hotspot-family-baseline-check",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 1.7,
+      "command": "E:\\\\github\\\\BioactivityDataAcquisition\\\\.venv-win\\\\Scripts\\\\python.exe -m scripts.engineering.qa report-family-baseline --check",
+      "skip_reason": null,
+      "follow_up": null
+    },
+    {
+      "label": "repo-identity-check",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 0.424,
+      "command": "E:\\\\github\\\\BioactivityDataAcquisition\\\\.venv-win\\\\Scripts\\\\python.exe -m scripts.docs sync-repo-identity --check",
+      "skip_reason": null,
+      "follow_up": null
+    },
+    {
+      "label": "integration-vcr-policy-check",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 0.402,
+      "command": "E:\\\\github\\\\BioactivityDataAcquisition\\\\.venv-win\\\\Scripts\\\\python.exe -m scripts.engineering.qa sync-integration-vcr-policy --check",
+      "skip_reason": null,
+      "follow_up": null
+    },
+    {
+      "label": "docs-verify",
+      "status": "skip",
+      "proof_status": "skip",
+      "duration_seconds": 0.0,
+      "command": "not executed",
+      "skip_reason": "docs verification disabled by option or profile",
+      "follow_up": "rerun with --scope full or --scope strict"
+    },
+    {
+      "label": "memory-validate",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 1.011,
+      "command": "env PYTHONPATH=/e/github/bda-fk-selected-snapshot-11865/src:/e/github/bda-fk-selected-snapshot-11865:E:\\\\github\\\\bda-fk-selected-snapshot-11865\\\\src E:\\\\github\\\\BioactivityDataAcquisition\\\\.venv-win\\\\Scripts\\\\python.exe -m memory.tooling.validate",
+      "skip_reason": null,
+      "follow_up": null
+    },
+    {
+      "label": "memory-workflow-smoke",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 4.664,
+      "command": "env BIOETL_AI_RUNTIME=codex BIOETL_AI_AGENT=memory-workflow-smoke PYTHONPATH=/e/github/bda-fk-selected-snapshot-11865/src:/e/github/bda-fk-selected-snapshot-11865:E:\\\\github\\\\bda-fk-selected-snapshot-11865\\\\src E:\\\\github\\\\BioactivityDataAcquisition\\\\.venv-win\\\\Scripts\\\\python.exe -m memory.tooling.workflow smoke --validation-timeout-seconds 15 --json",
+      "skip_reason": null,
+      "follow_up": null
+    },
+    {
+      "label": "memory-refresh-smoke",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 23.98,
+      "command": "env PYTHONPATH=/e/github/bda-fk-selected-snapshot-11865/src:/e/github/bda-fk-selected-snapshot-11865:E:\\\\github\\\\bda-fk-selected-snapshot-11865\\\\src E:\\\\github\\\\BioactivityDataAcquisition\\\\.venv-win\\\\Scripts\\\\python.exe -m memory.tooling.refresh_all --root /e/github/bda-fk-selected-snapshot-11865 --output-root /tmp/tmp.pm5YeCi10a --rag-build-scope full --json",
+      "skip_reason": null,
+      "follow_up": null
+    },
+    {
+      "label": "memory-rag-manifest-validate",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 9.334,
+      "command": "capture_json_output /tmp/tmp.CFSP3yD2E5 env PYTHONPATH=/e/github/bda-fk-selected-snapshot-11865/src:/e/github/bda-fk-selected-snapshot-11865:E:\\\\github\\\\bda-fk-selected-snapshot-11865\\\\src E:\\\\github\\\\BioactivityDataAcquisition\\\\.venv-win\\\\Scripts\\\\python.exe -m memory.rag.validation --root /e/github/bda-fk-selected-snapshot-11865 --manifest-dir /tmp/tmp.pm5YeCi10a/rag/manifests --require-build-scope full --json",
+      "skip_reason": null,
+      "follow_up": null
+    },
+    {
+      "label": "memory-prune-dry-run",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 0.25,
+      "command": "env PYTHONPATH=/e/github/bda-fk-selected-snapshot-11865/src:/e/github/bda-fk-selected-snapshot-11865:E:\\\\github\\\\bda-fk-selected-snapshot-11865\\\\src E:\\\\github\\\\BioactivityDataAcquisition\\\\.venv-win\\\\Scripts\\\\python.exe -m memory.tooling.prune --json --check",
+      "skip_reason": null,
+      "follow_up": null
+    },
+    {
+      "label": "architecture-fail-fast",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 6.001,
+      "command": "env BIOETL_SKIP_PREFLIGHT=1 BIOETL_PREFLIGHT_DONE=1 bash scripts/engineering/dev/run_pytest.sh --skip-preflight --narrow tests/architecture/test_integration_vcr_policy.py::TestIntegrationVcrPolicy::test_every_test_surface_under_integration_and_e2e_is_in_tracked_inventory tests/architecture/test_integration_vcr_policy.py::TestIntegrationVcrPolicy::test_testing_guide_matches_current_fixture_governance_and_live_contract_policy tests/architecture/test_documentation_sync.py::test_no_legacy_repo_slug_in_active_docs_and_workflows tests/architecture/test_documentation_sync.py::test_no_legacy_contract_path_in_active_docs tests/architecture/test_generated_artifact_routing.py tests/architecture/test_scripts_catalog_governance.py::test_scripts_catalog_governance_check_passes -q -x --tb=short",
+      "skip_reason": null,
+      "follow_up": null
+    }
+  ],
+  "auto_fixed": [],
+  "failed_steps": [],
+  "memory_rag_validation": {
+    "build_scope": "full",
+    "chunk_count": 58309,
+    "eligible_source_count": 7497,
+    "generator_version": 2,
+    "git_head_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+    "indexed_source_count": 7497,
+    "issue_codes": [],
+    "missing_path_count": 0,
+    "ok": true,
+    "source_surface_sha256": "2c69c9cef1e7b61b4adae221eb011a8a8ff16fd5677ed6b93e5404e3f9339c23",
+    "stale_chunk_count": 0,
+    "working_tree_state": "clean"
+  }
+}

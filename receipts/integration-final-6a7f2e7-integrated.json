@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "code_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+  "actor": {
+    "identity": "/root",
+    "role": "implementation"
+  },
+  "actual_integrated_prs": [
+    {
+      "number": 11916,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/pull/11916",
+      "head_sha": "70a138def3af27830ea99c27d01dc0589d26071f",
+      "merge_sha": "45da427d46702769d87765d9f2616f1c26aa06ad",
+      "merged_at": "2026-10-03T21:25:49Z",
+      "base": "main"
+    },
+    {
+      "number": 11917,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/pull/11917",
+      "head_sha": "afa0338fe81112f70bc2dd6180b52265d5e3cd43",
+      "merge_sha": "367b51cf7d2a4af6de8a5aa937f33dc3ce4bc026",
+      "merged_at": "2026-10-03T21:36:55Z",
+      "base": "main"
+    },
+    {
+      "number": 11918,
+      "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/pull/11918",
+      "head_sha": "20024d66249008286402d2e9232d2f71677baeb2",
+      "merge_sha": "7d411a9d43a2d9b33f11966bad8edd92ead06632",
+      "merged_at": "2026-10-03T21:51:35Z",
+      "base": "main"
+    }
+  ],
+  "fulltree_receipt_sha256": "9ef74eb85e8835f164c684864eea6c3f20258024619599b929a38a3be9478172",
+  "qualification": "ACTUAL_GH_MERGES_AND_SOURCEBOUND_FULLTREE"
+}

@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "code_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+  "kind": "native",
+  "actor": {
+    "identity": "/root",
+    "role": "implementation"
+  },
+  "qualification": "ROOT_REVIEWED_IMPLEMENTATION_EVIDENCE",
+  "provenance": {
+    "type": "qualified_derivative",
+    "original_sha256": "464bce9993ef264949240fc9f429b1f08e6a5c589f843c29b3d363ae7e9fdeef",
+    "qualified_by": "/root",
+    "operation": "host-path substitution only; original values retained"
+  },
+  "terminal_source_guard": null,
+  "resume_contract_details": null,
+  "synthetic_fixture": false,
+  "payload": {
+    "source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+    "command": [
+      "<LOCAL_RUNTIME_ROOT>\\.venv-win\\Scripts\\python.exe",
+      "-m",
+      "bioetl",
+      "workflow",
+      "run",
+      "chembl_core",
+      "--limit",
+      "1000",
+      "--reconciliation-mode",
+      "selected-snapshot",
+      "--use-cached-bronze",
+      "--log-level",
+      "WARNING"
+    ],
+    "exit_code": 0,
+    "data_root": "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data",
+    "report_root": "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\reports",
+    "archive_root": "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\archive",
+    "runtime_source_id": "84de3685c62f3262f094321f4577dd6198a42bf535839fc03e9d024b4547b45f",
+    "inputs": [
+      {
+        "source": "<LOCAL_RUNTIME_ROOT>\\data\\output\\bronze\\chembl\\activity\\2026-10-01\\batch_2026-10-01_5dd460d2-8979-5644-b7b9-ee541e09cb56.jsonl.zst",
+        "destination": "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\bronze\\chembl\\activity\\2026-10-01\\batch_2026-10-01_5dd460d2-8979-5644-b7b9-ee541e09cb56.jsonl.zst",
+        "rows": 1000,
+        "sha256": "cec031ccc0fb8d49fb6c172521b2862a1ba80d40f38edc68a2141b6980f5da3c",
+        "metadata_sha256": "7aef4b142473a458bd07be33fabe0215c21c172930e4d5e4e1f9ce4d013a3902"
+      },
+      {
+        "source": "<LOCAL_RUNTIME_ROOT>\\data\\output\\bronze\\chembl\\assay\\2026-10-02\\batch_2026-10-02_70334dcd-b749-5a39-8736-75cbc196946f.jsonl.zst",
+        "destination": "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\bronze\\chembl\\assay\\2026-10-02\\batch_2026-10-02_70334dcd-b749-5a39-8736-75cbc196946f.jsonl.zst",
+        "rows": 1000,
+        "sha256": "1e052c10ada069a9746e6f2949ce9b29eeec0d7cde49aa365fd761c2d619bd16",
+        "metadata_sha256": "2d5a19e8e193c74ab822a01358ef4ad0a424f57753136c79e99cb7819c4d9a89"
+      },
+      {
+        "source": "<LOCAL_RUNTIME_ROOT>\\data\\output\\bronze\\chembl\\target\\2026-10-01\\batch_2026-10-01_f5c7dcdb-29a5-5a1a-9254-13cca0cba482.jsonl.zst",
+        "destination": "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\bronze\\chembl\\target\\2026-10-01\\batch_2026-10-01_f5c7dcdb-29a5-5a1a-9254-13cca0cba482.jsonl.zst",
+        "rows": 1000,
+        "sha256": "6c7742eb101a6c79759a13bd6d7b0748604f5f5b9038d321314f179332aab6f2",
+        "metadata_sha256": "afd3d1ed79fbe51be61bc6988e87c92a4f49937673b3a56719dd4e201f4e14e2"
+      },
+      {
+        "source": "<LOCAL_RUNTIME_ROOT>\\data\\output\\bronze\\chembl\\publication\\2026-10-02\\batch_2026-10-02_b5d811d5-db8d-5e65-9d1c-05c2c7273ca8.jsonl.zst",
+        "destination": "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\bronze\\chembl\\publication\\2026-10-02\\batch_2026-10-02_b5d811d5-db8d-5e65-9d1c-05c2c7273ca8.jsonl.zst",
+        "rows": 1000,
+        "sha256": "8b5df516fcee6fb72904fc323f0edc2e517455255f6362490efd7007108b8d2d",
+        "metadata_sha256": "2a98ee0f9ec1f81937f3419f20ab23fc75081605152ad003a495017b51426c12"
+      },
+      {
+        "source": "<LOCAL_RUNTIME_ROOT>\\data\\output\\bronze\\chembl\\molecule\\2026-10-01\\batch_2026-10-01_0bb2832f-c215-5fbf-ac7e-1b9625f16c13.jsonl.zst",
+        "destination": "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\bronze\\chembl\\molecule\\2026-10-01\\batch_2026-10-01_0bb2832f-c215-5fbf-ac7e-1b9625f16c13.jsonl.zst",
+        "rows": 1000,
+        "sha256": "f901481aca1c95b10395d2453e7764523cfd73b97d661a5e7c74132d9abf4e4a",
+        "metadata_sha256": "0de4ebc4429929bf3bd47365d0f0cef371fc6d7d6f73cdae73e8d2a231a1fb86"
+      }
+    ],
+    "process_thread_caps": {
+      "OPENBLAS_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1",
+      "POLARS_MAX_THREADS": "2",
+      "RAYON_NUM_THREADS": "2",
+      "TOKIO_WORKER_THREADS": "2",
+      "ARROW_IO_THREADS": "2"
+    },
+    "ended_source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+    "ended_source_dirty": false,
+    "source_stable": true
+  }
+}

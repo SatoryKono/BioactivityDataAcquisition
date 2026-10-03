@@ -1,0 +1,12 @@
+{
+  "source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+  "actor": "/root",
+  "source_before": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+  "source_after": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+  "dirty_before": false,
+  "dirty_after": false,
+  "exit_code": 0,
+  "actual_session_id": 27883,
+  "actual_terminal_chunk": "d93449",
+  "computed_terminal_sha256": "8782e718cee6d4c55398159543bb61c9f9069e7cb8f5eb1cbc28d1d7393d79e0"
+}

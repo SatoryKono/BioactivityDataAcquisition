@@ -1,0 +1,241 @@
+{
+  "schema_version": 1,
+  "code_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+  "kind": "resume",
+  "actor": {
+    "identity": "/root/delta_merge_diagnosis",
+    "role": "implementation"
+  },
+  "qualification": "ROOT_REVIEWED_IMPLEMENTATION_EVIDENCE",
+  "provenance": {
+    "type": "qualified_derivative",
+    "original_sha256": "d5a06bccf82d2c90df70f39de812cfab727f6b7b7c86c0d4c1a62ee311beb0e6",
+    "qualified_by": "/root/delta_merge_diagnosis",
+    "operation": "host-path substitution only; original values retained"
+  },
+  "terminal_source_guard": {
+    "original_sha256": "e0933864b78e43c47e03c08e3fbba723a5294154f13a7f5688d5cfc7f2b991a1",
+    "verified_source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+    "verified_exit_code": 0,
+    "field_bindings": {
+      "source_before": [
+        "source_before"
+      ],
+      "source_after": [
+        "source_after"
+      ],
+      "dirty_before": [
+        "dirty_before"
+      ],
+      "dirty_after": [
+        "dirty_after"
+      ],
+      "exit_code": [
+        "exit_code"
+      ]
+    }
+  },
+  "resume_contract_details": {
+    "contract": "completed_refusal_plus_partial_resume",
+    "historical_native_failure_sha256": "518866e8abfd8820607e5e99bbe0d3371dc63071e44af40808e3a098cf54347b",
+    "historical_computed_exit_code": 1,
+    "historical_outcomes": {
+      "baseline": 0,
+      "core": 0,
+      "fixture": 0,
+      "resume": 1
+    },
+    "partial_resume_evidence": {
+      "qualification_sha256": "4debb7985f7cfc0f28ef476f380738984632a64985eb7aa944acfbb42a66ab95",
+      "junit_sha256": "1d9d784c673ae5008c03fef15fe93bea54cb81d9a93cc886f4d18d15226fd2b6",
+      "actor": "/root/independent_closeout_evaluator",
+      "cases": [
+        {
+          "classname": "tests.unit.composition.test_workflow_cohort_lineage",
+          "name": "test_real_gold_expiry_descendant_and_partial_resume_keep_scoped_history[None]"
+        },
+        {
+          "classname": "tests.unit.composition.test_workflow_cohort_lineage",
+          "name": "test_real_gold_expiry_descendant_and_partial_resume_keep_scoped_history[external_version]"
+        }
+      ]
+    },
+    "claim": "completed CLI refused with exit1 and no mutation; partial resume verified separately by genuine tests"
+  },
+  "synthetic_fixture": false,
+  "payload": {
+    "source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+    "classification": "EXPECTED_REFUSAL_VERIFICATION_NOT_PARTIAL_RESUME",
+    "started_at": "2026-10-03T22:59:40.144972+00:00",
+    "actor": "/root/delta_merge_diagnosis",
+    "partial_resume_verified": false,
+    "receipts": [
+      {
+        "flow": "baseline",
+        "source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+        "run_id": "9e3a7e5c-5869-5ae9-a699-ff0c586f3028",
+        "before_versions": {
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\gold\\chembl\\assay": 2,
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\gold\\chembl\\publication": 50,
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\gold\\chembl\\target": 50,
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\quarantine": 3,
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\silver\\chembl\\assay": 0,
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\silver\\chembl\\publication": 98,
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\silver\\chembl\\target": 98
+        },
+        "before_byte_digests": {
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\control\\workflow_manifest\\3d09006b-0a4f-57d0-85a9-e5ab078b0b4d.json": "eb89bdba8097aa003bfe32ed4654de8cce6cd1f9682975b6c19ae435459eca93",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\control\\workflow_manifest\\_by_run_id\\9e3a7e5c-5869-5ae9-a699-ff0c586f3028.txt": "3df9585716b74e46c3cc46d94cac5825e07aed053414adc1511a2716333122c2",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\control\\workflow_state\\9e3a7e5c-5869-5ae9-a699-ff0c586f3028.json": "0079c022eba394cf96a9578cd3c9ca5d221c6777a494f02434a5e4b325d15660",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\control\\workflow_state\\_by_manifest_id\\3d09006b-0a4f-57d0-85a9-e5ab078b0b4d.txt": "a4ea2ddd89f6b857c2d832fc4df635130675884dca391f50c6cc18527a8f763e",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\control\\workflow_state\\_latest_by_workflow\\chembl_baseline.txt": "a4ea2ddd89f6b857c2d832fc4df635130675884dca391f50c6cc18527a8f763e",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\control\\workflow_transform_results\\9e3a7e5c-5869-5ae9-a699-ff0c586f3028\\reconcile_assay_publication_orphans\\result.json": "c7a70684299c1e4c35681b62a00a42a170e0f71c0dd59809bbad31ebaa366396",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\control\\workflow_transform_results\\9e3a7e5c-5869-5ae9-a699-ff0c586f3028\\reconcile_assay_target_orphans\\result.json": "806ebf5c5101fe7e0580f3ff0f4b00d4be9a8d93aa194e167d417562bc1ee272",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\control\\workflow_transform_results\\9e3a7e5c-5869-5ae9-a699-ff0c586f3028\\reconcile_publication_assay_orphans\\result.json": "eb2303b19547315b2cb6b6a9a3c126c1ad0272ed4980e4780e21a6943428a9f1",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\control\\workflow_transform_results\\9e3a7e5c-5869-5ae9-a699-ff0c586f3028\\reconcile_target_assay_orphans\\result.json": "822765d3fe5b95875cea74fcbc8cd747d7d3e2eb7accf49a916c3b746415fe08",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\reports\\workflow\\chembl_baseline\\9e3a7e5c-5869-5ae9-a699-ff0c586f3028\\workflow-run-report.json": "cd0fd3402b960cefbdbb5fcc9e2aea54d2ce4f3c5012e177d5554e667ef1ec82",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\reports\\workflow\\chembl_baseline\\9e3a7e5c-5869-5ae9-a699-ff0c586f3028\\workflow-run-report.md": "09d511048371d2aaa51e0a26492350efa83d56857aae11ab03b97f96ce7ea39e",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\reports\\workflow\\chembl_baseline\\_latest.json": "53e34248d3b41a3dc44294614b888239dfaec239cc7843ac41cb67727faf4dc6"
+        },
+        "original_report_sha256": "cd0fd3402b960cefbdbb5fcc9e2aea54d2ce4f3c5012e177d5554e667ef1ec82",
+        "immutable_original_path": "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\workflow-before-resume.json",
+        "expected_refusal": true,
+        "partial_resume_verified": false,
+        "command": [
+          "<LOCAL_RUNTIME_ROOT>\\.venv-win\\Scripts\\python.exe",
+          "-m",
+          "bioetl",
+          "workflow",
+          "run",
+          "chembl_baseline",
+          "--limit",
+          "1000",
+          "--reconciliation-mode",
+          "selected-snapshot",
+          "--use-cached-bronze",
+          "--resume-run-id",
+          "9e3a7e5c-5869-5ae9-a699-ff0c586f3028",
+          "--log-level",
+          "WARNING"
+        ],
+        "log_path": "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\completed-resume-refusal.log",
+        "started_at": "2026-10-03T22:59:44.116217+00:00",
+        "pid": 50984,
+        "actual_exit_code": 1,
+        "completed_at": "2026-10-03T23:01:35.742809+00:00",
+        "log_sha256": "a59f4967e8862a895a2b19b12dc9ee620b3c61e6a336c6367e31fe6490931ac4",
+        "expected_exception": "RuntimeError: Workflow 'chembl_baseline' already completed successfully; nothing to resume",
+        "actual_last_nonempty_line": "RuntimeError: Workflow 'chembl_baseline' already completed successfully; nothing to resume",
+        "after_versions": {
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\gold\\chembl\\assay": 2,
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\gold\\chembl\\publication": 50,
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\gold\\chembl\\target": 50,
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\quarantine": 3,
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\silver\\chembl\\assay": 0,
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\silver\\chembl\\publication": 98,
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\silver\\chembl\\target": 98
+        },
+        "after_byte_digests": {
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\control\\workflow_manifest\\3d09006b-0a4f-57d0-85a9-e5ab078b0b4d.json": "eb89bdba8097aa003bfe32ed4654de8cce6cd1f9682975b6c19ae435459eca93",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\control\\workflow_manifest\\_by_run_id\\9e3a7e5c-5869-5ae9-a699-ff0c586f3028.txt": "3df9585716b74e46c3cc46d94cac5825e07aed053414adc1511a2716333122c2",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\control\\workflow_state\\9e3a7e5c-5869-5ae9-a699-ff0c586f3028.json": "0079c022eba394cf96a9578cd3c9ca5d221c6777a494f02434a5e4b325d15660",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\control\\workflow_state\\_by_manifest_id\\3d09006b-0a4f-57d0-85a9-e5ab078b0b4d.txt": "a4ea2ddd89f6b857c2d832fc4df635130675884dca391f50c6cc18527a8f763e",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\control\\workflow_state\\_latest_by_workflow\\chembl_baseline.txt": "a4ea2ddd89f6b857c2d832fc4df635130675884dca391f50c6cc18527a8f763e",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\control\\workflow_transform_results\\9e3a7e5c-5869-5ae9-a699-ff0c586f3028\\reconcile_assay_publication_orphans\\result.json": "c7a70684299c1e4c35681b62a00a42a170e0f71c0dd59809bbad31ebaa366396",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\control\\workflow_transform_results\\9e3a7e5c-5869-5ae9-a699-ff0c586f3028\\reconcile_assay_target_orphans\\result.json": "806ebf5c5101fe7e0580f3ff0f4b00d4be9a8d93aa194e167d417562bc1ee272",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\control\\workflow_transform_results\\9e3a7e5c-5869-5ae9-a699-ff0c586f3028\\reconcile_publication_assay_orphans\\result.json": "eb2303b19547315b2cb6b6a9a3c126c1ad0272ed4980e4780e21a6943428a9f1",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data\\output\\control\\workflow_transform_results\\9e3a7e5c-5869-5ae9-a699-ff0c586f3028\\reconcile_target_assay_orphans\\result.json": "822765d3fe5b95875cea74fcbc8cd747d7d3e2eb7accf49a916c3b746415fe08",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\reports\\workflow\\chembl_baseline\\9e3a7e5c-5869-5ae9-a699-ff0c586f3028\\workflow-run-report.json": "cd0fd3402b960cefbdbb5fcc9e2aea54d2ce4f3c5012e177d5554e667ef1ec82",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\reports\\workflow\\chembl_baseline\\9e3a7e5c-5869-5ae9-a699-ff0c586f3028\\workflow-run-report.md": "09d511048371d2aaa51e0a26492350efa83d56857aae11ab03b97f96ce7ea39e",
+          "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\reports\\workflow\\chembl_baseline\\_latest.json": "53e34248d3b41a3dc44294614b888239dfaec239cc7843ac41cb67727faf4dc6"
+        },
+        "delta_versions_unchanged": true,
+        "workflow_reports_state_transforms_membership_bytes_unchanged": true,
+        "immutable_original_unchanged": true,
+        "status": "PASS_EXPECTED_REFUSAL_NO_MUTATION"
+      },
+      {
+        "flow": "core",
+        "source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+        "run_id": "9f942841-146c-5651-8a40-81e70ca8b8be",
+        "before_versions": {
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\gold\\chembl\\activity": 0,
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\gold\\chembl\\assay": 1,
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\gold\\chembl\\target": 49,
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\quarantine": 1,
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\silver\\chembl\\activity": 0,
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\silver\\chembl\\assay": 0,
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\silver\\chembl\\target": 98
+        },
+        "before_byte_digests": {
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\control\\workflow_manifest\\2a1b9502-3247-5792-8fe0-f8024cbc4bdd.json": "c434b9268635a42542b03f3da2ec5692aba6fe129e0d07f6081a1c4365e6e115",
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\control\\workflow_manifest\\_by_run_id\\9f942841-146c-5651-8a40-81e70ca8b8be.txt": "323f97fa56371afc8b1cf715476748169e0c21c6ba02fad930b383dd3dd06a15",
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\control\\workflow_state\\9f942841-146c-5651-8a40-81e70ca8b8be.json": "c5975f7c5e5f958bd343783f20be0ce146f3b8af7d8e842d59ae36f721a655d1",
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\control\\workflow_state\\_by_manifest_id\\2a1b9502-3247-5792-8fe0-f8024cbc4bdd.txt": "a3614cce25c81e616a1cf32efab75bf8e557bae7f633b59ecf0dda5083a2b3cb",
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\control\\workflow_state\\_latest_by_workflow\\chembl_core.txt": "a3614cce25c81e616a1cf32efab75bf8e557bae7f633b59ecf0dda5083a2b3cb",
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\control\\workflow_transform_results\\9f942841-146c-5651-8a40-81e70ca8b8be\\reconcile_assay_target_orphans\\result.json": "298db17f22ae1d1e99fd1da73c3e6d39b2a3a25c7575e5b610341703b8bf6b55",
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\reports\\workflow\\chembl_core\\9f942841-146c-5651-8a40-81e70ca8b8be\\workflow-run-report.json": "945f9e6f6b858435d4f3096b5a3d2e6afd2508dec8494c7fe69590ddf02bbc7e",
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\reports\\workflow\\chembl_core\\9f942841-146c-5651-8a40-81e70ca8b8be\\workflow-run-report.md": "2fa0adbd536caf67cad65e075f97ec81b7345c9249311fcde84b677a539ed4ae",
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\reports\\workflow\\chembl_core\\_latest.json": "4a93c60b97246d39b006a64e6c7a582ee22b4b899339371b75b71c48a388ef4d"
+        },
+        "original_report_sha256": "945f9e6f6b858435d4f3096b5a3d2e6afd2508dec8494c7fe69590ddf02bbc7e",
+        "immutable_original_path": "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\workflow-before-resume.json",
+        "expected_refusal": true,
+        "partial_resume_verified": false,
+        "command": [
+          "<LOCAL_RUNTIME_ROOT>\\.venv-win\\Scripts\\python.exe",
+          "-m",
+          "bioetl",
+          "workflow",
+          "run",
+          "chembl_core",
+          "--limit",
+          "1000",
+          "--reconciliation-mode",
+          "selected-snapshot",
+          "--use-cached-bronze",
+          "--resume-run-id",
+          "9f942841-146c-5651-8a40-81e70ca8b8be",
+          "--log-level",
+          "WARNING"
+        ],
+        "log_path": "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\completed-resume-refusal.log",
+        "started_at": "2026-10-03T23:01:37.421176+00:00",
+        "pid": 10284,
+        "actual_exit_code": 1,
+        "completed_at": "2026-10-03T23:02:37.174576+00:00",
+        "log_sha256": "4dabe12b44ea83018aec8f857357be2af1ce074bd1fdd287f33b0d4e39dbfa79",
+        "expected_exception": "RuntimeError: Workflow 'chembl_core' already completed successfully; nothing to resume",
+        "actual_last_nonempty_line": "RuntimeError: Workflow 'chembl_core' already completed successfully; nothing to resume",
+        "after_versions": {
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\gold\\chembl\\activity": 0,
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\gold\\chembl\\assay": 1,
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\gold\\chembl\\target": 49,
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\quarantine": 1,
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\silver\\chembl\\activity": 0,
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\silver\\chembl\\assay": 0,
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\silver\\chembl\\target": 98
+        },
+        "after_byte_digests": {
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\control\\workflow_manifest\\2a1b9502-3247-5792-8fe0-f8024cbc4bdd.json": "c434b9268635a42542b03f3da2ec5692aba6fe129e0d07f6081a1c4365e6e115",
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\control\\workflow_manifest\\_by_run_id\\9f942841-146c-5651-8a40-81e70ca8b8be.txt": "323f97fa56371afc8b1cf715476748169e0c21c6ba02fad930b383dd3dd06a15",
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\control\\workflow_state\\9f942841-146c-5651-8a40-81e70ca8b8be.json": "c5975f7c5e5f958bd343783f20be0ce146f3b8af7d8e842d59ae36f721a655d1",
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\control\\workflow_state\\_by_manifest_id\\2a1b9502-3247-5792-8fe0-f8024cbc4bdd.txt": "a3614cce25c81e616a1cf32efab75bf8e557bae7f633b59ecf0dda5083a2b3cb",
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\control\\workflow_state\\_latest_by_workflow\\chembl_core.txt": "a3614cce25c81e616a1cf32efab75bf8e557bae7f633b59ecf0dda5083a2b3cb",
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data\\output\\control\\workflow_transform_results\\9f942841-146c-5651-8a40-81e70ca8b8be\\reconcile_assay_target_orphans\\result.json": "298db17f22ae1d1e99fd1da73c3e6d39b2a3a25c7575e5b610341703b8bf6b55",
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\reports\\workflow\\chembl_core\\9f942841-146c-5651-8a40-81e70ca8b8be\\workflow-run-report.json": "945f9e6f6b858435d4f3096b5a3d2e6afd2508dec8494c7fe69590ddf02bbc7e",
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\reports\\workflow\\chembl_core\\9f942841-146c-5651-8a40-81e70ca8b8be\\workflow-run-report.md": "2fa0adbd536caf67cad65e075f97ec81b7345c9249311fcde84b677a539ed4ae",
+          "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\reports\\workflow\\chembl_core\\_latest.json": "4a93c60b97246d39b006a64e6c7a582ee22b4b899339371b75b71c48a388ef4d"
+        },
+        "delta_versions_unchanged": true,
+        "workflow_reports_state_transforms_membership_bytes_unchanged": true,
+        "immutable_original_unchanged": true,
+        "status": "PASS_EXPECTED_REFUSAL_NO_MUTATION"
+      }
+    ],
+    "source_stable": true,
+    "tracked_source_clean": true,
+    "status": "PASS_EXPECTED_REFUSAL_NO_MUTATION",
+    "completed_at": "2026-10-03T23:02:37.344139+00:00"
+  }
+}

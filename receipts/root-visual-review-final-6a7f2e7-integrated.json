@@ -1,0 +1,127 @@
+{
+  "source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+  "actor": "/root",
+  "status": "PASS",
+  "scope": "Nine actual original PNGs reviewed for RF-005 selected-snapshot saved semantics; not a full dashboard release or accessibility audit",
+  "actual_outer_session_id": 27883,
+  "actual_outer_terminal_chunk": "d93449",
+  "actual_outer_exit_code": 0,
+  "continuation_sha256": "8782e718cee6d4c55398159543bb61c9f9069e7cb8f5eb1cbc28d1d7393d79e0",
+  "views": [
+    {
+      "view_id": "baseline/overview",
+      "relative_path": "baseline-final-6a7f2e7-integrated/browser-viewport/bioetl-overview-v2.png",
+      "sha256": "c621220c3bb759afb3a9502ba493634669c23fe56f29527c7d9673f33ab92c60",
+      "viewed_with": "view_image(detail=original)",
+      "viewport": [
+        1920,
+        1800
+      ],
+      "status": "PASS_RENDER_AND_EXPECTED_SAVED_SEMANTICS"
+    },
+    {
+      "view_id": "baseline/saved-evidence-replay",
+      "relative_path": "baseline-final-6a7f2e7-integrated/browser-viewport/bioetl-control-plane-v1.png",
+      "sha256": "75ee4d4eca22ba0a2f79953b0b28afb5bba44f56e6ec54fa9d921db0c643bdad",
+      "viewed_with": "view_image(detail=original)",
+      "viewport": [
+        1920,
+        1800
+      ],
+      "status": "PASS_RENDER_AND_EXPECTED_SAVED_SEMANTICS"
+    },
+    {
+      "view_id": "baseline/run-explorer",
+      "relative_path": "baseline-final-6a7f2e7-integrated/browser-viewport/bioetl-run-explorer-v1.png",
+      "sha256": "551885676f0685930742ad190e2140f9884b8c3cf50d829e2f236cb88a8e61ac",
+      "viewed_with": "view_image(detail=original)",
+      "viewport": [
+        1920,
+        1800
+      ],
+      "status": "PASS_RENDER_AND_EXPECTED_SAVED_SEMANTICS"
+    },
+    {
+      "view_id": "core/overview",
+      "relative_path": "core-final-6a7f2e7-integrated/browser-viewport/bioetl-overview-v2.png",
+      "sha256": "e93c57b72ff172d1bf8d57f5477d2cf4677732602467ac3a2e1ab804e247f94b",
+      "viewed_with": "view_image(detail=original)",
+      "viewport": [
+        1920,
+        1800
+      ],
+      "status": "PASS_RENDER_AND_EXPECTED_SAVED_SEMANTICS"
+    },
+    {
+      "view_id": "core/saved-evidence-replay",
+      "relative_path": "core-final-6a7f2e7-integrated/browser-viewport/bioetl-control-plane-v1.png",
+      "sha256": "ab7565dc083cb1e43990aa7faeeff50dddc8b0445791fcbf8471da7186f8a1fe",
+      "viewed_with": "view_image(detail=original)",
+      "viewport": [
+        1920,
+        1800
+      ],
+      "status": "PASS_RENDER_AND_EXPECTED_SAVED_SEMANTICS"
+    },
+    {
+      "view_id": "core/run-explorer",
+      "relative_path": "core-final-6a7f2e7-integrated/browser-viewport/bioetl-run-explorer-v1.png",
+      "sha256": "09662295224cfedf88418b59323e8fde47ccbbccea669034f09fce9d13278a92",
+      "viewed_with": "view_image(detail=original)",
+      "viewport": [
+        1920,
+        1800
+      ],
+      "status": "PASS_RENDER_AND_EXPECTED_SAVED_SEMANTICS"
+    },
+    {
+      "view_id": "fixture/overview",
+      "relative_path": "total-expiry-fixture-final-6a7f2e7-integrated/browser-viewport-all-marker/bioetl-overview-v2.png",
+      "sha256": "2ff2c21e4ea4f2c06cfc5937a2a9a9bd2534e170b9e60d5a5ec59728a9049cf7",
+      "viewed_with": "view_image(detail=original)",
+      "viewport": [
+        1920,
+        1800
+      ],
+      "status": "PASS_RENDER_AND_EXPECTED_SAVED_SEMANTICS"
+    },
+    {
+      "view_id": "fixture/saved-evidence-replay",
+      "relative_path": "total-expiry-fixture-final-6a7f2e7-integrated/browser-viewport-all-marker/bioetl-control-plane-v1.png",
+      "sha256": "c6475daeb3489f3e86fd66fad7f5ce1111c8d0e73dbccdb49ecc2e396bf58cd5",
+      "viewed_with": "view_image(detail=original)",
+      "viewport": [
+        1920,
+        1800
+      ],
+      "status": "PASS_RENDER_AND_EXPECTED_SAVED_SEMANTICS"
+    },
+    {
+      "view_id": "fixture/run-explorer",
+      "relative_path": "total-expiry-fixture-final-6a7f2e7-integrated/browser-viewport-all-marker/bioetl-run-explorer-v1.png",
+      "sha256": "b09b463e0f224b9454ddc01b90963c7362b9b67ba7ab266d1fd72b5bfed95d20",
+      "viewed_with": "view_image(detail=original)",
+      "viewport": [
+        1920,
+        1800
+      ],
+      "status": "PASS_RENDER_AND_EXPECTED_SAVED_SEMANTICS"
+    }
+  ],
+  "observed_semantics": {
+    "baseline": "SUCCESS; Overview OK; exact pipeline replay READY. Four FK rows preserve selected-snapshot, unproven, limit1000, current_run, original loaded983 plus scoped retained550 then5.",
+    "core": "SUCCESS; Overview OK; exact pipeline replay READY. FK expired433/983; retained550; mode selected-snapshot and completeness unproven.",
+    "fixture": "Synthetic total expiry2/2 retained0; workflow SUCCESS. Overview INCOMPLETE and Replay INSUFFICIENT remain visible; Saved Trust ERROR is caused by absent native manifest and synthetic gold2/silver0 accounting, not a claim of native complete evidence."
+  },
+  "observed_qualifiers": [
+    "Run Explorer selectors show STALE catalog on all three cases; successful selected rows remain visible. Separate read-only catalog diagnosis required before final issue qualification.",
+    "Native leaf replay evidence retains Resume Contract WARN and Checkpoint File UNKNOWN; composite fields N/A. READY describes supported exact leaf replay, not completed-workflow resume or composite replay.",
+    "Fixture provider/data-quality/data-validation evidence UNKNOWN/INCOMPLETE is expected for explicitly synthetic fixture; never qualified as provider acceptance or replay READY.",
+    "Long workflow-step labels may truncate at right of the FK table; mode, scope, limit, snapshot, unproven interpretation and result remain visible."
+  ],
+  "historical_failed_acceptance": {
+    "session_id": 45258,
+    "actual_exit_code": 1,
+    "reason": "Helper wrongly expected success when resuming completed workflow; original receipts preserved"
+  }
+}

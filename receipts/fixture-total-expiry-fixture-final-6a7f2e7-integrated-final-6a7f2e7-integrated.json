@@ -1,0 +1,1091 @@
+{
+  "schema_version": 1,
+  "code_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+  "kind": "fixture",
+  "actor": {
+    "identity": "/root",
+    "role": "implementation"
+  },
+  "qualification": "ROOT_REVIEWED_IMPLEMENTATION_EVIDENCE",
+  "provenance": {
+    "type": "qualified_derivative",
+    "original_sha256": "af77580f701260a5ef2ed5afeee4137251cf17bca89c52298de641c15484bea3",
+    "qualified_by": "/root",
+    "operation": "host-path substitution only; original values retained"
+  },
+  "terminal_source_guard": {
+    "original_sha256": "518866e8abfd8820607e5e99bbe0d3371dc63071e44af40808e3a098cf54347b",
+    "verified_source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+    "verified_exit_code": 0,
+    "field_bindings": {
+      "source_before": [
+        "steps",
+        2,
+        "source_before"
+      ],
+      "source_after": [
+        "steps",
+        2,
+        "source_after"
+      ],
+      "dirty_before": [
+        "steps",
+        2,
+        "dirty_before"
+      ],
+      "dirty_after": [
+        "steps",
+        2,
+        "dirty_after"
+      ],
+      "exit_code": [
+        "steps",
+        2,
+        "exit_code"
+      ]
+    }
+  },
+  "resume_contract_details": null,
+  "synthetic_fixture": true,
+  "payload": {
+    "archive_root": "<EVIDENCE_ROOT>\\total-expiry-fixture-final-6a7f2e7-integrated\\archive",
+    "artifact": {
+      "path": "<EVIDENCE_ROOT>\\total-expiry-fixture-final-6a7f2e7-integrated\\data\\workflow-transforms\\f40f69b8-22bb-41af-be57-3bf16d8bf2a6\\reconcile_fixture_total_expiry\\result.json",
+      "sha256": "98d721b81197de13d11d99e7c050e70902eb705969f09af54689d5be7ee3e303",
+      "size_bytes": 2889,
+      "type": "workflow_transform_result"
+    },
+    "builder_sha256": "e50dd29377ff7afbc353790cbb990eb7f8a7c2ba8911e0d38d63b0281617ce66",
+    "child_report": "<EVIDENCE_ROOT>\\total-expiry-fixture-final-6a7f2e7-integrated\\reports\\pipeline\\fixture_source\\ffe1e8c7-cf85-4131-9347-17c488224558\\pipeline-run-report.json",
+    "delta_after": [
+      {
+        "_is_current": true,
+        "_run_id": "unrelated",
+        "_valid_to": "",
+        "fk": "missing-other",
+        "id": "other"
+      },
+      {
+        "_is_current": false,
+        "_run_id": "unrelated",
+        "_valid_to": "",
+        "fk": "old",
+        "id": "a"
+      },
+      {
+        "_is_current": false,
+        "_run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+        "_valid_to": "2026-10-03T22:16:24.127645+00:00",
+        "fk": "missing-a",
+        "id": "a"
+      },
+      {
+        "_is_current": false,
+        "_run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+        "_valid_to": "2026-10-03T22:16:24.127645+00:00",
+        "fk": "missing-b",
+        "id": "b"
+      }
+    ],
+    "delta_before": [
+      {
+        "_is_current": true,
+        "_run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+        "_valid_to": "",
+        "fk": "missing-a",
+        "id": "a"
+      },
+      {
+        "_is_current": true,
+        "_run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+        "_valid_to": "",
+        "fk": "missing-b",
+        "id": "b"
+      },
+      {
+        "_is_current": true,
+        "_run_id": "unrelated",
+        "_valid_to": "",
+        "fk": "missing-other",
+        "id": "other"
+      },
+      {
+        "_is_current": false,
+        "_run_id": "unrelated",
+        "_valid_to": "",
+        "fk": "old",
+        "id": "a"
+      }
+    ],
+    "delta_post_version": 1,
+    "destructive_commits": [
+      {
+        "details": {
+          "action": "delete_orphans",
+          "artifact_refs": [
+            {
+              "path": "<EVIDENCE_ROOT>\\total-expiry-fixture-final-6a7f2e7-integrated\\data\\workflow-transforms\\f40f69b8-22bb-41af-be57-3bf16d8bf2a6\\reconcile_fixture_total_expiry\\result.json",
+              "sha256": "98d721b81197de13d11d99e7c050e70902eb705969f09af54689d5be7ee3e303",
+              "size_bytes": 2889,
+              "type": "workflow_transform_result"
+            }
+          ],
+          "closed_cohort_verified": false,
+          "dry_run": false,
+          "fingerprint": "aa676497c833c49661e247df37b51ec3ee19e17c623f695d0385f86351b2444b",
+          "input_snapshots": {
+            "gold:fixture.reference": {
+              "ancestor_versions": [],
+              "limit": 1000,
+              "producer_pipeline": "fixture_reference",
+              "run_ids": [
+                "775abda9-00e2-4c7b-8d68-c74449f309da"
+              ],
+              "table_id": "5d8425dd-1397-4f3e-a971-9f109574b3a5",
+              "version": 0
+            },
+            "gold:fixture.source": {
+              "ancestor_versions": [],
+              "limit": 1000,
+              "producer_pipeline": "fixture_source",
+              "run_ids": [
+                "ffe1e8c7-cf85-4131-9347-17c488224558"
+              ],
+              "table_id": "7a6a1bf6-05df-4151-9d37-19793c9b1d69",
+              "version": 0
+            }
+          },
+          "manifest_id": "bfcde707-4c84-4522-86ff-411f84b6726f",
+          "mutated": true,
+          "mutation_layer": "gold",
+          "mutation_mode": "gold_scd2_expiry",
+          "nulls_equal": false,
+          "orphan_rows_deleted": 2,
+          "quarantine_batch_id": "80c04cc4-faed-5c7d-a6a5-b56ca5243d61",
+          "quarantine_error_code": "FILTERED_OUT_GOLD",
+          "quarantine_rows_written": 2,
+          "reconciliation_mode": "selected-snapshot",
+          "reference_completeness": "unproven",
+          "reference_key": "id",
+          "reference_keys": [
+            "id"
+          ],
+          "reference_layer": "gold",
+          "reference_scope": "current_run",
+          "reference_table": "fixture.reference",
+          "retained_rows": 0,
+          "scanned_rows": 2,
+          "selected_snapshots": {
+            "gold:fixture.reference": {
+              "ancestor_versions": [],
+              "limit": 1000,
+              "producer_pipeline": "fixture_reference",
+              "run_ids": [
+                "775abda9-00e2-4c7b-8d68-c74449f309da"
+              ],
+              "table_id": "5d8425dd-1397-4f3e-a971-9f109574b3a5",
+              "version": 0
+            },
+            "gold:fixture.source": {
+              "ancestor_versions": [
+                0
+              ],
+              "limit": 1000,
+              "producer_pipeline": "fixture_source",
+              "run_ids": [
+                "ffe1e8c7-cf85-4131-9347-17c488224558"
+              ],
+              "table_id": "7a6a1bf6-05df-4151-9d37-19793c9b1d69",
+              "version": 1
+            }
+          },
+          "source_key": "fk",
+          "source_keys": [
+            "fk"
+          ],
+          "source_layer": "gold",
+          "source_run_ids": [
+            "f40f69b8-22bb-41af-be57-3bf16d8bf2a6",
+            "ffe1e8c7-cf85-4131-9347-17c488224558",
+            "775abda9-00e2-4c7b-8d68-c74449f309da"
+          ],
+          "source_scope": "current_run",
+          "source_snapshot": {
+            "current_rows": 1,
+            "physical_rows": 4,
+            "version": 1
+          },
+          "source_table": "fixture.source",
+          "step_id": "reconcile_fixture_total_expiry",
+          "transform_name": "reconcile_foreign_keys",
+          "unproven_unmatched_rows": 0,
+          "workflow_name": "fk_total_expiry_fixture",
+          "workflow_run_id": "f40f69b8-22bb-41af-be57-3bf16d8bf2a6",
+          "would_mutate": false
+        },
+        "fingerprint": "aa676497c833c49661e247df37b51ec3ee19e17c623f695d0385f86351b2444b",
+        "step_id": "reconcile_fixture_total_expiry"
+      }
+    ],
+    "fixture": true,
+    "pipeline": "fixture_source",
+    "projection": {
+      "checks_verdict": "INCOMPLETE",
+      "completed_at": "2026-10-03T22:16:24.195946+00:00",
+      "diagnostic_blockers": [
+        {
+          "duration_seconds": null,
+          "reason": "stage_balance_failing",
+          "records_in": 0,
+          "records_out": 2,
+          "source": "report.funnel",
+          "stage_id": "gold",
+          "state": "FAILING"
+        }
+      ],
+      "diagnostic_coverage": "INCOMPLETE",
+      "domains": [
+        {
+          "action": "Inspect saved evidence",
+          "applicable": true,
+          "checks_verdict": "INCOMPLETE",
+          "completed_at": "2026-10-03T22:16:24.195946+00:00",
+          "display_verdict": "OK",
+          "domain": "Runtime",
+          "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+          "evidence_availability": "AVAILABLE",
+          "evidence_completeness": "INCOMPLETE",
+          "evidence_ref": "#/identity",
+          "execution_state": "SUCCESS",
+          "heartbeat_now": "NOT EVALUATED",
+          "pipeline": "fixture_source",
+          "reason": "execution_success",
+          "reason_display": "execution_success",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "run_verdict": "INCOMPLETE",
+          "started_at": "2026-10-03T22:16:18.352311+00:00",
+          "verdict": "OK",
+          "workflow_id": "fk_total_expiry_fixture"
+        },
+        {
+          "action": "Inspect reason and evidence",
+          "applicable": true,
+          "checks_verdict": "INCOMPLETE",
+          "completed_at": "2026-10-03T22:16:24.195946+00:00",
+          "display_verdict": "ERROR",
+          "domain": "Control Plane",
+          "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+          "evidence_availability": "AVAILABLE",
+          "evidence_completeness": "INCOMPLETE",
+          "evidence_ref": "#/observations/Control Plane",
+          "execution_state": "SUCCESS",
+          "heartbeat_now": "NOT EVALUATED",
+          "pipeline": "fixture_source",
+          "reason": "run_observation_missing",
+          "reason_display": "Result not recorded\nSaved report accounting conflict: gold_vs_silver_status=FAILING, delta=-2. Saved Trust verdict: INCOMPLETE; inspect report and ledger.",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "run_verdict": "INCOMPLETE",
+          "started_at": "2026-10-03T22:16:18.352311+00:00",
+          "verdict": "INCOMPLETE",
+          "workflow_id": "fk_total_expiry_fixture"
+        },
+        {
+          "action": "Inspect saved evidence",
+          "applicable": true,
+          "checks_verdict": "INCOMPLETE",
+          "completed_at": "2026-10-03T22:16:24.195946+00:00",
+          "display_verdict": "OK",
+          "domain": "Workflow",
+          "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+          "evidence_availability": "AVAILABLE",
+          "evidence_completeness": "INCOMPLETE",
+          "evidence_ref": "#/observations/Workflow",
+          "execution_state": "SUCCESS",
+          "heartbeat_now": "NOT EVALUATED",
+          "pipeline": "fixture_source",
+          "reason": "workflow_success",
+          "reason_display": "workflow_success",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "run_verdict": "INCOMPLETE",
+          "started_at": "2026-10-03T22:16:18.352311+00:00",
+          "verdict": "OK",
+          "workflow_id": "fk_total_expiry_fixture"
+        },
+        {
+          "action": "Inspect reason and evidence",
+          "applicable": true,
+          "checks_verdict": "INCOMPLETE",
+          "completed_at": "2026-10-03T22:16:24.195946+00:00",
+          "display_verdict": "INCOMPLETE",
+          "domain": "Data Quality",
+          "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+          "evidence_availability": "AVAILABLE",
+          "evidence_completeness": "INCOMPLETE",
+          "evidence_ref": "#/observations/Data Quality",
+          "execution_state": "SUCCESS",
+          "heartbeat_now": "NOT EVALUATED",
+          "pipeline": "fixture_source",
+          "reason": "run_observation_missing",
+          "reason_display": "Result not recorded",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "run_verdict": "INCOMPLETE",
+          "started_at": "2026-10-03T22:16:18.352311+00:00",
+          "verdict": "INCOMPLETE",
+          "workflow_id": "fk_total_expiry_fixture"
+        },
+        {
+          "action": "Inspect reason and evidence",
+          "applicable": true,
+          "checks_verdict": "INCOMPLETE",
+          "completed_at": "2026-10-03T22:16:24.195946+00:00",
+          "display_verdict": "INCOMPLETE",
+          "domain": "Provider",
+          "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+          "evidence_availability": "AVAILABLE",
+          "evidence_completeness": "INCOMPLETE",
+          "evidence_ref": "#/observations/Provider",
+          "execution_state": "SUCCESS",
+          "heartbeat_now": "NOT EVALUATED",
+          "pipeline": "fixture_source",
+          "reason": "run_observation_missing",
+          "reason_display": "Result not recorded",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "run_verdict": "INCOMPLETE",
+          "started_at": "2026-10-03T22:16:18.352311+00:00",
+          "verdict": "INCOMPLETE",
+          "workflow_id": "fk_total_expiry_fixture"
+        },
+        {
+          "action": "Inspect reason and evidence",
+          "applicable": true,
+          "checks_verdict": "INCOMPLETE",
+          "completed_at": "2026-10-03T22:16:24.195946+00:00",
+          "display_verdict": "INCOMPLETE",
+          "domain": "Data Validation",
+          "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+          "evidence_availability": "AVAILABLE",
+          "evidence_completeness": "INCOMPLETE",
+          "evidence_ref": "#/observations/Data Validation",
+          "execution_state": "SUCCESS",
+          "heartbeat_now": "NOT EVALUATED",
+          "pipeline": "fixture_source",
+          "reason": "run_observation_missing",
+          "reason_display": "Result not recorded",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "run_verdict": "INCOMPLETE",
+          "started_at": "2026-10-03T22:16:18.352311+00:00",
+          "verdict": "INCOMPLETE",
+          "workflow_id": "fk_total_expiry_fixture"
+        }
+      ],
+      "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+      "evidence_availability": "AVAILABLE",
+      "evidence_completeness": "INCOMPLETE",
+      "execution_state": "SUCCESS",
+      "heartbeat_now": "NOT EVALUATED",
+      "pipeline": "fixture_source",
+      "presentation_domains": [
+        {
+          "action": "Inspect saved evidence",
+          "action_path": "api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=fixture_source&run_id=ffe1e8c7-cf85-4131-9347-17c488224558&format=pipeline_run_report_json",
+          "applicable": true,
+          "checks_verdict": "INCOMPLETE",
+          "completed_at": "2026-10-03T22:16:24.195946+00:00",
+          "display_verdict": "OK",
+          "domain": "Runtime",
+          "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+          "evidence_availability": "AVAILABLE",
+          "evidence_completeness": "INCOMPLETE",
+          "evidence_ref": "#/identity",
+          "execution_state": "SUCCESS",
+          "heartbeat_now": "NOT EVALUATED",
+          "pipeline": "fixture_source",
+          "reason": "execution_success",
+          "reason_display": "execution_success",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "run_verdict": "INCOMPLETE",
+          "started_at": "2026-10-03T22:16:18.352311+00:00",
+          "verdict": "OK",
+          "workflow_id": "fk_total_expiry_fixture"
+        },
+        {
+          "action": "Inspect reason and evidence",
+          "action_path": "api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=fixture_source&run_id=ffe1e8c7-cf85-4131-9347-17c488224558&format=pipeline_run_report_json",
+          "applicable": true,
+          "checks_verdict": "INCOMPLETE",
+          "completed_at": "2026-10-03T22:16:24.195946+00:00",
+          "display_verdict": "ERROR",
+          "domain": "Control Plane",
+          "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+          "evidence_availability": "AVAILABLE",
+          "evidence_completeness": "INCOMPLETE",
+          "evidence_ref": "#/observations/Control Plane",
+          "execution_state": "SUCCESS",
+          "heartbeat_now": "NOT EVALUATED",
+          "pipeline": "fixture_source",
+          "reason": "run_observation_missing",
+          "reason_display": "Result not recorded\nSaved report accounting conflict: gold_vs_silver_status=FAILING, delta=-2. Saved Trust verdict: INCOMPLETE; inspect report and ledger.",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "run_verdict": "INCOMPLETE",
+          "started_at": "2026-10-03T22:16:18.352311+00:00",
+          "verdict": "INCOMPLETE",
+          "workflow_id": "fk_total_expiry_fixture"
+        },
+        {
+          "action": "Inspect saved evidence",
+          "action_path": "api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=fixture_source&run_id=ffe1e8c7-cf85-4131-9347-17c488224558&format=pipeline_run_report_json",
+          "applicable": true,
+          "checks_verdict": "INCOMPLETE",
+          "completed_at": "2026-10-03T22:16:24.195946+00:00",
+          "display_verdict": "OK",
+          "domain": "Workflow",
+          "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+          "evidence_availability": "AVAILABLE",
+          "evidence_completeness": "INCOMPLETE",
+          "evidence_ref": "#/observations/Workflow",
+          "execution_state": "SUCCESS",
+          "heartbeat_now": "NOT EVALUATED",
+          "pipeline": "fixture_source",
+          "reason": "workflow_success",
+          "reason_display": "workflow_success",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "run_verdict": "INCOMPLETE",
+          "started_at": "2026-10-03T22:16:18.352311+00:00",
+          "verdict": "OK",
+          "workflow_id": "fk_total_expiry_fixture"
+        },
+        {
+          "action": "Inspect reason and evidence",
+          "action_path": "api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=fixture_source&run_id=ffe1e8c7-cf85-4131-9347-17c488224558&format=pipeline_run_report_json",
+          "applicable": true,
+          "checks_verdict": "INCOMPLETE",
+          "completed_at": "2026-10-03T22:16:24.195946+00:00",
+          "display_verdict": "INCOMPLETE",
+          "domain": "Data Quality",
+          "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+          "evidence_availability": "AVAILABLE",
+          "evidence_completeness": "INCOMPLETE",
+          "evidence_ref": "#/observations/Data Quality",
+          "execution_state": "SUCCESS",
+          "heartbeat_now": "NOT EVALUATED",
+          "pipeline": "fixture_source",
+          "reason": "run_observation_missing",
+          "reason_display": "Result not recorded",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "run_verdict": "INCOMPLETE",
+          "started_at": "2026-10-03T22:16:18.352311+00:00",
+          "verdict": "INCOMPLETE",
+          "workflow_id": "fk_total_expiry_fixture"
+        },
+        {
+          "action": "Inspect reason and evidence",
+          "action_path": "api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=fixture_source&run_id=ffe1e8c7-cf85-4131-9347-17c488224558&format=pipeline_run_report_json",
+          "applicable": true,
+          "checks_verdict": "INCOMPLETE",
+          "completed_at": "2026-10-03T22:16:24.195946+00:00",
+          "display_verdict": "INCOMPLETE",
+          "domain": "Provider",
+          "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+          "evidence_availability": "AVAILABLE",
+          "evidence_completeness": "INCOMPLETE",
+          "evidence_ref": "#/observations/Provider",
+          "execution_state": "SUCCESS",
+          "heartbeat_now": "NOT EVALUATED",
+          "pipeline": "fixture_source",
+          "reason": "run_observation_missing",
+          "reason_display": "Result not recorded",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "run_verdict": "INCOMPLETE",
+          "started_at": "2026-10-03T22:16:18.352311+00:00",
+          "verdict": "INCOMPLETE",
+          "workflow_id": "fk_total_expiry_fixture"
+        },
+        {
+          "action": "Inspect reason and evidence",
+          "action_path": "api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=fixture_source&run_id=ffe1e8c7-cf85-4131-9347-17c488224558&format=pipeline_run_report_json",
+          "applicable": true,
+          "checks_verdict": "INCOMPLETE",
+          "completed_at": "2026-10-03T22:16:24.195946+00:00",
+          "display_verdict": "INCOMPLETE",
+          "domain": "Data Validation",
+          "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+          "evidence_availability": "AVAILABLE",
+          "evidence_completeness": "INCOMPLETE",
+          "evidence_ref": "#/observations/Data Validation",
+          "execution_state": "SUCCESS",
+          "heartbeat_now": "NOT EVALUATED",
+          "pipeline": "fixture_source",
+          "reason": "run_observation_missing",
+          "reason_display": "Result not recorded",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "run_verdict": "INCOMPLETE",
+          "started_at": "2026-10-03T22:16:18.352311+00:00",
+          "verdict": "INCOMPLETE",
+          "workflow_id": "fk_total_expiry_fixture"
+        }
+      ],
+      "presentation_summary": [
+        {
+          "checks_verdict": "INCOMPLETE",
+          "completed_at": "2026-10-03T22:16:24.195946+00:00",
+          "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+          "evidence_availability": "AVAILABLE",
+          "evidence_completeness": "INCOMPLETE",
+          "execution_state": "SUCCESS",
+          "heartbeat_now": "NOT EVALUATED",
+          "pipeline": "fixture_source",
+          "reason": "Control Plane: Result not recorded; Data Quality: Result not recorded; Provider: Result not recorded; Data Validation: Result not recorded",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "started_at": "2026-10-03T22:16:18.352311+00:00",
+          "verdict": "INCOMPLETE",
+          "workflow_id": "fk_total_expiry_fixture"
+        }
+      ],
+      "presentation_trust": [
+        {
+          "accounting_integrity": "CONFLICT",
+          "evidence_observed_at": "2026-10-03T22:16:24.195946+00:00",
+          "pipeline": "fixture_source",
+          "processing_status": "success",
+          "reasons_count": 2,
+          "reasons_display": "Result not recorded\nSaved report accounting conflict: gold_vs_silver_status=FAILING, delta=-2. Saved Trust verdict: INCOMPLETE; inspect report and ledger.",
+          "reasons_text": "run_observation_missing\nSaved report accounting conflict: gold_vs_silver_status=FAILING, delta=-2. Saved Trust verdict: INCOMPLETE; inspect report and ledger.",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "saved_trust_status": "INCOMPLETE",
+          "trust_reasons_action": "View trust reasons",
+          "trust_status": "ERROR"
+        }
+      ],
+      "provider_checks": [
+        {
+          "check_result": "INCOMPLETE",
+          "evidence": "Данные проверки провайдера для этого запуска не сохранены",
+          "observed_at": null,
+          "provider": "—"
+        }
+      ],
+      "provider_options": [],
+      "quality_evidence": {
+        "funnel": [
+          {
+            "balance_status": "OK",
+            "records_in": 0,
+            "records_out": 0,
+            "removals": [],
+            "removed_total": 0,
+            "stage_id": "extract",
+            "tracking": "partial",
+            "unaccounted": 0
+          },
+          {
+            "balance_status": "OK",
+            "records_in": 0,
+            "records_out": 0,
+            "removals": [],
+            "removed_total": 0,
+            "stage_id": "bronze",
+            "tracking": "partial",
+            "unaccounted": 0
+          },
+          {
+            "balance_status": "OK",
+            "records_in": 0,
+            "records_out": 0,
+            "removals": [],
+            "removed_total": 0,
+            "stage_id": "silver",
+            "tracking": "partial",
+            "unaccounted": 0
+          },
+          {
+            "balance_status": "FAILING",
+            "records_in": 0,
+            "records_out": 2,
+            "removals": [],
+            "removed_total": 0,
+            "stage_id": "gold",
+            "tracking": "partial",
+            "unaccounted": 0
+          }
+        ],
+        "pipeline": "fixture_source"
+      },
+      "reason": "Control Plane: Result not recorded; Data Quality: Result not recorded; Provider: Result not recorded; Data Validation: Result not recorded",
+      "reconciliation_display": [
+        {
+          "limit": "source 1000; reference 1000",
+          "meaning": "Orphan = no match in selected reference; completeness: unproven",
+          "mode": "selected-snapshot",
+          "pins": "gold:fixture.source@0 → gold:fixture.reference@0",
+          "result": "expired 2/2; retained 0",
+          "scope": "current_run → current_run",
+          "step_id": "reconcile_fixture_total_expiry"
+        }
+      ],
+      "replay_checks": [
+        {
+          "code": "terminal_status",
+          "evidence_ref": "#/identity/status",
+          "reason": "success",
+          "result": "pass"
+        },
+        {
+          "code": "replay_of_run_id",
+          "evidence_ref": "#/identity/replay_of_run_id",
+          "reason": "source_run_not_a_replay",
+          "result": "n/a"
+        },
+        {
+          "code": "manifest_not_recorded",
+          "evidence_ref": "#/manifest",
+          "reason": "manifest_not_recorded",
+          "result": "unknown"
+        },
+        {
+          "code": "artifact_inventory",
+          "evidence_ref": "#/artifacts",
+          "reason": "inventory_present",
+          "result": "pass"
+        },
+        {
+          "code": "pipeline_run_report_json",
+          "evidence_ref": "#/artifacts/0",
+          "reason": "digest_matches",
+          "result": "pass"
+        },
+        {
+          "code": "pipeline_run_report_md",
+          "evidence_ref": "#/artifacts/1",
+          "reason": "digest_matches",
+          "result": "pass"
+        }
+      ],
+      "replay_readiness": [
+        {
+          "blockers": "—",
+          "checked_at": "2026-10-03T22:16:24.195946+00:00",
+          "domain_verdict": "exact_replay_blocked",
+          "evidence_revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "explanation": "Not verified: manifest for this run was not recorded",
+          "pipeline": "fixture_source",
+          "replay_mode": "fixture",
+          "rules_version": "exact-replay-readiness-v1",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "unknown_checks": "manifest for this run was not recorded",
+          "verdict": "INSUFFICIENT"
+        }
+      ],
+      "replay_readiness_now": "INSUFFICIENT",
+      "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+      "rows": [
+        {
+          "action": "Inspect saved evidence",
+          "applicable": true,
+          "checks_verdict": "INCOMPLETE",
+          "completed_at": "2026-10-03T22:16:24.195946+00:00",
+          "display_verdict": "OK",
+          "domain": "Runtime",
+          "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+          "evidence_availability": "AVAILABLE",
+          "evidence_completeness": "INCOMPLETE",
+          "evidence_ref": "#/identity",
+          "execution_state": "SUCCESS",
+          "heartbeat_now": "NOT EVALUATED",
+          "pipeline": "fixture_source",
+          "reason": "execution_success",
+          "reason_display": "execution_success",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "run_verdict": "INCOMPLETE",
+          "started_at": "2026-10-03T22:16:18.352311+00:00",
+          "verdict": "OK",
+          "workflow_id": "fk_total_expiry_fixture"
+        },
+        {
+          "action": "Inspect reason and evidence",
+          "applicable": true,
+          "checks_verdict": "INCOMPLETE",
+          "completed_at": "2026-10-03T22:16:24.195946+00:00",
+          "display_verdict": "ERROR",
+          "domain": "Control Plane",
+          "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+          "evidence_availability": "AVAILABLE",
+          "evidence_completeness": "INCOMPLETE",
+          "evidence_ref": "#/observations/Control Plane",
+          "execution_state": "SUCCESS",
+          "heartbeat_now": "NOT EVALUATED",
+          "pipeline": "fixture_source",
+          "reason": "run_observation_missing",
+          "reason_display": "Result not recorded\nSaved report accounting conflict: gold_vs_silver_status=FAILING, delta=-2. Saved Trust verdict: INCOMPLETE; inspect report and ledger.",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "run_verdict": "INCOMPLETE",
+          "started_at": "2026-10-03T22:16:18.352311+00:00",
+          "verdict": "INCOMPLETE",
+          "workflow_id": "fk_total_expiry_fixture"
+        },
+        {
+          "action": "Inspect saved evidence",
+          "applicable": true,
+          "checks_verdict": "INCOMPLETE",
+          "completed_at": "2026-10-03T22:16:24.195946+00:00",
+          "display_verdict": "OK",
+          "domain": "Workflow",
+          "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+          "evidence_availability": "AVAILABLE",
+          "evidence_completeness": "INCOMPLETE",
+          "evidence_ref": "#/observations/Workflow",
+          "execution_state": "SUCCESS",
+          "heartbeat_now": "NOT EVALUATED",
+          "pipeline": "fixture_source",
+          "reason": "workflow_success",
+          "reason_display": "workflow_success",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "run_verdict": "INCOMPLETE",
+          "started_at": "2026-10-03T22:16:18.352311+00:00",
+          "verdict": "OK",
+          "workflow_id": "fk_total_expiry_fixture"
+        },
+        {
+          "action": "Inspect reason and evidence",
+          "applicable": true,
+          "checks_verdict": "INCOMPLETE",
+          "completed_at": "2026-10-03T22:16:24.195946+00:00",
+          "display_verdict": "INCOMPLETE",
+          "domain": "Data Quality",
+          "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+          "evidence_availability": "AVAILABLE",
+          "evidence_completeness": "INCOMPLETE",
+          "evidence_ref": "#/observations/Data Quality",
+          "execution_state": "SUCCESS",
+          "heartbeat_now": "NOT EVALUATED",
+          "pipeline": "fixture_source",
+          "reason": "run_observation_missing",
+          "reason_display": "Result not recorded",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "run_verdict": "INCOMPLETE",
+          "started_at": "2026-10-03T22:16:18.352311+00:00",
+          "verdict": "INCOMPLETE",
+          "workflow_id": "fk_total_expiry_fixture"
+        },
+        {
+          "action": "Inspect reason and evidence",
+          "applicable": true,
+          "checks_verdict": "INCOMPLETE",
+          "completed_at": "2026-10-03T22:16:24.195946+00:00",
+          "display_verdict": "INCOMPLETE",
+          "domain": "Provider",
+          "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+          "evidence_availability": "AVAILABLE",
+          "evidence_completeness": "INCOMPLETE",
+          "evidence_ref": "#/observations/Provider",
+          "execution_state": "SUCCESS",
+          "heartbeat_now": "NOT EVALUATED",
+          "pipeline": "fixture_source",
+          "reason": "run_observation_missing",
+          "reason_display": "Result not recorded",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "run_verdict": "INCOMPLETE",
+          "started_at": "2026-10-03T22:16:18.352311+00:00",
+          "verdict": "INCOMPLETE",
+          "workflow_id": "fk_total_expiry_fixture"
+        },
+        {
+          "action": "Inspect reason and evidence",
+          "applicable": true,
+          "checks_verdict": "INCOMPLETE",
+          "completed_at": "2026-10-03T22:16:24.195946+00:00",
+          "display_verdict": "INCOMPLETE",
+          "domain": "Data Validation",
+          "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+          "evidence_availability": "AVAILABLE",
+          "evidence_completeness": "INCOMPLETE",
+          "evidence_ref": "#/observations/Data Validation",
+          "execution_state": "SUCCESS",
+          "heartbeat_now": "NOT EVALUATED",
+          "pipeline": "fixture_source",
+          "reason": "run_observation_missing",
+          "reason_display": "Result not recorded",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "run_verdict": "INCOMPLETE",
+          "started_at": "2026-10-03T22:16:18.352311+00:00",
+          "verdict": "INCOMPLETE",
+          "workflow_id": "fk_total_expiry_fixture"
+        }
+      ],
+      "rules_version": "selected-run-v2",
+      "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+      "run_type": "fixture",
+      "stage_diagnostics": [
+        {
+          "duration_seconds": null,
+          "reason": "stage_balanced",
+          "records_in": 0,
+          "records_out": 0,
+          "source": "report.funnel",
+          "stage_id": "extract",
+          "state": "OK"
+        },
+        {
+          "duration_seconds": null,
+          "reason": "stage_balanced",
+          "records_in": 0,
+          "records_out": 0,
+          "source": "report.funnel",
+          "stage_id": "bronze",
+          "state": "OK"
+        },
+        {
+          "duration_seconds": null,
+          "reason": "stage_balanced",
+          "records_in": 0,
+          "records_out": 0,
+          "source": "report.funnel",
+          "stage_id": "silver",
+          "state": "OK"
+        },
+        {
+          "duration_seconds": null,
+          "reason": "stage_balance_failing",
+          "records_in": 0,
+          "records_out": 2,
+          "source": "report.funnel",
+          "stage_id": "gold",
+          "state": "FAILING"
+        }
+      ],
+      "started_at": "2026-10-03T22:16:18.352311+00:00",
+      "summary": [
+        {
+          "checks_verdict": "INCOMPLETE",
+          "completed_at": "2026-10-03T22:16:24.195946+00:00",
+          "evaluation_at": "2026-10-03T22:16:24.195946+00:00",
+          "evidence_availability": "AVAILABLE",
+          "evidence_completeness": "INCOMPLETE",
+          "execution_state": "SUCCESS",
+          "heartbeat_now": "NOT EVALUATED",
+          "pipeline": "fixture_source",
+          "reason": "Control Plane: Result not recorded; Data Quality: Result not recorded; Provider: Result not recorded; Data Validation: Result not recorded",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "run_type": "fixture",
+          "started_at": "2026-10-03T22:16:18.352311+00:00",
+          "verdict": "INCOMPLETE",
+          "workflow_id": "fk_total_expiry_fixture"
+        }
+      ],
+      "trust": [
+        {
+          "accounting_integrity": "CONFLICT",
+          "evidence_observed_at": "2026-10-03T22:16:24.195946+00:00",
+          "pipeline": "fixture_source",
+          "processing_status": "success",
+          "reasons_count": 2,
+          "reasons_display": "Result not recorded\nSaved report accounting conflict: gold_vs_silver_status=FAILING, delta=-2. Saved Trust verdict: INCOMPLETE; inspect report and ledger.",
+          "reasons_text": "run_observation_missing\nSaved report accounting conflict: gold_vs_silver_status=FAILING, delta=-2. Saved Trust verdict: INCOMPLETE; inspect report and ledger.",
+          "replay_readiness_now": "INSUFFICIENT",
+          "revision": "621d51f55379a6c7b7453232fcecc187b2e502b5dd7ba5d55157a8ac07bc6e67",
+          "rules_version": "selected-run-v2",
+          "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+          "saved_trust_status": "INCOMPLETE",
+          "trust_reasons_action": "View trust reasons",
+          "trust_status": "ERROR"
+        }
+      ],
+      "verdict": "INCOMPLETE",
+      "workflow_id": "fk_total_expiry_fixture"
+    },
+    "reconcile_result": {
+      "action": "delete_orphans",
+      "artifact_refs": [
+        {
+          "path": "<EVIDENCE_ROOT>\\total-expiry-fixture-final-6a7f2e7-integrated\\data\\workflow-transforms\\f40f69b8-22bb-41af-be57-3bf16d8bf2a6\\reconcile_fixture_total_expiry\\result.json",
+          "sha256": "98d721b81197de13d11d99e7c050e70902eb705969f09af54689d5be7ee3e303",
+          "size_bytes": 2889,
+          "type": "workflow_transform_result"
+        }
+      ],
+      "closed_cohort_verified": false,
+      "dry_run": false,
+      "fingerprint": "aa676497c833c49661e247df37b51ec3ee19e17c623f695d0385f86351b2444b",
+      "input_snapshots": {
+        "gold:fixture.reference": {
+          "ancestor_versions": [],
+          "limit": 1000,
+          "producer_pipeline": "fixture_reference",
+          "run_ids": [
+            "775abda9-00e2-4c7b-8d68-c74449f309da"
+          ],
+          "table_id": "5d8425dd-1397-4f3e-a971-9f109574b3a5",
+          "version": 0
+        },
+        "gold:fixture.source": {
+          "ancestor_versions": [],
+          "limit": 1000,
+          "producer_pipeline": "fixture_source",
+          "run_ids": [
+            "ffe1e8c7-cf85-4131-9347-17c488224558"
+          ],
+          "table_id": "7a6a1bf6-05df-4151-9d37-19793c9b1d69",
+          "version": 0
+        }
+      },
+      "manifest_id": "bfcde707-4c84-4522-86ff-411f84b6726f",
+      "mutated": true,
+      "mutation_layer": "gold",
+      "mutation_mode": "gold_scd2_expiry",
+      "nulls_equal": false,
+      "orphan_rows_deleted": 2,
+      "quarantine_batch_id": "80c04cc4-faed-5c7d-a6a5-b56ca5243d61",
+      "quarantine_error_code": "FILTERED_OUT_GOLD",
+      "quarantine_rows_written": 2,
+      "reconciliation_mode": "selected-snapshot",
+      "reference_completeness": "unproven",
+      "reference_key": "id",
+      "reference_keys": [
+        "id"
+      ],
+      "reference_layer": "gold",
+      "reference_scope": "current_run",
+      "reference_table": "fixture.reference",
+      "retained_rows": 0,
+      "scanned_rows": 2,
+      "selected_snapshots": {
+        "gold:fixture.reference": {
+          "ancestor_versions": [],
+          "limit": 1000,
+          "producer_pipeline": "fixture_reference",
+          "run_ids": [
+            "775abda9-00e2-4c7b-8d68-c74449f309da"
+          ],
+          "table_id": "5d8425dd-1397-4f3e-a971-9f109574b3a5",
+          "version": 0
+        },
+        "gold:fixture.source": {
+          "ancestor_versions": [
+            0
+          ],
+          "limit": 1000,
+          "producer_pipeline": "fixture_source",
+          "run_ids": [
+            "ffe1e8c7-cf85-4131-9347-17c488224558"
+          ],
+          "table_id": "7a6a1bf6-05df-4151-9d37-19793c9b1d69",
+          "version": 1
+        }
+      },
+      "source_key": "fk",
+      "source_keys": [
+        "fk"
+      ],
+      "source_layer": "gold",
+      "source_run_ids": [
+        "f40f69b8-22bb-41af-be57-3bf16d8bf2a6",
+        "ffe1e8c7-cf85-4131-9347-17c488224558",
+        "775abda9-00e2-4c7b-8d68-c74449f309da"
+      ],
+      "source_scope": "current_run",
+      "source_snapshot": {
+        "current_rows": 1,
+        "physical_rows": 4,
+        "version": 1
+      },
+      "source_table": "fixture.source",
+      "step_id": "reconcile_fixture_total_expiry",
+      "transform_name": "reconcile_foreign_keys",
+      "unproven_unmatched_rows": 0,
+      "workflow_name": "fk_total_expiry_fixture",
+      "workflow_run_id": "f40f69b8-22bb-41af-be57-3bf16d8bf2a6",
+      "would_mutate": false
+    },
+    "report_root": "<EVIDENCE_ROOT>\\total-expiry-fixture-final-6a7f2e7-integrated\\reports",
+    "root": "<EVIDENCE_ROOT>\\total-expiry-fixture-final-6a7f2e7-integrated",
+    "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+    "source_dirty": false,
+    "source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+    "source_tree_sha256": "6e4f55e3eb3245e9bb8dff981a6075474f48c151dbbb087f2f5913732e7d9c40",
+    "workflow_name": "fk_total_expiry_fixture",
+    "workflow_report": "<EVIDENCE_ROOT>\\total-expiry-fixture-final-6a7f2e7-integrated\\reports\\workflow\\fk_total_expiry_fixture\\f40f69b8-22bb-41af-be57-3bf16d8bf2a6\\workflow-run-report.json",
+    "workflow_run_id": "f40f69b8-22bb-41af-be57-3bf16d8bf2a6"
+  }
+}

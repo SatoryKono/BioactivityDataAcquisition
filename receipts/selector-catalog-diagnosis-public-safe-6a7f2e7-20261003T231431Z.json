@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+  "actor": "/root/git_io_diagnosis",
+  "product_implementation_participation": true,
+  "classification": "READ_ONLY_SELECTOR_DIAGNOSIS_NOT_VISUAL_OR_PROVIDER_ACCEPTANCE",
+  "source_anchors": [
+    {
+      "repository_path": "docs/03-guides/dashboards/selector-architecture.md",
+      "sha256": "e5fe72ae9e769e104c6498a91e68b9cb2f92f82ddc6acb04702457120d7a3d48"
+    },
+    {
+      "repository_path": "src/bioetl/interfaces/http/_selector_options_cache.py",
+      "sha256": "dbbdc9f3a489a7f516310fc705e9e66440c9bdd596fd3b1b308a06b0828bd09b"
+    },
+    {
+      "repository_path": "tests/unit/interfaces/http/test_selector_options_cache.py",
+      "sha256": "41776c8f577f71d6e1c36d2c53d1aaa1a148032c79fb42d46c1593e4d878f63b"
+    },
+    {
+      "repository_path": "grafana/dashboards/bioetl-run-explorer-v1.json",
+      "sha256": "ef3faac095dda33c331f04aa7a3a122cdf560b5f9d7430428f47f1c5d3cf72d1"
+    }
+  ],
+  "observations": [
+    {
+      "dimension": "workflow",
+      "url": "http://127.0.0.1:18086/ops/control-plane/filter-options?dimension=workflow&response_shape=options&allow_stale=1",
+      "started_at": "2026-10-03T23:09:43.659269+00:00",
+      "completed_at": "2026-10-03T23:09:43.717864+00:00",
+      "http_status": 200,
+      "raw_response": {
+        "path": "<EVIDENCE_ROOT>\\selector-catalog-http-6a7f2e7-20261003T230943Z-workflow.json",
+        "sha256": "2ff4108261dc36610b5dd7bedf7106539c89a3df16cf3ec15c944ec9301993db"
+      },
+      "catalog": {
+        "state": "fresh",
+        "snapshot_id": "792842af01c1405a66294332de869c75d3d06fb885e1114b24abf884e294af16",
+        "observed_at": "2026-10-03T23:09:43.717532+00:00",
+        "age_seconds": 7.329997606575489e-05,
+        "refresh_in_progress": false,
+        "last_refresh_error": null
+      },
+      "items": [
+        {
+          "text": "chembl_baseline",
+          "value": "chembl_baseline"
+        }
+      ],
+      "same_snapshot_id_as_prior_tool_observation": true
+    },
+    {
+      "dimension": "pipeline",
+      "url": "http://127.0.0.1:18086/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=chembl_baseline&allow_stale=1",
+      "started_at": "2026-10-03T23:09:43.718182+00:00",
+      "completed_at": "2026-10-03T23:09:43.723411+00:00",
+      "http_status": 200,
+      "raw_response": {
+        "path": "<EVIDENCE_ROOT>\\selector-catalog-http-6a7f2e7-20261003T230943Z-pipeline.json",
+        "sha256": "4af63cc04448ede762f38d9a4fe33a98e2d82a50299d4af3cb6aea5c514569a0"
+      },
+      "catalog": {
+        "state": "fresh",
+        "snapshot_id": "9d7dbbfbba11ff33f4714b961c6602424d82460604e55db15c299eeb53ed202a",
+        "observed_at": "2026-10-03T23:09:43.723128+00:00",
+        "age_seconds": 7.830001413822174e-05,
+        "refresh_in_progress": false,
+        "last_refresh_error": null
+      },
+      "items": [
+        {
+          "text": "unknown",
+          "value": "unknown"
+        },
+        {
+          "text": "chembl_publication",
+          "value": "chembl_publication"
+        },
+        {
+          "text": "chembl_target",
+          "value": "chembl_target"
+        },
+        {
+          "text": "chembl_assay",
+          "value": "chembl_assay"
+        }
+      ],
+      "same_snapshot_id_as_prior_tool_observation": true
+    },
+    {
+      "dimension": "run_id",
+      "url": "http://127.0.0.1:18086/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=chembl_baseline&pipeline=chembl_assay&run_type=backfill&timezone=UTC&allow_stale=1",
+      "started_at": "2026-10-03T23:09:43.723712+00:00",
+      "completed_at": "2026-10-03T23:09:43.733404+00:00",
+      "http_status": 200,
+      "raw_response": {
+        "path": "<EVIDENCE_ROOT>\\selector-catalog-http-6a7f2e7-20261003T230943Z-run_id.json",
+        "sha256": "77c1fd1607655310e93cd8432c50b049ab63bf0137043a7bc257e7d0c1c9dd03"
+      },
+      "catalog": {
+        "state": "fresh",
+        "snapshot_id": "a7156db8772d84606ffb6c11df4fc5193224614e25347516aba0d1efafd5918b",
+        "observed_at": "2026-10-03T23:09:43.733136+00:00",
+        "age_seconds": 7.660000119358301e-05,
+        "refresh_in_progress": false,
+        "last_refresh_error": null
+      },
+      "items": [
+        {
+          "text": "SELECT RUN",
+          "value": "-"
+        },
+        {
+          "text": "2026-10-03 22:02 UTC \u00b7 chembl_assay \u00b7 success \u00b7 f65c8aa8-b05c-5c26-af94-fee2dd4692d2",
+          "value": "f65c8aa8-b05c-5c26-af94-fee2dd4692d2"
+        }
+      ],
+      "same_snapshot_id_as_prior_tool_observation": true
+    }
+  ],
+  "prior_observation": {
+    "raw_responses_saved": false,
+    "basis": "actual tool responses; not a current freshness claim",
+    "snapshot_ids": {
+      "workflow": "792842af01c1405a66294332de869c75d3d06fb885e1114b24abf884e294af16",
+      "pipeline": "9d7dbbfbba11ff33f4714b961c6602424d82460604e55db15c299eeb53ed202a",
+      "run_id": "a7156db8772d84606ffb6c11df4fc5193224614e25347516aba0d1efafd5918b"
+    },
+    "last_observed_catalog_timestamps": {
+      "workflow": "2026-10-04T02:07:34.265171+03:00",
+      "pipeline": "2026-10-04T02:07:34.363191+03:00",
+      "run_id": "2026-10-04T02:07:34.383093+03:00"
+    }
+  },
+  "interpretation": "STALE catalog indicates eligible cached option age (30 to under120 seconds), not selected run verdict; values unchanged. Capture warning remains preserved regardless of later HTTP freshness.",
+  "mutations": {
+    "Grafana": false,
+    "datasource": false,
+    "source": false,
+    "Delta": false
+  },
+  "synthetic_fixture_provider_acceptance": false,
+  "provenance": {
+    "type": "qualified_derivative",
+    "original_sha256": "f36a0d04c09dba3a993adcd7a21021f30341cd58a8ba4fe259f869fb6ed0df5a",
+    "qualified_by": "/root/git_io_diagnosis",
+    "operation": "host-path substitution only"
+  }
+}

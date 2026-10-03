@@ -1,0 +1,23 @@
+{
+  "source_commit": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+  "container": "bioetl-grafana-fk-11865",
+  "base_url": "http://localhost:3003",
+  "dashboards": [
+    {
+      "uid": "bioetl-overview-v2",
+      "source_model_sha256": "c2369dae3b042caae4f10e010da760f265f0d4b9d596826b6b9f8a60afa5d140",
+      "runtime_model_sha256": "c2369dae3b042caae4f10e010da760f265f0d4b9d596826b6b9f8a60afa5d140"
+    },
+    {
+      "uid": "bioetl-control-plane-v1",
+      "source_model_sha256": "6dfd0cbb095cd267eb0e751ecb182b5a4e8d4c613aa76b2e7fcee237ddaabd9d",
+      "runtime_model_sha256": "6dfd0cbb095cd267eb0e751ecb182b5a4e8d4c613aa76b2e7fcee237ddaabd9d"
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "source_model_sha256": "cff192dfc9de9f28eb2e4073245c12b2fa7b1471de03a203275ad35edde7a7de",
+      "runtime_model_sha256": "cff192dfc9de9f28eb2e4073245c12b2fa7b1471de03a203275ad35edde7a7de"
+    }
+  ],
+  "status": "PASS"
+}

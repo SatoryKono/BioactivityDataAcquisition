@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+  "actor": "/root/git_io_diagnosis",
+  "timestamp": "2026-10-03T23:11:44.892556+00:00",
+  "classification": "READ_ONLY_PROVENANCE_REVIEW_NOT_INDEPENDENT_CRITERION_QUALIFICATION",
+  "pixel_review_performed_by_this_agent": false,
+  "root_visual_attestation": {
+    "relative_path": "root-visual-review-final-6a7f2e7-integrated.json",
+    "sha256": "4f934c6d34c146db63728554ef921fa1e2bc2158f66eb6ef89178945a819be03",
+    "actor": "/root",
+    "observed_fixture_semantics": "Synthetic total expiry2/2 retained0; workflow SUCCESS. Overview INCOMPLETE and Replay INSUFFICIENT remain visible; Saved Trust ERROR is caused by absent native manifest and synthetic gold2/silver0 accounting, not a claim of native complete evidence."
+  },
+  "genuine_independent_qualification": {
+    "relative_path": "public-own-qualification-final-6a7f2e7-integrated-evaluator/independent-qualification-final-6a7f2e7-integrated-evaluator.json",
+    "sha256": "4debb7985f7cfc0f28ef476f380738984632a64985eb7aa944acfbb42a66ab95",
+    "actor": "/root/independent_closeout_evaluator"
+  },
+  "junit": {
+    "relative_path": "tests-final-6a7f2e7-integrated-evaluator.xml",
+    "sha256": "1d9d784c673ae5008c03fef15fe93bea54cb81d9a93cc886f4d18d15226fd2b6",
+    "cases": [
+      {
+        "classname": "tests.unit.domain.run_reports.test_cr_8859_1c_accounting",
+        "name": "test_mapped_zero_is_not_replaced_by_coarse_metric",
+        "result": "ACTUAL_JUNIT_PASS"
+      },
+      {
+        "classname": "tests.unit.domain.run_reports.test_cr_8859_1c_accounting",
+        "name": "test_measured_zero_extracted_is_not_replaced_by_payload",
+        "result": "ACTUAL_JUNIT_PASS"
+      },
+      {
+        "classname": "tests.unit.domain.run_reports.test_stage_diagnostics",
+        "name": "test_success_with_balanced_funnel_keeps_zero_and_coverage",
+        "result": "ACTUAL_JUNIT_PASS"
+      }
+    ]
+  },
+  "source_anchors": [
+    {
+      "repository_path": "tests/unit/domain/run_reports/test_stage_diagnostics.py",
+      "sha256": "36fd59f46baae41fa4ac5155b974f596d48afdf74cb900c3e0c9413e758ef352"
+    },
+    {
+      "repository_path": "tests/unit/domain/run_reports/test_cr_8859_1c_accounting.py",
+      "sha256": "4bd9a6648e7af9f13ffaa87295a31a2c545a21f1031b9330cc278c50534a1738"
+    }
+  ],
+  "interpretation": "Balanced success with measured records_out=0 is OK/COMPLETE in genuine owning regression. Synthetic fixture Saved Trust ERROR also reflects absent native manifest and gold2/silver0 accounting; fixture is not provider acceptance or native complete evidence. Do not classify its ERROR as zero alone or use it to claim zero-success UI acceptance.",
+  "privacy_review": {
+    "scope": "root visual attestation JSON and this provenance receipt only; no new pixel qualification",
+    "root_visual_paths_relative": true,
+    "secrets_or_usernames_found": false
+  },
+  "provider_acceptance_claim": false,
+  "fixture_replay_ready_claim": false
+}

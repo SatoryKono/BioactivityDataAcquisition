@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "code_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+  "kind": "verifier",
+  "actor": {
+    "identity": "/root",
+    "role": "implementation"
+  },
+  "qualification": "ROOT_REVIEWED_IMPLEMENTATION_EVIDENCE",
+  "provenance": {
+    "type": "qualified_derivative",
+    "original_sha256": "c92dcd928c5512ba97afc36d07bdd2ac5ffdd23877700b2e47712a221c30da19",
+    "qualified_by": "/root",
+    "operation": "host-path substitution only; original values retained"
+  },
+  "terminal_source_guard": {
+    "original_sha256": "8782e718cee6d4c55398159543bb61c9f9069e7cb8f5eb1cbc28d1d7393d79e0",
+    "verified_source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+    "verified_exit_code": 0,
+    "field_bindings": {
+      "source_before": [
+        "source_before"
+      ],
+      "source_after": [
+        "source_after"
+      ],
+      "dirty_before": [
+        "dirty_before"
+      ],
+      "dirty_after": [
+        "dirty_after"
+      ],
+      "exit_code": [
+        "exit_code"
+      ]
+    }
+  },
+  "resume_contract_details": null,
+  "synthetic_fixture": false,
+  "payload": [
+    {
+      "workflow": "chembl_baseline",
+      "run_id": "9e3a7e5c-5869-5ae9-a699-ff0c586f3028",
+      "manifest_id": "3d09006b-0a4f-57d0-85a9-e5ab078b0b4d",
+      "source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+      "roots": {
+        "data": "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\data",
+        "reports": "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\reports",
+        "archive": "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\archive"
+      },
+      "transforms": [
+        {
+          "step_id": "reconcile_assay_target_orphans",
+          "scanned": 983,
+          "retained": 550,
+          "expired": 433,
+          "input_version": 0,
+          "post_version": 1,
+          "artifact_sha256": "806ebf5c5101fe7e0580f3ff0f4b00d4be9a8d93aa194e167d417562bc1ee272"
+        },
+        {
+          "step_id": "reconcile_assay_publication_orphans",
+          "scanned": 550,
+          "retained": 5,
+          "expired": 545,
+          "input_version": 1,
+          "post_version": 2,
+          "artifact_sha256": "c7a70684299c1e4c35681b62a00a42a170e0f71c0dd59809bbad31ebaa366396"
+        },
+        {
+          "step_id": "reconcile_target_assay_orphans",
+          "scanned": 922,
+          "retained": 5,
+          "expired": 917,
+          "input_version": 49,
+          "post_version": 50,
+          "artifact_sha256": "822765d3fe5b95875cea74fcbc8cd747d7d3e2eb7accf49a916c3b746415fe08"
+        },
+        {
+          "step_id": "reconcile_publication_assay_orphans",
+          "scanned": 1000,
+          "retained": 4,
+          "expired": 996,
+          "input_version": 49,
+          "post_version": 50,
+          "artifact_sha256": "eb2303b19547315b2cb6b6a9a3c126c1ad0272ed4980e4780e21a6943428a9f1"
+        }
+      ],
+      "tables": {
+        "chembl.assay": {
+          "version": 2,
+          "table_id": "02ca543b-2333-4f2f-a698-31991c286f82",
+          "physical": 983,
+          "current": 5,
+          "historical": 978
+        },
+        "chembl.publication": {
+          "version": 50,
+          "table_id": "e0a44f83-abd5-471a-971e-ae0d497a4ad5",
+          "physical": 1000,
+          "current": 4,
+          "historical": 996
+        },
+        "chembl.target": {
+          "version": 50,
+          "table_id": "3354b333-55be-4375-b365-299c3b6f9f31",
+          "physical": 922,
+          "current": 5,
+          "historical": 917
+        }
+      },
+      "canonical_digest_checks": 6,
+      "latest_revision_archive_matches": 3,
+      "destructive_commits": 4,
+      "status": "pass"
+    },
+    {
+      "workflow": "chembl_core",
+      "run_id": "9f942841-146c-5651-8a40-81e70ca8b8be",
+      "manifest_id": "2a1b9502-3247-5792-8fe0-f8024cbc4bdd",
+      "source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+      "roots": {
+        "data": "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\data",
+        "reports": "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\reports",
+        "archive": "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\archive"
+      },
+      "transforms": [
+        {
+          "step_id": "reconcile_assay_target_orphans",
+          "scanned": 983,
+          "retained": 550,
+          "expired": 433,
+          "input_version": 0,
+          "post_version": 1,
+          "artifact_sha256": "298db17f22ae1d1e99fd1da73c3e6d39b2a3a25c7575e5b610341703b8bf6b55"
+        }
+      ],
+      "tables": {
+        "chembl.assay": {
+          "version": 1,
+          "table_id": "47ffe98c-ae58-4326-b299-68efcd15d543",
+          "physical": 983,
+          "current": 550,
+          "historical": 433
+        }
+      },
+      "canonical_digest_checks": 6,
+      "latest_revision_archive_matches": 3,
+      "destructive_commits": 1,
+      "status": "pass"
+    }
+  ]
+}

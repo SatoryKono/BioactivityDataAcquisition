@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "code_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+  "kind": "ui_attestation",
+  "actor": {
+    "identity": "/root",
+    "role": "implementation"
+  },
+  "qualification": "ROOT_REVIEWED_IMPLEMENTATION_EVIDENCE",
+  "provenance": {
+    "type": "qualified_derivative",
+    "original_sha256": "63b54f6f1120e7cd86f9236d5fa1aabe4f7b5167b77bd48692d05c4c4966b491",
+    "qualified_by": "/root",
+    "operation": "host-path substitution only; original values retained"
+  },
+  "terminal_source_guard": {
+    "original_sha256": "8782e718cee6d4c55398159543bb61c9f9069e7cb8f5eb1cbc28d1d7393d79e0",
+    "verified_source_sha": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+    "verified_exit_code": 0,
+    "field_bindings": {
+      "source_before": [
+        "source_before"
+      ],
+      "source_after": [
+        "source_after"
+      ],
+      "dirty_before": [
+        "dirty_before"
+      ],
+      "dirty_after": [
+        "dirty_after"
+      ],
+      "exit_code": [
+        "exit_code"
+      ]
+    }
+  },
+  "resume_contract_details": null,
+  "synthetic_fixture": false,
+  "payload": {
+    "status": "PASS",
+    "source_commit": "6a7f2e761780f6574c81a1a78cb449d633abb70b",
+    "scope": "RF-005 three requested dashboard viewports and exact run IDs; not the full dashboard release or accessibility audit",
+    "cases": [
+      {
+        "flow": "baseline",
+        "run_id": "f65c8aa8-b05c-5c26-af94-fee2dd4692d2",
+        "capture_report": "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\workflow-at-browser-capture.json",
+        "capture_report_sha256": "cd0fd3402b960cefbdbb5fcc9e2aea54d2ce4f3c5012e177d5554e667ef1ec82",
+        "manifest": "<EVIDENCE_ROOT>\\baseline-final-6a7f2e7-integrated\\browser-viewport\\render-manifest--selected-subset--20261003T230352299863Z-541320e5869d.json",
+        "manifest_sha256": "a5f30736c26d4356b92501ed6ec67e46b04ec94f7b237149279bddbe12fc6298",
+        "http_sha256": "9f801216e2770d68ee91b69ab7a13fc2ca0317617c18441966f183a70eb859f1",
+        "execution_state": "SUCCESS",
+        "evidence_completeness": "COMPLETE",
+        "replay_readiness": "READY",
+        "dashboards": [
+          {
+            "uid": "bioetl-control-plane-v1",
+            "status": "PASS",
+            "errors": []
+          },
+          {
+            "uid": "bioetl-overview-v2",
+            "status": "PASS",
+            "errors": []
+          },
+          {
+            "uid": "bioetl-run-explorer-v1",
+            "status": "PASS",
+            "errors": []
+          }
+        ]
+      },
+      {
+        "flow": "core",
+        "run_id": "f43a826f-b162-5461-a249-19a078fc99b3",
+        "capture_report": "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\workflow-at-browser-capture.json",
+        "capture_report_sha256": "945f9e6f6b858435d4f3096b5a3d2e6afd2508dec8494c7fe69590ddf02bbc7e",
+        "manifest": "<EVIDENCE_ROOT>\\core-final-6a7f2e7-integrated\\browser-viewport\\render-manifest--selected-subset--20261003T230503709394Z-ea1816c0c50c.json",
+        "manifest_sha256": "c8a273295930d987df155f74f6bfc4122f6e644f3f62eb83f6619eb3b9a8f58f",
+        "http_sha256": "43553adab6f5ab375bb01e383751897f428c75a26d1cc59e4d880c3af620be64",
+        "execution_state": "SUCCESS",
+        "evidence_completeness": "COMPLETE",
+        "replay_readiness": "READY",
+        "dashboards": [
+          {
+            "uid": "bioetl-control-plane-v1",
+            "status": "PASS",
+            "errors": []
+          },
+          {
+            "uid": "bioetl-overview-v2",
+            "status": "PASS",
+            "errors": []
+          },
+          {
+            "uid": "bioetl-run-explorer-v1",
+            "status": "PASS",
+            "errors": []
+          }
+        ]
+      },
+      {
+        "flow": "total-expiry-fixture",
+        "run_id": "ffe1e8c7-cf85-4131-9347-17c488224558",
+        "capture_report": "<EVIDENCE_ROOT>\\total-expiry-fixture-final-6a7f2e7-integrated\\reports\\workflow\\fk_total_expiry_fixture\\f40f69b8-22bb-41af-be57-3bf16d8bf2a6\\workflow-run-report.json",
+        "capture_report_sha256": "e43667bc6dcc4899e52cd7aab4e2ec42042c6783d4227357724a9834ef1eecf5",
+        "manifest": "<EVIDENCE_ROOT>\\total-expiry-fixture-final-6a7f2e7-integrated\\browser-viewport-all-marker\\render-manifest--selected-subset--20261003T230614232495Z-434c496ffed8.json",
+        "manifest_sha256": "0dc86cb3eb053030243ce429cf344e87aa16c779b556dddc30e6231dda2b1538",
+        "http_sha256": "1933463084707a8b61d561f576f22933382e0d197132ef0c0ffe8d1f3c556418",
+        "execution_state": "SUCCESS",
+        "evidence_completeness": "INCOMPLETE",
+        "replay_readiness": "INSUFFICIENT",
+        "dashboards": [
+          {
+            "uid": "bioetl-control-plane-v1",
+            "status": "PASS",
+            "errors": []
+          },
+          {
+            "uid": "bioetl-overview-v2",
+            "status": "PASS",
+            "errors": []
+          },
+          {
+            "uid": "bioetl-run-explorer-v1",
+            "status": "PASS",
+            "errors": []
+          }
+        ]
+      }
+    ]
+  }
+}
