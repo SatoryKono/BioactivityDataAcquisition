@@ -51,7 +51,7 @@ pytestmark = pytest.mark.unit
     [
         (Path("configs"), False),
         (Path("/tmp/bioetl-configs"), True),
-        (PureWindowsPath(r"\\configs"), True),
+        (PureWindowsPath(r"\configs"), True),
     ],
 )
 def test_rooted_explicit_path_detection_is_platform_independent(
