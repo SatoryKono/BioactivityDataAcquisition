@@ -28,3 +28,18 @@ Deprecated prompts have no workflow: `prompt.audit.cyclic-pack` and
 | `prompt.observability.dashboard-audit-cycle` | `library/audit/dashboard.md` | `.muse/workflows/audit/cyclic-audit.js` | `CYCLE_KIND=dashboard, N=1, SCOPE, CONTOURS, VIEWPORT, THEME, ALLOW_*, LANGUAGE` |
 | `prompt.audit.sequential-run` | `library/audit/sequential-run.md` | `.muse/workflows/audit/cyclic-audit.js` | `CYCLE_KIND=sequential, N, SCOPE, DEPTH, MONITORING, ALLOW_*, MAX_ISSUES_PER_STEP, LANGUAGE` |
 | `prompt.observability.sequential-run` | `library/audit/observability-sequential.md` | `.muse/workflows/audit/cyclic-audit.js` | `CYCLE_KIND=observability-sequential, SCOPE, MONITORING, ALLOW_*, MAX_ISSUES_PER_STEP, LANGUAGE` |
+
+
+## Comprehensive audit campaign
+
+The P00-P20 package is integrated as Prompt Library cards rather than a second
+runtime workflow implementation.
+
+| Prompt id | Prompt file | Execution |
+| --- | --- | --- |
+| `prompt.audit.comprehensive` | `library/audit/comprehensive.md` | Operator campaign; compiles/runs registered domain cards using their existing workflows where available, then hands immutable evidence to P20 |
+| `prompt.audit.reconcile` | `library/audit/reconcile.md` | Independent reviewer/operator card; no mutation workflow, read-only reconciliation |
+
+The campaign preserves existing Muse domain workflows instead of duplicating
+them. POST-A/POST-B mutation remains delegated to
+`prompt.audit.orchestrator` under explicit `ALLOW_*` flags.
