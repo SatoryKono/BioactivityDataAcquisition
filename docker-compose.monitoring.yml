@@ -103,7 +103,7 @@ services:
       { driver: json-file, options: { max-size: "100m", max-file: "10" } }
 
   grafana:
-    image: mirror.gcr.io/grafana/grafana:12.2.5@sha256:e67fa772c14a0c728df61d7ac1b46d0da24e557efa729dbe1c404bf4403d6f35
+    image: satorykono/bioetl-grafana-router7-canvas@sha256:8c17eb9a8b5da0aa983da2ba0aa316e55ee8d0204f8ab49e641dcf3bdf3175e9
     container_name: bioetl-grafana
     ports:
       - "127.0.0.1:3000:3000"
@@ -112,6 +112,7 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_METRICS_ENABLED=true
       - GF_LOG_LEVEL=info
+      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=bioetl-scenes-app,bioetl-selectorshell-panel
       - GF_SERVER_ROOT_URL=http://localhost:3000
       - GF_SERVER_SERVE_FROM_SUB_PATH=false
       # Operator-facing clock on all shipped dashboards: YYYY-MM-DD HH:mm
@@ -126,7 +127,7 @@ services:
       - GF_DATE_FORMATS_INTERVAL_YEAR=YYYY
       - GF_DATE_FORMATS_USE_BROWSER_LOCALE=false
       # Required for BioETL Ops HTTP panels (Run Explorer, identity tables, etc.).
-      # Infinity 3.8.0 is verified with pinned Grafana 12.2.5. Keep this pin
+      # Infinity 3.8.0 is retained for the private Grafana 13.2.3 host. Keep this pin
       # until a newer plugin passes the Ops HTTP table render checks.
       - BIOETL_INFINITY_PLUGIN_VERSION=${BIOETL_INFINITY_PLUGIN_VERSION:-3.8.0}
       # Remote renderer is optional for UI. When renderer is down/OOM, Grafana must

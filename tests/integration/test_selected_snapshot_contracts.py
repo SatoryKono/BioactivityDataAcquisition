@@ -47,7 +47,7 @@ from tests.unit.application.services.control_plane.workflow.test_execution_resum
     _state,
 )
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.integration
 
 
 def config():

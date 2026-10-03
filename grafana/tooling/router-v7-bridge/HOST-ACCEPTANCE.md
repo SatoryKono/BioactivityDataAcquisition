@@ -42,6 +42,17 @@ Current blockers are tracked in #11888, #11889 and #11895. A billing-blocked CI 
 unpatched braces advisory, or failed governance gate is not successful acceptance.
 Do not change .env, raise budgets, or suppress advisories to make the candidate pass.
 
-The checked Actions integration is also supplied as workflow-canvas-acceptance.patch.
-It is not active until applied by a workflow-authorized publisher; existing local
-credentials were insufficient. Its absence is an acceptance blocker.
+The Actions integration applies all three patches and runs the focused Canvas
+failure/recovery tests before the production build. The historical proposed
+change remains in workflow-canvas-acceptance.patch for provenance.
+
+Dockerfile.host packages the compiled frontend and both owned plugins against
+the pinned official 13.2.3 base. Plugins use Grafana's bundled-plugin directory;
+the managed data volume therefore cannot mask them. host-image.json binds the
+delivered digest to patch, lock and bundle hashes. Only the two owned plugin IDs
+are allowed unsigned; the acceptance-only runtime-probe is never shipped.
+
+The runtime-probe plugin executes navigation and hydration fixtures through
+Grafana's shared react-router external. Install it only on the acceptance host,
+run its explicit button, preserve the rendered receipt and remove it afterward.
+Its temporary hydration data and harmless constructor are restored in finally.

@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 from pathlib import Path
 import shutil
@@ -28,6 +29,27 @@ RENDERER_IMAGE = (
     "@sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b"
 )
 INFINITY_PLUGIN_VERSION = "3.8.0"
+
+
+def test_private_host_delivery_binds_source_and_survives_data_volume() -> None:
+    """A compose digest alone must not sever patched host/plugin provenance."""
+    owner = Path("grafana/tooling/router-v7-bridge")
+    manifest = json.loads((owner / "host-image.json").read_text(encoding="utf-8"))
+    assert (
+        manifest["image"] == _load_monitoring_compose()["services"]["grafana"]["image"]
+    )
+    assert manifest["grafana_version"] == "13.2.3"
+    assert manifest["router_version"] == "7.18.4"
+    assert manifest["upstream_sha"] == "6193dc03311b631b9727b560d24369e683dc396e"
+    for relative, digest in manifest["artifact_sha256"].items():
+        if "/dist/" not in relative:
+            assert hashlib.sha256(Path(relative).read_bytes()).hexdigest() == digest
+    recipe = (owner / "Dockerfile.host").read_text(encoding="utf-8")
+    assert "FROM " + manifest["base_image"] in recipe
+    assert "runtime-probe" not in recipe
+    for plugin in ("bioetl-scenes-app", "bioetl-selectorshell-panel"):
+        assert "/usr/share/grafana/data/plugins-bundled/" + plugin in recipe
+
 
 _REMOVED_MONITORING_SERVICES = (
     "loki",
@@ -113,7 +135,7 @@ def test_audit_overlay_no_longer_ships_loki_or_quarantine() -> None:
 
 
 def test_grafana_compose_pins_compatible_infinity_plugin() -> None:
-    """Grafana must enforce the Infinity version verified with Grafana 12.2."""
+    """Grafana must enforce the Infinity version used in host acceptance."""
     monitoring = _load_monitoring_compose()
     grafana_environment = monitoring["services"]["grafana"]["environment"]
     assert (
@@ -138,8 +160,8 @@ def test_grafana_compose_pins_compatible_infinity_plugin() -> None:
 def test_monitoring_images_are_pinned_and_pushgateway_is_not_a_datasource() -> None:
     monitoring = _load_monitoring_compose()
     assert monitoring["services"]["grafana"]["image"] == (
-        "mirror.gcr.io/grafana/grafana:12.2.5@sha256:"
-        "e67fa772c14a0c728df61d7ac1b46d0da24e557efa729dbe1c404bf4403d6f35"
+        "satorykono/bioetl-grafana-router7-canvas@sha256:"
+        "8c17eb9a8b5da0aa983da2ba0aa316e55ee8d0204f8ab49e641dcf3bdf3175e9"
     )
     assert monitoring["services"]["prometheus"]["image"] == (
         "prom/prometheus:v3.13.1@sha256:3c42b892cf723fa54d2f262c37a0e1f80aa8c8ddb1da7b9b0df9455a35a7f893"

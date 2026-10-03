@@ -112,11 +112,20 @@ jobs:
         run: |
           git -c core.autocrlf=false apply --check "$GITHUB_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-v13.2.3.patch"
           git -c core.autocrlf=false apply "$GITHUB_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-v13.2.3.patch"
+          git -c core.autocrlf=false apply --check "$GITHUB_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-canvas-query-error.patch"
+          git -c core.autocrlf=false apply "$GITHUB_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-canvas-query-error.patch"
+          git -c core.autocrlf=false apply --check "$GITHUB_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-router-jest-esm.patch"
+          git -c core.autocrlf=false apply "$GITHUB_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-router-jest-esm.patch"
           cmp packages/bioetl-router-v7-bridge/index.mjs "$GITHUB_WORKSPACE/grafana/tooling/router-v7-bridge/index.mjs"
           cmp packages/bioetl-router-v7-bridge/index.d.ts "$GITHUB_WORKSPACE/grafana/tooling/router-v7-bridge/index.d.ts"
       - name: Install immutable upstream dependency graph
         working-directory: reports/qa/router-v7-grafana-host
         run: node .yarn/releases/yarn-4.17.1.cjs install --immutable --mode=skip-build
+      - name: Test Canvas query failure and recovery
+        working-directory: reports/qa/router-v7-grafana-host
+        env:
+          NODE_ENV: test
+        run: node node_modules/jest/bin/jest.js public/app/plugins/panel/canvas/CanvasPanel.integration.test.tsx --runInBand --watch=false --testNamePattern="query error"
       - name: Build production frontend and Swagger with bounded workers
         working-directory: reports/qa/router-v7-grafana-host
         run: |
