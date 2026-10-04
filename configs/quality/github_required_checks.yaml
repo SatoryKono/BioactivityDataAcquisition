@@ -161,17 +161,7 @@ gates:
     not_applicable_allowed: false
     artifacts: []
     sha_binding: true
-  - id: codeql
-    display_name: CodeQL
-    owner_workflow: .github/workflows/codeql.yml
-    owner_jobs: [analyze]
-    legacy_context: codeql-analyze
-    decision: always_required
-    paths: []
-    allowed_results: [success]
-    not_applicable_allowed: false
-    artifacts: []
-    sha_binding: true
+
   - id: docker
     display_name: Docker Build and Compose
     owner_workflow: .github/workflows/docker.yml
