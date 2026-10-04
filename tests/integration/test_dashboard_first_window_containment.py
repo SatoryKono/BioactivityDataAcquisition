@@ -353,6 +353,11 @@ def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:
     assert "presentation_domains" in panels[9002]["targets"][0]["root_selector"]
     assert "/selected-run-status?" in panels[9002]["targets"][0]["url"]
     assert panels[9603]["targets"] == [
-        {"panelId": 9002, "refId": "A", "withTransforms": False}
+        {
+            "panelId": 9002,
+            "refId": "A",
+            "withTransforms": False,
+            "datasource": {"type": "datasource", "uid": "-- Dashboard --"},
+        }
     ]
     assert panels[9603]["datasource"]["uid"] == "-- Dashboard --"

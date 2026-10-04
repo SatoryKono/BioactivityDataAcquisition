@@ -1,0 +1,20 @@
+{
+  "bioetl-scenes-app": {
+    "status": "PASS",
+    "simulated_utc_date": "2050-01-01",
+    "metadata_release_date": "2026-10-03",
+    "hashes": {
+      "module.js": "2cb847b82284b3c5792051ad5f7b7ee67be4364bebfd2353616c71667bceabd2",
+      "plugin.json": "81111da9a83dbc49c5aab904ea3ff6406b897295469368449d9959a8097c0a72"
+    }
+  },
+  "bioetl-selectorshell-panel": {
+    "status": "PASS",
+    "simulated_utc_date": "2050-01-01",
+    "metadata_release_date": "2026-10-03",
+    "hashes": {
+      "module.js": "006f192a786c3f4fe760b62db24039c445aeb3f35f267d3195532e3887757065",
+      "plugin.json": "928a540525d8996d35459bbc54849026ae859ea3a8730a97c224cd97e8b33e15"
+    }
+  }
+}

@@ -5,6 +5,9 @@ from __future__ import annotations
 from dataclasses import replace
 from datetime import datetime
 
+from bioetl.application.services.workflow.control_plane.execution_recording_payloads import (
+    build_step_completion_details,
+)
 from bioetl.application.services.workflow.workflow_runner_service import (
     WorkflowStepExecutionResult,
 )
@@ -19,6 +22,13 @@ def _apply_completed_step_state(
     updated_at: datetime,
     last_event_id: str,
 ) -> WorkflowExecutionState:
+    # Resume-skipped steps retain the producer evidence from their original completion.
+    if _retains_completed_evidence(result, _find_step_state(state, result.step_id)):
+        return state
+    previous = _find_step_state(state, result.step_id)
+    pending = bool(
+        previous and previous.commit_pending_confirmation and result.status != "success"
+    )
     state = _record_step_state(
         state,
         WorkflowStepState(
@@ -28,6 +38,10 @@ def _apply_completed_step_state(
             fingerprint=fingerprint,
             error_type=result.error_type,
             error_message=result.error_message,
+            output_details=build_step_completion_details(result),
+            destructive=bool(previous and previous.destructive),
+            commit_pending_confirmation=pending,
+            mutation_details=previous.mutation_details if previous else None,
         ),
         updated_at=updated_at,
         last_event_id=last_event_id,
@@ -38,7 +52,18 @@ def _apply_completed_step_state(
             step_id=result.step_id,
             fingerprint=fingerprint,
         )
-    return _clear_ambiguous_step(state, result.step_id)
+    return state if pending else _clear_ambiguous_step(state, result.step_id)
+
+
+def _retains_completed_evidence(
+    result: WorkflowStepExecutionResult, previous: WorkflowStepState | None
+) -> bool:
+    """Keep the original receipt when resume deliberately skips a completed step."""
+    return (
+        result.status == "skipped"
+        and result.error_type == "AlreadyCompletedOnResume"
+        and previous is not None
+    )
 
 
 def _record_step_state(

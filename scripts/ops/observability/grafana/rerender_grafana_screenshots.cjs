@@ -798,6 +798,14 @@ async function createBrowserContext(browser, nativeContext = null) {
   };
 }
 
+function canonicalNavigationPanels(panels) {
+  return panels.flatMap(panel => {
+    if (!panel || typeof panel !== "object") return [];
+    const nested = Array.isArray(panel.panels) ? canonicalNavigationPanels(panel.panels) : [];
+    return panel.id === 1000 ? [panel, ...nested] : nested;
+  });
+}
+
 function dashboardEntryFromPayload(payload) {
   const uid = typeof payload.uid === "string" ? payload.uid : "";
   const title = typeof payload.title === "string" ? payload.title : uid;
@@ -809,6 +817,10 @@ function dashboardEntryFromPayload(payload) {
   }
   const slug = grafanaSlugify(title) || uid;
   const panels = Array.isArray(payload.panels) ? payload.panels : [];
+  const navigationPanels = canonicalNavigationPanels(panels);
+  if (navigationPanels.length > 1) {
+    throw new Error(`${uid} has duplicate canonical navigation panels id=1000`);
+  }
   const allRequiredPanels = requiredNonRowPanels(
     panels,
     CONFIG.expandCollapsedRows,
@@ -839,6 +851,8 @@ function dashboardEntryFromPayload(payload) {
     url: `/d/${uid}/${slug}`,
     file: `${uid}.png`,
     requiredPanels,
+    navigationHtml: navigationPanels[0]?.options?.content || "",
+    navigationExpected: navigationPanels.length === 1,
     firstWindowPanels: selectContainmentPanels(panels, CONFIG.navigationOnly).map(summarizeFirstWindowPanel),
     requiredTerminalPanelIds:
       uid === "bioetl-silver-reject-explorer" ? [13] : [],
@@ -1762,7 +1776,7 @@ async function collectPanelContainment(page, dashboard) {
   });
 }
 
-function navigationValidationFromDom({expectedLinkCount = 7} = {}) {
+function navigationValidationFromDom({expectedNavigationHtml = "", expectedLinkCount} = {}) {
     const panel =
       document.querySelector('[data-panelid="1000"]') ||
       document.querySelector('[data-viz-panel-key="panel-1000"]') ||
@@ -1782,6 +1796,19 @@ function navigationValidationFromDom({expectedLinkCount = 7} = {}) {
           nav.querySelectorAll(".bioetl-nav-link, .bioetl-nav-current"),
         )
       : [];
+    const expectedRoot = document.createElement("div");
+    expectedRoot.innerHTML = expectedNavigationHtml;
+    const expectedNavigation = expectedRoot.querySelector(".bioetl-nav");
+    const expectedLinks = expectedNavigation
+      ? Array.from(expectedNavigation.querySelectorAll(".bioetl-nav-link, .bioetl-nav-current"))
+      : [];
+    const name = link => (link.textContent || "").trim().replace(/\s+/g, " ");
+    const linkNames = links.map(name);
+    const expectedLinkNames = expectedLinks.map(name);
+    const canonicalLinksMatch = expectedLinks.length > 0 &&
+      links.length === expectedLinks.length && links.every((link, index) =>
+        name(link) === name(expectedLinks[index]) &&
+        link.getAttribute("title") === expectedLinks[index].getAttribute("title"));
     const panelRect = panel?.getBoundingClientRect() || null;
     const navRect = nav?.getBoundingClientRect() || null;
     const linkRects = links.map((link) => link.getBoundingClientRect());
@@ -1833,6 +1860,10 @@ function navigationValidationFromDom({expectedLinkCount = 7} = {}) {
       titleFound: Boolean(title),
       linkNamesPresent: links.every(link => Boolean(link.textContent?.trim()) && Boolean(link.getAttribute('title'))),
       linkCount: links.length,
+      expectedLinkCount: expectedLinks.length,
+      linkNames,
+      expectedLinkNames,
+      canonicalLinksMatch,
       contentInsidePanel,
       linksInsidePanel,
       linkTextFits,
@@ -1853,7 +1884,8 @@ function navigationValidationFromDom({expectedLinkCount = 7} = {}) {
         evidence.navigationFound &&
         !evidence.titleFound &&
         evidence.linkNamesPresent &&
-        evidence.linkCount === expectedLinkCount &&
+        evidence.canonicalLinksMatch &&
+        evidence.linkCount === (expectedLinkCount ?? expectedLinks.length) &&
         evidence.contentInsidePanel &&
         evidence.linksInsidePanel &&
         evidence.linkTextFits &&
@@ -1867,15 +1899,18 @@ function navigationValidationFromDom({expectedLinkCount = 7} = {}) {
 }
 
 async function collectNavigationValidation(page, dashboard) {
-  if (dashboard.navigationLinkCount === 0) {
-    return page.evaluate(navigationValidationFromDom, {expectedLinkCount: 0});
+  if (dashboard.navigationExpected === false) {
+    const unexpected = await page.locator('.bioetl-nav, [data-panelid="1000"], [data-viz-panel-key="panel-1000"], [data-griditem-key="grid-item-1000"]').count();
+    return unexpected === 0
+      ? {status: "not_applicable", reason: "canonical_dashboard_has_no_navigation_panel"}
+      : {status: "error", reason: "unexpected_navigation_not_in_canonical_dashboard"};
   }
   await page.keyboard.press("Tab");
   await page.locator('.bioetl-nav a.bioetl-nav-link[href*="/d/"]').first().focus();
   // Grafana's native focus shadow has a 200 ms transition. Sampling in the
   // focus event frame observes its transparent start rather than the indicator.
   await page.waitForTimeout(250);
-  return page.evaluate(navigationValidationFromDom, {expectedLinkCount: dashboard.navigationLinkCount});
+  return page.evaluate(navigationValidationFromDom, {expectedNavigationHtml: dashboard.navigationHtml, expectedLinkCount: dashboard.navigationLinkCount});
 }
 
 function typographyValidationFromDom({
@@ -2298,7 +2333,8 @@ async function collectVerifiedPanelSurfaces(page, dashboard) {
       `Typography validation failed for ${dashboard.uid}: ${dashboard.typographyValidation.violations.length} violation(s)`,
     );
   }
-  if (dashboard.navigationValidation.status !== "ok") {
+  if (dashboard.navigationValidation.status !== "ok" &&
+      !(dashboard.navigationExpected === false && dashboard.navigationValidation.status === "not_applicable")) {
     throw new Error(
       `Navigation validation failed for ${dashboard.uid}: ${JSON.stringify(dashboard.navigationValidation)}`,
     );
@@ -2384,6 +2420,30 @@ function screenshotOptions(dashboard, filePath) {
   return options;
 }
 
+function browserDashboardResponseKind(responseUrl, baseUrl, uid) {
+  const url = new URL(responseUrl);
+  if (url.origin !== new URL(baseUrl).origin) return null;
+  if (url.pathname === `/api/dashboards/uid/${encodeURIComponent(uid)}`) return "legacy";
+  const resource = url.pathname.match(/^\/apis\/dashboard\.grafana\.app\/v1beta1\/namespaces\/[^/]+\/dashboards\/([^/]+)\/dto$/);
+  if (resource && decodeURIComponent(resource[1]) === uid) return "grafana-v1beta1-dto";
+  return null;
+}
+
+function normalizeBrowserDashboardPayload(payload, kind, uid) {
+  if (kind === "legacy" && payload?.dashboard?.uid === uid) return payload.dashboard;
+  if (kind === "grafana-v1beta1-dto" &&
+      payload?.kind === "DashboardWithAccessInfo" &&
+      payload?.apiVersion === "dashboard.grafana.app/v1beta1" &&
+      payload?.metadata?.name === uid &&
+      payload.spec && typeof payload.spec === "object" && !Array.isArray(payload.spec) &&
+      (payload.spec.uid === undefined || payload.spec.uid === uid)) {
+    // The DTO resource name is the dashboard UID; metadata.uid identifies the
+    // Kubernetes resource. Preserve every actual spec field (including migrations).
+    return {...payload.spec, uid: payload.metadata.name};
+  }
+  throw new Error(`Browser dashboard response identity/schema mismatch for ${uid}`);
+}
+
 async function renderDashboard(page, dashboard, index, total) {
   const target = dashboardRenderUrl(dashboard);
   const {observeCanvasDrawing,canvasEvidenceFromDom} = require('./capture_canvas_evidence.cjs');
@@ -2401,12 +2461,19 @@ async function renderDashboard(page, dashboard, index, total) {
   dashboard.provisionedModel = {
     captureId: process.env.GRAFANA_CAPTURE_ID || '',
     before: await readModel(), loaded: [], after: null,
+    loadedResponseUrls: [], loadedResponseErrors: [],
   };
   const observedModels = [];
   page.on('response', (response) => {
-    if (response.url().split('?')[0] === modelUrl && response.ok()) {
-      observedModels.push(response.json().then((payload) => {
-        dashboard.provisionedModel.loaded.push(payload.dashboard);
+    const kind = browserDashboardResponseKind(response.url(), CONFIG.baseUrl, dashboard.uid);
+    if (kind) {
+      dashboard.provisionedModel.loadedResponseUrls.push(response.url());
+      observedModels.push((async () => {
+        if (!response.ok()) throw new Error(`Browser dashboard response failed: ${response.status()}`);
+        const payload = await response.json();
+        dashboard.provisionedModel.loaded.push(normalizeBrowserDashboardPayload(payload, kind, dashboard.uid));
+      })().catch(error => {
+        dashboard.provisionedModel.loadedResponseErrors.push(String(error?.message ?? error));
       }));
     }
   });
@@ -2503,6 +2570,9 @@ async function renderDashboard(page, dashboard, index, total) {
     capturedAt: new Date().toISOString(),
   };
   await Promise.all(observedModels);
+  if (dashboard.provisionedModel.loadedResponseErrors.length) {
+    throw new Error(dashboard.provisionedModel.loadedResponseErrors.join("; "));
+  }
   dashboard.provisionedModel.observedUrl = page.url();
   dashboard.provisionedModel.browserVersion = page.nativeZoomEvidence?.browserVersion || page.context().browser().version();
   const panelDir = path.join(CONFIG.outputDir, 'panels', dashboard.uid);
@@ -2693,11 +2763,15 @@ if (require.main === module) {
 }
 
 module.exports = {
+  browserDashboardResponseKind,
+  normalizeBrowserDashboardPayload,
+  dashboardEntryFromPayload,
   closeCaptureBrowser,
   mergeTerminalObservations,
   mergeTypographyObservations,
   layoutFitMeasurementsFromDom,
   navigationValidationFromDom,
+  collectNavigationValidation,
   graphicsMeasurementsFromDom,
   browserAndKioskStateFromDom,
   accessibilityMeasurementsFromDom,

@@ -1,0 +1,57 @@
+{
+  "status": "PASS",
+  "built_image_config_digest": "sha256:5893953e261ab8908bb2db9736c1de609dec37872315f5c62a60ecbaaae075ab",
+  "declared_image": "satorykono/bioetl-grafana-router7-canvas@sha256:abace6d89d5f03680f40edcce05b7a05e2dd1b688ecd17a455d19bd9752c3609",
+  "declared_image_config_digest": "sha256:5893953e261ab8908bb2db9736c1de609dec37872315f5c62a60ecbaaae075ab",
+  "rootfs_sha256": "1be4e5db7efad14ff5752314bd5eb1858e61010d8edc925a9ebbf24df7cc4d47",
+  "built_layers": [
+    "sha256:74d97c428c51a828f9051a7a40a53ff1fc99e54fc30323ce36760701b0b7f711",
+    "sha256:79b29da56069ed0bdc63c3256420d49ee7bdc5583f7e8581da5f6df339e728fa",
+    "sha256:579a8de91bc9c7c36f718220d832a4415d78ca393a471ed00be1dca6adc3d931",
+    "sha256:ff4d7e8603b0e118f34867226d5a5c9e4ec684f4eac1b2a1204922facbc70ca3",
+    "sha256:cf5656ac3137929fb1984612e578e91f714d06633e99d0447eeec99663701f89",
+    "sha256:cb6af55cfc9efb41199fbc9649873a3d93ada1809b04c33e3748329af5e4b106",
+    "sha256:d24684cb04f98a1dc6aaeddde6a37208ac64a85b229cb9f042c61882a4acdd71",
+    "sha256:774fa11a77abdc202e03736ad9f43eaf8bd8f71e8e39a5dd015b02cc00d2fb8a",
+    "sha256:028144a16cdc7a77d5d0232c1108f887dc8b2dbc22a3cc2d1c12a0e27e722d99",
+    "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+    "sha256:e7abeb13f33f0e8fc89e2c811a59e31df9fa7f6edb4e347d0efef2640ae96e72",
+    "sha256:78eb8d814b1238f8ea22aaaca24e8420b1c14bb85a739cd246faa5dbcb207dad",
+    "sha256:cd232c8abeb79a720bed0f94e54dfb31117d61e488487ddfe47c0811cb14eba6",
+    "sha256:699d73f40958fea61ee9072334e26d145d2ddf9ffd1a359312f73a339236ad77",
+    "sha256:4f2f1a009918ca6da94a2128a9578b216285d5bc1a8d1a34a814e1004e7741be",
+    "sha256:95bac99d8e67beb3ab0f9ca7698a040d178a2dd5f7bdb7e5fcdedb3a3e555477"
+  ],
+  "declared_layers": [
+    "sha256:74d97c428c51a828f9051a7a40a53ff1fc99e54fc30323ce36760701b0b7f711",
+    "sha256:79b29da56069ed0bdc63c3256420d49ee7bdc5583f7e8581da5f6df339e728fa",
+    "sha256:579a8de91bc9c7c36f718220d832a4415d78ca393a471ed00be1dca6adc3d931",
+    "sha256:ff4d7e8603b0e118f34867226d5a5c9e4ec684f4eac1b2a1204922facbc70ca3",
+    "sha256:cf5656ac3137929fb1984612e578e91f714d06633e99d0447eeec99663701f89",
+    "sha256:cb6af55cfc9efb41199fbc9649873a3d93ada1809b04c33e3748329af5e4b106",
+    "sha256:d24684cb04f98a1dc6aaeddde6a37208ac64a85b229cb9f042c61882a4acdd71",
+    "sha256:774fa11a77abdc202e03736ad9f43eaf8bd8f71e8e39a5dd015b02cc00d2fb8a",
+    "sha256:028144a16cdc7a77d5d0232c1108f887dc8b2dbc22a3cc2d1c12a0e27e722d99",
+    "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+    "sha256:e7abeb13f33f0e8fc89e2c811a59e31df9fa7f6edb4e347d0efef2640ae96e72",
+    "sha256:78eb8d814b1238f8ea22aaaca24e8420b1c14bb85a739cd246faa5dbcb207dad",
+    "sha256:cd232c8abeb79a720bed0f94e54dfb31117d61e488487ddfe47c0811cb14eba6",
+    "sha256:699d73f40958fea61ee9072334e26d145d2ddf9ffd1a359312f73a339236ad77",
+    "sha256:4f2f1a009918ca6da94a2128a9578b216285d5bc1a8d1a34a814e1004e7741be",
+    "sha256:95bac99d8e67beb3ab0f9ca7698a040d178a2dd5f7bdb7e5fcdedb3a3e555477"
+  ],
+  "artifacts": {
+    "/usr/share/grafana/public/build": {
+      "tree_sha256": "9ea6fd561bf295f89654c7c1856a29be8ecf726ada96b633c2bac305efae42ce",
+      "module_sha256": null
+    },
+    "/usr/share/grafana/data/plugins-bundled/bioetl-scenes-app": {
+      "tree_sha256": "604550e55d09fb7e1a4dc8b4de4f5c7c53dddb940418db00c2d4dbd889d7bb72",
+      "module_sha256": "2cb847b82284b3c5792051ad5f7b7ee67be4364bebfd2353616c71667bceabd2"
+    },
+    "/usr/share/grafana/data/plugins-bundled/bioetl-selectorshell-panel": {
+      "tree_sha256": "4c8eb2b5a0d465a165874a91dcef62512fd8f84c76c08d441fad5ebcb16ad2a5",
+      "module_sha256": "006f192a786c3f4fe760b62db24039c445aeb3f35f267d3195532e3887757065"
+    }
+  }
+}

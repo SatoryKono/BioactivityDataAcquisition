@@ -853,6 +853,9 @@ def test_backend_process_helpers_cover_listener_parsing_and_detached_start(
         lambda *args, **kwargs: fake_result,
     )
     monkeypatch.setattr(backend_process.os, "name", "posix")
+    monkeypatch.setattr(
+        backend_process, "_resolve_system_executable", lambda command: "/usr/bin/ss"
+    )
     assert backend_process._find_listening_backend_pids_by_port(9090) == (123,)
     assert backend_process._find_listening_backend_pid_by_port(9090) == 123
 

@@ -680,11 +680,15 @@ def test_composite_source_identity_is_stable_across_layer_projections():
                 provider_field_map={"crossref": fields},
                 enrichment_status={"crossref": "success"},
                 composite_run_id=str(context.run_id),
-                composite_name="composite_publication",
+                composite_name="composite.merged"
+                if layer == "silver"
+                else "composite/publication",
             )
         )
     (silver_nodes, silver_edges), (gold_nodes, gold_edges) = fragments
     assert silver_nodes == gold_nodes
+    assert silver_edges[0].attributes["composite_name"] == "composite.merged"
+    assert gold_edges[0].attributes["composite_name"] == "composite/publication"
     assert list(silver_edges[0].attributes["selected_fields"]) == ["title", "abstract"]
     assert list(gold_edges[0].attributes["selected_fields"]) == ["title"]
     assert silver_edges[0].manifest_id == gold_edges[0].manifest_id == "parent-manifest"

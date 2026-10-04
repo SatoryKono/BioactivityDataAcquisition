@@ -96,11 +96,16 @@ def _build_reconcile_payload(
         "quarantine_rows_written": r.quarantine_rows_written,
         "quarantine_error_code": r.quarantine_error_code,
         "reference_completeness": request.reference_completeness,
-        "closed_cohort_verified": request.require_closed_cohort
-        and r.retained_rows == r.scanned_rows
-        and not r.mutated,
+        "closed_cohort_verified": _closed_cohort_verified(request, result),
         "unproven_unmatched_rows": getattr(r, "unproven_unmatched_rows", 0),
     }
+    if request.reconciliation_mode == "selected-snapshot":
+        payload.update(
+            reconciliation_mode=request.reconciliation_mode,
+            selected_snapshots=getattr(r, "selected_snapshots", None),
+            input_snapshots=getattr(r, "input_snapshots", None),
+            reference_scope="current_run",
+        )
     blocked_reason = getattr(r, "mutation_blocked_reason", None)
     if blocked_reason:
         payload["mutation_blocked_reason"] = blocked_reason
@@ -109,6 +114,19 @@ def _build_reconcile_payload(
     if getattr(r, "source_snapshot", None) is not None:
         payload["source_snapshot"] = dict(r.source_snapshot)
     return payload
+
+
+def _closed_cohort_verified(
+    request: ForeignKeyReconciliationRequest, result: object
+) -> bool:
+    """Selected snapshots never imply complete-reference cohort verification."""
+    r = cast(Any, result)  # Any: structural FK reconcile result port
+    return bool(
+        request.require_closed_cohort
+        and request.reconciliation_mode == "complete-reference"
+        and r.retained_rows == r.scanned_rows
+        and not r.mutated
+    )
 
 
 def _record_reconcile_destructive_commit(
@@ -184,6 +202,11 @@ def build_reconcile_foreign_keys_executor(
         )
         if artifact_refs:
             payload["artifact_refs"] = list(artifact_refs)
+        if (
+            payload.get("mutation_blocked_reason")
+            == "selected_snapshot_commit_ambiguous"
+        ):
+            raise RuntimeError("selected snapshot commit is ambiguous; repair required")
         return payload
 
     return _executor
@@ -219,6 +242,16 @@ def _build_request(
             reference_table=reference_table,
         )
     )
+    from bioetl.application.workflow.transforms.selected_snapshot_inputs import (
+        selected_snapshot_inputs,
+    )
+
+    snapshots = (
+        selected_snapshot_inputs(upstream_outputs or {})
+        if config.get("reconciliation_mode") == "selected-snapshot"
+        or config.get("require_closed_cohort") is True
+        else {}
+    )
     return ForeignKeyReconciliationRequest(
         source_table=source_table,
         reference_table=reference_table,
@@ -242,6 +275,10 @@ def _build_request(
         debug_export_enabled=debug_export_enabled,
         debug_export_dir=debug_export_dir,
         source_scope=_source_scope(config),
+        reconciliation_mode=str(
+            config.get("reconciliation_mode", "complete-reference")
+        ),
+        selected_snapshots=snapshots or None,
         source_run_ids=source_run_ids,
         reference_completeness=completeness,
         reference_identity=identity,

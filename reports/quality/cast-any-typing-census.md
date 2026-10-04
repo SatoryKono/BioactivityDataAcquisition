@@ -4,9 +4,9 @@ Linked issue: #10596 (AUD-006). Schema: `cast-any-typing-census-v1`.
 
 Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`, `Any: JSON`, `as_mixin_host(`.
 
-- total_cast_any_count: 304
+- total_cast_any_count: 305
 - justified_count: 241
-- unjustified_count: 63
+- unjustified_count: 64
 - file_count: 99
 
 ## By category
@@ -20,13 +20,13 @@ Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`
 | `any_host_attr` | 16 |
 | `any_json` | 0 |
 | `as_mixin_host_call` | 0 |
-| `unjustified` | 63 |
+| `unjustified` | 64 |
 
 ## By layer
 
 | Layer | Total | Unjustified |
 | --- | ---: | ---: |
-| `application` | 141 | 18 |
+| `application` | 142 | 19 |
 | `composition` | 18 | 4 |
 | `domain` | 12 | 2 |
 | `infrastructure` | 130 | 38 |
@@ -37,7 +37,7 @@ Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`
 | Sub-bucket | Count |
 | --- | ---: |
 | `pd4_host_default_pending_protocol` | 0 |
-| `free_form_reason` | 63 |
+| `free_form_reason` | 64 |
 | `no_reason_tag` | 0 |
 
 ## Top files
@@ -47,11 +47,11 @@ Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`
 | `src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py` | 5 | 0 | 5 |
 | `src/bioetl/infrastructure/quality/exemptions_registry.py` | 4 | 0 | 4 |
 | `src/bioetl/application/services/export_lineage/export_execution.py` | 3 | 0 | 3 |
+| `src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py` | 3 | 0 | 3 |
 | `src/bioetl/infrastructure/observability/observability_backend_process.py` | 3 | 0 | 3 |
 | `src/bioetl/application/composite/helpers/dependency_chained_key_resolver.py` | 2 | 0 | 2 |
 | `src/bioetl/application/core/batch_writer_columns_mixin.py` | 2 | 0 | 2 |
 | `src/bioetl/application/services/ops/health_service.py` | 2 | 0 | 2 |
-| `src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py` | 2 | 0 | 2 |
 | `src/bioetl/infrastructure/adapters/decorators/_circuit_breaker_snapshot.py` | 2 | 0 | 2 |
 | `src/bioetl/infrastructure/export/debug_export_ops.py` | 2 | 0 | 2 |
 | `src/bioetl/infrastructure/provenance/code_revision.py` | 2 | 0 | 2 |
@@ -79,12 +79,12 @@ Justified markers: `PD3`, `PD6`, `TYPE-002`, `Any: mixin host`, `Any: host attr`
 | `export port accepts Arrow/table duck-type` | 3 |
 | `pyarrow Table after read boundary` | 3 |
 | `pyarrow.Table returned via executor is untyped to mypy` | 3 |
+| `structural FK reconcile result port` | 3 |
 | `DeltaTable runtime type has no complete type stubs` | 2 |
 | `external mutation summary compatibility` | 2 |
 | `gold write request duck-type` | 2 |
 | `lineage bundle duck-type` | 2 |
 | `reconciliation mutation helper uses structural host` | 2 |
-| `structural FK reconcile result port` | 2 |
 | `CSV exporter Arrow table duck-type` | 1 |
 | `DQ metrics .dict() duck-type` | 1 |
 | `asdict over caller-guaranteed dataclass` | 1 |

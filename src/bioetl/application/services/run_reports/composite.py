@@ -106,6 +106,7 @@ class CompositeRunReportService:
             error=error,
             children=children,
             layers=layers,
+            store=self.store,
         )
         paths = write_pipeline_run_report(report, root=self.root, store=self.store)
         if status == "success" and self.archive is not None:

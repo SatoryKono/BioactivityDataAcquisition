@@ -193,6 +193,7 @@ tracked_suite_inventory:
     - tests/integration/test_grafana_control_plane_variables.py
     - tests/integration/test_incident_explanations.py
     - tests/integration/test_json_hash_stability.py
+    - tests/integration/test_live_green_acceptance.py
     - tests/integration/test_organism_classification_csv_coverage.py
     - tests/integration/test_pipeline_diagnostics_evidence_actions.py
     - tests/integration/test_pipeline_diagnostics_retirement.py
@@ -200,8 +201,10 @@ tracked_suite_inventory:
     - tests/integration/test_run_explorer_http_catalog.py
     - tests/integration/test_run_explorer_request_fixtures.py
     - tests/integration/test_runtime_metric_emission_consistency.py
+    - tests/integration/test_selected_snapshot_contracts.py
     - tests/integration/test_trust_telemetry_coverage.py
     - tests/integration/test_uniprot_idmapping_pipeline.py
+    - tests/integration/workflow/test_selected_snapshot_reconciliation.py
     - tests/integration/workflow/test_workflow_foreign_key_reconciliation.py
     - tests/integration/workflow/test_workflow_runner_service.py
     governance_and_runtime_surfaces:
@@ -278,6 +281,7 @@ tracked_suite_inventory:
     - tests/integration/composite/test_composite_cross_validation.py
     - tests/integration/composite/test_molecule_pipeline.py
     config_and_storage_surfaces:
+    - tests/integration/config/test_activity_raw_compound_units.py
     - tests/integration/config/test_chembl_bronze_observed_value_inventory_snapshot.py
     - tests/integration/config/test_chembl_contract_registry_coverage.py
     - tests/integration/config/test_chembl_dq_catalog_sync.py
@@ -291,6 +295,8 @@ tracked_suite_inventory:
     - tests/integration/config/test_dq_config_loading.py
     - tests/integration/config/test_generic_field_ownership.py
     - tests/integration/config/test_gold_nullable_numeric_contract.py
+    - tests/integration/config/test_live_chembl_regressions.py
+    - tests/integration/config/test_live_uniprot_pubchem_regressions.py
     - tests/integration/config/test_non_chembl_contract_registry_coverage.py
     - tests/integration/config/test_non_chembl_hash_policy_alignment.py
     - tests/integration/config/test_ontology_unit_semantics.py

@@ -51,11 +51,11 @@ Orphan temp / dynamic hosted workflows are out of scope here (#10265, #10268).
 | `github-settings-quarterly-review.yml` | Quarterly GitHub Settings Review | Read-only quarterly GitHub settings review |
 | `import-linter.yml` | Lint and Architecture Gates | import-linter + layer architecture |
 | `no-partial-tree-commits.yml` | No partial-tree commits | Reject incomplete Git trees (#11709) |
-| `router-v7-bridge.yml` | Router 7 bridge candidate | Path-scoped candidate tests, browser build and dependency audit |
 | `opencode-pr-review.yml` | opencode-pr-review | Dispatch-only stub (#11012); remote OpenCode installer removed |
 | `opencode-triage.yml` | opencode-triage | Dispatch-only stub (#11012); remote OpenCode installer removed |
 | `pr-required.yml` | PR Gate Complete | Fail-closed coordinator; GitHub required context `pr-gate-complete` (ruleset 13643213, #10267) |
 | `root-hygiene.yml` | Root Hygiene | Root allowlist / clutter gates |
+| `router-v7-bridge.yml` | Router 7 bridge candidate | Candidate plugin, frontend and image parity checks; managed host acceptance remains separate |
 | `schema-governance.yml` | Schema Governance | Schema governance checks |
 | `scorecard.yml` | OpenSSF Scorecard | Weekly non-blocking OpenSSF Scorecard baseline |
 | `security.yml` | Security Scans | Secrets, pip-audit, Bandit, Gitleaks, OSV-Scanner |

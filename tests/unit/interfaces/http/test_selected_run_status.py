@@ -118,6 +118,25 @@ def read(tmp_path, run_id="run-a") -> dict[str, Any]:
     )
 
 
+@pytest.mark.parametrize("run_id", ["-", "missing-run"])
+def test_quality_evidence_unavailable_never_invents_counters(tmp_path, run_id):
+    result = read(tmp_path, run_id=run_id)
+    assert result["quality_evidence"] == {"pipeline": "chembl_activity", "funnel": None}
+    assert result["verdict"] == ("SELECT RUN" if run_id == "-" else "UNKNOWN")
+
+
+def test_quality_evidence_preserves_exact_saved_funnel(tmp_path):
+    path = persist(tmp_path).json_path
+    before = path.read_bytes()
+    saved = json.loads(before)
+    result = read(tmp_path)
+    assert result["quality_evidence"] == {
+        "pipeline": "chembl_activity",
+        "funnel": saved.get("funnel"),
+    }
+    assert path.read_bytes() == before
+
+
 def _run_observations() -> dict[str, Any]:
     return run_observations()
 

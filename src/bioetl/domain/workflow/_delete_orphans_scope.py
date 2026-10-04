@@ -12,6 +12,7 @@ from bioetl.domain.workflow.config import (
 )
 
 __all__ = [
+    "apply_reconciliation_mode",
     "mark_delete_orphans_current_run_scope",
     "reject_delete_orphans_after_limited_extracts",
 ]
@@ -152,6 +153,8 @@ def reject_delete_orphans_after_limited_extracts(config: WorkflowConfig) -> None
         transform = _delete_orphans_transform(step)
         if transform is None:
             continue
+        if _transform_mode(transform, config) == "selected-snapshot":
+            continue
         _reject_limited_delete_orphans(transform, config, steps_by_id)
 
 
@@ -180,3 +183,92 @@ def _reject_limited_delete_orphans(
         f"({', '.join(limited)}); independently bounded extracts "
         "make Gold FK orphans false positives"
     )
+
+
+def apply_reconciliation_mode(
+    config: WorkflowConfig, mode: str | None = None
+) -> WorkflowConfig:
+    """Bind effective mode and bounded source scope into transform fingerprints."""
+    steps: list[WorkflowStep] = []
+    producers: set[str] = set()
+    definitions = {step.step_id: step for step in config.steps}
+    for step in config.steps:
+        transform = _delete_orphans_transform(step)
+        if transform is None:
+            steps.append(step)
+            continue
+        steps.append(
+            _bind_transform_mode(transform, config, mode, definitions, producers)
+        )
+    captured = tuple(_mark_selected_producer(step, producers) for step in steps)
+    return _require_workflow_config(replace(config, steps=captured))
+
+
+def _transform_mode(transform: TransformStepConfig, config: WorkflowConfig) -> object:
+    return (transform.config or {}).get(
+        "reconciliation_mode",
+        config.defaults.reconciliation_mode or "complete-reference",
+    )
+
+
+def _bind_transform_mode(
+    transform: TransformStepConfig,
+    config: WorkflowConfig,
+    mode: str | None,
+    definitions: dict[str, WorkflowStep],
+    producers: set[str],
+) -> WorkflowStep:
+    values = dict(transform.config or {})
+    effective = _effective_mode(values, config, mode)
+    if effective == "selected-snapshot":
+        values.update(reconciliation_mode=effective, source_scope="current_run")
+        producers.update(_upstream_producers(transform, definitions))
+        return replace(transform, config=values)
+    if mode is not None:
+        values["reconciliation_mode"] = effective
+        return replace(transform, config=values)
+    return transform
+
+
+def _effective_mode(
+    values: dict[str, object], config: WorkflowConfig, mode: str | None
+) -> str:
+    from bioetl.domain.workflow.foreign_key_reconciliation import (
+        require_reconciliation_mode,
+    )
+
+    return require_reconciliation_mode(
+        mode
+        or config.defaults.reconciliation_mode
+        or str(values.get("reconciliation_mode", "complete-reference"))
+    )
+
+
+def _upstream_producers(
+    transform: TransformStepConfig,
+    definitions: dict[str, WorkflowStep],
+) -> set[str]:
+    pending = list(transform.depends_on)
+    seen: set[str] = set()
+    producers: set[str] = set()
+    while pending:
+        identity = pending.pop()
+        if identity in seen:
+            continue
+        seen.add(identity)
+        ancestor = definitions[identity]
+        pending.extend(ancestor.depends_on)
+        if isinstance(ancestor, WorkflowStepConfig):
+            producers.add(identity)
+    return producers
+
+
+def _mark_selected_producer(step: WorkflowStep, producers: set[str]) -> WorkflowStep:
+    if isinstance(step, WorkflowStepConfig) and step.step_id in producers:
+        return replace(
+            step,
+            run_options=replace(
+                step.run_options, reconciliation_mode="selected-snapshot"
+            ),
+        )
+    return step

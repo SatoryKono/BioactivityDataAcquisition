@@ -15,6 +15,9 @@ from bioetl.application.services.run_reports.composite import (
     record_composite_child,
 )
 from bioetl.application.services.run_reports.observations import record_run_observation
+from bioetl.application.services.run_reports.artifact_digest import (
+    canonical_report_sha256,
+)
 from bioetl.domain.composite.result import CompositeResult, MergeResult, SeedResult
 from tests.helpers.clock import fixed_test_clock
 from tests.helpers.run_report_store import MemoryReportStore
@@ -129,6 +132,15 @@ async def test_parent_records_terminal_evidence(
         report["observations"]["Data Validation"]["reason"] == "actual_merge_validation"
     )
     assert report["io"]["child_runs"][0]["run_id"] == "child-id"
+    child_artifact = next(
+        item
+        for item in report["artifacts"]
+        if item["kind"] == "composite_child_run_report"
+    )
+    assert "\\" not in child_artifact["ref"]
+    assert child_artifact["sha256"] == canonical_report_sha256(
+        json.loads(service.store.read_text(str(child_path)))
+    )
     assert report["layers"]["bronze_records"] == 0
     assert report["layers"]["gold_written"] == (9 if outcome == "success" else 0)
     if outcome != "success":

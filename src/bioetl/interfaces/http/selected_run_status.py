@@ -28,6 +28,10 @@ from bioetl.interfaces.http._forensic_request_budget import (
 from bioetl.interfaces.http._health_server_observability_protocols import (
     _HealthObservabilityRoutingHost,
 )
+from bioetl.interfaces.http._reconciliation_display import (
+    linked_reconciliation_display,
+    unavailable_reconciliation,
+)
 from bioetl.interfaces.http._selected_run_artifact_probes import _artifact_probes
 from bioetl.interfaces.http._selected_run_live import (
     active_run_diagnostics,
@@ -116,6 +120,7 @@ def unavailable_status(
             else trust
         ],
         "domains": rows,
+        "reconciliation_display": unavailable_reconciliation(reason),
         "presentation_domains": presentation_rows(rows, selection=state == _SELECT_RUN),
         "provider_checks": [
             {
@@ -126,6 +131,7 @@ def unavailable_status(
             }
         ],
         "provider_options": [],
+        "quality_evidence": {"pipeline": pipeline, "funnel": None},
         "rows": rows,
         "trust": [trust],
         **_readiness_fields(
@@ -244,6 +250,10 @@ def _present_status(
         "presentation_domains": presentation_rows(rows),
         "provider_checks": provider_check_rows(report),
         "provider_options": provider_selector_options(report),
+        "quality_evidence": {
+            "pipeline": summary["pipeline"],
+            "funnel": report.get("funnel"),
+        },
         "rows": rows,
         "trust": [trust],
         **readiness_fields,
@@ -315,7 +325,9 @@ def load_selected_run_status(
     readiness_fields = _readiness_fields(projection)
     domain_rows = assessment["domains"]
     assert isinstance(domain_rows, list)  # Produced by the verified assessment.
-    return _present_status(summary, report, domain_rows, readiness_fields)
+    result = _present_status(summary, report, domain_rows, readiness_fields)
+    result["reconciliation_display"] = linked_reconciliation_display(report, root)
+    return result
 
 
 def _merge_active_diagnostics(

@@ -47,7 +47,7 @@ dashboards:
       - Prometheus
       - Grafana
       - BioETL Ops HTTP
-    panel_count: 10
+    panel_count: 11
     key_panels:
       - id: 9603
         title: Review Selected Run Status

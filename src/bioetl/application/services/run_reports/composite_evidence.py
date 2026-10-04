@@ -6,6 +6,9 @@ import asyncio
 import json
 
 from bioetl.application.services.execution.pipeline_runner_models import RunResult
+from bioetl.application.services.run_reports.artifact_digest import (
+    canonical_report_sha256,
+)
 from bioetl.application.services.run_reports.observations import run_observations
 from bioetl.domain.composite.result import CompositeResult
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
@@ -40,18 +43,23 @@ def composite_layer_counts(result: CompositeResult | None) -> LayerCounts:
     )
 
 
-def _child_artifacts(children: list[RunResult]) -> tuple[dict[str, str | None], ...]:
-    return tuple(
-        {
-            "kind": "composite_child_run_report",
-            "ref": child.run_report_json_path,
-            "run_id": child.run_id,
-            "pipeline_name": child.pipeline_name,
-            "manifest_id": child.manifest_id,
-        }
-        for child in children
-        if child.run_report_json_path
-    )
+def _child_artifact(child: RunResult, store: RunReportStorePort) -> dict[str, object]:
+    """Bind a portable child reference to its canonical report digest when available."""
+    artifact: dict[str, object] = {
+        "kind": "composite_child_run_report",
+        "ref": str(child.run_report_json_path).replace("\\", "/"),
+        "run_id": child.run_id,
+        "pipeline_name": child.pipeline_name,
+        "manifest_id": child.manifest_id,
+    }
+    try:
+        payload = json.loads(store.read_text(str(child.run_report_json_path)))
+        if isinstance(payload, dict):
+            artifact["sha256"] = canonical_report_sha256(payload)
+    except (OSError, ValueError, TypeError):
+        # Preserve missing/invalid references so readers expose insufficient evidence.
+        pass
+    return artifact
 
 
 def _failure(error: BaseException | None) -> dict[str, str] | None:
@@ -67,6 +75,7 @@ def build_composite_report(
     error: BaseException | None,
     children: list[RunResult],
     layers: LayerCounts,
+    store: RunReportStorePort,
 ) -> PipelineRunReport:
     """Assemble parent evidence without borrowing any child run identity."""
     merge = result.merge_result if result is not None else None
@@ -82,7 +91,11 @@ def build_composite_report(
         },
         tracking_coverage=TrackingCoverage.PARTIAL,
         reason_catalog_version=default_reason_catalog().version,
-        artifacts=_child_artifacts(children),
+        artifacts=tuple(
+            _child_artifact(child, store)
+            for child in children
+            if child.run_report_json_path
+        ),
         failure=_failure(error),
         io={
             "execution_context": "composite",

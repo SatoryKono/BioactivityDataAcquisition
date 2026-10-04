@@ -1,0 +1,43 @@
+{
+  "plugin": "bioetl-selectorshell-panel",
+  "commands": [
+    {
+      "command": "npm.cmd ci --ignore-scripts",
+      "exit_code": 0
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "exit_code": 0
+    },
+    {
+      "command": "npm.cmd run lint",
+      "exit_code": 0
+    },
+    {
+      "command": "npm.cmd run test:ci",
+      "exit_code": 0,
+      "test_count": 12
+    },
+    {
+      "command": "npm.cmd run build",
+      "exit_code": 0,
+      "js_bundle_present": true,
+      "js_bundle_size": 7909
+    },
+    {
+      "command": "npm.cmd audit --json",
+      "exit_code": 1,
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 31,
+        "critical": 0,
+        "total": 31
+      },
+      "advisories": [
+        "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm"
+      ]
+    }
+  ]
+}

@@ -113,10 +113,10 @@ def test_dashboard_schema_version_and_iteration():
         dashboard = load_dashboard(dashboard_path)
         schema_version = dashboard.get("schemaVersion")
         iteration = dashboard.get("iteration")
-        # schemaVersion may be 30 or 39 (permitted values)
+        # Pinned Grafana 12.2.5 must not rewrite the canonical model at runtime.
         if schema_version is not None:
-            assert schema_version in (30, 39), (
-                f"{dashboard_path.name} schemaVersion must be 30 or 39, got {schema_version}"
+            assert schema_version == 42, (
+                f"{dashboard_path.name} schemaVersion must be 42, got {schema_version}"
             )
         # iteration if present must be positive integer
         if iteration is not None:

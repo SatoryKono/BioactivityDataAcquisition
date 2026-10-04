@@ -176,6 +176,8 @@ def _normalize_datasource_dict(ref: dict[str, object]) -> str | None:
 
     if name == QUARANTINE_EXPLORER_DATASOURCE or uid == "quarantine-explorer":
         return QUARANTINE_EXPLORER_DATASOURCE
+    if uid == "bioetl-ops-http":
+        return "BioETL Ops HTTP"
     if kind == "prometheus" or uid == "prometheus":
         return "Prometheus"
     if kind == "loki" or uid == "loki":
@@ -957,6 +959,37 @@ def _render_health_summary(summary: DashboardHealthSummary) -> str:
     return "\n".join(lines)
 
 
+def sync_inventory_panel_counts(inventory: list[DashboardInventoryItem]) -> None:
+    """Refresh source-derived counts without changing reviewed inventory fields."""
+    entries, errors = _dashboard_inventory_contract_entries()
+    actual = {str(item["uid"]): item["panel_count"] for item in inventory}
+    if errors or len(actual) != len(inventory) or set(actual) != set(entries):
+        raise ValueError(
+            "dashboard-inventory: invalid or mismatched dashboard UID roster"
+        )
+    original = DASHBOARD_INVENTORY_CONTRACT.read_text(encoding="utf-8")
+    document = yaml.compose(original)
+    dashboards = next(node for key, node in document.value if key.value == "dashboards")
+    edits = []
+    for entry in dashboards.value:
+        fields = {key.value: node for key, node in entry.value}
+        count = fields["panel_count"]
+        edits.append(
+            (
+                count.start_mark.index,
+                count.end_mark.index,
+                str(actual[fields["uid"].value]),
+            )
+        )
+    rendered = original
+    for start, end, value in sorted(edits, reverse=True):
+        rendered = rendered[:start] + value + rendered[end:]
+    if rendered != original:
+        temporary = DASHBOARD_INVENTORY_CONTRACT.with_suffix(".yaml.tmp")
+        temporary.write_text(rendered, encoding="utf-8")
+        temporary.replace(DASHBOARD_INVENTORY_CONTRACT)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -979,9 +1012,20 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Emit per-dashboard local health rollup over docs/provisioning/deployment contracts",
     )
+    parser.add_argument(
+        "--sync-contract",
+        action="store_true",
+        help="Refresh only source-derived panel counts in the reviewed inventory contract",
+    )
     args = parser.parse_args(argv)
 
     inventory = _load_inventory()
+    if args.sync_contract:
+        try:
+            sync_inventory_panel_counts(inventory)
+        except (OSError, ValueError) as exc:
+            print(str(exc))
+            return 1
     parity_errors, parity_by_dashboard = _check_parity(inventory)
     provisioning_errors, provisioning_metadata = _check_provisioning_contract()
     deployed_errors: list[str] = []

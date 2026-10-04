@@ -16,6 +16,37 @@ from scripts.ops.observability.grafana import render_nav_bus as nav_bus
 pytestmark = pytest.mark.unit
 
 
+def test_run_explorer_processing_status_fits_zoom_with_inspectable_run_id() -> None:
+    from scripts.ops.observability.grafana._run_explorer_columns import (
+        apply_run_explorer_columns,
+    )
+
+    payload = json.loads(
+        (nav_bus.DASH_DIR / "bioetl-run-explorer-v1.json").read_text(encoding="utf-8")
+    )
+    apply_run_explorer_columns(payload)
+    panel = next(item for item in payload["panels"] if item["id"] == 3010)
+    fields = {
+        override["matcher"]["options"]: {
+            property["id"]: property["value"] for property in override["properties"]
+        }
+        for override in panel["fieldConfig"]["overrides"]
+    }
+    assert fields["Overview"]["custom.width"] == 180
+    assert fields["Overview"]["custom.minWidth"] == 180
+    assert fields["Run ID"]["custom.inspect"] is True
+    assert any(
+        "${__data.fields.run_id}" in link["title"] for link in fields["Run ID"]["links"]
+    )
+    visible_width = sum(
+        properties.get("custom.width", 0)
+        for properties in fields.values()
+        if properties.get("custom.hidden") is not True
+    )
+    budget = (1366 // 2) * panel["gridPos"]["w"] // 24 - 40
+    assert visible_width <= budget
+
+
 def test_complete_run_discovery_preserves_scope_and_avoids_null_auto_height() -> None:
     from scripts.ops.observability.grafana._latest_complete_run_panel import (
         stamp_latest_complete_run_panel,

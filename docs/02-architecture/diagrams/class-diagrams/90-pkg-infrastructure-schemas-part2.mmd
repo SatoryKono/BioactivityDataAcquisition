@@ -1,25 +1,13 @@
 %% Title: Package Family: infrastructure/schemas (Part 2/4)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 2/4; modules: workflow_config, composite_validation, base_schemas_pubchem.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 2/4; modules: composite_validation, base_schemas_pubchem, pipeline_config_common, workflow_config.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
 %% @date    2026-10-04
 %% @level   Package Family / Inventory Slice
-%% @nodes   24
+%% @nodes   29
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
-
-    namespace workflow_config {
-        class WorkflowConfigFileSchema
-        class WorkflowConfigSchema
-        class WorkflowDefaultsSchema
-        class WorkflowPipelineStepSchema
-        class WorkflowReconcileForeignKeysConfigSchema
-        class WorkflowReconcileRowsConfigSchema
-        class WorkflowReferenceCohortSchema
-        class WorkflowRunOptionsSchema
-        class WorkflowTransformStepSchema
-    }
 
     namespace composite_validation {
         class CompositeDQSchema
@@ -40,4 +28,24 @@ classDiagram
         class BaseGoldListLengthFilterConfig
         class BaseGoldRangeFilterConfig
         class BaseInputFilterConfig
+    }
+
+    namespace pipeline_config_common {
+        class CircuitBreakerYamlConfig
+        class ConditionalValidationConfig
+        class CrossFieldValidationConfig
+        class CsvExportConfig
+        class DQReportYamlConfig
+        class DQYamlConfig
+        class FieldValidationConfig
+    }
+
+    namespace workflow_config {
+        class WorkflowConfigFileSchema
+        class WorkflowConfigSchema
+        class WorkflowPipelineStepSchema
+        class WorkflowReconcileForeignKeysConfigSchema
+        class WorkflowReconcileRowsConfigSchema
+        class WorkflowReferenceCohortSchema
+        class WorkflowTransformStepSchema
     }

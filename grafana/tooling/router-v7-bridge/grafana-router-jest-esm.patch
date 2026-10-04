@@ -1,0 +1,43 @@
+diff --git a/jest.config.js b/jest.config.js
+--- a/jest.config.js
++++ b/jest.config.js
+@@ -51,6 +51,7 @@
+     customExportConditions: ['@grafana-app/source', 'browser'],
+   },
+   transform: {
++    '^.+\\.mjs$': '<rootDir>/public/test/routerBridgeTransformer.cjs',
+     '^.+\\.(ts|tsx|js|jsx)$': [require.resolve('ts-jest')],
+   },
+   transformIgnorePatterns: [
+@@ -62,7 +63,7 @@
+   moduleDirectories: ['public', 'node_modules'],
+   roots: ['<rootDir>/public/app', '<rootDir>/public/test', '<rootDir>/packages', '<rootDir>/scripts/tests'],
+   testRegex: '(\\.|/)(test)\\.(jsx?|tsx?)$',
+-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'cjs'],
++  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'cjs', 'mjs'],
+   setupFiles: ['jest-canvas-mock', './public/test/jest-setup.ts'],
+   testTimeout: 30000,
+   resolver: `<rootDir>/public/test/jest-resolver.js`,
+diff --git a/public/test/routerBridgeTransformer.cjs b/public/test/routerBridgeTransformer.cjs
+new file mode 100644
+--- /dev/null
++++ b/public/test/routerBridgeTransformer.cjs
+@@ -0,0 +1,18 @@
++const ts = require('typescript');
++
++module.exports = {
++  process(source, filename) {
++    return {
++      code: ts.transpileModule(source, {
++        // TypeScript preserves ESM for .mjs even with module: CommonJS.
++        fileName: filename.replace(/\.mjs$/, '.js'),
++        compilerOptions: {
++          allowJs: true,
++          module: ts.ModuleKind.CommonJS,
++          target: ts.ScriptTarget.ES2022,
++          esModuleInterop: true,
++        },
++      }).outputText,
++    };
++  },
++};

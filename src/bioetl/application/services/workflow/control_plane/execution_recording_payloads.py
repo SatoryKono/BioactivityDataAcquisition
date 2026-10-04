@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from bioetl.application.services.execution.pipeline_runner_models import RunResult
 from bioetl.application.services.workflow.workflow_runner_service import (
     WorkflowRunExecutionResult,
     WorkflowStepExecutionResult,
@@ -14,6 +15,13 @@ _TRANSFORM_RESULT_SUMMARY_KEYS = (
     "manifest_id",
     "step_id",
     "source_table",
+    "reconciliation_mode",
+    "reference_completeness",
+    "source_scope",
+    "reference_scope",
+    "source_run_ids",
+    "input_snapshots",
+    "selected_snapshots",
     "reference_table",
     "source_key",
     "reference_key",
@@ -111,6 +119,30 @@ def _pipeline_child_details(
         "child_run_id": child_run_id,
         "child_manifest_id": child_manifest_id,
     }
+    snapshots = getattr(result.payload, "selected_snapshots", None)
+    if snapshots:
+        details["selected_snapshots"] = snapshots
+        if isinstance(result.payload, RunResult):
+            producer = result.payload
+            details["producer_result"] = {
+                "schema_version": 1,
+                "status": producer.status.value,
+                "pipeline_name": producer.pipeline_name,
+                "run_id": producer.run_id,
+                "manifest_id": producer.manifest_id,
+                "run_type": producer.run_type,
+                "records_fetched": producer.records_fetched,
+                "records_bronze": producer.records_bronze,
+                "records_silver": producer.records_silver,
+                "records_gold": producer.records_gold,
+                "records_gold_excluded_by_contract": producer.records_gold_excluded_by_contract,
+                "records_quarantined": producer.records_quarantined,
+                "records_filtered_out": producer.records_filtered_out,
+                "started_at": producer.started_at.isoformat(),
+                "completed_at": producer.completed_at.isoformat(),
+                "run_report_json_path": producer.run_report_json_path,
+                "run_report_markdown_path": producer.run_report_markdown_path,
+            }
     if fingerprint is not None:
         details["fingerprint"] = fingerprint
     return details

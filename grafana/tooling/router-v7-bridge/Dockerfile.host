@@ -1,0 +1,19 @@
+FROM grafana/grafana@sha256:d84563330dc9d2fd2bc096d0fb96021b5319c75bf6ed555566709998e823dec4
+USER root
+# COPY merges existing directories; remove obsolete base frontend assets first.
+RUN rm -rf /usr/share/grafana/public/build
+COPY --chown=root:root host-build/ /usr/share/grafana/public/build/
+# The managed data volume masks /var/lib/grafana; keep shipped plugins in the
+# host's bundled-plugin directory so the complete artifact set survives it.
+COPY --chown=root:root bioetl-scenes-app/ /usr/share/grafana/data/plugins-bundled/bioetl-scenes-app/
+COPY --chown=root:root bioetl-selectorshell-panel/ /usr/share/grafana/data/plugins-bundled/bioetl-selectorshell-panel/
+# The runtime user can read shipped code, but cannot rewrite or replace it.
+RUN chown root:root /usr/share/grafana/public /usr/share/grafana/data /usr/share/grafana/data/plugins-bundled \
+    && chown -R root:root /usr/share/grafana/public/build \
+        /usr/share/grafana/data/plugins-bundled/bioetl-scenes-app \
+        /usr/share/grafana/data/plugins-bundled/bioetl-selectorshell-panel \
+    && chmod go-w /usr/share/grafana/public /usr/share/grafana/data /usr/share/grafana/data/plugins-bundled \
+    && chmod -R a-w /usr/share/grafana/public/build \
+        /usr/share/grafana/data/plugins-bundled/bioetl-scenes-app \
+        /usr/share/grafana/data/plugins-bundled/bioetl-selectorshell-panel
+USER grafana

@@ -5,4 +5,6 @@ process.env.TZ = 'UTC';
 module.exports = {
   // Jest configuration provided by Grafana scaffolding
   ...require('./.config/jest.config'),
+  // Relative globs avoid Jest escaping the .codex ancestor on Windows.
+  testMatch: ['**/src/**/__tests__/**/*.{js,jsx,ts,tsx}', '**/src/**/*.{spec,test,jest}.{js,jsx,ts,tsx}'],
 };

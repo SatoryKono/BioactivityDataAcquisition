@@ -45,6 +45,7 @@ class RunResult:
     run_report_markdown_path: str | None = None
     run_report_funnel: tuple[StageFunnelRow, ...] = ()
     run_report_error: str | None = None
+    selected_snapshots: dict[str, dict[str, object]] | None = None
 
     @property
     def duration_seconds(self) -> float:

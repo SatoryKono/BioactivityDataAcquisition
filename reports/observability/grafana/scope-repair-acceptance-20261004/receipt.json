@@ -1,0 +1,69 @@
+{
+  "recorded_at": "2026-10-03T21:08:50.939994+00:00",
+  "source_sha": "8c0cac656cc7a47ab5013b481e0384cebbb98c1c",
+  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:6b06ed07d91d3dee737f9a2d7bb2f5bf933e21d4eef00525584bc81f4afdaa69",
+  "image_config_digest": "sha256:341db58b1c054b06e8ec2a8d08097e0b872ac570730177a7a85763849aaf799c",
+  "trust_tier": "local_single_host",
+  "rollout": "NOT_ADMITTED",
+  "frontend_build": "Reused existing candidate frontend; no fresh upstream compile in this repair",
+  "browser_security": {
+    "status": "PASS",
+    "assertions": 22,
+    "actual_host_module_loading": true
+  },
+  "scenes": {
+    "version": "0.1.2",
+    "routes_rendered": 6,
+    "exact_run_fallback": "PASS",
+    "range_timezone_scope": "PASS",
+    "settled_back_forward": "PASS"
+  },
+  "canvas": {
+    "status": "PARTIAL_PASS",
+    "no_run": "SELECT RUN / Choose a run",
+    "endpoint_connection_refused": "QUERY ERROR",
+    "restore": "SELECT RUN / Choose a run",
+    "saved_assay": "OK / excluded 0%",
+    "saved_assay_run_id": "317440c1-dc5c-5575-9103-1e163f460bdf",
+    "tree_missing_on_new_digest": "NOT_REPEATED",
+    "selector_cancellation_browser_matrix": "NOT_REPEATED"
+  },
+  "sbom": {
+    "status": "INVENTORY_GENERATED",
+    "tool": "syft-1.54.0",
+    "scanner_image": "anchore/syft@sha256:f43f12891e3123e337b6045bab944f53d4b0126707ca1cc9a25d6756b14085ce",
+    "packages": 1762,
+    "security_audit": "NOT_CLEARED; braces GHSA-vfj7-8cjw-p6xm has no patched version"
+  },
+  "validation": {
+    "scenes_jest": "10 PASS",
+    "scenes_typecheck": "PASS",
+    "scenes_lint": "PASS",
+    "webpack": "PASS; 429 KiB asset-size warning",
+    "provisioning_scenes_python": "20 PASS, 6 SKIP",
+    "readability_layout_python": "29 PASS",
+    "test_governance": "PASS",
+    "runtime_mirror": "N/A; no AI runtime changes"
+  },
+  "blockers": [
+    "GitHub Actions billing prevents independent execution",
+    "Required rollout trust-tier ADMIT absent",
+    "Fresh final architecture suite and nonregressing coverage adoption not yet supplied",
+    "SDK security audit not cleared",
+    "Complete host acceptance, backup and rollback receipts pending"
+  ],
+  "artifacts": {
+    "image-parity.json": {
+      "bytes": 3741,
+      "sha256": "bbfa4ca57bb185237125fa35d318690297b724acff5a68c2b910d0932b03e3c4"
+    },
+    "image.spdx.json": {
+      "bytes": 3728959,
+      "sha256": "1c6ab63dc6374522a853658e258ea1d018b1cb77013c398588d81a52de214f99"
+    },
+    "image.syft.json": {
+      "bytes": 2944957,
+      "sha256": "1232323aa92102291c69d620707d3c6f074b7af4fb07a90ba9e2a3106095f34e"
+    }
+  }
+}

@@ -21,7 +21,7 @@
   "id": null,
   "links": [],
   "refresh": "60s",
-  "schemaVersion": 39,
+  "schemaVersion": 42,
   "tags": [
     "bioetl",
     "incident",
@@ -70,7 +70,10 @@
           "text": "All",
           "value": "$__all"
         },
-        "datasource": "BioETL Ops HTTP",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
         "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}&allow_stale=1",
         "hide": 0,
         "includeAll": true,
@@ -163,7 +166,10 @@
           "text": "-",
           "value": "-"
         },
-        "datasource": "BioETL Ops HTTP",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
         "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}&allow_stale=1",
         "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
         "hide": 0,
@@ -416,7 +422,11 @@
           "refId": "A",
           "instant": true,
           "expr": "topk(1, bioetl_workflow_scope_priority_by_input{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
-          "legendFormat": "{{workflow}} · {{input}}"
+          "legendFormat": "{{workflow}} · {{input}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
         }
       ],
       "fieldConfig": {
@@ -565,7 +575,11 @@
           "instant": true,
           "range": false,
           "format": "table",
-          "expr": "label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\")"
+          "expr": "label_replace(label_replace(bioetl_incident_ranked_evidence,\"object\",\"$1\",\"object\",\"(.*) / $\"),\"route_pipeline\",\".*\",\"pipeline\",\"unknown\")",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
         }
       ],
       "transformations": [
@@ -1223,7 +1237,11 @@
           "expr": "label_replace(label_replace(label_replace(label_replace((label_replace(label_join((bioetl_incident_alert_priority{provider!=\"\"} or ((bioetl_incident_alert_priority{provider=\"\"} unless bioetl_incident_alert_priority{provider=\"\",pipeline=\"\",alertname=\"BioETLDockerRuntimeProbeMissing\"}) * on(pipeline) group_left(provider) (group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0) and on(pipeline) (count by(pipeline)(group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0)) == 1))) or ((bioetl_incident_alert_priority{provider=\"\"} unless bioetl_incident_alert_priority{provider=\"\",pipeline=\"\",alertname=\"BioETLDockerRuntimeProbeMissing\"}) unless on(pipeline) (group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0) and on(pipeline) (count by(pipeline)(group by(pipeline,provider)(bioetl_workflow_pipeline_expected{pipeline!=\"\",provider!=\"\",provider!=\"unknown\"} > 0)) == 1))) or label_replace(bioetl_incident_alert_priority{provider=\"\",pipeline=\"\",alertname=\"BioETLDockerRuntimeProbeMissing\"},\"provider\",\"N/A — Infrastructure\",\"\",\"\")),\"pipeline_context\",\";\",\"alertname\",\"pipeline\"),\"pipeline\",\"N/A — Docker infrastructure\",\"pipeline_context\",\"BioETLDockerRuntimeProbeMissing;\")),\"pipeline\",\"Not provided\",\"pipeline\",\"^$\"),\"provider\",\"Not provided\",\"provider\",\"^$\"),\"alert_runbook\",\"incident-response\",\"\",\"\"),\"alert_runbook\",\"docker-stability\",\"alertname\",\"BioETLDockerRuntimeProbeMissing\")",
           "format": "table",
           "instant": true,
-          "refId": "A"
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
         }
       ],
       "fieldConfig": {
@@ -1572,7 +1590,11 @@
               "legendFormat": "{{alertname}} · {{pipeline}} / {{entity}} {{provider}} · {{alertstate}}",
               "refId": "A",
               "instant": false,
-              "range": true
+              "range": true,
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "fieldConfig": {
@@ -1689,7 +1711,11 @@
               "expr": "topk(10, max by (pipeline, run_type, reason) (bioetl_runtime_current_blocker_reason) > 0)",
               "format": "table",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "fieldConfig": {
@@ -1815,7 +1841,7 @@
                   {
                     "id": "custom.hideFrom",
                     "value": {
-                      "tooltip": false,
+                      "tooltip": true,
                       "viz": true,
                       "legend": true
                     }
@@ -1909,7 +1935,11 @@
               "expr": "topk(10, max by (provider, cause) (bioetl_provider_current_cause) > 0)",
               "format": "table",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "transformations": [
@@ -2100,7 +2130,11 @@
               "expr": "topk(10, max by (pipeline, reason) (bioetl_dq_current_reason) > 0)",
               "format": "table",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "transformations": [
@@ -2282,7 +2316,7 @@
                   {
                     "id": "custom.hideFrom",
                     "value": {
-                      "tooltip": false,
+                      "tooltip": true,
                       "viz": true,
                       "legend": true
                     }
@@ -2320,7 +2354,11 @@
               "expr": "(label_join(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(max by (pipeline, run_type, stage) (max_over_time(bioetl_stage_lag_seconds[15m])) >= 300,\"signal\",\"stage_lag\",\"\",\"\"),\"window\",\"15m maximum\",\"\",\"\"),\"threshold\",\">= 300 s (15m maximum)\",\"\",\"\"),\"unit\",\"s\",\"\",\"\"),\"observation_time\",\"Not provided\",\"\",\"\"),\"publication_time\",\"Not provided\",\"\",\"\"),\"freshness\",\"Not verified: observed/published timestamps not provided\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\")) or (label_join(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(max by (pipeline, run_type, stage) (bioetl_stage_backlog_records{stage!=\"validation\"}) > 0,\"signal\",\"stage_backlog\",\"\",\"\"),\"window\",\"instant\",\"\",\"\"),\"threshold\",\"> 0 records (instant)\",\"\",\"\"),\"unit\",\"records\",\"\",\"\"),\"observation_time\",\"Not provided\",\"\",\"\"),\"publication_time\",\"Not provided\",\"\",\"\"),\"freshness\",\"Not verified: observed/published timestamps not provided\",\"\",\"\"),\"scope\",\" / \",\"pipeline\",\"run_type\",\"stage\"))",
               "instant": true,
               "range": false,
-              "format": "table"
+              "format": "table",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "transformations": [
@@ -2551,7 +2589,10 @@
             "w": 24,
             "h": 5
           },
-          "datasource": "BioETL Ops HTTP",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
           "description": "SELECTED RUN · Overall verdict is the data quality assessment of this Run ID. Processing is the ETL outcome. Trust is the saved Trust verdict and does not authorize replay. Saved evidence for this Run ID. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
           "fieldConfig": {
             "defaults": {
@@ -2699,6 +2740,10 @@
               "url_options": {
                 "method": "GET",
                 "data": ""
+              },
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http"
               }
             }
           ],
@@ -2892,7 +2937,11 @@
               "refId": "A",
               "instant": true,
               "expr": "topk(1, bioetl_workflow_scope_priority_by_input{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
-              "legendFormat": "{{workflow}} · {{input}}"
+              "legendFormat": "{{workflow}} · {{input}}",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ]
         },
@@ -3301,7 +3350,11 @@
               "format": "table",
               "instant": true,
               "legendFormat": "{{pipeline}} {{run_type}} {{reason}} {{severity}} {{action_target}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "transformations": [
@@ -3552,19 +3605,31 @@
               "expr": "max(up{job=\"bioetl\"})",
               "refId": "A",
               "instant": true,
-              "legendFormat": "Endpoint"
+              "legendFormat": "Endpoint",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "label_replace(min(bioetl_rt_stage_ratio{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or on() vector(-1),\"k\",\"stages\",\"\",\"\") or label_replace(bioetl_runtime_trust_gap_active_10m,\"k\",\"quality\",\"\",\"\")",
               "refId": "B",
               "instant": true,
-              "legendFormat": "{{k}}"
+              "legendFormat": "{{k}}",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "bioetl_runtime_required_rule_age_seconds",
               "refId": "C",
               "instant": true,
-              "legendFormat": "Rule age"
+              "legendFormat": "Rule age",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Monitor Coverage",
@@ -3776,7 +3841,11 @@
               "refId": "A",
               "expr": "bioetl_runtime_stage_progress_by_scope{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
               "instant": true,
-              "format": "table"
+              "format": "table",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Review Stage Progress",
@@ -3810,7 +3879,10 @@
             "w": 24,
             "h": 3
           },
-          "datasource": "BioETL Ops HTTP",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "s",
@@ -3859,7 +3931,11 @@
                 "method": "GET",
                 "data": ""
               },
-              "uql": "parse-json | jsonata \"($s := summary[0]; $start := $s.started_at ? $toMillis($s.started_at) : null; $end := $s.completed_at ? $toMillis($s.completed_at) : null; [{'Run duration': $start != null and $end != null and $end >= $start ? ($end - $start) / 1000 : null}])\""
+              "uql": "parse-json | jsonata \"($s := summary[0]; $start := $s.started_at ? $toMillis($s.started_at) : null; $end := $s.completed_at ? $toMillis($s.completed_at) : null; [{'Run duration': $start != null and $end != null and $end >= $start ? ($end - $start) / 1000 : null}])\"",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http"
+              }
             }
           ]
         },
@@ -3994,7 +4070,11 @@
             {
               "expr": "max by(stage) (bioetl_stage_backlog_records{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"})",
               "legendFormat": "{{stage}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Stage Backlog Trend",
@@ -4068,17 +4148,29 @@
             {
               "expr": "(histogram_quantile(0.50, (sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on (phase, status) (sum by (phase, status) (changes(bioetl_phase_duration_seconds_created{pipeline=~\"$pipeline\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{phase}} / {{status}} p50",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "(histogram_quantile(0.95, (sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on (phase, status) (sum by (phase, status) (changes(bioetl_phase_duration_seconds_created{pipeline=~\"$pipeline\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{phase}} / {{status}} p95",
-              "refId": "B"
+              "refId": "B",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "(histogram_quantile(0.99, (sum by (le, phase, status) (rate(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__rate_interval])) unless on (phase, status) (sum by (phase, status) (changes(bioetl_phase_duration_seconds_created{pipeline=~\"$pipeline\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{phase}} / {{status}} p99",
-              "refId": "C"
+              "refId": "C",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Phase Duration",
@@ -4152,17 +4244,29 @@
             {
               "expr": "(histogram_quantile(0.50, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{stage}} / {{status}} / {{run_type}} p50",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "(histogram_quantile(0.95, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{stage}} / {{status}} / {{run_type}} p95",
-              "refId": "B"
+              "refId": "B",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "(histogram_quantile(0.99, (sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"}[$__rate_interval])) unless on (stage, status, run_type) (sum by (stage, status, run_type) (changes(bioetl_pipeline_duration_seconds_created{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"}[$__rate_interval]) > 0))))) >= 0",
               "legendFormat": "{{stage}} / {{status}} / {{run_type}} p99",
-              "refId": "C"
+              "refId": "C",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Pipeline Duration",
@@ -4261,7 +4365,11 @@
           "targets": [
             {
               "expr": "max(max_over_time(bioetl_stage_lag_seconds{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[15m]) or ((max_over_time(bioetl_stage_lag_seconds{run_type=~\"$run_type\"}[15m])) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")))",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Monitor Worst Stage Lag",
@@ -4356,7 +4464,11 @@
           "targets": [
             {
               "expr": "sum((bioetl_runtime_current_blocker_reason_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or ((max(bioetl_runtime_current_status_trusted{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) == 0) * 0))",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Monitor Active Blocker Count",
@@ -4444,7 +4556,11 @@
               "expr": "(sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[$__range])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range])) > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range]) unless on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[$__range]) >= 2))",
               "instant": true,
               "range": false,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Monitor Failed Runs",
@@ -4536,7 +4652,11 @@
           "targets": [
             {
               "expr": "sum(bioetl_runtime_pipeline_alert_count{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0)",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Monitor Pipeline Alerts",
@@ -4625,7 +4745,11 @@
           "targets": [
             {
               "expr": "round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range])))",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Failed Workflow Runs",
@@ -4718,7 +4842,11 @@
           "targets": [
             {
               "expr": "sum(((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[30m])) > 0) unless on (pipeline, run_type) (sum by (pipeline, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[30m])) > 0))) or ((count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0) * 0)",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Monitor No-Records Runs",
@@ -4807,7 +4935,11 @@
           "targets": [
             {
               "expr": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",pipeline_context=~\"$pipeline\",run_type_context=~\"$run_type\",status=\"failed\"}[$__range])))",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Failed Workflow Steps",
@@ -4911,7 +5043,11 @@
           "targets": [
             {
               "expr": "max(max_over_time(bioetl_memory_pressure_state{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[15m]))",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Monitor Memory Pressure",
@@ -5078,7 +5214,11 @@
               "expr": "sum by(stage, error_code) (increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage!~\"none.*\"}[$__range]))",
               "instant": true,
               "refId": "A",
-              "format": "table"
+              "format": "table",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Review Errors by Stage & Code",
@@ -5221,7 +5361,11 @@
               "instant": true,
               "refId": "A",
               "legendFormat": "{{stage}} · {{run_type}}",
-              "format": "table"
+              "format": "table",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Compare Records by Stage & Run Type",
@@ -5348,7 +5492,11 @@
             {
               "expr": "clamp_max(max(bioetl_replay_safety_blockers_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0)), 2)",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Monitor Replay",
@@ -5430,7 +5578,11 @@
             {
               "expr": "max(bioetl_checkpoint_age_seconds{pipeline=~\"$pipeline\"})",
               "refId": "A",
-              "instant": true
+              "instant": true,
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "transformations": [
@@ -5561,7 +5713,11 @@
             {
               "expr": "clamp_max(max(bioetl_manifest_ledger_failures_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} and on(pipeline,run_type) (bioetl_control_plane_telemetry_missing_5m == 0)), 2)",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Monitor Ledger",
@@ -5667,7 +5823,11 @@
             {
               "expr": "clamp_max(max(bioetl_control_plane_telemetry_missing_5m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}), 2)",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Monitor Telemetry",
@@ -5821,7 +5981,11 @@
             {
               "expr": "sum by(stage) (max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__interval]))",
               "legendFormat": "{{stage}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Records by Stage / Interval",
@@ -5915,7 +6079,11 @@
           "targets": [
             {
               "expr": "((((sum(bioetl_runtime_alert_condition_dq_soft_threshold_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_dq_hard_fail_15m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_dq_critical_anomaly_30m{pipeline=~\"$pipeline\"})) + (sum(bioetl_runtime_alert_condition_silver_validation_failures_30m{pipeline=~\"$pipeline\"}))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\"}) > bool 0)))",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Inspect DQ Alert Conditions",
@@ -6001,7 +6169,11 @@
           "targets": [
             {
               "expr": "sum(bioetl_runtime_control_plane_alert_count{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0)",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Inspect Control Plane Alerts",
@@ -6094,7 +6266,11 @@
           "targets": [
             {
               "expr": "sum(bioetl_runtime_provider_alert_count{provider=~\"$provider\"}) and on() (count(bioetl_provider_current_status{provider=~\"$provider\"}) > bool 0)",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Inspect Provider Alerts",
@@ -6259,7 +6435,11 @@
           "targets": [
             {
               "expr": "(((sum(bioetl_runtime_alert_condition_provider_adapter_latency_high_30m)) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m))) and on() (count(bioetl_provider_current_status) > bool 0))",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Inspect Global Provider Alert Conditions",
@@ -6326,7 +6506,11 @@
               "instant": true,
               "legendFormat": "{{terminal_status}}",
               "refId": "A",
-              "format": "table"
+              "format": "table",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Review Observed Terminal Counters",
@@ -6436,7 +6620,11 @@
               "expr": "sum(clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}), 0) > bool 86400) or (count(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}) * 0)",
               "refId": "A",
               "instant": true,
-              "range": false
+              "range": false,
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Inspect Entities Stale Over 24h",
@@ -6532,7 +6720,11 @@
             {
               "expr": "round((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[$__range]))))",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Global Read Failures",
@@ -6628,7 +6820,11 @@
             {
               "expr": "((((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m]))), 1)) > bool 0.05) + (((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m]))) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m]))), 1)) > bool 0.10))",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Monitor Global Read Failures (30m)",
@@ -6725,7 +6921,11 @@
             {
               "expr": "round((sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range]))))",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Missing Lineage",
@@ -6821,7 +7021,11 @@
             {
               "expr": "round((sum(increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Lineage Failures",
@@ -6917,7 +7121,11 @@
             {
               "expr": "round((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Ledger Failures",
@@ -7005,7 +7213,11 @@
             {
               "expr": "round((sum(increase(bioetl_trust_replay_blocker_events_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range])) + sum(max_over_time(bioetl_trust_replay_blocker_integrity{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range]) > bool 0)))",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Replay Blockers",
@@ -7126,70 +7338,110 @@
               "legendFormat": "{{pipeline}} / {{reason}} / {{severity}} / {{action_target}}",
               "refId": "J",
               "instant": true,
-              "format": "table"
+              "format": "table",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "label_replace((bioetl_runtime_alert_condition_pipeline_preflight_failed_15m{pipeline=~\"$pipeline\"} > 0) or (((bioetl_runtime_alert_condition_pipeline_preflight_failed_15m) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"preflight_failed\", \"\", \"\")",
               "legendFormat": "{{pipeline}} / {{blocker}}",
               "refId": "A",
               "instant": true,
-              "format": "table"
+              "format": "table",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "label_replace((bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m{pipeline=~\"$pipeline\"} > 0) or (((bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"infrastructure_failed\", \"\", \"\")",
               "legendFormat": "{{pipeline}} / {{blocker}}",
               "refId": "H",
               "instant": true,
-              "format": "table"
+              "format": "table",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "label_replace((bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_pipeline_runs_failed_15m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"runs_failed\", \"\", \"\")",
               "legendFormat": "{{pipeline}} / {{blocker}}",
               "refId": "B",
               "instant": true,
-              "format": "table"
+              "format": "table",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "label_replace((bioetl_runtime_alert_condition_stage_backlog_active_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_stage_backlog_active_15m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"stage_backlog_active\", \"\", \"\")",
               "legendFormat": "{{pipeline}} / {{stage}} / {{blocker}}",
               "refId": "C",
               "instant": true,
-              "format": "table"
+              "format": "table",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "label_replace((bioetl_runtime_alert_condition_stage_lag_high_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_stage_lag_high_15m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"stage_lag_high\", \"\", \"\")",
               "legendFormat": "{{pipeline}} / {{stage}} / {{blocker}}",
               "refId": "D",
               "instant": true,
-              "format": "table"
+              "format": "table",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "label_replace((bioetl_runtime_alert_condition_gold_write_missing_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_gold_write_missing_15m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"gold_write_missing\", \"\", \"\")",
               "legendFormat": "{{pipeline}} / {{blocker}}",
               "refId": "E",
               "instant": true,
-              "format": "table"
+              "format": "table",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "label_replace((bioetl_runtime_alert_condition_no_terminal_run_30m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_no_terminal_run_30m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"no_terminal_run\", \"\", \"\")",
               "legendFormat": "{{pipeline}} / {{blocker}}",
               "refId": "F",
               "instant": true,
-              "format": "table"
+              "format": "table",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "label_replace((bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"ingestion_throughput_degraded\", \"\", \"\")",
               "legendFormat": "{{pipeline}} / {{blocker}}",
               "refId": "I",
               "instant": true,
-              "format": "table"
+              "format": "table",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "label_replace((bioetl_runtime_alert_condition_record_flow_invariant_violated_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_alert_condition_record_flow_invariant_violated_15m{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"flow_invariant_violated\", \"\", \"\")",
               "legendFormat": "{{pipeline}} / {{blocker}}",
               "refId": "G",
               "instant": true,
-              "format": "table"
+              "format": "table",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Inspect Active Runtime Blocker Detail",
@@ -7252,7 +7504,11 @@
               "refId": "A",
               "expr": "bioetl_runtime_stage_evidence_detail{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
               "format": "table",
-              "instant": true
+              "instant": true,
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "fieldConfig": {
@@ -7460,7 +7716,11 @@
             {
               "expr": "sum by (store, operation, status) (increase(bioetl_control_plane_reads_total[$__rate_interval]))",
               "legendFormat": "{{store}} / {{operation}} / {{status}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Compare Global Reads by Store",
@@ -7558,7 +7818,11 @@
             {
               "expr": "round((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range]))))",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Manifest Failures",
@@ -7655,7 +7919,11 @@
             {
               "expr": "round((sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range]))))",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Incompatibilities",
@@ -7751,7 +8019,11 @@
             {
               "expr": "round((sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range]))))",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Unreconstructable",
@@ -7898,7 +8170,11 @@
               "expr": "sum by (layer, ref_type) (increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range]))",
               "instant": true,
               "legendFormat": "{{layer}} / {{ref_type}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Review Missing Lineage by Layer",
@@ -8005,7 +8281,11 @@
             {
               "expr": "round((sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))))",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Replay Drift",
@@ -8101,7 +8381,11 @@
             {
               "expr": "sum(bioetl_control_plane_manifest_fail_severity_30m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Monitor Manifest (30m)",
@@ -8179,7 +8463,11 @@
             {
               "expr": "round(sum by(reason) (increase(bioetl_shutdown_initiated_total[$__rate_interval])))",
               "legendFormat": "{{reason}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Global Shutdown Starts",
@@ -8277,7 +8565,11 @@
             {
               "expr": "round((sum(increase(bioetl_checkpoint_load_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Load Failures",
@@ -8373,7 +8665,11 @@
             {
               "expr": "sum(bioetl_control_plane_ledger_fail_severity_30m{pipeline=~\"$pipeline\"})",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Monitor Ledger (30m)",
@@ -8451,7 +8747,11 @@
             {
               "expr": "round(sum by(reason) (increase(bioetl_shutdown_completed_total[$__rate_interval])))",
               "legendFormat": "{{reason}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Global Shutdown Completions",
@@ -8549,7 +8849,11 @@
             {
               "expr": "round((sum(increase(bioetl_checkpoint_save_events_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))))",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Save Failures",
@@ -8634,31 +8938,51 @@
               "refId": "A",
               "expr": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) sum by(pipeline,run_type) (count_over_time(bioetl_control_plane_manifest_writes_total[5m]))) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
               "instant": true,
-              "legendFormat": "Manifest writes (5m)"
+              "legendFormat": "Manifest writes (5m)",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "refId": "B",
               "expr": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline) sum by(pipeline) (count_over_time(bioetl_control_plane_ledger_appends_total[5m]))) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
               "instant": true,
-              "legendFormat": "Ledger appends (5m)"
+              "legendFormat": "Ledger appends (5m)",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "refId": "C",
               "expr": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,risk_type) (count_over_time(bioetl_replay_duplicate_overwrite_risk_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",risk_type=~\"duplicate|overwrite\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
               "instant": true,
-              "legendFormat": "Replay risk pair (5m)"
+              "legendFormat": "Replay risk pair (5m)",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "refId": "D",
               "expr": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (count by(pipeline,run_type) (group by(pipeline,run_type,integrity_type) (count_over_time(bioetl_manifest_ledger_integrity_ratio{pipeline=~\"$pipeline\",run_type=~\"$run_type\",integrity_type=~\"consistent|inconsistent\"}[5m]))) == 2)) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
               "instant": true,
-              "legendFormat": "Integrity pair (5m)"
+              "legendFormat": "Integrity pair (5m)",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "refId": "E",
               "expr": "max((bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} unless on(pipeline,run_type) (push_time_seconds{job=\"bioetl\",pipeline!=\"\",run_type!=\"\"} > 0 and push_time_seconds{job=\"bioetl\",pipeline!=\"\",run_type!=\"\"} <= time())) or (bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} * 0))",
               "instant": true,
-              "legendFormat": "Publication timestamp"
+              "legendFormat": "Publication timestamp",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Inspect Telemetry Coverage",
@@ -8754,7 +9078,11 @@
             {
               "expr": "round((sum(increase(bioetl_checkpoint_operator_operations_total{status=\"failed\"}[$__range]))))",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Global Admin Failures",
@@ -8825,7 +9153,11 @@
             {
               "expr": "(histogram_quantile($read_latency_quantile, (sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])) unless on (store, operation) (sum by (store, operation) (changes(bioetl_control_plane_read_duration_seconds_created{status!=\"failed\"}[$__range]) > 0))))) >= 0",
               "legendFormat": "{{store}} / {{operation}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Global Read Latency",
@@ -8888,7 +9220,11 @@
             {
               "expr": "sum by (status, run_type) (increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__rate_interval]))",
               "legendFormat": "{{run_type}} / {{status}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Observed Manifest Write Increments",
@@ -8986,7 +9322,11 @@
             {
               "expr": "max(max_over_time(bioetl_replay_lag_seconds{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
               "instant": true,
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Peak Replay Lag",
@@ -9038,7 +9378,11 @@
             {
               "expr": "round(sum by (layer, operation, status) (increase(bioetl_audit_write_events_total[$__rate_interval])))",
               "legendFormat": "{{layer}} / {{operation}} / {{status}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Compare Global Audit Write Outcomes",
@@ -9105,7 +9449,11 @@
             {
               "expr": "sum by (replay_capability, drift_type, status) (increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__rate_interval]))",
               "legendFormat": "{{replay_capability}} / {{drift_type}} / {{status}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Replay Drift by Type",
@@ -9134,7 +9482,11 @@
               "legendFormat": "{{stage}}",
               "refId": "A",
               "instant": false,
-              "range": true
+              "range": true,
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "fieldConfig": {
@@ -9307,7 +9659,11 @@
             {
               "expr": "sum by (disposition) (increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\"}[$__rate_interval]))",
               "legendFormat": "{{disposition}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Compare Checkpoint Outcomes",
@@ -9361,7 +9717,11 @@
             {
               "expr": "round(sum by (layer_filter, status) (increase(bioetl_audit_query_events_total[$__rate_interval])))",
               "legendFormat": "{{layer_filter}} / {{status}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Compare Global Audit Query Outcomes",
@@ -9432,7 +9792,11 @@
             {
               "expr": "max by (replay_capability, status) (bioetl_replay_lag_seconds{pipeline=~\"$pipeline\", run_type=~\"$run_type\"})",
               "legendFormat": "{{replay_capability}} / {{status}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Replay Lag",
@@ -9490,7 +9854,11 @@
             {
               "expr": "sum by (event_type, status) (increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[$__rate_interval]))",
               "legendFormat": "{{event_type}} / {{status}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Compare Ledger Appends by Type & Status",
@@ -9793,14 +10161,22 @@
               "legendFormat": "{{stage}}",
               "refId": "A",
               "instant": true,
-              "format": "table"
+              "format": "table",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "max by (pipeline, stage) (max_over_time(bioetl_stage_records_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[15m]))",
               "legendFormat": "{{stage}} records",
               "refId": "B",
               "instant": true,
-              "format": "table"
+              "format": "table",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Inspect Stage Expectedness",
@@ -9902,17 +10278,29 @@
             {
               "expr": "(histogram_quantile(0.50, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__range]) > 0))))) >= 0",
               "legendFormat": "p50 {{pipeline}} / {{operation}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "(histogram_quantile(0.95, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__range]) > 0))))) >= 0",
               "legendFormat": "p95 {{pipeline}} / {{operation}}",
-              "refId": "B"
+              "refId": "B",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "(histogram_quantile(0.99, (sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])) unless on (pipeline, operation) (sum by (pipeline, operation) (changes(bioetl_checkpoint_save_duration_seconds_created{pipeline=~\"$pipeline\"}[$__range]) > 0))))) >= 0",
               "legendFormat": "p99 {{pipeline}} / {{operation}}",
-              "refId": "C"
+              "refId": "C",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Checkpoint Save Latency",
@@ -9986,17 +10374,29 @@
             {
               "expr": "(histogram_quantile(0.50, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__range]) > 0))))) >= 0",
               "legendFormat": "p50",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "(histogram_quantile(0.95, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__range]) > 0))))) >= 0",
               "legendFormat": "p95",
-              "refId": "B"
+              "refId": "B",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "(histogram_quantile(0.99, (sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_write_duration_seconds_created[$__range]) > 0))))) >= 0",
               "legendFormat": "p99",
-              "refId": "C"
+              "refId": "C",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Global Audit Write Latency",
@@ -10071,17 +10471,29 @@
             {
               "expr": "(histogram_quantile(0.50, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__range]) > 0))))) >= 0",
               "legendFormat": "p50 {{operation}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "(histogram_quantile(0.95, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__range]) > 0))))) >= 0",
               "legendFormat": "p95 {{operation}}",
-              "refId": "B"
+              "refId": "B",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "(histogram_quantile(0.99, (sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])) unless on (operation) (sum by (operation) (changes(bioetl_checkpoint_operator_duration_seconds_created[$__range]) > 0))))) >= 0",
               "legendFormat": "p99 {{operation}}",
-              "refId": "C"
+              "refId": "C",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Global Checkpoint Admin Latency",
@@ -10155,17 +10567,29 @@
             {
               "expr": "(histogram_quantile(0.50, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__range]) > 0))))) >= 0",
               "legendFormat": "p50",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "(histogram_quantile(0.95, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__range]) > 0))))) >= 0",
               "legendFormat": "p95",
-              "refId": "B"
+              "refId": "B",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "expr": "(histogram_quantile(0.99, (sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])) unless on () (sum (changes(bioetl_audit_query_duration_seconds_created[$__range]) > 0))))) >= 0",
               "legendFormat": "p99",
-              "refId": "C"
+              "refId": "C",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Track Global Audit Query Latency",
@@ -10249,7 +10673,11 @@
           "targets": [
             {
               "expr": "max(bioetl_runtime_error_rate_30m{pipeline=~\"$pipeline\"})",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Monitor Runtime Error Rate",
@@ -10301,7 +10729,11 @@
             {
               "expr": "sum by (layer, status) (increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\"}[$__rate_interval]))",
               "legendFormat": "{{layer}} / {{status}}",
-              "refId": "A"
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "title": "Compare Lineage Persistence Outcomes",
@@ -10342,7 +10774,11 @@
             {
               "panelId": 2010,
               "refId": "A",
-              "withTransforms": false
+              "withTransforms": false,
+              "datasource": {
+                "type": "datasource",
+                "uid": "-- Dashboard --"
+              }
             }
           ],
           "transformations": [
@@ -11023,7 +11459,11 @@
             {
               "panelId": 2005,
               "refId": "A",
-              "withTransforms": false
+              "withTransforms": false,
+              "datasource": {
+                "type": "datasource",
+                "uid": "-- Dashboard --"
+              }
             }
           ],
           "fieldConfig": {
@@ -11361,7 +11801,10 @@
             "w": 24,
             "h": 8
           },
-          "datasource": "BioETL Ops HTTP",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
           "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
           "options": {
             "showHeader": true,
@@ -11576,6 +12019,10 @@
               "url_options": {
                 "method": "GET",
                 "data": ""
+              },
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http"
               }
             },
             {
@@ -11590,7 +12037,11 @@
                 "method": "GET",
                 "data": ""
               },
-              "uql": "parse-json | jsonata \"($r := function($s,$o){$exists($s.removals[outcome=$o]) ? $sum($s.removals[outcome=$o].count) : ($s.tracking = 'full' ? 0 : null)}; $map(funnel, function($s){ {'stage_id':$s.stage_id, 'quarantined':$r($s,'quarantined'), 'excluded':$r($s,'excluded_by_contract'), 'deduplicated':$r($s,'deduplicated'), 'filtered_out':$r($s,'filtered_out')} }))\""
+              "uql": "parse-json | jsonata \"($r := function($s,$o){$exists($s.removals[outcome=$o]) ? $sum($s.removals[outcome=$o].count) : ($s.tracking = 'full' ? 0 : null)}; $map(funnel, function($s){ {'stage_id':$s.stage_id, 'quarantined':$r($s,'quarantined'), 'excluded':$r($s,'excluded_by_contract'), 'deduplicated':$r($s,'deduplicated'), 'filtered_out':$r($s,'filtered_out')} }))\"",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http"
+              }
             }
           ],
           "transformations": [
@@ -11664,7 +12115,10 @@
             "w": 24,
             "h": 12
           },
-          "datasource": "BioETL Ops HTTP",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
           "description": "SELECTED RUN · Domain verdicts of this Run ID; this is not the page status. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
           "options": {
             "showHeader": true,
@@ -11846,6 +12300,10 @@
               "url_options": {
                 "method": "GET",
                 "data": ""
+              },
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http"
               }
             }
           ],
@@ -11910,7 +12368,10 @@
             "w": 24,
             "h": 8
           },
-          "datasource": "BioETL Ops HTTP",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          },
           "description": "SELECTED RUN · Full identifiers of this Run ID; the short table is Inspect Run Identity on the first screen. Missing checks are INCOMPLETE; missing selection is SELECT RUN; request failure is QUERY ERROR. N/A means explicitly inapplicable. VALID EMPTY is an empty successful query. This saved verdict does not authorize replay. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
           "options": {
             "showHeader": true,
@@ -12014,6 +12475,10 @@
               "url_options": {
                 "method": "GET",
                 "data": ""
+              },
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bioetl-ops-http"
               }
             }
           ],
@@ -12114,13 +12579,21 @@
               "refId": "A",
               "instant": true,
               "format": "table",
-              "expr": "label_replace(max by(workflow)(bioetl_workflow_scope_input_status{input=\"workflow\",workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"reason\",\"Reason unavailable\",\"\",\"\")"
+              "expr": "label_replace(max by(workflow)(bioetl_workflow_scope_input_status{input=\"workflow\",workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}),\"reason\",\"Reason unavailable\",\"\",\"\")",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             },
             {
               "refId": "B",
               "instant": true,
               "format": "table",
-              "expr": "bioetl_workflow_scope_published_seconds * on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) * 1000"
+              "expr": "bioetl_workflow_scope_published_seconds * on(workflow) group by(workflow)(bioetl_workflow_scope_universe{workflow=~\"$workflow\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) * 1000",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              }
             }
           ],
           "transformations": [

@@ -106,7 +106,12 @@ def test_summary_uses_aggregate_verdict_and_explains_missing_archive(uid):
     )
     target = summary["targets"][0]
     if uid == "bioetl-overview-v2":
-        assert target == {"panelId": 9002, "refId": "A", "withTransforms": False}
+        assert target == {
+            "panelId": 9002,
+            "refId": "A",
+            "withTransforms": False,
+            "datasource": {"type": "datasource", "uid": "-- Dashboard --"},
+        }
         target = panels[9002]["targets"][0]
         assert "'run_verdict': $s.verdict" in target["root_selector"]
     assert "/selected-run-status?" in target["url"]

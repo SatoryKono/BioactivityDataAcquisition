@@ -24,6 +24,7 @@ class WorkflowStepState:
     destructive: bool = False
     commit_pending_confirmation: bool = False
     mutation_details: dict[str, object] | None = None
+    output_details: dict[str, object] | None = None
 
     def to_dict(self) -> dict[str, object]:
         """Return a JSON-serializable step-state payload."""
@@ -70,7 +71,7 @@ class WorkflowExecutionState:
 
 
 def _workflow_step_state_to_dict(step_state: WorkflowStepState) -> dict[str, object]:
-    return {
+    payload: dict[str, object] = {
         "step_id": step_state.step_id,
         "step_kind": step_state.step_kind,
         "status": step_state.status,
@@ -81,6 +82,9 @@ def _workflow_step_state_to_dict(step_state: WorkflowStepState) -> dict[str, obj
         "commit_pending_confirmation": step_state.commit_pending_confirmation,
         "mutation_details": step_state.mutation_details,
     }
+    if step_state.output_details is not None:
+        payload["output_details"] = step_state.output_details
+    return payload
 
 
 def _workflow_step_state_from_dict(
@@ -99,6 +103,7 @@ def _workflow_step_state_from_dict(
             payload.get("commit_pending_confirmation", False)
         ),
         mutation_details=_load_mutation_details(payload.get("mutation_details")),
+        output_details=_load_mutation_details(payload.get("output_details")),
     )
 
 

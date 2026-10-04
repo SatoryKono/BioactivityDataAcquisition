@@ -81,6 +81,9 @@ class WorkflowTransformRegistry:
     """In-memory registry for named workflow transform executors."""
 
     _executors: dict[str, WorkflowTransformCallable] = field(default_factory=dict)
+    snapshot_reader: (
+        Callable[[str, str], Awaitable[dict[str, dict[str, object]]]] | None
+    ) = None
 
     def register(
         self,

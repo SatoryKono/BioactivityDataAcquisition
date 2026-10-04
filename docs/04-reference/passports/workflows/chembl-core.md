@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:chembl_core`
 - Schema: `1.0.0`
-- Source revision: `11e60d87cb1659c2ff918c8a01ae87b702ef937d`
+- Source revision: `8254c925d2cbb4e6cf14f927cb651593924fb3f3`
 
 ## Evidence
 
@@ -26,11 +26,15 @@
     "workflow_manifest": true
   },
   "dag": {
-    "edge_count": 5,
+    "edge_count": 6,
     "edges": [
       {
         "from": "chembl_activity_ingest",
         "to": "summarize_core_extracts"
+      },
+      {
+        "from": "chembl_assay_ingest",
+        "to": "chembl_target_ingest"
       },
       {
         "from": "chembl_assay_ingest",
@@ -49,7 +53,7 @@
         "to": "summarize_core_extracts"
       }
     ],
-    "mermaid": "flowchart TD\n  chembl_activity_ingest[\"chembl_activity\"]\n  chembl_assay_ingest[\"chembl_assay\"]\n  chembl_target_ingest[\"chembl_target\"]\n  reconcile_assay_target_orphans[\"reconcile_foreign_keys\"]\n  summarize_core_extracts[\"summarize_upstream_outputs\"]\n  chembl_activity_ingest --> summarize_core_extracts\n  chembl_assay_ingest --> reconcile_assay_target_orphans\n  chembl_assay_ingest --> summarize_core_extracts\n  chembl_target_ingest --> reconcile_assay_target_orphans\n  chembl_target_ingest --> summarize_core_extracts\n",
+    "mermaid": "flowchart TD\n  chembl_activity_ingest[\"chembl_activity\"]\n  chembl_assay_ingest[\"chembl_assay\"]\n  chembl_target_ingest[\"chembl_target\"]\n  reconcile_assay_target_orphans[\"reconcile_foreign_keys\"]\n  summarize_core_extracts[\"summarize_upstream_outputs\"]\n  chembl_activity_ingest --> summarize_core_extracts\n  chembl_assay_ingest --> chembl_target_ingest\n  chembl_assay_ingest --> reconcile_assay_target_orphans\n  chembl_assay_ingest --> summarize_core_extracts\n  chembl_target_ingest --> reconcile_assay_target_orphans\n  chembl_target_ingest --> summarize_core_extracts\n",
     "step_count": 5,
     "steps": [
       {
@@ -63,8 +67,17 @@
         "step_id": "chembl_assay_ingest"
       },
       {
+        "depends_on": [
+          "chembl_assay_ingest"
+        ],
         "kind": "pipeline",
         "pipeline_name": "chembl_target",
+        "reference_cohort": {
+          "column": "target_id",
+          "filter_field": "target_id",
+          "step_id": "chembl_assay_ingest",
+          "table": "chembl.assay"
+        },
         "step_id": "chembl_target_ingest"
       },
       {
@@ -77,6 +90,7 @@
           "reference_key": "target_id",
           "reference_layer": "gold",
           "reference_table": "chembl.target",
+          "require_closed_cohort": true,
           "source_key": "target_id",
           "source_layer": "gold",
           "source_table": "chembl.assay"
@@ -125,6 +139,7 @@
         "reference_key": "target_id",
         "reference_layer": "gold",
         "reference_table": "chembl.target",
+        "require_closed_cohort": true,
         "source_key": "target_id",
         "source_layer": "gold",
         "source_table": "chembl.assay"
@@ -172,8 +187,8 @@
   "passport_schema_version": "1.0.0",
   "provenance": {
     "projector_version": "1.0.0",
-    "semantic_content_hash": "sha256:100a47685b9d77e65251e358b03881a591b0347bd9ee2603c0c2003474268f93",
-    "source_revision": "11e60d87cb1659c2ff918c8a01ae87b702ef937d"
+    "semantic_content_hash": "sha256:44a0fd2a71284240fe8336302f8ff44f2edde9582468cac6fbde757419616622",
+    "source_revision": "8254c925d2cbb4e6cf14f927cb651593924fb3f3"
   },
   "source_references": [
     {

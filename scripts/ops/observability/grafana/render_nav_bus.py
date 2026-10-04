@@ -2760,6 +2760,7 @@ def apply_to_dashboard(
             if http_states not in description:
                 panel["description"] = f"{description} {http_states}".strip()
     _document_required_http_evidence(payload)
+    _migrate_grafana_schema42(payload)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     current = safe_path.read_text(encoding="utf-8")
     if check:
@@ -2774,6 +2775,55 @@ def apply_to_dashboard(
         encoding="utf-8",
     )
     return True
+
+
+def _migrate_grafana_schema42(payload: dict[str, Any]) -> None:
+    """Author the pinned Grafana 12.2.5 v1 schema instead of runtime migration.
+
+    Mirrors DashboardMigrator v33/v36 datasource refs, v41 unused time_options,
+    and v42 hidden-series tooltip semantics. Static panels remain query-free.
+    """
+    references = {
+        "Prometheus": {"type": "prometheus", "uid": "prometheus"},
+        "BioETL Ops HTTP": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http",
+        },
+        "-- Grafana --": {"uid": "-- Grafana --"},
+        "-- Dashboard --": {"type": "datasource", "uid": "-- Dashboard --"},
+    }
+    pending: list[object] = [payload]
+    while pending:
+        value = pending.pop()
+        if isinstance(value, dict):
+            datasource = value.get("datasource")
+            if isinstance(datasource, str):
+                if datasource not in references:
+                    raise ValueError(f"Unresolved canonical datasource: {datasource}")
+                value["datasource"] = dict(references[datasource])
+            elif isinstance(datasource, dict) and not (
+                isinstance(datasource.get("uid"), str) and datasource["uid"]
+            ):
+                raise ValueError(
+                    "Canonical datasource reference requires an explicit UID"
+                )
+            pending.extend(value.values())
+        elif isinstance(value, list):
+            pending.extend(value)
+    for panel in _walk_panels(payload.get("panels", [])):
+        datasource = panel.get("datasource")
+        for target in panel.get("targets", []):
+            if target.get("datasource") is None and isinstance(datasource, dict):
+                target["datasource"] = dict(datasource)
+        for override in panel.get("fieldConfig", {}).get("overrides", []):
+            for prop in override.get("properties", []):
+                if (
+                    prop.get("id") == "custom.hideFrom"
+                    and prop.get("value", {}).get("viz") is True
+                ):
+                    prop["value"]["tooltip"] = True
+    payload.setdefault("timepicker", {}).pop("time_options", None)
+    payload["schemaVersion"] = 42
 
 
 def main(argv: list[str] | None = None) -> int:

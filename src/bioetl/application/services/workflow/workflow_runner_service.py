@@ -124,16 +124,29 @@ class WorkflowRunnerService:
             Callable[[WorkflowTransformDestructiveCommit], None] | None
         ) = None,
         created_at_factory: Callable[[], datetime] | None = None,
+        restored_step_outputs: Mapping[str, object] | None = None,
     ) -> WorkflowRunExecutionResult:
         """Run a workflow config and stop on first failed step."""
         started_at = current_utc_time()
         started_monotonic = perf_counter()
         self.record_expected_pipeline_metrics(config)
-        state = WorkflowExecutionState(step_results=[], step_outputs={})
+        state = WorkflowExecutionState(
+            step_results=[], step_outputs=dict(restored_step_outputs or {})
+        )
         workflow_context_labels = config.workflow_context_labels
         effective_dry_run = bool(config.defaults.dry_run)
         debug_export_enabled = bool(config.defaults.debug_export_enabled)
         debug_export_dir = config.defaults.debug_export_dir
+        cohort_producers = {
+            producer.reference_cohort.step_id
+            for producer in config.pipeline_steps
+            if producer.reference_cohort is not None
+        }
+        cohort_producers.update(
+            producer.step_id
+            for producer in config.pipeline_steps
+            if producer.reference_cohort is not None
+        )
 
         for step_id in config.topological_step_ids:
             step = config.get_step(step_id)
@@ -153,6 +166,7 @@ class WorkflowRunnerService:
                 manifest_id=manifest_id,
                 debug_export=(debug_export_enabled, debug_export_dir),
                 created_at_factory=created_at_factory,
+                capture_producer_snapshot=step_id in cohort_producers,
             )
             apply_workflow_step_transition(
                 state=state,
@@ -219,6 +233,7 @@ class WorkflowRunnerService:
         manifest_id: str | None,
         debug_export: tuple[bool, str | None],
         created_at_factory: Callable[[], datetime] | None,
+        capture_producer_snapshot: bool = False,
     ) -> ResolvedWorkflowStepTransitionRecord:
         """Resolve whether a step should run, resume-skip, or failure-skip."""
         debug_export_enabled, debug_export_dir = debug_export
@@ -240,14 +255,27 @@ class WorkflowRunnerService:
                 ),
             )
         if policy.disposition == "skip_completed":
+            completed = build_resume_skipped_step_result(
+                metrics=self.metrics,
+                workflow_name=workflow_name,
+                step=step,
+                context_labels=workflow_context_labels,
+            )
+            restored = state.step_outputs.get(step.step_id)
+            if isinstance(restored, Mapping):
+                run_id = restored.get("run_id")
+                child_manifest = restored.get("manifest_id")
+                completed = replace(
+                    completed,
+                    payload=restored,
+                    child_run_id=str(run_id) if run_id is not None else None,
+                    child_manifest_id=str(child_manifest)
+                    if child_manifest is not None
+                    else None,
+                )
             return ResolvedWorkflowStepTransitionRecord(
                 policy=policy,
-                result=build_resume_skipped_step_result(
-                    metrics=self.metrics,
-                    workflow_name=workflow_name,
-                    step=step,
-                    context_labels=workflow_context_labels,
-                ),
+                result=completed,
             )
         return ResolvedWorkflowStepTransitionRecord(
             policy=policy,
@@ -265,6 +293,7 @@ class WorkflowRunnerService:
                 debug_export_enabled=debug_export_enabled,
                 debug_export_dir=debug_export_dir,
                 created_at_factory=created_at_factory,
+                capture_producer_snapshot=capture_producer_snapshot,
             ),
         )
 
@@ -286,12 +315,14 @@ class WorkflowRunnerService:
         debug_export_enabled: bool,
         debug_export_dir: str | None,
         created_at_factory: Callable[[], datetime] | None,
+        capture_producer_snapshot: bool = False,
     ) -> WorkflowStepExecutionResult:
         if isinstance(step, WorkflowStepConfig):
             return await execute_pipeline_step(
                 pipeline_runner=self.pipeline_runner,
                 cohort_resolver=self.cohort_resolver,
                 upstream_outputs=step_outputs,
+                capture_producer_snapshot=capture_producer_snapshot,
                 metrics=self.metrics,
                 monotonic=self.monotonic,
                 workflow_name=workflow_name,
@@ -299,6 +330,11 @@ class WorkflowRunnerService:
                 workflow_context_labels=workflow_context_labels,
                 step_started_callback=step_started_callback,
                 workflow_run_id=workflow_run_id,
+                snapshot_reader=getattr(
+                    getattr(self.transform_service, "registry", None),
+                    "snapshot_reader",
+                    None,
+                ),
             )
         return await execute_transform_step(
             transform_service=self.transform_service,

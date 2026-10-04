@@ -83,8 +83,19 @@ def test_dashboard_rows_match_flat_and_forensic_surfaces() -> None:
         observed[dashboard_path.name] = len(rows)
         if expected_rows[dashboard_path.name] == 0:
             assert len(get_dashboard_panels(dashboard)) == (
-                2 if dashboard_path.stem == "bioetl-run-explorer-v1" else 10
+                2 if dashboard_path.stem == "bioetl-run-explorer-v1" else 11
             )
+            if dashboard_path.stem == "bioetl-overview-v2":
+                comparison = next(
+                    panel
+                    for panel in get_dashboard_panels(dashboard)
+                    if panel["id"] == 9483
+                )
+                assert comparison["type"] == "table"
+                assert (
+                    comparison["targets"][0]["root_selector"]
+                    == "reconciliation_display"
+                )
     assert observed == expected_rows
 
 

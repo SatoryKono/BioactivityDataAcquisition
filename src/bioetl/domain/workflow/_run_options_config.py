@@ -21,6 +21,7 @@ class WorkflowRunOptionsConfig:
     resume: bool | None = None
     start_offset: int | None = None
     limit: int | None = None
+    reconciliation_mode: str | None = None
     dry_run: bool | None = None
     input_csv: str | None = None
     filter_column: str | None = None
@@ -52,6 +53,12 @@ class WorkflowRunOptionsConfig:
     no_control_plane_archive: bool | None = None
 
     def __post_init__(self) -> None:
+        from bioetl.domain.workflow.foreign_key_reconciliation import (
+            require_reconciliation_mode,
+        )
+
+        if self.reconciliation_mode is not None:
+            require_reconciliation_mode(self.reconciliation_mode)
         if self.multi_filter_ids is not None:
             object.__setattr__(
                 self,

@@ -3,7 +3,9 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "-- Grafana --",
+        "datasource": {
+          "uid": "-- Grafana --"
+        },
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -19,7 +21,7 @@
   "id": null,
   "links": [],
   "refresh": "60s",
-  "schemaVersion": 30,
+  "schemaVersion": 42,
   "style": "dark",
   "tags": [
     "bioetl",
@@ -73,7 +75,10 @@
           "text": "All",
           "value": "$__all"
         },
-        "datasource": "BioETL Ops HTTP",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
         "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=options&workflow=${workflow}&allow_stale=1",
         "hide": 0,
         "includeAll": true,
@@ -160,7 +165,10 @@
           "text": "-",
           "value": "-"
         },
-        "datasource": "BioETL Ops HTTP",
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "bioetl-ops-http"
+        },
         "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=options&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}&timezone=${__timezone}&allow_stale=1",
         "description": "Run ID selector sourced from the local control-plane run-manifest catalog for the current pipeline/run_type scope. Grafana All values are normalized to an unbounded scope, so Run Type = All no longer empties the selector; Pipeline = All exposes aggregate exact-run handoff options from the catalog. This selector remains HTTP-backed and does not reintroduce run_id into Prometheus labels. Run ID options are ordered by start time descending from the control-plane catalog; Grafana sort is disabled so backend order is preserved.",
         "hide": 0,
@@ -361,7 +369,11 @@
         {
           "panelId": 9002,
           "refId": "A",
-          "withTransforms": false
+          "withTransforms": false,
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          }
         }
       ],
       "transformations": [
@@ -478,7 +490,10 @@
         "w": 15,
         "h": 13
       },
-      "datasource": "BioETL Ops HTTP",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
       "fieldConfig": {
         "defaults": {
           "noValue": "UNKNOWN",
@@ -646,7 +661,11 @@
             "method": "GET",
             "data": ""
           },
-          "uql": "parse-json | jsonata \"($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') and $d.verdict = 'N/A' ? '—' : $d.verdict, 'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $r ? $r : ($count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))\""
+          "uql": "parse-json | jsonata \"($s := presentation_summary[0]; $t := presentation_trust[0].trust_status; $r := presentation_trust[0].reasons_display; $issues := presentation_domains[verdict != 'OK' and verdict != 'N/A']; $map(presentation_domains, function($d) { $merge([$d, {'status_display': ($d.domain = 'Workflow' or $d.domain = 'Provider') and $d.verdict = 'N/A' ? '—' : $d.verdict, 'reason_display': $d.reason = 'cached_bronze_no_remote_probe' ? 'Cached Bronze used; provider API was not called.' : $d.reason_display, 'run_execution': $s.execution_state, 'run_verdict': $s.verdict, 'saved_trust': $t, 'run_reason': $r ? $r : ($count($issues) > 0 ? $join($map($issues, function($d) { $d.domain & ': ' & ($d.reason = 'run_observation_missing' ? 'Result not recorded' : $d.reason_display) }), '; ') : $s.reason)}]) }))\"",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          }
         }
       ],
       "options": {
@@ -1024,7 +1043,11 @@
         {
           "panelId": 9002,
           "refId": "A",
-          "withTransforms": false
+          "withTransforms": false,
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          }
         }
       ],
       "transformations": [
@@ -1094,7 +1117,10 @@
         "h": 8
       },
       "description": "SELECTED RUN · Pipeline and full Run ID identify the saved run. Run Type and Started at (with saved UTC offset) characterize its execution. SELECT RUN means no selected run context. Missing saved values are Not recorded; request failures remain QUERY ERROR. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
-      "datasource": "BioETL Ops HTTP",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1136,7 +1162,11 @@
             "data": "",
             "method": "GET"
           },
-          "uql": "parse-json | jsonata \"($v := function($x){$exists($x) and $x != \\\"\\\" ? $string($x) : \\\"Not recorded in saved run evidence\\\"}; $s := summary[0]; $start := $s.started_at ? $toMillis($s.started_at) : null; $end := $s.completed_at ? $toMillis($s.completed_at) : null; [{\\\"parameter\\\":\\\"Run ID\\\",\\\"value\\\":$v(run_id)},{\\\"parameter\\\":\\\"Pipeline\\\",\\\"value\\\":$v(pipeline)},{\\\"parameter\\\":\\\"Run Type\\\",\\\"value\\\":$v(run_type)},{\\\"parameter\\\":\\\"Started at\\\",\\\"value\\\":started_at ? $substring(started_at,0,10) & \\\" \\\" & $substring(started_at,11,5) & \\\" \\\" & ($substring(started_at,-1) = \\\"Z\\\" ? \\\"UTC\\\" : $substring(started_at,-6)) : \\\"Not recorded in saved run evidence\\\"},{\\\"parameter\\\":\\\"Total Run Duration\\\",\\\"value\\\":$start != null and $end != null and $end >= $start ? ($n := $floor(($end - $start) / 1000 + 0.5); $parts := [$floor($n / 86400), $floor(($n % 86400) / 3600), $floor(($n % 3600) / 60), $n % 60]; $units := [\\\" d\\\", \\\" h\\\", \\\" min\\\", \\\" s\\\"]; $n = 0 ? \\\"0 s\\\" : $join($map($parts, function($v, $i){$v > 0 ? $string($v) & $units[$i]}), \\\" \\\")) : \\\"Not recorded in saved run evidence\\\"}])\""
+          "uql": "parse-json | jsonata \"($v := function($x){$exists($x) and $x != \\\"\\\" ? $string($x) : \\\"Not recorded in saved run evidence\\\"}; $s := summary[0]; $start := $s.started_at ? $toMillis($s.started_at) : null; $end := $s.completed_at ? $toMillis($s.completed_at) : null; [{\\\"parameter\\\":\\\"Run ID\\\",\\\"value\\\":$v(run_id)},{\\\"parameter\\\":\\\"Pipeline\\\",\\\"value\\\":$v(pipeline)},{\\\"parameter\\\":\\\"Run Type\\\",\\\"value\\\":$v(run_type)},{\\\"parameter\\\":\\\"Started at\\\",\\\"value\\\":started_at ? $substring(started_at,0,10) & \\\" \\\" & $substring(started_at,11,5) & \\\" \\\" & ($substring(started_at,-1) = \\\"Z\\\" ? \\\"UTC\\\" : $substring(started_at,-6)) : \\\"Not recorded in saved run evidence\\\"},{\\\"parameter\\\":\\\"Total Run Duration\\\",\\\"value\\\":$start != null and $end != null and $end >= $start ? ($n := $floor(($end - $start) / 1000 + 0.5); $parts := [$floor($n / 86400), $floor(($n % 86400) / 3600), $floor(($n % 3600) / 60), $n % 60]; $units := [\\\" d\\\", \\\" h\\\", \\\" min\\\", \\\" s\\\"]; $n = 0 ? \\\"0 s\\\" : $join($map($parts, function($v, $i){$v > 0 ? $string($v) & $units[$i]}), \\\" \\\")) : \\\"Not recorded in saved run evidence\\\"}])\"",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          }
         }
       ],
       "options": {
@@ -1179,7 +1209,10 @@
         "w": 15,
         "h": 5
       },
-      "datasource": "BioETL Ops HTTP",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
       "description": "SELECTED RUN · Saved provider evidence for this Run ID. Cached Bronze means the provider API was not called: Check performed is No and Check result is —. Provider check identifies saved preflight evidence, not the extraction transport. UNKNOWN means the performed state or result is unknown. Since completed is elapsed wall time from the saved completion timestamp, updated on refresh. Expand Provider HTTP details for recorded response time, HTTP status and endpoint; missing details are not invented. VALID EMPTY is an empty successful response. SELECT RUN requires context; QUERY ERROR is a failed request. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
       "options": {
         "showHeader": true,
@@ -1309,7 +1342,11 @@
             "method": "GET",
             "data": ""
           },
-          "uql": "parse-json | jsonata \"($d := presentation_domains[domain = 'Provider'][0]; $cached := $d.reason = 'cached_bronze_no_remote_probe'; $saved := evidence_availability in ['AVAILABLE', 'legacy_no_snapshot']; $completed := summary[0].completed_at; $age := $completed ? $floor(($millis() - $toMillis($completed)) / 1000) : null; $seconds := $age != null and $age>=0 ? $age : 0; $parts := [$floor($seconds/86400), $floor(($seconds%86400)/3600), $floor(($seconds%3600)/60)]; $units := [' d',' h',' min']; $elapsed := $join($map($parts,function($v,$i){$v>0 ? $string($v)&$units[$i]}),' '); [$map(provider_checks, function($p) { $merge([$p, {'data_source': $cached ? 'Cached Bronze' : ($p.data_source ? $p.data_source : ($d.reason = 'run_preflight_provider_observation' and $p.evidence = 'PRESENT' ? 'Provider check' : 'UNKNOWN')), 'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), 'check_result': $cached ? '—' : ($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN'), 'reason': $cached ? 'Cached Bronze used; provider API was not called.' : ($d.reason = 'run_preflight_provider_observation' ? 'Saved provider preflight check.' : ($d.reason_display ? $d.reason_display : 'Provider check evidence was not recorded.')), 'observed_display': $age != null and $age >= 0 ? ($age<60 ? 'Just now' : $elapsed & ' ago') : 'Not recorded', 'report_label': $saved or $cached ? 'Open report' : '—' }]) })])\""
+          "uql": "parse-json | jsonata \"($d := presentation_domains[domain = 'Provider'][0]; $cached := $d.reason = 'cached_bronze_no_remote_probe'; $saved := evidence_availability in ['AVAILABLE', 'legacy_no_snapshot']; $completed := summary[0].completed_at; $age := $completed ? $floor(($millis() - $toMillis($completed)) / 1000) : null; $seconds := $age != null and $age>=0 ? $age : 0; $parts := [$floor($seconds/86400), $floor(($seconds%86400)/3600), $floor(($seconds%3600)/60)]; $units := [' d',' h',' min']; $elapsed := $join($map($parts,function($v,$i){$v>0 ? $string($v)&$units[$i]}),' '); [$map(provider_checks, function($p) { $merge([$p, {'data_source': $cached ? 'Cached Bronze' : ($p.data_source ? $p.data_source : ($d.reason = 'run_preflight_provider_observation' and $p.evidence = 'PRESENT' ? 'Provider check' : 'UNKNOWN')), 'check_performed': $cached ? 'No' : ($p.evidence = 'PRESENT' ? 'Yes' : 'UNKNOWN'), 'check_result': $cached ? '—' : ($p.evidence = 'PRESENT' and $p.check_result ? $p.check_result : 'UNKNOWN'), 'reason': $cached ? 'Cached Bronze used; provider API was not called.' : ($d.reason = 'run_preflight_provider_observation' ? 'Saved provider preflight check.' : ($d.reason_display ? $d.reason_display : 'Provider check evidence was not recorded.')), 'observed_display': $age != null and $age >= 0 ? ($age<60 ? 'Just now' : $elapsed & ' ago') : 'Not recorded', 'report_label': $saved or $cached ? 'Open report' : '—' }]) })])\"",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          }
         }
       ],
       "transformations": [
@@ -1365,7 +1402,10 @@
         "w": 9,
         "h": 5
       },
-      "datasource": "BioETL Ops HTTP",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
       "description": "SELECTED RUN · Saved provider check result. Missing evidence stays UNKNOWN. OK/WARN/CRIT color the saved check verdict, not live fleet health. SELECT RUN means no Run ID is selected. VALID EMPTY means no saved provider check. QUERY ERROR means backend unavailable or request failure. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
       "options": {
         "reduceOptions": {
@@ -1477,6 +1517,10 @@
           "url_options": {
             "method": "GET",
             "data": ""
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
           }
         }
       ],
@@ -1510,7 +1554,10 @@
         "w": 15,
         "h": 6
       },
-      "datasource": "BioETL Ops HTTP",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
       "description": "SELECTED RUN · Saved stage rows for the exact Run ID; the table shows at most 12 stages. SUCCESS with missing stage evidence stays INCOMPLETE. A recorded zero stays 0. An unknown count is empty, not 0. UNFINISHED means no terminal event. Prometheus does not change this table. Request failure is QUERY ERROR. Removal counters are per-stage saved funnel removals; untracked stages stay UNKNOWN. Excluded % is excluded_by_contract / stage records in; Saved % is records out / stage records in. Empty or incomplete inputs are UNKNOWN. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
       "options": {
         "showHeader": true,
@@ -1891,6 +1938,10 @@
           "url_options": {
             "method": "GET",
             "data": ""
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
           }
         },
         {
@@ -1905,7 +1956,11 @@
             "method": "GET",
             "data": ""
           },
-          "uql": "parse-json | jsonata \"($r := function($s,$o){$exists($s.removals[outcome=$o]) ? $sum($s.removals[outcome=$o].count) : ($s.tracking = 'full' ? 0 : null)}; $map(funnel, function($s){ {'stage_id':$s.stage_id, 'quarantined':$r($s,'quarantined'), 'excluded':$r($s,'excluded_by_contract'), 'deduplicated':$r($s,'deduplicated'), 'filtered_out':$r($s,'filtered_out')} }))\""
+          "uql": "parse-json | jsonata \"($r := function($s,$o){$exists($s.removals[outcome=$o]) ? $sum($s.removals[outcome=$o].count) : ($s.tracking = 'full' ? 0 : null)}; $map(funnel, function($s){ {'stage_id':$s.stage_id, 'quarantined':$r($s,'quarantined'), 'excluded':$r($s,'excluded_by_contract'), 'deduplicated':$r($s,'deduplicated'), 'filtered_out':$r($s,'filtered_out')} }))\"",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          }
         },
         {
           "refId": "C",
@@ -1919,7 +1974,11 @@
             "method": "GET",
             "data": ""
           },
-          "uql": "parse-json | jsonata \"($ratio := function($s,$n){$s.tracking='full' and $type($s.records_in)='number' and $type($n)='number' ? ($s.records_in>0 and $n>=0 and $n<=$s.records_in ? 100*$n/$s.records_in : null) : null}; $map(funnel,function($s){($excluded := $s.tracking='full' and $type($s.removals)='array' ? $sum($append([0],$s.removals[outcome='excluded_by_contract'].count)) : null; {'stage_id':$s.stage_id,'excluded_pct':$ratio($s,$excluded),'saved_pct':$ratio($s,$s.records_out)})}))\""
+          "uql": "parse-json | jsonata \"($ratio := function($s,$n){$s.tracking='full' and $type($s.records_in)='number' and $type($n)='number' ? ($s.records_in>0 and $n>=0 and $n<=$s.records_in ? 100*$n/$s.records_in : null) : null}; $map(funnel,function($s){($excluded := $s.tracking='full' and $type($s.removals)='array' ? $sum($append([0],$s.removals[outcome='excluded_by_contract'].count)) : null; {'stage_id':$s.stage_id,'excluded_pct':$ratio($s,$excluded),'saved_pct':$ratio($s,$s.records_out)})}))\"",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          }
         }
       ],
       "transformations": [
@@ -2015,7 +2074,10 @@
         "w": 9,
         "h": 6
       },
-      "datasource": "BioETL Ops HTTP",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
       "description": "SELECTED RUN · Excluded-by-contract records summed across Bronze, Silver and Gold. Exclusion rate uses Bronze records out: below soft limit OK, at soft limit WARN, at hard limit ERROR. Limits come from pipeline configuration at dashboard generation, not historical run overrides. UNKNOWN means incomplete tracking or invalid counters; SELECT RUN requires a Run ID. Failed requests remain QUERY ERROR. Quarantined, filtered and deduplicated records are separate outcomes and are not included. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response. Empty is a coverage gap: required saved evidence is missing, not a pass. Request failure is QUERY ERROR.",
       "options": {
         "inlineEditing": false,
@@ -2152,17 +2214,117 @@
           "source": "url",
           "parser": "uql",
           "format": "table",
-          "root_selector": "($limits := {\"chembl_activity\":[0.05,0.5],\"chembl_assay\":[0.05,0.5],\"chembl_assay_parameters\":[0.05,0.5],\"chembl_cell_line\":[0.05,0.5],\"chembl_compound_record\":[0.05,0.5],\"chembl_molecule\":[0.05,0.5],\"chembl_protein_class\":[0.05,0.5],\"chembl_publication\":[0.05,0.5],\"chembl_publication_similarity\":[0.05,0.5],\"chembl_publication_term\":[0.05,0.5],\"chembl_subcellular_fraction\":[0.05,0.5],\"chembl_target\":[0.05,0.5],\"chembl_target_component\":[0.05,0.5],\"chembl_target_protein_classification\":[0.05,0.5],\"chembl_tissue\":[0.05,0.5],\"composite_activity\":[0.05,0.5],\"composite_assay\":[0.05,0.5],\"composite_molecule\":[0.05,0.5],\"composite_publication\":[0.05,0.5],\"composite_target\":[0.05,0.5],\"crossref_publication\":[0.1,0.5],\"openalex_publication\":[0.08,0.5],\"pubchem_compound\":[0.08,0.5],\"pubmed_publication\":[0.05,0.15],\"semanticscholar_publication\":[0.15,0.4],\"uniprot_idmapping\":[0.3,0.8],\"uniprot_protein\":[0.03,0.1]}; $limit := $lookup($limits, identity.pipeline_name); $s := funnel[stage_id in ['bronze','silver','gold']]; $r := $s.removals[outcome='excluded_by_contract']; $base := $s[stage_id='bronze'].records_out; $known := $count($distinct($s.stage_id)) = 3 and $count($s) = 3 and $count($s[tracking='full' and $type(removals)='array']) = 3 and $count($r) = $count($r[$type(count)='number' ? count >= 0 and count=$floor(count) : false]) and ($type($base)='number' ? $base >= 0 and $base=$floor($base) : false) and $count($limit)=2; $n := $known ? $sum($append([0], $r.count)) : null; $known := $known and $n <= $base; $rate := $known ? ($base=0 ? 0 : $n/$base) : null; $status := $known ? ($rate >= $limit[1] ? 'ERROR' : $rate >= $limit[0] ? 'WARN' : 'OK') : 'UNKNOWN'; [{'status': $status, 'detail': ($known ? 'excluded ' & $string($round($rate*100,2)) & '%' : 'excluded UNKNOWN')}])",
-          "url": "/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
+          "root_selector": "($limits := {\"chembl_activity\":[0.05,0.5],\"chembl_assay\":[0.05,0.5],\"chembl_assay_parameters\":[0.05,0.5],\"chembl_cell_line\":[0.05,0.5],\"chembl_compound_record\":[0.05,0.5],\"chembl_molecule\":[0.05,0.5],\"chembl_protein_class\":[0.05,0.5],\"chembl_publication\":[0.05,0.5],\"chembl_publication_similarity\":[0.05,0.5],\"chembl_publication_term\":[0.05,0.5],\"chembl_subcellular_fraction\":[0.05,0.5],\"chembl_target\":[0.05,0.5],\"chembl_target_component\":[0.05,0.5],\"chembl_target_protein_classification\":[0.05,0.5],\"chembl_tissue\":[0.05,0.5],\"composite_activity\":[0.05,0.5],\"composite_assay\":[0.05,0.5],\"composite_molecule\":[0.05,0.5],\"composite_publication\":[0.05,0.5],\"composite_target\":[0.05,0.5],\"crossref_publication\":[0.1,0.5],\"openalex_publication\":[0.08,0.5],\"pubchem_compound\":[0.08,0.5],\"pubmed_publication\":[0.05,0.15],\"semanticscholar_publication\":[0.15,0.4],\"uniprot_idmapping\":[0.3,0.8],\"uniprot_protein\":[0.03,0.1]}; $limit := $lookup($limits, quality_evidence.pipeline); $s := quality_evidence.funnel[stage_id in ['bronze','silver','gold']]; $r := $s.removals[outcome='excluded_by_contract']; $base := $s[stage_id='bronze'].records_out; $known := $count($distinct($s.stage_id)) = 3 and $count($s) = 3 and $count($s[tracking='full' and $type(removals)='array']) = 3 and $count($r) = $count($r[$type(count)='number' ? count >= 0 and count=$floor(count) : false]) and ($type($base)='number' ? $base >= 0 and $base=$floor($base) : false) and $count($limit)=2; $n := $known ? $sum($append([0], $r.count)) : null; $known := $known and $n <= $base; $rate := $known ? ($base=0 ? 0 : $n/$base) : null; $status := verdict='SELECT RUN' ? 'SELECT RUN' : $known ? ($rate >= $limit[1] ? 'ERROR' : $rate >= $limit[0] ? 'WARN' : 'OK') : 'UNKNOWN'; [{'status': $status, 'detail': (verdict='SELECT RUN' ? 'Choose a run' : $known ? 'excluded ' & $string($round($rate*100,2)) & '%' : 'excluded UNKNOWN')}])",
+          "url": "/ops/observability/selected-run-status?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&run_type=${run_type:csv}&workflow=${workflow:csv}",
           "url_options": {
             "method": "GET",
             "data": ""
           },
-          "uql": "parse-json | jsonata \"($limits := {\\\"chembl_activity\\\":[0.05,0.5],\\\"chembl_assay\\\":[0.05,0.5],\\\"chembl_assay_parameters\\\":[0.05,0.5],\\\"chembl_cell_line\\\":[0.05,0.5],\\\"chembl_compound_record\\\":[0.05,0.5],\\\"chembl_molecule\\\":[0.05,0.5],\\\"chembl_protein_class\\\":[0.05,0.5],\\\"chembl_publication\\\":[0.05,0.5],\\\"chembl_publication_similarity\\\":[0.05,0.5],\\\"chembl_publication_term\\\":[0.05,0.5],\\\"chembl_subcellular_fraction\\\":[0.05,0.5],\\\"chembl_target\\\":[0.05,0.5],\\\"chembl_target_component\\\":[0.05,0.5],\\\"chembl_target_protein_classification\\\":[0.05,0.5],\\\"chembl_tissue\\\":[0.05,0.5],\\\"composite_activity\\\":[0.05,0.5],\\\"composite_assay\\\":[0.05,0.5],\\\"composite_molecule\\\":[0.05,0.5],\\\"composite_publication\\\":[0.05,0.5],\\\"composite_target\\\":[0.05,0.5],\\\"crossref_publication\\\":[0.1,0.5],\\\"openalex_publication\\\":[0.08,0.5],\\\"pubchem_compound\\\":[0.08,0.5],\\\"pubmed_publication\\\":[0.05,0.15],\\\"semanticscholar_publication\\\":[0.15,0.4],\\\"uniprot_idmapping\\\":[0.3,0.8],\\\"uniprot_protein\\\":[0.03,0.1]}; $limit := $lookup($limits, identity.pipeline_name); $s := funnel[stage_id in ['bronze','silver','gold']]; $r := $s.removals[outcome='excluded_by_contract']; $base := $s[stage_id='bronze'].records_out; $known := $count($distinct($s.stage_id)) = 3 and $count($s) = 3 and $count($s[tracking='full' and $type(removals)='array']) = 3 and $count($r) = $count($r[$type(count)='number' ? count >= 0 and count=$floor(count) : false]) and ($type($base)='number' ? $base >= 0 and $base=$floor($base) : false) and $count($limit)=2; $n := $known ? $sum($append([0], $r.count)) : null; $known := $known and $n <= $base; $rate := $known ? ($base=0 ? 0 : $n/$base) : null; $status := $known ? ($rate >= $limit[1] ? 'ERROR' : $rate >= $limit[0] ? 'WARN' : 'OK') : 'UNKNOWN'; [{'status': $status, 'detail': ($known ? 'excluded ' & $string($round($rate*100,2)) & '%' : 'excluded UNKNOWN')}])\""
+          "uql": "parse-json | jsonata \"($limits := {\\\"chembl_activity\\\":[0.05,0.5],\\\"chembl_assay\\\":[0.05,0.5],\\\"chembl_assay_parameters\\\":[0.05,0.5],\\\"chembl_cell_line\\\":[0.05,0.5],\\\"chembl_compound_record\\\":[0.05,0.5],\\\"chembl_molecule\\\":[0.05,0.5],\\\"chembl_protein_class\\\":[0.05,0.5],\\\"chembl_publication\\\":[0.05,0.5],\\\"chembl_publication_similarity\\\":[0.05,0.5],\\\"chembl_publication_term\\\":[0.05,0.5],\\\"chembl_subcellular_fraction\\\":[0.05,0.5],\\\"chembl_target\\\":[0.05,0.5],\\\"chembl_target_component\\\":[0.05,0.5],\\\"chembl_target_protein_classification\\\":[0.05,0.5],\\\"chembl_tissue\\\":[0.05,0.5],\\\"composite_activity\\\":[0.05,0.5],\\\"composite_assay\\\":[0.05,0.5],\\\"composite_molecule\\\":[0.05,0.5],\\\"composite_publication\\\":[0.05,0.5],\\\"composite_target\\\":[0.05,0.5],\\\"crossref_publication\\\":[0.1,0.5],\\\"openalex_publication\\\":[0.08,0.5],\\\"pubchem_compound\\\":[0.08,0.5],\\\"pubmed_publication\\\":[0.05,0.15],\\\"semanticscholar_publication\\\":[0.15,0.4],\\\"uniprot_idmapping\\\":[0.3,0.8],\\\"uniprot_protein\\\":[0.03,0.1]}; $limit := $lookup($limits, quality_evidence.pipeline); $s := quality_evidence.funnel[stage_id in ['bronze','silver','gold']]; $r := $s.removals[outcome='excluded_by_contract']; $base := $s[stage_id='bronze'].records_out; $known := $count($distinct($s.stage_id)) = 3 and $count($s) = 3 and $count($s[tracking='full' and $type(removals)='array']) = 3 and $count($r) = $count($r[$type(count)='number' ? count >= 0 and count=$floor(count) : false]) and ($type($base)='number' ? $base >= 0 and $base=$floor($base) : false) and $count($limit)=2; $n := $known ? $sum($append([0], $r.count)) : null; $known := $known and $n <= $base; $rate := $known ? ($base=0 ? 0 : $n/$base) : null; $status := verdict='SELECT RUN' ? 'SELECT RUN' : $known ? ($rate >= $limit[1] ? 'ERROR' : $rate >= $limit[0] ? 'WARN' : 'OK') : 'UNKNOWN'; [{'status': $status, 'detail': (verdict='SELECT RUN' ? 'Choose a run' : $known ? 'excluded ' & $string($round($rate*100,2)) & '%' : 'excluded UNKNOWN')}])\"",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          }
         }
       ],
       "transformations": [],
       "links": []
+    },
+    {
+      "id": 9483,
+      "type": "table",
+      "title": "Review FK Comparison Scope",
+      "description": "SELECTED RUN · Persisted FK comparison in the exact parent workflow. selected-snapshot means absence only inside the pinned reference, not absence from the complete provider. Expiry can affect all selected rows while execution succeeds; remaining rows and scope stay explicit. Missing evidence is UNKNOWN and failed requests remain QUERY ERROR. Saved Evidence and Replay Readiness retain their independent checks. VALID EMPTY means an empty successful response; it does not replace UNKNOWN for missing required evidence. Backend failure renders as QUERY ERROR and must not be interpreted as an empty successful response.",
+      "gridPos": {
+        "x": 0,
+        "y": 29,
+        "w": 24,
+        "h": 12
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "reconciliation_display",
+          "columns": [
+            {
+              "selector": "step_id",
+              "text": "Workflow step",
+              "type": "string"
+            },
+            {
+              "selector": "mode",
+              "text": "Mode",
+              "type": "string"
+            },
+            {
+              "selector": "scope",
+              "text": "Row scope",
+              "type": "string"
+            },
+            {
+              "selector": "pins",
+              "text": "Compared snapshots",
+              "type": "string"
+            },
+            {
+              "selector": "limit",
+              "text": "Limit",
+              "type": "string"
+            },
+            {
+              "selector": "result",
+              "text": "Result",
+              "type": "string"
+            },
+            {
+              "selector": "meaning",
+              "text": "Interpretation",
+              "type": "string"
+            }
+          ],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bioetl-ops-http"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "UNKNOWN",
+          "custom": {
+            "align": "left",
+            "minWidth": 50,
+            "inspect": true,
+            "wrapText": true,
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": true
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "lg",
+        "footer": {
+          "show": false,
+          "enablePagination": true
+        }
+      }
     }
   ]
 }

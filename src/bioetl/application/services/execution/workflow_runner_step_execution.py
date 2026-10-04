@@ -38,6 +38,7 @@ from bioetl.domain.workflow import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.application.services.execution.pipeline_runner_models import RunResult
     from bioetl.application.services.execution.pipeline_runner_service import (
         PipelineRunnerService,
     )
@@ -102,11 +103,14 @@ async def execute_pipeline_step(
     workflow_context_labels: Mapping[str, str],
     step_started_callback: Callable[..., None] | None,
     workflow_run_id: str | None,
+    snapshot_reader: Callable[[str, str], Awaitable[dict[str, dict[str, object]]]]
+    | None = None,
     cohort_resolver: Callable[
         [WorkflowStepConfig, Mapping[str, object]], Awaitable[WorkflowStepConfig]
     ]
     | None = None,
     upstream_outputs: Mapping[str, object] | None = None,
+    capture_producer_snapshot: bool = False,
 ) -> WorkflowStepExecutionResult:
     """Run one pipeline step and project step-level metrics."""
     if step_started_callback is not None:
@@ -124,9 +128,20 @@ async def execute_pipeline_step(
             workflow_name=workflow_name,
             workflow_step_id=step.step_id,
         )
+        capture_required = (
+            capture_producer_snapshot
+            or step.run_options.reconciliation_mode == "selected-snapshot"
+        )
+        if capture_required:
+            if snapshot_reader is None:
+                raise ValueError("producer scope requires a snapshot reader")
+            await snapshot_reader(step.pipeline_name, "")
         result = await pipeline_runner.run(
             step.pipeline_name,
             options=step_options,
+        )
+        result = await _capture_producer_result(
+            result, step, snapshot_reader, capture_required
         )
     except _WORKFLOW_STEP_FAILURES as exc:
         record_step_metrics(
@@ -165,6 +180,25 @@ async def execute_pipeline_step(
         child_run_id=optional_identity(result, "run_id"),
         child_manifest_id=optional_identity(result, "manifest_id"),
     )
+
+
+async def _capture_producer_result(
+    result: RunResult,
+    step: WorkflowStepConfig,
+    snapshot_reader: Callable[[str, str], Awaitable[dict[str, dict[str, object]]]]
+    | None,
+    capture_required: bool,
+) -> RunResult:
+    """Persist the successful producer's exact bounded snapshots."""
+    if not result.is_success or not capture_required:
+        return result
+    if snapshot_reader is None:
+        raise ValueError("producer scope requires a snapshot reader")
+    snapshots = await snapshot_reader(step.pipeline_name, result.run_id)
+    for snapshot in snapshots.values():
+        snapshot["limit"] = step.run_options.limit
+        snapshot["start_offset"] = step.run_options.start_offset
+    return replace(result, selected_snapshots=snapshots)
 
 
 @dataclass(frozen=True, slots=True)

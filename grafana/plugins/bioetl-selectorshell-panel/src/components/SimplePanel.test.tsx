@@ -5,7 +5,15 @@ import { locationService } from '@grafana/runtime';
 import { defaultOptions, SelectorContextPayload } from '../types';
 import { SimplePanel } from './SimplePanel';
 
-jest.mock('@grafana/runtime', () => ({ locationService: { partial: jest.fn() } }));
+jest.mock('@grafana/runtime', () => {
+  const { BehaviorSubject } = jest.requireActual<typeof import('rxjs')>('rxjs');
+  const changes = new BehaviorSubject({ search: '' });
+  return { locationService: {
+    partial: jest.fn(),
+    getLocation: () => changes.value,
+    getLocationObservable: () => changes,
+  } };
+});
 jest.mock('@grafana/ui', () => ({
   useStyles2: () => ({ wrapper: 'wrapper', code: 'code' }),
   Stack: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -20,11 +28,11 @@ function props(path = '/selector-context'): React.ComponentProps<typeof SimplePa
   } as React.ComponentProps<typeof SimplePanel>;
 }
 
-function response(): Response {
+function response(runId = 'run-123'): Response {
   const payload: SelectorContextPayload = {
     contract: 'control_plane_selector_context_v1',
     resolved_via: 'selected_run_id',
-    selected: { workflow: 'chembl', pipeline: 'chembl', run_type: 'backfill', run_id: 'run-123' },
+    selected: { workflow: 'chembl', pipeline: 'chembl', run_type: 'backfill', run_id: runId },
   };
   return { ok: true, json: async () => payload } as Response;
 }
@@ -43,6 +51,26 @@ describe('selector context request lifecycle', () => {
   afterEach(() => {
     global.fetch = originalFetch;
     jest.clearAllMocks();
+  });
+
+  it('refreshes a changed run with the same replaceVariables function', async () => {
+    let runId = 'run-123';
+    const replaceVariables = (value: string) => (value.includes('run_id') ? runId : 'chembl');
+    const fetchMock = jest.fn().mockResolvedValue(response());
+    global.fetch = fetchMock;
+    const panelProps = { ...props(), replaceVariables };
+    render(<SimplePanel {...panelProps} />);
+    await screen.findByText(/Resolved run-123/);
+    runId = 'run-456';
+    fetchMock.mockResolvedValue(response(runId));
+    act(() => {
+      const changes = locationService.getLocationObservable() as unknown as import('rxjs').BehaviorSubject<{ search: string }>;
+      changes.next({ search: '?var-run_id=run-456' });
+    });
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(
+      '/selector-context?run_id=run-456', expect.objectContaining({ credentials: 'same-origin' })
+    ));
+    await screen.findByText(/Resolved run-456/);
   });
 
   it('shows loading until the current request resolves', async () => {

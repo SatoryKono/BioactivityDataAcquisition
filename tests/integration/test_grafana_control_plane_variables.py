@@ -34,7 +34,10 @@ def test_control_plane_dashboard_uses_control_plane_native_variable_sources() ->
 
     assert "/ops/control-plane/filter-options" in pipeline_url
     assert "dimension=pipeline" in pipeline_url
-    assert pipeline_var.get("datasource") == "BioETL Ops HTTP"
+    assert pipeline_var.get("datasource") == {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bioetl-ops-http",
+    }
     assert "bioetl_control_plane_run_type_universe" in run_type_query_text
     assert "bioetl_control_plane_manifest_writes_total" not in run_type_query_text
     assert "bioetl_records_processed_total" not in run_type_query_text

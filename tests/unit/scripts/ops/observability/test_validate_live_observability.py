@@ -145,9 +145,12 @@ def test_load_repo_environment_preserves_process_precedence(
         calls.append((dotenv_path, override))
         monkeypatch.setenv("GF_SECURITY_ADMIN_PASSWORD", "from-repo-env")
 
-    monkeypatch.delenv("GRAFANA_PASSWORD", raising=False)
-    monkeypatch.delenv("GRAFANA_ADMIN_PASSWORD", raising=False)
-    monkeypatch.delenv("GF_SECURITY_ADMIN_PASSWORD", raising=False)
+    for name in (
+        "GF_SECURITY_ADMIN_PASSWORD",
+        "GRAFANA_PASSWORD",
+        "GRAFANA_ADMIN_PASSWORD",
+    ):
+        monkeypatch.delenv(name, raising=False)
     monkeypatch.setattr(vlo, "load_dotenv", fake_load_dotenv)
 
     vlo._load_repo_environment()

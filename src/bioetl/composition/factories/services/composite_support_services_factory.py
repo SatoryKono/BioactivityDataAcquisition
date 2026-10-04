@@ -171,9 +171,6 @@ class CompositeSupportServicesFactory:
         )
 
 
-__all__ = ["CompositeSupportServices", "CompositeSupportServicesFactory"]
-
-
 def build_support_services(
     *,
     config: CompositeConfig,
@@ -215,3 +212,10 @@ def build_support_services(
         create_dq_report_service=create_dq_report_service_fn,
         checkpoint_manager_cls=CompositeCheckpointService,
     ).build()
+
+
+__all__ = [
+    "CompositeSupportServices",
+    "CompositeSupportServicesFactory",
+    "build_support_services",
+]
