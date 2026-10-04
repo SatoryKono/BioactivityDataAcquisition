@@ -199,7 +199,7 @@ class WorkflowCohortResolver:
             raise ValueError("reference_cohort contains no reference keys")
         if step.run_options.limit is not None and len(keys) > step.run_options.limit:
             raise ValueError("reference_cohort exceeds the requested record limit")
-        return replace(
+        resolved_step: WorkflowStepConfig = replace(
             step,
             run_options=replace(
                 step.run_options,
@@ -210,3 +210,4 @@ class WorkflowCohortResolver:
                 ignore_yaml_filter=True,
             ),
         )
+        return resolved_step

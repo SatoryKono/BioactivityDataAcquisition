@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `5ca5c955c9ee337802bdd11eea583100c159f8ca60fbbefbc64b053e8039786d`
+Evidence surface SHA-256: `f9618eff53fe65c0fb7a3dd9391782d65b90a5ea569cc7e273d85511293312da`
 
 ## Current evidence summary
 
@@ -69,7 +69,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "5ca5c955c9ee337802bdd11eea583100c159f8ca60fbbefbc64b053e8039786d",
+  "evidence_surface_sha256": "f9618eff53fe65c0fb7a3dd9391782d65b90a5ea569cc7e273d85511293312da",
   "metrics": {
     "architecture_integral_score": 10.0,
     "architecture_interpretation": "excellent",
@@ -99,7 +99,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 
 | Facade | Source importers | Test importers |
 | --- | ---: | ---: |
-| `bioetl.domain.composite.config` | 0 | 44 |
+| `bioetl.domain.composite.config` | 0 | 43 |
 | `bioetl.application.composite.merger` | 0 | 5 |
 
 ## Evidence anchors

@@ -198,7 +198,8 @@ async def _capture_producer_result(
     for snapshot in snapshots.values():
         snapshot["limit"] = step.run_options.limit
         snapshot["start_offset"] = step.run_options.start_offset
-    return replace(result, selected_snapshots=snapshots)
+    captured: RunResult = replace(result, selected_snapshots=snapshots)
+    return captured
 
 
 @dataclass(frozen=True, slots=True)

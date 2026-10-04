@@ -11,6 +11,8 @@ from pathlib import Path
 from typing import Any
 from xml.etree import ElementTree
 
+_XML_BOUNDARY_ERROR = "Local measurement XML must remain within its manifest directory"
+
 
 def junit_telemetry_sha256(path: Path) -> str:
     """Bind case identity, duration and outcome, independent of redacted logs."""
@@ -42,22 +44,16 @@ def _measurement_file(raw_path: object, *, measurement_root: Path) -> Path:
     if not candidate.is_absolute():
         candidate = measurement_root / candidate
     if ".." in candidate.parts or not candidate.is_relative_to(measurement_root):
-        raise ValueError(
-            "Local measurement XML must remain within its manifest directory"
-        )
+        raise ValueError(_XML_BOUNDARY_ERROR)
     # Resolve without requiring existence: a missing external symlink target
     # must be rejected by the same boundary check as an existing one.
     try:
         resolved = candidate.resolve(strict=False)
         resolved.relative_to(measurement_root)
     except (OSError, ValueError):
-        raise ValueError(
-            "Local measurement XML must remain within its manifest directory"
-        ) from None
+        raise ValueError(_XML_BOUNDARY_ERROR) from None
     if resolved.suffix != ".xml":
-        raise ValueError(
-            "Local measurement XML must remain within its manifest directory"
-        )
+        raise ValueError(_XML_BOUNDARY_ERROR)
     if not resolved.is_file():
         raise ValueError("Local measurement XML must be a regular file")
     return resolved
@@ -113,6 +109,19 @@ def _collect_shard_telemetry(
     return junit_paths, durations, counts
 
 
+def _manifest_file(manifest_path: Path, *, repo_root: Path) -> Path:
+    """Validate the manifest boundary before loading evidence."""
+    root = repo_root.resolve(strict=True)
+    if not manifest_path.is_absolute():
+        manifest_path = root / manifest_path
+    if ".." in manifest_path.parts or not manifest_path.is_relative_to(root):
+        raise ValueError("Local measurement manifest must remain within the repository")
+    manifest_path = manifest_path.resolve(strict=True)
+    if not manifest_path.is_relative_to(root) or manifest_path.suffix != ".json":
+        raise ValueError("Local measurement manifest must remain within the repository")
+    return manifest_path
+
+
 def validate_local_measurement(
     manifest_path: Path,
     *,
@@ -127,14 +136,7 @@ def validate_local_measurement(
     """
     from scripts.engineering.qa.run_local_coverage_verify import SHARDS
 
-    root = repo_root.resolve(strict=True)
-    if not manifest_path.is_absolute():
-        manifest_path = root / manifest_path
-    if ".." in manifest_path.parts or not manifest_path.is_relative_to(root):
-        raise ValueError("Local measurement manifest must remain within the repository")
-    manifest_path = manifest_path.resolve(strict=True)
-    if not manifest_path.is_relative_to(root) or manifest_path.suffix != ".json":
-        raise ValueError("Local measurement manifest must remain within the repository")
+    manifest_path = _manifest_file(manifest_path, repo_root=repo_root)
     measurement_root = manifest_path.parent
     payload = json.loads(manifest_path.read_text(encoding="utf-8"))
     _validate_measurement_timestamps(payload)
