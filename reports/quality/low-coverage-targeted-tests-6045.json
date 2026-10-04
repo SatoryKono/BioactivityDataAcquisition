@@ -10,7 +10,7 @@
   },
   "debt_budget_policy": "flat_or_decreasing_only",
   "issue": 6045,
-  "module_coverage_inventory_source_tree_sha256": "f5f56d1b51cb1ccd9483c28e6c9435a807198f2fc61915e05754851ccb480608",
+  "module_coverage_inventory_source_tree_sha256": "d2764a40ec87e32214fbbf4ac1ed184b4a4de6b3e755c38c48ed74a86b8a705b",
   "reviewed_on": "2026-07-20",
   "schema_version": "low-coverage-targeted-tests-6045-v1",
   "targeted_modules": [
@@ -95,10 +95,10 @@
     }
   ],
   "source_binding_refresh": {
-    "previous_source_tree_sha256": "29b4c6ac3d6b9e0e6d1b4919a55d1a2496975439af6efc51713fd1fc86cf4a40",
-    "measured_head": "13dc2d3819af7a91a63e4e88116f6d4d5acfdcc3",
-    "source_tree_sha256": "f5f56d1b51cb1ccd9483c28e6c9435a807198f2fc61915e05754851ccb480608",
-    "evidence": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-35/manifest.json",
+    "previous_source_tree_sha256": "f5f56d1b51cb1ccd9483c28e6c9435a807198f2fc61915e05754851ccb480608",
+    "measured_head": "e916f820e70c807183fcaf2e73f4cad714524844",
+    "source_tree_sha256": "d2764a40ec87e32214fbbf4ac1ed184b4a4de6b3e755c38c48ed74a86b8a705b",
+    "evidence": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-39/manifest.json",
     "semantics": "Current accepted inventory may retain historical nonregressing rows; raw measured candidate remains separate.",
     "historical_reviewed_on": "2026-07-20",
     "historical_validation_preserved": true

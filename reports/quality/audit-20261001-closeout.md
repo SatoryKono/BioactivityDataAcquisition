@@ -1,5 +1,34 @@
 # Audit issue batch: implementation and remaining acceptance
 
+## Current architecture/coverage closeout preparation: wave 39
+
+Producer: `e916f820e70c807183fcaf2e73f4cad714524844`; source `d2764a40ec87e32214fbbf4ac1ed184b4a4de6b3e755c38c48ed74a86b8a705b`;
+tests `46c24ca78ce6b9184b723b097a9b754f9a3a4a492c9535ea497f1004f6e8b10b`. All 17 canonical shards completed:
+32809 PASS, 196 SKIP, zero failures/errors. Lines 99.70%; branches 94.34%.
+XML SHA-256: `ae32dd38cbc695b4fbd64339b08c248c91bdade223d067f123b29f9e53411b46`.
+`config_root`: 40/40 executable lines and 18/18 branches; fallback line 32 hit.
+Canonical adoption covers 2553 current modules, including nine newly measured paths.
+The raw comparison records 80 module regressions; historical floors
+are preserved without asserting fresh global nonregression.
+
+| Child | Merged SHA | Provenance |
+| --- | --- | --- |
+| #11846 | `d311a17e17c52f2f50b9f1020ed5e4181ff75b36` | CLOSED; ancestor verified |
+| #11847 | `8f024f97cb10d87d2d12b31f7a4282aac1cf895c` | CLOSED; ancestor verified |
+| #11848 | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED; ancestor verified |
+| #11849 | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED; ancestor verified |
+| #11850 | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED; ancestor verified |
+| #11851 | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED; ancestor verified |
+| #11852 | `dbc2ee7f257b8f8e7866383e1e05361555faf5de` | CLOSED; ancestor verified |
+| #11853 | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED; ancestor verified |
+
+Final full architecture, documentation and governance checks, publication,
+applicable lifecycle ADMIT and post-merge verification remain pending.
+GitHub Actions billing remains BLOCKED_EXTERNAL_PERMANENT; local receipts retain
+local_single_host trust. Existing budgets, thresholds and exclusions are unchanged.
+
+## Preserved historical audit and prior measurements
+
 ## Current architecture/coverage closeout preparation: wave 35
 
 Pinned producer commit: `13dc2d3819af7a91a63e4e88116f6d4d5acfdcc3`. Product source: `f5f56d1b51cb1ccd9483c28e6c9435a807198f2fc61915e05754851ccb480608`.

@@ -2238,15 +2238,13 @@
       "decision_date": "2026-09-16",
       "decision_path": "docs/02-architecture/decisions/ADR-061-persisted-selected-run-assessment.md",
       "enforcement_owner_paths": [
-        "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/unit/scripts/test_documentation_governance_check.py"
+        "tests/architecture/test_adr_registry_governance_sync.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/RULES.md",
         "docs/04-reference/selected-run-status.md",
-        "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/unit/scripts/test_documentation_governance_check.py"
+        "tests/architecture/test_adr_registry_governance_sync.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",
@@ -2260,14 +2258,17 @@
       "decision_path": "docs/02-architecture/decisions/ADR-062-assay-parent-exact-replay.md",
       "enforcement_owner_paths": [
         "tests/integration/composite/test_assay_snapshot_merge_replay.py",
-        "tests/unit/infrastructure/storage/test_composite_replay_bundle.py"
+        "tests/unit/infrastructure/storage/test_composite_replay_bundle.py",
+        "tests/unit/scripts/test_documentation_governance_check.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
+        "docs/00-project/RULES.md",
         "docs/04-reference/cli.md",
         "src/bioetl/composition/bootstrap/runtime/assay_replay.py",
         "tests/integration/composite/test_assay_snapshot_merge_replay.py",
-        "tests/unit/infrastructure/storage/test_composite_replay_bundle.py"
+        "tests/unit/infrastructure/storage/test_composite_replay_bundle.py",
+        "tests/unit/scripts/test_documentation_governance_check.py"
       ],
       "manual_exception": null,
       "owner": "BioETL maintainers",

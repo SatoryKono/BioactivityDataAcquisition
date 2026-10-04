@@ -773,3 +773,10 @@ workflows:
             - commit-lint
             - docs-governance
             - docker-build
+
+  architecture-coverage-closeout:
+    jobs:
+      - proof-closeout:
+          filters:
+            branches:
+              only: codex/architecture-coverage-closeout-11854-11899
