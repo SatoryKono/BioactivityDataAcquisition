@@ -454,7 +454,8 @@ jobs:
     resource_class: small
     steps:
       - checkout
-      - setup-python-uv
+      - setup-python-uv:
+          extras: "dev tracing docs"
       - check-gate:
           gate: docs-governance
       - run:
@@ -514,6 +515,10 @@ jobs:
             "$HOME/.local/bin/hadolint" Dockerfile.bioetl
       - run:
           name: docker compose config validation
+          environment:
+            NEO4J_PASSWORD: "ci-compose-validation-only"
+            GF_SECURITY_ADMIN_PASSWORD: "ci-compose-validation-only"
+            GF_RENDERING_RENDERER_TOKEN: "ci-compose-validation-only"
           command: |
             docker compose config > /dev/null
             docker compose -f docker-compose.monitoring.yml config > /dev/null
