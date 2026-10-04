@@ -13,8 +13,11 @@ version: 2.1
 parameters:
   ci-lane:
     type: enum
-    enum: [pr-gate, docs-kpi]
+    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review]
     default: pr-gate
+  include-hypothesis:
+    type: boolean
+    default: true
 
 commands:
   # Port of .github/actions/setup-python-uv (uv 0.11.26, uv cache, uv sync).
@@ -74,6 +77,87 @@ commands:
             fi
 
 jobs:
+  memory-retention:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    environment:
+      PYTHONPATH: src
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: Check episodic retention policy without pruning
+          command: |
+            mkdir -p reports/memory
+            uv run --frozen --no-build python -m memory.tooling.prune --check --json > reports/memory/retention.json
+      - store_artifacts:
+          path: reports/memory
+
+  port-contracts:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    environment:
+      HYPOTHESIS_PROFILE: ci
+    steps:
+      - checkout
+      - setup-python-uv:
+          extras: "tests"
+      - run:
+          name: Verify port adapter and registry contracts
+          command: |
+            mkdir -p reports/junit
+            uv run --frozen --no-build pytest \
+              tests/architecture/test_port_contracts.py \
+              tests/architecture/test_adapter_contracts.py \
+              tests/architecture/test_registry_contracts.py \
+              -p no:xdist --junitxml=reports/junit/port-contracts.xml
+      - when:
+          condition: << pipeline.parameters.include-hypothesis >>
+          steps:
+            - run:
+                name: Verify hypothesis contracts
+                command: |
+                  uv run --frozen --no-build pytest tests/architecture/test_port_contracts_hypothesis.py \
+                    -m hypothesis -p no:xdist --junitxml=reports/junit/hypothesis-contracts.xml
+      - store_test_results:
+          path: reports/junit
+      - store_artifacts:
+          path: reports/junit
+
+  skills-consistency:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: Verify runtime mirrors without synchronizing
+          command: |
+            bash scripts/ai/junie/check_junie_mirror.sh --check
+            bash scripts/ops/support/skills/check_skills_mirror.sh --check
+            bash scripts/ops/support/skills/check_ai_skills_layout.sh
+
+  github-settings-review:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: Collect read-only GitHub settings evidence
+          command: |
+            mkdir -p reports/github-settings
+            uv run --frozen --no-build python -m scripts.engineering.repo github-settings-review \
+              --json-out reports/github-settings/review.json \
+              --markdown-out reports/github-settings/review.md
+      - store_artifacts:
+          path: reports/github-settings
+
   # Prepared manual/scheduled lane; external schedule registration is separate.
   docs-kpi:
     docker:
@@ -201,7 +285,7 @@ jobs:
             mkdir -p reports/test-telemetry
             HYPOTHESIS_PROFILE=fast \
             uv run --frozen --no-build pytest tests/architecture \
-              -m not-slow-not-benchmark-not-memory \
+              -m "not slow and not benchmark and not memory" \
               -q --tb=short \
               --junitxml=reports/test-telemetry/junit-arch.xml
       - store_test_results:
@@ -283,6 +367,11 @@ jobs:
     docker:
       - image: cimg/python:3.13
     resource_class: small
+    environment:
+      # Bound auto-detected workers to the runner CPU quota.
+      PYTEST_XDIST_AUTO_NUM_WORKERS: "2"
+      OPENBLAS_NUM_THREADS: "1"
+      POLARS_MAX_THREADS: "2"
     parameters:
       test-group:
         type: string
@@ -421,7 +510,10 @@ jobs:
   duplication:
     docker:
       - image: cimg/python:3.12-node
-    resource_class: small
+    # Preserve the complete src/tests scan within the runner memory quota.
+    resource_class: medium
+    environment:
+      NODE_OPTIONS: --max-old-space-size=3072
     steps:
       - checkout
       - setup-python-uv
@@ -709,3 +801,32 @@ workflows:
         - equal: [main, << pipeline.git.branch >>]
     jobs:
       - docs-kpi
+  memory-retention:
+    when:
+      and:
+        - equal: [memory-retention, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - memory-retention
+  port-contracts:
+    when:
+      and:
+        - equal: [port-contracts, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - port-contracts
+  skills-consistency:
+    when:
+      and:
+        - equal: [skills-consistency, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - skills-consistency
+  github-settings-review:
+    when:
+      and:
+        - equal: [github-settings-review, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - github-settings-review:
+          context: bioetl-github-read-only

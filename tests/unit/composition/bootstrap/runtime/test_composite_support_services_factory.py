@@ -29,6 +29,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, cast
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
@@ -55,6 +56,7 @@ from bioetl.application.composite.join_planner_helpers import (
     resolve_field_aliases_from_registry,
 )
 from bioetl.domain.composite.strategy import MergeStrategy
+from bioetl.composition.factories.storage import StorageBundle
 
 
 def _make_factory(
@@ -84,10 +86,10 @@ def _make_factory(
         ),
     )
     runtime = CompositeRuntimeConfig(resume=False)
-    settings = cast(Any, SimpleNamespace(data_dir="data"))
+    settings = cast(Any, SimpleNamespace(data_dir="data", report_root=Path("reports")))
     logger = MagicMock()
     metrics = MagicMock()
-    storage = MagicMock()
+    storage = MagicMock(spec=StorageBundle)
 
     infra_context = cast(Any, CompositeInfrastructureContext)(
         run_id="run-123",

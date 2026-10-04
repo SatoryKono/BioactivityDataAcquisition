@@ -148,3 +148,79 @@ def test_compose_placeholders_are_step_scoped_and_runtime_stays_strict():
     for step in job["steps"]:
         if isinstance(step, dict) and "run" in step and step["run"] is not validation:
             assert "ci-compose-validation-placeholder" not in str(step)
+
+
+@pytest.mark.parametrize(
+    "lane",
+    [
+        "memory-retention",
+        "port-contracts",
+        "skills-consistency",
+        "github-settings-review",
+    ],
+)
+def test_independent_lanes_are_opt_in_main_only(lane):
+    config = _config()
+    workflow = config["workflows"][lane]
+    assert workflow["when"] == {
+        "and": [
+            {"equal": [lane, "<< pipeline.parameters.ci-lane >>"]},
+            {"equal": ["main", "<< pipeline.git.branch >>"]},
+        ]
+    }
+    assert len(workflow["jobs"]) == 1
+    assert "docker-build" not in str(workflow["jobs"])
+    assert "mutation" not in str(workflow["jobs"])
+    assert "context" not in str(workflow["jobs"]) or lane == "github-settings-review"
+
+
+def test_retention_and_skills_lanes_do_not_mutate_source():
+    jobs = _config()["jobs"]
+    for lane in ["memory-retention", "skills-consistency"]:
+        commands = "\n".join(
+            step["run"]["command"]
+            for step in jobs[lane]["steps"]
+            if isinstance(step, dict) and "run" in step
+        )
+        assert "--check" in commands
+        assert "--sync" not in commands
+        assert "git push" not in commands
+    assert "prune --check --json" in str(jobs["memory-retention"])
+
+
+def test_hypothesis_defaults_on_and_settings_context_is_separate():
+    config = _config()
+    assert config["parameters"]["include-hypothesis"]["default"] is True
+    assert config["workflows"]["github-settings-review"]["jobs"] == [
+        {"github-settings-review": {"context": "bioetl-github-read-only"}}
+    ]
+
+
+@pytest.mark.parametrize(
+    ("markers", "selected"),
+    [
+        (set(), True),
+        ({"architecture"}, True),
+        ({"slow"}, False),
+        ({"benchmark"}, False),
+        ({"memory"}, False),
+    ],
+)
+def test_architecture_selector_includes_ordinary_tests_and_excludes_heavy_ones(
+    markers, selected
+):
+    import shlex
+    from _pytest.mark.expression import Expression
+
+    steps = _config()["jobs"]["arch-tests"]["steps"]
+    command = next(
+        step["run"]["command"]
+        for step in steps
+        if isinstance(step, dict) and "run" in step
+    )
+    arguments = shlex.split(command.replace("\\\n", " "))
+    selector = arguments[arguments.index("-m") + 1]
+    assert (
+        Expression.compile(selector).evaluate(lambda name, **kwargs: name in markers)
+        is selected
+    )

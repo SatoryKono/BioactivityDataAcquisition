@@ -39,13 +39,26 @@ it does not start the PR gate, mutation testing or Docker publication. The job
 preserves the existing KPI limits (target 120, hard limit 135, zero orphans),
 freshness validation and report artifacts. Run it through a CircleCI pipeline
 trigger after the config is integrated; `type: approval` is not a trigger.
+Other prepared opt-in lanes are `memory-retention` (check-only), `port-contracts`
+(property checks enabled by default through `include-hypothesis`),
+`skills-consistency` (verify-only, no approved runtime sync), and
+`github-settings-review` (requires the restricted `bioetl-github-read-only`
+context). All are main-only and isolated from the normal PR workflow. Context
+registration, trigger activation, remaining event parity and external acceptance
+are pending; these additions do not establish full legacy-workflow parity.
+
 The intended weekly cadence is Monday 04:30 UTC. No external schedule has been
 registered by this preparation change, and no successful remote run is claimed.
 
 Independent phase-3 jobs may be prepared in parallel with phase A. Publishing
 requires successful build/security/baseline gates and separate approval. Final
 badges require the verified phase-B contract. Do not integrate this preparation
-into the W38 acceptance branch or run heavy jobs alongside W38.
+into the active coverage acceptance branch or run heavy jobs alongside its producer.
+
+The prepared acceptance fixes use the architecture marker expression `not slow and
+not benchmark and not memory`; pytest exit 5 remains a failure. Matrix workers
+are capped at two, and the complete duplication scan uses a medium runner with
+a 3072 MiB Node heap. Existing quality thresholds and scan paths are preserved.
 
 ## How to use
 
