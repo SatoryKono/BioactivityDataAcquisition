@@ -20,6 +20,10 @@ from typing import TextIO
 
 import yaml
 
+LOCK_FILENAME = "uv.lock"
+RESULT_FILENAME = "result.json"
+CAMPAIGN_FILENAME = "campaign.json"
+
 
 @dataclass(frozen=True)
 class Case:
@@ -247,7 +251,7 @@ def write_receipt(path: Path, payload: dict) -> None:
 def input_fingerprints(root: Path) -> dict[str, str]:
     """Bind all copied inputs by relative name and bytes, without exposing content."""
     fingerprints = {}
-    for name in ("configs", "data/input", "uv.lock"):
+    for name in ("configs", "data/input", LOCK_FILENAME):
         path = root / name
         if not path.exists():
             raise FileNotFoundError(name)
@@ -339,7 +343,7 @@ def execute(
         "failures": failures,
         "processes": [],
     }
-    write_receipt(folder / "result.json", receipt)
+    write_receipt(folder / RESULT_FILENAME, receipt)
     try:
         failures.extend(_execute_case(case, root, folder, env_file, limit, receipt))
     except BaseException as exc:
@@ -358,7 +362,7 @@ def execute(
         if receipt["status"] == "running":
             receipt["status"] = "failed" if failures else "success"
         receipt.update(finished_at=timestamp(), passed=not failures)
-        write_receipt(folder / "result.json", receipt)
+        write_receipt(folder / RESULT_FILENAME, receipt)
     return failures
 
 
@@ -370,50 +374,19 @@ def _execute_case(
     limit: int,
     receipt: dict,
 ) -> list[str]:
-    from dotenv import dotenv_values
-
     data, reports = folder / "data", folder / "reports"
     inputs_before = input_fingerprints(root)
     shutil.copytree(root / "data/input", data / "input")
     shutil.copytree(root / "configs", folder / "configs")
-    shutil.copy2(root / "uv.lock", folder / "uv.lock")
+    shutil.copy2(root / LOCK_FILENAME, folder / LOCK_FILENAME)
     receipt["input_fingerprints"] = input_fingerprints(folder)
     if (
         receipt["input_fingerprints"] != inputs_before
         or input_fingerprints(root) != inputs_before
     ):
         raise ValueError("input_snapshot_changed_during_copy")
-    write_receipt(folder / "result.json", receipt)
-    environment = {
-        **os.environ,
-        **{
-            key: value
-            for key, value in dotenv_values(env_file).items()
-            if value is not None
-        },
-    }
-    environment.update(
-        BIOETL_DATA_DIR=str(data),
-        BIOETL_REPORT_ROOT=str(reports),
-        BIOETL_CONFIGS_ROOT=str(folder / "configs"),
-        PYTHONPATH=os.pathsep.join([str(root / "src"), str(root)]),
-        BIOETL_METRICS_ENABLED="false",
-        BIOETL_OBSERVABILITY__METRICS_ENABLED="false",
-        BIOETL_OBSERVABILITY__METRICS_SERVER_ENABLED="false",
-        BIOETL_PUSHGATEWAY_URL="",
-        BIOETL_SEMANTICSCHOLAR_API_KEY="",
-        PYTHONDONTWRITEBYTECODE="1",
-        OPENBLAS_NUM_THREADS="1",
-        OMP_NUM_THREADS="1",
-        MKL_NUM_THREADS="1",
-        NUMEXPR_NUM_THREADS="1",
-        POLARS_MAX_THREADS="2",
-        TOKIO_WORKER_THREADS="2",
-    )
-    if sys.platform == "win32":
-        environment[
-            "BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__PLAIN_WRITE_PROCESS_ISOLATION"
-        ] = "true"
+    write_receipt(folder / RESULT_FILENAME, receipt)
+    environment = _case_environment(root, folder, env_file)
     failures = []
     launch_cases = [Case("pipeline", name) for name in case.prerequisites] + [case]
     launches = [command(launch_case, limit) for launch_case in launch_cases]
@@ -461,6 +434,44 @@ def _execute_case(
     ):
         failures.append("input_snapshot_changed_during_execution")
     return failures
+
+
+def _case_environment(root: Path, folder: Path, env_file: Path) -> dict[str, str]:
+    """Bind runtime to captured roots and the unchanged provider/thread budgets."""
+    from dotenv import dotenv_values
+
+    data, reports = folder / "data", folder / "reports"
+    environment = {
+        **os.environ,
+        **{
+            key: value
+            for key, value in dotenv_values(env_file).items()
+            if value is not None
+        },
+    }
+    environment.update(
+        BIOETL_DATA_DIR=str(data),
+        BIOETL_REPORT_ROOT=str(reports),
+        BIOETL_CONFIGS_ROOT=str(folder / "configs"),
+        PYTHONPATH=os.pathsep.join([str(root / "src"), str(root)]),
+        BIOETL_METRICS_ENABLED="false",
+        BIOETL_OBSERVABILITY__METRICS_ENABLED="false",
+        BIOETL_OBSERVABILITY__METRICS_SERVER_ENABLED="false",
+        BIOETL_PUSHGATEWAY_URL="",
+        BIOETL_SEMANTICSCHOLAR_API_KEY="",
+        PYTHONDONTWRITEBYTECODE="1",
+        OPENBLAS_NUM_THREADS="1",
+        OMP_NUM_THREADS="1",
+        MKL_NUM_THREADS="1",
+        NUMEXPR_NUM_THREADS="1",
+        POLARS_MAX_THREADS="2",
+        TOKIO_WORKER_THREADS="2",
+    )
+    if sys.platform == "win32":
+        environment[
+            "BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__PLAIN_WRITE_PROCESS_ISOLATION"
+        ] = "true"
+    return environment
 
 
 def run_launch(
@@ -525,6 +536,15 @@ def run_launch(
 COMPOSITE_ORDER = ("activity", "assay", "molecule", "target", "publication")
 
 
+def _validate_campaign_output(root: Path, output: Path, limit: int) -> None:
+    """Reject invalid limits, parallel workers and outputs outside this worktree."""
+    validate_limit(limit)
+    if os.environ.get("PYTEST_XDIST_WORKER"):
+        raise ValueError("Campaign requires sequential pytest without xdist")
+    if not output.resolve().is_relative_to((root / "reports").resolve()):
+        raise ValueError("Campaign output must stay inside worktree reports")
+
+
 def execute_campaign(
     root: Path, output: Path, env_file: Path, *, limit: int = 10
 ) -> list[str]:
@@ -533,11 +553,7 @@ def execute_campaign(
     Local checks are preparation evidence. HTTP and offline replay acceptance
     remain separate obligations even if every local check passes.
     """
-    validate_limit(limit)
-    if os.environ.get("PYTEST_XDIST_WORKER"):
-        raise ValueError("Campaign requires sequential pytest without xdist")
-    if not output.resolve().is_relative_to((root / "reports").resolve()):
-        raise ValueError("Campaign output must stay inside worktree reports")
+    _validate_campaign_output(root, output, limit)
     source = source_commit(root)
     inputs = input_fingerprints(root)
     available = {case.name: case for case in discover(root) if case.kind == "composite"}
@@ -566,10 +582,10 @@ def execute_campaign(
     try:
         output.mkdir(parents=True, exist_ok=False)
         created = True
-        write_receipt(output / "campaign.json", manifest)
+        write_receipt(output / CAMPAIGN_FILENAME, manifest)
         for case, row in zip(cases, rows, strict=True):
             row["status"] = "running"
-            write_receipt(output / "campaign.json", manifest)
+            write_receipt(output / CAMPAIGN_FILENAME, manifest)
             try:
                 if input_fingerprints(root) != inputs:
                     raise ValueError("campaign_inputs_changed")
@@ -587,7 +603,7 @@ def execute_campaign(
                 raise
             row.update(status="failed" if errors else "success", failures=errors)
             failures.extend(f"{case.id}:{error}" for error in errors)
-            write_receipt(output / "campaign.json", manifest)
+            write_receipt(output / CAMPAIGN_FILENAME, manifest)
         if input_fingerprints(root) != inputs:
             failures.append("campaign_inputs_changed")
         manifest["status"] = "failed" if failures else "success"
@@ -598,7 +614,7 @@ def execute_campaign(
                 if manifest["status"] == "running":
                     manifest["status"] = "interrupted"
                 manifest["finished_at"] = timestamp()
-                write_receipt(output / "campaign.json", manifest)
+                write_receipt(output / CAMPAIGN_FILENAME, manifest)
         finally:
             lock.unlink()
     return failures
