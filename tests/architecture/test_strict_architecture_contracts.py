@@ -355,7 +355,6 @@ def _schema_field_aliases() -> dict[str, str]:
     return {
         "molecule_id": "molecule_id",
         "parent_molecule_id": "parent_molecule_id",
-        "action_type": "action_type_action_type",
         "journal": "journal",
         "publication_id": "publication_id",
         "publication_year": "publication_year",
@@ -369,7 +368,6 @@ def _schema_field_aliases() -> dict[str, str]:
         "aromatic_ring_count": "aromatic_ring_count",
         "logp": "logp",
         "logp_method": "logp_method",
-        "xlogp": "logp",
         "tpsa": "tpsa",
         "polar_surface_area": "tpsa",
         "reactions": "catalytic_activity",
@@ -715,12 +713,10 @@ def test_silver_schemas_match_domain_entities():
             entity_field_name = aliases.get(field, field)
 
             if entity_field_name not in entity_fields:
-                # Temporary workaround: only warn for missing fields to allow build to pass
-                # while aligning schema and entities.
-                # violations.append(
-                #     f"Field '{field}' (mapped to '{entity_field_name}') in "
-                #     f"{schema} not found in {entity_cls.__name__}"
-                # )
+                violations.append(
+                    f"Field '{field}' (mapped to '{entity_field_name}') in "
+                    f"{schema} not found in {entity_cls.__name__}"
+                )
                 continue
     assert not violations, "\n".join(violations)
 
