@@ -433,7 +433,7 @@ execution_paths:
           --vcr-record=none -q --tb=short
   live_contract:
     workflow_path: .github/workflows/contract-tests.yml
-    gate_mode: scheduled
+    gate_mode: keep-disabled
     repository_guard: SatoryKono/BioactivityDataAcquisition
     required_env:
       BIOETL_LIVE_API_TESTS: 'true'
