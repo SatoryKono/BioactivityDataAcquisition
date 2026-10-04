@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3470 |
-| Tracked doc-like files | 3470 |
+| Doc-like files | 3471 |
+| Tracked doc-like files | 3471 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 7 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3470 |
+| tracked | 3471 |
 
 ## Lifecycle Counts
 
@@ -26,7 +26,7 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 278 |
-| active_quality_baseline | 42 |
+| active_quality_baseline | 43 |
 | closeout_evidence | 56 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 27 |
@@ -61,7 +61,7 @@
 | Archived | 277 |
 | Canonical | 75 |
 | Generated | 1058 |
-| Working | 1313 |
+| Working | 1314 |
 
 ## Surface Families
 
@@ -71,7 +71,7 @@
 | archive | 277 |
 | canonical | 75 |
 | generated | 1058 |
-| working | 1313 |
+| working | 1314 |
 
 ## Recommended Actions
 
@@ -80,7 +80,7 @@
 | archive-after-github-state-check | 338 |
 | archive-after-migration | 869 |
 | generate-automatically | 1058 |
-| keep | 1197 |
+| keep | 1198 |
 | reconcile-with-github-state | 8 |
 
 ## Cleanup Candidates
@@ -117,7 +117,7 @@
 | `docs/reports/dashboard-ux-checks/2026-09-23-vis-followups.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-09-23.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-09-25.md` | Working | 0 | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-10-02.md` | Working | 2 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-10-02.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-event-age.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-final-tests.txt` | Working | 0 | archive-after-migration |
