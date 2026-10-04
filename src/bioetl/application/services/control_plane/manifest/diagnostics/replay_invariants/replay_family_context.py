@@ -2,18 +2,17 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from typing import Literal
 
 from bioetl.domain.control_plane import RunManifest
-from bioetl.domain.control_plane.composite_replay import has_composite_replay_bindings
 from bioetl.domain.control_plane.execution_context import (
     is_composite_execution_context as _is_composite_execution_context,
 )
 from bioetl.domain.control_plane.reproducibility_profiles import (
     ReproducibilityFamilyProfile,
     build_replay_family_contract,
-    resolve_manifest_reproducibility_profile,
+    resolve_reproducibility_family_profile,
 )
 
 from .replay_family_context_build_replay_family_contract_payload import (
@@ -44,19 +43,18 @@ def _resolve_replay_family_execution_context(
 def build_replay_family_context(manifest: RunManifest) -> ReplayFamilyContext:
     """Return replay-family profile and contract for one manifest."""
     execution_context = _resolve_replay_family_execution_context(manifest)
-    profile = resolve_manifest_reproducibility_profile(manifest)
+    profile = resolve_reproducibility_family_profile(
+        provider=manifest.provider,
+        entity=manifest.entity,
+        contract_ref=manifest.code_provenance.contract_ref,
+        execution_context=execution_context,
+    )
     replay_family_contract = build_replay_family_contract(
         provider=manifest.provider,
         entity=manifest.entity,
         contract_ref=manifest.code_provenance.contract_ref,
         execution_context=execution_context,
     )
-    if execution_context == "composite" and not has_composite_replay_bindings(manifest):
-        profile = replace(profile, strict_exact_replay_supported=False)
-        replay_family_contract = {
-            **replay_family_contract,
-            "strict_exact_replay_supported": False,
-        }
     return ReplayFamilyContext(
         execution_context=execution_context,
         profile=profile,

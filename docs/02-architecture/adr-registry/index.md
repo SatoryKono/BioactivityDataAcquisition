@@ -7,16 +7,15 @@ Canonical live ADR index: `docs/02-architecture/decisions/README.md`.
 This page is a generated governance mirror and MUST be regenerated via
 `python3 scripts/generate_adr_registry.py` after ADR additions or metadata changes.
 
-**Total ADRs**: 62
-**Last Updated**: 2026-10-02
+**Total ADRs**: 61
+**Last Updated**: 2026-09-22
 
 ## 📊 Status Summary
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| `accepted` | 59 | 95.2% |
-| `draft` | 1 | 1.6% |
-| `superseded` | 2 | 3.2% |
+| `accepted` | 59 | 96.7% |
+| `superseded` | 2 | 3.3% |
 
 ## 🟢 Accepted ADRs
 
@@ -731,23 +730,6 @@ stay un...
 coverage. They cannot define the outcome of a completed run. A successf...
 
 [📄 View Full ADR](../decisions/ADR-061-persisted-selected-run-assessment.md)
-
----
-
-## 🟡 Draft ADRs
-
-### 1 decisions
-
-### ADR-062: composite snapshot replay
-
-**Status**: `draft` | **Category**: `architecture` | **Owner**: `BioETL Team`
-
-**Source status text**: `Added`
-
-**Context**: Composite execution success does not establish replay readiness. The existing
-rebuild-only boundary cannot be removed merely by changing a dashboard v...
-
-[📄 View Full ADR](../decisions/ADR-062-composite-snapshot-replay.md)
 
 ---
 

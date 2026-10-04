@@ -37,6 +37,30 @@ class DependencyProgressService:
         )
         return True
 
+    def maybe_store_blocked_chain(
+        self,
+        *,
+        dependency: DependencyConfig,
+        results: dict[str, DependencyResult],
+    ) -> bool:
+        """Reject chained execution after its key-producing stage failed."""
+        source = results.get(dependency.key_source or "")
+        if source is None or source.is_success:
+            return False
+        reason = (
+            f"Key source '{dependency.key_source}' ended with {source.status.value}"
+        )
+        results[dependency.pipeline] = DependencyResult.failed(
+            pipeline_name=dependency.pipeline, error_message=reason
+        )
+        self.logger.warning(
+            "Chained dependency blocked by failed key source",
+            dependency=dependency.pipeline,
+            key_source=dependency.key_source,
+            source_status=source.status.value,
+        )
+        return True
+
     def should_stop_after_result(
         self,
         *,

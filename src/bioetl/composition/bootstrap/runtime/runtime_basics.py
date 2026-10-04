@@ -3,13 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import replace
 from typing import TYPE_CHECKING, cast
-from uuid import UUID, uuid4
-
-from bioetl.composition.bootstrap.runtime.composite_replay_inputs import (
-    load_runtime_composite_replay,
-)
+from uuid import UUID
 
 from bioetl.application.composite.runtime_wiring_api import (
     JOIN_KEY_NORMALIZATION_POLICIES,
@@ -18,6 +13,7 @@ from bioetl.application.composite.runtime_wiring_api import (
 from bioetl.application.services.execution.pipeline_runner_models import RunOptions
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
+    build_manifest_storage_factory,
 )
 from bioetl.composition.bootstrap.runtime._dependency_runner_support import (
     resolve_required_gold_pipelines,
@@ -33,9 +29,6 @@ from bioetl.composition.bootstrap.runtime.enum_loader_wiring import (
 )
 from bioetl.composition.bootstrap.runtime.pipeline_context_builder import (
     build_pipeline_context,
-)
-from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
-    RunnerFactoryHooks,
 )
 from bioetl.composition.factories.services.port_factories import create_metrics
 from bioetl.domain.types import RunID, RunType
@@ -63,7 +56,6 @@ if TYPE_CHECKING:
         ClockPort,
         LockPort,
         LoggerPort,
-        PipelineControlPlaneArtifacts,
         TracingPort,
     )
     from bioetl.infrastructure.config.settings_api import Settings
@@ -109,37 +101,15 @@ def bootstrap_runtime_basics(
         provider="composite",
         entity="merged",
     )
-    storage = storage_bootstrapper(
+    storage_for_manifest = build_manifest_storage_factory(
         run_context=storage_run_context,
+        storage_bootstrapper=storage_bootstrapper,
         logger=logger,
         metrics=metrics,
-        tracing=tracer,
-        enable_csv_export=True,
+        tracer=tracer,
         settings=settings,
     )
-
-    def storage_for_manifest(
-        artifacts: PipelineControlPlaneArtifacts,
-    ) -> CompositeRuntimeStorageProtocol:
-        bound_context = replace(
-            storage_run_context,
-            manifest_id=artifacts.manifest_id,
-            config_hash=artifacts.config_hash,
-            resolved_config_hash=artifacts.resolved_config_hash,
-            effective_config_hash=artifacts.effective_config_hash,
-            execution_fingerprint=artifacts.execution_fingerprint,
-            dq_contract_compatibility_hash=artifacts.dq_contract_compatibility_hash,
-            effective_config_artifact_id=artifacts.effective_config_artifact_id,
-            input_snapshot_fingerprint=artifacts.input_snapshot_fingerprint,
-        )
-        return storage_bootstrapper(
-            run_context=bound_context,
-            logger=logger,
-            metrics=metrics,
-            tracing=tracer,
-            enable_csv_export=True,
-            settings=settings,
-        )
+    storage = storage_for_manifest(None)
 
     lock = lock_factory()
     return CompositeInfrastructureContext(
@@ -171,11 +141,23 @@ def build_runner_factories(
     Callable[[str, pl.DataFrame], PipelineRunner],
     Callable[[str, pl.DataFrame], PipelineRunner],
 ]:
-    """Build phase factories with normalized filters and verified child reports.
+    """Build seed/dependency/enricher runner factories for composite phases.
 
-    Injected builders own context, pipeline execution, and Bronze option policy.
-    Replay options are prepared before context creation; saved manifests are
-    checked before wrapping each child runner with its report writer.
+    Args:
+        config: CompositeConfig describing seed, enrichers, and dependencies.
+        runtime: Runtime options used to resolve per-phase Bronze cache settings.
+        logger: Structured logger forwarded to the runner factory builder.
+        runner_factory_builder_cls: Class implementing per-phase runner factory
+            construction.
+        filter_extraction_service_cls: Class used to extract filter IDs from
+            keys DataFrames during enricher/dependency factory invocations.
+        pipeline_runner_builder: Callable that accepts a PipelineRunContext and
+            returns a configured PipelineRunner.
+        resolve_bronze_opts_fn: Callable returning BronzeRunOptions for a given
+            runtime config and optional phase-level override flag.
+
+    Returns:
+        Tuple of (seed_factory, dependency_factory, enricher_factory) callables.
     """
     validate_join_key_normalization_policies(config)
     filter_extraction_service = filter_extraction_service_cls(
@@ -183,22 +165,11 @@ def build_runner_factories(
         normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
     )
     run_options_factory: Callable[..., RunOptions] = RunOptions
-    replay = load_runtime_composite_replay(config, runtime)
 
     def build_context_fn(name: str, options: RunOptions) -> PipelineRunContext:
-        # Composite phases require an explicit clock, like entity runners.
-        return build_pipeline_context(
-            name,
-            options,
-            clock=SystemClock(),
-            run_id_factory=uuid4 if options.exact_replay else None,
-        )
-
-    def build_verified_runner(context: PipelineRunContext) -> PipelineRunner:
-        runner = pipeline_runner_builder(context)
-        if replay is not None:
-            replay.validate_runtime_manifest(context.pipeline_name, context.run_id)
-        return runner
+        # Match entity ``create_pipeline_runner``: composite phase factories must
+        # inject an explicit ClockPort; ``build_pipeline_context`` rejects None.
+        return build_pipeline_context(name, options, clock=SystemClock())
 
     runner_factory_builder = cast(
         "Callable[..., RunnerFactoryBuilder[RunOptions]]",
@@ -207,16 +178,9 @@ def build_runner_factories(
         logger=logger,
         run_options_cls=run_options_factory,
         build_context=build_context_fn,
-        pipeline_runner_builder=build_verified_runner,
-        hooks=RunnerFactoryHooks(
-            replay_options=replay.prepare_options if replay is not None else None,
-            reporting_runner_builder=lambda context, options: (
-                build_reported_child_runner(
-                    context=context,
-                    options=options,
-                    runner_builder=build_verified_runner,
-                )
-            ),
+        pipeline_runner_builder=pipeline_runner_builder,
+        reporting_runner_builder=lambda context, options: build_reported_child_runner(
+            context=context, options=options, runner_builder=pipeline_runner_builder
         ),
         filter_extraction_service=filter_extraction_service,
         gold_required_pipelines=resolve_required_gold_pipelines(config),

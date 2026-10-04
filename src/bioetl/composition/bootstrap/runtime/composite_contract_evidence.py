@@ -1,7 +1,5 @@
 """Finalize composite contract evidence only after its runtime lock is held."""
 
-from __future__ import annotations
-
 from collections.abc import Callable
 from pathlib import Path
 

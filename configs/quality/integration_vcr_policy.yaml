@@ -135,6 +135,7 @@ tracked_suite_inventory:
     - tests/integration/application/services/test_forensic_diff_service.py
     - tests/integration/application/services/test_run_manifest_file_store.py
     - tests/integration/application/workflow/test_reconcile_fk_parity.py
+    - tests/integration/composite/test_assay_snapshot_merge_replay.py
     - tests/integration/determinism/test_chembl_assay_reproducibility_determinism_gate.py
     - tests/integration/determinism/test_composite_reproducibility_determinism_gate.py
     - tests/integration/determinism/test_tracked_fixture_idempotency_gate.py
@@ -151,6 +152,7 @@ tracked_suite_inventory:
     - tests/integration/run_reports/test_query.py
     - tests/integration/run_reports/test_workflow_runner_reports.py
     - tests/integration/run_reports/test_writer.py
+    - tests/integration/test_composite_child_snapshot_evidence.py
     - tests/integration/test_composite_report.py
     - tests/integration/test_cross_pipeline_normalization.py
     - tests/integration/test_cross_provider_doi_normalization.py
@@ -188,10 +190,12 @@ tracked_suite_inventory:
     - tests/integration/test_dashboard_vis_stream2_layout.py
     - tests/integration/test_dashboard_vis_stream3_layout.py
     - tests/integration/test_dashboard_visual_semantics.py
+    - tests/integration/test_deployed_replay_readiness.py
     - tests/integration/test_dux4_scope_title_helpers.py
     - tests/integration/test_dux5_residual_contracts.py
     - tests/integration/test_dux6_residual_contracts.py
     - tests/integration/test_grafana_control_plane_variables.py
+    - tests/integration/test_health_replay_production_bootstrap.py
     - tests/integration/test_incident_explanations.py
     - tests/integration/test_json_hash_stability.py
     - tests/integration/test_live_green_acceptance.py
@@ -430,7 +434,7 @@ execution_paths:
           --vcr-record=none -q --tb=short
   live_contract:
     workflow_path: .github/workflows/contract-tests.yml
-    gate_mode: scheduled
+    gate_mode: keep-disabled
     repository_guard: SatoryKono/BioactivityDataAcquisition
     required_env:
       BIOETL_LIVE_API_TESTS: 'true'

@@ -63,7 +63,6 @@ def test_only_gold_consuming_composites_enable_upstream_gold(
     build_runner_factories(
         config=config,
         runtime=SimpleNamespace(
-            replay_of_manifest_id=None,
             seed_limit=1000,
             cached_bronze_enrichers=False,
             cached_bronze_dependencies=False,

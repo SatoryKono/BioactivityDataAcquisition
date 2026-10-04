@@ -43,7 +43,11 @@ def build_dataset_fragment_nodes(
             run_context=run_context,
             dataset_node=dataset_node,
             records=records,
-            composite_name=composite_name,
+            composite_name=(
+                run_context.pipeline_name
+                if run_context.provider == "composite"
+                else composite_name
+            ),
             created_at=created_at,
             composite_run_id=composite_run_id,
             lineage_created_at=lineage_created_at,

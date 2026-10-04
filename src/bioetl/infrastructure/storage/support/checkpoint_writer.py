@@ -8,9 +8,14 @@ to satisfy ARCH-002 (no direct I/O in application/domain).
 from __future__ import annotations
 
 import contextlib
+import json
 import os
 import tempfile
 from pathlib import Path, PurePosixPath, PureWindowsPath
+
+from bioetl.infrastructure.checkpoint._local_checkpoint_integrity import (
+    compute_checkpoint_payload_sha256,
+)
 
 # Bound checkpoint I/O to protect operators from oversized / runaway listings.
 _DEFAULT_MAX_CHECKPOINT_BYTES = 16 * 1024 * 1024  # 16 MiB
@@ -38,10 +43,14 @@ class FileCompositeCheckpointWriter:
         *,
         max_checkpoint_bytes: int = _DEFAULT_MAX_CHECKPOINT_BYTES,
         max_glob_matches: int = _DEFAULT_MAX_GLOB_MATCHES,
+        history_root: Path | None = None,
     ) -> None:
         self._checkpoint_dir = Path(checkpoint_dir).resolve(strict=False)
         self._max_checkpoint_bytes = max_checkpoint_bytes
         self._max_glob_matches = max_glob_matches
+        self._history_root = (
+            Path(history_root).resolve() if history_root is not None else None
+        )
 
     @staticmethod
     def _relative_path(path: str, *, kind: str = "path") -> Path:
@@ -98,6 +107,65 @@ class FileCompositeCheckpointWriter:
         return full.read_text(encoding="utf-8")
 
     def write_atomic(self, path: str, content: str) -> None:
+        """Persist active state and manifest-indexed history before returning."""
+        self._write_text_atomic(path, content)
+        if self._relative_path(path).parts[0] != ".history":
+            self._save_history(content)
+
+    def _save_history(self, content: str) -> None:
+        """Keep immutable evidence after the active checkpoint is removed."""
+        try:
+            state = json.loads(content)
+        except ValueError:
+            return
+        if not isinstance(state, dict) or not state.get("manifest_id"):
+            return
+        identity = [
+            state.get(key) for key in ("composite_name", "run_id", "manifest_id")
+        ]
+        if not all(
+            isinstance(value, str)
+            and value not in {"", ".", ".."}
+            and all(c.isalnum() or c in "._-" for c in value)
+            for value in identity
+        ):
+            raise CheckpointPathError(
+                "Composite checkpoint history requires safe identity segments"
+            )
+        # The application owns local resume history; only an explicit separate
+        # history root receives the control-plane envelope.
+        if self._history_root is None:
+            return
+        pipeline, run_id, manifest_id = identity
+        envelope = {
+            "pipeline": pipeline,
+            "run_id": run_id,
+            "metadata": state,
+            "version": "2.0",
+        }
+        digest = compute_checkpoint_payload_sha256(envelope)
+        envelope["payload_sha256"] = digest
+        history_path = f".history/by_pipeline/{pipeline}/{run_id}/{digest}.json"
+        history_writer = FileCompositeCheckpointWriter(
+            self._history_root, max_checkpoint_bytes=self._max_checkpoint_bytes
+        )
+        if not history_writer.exists(history_path):
+            history_writer._write_text_atomic(
+                history_path, json.dumps(envelope, ensure_ascii=False)
+            )
+        history_writer._write_text_atomic(
+            f".history/by_manifest/{manifest_id}.json",
+            json.dumps(
+                {
+                    "manifest_id": manifest_id,
+                    "pipeline": pipeline,
+                    "run_id": run_id,
+                    "history_path": history_path,
+                }
+            ),
+        )
+
+    def _write_text_atomic(self, path: str, content: str) -> None:
         """Write checkpoint file atomically via unique temp + rename."""
         encoded = content.encode("utf-8")
         if len(encoded) > self._max_checkpoint_bytes:

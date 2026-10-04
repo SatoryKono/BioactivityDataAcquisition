@@ -1375,12 +1375,6 @@
       "owner": "@bioetl-observability",
       "review_by": "2026-09-30"
     },
-    "scripts/ops/observability/composite_replay_acceptance.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the offline composite replay acceptance helper used by the integration matrix; preserve same-revision, isolated-output and network-denial checks.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-12-31"
-    },
     "scripts/ops/observability/grafana/_apply_ds2_all.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain only as a one-off DS2 migration helper for auditability; do not promote it to an active operator workflow.",

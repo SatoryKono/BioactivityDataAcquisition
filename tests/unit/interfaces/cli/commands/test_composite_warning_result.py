@@ -29,6 +29,7 @@ def test_composite_result_preserves_warning_without_changing_optional_exit_code(
     result = SimpleNamespace(
         is_success=success,
         had_warnings=warnings,
+        provider_warnings=(),
         failed_enrichers=["semanticscholar_publication"]
         if warnings or not success
         else [],
@@ -43,3 +44,20 @@ def test_composite_result_preserves_warning_without_changing_optional_exit_code(
     if warnings:
         assert "semanticscholar_publication" in text
         assert "completed successfully" not in text
+
+
+def test_successful_enricher_provider_warning_is_visible(capsys):
+    result = SimpleNamespace(
+        is_success=True,
+        had_warnings=False,
+        provider_warnings=("chembl_cell_line",),
+        failed_enrichers=[],
+    )
+    with pytest.raises(SystemExit) as stopped:
+        exit_with_composite_result(*build_run_composite_result(result))
+    assert stopped.value.code == 0
+    captured = capsys.readouterr()
+    text = captured.out + captured.err
+    assert "completed with warnings" in text
+    assert "Provider warnings: chembl_cell_line" in text
+    assert "completed successfully" not in text

@@ -43,6 +43,16 @@ __all__ = [
 ]
 
 _LAZY_COMMAND_SPECS: dict[str, tuple[str, str, str]] = {
+    "replay-composite": (
+        "bioetl.interfaces.cli.commands.replay_assay",
+        "replay_composite_command",
+        "Replay saved composite inputs offline and verify Silver/Gold",
+    ),
+    "replay-assay": (
+        "bioetl.interfaces.cli.commands.replay_assay",
+        "replay_assay_command",
+        "Replay saved assay inputs offline and verify Silver/Gold",
+    ),
     "adr": ("bioetl.interfaces.cli.commands.adr", "adr", "ADR tooling"),
     "checkpoint": (
         "bioetl.interfaces.cli.commands.checkpoint",

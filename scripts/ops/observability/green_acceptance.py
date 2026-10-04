@@ -85,10 +85,8 @@ def discover(root: Path) -> tuple[Case, ...]:
     return tuple(cases)
 
 
-def command(case: Case, *, limit: int = 1000) -> list[str]:
+def command(case: Case) -> list[str]:
     """Every actual launch carries the user-required record limit."""
-    if type(limit) is not int or limit <= 0:
-        raise ValueError("Acceptance limit must be a positive integer")
     if case.kind == "workflow":
         args = ["workflow", "run", case.name]
     elif case.kind == "composite":
@@ -106,7 +104,7 @@ def command(case: Case, *, limit: int = 1000) -> list[str]:
         "bioetl",
         *args,
         "--limit",
-        str(limit),
+        "1000",
         "--required-persistence-profile",
         "degraded_observable",
     ]
@@ -213,18 +211,14 @@ def inspect_pipeline(path: Path, reports: Path, data: Path) -> list[str]:
     ]
 
 
-def execute(
-    case: Case, root: Path, output: Path, env_file: Path, *, limit: int = 1000
-) -> list[str]:
+def execute(case: Case, root: Path, output: Path, env_file: Path) -> list[str]:
     """Run once into a fresh case directory; persist failures even on process exit."""
     from dotenv import dotenv_values
 
     branch = subprocess.check_output(
         ["git", "branch", "--show-current"], cwd=root, text=True
     ).strip()
-    assert branch.startswith("codex/") and (root / ".git").is_file(), (
-        f"Acceptance requires an isolated codex worktree: {branch}"
-    )
+    assert branch.startswith("codex/pipeline-green-gates"), f"Unsafe branch: {branch}"
     assert not subprocess.check_output(
         ["git", "status", "--porcelain", "-uno"], cwd=root, text=True
     ).strip(), "Commit candidate before replay-ready launches"
@@ -266,10 +260,10 @@ def execute(
         environment[
             "BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__PLAIN_WRITE_PROCESS_ISOLATION"
         ] = "true"
-    args = command(case, limit=limit)
+    args = command(case)
     failures = []
     launch_cases = [Case("pipeline", name) for name in case.prerequisites] + [case]
-    launches = [command(launch_case, limit=limit) for launch_case in launch_cases]
+    launches = [command(launch_case) for launch_case in launch_cases]
     timeouts = [launch_timeout(launch_case, root) for launch_case in launch_cases]
     with (folder / "launch.log").open("w", encoding="utf-8") as log:
         for launch, timeout in zip(launches, timeouts, strict=True):
@@ -303,7 +297,7 @@ def execute(
                 "command": args,
                 "launches": launches,
                 "launch_timeout_seconds": timeouts,
-                "limit": limit,
+                "limit": 1000,
                 "source_commit": subprocess.check_output(
                     ["git", "rev-parse", "HEAD"], cwd=root, text=True
                 ).strip(),

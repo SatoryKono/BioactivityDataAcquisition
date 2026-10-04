@@ -129,6 +129,7 @@ def bootstrap_composite_checkpoint_writer() -> CompositeCheckpointPort:
     settings = get_settings()
     checkpoint = FileCompositeCheckpointWriter(
         checkpoint_dir=_logical_fs_path(Path(settings.checkpoint_path) / "composite"),
+        history_root=_logical_fs_path(Path(settings.checkpoint_path)),
     )
     assert isinstance(checkpoint, CompositeCheckpointPort), (
         "FileCompositeCheckpointWriter must implement CompositeCheckpointPort, "

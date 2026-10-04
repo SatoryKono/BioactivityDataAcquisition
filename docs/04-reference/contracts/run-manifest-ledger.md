@@ -88,8 +88,6 @@ contexts.
   record, batch, write, and post-write flows.
 - `RunManifest` remains an immutable provenance/control-plane artifact linked
   to runtime execution via `manifest_id`.
-- `RunManifest.objects` is a mapping of object identifiers to boolean verification
-  results. It defaults to an empty mapping when older manifests omit `objects`.
 - `RunCodeProvenance` includes `normalization_profile_ref`,
   `normalization_profile_version`, and `normalization_profile_hash` so replay
   diagnostics can tie one manifest to the exact normalization profile surface

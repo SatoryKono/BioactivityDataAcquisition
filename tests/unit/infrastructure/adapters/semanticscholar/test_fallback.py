@@ -32,9 +32,11 @@ Tests for SemanticScholarTitleFallbackHandler class.
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
+import httpx
 import pytest
 
 from bioetl.infrastructure.adapters._base_headers import BIOETL_USER_AGENT
@@ -45,6 +47,48 @@ from bioetl.infrastructure.adapters.semanticscholar.fallback import (
 
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("status", [403, 429, 503])
+async def test_exhausted_fallback_stops_before_next_title(status):
+    request = httpx.Request(
+        "GET", "https://api.semanticscholar.org/graph/v1/paper/search"
+    )
+    failure = httpx.HTTPStatusError(
+        "retry exhausted",
+        request=request,
+        response=httpx.Response(status, request=request),
+    )
+    client = AsyncMock()
+    client.get.side_effect = failure
+    handler = SemanticScholarTitleFallbackHandler(client, MagicMock())
+    with pytest.raises(httpx.HTTPStatusError) as caught:
+        async for _ in handler.process_missing_dois(
+            dois=["doi1", "doi2"],
+            found_dois=set(),
+            fallback_mapping={"doi1": "first title", "doi2": "second title"},
+            normalize_fn=lambda value: value,
+            limit=100,
+            fetched=0,
+        ):
+            pytest.fail("A failed search must not yield records")
+    assert caught.value.response.status_code == status
+    assert client.get.await_count == 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "failure", [httpx.ReadTimeout("timeout"), asyncio.CancelledError()]
+)
+async def test_fallback_preserves_transport_error_and_cancellation(failure):
+    client = AsyncMock()
+    client.get.side_effect = failure
+    handler = SemanticScholarTitleFallbackHandler(client, MagicMock())
+    with pytest.raises(type(failure)):
+        await handler._search_by_title("known title")
+    client.get.assert_awaited_once()
+
 
 # =============================================================================
 # Fixtures
@@ -266,16 +310,15 @@ class TestSemanticScholarTitleFallbackHandler:
     async def test_title_fallback_handler__handles_exception__b7569eea(
         self, mock_logger, mock_http_client
     ):
-        """Test that search errors are caught and logged."""
+        """Search failures must propagate after logging, never become not-found."""
         mock_http_client.get.side_effect = RuntimeError("Search failed")
 
         handler = SemanticScholarTitleFallbackHandler(
             http_client=mock_http_client,
             logger=mock_logger,
         )
-        result = await handler._search_by_title("Test title")
-
-        assert result is None
+        with pytest.raises(RuntimeError, match="Search failed"):
+            await handler._search_by_title("Test title")
         mock_logger.debug.assert_called()
 
     @pytest.mark.asyncio

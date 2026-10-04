@@ -659,3 +659,51 @@ class TestDependencyExecution:
             abs=1e-6,
         )
         mock_logger.error.assert_called()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("required", [False, True])
+@pytest.mark.parametrize("status", [DependencyStatus.FAILED, DependencyStatus.TIMEOUT])
+async def test_failed_key_source_blocks_downstream_without_read_or_runner(
+    mock_logger, seed_keys, monkeypatch, required, status
+):
+    coordinator = _make_coordinator(mock_logger)
+    source = DependencyConfig(
+        pipeline="uniprot_idmapping", join_keys=("target_id",), required=False
+    )
+    child = DependencyConfig(
+        pipeline="uniprot_protein",
+        join_keys=("uniprot_accession",),
+        key_source=source.pipeline,
+        required=required,
+    )
+    tail = DependencyConfig(
+        pipeline="chembl_target_component", join_keys=("target_id",), required=False
+    )
+    keys = AsyncMock(return_value=seed_keys)
+    execute = AsyncMock(
+        side_effect=[
+            DependencyResult(source.pipeline, status),
+            DependencyResult.success(tail.pipeline, 1, 1),
+        ]
+    )
+    monkeypatch.setattr(coordinator, "_get_effective_keys", keys)
+    monkeypatch.setattr(coordinator, "_run_single_dependency", execute)
+    results = await coordinator.run_dependencies(
+        keys=seed_keys,
+        dependencies=(source, child, tail),
+        completed=frozenset(),
+        runner_factory=MagicMock(),
+    )
+    assert results[child.pipeline].status == DependencyStatus.FAILED
+    assert source.pipeline in results[child.pipeline].error_message
+    assert (tail.pipeline in results) is (not required)
+    assert execute.await_count == (1 if required else 2)
+    assert all(
+        call.kwargs["dependency"].pipeline != child.pipeline
+        for call in keys.await_args_list
+    )
+    assert all(
+        call.kwargs["dependency"].pipeline != child.pipeline
+        for call in execute.await_args_list
+    )

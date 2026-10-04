@@ -11,13 +11,14 @@ from bioetl.application.services.run_reports.artifact_digest import (
     canonical_report_sha256,
 )
 from bioetl.interfaces.http._composite_child_artifact_probe import (
-    _probe_composite_child,
+    _probe_composite_child as _probe_captured_child,
 )
 from bioetl.interfaces.http._forensic_request_budget import (
     _deadline_exceeded_error,
     request_deadline_exceeded,
 )
 
+_PIPELINE_REPORT_FILE = "pipeline-run-report.json"
 _SELF_REPORT_KINDS = frozenset(
     {
         "pipeline_run_report_json",
@@ -27,7 +28,7 @@ _SELF_REPORT_KINDS = frozenset(
     }
 )
 _SELF_REPORT_FILENAMES = {
-    "pipeline_run_report_json": "pipeline-run-report.json",
+    "pipeline_run_report_json": _PIPELINE_REPORT_FILE,
     "pipeline_run_report_md": "pipeline-run-report.md",
     "workflow_run_report_json": "workflow-run-report.json",
     "workflow_run_report_md": "workflow-run-report.md",
@@ -68,6 +69,54 @@ def _resolve_artifact_path(
 _HASH_READ_CHUNK_SIZE = 256 * 1024
 
 
+def _probe_composite_child(item: Mapping[str, object], root: Path) -> str:
+    """Verify a child only at its exact identity-bound path in this report tree."""
+    from bioetl.interfaces.http._selected_run_report_assessment import (
+        _load_report_assessment,
+    )
+
+    pipeline, run_id = item.get("pipeline_name"), item.get("run_id")
+    if not all(
+        isinstance(value, str)
+        and value not in {"", ".", ".."}
+        and all(c.isalnum() or c in "._-" for c in value)
+        for value in (pipeline, run_id)
+    ):
+        return "child_identity_invalid"
+    tree = root.parents[1]
+    expected = tree / str(pipeline) / str(run_id) / _PIPELINE_REPORT_FILE
+    candidate = expected.resolve()
+    raw = item.get("ref")
+    portable = f"pipeline/{pipeline}/{run_id}/pipeline-run-report.json"
+    if (
+        not isinstance(raw, str)
+        or (raw.replace("\\", "/") != portable and Path(raw).resolve() != candidate)
+        or not candidate.is_relative_to(tree)
+    ):
+        return "artifact_path_escape"
+    if not candidate.is_file():
+        return "artifact_missing"
+    digest = item.get("sha256")
+    try:
+        child_report, identity, assessment, availability, _revision = (
+            _load_report_assessment(candidate, str(pipeline), str(run_id))
+        )
+    except (OSError, ValueError, TypeError, KeyError):
+        return "child_evidence_invalid"
+    if not isinstance(digest, str) or canonical_report_sha256(child_report) != digest:
+        return "child_digest_mismatch"
+    if identity.get("manifest_id") != item.get("manifest_id"):
+        return "child_manifest_mismatch"
+    if (
+        availability != "AVAILABLE"
+        or identity.get("status") != "success"
+        or assessment.get("verdict") not in {"OK", "N/A"}
+        or assessment.get("evidence_completeness") != "COMPLETE"
+    ):
+        return "child_evidence_not_green"
+    return ""
+
+
 def _probe_digest(candidate: Path, kind: str) -> str:
     """Hash JSON self-reports canonically; other artifacts as raw bytes."""
     if kind in _JSON_SELF_REPORT_KINDS:
@@ -104,7 +153,7 @@ def _child_path(
     parts = PurePosixPath(reference.replace("\\", "/")).parts
     if ".." in parts:
         return None, "artifact_path_escape"
-    suffix = ("pipeline", str(pipeline), str(run_id), "pipeline-run-report.json")
+    suffix = ("pipeline", str(pipeline), str(run_id), _PIPELINE_REPORT_FILE)
     if tuple(parts[-4:]) != suffix or root.parent.parent.name != "pipeline":
         return None, "artifact_record_invalid"
     catalog = root.parent.parent.resolve()
@@ -172,11 +221,36 @@ def _artifact_probes(
                 }
             )
             continue
+        child_ref = item.get("ref")
         if item.get("kind") == "composite_child_run_report" and (
-            str(item.get("ref", "")).replace("\\", "/").startswith("child-reports/")
-            or "canonical_sha256" in item
+            "canonical_sha256" in item
+            or (
+                isinstance(child_ref, str)
+                and child_ref.replace("\\", "/").startswith("child-reports/")
+            )
         ):
-            reason = _probe_composite_child(item, root, _hash_artifact_chunked)
+            reason = _probe_captured_child(item, root, _hash_artifact_chunked)
+            probes.append(
+                {
+                    "code": f"child_report_{item.get('run_id', index)}",
+                    "result": "fail" if reason else "pass",
+                    "reason": reason or "child_evidence_verified",
+                    "evidence_ref": ref,
+                }
+            )
+            continue
+        portable_child = f"pipeline/{item.get('pipeline_name')}/{item.get('run_id')}/pipeline-run-report.json"
+        # Current reports bind exact child refs and require green child evidence.
+        # Legacy relocated refs retain their snapshot/revision verification below.
+        if (
+            item.get("kind") == "composite_child_run_report"
+            and isinstance(child_ref, str)
+            and (
+                child_ref.replace("\\", "/") == portable_child
+                or Path(child_ref).resolve().is_relative_to(root.parents[1])
+            )
+        ):
+            reason = _probe_composite_child(item, root)
             probes.append(
                 {
                     "code": f"child_report_{item.get('run_id', index)}",
@@ -260,20 +334,3 @@ def _artifact_probes(
             }
         )
     return probes, True
-
-
-def _report_probes(
-    report: Mapping[str, object], run_root: Path, assessment: Mapping[str, object]
-) -> tuple[list[Mapping[str, object]], bool]:
-    """Keep an incomplete report from producing a ready replay verdict."""
-    probes, inventory_present = _artifact_probes(report, run_root)
-    if assessment.get("evidence_completeness") != "COMPLETE":
-        probes.append(
-            {
-                "code": "report_evidence_completeness",
-                "result": "unknown",
-                "reason": "report_evidence_incomplete",
-                "evidence_ref": "#/selected_run_snapshot/assessment",
-            }
-        )
-    return probes, inventory_present

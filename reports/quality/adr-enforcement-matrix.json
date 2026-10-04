@@ -950,6 +950,7 @@
         "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/00-project/ai/prompts/domains.yaml",
         "docs/00-project/ai/rules/windsurf/rules/03-testing.md",
         "docs/00-project/ai/rules/windsurf/rules/04-patterns.md",
         "docs/00-project/ai/skills/local/technical-designer-mermaid/references/patterns.md",
@@ -2249,6 +2250,26 @@
       "owner": "BioETL Team",
       "status": "enforced",
       "title": "Persisted Selected Run Assessment"
+    },
+    {
+      "adr_id": "ADR-062",
+      "category": "Replay",
+      "decision_date": "2026-10-03",
+      "decision_path": "docs/02-architecture/decisions/ADR-062-assay-parent-exact-replay.md",
+      "enforcement_owner_paths": [
+        "tests/integration/composite/test_assay_snapshot_merge_replay.py",
+        "tests/unit/infrastructure/storage/test_composite_replay_bundle.py"
+      ],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "src/bioetl/composition/bootstrap/runtime/assay_replay.py",
+        "tests/integration/composite/test_assay_snapshot_merge_replay.py",
+        "tests/unit/infrastructure/storage/test_composite_replay_bundle.py"
+      ],
+      "manual_exception": null,
+      "owner": "BioETL maintainers",
+      "status": "enforced",
+      "title": "Immutable Composite Parent Merge Replay"
     }
   ],
   "schema_version": 1,
@@ -2258,9 +2279,9 @@
     "tracked_file_discovery": "git grep --untracked with python fallback"
   },
   "summary": {
-    "accepted_adr_count": 59,
+    "accepted_adr_count": 60,
     "blocking_gap_count": 0,
-    "enforced_adr_count": 59,
+    "enforced_adr_count": 60,
     "manual_exception_count": 0,
     "missing_enforcement_owner_count": 0,
     "missing_implementation_owner_count": 0

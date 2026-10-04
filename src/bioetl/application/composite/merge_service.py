@@ -5,7 +5,7 @@ from __future__ import annotations
 
 __all__ = ["MergeService"]
 
-from collections.abc import Sequence
+from collections.abc import Awaitable, Callable, Sequence
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.composite.join_planner_helpers import (
@@ -111,6 +111,16 @@ class MergeService(
         cross_validator = runtime.pop("cross_validator", None)
         gold_schema = runtime.pop("gold_schema", None)
         clock = runtime.pop("clock", None)
+        self._execution_hook: (
+            Callable[
+                [
+                    MergeExecutionRequest,
+                    Callable[[MergeExecutionRequest], Awaitable[MergeResult]],
+                ],
+                Awaitable[MergeResult],
+            ]
+            | None
+        ) = runtime.pop("execution_hook", None)
         if runtime:
             unexpected = ", ".join(sorted(str(key) for key in runtime))
             raise TypeError(
@@ -179,4 +189,12 @@ class MergeService(
         request: MergeExecutionRequest,
     ) -> MergeResult:
         """Execute a canonical merge request envelope."""
-        return await execute_merge_request(cast(MergeWorkflowContext, self), request)  # pyright: ignore[reportInvalidCast]
+
+        async def execute(resolved: MergeExecutionRequest) -> MergeResult:
+            return await execute_merge_request(
+                cast(MergeWorkflowContext, self), resolved
+            )
+
+        if self._execution_hook is not None:
+            return await self._execution_hook(request, execute)
+        return await execute(request)

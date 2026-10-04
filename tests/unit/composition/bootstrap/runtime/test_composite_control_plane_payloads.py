@@ -58,8 +58,6 @@ def _build_config() -> SimpleNamespace:
 
 def _build_runtime() -> SimpleNamespace:
     return SimpleNamespace(
-        exact_replay=False,
-        replay_of_manifest_id=None,
         resume=True,
         dry_run=False,
         required_only=True,
@@ -142,18 +140,6 @@ def test_build_composite_source_refs_accepts_manifest_backed_snapshot_resolution
     monkeypatch.setattr(
         "bioetl.composition.bootstrap.runtime._composite_control_plane_payloads.resolve_manifest_input_snapshot_refs",
         lambda **_: (manifest_snapshot,),
-    )
-    monkeypatch.setattr(
-        "bioetl.infrastructure.control_plane.FileRunManifestStore.get",
-        lambda self, identity: SimpleNamespace(
-            launch_context={
-                "child_replay_manifests": {
-                    "pubmed_publications": "child-seed",
-                    "crossref_publications": "child-dependency",
-                    "openalex_publications": "child-enricher",
-                }
-            }
-        ),
     )
 
     result = build_composite_source_refs(

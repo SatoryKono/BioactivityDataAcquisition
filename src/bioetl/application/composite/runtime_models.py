@@ -86,38 +86,18 @@ class CompositeRuntimeConfig:
     cached_bronze_enrichers: bool | None = None
     cached_bronze_dependencies: bool = False
     exact_replay: bool = False
-    replay_of_manifest_id: str | None = None
     required_persistence_profile: str | None = None
     heartbeat_interval_seconds: int = 30
     lock_ttl_seconds: int = _DEFAULT_COMPOSITE_LOCK_TTL_SECONDS
 
     def __post_init__(self) -> None:
         """Normalize mutable values into immutable runtime fields."""
-        if self.exact_replay and not self.replay_of_manifest_id:
+        if self.exact_replay:
             raise ValueError(
                 "Composite execution is outside the strict exact-replay support "
                 "boundary; use source-run exact replay or composite rebuild/resume "
                 "semantics instead."
             )
-        if self.replay_of_manifest_id and any(
-            (
-                self.resume,
-                self.dry_run,
-                self.enrich_only,
-                self.required_only,
-                self.force_enricher,
-                self.use_cached_bronze,
-                self.cached_bronze_dependencies,
-                self.cached_bronze_enrichers is not None,
-                self.cached_bronze_path is not None,
-                self.cached_bronze_date is not None,
-            )
-        ):
-            raise ValueError(
-                "Composite replay cannot override captured stage selection"
-            )
-        if self.replay_of_manifest_id and not self.exact_replay:
-            raise ValueError("Composite replay requires exact_replay=True")
         raw_enrich_only = cast("tuple[str, ...] | list[str] | None", self.enrich_only)
         if isinstance(raw_enrich_only, list):
             object.__setattr__(self, "enrich_only", tuple(raw_enrich_only))

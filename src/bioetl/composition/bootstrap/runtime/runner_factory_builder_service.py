@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, TypedDict, TypeVar
 
 if TYPE_CHECKING:
     import polars as pl
@@ -23,6 +22,8 @@ from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service im
     CompositeFilterExtractor,
 )
 
+_COMPOSITE_PHASE_REQUIRED_PERSISTENCE_PROFILE = "degraded_observable"
+
 
 class BronzeRunOptions(TypedDict):
     """Cached bronze options passed to RunOptions constructor."""
@@ -32,11 +33,18 @@ class BronzeRunOptions(TypedDict):
     cached_bronze_date: str | None
 
 
+_RunOptionsT = TypeVar("_RunOptionsT")
+
+
 def resolve_bronze_opts(
     runtime: CompositeRuntimeConfig,
     phase_override: bool | None,
 ) -> BronzeRunOptions:
-    """Return phase Bronze options, falling back to runtime when override is None."""
+    """Resolve per-phase cached bronze options using tri-state override.
+
+    Returns:
+        BronzeRunOptions with resolved cached bronze settings for the phase.
+    """
     effective = (
         phase_override if phase_override is not None else runtime.use_cached_bronze
     )
@@ -47,16 +55,6 @@ def resolve_bronze_opts(
     )
 
 
-@dataclass(frozen=True, slots=True)
-class RunnerFactoryHooks[RunOptionsT]:
-    """Optional replay preparation and report wrapping for child runners."""
-
-    reporting_runner_builder: (
-        Callable[[PipelineRunContext, RunOptionsT], PipelineRunner] | None
-    ) = None
-    replay_options: Callable[[str, dict[str, object]], dict[str, object]] | None = None
-
-
 class RunnerFactoryBuilder[RunOptionsT]:
     """Build seed/enricher/dependency runner factories."""
 
@@ -64,15 +62,18 @@ class RunnerFactoryBuilder[RunOptionsT]:
         self,
         *,
         logger: LoggerPort,
-        run_options_cls: Callable[..., RunOptionsT],
-        build_context: Callable[[str, RunOptionsT], PipelineRunContext],
+        run_options_cls: Callable[..., _RunOptionsT],
+        build_context: Callable[[str, _RunOptionsT], PipelineRunContext],
         pipeline_runner_builder: Callable[[PipelineRunContext], PipelineRunner],
         filter_extraction_service: CompositeFilterExtractor,
         required_persistence_profile: str | None = None,
         gold_required_pipelines: frozenset[str] = frozenset(),
-        hooks: RunnerFactoryHooks[RunOptionsT] | None = None,
+        reporting_runner_builder: Callable[
+            [PipelineRunContext, _RunOptionsT], PipelineRunner
+        ]
+        | None = None,
     ) -> None:
-        self._hooks = hooks or RunnerFactoryHooks()
+        self._reporting_runner_builder = reporting_runner_builder
         self._logger = logger
         self._gold_required_pipelines = gold_required_pipelines
         self._run_options_cls = run_options_cls
@@ -80,7 +81,9 @@ class RunnerFactoryBuilder[RunOptionsT]:
         self._pipeline_runner_builder = pipeline_runner_builder
         self._filter_extraction_service = filter_extraction_service
         raw = str(required_persistence_profile or "").strip()
-        self._required_persistence_profile = raw or "degraded_observable"
+        self._required_persistence_profile = (
+            raw or _COMPOSITE_PHASE_REQUIRED_PERSISTENCE_PROFILE
+        )
 
     def _create_runner(
         self,
@@ -92,12 +95,10 @@ class RunnerFactoryBuilder[RunOptionsT]:
             "required_persistence_profile",
             self._required_persistence_profile,
         )
-        if self._hooks.replay_options is not None:
-            option_kwargs = self._hooks.replay_options(pipeline_name, option_kwargs)
         options = self._run_options_cls(**option_kwargs)
         ctx = self._build_context(pipeline_name, options)
-        if self._hooks.reporting_runner_builder is not None:
-            return self._hooks.reporting_runner_builder(ctx, options)
+        if self._reporting_runner_builder is not None:
+            return self._reporting_runner_builder(ctx, options)
         return self._pipeline_runner_builder(ctx)
 
     def build_seed_factory(

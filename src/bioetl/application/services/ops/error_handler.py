@@ -11,8 +11,7 @@ REQ-OBS-001: Errors should be logged with full context
 from __future__ import annotations
 
 import inspect
-from collections.abc import Callable, Iterator
-from contextlib import contextmanager
+from collections.abc import Callable
 from typing import Any
 
 from bioetl.domain.exceptions.base_exceptions import (
@@ -20,21 +19,6 @@ from bioetl.domain.exceptions.base_exceptions import (
     BioETLIntegrationError,
 )
 from bioetl.domain.ports import LoggerPort, MetricsPort
-
-
-@contextmanager
-def handle_operation_errors(
-    on_error: Callable[[Exception], None],
-) -> Iterator[None]:
-    """Apply an explicit recovery policy; cancellation and process exits propagate.
-
-    Returning from the policy suppresses the operation error. A policy that cannot
-    recover must raise; errors raised by the policy itself are never intercepted.
-    """
-    try:
-        yield
-    except Exception as error:
-        on_error(error)
 
 
 class ErrorHandlerService:

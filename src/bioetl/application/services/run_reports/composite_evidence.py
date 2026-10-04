@@ -25,7 +25,8 @@ def snapshot_child_reports(
         payload = json.loads(raw)
         identity = payload.get("identity", {}) if isinstance(payload, dict) else {}
         if (
-            identity.get("run_id") != child.run_id
+            not isinstance(identity, dict)
+            or identity.get("run_id") != child.run_id
             or identity.get("pipeline_name") != child.pipeline_name
         ):
             raise ValueError("Composite child report identity mismatch")
@@ -82,3 +83,26 @@ def _snapshot_child_revision(
                     raise ValueError("Captured child revision differs from source")
             else:
                 store.write_text(str(saved_revision), revision_raw)
+
+
+def capture_child_report_artifacts(
+    children: list[RunResult], run_root: Path, store: RunReportStorePort
+) -> tuple[dict[str, object], ...]:
+    """Keep terminal evidence available when immutable child capture fails."""
+    from bioetl.application.services.run_reports.composite_report_support import (
+        child_artifacts,
+    )
+    from bioetl.application.services.run_reports.observations import (
+        record_run_observation,
+    )
+
+    try:
+        return snapshot_child_reports(children, run_root, store)
+    except (OSError, ValueError, TypeError):
+        record_run_observation(
+            "Control Plane",
+            verdict="INCOMPLETE",
+            reason="child_report_capture_failed",
+            facts={},
+        )
+        return child_artifacts(store, children)

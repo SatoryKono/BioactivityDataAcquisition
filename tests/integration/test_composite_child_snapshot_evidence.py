@@ -109,3 +109,63 @@ def test_captured_child_keeps_strict_assessment_and_archive_revision(
         archived = selected_report_sources(root, manifest)
         assert captured in archived.values()
         assert revision in archived.values()
+
+
+def test_legacy_external_child_reference_remains_archivable(tmp_path):
+    root = tmp_path / "reports"
+    parent = root / "pipeline/composite_activity/parent"
+    parent.mkdir(parents=True)
+    report = parent / "pipeline-run-report.json"
+    report.write_text(
+        json.dumps(
+            {
+                "identity": {"pipeline_name": "composite_activity", "run_id": "parent"},
+                "artifacts": [
+                    {
+                        "kind": "composite_child_run_report",
+                        "ref": "pipeline/chembl_activity/child/pipeline-run-report.json",
+                        "sha256": "old-canonical-digest",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    manifest = SimpleNamespace(pipeline_name="composite_activity", run_id="parent")
+    assert list(selected_report_sources(root, manifest).values()) == [report]
+
+
+@pytest.mark.parametrize(
+    "raw", ['{"identity": []}', '{"identity": {"run_id": "foreign"}}', "invalid-json"]
+)
+def test_invalid_child_capture_records_incomplete_without_losing_parent_evidence(
+    tmp_path, raw
+):
+    from bioetl.application.services.run_reports.composite_evidence import (
+        capture_child_report_artifacts,
+    )
+    from bioetl.application.services.run_reports.observations import (
+        bind_run_observations,
+        reset_run_observations,
+        run_observations,
+    )
+
+    source = tmp_path / "child.json"
+    source.write_text(raw, encoding="utf-8")
+    child = RunResult(
+        PipelineRunResult.SUCCESS,
+        "chembl_activity",
+        "child",
+        "incremental",
+        run_report_json_path=str(source),
+    )
+    token = bind_run_observations()
+    try:
+        capture_child_report_artifacts(
+            [child], tmp_path / "parent", FileRunReportStoreAdapter()
+        )
+        evidence = run_observations()["Control Plane"]
+        assert evidence["verdict"] == "INCOMPLETE"
+        assert evidence["reason"] == "child_report_capture_failed"
+    finally:
+        reset_run_observations(token)
