@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-03T20:40:01.580874+00:00",
+  "generated_at": "2026-10-04T09:43:39.958511+00:00",
   "summary": {
     "total_scripts": 635,
     "status_counts": {
@@ -12272,7 +12272,7 @@
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 183,
+          "line": 186,
           "source_group": "docs",
           "text": "python3 scripts/engineering/diagnostics/audit_structure.py --path ."
         },
@@ -18851,7 +18851,7 @@
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 447,
+          "line": 450,
           "source_group": "docs",
           "text": "uv run python -m scripts.ops.data check-data-dir"
         },
@@ -21067,7 +21067,7 @@
         },
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 294,
+          "line": 303,
           "source_group": "tests",
           "text": "recover_ps1 = Path(\"scripts/ops/observability/grafana/recover_renderer.ps1\")"
         }
@@ -21135,7 +21135,7 @@
       "references": [
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 295,
+          "line": 304,
           "source_group": "tests",
           "text": "recover_sh = Path(\"scripts/ops/observability/grafana/recover_renderer.sh\")"
         }

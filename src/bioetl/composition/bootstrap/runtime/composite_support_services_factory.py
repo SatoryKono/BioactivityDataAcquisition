@@ -23,6 +23,7 @@ from bioetl.composition.bootstrap.runtime.composite_execution_support_builder im
     build_execution_support_services,
 )
 from bioetl.composition.bootstrap.runtime.composite_merge_service_builder import (
+    SYSTEM_COLUMNS_TO_DROP,
     build_composite_merge_service,
 )
 from bioetl.composition.bootstrap.runtime.composite_runtime_management_builder import (
@@ -31,6 +32,11 @@ from bioetl.composition.bootstrap.runtime.composite_runtime_management_builder i
 from bioetl.composition.bootstrap.runtime.composite_support_runtime_context import (
     resolve_composite_support_runtime_context,
 )
+from bioetl.composition.bootstrap.runtime.assay_replay_capture import (
+    prepare_assay_replay,
+)
+from bioetl.composition.factories.storage import StorageBundle
+from bioetl.infrastructure.storage.composite_replay_bundle import SUPPORTED_COMPOSITES
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -42,6 +48,7 @@ if TYPE_CHECKING:
     from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import (
+        DeltaReaderPort,
         LoggerPort,
         MetricsPort,
         QuarantinePort,
@@ -69,20 +76,7 @@ class CompositeSupportServicesFactory:
     """Build support services used by composite runtime orchestration."""
 
     _JOIN_KEY_NORMALIZATION_POLICIES = JOIN_KEY_NORMALIZATION_POLICIES
-    _SYSTEM_COLUMNS_TO_DROP: frozenset[str] = frozenset(
-        {
-            "_run_id",
-            "_run_type",
-            "_source_batch_id",
-            "_ingestion_ts",
-            "_dq_warn",
-            "_dq_error",
-            "_index",
-            "_lookup_method",
-            "_original_id",
-            "_source",
-        }
-    )
+    _SYSTEM_COLUMNS_TO_DROP = SYSTEM_COLUMNS_TO_DROP
 
     def __init__(
         self,
@@ -129,21 +123,37 @@ class CompositeSupportServicesFactory:
             delta_reader=runtime_context.delta_reader,
             clock=self._infra.clock,
         )
+        storage = (
+            self._infra.storage_for_manifest(runtime_context.control_plane_bundle)
+            if self._infra.storage_for_manifest is not None
+            else self._infra.storage
+        )
+        merge_reader: DeltaReaderPort = runtime_context.delta_reader
+        execution_hook = None
+        if self._config.name in SUPPORTED_COMPOSITES:
+            candidate_storage: object = storage
+            if not isinstance(candidate_storage, StorageBundle):
+                raise TypeError("assay_replay_requires_storage_bundle")
+            merge_reader, execution_hook = prepare_assay_replay(
+                config=self._config,
+                reader=merge_reader,
+                storage=candidate_storage,
+                settings=self._infra.settings,
+                logger=runtime_context.logger,
+                field_group_registry=runtime_context.field_group_registry,
+            )
         merger = build_composite_merge_service(
             config=self._config,
-            storage=(
-                self._infra.storage_for_manifest(runtime_context.control_plane_bundle)
-                if self._infra.storage_for_manifest is not None
-                else self._infra.storage
-            ),
+            storage=storage,
             resolve_gold_schema=self._resolve_gold_schema,
-            delta_reader=runtime_context.delta_reader,
+            delta_reader=merge_reader,
             field_group_registry=runtime_context.field_group_registry,
             cross_validator=runtime_context.cross_validator,
             logger=runtime_context.logger,
             system_columns_to_drop=self._SYSTEM_COLUMNS_TO_DROP,
             normalization_policies=self._JOIN_KEY_NORMALIZATION_POLICIES,
             clock=self._infra.clock,
+            execution_hook=execution_hook,
         )
         runtime_management_services = build_runtime_management_services(
             config=self._config,

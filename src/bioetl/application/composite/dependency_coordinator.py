@@ -142,6 +142,15 @@ class DependencyCoordinatorService:
             ):
                 continue
 
+            if self._progress_service.maybe_store_blocked_chain(
+                dependency=dependency, results=results
+            ):
+                if self._progress_service.should_stop_after_result(
+                    dependency=dependency, result=results[dependency.pipeline]
+                ):
+                    break
+                continue
+
             effective_keys = await self._get_effective_keys(
                 dependency=dependency,
                 seed_keys=keys,

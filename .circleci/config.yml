@@ -1,4 +1,4 @@
-# CircleCI config v2 — PR gates port (phase 2, 03.10.2026)
+# CircleCI config v2 â€” PR gates port (phase 2, 03.10.2026)
 # Repo: SatoryKono/BioactivityDataAcquisition
 # Mirrors .github/workflows/pr-required.yml: the `classify` job runs the repo's own
 # decision-matrix classifier (scripts/engineering/ci pr-gate classify); each gate job
@@ -62,7 +62,7 @@ commands:
             DECISION=$(python3 -c "import json; print(json.load(open('/tmp/cci-ws/pr-gate-decisions.json'))['decisions']['<< parameters.gate >>']['decision'])")
             echo "gate << parameters.gate >> decision: $DECISION"
             if [ "$DECISION" != "required" ]; then
-              echo "Gate not applicable for this change set — skipping."
+              echo "Gate not applicable for this change set â€” skipping."
               circleci-agent step halt
             fi
 
@@ -469,7 +469,7 @@ jobs:
 
   # --- Gate: docker (path_scoped) ----------------------------------------------------
   # Mirrors docker.yml validation part only (lint + compose + build). No push, no
-  # Trivy baseline here — image security baseline stays a phase-3 item.
+  # Trivy baseline here â€” image security baseline stays a phase-3 item.
   docker-build:
     docker:
       - image: cimg/python:3.12
@@ -528,10 +528,68 @@ jobs:
           name: PR gate complete
           command: echo "All required CircleCI gates passed."
 
+  composite-closeout:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: medium
+    steps:
+      - checkout
+      - setup-python-uv:
+          extras: "dev tracing docs"
+      - run:
+          name: "Scoped evidence for issues 11904 and 11905"
+          command: |
+            export PATH="$HOME/.local/bin:$PATH"
+            export PYTHONPATH="$PWD/src:$PWD"
+            export BIOETL_AI_RUNTIME=circleci BIOETL_AI_AGENT=composite-closeout BIOETL_AI_MEMORY_MODE=read-only
+            export PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+            uv run --frozen --no-build python - \<<'PY'
+            import datetime, json, os, pathlib, subprocess, sys, time
+            root = pathlib.Path.cwd()
+            run_id = "issues-11904-11905-ci-" + os.environ["CIRCLE_BUILD_NUM"]
+            folder = root / "reports/quality/proof-or-stop" / run_id
+            folder.mkdir(parents=True, exist_ok=False)
+            prefix = [sys.executable, "-m", "scripts.engineering.qa", "proof-or-stop"]
+            common = ["--task-id", "issues-11904-11905", "--claim", "done", "--run-id", run_id]
+            identity = ["--trust-tier", "ci", "--ci-run-id", os.environ["CIRCLE_BUILD_URL"]]
+            subprocess.run(prefix + ["plan"] + common + ["--ci-run-id", os.environ["CIRCLE_BUILD_URL"]], check=True)
+            paths = ['tests/unit/interfaces/http/test_composite_child_artifact.py', 'tests/integration/adapters/test_http_retry_semantics.py', 'tests/integration/infrastructure/storage/test_composite_checkpoint_writer.py', 'tests/integration/test_health_replay_production_bootstrap.py', 'tests/unit/application/services/lineage/test_composite_source_identity.py', 'tests/integration/test_composite_report.py', 'tests/unit/application/services/test_metadata_lineage_node_builders.py', 'tests/unit/composition/bootstrap/runtime/test_composite_bootstrap_builders.py', 'tests/unit/composition/bootstrap/runtime/test_composite_gold_dependencies.py', 'tests/unit/composition/bootstrap/runtime/test_runtime_basics.py', 'tests/unit/composition/bootstrap/test_health_replay_object_wiring.py', 'tests/unit/composition/factories/datasource/test_http_client_factory.py', 'tests/unit/domain/composite/test_composite_result.py', 'tests/unit/infrastructure/adapters/http/test_client_retry_mixin.py', 'tests/unit/infrastructure/adapters/http/test_request_timing.py', 'tests/unit/infrastructure/adapters/semanticscholar/test_batch_request_mixin.py', 'tests/unit/infrastructure/adapters/semanticscholar/test_fallback.py', 'tests/unit/infrastructure/storage/support/test_checkpoint_writer.py', 'tests/unit/infrastructure/storage/test_lineage_persistence.py', 'tests/unit/interfaces/cli/commands/test_composite_warning_result.py', 'tests/unit/interfaces/cli/commands/test_run_composite.py', 'tests/unit/interfaces/http/test_selected_run_status.py', 'tests/unit/interfaces/http/test_selected_run_unfinished_evidence.py', 'tests/unit/infrastructure/adapters/http/test_provider_scope.py', 'tests/unit/infrastructure/storage/test_composite_replay_inputs.py', 'tests/integration/composite/test_assay_snapshot_merge_replay.py', 'tests/unit/infrastructure/storage/test_composite_replay_bundle.py', 'tests/unit/interfaces/cli/test_cli_root_help_uniqueness.py', 'tests/unit/interfaces/cli/test_cli_main_module.py', 'tests/unit/application/composite/test_merger_metrics_mixin.py', 'tests/unit/application/composite/test_dependency_coordinator.py', 'tests/unit/application/composite/test_dependency_progress_tracker.py', 'tests/unit/application/composite/test_composite_activity.py', 'tests/unit/scripts/qa/test_report_debt_governance_gates.py', 'tests/unit/scripts/qa/test_report_architecture_debt_remote_main_baseline.py']
+            checks = [
+                ("tests", "test_health", [sys.executable, "-m", "pytest", "-o", "addopts=", "-p", "pytest_asyncio.plugin", "-p", "pytest_timeout", "-p", "respx.plugin", "-p", "pytest_cov.plugin", "-p", "_hypothesis_pytestplugin", *paths, "--no-cov", "-q", "--tb=short", "--junitxml=" + str(folder / "tests.xml")]),
+                ("governance", "pretest_guardrails", ["bash", "scripts/engineering/dev/pretest_guardrails.sh", "--mode", "check", "--scope", "governance"]),
+                ("docs_runtime", "docs_runtime_checks", [sys.executable, "-m", "scripts.docs", "verify"]),
+                ("debt", "debt_governance_gates", [sys.executable, "-m", "scripts.engineering.qa", "report-debt-governance-gates", "--check"]),
+            ]
+            receipts = []
+            for kind, producer, command in checks:
+                started = datetime.datetime.now(datetime.UTC).isoformat()
+                clock = time.monotonic()
+                log = folder / (kind + ".log")
+                with log.open("w") as stream:
+                    result = subprocess.run(command, stdout=stream, stderr=subprocess.STDOUT)
+                normalized = " ".join(["python", *command[1:]]) if command[0] == sys.executable else " ".join(command)
+                output = folder / "receipts" / (kind + ".json")
+                subprocess.run(prefix + ["receipt"] + common + identity + ["--receipt-id", kind, "--producer", producer, "--evidence-kind", kind, "--command", normalized, "--started-at", started, "--duration-ms", str(int((time.monotonic()-clock)*1000)), "--exit-code", str(result.returncode), "--status", "pass" if result.returncode == 0 else "fail", "--output-artifact", str(log), "--output", str(output)], check=True)
+                receipts += ["--receipt", str(output)]
+                print(kind, result.returncode, flush=True)
+            subprocess.run(prefix + ["assemble"] + common + identity + ["--actor", "circleci", "--runtime", "circleci"] + receipts, check=True)
+            result = subprocess.run(prefix + ["verify", "--bundle", str(folder / "bundle.json"), "--output", str(folder / "verification.json")])
+            sys.exit(result.returncode)
+            PY
+      - store_test_results:
+          path: reports/quality/proof-or-stop
+      - store_artifacts:
+          path: reports/quality/proof-or-stop
+          destination: composite-closeout
+
 workflows:
   version: 2
   pr-gate:
     jobs:
+      - composite-closeout:
+          filters:
+            branches:
+              only: /codex\/issues-11904-11905-closeout/
       - classify
       - lint-ruff:
           requires: [classify]

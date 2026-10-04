@@ -86,6 +86,35 @@ class TestAddLineage:
         assert "_composite_run_id" not in result.columns
         assert "_lineage_created_at" not in result.columns
 
+    def test_status_order_does_not_change_canonical_rows(self) -> None:
+        recorder = _make_mixin()
+        frame = pl.DataFrame({"entity_id": ["target-1"]})
+        dependencies = {
+            name: DependencyResult(name, status)
+            for name, status in (
+                ("chembl_target_component", DependencyStatus.SUCCESS),
+                ("chembl_protein_class", DependencyStatus.SUCCESS),
+                ("uniprot_idmapping", DependencyStatus.FAILED),
+            )
+        }
+        enrichers = {
+            name: EnrichmentResult(name, EnrichmentStatus.SUCCESS)
+            for name in ("pubmed_publication", "crossref_publication")
+        }
+        forward = recorder._add_lineage(
+            frame, enrichers, "run", None, ["seed"], dependencies
+        )
+        reversed_order = recorder._add_lineage(
+            frame,
+            dict(reversed(tuple(enrichers.items()))),
+            "run",
+            None,
+            ["seed"],
+            dict(reversed(tuple(dependencies.items()))),
+        )
+        assert forward.equals(reversed_order)
+        assert '"uniprot_idmapping": "failed"' in forward["_enrichment_status"][0]
+
     def test_includes_dependency_results_in_status(self) -> None:
         mixin = _make_mixin()
         df = pl.DataFrame({"doi": ["10.1/a"]})

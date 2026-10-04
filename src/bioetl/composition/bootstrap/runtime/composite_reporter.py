@@ -12,6 +12,8 @@ from bioetl.infrastructure.storage.run_report_store_adapter import (
     FileRunReportStoreAdapter,
 )
 from bioetl.infrastructure.time import SystemClock
+from bioetl.infrastructure.adapters.http.health import provider_execution_scope
+from bioetl.composition.bootstrap.runtime.assay_replay_evidence import replay_artifacts
 
 
 def create_composite_reporter(
@@ -38,6 +40,10 @@ def create_composite_reporter(
         clock=SystemClock(),
         logger=logger,
         archive=archive,
+        execution_scope=provider_execution_scope,
+        replay_artifacts=lambda run_id: replay_artifacts(
+            settings.report_root, pipeline_name, run_id
+        ),
         capture=create_run_status_capture(
             settings.data_dir,
             report_root=settings.report_root,

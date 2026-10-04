@@ -20,6 +20,11 @@ Evidence:
 
 ## Decision
 
+The post-capture exception for assay, activity, molecule, publication and target is defined in
+[ADR-062](../ADR-062-assay-parent-exact-replay.md). It requires an immutable input
+envelope and a verified offline replay of physical Silver/Gold outputs. Launch
+manifests and families outside the explicit supported set retain this rebuild-only boundary.
+
 Composite launches remain **outside** the strict exact-replay boundary.
 
 Operators and control-plane consumers **MUST** treat composite runs as:

@@ -11,7 +11,21 @@ See Also:
 
 from __future__ import annotations
 
-__all__ = ["assess_health_from_circuit_breaker"]
+import asyncio
+from collections.abc import Awaitable, Callable, Iterator
+from contextlib import contextmanager, suppress
+from contextvars import ContextVar
+from dataclasses import dataclass, field
+
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+
+__all__ = [
+    "HealthProbeCoordinator",
+    "ProviderResources",
+    "assess_health_from_circuit_breaker",
+    "provider_execution_scope",
+    "resolve_provider_resources",
+]
 
 
 from bioetl.domain.ports import CircuitBreakerPort
@@ -71,3 +85,75 @@ def assess_health_from_circuit_breaker(
     if failure_count == 0:
         return HealthStatus.HEALTHY
     return HealthStatus.DEGRADED
+
+
+@dataclass
+class _Probe:
+    task: asyncio.Task[HealthStatus]
+    waiters: int = 0
+
+
+@dataclass
+class HealthProbeCoordinator:
+    """Coalesce concurrent probes only; never cache a completed health verdict."""
+
+    _pending: dict[str, _Probe] = field(default_factory=dict)
+
+    async def run(
+        self, key: str, probe: Callable[[], Awaitable[HealthStatus]]
+    ) -> HealthStatus:
+        flight = self._pending.get(key)
+        if flight is None or flight.task.done():
+
+            async def execute() -> HealthStatus:
+                return await probe()
+
+            flight = _Probe(asyncio.create_task(execute()))
+            self._pending[key] = flight
+        flight.waiters += 1
+        try:
+            return await asyncio.shield(flight.task)
+        finally:
+            flight.waiters -= 1
+            if flight.waiters == 0:
+                if self._pending.get(key) is flight:
+                    del self._pending[key]
+                if not flight.task.done():
+                    flight.task.cancel()
+                    with suppress(asyncio.CancelledError):
+                        await flight.task
+
+
+@dataclass
+class ProviderResources:
+    limiter: TokenBucketRateLimiter
+    health: HealthProbeCoordinator = field(default_factory=HealthProbeCoordinator)
+
+
+_resources: ContextVar[dict[tuple[str, float, int], ProviderResources] | None] = (
+    ContextVar("composite_provider_resources", default=None)
+)
+
+
+@contextmanager
+def provider_execution_scope() -> Iterator[None]:
+    """Bind fresh provider resources inherited by all child asyncio tasks."""
+    token = _resources.set({})
+    try:
+        yield
+    finally:
+        _resources.reset(token)
+
+
+def resolve_provider_resources(
+    provider: str, rate: float, capacity: int
+) -> ProviderResources:
+    """Keep standalone clients independent; share clients inside a bound run."""
+    scope = _resources.get()
+    key = (provider, rate, capacity)
+    if scope is not None and key in scope:
+        return scope[key]
+    resources = ProviderResources(TokenBucketRateLimiter(rate, capacity, provider))
+    if scope is not None:
+        scope[key] = resources
+    return resources

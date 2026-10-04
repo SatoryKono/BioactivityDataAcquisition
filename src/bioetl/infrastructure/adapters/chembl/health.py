@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import asyncio
+
 __all__ = [
     "CHEMBL_HEALTH_ERRORS",
     "CHEMBL_HEALTH_PROBE_TIMEOUT_SECONDS",
@@ -22,6 +24,7 @@ from bioetl.infrastructure.adapters.chembl._health_probe import (
     probe_chembl_status,
 )
 from bioetl.infrastructure.adapters.http.health import (
+    HealthProbeCoordinator,
     assess_health_from_circuit_breaker,
 )
 
@@ -41,6 +44,7 @@ CHEMBL_HEALTH_ERRORS = build_common_network_error_bundle(
     httpx.HTTPError,
 )
 CHEMBL_HEALTH_PROBE_TIMEOUT_SECONDS = 5.0
+CHEMBL_HEALTH_CHECK_DEADLINE_SECONDS = 30.0
 CHEMBL_TRANSIENT_HEALTH_ERRORS = (
     TimeoutError,
     httpx.TimeoutException,
@@ -130,6 +134,31 @@ class ChemblHealthMixin:
         Returns:
             HealthStatus from the ChEMBL status endpoint or DEGRADED on transient failures.
         """
+        coordinator = getattr(self.http_client, "health_probe_coordinator", None)
+        try:
+            async with asyncio.timeout(CHEMBL_HEALTH_CHECK_DEADLINE_SECONDS):
+                status = (
+                    await coordinator.run("chembl/status", self._shared_health_probe)
+                    if isinstance(coordinator, HealthProbeCoordinator)
+                    else await self._probe_health_attempts()
+                )
+        except TimeoutError:
+            self._logger.warning(
+                "health_probe_deadline_exceeded",
+                provider=self.provider_name,
+                deadline_seconds=CHEMBL_HEALTH_CHECK_DEADLINE_SECONDS,
+            )
+            status = HealthStatus.DEGRADED
+        self._last_probe_health_status = status
+        return status
+
+    async def _shared_health_probe(self) -> HealthStatus:
+        """Keep the transport alive if its originating child is cancelled."""
+        async with self.http_client:
+            return await self._probe_health_attempts()
+
+    async def _probe_health_attempts(self) -> HealthStatus:
+        """Allow two transport attempts; admission waits use the shared limiter."""
         for attempt in range(2):
             status = await probe_chembl_status(
                 http_client=self.http_client,
@@ -150,7 +179,6 @@ class ChemblHealthMixin:
                     previous_status=status.value,
                     attempt=2,
                 )
-        self._last_probe_health_status = status
         return status
 
     def _get_health_status(self) -> HealthStatus:
