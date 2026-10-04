@@ -2255,6 +2255,7 @@
       "decision_date": "2026-10-03",
       "decision_path": "docs/02-architecture/decisions/ADR-062-assay-parent-exact-replay.md",
       "enforcement_owner_paths": [
+        "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/integration/composite/test_assay_snapshot_merge_replay.py",
         "tests/unit/infrastructure/storage/test_composite_replay_bundle.py",
         "tests/unit/scripts/test_documentation_governance_check.py"
@@ -2263,6 +2264,7 @@
       "implementation_owner_paths": [
         "docs/00-project/RULES.md",
         "src/bioetl/composition/bootstrap/runtime/assay_replay.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/integration/composite/test_assay_snapshot_merge_replay.py",
         "tests/unit/infrastructure/storage/test_composite_replay_bundle.py",
         "tests/unit/scripts/test_documentation_governance_check.py"
