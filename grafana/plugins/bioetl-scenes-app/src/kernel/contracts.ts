@@ -19,6 +19,7 @@ export interface RouteContext {
   pipeline?: string;
   from?: string;
   to?: string;
+  timezone?: string;
   runType?: string;
   runId?: string;
   provider?: string;
@@ -33,6 +34,7 @@ const CONTEXT_KEYS: ReadonlyArray<keyof RouteContext> = [
   'pipeline',
   'from',
   'to',
+  'timezone',
   'runType',
   'runId',
   'provider',
@@ -47,6 +49,7 @@ const QUERY_KEYS: Record<keyof RouteContext, string> = {
   pipeline: 'var-pipeline',
   from: 'from',
   to: 'to',
+  timezone: 'timezone',
   runType: 'var-run_type',
   runId: 'var-run_id',
   provider: 'var-provider',

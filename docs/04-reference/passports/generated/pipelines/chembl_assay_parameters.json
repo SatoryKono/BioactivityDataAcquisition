@@ -21,7 +21,7 @@
       "run_ledger": true,
       "run_manifest": true
     },
-    "effective_config_hash": "sha256:6cf1a25740d5daa458ade264243c924b46b7d61c812a4f244549faf5edd513de",
+    "effective_config_hash": "sha256:ca66942702bfe2c4fbbbaf21409ca3524cb35b35b76375943b25df3d2bbbfab7",
     "projection_profiles": [
       "batch",
       "http"
@@ -82,9 +82,9 @@
     ],
     "filters": [
       {
-        "description": "IDs from data/input/assay_parameters.csv column assay_param_id; CLI may override the input CSV",
-        "name": "assay_param_id",
-        "required": true,
+        "description": "IDs from data/input/assay_parameters.csv column assay_id; CLI may override the input CSV",
+        "name": "assay_id",
+        "required": false,
         "source": "cli"
       }
     ],
@@ -247,7 +247,7 @@
       "status": "resolved_by_adr_018",
       "strict": true
     },
-    "contract_version": "1.0.0",
+    "contract_version": "2.0.0",
     "write": {
       "idempotency_contract": "scd2",
       "mode": "scd2",
@@ -333,8 +333,8 @@
   "passport_schema_version": "1.0.0",
   "provenance": {
     "projector_version": "1.1.0",
-    "semantic_content_hash": "sha256:28f1fe692b6d782ea947f20fdde7a570bf0bb40876fc68bef814e4a9fc44c81a",
-    "source_revision": "11e60d87cb1659c2ff918c8a01ae87b702ef937d"
+    "semantic_content_hash": "sha256:21d875a05faffb9edf92e6172748e44d6e170d8b3bb8d6a010780bec8f3b7731",
+    "source_revision": "8254c925d2cbb4e6cf14f927cb651593924fb3f3"
   },
   "silver": {
     "column_projection": {
@@ -395,15 +395,15 @@
   "summary": {
     "excluded_data_summary": "invalid_record_policy=quarantine",
     "field_selection_summary": "В business-проекцию входят `assay_param_id`, `assay_id`, `type_raw`, `parameter_type`, `parameter_relation`, `parameter_value`, `qudt_units`, `qudt_unit_iri` и ещё 14 полей.",
-    "query_filter_summary": "assay_param_id=IDs from data/input/assay_parameters.csv column assay_param_id; CLI may override the input CSV",
+    "query_filter_summary": "assay_id=IDs from data/input/assay_parameters.csv column assay_id; CLI may override the input CSV",
     "sentences": [
-      "Extract experimental assay parameters from ChEMBL API. Источник — `chembl:assay_parameters` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: assay_param_id=IDs from data/input/assay_parameters.csv column assay_param_id; CLI may override the input CSV.",
+      "Extract experimental assay parameters from ChEMBL API. Источник — `chembl:assay_parameters` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: assay_id=IDs from data/input/assay_parameters.csv column assay_id; CLI may override the input CSV.",
       "В business-проекцию входят `assay_param_id`, `assay_id`, `type_raw`, `parameter_type`, `parameter_relation`, `parameter_value`, `qudt_units`, `qudt_unit_iri` и ещё 14 полей.",
-      "Silver использует профиль `chembl.assay_parameters` и проверяет обязательные поля `assay_id`, `assay_param_id`, `parameter_type`, `type`; невалидные записи направляются в `quarantine`.",
+      "Silver использует профиль `chembl.assay_parameters` и проверяет обязательные поля `assay_id`, `assay_param_id`, `parameter_type`; невалидные записи направляются в `quarantine`.",
       "Перед Gold применяется строгий Pandera-контракт `chembl.assay_parameters`; Gold filters/constraints заданы в entity config (6 групп правил)."
     ],
-    "silver_processing_summary": "Silver использует профиль `chembl.assay_parameters` и проверяет обязательные поля `assay_id`, `assay_param_id`, `parameter_type`, `type`; невалидные записи направляются в `quarantine`.",
-    "source_description": "Extract experimental assay parameters from ChEMBL API. Источник — `chembl:assay_parameters` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: assay_param_id=IDs from data/input/assay_parameters.csv column assay_param_id; CLI may override the input CSV.",
+    "silver_processing_summary": "Silver использует профиль `chembl.assay_parameters` и проверяет обязательные поля `assay_id`, `assay_param_id`, `parameter_type`; невалидные записи направляются в `quarantine`.",
+    "source_description": "Extract experimental assay parameters from ChEMBL API. Источник — `chembl:assay_parameters` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: assay_id=IDs from data/input/assay_parameters.csv column assay_id; CLI may override the input CSV.",
     "validation_summary": "Перед Gold применяется строгий Pandera-контракт `chembl.assay_parameters`; Gold filters/constraints заданы в entity config (6 групп правил)."
   }
 }

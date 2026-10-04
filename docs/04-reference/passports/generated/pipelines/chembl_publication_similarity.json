@@ -21,7 +21,7 @@
       "run_ledger": true,
       "run_manifest": true
     },
-    "effective_config_hash": "sha256:f8d33d103934a8c3b820bc0d9531fe1417e49ad418d9e068ae90da200c6bde31",
+    "effective_config_hash": "sha256:22dbd7cedfefd493478adfca7fd8b6d2682c098beac4ec6326ce30e73d2a6d7c",
     "projection_profiles": [
       "batch",
       "http"
@@ -52,11 +52,13 @@
         "name": "system"
       },
       {
-        "field_count": 9,
+        "field_count": 11,
         "fields": [
           "sim_id",
           "doc_1",
           "doc_2",
+          "publication_id1",
+          "publication_id2",
           "pubmed_id1",
           "pubmed_id2",
           "tid_tani",
@@ -85,13 +87,25 @@
       },
       {
         "name": "doc_1",
-        "required": true,
+        "required": false,
         "source_object": "publication_similarity",
         "target_group": "business"
       },
       {
         "name": "doc_2",
-        "required": true,
+        "required": false,
+        "source_object": "publication_similarity",
+        "target_group": "business"
+      },
+      {
+        "name": "publication_id1",
+        "required": false,
+        "source_object": "publication_similarity",
+        "target_group": "business"
+      },
+      {
+        "name": "publication_id2",
+        "required": false,
         "source_object": "publication_similarity",
         "target_group": "business"
       },
@@ -156,7 +170,7 @@
       "status": "resolved_by_adr_018",
       "strict": true
     },
-    "contract_version": "1.0.0",
+    "contract_version": "2.0.0",
     "write": {
       "idempotency_contract": "overwrite_rebuild",
       "mode": "overwrite"
@@ -236,8 +250,8 @@
   "passport_schema_version": "1.0.0",
   "provenance": {
     "projector_version": "1.1.0",
-    "semantic_content_hash": "sha256:d13c39495c82b89689609508efeb88b9905e66e1a00d7cefcc596d16af533aef",
-    "source_revision": "11e60d87cb1659c2ff918c8a01ae87b702ef937d"
+    "semantic_content_hash": "sha256:1d2217992a5010f4977d22c98d8c8ca32f9ba0ae99a8976e8287bef98b79dc94",
+    "source_revision": "8254c925d2cbb4e6cf14f927cb651593924fb3f3"
   },
   "silver": {
     "column_projection": {
@@ -295,15 +309,15 @@
   ],
   "summary": {
     "excluded_data_summary": "invalid_record_policy=quarantine",
-    "field_selection_summary": "В business-проекцию входят `sim_id`, `doc_1`, `doc_2`, `pubmed_id1`, `pubmed_id2`, `tid_tani`, `mol_tani`, `avg_tani` и ещё 1 полей.",
+    "field_selection_summary": "В business-проекцию входят `sim_id`, `doc_1`, `doc_2`, `publication_id1`, `publication_id2`, `pubmed_id1`, `pubmed_id2`, `tid_tani` и ещё 3 полей.",
     "query_filter_summary": "sim_id=IDs from data/input/publication_similarity.csv column sim_id; CLI may override the input CSV",
     "sentences": [
       "Extract publication similarity data (Tanimoto coefficients) from ChEMBL API. Источник — `chembl:publication_similarity` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: sim_id=IDs from data/input/publication_similarity.csv column sim_id; CLI may override the input CSV.",
-      "В business-проекцию входят `sim_id`, `doc_1`, `doc_2`, `pubmed_id1`, `pubmed_id2`, `tid_tani`, `mol_tani`, `avg_tani` и ещё 1 полей.",
-      "Silver использует профиль `chembl.publication_similarity` и проверяет обязательные поля `sim_id`, `doc_1`, `doc_2`; невалидные записи направляются в `quarantine`.",
+      "В business-проекцию входят `sim_id`, `doc_1`, `doc_2`, `publication_id1`, `publication_id2`, `pubmed_id1`, `pubmed_id2`, `tid_tani` и ещё 3 полей.",
+      "Silver использует профиль `chembl.publication_similarity` и проверяет обязательные поля `sim_id`; невалидные записи направляются в `quarantine`.",
       "Перед Gold применяется строгий Pandera-контракт `chembl.publication_similarity`; Gold filters/constraints заданы в entity config (6 групп правил)."
     ],
-    "silver_processing_summary": "Silver использует профиль `chembl.publication_similarity` и проверяет обязательные поля `sim_id`, `doc_1`, `doc_2`; невалидные записи направляются в `quarantine`.",
+    "silver_processing_summary": "Silver использует профиль `chembl.publication_similarity` и проверяет обязательные поля `sim_id`; невалидные записи направляются в `quarantine`.",
     "source_description": "Extract publication similarity data (Tanimoto coefficients) from ChEMBL API. Источник — `chembl:publication_similarity` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: sim_id=IDs from data/input/publication_similarity.csv column sim_id; CLI may override the input CSV.",
     "validation_summary": "Перед Gold применяется строгий Pandera-контракт `chembl.publication_similarity`; Gold filters/constraints заданы в entity config (6 групп правил)."
   }

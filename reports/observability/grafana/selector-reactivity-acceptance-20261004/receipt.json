@@ -1,0 +1,169 @@
+{
+  "recorded_at": "2026-10-03T21:59:40.852307+00:00",
+  "source_sha": "1cc32cbd844449a5084087fc60571e30c59a94e6",
+  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:abace6d89d5f03680f40edcce05b7a05e2dd1b688ecd17a455d19bd9752c3609",
+  "image_config_digest": "sha256:5893953e261ab8908bb2db9736c1de609dec37872315f5c62a60ecbaaae075ab",
+  "trust_tier": "local_single_host",
+  "rollout": "NOT_ADMITTED",
+  "frontend_build": "Reused previously verified candidate frontend; no fresh upstream compile in this repair",
+  "browser_security": {
+    "status": "PASS",
+    "assertions": 22,
+    "actual_host_module_loading": true,
+    "navigation": "four malicious vectors rejected after render; three internal/encoded routes match pathname/search/hash/origin",
+    "hydration": "four constructor-name fixtures ignored while preserving error"
+  },
+  "scenes": {
+    "version": "0.1.3",
+    "routes_rendered": 6,
+    "exact_run_fallback": "PASS",
+    "zoom_range_timezone_scope": "PASS",
+    "settled_back_forward": "PASS"
+  },
+  "selector": {
+    "version": "1.0.1",
+    "location_change_without_forced_rerender": "PASS",
+    "stale_request_on_scope_change": "PASS; slow-before-beta client_cancelled; fresh-beta retained",
+    "unmount_cancellation": "PASS; slow-before-unmount client_cancelled; no scope rewrite"
+  },
+  "canvas": {
+    "viewports": [
+      [
+        1280,
+        720
+      ],
+      [
+        1024,
+        768
+      ]
+    ],
+    "no_run": "SELECT RUN / Choose a run",
+    "real_connection_refused": "QUERY ERROR",
+    "recovery": "SELECT RUN / Choose a run",
+    "saved_assay": {
+      "run_id": "317440c1-dc5c-5575-9103-1e163f460bdf",
+      "rendered": "OK / excluded 0%"
+    },
+    "saved_composite_without_funnel": {
+      "run_id": "55413289-ccf0-5375-a9ef-a290c89f4726",
+      "rendered": "UNKNOWN / excluded UNKNOWN"
+    },
+    "missing_tree": "TREE_MISSING visible without horizontal clipping at both viewports",
+    "missing_report": {
+      "run_id": "00000000-0000-4000-8000-000000000000",
+      "rendered": "UNKNOWN / excluded UNKNOWN",
+      "viewports": [
+        [
+          1280,
+          720
+        ],
+        [
+          1024,
+          768
+        ]
+      ]
+    },
+    "recent_runs_primary_endpoint": "BLOCKED_RUNTIME_TIMEOUT; direct wget to bioetl:8000 recent view timed out; no table success claimed"
+  },
+  "sbom": {
+    "status": "INVENTORY_GENERATED",
+    "scanner": "syft-1.54.0",
+    "scanner_image": "anchore/syft@sha256:f43f12891e3123e337b6045bab944f53d4b0126707ca1cc9a25d6756b14085ce",
+    "syft_artifacts": 1761,
+    "spdx_packages": 1762,
+    "security_audit": "NOT_CLEARED; npm audit exits 1, 31 high each"
+  },
+  "validation": {
+    "scenes_jest": "10 PASS",
+    "selector_jest": "12 PASS",
+    "both_typecheck_lint_build": "PASS; Scenes 429 KiB warning",
+    "future_date_build_2050": "PASS; module.js and plugin.json identical for both plugins",
+    "provisioning_scenes_navigation_python": "28 PASS, 6 SKIP",
+    "test_governance": "PASS",
+    "runtime_mirror": "N/A; no AI runtime changes",
+    "architecture_full": {
+      "status": "FAIL",
+      "tests": 4960,
+      "failures": 134,
+      "skipped": 76,
+      "passed": 4750,
+      "exit_code": 1,
+      "head_unchanged": true
+    },
+    "workflow_provisioning_repair": "39 PASS, 2 Windows POSIX skips on 300db9f1166; clean-artifact assertions enabled",
+    "architecture_integrated": {
+      "source_sha": "a2a706098ded8ad0da79f9489b3db285ae22fe86",
+      "status": "FAIL",
+      "tests": 4960,
+      "passed": 4755,
+      "failures": 129,
+      "skipped": 76,
+      "exit_code": 1,
+      "head_unchanged": true
+    }
+  },
+  "blockers": [
+    "GitHub Actions blocked by account billing",
+    "Policy-required independent ADMIT absent",
+    "SDK security audit not cleared",
+    "Managed rollout not admitted",
+    "Final architecture and coverage program acceptance remains separate",
+    "Full architecture suite: 134 failures on source SHA 1cc32; historical evidence/hash and architecture metric failures remain",
+    "Telemetry refresh requires an actual canonical Tests-run ancestor, unavailable under current billing lock"
+  ],
+  "artifacts": {
+    "image-parity.json": {
+      "bytes": 3741,
+      "sha256": "d8f17489fca3b911c127ff8ea6a9bf482a7a0f6a3f7d852bb75bb3861f35b1e4"
+    },
+    "image.spdx.json": {
+      "bytes": 3728959,
+      "sha256": "0e7636d5a1a0d047f6ba871723fd75969e9e2dae67c89386bc7d837dbf8b9aba"
+    },
+    "image.syft.json": {
+      "bytes": 2944964,
+      "sha256": "9e8b117b0399038f0c6876b3a2b866a3976a55ea736ff44ecc56e91ed3abcc6f"
+    },
+    "owned-rollback.json": {
+      "bytes": 1607,
+      "sha256": "bd5aa547a3f2777baa6b47adef003d0ad9ef6f31bc64d92a5bb3266ed79dd11f"
+    },
+    "deterministic-plugin-release.json": {
+      "bytes": 676,
+      "sha256": "ec6379d5398411c21f1be33b1c591e3ac212ae321ff14e6fdaa4c10c8fe05386"
+    },
+    "selector-cancellation.jsonl": {
+      "bytes": 767,
+      "sha256": "adffb1b3677e745953eaefbed651eb32d58d3abb95a0bd71eb45bced3d469266"
+    },
+    "scenes-npm-audit.json": {
+      "bytes": 16831,
+      "sha256": "2a8082e21ef21cb1800ae3dc1e599802bf24152b4e9d22fbb11c7be23ca65c84"
+    },
+    "selector-npm-audit.json": {
+      "bytes": 16839,
+      "sha256": "dd4f78d2367a77ad870df99e861759e764b9789c0d0fd986c3c17d0e10996437"
+    },
+    "architecture-failures.json": {
+      "bytes": 70751,
+      "sha256": "16250226908f6e00ab19ee2e4c08fe92be1175f6f09d876b940286ae51196c8b"
+    },
+    "architecture-run.json": {
+      "bytes": 490,
+      "sha256": "81ec23d4af5b2dffc4f32454ef4296cf7cc9bccbd204dd05dc09f0eef558e912"
+    },
+    "owned-probe-removal.json": {
+      "bytes": 454,
+      "sha256": "1ea61439a713b708f38d2f42b19b38b8bbf2edfaf2f0bb0dd6bbd6811f69f88e"
+    },
+    "architecture-integrated-failures.json": {
+      "bytes": 65911,
+      "sha256": "a2934bac44b141519e44cbfc01c294b897d2d684fc4685eab96a11dcc584a5d5"
+    },
+    "architecture-integrated-run.json": {
+      "bytes": 526,
+      "sha256": "30901d7df8f0b7029fa543782e2401e0d71dcc5c175b5c960bd9347feb8a5619"
+    }
+  },
+  "probe_cleanup": "PASS; active host mount and unsigned probe allowlist removed; candidate digest unchanged"
+}

@@ -225,6 +225,12 @@ def _run_gold_contract_generation(check: bool) -> bool:
     if check:
         current = _snapshot_generated_contracts()
         expected = _expected_generated_contracts_snapshot()
+        retained = _load_generate_contracts_module().RETAINED_LEGACY_CONTRACT_FILENAMES
+        current = {
+            path: content
+            for path, content in current.items()
+            if path in expected or Path(path).name not in retained
+        }
         stale = current != expected
         if stale:
             _emit(f"STALE {GENERATED_GLOB}", err=True)
