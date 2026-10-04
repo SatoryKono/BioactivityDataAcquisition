@@ -28,19 +28,19 @@ truth; existing documentation is evidence only when it matches those sources.
 | Error catalog | 1 | `configs/contracts/errors/error_catalog.yaml` | Canonical error-code taxonomy; not counted as an entity data contract. |
 | Provider configs | 7 | `configs/providers/*.yaml` | ChEMBL, CrossRef, OpenAlex, PubChem, PubMed, Semantic Scholar, UniProt. |
 | Grafana dashboards | 7 | `grafana/dashboards/*.json` | Trust/control-plane, overview, runtime, provider health, DQ, incident, run-explorer (Silver Reject Explorer removed 2026-07-23). |
-| Domain port files | 81 | `src/bioetl/domain/ports/**/*.py` | 72 port modules + 9 package `__init__.py` (inventory: `reports/quality/domain-ports-inventory.json`); 24 top-level `*.py` including `__init__.py` and `_facade_support.py`. |
+| Domain port files | 80 | `src/bioetl/domain/ports/**/*.py` | 71 port modules + 9 package `__init__.py` (inventory: `reports/quality/domain-ports-inventory.json`); 23 top-level `*.py` including `__init__.py` and `_facade_support.py`. |
 
 ## Architecture Quality Evidence
 
-The following values describe the accepted inventory after a complete 17-group local measurement on `c4071c0eeecd6b06f18bc781a0435ee128e0e994`. Canonical nonregressing adoption preserves historical rows where fresh raw coverage is lower. The raw comparison records 80 remaining module regressions; accepted inventory values are not a claim of fresh global nonregression. `config_root` was freshly measured at 40/40 lines and 18/18 branches. Final architecture acceptance and publication remain separate checks.
+The source inventory has been rebound after the approved LoggerPort alias removal; this is not a new coverage measurement. Coverage values below retain the accepted inventory after a complete 17-group local measurement on `c4071c0eeecd6b06f18bc781a0435ee128e0e994`. Canonical nonregressing adoption preserves historical rows where fresh raw coverage is lower. The raw comparison records 80 remaining module regressions; accepted inventory values are not a claim of fresh global nonregression. `config_root` was freshly measured at 40/40 lines and 18/18 branches. Final architecture acceptance and publication remain separate checks.
 
 | Artifact | Current value | Source |
 | --- | ---: | --- |
 | Architecture quality score | `10.00` (`excellent`) | `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2553` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2552` | `reports/quality/module-coverage-inventory.json` |
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, `reports/quality/debt-governance-gates.json` |
-| Coverage inventory status counts | `2514` fully covered, `38` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
+| Coverage inventory status counts | `2513` fully covered, `38` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Families at fan-in budget | `0` | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
 | Module-boundaries coupling | `10.0` (`control-plane` fan-in `1/2`, `runtime_builders` fan-in `2/3`) | `reports/quality/architecture-quality-scorecard.json`, `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py` |

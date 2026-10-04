@@ -1,5 +1,11 @@
 # Сводка evidence: project-package-topology
 
+Source-only refresh (2026-10-04): removed the approved LoggerPort alias and restored type-only workflow imports. This rebind does not represent a new coverage measurement; historical measurement records below remain unchanged.
+
+`source_tree_sha256=4db123e5e95045405ceb710e2425c1cd0e733fb6a225dccc7fc4146c63eaacb5`
+
+`source_module_count=2552`
+
 Current refresh (2026-10-04): accepted inventory after the complete 17-group local measurement on `c4071c0eeecd6b06f18bc781a0435ee128e0e994` and canonical nonregressing adoption. The raw comparison retains 80 visible module regressions. Retained historical values are not fresh measurements. Current accepted source binding: `78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db`; raw measurement source binding: `78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db`. Earlier refresh notes below remain historical.
 
 `source_tree_sha256=78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db`

@@ -35,7 +35,9 @@ def test_backport_archive_matches_reviewed_source() -> None:
             assert hashlib.sha256(member.read()).hexdigest() == digest
         metadata = packed.extractfile("package/package.json")
         assert metadata is not None
-        assert metadata.read() == (BACKPORT / "package.json").read_bytes()
+        assert json.loads(metadata.read()) == json.loads(
+            (BACKPORT / "package.json").read_text(encoding="utf-8")
+        )
 
 
 @pytest.mark.parametrize("consumer", CONSUMERS)

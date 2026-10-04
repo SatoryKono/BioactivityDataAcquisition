@@ -10,9 +10,18 @@
   },
   "debt_budget_policy": "flat_or_decreasing_only",
   "issue": 6045,
-  "module_coverage_inventory_source_tree_sha256": "78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db",
+  "module_coverage_inventory_source_tree_sha256": "4db123e5e95045405ceb710e2425c1cd0e733fb6a225dccc7fc4146c63eaacb5",
   "reviewed_on": "2026-07-20",
   "schema_version": "low-coverage-targeted-tests-6045-v1",
+  "source_binding_refresh": {
+    "evidence": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-42/manifest.json",
+    "historical_reviewed_on": "2026-07-20",
+    "historical_validation_preserved": true,
+    "measured_head": "c4071c0eeecd6b06f18bc781a0435ee128e0e994",
+    "previous_source_tree_sha256": "78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db",
+    "semantics": "Current accepted inventory may retain historical nonregressing rows; raw measured candidate remains separate.",
+    "source_tree_sha256": "78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db"
+  },
   "targeted_modules": [
     {
       "baseline_coverage_percent": 18.03,
@@ -93,14 +102,5 @@
       "reason": "Local pytest-cov collection hit deltalake/pandas import instability: numpy cannot load module more than once per process. Functional targeted tests pass and the canonical full-suite coverage inventory remains the authoritative coverage source.",
       "status": "not_recorded"
     }
-  ],
-  "source_binding_refresh": {
-    "previous_source_tree_sha256": "78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db",
-    "measured_head": "c4071c0eeecd6b06f18bc781a0435ee128e0e994",
-    "source_tree_sha256": "78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db",
-    "evidence": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-42/manifest.json",
-    "semantics": "Current accepted inventory may retain historical nonregressing rows; raw measured candidate remains separate.",
-    "historical_reviewed_on": "2026-07-20",
-    "historical_validation_preserved": true
-  }
+  ]
 }

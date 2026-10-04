@@ -149,7 +149,8 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
     """Only the explicit scenes bridge candidate may override the router seam."""
     selector_pkg = _json(SELECTOR_PKG)
     assert selector_pkg["overrides"] == {
-        "react-router-dom-v5-compat": "$react-router-dom-v5-compat"
+        "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
+        "braces": "$braces",
     }
     scenes_pkg = _json(SCENES_PKG)
     bridge_ref = (
@@ -159,6 +160,7 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
     assert selector_pkg["dependencies"]["react-router-dom-v5-compat"] == bridge_ref
     assert scenes_pkg["overrides"] == {
         "@grafana/scenes": {"react-router-dom": "7.18.4"},
+        "braces": "$braces",
         "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
     }
     # This candidate has a real adapter for Grafana's legacy history contract;

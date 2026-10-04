@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import replace
-from bioetl.domain.workflow.config import WorkflowStepConfig
 from bioetl.application.services.execution.pipeline_runner_models import RunResult
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
@@ -50,6 +49,7 @@ from bioetl.infrastructure.storage.workflow_row_reconciliation import (
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
+    from bioetl.domain.workflow.config import WorkflowStepConfig
     from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.control_plane import FileWorkflowTransformArtifactStore
@@ -199,7 +199,7 @@ class WorkflowCohortResolver:
             raise ValueError("reference_cohort contains no reference keys")
         if step.run_options.limit is not None and len(keys) > step.run_options.limit:
             raise ValueError("reference_cohort exceeds the requested record limit")
-        resolved_step = replace(
+        return replace(
             step,
             run_options=replace(
                 step.run_options,
@@ -210,6 +210,3 @@ class WorkflowCohortResolver:
                 ignore_yaml_filter=True,
             ),
         )
-        if not isinstance(resolved_step, WorkflowStepConfig):
-            raise TypeError("Cohort resolution must preserve WorkflowStepConfig")
-        return resolved_step

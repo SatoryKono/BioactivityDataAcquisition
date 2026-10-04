@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING
 from bioetl.application.services.execution.pipeline_run_execution_service import (
     format_run_error_message,
 )
-from bioetl.application.services.execution.pipeline_runner_models import RunResult
 from bioetl.application.services.workflow.workflow_runner_models import (
     WorkflowStepExecutionResult,
 )
@@ -39,6 +38,7 @@ from bioetl.domain.workflow import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.application.services.execution.pipeline_runner_models import RunResult
     from bioetl.application.services.execution.pipeline_runner_service import (
         PipelineRunnerService,
     )
@@ -198,10 +198,7 @@ async def _capture_producer_result(
     for snapshot in snapshots.values():
         snapshot["limit"] = step.run_options.limit
         snapshot["start_offset"] = step.run_options.start_offset
-    captured = replace(result, selected_snapshots=snapshots)
-    if not isinstance(captured, RunResult):
-        raise TypeError("Snapshot capture must preserve RunResult")
-    return captured
+    return replace(result, selected_snapshots=snapshots)
 
 
 @dataclass(frozen=True, slots=True)
