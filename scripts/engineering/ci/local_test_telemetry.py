@@ -34,6 +34,27 @@ def junit_telemetry_sha256(path: Path) -> str:
     return hashlib.sha256(json.dumps(rows, sort_keys=True).encode()).hexdigest()
 
 
+def _measurement_file(raw_path: object, *, measurement_root: Path) -> Path:
+    """Resolve an XML artifact within its manifest directory before opening it."""
+    if not isinstance(raw_path, str) or not raw_path:
+        raise ValueError("Local measurement artifact path must be nonempty text")
+    candidate = Path(raw_path)
+    if not candidate.is_absolute():
+        candidate = measurement_root / candidate
+    if ".." in candidate.parts or not candidate.is_relative_to(measurement_root):
+        raise ValueError(
+            "Local measurement XML must remain within its manifest directory"
+        )
+    resolved = candidate.resolve(strict=True)
+    if not resolved.is_relative_to(measurement_root) or resolved.suffix != ".xml":
+        raise ValueError(
+            "Local measurement XML must remain within its manifest directory"
+        )
+    if not resolved.is_file():
+        raise ValueError("Local measurement XML must be a regular file")
+    return resolved
+
+
 def validate_local_measurement(
     manifest_path: Path,
     *,
@@ -48,6 +69,15 @@ def validate_local_measurement(
     """
     from scripts.engineering.qa.run_local_coverage_verify import SHARDS
 
+    root = repo_root.resolve(strict=True)
+    if not manifest_path.is_absolute():
+        manifest_path = root / manifest_path
+    if ".." in manifest_path.parts or not manifest_path.is_relative_to(root):
+        raise ValueError("Local measurement manifest must remain within the repository")
+    manifest_path = manifest_path.resolve(strict=True)
+    if not manifest_path.is_relative_to(root) or manifest_path.suffix != ".json":
+        raise ValueError("Local measurement manifest must remain within the repository")
+    measurement_root = manifest_path.parent
     payload = json.loads(manifest_path.read_text(encoding="utf-8"))
     try:
         started = datetime.fromisoformat(payload["started_at_utc"])
@@ -93,7 +123,7 @@ def validate_local_measurement(
         != 0
     ):
         raise ValueError("Local measurement commit must be an ancestor of HEAD")
-    xml = Path(payload["coverage_xml"])
+    xml = _measurement_file(payload["coverage_xml"], measurement_root=measurement_root)
     if hashlib.sha256(xml.read_bytes()).hexdigest() != payload["coverage_xml_sha256"]:
         raise ValueError("Local coverage XML digest mismatch")
     coverage = ElementTree.parse(xml).getroot()
@@ -108,7 +138,7 @@ def validate_local_measurement(
     durations = {}
     counts = {"passed": 0, "skipped": 0}
     for row in payload["shards"]:
-        path = Path(row["junit_file"])
+        path = _measurement_file(row["junit_file"], measurement_root=measurement_root)
         if row["exit_code"] != 0 or not re.fullmatch(
             r"[0-9a-f]{64}", str(row.get("coverage_sha256", ""))
         ):

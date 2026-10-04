@@ -203,3 +203,79 @@ def test_junit_telemetry_digest_ignores_redacted_log_text(tmp_path: Path) -> Non
     original = junit_telemetry_sha256(junit)
     junit.write_text(junit.read_text().replace("secret", "[REDACTED_LOCAL_SECRET]"))
     assert junit_telemetry_sha256(junit) == original
+
+
+@pytest.mark.parametrize("field", ["coverage_xml", "junit_file"])
+@pytest.mark.parametrize("relative", [False, True])
+def test_manifest_cannot_read_xml_outside_measurement(
+    measurement: Path, monkeypatch: pytest.MonkeyPatch, field: str, relative: bool
+) -> None:
+    payload = json.loads(measurement.read_text())
+    outside = measurement.parent.parent / f"{measurement.parent.name}-outside.xml"
+    outside.write_text("sensitive external data")
+    path = "../" + outside.name if relative else str(outside)
+    if field == "coverage_xml":
+        payload[field] = path
+    else:
+        payload["shards"][0][field] = path
+    measurement.write_text(json.dumps(payload))
+    original_read = Path.read_bytes
+
+    def guarded_read(path: Path) -> bytes:
+        assert path != outside, "External artifact was opened before validation"
+        return original_read(path)
+
+    monkeypatch.setattr(Path, "read_bytes", guarded_read)
+    with pytest.raises(ValueError, match="within its manifest directory"):
+        _validate(measurement)
+
+
+def test_manifest_itself_must_be_within_repo(
+    measurement: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo_root = measurement.parent / "repo"
+    repo_root.mkdir()
+    original_read = Path.read_text
+
+    def guarded_read(path: Path, *args: object, **kwargs: object) -> str:
+        assert path != measurement, "External manifest was read before validation"
+        return original_read(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", guarded_read)
+    with pytest.raises(ValueError, match="within the repository"):
+        validate_local_measurement(
+            measurement,
+            repo_root=repo_root,
+            test_tree_sha256="tests",
+            source_tree_sha256="source",
+        )
+
+
+@pytest.mark.parametrize("field", ["coverage_xml", "junit_file"])
+def test_manifest_cannot_follow_xml_symlink_outside_measurement(
+    measurement: Path, monkeypatch: pytest.MonkeyPatch, field: str
+) -> None:
+    outside = (
+        measurement.parent.parent / f"{measurement.parent.name}-symlink-target.xml"
+    )
+    outside.write_text("external data")
+    link = measurement.parent / "external.xml"
+    try:
+        link.symlink_to(outside)
+    except OSError as error:
+        pytest.skip(f"symlink creation unavailable: {error}")
+    payload = json.loads(measurement.read_text())
+    if field == "coverage_xml":
+        payload[field] = str(link)
+    else:
+        payload["shards"][0][field] = str(link)
+    measurement.write_text(json.dumps(payload))
+    original_read = Path.read_bytes
+
+    def guarded_read(path: Path) -> bytes:
+        assert path not in {outside, link}, "External symlink target was read"
+        return original_read(path)
+
+    monkeypatch.setattr(Path, "read_bytes", guarded_read)
+    with pytest.raises(ValueError, match="within its manifest directory"):
+        _validate(measurement)

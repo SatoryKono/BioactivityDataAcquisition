@@ -153,7 +153,7 @@ jobs:
   arch-tests:
     docker:
       - image: cimg/python:3.12
-    resource_class: small
+    resource_class: medium
     steps:
       - checkout
       - setup-python-uv
@@ -165,7 +165,7 @@ jobs:
             HYPOTHESIS_PROFILE=fast \
             uv run --frozen --no-build pytest tests/architecture \
               -m "not slow and not benchmark and not memory" \
-              -q --tb=short \
+              -q --tb=short --no-cov \
               --junitxml=reports/test-telemetry/junit-arch.xml
       - store_test_results:
           path: reports/test-telemetry
