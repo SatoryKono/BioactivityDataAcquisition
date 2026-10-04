@@ -2,7 +2,16 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.dq.disabled_gold_filter import DisabledGoldFilter
+from collections.abc import Awaitable, Callable
+from dataclasses import dataclass
+from bioetl.application.core.wiring.runtime import (
+    BatchProcessingComponents,
+    CheckpointRuntimeService,
+)
+
+from bioetl.application.services.dq.disabled_gold_filter import (
+    DisabledGoldFilterService,
+)
 
 from typing import Any, TYPE_CHECKING, cast
 
@@ -17,9 +26,6 @@ from bioetl.application.core.wiring.runtime import (
     GoldFilterCallback,
 )
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
-from bioetl.composition.factories.services._pipeline_batch_executor_types import (
-    BatchExecutorBuildRequest,
-)
 from bioetl.composition.factories.services.pipeline_processing import (
     build_components_and_processing_service,
 )
@@ -34,6 +40,13 @@ from bioetl.domain.observability_contract import normalize_observability_pipelin
 from bioetl.infrastructure.validation import ContractAwareGoldValidator
 
 if TYPE_CHECKING:
+    import pyarrow as pa
+    from bioetl.application.observability.domain_event_emitter import (
+        DomainEventEmitterProtocol,
+    )
+    from bioetl.domain.config import MemoryConfig
+    from bioetl.domain.ports import BatchIdGeneratorPort, MemoryMonitorPort, TracingPort
+    from bioetl.domain.types import GoldSchemaType
     from bioetl.application.core.wiring.runtime import (
         BasePipeline,
         BatchCheckpointRecoveryService,
@@ -43,6 +56,33 @@ if TYPE_CHECKING:
         BatchProgressService,
         ShutdownSignal,
     )
+
+
+BatchProcessingComponentsFactory = Callable[..., BatchProcessingComponents]
+
+
+@dataclass(frozen=True, slots=True)
+class BatchExecutorBuildRequest:
+    """Canonical input bundle for batch-executor construction."""
+
+    pipeline: BasePipeline
+    callbacks: PipelineCallbacksContext
+    silver_schema: pa.Schema | None
+    gold_schema: GoldSchemaType
+    checkpoint_manager: CheckpointRuntimeService
+    shutdown_signal: ShutdownSignal
+    create_batch_processing_components_fn: BatchProcessingComponentsFactory
+    strict_gold_validation: bool = True
+    lock_validator: Callable[[], Awaitable[bool]] | None = None
+    tracer: TracingPort | None = None
+    memory_monitor: MemoryMonitorPort | None = None
+    memory_config: MemoryConfig | None = None
+    bronze_output_path: str | None = None
+    silver_output_path: str | None = None
+    gold_output_path: str | None = None
+    flat_structure: bool = False
+    batch_id_factory: BatchIdGeneratorPort | None = None
+    domain_event_emitter: DomainEventEmitterProtocol | None = None
 
 
 def create_batch_executor_from_pipeline(
@@ -129,7 +169,7 @@ def _resolve_gold_filter(
             table_name=_resolve_effective_gold_table(pipeline),
             state="disabled",
         )
-        return DisabledGoldFilter()
+        return DisabledGoldFilterService()
     return callbacks.gold_filter
 
 

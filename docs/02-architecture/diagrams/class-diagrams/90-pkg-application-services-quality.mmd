@@ -1,11 +1,11 @@
 %% Title: Package Family: application/services/quality
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/quality; modules: config_dq_service, data_quality_anomalies, _quarantine_service_async_mixin, _quarantine_service_filtered_mixin, dq_report_models, _dq_report_layer_flows.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/quality; modules: config_dq_service, data_quality_anomalies, dq_report_models, _quarantine_service_async_mixin, _quarantine_service_filtered_mixin, _dq_report_layer_flows.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-09-25
+%% @date    2026-10-04
 %% @level   Package Family / Inventory Slice
-%% @nodes   24
+%% @nodes   25
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -22,6 +22,12 @@ classDiagram
         class DataQualityMetricsMixin
     }
 
+    namespace dq_report_models {
+        class DQReportContext
+        class DQReportResult
+        class _DQReportGenerationHostProtocol
+    }
+
     namespace quarantine_service_async_mixin {
         class QuarantineServiceAsyncMixin
         class _QuarantineAsyncHost
@@ -30,11 +36,6 @@ classDiagram
     namespace quarantine_service_filtered_mixin {
         class QuarantineServiceFilteredMixin
         class _FilteredQuarantineHost
-    }
-
-    namespace dq_report_models {
-        class DQReportContext
-        class DQReportResult
     }
 
     namespace dq_report_layer_flows {
@@ -90,4 +91,3 @@ classDiagram
     QuarantineServiceReplayPurgeSyncMixin <|-- QuarantineServiceSyncMixin
     QuarantineServiceStatusSyncMixin <|-- QuarantineServiceSyncMixin
     QuarantineServiceSyncMixin <|-- QuarantineServiceFilteredMixin
-

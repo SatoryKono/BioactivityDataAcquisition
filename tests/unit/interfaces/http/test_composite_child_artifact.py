@@ -8,7 +8,7 @@ from bioetl.application.services.run_reports.artifact_digest import (
     canonical_report_sha256,
 )
 from bioetl.application.services.run_reports.writer import write_pipeline_run_report
-from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
+from bioetl.domain.run_reports import build_pipeline_run_report
 from bioetl.infrastructure.storage.run_report_store_adapter import (
     FileRunReportStoreAdapter,
 )

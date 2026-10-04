@@ -29,7 +29,7 @@
     "tests/architecture/test_module_coverage_inventory.py"
   ],
   "current_live_metrics": {
-    "below_85_module_count": 12,
+    "below_85_module_count": 0,
     "uncovered_module_count": 0,
     "unmeasured_module_count": 0,
     "tracked_module_coverage_percent": 100.0,
@@ -38,8 +38,27 @@
   "closeout": {
     "status": "regressed_after_closeout",
     "historical_status": "bounded_shard_complete",
-    "residual_tail_remains": true,
-    "residual_below_85_module_count": 12,
-    "rationale": "Live merged inventory has 12 measured modules below the default floor; uncovered=0, unmeasured=0. Both branch measurements and newer main measurements are retained. Historical shard delta is unchanged."
-  }
+    "residual_tail_remains": false,
+    "residual_below_85_module_count": 0,
+    "rationale": "Current retained inventory has 0 measured modules below the floor. Historical shard delta and regression status are preserved; this does not claim fresh per-module nonregression."
+  },
+  "previous_current_bindings": [
+    {
+      "source": "pre-wave30 committed closeout",
+      "current_live_metrics": {
+        "below_85_module_count": 5,
+        "uncovered_module_count": 0,
+        "unmeasured_module_count": 0,
+        "tracked_module_coverage_percent": 100,
+        "tracked_module_status": "fully_covered"
+      },
+      "closeout": {
+        "status": "regressed_after_closeout",
+        "historical_status": "bounded_shard_complete",
+        "residual_tail_remains": true,
+        "residual_below_85_module_count": 5,
+        "rationale": "Live inventory has 5 measured modules below the default floor; uncovered=0, unmeasured=0. Historical shard delta is unchanged; current values are derived from the source-bound inventory."
+      }
+    }
+  ]
 }

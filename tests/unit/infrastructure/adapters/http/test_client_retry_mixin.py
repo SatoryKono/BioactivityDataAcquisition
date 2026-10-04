@@ -34,7 +34,7 @@ import httpx
 import pytest
 
 from bioetl.domain.resilience import RetryConfig
-import bioetl.infrastructure.adapters.http._client_retry_policy as retry_policy_module
+import bioetl.infrastructure.adapters.http.client_retry_policy as retry_policy_module
 import bioetl.infrastructure.adapters.http.client_retry_mixin as retry_mixin_module
 
 from bioetl.infrastructure.adapters.http.client_retry_mixin import HTTPClientRetryMixin

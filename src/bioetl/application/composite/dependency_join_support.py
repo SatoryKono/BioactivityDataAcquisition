@@ -6,7 +6,7 @@ modules directly, but this module is the sanctioned aggregate seam.
 
 from __future__ import annotations
 
-from bioetl.application.composite.dependency_join_context_builders import (
+from bioetl.application.composite.dependency_join_context_assembly import (
     build_composite_join_metadata,
     build_prepared_dependency_join_context,
     build_single_key_join_metadata,

@@ -12,7 +12,7 @@ from bioetl.application.services.run_reports.artifact_digest import (
     canonical_report_sha256,
 )
 from bioetl.application.services.run_reports.writer import write_pipeline_run_report
-from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
+from bioetl.domain.run_reports.pipeline_report_assembly import build_pipeline_run_report
 from bioetl.domain.run_reports.selected_status import verify_snapshot
 from bioetl.interfaces.http._selected_run_artifact_probes import _artifact_probes
 from tests.helpers.run_report_store import MemoryReportStore

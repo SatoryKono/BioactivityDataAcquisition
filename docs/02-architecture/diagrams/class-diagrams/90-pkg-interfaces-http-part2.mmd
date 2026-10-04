@@ -1,16 +1,36 @@
 %% Title: Package Family: interfaces/http (Part 2/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/interfaces/http; part 2/2; modules: control_plane_selector_context, health_server_routing_mixin, health_server_state_mixin, types.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/interfaces/http; part 2/2; modules: _health_server_control_plane_metrics_refresh, _processed_records_http, _processed_records_table_support, _selector_catalog, control_plane_selector_context, health_server.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-09-25
+%% @date    2026-10-04
 %% @level   Package Family / Inventory Slice
-%% @nodes   4
+%% @nodes   9
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
 
+    namespace health_server_control_plane_metrics_refresh {
+        class ControlPlaneMetricsRefresher
+    }
+
+    namespace processed_records_http {
+        class _UrlResponse
+    }
+
+    namespace processed_records_table_support {
+        class ProcessedRecordRowSpec
+    }
+
+    namespace selector_catalog {
+        class SelectorCatalog
+    }
+
     namespace control_plane_selector_context {
         class RunIdOptionPolicy
+    }
+
+    namespace health_server {
+        class HealthServer
     }
 
     namespace health_server_routing_mixin {
@@ -21,7 +41,9 @@ classDiagram
         class HealthServerStateMixin
     }
 
-    namespace types {
-        class HealthResponse
+    namespace run_report_ops {
+        class InvalidRunReportError
     }
 
+    HealthServerRoutingMixin <|-- HealthServer
+    HealthServerStateMixin <|-- HealthServer

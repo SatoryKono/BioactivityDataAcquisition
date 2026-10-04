@@ -339,16 +339,6 @@ entries:
     vcr_related: false
     review_date: "2026-08-18"
     rationale: Live Grafana /api/ds/query fill check skips when Grafana health or API auth is unavailable.
-  - path: tests/integration/test_grafana_variable_reference.py
-    suite: integration
-    category: live_endpoint_unavailability
-    owner: "@bioetl-observability"
-    linked_issue: "#5562"
-    lifecycle: permanent_policy
-    reviewed_skip_calls: 1
-    vcr_related: false
-    review_date: "2026-07-27"
-    rationale: Reviewed skip/importorskip surface tracked for governance.
   - path: tests/integration/test_grafana_render_first_remediation.py
     suite: integration
     category: conditional_environment_guard
@@ -431,6 +421,32 @@ entries:
     vcr_related: false
     review_date: "2026-08-27"
     rationale: Schema-drift e2e importorskips when optional deltalake is absent.
+  - path: tests/integration/test_live_green_acceptance.py
+    suite: integration
+    category: live_network_opt_in_guard
+    owner: "@bioetl-platform"
+    linked_issue: "#11871"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-10-03"
+    rationale: >
+      Live launch acceptance requires BIOETL_GREEN_ACCEPTANCE=1 and isolated
+      output/environment inputs; selected cases fail on missing or failed evidence.
+  - path: tests/integration/test_deployed_replay_readiness.py
+    suite: integration
+    category: live_network_opt_in_guard
+    owner: "@bioetl-platform"
+    linked_issue: "#11871"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-10-04"
+    rationale: >
+      Read-only deployed acceptance requires BIOETL_REPLAY_ACCEPTANCE_CATALOG
+      with exact run IDs; selected tests fail closed on absent or invalid evidence.
+
+
 e2e_matrix_replay_deferred:
   owner: "@bioetl-platform"
   linked_issue: "#9729"

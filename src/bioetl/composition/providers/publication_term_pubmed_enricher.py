@@ -7,7 +7,8 @@ from contextlib import AsyncExitStack
 from typing import TYPE_CHECKING, cast
 
 import defusedxml.ElementTree as defused_ET
-from defusedxml.common import EntitiesForbidden
+from defusedxml.common import DefusedXmlException
+from bioetl.domain.exceptions import BioETLError
 
 from bioetl.application.core.publication_term_runtime import (
     mesh_terms_from_pubmed_headings,
@@ -19,17 +20,17 @@ from bioetl.composition.providers._registration_biblio_adapters import (
 from bioetl.composition.providers._registration_contracts import (
     resolve_provider_assembly_support,
 )
-from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
 
 if TYPE_CHECKING:
+    from bioetl.domain.types import BronzeRecord
     from bioetl.composition.providers._models import ProviderSettingsProtocol
     from bioetl.composition.providers._registration_contracts import (
         ProviderAssemblySupport,
     )
     from bioetl.domain.ports import FilterableDataSourcePort, LoggerPort, MetricsPort
-    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 __all__ = [
     "PubMedPublicationTermPayloadEnricher",
@@ -46,7 +47,7 @@ def parse_pubmed_mesh_xml(
         root = defused_ET.fromstring(xml_text)
     except (
         defused_ET.ParseError,
-        EntitiesForbidden,
+        DefusedXmlException,
     ):
         return [], []
 
@@ -163,7 +164,7 @@ class PubMedPublicationTermPayloadEnricher:
                     pmid = _as_pmid(pubmed_record.get("pmid"))
                     if pmid is not None:
                         pubmed_by_pmid[pmid] = pubmed_record
-        except Exception as exc:
+        except (BioETLError, OSError, RuntimeError, ValueError) as exc:
             self._logger.warning(
                 "publication_term_pubmed_enrichment_failed",
                 error=str(exc),
@@ -174,13 +175,11 @@ class PubMedPublicationTermPayloadEnricher:
         enriched: list[BronzeRecord] = []
         for record in records:
             pmid = publication_pubmed_id(record)
-            matched_pubmed_record = (
-                pubmed_by_pmid.get(pmid) if pmid is not None else None
-            )
-            if matched_pubmed_record is None:
+            matched_record = pubmed_by_pmid.get(pmid) if pmid is not None else None
+            if matched_record is None:
                 enriched.append(record)
                 continue
-            headings, keywords = pubmed_term_payload(matched_pubmed_record)
+            headings, keywords = pubmed_term_payload(matched_record)
             mesh_terms, keyword_terms = mesh_terms_from_pubmed_headings(
                 headings, keywords
             )
@@ -225,7 +224,7 @@ def create_pubmed_publication_term_enricher(
             email=email,
             metrics=metrics,
         )
-    except Exception as exc:
+    except (BioETLError, OSError, RuntimeError, ValueError) as exc:
         logger.warning(
             "publication_term_pubmed_enricher_unavailable",
             error=str(exc),

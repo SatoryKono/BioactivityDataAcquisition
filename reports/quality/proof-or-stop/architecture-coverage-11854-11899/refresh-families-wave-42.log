@@ -1,0 +1,8 @@
+[flaky-test-burndown-review] wrote E:\github\bda-arch-cov-local-20261003\reports\quality\flaky-test-burndown-review.json
+[test-telemetry] source_tree_sha256=8ec20677d86701547f98969641305ec6f981251ca18856043ea8e0665dfbb15e
+CI drift families update: test-gov, flaky-fingerprint, telemetry, remote-main
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_test_governance_audit --json-out reports/quality/test-governance-current.json --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa report-flaky-test-burndown-review
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest reports\quality\proof-or-stop\architecture-coverage-11854-11899\full-coverage-wave-42\manifest.json
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update
+CI drift families complete (no budget ratchet)
