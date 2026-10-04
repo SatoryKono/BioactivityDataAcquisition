@@ -51,6 +51,90 @@ from bioetl.domain.workflow import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize(
+    "archive_error", [None, OSError, RuntimeError, TypeError, ValueError]
+)
+def test_workflow_child_archive_continues_after_failure_and_preserves_options(
+    archive_error,
+):
+    from bioetl.application.services.execution.pipeline_runner_models import (
+        PipelineRunResult,
+        RunResult,
+    )
+    from bioetl.application.services.workflow.workflow_runner_reports import (
+        archive_workflow_children,
+    )
+    from bioetl.domain.workflow import WorkflowRunOptionsConfig
+
+    config = WorkflowConfig(
+        name="workflow",
+        defaults=WorkflowRunOptionsConfig(limit=17),
+        steps=(
+            WorkflowStepConfig(step_id="first", pipeline_name="chembl_activity"),
+            WorkflowStepConfig(
+                step_id="second",
+                pipeline_name="chembl_assay",
+                run_options=WorkflowRunOptionsConfig(no_control_plane_archive=True),
+            ),
+            TransformStepConfig(step_id="transform", transform_name="join"),
+        ),
+    )
+    first = RunResult(
+        PipelineRunResult.SUCCESS, "chembl_activity", "run-1", "incremental"
+    )
+    second = RunResult(
+        PipelineRunResult.SUCCESS, "chembl_assay", "run-2", "incremental"
+    )
+    result = WorkflowRunExecutionResult(
+        workflow_name="workflow",
+        status="success",
+        steps=(
+            WorkflowStepExecutionResult("first", "pipeline", "success", first),
+            WorkflowStepExecutionResult("transform", "transform", "success", object()),
+            WorkflowStepExecutionResult("missing", "pipeline", "success", first),
+            WorkflowStepExecutionResult("second", "pipeline", "success", second),
+        ),
+    )
+    archive = MagicMock(
+        side_effect=[
+            archive_error("archive unavailable") if archive_error else None,
+            None,
+        ]
+    )
+
+    archive_workflow_children(config, result, archive)
+
+    assert archive.call_count == 2
+    first_call, second_call = archive.call_args_list
+    assert first_call.args[0] is first
+    assert first_call.args[1].limit == 17
+    assert first_call.args[1].no_control_plane_archive is False
+    assert second_call.args[0] is second
+    assert second_call.args[1].no_control_plane_archive is True
+
+
+def test_workflow_child_archive_requires_successful_report_attachment():
+    from dataclasses import replace
+
+    from bioetl.application.services.workflow.workflow_runner_reports import (
+        archive_workflow_children,
+    )
+
+    config = WorkflowConfig(
+        name="workflow",
+        steps=(WorkflowStepConfig(step_id="first", pipeline_name="chembl_activity"),),
+    )
+    result = WorkflowRunExecutionResult(
+        workflow_name="workflow", status="success", steps=()
+    )
+    archive = MagicMock()
+    archive_workflow_children(config, result, None)
+    archive_workflow_children(
+        config, replace(result, run_report_error="write failed"), archive
+    )
+    archive.assert_not_called()
+
+
 def _file_run_report_store() -> object:
     from bioetl.infrastructure.storage.run_report_store_adapter import (
         FileRunReportStoreAdapter,
@@ -379,3 +463,38 @@ def test_workflow_runner_reports_helpers(tmp_path: Path) -> None:
     )
     assert failed.run_report_error is not None
     logger.warning.assert_called()
+
+
+@pytest.mark.asyncio
+async def test_workflow_cohort_without_resolver_fails_before_pipeline_launch():
+    from unittest.mock import AsyncMock
+    from bioetl.application.services.execution.workflow_runner_step_execution import (
+        execute_pipeline_step,
+    )
+    from bioetl.domain.workflow.config import WorkflowReferenceCohort
+
+    runner = SimpleNamespace(run=AsyncMock())
+    step = WorkflowStepConfig(
+        step_id="consumer",
+        pipeline_name="chembl_activity",
+        reference_cohort=WorkflowReferenceCohort(
+            step_id="source",
+            table="chembl.assay",
+            column="assay_id",
+            filter_field="assay_id",
+        ),
+    )
+    result = await execute_pipeline_step(
+        pipeline_runner=runner,
+        metrics=MagicMock(),
+        monotonic=lambda: 1.0,
+        workflow_name="wf",
+        step=step,
+        workflow_context_labels={},
+        step_started_callback=None,
+        workflow_run_id="run-1",
+    )
+    assert result.status == "failed"
+    assert result.error_type == "ValueError"
+    assert result.error_message == "reference_cohort resolver unavailable"
+    runner.run.assert_not_awaited()

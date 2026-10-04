@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 
 
 def mounted_worktree_skip_reason() -> str | None:
@@ -20,11 +21,24 @@ def mounted_worktree_skip_reason() -> str | None:
     if sys.platform.startswith("win"):
         return "Skipped on Windows due to filesystem performance"
 
+    root = Path(__file__).resolve().parents[2]
     try:
-        with open("/proc/version", encoding="utf-8") as handle:
-            if "microsoft" in handle.read().lower():
-                return "Skipped on WSL due to filesystem performance"
+        mounts = Path("/proc/mounts").read_text(encoding="utf-8").splitlines()
     except OSError:
         return None
 
+    # WSL also supports native Linux checkouts. Only the filesystem containing
+    # this checkout determines whether the expensive scan needs a skip.
+    containing_mounts = []
+    for row in mounts:
+        fields = row.split()
+        if len(fields) < 4:
+            continue
+        mount = Path(fields[1].replace(r"\040", " "))
+        if root.is_relative_to(mount):
+            containing_mounts.append((len(mount.parts), fields[2], fields[3]))
+    if containing_mounts:
+        _, filesystem, options = max(containing_mounts)
+        if filesystem == "drvfs" or (filesystem == "9p" and "aname=drvfs" in options):
+            return "Skipped on WSL due to filesystem performance"
     return None

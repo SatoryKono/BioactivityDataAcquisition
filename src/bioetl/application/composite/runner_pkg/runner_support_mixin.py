@@ -9,6 +9,7 @@ from typing import Any, cast
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointService
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
+from bioetl.application.composite.key_extractor import KeyExtractorService
 from bioetl.application.composite.lifecycle_observer_service import (
     CompositeLifecycleObserverService,
 )
@@ -44,6 +45,7 @@ class CompositeRunnerSupportMixin(
 ):
     """Support helpers composed with observability (ARCH-REF-R2 / #7729)."""
 
+    _key_extractor: KeyExtractorService
     _config: CompositeConfig = cast(Any, None)  # Any: host attr default (PD3)
     _runtime: CompositeRuntimeConfig = cast(Any, None)  # Any: host attr default (PD3)
     _seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort] = cast(

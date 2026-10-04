@@ -11,7 +11,7 @@ import pytest
 from bioetl.composition.bootstrap.runtime._composite_control_plane_payloads import (
     _resolve_composite_bronze_root,
 )
-from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
+from bioetl.application.composite.helpers.filter_extraction import (
     CompositeFilterExtractor,
 )
 from bioetl.composition.factories.pipeline import runner_assembly as assembly

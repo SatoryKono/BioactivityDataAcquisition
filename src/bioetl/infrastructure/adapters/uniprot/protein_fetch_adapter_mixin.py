@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.mixin_host import as_mixin_host
 from bioetl.domain.types import BronzeRecord, JsonDict
-from bioetl.infrastructure.adapters.uniprot.query_builder import (
+from bioetl.infrastructure.adapters.uniprot.query_planning import (
     build_uniprot_protein_search_params,
 )
 from bioetl.infrastructure.adapters.uniprot.response_parser import (

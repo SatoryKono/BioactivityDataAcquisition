@@ -29,6 +29,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, cast
@@ -197,6 +198,16 @@ def test_checkpoint_metadata_execution_fingerprint_matches_manifest_contract(
     snapshot_refs = build_cached_bronze_input_snapshot_refs(
         bronze_root=bronze_root,
         bronze_date=None,
+    )
+    # Explicit cache roots are persisted as absolute file URIs in manifests.
+    snapshot_refs = tuple(
+        replace(
+            ref,
+            immutable_uri=(bronze_root / ref.immutable_uri.removeprefix("bronze://"))
+            .resolve()
+            .as_uri(),
+        )
+        for ref in snapshot_refs
     )
     manifest = manifest_service.create_manifest(
         RunManifestCreateRequest(

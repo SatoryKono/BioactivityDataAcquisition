@@ -94,3 +94,17 @@ def test_missing_run_manifest_is_empty() -> None:
     store = Mock()
     store.get_by_run_id.return_value = None
     assert resolve_manifest_input_snapshot_refs(store=store, run_id=RUN_ID) == ()
+
+
+def test_snapshot_recording_verifies_only_existing_local_files(tmp_path):
+    from bioetl.application.services.control_plane.ledger.input_snapshot_recording import (
+        _local_batch_file_verified,
+        _optional_datetime,
+    )
+
+    batch = tmp_path / "batch.jsonl.zst"
+    batch.write_bytes(b"batch")
+    assert _local_batch_file_verified("file://" + str(batch)) is True
+    assert _local_batch_file_verified("https://example.test/batch.jsonl.zst") is None
+    assert _local_batch_file_verified(" ") is None
+    assert _optional_datetime(" ") is None

@@ -109,6 +109,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "DataExtractorStrategy",
         "IdentifierResolverStrategy",
         "PublicationMetadataStrategy",
+        "PublicationTermPayloadEnricherProtocol",
     ),
     "bioetl.domain.ports.protein_classification": ("ProteinClassificationPort",),
     "bioetl.domain.ports.quality": (
@@ -201,7 +202,6 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
 }
 
 _EXPORT_MODULES = build_export_modules(_EXPORT_GROUPS)
-
 __all__ = [*_EXPORT_MODULES]
 
 

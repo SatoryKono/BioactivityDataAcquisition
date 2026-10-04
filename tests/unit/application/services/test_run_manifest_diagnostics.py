@@ -1933,7 +1933,8 @@ def test_build_diagnostics_summary_formalizes_composite_rebuild_resume_boundary(
     summary = build_diagnostics_summary(manifest, ())
 
     assert (
-        summary["exact_replay_support_boundary"] == "snapshot_backed_source_runs_only"
+        summary["exact_replay_support_boundary"]
+        == "verified_composite_child_snapshot_bindings"
     )
     assert summary["replay_family_contract"] == _expected_replay_family_contract(
         manifest

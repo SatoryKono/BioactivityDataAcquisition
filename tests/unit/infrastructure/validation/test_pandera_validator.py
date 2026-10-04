@@ -559,3 +559,38 @@ class TestPanderaValidatorPropertyBased:
         result = validator.validate([record])
         assert result.valid is True
         assert result.errors == []
+
+
+@pytest.mark.unit
+def test_base_validator_seeds_nullable_columns_and_keeps_required_fields_strict():
+    import pandera.pandas as pa
+    from bioetl.infrastructure.validation.pandera_validator import BasePanderaValidator
+
+    validator = BasePanderaValidator(
+        pa.DataFrameSchema(
+            {
+                "id": pa.Column(int),
+                "optional_label": pa.Column(str, nullable=True),
+            }
+        ),
+        strict=True,
+    )
+    record = {"id": 1}
+    assert validator.validate([record]).valid is True
+    assert record == {"id": 1}
+    invalid = validator.validate([{"optional_label": "present"}])
+    assert invalid.valid is False
+    assert invalid.errors
+
+
+@pytest.mark.unit
+def test_silver_validator_accepts_validation_only_schema_adapter():
+    from types import SimpleNamespace
+    from unittest.mock import MagicMock
+
+    validate = MagicMock()
+    validator = PanderaSilverValidator(SimpleNamespace(validate=validate), strict=True)
+    assert validator.validate([{"id": 1}]).valid is True
+    validate.assert_called_once()
+    assert validate.call_args.args[0].to_dict("records") == [{"id": 1}]
+    assert validate.call_args.kwargs == {"lazy": True}

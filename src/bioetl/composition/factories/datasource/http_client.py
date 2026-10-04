@@ -158,13 +158,6 @@ class HttpClientFactory:
             recovery_timeout = source_config.circuit_breaker.recovery_timeout
             timeout = source_config.timeout_sec
             max_retries = source_config.max_retries
-            api_key_present = (
-                api_key_setting is not None
-                and settings is not None
-                and cls._check_setting(settings, api_key_setting)
-            )
-            if provider == "semanticscholar" and not api_key_present:
-                max_retries = min(max_retries, 2)
             base_delay = source_config.retry_base_delay
             max_delay = source_config.retry_max_delay
             max_connections = source_config.max_connections

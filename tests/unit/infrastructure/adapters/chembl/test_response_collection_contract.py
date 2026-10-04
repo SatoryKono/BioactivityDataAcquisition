@@ -18,6 +18,8 @@ pytestmark = pytest.mark.unit
         {},
         {"error": "temporary failure"},
         {"target_components": None},
+        {"target_components": [], "page_meta": None},
+        {"target_components": [], "page_meta": []},
         {"target_components": [], "page_meta": {"next": "/next"}},
     ],
 )

@@ -221,7 +221,8 @@ async def test_fetch_adapter_mixin__fetch_multi_filtered__raises_not_implemented
 
 
 @pytest.mark.asyncio
-async def test_search_http_failure_is_normalized_at_adapter_boundary():
+@pytest.mark.parametrize("transport_error", [False, True])
+async def test_search_http_failure_is_normalized_at_adapter_boundary(transport_error):
     from bioetl.infrastructure.adapters.semanticscholar._search_fetch_flow import (
         _SemanticScholarSearchFetchMixin,
     )
@@ -237,8 +238,36 @@ async def test_search_http_failure_is_normalized_at_adapter_boundary():
     error = httpx.HTTPStatusError(
         "rate limited", request=request, response=httpx.Response(429, request=request)
     )
+    if transport_error:
+        error = httpx.ConnectError("connection lost", request=request)
     adapter._http_client.get = AsyncMock(side_effect=error)
     with pytest.raises(ApiError) as caught:
         await adapter._fetch_search_page(query="*", page_size=100, current_offset=0)
-    assert caught.value.status_code == 429
+    if transport_error:
+        assert "transport failed" in str(caught.value)
+    else:
+        assert caught.value.status_code == 429
     assert caught.value.__cause__ is error
+
+
+@pytest.mark.asyncio
+async def test_full_provider_batch_preserves_all_identifiers_and_null_slots() -> None:
+    adapter = _SemanticScholarAdapter()
+    adapter.batch_size = 500
+    ids = [f"10.1000/{index}" for index in range(1001)]
+    calls = []
+
+    async def fetch(batch):
+        calls.append(batch)
+        return [None if doi == ids[499] else {"paperId": doi} for doi in batch]
+
+    adapter._fetch_batch_with_nulls = fetch
+    resolved = set()
+    records = await collect_async_iterator(
+        adapter._batch_doi_phase(ids, resolved, 1000, 0)
+    )
+    assert [len(batch) for batch in calls] == [500, 500, 1]
+    assert [doi for batch in calls for doi in batch] == ids
+    assert len(records) == 1000
+    assert resolved == set(ids) - {ids[499]}
+    assert {record["_resolved_doi"] for record in records} == resolved

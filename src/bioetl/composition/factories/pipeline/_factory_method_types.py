@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import cast
 
@@ -34,7 +34,7 @@ from bioetl.domain.ports import (
 from bioetl.domain.types import GoldSchemaType, RunID
 from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-from bioetl.composition.pipeline_runner_request import (
+from bioetl.composition.factories.pipeline.runner_request import (
     build_pipeline_create_runner_request_from_kwargs as _build_request,
 )
 
@@ -97,16 +97,7 @@ def build_create_factory_runner_request(
         started_at=request.started_at,
         settings=cast("Settings", request.settings),
         observability=cast("ObservabilityBundle", request.observability),
-        manifest_id=control_plane.manifest_id,
-        execution_fingerprint=control_plane.execution_fingerprint,
-        config_hash=control_plane.config_hash,
-        resolved_config_hash=control_plane.resolved_config_hash,
-        effective_config_hash=control_plane.effective_config_hash,
-        dq_contract_compatibility_hash=control_plane.dq_contract_compatibility_hash,
-        effective_config_artifact_id=control_plane.effective_config_artifact_id,
-        replay_of_run_id=control_plane.replay_of_run_id,
-        replay_of_manifest_id=control_plane.replay_of_manifest_id,
-        input_snapshot_fingerprint=control_plane.input_snapshot_fingerprint,
+        **asdict(control_plane),
         filter_config=request.filter_config,
         config=cast("PipelineYamlConfig | None", request.config),
         cached_bronze=request.cached_bronze,
@@ -149,24 +140,8 @@ def resolve_data_source_creator(
     return get_data_source_creator_fn(provider, provider_registry=provider_registry)
 
 
-def build_pipeline_factory_context(
-    *,
-    pipeline_name: str,
-    create_data_source_fn: DataSourceCreatorProtocol,
-    pipeline_class: type[BasePipeline] | None = None,
-    provider: str | None = None,
-    transformer_class: type[BaseTransformer] | None = None,
-    pandera_silver_schema: object | None = None,
-) -> _PipelineFactoryContext:
-    """Build immutable factory context consumed by helper orchestration flows."""
-    return _PipelineFactoryContext(
-        pipeline_name=pipeline_name,
-        create_data_source_fn=create_data_source_fn,
-        pipeline_class=pipeline_class,
-        provider=provider,
-        transformer_class=transformer_class,
-        pandera_silver_schema=pandera_silver_schema,
-    )
+# Preserve the builder name while using the typed constructor directly.
+build_pipeline_factory_context = _PipelineFactoryContext
 
 
 def build_create_pipeline_with_services_request(

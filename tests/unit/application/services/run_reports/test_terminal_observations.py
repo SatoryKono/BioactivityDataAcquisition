@@ -116,3 +116,30 @@ def test_finalize_does_not_erase_existing_data_validation() -> None:
         assert observation["reason"] == "run_gold_schema_validation"
     finally:
         reset_run_observations(token)
+
+
+def test_provisional_workflow_observation_never_overwrites_terminal_evidence():
+    from bioetl.application.services.run_reports.observations import (
+        record_run_observation,
+        ensure_terminal_workflow_observation,
+        bind_run_observations,
+        reset_run_observations,
+        run_observations,
+    )
+
+    token = bind_run_observations()
+    try:
+        record_run_observation(
+            "Workflow",
+            verdict="OK",
+            reason="completed",
+            facts={"workflow_run_id": "run-1"},
+        )
+        before = run_observations()
+        ensure_terminal_workflow_observation(
+            workflow_run_id="run-1", workflow_id="wf", workflow_step_id="step"
+        )
+        assert run_observations() == before
+        assert run_observations()["Workflow"]["verdict"] == "OK"
+    finally:
+        reset_run_observations(token)

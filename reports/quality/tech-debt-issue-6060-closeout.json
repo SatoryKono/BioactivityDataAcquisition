@@ -1,0 +1,34 @@
+{
+  "schema_version": "tech-debt-issue-6060-closeout-v1",
+  "issue": 6060,
+  "status": "closeable",
+  "debt_outcome": "improved",
+  "budget_growth_allowed": false,
+  "closed_on": "2026-07-08",
+  "scope": {
+    "family": "composition_runtime_builders",
+    "path_prefix": "src/bioetl/composition/runtime_builders/",
+    "target_metric": "max_internal_fan_in"
+  },
+  "before": {
+    "max_internal_fan_in": 4,
+    "max_internal_fan_in_module": "bioetl.composition.runtime_builders.run_manifest_support",
+    "bounded_growth_budget": 5
+  },
+  "after": {
+    "max_internal_fan_in": 3,
+    "max_internal_fan_in_module": "bioetl.composition.runtime_builders.run_manifest_support",
+    "bounded_growth_budget": 5
+  },
+  "summary": [
+    "Moved contract-identity shape helpers to the existing identity-ref-values owner while preserving compatibility re-exports.",
+    "Converted annotation-only ResolvedVacuumSettings imports to type-only imports and facade binding.",
+    "Moved effective-config resolved-config serialization behind effective-config support.",
+    "Split run-manifest data-root path construction from data-root mode policy and routed callers through narrower owners.",
+    "Split runner control-plane strict data-root and artifact-recorder validation into leaf policy owners."
+  ],
+  "validation": [
+    "python -m scripts.engineering.qa report-family-baseline --check",
+    "pytest tests/architecture/test_tech_debt_issue_6060_closeout.py -q"
+  ]
+}

@@ -16,6 +16,7 @@ __all__ = [
     "GoldReconciliationReaderProtocol",
     "GoldSnapshotReaderProtocol",
     "filter_current_rows",
+    "filter_source_rows_to_current_run",
     "read_reference_rows",
     "read_rows",
     "read_source_rows",
@@ -189,3 +190,41 @@ async def read_rows(
         current_only=current_only,
         layer="gold",
     )
+
+
+_RUN_IDENTITY_COLUMNS = (
+    "_run_id",
+    "run_id",
+    "composite_run_id",
+    "_composite_run_id",
+    "workflow_run_id",
+)
+
+
+def filter_source_rows_to_current_run(
+    rows: list[dict[str, object]],
+    *,
+    source_scope: str,
+    source_run_ids: tuple[str, ...],
+) -> tuple[list[dict[str, object]], str]:
+    """Restrict source rows to the current run for CLI --limit scoped delete_orphans."""
+    if source_scope != "current_run":
+        return rows, "all_current"
+    if not rows:
+        return rows, "current_run"
+    if not source_run_ids:
+        return [], "blocked"
+    allowed = {item.strip() for item in source_run_ids if item.strip()}
+    column = _first_run_identity_column(rows)
+    if column is None:
+        return [], "blocked"
+    scoped = [row for row in rows if str(row.get(column) or "").strip() in allowed]
+    return scoped, "current_run"
+
+
+def _first_run_identity_column(rows: list[dict[str, object]]) -> str | None:
+    """Return the first known run-identity column present in any row."""
+    for candidate in _RUN_IDENTITY_COLUMNS:
+        if any(candidate in row for row in rows):
+            return candidate
+    return None

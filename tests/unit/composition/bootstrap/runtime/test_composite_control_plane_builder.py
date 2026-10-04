@@ -264,6 +264,7 @@ def test_build_composite_control_plane_bundle_fails_closed_when_manifest_disable
             clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
             settings=SimpleNamespace(
                 data_dir=str(tmp_path),
+                bronze_path=tmp_path / "output" / "bronze",
                 pipeline=SimpleNamespace(
                     control_plane=SimpleNamespace(
                         run_manifest_enabled=False,
@@ -304,6 +305,7 @@ def test_build_composite_control_plane_bundle_allows_disabled_ledger_under_degra
             clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
             settings=SimpleNamespace(
                 data_dir=str(tmp_path),
+                bronze_path=tmp_path / "output" / "bronze",
                 pipeline=SimpleNamespace(
                     control_plane=SimpleNamespace(
                         run_manifest_enabled=True,
@@ -360,6 +362,7 @@ def test_build_composite_control_plane_bundle_accepts_cli_degraded_override_when
             clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
             settings=SimpleNamespace(
                 data_dir=str(tmp_path),
+                bronze_path=tmp_path / "output" / "bronze",
                 pipeline=SimpleNamespace(
                     control_plane=SimpleNamespace(
                         run_manifest_enabled=True,
@@ -411,6 +414,7 @@ def test_build_composite_control_plane_bundle_requires_ledger_for_forensic_grade
             clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
             settings=SimpleNamespace(
                 data_dir=str(tmp_path),
+                bronze_path=tmp_path / "output" / "bronze",
                 pipeline=SimpleNamespace(
                     control_plane=SimpleNamespace(
                         run_manifest_enabled=True,
@@ -468,6 +472,7 @@ def test_build_composite_control_plane_bundle_rejects_forensic_grade_with_full_s
             clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
             settings=SimpleNamespace(
                 data_dir=str(tmp_path),
+                bronze_path=tmp_path / "output" / "bronze",
                 pipeline=SimpleNamespace(
                     control_plane=SimpleNamespace(
                         run_manifest_enabled=True,
@@ -509,6 +514,7 @@ def test_build_composite_control_plane_bundle_rejects_replay_ready_profile(
             clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
             settings=SimpleNamespace(
                 data_dir=str(tmp_path),
+                bronze_path=tmp_path / "output" / "bronze",
                 pipeline=SimpleNamespace(
                     control_plane=SimpleNamespace(
                         run_manifest_enabled=True,
@@ -566,6 +572,7 @@ def test_build_composite_control_plane_bundle_rejects_replay_ready_with_full_sna
             clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
             settings=SimpleNamespace(
                 data_dir=str(tmp_path),
+                bronze_path=tmp_path / "output" / "bronze",
                 pipeline=SimpleNamespace(
                     control_plane=SimpleNamespace(
                         run_manifest_enabled=True,
@@ -624,6 +631,7 @@ def test_build_composite_control_plane_bundle_persists_manifest_created_when_led
             clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
             settings=SimpleNamespace(
                 data_dir=str(tmp_path),
+                bronze_path=tmp_path / "output" / "bronze",
                 pipeline=SimpleNamespace(
                     control_plane=SimpleNamespace(
                         run_manifest_enabled=True,
@@ -712,6 +720,7 @@ def test_build_composite_control_plane_bundle_persists_effective_config_artifact
             clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
             settings=SimpleNamespace(
                 data_dir=str(tmp_path),
+                bronze_path=tmp_path / "output" / "bronze",
                 pipeline=SimpleNamespace(
                     control_plane=SimpleNamespace(
                         run_manifest_enabled=True,

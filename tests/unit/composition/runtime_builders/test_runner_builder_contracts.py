@@ -35,7 +35,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from bioetl.composition.runtime_builders._runner_control_plane_artifact_policy import (
+from bioetl.domain.control_plane.artifact_publication_policy import (
     requires_artifact_publication_closure,
     validate_artifact_recorder_attachment,
 )

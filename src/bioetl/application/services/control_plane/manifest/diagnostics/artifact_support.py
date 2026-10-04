@@ -2,33 +2,10 @@
 
 from __future__ import annotations
 
-from bioetl.domain.control_plane import RunManifest
-
-_ARTIFACT_TRACE_ORDERED_KEYS = (
-    "event_type",
-    "publication_status",
-    "stage",
-    "artifact_id",
-    "dataset_ref",
-    "lineage_fragment_id",
-    "artifact_path",
-    "metadata_path",
-    "artifact_kind",
-    "artifact_semantics",
-    "record_count",
-    "total_bytes",
-    "content_hash",
-    "hash_algorithm",
-    "execution_fingerprint",
-    "input_snapshot_count",
-    "input_snapshot_ids",
-    "input_snapshot_content_hashes",
-    "pipeline_name",
-    "provider",
-    "entity",
-    "run_id",
-    "manifest_id",
+from bioetl.application.ports.control_plane import (
+    ARTIFACT_TRACE_ORDERED_KEYS,
 )
+from bioetl.domain.control_plane import RunManifest
 
 
 def sorted_text_items(value: object) -> list[str]:
@@ -55,7 +32,7 @@ def build_trace_artifact_ref(
     """Return the concrete produced-artifact shape used by replay trace output."""
     return {
         key: artifact_ref[key]
-        for key in _ARTIFACT_TRACE_ORDERED_KEYS
+        for key in ARTIFACT_TRACE_ORDERED_KEYS
         if key in artifact_ref and artifact_ref[key] is not None
     }
 

@@ -1,5 +1,7 @@
 """Resolve immutable producer snapshots carried by workflow dependencies."""
 
+from __future__ import annotations
+
 from collections.abc import Mapping
 
 
@@ -21,27 +23,36 @@ def selected_snapshot_inputs(
             if not isinstance(value, Mapping):
                 raise ValueError("invalid selected snapshot metadata")
             candidate = dict(value)
-            for metadata in (candidate, snapshots.get(str(identity), {})):
-                lineage = metadata.get("ancestor_versions", [])
-                if not isinstance(lineage, list) or any(
-                    type(v) is not int for v in lineage
-                ):
-                    raise ValueError("invalid selected snapshot lineage")
             previous = snapshots.get(str(identity))
-            if previous and previous.get("table_id") != candidate.get("table_id"):
-                raise ValueError(f"selected table identity changed: {identity}")
-            if previous and previous != candidate:
-                ancestors = candidate.get("ancestor_versions", [])
-                assert isinstance(ancestors, list)
-                reverse = previous.get("ancestor_versions", [])
-                assert isinstance(reverse, list)
-                if previous.get("version") in ancestors:
-                    pass
-                elif candidate.get("version") in reverse:
-                    continue
-                else:
-                    raise ValueError(f"ambiguous selected snapshot: {identity}")
-                if previous.get("run_ids") != candidate.get("run_ids"):
-                    raise ValueError(f"selected snapshot producer changed: {identity}")
-            snapshots[str(identity)] = candidate
+            if _accept_snapshot(str(identity), candidate, previous):
+                snapshots[str(identity)] = candidate
     return snapshots
+
+
+def _lineage(metadata: Mapping[str, object]) -> list[int]:
+    """Validate ancestry before comparing selected versions."""
+    lineage = metadata.get("ancestor_versions", [])
+    if not isinstance(lineage, list) or any(type(v) is not int for v in lineage):
+        raise ValueError("invalid selected snapshot lineage")
+    return lineage
+
+
+def _accept_snapshot(
+    identity: str, candidate: dict[str, object], previous: dict[str, object] | None
+) -> bool:
+    """Accept a descendant while preserving the producer and table identities."""
+    ancestors = _lineage(candidate)
+    reverse = _lineage(previous or {})
+    if not previous:
+        return True
+    if previous.get("table_id") != candidate.get("table_id"):
+        raise ValueError(f"selected table identity changed: {identity}")
+    if previous == candidate:
+        return True
+    if previous.get("version") not in ancestors:
+        if candidate.get("version") in reverse:
+            return False
+        raise ValueError(f"ambiguous selected snapshot: {identity}")
+    if previous.get("run_ids") != candidate.get("run_ids"):
+        raise ValueError(f"selected snapshot producer changed: {identity}")
+    return True

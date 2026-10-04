@@ -13,34 +13,33 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_invar
 from bioetl.application.services.control_plane.manifest.diagnostics.resume_contract_resolve_resume_guarantee import (
     _resolve_resume_guarantee,
 )
-from bioetl.domain.control_plane import ReplayCapability, RunManifest
+from bioetl.domain.control_plane import ReplayCapability
 from bioetl.domain.control_plane.execution_context import (
     is_composite_execution_context as _is_composite_execution_context,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
-    ReproducibilityPolicyAssessment,
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context import (
-        ReplayFamilyContext,
+    from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload import (
+        _ReplayProjectionContextKwargs,
     )
 
 
 def _build_resume_contract(
     *,
-    manifest: RunManifest,
-    requested_exact_replay: bool,
-    resume_requested: bool,
+    context: _ReplayProjectionContextKwargs,
     continuation_mode: str,
-    policy_assessment: ReproducibilityPolicyAssessment,
-    replay_family_context: ReplayFamilyContext,
 ) -> dict[str, object]:
     """Return the published checkpoint/resume contract for one manifested run."""
-    profile = replay_family_context.profile
+    manifest = context["manifest"]
+    requested_exact_replay = context["requested_exact_replay"]
+    profile = context["replay_family_context"].profile
     requested_policy = _resolve_requested_checkpoint_compatibility_policy(manifest)
-    required_persistence_profile = policy_assessment.required_persistence_profile
+    required_persistence_profile = context[
+        "policy_assessment"
+    ].required_persistence_profile
     applied_policy = _resolve_applied_checkpoint_compatibility_policy(
         requested_exact_replay=requested_exact_replay,
         requested_policy=requested_policy,
@@ -56,7 +55,7 @@ def _build_resume_contract(
         continuation_mode=continuation_mode,
     )
     return {
-        "resume_requested": resume_requested,
+        "resume_requested": context["resume_requested"],
         "requested_exact_replay": requested_exact_replay,
         "requested_checkpoint_compatibility_policy": requested_policy,
         "applied_checkpoint_compatibility_policy": applied_policy,

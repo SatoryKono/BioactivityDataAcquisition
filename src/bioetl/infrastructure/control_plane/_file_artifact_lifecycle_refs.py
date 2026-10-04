@@ -254,6 +254,12 @@ def _append_checkpoint_candidates(
     )
 
     checkpoint_root = base_path.parent / "checkpoints"
+    composite_root = checkpoint_root / "composite"
+    if (
+        manifest.provider == "composite"
+        or manifest.pipeline_name.startswith("composite_")
+    ) and manifest_index_path(composite_root, manifest.manifest_id).is_file():
+        checkpoint_root = composite_root
     if not checkpoint_root.exists():
         issues.append(
             _resolution_issue(

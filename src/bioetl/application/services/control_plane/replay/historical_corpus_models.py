@@ -4,6 +4,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.application.ports.control_plane import (
+    HistoricalReplayRunIdentityRecord,
+)
+
 CORPUS_MODEL_PUBLIC_NAMES: tuple[str, ...] = (
     "HistoricalReplayBulkCertificationRecord",
     "HistoricalReplayBulkCertificationResult",
@@ -34,15 +38,9 @@ class HistoricalReplaySnapshotCertification:
 
 
 @dataclass(frozen=True, slots=True)
-class HistoricalReplayCertifiabilityRecord:
+class HistoricalReplayCertifiabilityRecord(HistoricalReplayRunIdentityRecord):
     """One deterministic certifiability record for a retained manifest."""
 
-    manifest_id: str
-    run_id: str
-    pipeline_name: str
-    provider: str
-    entity: str
-    execution_context: str
     family: str | None
     certification_scope: str | None
     certification_status: str

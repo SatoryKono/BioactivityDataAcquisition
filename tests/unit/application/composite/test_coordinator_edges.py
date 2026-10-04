@@ -259,3 +259,36 @@ def test_process_results_maps_names_to_results(
 
     assert processed["crossref_publication"] is result
     assert processed["crossref_publication"].status == EnrichmentStatus.FAILED
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+@pytest.mark.parametrize("required", [False, True])
+async def test_unexpected_provider_exception_obeys_required_enricher_contract(
+    coordinator: EnrichmentCoordinatorService,
+    mock_logger: MagicMock,
+    required: bool,
+) -> None:
+    class ProviderFailure(Exception):
+        pass
+
+    error = ProviderFailure("provider plugin failed")
+    runner = MagicMock()
+    runner.run = AsyncMock(side_effect=error)
+    invocation = coordinator._run_single_enricher(
+        enricher=_make_enricher(required=required),
+        keys=pl.DataFrame({"chembl_id": ["CHEMBL1"]}),
+        runner_factory=lambda _pipeline, _keys: runner,
+    )
+    if required:
+        with pytest.raises(ProviderFailure) as caught:
+            await invocation
+        assert caught.value is error
+        log = mock_logger.error
+    else:
+        result = await invocation
+        assert result.status == EnrichmentStatus.FAILED
+        assert "provider plugin failed" in result.error_message
+        log = mock_logger.warning
+    assert log.call_args.kwargs["reason_code"] == "unexpected_provider_error"
+    runner.run.assert_awaited_once()

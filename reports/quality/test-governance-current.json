@@ -27,7 +27,7 @@
       "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
       "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
     ],
-    "scanned_test_count": 372,
+    "scanned_test_count": 373,
     "unreviewed_count": 0
   },
   "assertion_branch_reachability_percent": 100.0,
@@ -90,7 +90,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1552",
+      "line": "1554",
       "path": "tests/unit/application/test_issue_10518_application_svc2.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_checkpoint_record_metrics_noop_without_sink"
@@ -300,21 +300,21 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "308",
+      "line": "320",
       "path": "tests/unit/infrastructure/adapters/test_client_retry_mixin.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_record_retry_budget_exhausted_silent_without_logger"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "419",
+      "line": "431",
       "path": "tests/unit/infrastructure/adapters/test_client_retry_mixin.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_log_retry_silent_without_logger"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "234",
+      "line": "258",
       "path": "tests/unit/infrastructure/adapters/decorators/test_circuit_breaker_decorator.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_aclose_delegated"
@@ -630,7 +630,7 @@
     "tests/unit/application/test_issue_10518_application_coreobs_b.py:50",
     "tests/unit/application/test_issue_10518_application_pipelines_a.py:753",
     "tests/unit/application/test_issue_10518_application_svc1a.py:915",
-    "tests/unit/application/test_issue_10518_application_svc2.py:1552",
+    "tests/unit/application/test_issue_10518_application_svc2.py:1554",
     "tests/unit/application/test_issue_10518_application_tail1a.py:981",
     "tests/unit/application/core/test_batch_metrics_accounting.py:48",
     "tests/unit/application/core/test_batch_tracing.py:137",
@@ -1058,7 +1058,7 @@
       "test_count": 9
     },
     "pipeline_run_fsm": {
-      "assertion_backed_tests": 81,
+      "assertion_backed_tests": 82,
       "assertion_examples": [
         "tests/unit/application/core/test_batch_transformer.py:73",
         "tests/unit/application/core/test_batch_transformer.py:91",
@@ -1079,7 +1079,7 @@
         "tests/unit/domain/aggregates/test_batch_invariant_properties.py",
         "tests/unit/application/core/test_batch_transformer.py"
       ],
-      "test_count": 81
+      "test_count": 82
     },
     "quarantine_replay": {
       "assertion_backed_tests": 45,
@@ -1197,7 +1197,7 @@
         "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
         "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
       ],
-      "scanned_test_count": 372,
+      "scanned_test_count": 373,
       "unreviewed_count": 0
     },
     "assertion_branch_reachability_percent": 100.0,
@@ -1260,7 +1260,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1552",
+        "line": "1554",
         "path": "tests/unit/application/test_issue_10518_application_svc2.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_checkpoint_record_metrics_noop_without_sink"
@@ -1470,21 +1470,21 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "308",
+        "line": "320",
         "path": "tests/unit/infrastructure/adapters/test_client_retry_mixin.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_record_retry_budget_exhausted_silent_without_logger"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "419",
+        "line": "431",
         "path": "tests/unit/infrastructure/adapters/test_client_retry_mixin.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_log_retry_silent_without_logger"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "234",
+        "line": "258",
         "path": "tests/unit/infrastructure/adapters/decorators/test_circuit_breaker_decorator.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_delegated"
@@ -1800,7 +1800,7 @@
       "tests/unit/application/test_issue_10518_application_coreobs_b.py:50",
       "tests/unit/application/test_issue_10518_application_pipelines_a.py:753",
       "tests/unit/application/test_issue_10518_application_svc1a.py:915",
-      "tests/unit/application/test_issue_10518_application_svc2.py:1552",
+      "tests/unit/application/test_issue_10518_application_svc2.py:1554",
       "tests/unit/application/test_issue_10518_application_tail1a.py:981",
       "tests/unit/application/core/test_batch_metrics_accounting.py:48",
       "tests/unit/application/core/test_batch_tracing.py:137",
@@ -1895,7 +1895,7 @@
         "test_count": 9
       },
       "pipeline_run_fsm": {
-        "assertion_backed_tests": 81,
+        "assertion_backed_tests": 82,
         "assertion_examples": [
           "tests/unit/application/core/test_batch_transformer.py:73",
           "tests/unit/application/core/test_batch_transformer.py:91",
@@ -1916,7 +1916,7 @@
           "tests/unit/domain/aggregates/test_batch_invariant_properties.py",
           "tests/unit/application/core/test_batch_transformer.py"
         ],
-        "test_count": 81
+        "test_count": 82
       },
       "quarantine_replay": {
         "assertion_backed_tests": 45,
@@ -2010,8 +2010,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2992,
-      "test_python_file_count": 3227,
+      "test_glob_file_count": 3008,
+      "test_python_file_count": 3243,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2052,13 +2052,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2992,
-    "total_test_functions": 29243,
+    "total_test_files": 3008,
+    "total_test_functions": 29408,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "c2c857a241e4273b15d193fdf52f843358e971b6658cc613ea68fec666b3e157",
+  "source_tree_sha256": "cef81bacda9fe225fd16d49350c41eb0b413ad96a69e672755390a064cf1bcaa",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 83,
@@ -2078,8 +2078,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2992,
-    "test_python_file_count": 3227,
+    "test_glob_file_count": 3008,
+    "test_python_file_count": 3243,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2120,8 +2120,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2992,
-  "total_test_functions": 29243,
+  "total_test_files": 3008,
+  "total_test_functions": 29408,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

@@ -100,6 +100,36 @@ def test_find_next_suffix_returns_next_single_letter(
 
 
 @pytest.mark.unit
+def test_preserve_sources_never_overwrites_existing_canonical_field(
+    logger, coalesce_policy
+):
+    frame = pl.DataFrame(
+        {"title": ["canonical"], "chembl.publication.title": ["source"]}
+    )
+    service = _build_service(logger, coalesce_policy, preserve_all_sources=True)
+    result = service._materialize_canonical_fields(frame, "chembl_publication")
+    assert result.equals(frame)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("no_qualified_columns", [False, True])
+def test_preserve_sources_leaves_frame_intact_when_policy_has_no_candidates(
+    logger, coalesce_policy, monkeypatch, no_qualified_columns
+):
+    from bioetl.application.composite import _coalesce_policy_support as support
+
+    frame = pl.DataFrame({"chembl.publication.title": ["source"]})
+    service = _build_service(logger, coalesce_policy, preserve_all_sources=True)
+    if no_qualified_columns:
+        monkeypatch.setattr(support, "build_field_groups", lambda _frame: {"title": []})
+    else:
+        monkeypatch.setattr(support, "compatible_columns", lambda _frame, _cols: [])
+    result = service._materialize_canonical_fields(frame, "chembl_publication")
+    assert result.equals(frame)
+    assert "title" not in result.columns
+
+
+@pytest.mark.unit
 def test_find_next_suffix_rolls_to_double_letter(
     logger: MagicMock, coalesce_policy: MagicMock
 ) -> None:

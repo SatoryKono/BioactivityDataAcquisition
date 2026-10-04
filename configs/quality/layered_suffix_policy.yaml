@@ -112,24 +112,6 @@ suffix_boundary_rules:
       - src/bioetl/composition/
     allowed_symbol_exceptions: []
     allowed_module_exceptions:
-      - path: src/bioetl/application/composite/dependency_join_context_builders.py
-        issue: "#3722"
-        owner: "@bioetl-architecture"
-        expires_on: "2026-09-30"
-        removal_step: Rename module when dependency-join helper API can move behind composition-owned construction vocabulary.
-        reason: Existing application helper module with no public *Builder symbol; retained as reviewed naming debt.
-      - path: src/bioetl/application/services/dq/dq_report_builders.py
-        issue: "#3722"
-        owner: "@bioetl-architecture"
-        expires_on: "2026-09-30"
-        removal_step: Rename module when DQ report assembly helpers are consolidated behind role-neutral service naming.
-        reason: Existing DQ helper module with no public *Builder symbol; retained as reviewed naming debt.
-      - path: src/bioetl/application/services/lineage/metadata_lineage_node_builders.py
-        issue: "#3722"
-        owner: "@bioetl-architecture"
-        expires_on: "2026-09-30"
-        removal_step: Rename module when lineage metadata node assembly helpers are consolidated behind role-neutral service naming.
-        reason: Existing lineage helper module with no public *Builder symbol; retained as reviewed naming debt.
       - path: src/bioetl/domain/value_objects/dq_report_builder.py
         issue: "#3722"
         owner: "@bioetl-architecture"
@@ -139,13 +121,13 @@ suffix_boundary_rules:
       - path: src/bioetl/infrastructure/adapters/crossref/client_builders.py
         issue: "#3722"
         owner: "@bioetl-architecture"
-        expires_on: "2026-10-31"
+        expires_on: "2026-10-15"
         removal_step: Rename module when CrossRef client component helpers move behind adapter-owned role-neutral naming.
         reason: Existing adapter helper module with no public *Builder symbol; retained as reviewed naming debt.
       - path: src/bioetl/infrastructure/adapters/crossref/query_builder.py
         issue: "#3722"
         owner: "@bioetl-architecture"
-        expires_on: "2026-10-31"
+        expires_on: "2026-10-15"
         removal_step: Rename module when CrossRef query planning helpers move behind adapter-owned role-neutral naming.
         reason: Existing adapter query helper module with no public *Builder symbol; retained as reviewed naming debt.
       - path: src/bioetl/infrastructure/adapters/openalex/query_builder.py
@@ -166,30 +148,6 @@ suffix_boundary_rules:
         expires_on: "2026-11-30"
         removal_step: Rename module when PubChem query planning helpers move behind adapter-owned role-neutral naming.
         reason: Existing adapter query helper module with no public *Builder symbol; retained as reviewed naming debt.
-      - path: src/bioetl/infrastructure/adapters/uniprot/query_builder.py
-        issue: "#3722"
-        owner: "@bioetl-architecture"
-        expires_on: "2026-09-30"
-        removal_step: Rename module when UniProt query planning helpers move behind adapter-owned role-neutral naming.
-        reason: Existing adapter query helper module with no public *Builder symbol; retained as reviewed naming debt.
-      - path: src/bioetl/infrastructure/storage/bronze/metadata_builders.py
-        issue: "#3722"
-        owner: "@bioetl-architecture"
-        expires_on: "2026-09-30"
-        removal_step: Rename module when Bronze metadata payload helpers move behind storage-owned role-neutral naming.
-        reason: Existing storage metadata helper module with no public *Builder symbol; retained as reviewed naming debt.
-      - path: src/bioetl/domain/run_reports/pipeline_builder.py
-        issue: "#3722"
-        owner: "@bioetl-architecture"
-        expires_on: "2026-09-30"
-        removal_step: Rename module when pipeline run-report assembly helpers move behind role-neutral domain naming.
-        reason: Existing domain helper module with build_* functions and no public *Builder symbol; retained as reviewed naming debt.
-      - path: src/bioetl/domain/run_reports/workflow_builder.py
-        issue: "#3722"
-        owner: "@bioetl-architecture"
-        expires_on: "2026-09-30"
-        removal_step: Rename module when workflow run-report assembly helpers move behind role-neutral domain naming.
-        reason: Existing domain helper module with build_* functions and no public *Builder symbol; retained as reviewed naming debt.
   - rule_id: composition_infrastructure_service_suffix
     description: >
       Composition and infrastructure layers must not expose new first-party

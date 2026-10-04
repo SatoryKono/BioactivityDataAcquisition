@@ -24,15 +24,17 @@
 # pyright: reportFunctionMemberAccess=false
 # pyright: reportConstantRedefinition=false
 # pyright: reportInvalidTypeForm=false
-# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+# PD5 test mock/fixture surface â€” product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Unit tests for reconcile_foreign_keys workflow config validation."""
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 import pytest
 from pydantic import ValidationError
 
-from bioetl.domain.workflow import TransformStepConfig
+from bioetl.domain.workflow import TransformStepConfig, WorkflowStepConfig
 from bioetl.infrastructure.schemas.workflow_config import WorkflowConfigFileSchema
 
 pytestmark = pytest.mark.unit
@@ -81,6 +83,7 @@ def test_reconcile_foreign_keys_config_is_normalized_into_domain_config() -> Non
     step = workflow.steps[0]
     assert isinstance(step, TransformStepConfig)
     assert step.config == {
+        "require_closed_cohort": False,
         "source_layer": "gold",
         "reference_layer": "gold",
         "mutation_layer": "gold",
@@ -91,7 +94,6 @@ def test_reconcile_foreign_keys_config_is_normalized_into_domain_config() -> Non
         "primary_keys": ["assay_id"],
         "action": "delete_orphans",
         "nulls_equal": False,
-        "require_closed_cohort": False,
     }
 
 
@@ -234,9 +236,7 @@ def test_delete_orphans_rejects_limited_pipeline_behind_intermediary() -> None:
 def test_cli_limit_override_requires_bound_references(
     workflow_name: str, bound_cohort: bool
 ) -> None:
-    from dataclasses import replace
 
-    from bioetl.domain.workflow import WorkflowStepConfig
     from bioetl.infrastructure.config.workflow_config_api import load_workflow_config
     from bioetl.interfaces.cli.commands._workflow_override_support import (
         apply_cli_overrides,

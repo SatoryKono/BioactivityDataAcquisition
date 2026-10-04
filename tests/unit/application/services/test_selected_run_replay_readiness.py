@@ -180,3 +180,68 @@ def test_unfinished_run_is_not_ready() -> None:
         artifact_probes=(_pass_probe(),),
     )
     assert projection["verdict"] == BLOCKED
+
+
+def test_replay_with_a_recorded_run_anchor_can_be_ready() -> None:
+    projection = project_selected_run_replay_readiness(
+        identity={
+            **_PASSING_IDENTITY,
+            "exact_replay": True,
+            "replay_of_run_id": "source",
+        },
+        manifest=_PASSING_MANIFEST,
+        inventory_present=True,
+        artifact_probes=(_pass_probe(),),
+    )
+    assert projection["verdict"] == READY
+    anchor = next(c for c in projection["checks"] if c["code"] == "replay_of_run_id")
+    assert anchor["result"] == "pass"
+    assert anchor["reason"] == "replay_anchor_present"
+
+
+def test_unknown_terminal_state_is_insufficient_even_with_verified_artifacts() -> None:
+    projection = project_selected_run_replay_readiness(
+        identity={**_PASSING_IDENTITY, "status": "unrecognized"},
+        manifest=_PASSING_MANIFEST,
+        inventory_present=True,
+        artifact_probes=(_pass_probe(),),
+    )
+    assert projection["verdict"] == INSUFFICIENT
+    assert projection["unknown_checks"] == ["terminal_status"]
+
+
+def test_present_but_empty_artifact_inventory_cannot_be_ready() -> None:
+    projection = project_selected_run_replay_readiness(
+        identity=_PASSING_IDENTITY,
+        manifest=_PASSING_MANIFEST,
+        inventory_present=True,
+    )
+    assert projection["verdict"] == INSUFFICIENT
+    assert projection["unknown_checks"] == ["artifact_inventory"]
+    assert projection["checks"][-1]["reason"] == "artifact_inventory_empty"
+
+
+@pytest.mark.parametrize("flag,expected", [("yes", READY), ("0", UNSUPPORTED)])
+def test_legacy_family_support_tokens_retain_their_recorded_meaning(
+    flag: str, expected: str
+) -> None:
+    manifest = {**_PASSING_MANIFEST, "strict_exact_replay_supported": flag}
+    del manifest["exact_replay_supported"]
+    projection = project_selected_run_replay_readiness(
+        identity=_PASSING_IDENTITY,
+        manifest=manifest,
+        inventory_present=True,
+        artifact_probes=(_pass_probe(),),
+    )
+    assert projection["verdict"] == expected
+
+
+def test_unknown_capability_remains_insufficient() -> None:
+    projection = project_selected_run_replay_readiness(
+        identity=_PASSING_IDENTITY,
+        manifest={**_PASSING_MANIFEST, "replay_capability": "unrecognized"},
+        inventory_present=True,
+        artifact_probes=(_pass_probe(),),
+    )
+    assert projection["verdict"] == INSUFFICIENT
+    assert projection["unknown_checks"] == ["exact_replay_family"]

@@ -9,6 +9,50 @@ from bioetl.domain.run_reports.stage_diagnostics import project_stage_diagnostic
 pytestmark = pytest.mark.unit
 
 
+def test_missing_report_and_unrelated_events_do_not_invent_stage_evidence():
+    payload = project_stage_diagnostics(
+        None, ledger_events=({"event_type": "run_started"},)
+    )
+    assert payload["diagnostic_coverage"] == "INCOMPLETE"
+    assert payload["stage_diagnostics"][0]["records_in"] is None
+
+
+@pytest.mark.parametrize("duration", [{"duration_seconds": True}, "invalid"])
+def test_unknown_balance_and_invalid_measurements_remain_incomplete(duration):
+    payload = project_stage_diagnostics(
+        {
+            "identity": {"status": "success"},
+            "funnel": [{"stage_id": "silver", "records_in": True, "records_out": "3"}],
+            "stage_timings": {"silver": duration},
+        }
+    )
+    row = payload["stage_diagnostics"][0]
+    assert row["state"] == "INCOMPLETE"
+    assert row["reason"] == "stage_balance_unknown"
+    assert row["records_in"] is None
+    assert row["records_out"] is None
+    assert row["duration_seconds"] is None
+
+
+def test_ledger_start_is_unfinished_and_does_not_duplicate_report_stage():
+    payload = project_stage_diagnostics(
+        {
+            "identity": {"status": "running"},
+            "funnel": [{"stage_id": "bronze", "balance_status": "OK"}],
+        },
+        ledger_events=(
+            {"event_type": "stage_started", "stage_id": "silver"},
+            {"event_type": "stage_completed", "stage_id": "bronze"},
+            {"event_type": "run_started"},
+        ),
+    )
+    rows = payload["stage_diagnostics"]
+    assert [row["stage_id"] for row in rows] == ["bronze", "silver"]
+    assert [row["state"] for row in rows] == ["UNFINISHED", "UNFINISHED"]
+    assert rows[1]["source"] == "ledger"
+    assert payload["diagnostic_coverage"] == "INCOMPLETE"
+
+
 def test_success_with_balanced_funnel_keeps_zero_and_coverage() -> None:
     payload = project_stage_diagnostics(
         {

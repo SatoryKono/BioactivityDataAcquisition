@@ -90,17 +90,7 @@ class ForeignKeyReconciliationRequest:
         require_optional_str(self.debug_export_dir, "debug_export_dir")
         require_source_scope(self.source_scope)
         require_reconciliation_mode(self.reconciliation_mode)
-        if self.reconciliation_mode == "selected-snapshot":
-            if (
-                self.source_scope != "current_run"
-                or not self.workflow_run_id
-                or not self.source_run_ids
-            ):
-                raise ValueError(
-                    "selected-snapshot requires current_run scope and workflow/producer run identities"
-                )
-            if not self.selected_snapshots:
-                raise ValueError("selected-snapshot requires pinned producer snapshots")
+        self._validate_selected_snapshot()
         object.__setattr__(
             self,
             "source_run_ids",
@@ -120,6 +110,27 @@ class ForeignKeyReconciliationRequest:
         require_optional_str(
             self.completeness_evidence_ref, "completeness_evidence_ref"
         )
+        self._validate_completeness_identity(completeness)
+
+    def _validate_selected_snapshot(self) -> None:
+        """Validate the bounded producer evidence before normalizing run IDs."""
+        if self.reconciliation_mode != "selected-snapshot":
+            return
+        if any(
+            (
+                self.source_scope != "current_run",
+                not self.workflow_run_id,
+                not self.source_run_ids,
+            )
+        ):
+            raise ValueError(
+                "selected-snapshot requires current_run scope and workflow/producer run identities"
+            )
+        if not self.selected_snapshots:
+            raise ValueError("selected-snapshot requires pinned producer snapshots")
+
+    def _validate_completeness_identity(self, completeness: str) -> None:
+        """Require an auditable identity for complete reference evidence."""
         if completeness == "complete" and (
             self.reference_identity is None or self.completeness_evidence_ref is None
         ):

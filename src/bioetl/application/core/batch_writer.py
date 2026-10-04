@@ -14,7 +14,6 @@ from bioetl.application.core.batch_writer_tracing_mixin import (
     BatchWriterLockValidator,
     BatchWriterTracingMixin,
 )
-from bioetl.domain.composite import DataSchemaConfig
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -25,6 +24,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.export_lineage.debug_export_service import (
         DebugExportService,
     )
+    from bioetl.domain.composite import DataSchemaConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.models.metadata import SourceMetadata

@@ -10,6 +10,7 @@ import asyncio
 import contextlib
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.ops.error_handler import handle_operation_errors
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.domain.types import RunID
 
@@ -102,17 +103,22 @@ class HeartbeatTask:
         On lock loss, request shutdown and return immediately so the background
         task completes cleanly without failing with PipelineShutdownError.
         """
+
+        def request_shutdown(error: Exception) -> None:
+            self._logger.error(
+                "Heartbeat failed during execution", error_type=type(error).__name__
+            )
+            self._shutdown_signal.request()
+
         while not self._shutdown_signal.is_requested:
             await asyncio.sleep(self._interval)
-            try:
+            completed = False
+            with handle_operation_errors(request_shutdown):
                 success = await self._lock_port.heartbeat(
                     self._lock_key, self._owner_id, exclusive=self._exclusive
                 )
-            except Exception as exc:
-                self._logger.error(
-                    "Heartbeat failed during execution: %s", type(exc).__name__
-                )
-                self._shutdown_signal.request()
+                completed = True
+            if not completed:
                 return
             if not success:
                 self._logger.error("Lost lock during execution!")

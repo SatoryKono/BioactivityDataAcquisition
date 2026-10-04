@@ -6,6 +6,16 @@ from bioetl.interfaces.http._identity_display_rows import identity_display_rows
 pytestmark = pytest.mark.unit
 
 
+def test_naive_timestamp_formatter_uses_utc_before_timezone_conversion():
+    from datetime import datetime
+    from bioetl.interfaces.http._identity_display_rows import format_timestamp_label
+
+    assert (
+        format_timestamp_label(datetime(2026, 9, 8, 5, 10), "Europe/Kiev")
+        == "2026-09-08 08:10 EEST"
+    )
+
+
 @pytest.mark.parametrize(
     "zone,expected",
     [

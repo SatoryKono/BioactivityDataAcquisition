@@ -16,10 +16,6 @@ from bioetl.application.composite.runner_pkg.runner_execution_orchestrator impor
     CompositeLockedExecutionContext,
     execute_locked_run_phases,
 )
-from bioetl.application.composite.runner_pkg.runner_key_flow import (
-    CompositeEnrichmentKeyContext,
-    extract_enrichment_keys,
-)
 from bioetl.application.composite.runner_pkg.runner_lifecycle_flow import (
     _RunnerLifecycleHost,
     complete_successful_run,
@@ -57,10 +53,7 @@ from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 if TYPE_CHECKING:
     from datetime import datetime
 
-    import polars as pl
-
     from bioetl.application.composite.checkpoint import CompositeCheckpointState
-    from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.application.services.run_reports.composite import (
         CompositeRunReportService,
     )
@@ -83,7 +76,6 @@ class CompositePipelineRunner(
 
     _lock: LockPort  # pyright: ignore[reportUninitializedInstanceVariable]
     _clock: ClockPort | None
-    _key_extractor: KeyExtractorService  # pyright: ignore[reportUninitializedInstanceVariable]
     _observer: CompositeLifecycleObserverService
     _tracing: TracingPort | None
     # Lifecycle host surface (initialized by initialize_runner_runtime_state).
@@ -217,19 +209,6 @@ class CompositePipelineRunner(
             current_run_id=self._run_id_str,
         )
         return state
-
-    async def _extract_enrichment_keys(self) -> pl.DataFrame:
-        """Extract seed keys once the seed phase has completed."""
-        enrichment_key_result = await extract_enrichment_keys(
-            key_extractor=self._key_extractor,
-            logger=self._logger,
-            request=CompositeEnrichmentKeyContext(
-                composite_name=self._config.name,
-                silver_table=self._config.seed.silver_table,
-                output_keys=tuple(self._config.seed.output_keys),
-            ),
-        )
-        return enrichment_key_result.keys_df
 
     async def _execute_locked_run_phases(
         self,

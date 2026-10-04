@@ -242,3 +242,77 @@ def test_checkpoint_writer_rejects_oversized_payload(tmp_path: Path) -> None:
     writer = FileCompositeCheckpointWriter(tmp_path, max_checkpoint_bytes=8)
     with pytest.raises(CheckpointSizeError):
         writer.write_atomic("state.json", "x" * 16)
+
+
+def test_composite_history_survives_cleanup_and_is_manifest_addressable(
+    tmp_path: Path,
+) -> None:
+    import json
+    from types import SimpleNamespace
+    from uuid import UUID
+    from bioetl.infrastructure.control_plane._file_artifact_lifecycle_refs import (
+        _append_checkpoint_candidates,
+    )
+
+    root = tmp_path / "output/checkpoints/composite"
+    writer = FileCompositeCheckpointWriter(root, preserve_history=True)
+    run_id, manifest_id = str(UUID(int=1)), str(UUID(int=2))
+    payload = {
+        "composite_name": "composite_activity",
+        "run_id": run_id,
+        "manifest_id": manifest_id,
+        "state": "MERGING",
+    }
+    writer.write_atomic("active.json", json.dumps(payload))
+    payload["state"] = "COMPLETED"
+    writer.write_atomic("active.json", json.dumps(payload))
+    writer.delete("active.json")
+    candidates, issues = [], []
+    manifest = SimpleNamespace(
+        provider="composite",
+        pipeline_name="composite_activity",
+        run_id=run_id,
+        manifest_id=manifest_id,
+    )
+    _append_checkpoint_candidates(
+        candidates, issues, tmp_path / "output/control", manifest
+    )
+    assert not issues
+    paths = {path for _, path in candidates}
+    index = root / ".history/by_manifest" / f"{manifest_id}.json"
+    assert index in paths
+    history = root / json.loads(index.read_text())["history_path"]
+    assert history in paths
+    assert json.loads(history.read_text()) == payload
+    assert (
+        len(
+            list(
+                (root / ".history/by_pipeline/composite_activity" / run_id).glob(
+                    "*.json"
+                )
+            )
+        )
+        == 2
+    )
+
+
+@pytest.mark.parametrize("pipeline", ["../escape", "nested/name", "C:\\escape", ""])
+def test_composite_history_rejects_invalid_identity(
+    tmp_path: Path, pipeline: str
+) -> None:
+    import json
+    from uuid import UUID
+
+    writer = FileCompositeCheckpointWriter(tmp_path, preserve_history=True)
+    with pytest.raises(CheckpointPathError):
+        writer.write_atomic(
+            "state.json",
+            json.dumps(
+                {
+                    "composite_name": pipeline,
+                    "run_id": str(UUID(int=1)),
+                    "manifest_id": str(UUID(int=2)),
+                }
+            ),
+        )
+    assert not (tmp_path / ".history").exists()

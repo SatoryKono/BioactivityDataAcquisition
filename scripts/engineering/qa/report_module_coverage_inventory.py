@@ -732,6 +732,13 @@ def _build_one_hotspot_family_coverage(
         unexpected_unmeasured_modules=unexpected_unmeasured_modules,
         covered_line_percent=covered_line_percent,
     )
+    if family_thresholds.get("require_all_modules_covered") and (
+        not family_rows
+        or measured_module_count != len(family_rows)
+        or covered_module_count != len(family_rows)
+        or covered_line_percent is None
+    ):
+        threshold_status = "fail"
     return {
         "module_count": len(family_rows),
         "measured_module_count": measured_module_count,

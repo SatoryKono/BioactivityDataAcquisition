@@ -14,6 +14,32 @@ from bioetl.interfaces.http import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.asyncio
+async def test_latest_complete_uses_both_pipeline_and_workflow_catalogs(monkeypatch):
+    from unittest.mock import MagicMock
+    from bioetl.interfaces.http import (
+        _health_server_control_plane_evidence_routing as module,
+    )
+
+    host = MagicMock()
+    host._read_required_param.return_value = "chembl_activity"
+    host._read_scope_csv_param.side_effect = lambda _query, key: (
+        ("backfill",) if key == "run_type" else ()
+    )
+    host._is_all_scope_token.return_value = False
+    host._run_manifest_port.list_all.return_value = ("pipeline-manifest",)
+    host._workflow_manifest_port.list_all.return_value = ("workflow-manifest",)
+    monkeypatch.setattr(module, "read_selected_run_id", lambda *a: None)
+    monkeypatch.setattr(module, "_require_service", lambda _host: "service")
+    build = MagicMock(return_value={"status": "OK"})
+    monkeypatch.setattr(module, "build_latest_complete_run_payload", build)
+    assert await module._latest_complete_payload(host, {}) == {"status": "OK"}
+    assert build.call_args.kwargs["manifests"] == ("pipeline-manifest",)
+    assert build.call_args.kwargs["workflow_manifests"] == ("workflow-manifest",)
+    host._run_manifest_port.list_all.assert_called_once_with()
+    host._workflow_manifest_port.list_all.assert_called_once_with()
+
+
 class _Host:
     def __init__(self, *, pipeline_error: Exception | None = None) -> None:
         self._run_manifest_port = object()

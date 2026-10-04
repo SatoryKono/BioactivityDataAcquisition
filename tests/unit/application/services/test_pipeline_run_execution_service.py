@@ -213,3 +213,12 @@ class TestPipelineRunExecutionService:
 
         runner.run.assert_awaited_once()
         run_logger.info.assert_called_once_with("Pipeline completed successfully")
+
+
+@pytest.mark.unit
+def test_blank_error_message_preserves_nonempty_exception_args():
+    from bioetl.application.services.execution.pipeline_run_execution_service import (
+        format_run_error_message,
+    )
+
+    assert format_run_error_message(TypeError("")) == "TypeError: ('',)"

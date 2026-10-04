@@ -150,3 +150,51 @@ async def test_assay_parameters_limited_fetch_uses_multiplied_upstream_budget():
     source = AssayParametersDataSource(adapter)
     _ = [row async for row in source.fetch("assay_parameters", limit=10)]
     assert adapter.fetch_calls[-1]["limit"] == 10 * source.ASSAY_LIMIT_MULTIPLIER + 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("fetch_mode", ["multi", "fallback"])
+async def test_filtered_expansion_preserves_parameter_limit_and_identity(fetch_mode):
+    adapter = _FilterableAssaySource(
+        [
+            {
+                "assay_chembl_id": "CHEMBL1",
+                "assay_parameters": [
+                    {"type": "PH", "value": 7},
+                    {"type": "PH", "value": 8},
+                ],
+            },
+        ]
+    )
+    source = AssayParametersDataSource(adapter)
+    if fetch_mode == "multi":
+        records = source.fetch_multi_filtered(
+            "assay_parameters", filters={"assay_id": ["CHEMBL1"]}, limit=1
+        )
+    else:
+        records = source.fetch_filtered_with_fallback(
+            "assay_parameters",
+            filter_ids=["CHEMBL1"],
+            filter_field="assay_id",
+            fallback_mapping={"CHEMBL1": "assay one"},
+            limit=1,
+        )
+
+    rows = [row async for row in records]
+
+    assert len(rows) == 1
+    assert rows[0]["assay_id"] == "CHEMBL1"
+    assert rows[0]["value"] == 7
+    assert (
+        rows[0]["assay_param_id"]
+        == source._parameters(adapter._assays[0])[0]["assay_param_id"]
+    )
+
+
+def test_malformed_parameter_reaches_quarantine_without_manufactured_identity():
+    assert AssayParametersDataSource._parameters(
+        {"assay_chembl_id": "CHEMBL1", "assay_parameters": [None, "invalid"]}
+    ) == [
+        {"assay_id": "CHEMBL1", "invalid_parameter": None},
+        {"assay_id": "CHEMBL1", "invalid_parameter": "invalid"},
+    ]

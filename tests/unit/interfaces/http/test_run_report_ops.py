@@ -100,6 +100,46 @@ def test_load_missing_returns_none(tmp_path: Path) -> None:
     )
 
 
+@pytest.mark.parametrize(
+    "content,reason",
+    [
+        (b"{", "malformed_json"),
+        (b"\xff", "malformed_encoding"),
+        (b"[]", "invalid_payload"),
+    ],
+)
+def test_corrupt_workflow_report_is_explicitly_rejected(tmp_path, content, reason):
+    target = tmp_path / "workflow" / "wf" / "run1" / "workflow-run-report.json"
+    target.parent.mkdir(parents=True)
+    target.write_bytes(content)
+    with pytest.raises(InvalidRunReportError) as caught:
+        load_workflow_run_report_payload(
+            workflow_name="wf", workflow_run_id="run1", root=tmp_path
+        )
+    assert caught.value.reason == reason
+    assert caught.value.expected_schema == "workflow_run_report_v1"
+
+
+def test_unreadable_workflow_report_preserves_io_failure_reason(tmp_path, monkeypatch):
+    target = tmp_path / "workflow" / "wf" / "run1" / "workflow-run-report.json"
+    target.parent.mkdir(parents=True)
+    target.write_text("{}")
+    original = Path.read_text
+
+    def fail_selected(path, *args, **kwargs):
+        if path == target:
+            raise PermissionError("access denied")
+        return original(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", fail_selected)
+    with pytest.raises(InvalidRunReportError) as caught:
+        load_workflow_run_report_payload(
+            workflow_name="wf", workflow_run_id="run1", root=tmp_path
+        )
+    assert caught.value.reason == "report_read_error"
+    assert isinstance(caught.value.__cause__, PermissionError)
+
+
 def test_load_explicit_workflow_report_missing_file_returns_none(
     tmp_path: Path,
 ) -> None:

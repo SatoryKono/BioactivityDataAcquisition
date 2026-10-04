@@ -6,7 +6,7 @@ Provides a declarative API for registering provider adapters.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, Protocol, TypeVar, cast
 
 from bioetl.composition.providers._models import (
     AdapterCreatorProtocol,
@@ -16,7 +16,6 @@ from bioetl.composition.providers._models import (
 from bioetl.composition.providers.provider_registry import (
     register_default_provider_config,
 )
-from bioetl.domain.mixin_host import as_mixin_host
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -30,6 +29,12 @@ __all__ = [
 ]
 
 T = TypeVar("T", bound="DataSourcePort")
+
+
+class _ProviderClassMetadata(Protocol):
+    """Registration metadata attached to the adapter class, not its instances."""
+
+    __provider_name__: str
 
 
 def _register_provider_class[T: "DataSourcePort"](
@@ -71,7 +76,7 @@ def _register_provider_class[T: "DataSourcePort"](
     # Decorators remain the sanctioned import-time compatibility seam for
     # populating the lazy default registry.
     register_default_provider_config(name, config)
-    as_mixin_host(cls).__provider_name__ = name
+    cast(_ProviderClassMetadata, cls).__provider_name__ = name
 
 
 def register_provider(

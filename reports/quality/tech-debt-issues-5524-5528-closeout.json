@@ -1,0 +1,66 @@
+{
+  "snapshot_date": "2026-07-12",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
+  "issues": [
+    {
+      "issue": "#5524",
+      "theme": "Filter metadata registry replaces inline duplicates",
+      "debt_types": ["Config debt", "Governance gap", "Duplication"],
+      "action": "Replaced inline duplicates with filter metadata registry.",
+      "risk": "low",
+      "evidence": [
+        "configs/quality/entity_filter_metadata_registry.yaml",
+        "reports/quality/config-surface-backlog.json",
+        "tests/architecture/test_tech_debt_issues_5524_5528_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5525",
+      "theme": "Pipeline sink shell is deduplicated from raw entity configs",
+      "debt_types": ["Config debt", "Governance gap", "Duplication"],
+      "action": "Deduplicated pipeline sink shell from raw entity configs.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/config-surface-backlog.json",
+        "tests/architecture/test_tech_debt_issues_5524_5528_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5526",
+      "theme": "Module coverage warning debt is replaced with reviewed ratchets",
+      "debt_types": ["Coverage debt", "Governance gap", "Budget debt"],
+      "action": "Replaced module coverage warning debt with reviewed ratchets.",
+      "risk": "low",
+      "evidence": [
+        "configs/quality/module_coverage_gates.yaml",
+        "reports/quality/debt-governance-gates.json",
+        "tests/architecture/test_tech_debt_issues_5524_5528_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5527",
+      "theme": "Internal composite wrapper dependency is removed",
+      "debt_types": ["Architecture debt", "Governance gap", "Compatibility debt"],
+      "action": "Removed internal composite wrapper dependency with proper cleanup.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/compatibility-importer-census.json",
+        "tests/architecture/test_tech_debt_issues_5524_5528_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5528",
+      "theme": "Entrypoints public export budget is ratchet down",
+      "debt_types": ["Architecture debt", "Governance gap", "Public API debt"],
+      "action": "Ratcheted down entrypoints public export budget with proper tracking.",
+      "risk": "low",
+      "evidence": [
+        "src/bioetl/composition/entrypoints.py",
+        "reports/quality/compatibility-importer-census.json",
+        "configs/quality/compatibility_facade_inventory.yaml",
+        "tests/architecture/test_tech_debt_issues_5524_5528_closeout.py"
+      ]
+    }
+  ]
+}

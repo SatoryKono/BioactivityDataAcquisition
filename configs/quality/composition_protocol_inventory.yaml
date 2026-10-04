@@ -1,7 +1,7 @@
 schema_version: 1
 owner: '@bioetl-architecture'
 linked_issue: '9599'
-expected_total: 77
+expected_total: 78
 max_composition_declarations_outside_contracts: 0
 protocols:
 - name: ObservabilityApiModule
@@ -110,35 +110,35 @@ protocols:
   target_tier: composition_contracts
 - name: ControlPlaneArtifactLifecycleStoreProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 48
+  line: 127
   target_tier: application
 - name: ForensicRunDiffServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 68
+  line: 147
   target_tier: application
 - name: HistoricalReplayClosureServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 80
+  line: 159
   target_tier: application
 - name: HistoricalReplayCorpusServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 97
+  line: 176
   target_tier: application
 - name: HistoricalReplayUniverseServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 115
+  line: 194
   target_tier: application
 - name: LineageInspectionServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 127
+  line: 206
   target_tier: application
 - name: RunManifestInspectionServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 148
+  line: 227
   target_tier: application
 - name: WorkflowInspectionServiceProtocol
   path: src/bioetl/application/ports/control_plane.py
-  line: 172
+  line: 268
   target_tier: application
 - name: DQDetectorConfig
   path: src/bioetl/application/ports/dq.py
@@ -312,3 +312,7 @@ protocols:
   path: src/bioetl/domain/ports/source_config.py
   line: 16
   target_tier: domain
+- name: RunLedgerCorrelationFieldsProtocol
+  path: src/bioetl/application/ports/control_plane.py
+  line: 251
+  target_tier: application

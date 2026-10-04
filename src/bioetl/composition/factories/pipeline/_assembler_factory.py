@@ -37,7 +37,7 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     extract_entity_type as _extract_entity_type,
 )
-from bioetl.composition.pipeline_runner_request import (
+from bioetl.composition.factories.pipeline.runner_request import (
     build_pipeline_create_runner_request_from_kwargs as _build_pipeline_create_runner_request_from_kwargs,
 )
 from bioetl.composition.providers.provider_registry import (
@@ -65,14 +65,13 @@ from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
-def _public_assembler_seam(name: str) -> object:
-    public_assembler = import_module("bioetl.composition.factories.pipeline.assembler")
-    return getattr(public_assembler, name)
-
-
 def _public_assembler_callable(name: str) -> Callable[..., object]:
     """Resolve a callable from the public assembler facade with explicit typing."""
-    return cast(Callable[..., object], _public_assembler_seam(name))
+    public_assembler = import_module("bioetl.composition.factories.pipeline.assembler")
+    return cast(Callable[..., object], getattr(public_assembler, name))
+
+
+_public_assembler_seam = _public_assembler_callable
 
 
 def _optional_string_kwarg(kwargs: dict[str, object], key: str) -> str | None:

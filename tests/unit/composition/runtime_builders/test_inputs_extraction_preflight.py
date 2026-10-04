@@ -30,6 +30,45 @@ _REQUIRED_PIPELINE = "pubchem_compound"
 _OPEN_SCAN_PIPELINE = "chembl_activity"
 
 
+def test_runner_derived_inputs_logs_validated_query_provenance(monkeypatch):
+    from unittest.mock import MagicMock
+    from bioetl.composition.runtime_builders import _runner_input_preparation as module
+
+    runtime = SimpleNamespace(query="aspirin")
+    logger = MagicMock()
+    monkeypatch.setattr(module, "_resolve_runner_runtime_config", lambda **kw: runtime)
+    monkeypatch.setattr(module, "_resolve_runner_filter_config", lambda **kw: None)
+    prepared = module.PreparedRunnerContext(
+        settings=SimpleNamespace(),
+        effective_ctx=SimpleNamespace(),
+        cached_bronze=None,
+        yaml_config=SimpleNamespace(
+            pipeline_name="pubchem_compound", provider="pubchem"
+        ),
+        observability=SimpleNamespace(logger=logger),
+    )
+    result = module.resolve_runner_derived_inputs(
+        prepared=prepared,
+        default_health_check_mode="strict",
+        assemble_vacuum_settings_fn=MagicMock(),
+        assemble_runtime_config_fn=MagicMock(),
+        assemble_filter_config_fn=MagicMock(),
+        adjust_batch_size_for_filter_fn=MagicMock(),
+    )
+    assert result.runtime_config is runtime
+    assert result.filter_config is None
+    logger.info.assert_called_once_with(
+        "extraction_input_preflight_passed",
+        pipeline="pubchem_compound",
+        provider="pubchem",
+        input_kind="query",
+        source_path=None,
+        column_name=None,
+        filter_field=None,
+        id_count=None,
+    )
+
+
 def test_open_scan_pipeline_skips_preflight() -> None:
     provenance = validate_resolved_extraction_input(
         pipeline_name=_OPEN_SCAN_PIPELINE,

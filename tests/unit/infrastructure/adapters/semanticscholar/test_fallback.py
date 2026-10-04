@@ -232,6 +232,26 @@ class TestSemanticScholarTitleFallbackHandler:
         mock_http_client.get.assert_called_once()
 
     @pytest.mark.asyncio
+    async def test_title_search_supports_awaitable_json(
+        self, mock_logger, mock_http_client
+    ):
+        response = create_mock_response([])
+        response.json = AsyncMock(
+            return_value={
+                "data": [
+                    {"paperId": "abc123", "title": "Crystal structure of rhodopsin"}
+                ]
+            }
+        )
+        mock_http_client.get.return_value = response
+        handler = SemanticScholarTitleFallbackHandler(
+            http_client=mock_http_client, logger=mock_logger
+        )
+        result = await handler._search_by_title("Crystal structure of rhodopsin")
+        assert result["paperId"] == "abc123"
+        response.json.assert_awaited_once()
+
+    @pytest.mark.asyncio
     async def test_search_by_title_validates_title_match(
         self, mock_logger, mock_http_client
     ):
@@ -334,7 +354,10 @@ class TestSemanticScholarTitleFallbackHandler:
         )
         await handler._search_by_title("Test Paper")
 
-        mock_metrics.measure_request.assert_called_once_with("/paper/search")
+        mock_metrics.measure_request.assert_called_once_with("/paper/search/match")
+        args, kwargs = mock_http_client.get.call_args
+        assert args[0].endswith("/paper/search/match")
+        assert "limit" not in kwargs["params"]
 
 
 # =============================================================================

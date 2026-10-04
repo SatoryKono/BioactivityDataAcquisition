@@ -29,11 +29,14 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import pytest
 
 from bioetl.infrastructure.adapters.health_probe_policy import (
     DEFAULT_SLOW_HEALTH_PROBE_THRESHOLD_SECONDS,
     is_slow_health_probe,
+    resolve_health_probe_elapsed,
 )
 
 pytestmark = pytest.mark.unit
@@ -48,3 +51,20 @@ def test_is_slow_health_probe_uses_default_threshold() -> None:
 def test_is_slow_health_probe_supports_custom_threshold() -> None:
     assert not is_slow_health_probe(elapsed_seconds=1.5, slow_threshold_seconds=2.0)
     assert is_slow_health_probe(elapsed_seconds=2.1, slow_threshold_seconds=2.0)
+
+
+@pytest.mark.parametrize(
+    "extensions, expected",
+    [
+        (None, 9.0),
+        ({}, 9.0),
+        ({"bioetl_transport_seconds": "invalid"}, 9.0),
+        ({"bioetl_transport_seconds": 0.0}, 0.0),
+        ({"bioetl_transport_seconds": 2}, 2.0),
+    ],
+)
+def test_probe_latency_uses_transport_measurement_or_fallback(extensions, expected):
+    assert (
+        resolve_health_probe_elapsed(SimpleNamespace(extensions=extensions), 9.0)
+        == expected
+    )

@@ -72,23 +72,7 @@ def _normalize_contract_identity_result(
             result.normalization_profile_hash,
         )
     if len(result) == 5:
-        (
-            contract_ref,
-            contract_version,
-            contract_schema_hash,
-            dq_policy_ref,
-            rule_bundle_version,
-        ) = result
-        return (
-            contract_ref,
-            contract_version,
-            contract_schema_hash,
-            dq_policy_ref,
-            rule_bundle_version,
-            None,
-            None,
-            None,
-        )
+        return (*result, None, None, None)
     if len(result) == 8:
         return result
     raise RuntimeError(

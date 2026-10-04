@@ -172,26 +172,8 @@ class RunLedgerService(RunLedgerRichEventRecordingMixin):
             details=details,
         )
 
-    def record_artifact_published(
-        self,
-        *,
-        layer: str,
-        artifact_path: str,
-        artifact_content_hash: str,
-        dataset_ref: str | None = None,
-        lineage_fragment_id: str | None = None,
-        details: dict[str, object] | None = None,
-    ) -> RunLedgerEntry:
-        """Record a published layer artifact tied to this manifest."""
-        return _core_events.record_artifact_published(
-            self,
-            layer=layer,
-            artifact_path=artifact_path,
-            artifact_content_hash=artifact_content_hash,
-            dataset_ref=dataset_ref,
-            lineage_fragment_id=lineage_fragment_id,
-            details=details,
-        )
+    # Bind the canonical recorder as a method; callers retain the service hook.
+    record_artifact_published = _core_events.record_artifact_published
 
     def record_dq_policy_applied(
         self,

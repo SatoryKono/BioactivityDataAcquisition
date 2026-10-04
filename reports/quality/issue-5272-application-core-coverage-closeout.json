@@ -12,14 +12,14 @@
   "current_metrics": {
     "repo_uncovered_module_count": 0,
     "repo_unmeasured_module_count": 0,
-    "application_core_covered_line_percent": 99.93,
+    "application_core_covered_line_percent": 99.86,
     "application_core_uncovered_module_count": 0,
     "application_core_unmeasured_module_count": 0
   },
   "parent_epic_status": {
     "status": "not_closeable_under_current_definition_of_done",
     "remaining_below_85_module_count": 0,
-    "reason": "Issue #5244 requires zero below-tier production modules; the live inventory now reports zero modules below the default floor, while this closeout remains the #5272 application-core evidence pack."
+    "reason": "The accepted inventory has zero modules below 85%; this local measurement does not close the parent epic or prove a complete full-suite run."
   },
   "evidence": [
     "reports/quality/module-coverage-inventory.json",
@@ -34,5 +34,18 @@
     "application_core_uncovered_module_count": "zero",
     "application_core_unmeasured_module_count": "zero"
   },
-  "notes": "Application core coverage improved significantly (49.09% -> 99.93%) and application_core uncovered/unmeasured modules remain zero. Repo-level unmeasured modules is 0. Parent epic #5244 floor metric is now zero below-85 modules in the committed inventory."
+  "notes": "Application core measured inventory coverage is 99.86%. Uncovered and unmeasured module counts remain zero. The merged nonregressing inventory has no modules below 85%; measurements are not a single full-suite coverage run.",
+  "inventory_refresh": {
+    "source_tree_sha256": "d03186d3cd8ab268372d4616bec9461c3e4fa95921fbe3ef19c842024e0e9f7a",
+    "measurement_run": "remaining-coverage-pinned; additive to continuation-coverage-complete + coverage-owner-tails",
+    "source_commit": "4c1f2b2edd83eb6752f222490bb6a7a334ff57b0"
+  },
+  "current_inventory_binding": {
+    "source_commit": "1f3cbe773379ae18de7c71ef8edbb6dd49b5396b",
+    "source_tree_sha256": "cef8be59cad1c0191e2d981c4500964c80ff5cdba34eec6e9bb6b2e8cb36a146",
+    "evidence": "reports/residual-pinned.xml",
+    "tests": 77,
+    "status": "pass",
+    "note": "Historical coverage measurements remain recorded in inventory_refresh; this run validates changed composition and historical targeted owners, not the full suite."
+  }
 }

@@ -182,3 +182,60 @@ def test_create_enricher_skips_without_email() -> None:
     assert result is None
     logger.warning.assert_called_once()
     assert logger.warning.call_args.kwargs["reason"] == "missing_pubmed_email"
+
+
+@pytest.mark.parametrize("pipeline_email", [None, " pipeline@example.test "])
+def test_create_enricher_wires_resolved_email_and_provider_support(
+    monkeypatch: pytest.MonkeyPatch, pipeline_email: str | None
+) -> None:
+    from types import SimpleNamespace
+
+    import bioetl.composition.providers.publication_term_pubmed_enricher as module
+
+    settings = MagicMock(default_email=" default@example.test ")
+    config = SimpleNamespace(source=SimpleNamespace(email=pipeline_email))
+    support = MagicMock()
+    adapter = _PubmedSource([])
+    build_adapter = MagicMock(return_value=adapter)
+    monkeypatch.setattr(module, "resolve_provider_assembly_support", lambda _: support)
+    monkeypatch.setattr(module, "_build_pubmed_adapter_from_settings", build_adapter)
+    logger, metrics = MagicMock(), MagicMock()
+
+    enricher = create_pubmed_publication_term_enricher(
+        settings=settings, logger=logger, metrics=metrics, pipeline_config=config
+    )
+
+    assert isinstance(enricher, PubMedPublicationTermPayloadEnricher)
+    assert enricher._pubmed_source is adapter
+    support.create_http_client.assert_called_once_with(
+        "pubmed", settings, metrics=metrics, logger=logger
+    )
+    build_adapter.assert_called_once_with(
+        adapter_cls=module.PubMedAdapter,
+        http_client=support.create_http_client.return_value,
+        logger=logger,
+        settings=settings,
+        email="pipeline@example.test" if pipeline_email else "default@example.test",
+        metrics=metrics,
+    )
+    logger.warning.assert_not_called()
+
+
+def test_create_enricher_reports_adapter_assembly_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import bioetl.composition.providers.publication_term_pubmed_enricher as module
+
+    settings = MagicMock(default_email="owner@example.test")
+    support = MagicMock()
+    support.create_http_client.side_effect = RuntimeError("adapter unavailable")
+    monkeypatch.setattr(module, "resolve_provider_assembly_support", lambda _: support)
+    logger = MagicMock()
+
+    assert (
+        create_pubmed_publication_term_enricher(settings=settings, logger=logger)
+        is None
+    )
+    logger.warning.assert_called_once_with(
+        "publication_term_pubmed_enricher_unavailable", error="adapter unavailable"
+    )

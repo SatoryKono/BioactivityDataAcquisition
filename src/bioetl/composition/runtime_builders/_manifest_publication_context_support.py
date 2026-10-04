@@ -22,6 +22,15 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
 
 
+class ManifestPublicationFields(TypedDict):
+    """Resolved identity shared by effective-config and manifest publication."""
+
+    provider: str
+    entity: str
+    reproducibility_context: ManifestReproducibilityContext
+    contract_identity: RunManifestContractIdentity
+
+
 @dataclass(frozen=True, slots=True)
 class ResolvedManifestPublicationContext:
     """Provider, entity, reproducibility, and contract identity for one run."""
@@ -30,6 +39,15 @@ class ResolvedManifestPublicationContext:
     entity: str
     reproducibility_context: ManifestReproducibilityContext
     contract_identity: RunManifestContractIdentity
+
+    def publication_fields(self) -> ManifestPublicationFields:
+        """Project the same resolved identity into both publication requests."""
+        return {
+            "provider": self.provider,
+            "entity": self.entity,
+            "reproducibility_context": self.reproducibility_context,
+            "contract_identity": self.contract_identity,
+        }
 
 
 class ManifestPublicationIdentityKwargs(TypedDict):

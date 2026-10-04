@@ -407,3 +407,56 @@ class TestChemblSchemas:
 
         with pytest.raises(SchemaError, match="standard_units"):
             ActivitySchema.validate(pd.DataFrame([record]))
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("layer", ["silver", "gold"])
+def test_similarity_dataframe_check_rejects_incomplete_and_mixed_pairs(layer):
+    import pandas as pd
+    from bioetl.domain.contracts.gold import ChEMBLPublicationSimilarityGoldSchema
+
+    schema = (
+        PublicationSimilaritySchema
+        if layer == "silver"
+        else ChEMBLPublicationSimilarityGoldSchema
+    )
+    frame = pd.DataFrame(
+        [
+            {"publication_id1": "CHEMBL1", "publication_id2": "CHEMBL2"},
+            {"doc_1": 1, "doc_2": 2},
+            {"publication_id1": "CHEMBL1", "doc_2": 2},
+            {"publication_id1": "CHEMBL1", "publication_id2": "CHEMBL1"},
+            {"doc_1": 1},
+            {},
+        ]
+    )
+    assert schema.complete_document_pair(frame).tolist() == [
+        True,
+        True,
+        False,
+        False,
+        False,
+        False,
+    ]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("kind", "first", "second", "message"),
+    [
+        ("public", "CHEMBL1", None, "Both public document"),
+        ("public", "CHEMBL1", "CHEMBL1", "similar to itself"),
+        ("legacy", 1, None, "Both document identifiers"),
+    ],
+)
+def test_similarity_pair_validation_rejects_missing_and_self_endpoints(
+    kind, first, second, message
+):
+    from bioetl.domain.schemas.chembl.similarity_pair import (
+        validate_legacy_pair,
+        validate_public_pair,
+    )
+
+    validate = validate_public_pair if kind == "public" else validate_legacy_pair
+    with pytest.raises(ValueError, match=message):
+        validate(first, second)

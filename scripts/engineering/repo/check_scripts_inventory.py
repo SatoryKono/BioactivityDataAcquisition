@@ -193,7 +193,6 @@ DEPRECATED_LEGACY_PATHS: Final[frozenset[str]] = frozenset(
 )
 ACTIVE_EXPLICIT_SCRIPTS: Final[frozenset[str]] = frozenset(
     {
-        "scripts/ci_check_docs_parity.sh",
         "scripts/ops/support/repo/cleanup_repository.py",
         "scripts/data_quality/check_dq_dsl_parity.py",
         "scripts/engineering/ci/validate_control_plane_artifacts.py",

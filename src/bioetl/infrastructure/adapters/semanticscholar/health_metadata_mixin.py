@@ -20,9 +20,11 @@ from bioetl.infrastructure.adapters.common.source_metadata_capability import (
 )
 from bioetl.infrastructure.adapters.health_probe_policy import (
     is_slow_health_probe,
+    resolve_health_probe_elapsed,
 )
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
+    SEMANTICSCHOLAR_HEALTH_PAPER,
 )
 
 __all__ = [
@@ -41,6 +43,8 @@ class SemanticScholarHTTPResponseProtocol(Protocol):
     """HTTP response surface required by health checks."""
 
     status_code: int
+
+    def json(self) -> object: ...
 
 
 @runtime_checkable
@@ -135,8 +139,8 @@ class SemanticScholarHealthMetadataMixin(SemanticScholarHealthMetadataMixinABC):
         """
         deps = self._health_metadata_dependencies()
         try:
-            url = f"{SEMANTICSCHOLAR_BASE_URL}/paper/search"
-            params = {"query": "test", "limit": 1, "fields": "paperId"}
+            url = f"{SEMANTICSCHOLAR_BASE_URL}/paper/{SEMANTICSCHOLAR_HEALTH_PAPER}"
+            params = {"fields": "paperId"}
 
             start_time = time.monotonic()
             with deps._adapter_metrics.measure_request("/health"):
@@ -144,11 +148,7 @@ class SemanticScholarHealthMetadataMixin(SemanticScholarHealthMetadataMixinABC):
                     url, params=params, headers=deps._build_headers()
                 )
             elapsed = time.monotonic() - start_time
-            extensions = getattr(response, "extensions", None)
-            if isinstance(extensions, dict):
-                transport_seconds = extensions.get("bioetl_transport_seconds")
-                if isinstance(transport_seconds, (int, float)):
-                    elapsed = transport_seconds
+            elapsed = resolve_health_probe_elapsed(response, elapsed)
 
             status_code = response.status_code
             if status_code in (429, 403):
@@ -164,6 +164,15 @@ class SemanticScholarHealthMetadataMixin(SemanticScholarHealthMetadataMixinABC):
                     "semanticscholar_health_check_failed",
                     status_code=status_code,
                 )
+                return HealthStatus.UNHEALTHY
+
+            payload = response.json()
+            if (
+                not isinstance(payload, dict)
+                or not isinstance(payload.get("paperId"), str)
+                or not payload["paperId"]
+            ):
+                deps.logger.warning("semanticscholar_health_check_invalid_payload")
                 return HealthStatus.UNHEALTHY
 
             if is_slow_health_probe(elapsed_seconds=elapsed):
@@ -201,7 +210,7 @@ class SemanticScholarHealthMetadataMixin(SemanticScholarHealthMetadataMixinABC):
         Returns:
             Endpoint path string used for Semantic Scholar health probe requests.
         """
-        return "/paper/search"
+        return "/paper/{paper_id}"
 
     def get_source_metadata(
         self,

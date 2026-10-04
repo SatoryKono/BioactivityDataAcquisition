@@ -40,12 +40,19 @@ _HEADER = """# Reproducibility Support Matrix (Auto-Generated)
 > Replay-supported families are also protected by a no-new-uncertifiable-runs
 > evidence floor so lifecycle cleanup does not delete retained replay evidence
 > before that broader historical tranche can be exercised.
+> Composite execution additionally requires verified child manifest bindings,
+> the captured clean code revision and staged child Bronze snapshots. Historical
+> evidence certification alone does not supply those executable bindings.
 
 """
 
 
 def _snapshot_requirement(row: dict[str, object]) -> str:
     contract = str(row["replay_family_contract"])
+    if row["execution_context"] == "composite" and bool(
+        row["strict_exact_replay_supported"]
+    ):
+        return "verified_child_manifests_and_full_composite_snapshot_envelope"
     if contract == "snapshot_backed_exact_replay":
         return "full_source_snapshot_envelope"
     if contract == "composite_snapshot_backed_exact_replay":

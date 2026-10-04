@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from typing import Protocol
 
+from bioetl.application.ports.control_plane import (
+    RunLedgerCorrelationFieldsProtocol,
+)
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import (
     ARTIFACT_PUBLISHED_EVENT,
@@ -25,22 +28,7 @@ __all__ = [
 ]
 
 
-class _RunLedgerCorrelationFields(Protocol):
-    pipeline_name: str | None
-    provider: str | None
-    entity: str | None
-    run_type: str | None
-    resolved_config_hash: str | None
-    effective_config_hash: str | None
-    contract_ref: str | None
-    contract_version: str | None
-    dq_policy_ref: str | None
-    rule_bundle_version: str | None
-    dq_contract_compatibility_hash: str | None
-    effective_config_artifact_id: str | None
-
-
-class _RunLedgerCoreEventAppender(_RunLedgerCorrelationFields, Protocol):
+class _RunLedgerCoreEventAppender(RunLedgerCorrelationFieldsProtocol, Protocol):
     @property
     def manifest_id(self) -> str: ...
 

@@ -861,6 +861,10 @@ def test_provider_health_evidence_freshness_and_invalid_payloads(
         endpoint="/status",
     )
     assert stale.is_fresh(now=now) is False
+    invalid_date = ProviderHealthEvidenceRecord(
+        provider="chembl", status=1, observed_at="invalid", endpoint="/status"
+    )
+    assert invalid_date.is_fresh(now=now) is False
     assert (
         ProviderHealthEvidenceRecord(
             provider="chembl",
@@ -894,6 +898,41 @@ def test_provider_health_evidence_freshness_and_invalid_payloads(
     )
     records = store.list_all()
     assert all(item.provider == "chembl" for item in records)
+
+    from bioetl.infrastructure.control_plane.file_provider_health_evidence import (
+        PROVIDER_HEALTH_EVIDENCE_SCHEMA,
+        _record_from_path,
+    )
+
+    valid_payload = {
+        "schema_version": PROVIDER_HEALTH_EVIDENCE_SCHEMA,
+        "provider": "chembl",
+        "status": 1,
+        "observed_at": now.isoformat(),
+        "endpoint": "/status",
+    }
+    bad.write_text(json.dumps(valid_payload), encoding="utf8")
+    assert _record_from_path(bad) is not None
+    assert _record_from_path(tmp_path / "missing.json") is None
+    for status in (True, "1", 9):
+        bad.write_text(json.dumps({**valid_payload, "status": status}), encoding="utf8")
+        assert _record_from_path(bad) is None
+    bad.write_text(json.dumps({**valid_payload, "endpoint": None}), encoding="utf8")
+    assert _record_from_path(bad).endpoint == ""
+    (store.base_path / "ignore.txt").write_text("not evidence", encoding="utf8")
+    (store.base_path / "directory.json").mkdir()
+    assert len(store.list_all()) == 2
+    for invalid in (None, "", "   ", 42):
+        bad.write_text(
+            json.dumps({**valid_payload, "provider": invalid}),
+            encoding="utf8",
+        )
+        assert _record_from_path(bad) is None
+        bad.write_text(
+            json.dumps({**valid_payload, "observed_at": invalid}),
+            encoding="utf8",
+        )
+        assert _record_from_path(bad) is None
 
 
 def test_pandera_validator_schema_gaps_and_gold_passthrough() -> None:

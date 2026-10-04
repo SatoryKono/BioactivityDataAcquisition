@@ -95,7 +95,6 @@ This is the most complex sub-package. It handles pipeline runtime assembly:
 | `runner_factory_builder_service.py`      | RunnerFactoryBuilder                                                      |
 | `composite.py`                           | Composite pipeline assembly                                               |
 | `composite_support_services_factory.py`  | Support services for composite pipelines                                  |
-| `composite_filter_extraction_service.py` | Filter extraction for composites                                          |
 | `composite_support_helpers.py`           | Utility helpers for composite support                                     |
 | `composite_*_builder.py`                 | Owner builders (execution support, merge dependencies, runtime management) |
 | `observability.py`                       | Observability bootstrap (logger, tracer, metrics)                         |
@@ -107,6 +106,10 @@ This is the most complex sub-package. It handles pipeline runtime assembly:
 | `classification_init.py`                 | Publication type classification init                                      |
 | `runtime_basics.py`                      | CompositeRuntimeBasics container                                          |
 | `pipeline_runner_service_bootstrap.py`   | PipelineRunnerService bootstrap                                           |
+
+Composite filter extraction is owned by
+`bioetl.application.composite.helpers.filter_extraction`. Bootstrap injects that
+application policy into runner factories.
 
 ## factories/storage/ — Mixin Architecture
 
@@ -194,3 +197,7 @@ Supporting (not package-root freezes, still composition-owned):
   `bioetl.infrastructure.config.composite_config_api`, and
   `bootstrap_composite_runner()` instead of inventing a parallel `run_composite()`
   wrapper at the `entrypoints.py` level.
+
+Pipeline request validation and assembly live in
+`factories/pipeline/runner_request.py`; `pipeline_runner_request.py` preserves
+the public request assembly imports.

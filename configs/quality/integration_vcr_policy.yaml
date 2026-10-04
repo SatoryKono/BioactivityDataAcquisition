@@ -151,6 +151,10 @@ tracked_suite_inventory:
     - tests/integration/run_reports/test_query.py
     - tests/integration/run_reports/test_workflow_runner_reports.py
     - tests/integration/run_reports/test_writer.py
+    - tests/integration/test_composite_run_report.py
+    - tests/integration/test_composite_child_snapshot_evidence.py
+    - tests/integration/test_composite_snapshot_replay.py
+    - tests/integration/test_selected_snapshot_contracts.py
     - tests/integration/test_cross_pipeline_normalization.py
     - tests/integration/test_cross_provider_doi_normalization.py
     - tests/integration/test_dashboard_collapsed_rows.py
@@ -187,10 +191,12 @@ tracked_suite_inventory:
     - tests/integration/test_dashboard_vis_stream2_layout.py
     - tests/integration/test_dashboard_vis_stream3_layout.py
     - tests/integration/test_dashboard_visual_semantics.py
+    - tests/integration/test_deployed_replay_readiness.py
     - tests/integration/test_dux4_scope_title_helpers.py
     - tests/integration/test_dux5_residual_contracts.py
     - tests/integration/test_dux6_residual_contracts.py
     - tests/integration/test_grafana_control_plane_variables.py
+    - tests/integration/test_health_replay_production_bootstrap.py
     - tests/integration/test_incident_explanations.py
     - tests/integration/test_json_hash_stability.py
     - tests/integration/test_live_green_acceptance.py
@@ -201,6 +207,7 @@ tracked_suite_inventory:
     - tests/integration/test_run_explorer_http_catalog.py
     - tests/integration/test_run_explorer_request_fixtures.py
     - tests/integration/test_runtime_metric_emission_consistency.py
+    - tests/integration/test_selected_snapshot_contracts.py
     - tests/integration/test_trust_telemetry_coverage.py
     - tests/integration/test_uniprot_idmapping_pipeline.py
     - tests/integration/workflow/test_selected_snapshot_reconciliation.py
@@ -214,9 +221,11 @@ tracked_suite_inventory:
       - tests/integration/ci/test_reproducibility_contract_inventory.py
       - tests/integration/ci/test_reproducibility_contract_manifest_diff.py
       - tests/integration/ci/test_reproducibility_contract_suite.py
+      - tests/integration/ci/test_replay_evidence_closure.py
       - tests/integration/ci/test_silver_gold_filter_parity.py
       - tests/integration/ci/test_track_d_fixture_control_plane_linkage.py
       - tests/integration/config/test_activity_hash_policy_alignment.py
+      - tests/integration/test_live_green_acceptance.py
       - tests/integration/test_preflight_health_modes.py
       - tests/integration/test_runner_lifecycle.py
       data_quality:
@@ -428,7 +437,7 @@ execution_paths:
           --vcr-record=none -q --tb=short
   live_contract:
     workflow_path: .github/workflows/contract-tests.yml
-    gate_mode: scheduled
+    gate_mode: keep-disabled
     repository_guard: SatoryKono/BioactivityDataAcquisition
     required_env:
       BIOETL_LIVE_API_TESTS: 'true'

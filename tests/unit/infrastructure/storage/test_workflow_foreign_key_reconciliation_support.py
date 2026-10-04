@@ -84,3 +84,69 @@ def test_partition_matches_integral_float_keys() -> None:
     )
     assert {row["activity_id"] for row in retained} == {"a1", "a2"}
     assert {row["activity_id"] for row in orphans} == {"a3"}
+
+
+@pytest.mark.parametrize("flag", ["_is_current", "is_current"])
+def test_current_rows_keep_only_explicit_true_flags(flag):
+    from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support import (
+        filter_current_rows,
+    )
+
+    values = [True, False, None, 1, 0, 1.0, 2.0, " true ", "false", "yes", object()]
+    rows = [{"id": index, flag: value} for index, value in enumerate(values)]
+    assert [
+        row["id"] for row in filter_current_rows(rows, current_only=True, layer="gold")
+    ] == [0, 3, 5, 7, 9]
+    assert filter_current_rows(rows, current_only=False, layer="gold") is rows
+    without_flags = [{"id": 1}]
+    assert (
+        filter_current_rows(without_flags, current_only=True, layer="silver")
+        is without_flags
+    )
+    assert filter_current_rows([], current_only=True, layer="gold") == []
+
+
+@pytest.mark.asyncio
+async def test_mutation_completion_preserves_quarantine_result_and_debug_rows(
+    monkeypatch,
+):
+    from unittest.mock import AsyncMock, MagicMock
+    from bioetl.infrastructure.storage import (
+        workflow_foreign_key_reconciliation_support as support,
+    )
+    from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_quarantine import (
+        ReconciliationMutationSummary,
+    )
+
+    host = MagicMock()
+    request = _request()
+    retained = [{"activity_id": "a1", "assay_id": "valid"}]
+    orphans = [{"activity_id": "a2", "assay_id": "missing"}]
+    mutate = AsyncMock(
+        return_value=ReconciliationMutationSummary(
+            mutation_mode="silver_rewrite",
+            quarantine_batch_id="batch-1",
+            quarantine_rows_written=1,
+            quarantine_error_code="FILTERED_OUT_SILVER",
+        )
+    )
+    monkeypatch.setattr(support, "apply_reconciliation_mutation", mutate)
+    result = await support.complete_with_mutation(
+        host,
+        request,
+        scanned_rows=2,
+        retained_rows_count=1,
+        orphan_rows_deleted=1,
+        retained_rows=retained,
+        orphan_rows=orphans,
+    )
+    mutate.assert_awaited_once_with(host, request, orphan_rows=orphans)
+    assert result.mutated is True
+    assert result.mutation_mode == "silver_rewrite"
+    assert result.quarantine_rows_written == 1
+    assert result.quarantine_batch_id == "batch-1"
+    assert result.quarantine_error_code == "FILTERED_OUT_SILVER"
+    host._write_debug_artifacts.assert_called_once_with(
+        request, result, retained_rows=retained, orphan_rows=orphans
+    )
+    assert host._log.call_args.kwargs["scanned_rows"] == 2

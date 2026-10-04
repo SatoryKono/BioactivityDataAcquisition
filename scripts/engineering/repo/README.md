@@ -101,3 +101,11 @@ Use explicit opt-ins for review-only local roots:
   `.import_linter_cache/`, and `.npm-cache/`.
 - `--include-local-vendor` adds `.junie/`, `.qodo/`, `.sonarlint/`, and
   `.windsurf/`.
+
+## Retired documentation-parity wrapper
+
+Legacy local invocations of `bash scripts/ci_check_docs_parity.sh` remain
+supported by a compatibility wrapper (DOCS-PIPE-010, #11858). It delegates to
+`python -m scripts.data_quality check-entity-config-parity`; use that canonical
+command for new automation. The wrapper is classified as supporting and is
+not called by CI workflows.

@@ -12,7 +12,7 @@ from bioetl.infrastructure.config.field_group_loader import (
 )
 
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
-from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
+from bioetl.application.composite.helpers.filter_extraction import (
     CompositeFilterExtractor,
 )
 from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (

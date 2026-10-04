@@ -32,7 +32,7 @@ from bioetl.interfaces.http._reconciliation_display import (
     linked_reconciliation_display,
     unavailable_reconciliation,
 )
-from bioetl.interfaces.http._selected_run_artifact_probes import _artifact_probes
+from bioetl.interfaces.http._selected_run_artifact_probes import _report_probes
 from bioetl.interfaces.http._selected_run_live import (
     active_run_diagnostics,
     scope_matches,
@@ -131,6 +131,7 @@ def unavailable_status(
             }
         ],
         "provider_options": [],
+        "quality_evidence": {"pipeline": pipeline, "funnel": None},
         "rows": rows,
         "trust": [trust],
         **_readiness_fields(
@@ -249,6 +250,10 @@ def _present_status(
         "presentation_domains": presentation_rows(rows),
         "provider_checks": provider_check_rows(report),
         "provider_options": provider_selector_options(report),
+        "quality_evidence": {
+            "pipeline": summary["pipeline"],
+            "funnel": report.get("funnel"),
+        },
         "rows": rows,
         "trust": [trust],
         **readiness_fields,
@@ -307,7 +312,7 @@ def load_selected_run_status(
         "heartbeat_now": _NOT_EVALUATED,
         "reason": "Saved run evidence; CURRENT and chart coverage are separate",
     }
-    probes, inventory_present = _artifact_probes(report, path.parent)
+    probes, inventory_present = _report_probes(report, path.parent, assessment)
     projection = project_selected_run_replay_readiness(
         identity=identity,
         manifest=_manifest_snapshot(manifest_port, run_id),

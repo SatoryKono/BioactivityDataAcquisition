@@ -29,6 +29,8 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import pytest
 
 from bioetl.application.core.publication_term_runtime import (
@@ -214,3 +216,28 @@ def test_mesh_terms_from_pubmed_headings_maps_descriptor_and_extra_qualifiers() 
         ("MESH_HEADING", "Humans"),
         ("KEYWORD", "bioactivity"),
     ]
+
+
+def test_mesh_terms_accept_object_headings_and_mixed_qualifier_shapes() -> None:
+    headings = [
+        object(),
+        SimpleNamespace(
+            descriptor_name=" Humans ",
+            descriptor_ui=" D006801 ",
+            qualifiers=[
+                " genetics ",
+                SimpleNamespace(name=" metabolism "),
+                {"name": "", "qualifier_name": " physiology "},
+                object(),
+            ],
+        ),
+    ]
+
+    terms, keywords = mesh_terms_from_pubmed_headings(headings)
+
+    assert terms == [
+        {"mesh_heading": "Humans", "mesh_id": "D006801", "mesh_qualifier": "genetics"},
+        {"mesh_heading": None, "mesh_id": "D006801", "mesh_qualifier": "metabolism"},
+        {"mesh_heading": None, "mesh_id": "D006801", "mesh_qualifier": "physiology"},
+    ]
+    assert keywords == []

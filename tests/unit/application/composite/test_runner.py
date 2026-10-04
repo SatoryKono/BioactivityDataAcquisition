@@ -77,6 +77,20 @@ from tests.unit.application.composite.runner_test_support import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.asyncio
+async def test_reporter_wraps_lifecycle_and_preserves_result() -> None:
+    runner = create_runner()
+    expected = object()
+    reporter = MagicMock()
+    reporter.execute = AsyncMock(return_value=expected)
+    runner._reporter = reporter
+
+    result = await runner.run()
+
+    assert result is expected
+    reporter.execute.assert_awaited_once_with(runner.run_id, runner._run_with_lifecycle)
+
+
 def create_runner(
     seed_runner: MockPipelineRunner | None = None,
     checkpoint_manager: AsyncMock | None = None,

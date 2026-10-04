@@ -11,9 +11,11 @@ from urllib.error import HTTPError
 import pubchempy as pcp
 
 from bioetl.domain.resilience import RetryConfig
-from bioetl.infrastructure.adapters.http._client_retry_policy import (
-    _can_retry,
-    _parse_retry_after,
+from bioetl.infrastructure.adapters.http import (
+    can_retry as _can_retry,
+)
+from bioetl.infrastructure.adapters.http import (
+    parse_retry_after as _parse_retry_after,
 )
 
 if TYPE_CHECKING:

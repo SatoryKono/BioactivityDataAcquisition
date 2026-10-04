@@ -84,6 +84,7 @@ def test_reconcile_rows_config_is_normalized_into_domain_config() -> None:
     step = workflow.steps[0]
     assert isinstance(step, TransformStepConfig)
     assert step.config == {
+        "require_closed_cohort": False,
         "layer": "silver",
         "left_table": "chembl.activity",
         "right_table": "chembl.target",
@@ -91,7 +92,6 @@ def test_reconcile_rows_config_is_normalized_into_domain_config() -> None:
         "right_columns": ["target_id"],
         "left_primary_keys": ["activity_id"],
         "nulls_equal": False,
-        "require_closed_cohort": False,
         "type_policy": "strict",
         "report_only": True,
         "preserve_order": True,

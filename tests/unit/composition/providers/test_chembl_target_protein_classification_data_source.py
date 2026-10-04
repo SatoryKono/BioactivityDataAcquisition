@@ -37,7 +37,7 @@ import pytest
 from bioetl.composition.providers._chembl_target_protein_classification_data_source import (
     TargetProteinClassificationSnapshotDataSource,
 )
-from bioetl.composition.providers._chembl_target_protein_classification_manifest import (
+from bioetl.infrastructure.adapters.chembl.protein_classification_source_manifest import (
     source_manifest,
     with_source_manifest,
 )

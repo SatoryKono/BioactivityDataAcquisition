@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `f8518a8d86c23aab9d94abe9011591382605944b93e2dce7d39496ddb1cca83a`
+Evidence surface SHA-256: `d7e8d89e659536ef9f4e784c337f09d6e91a3301e21a531181c4de497212ee4c`
 
 ## Current evidence summary
 
@@ -38,11 +38,11 @@ Debt-governance gates: **46 pass / 0 fail**
 
 Architecture quality integral score: **9.47** (`good_targeted_improvements`)
 
-source_module_count: **2563**
+source_module_count: **2555**
 
-fully_covered: **2518**
+fully_covered: **2514**
 
-partially_covered: **44**
+partially_covered: **40**
 
 no_executable_lines: **1**
 
@@ -50,7 +50,7 @@ uncovered: **0**
 
 unmeasured: **0**
 
-= 2563 == source_module_count
+= 2555 == source_module_count
 
 Contract coverage matrix schema: **contract-coverage-matrix-v3**
 
@@ -68,7 +68,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "f8518a8d86c23aab9d94abe9011591382605944b93e2dce7d39496ddb1cca83a",
+  "evidence_surface_sha256": "d7e8d89e659536ef9f4e784c337f09d6e91a3301e21a531181c4de497212ee4c",
   "metrics": {
     "architecture_integral_score": 9.47,
     "architecture_interpretation": "good_targeted_improvements",
@@ -79,11 +79,11 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 46,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 2518,
+    "fully_covered_module_count": 2514,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 1,
-    "partially_covered_module_count": 44,
-    "source_module_count": 2563,
+    "partially_covered_module_count": 40,
+    "source_module_count": 2555,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
@@ -98,7 +98,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 
 | Facade | Source importers | Test importers |
 | --- | ---: | ---: |
-| `bioetl.domain.composite.config` | 0 | 44 |
+| `bioetl.domain.composite.config` | 0 | 43 |
 | `bioetl.application.composite.merger` | 0 | 5 |
 
 ## Evidence anchors

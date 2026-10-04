@@ -204,6 +204,30 @@ def mock_metrics() -> MagicMock:
 class TestCircuitBreakerDecoratorBasics:
     """Test basic delegation and property access."""
 
+    @pytest.mark.asyncio
+    async def test_provider_error_is_recorded_and_original_exception_preserved(
+        self, mock_circuit_breaker
+    ):
+        from bioetl.domain.exceptions import BioETLError
+
+        error = BioETLError("source failed")
+
+        class FailingSource(MockDataSource):
+            async def fetch(self, *args, **kwargs):
+                yield {"id": 1}
+                raise error
+
+        decorator = CircuitBreakerDataSourceDecorator(
+            data_source=FailingSource(),
+            circuit_breaker=mock_circuit_breaker,
+        )
+        stream = decorator.fetch("record")
+        assert await anext(stream) == {"id": 1}
+        with pytest.raises(BioETLError) as caught:
+            await anext(stream)
+        assert caught.value is error
+        assert mock_circuit_breaker._call_count == 1
+
     def test_provider_name_delegated(
         self,
         mock_data_source: MockDataSource,

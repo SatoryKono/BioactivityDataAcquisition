@@ -31,9 +31,6 @@ from .tracing_bootstrap import bootstrap_tracer as _bootstrap_tracer_impl
 from bioetl.composition.factories.storage.audit import (
     create_audit_port as create_audit_port_impl,
 )
-from bioetl.composition.bootstrap.runtime.observability_validate_observability_preflight import (
-    validate_observability_preflight as _validate_observability_preflight_delegated,
-)
 
 
 def validate_observability_preflight(
@@ -50,18 +47,17 @@ def validate_observability_preflight(
     skip_gold: bool = False,
 ) -> None:
     """Validate observability components for production readiness."""
-    _validate_observability_preflight_delegated(
-        tracer,
-        metrics,
-        environment,
-        logger,
-        allow_noop_in_prod,
+    _validate_observability_preflight_impl(
+        tracer=tracer,
+        metrics=metrics,
+        environment=environment,
+        logger=logger,
+        allow_noop_in_prod=allow_noop_in_prod,
         audit=audit,
         audit_required=audit_required,
         control_plane=control_plane,
         yaml_config=yaml_config,
         skip_gold=skip_gold,
-        impl=_validate_observability_preflight_impl,
     )
 
 
@@ -81,23 +77,6 @@ __all__ = [
 ]
 
 
-def _create_runtime_audit_port(
-    *,
-    settings: Settings,
-    logger: LoggerPort,
-    metrics: MetricsPort,
-    tracing: TracingPort,
-) -> AuditPort:
-    """Resolve the canonical runtime audit factory lazily."""
-
-    return create_audit_port_impl(
-        settings=settings,
-        logger=logger,
-        metrics=metrics,
-        tracing=tracing,
-    )
-
-
 def _runtime_audit_bootstrapper(
     audit_settings: Settings,
     audit_logger: LoggerPort,
@@ -105,7 +84,7 @@ def _runtime_audit_bootstrapper(
     audit_tracer: TracingPort,
 ) -> AuditPort:
     """Bootstrapper for runtime audit port."""
-    return _create_runtime_audit_port(
+    return create_audit_port_impl(
         settings=audit_settings,
         logger=audit_logger,
         metrics=audit_metrics,

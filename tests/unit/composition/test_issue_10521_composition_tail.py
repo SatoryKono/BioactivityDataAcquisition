@@ -216,6 +216,32 @@ def test_input_snapshot_resolution_branches(
     assert len(run_lookups) == 1
 
 
+def test_enabled_empty_cached_bronze_does_not_prepare_manifest_store(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        snapshots, "resolve_cached_bronze_input_snapshot_refs", lambda **_kwargs: ()
+    )
+    path_builder = MagicMock(side_effect=AssertionError("manifest path prepared"))
+    store_builder = MagicMock(side_effect=AssertionError("manifest store constructed"))
+    monkeypatch.setattr(snapshots, "control_plane_root", path_builder)
+    monkeypatch.setattr(snapshots, "FileRunManifestStore", store_builder)
+    assert (
+        snapshots.resolve_pipeline_input_snapshot_refs(
+            ctx=MagicMock(
+                replay_of_manifest_id="parent", replay_of_run_id="not-a-uuid"
+            ),
+            cached_bronze=MagicMock(enabled=True),
+            settings=MagicMock(),
+            provider="chembl",
+            entity="assay",
+        )
+        == ()
+    )
+    path_builder.assert_not_called()
+    store_builder.assert_not_called()
+
+
 def test_effective_config_serializer_optional_fields() -> None:
     serializer = EffectiveConfigSerializer()
     ref = ConfigSourceRef(

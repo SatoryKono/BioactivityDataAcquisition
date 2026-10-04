@@ -10,6 +10,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities import BaseEntity
     from bioetl.domain.types import BronzeRecord, JsonDict
@@ -79,4 +81,14 @@ class PublicationMetadataStrategy(Protocol):
 
     def post_process_silver_record(self, silver_record: JsonDict) -> JsonDict:
         """Apply provider-specific cleanup to the final Silver record."""
+        ...
+
+
+class PublicationTermPayloadEnricherProtocol(Protocol):
+    """Optional async enricher that attaches ``mesh_terms`` / ``keywords``."""
+
+    async def enrich_many(
+        self, records: Sequence[BronzeRecord]
+    ) -> Sequence[BronzeRecord]:
+        """Return one record per input, possibly with PubMed MeSH attached."""
         ...

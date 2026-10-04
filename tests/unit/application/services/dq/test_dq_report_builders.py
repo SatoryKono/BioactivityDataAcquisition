@@ -34,7 +34,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from bioetl.application.services.dq.dq_report_builders import (
+from bioetl.application.services.dq.dq_report_assembly import (
     build_summary,
     convert_value,
     run_serialized_checks,

@@ -583,6 +583,7 @@ def test_file_artifact_lifecycle_uri_and_planned_bronze(tmp_path: Any) -> None:
         manifest_id="m1",
         run_id="r1",
         pipeline_name="chembl_activity",
+        provider="chembl",
         code_provenance=SimpleNamespace(effective_config_artifact_id=None),
         source_refs=(),
         planned_artifacts=(),

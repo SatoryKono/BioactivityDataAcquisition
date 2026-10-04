@@ -120,7 +120,7 @@ areas:
     depends_on: [join]
     modules:
       - src/bioetl/application/composite/dependency_coordinator.py
-      - src/bioetl/application/composite/dependency_join_context_builders.py
+      - src/bioetl/application/composite/dependency_join_context_assembly.py
       - src/bioetl/application/composite/dependency_join_execution.py
       - src/bioetl/application/composite/dependency_join_models.py
       - src/bioetl/application/composite/dependency_join_support.py
@@ -128,6 +128,7 @@ areas:
       - src/bioetl/application/composite/dependency_key_resolvers.py
       - src/bioetl/application/composite/dependency_progress_tracker.py
       - src/bioetl/application/composite/dependency_result_mapper.py
+      - src/bioetl/application/composite/helpers/filter_extraction.py
       - src/bioetl/application/composite/helpers/dependency_chained_key_resolver.py
       - src/bioetl/application/composite/helpers/dependency_coordinator_execution.py
       - src/bioetl/application/composite/helpers/dependency_join_apply_ops.py

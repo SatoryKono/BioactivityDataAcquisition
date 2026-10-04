@@ -459,6 +459,29 @@ class TestUniProtIDMappingClient:
         assert mock_http_client.get.await_count == 4
 
     @pytest.mark.asyncio
+    async def test_results_page_limit_stops_unbounded_pagination(
+        self, idmapping_client, mock_http_client, monkeypatch
+    ):
+        from bioetl.infrastructure.adapters.uniprot import (
+            _idmapping_transport as module,
+        )
+
+        monkeypatch.setattr(module, "_MAX_RESULT_PAGES", 2)
+        response = MagicMock(
+            status_code=200,
+            headers={
+                "Link": '<https://rest.uniprot.org/idmapping/results/job-1?cursor=next>; rel="next"'
+            },
+        )
+        response.json.return_value = {"results": []}
+        mock_http_client.get = AsyncMock(return_value=response)
+        with pytest.raises(IDMappingJobError, match="page limit exceeded"):
+            await idmapping_client._fetch_results_pages(
+                "job-1", {}, "https://rest.uniprot.org/idmapping/results/job-1"
+            )
+        assert mock_http_client.get.await_count == 2
+
+    @pytest.mark.asyncio
     async def test_results_non_success_is_logged_and_stops(
         self,
         idmapping_client: UniProtIDMappingClient,

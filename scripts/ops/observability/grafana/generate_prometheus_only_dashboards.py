@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import Any
 
@@ -48,21 +47,9 @@ def build_notice(dashboard: dict[str, Any]) -> dict[str, Any]:
 
 
 def render_notices(root: Path = ROOT, *, check: bool = False) -> bool:
-    """Write or verify the six notices without modifying the full profile."""
-    sources = sorted((root / "grafana/dashboards").glob("*.json"))
-    if len(sources) != 5:
-        raise ValueError("Expected exactly five full dashboard sources")
-    destination = root / "grafana/dashboards-prometheus-only"
-    ok = True
-    for source in sources:
-        notice = build_notice(json.loads(source.read_text(encoding="utf-8")))
-        serialized = json.dumps(notice, indent=2, ensure_ascii=False) + "\n"
-        target = destination / source.name
-        if check:
-            if not target.exists() or target.read_text(encoding="utf-8") != serialized:
-                print(f"drift prometheus_only/{source.name}")
-                ok = False
-        else:
-            destination.mkdir(parents=True, exist_ok=True)
-            target.write_text(serialized, encoding="utf-8")
-    return ok
+    """Delegate persistence to the canonical dashboard generator."""
+    from scripts.ops.observability.grafana.render_nav_bus import (
+        render_notices as render,
+    )
+
+    return render(root, check=check)

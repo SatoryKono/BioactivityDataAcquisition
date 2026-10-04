@@ -117,3 +117,14 @@ def test_inspection_service_raises_when_manifest_is_missing() -> None:
 
     with pytest.raises(RuntimeError, match="persisted manifest could not be loaded"):
         service.inspect_latest("chembl_baseline")
+
+
+def test_invalid_workflow_run_id_does_not_query_storage():
+    from unittest.mock import MagicMock
+
+    state = MagicMock()
+    service = WorkflowInspectionService(
+        manifest_port=MagicMock(), ledger_port=MagicMock(), state_port=state
+    )
+    assert service.inspect_run_id("invalid-uuid") is None
+    state.get_by_run_id.assert_not_called()

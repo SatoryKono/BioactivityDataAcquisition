@@ -97,16 +97,7 @@ def resolve_resolution_policy(
 def compute_source_fingerprint(source_refs: list[ConfigSourceRef]) -> str:
     if not source_refs:
         return "no_sources"
-    ordered = sorted(
-        source_refs,
-        key=lambda src: (
-            src.priority,
-            src.source_type,
-            src.source_path,
-            src.source_hash or "",
-            src.raw_source_hash or "",
-        ),
-    )
+    ordered = sorted(source_refs, key=ConfigSourceRef.identity_order_key)
     return stable_json_hash(
         [
             {

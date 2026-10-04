@@ -1,0 +1,154 @@
+"""Validate workflow-owned FK descendants without replacing producer evidence."""
+
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, cast
+
+from bioetl.application.workflow.transforms.selected_snapshot_inputs import (
+    selected_snapshot_inputs,
+)
+
+if TYPE_CHECKING:
+    from bioetl.application.services.execution.pipeline_runner_models import RunResult
+
+
+def _identity(entry: Mapping[str, object]) -> dict[str, object]:
+    return {
+        key: value
+        for key, value in entry.items()
+        if key not in {"version", "ancestor_versions"}
+    }
+
+
+def _mutation_count(payload: Mapping[str, object], expected_count: int) -> int:
+    counts = [
+        payload.get(key)
+        for key in (
+            "scanned_rows",
+            "retained_rows",
+            "orphan_rows_deleted",
+            "quarantine_rows_written",
+        )
+    ]
+    if any(type(count) is not int or count < 0 for count in counts):
+        raise ValueError("reference_cohort descendant counts invalid")
+    scanned, retained, expired, quarantined = [cast(int, count) for count in counts]
+    if (
+        scanned != expected_count
+        or scanned != retained + expired
+        or expired <= 0
+        or quarantined != expired
+    ):
+        raise ValueError("reference_cohort descendant count or quarantine mismatch")
+    return retained
+
+
+def _source_mutations(
+    upstream: Mapping[str, object], key: str
+) -> list[Mapping[str, object]]:
+    mutations = []
+    for result in upstream.values():
+        payload = getattr(result, "output", result)
+        if (
+            not isinstance(payload, Mapping)
+            or payload.get("transform_name") != "reconcile_foreign_keys"
+        ):
+            continue
+        if (
+            f"{payload.get('source_layer')}:{payload.get('source_table')}" != key
+            or payload.get("mutated") is not True
+        ):
+            continue
+        if (
+            getattr(result, "status", "success") != "success"
+            or payload.get("dry_run") is not False
+            or payload.get("would_mutate") is not False
+            or payload.get("reconciliation_mode") != "selected-snapshot"
+            or payload.get("source_scope") != "current_run"
+            or payload.get("reference_scope") != "current_run"
+            or payload.get("mutation_blocked_reason")
+        ):
+            raise ValueError("reference_cohort descendant mutation unconfirmed")
+        mutations.append(payload)
+    return mutations
+
+
+def _advance(
+    entry: Mapping[str, object], payload: Mapping[str, object], key: str
+) -> dict[str, object]:
+    inputs, outputs = payload.get("input_snapshots"), payload.get("selected_snapshots")
+    if (
+        not isinstance(inputs, Mapping)
+        or not isinstance(outputs, Mapping)
+        or inputs.get(key) != entry
+    ):
+        raise ValueError("reference_cohort descendant input pin mismatch")
+    expected = dict(entry)
+    expected["version"] = cast(int, entry["version"]) + 1
+    expected["ancestor_versions"] = [
+        *cast(list[int], entry.get("ancestor_versions", [])),
+        entry["version"],
+    ]
+    if (
+        outputs.get(key) != expected
+        or set(inputs) != set(outputs)
+        or any(
+            inputs[identity] != outputs[identity]
+            for identity in inputs
+            if identity != key
+        )
+    ):
+        raise ValueError(
+            "reference_cohort descendant pin or producer membership mismatch"
+        )
+    return expected
+
+
+def resolve_cohort_lineage(
+    source: RunResult, upstream: Mapping[str, object], key: str
+) -> tuple[Mapping[str, object], int]:
+    """Resolve an exact recorded descendant and its producer-scoped retained count."""
+    original = (source.selected_snapshots or {}).get(key)
+    selected = selected_snapshot_inputs(upstream).get(key)
+    if not isinstance(original, Mapping) or not isinstance(selected, Mapping):
+        raise ValueError("reference_cohort producer snapshot identity mismatch")
+    for pin in (original, selected):
+        version, ancestors = pin.get("version"), pin.get("ancestor_versions", [])
+        if (
+            type(version) is not int
+            or version < 0
+            or not isinstance(ancestors, list)
+            or any(type(value) is not int or value < 0 for value in ancestors)
+        ):
+            raise ValueError("reference_cohort invalid descendant version lineage")
+    if _identity(original) != _identity(selected):
+        raise ValueError("reference_cohort descendant producer identity mismatch")
+    mutations = _source_mutations(upstream, key)
+    entry, expected_count = original, source.records_gold
+    while entry != selected:
+        candidates = [
+            payload
+            for payload in mutations
+            if isinstance(payload.get("input_snapshots"), Mapping)
+            and cast(Mapping[str, object], payload["input_snapshots"]).get(key) == entry
+        ]
+        if len(candidates) != 1:
+            raise ValueError(
+                "reference_cohort lacks unambiguous source mutation lineage"
+            )
+        payload = candidates[0]
+        run_ids = payload.get("source_run_ids")
+        if (
+            not isinstance(run_ids, list)
+            or not run_ids
+            or any(not isinstance(run_id, str) or not run_id for run_id in run_ids)
+            or source.run_id not in run_ids
+        ):
+            raise ValueError("reference_cohort descendant source run mismatch")
+        expected_count = _mutation_count(payload, expected_count)
+        entry = _advance(entry, payload, key)
+        mutations.remove(payload)
+    if mutations:
+        raise ValueError("reference_cohort conflicting source mutation lineage")
+    return selected, expected_count

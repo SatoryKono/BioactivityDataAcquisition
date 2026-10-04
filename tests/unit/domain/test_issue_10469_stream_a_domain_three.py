@@ -47,7 +47,7 @@ from bioetl.domain.normalization.json import (
 from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
 from bioetl.domain.run_reports.models import StageId
 from bioetl.domain.run_reports.reason_catalog import default_reason_catalog
-from bioetl.domain.run_reports.workflow_builder import build_workflow_run_report
+from bioetl.domain.run_reports.workflow_assembly import build_workflow_run_report
 from bioetl.domain.types import RunID
 from bioetl.domain.types.dq_contracts import DQDisposition
 

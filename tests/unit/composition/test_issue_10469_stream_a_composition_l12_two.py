@@ -26,7 +26,7 @@ from bioetl.composition.factories.pipeline_support.checkpoint_policy_helpers imp
 )
 from bioetl.composition.factories.services import bundle as bundle_mod
 from bioetl.composition.occurrence_identity import create_runtime_occurrence_batch_id
-from bioetl.composition.runtime_builders import _config_access_loaders as loaders
+from bioetl.composition.runtime_builders import config_access as loaders
 from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
     build_cached_bronze_input_snapshot_refs,
 )
@@ -54,8 +54,7 @@ def test_fail_fast_cached_bronze_requires_snapshot_refs(
 ) -> None:
     captured: dict[str, object] = {}
     monkeypatch.setattr(
-        pipeline_runtime,
-        "require_cached_bronze_input_snapshot_refs",
+        "bioetl.composition.runtime_builders.cached_bronze_snapshot_support.require_cached_bronze_input_snapshot_refs",
         lambda **kwargs: captured.update(kwargs),
     )
     context = SimpleNamespace(

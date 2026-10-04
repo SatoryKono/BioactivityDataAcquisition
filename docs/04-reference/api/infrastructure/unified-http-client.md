@@ -39,3 +39,13 @@ Reviewers:
   Last verified: '2026-09-25'
 
 ______________________________________________________________________
+
+
+Semantic Scholar's publication health probe resolves a stable DOI through the
+paper-details endpoint with only `paperId` requested. It verifies a nonempty
+paper identity before reporting healthy. This probes the identifier lookup used
+by ingestion; title-search fallback failures remain runtime failures of the
+search operation. Anonymous requests retain the shared local 100-second pacing
+budget, including the health probe and retries.
+Live anonymous clients use the provider-configured retry attempts and backoff.
+Only test mode caps anonymous attempts at two and disables retry waits.

@@ -1,0 +1,77 @@
+{
+  "snapshot_date": "2026-07-11",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
+  "issues": [
+    {
+      "issue": "#5518",
+      "theme": "CLI bootstrap config uses owner loader seam",
+      "debt_types": ["Architecture debt", "Governance gap", "Config debt"],
+      "action": "Ensured CLI bootstrap config uses owner loader seam with proper dependency injection.",
+      "risk": "low",
+      "evidence": [
+        "src/bioetl/composition/bootstrap/cli/config.py",
+        "src/bioetl/composition/runtime_builders/config_access.py",
+        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5519",
+      "theme": "Health API has zero src importers",
+      "debt_types": ["Architecture debt", "Governance gap", "Compatibility debt"],
+      "action": "Ensured health API has zero src importers with proper compatibility tracking.",
+      "risk": "low",
+      "evidence": [
+        "src/bioetl/composition/health_api.py",
+        "reports/quality/compatibility-importer-census.json",
+        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5520",
+      "theme": "Domain composite config root facade stays zero src importers",
+      "debt_types": ["Architecture debt", "Governance gap", "Compatibility debt"],
+      "action": "Maintained domain composite config root facade with zero src importers.",
+      "risk": "low",
+      "evidence": [
+        "src/bioetl/domain/composite/config.py",
+        "reports/quality/compatibility-importer-census.json",
+        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5521",
+      "theme": "Run manifest output twin pair removed",
+      "debt_types": ["Architecture debt", "Governance gap", "Duplication"],
+      "action": "Removed run manifest output twin pair with proper cleanup.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/compatibility-importer-census.json",
+        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5522",
+      "theme": "Entity quality metadata registry replaces inline duplicates",
+      "debt_types": ["Config debt", "Governance gap", "Duplication"],
+      "action": "Replaced inline duplicates with entity quality metadata registry.",
+      "risk": "low",
+      "evidence": [
+        "configs/quality/entity_contract_metadata_registry.yaml",
+        "reports/quality/config-surface-backlog.json",
+        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5523",
+      "theme": "Observability freshness limit is tightened and passing",
+      "debt_types": ["Observability gap", "Governance gap", "Quality debt"],
+      "action": "Tightened observability freshness limit with proper gate tracking.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/debt-governance-gates.json",
+        "tests/architecture/test_tech_debt_issues_5518_5523_closeout.py"
+      ]
+    }
+  ]
+}

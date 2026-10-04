@@ -39,8 +39,13 @@ def test_overview_v2_semantics_contract():
         p.get("title", "") for p in d.get("panels", []) if p.get("type") == "row"
     )
     assert "Range Evidence" not in row_labels
-    assert "Inspect Run Context" in row_labels
-    assert "Inspect Saved Run Evidence" in row_labels
+    for title in (
+        "Review Run Identity",
+        "Review Provider Evidence",
+        "Review Provider Check",
+        "Inspect Selected Run Stages",
+    ):
+        assert titles.count(title) == 1
 
     nav_links = list(d.get("links", []))
     links_blob = ""
@@ -49,16 +54,23 @@ def test_overview_v2_semantics_contract():
             nav_links.extend(panel.get("links", []))
             links_blob = str(panel.get("options", {}).get("content", ""))
     links = " ".join(link.get("title", "") for link in nav_links) + links_blob
-    # Full portfolio bus 0–6, with Run Explorer first.
+    # Approved five-dashboard portfolio: DQ is a contextual Run Domains action.
     for token in [
-        "Trust",
-        "Pipeline Diagnostics",
-        "Provider Health",
-        "Data Quality",
+        "Replay Readiness",
+        "Run Overview",
         "Incident Workspace",
         "Run Explorer",
     ]:
         assert token in links
+    assert 'aria-current="page"' in links_blob
+    assert "bioetl-provider-health-v2" not in links
+    assert "/d/bioetl-runtime" not in links
+    domains = next(panel for panel in panels if panel.get("id") == 9002)
+    domain_links = json.dumps(domains)
+    for target in ("bioetl-control-plane-v1", "bioetl-dq-v2"):
+        assert f"/d/{target}/" in domain_links
+    assert "${run_id:queryparam}" in domain_links
+    assert "${__url_time_range}" in domain_links
 
     for current_title in [
         "Monitor Scope Health",
@@ -70,7 +82,3 @@ def test_overview_v2_semantics_contract():
         "Review Workflow Status",
     ]:
         assert current_title not in titles
-        continue
-        p = next(x for x in panels if x.get("title") == current_title)
-        expr = "\n".join(t.get("expr", "") for t in p.get("targets", []))
-        assert "$__range" not in expr

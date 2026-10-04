@@ -6,17 +6,14 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, Protocol, cast, runtime_checkable
 
-import httpx
-
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.adapters.common.response_shapes import extract_response_text
 from bioetl.infrastructure.adapters.uniprot._idmapping_errors import IDMappingJobError
 from bioetl.infrastructure.adapters.uniprot._idmapping_url_policy import (
+    resolve_results_redirect,
     trusted_idmapping_url,
 )
 
-_REDIRECT_STATUS_CODES = frozenset({301, 302, 303, 307, 308})
-_MAX_RESULT_REDIRECTS = 3
 _MAX_RESULT_PAGES = 50
 
 if TYPE_CHECKING:
@@ -149,8 +146,8 @@ class IDMappingTransportMixin:
             with deps._adapter_metrics.measure_request("/idmapping/results"):
                 response = await deps.http_client.get(url, follow_redirects=False)
 
-            redirect = self._results_redirect(
-                deps,
+            redirect = resolve_results_redirect(
+                deps.base_url,
                 response,
                 redirect_count=redirect_count,
             )
@@ -179,24 +176,6 @@ class IDMappingTransportMixin:
 
             next_url = deps._get_next_page_url(response.headers)
             url = trusted_idmapping_url(deps.base_url, next_url) if next_url else None
-
-    @staticmethod
-    def _results_redirect(
-        deps: IDMappingTransportDependencies,
-        response: httpx.Response,
-        *,
-        redirect_count: int,
-    ) -> tuple[str, int] | None:
-        """Return one validated redirect target and its bounded hop count."""
-        if response.status_code not in _REDIRECT_STATUS_CODES:
-            return None
-        next_count = redirect_count + 1
-        if next_count > _MAX_RESULT_REDIRECTS:
-            raise ValueError("UniProt ID mapping redirect limit exceeded")
-        location = response.headers.get("location")
-        if not location:
-            raise ValueError("UniProt ID mapping redirect omitted Location")
-        return trusted_idmapping_url(deps.base_url, location), next_count
 
     def _resolve_entries(
         self,

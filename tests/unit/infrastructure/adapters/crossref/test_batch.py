@@ -61,7 +61,7 @@ def mock_metrics():
     """Create mock metrics with context manager."""
     metrics = MagicMock()
     metrics.measure_request.return_value.__enter__ = MagicMock()
-    metrics.measure_request.return_value.__exit__ = MagicMock()
+    metrics.measure_request.return_value.__exit__ = MagicMock(return_value=False)
     return metrics
 
 
@@ -94,6 +94,30 @@ def search_paginator(mock_http, mock_logger, mock_metrics):
 # =============================================================================
 # DoiBatchProcessor Tests
 # =============================================================================
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("status", [404, 503])
+async def test_single_doi_handles_transport_raised_http_status(
+    batch_processor, mock_http, mock_logger, status
+):
+    import httpx
+
+    request = httpx.Request("GET", "https://api.crossref.org/works/10.1234/example")
+    error = httpx.HTTPStatusError(
+        "failed", request=request, response=httpx.Response(status, request=request)
+    )
+    mock_http.get.side_effect = error
+    if status == 404:
+        assert await batch_processor.fetch_single("10.1234/example") is None
+        mock_logger.debug.assert_called_with(
+            "crossref_doi_not_found", doi="10.1234/example"
+        )
+    else:
+        with pytest.raises(CrossRefApiError) as caught:
+            await batch_processor.fetch_single("10.1234/example")
+        assert caught.value.__cause__ is error
+        assert caught.value.status_code == status
 
 
 @pytest.mark.asyncio

@@ -89,7 +89,7 @@ def test_golden_json_is_canonically_ordered() -> None:
 
 @pytest.mark.parametrize("dry_run", [False, True])
 def test_reconciliation_report_keeps_last_table_count_and_expiry(dry_run: bool) -> None:
-    from bioetl.domain.run_reports.workflow_builder import build_workflow_run_report
+    from bioetl.domain.run_reports.workflow_assembly import build_workflow_run_report
 
     execution = [
         {
@@ -137,3 +137,34 @@ def test_reconciliation_report_keeps_last_table_count_and_expiry(dry_run: bool) 
     assert payload["execution"][1]["reconciliation"]["scanned_rows"] == 983
     schema = json.loads((CONTRACT_ROOT / "workflow_run_report.v1.json").read_text())
     validator_for(schema)(schema).validate(payload)
+
+
+@pytest.mark.parametrize(
+    "snapshot", [None, {"physical_rows": "983", "current_rows": 5}]
+)
+def test_reconciliation_does_not_invent_historical_counts_from_invalid_snapshot(
+    snapshot,
+):
+    from bioetl.domain.run_reports.workflow_assembly import build_workflow_run_report
+
+    payload = build_workflow_run_report(
+        identity={"workflow_name": "baseline", "status": "success"},
+        plan_steps=[],
+        execution_steps=[
+            {
+                "step_id": "reconcile",
+                "kind": "transform",
+                "status": "success",
+                "payload": {
+                    "transform_name": "reconcile_foreign_keys",
+                    "source_table": "chembl.assay",
+                    "source_layer": "gold",
+                    "source_scope": "all_current",
+                    "source_snapshot": snapshot,
+                    "mutation_mode": "no_op",
+                    "dry_run": False,
+                },
+            }
+        ],
+    ).to_dict()
+    assert payload["totals"]["historical_by_table"] == {}

@@ -76,6 +76,27 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 pytestmark = pytest.mark.unit
 
 
+def test_effective_config_json_preserves_artifact_and_runtime_overrides(monkeypatch):
+    service = MagicMock()
+    service.get_effective_config_artifact.return_value = {
+        "pipeline": "chembl_activity",
+        "runtime": {"limit": "7"},
+    }
+    output = MagicMock()
+    monkeypatch.setattr(config_dq, "get_config_service", lambda: service)
+    monkeypatch.setattr(config_dq, "echo_info", output)
+    config_dq.show_effective_config_command.callback(
+        "chembl_activity", "json", ("limit=7",)
+    )
+    service.get_effective_config_artifact.assert_called_once_with(
+        "chembl_activity", {"limit": "7"}
+    )
+    assert (
+        json.loads(output.call_args.args[0])
+        == service.get_effective_config_artifact.return_value
+    )
+
+
 def _make_workflow_config(
     *, reconcile_action: str = "delete_orphans"
 ) -> WorkflowConfig:

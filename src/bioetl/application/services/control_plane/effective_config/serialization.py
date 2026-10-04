@@ -25,19 +25,9 @@ from bioetl.domain.types.dq_contracts import DQPolicyRef
 EFFECTIVE_CONFIG_SCHEMA_VERSION = EFFECTIVE_CONFIG_ARTIFACT_SCHEMA_VERSION
 
 
-def _source_ref_sort_key(src: ConfigSourceRef) -> tuple[int, str, str, str, str]:
-    return (
-        src.priority,
-        src.source_type,
-        src.source_path,
-        src.source_hash or "",
-        src.raw_source_hash or "",
-    )
-
-
 def canonical_source_refs(source_refs: list[ConfigSourceRef]) -> list[ConfigSourceRef]:
     """Return source refs in the deterministic order used by semantic identity."""
-    return sorted(source_refs, key=_source_ref_sort_key)
+    return sorted(source_refs, key=ConfigSourceRef.identity_order_key)
 
 
 def semantic_source_refs_payload(source_refs: list[ConfigSourceRef]) -> list[JsonDict]:

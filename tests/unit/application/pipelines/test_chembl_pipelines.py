@@ -239,6 +239,25 @@ class TestChEMBLMoleculePipeline:
             ),
         )
 
+    def test_non_identifier_transformation_failure_is_not_reclassified(
+        self, pipeline, monkeypatch
+    ):
+        from bioetl.application.pipelines.chembl.molecule_transformer import (
+            BaseChemblTransformer,
+        )
+        from bioetl.application.core.base_transformer.errors import TransformationError
+        from unittest.mock import MagicMock
+
+        error = TransformationError("invalid property", field="molecular_weight")
+        monkeypatch.setattr(
+            BaseChemblTransformer, "_resolve_primary_id", MagicMock(side_effect=error)
+        )
+        with pytest.raises(TransformationError) as caught:
+            pipeline._transformer._resolve_primary_id(
+                {"molecule_chembl_id": "CHEMBL25"}
+            )
+        assert caught.value is error
+
     def test_b_l_molecule_pipeline__initialization__04e9e507(self, pipeline):
         """Test pipeline initializes correctly."""
         assert pipeline.provider == "chembl"

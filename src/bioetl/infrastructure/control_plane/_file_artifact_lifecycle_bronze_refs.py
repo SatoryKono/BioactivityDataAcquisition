@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path, PureWindowsPath
+from urllib.parse import urlsplit
+from urllib.request import url2pathname
 
 from bioetl.domain.control_plane import (
     ControlPlaneArtifactResolutionIssue,
@@ -98,6 +100,15 @@ def _append_snapshot_bronze_candidate(
         )
         return
     path = resolve_bronze_uri(bronze_root, str(uri).strip())
+    if str(uri).startswith("file://"):
+        parsed = urlsplit(str(uri))
+        candidate = Path(url2pathname(parsed.path)).resolve()
+        # Explicit cached inputs can be staged under the local control root.
+        # Archive packs must never read outside the configured data boundary.
+        if parsed.netloc in ("", "localhost") and candidate.is_relative_to(
+            bronze_root.parent.parent.resolve()
+        ):
+            path = candidate
     # Cached-Bronze launch refs are relative to the provider/entity reader root.
     # Retain support for older refs rooted at the shared Bronze directory.
     if path is not None and not path.is_file():
@@ -112,7 +123,7 @@ def _append_snapshot_bronze_candidate(
                 ControlPlaneArtifactResolutionIssueCode.SNAPSHOT_URI_NOT_RECORDED,
                 ControlPlaneArtifactSurface.CACHED_BRONZE,
                 f"Input snapshot '{snapshot_id}' immutable_uri is not a usable "
-                "bronze:// location.",
+                "local Bronze or data-root file location.",
             )
         )
         return

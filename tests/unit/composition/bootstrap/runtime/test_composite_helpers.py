@@ -31,7 +31,7 @@ Covers the stateless helper functions that can be tested without bootstrapping
 the full composition root:
 - _resolve_composite_gold_schema (composite.py)
 - _resolve_composite_config_path (composite.py)
-- CompositeFilterExtractor methods (composite_filter_extraction_service.py)
+- CompositeFilterExtractor methods (application/composite/filter_extraction.py)
 - resolve_bronze_opts (runner_factory_builder_service.py)
 - _load_field_group_registry (composite.py, graceful degradation path)
 """
@@ -72,7 +72,7 @@ def _import_helpers():
     tests do not pay the full pipeline-registry/pandera import graph on
     Windows cloud-synced checkouts (prior source of pytest-timeout hangs).
     """
-    from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
+    from bioetl.application.composite.helpers.filter_extraction import (
         CompositeFilterExtractor,
     )
 

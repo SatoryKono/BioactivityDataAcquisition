@@ -137,3 +137,19 @@ def test_create_term_record_normalizes_mesh_id_and_qualifier_s5_residual() -> No
     )
     assert record["mesh_id"] == "D1"
     assert record["qualifier"] == "use"
+
+
+@pytest.mark.asyncio
+async def test_filtered_publication_terms_without_ids_do_not_start_unbounded_fetch():
+    from unittest.mock import MagicMock
+
+    upstream = MagicMock()
+    wrapper = PublicationTermDataSource(data_source=upstream)
+    rows = [
+        row
+        async for row in wrapper._fetch_target_filtered_records(
+            upstream, None, "publication_id", limit=2
+        )
+    ]
+    assert rows == []
+    upstream.fetch_filtered.assert_not_called()

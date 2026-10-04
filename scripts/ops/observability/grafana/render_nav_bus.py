@@ -2811,6 +2811,31 @@ def _migrate_grafana_schema42(payload: dict[str, Any]) -> None:
     payload["schemaVersion"] = 42
 
 
+def render_notices(root: Path = ROOT, *, check: bool = False) -> bool:
+    """Write or verify the five notices without modifying the full profile."""
+    from scripts.ops.observability.grafana.generate_prometheus_only_dashboards import (
+        build_notice,
+    )
+
+    sources = sorted((root / "grafana/dashboards").glob("*.json"))
+    if len(sources) != 5:
+        raise ValueError("Expected exactly five full dashboard sources")
+    destination = root / "grafana/dashboards-prometheus-only"
+    ok = True
+    for source in sources:
+        notice = build_notice(json.loads(source.read_text(encoding="utf-8")))
+        serialized = json.dumps(notice, indent=2, ensure_ascii=False) + "\n"
+        target = destination / source.name
+        if check:
+            if not target.exists() or target.read_text(encoding="utf-8") != serialized:
+                print(f"drift prometheus_only/{source.name}")
+                ok = False
+        else:
+            destination.mkdir(parents=True, exist_ok=True)
+            target.write_text(serialized, encoding="utf-8")
+    return ok
+
+
 def main(argv: list[str] | None = None) -> int:
     from scripts.engineering.common.repo_paths import ensure_path_within_root
 
@@ -2840,10 +2865,6 @@ def main(argv: list[str] | None = None) -> int:
         ok = current_ok and ok
         if not args.check:
             print(f"updated {filename} current={item['title']!r}")
-    from scripts.ops.observability.grafana.generate_prometheus_only_dashboards import (
-        render_notices,
-    )
-
     return 0 if render_notices(check=args.check) and ok else 1
 
 

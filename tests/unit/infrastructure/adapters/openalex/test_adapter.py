@@ -735,6 +735,21 @@ class TestHealthCheck:
     """Tests for health_check method."""
 
     @pytest.mark.asyncio
+    async def test_transport_raised_status_is_classified(
+        self, adapter, mock_http_client
+    ):
+        import httpx
+
+        request = httpx.Request("GET", "https://api.openalex.org/works")
+        mock_http_client.get_once.side_effect = httpx.HTTPStatusError(
+            "unavailable",
+            request=request,
+            response=httpx.Response(503, request=request),
+        )
+        assert await adapter._probe_health() == HealthStatus.DEGRADED
+        mock_http_client.get_once.assert_awaited_once()
+
+    @pytest.mark.asyncio
     async def test_adapter_health_check__health_check_healthy__e54148f5(
         self, adapter: OpenAlexAdapter, mock_http_client: MagicMock
     ) -> None:

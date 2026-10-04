@@ -29,6 +29,7 @@
 
 from __future__ import annotations
 
+import ast
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -49,12 +50,38 @@ from scripts.diagrams.render.pipeline_dataflow_render import (
     render_mermaid_views,
 )
 from scripts.schema.analysis.generate_unified_schema_map import (
+    _binding_from_pipeline_call,
     build_unified_schema_rows,
 )
 
 pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 REPO_ROOT = Path(__file__).resolve().parents[5]
+
+
+@pytest.mark.parametrize(
+    "call",
+    [
+        'PipelineFactoryConfig(pipeline_name="chembl_assay_parameters", '
+        'provider="chembl", entity_type="assay_parameters", '
+        "silver_schema=CHEMBL_ASSAY_PARAMETERS_SCHEMA, gold_schema=AssayGold, "
+        "pandera_silver_schema=AssaySilver)",
+        'PipelineFactoryConfig.for_pipeline(pipeline_name="chembl_assay_parameters", '
+        "silver_schema=silver.CHEMBL_ASSAY_PARAMETERS_SCHEMA, gold_schema=gold.AssayGold, "
+        "pandera_silver_schema=AssaySilver)",
+    ],
+)
+def test_registry_ast_preserves_identity_and_qualified_schema_bindings(
+    call: str,
+) -> None:
+    binding = _binding_from_pipeline_call(ast.parse(call, mode="eval").body)
+    assert binding is not None
+    assert binding.pipeline_name == "chembl_assay_parameters"
+    assert binding.provider == "chembl"
+    assert binding.entity_type == "assay_parameters"
+    assert binding.silver_schema_symbol == "CHEMBL_ASSAY_PARAMETERS_SCHEMA"
+    assert binding.gold_schema_symbol == "AssayGold"
+    assert binding.pandera_silver_symbol == "AssaySilver"
 
 
 @pytest.mark.parametrize(

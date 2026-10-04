@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.composition.runtime_builders._effective_config_graph_support import (
+from bioetl.infrastructure.config.effective_config_graph import (
     build_effective_config_candidate_paths,
 )
 from bioetl.composition.runtime_builders._effective_config_source_refs_support import (

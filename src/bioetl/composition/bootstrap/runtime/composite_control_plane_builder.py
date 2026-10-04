@@ -215,6 +215,7 @@ def _build_composite_manifest_create_request(
         resolved_config=build_composite_resolved_config_snapshot(config),
         source_refs=source_refs,
         planned_artifacts=build_composite_planned_artifacts(config),
+        replay_of_manifest_id=runtime.replay_of_manifest_id,
         pipeline_version=config_artifacts.pipeline_version,
         git_commit=code_revision.git_commit,
         source_revision_state=code_revision.source_revision_state,

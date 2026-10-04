@@ -44,6 +44,9 @@ def build_composite_run_command_input(
     return CompositeRunCommandInput(
         composite=option_str(options, "composite"),
         runtime=CompositeRuntimeCliInput(
+            replay_of_manifest_id=option_optional_str_get(
+                options, "replay_of_manifest_id"
+            ),
             resume=option_bool_get(options, "resume", False),
             dry_run=option_bool_get(options, "dry_run", False),
             seed_limit=option_optional_int_get(options, "seed_limit"),

@@ -37,6 +37,8 @@ import asyncio
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -202,6 +204,11 @@ class _SelectiveFailingPipelineRunner:
 @dataclass
 class _RecordingTransformService:
     calls: list[tuple[str, tuple[str, ...], bool]] = field(default_factory=list)
+    registry: object = field(
+        default_factory=lambda: SimpleNamespace(
+            snapshot_reader=AsyncMock(return_value={})
+        )
+    )
 
     async def run_step(
         self,

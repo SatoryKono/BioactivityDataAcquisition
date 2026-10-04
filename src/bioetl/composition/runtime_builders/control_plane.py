@@ -118,10 +118,7 @@ def create_run_manifest_with_effective_config(
         create_and_persist_effective_config_artifact(
             ctx=ctx,
             inputs=inputs,
-            provider=publication_context.provider,
-            entity=publication_context.entity,
-            reproducibility_context=publication_context.reproducibility_context,
-            contract_identity=publication_context.contract_identity,
+            **publication_context.publication_fields(),
         )
     )
     return create_run_manifest(

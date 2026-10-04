@@ -16,10 +16,9 @@ from bioetl.composition.factories.pipeline._factory_method_control_plane import 
 from bioetl.composition.factories.pipeline._factory_method_types import (
     _CreatePipelineWithServicesRequest,
     _PipelineFactoryContext,
+    build_create_pipeline_with_services_request,
 )
-from bioetl.composition.factories.pipeline.control_plane_artifacts import (
-    ControlPlaneArtifacts as _ControlPlaneArtifacts,
-)
+from bioetl.domain.ports import PipelineControlPlaneArtifacts as _ControlPlaneArtifacts
 from bioetl.composition.factories.pipeline.creation_support import (
     _PipelineCreationInputs,
 )
@@ -86,36 +85,19 @@ def create_factory_runner_from_request(
 ) -> PipelineRunner:
     """Create a pipeline and assemble a runner from resolved runtime inputs."""
 
-    artifacts = control_plane_artifacts
     # Concrete Settings/PipelineYamlConfig still required by the creation-request
     # dataclass and assembler seams; ports are accepted at this boundary.
     concrete_settings = cast("Settings", settings)
     concrete_yaml = cast("PipelineYamlConfig", yaml_config)
     concrete_observability = cast("ObservabilityBundle", observability)
-    pipeline_request = _CreatePipelineWithServicesRequest(
+    pipeline_request = build_create_pipeline_with_services_request(
         run_id=run_id,
         runtime=runtime,
         started_at=started_at,
         settings=concrete_settings,
         logger=observability.logger,
         audit=observability.audit,
-        manifest_id=None if artifacts is None else artifacts.manifest_id,
-        execution_fingerprint=(
-            None if artifacts is None else artifacts.execution_fingerprint
-        ),
-        config_hash=None if artifacts is None else artifacts.config_hash,
-        resolved_config_hash=(
-            None if artifacts is None else artifacts.resolved_config_hash
-        ),
-        effective_config_hash=(
-            None if artifacts is None else artifacts.effective_config_hash
-        ),
-        dq_contract_compatibility_hash=(
-            None if artifacts is None else artifacts.dq_contract_compatibility_hash
-        ),
-        effective_config_artifact_id=(
-            None if artifacts is None else artifacts.effective_config_artifact_id
-        ),
+        control_plane_artifacts=control_plane_artifacts,
         config=concrete_yaml,
         filter_config=filter_config,
         tracer=observability.tracer,

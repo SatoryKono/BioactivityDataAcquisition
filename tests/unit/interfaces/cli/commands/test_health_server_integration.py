@@ -53,6 +53,32 @@ from bioetl.interfaces.cli.commands.domains.health.server_integration import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.asyncio
+async def test_direct_server_start_assigns_cache_prefix_before_building_dependencies(
+    monkeypatch, tmp_path
+):
+    import sys
+    from bioetl.interfaces.cli.commands.domains.health import (
+        server_integration_lifecycle as module,
+    )
+
+    class StopBootstrap(Exception):
+        pass
+
+    monkeypatch.setattr(sys, "pycache_prefix", None)
+    monkeypatch.setattr(
+        module._deps, "build_health_server_pycache_prefix", lambda: tmp_path / "cache"
+    )
+    dependency_loader = MagicMock(side_effect=StopBootstrap())
+    monkeypatch.setattr(
+        module._deps, "get_health_server_dependencies", dependency_loader
+    )
+    with pytest.raises(StopBootstrap):
+        await module._run_health_server("127.0.0.1", 8000)
+    assert sys.pycache_prefix == str(tmp_path / "cache")
+    dependency_loader.assert_called_once_with()
+
+
 def test_build_health_server_pycache_prefix_uses_platform_tempdir() -> None:
     path = build_health_server_pycache_prefix()
 

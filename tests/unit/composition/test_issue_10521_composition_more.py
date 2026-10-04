@@ -140,6 +140,9 @@ def test_exact_replay_bind_and_uri_helpers() -> None:
     same = bind_cached_bronze_context(bound, "new")  # type: ignore[arg-type]
     assert same is bound
 
+    with pytest.raises(TypeError, match="requires a dataclass instance"):
+        bind_cached_bronze_context(_Ctx, "new")
+
     class _NoSlots:
         __slots__ = ()
 

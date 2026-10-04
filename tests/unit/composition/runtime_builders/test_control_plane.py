@@ -33,6 +33,9 @@ import pytest
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 from types import SimpleNamespace
+from bioetl.composition.runtime_builders._manifest_publication_context_support import (
+    ResolvedManifestPublicationContext,
+)
 
 from bioetl.composition.runtime_builders import control_plane
 from bioetl.composition.runtime_builders.run_manifest_support import (
@@ -91,7 +94,7 @@ def test_create_run_manifest_with_effective_config_uses_yaml_provider_entity(
     monkeypatch.setattr(
         control_plane,
         "resolve_manifest_publication_context",
-        lambda **_: SimpleNamespace(
+        lambda **_: ResolvedManifestPublicationContext(
             provider="chembl",
             entity="activity",
             reproducibility_context=reproducibility_context,
@@ -163,7 +166,7 @@ def test_create_run_manifest_with_effective_config_reuses_publication_context(
     monkeypatch.setattr(
         control_plane,
         "resolve_manifest_publication_context",
-        lambda **_: SimpleNamespace(
+        lambda **_: ResolvedManifestPublicationContext(
             provider="chembl",
             entity="activity",
             reproducibility_context=reproducibility_context,

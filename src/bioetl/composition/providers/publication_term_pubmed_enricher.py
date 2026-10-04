@@ -2,32 +2,34 @@
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET  # nosec B405 - parse-error type only
 from collections.abc import Sequence
 from contextlib import AsyncExitStack
 from typing import TYPE_CHECKING, cast
 
 import defusedxml.ElementTree as defused_ET
+from defusedxml.common import EntitiesForbidden
 
 from bioetl.application.core.publication_term_runtime import (
     mesh_terms_from_pubmed_headings,
     publication_pubmed_id,
 )
+from bioetl.application.services.ops.error_handler import handle_operation_errors
 from bioetl.composition.providers._registration_biblio_adapters import (
     _build_pubmed_adapter_from_settings,
 )
 from bioetl.composition.providers._registration_contracts import (
     resolve_provider_assembly_support,
 )
-from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
 
 if TYPE_CHECKING:
+    from bioetl.domain.types import BronzeRecord
     from bioetl.composition.providers._models import ProviderSettingsProtocol
     from bioetl.composition.providers._registration_contracts import (
         ProviderAssemblySupport,
     )
     from bioetl.domain.ports import FilterableDataSourcePort, LoggerPort, MetricsPort
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [
@@ -43,10 +45,7 @@ def parse_pubmed_mesh_xml(
     """Parse MeshHeadingList and KeywordList from a PubMed efetch XML payload."""
     try:
         root = defused_ET.fromstring(xml_text)
-    except (
-        ET.ParseError,
-        getattr(defused_ET, "EntitiesForbidden", ET.ParseError),
-    ):
+    except (defused_ET.ParseError, EntitiesForbidden):
         return [], []
 
     headings: list[dict[str, object]] = []
@@ -147,8 +146,16 @@ class PubMedPublicationTermPayloadEnricher:
         if not pmids:
             return list(records)
 
+        def report_failure(error: Exception) -> None:
+            self._logger.warning(
+                "publication_term_pubmed_enrichment_failed",
+                error=str(error),
+                pmid_count=len(pmids),
+            )
+
         pubmed_by_pmid: dict[str, BronzeRecord] = {}
-        try:
+        completed = False
+        with handle_operation_errors(report_failure):
             async with AsyncExitStack() as stack:
                 enter = getattr(self._pubmed_source, "__aenter__", None)
                 if callable(enter):
@@ -162,22 +169,18 @@ class PubMedPublicationTermPayloadEnricher:
                     pmid = _as_pmid(pubmed_record.get("pmid"))
                     if pmid is not None:
                         pubmed_by_pmid[pmid] = pubmed_record
-        except Exception as exc:
-            self._logger.warning(
-                "publication_term_pubmed_enrichment_failed",
-                error=str(exc),
-                pmid_count=len(pmids),
-            )
+            completed = True
+        if not completed:
             return list(records)
 
         enriched: list[BronzeRecord] = []
         for record in records:
             pmid = publication_pubmed_id(record)
-            pubmed_record = pubmed_by_pmid.get(pmid) if pmid is not None else None
-            if pubmed_record is None:
+            matched_record = pubmed_by_pmid.get(pmid) if pmid is not None else None
+            if matched_record is None:
                 enriched.append(record)
                 continue
-            headings, keywords = pubmed_term_payload(pubmed_record)
+            headings, keywords = pubmed_term_payload(matched_record)
             mesh_terms, keyword_terms = mesh_terms_from_pubmed_headings(
                 headings, keywords
             )
@@ -189,7 +192,7 @@ class PubMedPublicationTermPayloadEnricher:
                 attached["mesh_terms"] = mesh_terms
             if keyword_terms:
                 attached["keywords"] = keyword_terms
-            enriched.append(cast("BronzeRecord", attached))
+            enriched.append(attached)
         return enriched
 
 
@@ -209,24 +212,26 @@ def create_pubmed_publication_term_enricher(
             reason="missing_pubmed_email",
         )
         return None
-    try:
+
+    def report_unavailable(error: Exception) -> None:
+        logger.warning("publication_term_pubmed_enricher_unavailable", error=str(error))
+
+    completed = False
+    with handle_operation_errors(report_unavailable):
         support = resolve_provider_assembly_support(assembly_support)
         http_client = support.create_http_client(
             "pubmed", settings, metrics=metrics, logger=logger
         )
         adapter = _build_pubmed_adapter_from_settings(
             adapter_cls=PubMedAdapter,
-            http_client=http_client,
+            http_client=cast("UnifiedHTTPClient", http_client),
             logger=logger,
             settings=settings,
             email=email,
             metrics=metrics,
         )
-    except Exception as exc:
-        logger.warning(
-            "publication_term_pubmed_enricher_unavailable",
-            error=str(exc),
-        )
+        completed = True
+    if not completed:
         return None
     return PubMedPublicationTermPayloadEnricher(
         pubmed_source=adapter,

@@ -7,12 +7,14 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
-from bioetl.application.services.control_plane.ledger.entry_diagnostic_details import (
+from bioetl.application.ports.control_plane import (
     RunLedgerCorrelationFieldsProtocol,
-    build_run_ledger_diagnostic_request,
 )
 from bioetl.application.services.control_plane.ledger.entry_diagnostic_details import (
     build_run_ledger_diagnostic_details as build_run_ledger_diagnostic_details,
+)
+from bioetl.application.services.control_plane.ledger.entry_diagnostic_details import (
+    build_run_ledger_diagnostic_request,
 )
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane.run_ledger import infer_ledger_event_family

@@ -8,9 +8,11 @@ to satisfy ARCH-002 (no direct I/O in application/domain).
 from __future__ import annotations
 
 import contextlib
+import json
 import os
 import tempfile
 from pathlib import Path, PurePosixPath, PureWindowsPath
+from uuid import UUID
 
 # Bound checkpoint I/O to protect operators from oversized / runaway listings.
 _DEFAULT_MAX_CHECKPOINT_BYTES = 16 * 1024 * 1024  # 16 MiB
@@ -38,10 +40,12 @@ class FileCompositeCheckpointWriter:
         *,
         max_checkpoint_bytes: int = _DEFAULT_MAX_CHECKPOINT_BYTES,
         max_glob_matches: int = _DEFAULT_MAX_GLOB_MATCHES,
+        preserve_history: bool = False,
     ) -> None:
         self._checkpoint_dir = Path(checkpoint_dir).resolve(strict=False)
         self._max_checkpoint_bytes = max_checkpoint_bytes
         self._max_glob_matches = max_glob_matches
+        self._preserve_history = preserve_history
 
     @staticmethod
     def _relative_path(path: str, *, kind: str = "path") -> Path:
@@ -122,11 +126,53 @@ class FileCompositeCheckpointWriter:
             temp = self._ensure_contained(temp, source=path)
             full = self._ensure_contained(full, source=path)
             temp.replace(full)
+            if self._preserve_history:
+                self._write_history(content)
         finally:
             with contextlib.suppress(OSError, CheckpointPathError):
                 temp = self._ensure_contained(temp, source=path)
                 if temp.exists():
                     temp.unlink()
+
+    def _write_history(self, content: str) -> None:
+        """Retain manifest-bound states after the resumable checkpoint is deleted."""
+        from bioetl.domain.types import RunID
+        from bioetl.infrastructure.checkpoint import (
+            build_history_entry_path,
+            manifest_index_path,
+        )
+
+        payload = json.loads(content)
+        manifest_id = payload.get("manifest_id")
+        if not manifest_id:
+            return
+        manifest_id = str(UUID(manifest_id))
+        run_id = RunID(UUID(payload["run_id"]))
+        pipeline = payload["composite_name"]
+        if (
+            not isinstance(pipeline, str)
+            or self._relative_path(pipeline).name != pipeline
+        ):
+            raise CheckpointPathError("Invalid composite checkpoint identity")
+        history = build_history_entry_path(self._checkpoint_dir, pipeline, run_id)
+        index = manifest_index_path(self._checkpoint_dir, manifest_id)
+        # Use a non-recursive writer with the same containment and size checks.
+        writer = FileCompositeCheckpointWriter(
+            self._checkpoint_dir, max_checkpoint_bytes=self._max_checkpoint_bytes
+        )
+        relative = history.relative_to(self._checkpoint_dir).as_posix()
+        writer.write_atomic(relative, content)
+        writer.write_atomic(
+            index.relative_to(self._checkpoint_dir).as_posix(),
+            json.dumps(
+                {
+                    "manifest_id": manifest_id,
+                    "pipeline": pipeline,
+                    "run_id": str(run_id),
+                    "history_path": relative,
+                }
+            ),
+        )
 
     def delete(self, path: str) -> bool:
         """Delete checkpoint file. Returns True if existed."""

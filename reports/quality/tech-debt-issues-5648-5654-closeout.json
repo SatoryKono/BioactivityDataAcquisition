@@ -1,0 +1,87 @@
+{
+  "snapshot_date": "2026-07-17",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
+  "issues": [
+    {
+      "issue": "#5648",
+      "theme": "Duplication baseline governance",
+      "debt_types": ["Duplication", "Governance gap", "Architecture debt"],
+      "action": "Governed duplication baseline with bounded cluster counts and proper target tracking.",
+      "risk": "medium",
+      "evidence": [
+        "reports/quality/full-app-duplication-baseline.json",
+        "tests/architecture/test_tech_debt_issues_5648_5654_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5649",
+      "theme": "Hotspot baseline governance",
+      "debt_types": ["Hotspot", "Governance gap", "Architecture debt"],
+      "action": "Governed hotspot baseline with reviewed baselines and bounded growth budgets.",
+      "risk": "medium",
+      "evidence": [
+        "reports/quality/hotspot-family-baseline.json",
+        "configs/quality/debt_scorecard.yaml::hotspot_family_ratchets",
+        "tests/architecture/test_tech_debt_issues_5648_5654_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5650",
+      "theme": "Architecture scorecard governance",
+      "debt_types": ["Governance gap", "Architecture debt", "Budget debt"],
+      "action": "Governed architecture quality scorecard with proper metrics and ratchet tracking.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/architecture-quality-scorecard.json",
+        "configs/quality/debt_scorecard.yaml",
+        "tests/architecture/test_tech_debt_issues_5648_5654_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5651",
+      "theme": "Debt gates governance",
+      "debt_types": ["Governance gap", "Quality debt", "Budget debt"],
+      "action": "Governed debt gates with proper status tracking and artifact alignment.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/debt-governance-gates.json",
+        "tests/architecture/test_tech_debt_issues_5648_5654_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5652",
+      "theme": "Compatibility registry governance",
+      "debt_types": ["Compatibility debt", "Governance gap", "Public API debt"],
+      "action": "Governed compatibility registry with proper entrypoint tracking and sunset policies.",
+      "risk": "low",
+      "evidence": [
+        "configs/quality/compatibility_facade_inventory.yaml",
+        "reports/quality/compatibility-importer-census.json",
+        "tests/architecture/test_tech_debt_issues_5648_5654_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5653",
+      "theme": "Internal shims governance",
+      "debt_types": ["Compatibility debt", "Governance gap", "Architecture debt"],
+      "action": "Governed internal compatibility shims with proper tracking and sunset policies.",
+      "risk": "medium",
+      "evidence": [
+        "configs/quality/internal_compatibility_shim_inventory.yaml",
+        "tests/architecture/test_tech_debt_issues_5648_5654_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5654",
+      "theme": "Dead code inventory governance",
+      "debt_types": ["Governance gap", "Architecture debt", "Test debt"],
+      "action": "Governed dead code inventory with proper triage and retirement tracking.",
+      "risk": "medium",
+      "evidence": [
+        "reports/quality/dead-code-inventory.json",
+        "tests/architecture/test_tech_debt_issues_5648_5654_closeout.py"
+      ]
+    }
+  ]
+}

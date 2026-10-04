@@ -544,7 +544,7 @@ class TestLineageFragments:
 
         gold_attrs = mapping_to_plain(gold_dataset.attributes)
         assert gold_attrs["composite_run_id"] == "comp-run-123"
-        assert gold_attrs["composite_name"] == "composite.publication"
+        assert gold_attrs["composite_name"] == context.pipeline_name
         assert gold_attrs["source_providers"] == ["seed", "openalex"]
         assert gold_attrs["seed_record_id"] == "seed-001"
         assert gold_attrs["field_sources"] == {
@@ -680,11 +680,16 @@ def test_composite_source_identity_is_stable_across_layer_projections():
                 provider_field_map={"crossref": fields},
                 enrichment_status={"crossref": "success"},
                 composite_run_id=str(context.run_id),
-                composite_name="composite_publication",
+                composite_name="composite.merged"
+                if layer == "silver"
+                else "composite/publication",
             )
         )
     (silver_nodes, silver_edges), (gold_nodes, gold_edges) = fragments
     assert silver_nodes == gold_nodes
+    assert "composite_name" not in silver_nodes[0].attributes
+    assert silver_edges[0].attributes["composite_name"] == "composite.merged"
+    assert gold_edges[0].attributes["composite_name"] == "composite/publication"
     assert list(silver_edges[0].attributes["selected_fields"]) == ["title", "abstract"]
     assert list(gold_edges[0].attributes["selected_fields"]) == ["title"]
     assert silver_edges[0].manifest_id == gold_edges[0].manifest_id == "parent-manifest"

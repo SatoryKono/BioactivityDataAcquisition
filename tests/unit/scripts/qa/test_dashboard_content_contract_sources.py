@@ -2,6 +2,8 @@
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from scripts.engineering.qa.generate_dashboard_content_contract import (
     _resolved_evidence_source,
 )

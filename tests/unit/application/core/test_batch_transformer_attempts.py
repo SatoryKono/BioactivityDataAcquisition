@@ -691,3 +691,63 @@ def test_gold_exclusion_records_bounded_rule_details_without_record_values() -> 
         ]
         == 3
     )
+
+
+@pytest.mark.unit
+def test_quarantine_reason_uses_field_when_explicit_reason_is_missing():
+    from bioetl.application.core.batch_transformer_attempt_failures import (
+        _resolve_quarantine_reason_code,
+    )
+
+    error = DataQualityError("invalid value")
+    error.field = " title "
+    assert (
+        _resolve_quarantine_reason_code(error, error_type=ErrorType.INVALID_DATA)
+        == "INVALID_DATA:title"
+    )
+
+
+@pytest.mark.unit
+def test_primary_quarantine_field_ignores_warning_fields_and_non_field_rules():
+    from bioetl.application.core.batch_transformer_attempt_success import (
+        _primary_dq_affected_field,
+    )
+    from bioetl.domain.types.dq_contracts import DQViolationKind
+
+    outcomes = [
+        DQRuleOutcome(
+            "field.author.present",
+            DQViolationKind.SCHEMA_VIOLATION,
+            "warning",
+            DQDisposition.WARN,
+            affected_fields=("author",),
+        ),
+        DQRuleOutcome(
+            "record.required",
+            DQViolationKind.SCHEMA_VIOLATION,
+            "error",
+            DQDisposition.QUARANTINE,
+        ),
+        DQRuleOutcome(
+            "field.title.present",
+            DQViolationKind.SCHEMA_VIOLATION,
+            "error",
+            DQDisposition.QUARANTINE,
+            affected_fields=("title",),
+        ),
+    ]
+    assert _primary_dq_affected_field(outcomes, DQDisposition.QUARANTINE) == "title"
+
+
+@pytest.mark.unit
+def test_gold_exclusion_requires_reason_and_preserves_reason_without_field():
+    from bioetl.application.services.dq.gold_filter_diagnostics import (
+        gold_exclusion_reason_code,
+    )
+
+    with pytest.raises(ValueError, match="missing reason_code"):
+        gold_exclusion_reason_code({"field": "title"})
+    assert (
+        gold_exclusion_reason_code({"reason_code": " gold_filter_exclusion "})
+        == "gold_filter_exclusion"
+    )

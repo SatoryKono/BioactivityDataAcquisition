@@ -40,6 +40,14 @@ revision is INCOMPLETE; read/timeout failures are QUERY ERROR. Legacy reports
 are explicitly `legacy_no_snapshot`, and their missing observations remain
 unknown or incomplete. No migration rewrites legacy history.
 
+`quality_evidence` exposes the verified report's pipeline and saved funnel for
+the Overview exclusion assessment. Missing evidence has a null funnel; explicit
+recorded zeros remain zero. The DQ panel uses this status endpoint so an empty
+selection displays SELECT RUN instead of requesting a nonexistent artifact.
+Its exclusion limits come from the pipeline configuration at dashboard generation;
+this presentation does not replace the frozen saved Data Quality verdict.
+HTTP failures remain query errors and must never be treated as healthy empty data.
+
 Finalization writes a content-addressed revision into `status-revisions` first,
 then atomically publishes `pipeline-run-report.json` as the commit record.
 Retrying identical evidence keeps the same revision. Late workflow or other
@@ -55,7 +63,7 @@ corrupt files cannot be hidden behind an archived OK. Reports outside the
 selected pipeline/run directory are never included.
 
 Grafana keeps CURRENT telemetry separately labelled. The Overview domain table
-and selected-run summary use the same saved-run endpoint; all seven dashboards
+and selected-run summary use the same saved-run endpoint; all five shipped dashboards
 include an expandable saved-evidence view. Navigation preserves the selected
 run and chart range. Chart coverage and the Set range to run action remain in
 Run Explorer; partial coverage never modifies the saved-run verdict.

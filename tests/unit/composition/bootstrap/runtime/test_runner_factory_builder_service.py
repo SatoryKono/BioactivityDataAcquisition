@@ -37,11 +37,12 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
+from bioetl.application.composite.helpers.filter_extraction import (
     CompositeFilterExtractor,
 )
 from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
     RunnerFactoryBuilder,
+    RunnerFactoryHooks,
     resolve_bronze_opts,
 )
 
@@ -111,6 +112,38 @@ def test_seed_runoptions_snapshot() -> None:
         "cached_bronze_date": "2026-03-04",
         "required_persistence_profile": "degraded_observable",
     }
+
+
+@pytest.mark.unit
+def test_seed_factory_preserves_options_for_reporting_runner() -> None:
+    reporter_builder = MagicMock()
+    plain_builder = MagicMock()
+    prepare = MagicMock(side_effect=lambda name, options: {**options, "limit": 11})
+    builder = RunnerFactoryBuilder(
+        logger=MagicMock(),
+        run_options_cls=SimpleNamespace,
+        build_context=_build_context,
+        pipeline_runner_builder=plain_builder,
+        hooks=RunnerFactoryHooks(
+            reporting_runner_builder=reporter_builder, replay_options=prepare
+        ),
+        filter_extraction_service=CompositeFilterExtractor(),
+    )
+    factory = builder.build_seed_factory(
+        seed_pipeline="chembl_publication",
+        seed_limit=7,
+        bronze_opts=resolve_bronze_opts(_make_runtime(), phase_override=None),
+    )
+    assert factory() is reporter_builder.return_value
+    reporter_builder.assert_called_once()
+    ctx, options = reporter_builder.call_args.args
+    assert ctx == {"pipeline": "chembl_publication", "options": options}
+    assert options.limit == 11
+    prepare.assert_called_once()
+    assert prepare.call_args.args[0] == "chembl_publication"
+    assert prepare.call_args.args[1]["limit"] == 7
+    assert options.required_persistence_profile == "degraded_observable"
+    plain_builder.assert_not_called()
 
 
 @pytest.mark.unit

@@ -62,11 +62,6 @@ def _get_default_registration_state() -> PipelineFactoryRegistrationState:
         return _default_registration_state
 
 
-def _register_to_explicit_registry(registry: PipelineRegistryProtocol) -> None:
-    """Register factories into an explicit registry instance."""
-    _register_factories_to(registry)
-
-
 def register_all_pipelines(
     registry: PipelineRegistryProtocol | None = None,
     *,
@@ -92,7 +87,7 @@ def register_all_pipelines(
         else _get_default_registration_state()
     )
     with state._lock:
-        _register_to_explicit_registry(registry)
+        _register_factories_to(registry)
         state._registered = True
 
 
@@ -112,9 +107,7 @@ def _register_factories_to(registry: PipelineRegistryProtocol) -> None:
         registry.register_factory(cast("PipelineFactoryPort", factory))
 
 
-def _list_pipeline_names() -> list[str]:
-    """Return available pipeline names in canonical sorted order."""
-    return list_pipeline_names()
+_list_pipeline_names = list_pipeline_names
 
 
 def is_registered(

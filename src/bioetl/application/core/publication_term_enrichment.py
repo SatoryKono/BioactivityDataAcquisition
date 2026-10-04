@@ -2,16 +2,16 @@
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator, Awaitable, Callable, Sequence
-from typing import Protocol
+from collections.abc import AsyncIterator, Awaitable, Callable
 
 from bioetl.application.core.derived_scan_budget import bounded_source_records
 from bioetl.application.core.publication_term_runtime import publication_pubmed_id
+from bioetl.domain.ports import PublicationTermPayloadEnricherProtocol
 from bioetl.domain.types import BronzeRecord
 
 __all__ = [
     "PUBLICATION_TERM_PUBMED_ENRICH_BATCH_SIZE",
-    "PublicationTermPayloadEnricher",
+    "PublicationTermPayloadEnricherProtocol",
     "yield_terms_from_publications",
 ]
 
@@ -19,16 +19,6 @@ PUBLICATION_TERM_PUBMED_ENRICH_BATCH_SIZE = 200
 
 _ExtractTerms = Callable[[BronzeRecord, str], list[BronzeRecord]]
 _ClosePublications = Callable[[AsyncIterator[BronzeRecord]], Awaitable[None]]
-
-
-class PublicationTermPayloadEnricher(Protocol):
-    """Optional async enricher that attaches ``mesh_terms`` / ``keywords``."""
-
-    async def enrich_many(
-        self, records: Sequence[BronzeRecord]
-    ) -> Sequence[BronzeRecord]:
-        """Return one record per input, possibly with PubMed MeSH attached."""
-        ...
 
 
 def _publication_id(record: BronzeRecord) -> str | None:
@@ -43,9 +33,7 @@ def _needs_pubmed_enrichment(
     record: BronzeRecord, extract_terms: _ExtractTerms
 ) -> bool:
     publication_id = _publication_id(record)
-    if publication_id is None:
-        return False
-    if publication_pubmed_id(record) is None:
+    if publication_id is None or publication_pubmed_id(record) is None:
         return False
     return not extract_terms(record, publication_id)
 
@@ -54,7 +42,7 @@ async def _attach_pubmed_payloads(
     records: list[BronzeRecord],
     *,
     extract_terms: _ExtractTerms,
-    enricher: PublicationTermPayloadEnricher,
+    enricher: PublicationTermPayloadEnricherProtocol,
 ) -> list[BronzeRecord]:
     need = [
         record for record in records if _needs_pubmed_enrichment(record, extract_terms)
@@ -77,7 +65,7 @@ async def yield_terms_from_publications(
     limit: int | None,
     scan_limit: int,
     extract_terms: _ExtractTerms,
-    enricher: PublicationTermPayloadEnricher | None,
+    enricher: PublicationTermPayloadEnricherProtocol | None,
     close_publications: _ClosePublications,
 ) -> AsyncIterator[BronzeRecord]:
     """Expand publications into term records, enriching empty PubMed-linked docs."""

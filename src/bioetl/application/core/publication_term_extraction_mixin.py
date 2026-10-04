@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, ClassVar, Protocol, cast
 
 from bioetl.application.core.derived_scan_budget import DEFAULT_SCAN_RECORDS
 from bioetl.application.core.publication_term_enrichment import (
-    PublicationTermPayloadEnricher,
+    PublicationTermPayloadEnricherProtocol,
     yield_terms_from_publications,
 )
 from bioetl.application.core.publication_term_runtime import (
@@ -83,7 +83,7 @@ class PublicationTermExtractionHost(Protocol):
     SOURCE_ENTITY_TYPE: ClassVar[str]
     PUBLICATION_LIMIT_MULTIPLIER: ClassVar[int]
     _data_source: DataSourcePort
-    _term_payload_enricher: PublicationTermPayloadEnricher | None
+    _term_payload_enricher: PublicationTermPayloadEnricherProtocol | None
 
     def _extract_terms_from_publication(
         self,

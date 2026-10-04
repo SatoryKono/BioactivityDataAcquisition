@@ -19,7 +19,7 @@ from bioetl.application.services.run_reports.observations import (
     run_observations,
 )
 from bioetl.application.services.run_reports.writer import write_pipeline_run_report
-from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
+from bioetl.domain.run_reports.pipeline_assembly import build_pipeline_run_report
 from bioetl.domain.run_reports.selected_status import (
     DOMAINS,
     build_snapshot,
@@ -116,6 +116,25 @@ def read(tmp_path, run_id="run-a") -> dict[str, Any]:
     return load_selected_run_status(
         pipeline="chembl_activity", run_id=run_id, root=tmp_path
     )
+
+
+@pytest.mark.parametrize("run_id", ["-", "missing-run"])
+def test_quality_evidence_unavailable_never_invents_counters(tmp_path, run_id):
+    result = read(tmp_path, run_id=run_id)
+    assert result["quality_evidence"] == {"pipeline": "chembl_activity", "funnel": None}
+    assert result["verdict"] == ("SELECT RUN" if run_id == "-" else "UNKNOWN")
+
+
+def test_quality_evidence_preserves_exact_saved_funnel(tmp_path):
+    path = persist(tmp_path).json_path
+    before = path.read_bytes()
+    saved = json.loads(before)
+    result = read(tmp_path)
+    assert result["quality_evidence"] == {
+        "pipeline": "chembl_activity",
+        "funnel": saved.get("funnel"),
+    }
+    assert path.read_bytes() == before
 
 
 def _run_observations() -> dict[str, Any]:
@@ -585,13 +604,16 @@ def test_snapshot_tamper_invalidates_assessment():
 
 
 @pytest.mark.parametrize("reason", ["timeout", "queue_full"])
-async def test_endpoint_timeout_is_query_error(monkeypatch, reason):
+@pytest.mark.parametrize("request_id", [None, "request-123"])
+async def test_endpoint_timeout_is_query_error(monkeypatch, reason, request_id):
     from bioetl.interfaces.http._forensic_request_budget import (
         ForensicEndpointUnavailable,
     )
 
     async def fail(**kwargs):
-        raise ForensicEndpointUnavailable(reason=reason, status_code=504)
+        raise ForensicEndpointUnavailable(
+            reason=reason, status_code=504, request_id=request_id
+        )
 
     monkeypatch.setattr(
         "bioetl.interfaces.http.selected_run_status.run_bounded_forensic_operation",
@@ -605,6 +627,8 @@ async def test_endpoint_timeout_is_query_error(monkeypatch, reason):
     payload = host._send_payload_response.call_args.args[2]
     assert payload["verdict"] == "QUERY ERROR"
     assert payload["reason"] == reason
+    if request_id is not None:
+        assert payload["request_id"] == request_id
 
 
 def test_workflow_completion_creates_explicit_child_revision(tmp_path):
@@ -1661,3 +1685,110 @@ def test_chunked_artifact_hash_stops_after_deadline(tmp_path, monkeypatch):
     monkeypatch.setattr(probes, "request_deadline_exceeded", lambda: True)
     with pytest.raises(ForensicEndpointUnavailable, match="deadline_exceeded"):
         probes._hash_artifact_chunked(candidate)
+
+
+@pytest.mark.parametrize("damage", [None, "digest", "identity", "escape"])
+def test_archive_captures_and_checks_child_report_artifacts(
+    tmp_path: Path, damage: str | None
+) -> None:
+    import hashlib
+    from types import SimpleNamespace
+    from bioetl.infrastructure.control_plane.archive_run_reports import (
+        selected_report_sources,
+    )
+
+    path = persist(tmp_path).json_path
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload.pop("selected_run_snapshot")
+    identity = {
+        "run_id": "child-a",
+        "pipeline_name": "chembl_activity",
+        "manifest_id": "child-manifest",
+    }
+    raw = json.dumps({"identity": identity}).encode()
+    child = path.parent / "child-reports/child.json"
+    child.parent.mkdir()
+    child.write_bytes(raw)
+    artifact = {
+        "kind": "composite_child_run_report",
+        "ref": "child-reports/child.json",
+        "sha256": hashlib.sha256(raw).hexdigest(),
+        **identity,
+    }
+    if damage == "digest":
+        child.write_bytes(raw + b" ")
+    elif damage == "identity":
+        artifact["run_id"] = "foreign"
+    elif damage == "escape":
+        artifact["ref"] = "../outside.json"
+    payload["artifacts"] = [artifact]
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    manifest: Any = SimpleNamespace(run_id="run-a", pipeline_name="chembl_activity")
+    if damage:
+        with pytest.raises(ValueError, match="archive_child_report"):
+            selected_report_sources(tmp_path, manifest)
+    else:
+        assert child in selected_report_sources(tmp_path, manifest).values()
+
+
+@pytest.mark.parametrize(
+    "artifact,expected_result,expected_reason",
+    [
+        (None, "fail", "artifact_record_invalid"),
+        ({"kind": "gold", "sha256": "abcd"}, "fail", "hash_without_object"),
+        ({"kind": "gold"}, "fail", "artifact_path_missing"),
+        ({"kind": "gold", "ref": "data.bin"}, "unknown", "digest_not_recorded"),
+        (
+            {"kind": "gold", "ref": "data.bin", "sha256": "abcd"},
+            "fail",
+            "digest_mismatch",
+        ),
+    ],
+)
+def test_artifact_probe_distinguishes_invalid_missing_and_mismatched_evidence(
+    tmp_path, artifact, expected_result, expected_reason
+):
+    from bioetl.interfaces.http._selected_run_artifact_probes import _artifact_probes
+
+    (tmp_path / "data.bin").write_bytes(b"payload")
+    probes, present = _artifact_probes({"artifacts": [artifact]}, tmp_path)
+
+    assert present is True
+    assert probes == [
+        {
+            "code": "artifact_0" if artifact is None else "gold",
+            "result": expected_result,
+            "reason": expected_reason,
+            "evidence_ref": "#/artifacts/0",
+        }
+    ]
+
+
+@pytest.mark.parametrize(
+    "reference,kind,reason",
+    [
+        ("absolute", "custom", "artifact_path_escape"),
+        ("absolute", "gold", ""),
+        ("../outside.bin", "custom", "artifact_path_escape"),
+        ("nested/data.bin", "custom", ""),
+        ("inside.bin", "custom", ""),
+    ],
+)
+def test_artifact_resolution_limits_external_paths_to_layer_evidence(
+    tmp_path, reference, kind, reason
+):
+    from bioetl.interfaces.http._selected_run_artifact_probes import (
+        _resolve_artifact_path,
+    )
+
+    root = tmp_path / "run"
+    root.mkdir()
+    outside = tmp_path / "outside.bin"
+    outside.write_bytes(b"layer")
+    relative = str(outside) if reference == "absolute" else reference
+
+    candidate, actual_reason = _resolve_artifact_path(root.resolve(), relative, kind)
+
+    assert actual_reason == reason
+    expected = outside if reference == "absolute" else root / reference
+    assert candidate == (None if reason else expected.resolve())

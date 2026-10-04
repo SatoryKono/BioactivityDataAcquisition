@@ -8,6 +8,14 @@ from typing import cast
 
 from bioetl.application.services.control_plane.ledger import RunLedgerService
 from bioetl.application.services.control_plane.replay._historical_certification_upstream import (
+    CERTIFICATION_SHARED_PUBLIC_NAMES,
+    _source_key,
+    load_upstream_manifest,
+    validate_upstream_certification_state,
+    validate_upstream_presence,
+    validate_upstream_run_id_match,
+)
+from bioetl.application.services.control_plane.replay._historical_certification_upstream import (
     DiagnosticsSummaryBuilder as DiagnosticsSummaryBuilder,
 )
 from bioetl.application.services.control_plane.replay._historical_certification_upstream import (
@@ -19,22 +27,12 @@ from bioetl.application.services.control_plane.replay._historical_certification_
 from bioetl.application.services.control_plane.replay._historical_certification_upstream import (
     HistoricalReplayCertificationResultAssembler as HistoricalReplayCertificationResultAssembler,
 )
-from bioetl.application.services.control_plane.replay._historical_certification_upstream import (
-    _source_key,
-    load_upstream_manifest,
-    validate_upstream_certification_state,
-    validate_upstream_presence,
-    validate_upstream_run_id_match,
-)
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.domain.types import RunID
 
 __all__ = [
-    "DiagnosticsSummaryBuilder",
-    "HistoricalReplayCertificationProtocol",
-    "HistoricalReplayCertificationResult",
-    "HistoricalReplayCertificationResultAssembler",
+    *CERTIFICATION_SHARED_PUBLIC_NAMES,
     "HistoricalReplayCertificationValidator",
 ]
 

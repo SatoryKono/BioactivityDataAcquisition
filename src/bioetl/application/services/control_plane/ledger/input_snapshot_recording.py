@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.ledger._input_snapshot_manifest import (
     persist_input_snapshots_on_manifest,
@@ -16,49 +15,6 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.ledger.service import (
         RunLedgerService,
     )
-
-
-class _SnapshotPublishKwargs(TypedDict):
-    """Publish kwargs for one validated input-snapshot payload."""
-
-    provider: str
-    entity: str
-    pipeline_name: str
-    snapshot_id: str
-    content_hash: str
-    immutable_uri: str
-    bronze_batch_ref: str
-    query_fingerprint: str | None
-    details: Mapping[str, object]
-
-
-def _published_snapshot_kwargs(
-    snapshot: dict[str, object],
-    *,
-    details: dict[str, object],
-    artifact_path: str,
-    snapshot_id: str,
-) -> _SnapshotPublishKwargs:
-    """Build publish kwargs for one validated snapshot payload."""
-    return {
-        "provider": str(details.get("provider") or ""),
-        "entity": str(details.get("entity") or ""),
-        "pipeline_name": str(details.get("pipeline_name") or ""),
-        "snapshot_id": snapshot_id,
-        "content_hash": str(snapshot.get("content_hash") or ""),
-        "immutable_uri": str(snapshot.get("immutable_uri")),
-        "bronze_batch_ref": artifact_path,
-        "query_fingerprint": (
-            None
-            if snapshot.get("query_fingerprint") is None
-            else str(snapshot.get("query_fingerprint"))
-        ),
-        "details": {
-            key: value
-            for key, value in snapshot.items()
-            if key not in {"snapshot_id", "content_hash", "immutable_uri"}
-        },
-    }
 
 
 def _record_one_input_snapshot(
@@ -77,12 +33,23 @@ def _record_one_input_snapshot(
     if not snapshot_id:
         raise ValueError("input snapshot is missing snapshot_id")
     service.record_input_snapshot_published(
-        **_published_snapshot_kwargs(
-            snapshot,
-            details=details,
-            artifact_path=artifact_path,
-            snapshot_id=snapshot_id,
-        )
+        provider=_text_or_empty(details.get("provider")),
+        entity=_text_or_empty(details.get("entity")),
+        pipeline_name=_text_or_empty(details.get("pipeline_name")),
+        snapshot_id=snapshot_id,
+        content_hash=_text_or_empty(snapshot.get("content_hash")),
+        immutable_uri=str(snapshot.get("immutable_uri")),
+        bronze_batch_ref=artifact_path,
+        query_fingerprint=(
+            None
+            if snapshot.get("query_fingerprint") is None
+            else str(snapshot.get("query_fingerprint"))
+        ),
+        details={
+            key: value
+            for key, value in snapshot.items()
+            if key not in {"snapshot_id", "content_hash", "immutable_uri"}
+        },
     )
     return _snapshot_ref_from_payload(snapshot, snapshot_id=snapshot_id)
 
@@ -113,9 +80,9 @@ def record_input_snapshots_from_artifact(
     persist_input_snapshots_on_manifest(
         service,
         snapshots=tuple(attached),
-        provider=str(details.get("provider") or ""),
-        entity=str(details.get("entity") or ""),
-        pipeline_name=str(details.get("pipeline_name") or ""),
+        provider=_text_or_empty(details.get("provider")),
+        entity=_text_or_empty(details.get("entity")),
+        pipeline_name=_text_or_empty(details.get("pipeline_name")),
         input_snapshot_verified=_local_batch_file_verified(artifact_path),
     )
 
@@ -143,7 +110,7 @@ def _snapshot_ref_from_payload(
 ) -> RunInputSnapshotRef:
     return RunInputSnapshotRef(
         snapshot_id=snapshot_id,
-        content_hash=str(payload.get("content_hash") or ""),
+        content_hash=_text_or_empty(payload.get("content_hash")),
         immutable_uri=(
             None
             if payload.get("immutable_uri") is None
@@ -192,3 +159,8 @@ def _optional_datetime(value: object) -> datetime | None:
 def _optional_iso_text(value: object) -> str | None:
     moment = _optional_datetime(value)
     return None if moment is None else moment.isoformat()
+
+
+def _text_or_empty(value: object) -> str:
+    """Serialize absent or falsey snapshot metadata as the empty token."""
+    return str(value or "")

@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, cast
 
-from bioetl.application.runtime_clock import current_utc_time
+from bioetl.infrastructure.time import SystemClock
 from bioetl.composition.factories.storage.resilience import run_storage_blocking
 from bioetl.infrastructure.storage.delta.gold_table_vacuum import (
     vacuum_gold_delta_table,
@@ -19,6 +19,11 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 __all__ = ["StorageBundleMaintenanceMixin"]
+
+
+def current_utc_time() -> datetime:
+    """Resolve the storage composition clock through the infrastructure owner."""
+    return SystemClock().now()
 
 
 def _is_delta_table_dir(path: Path) -> bool:

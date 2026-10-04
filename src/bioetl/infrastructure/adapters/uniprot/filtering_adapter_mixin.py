@@ -21,22 +21,13 @@ from bioetl.infrastructure.adapters.uniprot.fallback_resolver import (
     iter_uniprot_fallback_records,
     resolve_uniprot_missing_ids,
 )
+from bioetl.infrastructure.adapters.uniprot.response_parser import (
+    extract_uniprot_accession as extract_uniprot_accession,
+)
 
 _FetchStrategy = Callable[..., AsyncIterator[BronzeRecord]]
 
 _UNIPROT_FILTER_BATCH_SIZE = 100
-
-
-def extract_uniprot_accession(record: BronzeRecord) -> str | None:
-    """Return a normalized accession from primaryAccession or accession."""
-    for key in ("primaryAccession", "accession"):
-        value = record.get(key)
-        if not isinstance(value, str):
-            continue
-        normalized = value.strip()
-        if normalized:
-            return normalized
-    return None
 
 
 class UniProtFilteringAdapterMixin:
@@ -241,9 +232,6 @@ class UniProtFilteringAdapterMixin:
             ):
                 yield record
 
-        def _extract_accession(record: BronzeRecord) -> str | None:
-            return extract_uniprot_accession(record)
-
         async for record in as_mixin_host(
             self
         )._fallback_decorator.execute(  # Any: mixin host
@@ -252,7 +240,7 @@ class UniProtFilteringAdapterMixin:
             primary_record_fetcher=_primary_records,
             limit=limit,
             filter_field=filter_field,
-            extract_record_id=_extract_accession,
+            extract_record_id=extract_uniprot_accession,
             fallback_handler=fallback_handler,
         ):
             yield record

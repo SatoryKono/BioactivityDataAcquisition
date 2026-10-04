@@ -121,7 +121,7 @@ access.
 | ---------------------------------- | ------------------------------------------------- |
 | `CompositeSupportServicesFactory`  | Factory for composite pipeline support services   |
 | `CompositeSupportServices`         | Container for composite support service instances |
-| `CompositeFilterExtractor`         | Filter extraction for composite pipelines         |
+| `CompositeFilterExtractor`         | Compatibility export of the application-owned composite filter policy |
 | `RunnerFactoryBuilder`             | Builds runner factories from configuration        |
 
 ### CLI Bootstrap

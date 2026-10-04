@@ -145,3 +145,16 @@ def test_silver_filter_rejection_labels_variants() -> None:
         "structural_policy"
     )
     assert _silver_filter_rejection_labels({"policy_stage": "other"})[1] is None
+
+
+def test_processed_removal_is_recorded_but_gold_contract_exclusion_is_not_double_counted():
+    accounting = MagicMock()
+    with patch(
+        "bioetl.application.core.batch_metrics_accounting.get_stage_accounting",
+        return_value=accounting,
+    ):
+        _record_processed_stage_accounting("deduplicated", 2)
+        _record_stage_outcome_accounting("gold", "excluded_by_contract", 2)
+    accounting.record_removal.assert_called_once_with(
+        "silver", outcome="deduplicated", reason_code="DEDUP_KEY_COLLISION", count=2
+    )

@@ -96,9 +96,11 @@ class HistoricalReplayClosureReportRecord:
         }
 
 
-__all__ = [
+CLOSURE_MODEL_PUBLIC_NAMES: tuple[str, ...] = (
     "RESIDUAL_BLOCKED_STATUSES",
     "HistoricalReplayClaimScopeMode",
     "HistoricalReplayClosureReportRecord",
     "HistoricalReplayResidualDispositionRecord",
-]
+)
+
+__all__ = list(CLOSURE_MODEL_PUBLIC_NAMES)

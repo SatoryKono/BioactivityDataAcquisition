@@ -63,6 +63,20 @@ from tests.unit.application.services.run_manifest_test_support import (
 pytestmark = pytest.mark.unit
 
 
+def test_replay_verification_without_verifier_has_no_invented_evidence(tmp_path):
+    store = FileRunManifestStore(base_path=tmp_path)
+    assert store.verify_replay_objects(make_run_manifest()) == {}
+
+
+def test_replay_verification_preserves_verifier_results(tmp_path):
+    verifier = MagicMock()
+    verifier.verify.return_value = {"bronze://batch": False, "gold://table": True}
+    store = FileRunManifestStore(base_path=tmp_path, replay_object_verifier=verifier)
+    manifest = make_run_manifest()
+    assert store.verify_replay_objects(manifest) is verifier.verify.return_value
+    verifier.verify.assert_called_once_with(manifest)
+
+
 def test_repeated_catalog_decodes_identical_contents_once(tmp_path) -> None:
     store = FileRunManifestStore(base_path=tmp_path)
     manifest = make_run_manifest(manifest_id="decode-reuse")

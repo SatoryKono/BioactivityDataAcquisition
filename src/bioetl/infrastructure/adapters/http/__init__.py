@@ -12,6 +12,12 @@ Provides:
 
 from __future__ import annotations
 
+from bioetl.infrastructure.adapters.http._client_retry_policy import (
+    _can_retry as can_retry,
+)
+from bioetl.infrastructure.adapters.http._client_retry_policy import (
+    _parse_retry_after as parse_retry_after,
+)
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import RetryConfig, UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.health_monitor import (
@@ -31,4 +37,6 @@ __all__ = [
     "RetryConfig",
     "TokenBucketRateLimiter",
     "UnifiedHTTPClient",
+    "can_retry",
+    "parse_retry_after",
 ]

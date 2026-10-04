@@ -10,6 +10,10 @@ from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.runner_pkg.runner_helpers import (
     log_enrichment_summary,
 )
+from bioetl.application.composite.runner_pkg.runner_key_flow import (
+    CompositeEnrichmentKeyContext,
+    extract_enrichment_keys,
+)
 from bioetl.application.composite.runner_pkg.runner_stage_enrichment_types import (
     _CompositeRunnerStageEnrichmentHostProtocol,
     _PreparedEnrichmentRunContext,
@@ -143,3 +147,18 @@ class _CompositeRunnerStageEnrichmentExecutionMixin:
         await self._validate_required_enrichment_results(state, enrichment_results)
 
         return state, enrichment_results
+
+    async def _extract_enrichment_keys(
+        self: _CompositeRunnerStageEnrichmentHostProtocol,
+    ) -> pl.DataFrame:
+        """Extract seed keys once the seed phase has completed."""
+        enrichment_key_result = await extract_enrichment_keys(
+            key_extractor=self._key_extractor,
+            logger=self._logger,
+            request=CompositeEnrichmentKeyContext(
+                composite_name=self._config.name,
+                silver_table=self._config.seed.silver_table,
+                output_keys=tuple(self._config.seed.output_keys),
+            ),
+        )
+        return enrichment_key_result.keys_df

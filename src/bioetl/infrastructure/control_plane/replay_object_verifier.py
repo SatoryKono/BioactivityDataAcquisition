@@ -6,8 +6,10 @@ import hashlib
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import urlsplit
+from urllib.request import url2pathname
 
-from bioetl.domain.control_plane import RunManifest
+from bioetl.domain.control_plane import RunManifest, RunSourceRef
 from bioetl.domain.normalization.json import stable_json_hash
 from bioetl.infrastructure.control_plane.file_effective_config_artifact_store import (
     FileEffectiveConfigArtifactStore,
@@ -54,7 +56,53 @@ class ReplayObjectVerifier:
             ),
             "input_snapshot_fingerprint": self._snapshots(manifest),
         }
+        if getattr(
+            manifest, "provider", None
+        ) == "composite" and manifest.launch_context.get("child_replay_manifests"):
+            values["input_snapshot_fingerprint"] = self._composite_children(
+                manifest, values["input_snapshot_fingerprint"]
+            )
         return {key: value for key, value in values.items() if value is not None}
+
+    def _composite_children(
+        self, manifest: RunManifest, snapshots: bool | None
+    ) -> bool | None:
+        from bioetl.domain.control_plane.composite_replay import (
+            has_composite_replay_bindings,
+        )
+        from bioetl.infrastructure.control_plane.file_run_manifest_store import (
+            FileRunManifestStore,
+        )
+
+        if not has_composite_replay_bindings(manifest):
+            return False
+        bindings = manifest.launch_context["child_replay_manifests"]
+        if not isinstance(bindings, dict):
+            return False
+        store = FileRunManifestStore(base_path=self.config_root.parent / "run_manifest")
+        sources: list[RunSourceRef] = []
+        for pipeline, identity in sorted(bindings.items()):
+            child = store.get(str(identity))
+            if child is None:
+                return None
+            if (
+                child.provider == "composite"
+                or child.pipeline_name != pipeline
+                or child.code_provenance.git_commit
+                != manifest.code_provenance.git_commit
+                or child.code_provenance.dependency_lock_hash
+                != manifest.code_provenance.dependency_lock_hash
+            ):
+                return False
+            checks = self.verify(child)
+            if False in checks.values():
+                return False
+            if len(checks) != 3:
+                return None
+            sources.extend(child.source_refs)
+        if tuple(sources) != manifest.source_refs:
+            return False
+        return snapshots
 
     def _config(self, manifest: RunManifest) -> bool | None:
         expected = _digest(manifest.code_provenance.effective_config_hash)
@@ -103,7 +151,10 @@ class ReplayObjectVerifier:
             candidate = (root / uri.removeprefix("bronze://")).resolve()
             return candidate if candidate.is_relative_to(root) else None
         if uri.startswith("file://"):
-            return Path(uri.removeprefix("file://"))
+            parsed = urlsplit(uri)
+            if parsed.netloc not in ("", "localhost"):
+                return None
+            return Path(url2pathname(parsed.path))
         return None if "://" in uri or not uri else Path(uri)
 
     def _snapshots(self, manifest: RunManifest) -> bool | None:
@@ -111,7 +162,7 @@ class ReplayObjectVerifier:
         for source in manifest.source_refs:
             for snapshot in source.input_snapshots:
                 path = self._snapshot_path(
-                    snapshot.immutable_uri,
+                    snapshot.immutable_uri or "",
                     getattr(source, "provider", ""),
                     getattr(source, "entity", ""),
                 )

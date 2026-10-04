@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "stream": "stream-b-compatibility-governance-evidence",
+  "reviewed_on": "2026-06-26",
+  "issues": [
+    5651,
+    5652,
+    5653,
+    5655
+  ],
+  "debt_budget_policy": "flat_or_decreasing_only",
+  "outcomes": {
+    "5651": {
+      "status": "closeable",
+      "debt_type": "compatibility_debt",
+      "outcome": "unchanged_but_fully_justified",
+      "evidence": [
+        "configs/quality/compatibility_facade_inventory.yaml",
+        "reports/quality/compatibility-importer-census.json"
+      ],
+      "closeout_reason": "Retained public entrypoints remain external compatibility seams with zero first-party src importers, reviewed exit criteria, and no duplicate or conflicting lazy exports."
+    },
+    "5652": {
+      "status": "closeable",
+      "debt_type": "compatibility_debt_determinism_risk",
+      "outcome": "improved",
+      "evidence": [
+        "src/bioetl/domain/filtering/silver_filter_identity.py",
+        "src/bioetl/infrastructure/config/silver_filter_migration.py",
+        "configs/quality/internal_compatibility_shim_inventory.yaml",
+        "tests/architecture/test_silver_filter_compatibility_surface.py",
+        "tests/unit/domain/filtering/test_silver_filter_identity.py"
+      ],
+      "closeout_reason": "Runtime builders now use domain-owned Silver filter identity helpers directly, reducing the infrastructure compatibility facade first-party importer budget to zero while preserving manifest/effective-config identity."
+    },
+    "5653": {
+      "status": "closeable",
+      "debt_type": "dead_code_governance_debt",
+      "outcome": "unchanged_but_fully_triaged",
+      "evidence": [
+        "reports/quality/dead-code-inventory.json",
+        "configs/quality/retirement_candidate_triage.yaml"
+      ],
+      "current_counts": {
+        "repo_wide_zero_import_candidate_count": 10,
+        "repo_wide_classified_zero_import_candidate_count": 10,
+        "repo_wide_untriaged_zero_import_candidate_count": 0,
+        "repo_wide_owner_test_anchored_candidate_count": 10
+      },
+      "closeout_reason": "All repo-wide zero-import candidates are classified, owner-test anchored, and under a fail-fast zero-untriaged review window."
+    },
+    "5655": {
+      "status": "closeable",
+      "debt_type": "contract_drift_observability_freshness_governance",
+      "outcome": "enforced",
+      "evidence": [
+        "reports/quality/debt-governance-gates.json",
+        "reports/quality/contract-registry-diagnostics.json",
+        "scripts/engineering/ci/validate_registry_dq_refs.py",
+        "reports/quality/config-discrepancy-baseline.json",
+        "reports/observability/runtime_cardinality_inventory.json",
+        "reports/observability/runtime_cardinality_review.json",
+        "configs/base/bronze_fixture_gaps.yaml",
+        ".github/workflows/tests.yml",
+        ".github/workflows/contract-governance-fast-check.yml"
+      ],
+      "closeout_reason": "Config, contract, DQ, observability, and touched-metric freshness gates are deterministic and currently clean."
+    }
+  },
+  "required_closeout_checks": [
+    "python -m scripts.engineering.qa report-compatibility-importer-census --check",
+    "python -m scripts.engineering.qa report-dead-code-inventory --check",
+    "python -m scripts.engineering.qa report-debt-governance-gates --check",
+    "python -m scripts.engineering.qa report-observability-metric-inventory --check --json --allow-local-cardinality-fallback",
+    "python -m scripts.schema generate-config-matrix --check",
+    "pytest tests/architecture/test_tech_debt_issues_5651_5655_closeout.py"
+  ]
+}

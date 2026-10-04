@@ -16,8 +16,6 @@ from bioetl.domain.workflow.foreign_key_reconciliation_models import (
 )
 from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_reads import (
     filter_current_rows,
-)
-from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support import (
     filter_source_rows_to_current_run,
 )
 
@@ -119,7 +117,10 @@ async def validate_snapshot_versions(
     host: SelectedSnapshotHost, request: ForeignKeyReconciliationRequest
 ) -> None:
     """Reject source or reference changes instead of silently selecting latest."""
-    if request.reconciliation_mode != "selected-snapshot":
+    if (
+        request.reconciliation_mode != "selected-snapshot"
+        and not request.require_closed_cohort
+    ):
         return
     for layer, name in (
         (request.source_layer, request.source_table),

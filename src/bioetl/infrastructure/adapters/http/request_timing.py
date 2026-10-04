@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import time
+from collections.abc import Awaitable, Callable
 from typing import Protocol
 
 import httpx
@@ -24,10 +25,8 @@ class RequestTimingHost(Protocol):
 
 async def execute_timed_request(
     host: RequestTimingHost,
-    client: httpx.AsyncClient,
     method: str,
-    url: str,
-    request_kwargs: dict[str, object],
+    request: Callable[[], Awaitable[httpx.Response]],
     *,
     request_timeout: float | None = None,
     attempt_number: int = 1,
@@ -51,7 +50,7 @@ async def execute_timed_request(
 
         async def send() -> httpx.Response:
             async with asyncio.timeout(request_timeout):
-                return await client.request(method, url, **request_kwargs)
+                return await request()
 
         response = await host.circuit_breaker.call(send)
         response.extensions["bioetl_transport_seconds"] = time.monotonic() - admitted

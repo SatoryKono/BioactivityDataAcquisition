@@ -13,7 +13,8 @@ source:
             retry_max_delay: 300.0
         pagination:
             page_size: 100
-            id_batch_size: 50
+            # /paper/batch accepts 500 IDs; reduce requests without faster admission.
+            id_batch_size: 500
             strategy: offset
         fallback:
             enabled: true

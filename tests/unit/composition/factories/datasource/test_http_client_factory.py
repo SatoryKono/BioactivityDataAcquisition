@@ -24,7 +24,7 @@
 # pyright: reportFunctionMemberAccess=false
 # pyright: reportConstantRedefinition=false
 # pyright: reportInvalidTypeForm=false
-# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+# PD5 test mock/fixture surface â€” product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Unit tests for HttpClientFactory."""
 
 from __future__ import annotations
@@ -165,10 +165,11 @@ class TestHttpClientFactory:
         assert kwargs["retry_config"].base_delay == pytest.approx(1.0)
         assert kwargs["retry_config"].max_delay == pytest.approx(60.0)
 
-    def test_create_clamps_retry_waits_in_test_mode(
-        self, monkeypatch: pytest.MonkeyPatch
+    @pytest.mark.parametrize("test_mode", [True, False])
+    def test_create_clamps_retry_waits_only_in_test_mode(
+        self, monkeypatch: pytest.MonkeyPatch, test_mode: bool
     ) -> None:
-        """Test mode keeps anonymous Semantic Scholar retries and waits bounded."""
+        """Production respects configured attempts; test mode keeps waits bounded."""
         from bioetl.composition.factories.datasource import http_client as module
 
         source_config = SimpleNamespace(
@@ -198,19 +199,22 @@ class TestHttpClientFactory:
         monkeypatch.setattr(module, "load_source_config", lambda _: source_config)
         monkeypatch.setattr(module, "UnifiedHTTPClient", client_ctor)
 
-        settings = SimpleNamespace(test_mode=True)
+        settings = SimpleNamespace(test_mode=test_mode)
         result = HttpClientFactory.create_for_provider(
             "semanticscholar",
             settings=settings,
         )
 
         assert result == "client-test-mode"
-        assert client_ctor.call_args.kwargs["timeout"] == pytest.approx(5.0)
+        assert client_ctor.call_args.kwargs["timeout"] == pytest.approx(
+            5.0 if test_mode else 42.0
+        )
         retry_config = client_ctor.call_args.kwargs["retry_config"]
-        assert retry_config.max_attempts == 2
-        assert retry_config.base_delay == pytest.approx(0.0)
-        assert retry_config.max_delay == pytest.approx(0.0)
-        assert retry_config.max_retry_after_seconds == pytest.approx(0.0)
+        assert retry_config.max_attempts == 5
+        assert retry_config.base_delay == pytest.approx(0.0 if test_mode else 30.0)
+        assert retry_config.max_delay == pytest.approx(0.0 if test_mode else 300.0)
+        if test_mode:
+            assert retry_config.max_retry_after_seconds == pytest.approx(0.0)
 
     def test_create_uses_explicit_provider_registry_instance(
         self, monkeypatch: pytest.MonkeyPatch
@@ -259,7 +263,7 @@ class TestHttpClientFactory:
 
 @pytest.mark.unit
 class TestResolvedHttpConfig:
-    """Tests for _resolve_config — pure config resolution without infra objects."""
+    """Tests for _resolve_config â€” pure config resolution without infra objects."""
 
     def test_resolve_from_source_yaml(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Source YAML config should populate all ResolvedHttpConfig fields."""
@@ -392,6 +396,25 @@ class TestResolvedHttpConfig:
             setattr(settings, setting_name, "present")
         with_key = HttpClientFactory._resolve_config(provider, settings)
         assert (with_key.rate, with_key.capacity) == authenticated
+
+    @pytest.mark.parametrize("authenticated", [False, True])
+    @pytest.mark.parametrize("test_mode", [False, True])
+    def test_semanticscholar_uses_configured_attempt_budget(
+        self, authenticated, test_mode
+    ):
+        from bioetl.infrastructure.config import load_source_config
+
+        settings = SimpleNamespace(
+            test_mode=test_mode,
+            semanticscholar_api_key="present" if authenticated else None,
+        )
+        configured = load_source_config("semanticscholar")
+        resolved = HttpClientFactory._resolve_config("semanticscholar", settings)
+        retry = HttpClientFactory._build_retry_config(resolved, settings)
+        assert retry.max_attempts == configured.max_retries == 5
+        assert retry.effective_retry_budget() == 4
+        if not authenticated:
+            assert (resolved.rate, resolved.capacity) == (0.01, 1)
 
     def test_resolved_http_config_is_frozen(self) -> None:
         """ResolvedHttpConfig should be immutable."""

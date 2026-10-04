@@ -11,7 +11,6 @@ from bioetl.composition.bootstrap_contexts import (
     RateLimitContext,
 )
 from bioetl.composition.providers._models import ProviderSettingsProtocol
-from bioetl.domain.ports import DataSourcePort
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.infrastructure.config.source_config_loader import load_source_config
 from bioetl.composition.providers._registration_contracts import (
@@ -26,6 +25,7 @@ from bioetl.composition.factories.datasource.adapter_helpers import (
 from bioetl.composition.lazy_exports import resolve_lazy_callable
 
 if TYPE_CHECKING:
+    from bioetl.domain.ports import DataSourcePort
     from bioetl.composition.bootstrap_contexts import RateLimitContext
     from bioetl.composition.providers._models import ProviderConfig
     from bioetl.composition.providers._registration_contracts import (

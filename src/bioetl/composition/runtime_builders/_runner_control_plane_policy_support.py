@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-from bioetl.composition.runtime_builders._runner_control_plane_artifact_policy import (
+from bioetl.domain.control_plane.artifact_publication_policy import (
     requires_artifact_publication_closure as _requires_artifact_publication_closure,
     validate_artifact_recorder_attachment as _validate_artifact_recorder_attachment,
 )
@@ -17,9 +15,6 @@ from bioetl.domain.control_plane.artifact_lineage_layers import (
 from bioetl.domain.control_plane.reproducibility_policy import (
     validate_required_persistence_profile as domain_validate_required_persistence_profile,
 )
-
-if TYPE_CHECKING:
-    from bioetl.infrastructure.config.settings_api import Settings
 
 
 def resolve_required_artifact_lineage_layers(
@@ -57,20 +52,7 @@ def validate_required_persistence_profile(
     )
 
 
-def validate_strict_data_root_policy(
-    *,
-    settings: Settings,
-    required_profile: object,
-    exact_replay: bool = False,
-) -> None:
-    """Fail closed when strict reproducibility relies on fallback data roots."""
-    _validate_strict_data_root_policy(
-        settings=settings,
-        required_profile=required_profile,
-        exact_replay=exact_replay,
-    )
-
-
+validate_strict_data_root_policy = _validate_strict_data_root_policy
 requires_artifact_publication_closure = _requires_artifact_publication_closure
 validate_artifact_recorder_attachment = _validate_artifact_recorder_attachment
 

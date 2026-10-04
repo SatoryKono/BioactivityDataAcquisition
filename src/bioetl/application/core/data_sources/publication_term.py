@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
     from bioetl.application.core.publication_term_enrichment import (
-        PublicationTermPayloadEnricher,
+        PublicationTermPayloadEnricherProtocol,
     )
     from bioetl.domain.ports import DataSourcePort
 
@@ -50,7 +50,7 @@ class PublicationTermDataSource(
     def __init__(
         self,
         data_source: DataSourcePort,
-        term_payload_enricher: PublicationTermPayloadEnricher | None = None,
+        term_payload_enricher: PublicationTermPayloadEnricherProtocol | None = None,
     ) -> None:
         self._data_source = data_source
         self._term_payload_enricher = term_payload_enricher

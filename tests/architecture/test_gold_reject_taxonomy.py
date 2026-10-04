@@ -17,6 +17,10 @@ from pathlib import Path
 
 import pytest
 
+from bioetl.interfaces.http._processed_records_table_support import (
+    PROCESSED_RECORDS_ROW_SPECS,
+)
+
 pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -77,20 +81,29 @@ def test_dq_dashboard_gold_reject_panel_is_not_silver_alias_surface() -> None:
         (
             item
             for item in _iter_dashboard_panels(dashboard)
-            if item.get("title") == "Inspect Gold Reject Outcomes by Pipeline"
+            if item.get("title") == "Inspect Processed Records"
         ),
         None,
     )
 
     assert panel is not None
-    expressions = [
-        target.get("expr", "")
-        for target in panel.get("targets", [])
-        if isinstance(target.get("expr"), str)
-    ]
-    joined = "\n".join(expressions)
-    assert "bioetl_processed_records_gold_quarantined_current" in joined
-    assert "bioetl_processed_records_gold_excluded_by_contract_current" in joined
+    targets = panel["targets"]
+    primary = next(target for target in targets if target["refId"] == "A")
+    assert primary["url"] == (
+        "/ops/observability/processed-records?pipeline=${pipeline}"
+        "&run_type=${run_type:csv}&run_id=${run_id}"
+    )
+    assert primary["root_selector"] == "rows"
+    metrics_by_parameter = {
+        row.parameter: row.metric for row in PROCESSED_RECORDS_ROW_SPECS
+    }
+    assert metrics_by_parameter["09 gold_quarantined_records"] == (
+        "bioetl_processed_records_gold_quarantined_current"
+    )
+    assert metrics_by_parameter["08 gold_excluded_by_contract_records"] == (
+        "bioetl_processed_records_gold_excluded_by_contract_current"
+    )
+    joined = json.dumps(targets)
     assert "bioetl_silver_filter_rejections_total" not in joined
     assert 'stage="filtered_out"' not in joined
 

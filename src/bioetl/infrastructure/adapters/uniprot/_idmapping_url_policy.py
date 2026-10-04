@@ -4,6 +4,11 @@ from __future__ import annotations
 
 from urllib.parse import unquote, urljoin, urlsplit
 
+import httpx
+
+_REDIRECT_STATUS_CODES = frozenset({301, 302, 303, 307, 308})
+_MAX_RESULT_REDIRECTS = 3
+
 
 def _origin(url: str) -> tuple[str, str, int]:
     parsed = urlsplit(url)
@@ -36,3 +41,21 @@ def trusted_idmapping_url(base_url: str, candidate: str) -> str:
     if not decoded_path.startswith(allowed_prefix):
         raise ValueError("URL is outside the UniProt ID mapping API")
     return joined
+
+
+def resolve_results_redirect(
+    base_url: str,
+    response: httpx.Response,
+    *,
+    redirect_count: int,
+) -> tuple[str, int] | None:
+    """Return one validated redirect target and its bounded hop count."""
+    if response.status_code not in _REDIRECT_STATUS_CODES:
+        return None
+    next_count = redirect_count + 1
+    if next_count > _MAX_RESULT_REDIRECTS:
+        raise ValueError("UniProt ID mapping redirect limit exceeded")
+    location = response.headers.get("location")
+    if not location:
+        raise ValueError("UniProt ID mapping redirect omitted Location")
+    return trusted_idmapping_url(base_url, location), next_count

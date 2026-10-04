@@ -954,3 +954,39 @@ def test_bronze_snapshot_uri_cannot_escape_root(tmp_path: Path, uri: str) -> Non
     )
 
     assert resolve_bronze_uri(tmp_path / "bronze", uri) is None
+
+
+@pytest.mark.parametrize("location", ["staged", "outside", "remote"])
+def test_lifecycle_resolves_only_local_cached_files_inside_data_root(
+    tmp_path: Path, location: str
+) -> None:
+    from types import SimpleNamespace
+    from bioetl.infrastructure.control_plane._file_artifact_lifecycle_bronze_refs import (
+        _append_snapshot_bronze_candidate,
+    )
+
+    data = tmp_path / "data"
+    bronze = data / "output/bronze"
+    staged = data / "output/control/composite_replay_inputs/batch.jsonl.zst"
+    staged.parent.mkdir(parents=True)
+    staged.write_bytes(b"captured input")
+    uri = staged.as_uri()
+    if location == "outside":
+        uri = (tmp_path / "outside.jsonl.zst").as_uri()
+    elif location == "remote":
+        uri = "file://foreign-server/share/batch.jsonl.zst"
+    candidates, issues = [], []
+    _append_snapshot_bronze_candidate(
+        candidates,
+        issues,
+        bronze_root=bronze,
+        source_root=bronze / "chembl/activity",
+        snapshot=SimpleNamespace(immutable_uri=uri, snapshot_id="captured"),
+        seen=set(),
+    )
+    if location == "staged":
+        assert not issues
+        assert candidates[0][1] == staged
+    else:
+        assert not candidates
+        assert len(issues) == 1

@@ -28,8 +28,11 @@
 from __future__ import annotations
 
 from pathlib import Path, PureWindowsPath
+from unittest.mock import Mock
 
 import pytest
+
+from bioetl.infrastructure.config import config_root
 
 from bioetl.infrastructure.config._base import get_pipeline_config
 from bioetl.infrastructure.config.pipeline_config_api import (
@@ -59,6 +62,36 @@ def test_rooted_explicit_path_detection_is_platform_independent(
     expected: bool,
 ) -> None:
     assert ConfigRootResolver._is_rooted_explicit_path(explicit_path) is expected
+
+
+def test_installed_layout_without_repository_markers_uses_source_ancestor(
+    tmp_path, monkeypatch
+):
+    from bioetl.infrastructure.config import config_root as module
+
+    source = (
+        tmp_path
+        / "package"
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "config"
+        / "config_root.py"
+    )
+    source.parent.mkdir(parents=True)
+    source.touch()
+    monkeypatch.setattr(module, "__file__", str(source))
+    assert module.get_default_repo_root() == tmp_path / "package"
+
+
+def test_cwd_preference_resolves_with_explicit_default_repository(
+    tmp_path, monkeypatch
+):
+    root = get_default_repo_root()
+    (tmp_path / "configs").mkdir()
+    monkeypatch.chdir(tmp_path)
+    resolver = ConfigRootResolver(repo_root=root, prefer_cwd_configs=True)
+    assert resolver.resolve() == tmp_path / "configs"
 
 
 def test_resolve_configs_root_defaults_to_repo_configs_directory() -> None:
@@ -98,6 +131,12 @@ def test_resolve_config_subdir_honors_explicit_configs_root(tmp_path: Path) -> N
     )
 
 
+def test_resolve_config_subdir_preserves_absolute_location(tmp_path: Path) -> None:
+    explicit = tmp_path / "external-configs" / "workflows"
+
+    assert resolve_config_subdir(explicit) == explicit
+
+
 def test_resolve_configs_root_ignores_cwd_configs_by_default(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -133,6 +172,63 @@ def test_get_default_repo_root_points_to_repository_root() -> None:
     assert (repo_root / "configs").is_dir()
     assert (repo_root / "pyproject.toml").is_file()
     assert (repo_root / "src" / "bioetl").is_dir()
+
+
+def _use_synthetic_source_layout(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> Path:
+    source = (
+        tmp_path
+        / "repo"
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "config"
+        / "config_root.py"
+    )
+    source.parent.mkdir(parents=True)
+    # Limit discovery to this fixture: ancestors outside it must never select
+    # the real checkout or an unrelated machine-local configs directory.
+    source_path = Mock(spec=Path)
+    source_path.resolve.return_value = source_path
+    source_path.parents = tuple(source.parents[:5])
+    monkeypatch.setattr(config_root, "Path", lambda _: source_path)
+    return source.parents[4]
+
+
+def test_get_default_repo_root_falls_back_without_any_candidate_configs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    expected = _use_synthetic_source_layout(tmp_path, monkeypatch)
+
+    assert get_default_repo_root() == expected
+
+
+@pytest.mark.parametrize("marker", ["pyproject.toml", "AGENTS.md"])
+def test_get_default_repo_root_skips_configs_without_repository_marker(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, marker: str
+) -> None:
+    expected = _use_synthetic_source_layout(tmp_path, monkeypatch)
+    markerless = expected / "src" / "bioetl" / "infrastructure" / "config"
+    (markerless / "configs").mkdir()
+    (expected / "configs").mkdir()
+    (expected / marker).write_text("fixture repository marker", encoding="utf-8")
+
+    assert get_default_repo_root() == expected
+
+
+def test_resolve_configs_root_falls_back_when_preferred_cwd_configs_are_absent(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = tmp_path / "repo"
+    cwd = tmp_path / "cwd"
+    repo.mkdir()
+    cwd.mkdir()
+    monkeypatch.setattr(config_root, "get_default_repo_root", lambda: repo)
+    monkeypatch.chdir(cwd)
+    resolver = ConfigRootResolver(repo_root=repo, prefer_cwd_configs=True)
+
+    assert resolver.resolve() == (repo / "configs").resolve()
 
 
 def test_get_pipeline_config_falls_back_to_repo_root_when_cwd_is_src(

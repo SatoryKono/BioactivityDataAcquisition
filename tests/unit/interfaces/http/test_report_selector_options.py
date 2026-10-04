@@ -11,6 +11,30 @@ from bioetl.interfaces.http._report_selector_options import supplement_report_op
 pytestmark = pytest.mark.unit
 
 
+def test_plain_report_options_return_values(tmp_path):
+    _report(tmp_path)
+    assert supplement_report_options(
+        {"items": []},
+        dimension="run_type",
+        response_shape="values",
+        scopes={},
+        root=tmp_path,
+    ) == {"items": ["backfill"]}
+
+
+def test_report_index_cannot_escape_requested_pipeline_scope(tmp_path, monkeypatch):
+    from bioetl.interfaces.http import _report_selector_options as module
+
+    _report(tmp_path)
+    from bioetl.composition.observability_runtime import create_run_report_store
+
+    entries = module.list_pipeline_reports(
+        root=tmp_path, store=create_run_report_store()
+    )
+    monkeypatch.setattr(module, "list_pipeline_reports", lambda **kw: entries)
+    assert _options(tmp_path, pipeline=("pubmed_publication",)) == {"items": []}
+
+
 @pytest.mark.parametrize(
     "zone,started,label",
     [

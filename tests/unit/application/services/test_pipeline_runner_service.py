@@ -1014,3 +1014,25 @@ async def test_cancelled_execution_persists_snapshot_and_releases_observations(
     )
     assert run_observations() == {}
     service.capture_control_plane.assert_called_once()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "error", [LookupError("unexpected constructor failure"), asyncio.CancelledError()]
+)
+async def test_constructor_boundary_preserves_exception_identity_and_cancellation(
+    error,
+):
+    from bioetl.application.services.execution._pipeline_runner_support import (
+        create_execution_runner_audited,
+    )
+
+    factory = MagicMock(side_effect=error)
+    record_failure = AsyncMock()
+    with pytest.raises(type(error)) as raised:
+        await create_execution_runner_audited(factory, record_failure=record_failure)
+    assert raised.value is error
+    if isinstance(error, asyncio.CancelledError):
+        record_failure.assert_not_awaited()
+    else:
+        record_failure.assert_awaited_once_with(error)

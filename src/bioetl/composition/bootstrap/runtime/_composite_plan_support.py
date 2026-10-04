@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.runtime_wiring_api import PipelineRunner
     from bioetl.application.services.quality.dq_report_service import DQReportService
     from bioetl.application.services.execution.pipeline_runner_models import RunOptions
-    from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
+    from bioetl.application.composite.helpers.filter_extraction import (
         CompositeFilterExtractor,
     )
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (

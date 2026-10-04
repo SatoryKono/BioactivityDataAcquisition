@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import replace
 
 from bioetl.domain.workflow.config import (
@@ -92,7 +93,7 @@ def _scope_delete_orphans_step(
         return step, False
     if not _limited_upstream_pipeline_ids(transform.step_id, config, steps_by_id):
         return step, False
-    scoped = dict(transform.config or {})
+    scoped = dict(_transform_options(transform))
     scoped["source_scope"] = "current_run"
     return replace(transform, config=scoped), True
 
@@ -119,115 +120,151 @@ def mark_delete_orphans_current_run_scope(config: WorkflowConfig) -> WorkflowCon
     return _require_workflow_config(replace(config, steps=tuple(updated_steps)))
 
 
+def _transform_options(transform: TransformStepConfig) -> Mapping[str, object]:
+    """Expose optional transform configuration with an empty default."""
+    return transform.config or {}
+
+
+def _step_definitions(config: WorkflowConfig) -> dict[str, WorkflowStep]:
+    """Index the workflow for consistent upstream traversal."""
+    return {step.step_id: step for step in config.steps}
+
+
+def _ancestors(step: WorkflowStep, definitions: dict[str, WorkflowStep]) -> set[str]:
+    """Collect each upstream step once, including through transform nodes."""
+    ancestors: set[str] = set()
+    pending = list(step.depends_on)
+    while pending:
+        identity = pending.pop()
+        if identity not in ancestors:
+            ancestors.add(identity)
+            pending.extend(definitions[identity].depends_on)
+    return ancestors
+
+
+def _cohort_matches(
+    producer: WorkflowStepConfig, options: Mapping[str, object]
+) -> bool:
+    """Match either orientation of the explicitly bound reference relation."""
+    cohort = producer.reference_cohort
+    if cohort is None:
+        return False
+    relation = (
+        producer.pipeline_name.replace("_", ".", 1),
+        cohort.table,
+        cohort.column,
+    )
+    return relation in (
+        (
+            options.get("reference_table"),
+            options.get("source_table"),
+            options.get("source_key"),
+        ),
+        (
+            options.get("source_table"),
+            options.get("reference_table"),
+            options.get("reference_key"),
+        ),
+    )
+
+
 def _has_bound_reference_cohort(
     transform: TransformStepConfig, config: WorkflowConfig
 ) -> bool:
-    """Permit bounded verification only for an explicitly linked selection."""
-    options = transform.config or {}
+    """Permit bounded verification only for an explicitly linked ancestor."""
+    options = _transform_options(transform)
     if options.get("require_closed_cohort") is not True:
         return False
-    source_table, reference_table = (
-        options.get("source_table"),
-        options.get("reference_table"),
+    ancestors = _ancestors(transform, _step_definitions(config))
+    return any(
+        _cohort_matches(producer, options)
+        for producer in config.pipeline_steps
+        if producer.step_id in ancestors
     )
-    for producer in config.pipeline_steps:
-        cohort = producer.reference_cohort
-        if cohort is None:
-            continue
-        table = producer.pipeline_name.replace("_", ".", 1)
-        if (
-            table == reference_table
-            and cohort.table == source_table
-            and cohort.column == options.get("source_key")
-        ):
-            return True
-        if (
-            table == source_table
-            and cohort.table == reference_table
-            and cohort.column == options.get("reference_key")
-        ):
-            return True
-    return False
+
+
+def _reject_limited_transform(
+    transform: TransformStepConfig,
+    config: WorkflowConfig,
+    definitions: dict[str, WorkflowStep],
+) -> None:
+    """Require complete references unless bounded selection evidence is linked."""
+    mode = (_transform_options(transform)).get(
+        "reconciliation_mode",
+        config.defaults.reconciliation_mode or "complete-reference",
+    )
+    if mode == "selected-snapshot":
+        return
+    limited = _limited_upstream_pipeline_ids(transform.step_id, config, definitions)
+    if limited and not _has_bound_reference_cohort(transform, config):
+        raise ValueError(
+            "reconcile_foreign_keys action=delete_orphans cannot depend on "
+            "pipeline steps with run_options.limit "
+            f"({', '.join(limited)}); independently bounded extracts "
+            "make Gold FK orphans false positives"
+        )
 
 
 def reject_delete_orphans_after_limited_extracts(config: WorkflowConfig) -> None:
-    """Reject effective configuration with delete_orphans on limited extracts.
-
-    Independently bounded extracts make Gold FK orphans false positives.
-    Walks the full upstream DAG so an intermediary transform cannot hide a
-    limited producer. Apply this after CLI overrides as well as YAML loading.
-    """
-    steps_by_id = {step.step_id: step for step in config.steps}
+    """Reject destructive reconciliation after independently bounded extracts."""
+    definitions = _step_definitions(config)
     for step in config.steps:
         transform = _delete_orphans_transform(step)
-        if transform is None:
-            continue
-        mode = (transform.config or {}).get(
-            "reconciliation_mode",
-            config.defaults.reconciliation_mode or "complete-reference",
+        if transform is not None:
+            _reject_limited_transform(transform, config, definitions)
+
+
+def _apply_transform_mode(
+    transform: TransformStepConfig, config: WorkflowConfig, mode: str | None
+) -> tuple[WorkflowStep, bool]:
+    """Bind the effective mode and indicate whether producer capture is needed."""
+    from bioetl.domain.workflow.foreign_key_reconciliation import (
+        require_reconciliation_mode,
+    )
+
+    values = dict(_transform_options(transform))
+    effective = require_reconciliation_mode(
+        mode
+        or config.defaults.reconciliation_mode
+        or str(values.get("reconciliation_mode", "complete-reference"))
+    )
+    if effective == "selected-snapshot":
+        values.update(reconciliation_mode=effective, source_scope="current_run")
+        return replace(transform, config=values), True
+    if mode is not None:
+        values["reconciliation_mode"] = effective
+        return replace(transform, config=values), False
+    return transform, False
+
+
+def _capture_producer(step: WorkflowStep, producers: set[str]) -> WorkflowStep:
+    """Mark selected producer steps without modifying unrelated run options."""
+    if isinstance(step, WorkflowStepConfig) and step.step_id in producers:
+        return replace(
+            step,
+            run_options=replace(
+                step.run_options, reconciliation_mode="selected-snapshot"
+            ),
         )
-        if mode == "selected-snapshot":
-            continue
-        limited = _limited_upstream_pipeline_ids(transform.step_id, config, steps_by_id)
-        if limited and not _has_bound_reference_cohort(transform, config):
-            raise ValueError(
-                "reconcile_foreign_keys action=delete_orphans cannot depend on "
-                "pipeline steps with run_options.limit "
-                f"({', '.join(limited)}); independently bounded extracts "
-                "make Gold FK orphans false positives"
-            )
+    return step
 
 
 def apply_reconciliation_mode(
     config: WorkflowConfig, mode: str | None = None
 ) -> WorkflowConfig:
     """Bind effective mode and bounded source scope into transform fingerprints."""
-    from bioetl.domain.workflow.foreign_key_reconciliation import (
-        require_reconciliation_mode,
-    )
-
     steps: list[WorkflowStep] = []
     producers: set[str] = set()
-    definitions = {step.step_id: step for step in config.steps}
+    definitions = _step_definitions(config)
     for step in config.steps:
         transform = _delete_orphans_transform(step)
         if transform is None:
             steps.append(step)
             continue
-        values = dict(transform.config or {})
-        effective = require_reconciliation_mode(
-            mode
-            or config.defaults.reconciliation_mode
-            or str(values.get("reconciliation_mode", "complete-reference"))
-        )
-        if effective == "selected-snapshot":
-            values.update(reconciliation_mode=effective, source_scope="current_run")
-            pending = list(transform.depends_on)
-            seen: set[str] = set()
-            while pending:
-                identity = pending.pop()
-                if identity in seen:
-                    continue
-                seen.add(identity)
-                ancestor = definitions[identity]
-                pending.extend(ancestor.depends_on)
-                if isinstance(ancestor, WorkflowStepConfig):
-                    producers.add(identity)
-            steps.append(replace(transform, config=values))
-        elif mode is not None:
-            values["reconciliation_mode"] = effective
-            steps.append(replace(transform, config=values))
-        else:
-            steps.append(step)
-    captured = tuple(
-        replace(
-            step,
-            run_options=replace(
-                step.run_options, reconciliation_mode="selected-snapshot"
-            ),
-        )
-        if isinstance(step, WorkflowStepConfig) and step.step_id in producers
-        else step
-        for step in steps
+        updated, selected = _apply_transform_mode(transform, config, mode)
+        steps.append(updated)
+        if selected:
+            producers.update(_ancestors(transform, definitions))
+    return replace(
+        config, steps=tuple(_capture_producer(step, producers) for step in steps)
     )
-    return replace(config, steps=captured)

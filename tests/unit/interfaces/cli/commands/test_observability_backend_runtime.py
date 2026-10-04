@@ -52,6 +52,7 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
     build_observability_backend_health_url,
     probe_observability_backend_required_paths,
     ensure_observability_backend_started,
+    docker_engine_not_ready_message,
     probe_observability_backend,
     start_detached_quarantine_backend,
     should_disable_transient_health_server,
@@ -61,6 +62,33 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
 
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize("failure", [None, OSError("not reachable")])
+def test_docker_readiness_checks_process_result_and_io_failure(monkeypatch, failure):
+    monkeypatch.setattr(runtime_subject.shutil, "which", lambda _name: "docker")
+    run = MagicMock(return_value=SimpleNamespace(returncode=0), side_effect=failure)
+    monkeypatch.setattr(runtime_subject.subprocess, "run", run)
+    result = docker_engine_not_ready_message()
+    if failure is None:
+        assert result is None
+    else:
+        assert "not reachable" in result
+    run.assert_called_once_with(
+        ["docker", "info"], capture_output=True, timeout=8, check=False
+    )
+
+
+def test_backend_start_rejects_unready_docker_before_launch(monkeypatch):
+    import click
+
+    monkeypatch.setattr(
+        runtime_subject, "docker_engine_not_ready_message", lambda: "Docker unavailable"
+    )
+    start = MagicMock()
+    with pytest.raises(click.ClickException, match="Docker unavailable"):
+        ensure_observability_backend_started(enabled=True, port=8082, start_fn=start)
+    start.assert_not_called()
 
 
 @pytest.fixture(autouse=True)

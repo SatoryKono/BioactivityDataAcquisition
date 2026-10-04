@@ -126,6 +126,15 @@ def _expected_hotspot_threshold_status(family_row: dict[str, object]) -> str:
     covered_line_percent = family_row["covered_line_percent"]
 
     threshold_status = "pass"
+    if thresholds.get("require_all_modules_covered"):
+        module_count = int(family_row["module_count"])
+        if (
+            module_count == 0
+            or measured_module_count != module_count
+            or covered_module_count != module_count
+            or covered_line_percent is None
+        ):
+            threshold_status = "fail"
     if measured_module_count < int(
         thresholds.get("min_measured_module_count", measured_module_count)
     ):

@@ -252,8 +252,8 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
     snapshots = source_refs[0]["input_snapshots"]
     assert len(snapshots) == 2
     assert sorted(snapshot["immutable_uri"] for snapshot in snapshots) == [
-        "bronze://2026-01-01/batch_2026-01-01_demo.jsonl.zst",
-        "bronze://2026-01-01/batch_2026-01-01_extra.jsonl.zst",
+        (bronze_day / "batch_2026-01-01_demo.jsonl.zst").resolve().as_uri(),
+        (bronze_day / "batch_2026-01-01_extra.jsonl.zst").resolve().as_uri(),
     ]
     assert all(snapshot["content_hash"] for snapshot in snapshots)
     assert all(

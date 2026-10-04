@@ -22,7 +22,7 @@ from bioetl.composition.bootstrap.runtime import (
 from bioetl.composition.bootstrap.runtime.assembly import (
     assemble_cached_bronze_context,
 )
-from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
+from bioetl.application.composite.helpers.filter_extraction import (
     CompositeFilterExtractor,
 )
 from bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder import (

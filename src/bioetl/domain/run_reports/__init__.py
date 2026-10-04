@@ -18,7 +18,7 @@ from bioetl.domain.run_reports.models import (
     WorkflowExecutionRow,
     WorkflowRunReport,
 )
-from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
+from bioetl.domain.run_reports.pipeline_assembly import build_pipeline_run_report
 from bioetl.domain.run_reports.reason_catalog import (
     REASON_CATALOG_VERSION,
     ReasonCatalog,
@@ -26,7 +26,7 @@ from bioetl.domain.run_reports.reason_catalog import (
     default_reason_catalog,
     normalize_reason_code,
 )
-from bioetl.domain.run_reports.workflow_builder import build_workflow_run_report
+from bioetl.domain.run_reports.workflow_assembly import build_workflow_run_report
 
 __all__ = [
     "REASON_CATALOG_VERSION",

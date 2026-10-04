@@ -20,9 +20,7 @@ from bioetl.composition.factories.pipeline._creation_metadata import (
     _build_metadata_coordinator,
     _create_silver_validator,
 )
-from bioetl.composition.factories.pipeline.control_plane_artifacts import (
-    ControlPlaneArtifacts,
-)
+from bioetl.domain.ports import PipelineControlPlaneArtifacts as ControlPlaneArtifacts
 from bioetl.composition.factories.pipeline.transformer_builder import (
     TransformerBuilder,
 )

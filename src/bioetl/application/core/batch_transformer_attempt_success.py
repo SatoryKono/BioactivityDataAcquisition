@@ -10,7 +10,9 @@ from bioetl.application.core.batch_transformer_state import (
     RecordTransformOutcome as RecordTransformOutcome,
 )
 from bioetl.application.core.pre_silver_record import PreSilverRecord
-from bioetl.application.services.dq.disabled_gold_filter import DisabledGoldFilter
+from bioetl.application.services.dq.disabled_gold_filter import (
+    DisabledGoldFilterService,
+)
 from bioetl.application.services.dq.gold_filter_diagnostics import (
     resolve_gold_filter_details as _resolve_gold_filter_details,
 )
@@ -55,20 +57,10 @@ def _finalize_transformed_record(
     if isinstance(transformed, PreSilverRecord):
         if normalization_processor is None:
             raise RuntimeError("PreSilverRecord requires RecordNormalizationProcessor")
-        finalized_record: dict[str, object] | None = (
-            normalization_processor.finalize_pre_silver(
-                transformed,
-                context,
-                index,
-            )
-        )
-        return finalized_record
+        return normalization_processor.finalize_pre_silver(transformed, context, index)
     if normalization_processor is None:
         return transformed
-    normalized_record: dict[str, object] | None = (
-        normalization_processor.normalize_record(transformed)
-    )
-    return normalized_record
+    return normalization_processor.normalize_record(transformed)
 
 
 def _build_gold_record(
@@ -79,7 +71,7 @@ def _build_gold_record(
     gold_transform: GoldTransformCallback,
 ) -> tuple[dict[str, object] | None, bool, object | None]:
     """Create a Gold record and report contract-based exclusion."""
-    if isinstance(gold_filter, DisabledGoldFilter):
+    if isinstance(gold_filter, DisabledGoldFilterService):
         accounting = get_stage_accounting()
         if accounting is not None:
             accounting.record_removal(
@@ -121,9 +113,7 @@ def _primary_dq_affected_field(
     fields: set[str] = set()
     for outcome in outcomes:
         fields.update(_outcome_dq_fields(outcome, disposition))
-    if not fields:
-        return None
-    return sorted(fields)[0]
+    return min(fields, default=None)
 
 
 def _apply_runtime_dq_outcomes(

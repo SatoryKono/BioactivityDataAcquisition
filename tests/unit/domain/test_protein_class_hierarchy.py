@@ -115,3 +115,17 @@ def test_protein_class_levels_must_match_path_entries() -> None:
             leaf_id=2,
             path=(l1, l2),
         )
+
+
+def test_populated_levels_cannot_exceed_explicit_path_depth() -> None:
+    root = ProteinClassLevel(id=1, name="Root", desc=None)
+    with pytest.raises(ValueError, match="exceed path depth"):
+        ProteinClassHierarchy(
+            l1=root,
+            l2=ProteinClassLevel(id=2, name="Child", desc=None),
+            l3=ProteinClassLevel.empty(),
+            l4=ProteinClassLevel.empty(),
+            l5=ProteinClassLevel.empty(),
+            leaf_id=1,
+            path=(root,),
+        )

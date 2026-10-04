@@ -9,7 +9,7 @@ from bioetl.application.services.run_reports.query import (
     prune_reports,
 )
 from bioetl.application.services.run_reports.writer import write_pipeline_run_report
-from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
+from bioetl.domain.run_reports.pipeline_assembly import build_pipeline_run_report
 
 pytestmark = pytest.mark.unit
 

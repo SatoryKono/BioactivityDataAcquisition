@@ -40,3 +40,15 @@ def parse_uniprot_protein_response(
 
 
 __all__ = ["parse_uniprot_protein_response"]
+
+
+def extract_uniprot_accession(record: BronzeRecord) -> str | None:
+    """Return a normalized accession from primaryAccession or accession."""
+    for key in ("primaryAccession", "accession"):
+        value = record.get(key)
+        if not isinstance(value, str):
+            continue
+        normalized = value.strip()
+        if normalized:
+            return normalized
+    return None

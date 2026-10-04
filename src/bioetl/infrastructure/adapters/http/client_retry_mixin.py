@@ -72,7 +72,7 @@ class HTTPClientRetryMixin(HTTPClientRetryRequestFlow):
             self.logger.info(
                 "http_retry_wait",
                 provider=self.provider,
-                run_id=self._observability_run_id(),
+                **({"run_id": str(self.run_id)} if self.run_id is not None else {}),
                 attempt=attempt + 1,
                 wait_seconds=float(delay),
                 status_code=response.status_code if response is not None else None,
@@ -96,7 +96,7 @@ class HTTPClientRetryMixin(HTTPClientRetryRequestFlow):
             self.logger.warning(
                 "http_retry_budget_exhausted",
                 provider=self.provider,
-                run_id=self._observability_run_id(),
+                **({"run_id": str(self.run_id)} if self.run_id is not None else {}),
                 method=method,
                 url=url,
                 retry_budget=self.retry_config.effective_retry_budget(),
@@ -145,7 +145,7 @@ class HTTPClientRetryMixin(HTTPClientRetryRequestFlow):
             url=url,
             method=method,
             provider=self.provider,
-            run_id=self._observability_run_id(),
+            **({"run_id": str(self.run_id)} if self.run_id is not None else {}),
         )
 
     async def _execute_single_attempt(
@@ -158,7 +158,10 @@ class HTTPClientRetryMixin(HTTPClientRetryRequestFlow):
     ) -> httpx.Response:
         """Execute one rate-limited circuit-breaker guarded request."""
         return await execute_timed_request(
-            self, client, method, url, kwargs, attempt_number=attempt_number
+            self,
+            method,
+            lambda: client.request(method, url, **kwargs),
+            attempt_number=attempt_number,
         )
 
     def _should_continue_retry(

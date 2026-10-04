@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import argparse
-import json
-from pathlib import Path
 from typing import Any
 
 from copy import deepcopy
@@ -48,10 +45,10 @@ _COLUMNS = {
     "workflow_id": ("Workflow", None, 100),
     "pipeline": ("Pipeline", None, 80),
     "provider": ("Provider", 85, 50),
-    "run_label": ("Run ID", 90, 50),
+    "run_label": ("Run ID", 60, 50),
     "started_at": ("Started", 115, 50),
     "duration_display": ("Duration", 75, 50),
-    "status": ("Overview", 85, 50),
+    "status": ("Overview", 180, 180),
     "saved_evidence_status": ("Saved Evidence", None, 90),
     "data_quality_status": ("Data Quality", None, 90),
     "replay_readiness_status": ("Replay Readiness", 125, 90),
@@ -491,24 +488,10 @@ def _apply_run_explorer_templating(payload: dict[str, Any]) -> None:
 
 
 def main() -> int:
-    """Refresh this scoped presentation without unrelated layout migrations."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--check", action="store_true")
-    args = parser.parse_args()
-    directory = Path(__file__).resolve().parents[4] / "grafana" / "dashboards"
-    drift = False
-    for path in sorted(directory.glob("*.json")):
-        original = path.read_text(encoding="utf-8")
-        payload = json.loads(original)
-        apply_run_explorer_columns(payload)
-        rendered = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
-        if args.check:
-            if original != rendered:
-                print(f"drift {path.name}")
-                drift = True
-        else:
-            path.write_text(rendered, encoding="utf-8")
-    return int(drift)
+    """Refresh through the canonical generator, which owns dashboard writes."""
+    from scripts.ops.observability.grafana.render_nav_bus import main as render
+
+    return render()
 
 
 if __name__ == "__main__":

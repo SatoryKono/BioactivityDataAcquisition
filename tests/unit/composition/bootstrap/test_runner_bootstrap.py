@@ -121,6 +121,29 @@ def _cached_bootstrapped_service() -> PipelineRunnerService:
     return _LIST_SERVICE_CACHE
 
 
+def test_archive_callback_preserves_configured_paths_and_run_options(
+    bootstrap_with_light_observability, tmp_path, monkeypatch
+):
+    from bioetl.composition.bootstrap.runtime import runner as module
+
+    settings, _observability, _bundle = bootstrap_with_light_observability
+    settings.return_value.data_dir = str(tmp_path / "data")
+    settings.return_value.archive_root = tmp_path / "archive"
+    settings.return_value.report_root = tmp_path / "reports"
+    archive = MagicMock(return_value=(True, "verified"))
+    monkeypatch.setattr(module, "archive_successful_run", archive)
+    service = bootstrap_pipeline_runner_service()
+    result, options = object(), object()
+    assert service.archive_control_plane(result, options) is None
+    archive.assert_called_once_with(
+        result=result,
+        options=options,
+        data_root=tmp_path / "data",
+        archive_root=tmp_path / "archive",
+        report_root=tmp_path / "reports",
+    )
+
+
 @pytest.mark.unit
 class TestBootstrapPipelineRunnerService:
     """Tests for bootstrap_pipeline_runner_service function."""

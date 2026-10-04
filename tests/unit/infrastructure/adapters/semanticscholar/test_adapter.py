@@ -365,6 +365,7 @@ class TestHealthCheck:
         """Test healthy status."""
         mock_response = MagicMock()
         mock_response.status_code = 200
+        mock_response.json.return_value = {"paperId": "a" * 40}
         mock_http_client.get_once.return_value = mock_response
 
         status = await adapter.health_check()
@@ -394,6 +395,7 @@ class TestHealthCheck:
         """Slow health probes should degrade the provider status."""
         mock_response = MagicMock()
         mock_response.status_code = 200
+        mock_response.json.return_value = {"paperId": "a" * 40}
         mock_http_client.get_once.return_value = mock_response
 
         import bioetl.infrastructure.adapters.semanticscholar.health_metadata_mixin as health_module
@@ -549,5 +551,18 @@ async def test_health_latency_excludes_local_admission_wait(
     mock_http_client.get_once.return_value = httpx.Response(
         200,
         extensions={"bioetl_transport_seconds": 0.1},
+        json={"paperId": "a" * 40},
     )
     assert await adapter._probe_health() == HealthStatus.HEALTHY
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("payload", [{}, {"paperId": ""}, {"paperId": 123}, []])
+async def test_health_requires_a_real_paper_payload(adapter, mock_http_client, payload):
+    import httpx
+
+    response = httpx.Response(200, json=payload)
+    mock_http_client.get_once.return_value = response
+    assert await adapter._probe_health() == HealthStatus.UNHEALTHY
+    assert "/paper/DOI:" in mock_http_client.get_once.call_args.args[0]
+    assert mock_http_client.get_once.call_args.kwargs["params"] == {"fields": "paperId"}

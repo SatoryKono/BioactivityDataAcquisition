@@ -187,10 +187,11 @@ def _assigned_value(node: ast.stmt) -> ast.AST | None:
 
 
 def _binding_from_pipeline_call(element: ast.Call) -> PipelineBinding | None:
-    if (
-        not isinstance(element.func, ast.Name)
-        or element.func.id != "PipelineFactoryConfig"
-    ):
+    constructor = ast.unparse(element.func)
+    if constructor not in {
+        "PipelineFactoryConfig",
+        "PipelineFactoryConfig.for_pipeline",
+    }:
         return None
 
     kwargs = {kw.arg: kw.value for kw in element.keywords if kw.arg is not None}
@@ -200,12 +201,18 @@ def _binding_from_pipeline_call(element: ast.Call) -> PipelineBinding | None:
 
     def _symbol_name(keyword: str) -> str:
         value = kwargs.get(keyword)
+        if isinstance(value, ast.Attribute):
+            return value.attr
         return value.id if isinstance(value, ast.Name) else ""
 
+    provider = _literal_string(kwargs.get("provider"))
+    entity = _literal_string(kwargs.get("entity_type"))
+    if constructor == "PipelineFactoryConfig.for_pipeline":
+        provider, _, entity = pipeline_name.partition("_")
     return PipelineBinding(
         pipeline_name=pipeline_name,
-        provider=_literal_string(kwargs.get("provider")),
-        entity_type=_literal_string(kwargs.get("entity_type")),
+        provider=provider,
+        entity_type=entity,
         silver_schema_symbol=_symbol_name("silver_schema"),
         gold_schema_symbol=_symbol_name("gold_schema"),
         pandera_silver_symbol=_symbol_name("pandera_silver_schema"),

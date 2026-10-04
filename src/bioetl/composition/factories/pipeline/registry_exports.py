@@ -2,30 +2,6 @@
 
 from __future__ import annotations
 
-FACTORY_EXPORTS: dict[str, str] = {
-    "chembl_activity_factory": "chembl_activity",
-    "chembl_assay_factory": "chembl_assay",
-    "chembl_assay_parameters_factory": "chembl_assay_parameters",
-    "chembl_cell_line_factory": "chembl_cell_line",
-    "chembl_compound_record_factory": "chembl_compound_record",
-    "chembl_publication_factory": "chembl_publication",
-    "chembl_publication_similarity_factory": "chembl_publication_similarity",
-    "chembl_publication_term_factory": "chembl_publication_term",
-    "chembl_molecule_factory": "chembl_molecule",
-    "chembl_target_factory": "chembl_target",
-    "chembl_target_component_factory": "chembl_target_component",
-    "chembl_tissue_factory": "chembl_tissue",
-    "chembl_subcellular_fraction_factory": "chembl_subcellular_fraction",
-    "chembl_protein_class_factory": "chembl_protein_class",
-    "pubchem_compound_factory": "pubchem_compound",
-    "uniprot_protein_factory": "uniprot_protein",
-    "uniprot_idmapping_factory": "uniprot_idmapping",
-    "pubmed_publication_factory": "pubmed_publication",
-    "crossref_publication_factory": "crossref_publication",
-    "openalex_publication_factory": "openalex_publication",
-    "semanticscholar_publication_factory": "semanticscholar_publication",
-}
-
 REGISTRY_PUBLIC_EXPORTS: tuple[str, ...] = (
     "PipelineDefinition",
     "PIPELINE_CONFIGS",
@@ -61,6 +37,13 @@ REGISTRY_PUBLIC_EXPORTS: tuple[str, ...] = (
     "uniprot_idmapping_factory",
     "uniprot_protein_factory",
 )
+
+# Keep exported compatibility names as the sole list of factory aliases.
+FACTORY_EXPORTS: dict[str, str] = {
+    name: name.removesuffix("_factory")
+    for name in REGISTRY_PUBLIC_EXPORTS
+    if name.endswith("_factory") and name != "get_factory"
+}
 
 __all__ = [
     "FACTORY_EXPORTS",

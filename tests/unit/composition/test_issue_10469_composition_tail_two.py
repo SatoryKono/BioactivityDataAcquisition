@@ -7,9 +7,11 @@ from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
+from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
+    _coerce_optional_str,
+)
 
 from bioetl.composition.bootstrap.runtime.pipeline import (
-    _coerce_optional_str,
     _fail_fast_empty_explicit_cached_bronze,
 )
 from bioetl.composition.factories import transformer_dependencies

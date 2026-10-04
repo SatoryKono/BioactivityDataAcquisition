@@ -15,6 +15,7 @@ from __future__ import annotations
 import re
 
 import pytest
+import yaml
 
 from pathlib import Path
 
@@ -126,7 +127,14 @@ def test_metrics_catalog_runtime_rows_match_canonical_registry() -> None:
 
     assert registered_metrics.isdisjoint(alias_metrics)
     assert registered_metrics.isdisjoint(governed_metrics)
-    assert len(alias_metrics) == 15
+    declarations = yaml.safe_load(
+        (
+            PROJECT_ROOT / "configs/quality/observability_metric_declarations.yaml"
+        ).read_text(encoding="utf-8")
+    )
+    assert alias_metrics == set(declarations["policy_alias_metrics"]), (
+        "Published policy aliases must exactly match canonical declarations"
+    )
     assert len(governed_metrics) == 41
     assert "**Governed Recording/Current-State Metrics: 41**" in catalog
     assert "**Governed Recording/Current-State Metrics**: 41" in catalog

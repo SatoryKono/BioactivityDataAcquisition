@@ -40,7 +40,9 @@ CHEMBL_HEALTH_ERRORS = build_common_network_error_bundle(
     CriticalError,
     httpx.HTTPError,
 )
-CHEMBL_HEALTH_PROBE_TIMEOUT_SECONDS = 5.0
+# The status service can exceed five seconds while the data API remains UP.
+# Keep a bounded probe budget below the provider's 120-second data timeout.
+CHEMBL_HEALTH_PROBE_TIMEOUT_SECONDS = 30.0
 CHEMBL_TRANSIENT_HEALTH_ERRORS = (
     TimeoutError,
     httpx.TimeoutException,
@@ -68,7 +70,7 @@ class ChemblHealthMixin:
         * UNHEALTHY -> raises ``CriticalError`` (fail-fast).
 
     Active probe (``_probe_health``):
-        Hits the ``/chembl/api/data/status`` endpoint with a short provider-local
+        Hits the ``/chembl/api/data/status`` endpoint with a bounded provider-local
         timeout. A 200 response with ``{"status": "UP"}`` yields HEALTHY; 5xx
         or transient network errors (timeout, connect, read, write) yield
         DEGRADED; other exceptions

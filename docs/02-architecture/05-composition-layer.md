@@ -80,10 +80,13 @@ import paths.
 | Файл                                     | Назначение                                    |
 | ---------------------------------------- | --------------------------------------------- |
 | `composite.py`                           | Bootstrap `CompositePipelineRunner` (ADR-026) |
-| `composite_filter_extraction_service.py` | Bootstrap filter extraction для composite     |
 | `composite_support_helpers.py`           | Вспомогательные функции composite bootstrap   |
 | `composite_*_builder.py`                 | Owner-builders composite support services     |
 | `composite_support_services_factory.py`  | Фабрика composite support services            |
+
+Политика извлечения фильтров находится в
+`bioetl.application.composite.helpers.filter_extraction`; bootstrap передаёт её экземпляр
+в фабрики runner.
 
 **Observability bootstrap:**
 

@@ -13,7 +13,9 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
+import shlex
 from pathlib import Path
 import shutil
 import subprocess
@@ -28,6 +30,52 @@ RENDERER_IMAGE = (
     "@sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b"
 )
 INFINITY_PLUGIN_VERSION = "3.8.0"
+
+
+def test_private_host_delivery_binds_source_and_survives_data_volume() -> None:
+    """A compose digest alone must not sever patched host/plugin provenance."""
+    owner = Path("grafana/tooling/router-v7-bridge")
+    manifest = json.loads((owner / "host-image.json").read_text(encoding="utf-8"))
+    assert (
+        manifest["image"]
+        == yaml.safe_load((owner / "compose.acceptance.yml").read_text(encoding="utf-8"))[
+            "services"
+        ]["grafana"]["image"]
+    )
+    assert manifest["grafana_version"] == "13.2.3"
+    assert manifest["router_version"] == "7.18.4"
+    assert manifest["upstream_sha"] == "6193dc03311b631b9727b560d24369e683dc396e"
+    for relative, digest in manifest["artifact_sha256"].items():
+        if "/dist/" not in relative:
+            assert hashlib.sha256(Path(relative).read_bytes()).hexdigest() == digest
+    recipe = (owner / "Dockerfile.host").read_text(encoding="utf-8")
+    assert "FROM " + manifest["base_image"] in recipe
+    assert "runtime-probe" not in recipe
+    copies = [
+        tuple(shlex.split(line, comments=True))
+        for line in recipe.splitlines()
+        if line.lstrip().upper().startswith("COPY ")
+    ]
+    assert (
+        "COPY", "--chown=root:root", "host-build/", "/usr/share/grafana/public/build/"
+    ) in copies
+    active = [
+        tuple(shlex.split(line, comments=True))
+        for line in recipe.replace("\\\n", " ").splitlines()
+        if line.lstrip().upper().startswith(("RUN ", "COPY "))
+    ]
+    assert active.index(("RUN", "rm", "-rf", "/usr/share/grafana/public/build")) < active.index(
+        ("COPY", "--chown=root:root", "host-build/", "/usr/share/grafana/public/build/")
+    )
+    for plugin in ("bioetl-scenes-app", "bioetl-selectorshell-panel"):
+        metadata = json.loads(Path(f"grafana/plugins/{plugin}/src/plugin.json").read_text())
+        assert metadata["info"]["updated"] == manifest["plugin_release_date"]
+
+        assert (
+            "COPY", "--chown=root:root", plugin + "/",
+            "/usr/share/grafana/data/plugins-bundled/" + plugin + "/",
+        ) in copies
+
 
 _REMOVED_MONITORING_SERVICES = (
     "loki",
@@ -113,7 +161,7 @@ def test_audit_overlay_no_longer_ships_loki_or_quarantine() -> None:
 
 
 def test_grafana_compose_pins_compatible_infinity_plugin() -> None:
-    """Grafana must enforce the Infinity version verified with Grafana 12.2."""
+    """Grafana must enforce the Infinity version used in host acceptance."""
     monitoring = _load_monitoring_compose()
     grafana_environment = monitoring["services"]["grafana"]["environment"]
     assert (

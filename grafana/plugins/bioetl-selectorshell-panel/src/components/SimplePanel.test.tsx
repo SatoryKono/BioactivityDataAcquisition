@@ -20,11 +20,11 @@ function props(path = '/selector-context'): React.ComponentProps<typeof SimplePa
   } as React.ComponentProps<typeof SimplePanel>;
 }
 
-function response(): Response {
+function response(runId = 'run-123'): Response {
   const payload: SelectorContextPayload = {
     contract: 'control_plane_selector_context_v1',
     resolved_via: 'selected_run_id',
-    selected: { workflow: 'chembl', pipeline: 'chembl', run_type: 'backfill', run_id: 'run-123' },
+    selected: { workflow: 'chembl', pipeline: 'chembl', run_type: 'backfill', run_id: runId },
   };
   return { ok: true, json: async () => payload } as Response;
 }
@@ -43,6 +43,23 @@ describe('selector context request lifecycle', () => {
   afterEach(() => {
     global.fetch = originalFetch;
     jest.clearAllMocks();
+  });
+
+  it('refreshes a changed run with the same replaceVariables function', async () => {
+    let runId = 'run-123';
+    const replaceVariables = (value: string) => (value.includes('run_id') ? runId : 'chembl');
+    const fetchMock = jest.fn().mockResolvedValue(response());
+    global.fetch = fetchMock;
+    const panelProps = { ...props(), replaceVariables };
+    const view = render(<SimplePanel {...panelProps} />);
+    await screen.findByText(/Resolved run-123/);
+    runId = 'run-456';
+    fetchMock.mockResolvedValue(response(runId));
+    view.rerender(<SimplePanel {...panelProps} />);
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(
+      '/selector-context?run_id=run-456', expect.objectContaining({ credentials: 'same-origin' })
+    ));
+    await screen.findByText(/Resolved run-456/);
   });
 
   it('shows loading until the current request resolves', async () => {

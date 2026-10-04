@@ -134,18 +134,7 @@ def build_postrun_service_for_pipeline(
     )
 
 
-def build_runner_constructor_payload(
-    *,
-    pipeline: BasePipeline,
-    observability: ObservabilityBundle,
-    parts: RunnerAssemblyParts,
-) -> RunnerConstructorPayload:
-    """Package runner shell inputs into one typed constructor payload."""
-    return RunnerConstructorPayload(
-        pipeline=pipeline,
-        observability=observability,
-        parts=parts,
-    )
+build_runner_constructor_payload = RunnerConstructorPayload
 
 
 def assemble_runner_parts(

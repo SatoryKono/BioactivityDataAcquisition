@@ -50,6 +50,17 @@ from bioetl.infrastructure.adapters.http.health_monitor import (
 
 pytestmark = pytest.mark.unit
 
+
+def test_clear_window_without_previous_error_is_immediately_satisfied():
+    from bioetl.infrastructure.adapters.http._health_monitor_transitions import (
+        check_clear_window,
+    )
+
+    state = ProviderHealthState(provider="chembl")
+    assert state.last_error is None
+    assert check_clear_window(state, now=0.0) is True
+
+
 if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.health_monitor import (
         ProviderHealthTracker,

@@ -180,6 +180,21 @@ class TestDebugCommand:
 
         assert result.exit_code == ExitCode.CONFIG_ERROR
 
+    def test_debug_runtime_configuration_failure_exits_with_config_error(
+        self, cli_runner, mock_registry
+    ):
+        with (
+            mock_asyncio_run(side_effect=ValueError("invalid runtime config")),
+            patch("bioetl.interfaces.cli.commands.debug.get_pipeline_runner_service"),
+            patch(
+                "bioetl.interfaces.cli.registry_helpers.build_cli_registry",
+                return_value=mock_registry,
+            ),
+        ):
+            result = cli_runner.invoke(cli, ["debug", "--pipeline", _PIPELINE])
+        assert result.exit_code == ExitCode.CONFIG_ERROR
+        assert "invalid runtime config" in result.output
+
     def test_debug_abort_error_exits_with_sigint(
         self,
         cli_runner: CliRunner,

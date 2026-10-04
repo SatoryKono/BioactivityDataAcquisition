@@ -3,23 +3,7 @@
 from __future__ import annotations
 
 from bioetl.composition.factories.pipeline.config_types import PipelineFactoryConfig
-from bioetl.domain.contracts.gold import (
-    ChEMBLActivityGoldSchema,
-    ChEMBLAssayGoldSchema,
-    ChEMBLAssayParametersGoldSchema,
-    ChEMBLCellLineGoldSchema,
-    ChEMBLCompoundRecordGoldSchema,
-    ChEMBLMoleculeGoldSchema,
-    ChEMBLProteinClassGoldSchema,
-    ChEMBLPublicationGoldSchema,
-    ChEMBLPublicationSimilarityGoldSchema,
-    ChEMBLPublicationTermGoldSchema,
-    ChEMBLSubcellularFractionGoldSchema,
-    ChEMBLTargetComponentGoldSchema,
-    ChEMBLTargetGoldSchema,
-    ChEMBLTargetProteinClassificationGoldSchema,
-    ChEMBLTissueGoldSchema,
-)
+from bioetl.domain.contracts import gold
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
 from bioetl.domain.schemas.chembl.assay import AssaySchema
 from bioetl.domain.schemas.chembl.assay_parameters import AssayParametersSchema
@@ -43,158 +27,112 @@ from bioetl.domain.schemas.chembl.target_protein_classification import (
     TargetProteinClassificationSchema,
 )
 from bioetl.domain.schemas.chembl.tissue import TissueSchema
-from bioetl.infrastructure.schemas.silver import (
-    CHEMBL_ACTIVITY_SCHEMA,
-    CHEMBL_ASSAY_PARAMETERS_SCHEMA,
-    CHEMBL_ASSAY_SCHEMA,
-    CHEMBL_CELL_LINE_SCHEMA,
-    CHEMBL_COMPOUND_RECORD_SCHEMA,
-    CHEMBL_DOCUMENT_SIMILARITY_SCHEMA,
-    CHEMBL_DOCUMENT_TERM_SCHEMA,
-    CHEMBL_MOLECULE_SCHEMA,
-    CHEMBL_PROTEIN_CLASS_SCHEMA,
-    CHEMBL_PUBLICATION_SCHEMA,
-    CHEMBL_SUBCELLULAR_FRACTION_SCHEMA,
-    CHEMBL_TARGET_COMPONENT_SCHEMA,
-    CHEMBL_TARGET_PROTEIN_CLASSIFICATION_SCHEMA,
-    CHEMBL_TARGET_SCHEMA,
-    CHEMBL_TISSUE_SCHEMA,
-)
+from bioetl.infrastructure.schemas import silver
 
 CHEMBL_PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="chembl_activity",
-        provider="chembl",
-        entity_type="activity",
         transformer_class="bioetl.application.pipelines.chembl.activity_transformer.ActivityTransformer",
-        silver_schema=CHEMBL_ACTIVITY_SCHEMA,
-        gold_schema=ChEMBLActivityGoldSchema,
+        silver_schema=silver.CHEMBL_ACTIVITY_SCHEMA,
+        gold_schema=gold.ChEMBLActivityGoldSchema,
         pandera_silver_schema=ActivitySchema,
     ),
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="chembl_assay",
-        provider="chembl",
-        entity_type="assay",
         transformer_class="bioetl.application.pipelines.chembl.assay_transformer.AssayTransformer",
-        silver_schema=CHEMBL_ASSAY_SCHEMA,
-        gold_schema=ChEMBLAssayGoldSchema,
+        silver_schema=silver.CHEMBL_ASSAY_SCHEMA,
+        gold_schema=gold.ChEMBLAssayGoldSchema,
         pandera_silver_schema=AssaySchema,
     ),
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="chembl_assay_parameters",
-        provider="chembl",
-        entity_type="assay_parameters",
         transformer_class="bioetl.application.pipelines.chembl.assay_parameters_transformer.AssayParametersTransformer",
-        silver_schema=CHEMBL_ASSAY_PARAMETERS_SCHEMA,
-        gold_schema=ChEMBLAssayParametersGoldSchema,
+        silver_schema=silver.CHEMBL_ASSAY_PARAMETERS_SCHEMA,
+        gold_schema=gold.ChEMBLAssayParametersGoldSchema,
         pandera_silver_schema=AssayParametersSchema,
     ),
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="chembl_cell_line",
-        provider="chembl",
-        entity_type="cell_line",
         transformer_class="bioetl.application.pipelines.chembl.cell_line_transformer.CellLineTransformer",
-        silver_schema=CHEMBL_CELL_LINE_SCHEMA,
-        gold_schema=ChEMBLCellLineGoldSchema,
+        silver_schema=silver.CHEMBL_CELL_LINE_SCHEMA,
+        gold_schema=gold.ChEMBLCellLineGoldSchema,
         pandera_silver_schema=CellLineSchema,
     ),
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="chembl_compound_record",
-        provider="chembl",
-        entity_type="compound_record",
         transformer_class="bioetl.application.pipelines.chembl.compound_record_transformer.CompoundRecordTransformer",
-        silver_schema=CHEMBL_COMPOUND_RECORD_SCHEMA,
-        gold_schema=ChEMBLCompoundRecordGoldSchema,
+        silver_schema=silver.CHEMBL_COMPOUND_RECORD_SCHEMA,
+        gold_schema=gold.ChEMBLCompoundRecordGoldSchema,
         pandera_silver_schema=CompoundRecordSchema,
     ),
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="chembl_publication",
-        provider="chembl",
-        entity_type="publication",
         transformer_class="bioetl.application.pipelines.chembl.publication_transformer.PublicationTransformer",
-        silver_schema=CHEMBL_PUBLICATION_SCHEMA,
-        gold_schema=ChEMBLPublicationGoldSchema,
+        silver_schema=silver.CHEMBL_PUBLICATION_SCHEMA,
+        gold_schema=gold.ChEMBLPublicationGoldSchema,
         pandera_silver_schema=ChemblPublicationSchema,
     ),
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="chembl_publication_similarity",
-        provider="chembl",
-        entity_type="publication_similarity",
         transformer_class="bioetl.application.pipelines.chembl.publication_similarity_transformer.PublicationSimilarityTransformer",
-        silver_schema=CHEMBL_DOCUMENT_SIMILARITY_SCHEMA,
-        gold_schema=ChEMBLPublicationSimilarityGoldSchema,
+        silver_schema=silver.CHEMBL_DOCUMENT_SIMILARITY_SCHEMA,
+        gold_schema=gold.ChEMBLPublicationSimilarityGoldSchema,
         pandera_silver_schema=PublicationSimilaritySchema,
     ),
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="chembl_publication_term",
-        provider="chembl",
-        entity_type="publication_term",
         transformer_class="bioetl.application.pipelines.chembl.publication_term_transformer.PublicationTermTransformer",
-        silver_schema=CHEMBL_DOCUMENT_TERM_SCHEMA,
-        gold_schema=ChEMBLPublicationTermGoldSchema,
+        silver_schema=silver.CHEMBL_DOCUMENT_TERM_SCHEMA,
+        gold_schema=gold.ChEMBLPublicationTermGoldSchema,
         pandera_silver_schema=PublicationTermSchema,
     ),
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="chembl_molecule",
-        provider="chembl",
-        entity_type="molecule",
         transformer_class="bioetl.application.pipelines.chembl.molecule_transformer.MoleculeTransformer",
-        silver_schema=CHEMBL_MOLECULE_SCHEMA,
-        gold_schema=ChEMBLMoleculeGoldSchema,
+        silver_schema=silver.CHEMBL_MOLECULE_SCHEMA,
+        gold_schema=gold.ChEMBLMoleculeGoldSchema,
         pandera_silver_schema=MoleculeSchema,
     ),
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="chembl_target",
-        provider="chembl",
-        entity_type="target",
         transformer_class="bioetl.application.pipelines.chembl.target_transformer.TargetTransformer",
-        silver_schema=CHEMBL_TARGET_SCHEMA,
-        gold_schema=ChEMBLTargetGoldSchema,
+        silver_schema=silver.CHEMBL_TARGET_SCHEMA,
+        gold_schema=gold.ChEMBLTargetGoldSchema,
         pandera_silver_schema=TargetSchema,
     ),
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="chembl_target_component",
-        provider="chembl",
-        entity_type="target_component",
         transformer_class="bioetl.application.pipelines.chembl.target_component_transformer.TargetComponentTransformer",
-        silver_schema=CHEMBL_TARGET_COMPONENT_SCHEMA,
-        gold_schema=ChEMBLTargetComponentGoldSchema,
+        silver_schema=silver.CHEMBL_TARGET_COMPONENT_SCHEMA,
+        gold_schema=gold.ChEMBLTargetComponentGoldSchema,
         pandera_silver_schema=TargetComponentSchema,
     ),
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="chembl_target_protein_classification",
-        provider="chembl",
-        entity_type="target_protein_classification",
         transformer_class="bioetl.application.pipelines.chembl.target_protein_classification_transformer.TargetProteinClassificationTransformer",
-        silver_schema=CHEMBL_TARGET_PROTEIN_CLASSIFICATION_SCHEMA,
-        gold_schema=ChEMBLTargetProteinClassificationGoldSchema,
+        silver_schema=silver.CHEMBL_TARGET_PROTEIN_CLASSIFICATION_SCHEMA,
+        gold_schema=gold.ChEMBLTargetProteinClassificationGoldSchema,
         pandera_silver_schema=TargetProteinClassificationSchema,
     ),
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="chembl_protein_class",
-        provider="chembl",
-        entity_type="protein_class",
         transformer_class="bioetl.application.pipelines.chembl.protein_class_transformer.ProteinClassTransformer",
-        silver_schema=CHEMBL_PROTEIN_CLASS_SCHEMA,
-        gold_schema=ChEMBLProteinClassGoldSchema,
+        silver_schema=silver.CHEMBL_PROTEIN_CLASS_SCHEMA,
+        gold_schema=gold.ChEMBLProteinClassGoldSchema,
         pandera_silver_schema=ProteinClassificationSchema,
     ),
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="chembl_tissue",
-        provider="chembl",
-        entity_type="tissue",
         transformer_class="bioetl.application.pipelines.chembl.tissue_transformer.TissueTransformer",
-        silver_schema=CHEMBL_TISSUE_SCHEMA,
-        gold_schema=ChEMBLTissueGoldSchema,
+        silver_schema=silver.CHEMBL_TISSUE_SCHEMA,
+        gold_schema=gold.ChEMBLTissueGoldSchema,
         pandera_silver_schema=TissueSchema,
     ),
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="chembl_subcellular_fraction",
-        provider="chembl",
-        entity_type="subcellular_fraction",
         transformer_class="bioetl.application.pipelines.chembl.subcellular_fraction_transformer.SubcellularFractionTransformer",
-        silver_schema=CHEMBL_SUBCELLULAR_FRACTION_SCHEMA,
-        gold_schema=ChEMBLSubcellularFractionGoldSchema,
+        silver_schema=silver.CHEMBL_SUBCELLULAR_FRACTION_SCHEMA,
+        gold_schema=gold.ChEMBLSubcellularFractionGoldSchema,
         pandera_silver_schema=SubcellularFractionSchema,
     ),
 )

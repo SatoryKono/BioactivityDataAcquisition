@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-03T13:19:20.565625+00:00",
+  "generated_at": "2026-10-03T22:30:41.059613+00:00",
   "summary": {
-    "total_scripts": 635,
+    "total_scripts": 636,
     "status_counts": {
       "active": 336,
-      "supporting": 299
+      "supporting": 300
     },
     "reference_group_coverage": {
       "agents": 10,
       "build": 17,
       "ci": 86,
-      "docs": 259,
+      "docs": 260,
       "other": 48,
-      "scripts": 530,
+      "scripts": 532,
       "skills": 12,
-      "tests": 447
+      "tests": 449
     }
   },
   "scripts": [
@@ -455,7 +455,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 203,
+          "line": 202,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.ps1\","
         },
@@ -486,7 +486,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 204,
+          "line": 203,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.sh\","
         },
@@ -815,7 +815,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 205,
+          "line": 204,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/setup-env.sh\","
         },
@@ -972,7 +972,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 202,
+          "line": 201,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/test-basic.sh\","
         }
@@ -1572,7 +1572,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
-          "line": 195,
+          "line": 198,
           "source_group": "tests",
           "text": "\"setup-codex-wsl.ps1\": \"scripts/ai/codex/setup.ps1\","
         }
@@ -2055,7 +2055,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 206,
+          "line": 205,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/check-env.ps1\","
         }
@@ -2240,7 +2240,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 207,
+          "line": 206,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/setup-env.sh\","
         },
@@ -2673,7 +2673,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 10,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -2718,10 +2718,10 @@
           "text": "- Python: `check_junie_mirror.py`"
         },
         {
-          "path": "scripts/ai/junie/check_junie_mirror.sh",
-          "line": 43,
-          "source_group": "scripts",
-          "text": "exec \"$PYTHON_BIN\" \"$SCRIPT_DIR/check_junie_mirror.py\" \"$MODE\""
+          "path": "docs/05-operations/runbooks/local-acceptance-without-actions.md",
+          "line": 86,
+          "source_group": "docs",
+          "text": "изменены, выполнить `python scripts/ai/junie/check_junie_mirror.py --check`."
         }
       ],
       "owner": "@bioetl-platform",
@@ -5302,25 +5302,25 @@
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 118,
+          "line": 121,
           "source_group": "docs",
           "text": "| `pipeline/registry.py`              | Реестр фабрик                                   | Все зарегистрированные pipeline factories                      |"
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 230,
+          "line": 233,
           "source_group": "docs",
           "text": "### 2.4. `registry.py` — Реестр пайплайнов"
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 268,
+          "line": 271,
           "source_group": "docs",
           "text": "- **Декларативность:** `GenericPipelineFactory`, `PIPELINE_CONFIGS` и `factories/pipeline/registry.py` позволяют добавлять новые пайплайны без дублирования шаблонного assembly-кода."
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 103,
+          "line": 110,
           "source_group": "docs",
           "text": "| Pipeline factory registry | `src/bioetl/composition/factories/pipeline/registry.py` | Registers provider/composite factories for composition-time lookup. | Composition registry API and pipeline fact"
         },
@@ -5596,7 +5596,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 208,
+          "line": 207,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/check-env.ps1\","
         }
@@ -5617,7 +5617,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 209,
+          "line": 208,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/check-env.sh\","
         }
@@ -5638,7 +5638,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 210,
+          "line": 209,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/setup-env.ps1\","
         }
@@ -5671,7 +5671,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 211,
+          "line": 210,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/setup-env.sh\","
         },
@@ -5800,24 +5800,28 @@
     {
       "path": "scripts/ci_check_docs_parity.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
         {
-          "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 196,
+          "path": "scripts/engineering/repo/README.md",
+          "line": 107,
           "source_group": "scripts",
-          "text": "\"scripts/ci_check_docs_parity.sh\","
+          "text": "Legacy local invocations of `bash scripts/ci_check_docs_parity.sh` remain"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "compatibility_wrapper",
+      "review_by": "2026-10-31",
+      "next_step": "Retain the retired DOCS-PIPE-010 (#11858) wrapper only for legacy local invocations; the active CI entrypoint is python -m scripts.data_quality check-entity-config-parity."
     },
     {
       "path": "scripts/data_quality/__main__.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 9,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -5894,7 +5898,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 198,
+          "line": 197,
           "source_group": "scripts",
           "text": "\"scripts/data_quality/check_dq_dsl_parity.py\","
         }
@@ -7534,7 +7538,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
-          "line": 39,
+          "line": 40,
           "source_group": "tests",
           "text": "from scripts.diagrams.render.generate_pipeline_dataflows import ("
         }
@@ -7651,25 +7655,25 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
-          "line": 38,
+          "line": 39,
           "source_group": "tests",
           "text": "from scripts.diagrams.render import pipeline_dataflow_ir"
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
-          "line": 43,
+          "line": 44,
           "source_group": "tests",
           "text": "from scripts.diagrams.render.pipeline_dataflow_ir import ("
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
-          "line": 276,
+          "line": 303,
           "source_group": "tests",
           "text": "from scripts.diagrams.render.pipeline_dataflow_ir import _project_fields"
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
-          "line": 288,
+          "line": 315,
           "source_group": "tests",
           "text": "from scripts.diagrams.render.pipeline_dataflow_ir import _project_fields"
         }
@@ -7694,7 +7698,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
-          "line": 47,
+          "line": 48,
           "source_group": "tests",
           "text": "from scripts.diagrams.render.pipeline_dataflow_render import ("
         }
@@ -8037,7 +8041,7 @@
         "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 215,
+      "reference_count": 218,
       "references": [
         {
           "path": ".codex/agents/ORCHESTRATION.md",
@@ -8281,7 +8285,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 38,
+      "reference_count": 39,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -9497,7 +9501,7 @@
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 274,
+          "line": 281,
           "source_group": "docs",
           "text": "| Manifest service orchestration | `src/bioetl/application/services/control_plane/manifest/service.py`, `models.py`, `validation.py` | Create/inspect immutable run manifests and enforce application-le"
         },
@@ -10319,7 +10323,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 200,
+          "line": 199,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/update_test_telemetry_baseline.py\","
         },
@@ -10400,7 +10404,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 199,
+          "line": 198,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_control_plane_artifacts.py\","
         },
@@ -10738,7 +10742,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 55,
+      "reference_count": 56,
       "references": [
         {
           "path": "docs/00-project/RULES.md",
@@ -11975,7 +11979,7 @@
       "references": [
         {
           "path": "pyproject.toml",
-          "line": 341,
+          "line": 342,
           "source_group": "build",
           "text": "# (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py); memory"
         },
@@ -12437,7 +12441,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 364,
+      "reference_count": 366,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -14279,7 +14283,7 @@
         },
         {
           "path": "tests/unit/scripts/qa/test_dashboard_content_contract_sources.py",
-          "line": 5,
+          "line": 7,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.generate_dashboard_content_contract import ("
         },
@@ -15747,7 +15751,7 @@
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 298,
+          "line": 305,
           "source_group": "docs",
           "text": "| Generated artifact drift gate did not include module coverage source-tree hash freshness | `report-module-coverage --check` could fail stale source-tree evidence while `report-debt-governance-gates "
         },
@@ -16141,7 +16145,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 17,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
@@ -16670,7 +16674,7 @@
       "references": [
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 255,
+          "line": 258,
           "source_group": "docs",
           "text": "`scripts/engineering/qa/run_architecture_audit_read_only.py`."
         },
@@ -16750,7 +16754,7 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 305,
+          "line": 307,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_closure_campaign.py --require-global-claim`"
         },
@@ -16789,19 +16793,19 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 302,
+          "line": 304,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py` persists"
         },
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 308,
+          "line": 310,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-universal-claim`"
         },
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 311,
+          "line": 313,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-durable-evidence-coverage`"
         },
@@ -17741,7 +17745,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": ".github/workflows/no-partial-tree-commits.yml",
@@ -17754,6 +17758,12 @@
           "line": 151,
           "source_group": "agents",
           "text": "`python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD`."
+        },
+        {
+          "path": "docs/05-operations/runbooks/local-acceptance-without-actions.md",
+          "line": 59,
+          "source_group": "docs",
+          "text": "python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD"
         },
         {
           "path": "tests/architecture/test_junie_runtime_ci_contract.py",
@@ -18081,7 +18091,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
-          "line": 159,
+          "line": 162,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"cleanup_root_local_clutter.py\""
         },
@@ -18343,7 +18353,7 @@
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 244,
+          "line": 247,
           "source_group": "docs",
           "text": "| Pipeline run CLI | `src/bioetl/interfaces/cli/commands/run.py` resolves the canonical `bioetl.composition.entrypoints` seam; `execution_api` is external compatibility only | `src/bioetl/composition/"
         },
@@ -20036,6 +20046,21 @@
       ]
     },
     {
+      "path": "scripts/ops/observability/composite_replay_acceptance.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/integration/test_composite_snapshot_replay.py",
+          "line": 8,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.composite_replay_acceptance import execute_replay"
+        }
+      ]
+    },
+    {
       "path": "scripts/ops/observability/grafana/_apply_ds2_all.py",
       "type": "py",
       "status": "supporting",
@@ -20214,7 +20239,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_nav_bus.py",
-          "line": 20,
+          "line": 51,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._latest_complete_run_panel import ("
         }
@@ -20354,7 +20379,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
@@ -20366,6 +20391,12 @@
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
           "line": 2544,
           "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana._run_explorer_columns import ("
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_grafana_nav_bus.py",
+          "line": 20,
+          "source_group": "tests",
           "text": "from scripts.ops.observability.grafana._run_explorer_columns import ("
         }
       ]
@@ -20968,7 +20999,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 2843,
+          "line": 2816,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.generate_prometheus_only_dashboards import ("
         },
@@ -21061,7 +21092,7 @@
         },
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 246,
+          "line": 294,
           "source_group": "tests",
           "text": "recover_ps1 = Path(\"scripts/ops/observability/grafana/recover_renderer.ps1\")"
         }
@@ -21129,7 +21160,7 @@
       "references": [
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 247,
+          "line": 295,
           "source_group": "tests",
           "text": "recover_sh = Path(\"scripts/ops/observability/grafana/recover_renderer.sh\")"
         }
@@ -21194,7 +21225,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 19,
       "references": [
         {
           "path": ".github/ISSUES/DS2-2026-07-28-DASHBOARD-SYSTEM-2-REFACTOR-ISSUE-PACK.md",
@@ -21543,8 +21574,20 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 8,
       "references": [
+        {
+          "path": "scripts/ops/observability/composite_replay_acceptance.py",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.green_acceptance import ("
+        },
+        {
+          "path": "tests/integration/test_composite_snapshot_replay.py",
+          "line": 9,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.green_acceptance import discover, launch_timeout"
+        },
         {
           "path": "tests/integration/test_live_green_acceptance.py",
           "line": 9,
@@ -22912,7 +22955,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 213,
+          "line": 212,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1\","
         },
@@ -22973,7 +23016,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 214,
+          "line": 213,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/neo4j_quick_start.sh\","
         },
@@ -23095,7 +23138,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 216,
+          "line": 215,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/start-neo4j-audit.sh\","
         }
@@ -23313,7 +23356,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 197,
+          "line": 196,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/repo/cleanup_repository.py\","
         },
@@ -23720,7 +23763,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
-          "line": 51,
+          "line": 52,
           "source_group": "tests",
           "text": "from scripts.schema.analysis.generate_unified_schema_map import ("
         }

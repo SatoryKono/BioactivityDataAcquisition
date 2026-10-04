@@ -200,10 +200,14 @@ class TestExitCodeIntegration:
                 from bioetl.domain.types import ConfigValidationError
 
                 assert ConfigValidationError is not None
-            else:
-                pytest.skip(
-                    f"Exception {exc_name} not found - may be defined elsewhere"
+            elif exc_name == "ExtractionInputError":
+                from bioetl.composition.runtime_builders.inputs_resolution_orchestration import (
+                    ExtractionInputError,
                 )
+
+                assert issubclass(ExtractionInputError, ValueError)
+            else:
+                pytest.fail(f"Mapped exception {exc_name} has no verified owner")
 
     def test_exit_codes_are_unique(self) -> None:
         """BioETL-specific exit codes must be unique (no collisions)."""

@@ -29,7 +29,7 @@
     "tests/architecture/test_module_coverage_inventory.py"
   ],
   "current_live_metrics": {
-    "below_85_module_count": 12,
+    "below_85_module_count": 0,
     "uncovered_module_count": 0,
     "unmeasured_module_count": 0,
     "tracked_module_coverage_percent": 100.0,
@@ -38,8 +38,8 @@
   "closeout": {
     "status": "regressed_after_closeout",
     "historical_status": "bounded_shard_complete",
-    "residual_tail_remains": true,
-    "residual_below_85_module_count": 12,
-    "rationale": "Live merged inventory has 12 measured modules below the default floor; uncovered=0, unmeasured=0. Both branch measurements and newer main measurements are retained. Historical shard delta is unchanged."
+    "residual_tail_remains": false,
+    "residual_below_85_module_count": 0,
+    "rationale": "Accepted additive inventory has zero measured modules below the default floor; uncovered=0, unmeasured=0. Historical shard delta and closeout status are retained pending full acceptance; this reconciliation is not a new full-suite coverage measurement."
   }
 }

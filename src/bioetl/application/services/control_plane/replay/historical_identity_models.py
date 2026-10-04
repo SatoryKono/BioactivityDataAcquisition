@@ -5,6 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass, fields
 from typing import Protocol
 
+from bioetl.application.ports.control_plane import (
+    HistoricalReplayRunIdentityRecord as HistoricalReplayRunIdentityRecord,
+)
+
 __all__ = [
     "HistoricalReplayRunIdentity",
     "HistoricalReplayRunIdentityRecord",
@@ -16,18 +20,6 @@ __all__ = [
     "build_historical_identity_core_payload",
     "build_historical_run_identity_payload",
 ]
-
-
-@dataclass(frozen=True, slots=True)
-class HistoricalReplayRunIdentityRecord:
-    """Core run identity anchors shared by historical replay inventory records."""
-
-    manifest_id: str
-    run_id: str
-    pipeline_name: str
-    provider: str
-    entity: str
-    execution_context: str
 
 
 HistoricalReplayRunIdentity = HistoricalReplayRunIdentityRecord

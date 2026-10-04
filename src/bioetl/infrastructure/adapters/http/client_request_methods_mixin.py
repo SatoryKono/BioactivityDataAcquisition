@@ -125,10 +125,8 @@ class HTTPClientRequestMethodsMixin:
         client = self._get_client()
         response = await execute_timed_request(
             self,
-            client,
             "GET",
-            url,
-            {"params": params, "headers": headers},
+            lambda: client.get(url, params=params, headers=headers),
             request_timeout=request_timeout,
         )
         # circuit_breaker.call is typed to return httpx.Response for this path.

@@ -29,6 +29,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import os
 from dataclasses import replace
 from pathlib import Path
@@ -593,6 +594,25 @@ def test_resolve_code_revision_for_manifest_uses_deterministic_fallback_for_dirt
     assert provenance.git_commit == "test-deadbeefdead"
     assert provenance.source_revision_state == "clean"
     assert provenance.dependency_lock_hash == "sha256:test-lock-deadbeefdead"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("size", [0, 3, 1_048_577])
+def test_cached_bronze_snapshot_hash_covers_complete_file(
+    tmp_path: Path, size: int
+) -> None:
+    payload = (b"\x00\xffabc" * ((size + 4) // 5))[:size]
+    (tmp_path / "batch_payload.jsonl.zst").write_bytes(payload)
+
+    refs = build_cached_bronze_input_snapshot_refs(
+        bronze_root=tmp_path, bronze_date=None
+    )
+
+    expected_hash = hashlib.sha256(payload).hexdigest()
+    assert len(refs) == 1
+    assert refs[0].content_hash == expected_hash
+    assert refs[0].snapshot_id == f"sha256:{expected_hash}"
+    assert refs[0].immutable_uri == "bronze://batch_payload.jsonl.zst"
 
 
 @pytest.mark.unit

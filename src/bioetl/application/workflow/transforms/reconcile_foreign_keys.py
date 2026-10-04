@@ -56,6 +56,19 @@ def _runtime_flag(
     return bool(getattr(runtime_context, name, default))
 
 
+def _closed_cohort_verified(
+    request: ForeignKeyReconciliationRequest, result: object
+) -> bool:
+    """Require complete reference evidence and unchanged row membership."""
+    r = cast(Any, result)  # Any: structural FK reconcile result port
+    return (
+        request.require_closed_cohort
+        and request.reconciliation_mode == "complete-reference"
+        and r.retained_rows == r.scanned_rows
+        and not r.mutated
+    )
+
+
 def _build_reconcile_payload(
     *,
     spec: WorkflowTransformSpec,
@@ -96,10 +109,7 @@ def _build_reconcile_payload(
         "quarantine_rows_written": r.quarantine_rows_written,
         "quarantine_error_code": r.quarantine_error_code,
         "reference_completeness": request.reference_completeness,
-        "closed_cohort_verified": request.require_closed_cohort
-        and request.reconciliation_mode == "complete-reference"
-        and r.retained_rows == r.scanned_rows
-        and not r.mutated,
+        "closed_cohort_verified": _closed_cohort_verified(request, r),
         "unproven_unmatched_rows": getattr(r, "unproven_unmatched_rows", 0),
     }
     if request.reconciliation_mode == "selected-snapshot":
@@ -239,6 +249,7 @@ def _build_request(
     snapshots = (
         selected_snapshot_inputs(upstream_outputs or {})
         if config.get("reconciliation_mode") == "selected-snapshot"
+        or config.get("require_closed_cohort") is True
         else {}
     )
     return ForeignKeyReconciliationRequest(

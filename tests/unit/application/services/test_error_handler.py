@@ -33,10 +33,15 @@ logging and metrics ports.
 
 from __future__ import annotations
 
+import asyncio
+from unittest.mock import Mock
 
 import pytest
 
-from bioetl.application.services.ops.error_handler import ErrorHandler
+from bioetl.application.services.ops.error_handler import (
+    ErrorHandler,
+    handle_operation_errors,
+)
 from bioetl.domain.exceptions.base_exceptions import (
     BioETLDomainError,
     BioETLIntegrationError,
@@ -47,6 +52,55 @@ from bioetl.domain.exceptions.base_exceptions import (
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_operation_boundary_does_not_invoke_recovery_on_success() -> None:
+    recovery = Mock()
+    with handle_operation_errors(recovery):
+        pass
+    recovery.assert_not_called()
+
+
+def test_operation_boundary_passes_original_error_to_recovery() -> None:
+    error = LookupError("backend failure")
+    recovery = Mock()
+    with handle_operation_errors(recovery):
+        raise error
+    recovery.assert_called_once_with(error)
+
+
+def test_operation_boundary_preserves_reraised_error_identity() -> None:
+    error = RuntimeError("report failure")
+
+    def propagate(caught: Exception) -> None:
+        raise caught
+
+    with pytest.raises(RuntimeError) as caught, handle_operation_errors(propagate):
+        raise error
+    assert caught.value is error
+
+
+def test_operation_boundary_does_not_recapture_recovery_failure() -> None:
+    failure = ValueError("recovery failed")
+    recovery = Mock(side_effect=failure)
+    original = LookupError("operation failed")
+    with pytest.raises(ValueError) as caught, handle_operation_errors(recovery):
+        raise original
+    assert caught.value is failure
+    assert caught.value.__context__ is original
+    recovery.assert_called_once_with(original)
+
+
+@pytest.mark.parametrize(
+    "error_type", [asyncio.CancelledError, KeyboardInterrupt, SystemExit]
+)
+def test_operation_boundary_preserves_control_flow_exceptions(error_type) -> None:
+    error = error_type()
+    recovery = Mock()
+    with pytest.raises(error_type) as caught, handle_operation_errors(recovery):
+        raise error
+    assert caught.value is error
+    recovery.assert_not_called()
 
 
 class MockLoggerPort:

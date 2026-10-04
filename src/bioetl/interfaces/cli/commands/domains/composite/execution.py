@@ -45,6 +45,14 @@ def build_run_composite_result(
 ) -> tuple[bool, str | None]:
     """Map composite runner result to CLI success/error tuple."""
     if result.is_success:
+        if result.had_warnings:
+            failed = ", ".join(result.failed_enrichers)
+            return (
+                True,
+                f"Optional stages failed: {failed}"
+                if failed
+                else "Partial stage execution",
+            )
         return True, None
     failed = result.failed_enrichers
     if failed:

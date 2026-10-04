@@ -71,3 +71,28 @@ def test_missing_storage_does_not_invent_observation(tmp_path):
     metrics = Mock()
     assert rehydrate_checkpoint_metrics(metrics, tmp_path, now=NOW) == 0
     metrics.set_gauge.assert_not_called()
+
+
+@pytest.mark.unit
+def test_history_directory_without_checkpoint_invalidates_previous_gauge(tmp_path):
+    (tmp_path / ".history" / "by_pipeline" / "chembl_assay").mkdir(parents=True)
+    metrics = Mock()
+    assert rehydrate_checkpoint_metrics(metrics, tmp_path, now=NOW) == 0
+    metrics.set_gauge.assert_called_once_with(
+        "bioetl_checkpoint_saved_at_seconds", 0.0, {"pipeline": "chembl_assay"}
+    )
+
+
+@pytest.mark.parametrize("error_type", [OSError, ValueError, TypeError, KeyError])
+def test_unreadable_checkpoint_invalidates_gauge(tmp_path, monkeypatch, error_type):
+    from bioetl.infrastructure.checkpoint import metrics_rehydrate as module
+
+    (tmp_path / "chembl_assay.json").write_text("{}")
+    monkeypatch.setattr(
+        module, "read_json_file", Mock(side_effect=error_type("bad checkpoint"))
+    )
+    metrics = Mock()
+    assert rehydrate_checkpoint_metrics(metrics, tmp_path, now=NOW) == 0
+    metrics.set_gauge.assert_called_once_with(
+        "bioetl_checkpoint_saved_at_seconds", 0.0, {"pipeline": "chembl_assay"}
+    )

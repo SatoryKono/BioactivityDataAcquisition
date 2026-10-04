@@ -127,6 +127,42 @@ def virtual_clock(monkeypatch):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("retry_after", ["0", "250", "invalid"])
+async def test_anonymous_semanticscholar_batch_retries_keep_100_second_floor(
+    monkeypatch, retry_after
+):
+    now = virtual_clock(monkeypatch)
+    sent = []
+
+    def respond(request):
+        sent.append(now[0])
+        return (
+            httpx.Response(429, headers={"Retry-After": retry_after})
+            if len(sent) < 5
+            else httpx.Response(200, json=[])
+        )
+
+    client = UnifiedHTTPClient(
+        rate_limiter=TokenBucketRateLimiter(0.01, 1),
+        circuit_breaker=CircuitBreakerGuard(
+            provider="semanticscholar", failure_threshold=10, recovery_timeout=600
+        ),
+        provider="semanticscholar",
+        logger=MagicMock(),
+        retry_config=RetryConfig(max_attempts=5, base_delay=30, max_delay=300),
+    )
+    async with httpx.AsyncClient(transport=httpx.MockTransport(respond)) as transport:
+        client._client = transport
+        response = await client.post(
+            "https://example.test/paper/batch", json={"ids": ["DOI:10.1234/test"]}
+        )
+    assert response.status_code == 200
+    assert len(sent) == 5
+    floor = 250 if retry_after == "250" else 100
+    assert all(right - left >= floor for left, right in pairwise(sent))
+
+
+@pytest.mark.asyncio
 async def test_health_retry_after_delays_following_data_request(monkeypatch):
     now = virtual_clock(monkeypatch)
     sent = []

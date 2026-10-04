@@ -66,6 +66,37 @@ def metrics() -> MagicMock:
 class TestQuarantineManagerBulkWrites:
     """Tests for batch quarantine helpers."""
 
+    @pytest.mark.parametrize("stage", ["silver", "gold"])
+    @pytest.mark.asyncio
+    async def test_dq_quarantine_preserves_layer_accounting(
+        self, quarantine_port: MagicMock, stage: str
+    ) -> None:
+        batch_metrics = MagicMock()
+        manager = QuarantineRuntimeService(
+            quarantine_port=quarantine_port,
+            pipeline_name="chembl_activity",
+            batch_metrics=batch_metrics,
+        )
+        await manager.quarantine_records(
+            [({"activity_id": "1"}, ErrorType.SCHEMA_VIOLATION, "invalid schema")],
+            deterministic_batch_uuid_from_callsite("test_quarantine_manager"),
+            ingestion_ts=datetime(2026, 3, 10, 12, tzinfo=UTC),
+            stage=stage,
+        )
+        quarantine_port.write_many.assert_awaited_once()
+        batch_metrics.track_quarantined_records.assert_called_once_with(
+            ErrorType.SCHEMA_VIOLATION,
+            1,
+            stage=stage,
+            reason_code=ErrorType.SCHEMA_VIOLATION.value,
+        )
+        if stage == "silver":
+            batch_metrics.track_processed_records.assert_called_once_with(
+                "quarantined", 1
+            )
+        else:
+            batch_metrics.track_processed_records.assert_not_called()
+
     @pytest.mark.asyncio
     async def test_quarantine_filtered_records_batches_writes_and_metrics(
         self,
@@ -450,3 +481,35 @@ class TestQuarantineManagerBulkWrites:
         request = quarantine_port.write_many.call_args[0][0][0]
         assert request["error_code"] == ErrorType.INVALID_DATA.value
         assert request["payload"] == {"id": "1"}
+
+
+@pytest.mark.unit
+def test_unsupported_quarantine_stage_is_rejected_before_port_access():
+    from bioetl.application.core._quarantine_manager_support import (
+        QuarantineManagerSupportMixin,
+    )
+
+    with pytest.raises(ValueError, match="Unsupported quarantine stage"):
+        QuarantineManagerSupportMixin()._quarantine_runtime_ports("bronze")
+
+
+@pytest.mark.unit
+def test_quarantine_error_counts_preserve_typed_and_legacy_entries():
+    from bioetl.application.core._quarantine_metrics_support import (
+        count_dq_error_types,
+        filtered_reason_code_from_details,
+    )
+
+    entries = [
+        DQQuarantineEntry({}, ErrorType.INVALID_DATA, "invalid"),
+        ({}, ErrorType.INVALID_DATA, "legacy"),
+        DQQuarantineEntry({}, ErrorType.MISSING_REQUIRED_FIELD, "missing"),
+    ]
+    assert count_dq_error_types(entries) == {
+        ErrorType.INVALID_DATA: 2,
+        ErrorType.MISSING_REQUIRED_FIELD: 1,
+    }
+    assert (
+        filtered_reason_code_from_details(None, fallback="FILTERED_OUT_GOLD")
+        == "FILTERED_OUT_GOLD"
+    )

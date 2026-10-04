@@ -71,13 +71,10 @@ def create_run_manifest(
     manifest_create_request = _build_manifest_create_request(
         ctx=ctx,
         inputs=inputs,
-        provider=publication_context.provider,
-        entity=publication_context.entity,
-        reproducibility_context=publication_context.reproducibility_context,
+        **publication_context.publication_fields(),
         run_type_value=run_type_value,
         execution_context_value=execution_context_value,
         provenance=provenance,
-        contract_identity=publication_context.contract_identity,
         ledger_enabled=ledger_enabled,
     )
     return _publish_manifest_and_refs(

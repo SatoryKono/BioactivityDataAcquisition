@@ -83,7 +83,7 @@ new spend/safety decision.
 | `pr-required.yml` | `PR Gate Complete` | `pull_request`, `workflow_dispatch` | `active` | `active` | Always-materialized fail-closed coordinator; GitHub required context is job `pr-gate-complete` (ruleset 13643213) |
 | `port-contracts.yml` | `Port Contract Tests` | `push`, `pull_request`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Port-protocol and hypothesis contract tests |
 | `provider-contract-drift.yml` | `Provider Contract Drift` | `push`, `pull_request`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Provider contract replay/drift gate |
-| `router-v7-bridge.yml` | `Router 7 bridge candidate` | `push`, `pull_request` | pending first publication | `active` | Path-filtered migration candidate tests, browser build, and dependency audit; host acceptance remains separate |
+| `router-v7-bridge.yml` | `Router 7 bridge candidate` | `push`, `pull_request` | `active` | `active` | API state verified 2026-10-03; path-filtered migration candidate tests, browser build, and dependency audit; host acceptance remains separate |
 | `root-hygiene.yml` | `Root Hygiene` | `workflow_call`, `push`, `workflow_dispatch` | `active` | `active` | Root-surface cleanliness and governance checks |
 | `schema-governance.yml` | `Schema Governance` | `workflow_call`, `push` | `active` | `active` | Generated artifacts, schema parity, schema drift |
 | `codeql.yml` | `CodeQL` | `workflow_call`, `push`, `schedule` | `active` | `active` | Advanced Python CodeQL SAST; default setup off |

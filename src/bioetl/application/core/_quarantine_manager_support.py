@@ -65,7 +65,7 @@ class QuarantineManagerSupportMixin:
     ) -> QuarantineRuntimeDependencies:
         if stage not in {"silver", "gold"}:
             raise ValueError(f"Unsupported quarantine stage: {stage!r}")
-        ports = build_quarantine_runtime_ports(
+        return build_quarantine_runtime_ports(
             quarantine=self._quarantine,
             emitter=self._domain_event_emitter,
             pipeline_name=self._pipeline_name,
@@ -73,15 +73,6 @@ class QuarantineManagerSupportMixin:
             pipeline_metrics=self._pipeline_metrics,
             batch_metrics=self._batch_metrics,
             run_type=getattr(self, "_run_type", "unknown"),
-        )
-        return QuarantineRuntimeDependencies(
-            quarantine=ports.quarantine,
-            emitter=ports.emitter,
-            pipeline_name=ports.pipeline_name,
-            metrics=ports.metrics,
-            pipeline_metrics=ports.pipeline_metrics,
-            batch_metrics=ports.batch_metrics,
-            run_type=ports.run_type,
             stage=stage,
         )
 

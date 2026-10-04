@@ -17,6 +17,13 @@ from bioetl.infrastructure.control_plane.replay_object_verifier import (
 pytestmark = pytest.mark.unit
 
 
+def test_file_uri_with_escaped_path_round_trips(tmp_path):
+    verifier = ReplayObjectVerifier(tmp_path, tmp_path, tmp_path)
+    path = tmp_path / "saved data" / "batch.jsonl.zst"
+    assert verifier._snapshot_path(path.as_uri()) == path
+    assert verifier._snapshot_path("file://remote-host/share/batch") is None
+
+
 def evidence(tmp_path):
     verifier = ReplayObjectVerifier(
         tmp_path / "config", tmp_path / "locks", tmp_path / "bronze"

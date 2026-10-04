@@ -257,3 +257,14 @@ def test_http_summary_allows_only_known_measured_fields() -> None:
     assert build_http_summary(
         {"request_count": 3, "retry_count": 1, "secret": "drop"}
     ) == {"request_count": 3, "retry_count": 1}
+
+
+def test_cached_bronze_artifacts_ignore_directories_matching_batch_pattern(tmp_path):
+    (tmp_path / "batch_directory.jsonl.zst").mkdir()
+    assert (
+        build_artifacts_from_result(
+            _result(),
+            options=_options(use_cached_bronze=True, cached_bronze_path=str(tmp_path)),
+        )
+        == ()
+    )

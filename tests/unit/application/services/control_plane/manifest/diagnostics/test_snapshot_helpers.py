@@ -66,6 +66,13 @@ from bioetl.domain.types import RunID
 pytestmark = pytest.mark.unit
 
 
+def test_materialization_summary_ignores_non_mapping_payloads():
+    assert (
+        resolve_post_manifest_input_snapshot_materialization_mode([None, "invalid"])
+        is None
+    )
+
+
 def _run_id() -> RunID:
     return RunID(UUID("00000000-0000-0000-0000-000000000123"))
 
@@ -252,3 +259,17 @@ def test_merge_ledger_input_snapshots_returns_original_when_no_ledger_refs() -> 
     summary = {"input_snapshots": []}
 
     assert merge_ledger_input_snapshots_into_summary(summary, ()) is summary
+
+
+def test_published_snapshot_with_non_mapping_details_is_not_trusted():
+    from types import SimpleNamespace
+    from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_ledger import (
+        _published_details,
+    )
+
+    assert (
+        _published_details(
+            SimpleNamespace(event_type=INPUT_SNAPSHOT_PUBLISHED_EVENT, details=None)
+        )
+        == {}
+    )

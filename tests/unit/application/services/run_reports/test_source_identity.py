@@ -273,3 +273,15 @@ def test_repository_env_loader_preserves_hash_literal_semantics(
     )
 
     assert loaded == {"TEST_VALUE": expected}
+
+
+def test_runtime_path_maps_windows_spelling_on_posix_host(monkeypatch):
+    from pathlib import PurePosixPath
+    from types import SimpleNamespace
+    from bioetl.application.services.run_reports import source_identity
+
+    monkeypatch.setattr(source_identity, "os", SimpleNamespace(name="posix"))
+    monkeypatch.setattr(source_identity, "Path", PurePosixPath)
+    assert source_identity.runtime_path_to_local_path(
+        r"E:\data\bronze", root="/repo"
+    ) == PurePosixPath("/mnt/e/data/bronze")

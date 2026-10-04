@@ -40,6 +40,35 @@ from bioetl.domain.workflow import (
     WorkflowStepConfig,
     topologically_sorted_step_ids,
 )
+from bioetl.domain.workflow.config import WorkflowReferenceCohort
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("invalid", ["dependency", "producer", "table"])
+def test_reference_cohort_requires_matching_direct_pipeline_producer(invalid):
+    producer = (
+        TransformStepConfig(step_id="source", transform_name="normalize")
+        if invalid == "producer"
+        else WorkflowStepConfig(step_id="source", pipeline_name="chembl_assay")
+    )
+    consumer = WorkflowStepConfig(
+        step_id="consumer",
+        pipeline_name="chembl_activity",
+        depends_on=() if invalid == "dependency" else ("source",),
+        reference_cohort=WorkflowReferenceCohort(
+            step_id="source",
+            table="chembl.molecule" if invalid == "table" else "chembl.assay",
+            column="assay_id",
+            filter_field="assay_id",
+        ),
+    )
+    messages = {
+        "dependency": "direct upstream dependency",
+        "producer": "pipeline producer",
+        "table": "table must match its producer",
+    }
+    with pytest.raises(ValueError, match=messages[invalid]):
+        WorkflowConfig(name="workflow", steps=(producer, consumer))
 
 
 @pytest.mark.unit

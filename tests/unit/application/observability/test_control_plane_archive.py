@@ -24,6 +24,39 @@ pytestmark = pytest.mark.unit
 RUN_ID = RunID(UUID(int=14))
 
 
+@pytest.mark.parametrize("error_type", [OSError, RuntimeError, TypeError, ValueError])
+def test_archive_assessment_error_returns_failure_without_claiming_success(
+    tmp_path, monkeypatch, error_type
+):
+    from types import SimpleNamespace
+    from unittest.mock import MagicMock
+    from bioetl.composition import control_plane_archive as module
+
+    manifest = SimpleNamespace(pipeline_name="chembl_assay")
+    monkeypatch.setattr(
+        module.FileRunManifestStore, "get_by_run_id", lambda *a: manifest
+    )
+    monkeypatch.setattr(
+        module, "_create_or_verify_pack", lambda **kw: (True, "verified")
+    )
+    monkeypatch.setattr(
+        module.FileControlPlaneArtifactLifecycleStore,
+        "plan_for_manifest",
+        lambda *a, **kw: object(),
+    )
+    refresh = MagicMock(side_effect=error_type("assessment failed"))
+    monkeypatch.setattr(module, "refresh_archived_assessment", refresh)
+
+    assert archive_successful_run(
+        result=_result(),
+        options=None,
+        data_root=tmp_path,
+        archive_root=tmp_path / "archive",
+        report_root=tmp_path / "reports",
+    ) == (False, "archive_assessment_failed")
+    refresh.assert_called_once()
+
+
 def _result(**overrides: object) -> RunResult:
     payload: dict[str, object] = {
         "status": PipelineRunResult.SUCCESS,

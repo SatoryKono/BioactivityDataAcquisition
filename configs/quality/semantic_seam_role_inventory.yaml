@@ -1,7 +1,7 @@
 schema_version: 1
 policy_scope: semantic_seam_role_inventory
 linked_issue: '#5566'
-review_date: '2026-06-23'
+review_date: '2026-10-02'
 owner: '@bioetl-architecture'
 new_caller_policy: fail_fast_review_required
 allowed_semantic_roles:
@@ -22,7 +22,7 @@ seams:
   caller_guard:
     max_src_importer_count: 4
     allowed_src_importers:
-    - src/bioetl/application/core/_batch_write_support.py
+    - src/bioetl/application/core/_batch_write_events.py
     - src/bioetl/application/core/batch_shared_operation_errors.py
     - src/bioetl/application/core/runner_execution_flow.py
     - src/bioetl/application/core/runner_flow.py
@@ -51,5 +51,5 @@ seams:
     max_src_importer_count: 3
     allowed_src_importers:
     - src/bioetl/composition/factories/pipeline/run_context_contract_identity.py
-    - src/bioetl/composition/runtime_builders/control_plane.py
+    - src/bioetl/composition/runtime_builders/_run_manifest_creation_support_helpers.py
     - src/bioetl/composition/runtime_builders/run_manifest_builder.py

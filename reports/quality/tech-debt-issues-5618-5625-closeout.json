@@ -1,0 +1,98 @@
+{
+  "snapshot_date": "2026-07-13",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
+  "issues": [
+    {
+      "issue": "#5618",
+      "theme": "Debt gates governance baseline",
+      "debt_types": ["Governance gap", "Quality debt", "Budget debt"],
+      "action": "Established debt gates governance baseline with proper status tracking and artifact alignment.",
+      "risk": "medium",
+      "evidence": [
+        "reports/quality/debt-governance-gates.json",
+        "tests/architecture/test_tech_debt_issues_5618_5625_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5619",
+      "theme": "Compatibility census governance",
+      "debt_types": ["Compatibility debt", "Governance gap", "Public API debt"],
+      "action": "Governed compatibility census with proper entrypoint tracking and importer counts.",
+      "risk": "low",
+      "evidence": [
+        "reports/quality/compatibility-importer-census.json",
+        "tests/architecture/test_tech_debt_issues_5618_5625_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5620",
+      "theme": "Internal shims governance",
+      "debt_types": ["Compatibility debt", "Governance gap", "Architecture debt"],
+      "action": "Governed internal compatibility shims with proper tracking and sunset policies.",
+      "risk": "medium",
+      "evidence": [
+        "configs/quality/internal_compatibility_shim_inventory.yaml",
+        "tests/architecture/test_tech_debt_issues_5618_5625_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5621",
+      "theme": "Duplication baseline governance",
+      "debt_types": ["Duplication", "Governance gap", "Architecture debt"],
+      "action": "Governed duplication baseline with bounded cluster counts and proper target tracking.",
+      "risk": "medium",
+      "evidence": [
+        "reports/quality/full-app-duplication-baseline.json",
+        "tests/architecture/test_tech_debt_issues_5618_5625_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5622",
+      "theme": "Duplication ceiling enforcement",
+      "debt_types": ["Duplication", "Governance gap", "Architecture debt"],
+      "action": "Enforced duplication ceiling with total duplication at 88 and CLI duplication at 3.",
+      "risk": "medium",
+      "evidence": [
+        "reports/quality/full-app-duplication-baseline.json",
+        "tests/architecture/test_tech_debt_issues_5618_5625_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5623",
+      "theme": "Runtime cardinality review governance",
+      "debt_types": ["Observability gap", "Governance gap", "Quality debt"],
+      "action": "Governed runtime cardinality review with proper freshness tracking and inventory alignment.",
+      "risk": "low",
+      "evidence": [
+        "reports/observability/runtime_cardinality_review.json",
+        "reports/observability/runtime_cardinality_inventory.json",
+        "tests/architecture/test_tech_debt_issues_5618_5625_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5624",
+      "theme": "Hotspot budget ceilings",
+      "debt_types": ["Hotspot", "Governance gap", "Architecture debt"],
+      "action": "Enforced hotspot budget ceilings with proper bounded growth for application_core and other families.",
+      "risk": "medium",
+      "evidence": [
+        "configs/quality/debt_scorecard.yaml::hotspot_family_ratchets",
+        "reports/quality/hotspot-family-baseline.json",
+        "tests/architecture/test_tech_debt_issues_5618_5625_closeout.py"
+      ]
+    },
+    {
+      "issue": "#5625",
+      "theme": "Test governance baseline",
+      "debt_types": ["Test debt", "Governance gap", "Quality debt"],
+      "action": "Established test governance baseline with proper config and report alignment.",
+      "risk": "low",
+      "evidence": [
+        "configs/quality/test_governance_audit.yaml",
+        "reports/quality/test-governance-current.json",
+        "tests/architecture/test_tech_debt_issues_5618_5625_closeout.py"
+      ]
+    }
+  ]
+}

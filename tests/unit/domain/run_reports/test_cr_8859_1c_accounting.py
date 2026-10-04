@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+
 from types import SimpleNamespace
 
 import pytest
@@ -16,7 +17,7 @@ from bioetl.domain.run_reports.reason_catalog import (
     UNKNOWN_REASON,
     normalize_reason_code,
 )
-from bioetl.domain.run_reports.workflow_builder import build_workflow_run_report
+from bioetl.domain.run_reports.workflow_assembly import build_workflow_run_report
 from bioetl.domain.run_reports.workflow_reasons import (
     _as_int,
     _optional_reason_text,
@@ -207,3 +208,9 @@ def test_reason_scalar_normalizers_fail_closed() -> None:
     assert _as_int(object(), default=8) == 8
     assert _as_int("bad", default=9) == 9
     assert _as_int(float("inf"), default=10) == 10
+
+
+def test_blank_field_reason_base_uses_unknown_catalog_code():
+    from bioetl.domain.run_reports.reason_catalog import compose_field_reason_code
+
+    assert compose_field_reason_code("  ", "title") == "UNKNOWN_REASON"

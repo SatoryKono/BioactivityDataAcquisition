@@ -207,8 +207,11 @@ catalog smoke.
 ## Bounded workflow FK reconciliation (`selected-snapshot`)
 
 `chembl_baseline` and `chembl_core` require explicit opt-in when extracts are
-independently limited. `complete-reference` remains the default: limited
-extracts are rejected, and an unproven reference cannot authorize deletion.
+independently limited. `complete-reference` remains the default: independently
+limited extracts are rejected, and an unproven reference cannot authorize
+deletion. An explicit `reference_cohort` binds a reference producer to the
+upstream source keys; `require_closed_cohort` permits that bounded default
+workflow only when the selected cohort is closed, without orphan mutation.
 
 `selected-snapshot` compares current rows owned by the selected workflow's
 producer run IDs against current rows owned by the reference producer in its
@@ -222,7 +225,8 @@ The behavior matrix separates mutation permission from provider completeness:
 
 | Mode / condition | Mutation outcome | Persisted evidence |
 | --- | --- | --- |
-| Default `complete-reference`, any upstream limit/offset | CLI/config rejects destructive workflow execution. | No reconciliation commit; validation error. |
+| Default `complete-reference`, independently bounded upstream limit/offset without an explicit closed reference cohort | CLI/config rejects destructive workflow execution. | No reconciliation commit; validation error. |
+| Default `complete-reference`, explicit `reference_cohort` and `require_closed_cohort` | A closed cohort proceeds without orphan mutation; unmatched source rows fail the closed-cohort guard. | Actual producer scope and pins; cohort closure does not prove provider completeness. |
 | `complete-reference`, no limit, nonempty source, reference `unproven` | `blocked`; all scanned rows retained. | `reference_completeness_unproven`, unmatched count; completeness remains `unproven`. |
 | `complete-reference`, no limit, proven complete reference | Existing guarded deletion/Gold expiry; `no_op` when no orphans. | Completeness identity and actual mutation counts. |
 | Explicit `selected-snapshot`, limited or unlimited producers | Scoped deletion/Gold expiry, including partial or total expiry. | Mode, current-run ownership, producer IDs, pinned table IDs/versions, limits and counts; completeness remains `unproven`. |
@@ -282,6 +286,14 @@ stand in for a persisted producer snapshot. Missing snapshots fail closed.
 Resume restores completed producers' pinned versions and transform descendants
 from durable step evidence. A changed mode/scope changes the execution
 fingerprint; missing legacy snapshots and incompatible versions reject resume.
+Completed producers retain their original identity, counts and pinned snapshots
+in a versioned receipt. A downstream reference cohort may follow an exact
+workflow-owned FK descendant: each source mutation must preserve producer
+membership and table identity, advance the recorded pin by one version, and
+reconcile the previous scoped count with retained, expired and quarantined rows.
+Reference-only transforms, no-op results and dry runs cannot replace that count.
+Resume requires this producer receipt for explicit reference cohorts in both
+reconciliation modes; external snapshot drift still fails closed.
 An uncertain post-commit outcome records destructive commit evidence and requires
 explicit repair. Old reports lacking a mode remain legacy evidence; readers must
 not infer opt-in or reference completeness from absent fields.

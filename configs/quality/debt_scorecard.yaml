@@ -461,7 +461,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 200
-      total_loc: 24786
+      total_loc: 24774
       files_ge_250_loc: 0
       helper_function_ratio: 0.388
       max_internal_fan_in: 5
@@ -488,10 +488,10 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
-      files: 50
-      total_loc: 6174
+      files: 53
+      total_loc: 6443
       files_ge_250_loc: 0
-      helper_function_ratio: 0.323
+      helper_function_ratio: 0.283
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.tracing_bootstrap
     trend:
@@ -515,12 +515,12 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
-      files: 32
+      files: 33
       total_loc: 3870
       files_ge_250_loc: 0
       helper_function_ratio: 0.358
       max_internal_fan_in: 2
-      max_internal_fan_in_module: bioetl.composition.factories.pipeline.runner_constructor
+      max_internal_fan_in_module: bioetl.composition.factories.pipeline.runner_request
     trend:
       status: reduced_2026-07-28_issue_6787_helper_ratio
       next_action: '2026-07-28 issue 6787: helper-heavy modules remain under composition/factories/pipeline_support/
@@ -543,9 +543,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 130
-      total_loc: 15558
+      total_loc: 15301
       files_ge_250_loc: 0
-      helper_function_ratio: 0.399
+      helper_function_ratio: 0.398
       max_internal_fan_in: 1
       max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_models
     trend:
@@ -570,8 +570,8 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
-      files: 55
-      total_loc: 6641
+      files: 51
+      total_loc: 6583
       files_ge_250_loc: 0
       helper_function_ratio: 0.342
       max_internal_fan_in: 2
@@ -697,8 +697,8 @@ oversized_source_module_inventory:
       module from 579 to 218 lines after adding typed facade exports; the tracked shrink-only value is
       tightened to the current source size.
   - issue: '#6478'
-    source: src/bioetl/application/services/lineage/metadata_lineage_node_builders.py
-    extracted_surface: src/bioetl/application/services/lineage/metadata_lineage_node_builders.py
+    source: src/bioetl/application/services/lineage/metadata_lineage_node_assembly.py
+    extracted_surface: src/bioetl/application/services/lineage/metadata_lineage_node_assembly.py
     source_lines_after_split: 51
     extracted_surface_lines: 51
     rationale: Active top-list entry retired after prior extractions left the module well under the practical
@@ -753,9 +753,8 @@ hotspot_family_coverage_thresholds:
       min_covered_line_percent: 96.44
       allowlisted_unmeasured_paths: []
     composition_runtime_builders:
-      min_measured_module_count: 55
+      require_all_modules_covered: true
       max_unmeasured_module_count: 0
-      min_covered_module_count: 55
       min_covered_line_percent: 94.9
       allowlisted_unmeasured_paths: []
 removable_complexity_family_ratchets:

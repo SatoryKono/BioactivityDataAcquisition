@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
@@ -42,6 +43,84 @@ if TYPE_CHECKING:
         ControlPlaneArtifactLifecyclePlan,
         ControlPlaneArtifactLifecyclePolicy,
     )
+
+
+# Stable read contracts shared by control-plane recording and inspection.
+ARTIFACT_DETAIL_KEYS = (
+    "metadata_path",
+    "artifact_kind",
+    "artifact_semantics",
+    "record_count",
+    "total_bytes",
+    "content_hash",
+    "hash_algorithm",
+    "execution_fingerprint",
+    "input_snapshot_count",
+    "input_snapshot_ids",
+    "input_snapshot_content_hashes",
+    "pipeline_name",
+    "provider",
+    "entity",
+    "run_id",
+    "manifest_id",
+)
+
+ARTIFACT_TRACE_ORDERED_KEYS = (
+    "event_type",
+    "publication_status",
+    "stage",
+    "artifact_id",
+    "dataset_ref",
+    "lineage_fragment_id",
+    "artifact_path",
+    *ARTIFACT_DETAIL_KEYS,
+)
+
+REPLAY_TAXONOMY_FIELDS: tuple[str, ...] = (
+    "replay_capability",
+    "requested_exact_replay",
+    "exact_replay_support_boundary",
+    "replay_family_contract",
+    "replay_support_state",
+    "post_capture_replayable_parent_supported",
+    "post_capture_replayable_parent_boundary",
+    "historical_live_run_upgrade_policy",
+    "historical_live_run_upgrade_boundary",
+    "historical_live_run_upgrade_reason",
+    "broader_historical_exact_replay_policy",
+    "broader_historical_exact_replay_boundary",
+    "broader_historical_exact_replay_reason",
+    "broader_historical_exact_replay_state",
+    "historical_live_run_upgrade_state",
+    "replay_occurrence_kind",
+    "source_posture",
+    "input_snapshot_missing_source_refs",
+    "replay_capability_reason",
+    "replay_mode",
+    "continuation_mode",
+    "operator_replay_mode",
+    "replay_resume_rebuild_verdict",
+    "replay_next_action",
+    "exact_replay_eligible",
+    "exact_replay_blockers",
+    "replay_readiness_verdict",
+    "append_mode_semantic_sinks",
+    "resume_contract",
+    "resume_diagnostics",
+    "lineage_closure_boundary",
+)
+
+
+@dataclass(frozen=True, slots=True)
+class HistoricalReplayRunIdentityRecord:
+    """Core run identity anchors shared by historical replay inventory records."""
+
+    manifest_id: str
+    run_id: str
+    pipeline_name: str
+    provider: str
+    entity: str
+    execution_context: str
 
 
 @runtime_checkable
@@ -167,6 +246,23 @@ class RunManifestInspectionServiceProtocol(Protocol):
     ) -> RunManifestVerifyResult:
         """Verify two persisted run manifests against each other."""
         ...
+
+
+class RunLedgerCorrelationFieldsProtocol(Protocol):
+    """Shared correlation defaults required by ledger recording and diagnostics."""
+
+    pipeline_name: str | None
+    provider: str | None
+    entity: str | None
+    run_type: str | None
+    resolved_config_hash: str | None
+    effective_config_hash: str | None
+    contract_ref: str | None
+    contract_version: str | None
+    dq_policy_ref: str | None
+    rule_bundle_version: str | None
+    dq_contract_compatibility_hash: str | None
+    effective_config_artifact_id: str | None
 
 
 class WorkflowInspectionServiceProtocol(Protocol):

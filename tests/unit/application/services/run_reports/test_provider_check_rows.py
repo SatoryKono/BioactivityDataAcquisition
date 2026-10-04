@@ -19,6 +19,48 @@ from bioetl.domain.types import ComponentHealthResult, HealthStatus
 pytestmark = pytest.mark.unit
 
 
+def test_cached_bronze_does_not_reuse_a_live_provider_verdict():
+    assert provider_check_rows(
+        {
+            "identity": {"provider": "chembl"},
+            "io": {"use_cached_bronze": True},
+            "observations": {"Provider": {"verdict": "OK"}},
+        }
+    ) == [
+        {
+            "provider": "chembl",
+            "check_result": "N/A",
+            "evidence": "N/A",
+            "observed_at": None,
+        }
+    ]
+
+
+@pytest.mark.parametrize(
+    ("verdict", "expected", "evidence"),
+    [("N/A", "N/A", "N/A"), ("unexpected", "UNKNOWN", "PRESENT")],
+)
+def test_saved_provider_verdict_is_normalized_without_inventing_success(
+    verdict, expected, evidence
+):
+    report = {
+        "observations": {
+            "Provider": {"verdict": verdict, "facts": {"provider": " pubmed "}},
+        },
+    }
+    row = provider_check_rows(report)[0]
+    assert row["check_result"] == expected
+    assert row["evidence"] == evidence
+    assert row["observed_at"] is None
+    assert provider_selector_options(report) == [{"text": "pubmed", "value": "pubmed"}]
+
+
+def test_provider_selector_rejects_non_text_candidate():
+    from bioetl.domain.run_reports.selected_status import _clean_candidate_name
+
+    assert _clean_candidate_name(123, []) == ""
+
+
 def test_missing_provider_observation_is_not_ok() -> None:
     rows = provider_check_rows({})
     assert rows == [

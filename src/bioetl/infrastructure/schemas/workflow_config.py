@@ -13,6 +13,7 @@ from bioetl.domain.workflow import (
     WorkflowConfig,
     WorkflowRunOptionsConfig,
     WorkflowStepConfig,
+    apply_reconciliation_mode,
     reject_delete_orphans_after_limited_extracts,
 )
 from bioetl.domain.workflow.config import WorkflowReferenceCohort
@@ -401,15 +402,7 @@ class WorkflowConfigSchema(BaseModel):
     @model_validator(mode="after")
     def validate_domain_invariants(self) -> Self:
         """Delegate duplicate/dependency/cycle checks to the domain layer."""
-        try:
-            domain = self.to_domain()
-        except ValueError as exc:
-            raise ValueError(str(exc)) from exc
-        from bioetl.domain.workflow._delete_orphans_scope import (
-            apply_reconciliation_mode,
-        )
-
-        domain = apply_reconciliation_mode(domain)
+        domain = self.to_domain()
         reject_delete_orphans_after_limited_extracts(domain)
         return self
 
@@ -422,10 +415,6 @@ class WorkflowConfigSchema(BaseModel):
             else step.to_domain()
             for step in self.steps
         )
-        from bioetl.domain.workflow._delete_orphans_scope import (
-            apply_reconciliation_mode,
-        )
-
         return apply_reconciliation_mode(
             WorkflowConfig(
                 name=self.name,
@@ -451,5 +440,4 @@ class WorkflowConfigFileSchema(BaseModel):
 
 def validate_workflow_config_payload(payload: JsonDict) -> WorkflowConfigFileSchema:
     """Validate a workflow YAML payload against the strict runtime contract."""
-    result: WorkflowConfigFileSchema = WorkflowConfigFileSchema.model_validate(payload)
-    return result
+    return WorkflowConfigFileSchema.model_validate(payload)

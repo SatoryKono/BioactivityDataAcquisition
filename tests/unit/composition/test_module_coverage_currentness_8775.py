@@ -20,7 +20,7 @@ from bioetl.composition.factories.datasource import http_client
 from bioetl.composition.factories.pipeline.control_plane_artifacts import (
     build_control_plane_artifacts,
 )
-from bioetl.composition.pipeline_runner_request import (
+from bioetl.composition.factories.pipeline.runner_request import (
     _optional_cached_bronze,
     _optional_control_plane,
     _optional_filter_config,

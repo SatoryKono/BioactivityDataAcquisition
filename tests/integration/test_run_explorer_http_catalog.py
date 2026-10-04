@@ -48,7 +48,9 @@ def test_recent_report_link_preserves_row_url_through_transforms() -> None:
     assert "var-run_id=${__data.fields.run_id:percentencode}" in links[0]["url"]
     assert links[0]["targetBlank"] is False
     assert links[1]["url"] == "${__data.fields.report_url:raw}"
+    assert "${__data.fields.run_id}" in links[1]["title"]
     assert links[1]["targetBlank"] is True
+    assert overrides["Run ID"]["custom.inspect"] is True
     assert overrides["report_url"]["custom.hidden"] is True
     organize = next(
         t["options"] for t in panel["transformations"] if t["id"] == "organize"
@@ -247,9 +249,12 @@ def test_run_explorer_flex_columns_omit_custom_width() -> None:
     assert "custom.width" not in panel["fieldConfig"]["defaults"].get("custom", {})
     widths: dict[str, int] = {}
     min_widths: dict[str, int] = {}
+    hidden: set[str] = set()
     for override in panel["fieldConfig"]["overrides"]:
         field = override["matcher"]["options"]
         props = {item["id"]: item["value"] for item in override["properties"]}
+        if props.get("custom.hidden") is True:
+            hidden.add(field)
         if "custom.width" in props:
             widths[field] = int(props["custom.width"])
         if "custom.minWidth" in props:
@@ -258,4 +263,9 @@ def test_run_explorer_flex_columns_omit_custom_width() -> None:
         assert field not in widths
         assert min_widths[field] >= 80
     assert widths["Replay Readiness"] == 125
-    assert widths["Run ID"] == 90
+    assert widths["Run ID"] == 60
+    assert min_widths["Run ID"] == 50
+    assert widths["Overview"] == min_widths["Overview"] == 180
+    visible_width = sum(width for field, width in widths.items() if field not in hidden)
+    budget = (1366 // 2) * panel["gridPos"]["w"] // 24 - 40
+    assert visible_width <= budget

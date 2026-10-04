@@ -3,15 +3,7 @@
 from __future__ import annotations
 
 from bioetl.composition.factories.pipeline.config_types import PipelineFactoryConfig
-from bioetl.domain.contracts.gold import (
-    CrossRefPublicationGoldSchema,
-    OpenAlexPublicationGoldSchema,
-    PubChemCompoundGoldSchema,
-    PubMedPublicationGoldSchema,
-    SemanticScholarPublicationGoldSchema,
-    UniProtIDMappingGoldSchema,
-    UniProtProteinGoldSchema,
-)
+from bioetl.domain.contracts import gold
 from bioetl.domain.schemas.crossref.publication import PublicationEnrichedSchema
 from bioetl.domain.schemas.openalex.publication import OpenAlexPublicationSchema
 from bioetl.domain.schemas.pubchem.compound import PubchemMoleculeSchema
@@ -21,79 +13,57 @@ from bioetl.domain.schemas.semanticscholar.publication import (
 )
 from bioetl.domain.schemas.uniprot.idmapping import IDMappingSchema
 from bioetl.domain.schemas.uniprot.protein import UniprotTargetSchema
-from bioetl.infrastructure.schemas.silver import (
-    CROSSREF_PUBLICATION_SCHEMA,
-    OPENALEX_PUBLICATION_SCHEMA,
-    PUBCHEM_COMPOUND_SCHEMA,
-    PUBMED_PUBLICATION_SCHEMA,
-    SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
-    UNIPROT_ID_MAPPING_SCHEMA,
-    UNIPROT_PROTEIN_SCHEMA,
-)
+from bioetl.infrastructure.schemas import silver
 
 NON_CHEMBL_PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="pubchem_compound",
-        provider="pubchem",
-        entity_type="compound",
         transformer_class="bioetl.application.pipelines.pubchem.transformer.PubChemCompoundTransformer",
-        silver_schema=PUBCHEM_COMPOUND_SCHEMA,
-        gold_schema=PubChemCompoundGoldSchema,
+        silver_schema=silver.PUBCHEM_COMPOUND_SCHEMA,
+        gold_schema=gold.PubChemCompoundGoldSchema,
         pandera_silver_schema=PubchemMoleculeSchema,
     ),
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="uniprot_protein",
-        provider="uniprot",
-        entity_type="protein",
         transformer_class="bioetl.application.pipelines.uniprot.transformer.UniProtProteinTransformer",
-        silver_schema=UNIPROT_PROTEIN_SCHEMA,
-        gold_schema=UniProtProteinGoldSchema,
+        silver_schema=silver.UNIPROT_PROTEIN_SCHEMA,
+        gold_schema=gold.UniProtProteinGoldSchema,
         pandera_silver_schema=UniprotTargetSchema,
     ),
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="uniprot_idmapping",
-        provider="uniprot",
-        entity_type="idmapping",
         transformer_class="bioetl.application.pipelines.uniprot.idmapping_transformer.IDMappingTransformer",
-        silver_schema=UNIPROT_ID_MAPPING_SCHEMA,
-        gold_schema=UniProtIDMappingGoldSchema,
+        silver_schema=silver.UNIPROT_ID_MAPPING_SCHEMA,
+        gold_schema=gold.UniProtIDMappingGoldSchema,
         pandera_silver_schema=IDMappingSchema,
         data_source_provider="uniprot_idmapping",
     ),
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="pubmed_publication",
-        provider="pubmed",
-        entity_type="publication",
         transformer_class="bioetl.application.pipelines.pubmed.transformer.PubMedPublicationTransformer",
-        silver_schema=PUBMED_PUBLICATION_SCHEMA,
-        gold_schema=PubMedPublicationGoldSchema,
+        silver_schema=silver.PUBMED_PUBLICATION_SCHEMA,
+        gold_schema=gold.PubMedPublicationGoldSchema,
         pandera_silver_schema=PubMedPublicationSchema,
     ),
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="crossref_publication",
-        provider="crossref",
-        entity_type="publication",
         transformer_class="bioetl.application.pipelines.crossref.transformer.CrossRefPublicationTransformer",
-        silver_schema=CROSSREF_PUBLICATION_SCHEMA,
-        gold_schema=CrossRefPublicationGoldSchema,
+        silver_schema=silver.CROSSREF_PUBLICATION_SCHEMA,
+        gold_schema=gold.CrossRefPublicationGoldSchema,
         pandera_silver_schema=PublicationEnrichedSchema,
     ),
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="openalex_publication",
-        provider="openalex",
-        entity_type="publication",
         transformer_class="bioetl.application.pipelines.openalex.transformer.OpenAlexPublicationTransformer",
-        silver_schema=OPENALEX_PUBLICATION_SCHEMA,
-        gold_schema=OpenAlexPublicationGoldSchema,
+        silver_schema=silver.OPENALEX_PUBLICATION_SCHEMA,
+        gold_schema=gold.OpenAlexPublicationGoldSchema,
         pandera_silver_schema=OpenAlexPublicationSchema,
     ),
-    PipelineFactoryConfig(
+    PipelineFactoryConfig.for_pipeline(
         pipeline_name="semanticscholar_publication",
-        provider="semanticscholar",
-        entity_type="publication",
         transformer_class="bioetl.application.pipelines.semanticscholar.transformer.SemanticScholarPublicationTransformer",
-        silver_schema=SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
-        gold_schema=SemanticScholarPublicationGoldSchema,
+        silver_schema=silver.SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
+        gold_schema=gold.SemanticScholarPublicationGoldSchema,
         pandera_silver_schema=SemanticScholarPublicationSchema,
     ),
 )

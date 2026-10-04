@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "generated_by": "codex",
+  "snapshot_date": "2026-07-06",
+  "linked_issue": 5983,
+  "coverage_xml": "reports/coverage/coverage.xml",
+  "gate_command": "python -m scripts.engineering.qa check-branch-coverage --coverage-xml reports/coverage/coverage.xml --min-percent 85",
+  "branch_rate_percent": 85.002,
+  "branch_covered": 17218,
+  "branch_total": 20256,
+  "required_branch_covered": 17218,
+  "threshold_percent": 85,
+  "threshold_margin": 0,
+  "promotion_status": "promoted_to_blocking_gate",
+  "consecutive_checks": [
+    {
+      "sequence": 1,
+      "status": "pass",
+      "branch_rate_percent": 85.002,
+      "threshold_margin": 0
+    },
+    {
+      "sequence": 2,
+      "status": "pass",
+      "branch_rate_percent": 85.002,
+      "threshold_margin": 0
+    },
+    {
+      "sequence": 3,
+      "status": "pass",
+      "branch_rate_percent": 85.002,
+      "threshold_margin": 0
+    }
+  ],
+  "blocking_surfaces": [
+    ".github/workflows/tests.yml#coverage-verify",
+    "configs/quality/module_coverage_gates.yaml#branch_coverage",
+    "scripts/engineering/qa/check_branch_coverage.py"
+  ],
+  "notes": "Branch coverage is promoted to a blocking coverage-verify gate at the existing 85% threshold without increasing any budget or weakening the line coverage gate."
+}

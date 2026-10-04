@@ -55,6 +55,16 @@ class ConfigSourceRef:
     source_hash_version: str | None = None
     raw_source_hash_version: str | None = None
 
+    def identity_order_key(self) -> tuple[int, str, str, str, str]:
+        """Return the canonical ordering of configuration source identities."""
+        return (
+            self.priority,
+            self.source_type,
+            self.source_path,
+            self.source_hash or "",
+            self.raw_source_hash or "",
+        )
+
 
 @dataclass(frozen=True)
 class SourceClassProvenance:

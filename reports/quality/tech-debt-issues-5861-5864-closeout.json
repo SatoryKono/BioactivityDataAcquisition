@@ -39,7 +39,7 @@
     {
       "evidence": [
         "src/bioetl/composition/runtime_builders/registry_manifest.py",
-        "src/bioetl/composition/runtime_builders/_config_access_loaders.py",
+        "src/bioetl/composition/runtime_builders/config_access.py",
         "src/bioetl/composition/runtime_builders/__init__.py",
         "tests/unit/composition/runtime_builders/test_runtime_builder_registry_manifest.py",
         "reports/quality/hotspot-family-baseline.json"

@@ -179,6 +179,11 @@ class TestHTTPClientRetryRefactoring:
         ("inf", datetime(2015, 10, 21, 7, 27, 55, tzinfo=UTC), 1.0),
         ("-1", datetime(2015, 10, 21, 7, 27, 55, tzinfo=UTC), 1.0),
         ("bad date", datetime(2015, 10, 21, 7, 27, 55, tzinfo=UTC), 1.0),
+        (
+            "Wed, 21 Oct 2015 07:28:00 -0000",
+            datetime(2015, 10, 21, 7, 27, 55, tzinfo=UTC),
+            1.0,
+        ),
         ("", datetime(2015, 10, 21, 7, 27, 55, tzinfo=UTC), 1.0),
         (
             "Wed, 21 Oct 2015 07:27:00 GMT",

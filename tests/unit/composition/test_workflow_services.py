@@ -47,6 +47,7 @@ def test_workflow_composition_passes_configured_report_root(monkeypatch, tmp_pat
         data_dir=tmp_path / "data",
         gold_path=tmp_path / "data" / "output" / "gold",
         report_root=tmp_path / "reports",
+        silver_path=tmp_path / "data" / "output" / "silver",
     )
     monkeypatch.setattr(_workflow_services, "get_settings", lambda: settings)
     monkeypatch.setattr(

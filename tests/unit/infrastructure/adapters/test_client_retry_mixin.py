@@ -24,7 +24,7 @@
 # pyright: reportFunctionMemberAccess=false
 # pyright: reportConstantRedefinition=false
 # pyright: reportInvalidTypeForm=false
-# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+# PD5 test mock/fixture surface â€” product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Unit tests for HTTPClientRetryMixin.
 
 Tests retry delay calculation, Retry-After header handling, retry budget
@@ -43,21 +43,33 @@ import pytest
 
 from bioetl.domain.ports import CircuitBreakerPort
 from bioetl.domain.ports.noop import NoOpTracing
+from bioetl.domain.types import CircuitBreakerState
 from bioetl.domain.exceptions import (
     CircuitBreakerOpenError,
     RecoverableError,
     RetryExhaustedError,
 )
 from bioetl.domain.resilience import RetryConfig
-from bioetl.domain.types import CircuitBreakerState
 from bioetl.infrastructure.adapters.http import request_timing
 from bioetl.infrastructure.adapters.http.client_retry_mixin import HTTPClientRetryMixin
 
 
 pytestmark = pytest.mark.unit
 
+
+@pytest.mark.asyncio
+async def test_retry_logs_preserve_bound_logger_run_identity(client, mock_logger):
+    client.run_id = None
+    with patch("asyncio.sleep", new_callable=AsyncMock):
+        await client._handle_retry_delay(0)
+    client._log_retry("https://example.test", "GET", 0, 1.0)
+    client._record_retry_budget_exhausted("GET", "https://example.test")
+    for call in [*mock_logger.info.call_args_list, *mock_logger.warning.call_args_list]:
+        assert "run_id" not in call.kwargs
+
+
 # ---------------------------------------------------------------------------
-# Helpers — minimal concrete subclass that satisfies mixin dependencies
+# Helpers â€” minimal concrete subclass that satisfies mixin dependencies
 # ---------------------------------------------------------------------------
 
 
@@ -146,7 +158,7 @@ async def _passthrough_circuit_breaker_call(func, *args, **kwargs):
 
 
 # ---------------------------------------------------------------------------
-# _handle_retry_delay — sleep duration and Retry-After override
+# _handle_retry_delay â€” sleep duration and Retry-After override
 # ---------------------------------------------------------------------------
 
 
@@ -193,7 +205,7 @@ async def test_handle_retry_delay_honors_retry_after_header(
             attempt=0, url="", response=response
         )
 
-    # clamp_retry_after(10.0) with max_delay=60 → 10.0
+    # clamp_retry_after(10.0) with max_delay=60 â†’ 10.0
     assert returned == pytest.approx(10.0)
     mock_sleep.assert_awaited_once_with(pytest.approx(10.0))
 
@@ -236,13 +248,13 @@ async def test_handle_retry_delay_clamps_retry_after_to_max_delay(
 
 
 # ---------------------------------------------------------------------------
-# _can_retry — budget and last-attempt logic
+# _can_retry â€” budget and last-attempt logic
 # ---------------------------------------------------------------------------
 
 
 def test_can_retry_returns_true_within_budget(client: _ConcreteRetryClient) -> None:
     """Should return True when attempt is not the last and retries remain."""
-    # max_attempts=3 → budget=2; attempt=0, retries_used=0 → can retry
+    # max_attempts=3 â†’ budget=2; attempt=0, retries_used=0 â†’ can retry
     assert client._can_retry(attempt=0, retries_used=0) is True
 
 
@@ -256,7 +268,7 @@ def test_can_retry_returns_false_when_budget_exhausted(
     client: _ConcreteRetryClient,
 ) -> None:
     """Should return False when retry budget is fully consumed."""
-    # budget=2, retries_used=2 → exhausted
+    # budget=2, retries_used=2 â†’ exhausted
     assert client._can_retry(attempt=0, retries_used=2) is False
 
 
@@ -273,7 +285,7 @@ def test_can_retry_with_explicit_budget_per_request() -> None:
 
 
 # ---------------------------------------------------------------------------
-# _record_retry_budget_exhausted — metrics and log output
+# _record_retry_budget_exhausted â€” metrics and log output
 # ---------------------------------------------------------------------------
 
 
@@ -315,7 +327,7 @@ def test_record_retry_budget_exhausted_silent_without_logger(
 
 
 # ---------------------------------------------------------------------------
-# _record_request_metrics — histogram and counter calls
+# _record_request_metrics â€” histogram and counter calls
 # ---------------------------------------------------------------------------
 
 
@@ -392,7 +404,7 @@ def test_record_request_metrics_skips_retry_counter_when_no_retries(
 
 
 # ---------------------------------------------------------------------------
-# _log_retry — structured log emission
+# _log_retry â€” structured log emission
 # ---------------------------------------------------------------------------
 
 
@@ -413,7 +425,7 @@ def test_log_retry_emits_structured_warning(
     assert args[0] == "Retrying request"
     assert kwargs.get("provider") == "chembl"
     assert kwargs.get("run_id") == "test-run-001"
-    assert kwargs.get("attempt") == 1  # 0-indexed → displayed as 1
+    assert kwargs.get("attempt") == 1  # 0-indexed â†’ displayed as 1
 
 
 def test_log_retry_silent_without_logger(default_config: RetryConfig) -> None:
@@ -443,7 +455,7 @@ def test_log_retry_uses_reason_when_no_status_code(
 
 
 # ---------------------------------------------------------------------------
-# _is_retryable_error — classification of exception types
+# _is_retryable_error â€” classification of exception types
 # ---------------------------------------------------------------------------
 
 
@@ -528,7 +540,7 @@ def test_is_retryable_error_custom_retryable_exception_type() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Characterization — full retry loop and attempt semantics
+# Characterization â€” full retry loop and attempt semantics
 # ---------------------------------------------------------------------------
 
 

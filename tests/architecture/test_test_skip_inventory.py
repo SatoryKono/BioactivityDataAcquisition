@@ -360,3 +360,69 @@ def test_e2e_matrix_replay_deferred_matches_inventory() -> None:
     declared = re.findall(r'"([^"]+)"', match.group(1))
     assert listed == declared
     assert str(deferred["linked_issue"]) == "#9729"
+
+
+@pytest.mark.parametrize(
+    ("platform", "checkout", "mounts", "expected"),
+    [
+        ("win32", "/repo", "", "Windows"),
+        (
+            "linux",
+            "/home/fedor/repo",
+            "root / ext4 rw 0 0\nC: /mnt/c 9p rw,aname=drvfs 0 0",
+            None,
+        ),
+        (
+            "linux",
+            "/mnt/c/repo",
+            "root / ext4 rw 0 0\nC: /mnt/c 9p rw,aname=drvfs 0 0",
+            "WSL",
+        ),
+        (
+            "linux",
+            "/custom/windows/repo",
+            "root / ext4 rw 0 0\nC: /custom/windows drvfs rw 0 0",
+            "WSL",
+        ),
+        (
+            "linux",
+            "/mnt/c/native/repo",
+            "C: /mnt/c 9p rw,aname=drvfs 0 0\nroot /mnt/c/native ext4 rw 0 0",
+            None,
+        ),
+        ("linux", "/home/repo", "root / 9p rw,aname=linux 0 0", None),
+        ("linux", "/repo", None, None),
+    ],
+)
+def test_mounted_worktree_guard_uses_checkout_filesystem(
+    monkeypatch, platform, checkout, mounts, expected
+) -> None:
+    from pathlib import PurePosixPath
+    from types import SimpleNamespace
+
+    from tests.architecture import _platform_skip_support as support
+
+    monkeypatch.setattr(support.sys, "platform", platform)
+    monkeypatch.setattr(
+        support, "__file__", checkout + "/tests/architecture/_platform_skip_support.py"
+    )
+
+    def read_mounts(**kwargs):
+        assert kwargs == {"encoding": "utf-8"}
+        if mounts is None:
+            raise OSError("Mount table unavailable")
+        return mounts
+
+    def platform_path(value):
+        if value == "/proc/mounts":
+            return SimpleNamespace(read_text=read_mounts)
+        if value == support.__file__:
+            return SimpleNamespace(resolve=lambda: PurePosixPath(value))
+        return PurePosixPath(value)
+
+    monkeypatch.setattr(support, "Path", platform_path)
+    reason = support.mounted_worktree_skip_reason()
+    if expected is None:
+        assert reason is None
+    else:
+        assert expected in reason

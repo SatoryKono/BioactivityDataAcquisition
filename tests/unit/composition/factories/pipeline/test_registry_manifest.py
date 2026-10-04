@@ -47,6 +47,40 @@ from bioetl.composition.factories.pipeline.registry_manifest import (
 
 
 @pytest.mark.unit
+def test_pipeline_identity_preserves_full_entity_and_explicit_bindings() -> None:
+    gold, silver, pandera = object(), object(), object()
+    config = PipelineFactoryConfig.for_pipeline(
+        "chembl_target_protein_classification",
+        transformer_class="explicit.module.Transformer",
+        silver_schema=silver,
+        gold_schema=gold,
+        pandera_silver_schema=pandera,
+        data_source_provider="custom_source",
+    )
+    assert (config.provider, config.entity_type) == (
+        "chembl",
+        "target_protein_classification",
+    )
+    assert config.transformer_class == "explicit.module.Transformer"
+    assert config.silver_schema is silver
+    assert config.gold_schema is gold
+    assert config.pandera_silver_schema is pandera
+    assert config.data_source_provider == "custom_source"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("name", ["", "chembl", "_activity", "chembl_"])
+def test_pipeline_identity_rejects_missing_components(name: str) -> None:
+    with pytest.raises(ValueError, match="provider and entity"):
+        PipelineFactoryConfig.for_pipeline(
+            name,
+            transformer_class="module.Transformer",
+            silver_schema=None,
+            gold_schema=object(),
+        )
+
+
+@pytest.mark.unit
 def test_registry_manifest_concatenates_prebuilt_pipeline_factory_configs() -> None:
     """The manifest should only concatenate already prepared config tuples."""
     assert PIPELINE_CONFIGS == (

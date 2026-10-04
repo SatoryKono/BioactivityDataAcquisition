@@ -65,6 +65,27 @@ _BIBLIO_BATCH = (
 class TestChemblPublicationTermBranch:
     """Covers publication_term wrapper branch in ChEMBL creator."""
 
+    def test_assay_parameters_wrapper_precedes_input_filter(self, monkeypatch):
+        from bioetl.composition.providers import registration_bio as module
+
+        support = MagicMock()
+        wrapper = MagicMock()
+        filter_wrapper = MagicMock()
+        monkeypatch.setattr(module, "AssayParametersDataSource", wrapper)
+        monkeypatch.setattr(module, "_wrap_with_filter", filter_wrapper)
+        monkeypatch.setattr(module, "_get_adapter_config", MagicMock())
+        config = MagicMock(entity_type="assay_parameters", extraction_params={})
+
+        result = _create_chembl_data_source(
+            settings=MagicMock(),
+            pipeline_config=config,
+            logger=MagicMock(),
+            assembly_support=support,
+        )
+        wrapper.assert_called_once_with(support.create_adapter.return_value)
+        assert filter_wrapper.call_args.args[0] is wrapper.return_value
+        assert result is filter_wrapper.return_value
+
     @patch("bioetl.composition.providers.registration_bio._wrap_with_filter")
     @patch("bioetl.composition.providers.registration_bio.PublicationTermDataSource")
     @patch("bioetl.composition.providers.registration_bio._get_adapter_config")

@@ -5,6 +5,9 @@ from __future__ import annotations
 from typing import Protocol, cast
 
 from bioetl.application.services.control_plane.replay.historical_closure_models import (
+    CLOSURE_MODEL_PUBLIC_NAMES as CLOSURE_MODEL_PUBLIC_NAMES,
+)
+from bioetl.application.services.control_plane.replay.historical_closure_models import (
     RESIDUAL_BLOCKED_STATUSES as RESIDUAL_BLOCKED_STATUSES,
 )
 from bioetl.application.services.control_plane.replay.historical_closure_models import (
@@ -148,10 +151,7 @@ def build_universal_scope_global_claim(
 
 
 __all__ = [
-    "RESIDUAL_BLOCKED_STATUSES",
-    "HistoricalReplayClaimScopeMode",
-    "HistoricalReplayClosureReportRecord",
-    "HistoricalReplayResidualDispositionRecord",
+    *CLOSURE_MODEL_PUBLIC_NAMES,
     "build_narrowed_scope_global_claim",
     "build_universal_scope_global_claim",
     "has_irrecoverable_dispositions",

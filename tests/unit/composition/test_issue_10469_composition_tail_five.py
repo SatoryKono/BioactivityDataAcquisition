@@ -16,7 +16,7 @@ from bioetl.composition.factories.pipeline_support import checkpoint_metadata_re
 from bioetl.composition.factories.storage import _layer_writers
 from bioetl.composition import observability_backend, observability_runtime
 from bioetl.composition.providers import _config_helpers
-from bioetl.composition.runtime_builders import _config_access_loaders
+from bioetl.composition.runtime_builders import config_access as _config_access_loaders
 from bioetl.composition.runtime_builders._run_manifest_snapshot_resolution import (
     resolve_replay_parentage_mapping_value,
 )

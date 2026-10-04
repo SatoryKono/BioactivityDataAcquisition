@@ -417,6 +417,7 @@ def test_exact_lookup_precedes_recent_limit_and_respects_scope(tmp_path):
         (2700, "45 m"),
         (3600, "1 h"),
         (7200, "2 h"),
+        (7190, "2 h"),
         (60750, "16 h 53 m"),
     ],
 )

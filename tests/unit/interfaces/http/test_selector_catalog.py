@@ -17,6 +17,40 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.asyncio
+async def test_prewarm_failure_does_not_abort_server_startup():
+    from bioetl.interfaces.http._forensic_request_budget import (
+        ForensicEndpointUnavailable,
+    )
+
+    host = MagicMock()
+    host._selector_catalog.options.read = AsyncMock(
+        side_effect=ForensicEndpointUnavailable(
+            reason="deadline_exceeded", status_code=504
+        )
+    )
+    assert await routing.prewarm_selector_options(host) is None
+    host._selector_catalog.options.read.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_report_catalog_evicts_oldest_scope_at_capacity(monkeypatch):
+    monkeypatch.setattr(catalog_module, "monotonic", lambda: 0.0)
+    catalog = SelectorCatalog()
+    loader = MagicMock(return_value=[])
+    for index in range(33):
+        assert (
+            await catalog.read_reports({"pipeline": (f"pipeline_{index}",)}, loader)
+            == []
+        )
+    assert len(catalog._report_snapshots) == 32
+    await catalog.read_reports({"pipeline": ("pipeline_32",)}, loader)
+    assert loader.call_count == 33
+    await catalog.read_reports({"pipeline": ("pipeline_0",)}, loader)
+    assert loader.call_count == 34
+    assert len(catalog._report_snapshots) == 32
+
+
+@pytest.mark.asyncio
 async def test_opt_in_reuses_projection_and_status_does_not_refresh(monkeypatch):
     host = HealthServer()
     host._send_payload_response = AsyncMock()

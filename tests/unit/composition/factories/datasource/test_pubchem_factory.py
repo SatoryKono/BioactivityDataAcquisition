@@ -39,6 +39,17 @@ from bioetl.infrastructure.adapters.common import SyncAdapterDependencyContext
 
 
 @pytest.mark.unit
+def test_missing_pubchem_source_configuration_uses_default_retry_budget(monkeypatch):
+    from bioetl.composition.factories.datasource import pubchem
+
+    loader = MagicMock(side_effect=ValueError("source configuration unavailable"))
+    monkeypatch.setattr(pubchem, "load_source_config", loader)
+
+    assert pubchem._resolve_retry_config("pubchem") == pubchem.RetryConfig()
+    loader.assert_called_once_with("pubchem")
+
+
+@pytest.mark.unit
 class TestCreatePubChemAdapter:
     """Verify composition-owned PubChem assembly."""
 

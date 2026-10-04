@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import base64
+import hashlib
 import json
 from datetime import date
 from pathlib import Path
@@ -145,19 +147,45 @@ def test_vendored_extract_zip_validates_symlink_targets() -> None:
     assert 'cp -R "${ACTION_DIR}/vendor/." "${TOOL_DIR}/vendor/"' in action
 
 
-def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
-    """Grafana 13 host still ships react-router 6; do not fake a 7.x/uuid 11 closeout."""
-    for package_json in (SCENES_PKG, SELECTOR_PKG):
+def test_grafana_plugins_use_verified_router_bridge_candidate() -> None:
+    """Verify the explicit candidate dependency graph, not host compatibility."""
+    bridge_root = ROOT / "grafana/tooling/router-v7-bridge"
+    archive = bridge_root / "bioetl-grafana-router-v7-bridge-0.3.0.tgz"
+    expected_integrity = "sha512-" + base64.b64encode(
+        hashlib.sha512(archive.read_bytes()).digest()
+    ).decode("ascii")
+    bridge_dependency = (
+        "file:../../tooling/router-v7-bridge/bioetl-grafana-router-v7-bridge-0.3.0.tgz"
+    )
+    for package_json, lock_path in (
+        (SCENES_PKG, SCENES_LOCK),
+        (SELECTOR_PKG, SELECTOR_LOCK),
+    ):
         payload = _json(package_json)
-        assert "overrides" not in payload
-
-    scenes = _lock_packages(SCENES_LOCK)
-    selector = _lock_packages(SELECTOR_LOCK)
-    assert scenes["node_modules/react-router"]["version"].startswith("6.")
-    assert scenes["node_modules/uuid"]["version"].startswith("9.")
-    assert "6.30.6" in {
-        selector["node_modules/react-router-dom-v5-compat"]["version"],
-        selector["node_modules/react-router-dom-v5-compat/node_modules/react-router"][
-            "version"
-        ],
-    }
+        expected_overrides = {
+            "react-router-dom-v5-compat": "$react-router-dom-v5-compat"
+        }
+        if package_json == SCENES_PKG:
+            expected_overrides["@grafana/scenes"] = {"react-router-dom": "7.18.4"}
+        assert payload["overrides"] == expected_overrides
+        assert (
+            payload["dependencies"]["react-router-dom-v5-compat"] == bridge_dependency
+        )
+        packages = _lock_packages(lock_path)
+        bridge = packages["node_modules/react-router-dom-v5-compat"]
+        assert bridge["name"] == "@bioetl/grafana-router-v7-bridge"
+        assert bridge["version"] == "0.3.0"
+        assert bridge["resolved"] == bridge_dependency
+        assert bridge["integrity"] == expected_integrity
+        router = packages["node_modules/react-router-v7"]
+        assert router["name"] == "react-router"
+        assert router["version"] == "7.18.4"
+        assert router["resolved"] == (
+            "https://registry.npmjs.org/react-router/-/react-router-7.18.4.tgz"
+        )
+        assert (
+            router["integrity"]
+            == _lock_packages(bridge_root / "package-lock.json")[
+                "node_modules/react-router-v7"
+            ]["integrity"]
+        )

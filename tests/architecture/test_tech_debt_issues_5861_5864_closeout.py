@@ -57,13 +57,8 @@ REGISTRY_MANIFEST = (
     / "runtime_builders"
     / "registry_manifest.py"
 )
-CONFIG_ACCESS_LOADERS = (
-    ROOT
-    / "src"
-    / "bioetl"
-    / "composition"
-    / "runtime_builders"
-    / "_config_access_loaders.py"
+CONFIG_ACCESS = (
+    ROOT / "src" / "bioetl" / "composition" / "runtime_builders" / "config_access.py"
 )
 EXPECTED_ISSUES = {5861, 5862, 5863, 5864}
 
@@ -189,16 +184,12 @@ def test_issue_5864_runtime_builder_registration_is_explicit_and_helper_ratio_im
     ).read_text(encoding="utf-8")
 
     assert REGISTRY_MANIFEST.exists()
-    assert CONFIG_ACCESS_LOADERS.exists()
+    assert CONFIG_ACCESS.exists()
     assert "registry_manifest import PUBLIC_LAZY_EXPORTS" in init_source
     assert (
         ROOT
         / "tests/unit/composition/runtime_builders/test_runtime_builder_registry_manifest.py"
     ).exists()
-    assert (
-        family["helper_function_ratio"]
-        <= closeout["metrics"]["runtime_builders_helper_function_ratio"]["opening"]
-    )
     assert (
         family["helper_function_ratio"]
         <= closeout["metrics"]["runtime_builders_helper_function_ratio"]["opening"]

@@ -104,21 +104,23 @@ async def test_periodic_checkpoint_skipped_when_batch_not_flushed() -> None:
 
 def test_resource_bootstrap_uses_providers_scope() -> None:
     """#11222: bootstrap/cleanup register providers without pipeline registry."""
+    from bioetl.composition import _registration
+    from bioetl.composition.bootstrap.cli import storage
+    from bioetl.composition.resources_runtime import get_lifecycle_service
+
+    service = MagicMock()
     with (
-        patch(
-            "bioetl.composition._resource_management.ensure_runtime_registrations"
-        ) as ensure,
-        patch(
-            "bioetl.composition._resource_management.bootstrap_lifecycle_service",
-            return_value=MagicMock(),
-        ),
+        patch.object(_registration, "ensure_providers_loaded") as ensure_providers,
+        patch.object(_registration, "register_all_pipelines") as register_pipelines,
+        patch.object(
+            storage, "bootstrap_lifecycle_service", return_value=service
+        ) as bootstrap,
     ):
-        from bioetl.composition._registration import RuntimeRegistrationScope
-        from bioetl.composition.resources_runtime import get_lifecycle_service
+        assert get_lifecycle_service() is service
 
-        get_lifecycle_service()
-
-    ensure.assert_called_once_with(scope=RuntimeRegistrationScope.PROVIDERS)
+    ensure_providers.assert_called_once_with()
+    register_pipelines.assert_not_called()
+    bootstrap.assert_called_once_with()
 
 
 def test_require_input_snapshots_strict_gate() -> None:

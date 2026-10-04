@@ -15,7 +15,7 @@ from bioetl.composition.pipeline_runner_request import (
 )
 from bioetl.composition.providers import ensure_providers_loaded
 from bioetl.composition.registry_api import PipelineRegistry, create_registry
-from bioetl.composition.runtime_builders._runner_control_plane_artifact_policy import (
+from bioetl.domain.control_plane.artifact_publication_policy import (
     validate_artifact_recorder_attachment as _validate_artifact_recorder_attachment,
 )
 from bioetl.composition.runtime_builders.ledger_collaborator import (

@@ -155,6 +155,41 @@ def _forbidden_selector_labels(expr: str) -> set[str]:
     return labels
 
 
+def _forbidden_promql_identifiers(expr: str) -> set[str]:
+    """Inspect identifiers and label-name arguments, not URL template contents."""
+
+    def retain_label_name(match: re.Match[str]) -> str:
+        value = match.group(0)[1:-1]
+        return value if value in FORBIDDEN_PROM_LABELS else ""
+
+    identifiers = re.sub(r'"(?:\\.|[^"\\])*"', retain_label_name, expr)
+    return {
+        token
+        for token in FORBIDDEN_PROM_LABELS
+        if re.search(rf"\b{re.escape(token)}\b", identifiers)
+    }
+
+
+@pytest.mark.parametrize(
+    ("expr", "expected"),
+    [
+        ('metric{run_id="abc"}', {"run_id"}),
+        ("sum by (run_id) (metric)", {"run_id"}),
+        ("metric and on (manifest_id) other", {"manifest_id"}),
+        ('label_replace(metric, "run_id", "$1", "pipeline", "(.*)")', {"run_id"}),
+        ('label_join(metric, "href", "?", "run_id")', {"run_id"}),
+        (
+            'label_replace(metric, "href", "/d/x?${run_id:queryparam}", "pipeline", "(.*)")',
+            set(),
+        ),
+    ],
+)
+def test_forbidden_promql_identifiers_distinguish_url_literals(
+    expr: str, expected: set[str]
+) -> None:
+    assert _forbidden_promql_identifiers(expr) == expected
+
+
 def test_error_catalog_is_machine_readable_stable_and_bounded() -> None:
     payload = _load_yaml(ERROR_CATALOG)
 
@@ -260,9 +295,8 @@ def test_dashboard_and_rule_promql_do_not_use_forbidden_identifier_labels() -> N
         forbidden_labels = _forbidden_selector_labels(expr)
         if forbidden_labels:
             offenders.append(f"{source}::{title}: {sorted(forbidden_labels)}")
-        for token in FORBIDDEN_PROM_LABELS:
-            if re.search(rf"\b{re.escape(token)}\b", expr):
-                offenders.append(f"{source}::{title}: token={token}")
+        for token in _forbidden_promql_identifiers(expr):
+            offenders.append(f"{source}::{title}: token={token}")
 
     assert not offenders, "\n".join(offenders[:40])
 

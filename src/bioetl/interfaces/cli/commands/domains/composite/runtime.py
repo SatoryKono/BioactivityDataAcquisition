@@ -29,6 +29,7 @@ class CompositeRuntimeCliInput:
     cached_bronze_enrichers: bool | None = None
     cached_bronze_dependencies: bool = False
     required_persistence_profile: str | None = None
+    replay_of_manifest_id: str | None = None
 
 
 def parse_enrich_only(enrich_only: str | None) -> tuple[str, ...] | None:
@@ -92,6 +93,8 @@ def build_runtime_config(
         cached_bronze_enrichers=resolved.cached_bronze_enrichers,
         cached_bronze_dependencies=resolved.cached_bronze_dependencies,
         required_persistence_profile=resolved.required_persistence_profile,
+        replay_of_manifest_id=resolved.replay_of_manifest_id,
+        exact_replay=resolved.replay_of_manifest_id is not None,
     )
 
 
@@ -113,6 +116,7 @@ def _build_overridden_cli_input(
         "cached_bronze_enrichers",
         "cached_bronze_dependencies",
         "required_persistence_profile",
+        "replay_of_manifest_id",
     }
     unknown = sorted(set(overrides) - allowed)
     if unknown:
@@ -120,6 +124,10 @@ def _build_overridden_cli_input(
             "Unknown composite runtime override keys: " + ", ".join(unknown)
         )
     return CompositeRuntimeCliInput(
+        replay_of_manifest_id=cast(
+            str | None,
+            overrides.get("replay_of_manifest_id", resolved.replay_of_manifest_id),
+        ),
         resume=cast(bool, overrides.get("resume", resolved.resume)),
         dry_run=cast(bool, overrides.get("dry_run", resolved.dry_run)),
         seed_limit=cast(int | None, overrides.get("seed_limit", resolved.seed_limit)),

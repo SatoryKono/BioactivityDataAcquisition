@@ -37,11 +37,9 @@ from bioetl.application.services.run_reports.observations import (
 from bioetl.application.services.run_reports.writer import write_pipeline_run_report
 from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
-from bioetl.domain.run_reports.context import (
-    get_stage_accounting,
-)
+from bioetl.domain.run_reports.context import get_stage_accounting
 from bioetl.domain.run_reports.models import StageId
-from bioetl.domain.run_reports.pipeline_builder import (
+from bioetl.domain.run_reports.pipeline_assembly import (
     PipelineRunReportOptionalBlocks,
     build_pipeline_run_report,
 )
@@ -172,7 +170,8 @@ def finalize_pipeline_run_report(
         options=options,
         duration=_result_duration_seconds(result),
     )
-    if not (options and options.dry_run):
+    dry_run = bool(options and options.dry_run)
+    if not dry_run:
         ensure_terminal_data_validation_observation(
             status=result.status.value,
             records_gold=result.records_gold,
@@ -194,7 +193,6 @@ def finalize_pipeline_run_report(
             accounting=accounting,
             artifacts=build_artifacts_from_result(result, options=options),
         )
-        reasons = draft.reasons_top_n
         report = build_pipeline_run_report(
             identity=identity,
             metrics=metrics,
@@ -203,8 +201,10 @@ def finalize_pipeline_run_report(
             optional_blocks=PipelineRunReportOptionalBlocks(
                 failure=build_failure_block(result),
                 io=build_io_block(result, options=options),
-                quarantine=build_quarantine_block(result, reasons_top_n=reasons),
-                dq_summary=build_dq_summary(result, reasons_top_n=reasons),
+                quarantine=build_quarantine_block(
+                    result, reasons_top_n=draft.reasons_top_n
+                ),
+                dq_summary=build_dq_summary(result, reasons_top_n=draft.reasons_top_n),
                 schema_versions=build_schema_versions(
                     reason_catalog_version=draft.reason_catalog_version,
                     package_version=package_version,
@@ -215,9 +215,7 @@ def finalize_pipeline_run_report(
         )
         report = replace(
             report,
-            observations={}
-            if options and options.dry_run
-            else dict(run_observations()),
+            observations={} if dry_run else dict(run_observations()),
         )
         written = write_pipeline_run_report(report, root=report_root, store=store)
     except Exception as exc:
@@ -260,10 +258,9 @@ def build_pipeline_run_result(
     store: RunReportStorePort,
 ) -> RunResult:
     """Convert execution outcome to the public RunResult contract."""
-    status = PipelineRunResult(outcome.status)
     metrics = outcome.metrics
     result = RunResult(
-        status=status,
+        status=PipelineRunResult(outcome.status),
         pipeline_name=pipeline_name,
         run_id=str(run_id),
         manifest_id=getattr(runner, "manifest_id", None),
@@ -313,25 +310,28 @@ async def complete_pipeline_dry_run(
 
 
 async def create_execution_runner_audited(
-    create_runner: Callable[[], ExecutionMetricsRunnerPort],
+    create_runner: Callable[[], object],
     *,
-    record_failure: Callable[[Exception], Awaitable[None]],
-) -> ExecutionMetricsRunnerPort:
-    """Create a runner and audit unexpected constructor failures."""
+    record_failure: Callable[[Exception], Awaitable[RunResult]],
+) -> ExecutionMetricsRunnerPort | RunResult:
+    """Validate a runner and audit failures before execution can begin.
+
+    Empty cached-Bronze provenance is a reported failed outcome; unexpected
+    constructor and port-contract failures are audited and re-raised unchanged.
+    Cancellation is not intercepted by this exception boundary.
+    """
     try:
-        return create_runner()
+        runner = create_runner()
+        from bioetl.domain.ports import ExecutionMetricsRunnerPort
+
+        if not isinstance(runner, ExecutionMetricsRunnerPort):
+            raise TypeError("Runner does not implement ExecutionMetricsRunnerPort")
+        return runner
     except Exception as exc:
-        await record_failure(exc)
+        failed_result = await record_failure(exc)
+        if is_empty_cached_bronze_provenance_error(exc):
+            return failed_result
         raise
-
-
-def _require_execution_runner(runner: object) -> ExecutionMetricsRunnerPort:
-    """Validate producer output before pipeline side effects begin."""
-    from bioetl.domain.ports import ExecutionMetricsRunnerPort
-
-    if not isinstance(runner, ExecutionMetricsRunnerPort):
-        raise TypeError("Runner does not implement ExecutionMetricsRunnerPort")
-    return runner
 
 
 def is_empty_cached_bronze_provenance_error(exc: BaseException) -> bool:

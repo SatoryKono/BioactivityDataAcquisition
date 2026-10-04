@@ -22,9 +22,11 @@ from bioetl.domain.ports import ClockPort, ExecutionMetricsRunnerPort, LoggerPor
 
 if TYPE_CHECKING:
     from bioetl.application.composite.checkpoint import CompositeCheckpointState
+    from bioetl.application.composite.key_extractor import KeyExtractorService
 
 
 class _CompositeRunnerStageEnrichmentHostProtocol(Protocol):
+    _key_extractor: KeyExtractorService
     _config: CompositeConfig
     _coordinator: EnrichmentCoordinatorService
     _enricher_runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort]

@@ -63,24 +63,34 @@ def _snapshot_current(details: Mapping[str, object]) -> int | None:
     return value if isinstance(value, int) else None
 
 
+def _has_measured_snapshot(details: Mapping[str, object]) -> bool:
+    """Require the selected version to match the measured version."""
+    if details.get("source_scope") == "all_current":
+        return True
+    if details.get("reconciliation_mode") != "selected-snapshot":
+        return False
+    snapshots = details.get("selected_snapshots")
+    measured = details.get("source_snapshot")
+    if not isinstance(snapshots, Mapping) or not isinstance(measured, Mapping):
+        return False
+    selected = snapshots.get(f"gold:{details.get('source_table')}")
+    return _same_snapshot_version(selected, measured)
+
+
+def _same_snapshot_version(selected: object, measured: Mapping[str, object]) -> bool:
+    """Compare only mapping-backed snapshot versions."""
+    return isinstance(selected, Mapping) and selected.get("version") == measured.get(
+        "version"
+    )
+
+
 def _measured_current(
     row: WorkflowExecutionRow, details: Mapping[str, object]
 ) -> int | None:
     if row.status.lower() not in _SUCCESS or details.get("dry_run"):
         return None
-    if details.get("source_scope") != "all_current":
-        if details.get("reconciliation_mode") != "selected-snapshot":
-            return None
-        snapshots = details.get("selected_snapshots")
-        measured = details.get("source_snapshot")
-        identity = f"gold:{details.get('source_table')}"
-        if not isinstance(snapshots, Mapping) or not isinstance(measured, Mapping):
-            return None
-        selected = snapshots.get(identity)
-        if not isinstance(selected, Mapping) or selected.get("version") != measured.get(
-            "version"
-        ):
-            return None
+    if not _has_measured_snapshot(details):
+        return None
     if details.get("mutation_mode") not in {"gold_scd2_expiry", "no_op"}:
         return None
     return _snapshot_current(details)

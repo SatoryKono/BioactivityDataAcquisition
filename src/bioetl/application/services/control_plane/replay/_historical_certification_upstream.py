@@ -9,11 +9,15 @@ from typing import Protocol
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 
-__all__ = [
+CERTIFICATION_SHARED_PUBLIC_NAMES: tuple[str, ...] = (
     "DiagnosticsSummaryBuilder",
     "HistoricalReplayCertificationProtocol",
     "HistoricalReplayCertificationResult",
     "HistoricalReplayCertificationResultAssembler",
+)
+
+__all__ = [
+    *CERTIFICATION_SHARED_PUBLIC_NAMES,
     "_source_key",
     "load_upstream_manifest",
     "validate_upstream_certification_state",

@@ -22,6 +22,9 @@ import runpy
 import sys
 
 
+from tests.architecture._platform_skip_support import mounted_worktree_skip_reason
+
+
 pytestmark = pytest.mark.architecture
 
 
@@ -95,16 +98,8 @@ def test_nightly_workflow_regenerates_dependency_map() -> None:
 def test_dependency_map_drift_check_passes_current_repo(
     monkeypatch,
 ) -> None:
-    # Skip on WSL and Windows due to filesystem performance causing dependency map generation timeout
-
-    if sys.platform.startswith("win"):
-        pytest.skip("Skipped on Windows due to filesystem performance")
-    try:
-        with open("/proc/version") as f:
-            if "microsoft" in f.read().lower():
-                pytest.skip("Skipped on WSL due to filesystem performance")
-    except OSError:
-        pass
+    if reason := mounted_worktree_skip_reason():
+        pytest.skip(reason)
 
     script_globals = runpy.run_path(
         "scripts/engineering/qa/generate_architecture_dependency_map.py",
