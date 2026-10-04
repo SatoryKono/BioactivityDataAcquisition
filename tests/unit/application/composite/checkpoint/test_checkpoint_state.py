@@ -815,6 +815,34 @@ class TestFromDict:
         assert state.input_snapshot_fingerprint == ""
         assert state.contract_version == ""
 
+    def test_extra_fields_are_ignored(self) -> None:
+        """from_dict ignores unknown fields in the dictionary (forward compat)."""
+        data = {
+            "composite_name": "c",
+            "run_id": "r",
+            "unknown_future_field": "some_value",
+            "another_extra_field": {"nested": True},
+        }
+        state = CompositeCheckpointState.from_dict(data)
+        assert state.composite_name == "c"
+        assert state.run_id == "r"
+
+    def test_null_values_for_optional_fields(self) -> None:
+        """from_dict handles explicit None values for fields gracefully."""
+        data = {
+            "composite_name": "c",
+            "run_id": "r",
+            "effective_config_hash": None,
+            "last_event_id": None,
+            "last_event_occurred_at": None,
+            "seed_result": None,
+        }
+        state = CompositeCheckpointState.from_dict(data)
+        assert state.effective_config_hash == ""
+        assert state.last_event_id is None
+        assert state.last_event_occurred_at is None
+        assert state.seed_result is None
+
     def test_runtime_anchors_are_normalized_during_round_trip(self) -> None:
         """Checkpoint serialization/deserialization canonicalizes runtime anchors."""
         effective_config_hash = " SHA256:" + ("ABCDEF12" * 8) + " "
