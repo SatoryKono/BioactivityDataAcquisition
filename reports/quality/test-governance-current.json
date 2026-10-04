@@ -33,6 +33,13 @@
   "assertion_branch_reachability_percent": 100.0,
   "assertless_candidates": [
     {
+      "category": "architecture_helper_guard",
+      "line": "1014",
+      "path": "tests/architecture/test_strict_architecture_contracts.py",
+      "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
+      "test_name": "test_schema_entity_alignment_strict_assertion_prevents_hiding_missing_fields"
+    },
+    {
       "category": "intentional_no_exception_contract",
       "line": "84",
       "path": "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py",
@@ -615,13 +622,14 @@
     }
   ],
   "assertless_category_counts": {
-    "architecture_helper_guard": 0,
+    "architecture_helper_guard": 1,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
     "intentional_no_exception_contract": 83,
     "weak_no_value": 0
   },
   "assertless_examples": [
+    "tests/architecture/test_strict_architecture_contracts.py:1014",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
     "tests/integration/infrastructure/storage/test_delta_reader.py:586",
     "tests/unit/application/test_issue_10518_app_leftovers_branches.py:100",
@@ -645,10 +653,15 @@
     "tests/unit/composition/test_observability_contract.py:421",
     "tests/unit/composition/test_observability_contract.py:431",
     "tests/unit/composition/factories/storage/test_health_mixin.py:72",
-    "tests/unit/composition/factories/storage/test_health_mixin.py:103",
-    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:617"
+    "tests/unit/composition/factories/storage/test_health_mixin.py:103"
   ],
   "assertless_families": {
+    "tests/architecture/test_strict_architecture_contracts.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "architecture_helper_guard": 1
+      }
+    },
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py": {
       "assertless_tests": 1,
       "categories": {
@@ -980,7 +993,7 @@
       }
     }
   },
-  "assertless_total_candidates": 83,
+  "assertless_total_candidates": 84,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -1202,6 +1215,13 @@
     },
     "assertion_branch_reachability_percent": 100.0,
     "assertless_candidates": [
+      {
+        "category": "architecture_helper_guard",
+        "line": "1014",
+        "path": "tests/architecture/test_strict_architecture_contracts.py",
+        "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
+        "test_name": "test_schema_entity_alignment_strict_assertion_prevents_hiding_missing_fields"
+      },
       {
         "category": "intentional_no_exception_contract",
         "line": "84",
@@ -1785,13 +1805,14 @@
       }
     ],
     "assertless_category_counts": {
-      "architecture_helper_guard": 0,
+      "architecture_helper_guard": 1,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
       "intentional_no_exception_contract": 83,
       "weak_no_value": 0
     },
     "assertless_examples": [
+      "tests/architecture/test_strict_architecture_contracts.py:1014",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
       "tests/integration/infrastructure/storage/test_delta_reader.py:586",
       "tests/unit/application/test_issue_10518_app_leftovers_branches.py:100",
@@ -1815,10 +1836,9 @@
       "tests/unit/composition/test_observability_contract.py:421",
       "tests/unit/composition/test_observability_contract.py:431",
       "tests/unit/composition/factories/storage/test_health_mixin.py:72",
-      "tests/unit/composition/factories/storage/test_health_mixin.py:103",
-      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:617"
+      "tests/unit/composition/factories/storage/test_health_mixin.py:103"
     ],
-    "assertless_total_candidates": 83,
+    "assertless_total_candidates": 84,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -2053,15 +2073,15 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3003,
-    "total_test_functions": 29319,
+    "total_test_functions": 29320,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "77c9731a4024096fcafda645ab963c0a1f519143073c5e6e9889428a20daba2e",
+  "source_tree_sha256": "aeeeedd279f255279095b611ce6e5437d38d93be21428db4a0c625afac7e71bd",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 83,
+    "assertless_total_candidates": 84,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
@@ -2121,7 +2141,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3003,
-  "total_test_functions": 29319,
+  "total_test_functions": 29320,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
