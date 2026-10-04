@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "17f16934030345e14ea024d327a1b991f0dd361c9e5c10599290e9c98da7bd1e",
-      "limit": "17f16934030345e14ea024d327a1b991f0dd361c9e5c10599290e9c98da7bd1e",
+      "current": "35e6c64feb908c611bdb125ccb2a71a5ff692e0fcf32341032b0c17aec6c21f0",
+      "limit": "35e6c64feb908c611bdb125ccb2a71a5ff692e0fcf32341032b0c17aec6c21f0",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -57,13 +57,13 @@
     {
       "current": {
         "source_module_count": 2563,
-        "source_tree_sha256": "17f16934030345e14ea024d327a1b991f0dd361c9e5c10599290e9c98da7bd1e",
+        "source_tree_sha256": "35e6c64feb908c611bdb125ccb2a71a5ff692e0fcf32341032b0c17aec6c21f0",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2563,
-        "source_tree_sha256": "17f16934030345e14ea024d327a1b991f0dd361c9e5c10599290e9c98da7bd1e",
+        "source_tree_sha256": "35e6c64feb908c611bdb125ccb2a71a5ff692e0fcf32341032b0c17aec6c21f0",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -379,7 +379,7 @@
       "status": "pass"
     },
     {
-      "current": 17,
+      "current": 18,
       "limit": 21,
       "metric": "generated_at_age_days",
       "name": "observability_release_review_freshness",
@@ -415,7 +415,7 @@
       "status": "pass"
     },
     {
-      "current": "18d6c181b4b32bd93751298ecba2be4225d778ede047e0782040449b614b9499",
+      "current": "317e152ec20c259f7fc323b644693c5e48aa6ab1a879cdf7343d839d72e26d6e",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -472,7 +472,7 @@
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 9.36,
+    "architecture_quality_scorecard_integral_score": 9.47,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
     "fail_count": 0,
     "failing_gates": [],
