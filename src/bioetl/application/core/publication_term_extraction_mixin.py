@@ -75,7 +75,7 @@ def _cap_filter_ids(
     if filter_ids is None or pub_limit is None:
         return filter_ids, pub_limit
     ids = filter_ids[:pub_limit]
-    return ids, len(ids) if pub_limit is None else min(pub_limit, len(ids))
+    return ids, len(ids)
 
 
 class PublicationTermExtractionHost(Protocol):
