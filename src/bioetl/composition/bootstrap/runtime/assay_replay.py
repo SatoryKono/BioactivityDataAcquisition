@@ -55,6 +55,9 @@ from bioetl.composition.bootstrap.runtime.composite_replay_context import (
 )
 
 
+_FIELD_GROUPS_FILE = "field-groups.json"
+
+
 async def _verify_outputs(
     root: Path,
     output_reader: DeltaReader,
@@ -158,10 +161,10 @@ async def replay_assay(
             delta_reader=reader,
             field_group_registry=restore_field_groups(
                 load_verified_json(
-                    root, "field-groups.json", objects["field-groups.json"]
+                    root, _FIELD_GROUPS_FILE, objects[_FIELD_GROUPS_FILE]
                 )
             )
-            if "field-groups.json" in objects
+            if _FIELD_GROUPS_FILE in objects
             else None,
             cross_validator=EnrichmentCrossValidator(
                 config=config.cross_validation, logger=logger

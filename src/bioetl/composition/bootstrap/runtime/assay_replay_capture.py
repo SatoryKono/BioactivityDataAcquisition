@@ -6,6 +6,7 @@ from collections.abc import Awaitable, Callable
 from dataclasses import replace
 from pathlib import Path
 from uuid import UUID
+from typing import override
 
 
 from bioetl.application.composite.merger_orchestration import (
@@ -39,11 +40,13 @@ from bioetl.composition.bootstrap.runtime.composite_replay_context import (
     output_table_name,
 )
 
+
+_DEPENDENCY_LOCK_FILE = "uv.lock"
 MergeExecutor = Callable[[MergeExecutionRequest], Awaitable[MergeResult]]
 MergeHook = Callable[[MergeExecutionRequest, MergeExecutor], Awaitable[MergeResult]]
 
 
-class RequestReader:
+class RequestReader(DeltaReaderPort):
     def __init__(self, captures: dict[str, CompositeInputCapture]) -> None:
         self._captures = captures
 
@@ -64,6 +67,7 @@ class RequestReader:
     async def table_exists(self, table_path: str) -> bool:
         return await self._captures["active"].table_exists(table_path)
 
+    @override
     async def aclose(self) -> None:
         return None
 
@@ -105,8 +109,8 @@ def prepare_assay_replay(
             for path in (root / "inputs").iterdir()
         }
         objects["config.json"] = publish_json(root, "config.json", config.to_dict())
-        objects["uv.lock"] = publish_bytes(
-            root, "uv.lock", Path("uv.lock").read_bytes()
+        objects[_DEPENDENCY_LOCK_FILE] = publish_bytes(
+            root, _DEPENDENCY_LOCK_FILE, Path(_DEPENDENCY_LOCK_FILE).read_bytes()
         )
         objects["pipeline-settings.json"] = publish_json(
             root, "pipeline-settings.json", settings.pipeline.model_dump(mode="json")

@@ -14,6 +14,10 @@ from bioetl.infrastructure.storage.composite_replay_bundle import (
 )
 
 
+_PARENT_ENVELOPE_FILE = "parent.json"
+_VERIFICATION_RECEIPT_FILE = "verification/verification.json"
+
+
 def replay_artifacts(
     root: Path | None, pipeline: str, run_id: str
 ) -> tuple[JsonDict, ...]:
@@ -21,18 +25,18 @@ def replay_artifacts(
     if root is None or pipeline not in SUPPORTED_COMPOSITES:
         return ()
     replay = root / "pipeline" / pipeline / run_id / "replay"
-    parent = replay / "parent.json"
+    parent = replay / _PARENT_ENVELOPE_FILE
     receipt_path = replay / "verification" / "verification.json"
     if not parent.is_file() or not receipt_path.is_file():
         return ()
     envelope_hash = digest_bytes(parent.read_bytes())
     envelope = verify_bundle(replay, envelope_hash)
     receipt_hash = digest_bytes(receipt_path.read_bytes())
-    receipt = load_verified_json(replay, "verification/verification.json", receipt_hash)
+    receipt = load_verified_json(replay, _VERIFICATION_RECEIPT_FILE, receipt_hash)
     _verify_receipt(replay, envelope_hash, run_id, receipt)
     references = {
-        "parent.json": envelope_hash,
-        "verification/verification.json": receipt_hash,
+        _PARENT_ENVELOPE_FILE: envelope_hash,
+        _VERIFICATION_RECEIPT_FILE: receipt_hash,
         **envelope["objects"],
         **{
             f"verification/{name}": digest
@@ -42,7 +46,7 @@ def replay_artifacts(
     return tuple(
         {
             "kind": "composite_exact_replay"
-            if name == "parent.json"
+            if name == _PARENT_ENVELOPE_FILE
             else "composite_replay_object",
             "ref": f"replay/{name}",
             "sha256": digest,
@@ -114,7 +118,7 @@ def project_assay_replay(
         if len(receipts) != 1:
             raise ValueError("assay_replay_verification_missing")
         receipt = load_verified_json(
-            root, "verification/verification.json", receipts[0]["sha256"]
+            root, _VERIFICATION_RECEIPT_FILE, receipts[0]["sha256"]
         )
         _verify_receipt(root, envelope_hash, run_id, receipt)
         upgraded = {

@@ -15,6 +15,7 @@ from bioetl.interfaces.http._forensic_request_budget import (
     request_deadline_exceeded,
 )
 
+_PIPELINE_REPORT_FILE = "pipeline-run-report.json"
 _SELF_REPORT_KINDS = frozenset(
     {
         "pipeline_run_report_json",
@@ -24,7 +25,7 @@ _SELF_REPORT_KINDS = frozenset(
     }
 )
 _SELF_REPORT_FILENAMES = {
-    "pipeline_run_report_json": "pipeline-run-report.json",
+    "pipeline_run_report_json": _PIPELINE_REPORT_FILE,
     "pipeline_run_report_md": "pipeline-run-report.md",
     "workflow_run_report_json": "workflow-run-report.json",
     "workflow_run_report_md": "workflow-run-report.md",
@@ -80,7 +81,7 @@ def _probe_composite_child(item: Mapping[str, object], root: Path) -> str:
     ):
         return "child_identity_invalid"
     tree = root.parents[1]
-    expected = tree / str(pipeline) / str(run_id) / "pipeline-run-report.json"
+    expected = tree / str(pipeline) / str(run_id) / _PIPELINE_REPORT_FILE
     candidate = expected.resolve()
     raw = item.get("ref")
     portable = f"pipeline/{pipeline}/{run_id}/pipeline-run-report.json"
@@ -149,7 +150,7 @@ def _child_path(
     parts = PurePosixPath(reference.replace("\\", "/")).parts
     if ".." in parts:
         return None, "artifact_path_escape"
-    suffix = ("pipeline", str(pipeline), str(run_id), "pipeline-run-report.json")
+    suffix = ("pipeline", str(pipeline), str(run_id), _PIPELINE_REPORT_FILE)
     if tuple(parts[-4:]) != suffix or root.parent.parent.name != "pipeline":
         return None, "artifact_record_invalid"
     catalog = root.parent.parent.resolve()

@@ -10,6 +10,7 @@ import asyncio
 import hashlib
 import json
 from pathlib import Path
+from typing import override
 
 import pyarrow as pa
 
@@ -122,7 +123,7 @@ class CompositeInputCapture:
         return _digest(envelope)
 
 
-class CompositeReplayInputReader:
+class CompositeReplayInputReader(DeltaReaderPort):
     """Read verified inputs with no live reader or datasource dependency."""
 
     def __init__(self, root: Path, *, envelope_sha256: str) -> None:
@@ -152,6 +153,7 @@ class CompositeReplayInputReader:
         if not required or not set(required).issubset(self._tables):
             raise ValueError("composite_required_input_missing")
 
+    @override
     async def read_table(
         self,
         table_path: str,
@@ -178,6 +180,7 @@ class CompositeReplayInputReader:
         assert isinstance(table, pa.Table)
         return int(table.num_rows)
 
+    @override
     async def table_exists(self, table_path: str) -> bool:
         """Check only the sealed inventory."""
         return table_path in self._tables

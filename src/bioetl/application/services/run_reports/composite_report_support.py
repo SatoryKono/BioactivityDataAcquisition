@@ -22,6 +22,8 @@ from bioetl.domain.run_reports.models import (
 )
 from bioetl.domain.run_reports.reason_catalog_data import default_reason_catalog
 
+_DATA_QUALITY_DOMAIN = "Data Quality"
+
 
 def completion_status(
     status: str, result: CompositeResult | None, provider_warnings: tuple[str, ...]
@@ -74,11 +76,11 @@ def record_stage_quality(
     failures = [child.run_id for child in children if not child.is_success]
     if not result.had_warnings and not failures:
         return
-    evidence = run_observations().get("Data Quality", {})
+    evidence = run_observations().get(_DATA_QUALITY_DOMAIN, {})
     verdict = str(evidence.get("verdict", "WARN"))
     facts = evidence.get("facts", {})
     record_run_observation(
-        "Data Quality",
+        _DATA_QUALITY_DOMAIN,
         verdict=verdict if verdict in {"ERROR", "INCOMPLETE", "UNKNOWN"} else "WARN",
         reason="composite_partial_stage_execution",
         facts={
@@ -174,6 +176,6 @@ def assess_result(
         or any(not child.is_success for child in children)
         or any(
             run_observations().get(domain, {}).get("verdict") not in {"OK", "N/A"}
-            for domain in ("Provider", "Data Quality")
+            for domain in ("Provider", _DATA_QUALITY_DOMAIN)
         ),
     )
