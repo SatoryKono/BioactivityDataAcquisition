@@ -2263,6 +2263,7 @@
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/RULES.md",
+        "docs/04-reference/cli.md",
         "src/bioetl/composition/bootstrap/runtime/assay_replay.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/integration/composite/test_assay_snapshot_merge_replay.py",
