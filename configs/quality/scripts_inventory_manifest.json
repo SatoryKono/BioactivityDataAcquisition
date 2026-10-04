@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-04T16:47:47.478078+00:00",
+  "generated_at": "2026-10-04T18:11:19.105142+00:00",
   "summary": {
     "total_scripts": 636,
     "status_counts": {
@@ -10057,7 +10057,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
@@ -10076,6 +10076,12 @@
           "line": 12,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.local_test_telemetry import ("
+        },
+        {
+          "path": "tests/unit/scripts/ci/test_local_test_telemetry.py",
+          "line": 288,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.local_test_telemetry import _measurement_file"
         }
       ],
       "owner": "@bioetl-quality",
@@ -10356,7 +10362,7 @@
         },
         {
           "path": "scripts/engineering/ci/local_test_telemetry.py",
-          "line": 173,
+          "line": 196,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.update_test_telemetry_baseline import ("
         },
@@ -16212,7 +16218,7 @@
         },
         {
           "path": "scripts/engineering/ci/local_test_telemetry.py",
-          "line": 177,
+          "line": 200,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.report_module_coverage_inventory import ("
         },
@@ -16895,13 +16901,13 @@
       "references": [
         {
           "path": "scripts/engineering/ci/local_test_telemetry.py",
-          "line": 70,
+          "line": 128,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.run_local_coverage_verify import SHARDS"
         },
         {
           "path": "scripts/engineering/ci/local_test_telemetry.py",
-          "line": 102,
+          "line": 146,
           "source_group": "scripts",
           "text": "payload.get(\"producer\") != \"run_local_coverage_verify.py\""
         },

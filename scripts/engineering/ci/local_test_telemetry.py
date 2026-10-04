@@ -45,14 +45,72 @@ def _measurement_file(raw_path: object, *, measurement_root: Path) -> Path:
         raise ValueError(
             "Local measurement XML must remain within its manifest directory"
         )
-    resolved = candidate.resolve(strict=True)
-    if not resolved.is_relative_to(measurement_root) or resolved.suffix != ".xml":
+    # Resolve without requiring existence: a missing external symlink target
+    # must be rejected by the same boundary check as an existing one.
+    try:
+        resolved = candidate.resolve(strict=False)
+        resolved.relative_to(measurement_root)
+    except (OSError, ValueError):
+        raise ValueError(
+            "Local measurement XML must remain within its manifest directory"
+        ) from None
+    if resolved.suffix != ".xml":
         raise ValueError(
             "Local measurement XML must remain within its manifest directory"
         )
     if not resolved.is_file():
         raise ValueError("Local measurement XML must be a regular file")
     return resolved
+
+
+def _validate_measurement_timestamps(payload: dict[str, Any]) -> None:
+    """Validate capture timestamps before publishing measurement evidence."""
+    try:
+        started = datetime.fromisoformat(payload["started_at_utc"])
+        finished = datetime.fromisoformat(payload["finished_at_utc"])
+    except (KeyError, TypeError, ValueError) as error:
+        raise ValueError(
+            "Local measurement requires valid start/completion timestamps"
+        ) from error
+    if (
+        started.tzinfo is None
+        or finished.tzinfo is None
+        or not (started <= finished <= datetime.now(UTC))
+    ):
+        raise ValueError(
+            "Local measurement timestamps must be ordered and not in the future"
+        )
+
+
+def _collect_shard_telemetry(
+    payload: dict[str, Any], *, measurement_root: Path
+) -> tuple[list[Path], dict[str, float], dict[str, int]]:
+    """Validate every shard before accumulating case counts and durations."""
+    junit_paths = []
+    durations = {}
+    counts = {"passed": 0, "skipped": 0}
+    for row in payload["shards"]:
+        path = _measurement_file(row["junit_file"], measurement_root=measurement_root)
+        if row["exit_code"] != 0 or not re.fullmatch(
+            r"[0-9a-f]{64}", str(row.get("coverage_sha256", ""))
+        ):
+            raise ValueError("Local shard failed or has no coverage evidence")
+        if junit_telemetry_sha256(path) != row.get("junit_telemetry_sha256"):
+            raise ValueError("Local JUnit telemetry digest mismatch")
+        cases = list(ElementTree.parse(path).getroot().iter("testcase"))
+        if not cases or any(
+            case.find("failure") is not None or case.find("error") is not None
+            for case in cases
+        ):
+            raise ValueError("Local JUnit has failures, errors or no test cases")
+        skipped = sum(case.find("skipped") is not None for case in cases)
+        counts["skipped"] += skipped
+        counts["passed"] += len(cases) - skipped
+        durations[path.name] = round(
+            sum(float(case.get("time", "0")) for case in cases), 3
+        )
+        junit_paths.append(path)
+    return junit_paths, durations, counts
 
 
 def validate_local_measurement(
@@ -79,21 +137,7 @@ def validate_local_measurement(
         raise ValueError("Local measurement manifest must remain within the repository")
     measurement_root = manifest_path.parent
     payload = json.loads(manifest_path.read_text(encoding="utf-8"))
-    try:
-        started = datetime.fromisoformat(payload["started_at_utc"])
-        finished = datetime.fromisoformat(payload["finished_at_utc"])
-    except (KeyError, TypeError, ValueError) as error:
-        raise ValueError(
-            "Local measurement requires valid start/completion timestamps"
-        ) from error
-    if (
-        started.tzinfo is None
-        or finished.tzinfo is None
-        or not (started <= finished <= datetime.now(UTC))
-    ):
-        raise ValueError(
-            "Local measurement timestamps must be ordered and not in the future"
-        )
+    _validate_measurement_timestamps(payload)
     branch = str(payload.get("source_branch", ""))
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/-]*", branch) or ".." in branch:
         raise ValueError("Local measurement requires a valid source branch")
@@ -134,30 +178,9 @@ def validate_local_measurement(
         percent = round(float(coverage.attrib[attribute]) * 100, 2)
         if percent < 85 or percent != payload[field]:
             raise ValueError("Local coverage thresholds or manifest values mismatch")
-    junit_paths = []
-    durations = {}
-    counts = {"passed": 0, "skipped": 0}
-    for row in payload["shards"]:
-        path = _measurement_file(row["junit_file"], measurement_root=measurement_root)
-        if row["exit_code"] != 0 or not re.fullmatch(
-            r"[0-9a-f]{64}", str(row.get("coverage_sha256", ""))
-        ):
-            raise ValueError("Local shard failed or has no coverage evidence")
-        if junit_telemetry_sha256(path) != row.get("junit_telemetry_sha256"):
-            raise ValueError("Local JUnit telemetry digest mismatch")
-        cases = list(ElementTree.parse(path).getroot().iter("testcase"))
-        if not cases or any(
-            case.find("failure") is not None or case.find("error") is not None
-            for case in cases
-        ):
-            raise ValueError("Local JUnit has failures, errors or no test cases")
-        skipped = sum(case.find("skipped") is not None for case in cases)
-        counts["skipped"] += skipped
-        counts["passed"] += len(cases) - skipped
-        durations[path.name] = round(
-            sum(float(case.get("time", "0")) for case in cases), 3
-        )
-        junit_paths.append(path)
+    junit_paths, durations, counts = _collect_shard_telemetry(
+        payload, measurement_root=measurement_root
+    )
     return {
         "manifest": payload,
         "junit_paths": junit_paths,
