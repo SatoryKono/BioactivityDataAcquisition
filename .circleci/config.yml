@@ -13,7 +13,7 @@ version: 2.1
 parameters:
   ci-lane:
     type: enum
-    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance]
+    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness]
     default: pr-gate
   include-hypothesis:
     type: boolean
@@ -77,6 +77,84 @@ commands:
             fi
 
 jobs:
+  replay-parity:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    environment:
+      BIOETL_TEST_MODE: "true"
+      BIOETL_PIPELINE__HEALTH_CHECK_MODE: probe
+      OPENBLAS_NUM_THREADS: "1"
+      POLARS_MAX_THREADS: "2"
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+      - run:
+          name: Sync replay dependencies
+          command: uv sync --frozen --all-extras --dev
+      - run:
+          name: Verify replay matrix including independent determinism recheck
+          no_output_timeout: 65m
+          command: |
+            timeout --signal=TERM --kill-after=30s 60m bash -euo pipefail -c 'export PATH="$HOME/.local/bin:$PATH"
+            mkdir -p reports/nightly-replay
+            uv run --frozen --no-build pytest tests/integration/determinism -q \
+              --junitxml=reports/nightly-replay/determinism.xml \
+              --basetemp .artifacts/nightly-replay/determinism/run1
+            uv run --frozen --no-build pytest tests/integration/idempotency -q \
+              --junitxml=reports/nightly-replay/idempotency.xml \
+              --basetemp .artifacts/nightly-replay/idempotency/run1
+            uv run --frozen --no-build pytest tests/integration/composite_resume -q \
+              --junitxml=reports/nightly-replay/composite_resume.xml \
+              --basetemp .artifacts/nightly-replay/composite_resume/run1
+            uv run --frozen --no-build pytest tests/integration/determinism -q \
+              --junitxml=reports/nightly-replay/determinism-recheck.xml \
+              --basetemp .artifacts/nightly-replay/determinism/run2
+            '
+      - run:
+          name: Compare nonempty replay checksum inventories
+          command: |
+            WORKSPACE_ROOT="$PWD"
+            find .artifacts/nightly-replay/determinism/run1 -type f -print -quit | grep -q .
+            find .artifacts/nightly-replay/determinism/run2 -type f -print -quit | grep -q .
+            mkdir -p reports/nightly-replay/checksums
+            find .artifacts/nightly-replay/determinism -type f | sort | xargs sha256sum > reports/nightly-replay/checksums/determinism.sha256
+            find .artifacts/nightly-replay/idempotency -type f | sort | xargs sha256sum > reports/nightly-replay/checksums/idempotency.sha256
+            find .artifacts/nightly-replay/composite_resume -type f | sort | xargs sha256sum > reports/nightly-replay/checksums/composite_resume.sha256
+            (
+              cd .artifacts/nightly-replay/determinism/run1
+              find . -type f -print0 | sort -z | xargs -0 sha256sum
+            ) > "$WORKSPACE_ROOT/reports/nightly-replay/checksums/determinism-run1.sha256"
+            (
+              cd .artifacts/nightly-replay/determinism/run2
+              find . -type f -print0 | sort -z | xargs -0 sha256sum
+            ) > "$WORKSPACE_ROOT/reports/nightly-replay/checksums/determinism-run2.sha256"
+            diff -u reports/nightly-replay/checksums/determinism-run1.sha256 reports/nightly-replay/checksums/determinism-run2.sha256 > reports/nightly-replay/checksums/determinism-replay-diff.txt
+      - store_test_results:
+          path: reports/nightly-replay
+      - store_artifacts:
+          path: reports/nightly-replay
+
+  memory-freshness:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+      - run:
+          name: Check repository memory freshness without notification writes
+          command: |
+            mkdir -p reports/memory
+            uv run --frozen --no-build python -m memory.tooling.check_freshness --json > reports/memory/freshness.json
+      - run:
+          name: Verify freshness contracts
+          command: uv run --frozen --no-build pytest tests/unit/memory/test_check_freshness.py -q -p no:xdist
+      - store_artifacts:
+          path: reports/memory
+
   performance:
     docker:
       - image: cimg/python:3.13
@@ -87,6 +165,7 @@ jobs:
     steps:
       - checkout
       - setup-python-uv:
+          python-version: "3.13"
           extras: "dev tracing performance"
       - run:
           name: Run performance benchmarks with existing budgets
@@ -127,7 +206,8 @@ jobs:
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
       - checkout
-      - setup-python-uv
+      - setup-python-uv:
+          python-version: "3.13"
       - run:
           name: Check episodic retention policy without pruning
           command: |
@@ -145,6 +225,7 @@ jobs:
     steps:
       - checkout
       - setup-python-uv:
+          python-version: "3.13"
           extras: "tests"
       - run:
           name: Verify port adapter and registry contracts
@@ -174,7 +255,8 @@ jobs:
     resource_class: small
     steps:
       - checkout
-      - setup-python-uv
+      - setup-python-uv:
+          python-version: "3.13"
       - run:
           name: Verify runtime mirrors without synchronizing
           command: |
@@ -188,7 +270,8 @@ jobs:
     resource_class: small
     steps:
       - checkout
-      - setup-python-uv
+      - setup-python-uv:
+          python-version: "3.13"
       - run:
           name: Collect read-only GitHub settings evidence
           command: |
@@ -470,6 +553,7 @@ jobs:
             uv run --frozen --no-build python -m scripts.engineering.repo check-cleanup-governance
             uv run --frozen --no-build python -m scripts.engineering.repo check-root-governance-docs
             uv run --frozen --no-build python -m scripts.engineering.repo check-root-review-registry
+            uv run --frozen --no-build python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD
 
   # --- Gate: compiled-artifacts (always_required) -------------------------------
   # Mirrors compiled-artifacts-block.yml `no-pyc-check`.
@@ -881,3 +965,17 @@ workflows:
         - equal: [main, << pipeline.git.branch >>]
     jobs:
       - performance
+  replay-parity:
+    when:
+      and:
+        - equal: [replay-parity, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - replay-parity
+  memory-freshness:
+    when:
+      and:
+        - equal: [memory-freshness, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - memory-freshness

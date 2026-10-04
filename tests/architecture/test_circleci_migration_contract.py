@@ -155,6 +155,8 @@ def test_compose_placeholders_are_step_scoped_and_runtime_stays_strict():
     [
         "memory-retention",
         "performance",
+        "replay-parity",
+        "memory-freshness",
         "port-contracts",
         "skills-consistency",
         "github-settings-review",
@@ -274,3 +276,54 @@ def test_performance_gate_rejects_missing_empty_or_failing_evidence(
         [sys.executable, "-c", script], cwd=tmp_path, capture_output=True, check=False
     )
     assert result.returncode == expected
+
+
+@pytest.mark.parametrize("second, expected", [(b"same", 0), (b"changed", 1), (None, 1)])
+def test_replay_checksums_reject_drift_and_empty_runs(tmp_path, second, expected):
+    import shutil
+    import subprocess
+
+    bash = shutil.which("bash")
+    if sys.platform == "win32":
+        import os
+
+        git_bash = (
+            Path(os.environ.get("ProgramFiles", "C:/Program Files"))
+            / "Git/bin/bash.exe"
+        )
+        bash = str(git_bash) if git_bash.is_file() else None
+    if bash is None:
+        pytest.skip("bash is required to execute the Linux CI checksum contract")
+    roots = tmp_path / ".artifacts/nightly-replay"
+    for lane in [
+        "determinism/run1",
+        "determinism/run2",
+        "idempotency",
+        "composite_resume",
+    ]:
+        (roots / lane).mkdir(parents=True)
+    (roots / "determinism/run1/payload.json").write_bytes(b"same")
+    if second is not None:
+        (roots / "determinism/run2/payload.json").write_bytes(second)
+    steps = _config()["jobs"]["replay-parity"]["steps"]
+    command = next(
+        step["run"]["command"]
+        for step in steps
+        if isinstance(step, dict)
+        and step.get("run", {}).get("name")
+        == "Compare nonempty replay checksum inventories"
+    )
+    result = subprocess.run(
+        [bash, "-euo", "pipefail", "-c", command],
+        cwd=tmp_path,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == expected, result.stderr.decode(errors="replace")
+
+
+def test_memory_freshness_preparation_does_not_get_write_context():
+    job = _config()["jobs"]["memory-freshness"]
+    assert "gh issue" not in str(job)
+    assert "issues: write" not in str(job)
+    assert "context" not in str(_config()["workflows"]["memory-freshness"])
