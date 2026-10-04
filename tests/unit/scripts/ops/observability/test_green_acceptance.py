@@ -115,3 +115,365 @@ def test_failed_execution_cannot_be_hidden_by_green_evidence(status):
         {"saved_evidence_status": "OK", "replay_readiness_status": "OK"},
         {"verdict": "OK", "evidence_completeness": "COMPLETE"},
     )
+
+
+@pytest.mark.parametrize("limit", [0, -1, True, "10", 1.5])
+def test_invalid_limit_rejected_before_launch(limit):
+    with pytest.raises(ValueError, match="positive integer"):
+        command(Case("pipeline", "test"), limit)
+
+
+@pytest.mark.parametrize("kind", ["pipeline", "composite", "workflow"])
+@pytest.mark.parametrize("limit", [10, 100])
+def test_explicit_limit_reaches_cli(kind, limit):
+    args = command(Case(kind, "test"), limit)
+    assert args[args.index("--limit") + 1] == str(limit)
+
+
+@pytest.mark.parametrize("error", [OSError("setup failed"), KeyboardInterrupt()])
+def test_setup_failure_and_cancellation_keep_terminal_receipt(
+    tmp_path, monkeypatch, error
+):
+    import json
+    from scripts.ops.observability import green_acceptance as runner
+
+    monkeypatch.setattr(runner, "source_commit", lambda root: "pinned-sha")
+
+    def fail(*args):
+        raise error
+
+    monkeypatch.setattr(runner, "_execute_case", fail)
+    with pytest.raises(type(error)):
+        runner.execute(
+            Case("pipeline", "test"),
+            tmp_path,
+            tmp_path / "reports",
+            tmp_path / "env",
+            limit=10,
+        )
+    result = json.loads((tmp_path / "reports/pipeline-test/result.json").read_text())
+    assert result["passed"] is False
+    assert result["status"] == (
+        "failed" if isinstance(error, Exception) else "interrupted"
+    )
+    assert result["started_at"] <= result["finished_at"]
+    assert result["source_commit"] == result["source_commit_after"] == "pinned-sha"
+    assert result["limit"] == 10
+
+
+def test_changed_source_fails_otherwise_successful_case(tmp_path, monkeypatch):
+    import json
+    from scripts.ops.observability import green_acceptance as runner
+
+    commits = iter(["before", "after"])
+    monkeypatch.setattr(runner, "source_commit", lambda root: next(commits))
+    monkeypatch.setattr(runner, "_execute_case", lambda *args: [])
+    failures = runner.execute(
+        Case("pipeline", "test"), tmp_path, tmp_path / "reports", tmp_path / "env"
+    )
+    assert failures == ["source_commit_changed"]
+    result = json.loads((tmp_path / "reports/pipeline-test/result.json").read_text())
+    assert result["passed"] is False
+
+
+def campaign_stubs(monkeypatch):
+    from scripts.ops.observability import green_acceptance as runner
+
+    monkeypatch.setattr(runner, "input_fingerprints", lambda root: {"configs": "fixed"})
+    monkeypatch.delenv("PYTEST_XDIST_WORKER", raising=False)
+    monkeypatch.setattr(runner, "source_commit", lambda root: "pinned-sha")
+    monkeypatch.setattr(
+        runner,
+        "discover",
+        lambda root: tuple(
+            Case("composite", f"composite_{name}") for name in runner.COMPOSITE_ORDER
+        ),
+    )
+    return runner
+
+
+def test_campaign_is_ordered_pinned_and_not_final_acceptance(tmp_path, monkeypatch):
+    import json
+
+    runner = campaign_stubs(monkeypatch)
+    launches = []
+
+    def execute(case, root, output, env_file, **kwargs):
+        assert (root / "reports/quality/green-acceptance.lock").is_file()
+        launches.append((case.name, kwargs))
+        return ["Provider WARN"] if case.name == "composite_assay" else []
+
+    monkeypatch.setattr(runner, "execute", execute)
+    output = tmp_path / "reports/campaign"
+    assert runner.execute_campaign(tmp_path, output, tmp_path / "env") == [
+        "composite-composite_assay:Provider WARN"
+    ]
+    assert [name for name, _ in launches] == [
+        f"composite_{name}" for name in runner.COMPOSITE_ORDER
+    ]
+    assert all(
+        kwargs == {"limit": 10, "expected_source": "pinned-sha"}
+        for _, kwargs in launches
+    )
+    receipt = json.loads((output / "campaign.json").read_text())
+    assert receipt["local_checks_passed"] is False
+    assert receipt["acceptance_status"] == "PENDING_HTTP_AND_OFFLINE_REPLAY"
+    assert not (tmp_path / "reports/quality/green-acceptance.lock").exists()
+    with pytest.raises(FileExistsError):
+        runner.execute_campaign(tmp_path, output, tmp_path / "env")
+    assert len(launches) == 5
+
+
+@pytest.mark.parametrize("error", [KeyboardInterrupt(), OSError("setup")])
+def test_campaign_cancel_records_unstarted_cases_and_releases_lease(
+    tmp_path, monkeypatch, error
+):
+    import json
+
+    runner = campaign_stubs(monkeypatch)
+
+    def interrupt(*args, **kwargs):
+        raise error
+
+    monkeypatch.setattr(runner, "execute", interrupt)
+    output = tmp_path / "reports/campaign"
+    with pytest.raises(type(error)):
+        runner.execute_campaign(tmp_path, output, tmp_path / "env")
+    receipt = json.loads((output / "campaign.json").read_text())
+    expected = "failed" if isinstance(error, Exception) else "interrupted"
+    assert receipt["status"] == expected
+    assert [row["status"] for row in receipt["cases"]] == [expected] + [
+        "not_started"
+    ] * 4
+    assert receipt["local_checks_passed"] is False
+    assert not (tmp_path / "reports/quality/green-acceptance.lock").exists()
+
+
+def test_existing_campaign_lease_is_preserved(tmp_path, monkeypatch):
+    runner = campaign_stubs(monkeypatch)
+    lock = tmp_path / "reports/quality/green-acceptance.lock"
+    lock.parent.mkdir(parents=True)
+    lock.write_text("another-owner")
+    with pytest.raises(FileExistsError):
+        runner.execute_campaign(
+            tmp_path, tmp_path / "reports/campaign", tmp_path / "env"
+        )
+    assert lock.read_text() == "another-owner"
+    assert not (tmp_path / "reports/campaign").exists()
+
+
+@pytest.mark.parametrize("outcome", [0, 7, "timeout", "cancel"])
+def test_launch_receipts_and_owned_process_cleanup(tmp_path, monkeypatch, outcome):
+    import io
+    from unittest.mock import Mock
+    from scripts.ops.observability import green_acceptance as runner
+
+    process = Mock(pid=123, returncode=-9)
+    process.poll.return_value = None
+    if outcome == "timeout":
+        process.wait.side_effect = [runner.subprocess.TimeoutExpired("fake", 12), -9]
+    elif outcome == "cancel":
+        process.wait.side_effect = [KeyboardInterrupt(), -9]
+    else:
+        process.wait.return_value = outcome
+        process.poll.return_value = outcome
+        process.returncode = outcome
+    monkeypatch.setattr(runner.subprocess, "Popen", Mock(return_value=process))
+    terminate = Mock()
+    monkeypatch.setattr(runner.sys, "platform", "win32")
+    monkeypatch.setattr(runner.subprocess, "run", terminate)
+    receipt = {}
+    if outcome == "cancel":
+        with pytest.raises(KeyboardInterrupt):
+            runner.run_launch(
+                ["fake"],
+                tmp_path,
+                {},
+                io.StringIO(),
+                timeout_seconds=12,
+                receipt=receipt,
+            )
+    else:
+        failures = runner.run_launch(
+            ["fake"], tmp_path, {}, io.StringIO(), timeout_seconds=12, receipt=receipt
+        )
+        assert failures == (
+            []
+            if outcome == 0
+            else ["launch_timeout=12s"]
+            if outcome == "timeout"
+            else ["exit_code=7"]
+        )
+    assert receipt["pid"] == 123
+    assert receipt["finished_at"] >= receipt["started_at"]
+    assert (
+        receipt["status"]
+        == {0: "success", 7: "failed", "timeout": "timeout", "cancel": "interrupted"}[
+            outcome
+        ]
+    )
+    if outcome in ("timeout", "cancel"):
+        assert terminate.call_args.args[0] == ["taskkill", "/PID", "123", "/T", "/F"]
+    else:
+        terminate.assert_not_called()
+
+
+def test_launch_creation_error_has_terminal_receipt(tmp_path, monkeypatch):
+    import io
+    from unittest.mock import Mock
+    from scripts.ops.observability import green_acceptance as runner
+
+    monkeypatch.setattr(
+        runner.subprocess, "Popen", Mock(side_effect=OSError("unavailable"))
+    )
+    receipt = {}
+    with pytest.raises(OSError):
+        runner.run_launch(["fake"], tmp_path, {}, io.StringIO(), receipt=receipt)
+    assert receipt["status"] == "failed"
+    assert receipt["error_type"] == "OSError"
+    assert "finished_at" in receipt
+    assert "pid" not in receipt
+
+
+def test_campaign_rejects_xdist_before_reading_source(tmp_path, monkeypatch):
+    runner = campaign_stubs(monkeypatch)
+    monkeypatch.setenv("PYTEST_XDIST_WORKER", "gw0")
+    with pytest.raises(ValueError, match="sequential"):
+        runner.execute_campaign(
+            tmp_path, tmp_path / "reports/campaign", tmp_path / "env"
+        )
+    assert not (tmp_path / "reports").exists()
+
+
+def test_successful_local_campaign_still_requires_external_acceptance(
+    tmp_path, monkeypatch
+):
+    runner = campaign_stubs(monkeypatch)
+    monkeypatch.setattr(runner, "execute", lambda *args, **kwargs: [])
+    output = tmp_path / "reports/campaign"
+    assert runner.execute_campaign(tmp_path, output, tmp_path / "env", limit=10) == []
+    manifest = json.loads((output / "campaign.json").read_text())
+    assert manifest["local_checks_passed"] is True
+    assert manifest["acceptance_status"] == "PENDING_HTTP_AND_OFFLINE_REPLAY"
+
+
+def test_case_uses_copied_configs_and_same_limit_for_prerequisites(
+    tmp_path, monkeypatch
+):
+    from scripts.ops.observability import green_acceptance as runner
+    import dotenv
+
+    (tmp_path / "data/input").mkdir(parents=True)
+    (tmp_path / "configs").mkdir()
+    (tmp_path / "configs/sentinel.yaml").write_text("copied: true")
+    (tmp_path / "uv.lock").write_text("version = 1")
+    monkeypatch.setattr(
+        dotenv,
+        "dotenv_values",
+        lambda path: {"BIOETL_SEMANTICSCHOLAR_API_KEY": "not-used"},
+    )
+    launches = []
+
+    def launch(args, folder, environment, log, **kwargs):
+        assert Path(environment["BIOETL_CONFIGS_ROOT"]) == folder / "configs"
+        assert (Path(environment["BIOETL_CONFIGS_ROOT"]) / "sentinel.yaml").is_file()
+        assert environment["BIOETL_DATA_DIR"] == str(folder / "data")
+        assert environment["BIOETL_SEMANTICSCHOLAR_API_KEY"] == ""
+        launches.append(args)
+        return []
+
+    monkeypatch.setattr(runner, "run_launch", launch)
+    folder = tmp_path / "reports/case"
+    folder.mkdir(parents=True)
+    receipt = {"processes": []}
+    failures = runner._execute_case(
+        Case("pipeline", "downstream", prerequisites=("upstream",)),
+        tmp_path,
+        folder,
+        tmp_path / "unused-env",
+        10,
+        receipt,
+    )
+    assert "pipeline_reports_missing" in failures
+    assert len(launches) == 2
+    assert all(args[args.index("--limit") + 1] == "10" for args in launches)
+    assert receipt["launch_timeout_seconds"] == [1800, 1800]
+
+
+@pytest.mark.parametrize(
+    "branch, dirty",
+    [("main", ""), ("codex/pipeline-green-gates-test", " M src/file.py")],
+)
+def test_source_rejects_unsafe_branch_and_dirty_tree(
+    tmp_path, monkeypatch, branch, dirty
+):
+    from unittest.mock import Mock
+    from scripts.ops.observability import green_acceptance as runner
+
+    monkeypatch.setattr(
+        runner.subprocess, "check_output", Mock(side_effect=[branch, dirty])
+    )
+    with pytest.raises(ValueError):
+        runner.source_commit(tmp_path)
+
+
+def test_outside_output_rejected_before_creation(tmp_path, monkeypatch):
+    from scripts.ops.observability import green_acceptance as runner
+
+    root = tmp_path / "worktree"
+    root.mkdir()
+    monkeypatch.setattr(runner, "source_commit", lambda root: "sha")
+    with pytest.raises(ValueError, match="inside"):
+        runner.execute(
+            Case("pipeline", "test"), root, tmp_path / "outside", tmp_path / "unused"
+        )
+    assert not (tmp_path / "outside").exists()
+
+
+def test_input_fingerprint_binds_file_names_and_content(tmp_path):
+    from scripts.ops.observability import green_acceptance as runner
+
+    (tmp_path / "configs").mkdir()
+    (tmp_path / "data/input").mkdir(parents=True)
+    (tmp_path / "uv.lock").write_text("lock")
+    item = tmp_path / "data/input/ids.csv"
+    item.write_text("one")
+    before = runner.input_fingerprints(tmp_path)
+    item.write_text("two")
+    changed = runner.input_fingerprints(tmp_path)
+    assert before["data/input"] != changed["data/input"]
+    item.rename(item.with_name("other.csv"))
+    assert runner.input_fingerprints(tmp_path)["data/input"] != changed["data/input"]
+    assert before["uv.lock"] == changed["uv.lock"]
+
+
+@pytest.mark.parametrize("defect", [None, "missing", "wrong_run", "failed"])
+def test_composite_child_coverage_binds_config_and_parent(tmp_path, defect):
+    from scripts.ops.observability import green_acceptance as runner
+
+    config = tmp_path / "configs/composites"
+    config.mkdir(parents=True)
+    (config / "assay.yaml").write_text(
+        "composite:\n  seed:\n    pipeline: seed\n  enrichers:\n    - pipeline: optional_child\n      required: false\n"
+    )
+    paths = []
+    for name in ("composite_assay", "seed", "optional_child"):
+        path = tmp_path / "reports/pipeline" / name / "run" / "pipeline-run-report.json"
+        path.parent.mkdir(parents=True)
+        path.write_text("{}")
+        paths.append(path)
+    children = [
+        {"pipeline_name": name, "run_id": "run", "status": "success"}
+        for name in ("seed", "optional_child")
+    ]
+    if defect == "missing":
+        paths.pop()
+    elif defect == "wrong_run":
+        children[1]["run_id"] = "another"
+    elif defect == "failed":
+        children[1]["status"] = "failed"
+    paths[0].write_text(json.dumps({"io": {"child_runs": children}}))
+    failures = runner.composite_report_coverage(
+        Case("composite", "composite_assay"), tmp_path / "configs", paths
+    )
+    assert bool(failures) is (defect is not None)

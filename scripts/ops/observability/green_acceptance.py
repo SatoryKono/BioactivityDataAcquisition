@@ -6,12 +6,15 @@ unsupported replay family or unsuccessful child is accepted as a green run.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shutil
+import signal
 import subprocess
 import sys
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TextIO
 
@@ -85,8 +88,9 @@ def discover(root: Path) -> tuple[Case, ...]:
     return tuple(cases)
 
 
-def command(case: Case) -> list[str]:
+def command(case: Case, limit: int = 1000) -> list[str]:
     """Every actual launch carries the user-required record limit."""
+    validate_limit(limit)
     if case.kind == "workflow":
         args = ["workflow", "run", case.name]
     elif case.kind == "composite":
@@ -104,7 +108,7 @@ def command(case: Case) -> list[str]:
         "bioetl",
         *args,
         "--limit",
-        "1000",
+        str(limit),
         "--required-persistence-profile",
         "degraded_observable",
     ]
@@ -211,26 +215,175 @@ def inspect_pipeline(path: Path, reports: Path, data: Path) -> list[str]:
     ]
 
 
-def execute(case: Case, root: Path, output: Path, env_file: Path) -> list[str]:
-    """Run once into a fresh case directory; persist failures even on process exit."""
-    from dotenv import dotenv_values
+def validate_limit(limit: int) -> None:
+    """Reject accidental booleans, unlimited runs and malformed record limits."""
+    if isinstance(limit, bool) or not isinstance(limit, int) or limit <= 0:
+        raise ValueError("limit must be a positive integer")
 
+
+def source_commit(root: Path) -> str:
+    """Require a committed candidate on an isolated acceptance branch."""
     branch = subprocess.check_output(
         ["git", "branch", "--show-current"], cwd=root, text=True
     ).strip()
-    assert branch.startswith("codex/pipeline-green-gates"), f"Unsafe branch: {branch}"
-    assert not subprocess.check_output(
-        ["git", "status", "--porcelain", "-uno"], cwd=root, text=True
-    ).strip(), "Commit candidate before replay-ready launches"
-    folder = output / case.id
-    assert folder.resolve().is_relative_to(root.resolve()), (
-        "Output must stay inside the isolated worktree"
+    if not branch.startswith("codex/pipeline-green-gates"):
+        raise ValueError(f"Unsafe branch: {branch}")
+    if subprocess.check_output(
+        ["git", "status", "--porcelain"], cwd=root, text=True
+    ).strip():
+        raise ValueError("Commit candidate before replay-ready launches")
+    return subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=root, text=True
+    ).strip()
+
+
+def write_receipt(path: Path, payload: dict) -> None:
+    """Replace only a receipt owned by this new attempt, atomically."""
+    temporary = path.with_suffix(".json.tmp")
+    temporary.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    temporary.replace(path)
+
+
+def input_fingerprints(root: Path) -> dict[str, str]:
+    """Bind all copied inputs by relative name and bytes, without exposing content."""
+    fingerprints = {}
+    for name in ("configs", "data/input", "uv.lock"):
+        path = root / name
+        if not path.exists():
+            raise FileNotFoundError(name)
+        files = sorted(path.rglob("*")) if path.is_dir() else [path]
+        entries = {}
+        for item in files:
+            if item.is_symlink():
+                raise ValueError(
+                    f"Snapshot symlink is unsupported: {item.relative_to(root)}"
+                )
+            if item.is_file():
+                with item.open("rb") as stream:
+                    entries[item.relative_to(root).as_posix()] = hashlib.file_digest(
+                        stream, "sha256"
+                    ).hexdigest()
+        fingerprints[name] = hashlib.sha256(
+            json.dumps(entries, sort_keys=True).encode()
+        ).hexdigest()
+    return fingerprints
+
+
+def composite_report_coverage(
+    case: Case, config_root: Path, paths: list[Path]
+) -> list[str]:
+    """Require exact configured child coverage, including optional enrichers."""
+    config = yaml.safe_load(
+        (
+            config_root / "composites" / f"{case.name.removeprefix('composite_')}.yaml"
+        ).read_text(encoding="utf-8")
+    )["composite"]
+    expected = [
+        config["seed"]["pipeline"],
+        *[row["pipeline"] for row in config.get("dependencies", [])],
+        *[row["pipeline"] for row in config.get("enrichers", [])],
+    ]
+    actual = [path.parent.parent.name for path in paths]
+    failures = []
+    if sorted(actual) != sorted([case.name, *expected]):
+        failures.append("composite_report_coverage_mismatch")
+    parents = [path for path in paths if path.parent.parent.name == case.name]
+    if len(parents) != 1:
+        return failures + ["composite_parent_report_missing_or_ambiguous"]
+    parent = json.loads(parents[0].read_text(encoding="utf-8"))
+    children = parent.get("io", {}).get("child_runs", [])
+    bound = sorted(
+        (row.get("pipeline_name", ""), row.get("run_id", "")) for row in children
     )
+    observed = sorted(
+        (path.parent.parent.name, path.parent.name)
+        for path in paths
+        if path not in parents
+    )
+    if bound != observed or any(row.get("status") != "success" for row in children):
+        failures.append("composite_child_identity_or_status_mismatch")
+    return failures
+
+
+def timestamp() -> str:
+    return datetime.now(UTC).isoformat()
+
+
+def execute(
+    case: Case,
+    root: Path,
+    output: Path,
+    env_file: Path,
+    *,
+    limit: int = 1000,
+    expected_source: str | None = None,
+) -> list[str]:
+    """Run once; retain a terminal receipt for setup errors and cancellation."""
+    validate_limit(limit)
+    source = source_commit(root)
+    if expected_source is not None and source != expected_source:
+        raise ValueError("source_commit_changed")
+    folder = output / case.id
+    if not folder.resolve().is_relative_to(root.resolve()):
+        raise ValueError("Output must stay inside the isolated worktree")
     folder.mkdir(parents=True, exist_ok=False)
+    failures: list[str] = []
+    receipt = {
+        "case": case.id,
+        "command": command(case, limit),
+        "limit": limit,
+        "source_commit": source,
+        "started_at": timestamp(),
+        "status": "running",
+        "passed": False,
+        "failures": failures,
+        "processes": [],
+    }
+    write_receipt(folder / "result.json", receipt)
+    try:
+        failures.extend(_execute_case(case, root, folder, env_file, limit, receipt))
+    except BaseException as exc:
+        failures.append(f"execution_error:{type(exc).__name__}")
+        receipt["status"] = (
+            "interrupted" if not isinstance(exc, Exception) else "failed"
+        )
+        raise
+    finally:
+        try:
+            receipt["source_commit_after"] = source_commit(root)
+            if receipt["source_commit_after"] != source:
+                failures.append("source_commit_changed")
+        except Exception as exc:
+            failures.append(f"source_verification_error:{type(exc).__name__}")
+        if receipt["status"] == "running":
+            receipt["status"] = "failed" if failures else "success"
+        receipt.update(finished_at=timestamp(), passed=not failures)
+        write_receipt(folder / "result.json", receipt)
+    return failures
+
+
+def _execute_case(
+    case: Case,
+    root: Path,
+    folder: Path,
+    env_file: Path,
+    limit: int,
+    receipt: dict,
+) -> list[str]:
+    from dotenv import dotenv_values
+
     data, reports = folder / "data", folder / "reports"
+    inputs_before = input_fingerprints(root)
     shutil.copytree(root / "data/input", data / "input")
     shutil.copytree(root / "configs", folder / "configs")
     shutil.copy2(root / "uv.lock", folder / "uv.lock")
+    receipt["input_fingerprints"] = input_fingerprints(folder)
+    if (
+        receipt["input_fingerprints"] != inputs_before
+        or input_fingerprints(root) != inputs_before
+    ):
+        raise ValueError("input_snapshot_changed_during_copy")
+    write_receipt(folder / "result.json", receipt)
     environment = {
         **os.environ,
         **{
@@ -242,12 +395,13 @@ def execute(case: Case, root: Path, output: Path, env_file: Path) -> list[str]:
     environment.update(
         BIOETL_DATA_DIR=str(data),
         BIOETL_REPORT_ROOT=str(reports),
-        BIOETL_CONFIGS_ROOT=str(root / "configs"),
+        BIOETL_CONFIGS_ROOT=str(folder / "configs"),
         PYTHONPATH=os.pathsep.join([str(root / "src"), str(root)]),
         BIOETL_METRICS_ENABLED="false",
         BIOETL_OBSERVABILITY__METRICS_ENABLED="false",
         BIOETL_OBSERVABILITY__METRICS_SERVER_ENABLED="false",
         BIOETL_PUSHGATEWAY_URL="",
+        BIOETL_SEMANTICSCHOLAR_API_KEY="",
         PYTHONDONTWRITEBYTECODE="1",
         OPENBLAS_NUM_THREADS="1",
         OMP_NUM_THREADS="1",
@@ -260,15 +414,24 @@ def execute(case: Case, root: Path, output: Path, env_file: Path) -> list[str]:
         environment[
             "BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__PLAIN_WRITE_PROCESS_ISOLATION"
         ] = "true"
-    args = command(case)
     failures = []
     launch_cases = [Case("pipeline", name) for name in case.prerequisites] + [case]
-    launches = [command(launch_case) for launch_case in launch_cases]
+    launches = [command(launch_case, limit) for launch_case in launch_cases]
     timeouts = [launch_timeout(launch_case, root) for launch_case in launch_cases]
+    receipt.update(launches=launches, launch_timeout_seconds=timeouts)
     with (folder / "launch.log").open("w", encoding="utf-8") as log:
         for launch, timeout in zip(launches, timeouts, strict=True):
+            process_receipt: dict = {}
+            receipt["processes"].append(process_receipt)
             failures.extend(
-                run_launch(launch, folder, environment, log, timeout_seconds=timeout)
+                run_launch(
+                    launch,
+                    folder,
+                    environment,
+                    log,
+                    timeout_seconds=timeout,
+                    receipt=process_receipt,
+                )
             )
             if failures:
                 break
@@ -290,24 +453,13 @@ def execute(case: Case, root: Path, output: Path, env_file: Path) -> list[str]:
     if case.kind == "workflow":
         failures.extend(inspect_workflow(case, reports, paths))
     failures.extend(inspect_composite_parents(case, data, paths))
-    (folder / "result.json").write_text(
-        json.dumps(
-            {
-                "case": case.id,
-                "command": args,
-                "launches": launches,
-                "launch_timeout_seconds": timeouts,
-                "limit": 1000,
-                "source_commit": subprocess.check_output(
-                    ["git", "rev-parse", "HEAD"], cwd=root, text=True
-                ).strip(),
-                "failures": failures,
-                "passed": not failures,
-            },
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
+    if case.kind == "composite":
+        failures.extend(composite_report_coverage(case, folder / "configs", paths))
+    if (
+        input_fingerprints(folder) != inputs_before
+        or input_fingerprints(root) != inputs_before
+    ):
+        failures.append("input_snapshot_changed_during_execution")
     return failures
 
 
@@ -318,9 +470,12 @@ def run_launch(
     log: TextIO,
     *,
     timeout_seconds: int = 1800,
+    receipt: dict | None = None,
 ) -> list[str]:
-    """Run one bounded launch and terminate its complete Windows process tree."""
-    failures = []
+    """Bound a launch, recording its exit and cleaning up its own process tree."""
+    receipt = receipt if receipt is not None else {}
+    receipt.update(command=args, started_at=timestamp(), status="starting")
+    process = None
     try:
         process = subprocess.Popen(
             args,
@@ -328,23 +483,124 @@ def run_launch(
             env=environment,
             stdout=log,
             stderr=subprocess.STDOUT,
+            start_new_session=sys.platform != "win32",
         )
+        receipt.update(pid=process.pid, status="running")
         returncode = process.wait(timeout=timeout_seconds)
-        if returncode:
-            failures.append(f"exit_code={returncode}")
+        receipt.update(
+            exit_code=returncode, status="failed" if returncode else "success"
+        )
+        return [f"exit_code={returncode}"] if returncode else []
     except subprocess.TimeoutExpired:
-        if sys.platform == "win32":
-            subprocess.run(
-                ["taskkill", "/PID", str(process.pid), "/T", "/F"],
-                stdout=log,
-                stderr=subprocess.STDOUT,
-                check=False,
-                timeout=30,
-            )
-        else:
-            process.kill()
-        process.wait(timeout=30)
-        failures.append(f"launch_timeout={timeout_seconds}s")
+        receipt["status"] = "timeout"
+        return [f"launch_timeout={timeout_seconds}s"]
+    except BaseException as exc:
+        receipt["status"] = "failed" if isinstance(exc, Exception) else "interrupted"
+        receipt["error_type"] = type(exc).__name__
+        raise
+    finally:
+        try:
+            if process is not None and receipt["status"] in {
+                "timeout",
+                "interrupted",
+                "failed",
+            }:
+                if process.poll() is None:
+                    if sys.platform == "win32":
+                        subprocess.run(
+                            ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                            stdout=log,
+                            stderr=subprocess.STDOUT,
+                            check=True,
+                            timeout=30,
+                        )
+                    else:
+                        os.killpg(process.pid, signal.SIGKILL)
+                    process.wait(timeout=30)
+                receipt["exit_code"] = process.returncode
+        finally:
+            receipt["finished_at"] = timestamp()
+
+
+COMPOSITE_ORDER = ("activity", "assay", "molecule", "target", "publication")
+
+
+def execute_campaign(
+    root: Path, output: Path, env_file: Path, *, limit: int = 10
+) -> list[str]:
+    """Run the five RF-022 cases sequentially under one exclusive worktree lease.
+
+    Local checks are preparation evidence. HTTP and offline replay acceptance
+    remain separate obligations even if every local check passes.
+    """
+    validate_limit(limit)
+    if os.environ.get("PYTEST_XDIST_WORKER"):
+        raise ValueError("Campaign requires sequential pytest without xdist")
+    if not output.resolve().is_relative_to((root / "reports").resolve()):
+        raise ValueError("Campaign output must stay inside worktree reports")
+    source = source_commit(root)
+    inputs = input_fingerprints(root)
+    available = {case.name: case for case in discover(root) if case.kind == "composite"}
+    cases = [available[f"composite_{name}"] for name in COMPOSITE_ORDER]
+    lock = root / "reports/quality/green-acceptance.lock"
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    with lock.open("x", encoding="utf-8") as stream:
+        json.dump(
+            {"pid": os.getpid(), "source_commit": source, "output": str(output)}, stream
+        )
+    rows = [
+        {"case": case.id, "status": "not_started", "failures": []} for case in cases
+    ]
+    manifest = {
+        "source_commit": source,
+        "limit": limit,
+        "started_at": timestamp(),
+        "status": "running",
+        "local_checks_passed": False,
+        "acceptance_status": "PENDING_HTTP_AND_OFFLINE_REPLAY",
+        "input_fingerprints": inputs,
+        "cases": rows,
+    }
+    created = False
+    failures: list[str] = []
+    try:
+        output.mkdir(parents=True, exist_ok=False)
+        created = True
+        write_receipt(output / "campaign.json", manifest)
+        for case, row in zip(cases, rows, strict=True):
+            row["status"] = "running"
+            write_receipt(output / "campaign.json", manifest)
+            try:
+                if input_fingerprints(root) != inputs:
+                    raise ValueError("campaign_inputs_changed")
+                errors = execute(
+                    case, root, output, env_file, limit=limit, expected_source=source
+                )
+            except BaseException as exc:
+                row.update(
+                    status="interrupted"
+                    if not isinstance(exc, Exception)
+                    else "failed",
+                    error_type=type(exc).__name__,
+                )
+                manifest["status"] = row["status"]
+                raise
+            row.update(status="failed" if errors else "success", failures=errors)
+            failures.extend(f"{case.id}:{error}" for error in errors)
+            write_receipt(output / "campaign.json", manifest)
+        if input_fingerprints(root) != inputs:
+            failures.append("campaign_inputs_changed")
+        manifest["status"] = "failed" if failures else "success"
+        manifest["local_checks_passed"] = not failures
+    finally:
+        try:
+            if created:
+                if manifest["status"] == "running":
+                    manifest["status"] = "interrupted"
+                manifest["finished_at"] = timestamp()
+                write_receipt(output / "campaign.json", manifest)
+        finally:
+            lock.unlink()
     return failures
 
 
