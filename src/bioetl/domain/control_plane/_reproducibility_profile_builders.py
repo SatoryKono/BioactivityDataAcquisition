@@ -96,18 +96,23 @@ def _build_composite_reproducibility_family_profile(
     family: str | None,
     execution_context: ReproducibilityExecutionContext,
 ) -> ReproducibilityFamilyProfile:
+    supported = family in _REGISTERED_STRICT_COMPOSITE_FAMILIES
     return ReproducibilityFamilyProfile(
         family=family,
         execution_context=execution_context,
         lineage_closure_supported=True,
-        strict_exact_replay_supported=False,
-        support_state="rebuild_only",
-        strict_replay_runtime_verdict="blocked_outside_supported_boundary",
-        exact_replay_support_boundary="snapshot_backed_source_runs_only",
-        post_capture_replayable_parent_supported=False,
-        post_capture_replayable_parent_boundary=None,
+        strict_exact_replay_supported=supported,
+        support_state="exact_replay_supported" if supported else "rebuild_only",
+        strict_replay_runtime_verdict="allowed_with_snapshot_backed_source_refs"
+        if supported
+        else "blocked_outside_supported_boundary",
+        exact_replay_support_boundary="verified_composite_child_snapshot_bindings",
+        post_capture_replayable_parent_supported=supported,
+        post_capture_replayable_parent_boundary="verified_composite_child_snapshot_bindings"
+        if supported
+        else None,
         post_capture_replayable_parent_reason=(
-            "composite_launches_do_not_use_post_capture_parent_promotion"
+            "complete_successful_composites_require_verified_child_manifest_bindings"
         ),
         historical_live_run_upgrade_policy="not_applicable",
         historical_live_run_upgrade_boundary=None,
@@ -123,10 +128,12 @@ def _build_composite_reproducibility_family_profile(
         broader_historical_exact_replay_reason=(
             "historical_composite_runs_can_gain_certified_exact_replay_parent_evidence_via_certified_source_lineage"
         ),
-        replay_family_contract="rebuild_only",
+        replay_family_contract="snapshot_backed_exact_replay"
+        if supported
+        else "rebuild_only",
         default_required_persistence_profile="degraded_observable",
-        support_scope="bounded_composite_rebuild_resume_debug",
-        reason="composite_execution_outside_strict_exact_replay_boundary",
+        support_scope="same_revision_composite_child_snapshot_replay",
+        reason="composite_replay_requires_verified_child_manifest_bindings",
     )
 
 

@@ -17,6 +17,8 @@ from bioetl.domain.control_plane._reproducibility_profile_types import (
     ReproducibilityExecutionContext,
     ReproducibilityFamilyProfile,
 )
+from bioetl.domain.control_plane.execution_context import is_composite_execution_context
+from bioetl.domain.control_plane.run_manifest import RunManifest
 
 __all__ = [
     "ReproducibilityExecutionContext",
@@ -29,6 +31,7 @@ __all__ = [
     "published_supported_reproducibility_families",
     "registered_reproducibility_families",
     "registered_reproducibility_family_inventory",
+    "resolve_manifest_reproducibility_profile",
     "resolve_reproducibility_family",
     "resolve_reproducibility_family_profile",
 ]
@@ -113,6 +116,20 @@ def resolve_reproducibility_family_profile(
     return _build_source_reproducibility_family_profile(
         family=family,
         execution_context=execution_context,
+    )
+
+
+def resolve_manifest_reproducibility_profile(
+    manifest: RunManifest,
+) -> ReproducibilityFamilyProfile:
+    """Resolve a manifest's profile using its explicit execution context."""
+    return resolve_reproducibility_family_profile(
+        provider=manifest.provider,
+        entity=manifest.entity,
+        contract_ref=manifest.code_provenance.contract_ref,
+        execution_context=(
+            "composite" if is_composite_execution_context(manifest) else "source"
+        ),
     )
 
 

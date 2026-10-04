@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from pathlib import Path
+
+from bioetl.infrastructure.control_plane import FileRunManifestStore
+from bioetl.composition.control_plane_paths import control_plane_root
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
@@ -108,14 +111,24 @@ def _build_composite_input_snapshots(
     if runtime is None:
         return ()
     replay_of_manifest_id = getattr(runtime, "replay_of_manifest_id", None)
-    replay_of_run_id = getattr(runtime, "replay_of_run_id", None)
-    if replay_of_manifest_id or replay_of_run_id:
+    if isinstance(replay_of_manifest_id, str) and replay_of_manifest_id:
         if settings is None:
             raise ValueError("Composite replay source refs require runtime Settings")
+        parent = FileRunManifestStore(
+            base_path=control_plane_root(settings, "run_manifest")
+        ).get(replay_of_manifest_id)
+        bindings = (
+            parent.launch_context.get("child_replay_manifests")
+            if parent is not None
+            else None
+        )
+        if not isinstance(bindings, dict) or not isinstance(
+            bindings.get(pipeline_name), str
+        ):
+            return ()
         return resolve_manifest_input_snapshot_refs(
             settings=settings,
-            manifest_id=replay_of_manifest_id,
-            run_id=replay_of_run_id,
+            manifest_id=str(bindings[pipeline_name]),
         )
     if not runtime.use_cached_bronze:
         return ()

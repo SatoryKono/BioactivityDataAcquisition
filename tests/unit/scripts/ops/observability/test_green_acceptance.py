@@ -115,3 +115,15 @@ def test_failed_execution_cannot_be_hidden_by_green_evidence(status):
         {"saved_evidence_status": "OK", "replay_readiness_status": "OK"},
         {"verdict": "OK", "evidence_completeness": "COMPLETE"},
     )
+
+
+@pytest.mark.parametrize("limit", [1, 100, 1000])
+def test_explicit_acceptance_limit_is_preserved(limit):
+    args = command(Case("composite", "composite_publication"), limit=limit)
+    assert args[args.index("--limit") + 1] == str(limit)
+
+
+@pytest.mark.parametrize("limit", [0, -1, True, "100"])
+def test_invalid_acceptance_limit_is_rejected(limit):
+    with pytest.raises(ValueError, match="positive integer"):
+        command(Case("composite", "composite_publication"), limit=limit)

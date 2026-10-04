@@ -1,11 +1,16 @@
 """Compose parent report persistence with the configured evidence stores."""
 
+from __future__ import annotations
+
 from pathlib import Path
 
 from bioetl.application.services.execution.pipeline_runner_models import RunResult
 from bioetl.application.services.run_reports.composite import CompositeRunReportService
 from bioetl.composition.control_plane_archive import archive_successful_run
 from bioetl.composition.bootstrap.runtime.run_status import create_run_status_capture
+from bioetl.composition.bootstrap.runtime.composite_replay_capture import (
+    bind_composite_replay_children,
+)
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.domain.ports import LoggerPort
 from bioetl.infrastructure.storage.run_report_store_adapter import (
@@ -38,6 +43,9 @@ def create_composite_reporter(
         clock=SystemClock(),
         logger=logger,
         archive=archive,
+        bind_replay=lambda children: bind_composite_replay_children(
+            manifest_id, children, settings
+        ),
         capture=create_run_status_capture(
             settings.data_dir,
             report_root=settings.report_root,

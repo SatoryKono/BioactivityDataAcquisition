@@ -99,11 +99,53 @@ def selected_report_sources(
         path,
         *([markdown_path] if markdown_path.is_file() else []),
         *_revision_sources(payload, revisions),
+        *_child_report_sources(payload, folder),
     ]
     result = {}
     for item in files:
         _validate_source(item, base, revisions, manifest)
         result[f"run-reports/{item.relative_to(base).as_posix()}"] = item
+    return result
+
+
+def _child_report_sources(payload: dict[str, object], folder: Path) -> list[Path]:
+    """Keep the parent's captured child reports inside its verified archive."""
+    artifacts = payload.get("artifacts", [])
+    if not isinstance(artifacts, list):
+        raise ValueError("archive_report_artifacts_corrupt")
+    result = []
+    for artifact in artifacts:
+        if (
+            not isinstance(artifact, dict)
+            or artifact.get("kind") != "composite_child_run_report"
+        ):
+            continue
+        raw_ref = str(artifact.get("ref", ""))
+        if "canonical_sha256" not in artifact and not raw_ref.replace(
+            "\\", "/"
+        ).startswith("child-reports/"):
+            # Legacy references are verified separately and were never parent-owned.
+            continue
+        relative = Path(raw_ref)
+        item = folder / relative
+        if (
+            relative.is_absolute()
+            or ".." in relative.parts
+            or not item.resolve().is_relative_to(folder.resolve())
+        ):
+            raise ValueError("archive_child_report_outside_root")
+        raw = item.read_bytes()
+        if hashlib.sha256(raw).hexdigest() != artifact.get("sha256"):
+            raise ValueError("archive_child_report_checksum_mismatch")
+        child = json.loads(raw)
+        identity = child.get("identity", {})
+        if any(
+            identity.get(key) != artifact.get(key)
+            for key in ("run_id", "pipeline_name", "manifest_id")
+        ):
+            raise ValueError("archive_child_report_identity_mismatch")
+        result.append(item)
+        result.extend(_revision_sources(child, item.parent / "status-revisions"))
     return result
 
 

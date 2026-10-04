@@ -52,7 +52,7 @@ from bioetl.domain.serialization.snapshot_serialization import (
     normalize_snapshot,
     to_serializable_mapping,
 )
-from bioetl.domain.types import JsonDict
+from bioetl.domain.types import BronzeRecord, JsonDict
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -305,6 +305,7 @@ def flatten_arrow_table_for_export(table: pa.Table) -> pa.Table:
 __all__ = [
     "_escape_non_ascii",
     "_has_non_ascii",
+    "canonical_bronze_record_order",
     "canonicalize_json_string",
     "deserialize_from_json",
     "flatten_arrow_table_for_export",
@@ -315,3 +316,10 @@ __all__ = [
     "serialize_to_json_canonical",
     "to_serializable_mapping",
 ]
+
+
+def canonical_bronze_record_order(records: list[BronzeRecord]) -> list[BronzeRecord]:
+    """Use the persisted Bronze JSONL order when assigning record ordinals."""
+    return sorted(
+        records, key=lambda record: orjson.dumps(record, option=orjson.OPT_SORT_KEYS)
+    )

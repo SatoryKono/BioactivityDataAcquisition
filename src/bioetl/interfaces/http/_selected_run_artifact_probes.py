@@ -10,6 +10,9 @@ from pathlib import Path, PurePosixPath
 from bioetl.application.services.run_reports.artifact_digest import (
     canonical_report_sha256,
 )
+from bioetl.interfaces.http._composite_child_artifact_probe import (
+    _probe_composite_child,
+)
 from bioetl.interfaces.http._forensic_request_budget import (
     _deadline_exceeded_error,
     request_deadline_exceeded,
@@ -169,6 +172,20 @@ def _artifact_probes(
                 }
             )
             continue
+        if item.get("kind") == "composite_child_run_report" and (
+            str(item.get("ref", "")).replace("\\", "/").startswith("child-reports/")
+            or "canonical_sha256" in item
+        ):
+            reason = _probe_composite_child(item, root, _hash_artifact_chunked)
+            probes.append(
+                {
+                    "code": f"child_report_{item.get('run_id', index)}",
+                    "result": "fail" if reason else "pass",
+                    "reason": reason or "child_evidence_verified",
+                    "evidence_ref": ref,
+                }
+            )
+            continue
         name = item.get("name") or item.get("id") or item.get("kind") or code
         code = str(name)
         relative = item.get("path") or item.get("relative_path") or item.get("ref")
@@ -243,3 +260,20 @@ def _artifact_probes(
             }
         )
     return probes, True
+
+
+def _report_probes(
+    report: Mapping[str, object], run_root: Path, assessment: Mapping[str, object]
+) -> tuple[list[Mapping[str, object]], bool]:
+    """Keep an incomplete report from producing a ready replay verdict."""
+    probes, inventory_present = _artifact_probes(report, run_root)
+    if assessment.get("evidence_completeness") != "COMPLETE":
+        probes.append(
+            {
+                "code": "report_evidence_completeness",
+                "result": "unknown",
+                "reason": "report_evidence_incomplete",
+                "evidence_ref": "#/selected_run_snapshot/assessment",
+            }
+        )
+    return probes, inventory_present

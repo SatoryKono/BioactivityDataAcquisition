@@ -17967,7 +17967,7 @@
       "github_issue_url": null,
       "inbound_links": 3,
       "lifecycle": null,
-      "outbound_links": 61,
+      "outbound_links": 62,
       "owner": "BioETL Team",
       "path": "docs/02-architecture/adr-registry.md",
       "recommended_action": "generate-automatically",
@@ -18023,7 +18023,7 @@
       "github_issue_url": null,
       "inbound_links": 1,
       "lifecycle": null,
-      "outbound_links": 61,
+      "outbound_links": 62,
       "owner": "BioETL Team",
       "path": "docs/02-architecture/adr-registry/index.md",
       "recommended_action": "generate-automatically",
@@ -19902,6 +19902,34 @@
       "outbound_links": 0,
       "owner": "BioETL Team",
       "path": "docs/02-architecture/decisions/ADR-061-persisted-selected-run-assessment.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "02-architecture",
+      "status": "Canonical",
+      "surface_family": "canonical",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": "internal",
+      "declared_status": "Added",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 3,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/02-architecture/decisions/ADR-062-composite-snapshot-replay.md",
       "recommended_action": "keep",
       "root_doc_kind": null,
       "section": "02-architecture",
@@ -45099,7 +45127,7 @@
       "github_issue_url": null,
       "inbound_links": 0,
       "lifecycle": null,
-      "outbound_links": 0,
+      "outbound_links": 1,
       "owner": "BioETL Team",
       "path": "docs/02-architecture/domain-composite.md",
       "recommended_action": "keep",
@@ -97568,14 +97596,14 @@
       "archive-after-github-state-check": 338,
       "archive-after-migration": 860,
       "generate-automatically": 1056,
-      "keep": 1193,
+      "keep": 1194,
       "reconcile-with-github-state": 8
     },
     "by_section": {
       ".github": 354,
       "00-project": 270,
       "01-requirements": 4,
-      "02-architecture": 993,
+      "02-architecture": 994,
       "03-data-model": 2,
       "03-guides": 127,
       "04-reference": 334,
@@ -97599,19 +97627,19 @@
     "by_status": {
       "Active": 747,
       "Archived": 277,
-      "Canonical": 74,
+      "Canonical": 75,
       "Generated": 1056,
       "Working": 1301
     },
     "by_surface_family": {
       "active": 747,
       "archive": 277,
-      "canonical": 74,
+      "canonical": 75,
       "generated": 1056,
       "working": 1301
     },
     "by_tracking_state": {
-      "tracked": 3455
+      "tracked": 3456
     },
     "docs_reports_local_count": 56,
     "duplicate_group_count": 7,
@@ -97627,8 +97655,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3455,
+    "total_doc_like": 3456,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3455
+    "total_doc_like_tracked": 3456
   }
 }

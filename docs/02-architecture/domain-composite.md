@@ -337,3 +337,20 @@ cv_config = CrossValidationConfig(
 - Покрытие тестами: >90%
 - Cyclomatic complexity: <10 для всех функций
 - Type coverage: 100% (strict mode)
+
+
+## Verified child snapshot replay
+
+`run-composite --replay-of-manifest-id <manifest> --limit <captured-limit>`
+replays a completed composite using verified child Bronze snapshots. The source
+revision, dependency lock, effective configuration and seed limit must match.
+Stage overrides, resume and user-supplied cache substitutions are rejected.
+Historical parents without complete child bindings remain outside this path.
+
+Parent reports capture child report bytes and frozen revisions in their own
+artifact directory. Capture failures retain the parent failure report and an
+explicit `INCOMPLETE` observation. Optional stage failures retain their warnings;
+CLI exit zero alone does not establish replay readiness.
+
+See [ADR-062](decisions/ADR-062-composite-snapshot-replay.md) for the pending
+acceptance boundary and offline output-equivalence requirements.

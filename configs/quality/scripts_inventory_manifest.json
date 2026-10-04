@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-03T20:40:01.580874+00:00",
+  "generated_at": "2026-10-04T10:36:44.871761+00:00",
   "summary": {
-    "total_scripts": 635,
+    "total_scripts": 636,
     "status_counts": {
       "active": 336,
-      "supporting": 299
+      "supporting": 300
     },
     "reference_group_coverage": {
       "agents": 10,
@@ -13,9 +13,9 @@
       "ci": 86,
       "docs": 259,
       "other": 48,
-      "scripts": 530,
+      "scripts": 531,
       "skills": 12,
-      "tests": 448
+      "tests": 449
     }
   },
   "scripts": [
@@ -12272,7 +12272,7 @@
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 183,
+          "line": 186,
           "source_group": "docs",
           "text": "python3 scripts/engineering/diagnostics/audit_structure.py --path ."
         },
@@ -16750,7 +16750,7 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 305,
+          "line": 307,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_closure_campaign.py --require-global-claim`"
         },
@@ -16789,19 +16789,19 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 302,
+          "line": 304,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py` persists"
         },
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 308,
+          "line": 310,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-universal-claim`"
         },
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 311,
+          "line": 313,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-durable-evidence-coverage`"
         },
@@ -18851,7 +18851,7 @@
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 447,
+          "line": 450,
           "source_group": "docs",
           "text": "uv run python -m scripts.ops.data check-data-dir"
         },
@@ -20036,6 +20036,25 @@
       ]
     },
     {
+      "path": "scripts/ops/observability/composite_replay_acceptance.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/integration/test_composite_snapshot_replay.py",
+          "line": 8,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.composite_replay_acceptance import execute_replay"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-31",
+      "next_step": "Retain as the offline composite replay acceptance helper used by the integration matrix; preserve same-revision, isolated-output and network-denial checks."
+    },
+    {
       "path": "scripts/ops/observability/grafana/_apply_ds2_all.py",
       "type": "py",
       "status": "supporting",
@@ -21067,7 +21086,7 @@
         },
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 294,
+          "line": 303,
           "source_group": "tests",
           "text": "recover_ps1 = Path(\"scripts/ops/observability/grafana/recover_renderer.ps1\")"
         }
@@ -21135,7 +21154,7 @@
       "references": [
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 295,
+          "line": 304,
           "source_group": "tests",
           "text": "recover_sh = Path(\"scripts/ops/observability/grafana/recover_renderer.sh\")"
         }
@@ -21549,8 +21568,20 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 8,
       "references": [
+        {
+          "path": "scripts/ops/observability/composite_replay_acceptance.py",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.green_acceptance import ("
+        },
+        {
+          "path": "tests/integration/test_composite_snapshot_replay.py",
+          "line": 9,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.green_acceptance import discover, launch_timeout"
+        },
         {
           "path": "tests/integration/test_live_green_acceptance.py",
           "line": 9,

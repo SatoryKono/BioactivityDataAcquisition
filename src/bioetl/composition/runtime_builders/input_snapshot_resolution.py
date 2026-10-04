@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from dataclasses import replace
 from typing import TYPE_CHECKING
 
 from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
@@ -56,10 +57,23 @@ def resolve_cached_bronze_input_snapshot_refs(
         if require
         else build_cached_bronze_input_snapshot_refs
     )
-    return loader(
+    refs = loader(
         bronze_root=bronze_root,
         bronze_date=_coerce_optional_str(bronze_date),
     )
+    default_root = Path(str(settings.bronze_path)) / provider / entity
+    if bronze_root.resolve() != default_root.resolve():
+        return tuple(
+            replace(
+                ref,
+                immutable_uri=(
+                    bronze_root.resolve()
+                    / (ref.immutable_uri or "").removeprefix("bronze://")
+                ).as_uri(),
+            )
+            for ref in refs
+        )
+    return refs
 
 
 def resolve_manifest_input_snapshot_refs(

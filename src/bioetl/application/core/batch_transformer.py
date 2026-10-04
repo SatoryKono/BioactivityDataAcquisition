@@ -44,6 +44,7 @@ from bioetl.application.core.transformer_runtime.state import (
 from bioetl.application.core.transformer_runtime.streaming import (
     StreamingBatchProcessor,
 )
+from bioetl.domain.serialization import canonical_bronze_record_order
 from bioetl.domain.types import BronzeRecord
 
 if TYPE_CHECKING:
@@ -137,6 +138,7 @@ class BatchTransformer:
         self, records: list[BronzeRecord], batch_id: BatchID, start_index: int = 0
     ) -> TransformResult:
         """Transform all records in batch, returning silver, gold, and quarantine count."""
+        records = canonical_bronze_record_order(records)
         begin_batch_metrics_if_present(self._batch_metrics)
         state = await collect_batch_transform_state(
             records=records,
@@ -188,6 +190,7 @@ class BatchTransformer:
         start_index: int = 0,
     ) -> TransformResult:
         """Transform records one-at-a-time while accumulating batch write results."""
+        records = canonical_bronze_record_order(records)
         begin_batch_metrics_if_present(self._batch_metrics)
         state = await collect_stream_transform_state(
             records=records,

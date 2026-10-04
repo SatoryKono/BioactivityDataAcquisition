@@ -1246,3 +1246,33 @@ class TestBatchTransformerDQThresholds:
         )
         assert result.quarantined_count == 0
         assert metrics.batch_error_count == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("method", ["transform_batch", "transform_stream"])
+async def test_record_ordinals_match_persisted_bronze_order(batch_transformer, method):
+    import orjson
+
+    records = [{"id": "b", "value": 10}, {"id": "a", "value": 11}]
+    original_order = [record["id"] for record in records]
+    persisted = [
+        orjson.loads(raw)
+        for raw in sorted(
+            orjson.dumps(record, option=orjson.OPT_SORT_KEYS) for record in records
+        )
+    ]
+
+    async def transform(ctx, record, index):
+        return {"entity_id": record["id"], "value": record["value"], "_index": index}
+
+    batch_transformer._transform = transform
+    operation = getattr(batch_transformer, method)
+    batch_id = deterministic_batch_uuid_from_callsite("canonical_record_order")
+    live = await operation(records, batch_id, start_index=500)
+    replay = await operation(persisted, batch_id, start_index=500)
+    assert live.silver_records == replay.silver_records
+    assert [(row["entity_id"], row["_index"]) for row in live.silver_records] == [
+        ("a", 500),
+        ("b", 501),
+    ]
+    assert [record["id"] for record in records] == original_order

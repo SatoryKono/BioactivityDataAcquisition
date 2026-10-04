@@ -210,6 +210,11 @@ def _exit_with_composite_result(success: bool, error_message: str | None) -> Non
     help="Maximum records for seed pipeline",
 )
 @typed_click_option(
+    "--replay-of-manifest-id",
+    type=str,
+    help="Replay a completed composite from its verified child Bronze snapshots.",
+)
+@typed_click_option(
     "--enrich-only",
     type=str,
     help="Run only specified enrichers (comma-separated)",
