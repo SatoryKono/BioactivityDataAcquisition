@@ -45,18 +45,18 @@ def _measurement_file(raw_path: object, *, measurement_root: Path) -> Path:
         candidate = measurement_root / candidate
     if ".." in candidate.parts or not candidate.is_relative_to(measurement_root):
         raise ValueError(_XML_BOUNDARY_ERROR)
-    # Resolve without requiring existence: a missing external symlink target
-    # must be rejected by the same boundary check as an existing one.
-    try:
-        resolved = candidate.resolve(strict=False)
-        resolved.relative_to(measurement_root)
-    except (OSError, ValueError):
-        raise ValueError(_XML_BOUNDARY_ERROR) from None
-    if resolved.suffix != ".xml":
+    if candidate.suffix != ".xml":
         raise ValueError(_XML_BOUNDARY_ERROR)
-    if not resolved.is_file():
+    # Inspect each component without following links. Even non-strict resolve()
+    # can traverse an external target before the containment check runs.
+    component = measurement_root
+    for part in candidate.relative_to(measurement_root).parts:
+        component = component / part
+        if component.is_symlink() or component.is_junction():
+            raise ValueError(_XML_BOUNDARY_ERROR)
+    if not candidate.is_file():
         raise ValueError("Local measurement XML must be a regular file")
-    return resolved
+    return candidate
 
 
 def _validate_measurement_timestamps(payload: dict[str, Any]) -> None:

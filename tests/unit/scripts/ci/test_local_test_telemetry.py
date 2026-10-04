@@ -302,6 +302,7 @@ def test_external_xml_symlink_does_not_disclose_target_existence(
         pytest.fail(f"File existence was probed before boundary rejection: {path}")
 
     monkeypatch.setattr(Path, "is_file", forbidden_probe)
+    monkeypatch.setattr(Path, "resolve", forbidden_probe)
     with pytest.raises(
         ValueError,
         match="^Local measurement XML must remain within its manifest directory$",

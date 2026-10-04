@@ -404,6 +404,7 @@ jobs:
             export NODE_OPTIONS="--max-old-space-size=3072"
             mkdir -p reports/jscpd
             npm ci --ignore-scripts --no-fund --no-audit --prefix "$PWD/.github/tooling/jscpd"
+            node .github/tooling/braces-backport/test.cjs .github/tooling/jscpd
             "$PWD/.github/tooling/jscpd/node_modules/.bin/jscpd" \
               "$PWD/src" "$PWD/tests" \
               --config "$PWD/.jscpd.json" \

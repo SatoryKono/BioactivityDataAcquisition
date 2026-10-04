@@ -33,16 +33,23 @@ def make_client(limiter=None, **kwargs):
 
 
 @pytest.mark.asyncio
-async def test_health_transport_deadline_excludes_admission_wait():
+async def test_health_transport_deadline_excludes_admission_wait(monkeypatch):
+    now = [0.0]
+    monkeypatch.setattr(
+        request_timing, "time", SimpleNamespace(monotonic=lambda: now[0])
+    )
+
     class WaitingLimiter:
         async def acquire(self):
             await asyncio.sleep(0.03)
+            now[0] += 0.03
 
     client = make_client(WaitingLimiter())
     requests = []
 
     def respond(request):
         requests.append(request)
+        now[0] += 0.001
         return httpx.Response(200, json={"status": "UP"})
 
     async with httpx.AsyncClient(transport=httpx.MockTransport(respond)) as transport:
@@ -64,8 +71,8 @@ async def test_health_transport_deadline_excludes_admission_wait():
     assert result == HealthStatus.HEALTHY
     assert len(requests) == 1
     facts = client.logger.info.call_args.kwargs
-    assert facts["admission_seconds"] >= 0.025
-    assert facts["transport_seconds"] < 0.01
+    assert facts["admission_seconds"] == pytest.approx(0.03)
+    assert facts["transport_seconds"] == pytest.approx(0.001)
 
 
 @pytest.mark.asyncio
