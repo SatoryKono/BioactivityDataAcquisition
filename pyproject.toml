@@ -178,6 +178,7 @@ dev = [
     "autoflake>=2.3.1",
     "pre-commit>=4.5.1",
     "types-pyyaml>=6.0.12.20260906",
+    "types-defusedxml>=0.7.0.20260504",
 ]
 docs = [
     "mkdocs>=1.6,<2.0",
