@@ -1,5 +1,13 @@
 # Audit issue batch: implementation and remaining acceptance
 
+## W40: final source measurement (2026-10-04)
+
+Complete canonical 17-group producer on `72905b3fdb289e7229f17ce36727f2b815241361`: 33,005 cases, 32,823 PASS, 182 SKIP, zero failures/errors; lines 99.70%, branches 94.34%. `config_root`: 40/40 lines and 18/18 branches, line 32 executed. XML SHA-256 `150f069397a0081aee4338dae9c64a1dbef05a1ad776f0271b768b7d9e8b959a`.
+
+Raw candidate retains 80 visible module regressions against historical accepted rows. Canonical nonregressing adoption keeps those historical baselines and completes the current roster of 2,553 modules. Immutable producer, XML, JUnit, raw candidate and ledger are preserved under `proof-or-stop/architecture-coverage-11854-11899/`. These retained values are not newly measured global 100% coverage.
+
+Final full architecture, governance and independent CI admission remain pending. Previous failures and measurements below remain historical.
+
 ## Current architecture/coverage closeout preparation: wave 39
 
 Producer: `e916f820e70c807183fcaf2e73f4cad714524844`; source `d2764a40ec87e32214fbbf4ac1ed184b4a4de6b3e755c38c48ed74a86b8a705b`;

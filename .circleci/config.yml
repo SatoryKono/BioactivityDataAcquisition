@@ -609,7 +609,7 @@ jobs:
         no_output_timeout: 30m
         command: "export PATH=\"$PWD/.venv/bin:$HOME/.local/bin:$PATH\"\nexport PYTHONPATH=\"$PWD/src\" PYTHONUTF8=1\n\
           export BIOETL_AI_MEMORY_MODE=off BIOETL_SKIP_PREFLIGHT=1 BIOETL_SKIP_SETUP_PLUGINS=1\nexport OPENBLAS_NUM_THREADS=1\
-          \ OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1\npython - \\<<'CLOSEOUT_PY'\n\"\"\"Candidate\
+          \ OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1\n# Preserve resolved PATH; isolate child shell probes from CircleCI BASH_ENV.\nunset BASH_ENV\npython - \\<<'CLOSEOUT_PY'\n\"\"\"Candidate\
           \ embedded runner; execute only in a genuine CircleCI checkout.\"\"\"\nfrom datetime import UTC, datetime\n\
           from pathlib import Path\nimport json\nimport hashlib\nimport os\nimport subprocess\nimport time\n\nroot\
           \ = Path.cwd().resolve()\nhead = subprocess.check_output([\"git\", \"rev-parse\", \"HEAD\"], text=True).strip()\n\

@@ -32,7 +32,7 @@ truth; existing documentation is evidence only when it matches those sources.
 
 ## Architecture Quality Evidence
 
-The following values describe the accepted inventory after a complete 17-group local measurement on `e916f820e70c807183fcaf2e73f4cad714524844`. Canonical nonregressing adoption preserves historical rows where fresh raw coverage is lower. The raw comparison records 80 remaining module regressions; accepted inventory values are not a claim of fresh global nonregression. `config_root` was freshly measured at 40/40 lines and 18/18 branches. Final architecture acceptance and publication remain separate checks.
+The following values describe the accepted inventory after a complete 17-group local measurement on `72905b3fdb289e7229f17ce36727f2b815241361`. Canonical nonregressing adoption preserves historical rows where fresh raw coverage is lower. The raw comparison records 80 remaining module regressions; accepted inventory values are not a claim of fresh global nonregression. `config_root` was freshly measured at 40/40 lines and 18/18 branches. Final architecture acceptance and publication remain separate checks.
 
 | Artifact | Current value | Source |
 | --- | ---: | --- |
@@ -44,7 +44,7 @@ The following values describe the accepted inventory after a complete 17-group l
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Families at fan-in budget | `0` | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
 | Module-boundaries coupling | `10.0` (`control-plane` fan-in `1/2`, `runtime_builders` fan-in `2/3`) | `reports/quality/architecture-quality-scorecard.json`, `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py` |
-| Debt-governance gates | `45` pass, `0` warn, `1` fail | `reports/quality/debt-governance-gates.json` |
+| Debt-governance gates | `46` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
 | Full-app duplication hotspot baseline | `0` actionable / `58` raw excluded clusters | `reports/quality/full-app-duplication-baseline.json` |
 
 The full-app duplication baseline distinguishes actionable clusters from raw
