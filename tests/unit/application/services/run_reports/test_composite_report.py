@@ -16,10 +16,8 @@ from bioetl.application.services.run_reports.composite import (
 )
 from bioetl.application.services.run_reports.observations import record_run_observation
 from bioetl.domain.composite.result import CompositeResult, MergeResult, SeedResult
-from bioetl.infrastructure.storage.run_report_store_adapter import (
-    FileRunReportStoreAdapter,
-)
-from bioetl.infrastructure.time import SystemClock
+from tests.helpers.clock import fixed_test_clock
+from tests.helpers.run_report_store import MemoryReportStore
 
 
 pytestmark = pytest.mark.unit
@@ -36,15 +34,16 @@ async def test_parent_records_terminal_evidence(
     service = CompositeRunReportService(
         "composite_assay",
         "parent-manifest",
-        FileRunReportStoreAdapter(),
+        MemoryReportStore(),
         tmp_path,
-        SystemClock(),
+        fixed_test_clock(),
         MagicMock(),
         MagicMock(),
         archive=archive,
     )
     child_path = tmp_path / "child.json"
-    child_path.write_text(
+    service.store.write_text(
+        str(child_path),
         json.dumps(
             {
                 "identity": {"run_id": "child-id"},
@@ -53,7 +52,7 @@ async def test_parent_records_terminal_evidence(
                     **({"Data Quality": {"verdict": dq_verdict}} if dq_verdict else {}),
                 },
             }
-        )
+        ),
     )
 
     async def body():
@@ -93,9 +92,11 @@ async def test_parent_records_terminal_evidence(
         ):
             await service.execute("parent-id", body)
     report = json.loads(
-        (
-            tmp_path / "pipeline/composite_assay/parent-id/pipeline-run-report.json"
-        ).read_text()
+        service.store.read_text(
+            str(
+                tmp_path / "pipeline/composite_assay/parent-id/pipeline-run-report.json"
+            )
+        )
     )
     if outcome == "success":
         archive.assert_called_once()
@@ -142,9 +143,9 @@ async def test_child_scopes_do_not_leak_between_concurrent_parents(tmp_path):
         CompositeRunReportService(
             "composite_assay",
             None,
-            FileRunReportStoreAdapter(),
+            MemoryReportStore(),
             tmp_path,
-            SystemClock(),
+            fixed_test_clock(),
             MagicMock(),
             MagicMock(),
         )
@@ -172,10 +173,12 @@ async def test_child_scopes_do_not_leak_between_concurrent_parents(tmp_path):
     )
     for i in range(2):
         report = json.loads(
-            (
-                tmp_path
-                / f"pipeline/composite_assay/parent-{i}/pipeline-run-report.json"
-            ).read_text()
+            services[i].store.read_text(
+                str(
+                    tmp_path
+                    / f"pipeline/composite_assay/parent-{i}/pipeline-run-report.json"
+                )
+            )
         )
         assert [c["run_id"] for c in report["io"]["child_runs"]] == [f"child-{i}"]
         assert report["observations"]["Provider"]["verdict"] == "INCOMPLETE"

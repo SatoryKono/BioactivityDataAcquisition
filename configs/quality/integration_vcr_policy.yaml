@@ -222,9 +222,9 @@ tracked_suite_inventory:
       - tests/integration/test_runner_lifecycle.py
       data_quality:
       - tests/integration/config/test_non_chembl_identifier_dq_parity.py
-      - tests/integration/test_live_green_acceptance.py
       - tests/integration/test_dq_monitor_integration.py
       - tests/integration/test_dq_report_integration.py
+      - tests/integration/test_live_green_acceptance.py
       docker_integration:
       - tests/integration/test_docker_compose_smoke.py
       grafana:

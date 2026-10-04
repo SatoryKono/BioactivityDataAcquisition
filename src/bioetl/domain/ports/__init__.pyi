@@ -1,12 +1,8 @@
 from bioetl.domain.ports.adr import AdrDocument as AdrDocument
 from bioetl.domain.ports.adr import AdrInfo as AdrInfo
 from bioetl.domain.ports.adr import AdrIssueSeverity as AdrIssueSeverity
-from bioetl.domain.ports.adr import (
-    AdrServicePort as AdrServicePort,
-)
-from bioetl.domain.ports.adr import (
-    AdrValidationIssue as AdrValidationIssue,
-)
+from bioetl.domain.ports.adr import AdrServicePort as AdrServicePort
+from bioetl.domain.ports.adr import AdrValidationIssue as AdrValidationIssue
 from bioetl.domain.ports.adr import (
     AdrValidationReport as AdrValidationReport,
 )

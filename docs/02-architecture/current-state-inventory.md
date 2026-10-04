@@ -36,7 +36,7 @@ The following values describe the accepted inventory after a complete 17-group l
 
 | Artifact | Current value | Source |
 | --- | ---: | --- |
-| Architecture quality score | `10.0` (`excellent`) | `reports/quality/architecture-quality-scorecard.json` |
+| Architecture quality score | `10.00` (`excellent`) | `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
 | Source modules in module coverage inventory | `2545` | `reports/quality/module-coverage-inventory.json` |
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, `reports/quality/debt-governance-gates.json` |
