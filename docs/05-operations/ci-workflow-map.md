@@ -25,6 +25,28 @@ the GitHub ruleset required context on `main` (ruleset `13643213`,
 Companion `root-hygiene-required-check` (15730586) stays `enforcement: disabled`.
 Orphan temp / dynamic hosted workflows are out of scope here (#10265, #10268).
 
+## CircleCI migration preparation (#11929 / #11931)
+
+The map above records the legacy Actions inventory; it is not evidence that
+Actions are running. Actions are disabled and billing restoration is out of scope.
+CodeQL is excluded from required checks; optional analysis and workflow retirement
+remain separate decisions. The CircleCI default-branch matrix reads the canonical
+required-check catalog instead of maintaining a second gate list.
+
+The isolated preparation branch adds a `ci-lane` pipeline parameter with default
+`pr-gate`. Setting `ci-lane=docs-kpi` selects only the Docs KPI workflow on `main`;
+it does not start the PR gate, mutation testing or Docker publication. The job
+preserves the existing KPI limits (target 120, hard limit 135, zero orphans),
+freshness validation and report artifacts. Run it through a CircleCI pipeline
+trigger after the config is integrated; `type: approval` is not a trigger.
+The intended weekly cadence is Monday 04:30 UTC. No external schedule has been
+registered by this preparation change, and no successful remote run is claimed.
+
+Independent phase-3 jobs may be prepared in parallel with phase A. Publishing
+requires successful build/security/baseline gates and separate approval. Final
+badges require the verified phase-B contract. Do not integrate this preparation
+into the W38 acceptance branch or run heavy jobs alongside W38.
+
 ## How to use
 
 1. Find the concern in the **active** table.

@@ -1,0 +1,150 @@
+"""Behavioral contracts for the isolated CircleCI migration preparation."""
+
+from __future__ import annotations
+
+from contextlib import redirect_stdout
+from io import StringIO
+import json
+from pathlib import Path
+import sys
+
+import pytest
+import yaml
+
+from scripts.engineering.ci.pr_gate import evaluate_results, load_catalog
+
+pytestmark = pytest.mark.architecture
+ROOT = Path(__file__).resolve().parents[2]
+
+
+def _config():
+    return yaml.safe_load((ROOT / ".circleci/config.yml").read_text(encoding="utf-8"))
+
+
+def _default_branch_matrix(monkeypatch):
+    steps = _config()["jobs"]["classify"]["steps"]
+    command = next(
+        step["run"]["command"]
+        for step in steps
+        if isinstance(step, dict) and "run" in step
+    )
+    script = command.split("import json, sys", 1)[1].split("EOF", 1)[0]
+    script = "import json, sys" + script
+    monkeypatch.chdir(ROOT)
+    monkeypatch.setattr(sys, "argv", ["classifier", "a" * 40])
+    output = StringIO()
+    with redirect_stdout(output):
+        exec(compile(script, "circleci-default-branch", "exec"), {})
+    return json.loads(output.getvalue())
+
+
+def test_default_branch_matrix_uses_catalog_without_codeql(monkeypatch):
+    matrix = _default_branch_matrix(monkeypatch)
+    catalog = load_catalog(ROOT / "configs/quality/github_required_checks.yaml")
+    assert set(matrix["decisions"]) == {gate["id"] for gate in catalog["gates"]}
+    assert "codeql" not in matrix["decisions"]
+    assert matrix["config_version"] == catalog["version"]
+    assert matrix["head_sha"] == "a" * 40
+    assert all(row["decision"] == "required" for row in matrix["decisions"].values())
+
+
+@pytest.mark.parametrize("state", ["failure", "cancelled", "skipped"])
+def test_remaining_security_failure_blocks_aggregate(monkeypatch, state):
+    matrix = _default_branch_matrix(monkeypatch)
+    catalog = load_catalog(ROOT / "configs/quality/github_required_checks.yaml")
+    results = {
+        gate: {"required": "success", "not_applicable": "skipped"}
+        for gate in matrix["decisions"]
+    }
+    assert (
+        evaluate_results(
+            catalog,
+            matrix,
+            results,
+            expected_head_sha="a" * 40,
+            observed_head_sha="a" * 40,
+        )
+        == []
+    )
+    results["security"]["required"] = state
+    assert evaluate_results(
+        catalog, matrix, results, expected_head_sha="a" * 40, observed_head_sha="a" * 40
+    )
+
+
+def test_legacy_coordinator_has_no_codeql_dependency():
+    coordinator = yaml.safe_load(
+        (ROOT / ".github/workflows/pr-required.yml").read_text(encoding="utf-8")
+    )
+    jobs = coordinator["jobs"]
+    assert "codeql" not in jobs
+    assert "codeql" not in jobs["classify-changes"]["outputs"]
+    assert "codeql" not in jobs["pr-gate-complete"]["needs"]
+
+
+def test_docs_kpi_is_opt_in_main_only_and_preserves_policy():
+    config = _config()
+    assert config["parameters"]["ci-lane"]["default"] == "pr-gate"
+    workflows = config["workflows"]
+    assert workflows["pr-gate"]["when"] == {
+        "equal": ["pr-gate", "<< pipeline.parameters.ci-lane >>"]
+    }
+    docs = workflows["docs-kpi"]
+    assert docs["when"] == {
+        "and": [
+            {"equal": ["docs-kpi", "<< pipeline.parameters.ci-lane >>"]},
+            {"equal": ["main", "<< pipeline.git.branch >>"]},
+        ]
+    }
+    assert docs["jobs"] == ["docs-kpi"]
+    steps = config["jobs"]["docs-kpi"]["steps"]
+    command = next(
+        step["run"]["command"]
+        for step in steps
+        if isinstance(step, dict)
+        and step.get("run", {}).get("name") == "Generate docs KPI report"
+    )
+    for required in [
+        "--kpi-target-not-in-nav 120",
+        "--hard-limit-not-in-nav 135",
+        "--max-orphans 0",
+        "--target-deadline 2026-12-31",
+        "--fail-on-breach",
+    ]:
+        assert required in command
+    assert any(
+        step.get("store_artifacts", {}).get("path") == "reports/docs-kpi"
+        for step in steps
+        if isinstance(step, dict)
+    )
+
+
+def test_compose_placeholders_are_step_scoped_and_runtime_stays_strict():
+    job = _config()["jobs"]["docker-build"]
+    assert "environment" not in job
+    validation = next(
+        step["run"]
+        for step in job["steps"]
+        if isinstance(step, dict)
+        and step.get("run", {}).get("name") == "docker compose config validation"
+    )
+    assert validation["environment"]["COMPOSE_DISABLE_ENV_FILE"] == "1"
+    for key in [
+        "NEO4J_PASSWORD",
+        "GF_SECURITY_ADMIN_PASSWORD",
+        "GF_RENDERING_RENDERER_TOKEN",
+    ]:
+        assert validation["environment"][key] == "ci-compose-validation-placeholder"
+    assert "docker compose config --quiet" in validation["command"]
+    assert (
+        "docker compose -f docker-compose.monitoring.yml config --quiet"
+        in validation["command"]
+    )
+    runtime = (ROOT / "docker-compose.yml").read_text(encoding="utf-8")
+    monitoring = (ROOT / "docker-compose.monitoring.yml").read_text(encoding="utf-8")
+    assert "${NEO4J_PASSWORD:?" in runtime
+    assert "${GF_SECURITY_ADMIN_PASSWORD:?" in monitoring
+    assert "${GF_RENDERING_RENDERER_TOKEN:?" in monitoring
+    for step in job["steps"]:
+        if isinstance(step, dict) and "run" in step and step["run"] is not validation:
+            assert "ci-compose-validation-placeholder" not in str(step)

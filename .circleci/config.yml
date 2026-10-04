@@ -3,11 +3,18 @@
 # Mirrors .github/workflows/pr-required.yml: the `classify` job runs the repo's own
 # decision-matrix classifier (scripts/engineering/ci pr-gate classify); each gate job
 # reads the matrix from the workspace and halts early when not_applicable.
-# 8 gates are always_required in the catalog; 4 are path_scoped (docker,
+# Gate ownership and applicability come from the canonical catalog (docker,
 # generated-artifacts, commit-governance, docs-governance).
-# NOT ported (GitHub-native): codeql, dependency-review, labeler, stale.
+# CodeQL is excluded from required checks (#11929); optional analysis is separate.
+# Remaining migration decisions: dependency-review, labeler, stale.
 # Deploy: replace .circleci/config.yml at repo root, commit, push.
 version: 2.1
+
+parameters:
+  ci-lane:
+    type: enum
+    enum: [pr-gate, docs-kpi]
+    default: pr-gate
 
 commands:
   # Port of .github/actions/setup-python-uv (uv 0.11.26, uv cache, uv sync).
@@ -67,6 +74,35 @@ commands:
             fi
 
 jobs:
+  # Prepared manual/scheduled lane; external schedule registration is separate.
+  docs-kpi:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv:
+          extras: "docs"
+      - run:
+          name: Check docs runtime mirrors and freshness
+          command: uv run --frozen --no-build python -m scripts.docs check-drift --runtime-mirrors --freshness
+      - run:
+          name: Generate docs KPI report
+          command: |
+            mkdir -p reports/docs-kpi
+            uv run --frozen --no-build python -m scripts.docs check-kpi \
+              --kpi-target-not-in-nav 120 \
+              --hard-limit-not-in-nav 135 \
+              --max-orphans 0 \
+              --target-deadline 2026-12-31 \
+              --json-out reports/docs-kpi/docs-kpi-weekly.json \
+              --markdown-out reports/docs-kpi/docs-kpi-weekly.md \
+              --summary-out reports/docs-kpi/summary.md \
+              --fail-on-breach
+      - store_artifacts:
+          path: reports/docs-kpi
+          destination: docs-kpi
+
   # Mirrors pr-required.yml `classify-changes`: runs the repo's own classifier
   # against the canonical catalog. On main/master pushes all gates are required
   # (fail-closed); on branches the matrix is computed from merge-base...HEAD.
@@ -84,13 +120,14 @@ jobs:
             HEAD_SHA="$CIRCLE_SHA1"
             if [ "$CIRCLE_BRANCH" = "main" ] || [ "$CIRCLE_BRANCH" = "master" ]; then
               echo "Default-branch push: all gates required (fail-closed)."
-              python3 - "$HEAD_SHA" \<<'EOF' > /tmp/pr-gate-decisions.json
+              uv run --frozen --no-build python - "$HEAD_SHA" \<<'EOF' > /tmp/pr-gate-decisions.json
             import json, sys
+            from pathlib import Path
+            from scripts.engineering.ci.pr_gate import load_catalog
             head = sys.argv[1]
-            gates = ["lint-arch","tests","type-checking","security","codeql","docker",
-                     "duplication","root-hygiene","generated-artifacts","compiled-artifacts",
-                     "commit-governance","docs-governance"]
-            print(json.dumps({"schema_version": 1, "config_version": 2, "head_sha": head,
+            catalog = load_catalog(Path("configs/quality/github_required_checks.yaml"))
+            gates = [gate["id"] for gate in catalog["gates"]]
+            print(json.dumps({"schema_version": 1, "config_version": catalog["version"], "head_sha": head,
                               "decisions": {g: {"decision": "required", "reason": "default_branch_push"} for g in gates},
                               "changed_files": [], "unclassified_files": []}, indent=2))
             EOF
@@ -511,9 +548,15 @@ jobs:
             "$HOME/.local/bin/hadolint" Dockerfile.bioetl
       - run:
           name: docker compose config validation
+          environment:
+            # Interpolation only: these values never reach build/publish steps.
+            COMPOSE_DISABLE_ENV_FILE: "1"
+            NEO4J_PASSWORD: ci-compose-validation-placeholder
+            GF_SECURITY_ADMIN_PASSWORD: ci-compose-validation-placeholder
+            GF_RENDERING_RENDERER_TOKEN: ci-compose-validation-placeholder
           command: |
-            docker compose config > /dev/null
-            docker compose -f docker-compose.monitoring.yml config > /dev/null
+            docker compose config --quiet
+            docker compose -f docker-compose.monitoring.yml config --quiet
       - run:
           name: docker build (Dockerfile.bioetl)
           command: docker build -f Dockerfile.bioetl -t bioetl:ci .
@@ -585,6 +628,8 @@ jobs:
 workflows:
   version: 2
   pr-gate:
+    when:
+      equal: [pr-gate, << pipeline.parameters.ci-lane >>]
     jobs:
       - composite-closeout:
           filters:
@@ -657,3 +702,10 @@ workflows:
             - commit-lint
             - docs-governance
             - docker-build
+  docs-kpi:
+    when:
+      and:
+        - equal: [docs-kpi, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - docs-kpi
