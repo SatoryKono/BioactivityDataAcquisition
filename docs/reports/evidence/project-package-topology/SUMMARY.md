@@ -1,5 +1,11 @@
 # Сводка evidence: project-package-topology
 
+Current refresh (2026-10-04): accepted inventory after the complete 17-group local measurement on `2f6b4cbee2da2f3a7b149b4781432a785cbebff3` and canonical nonregressing adoption. The raw comparison retains 80 visible module regressions. Retained historical values are not fresh measurements. Current accepted source binding: `78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db`; raw measurement source binding: `78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db`. Earlier refresh notes below remain historical.
+
+`source_tree_sha256=78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db`
+
+`source_module_count=2553`
+
 Current refresh (2026-10-04): accepted inventory after the complete 17-group local measurement on `72905b3fdb289e7229f17ce36727f2b815241361` and canonical nonregressing adoption. The raw comparison retains 80 visible module regressions. Retained historical values are not fresh measurements. Current accepted source binding: `15a5c83f203ec962c8f6e65ba6166d8d89207e5cbe0acc0f92ca1e631a8f96f8`; raw measurement source binding: `15a5c83f203ec962c8f6e65ba6166d8d89207e5cbe0acc0f92ca1e631a8f96f8`. Earlier refresh notes below remain historical.
 
 `source_tree_sha256=15a5c83f203ec962c8f6e65ba6166d8d89207e5cbe0acc0f92ca1e631a8f96f8`

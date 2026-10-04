@@ -1,6 +1,6 @@
 {
-  "additive_coverage_xml_path": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-40/coverage.xml",
-  "additive_coverage_xml_sha256": "d7c80797172d5e89ab9a3b7e27b060ea169063301fd67613a11e0b4df4f9ea70",
+  "additive_coverage_xml_path": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-41/coverage.xml",
+  "additive_coverage_xml_sha256": "af5afe13756f2d73aaeef7a30796fded2116c9ae7fbc4058d66b13156fe23ef9",
   "additive_measured_module_count": 2472,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",

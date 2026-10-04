@@ -32,7 +32,7 @@ truth; existing documentation is evidence only when it matches those sources.
 
 ## Architecture Quality Evidence
 
-The following values describe the accepted inventory after a complete 17-group local measurement on `72905b3fdb289e7229f17ce36727f2b815241361`. Canonical nonregressing adoption preserves historical rows where fresh raw coverage is lower. The raw comparison records 80 remaining module regressions; accepted inventory values are not a claim of fresh global nonregression. `config_root` was freshly measured at 40/40 lines and 18/18 branches. Final architecture acceptance and publication remain separate checks.
+The following values describe the accepted inventory after a complete 17-group local measurement on `2f6b4cbee2da2f3a7b149b4781432a785cbebff3`. Canonical nonregressing adoption preserves historical rows where fresh raw coverage is lower. The raw comparison records 80 remaining module regressions; accepted inventory values are not a claim of fresh global nonregression. `config_root` was freshly measured at 40/40 lines and 18/18 branches. Final architecture acceptance and publication remain separate checks.
 
 | Artifact | Current value | Source |
 | --- | ---: | --- |
