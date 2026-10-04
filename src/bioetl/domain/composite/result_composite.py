@@ -36,6 +36,7 @@ class CompositeResult:
     completed_at: datetime | None = None
     lineage: CompositeLineageMetadata | None = None
     had_warnings: bool = False
+    provider_warnings: tuple[str, ...] = ()
     original_run_id: str | None = None
     _required_enrichers: frozenset[str] = field(default_factory=frozenset)
     _required_dependencies: frozenset[str] = field(default_factory=frozenset)
@@ -161,6 +162,7 @@ class CompositeResult:
             "composite_run_id": self.composite_run_id,
             "is_success": self.is_success,
             "had_warnings": self.had_warnings,
+            "provider_warnings": list(self.provider_warnings),
             "seed_records": self.seed_result.records_silver,
             "dependencies_run": len(self.dependency_results),
             "dependencies_succeeded": len(self.successful_dependencies),

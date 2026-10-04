@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import asyncio
-import json
 from collections.abc import Awaitable, Callable
+from contextlib import AbstractContextManager, nullcontext
 from contextvars import ContextVar
 from dataclasses import dataclass
 from datetime import datetime
@@ -14,25 +14,24 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
     RunResult,
 )
-from bioetl.application.services.run_reports.artifact_digest import (
-    canonical_report_sha256,
+from bioetl.application.services.run_reports.composite_report_support import (
+    assess_result,
+    build_composite_report,
+    child_artifacts,
+    child_verdict,
+    completion_status,
+    merge_layers,
+    record_stage_quality,
 )
 from bioetl.application.services.run_reports.observations import (
     bind_run_observations,
     record_run_observation,
     reset_run_observations,
-    run_observations,
 )
 from bioetl.application.services.run_reports.writer import write_pipeline_run_report
 from bioetl.domain.composite.result import CompositeResult
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.domain.ports import ClockPort, LoggerPort, RunReportStorePort
-from bioetl.domain.run_reports.models import (
-    LayerCounts,
-    PipelineRunReport,
-    TrackingCoverage,
-)
-from bioetl.domain.run_reports.reason_catalog import default_reason_catalog
 
 _children: ContextVar[list[RunResult] | None] = ContextVar(
     "composite_report_children", default=None
@@ -44,25 +43,6 @@ def record_composite_child(result: RunResult) -> None:
     children = _children.get()
     if children is not None:
         children.append(result)
-
-
-def _child_artifact(child: RunResult, store: RunReportStorePort) -> dict[str, object]:
-    """Persist portable child references and bind available evidence by digest."""
-    artifact: dict[str, object] = {
-        "kind": "composite_child_run_report",
-        "ref": str(child.run_report_json_path).replace("\\", "/"),
-        "run_id": child.run_id,
-        "pipeline_name": child.pipeline_name,
-        "manifest_id": child.manifest_id,
-    }
-    try:
-        payload = json.loads(store.read_text(str(child.run_report_json_path)))
-        if isinstance(payload, dict):
-            artifact["sha256"] = canonical_report_sha256(payload)
-    except (OSError, ValueError, TypeError):
-        # Preserve the reference: readers must expose missing/invalid evidence.
-        pass
-    return artifact
 
 
 @dataclass(frozen=True)
@@ -77,6 +57,8 @@ class CompositeRunReportService:
     logger: LoggerPort
     capture: Callable[[str, str, datetime], None]
     archive: Callable[[RunResult], None] | None = None
+    execution_scope: Callable[[], AbstractContextManager[object]] = nullcontext
+    replay_artifacts: Callable[[str], tuple[dict[str, object], ...]] | None = None
 
     def write(
         self,
@@ -86,7 +68,7 @@ class CompositeRunReportService:
         result: CompositeResult | None,
         error: BaseException | None,
         children: list[RunResult],
-    ) -> None:
+    ) -> CompositeResult | None:
         completed_at = self.clock.now()
         status = (
             "success"
@@ -104,76 +86,27 @@ class CompositeRunReportService:
                 reason="completion_assessment_failed",
                 facts={},
             )
-        self._record_child_evidence(children, "Provider")
+        provider_warnings = self._record_child_evidence(children, "Provider")
         self._record_child_evidence(children, "Data Quality")
-        if result is not None and (
-            result.had_warnings or any(not child.is_success for child in children)
-        ):
-            record_run_observation(
-                "Data Quality",
-                verdict="WARN",
-                reason="composite_partial_stage_execution",
-                facts={
-                    "failed_children": [
-                        child.run_id for child in children if not child.is_success
-                    ]
-                },
-            )
-        merge = result.merge_result if result is not None else None
-        # These are the parent's actual merge writes. Child extraction layers are
-        # referenced separately and must not be counted again as parent Bronze.
-        layers = LayerCounts(
-            silver_valid=merge.records_merged
-            if merge and merge.output_silver_path
-            else 0,
-            gold_written=merge.records_merged
-            if merge and merge.output_gold_path
-            else 0,
-        )
-        report = PipelineRunReport(
-            identity={
-                "pipeline_name": self.pipeline_name,
-                "run_id": run_id,
-                "manifest_id": self.manifest_id,
-                "provider": "composite",
-                "entity": "merged",
-                "run_type": "composite",
-                "status": status,
-                "started_at": started_at.isoformat(),
-                "completed_at": completed_at.isoformat(),
-            },
-            funnel=(),
-            layers=layers,
-            reasons_top_n=(),
-            reconciliation={
-                "scope": "composite_merge",
-                "seed_records": merge.records_from_seed if merge else None,
-                "merged_records": merge.records_merged if merge else None,
-            },
-            tracking_coverage=TrackingCoverage.PARTIAL,
-            reason_catalog_version=default_reason_catalog().version,
-            artifacts=tuple(
-                _child_artifact(child, self.store)
-                for child in children
-                if child.run_report_json_path
-            ),
-            failure={"error_type": type(error).__name__, "error_message": str(error)}
-            if error
-            else None,
-            io={
-                "execution_context": "composite",
-                "child_runs": [
-                    {
-                        "pipeline_name": c.pipeline_name,
-                        "run_id": c.run_id,
-                        "status": c.status.value,
-                        "report_ref": c.run_report_json_path,
-                    }
-                    for c in children
-                ],
-            },
-            observations=dict(run_observations()),
-        )
+        record_stage_quality(result, children)
+        result = assess_result(result, children, provider_warnings)
+        layers = merge_layers(result)
+        identity: dict[str, object] = {
+            "pipeline_name": self.pipeline_name,
+            "run_id": run_id,
+            "manifest_id": self.manifest_id,
+            "provider": "composite",
+            "entity": "merged",
+            "run_type": "composite",
+            "status": status,
+            "completion_status": completion_status(status, result, provider_warnings),
+            "started_at": started_at.isoformat(),
+            "completed_at": completed_at.isoformat(),
+        }
+        artifacts = child_artifacts(self.store, children)
+        if self.replay_artifacts is not None:
+            artifacts += self.replay_artifacts(run_id)
+        report = build_composite_report(identity, result, error, children, artifacts)
         paths = write_pipeline_run_report(report, root=self.root, store=self.store)
         if status == "success" and self.archive is not None:
             self.archive(
@@ -192,26 +125,12 @@ class CompositeRunReportService:
                 )
             )
 
-    def _record_child_evidence(self, children: list[RunResult], domain: str) -> None:
-        verdicts: list[str] = []
-        for child in children:
-            try:
-                if not child.run_report_json_path:
-                    raise ValueError("child_report_missing")
-                report = json.loads(self.store.read_text(child.run_report_json_path))
-                if report["identity"]["run_id"] != child.run_id:
-                    raise ValueError("child_report_identity_mismatch")
-                verdicts.append(
-                    str(
-                        report.get("observations", {})
-                        .get(domain, {})
-                        .get("verdict", "INCOMPLETE")
-                    )
-                )
-            except (OSError, ValueError, KeyError, TypeError):
-                verdicts.append("INCOMPLETE")
-        allowed = {"ERROR", "INCOMPLETE", "UNKNOWN", "WARN", "OK", "N/A"}
-        verdicts = [value if value in allowed else "INCOMPLETE" for value in verdicts]
+        return result
+
+    def _record_child_evidence(
+        self, children: list[RunResult], domain: str
+    ) -> tuple[str, ...]:
+        verdicts = [child_verdict(self.store, child, domain) for child in children]
         verdict = next(
             (
                 v
@@ -233,6 +152,11 @@ class CompositeRunReportService:
                 "report_refs": [child.run_report_json_path for child in children],
             },
         )
+        return tuple(
+            child.pipeline_name
+            for child, value in zip(children, verdicts, strict=True)
+            if value not in {"OK", "N/A"}
+        )
 
     async def execute(
         self, run_id: str, body: Callable[[], Awaitable[CompositeResult]]
@@ -245,14 +169,14 @@ class CompositeRunReportService:
         result = None
         error = None
         try:
-            result = await body()
-            return result
+            with self.execution_scope():
+                result = await body()
         except BaseException as exc:
             error = exc
             raise
         finally:
             try:
-                self.write(
+                result = self.write(
                     run_id=run_id,
                     started_at=started_at,
                     result=result,
@@ -268,3 +192,5 @@ class CompositeRunReportService:
             finally:
                 _children.reset(children_token)
                 reset_run_observations(observations_token)
+        assert result is not None
+        return result

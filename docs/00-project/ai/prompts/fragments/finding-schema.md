@@ -1,10 +1,10 @@
 ---
 id: prompt.fragment.finding-schema
-version: 1.2.0
+version: 1.3.0
 status: active
 class: fragment
 owner: BioETL Team
-summary: Finding fields + findings.json contract including requirement_id (REQ-*/DASH-*)
+summary: Finding schema v1.3 — root-cause identity, freshness, disproof, review traceability
 ---
 
 ## Finding schema
@@ -13,29 +13,39 @@ Each finding **must** include:
 
 | Field | Rule |
 | --- | --- |
-| `id` | Stable short id (e.g. `DOCS-012`) |
-| `requirement_id` | Existing `REQ-*` from REQUIREMENTS.md / traceability CSV, or `DASH-*` for presentation, or `GAP` |
-| `path` | Existing file; prefer `path:line` or line range |
-| `observation` | One factual claim |
-| `method` | Command, test, or inspection method |
+| `id` | Stable short id, e.g. `DOCS-012` |
+| `root_cause_id` | Stable causal cluster id shared across prompt domains |
+| `requirement_id` | Existing `REQ-*` / `DASH-*`, or `GAP` |
+| `path` | Existing file; prefer `path:line` or range |
+| `observation` | One factual, falsifiable claim |
+| `method` | Command, test, artifact, or inspection method |
 | `expected` | Expected state |
 | `actual` | Observed state |
 | `impact` | User/runtime/security/ops impact |
-| `confidence` | Band `high` \| `medium` \| `low`; optional float `confidence_score` in 0..1 |
-| `status` | `PROVEN` \| `NOT_PROVEN` |
-| `priority` | `P0` \| `P1` \| `P2` \| `P3` |
-| `severity` | Critical / High / Medium / Low (map from priority) |
-| `remediation` | Concrete next step |
-| `effort` | `S` \| `M` \| `L` \| `XL` when known |
-| `automation` | Prevention (CI/hook/test) or `n/a` |
-| `automated_fix_possible` | boolean; does **not** authorize applying a fix |
+| `confidence` | `high \| medium \| low`; optional `confidence_score` 0..1 |
+| `status` | `PROVEN \| NOT_PROVEN` |
+| `review_verdict` | Optional: `CONFIRMED \| DOWNGRADED \| REJECTED \| NOT_VERIFIABLE` |
+| `evidence_freshness` | `CURRENT \| STALE \| UNBOUND` |
+| `priority` | `P0 \| P1 \| P2 \| P3` |
+| `severity` | Critical / High / Medium / Low, mapped from priority |
+| `attempted_disproof` | Falsifier/counterexample checked and result |
+| `exception_ref` | Valid exception/waiver reference or `null` |
+| `remediation` | Smallest safe next step |
+| `effort` | `S \| M \| L \| XL` when known |
+| `automation` | Prevention CI/hook/test or `n/a` |
+| `automated_fix_possible` | boolean; never authorizes applying a fix |
 
 Rules:
 
-- No file-level proof → `NOT_PROVEN` (do not open a GitHub issue).
+- No current file/command/runtime proof -> `NOT_PROVEN`.
+- `STALE`/`UNBOUND` evidence may guide investigation but cannot by itself
+  prove a current defect.
+- P0/P1/P2 `PROVEN` findings require recorded attempted disproof.
+- A valid exception must satisfy the evidence-contract exception/suppression
+  contract.
 - Do not invent stack, SLA, coverage targets, or threat models; mark unknown.
 - Prefer current checkout + `origin/main` over memory or stale reports.
-- Never put secret values in findings, issues, PR bodies, or logs.
+- Never put secret values in findings, issues, PR bodies, logs, or artifacts.
 
 ## findings.json (machine-readable)
 
@@ -45,25 +55,32 @@ Recommended object shape:
 ```json
 {
   "id": "AREA-001",
+  "root_cause_id": "rc-8d15f9c9",
   "requirement_id": "REQ-ARCH-001",
   "priority": "P1",
   "severity": "High",
   "confidence": "high",
-  "confidence_score": 0.9,
+  "confidence_score": 0.93,
   "status": "PROVEN",
+  "review_verdict": null,
+  "evidence_freshness": "CURRENT",
   "category": "string",
   "evidence": [
     {
       "path": "path/to/file",
       "line": 42,
       "command": "safe diagnostic command",
+      "source_revision": "<sha>",
+      "observed_at": "2026-10-04T00:00:00Z",
       "observation": "what was observed"
     }
   ],
   "expected": "desired or documented state",
   "actual": "observed state",
   "impact": "specific impact",
-  "root_cause": "known root cause or unspecified",
+  "root_cause": "minimal causal explanation",
+  "attempted_disproof": "compatibility seam checked; claim still reproduces",
+  "exception_ref": null,
   "remediation": "smallest safe remediation",
   "effort": "S",
   "dependencies": [],
@@ -72,4 +89,6 @@ Recommended object shape:
 }
 ```
 
-Companion human report: `report.md` (executive summary, surface_score, top gaps).
+Companion human report: `report.md` (executive summary, surface_score, top
+gaps). Independent reviewers keep rejected/downgraded hypotheses in a
+reconciliation ledger rather than deleting them.

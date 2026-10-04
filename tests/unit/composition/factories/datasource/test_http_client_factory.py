@@ -207,7 +207,7 @@ class TestHttpClientFactory:
         assert result == "client-test-mode"
         assert client_ctor.call_args.kwargs["timeout"] == pytest.approx(5.0)
         retry_config = client_ctor.call_args.kwargs["retry_config"]
-        assert retry_config.max_attempts == 2
+        assert retry_config.max_attempts == 5
         assert retry_config.base_delay == pytest.approx(0.0)
         assert retry_config.max_delay == pytest.approx(0.0)
         assert retry_config.max_retry_after_seconds == pytest.approx(0.0)
@@ -392,6 +392,25 @@ class TestResolvedHttpConfig:
             setattr(settings, setting_name, "present")
         with_key = HttpClientFactory._resolve_config(provider, settings)
         assert (with_key.rate, with_key.capacity) == authenticated
+
+    @pytest.mark.parametrize("authenticated", [False, True])
+    @pytest.mark.parametrize("test_mode", [False, True])
+    def test_semanticscholar_uses_configured_attempt_budget(
+        self, authenticated, test_mode
+    ):
+        from bioetl.infrastructure.config import load_source_config
+
+        settings = SimpleNamespace(
+            test_mode=test_mode,
+            semanticscholar_api_key="present" if authenticated else None,
+        )
+        configured = load_source_config("semanticscholar")
+        resolved = HttpClientFactory._resolve_config("semanticscholar", settings)
+        retry = HttpClientFactory._build_retry_config(resolved, settings)
+        assert retry.max_attempts == configured.max_retries == 5
+        assert retry.effective_retry_budget() == 4
+        if not authenticated:
+            assert (resolved.rate, resolved.capacity) == (0.01, 1)
 
     def test_resolved_http_config_is_frozen(self) -> None:
         """ResolvedHttpConfig should be immutable."""

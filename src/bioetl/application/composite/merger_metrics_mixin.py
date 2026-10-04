@@ -61,7 +61,9 @@ class MergeMetricsRecorderMixin:
         return df.with_columns(
             [
                 pl.lit(json.dumps(sources_used)).alias("_source_providers"),
-                pl.lit(json.dumps(status_dict)).alias("_enrichment_status"),
+                pl.lit(json.dumps(status_dict, sort_keys=True)).alias(
+                    "_enrichment_status"
+                ),
             ]
         )
 
@@ -190,9 +192,7 @@ class MergeMetricsRecorderMixin:
         if not any(not col.startswith("_") for col in df.columns):
             return {}
 
-        # Batch evaluation into a single operation to avoid python loop overhead
-        # ⚡ Bolt: Native DataFrame null_count() avoids FFI overhead from creating large expression lists.
-        # ⚡ Bolt: Using Polars selectors instead of list comprehensions over df.columns prevents FFI overhead.
+        # Aggregate null counts with native selectors to avoid per-column FFI calls.
         counts = df.select((~cs.starts_with("_")).null_count()).row(0, named=True)
         return {col: (df_len - count) / df_len for col, count in counts.items()}
 

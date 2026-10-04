@@ -13,6 +13,9 @@ from bioetl.application.services.control_plane.manifest.diagnostics.selected_run
     empty_replay_readiness,
     project_selected_run_replay_readiness,
 )
+from bioetl.composition.composite_catalog import (
+    project_assay_replay,
+)
 from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.run_reports.selected_status import (
     DOMAINS,
@@ -37,7 +40,10 @@ from bioetl.interfaces.http._selected_run_live import (
     active_run_diagnostics,
     scope_matches,
 )
-from bioetl.interfaces.http._selected_run_presentation import presentation_rows
+from bioetl.interfaces.http._selected_run_presentation import (
+    _readiness_fields,
+    presentation_rows,
+)
 from bioetl.interfaces.http._selected_run_report_assessment import (
     _IdentityMismatchError,
     _load_report_assessment,
@@ -152,46 +158,6 @@ def _readiness_state(state: str) -> str:
     if state == _QUERY_ERROR:
         return _QUERY_ERROR
     return INSUFFICIENT
-
-
-_UNKNOWN_CHECK_LABELS = {
-    "manifest_not_recorded": "manifest for this run was not recorded",
-}
-
-
-def _readiness_fields(projection: Mapping[str, object]) -> dict[str, object]:
-    blockers = projection.get("blockers")
-    unknown = projection.get("unknown_checks")
-    blocker_text = (
-        ", ".join(blockers) if isinstance(blockers, list) and blockers else "—"
-    )
-    unknown_text = (
-        ", ".join(_UNKNOWN_CHECK_LABELS.get(str(code), str(code)) for code in unknown)
-        if isinstance(unknown, list) and unknown
-        else "—"
-    )
-    row = {
-        key: value
-        for key, value in projection.items()
-        if key not in {"checks", "blockers", "unknown_checks"}
-    }
-    row["blockers"] = blocker_text
-    row["unknown_checks"] = unknown_text
-    explanations = []
-    if blocker_text != "—":
-        explanations.append("Failed checks: " + blocker_text)
-    if unknown_text != "—":
-        explanations.append("Not verified: " + unknown_text)
-    row["explanation"] = "; ".join(explanations) or (
-        "Required replay checks passed"
-        if projection.get("verdict") == "READY"
-        else "Open replay checks for the assessment basis"
-    )
-    checks = projection.get("checks")
-    return {
-        "replay_readiness": [row],
-        "replay_checks": checks if isinstance(checks, list) else [],
-    }
 
 
 def _present_status(
@@ -313,9 +279,23 @@ def load_selected_run_status(
         "reason": "Saved run evidence; CURRENT and chart coverage are separate",
     }
     probes, inventory_present = _artifact_probes(report, path.parent)
+    if assessment.get("evidence_completeness") != "COMPLETE":
+        probes.append(
+            {
+                "code": "report_evidence_completeness",
+                "result": "unknown",
+                "reason": "report_evidence_incomplete",
+                "evidence_ref": "#/selected_run_snapshot/assessment",
+            }
+        )
+    manifest, replay_probe = project_assay_replay(
+        path.parent, run_id, report, _manifest_snapshot(manifest_port, run_id)
+    )
+    if replay_probe is not None:
+        probes.append(replay_probe)
     projection = project_selected_run_replay_readiness(
         identity=identity,
-        manifest=_manifest_snapshot(manifest_port, run_id),
+        manifest=manifest,
         artifact_probes=probes,
         inventory_present=inventory_present,
         evidence_revision=revision,

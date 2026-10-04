@@ -30,6 +30,9 @@ if TYPE_CHECKING:
         TracingPort,
     )
     from bioetl.domain.types import RunID
+    from bioetl.infrastructure.adapters.http.health import (
+        HealthProbeCoordinator,
+    )
 
 
 __all__ = ["RetryConfig", "UnifiedHTTPClient"]
@@ -56,6 +59,7 @@ class UnifiedHTTPClient(
     tracer: TracingPort | None = None
     metrics: MetricsPort | None = None
     logger: LoggerPort | None = None
+    health_probe_coordinator: HealthProbeCoordinator | None = None
 
     _client: httpx.AsyncClient | None = field(init=False, default=None)
     _client_enter_depth: int = field(init=False, default=0)

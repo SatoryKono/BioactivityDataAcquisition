@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 4.0.0
+Version: 4.1.0
 Status: active
 Class: internal (repo-only entrypoint; excluded from MkDocs)
 Owner: BioETL Team
@@ -34,8 +34,8 @@ scenario-table content parity (`check_readme_scenarios`), not version equality.
 ```text
 docs/00-project/ai/prompts/
   README.md
-  REGISTRY.yaml          # 17 scenarios + entries
-  domains.yaml           # 24 ADR-060 overlays (consolidated)
+  REGISTRY.yaml          # 18 scenarios + entries
+  domains.yaml           # 28 ADR-060 overlays (consolidated)
   CATALOG.md             # optional, from python -m scripts.ai.prompts catalog
   _schema/*.json         # 6 schemas
   fragments/             # 14 reusable blocks
@@ -45,7 +45,7 @@ docs/00-project/ai/prompts/
 
 Historical copies: `docs/99-archive/prompts-2026-09/`.
 
-## 17 scenarios
+## 18 scenarios
 
 See `REGISTRY.yaml` `scenarios:`. Primary cards (this table must mirror
 `scenarios:` id + prompt id both ways — enforced by `check`):
@@ -54,6 +54,7 @@ See `REGISTRY.yaml` `scenarios:`. Primary cards (this table must mirror
 | --- | --- | --- |
 | session-bootstrap | `prompt.session.grok-bootstrap` | [library/session/bootstrap.md](library/session/bootstrap.md) |
 | audit-cycle | `prompt.audit.cycle` | [library/audit/cycle.md](library/audit/cycle.md) |
+| comprehensive-audit | `prompt.audit.comprehensive` | [library/audit/comprehensive.md](library/audit/comprehensive.md) |
 | audit-tech-debt | `prompt.audit.tech-debt` | [library/audit/tech-debt.md](library/audit/tech-debt.md) |
 | plan-scoped | `prompt.plan.scoped` | [library/plan/scoped.md](library/plan/scoped.md) |
 | agent-efficiency | `prompt.plan.agent-efficiency` | [library/plan/agent-efficiency.md](library/plan/agent-efficiency.md) |
@@ -71,6 +72,33 @@ See `REGISTRY.yaml` `scenarios:`. Primary cards (this table must mirror
 | sequential-run | `prompt.audit.sequential-run` | [library/audit/sequential-run.md](library/audit/sequential-run.md) |
 
 Deprecated: `prompt.audit.grok-cycle`, `prompt.audit.cyclic-pack` → `prompt.audit.cycle`.
+
+
+## Comprehensive BioETL audit v2
+
+`prompt.audit.comprehensive` integrates the audited P00-P20 package into the
+current library rather than tracking a second monolithic prompt SSOT.
+
+- P00 is the dependency-aware campaign/orchestrator.
+- P01-P19 reuse existing domain overlays and shared fragments.
+- Four dedicated overlays were added where the library had no clear PRIMARY
+  owner: `composite-workflow`, `reproducibility`, `performance`,
+  `repo-hygiene`.
+- P20 is `prompt.audit.reconcile`, an independent read-only reconciliation
+  card.
+- POST-A/POST-B map to the existing fail-closed
+  `prompt.audit.orchestrator`/closeout flow; raw P01-P19 findings must not
+  create Issues before P20 reconciliation.
+
+Typical entry:
+
+```text
+python -m scripts.ai.prompts render prompt.audit.comprehensive --param SCOPE=repo
+```
+
+Domain cards remain compilable independently with `audit-readonly`; the
+comprehensive card owns ordering, shared evidence, handoffs and final
+reconciliation.
 
 ## Fragments
 

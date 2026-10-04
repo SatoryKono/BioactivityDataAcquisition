@@ -1,4 +1,4 @@
-version: 1.0.0
+version: 1.1.0
 schema: _schema/domain-overlay.schema.json
 note: 'Consolidated from overlays/*.yaml for epic #10081. Compiler reads domains.<name>;
   ADR-060 overlay semantics unchanged.'
@@ -761,3 +761,145 @@ domains:
     OUTPUT_EXTRAS:
     - cassette-inventory.csv
     - replay-hashes.json
+
+  composite-workflow:
+    domain: composite-workflow
+    id: prompt.audit.project.new2.composite-workflow
+    OBJECT: Composite Pipeline and Workflow state machines, join semantics, merge policy,
+      recovery, and cross-validation
+    SCOPE:
+    - src/bioetl/domain/composite/
+    - src/bioetl/domain/workflow/
+    - src/bioetl/application/composite/
+    - src/bioetl/application/workflow/
+    - src/bioetl/composition/
+    - configs/composites/
+    - configs/workflows/
+    SSOT:
+    - docs/02-architecture/decisions/ADR-026-composite-pipeline-pattern.md
+    - docs/02-architecture/decisions/ADR-047-workflow-control-plane.md
+    - docs/00-project/RULES.md
+    AUDIT_CONTOURS:
+    - separate Composite FSM and Workflow FSM with identity and transition ownership
+    - seed dependencies enrichers merge cross-validation Gold-write order
+    - join-key subset, MANY_TO_ONE aggregation, EXPLICIT_RULES field-priority invariants
+    - deterministic conflict resolution, normalization-profile compatibility, and tie-breaks
+    - failure, repair, force, resume, partial retry, duplicate Gold/lineage prevention
+    MANDATORY_EVIDENCE:
+    - composite-fsm.json and workflow-fsm.json
+    - join-cardinality-matrix.csv and merge-policy-matrix.csv
+    - recovery-equivalence-matrix.csv with persisted state and expected artifacts
+    VALIDATION:
+    - composite/workflow unit and integration tests including invalid transitions
+    - deterministic merge and recovery/retry replay checks
+    DOMAIN_STOP:
+    - merge/cardinality rule accepted without required aggregation or priorities
+    - recovery creates duplicate semantic rows or loses provenance
+    OUTPUT_EXTRAS:
+    - join-cardinality-matrix.csv
+    - recovery-equivalence-matrix.csv
+  reproducibility:
+    domain: reproducibility
+    id: prompt.audit.project.new2.reproducibility
+    OBJECT: Determinism, idempotency, exact replay eligibility, manifests, ledgers,
+      checkpoints, lineage, hashes, and provenance closure
+    SCOPE:
+    - src/bioetl/domain/deterministic_identity.py
+    - src/bioetl/domain/control_plane/
+    - src/bioetl/application/services/control_plane/
+    - src/bioetl/infrastructure/control_plane/
+    - src/bioetl/composition/
+    SSOT:
+    - docs/02-architecture/decisions/ADR-014-deterministic-writes.md
+    - docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md
+    - docs/02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md
+    - docs/02-architecture/decisions/ADR-047-workflow-control-plane.md
+    AUDIT_CONTOURS:
+    - run, manifest, occurrence, replay-parent and execution-fingerprint identity
+    - effective config, code/dependency, contract/profile/DQ and input snapshot provenance
+    - canonical hashing, ordering, META_FIELDS exclusions, normalization-before-hash
+    - manifest immutability, append-only ledger, checkpoint anchors, lineage/artifact closure
+    - byte, semantic, occurrence-only, and non-equivalent replay classification
+    - nondeterminism from time, random, concurrency, ordering, mutable external state
+    MANDATORY_EVIDENCE:
+    - replay-eligibility-matrix.csv and replay-dossier.json
+    - equivalence-matrix.csv with allowed occurrence-only fields
+    - two-pass-audit-reconciliation.json and lineage-closure.json
+    VALIDATION:
+    - independent A/B evidence passes on representative high-risk pipeline/workflow
+    - hash, forensic diff, resume/replay and lineage closure tests
+    DOMAIN_STOP:
+    - exact replay claimed without immutable inputs or pinned semantic anchors
+    - occurrence-only differences silently treated as byte equivalence
+    OUTPUT_EXTRAS:
+    - replay-eligibility-matrix.csv
+    - equivalence-matrix.csv
+  performance:
+    domain: performance
+    id: prompt.audit.project.new2.performance
+    OBJECT: Measured BioETL latency, throughput, CPU, memory, I/O, locking, and
+      resource efficiency within the local-only architecture
+    SCOPE:
+    - src/bioetl/
+    - tests/
+    - .benchmarks/
+    - scripts/engineering/
+    SSOT:
+    - docs/00-project/RULES.md
+    - docs/02-architecture/decisions/ADR-010-local-only-deployment.md
+    - docs/02-architecture/decisions/ADR-014-deterministic-writes.md
+    AUDIT_CONTOURS:
+    - benchmark manifest revision environment dataset warmup repetitions variance cache concurrency
+    - measured CPU memory I/O network and lock hotspots, not LOC-based guesses
+    - repeated scans, N+1 HTTP/storage, materialization/conversion and write amplification
+    - batching streaming pagination backpressure, composite cardinality explosion, bootstrap overhead
+    - performance budgets/regression gates and representativeness of benchmark inputs
+    MANDATORY_EVIDENCE:
+    - benchmark-manifest.json and benchmark-results.csv
+    - hotspot-profile.json with cause class and variance
+    - performance-gate-map.csv and bounded recommendations
+    VALIDATION:
+    - reproduce each P1/P2 hotspot within the declared benchmark envelope
+    - rerun acceptance benchmark with same dataset, warmup and repetition policy
+    DOMAIN_STOP:
+    - performance claim promoted to PROVEN without reproducible benchmark evidence
+    - distributed/caching/concurrency redesign proposed without measured bottleneck
+    OUTPUT_EXTRAS:
+    - benchmark-results.csv
+    - hotspot-profile.json
+  repo-hygiene:
+    domain: repo-hygiene
+    id: prompt.audit.project.new2.repo-hygiene
+    OBJECT: Repository hygiene, typing, naming, public API, duplication, dead code,
+      compatibility debt, package/build metadata, and static-analysis ratchets
+    SCOPE:
+    - src/
+    - tests/
+    - scripts/
+    - pyproject.toml
+    - .github/root-allowlist.txt
+    - configs/quality/
+    SSOT:
+    - docs/00-project/RULES.md
+    - .github/root-allowlist.txt
+    - pyproject.toml
+    AUDIT_CONTOURS:
+    - root allowlist, generated/transient tracking, naming and public export consistency
+    - exact/near duplication vs intentional mirrors/provider-specific implementations
+    - dead/zero-reference proof including importlib, registries, entrypoints, resources and workflows
+    - mypy/ruff/type-ignore/Any/cast debt and Protocol conformance at boundaries
+    - package data, entrypoints, dependency declarations, compatibility shims and sunset policy
+    - hotspots, mixin/factory/helper proliferation, TODO/FIXME and disabled-gate debt
+    MANDATORY_EVIDENCE:
+    - repo-hygiene-inventory.csv and public-surface-delta.json
+    - static-analysis-debt.json and duplication-clusters.json
+    - deletion-candidates.json with negative-use proof and consumer risk
+    VALIDATION:
+    - root hygiene, static analysis, package/import and architecture gates
+    - dynamic-registration and entrypoint checks before dead-code/deletion conclusions
+    DOMAIN_STOP:
+    - deletion proposed from grep-zero alone
+    - debt threshold/allowlist increased as remediation
+    OUTPUT_EXTRAS:
+    - static-analysis-debt.json
+    - deletion-candidates.json
