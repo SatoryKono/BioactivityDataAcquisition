@@ -164,7 +164,7 @@ jobs:
             mkdir -p reports/test-telemetry
             HYPOTHESIS_PROFILE=fast \
             uv run --frozen --no-build pytest tests/architecture \
-              -m not-slow-not-benchmark-not-memory \
+              -m "not slow and not benchmark and not memory" \
               -q --tb=short \
               --junitxml=reports/test-telemetry/junit-arch.xml
       - store_test_results:
@@ -511,6 +511,10 @@ jobs:
             "$HOME/.local/bin/hadolint" Dockerfile.bioetl
       - run:
           name: docker compose config validation
+          environment:
+            NEO4J_PASSWORD: ci-config-validation-only
+            GF_SECURITY_ADMIN_PASSWORD: ci-config-validation-only
+            GF_RENDERING_RENDERER_TOKEN: ci-config-validation-only
           command: |
             docker compose config > /dev/null
             docker compose -f docker-compose.monitoring.yml config > /dev/null
