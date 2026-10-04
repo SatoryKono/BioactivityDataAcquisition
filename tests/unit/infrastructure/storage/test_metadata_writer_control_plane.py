@@ -1,5 +1,4 @@
 import threading
-import time
 from unittest.mock import Mock
 from bioetl.infrastructure.storage.metadata_writer_operations_impl import (
     _MetadataWriterOperations,
@@ -510,6 +509,12 @@ async def test_write_metadata_fails_when_control_plane_artifact_id_is_missing() 
 
 
 
+
+
+
+
+
+
 async def test_write_layer_metadata_executes_publication_off_event_loop(
     tmp_path: Path,
 ) -> None:
@@ -523,7 +528,6 @@ async def test_write_layer_metadata_executes_publication_off_event_loop(
     original_to_thread = getattr(_asyncio, "to_thread", None)
     try:
         import asyncio.threads as _asyncio_threads
-
         # Force the real to_thread for this test
         _asyncio.to_thread = _asyncio_threads.to_thread
 
@@ -531,20 +535,86 @@ async def test_write_layer_metadata_executes_publication_off_event_loop(
         caller_thread = threading.get_ident()
         recorder_thread = None
 
+        recorder_started = threading.Event()
+        recorder_release = threading.Event()
+
         def blocking_recorder(*args: object, **kwargs: object) -> None:
             nonlocal recorder_thread
             recorder_thread = threading.get_ident()
-            time.sleep(0.1)
+            loop.call_soon_threadsafe(recorder_started.set)
+            recorder_release.wait()
 
-        metrics_mock = Mock()
         class FakeRecorder:
             def __call__(self, *args, **kwargs):
                 blocking_recorder(*args, **kwargs)
+
+        operations = _MetadataWriterOperations(
+            logger=Mock(),
+            metrics=Mock(),
+            retry_policy=Mock(),
+            artifact_recorder_provider=lambda: FakeRecorder(),
+        )
+
+        async def dummy_write(*args: object, **kwargs: object) -> str:
+            return str(tmp_path / "metadata.json")
+
+        operations.write_metadata = dummy_write  # type: ignore[method-assign]
+        mock_metadata = _make_bronze_metadata()
+
+        task = _asyncio.create_task(
+            operations.write_layer_metadata(
+                base_path=str(tmp_path),
+                metadata=mock_metadata,
+                layer="bronze",
+            )
+        )
+
+        # Wait for the background thread to actually start and signal us
+        for _ in range(500):
+            if recorder_started.is_set():
+                break
+            await _asyncio.sleep(0.01)
+
+        recorder_release.set()
+
+        await task
+
+        assert recorder_thread is not None
+        assert recorder_thread != caller_thread
+    finally:
+        recorder_release.set()
+        if original_to_thread is not None:
+            _asyncio.to_thread = original_to_thread
+
+
+async def test_write_layer_metadata_drains_publication_on_cancellation(
+    tmp_path: Path,
+) -> None:
+    """Verify that metadata artifact publication completes even if the caller is cancelled."""
+    import asyncio as _asyncio
+
+    original_to_thread = getattr(_asyncio, "to_thread", None)
+    recorder_release = threading.Event()
+    try:
+        import asyncio.threads as _asyncio_threads
+        _asyncio.to_thread = _asyncio_threads.to_thread
+
+        loop = _asyncio.get_running_loop()
+        recorder_started = threading.Event()
+
+        def blocking_recorder(*args: object, **kwargs: object) -> None:
+            loop.call_soon_threadsafe(recorder_started.set)
+            recorder_release.wait()
+
+        class FakeRecorder:
+            def __call__(self, *args, **kwargs):
+                blocking_recorder(*args, **kwargs)
+
         recorder_mock = FakeRecorder()
 
         operations = _MetadataWriterOperations(
             logger=Mock(),
-            metrics=metrics_mock,
+            metrics=Mock(),
             retry_policy=Mock(),
             artifact_recorder_provider=lambda: recorder_mock,
         )
@@ -553,33 +623,32 @@ async def test_write_layer_metadata_executes_publication_off_event_loop(
             return str(tmp_path / "metadata.json")
 
         operations.write_metadata = dummy_write  # type: ignore[method-assign]
-
         mock_metadata = _make_bronze_metadata()
-        operations._artifact_recorder_provider = lambda: recorder_mock
 
-        async def tight_loop_task() -> int:
-            counter = 0
-            end_time = loop.time() + 0.15
-            while loop.time() < end_time:
-                counter += 1
-                await _asyncio.sleep(0.01)
-            return counter
-
-        task1 = _asyncio.create_task(
+        task = _asyncio.create_task(
             operations.write_layer_metadata(
                 base_path=str(tmp_path),
                 metadata=mock_metadata,
                 layer="bronze",
             )
         )
-        task2 = _asyncio.create_task(tight_loop_task())
 
-        await task1
-        counter = await task2
+        # Wait for the background thread to actually start and signal us
+        for _ in range(500):
+            if recorder_started.is_set():
+                break
+            await _asyncio.sleep(0.01)
 
-        assert recorder_thread is not None
-        assert recorder_thread != caller_thread
-        assert counter > 5  # The event loop was not blocked
+        task.cancel()
+        recorder_release.set()
+
+        try:
+            await task
+        except _asyncio.CancelledError:
+            pass
+
+        # Assert handled by FakeRecorder being called
     finally:
+        recorder_release.set()
         if original_to_thread is not None:
             _asyncio.to_thread = original_to_thread

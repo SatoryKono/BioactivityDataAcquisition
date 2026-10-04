@@ -135,15 +135,27 @@ class _MetadataWriterOperations:
                 entity=entity,
             )
         )
-        await asyncio.to_thread(
-            _record_artifact_publication,
-            recorder=self._artifact_recorder_provider(),
-            metrics=self._metrics,
-            layer=layer,
-            base_path=base_path,
-            metadata_path=metadata_path,
-            metadata=metadata,
+        publication_task = asyncio.create_task(
+            asyncio.to_thread(
+                _record_artifact_publication,
+                recorder=self._artifact_recorder_provider(),
+                metrics=self._metrics,
+                layer=layer,
+                base_path=base_path,
+                metadata_path=metadata_path,
+                metadata=metadata,
+            )
         )
+        try:
+            await asyncio.shield(publication_task)
+        except asyncio.CancelledError:
+            # Drain the pending publication worker to ensure we don't leave
+            # orphaned thread state running after cancellation propagation.
+            import contextlib
+
+            with contextlib.suppress(asyncio.CancelledError):
+                await publication_task
+            raise
         return metadata_path
 
     async def write_metadata(self, request: _MetadataWriteRequest) -> str:
