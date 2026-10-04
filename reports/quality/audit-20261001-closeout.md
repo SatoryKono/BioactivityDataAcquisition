@@ -34,7 +34,7 @@ The live mapping used here is:
 - 173 repo-backed observability tooling tests passed; the broader observability unit suite also passed after retiring old fixtures.
 - Required dashboard operator readability, first-window no-scroll and replay layout checks passed (30 tests).
 - Full `python -m scripts.docs verify` passed, including strict MkDocs build.
-- Codex–Junie parity, cast census and hotspot baseline checks passed.
+- Codexâ€“Junie parity, cast census and hotspot baseline checks passed.
 - Scripts catalog: 636 scripts, 338 active, 298 supporting; no status laundering or cap increase.
 - Debt governance: 46 pass / 0 fail; these gates do not establish full-suite success.
 - First coverage attempt stopped on an obsolete import of the removed Mermaid duplicate. Second attempt retained as failed diagnostics after a stale Runtime route assertion. Tests were then corrected; it is not an admissible fixed-test-tree coverage measurement and must not be reused as full coverage.
@@ -114,7 +114,7 @@ The live mapping used here is:
 - `tests.integration.test_dashboard_required_panel_links::test_workflow_overview_required_panel_links`
 
 
-## Architecture program and config-root measurement checkpoint — 2026-10-04
+## Architecture program and config-root measurement checkpoint â€” 2026-10-04
 
 This checkpoint preserves the earlier audit results above. It records local implementation and measurement; the source-bound final acceptance receipts remain the authority for completion.
 
@@ -146,7 +146,7 @@ Run complete `python -m pytest tests/architecture`, the complete 17-group covera
 Billing lock remains `CI=BLOCKED_EXTERNAL_PERMANENT`. Local execution is not CI PASS. `local_single_host` evidence can qualify only as DEGRADED under the existing proof policy; required ADMIT cannot be replaced by fabricated independent attestation. Publication/integration and the applicable lifecycle acceptance are separate requirements. Runtime mirror parity is N/A because Codex/Junie runtime sources were unchanged. The original shared checkout and all `.env` files are preserved.
 
 
-## Architecture remainder repair checkpoint — 2026-10-04
+## Architecture remainder repair checkpoint â€” 2026-10-04
 
 The complete architecture run on `d20319c66039dc30ff6bf0a2807159a079912212`
 finished with 4864 passed, 20 failed, 76 skipped and zero errors. This is a
@@ -176,7 +176,7 @@ are preserved explicitly as unverified history. Local evidence retains
 GitHub run URL, CI PASS claim or lifecycle ADMIT.
 
 
-## Complete local measurement and current bindings — 2026-10-04
+## Complete local measurement and current bindings â€” 2026-10-04
 
 Wave 30 completed all 17 canonical groups on
 `b7334cc49d144a50a26f656e0241ea6dfe42d0e9`: 32354 passed, 179 skipped,
@@ -210,3 +210,43 @@ the 157-error baseline. Changed product and telemetry/governance modules
 passed their scoped strict checks. No claim of global typing cleanliness is
 made. Final full architecture, docs/governance/debt validation and applicable
 trust-tier admission remain required before lifecycle closure.
+### Wave 32 complete measurement and archive checkpoint (2026-10-04)
+
+The full canonical 17-group producer completed on clean full-tree commit
+`0d89b40862340ad62cd361b8abbd080c64c15264`: 32533 tests, 32354 passed,
+179 skipped, zero failures/errors, all 17 shard exits zero, both 85% gates zero.
+Fresh aggregate coverage is 99.74% lines and 94.43% branches. `config_root`
+is 40/40 executable lines and 18/18 branches; fallback line 32 was hit and
+no lines are missing. Product source SHA-256 is
+`29b4c6ac3d6b9e0e6d1b4919a55d1a2496975439af6efc51713fd1fc86cf4a40`;
+test-tree SHA-256 is
+`9bc4cbef5dc67035c795d600d665ff503ddf067cb59078cc7b873c28dae90db8`.
+
+Raw comparison still records 67 other-module regressions and zero new paths.
+Canonical nonregressing adoption retains historical floors across the exact
+2545 current module paths. This is not fresh global module nonregression.
+Historical snapshots and the raw comparison ledger remain distinct.
+Telemetry was materialized from this completed manifest without CI identity.
+
+The complete architecture diagnostic on this measurement commit had 4881
+passed, four stale evidence bindings failed, 76 skipped and zero errors.
+Those four bindings (6045, topology, telemetry population and telemetry branch
+identity) are refreshed from the actual completed run; final full architecture
+acceptance must be checked again on the committed materialization.
+All nine earlier ownership/count/inventory failures passed targeted checks.
+Ruff and scoped strict typing for the changed ports facade passed. Comparable
+full-source strict Mypy previously remained failed: 108 errors in 39 files
+versus historical 157 in 51, with zero added error messages. The separate
+broader `src scripts` scan reported 719 errors in 184 files and has no comparable
+baseline; it is not claimed green or globally nonregressing.
+
+Four expired tracked episodic notes were archived as exact original Git blobs
+under `docs/99-archive/engineering/memory/expired-episodic-2026-10-04/`, with original paths,
+creation/expiry dates and SHA-256 in its archive index. No historical evidence
+content was discarded or rewritten, and the 14-day TTL was not extended.
+The original shared checkout and its local memory are untouched.
+
+`CI=BLOCKED_EXTERNAL_PERMANENT`. Local PASS is not CI PASS or lifecycle ADMIT.
+Final architecture/governance/docs/debt receipts and policy trust admission
+remain explicit acceptance steps. Runtime mirror source was unchanged;
+Codex/Junie mirror synchronization is not applicable to these changes.

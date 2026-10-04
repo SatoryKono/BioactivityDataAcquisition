@@ -1,6 +1,6 @@
 {
-  "additive_coverage_xml_path": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-30/coverage.xml",
-  "additive_coverage_xml_sha256": "d4c1bd861dcf59bde412cdb56f337ef4b4e853b3a2c2bcf7ae0a592887b075f4",
+  "additive_coverage_xml_path": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-32/coverage.xml",
+  "additive_coverage_xml_sha256": "9c8c550a9ea3920b24c46e3f1f30459dfaa24280ab1aa5148b3e63e2623536f3",
   "additive_measured_module_count": 2477,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
@@ -14656,7 +14656,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.ports",
       "path": "src/bioetl/domain/ports/__init__.py",
-      "source_lines": 219
+      "source_lines": 216
     },
     {
       "coverage_percent": 100.0,
@@ -40108,7 +40108,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.ports",
       "path": "src/bioetl/domain/ports/__init__.py",
-      "source_lines": 219
+      "source_lines": 216
     },
     {
       "coverage_percent": 100.0,

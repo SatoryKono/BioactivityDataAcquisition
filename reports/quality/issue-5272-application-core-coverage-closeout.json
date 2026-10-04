@@ -67,12 +67,28 @@
         "reason": "Issue #5244 requires zero below-tier production modules; the live inventory now reports zero modules below the default floor, while this closeout remains the #5272 application-core evidence pack."
       },
       "notes": "Current metrics are rebound to the accepted module inventory. Historical measurements, baseline, and earlier closeout notes are preserved in previous_current_bindings. This does not claim fresh global measured nonregression."
+    },
+    {
+      "snapshot_date": "2026-08-17",
+      "current_metrics": {
+        "repo_uncovered_module_count": 0,
+        "repo_unmeasured_module_count": 0,
+        "application_core_covered_line_percent": 99.82,
+        "application_core_uncovered_module_count": 0,
+        "application_core_unmeasured_module_count": 0
+      },
+      "parent_epic_status": {
+        "status": "not_closeable_under_current_definition_of_done",
+        "remaining_below_85_module_count": 0,
+        "reason": "Issue #5244 requires zero below-tier production modules; the live inventory now reports zero modules below the default floor, while this closeout remains the #5272 application-core evidence pack."
+      },
+      "notes": "Current metrics are rebound to the accepted module inventory. Historical measurements, baseline, and earlier closeout notes are preserved in previous_current_bindings. This does not claim fresh global measured nonregression."
     }
   ],
   "current_binding_refresh": {
-    "measured_head": "b7334cc49d144a50a26f656e0241ea6dfe42d0e9",
-    "source_tree_sha256": "8d3e76877a6e5c205d49b926d60e57775d94015f9222ba2f4202ccc55c1026c8",
-    "evidence": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-30/manifest.json",
+    "measured_head": "0d89b40862340ad62cd361b8abbd080c64c15264",
+    "source_tree_sha256": "29b4c6ac3d6b9e0e6d1b4919a55d1a2496975439af6efc51713fd1fc86cf4a40",
+    "evidence": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-32/manifest.json",
     "semantics": "Current accepted inventory may retain historical nonregressing rows; raw measured candidate remains separate."
   }
 }
