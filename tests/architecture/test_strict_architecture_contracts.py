@@ -370,13 +370,6 @@ def _schema_field_aliases() -> dict[str, str]:
         "logp_method": "logp_method",
         "tpsa": "tpsa",
         "polar_surface_area": "tpsa",
-        "reactions": "catalytic_activity",
-        "reaction_ec_numbers": "protein_ec_numbers",
-        "isoform_count": "alternative_products",
-        "cross_reference_count": "go_terms",
-        "feature_count": "features_json",
-        "keyword_count": "keywords",
-        "publication_count": "similarity_comment",
     }
 
 
@@ -711,6 +704,15 @@ def test_silver_schemas_match_domain_entities():
                 continue
 
             entity_field_name = aliases.get(field, field)
+
+            # Regression check: If the schema field name is natively present in the entity,
+            # it should not be aliased to something else. This prevents aliases from hiding
+            # actual fields that are now implemented natively.
+            if field in entity_fields and field in aliases and aliases[field] != field:
+                violations.append(
+                    f"Redundant alias: Schema field '{field}' exists natively in {entity_cls.__name__}, "
+                    f"but is aliased to '{aliases[field]}'."
+                )
 
             if entity_field_name not in entity_fields:
                 violations.append(
