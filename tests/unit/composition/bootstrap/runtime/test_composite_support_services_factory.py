@@ -29,6 +29,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, cast
 from types import SimpleNamespace
 from pathlib import Path
@@ -57,6 +58,7 @@ from bioetl.application.composite.join_planner_helpers import (
 )
 from bioetl.composition.factories.storage import StorageBundle
 from bioetl.domain.composite.strategy import MergeStrategy
+from bioetl.composition.factories.storage import StorageBundle
 
 
 def _make_factory(

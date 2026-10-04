@@ -1,0 +1,25 @@
+{
+  "command": [
+    "E:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "tests/unit/application/services/test_metadata_coordinator_lineage.py",
+    "tests/unit/composition/bootstrap/runtime/test_composite_support_services_factory.py",
+    "tests/unit/composition/test_issue_10469_composition_tail_two.py",
+    "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
+    "tests/unit/scripts/test_documentation_governance_check.py",
+    "tests/unit/infrastructure/config/test_config_root.py",
+    "tests/architecture/test_config_root_governance.py",
+    "-q",
+    "--no-cov",
+    "--junitxml=reports/quality/proof-or-stop/config-root-11899/repaired-fixtures.xml"
+  ],
+  "cwd": "E:\\github\\bda-config-root-closeout-11899",
+  "started_at": "2026-10-04T17:54:46.528670+00:00",
+  "duration_ms": 18619,
+  "exit_code": 0,
+  "head_before": "1fedcce1cedeb2a62c9f5338019da39d345a575a",
+  "head_after": "1fedcce1cedeb2a62c9f5338019da39d345a575a",
+  "head_unchanged": true,
+  "log": "E:\\github\\bda-config-root-closeout-11899\\reports\\quality\\proof-or-stop\\config-root-11899\\repaired-fixtures.log"
+}
