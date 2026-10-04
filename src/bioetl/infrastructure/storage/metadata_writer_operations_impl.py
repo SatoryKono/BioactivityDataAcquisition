@@ -153,8 +153,9 @@ class _MetadataWriterOperations:
             # orphaned thread state running after cancellation propagation.
             import contextlib
 
-            with contextlib.suppress(asyncio.CancelledError):
-                await publication_task
+            while not publication_task.done():
+                with contextlib.suppress(asyncio.CancelledError):
+                    await asyncio.shield(publication_task)
             raise
         return metadata_path
 
