@@ -59,6 +59,7 @@ def build_quarantine_runtime_ports(
     pipeline_metrics: PipelineMetricsRecorder,
     batch_metrics: BatchMetricsRecorderService | None,
     run_type: str = "unknown",
+    stage: str = "silver",
 ) -> QuarantineRuntimeDependencies:
     """Build runtime ports from quarantine manager state."""
     return QuarantineRuntimeDependencies(
@@ -69,6 +70,7 @@ def build_quarantine_runtime_ports(
         pipeline_metrics=pipeline_metrics,
         batch_metrics=batch_metrics,
         run_type=run_type,
+        stage=stage,
     )
 
 
@@ -139,10 +141,9 @@ async def persist_dq_quarantine_requests(
         run_id=run_id,
         ingestion_ts=ingestion_ts,
     )
-    reason_counts: dict[tuple[ErrorType, str], int] = {}
-    for _, error_type, _, reason_code in parts:
-        key = (error_type, reason_code)
-        reason_counts[key] = reason_counts.get(key, 0) + 1
+    reason_counts = Counter(
+        (error_type, reason_code) for _, error_type, _, reason_code in parts
+    )
     for (error_type, reason_code), count in reason_counts.items():
         track_quarantine_metrics(
             metrics=ports.metrics,
