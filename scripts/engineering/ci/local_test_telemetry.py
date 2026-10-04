@@ -47,16 +47,29 @@ def _measurement_file(raw_path: object, *, measurement_root: Path) -> Path:
         raise ValueError(_XML_BOUNDARY_ERROR)
     if candidate.suffix != ".xml":
         raise ValueError(_XML_BOUNDARY_ERROR)
+    from scripts.engineering.qa.run_local_coverage_verify import SHARDS
+
+    approved_paths = [measurement_root / "coverage.xml"]
+    for shard in SHARDS:
+        approved_paths.extend(
+            (
+                measurement_root / f"{shard.name}.xml",
+                measurement_root / "junit" / f"{shard.name}.xml",
+            )
+        )
+    approved = next((path for path in approved_paths if path == candidate), None)
+    if approved is None:
+        raise ValueError(_XML_BOUNDARY_ERROR)
     # Inspect each component without following links. Even non-strict resolve()
     # can traverse an external target before the containment check runs.
     component = measurement_root
-    for part in candidate.relative_to(measurement_root).parts:
+    for part in approved.relative_to(measurement_root).parts:
         component = component / part
         if component.is_symlink() or component.is_junction():
             raise ValueError(_XML_BOUNDARY_ERROR)
-    if not candidate.is_file():
+    if not approved.is_file():
         raise ValueError("Local measurement XML must be a regular file")
-    return candidate
+    return approved
 
 
 def _validate_measurement_timestamps(payload: dict[str, Any]) -> None:

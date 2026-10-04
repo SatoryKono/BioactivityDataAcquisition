@@ -25,12 +25,14 @@ def test_backport_archive_matches_reviewed_source() -> None:
     assert provenance["upstream_commit"] == "28d440b5dd449dbf1fe6f3506cf94ecca4d02660"
     archive = BACKPORT / "braces-3.0.4-bioetl.1.tgz"
     with tarfile.open(archive) as packed:
+        assert set(packed.getnames()) == {
+            *(f"package/{name}" for name in provenance["files"]),
+            "package/package.json",
+        }
         for relative, digest in provenance["files"].items():
-            source = (BACKPORT / relative).read_bytes()
-            assert hashlib.sha256(source).hexdigest() == digest
             member = packed.extractfile(f"package/{relative}")
             assert member is not None
-            assert member.read() == source
+            assert hashlib.sha256(member.read()).hexdigest() == digest
         metadata = packed.extractfile("package/package.json")
         assert metadata is not None
         assert metadata.read() == (BACKPORT / "package.json").read_bytes()

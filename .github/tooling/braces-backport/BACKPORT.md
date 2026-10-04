@@ -6,11 +6,12 @@ It addresses CVE-2026-93687 / GHSA-vfj7-8cjw-p6xm with the proposed upstream
 fix from https://github.com/micromatch/braces/pull/72 at commit
 `28d440b5dd449dbf1fe6f3506cf94ecca4d02660` in `FSDevelop/braces`.
 
-The JavaScript implementation and MIT license are copied unchanged from that
-commit. `provenance.json` pins their hashes. Only package metadata differs:
+The archive contains the JavaScript implementation and MIT license unchanged
+from that commit. `provenance.json` pins each upstream file hash; the upstream
+commit remains the source of truth. Only package metadata differs:
 the private version, description and omission of upstream development tooling.
 The tarball is built with `npm pack`; architecture tests verify its bytes
-against the checked-in source and each consumer lockfile's SHA-512 integrity.
+against the pinned source hashes and each consumer lockfile's SHA-512 integrity.
 No OSV advisory is ignored or suppressed.
 
 The patch bounds brace/parenthesis nesting to 100, honors stricter limits,

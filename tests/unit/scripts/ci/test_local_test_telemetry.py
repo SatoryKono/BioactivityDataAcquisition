@@ -292,7 +292,7 @@ def test_external_xml_symlink_does_not_disclose_target_existence(
     external = tmp_path / "external.xml"
     if target_exists:
         external.write_text("private data")
-    link = measurement_root / "artifact.xml"
+    link = measurement_root / "coverage.xml"
     try:
         link.symlink_to(external)
     except OSError as error:
@@ -308,3 +308,23 @@ def test_external_xml_symlink_does_not_disclose_target_existence(
         match="^Local measurement XML must remain within its manifest directory$",
     ):
         _measurement_file(str(link), measurement_root=measurement_root)
+
+
+@pytest.mark.parametrize("target_exists", [False, True])
+def test_noncanonical_xml_is_rejected_before_filesystem_probe(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, target_exists: bool
+) -> None:
+    from scripts.engineering.ci.local_test_telemetry import _measurement_file
+
+    candidate = tmp_path / "private.xml"
+    if target_exists:
+        candidate.write_text("private")
+
+    def forbidden_probe(*args: object, **kwargs: object) -> bool:
+        pytest.fail("An unregistered artifact must not cause a filesystem probe")
+
+    monkeypatch.setattr(Path, "is_file", forbidden_probe)
+    monkeypatch.setattr(Path, "is_symlink", forbidden_probe)
+    monkeypatch.setattr(Path, "resolve", forbidden_probe)
+    with pytest.raises(ValueError, match="within its manifest directory"):
+        _measurement_file(str(candidate), measurement_root=tmp_path)

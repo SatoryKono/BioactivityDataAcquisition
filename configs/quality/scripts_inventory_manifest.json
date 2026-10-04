@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-04T18:35:01.095924+00:00",
+  "generated_at": "2026-10-04T19:16:50.357653+00:00",
   "summary": {
     "total_scripts": 636,
     "status_counts": {
@@ -10057,7 +10057,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
@@ -10080,6 +10080,12 @@
         {
           "path": "tests/unit/scripts/ci/test_local_test_telemetry.py",
           "line": 288,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.local_test_telemetry import _measurement_file"
+        },
+        {
+          "path": "tests/unit/scripts/ci/test_local_test_telemetry.py",
+          "line": 317,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.local_test_telemetry import _measurement_file"
         }
@@ -10362,7 +10368,7 @@
         },
         {
           "path": "scripts/engineering/ci/local_test_telemetry.py",
-          "line": 198,
+          "line": 211,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.update_test_telemetry_baseline import ("
         },
@@ -16218,7 +16224,7 @@
         },
         {
           "path": "scripts/engineering/ci/local_test_telemetry.py",
-          "line": 202,
+          "line": 215,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.report_module_coverage_inventory import ("
         },
@@ -16897,17 +16903,23 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 9,
       "references": [
         {
           "path": "scripts/engineering/ci/local_test_telemetry.py",
-          "line": 137,
+          "line": 50,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.run_local_coverage_verify import SHARDS"
         },
         {
           "path": "scripts/engineering/ci/local_test_telemetry.py",
-          "line": 148,
+          "line": 150,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa.run_local_coverage_verify import SHARDS"
+        },
+        {
+          "path": "scripts/engineering/ci/local_test_telemetry.py",
+          "line": 161,
           "source_group": "scripts",
           "text": "payload.get(\"producer\") != \"run_local_coverage_verify.py\""
         },
@@ -16940,12 +16952,6 @@
           "line": 51,
           "source_group": "tests",
           "text": "\"producer\": \"run_local_coverage_verify.py\","
-        },
-        {
-          "path": "tests/unit/scripts/qa/test_run_local_coverage_verify.py",
-          "line": 10,
-          "source_group": "tests",
-          "text": "from scripts.engineering.qa.run_local_coverage_verify import ("
         }
       ]
     },
