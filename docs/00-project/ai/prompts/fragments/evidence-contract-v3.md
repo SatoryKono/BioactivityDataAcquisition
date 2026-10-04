@@ -21,11 +21,11 @@ that verdict does not replace the finding `status` field.
 | `finding_id` | unique per run, stable within iteration |
 | `root_cause_id` | stable cross-prompt id for one causal defect; shared by symptoms |
 | `fingerprint` | finding-specific SHA-256 over domain, requirement, root cause and canonical paths |
-| `status` | `PROVEN | NOT_PROVEN` |
+| `status` | `PROVEN \| NOT_PROVEN` |
 | `review_verdict` | optional independent-review verdict; never used as the primary status gate |
-| `evidence_class` | `FACT | INFERENCE | GAP | CONTRADICTION` |
-| `evidence_freshness` | `CURRENT | STALE | UNBOUND` |
-| `priority` | `P0 | P1 | P2 | P3` |
+| `evidence_class` | `FACT \| INFERENCE \| GAP \| CONTRADICTION` |
+| `evidence_freshness` | `CURRENT \| STALE \| UNBOUND` |
+| `priority` | `P0 \| P1 \| P2 \| P3` |
 | `requirement_id` | SSOT ID (`REQ-*`/`DASH-*`) or literal `GAP` |
 | `claim` | single falsifiable statement |
 | `broken_invariant` | rule/contract violated |

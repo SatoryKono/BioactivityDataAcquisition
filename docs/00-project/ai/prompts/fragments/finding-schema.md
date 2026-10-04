@@ -22,16 +22,16 @@ Each finding **must** include:
 | `expected` | Expected state |
 | `actual` | Observed state |
 | `impact` | User/runtime/security/ops impact |
-| `confidence` | `high | medium | low`; optional `confidence_score` 0..1 |
-| `status` | `PROVEN | NOT_PROVEN` |
-| `review_verdict` | Optional: `CONFIRMED | DOWNGRADED | REJECTED | NOT_VERIFIABLE` |
-| `evidence_freshness` | `CURRENT | STALE | UNBOUND` |
-| `priority` | `P0 | P1 | P2 | P3` |
+| `confidence` | `high \| medium \| low`; optional `confidence_score` 0..1 |
+| `status` | `PROVEN \| NOT_PROVEN` |
+| `review_verdict` | Optional: `CONFIRMED \| DOWNGRADED \| REJECTED \| NOT_VERIFIABLE` |
+| `evidence_freshness` | `CURRENT \| STALE \| UNBOUND` |
+| `priority` | `P0 \| P1 \| P2 \| P3` |
 | `severity` | Critical / High / Medium / Low, mapped from priority |
 | `attempted_disproof` | Falsifier/counterexample checked and result |
 | `exception_ref` | Valid exception/waiver reference or `null` |
 | `remediation` | Smallest safe next step |
-| `effort` | `S | M | L | XL` when known |
+| `effort` | `S \| M \| L \| XL` when known |
 | `automation` | Prevention CI/hook/test or `n/a` |
 | `automated_fix_possible` | boolean; never authorizes applying a fix |
 

@@ -117,6 +117,12 @@ Rules:
 Only `CONFIRMED` and accepted `DOWNGRADED` findings enter the canonical
 actionable register.
 
+For P2/P3 findings excluded from substantive sampling, record each source
+finding ID with `sampling_status = NOT_SELECTED` in `reconciliation-ledger.json`.
+Do not assign a `review_verdict` or add these findings to `canonical-findings.json`
+or `rejected-downgraded.json`. Retain them in `raw-findings.json` and carry them
+into the next P20 reconciliation until reviewed or explicitly closed.
+
 ## Reconciliation record
 
 For every reviewed finding record:

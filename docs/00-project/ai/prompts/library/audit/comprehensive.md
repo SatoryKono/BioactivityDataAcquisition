@@ -232,6 +232,7 @@ reports/audit-runs/<run_id>/comprehensive/
   canonical-findings.json
   rejected-downgraded.json
   coverage-matrix.csv
+  final-coverage-matrix.csv
   final-scorecard.json
   final-report.md
   roadmap.md
