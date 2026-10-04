@@ -1,0 +1,4 @@
+full-coverage-wave-43/** -text whitespace=cr-at-eol
+*.xml -text whitespace=cr-at-eol
+*.log -text whitespace=cr-at-eol
+*.json -text whitespace=cr-at-eol
