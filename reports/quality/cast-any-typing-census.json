@@ -17,9 +17,9 @@
     "ratchet_policy": "shrink_only"
   },
   "summary": {
-    "total_cast_any_count": 305,
+    "total_cast_any_count": 304,
     "justified_count": 241,
-    "unjustified_count": 64,
+    "unjustified_count": 63,
     "by_category": {
       "pd3_host_attr_default": 131,
       "pd6_host_attr_default": 90,
@@ -28,12 +28,12 @@
       "any_host_attr": 16,
       "any_json": 0,
       "as_mixin_host_call": 0,
-      "unjustified": 64
+      "unjustified": 63
     },
     "by_layer": {
       "application": {
-        "total": 142,
-        "unjustified": 19
+        "total": 141,
+        "unjustified": 18
       },
       "composition": {
         "total": 18,
@@ -54,7 +54,7 @@
     },
     "unjustified_by_subcategory": {
       "pd4_host_default_pending_protocol": 0,
-      "free_form_reason": 64,
+      "free_form_reason": 63,
       "no_reason_tag": 0
     },
     "file_count": 99
@@ -79,12 +79,6 @@
       "justified": 0
     },
     {
-      "path": "src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py",
-      "total": 3,
-      "unjustified": 3,
-      "justified": 0
-    },
-    {
       "path": "src/bioetl/infrastructure/observability/observability_backend_process.py",
       "total": 3,
       "unjustified": 3,
@@ -104,6 +98,12 @@
     },
     {
       "path": "src/bioetl/application/services/ops/health_service.py",
+      "total": 2,
+      "unjustified": 2,
+      "justified": 0
+    },
+    {
+      "path": "src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py",
       "total": 2,
       "unjustified": 2,
       "justified": 0
@@ -233,10 +233,6 @@
       "count": 3
     },
     {
-      "reason": "structural FK reconcile result port",
-      "count": 3
-    },
-    {
       "reason": "DeltaTable runtime type has no complete type stubs",
       "count": 2
     },
@@ -254,6 +250,10 @@
     },
     {
       "reason": "reconciliation mutation helper uses structural host",
+      "count": 2
+    },
+    {
+      "reason": "structural FK reconcile result port",
       "count": 2
     },
     {
@@ -1800,17 +1800,7 @@
     },
     {
       "path": "src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py",
-      "line": 123,
-      "layer": "application",
-      "category": "unjustified",
-      "justified": false,
-      "unjustified_subcategory": "free_form_reason",
-      "reason_tag": "structural FK reconcile result port",
-      "snippet": "r = cast(Any, result)  # Any: structural FK reconcile result port"
-    },
-    {
-      "path": "src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py",
-      "line": 139,
+      "line": 144,
       "layer": "application",
       "category": "unjustified",
       "justified": false,

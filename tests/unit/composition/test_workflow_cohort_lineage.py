@@ -26,7 +26,7 @@ from bioetl.application.services.workflow.workflow_runner_models import (
 from bioetl.application.workflow.transforms.reconcile_foreign_keys import (
     _build_reconcile_payload,
 )
-from bioetl.composition.bootstrap.assembly.workflow_transforms import (
+from bioetl.composition.factories.services.workflow_transforms import (
     WorkflowCohortResolver,
 )
 from bioetl.application.workflow.transforms.selected_snapshot_inputs import (

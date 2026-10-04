@@ -1,5 +1,7 @@
 """Restore bounded reconciliation inputs from durable completion evidence."""
 
+from __future__ import annotations
+
 from collections.abc import Mapping
 from datetime import datetime
 from typing import TypedDict, cast

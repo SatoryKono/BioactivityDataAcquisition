@@ -1,5 +1,7 @@
 """Resolve immutable producer snapshots carried by workflow dependencies."""
 
+from __future__ import annotations
+
 from collections.abc import Mapping
 from typing import cast
 

@@ -134,12 +134,24 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
 
     assert len(root_files) <= payload["outcomes"]["5847"]["tracked_root_files_after"]
     assert ".devin" in approved_tooling_roots
+    circleci_rows = [
+        row
+        for row in structure_catalog["root_tooling_roots"]["approved_roots"]
+        if row["path"] == ".circleci"
+    ]
+    assert len(circleci_rows) == 1
+    assert circleci_rows[0]["role"] == "canonical_circleci_project_configuration"
+    assert {path for path in tracked if path.startswith(".circleci/")} == {
+        ".circleci/config.yml"
+    }
     # Devin, Zed, and Claude were accepted as governed tooling roots after
     # this debt baseline; they are not the root clutter measured by #5847.
     # OpenCode (.opencode) was accepted the same way as an owner-approved
     # Phase 1 review/triage surface (Muse Spark); it is tooling, not clutter.
+    # Main also admitted exactly one CircleCI configuration in the canonical
+    # catalog. Its exact tracked surface is checked above, not a new budget.
     assert (
-        len(root_dirs - {".claude", ".devin", ".zed", ".opencode"})
+        len(root_dirs - {".claude", ".devin", ".zed", ".opencode", ".circleci"})
         == payload["outcomes"]["5847"]["tracked_root_dirs_after"]
     )
     assert (

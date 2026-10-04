@@ -8,7 +8,6 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import replace
 from bioetl.application.services.execution.pipeline_runner_models import RunResult
-from bioetl.domain.workflow.config import WorkflowStepConfig
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
 from typing import TYPE_CHECKING, cast
@@ -50,6 +49,7 @@ from bioetl.infrastructure.storage.workflow_row_reconciliation import (
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
+    from bioetl.domain.workflow.config import WorkflowStepConfig
     from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.control_plane import FileWorkflowTransformArtifactStore
