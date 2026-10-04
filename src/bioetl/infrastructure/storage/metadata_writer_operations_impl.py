@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -134,12 +135,7 @@ class _MetadataWriterOperations:
                 entity=entity,
             )
         )
-        import asyncio
-        import asyncio.threads
-
-        # Bypassing the conftest.py inline override if present
-        to_thread = getattr(asyncio.threads, "to_thread", asyncio.to_thread)
-        await to_thread(
+        await asyncio.to_thread(
             _record_artifact_publication,
             recorder=self._artifact_recorder_provider(),
             metrics=self._metrics,

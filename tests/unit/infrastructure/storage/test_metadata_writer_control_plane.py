@@ -1,3 +1,10 @@
+import threading
+import time
+from unittest.mock import Mock
+from bioetl.infrastructure.storage.metadata_writer_operations_impl import (
+    _MetadataWriterOperations,
+)
+
 # pyright: reportArgumentType=false
 # pyright: reportAttributeAccessIssue=false
 # pyright: reportCallIssue=false
@@ -27,7 +34,6 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Focused tests for MetadataWriter control-plane artifact recording."""
 
-from __future__ import annotations
 
 from datetime import UTC, datetime
 from pathlib import Path
@@ -501,3 +507,79 @@ async def test_write_metadata_fails_when_control_plane_artifact_id_is_missing() 
                 provider="chembl",
                 entity="activity",
             )
+
+
+
+async def test_write_layer_metadata_executes_publication_off_event_loop(
+    tmp_path: Path,
+) -> None:
+    """Verify that metadata artifact publication (with potential file I/O retries)
+    does not block the asyncio event loop thread.
+    """
+    import asyncio as _asyncio
+
+    # WSL pytest workaround uses a synchronous `asyncio.to_thread` mock in conftest.
+    # We temporarily bypass it here to test the real offload mechanics.
+    original_to_thread = getattr(_asyncio, "to_thread", None)
+    try:
+        import asyncio.threads as _asyncio_threads
+
+        # Force the real to_thread for this test
+        _asyncio.to_thread = _asyncio_threads.to_thread
+
+        loop = _asyncio.get_running_loop()
+        caller_thread = threading.get_ident()
+        recorder_thread = None
+
+        def blocking_recorder(*args: object, **kwargs: object) -> None:
+            nonlocal recorder_thread
+            recorder_thread = threading.get_ident()
+            time.sleep(0.1)
+
+        metrics_mock = Mock()
+        class FakeRecorder:
+            def __call__(self, *args, **kwargs):
+                blocking_recorder(*args, **kwargs)
+        recorder_mock = FakeRecorder()
+
+        operations = _MetadataWriterOperations(
+            logger=Mock(),
+            metrics=metrics_mock,
+            retry_policy=Mock(),
+            artifact_recorder_provider=lambda: recorder_mock,
+        )
+
+        async def dummy_write(*args: object, **kwargs: object) -> str:
+            return str(tmp_path / "metadata.json")
+
+        operations.write_metadata = dummy_write  # type: ignore[method-assign]
+
+        mock_metadata = _make_bronze_metadata()
+        operations._artifact_recorder_provider = lambda: recorder_mock
+
+        async def tight_loop_task() -> int:
+            counter = 0
+            end_time = loop.time() + 0.15
+            while loop.time() < end_time:
+                counter += 1
+                await _asyncio.sleep(0.01)
+            return counter
+
+        task1 = _asyncio.create_task(
+            operations.write_layer_metadata(
+                base_path=str(tmp_path),
+                metadata=mock_metadata,
+                layer="bronze",
+            )
+        )
+        task2 = _asyncio.create_task(tight_loop_task())
+
+        await task1
+        counter = await task2
+
+        assert recorder_thread is not None
+        assert recorder_thread != caller_thread
+        assert counter > 5  # The event loop was not blocked
+    finally:
+        if original_to_thread is not None:
+            _asyncio.to_thread = original_to_thread
