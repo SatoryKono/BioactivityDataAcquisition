@@ -3,9 +3,11 @@
 The canonical coverage inventory supplies adopted values; W44 raw measurements
 and historical floors remain distinct. This record has no existing generator.
 """
-from copy import deepcopy
+
 import hashlib
 import json
+import sys
+from copy import deepcopy
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[4]
@@ -20,7 +22,12 @@ assert record["schema_version"] == "issue-5376-coverage-tail-closeout-v1"
 assert record["issue"]["number"] == 5376
 assert record["closeout"]["status"] == "regressed_after_closeout"
 rows = inventory["modules"]
-below = [row for row in rows if isinstance(row.get("coverage_percent"), (int, float)) and row["coverage_percent"] < 85]
+below = [
+    row
+    for row in rows
+    if isinstance(row.get("coverage_percent"), (int, float))
+    and row["coverage_percent"] < 85
+]
 tracked = next(row for row in rows if row["path"] == removed["path"])
 record["current_live_metrics"].update(
     below_85_module_count=len(below),
@@ -31,11 +38,13 @@ record["current_live_metrics"].update(
 )
 record["closeout"].update(
     residual_below_85_module_count=len(below),
-    rationale=(f"Retained live inventory has {len(below)} measured modules below the default floor; "
-               f"uncovered={inventory['summary']['uncovered_module_count']}, "
-               f"unmeasured={inventory['summary']['unmeasured_module_count']}. "
-               "Historical floors are retained; these values do not assert fresh raw coverage. "
-               "Historical shard delta and regressed_after_closeout status remain unchanged."),
+    rationale=(
+        f"Retained live inventory has {len(below)} measured modules below the default floor; "
+        f"uncovered={inventory['summary']['uncovered_module_count']}, "
+        f"unmeasured={inventory['summary']['unmeasured_module_count']}. "
+        "Historical floors are retained; these values do not assert fresh raw coverage. "
+        "Historical shard delta and regressed_after_closeout status remain unchanged."
+    ),
 )
 record["current_live_metrics_provenance"] = {
     "source_inventory_sha256": hashlib.sha256(inventory_path.read_bytes()).hexdigest(),
@@ -46,4 +55,6 @@ record["current_live_metrics_provenance"] = {
 assert record["historical_coverage_inventory_delta"] == historical
 assert record["removed_low_tail_module"] == removed
 record_path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
-print("Updated #5376 live metrics from canonical inventory; historical record preserved; below85=", len(below))
+sys.stdout.write(
+    f"Updated #5376 live metrics; historical record preserved; below85={len(below)}\n"
+)
