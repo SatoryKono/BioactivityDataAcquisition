@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     )
 
 
-def refresh_archived_assessment(
+def refresh_archived_assessment[ObservationToken](
     *,
     data_root: Path,
     archive_root: Path,
@@ -34,8 +34,8 @@ def refresh_archived_assessment(
     plan: ControlPlaneArtifactLifecyclePlan,
     observed_at: datetime,
     capture_factory: Callable[[], Callable[[str, str, datetime], None]],
-    bind_observations: Callable[[], object],
-    reset_observations: Callable[[object], None],
+    bind_observations: Callable[[], ObservationToken],
+    reset_observations: Callable[[ObservationToken], None],
     control_plane_observation: Callable[[], object],
     publish_snapshot: Callable[..., object],
     write_json: Callable[..., None],

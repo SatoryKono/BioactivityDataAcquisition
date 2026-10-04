@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from pathlib import Path
 
-import subprocess
+import subprocess  # nosec B404 - see suppression registry
 
 from bioetl.infrastructure.observability.observability_backend_process import (
     DEFAULT_HEALTH_SERVER_PORT,

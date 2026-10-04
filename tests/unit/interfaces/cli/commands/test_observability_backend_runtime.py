@@ -30,6 +30,7 @@
 
 from __future__ import annotations
 
+
 import os
 import signal
 from io import BytesIO
@@ -905,3 +906,53 @@ def test_should_disable_transient_health_server_only_on_matching_live_backend() 
         )
         is False
     )
+
+
+_DOCKER_READINESS_PROBE = runtime_subject.docker_engine_not_ready_message
+
+
+def test_docker_readiness_uses_fixed_argv_without_shell(monkeypatch):
+    executable = "C:/Program Files/Docker/docker.exe"
+    calls = []
+    monkeypatch.setattr(runtime_subject.shutil, "which", lambda name: executable)
+
+    def run(command, **kwargs):
+        calls.append((command, kwargs))
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(runtime_subject.subprocess, "run", run)
+    assert _DOCKER_READINESS_PROBE() is None
+    assert calls == [
+        (
+            [executable, "info"],
+            {
+                "capture_output": True,
+                "timeout": 8,
+                "check": False,
+                "shell": False,
+            },
+        )
+    ]
+
+
+def test_docker_readiness_skips_absent_cli(monkeypatch):
+    monkeypatch.setattr(runtime_subject.shutil, "which", lambda name: None)
+    run = MagicMock()
+    monkeypatch.setattr(runtime_subject.subprocess, "run", run)
+    assert _DOCKER_READINESS_PROBE() is None
+    run.assert_not_called()
+
+
+@pytest.mark.parametrize("failure", ["exit", "oserror", "timeout"])
+def test_docker_readiness_contains_probe_failures(monkeypatch, failure):
+    monkeypatch.setattr(runtime_subject.shutil, "which", lambda name: "/usr/bin/docker")
+
+    def run(command, **kwargs):
+        if failure == "oserror":
+            raise OSError("unavailable")
+        if failure == "timeout":
+            raise runtime_subject.subprocess.TimeoutExpired(command, kwargs["timeout"])
+        return SimpleNamespace(returncode=1)
+
+    monkeypatch.setattr(runtime_subject.subprocess, "run", run)
+    assert "Docker engine is not" in _DOCKER_READINESS_PROBE()

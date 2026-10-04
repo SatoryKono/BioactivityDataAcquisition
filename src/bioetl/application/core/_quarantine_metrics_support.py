@@ -210,7 +210,7 @@ def record_service_quarantined_records(
         )
     _record_silver_removal_accounting(
         outcome="quarantined",
-        reason_code=reason_code or getattr(error_type, "value", str(error_type)),
+        reason_code=reason_code or error_type.value,
         count=count,
         stage=stage,
     )

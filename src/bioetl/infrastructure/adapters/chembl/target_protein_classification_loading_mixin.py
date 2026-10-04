@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable, Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from typing import Protocol, cast
 
 import pyarrow as pa
@@ -31,13 +31,36 @@ _TARGET_COMPONENT_TABLE = "chembl.target_component"
 _PROTEIN_CLASS_TABLE = "chembl.protein_class"
 
 
+class _ResolutionRow(Protocol):
+    def to_dict(self) -> JsonDict: ...
+
+
+class _ResolutionIssue(Protocol):
+    @property
+    def component_id(self) -> int | None: ...
+
+    @property
+    def error_code(self) -> str: ...
+
+    @property
+    def message(self) -> str: ...
+
+
+class _ResolutionResult(Protocol):
+    @property
+    def rows(self) -> Sequence[_ResolutionRow]: ...
+
+    @property
+    def dq_issues(self) -> Sequence[_ResolutionIssue]: ...
+
+
 class _ResolutionService(Protocol):
     def resolve_target(
         self,
         *,
         target_id: str,
         component_ids: tuple[int, ...],
-    ) -> object: ...
+    ) -> _ResolutionResult: ...
 
 
 IndexBuilder = Callable[

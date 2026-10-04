@@ -154,7 +154,10 @@ def _is_likely_network_drive(path: Path) -> bool:
         from ctypes import wintypes
 
         DRIVE_REMOTE = 4
-        kernel32 = ctypes.windll.kernel32
+        windows_loader = getattr(ctypes, "windll", None)
+        if windows_loader is None:
+            return False
+        kernel32 = windows_loader.kernel32
         kernel32.GetDriveTypeW.argtypes = [wintypes.LPCWSTR]
         kernel32.GetDriveTypeW.restype = wintypes.DWORD
 

@@ -120,6 +120,13 @@ regexTarget = "match"
 regexes = ['''^"?key"[ \t]*:[ \t]*"(?:[A-Za-z0-9_-]{20}|[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12})"[, \t\r\n]*$''']
 
 [[rules.allowlists]]
+description = "Exact public issue IDs in the reviewed 2026-09-24 Sonar export"
+condition = "AND"
+paths = ['''^reports/quality/sonar/live-issues-20260924-rf009-full\.json$''']
+regexTarget = "match"
+regexes = ['''^"?key"[ \t]*:[ \t]*"(?:AaC-134a4jtq7QCmJvUR|AaC-rmxc4jtq7QCmIN0U|AaC-rmxc4jtq7QCmIN0V|AaC-rmxc4jtq7QCmIN0W|AaCrOdK-fLUykpRDbtDD|AaCrOdK-fLUykpRDbtDF|AaCrROex6ovrfHki8whE|AaCrROex6ovrfHki8whF|AaCrdW8wuAUYUSCNAYjL|AaCsB1PKJ8AvPpfnR13U|AaCt95lUL4QSNSxNsszN|AaCv32X_anF1EROvwhVe|AaCwhPtflNfxZaDohRq6|AaDC76-_Xjd--IaQqv0Q|AaDDhHynR3Q-DMha0r85|AaDDhHynR3Q-DMha0r86|AaDFMTVgmO2A-5xlOQD_|AaDFMXonmO2A-5xlOQEC|AaDHiFwVGoclI8RylWqF|AaDHiGOLGoclI8RylWqG|AaDI8WniOkIF99j5JvuC|AaDI8WniOkIF99j5JvuD|AaDI8WniOkIF99j5JvuE|AaDIMass3uREZRvhbkcP|AaDIiamXOkIF99j5Fwik|AaDIicbcOkIF99j5Fwim|AaDJZB_CH2p6tZfK9EE3|AaDJZHYkH2p6tZfK9EE4|AaDNjgKv2qw7ls_VSvgK|AaDNvD2L43bC2CNePP29|AaDNvGTv43bC2CNePP2-|AaDONVQedY9fl74aXa9N|AaDONY9NdY9fl74aXa9P|AaDOaiv1qOdIt96h_Y2q|AaDOaiv1qOdIt96h_Y2r|AaDPY1TQOkQ8Qmoqlt7m|AaDPY1TQOkQ8Qmoqlt7n|AaDPqyRlj5nm0vNCEcQ1)"[, \t\r\n]*$''']
+
+[[rules.allowlists]]
 description = "ChEMBL species/target text: api inside sapiens is not an API assignment"
 condition = "AND"
 paths = ['''^data/output/.*\.csv$''']

@@ -51,7 +51,7 @@
     },
     {
       "evidence_metrics": {
-        "families_at_budget_count": 0,
+        "families_at_budget_count": 1,
         "hotspot_budget_warning_count": 0,
         "hotspot_family_count": 5,
         "lazy_util": 0.0,
@@ -59,9 +59,9 @@
       },
       "id": "module_boundaries_coupling",
       "name": "Module boundaries / coupling",
-      "score": 10.0,
+      "score": 9.2,
       "weight": 0.14,
-      "weighted_score": 1.4
+      "weighted_score": 1.288
     },
     {
       "evidence_metrics": {
@@ -170,8 +170,10 @@
     "composition_module_cap": 295,
     "composition_module_count": 289,
     "composition_util": 0.9797,
-    "families_at_budget": [],
-    "families_at_budget_count": 0,
+    "families_at_budget": [
+      "application_services_control_plane"
+    ],
+    "families_at_budget_count": 1,
     "grade_kind": "diagnostic_proxy",
     "lazy_import_cap": 0,
     "lazy_import_observed_count": 0,
@@ -183,7 +185,7 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.47,
+  "integral_score": 9.36,
   "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 60,
@@ -198,8 +200,10 @@
     "dashboarded_without_emission_count": 0,
     "dq_blocking_issue_count": 0,
     "expired_compat_count": 0,
-    "families_at_budget": [],
-    "families_at_budget_count": 0,
+    "families_at_budget": [
+      "application_services_control_plane"
+    ],
+    "families_at_budget_count": 1,
     "hotspot_budget_warning_count": 0,
     "hotspot_family_count": 5,
     "layer_violations": 0,
@@ -250,7 +254,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "ce8fd93777c5dcf1bd747e43302ab26f76b01598398216a52c2de56484fc170f"
+      "source_fingerprint": "ca050f95e6742b19b30cb2d694026b43792e12404b150bc8ed57ffb2d250f25a"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -269,7 +273,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "909cdf7001f5046061cb01e968f519108eb7ede364a64078e96322da2b94b7d6"
+      "source_tree_sha256": "17f16934030345e14ea024d327a1b991f0dd361c9e5c10599290e9c98da7bd1e"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

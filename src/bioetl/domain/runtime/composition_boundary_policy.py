@@ -45,7 +45,7 @@ def resolve_health_check_mode(
     if test_mode:
         return "probe"
     if configured_mode in ("strict", "probe"):
-        return configured_mode  # type: ignore[return-value]
+        return configured_mode
     return default_health_check_mode
 
 

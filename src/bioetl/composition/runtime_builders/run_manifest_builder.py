@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.ledger.service import RunLedgerService
 from bioetl.composition.runtime_builders.run_manifest_support import (
-    ManifestControlPlaneRefs,
+    ManifestControlPlaneRefs as ManifestControlPlaneRefs,
     RunManifestContractIdentity,
     RunManifestProvenanceBundle,
     build_run_manifest_provenance_bundle as build_run_manifest_provenance_bundle,

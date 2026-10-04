@@ -7,11 +7,19 @@ from collections.abc import Mapping
 from typing import Any
 
 from bioetl.domain.run_reports.reason_catalog_data import (
-    REASON_CATALOG_VERSION,
-    UNKNOWN_REASON,
-    ReasonCatalog,
-    ReasonCatalogEntry,
-    default_reason_catalog,
+    REASON_CATALOG_VERSION as REASON_CATALOG_VERSION,
+)
+from bioetl.domain.run_reports.reason_catalog_data import (
+    UNKNOWN_REASON as UNKNOWN_REASON,
+)
+from bioetl.domain.run_reports.reason_catalog_data import (
+    ReasonCatalog as ReasonCatalog,
+)
+from bioetl.domain.run_reports.reason_catalog_data import (
+    ReasonCatalogEntry as ReasonCatalogEntry,
+)
+from bioetl.domain.run_reports.reason_catalog_data import (
+    default_reason_catalog as default_reason_catalog,
 )
 
 _FIELD_REASON_TOKEN = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")

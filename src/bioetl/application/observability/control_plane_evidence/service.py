@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from typing import cast
@@ -108,13 +109,14 @@ class ControlPlaneEvidenceService:
         if _processing_status(scope.manifest, snapshot) != "success":
             return None
         checks: list[EvidenceCheckResult] = []
-        for build in (
+        builders: tuple[Callable[[], dict[str, object]], ...] = (
             lambda: self.manifest_validation(scope=scope, ledger_snapshot=snapshot),
             lambda: self.retention_compliance(
                 scope=scope, now=now, ledger_snapshot=snapshot
             ),
             lambda: self.lineage_validation(scope=scope, ledger_snapshot=snapshot),
-        ):
+        )
+        for build in builders:
             current = component_checks((build(),))
             if not current or any(check.status != "OK" for check in current):
                 return None

@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET  # nosec B405 - parse-error type only
 from collections.abc import Sequence
 from contextlib import AsyncExitStack
 from typing import TYPE_CHECKING, cast
 
 import defusedxml.ElementTree as defused_ET
+from defusedxml.common import EntitiesForbidden
 
 from bioetl.application.core.publication_term_runtime import (
     mesh_terms_from_pubmed_headings,
@@ -28,6 +28,7 @@ if TYPE_CHECKING:
         ProviderAssemblySupport,
     )
     from bioetl.domain.ports import FilterableDataSourcePort, LoggerPort, MetricsPort
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [
@@ -44,8 +45,8 @@ def parse_pubmed_mesh_xml(
     try:
         root = defused_ET.fromstring(xml_text)
     except (
-        ET.ParseError,
-        getattr(defused_ET, "EntitiesForbidden", ET.ParseError),
+        defused_ET.ParseError,
+        EntitiesForbidden,
     ):
         return [], []
 
@@ -173,11 +174,13 @@ class PubMedPublicationTermPayloadEnricher:
         enriched: list[BronzeRecord] = []
         for record in records:
             pmid = publication_pubmed_id(record)
-            pubmed_record = pubmed_by_pmid.get(pmid) if pmid is not None else None
-            if pubmed_record is None:
+            matched_pubmed_record = (
+                pubmed_by_pmid.get(pmid) if pmid is not None else None
+            )
+            if matched_pubmed_record is None:
                 enriched.append(record)
                 continue
-            headings, keywords = pubmed_term_payload(pubmed_record)
+            headings, keywords = pubmed_term_payload(matched_pubmed_record)
             mesh_terms, keyword_terms = mesh_terms_from_pubmed_headings(
                 headings, keywords
             )
@@ -189,7 +192,7 @@ class PubMedPublicationTermPayloadEnricher:
                 attached["mesh_terms"] = mesh_terms
             if keyword_terms:
                 attached["keywords"] = keyword_terms
-            enriched.append(cast("BronzeRecord", attached))
+            enriched.append(attached)
         return enriched
 
 
@@ -216,7 +219,7 @@ def create_pubmed_publication_term_enricher(
         )
         adapter = _build_pubmed_adapter_from_settings(
             adapter_cls=PubMedAdapter,
-            http_client=http_client,
+            http_client=cast("UnifiedHTTPClient", http_client),
             logger=logger,
             settings=settings,
             email=email,

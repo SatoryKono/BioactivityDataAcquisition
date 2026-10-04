@@ -10,7 +10,8 @@ from pathlib import Path
 
 def _clear_known_stale_windows_bytecode() -> None:
     """Avoid stale shared-drive bytecode for runtime builder support imports."""
-    if sys.platform != "win32":
+    runtime_platform = sys.platform
+    if runtime_platform != "win32":
         return
 
     stale_cache = (

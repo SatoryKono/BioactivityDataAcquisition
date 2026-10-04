@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import httpx
 
@@ -28,10 +28,17 @@ from bioetl.infrastructure.adapters.http.client_retry_observability import (
     start_request_span,
 )
 
+if TYPE_CHECKING:
+    from bioetl.infrastructure.adapters.http._client_retry_models import (
+        _RetryRequestHost as _RetryRequestBase,
+    )
+else:
+    _RetryRequestBase = object
+
 __all__ = ["HTTPClientRetryRequestFlow"]
 
 
-class HTTPClientRetryRequestFlow:
+class HTTPClientRetryRequestFlow(_RetryRequestBase):
     """Request, attempt, and exception flow for the HTTP retry mixin."""
 
     async def _request_with_retry(

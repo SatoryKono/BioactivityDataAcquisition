@@ -12,6 +12,10 @@ from memory.graph.sync_pkg.complexity_candidate_anchor_slices import (
     _complexity_candidate_anchor_slices,
     _link_complexity_candidate,
 )
+from memory.graph.sync_pkg.graph_contexts import (
+    SurfaceAnchorSets,
+    SurfaceComplexityMetrics,
+)
 from memory.graph.sync_pkg.graph_snapshot import GraphNode, GraphSnapshot
 
 __all__ = [

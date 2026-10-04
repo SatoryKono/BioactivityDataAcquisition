@@ -4,13 +4,41 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import Protocol
+from typing import Protocol, TypedDict, cast
 
 import httpx
+from httpx._client import UseClientDefault
+from httpx._types import (
+    AuthTypes,
+    CookieTypes,
+    HeaderTypes,
+    QueryParamTypes,
+    RequestContent,
+    RequestData,
+    RequestExtensions,
+    RequestFiles,
+    TimeoutTypes,
+)
 
 from bioetl.domain.ports import CircuitBreakerPort, LoggerPort, RateLimiterPort
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.adapters.http._client_retry_policy import _parse_retry_after
+
+
+class _RequestKwargs(TypedDict, total=False):
+    """Keyword contract of the HTTPX request forwarded by the timing wrapper."""
+
+    content: RequestContent | None
+    data: RequestData | None
+    files: RequestFiles | None
+    json: object
+    params: QueryParamTypes | None
+    headers: HeaderTypes | None
+    cookies: CookieTypes | None
+    auth: AuthTypes | UseClientDefault | None
+    follow_redirects: bool | UseClientDefault
+    timeout: TimeoutTypes | UseClientDefault
+    extensions: RequestExtensions | None
 
 
 class RequestTimingHost(Protocol):
@@ -51,7 +79,9 @@ async def execute_timed_request(
 
         async def send() -> httpx.Response:
             async with asyncio.timeout(request_timeout):
-                return await client.request(method, url, **request_kwargs)
+                return await client.request(
+                    method, url, **cast(_RequestKwargs, request_kwargs)
+                )
 
         response = await host.circuit_breaker.call(send)
         response.extensions["bioetl_transport_seconds"] = time.monotonic() - admitted

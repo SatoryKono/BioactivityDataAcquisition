@@ -111,7 +111,7 @@ class ReplayObjectVerifier:
         for source in manifest.source_refs:
             for snapshot in source.input_snapshots:
                 path = self._snapshot_path(
-                    snapshot.immutable_uri,
+                    snapshot.immutable_uri or "",
                     getattr(source, "provider", ""),
                     getattr(source, "entity", ""),
                 )

@@ -324,7 +324,9 @@ def test_build_expr_trim_only_and_canonicalizer() -> None:
 def test_build_expr_lowercase_branch_without_canonicalizer() -> None:
     policies = {"mykey": JoinKeyNormalizationPolicy(trim=True, lowercase=True)}
     expr = build_join_key_normalization_expr(
-        column="mykey", key="mykey", normalization_policies=policies
+        column="mykey",
+        key="mykey",
+        normalization_policies=policies,
     )
     assert expr is not None
     df = pl.DataFrame({"mykey": ["  AbC  "]})

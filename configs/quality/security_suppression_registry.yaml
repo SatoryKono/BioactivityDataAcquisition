@@ -24,6 +24,40 @@ scope:
     - B110
     - B506
 entries:
+  - id: SUP-SP-006
+    path: src/bioetl/composition/observability_backend.py
+    line: 8
+    rule: B404
+    symbol: subprocess
+    owner: stream-a
+    review_date: "2027-03-18"
+    rationale: >-
+      Composition uses Popen for process handle annotations and the default
+      injected factory; process execution stays in the existing infrastructure
+      adapter, which builds fixed python -m bioetl argv without a shell.
+  - id: SUP-SP-007
+    path: src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py
+    line: 7
+    rule: B404
+    symbol: subprocess
+    owner: stream-a
+    review_date: "2027-03-18"
+    rationale: >-
+      Supports the local Docker readiness probe and its TimeoutExpired type.
+      The executable is resolved by shutil.which; the only argument is the
+      literal info, with shell=False, an eight-second timeout and captured output.
+  - id: SUP-SR-008
+    path: src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py
+    line: 247
+    rule: B603
+    symbol: subprocess.run
+    owner: stream-a
+    review_date: "2027-03-18"
+    rationale: >-
+      Docker readiness uses the resolved local docker executable and literal
+      info only; no user-supplied command arguments, shell=False, timeout=8,
+      captured output and contained OSError/TimeoutExpired. Regression tests
+      assert the argv and execution flags and cover absent CLI and probe failures.
   # --- xml.etree.ElementTree (B405): typing/traversal only, parse via defusedxml ---
   - id: SUP-ET-001
     path: src/bioetl/application/pipelines/pubmed/xml_parser.py
@@ -283,16 +317,6 @@ entries:
     rationale: >-
       DQ status enum literals "pass" (check and report status); not credentials.
   # --- yaml.load with SafeLoader subclass (B506) ---
-  - id: SUP-YL-001
-    path: src/bioetl/domain/control_plane/config_source_hashing.py
-    line: 75
-    rule: B506
-    symbol: yaml.load
-    owner: stream-b
-    review_date: "2027-03-18"
-    rationale: >-
-      Loader is _UniqueKeySafeLoader, a yaml.SafeLoader subclass with
-      duplicate-key rejection; no arbitrary object construction.
   # --- best-effort telemetry cleanup (B110) ---
   - id: SUP-TE-001
     path: src/bioetl/infrastructure/observability/tracing.py

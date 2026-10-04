@@ -6,20 +6,20 @@ from collections.abc import Callable
 from dataclasses import replace
 from typing import cast
 
-from bioetl.domain.control_plane import ReplayCapability, RunManifest
+from bioetl.domain.control_plane import ReplayCapability, RunManifest, RunSourceRef
 from bioetl.domain.control_plane.reproducibility_policy import (
     assess_reproducibility_policy,
 )
 
 
-def _refresh_replay_summary_build_policy_assessment(
+def _refresh_replay_summary_build_policy_assessment[RefreshContext](
     manifest: RunManifest,
     summary: dict[str, object],
     input_snapshots: list[dict[str, object]],
     *,
-    build_source_refs: Callable[..., tuple[object, ...]],
-    refresh_context_type: Callable[..., object],
-) -> object:
+    build_source_refs: Callable[..., tuple[RunSourceRef, ...]],
+    refresh_context_type: Callable[..., RefreshContext],
+) -> RefreshContext:
     """Build policy assessment from materialized snapshots."""
     source_refs = build_source_refs(
         manifest=manifest,

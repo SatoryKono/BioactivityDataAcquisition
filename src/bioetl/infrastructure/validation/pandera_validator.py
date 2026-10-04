@@ -16,7 +16,8 @@ __all__ = [
     "PanderaSilverValidator",
 ]
 
-from typing import TYPE_CHECKING, ClassVar
+from collections.abc import Callable
+from typing import TYPE_CHECKING, ClassVar, cast
 
 from bioetl.domain.types import JsonDict, ValidationResult
 
@@ -32,7 +33,9 @@ if TYPE_CHECKING:
     import pandera.pandas as pa
 
 
-def _materialize_pandera_schema(schema: object | None) -> object | None:
+def _materialize_pandera_schema(
+    schema: pa.DataFrameSchema | None,
+) -> pa.DataFrameSchema | None:
     """Resolve DataFrameModel classes to ``DataFrameSchema`` via ``to_schema``.
 
     Pandera DataFrameModel metaclasses expose validation through the class but
@@ -43,7 +46,7 @@ def _materialize_pandera_schema(schema: object | None) -> object | None:
         return None
     to_schema = getattr(schema, "to_schema", None)
     if callable(to_schema):
-        return to_schema()
+        return cast("Callable[[], pa.DataFrameSchema]", to_schema)()
     return schema
 
 
@@ -273,6 +276,7 @@ class PanderaSilverValidator(BasePanderaValidator):
         super().__init__(schema=schema, strict=strict)
 
     def _reindex_non_strict(self, df: pd.DataFrame) -> pd.DataFrame:
+        assert self._schema is not None
         schema_columns = list(self._schema.columns.keys())
         df_to_validate = df.reindex(columns=schema_columns)
         dq_defaults = {"_dq_warn": False, "_dq_error": False, "_index": 0}
@@ -284,7 +288,7 @@ class PanderaSilverValidator(BasePanderaValidator):
         return df_to_validate
 
     def _seed_missing_nullable_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        if not hasattr(self._schema, "columns"):
+        if self._schema is None or not hasattr(self._schema, "columns"):
             return df
         missing = [name for name in self._schema.columns if name not in df.columns]
         if not missing:

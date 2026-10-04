@@ -587,7 +587,7 @@ export BIOETL_CHEMBL_API_KEY="your-key-here"
 echo "BIOETL_CHEMBL_API_KEY=your-key" >> .env
 
 # ❌ Неправильно: hardcoded в коде
-API_KEY = "sk-1234567890"  # НИКОГДА!
+API_KEY = "<your-api-key>"  # НИКОГДА!
 
 # ❌ Неправильно: в VCR cassettes без sanitization
 # Используйте before_record hooks!

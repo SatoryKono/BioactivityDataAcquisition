@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import AsyncIterator, Callable
 from types import TracebackType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self
 
 from bioetl.domain.ports import DeltaReaderPort, LoggerPort
 from bioetl.domain.types import HealthStatus, JsonDict
@@ -64,7 +64,7 @@ class TargetProteinClassificationSnapshotDataSource(
         self._resolution_service: _ResolutionService | None = None
         self._source_manifest: JsonDict = {}
 
-    async def __aenter__(self) -> TargetProteinClassificationSnapshotDataSource:
+    async def __aenter__(self) -> Self:
         await self._ensure_loaded()
         return self
 
