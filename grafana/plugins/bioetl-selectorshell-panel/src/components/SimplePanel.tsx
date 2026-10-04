@@ -41,7 +41,20 @@ export const SimplePanel: React.FC<Props> = ({ options, replaceVariables }) => {
   const styles = useStyles2(getStyles);
   const mergedOptions = { ...defaultOptions, ...options };
   const [result, setResult] = useState<SelectorContextResult | null>(null);
+  const [, setLocationSearch] = useState(locationService.getLocation().search);
   const appliedSignatureRef = useRef<string>('');
+
+  useEffect(() => {
+    const subscription = locationService.getLocationObservable().subscribe((location) => {
+      setLocationSearch(location.search);
+    });
+    const onPopState = () => setLocationSearch(window.location.search);
+    window.addEventListener('popstate', onPopState);
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('popstate', onPopState);
+    };
+  }, []);
 
   const workflow = replaceVariables('${workflow:text}');
   const pipeline = replaceVariables('${pipeline:text}');

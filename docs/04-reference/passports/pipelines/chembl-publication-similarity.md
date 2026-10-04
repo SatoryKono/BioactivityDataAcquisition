@@ -8,13 +8,13 @@
 | --- | --- |
 | Typed identity `[type:provider_entity]` | `pipeline:chembl_publication_similarity` |
 | Status | `active` |
-| Gold contract | `chembl.publication_similarity v1.0.0` |
+| Gold contract | `chembl.publication_similarity v2.0.0` |
 
 ## Назначение и обработка данных
 
 Extract publication similarity data (Tanimoto coefficients) from ChEMBL API. Источник — `chembl:publication_similarity` на `https://www.ebi.ac.uk/chembl/api/data`; применяемые extraction/input filters: sim_id=IDs from data/input/publication_similarity.csv column sim_id; CLI may override the input CSV.
-В business-проекцию входят `sim_id`, `doc_1`, `doc_2`, `pubmed_id1`, `pubmed_id2`, `tid_tani`, `mol_tani`, `avg_tani` и ещё 1 полей.
-Silver использует профиль `chembl.publication_similarity` и проверяет обязательные поля `sim_id`, `doc_1`, `doc_2`; невалидные записи направляются в `quarantine`.
+В business-проекцию входят `sim_id`, `doc_1`, `doc_2`, `publication_id1`, `publication_id2`, `pubmed_id1`, `pubmed_id2`, `tid_tani` и ещё 3 полей.
+Silver использует профиль `chembl.publication_similarity` и проверяет обязательные поля `sim_id`; невалидные записи направляются в `quarantine`.
 Перед Gold применяется строгий Pandera-контракт `chembl.publication_similarity`; Gold filters/constraints заданы в entity config (6 групп правил).
 
 ## Извлечение данных
@@ -25,7 +25,7 @@ Silver использует профиль `chembl.publication_similarity` и п
 | Method / endpoint | `GET` · `https://www.ebi.ac.uk/chembl/api/data/document_similarity` |
 | Resource / tables | `document_similarity` |
 | Filters | `sim_id`: IDs from data/input/publication_similarity.csv column sim_id; CLI may override the input CSV |
-| Selected fields | `system` (7 fields); `business` (9 fields) |
+| Selected fields | `system` (7 fields); `business` (11 fields) |
 
 ## Silver и Data Quality
 
@@ -35,7 +35,7 @@ Silver использует профиль `chembl.publication_similarity` и п
 
 ## Gold
 
-- Contract: `chembl.publication_similarity v1.0.0`; strict validation: `True`.
+- Contract: `chembl.publication_similarity v2.0.0`; strict validation: `True`.
 - Write mode: `overwrite`.
 - Technical exclusions: `_dq_*`, `_source_batch_id`, `_index`.
 

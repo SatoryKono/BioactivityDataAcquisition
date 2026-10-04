@@ -113,9 +113,12 @@ Docker helper dispositions are resolved as follows and MUST stay aligned with
   MUST route into approved `reports/**` or archive/report surfaces instead of a
   root-level txt dump.
 - Root-level tracked директории MUST ограничиваться approved runtime/tooling and
-  project surfaces: `.agents`, `.claude`, `.codex`, `.cursor`, `.devin`, `.gemini`, `.github`,
+  project surfaces: `.agents`, `.circleci`, `.claude`, `.codex`, `.cursor`, `.devin`, `.gemini`, `.github`,
   `.junie`, `.opencode`, `.vibe`, `.vscode`, `.zed`, `artifacts`, `assets`, `configs`, `data`,
   `docs`, `grafana`, `reports`, `scripts`, `src`, and `tests`.
+- `.circleci/config.yml` is the vendor-required entrypoint for the existing
+  CircleCI project. Its tracked root is limited to reviewed CI configuration;
+  credentials, caches, runtime state, and generated artifacts remain excluded.
 - Canonical machine-readable root governance lives in `.github/root-allowlist.txt`,
   `configs/quality/repo_structure_catalog.yaml`,
   `configs/quality/root_hygiene_review_registry.yaml`, and

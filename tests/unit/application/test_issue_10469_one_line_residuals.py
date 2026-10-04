@@ -400,6 +400,7 @@ async def test_workflow_runner_skips_missing_topological_step() -> None:
     config = SimpleNamespace(
         name="workflow",
         topological_step_ids=("missing",),
+        pipeline_steps=(),
         get_step=lambda _step_id: None,
         workflow_context_labels={},
         defaults=SimpleNamespace(
