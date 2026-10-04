@@ -692,3 +692,72 @@ async def test_write_layer_metadata_propagates_worker_failure(
             raise AssertionError("Expected RuntimeError")
         except RuntimeError as e:
             assert str(e) == "Ordinary worker error"
+
+
+async def test_write_layer_metadata_cancellation_propagates_worker_error(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Verify that a worker failure during cancellation is properly propagated instead of just raising CancelledError."""
+    import asyncio
+    import threading
+    import asyncio.threads
+    from unittest.mock import Mock
+
+    loop = asyncio.get_running_loop()
+    recorder_started = threading.Event()
+    recorder_release = threading.Event()
+
+    def blocking_recorder(*args: object, **kwargs: object) -> None:
+        loop.call_soon_threadsafe(recorder_started.set)
+        recorder_release.wait(timeout=5.0)
+        raise RuntimeError("Ordinary worker error during drain")
+
+    class FakeRecorder:
+        def __call__(self, *args, **kwargs):
+            blocking_recorder(*args, **kwargs)
+
+    recorder_mock = FakeRecorder()
+
+    operations = _MetadataWriterOperations(
+        logger=Mock(),
+        metrics=Mock(),
+        retry_policy=Mock(),
+        artifact_recorder_provider=lambda: recorder_mock,
+    )
+
+    async def dummy_write(*args: object, **kwargs: object) -> str:
+        return str(tmp_path / "metadata.json")
+
+    operations.write_metadata = dummy_write  # type: ignore[method-assign]
+    mock_metadata = _make_bronze_metadata()
+
+    with monkeypatch.context() as m:
+        m.setattr(asyncio, "to_thread", asyncio.threads.to_thread)
+
+        task = asyncio.create_task(
+            operations.write_layer_metadata(
+                base_path=str(tmp_path),
+                metadata=mock_metadata,
+                layer="bronze",
+            )
+        )
+
+        for _ in range(500):
+            if recorder_started.is_set():
+                break
+            await asyncio.sleep(0.01)
+
+        assert recorder_started.is_set(), "Timeout waiting for recorder thread to start"
+
+        # Cancel the task while the background thread is blocked
+        task.cancel()
+
+        # Release the background thread so it can raise its exception
+        recorder_release.set()
+
+        try:
+            await task
+            raise AssertionError("Expected RuntimeError")
+        except RuntimeError as e:
+            assert str(e) == "Ordinary worker error during drain"

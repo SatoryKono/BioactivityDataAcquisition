@@ -156,6 +156,11 @@ class _MetadataWriterOperations:
             while not publication_task.done():
                 with contextlib.suppress(asyncio.CancelledError):
                     await asyncio.shield(publication_task)
+
+            # Explicitly check for and propagate worker errors that occurred
+            # before or during the cancellation drain to prevent swallowing them.
+            publication_task.result()
+
             raise
         return metadata_path
 
