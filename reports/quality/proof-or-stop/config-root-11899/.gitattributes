@@ -2,3 +2,9 @@ full-coverage-wave-43/** -text whitespace=cr-at-eol
 *.xml -text whitespace=cr-at-eol
 *.log -text whitespace=cr-at-eol
 *.json -text whitespace=cr-at-eol
+
+# Preserve whitespace emitted inside immutable pytest failure diagnostics.
+full-coverage-wave-43/junit/*.xml -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+full-coverage-wave-43/logs/*.log -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+owning-inventory-before-adoption.log -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+owning-inventory-before-adoption.xml -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
