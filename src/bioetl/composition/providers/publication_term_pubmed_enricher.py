@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET  # nosec B405 - parse-error type only
 from collections.abc import Sequence
 from contextlib import AsyncExitStack
 from typing import TYPE_CHECKING, cast
 
 import defusedxml.ElementTree as defused_ET
+from defusedxml.common import EntitiesForbidden
 
 from bioetl.application.core.publication_term_runtime import (
     mesh_terms_from_pubmed_headings,
@@ -45,8 +45,8 @@ def parse_pubmed_mesh_xml(
     try:
         root = defused_ET.fromstring(xml_text)
     except (
-        ET.ParseError,
-        getattr(defused_ET, "EntitiesForbidden", ET.ParseError),
+        defused_ET.ParseError,
+        EntitiesForbidden,
     ):
         return [], []
 

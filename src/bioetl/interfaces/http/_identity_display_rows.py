@@ -40,14 +40,14 @@ def format_timestamp_label(moment: datetime, timezone: str) -> str:
 
 
 def _resolve_zone(timezone: str) -> ZoneInfo:
-    token = timezone.strip() or "UTC"
-    lowered = token.lower()
+    zone_name = timezone.strip() or "UTC"
+    lowered = zone_name.lower()
     if lowered in {"utc", "browser", "default"}:
         return ZoneInfo("UTC")
-    if token == "Europe/Kiev":
-        token = "Europe/Kyiv"
+    if zone_name == "Europe/Kiev":
+        zone_name = "Europe/Kyiv"
     try:
-        return ZoneInfo(token)
+        return ZoneInfo(zone_name)
     except (ZoneInfoNotFoundError, ValueError):
         return ZoneInfo("UTC")
 
