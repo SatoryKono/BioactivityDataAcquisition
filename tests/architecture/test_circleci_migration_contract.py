@@ -154,6 +154,7 @@ def test_compose_placeholders_are_step_scoped_and_runtime_stays_strict():
     "lane",
     [
         "memory-retention",
+        "performance",
         "port-contracts",
         "skills-consistency",
         "github-settings-review",
@@ -224,3 +225,52 @@ def test_architecture_selector_includes_ordinary_tests_and_excludes_heavy_ones(
         Expression.compile(selector).evaluate(lambda name, **kwargs: name in markers)
         is selected
     )
+
+
+def test_hotspot_report_dispatcher_accepts_cli_arguments():
+    import subprocess
+
+    result = subprocess.run(
+        [sys.executable, "-m", "scripts.engineering.qa", "report-hotspots", "--help"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "--observations" in result.stdout
+
+
+@pytest.mark.parametrize(
+    "summary, expected",
+    [
+        ({"total": 1, "failed": 0}, 0),
+        ({"total": 1, "failed": 1}, 1),
+        ({"total": 0, "failed": 0}, 1),
+        (None, 1),
+    ],
+)
+def test_performance_gate_rejects_missing_empty_or_failing_evidence(
+    tmp_path, summary, expected
+):
+    import shlex
+    import subprocess
+
+    steps = _config()["jobs"]["performance"]["steps"]
+    command = next(
+        step["run"]["command"]
+        for step in steps
+        if isinstance(step, dict)
+        and step.get("run", {}).get("name")
+        == "Reject missing or failing performance evidence"
+    )
+    arguments = shlex.split(command)
+    script = arguments[arguments.index("-c") + 1]
+    if summary is not None:
+        path = tmp_path / "reports/performance/hotspot-degradation.json"
+        path.parent.mkdir(parents=True)
+        path.write_text(json.dumps({"summary": summary}), encoding="utf-8")
+    result = subprocess.run(
+        [sys.executable, "-c", script], cwd=tmp_path, capture_output=True, check=False
+    )
+    assert result.returncode == expected

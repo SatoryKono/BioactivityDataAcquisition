@@ -13,7 +13,7 @@ version: 2.1
 parameters:
   ci-lane:
     type: enum
-    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review]
+    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance]
     default: pr-gate
   include-hypothesis:
     type: boolean
@@ -77,6 +77,47 @@ commands:
             fi
 
 jobs:
+  performance:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    environment:
+      OPENBLAS_NUM_THREADS: "1"
+      POLARS_MAX_THREADS: "2"
+    steps:
+      - checkout
+      - setup-python-uv:
+          extras: "dev tracing performance"
+      - run:
+          name: Run performance benchmarks with existing budgets
+          no_output_timeout: 35m
+          command: |
+            mkdir -p reports/performance
+            timeout --signal=TERM --kill-after=30s 30m \
+              uv run --frozen --no-build pytest tests/performance/ tests/benchmarks/ \
+              -m "benchmark or performance" -p no:xdist -v --tb=short \
+              --perf-obs-out reports/performance/hotspot-observations.jsonl \
+              --junitxml=reports/performance/hotspot-budgets.xml
+      - run:
+          name: Build performance degradation evidence
+          when: always
+          command: |
+            test -s reports/performance/hotspot-observations.jsonl
+            uv run --frozen --no-build python -m scripts.engineering.qa report-hotspots \
+              --observations reports/performance/hotspot-observations.jsonl \
+              --budgets tests/performance/hotspot_budgets.json --window-size 5 \
+              --json-out reports/performance/hotspot-degradation.json \
+              --markdown-out reports/performance/hotspot-degradation.md
+      - run:
+          name: Reject missing or failing performance evidence
+          when: always
+          command: |
+            uv run --frozen --no-build python -c 'import json,sys; d=json.load(open("reports/performance/hotspot-degradation.json")); s=d["summary"]; sys.exit(0 if s["total"] > 0 and s["failed"] == 0 else 1)'
+      - store_test_results:
+          path: reports/performance
+      - store_artifacts:
+          path: reports/performance
+
   memory-retention:
     docker:
       - image: cimg/python:3.13
@@ -830,3 +871,10 @@ workflows:
     jobs:
       - github-settings-review:
           context: bioetl-github-read-only
+  performance:
+    when:
+      and:
+        - equal: [performance, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - performance

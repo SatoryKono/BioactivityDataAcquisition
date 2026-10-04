@@ -46,6 +46,10 @@ Other prepared opt-in lanes are `memory-retention` (check-only), `port-contracts
 context). All are main-only and isolated from the normal PR workflow. Context
 registration, trigger activation, remaining event parity and external acceptance
 are pending; these additions do not establish full legacy-workflow parity.
+The prepared `performance` lane preserves benchmark budgets and the five-sample
+window, emits JUnit/observations/JSON/Markdown artifacts, and fails on missing,
+empty or over-budget evidence. It is opt-in and main-only; no benchmark run or
+external nightly schedule is claimed.
 
 The intended weekly cadence is Monday 04:30 UTC. No external schedule has been
 registered by this preparation change, and no successful remote run is claimed.
