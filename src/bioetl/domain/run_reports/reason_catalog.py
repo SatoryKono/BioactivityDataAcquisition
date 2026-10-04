@@ -10,11 +10,13 @@ from bioetl.domain.run_reports.reason_catalog_data import (
     REASON_CATALOG_VERSION as REASON_CATALOG_VERSION,
 )
 from bioetl.domain.run_reports.reason_catalog_data import (
-    UNKNOWN_REASON,
-    ReasonCatalogEntry,
+    UNKNOWN_REASON as UNKNOWN_REASON,
 )
 from bioetl.domain.run_reports.reason_catalog_data import (
     ReasonCatalog as ReasonCatalog,
+)
+from bioetl.domain.run_reports.reason_catalog_data import (
+    ReasonCatalogEntry as ReasonCatalogEntry,
 )
 from bioetl.domain.run_reports.reason_catalog_data import (
     default_reason_catalog as default_reason_catalog,

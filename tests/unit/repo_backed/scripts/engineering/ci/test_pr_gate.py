@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import argparse
+import json
 from pathlib import Path
 from typing import Any
 
 import pytest
+
+from scripts.engineering.ci import pr_gate
 
 from scripts.engineering.ci.pr_gate import (
     NOT_APPLICABLE,
@@ -24,6 +28,49 @@ from scripts.engineering.ci.pr_gate import (
 pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 HEAD_SHA = "a" * 40
+
+
+@pytest.mark.parametrize("github_actions", [False, True])
+def test_classify_cli_preserves_artifact_and_optional_github_outputs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, github_actions: bool
+) -> None:
+    artifact = tmp_path / "matrix.json"
+    output = tmp_path / "github-output"
+    monkeypatch.delenv("GITHUB_OUTPUT", raising=False)
+    monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
+    if github_actions:
+        monkeypatch.setenv("GITHUB_ACTIONS", "true")
+        monkeypatch.setenv("GITHUB_OUTPUT", str(output))
+    monkeypatch.setattr(pr_gate, "load_catalog", lambda _: _catalog())
+    monkeypatch.setattr(pr_gate, "collect_changed_files", lambda **_: ["docs/guide.md"])
+    args = argparse.Namespace(
+        catalog=tmp_path / "catalog.yaml",
+        artifact=artifact,
+        event_name="pull_request",
+        base_sha="b" * 40,
+        before_sha="",
+        head_sha=HEAD_SHA,
+    )
+
+    assert pr_gate._classify_command(args) == 0
+    matrix = json.loads(artifact.read_text(encoding="utf-8"))
+    assert matrix["head_sha"] == HEAD_SHA
+    assert matrix["decisions"]["docs"]["decision"] == REQUIRED
+    if github_actions:
+        values = dict(line.split("=", 1) for line in output.read_text().splitlines())
+        assert json.loads(values["decision_matrix"]) == matrix
+        assert values["docs"] == REQUIRED
+    else:
+        assert not output.exists()
+
+
+def test_github_actions_requires_output_channel(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.delenv("GITHUB_OUTPUT", raising=False)
+    with pytest.raises(RuntimeError, match="GITHUB_OUTPUT"):
+        pr_gate._write_outputs(classify_changes(_catalog(), [], head_sha=HEAD_SHA))
 
 
 def _catalog() -> dict[str, Any]:

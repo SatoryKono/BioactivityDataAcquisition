@@ -399,7 +399,12 @@ def evaluate_results(
 
 
 def _write_outputs(matrix: dict[str, Any]) -> None:
-    output_path = Path(os.environ["GITHUB_OUTPUT"])
+    output = os.environ.get("GITHUB_OUTPUT")
+    if not output:
+        if os.environ.get("GITHUB_ACTIONS") == "true":
+            raise RuntimeError("GITHUB_OUTPUT is required in GitHub Actions")
+        return
+    output_path = Path(output)
     compact = json.dumps(matrix, sort_keys=True, separators=(",", ":"))
     with output_path.open("a", encoding="utf-8") as handle:
         handle.write(f"head_sha={matrix['head_sha']}\n")

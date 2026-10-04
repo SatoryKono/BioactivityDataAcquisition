@@ -14,6 +14,9 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context import (
         ReplayFamilyContext,
     )
+    from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload import (
+        _ReplayProjectionContextKwargs,
+    )
 
 
 def _build_operator_replay_projection(
@@ -26,7 +29,7 @@ def _build_operator_replay_projection(
     replay_family_context: ReplayFamilyContext,
     replay_family_contract: dict[str, object],
     replay_family_contract_payload: dict[str, object],
-    build_context_kwargs: Callable[..., dict[str, object]],
+    build_context_kwargs: Callable[..., _ReplayProjectionContextKwargs],
     build_inputs: Callable[..., dict[str, object]],
     build_payload: Callable[..., dict[str, object]],
     build_taxonomy: Callable[..., dict[str, object]],

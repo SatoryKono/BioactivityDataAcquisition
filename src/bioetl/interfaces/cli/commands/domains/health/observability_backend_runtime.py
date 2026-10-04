@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import shutil
-import subprocess
+import subprocess  # nosec B404 - see suppression registry
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
 from os import environ as os_environ
@@ -244,11 +244,12 @@ def docker_engine_not_ready_message() -> str | None:
     if docker is None:
         return None
     try:
-        completed = subprocess.run(
+        completed = subprocess.run(  # nosec B603 - see suppression registry
             [docker, "info"],
             capture_output=True,
             timeout=8,
             check=False,
+            shell=False,
         )
     except (OSError, subprocess.TimeoutExpired):
         return (

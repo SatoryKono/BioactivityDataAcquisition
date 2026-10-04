@@ -27,11 +27,72 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("damage", ["wrong_identity", "invalid_json", "missing_file"])
+async def test_damaged_child_report_cannot_produce_success_message(tmp_path, damage):
+    child_path = tmp_path / "child.json"
+    store = MemoryReportStore()
+    if damage == "wrong_identity":
+        store.write_text(
+            str(child_path), json.dumps({"identity": {"run_id": "other-run"}})
+        )
+    elif damage == "invalid_json":
+        store.write_text(str(child_path), "{broken")
+    service = CompositeRunReportService(
+        "composite_assay",
+        "manifest",
+        store,
+        tmp_path,
+        fixed_test_clock(),
+        MagicMock(),
+        MagicMock(),
+    )
+
+    async def body():
+        record_composite_child(
+            RunResult(
+                status=PipelineRunResult.SUCCESS,
+                pipeline_name="chembl_assay",
+                run_id="child-id",
+                run_type="incremental",
+                run_report_json_path=str(child_path),
+            )
+        )
+        return CompositeResult(
+            "composite_assay",
+            "parent-id",
+            SeedResult("chembl_assay", records_silver=1),
+            merge_result=MergeResult(records_merged=1, output_silver_path="silver"),
+        )
+
+    result = await service.execute("parent-id", body)
+    assert result.had_warnings is True
+    assert result.provider_warnings == ("chembl_assay",)
+    from bioetl.interfaces.cli.commands.domains.composite.execution import (
+        build_run_composite_result,
+    )
+
+    successful, message = build_run_composite_result(result)
+    assert successful is True
+    assert "Provider warnings: chembl_assay" in message
+    report = json.loads(
+        next(
+            value
+            for path, value in store.files.items()
+            if path.endswith("pipeline-run-report.json")
+        )
+    )
+    assert report["observations"]["Provider"]["verdict"] == "INCOMPLETE"
+    assert report["observations"]["Data Quality"]["verdict"] == "INCOMPLETE"
+    assert report["identity"]["completion_status"] == "completed_with_warnings"
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize("outcome", ["success", "error", "cancel"])
-@pytest.mark.parametrize("child_verdict", ["OK", "WARN"])
-@pytest.mark.parametrize("dq_verdict", ["OK", "WARN", "ERROR", None])
+@pytest.mark.parametrize("child_verdict", ["OK", "WARN", "ERROR", "UNKNOWN"])
+@pytest.mark.parametrize("dq_verdict", ["OK", "WARN", "ERROR", "UNKNOWN", None])
+@pytest.mark.parametrize("warnings", [False, True])
 async def test_parent_records_terminal_evidence(
-    tmp_path, outcome, child_verdict, dq_verdict
+    tmp_path, outcome, child_verdict, dq_verdict, warnings
 ):
     archive = MagicMock()
     service = CompositeRunReportService(
@@ -59,6 +120,11 @@ async def test_parent_records_terminal_evidence(
     )
 
     async def body():
+        # Archive trust is finalized after the initial report is persisted.
+        # Its provisional state must not become a permanent execution warning.
+        record_run_observation(
+            "Control Plane", verdict="INCOMPLETE", reason="archive_pending", facts={}
+        )
         record_composite_child(
             RunResult(
                 status=PipelineRunResult.SUCCESS,
@@ -79,6 +145,7 @@ async def test_parent_records_terminal_evidence(
             "composite_assay",
             "parent-id",
             SeedResult("chembl_assay", records_silver=10),
+            had_warnings=warnings,
             merge_result=MergeResult(
                 records_merged=9,
                 records_from_seed=10,
@@ -88,7 +155,19 @@ async def test_parent_records_terminal_evidence(
         )
 
     if outcome == "success":
-        await service.execute("parent-id", body)
+        assessed = await service.execute("parent-id", body)
+        expected_warnings = warnings or child_verdict != "OK" or dq_verdict != "OK"
+        assert assessed.had_warnings is expected_warnings
+        assert assessed.provider_warnings == (
+            ("chembl_assay",) if child_verdict != "OK" else ()
+        )
+        from bioetl.interfaces.cli.commands.domains.composite.execution import (
+            build_run_composite_result,
+        )
+
+        cli_success, cli_message = build_run_composite_result(assessed)
+        assert cli_success is True
+        assert bool(cli_message) is expected_warnings
     else:
         with pytest.raises(
             ValueError if outcome == "error" else asyncio.CancelledError
@@ -122,8 +201,16 @@ async def test_parent_records_terminal_evidence(
         == {"success": "success", "error": "failed", "cancel": "shutdown"}[outcome]
     )
     assert report["observations"]["Provider"]["verdict"] == child_verdict
-    assert report["observations"]["Data Quality"]["verdict"] == (
-        dq_verdict or "INCOMPLETE"
+    assert report["observations"]["Control Plane"]["verdict"] == "INCOMPLETE"
+    expected_dq = dq_verdict or "INCOMPLETE"
+    if warnings and outcome == "success" and expected_dq in {"OK", "WARN"}:
+        expected_dq = "WARN"
+    assert report["observations"]["Data Quality"]["verdict"] == expected_dq
+    assert report["identity"]["completion_status"] == (
+        "completed_with_warnings"
+        if outcome == "success"
+        and (warnings or child_verdict != "OK" or dq_verdict != "OK")
+        else report["identity"]["status"]
     )
     assert report["observations"]["Data Quality"]["facts"]["child_run_ids"] == [
         "child-id"

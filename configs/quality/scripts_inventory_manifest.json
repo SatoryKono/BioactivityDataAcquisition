@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-04T10:43:22.243539+00:00",
+  "generated_at": "2026-10-04T12:25:30.052550+00:00",
   "summary": {
     "total_scripts": 636,
     "status_counts": {
@@ -2591,7 +2591,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 100,
+          "line": 128,
           "source_group": "docs",
           "text": "- Grok project-domain audit workflow: scripts/ai/generate_project_domain_audit_workflow.py -- generates .grok/workflows/project-domain-audit.rhai"
         },
@@ -5016,7 +5016,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 24,
       "references": [
         {
           "path": "docs/00-project/ai/README.md",
@@ -5038,19 +5038,25 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 90,
+          "line": 96,
+          "source_group": "docs",
+          "text": "python -m scripts.ai.prompts render prompt.audit.comprehensive --param SCOPE=repo"
+        },
+        {
+          "path": "docs/00-project/ai/prompts/README.md",
+          "line": 118,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts compile --domain docs --profile audit-readonly"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 91,
+          "line": 119,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.cycle --param SCOPE=src/bioetl --param DOMAIN=docs"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 92,
+          "line": 120,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts check"
         },
@@ -5059,12 +5065,6 @@
           "line": 131,
           "source_group": "docs",
           "text": "`python -m scripts.ai.prompts compile --profile full-write`) or the explicit"
-        },
-        {
-          "path": "docs/00-project/ai/prompts/fragments/project-requirements-audit.md",
-          "line": 73,
-          "source_group": "docs",
-          "text": "- Docs/prompts → `python -m scripts.ai.prompts check` when `docs/00-project/ai/prompts/**` changed"
         }
       ],
       "owner": "@bioetl-platform",
@@ -5081,7 +5081,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 85,
+          "line": 113,
           "source_group": "docs",
           "text": "in `scripts/ai/prompts/check.py` (per-card override `max_rendered_lines`)."
         },
@@ -10088,7 +10088,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
@@ -10104,7 +10104,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/engineering/ci/test_pr_gate.py",
-          "line": 11,
+          "line": 13,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci import pr_gate"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/engineering/ci/test_pr_gate.py",
+          "line": 15,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pr_gate import ("
         }
@@ -12018,7 +12024,7 @@
       "references": [
         {
           "path": "pyproject.toml",
-          "line": 341,
+          "line": 343,
           "source_group": "build",
           "text": "# (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py); memory"
         },

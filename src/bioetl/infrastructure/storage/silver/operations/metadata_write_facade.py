@@ -18,6 +18,7 @@ from bioetl.infrastructure.storage.silver.metadata_write_models import (
     _SilverMetadataWriteRequest,
 )
 from bioetl.infrastructure.storage.silver.operations.metadata_audit_operations import (
+    _SilverMetadataAuditOps,
     log_internal_silver_audit_operation,
     log_silver_audit_operation,
 )
@@ -30,6 +31,7 @@ from bioetl.infrastructure.storage.silver.operations.metadata_finalization_opera
 )
 from bioetl.infrastructure.storage.silver.operations.metadata_write_operations import (
     _ExecuteSilverMetadataWrite,
+    _SilverMetadataWriteOps,
     write_internal_silver_metadata_operation,
     write_silver_merged_metadata_operation,
     write_silver_metadata_via_support_request,
@@ -55,7 +57,7 @@ class _SilverMetadataWriteFacade(_SilverMetadataContextFacade):
     """Write, audit, and finalization methods for metadata services."""
 
     async def _write_silver_metadata(
-        self,
+        self: _SilverMetadataWriteOps,
         request: _SilverMetadataWriteRequest,
     ) -> None:
         """Canonical Silver metadata publication path for composition-backed ops."""
@@ -66,7 +68,7 @@ class _SilverMetadataWriteFacade(_SilverMetadataContextFacade):
         )
 
     async def _write_silver_merged_metadata(
-        self,
+        self: _SilverMetadataWriteOps,
         *,
         table_path: str,
         table_name: str,
@@ -90,7 +92,7 @@ class _SilverMetadataWriteFacade(_SilverMetadataContextFacade):
         )
 
     async def write_silver_metadata(
-        self,
+        self: _SilverMetadataWriteOps,
         table_name: str,
         dq_metrics: BatchDQMetrics,
         records: list[BronzeRecord],
@@ -122,7 +124,7 @@ class _SilverMetadataWriteFacade(_SilverMetadataContextFacade):
         )
 
     async def log_silver_audit(
-        self,
+        self: _SilverMetadataAuditOps,
         table_name: str,
         records: list[BronzeRecord],
         mode: str,
@@ -148,7 +150,7 @@ class _SilverMetadataWriteFacade(_SilverMetadataContextFacade):
         )
 
     async def _log_silver_audit(
-        self,
+        self: _SilverMetadataAuditOps,
         request: _SilverMetadataAuditSupportRequest,
     ) -> None:
         """Log Silver audit through the canonical request payload."""

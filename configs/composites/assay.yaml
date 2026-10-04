@@ -8,12 +8,12 @@
 # - Enrichers: ChEMBL cell_line (cell context), ChEMBL tissue (tissue context)
 #
 # Architecture Decision: Using ENRICHERS (not dependencies) because:
-# - Cell Line and Tissue are reference tables already populated in Silver
-# - No API calls needed - just lookup from existing Silver tables
+# - Cell Line and Tissue are optional metadata selected by seed foreign keys
+# - Enrichers fetch provider data and persist Silver tables before the merge
 # - Enrichers execute in parallel (unlike sequential dependencies)
 #
 # Join Strategy:
-# - cell_chembl_id and tissue_chembl_id are nullable foreign keys
+# - cell_id and tissue_id are nullable foreign keys
 # - ~70% of assays lack cell_line or tissue data
 # - Merge uses left_outer to preserve all assays
 #
@@ -71,7 +71,7 @@ composite:
     silver_table: silver/chembl/assay
 
   # ---------------------------------------------------------------------------
-  # Dependencies (none - enrichers read from pre-populated Silver)
+  # Dependencies (none - optional reference data is fetched by enrichers)
   # ---------------------------------------------------------------------------
   dependencies: []
   # ---------------------------------------------------------------------------

@@ -2,23 +2,26 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Awaitable, Callable
+from contextlib import AbstractContextManager, nullcontext
 from contextvars import ContextVar
 from dataclasses import dataclass
 from datetime import datetime
-from functools import partial
 from pathlib import Path
 
-from bioetl.application.services.execution import finalize_terminal_evidence
 from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
     RunResult,
 )
-from bioetl.application.services.run_reports.composite_evidence import (
+from bioetl.application.services.run_reports.composite_report_support import (
+    assess_result,
     build_composite_report,
-    composite_layer_counts,
-    composite_terminal_status,
-    read_child_observation_verdict,
+    child_artifacts,
+    child_verdict,
+    completion_status,
+    merge_layers,
+    record_stage_quality,
 )
 from bioetl.application.services.run_reports.observations import (
     bind_run_observations,
@@ -27,6 +30,7 @@ from bioetl.application.services.run_reports.observations import (
 )
 from bioetl.application.services.run_reports.writer import write_pipeline_run_report
 from bioetl.domain.composite.result import CompositeResult
+from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.domain.ports import ClockPort, LoggerPort, RunReportStorePort
 
 _children: ContextVar[list[RunResult] | None] = ContextVar(
@@ -53,6 +57,8 @@ class CompositeRunReportService:
     logger: LoggerPort
     capture: Callable[[str, str, datetime], None]
     archive: Callable[[RunResult], None] | None = None
+    execution_scope: Callable[[], AbstractContextManager[object]] = nullcontext
+    replay_artifacts: Callable[[str], tuple[dict[str, object], ...]] | None = None
 
     def write(
         self,
@@ -62,9 +68,15 @@ class CompositeRunReportService:
         result: CompositeResult | None,
         error: BaseException | None,
         children: list[RunResult],
-    ) -> None:
+    ) -> CompositeResult | None:
         completed_at = self.clock.now()
-        status = composite_terminal_status(result, error)
+        status = (
+            "success"
+            if result is not None and result.is_success and error is None
+            else "failed"
+        )
+        if isinstance(error, (asyncio.CancelledError, PipelineShutdownError)):
+            status = "shutdown"
         try:
             self.capture(self.pipeline_name, run_id, completed_at)
         except (OSError, RuntimeError, ValueError, TypeError):
@@ -74,40 +86,27 @@ class CompositeRunReportService:
                 reason="completion_assessment_failed",
                 facts={},
             )
-        self._record_child_evidence(children, "Provider")
+        provider_warnings = self._record_child_evidence(children, "Provider")
         self._record_child_evidence(children, "Data Quality")
-        if result is not None and (
-            result.had_warnings or any(not child.is_success for child in children)
-        ):
-            record_run_observation(
-                "Data Quality",
-                verdict="WARN",
-                reason="composite_partial_stage_execution",
-                facts={
-                    "failed_children": [
-                        child.run_id for child in children if not child.is_success
-                    ]
-                },
-            )
-        layers = composite_layer_counts(result)
-        report = build_composite_report(
-            identity={
-                "pipeline_name": self.pipeline_name,
-                "run_id": run_id,
-                "manifest_id": self.manifest_id,
-                "provider": "composite",
-                "entity": "merged",
-                "run_type": "composite",
-                "status": status,
-                "started_at": started_at.isoformat(),
-                "completed_at": completed_at.isoformat(),
-            },
-            result=result,
-            error=error,
-            children=children,
-            layers=layers,
-            store=self.store,
-        )
+        record_stage_quality(result, children)
+        result = assess_result(result, children, provider_warnings)
+        layers = merge_layers(result)
+        identity: dict[str, object] = {
+            "pipeline_name": self.pipeline_name,
+            "run_id": run_id,
+            "manifest_id": self.manifest_id,
+            "provider": "composite",
+            "entity": "merged",
+            "run_type": "composite",
+            "status": status,
+            "completion_status": completion_status(status, result, provider_warnings),
+            "started_at": started_at.isoformat(),
+            "completed_at": completed_at.isoformat(),
+        }
+        artifacts = child_artifacts(self.store, children)
+        if self.replay_artifacts is not None:
+            artifacts += self.replay_artifacts(run_id)
+        report = build_composite_report(identity, result, error, children, artifacts)
         paths = write_pipeline_run_report(report, root=self.root, store=self.store)
         if status == "success" and self.archive is not None:
             self.archive(
@@ -126,13 +125,12 @@ class CompositeRunReportService:
                 )
             )
 
-    def _record_child_evidence(self, children: list[RunResult], domain: str) -> None:
-        verdicts = [
-            read_child_observation_verdict(self.store, child, domain)
-            for child in children
-        ]
-        allowed = {"ERROR", "INCOMPLETE", "UNKNOWN", "WARN", "OK", "N/A"}
-        verdicts = [value if value in allowed else "INCOMPLETE" for value in verdicts]
+        return result
+
+    def _record_child_evidence(
+        self, children: list[RunResult], domain: str
+    ) -> tuple[str, ...]:
+        verdicts = [child_verdict(self.store, child, domain) for child in children]
         verdict = next(
             (
                 v
@@ -154,6 +152,11 @@ class CompositeRunReportService:
                 "report_refs": [child.run_report_json_path for child in children],
             },
         )
+        return tuple(
+            child.pipeline_name
+            for child, value in zip(children, verdicts, strict=True)
+            if value not in {"OK", "N/A"}
+        )
 
     async def execute(
         self, run_id: str, body: Callable[[], Awaitable[CompositeResult]]
@@ -166,26 +169,28 @@ class CompositeRunReportService:
         result = None
         error = None
         try:
-            result = await body()
-            return result
+            with self.execution_scope():
+                result = await body()
         except BaseException as exc:
             error = exc
             raise
         finally:
             try:
-                finalize_terminal_evidence(
-                    partial(
-                        self.write,
-                        run_id=run_id,
-                        started_at=started_at,
-                        result=result,
-                        error=error,
-                        children=children,
-                    ),
-                    execution_error=error,
-                    logger=self.logger,
-                    event="composite_report_write_failed",
+                result = self.write(
+                    run_id=run_id,
+                    started_at=started_at,
+                    result=result,
+                    error=error,
+                    children=children,
+                )
+            except Exception as report_error:
+                if error is None:
+                    raise
+                self.logger.error(
+                    "composite_report_write_failed", error=str(report_error)
                 )
             finally:
                 _children.reset(children_token)
                 reset_run_observations(observations_token)
+        assert result is not None
+        return result

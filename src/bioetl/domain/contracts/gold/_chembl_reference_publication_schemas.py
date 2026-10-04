@@ -140,7 +140,9 @@ class ChEMBLPublicationSimilarityGoldSchema(StrictGoldContractSchema):
 
     @pa.dataframe_check
     @classmethod
-    def complete_document_pair(cls, frame: DataFrame) -> Series[bool]:
+    def complete_document_pair(
+        cls, frame: DataFrame[ChEMBLPublicationSimilarityGoldSchema]
+    ) -> Series[bool]:
         """Do not accept a missing or half-present public/internal pair."""
         return cast(
             Series[bool],

@@ -36,7 +36,7 @@ def _resolution_policy_payload(policy: ConfigResolutionPolicy) -> JsonDict:
 
 def _resolved_config_payload(
     config: ResolvedConfigSnapshot,
-    normalize: Callable[[object], JsonDict],
+    normalize: Callable[[JsonDict], JsonDict],
 ) -> JsonDict:
     """Project a resolved config snapshot to a JSON dict."""
     return {
@@ -48,7 +48,7 @@ def _resolved_config_payload(
 
 def _runtime_overrides_payload(
     overrides: RuntimeOverrideSnapshot,
-    normalize: Callable[[object], JsonDict],
+    normalize: Callable[[JsonDict], JsonDict],
 ) -> JsonDict:
     """Project runtime overrides to a JSON dict."""
     result: JsonDict = {}
@@ -67,7 +67,7 @@ def _runtime_overrides_payload(
 
 def _effective_config_payload(
     config: EffectiveExecutionConfig,
-    normalize: Callable[[object], JsonDict],
+    normalize: Callable[[JsonDict], JsonDict],
 ) -> JsonDict:
     """Project an effective execution config to a JSON dict."""
     return {

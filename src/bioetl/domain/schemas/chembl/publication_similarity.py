@@ -24,7 +24,9 @@ class PublicationSimilaritySchema(ETLRecordSchema):
 
     @pa.dataframe_check
     @classmethod
-    def complete_document_pair(cls, frame: DataFrame) -> Series[bool]:
+    def complete_document_pair(
+        cls, frame: DataFrame[PublicationSimilaritySchema]
+    ) -> Series[bool]:
         """Require a complete public pair or a complete legacy internal pair."""
         return cast(
             Series[bool],

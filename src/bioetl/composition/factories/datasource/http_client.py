@@ -16,7 +16,9 @@ from bioetl.composition.providers.provider_registry import (
 from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+from bioetl.infrastructure.adapters.http.health import (
+    resolve_provider_resources,
+)
 from bioetl.infrastructure.config.source_config_loader import load_source_config
 
 if TYPE_CHECKING:
@@ -158,13 +160,6 @@ class HttpClientFactory:
             recovery_timeout = source_config.circuit_breaker.recovery_timeout
             timeout = source_config.timeout_sec
             max_retries = source_config.max_retries
-            api_key_present = (
-                api_key_setting is not None
-                and settings is not None
-                and cls._check_setting(settings, api_key_setting)
-            )
-            if provider == "semanticscholar" and not api_key_present:
-                max_retries = min(max_retries, 2)
             base_delay = source_config.retry_base_delay
             max_delay = source_config.retry_max_delay
             max_connections = source_config.max_connections
@@ -228,11 +223,11 @@ class HttpClientFactory:
         )
         retry_config = cls._build_retry_config(cfg, settings)
         timeout = cls._resolve_request_timeout(cfg, settings)
+        resources = resolve_provider_resources(provider, cfg.rate, cfg.capacity)
 
         return UnifiedHTTPClient(
-            rate_limiter=TokenBucketRateLimiter(
-                rate=cfg.rate, capacity=cfg.capacity, provider=provider
-            ),
+            rate_limiter=resources.limiter,
+            health_probe_coordinator=resources.health,
             circuit_breaker=CircuitBreakerGuard(
                 provider=provider,
                 failure_threshold=cfg.failure_threshold,

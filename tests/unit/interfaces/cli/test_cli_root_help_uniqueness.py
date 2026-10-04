@@ -63,6 +63,19 @@ def test_list_commands_is_unique_and_eager_first() -> None:
     assert set(_EAGER_ROOT_COMMANDS).isdisjoint(cli_main._LAZY_COMMAND_SPECS)
 
 
+def test_replay_aliases_have_independent_command_names() -> None:
+    context = click.Context(cli)
+    legacy = cli.get_command(context, "replay-assay")
+    composite = cli.get_command(context, "replay-composite")
+    assert legacy is not composite
+    assert legacy.name == "replay-assay"
+    assert composite.name == "replay-composite"
+    for name in ("replay-assay", "replay-composite"):
+        result = CliRunner().invoke(cli, [name, "--help"])
+        assert result.exit_code == 0
+        assert name in result.output
+
+
 @pytest.mark.parametrize("command_name", _EAGER_ROOT_COMMANDS)
 def test_eager_root_commands_resolve_help(command_name: str) -> None:
     result = CliRunner().invoke(cli, [command_name, "--help"])

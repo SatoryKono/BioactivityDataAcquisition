@@ -118,7 +118,8 @@ class MemoryMonitor:
 
     def _get_stats_fallback(self) -> MemoryStats:
         """Get memory stats using fallback methods."""
-        if sys.platform != "win32":
+        runtime_platform = sys.platform
+        if runtime_platform != "win32":
             return self._get_stats_resource()
         return self._get_stats_estimate()
 

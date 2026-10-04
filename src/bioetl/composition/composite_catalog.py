@@ -4,9 +4,16 @@ from __future__ import annotations
 
 from pathlib import Path
 
+
 from bioetl.composition.bootstrap.runtime.composite import (
     bootstrap_composite_runner,
     load_composite_config,
+)
+from bioetl.composition.bootstrap.runtime.assay_replay import (
+    replay_assay as replay_assay,
+)
+from bioetl.composition.bootstrap.runtime.assay_replay_evidence import (
+    project_assay_replay as project_assay_replay,
 )
 from bioetl.infrastructure.config.config_root import resolve_config_subdir
 from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
@@ -19,6 +26,8 @@ __all__ = [
     "list_configured_pipeline_names",
     "load_composite_config",
     "load_pipeline_config",
+    "project_assay_replay",
+    "replay_assay",
 ]
 
 

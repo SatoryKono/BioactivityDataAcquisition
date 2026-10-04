@@ -6,7 +6,7 @@ from bioetl.domain.exceptions.validation import ValidationError
 from bioetl.domain.normalization.profiles._chembl_reference_identifier_rules import (
     chembl_reference_identifier_rules,
 )
-from bioetl.domain.normalization.profiles._profile_governed_value_normalizers import (
+from bioetl.domain.normalization.profiles._profile_numeric_normalizers import (
     coerce_profile_quasi_enum_numeric,
 )
 from bioetl.domain.normalization.profiles._standard_profile_builder import (

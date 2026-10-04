@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import replace
 from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
@@ -14,6 +13,7 @@ from bioetl.application.composite.runtime_wiring_api import (
 from bioetl.application.services.execution.pipeline_runner_models import RunOptions
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
+    build_manifest_storage_factory,
 )
 from bioetl.composition.bootstrap.runtime._dependency_runner_support import (
     resolve_required_gold_pipelines,
@@ -56,7 +56,6 @@ if TYPE_CHECKING:
         ClockPort,
         LockPort,
         LoggerPort,
-        PipelineControlPlaneArtifacts,
         TracingPort,
     )
     from bioetl.infrastructure.config.settings_api import Settings
@@ -102,37 +101,15 @@ def bootstrap_runtime_basics(
         provider="composite",
         entity="merged",
     )
-    storage = storage_bootstrapper(
+    storage_for_manifest = build_manifest_storage_factory(
         run_context=storage_run_context,
+        storage_bootstrapper=storage_bootstrapper,
         logger=logger,
         metrics=metrics,
-        tracing=tracer,
-        enable_csv_export=True,
+        tracer=tracer,
         settings=settings,
     )
-
-    def storage_for_manifest(
-        artifacts: PipelineControlPlaneArtifacts,
-    ) -> CompositeRuntimeStorageProtocol:
-        bound_context = replace(
-            storage_run_context,
-            manifest_id=artifacts.manifest_id,
-            config_hash=artifacts.config_hash,
-            resolved_config_hash=artifacts.resolved_config_hash,
-            effective_config_hash=artifacts.effective_config_hash,
-            execution_fingerprint=artifacts.execution_fingerprint,
-            dq_contract_compatibility_hash=artifacts.dq_contract_compatibility_hash,
-            effective_config_artifact_id=artifacts.effective_config_artifact_id,
-            input_snapshot_fingerprint=artifacts.input_snapshot_fingerprint,
-        )
-        return storage_bootstrapper(
-            run_context=bound_context,
-            logger=logger,
-            metrics=metrics,
-            tracing=tracer,
-            enable_csv_export=True,
-            settings=settings,
-        )
+    storage = storage_for_manifest(None)
 
     lock = lock_factory()
     return CompositeInfrastructureContext(
