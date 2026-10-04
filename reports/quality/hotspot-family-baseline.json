@@ -18,7 +18,7 @@
       ],
       "duplication_clusters": 0,
       "files": 200,
-      "total_loc": 24795,
+      "total_loc": 24786,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.388,
       "max_internal_fan_in": 5,
@@ -1573,10 +1573,10 @@
         "src/bioetl/composition/bootstrap/runtime/"
       ],
       "duplication_clusters": 0,
-      "files": 57,
-      "total_loc": 7074,
+      "files": 49,
+      "total_loc": 6445,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.292,
+      "helper_function_ratio": 0.289,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.tracing_bootstrap",
       "bounded_growth_budgets": {
@@ -1585,9 +1585,9 @@
       },
       "internal_fan_in_census": {
         "distribution": {
-          "0": 2,
-          "1": 37,
-          "2": 18
+          "0": 6,
+          "1": 28,
+          "2": 15
         },
         "modules": [
           {
@@ -1610,13 +1610,6 @@
             ]
           },
           {
-            "module": "bioetl.composition.bootstrap.runtime._composite_control_plane_payloads_build_composite_launch_context_snapshot",
-            "fan_in": 1,
-            "runtime_importers": [
-              "bioetl.composition.bootstrap.runtime._composite_control_plane_payloads"
-            ]
-          },
-          {
             "module": "bioetl.composition.bootstrap.runtime._composite_control_plane_support",
             "fan_in": 2,
             "runtime_importers": [
@@ -1625,24 +1618,10 @@
             ]
           },
           {
-            "module": "bioetl.composition.bootstrap.runtime._composite_control_plane_support_resolve_composite_replay_capability",
-            "fan_in": 1,
-            "runtime_importers": [
-              "bioetl.composition.bootstrap.runtime._composite_control_plane_support"
-            ]
-          },
-          {
             "module": "bioetl.composition.bootstrap.runtime._composite_plan_runtime_support",
             "fan_in": 1,
             "runtime_importers": [
               "bioetl.composition.bootstrap.runtime._composite_plan_support"
-            ]
-          },
-          {
-            "module": "bioetl.composition.bootstrap.runtime._composite_plan_runtime_support_coerce_named_runtime_bundle",
-            "fan_in": 1,
-            "runtime_importers": [
-              "bioetl.composition.bootstrap.runtime._composite_plan_runtime_support"
             ]
           },
           {
@@ -1692,17 +1671,8 @@
           },
           {
             "module": "bioetl.composition.bootstrap.runtime.assay_replay_capture",
-            "fan_in": 1,
-            "runtime_importers": [
-              "bioetl.composition.bootstrap.runtime.composite_support_services_factory"
-            ]
-          },
-          {
-            "module": "bioetl.composition.bootstrap.runtime.assay_replay_evidence",
-            "fan_in": 1,
-            "runtime_importers": [
-              "bioetl.composition.bootstrap.runtime.composite_reporter"
-            ]
+            "fan_in": 0,
+            "runtime_importers": []
           },
           {
             "module": "bioetl.composition.bootstrap.runtime.assembly",
@@ -1710,13 +1680,6 @@
             "runtime_importers": [
               "bioetl.composition.bootstrap.runtime.pipeline",
               "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases"
-            ]
-          },
-          {
-            "module": "bioetl.composition.bootstrap.runtime.assembly_assemble_runtime_config",
-            "fan_in": 1,
-            "runtime_importers": [
-              "bioetl.composition.bootstrap.runtime.assembly"
             ]
           },
           {
@@ -1739,13 +1702,6 @@
             ]
           },
           {
-            "module": "bioetl.composition.bootstrap.runtime.composite_contract_evidence",
-            "fan_in": 1,
-            "runtime_importers": [
-              "bioetl.composition.bootstrap.runtime._runner_assembly_support"
-            ]
-          },
-          {
             "module": "bioetl.composition.bootstrap.runtime.composite_control_plane_builder",
             "fan_in": 1,
             "runtime_importers": [
@@ -1761,10 +1717,8 @@
           },
           {
             "module": "bioetl.composition.bootstrap.runtime.composite_execution_support_builder",
-            "fan_in": 1,
-            "runtime_importers": [
-              "bioetl.composition.bootstrap.runtime.composite_support_services_factory"
-            ]
+            "fan_in": 0,
+            "runtime_importers": []
           },
           {
             "module": "bioetl.composition.bootstrap.runtime.composite_execution_support_bundle",
@@ -1797,33 +1751,15 @@
           },
           {
             "module": "bioetl.composition.bootstrap.runtime.composite_merge_service_builder",
-            "fan_in": 2,
-            "runtime_importers": [
-              "bioetl.composition.bootstrap.runtime.assay_replay",
-              "bioetl.composition.bootstrap.runtime.composite_support_services_factory"
-            ]
-          },
-          {
-            "module": "bioetl.composition.bootstrap.runtime.composite_replay_context",
-            "fan_in": 2,
-            "runtime_importers": [
-              "bioetl.composition.bootstrap.runtime.assay_replay",
-              "bioetl.composition.bootstrap.runtime.assay_replay_capture"
-            ]
-          },
-          {
-            "module": "bioetl.composition.bootstrap.runtime.composite_reporter",
             "fan_in": 1,
             "runtime_importers": [
-              "bioetl.composition.bootstrap.runtime._runner_assembly_support"
+              "bioetl.composition.bootstrap.runtime.assay_replay"
             ]
           },
           {
             "module": "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder",
-            "fan_in": 1,
-            "runtime_importers": [
-              "bioetl.composition.bootstrap.runtime.composite_support_services_factory"
-            ]
+            "fan_in": 0,
+            "runtime_importers": []
           },
           {
             "module": "bioetl.composition.bootstrap.runtime.composite_runtime_management_bundle",
@@ -1841,18 +1777,8 @@
           },
           {
             "module": "bioetl.composition.bootstrap.runtime.composite_support_runtime_context",
-            "fan_in": 1,
-            "runtime_importers": [
-              "bioetl.composition.bootstrap.runtime.composite_support_services_factory"
-            ]
-          },
-          {
-            "module": "bioetl.composition.bootstrap.runtime.composite_support_services_factory",
-            "fan_in": 2,
-            "runtime_importers": [
-              "bioetl.composition.bootstrap.runtime.composite_support_helpers",
-              "bioetl.composition.bootstrap.runtime.runtime_basics"
-            ]
+            "fan_in": 0,
+            "runtime_importers": []
           },
           {
             "module": "bioetl.composition.bootstrap.runtime.dq_bootstrap",
@@ -1954,9 +1880,16 @@
           },
           {
             "module": "bioetl.composition.bootstrap.runtime.run_status",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime._runner_assembly_support"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.run_status_capture",
             "fan_in": 2,
             "runtime_importers": [
-              "bioetl.composition.bootstrap.runtime.composite_reporter",
+              "bioetl.composition.bootstrap.runtime.run_status",
               "bioetl.composition.bootstrap.runtime.runner"
             ]
           },
@@ -2012,9 +1945,6 @@
           "bioetl.composition.bootstrap.runtime._runner_assembly_support",
           "bioetl.composition.bootstrap.runtime.assembly",
           "bioetl.composition.bootstrap.runtime.composite_filter_extraction_service",
-          "bioetl.composition.bootstrap.runtime.composite_merge_service_builder",
-          "bioetl.composition.bootstrap.runtime.composite_replay_context",
-          "bioetl.composition.bootstrap.runtime.composite_support_services_factory",
           "bioetl.composition.bootstrap.runtime.dq_bootstrap",
           "bioetl.composition.bootstrap.runtime.logger_bootstrap",
           "bioetl.composition.bootstrap.runtime.metrics_bootstrap",
@@ -2022,7 +1952,7 @@
           "bioetl.composition.bootstrap.runtime.observability_assembly",
           "bioetl.composition.bootstrap.runtime.observability_bundle",
           "bioetl.composition.bootstrap.runtime.pipeline",
-          "bioetl.composition.bootstrap.runtime.run_status",
+          "bioetl.composition.bootstrap.runtime.run_status_capture",
           "bioetl.composition.bootstrap.runtime.tracing_bootstrap"
         ]
       },
@@ -2315,7 +2245,7 @@
       ],
       "duplication_clusters": 0,
       "files": 130,
-      "total_loc": 15571,
+      "total_loc": 15559,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.399,
       "max_internal_fan_in": 1,

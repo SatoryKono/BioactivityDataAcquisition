@@ -21,6 +21,7 @@ from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.infrastructure.adapters.chembl._health_probe import (
     extract_http_status_code,
     handle_chembl_health_response,
+    max_health_status,
     probe_chembl_status,
 )
 from bioetl.infrastructure.adapters.http.health import (
@@ -92,24 +93,14 @@ class ChemblHealthMixin:
     )  # Any: host attr default (PD6)
 
     @staticmethod
-    def _max_health_status(
-        left: HealthStatus,
-        right: HealthStatus,
-    ) -> HealthStatus:
-        """Return the more severe of two health signals."""
-        severity = {
-            HealthStatus.HEALTHY: 0,
-            HealthStatus.DEGRADED: 1,
-            HealthStatus.UNHEALTHY: 2,
-        }
-        return left if severity[left] >= severity[right] else right
+    def _max_health_status(left: HealthStatus, right: HealthStatus) -> HealthStatus:
+        """Return the more severe health signal through the probe owner."""
+        return max_health_status(left, right)
 
     def _get_effective_health_status(self) -> HealthStatus:
-        """Combine circuit-breaker and last active probe health.
+        """Retain probe degradation until the circuit breaker catches up.
 
-        The preflight probe can detect an upstream degradation before the
-        first fetch attempt mutates the circuit breaker. Preserving the last
-        probe result lets the first page fetch react to that signal.
+        The first page fetch must react to a degraded preflight probe.
         """
         circuit_status = self._get_health_status()
         probe_status = getattr(self, "_last_probe_health_status", None)
@@ -118,13 +109,7 @@ class ChemblHealthMixin:
         return self._max_health_status(circuit_status, probe_status)
 
     def _clear_probe_degraded_state_on_success(self) -> None:
-        """Drop stale probe degradation after a successful data request.
-
-        The active `/status` probe is only an early-warning signal. Once a real
-        data endpoint request succeeds, retaining a previous probe-only
-        DEGRADED state keeps the adapter on a reduced batch size path longer
-        than necessary.
-        """
+        """Clear probe-only degradation once a real data request succeeds."""
         if getattr(self, "_last_probe_health_status", None) == HealthStatus.DEGRADED:
             self._last_probe_health_status = None
 
@@ -182,11 +167,7 @@ class ChemblHealthMixin:
         return status
 
     def _get_health_status(self) -> HealthStatus:
-        """Get health status from circuit breaker state.
-
-        Returns:
-            HealthStatus derived from the circuit breaker's current state.
-        """
+        """Get health status from the circuit breaker state."""
         return assess_health_from_circuit_breaker(self.http_client.circuit_breaker)
 
     def _get_effective_batch_size(self) -> int:
@@ -224,19 +205,11 @@ class ChemblHealthMixin:
         return self._page_size
 
     def _fallback_health_status(self) -> HealthStatus:
-        """Return health status based on circuit breaker state.
-
-        Returns:
-            HealthStatus based on the circuit breaker's current state.
-        """
+        """Return health status from the current circuit breaker state."""
         return self._get_health_status()
 
     def _get_health_endpoint(self) -> str:
-        """Get the health check endpoint for ChEMBL.
-
-        Returns:
-            Health check endpoint path string for ChEMBL.
-        """
+        """Return the ChEMBL status endpoint path."""
         return "/chembl/api/data/status"
 
     def _handle_health_response(self, response: Response) -> HealthStatus:

@@ -77,7 +77,7 @@ def _bronze_schema_contract_payload() -> dict[str, Any]:
         BRONZE_WRITE_ERRORS,
         BronzeWriterRuntimeServices,
     )
-    from bioetl.infrastructure.storage.bronze.metadata_builders import (
+    from bioetl.infrastructure.storage.bronze.metadata_assembly import (
         BronzeLineageMetadataRequest,
         BronzeMetadataPayloadRequest,
     )

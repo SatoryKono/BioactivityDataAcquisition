@@ -1,9 +1,9 @@
 %% Title: Package Family: infrastructure/storage/bronze
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/storage/bronze; modules: pipeline_helpers, metadata_operations, metadata_builders, metrics_mixin, reporting_helpers, facade_contracts.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/storage/bronze; modules: pipeline_helpers, metadata_operations, metadata_assembly, metrics_mixin, reporting_helpers, facade_contracts.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-09-02
+%% @date    2026-10-04
 %% @level   Package Family / Inventory Slice
 %% @nodes   22
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
@@ -24,7 +24,7 @@ classDiagram
         class _BronzeMetadataWriteHostProtocol
     }
 
-    namespace metadata_builders {
+    namespace metadata_assembly {
         class BronzeLineageMetadataRequest
         class BronzeMetadataPayloadRequest
     }
@@ -68,4 +68,3 @@ classDiagram
     }
 
     BronzeWriterReadCleanupMixin <|-- BronzeWriterIOMixin
-

@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-10-03'
+  Last verified: '2026-10-04'
 
 ______________________________________________________________________
 
@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `main`
-- Source commit: `9f71c644417551222e489ec08c6b358e7c0b64b2`
-- Source run id: `36202183545`
-- Source event: `push`
-- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/36202183545`
-- Source tree sha256: `cfb80acd6d5efdf0e029dd0f044a3b9190e74cea7c022a17d73206bb4e5290ac`
+- Source branch: `codex/architecture-coverage-closeout-11854-11899`
+- Source commit: `e916f820e70c807183fcaf2e73f4cad714524844`
+- Source run id: `local-full-coverage-wave-39`
+- Source event: `local_coverage_verify`
+- Source run URL: `pending`
+- Source tree sha256: `46c24ca78ce6b9184b723b097a9b754f9a3a4a492c9535ea497f1004f6e8b10b`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-10-03T20:45:37.279513+00:00`
+- Refreshed at (UTC): `2026-10-04T14:55:20.498619+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -45,8 +45,15 @@ trend evidence only.
   and rejects future/stale `refreshed_at_utc` values.
 - `source_commit` must remain an ancestor of HEAD; exact `source_commit == HEAD`
   is opt-in via `BIOETL_REQUIRE_TELEMETRY_SOURCE_COMMIT_EQUALS_HEAD=1`.
-- A non-main source branch is accepted only for a `pull_request` run;
-  the run URL and id keep that pre-merge evidence independently auditable.
+- GitHub evidence from a non-main branch requires `pull_request`;
+  its run URL and id remain independently auditable.
+- `--local-manifest <path>` accepts only a complete canonical 17-shard run
+  with matching source/test hashes, reachable commit, XML/JUnit digests,
+  zero failures/errors and both 85% gates passed. Identity and inputs
+  are derived from that manifest; cached CI summaries are never reused.
+- Local captures use `source_event: local_coverage_verify`, a `local-` run
+  id and no GitHub run URL. Trust remains `local_single_host`;
+  `CI=BLOCKED_EXTERNAL_PERMANENT` never becomes CI PASS or lifecycle ADMIT.
 - Refresh command:
   `python -m scripts.engineering.ci.update_test_telemetry_baseline`
   `--source-commit <sha> --source-run-id <run-id>`
@@ -55,43 +62,43 @@ trend evidence only.
 ## Coverage
 
 - Hard threshold: `85.0%`
-- Actual coverage: `96.74%`
+- Actual coverage: `99.70%`
 - Threshold satisfied: `True`
 
 ## Duration Telemetry
 
-- Total collected test cases: `49975`
+- Total collected test cases: `32809`
 - Freshness guard: `<=45 days` via `refreshed_at_utc`
 
 ### Top Slowest Tests
 
 | Rank | Duration (s) | Test | Source |
 |---:|---:|---|---|
-| 1 | `13.364` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `junit-unit-scripts-tooling.debt-governance.xml` |
-| 2 | `11.048` | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation` | `junit-repo-backed-unit.ops.xml` |
-| 3 | `9.265` | `tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]` | `junit-contract-confidence.xml` |
-| 4 | `8.973` | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_cli_unavailable_fails_closed_with_redacted_report` | `junit-repo-backed-unit.ops.xml` |
-| 5 | `7.772` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact` | `junit-unit-scripts-tooling.debt-governance.xml` |
-| 6 | `7.749` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale` | `junit-unit-scripts-tooling.debt-governance.xml` |
-| 7 | `7.134` | `tests.unit.composition.factories.pipeline.test_registry::test_registry_completeness` | `junit.unit-other.xml` |
-| 8 | `7.028` | `tests.unit.scripts.qa.test_check_quality_exemptions::test_check_quality_exemptions_passes_current_zero_budget_registry` | `junit-unit-scripts-tooling.other.xml` |
-| 9 | `6.955` | `tests.unit.composition.factories.pipeline.test_registry_consistency.TestFactoryValidity::test_all_factories_have_pipeline_name` | `junit.unit-other.xml` |
-| 10 | `6.873` | `tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures::test_cached_populated_isolated_registry_contains_pipeline_factories` | `junit-repo-backed-unit.product.xml` |
+| 1 | `35.119` | `tests.unit.repo_backed.scripts.ai.mcp.test_repo_env_loaders::test_bash_keeps_openai_and_openrouter_credentials_separate` | `repo-backed-unit-tooling.xml` |
+| 2 | `25.255` | `tests.smoke.test_control_plane_rollout_smoke::test_control_plane_rollout_smoke_emits_artifacts_and_aggregate_metrics` | `smoke.xml` |
+| 3 | `20.019` | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers::test_filter_options_deadline_does_not_send_late_success` | `unit-other.xml` |
+| 4 | `16.81` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `unit-scripts-tooling-debt-governance.xml` |
+| 5 | `12.254` | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline::test_chembl_target_component_happy_path` | `integration.xml` |
+| 6 | `11.184` | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path` | `integration.xml` |
+| 7 | `10.87` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact` | `unit-scripts-tooling-debt-governance.xml` |
+| 8 | `10.771` | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_source_fields` | `integration.xml` |
+| 9 | `10.744` | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_happy_path` | `integration.xml` |
+| 10 | `10.652` | `tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline::test_chembl_compound_record_happy_path` | `integration.xml` |
 
 ### Top Slow Zones
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 3 | 28.885 | 13.364 |
-| 2 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 2 | 20.021 | 11.048 |
-| 3 | `tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix` | 4 | 16.122 | 4.11 |
-| 4 | `tests.integration.ci.test_track_d_fixture_control_plane_linkage` | 2 | 11.69 | 6.032 |
-| 5 | `tests.contract.test_provider_contract_drift_replay` | 1 | 9.265 | 9.265 |
-| 6 | `tests.unit.composition.factories.pipeline.test_registry` | 1 | 7.134 | 7.134 |
-| 7 | `tests.unit.scripts.qa.test_check_quality_exemptions` | 1 | 7.028 | 7.028 |
-| 8 | `tests.unit.composition.factories.pipeline.test_registry_consistency.TestFactoryValidity` | 1 | 6.955 | 6.955 |
-| 9 | `tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures` | 1 | 6.873 | 6.873 |
-| 10 | `tests.unit.scripts.docs.passports.test_passport_projector` | 1 | 6.4 | 6.4 |
+| 1 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 3 | 37.383 | 16.81 |
+| 2 | `tests.unit.repo_backed.scripts.ai.mcp.test_repo_env_loaders` | 1 | 35.119 | 35.119 |
+| 3 | `tests.smoke.test_control_plane_rollout_smoke` | 1 | 25.255 | 25.255 |
+| 4 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 21.515 | 10.771 |
+| 5 | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers` | 1 | 20.019 | 20.019 |
+| 6 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 2 | 17.394 | 10.458 |
+| 7 | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline` | 1 | 12.254 | 12.254 |
+| 8 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline` | 1 | 11.184 | 11.184 |
+| 9 | `tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline` | 1 | 10.652 | 10.652 |
+| 10 | `tests.smoke.test_smoke.TestCoreImports` | 1 | 9.172 | 9.172 |
 
 ## Refresh Procedure
 

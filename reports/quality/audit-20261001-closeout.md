@@ -1,5 +1,79 @@
 # Audit issue batch: implementation and remaining acceptance
 
+## Current architecture/coverage closeout preparation: wave 39
+
+Producer: `e916f820e70c807183fcaf2e73f4cad714524844`; source `d2764a40ec87e32214fbbf4ac1ed184b4a4de6b3e755c38c48ed74a86b8a705b`;
+tests `46c24ca78ce6b9184b723b097a9b754f9a3a4a492c9535ea497f1004f6e8b10b`. All 17 canonical shards completed:
+32809 PASS, 196 SKIP, zero failures/errors. Lines 99.70%; branches 94.34%.
+XML SHA-256: `ae32dd38cbc695b4fbd64339b08c248c91bdade223d067f123b29f9e53411b46`.
+`config_root`: 40/40 executable lines and 18/18 branches; fallback line 32 hit.
+Canonical adoption covers 2553 current modules, including nine newly measured paths.
+The raw comparison records 80 module regressions; historical floors
+are preserved without asserting fresh global nonregression.
+
+| Child | Merged SHA | Provenance |
+| --- | --- | --- |
+| #11846 | `d311a17e17c52f2f50b9f1020ed5e4181ff75b36` | CLOSED; ancestor verified |
+| #11847 | `8f024f97cb10d87d2d12b31f7a4282aac1cf895c` | CLOSED; ancestor verified |
+| #11848 | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED; ancestor verified |
+| #11849 | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED; ancestor verified |
+| #11850 | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED; ancestor verified |
+| #11851 | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED; ancestor verified |
+| #11852 | `dbc2ee7f257b8f8e7866383e1e05361555faf5de` | CLOSED; ancestor verified |
+| #11853 | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED; ancestor verified |
+
+Final full architecture, documentation and governance checks, publication,
+applicable lifecycle ADMIT and post-merge verification remain pending.
+GitHub Actions billing remains BLOCKED_EXTERNAL_PERMANENT; local receipts retain
+local_single_host trust. Existing budgets, thresholds and exclusions are unchanged.
+
+## Preserved historical audit and prior measurements
+
+## Current architecture/coverage closeout preparation: wave 35
+
+Pinned producer commit: `13dc2d3819af7a91a63e4e88116f6d4d5acfdcc3`. Product source: `f5f56d1b51cb1ccd9483c28e6c9435a807198f2fc61915e05754851ccb480608`.
+Test selection/source: `44ec9b07da7e65fb743405287d72e1c3c4ea45a00bd2185a256bdc680dd307e1`.
+The canonical producer completed all 17 groups: 32706 cases,
+32512 passed, 194 skipped,
+zero failures/errors. Aggregate coverage: 99.7% lines,
+94.3% branches. `config_root`: 40/40 lines, 18/18 branches,
+fallback line 32 hit; the meaningful synthetic-layout regression and existing
+`PureWindowsPath` cases remain selected.
+
+Raw comparison retains 80 visible module regressions.
+Canonical nonregressing adoption preserves historical floors; retained rows are
+not represented as fresh global nonregression. Producer source/test identities
+remained unchanged. The transient derived-scorecard write during the local run
+was restored and recorded separately in `measurement-wave35-artifact-incident.json`.
+
+| Child | Requirement | Merged SHA | Current provenance |
+| --- | --- | --- | --- |
+| #11846 | [refactoring][P0] RF-001: согласовать audit baseline и provenance quality reports | `d311a17e17c52f2f50b9f1020ed5e4181ff75b36` | CLOSED; ancestor verified |
+| #11847 | [refactoring][P1] RF-002: заменить PD4 host defaults типизированными контрактами Merge и Gold | `8f024f97cb10d87d2d12b31f7a4282aac1cf895c` | CLOSED; ancestor verified |
+| #11848 | [refactoring][P1] RF-003: отделить выбор replay snapshots от Composition wiring | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED; ancestor verified |
+| #11849 | [refactoring][P2] RF-004: проверить и сократить избыточные forwarding seams Composition/Core | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED; ancestor verified |
+| #11850 | [refactoring][P2] RF-005: провести reference-based retirement scripts без смены статусов ради метрик | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED; ancestor verified |
+| #11851 | [architecture][P2] RF-006: уточнить семантику DDD/ports/cycles evidence без дублирования gates | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED; ancestor verified |
+| #11852 | [bug][P0] Закрыть красные fan-in тесты application_core и composition_runtime_builders | `dbc2ee7f257b8f8e7866383e1e05361555faf5de` | CLOSED; ancestor verified |
+| #11853 | [refactoring][P1] Распространить typed host contract на оставшиеся PD4 mixins census | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED; ancestor verified |
+
+Final commands remain explicit acceptance steps on the committed materialization:
+`python -m pytest tests/architecture -q --no-cov`, governance pretest in check mode,
+`python -m scripts.docs verify`, debt gates check, and actual quality-integral gate.
+Their real commands, exits, source identities and artifacts are captured in
+source-bound receipts. This section does not claim those pending commands passed.
+The CircleCI closeout job provides an actual execution route; local receipts keep
+their local trust tier. GitHub Actions billing is `BLOCKED_EXTERNAL_PERMANENT`.
+Publication, applicable ADMIT and final main validation remain separate.
+
+Comparable whole-source strict Mypy remains FAIL: 107 errors against baseline 156,
+49 removed and zero new normalized error messages. The source-equivalence record
+binds the original execution to the unchanged product/memory sources; no new global
+Mypy execution or PASS is claimed. No debt budget, threshold or cap is increased.
+Runtime mirror sources were unchanged; mirror sync is not applicable.
+
+## Preserved historical audit and prior measurements
+
 Source measurement SHA: `3d6b0a76c625f3fb04cde47f708613d3217422b5`.
 Source tree SHA-256: `7a13b1bd58ed783e2c3c03d183387ac9715a1408d2c48b5be388614bf23cf9c9`.
 Status: **NOT CLOSED / NOT READY TO MERGE**. No full-suite or render PASS is claimed.
@@ -34,7 +108,7 @@ The live mapping used here is:
 - 173 repo-backed observability tooling tests passed; the broader observability unit suite also passed after retiring old fixtures.
 - Required dashboard operator readability, first-window no-scroll and replay layout checks passed (30 tests).
 - Full `python -m scripts.docs verify` passed, including strict MkDocs build.
-- Codex–Junie parity, cast census and hotspot baseline checks passed.
+- Codexâ€“Junie parity, cast census and hotspot baseline checks passed.
 - Scripts catalog: 636 scripts, 338 active, 298 supporting; no status laundering or cap increase.
 - Debt governance: 46 pass / 0 fail; these gates do not establish full-suite success.
 - First coverage attempt stopped on an obsolete import of the removed Mermaid duplicate. Second attempt retained as failed diagnostics after a stale Runtime route assertion. Tests were then corrected; it is not an admissible fixed-test-tree coverage measurement and must not be reused as full coverage.
@@ -112,3 +186,141 @@ The live mapping used here is:
 - `tests.integration.test_dashboard_requirement_coverage::test_dash_copy_001_fails_closed_without_empty_state_copy`
 - `tests.integration.test_dashboard_required_panel_links::test_overview_dashboard_required_panel_links`
 - `tests.integration.test_dashboard_required_panel_links::test_workflow_overview_required_panel_links`
+
+
+## Architecture program and config-root measurement checkpoint â€” 2026-10-04
+
+This checkpoint preserves the earlier audit results above. It records local implementation and measurement; the source-bound final acceptance receipts remain the authority for completion.
+
+Branch: `codex/architecture-coverage-closeout-11854-11899`. Complete 17-group producer measurement commit: `24f569369ce169cf971fd19691158f7e78edf806`; measured production source SHA-256: `57404f9168a198c9f4398b1cd519f397d3d90e901588e8ecc6469b41af57d203`. All 17 groups exited 0: 32,330 passed, 179 skipped, 0 failures, 0 errors; producer exit 0. Global measured coverage: 99.74% lines and 94.43% branches. Config-root coverage is a fresh 40/40 executable lines and 18/18 branches, including fallback line 32; production config-root behavior is unchanged.
+
+Current accepted inventory contains 2546 paths with no unmeasured/uncovered modules and none below 85%. Canonical nonregressing adoption preserves historical rows. The separate direct raw-candidate comparison failed with 67 remaining module regressions; global fresh measured nonregression is not claimed. Thirteen new paths were measured and adopted. Raw XML, shard hashes/JUnit, raw candidate, baseline copy and retained-row ledger are in the local `reports/quality/proof-or-stop/architecture-coverage-11854-11899/` evidence directory under distinct wave identities.
+
+After this measurement, an explicit UniProt helper re-export preserved its existing API and removed the one introduced strict type diagnostic. The current accepted source-only binding is `3b2e81219500a0aa6a5c796addb7772d66cff70704e8a85a690ad04726693a75`. This later rebind does not relabel the earlier raw measurement; final validation must run on the resulting committed tree. Full strict Mypy remains a failed diagnostic: 108 errors versus 157 in the complete baseline source/scripts snapshot, with zero added diagnostics and 49 removed. It is not reported as a full type-check pass.
+
+### Eight-stage merged/evidence matrix
+
+Every merged commit below is present in this local branch. CLOSED describes the verified child issue state and does not substitute for current contract execution. Their current contracts are included in the full architecture acceptance suite.
+
+| Child | Historical merged SHA | Ancestor of branch | Historical evidence |
+| --- | --- | --- | --- |
+| [#11846](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11846) | `d311a17e17c52f2f50b9f1020ed5e4181ff75b36` | yes | [historical evidence 1](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11846#issuecomment-5946567048); [historical evidence 2](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11846#issuecomment-5948670893) |
+| [#11847](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11847) | `8f024f97cb10d87d2d12b31f7a4282aac1cf895c` | yes | [historical evidence 1](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11847#issuecomment-5947798826) |
+| [#11848](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11848) | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | yes | [historical evidence 1](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11848#issuecomment-5953970678) |
+| [#11849](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11849) | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | yes | [historical evidence 1](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11849#issuecomment-5953958374) |
+| [#11850](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11850) | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | yes | [historical evidence 1](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11850#issuecomment-5953960202) |
+| [#11851](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11851) | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | yes | [historical evidence 1](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11851#issuecomment-5953962311) |
+| [#11852](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11852) | `dbc2ee7f257b8f8e7866383e1e05361555faf5de` | yes | [issue record](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11852) |
+| [#11853](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11853) | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | yes | [historical evidence 1](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11853#issuecomment-5951017215); [historical evidence 2](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11853#issuecomment-5953972399) |
+
+### Final acceptance requirements and limits
+
+Run complete `python -m pytest tests/architecture`, the complete 17-group coverage producer, strict docs verification, canonical debt/governance freshness checks and full-tree guard on one final committed tree. Record terminating exits and JUnit, then assemble and verify normalized proof receipts. The initial 133-failure architecture run and interrupted producers remain historical diagnostics, not acceptance. No budgets, thresholds, exemptions or exclusions are increased. All 161 files lost from tracking by the earlier index-isolation defect were restored with their original blobs; the affected temporary-Git fixture and coverage producer now isolate inherited `GIT_*` configuration.
+
+Billing lock remains `CI=BLOCKED_EXTERNAL_PERMANENT`. Local execution is not CI PASS. `local_single_host` evidence can qualify only as DEGRADED under the existing proof policy; required ADMIT cannot be replaced by fabricated independent attestation. Publication/integration and the applicable lifecycle acceptance are separate requirements. Runtime mirror parity is N/A because Codex/Junie runtime sources were unchanged. The original shared checkout and all `.env` files are preserved.
+
+
+## Architecture remainder repair checkpoint â€” 2026-10-04
+
+The complete architecture run on `d20319c66039dc30ff6bf0a2807159a079912212`
+finished with 4864 passed, 20 failed, 76 skipped and zero errors. This is a
+failed diagnostic, not final acceptance. Repairs follow the actual owners of
+workflow assembly and FSM transitions, merge the internal batch request into
+its builder, export the publication-term port consistently for runtime and
+typing, and shorten one naming-debt expiry from 2026-12-31 to 2026-10-15.
+No debt caps, thresholds or exception counts are increased.
+
+Focused product ownership checks passed 145 tests before source-manifest
+refresh, and 52 telemetry/tooling plus 43 dashboard-tooling/classification
+tests passed. Strict typing passed for nine affected product modules and five
+affected telemetry/governance modules. Full architecture and a new complete
+17-group producer remain required on the committed repair tree. The accepted
+module inventory is retained until that fresh measurement can be compared
+and adopted through the canonical nonregressing reporter.
+
+Live verification of historical Tests run `36202183545` found `push` on
+`main` at `9f71c644417551222e489ec08c6b358e7c0b64b2`, conclusion `failure`;
+it does not attest the former local-branch telemetry binding. The updated
+telemetry producer validates a complete canonical local manifest, matching
+source and test trees, reachable commit, coverage XML and JUnit telemetry
+digests, completion timestamps, zero failed shards and both 85% gates. It
+derives local identity and all measurement inputs; historical CI bindings
+are preserved explicitly as unverified history. Local evidence retains
+`local_single_host` trust and `CI=BLOCKED_EXTERNAL_PERMANENT`, without a
+GitHub run URL, CI PASS claim or lifecycle ADMIT.
+
+
+## Complete local measurement and current bindings â€” 2026-10-04
+
+Wave 30 completed all 17 canonical groups on
+`b7334cc49d144a50a26f656e0241ea6dfe42d0e9`: 32354 passed, 179 skipped,
+zero failures/errors; 99.74% line and 94.43% branch coverage. Actual product
+source SHA-256 is `8d3e76877a6e5c205d49b926d60e57775d94015f9222ba2f4202ccc55c1026c8`;
+actual test-tree SHA-256 is `625ee449d2aee798640e74ea0ca0bab5f77e428cced423ef541644cf1bf32a10`.
+`config_root` was measured at 40/40 lines and 18/18 branches, line 32 hit=1.
+A separate 22-test targeted run on the same pinned SHA passed without skips
+and measured the same complete line/branch coverage. The bootstrap profile
+passed 427 tests without skips on this SHA.
+
+The direct raw candidate still records 67 other module regressions and two
+new source paths after the ownership moves. Canonical nonregressing adoption
+passed with the exact 2545 maintained module paths, preserving historical
+floors; current status counts are 2513 fully covered, 31 partially covered,
+one no-executable-lines module, zero uncovered and zero unmeasured. These
+accepted values do not claim freshly measured global nonregression.
+
+The local telemetry baseline was materialized from this verified manifest,
+with 32354 executed and 179 skipped cases, explicit existing lane accounting,
+actual completion timestamp and no GitHub Actions run URL. Its historical CI
+binding remains an explicitly unverified preserved snapshot. Formatting the
+existing lane accounting as structured records corrects a telemetry schema
+defect without changing any test selection, skip policy, thresholds or gates.
+
+Comparable strict mypy (`src/bioetl src/memory`) remains FAIL: 108 errors in
+39 files versus 157 errors in 51 files in the baseline, 49 removed and zero
+new error messages. A separate broader `src scripts` diagnostic is also FAIL
+with 719 errors in 184 files; it is a different scope and is not compared with
+the 157-error baseline. Changed product and telemetry/governance modules
+passed their scoped strict checks. No claim of global typing cleanliness is
+made. Final full architecture, docs/governance/debt validation and applicable
+trust-tier admission remain required before lifecycle closure.
+### Wave 32 complete measurement and archive checkpoint (2026-10-04)
+
+The full canonical 17-group producer completed on clean full-tree commit
+`0d89b40862340ad62cd361b8abbd080c64c15264`: 32533 tests, 32354 passed,
+179 skipped, zero failures/errors, all 17 shard exits zero, both 85% gates zero.
+Fresh aggregate coverage is 99.74% lines and 94.43% branches. `config_root`
+is 40/40 executable lines and 18/18 branches; fallback line 32 was hit and
+no lines are missing. Product source SHA-256 is
+`29b4c6ac3d6b9e0e6d1b4919a55d1a2496975439af6efc51713fd1fc86cf4a40`;
+test-tree SHA-256 is
+`9bc4cbef5dc67035c795d600d665ff503ddf067cb59078cc7b873c28dae90db8`.
+
+Raw comparison still records 67 other-module regressions and zero new paths.
+Canonical nonregressing adoption retains historical floors across the exact
+2545 current module paths. This is not fresh global module nonregression.
+Historical snapshots and the raw comparison ledger remain distinct.
+Telemetry was materialized from this completed manifest without CI identity.
+
+The complete architecture diagnostic on this measurement commit had 4881
+passed, four stale evidence bindings failed, 76 skipped and zero errors.
+Those four bindings (6045, topology, telemetry population and telemetry branch
+identity) are refreshed from the actual completed run; final full architecture
+acceptance must be checked again on the committed materialization.
+All nine earlier ownership/count/inventory failures passed targeted checks.
+Ruff and scoped strict typing for the changed ports facade passed. Comparable
+full-source strict Mypy previously remained failed: 108 errors in 39 files
+versus historical 157 in 51, with zero added error messages. The separate
+broader `src scripts` scan reported 719 errors in 184 files and has no comparable
+baseline; it is not claimed green or globally nonregressing.
+
+Four expired tracked episodic notes were archived as exact original Git blobs
+under `docs/99-archive/engineering/memory/expired-episodic-2026-10-04/`, with original paths,
+creation/expiry dates and SHA-256 in its archive index. No historical evidence
+content was discarded or rewritten, and the 14-day TTL was not extended.
+The original shared checkout and its local memory are untouched.
+
+`CI=BLOCKED_EXTERNAL_PERMANENT`. Local PASS is not CI PASS or lifecycle ADMIT.
+Final architecture/governance/docs/debt receipts and policy trust admission
+remain explicit acceptance steps. Runtime mirror source was unchanged;
+Codex/Junie mirror synchronization is not applicable to these changes.

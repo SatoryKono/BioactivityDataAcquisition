@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3460 |
-| Tracked doc-like files | 3460 |
+| Doc-like files | 3508 |
+| Tracked doc-like files | 3508 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 7 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3460 |
+| tracked | 3508 |
 
 ## Lifecycle Counts
 
@@ -26,14 +26,14 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 278 |
-| active_quality_baseline | 39 |
-| closeout_evidence | 56 |
+| active_quality_baseline | 42 |
+| closeout_evidence | 71 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 27 |
 | docs_reports_generated_or_route_owned | 7 |
-| docs_reports_retention_sensitive_evidence | 20 |
+| docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_reference_mirror | 19 |
-| generated_test_run_evidence | 3 |
+| generated_test_run_evidence | 4 |
 | guide | 4 |
 | index | 4 |
 | issue_pack | 60 |
@@ -41,7 +41,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 830 |
+| working_report | 852 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -57,30 +57,30 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 747 |
-| Archived | 277 |
+| Active | 748 |
+| Archived | 283 |
 | Canonical | 75 |
-| Generated | 1058 |
-| Working | 1303 |
+| Generated | 1059 |
+| Working | 1343 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 747 |
-| archive | 277 |
+| active | 748 |
+| archive | 283 |
 | canonical | 75 |
-| generated | 1058 |
-| working | 1303 |
+| generated | 1059 |
+| working | 1343 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 338 |
-| archive-after-migration | 862 |
-| generate-automatically | 1058 |
-| keep | 1194 |
+| archive-after-migration | 884 |
+| generate-automatically | 1059 |
+| keep | 1219 |
 | reconcile-with-github-state | 8 |
 
 ## Cleanup Candidates
@@ -117,7 +117,7 @@
 | `docs/reports/dashboard-ux-checks/2026-09-23-vis-followups.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-09-23.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-09-25.md` | Working | 0 | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-10-02.md` | Working | 2 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-10-02.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-event-age.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-final-tests.txt` | Working | 0 | archive-after-migration |

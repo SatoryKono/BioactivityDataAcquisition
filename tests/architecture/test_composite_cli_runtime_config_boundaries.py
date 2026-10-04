@@ -29,7 +29,7 @@ import pytest
         Path("bioetl/composition/bootstrap/runtime/runtime_basics.py"),
         Path("bioetl/composition/bootstrap/runtime/runner_factory_builder_service.py"),
         Path(
-            "bioetl/composition/bootstrap/runtime/composite_support_services_factory.py"
+            "bioetl/composition/factories/services/composite_support_services_factory.py"
         ),
         Path("bioetl/composition/bootstrap/runtime/runner_assembly.py"),
     ],

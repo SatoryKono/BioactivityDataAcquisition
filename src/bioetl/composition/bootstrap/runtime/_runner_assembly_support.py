@@ -21,10 +21,10 @@ from bioetl.application.composite.runtime_wiring_api import (
     MergeService as _MergeService,
 )
 from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
-from bioetl.composition.bootstrap.runtime.composite_contract_evidence import (
+from bioetl.composition.bootstrap.runtime.run_status import (
     create_composite_contract_finalizer,
 )
-from bioetl.composition.bootstrap.runtime.composite_reporter import (
+from bioetl.composition.bootstrap.runtime.run_status import (
     create_composite_reporter,
 )
 from bioetl.infrastructure.time import SystemClock
@@ -42,7 +42,7 @@ if TYPE_CHECKING:
         RunLedgerService,
     )
     from bioetl.application.services.quality.dq_report_service import DQReportService
-    from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
+    from bioetl.composition.factories.services.composite_support_services_factory import (
         CompositeSupportServices,
     )
     from bioetl.domain.composite import CompositeConfig

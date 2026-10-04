@@ -20,7 +20,6 @@ from typing import Any
 import pytest
 import yaml
 
-
 pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -91,11 +90,8 @@ def _git_ls_files() -> set[str]:
         capture_output=True,
         check=True,
     )
-    return {
-        path
-        for path in completed.stdout.decode("utf-8", errors="replace").split("\0")
-        if path
-    }
+    paths = completed.stdout.decode("utf-8", errors="replace").split("\0")
+    return set(paths) - {""}
 
 
 def _registry_candidates() -> dict[str, dict[str, Any]]:
@@ -129,17 +125,23 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
         REPO_STRUCTURE_CATALOG.read_text(encoding="utf-8")
     )
     approved_tooling_roots = {
-        row["path"] for row in structure_catalog["root_tooling_roots"]["approved_roots"]
+        row["path"]: row
+        for row in structure_catalog["root_tooling_roots"]["approved_roots"]
     }
 
     assert len(root_files) <= payload["outcomes"]["5847"]["tracked_root_files_after"]
+    assert len(approved_tooling_roots) == len(
+        structure_catalog["root_tooling_roots"]["approved_roots"]
+    )
     assert ".devin" in approved_tooling_roots
-    # Devin, Zed, and Claude were accepted as governed tooling roots after
-    # this debt baseline; they are not the root clutter measured by #5847.
-    # OpenCode (.opencode) was accepted the same way as an owner-approved
-    # Phase 1 review/triage surface (Muse Spark); it is tooling, not clutter.
+    circleci = approved_tooling_roots[".circleci"]
+    assert circleci["role"] == "canonical_circleci_project_configuration"
+    assert {path for path in tracked if path.startswith(".circleci/")} == {
+        ".circleci/config.yml"
+    }
+    # Catalog-approved runtime/CI roots are governed tooling, not root clutter.
     assert (
-        len(root_dirs - {".claude", ".devin", ".zed", ".opencode"})
+        len(root_dirs - {".claude", ".devin", ".zed", ".opencode", ".circleci"})
         == payload["outcomes"]["5847"]["tracked_root_dirs_after"]
     )
     assert (

@@ -13,11 +13,11 @@ from bioetl.infrastructure.adapters.decorators._retry_support import (
 from bioetl.infrastructure.adapters.http._client_retry_models import (
     _RequestAttemptOutcome,
 )
-from bioetl.infrastructure.adapters.http._client_retry_policy import _parse_retry_after
 from bioetl.infrastructure.adapters.http.client_retry_observability import (
     SpanLike,
     mark_span_error,
 )
+from bioetl.infrastructure.adapters.http.client_retry_policy import parse_retry_after
 
 
 class _CanRetryCheck(Protocol):
@@ -113,7 +113,7 @@ async def handle_response_attempt(
 ) -> httpx.Response | _RequestAttemptOutcome:
     """Process a completed HTTP response without changing retry semantics."""
     retry_after = (
-        _parse_retry_after(response.headers.get("Retry-After", ""))
+        parse_retry_after(response.headers.get("Retry-After", ""))
         if retry_config.is_retryable_status(response.status_code)
         else None
     )
