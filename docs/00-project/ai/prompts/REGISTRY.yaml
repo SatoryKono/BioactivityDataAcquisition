@@ -2,10 +2,10 @@
 # Epic: #10081 | Schema: _schema/prompt.schema.json
 # Operator paste templates only — not runtime SSOT.
 
-version: 2.0.0
+version: 2.1.0
 root: docs/00-project/ai/prompts
 schema: _schema/prompt.schema.json
-note: 'Epic #10081: 17 scenarios. Operator paste only — not runtime SSOT.'
+note: 'Epic #10081: 18 scenarios. Operator paste only — not runtime SSOT.'
 scenarios:
 - id: session-bootstrap
   scenario: Daily session lock for Grok/Codex
@@ -252,6 +252,28 @@ scenarios:
   - prompt.fragment.git-safety
   - prompt.fragment.debt-budget-ban
   - prompt.fragment.env-guardrail
+- id: comprehensive-audit
+  scenario: Comprehensive P00-P20 evidence audit
+  role: py-audit-bot
+  prompt: prompt.audit.comprehensive
+  inputs:
+  - SCOPE
+  - AUDIT_MODE
+  - LANGUAGE
+  - EXTERNAL_VERIFY
+  - BASE_BRANCH
+  - REPO
+  - WORK_BRANCH
+  outputs:
+  - canonical-findings.json
+  - final-report.md
+  - roadmap.md
+  schema: _schema/prompt.schema.json
+  deps:
+  - prompt.fragment.evidence-contract-v3
+  - prompt.fragment.finding-schema
+  - prompt.fragment.audit-scale
+  - prompt.fragment.orchestrator-guards
 entries:
 - id: prompt.fragment.audit-scale
   path: fragments/audit-scale.md
@@ -288,14 +310,13 @@ entries:
   status: active
   class: fragment
   tags: []
-  summary: Evidence contract v3 — finding schema, fingerprint, status gate, evidence
-    binding
+  summary: Evidence contract v3.1 — freshness, disproof, root-cause identity, finding status gate
 - id: prompt.fragment.finding-schema
   path: fragments/finding-schema.md
   status: active
   class: fragment
   tags: []
-  summary: Finding fields + findings.json contract including requirement_id (REQ-*/DASH-*)
+  summary: Finding schema v1.3 — root-cause identity, freshness, disproof, review traceability
 - id: prompt.fragment.generated-artifact-ci
   path: fragments/generated-artifact-ci.md
   status: active
@@ -346,6 +367,31 @@ entries:
   tags: []
   summary: Bind project-domain audits to REQUIREMENTS.md — REQ-* IDs, gates, issue
     titles
+- id: prompt.audit.comprehensive
+  path: library/audit/comprehensive.md
+  status: active
+  class: campaign
+  tags:
+  - audit
+  - comprehensive
+  - bioetl
+  - dag
+  - evidence
+  - reconciliation
+  - operator
+  summary: BioETL comprehensive audit v2 — dependency-aware P00-P20 campaign over Prompt Library domains
+- id: prompt.audit.reconcile
+  path: library/audit/reconcile.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - review
+  - reconciliation
+  - double-check
+  - evidence
+  - operator
+  summary: Independent P20 reconciliation for comprehensive BioETL audits
 - id: prompt.audit.generic-nine.pack
   path: library/audit/generic-nine.pack.md
   status: active
