@@ -1,7 +1,4 @@
-"""Bootstrap functions for pipeline runner service.
-
-Assembles PipelineRunnerService for CLI and other orchestration layers.
-"""
+"""Bootstrap PipelineRunnerService for CLI and other orchestration layers."""
 
 from __future__ import annotations
 
