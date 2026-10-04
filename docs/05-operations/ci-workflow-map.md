@@ -56,6 +56,11 @@ and replay artifacts. `memory-freshness` checks and publishes evidence without
 GitHub write credentials; its schedule-failure notification and PR event parity
 remain pending. Both lanes are opt-in and main-only.
 
+The prepared `mutation` lane additionally requires `pipeline.trigger.type=schedule`;
+manual/API/PR triggers cannot start its four jobs. It preserves the existing four
+targets and 70/60/60/60 score thresholds, fails on missing, empty or invalid stats,
+and retains reports. No mutation execution or external schedule is claimed.
+
 The intended weekly cadence is Monday 04:30 UTC. No external schedule has been
 registered by this preparation change, and no successful remote run is claimed.
 
@@ -103,7 +108,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `labeler.yml` | — | GitHub API label maintenance | Pending port; trusted actor and scoped issue/PR write access |
 | `memory-freshness.yml` | `17 5 * * 1` | CircleCI memory-freshness | Prepared check-only lane; PR parity and scheduled failure notification pending |
 | `memory-retention.yml` | `17 4 * * 1` | CircleCI memory-retention | Prepared check-only lane; triggers pending, no prune mutation |
-| `mutation-testing.yml` | `0 0 * * 0` | Scheduled-only mutation lane | Pending port/acceptance; four targets and 70/60/60/60 thresholds unchanged |
+| `mutation-testing.yml` | `0 0 * * 0` | Scheduled-only mutation lane | Prepared; compiler, schedule and four-target execution acceptance pending; 70/60/60/60 thresholds unchanged |
 | `nightly-replay-parity.yml` | `30 2 * * *` | CircleCI replay-parity | Prepared four-run checksum lane; remote parity and schedule pending |
 | `no-partial-tree-commits.yml` | — | Full-tree guard in root governance | Local guard verified; CircleCI integration required before cutover |
 | `opencode-pr-review.yml` | — | Retain disabled review stub policy | Do not activate unpinned installer or write paths |

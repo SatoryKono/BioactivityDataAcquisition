@@ -327,3 +327,64 @@ def test_memory_freshness_preparation_does_not_get_write_context():
     assert "gh issue" not in str(job)
     assert "issues: write" not in str(job)
     assert "context" not in str(_config()["workflows"]["memory-freshness"])
+
+
+def test_mutation_preserves_targets_and_requires_schedule_trigger():
+    config = _config()
+    workflow = config["workflows"]["mutation"]
+    assert workflow["when"] == {
+        "and": [
+            {"equal": ["mutation", "<< pipeline.parameters.ci-lane >>"]},
+            {"equal": ["main", "<< pipeline.git.branch >>"]},
+            {"equal": ["schedule", "<< pipeline.trigger.type >>"]},
+        ]
+    }
+    legacy = yaml.safe_load(
+        (ROOT / ".github/workflows/mutation-testing.yml").read_text(encoding="utf-8")
+    )["jobs"]["mutation-testing"]["strategy"]["matrix"]["target"]
+    actual = [entry["mutation-testing"] for entry in workflow["jobs"]]
+    assert len(actual) == len(legacy) == 4
+    for old, new in zip(legacy, actual, strict=True):
+        assert new["target"] == old["id"]
+        assert new["source-path"] == old["paths_to_mutate"]
+        assert new["tests-dir"] == old["tests_dir"]
+        assert new["threshold"] == old["threshold"]
+    assert "pipeline.trigger_source" not in str(workflow)
+
+
+@pytest.mark.parametrize(
+    "stats,expected",
+    [
+        ({"killed": 6, "survived": 4, "timeout": 0}, 0),
+        ({"killed": 5, "survived": 4, "timeout": 1}, 0),
+        ({"killed": 5, "survived": 5, "timeout": 0}, 1),
+        ({"killed": 0, "survived": 0, "timeout": 0}, 1),
+        ({"killed": -1, "survived": 0, "timeout": 2}, 1),
+        ({"killed": "invalid", "survived": 0, "timeout": 0}, 1),
+        ({"killed": 1}, 1),
+        (None, 1),
+    ],
+)
+def test_mutation_score_rejects_invalid_missing_or_insufficient_evidence(
+    tmp_path, monkeypatch, stats, expected
+):
+    import subprocess
+
+    command = next(
+        step["run"]["command"]
+        for step in _config()["jobs"]["mutation-testing"]["steps"]
+        if isinstance(step, dict)
+        and step.get("run", {}).get("name") == "Check mutation score threshold"
+    )
+    script = command.split("python - <<'PY'\n", 1)[1].rsplit("\nPY", 1)[0]
+    monkeypatch.setenv("MUTATION_TARGET", "domain")
+    monkeypatch.setenv("MUTATION_SCORE_THRESHOLD", "60.0")
+    monkeypatch.setenv("PYTHONIOENCODING", "utf-8")
+    if stats is not None:
+        path = tmp_path / "reports/domain/mutmut-cicd-stats.json"
+        path.parent.mkdir(parents=True)
+        path.write_text(json.dumps(stats), encoding="utf-8")
+    result = subprocess.run(
+        [sys.executable, "-c", script], cwd=tmp_path, capture_output=True, check=False
+    )
+    assert result.returncode == expected, result.stderr.decode(errors="replace")
