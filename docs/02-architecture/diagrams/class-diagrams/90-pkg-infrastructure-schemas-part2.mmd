@@ -1,11 +1,11 @@
 %% Title: Package Family: infrastructure/schemas (Part 2/4)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 2/4; modules: composite_validation, base_schemas_pubchem, pipeline_config_common, workflow_config.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 2/4; modules: composite_validation, workflow_config, base_schemas_pubchem, pipeline_config_common.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
 %% @date    2026-10-04
 %% @level   Package Family / Inventory Slice
-%% @nodes   29
+%% @nodes   30
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
 
@@ -18,6 +18,17 @@ classDiagram
         class FieldComparisonSpecSchema
         class LineageSchema
         class RetrySchema
+    }
+
+    namespace workflow_config {
+        class WorkflowConfigFileSchema
+        class WorkflowConfigSchema
+        class WorkflowDefaultsSchema
+        class WorkflowPipelineStepSchema
+        class WorkflowReconcileForeignKeysConfigSchema
+        class WorkflowReconcileRowsConfigSchema
+        class WorkflowRunOptionsSchema
+        class WorkflowTransformStepSchema
     }
 
     namespace base_schemas_pubchem {
@@ -38,14 +49,4 @@ classDiagram
         class DQReportYamlConfig
         class DQYamlConfig
         class FieldValidationConfig
-    }
-
-    namespace workflow_config {
-        class WorkflowConfigFileSchema
-        class WorkflowConfigSchema
-        class WorkflowPipelineStepSchema
-        class WorkflowReconcileForeignKeysConfigSchema
-        class WorkflowReconcileRowsConfigSchema
-        class WorkflowReferenceCohortSchema
-        class WorkflowTransformStepSchema
     }

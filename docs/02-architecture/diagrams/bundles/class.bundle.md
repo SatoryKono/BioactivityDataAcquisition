@@ -1,6 +1,6 @@
 # BioETL Class Diagrams Bundle
 
-- Generated: 2026-10-03T22:57:37+00:00
+- Generated: 2026-10-04T10:03:06+00:00
 - Diagram count: 146
 
 ## Table of Contents
@@ -1300,13 +1300,13 @@
 ![90-pkg-composition-bootstrap-assembly](../class-diagrams/svg/90-pkg-composition-bootstrap-assembly.svg)
 
 ### Описание
-Диаграмма «Package Family: composition/bootstrap/assembly» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/composition/bootstrap/assembly; modules: health_server, health_service, workflow_transforms.. Схема имеет плотность порядка 5 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: health server, health service, workflow transforms. Показательные узлы для быстрого чтения: HealthServerDependencies, _ReadOnlyHealthMonitor, _RunManifestPorts, _HealthCheckDataSourceFactory, WorkflowCohortResolver. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: composition/bootstrap/assembly» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/composition/bootstrap/assembly; modules: health_server, health_service.. Схема имеет плотность порядка 4 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: health server, health service. Показательные узлы для быстрого чтения: HealthServerDependencies, _ReadOnlyHealthMonitor, _RunManifestPorts, _HealthCheckDataSourceFactory. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
 - Дата: `2026-10-04`
-- Узлы (metadata): `5`
+- Узлы (metadata): `4`
 
 \newpage
 
@@ -1376,13 +1376,13 @@
 ![90-pkg-composition-factories-services](../class-diagrams/svg/90-pkg-composition-factories-services.svg)
 
 ### Описание
-Диаграмма «Package Family: composition/factories/services» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/composition/factories/services; modules: common_service_wiring, _bundle_support, composite_support_services_factory, _builder_record_processor_support, builder, bundle.. Схема имеет плотность порядка 14 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: common service wiring, bundle support, composite support services factory, builder record processor support, builder, bundle. Показательные узлы для быстрого чтения: CommonServicePorts, CommonServicePortsRequest, _LazyStorageFactory, ServiceBundleDependencies, _PipelineCreationIdentity, CompositeSupportServices. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: composition/factories/services» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/composition/factories/services; modules: common_service_wiring, _bundle_support, composite_support_services_factory, _builder_record_processor_support, builder, bundle.. Схема имеет плотность порядка 15 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: common service wiring, bundle support, composite support services factory, builder record processor support, builder, bundle. Показательные узлы для быстрого чтения: CommonServicePorts, CommonServicePortsRequest, _LazyStorageFactory, ServiceBundleDependencies, _PipelineCreationIdentity, CompositeSupportServices. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
 - Дата: `2026-10-04`
-- Узлы (metadata): `14`
+- Узлы (metadata): `15`
 
 \newpage
 
@@ -2497,13 +2497,13 @@
 ![90-pkg-infrastructure-schemas-part2](../class-diagrams/svg/90-pkg-infrastructure-schemas-part2.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/schemas (Part 2/4)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 2/4; modules: composite_validation, base_schemas_pubchem, pipeline_config_common, workflow_config.. Схема имеет плотность порядка 29 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: composite validation, base schemas pubchem, pipeline config common, workflow config. Показательные узлы для быстрого чтения: CompositeDQSchema, CrossValidationSchema, DQOverrideSchema, EnricherFieldPairingSchema, ExecutionSchema, FieldComparisonSpecSchema. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/schemas (Part 2/4)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 2/4; modules: composite_validation, workflow_config, base_schemas_pubchem, pipeline_config_common.. Схема имеет плотность порядка 30 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: composite validation, workflow config, base schemas pubchem, pipeline config common. Показательные узлы для быстрого чтения: CompositeDQSchema, CrossValidationSchema, DQOverrideSchema, EnricherFieldPairingSchema, ExecutionSchema, FieldComparisonSpecSchema. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
 - Дата: `2026-10-04`
-- Узлы (metadata): `29`
+- Узлы (metadata): `30`
 
 \newpage
 
@@ -2535,13 +2535,13 @@
 ![90-pkg-infrastructure-schemas-part4](../class-diagrams/svg/90-pkg-infrastructure-schemas-part4.svg)
 
 ### Описание
-Диаграмма «Package Family: infrastructure/schemas (Part 4/4)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 4/4; modules: composite_config, pipeline_config, pipeline_config_provider, pipeline_contract_policy, workflow_run_options, source_profile_config.. Схема имеет плотность порядка 11 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: composite config, pipeline config, pipeline config provider, pipeline contract policy, workflow run options, source profile config. Показательные узлы для быстрого чтения: CompositeConfigFileSchema, CompositeConfigSchema, FieldPolicyConfigSchema, PipelineYamlConfig, ApiConfig, SourceConfig. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
+Диаграмма «Package Family: infrastructure/schemas (Part 4/4)» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 4/4; modules: composite_config, pipeline_config, pipeline_config_provider, pipeline_contract_policy, source_profile_config, workflow_config_fk.. Схема имеет плотность порядка 10 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: composite config, pipeline config, pipeline config provider, pipeline contract policy, source profile config, workflow config fk. Показательные узлы для быстрого чтения: CompositeConfigFileSchema, CompositeConfigSchema, FieldPolicyConfigSchema, PipelineYamlConfig, ApiConfig, SourceConfig. Примечание: Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30)..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
 - Дата: `2026-10-04`
-- Узлы (metadata): `11`
+- Узлы (metadata): `10`
 
 \newpage
 

@@ -5,7 +5,7 @@
   "profiled_on": "2026-10-04",
   "scope": "tests/unit/composition/bootstrap",
   "debt_budget_policy": "flat_or_decreasing_only",
-  "command": "E:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe -m pytest tests/unit/composition/bootstrap -q --no-cov --durations=10 --junitxml=reports/quality/proof-or-stop/architecture-coverage-11854-11899/bootstrap-profile-wave-32.xml",
+  "command": "E:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe -m pytest tests/unit/composition/bootstrap -q --no-cov --durations=15 --junitxml=reports/quality/proof-or-stop/architecture-coverage-11854-11899/bootstrap-profile-wave-35-with-durations.xml",
   "result": {
     "status": "pass",
     "test_count": 427,
@@ -21,18 +21,23 @@
       "fresh_provider_registry"
     ],
     "isolation_proof": "tests/unit/composition/bootstrap/test_bootstrap_metadata_cache_isolation.py",
-    "duration_seconds": 13.624
+    "duration_seconds": 13.731
   },
   "slowest_durations": [
     {
-      "seconds": 4.28,
+      "seconds": 4.12,
       "phase": "call",
       "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_contract_evidence.py::test_composite_archive_bootstrap_imports_in_fresh_process"
     },
     {
-      "seconds": 2.22,
+      "seconds": 2.48,
       "phase": "setup",
       "nodeid": "tests/unit/composition/bootstrap/test_bootstrap_cache_fixtures.py::test_cached_bootstrap_metadata_is_immutable_and_reusable"
+    },
+    {
+      "seconds": 0.23,
+      "phase": "call",
+      "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_control_plane_builder.py::test_build_composite_control_plane_bundle_allows_disabled_ledger_under_degraded_profile"
     },
     {
       "seconds": 0.21,
@@ -40,19 +45,14 @@
       "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_control_plane_builder.py::test_build_composite_control_plane_bundle_accepts_cli_degraded_override_when_settings_replay_ready"
     },
     {
-      "seconds": 0.19,
-      "phase": "call",
-      "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_control_plane_builder.py::test_build_composite_control_plane_bundle_persists_effective_config_artifact_and_hashes"
-    },
-    {
-      "seconds": 0.19,
+      "seconds": 0.2,
       "phase": "call",
       "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_control_plane_builder.py::test_build_composite_control_plane_bundle_persists_manifest_created_when_ledger_enabled"
     },
     {
-      "seconds": 0.19,
+      "seconds": 0.2,
       "phase": "call",
-      "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_control_plane_builder.py::test_build_composite_control_plane_bundle_allows_disabled_ledger_under_degraded_profile"
+      "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_control_plane_builder.py::test_build_composite_control_plane_bundle_persists_effective_config_artifact_and_hashes"
     },
     {
       "seconds": 0.17,
@@ -73,6 +73,31 @@
       "seconds": 0.13,
       "phase": "call",
       "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_config_loader.py::TestCompositeDQExternalization::test_composite_resolved_config_golden_master_before_after[activity-activity_id]"
+    },
+    {
+      "seconds": 0.12,
+      "phase": "call",
+      "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_config_loader.py::TestCompositeDQExternalization::test_composite_resolved_config_golden_master_before_after[molecule-molecule_id]"
+    },
+    {
+      "seconds": 0.12,
+      "phase": "call",
+      "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_config_loader.py::TestCompositeDQExternalization::test_composite_resolved_config_golden_master_before_after[assay-assay_id]"
+    },
+    {
+      "seconds": 0.1,
+      "phase": "call",
+      "nodeid": "tests/unit/composition/bootstrap/test_bootstrap_cache_fixtures.py::test_cached_bootstrap_metadata_is_immutable_and_reusable"
+    },
+    {
+      "seconds": 0.09,
+      "phase": "call",
+      "nodeid": "tests/unit/composition/bootstrap/test_bootstrap_metadata_cache_isolation.py::test_session_cached_bootstrap_metadata_is_immutable_catalog"
+    },
+    {
+      "seconds": 0.09,
+      "phase": "call",
+      "nodeid": "tests/unit/composition/bootstrap/test_health_bootstrap.py::test_diagnostic_probe_persists_measured_health_without_recounting[degraded-1]"
     }
   ],
   "fixture_scope_policy": {
@@ -145,13 +170,13 @@
     ]
   },
   "measurement_provenance": {
-    "measured_head": "0d89b40862340ad62cd361b8abbd080c64c15264",
-    "source_tree_sha256": "29b4c6ac3d6b9e0e6d1b4919a55d1a2496975439af6efc51713fd1fc86cf4a40",
-    "evidence": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-32/manifest.json",
+    "measured_head": "13dc2d3819af7a91a63e4e88116f6d4d5acfdcc3",
+    "source_tree_sha256": "f5f56d1b51cb1ccd9483c28e6c9435a807198f2fc61915e05754851ccb480608",
+    "evidence": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-35/manifest.json",
     "semantics": "Current accepted inventory may retain historical nonregressing rows; raw measured candidate remains separate.",
-    "started_at": "2026-10-04T00:07:41.208202+00:00",
-    "wall_duration_ms": 15560,
-    "junit": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/bootstrap-profile-wave-32.xml",
+    "started_at": "2026-10-04T11:50:05.783304+00:00",
+    "wall_duration_ms": 15754,
+    "junit": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/bootstrap-profile-wave-35-with-durations.xml",
     "status": "clean_pinned_local_measurement",
     "exit_code": 0
   },
@@ -449,6 +474,90 @@
         "started_at": "2026-10-03T23:09:52.998641+00:00",
         "wall_duration_ms": 15690,
         "junit": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/bootstrap-profile-wave-30.xml",
+        "status": "clean_pinned_local_measurement",
+        "exit_code": 0
+      }
+    },
+    {
+      "profiled_on": "2026-10-04",
+      "command": "E:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe -m pytest tests/unit/composition/bootstrap -q --no-cov --durations=10 --junitxml=reports/quality/proof-or-stop/architecture-coverage-11854-11899/bootstrap-profile-wave-32.xml",
+      "result": {
+        "status": "pass",
+        "test_count": 427,
+        "test_file_count": 47,
+        "local_conftest_present": true,
+        "local_conftest_path": "tests/unit/composition/bootstrap/conftest.py",
+        "session_scoped_immutable_fixtures": [
+          "bootstrap_metadata_cache",
+          "cached_bootstrap_metadata"
+        ],
+        "function_scoped_mutable_clones": [
+          "fresh_pipeline_registry",
+          "fresh_provider_registry"
+        ],
+        "isolation_proof": "tests/unit/composition/bootstrap/test_bootstrap_metadata_cache_isolation.py",
+        "duration_seconds": 13.624
+      },
+      "slowest_durations": [
+        {
+          "seconds": 4.28,
+          "phase": "call",
+          "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_contract_evidence.py::test_composite_archive_bootstrap_imports_in_fresh_process"
+        },
+        {
+          "seconds": 2.22,
+          "phase": "setup",
+          "nodeid": "tests/unit/composition/bootstrap/test_bootstrap_cache_fixtures.py::test_cached_bootstrap_metadata_is_immutable_and_reusable"
+        },
+        {
+          "seconds": 0.21,
+          "phase": "call",
+          "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_control_plane_builder.py::test_build_composite_control_plane_bundle_accepts_cli_degraded_override_when_settings_replay_ready"
+        },
+        {
+          "seconds": 0.19,
+          "phase": "call",
+          "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_control_plane_builder.py::test_build_composite_control_plane_bundle_persists_effective_config_artifact_and_hashes"
+        },
+        {
+          "seconds": 0.19,
+          "phase": "call",
+          "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_control_plane_builder.py::test_build_composite_control_plane_bundle_persists_manifest_created_when_ledger_enabled"
+        },
+        {
+          "seconds": 0.19,
+          "phase": "call",
+          "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_control_plane_builder.py::test_build_composite_control_plane_bundle_allows_disabled_ledger_under_degraded_profile"
+        },
+        {
+          "seconds": 0.17,
+          "phase": "call",
+          "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_config_loader.py::TestCompositeDQExternalization::test_composite_resolved_config_golden_master_before_after[target-target_id]"
+        },
+        {
+          "seconds": 0.16,
+          "phase": "call",
+          "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_config_loader.py::TestCompositeDQExternalization::test_composite_resolved_config_golden_master_before_after[publication-publication_id]"
+        },
+        {
+          "seconds": 0.16,
+          "phase": "setup",
+          "nodeid": "tests/unit/composition/bootstrap/cli/test_config.py::TestBootstrapConfigService::test_returns_config_service"
+        },
+        {
+          "seconds": 0.13,
+          "phase": "call",
+          "nodeid": "tests/unit/composition/bootstrap/runtime/test_composite_config_loader.py::TestCompositeDQExternalization::test_composite_resolved_config_golden_master_before_after[activity-activity_id]"
+        }
+      ],
+      "measurement_provenance": {
+        "measured_head": "0d89b40862340ad62cd361b8abbd080c64c15264",
+        "source_tree_sha256": "29b4c6ac3d6b9e0e6d1b4919a55d1a2496975439af6efc51713fd1fc86cf4a40",
+        "evidence": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-32/manifest.json",
+        "semantics": "Current accepted inventory may retain historical nonregressing rows; raw measured candidate remains separate.",
+        "started_at": "2026-10-04T00:07:41.208202+00:00",
+        "wall_duration_ms": 15560,
+        "junit": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/bootstrap-profile-wave-32.xml",
         "status": "clean_pinned_local_measurement",
         "exit_code": 0
       }

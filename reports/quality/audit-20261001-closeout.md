@@ -1,5 +1,50 @@
 # Audit issue batch: implementation and remaining acceptance
 
+## Current architecture/coverage closeout preparation: wave 35
+
+Pinned producer commit: `13dc2d3819af7a91a63e4e88116f6d4d5acfdcc3`. Product source: `f5f56d1b51cb1ccd9483c28e6c9435a807198f2fc61915e05754851ccb480608`.
+Test selection/source: `44ec9b07da7e65fb743405287d72e1c3c4ea45a00bd2185a256bdc680dd307e1`.
+The canonical producer completed all 17 groups: 32706 cases,
+32512 passed, 194 skipped,
+zero failures/errors. Aggregate coverage: 99.7% lines,
+94.3% branches. `config_root`: 40/40 lines, 18/18 branches,
+fallback line 32 hit; the meaningful synthetic-layout regression and existing
+`PureWindowsPath` cases remain selected.
+
+Raw comparison retains 80 visible module regressions.
+Canonical nonregressing adoption preserves historical floors; retained rows are
+not represented as fresh global nonregression. Producer source/test identities
+remained unchanged. The transient derived-scorecard write during the local run
+was restored and recorded separately in `measurement-wave35-artifact-incident.json`.
+
+| Child | Requirement | Merged SHA | Current provenance |
+| --- | --- | --- | --- |
+| #11846 | [refactoring][P0] RF-001: согласовать audit baseline и provenance quality reports | `d311a17e17c52f2f50b9f1020ed5e4181ff75b36` | CLOSED; ancestor verified |
+| #11847 | [refactoring][P1] RF-002: заменить PD4 host defaults типизированными контрактами Merge и Gold | `8f024f97cb10d87d2d12b31f7a4282aac1cf895c` | CLOSED; ancestor verified |
+| #11848 | [refactoring][P1] RF-003: отделить выбор replay snapshots от Composition wiring | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED; ancestor verified |
+| #11849 | [refactoring][P2] RF-004: проверить и сократить избыточные forwarding seams Composition/Core | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED; ancestor verified |
+| #11850 | [refactoring][P2] RF-005: провести reference-based retirement scripts без смены статусов ради метрик | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED; ancestor verified |
+| #11851 | [architecture][P2] RF-006: уточнить семантику DDD/ports/cycles evidence без дублирования gates | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED; ancestor verified |
+| #11852 | [bug][P0] Закрыть красные fan-in тесты application_core и composition_runtime_builders | `dbc2ee7f257b8f8e7866383e1e05361555faf5de` | CLOSED; ancestor verified |
+| #11853 | [refactoring][P1] Распространить typed host contract на оставшиеся PD4 mixins census | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED; ancestor verified |
+
+Final commands remain explicit acceptance steps on the committed materialization:
+`python -m pytest tests/architecture -q --no-cov`, governance pretest in check mode,
+`python -m scripts.docs verify`, debt gates check, and actual quality-integral gate.
+Their real commands, exits, source identities and artifacts are captured in
+source-bound receipts. This section does not claim those pending commands passed.
+The CircleCI closeout job provides an actual execution route; local receipts keep
+their local trust tier. GitHub Actions billing is `BLOCKED_EXTERNAL_PERMANENT`.
+Publication, applicable ADMIT and final main validation remain separate.
+
+Comparable whole-source strict Mypy remains FAIL: 107 errors against baseline 156,
+49 removed and zero new normalized error messages. The source-equivalence record
+binds the original execution to the unchanged product/memory sources; no new global
+Mypy execution or PASS is claimed. No debt budget, threshold or cap is increased.
+Runtime mirror sources were unchanged; mirror sync is not applicable.
+
+## Preserved historical audit and prior measurements
+
 Source measurement SHA: `3d6b0a76c625f3fb04cde47f708613d3217422b5`.
 Source tree SHA-256: `7a13b1bd58ed783e2c3c03d183387ac9715a1408d2c48b5be388614bf23cf9c9`.
 Status: **NOT CLOSED / NOT READY TO MERGE**. No full-suite or render PASS is claimed.
