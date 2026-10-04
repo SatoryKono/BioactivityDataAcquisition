@@ -558,7 +558,7 @@ jobs:
             export PYTHONPATH="$PWD/src:$PWD"
             export BIOETL_AI_RUNTIME=circleci BIOETL_AI_AGENT=composite-closeout BIOETL_AI_MEMORY_MODE=read-only
             export PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
-            uv run --frozen --no-build python - <<'PY'
+            uv run --frozen --no-build python - \<<'PY'
             import datetime, json, os, pathlib, subprocess, sys, time
             root = pathlib.Path.cwd()
             run_id = "issues-11904-11905-ci-" + os.environ["CIRCLE_BUILD_NUM"]
