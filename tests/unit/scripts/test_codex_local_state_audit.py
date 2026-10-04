@@ -146,3 +146,52 @@ def test_rule_classifier_rejects_temporary_path_tokens(candidate: str) -> None:
         "REMOVE",
         "temporary_path",
     )
+
+
+def test_parse_rule_rejects_maliciously_large_input(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import ast
+
+    eval_called = False
+
+    def mock_eval(node_or_string: str, **kwargs: object) -> list[str]:
+        nonlocal eval_called
+        eval_called = True
+        return ["mocked"]
+
+    monkeypatch.setattr(ast, "literal_eval", mock_eval)
+
+    line_long = 'prefix_rule(pattern=["' + "A" * 5000 + '"], decision="allow")'
+    assert local_state_audit._parse_rule(line_long) is None
+    assert not eval_called, "literal_eval should not be called for oversized input"
+
+    line_normal = 'prefix_rule(pattern=["normal"], decision="allow")'
+    assert local_state_audit._parse_rule(line_normal) is not None
+    assert eval_called
+
+
+def test_parse_rule_rejects_recursion_and_memory_errors(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import ast
+
+    def mock_eval_recursion(*args: object, **kwargs: object) -> None:
+        raise RecursionError("mocked recursion error")
+
+    monkeypatch.setattr(ast, "literal_eval", mock_eval_recursion)
+    # Should return None, not crash
+    assert (
+        local_state_audit._parse_rule('prefix_rule(pattern=["test"], decision="allow")')
+        is None
+    )
+
+    def mock_eval_memory(*args: object, **kwargs: object) -> None:
+        raise MemoryError("mocked memory error")
+
+    monkeypatch.setattr(ast, "literal_eval", mock_eval_memory)
+    # Should return None, not crash
+    assert (
+        local_state_audit._parse_rule('prefix_rule(pattern=["test"], decision="allow")')
+        is None
+    )
