@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `b5a7baba3c8fcd1308587d7e13caf534b7dea98696c75636c0455758f42ffefd`
+Evidence surface SHA-256: `da8e041ef1637079d29a12fc7d537e2e459cf7ad40f54612a4508594dfd7a6d8`
 
 ## Current evidence summary
 
@@ -24,7 +24,7 @@ This is a metadata rebind, not a new repository-wide audit. The audited SHA
 and audit date above remain historical. Earlier conflicting headline values
 are retained in Git history, not presented as current conclusions here.
 
-debt-governance gates passing. The architecture score `9.47` is unchanged.
+Current architecture and debt-governance values appear in the generated summary below.
 
 Coverage measurements require the complete local 17-shard producer (#11745).
 A hash-only refresh preserves historical measurements and cannot prove full
@@ -68,7 +68,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "b5a7baba3c8fcd1308587d7e13caf534b7dea98696c75636c0455758f42ffefd",
+  "evidence_surface_sha256": "da8e041ef1637079d29a12fc7d537e2e459cf7ad40f54612a4508594dfd7a6d8",
   "metrics": {
     "architecture_integral_score": 9.36,
     "architecture_interpretation": "good_targeted_improvements",

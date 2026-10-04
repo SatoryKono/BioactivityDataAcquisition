@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_core import (
-    ScoreCardRecord,
-)
+if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_core import (
+        ScoreCardRecord,
+    )
 
 
 def score_lineage_completeness(

@@ -70,12 +70,11 @@ def resolve_publication_upstream_limit(
 
 
 def _cap_filter_ids(
-    filter_ids: list[str] | None, term_limit: int | None, pub_limit: int | None
+    filter_ids: list[str] | None, pub_limit: int | None
 ) -> tuple[list[str] | None, int | None]:
-    if filter_ids is None or (term_limit is None and pub_limit is None):
+    if filter_ids is None or pub_limit is None:
         return filter_ids, pub_limit
-    cap = term_limit if term_limit is not None else pub_limit
-    ids = filter_ids[:cap]
+    ids = filter_ids[:pub_limit]
     return ids, len(ids) if pub_limit is None else min(pub_limit, len(ids))
 
 
@@ -141,7 +140,7 @@ class PublicationTermExtractionMixin:
             return
         normalized_limit, publication_limit = resolved
         capped_filter_ids, publication_limit = _cap_filter_ids(
-            filter_ids, normalized_limit, publication_limit
+            filter_ids, publication_limit
         )
         publications = self._data_source.fetch(
             entity_type=self.SOURCE_ENTITY_TYPE,
@@ -205,7 +204,7 @@ class PublicationTermExtractionMixin:
             return
         normalized_limit, publication_limit = resolved
         capped_filter_ids, publication_limit = _cap_filter_ids(
-            filter_ids, normalized_limit, publication_limit
+            filter_ids, publication_limit
         )
         if capped_filter_ids is None:
             return

@@ -65,7 +65,7 @@ async def test_fetch_limit_zero_yields_empty_without_upstream_records() -> None:
 
 
 @pytest.mark.asyncio
-async def test_fetch_limit_slices_filter_ids_to_term_cap() -> None:
+async def test_fetch_limit_preserves_filter_ids_within_publication_budget() -> None:
     class _Src:
         def __init__(self) -> None:
             self.filter_ids: list[str] | None = None
@@ -91,8 +91,8 @@ async def test_fetch_limit_slices_filter_ids_to_term_cap() -> None:
         )
     ]
     assert terms == []
-    assert source.filter_ids == ["A", "B"]
-    assert source.limit == 2
+    assert source.filter_ids == ["A", "B", "C", "D"]
+    assert source.limit == 4
 
 
 def test_extract_mesh_rejects_non_string_and_blank_fields_s5_residual() -> None:
@@ -137,3 +137,48 @@ def test_create_term_record_normalizes_mesh_id_and_qualifier_s5_residual() -> No
     )
     assert record["mesh_id"] == "D1"
     assert record["qualifier"] == "use"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("filtered", [False, True])
+async def test_term_limit_scans_past_publication_without_terms(filtered: bool) -> None:
+    class Source:
+        def __init__(self) -> None:
+            self.ids: list[str] = []
+
+        async def fetch(self, **kwargs):
+            self.ids = kwargs["filter_ids"]
+            for publication_id in self.ids[: kwargs["limit"]]:
+                yield {
+                    "publication_id": publication_id,
+                    "keywords": [] if publication_id == "A" else ["term", "extra"],
+                }
+
+    source = Source()
+    wrapper = PublicationTermDataSource(data_source=source)  # type: ignore[arg-type]
+    ids = ["A", "B"]
+    if filtered:
+
+        class FilteredSource:
+            def fetch_filtered(self, **kwargs):
+                return source.fetch(**kwargs)
+
+        terms = [
+            term
+            async for term in wrapper._fetch_filtered_publication_terms(
+                FilteredSource(), ids, "publication_id", 1
+            )
+        ]
+    else:
+        terms = [
+            term
+            async for term in wrapper.fetch(
+                "publication_term",
+                limit=1,
+                filter_ids=ids,
+                filter_field="publication_id",
+            )
+        ]
+    assert source.ids == ids
+    assert len(terms) == 1
+    assert terms[0]["publication_id"] == "B"

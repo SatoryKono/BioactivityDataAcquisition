@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:uniprot_protein`
 - Schema: `1.0.0`
-- Source revision: `33c03f8898fb0bb059f52ded416487d58cfb2c6e`
+- Source revision: `f1256e01f98a9259586b0a3c189860a93e998acb`
 
 ## Evidence
 
@@ -75,7 +75,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:6722ab88df38bcb8dad15251c9ebea51c66bffd4066abbde0b019fdb15c70875",
-    "source_revision": "33c03f8898fb0bb059f52ded416487d58cfb2c6e"
+    "source_revision": "f1256e01f98a9259586b0a3c189860a93e998acb"
   },
   "source_references": [
     {
