@@ -84,7 +84,7 @@ jobs:
             HEAD_SHA="$CIRCLE_SHA1"
             if [ "$CIRCLE_BRANCH" = "main" ] || [ "$CIRCLE_BRANCH" = "master" ]; then
               echo "Default-branch push: all gates required (fail-closed)."
-              python3 - "$HEAD_SHA" <<'EOF' > /tmp/pr-gate-decisions.json
+              python3 - "$HEAD_SHA" \<<'EOF' > /tmp/pr-gate-decisions.json
             import json, sys
             head = sys.argv[1]
             gates = ["lint-arch","tests","type-checking","security","codeql","docker",
