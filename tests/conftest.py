@@ -1,6 +1,5 @@
 import asyncio
 import contextlib
-import enum
 import gc
 import inspect
 import os
@@ -302,17 +301,7 @@ def pytest_addoption(parser: pytest.Parser) -> None:
             )
 
 
-def pytest_cmdline_main(config):
-    # Workaround for xdist serialization error with enum-valued options
-    # (historically syrupy's diff_mode). Avoid scanning every option attribute
-    # because collection startup cost compounds across large suites.
-    if hasattr(config, "option"):
-        _normalize_enum_option(config.option, "diff_mode")
-
-
 def pytest_configure(config):
-    # Keep it here as well just in case
-    _normalize_enum_option(config.option, "diff_mode")
     _reset_last_failed_collection_state(config)
     _auto_enable_benchmark_selection_for_explicit_benchmark_runs(config)
     _configure_windows_xdist(config)
@@ -766,18 +755,6 @@ if _supports_pytest_asyncio_loop_factories_hook():
         """Provide a selector-loop factory on Windows for pytest-asyncio >= 1.4."""
         del config, item
         return {"windows_selector": _windows_selector_loop_factory}
-
-
-def _normalize_enum_option(option_namespace: object, option_name: str) -> None:
-    """Convert a known enum option to its primitive value for xdist safety."""
-    if not hasattr(option_namespace, option_name):
-        return
-    try:
-        value = getattr(option_namespace, option_name)
-        if isinstance(value, enum.Enum):
-            setattr(option_namespace, option_name, value.value)
-    except (AttributeError, TypeError, ValueError):
-        return
 
 
 _PUBLICATION_CLASSIFICATION_TEST_PREFIXES = (
