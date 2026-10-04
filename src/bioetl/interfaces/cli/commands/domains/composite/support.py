@@ -146,7 +146,10 @@ def exit_with_composite_result(success: bool, error_message: str | None) -> None
     """Exit the CLI process using the canonical run-composite result mapping."""
     exit_code = map_success_flag_to_exit_code(success)
     if success:
-        echo_info("Composite pipeline completed successfully")
+        if error_message:
+            echo_warning(f"Composite pipeline completed with warnings: {error_message}")
+        else:
+            echo_info("Composite pipeline completed successfully")
         sys.exit(exit_code)
     echo_error("Composite pipeline failed", error_message or "Unknown error")
     sys.exit(exit_code)

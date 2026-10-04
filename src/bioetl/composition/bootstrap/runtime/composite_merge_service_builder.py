@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Awaitable, Callable, Mapping
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.runtime_wiring_api import (
@@ -17,18 +17,34 @@ from bioetl.domain.composite.strategy import MergeStrategy
 from bioetl.domain.normalization.join_keys import JoinKeyNormalizationPolicy
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from bioetl.application.composite.merger_orchestration import MergeExecutionRequest
+    from bioetl.domain.composite.result import MergeResult
 
     from bioetl.application.composite.runtime_wiring_api import (
         EnrichmentCrossValidator,
     )
     from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
-    from bioetl.domain.ports import ClockPort, LoggerPort
-    from bioetl.infrastructure.storage.delta_reader import DeltaReader
+    from bioetl.domain.ports import ClockPort, DeltaReaderPort, LoggerPort
 
 from bioetl.application.ports.storage import (
     CompositeMergeStorageProtocol as _CompositeMergeStorage,
+)
+
+
+SYSTEM_COLUMNS_TO_DROP = frozenset(
+    {
+        "_run_id",
+        "_run_type",
+        "_source_batch_id",
+        "_ingestion_ts",
+        "_dq_warn",
+        "_dq_error",
+        "_index",
+        "_lookup_method",
+        "_original_id",
+        "_source",
+    }
 )
 
 
@@ -51,13 +67,21 @@ def build_composite_merge_service(
     config: CompositeConfig,
     storage: _CompositeMergeStorage,
     resolve_gold_schema: Callable[[str], type | None],
-    delta_reader: DeltaReader,
+    delta_reader: DeltaReaderPort,
     field_group_registry: FieldGroupRegistry | None,
     cross_validator: EnrichmentCrossValidator | None,
     logger: LoggerPort,
     system_columns_to_drop: frozenset[str],
     normalization_policies: Mapping[str, JoinKeyNormalizationPolicy],
     clock: ClockPort | None = None,
+    execution_hook: Callable[
+        [
+            MergeExecutionRequest,
+            Callable[[MergeExecutionRequest], Awaitable[MergeResult]],
+        ],
+        Awaitable[MergeResult],
+    ]
+    | None = None,
 ) -> MergeService:
     """Build the composite merge service from explicit owner-only collaborators."""
     merge_dependencies = build_merge_dependencies(
@@ -77,6 +101,7 @@ def build_composite_merge_service(
         cross_validator=cross_validator,
         gold_schema=resolve_gold_schema(config.name),
         clock=clock,
+        execution_hook=execution_hook,
         collaborators=MergeCollaboratorGroup(
             deduplicator=merge_dependencies.deduplicator,
             aggregator=merge_dependencies.aggregator,

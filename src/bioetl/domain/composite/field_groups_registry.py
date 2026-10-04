@@ -73,6 +73,11 @@ class FieldGroupRegistry:
         return self._groups
 
     @property
+    def default_group(self) -> FieldGroupId:
+        """Group assigned to fields absent from the registry."""
+        return self._default_group
+
+    @property
     def provider_order(self) -> tuple[str, ...]:
         """Provider priority order."""
         return self._provider_order

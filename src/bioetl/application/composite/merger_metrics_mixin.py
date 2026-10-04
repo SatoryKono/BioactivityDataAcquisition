@@ -61,7 +61,9 @@ class MergeMetricsRecorderMixin:
         return df.with_columns(
             [
                 pl.lit(json.dumps(sources_used)).alias("_source_providers"),
-                pl.lit(json.dumps(status_dict)).alias("_enrichment_status"),
+                pl.lit(json.dumps(status_dict, sort_keys=True)).alias(
+                    "_enrichment_status"
+                ),
             ]
         )
 

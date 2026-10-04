@@ -419,6 +419,48 @@ async def test_repeated_degradation_never_becomes_healthy(adapter, mock_http_cli
 
 
 @pytest.mark.asyncio
+async def test_health_cancellation_does_not_retry_or_publish_success(
+    adapter, mock_http_client
+):
+    entered = asyncio.Event()
+
+    async def pending(*args, **kwargs):
+        entered.set()
+        await asyncio.Event().wait()
+
+    mock_http_client.get_once = AsyncMock(side_effect=pending)
+    task = asyncio.create_task(adapter.check_health())
+    await entered.wait()
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+    assert mock_http_client.get_once.await_count == 1
+    assert adapter._last_probe_health_status is None
+
+
+@pytest.mark.asyncio
+async def test_health_overall_deadline_remains_degraded(
+    adapter, mock_http_client, monkeypatch
+):
+    monkeypatch.setattr(
+        "bioetl.infrastructure.adapters.chembl.health.CHEMBL_HEALTH_CHECK_DEADLINE_SECONDS",
+        0.01,
+    )
+
+    async def pending(*args, **kwargs):
+        await asyncio.Event().wait()
+
+    mock_http_client.get_once = AsyncMock(side_effect=pending)
+    assert await adapter.health_check() == HealthStatus.DEGRADED
+    assert mock_http_client.get_once.await_count == 1
+    assert adapter._last_probe_health_status == HealthStatus.DEGRADED
+    assert any(
+        call.args == ("health_probe_deadline_exceeded",)
+        for call in adapter._logger.warning.call_args_list
+    )
+
+
+@pytest.mark.asyncio
 async def test_check_health_status_endpoint_500_returns_degraded(
     adapter, mock_http_client
 ):

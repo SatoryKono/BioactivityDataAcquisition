@@ -245,7 +245,7 @@ nav:
           - "ADR-031 Loading Strategy": 02-architecture/decisions/ADR-031-loading-strategy-formalization.md
           - "ADR-032 Unified HTTP Client": 02-architecture/decisions/ADR-032-unified-http-client.md
           - "ADR-033 Publication Validation": 02-architecture/decisions/ADR-033-publication-validation-strategy.md
-          - "ADR-034 Schema↔Domain Pairs": 02-architecture/decisions/ADR-034-schema-domain-pairs.md
+          - "ADR-034 Schemaâ†”Domain Pairs": 02-architecture/decisions/ADR-034-schema-domain-pairs.md
           - "ADR-035 JSON Field Typing": 02-architecture/decisions/ADR-035-json-field-typing-policy.md
           - "ADR-036 Gold Contract Versioning": 02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md
           - "ADR-037 Canonical Schema Generation": 02-architecture/decisions/ADR-037-canonical-schema-generation.md
@@ -272,6 +272,7 @@ nav:
           - "ADR-058 Layered Port Registries": 02-architecture/decisions/ADR-058-layered-port-registries.md
           - "ADR-059 Package Cohesion Budgets": 02-architecture/decisions/ADR-059-package-cohesion-budgets.md
           - "ADR-061 Persisted Selected Run Assessment": 02-architecture/decisions/ADR-061-persisted-selected-run-assessment.md
+          - "ADR-062 Immutable Composite Parent Merge Replay": 02-architecture/decisions/ADR-062-assay-parent-exact-replay.md
           - "Infrastructure Config Package Root Sunset": 02-architecture/compatibility/infrastructure-config-package-root-sunset.md
           - "Public API Freeze": 00-project/ai/agents/guides/PUBLIC_API_FREEZE.md
   - Guides:

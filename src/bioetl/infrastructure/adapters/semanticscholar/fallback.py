@@ -45,7 +45,10 @@ DEFAULT_SEARCH_FIELDS = (
     "openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal"
 )
 
-SEMANTICSCHOLAR_FALLBACK_ERRORS = COMMON_TITLE_FALLBACK_ERRORS
+SEMANTICSCHOLAR_FALLBACK_ERRORS: tuple[type[Exception], ...] = (
+    *COMMON_TITLE_FALLBACK_ERRORS,
+    httpx.HTTPError,
+)
 
 
 class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
@@ -191,12 +194,13 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
                 if not found_title:
                     return cast(JsonDict, record)  # Any: untyped API JSON record
 
-        except (*SEMANTICSCHOLAR_FALLBACK_ERRORS, httpx.HTTPError) as e:
+        except SEMANTICSCHOLAR_FALLBACK_ERRORS as e:
             self._logger.debug(
                 "semanticscholar_title_search_failed",
                 title=title[:50],
                 error=str(e),
             )
+            raise
         return None
 
     def titles_match(self, expected: str, actual: str) -> bool:

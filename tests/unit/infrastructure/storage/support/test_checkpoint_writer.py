@@ -242,3 +242,73 @@ def test_checkpoint_writer_rejects_oversized_payload(tmp_path: Path) -> None:
     writer = FileCompositeCheckpointWriter(tmp_path, max_checkpoint_bytes=8)
     with pytest.raises(CheckpointSizeError):
         writer.write_atomic("state.json", "x" * 16)
+
+
+def test_composite_checkpoint_history_survives_successful_cleanup(tmp_path):
+    import json
+    from uuid import UUID
+    from bioetl.domain.types import RunID
+    from tests.unit.application.services.run_manifest_test_support import (
+        make_run_manifest,
+        RunManifestOverrides,
+    )
+
+    root = tmp_path / "output" / "checkpoints"
+    writer = FileCompositeCheckpointWriter(root / "composite", history_root=root)
+    run_id = RunID(UUID("11111111-1111-4111-8111-111111111111"))
+    manifest = make_run_manifest(
+        run_id=run_id,
+        overrides=RunManifestOverrides(
+            pipeline_name="composite_activity", provider="composite"
+        ),
+    )
+    state = {
+        "manifest_id": manifest.manifest_id,
+        "composite_name": "composite_activity",
+        "run_id": str(run_id),
+        "state": "COMPLETED",
+    }
+    writer.write_atomic("composite_activity.json", json.dumps(state))
+    assert writer.delete("composite_activity.json")
+    index = root / ".history" / "by_manifest" / (manifest.manifest_id + ".json")
+    assert index.is_file(), (
+        "Composite completion loses manifest-indexed checkpoint evidence"
+    )
+    payload = json.loads(index.read_text())
+    history = root / payload["history_path"]
+    assert history.is_file()
+    assert json.loads(history.read_text())["metadata"] == state
+    from bioetl.domain.control_plane import ControlPlaneArtifactLifecyclePolicy
+    from bioetl.infrastructure.control_plane.file_artifact_lifecycle_store import (
+        FileControlPlaneArtifactLifecycleStore,
+    )
+    from bioetl.infrastructure.time import SystemClock
+
+    plan = FileControlPlaneArtifactLifecycleStore(
+        root.parent / "control"
+    ).plan_for_manifest(
+        ControlPlaneArtifactLifecyclePolicy(retention_days=90, now=SystemClock().now()),
+        manifest=manifest,
+    )
+    assert not [
+        issue
+        for issue in plan.resolution_issues
+        if issue.surface.value == "checkpoints"
+    ]
+
+
+@pytest.mark.parametrize("key", ["composite_name", "run_id", "manifest_id"])
+@pytest.mark.parametrize("bad", ["../escape", "a/b", "a\\b", "..", "C:drive"])
+def test_composite_history_rejects_identity_path_escape(tmp_path, key, bad):
+    import json
+
+    writer = FileCompositeCheckpointWriter(tmp_path)
+    state = {
+        "composite_name": "composite_activity",
+        "run_id": "run1",
+        "manifest_id": "manifest1",
+        key: bad,
+    }
+    with pytest.raises(CheckpointPathError):
+        writer.write_atomic("state.json", json.dumps(state))
+    assert not (tmp_path / ".history").exists()

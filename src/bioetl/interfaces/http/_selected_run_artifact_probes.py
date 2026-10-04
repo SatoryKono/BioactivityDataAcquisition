@@ -65,6 +65,54 @@ def _resolve_artifact_path(
 _HASH_READ_CHUNK_SIZE = 256 * 1024
 
 
+def _probe_composite_child(item: Mapping[str, object], root: Path) -> str:
+    """Verify a child only at its exact identity-bound path in this report tree."""
+    from bioetl.interfaces.http._selected_run_report_assessment import (
+        _load_report_assessment,
+    )
+
+    pipeline, run_id = item.get("pipeline_name"), item.get("run_id")
+    if not all(
+        isinstance(value, str)
+        and value not in {"", ".", ".."}
+        and all(c.isalnum() or c in "._-" for c in value)
+        for value in (pipeline, run_id)
+    ):
+        return "child_identity_invalid"
+    tree = root.parents[1]
+    expected = tree / str(pipeline) / str(run_id) / "pipeline-run-report.json"
+    candidate = expected.resolve()
+    raw = item.get("ref")
+    portable = f"pipeline/{pipeline}/{run_id}/pipeline-run-report.json"
+    if (
+        not isinstance(raw, str)
+        or (raw.replace("\\", "/") != portable and Path(raw).resolve() != candidate)
+        or not candidate.is_relative_to(tree)
+    ):
+        return "artifact_path_escape"
+    if not candidate.is_file():
+        return "artifact_missing"
+    digest = item.get("sha256")
+    if not isinstance(digest, str) or _hash_artifact_chunked(candidate) != digest:
+        return "child_digest_mismatch"
+    try:
+        _report, identity, assessment, availability, _revision = (
+            _load_report_assessment(candidate, str(pipeline), str(run_id))
+        )
+    except (OSError, ValueError, TypeError, KeyError):
+        return "child_evidence_invalid"
+    if identity.get("manifest_id") != item.get("manifest_id"):
+        return "child_manifest_mismatch"
+    if (
+        availability != "AVAILABLE"
+        or identity.get("status") != "success"
+        or assessment.get("verdict") not in {"OK", "N/A"}
+        or assessment.get("evidence_completeness") != "COMPLETE"
+    ):
+        return "child_evidence_not_green"
+    return ""
+
+
 def _probe_digest(candidate: Path, kind: str) -> str:
     """Hash JSON self-reports canonically; other artifacts as raw bytes."""
     if kind in _JSON_SELF_REPORT_KINDS:
@@ -165,6 +213,17 @@ def _artifact_probes(
                     "code": code,
                     "result": "fail",
                     "reason": "artifact_record_invalid",
+                    "evidence_ref": ref,
+                }
+            )
+            continue
+        if item.get("kind") == "composite_child_run_report":
+            reason = _probe_composite_child(item, root)
+            probes.append(
+                {
+                    "code": f"child_report_{item.get('run_id', index)}",
+                    "result": "fail" if reason else "pass",
+                    "reason": reason or "child_evidence_verified",
                     "evidence_ref": ref,
                 }
             )

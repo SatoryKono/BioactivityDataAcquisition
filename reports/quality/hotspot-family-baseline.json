@@ -1573,10 +1573,10 @@
         "src/bioetl/composition/bootstrap/runtime/"
       ],
       "duplication_clusters": 0,
-      "files": 53,
-      "total_loc": 6444,
+      "files": 57,
+      "total_loc": 7060,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.301,
+      "helper_function_ratio": 0.292,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.tracing_bootstrap",
       "bounded_growth_budgets": {
@@ -1586,8 +1586,8 @@
       "internal_fan_in_census": {
         "distribution": {
           "0": 2,
-          "1": 35,
-          "2": 16
+          "1": 37,
+          "2": 18
         },
         "modules": [
           {
@@ -1684,6 +1684,27 @@
             ]
           },
           {
+            "module": "bioetl.composition.bootstrap.runtime.assay_replay",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.assay_replay_capture"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.assay_replay_capture",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite_support_services_factory"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.assay_replay_evidence",
+            "fan_in": 1,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.composite_reporter"
+            ]
+          },
+          {
             "module": "bioetl.composition.bootstrap.runtime.assembly",
             "fan_in": 2,
             "runtime_importers": [
@@ -1776,9 +1797,18 @@
           },
           {
             "module": "bioetl.composition.bootstrap.runtime.composite_merge_service_builder",
-            "fan_in": 1,
+            "fan_in": 2,
             "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.assay_replay",
               "bioetl.composition.bootstrap.runtime.composite_support_services_factory"
+            ]
+          },
+          {
+            "module": "bioetl.composition.bootstrap.runtime.composite_replay_context",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.composition.bootstrap.runtime.assay_replay",
+              "bioetl.composition.bootstrap.runtime.assay_replay_capture"
             ]
           },
           {
@@ -1982,6 +2012,8 @@
           "bioetl.composition.bootstrap.runtime._runner_assembly_support",
           "bioetl.composition.bootstrap.runtime.assembly",
           "bioetl.composition.bootstrap.runtime.composite_filter_extraction_service",
+          "bioetl.composition.bootstrap.runtime.composite_merge_service_builder",
+          "bioetl.composition.bootstrap.runtime.composite_replay_context",
           "bioetl.composition.bootstrap.runtime.composite_support_services_factory",
           "bioetl.composition.bootstrap.runtime.dq_bootstrap",
           "bioetl.composition.bootstrap.runtime.logger_bootstrap",

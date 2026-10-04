@@ -19913,6 +19913,34 @@
       "canonical_successor": null,
       "catalog_lifecycle": null,
       "commit_policy": null,
+      "declared_class": null,
+      "declared_status": "Accepted",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 2,
+      "lifecycle": null,
+      "outbound_links": 2,
+      "owner": "BioETL maintainers",
+      "path": "docs/02-architecture/decisions/ADR-062-assay-parent-exact-replay.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "02-architecture",
+      "status": "Canonical",
+      "surface_family": "canonical",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
       "declared_class": "published",
       "declared_status": "active",
       "diagram_kind": null,
@@ -19927,7 +19955,7 @@
       "github_issue_url": null,
       "inbound_links": 2,
       "lifecycle": null,
-      "outbound_links": 122,
+      "outbound_links": 123,
       "owner": "BioETL Team",
       "path": "docs/02-architecture/decisions/README.md",
       "recommended_action": "keep",
@@ -19983,7 +20011,7 @@
       "github_issue_url": null,
       "inbound_links": 0,
       "lifecycle": null,
-      "outbound_links": 0,
+      "outbound_links": 1,
       "owner": "BioETL Team",
       "path": "docs/02-architecture/decisions/notes/2026-07-27-composite-rebuild-only-replay-boundary.md",
       "recommended_action": "keep",
@@ -97064,14 +97092,14 @@
       "archive-after-github-state-check": 338,
       "archive-after-migration": 843,
       "generate-automatically": 1056,
-      "keep": 1192,
+      "keep": 1193,
       "reconcile-with-github-state": 8
     },
     "by_section": {
       ".github": 354,
       "00-project": 270,
       "01-requirements": 4,
-      "02-architecture": 993,
+      "02-architecture": 994,
       "03-data-model": 2,
       "03-guides": 127,
       "04-reference": 334,
@@ -97095,19 +97123,19 @@
     "by_status": {
       "Active": 747,
       "Archived": 276,
-      "Canonical": 74,
+      "Canonical": 75,
       "Generated": 1056,
       "Working": 1284
     },
     "by_surface_family": {
       "active": 747,
       "archive": 276,
-      "canonical": 74,
+      "canonical": 75,
       "generated": 1056,
       "working": 1284
     },
     "by_tracking_state": {
-      "tracked": 3437
+      "tracked": 3438
     },
     "docs_reports_local_count": 56,
     "duplicate_group_count": 7,
@@ -97123,8 +97151,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3437,
+    "total_doc_like": 3438,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3437
+    "total_doc_like_tracked": 3438
   }
 }

@@ -1,0 +1,135 @@
+"""Create-only parent replay envelopes and verified logical table artifacts."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from pathlib import Path
+from typing import cast
+
+import pyarrow as pa
+
+from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.storage.composite_replay_inputs import _table_bytes
+
+SUPPORTED_COMPOSITES = frozenset(
+    f"composite_{name}"
+    for name in ("activity", "assay", "molecule", "publication", "target")
+)
+
+
+def digest_bytes(content: bytes) -> str:
+    """Return a portable SHA256 digest."""
+    return hashlib.sha256(content).hexdigest()
+
+
+def implementation_fingerprint() -> str:
+    """Bind replay to the installed implementation, independent of Git metadata."""
+    package = Path(__file__).resolve().parents[2]
+    digest = hashlib.sha256()
+    for path in sorted(package.rglob("*.py")):
+        digest.update(path.relative_to(package).as_posix().encode())
+        digest.update(b"\0")
+        digest.update(path.read_bytes().replace(b"\r\n", b"\n"))
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
+def publish_bytes(root: Path, name: str, content: bytes) -> str:
+    """Write one new object; reject escaping paths and previous evidence."""
+    path = confined_path(root, name)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("xb") as stream:
+        stream.write(content)
+    return digest_bytes(content)
+
+
+def confined_path(root: Path, name: str) -> Path:
+    """Resolve a strictly relative object reference within its evidence root."""
+    path = (root / name).resolve()
+    if Path(name).is_absolute() or not path.is_relative_to(root.resolve()):
+        raise ValueError("composite_replay_path_escape")
+    return path
+
+
+def publish_json(root: Path, name: str, payload: JsonDict) -> str:
+    """Publish canonical JSON without lossy fallback serialization."""
+    return publish_bytes(
+        root,
+        name,
+        json.dumps(
+            payload, sort_keys=True, separators=(",", ":"), allow_nan=False
+        ).encode(),
+    )
+
+
+def load_verified_json(root: Path, name: str, digest: str) -> JsonDict:
+    """Read an identity-bound JSON object."""
+    content = confined_path(root, name).read_bytes()
+    if digest_bytes(content) != digest:
+        raise ValueError("composite_replay_digest_mismatch")
+    value = json.loads(content)
+    if not isinstance(value, dict):
+        raise ValueError("composite_replay_envelope_invalid")
+    return cast(JsonDict, value)
+
+
+def canonical_table(table: pa.Table) -> pa.Table:
+    """Normalize physical Delta row ordering using the assay identity contract."""
+    keys = [
+        name
+        for name in ("entity_id", "chembl.assay.assay_id", "assay_id")
+        if name in table.column_names
+    ]
+    if not keys or table.num_rows == 0:
+        raise ValueError("composite_replay_output_identity_missing")
+    return (
+        table.sort_by([(name, "ascending") for name in keys])
+        .combine_chunks()
+        .replace_schema_metadata(None)
+    )
+
+
+def publish_table(root: Path, name: str, table: pa.Table) -> str:
+    """Save the logical table read from a completed physical output."""
+    return publish_bytes(root, name, _table_bytes(canonical_table(table)))
+
+
+def verify_bundle(root: Path, envelope_digest: str) -> JsonDict:
+    """Re-check every mandatory object; historical success does not bypass loss."""
+    envelope = load_verified_json(root, "parent.json", envelope_digest)
+    version = envelope.get("version")
+    if version not in {"assay-parent-replay-v1", "composite-parent-replay-v2"}:
+        raise ValueError("composite_replay_version_invalid")
+    allowed = (
+        {"composite_assay"}
+        if version == "assay-parent-replay-v1"
+        else SUPPORTED_COMPOSITES
+    )
+    if envelope.get("pipeline") not in allowed:
+        raise ValueError("composite_replay_family_invalid")
+    objects = envelope.get("objects")
+    if not isinstance(objects, dict) or not objects:
+        raise ValueError("composite_replay_objects_missing")
+    required = {
+        "config.json",
+        "uv.lock",
+        "pipeline-settings.json",
+        "expected/silver.arrow",
+        "expected/gold.arrow",
+        "inputs/inputs.json",
+    }
+    if version == "composite-parent-replay-v2":
+        required.add("field-groups.json")
+    if not required.issubset(objects) or objects["inputs/inputs.json"] != envelope.get(
+        "input_snapshot_fingerprint"
+    ):
+        raise ValueError("composite_replay_required_object_missing")
+    for name, digest in objects.items():
+        if not isinstance(name, str) or not isinstance(digest, str):
+            raise ValueError("composite_replay_object_invalid")
+        if digest_bytes(confined_path(root, name).read_bytes()) != digest:
+            raise ValueError("composite_replay_object_digest_mismatch")
+    if envelope.get("implementation") != implementation_fingerprint():
+        raise ValueError("composite_replay_implementation_mismatch")
+    return envelope

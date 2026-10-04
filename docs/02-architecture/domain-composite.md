@@ -159,6 +159,19 @@ src/bioetl/domain/composite/
 - `status: EnrichmentStatus` - статус enrichment
 - `field_sources: dict[str, FieldSource]` - маппинг полей к источникам
 
+В графе lineage узел `SOURCE_SYSTEM` хранит идентичность источника и его
+`provider`. Контекст запуска (`composite_run_id`, `composite_name`), выбранные
+поля и статус обогащения принадлежат рёбрам: один источник может участвовать
+в нескольких запусках и слоях. Silver и Gold используют имя пайплайна из
+контекста запуска; имена физических datasets остаются самостоятельными.
+Противоречащие атрибуты одного узла по-прежнему блокируют evidence.
+
+Удаление рабочего checkpoint после завершения сохраняет неизменяемую историю
+с checksum и индексом manifest в общем каталоге checkpoints. Эта история
+нужна для проверки и архивирования evidence; отсутствие индекса остаётся
+ошибкой приёмки. Ссылки родителя на дочерние отчёты относительны к reports,
+привязаны к pipeline/run ID и проверяются по сохранённому SHA-256.
+
 ### 8. CompositeResult
 
 **Файл:** `result.py`
@@ -177,6 +190,12 @@ src/bioetl/domain/composite/
 - `FAILURE` - ошибка выполнения
 - `PARTIAL` - частичное выполнение (Silver записан; merge включает эти данные)
 - `SKIPPED` - пропущено (нет Silver для merge)
+
+Падение необязательного этапа допускает завершение merge с кодом CLI `0`,
+но CLI явно сообщает `completed with warnings`, а отчёт сохраняет
+`completion_status=completed_with_warnings`. Это не зелёная строгая приёмка:
+WARN и ошибки дочерних запусков сохраняются в отчёте. Предупреждение родителя
+не понижает дочерние `ERROR`, `INCOMPLETE` или `UNKNOWN` до WARN.
 
 ### 9. State Machine
 
