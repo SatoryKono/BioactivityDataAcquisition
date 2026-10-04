@@ -140,14 +140,14 @@ class PublicationTermExtractionMixin:
         if resolved is None:
             return
         normalized_limit, publication_limit = resolved
-        filter_ids, publication_limit = _cap_filter_ids(
+        capped_filter_ids, publication_limit = _cap_filter_ids(
             filter_ids, normalized_limit, publication_limit
         )
         publications = self._data_source.fetch(
             entity_type=self.SOURCE_ENTITY_TYPE,
             limit=publication_limit,
             query=query,
-            filter_ids=filter_ids,
+            filter_ids=capped_filter_ids,
             filter_field=filter_field,
         )
         async for term in self._yield_terms_from_publications(
@@ -204,14 +204,14 @@ class PublicationTermExtractionMixin:
         if resolved is None:
             return
         normalized_limit, publication_limit = resolved
-        filter_ids, publication_limit = _cap_filter_ids(
+        capped_filter_ids, publication_limit = _cap_filter_ids(
             filter_ids, normalized_limit, publication_limit
         )
-        if filter_ids is None:
+        if capped_filter_ids is None:
             return
         publications = filterable.fetch_filtered(
             entity_type=self.SOURCE_ENTITY_TYPE,
-            filter_ids=filter_ids,
+            filter_ids=capped_filter_ids,
             filter_field=filter_field,
             limit=publication_limit,
         )

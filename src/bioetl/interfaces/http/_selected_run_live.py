@@ -10,7 +10,8 @@ from bioetl.domain.types import RunID
 from bioetl.interfaces.http._health_server_observability_protocols import (
     _HealthObservabilityRoutingHost,
 )
-from bioetl.interfaces.http.run_report_ops import _normalize_list_owner, _safe_segment
+from bioetl.interfaces.http.run_report_index import _normalize_list_owner
+from bioetl.interfaces.http.run_report_ops import _safe_segment
 
 
 def pipeline_owners(selection: str) -> set[str] | None:

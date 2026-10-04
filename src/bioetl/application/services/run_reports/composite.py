@@ -172,7 +172,7 @@ class CompositeRunReportService:
                     for c in children
                 ],
             },
-            observations=run_observations(),
+            observations=dict(run_observations()),
         )
         paths = write_pipeline_run_report(report, root=self.root, store=self.store)
         if status == "success" and self.archive is not None:

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import date
+from pathlib import Path
 
 from memory.graph.sync_pkg._core_models import (
     AnalysisLabelSets,

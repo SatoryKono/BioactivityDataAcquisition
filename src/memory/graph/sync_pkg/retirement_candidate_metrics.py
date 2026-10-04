@@ -6,6 +6,7 @@ from typing import cast
 
 from memory.graph.sync_pkg._core_convert import _coerce_int
 from memory.graph.sync_pkg._core_models import NodeKey
+from memory.graph.sync_pkg.graph_contexts import AnalysisAnchors
 from memory.graph.sync_pkg.graph_snapshot import GraphNode, GraphSnapshot
 
 __all__ = [

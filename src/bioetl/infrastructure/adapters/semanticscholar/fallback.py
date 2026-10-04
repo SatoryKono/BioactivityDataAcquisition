@@ -46,6 +46,10 @@ DEFAULT_SEARCH_FIELDS = (
 )
 
 SEMANTICSCHOLAR_FALLBACK_ERRORS = COMMON_TITLE_FALLBACK_ERRORS
+_TITLE_SEARCH_ERRORS: tuple[type[Exception], ...] = (
+    *SEMANTICSCHOLAR_FALLBACK_ERRORS,
+    httpx.HTTPError,
+)
 
 
 class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
@@ -191,7 +195,7 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
                 if not found_title:
                     return cast(JsonDict, record)  # Any: untyped API JSON record
 
-        except (*SEMANTICSCHOLAR_FALLBACK_ERRORS, httpx.HTTPError) as e:
+        except _TITLE_SEARCH_ERRORS as e:
             self._logger.debug(
                 "semanticscholar_title_search_failed",
                 title=title[:50],

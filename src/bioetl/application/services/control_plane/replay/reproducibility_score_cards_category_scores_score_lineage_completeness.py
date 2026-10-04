@@ -4,12 +4,16 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_category_scores_core import (
+    ScoreCardRecord,
+)
+
 
 def score_lineage_completeness(
     summary: dict[str, object],
     *,
-    build_score_card_record: Callable[..., object],
-) -> object:
+    build_score_card_record: Callable[..., ScoreCardRecord],
+) -> ScoreCardRecord:
     evidence = []
     blockers = []
     refs = [

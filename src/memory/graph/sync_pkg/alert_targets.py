@@ -5,12 +5,17 @@ from __future__ import annotations
 import re
 from collections.abc import Iterable, Mapping, Set
 
-from memory.graph.sync_pkg._core_convert import _as_string_list
+from memory.graph.sync_pkg._core_convert import (
+    _as_mapping,
+    _as_string_list,
+    _normalized_alert_selector,
+)
 from memory.graph.sync_pkg._core_models import (
     AlertDashboardConfig,
     AlertRuleSettings,
     NodeKey,
 )
+from memory.graph.sync_pkg.alerttargetselection import AlertTargetSelection
 from memory.graph.sync_pkg.dashboard_metrics import _extract_bioetl_metrics
 from memory.graph.sync_pkg.graph_contexts import AlertTargetContext
 
