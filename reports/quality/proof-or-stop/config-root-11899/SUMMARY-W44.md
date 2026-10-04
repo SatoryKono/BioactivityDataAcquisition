@@ -30,3 +30,11 @@ CircleCI on measured HEAD confirmed all fast/integration jobs, duplication, Ruff
 Security job 741 failed on HIGH GHSA-vfj7-8cjw-p6xm, braces 3.0.3, in three lockfiles. The official advisory lists no patched version. No advisory suppression, new exemption, fake version, or security gate weakening is introduced.
 
 No proof-or-stop ADMIT, global architecture closeout, main acceptance or issue closure is claimed. W43 remains immutable failed evidence. Runtime mirror parity N/A: runtime trees unchanged.
+
+## Latest post-publication checks
+
+At d32252f60260ef76dfde034ca6354c2eb20376e1, remote Docker build, docs-governance, duplication, all fast/integration jobs and SonarCloud passed. Architecture job 1233 failed with 137 test failures; security job 1238 still reports HIGH braces 3.0.3 in three lockfiles. Detailed architecture diagnostics and the current result index are preserved.
+
+Follow-up repairs regenerate config comparison, contract coverage and source manifest using their canonical generators; the current-state coverage counts derive from the adopted inventory. Full diagram views now reuse their declared canonical parent bodies. Focused config/source-manifest/current-state checks: 4 PASS; full-view parity: 1 PASS; contract matrix canonical --check: PASS. No source or test changes were made after W44, and no architecture/security waiver or closeout is claimed.
+
+Full docs verify after these artifact/view repairs exited 0. Cleanup inventory and evidence bindings were canonically refreshed and their checks passed.

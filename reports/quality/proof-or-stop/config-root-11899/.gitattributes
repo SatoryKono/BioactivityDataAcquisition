@@ -16,3 +16,4 @@ circleci-732-failure.log -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 circleci-741-failure.log -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 owning-inventory-wave44-clean.log -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 owning-inventory-wave44-clean.xml -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+circleci-1233-architecture.log -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
