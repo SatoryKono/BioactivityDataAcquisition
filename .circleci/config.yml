@@ -164,7 +164,7 @@ jobs:
             mkdir -p reports/test-telemetry
             HYPOTHESIS_PROFILE=fast \
             uv run --frozen --no-build pytest tests/architecture \
-              -m not-slow-not-benchmark-not-memory \
+              -m "not slow and not benchmark and not memory" \
               -q --tb=short \
               --junitxml=reports/test-telemetry/junit-arch.xml
       - store_test_results:
@@ -384,7 +384,7 @@ jobs:
   duplication:
     docker:
       - image: cimg/python:3.12-node
-    resource_class: small
+    resource_class: medium
     steps:
       - checkout
       - setup-python-uv
@@ -399,6 +399,7 @@ jobs:
           name: jscpd duplication detection
           command: |
             set -euo pipefail
+            export NODE_OPTIONS="--max-old-space-size=3072"
             mkdir -p reports/jscpd
             npm ci --ignore-scripts --no-fund --no-audit --prefix "$PWD/.github/tooling/jscpd"
             "$PWD/.github/tooling/jscpd/node_modules/.bin/jscpd" \
@@ -451,7 +452,8 @@ jobs:
     resource_class: small
     steps:
       - checkout
-      - setup-python-uv
+      - setup-python-uv:
+          extras: dev tracing docs
       - check-gate:
           gate: docs-governance
       - run:
@@ -511,6 +513,11 @@ jobs:
             "$HOME/.local/bin/hadolint" Dockerfile.bioetl
       - run:
           name: docker compose config validation
+          environment:
+            # Interpolation only; these values never start a runtime.
+            NEO4J_PASSWORD: ci-compose-validation-placeholder
+            GF_SECURITY_ADMIN_PASSWORD: ci-compose-validation-placeholder
+            GF_RENDERING_RENDERER_TOKEN: ci-compose-validation-placeholder
           command: |
             docker compose config > /dev/null
             docker compose -f docker-compose.monitoring.yml config > /dev/null

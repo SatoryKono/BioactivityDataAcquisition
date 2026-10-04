@@ -4,15 +4,18 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pyarrow as pa
+
+from bioetl.domain.ports import DeltaReaderPort
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.storage.composite_replay_bundle import (
     SUPPORTED_COMPOSITES,
+    canonical_table,
     confined_path,
     digest_bytes,
     load_verified_json,
     verify_bundle,
 )
-
 
 _PARENT_ENVELOPE_FILE = "parent.json"
 _VERIFICATION_RECEIPT_FILE = "verification/verification.json"
@@ -136,3 +139,36 @@ def project_assay_replay(
         return upgraded, probe
     except (OSError, ValueError, KeyError, TypeError):
         return manifest, probe
+
+
+async def verify_replay_outputs(
+    root: Path, output_reader: DeltaReaderPort, output_paths: dict[str, Path]
+) -> None:
+    """Compare both materialized logical layers against immutable captures."""
+    for layer, path in output_paths.items():
+        table = await output_reader.read_table(str(path))
+        if not isinstance(table, pa.Table):
+            raise TypeError("composite_replay_output_must_be_arrow_table")
+        actual = canonical_table(table)
+        expected = pa.ipc.open_file(root / f"expected/{layer}.arrow").read_all()
+        if not actual.equals(expected, check_metadata=True):
+            raise ValueError(f"assay_replay_{layer}_mismatch")
+
+
+def verification_receipt(
+    destination: Path, envelope_hash: str, run_id: str, records: int
+) -> JsonDict:
+    """Bind the verified outputs to immutable physical file digests."""
+    return {
+        "version": "assay-replay-verification-v1",
+        "envelope_sha256": envelope_hash,
+        "run_id": run_id,
+        "records": records,
+        "objects": {
+            path.relative_to(destination).as_posix(): digest_bytes(path.read_bytes())
+            for path in sorted((destination / "output").rglob("*"))
+            if path.is_file()
+        },
+        "silver_equal": True,
+        "gold_equal": True,
+    }

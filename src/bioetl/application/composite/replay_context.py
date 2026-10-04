@@ -10,18 +10,17 @@ from bioetl.application.composite.merger_orchestration import (
     build_merge_execution_request,
 )
 from bioetl.domain.composite import CompositeConfig
-from bioetl.domain.composite.result import (
-    DependencyResult,
-    DependencyStatus,
-    EnrichmentResult,
-    EnrichmentStatus,
-)
-
 from bioetl.domain.composite.field_groups import (
     FieldGroupDefinition,
     FieldGroupId,
     FieldGroupRegistry,
     FieldMapping,
+)
+from bioetl.domain.composite.result import (
+    DependencyResult,
+    DependencyStatus,
+    EnrichmentResult,
+    EnrichmentStatus,
 )
 from bioetl.domain.types import JsonDict
 

@@ -2,7 +2,7 @@
 
 import asyncio
 import json
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -281,3 +281,44 @@ async def test_child_scopes_do_not_leak_between_concurrent_parents(tmp_path):
         )
         assert [c["run_id"] for c in report["io"]["child_runs"]] == [f"child-{i}"]
         assert report["observations"]["Provider"]["verdict"] == "INCOMPLETE"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "primary", [ValueError("primary failure"), asyncio.CancelledError()]
+)
+@pytest.mark.parametrize("logger_fails", [False, True])
+async def test_report_failure_preserves_primary_error_and_cleans_scope(
+    tmp_path, primary, logger_fails
+):
+    from bioetl.application.services.run_reports import composite, observations
+
+    logger = MagicMock()
+    if logger_fails:
+        logger.error.side_effect = RuntimeError("logger failure")
+    service = CompositeRunReportService(
+        "composite_assay",
+        None,
+        MemoryReportStore(),
+        tmp_path,
+        fixed_test_clock(),
+        logger,
+        MagicMock(),
+    )
+    before_children = composite._children.get()
+    before_observations = observations.run_observations()
+
+    async def body():
+        raise primary
+
+    with patch.object(
+        CompositeRunReportService, "write", side_effect=OSError("report failure")
+    ):
+        with pytest.raises(type(primary)) as caught:
+            await service.execute("parent", body)
+    assert caught.value is primary
+    logger.error.assert_called_once_with(
+        "composite_report_write_failed", error="report failure"
+    )
+    assert composite._children.get() is before_children
+    assert observations.run_observations() == before_observations

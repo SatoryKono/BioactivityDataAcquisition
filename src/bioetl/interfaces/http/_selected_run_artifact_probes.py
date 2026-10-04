@@ -200,6 +200,31 @@ def probe_child_artifact(
         return "fail", "artifact_record_invalid"
 
 
+def _is_current_composite_child(item: Mapping[str, object], root: Path) -> bool:
+    child_ref = item.get("ref")
+    portable = f"pipeline/{item.get('pipeline_name')}/{item.get('run_id')}/pipeline-run-report.json"
+    return (
+        item.get("kind") == "composite_child_run_report"
+        and isinstance(child_ref, str)
+        and (
+            child_ref.replace("\\", "/") == portable
+            or Path(child_ref).resolve().is_relative_to(root.parents[1])
+        )
+    )
+
+
+def _current_child_probe(
+    item: Mapping[str, object], root: Path, index: int, ref: str
+) -> Mapping[str, object]:
+    reason = _probe_composite_child(item, root)
+    return {
+        "code": f"child_report_{item.get('run_id', index)}",
+        "result": "fail" if reason else "pass",
+        "reason": reason or "child_evidence_verified",
+        "evidence_ref": ref,
+    }
+
+
 def _artifact_probes(
     report: Mapping[str, object], run_root: Path
 ) -> tuple[list[Mapping[str, object]], bool]:
@@ -221,27 +246,8 @@ def _artifact_probes(
                 }
             )
             continue
-        child_ref = item.get("ref")
-        portable_child = f"pipeline/{item.get('pipeline_name')}/{item.get('run_id')}/pipeline-run-report.json"
-        # Current reports bind exact child refs and require green child evidence.
-        # Legacy relocated refs retain their snapshot/revision verification below.
-        if (
-            item.get("kind") == "composite_child_run_report"
-            and isinstance(child_ref, str)
-            and (
-                child_ref.replace("\\", "/") == portable_child
-                or Path(child_ref).resolve().is_relative_to(root.parents[1])
-            )
-        ):
-            reason = _probe_composite_child(item, root)
-            probes.append(
-                {
-                    "code": f"child_report_{item.get('run_id', index)}",
-                    "result": "fail" if reason else "pass",
-                    "reason": reason or "child_evidence_verified",
-                    "evidence_ref": ref,
-                }
-            )
+        if _is_current_composite_child(item, root):
+            probes.append(_current_child_probe(item, root, index, ref))
             continue
         name = item.get("name") or item.get("id") or item.get("kind") or code
         code = str(name)

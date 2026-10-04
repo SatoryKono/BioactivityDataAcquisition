@@ -23,7 +23,7 @@ from bioetl.application.composite.runtime_wiring_api import (
 from bioetl.composition.bootstrap.runtime.composite_merge_service_builder import (
     build_composite_merge_service,
 )
-from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
+from bioetl.composition.factories.services.composite_support_services_factory import (
     CompositeSupportServicesFactory,
 )
 from bioetl.domain.composite.result import EnrichmentResult
@@ -259,7 +259,7 @@ async def test_assay_replay_compares_physical_production_outputs(tmp_path, monke
     from bioetl.composition.bootstrap.runtime.assay_replay import (
         replay_assay,
     )
-    from bioetl.composition.bootstrap.runtime.assay_replay_evidence import (
+    from bioetl.infrastructure.storage.composite_replay_evidence import (
         replay_artifacts,
         project_assay_replay,
     )
@@ -405,7 +405,7 @@ async def _verify_production_http_chain(
         RunSourceRef,
     )
     from bioetl.domain.normalization.json import stable_json_hash
-    from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
+    from bioetl.domain.run_reports.pipeline_report_assembly import build_pipeline_run_report
     from bioetl.domain.run_reports.selected_status import DOMAINS
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.control_plane.file_effective_config_artifact_store import (

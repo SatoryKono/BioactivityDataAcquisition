@@ -54,11 +54,18 @@ def test_composite_reporter_archives_parent_identity_in_selected_roots(
             f"{MODULE}.archive_successful_run",
             side_effect=lambda **kw: archived.append(kw),
         ),
+        patch(f"{MODULE}.provider_execution_scope") as execution_scope,
+        patch(f"{MODULE}.replay_artifacts", return_value=()) as replay_artifacts,
     ):
         reporter = create_composite_reporter(
             pipeline_name="composite_assay",
             manifest_id="parent-manifest",
             logger=MagicMock(),
+        )
+        assert reporter.execution_scope is execution_scope
+        assert reporter.replay_artifacts("parent-run") == ()
+        replay_artifacts.assert_called_once_with(
+            settings.report_root, "composite_assay", "parent-run"
         )
         parent = RunResult(
             status=PipelineRunResult.SUCCESS,

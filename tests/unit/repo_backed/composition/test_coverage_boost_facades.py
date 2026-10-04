@@ -148,7 +148,7 @@ def _install_workflow_runner_service_dependencies(
             created["silver_writer"] = kwargs
 
     monkeypatch.setattr(
-        "bioetl.composition.factories.services.workflow_transforms.SilverWriter",
+        "bioetl.composition.bootstrap.assembly.workflow_transforms.SilverWriter",
         _SilverWriter,
     )
 

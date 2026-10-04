@@ -2264,6 +2264,7 @@
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
+        "docs/04-reference/cli.md",
         "src/bioetl/composition/bootstrap/runtime/assay_replay.py",
         "tests/integration/composite/test_assay_snapshot_merge_replay.py",
         "tests/unit/infrastructure/storage/test_composite_replay_bundle.py"

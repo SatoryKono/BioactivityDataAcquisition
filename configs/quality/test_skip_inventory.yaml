@@ -433,6 +433,19 @@ entries:
     rationale: >
       Live launch acceptance requires BIOETL_GREEN_ACCEPTANCE=1 and isolated
       output/environment inputs; selected cases fail on missing or failed evidence.
+  - path: tests/integration/test_deployed_replay_readiness.py
+    suite: integration
+    category: live_network_opt_in_guard
+    owner: "@bioetl-platform"
+    linked_issue: "#11871"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-10-04"
+    rationale: >
+      Read-only deployed acceptance requires BIOETL_REPLAY_ACCEPTANCE_CATALOG
+      with exact run IDs; selected tests fail closed on absent or invalid evidence.
+
 
 e2e_matrix_replay_deferred:
   owner: "@bioetl-platform"

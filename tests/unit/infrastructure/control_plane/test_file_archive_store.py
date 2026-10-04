@@ -34,7 +34,7 @@ def _assessment_case(archive_case, tmp_path, monkeypatch, *, dq="OK"):
     from bioetl.application.services.run_reports.observations import (
         record_run_observation,
     )
-    from bioetl.composition import archive_assessment
+    from bioetl.composition import control_plane_archive as archive_assessment
     from bioetl.infrastructure.storage.run_report_store_adapter import (
         FileRunReportStoreAdapter,
     )
@@ -85,7 +85,7 @@ def _assessment_case(archive_case, tmp_path, monkeypatch, *, dq="OK"):
 def test_archive_assessment_commits_verified_revision_and_preserves_history(
     archive_case, tmp_path, monkeypatch, dq, verdict
 ):
-    from bioetl.composition.archive_assessment import refresh_archived_assessment
+    from bioetl.composition.control_plane_archive import refresh_archived_assessment
     from bioetl.domain.run_reports.selected_status import verify_snapshot
 
     archive, manifest, plan, path = _assessment_case(
@@ -131,7 +131,7 @@ def test_archive_assessment_commits_verified_revision_and_preserves_history(
 def test_archive_assessment_failed_candidate_keeps_original_report(
     archive_case, tmp_path, monkeypatch
 ):
-    from bioetl.composition.archive_assessment import refresh_archived_assessment
+    from bioetl.composition.control_plane_archive import refresh_archived_assessment
 
     archive, manifest, plan, path = _assessment_case(
         archive_case, tmp_path, monkeypatch
@@ -203,7 +203,7 @@ def test_automatic_archive_resolves_default_report_root(
 def test_assessment_rejects_source_changed_during_candidate_archive(
     archive_case, tmp_path, monkeypatch
 ):
-    from bioetl.composition.archive_assessment import refresh_archived_assessment
+    from bioetl.composition.control_plane_archive import refresh_archived_assessment
 
     archive, manifest, plan, path = _assessment_case(
         archive_case, tmp_path, monkeypatch

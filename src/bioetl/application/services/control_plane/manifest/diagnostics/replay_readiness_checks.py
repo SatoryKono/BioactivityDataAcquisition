@@ -70,14 +70,8 @@ def _manifest_checks(
     manifest: Mapping[str, object] | None,
 ) -> list[dict[str, str]]:
     if manifest is None:
-        return [
-            _check(
-                "manifest_not_recorded",
-                "unknown",
-                "manifest_not_recorded",
-                "#/manifest",
-            )
-        ]
+        code = "manifest_not_recorded"
+        return [_check(code, "unknown", code, "#/manifest")]
     checks = [
         _recorded_object_check(manifest, code)
         for code in (

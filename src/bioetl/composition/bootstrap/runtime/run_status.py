@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+
 from collections.abc import Callable
 from bioetl.application.services.control_plane.manifest.contract_evidence import (
     build_runtime_contract_evidence,
@@ -13,6 +14,8 @@ from bioetl.infrastructure.control_plane.file_contract_evidence_recorder import 
 from bioetl.application.services.execution.pipeline_runner_models import RunResult
 from bioetl.application.services.run_reports.composite import CompositeRunReportService
 from bioetl.composition.runtime_builders.config_access import get_settings
+from bioetl.infrastructure.adapters.http.health import provider_execution_scope
+from bioetl.infrastructure.storage.composite_replay_evidence import replay_artifacts
 from bioetl.domain.ports import LoggerPort
 from bioetl.infrastructure.storage.run_report_store_adapter import (
     FileRunReportStoreAdapter,
@@ -22,9 +25,7 @@ from bioetl.infrastructure.control_plane.file_run_manifest_store import (
 )
 from bioetl.infrastructure.time import SystemClock
 from bioetl.composition.control_plane_archive import archive_successful_run
-from bioetl.composition.bootstrap.runtime.run_status_capture import (
-    create_run_status_capture as create_run_status_capture,
-)
+from bioetl.composition.bootstrap.runtime.run_status_capture import create_run_status_capture
 
 
 def create_composite_reporter(
@@ -51,6 +52,10 @@ def create_composite_reporter(
         clock=SystemClock(),
         logger=logger,
         archive=archive,
+        execution_scope=provider_execution_scope,
+        replay_artifacts=lambda run_id: replay_artifacts(
+            settings.report_root, pipeline_name, run_id
+        ),
         capture=create_run_status_capture(
             settings.data_dir,
             report_root=settings.report_root,

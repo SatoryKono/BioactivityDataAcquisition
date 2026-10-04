@@ -140,5 +140,6 @@ class _HTTPClientRetryHost(Protocol):
         span: SpanLike,
     ) -> _RequestAttemptOutcome | None: ...
 
+
 # Both retry flows share the complete host contract.
 _RetryRequestHost = _HTTPClientRetryHost
