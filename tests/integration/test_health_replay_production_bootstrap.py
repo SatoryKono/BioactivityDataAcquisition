@@ -7,6 +7,10 @@ from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID
 
 import httpx
+from bioetl.application.services.run_reports.artifact_digest import (
+    canonical_report_sha256,
+)
+import json
 import pytest
 
 from bioetl.application.services.run_reports.writer import write_pipeline_run_report
@@ -197,7 +201,9 @@ async def test_production_http_verifies_saved_replay_objects(
                 "ref": f"pipeline/chembl_activity/{child_id}/pipeline-run-report.json"
                 if portable_ref
                 else str(child_path),
-                "sha256": sha256(child_path.read_bytes()).hexdigest(),
+                "sha256": canonical_report_sha256(
+                    json.loads(child_path.read_text(encoding="utf-8"))
+                ),
             },
         ),
     )

@@ -93,14 +93,14 @@ def _probe_composite_child(item: Mapping[str, object], root: Path) -> str:
     if not candidate.is_file():
         return "artifact_missing"
     digest = item.get("sha256")
-    if not isinstance(digest, str) or _hash_artifact_chunked(candidate) != digest:
-        return "child_digest_mismatch"
     try:
-        _report, identity, assessment, availability, _revision = (
+        child_report, identity, assessment, availability, _revision = (
             _load_report_assessment(candidate, str(pipeline), str(run_id))
         )
     except (OSError, ValueError, TypeError, KeyError):
         return "child_evidence_invalid"
+    if not isinstance(digest, str) or canonical_report_sha256(child_report) != digest:
+        return "child_digest_mismatch"
     if identity.get("manifest_id") != item.get("manifest_id"):
         return "child_manifest_mismatch"
     if (
@@ -217,7 +217,18 @@ def _artifact_probes(
                 }
             )
             continue
-        if item.get("kind") == "composite_child_run_report":
+        child_ref = item.get("ref")
+        portable_child = f"pipeline/{item.get('pipeline_name')}/{item.get('run_id')}/pipeline-run-report.json"
+        # Current reports bind exact child refs and require green child evidence.
+        # Legacy relocated refs retain their snapshot/revision verification below.
+        if (
+            item.get("kind") == "composite_child_run_report"
+            and isinstance(child_ref, str)
+            and (
+                child_ref.replace("\\", "/") == portable_child
+                or Path(child_ref).resolve().is_relative_to(root.parents[1])
+            )
+        ):
             reason = _probe_composite_child(item, root)
             probes.append(
                 {

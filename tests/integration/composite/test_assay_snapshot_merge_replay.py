@@ -8,6 +8,10 @@ from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pyarrow as pa
+from bioetl.application.services.run_reports.artifact_digest import (
+    canonical_report_sha256,
+)
+import json
 import pytest
 
 from bioetl.application.composite.merger_orchestration import (
@@ -525,7 +529,9 @@ async def _verify_production_http_chain(
                     "run_id": selected_id,
                     "manifest_id": manifest.manifest_id,
                     "ref": f"pipeline/{pipeline}/{selected_id}/pipeline-run-report.json",
-                    "sha256": digest_bytes(path.read_bytes()),
+                    "sha256": canonical_report_sha256(
+                        json.loads(path.read_text(encoding="utf-8"))
+                    ),
                 }
             )
         identities.append((pipeline, selected_id))
