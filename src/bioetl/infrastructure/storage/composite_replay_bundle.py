@@ -9,9 +9,9 @@ from typing import cast
 import orjson
 import pyarrow as pa
 
+import bioetl.infrastructure.config.protein_class_target_type_loader as mapping
 from bioetl.domain.normalization.json import serialize_json_canonical
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.config import protein_class_target_type_loader as mapping
 from bioetl.infrastructure.storage.composite_replay_inputs import _table_bytes
 
 SUPPORTED_COMPOSITES = frozenset(

@@ -34,7 +34,7 @@ from bioetl.infrastructure.config.composite_config_api import (
     resolve_composite_gold_schema,
 )
 from bioetl.infrastructure.config.settings_api import Settings
-from bioetl.infrastructure.config import protein_class_target_type_loader as mapping
+import bioetl.infrastructure.config.protein_class_target_type_loader as mapping
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.composite_replay_bundle import (
     SUPPORTED_COMPOSITES,

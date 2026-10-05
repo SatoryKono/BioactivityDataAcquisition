@@ -21,7 +21,7 @@ from bioetl.domain.composite.result import (
 from bioetl.domain.ports import DeltaReaderPort, LoggerPort
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.settings_api import Settings
-from bioetl.infrastructure.config import protein_class_target_type_loader as mapping
+import bioetl.infrastructure.config.protein_class_target_type_loader as mapping
 from bioetl.infrastructure.storage.composite_replay_bundle import (
     digest_bytes,
     implementation_fingerprint,
