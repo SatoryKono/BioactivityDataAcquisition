@@ -974,6 +974,8 @@ jobs:
     docker:
       - image: cimg/python:3.12
     resource_class: small
+    environment:
+      CONTRACT_BASE_REVISION: << pipeline.git.base_revision >>
     steps:
       - checkout
       - setup-python-uv
@@ -985,6 +987,36 @@ jobs:
             export PATH="$HOME/.local/bin:$PATH"
             uv run --frozen --no-build python -m scripts.schema generate-artifacts --check
             uv run --frozen --no-build python -m scripts.schema verify-schema-parity --mode blocking
+            git fetch --no-tags origin main:refs/remotes/origin/main
+            if [ "$CIRCLE_BRANCH" = main ]; then
+              BASE="$CONTRACT_BASE_REVISION"
+              if ! [[ "$BASE" =~ ^[0-9a-f]{40}$ ]]; then
+                BASE="$(git rev-parse HEAD~1)"
+              fi
+            else
+              BASE="$(git merge-base origin/main "$CIRCLE_SHA1")"
+            fi
+            STATUS=0
+            check_contract() { "$@" || STATUS=1; }
+            check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_contract_identity.py
+            check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_contract_registry.py
+            check_contract uv run --frozen --no-build python -m scripts.engineering.qa report-pipeline-config-contract-ownership-map --check
+            check_contract uv run --frozen --no-build python -m scripts.engineering.qa report-contract-coverage-matrix --check
+            check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_schema_classifier_gate.py --base-sha "$BASE" --head-sha "$CIRCLE_SHA1"
+            check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_registry_dq_refs.py
+            exit "$STATUS"
+      - store_artifacts:
+          path: reports/quality/contract-identity-diagnostics.json
+      - store_artifacts:
+          path: reports/quality/contract-registry-diagnostics.json
+      - store_artifacts:
+          path: reports/quality/contract-schema-classifier-diagnostics.json
+      - store_artifacts:
+          path: reports/quality/contract-registry-dq-diagnostics.json
+      - store_artifacts:
+          path: reports/quality/contract-coverage-matrix.json
+      - store_artifacts:
+          path: reports/quality/pipeline-config-contract-ownership-map.json
 
   # --- Gate: commit-governance (path_scoped) ---------------------------------------
   # Mirrors commit-lint.yml (conventional commits on the PR range).
@@ -1187,7 +1219,7 @@ jobs:
           )\n    if clean != original:\n        path.write_text(clean, encoding=\"utf-8\")\n\ndef execute(name, command):\n\
           \    log = out / (name + \".log\")\n    started = datetime.now(UTC).isoformat()\n    clock = time.monotonic()\n\
           \    print(\"[closeout] start \" + name, flush=True)\n    with log.open(\"w\", encoding=\"utf-8\") as stream:\n\
-          \        result = subprocess.run(command, stdout=stream, stderr=subprocess.STDOUT, check=False)\n    duration\
+          \        result = subprocess.Popen(command, stdout=stream, stderr=subprocess.STDOUT)\n        while True:\n            try:\n                result.wait(timeout=60)\n                break\n            except subprocess.TimeoutExpired:\n                print(f\"[closeout] {name} running {int(time.monotonic() - clock)}s\", flush=True)\n    duration\
           \ = round((time.monotonic() - clock) * 1000)\n    sanitize(log)\n    assert subprocess.check_output([\"\
           git\", \"rev-parse\", \"HEAD\"], text=True).strip() == head\n    record = dict(command=command, cwd=str(root),\
           \ started_at=started,\n                  duration_ms=duration, exit_code=result.returncode,\n          \

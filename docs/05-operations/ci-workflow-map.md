@@ -44,8 +44,10 @@ Other prepared opt-in lanes are `memory-retention` (check-only), `port-contracts
 `skills-consistency` (verify-only, no approved runtime sync), and
 `github-settings-review` (requires the restricted `bioetl-github-read-only`
 context). All are main-only and isolated from the normal PR workflow. Context
-registration, trigger activation, remaining event parity and external acceptance
-are pending; these additions do not establish full legacy-workflow parity.
+registration was completed on 2026-10-05: `bioetl-github-read-only` is restricted
+to this project and `main`, excludes SSH and API config sources, and contains
+`GITHUB_TOKEN`. Token permissions and job authentication still require run evidence.
+Remaining event parity and external acceptance are pending.
 The prepared `performance` lane preserves benchmark budgets and the five-sample
 window, emits JUnit/observations/JSON/Markdown artifacts, and fails on missing,
 empty or over-budget evidence. It is opt-in and main-only; no benchmark run or
@@ -61,8 +63,13 @@ manual/API/PR triggers cannot start its four jobs. It preserves the existing fou
 targets and 70/60/60/60 score thresholds, fails on missing, empty or invalid stats,
 and retains reports. No mutation execution or external schedule is claimed.
 
-The intended weekly cadence is Monday 04:30 UTC. No external schedule has been
-registered by this preparation change, and no successful remote run is claimed.
+The Docs KPI intended cadence remains Monday 04:30 UTC; its trigger is pending.
+On 2026-10-05, the CircleCI UI confirmed creation of
+`bioetl-memory-retention-weekly`: branch `main`, `ci-lane=memory-retention`,
+Monday, every month, one run during 04:00–04:59 UTC, Scheduled Actor.
+The hour-based trigger replaces the legacy 04:17 minute with a weekly window.
+Its first run and exact-SHA acceptance remain pending; integrate the prepared
+configuration before that scheduled window.
 
 The `consolidation` lane preserves the manual canonical source/test hash artifacts
 with a ten-minute command limit. `branch-hygiene` preserves the report-only branch
@@ -108,7 +115,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `commit-lint.yml` | — | CircleCI commit-lint | Prepared required gate; external parity pending |
 | `compiled-artifacts-block.yml` | — | CircleCI compiled-artifacts | Prepared required gate; external parity pending |
 | `consolidation-gates.yml` | — | CircleCI consolidation | Prepared manual hash artifacts; external run and retention acceptance pending |
-| `contract-governance-fast-check.yml` | — | Contract confidence lane | Pending port; not replaced by schema check alone |
+| `contract-governance-fast-check.yml` | — | CircleCI schema-governance | Six canonical contract checks and diagnostics folded into the schema gate; any failure blocks the aggregate; remote acceptance pending |
 | `contract-tests.yml` | — | Local live-provider contract runner | Retain local-only policy #11190; preserve inputs and failure evidence |
 | `dashboard-first-window-noscroll.yml` | — | Dashboard host acceptance | Retain host dependency; pending automation boundary |
 | `dashboard-render-host.yml` | — | Local render host runner | Retain local host; Grafana/render secrets never on ordinary PR |
@@ -119,11 +126,11 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `docs.yml` | — | CircleCI docs-governance | Prepared required gate; full docs/render parity pending |
 | `duplication-complexity.yml` | — | CircleCI duplication | Prepared required gate; full scan thresholds preserved |
 | `e2e-matrix-health.yml` | `30 2 * * *` | E2E replay and controlled live lanes | Pending port; preserve reruns, skip SLO and credential separation |
-| `github-settings-quarterly-review.yml` | `23 6 1 1,4,7,10 *` | CircleCI github-settings-review | Prepared opt-in lane; restricted context and schedule pending |
+| `github-settings-quarterly-review.yml` | `23 6 1 1,4,7,10 *` | CircleCI github-settings-review | Restricted context created with token; schedule and authenticated run pending |
 | `import-linter.yml` | — | CircleCI lint-arch and arch-tests | Prepared gates; full external architecture acceptance pending |
 | `labeler.yml` | — | GitHub API label maintenance | Pending port; trusted actor and scoped issue/PR write access |
 | `memory-freshness.yml` | `17 5 * * 1` | CircleCI memory-freshness | Prepared check-only lane; PR parity and scheduled failure notification pending |
-| `memory-retention.yml` | `17 4 * * 1` | CircleCI memory-retention | Prepared check-only lane; triggers pending, no prune mutation |
+| `memory-retention.yml` | `17 4 * * 1` | CircleCI memory-retention | Weekly trigger created 2026-10-05; main integration/run evidence pending, no prune mutation |
 | `mutation-testing.yml` | `0 0 * * 0` | Scheduled-only mutation lane | Compiler validated; schedule and four-target execution acceptance pending; 70/60/60/60 thresholds unchanged |
 | `nightly-replay-parity.yml` | `30 2 * * *` | CircleCI replay-parity | Prepared four-run checksum lane; remote parity and schedule pending |
 | `no-partial-tree-commits.yml` | — | Full-tree guard in root governance | Local guard verified; CircleCI integration required before cutover |

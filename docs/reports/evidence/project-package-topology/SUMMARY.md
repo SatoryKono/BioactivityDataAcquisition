@@ -1,5 +1,9 @@
 # Сводка evidence: project-package-topology
 
+Source-only refresh (2026-10-05): shared EFO normalization is bound to the current source tree. This is not a new coverage measurement or topology audit. Historical measurements below are unchanged.
+
+`source_tree_sha256=59644ac64eca4474afffacf2b5d948e53ac67f4137adafc57cb220f820fb0cfc`
+
 Source-only refresh (2026-10-04): removed the approved LoggerPort alias and restored type-only workflow imports. This rebind does not represent a new coverage measurement; historical measurement records below remain unchanged.
 
 `source_tree_sha256=4db123e5e95045405ceb710e2425c1cd0e733fb6a225dccc7fc4146c63eaacb5`
