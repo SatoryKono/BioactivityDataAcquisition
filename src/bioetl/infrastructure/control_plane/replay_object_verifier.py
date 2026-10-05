@@ -100,7 +100,14 @@ class ReplayObjectVerifier:
             root = (bronze_root / provider / entity).resolve()
             if not root.is_relative_to(bronze_root):
                 return None
-            candidate = (root / uri.removeprefix("bronze://")).resolve()
+            relative = Path(uri.removeprefix("bronze://"))
+            prefix = Path(provider) / entity
+            anchor = (
+                bronze_root
+                if prefix.parts and relative.parts[: len(prefix.parts)] == prefix.parts
+                else root
+            )
+            candidate = (anchor / relative).resolve()
             return candidate if candidate.is_relative_to(root) else None
         if uri.startswith("file://"):
             return Path(uri.removeprefix("file://"))

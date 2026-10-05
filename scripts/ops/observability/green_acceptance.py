@@ -276,7 +276,7 @@ def input_fingerprints(root: Path) -> dict[str, str]:
 def composite_report_coverage(
     case: Case, config_root: Path, paths: list[Path]
 ) -> list[str]:
-    """Require exact configured child coverage, including optional enrichers."""
+    """Require every child unless immutable inputs prove an optional empty stage."""
     config = yaml.safe_load(
         (
             config_root / "composites" / f"{case.name.removeprefix('composite_')}.yaml"
@@ -289,12 +289,23 @@ def composite_report_coverage(
     ]
     actual = [path.parent.parent.name for path in paths]
     failures = []
-    if sorted(actual) != sorted([case.name, *expected]):
-        failures.append("composite_report_coverage_mismatch")
     parents = [path for path in paths if path.parent.parent.name == case.name]
     if len(parents) != 1:
         return failures + ["composite_parent_report_missing_or_ambiguous"]
     parent = json.loads(parents[0].read_text(encoding="utf-8"))
+    missing = set(expected) - set(actual)
+    if missing:
+        from scripts.ops.observability.green_optional_inputs import (
+            verified_empty_optional_stages,
+        )
+
+        try:
+            skipped = verified_empty_optional_stages(config, parent, parents[0])
+            expected = [name for name in expected if name not in missing & skipped]
+        except (ValueError, OSError, KeyError, TypeError) as exc:
+            failures.append(f"composite_optional_skip_unverified:{type(exc).__name__}")
+    if sorted(actual) != sorted([case.name, *expected]):
+        failures.append("composite_report_coverage_mismatch")
     children = parent.get("io", {}).get("child_runs", [])
     bound = sorted(
         (row.get("pipeline_name", ""), row.get("run_id", "")) for row in children

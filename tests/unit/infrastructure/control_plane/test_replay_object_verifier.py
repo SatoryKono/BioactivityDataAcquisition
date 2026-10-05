@@ -143,3 +143,32 @@ def test_corrupt_config_is_not_verified(tmp_path):
     verifier, manifest, batch, lock = evidence(tmp_path)
     (verifier.config_root / "saved-config.json").write_text("{")
     assert "effective_config_hash" not in verifier.verify(manifest)
+
+
+@pytest.mark.parametrize("state", ["original", "changed", "missing"])
+def test_provider_qualified_bronze_snapshot_is_verified(tmp_path, state):
+    verifier, manifest, batch, _ = evidence(tmp_path)
+    manifest.source_refs[0].input_snapshots[
+        0
+    ].immutable_uri = "bronze://chembl/activity/batch.jsonl"
+    if state == "changed":
+        batch.write_bytes(b"modified")
+    elif state == "missing":
+        batch.unlink()
+    result = verifier.verify(manifest)
+    if state == "missing":
+        assert "input_snapshot_fingerprint" not in result
+    else:
+        assert result["input_snapshot_fingerprint"] is (state == "original")
+
+
+@pytest.mark.parametrize(
+    "uri",
+    [
+        "bronze://chembl/activity/../tissue/batch.jsonl",
+        "bronze://chembl/activity/../../../uv.lock",
+    ],
+)
+def test_qualified_bronze_snapshot_cannot_escape_source_scope(tmp_path, uri):
+    verifier, _, _, _ = evidence(tmp_path)
+    assert verifier._snapshot_path(uri, "chembl", "activity") is None

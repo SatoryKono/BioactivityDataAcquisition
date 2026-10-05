@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-05T07:51:17.082624+00:00",
+  "generated_at": "2026-10-05T08:22:58.094923+00:00",
   "summary": {
-    "total_scripts": 636,
+    "total_scripts": 637,
     "status_counts": {
-      "active": 335,
+      "active": 336,
       "supporting": 301
     },
     "reference_group_coverage": {
@@ -13,7 +13,7 @@
       "ci": 86,
       "docs": 259,
       "other": 48,
-      "scripts": 533,
+      "scripts": 534,
       "skills": 12,
       "tests": 449
     }
@@ -21711,6 +21711,21 @@
           "line": 180,
           "source_group": "tests",
           "text": "from scripts.ops.observability import green_acceptance as runner"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/observability/green_optional_inputs.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/observability/green_acceptance.py",
+          "line": 298,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.green_optional_inputs import ("
         }
       ]
     },
