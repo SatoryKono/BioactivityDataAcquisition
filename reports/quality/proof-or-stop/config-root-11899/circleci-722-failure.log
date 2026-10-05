@@ -1,0 +1,246 @@
+docs governance checks
+Pipeline dataflow artifacts are current: chembl_activity
+Passport artifacts current: 112 files
+xwalk missing backlog OK: 171 marker instances across 5 xwalk files are tracked
+[
+  {
+    "file": "grafana/dashboards/bioetl-control-plane-v1.json",
+    "uid": "bioetl-control-plane-v1",
+    "title": "Replay Readiness",
+    "variables": [
+      "$pipeline",
+      "$provider_for_pipeline",
+      "$read_latency_quantile",
+      "$run_id",
+      "$run_type",
+      "$workflow"
+    ],
+    "link_uids": [
+      "bioetl-control-plane-v1",
+      "bioetl-incident-v1",
+      "bioetl-overview-v2",
+      "bioetl-run-explorer-v1"
+    ],
+    "tags": [
+      "bioetl",
+      "control-plane",
+      "control-plane-explorer",
+      "dashboard",
+      "dashboard-2.0",
+      "observability",
+      "replay-safety",
+      "traceability"
+    ],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "60s",
+    "editable": true,
+    "graphTooltip": 1,
+    "hideControls": "<missing>",
+    "data_sources": [
+      "Prometheus",
+      "Grafana",
+      "BioETL Ops HTTP"
+    ],
+    "panel_count": 13,
+    "panel_plugin_versions": []
+  },
+  {
+    "file": "grafana/dashboards/bioetl-dq-v2.json",
+    "uid": "bioetl-dq-v2",
+    "title": "Data Quality",
+    "variables": [
+      "$pipeline",
+      "$provider_for_pipeline",
+      "$run_id",
+      "$run_type",
+      "$stage",
+      "$workflow"
+    ],
+    "link_uids": [
+      "bioetl-control-plane-v1",
+      "bioetl-incident-v1",
+      "bioetl-overview-v2",
+      "bioetl-run-explorer-v1"
+    ],
+    "tags": [
+      "bioetl",
+      "dashboard-2.0",
+      "data-quality",
+      "data-trust",
+      "dq",
+      "three-lane",
+      "v2",
+      "validation"
+    ],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "60s",
+    "editable": true,
+    "graphTooltip": 1,
+    "hideControls": "<missing>",
+    "data_sources": [
+      "Prometheus",
+      "Grafana",
+      "BioETL Ops HTTP"
+    ],
+    "panel_count": 9,
+    "panel_plugin_versions": []
+  },
+  {
+    "file": "grafana/dashboards/bioetl-incident-v1.json",
+    "uid": "bioetl-incident-v1",
+    "title": "6. Incident Workspace",
+    "variables": [
+      "$pipeline",
+      "$provider",
+      "$provider_for_pipeline",
+      "$read_latency_quantile",
+      "$run_id",
+      "$run_type",
+      "$workflow"
+    ],
+    "link_uids": [
+      "bioetl-control-plane-v1",
+      "bioetl-dq-v2",
+      "bioetl-incident-v1",
+      "bioetl-overview-v2",
+      "bioetl-run-explorer-v1"
+    ],
+    "tags": [
+      "bioetl",
+      "dashboard-2.0",
+      "incident",
+      "phase-2"
+    ],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "60s",
+    "editable": true,
+    "graphTooltip": 1,
+    "hideControls": "<missing>",
+    "data_sources": [
+      "Prometheus",
+      "Grafana",
+      "BioETL Ops HTTP"
+    ],
+    "panel_count": 100,
+    "panel_plugin_versions": [
+      "10.4.0",
+      "12.2.0",
+      "9.5.0"
+    ]
+  },
+  {
+    "file": "grafana/dashboards/bioetl-overview-v2.json",
+    "uid": "bioetl-overview-v2",
+    "title": "Run Overview",
+    "variables": [
+      "$pipeline",
+      "$provider_for_pipeline",
+      "$run_id",
+      "$run_type",
+      "$workflow"
+    ],
+    "link_uids": [
+      "bioetl-control-plane-v1",
+      "bioetl-dq-v2",
+      "bioetl-incident-v1",
+      "bioetl-overview-v2",
+      "bioetl-run-explorer-v1"
+    ],
+    "tags": [
+      "answer-first",
+      "bioetl",
+      "dashboard-2.0",
+      "fleet",
+      "hybrid-overview",
+      "overview",
+      "pipeline",
+      "v3-baseline"
+    ],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "60s",
+    "editable": true,
+    "graphTooltip": 1,
+    "hideControls": "<missing>",
+    "data_sources": [
+      "Prometheus",
+      "Grafana",
+      "BioETL Ops HTTP"
+    ],
+    "panel_count": 11,
+    "panel_plugin_versions": []
+  },
+  {
+    "file": "grafana/dashboards/bioetl-run-explorer-v1.json",
+    "uid": "bioetl-run-explorer-v1",
+    "title": "Run Explorer",
+    "variables": [
+      "$lookup_run_id",
+      "$pipeline",
+      "$provider_for_pipeline",
+      "$run_id",
+      "$run_type",
+      "$workflow"
+    ],
+    "link_uids": [
+      "bioetl-run-explorer-v1"
+    ],
+    "tags": [
+      "bioetl",
+      "dashboard-2.0",
+      "run-explorer"
+    ],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "60s",
+    "editable": true,
+    "graphTooltip": 1,
+    "hideControls": "<missing>",
+    "data_sources": [
+      "Prometheus",
+      "Grafana",
+      "BioETL Ops HTTP"
+    ],
+    "panel_count": 2,
+    "panel_plugin_versions": []
+  }
+]
+
+Dashboard inventory / drift check passed.
+Version consistency check passed: release=6.1.0, governance=6.1.13
+Links: OK (no broken relative links found)
+Nav docs: OK (all mkdocs nav files exist)
+Nav link scope: OK (all nav docs are included in link checks)
+Local skill nav classification: OK (all local skill pages are in nav or not_in_nav)
+Specs: OK (all referenced spec files exist)
+Configs: OK (all convention-based config files exist)
+Gold contracts index: OK (docs list matches exported JSON files)
+Workflow inventory: OK (published workflow doc matches .github/workflows)
+ChEMBL provider overview: OK (README links match active entity-config inventory)
+Provider spec governance: OK
+Runbook governance: OK
+Control-plane contract governance: OK
+Not-in-nav growth: OK (current 228 <= baseline 228)
+Doc drift: OK (no guardrail violations in mkdocs nav docs)
+JSON report written to: reports/docs-link-check-report.json
+
+All checks passed.
+[docs-verify] check-drift: /home/circleci/project/.venv/bin/python -m scripts.docs.checks.check_drift --ports --classes --runtime-mirrors --freshness --modules --ai-surfaces
+Documentation Drift Report
+============================================================
+No drift detected. Documentation is in sync with code.
+
+Summary: 0 errors, 0 warnings
+[docs-verify] generate-dashboard-panel-inventory: /home/circleci/project/.venv/bin/python -m scripts.docs generate-dashboard-panel-inventory --check
+[docs-verify] check-docstrings: /home/circleci/project/.venv/bin/python -m scripts.docs.checks.check_docstrings --summary
+Docstrings: modules=100.0% classes=97.2% functions=90.1% (missing=733)
+All thresholds passed.
+[docs-verify] generate-cleanup-inventory: /home/circleci/project/.venv/bin/python -m scripts.docs.checks.documentation_cleanup_inventory --check
+[documentation-cleanup-inventory] inventory is synchronized
+[docs-verify] generate-pipeline-normalization-matrix: /home/circleci/project/.venv/bin/python -m scripts.docs generate-pipeline-normalization-matrix --check
+[docs-verify] ERROR: mkdocs is not installed. Install extra `docs`: `uv sync --extra docs` (Windows: .\.venv-win\Scripts\python.exe -m uv sync --extra docs). A missing extra produces this error instead of a cryptic mkdocs traceback.
+
+Exited with code exit status 2

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="22" time="63.893" timestamp="2026-10-04T22:00:53.969204+03:00" hostname="DESKTOP-AITNV0T"><testcase classname="tests.architecture.test_module_coverage_inventory" name="test_coverage_xml_digest_ignores_only_generation_timestamp" time="1.992" /><testcase classname="tests.architecture.test_module_coverage_inventory" name="test_module_coverage_git_guard_avoids_windows_pipe_reader_threads" time="0.005" /><testcase classname="tests.architecture.test_module_coverage_inventory" name="test_module_coverage_inventory_is_committed_and_shape_is_stable" time="0.017" /><testcase classname="tests.architecture.test_module_coverage_inventory" name="test_module_coverage_inventory_check_fails_for_stale_source_tree_hash" time="0.697" /><testcase classname="tests.architecture.test_module_coverage_inventory" name="test_allow_missing_coverage_xml_preserves_existing_inventory_rows" time="0.570" /><testcase classname="tests.architecture.test_module_coverage_inventory" name="test_declaration_only_modules_with_zero_hit_xml_are_not_uncovered" time="0.286" /><testcase classname="tests.architecture.test_module_coverage_inventory" name="test_existing_inventory_refresh_preserves_rows_unless_xml_refresh_is_explicit" time="0.794" /><testcase classname="tests.architecture.test_module_coverage_inventory" name="test_existing_inventory_refresh_does_not_fabricate_source_module_evidence" time="0.466" /><testcase classname="tests.architecture.test_module_coverage_inventory" name="test_module_coverage_inventory_reports_measured_hotspot_family_evidence" time="0.014" /><testcase classname="tests.architecture.test_module_coverage_inventory" name="test_retained_entrypoint_modules_have_measured_coverage" time="0.014" /><testcase classname="tests.architecture.test_module_coverage_inventory" name="test_hotspot_refactor_targets_have_authoritative_module_coverage_gates" time="0.092" /><testcase classname="tests.architecture.test_module_coverage_inventory" name="test_issue_5376_coverage_tail_closeout_matches_live_inventory" time="0.263"><failure message="AssertionError: assert 12 == 3&#10; +  where 3 = len([{'coverage_percent': 84.95, 'coverage_status': 'partially_covered', 'covered_lines': 79, 'executable_lines': 93, ...}...'coverage_percent': 83.72, 'coverage_status': 'partially_covered', 'covered_lines': 108, 'executable_lines': 129, ...}])">@pytest.mark.architecture
+    def test_issue_5376_coverage_tail_closeout_matches_live_inventory() -&gt; None:
+        """#5376 preserves historical shard evidence while exposing current regressions."""
+        skip_if_module_coverage_inventory_is_dirty(root=ROOT, inventory_path=INVENTORY_PATH)
+        committed = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
+        closeout = json.loads(COVERAGE_TAIL_CLOSEOUT_PATH.read_text(encoding="utf-8"))
+    
+        below_85 = [
+            row
+            for row in committed["modules"]
+            if row["coverage_percent"] is not None and row["coverage_percent"] &lt; 85
+        ]
+        below_85_paths = {row["path"] for row in below_85}
+        historical_delta = closeout["historical_coverage_inventory_delta"]
+        current_live = closeout["current_live_metrics"]
+        delta = int(historical_delta["after_below_85_module_count"]) - int(
+            historical_delta["before_below_85_module_count"]
+        )
+        tracked_path = closeout["removed_low_tail_module"]["path"]
+        tracked_row = next(
+            row for row in committed["modules"] if row["path"] == tracked_path
+        )
+    
+        assert closeout["issue"]["number"] == 5376
+        assert historical_delta["after_below_85_module_count"] == 104
+        assert historical_delta["below_85_module_count_delta"] == delta
+        assert delta &lt; 0
+&gt;       assert current_live["below_85_module_count"] == len(below_85)
+E       AssertionError: assert 12 == 3
+E        +  where 3 = len([{'coverage_percent': 84.95, 'coverage_status': 'partially_covered', 'covered_lines': 79, 'executable_lines': 93, ...}...'coverage_percent': 83.72, 'coverage_status': 'partially_covered', 'covered_lines': 108, 'executable_lines': 129, ...}])
+
+tests\architecture\test_module_coverage_inventory.py:701: AssertionError</failure></testcase><testcase classname="tests.architecture.test_module_coverage_inventory" name="test_module_coverage_inventory_check_requires_coverage_xml_by_default" time="0.005" /><testcase classname="tests.architecture.test_module_coverage_inventory" name="test_module_coverage_inventory_generation_requires_coverage_xml_by_default" time="0.005" /><testcase classname="tests.architecture.test_module_coverage_inventory" name="test_coverage_verify_workflow_generates_module_coverage_inventory" time="0.041" /><testcase classname="tests.architecture.test_module_coverage_inventory" name="test_module_coverage_gates_policy_is_committed" time="0.015" /><testcase classname="tests.architecture.test_module_coverage_inventory" name="test_module_coverage_tail_targets_are_ranked_and_owner_anchored" time="0.009" /><testcase classname="tests.architecture.test_module_coverage_inventory" name="test_test_matrix_declares_module_coverage_inventory_contract" time="0.062" /><testcase classname="tests.architecture.test_module_coverage_inventory_freshness" name="test_module_coverage_inventory_covers_every_source_module" time="0.195" /><testcase classname="tests.architecture.test_module_coverage_inventory_freshness" name="test_module_coverage_inventory_source_tree_hash_is_current" time="50.641" /><testcase classname="tests.architecture.test_config_root_governance" name="test_effective_config_source_refs_use_canonical_config_root_anchor" time="0.091" /><testcase classname="tests.architecture.test_config_root_governance" name="test_runtime_config_discovery_does_not_use_source_parent_arithmetic" time="5.385" /></testsuite></testsuites>

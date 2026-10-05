@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-04T19:16:50.357653+00:00",
+  "generated_at": "2026-10-05T07:51:17.082624+00:00",
   "summary": {
     "total_scripts": 636,
     "status_counts": {
@@ -9709,13 +9709,13 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 101,
+          "line": 99,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-gate classify \"${classify_args[@]}\""
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 370,
+          "line": 358,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-gate aggregate \\"
         },
@@ -9754,7 +9754,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 52,
+          "line": 59,
           "source_group": "scripts",
           "text": "| `scripts/engineering/ci/_compatibility_registry.py`       | Shared compatibility registry loader used by telemetry/reporting helpers      |"
         },
@@ -9803,7 +9803,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 53,
+          "line": 60,
           "source_group": "scripts",
           "text": "| `scripts/engineering/ci/_compatibility_telemetry.py`      | Compatibility inventory telemetry helper used by architecture reporting flows |"
         },
@@ -9864,7 +9864,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 51,
+          "line": 58,
           "source_group": "scripts",
           "text": "| `scripts/engineering/ci/apply-ci-optimizations-fixed.ps1` | Fixed variant of CI optimization                                              |"
         },
@@ -9889,7 +9889,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 50,
+          "line": 57,
           "source_group": "scripts",
           "text": "| `scripts/engineering/ci/apply-ci-optimizations.ps1`       | PowerShell CI optimization script                                             |"
         },
@@ -9914,7 +9914,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 24,
+          "line": 31,
           "source_group": "scripts",
           "text": "| `apply-ci-fixes` | `scripts/engineering/ci/apply_ci_fixes.py`             | One-off GitHub-hosted workflow repair helper requiring explicit token input |"
         },
@@ -9953,7 +9953,7 @@
         },
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 19,
+          "line": 26,
           "source_group": "scripts",
           "text": "| `e2e-skip-rate`  | `scripts/engineering/ci/check_e2e_matrix_skip_rate.py` | Check E2E matrix skip rate against threshold                                |"
         },
@@ -9992,7 +9992,7 @@
         },
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 20,
+          "line": 27,
           "source_group": "scripts",
           "text": "| `e2e-rerun`      | `scripts/engineering/ci/check_e2e_rerun_stability.py`  | Check E2E rerun stability                                                   |"
         },
@@ -10100,11 +10100,11 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 18,
+          "line": 25,
           "source_group": "scripts",
           "text": "| `pr-gate`         | `scripts/engineering/ci/pr_gate.py`                    | Fail-closed classification and aggregation for required PR checks            |"
         },
@@ -10113,6 +10113,12 @@
           "line": 38,
           "source_group": "scripts",
           "text": "\"pr-gate\": \"pr_gate.py\","
+        },
+        {
+          "path": "tests/architecture/test_circleci_migration_contract.py",
+          "line": 14,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.pr_gate import evaluate_results, load_catalog"
         },
         {
           "path": "tests/unit/repo_backed/scripts/engineering/ci/test_pr_gate.py",
@@ -10141,7 +10147,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 17,
+          "line": 24,
           "source_group": "scripts",
           "text": "| `quality-gate`   | `scripts/engineering/ci/quality_integral_gate.py`      | Integral quality gate for CI with descriptive test-health classification    |"
         },
@@ -10198,7 +10204,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 21,
+          "line": 28,
           "source_group": "scripts",
           "text": "| `docker-timing`  | `scripts/engineering/ci/report_docker_actions_timing.py` | Collect read-only Docker Actions timing and runner-capacity evidence      |"
         },
@@ -10241,7 +10247,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 22,
+          "line": 29,
           "source_group": "scripts",
           "text": "| `pr-gate-timing` | `scripts/engineering/ci/report_pr_gate_timing.py`        | Collect read-only PR Gate Complete wall-clock, queue, and owner-path evidence |"
         },
@@ -10278,7 +10284,7 @@
         },
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 23,
+          "line": 30,
           "source_group": "scripts",
           "text": "| `debt-report`    | `scripts/engineering/ci/report_quality_debt_weekly.py` | Generate weekly quality debt report                                         |"
         },
@@ -10323,7 +10329,7 @@
         },
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 16,
+          "line": 23,
           "source_group": "scripts",
           "text": "| `run-tests`      | `scripts/engineering/ci/run_pytest_resilient.py`       | Run pytest with resilient retry logic                                       |"
         },
@@ -17803,13 +17809,13 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 204,
+          "line": 207,
           "source_group": "docs",
           "text": "| `sha_pinning_required` | `true` | Workflow SHA-pin SSOT: [`check_github_actions_runtime_policy.py`](../../../scripts/engineering/repo/check_github_actions_runtime_policy.py) `ALLOWED_USES` |"
         },
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 552,
+          "line": 555,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -18236,7 +18242,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 205,
+          "line": 208,
           "source_group": "docs",
           "text": "| `allowed_actions` | `selected` | `github_owned_allowed: true`, `verified_allowed: false`. Third-party patterns are `owner/repo@*` plus nested `owner/repo/path@*` from `ALLOWED_USES` (GitHub `*` does"
         },
@@ -19776,7 +19782,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 472,
+          "line": 475,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }
@@ -21656,13 +21662,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 17,
       "references": [
         {
           "path": "tests/integration/test_live_green_acceptance.py",
           "line": 9,
           "source_group": "tests",
-          "text": "from scripts.ops.observability.green_acceptance import discover, execute, launch_timeout"
+          "text": "from scripts.ops.observability.green_acceptance import ("
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_green_acceptance.py",
@@ -21689,10 +21695,22 @@
           "text": "from scripts.ops.observability.green_acceptance import logged_errors"
         },
         {
-          "path": "tests/unit/scripts/ops/observability/test_green_launch_deadlines.py",
-          "line": 5,
+          "path": "tests/unit/scripts/ops/observability/test_green_acceptance.py",
+          "line": 138,
           "source_group": "tests",
-          "text": "from scripts.ops.observability.green_acceptance import Case, command, launch_timeout"
+          "text": "from scripts.ops.observability import green_acceptance as runner"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_green_acceptance.py",
+          "line": 166,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability import green_acceptance as runner"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_green_acceptance.py",
+          "line": 180,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability import green_acceptance as runner"
         }
       ]
     },
