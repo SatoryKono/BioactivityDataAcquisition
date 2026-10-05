@@ -1283,4 +1283,6 @@ workflows:
       - proof-closeout:
           filters:
             branches:
-              only: codex/architecture-coverage-final-20261004
+              only:
+                - codex/architecture-coverage-final-20261004
+                - codex/config-root-main-acceptance-20261005
