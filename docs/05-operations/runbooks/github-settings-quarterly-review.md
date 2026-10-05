@@ -18,8 +18,10 @@ ______________________________________________________________________
 
 ## Trigger
 
-- Scheduled on the first day of January, April, July, and October by
-  .github/workflows/github-settings-quarterly-review.yml.
+- The legacy cadence is the first day of January, April, July, and October.
+  GitHub Actions are disabled; CircleCI `ci-lane=github-settings-review` is the
+  active manual replacement. External quarterly schedule acceptance is pending
+  in #11931; do not claim the retained Actions YAML executes.
 - Run manually after migrations affecting rulesets, protected branches, merge
   methods, Actions policy, environments, security settings, CODEOWNERS, labels,
   Issue Forms, or Wiki ownership.
@@ -45,17 +47,22 @@ state.
 
 ## Procedure
 
-1. Run the workflow with workflow_dispatch or execute locally:
+1. Trigger the CircleCI main pipeline with `ci-lane=github-settings-review` or execute locally:
 
        python -m scripts.engineering.repo github-settings-review --json-out reports/quality/github-settings-review.json --markdown-out reports/quality/github-settings-review.md
 
 1. Confirm the report records the discovered repository/default branch and
    automation_mutated_github: false.
 1. Live GET of ruleset `main` (13643213) MUST be `enforcement: active` with
-   required context `pr-gate-complete`. Companion
-   `root-hygiene-required-check` (15730586) MUST remain `enforcement: disabled`.
-   `GET .../rules/branches/main` MUST include `pr-gate-complete`. Do not write
-   "both active". Closed `#9975`/`#9979` are history; live activation is #10267.
+   required context `ci/circleci: pr-gate-complete`. Companion
+   `root-hygiene-required-check` (15730586) MUST also be active with that context
+   and `ci/circleci: root-hygiene`. Confirm strict freshness, main-only scope and
+   no bypass actors. `GET .../rules/branches/main` MUST include both contexts.
+   This #11928 contract supersedes the #10267 state where the companion was
+   disabled. The current [JSON readback](../../../reports/governance/ruleset-11928-closeout-get-2026-10-05.json)
+   and [Markdown receipt](../../../reports/governance/ruleset-11928-closeout-get-2026-10-05.md)
+   preserve the exact settings and acceptance evidence. CircleCI uses legacy
+   commit statuses without an App identity; do not invent an integration_id.
 1. Review every control: rulesets, merge settings, Actions SHA policy,
    protected environments, agent-runtime environment `copilot` (`GH-ENV-003`),
    unused `staging` (`GH-ENV-002`), Dependabot, CodeQL, secret scanning, workflow

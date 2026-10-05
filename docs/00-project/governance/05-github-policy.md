@@ -29,7 +29,7 @@ ______________________________________________________________________
 
 | Branch           | Purpose                         | Protection                                             |
 | ---------------- | ------------------------------- | ------------------------------------------------------ |
-| `main`           | Production-ready code           | Ruleset `main` (13643213) **active** as of `2026-09-10T02:53:01+03:00` (#10267). GitHub required context is exactly `pr-gate-complete`. Companion `root-hygiene-required-check` (15730586) stays **disabled** with stored legacy `checks-complete` + `root-hygiene`. See §3. |
+| `main`           | Production-ready code           | Rulesets 13643213 and 15730586 are **active** as of 2026-10-05 (#11928), requiring `ci/circleci: pr-gate-complete` and companion `ci/circleci: root-hygiene`, with strict freshness and no bypass actors. See §3. |
 | `develop`        | Integration branch (optional)   | Commit lint enforced                                   |
 | Feature branches | `feat/*`, `fix/*`, `refactor/*` | None                                                   |
 
@@ -211,7 +211,7 @@ weaken gates, raise tech-debt budgets, or force Grafana npm majors
 | `secret_scanning_non_provider_patterns` | disabled | Intentionally off (noisy). Do not enable without a dated issue. |
 | Unused environments | absent | `staging` MUST NOT exist. `copilot` is an **agent-runtime** environment (`GH-ENV-003`, #10371), not unused. Live GET `2026-09-11`: `copilot` present with required reviewers + custom branch policy `copilot/**`; `staging` absent. Publish environments stay `ghcr-publish`, `observability-render-host`, `pypi`, `testpypi`. `GH-ENV-002.known_issue: null`. |
 | Agent-runtime environment | protected, non-publish | `copilot`: reviewer `@SatoryKono`, custom refs `copilot/**` only, zero environment secrets, no tracked workflow `environment: copilot`. Must not overlap `protected_environments`. `#10311` DELETE is superseded. |
-| `allow_auto_merge` | `true` | Allowed after #10267: live `GET .../rules/branches/main` applies required context `pr-gate-complete`. Do not treat a disabled companion ruleset as a merge wall. |
+| `allow_auto_merge` | `true` | Subject to the active CircleCI contexts and strict rulesets in §3; auto-merge cannot bypass them. |
 
 Controls live in [`github_governance_policy.json`](../../../configs/quality/github_governance_policy.json): `GH-SECRET-002`, `GH-SECRET-003`, `GH-ACTIONS-002`, `GH-ACTIONS-003`, `GH-ENV-002`, `GH-ENV-003`.
 
@@ -260,6 +260,30 @@ TestPyPI+PyPI, when that optional lane is re-enabled for an actual release.
 ______________________________________________________________________
 
 ## 3. Status Checks and Ruleset Contract
+
+### Current CircleCI protection — #11928
+
+As of 2026-10-05, the active provider is `.circleci/config.yml`, workflow
+`pr-gate`. Ruleset `main` (13643213) requires
+`ci/circleci: pr-gate-complete`; active companion
+`root-hygiene-required-check` (15730586) additionally requires
+`ci/circleci: root-hygiene`. Both target only `refs/heads/main`, retain strict
+freshness and have no bypass actors. Deletion, non-fast-forward and PR
+protections are preserved. Missing, failed, canceled or stale evidence must
+block merge. Main pipelines 218–220 passed all 81 jobs on
+`a34558b918b56984a185c0e4956d735b43483780`; isolated negative PR #11954
+confirmed merge rejection. The [live GET receipt](../../../reports/governance/ruleset-11928-closeout-get-2026-10-05.json)
+records both rulesets and the applied branch rules.
+
+The canonical catalog's `deployment` block identifies CircleCI. Legacy
+`coordinator_workflow` and `owner_workflow` fields retain source definitions
+until #11930. They do not declare runnable Actions: Actions are disabled and
+billing restoration is out of scope. CircleCI emits commit statuses without a
+GitHub App identity, so no integration_id binding is claimed. The following
+Actions-era contract and historical receipts remain migration references;
+where execution/enforcement differs, this current contract takes precedence.
+
+### Historical Actions protection — #10267
 
 Updates to `main` **are blocked** by repository ruleset `main` (13643213)
 with `enforcement: active` as of `2026-09-10T02:53:01+03:00` (#10267 owner-approved
@@ -424,6 +448,10 @@ To remove drift between workflow-specific job names and governance language, Bio
 | `docker.yml` | Supporting gate: `docker-build` | `.github/workflows/docker.yml` |
 
 ### Branch Protection Verification
+
+The current protection is the CircleCI #11928 contract above. The dated
+verification history below preserves prior states and must not be interpreted
+as the current required-check set.
 
 PR merges and direct pushes to `main` **are** blocked by repository ruleset
 `main` (13643213) while its enforcement is `active`. Repo-side evidence is the
