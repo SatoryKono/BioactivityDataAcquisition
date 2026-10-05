@@ -75,8 +75,11 @@ The `consolidation` lane preserves the manual canonical source/test hash artifac
 with a ten-minute command limit. `branch-hygiene` preserves the report-only branch
 inventory with a fifteen-minute limit and the `bioetl-github-read-only` context;
 it does not delete branches. Both are opt-in and main-only. The branch inventory's
-Monday 03:15 UTC schedule, PR branch-name event handling, and external acceptance
-remain pending. Artifact retention must be configured to at least fourteen days
+`bioetl-branch-hygiene-weekly` trigger was created in CircleCI on 2026-10-05:
+`main`, `ci-lane=branch-hygiene`, Monday, every month, one run during
+03:00–03:59 UTC, Scheduled Actor. This replaces the legacy 03:15 minute with
+an hourly window. Main integration, authenticated run evidence and PR
+branch-name event handling remain pending. Artifact retention must be configured to at least fourteen days
 in the CircleCI project before retiring either legacy workflow.
 
 The `architecture-docs` lane preserves passport generation/validation, class-diagram
@@ -108,7 +111,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | --- | --- | --- | --- |
 | `architecture-docs-nightly.yml` | `15 2 * * *` | CircleCI architecture-docs | Prepared passport/diagram/dependency audits and artifacts; schedule/retention/run acceptance pending |
 | `architecture.yml` | `20 2 * * *` | Architecture metrics lane | Pending port; canonical reporters and no budget growth |
-| `branch-hygiene.yml` | `15 3 * * 1` | CircleCI branch-hygiene inventory | Prepared read-only lane; schedule, context, retention and PR branch-name events pending |
+| `branch-hygiene.yml` | `15 3 * * 1` | CircleCI branch-hygiene inventory | Weekly trigger and restricted context created; authenticated run, retention and PR branch-name events pending |
 | `chembl-baseline-smoke.yml` | — | Representative offline smoke lane | Pending port; preserve cassette playback |
 | `codeql.yml` | `17 4 * * 1` | Retire Actions definition at #11930 cutover | Not required; optional analysis lifecycle remains explicit |
 | `coderabbit.yml` | — | Local CodeRabbit launcher | Retain local; external integration/event policy pending |

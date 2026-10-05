@@ -1002,7 +1002,7 @@ jobs:
             check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_contract_registry.py
             check_contract uv run --frozen --no-build python -m scripts.engineering.qa report-pipeline-config-contract-ownership-map --check
             check_contract uv run --frozen --no-build python -m scripts.engineering.qa report-contract-coverage-matrix --check
-            check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_schema_classifier_gate.py --base-sha "$BASE" --head-sha "$CIRCLE_SHA1"
+            check_contract uv run --frozen --no-build python -m scripts.engineering.ci.validate_schema_classifier_gate --base-sha "$BASE" --head-sha "$CIRCLE_SHA1"
             check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_registry_dq_refs.py
             exit "$STATUS"
       - store_artifacts:
