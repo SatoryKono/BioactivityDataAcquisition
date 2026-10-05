@@ -233,7 +233,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `consolidation-gates.yml` | — | CircleCI consolidation | Main run 3170 passes with both hash artifacts; artifact retention verified at 30 days |
 | `contract-governance-fast-check.yml` | — | CircleCI schema-governance | Six canonical contract checks and diagnostics folded into the schema gate; any failure blocks the aggregate; main gates 218–220 accepted |
 | `contract-tests.yml` | — | Local live-provider contract runner | Retain local-only policy #11190; preserve inputs and failure evidence |
-| `dashboard-first-window-noscroll.yml` | — | Dashboard host acceptance | Retain host dependency; pending automation boundary |
+| `dashboard-first-window-noscroll.yml` | — | CircleCI integration matrix | Nine static dashboard contract cases passed without skips in producer 4282 on 84524a90deab; no Grafana host is required for this source workflow. Retarget legacy workflow-path assertions at #11930; browser/render acceptance remains separate |
 | `dashboard-render-host.yml` | — | Local render host runner | Retain local host; Grafana/render secrets never on ordinary PR |
 | `dependency-review.yml` | — | Dependency diff security review | Pending replacement; do not drop HIGH/CRITICAL diff coverage |
 | `diagram-nightly.yml` | — | Diagram lint plus local full render | Keep disabled full-render surface; port only active checks |
