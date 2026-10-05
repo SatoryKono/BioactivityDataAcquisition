@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import ReplaceInFileWebpackPlugin from 'replace-in-file-webpack-plugin';
-import { portablePublicPathRules } from '../webpack-public-path';
+import { portablePublicPathRules } from '../../tooling/router-v7-bridge/webpack-public-path.cjs';
 
 import baseConfig, { type Env } from './.config/webpack/webpack.config.ts';
 
