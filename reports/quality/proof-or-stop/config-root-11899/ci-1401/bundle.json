@@ -1,0 +1,239 @@
+{
+  "acceptance": {
+    "require_full_trust": true,
+    "required_evidence": [
+      "tests",
+      "governance",
+      "docs_runtime",
+      "debt",
+      "quality"
+    ]
+  },
+  "actor": "circleci",
+  "bundle_digest": "13485a1ec790fc0700b80278eb19b64927165f80be515a68469d45018264b0e4",
+  "claim": "ready_to_merge",
+  "receipts": [
+    {
+      "argv": [
+        "python",
+        "-m",
+        "pytest",
+        "tests/architecture",
+        "-q",
+        "--no-cov",
+        "--junitxml=/home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-1401-cd50cf3ca727/architecture.xml"
+      ],
+      "command": "python -m pytest tests/architecture -q --no-cov --junitxml=/home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-1401-cd50cf3ca727/architecture.xml",
+      "cwd": "/home/circleci/project",
+      "duration_ms": 934730,
+      "evidence_kind": "tests",
+      "execution_attestation": "ci_identity",
+      "exit_code": 1,
+      "follow_up": null,
+      "output_digest": "e1158a66fe56e6c4a8196d21070a95ade33d284af43e9d32cdb436071691894c",
+      "producer": "test_health",
+      "receipt_digest": "d42090d072f65bef23194647d0b3d3b789f8db05ca8bbdb6d25751eaa73ec3b5",
+      "receipt_id": "tests",
+      "repository": {
+        "branch": "codex/architecture-coverage-final-20261004",
+        "ci_run_id": "https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/1401",
+        "repo_id": "bioactivitydataacquisition",
+        "worktree_id": "dda4ac9a21114761"
+      },
+      "skip_reason": null,
+      "source": {
+        "command_set_hash": "011a92ddf89dff93f4280e5689dd904c1c7d88aa3c808bb6adc255f80ec8a209",
+        "dirty": false,
+        "head_sha": "cd50cf3ca72783c49ecdd8a3825b2199101f7c2b",
+        "material_hash": "d4c8096c1fd8dff6143f7807479b68a7e8d0c8bedd538d972c7845869c372d08",
+        "policy_hash": "c4432025d75ea8fc9bf1c55dc655273239715b7cc94366e8eadb5c085a127c2b",
+        "task_diff_hash": "b47deb3f0905ea0363728a0946a31463e794f7ae42d3c6652f24fb557fa7e7f0",
+        "untracked_paths": []
+      },
+      "started_at": "2026-10-04T20:11:30.269073+00:00",
+      "status": "fail",
+      "task_id": "architecture-coverage-11854-11899"
+    },
+    {
+      "argv": [
+        "bash",
+        "scripts/engineering/dev/pretest_guardrails.sh",
+        "--mode",
+        "check",
+        "--scope",
+        "governance",
+        "--skip-cleanup",
+        "--report-json",
+        "/home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-1401-cd50cf3ca727/governance.json"
+      ],
+      "command": "bash scripts/engineering/dev/pretest_guardrails.sh --mode check --scope governance --skip-cleanup --report-json /home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-1401-cd50cf3ca727/governance.json",
+      "cwd": "/home/circleci/project",
+      "duration_ms": 59950,
+      "evidence_kind": "governance",
+      "execution_attestation": "ci_identity",
+      "exit_code": 0,
+      "follow_up": null,
+      "output_digest": "5db9d50cf1d5c8f724eb496fc9439d63e89bc561e1d8e646d3df0df06d45c088",
+      "producer": "pretest_guardrails",
+      "receipt_digest": "b30d7510fc7aba1df5a981083a8bef665f3d0c574bdc7d9f738e47a23d5601e5",
+      "receipt_id": "governance",
+      "repository": {
+        "branch": "codex/architecture-coverage-final-20261004",
+        "ci_run_id": "https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/1401",
+        "repo_id": "bioactivitydataacquisition",
+        "worktree_id": "dda4ac9a21114761"
+      },
+      "skip_reason": null,
+      "source": {
+        "command_set_hash": "011a92ddf89dff93f4280e5689dd904c1c7d88aa3c808bb6adc255f80ec8a209",
+        "dirty": false,
+        "head_sha": "cd50cf3ca72783c49ecdd8a3825b2199101f7c2b",
+        "material_hash": "d4c8096c1fd8dff6143f7807479b68a7e8d0c8bedd538d972c7845869c372d08",
+        "policy_hash": "c4432025d75ea8fc9bf1c55dc655273239715b7cc94366e8eadb5c085a127c2b",
+        "task_diff_hash": "b47deb3f0905ea0363728a0946a31463e794f7ae42d3c6652f24fb557fa7e7f0",
+        "untracked_paths": []
+      },
+      "started_at": "2026-10-04T20:27:07.067263+00:00",
+      "status": "pass",
+      "task_id": "architecture-coverage-11854-11899"
+    },
+    {
+      "argv": [
+        "python",
+        "-m",
+        "scripts.docs",
+        "verify"
+      ],
+      "command": "python -m scripts.docs verify",
+      "cwd": "/home/circleci/project",
+      "duration_ms": 58785,
+      "evidence_kind": "docs_runtime",
+      "execution_attestation": "ci_identity",
+      "exit_code": 0,
+      "follow_up": null,
+      "output_digest": "f082eaccc828f195042536b72af04e324ae2c8ea4c87704f229217e96ac48215",
+      "producer": "docs_runtime_checks",
+      "receipt_digest": "4eae3ba62ba7123bf2bbd7673283447c1d566f3cbd7f036ee9aa7ff690e769cd",
+      "receipt_id": "docs_runtime",
+      "repository": {
+        "branch": "codex/architecture-coverage-final-20261004",
+        "ci_run_id": "https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/1401",
+        "repo_id": "bioactivitydataacquisition",
+        "worktree_id": "dda4ac9a21114761"
+      },
+      "skip_reason": null,
+      "source": {
+        "command_set_hash": "011a92ddf89dff93f4280e5689dd904c1c7d88aa3c808bb6adc255f80ec8a209",
+        "dirty": false,
+        "head_sha": "cd50cf3ca72783c49ecdd8a3825b2199101f7c2b",
+        "material_hash": "d4c8096c1fd8dff6143f7807479b68a7e8d0c8bedd538d972c7845869c372d08",
+        "policy_hash": "c4432025d75ea8fc9bf1c55dc655273239715b7cc94366e8eadb5c085a127c2b",
+        "task_diff_hash": "b47deb3f0905ea0363728a0946a31463e794f7ae42d3c6652f24fb557fa7e7f0",
+        "untracked_paths": []
+      },
+      "started_at": "2026-10-04T20:28:08.753359+00:00",
+      "status": "pass",
+      "task_id": "architecture-coverage-11854-11899"
+    },
+    {
+      "argv": [
+        "python",
+        "-m",
+        "scripts.engineering.qa",
+        "report-debt-governance-gates",
+        "--check"
+      ],
+      "command": "python -m scripts.engineering.qa report-debt-governance-gates --check",
+      "cwd": "/home/circleci/project",
+      "duration_ms": 17740,
+      "evidence_kind": "debt",
+      "execution_attestation": "ci_identity",
+      "exit_code": 1,
+      "follow_up": null,
+      "output_digest": "dd78149b3f214e6eec46e0dcc8c6a007b7dad3991d4e41bc578bd15b0eb05b23",
+      "producer": "debt_governance_gates",
+      "receipt_digest": "86ac21d2f65804802fef7fbd1fb4cfb2d8e53b61d027434ee27350ebdeafb2cf",
+      "receipt_id": "debt",
+      "repository": {
+        "branch": "codex/architecture-coverage-final-20261004",
+        "ci_run_id": "https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/1401",
+        "repo_id": "bioactivitydataacquisition",
+        "worktree_id": "dda4ac9a21114761"
+      },
+      "skip_reason": null,
+      "source": {
+        "command_set_hash": "011a92ddf89dff93f4280e5689dd904c1c7d88aa3c808bb6adc255f80ec8a209",
+        "dirty": false,
+        "head_sha": "cd50cf3ca72783c49ecdd8a3825b2199101f7c2b",
+        "material_hash": "d4c8096c1fd8dff6143f7807479b68a7e8d0c8bedd538d972c7845869c372d08",
+        "policy_hash": "c4432025d75ea8fc9bf1c55dc655273239715b7cc94366e8eadb5c085a127c2b",
+        "task_diff_hash": "b47deb3f0905ea0363728a0946a31463e794f7ae42d3c6652f24fb557fa7e7f0",
+        "untracked_paths": []
+      },
+      "started_at": "2026-10-04T20:29:09.526857+00:00",
+      "status": "fail",
+      "task_id": "architecture-coverage-11854-11899"
+    },
+    {
+      "argv": [
+        "python",
+        "-m",
+        "scripts.engineering.ci.quality_integral_gate",
+        "--coverage-xml",
+        "/home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-1401-cd50cf3ca727/coverage/coverage.xml",
+        "--output",
+        "/home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-1401-cd50cf3ca727/quality.json"
+      ],
+      "command": "python -m scripts.engineering.ci.quality_integral_gate --coverage-xml /home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-1401-cd50cf3ca727/coverage/coverage.xml --output /home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-1401-cd50cf3ca727/quality.json",
+      "cwd": "/home/circleci/project",
+      "duration_ms": 900731,
+      "evidence_kind": "quality",
+      "execution_attestation": "ci_identity",
+      "exit_code": 0,
+      "follow_up": null,
+      "output_digest": "6688f22a5542ad8855b01ceb4ac2e4373873a68ca534ef179f19d360074ad92b",
+      "producer": "quality_integral_gate",
+      "receipt_digest": "c6952f146d914d05acdfe8b9e6ddc7f7119fb30408d6ac69e354b9905bd9d4fe",
+      "receipt_id": "quality",
+      "repository": {
+        "branch": "codex/architecture-coverage-final-20261004",
+        "ci_run_id": "https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/1401",
+        "repo_id": "bioactivitydataacquisition",
+        "worktree_id": "dda4ac9a21114761"
+      },
+      "skip_reason": null,
+      "source": {
+        "command_set_hash": "011a92ddf89dff93f4280e5689dd904c1c7d88aa3c808bb6adc255f80ec8a209",
+        "dirty": false,
+        "head_sha": "cd50cf3ca72783c49ecdd8a3825b2199101f7c2b",
+        "material_hash": "d4c8096c1fd8dff6143f7807479b68a7e8d0c8bedd538d972c7845869c372d08",
+        "policy_hash": "c4432025d75ea8fc9bf1c55dc655273239715b7cc94366e8eadb5c085a127c2b",
+        "task_diff_hash": "b47deb3f0905ea0363728a0946a31463e794f7ae42d3c6652f24fb557fa7e7f0",
+        "untracked_paths": []
+      },
+      "started_at": "2026-10-04T20:29:29.072474+00:00",
+      "status": "pass",
+      "task_id": "architecture-coverage-11854-11899"
+    }
+  ],
+  "repository": {
+    "branch": "codex/architecture-coverage-final-20261004",
+    "ci_run_id": "https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/1401",
+    "repo_id": "bioactivitydataacquisition",
+    "worktree_id": "dda4ac9a21114761"
+  },
+  "run_id": "circleci-closeout-1401-cd50cf3ca727",
+  "runtime": "ci",
+  "schema_version": 1,
+  "source": {
+    "command_set_hash": "011a92ddf89dff93f4280e5689dd904c1c7d88aa3c808bb6adc255f80ec8a209",
+    "dirty": false,
+    "head_sha": "cd50cf3ca72783c49ecdd8a3825b2199101f7c2b",
+    "material_hash": "d4c8096c1fd8dff6143f7807479b68a7e8d0c8bedd538d972c7845869c372d08",
+    "policy_hash": "c4432025d75ea8fc9bf1c55dc655273239715b7cc94366e8eadb5c085a127c2b",
+    "task_diff_hash": "b47deb3f0905ea0363728a0946a31463e794f7ae42d3c6652f24fb557fa7e7f0",
+    "untracked_paths": []
+  },
+  "task_id": "architecture-coverage-11854-11899",
+  "trust_tier": "ci"
+}
