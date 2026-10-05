@@ -21,6 +21,19 @@ def _config():
     return yaml.safe_load((ROOT / ".circleci/config.yml").read_text(encoding="utf-8"))
 
 
+def test_circleci_yaml_has_no_duplicate_mapping_keys():
+    """CircleCI rejects duplicates that PyYAML safe_load silently overwrites."""
+    pending = [yaml.compose((ROOT / ".circleci/config.yml").read_text(encoding="utf-8"))]
+    while pending:
+        node = pending.pop()
+        if isinstance(node, yaml.MappingNode):
+            keys = [key.value for key, _ in node.value]
+            assert len(keys) == len(set(keys)), f"Duplicate YAML key near {node.start_mark}"
+            pending.extend(value for _, value in node.value)
+        elif isinstance(node, yaml.SequenceNode):
+            pending.extend(node.value)
+
+
 def _default_branch_matrix(monkeypatch):
     steps = _config()["jobs"]["classify"]["steps"]
     command = next(
