@@ -1,6 +1,6 @@
 {
-  "additive_coverage_xml_path": "reports/coverage/coverage.xml",
-  "additive_coverage_xml_sha256": "bcc8f9f4f62387b4b3ce36f9300e13f909191c6cd4edd5722548e75ce304c1d8",
+  "additive_coverage_xml_path": "reports/quality/ci-11929-11931-preparation/job3363/proof-or-stop/circleci-closeout-3363-886a32e8bd71/coverage/coverage.xml",
+  "additive_coverage_xml_sha256": "e6bf9b79b094d9c709c825574d8e29b439e8d8a29b1d38805fd2b19b5efce4c2",
   "additive_measured_module_count": 2470,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",

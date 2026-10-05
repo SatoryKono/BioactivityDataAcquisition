@@ -58819,7 +58819,7 @@
       "github_issue_url": null,
       "inbound_links": 4,
       "lifecycle": null,
-      "outbound_links": 5,
+      "outbound_links": 4,
       "owner": "BioETL Team",
       "path": "docs/05-operations/ci-workflow-map.md",
       "recommended_action": "keep",
