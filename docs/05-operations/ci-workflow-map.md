@@ -223,7 +223,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | Source workflow | UTC schedule | Successor / disposition | Remaining acceptance |
 | --- | --- | --- | --- |
 | `architecture-docs-nightly.yml` | `15 2 * * *` | CircleCI architecture-docs | Main run 3113 passes passport/diagram/dependency audits with artifacts; daily 02 UTC schedule registered, first scheduled execution pending; artifact retention verified at 30 days |
-| `architecture.yml` | `20 2 * * *` | Architecture metrics lane | Pending port; canonical reporters and no budget growth |
+| `architecture.yml` | `20 2 * * *` | CircleCI architecture-metrics | Main-only typed run-heavy=false fast baseline; run-heavy=true keeps heavy coverage 85% and Windows stress; local Windows 2/2 PASS, remote and scheduled acceptance pending |
 | `branch-hygiene.yml` | `15 3 * * 1` | CircleCI branch-hygiene inventory | Weekly trigger and restricted context created; authenticated main run 3084 passes; scheduled run and PR branch-name events pending; artifact retention verified at 30 days |
 | `chembl-baseline-smoke.yml` | — | `dq-consistency` validates configurations; `arch-tests` and unit/integration groups cover all nine legacy test selectors; manual `ci-lane=pr-gate` | Nine test selectors and configuration steps accepted on main (DQ jobs 3488, 3505, 3554); legacy event parity acceptance pending |
 | `codeql.yml` | `17 4 * * 1` | Retire Actions definition at #11930 cutover | Not required; optional analysis lifecycle remains explicit |
@@ -395,3 +395,13 @@ remote publication acceptance remain pending. The draft rejects incomplete
 manifests, mismatched SHA/workflow/image identities, failed or missing approvals,
 blocking vulnerabilities, changed SHA tags, and substituted signed predicates.
 Local guard checks do not qualify as registry or attestation acceptance.
+
+
+Architecture Metrics retains its manual fast default through the boolean
+`run-heavy` parameter. The heavy profile preserves the legacy pytest selection,
+85% coverage threshold and 25-minute execution limit; it uses the four-core Linux
+executor. Its separate Windows Server 2022 job installs checksum-pinned uv
+0.11.26 and frozen Python 3.12 dependencies, runs both atomic lock stress tests,
+and rejects missing, failed or skipped JUnit cases. The nightly trigger must set
+`ci-lane=architecture-metrics` and `run-heavy=true`; schedule registration and
+remote acceptance are still pending.

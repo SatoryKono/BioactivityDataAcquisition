@@ -68,6 +68,8 @@ CURRENT
 }
 check_current_main
 # Confirm the server-side approval and successful producer in this workflow.
+# This public project exposes read-only workflow/job metadata without credentials.
+# An HTTP/auth failure aborts publication; there is no approval-check fallback.
 python3 - <<'APPROVAL'
 import json, os, urllib.request
 from pathlib import Path
