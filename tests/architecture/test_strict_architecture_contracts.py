@@ -1011,40 +1011,28 @@ def test_metrics_implementations_are_compliant(src_dir: Path):
     assert not violations, "\n".join(violations)
 
 
-def test_schema_entity_alignment_strict_assertion_prevents_hiding_missing_fields():
+def test_schema_entity_alignment_strict_assertion_prevents_hiding_missing_fields(
+    monkeypatch,
+):
     """Negative regression test: absence of real entity field must not be hidden by alias."""
     import pyarrow as pa
     import pytest
-    from dataclasses import dataclass, fields
+    from dataclasses import dataclass
 
-    # Simulate a schema with a real field 'publication_count'
-    schema = pa.schema([pa.field("publication_count", pa.int64())])
-
-    # Simulate an entity without 'publication_count' but WITH the old alias target 'similarity_comment'
     @dataclass(frozen=True)
     class DummyEntity:
         similarity_comment: str | None = None
 
-    pairs = [(schema, DummyEntity)]
-    system_fields_schema = {"_run_id", "_run_type", "_source_batch_id", "_ingestion_ts"}
-    # The new aliases dictionary (without the bad alias)
-    aliases = {}
+    schema = pa.schema([pa.field("publication_count", pa.int64())])
 
-    violations = []
+    monkeypatch.setattr(
+        "tests.architecture.test_strict_architecture_contracts._schema_entity_pairs",
+        lambda: [(schema, DummyEntity)],
+    )
 
-    for s, entity_cls in pairs:
-        schema_fields = set(s.names)
-        entity_fields = {f.name for f in fields(entity_cls)}
+    from tests.architecture.test_strict_architecture_contracts import (
+        test_silver_schemas_match_domain_entities,
+    )
 
-        for field in schema_fields:
-            if field in system_fields_schema:
-                continue
-
-            entity_field_name = aliases.get(field, field)
-
-            if entity_field_name not in entity_fields:
-                violations.append(
-                    f"Field '{field}' (mapped to '{entity_field_name}') in "
-                    f"{s.__class__.__name__} not found in {entity_cls.__name__}"
-                )
-                continue
+    with pytest.raises(AssertionError, match="publication_count"):
+        test_silver_schemas_match_domain_entities()
