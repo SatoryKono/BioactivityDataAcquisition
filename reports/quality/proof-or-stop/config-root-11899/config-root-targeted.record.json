@@ -1,0 +1,23 @@
+{
+  "command": [
+    "E:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "tests/unit/infrastructure/config/test_config_root.py",
+    "tests/architecture/test_config_root_governance.py",
+    "--cov=bioetl.infrastructure.config.config_root",
+    "--cov-branch",
+    "--cov-report=term-missing",
+    "--cov-report=xml:reports/quality/proof-or-stop/config-root-11899/config-root-targeted-coverage.xml",
+    "--junitxml=reports/quality/proof-or-stop/config-root-11899/config-root-targeted.xml",
+    "-q"
+  ],
+  "cwd": "E:\\github\\bda-config-root-closeout-11899",
+  "started_at": "2026-10-04T17:27:13.732304+00:00",
+  "duration_ms": 21043,
+  "exit_code": 0,
+  "head_before": "f9d01e009f8862ee0b755327faf94388fad1693a",
+  "head_after": "f9d01e009f8862ee0b755327faf94388fad1693a",
+  "head_unchanged": true,
+  "log": "E:\\github\\bda-config-root-closeout-11899\\reports\\quality\\proof-or-stop\\config-root-11899\\config-root-targeted.log"
+}

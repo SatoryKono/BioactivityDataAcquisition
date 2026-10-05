@@ -8,7 +8,8 @@ source:
         api_key_env: BIOETL_SEMANTICSCHOLAR_API_KEY
         client:
             timeout_sec: 60.0
-            max_retries: 5
+            # Keep anonymous campaign attempts bounded in the canonical config.
+            max_retries: 2
             retry_base_delay: 30.0
             retry_max_delay: 300.0
         pagination:

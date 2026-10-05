@@ -3,11 +3,21 @@
 # Mirrors .github/workflows/pr-required.yml: the `classify` job runs the repo's own
 # decision-matrix classifier (scripts/engineering/ci pr-gate classify); each gate job
 # reads the matrix from the workspace and halts early when not_applicable.
-# 8 gates are always_required in the catalog; 4 are path_scoped (docker,
+# Gate ownership and applicability come from the canonical catalog (docker,
 # generated-artifacts, commit-governance, docs-governance).
-# NOT ported (GitHub-native): codeql, dependency-review, labeler, stale.
+# CodeQL is excluded from required checks (#11929); optional analysis is separate.
+# Remaining migration decisions: dependency-review, labeler, stale.
 # Deploy: replace .circleci/config.yml at repo root, commit, push.
 version: 2.1
+
+parameters:
+  ci-lane:
+    type: enum
+    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation]
+    default: pr-gate
+  include-hypothesis:
+    type: boolean
+    default: true
 
 commands:
   # Port of .github/actions/setup-python-uv (uv 0.11.26, uv cache, uv sync).
@@ -67,6 +77,389 @@ commands:
             fi
 
 jobs:
+  mutation-testing:
+    parameters:
+      target:
+        type: string
+      source-path:
+        type: string
+      tests-dir:
+        type: string
+      threshold:
+        type: string
+    docker:
+    - image: cimg/python:3.13
+    resource_class: medium
+    environment:
+      OPENBLAS_NUM_THREADS: '1'
+      POLARS_MAX_THREADS: '2'
+    steps:
+    - checkout
+    - setup-python-uv:
+        python-version: '3.13'
+        extras: dev
+    - run:
+        name: Configure mutation target
+        command: |
+          export WORKSPACE_ROOT="$PWD"
+          export PYTHONPATH="$PWD/src:$PWD${PYTHONPATH:+:$PYTHONPATH}"
+          uv run --frozen --no-build python - <<'PY'
+          import os
+          from pathlib import Path
+
+          import tomlkit
+
+          path = Path("pyproject.toml")
+          document = tomlkit.parse(path.read_text(encoding="utf-8"))
+          config = document["tool"]["mutmut"]
+          # mutmut 3.x reads paths_to_mutate (source_paths is ignored).
+          config["paths_to_mutate"] = [os.environ["MUTMUT_SOURCE_PATH"]]
+          if "source_paths" in config:
+              del config["source_paths"]
+          # Subset mutation still needs the full package + tooling imports.
+          config["also_copy"] = [
+              "src/bioetl",
+              "scripts",
+              "configs",
+          ]
+          config["pytest_add_cli_args_test_selection"] = [
+              os.environ["MUTMUT_TESTS_DIR"]
+          ]
+          path.write_text(tomlkit.dumps(document), encoding="utf-8")
+          PY
+        environment:
+          MUTMUT_SOURCE_PATH: << parameters.source-path >>
+          MUTMUT_TESTS_DIR: << parameters.tests-dir >>
+    - run:
+        name: Run mutation testing
+        command: |-
+          timeout --signal=TERM --kill-after=30s 60m bash -euo pipefail -c 'export WORKSPACE_ROOT="$PWD"
+          export PYTHONPATH="$PWD/src:$PWD${PYTHONPATH:+:$PYTHONPATH}"
+          set -euo pipefail
+          echo "Running mutation testing for << parameters.target >>..."
+          # mutmut is a dev dependency; invoke via uv so PATH/venv entrypoints resolve
+          # under the frozen CI environment (bare `mutmut` is not on runner PATH).
+          export PYTHONPATH="${WORKSPACE_ROOT}/src:${WORKSPACE_ROOT}${PYTHONPATH:+:$PYTHONPATH}"
+          uv run --frozen --no-build python -c "import bioetl.domain, scripts; print('"'"'mutation import preflight ok'"'"')"
+          uv run --frozen --no-build mutmut run
+          '
+        no_output_timeout: 65m
+    - run:
+        name: Generate mutation report
+        command: |
+          export WORKSPACE_ROOT="$PWD"
+          export PYTHONPATH="$PWD/src:$PWD${PYTHONPATH:+:$PYTHONPATH}"
+          mkdir -p "reports/<< parameters.target >>"
+          uv run --frozen --no-build mutmut results > "reports/<< parameters.target >>/mutmut_results.txt"
+          uv run --frozen --no-build mutmut export-cicd-stats
+          if [ -f mutants/mutmut-cicd-stats.json ]; then
+            cp mutants/mutmut-cicd-stats.json \
+              "reports/<< parameters.target >>/mutmut-cicd-stats.json"
+          else
+            echo "Mutation stats missing after run; treating as setup/runtime failure." >&2
+            exit 1
+          fi
+          # mutmut 3.x no longer ships a stable `html` CLI command on all installs.
+          # Prefer HTML when available; never fail the report step on its absence.
+          if uv run --frozen --no-build mutmut --help 2>/dev/null | grep -Eq '(^|[[:space:]])html([[:space:]]|$)'; then
+            uv run --frozen --no-build mutmut html || true
+          fi
+          if [ -d "html" ]; then
+            mv html "reports/<< parameters.target >>/mutmut_html"
+          fi
+    - run:
+        name: Check mutation score threshold
+        command: |
+          export WORKSPACE_ROOT="$PWD"
+          export PYTHONPATH="$PWD/src:$PWD${PYTHONPATH:+:$PYTHONPATH}"
+          python - <<'PY'
+          import json
+          import os
+          import sys
+          from pathlib import Path
+
+          target = os.environ["MUTATION_TARGET"]
+          stats_path = Path("reports") / target / "mutmut-cicd-stats.json"
+          if not stats_path.is_file():
+              print(
+                  f"mutmut CI/CD stats are missing for {target}; "
+                  "treating this as a broken gate."
+              )
+              sys.exit(1)
+
+          stats = json.loads(stats_path.read_text(encoding="utf-8"))
+          try:
+              killed = int(stats["killed"])
+              survived = int(stats["survived"])
+              timeout = int(stats["timeout"])
+          except (KeyError, TypeError, ValueError) as exc:
+              print(
+                  f"Invalid mutmut CI/CD stats for {target}; "
+                  f"treating this as a broken gate: {exc}"
+              )
+              print(json.dumps(stats, sort_keys=True))
+              sys.exit(1)
+
+          total = killed + survived + timeout
+          if total <= 0 or min(killed, survived, timeout) < 0:
+              print("Mutation workflow produced zero mutants; treating this as a broken gate.")
+              sys.exit(1)
+
+          score = (killed + timeout) / total * 100
+          print(f"Mutation Score: {score:.1f}%")
+          print(f"  Killed: {killed}")
+          print(f"  Survived: {survived}")
+          print(f"  Timeout: {timeout}")
+          print(f"  Total: {total}")
+
+          threshold = float(os.environ["MUTATION_SCORE_THRESHOLD"])
+          if score < threshold:
+              print(f"\n⚠️  Mutation score {score:.1f}% is below threshold {threshold}%")
+              print("Consider improving test coverage for the surviving mutants")
+              sys.exit(1)
+          else:
+              print(f"\n✅ Mutation score {score:.1f}% meets threshold {threshold}%")
+          PY
+        environment:
+          MUTATION_TARGET: << parameters.target >>
+          MUTATION_SCORE_THRESHOLD: << parameters.threshold >>
+    - store_artifacts:
+        path: reports
+        destination: mutation
+  replay-parity:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    environment:
+      BIOETL_TEST_MODE: "true"
+      BIOETL_PIPELINE__HEALTH_CHECK_MODE: probe
+      OPENBLAS_NUM_THREADS: "1"
+      POLARS_MAX_THREADS: "2"
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+      - run:
+          name: Sync replay dependencies
+          command: uv sync --frozen --all-extras --dev
+      - run:
+          name: Verify replay matrix including independent determinism recheck
+          no_output_timeout: 65m
+          command: |
+            timeout --signal=TERM --kill-after=30s 60m bash -euo pipefail -c 'export PATH="$HOME/.local/bin:$PATH"
+            mkdir -p reports/nightly-replay
+            uv run --frozen --no-build pytest tests/integration/determinism -q \
+              --junitxml=reports/nightly-replay/determinism.xml \
+              --basetemp .artifacts/nightly-replay/determinism/run1
+            uv run --frozen --no-build pytest tests/integration/idempotency -q \
+              --junitxml=reports/nightly-replay/idempotency.xml \
+              --basetemp .artifacts/nightly-replay/idempotency/run1
+            uv run --frozen --no-build pytest tests/integration/composite_resume -q \
+              --junitxml=reports/nightly-replay/composite_resume.xml \
+              --basetemp .artifacts/nightly-replay/composite_resume/run1
+            uv run --frozen --no-build pytest tests/integration/determinism -q \
+              --junitxml=reports/nightly-replay/determinism-recheck.xml \
+              --basetemp .artifacts/nightly-replay/determinism/run2
+            '
+      - run:
+          name: Compare nonempty replay checksum inventories
+          command: |
+            WORKSPACE_ROOT="$PWD"
+            find .artifacts/nightly-replay/determinism/run1 -type f -print -quit | grep -q .
+            find .artifacts/nightly-replay/determinism/run2 -type f -print -quit | grep -q .
+            mkdir -p reports/nightly-replay/checksums
+            find .artifacts/nightly-replay/determinism -type f | sort | xargs sha256sum > reports/nightly-replay/checksums/determinism.sha256
+            find .artifacts/nightly-replay/idempotency -type f | sort | xargs sha256sum > reports/nightly-replay/checksums/idempotency.sha256
+            find .artifacts/nightly-replay/composite_resume -type f | sort | xargs sha256sum > reports/nightly-replay/checksums/composite_resume.sha256
+            (
+              cd .artifacts/nightly-replay/determinism/run1
+              find . -type f -print0 | sort -z | xargs -0 sha256sum
+            ) > "$WORKSPACE_ROOT/reports/nightly-replay/checksums/determinism-run1.sha256"
+            (
+              cd .artifacts/nightly-replay/determinism/run2
+              find . -type f -print0 | sort -z | xargs -0 sha256sum
+            ) > "$WORKSPACE_ROOT/reports/nightly-replay/checksums/determinism-run2.sha256"
+            diff -u reports/nightly-replay/checksums/determinism-run1.sha256 reports/nightly-replay/checksums/determinism-run2.sha256 > reports/nightly-replay/checksums/determinism-replay-diff.txt
+      - store_test_results:
+          path: reports/nightly-replay
+      - store_artifacts:
+          path: reports/nightly-replay
+
+  memory-freshness:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+      - run:
+          name: Check repository memory freshness without notification writes
+          command: |
+            mkdir -p reports/memory
+            uv run --frozen --no-build python -m memory.tooling.check_freshness --json > reports/memory/freshness.json
+      - run:
+          name: Verify freshness contracts
+          command: uv run --frozen --no-build pytest tests/unit/memory/test_check_freshness.py -q -p no:xdist
+      - store_artifacts:
+          path: reports/memory
+
+  performance:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    environment:
+      OPENBLAS_NUM_THREADS: "1"
+      POLARS_MAX_THREADS: "2"
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+          extras: "dev tracing performance"
+      - run:
+          name: Run performance benchmarks with existing budgets
+          no_output_timeout: 35m
+          command: |
+            mkdir -p reports/performance
+            timeout --signal=TERM --kill-after=30s 30m \
+              uv run --frozen --no-build pytest tests/performance/ tests/benchmarks/ \
+              -m "benchmark or performance" -p no:xdist -v --tb=short \
+              --perf-obs-out reports/performance/hotspot-observations.jsonl \
+              --junitxml=reports/performance/hotspot-budgets.xml
+      - run:
+          name: Build performance degradation evidence
+          when: always
+          command: |
+            test -s reports/performance/hotspot-observations.jsonl
+            uv run --frozen --no-build python -m scripts.engineering.qa report-hotspots \
+              --observations reports/performance/hotspot-observations.jsonl \
+              --budgets tests/performance/hotspot_budgets.json --window-size 5 \
+              --json-out reports/performance/hotspot-degradation.json \
+              --markdown-out reports/performance/hotspot-degradation.md
+      - run:
+          name: Reject missing or failing performance evidence
+          when: always
+          command: |
+            uv run --frozen --no-build python -c 'import json,sys; d=json.load(open("reports/performance/hotspot-degradation.json")); s=d["summary"]; sys.exit(0 if s["total"] > 0 and s["failed"] == 0 else 1)'
+      - store_test_results:
+          path: reports/performance
+      - store_artifacts:
+          path: reports/performance
+
+  memory-retention:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    environment:
+      PYTHONPATH: src
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+      - run:
+          name: Check episodic retention policy without pruning
+          command: |
+            mkdir -p reports/memory
+            uv run --frozen --no-build python -m memory.tooling.prune --check --json > reports/memory/retention.json
+      - store_artifacts:
+          path: reports/memory
+
+  port-contracts:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    environment:
+      HYPOTHESIS_PROFILE: ci
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+          extras: "tests"
+      - run:
+          name: Verify port adapter and registry contracts
+          command: |
+            mkdir -p reports/junit
+            uv run --frozen --no-build pytest \
+              tests/architecture/test_port_contracts.py \
+              tests/architecture/test_adapter_contracts.py \
+              tests/architecture/test_registry_contracts.py \
+              -p no:xdist --junitxml=reports/junit/port-contracts.xml
+      - when:
+          condition: << pipeline.parameters.include-hypothesis >>
+          steps:
+            - run:
+                name: Verify hypothesis contracts
+                command: |
+                  uv run --frozen --no-build pytest tests/architecture/test_port_contracts_hypothesis.py \
+                    -m hypothesis -p no:xdist --junitxml=reports/junit/hypothesis-contracts.xml
+      - store_test_results:
+          path: reports/junit
+      - store_artifacts:
+          path: reports/junit
+
+  skills-consistency:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+      - run:
+          name: Verify runtime mirrors without synchronizing
+          command: |
+            bash scripts/ai/junie/check_junie_mirror.sh --check
+            bash scripts/ops/support/skills/check_skills_mirror.sh --check
+            bash scripts/ops/support/skills/check_ai_skills_layout.sh
+
+  github-settings-review:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+      - run:
+          name: Collect read-only GitHub settings evidence
+          command: |
+            mkdir -p reports/github-settings
+            uv run --frozen --no-build python -m scripts.engineering.repo github-settings-review \
+              --json-out reports/github-settings/review.json \
+              --markdown-out reports/github-settings/review.md
+      - store_artifacts:
+          path: reports/github-settings
+
+  # Prepared manual/scheduled lane; external schedule registration is separate.
+  docs-kpi:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv:
+          extras: "docs"
+      - run:
+          name: Check docs runtime mirrors and freshness
+          command: uv run --frozen --no-build python -m scripts.docs check-drift --runtime-mirrors --freshness
+      - run:
+          name: Generate docs KPI report
+          command: |
+            mkdir -p reports/docs-kpi
+            uv run --frozen --no-build python -m scripts.docs check-kpi \
+              --kpi-target-not-in-nav 120 \
+              --hard-limit-not-in-nav 135 \
+              --max-orphans 0 \
+              --target-deadline 2026-12-31 \
+              --json-out reports/docs-kpi/docs-kpi-weekly.json \
+              --markdown-out reports/docs-kpi/docs-kpi-weekly.md \
+              --summary-out reports/docs-kpi/summary.md \
+              --fail-on-breach
+      - store_artifacts:
+          path: reports/docs-kpi
+          destination: docs-kpi
+
   # Mirrors pr-required.yml `classify-changes`: runs the repo's own classifier
   # against the canonical catalog. On main/master pushes all gates are required
   # (fail-closed); on branches the matrix is computed from merge-base...HEAD.
@@ -84,13 +477,14 @@ jobs:
             HEAD_SHA="$CIRCLE_SHA1"
             if [ "$CIRCLE_BRANCH" = "main" ] || [ "$CIRCLE_BRANCH" = "master" ]; then
               echo "Default-branch push: all gates required (fail-closed)."
-              python3 - "$HEAD_SHA" \<<'EOF' > /tmp/pr-gate-decisions.json
+              uv run --frozen --no-build python - "$HEAD_SHA" \<<'EOF' > /tmp/pr-gate-decisions.json
             import json, sys
+            from pathlib import Path
+            from scripts.engineering.ci.pr_gate import load_catalog
             head = sys.argv[1]
-            gates = ["lint-arch","tests","type-checking","security","codeql","docker",
-                     "duplication","root-hygiene","generated-artifacts","compiled-artifacts",
-                     "commit-governance","docs-governance"]
-            print(json.dumps({"schema_version": 1, "config_version": 2, "head_sha": head,
+            catalog = load_catalog(Path("configs/quality/github_required_checks.yaml"))
+            gates = [gate["id"] for gate in catalog["gates"]]
+            print(json.dumps({"schema_version": 1, "config_version": catalog["version"], "head_sha": head,
                               "decisions": {g: {"decision": "required", "reason": "default_branch_push"} for g in gates},
                               "changed_files": [], "unclassified_files": []}, indent=2))
             EOF
@@ -248,6 +642,11 @@ jobs:
     docker:
       - image: cimg/python:3.13
     resource_class: small
+    environment:
+      # Bound auto-detected workers to the runner CPU quota.
+      PYTEST_XDIST_AUTO_NUM_WORKERS: "2"
+      OPENBLAS_NUM_THREADS: "1"
+      POLARS_MAX_THREADS: "2"
     parameters:
       test-group:
         type: string
@@ -303,6 +702,7 @@ jobs:
             uv run --frozen --no-build python -m scripts.engineering.repo check-cleanup-governance
             uv run --frozen --no-build python -m scripts.engineering.repo check-root-governance-docs
             uv run --frozen --no-build python -m scripts.engineering.repo check-root-review-registry
+            uv run --frozen --no-build python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD
 
   # --- Gate: compiled-artifacts (always_required) -------------------------------
   # Mirrors compiled-artifacts-block.yml `no-pyc-check`.
@@ -386,7 +786,10 @@ jobs:
   duplication:
     docker:
       - image: cimg/python:3.12-node
+    # Preserve the complete src/tests scan within the runner memory quota.
     resource_class: medium
+    environment:
+      NODE_OPTIONS: --max-old-space-size=3072
     steps:
       - checkout
       - setup-python-uv
@@ -517,13 +920,14 @@ jobs:
       - run:
           name: docker compose config validation
           environment:
-            # Interpolation only; these values never start a runtime.
+            # Interpolation only: these values never reach build/publish steps.
+            COMPOSE_DISABLE_ENV_FILE: "1"
             NEO4J_PASSWORD: ci-compose-validation-placeholder
             GF_SECURITY_ADMIN_PASSWORD: ci-compose-validation-placeholder
             GF_RENDERING_RENDERER_TOKEN: ci-compose-validation-placeholder
           command: |
-            docker compose config > /dev/null
-            docker compose -f docker-compose.monitoring.yml config > /dev/null
+            docker compose config --quiet
+            docker compose -f docker-compose.monitoring.yml config --quiet
       - run:
           name: docker build (Dockerfile.bioetl)
           command: docker build -f Dockerfile.bioetl -t bioetl:ci .
@@ -704,6 +1108,8 @@ jobs:
 workflows:
   version: 2
   pr-gate:
+    when:
+      equal: [pr-gate, << pipeline.parameters.ci-lane >>]
     jobs:
       - composite-closeout:
           filters:
@@ -776,6 +1182,101 @@ workflows:
             - commit-lint
             - docs-governance
             - docker-build
+  docs-kpi:
+    when:
+      and:
+        - equal: [docs-kpi, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - docs-kpi
+  memory-retention:
+    when:
+      and:
+        - equal: [memory-retention, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - memory-retention
+  port-contracts:
+    when:
+      and:
+        - equal: [port-contracts, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - port-contracts
+  skills-consistency:
+    when:
+      and:
+        - equal: [skills-consistency, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - skills-consistency
+  github-settings-review:
+    when:
+      and:
+        - equal: [github-settings-review, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - github-settings-review:
+          context: bioetl-github-read-only
+  performance:
+    when:
+      and:
+        - equal: [performance, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - performance
+  replay-parity:
+    when:
+      and:
+        - equal: [replay-parity, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - replay-parity
+  memory-freshness:
+    when:
+      and:
+        - equal: [memory-freshness, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - memory-freshness
+
+  mutation:
+    when:
+      and:
+      - equal:
+        - mutation
+        - << pipeline.parameters.ci-lane >>
+      - equal:
+        - main
+        - << pipeline.git.branch >>
+      - equal:
+        - schedule
+        - << pipeline.trigger.type >>
+    jobs:
+    - mutation-testing:
+        name: mutation-domain
+        target: domain
+        source-path: src/bioetl/domain/
+        tests-dir: tests/unit/domain/
+        threshold: '70.0'
+    - mutation-testing:
+        name: mutation-application-control-plane
+        target: application-control-plane
+        source-path: src/bioetl/application/services/control_plane/
+        tests-dir: tests/unit/application/services/control_plane/
+        threshold: '60.0'
+    - mutation-testing:
+        name: mutation-application-export-manifests
+        target: application-export-manifests
+        source-path: src/bioetl/application/services/export_lineage/export_manifests.py
+        tests-dir: tests/unit/application/services/
+        threshold: '60.0'
+    - mutation-testing:
+        name: mutation-application-workflow-runner
+        target: application-workflow-runner
+        source-path: src/bioetl/application/services/workflow/workflow_runner_support.py
+        tests-dir: tests/unit/repo_backed/application/services/test_workflow_runner_service.py
+        threshold: '60.0'
 
   architecture-coverage-closeout:
     jobs:

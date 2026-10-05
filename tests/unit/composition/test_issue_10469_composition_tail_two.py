@@ -92,7 +92,8 @@ def test_semanticscholar_unauthenticated_retries_follow_paced_source_policy() ->
 
     source = load_source_config("semanticscholar")
     cfg = HttpClientFactory._resolve_config("semanticscholar", None)
-    assert cfg.max_retries == source.max_retries == 5
+    assert cfg.max_retries == source.max_retries == 2
+    assert cfg.max_retries <= 2
     assert cfg.base_delay == source.retry_base_delay == 30.0
     assert cfg.max_delay == source.retry_max_delay == 300.0
     assert cfg.rate == source.rate_limit.requests_per_second

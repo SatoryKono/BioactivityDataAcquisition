@@ -1,0 +1,5 @@
+[flaky-test-burndown-review] wrote E:\github\bda-config-root-closeout-11899\reports\quality\flaky-test-burndown-review.json
+CI drift families update: test-gov, flaky-fingerprint
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_test_governance_audit --json-out reports/quality/test-governance-current.json --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa report-flaky-test-burndown-review
+CI drift families complete (no budget ratchet)

@@ -1,0 +1,42 @@
+........................................................................ [ 25%]
+..............................................F
+================================== FAILURES ===================================
+___________________ test_rerender_config_uses_env_defaults ____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001C4950314E0>
+tmp_path = WindowsPath('C:/Users/Fedor/AppData/Local/Temp/bioetl-pytest/basetemp-41532-93b42163/test_rerender_config_uses_env_0')
+
+    def test_rerender_config_uses_env_defaults(monkeypatch: Any, tmp_path: Path) -> None:
+        monkeypatch.setenv("GRAFANA_BASE_URL", "http://grafana.local:3000")
+        monkeypatch.setenv("GRAFANA_USERNAME", "viewer")
+        monkeypatch.setenv("GRAFANA_PASSWORD", "secret")
+        monkeypatch.setenv("GRAFANA_SERVICE_ACCOUNT_TOKEN", "grafana-token")
+    
+        config = rerender_subject._parse_args(
+            [
+                "--output-dir",
+                str(tmp_path),
+                "--width",
+                "1024",
+                "--height",
+                "1800",
+                "--theme",
+                "light",
+                "--uids",
+                "bioetl-dq-v2",
+                "--navigation-only",
+            ]
+        )
+    
+        assert config.base_url == "http://grafana.local:3000"
+        assert config.username == "viewer"
+>       assert config.password == "secret"
+E       AssertionError: assert '[REDACTED_LOCAL_SECRET_FRAGMENT]TF...db6[REDACTED_LOCAL_SECRET_FRAGMENT]' == 'secret'
+E         
+E         - secret
+E         + [REDACTED_LOCAL_SECRET]
+
+tests\unit\repo_backed\scripts\ops\observability\test_grafana_dashboard_tooling.py:108: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py::test_rerender_config_uses_env_defaults
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!
