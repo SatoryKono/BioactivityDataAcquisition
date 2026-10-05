@@ -398,6 +398,8 @@ def _execute_case(
         raise ValueError("input_snapshot_changed_during_copy")
     write_receipt(folder / RESULT_FILENAME, receipt)
     environment = _case_environment(root, folder, env_file)
+    receipt["runtime_policy"] = _runtime_policy(folder, environment)
+    write_receipt(folder / RESULT_FILENAME, receipt)
     failures = []
     launch_cases = [Case("pipeline", name) for name in case.prerequisites] + [case]
     launches = [command(launch_case, limit) for launch_case in launch_cases]
@@ -461,6 +463,7 @@ def _case_environment(root: Path, folder: Path, env_file: Path) -> dict[str, str
         },
     }
     environment.update(
+        BIOETL_TEST_MODE="false",
         BIOETL_DATA_DIR=str(data),
         BIOETL_REPORT_ROOT=str(reports),
         BIOETL_CONFIGS_ROOT=str(folder / "configs"),
@@ -483,6 +486,24 @@ def _case_environment(root: Path, folder: Path, env_file: Path) -> dict[str, str
             "BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__PLAIN_WRITE_PROCESS_ISOLATION"
         ] = "true"
     return environment
+
+
+def _runtime_policy(folder: Path, environment: dict[str, str]) -> dict:
+    """Verify resolved production settings in the actual child environment."""
+    entrypoint = (
+        Path(__file__).resolve().parents[3]
+        / "scripts/ops/observability/green_runtime_policy.py"
+    )
+    result = subprocess.run(
+        [sys.executable, str(entrypoint)],
+        cwd=folder,
+        env=environment,
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=60,
+    )
+    return json.loads(result.stdout)
 
 
 def _stop_launch_process(process: subprocess.Popen, log: TextIO) -> None:

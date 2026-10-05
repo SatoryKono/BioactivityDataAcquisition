@@ -49,6 +49,17 @@ ______________________________________________________________________
   `"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python"` on WSL.
 - `.env` is present and readable. Do not create, edit, rename, move, or delete
   any `.env` file as part of this runbook.
+- Live acceptance children must use `BIOETL_TEST_MODE=false`, including when
+  launched from Windows pytest. The RF-022 runner overrides inherited test mode
+  in the child environment and records a `runtime_policy` in each case receipt:
+  resolved HTTP timeouts, retry delays, rate limits, and control-plane fsync.
+  The preflight rejects test mode before launching pipelines. This restores the
+  configured production policy; provider budgets and health-probe deadlines are
+  unchanged. Older campaigns without this check must not qualify production
+  acceptance solely from a successful CLI exit.
+  To inspect the same safe settings manually in the prepared child environment,
+  run `python -m scripts.ops.observability.green_runtime_policy` (entry point:
+  `scripts/ops/observability/green_runtime_policy.py`).
 - Confirm the catalog matches the live registry:
 
   ```powershell

@@ -436,6 +436,7 @@ def test_case_uses_copied_configs_and_same_limit_for_prerequisites(
         return []
 
     monkeypatch.setattr(runner, "run_launch", launch)
+    monkeypatch.setattr(runner, "_runtime_policy", lambda *args: {"test_mode": False})
     folder = tmp_path / "reports/case"
     folder.mkdir(parents=True)
     receipt = {"processes": []}
@@ -451,6 +452,46 @@ def test_case_uses_copied_configs_and_same_limit_for_prerequisites(
     assert len(launches) == 2
     assert all(args[args.index("--limit") + 1] == "10" for args in launches)
     assert receipt["launch_timeout_seconds"] == [1800, 1800]
+    assert receipt["runtime_policy"] == {"test_mode": False}
+
+
+@pytest.mark.parametrize("dotenv_mode", [None, "true"])
+def test_live_child_restores_production_http_and_durability(
+    tmp_path, monkeypatch, dotenv_mode
+):
+    import dotenv
+    from scripts.ops.observability import green_acceptance as runner
+
+    root = Path(__file__).resolve().parents[5]
+    monkeypatch.setenv("BIOETL_TEST_MODE", "true")
+    monkeypatch.setattr(
+        dotenv, "dotenv_values", lambda _: {"BIOETL_TEST_MODE": dotenv_mode}
+    )
+    environment = runner._case_environment(root, tmp_path, tmp_path / "unused-env")
+    environment["BIOETL_CONFIGS_ROOT"] = str(root / "configs")
+    assert environment["BIOETL_TEST_MODE"] == "false"
+    policy = runner._runtime_policy(tmp_path, environment)
+    assert policy["test_mode"] is False
+    assert policy["control_plane_fsync"] is True
+    chembl = policy["providers"]["chembl"]
+    assert chembl["timeout_seconds"] == 120
+    assert chembl["read_timeout_seconds"] == 240
+    assert chembl["retry_base_delay_seconds"] == 1
+    assert chembl["retry_after_cap_seconds"] is None
+    assert chembl["rate_per_second"] == 0.1
+    assert chembl["circuit_recovery_seconds"] == 3000
+
+
+def test_live_runtime_probe_rejects_test_mode(tmp_path, monkeypatch):
+    import subprocess
+    from scripts.ops.observability import green_acceptance as runner
+
+    root = Path(__file__).resolve().parents[5]
+    environment = runner._case_environment(root, tmp_path, tmp_path / "unused-env")
+    environment["BIOETL_TEST_MODE"] = "true"
+    with pytest.raises(subprocess.CalledProcessError) as error:
+        runner._runtime_policy(tmp_path, environment)
+    assert "live_acceptance_requires_production_runtime" in error.value.stderr
 
 
 @pytest.mark.parametrize(
