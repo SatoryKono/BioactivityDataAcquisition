@@ -97,7 +97,8 @@ def test_target_requires_digest_bound_mapping(bundle, damage):
 
 
 @pytest.mark.parametrize(
-    "damage", ["version", "empty", "duplicate", "ignored", "entry_type", "boolean"]
+    "damage",
+    ["version", "empty", "duplicate", "ignored", "entry_type", "boolean", "canonical"],
 )
 def test_sealed_target_mapping_must_restore_domain_invariants(bundle, damage):
     root, envelope, _ = bundle
@@ -117,6 +118,8 @@ def test_sealed_target_mapping_must_restore_domain_invariants(bundle, damage):
         mapping["non_counting_classes"] = "not-an-array"
     elif damage == "entry_type":
         mapping["entries"] = ["not-an-object"]
+    elif damage == "canonical":
+        entry["canonical_l1"] = "  "
     else:
         entry["counts_for_target_type"] = "false"
     envelope.update(version="composite-parent-replay-v2", pipeline="composite_target")
@@ -127,6 +130,7 @@ def test_sealed_target_mapping_must_restore_domain_invariants(bundle, damage):
         "version": "mapping_version must not be blank",
         "empty": "protein class target type mapping must not be empty",
         "duplicate": "protein class target type mapping has duplicate labels",
+        "canonical": "protein class mapping canonical_l1 must not be blank",
     }.get(damage, "composite_replay_target_mapping_invalid")
     with pytest.raises(ValueError, match=expected_message):
         verify_bundle(root, digest_bytes((root / "parent.json").read_bytes()))

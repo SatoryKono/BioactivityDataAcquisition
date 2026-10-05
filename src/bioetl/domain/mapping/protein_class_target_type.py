@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import unicodedata
-from collections.abc import Callable, Iterable, Mapping
+from collections.abc import Callable, Iterable, Iterator, Mapping
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass
 from typing import Final, Protocol
 
@@ -23,6 +25,7 @@ __all__ = [
     "is_protein_class_target_type_mapping_initialized",
     "normalize_protein_class_label",
     "normalize_protein_class_top_level",
+    "scoped_protein_class_target_type_mapping",
 ]
 
 PROTEIN_CLASS_TARGET_TYPE_RULE_VERSION: Final = "target_type_rule_v1"
@@ -36,6 +39,10 @@ class ProteinClassTopLevelMappingEntry:
     raw_label: str
     canonical_l1: str
     counts_for_target_type: bool
+
+    def __post_init__(self) -> None:
+        if not self.canonical_l1.strip():
+            raise ValueError("protein class mapping canonical_l1 must not be blank")
 
     @property
     def raw_key(self) -> str:
@@ -96,6 +103,9 @@ class ProteinClassTargetTypeResult:
 
 
 _mapping_data: ProteinClassTargetTypeMappingData | None = None
+_mapping_override: ContextVar[ProteinClassTargetTypeMappingData | None] = ContextVar(
+    "protein_class_target_type_mapping_override", default=None
+)
 
 
 class _NormalizedTopLevelLike(Protocol):
@@ -114,19 +124,32 @@ def initialize_protein_class_target_type_mapping(
     _mapping_data = data
 
 
+@contextmanager
+def scoped_protein_class_target_type_mapping(
+    data: ProteinClassTargetTypeMappingData | None,
+) -> Iterator[None]:
+    """Bind a task-local mapping without replacing the application default."""
+    token = _mapping_override.set(data)
+    try:
+        yield
+    finally:
+        _mapping_override.reset(token)
+
+
 def is_protein_class_target_type_mapping_initialized() -> bool:
     """Return whether the protein class target-type mapping has been loaded."""
-    return _mapping_data is not None
+    return _mapping_override.get() is not None or _mapping_data is not None
 
 
 def current_protein_class_target_type_mapping() -> ProteinClassTargetTypeMappingData:
     """Return the initialized mapping data or fail closed."""
-    if _mapping_data is None:
+    data = _mapping_override.get() or _mapping_data
+    if data is None:
         raise RuntimeError(
             "Protein class target type mapping not initialized. "
             "Call initialize_protein_class_target_type_mapping() at startup."
         )
-    return _mapping_data
+    return data
 
 
 def normalize_protein_class_label(value: object) -> str | None:

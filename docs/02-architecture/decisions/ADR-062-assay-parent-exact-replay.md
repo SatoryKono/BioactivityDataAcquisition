@@ -84,9 +84,12 @@ as a required digest-bound object, so publication replay preserves Gold filterin
 without loading mutable configuration. Output table names come from the captured
 merge configuration. Target envelopes additionally require `target-mapping.json`,
 containing the actual protein-class mapping version, entries, and non-counting
-classes used by the merge. Standalone replay initializes this lookup from the
-verified object; it cannot depend on prior live-process initialization or current
-YAML. A missing or modified mapping blocks target replay readiness.
+classes used by the merge. Standalone replay binds the verified lookup to its
+execution context; it cannot depend on prior live-process initialization or current
+YAML. The binding is restored on success, failure, and cancellation, and concurrent
+replays cannot replace each other's mapping or the live application default. Blank
+canonical labels are invalid. A missing, modified, or invalid mapping blocks target
+replay readiness.
 The legacy `replay-assay` command and v1 assay envelopes
 remain supported within their original dependency-free boundary.
 

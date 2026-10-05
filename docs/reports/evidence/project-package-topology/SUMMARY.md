@@ -1,3 +1,5 @@
+Source-only refresh (2026-10-05, scoped replay mapping): source_tree_sha256 `f8bfe58a0ddae76ef8e49d056ae14067951cc15736f2a126ce65199b4124e9a4`. Replay mapping is context-local and canonical labels are validated. This rebind does not claim a new coverage measurement.
+
 Source-only refresh (2026-10-05, direct owner imports): source_tree_sha256 `0d662d51438a2eee9bad3b02099e5a4d94c2938948ff83093ca6c968d50c55f7`. The three mapping codec imports now address their module owner directly; root-facade importers remain zero. This is a source binding update, not a new coverage measurement.
 
 # Сводка evidence: project-package-topology

@@ -197,10 +197,34 @@ async def test_other_composite_families_replay_physical_outputs(
     tables.clear()
     live.read_table.side_effect = AssertionError("Live input during replay")
     if family == "target":
-        monkeypatch.setattr(mapping, "_mapping_data", None)
+        default_mapping = mapping.ProteinClassTargetTypeMappingData(
+            "current-v2",
+            (
+                mapping.ProteinClassTopLevelMappingEntry(
+                    "enzyme", "current-enzyme", True
+                ),
+            ),
+        )
+        monkeypatch.setattr(mapping, "_mapping_data", default_mapping)
     receipt = await replay_assay(root, digest, tmp_path / "offline")
     assert receipt["silver_equal"] is True and receipt["gold_equal"] is True
     assert receipt["records"] == 1
+    if family == "target":
+        import asyncio
+        import bioetl.composition.bootstrap.runtime.assay_replay as replay_module
+
+        assert mapping.current_protein_class_target_type_mapping() is default_mapping
+        for failure in (ValueError, asyncio.CancelledError):
+            monkeypatch.setattr(
+                replay_module,
+                "verify_replay_outputs",
+                AsyncMock(side_effect=failure("replay verification failed")),
+            )
+            with pytest.raises(failure, match="replay verification failed"):
+                await replay_assay(root, digest, tmp_path / failure.__name__)
+            assert (
+                mapping.current_protein_class_target_type_mapping() is default_mapping
+            )
 
 
 async def test_assay_merge_replays_nullable_foreign_keys_without_live_reads(tmp_path):

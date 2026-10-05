@@ -24,7 +24,7 @@ from bioetl.composition.bootstrap.runtime.composite_merge_service_builder import
 
 from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.mapping.protein_class_target_type import (
-    initialize_protein_class_target_type_mapping as initialize_target_mapping,
+    scoped_protein_class_target_type_mapping as mapping_scope,
 )
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
@@ -59,18 +59,6 @@ from bioetl.application.composite.helpers.replay_context import (
 )
 
 
-_FIELD_GROUPS_FILE = "field-groups.json"
-
-
-def _initialize_replay_mapping(root: Path, envelope: JsonDict) -> None:
-    """Initialize target-only domain lookup from its mandatory sealed object."""
-    if envelope["pipeline"] == "composite_target":
-        payload = load_verified_json(
-            root, "target-mapping.json", envelope["objects"]["target-mapping.json"]
-        )
-        initialize_target_mapping(mapping.restore_target_mapping(payload))
-
-
 async def replay_assay(
     root: Path,
     envelope_hash: str,
@@ -80,88 +68,100 @@ async def replay_assay(
 ) -> JsonDict:
     """Rebuild physical Silver/Gold offline, then compare their materialized tables."""
     logger = logger or NoOpLogger()
-
     envelope = verify_bundle(root, envelope_hash)
     objects = envelope["objects"]
     if digest_bytes(Path("uv.lock").read_bytes()) != objects["uv.lock"]:
         raise ValueError("assay_replay_dependency_lock_mismatch")
-    _initialize_replay_mapping(root, envelope)
-    config = CompositeConfig.from_dict(
-        load_verified_json(root, "config.json", objects["config.json"])
-    )
-    if config.name not in SUPPORTED_COMPOSITES or config.name != envelope["pipeline"]:
-        raise ValueError("assay_replay_config_not_supported")
-    if envelope["version"] == "assay-parent-replay-v1" and config.dependencies:
-        raise ValueError("assay_replay_config_not_supported")
-    reader = CompositeReplayInputReader(
-        root / "inputs", envelope_sha256=envelope["input_snapshot_fingerprint"]
-    )
-    request = restore_merge_request(config, envelope["request"], envelope["run_id"])
-    assert request.metadata_timestamp is not None
-    destination.mkdir(parents=True, exist_ok=False)
-    settings = Settings.model_validate(
-        {
-            "data_dir": destination,
-            "pipeline": load_verified_json(
-                root, "pipeline-settings.json", objects["pipeline-settings.json"]
+    with mapping_scope(
+        mapping.restore_target_mapping(
+            load_verified_json(
+                root, "target-mapping.json", objects["target-mapping.json"]
+            )
+        )
+        if envelope["pipeline"] == "composite_target"
+        else None
+    ):
+        config = CompositeConfig.from_dict(
+            load_verified_json(root, "config.json", objects["config.json"])
+        )
+        if (
+            config.name not in SUPPORTED_COMPOSITES
+            or config.name != envelope["pipeline"]
+        ):
+            raise ValueError("assay_replay_config_not_supported")
+        if envelope["version"] == "assay-parent-replay-v1" and config.dependencies:
+            raise ValueError("assay_replay_config_not_supported")
+        reader = CompositeReplayInputReader(
+            root / "inputs", envelope_sha256=envelope["input_snapshot_fingerprint"]
+        )
+        request = restore_merge_request(config, envelope["request"], envelope["run_id"])
+        assert request.metadata_timestamp is not None
+        destination.mkdir(parents=True, exist_ok=False)
+        settings = Settings.model_validate(
+            {
+                "data_dir": destination,
+                "pipeline": load_verified_json(
+                    root, "pipeline-settings.json", objects["pipeline-settings.json"]
+                ),
+            }
+        )
+        storage = bootstrap_storage_adapter(
+            run_context=RunContext(
+                run_id=RunID(UUID(request.run_id)),
+                run_type=RunType.REBUILD,
+                started_at=request.metadata_timestamp,
+                pipeline_name=config.name,
+                provider="composite",
+                entity=config.name.removeprefix("composite_"),
             ),
-        }
-    )
-    storage = bootstrap_storage_adapter(
-        run_context=RunContext(
-            run_id=RunID(UUID(request.run_id)),
-            run_type=RunType.REBUILD,
-            started_at=request.metadata_timestamp,
-            pipeline_name=config.name,
-            provider="composite",
-            entity=config.name.removeprefix("composite_"),
-        ),
-        logger=logger,
-        metrics=NoOpMetrics(),
-        tracing=NoOpTracing(),
-        settings=settings,
-    )
-    observation_token = bind_run_observations()
-    try:
-        merger = build_composite_merge_service(
-            config=config,
-            storage=cast(CompositeMergeStorageProtocol, storage),
-            resolve_gold_schema=resolve_composite_gold_schema,
-            delta_reader=reader,
-            field_group_registry=restore_field_groups(
-                load_verified_json(
-                    root, _FIELD_GROUPS_FILE, objects[_FIELD_GROUPS_FILE]
-                )
-            )
-            if _FIELD_GROUPS_FILE in objects
-            else None,
-            cross_validator=EnrichmentCrossValidator(
-                config=config.cross_validation, logger=logger
-            )
-            if config.cross_validation.enabled
-            else None,
             logger=logger,
-            system_columns_to_drop=SYSTEM_COLUMNS_TO_DROP,
-            normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
-            clock=SystemClock(),
+            metrics=NoOpMetrics(),
+            tracing=NoOpTracing(),
+            settings=settings,
         )
-        result = await merger.execute_request(request)
-        output_reader = DeltaReader(destination / "output", logger)
-        paths = {
-            layer: storage.get_table_path(
-                output_table_name(getattr(config.merge, f"output_{layer}_path"), layer),
-                layer=layer,
-            )
-            for layer in ("silver", "gold")
-        }
-        await verify_replay_outputs(root, output_reader, paths)
-        receipt = verification_receipt(
-            destination, envelope_hash, request.run_id, result.records_merged
-        )
-        publish_json(destination, "verification.json", receipt)
-        return receipt
-    finally:
+        observation_token = bind_run_observations()
         try:
-            await storage.aclose()
+            merger = build_composite_merge_service(
+                config=config,
+                storage=cast(CompositeMergeStorageProtocol, storage),
+                resolve_gold_schema=resolve_composite_gold_schema,
+                delta_reader=reader,
+                field_group_registry=restore_field_groups(
+                    load_verified_json(
+                        root, "field-groups.json", objects["field-groups.json"]
+                    )
+                )
+                if "field-groups.json" in objects
+                else None,
+                cross_validator=EnrichmentCrossValidator(
+                    config=config.cross_validation, logger=logger
+                )
+                if config.cross_validation.enabled
+                else None,
+                logger=logger,
+                system_columns_to_drop=SYSTEM_COLUMNS_TO_DROP,
+                normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
+                clock=SystemClock(),
+            )
+            result = await merger.execute_request(request)
+            output_reader = DeltaReader(destination / "output", logger)
+            paths = {
+                layer: storage.get_table_path(
+                    output_table_name(
+                        getattr(config.merge, f"output_{layer}_path"), layer
+                    ),
+                    layer=layer,
+                )
+                for layer in ("silver", "gold")
+            }
+            await verify_replay_outputs(root, output_reader, paths)
+            receipt = verification_receipt(
+                destination, envelope_hash, request.run_id, result.records_merged
+            )
+            publish_json(destination, "verification.json", receipt)
+            return receipt
         finally:
-            reset_run_observations(observation_token)
+            try:
+                await storage.aclose()
+            finally:
+                reset_run_observations(observation_token)
