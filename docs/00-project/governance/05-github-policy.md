@@ -824,15 +824,15 @@ ______________________________________________________________________
 *See also: [CONTRIBUTING.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/CONTRIBUTING.md) | [SECURITY.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/SECURITY.md) | [RULES.md](../RULES.md)*
 
 
-### Main rulesets (RF-008 / GH-RULESET-001 — `pr-gate-complete` on `main`)
+### Historical main rulesets snapshot (2026-09-10; #10267)
 
-SSOT for live GitHub enforcement is §3 plus this block. Ruleset `main`
-(13643213) is **`enforcement: active`**. Companion `root-hygiene-required-check`
-(15730586) stays **`enforcement: disabled`**. Applied rules on `refs/heads/main`
-come only from `13643213`. Closed `#9975` / `#9979` are history; live activation
-is [#10267](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/10267).
+This dated snapshot is historical; the current SSOT is §3 above. At that time,
+ruleset `main` (13643213) was **`enforcement: active`** and companion
+`root-hygiene-required-check` (15730586) was **`enforcement: disabled`**.
+Applied rules on `refs/heads/main` came only from `13643213`. Closed
+`#9975` / `#9979` preceded the activation in [#10267](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/10267).
 
-Live GET `2026-09-10T02:53:01+03:00`:
+Historical GET `2026-09-10T02:53:01+03:00`:
 
 - `13643213` `main`: `enforcement: active` (required check `[pr-gate-complete]`,
   `strict_required_status_checks_policy: true`, `required_approving_review_count: 0`).
@@ -840,8 +840,9 @@ Live GET `2026-09-10T02:53:01+03:00`:
   `[checks-complete, root-hygiene]`; no PUT in #10267).
 - No bypass actors (`current_user_can_bypass: never`).
 
-Rollback is an explicitly approved PUT of
-`reports/governance/ruleset-10267-rollback-13643213.json`. Tracking: #10267,
+The historical rollback payload was
+`reports/governance/ruleset-10267-rollback-13643213.json`; it is not a rollback
+plan for the current CircleCI protection. Historical tracking: #10267,
 Scorecard #1272 (BranchProtection), #1295 (CodeReview), #1296 (CIIBestPractices).
 
 ### Quarterly Read-Only Review Runbook (read-only, no mutations)
@@ -849,7 +850,7 @@ Scorecard #1272 (BranchProtection), #1295 (CodeReview), #1296 (CIIBestPractices)
 Owner: @SatoryKono · Cadence: quarterly · Last: 2026-08-28 → Next: 2026-11-28 · Due: +5 days after quarter (Q4 due `2026-12-05`, cron `23 6 1 1,4,7,10`) · Evidence: `reports/governance/quarterly-review-YYYY-QN.md` + `reports/quality/github-settings-review*.json` (30d retention, `automation_mutated_github:false`).
 
 Checklist (read-only `GET`, `--paginate` where paginated, no `PUT/PATCH/POST/DELETE`):
-`GET /repos/{owner}/{repo}/rulesets` → `GET /rulesets/{id}` (expect 13643213 **`enforcement: active`** with required context `pr-gate-complete`; 15730586 **`enforcement: disabled`**) → `GET /rules/branches/main` (expect `pr-gate-complete`) → `GET /code-scanning/alerts?per_page=100` → `GET /labels?per_page=100 --paginate` (209 labels) → `GET /repos/{repo} --jq '{has_wiki,default_branch}'`.
+`GET /repos/{owner}/{repo}/rulesets` → `GET /rulesets/{id}` (expect both 13643213 and 15730586 **`enforcement: active`**, strict freshness and no bypass; required contexts `ci/circleci: pr-gate-complete` and companion `ci/circleci: root-hygiene`) → `GET /rules/branches/main` (expect both CircleCI contexts) → `GET /code-scanning/alerts?per_page=100` → `GET /labels?per_page=100 --paginate` (record the current label count) → `GET /repos/{repo} --jq '{has_wiki,default_branch}'`.
 Escalation: drift → open/update governance issue (high-risk → Security lane/Release engineering day of review); do not expand token scopes.
 Verification (no token, dry-run): `pytest tests/architecture/test_github_governance_review.py` (`READ_ONLY_GH_COMMANDS` + `workflow_dispatch` + `cron 23 6 1 1,4,7,10`).
 
