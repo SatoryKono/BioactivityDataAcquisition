@@ -66,6 +66,18 @@ database to select the candidate and allow the two owned unsigned plugins.
 Enable Scenes manually for shadow review; this does not authorize a cutover.
 The acceptance-only runtime-probe is never shipped in the image.
 
+`Dockerfile.managed` derives the JSON-dashboard host from the same immutable
+candidate, removing the Scenes package. `managed-image.json` binds this variant
+to its parent and recipe. `compose.managed-acceptance.yml` selects it for an
+isolated database; the default remains unchanged until managed acceptance.
+`verify-managed-image.py` checks the trusted parent layer prefix and compares
+every exported filesystem record against exactly the parent minus Scenes.
+The registry image and independently rebuilt image must both match, including
+backend, libraries, frontend, SelectorShell, owners, modes and symlink targets.
+Host Python reads the tar streams without extracting paths or running image
+executables. Only timestamps are excluded. CircleCI preserves the resulting
+receipt; this image parity check does not itself establish browser acceptance.
+
 The runtime-probe plugin executes navigation and hydration fixtures through
 Grafana's shared react-router external. Install it only on the acceptance host,
 run its explicit button, preserve the rendered receipt and remove it afterward.

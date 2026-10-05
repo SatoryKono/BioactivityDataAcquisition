@@ -1215,6 +1215,18 @@ jobs:
       - run:
           name: docker build (Dockerfile.bioetl)
           command: docker build -f Dockerfile.bioetl -t bioetl:ci .
+      - run:
+          name: Verify managed Router host preserves the complete pinned filesystem
+          command: |
+            python grafana/tooling/router-v7-bridge/verify-managed-image.test.py
+            docker build --platform linux/amd64 -f grafana/tooling/router-v7-bridge/Dockerfile.managed -t bioetl-router-host:managed-ci .
+            DECLARED=$(python -c "import json; print(json.load(open('grafana/tooling/router-v7-bridge/managed-image.json'))['image'])")
+            docker pull "$DECLARED"
+            BUILT=$(docker image inspect bioetl-router-host:managed-ci --format '{{.Id}}')
+            python grafana/tooling/router-v7-bridge/verify-managed-image.py "$BUILT"
+      - store_artifacts:
+          path: reports/qa/router-v7-managed-image-parity.json
+          destination: router-v7-managed-image-parity.json
 
   # --- Aggregator (mirrors pr-gate-complete; stable name for future rulesets) -------
   pr-gate-complete:
@@ -1658,3 +1670,4 @@ workflows:
                 - codex/config-root-main-acceptance-20261005
                 - codex/config-root-postmerge-20261005
                 - codex/architecture-meta-closeout-20261005
+                - codex/grafana-managed-closeout-20261005

@@ -1,0 +1,5 @@
+# Managed JSON-dashboard host. Scenes remains an optional acceptance image.
+FROM satorykono/bioetl-grafana-router7-canvas@sha256:abace6d89d5f03680f40edcce05b7a05e2dd1b688ecd17a455d19bd9752c3609
+USER root
+RUN rm -rf /usr/share/grafana/data/plugins-bundled/bioetl-scenes-app
+USER grafana

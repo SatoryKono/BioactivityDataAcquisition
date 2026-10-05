@@ -1,0 +1,6 @@
+# Candidate overlay: use only with an isolated database before governed rollout.
+services:
+  grafana:
+    image: satorykono/bioetl-grafana-router7-canvas@sha256:b9bd805ebb38d8065fd2e50a4bcf794d2c01bb431bd962984b64a7b5da2cf6e1
+    environment:
+      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=bioetl-selectorshell-panel
