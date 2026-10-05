@@ -12,6 +12,8 @@ import re
 import pytest
 import yaml
 
+pytestmark = pytest.mark.unit
+
 ROOT = next(
     path
     for path in Path(__file__).resolve().parents

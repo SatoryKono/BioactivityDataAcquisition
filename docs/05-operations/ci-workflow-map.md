@@ -420,3 +420,15 @@ preserved. A local Linux transport acceptance on main `303ced3b` completed uploa
 CircleCI security-write credentials, remote SARIF upload, and public Scorecard
 result publication remain separate unfinished requirements; the CI artifact
 identity records both publication flags as false until its transports run.
+
+The separate `scorecard-publish` lane prepares the GitHub SARIF transport:
+read-only analysis, explicit approval, then a serialized writer using
+`bioetl-security-events-write`. Its dedicated `SARIF_GITHUB_TOKEN` must have
+repository Contents read and Code scanning alerts write permissions, restricted
+to this repository; the context must enforce the same project/main/no-SSH/no-API-
+config restrictions as the Docker publication context. The writer verifies the
+producer job and approval through CircleCI, checks the source and report hashes,
+rejects stale main, and waits for GitHub ingestion to complete. A saved upload ID
+alone is not acceptance. This does not publish to the OpenSSF public results API;
+that upstream transport requires GitHub Actions identity and remains unresolved
+under the repository's Actions-disabled policy.

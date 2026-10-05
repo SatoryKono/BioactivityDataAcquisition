@@ -13,7 +13,7 @@ version: 2.1
 parameters:
   ci-lane:
     type: enum
-    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance, e2e-replay, coverage-closeout, docker-baseline, docker-publish, architecture-metrics, scorecard]
+    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance, e2e-replay, coverage-closeout, docker-baseline, docker-publish, architecture-metrics, scorecard, scorecard-publish]
     default: pr-gate
   include-hypothesis:
     type: boolean
@@ -157,11 +157,38 @@ jobs:
             path.with_name('results.sarif').write_text(json.dumps(sarif, sort_keys=True) + '\n', encoding='utf-8')
             # Scores and unsupported checks stay visible; the legacy lane is informational.
             identity = {'source_sha': os.environ['CIRCLE_SHA1'], 'workflow_id': os.environ['CIRCLE_WORKFLOW_ID'], 'job_number': os.environ['CIRCLE_BUILD_NUM'], 'check_count': len(checks), 'sarif_uploaded': False, 'public_results_published': False}
+            import hashlib
+            identity['sha256'] = {name: hashlib.sha256(path.with_name(name).read_bytes()).hexdigest() for name in ('results.json', 'results.sarif')}
             path.with_name('identity.json').write_text(json.dumps(identity, sort_keys=True) + '\n', encoding='utf-8')
             PY
+      - persist_to_workspace:
+          root: /tmp/bioetl-scorecard
+          paths:
+            - reports
       - store_artifacts:
           path: /tmp/bioetl-scorecard/reports
           destination: scorecard-analysis
+
+  scorecard-publish:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp/bioetl-scorecard
+      - run:
+          name: Upload approved source-bound Scorecard SARIF
+          no_output_timeout: 11m
+          command: |
+            set -euo pipefail
+            set +x
+            timeout --signal=TERM --kill-after=30s 10m python3 scripts/engineering/ci/publish_scorecard_sarif.py \
+              --directory /tmp/bioetl-scorecard/reports \
+              --output /tmp/bioetl-scorecard/publication/receipt.json
+      - store_artifacts:
+          path: /tmp/bioetl-scorecard/publication
+          destination: scorecard-publication
 
   architecture-fast-baseline:
     docker:
@@ -2229,3 +2256,20 @@ workflows:
     jobs:
       - scorecard-analysis:
           context: bioetl-github-read-only
+  scorecard-publish:
+    when:
+      and:
+        - equal: [scorecard-publish, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - scorecard-analysis:
+          context: bioetl-github-read-only
+      - scorecard-publish-approval:
+          type: approval
+          requires:
+            - scorecard-analysis
+      - scorecard-publish:
+          context: bioetl-security-events-write
+          requires:
+            - scorecard-publish-approval
+          serial-group: 9f037fd7-4fd9-41af-9916-33ca1e56cf7b/scorecard-publication
