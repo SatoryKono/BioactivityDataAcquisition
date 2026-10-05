@@ -1,0 +1,169 @@
+{
+  "source_branch": "main",
+  "source_commit": "95ca0a67f21a7055ad1b671f9ff57bd5ff39b1fb",
+  "source_run_id": "local-coverage",
+  "source_event": "local_coverage_verify",
+  "source_run_url": null,
+  "source_tree_sha256": "7ccb3fdf058e6b26c2a50c97bf44a7ecaa8443bb986e5f06b59101426155846e",
+  "refreshed_at_utc": "2026-10-05T13:20:38.941046+00:00",
+  "refresh_status": "captured",
+  "coverage_percent": 99.7,
+  "coverage": {
+    "threshold_percent": 85.0,
+    "actual_percent": 99.7,
+    "threshold_satisfied": true
+  },
+  "measurement_provenance": {
+    "producer": "run_local_coverage_verify.py",
+    "trust_tier": "local_single_host",
+    "ci_status": "BLOCKED_EXTERNAL_PERMANENT",
+    "complete": true,
+    "manifest_sha256": "3df34d780be71bdf43af791304c0e9a9f75daa88a3f4423ddb85e4267c6c0aa2",
+    "coverage_xml_sha256": "b66a8ae41d576142a583f127f04c51224d76502c3cac0ff9af6ff04b7ea21f0d",
+    "source_tree_sha256": "3786dc15afe014d3827d7f940c7cec030d02c993d78487b403eee55b4bdae29b",
+    "test_tree_sha256": "7ccb3fdf058e6b26c2a50c97bf44a7ecaa8443bb986e5f06b59101426155846e",
+    "head": "95ca0a67f21a7055ad1b671f9ff57bd5ff39b1fb",
+    "required_shards": [
+      "smoke",
+      "contract-confidence",
+      "repo-backed-unit-product",
+      "repo-backed-unit-tooling",
+      "repo-backed-unit-ops",
+      "unit-scripts-tooling-passport",
+      "unit-scripts-tooling-debt-governance",
+      "unit-scripts-tooling-other",
+      "unit-filesystem-contracts",
+      "unit-subprocess-backed",
+      "unit-domain",
+      "unit-application",
+      "unit-infrastructure",
+      "unit-other",
+      "integration",
+      "security",
+      "serial"
+    ],
+    "started_at_utc": "2026-10-05T12:53:19.276710+00:00",
+    "finished_at_utc": "2026-10-05T13:20:38.941046+00:00",
+    "shards": [
+      {
+        "name": "smoke",
+        "exit_code": 0,
+        "seconds": 18.61,
+        "coverage_sha256": "17b37dbe1212a2057a7349a6ba9d40b070b96ca471fc60aedd5faf1ab6987ea6",
+        "junit_telemetry_sha256": "7314da2b1365203ccaf2d8fc1b83dc974066e92d7e740fa043ca31844c768d35"
+      },
+      {
+        "name": "contract-confidence",
+        "exit_code": 0,
+        "seconds": 112.82,
+        "coverage_sha256": "88560c0514330468087d4702cf47df3f219324a98ca8b94fc50b83e08988e522",
+        "junit_telemetry_sha256": "34486f318bf39977221b1f6c3a51487adaa92590d58fa07f1551f1818e05e7b3"
+      },
+      {
+        "name": "repo-backed-unit-product",
+        "exit_code": 0,
+        "seconds": 33.33,
+        "coverage_sha256": "5f3cc779cc294fa3f76e1ab890f24084b6020da3745dc9c87d1557410fdf1426",
+        "junit_telemetry_sha256": "09f7d8a4e01c33fbd043c5cb4020888e36a2f95aff16eff90d6f3e748c93712a"
+      },
+      {
+        "name": "repo-backed-unit-tooling",
+        "exit_code": 0,
+        "seconds": 116.09,
+        "coverage_sha256": "ca22542cabb774d61bca96fa9e19cefd8f5af3416f7d6c21e950976d2ad8bbc9",
+        "junit_telemetry_sha256": "a78592fb399e10c582d241f6b885d0ae47cf4d598088088eb6d4ec058713db34"
+      },
+      {
+        "name": "repo-backed-unit-ops",
+        "exit_code": 0,
+        "seconds": 10.04,
+        "coverage_sha256": "e60f97972ddd8aec9940870b6f47a646d12523a8a03083939ae2cdc0082aab1d",
+        "junit_telemetry_sha256": "30f8b8ef40b65eff7c7ba541deebe2e372563d4cb212285e7569d7e678b2c21d"
+      },
+      {
+        "name": "unit-scripts-tooling-passport",
+        "exit_code": 0,
+        "seconds": 18.91,
+        "coverage_sha256": "1bc5bfecad456c8974dc3110a4f785b7604083ce7825e1f100ea9912acc5ea3f",
+        "junit_telemetry_sha256": "b9127711ef9f913506845153a04f388ef86e6c25555003ac46cbe6e4e1fdd166"
+      },
+      {
+        "name": "unit-scripts-tooling-debt-governance",
+        "exit_code": 0,
+        "seconds": 61.41,
+        "coverage_sha256": "f1a0533ed9d83a64f2c39a5d83d092fae35e56d47c69048ebaf275342df73bbf",
+        "junit_telemetry_sha256": "6c4152c522fc27f63ae522cb1c2bcfe2337cedd4ddc1e717c514a6b79eccc9d4"
+      },
+      {
+        "name": "unit-scripts-tooling-other",
+        "exit_code": 0,
+        "seconds": 140.56,
+        "coverage_sha256": "d451c9fa56ae64e7dfcd2a998f2dd29984dd88acf75dc5e41ddd6f828d43aaa0",
+        "junit_telemetry_sha256": "e355777e4795f88bab49661c40a95018d98cd51182174fe48923cdebcff57365"
+      },
+      {
+        "name": "unit-filesystem-contracts",
+        "exit_code": 0,
+        "seconds": 211.04,
+        "coverage_sha256": "8239d482c9fe010e61c73decb6aed697637846ec3d227365765dcd8b93046475",
+        "junit_telemetry_sha256": "211e7d8c9a1c58b63d3451f4d75f245b095bf9fca32a9685c351acf61ae4b4e7"
+      },
+      {
+        "name": "unit-subprocess-backed",
+        "exit_code": 0,
+        "seconds": 81.03,
+        "coverage_sha256": "fe01377638d24c7ac8332ebcca6fa43c548e11c937989eacf653ab29263278d5",
+        "junit_telemetry_sha256": "9362bbdcc5f328aedc859b9db44f47cb0928f952fca48338c6ad8de6e263cb36"
+      },
+      {
+        "name": "unit-domain",
+        "exit_code": 0,
+        "seconds": 136.42,
+        "coverage_sha256": "08364ec95b798b21d758f7c6da26fff33075983af5eadc859158aec10bb2ac3d",
+        "junit_telemetry_sha256": "007c456ad742ad47c9d9efff9378626f0aaf501892f5b9a33dd6cf40f4965dc3"
+      },
+      {
+        "name": "unit-application",
+        "exit_code": 0,
+        "seconds": 72.38,
+        "coverage_sha256": "ae2021e4dbd1c65deddf28564afd5079addf7b9554e374a2855491f7d7eb0eda",
+        "junit_telemetry_sha256": "c50071287cfe60f6ae31c654f081600929fbc841030c15b269f6efe0cec5faf6"
+      },
+      {
+        "name": "unit-infrastructure",
+        "exit_code": 0,
+        "seconds": 61.17,
+        "coverage_sha256": "a4427768c385adec07f0236f5db80151b99a7aadf32b529947595404cfc668ea",
+        "junit_telemetry_sha256": "dd70deae50cbc1f575f898ae3de32529a7e69757408e9eb95fb2e9b6ea4e4f79"
+      },
+      {
+        "name": "unit-other",
+        "exit_code": 0,
+        "seconds": 87.92,
+        "coverage_sha256": "cc5315763df1e200127bafa55d6ccb0b85828d2350c0c832bdcf3b8cf184eb9c",
+        "junit_telemetry_sha256": "9213bd7359465ccf9545fbbbc9cb247712e30fd73d4f3a332c576df5fc82ea05"
+      },
+      {
+        "name": "integration",
+        "exit_code": 0,
+        "seconds": 293.11,
+        "coverage_sha256": "0ce626ee6a2fd6ea9fa47d763e4e179f6ee180f89e66179faf52ea18a41a2783",
+        "junit_telemetry_sha256": "7c4e477f96464e00f692a0c4a57a00a2089909eb8a292f8cc39b705786314ca7"
+      },
+      {
+        "name": "security",
+        "exit_code": 0,
+        "seconds": 15.11,
+        "coverage_sha256": "e452fc992c98a5cccaf0d6ec3965e27c8f51c228fa112b86c0fa402119fcbbbd",
+        "junit_telemetry_sha256": "8a2b877006a0f2ed41fc513f5db1dca7c4a88b2a17a3d3f614f8cba709b4089a"
+      },
+      {
+        "name": "serial",
+        "exit_code": 0,
+        "seconds": 126.88,
+        "coverage_sha256": "a6a84c251958a2aca25e0cd530a4f5444151c56f28bb68386439739fca4cd318",
+        "junit_telemetry_sha256": "2f37dbd0f83a817001a99bf5a4739f8d7e476fc753432b5958adef3d9661c4d1"
+      }
+    ]
+  }
+}

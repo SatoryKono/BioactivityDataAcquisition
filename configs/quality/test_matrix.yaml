@@ -978,7 +978,7 @@ mutation_testing:
       enforced: true
     application_control_plane:
       paths_to_mutate: src/bioetl/application/services/control_plane/
-      tests_dir: tests/unit/application/services/control_plane/
+      tests_dir: tests/unit/application/
       min_score: 60
       enforced: true
     application_export_manifests:

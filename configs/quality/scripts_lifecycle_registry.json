@@ -781,6 +781,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-12-01"
     },
+    "scripts/engineering/ci/replay_parity_inputs.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the opt-in pytest fixture plugin consumed by the CircleCI replay-parity lane; it supplies deterministic operational inputs and has no standalone CLI. Keep full byte-level output comparison in the owning lane.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-31"
+    },
     "scripts/engineering/ci/report_docker_actions_timing.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the implementation behind python -m scripts.engineering.ci docker-timing; keep contributor execution routed through the unified CI dispatcher and do not count it as a separate active script.",
