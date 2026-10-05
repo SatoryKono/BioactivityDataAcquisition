@@ -6,6 +6,12 @@ import baseConfig, { type Env } from './.config/webpack/webpack.config.ts';
 
 export default async (env: Env) => {
   const config = await baseConfig(env);
+  // Preserve the scaffold's public-path injection on Windows and POSIX paths.
+  const rules = config.module?.rules?.map((rule) =>
+    rule && typeof rule === 'object' && rule.test instanceof RegExp &&
+    rule.test.source === 'src\\/(?:.*\\/)?module\\.tsx?$'
+      ? { ...rule, test: /src[\\/](?:.*[\\/])?module\.tsx?$/ }
+      : rule);
   const manifest = JSON.parse(fs.readFileSync(path.resolve('../../tooling/router-v7-bridge/host-image.json'), 'utf8'));
   const releaseDate: string = manifest.plugin_release_date;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(releaseDate) || new Date(releaseDate).toISOString().slice(0, 10) !== releaseDate) {
@@ -25,5 +31,5 @@ export default async (env: Env) => {
     }])
     : plugin);
   // This plugin has one entrypoint; absolute Windows paths are not glob patterns.
-  return { ...config, plugins, entry: { module: path.resolve('src/module.tsx') } };
+  return { ...config, module: { ...config.module, rules }, plugins, entry: { module: path.resolve('src/module.tsx') } };
 };

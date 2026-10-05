@@ -1,11 +1,11 @@
 {
-  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:b9bd805ebb38d8065fd2e50a4bcf794d2c01bb431bd962984b64a7b5da2cf6e1",
-  "parent_image": "satorykono/bioetl-grafana-router7-canvas@sha256:abace6d89d5f03680f40edcce05b7a05e2dd1b688ecd17a455d19bd9752c3609",
+  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:290cabdde90eb2e783e7ce1c513c9e32039287c5b3f22858b65c7a726eaf6f57",
+  "parent_image": "satorykono/bioetl-grafana-router7-canvas@sha256:0f754416e7b8ed27fc0894d64aaf0ce82bad4b078d1b31050de5af0e5e7ff02c",
   "grafana_version": "13.2.3",
   "router_version": "7.18.4",
-  "dockerfile_sha256": "cc62ffaba165fc1eaa612f227daa4b1555e03e37597afc5108de2b3139ed4590",
+  "dockerfile_sha256": "3b8d3c86677e3f5be0526bfe8d9436d48bcc1cf47237b8a5914fece349f428e5",
   "installed_bioetl_plugins": [
     "bioetl-selectorshell-panel"
   ],
-  "acceptance": "Candidate: exact parent filesystem with Scenes removed. Managed rollout requires complete browser and source/runtime acceptance."
+  "acceptance": "Fresh source-built parent with Scenes removed; managed rollout requires complete browser and source/runtime acceptance."
 }

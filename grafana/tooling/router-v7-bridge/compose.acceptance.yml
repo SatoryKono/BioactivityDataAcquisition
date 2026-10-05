@@ -2,6 +2,6 @@
 # Merge with docker-compose.monitoring.yml; this is not the default runtime.
 services:
   grafana:
-    image: satorykono/bioetl-grafana-router7-canvas@sha256:abace6d89d5f03680f40edcce05b7a05e2dd1b688ecd17a455d19bd9752c3609
+    image: satorykono/bioetl-grafana-router7-canvas@sha256:0f754416e7b8ed27fc0894d64aaf0ce82bad4b078d1b31050de5af0e5e7ff02c
     environment:
       - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=bioetl-scenes-app,bioetl-selectorshell-panel
