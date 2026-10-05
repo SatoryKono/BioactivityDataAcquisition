@@ -997,6 +997,10 @@ jobs:
           destination: composite-closeout
 
   proof-closeout:
+    parameters:
+      task-id:
+        type: string
+        default: architecture-coverage-11854-11899
     docker:
     - image: cimg/python:3.12
     resource_class: medium
@@ -1038,7 +1042,7 @@ jobs:
           \        head_before=head, head_after=head, log=str(log))\n    (out / (name + \".record.json\")).write_text(json.dumps(record,\
           \ indent=2) + \"\\n\", encoding=\"utf-8\")\n    print(f\"[closeout] {name} exit={result.returncode}\", flush=True)\n\
           \    return record\n\nprefix = [\"python\", \"-m\", \"scripts.engineering.qa\", \"proof-or-stop\"]\ncommon\
-          \ = [\"--run-id\", run_id, \"--task-id\", \"architecture-coverage-11854-11899\",\n          \"--claim\"\
+          \ = [\"--run-id\", run_id, \"--task-id\", \"<< parameters.task-id >>\",\n          \"--claim\"\
           , \"ready_to_merge\", \"--ci-run-id\", ci_id]\nassert execute(\"plan\", prefix + [\"plan\", *common, \"\
           --output\", str(out / \"plan.json\")])[\"exit_code\"] == 0\n(out / \"ci-identity.json\").write_text(json.dumps({\n\
           \    key: os.environ[key] for key in (\"CIRCLE_SHA1\", \"CIRCLE_BUILD_URL\", \"CIRCLE_BUILD_NUM\",\n   \
@@ -1286,3 +1290,11 @@ workflows:
               only:
                 - codex/architecture-coverage-final-20261004
                 - codex/config-root-main-acceptance-20261005
+
+  rf023-closeout:
+    jobs:
+      - proof-closeout:
+          task-id: rf023-11906-11907
+          filters:
+            branches:
+              only: codex/pipeline-green-gates-rf022-snapshot-fix
