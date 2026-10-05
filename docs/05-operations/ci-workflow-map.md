@@ -99,8 +99,10 @@ pipeline 187 started on main `95ca0a67f21a7055ad1b671f9ff57bd5ff39b1fb`;
 the trigger was then restored to Sunday 00:00–00:59 UTC, one run per hour,
 all months and Scheduling System attribution. Workflow-runner job 2885 passed
 with 163/222 mutants killed (73.42%, threshold 60%); export-manifests job 2886
-passed with 201/313 killed (64.22%, threshold 60%). Domain and control-plane
-acceptance remain pending. Each job retains its own target report directory.
+passed with 201/313 killed (64.22%, threshold 60%). Control-plane job 2888
+failed its unchanged 60% gate: 4,020 killed, 5,673 survived, 3 timeouts
+(41.49% under the existing formula), plus 2,787 mutants without tests.
+Domain acceptance remains pending. Each job retains its own target report directory.
 
 On 2026-10-05, `bioetl-docs-kpi-weekly` was registered for `main`,
 `ci-lane=docs-kpi`, Monday 04:00–04:59 UTC, one run, all months, Scheduled Actor.
