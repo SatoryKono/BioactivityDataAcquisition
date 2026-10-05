@@ -36,19 +36,25 @@ def docker_path():
     raise ValueError("Docker is absent from the fixed trusted locations")
 
 
-def run(*args):
-    return subprocess.check_output([docker_path(), *args], text=True)
+def immutable_reference(image):
+    if not (IMAGE.fullmatch(image) or CONFIG_ID.fullmatch(image)):
+        raise ValueError("Unsupported immutable image reference")
+    return image
 
 
 def inspect(image):
-    if not (IMAGE.fullmatch(image) or CONFIG_ID.fullmatch(image)):
-        raise ValueError("Unsupported immutable image reference")
-    return json.loads(run("image", "inspect", image))[0]
+    reference = immutable_reference(image)
+    return json.loads(subprocess.check_output(
+        [docker_path(), "image", "inspect", "--", reference], text=True
+    ))[0]
 
 
 def records(image):
-    inspect(image)  # Reject flags or arbitrary references before invoking Docker.
-    container = run("create", "--entrypoint", "/bin/true", image).strip()
+    reference = immutable_reference(image)
+    container = subprocess.check_output(
+        [docker_path(), "create", "--entrypoint", "/bin/true", "--", reference],
+        text=True,
+    ).strip()
     if not re.fullmatch(r"[0-9a-f]{64}", container):
         raise ValueError("Invalid container ID")
     try:

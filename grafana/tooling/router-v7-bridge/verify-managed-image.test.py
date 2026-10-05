@@ -2,6 +2,7 @@
 import copy
 import importlib.util
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 spec = importlib.util.spec_from_file_location("managed_image", Path(__file__).with_name("verify-managed-image.py"))
@@ -59,6 +60,15 @@ class ManagedImageTests(unittest.TestCase):
         self.delivered["RepoDigests"] = []
         with self.assertRaisesRegex(ValueError, "registry digest"):
             self.verify()
+
+    def test_cli_flags_and_mutable_references_are_rejected_before_docker(self):
+        for value in ("--privileged", "--help", "grafana:latest", self.declared + " --privileged"):
+            with self.subTest(reference=value), patch.object(managed.subprocess, "check_output") as command:
+                with self.assertRaisesRegex(ValueError, "immutable image reference"):
+                    managed.inspect(value)
+                with self.assertRaisesRegex(ValueError, "immutable image reference"):
+                    managed.records(value)
+                command.assert_not_called()
 
 
 if __name__ == "__main__":
