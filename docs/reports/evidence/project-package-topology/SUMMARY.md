@@ -1,3 +1,5 @@
+Source-only refresh (2026-10-05, main 95ca0a67 merge): source_tree_sha256 `2f462961d6e80105c964f5d536a956def9a7b4c66af316bad70abfb0f6b226a1`. Incoming normalization changes require a fresh complete coverage measurement; previous receipts remain historical.
+
 Coverage refresh (2026-10-05, RF-023): complete 17-shard measurement on `74aa6f87d40b5d3661acf5fa45e6f351fd0ca3c2`, source `e7066391216bdd39f5657961113056a22e9b99f84184fa46b45314e0c44f43ed`. Canonical nonregressing adoption retains 81 visible raw module regressions; retained historical values are not fresh measurements. Portable coverage/JUnit evidence is in `reports/quality/proof-or-stop/rf023-74aa6f87-complete-coverage`. This local measurement is not CI ADMIT or full-suite acceptance.
 
 Source-only refresh (2026-10-05, replay size limits): source_tree_sha256 `e7066391216bdd39f5657961113056a22e9b99f84184fa46b45314e0c44f43ed`. Reuse the existing normalized-row protocol and bind verified JSON reads to their envelope. This is not a new coverage measurement.
@@ -15,6 +17,10 @@ Source-only refresh (2026-10-05, RF-023): sealed target mapping codecs now use t
 `source_tree_sha256=d141e4aaac41d30aa6d90f53dff69fe99d2bf280335a394b41d4ec298485dd08`
 
 `source_module_count=2552`
+
+Source-only refresh (2026-10-05): shared EFO normalization identity revision is bound to the current source tree. This is not a new coverage measurement or topology audit. Historical measurements below are unchanged.
+
+`source_tree_sha256=3786dc15afe014d3827d7f940c7cec030d02c993d78487b403eee55b4bdae29b`
 
 Source-only refresh (2026-10-04): removed the approved LoggerPort alias and restored type-only workflow imports. This rebind does not represent a new coverage measurement; historical measurement records below remain unchanged.
 

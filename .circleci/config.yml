@@ -13,7 +13,7 @@ version: 2.1
 parameters:
   ci-lane:
     type: enum
-    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation]
+    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance, e2e-replay, coverage-closeout]
     default: pr-gate
   include-hypothesis:
     type: boolean
@@ -77,6 +77,128 @@ commands:
             fi
 
 jobs:
+  architecture-docs:
+    docker:
+    - image: cimg/python:3.13
+    resource_class: medium
+    environment: {}
+    steps:
+    - checkout
+    - setup-python-uv:
+        python-version: '3.13'
+        extras: dev tracing
+    - run:
+        name: architecture-docs canonical checks
+        command: 'timeout 15m bash -euo pipefail \<<''LANE''
+
+          mkdir -p reports/architecture-docs/junit
+
+          uv run --frozen --no-build python -m scripts.docs passports generate --output-root /tmp/bioetl-passports --manual-root docs/04-reference/passports/manual --source-revision "$CIRCLE_SHA1"
+
+          uv run --frozen --no-build pytest tests/unit/scripts/docs/passports tests/architecture/test_passport_documentation_projections.py --junitxml=reports/architecture-docs/junit/passports.xml
+
+          uv run --frozen --no-build python scripts/diagrams/render/generate_package_family_class_diagrams.py --check
+
+          uv run --frozen --no-build python -m scripts.engineering.qa.generate_architecture_dependency_map --update
+
+          git status --short docs/02-architecture/generated > reports/architecture-docs/status.txt
+
+          git diff --stat -- docs/02-architecture/generated > reports/architecture-docs/summary.txt
+
+          git diff --exit-code -- docs/02-architecture/generated
+
+          LANE
+
+          '
+    - store_test_results:
+        path: reports/architecture-docs/junit
+    - store_artifacts:
+        path: reports/architecture-docs
+        destination: architecture-docs
+    - store_artifacts:
+        path: docs/02-architecture/generated
+        destination: architecture-dependency-map
+    - store_artifacts:
+        path: /tmp/bioetl-passports
+        destination: executable-passports
+  provider-contract-drift:
+    docker:
+    - image: cimg/python:3.13
+    resource_class: medium
+    environment:
+      VCR_RECORD_MODE: none
+    steps:
+    - checkout
+    - setup-python-uv:
+        python-version: '3.13'
+        extras: dev tracing
+    - run:
+        name: provider-contract-drift canonical checks
+        command: 'timeout 15m bash -euo pipefail \<<''LANE''
+
+          mkdir -p reports/provider-contract-drift/junit
+
+          uv run --frozen --no-build python -m pytest tests/contract/test_provider_contract_drift_helper.py tests/contract/test_provider_contract_snapshot_registry.py tests/contract/test_provider_contract_replay_registry.py tests/contract/test_provider_contract_drift_replay.py tests/unit/application/services/test_export_manifests.py -q --tb=short --junitxml=reports/provider-contract-drift/junit/replay.xml
+
+          uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog
+
+          uv run --frozen --no-build python -m scripts.docs generate-pipeline-normalization-matrix --check
+
+          uv run --frozen --no-build python -m scripts.engineering.qa report-provider-contract-drift --output reports/quality/provider-contract-drift-report.json --fail-on breaking
+
+          test -s reports/quality/provider-contract-drift-report.json
+
+          LANE
+
+          '
+    - store_test_results:
+        path: reports/provider-contract-drift/junit
+    - store_artifacts:
+        path: reports/provider-contract-drift
+        destination: provider-contract-drift
+    - store_artifacts:
+        path: reports/quality/provider-contract-drift-report.json
+        destination: provider-contract-drift-report
+  consolidation:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Produce canonical manifest hashes
+          command: |
+            timeout 10m bash -euo pipefail -c '
+              mkdir -p reports/gates/artifacts
+              find tests -type f -print0 | sort -z | xargs -0 -r sha256sum > reports/gates/artifacts/tests.sha256
+              find src -type f -print0 | sort -z | xargs -0 -r sha256sum > reports/gates/artifacts/src.sha256
+              test -s reports/gates/artifacts/tests.sha256
+              test -s reports/gates/artifacts/src.sha256
+            '
+      - store_artifacts:
+          path: reports/gates/artifacts
+          destination: canonical-manifest-hashes
+
+  branch-hygiene:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: Generate report-only branch inventory
+          command: |
+            set -euo pipefail
+            : "${GITHUB_TOKEN:?restricted read-only context must provide GITHUB_TOKEN}"
+            timeout 15m uv run --frozen --no-build python -m scripts.engineering.repo \
+              generate-branch-cleanup-inventory \
+              --output reports/quality/branch-hygiene-latest.json
+            test -s reports/quality/branch-hygiene-latest.json
+      - store_artifacts:
+          path: reports/quality/branch-hygiene-latest.json
+          destination: branch-hygiene-inventory
+
   mutation-testing:
     parameters:
       target:
@@ -103,7 +225,7 @@ jobs:
         command: |
           export WORKSPACE_ROOT="$PWD"
           export PYTHONPATH="$PWD/src:$PWD${PYTHONPATH:+:$PYTHONPATH}"
-          uv run --frozen --no-build python - <<'PY'
+          uv run --frozen --no-build python - \<<'PY'
           import os
           from pathlib import Path
 
@@ -172,7 +294,7 @@ jobs:
         command: |
           export WORKSPACE_ROOT="$PWD"
           export PYTHONPATH="$PWD/src:$PWD${PYTHONPATH:+:$PYTHONPATH}"
-          python - <<'PY'
+          python - \<<'PY'
           import json
           import os
           import sys
@@ -413,6 +535,86 @@ jobs:
             bash scripts/ops/support/skills/check_skills_mirror.sh --check
             bash scripts/ops/support/skills/check_ai_skills_layout.sh
 
+  e2e-matrix-replay:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: medium
+    environment:
+      BIOETL_TEST_MODE: "true"
+      BIOETL_PIPELINE__HEALTH_CHECK_MODE: probe
+      VCR_RECORD_MODE: none
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+      - run:
+          name: Enforce three-run E2E replay and skip-rate contracts
+          command: |
+            set -euo pipefail
+            timeout 25m bash -eo pipefail \<<'E2E_REPLAY'
+            mkdir -p reports/e2e
+            for run in 1 2 3; do
+              set +e
+              VCR_RECORD_MODE=none uv run --frozen --no-build pytest \
+                tests/e2e/test_pipeline_matrix_e2e.py \
+                -k "test_pipeline_matrix_smoke" \
+                --record-mode=none \
+                -q --tb=short \
+                --junitxml="reports/e2e/matrix-smoke-run${run}.xml"
+              echo $? > "reports/e2e/pytest_exit_code_run${run}.txt"
+              set -e
+            done
+
+            mkdir -p reports/e2e
+            VCR_RECORD_MODE=none uv run --frozen --no-build pytest \
+              tests/e2e/test_chembl_activity_e2e.py \
+              -m "e2e_smoke and not benchmark and not memory" \
+              --record-mode=none \
+              -q --tb=short \
+              --junitxml=reports/e2e/chembl_activity_smoke.xml
+
+            # Expected total must match the active smoke matrix (not raw
+            # configs/entities/*.yaml count), which includes deferred exclusions.
+            EXPECTED_TOTAL="$(
+              uv run --frozen --no-build python -c \
+                "from tests.e2e.test_pipeline_matrix_e2e import ACTIVE_PIPELINE_CASES; print(len(ACTIVE_PIPELINE_CASES))"
+            )"
+            MAX_SKIPS="$(
+              uv run --frozen --no-build python -c \
+                "print(int(${EXPECTED_TOTAL} * 0.15))"
+            )"
+            uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \
+              --junit reports/e2e/matrix-smoke-run3.xml \
+              --expected-total "${EXPECTED_TOTAL}" \
+              --max-skips "${MAX_SKIPS}" \
+              --max-skip-rate 0.15 \
+              --markdown-out reports/e2e/matrix-smoke-summary.md
+
+            uv run --frozen --no-build python scripts/engineering/ci/check_e2e_rerun_stability.py \
+              --junit-glob "reports/e2e/matrix-smoke-run*.xml" \
+              --required-runs 3 \
+              --max-recurrent-infra-flaky 0 \
+              --max-recurrent-code-regression 0 \
+              --markdown-out reports/e2e/matrix-rerun-stability.md
+
+            fail=0
+            for run in 1 2 3; do
+              rc="$(cat "reports/e2e/pytest_exit_code_run${run}.txt")"
+              if [ "$rc" != "0" ]; then
+                echo "pytest matrix smoke run ${run} exited ${rc}"
+                fail=1
+              fi
+            done
+            if [ "$fail" != "0" ]; then
+              exit 1
+            fi
+            E2E_REPLAY
+      - store_test_results:
+          path: reports/e2e
+      - store_artifacts:
+          path: reports/e2e
+          destination: e2e-matrix-replay
+
   github-settings-review:
     docker:
       - image: cimg/python:3.13
@@ -421,6 +623,22 @@ jobs:
       - checkout
       - setup-python-uv:
           python-version: "3.13"
+      - run:
+          name: Install checksum-pinned GitHub CLI 2.102.0
+          command: |
+            set -euo pipefail
+            test "$(uname -m)" = x86_64
+            ARCHIVE="$(mktemp)"
+            DESTINATION="$(mktemp -d)"
+            trap 'rm -f "$ARCHIVE"; rm -rf "$DESTINATION"' EXIT
+            curl --fail --location --retry 3 \
+              https://github.com/cli/cli/releases/download/v2.102.0/gh_2.102.0_linux_amd64.tar.gz \
+              --output "$ARCHIVE"
+            printf '%s  %s\n' bb766f710eef8ede859c18578c72c327597cd4c8a85b06001b1f3843c6019386 "$ARCHIVE" | sha256sum --check -
+            tar -xzf "$ARCHIVE" -C "$DESTINATION"
+            mkdir -p "$HOME/.local/bin"
+            install -m 0755 "$DESTINATION/gh_2.102.0_linux_amd64/bin/gh" "$HOME/.local/bin/gh"
+            "$HOME/.local/bin/gh" --version
       - run:
           name: Collect read-only GitHub settings evidence
           command: |
@@ -812,12 +1030,48 @@ jobs:
               --threshold 10 --format python \
               --output "$PWD/reports/jscpd"
 
+  semantic-governance:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv:
+          extras: dev tracing
+      - run:
+          name: Semantic audit gates and regression tests
+          command: |
+            set -euo pipefail
+            export PATH="$HOME/.local/bin:$PATH"
+            timeout 10m bash -euo pipefail -c '
+              uv run --frozen --no-build python -m scripts.engineering.qa report-semantic-pipeline-audit --check
+              uv run --frozen --no-build python -m scripts.engineering.qa check-semantic-pair-budget --check --json
+              uv run --frozen --no-build python -m scripts.engineering.qa check-semantic-registry-drift --check --json
+              uv run --frozen --no-build python -m scripts.engineering.qa check-semantic-governance-policy --check --json
+              uv run --frozen --no-build python -m scripts.engineering.qa check-semantic-anchor-parity --check --json
+              uv run --frozen --no-build python -m scripts.engineering.qa check-generic-field-ownership --check --json
+              uv run --frozen --no-build python -m scripts.engineering.qa check-ontology-unit-semantics --check --json
+              uv run --frozen --no-build pytest -p no:benchmark --noconftest \
+                tests/integration/config/test_semantic_field_unification_contract.py \
+                tests/integration/config/test_semantic_governance_policy.py \
+                tests/integration/config/test_semantic_pair_matrix_budget.py \
+                tests/integration/config/test_semantic_anchor_parity.py \
+                -q --tb=short --junitxml=reports/quality/semantic-governance/junit.xml
+            '
+      - store_test_results:
+          path: reports/quality/semantic-governance
+      - store_artifacts:
+          path: reports/semantic_pipeline_audit
+          destination: semantic-pipeline-audit
+
   # --- Gate: generated-artifacts (path_scoped) ------------------------------------
   # Mirrors schema-governance.yml (generated schema artifacts + parity).
   schema-governance:
     docker:
       - image: cimg/python:3.12
     resource_class: small
+    environment:
+      CONTRACT_BASE_REVISION: << pipeline.git.base_revision >>
     steps:
       - checkout
       - setup-python-uv
@@ -829,6 +1083,36 @@ jobs:
             export PATH="$HOME/.local/bin:$PATH"
             uv run --frozen --no-build python -m scripts.schema generate-artifacts --check
             uv run --frozen --no-build python -m scripts.schema verify-schema-parity --mode blocking
+            git fetch --no-tags origin main:refs/remotes/origin/main
+            if [ "$CIRCLE_BRANCH" = main ]; then
+              BASE="$CONTRACT_BASE_REVISION"
+              if ! [[ "$BASE" =~ ^[0-9a-f]{40}$ ]]; then
+                BASE="$(git rev-parse HEAD~1)"
+              fi
+            else
+              BASE="$(git merge-base origin/main "$CIRCLE_SHA1")"
+            fi
+            STATUS=0
+            check_contract() { "$@" || STATUS=1; }
+            check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_contract_identity.py
+            check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_contract_registry.py
+            check_contract uv run --frozen --no-build python -m scripts.engineering.qa report-pipeline-config-contract-ownership-map --check
+            check_contract uv run --frozen --no-build python -m scripts.engineering.qa report-contract-coverage-matrix --check
+            check_contract uv run --frozen --no-build python -m scripts.engineering.ci.validate_schema_classifier_gate --base-sha "$BASE" --head-sha "$CIRCLE_SHA1"
+            check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_registry_dq_refs.py
+            exit "$STATUS"
+      - store_artifacts:
+          path: reports/quality/contract-identity-diagnostics.json
+      - store_artifacts:
+          path: reports/quality/contract-registry-diagnostics.json
+      - store_artifacts:
+          path: reports/quality/contract-schema-classifier-diagnostics.json
+      - store_artifacts:
+          path: reports/quality/contract-registry-dq-diagnostics.json
+      - store_artifacts:
+          path: reports/quality/contract-coverage-matrix.json
+      - store_artifacts:
+          path: reports/quality/pipeline-config-contract-ownership-map.json
 
   # --- Gate: commit-governance (path_scoped) ---------------------------------------
   # Mirrors commit-lint.yml (conventional commits on the PR range).
@@ -866,6 +1150,8 @@ jobs:
             export PATH="$HOME/.local/bin:$PATH"
             uv run --frozen --no-build python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check
             uv run --frozen --no-build python -m scripts.docs passports check
+            test -f docs/assets/javascripts/mermaid-init.js
+            test -f docs/assets/stylesheets/mermaid-responsive.css
             uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog
             uv run --frozen --no-build python -m scripts.engineering.qa report-dashboard-inventory --check --json
             uv run --frozen --no-build python -m scripts.engineering.repo check-versions
@@ -1033,7 +1319,7 @@ jobs:
           )\n    if clean != original:\n        path.write_text(clean, encoding=\"utf-8\")\n\ndef execute(name, command):\n\
           \    log = out / (name + \".log\")\n    started = datetime.now(UTC).isoformat()\n    clock = time.monotonic()\n\
           \    print(\"[closeout] start \" + name, flush=True)\n    with log.open(\"w\", encoding=\"utf-8\") as stream:\n\
-          \        result = subprocess.run(command, stdout=stream, stderr=subprocess.STDOUT, check=False)\n    duration\
+          \        result = subprocess.Popen(command, stdout=stream, stderr=subprocess.STDOUT)\n        while True:\n            try:\n                result.wait(timeout=60)\n                break\n            except subprocess.TimeoutExpired:\n                print(f\"[closeout] {name} running {int(time.monotonic() - clock)}s\", flush=True)\n    duration\
           \ = round((time.monotonic() - clock) * 1000)\n    sanitize(log)\n    assert subprocess.check_output([\"\
           git\", \"rev-parse\", \"HEAD\"], text=True).strip() == head\n    record = dict(command=command, cwd=str(root),\
           \ started_at=started,\n                  duration_ms=duration, exit_code=result.returncode,\n          \
@@ -1082,6 +1368,20 @@ jobs:
           \               \"--output\", str(out / \"verification.json\")])\nraise SystemExit(verification[\"exit_code\"\
           ] or coverage_record[\"exit_code\"])\nCLOSEOUT_PY\n"
     - run:
+        name: Export telemetry candidate from the complete producer
+        when: always
+        command: |
+          set -euo pipefail
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          export PYTHONPATH="$PWD/src" PYTHONUTF8=1
+          ROOT="reports/quality/proof-or-stop/circleci-closeout-${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:12}"
+          # Canonical validation rejects failed, partial, stale or substituted evidence.
+          python -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest "$ROOT/coverage/manifest.json"
+          mkdir -p "$ROOT/telemetry/configs/quality" "$ROOT/telemetry/docs/05-engineering" "$ROOT/telemetry/reports"
+          cp configs/quality/test_telemetry_baseline.yaml "$ROOT/telemetry/configs/quality/"
+          cp docs/05-engineering/test-telemetry-baseline.md "$ROOT/telemetry/docs/05-engineering/"
+          cp -R reports/test-telemetry "$ROOT/telemetry/reports/"
+    - run:
         name: Publish bounded sanitized execution evidence
         when: always
         command: "python - \\<<'ARTIFACT_PY'\nfrom pathlib import Path\nimport os\nimport shutil\nfrom xml.etree import\
@@ -1101,6 +1401,17 @@ jobs:
           \ = destination / \"junit\" / relative\n        junit.parent.mkdir(parents=True, exist_ok=True)\n      \
           \  shutil.copyfile(target, junit)\nprint(\"Published actual JSON/XML/log evidence; raw coverage SQLite and\
           \ caches remain on the CI host\")\nARTIFACT_PY\n"
+    - run:
+        name: Collect validated telemetry proposal
+        when: always
+        command: |
+          ROOT="reports/quality/proof-or-stop/circleci-closeout-${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:12}"
+          if [ -d "$ROOT/telemetry" ]; then
+            cp -R "$ROOT/telemetry" reports/quality/proof-or-stop/telemetry-candidate
+          fi
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/telemetry-candidate
+        destination: telemetry-candidate
     - store_test_results:
         path: reports/quality/proof-or-stop/circleci-artifacts/junit
     - store_artifacts:
@@ -1109,6 +1420,64 @@ jobs:
 
 workflows:
   version: 2
+  main-coverage-closeout:
+    when:
+      and:
+        - equal: [coverage-closeout, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - proof-closeout
+  e2e-replay:
+    when:
+      and:
+        - equal: [e2e-replay, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - e2e-matrix-replay
+  semantic-governance:
+    when:
+      and:
+        - equal: [semantic-governance, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - semantic-governance
+  architecture-docs:
+    when:
+      and:
+      - equal:
+        - architecture-docs
+        - << pipeline.parameters.ci-lane >>
+      - equal:
+        - main
+        - << pipeline.git.branch >>
+    jobs:
+    - architecture-docs
+  provider-contract-drift:
+    when:
+      and:
+      - equal:
+        - provider-contract-drift
+        - << pipeline.parameters.ci-lane >>
+      - equal:
+        - main
+        - << pipeline.git.branch >>
+    jobs:
+    - provider-contract-drift
+  consolidation:
+    when:
+      and:
+        - equal: [consolidation, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - consolidation
+  branch-hygiene:
+    when:
+      and:
+        - equal: [branch-hygiene, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - branch-hygiene:
+          context: bioetl-github-read-only
   pr-gate:
     when:
       equal: [pr-gate, << pipeline.parameters.ci-lane >>]
@@ -1160,6 +1529,8 @@ workflows:
           requires: [classify]
       - schema-governance:
           requires: [classify]
+      - semantic-governance:
+          requires: [classify]
       - commit-lint:
           requires: [classify]
       - docs-governance:
@@ -1181,6 +1552,7 @@ workflows:
             - security-scans
             - duplication
             - schema-governance
+            - semantic-governance
             - commit-lint
             - docs-governance
             - docker-build

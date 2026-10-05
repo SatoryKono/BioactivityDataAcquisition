@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-05T11:18:10.989576+00:00",
+  "generated_at": "2026-10-05T14:52:39.543931+00:00",
   "summary": {
     "total_scripts": 636,
     "status_counts": {
@@ -10116,7 +10116,7 @@
         },
         {
           "path": "tests/architecture/test_circleci_migration_contract.py",
-          "line": 14,
+          "line": 15,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pr_gate import evaluate_results, load_catalog"
         },
@@ -13459,25 +13459,25 @@
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 26,
+          "line": 27,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import check_test_audit_preflight as preflight"
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 28,
+          "line": 29,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_test_audit_preflight import ("
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 490,
+          "line": 491,
           "source_group": "tests",
           "text": "command = \"scripts/engineering/qa/check_test_audit_preflight.py --strict\""
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 517,
+          "line": 518,
           "source_group": "tests",
           "text": "assert \"check_test_audit_preflight.py --strict\" in body"
         }

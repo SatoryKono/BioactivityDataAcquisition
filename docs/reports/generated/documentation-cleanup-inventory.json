@@ -25837,7 +25837,35 @@
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
-      "path": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-adapters-http.mmd",
+      "path": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-adapters-http-part1.mmd",
+      "recommended_action": "generate-automatically",
+      "root_doc_kind": null,
+      "section": "02-architecture",
+      "status": "Generated",
+      "surface_family": "generated",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": "tracked_curated_generated_doc",
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": "diagram_generated_source",
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".mmd",
+      "freshness": "regenerate",
+      "generated_route": "architecture-diagram-package-family-sources",
+      "generated_route_exception": null,
+      "generator": "scripts/diagrams/render/generate_package_family_class_diagrams.py",
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/02-architecture/diagrams/class-diagrams/90-pkg-infrastructure-adapters-http-part2.mmd",
       "recommended_action": "generate-automatically",
       "root_doc_kind": null,
       "section": "02-architecture",
@@ -103027,7 +103055,7 @@
     "by_recommended_action": {
       "archive-after-github-state-check": 338,
       "archive-after-migration": 1011,
-      "generate-automatically": 1059,
+      "generate-automatically": 1060,
       "keep": 1234,
       "reconcile-with-github-state": 8
     },
@@ -103035,7 +103063,7 @@
       ".github": 354,
       "00-project": 272,
       "01-requirements": 4,
-      "02-architecture": 994,
+      "02-architecture": 995,
       "03-data-model": 2,
       "03-guides": 127,
       "04-reference": 334,
@@ -103060,18 +103088,18 @@
       "Active": 748,
       "Archived": 283,
       "Canonical": 75,
-      "Generated": 1059,
+      "Generated": 1060,
       "Working": 1485
     },
     "by_surface_family": {
       "active": 748,
       "archive": 283,
       "canonical": 75,
-      "generated": 1059,
+      "generated": 1060,
       "working": 1485
     },
     "by_tracking_state": {
-      "tracked": 3650
+      "tracked": 3651
     },
     "docs_reports_local_count": 57,
     "duplicate_group_count": 7,
@@ -103087,8 +103115,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3650,
+    "total_doc_like": 3651,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3650
+    "total_doc_like_tracked": 3651
   }
 }

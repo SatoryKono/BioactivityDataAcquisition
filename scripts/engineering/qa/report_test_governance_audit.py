@@ -256,7 +256,8 @@ def _compute_test_governance_source_tree_sha256(root_str: str) -> str:
 
     Digest bytes and file order match the historical sequential algorithm so
     committed ``source_tree_sha256`` values stay comparable. Only the file
-    reads are parallelized (latency-bound on cloud-synced Windows trees).
+    reads are parallelized in bounded batches (latency-bound on cloud-synced
+    Windows trees). Do not retain the entire fixture corpus in memory.
     """
     root = Path(root_str).resolve()
     governance_files = [
@@ -277,19 +278,24 @@ def _compute_test_governance_source_tree_sha256(root_str: str) -> str:
         relative = path.relative_to(root).as_posix()
         return relative, _read_source_tree_bytes(path)
 
-    workers = _source_tree_hash_workers(len(files))
-    if workers == 1:
-        payloads = [_read_one(path) for path in files]
-    else:
-        with ThreadPoolExecutor(max_workers=workers) as executor:
-            payloads = list(executor.map(_read_one, files, chunksize=16))
-
     digest = hashlib.sha256()
-    for relative, content in payloads:
+
+    def _update_digest(payload: tuple[str, bytes]) -> None:
+        relative, content = payload
         digest.update(relative.encode("utf-8"))
         digest.update(b"\0")
         digest.update(content)
         digest.update(b"\0")
+
+    workers = _source_tree_hash_workers(len(files))
+    if workers == 1:
+        for path in files:
+            _update_digest(_read_one(path))
+    else:
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            for start in range(0, len(files), workers):
+                for payload in executor.map(_read_one, files[start : start + workers]):
+                    _update_digest(payload)
     return digest.hexdigest()
 
 
