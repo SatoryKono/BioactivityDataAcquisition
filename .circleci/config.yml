@@ -1658,3 +1658,4 @@ workflows:
                 - codex/architecture-11854-postmerge-20261005
                 - codex/config-root-main-acceptance-20261005
                 - codex/config-root-postmerge-20261005
+                - codex/architecture-meta-closeout-20261005
