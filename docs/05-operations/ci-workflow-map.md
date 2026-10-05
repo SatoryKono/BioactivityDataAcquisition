@@ -40,6 +40,12 @@ and one missing VCR catalog owner. Those artifacts were refreshed after the run;
 this is not a claim of green main or successful Proof-or-Stop closeout.
 The temporary coverage-producer branch filter was removed after this measurement;
 normal architecture and test gates remain required for the next PR/main runs.
+The repository permits squash merges only. Since a squash does not preserve the
+branch producer as a main ancestor, final main adoption uses the isolated
+`ci-lane=coverage-closeout` on `main`, then a separate baseline-only change.
+This explicit lane runs the canonical 17-shard producer and Proof-or-Stop checks;
+it is not part of a normal PR/default-main run. Do not rewrite source identity
+to a squash SHA or weaken the ancestor guard to avoid this measurement.
 
 The map above records the legacy Actions inventory; it is not evidence that
 Actions are running. Actions are disabled and billing restoration is out of scope.
