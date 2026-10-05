@@ -383,7 +383,9 @@ def test_mutation_preserves_targets_and_requires_schedule_trigger():
         assert new["threshold"] == old["threshold"]
     assert "pipeline.trigger_source" not in str(workflow)
     # Control-plane callers and regression tests also live outside its subdirectory.
-    control_plane = next(job for job in actual if job["target"] == "application-control-plane")
+    control_plane = next(
+        job for job in actual if job["target"] == "application-control-plane"
+    )
     selected_root = ROOT / control_plane["tests-dir"]
     for caller_test in (
         "tests/unit/application/services/test_run_manifest_service.py",
