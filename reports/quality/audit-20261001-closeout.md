@@ -4,10 +4,20 @@
 
 The eight closed RF stages and their immutable issue evidence are recorded in the
 [verified child matrix](proof-or-stop/architecture-coverage-11854-11899/architecture-program-child-matrix-verified.json).
-All eight merged commits were rechecked as ancestors of `e51699ee734832bfae4bd850cc4f9ae48b67232e`.
+All eight merged commits were rechecked as ancestors of `3b11b223774c0b7bef4f306fd8cc45326a635b53`.
 The architecture scope remains explicit dependencies, source-bound governance,
 and the existing layer/port/hotspot contracts. No new score targets, debt budgets,
 thresholds or exemptions are introduced.
+
+The latest complete producer measured the integrated tree
+`3b11b223774c0b7bef4f306fd8cc45326a635b53`, including main `95ca0a67f21a7055ad1b671f9ff57bd5ff39b1fb`
+and the reviewed VCR whole-token matching repair. All 17 groups passed:
+32,877 passed, 187 skipped, zero failures/errors, 99.70% line and 94.34% branch
+coverage. The [integrated measurement summary](proof-or-stop/architecture-11854-postmerge/measurement-3b11b22.summary.json)
+binds the untouched raw coverage, XML, JUnit and manifest archive. Trust remains
+`local_single_host`. The 139 owning tests passed with no skips after integration;
+they include the repair of a test that evicted a parent package while retaining
+cached child modules. Previous measurements below retain their original SHAs.
 
 The complete W48 producer measured main `c61913580698f70b181ae3e9ac852c631f02a878`:
 17 successful groups, 32,866 passed, 187 skipped, no failures/errors, 99.70% line
