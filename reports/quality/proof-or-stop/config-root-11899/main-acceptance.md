@@ -118,3 +118,16 @@ measures 100%; retained module percentages have not been lowered. No global
 coverage-nonregression claim is made. Post-merge owning contracts: 96 passed,
 zero skips; full docs verification exited 0. A complete final architecture
 run and independent CI lifecycle acceptance still remain pending.
+
+
+## Completed architecture and passport provenance repair
+
+Full architecture on 00bb08174dacc7884e5272b1b647ed34fed12265 terminated
+with exit 0: 4,928 passed, 76 skipped, zero failures/errors. The JUnit and
+terminal command record are preserved. CircleCI job 2047 separately exposed
+stale passport source_revision after main PR #11935. Canonical regeneration
+changes 82 outputs, keeps all 54 changed generated JSON semantic hashes, and
+binds provenance to c61913580698f70b181ae3e9ac852c631f02a878. All 112
+passport outputs pass their owning check; repeated full docs verification
+exits 0. This docs-only repair does not change the W48 source/test cohort.
+Independent acceptance on the final delivery SHA is still pending.

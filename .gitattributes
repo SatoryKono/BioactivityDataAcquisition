@@ -63,3 +63,4 @@ reports/quality/proof-or-stop/config-root-11899/full-coverage-wave-48/** -text w
 reports/quality/proof-or-stop/config-root-11899/*repaired-acceptance* -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 reports/quality/proof-or-stop/config-root-11899/*interrupted-acceptance* -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 reports/quality/proof-or-stop/config-root-11899/*postmerge-acceptance* -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+reports/quality/proof-or-stop/config-root-11899/circleci-2047-docs.log -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
