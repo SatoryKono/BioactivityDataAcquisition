@@ -1,0 +1,39 @@
+{
+  "argv": [
+    "python",
+    "-m",
+    "scripts.engineering.qa",
+    "report-debt-governance-gates",
+    "--check"
+  ],
+  "command": "python -m scripts.engineering.qa report-debt-governance-gates --check",
+  "cwd": "/home/circleci/project",
+  "duration_ms": 13184,
+  "evidence_kind": "debt",
+  "execution_attestation": "ci_identity",
+  "exit_code": 1,
+  "follow_up": null,
+  "output_digest": "dd78149b3f214e6eec46e0dcc8c6a007b7dad3991d4e41bc578bd15b0eb05b23",
+  "producer": "debt_governance_gates",
+  "receipt_digest": "328b654590cef951430a523001839d7fd070b62bda79c49a2c8d19cb3ab84bc3",
+  "receipt_id": "debt",
+  "repository": {
+    "branch": "main",
+    "ci_run_id": "https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2772",
+    "repo_id": "bioactivitydataacquisition",
+    "worktree_id": "dda4ac9a21114761"
+  },
+  "skip_reason": null,
+  "source": {
+    "command_set_hash": "011a92ddf89dff93f4280e5689dd904c1c7d88aa3c808bb6adc255f80ec8a209",
+    "dirty": false,
+    "head_sha": "95ca0a67f21a7055ad1b671f9ff57bd5ff39b1fb",
+    "material_hash": "9aca4a1d314e25b22a66e44de9a168b2540829136284e53f2aea497aa0aa435d",
+    "policy_hash": "c4432025d75ea8fc9bf1c55dc655273239715b7cc94366e8eadb5c085a127c2b",
+    "task_diff_hash": "b47deb3f0905ea0363728a0946a31463e794f7ae42d3c6652f24fb557fa7e7f0",
+    "untracked_paths": []
+  },
+  "started_at": "2026-10-05T13:39:08.834718+00:00",
+  "status": "fail",
+  "task_id": "architecture-coverage-11854-11899"
+}

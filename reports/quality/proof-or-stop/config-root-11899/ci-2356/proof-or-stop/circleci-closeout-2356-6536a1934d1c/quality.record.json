@@ -1,0 +1,18 @@
+{
+  "command": [
+    "python",
+    "-m",
+    "scripts.engineering.ci.quality_integral_gate",
+    "--coverage-xml",
+    "/home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-2356-6536a1934d1c/coverage/coverage.xml",
+    "--output",
+    "/home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-2356-6536a1934d1c/quality.json"
+  ],
+  "cwd": "/home/circleci/project",
+  "started_at": "2026-10-05T11:43:13.313340+00:00",
+  "duration_ms": 945188,
+  "exit_code": 0,
+  "head_before": "6536a1934d1ce4459a9ed25f4f1eade134dd5ba3",
+  "head_after": "6536a1934d1ce4459a9ed25f4f1eade134dd5ba3",
+  "log": "/home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-2356-6536a1934d1c/quality.log"
+}
