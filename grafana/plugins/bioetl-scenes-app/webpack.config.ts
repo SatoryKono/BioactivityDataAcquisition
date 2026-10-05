@@ -1,17 +1,13 @@
 import path from 'path';
 import fs from 'fs';
 import ReplaceInFileWebpackPlugin from 'replace-in-file-webpack-plugin';
+import { portablePublicPathRules } from '../webpack-public-path';
 
 import baseConfig, { type Env } from './.config/webpack/webpack.config.ts';
 
 export default async (env: Env) => {
   const config = await baseConfig(env);
-  // Preserve the scaffold's public-path injection on Windows and POSIX paths.
-  const rules = config.module?.rules?.map((rule) =>
-    rule && typeof rule === 'object' && rule.test instanceof RegExp &&
-    rule.test.source === 'src\\/(?:.*\\/)?module\\.tsx?$'
-      ? { ...rule, test: /src[\\/](?:.*[\\/])?module\.tsx?$/ }
-      : rule);
+  const rules = portablePublicPathRules(config.module?.rules);
   const manifest = JSON.parse(fs.readFileSync(path.resolve('../../tooling/router-v7-bridge/host-image.json'), 'utf8'));
   const releaseDate: string = manifest.plugin_release_date;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(releaseDate) || new Date(releaseDate).toISOString().slice(0, 10) !== releaseDate) {

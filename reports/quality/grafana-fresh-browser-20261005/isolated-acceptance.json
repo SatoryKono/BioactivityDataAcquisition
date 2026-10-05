@@ -17,6 +17,15 @@
     ],
     "viewports": [
       [
+        1024,
+        768
+      ]
+    ],
+    "full_screen_panel_checks": 10,
+    "normal_dashboard_checks": 10,
+    "field_not_found": false,
+    "requested_viewports": [
+      [
         1280,
         720
       ],
@@ -25,9 +34,7 @@
         768
       ]
     ],
-    "full_screen_panel_checks": 10,
-    "normal_dashboard_checks": 10,
-    "field_not_found": false
+    "viewport_note": "Original captures remained 1024x768; their requested 1280x720 labels are not accepted as normal-viewport proof."
   },
   "scenes_routes": 6,
   "deep_link_context_and_back_forward": "PASS",
@@ -217,5 +224,25 @@
         "bytes": 3223
       }
     ]
+  },
+  "viewport_evidence_correction": {
+    "captured_source_commit": "bc2edfc743d15e4435aaa9028ae5d0a5844eecdd",
+    "published_comment": "https://github.com/SatoryKono/BioactivityDataAcquisition/pull/11952#issuecomment-6002653966",
+    "originals_archive": "https://github.com/user-attachments/files/33077931/bioetl-verified-viewport-acceptance-bc2edfc7.zip",
+    "archive_sha256": "28121b69dec755ca0a8200edcf1410d47e7a60f47018ef958754e4b908df8ea6",
+    "checks": 20,
+    "viewports": [
+      [
+        1280,
+        720
+      ],
+      [
+        1024,
+        768
+      ]
+    ],
+    "requested_equals_DOM_equals_JPEG": true,
+    "original_archive_retained": true,
+    "closure": "NOT CLOSED"
   }
 }

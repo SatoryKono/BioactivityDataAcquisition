@@ -25,8 +25,9 @@
     "grafana/plugins/bioetl-scenes-app/src/kernel/presentation.ts": "d9148fd2a974b6d9d972887f25fe3578ca34f0511a995ecf61a113f93e168c0e",
     "grafana/plugins/bioetl-selectorshell-panel/package.json": "b24d19356ec98f54e76743f1d7194f237ee22316bb0f4b348fef8b1996f626d4",
     "grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.tsx": "9f8962b1bbe000247a588fa2c1b6cb91e0ab22f96b03beb1e9dcb2ec939a5222",
-    "grafana/plugins/bioetl-selectorshell-panel/webpack.config.ts": "5158870e52ba1ac6e7d94e7716e6bf03c681177576bd7975c45fb3eddeca2979",
-    "grafana/plugins/bioetl-scenes-app/webpack.config.ts": "a34ef914983e2e59c194eaf4613721cc6dc96a811c882814c15909d8863743d9"
+    "grafana/plugins/bioetl-selectorshell-panel/webpack.config.ts": "ca7f2fe8a6a3496033f80946c3b11a9066ef95ab90783235ef5b8cd4fc6cb561",
+    "grafana/plugins/bioetl-scenes-app/webpack.config.ts": "8f32f84184967d9c7d2344e3815a891c9ded25eaa3cc2449403a2c5f5caa117d",
+    "grafana/plugins/webpack-public-path.ts": "b0fca6b6da97e419d24c404db36546f20429abc0d3c6cbb7d883a456b1d274b7"
   },
   "acceptance": "Fresh complete frontend and Linux plugin rebuild; managed rollout requires complete browser and source/runtime acceptance.",
   "plugin_release_date": "2026-10-03",
