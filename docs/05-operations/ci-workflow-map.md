@@ -93,9 +93,15 @@ PR event parity and successful external execution still require acceptance.
 The prepared `mutation` lane additionally requires `pipeline.trigger.type=schedule`;
 manual/API/PR triggers cannot start its four jobs. It preserves the existing four
 targets and 70/60/60/60 score thresholds, fails on missing, empty or invalid stats,
-and retains reports. No mutation execution or external schedule is claimed.
+and retains reports. `bioetl-mutation-weekly` was registered on 2026-10-05
+with an initial Monday 13:00–13:59 UTC acceptance window on `main`. Restore
+Sunday 00:00–00:59 UTC after collecting the first scheduled result. Registration
+is not proof that the four targets passed.
 
-The Docs KPI intended cadence remains Monday 04:30 UTC; its trigger is pending.
+On 2026-10-05, `bioetl-docs-kpi-weekly` was registered for `main`,
+`ci-lane=docs-kpi`, Monday 04:00–04:59 UTC, one run, all months, Scheduled Actor.
+The first scheduled execution and notification parity remain pending; the legacy
+04:30 minute is represented by an hourly window.
 On 2026-10-05, the CircleCI UI confirmed creation of
 `bioetl-memory-retention-weekly`: branch `main`, `ci-lane=memory-retention`,
 Monday, every month, one run during 04:00–04:59 UTC, Scheduled Actor.
@@ -131,6 +137,23 @@ The prepared acceptance fixes use the architecture marker expression `not slow a
 not benchmark and not memory`; pytest exit 5 remains a failure. Matrix workers
 are capped at two, and the complete duplication scan uses a medium runner with
 a 3072 MiB Node heap. Existing quality thresholds and scan paths are preserved.
+
+### External phase-3 acceptance, 2026-10-05
+
+All runs below used main `2d4507f595d03591c3db72b2aa554d7f41329ce3`.
+Artifact digests and terminal job evidence were collected before recording results.
+
+| Lane | CircleCI job | Result and remaining work |
+| --- | --- | --- |
+| Docs KPI | [2576](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2576) | SUCCESS; JSON, Markdown and summary artifacts; scheduled execution pending |
+| Memory retention | [2604](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2604) | SUCCESS; check-only report, no pruning; scheduled execution pending |
+| Memory freshness | [2605](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2605) | SUCCESS; report and contract checks; notifications and scheduled execution pending |
+| Port contracts | [2606](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2606) | SUCCESS; 188 tests including Hypothesis, both JUnit artifacts; event parity pending |
+| Skills consistency | [2607](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2607) | FAILED: stale wrapper-contract docs mirror. Mirror refreshed; tracked global snapshot entrypoint restores layout in clean checkouts. External rerun pending |
+| Performance | [2689](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2689) | FAILED: CrossRef median 0.45 ms exceeded 0.4125 ms; 43 benchmarks skipped because plugin was disabled. Explicit plugin opt-in added; 70 local tests pass, external acceptance pending. Budgets unchanged |
+| Replay parity | [2690](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2690) | FAILED: missing basetemp parent directories. Parent creation repaired; four local test runs pass. Whole-file parity still differs in operational occurrence IDs/timestamps, including with the same runtime root; checksum gate remains unchanged and unresolved |
+
+Manual successes do not establish scheduler, notification or release acceptance.
 
 ## Migration disposition ledger (#11930 / #11931)
 

@@ -370,6 +370,7 @@ jobs:
           command: |
             timeout --signal=TERM --kill-after=30s 60m bash -euo pipefail -c 'export PATH="$HOME/.local/bin:$PATH"
             mkdir -p reports/nightly-replay
+            mkdir -p .artifacts/nightly-replay/{determinism,idempotency,composite_resume}
             uv run --frozen --no-build pytest tests/integration/determinism -q \
               --junitxml=reports/nightly-replay/determinism.xml \
               --basetemp .artifacts/nightly-replay/determinism/run1
@@ -445,7 +446,7 @@ jobs:
             mkdir -p reports/performance
             timeout --signal=TERM --kill-after=30s 30m \
               uv run --frozen --no-build pytest tests/performance/ tests/benchmarks/ \
-              -m "benchmark or performance" -p no:xdist -v --tb=short \
+              -m "benchmark or performance" -p benchmark -p no:xdist -v --tb=short \
               --perf-obs-out reports/performance/hotspot-observations.jsonl \
               --junitxml=reports/performance/hotspot-budgets.xml
       - run:
