@@ -149,7 +149,9 @@ a 3072 MiB Node heap. Existing quality thresholds and scan paths are preserved.
 
 ### External phase-3 acceptance, 2026-10-05
 
-The first seven runs below used main `2d4507f595d03591c3db72b2aa554d7f41329ce3`.
+The first four runs below used main `2d4507f595d03591c3db72b2aa554d7f41329ce3`.
+Skills, performance and replay acceptance used main
+`886a32e8bd71abf88616879b46390a716b13059c`.
 Artifact digests and terminal job evidence were collected before recording results.
 
 | Lane | CircleCI job | Result and remaining work |
@@ -158,9 +160,9 @@ Artifact digests and terminal job evidence were collected before recording resul
 | Memory retention | [2604](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2604) | SUCCESS; check-only report, no pruning; scheduled execution pending |
 | Memory freshness | [2605](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2605) | SUCCESS; report and contract checks; notifications and scheduled execution pending |
 | Port contracts | [2606](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2606) | SUCCESS; 188 tests including Hypothesis, both JUnit artifacts; event parity pending |
-| Skills consistency | [2607](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2607) | FAILED: stale wrapper-contract docs mirror. Mirror refreshed; tracked global snapshot entrypoint restores layout in clean checkouts. External rerun pending |
-| Performance | [2689](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2689) | FAILED: CrossRef median 0.45 ms exceeded 0.4125 ms; 43 benchmarks skipped because plugin was disabled. Explicit plugin opt-in added; 70 local tests pass, external acceptance pending. Budgets unchanged |
-| Replay parity | [2690](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2690) | FAILED: missing basetemp parent directories. Parent creation repaired; four local test runs pass. The opt-in [CI pytest plugin](../../scripts/engineering/ci/replay_parity_inputs.py) fixes operational clocks/occurrence seeds and reuses one runtime root for two independent processes. Local 66-file byte parity passes; unchanged checksum gate still rejects drift/empty inventories. External rerun pending |
+| Skills consistency | [3364](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/3364) | SUCCESS; verify-only drift report has no drift, Junie parity passes; approved synchronization and event parity pending |
+| Performance | [3365](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/3365) | SUCCESS; 70 tests, zero skips/failures; all five hotspot budgets pass, CrossRef median 0.243 ms; budgets unchanged; schedule pending |
+| Replay parity | [3366](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/3366) | SUCCESS; four runs and nine artifacts; independent determinism checksum inventories match; schedule pending |
 
 On main `95ca0a67f21a7055ad1b671f9ff57bd5ff39b1fb`, GitHub settings job
 [2773](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2773)
@@ -188,6 +190,14 @@ passed on the same main SHA; both canonical source/test hash artifacts were reta
 The organization storage controls show thirty-day artifact retention and
 fifteen-day workspace/cache retention; no settings were changed.
 
+The opt-in `ci-lane=docker-baseline` runs only on `main` with the existing
+`bioetl-github-read-only` context. It builds the exact source SHA, verifies the
+runtime identity and health endpoint, preserves the canonical twelve-file
+security baseline, and exports the scanned image with checksums only after the
+strict vulnerability gate succeeds. Diagnostic artifacts are retained on failure.
+This lane has no registry write credentials or publication step; protected
+promotion, approval, SARIF transport and release acceptance remain pending.
+
 Manual successes do not establish scheduler, notification or release acceptance.
 
 ## Migration disposition ledger (#11930 / #11931)
@@ -202,7 +212,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `architecture-docs-nightly.yml` | `15 2 * * *` | CircleCI architecture-docs | Main run 3113 passes passport/diagram/dependency audits with artifacts; schedule acceptance pending; artifact retention verified at 30 days |
 | `architecture.yml` | `20 2 * * *` | Architecture metrics lane | Pending port; canonical reporters and no budget growth |
 | `branch-hygiene.yml` | `15 3 * * 1` | CircleCI branch-hygiene inventory | Weekly trigger and restricted context created; authenticated main run 3084 passes; scheduled run and PR branch-name events pending; artifact retention verified at 30 days |
-| `chembl-baseline-smoke.yml` | — | Representative offline smoke lane | Pending port; preserve cassette playback |
+| `chembl-baseline-smoke.yml` | — | `dq-consistency` validates configurations; `arch-tests` and unit/integration groups cover all nine legacy test selectors; manual `ci-lane=pr-gate` | Test selectors accepted on main; configuration-step and legacy event parity acceptance pending |
 | `codeql.yml` | `17 4 * * 1` | Retire Actions definition at #11930 cutover | Not required; optional analysis lifecycle remains explicit |
 | `coderabbit.yml` | — | Local CodeRabbit launcher | Retain local; external integration/event policy pending |
 | `commit-lint.yml` | — | CircleCI commit-lint | Prepared required gate; external parity pending |
@@ -214,7 +224,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `dashboard-render-host.yml` | — | Local render host runner | Retain local host; Grafana/render secrets never on ordinary PR |
 | `dependency-review.yml` | — | Dependency diff security review | Pending replacement; do not drop HIGH/CRITICAL diff coverage |
 | `diagram-nightly.yml` | — | Diagram lint plus local full render | Keep disabled full-render surface; port only active checks |
-| `docker.yml` | — | CircleCI docker-build plus protected promotion | Build prepared; Trivy/baseline/digest promotion pending |
+| `docker.yml` | — | CircleCI docker-build plus opt-in main-only `docker-baseline` | Security baseline job prepared with restricted read-only context, pinned Trivy, runtime/health checks, JSON/SARIF/SBOM and image checksums; remote acceptance and protected promotion pending |
 | `docs-kpi-weekly.yml` | `30 4 * * 1` | CircleCI docs-kpi | Registered `bioetl-docs-kpi-weekly`; first scheduled execution pending |
 | `docs.yml` | — | CircleCI docs-governance | Prepared required gate; full docs/render parity pending |
 | `duplication-complexity.yml` | — | CircleCI duplication | Prepared required gate; full scan thresholds preserved |
@@ -225,11 +235,11 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `memory-freshness.yml` | `17 5 * * 1` | CircleCI memory-freshness | Prepared check-only lane; PR parity and scheduled failure notification pending |
 | `memory-retention.yml` | `17 4 * * 1` | CircleCI memory-retention | Weekly trigger created 2026-10-05; main integration/run evidence pending, no prune mutation |
 | `mutation-testing.yml` | `0 0 * * 0` | Scheduled-only mutation lane | Compiler validated; schedule and four-target execution acceptance pending; 70/60/60/60 thresholds unchanged |
-| `nightly-replay-parity.yml` | `30 2 * * *` | CircleCI replay-parity | Prepared four-run checksum lane; remote parity and schedule pending |
+| `nightly-replay-parity.yml` | `30 2 * * *` | CircleCI replay-parity | Main job 3366 passes four-run checksum parity; schedule pending |
 | `no-partial-tree-commits.yml` | — | Full-tree guard in root governance | Local guard verified; CircleCI integration required before cutover |
 | `opencode-pr-review.yml` | — | Retain disabled review stub policy | Do not activate unpinned installer or write paths |
 | `opencode-triage.yml` | — | Retain disabled triage stub policy | Do not activate unpinned installer or write paths |
-| `performance-nightly.yml` | `0 3 * * *` | CircleCI performance | Prepared opt-in lane; remote benchmark evidence and schedule pending |
+| `performance-nightly.yml` | `0 3 * * *` | CircleCI performance | Main job 3365 passes 70 tests without skips and all five budgets; schedule pending |
 | `port-contracts.yml` | — | CircleCI port-contracts | Prepared Hypothesis-enabled lane; push/PR event parity pending |
 | `pr-hygiene.yml` | — | GitHub API PR maintenance | Pending port; validation and trusted write boundary |
 | `pr-required.yml` | — | CircleCI classify/pr-gate-complete | Prepared catalogue-backed contract; main acceptance/rulesets pending |
