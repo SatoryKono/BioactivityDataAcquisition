@@ -650,9 +650,15 @@ _Generated: 2026-10-01T21:18:22+03:00_
 
 ---
 
-## Pkg Infrastructure Adapters Http
+## Pkg Infrastructure Adapters Http Part 1
 
-![90-pkg-infrastructure-adapters-http](./90-pkg-infrastructure-adapters-http.svg)
+![90-pkg-infrastructure-adapters-http-part1](./90-pkg-infrastructure-adapters-http-part1.svg)
+
+---
+
+## Pkg Infrastructure Adapters Http Part 2
+
+![90-pkg-infrastructure-adapters-http-part2](./90-pkg-infrastructure-adapters-http-part2.svg)
 
 ---
 
