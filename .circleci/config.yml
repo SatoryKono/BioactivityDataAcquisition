@@ -13,7 +13,7 @@ version: 2.1
 parameters:
   ci-lane:
     type: enum
-    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift]
+    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance]
     default: pr-gate
   include-hypothesis:
     type: boolean
@@ -934,6 +934,40 @@ jobs:
               --threshold 10 --format python \
               --output "$PWD/reports/jscpd"
 
+  semantic-governance:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv:
+          extras: dev tracing
+      - run:
+          name: Semantic audit gates and regression tests
+          command: |
+            set -euo pipefail
+            export PATH="$HOME/.local/bin:$PATH"
+            timeout 10m bash -euo pipefail -c '
+              uv run --frozen --no-build python -m scripts.engineering.qa report-semantic-pipeline-audit --check
+              uv run --frozen --no-build python -m scripts.engineering.qa check-semantic-pair-budget --check --json
+              uv run --frozen --no-build python -m scripts.engineering.qa check-semantic-registry-drift --check --json
+              uv run --frozen --no-build python -m scripts.engineering.qa check-semantic-governance-policy --check --json
+              uv run --frozen --no-build python -m scripts.engineering.qa check-semantic-anchor-parity --check --json
+              uv run --frozen --no-build python -m scripts.engineering.qa check-generic-field-ownership --check --json
+              uv run --frozen --no-build python -m scripts.engineering.qa check-ontology-unit-semantics --check --json
+              uv run --frozen --no-build pytest -p no:benchmark --noconftest \
+                tests/integration/config/test_semantic_field_unification_contract.py \
+                tests/integration/config/test_semantic_governance_policy.py \
+                tests/integration/config/test_semantic_pair_matrix_budget.py \
+                tests/integration/config/test_semantic_anchor_parity.py \
+                -q --tb=short --junitxml=reports/quality/semantic-governance/junit.xml
+            '
+      - store_test_results:
+          path: reports/quality/semantic-governance
+      - store_artifacts:
+          path: reports/semantic_pipeline_audit
+          destination: semantic-pipeline-audit
+
   # --- Gate: generated-artifacts (path_scoped) ------------------------------------
   # Mirrors schema-governance.yml (generated schema artifacts + parity).
   schema-governance:
@@ -1200,6 +1234,20 @@ jobs:
           \               \"--output\", str(out / \"verification.json\")])\nraise SystemExit(verification[\"exit_code\"\
           ] or coverage_record[\"exit_code\"])\nCLOSEOUT_PY\n"
     - run:
+        name: Export telemetry candidate from the complete producer
+        when: always
+        command: |
+          set -euo pipefail
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          export PYTHONPATH="$PWD/src" PYTHONUTF8=1
+          ROOT="reports/quality/proof-or-stop/circleci-closeout-${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:12}"
+          # Canonical validation rejects failed, partial, stale or substituted evidence.
+          python -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest "$ROOT/coverage/manifest.json"
+          mkdir -p "$ROOT/telemetry/configs/quality" "$ROOT/telemetry/docs/05-engineering" "$ROOT/telemetry/reports"
+          cp configs/quality/test_telemetry_baseline.yaml "$ROOT/telemetry/configs/quality/"
+          cp docs/05-engineering/test-telemetry-baseline.md "$ROOT/telemetry/docs/05-engineering/"
+          cp -R reports/test-telemetry "$ROOT/telemetry/reports/"
+    - run:
         name: Publish bounded sanitized execution evidence
         when: always
         command: "python - \\<<'ARTIFACT_PY'\nfrom pathlib import Path\nimport os\nimport shutil\nfrom xml.etree import\
@@ -1219,6 +1267,17 @@ jobs:
           \ = destination / \"junit\" / relative\n        junit.parent.mkdir(parents=True, exist_ok=True)\n      \
           \  shutil.copyfile(target, junit)\nprint(\"Published actual JSON/XML/log evidence; raw coverage SQLite and\
           \ caches remain on the CI host\")\nARTIFACT_PY\n"
+    - run:
+        name: Collect validated telemetry proposal
+        when: always
+        command: |
+          ROOT="reports/quality/proof-or-stop/circleci-closeout-${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:12}"
+          if [ -d "$ROOT/telemetry" ]; then
+            cp -R "$ROOT/telemetry" reports/quality/proof-or-stop/telemetry-candidate
+          fi
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/telemetry-candidate
+        destination: telemetry-candidate
     - store_test_results:
         path: reports/quality/proof-or-stop/circleci-artifacts/junit
     - store_artifacts:
@@ -1227,6 +1286,13 @@ jobs:
 
 workflows:
   version: 2
+  semantic-governance:
+    when:
+      and:
+        - equal: [semantic-governance, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - semantic-governance
   architecture-docs:
     when:
       and:

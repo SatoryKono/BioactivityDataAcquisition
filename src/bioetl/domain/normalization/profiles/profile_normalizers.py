@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from bioetl.domain.normalization.chembl import (
     normalize_bao_identifier,
     normalize_cellosaurus_id,
@@ -227,7 +229,9 @@ def normalize_profile_operator(
 
 
 def normalize_profile_ontology_id(value: object) -> object:
-    """Normalize ontology identifier fields to canonical prefix form."""
+    """Normalize ontology IDs, including the provider EFO semicolon variant."""
+    if isinstance(value, str) and re.fullmatch(r"EFO;\d+", value.strip()):
+        value = value.strip().replace(";", ":", 1)
     return normalize_ontology_id(value) if isinstance(value, str) else value
 
 

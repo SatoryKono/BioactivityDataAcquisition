@@ -143,7 +143,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `schema-governance.yml` | — | CircleCI schema-governance | Prepared required gate; canonical generation/parity preserved |
 | `scorecard.yml` | `30 7 * * 1` | Scorecard plus SARIF publication | Pending port; SARIF transport separate from CodeQL analysis |
 | `security.yml` | — | CircleCI security-scans | Prepared required gate; unpatched braces blocks overall acceptance |
-| `semantic-governance.yml` | — | Semantic governance audit lane | Pending port; not replaced by syntax validation |
+| `semantic-governance.yml` | — | CircleCI `semantic-governance` | Prepared main-only opt-in lane: seven canonical checks and four regression suites; automatic event parity and remote acceptance pending |
 | `skills-consistency.yml` | — | CircleCI skills-consistency | Prepared verify-only lane; doctor/support/event parity pending |
 | `stale.yml` | — | GitHub API stale maintenance | Pending port; preserve exclusions and trusted write policy |
 | `tests.yml` | — | CircleCI test-fast/test-integration | Prepared matrices; full source-bound producer/remote acceptance pending |
