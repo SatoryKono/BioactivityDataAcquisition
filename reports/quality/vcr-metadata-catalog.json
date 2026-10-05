@@ -1828,6 +1828,7 @@
         "tests/unit/composition/factories/storage/test_health_mixin.py",
         "tests/unit/composition/test_observability_contract.py",
         "tests/unit/domain/ports/test_health_check_result_branches.py",
+        "tests/unit/domain/runtime/test_composition_boundary_policy.py",
         "tests/unit/domain/test_events.py",
         "tests/unit/domain/test_issue_10469_two_line_residuals.py",
         "tests/unit/infrastructure/adapters/chembl/test_chembl_client.py",
