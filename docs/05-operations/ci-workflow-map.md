@@ -456,3 +456,18 @@ workflow's 14-day stale/7-day close settings must not be copied into an active
 replacement. Preserve `.github/labeler.yml`, the label taxonomy, and the manual
 hygiene policy when #11930 removes the disabled workflow transports. Any future
 write automation needs its own policy-aligned implementation and acceptance.
+
+Publication implementations are supporting backends of the existing
+`python -m scripts.engineering.ci` router: `publish-docker` and
+`publish-scorecard`. CircleCI invokes these canonical commands. Their lifecycle
+entries retain named ownership and a review date; their safety checks and tests
+remain unchanged. This keeps the public script inventory within its existing
+335-entry limit without raising the cap or retiring an unrelated command.
+
+The inventory scanner treats `.circleci/` as a CI caller and recognizes pytest
+`-p scripts...` plugin loading as well as `python -m scripts...` modules. This
+preserves the real replay fixture ownership when Actions workflows are retired.
+The current security job verifies the Gitleaks binary checksum and redacts
+findings in logs. Git-history scan parity remains pending: directory scanning
+alone does not replace the legacy commit-range scan, and unsuccessful local
+history scans are not acceptance evidence.

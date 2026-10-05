@@ -39,6 +39,7 @@ SEARCH_ROOTS: Final[tuple[str, ...]] = (
     "AGENTS.md",
     ".github/ISSUES",
     ".github/workflows",
+    ".circleci",
     ".zed",
     ".codex/agents",
     ".codex/skills",
@@ -108,7 +109,7 @@ BASENAME_REF_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
     r"[A-Za-z0-9._-]+\.(?:py|sh|ps1|cmd|bat|mjs|sql)"
 )
 MODULE_REF_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
-    r"(?:uv\s+run\s+)?(?:python(?:3(?:\.\d+)?)?|py)\s+-m\s+"
+    r"(?:(?:uv\s+run\s+)?(?:python(?:3(?:\.\d+)?)?|py)\s+-m|(?<!\S)-p)\s+"
     r"(scripts(?:\.\w+)+)"
 )
 MODULE_STRING_REF_PATTERN: Final[re.Pattern[str]] = re.compile(
@@ -366,7 +367,7 @@ def _iter_search_files(root: Path) -> list[Path]:
 
 
 def _source_group(rel_path: str) -> str:
-    if rel_path.startswith(".github/workflows/"):
+    if rel_path.startswith((".github/workflows/", ".circleci/")):
         return "ci"
     if rel_path == ".pre-commit-config.yaml":
         return "ci"
@@ -475,10 +476,10 @@ def _discover_module_refs(
     )
     discovered: list[tuple[str, RefEvidence]] = []
     for module_name in set(MODULE_REF_CANDIDATE_PATTERN.findall(normalized_line)):
-        candidate_path = f"{module_name.replace('.', '/')}/__main__.py"
-        if candidate_path not in script_set or rel == candidate_path:
-            continue
-        discovered.append((candidate_path, evidence))
+        module_path = module_name.replace(".", "/")
+        for candidate_path in (f"{module_path}/__main__.py", f"{module_path}.py"):
+            if candidate_path in script_set and rel != candidate_path:
+                discovered.append((candidate_path, evidence))
     return discovered
 
 

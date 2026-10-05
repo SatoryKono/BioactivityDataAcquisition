@@ -383,7 +383,7 @@ jobs:
           command: |
             set -euo pipefail
             set +x
-            timeout --signal=TERM --kill-after=30s 10m python3 scripts/engineering/ci/publish_scorecard_sarif.py \
+            timeout --signal=TERM --kill-after=30s 10m python3 -m scripts.engineering.ci publish-scorecard \
               --directory /tmp/bioetl-scorecard/reports \
               --output /tmp/bioetl-scorecard/publication/receipt.json
       - store_artifacts:
@@ -769,7 +769,7 @@ jobs:
       - run:
           name: Verify approved scanned image and publish signed provenance
           no_output_timeout: 30m
-          command: timeout --signal=TERM --kill-after=30s 25m bash scripts/engineering/ci/publish_docker_image.sh
+          command: timeout --signal=TERM --kill-after=30s 25m python3 -m scripts.engineering.ci publish-docker
       - store_artifacts:
           path: /tmp/bioetl-publication/reports/security
           destination: docker-publication
@@ -1709,8 +1709,9 @@ jobs:
             curl -fsSL --proto '=https' --tlsv1.2 \
               https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz \
               -o /tmp/gitleaks.tar.gz
+            printf '%s  %s\n' '551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb' /tmp/gitleaks.tar.gz | sha256sum -c -
             mkdir -p "$HOME/.local/bin" && tar -xzf /tmp/gitleaks.tar.gz -C "$HOME/.local/bin" gitleaks
-            "$HOME/.local/bin/gitleaks" detect --config .gitleaks.toml --no-git -v
+            "$HOME/.local/bin/gitleaks" detect --config .gitleaks.toml --no-git -v --redact=100
       - run:
           name: osv-scanner (binary v2.6.0, lockfiles)
           command: |

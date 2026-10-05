@@ -161,11 +161,11 @@ def publish(directory: Path, output: Path, environment: dict[str, str]) -> dict:
     raise TimeoutError("GitHub SARIF ingestion did not finish; inspect receipt")
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--directory", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     receipt = publish(args.directory, args.output, dict(os.environ))
     print(
         "Scorecard SARIF ingestion:", receipt["processing_status"], receipt["upload_id"]
