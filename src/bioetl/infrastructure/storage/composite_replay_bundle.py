@@ -126,11 +126,16 @@ def verify_bundle(root: Path, envelope_digest: str) -> JsonDict:
         "input_snapshot_fingerprint"
     ):
         raise ValueError("composite_replay_required_object_missing")
+    _verify_objects(root, objects)
+    if envelope.get("implementation") != implementation_fingerprint():
+        raise ValueError("composite_replay_implementation_mismatch")
+    return envelope
+
+
+def _verify_objects(root: Path, objects: JsonDict) -> None:
+    """Check every sealed object's reference, type and actual bytes."""
     for name, digest in objects.items():
         if not isinstance(name, str) or not isinstance(digest, str):
             raise ValueError("composite_replay_object_invalid")
         if digest_bytes(confined_path(root, name).read_bytes()) != digest:
             raise ValueError("composite_replay_object_digest_mismatch")
-    if envelope.get("implementation") != implementation_fingerprint():
-        raise ValueError("composite_replay_implementation_mismatch")
-    return envelope

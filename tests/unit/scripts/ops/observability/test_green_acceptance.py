@@ -186,7 +186,8 @@ def campaign_stubs(monkeypatch):
         runner,
         "discover",
         lambda root: tuple(
-            Case("composite", f"composite_{name}") for name in runner.COMPOSITE_ORDER
+            Case("composite", f"composite_{name}")
+            for name in ("activity", "assay", "molecule", "target", "publication")
         ),
     )
     return runner
@@ -209,7 +210,10 @@ def test_campaign_is_ordered_pinned_and_not_final_acceptance(tmp_path, monkeypat
         "composite-composite_assay:Provider WARN"
     ]
     assert [name for name, _ in launches] == [
-        f"composite_{name}" for name in runner.COMPOSITE_ORDER
+        "composite_activity",
+        "composite_assay",
+        "composite_molecule",
+        "composite_target",
     ]
     assert all(
         kwargs == {"limit": 10, "expected_source": "pinned-sha"}
@@ -218,10 +222,15 @@ def test_campaign_is_ordered_pinned_and_not_final_acceptance(tmp_path, monkeypat
     receipt = json.loads((output / "campaign.json").read_text())
     assert receipt["local_checks_passed"] is False
     assert receipt["acceptance_status"] == "PENDING_HTTP_AND_OFFLINE_REPLAY"
+    assert receipt["scope"] == {
+        "issue": 11906,
+        "composites": [name for name, _ in launches],
+        "excluded": {"composite_publication": "Tracked separately in #11947"},
+    }
     assert not (tmp_path / "reports/quality/green-acceptance.lock").exists()
     with pytest.raises(FileExistsError):
         runner.execute_campaign(tmp_path, output, tmp_path / "env")
-    assert len(launches) == 5
+    assert len(launches) == 4
 
 
 @pytest.mark.parametrize("error", [KeyboardInterrupt(), OSError("setup")])
@@ -244,7 +253,7 @@ def test_campaign_cancel_records_unstarted_cases_and_releases_lease(
     assert receipt["status"] == expected
     assert [row["status"] for row in receipt["cases"]] == [expected] + [
         "not_started"
-    ] * 4
+    ] * 3
     assert receipt["local_checks_passed"] is False
     assert not (tmp_path / "reports/quality/green-acceptance.lock").exists()
 

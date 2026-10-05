@@ -552,7 +552,7 @@ def run_launch(
             receipt["finished_at"] = timestamp()
 
 
-COMPOSITE_ORDER = ("activity", "assay", "molecule", "target", "publication")
+COMPOSITE_ORDER = ("activity", "assay", "molecule", "target")
 
 
 def _validate_campaign_output(root: Path, output: Path, limit: int) -> None:
@@ -567,7 +567,7 @@ def _validate_campaign_output(root: Path, output: Path, limit: int) -> None:
 def execute_campaign(
     root: Path, output: Path, env_file: Path, *, limit: int = 10
 ) -> list[str]:
-    """Run the five RF-022 cases sequentially under one exclusive worktree lease.
+    """Run the four RF-022 cases sequentially under one exclusive worktree lease.
 
     Local checks are preparation evidence. HTTP and offline replay acceptance
     remain separate obligations even if every local check passes.
@@ -588,6 +588,11 @@ def execute_campaign(
     ]
     manifest = {
         "source_commit": source,
+        "scope": {
+            "issue": 11906,
+            "composites": [case.name for case in cases],
+            "excluded": {"composite_publication": "Tracked separately in #11947"},
+        },
         "limit": limit,
         "started_at": timestamp(),
         "status": "running",
