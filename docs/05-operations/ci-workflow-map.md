@@ -143,13 +143,13 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `schema-governance.yml` | — | CircleCI schema-governance | Prepared required gate; canonical generation/parity preserved |
 | `scorecard.yml` | `30 7 * * 1` | Scorecard plus SARIF publication | Pending port; SARIF transport separate from CodeQL analysis |
 | `security.yml` | — | CircleCI security-scans | Prepared required gate; unpatched braces blocks overall acceptance |
-| `semantic-governance.yml` | — | CircleCI `semantic-governance` | Prepared main-only opt-in lane: seven canonical checks and four regression suites; automatic event parity and remote acceptance pending |
+| `semantic-governance.yml` | — | CircleCI `semantic-governance` | Seven canonical checks and four regression suites in the PR/main aggregate and an opt-in main lane; remote acceptance pending |
 | `skills-consistency.yml` | — | CircleCI skills-consistency | Prepared verify-only lane; doctor/support/event parity pending |
 | `stale.yml` | — | GitHub API stale maintenance | Pending port; preserve exclusions and trusted write policy |
 | `tests.yml` | — | CircleCI test-fast/test-integration | Prepared matrices; full source-bound producer/remote acceptance pending |
 | `type-checking.yml` | — | CircleCI mypy | Prepared strict gate; final remote evidence pending |
 | `vacuum.yml` | — | Local maintenance command | Retain manual/local operation; no automatic destructive schedule |
-| `validate-vendored-mermaid-assets.yml` | — | Vendored tooling integrity lane | Pending port; preserve generated asset/hash guards |
+| `validate-vendored-mermaid-assets.yml` | — | CircleCI docs-governance | Both legacy MkDocs asset existence checks folded into the docs gate; remote acceptance pending |
 | `zizmor.yml` | — | Remaining Actions YAML audit | Retain while composite action YAML exists; retirement depends on actual removal |
 
 Local-only and intentionally disabled surfaces retain their operating policy;

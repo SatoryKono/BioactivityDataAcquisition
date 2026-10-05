@@ -1022,6 +1022,8 @@ jobs:
             export PATH="$HOME/.local/bin:$PATH"
             uv run --frozen --no-build python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check
             uv run --frozen --no-build python -m scripts.docs passports check
+            test -f docs/assets/javascripts/mermaid-init.js
+            test -f docs/assets/stylesheets/mermaid-responsive.css
             uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog
             uv run --frozen --no-build python -m scripts.engineering.qa report-dashboard-inventory --check --json
             uv run --frozen --no-build python -m scripts.engineering.repo check-versions
@@ -1381,6 +1383,8 @@ workflows:
           requires: [classify]
       - schema-governance:
           requires: [classify]
+      - semantic-governance:
+          requires: [classify]
       - commit-lint:
           requires: [classify]
       - docs-governance:
@@ -1402,6 +1406,7 @@ workflows:
             - security-scans
             - duplication
             - schema-governance
+            - semantic-governance
             - commit-lint
             - docs-governance
             - docker-build

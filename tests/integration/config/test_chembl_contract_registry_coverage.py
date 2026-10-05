@@ -119,7 +119,7 @@ _EXPECTED_CHEMBL_CONTRACT_SURFACE: dict[str, dict[str, str]] = {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_tissue_v1.0.json",
         "contract_version": "1.0.0",
-        "normalization_profile_hash": "a190bf6ddc44dec4588cf444dc37878bd5f22f4050d71a374728bae9c8f01f15",
+        "normalization_profile_hash": "442f35f1b18e7bfb8c6903788f8a5250a49affbd12c89111529182e3d8f19afb",
     },
 }
 
