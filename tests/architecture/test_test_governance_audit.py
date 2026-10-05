@@ -570,6 +570,7 @@ def test_governance_hash_releases_payloads_without_changing_digest(
     for path in files:
         expected.update(path.relative_to(tmp_path).as_posix().encode())
         expected.update(b"\0content\0")
+    files.reverse()
     counts = {"live": 0, "peak": 0}
 
     class Payload(bytes):

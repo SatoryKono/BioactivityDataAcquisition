@@ -235,6 +235,10 @@ def normalize_profile_ontology_id(value: object) -> object:
     return normalize_ontology_id(value) if isinstance(value, str) else value
 
 
+# Version the callable reference so null-aware wrappers also hash the EFO revision.
+normalize_profile_ontology_id.__qualname__ = "normalize_profile_ontology_id_v2"
+
+
 def normalize_profile_cellosaurus_id(value: object) -> object:
     """Normalize Cellosaurus identifiers to canonical ``CVCL_XXXX`` form."""
     return (

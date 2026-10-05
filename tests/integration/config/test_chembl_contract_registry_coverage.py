@@ -48,13 +48,13 @@ _EXPECTED_CHEMBL_CONTRACT_SURFACE: dict[str, dict[str, str]] = {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_assay_parameters_v2.0.json",
         "contract_version": "2.0.0",
-        "normalization_profile_hash": "cd43d4d61524b0ca8b0cc1b61372278efce0e813dc026beb1ed36ccb9b3457f8",
+        "normalization_profile_hash": "87a2e294b54c372de8809ade9934fedf365db07853c13a2d25dcc45a767ff729",
     },
     "chembl.cell_line": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_cell_line_v1.0.json",
         "contract_version": "1.0.0",
-        "normalization_profile_hash": "9cfc00ac9b5fe34f99cabedb3988f7d9090a4b93d3f2943d8021ac218eb711e7",
+        "normalization_profile_hash": "67afc659888120d566f89e83b0d7df21eac5b68d7c53e475c8edaf611f8a9c79",
     },
     "chembl.compound_record": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
@@ -119,7 +119,7 @@ _EXPECTED_CHEMBL_CONTRACT_SURFACE: dict[str, dict[str, str]] = {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_tissue_v1.0.json",
         "contract_version": "1.0.0",
-        "normalization_profile_hash": "442f35f1b18e7bfb8c6903788f8a5250a49affbd12c89111529182e3d8f19afb",
+        "normalization_profile_hash": "b3a72ff94b9aa6a85ad470ddf865d3213c505beae1d1e2cdaf4971a5a8fdc952",
     },
 }
 

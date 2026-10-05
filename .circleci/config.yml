@@ -170,8 +170,8 @@ jobs:
           command: |
             timeout 10m bash -euo pipefail -c '
               mkdir -p reports/gates/artifacts
-              find tests -type f | sort | xargs sha256sum > reports/gates/artifacts/tests.sha256
-              find src -type f | sort | xargs sha256sum > reports/gates/artifacts/src.sha256
+              find tests -type f -print0 | sort -z | xargs -0 -r sha256sum > reports/gates/artifacts/tests.sha256
+              find src -type f -print0 | sort -z | xargs -0 -r sha256sum > reports/gates/artifacts/src.sha256
               test -s reports/gates/artifacts/tests.sha256
               test -s reports/gates/artifacts/src.sha256
             '
