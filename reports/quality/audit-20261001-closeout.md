@@ -1,5 +1,41 @@
 # Audit issue batch: implementation and remaining acceptance
 
+## Architecture acceptance evidence: 2026-10-05
+
+The eight closed RF stages and their immutable issue evidence are recorded in the
+[verified child matrix](proof-or-stop/architecture-coverage-11854-11899/architecture-program-child-matrix-verified.json).
+All eight merged commits were rechecked as ancestors of `e51699ee734832bfae4bd850cc4f9ae48b67232e`.
+The architecture scope remains explicit dependencies, source-bound governance,
+and the existing layer/port/hotspot contracts. No new score targets, debt budgets,
+thresholds or exemptions are introduced.
+
+The complete W48 producer measured main `c61913580698f70b181ae3e9ac852c631f02a878`:
+17 successful groups, 32,866 passed, 187 skipped, no failures/errors, 99.70% line
+and 94.34% branch coverage. Its source and test hashes match the postmerge
+acceptance branch. The [W48 checksum summary](proof-or-stop/architecture-11854-postmerge/measurement-w48-summary.json)
+identifies the archive containing the original manifest, XML, JUnit and raw
+coverage databases. This is `local_single_host` measurement evidence; it does
+not itself establish independent CI admission.
+
+On `e51699ee734832bfae4bd850cc4f9ae48b67232e`, the 50 owning telemetry/skip/cleanup
+tests passed, full `python -m scripts.docs verify` exited 0, and both
+`python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check`
+and `python -m scripts.engineering.qa report-debt-governance-gates --check`
+exited 0 without `--changed-from-ref`. The full-tree guard also exited 0.
+Runtime AI sources were unchanged; mirror synchronization is not applicable.
+
+The final source-bound architecture, full-suite and independent proof decision
+are recorded in [PR #11945](https://github.com/SatoryKono/BioactivityDataAcquisition/pull/11945)
+and the [#11854 acceptance record](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11854).
+Only completed, successful receipts qualify closure; partial runs and a merge
+alone do not. GitHub Actions billing remains a separate external blocker;
+CircleCI provides the independent execution route.
+
+Config-root measured coverage and module-inventory adoption belong to #11899.
+The 81 other historical module comparisons in its published ledger remain a
+separate residual; retained historical floors are not newly measured coverage.
+The older sections below retain their original measurement and acceptance state.
+
 ## W40: final source measurement (2026-10-04)
 
 Complete canonical 17-group producer on `72905b3fdb289e7229f17ce36727f2b815241361`: 33,005 cases, 32,823 PASS, 182 SKIP, zero failures/errors; lines 99.70%, branches 94.34%. `config_root`: 40/40 lines and 18/18 branches, line 32 executed. XML SHA-256 `150f069397a0081aee4338dae9c64a1dbef05a1ad776f0271b768b7d9e8b959a`.
