@@ -1,10 +1,10 @@
 version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
-source_branch: codex/ci-11929-11931-preparation
-refreshed_at_utc: '2026-10-05T14:06:53.922533+00:00'
+source_branch: main
+refreshed_at_utc: '2026-10-05T16:10:01.883972+00:00'
 refresh_status: captured
-source_commit: a7d764fe24314b2029923517ccb2cb9ffff598e9
+source_commit: 886a32e8bd71abf88616879b46390a716b13059c
 source_run_id: local-coverage
 source_event: local_coverage_verify
 source_run_url: null
@@ -18,23 +18,23 @@ artifact_inputs:
   coverage_percent_fallback: null
   slowest_tests_json: reports/test-telemetry/slowest-tests.json
   junit_inputs:
-  - reports/quality/proof-or-stop/circleci-closeout-3055-a7d764fe2431/coverage/junit/smoke.xml
-  - reports/quality/proof-or-stop/circleci-closeout-3055-a7d764fe2431/coverage/junit/contract-confidence.xml
-  - reports/quality/proof-or-stop/circleci-closeout-3055-a7d764fe2431/coverage/junit/repo-backed-unit-product.xml
-  - reports/quality/proof-or-stop/circleci-closeout-3055-a7d764fe2431/coverage/junit/repo-backed-unit-tooling.xml
-  - reports/quality/proof-or-stop/circleci-closeout-3055-a7d764fe2431/coverage/junit/repo-backed-unit-ops.xml
-  - reports/quality/proof-or-stop/circleci-closeout-3055-a7d764fe2431/coverage/junit/unit-scripts-tooling-passport.xml
-  - reports/quality/proof-or-stop/circleci-closeout-3055-a7d764fe2431/coverage/junit/unit-scripts-tooling-debt-governance.xml
-  - reports/quality/proof-or-stop/circleci-closeout-3055-a7d764fe2431/coverage/junit/unit-scripts-tooling-other.xml
-  - reports/quality/proof-or-stop/circleci-closeout-3055-a7d764fe2431/coverage/junit/unit-filesystem-contracts.xml
-  - reports/quality/proof-or-stop/circleci-closeout-3055-a7d764fe2431/coverage/junit/unit-subprocess-backed.xml
-  - reports/quality/proof-or-stop/circleci-closeout-3055-a7d764fe2431/coverage/junit/unit-domain.xml
-  - reports/quality/proof-or-stop/circleci-closeout-3055-a7d764fe2431/coverage/junit/unit-application.xml
-  - reports/quality/proof-or-stop/circleci-closeout-3055-a7d764fe2431/coverage/junit/unit-infrastructure.xml
-  - reports/quality/proof-or-stop/circleci-closeout-3055-a7d764fe2431/coverage/junit/unit-other.xml
-  - reports/quality/proof-or-stop/circleci-closeout-3055-a7d764fe2431/coverage/junit/integration.xml
-  - reports/quality/proof-or-stop/circleci-closeout-3055-a7d764fe2431/coverage/junit/security.xml
-  - reports/quality/proof-or-stop/circleci-closeout-3055-a7d764fe2431/coverage/junit/serial.xml
+  - reports/quality/proof-or-stop/circleci-closeout-3363-886a32e8bd71/coverage/junit/smoke.xml
+  - reports/quality/proof-or-stop/circleci-closeout-3363-886a32e8bd71/coverage/junit/contract-confidence.xml
+  - reports/quality/proof-or-stop/circleci-closeout-3363-886a32e8bd71/coverage/junit/repo-backed-unit-product.xml
+  - reports/quality/proof-or-stop/circleci-closeout-3363-886a32e8bd71/coverage/junit/repo-backed-unit-tooling.xml
+  - reports/quality/proof-or-stop/circleci-closeout-3363-886a32e8bd71/coverage/junit/repo-backed-unit-ops.xml
+  - reports/quality/proof-or-stop/circleci-closeout-3363-886a32e8bd71/coverage/junit/unit-scripts-tooling-passport.xml
+  - reports/quality/proof-or-stop/circleci-closeout-3363-886a32e8bd71/coverage/junit/unit-scripts-tooling-debt-governance.xml
+  - reports/quality/proof-or-stop/circleci-closeout-3363-886a32e8bd71/coverage/junit/unit-scripts-tooling-other.xml
+  - reports/quality/proof-or-stop/circleci-closeout-3363-886a32e8bd71/coverage/junit/unit-filesystem-contracts.xml
+  - reports/quality/proof-or-stop/circleci-closeout-3363-886a32e8bd71/coverage/junit/unit-subprocess-backed.xml
+  - reports/quality/proof-or-stop/circleci-closeout-3363-886a32e8bd71/coverage/junit/unit-domain.xml
+  - reports/quality/proof-or-stop/circleci-closeout-3363-886a32e8bd71/coverage/junit/unit-application.xml
+  - reports/quality/proof-or-stop/circleci-closeout-3363-886a32e8bd71/coverage/junit/unit-infrastructure.xml
+  - reports/quality/proof-or-stop/circleci-closeout-3363-886a32e8bd71/coverage/junit/unit-other.xml
+  - reports/quality/proof-or-stop/circleci-closeout-3363-886a32e8bd71/coverage/junit/integration.xml
+  - reports/quality/proof-or-stop/circleci-closeout-3363-886a32e8bd71/coverage/junit/security.xml
+  - reports/quality/proof-or-stop/circleci-closeout-3363-886a32e8bd71/coverage/junit/serial.xml
 coverage:
   threshold_percent: 85.0
   actual_percent: 99.7
@@ -42,122 +42,122 @@ coverage:
 duration_telemetry:
   total_cases: 32885
   top_slowest:
-  - source: unit-scripts-tooling-debt-governance.xml
-    test: tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing
-    duration_s: 26.173
   - source: unit-other.xml
     test: tests.unit.interfaces.http.test_health_server_routing_pure_helpers::test_filter_options_deadline_does_not_send_late_success
-    duration_s: 20.028
+    duration_s: 20.026
   - source: unit-scripts-tooling-debt-governance.xml
-    test: tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale
-    duration_s: 14.631
+    test: tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing
+    duration_s: 19.989
   - source: integration.xml
     test: tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline::test_chembl_target_component_happy_path
-    duration_s: 13.746
+    duration_s: 12.952
+  - source: unit-scripts-tooling-debt-governance.xml
+    test: tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale
+    duration_s: 11.758
   - source: unit-scripts-tooling-debt-governance.xml
     test: tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact
-    duration_s: 13.031
-  - source: contract-confidence.xml
-    test: tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]
-    duration_s: 11.751
+    duration_s: 11.648
   - source: integration.xml
     test: tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path
-    duration_s: 11.437
+    duration_s: 11.09
   - source: integration.xml
     test: tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_source_fields
-    duration_s: 10.867
-  - source: integration.xml
-    test: tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_happy_path
-    duration_s: 10.849
+    duration_s: 10.768
   - source: integration.xml
     test: tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline::test_chembl_compound_record_happy_path
-    duration_s: 10.601
+    duration_s: 10.755
+  - source: integration.xml
+    test: tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_happy_path
+    duration_s: 10.708
+  - source: contract-confidence.xml
+    test: tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]
+    duration_s: 9.952
   - source: integration.xml
     test: tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts
-    duration_s: 9.402
-  - source: unit-other.xml
-    test: tests.unit.composition.test_registry_protocol.TestDataSourceCreatorHelper::test_provider_registry_has_list_keys
-    duration_s: 9.151
-  - source: unit-scripts-tooling-passport.xml
-    test: tests.unit.scripts.docs.passports.test_passport_projector::test_workflow_operations_are_classified
-    duration_s: 9.11
+    duration_s: 8.382
   - source: repo-backed-unit-product.xml
     test: tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures::test_cached_populated_isolated_registry_contains_pipeline_factories
-    duration_s: 8.723
-  - source: repo-backed-unit-tooling.xml
-    test: tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix::test_check_artifacts_detects_drift__unit_scripts_test_generate_pipeline_normalization_field_matrix_1213
-    duration_s: 8.468
-  - source: repo-backed-unit-tooling.xml
-    test: tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix::test_field_matrix__is_deterministic__61401586
-    duration_s: 8.376
-  - source: unit-other.xml
-    test: tests.unit.composition.factories.pipeline.test_registry::test_registry_completeness
-    duration_s: 7.843
-  - source: unit-scripts-tooling-other.xml
-    test: tests.unit.scripts.qa.test_check_quality_exemptions::test_check_quality_exemptions_passes_current_zero_budget_registry
-    duration_s: 7.82
-  - source: integration.xml
-    test: tests.integration.composite.test_assay_snapshot_merge_replay::test_assay_replay_compares_physical_production_outputs
-    duration_s: 7.43
-  - source: contract-confidence.xml
-    test: tests.contract.test_gold_pk_consistency.TestGoldPkConsistency::test_pipeline_configs_use_new_pk_naming
-    duration_s: 6.505
+    duration_s: 8.056
   - source: unit-infrastructure.xml
     test: tests.unit.infrastructure.test_issue_10469_stream_a_infra_thirteen.TestExemptionsDebtReductionAndFormatter::test_exemptions_policy_outside_src_and_required_registry_shapes
-    duration_s: 6.502
+    duration_s: 7.72
   - source: integration.xml
-    test: tests.integration.test_runtime_metric_emission_consistency::test_critical_observability_metric_families_are_runtime_emitted
-    duration_s: 6.301
-  - source: smoke.xml
-    test: tests.smoke.test_control_plane_rollout_smoke::test_control_plane_rollout_smoke_emits_artifacts_and_aggregate_metrics
-    duration_s: 6.232
-  - source: contract-confidence.xml
-    test: tests.contract.test_chembl_case_and_ontology_consistency::test_chembl_ontology_identifier_families_are_profile_and_matrix_aligned[profile0-chembl_assay-bao_format-bao:0000190-BAO_0000190]
-    duration_s: 6.197
+    test: tests.integration.composite.test_assay_snapshot_merge_replay::test_other_composite_families_replay_physical_outputs[target]
+    duration_s: 7.383
+  - source: unit-scripts-tooling-other.xml
+    test: tests.unit.scripts.qa.test_check_quality_exemptions::test_check_quality_exemptions_passes_current_zero_budget_registry
+    duration_s: 7.186
+  - source: unit-other.xml
+    test: tests.unit.composition.factories.pipeline.test_registry_consistency.TestRegistryNameUniqueness::test_registry_has_unique_names
+    duration_s: 7.121
+  - source: unit-scripts-tooling-passport.xml
+    test: tests.unit.scripts.docs.passports.test_passport_projector::test_workflow_operations_are_classified
+    duration_s: 6.791
+  - source: integration.xml
+    test: tests.integration.composite.test_assay_snapshot_merge_replay::test_assay_replay_compares_physical_production_outputs
+    duration_s: 6.712
+  - source: unit-other.xml
+    test: tests.unit.composition.factories.pipeline.test_registry::test_registry_completeness
+    duration_s: 6.399
   - source: unit-scripts-tooling-other.xml
     test: tests.unit.scripts.ops.test_recover_renderer::test_check_only_suggests_recover
-    duration_s: 6.005
+    duration_s: 6.004
+  - source: contract-confidence.xml
+    test: tests.contract.test_gold_pk_consistency.TestGoldPkConsistency::test_pipeline_configs_use_new_pk_naming
+    duration_s: 5.114
+  - source: repo-backed-unit-tooling.xml
+    test: tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix::test_field_matrix__is_deterministic__61401586
+    duration_s: 5.1
+  - source: integration.xml
+    test: tests.integration.composite.test_assay_snapshot_merge_replay::test_other_composite_families_replay_physical_outputs[molecule]
+    duration_s: 5.061
+  - source: smoke.xml
+    test: tests.smoke.test_control_plane_rollout_smoke::test_control_plane_rollout_smoke_emits_artifacts_and_aggregate_metrics
+    duration_s: 5.051
+  - source: repo-backed-unit-tooling.xml
+    test: tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix::test_check_artifacts_detects_drift__unit_scripts_test_generate_pipeline_normalization_field_matrix_1213
+    duration_s: 5.015
   top_slowest_zones:
   - zone: tests.unit.scripts.qa.test_report_debt_governance_gates
     test_count: 3
-    total_duration_s: 53.835
-    max_duration_s: 26.173
+    total_duration_s: 43.395
+    max_duration_s: 19.989
   - zone: tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline
     test_count: 2
-    total_duration_s: 21.716
-    max_duration_s: 10.867
+    total_duration_s: 21.476
+    max_duration_s: 10.768
   - zone: tests.unit.interfaces.http.test_health_server_routing_pure_helpers
     test_count: 1
-    total_duration_s: 20.028
-    max_duration_s: 20.028
-  - zone: tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix
-    test_count: 2
-    total_duration_s: 16.844
-    max_duration_s: 8.468
+    total_duration_s: 20.026
+    max_duration_s: 20.026
+  - zone: tests.integration.composite.test_assay_snapshot_merge_replay
+    test_count: 3
+    total_duration_s: 19.156
+    max_duration_s: 7.383
   - zone: tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline
     test_count: 1
-    total_duration_s: 13.746
-    max_duration_s: 13.746
-  - zone: tests.contract.test_provider_contract_drift_replay
-    test_count: 1
-    total_duration_s: 11.751
-    max_duration_s: 11.751
+    total_duration_s: 12.952
+    max_duration_s: 12.952
   - zone: tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline
     test_count: 1
-    total_duration_s: 11.437
-    max_duration_s: 11.437
+    total_duration_s: 11.09
+    max_duration_s: 11.09
   - zone: tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline
     test_count: 1
-    total_duration_s: 10.601
-    max_duration_s: 10.601
+    total_duration_s: 10.755
+    max_duration_s: 10.755
+  - zone: tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix
+    test_count: 2
+    total_duration_s: 10.115
+    max_duration_s: 5.1
+  - zone: tests.contract.test_provider_contract_drift_replay
+    test_count: 1
+    total_duration_s: 9.952
+    max_duration_s: 9.952
   - zone: tests.integration.ci.test_track_d_fixture_control_plane_linkage
     test_count: 1
-    total_duration_s: 9.402
-    max_duration_s: 9.402
-  - zone: tests.unit.composition.test_registry_protocol.TestDataSourceCreatorHelper
-    test_count: 1
-    total_duration_s: 9.151
-    max_duration_s: 9.151
+    total_duration_s: 8.382
+    max_duration_s: 8.382
   execution_context:
     junit_source_count: 17
     junit_sources:
@@ -181,23 +181,23 @@ duration_telemetry:
     executed_count: 32885
     worker_mode: canonical local 17-shard plan; per-shard command recorded
     junit_testcase_duration_sum_s:
-      smoke.xml: 19.333
-      contract-confidence.xml: 115.09
-      repo-backed-unit-product.xml: 25.4
-      repo-backed-unit-tooling.xml: 147.352
-      repo-backed-unit-ops.xml: 6.709
-      unit-scripts-tooling-passport.xml: 17.461
-      unit-scripts-tooling-debt-governance.xml: 58.764
-      unit-scripts-tooling-other.xml: 94.278
-      unit-filesystem-contracts.xml: 4.682
-      unit-subprocess-backed.xml: 0.201
-      unit-domain.xml: 189.253
-      unit-application.xml: 72.807
-      unit-infrastructure.xml: 69.582
-      unit-other.xml: 124.759
-      integration.xml: 251.22
-      security.xml: 18.831
-      serial.xml: 0.119
+      smoke.xml: 14.209
+      contract-confidence.xml: 93.176
+      repo-backed-unit-product.xml: 24.215
+      repo-backed-unit-tooling.xml: 97.172
+      repo-backed-unit-ops.xml: 5.203
+      unit-scripts-tooling-passport.xml: 13.188
+      unit-scripts-tooling-debt-governance.xml: 47.69
+      unit-scripts-tooling-other.xml: 90.389
+      unit-filesystem-contracts.xml: 5.058
+      unit-subprocess-backed.xml: 0.236
+      unit-domain.xml: 197.699
+      unit-application.xml: 76.332
+      unit-infrastructure.xml: 77.116
+      unit-other.xml: 104.576
+      integration.xml: 242.908
+      security.xml: 14.045
+      serial.xml: 0.104
     explicit_exclusions:
     - lane: live-provider-contracts
       reason: canonical contract-confidence marker excludes live network-owned contracts
@@ -214,34 +214,34 @@ duration_telemetry:
         remain unchanged
     skipped_count: 175
     lane_wall_time_s:
-      smoke: 28.01
-      contract-confidence: 127.59
-      repo-backed-unit-product: 37.83
-      repo-backed-unit-tooling: 156.11
-      repo-backed-unit-ops: 12.76
-      unit-scripts-tooling-passport: 22.11
-      unit-scripts-tooling-debt-governance: 62.12
-      unit-scripts-tooling-other: 113.53
-      unit-filesystem-contracts: 154.46
-      unit-subprocess-backed: 60.33
-      unit-domain: 126.37
-      unit-application: 75.77
-      unit-infrastructure: 64.68
-      unit-other: 96.78
-      integration: 285.78
-      security: 18.08
-      serial: 152.73
+      smoke: 21.14
+      contract-confidence: 102.69
+      repo-backed-unit-product: 36.21
+      repo-backed-unit-tooling: 104.27
+      repo-backed-unit-ops: 10.06
+      unit-scripts-tooling-passport: 16.53
+      unit-scripts-tooling-debt-governance: 50.45
+      unit-scripts-tooling-other: 108.4
+      unit-filesystem-contracts: 153.17
+      unit-subprocess-backed: 61.28
+      unit-domain: 132.92
+      unit-application: 81.83
+      unit-infrastructure: 67.05
+      unit-other: 80.9
+      integration: 274.48
+      security: 14.36
+      serial: 124.72
     lane_wall_time_source: producer_monotonic_clock
 measurement_provenance:
   producer: run_local_coverage_verify.py
   trust_tier: local_single_host
   ci_status: BLOCKED_EXTERNAL_PERMANENT
   complete: true
-  manifest_sha256: 32f17998502728881385994dd6ae8046982cfccdeb031b0b525e58ab86d04abb
-  coverage_xml_sha256: 1c3ae0f0bc8525f485d919b923ca2d33baf437fd880b0834dc6659f144cd22b7
+  manifest_sha256: 8560a27302d25c027ad0e07ac0d912175161511fef81343e91473d061773c49b
+  coverage_xml_sha256: cb0f6ebc22ec4a8531803e9cc0c82f311aa2532f1779b1efa68d61e584772681
   source_tree_sha256: 3786dc15afe014d3827d7f940c7cec030d02c993d78487b403eee55b4bdae29b
   test_tree_sha256: 9fbafad35669021e50767d1576076e1fff02b781b0ae6a3b57d9c8127f6579ec
-  head: a7d764fe24314b2029923517ccb2cb9ffff598e9
+  head: 886a32e8bd71abf88616879b46390a716b13059c
   required_shards:
   - smoke
   - contract-confidence
@@ -260,94 +260,94 @@ measurement_provenance:
   - integration
   - security
   - serial
-  started_at_utc: '2026-10-05T13:39:32.248494+00:00'
-  finished_at_utc: '2026-10-05T14:06:53.922533+00:00'
+  started_at_utc: '2026-10-05T15:45:25.323532+00:00'
+  finished_at_utc: '2026-10-05T16:10:01.883972+00:00'
   shards:
   - name: smoke
     exit_code: 0
-    seconds: 28.01
+    seconds: 21.14
     coverage_sha256: 17b37dbe1212a2057a7349a6ba9d40b070b96ca471fc60aedd5faf1ab6987ea6
-    junit_telemetry_sha256: 8c76ec47ee5e98094b1fe00d77e0aa1c3e57fac98eb2506d1422c6aa553144ef
+    junit_telemetry_sha256: af4a54c732fc97ec99515f6b406e46f130650d16ad61dadf40f33c66725d3658
   - name: contract-confidence
     exit_code: 0
-    seconds: 127.59
+    seconds: 102.69
     coverage_sha256: 218b9bbf91e720453f60cf5bc362cfdba3d72225a3223240b71ef109a4790065
-    junit_telemetry_sha256: 71ac201df1e6561334467a50fe3808026da2a5aad1ebdfa1e9939f15935517e1
+    junit_telemetry_sha256: d9c3c69e3ced929da2a08fcf8b0daeb26e597426cf6cdac0c08ac597fce89be2
   - name: repo-backed-unit-product
     exit_code: 0
-    seconds: 37.83
+    seconds: 36.21
     coverage_sha256: 5f3cc779cc294fa3f76e1ab890f24084b6020da3745dc9c87d1557410fdf1426
-    junit_telemetry_sha256: d710ba93d7ea6f9bc9424f7b2056b3d7e03317d436c20457b7e74c06d97d7c38
+    junit_telemetry_sha256: decdda03fe5e22d9d5692e0fa549d057306f7ae83a7c68608facbb5a04129582
   - name: repo-backed-unit-tooling
     exit_code: 0
-    seconds: 156.11
+    seconds: 104.27
     coverage_sha256: ca22542cabb774d61bca96fa9e19cefd8f5af3416f7d6c21e950976d2ad8bbc9
-    junit_telemetry_sha256: d9b6aa737986cf2be5ebbbe680789f6f58127775b774b2ee5f47a3080f84126e
+    junit_telemetry_sha256: aab8f21957ef3898e90bbbb29bd9f12858fa2363637f9a55d9bd5255fb91378e
   - name: repo-backed-unit-ops
     exit_code: 0
-    seconds: 12.76
+    seconds: 10.06
     coverage_sha256: e60f97972ddd8aec9940870b6f47a646d12523a8a03083939ae2cdc0082aab1d
-    junit_telemetry_sha256: 871ef27edeed1ca123b0920fe4e1e750a258baa9db193be39445b87accf017c1
+    junit_telemetry_sha256: 50e7fbca4aa8c6ece24ead399033061c74507532a746c411ad60c4aab494bcc3
   - name: unit-scripts-tooling-passport
     exit_code: 0
-    seconds: 22.11
+    seconds: 16.53
     coverage_sha256: 1bc5bfecad456c8974dc3110a4f785b7604083ce7825e1f100ea9912acc5ea3f
-    junit_telemetry_sha256: 16f93b2add329eb3764dc6a3637ef6ae570ebe60b24ede5755084ed777a7e51c
+    junit_telemetry_sha256: e6e2f54c0eef2da9b3bf9b5ee8cebe2466bae93bd3bd2f4aae48a7293b8b0476
   - name: unit-scripts-tooling-debt-governance
     exit_code: 0
-    seconds: 62.12
+    seconds: 50.45
     coverage_sha256: f1a0533ed9d83a64f2c39a5d83d092fae35e56d47c69048ebaf275342df73bbf
-    junit_telemetry_sha256: 9d5e1fe6378b2776797040b9bbc277d8548eb79587b962a6eb36c1da051a4b97
+    junit_telemetry_sha256: c05a8ed2b84b677b62889057b40ea4b1a50859cd75ab3947e717d04beca9a99f
   - name: unit-scripts-tooling-other
     exit_code: 0
-    seconds: 113.53
+    seconds: 108.4
     coverage_sha256: d451c9fa56ae64e7dfcd2a998f2dd29984dd88acf75dc5e41ddd6f828d43aaa0
-    junit_telemetry_sha256: 175081d57010fc1d309db72568c7e449e9e7811bb677c9a7139f71b4bc9b7d9a
+    junit_telemetry_sha256: 17d267d6724f6f495f68ce795140828e9d4308fa96b411bfeabbffbb40d8e078
   - name: unit-filesystem-contracts
     exit_code: 0
-    seconds: 154.46
-    coverage_sha256: 8239d482c9fe010e61c73decb6aed697637846ec3d227365765dcd8b93046475
-    junit_telemetry_sha256: d5c8881a6f1a5a488fcd5fe7adc59a6b021fab9c6ece8d9498332bbf0b69b62e
+    seconds: 153.17
+    coverage_sha256: b6aa45666873ed49cf94be95cec31840244fa303db74446094bdccde8291578a
+    junit_telemetry_sha256: 8f3beeb5bb5f0fb098beb873a883b002ea81a9d947fb744230434930712dcd66
   - name: unit-subprocess-backed
     exit_code: 0
-    seconds: 60.33
+    seconds: 61.28
     coverage_sha256: fe01377638d24c7ac8332ebcca6fa43c548e11c937989eacf653ab29263278d5
-    junit_telemetry_sha256: 274b85129a54613f17696604a040ab233726b78de4489b3e797a0de9eb3e755e
+    junit_telemetry_sha256: e53569cdbad606411b7b6a2b7d86148db556047c70048c3dd2a805f7c08a087b
   - name: unit-domain
     exit_code: 0
-    seconds: 126.37
-    coverage_sha256: af5f7075c80d1afafc0dccf13e1b8c0e59632c33eaaab5c18e7c85a5dd3b9e1d
-    junit_telemetry_sha256: 831fd7d77fc317e954b7d2e136c5f42b80c354941a1f2ff113f227c94491470c
+    seconds: 132.92
+    coverage_sha256: cbe4f1a56107b86447df34fef2bfd0ee5322e4eb8ba81c2c6a38f6127b82308e
+    junit_telemetry_sha256: 9c90e6464c266a2904250cb57da08cc2d633039b2cb9780b0250b94aeefa2c55
   - name: unit-application
     exit_code: 0
-    seconds: 75.77
-    coverage_sha256: 52084acfa8d72e0cbd08d5d5472226ce114c206211fe9990f266ce465cdc9b97
-    junit_telemetry_sha256: f8f88583b2e0b5348f54f1ac4464750f9cf6c958888cb8539811dee6230e9c34
+    seconds: 81.83
+    coverage_sha256: 8bea7c9ede0048bf53f26ccfefde28cfa75286d9e26a45ec9fd13ba520d73726
+    junit_telemetry_sha256: d7fbaa76dbb5d1954afbdb025e0fd39d690cbe68a514136164ae337c5ec5c70a
   - name: unit-infrastructure
     exit_code: 0
-    seconds: 64.68
-    coverage_sha256: e33dcc71cec1a6106cf9bdd7f14c39063c3a09aeac4679081bb3df5407b43c49
-    junit_telemetry_sha256: 088182c0b1632569cfe430ee12d23011813943d94ca275c3da288e388fcf4120
+    seconds: 67.05
+    coverage_sha256: bb1872bb1d85d2c4370df19bb0b9399e15aef9b1b1ed30b58de624adc8dd90bc
+    junit_telemetry_sha256: 92d379e8dae7c794cca0a75d647671c4fed8285d35ed01a245e939a686ba1c75
   - name: unit-other
     exit_code: 0
-    seconds: 96.78
-    coverage_sha256: 5f71a13fc019698eb5e5a657c967624e24b6c8a49ab1e40ff0134cd4d33a16c5
-    junit_telemetry_sha256: 52e4f230766728a15686730293d70651ad7f1c0eb084a972970e9d3b12ea39e9
+    seconds: 80.9
+    coverage_sha256: 691cb6d1a8b5af74d083e42fbf1f1d57b0375e23cba580ad56c1e78de029c0d6
+    junit_telemetry_sha256: c35610c34126b86e91c4f12a182bb1a6fdf93e1536b6fcac84e8b17f2e653c08
   - name: integration
     exit_code: 0
-    seconds: 285.78
-    coverage_sha256: d13ee36c6bae4b0b1020226bc5d7471beeae01dd0632f0ac62f91267fd1686cc
-    junit_telemetry_sha256: e8f2a596a3befc3ec1638013ea683c88fdbec1c7d8c0b78c2da2223e7a902be9
+    seconds: 274.48
+    coverage_sha256: 427b8a48a9c2fe3ce05616e24e5cad46cf9d113bc8662da73a04d2e09ef563af
+    junit_telemetry_sha256: 31c591e9f3df7d6bd0cb345ec5cc6c2276868b471b17367b17eeabbedd44bd27
   - name: security
     exit_code: 0
-    seconds: 18.08
-    coverage_sha256: 525e00ffa103674b13c0ad157683757fb39c93d6f7ea4a06a8fb54e8c9ae40ee
-    junit_telemetry_sha256: 7f21ccf5cfb598c8986e5939402bbd05e272312e80ca27d75c63ba0265634ded
+    seconds: 14.36
+    coverage_sha256: e452fc992c98a5cccaf0d6ec3965e27c8f51c228fa112b86c0fa402119fcbbbd
+    junit_telemetry_sha256: a20881acab5eeaaa5455ea696d68a2cf1b68bd362fd59d35493fc16e72dce72e
   - name: serial
     exit_code: 0
-    seconds: 152.73
+    seconds: 124.72
     coverage_sha256: a6a84c251958a2aca25e0cd530a4f5444151c56f28bb68386439739fca4cd318
-    junit_telemetry_sha256: 3837c7eddd5c5635f76f591899445c0c7aff16a834a1464a7921bf8e28c78128
+    junit_telemetry_sha256: b0ef9548adf6ed44710c8d7e673d81001f478192045b0adcc3cb1aeb29126eee
 slow_governance_cache_probe: &id001
   issue_ref: '#4663'
   refreshed_at_utc: '2026-05-26T04:32:00+00:00'
