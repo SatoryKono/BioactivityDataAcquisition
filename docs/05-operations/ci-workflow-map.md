@@ -57,6 +57,11 @@ resume and independent determinism recheck, with nonempty checksum comparison
 and replay artifacts. `memory-freshness` checks and publishes evidence without
 GitHub write credentials; its schedule-failure notification and PR event parity
 remain pending. Both lanes are opt-in and main-only.
+On 2026-10-05, CircleCI confirmed creation of `bioetl-memory-freshness-weekly`:
+branch `main`, `ci-lane=memory-freshness`, Monday, every month, one run during
+05:00–05:59 UTC, Scheduled Actor. This replaces the legacy 05:17 minute with
+an hourly window. The first scheduled run and failure-notification parity remain
+pending; trigger registration alone is not execution acceptance.
 
 The prepared `mutation` lane additionally requires `pipeline.trigger.type=schedule`;
 manual/API/PR triggers cannot start its four jobs. It preserves the existing four
