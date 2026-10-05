@@ -49,15 +49,13 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "GoldTransformCallback",
         "TransformCallback",
     ),
-    "bioetl.domain.ports.source_config": (
-        "PaginationConfigLike",
-        "SourceConfigLike",
-    ),
+    "bioetl.domain.ports.source_config": ("PaginationConfigLike", "SourceConfigLike"),
     "bioetl.domain.ports.data_normalization": ("DataNormalizationPort",),
     "bioetl.domain.ports.data_source": (
         "DataSourceFactoryPort",
         "DataSourcePort",
         "FilterableDataSourcePort",
+        "PublicationTermEnrichmentPort",
     ),
     "bioetl.domain.ports.delta_reader": ("DeltaReaderPort",),
     "bioetl.domain.ports.export": (

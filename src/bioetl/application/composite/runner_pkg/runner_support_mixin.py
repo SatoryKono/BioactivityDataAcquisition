@@ -7,7 +7,10 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import Any, cast
 
-from bioetl.application.composite.checkpoint import CompositeCheckpointService
+from bioetl.application.composite.checkpoint import (
+    CompositeCheckpointService,
+    CompositeCheckpointState,
+)
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.lifecycle_observer_service import (
     CompositeLifecycleObserverService,
@@ -17,6 +20,10 @@ from bioetl.application.composite.preflight_validator import (
 )
 from bioetl.application.composite.runner_pkg.runner_observability_mixin import (
     CompositeRunnerObservabilityMixin,
+)
+from bioetl.application.composite.runner_pkg.runner_runtime_helpers import (
+    prepare_run_state,
+    resolve_original_run_id,
 )
 from bioetl.application.composite.runner_pkg.runner_support_result_mixin import (
     _CompositeRunnerSupportResultMixin,
@@ -67,3 +74,18 @@ class CompositeRunnerSupportMixin(
         Any, None
     )  # Any: host attr default (PD3)
     _fsm: FSMStateHelperService = cast(Any, None)  # Any: host attr default (PD3)
+
+    async def _prepare_run_state(self) -> CompositeCheckpointState:
+        """Load checkpoint state and apply resume semantics when configured."""
+        state = await prepare_run_state(
+            checkpoint_manager=self._checkpoint_manager,
+            runtime=self._runtime,
+            fsm=self._fsm,
+            clock=self._clock,
+        )
+        self._original_run_id = resolve_original_run_id(
+            runtime=self._runtime,
+            state=state,
+            current_run_id=self._run_id_str,
+        )
+        return state

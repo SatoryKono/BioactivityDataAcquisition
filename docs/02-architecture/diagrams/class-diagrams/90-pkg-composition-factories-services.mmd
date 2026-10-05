@@ -1,11 +1,11 @@
 %% Title: Package Family: composition/factories/services
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/factories/services; modules: common_service_wiring, _bundle_support, _builder_record_processor_support, _pipeline_batch_executor_types, builder, bundle.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/factories/services; modules: common_service_wiring, _bundle_support, composite_support_services_factory, _builder_record_processor_support, builder, bundle.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-09-25
+%% @date    2026-10-04
 %% @level   Package Family / Inventory Slice
-%% @nodes   12
+%% @nodes   15
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -20,12 +20,13 @@ classDiagram
         class _PipelineCreationIdentity
     }
 
-    namespace builder_record_processor_support {
-        class _RecordProcessorBuildRequest
+    namespace composite_support_services_factory {
+        class CompositeSupportServices
+        class CompositeSupportServicesFactory
     }
 
-    namespace pipeline_batch_executor_types {
-        class BatchExecutorBuildRequest
+    namespace builder_record_processor_support {
+        class _RecordProcessorBuildRequest
     }
 
     namespace builder {
@@ -40,6 +41,10 @@ classDiagram
         class BaseServicesFactory
     }
 
+    namespace pipeline_batch_executor_builder {
+        class BatchExecutorBuildRequest
+    }
+
     namespace polars_join_adapter {
         class PolarsJoinBridge
     }
@@ -48,3 +53,6 @@ classDiagram
         class UuidBatchIdGenerator
     }
 
+    namespace workflow_transforms {
+        class WorkflowCohortResolver
+    }

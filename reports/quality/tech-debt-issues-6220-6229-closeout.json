@@ -144,7 +144,7 @@
   },
   "ratchets": {
     "public_lazy_facade_rows": {
-      "current": 51,
+      "current": 50,
       "max": 51,
       "opening": 53,
       "source": "configs/quality/public_lazy_facade_inventory.yaml"

@@ -9,8 +9,10 @@ from unittest.mock import Mock
 import pytest
 
 from bioetl.composition.bootstrap.runtime.pipeline import (
-    _coerce_optional_str,
     _fail_fast_empty_explicit_cached_bronze,
+)
+from bioetl.composition.factories.pipeline_support.checkpoint_policy_helpers import (
+    _coerce_optional_str,
 )
 from bioetl.composition.factories import transformer_dependencies
 from bioetl.composition.factories.datasource.http_client import HttpClientFactory

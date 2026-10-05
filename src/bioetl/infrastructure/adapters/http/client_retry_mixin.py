@@ -21,13 +21,13 @@ from bioetl.infrastructure.adapters.http._client_retry_models import (
     _RequestAttemptOutcome,
     _RetryRequestState,
 )
-from bioetl.infrastructure.adapters.http._client_retry_policy import (
-    _can_retry,
-    _parse_retry_after,
-    _record_request_metrics,
-)
 from bioetl.infrastructure.adapters.http._client_retry_request_flow import (
     HTTPClientRetryRequestFlow,
+)
+from bioetl.infrastructure.adapters.http.client_retry_policy import (
+    _record_request_metrics,
+    can_retry,
+    parse_retry_after,
 )
 from bioetl.infrastructure.adapters.http.request_timing import execute_timed_request
 
@@ -65,7 +65,7 @@ class HTTPClientRetryMixin(HTTPClientRetryRequestFlow):
         if response is not None:
             retry_after = response.headers.get("Retry-After")
             if retry_after:
-                retry_after_delay = _parse_retry_after(retry_after)
+                retry_after_delay = parse_retry_after(retry_after)
                 if retry_after_delay is not None:
                     delay = self.retry_config.clamp_retry_after(retry_after_delay)
         if self.logger is not None:
@@ -82,7 +82,7 @@ class HTTPClientRetryMixin(HTTPClientRetryRequestFlow):
 
     def _can_retry(self, attempt: int, retries_used: int) -> bool:
         """Check if retry is allowed based on retry budget and attempt count."""
-        return _can_retry(self.retry_config, attempt, retries_used)
+        return can_retry(self.retry_config, attempt, retries_used)
 
     def _record_retry_budget_exhausted(self, method: str, url: str) -> None:
         """Emit retry-budget exhaustion metrics and warning log."""

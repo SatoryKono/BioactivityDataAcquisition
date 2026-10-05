@@ -488,6 +488,27 @@ Composite resume semantics:
 
 ______________________________________________________________________
 
+### `replay-composite`
+
+Offline replay of a digest-bound composite parent envelope (ADR-062). Reproduces
+Silver/Gold in a new isolated directory without invoking provider APIs.
+
+```bash
+bioetl replay-composite --envelope <path/to/parent.json> --sha256 <parent-envelope-digest> --output <new-directory>
+```
+
+All three options are required. The envelope must be named `parent.json`; use the
+SHA-256 recorded by the parent run report. Missing or inconsistent evidence stops
+the command instead of claiming replay equivalence.
+
+### `replay-assay`
+
+Compatibility command for the same offline replay callback and required options:
+
+```bash
+bioetl replay-assay --envelope <path/to/parent.json> --sha256 <parent-envelope-digest> --output <new-directory>
+```
+
 ### `run-manifest` — Inspect control-plane manifests and ledgers
 
 Просмотр immutable run manifest и append-only ledger history для уже

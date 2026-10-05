@@ -38,6 +38,7 @@ from bioetl.domain.workflow import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.application.services.execution.pipeline_runner_models import RunResult
     from bioetl.application.services.execution.pipeline_runner_service import (
         PipelineRunnerService,
     )
@@ -139,14 +140,9 @@ async def execute_pipeline_step(
             step.pipeline_name,
             options=step_options,
         )
-        if result.is_success and capture_required:
-            if snapshot_reader is None:
-                raise ValueError("producer scope requires a snapshot reader")
-            snapshots = await snapshot_reader(step.pipeline_name, result.run_id)
-            for snapshot in snapshots.values():
-                snapshot["limit"] = step.run_options.limit
-                snapshot["start_offset"] = step.run_options.start_offset
-            result = replace(result, selected_snapshots=snapshots)
+        result = await _capture_producer_result(
+            result, step, snapshot_reader, capture_required
+        )
     except _WORKFLOW_STEP_FAILURES as exc:
         record_step_metrics(
             metrics=metrics,
@@ -184,6 +180,25 @@ async def execute_pipeline_step(
         child_run_id=optional_identity(result, "run_id"),
         child_manifest_id=optional_identity(result, "manifest_id"),
     )
+
+
+async def _capture_producer_result(
+    result: RunResult,
+    step: WorkflowStepConfig,
+    snapshot_reader: Callable[[str, str], Awaitable[dict[str, dict[str, object]]]]
+    | None,
+    capture_required: bool,
+) -> RunResult:
+    """Persist the successful producer's exact bounded snapshots."""
+    if not result.is_success or not capture_required:
+        return result
+    if snapshot_reader is None:
+        raise ValueError("producer scope requires a snapshot reader")
+    snapshots = await snapshot_reader(step.pipeline_name, result.run_id)
+    for snapshot in snapshots.values():
+        snapshot["limit"] = step.run_options.limit
+        snapshot["start_offset"] = step.run_options.start_offset
+    return replace(result, selected_snapshots=snapshots)
 
 
 @dataclass(frozen=True, slots=True)

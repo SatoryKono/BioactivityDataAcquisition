@@ -15,6 +15,8 @@ from bioetl.application.core.record_normalization_processor import (
 from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
 from bioetl.domain.config.validation_config import ValidationConfig
 
+pytestmark = pytest.mark.integration
+
 
 @pytest.mark.parametrize(
     "weight,valid",

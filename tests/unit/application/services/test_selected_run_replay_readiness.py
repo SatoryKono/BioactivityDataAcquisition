@@ -180,3 +180,89 @@ def test_unfinished_run_is_not_ready() -> None:
         artifact_probes=(_pass_probe(),),
     )
     assert projection["verdict"] == BLOCKED
+
+
+@pytest.mark.parametrize(
+    ("flag", "result", "reason"),
+    [
+        ("true", "unknown", "run_missing_input_snapshots"),
+        ("1", "unknown", "run_missing_input_snapshots"),
+        ("yes", "unknown", "run_missing_input_snapshots"),
+        ("false", "fail", "family_outside_supported_exact_replay_boundary"),
+        ("0", "fail", "family_outside_supported_exact_replay_boundary"),
+        ("no", "fail", "family_outside_supported_exact_replay_boundary"),
+        ("unrecorded", "unknown", "run_missing_input_snapshots"),
+        (None, "unknown", "run_missing_input_snapshots"),
+    ],
+)
+def test_recorded_family_support_tokens_keep_run_snapshot_gate(flag, result, reason):
+    manifest = {**_PASSING_MANIFEST, "replay_capability": "resume_only"}
+    manifest.pop("exact_replay_supported")
+    manifest["strict_exact_replay_supported"] = flag
+    projection = project_selected_run_replay_readiness(
+        identity=_PASSING_IDENTITY,
+        manifest=manifest,
+        inventory_present=True,
+        artifact_probes=(_pass_probe(),),
+    )
+    family = next(
+        item for item in projection["checks"] if item["code"] == "exact_replay_family"
+    )
+    assert (family["result"], family["reason"]) == (result, reason)
+    assert projection["verdict"] != READY
+
+
+@pytest.mark.parametrize("status", [None, "foreign_status", "", "  "])
+def test_unrecorded_terminal_status_is_insufficient(status):
+    projection = project_selected_run_replay_readiness(
+        identity={**_PASSING_IDENTITY, "status": status},
+        manifest=_PASSING_MANIFEST,
+        inventory_present=True,
+        artifact_probes=(_pass_probe(),),
+    )
+    assert projection["verdict"] == INSUFFICIENT
+    assert "terminal_status" in projection["unknown_checks"]
+
+
+def test_valid_replay_anchor_is_required_even_with_manifest_anchor():
+    projection = project_selected_run_replay_readiness(
+        identity={
+            **_PASSING_IDENTITY,
+            "replay_of_manifest_id": "parent",
+            "replay_of_run_id": "source-run",
+        },
+        manifest=_PASSING_MANIFEST,
+        inventory_present=True,
+        artifact_probes=(_pass_probe(),),
+    )
+    assert projection["verdict"] == READY
+    check = next(
+        item for item in projection["checks"] if item["code"] == "replay_of_run_id"
+    )
+    assert check["reason"] == "replay_anchor_present"
+
+
+@pytest.mark.parametrize("value", [None, "", "  ", [], {}])
+def test_empty_recorded_hash_is_unknown_despite_verification_flag(value):
+    projection = project_selected_run_replay_readiness(
+        identity=_PASSING_IDENTITY,
+        manifest={**_PASSING_MANIFEST, "effective_config_hash": value},
+        inventory_present=True,
+        artifact_probes=(_pass_probe(),),
+    )
+    assert projection["verdict"] == INSUFFICIENT
+    check = next(
+        item for item in projection["checks"] if item["code"] == "effective_config_hash"
+    )
+    assert check["reason"] == "not_recorded"
+
+
+def test_unknown_artifact_result_and_empty_inventory_never_produce_ready():
+    for probes in [(), ({"result": "foreign_status"},)]:
+        projection = project_selected_run_replay_readiness(
+            identity=_PASSING_IDENTITY,
+            manifest=_PASSING_MANIFEST,
+            inventory_present=True,
+            artifact_probes=probes,
+        )
+        assert projection["verdict"] == INSUFFICIENT

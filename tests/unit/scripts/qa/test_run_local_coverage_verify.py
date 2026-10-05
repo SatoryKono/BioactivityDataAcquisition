@@ -3,10 +3,16 @@
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
 
 import pytest
 
-from scripts.engineering.qa.run_local_coverage_verify import SHARDS, _command, main
+from scripts.engineering.qa.run_local_coverage_verify import (
+    SHARDS,
+    _command,
+    _measurement_environment,
+    main,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -60,3 +66,29 @@ def test_local_coverage_list_is_read_only(capsys) -> None:
     assert len(lines) == 17
     assert lines[0].startswith("smoke:")
     assert lines[-1].startswith("serial:")
+
+
+@pytest.mark.subprocess_backed
+def test_temporary_git_fixture_cannot_overwrite_callers_index(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    foreign_index = tmp_path / "foreign-index"
+    foreign_index.write_bytes(b"caller index must remain untouched")
+    monkeypatch.setenv("GIT_INDEX_FILE", str(foreign_index))
+    monkeypatch.setenv("GIT_WORK_TREE", str(tmp_path / "foreign-worktree"))
+    monkeypatch.setenv("WSLENV", "GIT_INDEX_FILE/p:PYTHONUTF8:GIT_WORK_TREE/p")
+    env = _measurement_environment()
+    repo = tmp_path / "fixture"
+    repo.mkdir()
+    for args in (("init", "-q"), ("read-tree", "--empty")):
+        subprocess.run(
+            ["git", *args],
+            cwd=repo,
+            env=env,
+            check=True,
+            capture_output=True,
+            timeout=20,
+        )
+    assert foreign_index.read_bytes() == b"caller index must remain untouched"
+    assert (repo / ".git" / "index").is_file()
+    assert env["WSLENV"] == "PYTHONUTF8"

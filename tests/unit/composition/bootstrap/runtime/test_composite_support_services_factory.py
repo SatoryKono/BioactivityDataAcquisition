@@ -46,7 +46,7 @@ from bioetl.composition.bootstrap.runtime.composite_merge_service_builder import
     _resolve_join_how,
     build_composite_merge_service,
 )
-from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
+from bioetl.composition.factories.services.composite_support_services_factory import (
     CompositeSupportServicesFactory,
 )
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
@@ -237,7 +237,7 @@ def test_build_uses_canonical_composite_checkpoint_port(
     mock_enrichment_coordinator_cls.return_value = MagicMock(name="coordinator")
     mock_fsm_state_helper_cls.return_value = MagicMock(name="fsm_state_helper")
     with patch(
-        "bioetl.composition.bootstrap.runtime.composite_support_services_factory.build_composite_merge_service",
+        "bioetl.composition.factories.services.composite_support_services_factory.build_composite_merge_service",
         return_value=merger,
     ) as mock_build_merge_service:
         result = factory.build()

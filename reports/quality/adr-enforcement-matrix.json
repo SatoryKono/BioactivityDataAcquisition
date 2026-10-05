@@ -2004,7 +2004,8 @@
         "scripts/ops/observability/grafana/generate_dux4_issue_pack.py",
         "tests/architecture/test_adr_enforcement_matrix.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_dashboard_scenes_contract.py"
+        "tests/architecture/test_dashboard_scenes_contract.py",
+        "tests/architecture/test_grafana_overview_v2_semantics.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
@@ -2036,7 +2037,8 @@
         "scripts/ops/observability/grafana/generate_dux4_issue_pack.py",
         "tests/architecture/test_adr_enforcement_matrix.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_dashboard_scenes_contract.py"
+        "tests/architecture/test_dashboard_scenes_contract.py",
+        "tests/architecture/test_grafana_overview_v2_semantics.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",
@@ -2263,6 +2265,7 @@
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/RULES.md",
+        "docs/04-reference/cli.md",
         "src/bioetl/composition/bootstrap/runtime/assay_replay.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/integration/composite/test_assay_snapshot_merge_replay.py",
