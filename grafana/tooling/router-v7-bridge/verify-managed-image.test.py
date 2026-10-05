@@ -2,8 +2,8 @@
 import copy
 import importlib.util
 import unittest
-from unittest.mock import patch
 from pathlib import Path
+from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location("managed_image", Path(__file__).with_name("verify-managed-image.py"))
 managed = importlib.util.module_from_spec(spec)
@@ -23,7 +23,8 @@ class ManagedImageTests(unittest.TestCase):
         self.parent_files = {"run.sh": ["trusted"], "usr/share/grafana/bin/grafana": ["backend"],
                              managed.SCENES + "/module.js": ["optional"],
                              "usr/share/grafana/public/build/frontend.js": ["frontend"],
-                             "usr/share/grafana/data/plugins-bundled/bioetl-selectorshell-panel/module.js": ["selector"]}
+                             "usr/share/grafana/data/plugins-bundled/"
+                             "bioetl-selectorshell-panel/module.js": ["selector"]}
         self.expected = {key: value for key, value in self.parent_files.items() if not key.startswith(managed.SCENES)}
 
     def verify(self, files=None):
@@ -69,6 +70,27 @@ class ManagedImageTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "immutable image reference"):
                     managed.records(value)
                 command.assert_not_called()
+
+    def test_rebuilt_plugin_maps_missing_and_extra_files_fail(self):
+        built = {plugin: {"module.js": "a" * 64, "module.js.map": "b" * 64}
+                 for plugin in ("bioetl-scenes-app", "bioetl-selectorshell-panel")}
+        parent = {"usr/share/grafana/data/plugins-bundled/" + plugin + "/" + name:
+                  ["0", 0o444, 0, 0, "", 0, 0, digest, {}]
+                  for plugin, files in built.items() for name, digest in files.items()}
+        self.assertEqual(managed.verify_plugin_bundles(parent, built),
+                         dict.fromkeys(built, 2))
+        for plugin in built:
+            for defect in ("changed_map", "missing_map", "extra_file"):
+                with self.subTest(plugin=plugin, defect=defect):
+                    changed = copy.deepcopy(built)
+                    if defect == "changed_map":
+                        changed[plugin]["module.js.map"] = "c" * 64
+                    elif defect == "missing_map":
+                        del changed[plugin]["module.js.map"]
+                    else:
+                        changed[plugin]["unrelated.js"] = "d" * 64
+                    with self.assertRaisesRegex(ValueError, "Complete rebuilt plugin mismatch"):
+                        managed.verify_plugin_bundles(parent, changed)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 {
-  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:0f754416e7b8ed27fc0894d64aaf0ce82bad4b078d1b31050de5af0e5e7ff02c",
+  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:301b213479446237b6d5ad904890ee34686198633d6dcb4d4f1989202b98772e",
   "grafana_version": "13.2.3",
   "upstream_sha": "6193dc03311b631b9727b560d24369e683dc396e",
   "base_image": "grafana/grafana@sha256:d84563330dc9d2fd2bc096d0fb96021b5319c75bf6ed555566709998e823dec4",
@@ -27,9 +27,11 @@
     "grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.tsx": "9f8962b1bbe000247a588fa2c1b6cb91e0ab22f96b03beb1e9dcb2ec939a5222",
     "grafana/plugins/bioetl-selectorshell-panel/webpack.config.ts": "4db8eb4dfc7042637cdcd201dafb0152be2d30b52fa97d497b1aabd98e552411",
     "grafana/plugins/bioetl-scenes-app/webpack.config.ts": "eab04a1aa4c728716d91db3d9fdd4c2fd7e9ec6beeaa98f7a0e95df1b0bc9426",
-    "grafana/tooling/router-v7-bridge/webpack-public-path.cjs": "e938b87e3750165c9cb90b666ddfe0ad15a22a3a9db8c846ca3b3b20c6a0feb0"
+    "grafana/tooling/router-v7-bridge/webpack-public-path.cjs": "e938b87e3750165c9cb90b666ddfe0ad15a22a3a9db8c846ca3b3b20c6a0feb0",
+    "grafana/plugins/bioetl-scenes-app/dist/module.js.map": "f08f919ebb16e86313f56065140cd117405f9202c3baf3489187786159aee5ef",
+    "grafana/plugins/bioetl-scenes-app/dist/528.js.map": "4bac095f1320f11c8f602ae4b80f79c264dc4e7b07a5183323589118e0f9212a"
   },
-  "acceptance": "Fresh complete frontend and Linux plugin rebuild; managed rollout requires complete browser and source/runtime acceptance.",
+  "acceptance": "Verified original source-built frontend with complete CI-reproduced plugin trees; managed rollout and post-merge runtime acceptance remain pending.",
   "plugin_release_date": "2026-10-03",
   "build_input_revalidation": {
     "source_commit": "c7b342cdf75fe326acb1c8fb7c3a33178c5f6108",

@@ -72,6 +72,36 @@ def records(image):
         subprocess.run([docker_path(), "rm", "-v", container], check=True, stdout=subprocess.DEVNULL)
 
 
+def verify_plugin_bundles(parent_files, built_files):
+    """Bind every rebuilt plugin file, including debug maps, to the parent image."""
+    counts = {}
+    for plugin in ("bioetl-scenes-app", "bioetl-selectorshell-panel"):
+        prefix = "usr/share/grafana/data/plugins-bundled/" + plugin + "/"
+        expected = {path.removeprefix(prefix): row[7]
+                    for path, row in parent_files.items()
+                    if path.startswith(prefix) and row[0] in {"0", "\x00"}}
+        if not expected or built_files.get(plugin) != expected:
+            raise ValueError("Complete rebuilt plugin mismatch: " + plugin)
+        counts[plugin] = len(expected)
+    return counts
+
+
+def rebuilt_plugin_files():
+    result = {}
+    for plugin in ("bioetl-scenes-app", "bioetl-selectorshell-panel"):
+        dist = ROOT / "grafana/plugins" / plugin / "dist"
+        if not dist.is_dir() or dist.resolve() != dist:
+            raise ValueError("Missing or redirected plugin build: " + plugin)
+        files = {}
+        for path in dist.rglob("*"):
+            if path.is_symlink():
+                raise ValueError("Plugin build contains a symlink")
+            if path.is_file():
+                files[path.relative_to(dist).as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
+        result[plugin] = files
+    return result
+
+
 def verify(parent, built, delivered, parent_files, built_files, delivered_files, declared):
     if declared not in delivered.get("RepoDigests", []):
         raise ValueError("Declared registry digest was not inspected")
@@ -113,16 +143,21 @@ def main():
     parent = inspect(manifest["parent_image"])
     built = inspect(sys.argv[1])
     delivered = inspect(manifest["image"])
-    result = verify(parent, built, delivered, records(manifest["parent_image"]),
+    parent_files = records(manifest["parent_image"])
+    plugin_counts = verify_plugin_bundles(parent_files, rebuilt_plugin_files())
+    result = verify(parent, built, delivered, parent_files,
                     records(sys.argv[1]), records(manifest["image"]), manifest["image"])
+    result["rebuilt_plugin_files_verified"] = plugin_counts
     target = ROOT / "reports/qa/router-v7-managed-image-parity.json"
     target.parent.mkdir(parents=True, exist_ok=True)
-    if target.parent.resolve() != target.parent or (target.exists() and (target.is_symlink() or target.stat().st_nlink != 1)):
+    if target.parent.resolve() != target.parent or (
+        target.exists() and (target.is_symlink() or target.stat().st_nlink != 1)
+    ):
         raise ValueError("Receipt path must not redirect writes")
     descriptor = os.open(target, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_NOFOLLOW", 0), 0o600)
     with os.fdopen(descriptor, "w") as stream:
         stream.write(json.dumps(result, indent=2) + "\n")
-    print(json.dumps(result))
+    sys.stdout.write(json.dumps(result) + "\n")
 
 
 if __name__ == "__main__":

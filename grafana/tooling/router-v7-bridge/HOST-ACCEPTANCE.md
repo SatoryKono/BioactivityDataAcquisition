@@ -78,6 +78,14 @@ Host Python reads the tar streams without extracting paths or running image
 executables. Only timestamps are excluded. CircleCI preserves the resulting
 receipt; this image parity check does not itself establish browser acceptance.
 
+The active CircleCI Docker gate also rebuilds both locked plugin graphs and
+compares every resulting file with the parent image's exported plugin trees.
+This includes source maps, metadata and other assets; missing, extra or changed
+files block delivery even when module.js and plugin.json hashes match. Release
+plugin artifacts must reproduce the CI build tree. A local build in a different
+working directory is diagnostic evidence until the complete file comparison
+passes, because webpack source-map metadata can depend on that directory.
+
 The runtime-probe plugin executes navigation and hydration fixtures through
 Grafana's shared react-router external. Install it only on the acceptance host,
 run its explicit button, preserve the rendered receipt and remove it afterward.
