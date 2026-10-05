@@ -13,7 +13,7 @@ version: 2.1
 parameters:
   ci-lane:
     type: enum
-    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance, e2e-replay, coverage-closeout, docker-baseline, docker-publish, architecture-metrics]
+    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance, e2e-replay, coverage-closeout, docker-baseline, docker-publish, architecture-metrics, scorecard]
     default: pr-gate
   include-hypothesis:
     type: boolean
@@ -98,6 +98,71 @@ commands:
             fi
 
 jobs:
+  scorecard-analysis:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Pinned OpenSSF Scorecard informational analysis
+          no_output_timeout: 16m
+          command: |
+            set -euo pipefail
+            set +x
+            test "$CIRCLE_BRANCH" = main
+            test "$(git rev-parse HEAD)" = "$CIRCLE_SHA1"
+            : "${GITHUB_TOKEN:?Missing read-only GitHub credential}"
+            export GITHUB_AUTH_TOKEN="$GITHUB_TOKEN"
+            timeout --signal=TERM --kill-after=30s 15m bash -euo pipefail -c '
+              mkdir -p /tmp/bioetl-scorecard/tools /tmp/bioetl-scorecard/reports
+              curl --fail --location --retry 3 https://github.com/ossf/scorecard/releases/download/v5.5.0/scorecard_5.5.0_linux_amd64.tar.gz -o /tmp/bioetl-scorecard/scorecard.tar.gz
+              echo "83b90a05c1540ef1390db1cd5711e5fd04be9c1d8537fb84d39d02092d6a8dff  /tmp/bioetl-scorecard/scorecard.tar.gz" | sha256sum --check -
+              tar -xzf /tmp/bioetl-scorecard/scorecard.tar.gz -C /tmp/bioetl-scorecard/tools scorecard
+              curl --fail --location --retry 3 https://raw.githubusercontent.com/ossf/scorecard-action/2d1146689b8cda280b9bc96326124645441f03bc/policies/template.yml -o /tmp/bioetl-scorecard/reports/policy.yml
+              echo "6e75dcc0df989d333492c0e1f6e484fc5b4d26ab768333ddcd0e3788539689b0  /tmp/bioetl-scorecard/reports/policy.yml" | sha256sum --check -
+              /tmp/bioetl-scorecard/tools/scorecard --repo=github.com/SatoryKono/BioactivityDataAcquisition --format=json --show-details --output=/tmp/bioetl-scorecard/reports/results.json
+              ENABLE_SARIF=true /tmp/bioetl-scorecard/tools/scorecard --repo=github.com/SatoryKono/BioactivityDataAcquisition --format=sarif --show-details --policy=/tmp/bioetl-scorecard/reports/policy.yml --output=/tmp/bioetl-scorecard/reports/results.raw.sarif
+            '
+            python3 - \<<'PY'
+            import json, os
+            from pathlib import Path
+            path = Path('/tmp/bioetl-scorecard/reports/results.json')
+            result = json.loads(path.read_text(encoding='utf-8'))
+            assert result['repo']['commit'] == os.environ['CIRCLE_SHA1'], 'Default branch changed during analysis'
+            assert result['repo']['name'] == 'github.com/SatoryKono/BioactivityDataAcquisition'
+            assert result['scorecard']['version'] == 'v5.5.0'
+            expected = {'Binary-Artifacts', 'Branch-Protection', 'CI-Tests', 'CII-Best-Practices', 'Code-Review', 'Contributors', 'Dangerous-Workflow', 'Dependency-Update-Tool', 'Fuzzing', 'License', 'Maintained', 'Packaging', 'Pinned-Dependencies', 'SAST', 'Security-Policy', 'Signed-Releases', 'Token-Permissions', 'Vulnerabilities'}
+            checks = result['checks']
+            assert len(checks) == len(expected) and {row['name'] for row in checks} == expected
+            assert all(isinstance(row['score'], int) and -1 <= row['score'] <= 10 and isinstance(row['reason'], str) for row in checks)
+            import urllib.request
+            request = urllib.request.Request('https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/git/ref/heads/main', headers={'Authorization': 'Bearer ' + os.environ['GITHUB_TOKEN'], 'Accept': 'application/vnd.github+json'})
+            with urllib.request.urlopen(request, timeout=30) as response:
+                assert json.load(response)['object']['sha'] == os.environ['CIRCLE_SHA1'], 'Main changed during SARIF analysis'
+            sarif = json.loads(path.with_name('results.raw.sarif').read_text(encoding='utf-8'))
+            assert sarif['version'] == '2.1.0' and sarif['runs']
+            from urllib.parse import quote
+            for run in sarif['runs']:
+                # Upstream project-wide findings use a placeholder containing spaces.
+                # Preserve its value as a valid URI reference for GitHub's strict parser.
+                for finding in run.get('results', []):
+                    for location in finding.get('locations', []):
+                        artifact = location.get('physicalLocation', {}).get('artifactLocation', {})
+                        if 'uri' in artifact:
+                            artifact['uri'] = quote(artifact['uri'], safe="/:#?&=%@[]!$'()*+,;~-._")
+                assert run['tool']['driver']['name'] == 'Scorecard'
+                assert run['tool']['driver']['semanticVersion'] == 'v5.5.0'
+                run['versionControlProvenance'] = [{'repositoryUri': 'https://github.com/SatoryKono/BioactivityDataAcquisition', 'revisionId': os.environ['CIRCLE_SHA1'], 'branch': 'main'}]
+            path.with_name('results.sarif').write_text(json.dumps(sarif, sort_keys=True) + '\n', encoding='utf-8')
+            # Scores and unsupported checks stay visible; the legacy lane is informational.
+            identity = {'source_sha': os.environ['CIRCLE_SHA1'], 'workflow_id': os.environ['CIRCLE_WORKFLOW_ID'], 'job_number': os.environ['CIRCLE_BUILD_NUM'], 'check_count': len(checks), 'sarif_uploaded': False, 'public_results_published': False}
+            path.with_name('identity.json').write_text(json.dumps(identity, sort_keys=True) + '\n', encoding='utf-8')
+            PY
+      - store_artifacts:
+          path: /tmp/bioetl-scorecard/reports
+          destination: scorecard-analysis
+
   architecture-fast-baseline:
     docker:
       - image: cimg/python:3.12
@@ -2156,3 +2221,11 @@ workflows:
     jobs:
       - architecture-heavy-nightly
       - windows-atomic-write-stress-nightly
+  scorecard:
+    when:
+      and:
+        - equal: [scorecard, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - scorecard-analysis:
+          context: bioetl-github-read-only

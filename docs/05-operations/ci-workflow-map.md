@@ -264,7 +264,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `root-hygiene.yml` | — | CircleCI root-hygiene | Main full-tree/strict checks accepted; cleanup diagnostic artifacts and dedicated legacy regression selectors added for next acceptance; structure-audit port is blocked by six tracked Python paths outside allowed roots |
 | `router-v7-bridge.yml` | — | Router bridge candidate acceptance | Pending port; managed host evidence remains separate |
 | `schema-governance.yml` | — | CircleCI schema-governance | Prepared required gate; canonical generation/parity preserved |
-| `scorecard.yml` | `30 7 * * 1` | Scorecard plus SARIF publication | Pending port; SARIF transport separate from CodeQL analysis |
+| `scorecard.yml` | `30 7 * * 1` | CircleCI scorecard plus SARIF publication | Main-only read-only JSON/SARIF analysis prepared; pinned v5.5.0, all 18 checks and exact main SHA; local Linux 7.8/10 on 303ced3b; local SARIF API upload processed, remote schedule/write context and public result publication pending |
 | `security.yml` | — | CircleCI security-scans | Main security gates 218–220 passed; all tracked lockfiles remain scanned; SARIF publication parity pending |
 | `semantic-governance.yml` | — | CircleCI `semantic-governance` | Seven canonical checks and four regression suites in the PR/main aggregate and an opt-in main lane; main gates 218–220 accepted |
 | `skills-consistency.yml` | — | CircleCI skills-consistency | Main run 3364 passed static doctor, MCP wrapper pairs, mirror checks and drift=false artifact; approved sync and event parity pending; artifact retention verified at 30 days |
@@ -405,3 +405,18 @@ executor. Its separate Windows Server 2022 job installs checksum-pinned uv
 and rejects missing, failed or skipped JUnit cases. The nightly trigger must set
 `ci-lane=architecture-metrics` and `run-heavy=true`; schedule registration and
 remote acceptance are still pending.
+
+
+The `scorecard` lane runs the complete default OpenSSF check set on main and
+validates the resolved report commit against `CIRCLE_SHA1`. It deliberately does
+not use `--commit=<sha>`, which excludes checks unsupported for historical
+commits. The tool remains informational, preserving negative and unsupported
+results in the JSON artifact. The pinned Linux v5.5.0 archive is verified against
+its published release checksum. SARIF uses the upstream formatter and the pinned
+policy from scorecard-action v2.4.4. Project-wide placeholder paths are URI-encoded
+because GitHub strict validation rejects their raw spaces; finding content is
+preserved. A local Linux transport acceptance on main `303ced3b` completed upload
+`d500be9a-c0fe-11f1-8779-79f1b989bac0` with processing status `complete`.
+CircleCI security-write credentials, remote SARIF upload, and public Scorecard
+result publication remain separate unfinished requirements; the CI artifact
+identity records both publication flags as false until its transports run.
