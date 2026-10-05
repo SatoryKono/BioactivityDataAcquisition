@@ -195,6 +195,13 @@ def _collect_direct_reference_owners(
     }
 
 
+def _reference_token_pattern(tokens: list[str]) -> re.Pattern[str]:
+    """Match whole cassette names, paths, or identifiers, longest first."""
+    ordered_tokens = sorted(set(tokens), key=lambda token: (-len(token), token))
+    alternatives = "|".join(re.escape(token) for token in ordered_tokens)
+    return re.compile(r"(?<![\w./\\-])(?:" + alternatives + r")(?![\w./\\-])")
+
+
 def _run_rg_reference_scan(
     *,
     repo_root: Path,
@@ -240,14 +247,15 @@ def _run_rg_reference_scan(
     if result.returncode not in {0, 1}:
         return _run_python_reference_scan(repo_root=repo_root, tokens=tokens)
     owners_by_token: dict[str, set[str]] = {}
+    token_pattern = _reference_token_pattern(tokens)
     for line in result.stdout.splitlines():
         event = json.loads(line)
         if event.get("type") != "match":
             continue
         data = event["data"]
         owner = data["path"]["text"].replace("\\", "/")
-        for submatch in data.get("submatches", []):
-            token = submatch["match"]["text"]
+        for match in token_pattern.finditer(data["lines"]["text"]):
+            token = match.group(0)
             owners_by_token.setdefault(token, set()).add(owner)
     return owners_by_token
 
@@ -257,16 +265,13 @@ def _run_python_reference_scan(
     repo_root: Path,
     tokens: list[str],
 ) -> dict[str, set[str]]:
-    """Fallback fixed-string reachability scan when ripgrep is unavailable."""
+    """Fallback whole-token reachability scan when ripgrep is unavailable."""
 
     owners_by_token: dict[str, set[str]] = {}
     if not tokens:
         return owners_by_token
 
-    # Mirror ripgrep's "prefer the longest overlapping token" behavior closely
-    # enough to keep fallback results stable on platforms where rg is unavailable.
-    ordered_tokens = sorted(set(tokens), key=lambda token: (-len(token), token))
-    token_pattern = re.compile("|".join(re.escape(token) for token in ordered_tokens))
+    token_pattern = _reference_token_pattern(tokens)
 
     for path in _iter_reachability_scan_files(repo_root):
         try:
