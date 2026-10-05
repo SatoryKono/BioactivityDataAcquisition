@@ -1,22 +1,30 @@
-# Canonical required-check catalog for pr-gate-complete aggregator.
-# RF-001 of #9975. One source of truth for GitHub PR gate decisions.
-# GitHub ruleset 13643213 names job `pr-gate-complete` from
-# .github/workflows/pr-required.yml (not leaf names / `PR Gate Complete / …`).
-# Ruleset enforcement is DISABLED (#11180, Actions billing). Catalog `status`
-# values are advisory until billing and ruleset 13643213 are restored.
+# Canonical applicability catalog shared by the CircleCI and retained Actions coordinators.
+# deployment records the live execution provider; owner_workflow and
+# coordinator_workflow retain legacy definitions until their retirement in #11930.
+# They are compatibility references, not runnable GitHub Actions declarations.
 schema_version: 1
 version: 2
 aggregator: pr-gate-complete
 coordinator_workflow: .github/workflows/pr-required.yml
+deployment:
+  provider: circleci
+  config_path: .circleci/config.yml
+  workflow: pr-gate
+  github_status_transport: commit_status
+  github_app_binding: unavailable
+  required_context: 'ci/circleci: pr-gate-complete'
+  root_hygiene_context: 'ci/circleci: root-hygiene'
+  legacy_owner_retirement_issue: 11930
 policy:
   allow_skipped_as_success: false
   allow_cancelled_as_success: false
   require_sha_binding: true
   not_applicable_requires_reason: true
-  github_ruleset_13643213_enforcement: disabled
-  github_ruleset_enforcement_disabled_reason: "Actions billing will not return (#11180); enabling would block main without runnable checks."
-  catalog_check_status: advisory
-  catalog_advisory_until: "GitHub Actions billing and ruleset 13643213 enforcement are restored"
+  github_ruleset_13643213_enforcement: active
+  github_ruleset_15730586_enforcement: active
+  catalog_check_status: enforced
+  enforcement_provider: circleci
+  enforcement_verified_date: "2026-10-05"
 canonical_checks:
   - id: ruff
     owner_workflow: .github/workflows/import-linter.yml

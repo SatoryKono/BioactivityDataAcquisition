@@ -17295,7 +17295,7 @@
       "github_issue_url": null,
       "inbound_links": 7,
       "lifecycle": null,
-      "outbound_links": 10,
+      "outbound_links": 11,
       "owner": "BioETL Team",
       "path": "docs/00-project/governance/05-github-policy.md",
       "recommended_action": "keep",
@@ -59911,7 +59911,7 @@
       "github_issue_url": null,
       "inbound_links": 3,
       "lifecycle": null,
-      "outbound_links": 1,
+      "outbound_links": 3,
       "owner": "BioETL Team",
       "path": "docs/05-operations/runbooks/github-settings-quarterly-review.md",
       "recommended_action": "keep",
@@ -74586,6 +74586,62 @@
       "outbound_links": 0,
       "owner": "BioETL Team",
       "path": "reports/governance/ruleset-10267-closeout-get-2026-09-10.json",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".json",
+      "freshness": "retention-sensitive",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 2,
+      "lifecycle": "closeout_evidence",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/governance/ruleset-11928-closeout-get-2026-10-05.json",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "retention-sensitive",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 1,
+      "lifecycle": "closeout_evidence",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/governance/ruleset-11928-closeout-get-2026-10-05.md",
       "recommended_action": "keep",
       "root_doc_kind": null,
       "section": "reports",
@@ -105192,7 +105248,7 @@
       "active_backlog": 1,
       "active_draft": 278,
       "active_quality_baseline": 60,
-      "closeout_evidence": 163,
+      "closeout_evidence": 165,
       "docs_reports_curated_entrypoint": 2,
       "docs_reports_curated_or_historical_report": 27,
       "docs_reports_generated_or_route_owned": 7,
@@ -105212,7 +105268,7 @@
       "archive-after-github-state-check": 338,
       "archive-after-migration": 992,
       "generate-automatically": 1060,
-      "keep": 1330,
+      "keep": 1332,
       "reconcile-with-github-state": 8
     },
     "by_section": {
@@ -105237,7 +105293,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 1245,
+      "reports": 1247,
       "security": 2
     },
     "by_status": {
@@ -105245,17 +105301,17 @@
       "Archived": 283,
       "Canonical": 75,
       "Generated": 1060,
-      "Working": 1561
+      "Working": 1563
     },
     "by_surface_family": {
       "active": 749,
       "archive": 283,
       "canonical": 75,
       "generated": 1060,
-      "working": 1561
+      "working": 1563
     },
     "by_tracking_state": {
-      "tracked": 3728
+      "tracked": 3730
     },
     "docs_reports_local_count": 57,
     "duplicate_group_count": 7,
@@ -105271,8 +105327,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3728,
+    "total_doc_like": 3730,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3728
+    "total_doc_like_tracked": 3730
   }
 }
