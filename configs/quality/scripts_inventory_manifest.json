@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-05T19:59:35.101107+00:00",
+  "generated_at": "2026-10-05T20:17:51.870233+00:00",
   "summary": {
     "total_scripts": 637,
     "status_counts": {
@@ -11,7 +11,7 @@
       "agents": 10,
       "build": 17,
       "ci": 86,
-      "docs": 259,
+      "docs": 260,
       "other": 48,
       "scripts": 533,
       "skills": 12,
@@ -8281,7 +8281,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 38,
+      "reference_count": 39,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -10200,8 +10200,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/05-operations/ci-workflow-map.md",
+          "line": 378,
+          "source_group": "docs",
+          "text": "[`replay_parity_inputs.py` pytest plugin](../../scripts/engineering/ci/replay_parity_inputs.py)"
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-12-31",
