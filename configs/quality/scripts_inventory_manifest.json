@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-05T14:29:35.135792+00:00",
+  "generated_at": "2026-10-05T21:25:02.918910+00:00",
   "summary": {
-    "total_scripts": 637,
+    "total_scripts": 639,
     "status_counts": {
-      "active": 335,
+      "active": 337,
       "supporting": 302
     },
     "reference_group_coverage": {
       "agents": 10,
       "build": 17,
       "ci": 86,
-      "docs": 260,
+      "docs": 259,
       "other": 48,
       "scripts": 533,
       "skills": 12,
-      "tests": 449
+      "tests": 451
     }
   },
   "scripts": [
@@ -8281,7 +8281,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 39,
+      "reference_count": 38,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -10139,6 +10139,36 @@
       "next_step": "Retain as the fail-closed classifier and aggregator implementation behind the canonical `python -m scripts.engineering.ci pr-gate` router command; keep direct CI and contributor usage routed through that public command."
     },
     {
+      "path": "scripts/engineering/ci/publish_docker_image.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/unit/scripts/ci/test_docker_publication_guards.py",
+          "line": 47,
+          "source_group": "tests",
+          "text": "source = (ROOT / \"scripts/engineering/ci/publish_docker_image.sh\").read_text("
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/ci/publish_scorecard_sarif.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/unit/scripts/ci/test_scorecard_publication.py",
+          "line": 14,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci import publish_scorecard_sarif as publisher"
+        }
+      ]
+    },
+    {
       "path": "scripts/engineering/ci/quality_integral_gate.py",
       "type": "py",
       "status": "active",
@@ -10200,15 +10230,8 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "docs/05-operations/ci-workflow-map.md",
-          "line": 163,
-          "source_group": "docs",
-          "text": "| Replay parity | [2690](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2690) | FAILED: missing basetemp parent directories. Parent creation repaired; four local test runs pass. The opt"
-        }
-      ],
+      "reference_count": 0,
+      "references": [],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-12-31",
@@ -17834,7 +17857,7 @@
         },
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 555,
+          "line": 583,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -19801,7 +19824,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 475,
+          "line": 503,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }
@@ -22216,7 +22239,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1270,
+          "line": 1271,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         },
@@ -24354,7 +24377,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1207,
+          "line": 1208,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -24422,7 +24445,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1207,
+          "line": 1208,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
