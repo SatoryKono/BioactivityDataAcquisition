@@ -11,11 +11,20 @@ thresholds or exemptions are introduced.
 
 The complete W48 producer measured main `c61913580698f70b181ae3e9ac852c631f02a878`:
 17 successful groups, 32,866 passed, 187 skipped, no failures/errors, 99.70% line
-and 94.34% branch coverage. Its source and test hashes match the postmerge
-acceptance branch. The [W48 checksum summary](proof-or-stop/architecture-11854-postmerge/measurement-w48-summary.json)
+and 94.34% branch coverage. Its source and test hashes matched the postmerge
+acceptance branch before the prompt-contract repair below. The [W48 checksum summary](proof-or-stop/architecture-11854-postmerge/measurement-w48-summary.json)
 identifies the archive containing the original manifest, XML, JUnit and raw
 coverage databases. This is `local_single_host` measurement evidence; it does
 not itself establish independent CI admission.
+
+The complete follow-up producer on `27feb6c1f57110f77452670a4dac569c0872ce35`
+repeated all 17 groups after aligning the prompt contracts with the 18 scenarios
+and 28 overlays already merged in #11919. It recorded 32,866 passed, 187 skipped,
+zero failures/errors, 99.70% line and 94.34% branch coverage. The
+[measurement checksum summary](proof-or-stop/architecture-11854-postmerge/measurement-27feb6c.summary.json)
+identifies its original manifest, XML, JUnit and raw coverage archive. This is
+`local_single_host` evidence; W48 remains historical evidence with its original
+identity. All 51 prompt tests passed separately with no skips.
 
 On `e51699ee734832bfae4bd850cc4f9ae48b67232e`, the 50 owning telemetry/skip/cleanup
 tests passed, full `python -m scripts.docs verify` exited 0, and both
