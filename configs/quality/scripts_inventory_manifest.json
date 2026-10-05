@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-05T08:22:58.094923+00:00",
+  "generated_at": "2026-10-05T08:36:41.591754+00:00",
   "summary": {
     "total_scripts": 637,
     "status_counts": {
@@ -21662,7 +21662,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 18,
       "references": [
         {
           "path": "tests/integration/test_live_green_acceptance.py",

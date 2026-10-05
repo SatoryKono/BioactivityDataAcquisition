@@ -82,7 +82,12 @@ enrichers. Every successfully consumed dependency must be captured. The actual
 field-group registry (including provider order and the default group) is stored
 as a required digest-bound object, so publication replay preserves Gold filtering
 without loading mutable configuration. Output table names come from the captured
-merge configuration. The legacy `replay-assay` command and v1 assay envelopes
+merge configuration. Target envelopes additionally require `target-mapping.json`,
+containing the actual protein-class mapping version, entries, and non-counting
+classes used by the merge. Standalone replay initializes this lookup from the
+verified object; it cannot depend on prior live-process initialization or current
+YAML. A missing or modified mapping blocks target replay readiness.
+The legacy `replay-assay` command and v1 assay envelopes
 remain supported within their original dependency-free boundary.
 
 Required tests cover typed round trips; source-buffer mutation; concurrent reads;

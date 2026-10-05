@@ -1,5 +1,7 @@
 """ADR-062: Fail-closed integrity checks for the parent envelope and verification receipt."""
 
+from __future__ import annotations
+
 import json
 
 import pyarrow as pa
@@ -22,6 +24,54 @@ from bioetl.infrastructure.storage.composite_replay_evidence import (
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_target_mapping_round_trip_uses_captured_lookup(monkeypatch):
+    from bioetl.application.composite.helpers.replay_context import (
+        freeze_target_mapping,
+        restore_target_mapping,
+    )
+    from bioetl.domain.mapping import protein_class_target_type as mapping
+
+    original = mapping.ProteinClassTargetTypeMappingData(
+        "captured-custom-v1",
+        (mapping.ProteinClassTopLevelMappingEntry("enzyme", "custom-enzyme", True),),
+        frozenset({"custom-ignored"}),
+    )
+    monkeypatch.setattr(mapping, "_mapping_data", original)
+    payload = json.loads(json.dumps(freeze_target_mapping()))
+    monkeypatch.setattr(mapping, "_mapping_data", None)
+    restored = restore_target_mapping(payload)
+    mapping.initialize_protein_class_target_type_mapping(restored)
+    assert mapping.current_protein_class_target_type_mapping() == original
+    assert (
+        mapping.normalize_protein_class_top_level("enzyme").canonical_l1
+        == "custom-enzyme"
+    )
+
+
+@pytest.mark.parametrize("damage", ["absent", "missing", "changed"])
+def test_target_requires_digest_bound_mapping(bundle, damage):
+    root, envelope, _ = bundle
+    envelope.update(version="composite-parent-replay-v2", pipeline="composite_target")
+    envelope["objects"]["field-groups.json"] = publish_json(
+        root, "field-groups.json", {}
+    )
+    if damage != "absent":
+        envelope["objects"]["target-mapping.json"] = publish_json(
+            root, "target-mapping.json", {}
+        )
+    path = root / "parent.json"
+    path.write_text(json.dumps(envelope))
+    digest = digest_bytes(path.read_bytes())
+    if damage != "absent":
+        assert verify_bundle(root, digest)["pipeline"] == "composite_target"
+        if damage == "missing":
+            (root / "target-mapping.json").unlink()
+        else:
+            (root / "target-mapping.json").write_bytes(b"changed")
+    with pytest.raises((ValueError, FileNotFoundError)):
+        verify_bundle(root, digest)
 
 
 @pytest.fixture

@@ -36,6 +36,7 @@ from bioetl.infrastructure.time import SystemClock
 from bioetl.composition.bootstrap.runtime.assay_replay import replay_assay
 from bioetl.application.composite.helpers.replay_context import (
     freeze_field_groups,
+    freeze_target_mapping,
     required_replay_tables,
     output_table_name,
 )
@@ -118,6 +119,10 @@ def prepare_assay_replay(
         objects["field-groups.json"] = publish_json(
             root, "field-groups.json", freeze_field_groups(field_group_registry)
         )
+        if config.name == "composite_target":
+            objects["target-mapping.json"] = publish_json(
+                root, "target-mapping.json", freeze_target_mapping()
+            )
         output_reader = DeltaReader(Path(settings.data_dir) / "output", logger)
         for layer in ("silver", "gold"):
             table_name = output_table_name(

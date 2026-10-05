@@ -120,6 +120,8 @@ def verify_bundle(root: Path, envelope_digest: str) -> JsonDict:
     }
     if version == "composite-parent-replay-v2":
         required.add("field-groups.json")
+    if envelope.get("pipeline") == "composite_target":
+        required.add("target-mapping.json")
     if not required.issubset(objects) or objects["inputs/inputs.json"] != envelope.get(
         "input_snapshot_fingerprint"
     ):

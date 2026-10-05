@@ -22,7 +22,33 @@ from bioetl.domain.composite.result import (
     EnrichmentResult,
     EnrichmentStatus,
 )
+from bioetl.domain.mapping.protein_class_target_type import (
+    ProteinClassTargetTypeMappingData,
+    ProteinClassTopLevelMappingEntry,
+    current_protein_class_target_type_mapping,
+)
 from bioetl.domain.types import JsonDict
+
+
+def freeze_target_mapping() -> JsonDict:
+    """Capture the exact initialized mapping consumed by target dependency joins."""
+    mapping = current_protein_class_target_type_mapping()
+    return {
+        "mapping_version": mapping.mapping_version,
+        "entries": [asdict(entry) for entry in mapping.entries],
+        "non_counting_classes": sorted(mapping.non_counting_classes),
+    }
+
+
+def restore_target_mapping(payload: JsonDict) -> ProteinClassTargetTypeMappingData:
+    """Restore sealed lookup data without consulting mutable configuration files."""
+    return ProteinClassTargetTypeMappingData(
+        mapping_version=payload["mapping_version"],
+        entries=tuple(
+            ProteinClassTopLevelMappingEntry(**row) for row in payload["entries"]
+        ),
+        non_counting_classes=frozenset(payload["non_counting_classes"]),
+    )
 
 
 def freeze_field_groups(registry: FieldGroupRegistry | None) -> JsonDict:

@@ -24,6 +24,9 @@ from bioetl.composition.bootstrap.runtime.composite_merge_service_builder import
 )
 
 from bioetl.domain.composite import CompositeConfig
+from bioetl.domain.mapping.protein_class_target_type import (
+    initialize_protein_class_target_type_mapping,
+)
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
 from bioetl.domain.types import JsonDict, RunID, RunType
@@ -53,10 +56,20 @@ from bioetl.application.composite.helpers.replay_context import (
     output_table_name,
     restore_field_groups,
     restore_merge_request,
+    restore_target_mapping,
 )
 
 
 _FIELD_GROUPS_FILE = "field-groups.json"
+
+
+def _initialize_replay_mapping(root: Path, envelope: JsonDict) -> None:
+    """Initialize target-only domain lookup from its mandatory sealed object."""
+    if envelope["pipeline"] == "composite_target":
+        payload = load_verified_json(
+            root, "target-mapping.json", envelope["objects"]["target-mapping.json"]
+        )
+        initialize_protein_class_target_type_mapping(restore_target_mapping(payload))
 
 
 async def replay_assay(
@@ -73,6 +86,7 @@ async def replay_assay(
     objects = envelope["objects"]
     if digest_bytes(Path("uv.lock").read_bytes()) != objects["uv.lock"]:
         raise ValueError("assay_replay_dependency_lock_mismatch")
+    _initialize_replay_mapping(root, envelope)
     config = CompositeConfig.from_dict(
         load_verified_json(root, "config.json", objects["config.json"])
     )
