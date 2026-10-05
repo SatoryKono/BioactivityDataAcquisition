@@ -1560,6 +1560,5 @@ workflows:
           filters:
             branches:
               only:
-                - codex/ci-11929-11931-preparation
                 - codex/architecture-coverage-final-20261004
                 - codex/config-root-main-acceptance-20261005

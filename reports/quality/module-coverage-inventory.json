@@ -1,6 +1,6 @@
 {
-  "additive_coverage_xml_path": "reports/quality/proof-or-stop/config-root-11899/ci-1401/coverage/coverage.xml",
-  "additive_coverage_xml_sha256": "e2a6f081125a4a0f192e08fcc34fe19994215d9a9e505543ab390c6a786038ed",
+  "additive_coverage_xml_path": "reports/coverage/coverage.xml",
+  "additive_coverage_xml_sha256": "e6bf9b79b094d9c709c825574d8e29b439e8d8a29b1d38805fd2b19b5efce4c2",
   "additive_measured_module_count": 2470,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
@@ -14481,12 +14481,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 26,
-      "executable_lines": 26,
+      "covered_lines": 20,
+      "executable_lines": 20,
       "missing_lines": 0,
       "module": "bioetl.domain.normalization.profiles.chembl_tissue",
       "path": "src/bioetl/domain/normalization/profiles/chembl_tissue.py",
-      "source_lines": 148
+      "source_lines": 132
     },
     {
       "coverage_percent": 100.0,
@@ -14511,12 +14511,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 29,
-      "executable_lines": 29,
+      "covered_lines": 33,
+      "executable_lines": 33,
       "missing_lines": 0,
       "module": "bioetl.domain.normalization.profiles.profile_normalizers",
       "path": "src/bioetl/domain/normalization/profiles/profile_normalizers.py",
-      "source_lines": 245
+      "source_lines": 253
     },
     {
       "coverage_percent": 100.0,
@@ -40003,12 +40003,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 26,
-      "executable_lines": 26,
+      "covered_lines": 20,
+      "executable_lines": 20,
       "missing_lines": 0,
       "module": "bioetl.domain.normalization.profiles.chembl_tissue",
       "path": "src/bioetl/domain/normalization/profiles/chembl_tissue.py",
-      "source_lines": 148
+      "source_lines": 132
     },
     {
       "coverage_percent": 100.0,
@@ -40033,12 +40033,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 29,
-      "executable_lines": 29,
+      "covered_lines": 33,
+      "executable_lines": 33,
       "missing_lines": 0,
       "module": "bioetl.domain.normalization.profiles.profile_normalizers",
       "path": "src/bioetl/domain/normalization/profiles/profile_normalizers.py",
-      "source_lines": 245
+      "source_lines": 253
     },
     {
       "coverage_percent": 100.0,

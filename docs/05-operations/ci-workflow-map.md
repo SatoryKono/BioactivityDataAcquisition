@@ -27,6 +27,20 @@ Orphan temp / dynamic hosted workflows are out of scope here (#10265, #10268).
 
 ## CircleCI migration preparation (#11929 / #11931)
 
+Acceptance evidence on 2026-10-05: CircleCI job
+[2302](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2302)
+produced a complete canonical 17-shard coverage manifest for source commit
+`0eabda84e6716d5720132c4f3c3c3b6e5c00f953`: all shard exits and both
+coverage gates were zero, with 99.70% line and 94.35% branch coverage.
+The canonical telemetry export passed and its XML/JUnit digests were verified
+before adoption. Module inventory uses the canonical additive, nonregressing
+refresh; retained historical measurements are not new measurements from this run.
+The overall job remained failed: architecture found two stale telemetry hashes
+and one missing VCR catalog owner. Those artifacts were refreshed after the run;
+this is not a claim of green main or successful Proof-or-Stop closeout.
+The temporary coverage-producer branch filter was removed after this measurement;
+normal architecture and test gates remain required for the next PR/main runs.
+
 The map above records the legacy Actions inventory; it is not evidence that
 Actions are running. Actions are disabled and billing restoration is out of scope.
 CodeQL is excluded from required checks; optional analysis and workflow retirement
