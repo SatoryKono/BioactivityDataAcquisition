@@ -14549,9 +14549,9 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 3,
+      "inbound_links": 4,
       "lifecycle": null,
-      "outbound_links": 1,
+      "outbound_links": 2,
       "owner": "BioETL Team",
       "path": "docs/00-project/ai/skills/README.md",
       "recommended_action": "keep",
@@ -15147,6 +15147,34 @@
       "section": "00-project",
       "status": "Generated",
       "surface_family": "generated",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 1,
+      "lifecycle": null,
+      "outbound_links": 1,
+      "owner": "BioETL Team",
+      "path": "docs/00-project/ai/skills/global/README.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "00-project",
+      "status": "Active",
+      "surface_family": "active",
       "tracking_state": "tracked"
     },
     {
@@ -58791,7 +58819,7 @@
       "github_issue_url": null,
       "inbound_links": 4,
       "lifecycle": null,
-      "outbound_links": 4,
+      "outbound_links": 5,
       "owner": "BioETL Team",
       "path": "docs/05-operations/ci-workflow-map.md",
       "recommended_action": "keep",
@@ -105296,12 +105324,12 @@
       "archive-after-github-state-check": 338,
       "archive-after-migration": 996,
       "generate-automatically": 1060,
-      "keep": 1329,
+      "keep": 1330,
       "reconcile-with-github-state": 8
     },
     "by_section": {
       ".github": 354,
-      "00-project": 272,
+      "00-project": 273,
       "01-requirements": 4,
       "02-architecture": 995,
       "03-data-model": 2,
@@ -105325,21 +105353,21 @@
       "security": 2
     },
     "by_status": {
-      "Active": 748,
+      "Active": 749,
       "Archived": 283,
       "Canonical": 75,
       "Generated": 1060,
       "Working": 1565
     },
     "by_surface_family": {
-      "active": 748,
+      "active": 749,
       "archive": 283,
       "canonical": 75,
       "generated": 1060,
       "working": 1565
     },
     "by_tracking_state": {
-      "tracked": 3731
+      "tracked": 3732
     },
     "docs_reports_local_count": 57,
     "duplicate_group_count": 7,
@@ -105355,8 +105383,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3731,
+    "total_doc_like": 3732,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3731
+    "total_doc_like_tracked": 3732
   }
 }

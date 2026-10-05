@@ -88,14 +88,29 @@ three matrix runs, the ChEMBL activity smoke, the 15% skip SLO, zero recurrent
 infra/code failures, and a final check of every pytest exit code. Execution is
 bounded to 25 minutes and retains JUnit and diagnostic artifacts. This lane has
 no credential context and cannot record new cassettes. Live/nightly credentials,
-PR event parity and successful external execution still require acceptance.
+PR event parity still requires acceptance. Manual main replay acceptance is recorded below.
 
 The prepared `mutation` lane additionally requires `pipeline.trigger.type=schedule`;
 manual/API/PR triggers cannot start its four jobs. It preserves the existing four
 targets and 70/60/60/60 score thresholds, fails on missing, empty or invalid stats,
-and retains reports. No mutation execution or external schedule is claimed.
+and retains reports. `bioetl-mutation-weekly` was registered on 2026-10-05
+with an initial Monday 13:00–13:59 UTC acceptance window on `main`. Scheduled
+pipeline 187 started on main `95ca0a67f21a7055ad1b671f9ff57bd5ff39b1fb`;
+the trigger was then restored to Sunday 00:00–00:59 UTC, one run per hour,
+all months and Scheduling System attribution. Workflow-runner job 2885 passed
+with 163/222 mutants killed (73.42%, threshold 60%); export-manifests job 2886
+passed with 201/313 killed (64.22%, threshold 60%). Control-plane job 2888
+failed its unchanged 60% gate: 4,020 killed, 5,673 survived, 3 timeouts
+(41.49% under the existing formula), plus 2,787 mutants without tests.
+The control-plane test selector is expanded to `tests/unit/application/` so
+existing manifest/caller regression tests participate; source target and threshold
+are unchanged. A fresh scheduled run is required. Domain job 2887 was interrupted before terminal statistics/report generation;
+it is not accepted. Each job retains its own target report directory.
 
-The Docs KPI intended cadence remains Monday 04:30 UTC; its trigger is pending.
+On 2026-10-05, `bioetl-docs-kpi-weekly` was registered for `main`,
+`ci-lane=docs-kpi`, Monday 04:00–04:59 UTC, one run, all months, Scheduled Actor.
+The first scheduled execution and notification parity remain pending; the legacy
+04:30 minute is represented by an hourly window.
 On 2026-10-05, the CircleCI UI confirmed creation of
 `bioetl-memory-retention-weekly`: branch `main`, `ci-lane=memory-retention`,
 Monday, every month, one run during 04:00–04:59 UTC, Scheduled Actor.
@@ -110,17 +125,17 @@ it does not delete branches. Both are opt-in and main-only. The branch inventory
 `bioetl-branch-hygiene-weekly` trigger was created in CircleCI on 2026-10-05:
 `main`, `ci-lane=branch-hygiene`, Monday, every month, one run during
 03:00–03:59 UTC, Scheduled Actor. This replaces the legacy 03:15 minute with
-an hourly window. Main integration, authenticated run evidence and PR
-branch-name event handling remain pending. Artifact retention must be configured to at least fourteen days
-in the CircleCI project before retiring either legacy workflow.
+an hourly window. Authenticated main run 3084 passed; scheduled execution and PR
+branch-name event handling remain pending. The organization storage controls were verified on 2026-10-05: artifacts are
+retained for thirty days, satisfying these lanes' fourteen-day minimum.
 
 The `architecture-docs` lane preserves passport generation/validation, class-diagram
 checks, dependency-map regeneration and the failing drift check, with JUnit and
 generated-document artifacts. `provider-contract-drift` preserves replay-only
 contract tests, xwalk/normalization checks and the canonical breaking-drift report.
 Both are isolated main-only preparations with fifteen-minute command limits.
-The nightly architecture schedule, provider push/PR event parity, and external
-artifact retention (fourteen/thirty days respectively) still need acceptance.
+The nightly architecture schedule and provider push/PR event parity still need
+acceptance. Verified thirty-day artifact retention covers both lanes.
 
 Independent phase-3 jobs may be prepared in parallel with phase A. Publishing
 requires successful build/security/baseline gates and separate approval. Final
@@ -132,6 +147,49 @@ not benchmark and not memory`; pytest exit 5 remains a failure. Matrix workers
 are capped at two, and the complete duplication scan uses a medium runner with
 a 3072 MiB Node heap. Existing quality thresholds and scan paths are preserved.
 
+### External phase-3 acceptance, 2026-10-05
+
+The first seven runs below used main `2d4507f595d03591c3db72b2aa554d7f41329ce3`.
+Artifact digests and terminal job evidence were collected before recording results.
+
+| Lane | CircleCI job | Result and remaining work |
+| --- | --- | --- |
+| Docs KPI | [2576](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2576) | SUCCESS; JSON, Markdown and summary artifacts; scheduled execution pending |
+| Memory retention | [2604](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2604) | SUCCESS; check-only report, no pruning; scheduled execution pending |
+| Memory freshness | [2605](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2605) | SUCCESS; report and contract checks; notifications and scheduled execution pending |
+| Port contracts | [2606](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2606) | SUCCESS; 188 tests including Hypothesis, both JUnit artifacts; event parity pending |
+| Skills consistency | [2607](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2607) | FAILED: stale wrapper-contract docs mirror. Mirror refreshed; tracked global snapshot entrypoint restores layout in clean checkouts. External rerun pending |
+| Performance | [2689](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2689) | FAILED: CrossRef median 0.45 ms exceeded 0.4125 ms; 43 benchmarks skipped because plugin was disabled. Explicit plugin opt-in added; 70 local tests pass, external acceptance pending. Budgets unchanged |
+| Replay parity | [2690](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2690) | FAILED: missing basetemp parent directories. Parent creation repaired; four local test runs pass. The opt-in [CI pytest plugin](../../scripts/engineering/ci/replay_parity_inputs.py) fixes operational clocks/occurrence seeds and reuses one runtime root for two independent processes. Local 66-file byte parity passes; unchanged checksum gate still rejects drift/empty inventories. External rerun pending |
+
+On main `95ca0a67f21a7055ad1b671f9ff57bd5ff39b1fb`, GitHub settings job
+[2773](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2773)
+passed with authenticated read-only collection. Its report still records settings
+drift, including disabled rulesets; collection success is not policy acceptance.
+E2E replay job [2829](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2829)
+passed three 11-case matrix runs with zero skips/failures, plus ChEMBL smoke;
+recurrent infrastructure and code failures were both zero. Nine artifacts were
+collected with SHA256 digests.
+
+Read-only branch hygiene job
+[3084](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/3084)
+passed on the same main SHA: 52 branches inventoried, `mode=dry-run`,
+`deletion_applied=false`; its artifact digest was retained. No branch was deleted.
+Provider-contract drift job
+[3112](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/3112)
+passed on the same main SHA: seven providers, twenty replay probes, zero skips,
+zero warnings and zero breaking changes; report and JUnit digests were retained.
+Architecture-docs job
+[3113](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/3113)
+passed on the same main SHA: 27 passport tests, no skips/failures, with generated
+passports, dependency-map artifacts and retained JSON/JUnit digests.
+Consolidation job [3170](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/3170)
+passed on the same main SHA; both canonical source/test hash artifacts were retained.
+The organization storage controls show thirty-day artifact retention and
+fifteen-day workspace/cache retention; no settings were changed.
+
+Manual successes do not establish scheduler, notification or release acceptance.
+
 ## Migration disposition ledger (#11930 / #11931)
 
 Current source inventory contains 52 workflows. Every row records the intended
@@ -141,15 +199,15 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 
 | Source workflow | UTC schedule | Successor / disposition | Remaining acceptance |
 | --- | --- | --- | --- |
-| `architecture-docs-nightly.yml` | `15 2 * * *` | CircleCI architecture-docs | Prepared passport/diagram/dependency audits and artifacts; schedule/retention/run acceptance pending |
+| `architecture-docs-nightly.yml` | `15 2 * * *` | CircleCI architecture-docs | Main run 3113 passes passport/diagram/dependency audits with artifacts; schedule acceptance pending; artifact retention verified at 30 days |
 | `architecture.yml` | `20 2 * * *` | Architecture metrics lane | Pending port; canonical reporters and no budget growth |
-| `branch-hygiene.yml` | `15 3 * * 1` | CircleCI branch-hygiene inventory | Weekly trigger and restricted context created; authenticated run, retention and PR branch-name events pending |
+| `branch-hygiene.yml` | `15 3 * * 1` | CircleCI branch-hygiene inventory | Weekly trigger and restricted context created; authenticated main run 3084 passes; scheduled run and PR branch-name events pending; artifact retention verified at 30 days |
 | `chembl-baseline-smoke.yml` | — | Representative offline smoke lane | Pending port; preserve cassette playback |
 | `codeql.yml` | `17 4 * * 1` | Retire Actions definition at #11930 cutover | Not required; optional analysis lifecycle remains explicit |
 | `coderabbit.yml` | — | Local CodeRabbit launcher | Retain local; external integration/event policy pending |
 | `commit-lint.yml` | — | CircleCI commit-lint | Prepared required gate; external parity pending |
 | `compiled-artifacts-block.yml` | — | CircleCI compiled-artifacts | Prepared required gate; external parity pending |
-| `consolidation-gates.yml` | — | CircleCI consolidation | Prepared manual hash artifacts; external run and retention acceptance pending |
+| `consolidation-gates.yml` | — | CircleCI consolidation | Main run 3170 passes with both hash artifacts; artifact retention verified at 30 days |
 | `contract-governance-fast-check.yml` | — | CircleCI schema-governance | Six canonical contract checks and diagnostics folded into the schema gate; any failure blocks the aggregate; remote acceptance pending |
 | `contract-tests.yml` | — | Local live-provider contract runner | Retain local-only policy #11190; preserve inputs and failure evidence |
 | `dashboard-first-window-noscroll.yml` | — | Dashboard host acceptance | Retain host dependency; pending automation boundary |
@@ -157,7 +215,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `dependency-review.yml` | — | Dependency diff security review | Pending replacement; do not drop HIGH/CRITICAL diff coverage |
 | `diagram-nightly.yml` | — | Diagram lint plus local full render | Keep disabled full-render surface; port only active checks |
 | `docker.yml` | — | CircleCI docker-build plus protected promotion | Build prepared; Trivy/baseline/digest promotion pending |
-| `docs-kpi-weekly.yml` | `30 4 * * 1` | CircleCI docs-kpi | Prepared opt-in lane; external schedule pending |
+| `docs-kpi-weekly.yml` | `30 4 * * 1` | CircleCI docs-kpi | Registered `bioetl-docs-kpi-weekly`; first scheduled execution pending |
 | `docs.yml` | — | CircleCI docs-governance | Prepared required gate; full docs/render parity pending |
 | `duplication-complexity.yml` | — | CircleCI duplication | Prepared required gate; full scan thresholds preserved |
 | `e2e-matrix-health.yml` | `30 2 * * *` | E2E replay and controlled live lanes | Main-only `e2e-replay` prepared with three reruns and skip SLO; live/nightly and PR event parity pending |
@@ -175,7 +233,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `port-contracts.yml` | — | CircleCI port-contracts | Prepared Hypothesis-enabled lane; push/PR event parity pending |
 | `pr-hygiene.yml` | — | GitHub API PR maintenance | Pending port; validation and trusted write boundary |
 | `pr-required.yml` | — | CircleCI classify/pr-gate-complete | Prepared catalogue-backed contract; main acceptance/rulesets pending |
-| `provider-contract-drift.yml` | — | CircleCI provider-contract-drift | Prepared replay, matrix/xwalk and breaking-drift gates; push/PR parity and remote acceptance pending |
+| `provider-contract-drift.yml` | — | CircleCI provider-contract-drift | Main run 3112 passes replay, matrix/xwalk and breaking-drift gates; push/PR parity pending; artifact retention verified at 30 days |
 | `quality-debt-weekly.yml` | — | Retain disabled debt review policy | Do not activate job with existing if:false; local audits retained |
 | `release.yml` | — | Protected release promotion lane | Pending port; approval and restricted PyPI/GHCR credentials |
 | `reusable-mermaid-setup.yml` | — | Shared pinned Mermaid tooling | Pending consumer migration; keep lockfile scanned by OSV |
@@ -186,7 +244,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `scorecard.yml` | `30 7 * * 1` | Scorecard plus SARIF publication | Pending port; SARIF transport separate from CodeQL analysis |
 | `security.yml` | — | CircleCI security-scans | Prepared required gate; unpatched braces blocks overall acceptance |
 | `semantic-governance.yml` | — | CircleCI `semantic-governance` | Seven canonical checks and four regression suites in the PR/main aggregate and an opt-in main lane; remote acceptance pending |
-| `skills-consistency.yml` | — | CircleCI skills-consistency | Prepared verify-only lane; doctor/support/event parity pending |
+| `skills-consistency.yml` | — | CircleCI skills-consistency | Prepared verify-only lane includes static doctor, MCP wrapper pairs and drift artifact; approved sync and event parity pending; artifact retention verified at 30 days |
 | `stale.yml` | — | GitHub API stale maintenance | Pending port; preserve exclusions and trusted write policy |
 | `tests.yml` | — | CircleCI test-fast/test-integration | Prepared matrices; full source-bound producer/remote acceptance pending |
 | `type-checking.yml` | — | CircleCI mypy | Prepared strict gate; final remote evidence pending |
@@ -295,3 +353,12 @@ When adding a workflow:
 3. Mark deprecated reusables clearly; do not reference them from new jobs.
 4. Record GitHub live `state` and a keep-disabled or active decision in the
    canonical inventory.
+
+
+The replay lane loads `scripts.engineering.ci.replay_parity_inputs` explicitly
+for the determinism suite only. It fixes input occurrence seeds, SystemClock,
+checkpoint history nanoseconds and storage metadata duration counters. Async
+scheduler/timeout clocks remain real. Both processes use the same working path;
+their complete outputs are copied separately before byte-level comparison.
+No output keys or files are filtered, normalized or rewritten, and within-run
+occurrence/checkpoint uniqueness remains exercised by the existing tests.
