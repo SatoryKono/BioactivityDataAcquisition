@@ -36,6 +36,7 @@ from bioetl.infrastructure.time import SystemClock
 from bioetl.composition.bootstrap.runtime.assay_replay import replay_assay
 from bioetl.application.composite.helpers.replay_context import (
     freeze_field_groups,
+    freeze_merge_request,
     freeze_target_mapping,
     required_replay_tables,
     output_table_name,
@@ -139,23 +140,7 @@ def prepare_assay_replay(
             "implementation": implementation_fingerprint(),
             "input_snapshot_fingerprint": input_hash,
             "objects": objects,
-            "request": {
-                "seed_table": resolved.seed_table,
-                "seed_pipeline": resolved.seed_pipeline,
-                "metadata_timestamp": (
-                    resolved.metadata_timestamp or SystemClock().now()
-                ).isoformat(),
-                "enrichers": [enricher.pipeline for enricher in resolved.enrichers],
-                "outcomes": {
-                    name: outcome.status.value
-                    for name, outcome in resolved.enrichment_results.items()
-                },
-                "dependencies": [item.pipeline for item in resolved.dependencies or ()],
-                "dependency_outcomes": {
-                    name: outcome.status.value
-                    for name, outcome in (resolved.dependency_results or {}).items()
-                },
-            },
+            "request": freeze_merge_request(resolved),
         }
         envelope_hash = publish_json(root, "parent.json", envelope)
         await replay_assay(root, envelope_hash, root / "verification", logger=logger)

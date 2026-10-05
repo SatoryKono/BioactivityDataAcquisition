@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 from pathlib import Path
 from uuid import UUID
 from typing import cast
@@ -94,12 +93,11 @@ async def replay_assay(
         raise ValueError("assay_replay_config_not_supported")
     if envelope["version"] == "assay-parent-replay-v1" and config.dependencies:
         raise ValueError("assay_replay_config_not_supported")
-    payload = envelope["request"]
-    timestamp = datetime.fromisoformat(payload["metadata_timestamp"])
     reader = CompositeReplayInputReader(
         root / "inputs", envelope_sha256=envelope["input_snapshot_fingerprint"]
     )
-    request = restore_merge_request(config, payload, envelope["run_id"])
+    request = restore_merge_request(config, envelope["request"], envelope["run_id"])
+    assert request.metadata_timestamp is not None
     destination.mkdir(parents=True, exist_ok=False)
     settings = Settings.model_validate(
         {
@@ -113,7 +111,7 @@ async def replay_assay(
         run_context=RunContext(
             run_id=RunID(UUID(request.run_id)),
             run_type=RunType.REBUILD,
-            started_at=timestamp,
+            started_at=request.metadata_timestamp,
             pipeline_name=config.name,
             provider="composite",
             entity=config.name.removeprefix("composite_"),
