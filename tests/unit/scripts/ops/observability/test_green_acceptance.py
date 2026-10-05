@@ -474,12 +474,15 @@ def test_live_child_restores_production_http_and_durability(
     assert policy["test_mode"] is False
     assert policy["control_plane_fsync"] is True
     chembl = policy["providers"]["chembl"]
-    assert chembl["timeout_seconds"] == 120
-    assert chembl["read_timeout_seconds"] == 240
-    assert chembl["retry_base_delay_seconds"] == 1
+    from bioetl.infrastructure.config.source_config_loader import load_source_config
+
+    config = load_source_config("chembl")
+    assert chembl["timeout_seconds"] == config.timeout_sec
+    assert chembl["read_timeout_seconds"] > chembl["timeout_seconds"]
+    assert chembl["retry_base_delay_seconds"] == config.retry_base_delay
     assert chembl["retry_after_cap_seconds"] is None
-    assert chembl["rate_per_second"] == 0.1
-    assert chembl["circuit_recovery_seconds"] == 3000
+    assert chembl["rate_per_second"] == config.rate_limit.requests_per_second
+    assert chembl["circuit_recovery_seconds"] == config.circuit_breaker.recovery_timeout
 
 
 def test_live_runtime_probe_rejects_test_mode(tmp_path, monkeypatch):
@@ -492,6 +495,7 @@ def test_live_runtime_probe_rejects_test_mode(tmp_path, monkeypatch):
     with pytest.raises(subprocess.CalledProcessError) as error:
         runner._runtime_policy(tmp_path, environment)
     assert "live_acceptance_requires_production_runtime" in error.value.stderr
+    assert (tmp_path / "runtime-policy.stderr.log").read_text() == error.value.stderr
 
 
 @pytest.mark.parametrize(

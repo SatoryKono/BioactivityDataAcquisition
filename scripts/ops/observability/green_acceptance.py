@@ -500,9 +500,11 @@ def _runtime_policy(folder: Path, environment: dict[str, str]) -> dict:
         env=environment,
         capture_output=True,
         text=True,
-        check=True,
+        check=False,
         timeout=60,
     )
+    (folder / "runtime-policy.stderr.log").write_text(result.stderr, encoding="utf-8")
+    result.check_returncode()
     return json.loads(result.stdout)
 
 

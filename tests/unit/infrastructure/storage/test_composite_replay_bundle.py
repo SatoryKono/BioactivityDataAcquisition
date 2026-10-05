@@ -50,7 +50,9 @@ def test_target_mapping_round_trip_uses_captured_lookup(monkeypatch):
     )
 
 
-@pytest.mark.parametrize("damage", ["absent", "missing", "changed"])
+@pytest.mark.parametrize(
+    "damage", ["absent", "missing", "changed", "invalid_structure"]
+)
 def test_target_requires_digest_bound_mapping(bundle, damage):
     root, envelope, _ = bundle
     envelope.update(version="composite-parent-replay-v2", pipeline="composite_target")
@@ -59,12 +61,26 @@ def test_target_requires_digest_bound_mapping(bundle, damage):
     )
     if damage != "absent":
         envelope["objects"]["target-mapping.json"] = publish_json(
-            root, "target-mapping.json", {}
+            root,
+            "target-mapping.json",
+            {
+                "mapping_version": "captured-v1",
+                "entries": [
+                    {
+                        "raw_label": "enzyme",
+                        "canonical_l1": "enzyme",
+                        "counts_for_target_type": True,
+                    }
+                ],
+                "non_counting_classes": [],
+            }
+            if damage != "invalid_structure"
+            else {},
         )
     path = root / "parent.json"
     path.write_text(json.dumps(envelope))
     digest = digest_bytes(path.read_bytes())
-    if damage != "absent":
+    if damage not in {"absent", "invalid_structure"}:
         assert verify_bundle(root, digest)["pipeline"] == "composite_target"
         if damage == "missing":
             (root / "target-mapping.json").unlink()
@@ -72,6 +88,37 @@ def test_target_requires_digest_bound_mapping(bundle, damage):
             (root / "target-mapping.json").write_bytes(b"changed")
     with pytest.raises((ValueError, FileNotFoundError)):
         verify_bundle(root, digest)
+
+
+@pytest.mark.parametrize(
+    "damage", ["version", "empty", "duplicate", "ignored", "entry_type", "boolean"]
+)
+def test_sealed_target_mapping_must_restore_domain_invariants(bundle, damage):
+    root, envelope, _ = bundle
+    entry = {
+        "raw_label": "enzyme",
+        "canonical_l1": "enzyme",
+        "counts_for_target_type": True,
+    }
+    mapping = {"mapping_version": "v1", "entries": [entry], "non_counting_classes": []}
+    if damage == "version":
+        mapping["mapping_version"] = " "
+    elif damage == "empty":
+        mapping["entries"] = []
+    elif damage == "duplicate":
+        mapping["entries"] = [entry, dict(entry, raw_label=" ENZYME ")]
+    elif damage == "ignored":
+        mapping["non_counting_classes"] = "not-an-array"
+    elif damage == "entry_type":
+        mapping["entries"] = ["not-an-object"]
+    else:
+        entry["counts_for_target_type"] = "false"
+    envelope.update(version="composite-parent-replay-v2", pipeline="composite_target")
+    for name, value in (("field-groups.json", {}), ("target-mapping.json", mapping)):
+        envelope["objects"][name] = publish_json(root, name, value)
+    (root / "parent.json").write_text(json.dumps(envelope))
+    with pytest.raises(ValueError):
+        verify_bundle(root, digest_bytes((root / "parent.json").read_bytes()))
 
 
 @pytest.fixture

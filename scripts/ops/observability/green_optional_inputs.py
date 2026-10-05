@@ -44,7 +44,7 @@ def verified_empty_optional_stages(config: dict, parent: dict, path: Path) -> se
     return {
         row["pipeline"]
         for row in config.get("enrichers", [])
-        if row.get("required") is False
+        if row.get("required", False) is False
         and request.get("outcomes", {}).get(row["pipeline"]) == "skipped"
         and _has_no_eligible_keys(seed, row.get("join_keys", []))
     }

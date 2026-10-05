@@ -22,6 +22,7 @@ pytestmark = pytest.mark.unit
     "defect",
     [
         None,
+        "default_optional",
         "eligible",
         "required",
         "unknown_keys",
@@ -44,6 +45,8 @@ def test_absent_optional_child_requires_verified_empty_input(tmp_path, defect):
             }
         ],
     }
+    if defect == "default_optional":
+        del config["enrichers"][0]["required"]
     config_root = tmp_path / "configs"
     (config_root / "composites").mkdir(parents=True)
     (config_root / "composites/assay.yaml").write_text(
@@ -141,4 +144,18 @@ def test_absent_optional_child_requires_verified_empty_input(tmp_path, defect):
     failures = composite_report_coverage(
         Case("composite", "composite_assay"), config_root, paths
     )
-    assert bool(failures) is (defect is not None)
+    if defect in {None, "default_optional"}:
+        assert failures == []
+    else:
+        assert "composite_report_coverage_mismatch" in failures
+        if defect in {
+            "wrong_run",
+            "missing",
+            "tampered",
+            "missing_arrow",
+            "path_escape",
+        }:
+            assert any(
+                value.startswith("composite_optional_skip_unverified:")
+                for value in failures
+            )
