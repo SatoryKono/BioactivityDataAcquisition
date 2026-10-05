@@ -1,0 +1,23 @@
+{
+  "source_commit": "3fb1ba278ec8aaa3e01d646933e783ca45b0e58e",
+  "kind": "terminating_canonical_full_suite",
+  "outcome": "PASS",
+  "counts": {
+    "total": 38524,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 379,
+    "passed": 38145
+  },
+  "duration_seconds": 3019.236,
+  "started_at": "2026-10-05T20:13:58.896611+00:00",
+  "finished_at": "2026-10-05T21:04:18.133668+00:00",
+  "clean_before_after": true,
+  "archive_sha256": "581b6d6ec67b69fbafd00b8acbb936bb386633a14a6b8d30c77548cbb6dc66eb",
+  "files": {
+    "execution.json": "739f1dc33191d72007d064bcde6b8e51d5b83d30a0ab93695fe080bcdfd5f648",
+    "junit.xml": "a47d6402a88ab7dfccd00a16850a2c53918dcc842cc171b989ae899622adfdad",
+    "pytest.log": "1b0a1e72ab10200dfab2bde0b3d38058d1e87a8ae90b4db654cd02562efa1c8f",
+    "resource-samples.jsonl": "1472f1b54e56e099b7e1247cc01ca4972ed6900c084a8ec400abd054c3ebc95b"
+  }
+}

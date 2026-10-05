@@ -1,0 +1,17 @@
+{
+  "source_commit": "3fb1ba278ec8aaa3e01d646933e783ca45b0e58e",
+  "evidence_only_orphan": true,
+  "never_merge_into_main": true,
+  "rf023_closeout": "BLOCKED_VCR_FRESHNESS",
+  "files": {
+    "ci-proof-summary.json": "47ca415cf3c1bec56f8a8573cfea4282674cef494f0436eaafadd2d4c526d11c",
+    "ci-proof.zip": "7652c1884d24f13398aabce6d77b7987582776b54358bb7d459163471f6868b3",
+    "full-suite-summary.json": "97a34be2d41a5c21cdc9b5f360b1a8afe089b31c345c32692d61d133f369f2ea",
+    "full-suite.zip": "581b6d6ec67b69fbafd00b8acbb936bb386633a14a6b8d30c77548cbb6dc66eb",
+    "README.md": "986dcc3da24179d33f7e41a9287b328fef3e76ccc65def0139a53d7a3fd8548d",
+    "vcr-freshness-summary.json": "3aaae39e7d4ff099dbab8cc9947caf406390a37fe17f0329d8c09e6639e2af9d",
+    "vcr-freshness.zip": "78dc08508dd02c83112f0d9deaee0080e22de96c94068967ff021a7f07c4ae80",
+    "vcr-live-pilot-summary.json": "aba39996c47c2b142b25f55a6273517c85d8a3708ad3a2cac26093a922985154",
+    "vcr-live-pilot.zip": "bce176e84aed1299de42b90889fa681e08c2fc412877e2b3a71a678f9269f503"
+  }
+}

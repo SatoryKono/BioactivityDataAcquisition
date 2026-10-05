@@ -1,0 +1,27 @@
+{
+  "source_commit": "3fb1ba278ec8aaa3e01d646933e783ca45b0e58e",
+  "outcome": "FAIL",
+  "failure_count": 178,
+  "providers": {
+    "chembl": 51,
+    "crossref": 24,
+    "multi_provider": 1,
+    "openalex": 25,
+    "pubchem": 12,
+    "pubmed": 24,
+    "semanticscholar": 24,
+    "uniprot": 17
+  },
+  "max_age_days": 90,
+  "observed_age_days": 94,
+  "recorded_at": "2026-07-03",
+  "metadata_modified": false,
+  "threshold_modified": false,
+  "log_sha256": "bb5c51dcb832858714e2dd9114c960c8f4a56c33df603d6e508b7e63fb342420",
+  "archive_sha256": "78dc08508dd02c83112f0d9deaee0080e22de96c94068967ff021a7f07c4ae80",
+  "files": {
+    "execution.json": "5d2eeec68896ddc158e71d9a6d6ee844b5a1a5e48dea9de2f0a9da42d72dbdc0",
+    "summary.json": "9b5e39ed2d97800d8efad4665d7b80cac7d3f4d78595ebbe728c85a7adde5770",
+    "check.log": "bb5c51dcb832858714e2dd9114c960c8f4a56c33df603d6e508b7e63fb342420"
+  }
+}
