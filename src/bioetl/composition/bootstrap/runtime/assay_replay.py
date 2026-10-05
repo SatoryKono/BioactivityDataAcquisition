@@ -70,6 +70,7 @@ async def replay_assay(
     logger = logger or NoOpLogger()
     envelope = verify_bundle(root, envelope_hash)
     objects = envelope["objects"]
+    field_key = "field-groups.json"
     if digest_bytes(Path("uv.lock").read_bytes()) != objects["uv.lock"]:
         raise ValueError("assay_replay_dependency_lock_mismatch")
     with mapping_scope(
@@ -127,11 +128,9 @@ async def replay_assay(
                 resolve_gold_schema=resolve_composite_gold_schema,
                 delta_reader=reader,
                 field_group_registry=restore_field_groups(
-                    load_verified_json(
-                        root, "field-groups.json", objects["field-groups.json"]
-                    )
+                    load_verified_json(root, field_key, objects[field_key])
                 )
-                if "field-groups.json" in objects
+                if field_key in objects
                 else None,
                 cross_validator=EnrichmentCrossValidator(
                     config=config.cross_validation, logger=logger

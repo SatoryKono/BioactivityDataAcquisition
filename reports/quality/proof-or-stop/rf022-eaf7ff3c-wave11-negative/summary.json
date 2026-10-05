@@ -1,0 +1,288 @@
+{
+  "source_commit": "eaf7ff3cc20d732c436a1296661b47048255787e",
+  "kind": "negative_diagnostics_only_not_replay_bundle",
+  "outcome": "FAIL",
+  "strict_pass": 0,
+  "required": 4,
+  "reason": "Every ChEMBL seed: two health timeouts followed by HTTP 500 and circuit breaker open",
+  "transport_failures": {
+    "composite-composite_activity": [
+      {
+        "pipeline": "chembl_activity",
+        "status_code": null,
+        "error_type": "TimeoutError",
+        "admission_seconds": 9e-06,
+        "transport_seconds": 5.007782
+      },
+      {
+        "pipeline": "chembl_activity",
+        "status_code": null,
+        "error_type": "TimeoutError",
+        "admission_seconds": 4.997737,
+        "transport_seconds": 5.006578
+      },
+      {
+        "pipeline": "chembl_activity",
+        "status_code": 500,
+        "error_type": null,
+        "admission_seconds": 4.97097,
+        "transport_seconds": 6.132305
+      },
+      {
+        "pipeline": "chembl_activity",
+        "status_code": null,
+        "error_type": "CircuitBreakerOpenError",
+        "admission_seconds": 2.691493,
+        "transport_seconds": 4.4e-05
+      }
+    ],
+    "composite-composite_assay": [
+      {
+        "pipeline": "chembl_assay",
+        "status_code": null,
+        "error_type": "TimeoutError",
+        "admission_seconds": 9e-06,
+        "transport_seconds": 5.012595
+      },
+      {
+        "pipeline": "chembl_assay",
+        "status_code": null,
+        "error_type": "TimeoutError",
+        "admission_seconds": 4.987714,
+        "transport_seconds": 5.01441
+      },
+      {
+        "pipeline": "chembl_assay",
+        "status_code": 500,
+        "error_type": null,
+        "admission_seconds": 4.960129,
+        "transport_seconds": 6.006413
+      },
+      {
+        "pipeline": "chembl_assay",
+        "status_code": null,
+        "error_type": "CircuitBreakerOpenError",
+        "admission_seconds": 2.729328,
+        "transport_seconds": 4.7e-05
+      }
+    ],
+    "composite-composite_molecule": [
+      {
+        "pipeline": "chembl_molecule",
+        "status_code": null,
+        "error_type": "TimeoutError",
+        "admission_seconds": 1e-05,
+        "transport_seconds": 5.004406
+      },
+      {
+        "pipeline": "chembl_molecule",
+        "status_code": null,
+        "error_type": "TimeoutError",
+        "admission_seconds": 5.002497,
+        "transport_seconds": 5.009069
+      },
+      {
+        "pipeline": "chembl_molecule",
+        "status_code": 500,
+        "error_type": null,
+        "admission_seconds": 4.958558,
+        "transport_seconds": 5.720129
+      },
+      {
+        "pipeline": "chembl_molecule",
+        "status_code": null,
+        "error_type": "CircuitBreakerOpenError",
+        "admission_seconds": 2.811281,
+        "transport_seconds": 5e-05
+      }
+    ],
+    "composite-composite_target": [
+      {
+        "pipeline": "chembl_target",
+        "status_code": null,
+        "error_type": "TimeoutError",
+        "admission_seconds": 1e-05,
+        "transport_seconds": 5.00454
+      },
+      {
+        "pipeline": "chembl_target",
+        "status_code": null,
+        "error_type": "TimeoutError",
+        "admission_seconds": 5.001004,
+        "transport_seconds": 5.014653
+      },
+      {
+        "pipeline": "chembl_target",
+        "status_code": 500,
+        "error_type": null,
+        "admission_seconds": 4.944448,
+        "transport_seconds": 5.957773
+      },
+      {
+        "pipeline": "chembl_target",
+        "status_code": null,
+        "error_type": "CircuitBreakerOpenError",
+        "admission_seconds": 2.544866,
+        "transport_seconds": 4.4e-05
+      }
+    ]
+  },
+  "campaign": {
+    "source_commit": "eaf7ff3cc20d732c436a1296661b47048255787e",
+    "scope": {
+      "issue": 11906,
+      "composites": [
+        "composite_activity",
+        "composite_assay",
+        "composite_molecule",
+        "composite_target"
+      ],
+      "excluded": {
+        "composite_publication": "Tracked separately in #11947"
+      }
+    },
+    "limit": 10,
+    "started_at": "2026-10-05T12:31:37.195336+00:00",
+    "status": "failed",
+    "local_checks_passed": false,
+    "acceptance_status": "PENDING_HTTP_AND_OFFLINE_REPLAY",
+    "input_fingerprints": {
+      "configs": "637fbae40bafe480f91111d4d95a45f039ad440e06da162afd99d6c4dafb0953",
+      "data/input": "e6e5b699b2c10cc1e166aeebbd2c78eb497709493528af953a02a033d63a5e7d",
+      "uv.lock": "7fa08765487bd9ee368c4479d32430e81150b08bcf09ae73f150aeaac0e3bf13"
+    },
+    "cases": [
+      {
+        "case": "composite-composite_activity",
+        "status": "failed",
+        "failures": [
+          "exit_code=82",
+          "error_log:external_api_error",
+          "error_log:execution_completed",
+          "error_log:pipeline_failed",
+          "error_log:Pipeline failed with exception",
+          "error_log:Seed pipeline failed",
+          "error_log:pipeline_failed",
+          "chembl_activity/c1d5df23-a0bd-5129-b0ca-783853d6a84f: overview='failed', expected success",
+          "chembl_activity/c1d5df23-a0bd-5129-b0ca-783853d6a84f: saved_evidence='INCOMPLETE', expected OK",
+          "chembl_activity/c1d5df23-a0bd-5129-b0ca-783853d6a84f: replay_readiness='INCOMPLETE', expected OK",
+          "chembl_activity/c1d5df23-a0bd-5129-b0ca-783853d6a84f: overall_verdict='ERROR', expected OK",
+          "chembl_activity/c1d5df23-a0bd-5129-b0ca-783853d6a84f: evidence_completeness='INCOMPLETE', expected COMPLETE",
+          "composite_activity/bfed8cc5-c2cc-593e-8c24-ae7300fb10d2: overview='failed', expected success",
+          "composite_activity/bfed8cc5-c2cc-593e-8c24-ae7300fb10d2: saved_evidence='INCOMPLETE', expected OK",
+          "composite_activity/bfed8cc5-c2cc-593e-8c24-ae7300fb10d2: replay_readiness='ERROR', expected OK",
+          "composite_activity/bfed8cc5-c2cc-593e-8c24-ae7300fb10d2: overall_verdict='ERROR', expected OK",
+          "composite_activity/bfed8cc5-c2cc-593e-8c24-ae7300fb10d2: evidence_completeness='INCOMPLETE', expected COMPLETE",
+          "composite_optional_skip_unverified:ValueError",
+          "composite_report_coverage_mismatch",
+          "composite_child_identity_or_status_mismatch"
+        ]
+      },
+      {
+        "case": "composite-composite_assay",
+        "status": "failed",
+        "failures": [
+          "exit_code=82",
+          "error_log:external_api_error",
+          "error_log:execution_completed",
+          "error_log:pipeline_failed",
+          "error_log:Pipeline failed with exception",
+          "error_log:Seed pipeline failed",
+          "error_log:pipeline_failed",
+          "chembl_assay/63f23661-1ce1-53ba-ae13-aaac7b98ee48: overview='failed', expected success",
+          "chembl_assay/63f23661-1ce1-53ba-ae13-aaac7b98ee48: saved_evidence='INCOMPLETE', expected OK",
+          "chembl_assay/63f23661-1ce1-53ba-ae13-aaac7b98ee48: replay_readiness='INCOMPLETE', expected OK",
+          "chembl_assay/63f23661-1ce1-53ba-ae13-aaac7b98ee48: overall_verdict='ERROR', expected OK",
+          "chembl_assay/63f23661-1ce1-53ba-ae13-aaac7b98ee48: evidence_completeness='INCOMPLETE', expected COMPLETE",
+          "composite_assay/89d9d88c-8c10-56ec-9223-0f4ec616c179: overview='failed', expected success",
+          "composite_assay/89d9d88c-8c10-56ec-9223-0f4ec616c179: saved_evidence='INCOMPLETE', expected OK",
+          "composite_assay/89d9d88c-8c10-56ec-9223-0f4ec616c179: replay_readiness='ERROR', expected OK",
+          "composite_assay/89d9d88c-8c10-56ec-9223-0f4ec616c179: overall_verdict='ERROR', expected OK",
+          "composite_assay/89d9d88c-8c10-56ec-9223-0f4ec616c179: evidence_completeness='INCOMPLETE', expected COMPLETE",
+          "composite_optional_skip_unverified:ValueError",
+          "composite_report_coverage_mismatch",
+          "composite_child_identity_or_status_mismatch"
+        ]
+      },
+      {
+        "case": "composite-composite_molecule",
+        "status": "failed",
+        "failures": [
+          "exit_code=82",
+          "error_log:external_api_error",
+          "error_log:execution_completed",
+          "error_log:pipeline_failed",
+          "error_log:Pipeline failed with exception",
+          "error_log:Seed pipeline failed",
+          "error_log:pipeline_failed",
+          "chembl_molecule/b27e9431-9c6b-5a70-8502-34c5892b442e: overview='failed', expected success",
+          "chembl_molecule/b27e9431-9c6b-5a70-8502-34c5892b442e: saved_evidence='INCOMPLETE', expected OK",
+          "chembl_molecule/b27e9431-9c6b-5a70-8502-34c5892b442e: replay_readiness='INCOMPLETE', expected OK",
+          "chembl_molecule/b27e9431-9c6b-5a70-8502-34c5892b442e: overall_verdict='ERROR', expected OK",
+          "chembl_molecule/b27e9431-9c6b-5a70-8502-34c5892b442e: evidence_completeness='INCOMPLETE', expected COMPLETE",
+          "composite_molecule/4fd55d10-5c40-5bff-9a07-18538d92b4bc: overview='failed', expected success",
+          "composite_molecule/4fd55d10-5c40-5bff-9a07-18538d92b4bc: saved_evidence='INCOMPLETE', expected OK",
+          "composite_molecule/4fd55d10-5c40-5bff-9a07-18538d92b4bc: replay_readiness='ERROR', expected OK",
+          "composite_molecule/4fd55d10-5c40-5bff-9a07-18538d92b4bc: overall_verdict='ERROR', expected OK",
+          "composite_molecule/4fd55d10-5c40-5bff-9a07-18538d92b4bc: evidence_completeness='INCOMPLETE', expected COMPLETE",
+          "composite_optional_skip_unverified:ValueError",
+          "composite_report_coverage_mismatch",
+          "composite_child_identity_or_status_mismatch"
+        ]
+      },
+      {
+        "case": "composite-composite_target",
+        "status": "failed",
+        "failures": [
+          "exit_code=82",
+          "error_log:external_api_error",
+          "error_log:execution_completed",
+          "error_log:pipeline_failed",
+          "error_log:Pipeline failed with exception",
+          "error_log:Seed pipeline failed",
+          "error_log:pipeline_failed",
+          "chembl_target/b80338ba-d6ce-51bd-b670-a6fad96c0d9e: overview='failed', expected success",
+          "chembl_target/b80338ba-d6ce-51bd-b670-a6fad96c0d9e: saved_evidence='INCOMPLETE', expected OK",
+          "chembl_target/b80338ba-d6ce-51bd-b670-a6fad96c0d9e: replay_readiness='INCOMPLETE', expected OK",
+          "chembl_target/b80338ba-d6ce-51bd-b670-a6fad96c0d9e: overall_verdict='ERROR', expected OK",
+          "chembl_target/b80338ba-d6ce-51bd-b670-a6fad96c0d9e: evidence_completeness='INCOMPLETE', expected COMPLETE",
+          "composite_target/0427c5b6-a65e-5129-b11f-eea45114bfe8: overview='failed', expected success",
+          "composite_target/0427c5b6-a65e-5129-b11f-eea45114bfe8: saved_evidence='INCOMPLETE', expected OK",
+          "composite_target/0427c5b6-a65e-5129-b11f-eea45114bfe8: replay_readiness='ERROR', expected OK",
+          "composite_target/0427c5b6-a65e-5129-b11f-eea45114bfe8: overall_verdict='ERROR', expected OK",
+          "composite_target/0427c5b6-a65e-5129-b11f-eea45114bfe8: evidence_completeness='INCOMPLETE', expected COMPLETE",
+          "composite_optional_skip_unverified:ValueError",
+          "composite_report_coverage_mismatch",
+          "composite_child_identity_or_status_mismatch"
+        ]
+      }
+    ],
+    "finished_at": "2026-10-05T12:34:31.491617+00:00"
+  },
+  "archive_sha256": "14ca51540ef59d4f2c11cf5d91cdd74d95e448d6fc1db79dd5ce89712d4dc65b",
+  "files": {
+    "rf022-live-eaf7ff3c-20261005-wave11/campaign.json": "dcf804b13914f2c31683ffbd6a7396b9cab2cdf1bfd1d05d4c1ac90c3ad042dc",
+    "rf022-live-eaf7ff3c-20261005-wave11/composite-composite_activity/launch.log": "0a7f9741e0fe29debbd671e37b3d0d9a442424f13d520320063749c4f5b75f79",
+    "rf022-live-eaf7ff3c-20261005-wave11/composite-composite_activity/reports/pipeline/chembl_activity/c1d5df23-a0bd-5129-b0ca-783853d6a84f/pipeline-run-report.json": "0dd29a7dd1f05fa8103f754a8f25459a309f06ff04e5ee1cf1552f8da34914ec",
+    "rf022-live-eaf7ff3c-20261005-wave11/composite-composite_activity/reports/pipeline/composite_activity/bfed8cc5-c2cc-593e-8c24-ae7300fb10d2/pipeline-run-report.json": "601fcd639f486ee5d19e8868b2aa175a048658b81fb50388930eb786f89aba48",
+    "rf022-live-eaf7ff3c-20261005-wave11/composite-composite_activity/result.json": "ad6b72bd85200ebc7173b83e1f97837a7a47979d1d80848e0e033e524e4b4799",
+    "rf022-live-eaf7ff3c-20261005-wave11/composite-composite_activity/runtime-policy.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rf022-live-eaf7ff3c-20261005-wave11/composite-composite_assay/launch.log": "8d87aa7d001a6ffc1f568fd448eecc2a6ed802654067d6bd1edb400a5a139049",
+    "rf022-live-eaf7ff3c-20261005-wave11/composite-composite_assay/reports/pipeline/chembl_assay/63f23661-1ce1-53ba-ae13-aaac7b98ee48/pipeline-run-report.json": "1324de449b18fdf548c20e61e500fd00240233b336ffbc06d7c2b1a47bdb6f09",
+    "rf022-live-eaf7ff3c-20261005-wave11/composite-composite_assay/reports/pipeline/composite_assay/89d9d88c-8c10-56ec-9223-0f4ec616c179/pipeline-run-report.json": "989f3db0bf041d5533709382c1c80bbe754f21159ef19ecffa78958c55d009c7",
+    "rf022-live-eaf7ff3c-20261005-wave11/composite-composite_assay/result.json": "eb0b5e8af4d364cee36c7c4fbc23e7555aef523f9260264f51681179f363bf7b",
+    "rf022-live-eaf7ff3c-20261005-wave11/composite-composite_assay/runtime-policy.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rf022-live-eaf7ff3c-20261005-wave11/composite-composite_molecule/launch.log": "b79626bbe245ba624880851215d8c57f9a56b829846644356730882fcf82a435",
+    "rf022-live-eaf7ff3c-20261005-wave11/composite-composite_molecule/reports/pipeline/chembl_molecule/b27e9431-9c6b-5a70-8502-34c5892b442e/pipeline-run-report.json": "3a265f61a6933536fefcf89904626228b71f30f467b87e13b62090ab5fd88c54",
+    "rf022-live-eaf7ff3c-20261005-wave11/composite-composite_molecule/reports/pipeline/composite_molecule/4fd55d10-5c40-5bff-9a07-18538d92b4bc/pipeline-run-report.json": "8ccd7246e640c19d8db910cd473f48f97e50199dc47f59cbdcea080a9276fbe6",
+    "rf022-live-eaf7ff3c-20261005-wave11/composite-composite_molecule/result.json": "3105d824d1a1c0d352c74608001684ef7de986a180ed3b61542489ce245e94c4",
+    "rf022-live-eaf7ff3c-20261005-wave11/composite-composite_molecule/runtime-policy.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rf022-live-eaf7ff3c-20261005-wave11/composite-composite_target/launch.log": "62ee893dfbe029cdf005244a8e370973d25411d7695f6b7d976bbd4f0a6936e6",
+    "rf022-live-eaf7ff3c-20261005-wave11/composite-composite_target/reports/pipeline/chembl_target/b80338ba-d6ce-51bd-b670-a6fad96c0d9e/pipeline-run-report.json": "d886f65d2fe41437690dc530fe3dbee9304f35a5e0c28be7f83e742334589b57",
+    "rf022-live-eaf7ff3c-20261005-wave11/composite-composite_target/reports/pipeline/composite_target/0427c5b6-a65e-5129-b11f-eea45114bfe8/pipeline-run-report.json": "bccc19e922dfe04bc55882c300591df0382427052fd28b92860f7ed4ba256687",
+    "rf022-live-eaf7ff3c-20261005-wave11/composite-composite_target/result.json": "4b169f1411e792b1c925efd03050b5ab398542114d4b1bfa27774c8b35692872",
+    "rf022-live-eaf7ff3c-20261005-wave11/composite-composite_target/runtime-policy.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rf022-preparation/rf022-wave11.log": "6e239ee1707d90bb888aaad1bdc203ead6cd66a4c5fe8447a7cead7fde4d6cc8",
+    "rf022-preparation/rf022-wave11.xml": "cce9facc923cff07373fd05bd9503c68dd36e011be6fe83a3d42f1ff85f6e03d"
+  }
+}

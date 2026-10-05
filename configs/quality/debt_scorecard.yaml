@@ -489,7 +489,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 49
-      total_loc: 6444
+      total_loc: 6443
       files_ge_250_loc: 0
       helper_function_ratio: 0.289
       max_internal_fan_in: 2
