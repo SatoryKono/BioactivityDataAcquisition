@@ -378,9 +378,19 @@ def test_mutation_preserves_targets_and_requires_schedule_trigger():
     for old, new in zip(legacy, actual, strict=True):
         assert new["target"] == old["id"]
         assert new["source-path"] == old["paths_to_mutate"]
-        assert new["tests-dir"] == old["tests_dir"]
+        # A replacement may include additional existing tests, never drop the legacy set.
+        assert (ROOT / old["tests_dir"]).is_relative_to(ROOT / new["tests-dir"])
         assert new["threshold"] == old["threshold"]
     assert "pipeline.trigger_source" not in str(workflow)
+    # Control-plane callers and regression tests also live outside its subdirectory.
+    control_plane = next(job for job in actual if job["target"] == "application-control-plane")
+    selected_root = ROOT / control_plane["tests-dir"]
+    for caller_test in (
+        "tests/unit/application/services/test_run_manifest_service.py",
+        "tests/unit/application/services/test_control_plane_service_seams.py",
+        "tests/unit/application/test_issue_10469_stream_a_lt75_control_plane.py",
+    ):
+        assert (ROOT / caller_test).is_relative_to(selected_root)
 
 
 @pytest.mark.parametrize(

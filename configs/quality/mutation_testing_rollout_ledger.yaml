@@ -45,7 +45,7 @@ entries:
   owner: "@bioetl-application"
   min_score: 60
   paths_to_mutate: src/bioetl/application/services/control_plane/
-  tests_dir: tests/unit/application/services/control_plane/
+  tests_dir: tests/unit/application/
   promotion_basis: curated_high_risk_application_scope
   issue: '#4386'
   last_reviewed: '2026-05-21'

@@ -102,7 +102,10 @@ with 163/222 mutants killed (73.42%, threshold 60%); export-manifests job 2886
 passed with 201/313 killed (64.22%, threshold 60%). Control-plane job 2888
 failed its unchanged 60% gate: 4,020 killed, 5,673 survived, 3 timeouts
 (41.49% under the existing formula), plus 2,787 mutants without tests.
-Domain acceptance remains pending. Each job retains its own target report directory.
+The control-plane test selector is expanded to `tests/unit/application/` so
+existing manifest/caller regression tests participate; source target and threshold
+are unchanged. A fresh scheduled run is required. Domain acceptance remains
+pending. Each job retains its own target report directory.
 
 On 2026-10-05, `bioetl-docs-kpi-weekly` was registered for `main`,
 `ci-lane=docs-kpi`, Monday 04:00–04:59 UTC, one run, all months, Scheduled Actor.
