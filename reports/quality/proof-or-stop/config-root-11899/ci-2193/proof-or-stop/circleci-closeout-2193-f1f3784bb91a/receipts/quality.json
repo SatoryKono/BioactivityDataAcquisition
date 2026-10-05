@@ -1,0 +1,41 @@
+{
+  "argv": [
+    "python",
+    "-m",
+    "scripts.engineering.ci.quality_integral_gate",
+    "--coverage-xml",
+    "/home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-2193-f1f3784bb91a/coverage/coverage.xml",
+    "--output",
+    "/home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-2193-f1f3784bb91a/quality.json"
+  ],
+  "command": "python -m scripts.engineering.ci.quality_integral_gate --coverage-xml /home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-2193-f1f3784bb91a/coverage/coverage.xml --output /home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-2193-f1f3784bb91a/quality.json",
+  "cwd": "/home/circleci/project",
+  "duration_ms": 927400,
+  "evidence_kind": "quality",
+  "execution_attestation": "ci_identity",
+  "exit_code": 0,
+  "follow_up": null,
+  "output_digest": "1b49fba26d5fbed7635a7ee1068b261df33dca62a6492791cbd632525d3efa75",
+  "producer": "quality_integral_gate",
+  "receipt_digest": "f4224827e6a0814990cb15f46edecef3b4ff6bdceae52974e6c479f313f935da",
+  "receipt_id": "quality",
+  "repository": {
+    "branch": "codex/config-root-postmerge-20261005",
+    "ci_run_id": "https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2193",
+    "repo_id": "bioactivitydataacquisition",
+    "worktree_id": "dda4ac9a21114761"
+  },
+  "skip_reason": null,
+  "source": {
+    "command_set_hash": "011a92ddf89dff93f4280e5689dd904c1c7d88aa3c808bb6adc255f80ec8a209",
+    "dirty": false,
+    "head_sha": "f1f3784bb91a6a71e861d49ea347fc0878fcd96a",
+    "material_hash": "287a4ed138546a54ac20385388662b34edf432cc1ac041836aa1d8a6e72916a7",
+    "policy_hash": "c4432025d75ea8fc9bf1c55dc655273239715b7cc94366e8eadb5c085a127c2b",
+    "task_diff_hash": "b47deb3f0905ea0363728a0946a31463e794f7ae42d3c6652f24fb557fa7e7f0",
+    "untracked_paths": []
+  },
+  "started_at": "2026-10-05T10:32:16.675404+00:00",
+  "status": "pass",
+  "task_id": "architecture-coverage-11854-11899"
+}

@@ -2110,7 +2110,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/chembl/health.py",
-      "line": 78,
+      "line": 83,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -2120,7 +2120,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/chembl/health.py",
-      "line": 79,
+      "line": 84,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -2130,7 +2130,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/chembl/health.py",
-      "line": 80,
+      "line": 85,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -2140,7 +2140,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/chembl/health.py",
-      "line": 81,
+      "line": 86,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -2150,7 +2150,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/chembl/health.py",
-      "line": 82,
+      "line": 87,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -2160,7 +2160,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/chembl/health.py",
-      "line": 83,
+      "line": 88,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
@@ -2170,7 +2170,7 @@
     },
     {
       "path": "src/bioetl/infrastructure/adapters/chembl/health.py",
-      "line": 86,
+      "line": 91,
       "layer": "infrastructure",
       "category": "pd6_host_attr_default",
       "justified": true,
