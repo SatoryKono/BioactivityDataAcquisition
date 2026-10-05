@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-05T07:56:43.747290+00:00",
+  "generated_at": "2026-10-05T09:09:39.992800+00:00",
   "summary": {
     "total_scripts": 636,
     "status_counts": {
@@ -21662,13 +21662,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 17,
       "references": [
         {
           "path": "tests/integration/test_live_green_acceptance.py",
           "line": 9,
           "source_group": "tests",
-          "text": "from scripts.ops.observability.green_acceptance import discover, execute, launch_timeout"
+          "text": "from scripts.ops.observability.green_acceptance import ("
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_green_acceptance.py",
@@ -21695,10 +21695,22 @@
           "text": "from scripts.ops.observability.green_acceptance import logged_errors"
         },
         {
-          "path": "tests/unit/scripts/ops/observability/test_green_launch_deadlines.py",
-          "line": 5,
+          "path": "tests/unit/scripts/ops/observability/test_green_acceptance.py",
+          "line": 138,
           "source_group": "tests",
-          "text": "from scripts.ops.observability.green_acceptance import Case, command, launch_timeout"
+          "text": "from scripts.ops.observability import green_acceptance as runner"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_green_acceptance.py",
+          "line": 166,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability import green_acceptance as runner"
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_green_acceptance.py",
+          "line": 180,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability import green_acceptance as runner"
         }
       ]
     },
