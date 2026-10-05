@@ -209,7 +209,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `scorecard.yml` | `30 7 * * 1` | Scorecard plus SARIF publication | Pending port; SARIF transport separate from CodeQL analysis |
 | `security.yml` | — | CircleCI security-scans | Prepared required gate; unpatched braces blocks overall acceptance |
 | `semantic-governance.yml` | — | CircleCI `semantic-governance` | Seven canonical checks and four regression suites in the PR/main aggregate and an opt-in main lane; remote acceptance pending |
-| `skills-consistency.yml` | — | CircleCI skills-consistency | Prepared verify-only lane; doctor/support/event parity pending |
+| `skills-consistency.yml` | — | CircleCI skills-consistency | Prepared verify-only lane includes static doctor, MCP wrapper pairs and drift artifact; approved sync, retention and event parity pending |
 | `stale.yml` | — | GitHub API stale maintenance | Pending port; preserve exclusions and trusted write policy |
 | `tests.yml` | — | CircleCI test-fast/test-integration | Prepared matrices; full source-bound producer/remote acceptance pending |
 | `type-checking.yml` | — | CircleCI mypy | Prepared strict gate; final remote evidence pending |

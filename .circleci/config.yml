@@ -535,6 +535,18 @@ jobs:
             bash scripts/ai/junie/check_junie_mirror.sh --check
             bash scripts/ops/support/skills/check_skills_mirror.sh --check
             bash scripts/ops/support/skills/check_ai_skills_layout.sh
+      - run:
+          name: Verify native runtime discovery and MCP wrappers
+          command: |
+            uv run --frozen --no-build python scripts/ai/codex/doctor.py static --no-write
+            uv run --frozen --no-build python -m scripts.ai.mcp wrappers check
+      - run:
+          name: Report runtime skill drift without synchronizing
+          command: |
+            uv run --frozen --no-build python -m scripts.ai.sync.runtime_skills \
+              --mode check --report reports/ai/runtime-skill-drift.json
+      - store_artifacts:
+          path: reports/ai/runtime-skill-drift.json
 
   e2e-matrix-replay:
     docker:
