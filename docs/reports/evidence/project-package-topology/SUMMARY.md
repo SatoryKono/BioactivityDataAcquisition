@@ -1,3 +1,5 @@
+Source-only refresh (2026-10-05, replay size limits): source_tree_sha256 `e7066391216bdd39f5657961113056a22e9b99f84184fa46b45314e0c44f43ed`. Reuse the existing normalized-row protocol and bind verified JSON reads to their envelope. This is not a new coverage measurement.
+
 Source-only refresh (2026-10-05, replay field key deduplication): source_tree_sha256 `1c0021a26ca5406ff9164492de749515da2ba41782bb0f703cf6344c27bace0b`. This source binding update is not a new coverage measurement.
 
 Source-only refresh (2026-10-05, scoped replay mapping): source_tree_sha256 `f8bfe58a0ddae76ef8e49d056ae14067951cc15736f2a126ce65199b4124e9a4`. Replay mapping is context-local and canonical labels are validated. This rebind does not claim a new coverage measurement.

@@ -70,21 +70,19 @@ async def replay_assay(
     logger = logger or NoOpLogger()
     envelope = verify_bundle(root, envelope_hash)
     objects = envelope["objects"]
+
+    def verified_json(key: str) -> JsonDict:
+        return load_verified_json(root, key, objects[key])
+
     field_key = "field-groups.json"
     if digest_bytes(Path("uv.lock").read_bytes()) != objects["uv.lock"]:
         raise ValueError("assay_replay_dependency_lock_mismatch")
     with mapping_scope(
-        mapping.restore_target_mapping(
-            load_verified_json(
-                root, "target-mapping.json", objects["target-mapping.json"]
-            )
-        )
+        mapping.restore_target_mapping(verified_json("target-mapping.json"))
         if envelope["pipeline"] == "composite_target"
         else None
     ):
-        config = CompositeConfig.from_dict(
-            load_verified_json(root, "config.json", objects["config.json"])
-        )
+        config = CompositeConfig.from_dict(verified_json("config.json"))
         if (
             config.name not in SUPPORTED_COMPOSITES
             or config.name != envelope["pipeline"]
@@ -101,9 +99,7 @@ async def replay_assay(
         settings = Settings.model_validate(
             {
                 "data_dir": destination,
-                "pipeline": load_verified_json(
-                    root, "pipeline-settings.json", objects["pipeline-settings.json"]
-                ),
+                "pipeline": verified_json("pipeline-settings.json"),
             }
         )
         storage = bootstrap_storage_adapter(
@@ -127,9 +123,7 @@ async def replay_assay(
                 storage=cast(CompositeMergeStorageProtocol, storage),
                 resolve_gold_schema=resolve_composite_gold_schema,
                 delta_reader=reader,
-                field_group_registry=restore_field_groups(
-                    load_verified_json(root, field_key, objects[field_key])
-                )
+                field_group_registry=restore_field_groups(verified_json(field_key))
                 if field_key in objects
                 else None,
                 cross_validator=EnrichmentCrossValidator(

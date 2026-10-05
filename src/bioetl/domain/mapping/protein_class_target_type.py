@@ -7,7 +7,7 @@ from collections.abc import Callable, Iterable, Iterator, Mapping
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass
-from typing import Final, Protocol
+from typing import Final
 
 from . import protein_class_target_type_helpers as helpers
 
@@ -108,14 +108,6 @@ _mapping_override: ContextVar[ProteinClassTargetTypeMappingData | None] = Contex
 )
 
 
-class _NormalizedTopLevelLike(Protocol):
-    @property
-    def canonical_l1(self) -> str: ...
-
-    @property
-    def counts_for_target_type(self) -> bool: ...
-
-
 def initialize_protein_class_target_type_mapping(
     data: ProteinClassTargetTypeMappingData,
 ) -> None:
@@ -183,7 +175,7 @@ def normalize_protein_class_top_level(
     )
 
 
-def normalized_top_level_from_row[NormalizedTopLevelT: _NormalizedTopLevelLike](
+def normalized_top_level_from_row[NormalizedTopLevelT: helpers._NormalizedTopLevelLike](
     row: Mapping[str, object],
     mapping_data: ProteinClassTargetTypeMappingData,
     *,
@@ -228,14 +220,14 @@ def normalized_top_level_from_row[NormalizedTopLevelT: _NormalizedTopLevelLike](
 
 
 def canonical_top_levels(
-    normalized_rows: Iterable[_NormalizedTopLevelLike],
+    normalized_rows: Iterable[helpers._NormalizedTopLevelLike],
 ) -> tuple[str, ...]:
     """Return sorted unique canonical L1 classes from normalized rows."""
     return tuple(sorted({row.canonical_l1 for row in normalized_rows}))
 
 
 def counted_top_levels(
-    normalized_rows: Iterable[_NormalizedTopLevelLike],
+    normalized_rows: Iterable[helpers._NormalizedTopLevelLike],
 ) -> tuple[str, ...]:
     """Return sorted unique counted top-level classes."""
     return tuple(
@@ -246,7 +238,7 @@ def counted_top_levels(
 
 
 def ignored_top_levels(
-    normalized_rows: Iterable[_NormalizedTopLevelLike],
+    normalized_rows: Iterable[helpers._NormalizedTopLevelLike],
 ) -> tuple[str, ...]:
     """Return sorted unique non-counted top-level classes."""
     return tuple(
@@ -286,10 +278,9 @@ def derive_protein_class_target_type(
         unknown_target_type=helpers.UNKNOWN_TARGET_TYPE,
     )
 
-    top_level_count = len(counted_levels)
     return ProteinClassTargetTypeResult(
         target_protein_class_type=target_type,
-        top_level_count=top_level_count,
+        top_level_count=len(counted_levels),
         canonical_top_levels=canonical_levels,
         counted_top_levels=counted_levels,
         ignored_top_levels=ignored_levels,

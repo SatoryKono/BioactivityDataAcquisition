@@ -23,9 +23,9 @@
     "composition_bootstrap_runtime": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
-      "helper_function_ratio": 0.289,
+      "helper_function_ratio": 0.288,
       "files": 49,
-      "total_loc": 6443,
+      "total_loc": 6437,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
