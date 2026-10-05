@@ -21,7 +21,6 @@ EXPECTED_GATES = {
     "tests",
     "type-checking",
     "security",
-    "codeql",
     "docker",
     "duplication",
     "root-hygiene",

@@ -526,7 +526,10 @@ def run_launch(
                             timeout=30,
                         )
                     else:
-                        os.killpg(process.pid, signal.SIGKILL)
+                        try:
+                            os.killpg(process.pid, signal.SIGKILL)
+                        except ProcessLookupError:
+                            pass
                     process.wait(timeout=30)
                 receipt["exit_code"] = process.returncode
         finally:

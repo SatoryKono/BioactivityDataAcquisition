@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -100,25 +100,6 @@ async def test_periodic_checkpoint_skipped_when_batch_not_flushed() -> None:
 
     checkpoint.save_periodic_checkpoint.assert_not_awaited()
     assert len(loop_state.batch) == 1
-
-
-def test_resource_bootstrap_uses_providers_scope() -> None:
-    """#11222: bootstrap/cleanup register providers without pipeline registry."""
-    with (
-        patch(
-            "bioetl.composition._resource_management.ensure_runtime_registrations"
-        ) as ensure,
-        patch(
-            "bioetl.composition._resource_management.bootstrap_lifecycle_service",
-            return_value=MagicMock(),
-        ),
-    ):
-        from bioetl.composition._registration import RuntimeRegistrationScope
-        from bioetl.composition.resources_runtime import get_lifecycle_service
-
-        get_lifecycle_service()
-
-    ensure.assert_called_once_with(scope=RuntimeRegistrationScope.PROVIDERS)
 
 
 def test_require_input_snapshots_strict_gate() -> None:

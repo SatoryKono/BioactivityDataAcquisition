@@ -1,5 +1,7 @@
 """Bind producer rows when analytical contracts omit row-level run metadata."""
 
+from __future__ import annotations
+
 import asyncio
 from collections.abc import Mapping
 

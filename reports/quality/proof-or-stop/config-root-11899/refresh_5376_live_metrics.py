@@ -4,6 +4,8 @@ The canonical coverage inventory supplies adopted values; W44 raw measurements
 and historical floors remain distinct. This record has no existing generator.
 """
 
+from __future__ import annotations
+
 import hashlib
 import json
 import sys

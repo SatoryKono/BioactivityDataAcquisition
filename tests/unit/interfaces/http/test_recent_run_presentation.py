@@ -8,7 +8,7 @@ import pytest
 from urllib.parse import urlsplit
 
 from bioetl.application.services.run_reports.writer import write_pipeline_run_report
-from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
+from bioetl.domain.run_reports.pipeline_report_assembly import build_pipeline_run_report
 from bioetl.domain.run_reports.selected_status import DOMAINS
 from bioetl.infrastructure.storage.run_report_store_adapter import (
     FileRunReportStoreAdapter,

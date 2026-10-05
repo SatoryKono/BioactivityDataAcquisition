@@ -54,3 +54,29 @@ def test_incomplete_source_portfolio_fails_before_writing(tmp_path):
     with pytest.raises(ValueError, match="exactly five"):
         render_notices(tmp_path)
     assert not (tmp_path / "grafana/dashboards-prometheus-only").exists()
+
+
+@pytest.mark.parametrize(
+    "relative",
+    [
+        "outside.json",
+        "grafana/dashboards/../outside.json",
+        "grafana/dashboards/local.env",
+    ],
+)
+def test_canonical_writer_rejects_foreign_outputs(tmp_path, relative):
+    from scripts.ops.observability.grafana.render_nav_bus import write_dashboard_source
+
+    target = tmp_path / relative
+    with pytest.raises(ValueError, match="canonical profile"):
+        write_dashboard_source(target, "{}", root=tmp_path)
+    assert not target.exists()
+
+
+def test_canonical_writer_rejects_nonobject_json(tmp_path):
+    from scripts.ops.observability.grafana.render_nav_bus import write_dashboard_source
+
+    target = tmp_path / "grafana/dashboards/dashboard.json"
+    with pytest.raises(ValueError, match="JSON object"):
+        write_dashboard_source(target, "[]", root=tmp_path)
+    assert not target.exists()

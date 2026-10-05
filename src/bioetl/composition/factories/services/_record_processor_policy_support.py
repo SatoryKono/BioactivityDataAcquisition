@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 from itertools import chain
-from typing import TYPE_CHECKING
 
 from bioetl.application.core.wiring.runtime import (
     BasePipeline,
@@ -16,8 +15,7 @@ from bioetl.domain.types import (
     GoldSchemaVersionPolicy,
 )
 
-if TYPE_CHECKING:
-    from bioetl.domain.types import GoldSchemaType
+from bioetl.domain.types import GoldSchemaType
 
 
 def coerce_string_frozenset(value: object | None) -> frozenset[str]:

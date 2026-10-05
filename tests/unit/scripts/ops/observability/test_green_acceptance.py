@@ -318,6 +318,50 @@ def test_launch_receipts_and_owned_process_cleanup(tmp_path, monkeypatch, outcom
         terminate.assert_not_called()
 
 
+@pytest.mark.parametrize("outcome", ["timeout", "cancel"])
+def test_launch_preserves_result_when_process_group_exits(
+    tmp_path, monkeypatch, outcome
+):
+    import io
+    from unittest.mock import Mock
+    from scripts.ops.observability import green_acceptance as runner
+
+    process = Mock(pid=123, returncode=0)
+    process.poll.return_value = None
+    original = (
+        runner.subprocess.TimeoutExpired("fake", 12)
+        if outcome == "timeout"
+        else KeyboardInterrupt()
+    )
+    process.wait.side_effect = [original, 0]
+    monkeypatch.setattr(runner.subprocess, "Popen", Mock(return_value=process))
+    monkeypatch.setattr(runner.sys, "platform", "linux")
+    monkeypatch.setattr(runner.signal, "SIGKILL", 9, raising=False)
+    terminate = Mock(side_effect=ProcessLookupError())
+    monkeypatch.setattr(runner.os, "killpg", terminate, raising=False)
+    receipt = {}
+    if outcome == "cancel":
+        with pytest.raises(KeyboardInterrupt) as raised:
+            runner.run_launch(
+                ["fake"],
+                tmp_path,
+                {},
+                io.StringIO(),
+                timeout_seconds=12,
+                receipt=receipt,
+            )
+        assert raised.value is original
+    else:
+        assert runner.run_launch(
+            ["fake"], tmp_path, {}, io.StringIO(), timeout_seconds=12, receipt=receipt
+        ) == ["launch_timeout=12s"]
+    terminate.assert_called_once_with(process.pid, runner.signal.SIGKILL)
+    process.wait.assert_called_with(timeout=30)
+    assert receipt["exit_code"] == 0
+    assert receipt["status"] == ("timeout" if outcome == "timeout" else "interrupted")
+    assert receipt["finished_at"] >= receipt["started_at"]
+
+
 def test_launch_creation_error_has_terminal_receipt(tmp_path, monkeypatch):
     import io
     from unittest.mock import Mock

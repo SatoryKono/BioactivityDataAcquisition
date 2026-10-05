@@ -35,7 +35,9 @@ from bioetl.composition._registration import ensure_runtime_registrations
 from bioetl.composition._service_registry import resolve as _resolve
 from bioetl.composition._service_registry import typed_port as _typed_port
 from bioetl.composition.registry_api import create_registry
-from bioetl.composition import _workflow_services
+from bioetl.composition.factories.services import (
+    workflow_services as _workflow_services,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_runner_service import (

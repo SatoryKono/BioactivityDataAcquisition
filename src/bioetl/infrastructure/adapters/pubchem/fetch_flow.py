@@ -11,9 +11,9 @@ from urllib.error import HTTPError
 import pubchempy as pcp
 
 from bioetl.domain.resilience import RetryConfig
-from bioetl.infrastructure.adapters.http._client_retry_policy import (
-    _can_retry,
-    _parse_retry_after,
+from bioetl.infrastructure.adapters.http.client_retry_policy import (
+    can_retry,
+    parse_retry_after,
 )
 
 if TYPE_CHECKING:
@@ -56,7 +56,7 @@ class PubChemFetchFlow:
         if isinstance(cause, HTTPError) and cause.headers is not None:
             value = cause.headers.get("Retry-After")
             if isinstance(value, str):
-                delay = _parse_retry_after(value)
+                delay = parse_retry_after(value)
                 if delay is not None:
                     return self.retry_config.clamp_retry_after(delay)
         return self.retry_config.calculate_delay(attempt, endpoint)
@@ -86,7 +86,7 @@ class PubChemFetchFlow:
                     status_code=error.code,
                 )
                 attempt += 1
-                if not _can_retry(
+                if not can_retry(
                     self.retry_config, attempt - 1, attempt - 1
                 ) or not self.retry_config.is_retryable_status(error.code):
                     raise

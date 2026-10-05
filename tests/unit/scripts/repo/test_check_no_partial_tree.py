@@ -8,27 +8,20 @@
 
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
 
 import pytest
 
 from scripts.engineering.repo import check_no_partial_tree as module
+from tests.helpers.isolated_git import run_isolated_git
 
 
 pytestmark = pytest.mark.unit
 
 
 def _git(repo: Path, *args: str) -> str:
-    result = subprocess.run(
-        ["git", *args],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        cwd=repo,
-        check=True,
-    )
+    result = run_isolated_git(repo, *args)
+    result.check_returncode()
     return result.stdout
 
 

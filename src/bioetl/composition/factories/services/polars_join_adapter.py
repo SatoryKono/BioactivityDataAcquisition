@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 
 from bioetl.application.composite.join_execution import JoinExecutorService
 
-if TYPE_CHECKING:
-    import polars as pl
-    from polars._typing import JoinStrategy as JoinHow
+import polars as pl
+from polars._typing import JoinStrategy as JoinHow
 
 
 class PolarsJoinBridge:
