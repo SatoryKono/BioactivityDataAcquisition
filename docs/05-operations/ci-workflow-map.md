@@ -242,7 +242,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `docs.yml` | — | CircleCI docs-governance | Prepared required gate; full docs/render parity pending |
 | `duplication-complexity.yml` | — | CircleCI duplication | Prepared required gate; full scan thresholds preserved |
 | `e2e-matrix-health.yml` | `30 2 * * *` | E2E replay and controlled live lanes | Main-only `e2e-replay` prepared with three reruns and skip SLO; live/nightly and PR event parity pending |
-| `github-settings-quarterly-review.yml` | `23 6 1 1,4,7,10 *` | CircleCI github-settings-review | Authenticated main run 2773 completed report collection (policy drift remains explicit); quarterly schedule pending |
+| `github-settings-quarterly-review.yml` | `23 6 1 1,4,7,10 *` | CircleCI github-settings-review | Authenticated main run 2773 completed report collection (policy drift remains explicit); quarterly first-day Jan/Apr/Jul/Oct 06 UTC schedule registered with Scheduling System; scheduled execution pending |
 | `import-linter.yml` | — | CircleCI lint-arch and arch-tests | Prepared gates; full external architecture acceptance pending |
 | `labeler.yml` | — | GitHub API label maintenance | Pending port; trusted actor and scoped issue/PR write access |
 | `memory-freshness.yml` | `17 5 * * 1` | CircleCI memory-freshness | Prepared check-only lane; PR parity and scheduled failure notification pending |
@@ -269,7 +269,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `semantic-governance.yml` | — | CircleCI `semantic-governance` | Seven canonical checks and four regression suites in the PR/main aggregate and an opt-in main lane; main gates 218–220 accepted |
 | `skills-consistency.yml` | — | CircleCI skills-consistency | Main run 3364 passed static doctor, MCP wrapper pairs, mirror checks and drift=false artifact; approved sync and event parity pending; artifact retention verified at 30 days |
 | `stale.yml` | — | GitHub API stale maintenance | Pending port; preserve exclusions and trusted write policy |
-| `tests.yml` | — | CircleCI test-fast/test-integration | Main gates 218–220 accepted; producer 3363 completed all 17 coverage shards; its overall Proof-or-Stop result remains STOP, not full closeout |
+| `tests.yml` | — | CircleCI test-fast/test-integration | Main gates 218–220 accepted; historical producer 3363 completed 17 shards with overall STOP; test-tree changes require a new complete 17-shard producer, followed by another main producer after squash integration |
 | `type-checking.yml` | — | CircleCI mypy | Strict mypy gate accepted in main pipelines 218–220 |
 | `vacuum.yml` | — | Local maintenance command | Retain manual/local operation; no automatic destructive schedule |
 | `validate-vendored-mermaid-assets.yml` | — | CircleCI docs-governance | Both legacy MkDocs asset existence checks folded into the docs gate; remote acceptance pending |
@@ -385,3 +385,13 @@ scheduler/timeout clocks remain real. Both processes use the same working path;
 their complete outputs are copied separately before byte-level comparison.
 No output keys or files are filtered, normalized or rewritten, and within-run
 occurrence/checkpoint uniqueness remains exercised by the existing tests.
+
+
+The protected `docker-publish` successor is prepared as an opt-in main-only lane:
+security baseline and exact scanned-image workspace, explicit approval, then
+serialized publication through `bioetl-ghcr-publish`. That context was created
+with project and main-only restrictions on 2026-10-05; registry credentials and
+remote publication acceptance remain pending. The draft rejects incomplete
+manifests, mismatched SHA/workflow/image identities, failed or missing approvals,
+blocking vulnerabilities, changed SHA tags, and substituted signed predicates.
+Local guard checks do not qualify as registry or attestation acceptance.
