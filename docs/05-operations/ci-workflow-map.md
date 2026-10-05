@@ -215,7 +215,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `dependency-review.yml` | — | Dependency diff security review | Pending replacement; do not drop HIGH/CRITICAL diff coverage |
 | `diagram-nightly.yml` | — | Diagram lint plus local full render | Keep disabled full-render surface; port only active checks |
 | `docker.yml` | — | CircleCI docker-build plus protected promotion | Build prepared; Trivy/baseline/digest promotion pending |
-| `docs-kpi-weekly.yml` | `30 4 * * 1` | CircleCI docs-kpi | Prepared opt-in lane; external schedule pending |
+| `docs-kpi-weekly.yml` | `30 4 * * 1` | CircleCI docs-kpi | Registered `bioetl-docs-kpi-weekly`; first scheduled execution pending |
 | `docs.yml` | — | CircleCI docs-governance | Prepared required gate; full docs/render parity pending |
 | `duplication-complexity.yml` | — | CircleCI duplication | Prepared required gate; full scan thresholds preserved |
 | `e2e-matrix-health.yml` | `30 2 * * *` | E2E replay and controlled live lanes | Main-only `e2e-replay` prepared with three reruns and skip SLO; live/nightly and PR event parity pending |

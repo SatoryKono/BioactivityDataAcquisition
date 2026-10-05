@@ -7,6 +7,8 @@ The scheduler clock and timeout clocks remain real; only persisted storage
 metadata duration counters are fixed. No output field is removed or rewritten.
 """
 
+from __future__ import annotations
+
 from datetime import UTC, datetime
 from itertools import count
 from types import SimpleNamespace
