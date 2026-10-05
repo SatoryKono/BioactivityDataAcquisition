@@ -1288,6 +1288,7 @@ workflows:
               only:
                 - codex/architecture-coverage-final-20261004
                 - codex/config-root-main-acceptance-20261005
+                - codex/config-root-postmerge-20261005
 
   rf023-closeout:
     jobs:

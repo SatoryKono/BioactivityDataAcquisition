@@ -429,10 +429,12 @@ entries:
     lifecycle: permanent_policy
     reviewed_skip_calls: 2
     vcr_related: false
-    review_date: "2026-10-03"
+    review_date: "2026-10-05"
     rationale: >
-      Live launch acceptance requires BIOETL_GREEN_ACCEPTANCE=1 and isolated
-      output/environment inputs; selected cases fail on missing or failed evidence.
+      Individual launch and RF-022 campaign entrypoints require explicit
+      BIOETL_GREEN_ACCEPTANCE=1 with mutually exclusive BIOETL_GREEN_CAMPAIGN
+      selection and isolated output/environment inputs. Both guards were shipped
+      in main by PR #11935; selected cases fail on missing or failed evidence.
   - path: tests/integration/test_deployed_replay_readiness.py
     suite: integration
     category: live_network_opt_in_guard
