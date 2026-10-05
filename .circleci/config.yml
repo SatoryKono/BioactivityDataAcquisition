@@ -63,6 +63,9 @@ commands:
             for extra in << parameters.extras >>; do CMD="$CMD --extra $extra"; done
             echo "Running: $CMD"
             $CMD
+            # Keep the exact extras/environment produced by the successful frozen sync.
+            export UV_NO_SYNC=1
+            echo 'export UV_NO_SYNC=1' >> "$BASH_ENV"
             uv run --frozen --no-build python -c 'import os, sys; actual = ".".join(map(str, sys.version_info[:2])); expected = os.environ["UV_PYTHON"]; assert actual == expected, f"Python mismatch: {actual} != {expected}"; print(f"Python {actual} matches requested runtime")'
       - save_cache:
           name: Save uv cache
