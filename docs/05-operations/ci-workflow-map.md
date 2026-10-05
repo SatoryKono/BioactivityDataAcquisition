@@ -104,8 +104,8 @@ failed its unchanged 60% gate: 4,020 killed, 5,673 survived, 3 timeouts
 (41.49% under the existing formula), plus 2,787 mutants without tests.
 The control-plane test selector is expanded to `tests/unit/application/` so
 existing manifest/caller regression tests participate; source target and threshold
-are unchanged. A fresh scheduled run is required. Domain acceptance remains
-pending. Each job retains its own target report directory.
+are unchanged. A fresh scheduled run is required. Domain job 2887 was interrupted before terminal statistics/report generation;
+it is not accepted. Each job retains its own target report directory.
 
 On 2026-10-05, `bioetl-docs-kpi-weekly` was registered for `main`,
 `ci-lane=docs-kpi`, Monday 04:00–04:59 UTC, one run, all months, Scheduled Actor.
@@ -125,7 +125,7 @@ it does not delete branches. Both are opt-in and main-only. The branch inventory
 `bioetl-branch-hygiene-weekly` trigger was created in CircleCI on 2026-10-05:
 `main`, `ci-lane=branch-hygiene`, Monday, every month, one run during
 03:00–03:59 UTC, Scheduled Actor. This replaces the legacy 03:15 minute with
-an hourly window. Main integration, authenticated run evidence and PR
+an hourly window. Authenticated main run 3084 passed; scheduled execution and PR
 branch-name event handling remain pending. Artifact retention must be configured to at least fourteen days
 in the CircleCI project before retiring either legacy workflow.
 
@@ -171,6 +171,15 @@ passed three 11-case matrix runs with zero skips/failures, plus ChEMBL smoke;
 recurrent infrastructure and code failures were both zero. Nine artifacts were
 collected with SHA256 digests.
 
+Read-only branch hygiene job
+[3084](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/3084)
+passed on the same main SHA: 52 branches inventoried, `mode=dry-run`,
+`deletion_applied=false`; its artifact digest was retained. No branch was deleted.
+Provider-contract drift job
+[3112](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/3112)
+passed on the same main SHA: seven providers, twenty replay probes, zero skips,
+zero warnings and zero breaking changes; report and JUnit digests were retained.
+
 Manual successes do not establish scheduler, notification or release acceptance.
 
 ## Migration disposition ledger (#11930 / #11931)
@@ -184,7 +193,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | --- | --- | --- | --- |
 | `architecture-docs-nightly.yml` | `15 2 * * *` | CircleCI architecture-docs | Prepared passport/diagram/dependency audits and artifacts; schedule/retention/run acceptance pending |
 | `architecture.yml` | `20 2 * * *` | Architecture metrics lane | Pending port; canonical reporters and no budget growth |
-| `branch-hygiene.yml` | `15 3 * * 1` | CircleCI branch-hygiene inventory | Weekly trigger and restricted context created; authenticated run, retention and PR branch-name events pending |
+| `branch-hygiene.yml` | `15 3 * * 1` | CircleCI branch-hygiene inventory | Weekly trigger and restricted context created; authenticated main run 3084 passes; scheduled run, retention and PR branch-name events pending |
 | `chembl-baseline-smoke.yml` | — | Representative offline smoke lane | Pending port; preserve cassette playback |
 | `codeql.yml` | `17 4 * * 1` | Retire Actions definition at #11930 cutover | Not required; optional analysis lifecycle remains explicit |
 | `coderabbit.yml` | — | Local CodeRabbit launcher | Retain local; external integration/event policy pending |
@@ -216,7 +225,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `port-contracts.yml` | — | CircleCI port-contracts | Prepared Hypothesis-enabled lane; push/PR event parity pending |
 | `pr-hygiene.yml` | — | GitHub API PR maintenance | Pending port; validation and trusted write boundary |
 | `pr-required.yml` | — | CircleCI classify/pr-gate-complete | Prepared catalogue-backed contract; main acceptance/rulesets pending |
-| `provider-contract-drift.yml` | — | CircleCI provider-contract-drift | Prepared replay, matrix/xwalk and breaking-drift gates; push/PR parity and remote acceptance pending |
+| `provider-contract-drift.yml` | — | CircleCI provider-contract-drift | Main run 3112 passes replay, matrix/xwalk and breaking-drift gates; push/PR parity and retention pending |
 | `quality-debt-weekly.yml` | — | Retain disabled debt review policy | Do not activate job with existing if:false; local audits retained |
 | `release.yml` | — | Protected release promotion lane | Pending port; approval and restricted PyPI/GHCR credentials |
 | `reusable-mermaid-setup.yml` | — | Shared pinned Mermaid tooling | Pending consumer migration; keep lockfile scanned by OSV |
