@@ -10,20 +10,29 @@ ______________________________________________________________________
 
 # CI / GitHub Actions Workflow Map
 
-Curated map of canonical `.github/workflows/*` (DOC-GOV-06 / #6886 / #10263).
-**Count at verification:** 48 tracked workflow files on the default branch
-(23 GitHub-`active`, 25 `keep-disabled`). That 48 is **not** GitHub API
-`total_count` (live GET `2026-09-10`: **77** = tracked + `dynamic/**` + orphan
-temp/residual). YAML self-description remains authoritative for
-triggers/secrets; GitHub UI `state` is authoritative for whether the lane
-actually runs. This page routes operators only to **active** lanes.
+The active PR/default-main provider is CircleCI `.circleci/config.yml`, workflow
+`pr-gate`, with GitHub required context `ci/circleci: pr-gate-complete`.
+The canonical applicability catalog is `configs/quality/github_required_checks.yaml`.
+Its `deployment` block identifies CircleCI; retained `coordinator_workflow` and
+`owner_workflow` fields describe the legacy Actions definitions until #11930.
+GitHub Actions are disabled; billing restoration is out of scope.
 
-`pr-required.yml` (`pr-gate-complete`) is the repo-side coordinator **and**
-the GitHub ruleset required context on `main` (ruleset `13643213`,
-`enforcement: active` as of `2026-09-10T02:53:01+03:00`,
-[#10267](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/10267)).
-Companion `root-hygiene-required-check` (15730586) stays `enforcement: disabled`.
-Orphan temp / dynamic hosted workflows are out of scope here (#10265, #10268).
+The legacy inventory below contains 52 tracked workflow files, including 13
+scheduled and 34 manual surfaces. These categories overlap. Retained YAML defines
+the behavior to preserve; presence in the repository does not prove a running lane.
+Optional CodeQL and inactive OpenCode stubs remain separate from required checks.
+
+Production rulesets `main` (13643213) and `root-hygiene-required-check` (15730586)
+are active as of 2026-10-05 after three consecutive successful main PR-gate
+pipelines 218, 219 and 220: all 81 jobs passed on source
+`a34558b918b56984a185c0e4956d735b43483780`. The main ruleset requires
+`ci/circleci: pr-gate-complete`; the companion also requires
+`ci/circleci: root-hygiene`. Both retain strict SHA freshness, main-only scope and
+no bypass actors; API readback matched the submitted settings exactly.
+The negative acceptance in isolated PR #11954 proved missing, failed, stale-SHA
+and canceled CircleCI workflow results block merge (HTTP 405); its test ruleset
+was disabled and the PR closed without merge. No App binding is claimed: this
+CircleCI integration publishes legacy commit statuses without an App identity.
 
 ## CircleCI migration preparation (#11929 / #11931)
 
@@ -242,7 +251,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `performance-nightly.yml` | `0 3 * * *` | CircleCI performance | Main job 3365 passes 70 tests without skips and all five budgets; schedule pending |
 | `port-contracts.yml` | — | CircleCI port-contracts | Prepared Hypothesis-enabled lane; push/PR event parity pending |
 | `pr-hygiene.yml` | — | GitHub API PR maintenance | Pending port; validation and trusted write boundary |
-| `pr-required.yml` | — | CircleCI classify/pr-gate-complete | Prepared catalogue-backed contract; main acceptance/rulesets pending |
+| `pr-required.yml` | — | CircleCI classify/pr-gate-complete | Main pipelines 218–220 pass all 81 jobs on a34558b918b5; both production rulesets active/read back; legacy owner references retained until #11930 |
 | `provider-contract-drift.yml` | — | CircleCI provider-contract-drift | Main run 3112 passes replay, matrix/xwalk and breaking-drift gates; push/PR parity pending; artifact retention verified at 30 days |
 | `quality-debt-weekly.yml` | — | Retain disabled debt review policy | Do not activate job with existing if:false; local audits retained |
 | `release.yml` | — | Protected release promotion lane | Pending port; approval and restricted PyPI/GHCR credentials |
@@ -294,7 +303,7 @@ Triggers, contexts, approved publication and exact-SHA evidence remain cutover g
 | `no-partial-tree-commits.yml` | No partial-tree commits | Reject incomplete Git trees (#11709) |
 | `opencode-pr-review.yml` | opencode-pr-review | Dispatch-only stub (#11012); remote OpenCode installer removed |
 | `opencode-triage.yml` | opencode-triage | Dispatch-only stub (#11012); remote OpenCode installer removed |
-| `pr-required.yml` | PR Gate Complete | Fail-closed coordinator; GitHub required context `pr-gate-complete` (ruleset 13643213, #10267) |
+| `pr-required.yml` | PR Gate Complete | Retained legacy coordinator; active CircleCI context `ci/circleci: pr-gate-complete` is enforced by rulesets 13643213 and 15730586 (#11928) |
 | `root-hygiene.yml` | Root Hygiene | Root allowlist / clutter gates |
 | `router-v7-bridge.yml` | Router 7 bridge candidate | Candidate plugin, frontend and image parity checks; managed host acceptance remains separate |
 | `schema-governance.yml` | Schema Governance | Schema governance checks |
