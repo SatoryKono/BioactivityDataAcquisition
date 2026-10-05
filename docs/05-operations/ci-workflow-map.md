@@ -160,7 +160,7 @@ Artifact digests and terminal job evidence were collected before recording resul
 | Port contracts | [2606](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2606) | SUCCESS; 188 tests including Hypothesis, both JUnit artifacts; event parity pending |
 | Skills consistency | [2607](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2607) | FAILED: stale wrapper-contract docs mirror. Mirror refreshed; tracked global snapshot entrypoint restores layout in clean checkouts. External rerun pending |
 | Performance | [2689](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2689) | FAILED: CrossRef median 0.45 ms exceeded 0.4125 ms; 43 benchmarks skipped because plugin was disabled. Explicit plugin opt-in added; 70 local tests pass, external acceptance pending. Budgets unchanged |
-| Replay parity | [2690](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2690) | FAILED: missing basetemp parent directories. Parent creation repaired; four local test runs pass. Whole-file parity still differs in operational occurrence IDs/timestamps, including with the same runtime root; checksum gate remains unchanged and unresolved |
+| Replay parity | [2690](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2690) | FAILED: missing basetemp parent directories. Parent creation repaired; four local test runs pass. Opt-in CI harness now fixes operational clocks/occurrence seeds and reuses one runtime root for two independent processes. Local 66-file byte parity passes; unchanged checksum gate still rejects drift/empty inventories. External rerun pending |
 
 On main `95ca0a67f21a7055ad1b671f9ff57bd5ff39b1fb`, GitHub settings job
 [2773](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2773)
@@ -336,3 +336,12 @@ When adding a workflow:
 3. Mark deprecated reusables clearly; do not reference them from new jobs.
 4. Record GitHub live `state` and a keep-disabled or active decision in the
    canonical inventory.
+
+
+The replay lane loads `scripts.engineering.ci.replay_parity_inputs` explicitly
+for the determinism suite only. It fixes input occurrence seeds, SystemClock,
+checkpoint history nanoseconds and storage metadata duration counters. Async
+scheduler/timeout clocks remain real. Both processes use the same working path;
+their complete outputs are copied separately before byte-level comparison.
+No output keys or files are filtered, normalized or rewritten, and within-run
+occurrence/checkpoint uniqueness remains exercised by the existing tests.

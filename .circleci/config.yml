@@ -372,8 +372,10 @@ jobs:
             mkdir -p reports/nightly-replay
             mkdir -p .artifacts/nightly-replay/{determinism,idempotency,composite_resume}
             uv run --frozen --no-build pytest tests/integration/determinism -q \
+              -p scripts.engineering.ci.replay_parity_inputs \
               --junitxml=reports/nightly-replay/determinism.xml \
-              --basetemp .artifacts/nightly-replay/determinism/run1
+              --basetemp .artifacts/nightly-replay/determinism/work
+            cp -a .artifacts/nightly-replay/determinism/work .artifacts/nightly-replay/determinism/run1
             uv run --frozen --no-build pytest tests/integration/idempotency -q \
               --junitxml=reports/nightly-replay/idempotency.xml \
               --basetemp .artifacts/nightly-replay/idempotency/run1
@@ -381,8 +383,10 @@ jobs:
               --junitxml=reports/nightly-replay/composite_resume.xml \
               --basetemp .artifacts/nightly-replay/composite_resume/run1
             uv run --frozen --no-build pytest tests/integration/determinism -q \
+              -p scripts.engineering.ci.replay_parity_inputs \
               --junitxml=reports/nightly-replay/determinism-recheck.xml \
-              --basetemp .artifacts/nightly-replay/determinism/run2
+              --basetemp .artifacts/nightly-replay/determinism/work
+            cp -a .artifacts/nightly-replay/determinism/work .artifacts/nightly-replay/determinism/run2
             '
       - run:
           name: Compare nonempty replay checksum inventories
