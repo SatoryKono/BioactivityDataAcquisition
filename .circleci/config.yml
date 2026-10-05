@@ -1373,7 +1373,12 @@ jobs:
           command: |
             git fetch --no-tags origin main:refs/remotes/origin/main
             BASE="$(git merge-base origin/main HEAD)"
-            npx --yes @commitlint/cli --config commitlint.config.mjs \
+            TOOL_ROOT="$PWD/scripts/engineering/ci/commitlint"
+            npm ci --prefix "$TOOL_ROOT" --ignore-scripts --no-audit --no-fund
+            # Resolve the shared config beside its locked conventional preset.
+            cp commitlint.config.mjs "$TOOL_ROOT/commitlint.config.mjs"
+            node "$TOOL_ROOT/node_modules/@commitlint/cli/cli.js" \
+              --config "$TOOL_ROOT/commitlint.config.mjs" \
               --from "$BASE" --to HEAD --verbose
 
   # --- Gate: docs-governance (path_scoped) ------------------------------------------

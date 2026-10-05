@@ -1,0 +1,15 @@
+{
+  "name": "bioetl-ci-commitlint",
+  "private": true,
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "@commitlint/cli": "21.2.3",
+    "@commitlint/config-conventional": "21.2.3"
+  },
+  "overrides": {
+    "conventional-changelog-conventionalcommits": "10.4.0"
+  }
+}
