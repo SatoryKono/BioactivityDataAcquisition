@@ -44,7 +44,7 @@ def build_dataset_fragment_nodes(
             dataset_node=dataset_node,
             records=records,
             composite_name=(
-                run_context.pipeline_name
+                f"{run_context.provider}.{run_context.entity}"
                 if run_context.provider == "composite"
                 else composite_name
             ),
