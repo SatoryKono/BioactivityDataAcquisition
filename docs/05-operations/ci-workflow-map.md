@@ -471,3 +471,11 @@ The current security job verifies the Gitleaks binary checksum and redacts
 findings in logs. Git-history scan parity remains pending: directory scanning
 alone does not replace the legacy commit-range scan, and unsuccessful local
 history scans are not acceptance evidence.
+
+Context boundary acceptance: [CircleCI pipeline 257](https://app.circleci.com/pipelines/github/SatoryKono/BioactivityDataAcquisition/257)
+on disposable full-tree source `55a943181692bf8a891c13db5af489c6bfd1ea20`
+requested `bioetl-github-read-only`, `bioetl-ghcr-publish`, and
+`bioetl-security-events-write` from a non-`main` branch. All three jobs
+(4366, 4368, 4367) returned `unauthorized` with zero duration; the probe never
+reads or prints environment variables. This proves the tested non-main denial,
+not successful publication or acceptance of every fork/trigger combination.
