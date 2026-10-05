@@ -1367,7 +1367,9 @@ jobs:
           command: |
             git fetch --no-tags origin main:refs/remotes/origin/main
             BASE="$(git merge-base origin/main HEAD)"
-            npx --yes @commitlint/cli --config commitlint.config.mjs \
+            # Frozen graph avoids the unavailable conventionalcommits 10.4.1 tarball.
+            npm ci --ignore-scripts --no-fund --no-audit
+            npm exec --no -- commitlint --config commitlint.config.mjs \
               --from "$BASE" --to HEAD --verbose
 
   # --- Gate: docs-governance (path_scoped) ------------------------------------------
