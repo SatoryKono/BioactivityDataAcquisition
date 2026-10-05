@@ -637,8 +637,6 @@ jobs:
 
   # Mirrors tests.yml `test-matrix` (6 groups; unit groups with xdist, integration serial).
   test-integration:
-    environment:
-      PYTEST_XDIST_AUTO_NUM_WORKERS: "2"
     docker:
       - image: cimg/python:3.13
     resource_class: small
@@ -1286,3 +1284,4 @@ workflows:
               only:
                 - codex/architecture-coverage-final-20261004
                 - codex/config-root-main-acceptance-20261005
+                - codex/config-root-postmerge-20261005
