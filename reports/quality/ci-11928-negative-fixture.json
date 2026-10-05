@@ -1,1 +1,1 @@
-{"purpose": "isolated server-side required-check acceptance", "production_evidence": false, "case": "first-head"}
+{"purpose": "isolated server-side required-check acceptance", "production_evidence": false, "case": "stale-success-and-real-cancellation"}
