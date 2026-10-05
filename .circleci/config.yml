@@ -346,8 +346,8 @@ jobs:
           MUTATION_TARGET: << parameters.target >>
           MUTATION_SCORE_THRESHOLD: << parameters.threshold >>
     - store_artifacts:
-        path: reports
-        destination: mutation
+        path: reports/<< parameters.target >>
+        destination: mutation/<< parameters.target >>
   replay-parity:
     docker:
       - image: cimg/python:3.13

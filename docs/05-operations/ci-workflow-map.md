@@ -88,15 +88,19 @@ three matrix runs, the ChEMBL activity smoke, the 15% skip SLO, zero recurrent
 infra/code failures, and a final check of every pytest exit code. Execution is
 bounded to 25 minutes and retains JUnit and diagnostic artifacts. This lane has
 no credential context and cannot record new cassettes. Live/nightly credentials,
-PR event parity and successful external execution still require acceptance.
+PR event parity still requires acceptance. Manual main replay acceptance is recorded below.
 
 The prepared `mutation` lane additionally requires `pipeline.trigger.type=schedule`;
 manual/API/PR triggers cannot start its four jobs. It preserves the existing four
 targets and 70/60/60/60 score thresholds, fails on missing, empty or invalid stats,
 and retains reports. `bioetl-mutation-weekly` was registered on 2026-10-05
-with an initial Monday 13:00–13:59 UTC acceptance window on `main`. Restore
-Sunday 00:00–00:59 UTC after collecting the first scheduled result. Registration
-is not proof that the four targets passed.
+with an initial Monday 13:00–13:59 UTC acceptance window on `main`. Scheduled
+pipeline 187 started on main `95ca0a67f21a7055ad1b671f9ff57bd5ff39b1fb`;
+the trigger was then restored to Sunday 00:00–00:59 UTC, one run per hour,
+all months and Scheduling System attribution. Workflow-runner job 2885 passed
+with 163/222 mutants killed (73.42%, threshold 60%); export-manifests job 2886
+passed with 201/313 killed (64.22%, threshold 60%). Domain and control-plane
+acceptance remain pending. Each job retains its own target report directory.
 
 On 2026-10-05, `bioetl-docs-kpi-weekly` was registered for `main`,
 `ci-lane=docs-kpi`, Monday 04:00–04:59 UTC, one run, all months, Scheduled Actor.
@@ -140,7 +144,7 @@ a 3072 MiB Node heap. Existing quality thresholds and scan paths are preserved.
 
 ### External phase-3 acceptance, 2026-10-05
 
-All runs below used main `2d4507f595d03591c3db72b2aa554d7f41329ce3`.
+The first seven runs below used main `2d4507f595d03591c3db72b2aa554d7f41329ce3`.
 Artifact digests and terminal job evidence were collected before recording results.
 
 | Lane | CircleCI job | Result and remaining work |
@@ -152,6 +156,15 @@ Artifact digests and terminal job evidence were collected before recording resul
 | Skills consistency | [2607](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2607) | FAILED: stale wrapper-contract docs mirror. Mirror refreshed; tracked global snapshot entrypoint restores layout in clean checkouts. External rerun pending |
 | Performance | [2689](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2689) | FAILED: CrossRef median 0.45 ms exceeded 0.4125 ms; 43 benchmarks skipped because plugin was disabled. Explicit plugin opt-in added; 70 local tests pass, external acceptance pending. Budgets unchanged |
 | Replay parity | [2690](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2690) | FAILED: missing basetemp parent directories. Parent creation repaired; four local test runs pass. Whole-file parity still differs in operational occurrence IDs/timestamps, including with the same runtime root; checksum gate remains unchanged and unresolved |
+
+On main `95ca0a67f21a7055ad1b671f9ff57bd5ff39b1fb`, GitHub settings job
+[2773](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2773)
+passed with authenticated read-only collection. Its report still records settings
+drift, including disabled rulesets; collection success is not policy acceptance.
+E2E replay job [2829](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2829)
+passed three 11-case matrix runs with zero skips/failures, plus ChEMBL smoke;
+recurrent infrastructure and code failures were both zero. Nine artifacts were
+collected with SHA256 digests.
 
 Manual successes do not establish scheduler, notification or release acceptance.
 
