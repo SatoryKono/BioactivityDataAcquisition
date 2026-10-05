@@ -346,8 +346,8 @@ jobs:
           MUTATION_TARGET: << parameters.target >>
           MUTATION_SCORE_THRESHOLD: << parameters.threshold >>
     - store_artifacts:
-        path: reports
-        destination: mutation
+        path: reports/<< parameters.target >>
+        destination: mutation/<< parameters.target >>
   replay-parity:
     docker:
       - image: cimg/python:3.13
@@ -370,9 +370,12 @@ jobs:
           command: |
             timeout --signal=TERM --kill-after=30s 60m bash -euo pipefail -c 'export PATH="$HOME/.local/bin:$PATH"
             mkdir -p reports/nightly-replay
+            mkdir -p .artifacts/nightly-replay/{determinism,idempotency,composite_resume}
             uv run --frozen --no-build pytest tests/integration/determinism -q \
+              -p scripts.engineering.ci.replay_parity_inputs \
               --junitxml=reports/nightly-replay/determinism.xml \
-              --basetemp .artifacts/nightly-replay/determinism/run1
+              --basetemp .artifacts/nightly-replay/determinism/work
+            cp -a .artifacts/nightly-replay/determinism/work .artifacts/nightly-replay/determinism/run1
             uv run --frozen --no-build pytest tests/integration/idempotency -q \
               --junitxml=reports/nightly-replay/idempotency.xml \
               --basetemp .artifacts/nightly-replay/idempotency/run1
@@ -380,8 +383,10 @@ jobs:
               --junitxml=reports/nightly-replay/composite_resume.xml \
               --basetemp .artifacts/nightly-replay/composite_resume/run1
             uv run --frozen --no-build pytest tests/integration/determinism -q \
+              -p scripts.engineering.ci.replay_parity_inputs \
               --junitxml=reports/nightly-replay/determinism-recheck.xml \
-              --basetemp .artifacts/nightly-replay/determinism/run2
+              --basetemp .artifacts/nightly-replay/determinism/work
+            cp -a .artifacts/nightly-replay/determinism/work .artifacts/nightly-replay/determinism/run2
             '
       - run:
           name: Compare nonempty replay checksum inventories
@@ -445,7 +450,7 @@ jobs:
             mkdir -p reports/performance
             timeout --signal=TERM --kill-after=30s 30m \
               uv run --frozen --no-build pytest tests/performance/ tests/benchmarks/ \
-              -m "benchmark or performance" -p no:xdist -v --tb=short \
+              -m "benchmark or performance" -p benchmark -p no:xdist -v --tb=short \
               --perf-obs-out reports/performance/hotspot-observations.jsonl \
               --junitxml=reports/performance/hotspot-budgets.xml
       - run:
@@ -534,6 +539,19 @@ jobs:
             bash scripts/ai/junie/check_junie_mirror.sh --check
             bash scripts/ops/support/skills/check_skills_mirror.sh --check
             bash scripts/ops/support/skills/check_ai_skills_layout.sh
+      - run:
+          name: Verify native runtime discovery and MCP wrappers
+          command: |
+            uv run --frozen --no-build python scripts/ai/codex/doctor.py static --no-write
+            uv run --frozen --no-build python -m scripts.ai.mcp wrappers check
+      - run:
+          name: Report runtime skill drift without synchronizing
+          when: always
+          command: |
+            uv run --frozen --no-build python -m scripts.ai.sync.runtime_skills \
+              --mode check --report reports/ai/runtime-skill-drift.json
+      - store_artifacts:
+          path: reports/ai/runtime-skill-drift.json
 
   e2e-matrix-replay:
     docker:
@@ -1645,7 +1663,7 @@ workflows:
         name: mutation-application-control-plane
         target: application-control-plane
         source-path: src/bioetl/application/services/control_plane/
-        tests-dir: tests/unit/application/services/control_plane/
+        tests-dir: tests/unit/application/
         threshold: '60.0'
     - mutation-testing:
         name: mutation-application-export-manifests
