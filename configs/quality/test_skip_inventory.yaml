@@ -427,7 +427,7 @@ entries:
     owner: "@bioetl-platform"
     linked_issue: "#11871"
     lifecycle: permanent_policy
-    reviewed_skip_calls: 1
+    reviewed_skip_calls: 2
     vcr_related: false
     review_date: "2026-10-03"
     rationale: >

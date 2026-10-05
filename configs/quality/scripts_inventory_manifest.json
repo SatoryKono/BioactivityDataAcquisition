@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-05T10:44:12.772318+00:00",
+  "generated_at": "2026-10-05T11:18:10.989576+00:00",
   "summary": {
     "total_scripts": 636,
     "status_counts": {
@@ -21662,7 +21662,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 22,
       "references": [
         {
           "path": "docs/05-operations/runbooks/bounded-pipeline-smoke.md",

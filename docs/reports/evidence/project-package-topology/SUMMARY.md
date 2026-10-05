@@ -1,5 +1,11 @@
 # Сводка evidence: project-package-topology
 
+Source-only refresh (2026-10-05, RF-023): sealed target mapping codecs now use the existing infrastructure config loader. Runtime cross-layer group edges are 330, within the unchanged 330 budget. This source binding is not a new coverage measurement or a complete topology re-audit; historical evidence below is preserved.
+
+`source_tree_sha256=d141e4aaac41d30aa6d90f53dff69fe99d2bf280335a394b41d4ec298485dd08`
+
+`source_module_count=2552`
+
 Source-only refresh (2026-10-04): removed the approved LoggerPort alias and restored type-only workflow imports. This rebind does not represent a new coverage measurement; historical measurement records below remain unchanged.
 
 `source_tree_sha256=4db123e5e95045405ceb710e2425c1cd0e733fb6a225dccc7fc4146c63eaacb5`

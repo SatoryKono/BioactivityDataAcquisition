@@ -764,18 +764,45 @@ def verified_empty_optional_stages(config: dict, parent: dict, path: Path) -> se
         for row in config.get("enrichers", [])
         if row.get("required", False) is False
         and request.get("outcomes", {}).get(row["pipeline"]) == "skipped"
-        and _has_no_eligible_keys(seed, row.get("join_keys", []))
+        and _has_no_eligible_keys(seed, config["seed"].get("output_keys", []), row)
     }
 
 
-def _has_no_eligible_keys(seed, keys: list[str]) -> bool:
-    """Unknown columns and empty key contracts cannot certify an empty stage."""
-    if not keys or not set(keys).issubset(seed.column_names):
-        return False
-    return not any(
-        all(value is not None for value in row.values())
-        for row in seed.select(keys).to_pylist()
+def _has_no_eligible_keys(seed, keys: list[str], enricher: dict) -> bool:
+    """Replay the runtime normalization and filter before certifying a skip."""
+    import polars as pl
+
+    from bioetl.application.composite.coordinator_planning import (
+        apply_enricher_filter,
+        find_column_case_insensitive,
     )
+    from bioetl.application.composite.join_key_normalization import (
+        normalize_join_key_dataframe_columns,
+    )
+    from bioetl.domain.composite import EnricherConfig
+    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+
+    join_keys = enricher.get("join_keys", [])
+    if not keys or not join_keys or not set(join_keys).issubset(keys):
+        return False
+    if not set(keys).issubset(seed.column_names):
+        return False
+    frame = normalize_join_key_dataframe_columns(
+        df=pl.from_arrow(seed.select(keys)), join_keys=keys
+    )
+    frame = frame.filter(pl.any_horizontal(pl.col(key).is_not_null() for key in keys))
+    filtered = apply_enricher_filter(
+        logger=NoOpLogger(),
+        keys=frame,
+        enricher=EnricherConfig(
+            pipeline=enricher["pipeline"],
+            join_keys=tuple(join_keys),
+            filter_condition=enricher.get("filter_condition"),
+        ),
+        find_column=find_column_case_insensitive,
+        filter_errors=(),
+    )
+    return filtered.is_empty()
 
 
 def runtime_policy() -> dict:

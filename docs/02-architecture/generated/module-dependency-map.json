@@ -1,12 +1,12 @@
 {
   "summary": {
     "scanned_modules": 2550,
-    "total_internal_imports": 8145,
+    "total_internal_imports": 8150,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "ee11e33344e8ead4b876f5638121e473db978bbe60f9c00b7093a6098b67d6e9"
+    "source_fingerprint": "9b3790a4bb09bdf14edb45570aae4067d4e0308a46a61998eb21a45d1c58965f"
   },
   "layer_edges": [
     {
@@ -36,13 +36,13 @@
     {
       "source": "composition",
       "target": "domain",
-      "imports": 307,
+      "imports": 308,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 290,
+      "imports": 292,
       "allowed": true
     },
     {
@@ -54,13 +54,13 @@
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 785,
+      "imports": 786,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1257,
+      "imports": 1258,
       "allowed": true
     },
     {
@@ -215,6 +215,11 @@
       "imports": 26
     },
     {
+      "source": "infrastructure.config",
+      "target": "domain.types",
+      "imports": 26
+    },
+    {
       "source": "application.services",
       "target": "domain.value_objects",
       "imports": 25
@@ -227,11 +232,6 @@
     {
       "source": "composition.factories",
       "target": "infrastructure.config",
-      "imports": 25
-    },
-    {
-      "source": "infrastructure.config",
-      "target": "domain.types",
       "imports": 25
     },
     {
@@ -285,6 +285,11 @@
       "imports": 20
     },
     {
+      "source": "composition.bootstrap",
+      "target": "infrastructure.config",
+      "imports": 20
+    },
+    {
       "source": "composition.factories",
       "target": "application.services",
       "imports": 20
@@ -298,11 +303,6 @@
       "source": "composition.factories",
       "target": "domain.types",
       "imports": 19
-    },
-    {
-      "source": "composition.bootstrap",
-      "target": "infrastructure.config",
-      "imports": 18
     },
     {
       "source": "application.core",

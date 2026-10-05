@@ -9,12 +9,9 @@ from typing import cast
 import orjson
 import pyarrow as pa
 
-from bioetl.domain.mapping.protein_class_target_type import (
-    ProteinClassTargetTypeMappingData,
-    ProteinClassTopLevelMappingEntry,
-)
 from bioetl.domain.normalization.json import serialize_json_canonical
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.config import protein_class_target_type_loader as mapping
 from bioetl.infrastructure.storage.composite_replay_inputs import _table_bytes
 
 SUPPORTED_COMPOSITES = frozenset(
@@ -144,36 +141,4 @@ def _verify_objects(root: Path, objects: JsonDict) -> None:
         if digest_bytes(confined_path(root, name).read_bytes()) != digest:
             raise ValueError("composite_replay_object_digest_mismatch")
         if name == "target-mapping.json":
-            _verify_target_mapping(load_verified_json(root, name, digest))
-
-
-def _verify_target_mapping(payload: JsonDict) -> None:
-    """Reject sealed mapping data that cannot restore the target collaborator."""
-    version = payload.get("mapping_version")
-    entries = payload.get("entries")
-    ignored = payload.get("non_counting_classes")
-    if not isinstance(version, str) or not isinstance(entries, list):
-        raise ValueError("composite_replay_target_mapping_invalid")
-    if not isinstance(ignored, list) or not all(isinstance(x, str) for x in ignored):
-        raise ValueError("composite_replay_target_mapping_invalid")
-    restored = []
-    for entry in entries:
-        if not isinstance(entry, dict) or set(entry) != {
-            "raw_label",
-            "canonical_l1",
-            "counts_for_target_type",
-        }:
-            raise ValueError("composite_replay_target_mapping_invalid")
-        raw, canonical, counting = (
-            entry["raw_label"],
-            entry["canonical_l1"],
-            entry["counts_for_target_type"],
-        )
-        if (
-            not isinstance(raw, str)
-            or not isinstance(canonical, str)
-            or not isinstance(counting, bool)
-        ):
-            raise ValueError("composite_replay_target_mapping_invalid")
-        restored.append(ProteinClassTopLevelMappingEntry(raw, canonical, counting))
-    ProteinClassTargetTypeMappingData(version, tuple(restored), frozenset(ignored))
+            mapping.restore_target_mapping(load_verified_json(root, name, digest))

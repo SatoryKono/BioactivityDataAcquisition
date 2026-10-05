@@ -19,6 +19,38 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.parametrize(
+    "values,condition,empty",
+    [
+        ({"doi": ""}, "doi IS NOT NULL", True),
+        ({"doi": "10.1000/example"}, "doi IS NOT NULL", False),
+        (
+            {"inchi_key": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N", "canonical_smiles": None},
+            "inchi_key IS NOT NULL",
+            False,
+        ),
+        ({"inchi_key": None, "canonical_smiles": "CC"}, "inchi_key IS NOT NULL", True),
+        ({"inchi_key": None, "canonical_smiles": "CC"}, None, False),
+        ({"cell_id": None, "tissue_id": "TISSUE1"}, "cell_id IS NULL", False),
+    ],
+)
+def test_optional_eligibility_matches_normalized_runtime_filter(
+    values, condition, empty
+):
+    from scripts.ops.observability.green_acceptance import _has_no_eligible_keys
+
+    table = pa.table(
+        {key: pa.array([value], type=pa.string()) for key, value in values.items()}
+    )
+    keys = list(values)
+    enricher = {
+        "pipeline": "optional_child",
+        "join_keys": keys,
+        "filter_condition": condition,
+    }
+    assert _has_no_eligible_keys(table, keys, enricher) is empty
+
+
+@pytest.mark.parametrize(
     "defect",
     [
         None,
@@ -36,7 +68,7 @@ pytestmark = pytest.mark.unit
 )
 def test_absent_optional_child_requires_verified_empty_input(tmp_path, defect):
     config = {
-        "seed": {"pipeline": "seed"},
+        "seed": {"pipeline": "seed", "output_keys": ["cell_id"]},
         "enrichers": [
             {
                 "pipeline": "optional_child",

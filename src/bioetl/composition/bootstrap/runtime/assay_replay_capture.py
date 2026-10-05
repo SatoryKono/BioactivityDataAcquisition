@@ -21,6 +21,7 @@ from bioetl.domain.composite.result import (
 from bioetl.domain.ports import DeltaReaderPort, LoggerPort
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.settings_api import Settings
+from bioetl.infrastructure.config import protein_class_target_type_loader as mapping
 from bioetl.infrastructure.storage.composite_replay_bundle import (
     digest_bytes,
     implementation_fingerprint,
@@ -37,7 +38,6 @@ from bioetl.composition.bootstrap.runtime.assay_replay import replay_assay
 from bioetl.application.composite.helpers.replay_context import (
     freeze_field_groups,
     freeze_merge_request,
-    freeze_target_mapping,
     required_replay_tables,
     output_table_name,
 )
@@ -122,7 +122,7 @@ def prepare_assay_replay(
         )
         if config.name == "composite_target":
             objects["target-mapping.json"] = publish_json(
-                root, "target-mapping.json", freeze_target_mapping()
+                root, "target-mapping.json", mapping.freeze_target_mapping()
             )
         output_reader = DeltaReader(Path(settings.data_dir) / "output", logger)
         for layer in ("silver", "gold"):

@@ -24,7 +24,7 @@ from bioetl.composition.bootstrap.runtime.composite_merge_service_builder import
 
 from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.mapping.protein_class_target_type import (
-    initialize_protein_class_target_type_mapping,
+    initialize_protein_class_target_type_mapping as initialize_target_mapping,
 )
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
@@ -34,6 +34,7 @@ from bioetl.infrastructure.config.composite_config_api import (
     resolve_composite_gold_schema,
 )
 from bioetl.infrastructure.config.settings_api import Settings
+from bioetl.infrastructure.config import protein_class_target_type_loader as mapping
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.composite_replay_bundle import (
     SUPPORTED_COMPOSITES,
@@ -55,7 +56,6 @@ from bioetl.application.composite.helpers.replay_context import (
     output_table_name,
     restore_field_groups,
     restore_merge_request,
-    restore_target_mapping,
 )
 
 
@@ -68,7 +68,7 @@ def _initialize_replay_mapping(root: Path, envelope: JsonDict) -> None:
         payload = load_verified_json(
             root, "target-mapping.json", envelope["objects"]["target-mapping.json"]
         )
-        initialize_protein_class_target_type_mapping(restore_target_mapping(payload))
+        initialize_target_mapping(mapping.restore_target_mapping(payload))
 
 
 async def replay_assay(

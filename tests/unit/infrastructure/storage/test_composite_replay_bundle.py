@@ -27,7 +27,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_target_mapping_round_trip_uses_captured_lookup(monkeypatch):
-    from bioetl.application.composite.helpers.replay_context import (
+    from bioetl.infrastructure.config.protein_class_target_type_loader import (
         freeze_target_mapping,
         restore_target_mapping,
     )
@@ -86,7 +86,13 @@ def test_target_requires_digest_bound_mapping(bundle, damage):
             (root / "target-mapping.json").unlink()
         else:
             (root / "target-mapping.json").write_bytes(b"changed")
-    with pytest.raises((ValueError, FileNotFoundError)):
+    expected_type, expected_message = {
+        "absent": (ValueError, "composite_replay_required_object_missing"),
+        "missing": (FileNotFoundError, "target-mapping"),
+        "changed": (ValueError, "composite_replay_object_digest_mismatch"),
+        "invalid_structure": (ValueError, "composite_replay_target_mapping_invalid"),
+    }[damage]
+    with pytest.raises(expected_type, match=expected_message):
         verify_bundle(root, digest)
 
 
@@ -117,7 +123,12 @@ def test_sealed_target_mapping_must_restore_domain_invariants(bundle, damage):
     for name, value in (("field-groups.json", {}), ("target-mapping.json", mapping)):
         envelope["objects"][name] = publish_json(root, name, value)
     (root / "parent.json").write_text(json.dumps(envelope))
-    with pytest.raises(ValueError):
+    expected_message = {
+        "version": "mapping_version must not be blank",
+        "empty": "protein class target type mapping must not be empty",
+        "duplicate": "protein class target type mapping has duplicate labels",
+    }.get(damage, "composite_replay_target_mapping_invalid")
+    with pytest.raises(ValueError, match=expected_message):
         verify_bundle(root, digest_bytes((root / "parent.json").read_bytes()))
 
 
