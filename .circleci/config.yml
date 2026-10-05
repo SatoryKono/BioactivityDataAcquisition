@@ -34,8 +34,21 @@ commands:
       - run:
           name: Install uv 0.11.26
           command: |
-            curl -LsSf https://astral.sh/uv/install.sh | sh
+            set -euo pipefail
+            test "$(uname -m)" = x86_64
+            archive="$(mktemp)"
+            extracted="$(mktemp -d)"
+            trap 'rm -f "$archive"; rm -rf "$extracted"' EXIT
+            curl --fail --location --retry 3 \
+              https://github.com/astral-sh/uv/releases/download/0.11.26/uv-x86_64-unknown-linux-gnu.tar.gz \
+              --output "$archive"
+            printf '%s  %s\n' 6426a73c3837e6e2483ee344cbc00f36394d179afcba6183cb77437e67db4af0 "$archive" | sha256sum --check -
+            tar -xzf "$archive" -C "$extracted"
+            mkdir -p "$HOME/.local/bin"
+            install -m 0755 "$extracted/uv-x86_64-unknown-linux-gnu/uv" "$HOME/.local/bin/uv"
+            install -m 0755 "$extracted/uv-x86_64-unknown-linux-gnu/uvx" "$HOME/.local/bin/uvx"
             echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$BASH_ENV"
+            echo 'export UV_PYTHON="<< parameters.python-version >>"' >> "$BASH_ENV"
             "$HOME/.local/bin/uv" --version
       - restore_cache:
           name: Restore uv cache
@@ -50,6 +63,7 @@ commands:
             for extra in << parameters.extras >>; do CMD="$CMD --extra $extra"; done
             echo "Running: $CMD"
             $CMD
+            uv run --frozen --no-build python -c 'import os, sys; actual = ".".join(map(str, sys.version_info[:2])); expected = os.environ["UV_PYTHON"]; assert actual == expected, f"Python mismatch: {actual} != {expected}"; print(f"Python {actual} matches requested runtime")'
       - save_cache:
           name: Save uv cache
           key: uv-v1-{{ checksum "uv.lock" }}-py<< parameters.python-version >>
@@ -93,6 +107,7 @@ jobs:
           command: |
             mkdir -p "$HOME/.local/bin"
             curl -fsSL --proto '=https' --tlsv1.2 https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz -o /tmp/docker-baseline-cli.tgz
+            echo "9b4f6fe406e50f9085ee474c451e2bb5adb119a03591f467922d3b4e2ddf31d3  /tmp/docker-baseline-cli.tgz" | sha256sum --check -
             tar -xzf /tmp/docker-baseline-cli.tgz -C /tmp
             install /tmp/docker/docker "$HOME/.local/bin/docker"
             echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$BASH_ENV"
@@ -171,12 +186,13 @@ jobs:
             {
               echo "source_sha=${CIRCLE_SHA1}"
               echo "wolfi_base_image=chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
-              echo "runtime_python=python-3.13=3.13.15-r6"
+              echo "runtime_python=python-3.13=3.13.16_git20261002-r2"
+              echo "runtime_zlib=zlib=1.3.2.1_rc20260917-r0"
               echo "builder_uv=uv=0.11.26-r0"
               echo "setuptools_build_constraint=setuptools==83.0.0"
               docker image inspect "${IMAGE_REF}" --format 'image_id={{.Id}} repo_digests={{json .RepoDigests}}'
               docker run --rm --entrypoint python "${IMAGE_REF}" --version
-              docker run --rm --entrypoint python "${IMAGE_REF}" -c 'import grp, importlib.util, os, pwd, shutil, stat, sys, tempfile; assert sys.version_info[:3] == (3, 13, 15); assert (os.getuid(), os.getgid()) == (999, 999); assert pwd.getpwuid(999).pw_name == "bioetl"; assert pwd.getpwuid(999).pw_shell == "/sbin/nologin"; assert grp.getgrgid(999).gr_name == "bioetl"; assert importlib.util.find_spec("pip") is None; assert stat.S_IMODE(os.stat("/tmp").st_mode) == 0o700; assert (os.stat("/tmp").st_uid, os.stat("/tmp").st_gid) == (999, 999); assert (os.stat("/app/configs").st_uid, os.stat("/app/configs").st_gid) == (0, 0); assert not os.access("/app/configs", os.W_OK); forbidden_paths = ("/bin/sh", "/bin/ash", "/bin/bash", "/bin/busybox", "/usr/bin/sh", "/usr/bin/ash", "/usr/bin/bash", "/usr/bin/busybox", "/sbin/apk", "/usr/bin/apk"); assert not any(os.path.lexists(path) for path in forbidden_paths); assert all(shutil.which(name) is None for name in ("sh", "ash", "bash", "busybox", "apk", "pip", "pip3", "pip3.13")); handle = tempfile.NamedTemporaryFile(dir="/tmp", delete=True); handle.close(); marker = "/app/logs/.runtime-security-probe"; open(marker, "wb").close(); os.unlink(marker); print("python=3.13.15 uid=999 gid=999 identity=bioetl shell=absent apk=absent pip=absent tmp=00700 tmp_owner=999:999 configs=root-readonly logs=writable")'
+              docker run --rm --entrypoint python "${IMAGE_REF}" -c 'import grp, importlib.util, os, pwd, shutil, stat, sys, tempfile, zlib; assert sys.version_info[:3] == (3, 13, 16); assert zlib.ZLIB_RUNTIME_VERSION == "1.3.2.1-motley"; assert (os.getuid(), os.getgid()) == (999, 999); assert pwd.getpwuid(999).pw_name == "bioetl"; assert pwd.getpwuid(999).pw_shell == "/sbin/nologin"; assert grp.getgrgid(999).gr_name == "bioetl"; assert importlib.util.find_spec("pip") is None; assert stat.S_IMODE(os.stat("/tmp").st_mode) == 0o700; assert (os.stat("/tmp").st_uid, os.stat("/tmp").st_gid) == (999, 999); assert (os.stat("/app/configs").st_uid, os.stat("/app/configs").st_gid) == (0, 0); assert not os.access("/app/configs", os.W_OK); forbidden_paths = ("/bin/sh", "/bin/ash", "/bin/bash", "/bin/busybox", "/usr/bin/sh", "/usr/bin/ash", "/usr/bin/bash", "/usr/bin/busybox", "/sbin/apk", "/usr/bin/apk"); assert not any(os.path.lexists(path) for path in forbidden_paths); assert all(shutil.which(name) is None for name in ("sh", "ash", "bash", "busybox", "apk", "pip", "pip3", "pip3.13")); handle = tempfile.NamedTemporaryFile(dir="/tmp", delete=True); handle.close(); marker = "/app/logs/.runtime-security-probe"; open(marker, "wb").close(); os.unlink(marker); print("python=3.13.16 uid=999 gid=999 identity=bioetl shell=absent apk=absent pip=absent tmp=00700 tmp_owner=999:999 configs=root-readonly logs=writable")'
             } > reports/security/bioetl-image-provenance.txt 2>&1
             docker image inspect "${IMAGE_REF}" --format '{{.Id}}' \
               > reports/security/bioetl-image-id.txt
@@ -483,7 +499,8 @@ jobs:
           # under the frozen CI environment (bare `mutmut` is not on runner PATH).
           export PYTHONPATH="${WORKSPACE_ROOT}/src:${WORKSPACE_ROOT}${PYTHONPATH:+:$PYTHONPATH}"
           uv run --frozen --no-build python -c "import bioetl.domain, scripts; print('"'"'mutation import preflight ok'"'"')"
-          uv run --frozen --no-build mutmut run
+          # Bound fork concurrency to the 4 GB executor; host CPU count is not its quota.
+          uv run --frozen --no-build mutmut run --max-children 1
           '
         no_output_timeout: 65m
     - run:
@@ -1163,6 +1180,20 @@ jobs:
             uv run --frozen --no-build python -m scripts.engineering.repo check-root-governance-docs
             uv run --frozen --no-build python -m scripts.engineering.repo check-root-review-registry
             uv run --frozen --no-build python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD
+      - run:
+          name: Export cleanup classification evidence
+          command: |
+            mkdir -p reports/quality && uv run --frozen --no-build python scripts/ops/support/repo/cleanup_repository.py --dry-run --detail-limit 0 --report-json reports/quality/root-hygiene-cleanup-classification.json --report-root-review-json reports/quality/root-hygiene-review-evidence.json --report-reports-workspace-json reports/quality/reports-workspace-review.json
+      - run:
+          name: Run root hygiene unit tests
+          command: |
+            uv run --frozen --no-build pytest tests/unit/scripts/repo/test_audit_root_cleanliness.py tests/unit/scripts/repo/test_check_cleanup_governance.py tests/unit/scripts/repo/test_check_root_governance_docs.py tests/unit/scripts/repo/test_audit_structure.py tests/unit/scripts/repo/test_check_root_hygiene_review_registry.py tests/unit/scripts/repo/test_cleanup_repository.py tests/unit/scripts/repo/test_cleanup_root_local_clutter.py tests/architecture/test_root_hygiene_workflow.py tests/architecture/test_root_hygiene_review_registry.py tests/architecture/test_env_example_reference_policy.py -q
+      - store_artifacts:
+          path: reports/quality/root-hygiene-cleanup-classification.json
+      - store_artifacts:
+          path: reports/quality/root-hygiene-review-evidence.json
+      - store_artifacts:
+          path: reports/quality/reports-workspace-review.json
 
   # --- Gate: compiled-artifacts (always_required) -------------------------------
   # Mirrors compiled-artifacts-block.yml `no-pyc-check`.
@@ -1671,6 +1702,14 @@ workflows:
     jobs:
       - docker-security-baseline:
           context: bioetl-github-read-only
+  # Temporary opt-in measurement for the migration test-tree update; remove after adoption.
+  migration-coverage-closeout:
+    when:
+      and:
+        - equal: [coverage-closeout, << pipeline.parameters.ci-lane >>]
+        - equal: [codex/ci-11929-11931-preparation, << pipeline.git.branch >>]
+    jobs:
+      - proof-closeout
   main-coverage-closeout:
     when:
       and:
