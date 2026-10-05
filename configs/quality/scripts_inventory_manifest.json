@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-05T10:10:58.209549+00:00",
+  "generated_at": "2026-10-05T10:44:12.772318+00:00",
   "summary": {
-    "total_scripts": 638,
+    "total_scripts": 636,
     "status_counts": {
-      "active": 337,
+      "active": 335,
       "supporting": 301
     },
     "reference_group_coverage": {
@@ -13,7 +13,7 @@
       "ci": 86,
       "docs": 260,
       "other": 48,
-      "scripts": 535,
+      "scripts": 533,
       "skills": 12,
       "tests": 449
     }
@@ -21662,8 +21662,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 20,
+      "reference_count": 21,
       "references": [
+        {
+          "path": "docs/05-operations/runbooks/bounded-pipeline-smoke.md",
+          "line": 62,
+          "source_group": "docs",
+          "text": "`scripts/ops/observability/green_acceptance.py`)."
+        },
         {
           "path": "tests/integration/test_live_green_acceptance.py",
           "line": 9,
@@ -21705,48 +21711,6 @@
           "line": 166,
           "source_group": "tests",
           "text": "from scripts.ops.observability import green_acceptance as runner"
-        },
-        {
-          "path": "tests/unit/scripts/ops/observability/test_green_acceptance.py",
-          "line": 180,
-          "source_group": "tests",
-          "text": "from scripts.ops.observability import green_acceptance as runner"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/observability/green_optional_inputs.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/observability/green_acceptance.py",
-          "line": 298,
-          "source_group": "scripts",
-          "text": "from scripts.ops.observability.green_optional_inputs import ("
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/observability/green_runtime_policy.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "docs/05-operations/runbooks/bounded-pipeline-smoke.md",
-          "line": 62,
-          "source_group": "docs",
-          "text": "`scripts/ops/observability/green_runtime_policy.py`)."
-        },
-        {
-          "path": "scripts/ops/observability/green_acceptance.py",
-          "line": 495,
-          "source_group": "scripts",
-          "text": "/ \"scripts/ops/observability/green_runtime_policy.py\""
         }
       ]
     },

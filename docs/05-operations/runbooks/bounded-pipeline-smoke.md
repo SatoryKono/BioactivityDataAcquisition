@@ -58,8 +58,8 @@ ______________________________________________________________________
   unchanged. Older campaigns without this check must not qualify production
   acceptance solely from a successful CLI exit.
   To inspect the same safe settings manually in the prepared child environment,
-  run `python -m scripts.ops.observability.green_runtime_policy` (entry point:
-  `scripts/ops/observability/green_runtime_policy.py`).
+  run `python -m scripts.ops.observability.green_acceptance --runtime-policy` (entry point:
+  `scripts/ops/observability/green_acceptance.py`).
 - Confirm the catalog matches the live registry:
 
   ```powershell

@@ -295,10 +295,6 @@ def composite_report_coverage(
     parent = json.loads(parents[0].read_text(encoding="utf-8"))
     missing = set(expected) - set(actual)
     if missing:
-        from scripts.ops.observability.green_optional_inputs import (
-            verified_empty_optional_stages,
-        )
-
         try:
             skipped = verified_empty_optional_stages(config, parent, parents[0])
             expected = [name for name in expected if name not in missing & skipped]
@@ -490,12 +486,9 @@ def _case_environment(root: Path, folder: Path, env_file: Path) -> dict[str, str
 
 def _runtime_policy(folder: Path, environment: dict[str, str]) -> dict:
     """Verify resolved production settings in the actual child environment."""
-    entrypoint = (
-        Path(__file__).resolve().parents[3]
-        / "scripts/ops/observability/green_runtime_policy.py"
-    )
+    entrypoint = Path(__file__).resolve()
     result = subprocess.run(
-        [sys.executable, str(entrypoint)],
+        [sys.executable, str(entrypoint), "--runtime-policy"],
         cwd=folder,
         env=environment,
         capture_output=True,
@@ -727,3 +720,104 @@ def inspect_composite_parents(case: Case, data: Path, paths: list[Path]) -> list
                 f"composite_parent_report_missing:{manifest.get('pipeline_name')}"
             )
     return failures
+
+
+def verified_empty_optional_stages(config: dict, parent: dict, path: Path) -> set[str]:
+    """Accept only declared skips whose captured join keys are all ineligible."""
+    import asyncio
+
+    from bioetl.infrastructure.storage.composite_replay_bundle import (
+        confined_path,
+        verify_bundle,
+    )
+    from bioetl.infrastructure.storage.composite_replay_inputs import (
+        CompositeReplayInputReader,
+    )
+
+    artifacts = [
+        item
+        for item in parent.get("artifacts", [])
+        if item.get("kind") == "composite_exact_replay"
+    ]
+    if len(artifacts) != 1:
+        raise ValueError("optional_skip_envelope_missing_or_ambiguous")
+    artifact = artifacts[0]
+    envelope_path = confined_path(path.parent, artifact["ref"])
+    if envelope_path.name != "parent.json":
+        raise ValueError("optional_skip_envelope_invalid")
+    envelope = verify_bundle(envelope_path.parent, artifact["sha256"])
+    if (envelope["pipeline"], envelope["run_id"]) != (
+        path.parent.parent.name,
+        path.parent.name,
+    ):
+        raise ValueError("optional_skip_identity_mismatch")
+    request = envelope["request"]
+    if request["seed_pipeline"] != config["seed"]["pipeline"]:
+        raise ValueError("optional_skip_seed_mismatch")
+    reader = CompositeReplayInputReader(
+        envelope_path.parent / "inputs",
+        envelope_sha256=envelope["input_snapshot_fingerprint"],
+    )
+    seed = asyncio.run(reader.read_table(request["seed_table"]))
+    return {
+        row["pipeline"]
+        for row in config.get("enrichers", [])
+        if row.get("required", False) is False
+        and request.get("outcomes", {}).get(row["pipeline"]) == "skipped"
+        and _has_no_eligible_keys(seed, row.get("join_keys", []))
+    }
+
+
+def _has_no_eligible_keys(seed, keys: list[str]) -> bool:
+    """Unknown columns and empty key contracts cannot certify an empty stage."""
+    if not keys or not set(keys).issubset(seed.column_names):
+        return False
+    return not any(
+        all(value is not None for value in row.values())
+        for row in seed.select(keys).to_pylist()
+    )
+
+
+def runtime_policy() -> dict:
+    """Reject test-mode contamination and expose only an explicit safe allowlist."""
+    from bioetl.composition.factories.datasource.http_client import HttpClientFactory
+    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+    from bioetl.infrastructure.config.config_root import resolve_config_subdir
+    from bioetl.infrastructure.config.settings_api import get_settings
+    from bioetl.infrastructure.control_plane._durability import (
+        should_fsync_control_plane_writes,
+    )
+
+    settings = get_settings()
+    fsync = should_fsync_control_plane_writes()
+    if settings.test_mode or not fsync:
+        raise ValueError("live_acceptance_requires_production_runtime")
+    providers = {}
+    for path in sorted(resolve_config_subdir("providers").glob("*.yaml")):
+        client = HttpClientFactory.create_for_provider(path.stem, settings)
+        if not isinstance(client.rate_limiter, TokenBucketRateLimiter):
+            raise TypeError("live_acceptance_rate_limiter_not_inspectable")
+        providers[path.stem] = {
+            "timeout_seconds": client.timeout,
+            "read_timeout_seconds": client.timeout * client.read_timeout_multiplier,
+            "max_attempts": client.retry_config.max_attempts,
+            "retry_base_delay_seconds": client.retry_config.base_delay,
+            "retry_max_delay_seconds": client.retry_config.max_delay,
+            "retry_after_cap_seconds": client.retry_config.max_retry_after_seconds,
+            "rate_per_second": client.rate_limiter.rate,
+            "burst": client.rate_limiter.capacity,
+            "circuit_recovery_seconds": client.circuit_breaker.get_recovery_timeout(),
+        }
+    return {
+        "test_mode": settings.test_mode,
+        "control_plane_fsync": fsync,
+        "providers": providers,
+    }
+
+
+if __name__ == "__main__":
+    if sys.argv[1:] != ["--runtime-policy"]:
+        raise SystemExit(
+            "Use --runtime-policy, or the pytest live acceptance entrypoint"
+        )
+    print(json.dumps(runtime_policy(), sort_keys=True))
