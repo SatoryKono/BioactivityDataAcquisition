@@ -1,3 +1,5 @@
+Coverage refresh (2026-10-05, RF-023): complete 17-shard measurement on `74aa6f87d40b5d3661acf5fa45e6f351fd0ca3c2`, source `e7066391216bdd39f5657961113056a22e9b99f84184fa46b45314e0c44f43ed`. Canonical nonregressing adoption retains 81 visible raw module regressions; retained historical values are not fresh measurements. Portable coverage/JUnit evidence is in `reports/quality/proof-or-stop/rf023-74aa6f87-complete-coverage`. This local measurement is not CI ADMIT or full-suite acceptance.
+
 Source-only refresh (2026-10-05, replay size limits): source_tree_sha256 `e7066391216bdd39f5657961113056a22e9b99f84184fa46b45314e0c44f43ed`. Reuse the existing normalized-row protocol and bind verified JSON reads to their envelope. This is not a new coverage measurement.
 
 Source-only refresh (2026-10-05, replay field key deduplication): source_tree_sha256 `1c0021a26ca5406ff9164492de749515da2ba41782bb0f703cf6344c27bace0b`. This source binding update is not a new coverage measurement.
