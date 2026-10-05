@@ -13,7 +13,7 @@ version: 2.1
 parameters:
   ci-lane:
     type: enum
-    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation]
+    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene]
     default: pr-gate
   include-hypothesis:
     type: boolean
@@ -77,6 +77,46 @@ commands:
             fi
 
 jobs:
+  consolidation:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Produce canonical manifest hashes
+          command: |
+            timeout 10m bash -euo pipefail -c '
+              mkdir -p reports/gates/artifacts
+              find tests -type f | sort | xargs sha256sum > reports/gates/artifacts/tests.sha256
+              find src -type f | sort | xargs sha256sum > reports/gates/artifacts/src.sha256
+              test -s reports/gates/artifacts/tests.sha256
+              test -s reports/gates/artifacts/src.sha256
+            '
+      - store_artifacts:
+          path: reports/gates/artifacts
+          destination: canonical-manifest-hashes
+
+  branch-hygiene:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: Generate report-only branch inventory
+          command: |
+            set -euo pipefail
+            : "${GITHUB_TOKEN:?restricted read-only context must provide GITHUB_TOKEN}"
+            timeout 15m uv run --frozen --no-build python -m scripts.engineering.repo \
+              generate-branch-cleanup-inventory \
+              --output reports/quality/branch-hygiene-latest.json
+            test -s reports/quality/branch-hygiene-latest.json
+      - store_artifacts:
+          path: reports/quality/branch-hygiene-latest.json
+          destination: branch-hygiene-inventory
+
   mutation-testing:
     parameters:
       target:
@@ -1105,6 +1145,21 @@ jobs:
 
 workflows:
   version: 2
+  consolidation:
+    when:
+      and:
+        - equal: [consolidation, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - consolidation
+  branch-hygiene:
+    when:
+      and:
+        - equal: [branch-hygiene, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - branch-hygiene:
+          context: bioetl-github-read-only
   pr-gate:
     when:
       equal: [pr-gate, << pipeline.parameters.ci-lane >>]
