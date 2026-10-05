@@ -1237,6 +1237,8 @@ jobs:
           name: Verify managed Router host preserves the complete pinned filesystem
           command: |
             python grafana/tooling/router-v7-bridge/verify-managed-image.test.py
+            PARENT=$(python -c "import json; print(json.load(open('grafana/tooling/router-v7-bridge/managed-image.json'))['parent_image'])")
+            docker pull "$PARENT"
             docker build --platform linux/amd64 -f grafana/tooling/router-v7-bridge/Dockerfile.managed -t bioetl-router-host:managed-ci .
             DECLARED=$(python -c "import json; print(json.load(open('grafana/tooling/router-v7-bridge/managed-image.json'))['image'])")
             docker pull "$DECLARED"
