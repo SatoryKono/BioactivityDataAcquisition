@@ -30,3 +30,4 @@ circleci-2047-docs.log -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 ci-2193/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 ci-2356/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 post-main-2d4507f5/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+ci-2772/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol

@@ -43,6 +43,16 @@ Post-main config-root/inventory/telemetry/CircleCI owning checks: **121 PASS, 0 
 
 This publication changes generated evidence and archival metadata only. Product/test sources, budgets and selection remain unchanged. The branch is included in the existing full Proof-or-Stop workflow so its new materialization receives fresh independent acceptance before merge and issue closure. Runtime mirror sync is N/A because .codex/.junie sources are unchanged. .env is untouched.
 
+## Main-bound telemetry repair after base advancement — 2026-10-05
+
+Main advanced to `95ca0a67f21a7055ad1b671f9ff57bd5ff39b1fb` through PR #11943. Its telemetry referenced the original feature producer `0eabda84`, which squash did not retain as an ancestor. The assertion remains unchanged; no measured SHA was relabeled. Fresh telemetry is adopted byte-exact from the canonical exporter of the actual-main CircleCI job #2772.
+
+[Original main coverage manifest](proof-or-stop/config-root-11899/ci-2772/proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/manifest.json) has **17/17 successful shards, 32885 PASS, 175 SKIP, zero failures/errors**, lines 99.70%, branches 94.35%; `config_root` remains **40/40 lines and 18/18 branches**. Source SHA-256 is `3786dc15afe014d3827d7f940c7cec030d02c993d78487b403eee55b4bdae29b`; test SHA-256 is `7ccb3fdf058e6b26c2a50c97bf44a7ecaa8443bb986e5f06b59101426155846e`. [Independent check](proof-or-stop/config-root-11899/ci-2772/coverage-independent-check.json) verifies source/test cohorts, raw XML SHA-256 `b66a8ae41d576142a583f127f04c51224d76502c3cac0ff9af6ff04b7ea21f0d`, all 17 semantic JUnit hashes and both 85% gates. Original SQLite hashes remain manifest-attested; the databases were not published.
+
+[Original #2772 verification](proof-or-stop/config-root-11899/ci-2772/proof-or-stop/circleci-closeout-2772-95ca0a67f21a/verification.json) remains **STOP**, with failed tests (unreachable old telemetry source) and debt (stale remote-main baseline). Governance, docs and quality exit 0. These failures are not rewritten as acceptance. The baseline now references measured actual main `95ca0a67`, already an ancestor of the publication branch; its `local_coverage_verify` classification is preserved. Exported S7 hotspots are identical and were not adopted as unrelated changes.
+
+The earlier eight-stage matrix and actual-main architecture receipts retain their original execution identities. Final independent delivery acceptance, merge and post-main checks are still required for #11854. The new telemetry snapshot does not fabricate fresh inventory rows or claim global per-module nonregression.
+
 ## Preserved historical snapshots — not current closeout claims
 
 

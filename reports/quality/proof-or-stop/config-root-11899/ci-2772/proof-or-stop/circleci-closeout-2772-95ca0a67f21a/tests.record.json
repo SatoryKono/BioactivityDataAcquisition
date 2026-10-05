@@ -1,0 +1,18 @@
+{
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "tests/architecture",
+    "-q",
+    "--no-cov",
+    "--junitxml=/home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-2772-95ca0a67f21a/architecture.xml"
+  ],
+  "cwd": "/home/circleci/project",
+  "started_at": "2026-10-05T13:20:39.195198+00:00",
+  "duration_ms": 978834,
+  "exit_code": 1,
+  "head_before": "95ca0a67f21a7055ad1b671f9ff57bd5ff39b1fb",
+  "head_after": "95ca0a67f21a7055ad1b671f9ff57bd5ff39b1fb",
+  "log": "/home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-2772-95ca0a67f21a/tests.log"
+}

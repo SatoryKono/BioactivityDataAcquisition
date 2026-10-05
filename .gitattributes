@@ -70,3 +70,4 @@ reports/quality/proof-or-stop/config-root-11899/ci-2193/** -text whitespace=-bla
 reports/quality/proof-or-stop/config-root-11899/ci-2356/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 reports/quality/proof-or-stop/config-root-11899/post-main-2d4507f5/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 reports/quality/proof-or-stop/architecture-meta-closeout-20261005/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+/reports/quality/proof-or-stop/config-root-11899/ci-2772/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
