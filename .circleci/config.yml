@@ -13,7 +13,7 @@ version: 2.1
 parameters:
   ci-lane:
     type: enum
-    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance]
+    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance, e2e-replay]
     default: pr-gate
   include-hypothesis:
     type: boolean
@@ -534,6 +534,86 @@ jobs:
             bash scripts/ai/junie/check_junie_mirror.sh --check
             bash scripts/ops/support/skills/check_skills_mirror.sh --check
             bash scripts/ops/support/skills/check_ai_skills_layout.sh
+
+  e2e-matrix-replay:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: medium
+    environment:
+      BIOETL_TEST_MODE: "true"
+      BIOETL_PIPELINE__HEALTH_CHECK_MODE: probe
+      VCR_RECORD_MODE: none
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+      - run:
+          name: Enforce three-run E2E replay and skip-rate contracts
+          command: |
+            set -euo pipefail
+            timeout 25m bash -eo pipefail \<<'E2E_REPLAY'
+            mkdir -p reports/e2e
+            for run in 1 2 3; do
+              set +e
+              VCR_RECORD_MODE=none uv run --frozen --no-build pytest \
+                tests/e2e/test_pipeline_matrix_e2e.py \
+                -k "test_pipeline_matrix_smoke" \
+                --record-mode=none \
+                -q --tb=short \
+                --junitxml="reports/e2e/matrix-smoke-run${run}.xml"
+              echo $? > "reports/e2e/pytest_exit_code_run${run}.txt"
+              set -e
+            done
+
+            mkdir -p reports/e2e
+            VCR_RECORD_MODE=none uv run --frozen --no-build pytest \
+              tests/e2e/test_chembl_activity_e2e.py \
+              -m "e2e_smoke and not benchmark and not memory" \
+              --record-mode=none \
+              -q --tb=short \
+              --junitxml=reports/e2e/chembl_activity_smoke.xml
+
+            # Expected total must match the active smoke matrix (not raw
+            # configs/entities/*.yaml count), which includes deferred exclusions.
+            EXPECTED_TOTAL="$(
+              uv run --frozen --no-build python -c \
+                "from tests.e2e.test_pipeline_matrix_e2e import ACTIVE_PIPELINE_CASES; print(len(ACTIVE_PIPELINE_CASES))"
+            )"
+            MAX_SKIPS="$(
+              uv run --frozen --no-build python -c \
+                "print(int(${EXPECTED_TOTAL} * 0.15))"
+            )"
+            uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \
+              --junit reports/e2e/matrix-smoke-run3.xml \
+              --expected-total "${EXPECTED_TOTAL}" \
+              --max-skips "${MAX_SKIPS}" \
+              --max-skip-rate 0.15 \
+              --markdown-out reports/e2e/matrix-smoke-summary.md
+
+            uv run --frozen --no-build python scripts/engineering/ci/check_e2e_rerun_stability.py \
+              --junit-glob "reports/e2e/matrix-smoke-run*.xml" \
+              --required-runs 3 \
+              --max-recurrent-infra-flaky 0 \
+              --max-recurrent-code-regression 0 \
+              --markdown-out reports/e2e/matrix-rerun-stability.md
+
+            fail=0
+            for run in 1 2 3; do
+              rc="$(cat "reports/e2e/pytest_exit_code_run${run}.txt")"
+              if [ "$rc" != "0" ]; then
+                echo "pytest matrix smoke run ${run} exited ${rc}"
+                fail=1
+              fi
+            done
+            if [ "$fail" != "0" ]; then
+              exit 1
+            fi
+            E2E_REPLAY
+      - store_test_results:
+          path: reports/e2e
+      - store_artifacts:
+          path: reports/e2e
+          destination: e2e-matrix-replay
 
   github-settings-review:
     docker:
@@ -1336,6 +1416,13 @@ jobs:
 
 workflows:
   version: 2
+  e2e-replay:
+    when:
+      and:
+        - equal: [e2e-replay, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - e2e-matrix-replay
   semantic-governance:
     when:
       and:

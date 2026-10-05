@@ -77,6 +77,13 @@ branch `main`, `ci-lane=memory-freshness`, Monday, every month, one run during
 an hourly window. The first scheduled run and failure-notification parity remain
 pending; trigger registration alone is not execution acceptance.
 
+The main-only `e2e-replay` lane retains the five legacy replay commands:
+three matrix runs, the ChEMBL activity smoke, the 15% skip SLO, zero recurrent
+infra/code failures, and a final check of every pytest exit code. Execution is
+bounded to 25 minutes and retains JUnit and diagnostic artifacts. This lane has
+no credential context and cannot record new cassettes. Live/nightly credentials,
+PR event parity and successful external execution still require acceptance.
+
 The prepared `mutation` lane additionally requires `pipeline.trigger.type=schedule`;
 manual/API/PR triggers cannot start its four jobs. It preserves the existing four
 targets and 70/60/60/60 score thresholds, fails on missing, empty or invalid stats,
@@ -147,7 +154,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `docs-kpi-weekly.yml` | `30 4 * * 1` | CircleCI docs-kpi | Prepared opt-in lane; external schedule pending |
 | `docs.yml` | — | CircleCI docs-governance | Prepared required gate; full docs/render parity pending |
 | `duplication-complexity.yml` | — | CircleCI duplication | Prepared required gate; full scan thresholds preserved |
-| `e2e-matrix-health.yml` | `30 2 * * *` | E2E replay and controlled live lanes | Pending port; preserve reruns, skip SLO and credential separation |
+| `e2e-matrix-health.yml` | `30 2 * * *` | E2E replay and controlled live lanes | Main-only `e2e-replay` prepared with three reruns and skip SLO; live/nightly and PR event parity pending |
 | `github-settings-quarterly-review.yml` | `23 6 1 1,4,7,10 *` | CircleCI github-settings-review | Restricted context created with token; schedule and authenticated run pending |
 | `import-linter.yml` | — | CircleCI lint-arch and arch-tests | Prepared gates; full external architecture acceptance pending |
 | `labeler.yml` | — | GitHub API label maintenance | Pending port; trusted actor and scoped issue/PR write access |
