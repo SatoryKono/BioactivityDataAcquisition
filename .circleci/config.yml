@@ -285,7 +285,9 @@ jobs:
             assert os.environ['CIRCLE_BRANCH'] == 'main'
             assert identity['source_sha'] == os.environ['CIRCLE_SHA1'] and identity['workflow_id'] == os.environ['CIRCLE_WORKFLOW_ID']
             with urllib.request.urlopen('https://circleci.com/api/v2/workflow/' + identity['workflow_id'] + '/job', timeout=30) as response:
-                jobs = json.load(response)['items']
+                payload = json.load(response)
+            assert not payload.get('next_page_token'), 'Unexpected workflow pagination'
+            jobs = payload['items']
             required = {'release-dist-build', 'release-install', 'release-tests', 'security-scans'}
             accepted = [job for job in jobs if job['name'] in required]
             assert len(accepted) == len(required) and {job['name'] for job in accepted} == required
@@ -315,19 +317,20 @@ jobs:
             : "${GITHUB_TOKEN:?Missing read-only GitHub credential}"
             export GITHUB_AUTH_TOKEN="$GITHUB_TOKEN"
             timeout --signal=TERM --kill-after=30s 15m bash -euo pipefail -c '
-              mkdir -p /tmp/bioetl-scorecard/tools /tmp/bioetl-scorecard/reports
-              curl --fail --location --retry 3 https://github.com/ossf/scorecard/releases/download/v5.5.0/scorecard_5.5.0_linux_amd64.tar.gz -o /tmp/bioetl-scorecard/scorecard.tar.gz
-              echo "83b90a05c1540ef1390db1cd5711e5fd04be9c1d8537fb84d39d02092d6a8dff  /tmp/bioetl-scorecard/scorecard.tar.gz" | sha256sum --check -
-              tar -xzf /tmp/bioetl-scorecard/scorecard.tar.gz -C /tmp/bioetl-scorecard/tools scorecard
-              curl --fail --location --retry 3 https://raw.githubusercontent.com/ossf/scorecard-action/2d1146689b8cda280b9bc96326124645441f03bc/policies/template.yml -o /tmp/bioetl-scorecard/reports/policy.yml
-              echo "6e75dcc0df989d333492c0e1f6e484fc5b4d26ab768333ddcd0e3788539689b0  /tmp/bioetl-scorecard/reports/policy.yml" | sha256sum --check -
-              /tmp/bioetl-scorecard/tools/scorecard --repo=github.com/SatoryKono/BioactivityDataAcquisition --format=json --show-details --output=/tmp/bioetl-scorecard/reports/results.json
-              ENABLE_SARIF=true /tmp/bioetl-scorecard/tools/scorecard --repo=github.com/SatoryKono/BioactivityDataAcquisition --format=sarif --show-details --policy=/tmp/bioetl-scorecard/reports/policy.yml --output=/tmp/bioetl-scorecard/reports/results.raw.sarif
+              umask 077
+              mkdir -p /home/circleci/bioetl-scorecard/tools /home/circleci/bioetl-scorecard/reports
+              curl --fail --location --retry 3 https://github.com/ossf/scorecard/releases/download/v5.5.0/scorecard_5.5.0_linux_amd64.tar.gz -o /home/circleci/bioetl-scorecard/scorecard.tar.gz
+              echo "83b90a05c1540ef1390db1cd5711e5fd04be9c1d8537fb84d39d02092d6a8dff  /home/circleci/bioetl-scorecard/scorecard.tar.gz" | sha256sum --check -
+              tar -xzf /home/circleci/bioetl-scorecard/scorecard.tar.gz -C /home/circleci/bioetl-scorecard/tools scorecard
+              curl --fail --location --retry 3 https://raw.githubusercontent.com/ossf/scorecard-action/2d1146689b8cda280b9bc96326124645441f03bc/policies/template.yml -o /home/circleci/bioetl-scorecard/reports/policy.yml
+              echo "6e75dcc0df989d333492c0e1f6e484fc5b4d26ab768333ddcd0e3788539689b0  /home/circleci/bioetl-scorecard/reports/policy.yml" | sha256sum --check -
+              /home/circleci/bioetl-scorecard/tools/scorecard --repo=github.com/SatoryKono/BioactivityDataAcquisition --format=json --show-details --output=/home/circleci/bioetl-scorecard/reports/results.json
+              ENABLE_SARIF=true /home/circleci/bioetl-scorecard/tools/scorecard --repo=github.com/SatoryKono/BioactivityDataAcquisition --format=sarif --show-details --policy=/home/circleci/bioetl-scorecard/reports/policy.yml --output=/home/circleci/bioetl-scorecard/reports/results.raw.sarif
             '
             python3 - \<<'PY'
             import json, os
             from pathlib import Path
-            path = Path('/tmp/bioetl-scorecard/reports/results.json')
+            path = Path('/home/circleci/bioetl-scorecard/reports/results.json')
             result = json.loads(path.read_text(encoding='utf-8'))
             assert result['repo']['commit'] == os.environ['CIRCLE_SHA1'], 'Default branch changed during analysis'
             assert result['repo']['name'] == 'github.com/SatoryKono/BioactivityDataAcquisition'
@@ -362,11 +365,11 @@ jobs:
             path.with_name('identity.json').write_text(json.dumps(identity, sort_keys=True) + '\n', encoding='utf-8')
             PY
       - persist_to_workspace:
-          root: /tmp/bioetl-scorecard
+          root: /home/circleci/bioetl-scorecard
           paths:
             - reports
       - store_artifacts:
-          path: /tmp/bioetl-scorecard/reports
+          path: /home/circleci/bioetl-scorecard/reports
           destination: scorecard-analysis
 
   scorecard-publish:
@@ -376,7 +379,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: /tmp/bioetl-scorecard
+          at: /home/circleci/bioetl-scorecard
       - run:
           name: Upload approved source-bound Scorecard SARIF
           no_output_timeout: 11m
@@ -384,10 +387,10 @@ jobs:
             set -euo pipefail
             set +x
             timeout --signal=TERM --kill-after=30s 10m python3 -m scripts.engineering.ci publish-scorecard \
-              --directory /tmp/bioetl-scorecard/reports \
-              --output /tmp/bioetl-scorecard/publication/receipt.json
+              --directory /home/circleci/bioetl-scorecard/reports \
+              --output /home/circleci/bioetl-scorecard/publication/receipt.json
       - store_artifacts:
-          path: /tmp/bioetl-scorecard/publication
+          path: /home/circleci/bioetl-scorecard/publication
           destination: scorecard-publication
 
   architecture-fast-baseline:

@@ -16,8 +16,8 @@ import urllib.request
 
 REPOSITORY = "SatoryKono/BioactivityDataAcquisition"
 GITHUB_API = "https://api.github.com/repos/" + REPOSITORY
-REPORT_DIRECTORY = Path("/tmp/bioetl-scorecard/reports")
-PUBLICATION_RECEIPT = Path("/tmp/bioetl-scorecard/publication/receipt.json")
+REPORT_DIRECTORY = Path("/home/circleci/bioetl-scorecard/reports")
+PUBLICATION_RECEIPT = Path("/home/circleci/bioetl-scorecard/publication/receipt.json")
 
 
 def _require(condition: bool, message: str) -> None:
@@ -113,6 +113,7 @@ def verify_workflow(identity: dict) -> None:
     response = _request(
         "https://circleci.com/api/v2/workflow/" + identity["workflow_id"] + "/job"
     )
+    _require(not response.get("next_page_token"), "Unexpected workflow pagination")
     jobs = response["items"]
     producers = [job for job in jobs if job["name"] == "scorecard-analysis"]
     approvals = [job for job in jobs if job["name"] == "scorecard-publish-approval"]
@@ -144,6 +145,12 @@ def publish(directory: Path, output: Path, environment: dict[str, str]) -> dict:
     _require(
         output.parent.resolve() in {report_root, report_root.parent / "publication"},
         "Receipt must stay in the publication workspace",
+    )
+    # Write through a canonical workspace path, never the caller's spelling.
+    output = (
+        report_root / "receipt.json"
+        if output.parent.resolve() == report_root
+        else report_root.parent / "publication" / "receipt.json"
     )
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     _require(head == identity["source_sha"], "Checkout differs from producer")
