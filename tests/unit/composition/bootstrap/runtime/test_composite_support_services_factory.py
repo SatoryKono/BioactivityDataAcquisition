@@ -57,7 +57,6 @@ from bioetl.application.composite.join_planner_helpers import (
 )
 from bioetl.composition.factories.storage import StorageBundle
 from bioetl.domain.composite.strategy import MergeStrategy
-from bioetl.composition.factories.storage import StorageBundle
 
 
 def _make_factory(

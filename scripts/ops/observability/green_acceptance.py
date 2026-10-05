@@ -474,6 +474,25 @@ def _case_environment(root: Path, folder: Path, env_file: Path) -> dict[str, str
     return environment
 
 
+def _stop_launch_process(process: subprocess.Popen, log: TextIO) -> None:
+    """Stop and reap an owned launch without masking a process-exit race."""
+    if process.poll() is None:
+        if sys.platform == "win32":
+            subprocess.run(
+                ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                stdout=log,
+                stderr=subprocess.STDOUT,
+                check=True,
+                timeout=30,
+            )
+        else:
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+        process.wait(timeout=30)
+
+
 def run_launch(
     args: list[str],
     folder: Path,
@@ -516,21 +535,7 @@ def run_launch(
                 "interrupted",
                 "failed",
             }:
-                if process.poll() is None:
-                    if sys.platform == "win32":
-                        subprocess.run(
-                            ["taskkill", "/PID", str(process.pid), "/T", "/F"],
-                            stdout=log,
-                            stderr=subprocess.STDOUT,
-                            check=True,
-                            timeout=30,
-                        )
-                    else:
-                        try:
-                            os.killpg(process.pid, signal.SIGKILL)
-                        except ProcessLookupError:
-                            pass
-                    process.wait(timeout=30)
+                _stop_launch_process(process, log)
                 receipt["exit_code"] = process.returncode
         finally:
             receipt["finished_at"] = timestamp()
