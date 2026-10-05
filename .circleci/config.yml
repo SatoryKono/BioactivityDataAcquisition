@@ -136,11 +136,61 @@ jobs:
             identity = {'source_sha': os.environ['CIRCLE_SHA1'], 'workflow_id': os.environ['CIRCLE_WORKFLOW_ID'], 'job_number': os.environ['CIRCLE_BUILD_NUM'], 'published': False, 'sha256': {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in files}}
             (root / 'identity.json').write_text(json.dumps(identity, sort_keys=True) + '\n', encoding='utf-8')
             PY
+      - run:
+          name: Generate source-bound distribution SPDX inventory
+          no_output_timeout: 11m
+          command: |
+            set -euo pipefail
+            curl -fsSL --proto '=https' --tlsv1.2 \
+              https://github.com/anchore/syft/releases/download/v1.54.0/syft_1.54.0_linux_amd64.tar.gz \
+              -o /tmp/syft.tar.gz
+            printf '%s  %s\n' '54a87372498168b2d033e876fd41fa4e8035b872699e525a57046e1f2f09c860' /tmp/syft.tar.gz | sha256sum -c -
+            tar -xzf /tmp/syft.tar.gz -C "$HOME/.local/bin" syft
+            python3 - \<<'PY'
+            import hashlib, json, tarfile, zipfile
+            from pathlib import Path
+            root = Path('/tmp/bioetl-release')
+            identity = json.loads((root / 'identity.json').read_text())
+            for name, digest in identity['sha256'].items():
+                archive = root / 'dist' / name
+                assert archive.is_file() and not archive.is_symlink()
+                assert hashlib.sha256(archive.read_bytes()).hexdigest() == digest
+                target = Path('/tmp/bioetl-dist-sbom-input') / name
+                target.mkdir(parents=True, exist_ok=False)
+                if name.endswith('.whl'):
+                    with zipfile.ZipFile(archive) as stream:
+                        for member in stream.infolist():
+                            assert (target / member.filename).resolve().is_relative_to(target.resolve())
+                            assert (member.external_attr >> 16) & 0o170000 != 0o120000
+                        stream.extractall(target)
+                else:
+                    with tarfile.open(archive) as stream:
+                        stream.extractall(target, filter='data')
+            PY
+            timeout --signal=TERM --kill-after=30s 10m "$HOME/.local/bin/syft" scan \
+              dir:/tmp/bioetl-dist-sbom-input --source-name bioetl \
+              -o spdx-json=/tmp/bioetl-release/bioetl-dist.spdx.json
+            python3 - \<<'PY'
+            import hashlib, json
+            from pathlib import Path
+            root = Path('/tmp/bioetl-release')
+            path = root / 'bioetl-dist.spdx.json'
+            sbom = json.loads(path.read_text())
+            version = next((root / 'dist').glob('*.whl')).name.split('-')[1]
+            assert sbom['spdxVersion'] == 'SPDX-2.3'
+            assert any(p['name'] == 'bioetl' and p.get('versionInfo') == version for p in sbom['packages'])
+            assert sbom.get('files'), 'Empty distribution catalog is not acceptance'
+            identity = json.loads((root / 'identity.json').read_text())
+            identity['sbom_sha256'] = hashlib.sha256(path.read_bytes()).hexdigest()
+            identity['sbom_tool'] = 'syft 1.54.0'
+            (root / 'identity.json').write_text(json.dumps(identity, sort_keys=True) + '\n', encoding='utf-8')
+            PY
       - persist_to_workspace:
           root: /tmp/bioetl-release
           paths:
             - dist
             - identity.json
+            - bioetl-dist.spdx.json
       - store_artifacts:
           path: /tmp/bioetl-release
           destination: release-build
@@ -168,6 +218,7 @@ jobs:
             root = Path('/tmp/bioetl-release')
             identity = json.loads((root / 'identity.json').read_text())
             assert identity['source_sha'] == os.environ['CIRCLE_SHA1'] and identity['workflow_id'] == os.environ['CIRCLE_WORKFLOW_ID']
+            assert hashlib.sha256((root / 'bioetl-dist.spdx.json').read_bytes()).hexdigest() == identity['sbom_sha256']
             files = sorted((root / 'dist').iterdir())
             assert len(files) == 2 and {p.name for p in files} == set(identity['sha256'])
             assert all(p.is_file() and not p.is_symlink() and hashlib.sha256(p.read_bytes()).hexdigest() == identity['sha256'][p.name] for p in files)
@@ -240,7 +291,7 @@ jobs:
             assert len(accepted) == len(required) and {job['name'] for job in accepted} == required
             assert all(job['status'] == 'success' for job in accepted)
             assert str(next(job for job in accepted if job['name'] == 'release-dist-build')['job_number']) == str(identity['job_number'])
-            receipt = {'source_sha': identity['source_sha'], 'workflow_id': identity['workflow_id'], 'distribution_validation': 'passed', 'published': False, 'publication_ready': False, 'pending': ['dist SBOM and signed provenance', 'protected TestPyPI/PyPI promotion', 'release assets'], 'jobs': {job['name']: job['job_number'] for job in accepted}}
+            receipt = {'source_sha': identity['source_sha'], 'workflow_id': identity['workflow_id'], 'distribution_validation': 'passed', 'published': False, 'publication_ready': False, 'sbom_sha256': identity['sbom_sha256'], 'pending': ['signed provenance', 'protected TestPyPI/PyPI promotion', 'release assets'], 'jobs': {job['name']: job['job_number'] for job in accepted}}
             (root / 'validation.json').write_text(json.dumps(receipt, sort_keys=True) + '\n', encoding='utf-8')
             PY
       - store_artifacts:

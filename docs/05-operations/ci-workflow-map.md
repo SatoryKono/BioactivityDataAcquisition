@@ -258,7 +258,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `pr-required.yml` | — | CircleCI classify/pr-gate-complete | Main pipelines 218–220 pass all 81 jobs on a34558b918b5; both production rulesets active/read back; legacy owner references retained until #11930 |
 | `provider-contract-drift.yml` | — | CircleCI provider-contract-drift | Main run 3112 passes replay, matrix/xwalk and breaking-drift gates; push/PR parity pending; artifact retention verified at 30 days |
 | `quality-debt-weekly.yml` | — | Retain disabled debt review policy | Do not activate job with existing if:false; local audits retained |
-| `release.yml` | — | CircleCI release-validation plus protected promotion | Build/install/release-test/security preflight prepared; remote acceptance, dist SBOM/provenance, TestPyPI/PyPI and release assets remain pending |
+| `release.yml` | — | CircleCI release-validation plus protected promotion | Build/install/release-test/security preflight prepared; source-bound SPDX prepared; remote acceptance, signed provenance, TestPyPI/PyPI and release assets remain pending |
 | `reusable-mermaid-setup.yml` | — | Shared pinned Mermaid tooling | Pending consumer migration; keep lockfile scanned by OSV |
 | `reusable-setup.yml` | — | CircleCI setup-python-uv | Checksum-pinned uv 0.11.26 and explicit UV_PYTHON prepared; remote runtime/cache parity pending |
 | `root-hygiene.yml` | — | CircleCI root-hygiene | Main full-tree/strict checks accepted; cleanup diagnostic artifacts and dedicated legacy regression selectors added for next acceptance; structure-audit port is blocked by six tracked Python paths outside allowed roots |
@@ -439,8 +439,10 @@ Python 3.13 smoke/supply-chain tests, and the existing security-scans job. Wheel
 installation runs in a fresh environment using hash-locked runtime dependencies
 and the local wheel only; its import and CLI checks cannot resolve the editable
 checkout. The aggregate records the successful same-workflow job numbers and
-explicitly leaves `publication_ready` and `published` false. Distribution SBOM,
-signed provenance, protected TestPyPI/PyPI promotion and release assets remain
+explicitly leaves `publication_ready` and `published` false. Syft 1.54.0 (archive SHA-256 pinned) inventories the safely expanded exact
+distributions; empty catalogs fail, and the SBOM hash is bound to the build
+identity and verified during installation. Signed provenance, protected
+TestPyPI/PyPI promotion and release assets remain
 required before release migration acceptance. This lane does not re-enable the
 KEEP-DISABLED Actions release workflow.
 
