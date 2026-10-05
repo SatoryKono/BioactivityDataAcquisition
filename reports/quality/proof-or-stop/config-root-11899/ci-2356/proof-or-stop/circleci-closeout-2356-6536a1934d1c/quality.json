@@ -1,0 +1,467 @@
+{
+  "generated_at_utc": "2026-10-05T11:58:58.431136+00:00",
+  "quarter": "2026-Q4",
+  "architecture_tests": {
+    "tests": 5004,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 7,
+    "returncode": 0,
+    "owner": "pytest"
+  },
+  "quarterly_target": {
+    "max_total_exemptions": 0,
+    "min_integral_score": 76.0
+  },
+  "ci_metric_targets": {
+    "architecture_test_failures_max": 0,
+    "total_exemptions_max": 145,
+    "max_class_loc_max": 300,
+    "domain_cc_gt5_exemptions_max": 18,
+    "vcr_cassettes_min_per_provider": 20,
+    "ruff_formatting_violations_max": 0,
+    "coverage_threshold_percent": 85.0
+  },
+  "metrics": {
+    "architecture_test_failures": 0,
+    "total_exemptions": 0,
+    "max_class_loc": 296,
+    "domain_cc_gt5_exemptions": 0,
+    "vcr_cassettes_min_per_provider": 0,
+    "vcr_cassettes_by_provider": {
+      "chembl": 102,
+      "crossref": 48,
+      "integration": 0,
+      "openalex": 50,
+      "pubchem": 24,
+      "pubmed": 48,
+      "semanticscholar": 48,
+      "uniprot": 34
+    },
+    "ruff_formatting_violations": 0,
+    "coverage_percent": 99.7,
+    "coverage_verified": true
+  },
+  "compatibility_surface": {
+    "curated_inventory_rows": 12,
+    "measured_tracked_modules": 12,
+    "measured_only_modules": 0,
+    "deprecated_warn_modules": 0,
+    "compat_shim_modules": 0,
+    "mixed_modules": 0,
+    "retained_entrypoints": 0,
+    "public_entrypoints": 12
+  },
+  "debt_governance_surface": {
+    "compatibility_surface": {
+      "curated_inventory_rows": 12,
+      "measured_tracked_modules": 12,
+      "measured_only_modules": 0,
+      "deprecated_warn_modules": 0,
+      "compat_shim_modules": 0,
+      "mixed_modules": 0,
+      "retained_entrypoints": 0,
+      "public_entrypoints": 12
+    },
+    "runtime_uuid": {
+      "runtime_uuid_seam_count": 0,
+      "replay_critical_uuid_seam_count": 0
+    },
+    "retirement": {
+      "triaged_entry_count": 17,
+      "repo_wide_zero_import_candidate_count": 2,
+      "repo_wide_classified_zero_import_candidate_count": 2,
+      "repo_wide_untriaged_zero_import_candidate_count": 0,
+      "repo_wide_owner_test_anchored_candidate_count": 2,
+      "repo_wide_candidates_without_owner_tests_count": 0,
+      "repo_wide_non_static_reachability_candidate_count": 1,
+      "triaged_retained_owner_test_anchored_count": 13,
+      "triaged_retained_without_owner_tests_count": 0
+    },
+    "test_governance": {
+      "compatibility_test_files": 0,
+      "refined_assertless_tests": 0,
+      "markerless_test_functions": 0,
+      "duplicate_test_names": 0,
+      "duplicate_test_name_occurrences": 0,
+      "uuid4_call_sites": 0,
+      "date_today_call_sites": 0
+    }
+  },
+  "architecture_quality_scorecard": {
+    "schema_version": 2,
+    "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
+    "source_artifacts": {
+      "dependency_map": {
+        "path": "docs/02-architecture/generated/module-dependency-map.json",
+        "source_fingerprint": "ee11e33344e8ead4b876f5638121e473db978bbe60f9c00b7093a6098b67d6e9"
+      },
+      "module_coverage_inventory": {
+        "path": "reports/quality/module-coverage-inventory.json",
+        "source_tree_sha256": "4db123e5e95045405ceb710e2425c1cd0e733fb6a225dccc7fc4146c63eaacb5",
+        "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c"
+      },
+      "compatibility_importer_census": {
+        "path": "reports/quality/compatibility-importer-census.json",
+        "snapshot_date": "2026-10-04"
+      },
+      "dead_code_inventory": {
+        "path": "reports/quality/dead-code-inventory.json",
+        "snapshot_date": "2026-09-11"
+      },
+      "contract_registry_diagnostics": {
+        "path": "reports/quality/contract-registry-diagnostics.json",
+        "valid": true
+      },
+      "contract_registry_dq_diagnostics": {
+        "path": "scripts/engineering/ci/validate_registry_dq_refs.py::build_diagnostics_payload",
+        "source_check": "python -m scripts.engineering.ci validate-dq-consistency",
+        "valid": true,
+        "blocking_issue_count": 0
+      },
+      "observability_runtime_cardinality_inventory": {
+        "path": "reports/observability/runtime_cardinality_inventory.json",
+        "dashboarded_without_emission_count": 0,
+        "dashboarded_without_declaration_count": 0
+      },
+      "duplication_baseline": {
+        "path": "reports/quality/full-app-duplication-baseline.json",
+        "snapshot_date": "2026-09-11",
+        "total_duplicate_clusters": 0
+      },
+      "hotspot_family_baseline": {
+        "path": "reports/quality/hotspot-family-baseline.json",
+        "snapshot_date": "2026-09-11",
+        "budget_warnings": 0
+      },
+      "test_governance_report": {
+        "path": "reports/quality/test-governance-current.json",
+        "compatibility_test_files": 0
+      },
+      "adr_enforcement_matrix": {
+        "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload",
+        "generated_artifact": "reports/quality/adr-enforcement-matrix.json",
+        "accepted_adr_count": 60,
+        "blocking_gap_count": 0
+      },
+      "diagnostic_policy": {
+        "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
+        "package_cohesion_budget": "configs/quality/package_cohesion_budget.yaml"
+      }
+    },
+    "weights_sum": 1.0,
+    "integral_score": 10.0,
+    "interpretation": "excellent",
+    "diagnostics": {
+      "grade_kind": "diagnostic_proxy",
+      "program_gate_policy": "external_unchanged",
+      "proxy_notes": {
+        "ddd_invariants": "module coverage status proxy; not a count of DDD aggregates or invariant completeness",
+        "module_boundaries_coupling": "hotspot budget warnings and duplicate clusters proxy; at-budget families and cap saturation penalize the diagnostic grade and remain shrink-only for program gates"
+      },
+      "families_at_budget_count": 0,
+      "families_at_budget": [],
+      "lazy_import_observed_count": 0,
+      "lazy_import_cap": 0,
+      "lazy_util": 0.0,
+      "composition_module_count": 278,
+      "composition_module_cap": 295,
+      "composition_util": 0.9424
+    },
+    "categories": [
+      {
+        "id": "layer_compliance",
+        "name": "Layer compliance",
+        "weight": 0.13,
+        "score": 10.0,
+        "weighted_score": 1.3,
+        "evidence_metrics": {
+          "layer_violations": 0
+        }
+      },
+      {
+        "id": "hexagonal_ports_adapters",
+        "name": "Hexagonal / Ports & Adapters",
+        "weight": 0.11,
+        "score": 10.0,
+        "weighted_score": 1.1,
+        "evidence_metrics": {
+          "layer_violations": 0,
+          "transition_compat_count": 0,
+          "sunset_compat_count": 0,
+          "expired_compat_count": 0
+        }
+      },
+      {
+        "id": "ddd_invariants",
+        "name": "DDD / aggregates / invariants",
+        "weight": 0.09,
+        "score": 10.0,
+        "weighted_score": 0.9,
+        "evidence_metrics": {
+          "source_module_count": 2552,
+          "uncovered_module_count": 0
+        }
+      },
+      {
+        "id": "composition_di",
+        "name": "Composition root / DI",
+        "weight": 0.1,
+        "score": 10.0,
+        "weighted_score": 1.0,
+        "evidence_metrics": {
+          "layer_violations": 0,
+          "public_entrypoint_growth_count": 0,
+          "public_export_facade_growth_count": 0,
+          "public_export_facade_conflict_count": 0,
+          "composition_util": 0.9424,
+          "lazy_util": 0.0
+        }
+      },
+      {
+        "id": "module_boundaries_coupling",
+        "name": "Module boundaries / coupling",
+        "weight": 0.14,
+        "score": 10.0,
+        "weighted_score": 1.4,
+        "evidence_metrics": {
+          "hotspot_family_count": 5,
+          "hotspot_budget_warning_count": 0,
+          "total_duplicate_clusters": 0,
+          "families_at_budget_count": 0,
+          "lazy_util": 0.0
+        }
+      },
+      {
+        "id": "naming_package_consistency",
+        "name": "Naming / package consistency",
+        "weight": 0.08,
+        "score": 10.0,
+        "weighted_score": 0.8,
+        "evidence_metrics": {
+          "expired_compat_count": 0,
+          "twin_pair_count": 0
+        }
+      },
+      {
+        "id": "test_strategy_testability",
+        "name": "Test strategy / testability",
+        "weight": 0.12,
+        "score": 10.0,
+        "weighted_score": 1.2,
+        "evidence_metrics": {
+          "unmeasured_module_count": 0,
+          "uncovered_module_count": 0,
+          "compatibility_test_file_count": 0
+        }
+      },
+      {
+        "id": "config_contracts_entrypoints",
+        "name": "Config / contracts / entrypoints",
+        "weight": 0.09,
+        "score": 10.0,
+        "weighted_score": 0.9,
+        "evidence_metrics": {
+          "contract_blocking_issue_count": 0,
+          "dq_blocking_issue_count": 0,
+          "adr_enforcement_blocking_gap_count": 0
+        }
+      },
+      {
+        "id": "determinism_replay_observability",
+        "name": "Determinism / replay / observability",
+        "weight": 0.08,
+        "score": 10.0,
+        "weighted_score": 0.8,
+        "evidence_metrics": {
+          "layer_violations": 0,
+          "contract_blocking_issue_count": 0,
+          "dashboarded_without_emission_count": 0,
+          "dashboarded_without_declaration_count": 0,
+          "runtime_cardinality_review_required_count": 0,
+          "runtime_cardinality_threshold_violation_count": 0
+        }
+      },
+      {
+        "id": "debt_burden_evolution_friction",
+        "name": "Debt burden / evolution friction",
+        "weight": 0.06,
+        "score": 10.0,
+        "weighted_score": 0.6,
+        "evidence_metrics": {
+          "transition_compat_count": 0,
+          "sunset_compat_count": 0,
+          "expired_compat_count": 0,
+          "public_entrypoint_growth_count": 0,
+          "public_export_facade_growth_count": 0,
+          "public_export_facade_conflict_count": 0,
+          "repo_wide_untriaged_zero_import_candidate_count": 0,
+          "hotspot_budget_warning_count": 0,
+          "total_duplicate_clusters": 0,
+          "composition_util": 0.9424
+        }
+      }
+    ],
+    "metrics": {
+      "layer_violations": 0,
+      "source_module_count": 2552,
+      "unmeasured_module_count": 0,
+      "uncovered_module_count": 0,
+      "hotspot_family_count": 5,
+      "hotspot_budget_warning_count": 0,
+      "families_at_budget_count": 0,
+      "families_at_budget": [],
+      "total_duplicate_clusters": 0,
+      "retained_entrypoint_count": 12,
+      "retained_public_export_facade_count": 3,
+      "transition_compat_count": 0,
+      "sunset_compat_count": 0,
+      "expired_compat_count": 0,
+      "public_entrypoint_growth_count": 0,
+      "public_export_facade_growth_count": 0,
+      "public_export_facade_conflict_count": 0,
+      "twin_pair_count": 0,
+      "compatibility_test_file_count": 0,
+      "repo_wide_untriaged_zero_import_candidate_count": 0,
+      "contract_blocking_issue_count": 0,
+      "dq_blocking_issue_count": 0,
+      "dashboarded_without_emission_count": 0,
+      "dashboarded_without_declaration_count": 0,
+      "runtime_cardinality_review_required_count": 0,
+      "runtime_cardinality_threshold_violation_count": 0,
+      "accepted_adr_count": 60,
+      "adr_enforcement_blocking_gap_count": 0,
+      "adr_enforcement_manual_exception_count": 0,
+      "lazy_import_observed_count": 0,
+      "lazy_import_cap": 0,
+      "lazy_util": 0.0,
+      "composition_module_count": 278,
+      "composition_module_cap": 295,
+      "composition_util": 0.9424
+    },
+    "debt_budget_policy": {
+      "budget_growth_allowed": false,
+      "compatibility_debt_metrics_source": "configs/quality/debt_scorecard.yaml#compatibility_debt_metrics",
+      "current_compatibility_debt_metrics": {
+        "transition_compat_count": {
+          "current_count": 0,
+          "max_count": 0,
+          "target_count": 0,
+          "owner": "@bioetl-architecture",
+          "linked_issue": "4700",
+          "rationale": "Stream C post-sunset shim removal cleared all control-plane manifest diagnostics transition_debt entries; callers use manifest.diagnostics.* owners. Sanctioned public entrypoints are tracked separately as stable public API.",
+          "ratchet_policy": "Fail on growth; ratchet current/max_count toward target_count zero as transition-only compatibility shims are removed."
+        },
+        "sunset_compat_count": {
+          "current_count": 0,
+          "max_count": 0,
+          "target_count": 0,
+          "owner": "@bioetl-architecture",
+          "linked_issue": "4700",
+          "sunset_date": "2026-09-30",
+          "rationale": "Control-plane run_manifest_diagnostics_* compatibility shims were removed in Stream C; transition_debt inventory is empty.",
+          "ratchet_policy": "May only decrease before the sunset; must reach zero after 2026-09-30."
+        },
+        "expired_compat_count": {
+          "current_count": 0,
+          "max_count": 0,
+          "owner": "@bioetl-architecture",
+          "linked_issue": "3354",
+          "rationale": "Expired compatibility items are not allowed to persist after their sunset date.",
+          "ratchet_policy": "Zero-budget fail-fast metric."
+        }
+      }
+    }
+  },
+  "test_health": {
+    "status": "non_green",
+    "summary": "Suite passed, but required confidence evidence is missing or explicitly outside the zero-debt baseline.",
+    "reasons": [
+      "architecture suite carries 7 skip(s); architecture skip budget is zero",
+      "Current quality-gate run does not execute the canonical contracts lane.",
+      "Current quality-gate run does not execute the canonical e2e lane.",
+      "Current quality-integral gate slice runs architecture checks only; the dedicated CI memory-tests lane remains separate and is not represented in this local classification."
+    ],
+    "architecture_skip_count": 7,
+    "architecture_skip_ratio": 0.0014,
+    "live_contract_enforced_provider_count": 7,
+    "live_contract_pilot_provider_count": 0,
+    "live_contract_vcr_only_provider_count": 0,
+    "skip_classes": {
+      "architecture_suite_skips": 7,
+      "live_network_opt_in_gate": 1,
+      "live_api_gate_mode_non_always": 1,
+      "contract_lane_not_run": 1,
+      "e2e_lane_not_run": 1,
+      "memory_lane_not_run": 1
+    },
+    "staged_rollout_flags": [
+      "mutation_testing.ci_gate_mode=partial",
+      "mutation_testing.targets.application=staged"
+    ],
+    "skip_classes_detail": [
+      {
+        "id": "architecture_suite_skips",
+        "count": 7,
+        "short_label": "Architecture Suite Skips",
+        "definition": "Skips reported directly by the architecture test run used by the quality gate.\n"
+      },
+      {
+        "id": "live_network_opt_in_gate",
+        "count": 1,
+        "short_label": "Network Opt-In Gate",
+        "definition": "Live or networked test surfaces require explicit opt-in and therefore can remain unexercised in ordinary runs.\n"
+      },
+      {
+        "id": "live_api_gate_mode_non_always",
+        "count": 1,
+        "short_label": "Scheduled Live Gate",
+        "definition": "Live-provider execution is policy-gated and not treated as always-on in the current baseline.\n"
+      },
+      {
+        "id": "contract_lane_not_run",
+        "count": 1,
+        "short_label": "Contracts Lane Not Run",
+        "definition": "The current quality-gate confidence slice does not execute the canonical contracts lane, so schema and provider-contract drift confidence remains incomplete for this run.\n"
+      },
+      {
+        "id": "e2e_lane_not_run",
+        "count": 1,
+        "short_label": "E2E Lane Not Run",
+        "definition": "The current quality-gate confidence slice does not execute the canonical e2e lane, so full pipeline behavior confidence remains incomplete for this run.\n"
+      },
+      {
+        "id": "memory_lane_not_run",
+        "count": 1,
+        "short_label": "Memory Lane Not Run",
+        "definition": "The current quality-integral gate confidence slice executes architecture checks only and does not include the dedicated CI memory-tests lane; Neo4j and MCP memory confidence is therefore tracked by that separate blocking lane rather than this local classification.\n"
+      }
+    ],
+    "classification_mode": "informational",
+    "merge_blocking_source": "ci_pass_fail_and_quality_gate",
+    "merge_blocking_note": "Descriptive test-health classes inform confidence posture and prioritization. Merge blocking remains governed by ordinary CI pass/fail and the quality gate.\n",
+    "short_label": "Non-Green",
+    "definition": "Failing or non-passing result where active regressions take precedence over descriptive confidence classification.\n",
+    "merge_semantics": "derived_from_blocking_ci"
+  },
+  "integral_score": {
+    "base": 100.0,
+    "bonus": 2.5,
+    "adjusted": 100.0,
+    "min_required": 76.0,
+    "pass": true
+  },
+  "debt_scorecard": {
+    "violations_count": 0,
+    "violations": []
+  },
+  "metric_comparison": {
+    "architecture_test_failures_ok": true,
+    "total_exemptions_ok": true,
+    "max_class_loc_ok": true,
+    "domain_cc_gt5_exemptions_ok": true,
+    "vcr_cassettes_min_per_provider_ok": false,
+    "ruff_formatting_violations_ok": true,
+    "coverage_ok": true
+  }
+}
