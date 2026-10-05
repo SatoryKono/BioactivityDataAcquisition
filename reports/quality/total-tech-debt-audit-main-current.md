@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `eff468358af9e67f527c0761ba60697914c0de27f9c6b635e75fa0dc734e150e`
+Evidence surface SHA-256: `76bdc9dca27784e6fd9d219fb36a79b07d3b276a68826fab25d42361c4220b9e`
 
 ## Current evidence summary
 
@@ -24,7 +24,8 @@ This is a metadata rebind, not a new repository-wide audit. The audited SHA
 and audit date above remain historical. Earlier conflicting headline values
 are retained in Git history, not presented as current conclusions here.
 
-Current architecture and debt-governance values appear in the generated summary below.
+Current result: debt-governance gates passing. The current architecture score `10.00`
+replaces the historical score `9.47`; the audited SHA and date remain historical.
 
 Coverage measurements require the complete local 17-shard producer (#11745).
 A hash-only refresh preserves historical measurements and cannot prove full
@@ -34,15 +35,15 @@ reported separately in the issue closeout evidence.
 
 <!-- current-audit-headlines:start -->
 
-Debt-governance gates: **46 pass / 0 fail**
+Debt-governance gates: **45 pass / 1 fail**
 
-Architecture quality integral score: **9.36** (`good_targeted_improvements`)
+Architecture quality integral score: **10.0** (`excellent`)
 
-source_module_count: **2563**
+source_module_count: **2552**
 
-fully_covered: **2518**
+fully_covered: **2513**
 
-partially_covered: **44**
+partially_covered: **38**
 
 no_executable_lines: **1**
 
@@ -50,7 +51,7 @@ uncovered: **0**
 
 unmeasured: **0**
 
-= 2563 == source_module_count
+= 2552 == source_module_count
 
 Contract coverage matrix schema: **contract-coverage-matrix-v3**
 
@@ -68,22 +69,22 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "eff468358af9e67f527c0761ba60697914c0de27f9c6b635e75fa0dc734e150e",
+  "evidence_surface_sha256": "76bdc9dca27784e6fd9d219fb36a79b07d3b276a68826fab25d42361c4220b9e",
   "metrics": {
-    "architecture_integral_score": 9.36,
-    "architecture_interpretation": "good_targeted_improvements",
+    "architecture_integral_score": 10.0,
+    "architecture_interpretation": "excellent",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 46,
-    "debt_gate_fail_count": 0,
-    "debt_gate_pass_count": 46,
+    "debt_gate_fail_count": 1,
+    "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 2518,
+    "fully_covered_module_count": 2513,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 1,
-    "partially_covered_module_count": 44,
-    "source_module_count": 2563,
+    "partially_covered_module_count": 38,
+    "source_module_count": 2552,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
@@ -98,7 +99,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 
 | Facade | Source importers | Test importers |
 | --- | ---: | ---: |
-| `bioetl.domain.composite.config` | 0 | 44 |
+| `bioetl.domain.composite.config` | 0 | 43 |
 | `bioetl.application.composite.merger` | 0 | 5 |
 
 ## Evidence anchors

@@ -138,7 +138,10 @@ from checks that run only for matching paths.
 
 ### 2.3.1 CodeQL ownership and alert triage
 
-BioETL uses **advanced CodeQL setup** owned by `.github/workflows/codeql.yml`.
+CodeQL is excluded from required checks by owner decision (#11929). Its legacy
+**advanced CodeQL setup** is retained in `.github/workflows/codeql.yml` until
+workflow retirement (#11930). GitHub Actions are disabled; this retained YAML
+does not prove active scanning. Optional external analysis is a separate decision.
 GitHub code-scanning **default setup MUST remain `not-configured`**. Do not
 enable default setup in parallel: that would duplicate Python scans and split
 alert ownership.
@@ -757,7 +760,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 ```
 
-Required push workflows on `main` (Tests, Lint and Architecture Gates, CodeQL)
+Retained push workflow definitions on `main` (Tests, Lint and Architecture Gates, CodeQL)
 MUST NOT share a ref-wide group. Queued runs for an older SHA are otherwise
 discarded when a newer `main` SHA arrives, even with `cancel-in-progress: false`.
 Those three workflows use:

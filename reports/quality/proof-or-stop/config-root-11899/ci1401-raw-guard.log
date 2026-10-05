@@ -1,0 +1,28 @@
+[module-coverage-inventory] module coverage gates: mode=block-regression; regressions=81; tier_gaps=0
+  - src/bioetl/application/composite/checkpoint/persistence_service.py: coverage regressed 100.00% -> 98.31%
+  - src/bioetl/application/composite/conflict_resolver.py: coverage regressed 100.00% -> 97.50%
+  - src/bioetl/application/composite/coordinator.py: coverage regressed 100.00% -> 96.23%
+  - src/bioetl/application/composite/runner_pkg/runner.py: coverage regressed 100.00% -> 98.91%
+  - src/bioetl/application/core/_quarantine_manager_support.py: coverage regressed 100.00% -> 97.87%
+  - src/bioetl/application/core/_quarantine_metrics_support.py: coverage regressed 100.00% -> 96.72%
+  - src/bioetl/application/core/batch_metrics_accounting.py: coverage regressed 100.00% -> 97.01%
+  - src/bioetl/application/core/batch_transformer_attempt_failures.py: coverage regressed 100.00% -> 98.59%
+  - src/bioetl/application/core/batch_transformer_attempt_success.py: coverage regressed 100.00% -> 96.67%
+  - src/bioetl/application/core/data_sources/assay_parameters.py: coverage regressed 93.62% -> 83.78%
+  - src/bioetl/application/core/publication_term_enrichment.py: coverage regressed 89.06% -> 88.14%
+  - src/bioetl/application/core/publication_term_extraction_mixin.py: coverage regressed 100.00% -> 98.61%
+  - src/bioetl/application/core/publication_term_runtime.py: coverage regressed 100.00% -> 89.02%
+  - src/bioetl/application/pipelines/chembl/molecule_transformer.py: coverage regressed 100.00% -> 98.00%
+  - src/bioetl/application/services/control_plane/manifest/diagnostics/snapshot_ledger.py: coverage regressed 100.00% -> 97.87%
+  - src/bioetl/application/services/control_plane/workflow/inspection_service.py: coverage regressed 100.00% -> 96.08%
+  - src/bioetl/application/services/dq/gold_filter_diagnostics.py: coverage regressed 100.00% -> 94.12%
+  - src/bioetl/application/services/execution/_pipeline_runner_support.py: coverage regressed 100.00% -> 94.59%
+  - src/bioetl/application/services/execution/pipeline_run_execution_service.py: coverage regressed 100.00% -> 97.96%
+  - src/bioetl/application/services/execution/workflow_runner_step_execution.py: coverage regressed 100.00% -> 96.20%
+  - src/bioetl/application/services/run_reports/enrichment.py: coverage regressed 100.00% -> 99.15%
+  - src/bioetl/application/services/run_reports/observations.py: coverage regressed 100.00% -> 98.31%
+  - src/bioetl/application/services/workflow/control_plane/execution_service.py: coverage regressed 100.00% -> 98.59%
+  - src/bioetl/application/services/workflow/control_plane/selected_snapshot_resume.py: coverage regressed 96.43% -> 89.74%
+  - src/bioetl/application/services/workflow/workflow_runner_reports.py: coverage regressed 100.00% -> 90.53%
+  - ... and 56 more
+[module-coverage-inventory] modules=2552; json=reports\quality\proof-or-stop\config-root-11899\ci-1401\raw-module-coverage.json

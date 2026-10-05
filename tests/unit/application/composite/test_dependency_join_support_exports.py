@@ -41,7 +41,7 @@ def test_dependency_join_support_reexports_canonical_helpers_and_models() -> Non
         "bioetl.application.composite.dependency_join_support"
     )
     builders_module = importlib.import_module(
-        "bioetl.application.composite.dependency_join_context_builders"
+        "bioetl.application.composite.dependency_join_context_assembly"
     )
     execution_module = importlib.import_module(
         "bioetl.application.composite.dependency_join_execution"

@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from bioetl.domain.control_plane import ControlPlaneArtifactLifecyclePolicy, RunManifest
-from bioetl.composition.archive_assessment import refresh_archived_assessment
+from bioetl.composition.control_plane_archive import refresh_archived_assessment
 from bioetl.infrastructure.control_plane.file_archive_store import FileArchiveStore
 from bioetl.infrastructure.control_plane.file_artifact_lifecycle_store import (
     FileControlPlaneArtifactLifecycleStore,

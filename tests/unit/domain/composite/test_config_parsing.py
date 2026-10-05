@@ -38,7 +38,13 @@ import math
 
 import pytest
 
-from bioetl.domain.composite.config_parsing import require_float
+from bioetl.domain.composite.config_parsing import (
+    optional_float,
+    require_float,
+    require_int,
+    require_str_mapping,
+    str_key_mapping,
+)
 from tests.unit.domain.composite._config_internal_test_support import (
     optional_bool,
     optional_int,
@@ -315,3 +321,66 @@ def test_require_float_rejects_non_finite() -> None:
         require_float(math.nan, "x")
     with pytest.raises(ValueError, match="finite"):
         require_float(math.inf, "x")
+
+
+def test_composite_config_parsing_covers_optional_and_error_branches() -> None:
+    assert require_object_dict({"a": 1}, "cfg") == {"a": 1}
+    with pytest.raises(ValueError, match="dictionary"):
+        require_object_dict([1], "cfg")
+    assert require_object_dict_sequence([{"a": 1}], "items") == ({"a": 1},)
+    with pytest.raises(ValueError, match="must be a list"):
+        require_object_dict_sequence("x", "items")
+    with pytest.raises(ValueError, match="contain dictionaries"):
+        require_object_dict_sequence(["x"], "items")
+
+    assert require_str("ok", "name") == "ok"
+    with pytest.raises(ValueError, match="non-empty string"):
+        require_str("", "name")
+    with pytest.raises(ValueError, match="non-empty string"):
+        require_str(1, "name")
+    assert optional_str(None, "name") is None
+    with pytest.raises(ValueError, match="when provided"):
+        optional_str("", "name")
+    with pytest.raises(ValueError, match="when provided"):
+        optional_str(1, "name")
+
+    assert optional_bool(None, default=True, field_name="flag") is True
+    assert optional_bool(False, default=True, field_name="flag") is False
+    with pytest.raises(ValueError, match="boolean"):
+        optional_bool("yes", default=True, field_name="flag")
+
+    assert optional_int(None, "n", default=3) == 3
+    assert require_int(None, "n", default=4) == 4
+    assert require_int(8, "n") == 8
+    with pytest.raises(ValueError, match="integer"):
+        require_int(None, "n")
+    with pytest.raises(ValueError, match="integer"):
+        require_int(True, "n")
+    with pytest.raises(ValueError, match="integer"):
+        optional_int("1", "n")
+
+    assert require_float(None, "x", default=1.5) == 1.5
+    assert require_float("2.5", "x") == 2.5
+    assert optional_float(None, "x") is None
+    with pytest.raises(ValueError, match="number"):
+        require_float(None, "x")
+    with pytest.raises(ValueError, match="number"):
+        require_float(True, "x")
+    with pytest.raises(ValueError, match="number"):
+        require_float("nope", "x")
+    with pytest.raises(ValueError, match="finite"):
+        require_float("inf", "x")
+
+    assert str_key_mapping(None, "map") == {}
+    with pytest.raises(ValueError, match="dictionary"):
+        str_key_mapping("x", "map")
+    assert require_str_mapping({"a": "b"}, "map") == {"a": "b"}
+    with pytest.raises(ValueError, match="must be a string"):
+        require_str_mapping({"a": 1}, "map")
+    assert require_str_tuple(["a", "b"], "vals") == ("a", "b")
+    with pytest.raises(ValueError, match="must be a list"):
+        require_str_tuple("a", "vals")
+    with pytest.raises(ValueError, match="non-empty strings"):
+        require_str_tuple(["a", ""], "vals")
+    assert optional_str_tuple(None, "vals") is None
+    assert optional_str_tuple(["a"], "vals") == ("a",)

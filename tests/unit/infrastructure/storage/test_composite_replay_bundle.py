@@ -15,7 +15,7 @@ from bioetl.infrastructure.storage.composite_replay_bundle import (
     publish_json,
     verify_bundle,
 )
-from bioetl.composition.bootstrap.runtime.assay_replay_evidence import (
+from bioetl.infrastructure.storage.composite_replay_evidence import (
     project_assay_replay,
     replay_artifacts,
 )
@@ -85,7 +85,7 @@ def test_v2_requires_captured_field_groups_and_preserves_their_digest(bundle):
 
 
 def test_field_group_round_trip_keeps_custom_defaults_and_gold_filtering():
-    from bioetl.composition.bootstrap.runtime.composite_replay_context import (
+    from bioetl.application.composite.helpers.replay_context import (
         freeze_field_groups,
         restore_field_groups,
     )
@@ -130,7 +130,7 @@ def test_field_group_round_trip_keeps_custom_defaults_and_gold_filtering():
     ],
 )
 def test_replay_output_path_matches_writer(path, layer, expected):
-    from bioetl.composition.bootstrap.runtime.composite_replay_context import (
+    from bioetl.application.composite.helpers.replay_context import (
         output_table_name,
     )
 

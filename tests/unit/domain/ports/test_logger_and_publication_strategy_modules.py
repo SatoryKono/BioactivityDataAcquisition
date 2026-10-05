@@ -35,10 +35,7 @@ from typing import Any, Self
 
 import pytest
 
-from bioetl.domain.ports.logger_port import LoggerPort
-from bioetl.domain.ports.observability.logging import (
-    LoggerPort as CanonicalLoggerPort,
-)
+from bioetl.domain.ports.observability.logging import LoggerPort
 from bioetl.domain.ports.publication_strategy import (
     DataExtractorStrategy,
     IdentifierResolverStrategy,
@@ -113,7 +110,6 @@ class _PublicationStrategy:
 def test_logger_port_runtime_check_and_methods() -> None:
     logger = _Logger(events=[])
 
-    assert LoggerPort is CanonicalLoggerPort
     assert isinstance(logger, LoggerPort)
 
     assert logger.bind(run_id="run-1") is logger

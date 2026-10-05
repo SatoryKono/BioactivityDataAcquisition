@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, ClassVar, Protocol, cast
 
 from bioetl.application.core.derived_scan_budget import DEFAULT_SCAN_RECORDS
 from bioetl.application.core.publication_term_enrichment import (
-    PublicationTermPayloadEnricher,
     yield_terms_from_publications,
 )
 from bioetl.application.core.publication_term_runtime import (
@@ -18,7 +17,11 @@ from bioetl.application.core.publication_term_runtime import (
 from bioetl.domain.types import BronzeRecord
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import DataSourcePort, FilterableDataSourcePort
+    from bioetl.domain.ports import (
+        DataSourcePort,
+        FilterableDataSourcePort,
+        PublicationTermEnrichmentPort,
+    )
 
 
 async def _close_publications(publications: AsyncIterator[BronzeRecord]) -> None:
@@ -82,7 +85,7 @@ class PublicationTermExtractionHost(Protocol):
     SOURCE_ENTITY_TYPE: ClassVar[str]
     PUBLICATION_LIMIT_MULTIPLIER: ClassVar[int]
     _data_source: DataSourcePort
-    _term_payload_enricher: PublicationTermPayloadEnricher | None
+    _term_payload_enricher: PublicationTermEnrichmentPort | None
 
     def _extract_terms_from_publication(
         self,

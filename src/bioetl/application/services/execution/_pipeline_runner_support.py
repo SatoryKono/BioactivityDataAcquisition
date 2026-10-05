@@ -29,6 +29,9 @@ from bioetl.application.services.run_reports.enrichment import (
     build_schema_versions,
     build_stage_timings,
 )
+from bioetl.application.services.run_reports.enrichment import (
+    build_run_identity as _identity_from_result,
+)
 from bioetl.application.services.run_reports.observations import (
     ensure_terminal_data_validation_observation,
     ensure_terminal_workflow_observation,
@@ -41,7 +44,7 @@ from bioetl.domain.run_reports.context import (
     get_stage_accounting,
 )
 from bioetl.domain.run_reports.models import StageId
-from bioetl.domain.run_reports.pipeline_builder import (
+from bioetl.domain.run_reports.pipeline_report_assembly import (
     PipelineRunReportOptionalBlocks,
     build_pipeline_run_report,
 )
@@ -51,11 +54,13 @@ if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_run_execution_service import (
         PipelineExecutionResult,
     )
+    from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.ports import (
         AuditPort,
         ClockPort,
         ExecutionMetricsRunnerPort,
         LoggerPort,
+        RunnerFactoryPort,
     )
 
 
@@ -103,38 +108,6 @@ def _result_duration_seconds(result: RunResult) -> float | None:
         return result.duration_seconds
     except Exception:
         return None
-
-
-def _identity_from_result(
-    result: RunResult,
-    *,
-    options: RunOptions | None,
-    duration: float | None,
-) -> dict[str, Any]:  # Any: report/json payload shape is dynamic
-    identity: dict[str, Any] = {  # Any: report/json payload shape is dynamic
-        "run_id": result.run_id,
-        "manifest_id": result.manifest_id,
-        "pipeline_name": result.pipeline_name,
-        "provider": None,
-        "entity": None,
-        "run_type": result.run_type,
-        "status": result.status.value,
-        "started_at": (
-            result.started_at.isoformat() if result.started_at is not None else None
-        ),
-        "completed_at": (
-            result.completed_at.isoformat() if result.completed_at is not None else None
-        ),
-        "duration_seconds": duration,
-        "workflow_id": options.workflow_id if options is not None else None,
-        "workflow_run_id": options.workflow_run_id if options is not None else None,
-        "workflow_step_id": options.workflow_step_id if options is not None else None,
-    }
-    if "_" in result.pipeline_name:
-        provider, _sep, entity = result.pipeline_name.partition("_")
-        identity["provider"] = provider or None
-        identity["entity"] = entity or None
-    return identity
 
 
 def _require_run_result(value: object) -> RunResult:
@@ -312,19 +285,6 @@ async def complete_pipeline_dry_run(
     return dry_run_result
 
 
-async def create_execution_runner_audited(
-    create_runner: Callable[[], ExecutionMetricsRunnerPort],
-    *,
-    record_failure: Callable[[Exception], Awaitable[None]],
-) -> ExecutionMetricsRunnerPort:
-    """Create a runner and audit unexpected constructor failures."""
-    try:
-        return create_runner()
-    except Exception as exc:
-        await record_failure(exc)
-        raise
-
-
 def _require_execution_runner(runner: object) -> ExecutionMetricsRunnerPort:
     """Validate producer output before pipeline side effects begin."""
     from bioetl.domain.ports import ExecutionMetricsRunnerPort
@@ -407,3 +367,34 @@ async def record_pipeline_audit_event(
     if error_type is not None:
         event_data["error_type"] = error_type
     await audit.log_event(event_name, event_data, timestamp=timestamp)
+
+
+async def prepare_execution_runner(
+    factory: RunnerFactoryPort,
+    context: PipelineRunContext,
+    record_failure: Callable[[Exception], Awaitable[RunResult]],
+) -> ExecutionMetricsRunnerPort | RunResult:
+    """Record constructor failures through the same terminal evidence boundary."""
+    try:
+        return _require_execution_runner(factory.create(context))
+    except Exception as error:
+        failed = await record_failure(error)
+        if is_empty_cached_bronze_provenance_error(error):
+            return failed
+        raise
+
+
+def finalize_terminal_evidence(
+    write_report: Callable[[], None],
+    *,
+    execution_error: BaseException | None,
+    logger: LoggerPort,
+    event: str,
+) -> None:
+    """Report persistence may fail visibly, but never replace a primary error."""
+    try:
+        write_report()
+    except Exception as report_error:
+        if execution_error is None:
+            raise
+        logger.error(event, error=str(report_error))

@@ -55,7 +55,8 @@
     "webpack-cli": "^6.0.0",
     "webpack-livereload-plugin": "^3.0.2",
     "webpack-subresource-integrity": "^5.1.0",
-    "webpack-virtual-modules": "^0.6.2"
+    "webpack-virtual-modules": "^0.6.2",
+    "braces": "file:../../../.github/tooling/braces-backport/braces-3.0.4-bioetl.1.tgz"
   },
   "engines": {
     "node": ">=20"
@@ -73,6 +74,7 @@
   },
   "packageManager": "npm@10.8.2",
   "overrides": {
-    "react-router-dom-v5-compat": "$react-router-dom-v5-compat"
+    "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
+    "braces": "$braces"
   }
 }

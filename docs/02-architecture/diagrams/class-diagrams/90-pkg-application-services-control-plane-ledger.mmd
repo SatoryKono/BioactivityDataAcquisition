@@ -1,11 +1,11 @@
 %% Title: Package Family: application/services/control_plane/ledger
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/control_plane/ledger; modules: core_events, entry_diagnostic_details, entry_support, rich_events, service.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/control_plane/ledger; modules: core_events, entry_diagnostic_details, entry_support, rich_events, input_snapshot_recording, service.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-09-25
+%% @date    2026-10-04
 %% @level   Package Family / Inventory Slice
-%% @nodes   9
+%% @nodes   10
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -29,6 +29,10 @@ classDiagram
         class _RunLedgerAppender
     }
 
+    namespace input_snapshot_recording {
+        class _SnapshotPublishKwargs
+    }
+
     namespace service {
         class RunLedgerService
     }
@@ -36,4 +40,3 @@ classDiagram
     RunLedgerCorrelationFieldsProtocol <|-- _RunLedgerServiceEntryProtocol
     RunLedgerRichEventRecordingMixin <|-- RunLedgerService
     _RunLedgerCorrelationFields <|-- _RunLedgerCoreEventAppender
-

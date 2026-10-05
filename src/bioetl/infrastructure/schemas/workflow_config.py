@@ -13,10 +13,12 @@ from bioetl.domain.workflow import (
     WorkflowConfig,
     WorkflowRunOptionsConfig,
     WorkflowStepConfig,
+    apply_reconciliation_mode,
     reject_delete_orphans_after_limited_extracts,
 )
 from bioetl.domain.workflow.config import WorkflowReferenceCohort
 from bioetl.infrastructure.schemas.workflow_config_fk import (
+    WorkflowReferenceCohortSchema,
     _normalize_fk_optional_name,
     _normalize_fk_optional_names,
     _normalize_fk_required_name,
@@ -154,16 +156,6 @@ class WorkflowDefaultsSchema(BaseModel):
     def to_domain(self) -> WorkflowRunOptionsConfig:
         """Convert workflow defaults to immutable domain config."""
         return self.run_options.to_domain()
-
-
-class WorkflowReferenceCohortSchema(BaseModel):
-    """Strict selection binding; no independently sampled reference universe."""
-
-    model_config = ConfigDict(extra="forbid")
-    step_id: str = Field(..., min_length=1)
-    table: str = Field(..., pattern=r"^[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*$")
-    column: str = Field(..., min_length=1)
-    filter_field: str = Field(..., min_length=1)
 
 
 class WorkflowPipelineStepSchema(BaseModel):
@@ -405,10 +397,6 @@ class WorkflowConfigSchema(BaseModel):
             domain = self.to_domain()
         except ValueError as exc:
             raise ValueError(str(exc)) from exc
-        from bioetl.domain.workflow._delete_orphans_scope import (
-            apply_reconciliation_mode,
-        )
-
         domain = apply_reconciliation_mode(domain)
         reject_delete_orphans_after_limited_extracts(domain)
         return self
@@ -422,10 +410,6 @@ class WorkflowConfigSchema(BaseModel):
             else step.to_domain()
             for step in self.steps
         )
-        from bioetl.domain.workflow._delete_orphans_scope import (
-            apply_reconciliation_mode,
-        )
-
         return apply_reconciliation_mode(
             WorkflowConfig(
                 name=self.name,

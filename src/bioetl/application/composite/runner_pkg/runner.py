@@ -33,8 +33,6 @@ from bioetl.application.composite.runner_pkg.runner_lifecycle_flow import (
 from bioetl.application.composite.runner_pkg.runner_runtime_helpers import (
     bind_runner_dependencies,
     initialize_runner_runtime_state,
-    prepare_run_state,
-    resolve_original_run_id,
     run_with_managed_lock,
     validate_runner_can_start,
 )
@@ -202,21 +200,6 @@ class CompositePipelineRunner(
         )
         self._mark_finished(CompositePipelineState.COMPLETED)
         return lock_run_result
-
-    async def _prepare_run_state(self) -> CompositeCheckpointState:
-        """Load checkpoint state and apply resume semantics when configured."""
-        state = await prepare_run_state(
-            checkpoint_manager=self._checkpoint_manager,
-            runtime=self._runtime,
-            fsm=self._fsm,
-            clock=self._clock,
-        )
-        self._original_run_id = resolve_original_run_id(
-            runtime=self._runtime,
-            state=state,
-            current_run_id=self._run_id_str,
-        )
-        return state
 
     async def _extract_enrichment_keys(self) -> pl.DataFrame:
         """Extract seed keys once the seed phase has completed."""
