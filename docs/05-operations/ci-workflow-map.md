@@ -11,7 +11,7 @@ ______________________________________________________________________
 # CI / GitHub Actions Workflow Map
 
 The active PR/default-main provider is CircleCI `.circleci/config.yml`, workflow
-`pr-gate`, with required status context `ci/circleci: pr-gate-complete`.
+`pr-gate`, with GitHub required context `ci/circleci: pr-gate-complete`.
 The canonical applicability catalog is `configs/quality/github_required_checks.yaml`.
 Its `deployment` block identifies CircleCI; retained `coordinator_workflow` and
 `owner_workflow` fields describe the legacy Actions definitions until #11930.
