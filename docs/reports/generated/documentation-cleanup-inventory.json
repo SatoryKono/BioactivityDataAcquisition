@@ -58819,7 +58819,7 @@
       "github_issue_url": null,
       "inbound_links": 4,
       "lifecycle": null,
-      "outbound_links": 4,
+      "outbound_links": 5,
       "owner": "BioETL Team",
       "path": "docs/05-operations/ci-workflow-map.md",
       "recommended_action": "keep",
@@ -101623,6 +101623,34 @@
       "duplicate_group": null,
       "duplicate_resolution": null,
       "extension": ".json",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "active_quality_baseline",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/quality/proof-or-stop/rf023-eda48c52-inventory-failure/summary.json",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".json",
       "freshness": "review-required",
       "generated_route": null,
       "generated_route_exception": null,
@@ -106423,7 +106451,7 @@
     "by_lifecycle": {
       "active_backlog": 1,
       "active_draft": 278,
-      "active_quality_baseline": 60,
+      "active_quality_baseline": 61,
       "closeout_evidence": 163,
       "docs_reports_curated_entrypoint": 2,
       "docs_reports_curated_or_historical_report": 27,
@@ -106444,7 +106472,7 @@
       "archive-after-github-state-check": 338,
       "archive-after-migration": 1036,
       "generate-automatically": 1060,
-      "keep": 1330,
+      "keep": 1331,
       "reconcile-with-github-state": 8
     },
     "by_section": {
@@ -106469,7 +106497,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 1289,
+      "reports": 1290,
       "security": 2
     },
     "by_status": {
@@ -106477,17 +106505,17 @@
       "Archived": 283,
       "Canonical": 75,
       "Generated": 1060,
-      "Working": 1605
+      "Working": 1606
     },
     "by_surface_family": {
       "active": 749,
       "archive": 283,
       "canonical": 75,
       "generated": 1060,
-      "working": 1605
+      "working": 1606
     },
     "by_tracking_state": {
-      "tracked": 3772
+      "tracked": 3773
     },
     "docs_reports_local_count": 57,
     "duplicate_group_count": 7,
@@ -106503,8 +106531,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3772,
+    "total_doc_like": 3773,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3772
+    "total_doc_like_tracked": 3773
   }
 }

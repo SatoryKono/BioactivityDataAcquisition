@@ -365,7 +365,8 @@ When adding a workflow:
    canonical inventory.
 
 
-The replay lane loads `scripts.engineering.ci.replay_parity_inputs` explicitly
+The replay lane loads
+[`scripts.engineering.ci.replay_parity_inputs`](../../scripts/engineering/ci/replay_parity_inputs.py) explicitly
 for the determinism suite only. It fixes input occurrence seeds, SystemClock,
 checkpoint history nanoseconds and storage metadata duration counters. Async
 scheduler/timeout clocks remain real. Both processes use the same working path;
