@@ -105,3 +105,9 @@ docker compose -f docker-compose.monitoring.yml -f grafana/tooling/router-v7-bri
 This removes both the probe mount and its unsigned allowlist entry. Do not add
 the probe to `.env` or the default compose. Keep the candidate opt-in isolated
 until acceptance, SBOM, backup/rollback and proof gates admit managed rollout.
+
+For the JSON-dashboard variant, use `compose.managed-acceptance.yml` in place of
+`compose.acceptance.yml`, and `compose.managed-probe.yml` in place of
+`compose.probe.yml`. This temporary allowlist contains only SelectorShell and
+the probe. After capture, recreate with the managed acceptance layer alone;
+Scenes remains absent and the probe mount and permission are removed.
