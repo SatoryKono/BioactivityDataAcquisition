@@ -83,6 +83,9 @@ jobs:
     resource_class: medium
     steps:
       - checkout
+      - setup-python-uv:
+          python-version: '3.13'
+          extras: dev
       - setup_remote_docker:
           version: default
       - run:
@@ -109,6 +112,9 @@ jobs:
             repo_root="$(git rev-parse --show-toplevel)"
             test "$(git rev-parse HEAD)" = "$CIRCLE_SHA1"
             export PYTHONPATH="${repo_root}/src:${repo_root}"
+            # Use the lockfile environment even after moving into the artifact directory.
+            export PATH="${repo_root}/.venv/bin:$PATH"
+            python3 -c "import yaml; from scripts.engineering.qa.docker_stability_campaign import trivy_baseline"
             export IMAGE_REF="bioetl:${CIRCLE_SHA1}"
             workdir="${DOCKER_BASELINE_WORKDIR:-/tmp/bioetl-docker-baseline}"
             mkdir "$workdir"
