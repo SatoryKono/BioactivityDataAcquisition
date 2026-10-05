@@ -13,7 +13,7 @@ version: 2.1
 parameters:
   ci-lane:
     type: enum
-    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance, e2e-replay, coverage-closeout, docker-baseline, docker-publish, architecture-metrics, scorecard, scorecard-publish]
+    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance, e2e-replay, coverage-closeout, docker-baseline, docker-publish, architecture-metrics, scorecard, scorecard-publish, release-validation]
     default: pr-gate
   include-hypothesis:
     type: boolean
@@ -98,6 +98,155 @@ commands:
             fi
 
 jobs:
+  release-dist-build:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+          extras: dev
+      - run:
+          name: Verify release source and passport history
+          command: |
+            set -euo pipefail
+            test "$CIRCLE_BRANCH" = main
+            test "$(git rev-parse HEAD)" = "$CIRCLE_SHA1"
+            if test "$(git rev-parse --is-shallow-repository)" = true; then
+              git fetch --unshallow --no-tags origin
+            fi
+            uv run --frozen --no-build python -m scripts.engineering.repo check-versions
+            uv run --frozen --no-build python -m scripts.docs passports check --require-clean-source
+      - run:
+          name: Build and verify wheel and source distribution
+          no_output_timeout: 11m
+          command: |
+            set -euo pipefail
+            timeout --signal=TERM --kill-after=30s 10m bash -euo pipefail -c '
+              uv run --frozen --no-build python -m build --outdir /tmp/bioetl-release/dist
+              uv run --frozen --no-build twine check /tmp/bioetl-release/dist/*
+            '
+            python3 - \<<'PY'
+            import hashlib, json, os
+            from pathlib import Path
+            root = Path('/tmp/bioetl-release')
+            files = sorted((root / 'dist').iterdir())
+            assert len(files) == 2 and len(list((root / 'dist').glob('*.whl'))) == len(list((root / 'dist').glob('*.tar.gz'))) == 1
+            identity = {'source_sha': os.environ['CIRCLE_SHA1'], 'workflow_id': os.environ['CIRCLE_WORKFLOW_ID'], 'job_number': os.environ['CIRCLE_BUILD_NUM'], 'published': False, 'sha256': {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in files}}
+            (root / 'identity.json').write_text(json.dumps(identity, sort_keys=True) + '\n', encoding='utf-8')
+            PY
+      - persist_to_workspace:
+          root: /tmp/bioetl-release
+          paths:
+            - dist
+            - identity.json
+      - store_artifacts:
+          path: /tmp/bioetl-release
+          destination: release-build
+
+  release-install:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+          extras: dev
+      - attach_workspace:
+          at: /tmp/bioetl-release
+      - run:
+          name: Install exact wheel into isolated locked runtime
+          no_output_timeout: 16m
+          command: |
+            set -euo pipefail
+            timeout --signal=TERM --kill-after=30s 15m bash -euo pipefail \<<'INSTALL'
+            python3 - \<<'PY'
+            import hashlib, json, os
+            from pathlib import Path
+            root = Path('/tmp/bioetl-release')
+            identity = json.loads((root / 'identity.json').read_text())
+            assert identity['source_sha'] == os.environ['CIRCLE_SHA1'] and identity['workflow_id'] == os.environ['CIRCLE_WORKFLOW_ID']
+            files = sorted((root / 'dist').iterdir())
+            assert len(files) == 2 and {p.name for p in files} == set(identity['sha256'])
+            assert all(p.is_file() and not p.is_symlink() and hashlib.sha256(p.read_bytes()).hexdigest() == identity['sha256'][p.name] for p in files)
+            wheels = list((root / 'dist').glob('*.whl'))
+            assert len(wheels) == 1
+            name, version, *_ = wheels[0].name.split('-')
+            assert name == 'bioetl'
+            requirement = f"{name}=={version} --hash=sha256:{identity['sha256'][wheels[0].name]}\n"
+            (root / 'wheel-requirements.txt').write_text(requirement, encoding='utf-8')
+            PY
+            uv venv --python 3.13 /tmp/bioetl-release-installed
+            uv export --frozen --no-dev --no-emit-project --format requirements-txt --output-file /tmp/bioetl-release/runtime-requirements.txt
+            uv pip install --python /tmp/bioetl-release-installed/bin/python --require-hashes --only-binary=:all: -r /tmp/bioetl-release/runtime-requirements.txt
+            uv pip install --python /tmp/bioetl-release-installed/bin/python --require-hashes --only-binary=:all: --no-deps --no-index --find-links=/tmp/bioetl-release/dist -r /tmp/bioetl-release/wheel-requirements.txt
+            unset PYTHONPATH
+            cd /tmp
+            /tmp/bioetl-release-installed/bin/python -I -c 'import bioetl, sys; from pathlib import Path; assert Path(bioetl.__file__).resolve().is_relative_to(Path(sys.prefix).resolve()); print(bioetl.__file__)'
+            /tmp/bioetl-release-installed/bin/bioetl --help
+            /tmp/bioetl-release-installed/bin/bioetl --version
+            INSTALL
+      - store_artifacts:
+          path: /tmp/bioetl-release
+          destination: release-install
+
+  release-tests:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: medium
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+          extras: dev
+      - run:
+          name: Same-SHA release smoke and supply-chain contracts
+          no_output_timeout: 21m
+          command: |
+            set -euo pipefail
+            timeout --signal=TERM --kill-after=30s 20m bash -euo pipefail -c '
+              mkdir -p reports/release-tests
+              uv run --frozen --no-build pytest tests/smoke/ -m "not memory" -q --tb=line --junitxml=reports/release-tests/smoke.xml
+              uv run --frozen --no-build pytest tests/architecture/test_github_actions_runtime_policy.py tests/architecture/test_docker_runtime_contracts.py -q --tb=line --junitxml=reports/release-tests/supply-chain.xml
+            '
+      - store_test_results:
+          path: reports/release-tests
+      - store_artifacts:
+          path: reports/release-tests
+
+  release-validation-complete:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/bioetl-release
+      - run:
+          name: Record verified release preflight without a publication claim
+          command: |
+            python3 - \<<'PY'
+            import json, os, urllib.request
+            from pathlib import Path
+            root = Path('/tmp/bioetl-release')
+            identity = json.loads((root / 'identity.json').read_text())
+            assert os.environ['CIRCLE_BRANCH'] == 'main'
+            assert identity['source_sha'] == os.environ['CIRCLE_SHA1'] and identity['workflow_id'] == os.environ['CIRCLE_WORKFLOW_ID']
+            with urllib.request.urlopen('https://circleci.com/api/v2/workflow/' + identity['workflow_id'] + '/job', timeout=30) as response:
+                jobs = json.load(response)['items']
+            required = {'release-dist-build', 'release-install', 'release-tests', 'security-scans'}
+            accepted = [job for job in jobs if job['name'] in required]
+            assert len(accepted) == len(required) and {job['name'] for job in accepted} == required
+            assert all(job['status'] == 'success' for job in accepted)
+            assert str(next(job for job in accepted if job['name'] == 'release-dist-build')['job_number']) == str(identity['job_number'])
+            receipt = {'source_sha': identity['source_sha'], 'workflow_id': identity['workflow_id'], 'distribution_validation': 'passed', 'published': False, 'publication_ready': False, 'pending': ['dist SBOM and signed provenance', 'protected TestPyPI/PyPI promotion', 'release assets'], 'jobs': {job['name']: job['job_number'] for job in accepted}}
+            (root / 'validation.json').write_text(json.dumps(receipt, sort_keys=True) + '\n', encoding='utf-8')
+            PY
+      - store_artifacts:
+          path: /tmp/bioetl-release/validation.json
+          destination: release-validation
+
   scorecard-analysis:
     docker:
       - image: cimg/python:3.12
@@ -2273,3 +2422,21 @@ workflows:
           requires:
             - scorecard-publish-approval
           serial-group: 9f037fd7-4fd9-41af-9916-33ca1e56cf7b/scorecard-publication
+  release-validation:
+    when:
+      and:
+        - equal: [release-validation, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - release-dist-build
+      - release-install:
+          requires:
+            - release-dist-build
+      - security-scans
+      - release-tests
+      - release-validation-complete:
+          requires:
+            - release-dist-build
+            - release-install
+            - security-scans
+            - release-tests

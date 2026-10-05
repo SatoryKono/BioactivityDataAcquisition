@@ -244,7 +244,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `e2e-matrix-health.yml` | `30 2 * * *` | E2E replay and controlled live lanes | Main-only `e2e-replay` prepared with three reruns and skip SLO; live/nightly and PR event parity pending |
 | `github-settings-quarterly-review.yml` | `23 6 1 1,4,7,10 *` | CircleCI github-settings-review | Authenticated main run 2773 completed report collection (policy drift remains explicit); quarterly first-day Jan/Apr/Jul/Oct 06 UTC schedule registered with Scheduling System; scheduled execution pending |
 | `import-linter.yml` | — | CircleCI lint-arch and arch-tests | Prepared gates; full external architecture acceptance pending |
-| `labeler.yml` | — | GitHub API label maintenance | Pending port; trusted actor and scoped issue/PR write access |
+| `labeler.yml` | — | Retain disabled label maintenance | Preserve #10263/#11234; taxonomy reconciliation is required before any future trusted replacement |
 | `memory-freshness.yml` | `17 5 * * 1` | CircleCI memory-freshness | Prepared check-only lane; PR parity and scheduled failure notification pending |
 | `memory-retention.yml` | `17 4 * * 1` | CircleCI memory-retention | Weekly trigger registered; main run 2604 passed check-only retention; scheduled execution pending, no prune mutation |
 | `mutation-testing.yml` | `0 0 * * 0` | Scheduled-only mutation lane | Sunday 00 UTC schedule restored after pipeline 227; two targets passed, domain and control-plane interrupted without final artifacts; 70/60/60/60 thresholds unchanged |
@@ -254,21 +254,21 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `opencode-triage.yml` | — | Retain disabled triage stub policy | Do not activate unpinned installer or write paths |
 | `performance-nightly.yml` | `0 3 * * *` | CircleCI performance | Main job 3365 passes 70 tests without skips and all five budgets; daily 03 UTC trigger registered, scheduled execution pending |
 | `port-contracts.yml` | — | CircleCI port-contracts | Main run 2606 passed 188 tests including 24 Hypothesis cases; push/PR event parity pending |
-| `pr-hygiene.yml` | — | GitHub API PR maintenance | Pending port; validation and trusted write boundary |
+| `pr-hygiene.yml` | — | Retain disabled PR maintenance | Preserve #10263; canonical 21-day draft/report-noise policy remains manual |
 | `pr-required.yml` | — | CircleCI classify/pr-gate-complete | Main pipelines 218–220 pass all 81 jobs on a34558b918b5; both production rulesets active/read back; legacy owner references retained until #11930 |
 | `provider-contract-drift.yml` | — | CircleCI provider-contract-drift | Main run 3112 passes replay, matrix/xwalk and breaking-drift gates; push/PR parity pending; artifact retention verified at 30 days |
 | `quality-debt-weekly.yml` | — | Retain disabled debt review policy | Do not activate job with existing if:false; local audits retained |
-| `release.yml` | — | Protected release promotion lane | Pending port; approval and restricted PyPI/GHCR credentials |
+| `release.yml` | — | CircleCI release-validation plus protected promotion | Build/install/release-test/security preflight prepared; remote acceptance, dist SBOM/provenance, TestPyPI/PyPI and release assets remain pending |
 | `reusable-mermaid-setup.yml` | — | Shared pinned Mermaid tooling | Pending consumer migration; keep lockfile scanned by OSV |
 | `reusable-setup.yml` | — | CircleCI setup-python-uv | Checksum-pinned uv 0.11.26 and explicit UV_PYTHON prepared; remote runtime/cache parity pending |
 | `root-hygiene.yml` | — | CircleCI root-hygiene | Main full-tree/strict checks accepted; cleanup diagnostic artifacts and dedicated legacy regression selectors added for next acceptance; structure-audit port is blocked by six tracked Python paths outside allowed roots |
 | `router-v7-bridge.yml` | — | Router bridge candidate acceptance | Pending port; managed host evidence remains separate |
 | `schema-governance.yml` | — | CircleCI schema-governance | Prepared required gate; canonical generation/parity preserved |
-| `scorecard.yml` | `30 7 * * 1` | CircleCI scorecard plus SARIF publication | Main-only read-only JSON/SARIF analysis prepared; pinned v5.5.0, all 18 checks and exact main SHA; local Linux 7.8/10 on 303ced3b; local SARIF API upload processed, remote schedule/write context and public result publication pending |
+| `scorecard.yml` | `30 7 * * 1` | CircleCI scorecard plus SARIF publication | Main-only JSON/SARIF analysis and protected writer prepared; pinned v5.5.0 and all 18 checks; local Linux 7.8/10 on 303ced3b and processed SARIF; restricted empty write context exists, credentials/remote acceptance/schedule and public result decision pending |
 | `security.yml` | — | CircleCI security-scans | Main security gates 218–220 passed; all tracked lockfiles remain scanned; SARIF publication parity pending |
 | `semantic-governance.yml` | — | CircleCI `semantic-governance` | Seven canonical checks and four regression suites in the PR/main aggregate and an opt-in main lane; main gates 218–220 accepted |
 | `skills-consistency.yml` | — | CircleCI skills-consistency | Main run 3364 passed static doctor, MCP wrapper pairs, mirror checks and drift=false artifact; approved sync and event parity pending; artifact retention verified at 30 days |
-| `stale.yml` | — | GitHub API stale maintenance | Pending port; preserve exclusions and trusted write policy |
+| `stale.yml` | — | Retain disabled stale maintenance | Preserve #10263; legacy 14/7-day automation contradicts the canonical draft-only policy |
 | `tests.yml` | — | CircleCI test-fast/test-integration | Main gates 218–220 accepted; historical producer 3363 completed 17 shards with overall STOP; test-tree changes require a new complete 17-shard producer, followed by another main producer after squash integration |
 | `type-checking.yml` | — | CircleCI mypy | Strict mypy gate accepted in main pipelines 218–220 |
 | `vacuum.yml` | — | Local maintenance command | Retain manual/local operation; no automatic destructive schedule |
@@ -432,3 +432,25 @@ rejects stale main, and waits for GitHub ingestion to complete. A saved upload I
 alone is not acceptance. This does not publish to the OpenSSF public results API;
 that upstream transport requires GitHub Actions identity and remains unresolved
 under the repository's Actions-disabled policy.
+
+The `release-validation` lane prepares the non-publishing release path on main.
+It preserves version/passport checks, wheel and sdist build, Twine validation,
+Python 3.13 smoke/supply-chain tests, and the existing security-scans job. Wheel
+installation runs in a fresh environment using hash-locked runtime dependencies
+and the local wheel only; its import and CLI checks cannot resolve the editable
+checkout. The aggregate records the successful same-workflow job numbers and
+explicitly leaves `publication_ready` and `published` false. Distribution SBOM,
+signed provenance, protected TestPyPI/PyPI promotion and release assets remain
+required before release migration acceptance. This lane does not re-enable the
+KEEP-DISABLED Actions release workflow.
+
+The disabled label-maintenance and PR-maintenance workflows are retirement
+candidates for their Actions transport, not activation requirements for CircleCI.
+`labeler.yml` explicitly retains #10263/#11234 until live labels match the
+canonical taxonomy. `stale.yml` and `pr-hygiene.yml` both have `if: false` and
+remain disabled under `.github/PULL_REQUEST_HYGIENE.md`: only draft report-noise
+PRs inactive for at least 21 days may qualify for closure. The legacy stale
+workflow's 14-day stale/7-day close settings must not be copied into an active
+replacement. Preserve `.github/labeler.yml`, the label taxonomy, and the manual
+hygiene policy when #11930 removes the disabled workflow transports. Any future
+write automation needs its own policy-aligned implementation and acceptance.
