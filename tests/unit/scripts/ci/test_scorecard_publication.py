@@ -175,6 +175,64 @@ def test_main_advance_prevents_publication(publication, monkeypatch):
     assert not any(payload for _, _, payload in calls)
 
 
+@pytest.mark.parametrize("value", [None, [], {}, {"sha256": []}])
+def test_malformed_identity_rejected_before_network(publication, value):
+    path, environment, _, _, calls, _ = publication
+    (path / "identity.json").write_text(json.dumps(value), encoding="utf-8")
+    with pytest.raises(ValueError):
+        publisher.publish(path, path / "receipt.json", environment)
+    assert calls == []
+    assert not (path / "receipt.json").exists()
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        None,
+        [],
+        {},
+        {"version": "2.1.0", "runs": {}},
+        {"version": "2.1.0", "runs": []},
+        {"version": "2.1.0", "runs": [None]},
+        {"version": "2.1.0", "runs": [{}]},
+        {"version": "2.1.0", "runs": [{"tool": []}]},
+        {"version": "2.1.0", "runs": [{"tool": {"driver": []}}]},
+    ],
+)
+def test_malformed_sarif_rejected_before_network(publication, value):
+    path, environment, identity, _, calls, _ = publication
+    report = path / "results.sarif"
+    report.write_text(json.dumps(value), encoding="utf-8")
+    identity["sha256"]["results.sarif"] = hashlib.sha256(
+        report.read_bytes()
+    ).hexdigest()
+    (path / "identity.json").write_text(json.dumps(identity), encoding="utf-8")
+    with pytest.raises(ValueError):
+        publisher.publish(path, path / "receipt.json", environment)
+    assert calls == []
+    assert not (path / "receipt.json").exists()
+
+
+def test_receipt_cannot_escape_workspace(publication):
+    path, environment, _, _, calls, _ = publication
+    output = path / ".." / "unrelated" / "receipt.json"
+    with pytest.raises(ValueError, match="publication workspace"):
+        publisher.publish(path, output, environment)
+    assert calls == []
+    assert not output.exists()
+
+
+def test_cli_rejects_arbitrary_output_before_publication(publication):
+    path, _, _, _, calls, _ = publication
+    output = path / "receipt.json"
+    with pytest.raises(ValueError, match="receipt path is fixed"):
+        publisher.main(
+            ["--directory", str(publisher.REPORT_DIRECTORY), "--output", str(output)]
+        )
+    assert calls == []
+    assert not output.exists()
+
+
 def test_writer_is_main_only_and_requires_approved_read_only_analysis():
     root = next(
         path

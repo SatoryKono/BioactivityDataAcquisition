@@ -16,6 +16,8 @@ import urllib.request
 
 REPOSITORY = "SatoryKono/BioactivityDataAcquisition"
 GITHUB_API = "https://api.github.com/repos/" + REPOSITORY
+REPORT_DIRECTORY = Path("/tmp/bioetl-scorecard/reports")
+PUBLICATION_RECEIPT = Path("/tmp/bioetl-scorecard/publication/receipt.json")
 
 
 def _require(condition: bool, message: str) -> None:
@@ -49,23 +51,40 @@ def validate_inputs(directory: Path, environment: dict[str, str]) -> tuple[dict,
     _require(re.fullmatch(r"[0-9a-f]{40}", sha) is not None, "Invalid source SHA")
     workflow = environment.get("CIRCLE_WORKFLOW_ID", "")
     _require(re.fullmatch(r"[0-9a-f-]{36}", workflow) is not None, "Invalid workflow")
-    identity = json.loads((directory / "identity.json").read_text(encoding="utf-8"))
-    _require(identity["source_sha"] == sha, "Foreign source SHA")
-    _require(identity["workflow_id"] == workflow, "Foreign producer workflow")
-    _require(str(identity["job_number"]).isdigit(), "Invalid producer job")
-    _require(identity["check_count"] == 18, "Incomplete Scorecard check set")
-    _require(identity["sarif_uploaded"] is False, "Report already marked uploaded")
     _require(
-        identity["public_results_published"] is False, "Unexpected publication claim"
+        directory.is_dir() and not directory.is_symlink(), "Invalid report directory"
     )
+    identity_path = directory / "identity.json"
+    _require(
+        identity_path.is_file() and not identity_path.is_symlink(),
+        "Missing or linked identity",
+    )
+    identity = json.loads(identity_path.read_text(encoding="utf-8"))
+    _require(isinstance(identity, dict), "Identity must be an object")
+    _require(identity.get("source_sha") == sha, "Foreign source SHA")
+    _require(identity.get("workflow_id") == workflow, "Foreign producer workflow")
+    _require(str(identity.get("job_number")).isdigit(), "Invalid producer job")
+    _require(identity.get("check_count") == 18, "Incomplete Scorecard check set")
+    _require(identity.get("sarif_uploaded") is False, "Report already marked uploaded")
+    _require(
+        identity.get("public_results_published") is False,
+        "Unexpected publication claim",
+    )
+    digests = identity.get("sha256")
+    _require(isinstance(digests, dict), "Report digests must be an object")
     for name in ("results.json", "results.sarif"):
         path = directory / name
         _require(path.is_file() and not path.is_symlink(), "Missing or linked report")
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
-        _require(identity["sha256"][name] == digest, "Report digest mismatch")
+        _require(digests.get(name) == digest, "Report digest mismatch")
     raw = (directory / "results.sarif").read_bytes()
     sarif = json.loads(raw)
-    _require(sarif["version"] == "2.1.0" and bool(sarif["runs"]), "Invalid SARIF")
+    _require(isinstance(sarif, dict), "SARIF must be an object")
+    runs = sarif.get("runs")
+    _require(sarif.get("version") == "2.1.0", "Invalid SARIF version")
+    _require(
+        isinstance(runs, list) and bool(runs), "SARIF runs must be a nonempty list"
+    )
     provenance = [
         {
             "repositoryUri": "https://github.com/" + REPOSITORY,
@@ -73,11 +92,19 @@ def validate_inputs(directory: Path, environment: dict[str, str]) -> tuple[dict,
             "branch": "main",
         }
     ]
-    for run in sarif["runs"]:
-        driver = run["tool"]["driver"]
-        _require(driver["name"] == "Scorecard", "Unexpected analysis tool")
-        _require(driver["semanticVersion"] == "v5.5.0", "Unexpected Scorecard version")
-        _require(run["versionControlProvenance"] == provenance, "Foreign SARIF source")
+    for run in runs:
+        _require(isinstance(run, dict), "SARIF run must be an object")
+        tool = run.get("tool")
+        _require(isinstance(tool, dict), "SARIF tool must be an object")
+        driver = tool.get("driver")
+        _require(isinstance(driver, dict), "SARIF driver must be an object")
+        _require(driver.get("name") == "Scorecard", "Unexpected analysis tool")
+        _require(
+            driver.get("semanticVersion") == "v5.5.0", "Unexpected Scorecard version"
+        )
+        _require(
+            run.get("versionControlProvenance") == provenance, "Foreign SARIF source"
+        )
     return identity, raw
 
 
@@ -109,6 +136,15 @@ def verify_workflow(identity: dict) -> None:
 def publish(directory: Path, output: Path, environment: dict[str, str]) -> dict:
     """Upload once, wait for GitHub ingestion, then persist a truthful receipt."""
     identity, raw = validate_inputs(directory, environment)
+    report_root = directory.resolve(strict=True)
+    _require(
+        output.name == "receipt.json" and not output.is_symlink(),
+        "Invalid receipt path",
+    )
+    _require(
+        output.parent.resolve() in {report_root, report_root.parent / "publication"},
+        "Receipt must stay in the publication workspace",
+    )
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     _require(head == identity["source_sha"], "Checkout differs from producer")
     token = environment.get("SARIF_GITHUB_TOKEN", "")
@@ -166,7 +202,12 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--directory", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(argv)
-    receipt = publish(args.directory, args.output, dict(os.environ))
+    _require(args.directory == REPORT_DIRECTORY, "CLI report workspace is fixed")
+    _require(args.output == PUBLICATION_RECEIPT, "CLI receipt path is fixed")
+    _require(
+        REPORT_DIRECTORY.parent.resolve() == REPORT_DIRECTORY.parent, "Linked workspace"
+    )
+    receipt = publish(REPORT_DIRECTORY, PUBLICATION_RECEIPT, dict(os.environ))
     print(
         "Scorecard SARIF ingestion:", receipt["processing_status"], receipt["upload_id"]
     )
