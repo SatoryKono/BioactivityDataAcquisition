@@ -31,7 +31,6 @@ from __future__ import annotations
 
 import importlib
 import importlib.util
-import sys
 
 import pytest
 
@@ -58,13 +57,19 @@ def test_composite_api_reexports_bootstrap_entrypoints() -> None:
 
 
 @pytest.mark.unit
-def test_bootstrap_package_root_reexports_curated_lazy_helpers() -> None:
+def test_bootstrap_package_root_reexports_curated_lazy_helpers(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Package bootstrap root should expose only the curated bootstrap surface."""
-    sys.modules.pop("bioetl.composition.bootstrap", None)
-
     bootstrap_module = importlib.import_module("bioetl.composition.bootstrap")
-    # E2E autouse may leave a stale lazy-export cache on the package root.
-    bootstrap_module.__dict__.pop("bootstrap_pipeline_runner", None)
+    # Keep package identity: child modules may already be cached in sys.modules.
+    # E2E autouse may leave stale lazy exports; restore them after this test.
+    for name in (
+        "bootstrap_pipeline_runner",
+        "bootstrap_composite_runner",
+        "load_pipeline_config",
+    ):
+        monkeypatch.delitem(bootstrap_module.__dict__, name, raising=False)
     runtime_pipeline_module = importlib.import_module(
         "bioetl.composition.bootstrap.runtime.pipeline"
     )
