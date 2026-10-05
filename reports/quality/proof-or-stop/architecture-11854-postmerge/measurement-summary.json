@@ -1,0 +1,15 @@
+{
+  "source_commit": "090d7a74c56e9de8db2f96d9a183a9058a55ccc8",
+  "source_tree_sha256": "4db123e5e95045405ceb710e2425c1cd0e733fb6a225dccc7fc4146c63eaacb5",
+  "test_tree_sha256": "89fd40d116eb824b6430cc0d89cd0baf88c3edda4d18677c79d06491e70f60da",
+  "complete": true,
+  "passed": 32830,
+  "skipped": 186,
+  "line_percent": 99.7,
+  "branch_percent": 94.34,
+  "manifest_sha256": "caf85330fbb02a01f200f45914eb9a4c7b1f71483056f9740864c79b4ef5f54f",
+  "archive_sha256": "9922bf38c360063ed15b08e4734d1a8a060e8d5001df82082622b36e1c949508",
+  "archive": "measurement-main-090d7a7.zip",
+  "trust_tier": "local_single_host",
+  "note": "Original manifest and artifact bytes preserved. Absolute producer paths identify the original checkout; archive members use paths relative to its measurement directory. All 17 raw coverage databases and JUnit digests verified. Not independent CI ADMIT."
+}
