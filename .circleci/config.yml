@@ -13,7 +13,7 @@ version: 2.1
 parameters:
   ci-lane:
     type: enum
-    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene]
+    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift]
     default: pr-gate
   include-hypothesis:
     type: boolean
@@ -77,6 +77,88 @@ commands:
             fi
 
 jobs:
+  architecture-docs:
+    docker:
+    - image: cimg/python:3.13
+    resource_class: medium
+    environment: {}
+    steps:
+    - checkout
+    - setup-python-uv:
+        python-version: '3.13'
+        extras: dev tracing
+    - run:
+        name: architecture-docs canonical checks
+        command: 'timeout 15m bash -euo pipefail \<<''LANE''
+
+          mkdir -p reports/architecture-docs/junit
+
+          uv run --frozen --no-build python -m scripts.docs passports generate --output-root /tmp/bioetl-passports --manual-root docs/04-reference/passports/manual --source-revision "$CIRCLE_SHA1"
+
+          uv run --frozen --no-build pytest tests/unit/scripts/docs/passports tests/architecture/test_passport_documentation_projections.py --junitxml=reports/architecture-docs/junit/passports.xml
+
+          uv run --frozen --no-build python scripts/diagrams/render/generate_package_family_class_diagrams.py --check
+
+          uv run --frozen --no-build python -m scripts.engineering.qa.generate_architecture_dependency_map --update
+
+          git status --short docs/02-architecture/generated > reports/architecture-docs/status.txt
+
+          git diff --stat -- docs/02-architecture/generated > reports/architecture-docs/summary.txt
+
+          git diff --exit-code -- docs/02-architecture/generated
+
+          LANE
+
+          '
+    - store_test_results:
+        path: reports/architecture-docs/junit
+    - store_artifacts:
+        path: reports/architecture-docs
+        destination: architecture-docs
+    - store_artifacts:
+        path: docs/02-architecture/generated
+        destination: architecture-dependency-map
+    - store_artifacts:
+        path: /tmp/bioetl-passports
+        destination: executable-passports
+  provider-contract-drift:
+    docker:
+    - image: cimg/python:3.13
+    resource_class: medium
+    environment:
+      VCR_RECORD_MODE: none
+    steps:
+    - checkout
+    - setup-python-uv:
+        python-version: '3.13'
+        extras: dev tracing
+    - run:
+        name: provider-contract-drift canonical checks
+        command: 'timeout 15m bash -euo pipefail \<<''LANE''
+
+          mkdir -p reports/provider-contract-drift/junit
+
+          uv run --frozen --no-build python -m pytest tests/contract/test_provider_contract_drift_helper.py tests/contract/test_provider_contract_snapshot_registry.py tests/contract/test_provider_contract_replay_registry.py tests/contract/test_provider_contract_drift_replay.py tests/unit/application/services/test_export_manifests.py -q --tb=short --junitxml=reports/provider-contract-drift/junit/replay.xml
+
+          uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog
+
+          uv run --frozen --no-build python -m scripts.docs generate-pipeline-normalization-matrix --check
+
+          uv run --frozen --no-build python -m scripts.engineering.qa report-provider-contract-drift --output reports/quality/provider-contract-drift-report.json --fail-on breaking
+
+          test -s reports/quality/provider-contract-drift-report.json
+
+          LANE
+
+          '
+    - store_test_results:
+        path: reports/provider-contract-drift/junit
+    - store_artifacts:
+        path: reports/provider-contract-drift
+        destination: provider-contract-drift
+    - store_artifacts:
+        path: reports/quality/provider-contract-drift-report.json
+        destination: provider-contract-drift-report
   consolidation:
     docker:
       - image: cimg/base:stable
@@ -1145,6 +1227,28 @@ jobs:
 
 workflows:
   version: 2
+  architecture-docs:
+    when:
+      and:
+      - equal:
+        - architecture-docs
+        - << pipeline.parameters.ci-lane >>
+      - equal:
+        - main
+        - << pipeline.git.branch >>
+    jobs:
+    - architecture-docs
+  provider-contract-drift:
+    when:
+      and:
+      - equal:
+        - provider-contract-drift
+        - << pipeline.parameters.ci-lane >>
+      - equal:
+        - main
+        - << pipeline.git.branch >>
+    jobs:
+    - provider-contract-drift
   consolidation:
     when:
       and:

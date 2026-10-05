@@ -1,12 +1,12 @@
-%% Title: Package Family: infrastructure/adapters/http
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/http; modules: _client_retry_flow, client_retry_observability, _client_retry_models, _health_monitor_models, client_request_methods_mixin, health_monitor.
+%% Title: Package Family: infrastructure/adapters/http (Part 1/2)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/http; part 1/2; modules: _client_retry_flow, client_retry_observability, _client_retry_models, _health_monitor_models, health, client_request_methods_mixin.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
 %% @date    2026-10-04
 %% @level   Package Family / Inventory Slice
 %% @nodes   30
-%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
 
     namespace client_retry_flow {
@@ -37,6 +37,12 @@ classDiagram
         class ProviderHealthStateView
     }
 
+    namespace health {
+        class HealthProbeCoordinator
+        class ProviderResources
+        class _Probe
+    }
+
     namespace client_request_methods_mixin {
         class HTTPClientRequestMethodsMixin
         class _HTTPClientRequestHost
@@ -45,6 +51,11 @@ classDiagram
     namespace health_monitor {
         class ProviderHealthMonitor
         class ProviderHealthState
+    }
+
+    namespace request_timing {
+        class RequestTimingHost
+        class _RequestKwargs
     }
 
     namespace client_retry_request_flow {
@@ -67,28 +78,6 @@ classDiagram
         class HTTPClientContextMixin
     }
 
-    namespace client_retry_mixin {
-        class HTTPClientRetryMixin
-    }
-
-    namespace health_tracker {
-        class ProviderHealthTracker
-    }
-
-    namespace pagination {
-        class PaginatedFetcherMixin
-    }
-
-    namespace rate_limiter {
-        class TokenBucketRateLimiter
-    }
-
-    namespace request_timing {
-        class RequestTimingHost
-    }
-
     HTTPClientContextMixin <|-- UnifiedHTTPClient
     HTTPClientRequestMethodsMixin <|-- UnifiedHTTPClient
-    HTTPClientRetryMixin <|-- UnifiedHTTPClient
-    HTTPClientRetryRequestFlow <|-- HTTPClientRetryMixin
     RequestTimingHost <|-- _HTTPClientRequestHost

@@ -72,6 +72,14 @@ Monday 03:15 UTC schedule, PR branch-name event handling, and external acceptanc
 remain pending. Artifact retention must be configured to at least fourteen days
 in the CircleCI project before retiring either legacy workflow.
 
+The `architecture-docs` lane preserves passport generation/validation, class-diagram
+checks, dependency-map regeneration and the failing drift check, with JUnit and
+generated-document artifacts. `provider-contract-drift` preserves replay-only
+contract tests, xwalk/normalization checks and the canonical breaking-drift report.
+Both are isolated main-only preparations with fifteen-minute command limits.
+The nightly architecture schedule, provider push/PR event parity, and external
+artifact retention (fourteen/thirty days respectively) still need acceptance.
+
 Independent phase-3 jobs may be prepared in parallel with phase A. Publishing
 requires successful build/security/baseline gates and separate approval. Final
 badges require the verified phase-B contract. Do not integrate this preparation
@@ -91,7 +99,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 
 | Source workflow | UTC schedule | Successor / disposition | Remaining acceptance |
 | --- | --- | --- | --- |
-| `architecture-docs-nightly.yml` | `15 2 * * *` | Architecture/docs audit lane | Pending port; preserve full audits and artifacts |
+| `architecture-docs-nightly.yml` | `15 2 * * *` | CircleCI architecture-docs | Prepared passport/diagram/dependency audits and artifacts; schedule/retention/run acceptance pending |
 | `architecture.yml` | `20 2 * * *` | Architecture metrics lane | Pending port; canonical reporters and no budget growth |
 | `branch-hygiene.yml` | `15 3 * * 1` | CircleCI branch-hygiene inventory | Prepared read-only lane; schedule, context, retention and PR branch-name events pending |
 | `chembl-baseline-smoke.yml` | — | Representative offline smoke lane | Pending port; preserve cassette playback |
@@ -125,7 +133,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `port-contracts.yml` | — | CircleCI port-contracts | Prepared Hypothesis-enabled lane; push/PR event parity pending |
 | `pr-hygiene.yml` | — | GitHub API PR maintenance | Pending port; validation and trusted write boundary |
 | `pr-required.yml` | — | CircleCI classify/pr-gate-complete | Prepared catalogue-backed contract; main acceptance/rulesets pending |
-| `provider-contract-drift.yml` | — | Provider replay drift lane | Pending port; generated matrix/xwalk and breaking drift failure retained |
+| `provider-contract-drift.yml` | — | CircleCI provider-contract-drift | Prepared replay, matrix/xwalk and breaking-drift gates; push/PR parity and remote acceptance pending |
 | `quality-debt-weekly.yml` | — | Retain disabled debt review policy | Do not activate job with existing if:false; local audits retained |
 | `release.yml` | — | Protected release promotion lane | Pending port; approval and restricted PyPI/GHCR credentials |
 | `reusable-mermaid-setup.yml` | — | Shared pinned Mermaid tooling | Pending consumer migration; keep lockfile scanned by OSV |
