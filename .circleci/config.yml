@@ -544,6 +544,22 @@ jobs:
       - setup-python-uv:
           python-version: "3.13"
       - run:
+          name: Install checksum-pinned GitHub CLI 2.102.0
+          command: |
+            set -euo pipefail
+            test "$(uname -m)" = x86_64
+            ARCHIVE="$(mktemp)"
+            DESTINATION="$(mktemp -d)"
+            trap 'rm -f "$ARCHIVE"; rm -rf "$DESTINATION"' EXIT
+            curl --fail --location --retry 3 \
+              https://github.com/cli/cli/releases/download/v2.102.0/gh_2.102.0_linux_amd64.tar.gz \
+              --output "$ARCHIVE"
+            printf '%s  %s\n' bb766f710eef8ede859c18578c72c327597cd4c8a85b06001b1f3843c6019386 "$ARCHIVE" | sha256sum --check -
+            tar -xzf "$ARCHIVE" -C "$DESTINATION"
+            mkdir -p "$HOME/.local/bin"
+            install -m 0755 "$DESTINATION/gh_2.102.0_linux_amd64/bin/gh" "$HOME/.local/bin/gh"
+            "$HOME/.local/bin/gh" --version
+      - run:
           name: Collect read-only GitHub settings evidence
           command: |
             mkdir -p reports/github-settings
