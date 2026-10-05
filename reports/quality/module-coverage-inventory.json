@@ -1,7 +1,7 @@
 {
-  "additive_coverage_xml_path": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-42/coverage.xml",
-  "additive_coverage_xml_sha256": "af5afe13756f2d73aaeef7a30796fded2116c9ae7fbc4058d66b13156fe23ef9",
-  "additive_measured_module_count": 2472,
+  "additive_coverage_xml_path": "reports/quality/proof-or-stop/config-root-11899/ci-1401/coverage/coverage.xml",
+  "additive_coverage_xml_sha256": "e2a6f081125a4a0f192e08fcc34fe19994215d9a9e505543ab390c6a786038ed",
+  "additive_measured_module_count": 2470,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
   "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",

@@ -1,0 +1,361 @@
+........................................................................ [  1%]
+........................................................................ [  2%]
+........................................................................ [  4%]
+....s................................................................... [  5%]
+........................................................................ [  7%]
+.............................................................sss........ [  8%]
+............s.......s................................................... [ 10%]
+........................................................................ [ 11%]
+........................................................................ [ 13%]
+........................................................................ [ 14%]
+........................................................................ [ 15%]
+........................................................................ [ 17%]
+........................................................................ [ 18%]
+........................................................................ [ 20%]
+........................................................................ [ 21%]
+........................................................................ [ 23%]
+...........s............................................................ [ 24%]
+...........sssss...ssss................................................. [ 26%]
+........................................................................ [ 27%]
+............................s........................................... [ 29%]
+........................................................................ [ 30%]
+........................................................................ [ 31%]
+...............................ssssssssssss............................. [ 33%]
+.................ss..................................................... [ 34%]
+........................................................................ [ 36%]
+.....................................................................s.. [ 37%]
+........................................................................ [ 39%]
+........................................................................ [ 40%]
+........................................................................ [ 42%]
+........................................................................ [ 43%]
+........................................................................ [ 44%]
+.......................................................s.....sss........ [ 46%]
+........................................................................ [ 47%]
+.....s.............................................................s.... [ 49%]
+........................................................................ [ 50%]
+.........................................ss............................. [ 52%]
+...........................................ss........................... [ 53%]
+........................................................................ [ 55%]
+........................................................................ [ 56%]
+........................................................................ [ 58%]
+........................................................................ [ 59%]
+.........sssssssssssssssssssssssssss....ssssssssssss.................... [ 60%]
+..............ss........................................................ [ 62%]
+........................................................................ [ 63%]
+..........sss........................................................... [ 65%]
+........................................................................ [ 66%]
+........................................................................ [ 68%]
+........................................................................ [ 69%]
+........................................................ss.............. [ 71%]
+...ss................................................................... [ 72%]
+........................................................................ [ 73%]
+...s....s............................................................... [ 75%]
+................................................................F....... [ 76%]
+F.......F.....F.........F.........................................F..... [ 78%]
+.F....F......s......F................................................... [ 79%]
+........................................................................ [ 81%]
+........................................................................ [ 82%]
+........................................................................ [ 84%]
+........................................................................ [ 85%]
+........................................................................ [ 87%]
+........................................................................ [ 88%]
+........................................................................ [ 89%]
+........................................................................ [ 91%]
+................................................................ss...... [ 92%]
+........................................................................ [ 94%]
+........................................................................ [ 95%]
+........................................................................ [ 97%]
+........................................................................ [ 98%]
+.....................................................................    [100%]
+================================== FAILURES ===================================
+___________ test_issue_5684_governance_freshness_gates_are_passing ____________
+
+    def test_issue_5684_governance_freshness_gates_are_passing() -> None:
+        gates = _load_json(DEBT_GATES)
+        review = _load_json(RUNTIME_CARDINALITY_REVIEW)
+        generated_at = review["generated_at"]
+        assert generated_at == "2026-09-16T16:48:20Z"
+    
+>       assert gates["summary"]["release_gate_status"] == "passing"
+E       AssertionError: assert 'failing' == 'passing'
+E         
+E         - passing
+E         + failing
+
+tests\architecture\test_tech_debt_issues_5677_5685_closeout.py:219: AssertionError
+________ test_issue_5707_governance_artifacts_are_current_and_passing _________
+
+    def test_issue_5707_governance_artifacts_are_current_and_passing() -> None:
+        scorecard = _load_json(SCORECARD)
+        gates = _load_json(DEBT_GATES)
+        outcome = _load_json(CLOSEOUT)["outcomes"]["5707"]
+        coverage = _load_json(MODULE_COVERAGE)
+    
+>       assert gates["summary"]["release_gate_status"] == "passing"
+E       AssertionError: assert 'failing' == 'passing'
+E         
+E         - passing
+E         + failing
+
+tests\architecture\test_tech_debt_issues_5707_5715_closeout.py:116: AssertionError
+___________ test_issue_5715_no_growth_enforcement_gates_are_active ____________
+
+    def test_issue_5715_no_growth_enforcement_gates_are_active() -> None:
+        payload = _load_json(CLOSEOUT)
+        outcome = payload["outcomes"]["5715"]
+        gates = _load_json(DEBT_GATES)
+        module_policy = _load_yaml(MODULE_COVERAGE_POLICY)
+        test_policy = _load_yaml(TEST_GOVERNANCE_POLICY)
+    
+        assert (
+            _gate(gates, "debt_budget_growth_policy")["current"]
+            is outcome["debt_budget_growth_allowed"]
+        )
+        assert (
+            _gate(gates, "debt_scorecard_budget_violations")["current"]
+            == outcome["debt_scorecard_budget_violations"]
+        )
+        assert (
+            module_policy["aggregate_residual_ratchets"]["unmeasured_module_count"][
+                "max_count"
+            ]
+            == outcome["module_coverage_unmeasured_limit"]
+        )
+        assert (
+            module_policy["aggregate_residual_ratchets"]["uncovered_module_count"][
+                "max_count"
+            ]
+            == outcome["module_coverage_uncovered_limit"]
+        )
+        assert (
+            test_policy["budgets"]["compatibility_test_file_max"]
+            == outcome["compatibility_test_file_max"]
+        )
+        assert (
+            _gate(gates, "production_uuid4_budget")["current"]
+            == outcome["production_uuid4_budget"]
+        )
+        # Skip release gate status check for local development with uncommitted changes
+>       assert gates["summary"]["fail_count"] == 0
+E       assert 1 == 0
+
+tests\architecture\test_tech_debt_issues_5707_5715_closeout.py:375: AssertionError
+_______ test_issue_5744_architecture_audit_freshness_gates_are_passing ________
+
+    def test_issue_5744_architecture_audit_freshness_gates_are_passing() -> None:
+        scorecard = _load_json(SCORECARD)
+        gates = _load_json(ROOT / "reports" / "quality" / "debt-governance-gates.json")
+>       assert gates["summary"]["release_gate_status"] == "passing"
+E       AssertionError: assert 'failing' == 'passing'
+E         
+E         - passing
+E         + failing
+
+tests\architecture\test_tech_debt_issues_5744_5751_closeout.py:77: AssertionError
+______ test_issue_5752_narrative_reports_match_live_governance_artifacts ______
+
+    def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
+        compatibility = _load_json(COMPATIBILITY_CENSUS)
+        test_governance = _load_json(TEST_GOVERNANCE)
+        scorecard = _load_json(SCORECARD)
+        gates = _load_json(DEBT_GATES)
+        debt_report = DEBT_REPORT.read_text(encoding="utf-8")
+        current_state = CURRENT_STATE.read_text(encoding="utf-8")
+    
+        validation_errors = validate_technical_debt_audit_registry(ROOT)
+>       assert validation_errors == []
+E       AssertionError: assert ['current aud...s / 1 fail**'] == []
+E         
+E         Left contains 3 more items, first extra item: 'current audit evidence_surface_sha256 is stale'
+E         Use -v to get more diff
+
+tests\architecture\test_tech_debt_issues_5752_5755_closeout.py:117: AssertionError
+____________ test_issue_5933_governance_artifacts_are_rebaselined _____________
+
+    def test_issue_5933_governance_artifacts_are_rebaselined() -> None:
+        closeout = _load_json(CLOSEOUT)
+        gates = _load_json(DEBT_GATES)
+        coverage = _load_json(MODULE_COVERAGE)
+        scorecard = _load_json(SCORECARD)
+        duplication = _load_json(DUPLICATION_BASELINE)
+        remote = _load_json(REMOTE_BASELINE)
+        debt_scorecard = _load_yaml(DEBT_SCORECARD)
+    
+>       assert gates["summary"]["release_gate_status"] == "passing"
+E       AssertionError: assert 'failing' == 'passing'
+E         
+E         - passing
+E         + failing
+
+tests\architecture\test_tech_debt_issues_5933_5944_closeout.py:100: AssertionError
+_________ test_issue_5955_debt_governance_rollup_blocks_budget_growth _________
+
+    def test_issue_5955_debt_governance_rollup_blocks_budget_growth() -> None:
+        tests_workflow = TESTS_WORKFLOW.read_text(encoding="utf-8")
+    
+        gates = _load_json(DEBT_GATES)
+>       assert gates["summary"]["release_gate_status"] == "passing"
+E       AssertionError: assert 'failing' == 'passing'
+E         
+E         - passing
+E         + failing
+
+tests\architecture\test_tech_debt_issues_5954_5955_5962_5963_closeout.py:68: AssertionError
+__________ test_scripts_and_root_hygiene_burndown_for_5959_and_5960 ___________
+
+    def test_scripts_and_root_hygiene_burndown_for_5959_and_5960() -> None:
+        closeout = _load_json(CLOSEOUT)
+        manifest = _load_json(SCRIPTS_MANIFEST)
+        lifecycle = _load_json(SCRIPTS_LIFECYCLE)
+        root_review = _load_json(ROOT_REVIEW)
+        gates = _load_json(DEBT_GATES)
+    
+        scripts = manifest["scripts"]
+        zero_ref_rows = [
+            row
+            for row in scripts
+            if row.get("status") == "supporting" and row.get("reference_count") == 0
+        ]
+        # The zero-reference supporting-script ratchet may only decrease.
+        assert (
+            len(zero_ref_rows)
+            <= closeout["ratchets"]["zero_reference_supporting_scripts"]["current"]
+        )
+        assert (
+            len(zero_ref_rows)
+            < closeout["ratchets"]["zero_reference_supporting_scripts"]["opening"]
+        )
+        assert not [
+            row["path"]
+            for row in zero_ref_rows
+            if not row.get("owner")
+            or not row.get("lifecycle_decision")
+            or not row.get("review_by")
+            or not row.get("next_step")
+        ]
+        assert not (ROOT / "scripts/engineering/qa/close_github_issue.py").exists()
+        assert "scripts/engineering/qa/close_github_issue.py" not in lifecycle["entries"]
+    
+        assert root_review["summary"]["ROOT_POLICY_MISMATCH"] == 0
+        assert (
+            root_review["summary"]["REVIEW_REQUIRED"]
+            == closeout["ratchets"]["root_review_required_surfaces"]["current"]
+        )
+        assert (
+            root_review["summary"]["REVIEW_REQUIRED"]
+            < closeout["ratchets"]["root_review_required_surfaces"]["opening"]
+        )
+        assert root_review["summary"]["SECURITY_REVIEW_REQUIRED"] == 3
+        assert not (ROOT / "_agent_qa_run.bat").exists()
+    
+        root_paths = {row["path"] for row in root_review["root_review_evidence"]}
+        assert "enforcement_strategy.md" not in root_paths
+        assert "CODEX_SETUP.txt" not in root_paths
+    
+        assert _gate(gates, "supporting_scripts_zero_reference_count")["status"] == "pass"
+        assert (
+            _gate(gates, "supporting_scripts_zero_reference_count")["current"]
+            == closeout["ratchets"]["zero_reference_supporting_scripts"]["current"]
+        )
+>       assert gates["summary"]["release_gate_status"] == "passing"
+E       AssertionError: assert 'failing' == 'passing'
+E         
+E         - passing
+E         + failing
+
+tests\architecture\test_tech_debt_issues_5956_5961_closeout.py:231: AssertionError
+___________ test_issue_6022_generated_artifact_coherence_gates_pass ___________
+
+    def test_issue_6022_generated_artifact_coherence_gates_pass() -> None:
+        coverage = _load_json(MODULE_COVERAGE)
+        scorecard = _load_json(SCORECARD)
+        gates = _load_json(GATES)
+    
+>       assert gates["summary"]["fail_count"] == 0
+E       assert 1 == 0
+
+tests\architecture\test_tech_debt_issues_6022_6028_closeout.py:70: AssertionError
+=========================== short test summary info ===========================
+SKIPPED [1] tests\architecture\test_architecture_dependency_docs_drift.py:101: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_codex_launcher_bootstrap.py:175: bash-based Codex shim installers are not reliable on native Windows shells
+SKIPPED [1] tests\architecture\test_codex_launcher_bootstrap.py:258: bash-based Codex shim installers are not reliable on native Windows shells
+SKIPPED [1] tests\architecture\test_codex_launcher_bootstrap.py:321: bash-based Codex shim installers are not reliable on native Windows shells
+SKIPPED [1] tests\architecture\test_codex_native_runtime.py:292: symlink creation is unavailable: [WinError 1314] A required privilege is not held by the client: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\bioetl-pytest\\basetemp-18864-b955233e\\test_mcp_report_path_rejects_s0-outside' -> 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\bioetl-pytest\\basetemp-18864-b955233e\\test_mcp_report_path_rejects_s0\\reports\\quality\\external'
+SKIPPED [1] tests\architecture\test_codex_skill_agent_links.py:179: User-global BioETL skills shadow project skills: agent-debugging, new-pipeline, observability-dashboard, observability-prometheus, py-audit-bot, py-config-bot, py-debug-bot, py-doc-bot, py-plan-bot, py-test-bot, research-workflow, technical-designer-mermaid, vcr-record, verify-architecture. This is a local environment state, not a project code error. Consider removing or renaming conflicting skills in ~/.codex/skills/.
+SKIPPED [1] tests\architecture\test_contract_coverage_matrix_drift.py:29: Contract coverage matrix generation requires full repo walk which is prohibitively slow on Windows
+SKIPPED [2] tests\architecture\test_cursor_skill_sync_safety.py:51: symlink safety contract is exercised through the Bash entrypoint
+SKIPPED [1] tests\architecture\test_cursor_skill_sync_safety.py:75: symlink safety contract is exercised through the Bash entrypoint
+SKIPPED [1] tests\architecture\test_cursor_skill_sync_safety.py:100: symlink safety contract is exercised through the Bash entrypoint
+SKIPPED [1] tests\architecture\test_cursor_skill_sync_safety.py:119: symlink safety contract is exercised through the Bash entrypoint
+SKIPPED [4] tests\architecture\test_dashboard_scenes_contract.py:104: Historical live-render artifact is unavailable; browser acceptance is not proven
+SKIPPED [1] tests\architecture\test_diagram_drift_and_embed_guards.py:251: Skipped on Windows due to filesystem performance
+SKIPPED [12] tests\architecture\_module_coverage_inventory_support.py:109: Committed-artifact assertions are only authoritative for a clean docs/reports/generated/documentation-cleanup-inventory.json artifact.
+SKIPPED [1] tests\architecture\test_domain_composite_config_importer_map.py:78: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_domain_composite_config_importer_map.py:89: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_fix_mermaid_operators.py:167: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_issue_10597_export_facade_shrink.py:121: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\_module_coverage_inventory_support.py:96: Committed-artifact assertions are only authoritative for tracked repo artifacts. Untracked or ignored: reports/quality/issue-5265-domain-invariants-closeout.json
+SKIPPED [7] tests\architecture\_module_coverage_inventory_support.py:131: Committed module-coverage inventory assertions are only authoritative for a clean reports/quality/module-coverage-inventory.json artifact.
+SKIPPED [1] tests\architecture\test_observability_dashboard_contracts.py:247: bioetl-workflow-overview.json retired from shipping surface (epic #6647)
+SKIPPED [1] tests\architecture\test_observability_dashboard_contracts.py:258: bioetl-workflow-overview.json retired from shipping surface (epic #6647)
+SKIPPED [1] tests\architecture\test_ops_ai_setup_scripts.py:31: bash-based dry-run scripts are not reliable on native Windows shells
+SKIPPED [1] tests\architecture\test_ops_ai_setup_scripts.py:51: bash-based dry-run scripts are not reliable on native Windows shells
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:196: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:252: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:290: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:333: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:372: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:394: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:408: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:440: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:463: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:476: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:496: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:515: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:540: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:560: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:570: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:592: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:609: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:621: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:635: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:651: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:668: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:684: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:702: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:721: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:734: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:745: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_facade_inventory.py:779: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_surface_importer_census_governance.py:165: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_surface_importer_census_governance.py:184: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_surface_importer_census_governance.py:259: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_surface_importer_census_governance.py:294: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_surface_importer_census_governance.py:338: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_surface_importer_census_governance.py:356: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_surface_importer_census_governance.py:373: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_surface_importer_census_governance.py:403: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_surface_importer_census_governance.py:423: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_surface_importer_census_governance.py:438: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_surface_importer_census_governance.py:459: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_public_surface_importer_census_governance.py:478: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_pytest_sharded_inventory.py:343: bash-based sharded runner checks are not reliable on native Windows shells
+SKIPPED [1] tests\architecture\test_pytest_sharded_inventory.py:364: bash-based sharded runner checks are not reliable on native Windows shells
+SKIPPED [1] tests\architecture\test_regression_metrics.py:712: Dependency map snapshot requires full repo walk which is prohibitively slow on Windows
+SKIPPED [1] tests\architecture\test_regression_metrics.py:729: Dependency map snapshot requires full repo walk which is prohibitively slow on Windows
+SKIPPED [1] tests\architecture\test_regression_metrics.py:743: Dependency map snapshot requires full repo walk which is prohibitively slow on Windows
+SKIPPED [1] tests\architecture\test_scripts_catalog_governance.py:51: Scripts catalog governance check requires full repo walk which is prohibitively slow on Windows
+SKIPPED [1] tests\architecture\test_scripts_catalog_governance.py:70: Scripts catalog governance check requires full repo walk which is prohibitively slow on Windows
+SKIPPED [1] tests\architecture\test_scripts_inventory_zero_reference_ratchet.py:44: Scripts inventory governance check requires full repo walk which is prohibitively slow on Windows
+SKIPPED [1] tests\architecture\test_scripts_lifecycle_fast_guard.py:33: Scripts lifecycle registry check requires full repo walk which is prohibitively slow on Windows
+SKIPPED [1] tests\architecture\test_vcr_metadata_catalog_drift.py:121: Skipped on Windows due to filesystem performance
+SKIPPED [1] tests\architecture\test_vcr_metadata_catalog_drift.py:162: Skipped on Windows due to filesystem performance
+FAILED tests/architecture/test_tech_debt_issues_5677_5685_closeout.py::test_issue_5684_governance_freshness_gates_are_passing
+FAILED tests/architecture/test_tech_debt_issues_5707_5715_closeout.py::test_issue_5707_governance_artifacts_are_current_and_passing
+FAILED tests/architecture/test_tech_debt_issues_5707_5715_closeout.py::test_issue_5715_no_growth_enforcement_gates_are_active
+FAILED tests/architecture/test_tech_debt_issues_5744_5751_closeout.py::test_issue_5744_architecture_audit_freshness_gates_are_passing
+FAILED tests/architecture/test_tech_debt_issues_5752_5755_closeout.py::test_issue_5752_narrative_reports_match_live_governance_artifacts
+FAILED tests/architecture/test_tech_debt_issues_5933_5944_closeout.py::test_issue_5933_governance_artifacts_are_rebaselined
+FAILED tests/architecture/test_tech_debt_issues_5954_5955_5962_5963_closeout.py::test_issue_5955_debt_governance_rollup_blocks_budget_growth
+FAILED tests/architecture/test_tech_debt_issues_5956_5961_closeout.py::test_scripts_and_root_hygiene_burndown_for_5959_and_5960
+FAILED tests/architecture/test_tech_debt_issues_6022_6028_closeout.py::test_issue_6022_generated_artifact_coherence_gates_pass

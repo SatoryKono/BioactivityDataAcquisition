@@ -1284,3 +1284,4 @@ workflows:
               only:
                 - codex/architecture-coverage-final-20261004
                 - codex/architecture-11854-postmerge-20261005
+                - codex/config-root-main-acceptance-20261005
