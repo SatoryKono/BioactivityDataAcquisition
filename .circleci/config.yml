@@ -13,7 +13,7 @@ version: 2.1
 parameters:
   ci-lane:
     type: enum
-    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance, e2e-replay, coverage-closeout]
+    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance, e2e-replay, coverage-closeout, docker-baseline]
     default: pr-gate
   include-hypothesis:
     type: boolean
@@ -77,6 +77,220 @@ commands:
             fi
 
 jobs:
+  docker-security-baseline:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: medium
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: default
+      - run:
+          name: Install Docker CLI and image archive tooling
+          command: |
+            mkdir -p "$HOME/.local/bin"
+            curl -fsSL --proto '=https' --tlsv1.2 https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz -o /tmp/docker-baseline-cli.tgz
+            tar -xzf /tmp/docker-baseline-cli.tgz -C /tmp
+            install /tmp/docker/docker "$HOME/.local/bin/docker"
+            echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$BASH_ENV"
+            sudo apt-get update
+            sudo apt-get install --no-install-recommends -y zstd
+      - run:
+          name: Build and verify canonical Docker security baseline
+          no_output_timeout: 50m
+          command: |
+            timeout --signal=TERM --kill-after=30s 45m bash -euo pipefail \<<'BASELINE'
+            set -euo pipefail
+            : "${CIRCLE_SHA1:?Missing exact source SHA}"
+            : "${CIRCLE_BRANCH:?Missing source branch}"
+            : "${CIRCLE_BUILD_NUM:?Missing job identity}"
+            : "${GITHUB_TOKEN:?Read-only GitHub security-alert access required}"
+            test "$CIRCLE_BRANCH" = main
+            repo_root="$(git rev-parse --show-toplevel)"
+            test "$(git rev-parse HEAD)" = "$CIRCLE_SHA1"
+            export PYTHONPATH="${repo_root}/src:${repo_root}"
+            export IMAGE_REF="bioetl:${CIRCLE_SHA1}"
+            workdir="${DOCKER_BASELINE_WORKDIR:-/tmp/bioetl-docker-baseline}"
+            mkdir "$workdir"
+            cd "$workdir"
+            mkdir -p reports/security
+            install_dir="$workdir/tools"
+            mkdir -p "$install_dir"
+            curl -fsSL --proto '=https' --tlsv1.2 https://github.com/aquasecurity/trivy/releases/download/v0.70.0/trivy_0.70.0_Linux-64bit.tar.gz -o "$install_dir/trivy.tar.gz"
+            echo "8b4376d5d6befe5c24d503f10ff136d9e0c49f9127a4279fd110b727929a5aa9  $install_dir/trivy.tar.gz" | sha256sum -c -
+            tar -xzf "$install_dir/trivy.tar.gz" -C "$install_dir" trivy
+            export PATH="$install_dir:$PATH"
+            docker build --file "$repo_root/Dockerfile.bioetl" --tag "$IMAGE_REF" "$repo_root"
+            export BUILD_IMAGE_ID="$(docker image inspect "$IMAGE_REF" --format '{{.Id}}')"
+            export BUILD_METADATA='{}'
+            export BUILD_DIGEST=''
+
+            # Capture Docker build action metadata
+            python3 - \<<'PY'
+            import json
+            import os
+            from pathlib import Path
+
+            metadata_raw = os.environ.get("BUILD_METADATA") or "{}"
+            try:
+                metadata = json.loads(metadata_raw)
+            except json.JSONDecodeError as exc:
+                raise SystemExit(f"invalid build metadata JSON: {exc}") from exc
+
+            payload = {
+                "schema_version": "docker-build-metadata-v1",
+                "producer": "circleci",
+                "source_sha": os.environ["CIRCLE_SHA1"],
+                "run_id": os.environ.get("CIRCLE_BUILD_NUM", ""),
+                "run_attempt": os.environ.get("CIRCLE_WORKFLOW_ID", ""),
+                "image_ref": os.environ["IMAGE_REF"],
+                "image_id": os.environ.get("BUILD_IMAGE_ID", ""),
+                "digest": os.environ.get("BUILD_DIGEST", ""),
+                "metadata": metadata,
+                "cache": {
+                    "from": "none",
+                    "to_policy": "no shared cache export",
+                },
+            }
+            if not payload["image_id"]:
+                raise SystemExit("docker build action did not emit imageid")
+            Path("reports/security/docker-build-metadata.json").write_text(
+                json.dumps(payload, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+            PY
+
+            # Capture image and runtime provenance
+            set -euo pipefail
+            {
+              echo "source_sha=${CIRCLE_SHA1}"
+              echo "wolfi_base_image=chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
+              echo "runtime_python=python-3.13=3.13.15-r6"
+              echo "builder_uv=uv=0.11.26-r0"
+              echo "setuptools_build_constraint=setuptools==83.0.0"
+              docker image inspect "${IMAGE_REF}" --format 'image_id={{.Id}} repo_digests={{json .RepoDigests}}'
+              docker run --rm --entrypoint python "${IMAGE_REF}" --version
+              docker run --rm --entrypoint python "${IMAGE_REF}" -c 'import grp, importlib.util, os, pwd, shutil, stat, sys, tempfile; assert sys.version_info[:3] == (3, 13, 15); assert (os.getuid(), os.getgid()) == (999, 999); assert pwd.getpwuid(999).pw_name == "bioetl"; assert pwd.getpwuid(999).pw_shell == "/sbin/nologin"; assert grp.getgrgid(999).gr_name == "bioetl"; assert importlib.util.find_spec("pip") is None; assert stat.S_IMODE(os.stat("/tmp").st_mode) == 0o700; assert (os.stat("/tmp").st_uid, os.stat("/tmp").st_gid) == (999, 999); assert (os.stat("/app/configs").st_uid, os.stat("/app/configs").st_gid) == (0, 0); assert not os.access("/app/configs", os.W_OK); forbidden_paths = ("/bin/sh", "/bin/ash", "/bin/bash", "/bin/busybox", "/usr/bin/sh", "/usr/bin/ash", "/usr/bin/bash", "/usr/bin/busybox", "/sbin/apk", "/usr/bin/apk"); assert not any(os.path.lexists(path) for path in forbidden_paths); assert all(shutil.which(name) is None for name in ("sh", "ash", "bash", "busybox", "apk", "pip", "pip3", "pip3.13")); handle = tempfile.NamedTemporaryFile(dir="/tmp", delete=True); handle.close(); marker = "/app/logs/.runtime-security-probe"; open(marker, "wb").close(); os.unlink(marker); print("python=3.13.15 uid=999 gid=999 identity=bioetl shell=absent apk=absent pip=absent tmp=00700 tmp_owner=999:999 configs=root-readonly logs=writable")'
+            } > reports/security/bioetl-image-provenance.txt 2>&1
+            docker image inspect "${IMAGE_REF}" --format '{{.Id}}' \
+              > reports/security/bioetl-image-id.txt
+            docker run --rm --entrypoint python "${IMAGE_REF}" -c 'from importlib.metadata import distributions; print("\n".join(sorted("{}=={}".format(d.metadata["Name"], d.version) for d in distributions())))' \
+              > reports/security/bioetl-pip-freeze.txt
+
+            # Prove default image health contract
+            set -euo pipefail
+            container_id="$(docker run --detach --rm "${IMAGE_REF}")"
+            cleanup() {
+              docker rm --force "${container_id}" >/dev/null 2>&1 || true
+            }
+            trap cleanup EXIT
+            health_status="starting"
+            for _ in $(seq 1 60); do
+              health_status="$(docker inspect "${container_id}" --format '{{.State.Health.Status}}')"
+              if [ "${health_status}" = "healthy" ]; then
+                break
+              fi
+              if [ "$(docker inspect "${container_id}" --format '{{.State.Running}}')" != "true" ]; then
+                docker logs "${container_id}"
+                exit 1
+              fi
+              sleep 2
+            done
+            test "${health_status}" = "healthy"
+            docker exec "${container_id}" python -c 'import urllib.request; response = urllib.request.urlopen("http://127.0.0.1:8000/health/live", timeout=3); assert response.status == 200; response.read(); print("health_live=ok docker_health=healthy")'
+            cleanup
+            trap - EXIT
+
+            # Run full Trivy JSON evidence scan
+            set -euo pipefail
+            trivy image \
+              --format json \
+              --output reports/security/trivy-results.json \
+              --severity CRITICAL,HIGH,MEDIUM,UNKNOWN \
+              --exit-code 0 \
+              "${IMAGE_REF}"
+            test -s reports/security/trivy-results.json
+
+            # Convert canonical Trivy JSON evidence
+            set -euo pipefail
+            trivy convert --format sarif --output reports/security/trivy-results.sarif reports/security/trivy-results.json
+            test -s reports/security/trivy-results.sarif
+
+            # SPDX SBOM is generated from the exact local image already scanned above.
+            trivy image --format spdx-json --output reports/security/bioetl.spdx.json "$IMAGE_REF"
+            trivy version --format json > reports/security/trivy-version.json
+            python3 - \<<'ALERTS'
+            import json, os, urllib.request
+            from pathlib import Path
+            pages = []
+            page = 1
+            while True:
+                url = "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/code-scanning/alerts?state=open&tool_name=Trivy&per_page=100&page=" + str(page)
+                request = urllib.request.Request(url, headers={"Authorization": "Bearer " + os.environ["GITHUB_TOKEN"], "Accept": "application/vnd.github+json"})
+                with urllib.request.urlopen(request, timeout=30) as response:
+                    alerts = json.load(response)
+                if not isinstance(alerts, list):
+                    raise RuntimeError("GitHub alert response must be a list")
+                pages.append(alerts)
+                if len(alerts) < 100:
+                    break
+                page += 1
+            Path("reports/security/github-trivy-alerts.json").write_text(json.dumps(pages, sort_keys=True) + "\n", encoding="utf-8")
+            ALERTS
+
+            # Export deterministic Trivy baseline CSV
+            python3 -c "from pathlib import Path; from scripts.engineering.qa.docker_stability_campaign.trivy_baseline import export_trivy_baseline_csv; count = export_trivy_baseline_csv(trivy_json=Path('reports/security/trivy-results.json').resolve(), github_alerts_json=Path('reports/security/github-trivy-alerts.json').resolve(), output=Path('reports/security/trivy-alerts.csv').resolve()); print(f'rows={count}')"
+
+            # Run Trivy on pinned Wolfi runtime base image
+            set -euo pipefail
+            trivy image \
+              --format json \
+              --output reports/security/trivy-base-results.json \
+              --severity CRITICAL,HIGH,MEDIUM,UNKNOWN \
+              --exit-code 0 \
+              "chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
+            test -s reports/security/trivy-base-results.json
+
+            # Generate Trivy fixability audit
+            python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \
+              --trivy-json "$PWD/reports/security/trivy-results.json" \
+              --output "$PWD/reports/security/trivy-fixability-audit.json"
+
+            # Validate complete security baseline
+            set -euo pipefail
+            required=(
+              reports/security/bioetl-image-id.txt
+              reports/security/bioetl-image-provenance.txt
+              reports/security/bioetl-pip-freeze.txt
+              reports/security/bioetl.spdx.json
+              reports/security/docker-build-metadata.json
+              reports/security/github-trivy-alerts.json
+              reports/security/trivy-alerts.csv
+              reports/security/trivy-base-results.json
+              reports/security/trivy-fixability-audit.json
+              reports/security/trivy-results.json
+              reports/security/trivy-results.sarif
+              reports/security/trivy-version.json
+            )
+            for evidence in "${required[@]}"; do
+              test -s "${evidence}"
+            done
+            (cd reports/security; sha256sum "${required[@]#reports/security/}") > reports/security/baseline.sha256
+
+            # Enforce canonical Trivy Critical High Medium zero policy
+            python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \
+              --trivy-json "$PWD/reports/security/trivy-results.json" \
+              --output "$PWD/reports/security/trivy-fixability-audit.json" \
+              --fail-on-blocking
+
+            # Export exact scanned image for publication
+            docker save "${IMAGE_REF}" | zstd -T0 -10 -o reports/security/bioetl-scanned-image.tar.zst
+            (cd reports/security; sha256sum bioetl-scanned-image.tar.zst) > reports/security/scanned-image.sha256
+            BASELINE
+      - store_artifacts:
+          path: /tmp/bioetl-docker-baseline/reports/security
+          destination: docker-security-baseline
+
   architecture-docs:
     docker:
     - image: cimg/python:3.13
@@ -268,6 +482,7 @@ jobs:
         no_output_timeout: 65m
     - run:
         name: Generate mutation report
+        when: always
         command: |
           export WORKSPACE_ROOT="$PWD"
           export PYTHONPATH="$PWD/src:$PWD${PYTHONPATH:+:$PYTHONPATH}"
@@ -918,6 +1133,11 @@ jobs:
           command: |
             export PATH="$HOME/.local/bin:$PATH"
             uv run --frozen --no-build python -m scripts.engineering.qa validate-dq-consistency
+      - run:
+          name: Validate pipeline configurations (ChEMBL baseline parity)
+          command: |
+            export PATH="$HOME/.local/bin:$PATH"
+            uv run --frozen --no-build python -m scripts.schema validate-configs
 
   # --- Gate: root-hygiene (always_required) ------------------------------------
   # Mirrors root-hygiene.yml `root-hygiene` (essential checks).
@@ -1434,6 +1654,14 @@ jobs:
 
 workflows:
   version: 2
+  docker-baseline:
+    when:
+      and:
+        - equal: [docker-baseline, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - docker-security-baseline:
+          context: bioetl-github-read-only
   main-coverage-closeout:
     when:
       and:
