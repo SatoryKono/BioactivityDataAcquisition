@@ -28,13 +28,13 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `codex/pipeline-green-gates-rf022-snapshot-fix`
-- Source commit: `d2130e8e6a03a6fd8d60078a26b8ff0019d3a8e7`
-- Source run id: `local-rf023-coverage-d2130e8e-retry`
+- Source commit: `d57aae4056ac05458ecf12658433169e23583995`
+- Source run id: `local-rf023-coverage-d57aae40-utf8`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `0c90859e476375c405d84b5eb16449055de4b8c6187929943f5c2a05f803cbf1`
+- Source tree sha256: `3b59eddc3fbf895ef4b48d4a635f51fdab3a65f571bf3148343f3ed8c83784f5`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-10-05T17:55:03.445424+00:00`
+- Refreshed at (UTC): `2026-10-05T20:02:47.818110+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -74,31 +74,31 @@ trend evidence only.
 
 | Rank | Duration (s) | Test | Source |
 |---:|---:|---|---|
-| 1 | `88.273` | `tests.smoke.test_control_plane_rollout_smoke::test_control_plane_rollout_smoke_emits_artifacts_and_aggregate_metrics` | `smoke.xml` |
-| 2 | `20.013` | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers::test_filter_options_deadline_does_not_send_late_success` | `unit-other.xml` |
-| 3 | `18.801` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `unit-scripts-tooling-debt-governance.xml` |
-| 4 | `12.681` | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline::test_chembl_target_component_happy_path` | `integration.xml` |
-| 5 | `11.777` | `tests.integration.composite.test_assay_snapshot_merge_replay::test_assay_replay_compares_physical_production_outputs` | `integration.xml` |
-| 6 | `11.642` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact` | `unit-scripts-tooling-debt-governance.xml` |
-| 7 | `11.176` | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path` | `integration.xml` |
-| 8 | `10.841` | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_source_fields` | `integration.xml` |
-| 9 | `10.808` | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_happy_path` | `integration.xml` |
-| 10 | `10.731` | `tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline::test_chembl_compound_record_happy_path` | `integration.xml` |
+| 1 | `72.888` | `tests.integration.test_dashboard_ux_report_freshness::test_dashboard_json_changes_require_fresh_ux_report_and_change_note_link` | `integration.xml` |
+| 2 | `52.714` | `tests.unit.composition.test_workflow_cohort_lineage::test_real_gold_expiry_descendant_and_partial_resume_keep_scoped_history[None]` | `unit-other.xml` |
+| 3 | `50.7` | `tests.smoke.test_control_plane_rollout_smoke::test_control_plane_rollout_smoke_emits_artifacts_and_aggregate_metrics` | `smoke.xml` |
+| 4 | `47.011` | `tests.contract.schemas.test_pubchem_shard_validation::test_pubchem_identity_shard_accepts_minimal_valid_row` | `contract-confidence.xml` |
+| 5 | `36.019` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `unit-scripts-tooling-debt-governance.xml` |
+| 6 | `27.549` | `tests.unit.composition.bootstrap.runtime.test_composite_contract_evidence::test_composite_archive_bootstrap_imports_in_fresh_process` | `unit-other.xml` |
+| 7 | `20.014` | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers::test_filter_options_deadline_does_not_send_late_success` | `unit-other.xml` |
+| 8 | `17.328` | `tests.unit.composition.runtime_builders.test_runner_builder_profiles::test_build_pipeline_runner_persists_manifest_before_empty_cached_bronze_fail` | `unit-other.xml` |
+| 9 | `12.624` | `tests.integration.composite.test_assay_snapshot_merge_replay::test_assay_replay_compares_physical_production_outputs` | `integration.xml` |
+| 10 | `12.424` | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline::test_chembl_target_component_happy_path` | `integration.xml` |
 
 ### Top Slow Zones
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.smoke.test_control_plane_rollout_smoke` | 1 | 88.273 | 88.273 |
-| 2 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 3 | 40.691 | 18.801 |
-| 3 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 3 | 25.219 | 10.535 |
-| 4 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 21.649 | 10.841 |
-| 5 | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers` | 1 | 20.013 | 20.013 |
-| 6 | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline` | 1 | 12.681 | 12.681 |
-| 7 | `tests.integration.composite.test_assay_snapshot_merge_replay` | 1 | 11.777 | 11.777 |
-| 8 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline` | 1 | 11.176 | 11.176 |
-| 9 | `tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline` | 1 | 10.731 | 10.731 |
-| 10 | `tests.contract.test_provider_contract_drift_replay` | 1 | 10.001 | 10.001 |
+| 1 | `tests.integration.test_dashboard_ux_report_freshness` | 1 | 72.888 | 72.888 |
+| 2 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 3 | 58.706 | 36.019 |
+| 3 | `tests.unit.composition.test_workflow_cohort_lineage` | 1 | 52.714 | 52.714 |
+| 4 | `tests.smoke.test_control_plane_rollout_smoke` | 1 | 50.7 | 50.7 |
+| 5 | `tests.contract.schemas.test_pubchem_shard_validation` | 1 | 47.011 | 47.011 |
+| 6 | `tests.integration.composite.test_assay_snapshot_merge_replay` | 3 | 36.683 | 12.624 |
+| 7 | `tests.unit.composition.bootstrap.runtime.test_composite_contract_evidence` | 1 | 27.549 | 27.549 |
+| 8 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 22.191 | 11.172 |
+| 9 | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers` | 1 | 20.014 | 20.014 |
+| 10 | `tests.unit.composition.runtime_builders.test_runner_builder_profiles` | 1 | 17.328 | 17.328 |
 
 ## Refresh Procedure
 

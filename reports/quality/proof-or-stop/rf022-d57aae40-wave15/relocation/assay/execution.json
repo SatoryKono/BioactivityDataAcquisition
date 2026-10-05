@@ -1,0 +1,16 @@
+{
+  "source_commit": "d57aae4056ac05458ecf12658433169e23583995",
+  "command": [
+    "E:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+    "C:\\Users\\Fedor\\.codex\\worktrees\\rf022-runner-preparation\\BioactivityDataAcquisition\\reports\\quality\\rf022-preparation\\offline_guard.py",
+    "C:\\Users\\Fedor\\.codex\\worktrees\\rf022-runner-preparation\\BioactivityDataAcquisition\\reports\\quality\\rf022-preparation\\package-d57-wave15\\relocation\\assay\\guard.json",
+    "replay-composite",
+    "--envelope",
+    "C:\\Users\\Fedor\\.codex\\worktrees\\rf022-runner-preparation\\BioactivityDataAcquisition\\reports\\quality\\rf022-preparation\\relocated-d57-wave15\\rf022-live-d57aae40-20261005-wave15\\composite-composite_assay\\reports\\pipeline\\composite_assay\\51f70f78-3f0a-50e0-b2c7-5245060d7da5\\replay\\parent.json",
+    "--sha256",
+    "fef30e34c5cdfc604997975dab287b768bd6b9d7eb305a3b79e45f45b2dd7d0b",
+    "--output",
+    "C:\\Users\\Fedor\\.codex\\worktrees\\rf022-runner-preparation\\BioactivityDataAcquisition\\reports\\quality\\rf022-preparation\\package-d57-wave15\\relocation\\assay\\replayed"
+  ],
+  "exit_code": 0
+}

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-05T18:23:47.129099+00:00",
+  "generated_at": "2026-10-05T20:09:42.259105+00:00",
   "summary": {
     "total_scripts": 637,
     "status_counts": {
@@ -10204,7 +10204,7 @@
       "references": [
         {
           "path": "docs/05-operations/ci-workflow-map.md",
-          "line": 369,
+          "line": 378,
           "source_group": "docs",
           "text": "[`scripts.engineering.ci.replay_parity_inputs`](../../scripts/engineering/ci/replay_parity_inputs.py) explicitly"
         }
@@ -17834,7 +17834,7 @@
         },
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 555,
+          "line": 583,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -19801,7 +19801,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 475,
+          "line": 503,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }
