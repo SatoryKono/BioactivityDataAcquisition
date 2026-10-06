@@ -2619,6 +2619,8 @@ jobs:
     - store_test_results:
         path: reports/quality/proof-or-stop/shared/coverage/coverage/junit
     - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/coverage/coverage/junit
+    - store_artifacts:
         path: reports/quality/proof-or-stop/shared/coverage/coverage/logs
     - store_artifacts:
         path: reports/quality/proof-or-stop/shared/coverage/coverage/manifest.json
@@ -2846,6 +2848,8 @@ jobs:
     - store_artifacts:
         path: reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/producer.log
     - store_test_results:
+        path: reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/measurement/junit
+    - store_artifacts:
         path: reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/measurement/junit
     - store_artifacts:
         path: reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/measurement/logs
