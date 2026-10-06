@@ -1,0 +1,26 @@
+{
+  "source_commit": "84efe3b728978eb59a8eea072c307e33df5626c5",
+  "outcome": "FAIL",
+  "full_suite_verified": false,
+  "counts": {
+    "tests": 9451,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 254
+  },
+  "cause": "PR11919 expanded prompt catalog to18 scenarios and28 overlays, but contract tests retained17 and24",
+  "repair_validation": {
+    "prompt_tests_passed": 51,
+    "prompt_library_check": "PASS",
+    "ruff": "PASS"
+  },
+  "archive_sha256": "fefe1510701409ba8b19c747d7d432fbc446cc57584df332cb6bce50b4c7aae8",
+  "files": {
+    "execution.json": "15d2f7fbdd933a00c06915e306f5498aab8ab515bcf6841185565b3b98d6514e",
+    "junit.xml": "eb2babf0b1a588da59f931a39eeeaba0d8bb22386451e0ff0c107a452d8df290",
+    "pytest.log": "cb0584a86f2fb08de84c4ec9752acb784ff29a733a184a65b445005d61e83d2c",
+    "resource-samples.jsonl": "85bee37cd16a4932b00689c9d75d68e4cd3dccda004afb4a98e9a0e14e7d8356",
+    "prompt-contract-18-28.xml": "4d0690385beb915a4ef1c064ea1b6452650f52e2c0713195330938855ececc4c",
+    "prompt-contract-18-28.log": "75821f9002217da562d386e85439fee97c815f0761cf2e3ba7b225ae6fc6dee2"
+  }
+}

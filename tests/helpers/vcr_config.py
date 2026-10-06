@@ -317,8 +317,12 @@ def infer_provider_cassette_dir(
 def _strip_credential_query(uri: str) -> list[tuple[str, str]]:
     """Return query params excluding credentials for VCR matching."""
     query_params = parse_qsl(urlparse(uri).query, keep_blank_values=True)
-    return [
-        (key, value)
-        for key, value in query_params
-        if key.lower() not in _VCR_IGNORED_QUERY_KEYS
-    ]
+    # Stable sorting ignores distinct-key ordering while retaining repeated values.
+    return sorted(
+        [
+            (key, value)
+            for key, value in query_params
+            if key.lower() not in _VCR_IGNORED_QUERY_KEYS
+        ],
+        key=lambda item: item[0],
+    )

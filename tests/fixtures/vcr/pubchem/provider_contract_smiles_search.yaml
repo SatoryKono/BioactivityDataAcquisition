@@ -1,37 +1,68 @@
-{
-  "interactions": [
-    {
-      "request": {
-        "body": null,
-        "headers": {
-          "Accept": [
-            "application/json"
-          ],
-          "User-Agent": [
-            "BioETL/1.0"
-          ]
-        },
-        "method": "GET",
-        "uri": "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/CC(=O)OC1=CC=CC=C1C(=O)O/cids/JSON"
-      },
-      "response": {
-        "body": {
-          "string": "{\"IdentifierList\": {\"CID\": [2244]}}"
-        },
-        "headers": {
-          "Content-Type": [
-            "application/json"
-          ],
-          "Date": [
-            "Tue, 07 Apr 2026 10:51:53 GMT"
-          ]
-        },
-        "status": {
-          "code": 200,
-          "message": "OK"
-        }
-      }
-    }
-  ],
-  "version": 1
-}
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      cookie:
+      - ncbi_sid=90C6ABF3AC474F51_0000SID
+      host:
+      - pubchem.ncbi.nlm.nih.gov
+      user-agent:
+      - python-httpx/0.28.1
+    method: GET
+    uri: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/CC(=O)OC1=CC=CC=C1C(=O)O/cids/JSON
+  response:
+    body:
+      string: "{\n  \"IdentifierList\": {\n    \"CID\": [\n      2244\n    ]\n  }\n}\n"
+    headers:
+      access-control-allow-origin:
+      - '*'
+      alt-svc:
+      - clear
+      cache-control:
+      - private
+      content-length:
+      - '60'
+      content-security-policy:
+      - upgrade-insecure-requests
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Oct 2026 04:11:33 GMT
+      expires:
+      - Tue, 06 Oct 2026 05:11:34 GMT
+      ncbi-phid:
+      - 95B7FD62AC474F510000000000000001.m_2
+      ncbi-sid:
+      - 90C6ABF3AC474F51_0000SID
+      referrer-policy:
+      - origin-when-cross-origin
+      server:
+      - Apache
+      set-cookie:
+      - ncbi_sid=90C6ABF3AC474F51_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 04:11:33 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      via:
+      - 1.1 google
+      x-throttling-control:
+      - 'Request Count status: Green (0%), Request Time status: Green (0%), Service
+        status: Yellow (53%)'
+      x-ua-compatible:
+      - IE=Edge
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -1,0 +1,11 @@
+{
+  "archive_sha256": "92715ddf8cca0e2a8102ecb83b002f2d8f9994631dea0afd9936c828b0e38336",
+  "verified_file_count": 2926,
+  "replayed": {
+    "activity": "PASS",
+    "assay": "PASS",
+    "molecule": "PASS",
+    "target": "PASS"
+  },
+  "status": "PASS"
+}

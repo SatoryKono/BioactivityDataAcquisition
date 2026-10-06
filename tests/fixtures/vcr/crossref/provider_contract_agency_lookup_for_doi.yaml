@@ -1,37 +1,53 @@
-{
-  "interactions": [
-    {
-      "request": {
-        "body": null,
-        "headers": {
-          "Accept": [
-            "application/json"
-          ],
-          "User-Agent": [
-            "BioETL/1.0 (mailto:test@example.com)"
-          ]
-        },
-        "method": "GET",
-        "uri": "https://api.crossref.org/works/10.1038%2Fs41586-020-2649-2/agency"
-      },
-      "response": {
-        "body": {
-          "string": "{\"status\": \"ok\", \"message-type\": \"work-agency\", \"message-version\": \"1.0.0\", \"message\": {\"DOI\": \"10.1038/s41586-020-2649-2\", \"agency\": {\"id\": \"crossref\", \"label\": \"Crossref\"}}}"
-        },
-        "headers": {
-          "Content-Type": [
-            "application/json;charset=utf-8"
-          ],
-          "Date": [
-            "Tue, 07 Apr 2026 10:51:51 GMT"
-          ]
-        },
-        "status": {
-          "code": 200,
-          "message": "OK"
-        }
-      }
-    }
-  ],
-  "version": 1
-}
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      host:
+      - api.crossref.org
+      user-agent:
+      - python-httpx/0.28.1
+    method: GET
+    uri: https://api.crossref.org/works/10.1038%2Fs41586-020-2649-2/agency
+  response:
+    body:
+      string: '{"status":"ok","message-type":"work-agency","message-version":"1.0.0","message":{"DOI":"10.1038\/s41586-020-2649-2","agency":{"id":"crossref","label":"Crossref"}}}'
+    headers:
+      access-control-allow-headers:
+      - X-Requested-With, Accept, Accept-Encoding, Accept-Charset, Accept-Language,
+        Accept-Ranges, Cache-Control
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link
+      connection:
+      - keep-alive
+      content-type:
+      - application/json;charset=utf-8
+      date:
+      - Tue, 06 Oct 2026 04:11:17 GMT
+      permissions-policy:
+      - interest-cohort=()
+      server:
+      - Jetty(9.4.40.v20210413)
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept
+      x-api-pool:
+      - public-single
+      x-concurrency-limit:
+      - '1'
+      x-rate-limit-interval:
+      - 1s
+      x-rate-limit-limit:
+      - '5'
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -7,9 +7,9 @@
   "scope_file_counts": {
     "fixture": 84,
     "golden": 30,
-    "vcr": 356
+    "vcr": 346
   },
-  "total_files": 470,
+  "total_files": 460,
   "tracked_extensions": [
     ".json",
     ".yaml",

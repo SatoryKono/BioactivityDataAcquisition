@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-06T09:55:54.616881+00:00",
+  "generated_at": "2026-10-06T11:16:01.595243+00:00",
   "summary": {
     "total_scripts": 639,
     "status_counts": {
@@ -11,7 +11,7 @@
       "agents": 11,
       "build": 18,
       "ci": 93,
-      "docs": 274,
+      "docs": 275,
       "other": 50,
       "scripts": 535,
       "skills": 13,
@@ -10199,7 +10199,7 @@
         },
         {
           "path": "tests/unit/scripts/qa/test_run_local_coverage_verify.py",
-          "line": 19,
+          "line": 20,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.local_test_telemetry import junit_telemetry_sha256"
         }
@@ -10559,13 +10559,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 14,
       "references": [
         {
           "path": ".circleci/config.yml",
           "line": 2620,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest reports/quality/proof-or-stop/shared/coverage/coverage/manifest.json"
+        },
+        {
+          "path": ".circleci/config.yml",
+          "line": 2969,
+          "source_group": "ci",
+          "text": "python -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest \"$ROOT/coverage/manifest.json\""
         },
         {
           "path": "docs/00-project/ai/prompts/library/plan/agent-efficiency.md",
@@ -10593,21 +10599,15 @@
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 68,
+          "line": 78,
           "source_group": "docs",
           "text": "| S7-d `test_committed_test_telemetry_baseline_is_populated` | telemetry | `pytest tests/architecture/test_test_telemetry_governance.py tests/architecture/test_test_telemetry_baseline.py` | `python -m"
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 131,
+          "line": 141,
           "source_group": "docs",
           "text": "| Committed test telemetry | `pytest tests/architecture/test_test_telemetry_baseline.py tests/architecture/test_test_telemetry_governance.py` | `python -m scripts.engineering.ci.update_test_telemetry_"
-        },
-        {
-          "path": "scripts/engineering/ci/local_test_telemetry.py",
-          "line": 211,
-          "source_group": "scripts",
-          "text": "from scripts.engineering.ci.update_test_telemetry_baseline import ("
         }
       ]
     },
@@ -11301,13 +11301,19 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 22,
       "references": [
         {
           "path": ".circleci/config.yml",
           "line": 2546,
           "source_group": "ci",
           "text": "(\"governance\", \"pretest_guardrails\", [\"bash\", \"scripts/engineering/dev/pretest_guardrails.sh\", \"--mode\", \"check\", \"--scope\", \"governance\"]),"
+        },
+        {
+          "path": ".circleci/config.yml",
+          "line": 2937,
+          "source_group": "ci",
+          "text": ", \\\"pretest_guardrails\\\", [\\\"bash\\\", \\\"scripts/engineering/dev/pretest_guardrails.sh\\\",\\n              \\"
         },
         {
           "path": ".github/workflows/tests.yml",
@@ -11344,12 +11350,6 @@
           "line": 130,
           "source_group": "scripts",
           "text": "invoke `bash scripts/engineering/dev/pretest_guardrails.sh --scope full`"
-        },
-        {
-          "path": "scripts/engineering/dev/README.md",
-          "line": 220,
-          "source_group": "scripts",
-          "text": "| `pretest-guardrails` | `scripts/engineering/dev/pretest_guardrails.sh`              | Run cleanup + repo/docs/memory/architecture preflight            |"
         }
       ]
     },
@@ -15548,7 +15548,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 134,
+          "line": 144,
           "source_group": "docs",
           "text": "| Architecture artifact duplication | `python -m scripts.engineering.qa.report_artifact_duplication_audit --check` | `python -m scripts.engineering.qa.report_artifact_duplication_audit --json-out repo"
         },
@@ -15780,7 +15780,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 122,
+          "line": 132,
           "source_group": "docs",
           "text": "| Config duplication/backlog audit | `pytest tests/architecture/test_config_surface_entity_residual_plateau.py` | `python -m scripts.engineering.qa.report_config_surface_backlog` |"
         },
@@ -16141,7 +16141,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 137,
+          "line": 147,
           "source_group": "docs",
           "text": "| Debt-governance rollup | `python -m scripts.engineering.qa.report_debt_governance_gates --check` | `python -m scripts.engineering.qa.report_debt_governance_gates --update` |"
         },
@@ -16311,7 +16311,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 135,
+          "line": 145,
           "source_group": "docs",
           "text": "| Flaky-test burndown review | `python -m scripts.engineering.qa.report_flaky_test_burndown_review --check` | `python -m scripts.engineering.qa.report_flaky_test_burndown_review` |"
         },
@@ -16514,7 +16514,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 136,
+          "line": 146,
           "source_group": "docs",
           "text": "| Live residual snapshot | `python -m scripts.engineering.qa.report_live_residual_snapshot --check` | `python -m scripts.engineering.qa.report_live_residual_snapshot` |"
         },
@@ -16925,13 +16925,13 @@
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 70,
+          "line": 80,
           "source_group": "docs",
           "text": "| test-governance `--check` | governance snapshot | `python -m scripts.engineering.qa.report_test_governance_audit --check` | `python -m scripts.engineering.qa.report_test_governance_audit --json-out "
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 128,
+          "line": 138,
           "source_group": "docs",
           "text": "| Test governance snapshots | `python -m scripts.engineering.qa.report_test_governance_audit --check` | `python -m scripts.engineering.qa.report_test_governance_audit --json-out reports/quality/test-g"
         },
@@ -17242,7 +17242,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 15,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
@@ -17252,7 +17252,13 @@
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 126,
+          "line": 62,
+          "source_group": "docs",
+          "text": "`python -m scripts.engineering.qa.run_local_coverage_verify --max-workers 1`."
+        },
+        {
+          "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
+          "line": 136,
           "source_group": "docs",
           "text": "| Module coverage measurements | `python -m scripts.engineering.qa.run_local_coverage_verify` completes all 17 local shards on one committed source tree; its manifest records every exit code and the c"
         },
@@ -17282,13 +17288,7 @@
         },
         {
           "path": "tests/architecture/test_proof_closeout_workflow_contract.py",
-          "line": 9,
-          "source_group": "tests",
-          "text": "from scripts.engineering.qa.run_local_coverage_verify import SHARDS"
-        },
-        {
-          "path": "tests/architecture/test_test_telemetry_baseline.py",
-          "line": 49,
+          "line": 11,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.run_local_coverage_verify import SHARDS"
         }
@@ -18201,7 +18201,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -18214,6 +18214,12 @@
           "line": 2777,
           "source_group": "ci",
           "text": "python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD"
+        },
+        {
+          "path": ".circleci/config.yml",
+          "line": 2889,
+          "source_group": "ci",
+          "text": "\\ scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD\\n\""
         },
         {
           "path": ".github/workflows/no-partial-tree-commits.yml",
@@ -22043,8 +22049,20 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 23,
       "references": [
+        {
+          "path": "docs/05-operations/runbooks/bounded-pipeline-smoke.md",
+          "line": 61,
+          "source_group": "docs",
+          "text": "run `python -m scripts.ops.observability.green_acceptance --runtime-policy` (entry point:"
+        },
+        {
+          "path": "docs/05-operations/runbooks/bounded-pipeline-smoke.md",
+          "line": 62,
+          "source_group": "docs",
+          "text": "`scripts/ops/observability/green_acceptance.py`)."
+        },
         {
           "path": "tests/integration/test_live_green_acceptance.py",
           "line": 9,
@@ -22078,18 +22096,6 @@
         {
           "path": "tests/unit/scripts/ops/observability/test_green_acceptance.py",
           "line": 138,
-          "source_group": "tests",
-          "text": "from scripts.ops.observability import green_acceptance as runner"
-        },
-        {
-          "path": "tests/unit/scripts/ops/observability/test_green_acceptance.py",
-          "line": 166,
-          "source_group": "tests",
-          "text": "from scripts.ops.observability import green_acceptance as runner"
-        },
-        {
-          "path": "tests/unit/scripts/ops/observability/test_green_acceptance.py",
-          "line": 180,
           "source_group": "tests",
           "text": "from scripts.ops.observability import green_acceptance as runner"
         }

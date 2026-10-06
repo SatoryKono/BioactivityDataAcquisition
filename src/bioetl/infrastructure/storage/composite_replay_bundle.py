@@ -9,6 +9,7 @@ from typing import cast
 import orjson
 import pyarrow as pa
 
+import bioetl.infrastructure.config.protein_class_target_type_loader as mapping
 from bioetl.domain.normalization.json import serialize_json_canonical
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.storage.composite_replay_inputs import _table_bytes
@@ -120,15 +121,24 @@ def verify_bundle(root: Path, envelope_digest: str) -> JsonDict:
     }
     if version == "composite-parent-replay-v2":
         required.add("field-groups.json")
+    if envelope.get("pipeline") == "composite_target":
+        required.add("target-mapping.json")
     if not required.issubset(objects) or objects["inputs/inputs.json"] != envelope.get(
         "input_snapshot_fingerprint"
     ):
         raise ValueError("composite_replay_required_object_missing")
+    _verify_objects(root, objects)
+    if envelope.get("implementation") != implementation_fingerprint():
+        raise ValueError("composite_replay_implementation_mismatch")
+    return envelope
+
+
+def _verify_objects(root: Path, objects: JsonDict) -> None:
+    """Check every sealed object's reference, type and actual bytes."""
     for name, digest in objects.items():
         if not isinstance(name, str) or not isinstance(digest, str):
             raise ValueError("composite_replay_object_invalid")
         if digest_bytes(confined_path(root, name).read_bytes()) != digest:
             raise ValueError("composite_replay_object_digest_mismatch")
-    if envelope.get("implementation") != implementation_fingerprint():
-        raise ValueError("composite_replay_implementation_mismatch")
-    return envelope
+        if name == "target-mapping.json":
+            mapping.restore_target_mapping(load_verified_json(root, name, digest))

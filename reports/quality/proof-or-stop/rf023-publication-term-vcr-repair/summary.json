@@ -1,0 +1,40 @@
+{
+  "source_commit": "18921da058b7bcb09b6561a7142b2bcd32e47c2f",
+  "working_tree_scope": "three publication_term cassettes and canonical digest sidecars",
+  "root_cause": "PubMed efetch episode missing in replay-only E2E cassette",
+  "record_mode": "new_episodes",
+  "recorded_from_live_http": true,
+  "replay_mode": "none",
+  "recorded_tests_passed": 3,
+  "e2e_passed": 182,
+  "e2e_skipped": 0,
+  "post_lf_replay_passed": 3,
+  "canonical_full_suite_before_repair": {
+    "passed": 6116,
+    "skipped": 191,
+    "failed": 1
+  },
+  "full_suite_after_repair": "PENDING",
+  "metadata_recorded_dates": "historical dates preserved; not a full cassette refresh",
+  "additional_freshness_check": "FAIL: pre-existing historical sidecars older than unchanged 90-day threshold",
+  "fixture_sha256": {
+    "tests/fixtures/vcr/chembl/test_chembl_publication_term_full_cycle.yaml": "64145300e79d259dd4dcfcaadad5336b7c14a1d70c43b3d779784a703a2595e1",
+    "tests/fixtures/vcr/chembl/test_chembl_publication_term_full_cycle_meta.yaml": "6aab13343c65847d482ef4f6b5daac0cce48d94a48a1f514cb9bc58c6800dfba",
+    "tests/fixtures/vcr/chembl/test_chembl_publication_term_mesh_fields.yaml": "088427fd2bf8b4d1d1885fc3ecafff1b93757223b06d7e78e6c61414249ae133",
+    "tests/fixtures/vcr/chembl/test_chembl_publication_term_mesh_fields_meta.yaml": "4fb99456d372c6335efccbbf1eb8be2c5f636536cb55f9745e7b441dd3c2a85b",
+    "tests/fixtures/vcr/chembl/test_chembl_publication_term_types.yaml": "6d0f437651c7fb91855578509617f0527590072fe805eb39b01b7566c683e4e6",
+    "tests/fixtures/vcr/chembl/test_chembl_publication_term_types_meta.yaml": "8a6c896bbcd72127349a80375815d319016ad060975a6cdf61b6fc387e5fe8c3"
+  },
+  "archive_sha256": "c264c7151e950782dcbd260e60c62cc64707a251fbeb25dc3fd30db6be4336a1",
+  "files": {
+    "rf022-preparation/publication-term-record.xml": "68fa127fc52bdccefdfcde2c254fd82b2f7cc16c9abffdf7ca7bfb0be997687a",
+    "rf022-preparation/publication-term-record.log": "5e3f91d5b20a66829e466f02192a9c8d9f6b5732114069cedcb7eceb7e0bb713",
+    "rf022-preparation/e2e-after-vcr.xml": "2dd00c01b77fab267cdf99e3ae4eb6a2d6ca5d9d43998cb78f68d8ab78ca57fc",
+    "rf022-preparation/e2e-after-vcr.log": "2bba6e5198a59110d71fa44102577909b9e7dca4a7146a9b716f5560f41b62da",
+    "rf022-preparation/publication-term-replay-final.xml": "b9272b7c5b6001fee211620203dacefc6817e7e5f505f3edb577afdf183a4a7d",
+    "rf022-preparation/publication-term-replay-final.log": "33754b47911d04a52688ed29521cfe73d85b7bef507aa26c20ce7d8c6a4a6cca",
+    "test-runs/rf023-full-18921da0-utf8/execution.json": "8481962e28d1d152f1272066dbf0f23dfae65b43693c26e0d8ceaf6df89c1aeb",
+    "test-runs/rf023-full-18921da0-utf8/junit.xml": "e30f46ee69c4c994cabbe589a467722a164e4ee27b70efab760af3f3a283c850",
+    "test-runs/rf023-full-18921da0-utf8/pytest.log": "15fdfc038e5f67ab8c6f9f191b57d243a86726adc637c9d1699d8b8e54d84226"
+  }
+}

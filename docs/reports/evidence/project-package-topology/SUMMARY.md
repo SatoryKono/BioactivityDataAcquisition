@@ -1,8 +1,29 @@
+Source-only refresh (2026-10-06, integration with main 480a54241e04): reviewed repairs and replay mapping are bound to `source_tree_sha256=10c473140c6f2c68ad212428c3208c03b3b21933cd63103edb317f0a0548a35f`. Historical measurements below are unchanged; this stamp is not new coverage evidence.
+
+Coverage refresh (2026-10-05, RF-023 after main merge): complete 17-shard measurement on `54c7c9d5b5dad9077054081484275fc93a8be83e`, source `2f462961d6e80105c964f5d536a956def9a7b4c66af316bad70abfb0f6b226a1`. 32979 PASS / 187 SKIP; line 99.70%, branch 94.34%. Canonical nonregressing adoption retains 81 visible raw module regressions as historical values. Portable evidence: `reports/quality/proof-or-stop/rf023-54c7c9d5-complete-coverage`. This local measurement does not claim full-suite acceptance or CI ADMIT.
+
+Source-only refresh (2026-10-05, main 95ca0a67 merge): source_tree_sha256 `2f462961d6e80105c964f5d536a956def9a7b4c66af316bad70abfb0f6b226a1`. Incoming normalization changes require a fresh complete coverage measurement; previous receipts remain historical.
+
+Coverage refresh (2026-10-05, RF-023): complete 17-shard measurement on `74aa6f87d40b5d3661acf5fa45e6f351fd0ca3c2`, source `e7066391216bdd39f5657961113056a22e9b99f84184fa46b45314e0c44f43ed`. Canonical nonregressing adoption retains 81 visible raw module regressions; retained historical values are not fresh measurements. Portable coverage/JUnit evidence is in `reports/quality/proof-or-stop/rf023-74aa6f87-complete-coverage`. This local measurement is not CI ADMIT or full-suite acceptance.
+
+Source-only refresh (2026-10-05, replay size limits): source_tree_sha256 `e7066391216bdd39f5657961113056a22e9b99f84184fa46b45314e0c44f43ed`. Reuse the existing normalized-row protocol and bind verified JSON reads to their envelope. This is not a new coverage measurement.
+
+Source-only refresh (2026-10-05, replay field key deduplication): source_tree_sha256 `1c0021a26ca5406ff9164492de749515da2ba41782bb0f703cf6344c27bace0b`. This source binding update is not a new coverage measurement.
+
+Source-only refresh (2026-10-05, scoped replay mapping): source_tree_sha256 `f8bfe58a0ddae76ef8e49d056ae14067951cc15736f2a126ce65199b4124e9a4`. Replay mapping is context-local and canonical labels are validated. This rebind does not claim a new coverage measurement.
+
+Source-only refresh (2026-10-05, direct owner imports): source_tree_sha256 `0d662d51438a2eee9bad3b02099e5a4d94c2938948ff83093ca6c968d50c55f7`. The three mapping codec imports now address their module owner directly; root-facade importers remain zero. This is a source binding update, not a new coverage measurement.
+
 # Сводка evidence: project-package-topology
 
 Source-only refresh (2026-10-06): reviewed PubChem, metadata and Polars repairs are bound to the current source tree. Historical coverage and topology measurements remain unchanged.
 
 `source_tree_sha256=6de85b6b390eb245580e3cb6a2b85955700250ff09e9623bf83f437a024b2648`
+Source-only refresh (2026-10-05, RF-023): sealed target mapping codecs now use the existing infrastructure config loader. Runtime cross-layer group edges are 330, within the unchanged 330 budget. This source binding is not a new coverage measurement or a complete topology re-audit; historical evidence below is preserved.
+
+`source_tree_sha256=d141e4aaac41d30aa6d90f53dff69fe99d2bf280335a394b41d4ec298485dd08`
+
+`source_module_count=2552`
 
 Source-only refresh (2026-10-05): shared EFO normalization identity revision is bound to the current source tree. This is not a new coverage measurement or topology audit. Historical measurements below are unchanged.
 

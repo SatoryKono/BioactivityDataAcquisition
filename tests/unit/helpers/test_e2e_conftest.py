@@ -8,10 +8,41 @@ from collections.abc import Callable
 from pathlib import Path
 
 import pytest
+import yaml
 
 from tests.e2e import conftest as e2e_conftest
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize(
+    ("body", "expected"),
+    [
+        ('{"mesh_terms": ["term"]}', True),
+        (b'{"keywords": ["term"]}', True),
+        (b"<MeshHeading><DescriptorName>term</DescriptorName></MeshHeading>", True),
+        ('<Keyword MajorTopicYN="N">term</Keyword>', True),
+        (b'{"documents": []}', False),
+        ("", False),
+    ],
+)
+def test_term_cassette_detection_decodes_response_bodies(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, body: str | bytes, expected: bool
+) -> None:
+    from tests.e2e import test_chembl_publication_term_e2e as term_e2e
+
+    cassette = {
+        "interactions": [
+            {
+                "request": {"body": '"mesh_terms"'},
+                "response": {"body": {"string": body}},
+            }
+        ]
+    }
+    (tmp_path / "terms.yaml").write_text(yaml.safe_dump(cassette), encoding="utf-8")
+    monkeypatch.setattr(term_e2e, "CASSETTE_DIR", tmp_path)
+
+    assert term_e2e._cassette_has_term_payload("terms") is expected
 
 
 class _ImmediateExecutorLoop:

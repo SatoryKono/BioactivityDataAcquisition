@@ -2,16 +2,22 @@ interactions:
 - request:
     body: cid=962
     headers:
-      Connection:
-      - close
-      Content-Length:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      content-length:
       - '7'
-      Content-Type:
+      content-type:
       - application/x-www-form-urlencoded
-      Host:
+      cookie:
+      - ncbi_sid=90C6ABF3AC474F51_0000SID
+      host:
       - pubchem.ncbi.nlm.nih.gov
-      User-Agent:
-      - Python-urllib/3.13
+      user-agent:
+      - python-httpx/0.28.1
     method: POST
     uri: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/JSON
   response:
@@ -146,43 +152,47 @@ interactions:
         0,\n        \"covalent_unit\": 1,\n        \"tautomers\": -1\n      }\n    }\n
         \ ]\n}\n"
     headers:
-      Access-Control-Allow-Origin:
+      access-control-allow-origin:
       - '*'
-      Cache-Control:
+      alt-svc:
+      - clear
+      cache-control:
       - private
-      Connection:
-      - close
-      Content-Security-Policy:
+      content-length:
+      - '9476'
+      content-security-policy:
       - upgrade-insecure-requests
-      Content-Type:
+      content-type:
       - application/json
-      Date:
-      - Tue, 05 May 2026 15:10:18 GMT
-      Expires:
-      - Tue, 05 May 2026 16:10:18 GMT
-      NCBI-PHID:
-      - '[REDACTED_KEY]'
-      NCBI-SID:
-      - '[REDACTED_KEY]'
-      Referrer-Policy:
+      date:
+      - Tue, 06 Oct 2026 04:11:47 GMT
+      expires:
+      - Tue, 06 Oct 2026 05:11:47 GMT
+      ncbi-phid:
+      - 90C6F80EAC4750310000000000000001.m_1
+      ncbi-sid:
+      - 90C6ABF3AC474F51_0000SID
+      referrer-policy:
       - origin-when-cross-origin
-      Server:
+      server:
       - Apache
-      Set-Cookie:
-      - ncbi_sid=[REDACTED_KEY]; domain=.nih.gov; path=/; expires=Wed, 05 May 2027
-        15:10:18 GMT
-      Strict-Transport-Security:
+      set-cookie:
+      - ncbi_sid=90C6ABF3AC474F51_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 04:11:47 GMT
+      strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
-      Transfer-Encoding:
+      transfer-encoding:
       - chunked
-      Vary:
+      vary:
       - Accept-Encoding
-      X-Throttling-Control:
-      - 'Request Count status: Green (0%), Request Time status: Green (0%), Service
-        status: Green (17%)'
-      X-UA-Compatible:
+      via:
+      - 1.1 google
+      x-throttling-control:
+      - 'Request Count status: Green (4%), Request Time status: Green (1%), Service
+        status: Green (43%)'
+      x-ua-compatible:
       - IE=Edge
-      X-XSS-Protection:
+      x-xss-protection:
       - 1; mode=block
     status:
       code: 200
@@ -190,16 +200,22 @@ interactions:
 - request:
     body: name=ibuprofen
     headers:
-      Connection:
-      - close
-      Content-Length:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      content-length:
       - '14'
-      Content-Type:
+      content-type:
       - application/x-www-form-urlencoded
-      Host:
+      cookie:
+      - ncbi_sid=90C6ABF3AC474F51_0000SID
+      host:
       - pubchem.ncbi.nlm.nih.gov
-      User-Agent:
-      - Python-urllib/3.13
+      user-agent:
+      - python-httpx/0.28.1
     method: POST
     uri: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/JSON
   response:
@@ -401,43 +417,47 @@ interactions:
         0,\n        \"covalent_unit\": 1,\n        \"tautomers\": -1\n      }\n    }\n
         \ ]\n}\n"
     headers:
-      Access-Control-Allow-Origin:
+      access-control-allow-origin:
       - '*'
-      Cache-Control:
+      alt-svc:
+      - clear
+      cache-control:
       - private
-      Connection:
-      - close
-      Content-Security-Policy:
+      content-length:
+      - '14635'
+      content-security-policy:
       - upgrade-insecure-requests
-      Content-Type:
+      content-type:
       - application/json
-      Date:
-      - Tue, 05 May 2026 15:10:19 GMT
-      Expires:
-      - Tue, 05 May 2026 16:10:19 GMT
-      NCBI-PHID:
-      - '[REDACTED_KEY]'
-      NCBI-SID:
-      - '[REDACTED_KEY]'
-      Referrer-Policy:
+      date:
+      - Tue, 06 Oct 2026 04:11:48 GMT
+      expires:
+      - Tue, 06 Oct 2026 05:11:48 GMT
+      ncbi-phid:
+      - 95B74B98AC4750410000000000000001.m_1
+      ncbi-sid:
+      - 90C6ABF3AC474F51_0000SID
+      referrer-policy:
       - origin-when-cross-origin
-      Server:
+      server:
       - Apache
-      Set-Cookie:
-      - ncbi_sid=[REDACTED_KEY]; domain=.nih.gov; path=/; expires=Wed, 05 May 2027
-        15:10:19 GMT
-      Strict-Transport-Security:
+      set-cookie:
+      - ncbi_sid=90C6ABF3AC474F51_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 04:11:48 GMT
+      strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
-      Transfer-Encoding:
+      transfer-encoding:
       - chunked
-      Vary:
+      vary:
       - Accept-Encoding
-      X-Throttling-Control:
-      - 'Request Count status: Green (0%), Request Time status: Green (0%), Service
-        status: Green (23%)'
-      X-UA-Compatible:
+      via:
+      - 1.1 google
+      x-throttling-control:
+      - 'Request Count status: Green (1%), Request Time status: Green (1%), Service
+        status: Green (17%)'
+      x-ua-compatible:
       - IE=Edge
-      X-XSS-Protection:
+      x-xss-protection:
       - 1; mode=block
     status:
       code: 200

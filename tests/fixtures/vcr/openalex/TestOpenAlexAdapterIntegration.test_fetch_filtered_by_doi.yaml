@@ -1,80 +1,26 @@
 interactions:
 - request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - BioETL/1.0 (mailto:bioetl-test@example.com)
-    method: GET
-    uri: https://api.openalex.org/works?filter=doi%3A10.1038%2Fs41586-020-2012-7&per-page=1
-  response:
-    body:
-      string: "{\n  \"meta\": {\n    \"count\": 1,\n    \"db_response_time_ms\": 15,\n
-        \   \"page\": null,\n    \"per_page\": 1,\n    \"groups_count\": null\n  },\n
-        \ \"results\": [\n    {\n      \"id\": \"https://openalex.org/W3006090887\",\n
-        \     \"doi\": \"https://doi.org/10.1038/s41586-020-2012-7\",\n      \"title\":
-        \"A pneumonia outbreak associated with a new coronavirus of probable bat origin\",\n
-        \     \"display_name\": \"A pneumonia outbreak associated with a new coronavirus
-        of probable bat origin\",\n      \"publication_year\": 2020,\n      \"publication_date\":
-        \"2020-02-03\",\n      \"type\": \"article\",\n      \"type_crossref\": \"journal-article\",\n
-        \     \"open_access\": {\n        \"is_oa\": true,\n        \"oa_status\":
-        \"gold\",\n        \"oa_url\": \"https://www.nature.com/articles/s41586-020-2012-7.pdf\",\n
-        \       \"any_repository_has_fulltext\": true\n      },\n      \"authorships\":
-        [\n        {\n          \"author_position\": \"first\",\n          \"author\":
-        {\n            \"id\": \"https://openalex.org/A5023888391\",\n            \"display_name\":
-        \"Peng Zhou\",\n            \"orcid\": null\n          },\n          \"institutions\":
-        [],\n          \"countries\": [\"CN\"],\n          \"is_corresponding\": false,\n
-        \         \"raw_author_name\": \"Peng Zhou\",\n          \"raw_affiliation_strings\":
-        []\n        }\n      ],\n      \"primary_location\": {\n        \"source\":
-        {\n          \"id\": \"https://openalex.org/S137773608\",\n          \"display_name\":
-        \"Nature\",\n          \"issn_l\": \"0028-0836\",\n          \"issn\": [\"0028-0836\",
-        \"1476-4687\"],\n          \"is_oa\": false,\n          \"is_in_doaj\": false,\n
-        \         \"host_organization\": \"https://openalex.org/P4310319965\",\n          \"host_organization_name\":
-        \"Springer Nature\",\n          \"type\": \"journal\"\n        },\n        \"license\":
-        \"cc-by\",\n        \"version\": \"publishedVersion\",\n        \"pdf_url\":
-        \"https://www.nature.com/articles/s41586-020-2012-7.pdf\"\n      },\n      \"cited_by_count\":
-        15000,\n      \"abstract_inverted_index\": {\n        \"Here\": [0],\n        \"we\":
-        [1, 12],\n        \"describe\": [2],\n        \"a\": [3, 8],\n        \"new\":
-        [4],\n        \"coronavirus\": [5],\n        \"associated\": [6],\n        \"with\":
-        [7],\n        \"human\": [9],\n        \"respiratory\": [10],\n        \"disease\":
-        [11],\n        \"call\": [13],\n        \"2019-nCoV\": [14]\n      },\n      \"concepts\":
-        [\n        {\n          \"id\": \"https://openalex.org/C71924100\",\n          \"wikidata\":
-        \"https://www.wikidata.org/wiki/Q84263196\",\n          \"display_name\":
-        \"COVID-19\",\n          \"level\": 2,\n          \"score\": 0.95\n        },\n
-        \       {\n          \"id\": \"https://openalex.org/C185592680\",\n          \"wikidata\":
-        \"https://www.wikidata.org/wiki/Q7867\",\n          \"display_name\": \"Chemistry\",\n
-        \         \"level\": 0,\n          \"score\": 0.88\n        }\n      ],\n
-        \     \"language\": \"en\"\n    }\n  ]\n}\n"
-    headers:
-      Content-Type:
-      - application/json
-    status:
-      code: 200
-      message: OK
-- request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - api.openalex.org
-      User-Agent:
-      - BioETL/1.0 (mailto:bioetl-test@example.com)
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://api.openalex.org/works?filter=doi%3A10.1038%2Fs41586-020-2012-7&per-page=1
-  response:
+  response: &id001
     body:
-      string: '{"meta": {"count": 1, "db_response_time_ms": 9, "page": 1, "per_page":
-        1, "groups_count": null, "cost_usd": 0.0001}, "results": [{"id": "https://openalex.org/W3004280078",
+      string: '{"meta": {"count": 1, "db_response_time_ms": 12, "page": 1, "per_page":
+        1, "groups_count": null, "x_query": {"oql": "get works where DOI is (10.1038/s41586-020-2012-7)",
+        "oqo": {"get_rows": "works", "filter_rows": [{"column_id": "doi", "value":
+        "10.1038/s41586-020-2012-7"}]}, "url": "/works?filter=doi:10.1038%2Fs41586-020-2012-7&per_page=1"},
+        "cost_usd": 0.0001}, "results": [{"id": "https://openalex.org/W3004280078",
         "doi": "https://doi.org/10.1038/s41586-020-2012-7", "title": "A pneumonia
         outbreak associated with a new coronavirus of probable bat origin", "display_name":
         "A pneumonia outbreak associated with a new coronavirus of probable bat origin",
@@ -86,7 +32,8 @@ interactions:
         "pdf_url": "https://www.nature.com/articles/s41586-020-2012-7.pdf", "source":
         {"id": "https://openalex.org/S137773608", "display_name": "Nature", "issn_l":
         "0028-0836", "issn": ["0028-0836", "1476-4687"], "is_oa": false, "is_in_doaj":
-        false, "is_core": true, "host_organization": "https://openalex.org/P4310319908",
+        false, "is_core": true, "listed_in": ["cwts-core", "doyens", "erih-plus",
+        "jufo-3", "ki-jl-3", "medline", "norway-2"], "host_organization": "https://openalex.org/P4310319908",
         "host_organization_name": "Nature Portfolio", "host_organization_lineage":
         ["https://openalex.org/P4310319908", "https://openalex.org/P4310319965"],
         "host_organization_lineage_names": ["Nature Portfolio", "Springer Nature"],
@@ -97,337 +44,354 @@ interactions:
         "hybrid", "oa_url": "https://www.nature.com/articles/s41586-020-2012-7.pdf",
         "any_repository_has_fulltext": true}, "authorships": [{"author_position":
         "first", "author": {"id": "https://openalex.org/A5083165835", "display_name":
-        "Peng Zhou", "orcid": "https://orcid.org/0000-0001-9863-4201"}, "institutions":
-        [{"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
+        "Peng Zhou", "orcid": "https://orcid.org/0000-0001-9863-4201", "observed_orcids":
+        ["https://orcid.org/0000-0001-9863-4201"]}, "institutions": [{"id": "https://openalex.org/I19820366",
+        "display_name": "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35",
+        "country_code": "CN", "type": "government", "lineage": ["https://openalex.org/I19820366"]},
+        {"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
         of Virology", "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type":
-        "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]},
-        {"id": "https://openalex.org/I19820366", "display_name": "Chinese Academy
-        of Sciences", "ror": "https://ror.org/034t30j35", "country_code": "CN", "type":
-        "funder", "lineage": ["https://openalex.org/I19820366"]}], "countries": ["CN"],
-        "is_corresponding": true, "raw_author_name": "Peng Zhou", "raw_affiliation_strings":
-        ["CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
-        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China"], "affiliations":
-        [{"raw_affiliation_string": "CAS Key Laboratory of Special Pathogens, Wuhan
+        "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}],
+        "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Peng Zhou",
+        "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens, Wuhan
         Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
-        of Sciences, Wuhan, China", "institution_ids": ["https://openalex.org/I4210106882",
-        "https://openalex.org/I19820366"]}]}, {"author_position": "middle", "author":
-        {"id": "https://openalex.org/A5039460637", "display_name": "Xing\u2010Lou
-        Yang", "orcid": "https://orcid.org/0000-0002-5317-8983"}, "institutions":
-        [{"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
-        of Virology", "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type":
-        "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]},
-        {"id": "https://openalex.org/I19820366", "display_name": "Chinese Academy
+        of Sciences, Wuhan, China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string":
+        "CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
+        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}]},
+        {"author_position": "middle", "author": {"id": "https://openalex.org/A5039460637",
+        "display_name": "Xing\u2010Lou Yang", "orcid": "https://orcid.org/0000-0002-5317-8983",
+        "observed_orcids": ["https://orcid.org/0000-0002-5317-8983"]}, "institutions":
+        [{"id": "https://openalex.org/I19820366", "display_name": "Chinese Academy
         of Sciences", "ror": "https://ror.org/034t30j35", "country_code": "CN", "type":
-        "funder", "lineage": ["https://openalex.org/I19820366"]}], "countries": ["CN"],
-        "is_corresponding": false, "raw_author_name": "Xing-Lou Yang", "raw_affiliation_strings":
-        ["CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
-        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China"], "affiliations":
-        [{"raw_affiliation_string": "CAS Key Laboratory of Special Pathogens, Wuhan
-        Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
-        of Sciences, Wuhan, China", "institution_ids": ["https://openalex.org/I4210106882",
-        "https://openalex.org/I19820366"]}]}, {"author_position": "middle", "author":
+        "government", "lineage": ["https://openalex.org/I19820366"]}, {"id": "https://openalex.org/I4210106882",
+        "display_name": "Wuhan Institute of Virology", "ror": "https://ror.org/01jxjav08",
+        "country_code": "CN", "type": "facility", "lineage": ["https://openalex.org/I19820366",
+        "https://openalex.org/I4210106882"]}], "countries": ["CN"], "is_corresponding":
+        false, "raw_author_name": "Xing-Lou Yang", "raw_affiliation_strings": ["CAS
+        Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
+        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China"], "raw_orcid":
+        null, "affiliations": [{"raw_affiliation_string": "CAS Key Laboratory of Special
+        Pathogens, Wuhan Institute of Virology, Center for Biosafety Mega-Science,
+        Chinese Academy of Sciences, Wuhan, China", "institution_ids": ["https://openalex.org/I19820366",
+        "https://openalex.org/I4210106882"]}]}, {"author_position": "middle", "author":
         {"id": "https://openalex.org/A5002787853", "display_name": "Xian-Guang Wang",
-        "orcid": null}, "institutions": [{"id": "https://openalex.org/I4210106882",
+        "orcid": null, "observed_orcids": []}, "institutions": [{"id": "https://openalex.org/I19820366",
+        "display_name": "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35",
+        "country_code": "CN", "type": "government", "lineage": ["https://openalex.org/I19820366"]},
+        {"id": "https://openalex.org/I3020662980", "display_name": "Jinyintan Hospital",
+        "ror": "https://ror.org/038p1ty61", "country_code": "CN", "type": "healthcare",
+        "lineage": ["https://openalex.org/I3020662980"]}, {"id": "https://openalex.org/I4210106882",
         "display_name": "Wuhan Institute of Virology", "ror": "https://ror.org/01jxjav08",
         "country_code": "CN", "type": "facility", "lineage": ["https://openalex.org/I19820366",
         "https://openalex.org/I4210106882"]}, {"id": "https://openalex.org/I4210165038",
         "display_name": "University of Chinese Academy of Sciences", "ror": "https://ror.org/05qbk4x57",
         "country_code": "CN", "type": "education", "lineage": ["https://openalex.org/I19820366",
-        "https://openalex.org/I4210165038"]}, {"id": "https://openalex.org/I4210086097",
-        "display_name": "Wuhan City Chinese Medicine Hospital", "ror": "https://ror.org/00hagsh42",
-        "country_code": "CN", "type": "healthcare", "lineage": ["https://openalex.org/I4210086097"]},
-        {"id": "https://openalex.org/I19820366", "display_name": "Chinese Academy
-        of Sciences", "ror": "https://ror.org/034t30j35", "country_code": "CN", "type":
-        "funder", "lineage": ["https://openalex.org/I19820366"]}], "countries": ["CN"],
-        "is_corresponding": false, "raw_author_name": "Xian-Guang Wang", "raw_affiliation_strings":
-        ["CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
-        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "University
+        "https://openalex.org/I4210165038"]}], "countries": ["CN"], "is_corresponding":
+        false, "raw_author_name": "Xian-Guang Wang", "raw_affiliation_strings": ["CAS
+        Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
+        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "University
         of Chinese Academy of Sciences, Beijing, China", "Wuhan Jin Yin-Tan Hospital,
-        Wuhan, China"], "affiliations": [{"raw_affiliation_string": "CAS Key Laboratory
-        of Special Pathogens, Wuhan Institute of Virology, Center for Biosafety Mega-Science,
-        Chinese Academy of Sciences, Wuhan, China", "institution_ids": ["https://openalex.org/I4210106882",
-        "https://openalex.org/I19820366"]}, {"raw_affiliation_string": "University
-        of Chinese Academy of Sciences, Beijing, China", "institution_ids": ["https://openalex.org/I4210165038"]},
-        {"raw_affiliation_string": "Wuhan Jin Yin-Tan Hospital, Wuhan, China", "institution_ids":
-        ["https://openalex.org/I4210086097"]}]}, {"author_position": "middle", "author":
-        {"id": "https://openalex.org/A5103013886", "display_name": "Ben Hu", "orcid":
-        "https://orcid.org/0000-0001-9194-3474"}, "institutions": [{"id": "https://openalex.org/I4210106882",
+        Wuhan, China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string":
+        "CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
+        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}, {"raw_affiliation_string":
+        "University of Chinese Academy of Sciences, Beijing, China", "institution_ids":
+        ["https://openalex.org/I4210165038"]}, {"raw_affiliation_string": "Wuhan Jin
+        Yin-Tan Hospital, Wuhan, China", "institution_ids": ["https://openalex.org/I3020662980"]}]},
+        {"author_position": "middle", "author": {"id": "https://openalex.org/A5103013886",
+        "display_name": "Ben Hu", "orcid": "https://orcid.org/0000-0001-9194-3474",
+        "observed_orcids": ["https://orcid.org/0000-0001-9194-3474"]}, "institutions":
+        [{"id": "https://openalex.org/I19820366", "display_name": "Chinese Academy
+        of Sciences", "ror": "https://ror.org/034t30j35", "country_code": "CN", "type":
+        "government", "lineage": ["https://openalex.org/I19820366"]}, {"id": "https://openalex.org/I4210106882",
         "display_name": "Wuhan Institute of Virology", "ror": "https://ror.org/01jxjav08",
         "country_code": "CN", "type": "facility", "lineage": ["https://openalex.org/I19820366",
-        "https://openalex.org/I4210106882"]}, {"id": "https://openalex.org/I19820366",
-        "display_name": "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35",
-        "country_code": "CN", "type": "funder", "lineage": ["https://openalex.org/I19820366"]}],
-        "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Ben Hu",
-        "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens, Wuhan
+        "https://openalex.org/I4210106882"]}], "countries": ["CN"], "is_corresponding":
+        false, "raw_author_name": "Ben Hu", "raw_affiliation_strings": ["CAS Key Laboratory
+        of Special Pathogens, Wuhan Institute of Virology, Center for Biosafety Mega-Science,
+        Chinese Academy of Sciences, Wuhan, China"], "raw_orcid": null, "affiliations":
+        [{"raw_affiliation_string": "CAS Key Laboratory of Special Pathogens, Wuhan
         Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
-        of Sciences, Wuhan, China"], "affiliations": [{"raw_affiliation_string": "CAS
-        Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
-        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
-        ["https://openalex.org/I4210106882", "https://openalex.org/I19820366"]}]},
-        {"author_position": "middle", "author": {"id": "https://openalex.org/A5100767849",
-        "display_name": "Lei Zhang", "orcid": "https://orcid.org/0000-0003-4921-8986"},
+        of Sciences, Wuhan, China", "institution_ids": ["https://openalex.org/I19820366",
+        "https://openalex.org/I4210106882"]}]}, {"author_position": "middle", "author":
+        {"id": "https://openalex.org/A5100767849", "display_name": "Lei Zhang", "orcid":
+        "https://orcid.org/0000-0003-4921-8986", "observed_orcids": ["https://orcid.org/0000-0003-4921-8986"]},
         "institutions": [{"id": "https://openalex.org/I19820366", "display_name":
         "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35", "country_code":
-        "CN", "type": "funder", "lineage": ["https://openalex.org/I19820366"]}, {"id":
-        "https://openalex.org/I4210106882", "display_name": "Wuhan Institute of Virology",
-        "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type": "facility",
-        "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}],
-        "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Lei Zhang",
-        "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens, Wuhan
-        Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
-        of Sciences, Wuhan, China"], "affiliations": [{"raw_affiliation_string": "CAS
-        Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
-        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
-        ["https://openalex.org/I4210106882", "https://openalex.org/I19820366"]}]},
-        {"author_position": "middle", "author": {"id": "https://openalex.org/A5100622062",
-        "display_name": "Wei Zhang", "orcid": "https://orcid.org/0000-0002-1960-4475"},
-        "institutions": [{"id": "https://openalex.org/I19820366", "display_name":
-        "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35", "country_code":
-        "CN", "type": "funder", "lineage": ["https://openalex.org/I19820366"]}, {"id":
-        "https://openalex.org/I4210106882", "display_name": "Wuhan Institute of Virology",
-        "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type": "facility",
-        "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}],
-        "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Wei Zhang",
-        "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens, Wuhan
-        Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
-        of Sciences, Wuhan, China"], "affiliations": [{"raw_affiliation_string": "CAS
-        Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
-        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
-        ["https://openalex.org/I4210106882", "https://openalex.org/I19820366"]}]},
-        {"author_position": "middle", "author": {"id": "https://openalex.org/A5102379144",
-        "display_name": "Hao-Rui Si", "orcid": null}, "institutions": [{"id": "https://openalex.org/I19820366",
-        "display_name": "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35",
-        "country_code": "CN", "type": "funder", "lineage": ["https://openalex.org/I19820366"]},
-        {"id": "https://openalex.org/I4210165038", "display_name": "University of
-        Chinese Academy of Sciences", "ror": "https://ror.org/05qbk4x57", "country_code":
-        "CN", "type": "education", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210165038"]},
+        "CN", "type": "government", "lineage": ["https://openalex.org/I19820366"]},
         {"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
         of Virology", "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type":
         "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}],
+        "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Lei Zhang",
+        "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens, Wuhan
+        Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
+        of Sciences, Wuhan, China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string":
+        "CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
+        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}]},
+        {"author_position": "middle", "author": {"id": "https://openalex.org/A5100622062",
+        "display_name": "Wei Zhang", "orcid": "https://orcid.org/0000-0002-1960-4475",
+        "observed_orcids": ["https://orcid.org/0000-0002-1960-4475"]}, "institutions":
+        [{"id": "https://openalex.org/I19820366", "display_name": "Chinese Academy
+        of Sciences", "ror": "https://ror.org/034t30j35", "country_code": "CN", "type":
+        "government", "lineage": ["https://openalex.org/I19820366"]}, {"id": "https://openalex.org/I4210106882",
+        "display_name": "Wuhan Institute of Virology", "ror": "https://ror.org/01jxjav08",
+        "country_code": "CN", "type": "facility", "lineage": ["https://openalex.org/I19820366",
+        "https://openalex.org/I4210106882"]}], "countries": ["CN"], "is_corresponding":
+        false, "raw_author_name": "Wei Zhang", "raw_affiliation_strings": ["CAS Key
+        Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for Biosafety
+        Mega-Science, Chinese Academy of Sciences, Wuhan, China"], "raw_orcid": null,
+        "affiliations": [{"raw_affiliation_string": "CAS Key Laboratory of Special
+        Pathogens, Wuhan Institute of Virology, Center for Biosafety Mega-Science,
+        Chinese Academy of Sciences, Wuhan, China", "institution_ids": ["https://openalex.org/I19820366",
+        "https://openalex.org/I4210106882"]}]}, {"author_position": "middle", "author":
+        {"id": "https://openalex.org/A5021939794", "display_name": "Hao-Rui Si", "orcid":
+        null, "observed_orcids": []}, "institutions": [{"id": "https://openalex.org/I19820366",
+        "display_name": "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35",
+        "country_code": "CN", "type": "government", "lineage": ["https://openalex.org/I19820366"]},
+        {"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
+        of Virology", "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type":
+        "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]},
+        {"id": "https://openalex.org/I4210165038", "display_name": "University of
+        Chinese Academy of Sciences", "ror": "https://ror.org/05qbk4x57", "country_code":
+        "CN", "type": "education", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210165038"]}],
         "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Hao-Rui
         Si", "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens,
         Wuhan Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
         of Sciences, Wuhan, China", "University of Chinese Academy of Sciences, Beijing,
-        China"], "affiliations": [{"raw_affiliation_string": "CAS Key Laboratory of
-        Special Pathogens, Wuhan Institute of Virology, Center for Biosafety Mega-Science,
-        Chinese Academy of Sciences, Wuhan, China", "institution_ids": ["https://openalex.org/I4210106882",
-        "https://openalex.org/I19820366"]}, {"raw_affiliation_string": "University
-        of Chinese Academy of Sciences, Beijing, China", "institution_ids": ["https://openalex.org/I4210165038"]}]},
-        {"author_position": "middle", "author": {"id": "https://openalex.org/A5060118564",
-        "display_name": "Yan Zhu", "orcid": "https://orcid.org/0000-0002-7045-4847"},
-        "institutions": [{"id": "https://openalex.org/I4210106882", "display_name":
-        "Wuhan Institute of Virology", "ror": "https://ror.org/01jxjav08", "country_code":
-        "CN", "type": "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]},
-        {"id": "https://openalex.org/I19820366", "display_name": "Chinese Academy
-        of Sciences", "ror": "https://ror.org/034t30j35", "country_code": "CN", "type":
-        "funder", "lineage": ["https://openalex.org/I19820366"]}], "countries": ["CN"],
-        "is_corresponding": false, "raw_author_name": "Yan Zhu", "raw_affiliation_strings":
-        ["CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
-        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China"], "affiliations":
-        [{"raw_affiliation_string": "CAS Key Laboratory of Special Pathogens, Wuhan
+        China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string": "CAS
+        Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
+        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}, {"raw_affiliation_string":
+        "University of Chinese Academy of Sciences, Beijing, China", "institution_ids":
+        ["https://openalex.org/I4210165038"]}]}, {"author_position": "middle", "author":
+        {"id": "https://openalex.org/A5060118564", "display_name": "Yan Zhu", "orcid":
+        "https://orcid.org/0000-0002-7045-4847", "observed_orcids": ["https://orcid.org/0000-0002-7045-4847"]},
+        "institutions": [{"id": "https://openalex.org/I19820366", "display_name":
+        "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35", "country_code":
+        "CN", "type": "government", "lineage": ["https://openalex.org/I19820366"]},
+        {"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
+        of Virology", "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type":
+        "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}],
+        "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Yan Zhu",
+        "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens, Wuhan
         Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
-        of Sciences, Wuhan, China", "institution_ids": ["https://openalex.org/I4210106882",
-        "https://openalex.org/I19820366"]}]}, {"author_position": "middle", "author":
-        {"id": "https://openalex.org/A5100356466", "display_name": "Bei Li", "orcid":
-        "https://orcid.org/0009-0007-6702-4276"}, "institutions": [{"id": "https://openalex.org/I19820366",
-        "display_name": "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35",
-        "country_code": "CN", "type": "funder", "lineage": ["https://openalex.org/I19820366"]},
+        of Sciences, Wuhan, China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string":
+        "CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
+        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}]},
+        {"author_position": "middle", "author": {"id": "https://openalex.org/A5100356466",
+        "display_name": "Bei Li", "orcid": "https://orcid.org/0009-0007-6702-4276",
+        "observed_orcids": ["https://orcid.org/0009-0007-6702-4276", "https://orcid.org/0009-0000-8582-1024"]},
+        "institutions": [{"id": "https://openalex.org/I19820366", "display_name":
+        "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35", "country_code":
+        "CN", "type": "government", "lineage": ["https://openalex.org/I19820366"]},
         {"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
         of Virology", "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type":
         "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}],
         "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Bei Li",
         "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens, Wuhan
         Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
-        of Sciences, Wuhan, China"], "affiliations": [{"raw_affiliation_string": "CAS
-        Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
-        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
-        ["https://openalex.org/I4210106882", "https://openalex.org/I19820366"]}]},
+        of Sciences, Wuhan, China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string":
+        "CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
+        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}]},
         {"author_position": "middle", "author": {"id": "https://openalex.org/A5101094927",
-        "display_name": "Chao-Lin Huang", "orcid": null}, "institutions": [{"id":
-        "https://openalex.org/I4210086097", "display_name": "Wuhan City Chinese Medicine
-        Hospital", "ror": "https://ror.org/00hagsh42", "country_code": "CN", "type":
-        "healthcare", "lineage": ["https://openalex.org/I4210086097"]}], "countries":
-        ["CN"], "is_corresponding": false, "raw_author_name": "Chao-Lin Huang", "raw_affiliation_strings":
-        ["Wuhan Jin Yin-Tan Hospital, Wuhan, China"], "affiliations": [{"raw_affiliation_string":
-        "Wuhan Jin Yin-Tan Hospital, Wuhan, China", "institution_ids": ["https://openalex.org/I4210086097"]}]},
+        "display_name": "Chao-Lin Huang", "orcid": null, "observed_orcids": []}, "institutions":
+        [{"id": "https://openalex.org/I3020662980", "display_name": "Jinyintan Hospital",
+        "ror": "https://ror.org/038p1ty61", "country_code": "CN", "type": "healthcare",
+        "lineage": ["https://openalex.org/I3020662980"]}], "countries": ["CN"], "is_corresponding":
+        false, "raw_author_name": "Chao-Lin Huang", "raw_affiliation_strings": ["Wuhan
+        Jin Yin-Tan Hospital, Wuhan, China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string":
+        "Wuhan Jin Yin-Tan Hospital, Wuhan, China", "institution_ids": ["https://openalex.org/I3020662980"]}]},
         {"author_position": "middle", "author": {"id": "https://openalex.org/A5017187601",
-        "display_name": "Huidong Chen", "orcid": "https://orcid.org/0000-0001-7676-6350"},
-        "institutions": [{"id": "https://openalex.org/I4210086097", "display_name":
-        "Wuhan City Chinese Medicine Hospital", "ror": "https://ror.org/00hagsh42",
-        "country_code": "CN", "type": "healthcare", "lineage": ["https://openalex.org/I4210086097"]}],
-        "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Hui-Dong
-        Chen", "raw_affiliation_strings": ["Wuhan Jin Yin-Tan Hospital, Wuhan, China"],
-        "affiliations": [{"raw_affiliation_string": "Wuhan Jin Yin-Tan Hospital, Wuhan,
-        China", "institution_ids": ["https://openalex.org/I4210086097"]}]}, {"author_position":
-        "middle", "author": {"id": "https://openalex.org/A5100394807", "display_name":
-        "Jing Chen", "orcid": "https://orcid.org/0000-0001-5972-3623"}, "institutions":
-        [{"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
+        "display_name": "Huidong Chen", "orcid": "https://orcid.org/0000-0001-7676-6350",
+        "observed_orcids": ["https://orcid.org/0000-0001-7676-6350"]}, "institutions":
+        [{"id": "https://openalex.org/I3020662980", "display_name": "Jinyintan Hospital",
+        "ror": "https://ror.org/038p1ty61", "country_code": "CN", "type": "healthcare",
+        "lineage": ["https://openalex.org/I3020662980"]}], "countries": ["CN"], "is_corresponding":
+        false, "raw_author_name": "Hui-Dong Chen", "raw_affiliation_strings": ["Wuhan
+        Jin Yin-Tan Hospital, Wuhan, China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string":
+        "Wuhan Jin Yin-Tan Hospital, Wuhan, China", "institution_ids": ["https://openalex.org/I3020662980"]}]},
+        {"author_position": "middle", "author": {"id": "https://openalex.org/A5100394807",
+        "display_name": "Jing Chen", "orcid": "https://orcid.org/0000-0001-5972-3623",
+        "observed_orcids": ["https://orcid.org/0000-0001-5972-3623", "https://orcid.org/0009-0008-5810-9611"]},
+        "institutions": [{"id": "https://openalex.org/I19820366", "display_name":
+        "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35", "country_code":
+        "CN", "type": "government", "lineage": ["https://openalex.org/I19820366"]},
+        {"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
         of Virology", "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type":
         "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]},
         {"id": "https://openalex.org/I4210165038", "display_name": "University of
         Chinese Academy of Sciences", "ror": "https://ror.org/05qbk4x57", "country_code":
-        "CN", "type": "education", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210165038"]},
-        {"id": "https://openalex.org/I19820366", "display_name": "Chinese Academy
-        of Sciences", "ror": "https://ror.org/034t30j35", "country_code": "CN", "type":
-        "funder", "lineage": ["https://openalex.org/I19820366"]}], "countries": ["CN"],
-        "is_corresponding": false, "raw_author_name": "Jing Chen", "raw_affiliation_strings":
-        ["CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
-        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "University
-        of Chinese Academy of Sciences, Beijing, China"], "affiliations": [{"raw_affiliation_string":
-        "CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
-        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
-        ["https://openalex.org/I4210106882", "https://openalex.org/I19820366"]}, {"raw_affiliation_string":
+        "CN", "type": "education", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210165038"]}],
+        "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Jing Chen",
+        "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens, Wuhan
+        Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
+        of Sciences, Wuhan, China", "University of Chinese Academy of Sciences, Beijing,
+        China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string": "CAS
+        Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
+        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}, {"raw_affiliation_string":
         "University of Chinese Academy of Sciences, Beijing, China", "institution_ids":
         ["https://openalex.org/I4210165038"]}]}, {"author_position": "middle", "author":
         {"id": "https://openalex.org/A5077234479", "display_name": "Yun Luo", "orcid":
-        "https://orcid.org/0000-0002-6243-7000"}, "institutions": [{"id": "https://openalex.org/I19820366",
-        "display_name": "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35",
-        "country_code": "CN", "type": "funder", "lineage": ["https://openalex.org/I19820366"]},
-        {"id": "https://openalex.org/I4210165038", "display_name": "University of
-        Chinese Academy of Sciences", "ror": "https://ror.org/05qbk4x57", "country_code":
-        "CN", "type": "education", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210165038"]},
+        "https://orcid.org/0000-0002-6243-7000", "observed_orcids": ["https://orcid.org/0000-0002-6243-7000"]},
+        "institutions": [{"id": "https://openalex.org/I19820366", "display_name":
+        "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35", "country_code":
+        "CN", "type": "government", "lineage": ["https://openalex.org/I19820366"]},
         {"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
         of Virology", "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type":
-        "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}],
+        "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]},
+        {"id": "https://openalex.org/I4210165038", "display_name": "University of
+        Chinese Academy of Sciences", "ror": "https://ror.org/05qbk4x57", "country_code":
+        "CN", "type": "education", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210165038"]}],
         "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Yun Luo",
         "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens, Wuhan
         Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
         of Sciences, Wuhan, China", "University of Chinese Academy of Sciences, Beijing,
-        China"], "affiliations": [{"raw_affiliation_string": "CAS Key Laboratory of
-        Special Pathogens, Wuhan Institute of Virology, Center for Biosafety Mega-Science,
-        Chinese Academy of Sciences, Wuhan, China", "institution_ids": ["https://openalex.org/I4210106882",
-        "https://openalex.org/I19820366"]}, {"raw_affiliation_string": "University
-        of Chinese Academy of Sciences, Beijing, China", "institution_ids": ["https://openalex.org/I4210165038"]}]},
-        {"author_position": "middle", "author": {"id": "https://openalex.org/A5018411180",
-        "display_name": "Hua Guo", "orcid": "https://orcid.org/0000-0003-4388-6465"},
-        "institutions": [{"id": "https://openalex.org/I4210165038", "display_name":
-        "University of Chinese Academy of Sciences", "ror": "https://ror.org/05qbk4x57",
-        "country_code": "CN", "type": "education", "lineage": ["https://openalex.org/I19820366",
-        "https://openalex.org/I4210165038"]}, {"id": "https://openalex.org/I4210106882",
-        "display_name": "Wuhan Institute of Virology", "ror": "https://ror.org/01jxjav08",
-        "country_code": "CN", "type": "facility", "lineage": ["https://openalex.org/I19820366",
-        "https://openalex.org/I4210106882"]}, {"id": "https://openalex.org/I19820366",
-        "display_name": "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35",
-        "country_code": "CN", "type": "funder", "lineage": ["https://openalex.org/I19820366"]}],
+        China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string": "CAS
+        Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
+        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}, {"raw_affiliation_string":
+        "University of Chinese Academy of Sciences, Beijing, China", "institution_ids":
+        ["https://openalex.org/I4210165038"]}]}, {"author_position": "middle", "author":
+        {"id": "https://openalex.org/A5018411180", "display_name": "Hua Guo", "orcid":
+        "https://orcid.org/0000-0003-4388-6465", "observed_orcids": ["https://orcid.org/0000-0003-4388-6465"]},
+        "institutions": [{"id": "https://openalex.org/I19820366", "display_name":
+        "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35", "country_code":
+        "CN", "type": "government", "lineage": ["https://openalex.org/I19820366"]},
+        {"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
+        of Virology", "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type":
+        "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]},
+        {"id": "https://openalex.org/I4210165038", "display_name": "University of
+        Chinese Academy of Sciences", "ror": "https://ror.org/05qbk4x57", "country_code":
+        "CN", "type": "education", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210165038"]}],
         "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Hua Guo",
         "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens, Wuhan
         Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
         of Sciences, Wuhan, China", "University of Chinese Academy of Sciences, Beijing,
-        China"], "affiliations": [{"raw_affiliation_string": "CAS Key Laboratory of
-        Special Pathogens, Wuhan Institute of Virology, Center for Biosafety Mega-Science,
-        Chinese Academy of Sciences, Wuhan, China", "institution_ids": ["https://openalex.org/I4210106882",
-        "https://openalex.org/I19820366"]}, {"raw_affiliation_string": "University
-        of Chinese Academy of Sciences, Beijing, China", "institution_ids": ["https://openalex.org/I4210165038"]}]},
-        {"author_position": "middle", "author": {"id": "https://openalex.org/A5050578152",
-        "display_name": "Ren-Di Jiang", "orcid": "https://orcid.org/0000-0003-4235-6964"},
-        "institutions": [{"id": "https://openalex.org/I4210106882", "display_name":
-        "Wuhan Institute of Virology", "ror": "https://ror.org/01jxjav08", "country_code":
-        "CN", "type": "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]},
-        {"id": "https://openalex.org/I19820366", "display_name": "Chinese Academy
-        of Sciences", "ror": "https://ror.org/034t30j35", "country_code": "CN", "type":
-        "funder", "lineage": ["https://openalex.org/I19820366"]}, {"id": "https://openalex.org/I4210165038",
-        "display_name": "University of Chinese Academy of Sciences", "ror": "https://ror.org/05qbk4x57",
-        "country_code": "CN", "type": "education", "lineage": ["https://openalex.org/I19820366",
-        "https://openalex.org/I4210165038"]}], "countries": ["CN"], "is_corresponding":
-        false, "raw_author_name": "Ren-Di Jiang", "raw_affiliation_strings": ["CAS
+        China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string": "CAS
         Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
-        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "University
-        of Chinese Academy of Sciences, Beijing, China"], "affiliations": [{"raw_affiliation_string":
-        "CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
-        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
-        ["https://openalex.org/I4210106882", "https://openalex.org/I19820366"]}, {"raw_affiliation_string":
+        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}, {"raw_affiliation_string":
+        "University of Chinese Academy of Sciences, Beijing, China", "institution_ids":
+        ["https://openalex.org/I4210165038"]}]}, {"author_position": "middle", "author":
+        {"id": "https://openalex.org/A5050578152", "display_name": "Ren-Di Jiang",
+        "orcid": "https://orcid.org/0000-0003-4235-6964", "observed_orcids": ["https://orcid.org/0000-0003-4235-6964"]},
+        "institutions": [{"id": "https://openalex.org/I19820366", "display_name":
+        "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35", "country_code":
+        "CN", "type": "government", "lineage": ["https://openalex.org/I19820366"]},
+        {"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
+        of Virology", "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type":
+        "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]},
+        {"id": "https://openalex.org/I4210165038", "display_name": "University of
+        Chinese Academy of Sciences", "ror": "https://ror.org/05qbk4x57", "country_code":
+        "CN", "type": "education", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210165038"]}],
+        "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Ren-Di
+        Jiang", "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens,
+        Wuhan Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
+        of Sciences, Wuhan, China", "University of Chinese Academy of Sciences, Beijing,
+        China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string": "CAS
+        Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
+        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}, {"raw_affiliation_string":
         "University of Chinese Academy of Sciences, Beijing, China", "institution_ids":
         ["https://openalex.org/I4210165038"]}]}, {"author_position": "middle", "author":
         {"id": "https://openalex.org/A5029219116", "display_name": "Mei-Qin Liu",
-        "orcid": null}, "institutions": [{"id": "https://openalex.org/I4210106882",
+        "orcid": null, "observed_orcids": []}, "institutions": [{"id": "https://openalex.org/I19820366",
+        "display_name": "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35",
+        "country_code": "CN", "type": "government", "lineage": ["https://openalex.org/I19820366"]},
+        {"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
+        of Virology", "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type":
+        "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]},
+        {"id": "https://openalex.org/I4210165038", "display_name": "University of
+        Chinese Academy of Sciences", "ror": "https://ror.org/05qbk4x57", "country_code":
+        "CN", "type": "education", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210165038"]}],
+        "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Mei-Qin
+        Liu", "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens,
+        Wuhan Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
+        of Sciences, Wuhan, China", "University of Chinese Academy of Sciences, Beijing,
+        China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string": "CAS
+        Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
+        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}, {"raw_affiliation_string":
+        "University of Chinese Academy of Sciences, Beijing, China", "institution_ids":
+        ["https://openalex.org/I4210165038"]}]}, {"author_position": "middle", "author":
+        {"id": "https://openalex.org/A5100383015", "display_name": "Ying Chen", "orcid":
+        "https://orcid.org/0000-0001-8306-8083", "observed_orcids": ["https://orcid.org/0000-0001-8306-8083"]},
+        "institutions": [{"id": "https://openalex.org/I19820366", "display_name":
+        "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35", "country_code":
+        "CN", "type": "government", "lineage": ["https://openalex.org/I19820366"]},
+        {"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
+        of Virology", "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type":
+        "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]},
+        {"id": "https://openalex.org/I4210165038", "display_name": "University of
+        Chinese Academy of Sciences", "ror": "https://ror.org/05qbk4x57", "country_code":
+        "CN", "type": "education", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210165038"]}],
+        "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Ying Chen",
+        "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens, Wuhan
+        Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
+        of Sciences, Wuhan, China", "University of Chinese Academy of Sciences, Beijing,
+        China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string": "CAS
+        Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
+        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}, {"raw_affiliation_string":
+        "University of Chinese Academy of Sciences, Beijing, China", "institution_ids":
+        ["https://openalex.org/I4210165038"]}]}, {"author_position": "middle", "author":
+        {"id": "https://openalex.org/A5101077869", "display_name": "Xu-Rui Shen",
+        "orcid": null, "observed_orcids": []}, "institutions": [{"id": "https://openalex.org/I19820366",
+        "display_name": "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35",
+        "country_code": "CN", "type": "government", "lineage": ["https://openalex.org/I19820366"]},
+        {"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
+        of Virology", "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type":
+        "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]},
+        {"id": "https://openalex.org/I4210165038", "display_name": "University of
+        Chinese Academy of Sciences", "ror": "https://ror.org/05qbk4x57", "country_code":
+        "CN", "type": "education", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210165038"]}],
+        "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Xu-Rui
+        Shen", "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens,
+        Wuhan Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
+        of Sciences, Wuhan, China", "University of Chinese Academy of Sciences, Beijing,
+        China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string": "CAS
+        Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
+        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}, {"raw_affiliation_string":
+        "University of Chinese Academy of Sciences, Beijing, China", "institution_ids":
+        ["https://openalex.org/I4210165038"]}]}, {"author_position": "middle", "author":
+        {"id": "https://openalex.org/A5101507174", "display_name": "Xi Wang", "orcid":
+        "https://orcid.org/0000-0002-4660-9562", "observed_orcids": ["https://orcid.org/0000-0002-4660-9562"]},
+        "institutions": [{"id": "https://openalex.org/I19820366", "display_name":
+        "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35", "country_code":
+        "CN", "type": "government", "lineage": ["https://openalex.org/I19820366"]},
+        {"id": "https://openalex.org/I3020662980", "display_name": "Jinyintan Hospital",
+        "ror": "https://ror.org/038p1ty61", "country_code": "CN", "type": "healthcare",
+        "lineage": ["https://openalex.org/I3020662980"]}, {"id": "https://openalex.org/I4210106882",
         "display_name": "Wuhan Institute of Virology", "ror": "https://ror.org/01jxjav08",
         "country_code": "CN", "type": "facility", "lineage": ["https://openalex.org/I19820366",
         "https://openalex.org/I4210106882"]}, {"id": "https://openalex.org/I4210165038",
         "display_name": "University of Chinese Academy of Sciences", "ror": "https://ror.org/05qbk4x57",
         "country_code": "CN", "type": "education", "lineage": ["https://openalex.org/I19820366",
-        "https://openalex.org/I4210165038"]}, {"id": "https://openalex.org/I19820366",
-        "display_name": "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35",
-        "country_code": "CN", "type": "funder", "lineage": ["https://openalex.org/I19820366"]}],
-        "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Mei-Qin
-        Liu", "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens,
-        Wuhan Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
-        of Sciences, Wuhan, China", "University of Chinese Academy of Sciences, Beijing,
-        China"], "affiliations": [{"raw_affiliation_string": "CAS Key Laboratory of
-        Special Pathogens, Wuhan Institute of Virology, Center for Biosafety Mega-Science,
-        Chinese Academy of Sciences, Wuhan, China", "institution_ids": ["https://openalex.org/I4210106882",
-        "https://openalex.org/I19820366"]}, {"raw_affiliation_string": "University
-        of Chinese Academy of Sciences, Beijing, China", "institution_ids": ["https://openalex.org/I4210165038"]}]},
-        {"author_position": "middle", "author": {"id": "https://openalex.org/A5100383015",
-        "display_name": "Ying Chen", "orcid": "https://orcid.org/0000-0001-8306-8083"},
-        "institutions": [{"id": "https://openalex.org/I4210106882", "display_name":
-        "Wuhan Institute of Virology", "ror": "https://ror.org/01jxjav08", "country_code":
-        "CN", "type": "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]},
-        {"id": "https://openalex.org/I4210165038", "display_name": "University of
-        Chinese Academy of Sciences", "ror": "https://ror.org/05qbk4x57", "country_code":
-        "CN", "type": "education", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210165038"]},
-        {"id": "https://openalex.org/I19820366", "display_name": "Chinese Academy
-        of Sciences", "ror": "https://ror.org/034t30j35", "country_code": "CN", "type":
-        "funder", "lineage": ["https://openalex.org/I19820366"]}], "countries": ["CN"],
-        "is_corresponding": false, "raw_author_name": "Ying Chen", "raw_affiliation_strings":
-        ["CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
-        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "University
-        of Chinese Academy of Sciences, Beijing, China"], "affiliations": [{"raw_affiliation_string":
-        "CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
-        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
-        ["https://openalex.org/I4210106882", "https://openalex.org/I19820366"]}, {"raw_affiliation_string":
-        "University of Chinese Academy of Sciences, Beijing, China", "institution_ids":
-        ["https://openalex.org/I4210165038"]}]}, {"author_position": "middle", "author":
-        {"id": "https://openalex.org/A5101077869", "display_name": "Xu-Rui Shen",
-        "orcid": null}, "institutions": [{"id": "https://openalex.org/I4210165038",
-        "display_name": "University of Chinese Academy of Sciences", "ror": "https://ror.org/05qbk4x57",
-        "country_code": "CN", "type": "education", "lineage": ["https://openalex.org/I19820366",
-        "https://openalex.org/I4210165038"]}, {"id": "https://openalex.org/I19820366",
-        "display_name": "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35",
-        "country_code": "CN", "type": "funder", "lineage": ["https://openalex.org/I19820366"]},
-        {"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
-        of Virology", "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type":
-        "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}],
-        "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Xu-Rui
-        Shen", "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens,
-        Wuhan Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
-        of Sciences, Wuhan, China", "University of Chinese Academy of Sciences, Beijing,
-        China"], "affiliations": [{"raw_affiliation_string": "CAS Key Laboratory of
-        Special Pathogens, Wuhan Institute of Virology, Center for Biosafety Mega-Science,
-        Chinese Academy of Sciences, Wuhan, China", "institution_ids": ["https://openalex.org/I4210106882",
-        "https://openalex.org/I19820366"]}, {"raw_affiliation_string": "University
-        of Chinese Academy of Sciences, Beijing, China", "institution_ids": ["https://openalex.org/I4210165038"]}]},
-        {"author_position": "middle", "author": {"id": "https://openalex.org/A5101507174",
-        "display_name": "Xi Wang", "orcid": "https://orcid.org/0000-0002-4660-9562"},
-        "institutions": [{"id": "https://openalex.org/I4210086097", "display_name":
-        "Wuhan City Chinese Medicine Hospital", "ror": "https://ror.org/00hagsh42",
-        "country_code": "CN", "type": "healthcare", "lineage": ["https://openalex.org/I4210086097"]},
-        {"id": "https://openalex.org/I4210165038", "display_name": "University of
-        Chinese Academy of Sciences", "ror": "https://ror.org/05qbk4x57", "country_code":
-        "CN", "type": "education", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210165038"]},
-        {"id": "https://openalex.org/I19820366", "display_name": "Chinese Academy
-        of Sciences", "ror": "https://ror.org/034t30j35", "country_code": "CN", "type":
-        "funder", "lineage": ["https://openalex.org/I19820366"]}, {"id": "https://openalex.org/I4210106882",
-        "display_name": "Wuhan Institute of Virology", "ror": "https://ror.org/01jxjav08",
-        "country_code": "CN", "type": "facility", "lineage": ["https://openalex.org/I19820366",
-        "https://openalex.org/I4210106882"]}], "countries": ["CN"], "is_corresponding":
+        "https://openalex.org/I4210165038"]}], "countries": ["CN"], "is_corresponding":
         false, "raw_author_name": "Xi Wang", "raw_affiliation_strings": ["CAS Key
         Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for Biosafety
         Mega-Science, Chinese Academy of Sciences, Wuhan, China", "University of Chinese
         Academy of Sciences, Beijing, China", "Wuhan Jin Yin-Tan Hospital, Wuhan,
-        China"], "affiliations": [{"raw_affiliation_string": "CAS Key Laboratory of
-        Special Pathogens, Wuhan Institute of Virology, Center for Biosafety Mega-Science,
-        Chinese Academy of Sciences, Wuhan, China", "institution_ids": ["https://openalex.org/I4210106882",
-        "https://openalex.org/I19820366"]}, {"raw_affiliation_string": "University
-        of Chinese Academy of Sciences, Beijing, China", "institution_ids": ["https://openalex.org/I4210165038"]},
-        {"raw_affiliation_string": "Wuhan Jin Yin-Tan Hospital, Wuhan, China", "institution_ids":
-        ["https://openalex.org/I4210086097"]}]}, {"author_position": "middle", "author":
-        {"id": "https://openalex.org/A5102343941", "display_name": "Xiao-Shuang Zheng",
-        "orcid": null}, "institutions": [{"id": "https://openalex.org/I4210106882",
-        "display_name": "Wuhan Institute of Virology", "ror": "https://ror.org/01jxjav08",
-        "country_code": "CN", "type": "facility", "lineage": ["https://openalex.org/I19820366",
-        "https://openalex.org/I4210106882"]}, {"id": "https://openalex.org/I19820366",
-        "display_name": "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35",
-        "country_code": "CN", "type": "funder", "lineage": ["https://openalex.org/I19820366"]},
+        China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string": "CAS
+        Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
+        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}, {"raw_affiliation_string":
+        "University of Chinese Academy of Sciences, Beijing, China", "institution_ids":
+        ["https://openalex.org/I4210165038"]}, {"raw_affiliation_string": "Wuhan Jin
+        Yin-Tan Hospital, Wuhan, China", "institution_ids": ["https://openalex.org/I3020662980"]}]},
+        {"author_position": "middle", "author": {"id": "https://openalex.org/A5102343941",
+        "display_name": "Xiao-Shuang Zheng", "orcid": null, "observed_orcids": []},
+        "institutions": [{"id": "https://openalex.org/I19820366", "display_name":
+        "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35", "country_code":
+        "CN", "type": "government", "lineage": ["https://openalex.org/I19820366"]},
+        {"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
+        of Virology", "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type":
+        "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]},
         {"id": "https://openalex.org/I4210165038", "display_name": "University of
         Chinese Academy of Sciences", "ror": "https://ror.org/05qbk4x57", "country_code":
         "CN", "type": "education", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210165038"]}],
@@ -435,148 +399,157 @@ interactions:
         Zheng", "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens,
         Wuhan Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
         of Sciences, Wuhan, China", "University of Chinese Academy of Sciences, Beijing,
-        China"], "affiliations": [{"raw_affiliation_string": "CAS Key Laboratory of
-        Special Pathogens, Wuhan Institute of Virology, Center for Biosafety Mega-Science,
-        Chinese Academy of Sciences, Wuhan, China", "institution_ids": ["https://openalex.org/I4210106882",
-        "https://openalex.org/I19820366"]}, {"raw_affiliation_string": "University
-        of Chinese Academy of Sciences, Beijing, China", "institution_ids": ["https://openalex.org/I4210165038"]}]},
-        {"author_position": "middle", "author": {"id": "https://openalex.org/A5100647548",
-        "display_name": "Kai Zhao", "orcid": "https://orcid.org/0000-0003-0468-2128"},
-        "institutions": [{"id": "https://openalex.org/I4210106882", "display_name":
-        "Wuhan Institute of Virology", "ror": "https://ror.org/01jxjav08", "country_code":
-        "CN", "type": "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]},
+        China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string": "CAS
+        Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
+        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}, {"raw_affiliation_string":
+        "University of Chinese Academy of Sciences, Beijing, China", "institution_ids":
+        ["https://openalex.org/I4210165038"]}]}, {"author_position": "middle", "author":
+        {"id": "https://openalex.org/A5100647548", "display_name": "Kai Xuan Zhao",
+        "orcid": "https://orcid.org/0000-0003-0468-2128", "observed_orcids": ["https://orcid.org/0000-0003-0468-2128"]},
+        "institutions": [{"id": "https://openalex.org/I19820366", "display_name":
+        "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35", "country_code":
+        "CN", "type": "government", "lineage": ["https://openalex.org/I19820366"]},
+        {"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
+        of Virology", "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type":
+        "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]},
         {"id": "https://openalex.org/I4210165038", "display_name": "University of
         Chinese Academy of Sciences", "ror": "https://ror.org/05qbk4x57", "country_code":
-        "CN", "type": "education", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210165038"]},
-        {"id": "https://openalex.org/I19820366", "display_name": "Chinese Academy
-        of Sciences", "ror": "https://ror.org/034t30j35", "country_code": "CN", "type":
-        "funder", "lineage": ["https://openalex.org/I19820366"]}], "countries": ["CN"],
-        "is_corresponding": false, "raw_author_name": "Kai Zhao", "raw_affiliation_strings":
-        ["CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
-        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "University
-        of Chinese Academy of Sciences, Beijing, China"], "affiliations": [{"raw_affiliation_string":
-        "CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
-        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
-        ["https://openalex.org/I4210106882", "https://openalex.org/I19820366"]}, {"raw_affiliation_string":
+        "CN", "type": "education", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210165038"]}],
+        "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Kai Zhao",
+        "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens, Wuhan
+        Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
+        of Sciences, Wuhan, China", "University of Chinese Academy of Sciences, Beijing,
+        China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string": "CAS
+        Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
+        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}, {"raw_affiliation_string":
         "University of Chinese Academy of Sciences, Beijing, China", "institution_ids":
         ["https://openalex.org/I4210165038"]}]}, {"author_position": "middle", "author":
         {"id": "https://openalex.org/A5029583070", "display_name": "Quan-Jiao Chen",
-        "orcid": null}, "institutions": [{"id": "https://openalex.org/I19820366",
+        "orcid": null, "observed_orcids": []}, "institutions": [{"id": "https://openalex.org/I19820366",
         "display_name": "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35",
-        "country_code": "CN", "type": "funder", "lineage": ["https://openalex.org/I19820366"]},
+        "country_code": "CN", "type": "government", "lineage": ["https://openalex.org/I19820366"]},
         {"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
         of Virology", "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type":
         "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}],
         "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Quan-Jiao
         Chen", "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens,
         Wuhan Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
-        of Sciences, Wuhan, China"], "affiliations": [{"raw_affiliation_string": "CAS
-        Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
-        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
-        ["https://openalex.org/I4210106882", "https://openalex.org/I19820366"]}]},
+        of Sciences, Wuhan, China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string":
+        "CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
+        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}]},
         {"author_position": "middle", "author": {"id": "https://openalex.org/A5110191677",
-        "display_name": "F\u0113i D\u00e8ng", "orcid": "https://orcid.org/0000-0002-5385-083X"},
-        "institutions": [{"id": "https://openalex.org/I4210106882", "display_name":
-        "Wuhan Institute of Virology", "ror": "https://ror.org/01jxjav08", "country_code":
-        "CN", "type": "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]},
-        {"id": "https://openalex.org/I19820366", "display_name": "Chinese Academy
+        "display_name": "F\u0113i D\u00e8ng", "orcid": "https://orcid.org/0000-0002-5385-083X",
+        "observed_orcids": ["https://orcid.org/0000-0002-5385-083X"]}, "institutions":
+        [{"id": "https://openalex.org/I19820366", "display_name": "Chinese Academy
         of Sciences", "ror": "https://ror.org/034t30j35", "country_code": "CN", "type":
-        "funder", "lineage": ["https://openalex.org/I19820366"]}], "countries": ["CN"],
-        "is_corresponding": false, "raw_author_name": "Fei Deng", "raw_affiliation_strings":
-        ["CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
-        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China"], "affiliations":
-        [{"raw_affiliation_string": "CAS Key Laboratory of Special Pathogens, Wuhan
-        Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
-        of Sciences, Wuhan, China", "institution_ids": ["https://openalex.org/I4210106882",
-        "https://openalex.org/I19820366"]}]}, {"author_position": "middle", "author":
+        "government", "lineage": ["https://openalex.org/I19820366"]}, {"id": "https://openalex.org/I4210106882",
+        "display_name": "Wuhan Institute of Virology", "ror": "https://ror.org/01jxjav08",
+        "country_code": "CN", "type": "facility", "lineage": ["https://openalex.org/I19820366",
+        "https://openalex.org/I4210106882"]}], "countries": ["CN"], "is_corresponding":
+        false, "raw_author_name": "Fei Deng", "raw_affiliation_strings": ["CAS Key
+        Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for Biosafety
+        Mega-Science, Chinese Academy of Sciences, Wuhan, China"], "raw_orcid": null,
+        "affiliations": [{"raw_affiliation_string": "CAS Key Laboratory of Special
+        Pathogens, Wuhan Institute of Virology, Center for Biosafety Mega-Science,
+        Chinese Academy of Sciences, Wuhan, China", "institution_ids": ["https://openalex.org/I19820366",
+        "https://openalex.org/I4210106882"]}]}, {"author_position": "middle", "author":
         {"id": "https://openalex.org/A5100409376", "display_name": "Linlin Liu", "orcid":
-        "https://orcid.org/0000-0001-5093-7940"}, "institutions": [{"id": "https://openalex.org/I4210103686",
-        "display_name": "Hubei Provincial Center for Disease Control and Prevention",
-        "ror": "https://ror.org/0197nmp73", "country_code": "CN", "type": "government",
-        "lineage": ["https://openalex.org/I4210103686"]}], "countries": ["CN"], "is_corresponding":
-        false, "raw_author_name": "Lin-Lin Liu", "raw_affiliation_strings": ["Hubei
-        Provincial Center for Disease Control and Prevention, Wuhan, China"], "affiliations":
-        [{"raw_affiliation_string": "Hubei Provincial Center for Disease Control and
-        Prevention, Wuhan, China", "institution_ids": ["https://openalex.org/I4210103686"]}]},
-        {"author_position": "middle", "author": {"id": "https://openalex.org/A5012216290",
-        "display_name": "Bing Yan", "orcid": "https://orcid.org/0000-0002-7970-6764"},
-        "institutions": [{"id": "https://openalex.org/I4210106882", "display_name":
-        "Wuhan Institute of Virology", "ror": "https://ror.org/01jxjav08", "country_code":
-        "CN", "type": "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]},
-        {"id": "https://openalex.org/I19820366", "display_name": "Chinese Academy
-        of Sciences", "ror": "https://ror.org/034t30j35", "country_code": "CN", "type":
-        "funder", "lineage": ["https://openalex.org/I19820366"]}], "countries": ["CN"],
-        "is_corresponding": false, "raw_author_name": "Bing Yan", "raw_affiliation_strings":
-        ["CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
-        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China"], "affiliations":
-        [{"raw_affiliation_string": "CAS Key Laboratory of Special Pathogens, Wuhan
+        "https://orcid.org/0000-0001-5093-7940", "observed_orcids": ["https://orcid.org/0000-0001-5093-7940"]},
+        "institutions": [{"id": "https://openalex.org/I4210103686", "display_name":
+        "Hubei Provincial Center for Disease Control and Prevention", "ror": "https://ror.org/0197nmp73",
+        "country_code": "CN", "type": "government", "lineage": ["https://openalex.org/I4210103686"]}],
+        "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Lin-Lin
+        Liu", "raw_affiliation_strings": ["Hubei Provincial Center for Disease Control
+        and Prevention, Wuhan, China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string":
+        "Hubei Provincial Center for Disease Control and Prevention, Wuhan, China",
+        "institution_ids": ["https://openalex.org/I4210103686"]}]}, {"author_position":
+        "middle", "author": {"id": "https://openalex.org/A5012216290", "display_name":
+        "Bing Yan", "orcid": "https://orcid.org/0000-0002-7970-6764", "observed_orcids":
+        ["https://orcid.org/0000-0002-7970-6764"]}, "institutions": [{"id": "https://openalex.org/I19820366",
+        "display_name": "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35",
+        "country_code": "CN", "type": "government", "lineage": ["https://openalex.org/I19820366"]},
+        {"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
+        of Virology", "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type":
+        "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}],
+        "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Bing Yan",
+        "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens, Wuhan
         Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
-        of Sciences, Wuhan, China", "institution_ids": ["https://openalex.org/I4210106882",
-        "https://openalex.org/I19820366"]}]}, {"author_position": "middle", "author":
-        {"id": "https://openalex.org/A5112582604", "display_name": "Fa-Xian Zhan",
-        "orcid": null}, "institutions": [{"id": "https://openalex.org/I4210103686",
-        "display_name": "Hubei Provincial Center for Disease Control and Prevention",
-        "ror": "https://ror.org/0197nmp73", "country_code": "CN", "type": "government",
-        "lineage": ["https://openalex.org/I4210103686"]}], "countries": ["CN"], "is_corresponding":
-        false, "raw_author_name": "Fa-Xian Zhan", "raw_affiliation_strings": ["Hubei
-        Provincial Center for Disease Control and Prevention, Wuhan, China"], "affiliations":
-        [{"raw_affiliation_string": "Hubei Provincial Center for Disease Control and
-        Prevention, Wuhan, China", "institution_ids": ["https://openalex.org/I4210103686"]}]},
-        {"author_position": "middle", "author": {"id": "https://openalex.org/A5027156402",
-        "display_name": "Yanyi Wang", "orcid": "https://orcid.org/0000-0003-0192-1891"},
-        "institutions": [{"id": "https://openalex.org/I19820366", "display_name":
-        "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35", "country_code":
-        "CN", "type": "funder", "lineage": ["https://openalex.org/I19820366"]}, {"id":
-        "https://openalex.org/I4210106882", "display_name": "Wuhan Institute of Virology",
-        "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type": "facility",
-        "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}],
+        of Sciences, Wuhan, China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string":
+        "CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
+        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}]},
+        {"author_position": "middle", "author": {"id": "https://openalex.org/A5112582604",
+        "display_name": "Fa-Xian Zhan", "orcid": null, "observed_orcids": []}, "institutions":
+        [{"id": "https://openalex.org/I4210103686", "display_name": "Hubei Provincial
+        Center for Disease Control and Prevention", "ror": "https://ror.org/0197nmp73",
+        "country_code": "CN", "type": "government", "lineage": ["https://openalex.org/I4210103686"]}],
+        "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Fa-Xian
+        Zhan", "raw_affiliation_strings": ["Hubei Provincial Center for Disease Control
+        and Prevention, Wuhan, China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string":
+        "Hubei Provincial Center for Disease Control and Prevention, Wuhan, China",
+        "institution_ids": ["https://openalex.org/I4210103686"]}]}, {"author_position":
+        "middle", "author": {"id": "https://openalex.org/A5027156402", "display_name":
+        "Yanyi Wang", "orcid": "https://orcid.org/0000-0003-0192-1891", "observed_orcids":
+        ["https://orcid.org/0000-0003-0192-1891"]}, "institutions": [{"id": "https://openalex.org/I19820366",
+        "display_name": "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35",
+        "country_code": "CN", "type": "government", "lineage": ["https://openalex.org/I19820366"]},
+        {"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
+        of Virology", "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type":
+        "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}],
         "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Yan-Yi
         Wang", "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens,
         Wuhan Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
-        of Sciences, Wuhan, China"], "affiliations": [{"raw_affiliation_string": "CAS
-        Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
-        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
-        ["https://openalex.org/I4210106882", "https://openalex.org/I19820366"]}]},
-        {"author_position": "middle", "author": {"id": "https://openalex.org/A5111259036",
-        "display_name": "Gengfu Xiao", "orcid": null}, "institutions": [{"id": "https://openalex.org/I19820366",
-        "display_name": "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35",
-        "country_code": "CN", "type": "funder", "lineage": ["https://openalex.org/I19820366"]},
+        of Sciences, Wuhan, China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string":
+        "CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
+        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}]},
+        {"author_position": "middle", "author": {"id": "https://openalex.org/A5029228548",
+        "display_name": "Gengfu Xiao", "orcid": "https://orcid.org/0000-0001-9401-235X",
+        "observed_orcids": ["https://orcid.org/0000-0001-9401-235X", "https://orcid.org/0000-0001-9403-2246"]},
+        "institutions": [{"id": "https://openalex.org/I19820366", "display_name":
+        "Chinese Academy of Sciences", "ror": "https://ror.org/034t30j35", "country_code":
+        "CN", "type": "government", "lineage": ["https://openalex.org/I19820366"]},
         {"id": "https://openalex.org/I4210106882", "display_name": "Wuhan Institute
         of Virology", "ror": "https://ror.org/01jxjav08", "country_code": "CN", "type":
         "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}],
         "countries": ["CN"], "is_corresponding": false, "raw_author_name": "Geng-Fu
         Xiao", "raw_affiliation_strings": ["CAS Key Laboratory of Special Pathogens,
         Wuhan Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
-        of Sciences, Wuhan, China"], "affiliations": [{"raw_affiliation_string": "CAS
-        Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
-        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
-        ["https://openalex.org/I4210106882", "https://openalex.org/I19820366"]}]},
-        {"author_position": "last", "author": {"id": "https://openalex.org/A5100689158",
-        "display_name": "Zheng\u2010Li Shi", "orcid": "https://orcid.org/0000-0001-8089-163X"},
-        "institutions": [{"id": "https://openalex.org/I4210106882", "display_name":
-        "Wuhan Institute of Virology", "ror": "https://ror.org/01jxjav08", "country_code":
-        "CN", "type": "facility", "lineage": ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]},
-        {"id": "https://openalex.org/I19820366", "display_name": "Chinese Academy
-        of Sciences", "ror": "https://ror.org/034t30j35", "country_code": "CN", "type":
-        "funder", "lineage": ["https://openalex.org/I19820366"]}], "countries": ["CN"],
-        "is_corresponding": false, "raw_author_name": "Zheng-Li Shi", "raw_affiliation_strings":
-        ["CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
-        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China. zlshi@wh.iov.cn",
-        "CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
-        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China"], "affiliations":
-        [{"raw_affiliation_string": "CAS Key Laboratory of Special Pathogens, Wuhan
-        Institute of Virology, Center for Biosafety Mega-Science, Chinese Academy
-        of Sciences, Wuhan, China. zlshi@wh.iov.cn", "institution_ids": []}, {"raw_affiliation_string":
+        of Sciences, Wuhan, China"], "raw_orcid": null, "affiliations": [{"raw_affiliation_string":
         "CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
         for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
-        ["https://openalex.org/I4210106882", "https://openalex.org/I19820366"]}]}],
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}]},
+        {"author_position": "last", "author": {"id": "https://openalex.org/A5100689158",
+        "display_name": "Zheng\u2010Li Shi", "orcid": "https://orcid.org/0000-0001-8089-163X",
+        "observed_orcids": ["https://orcid.org/0000-0001-8089-163X"]}, "institutions":
+        [{"id": "https://openalex.org/I19820366", "display_name": "Chinese Academy
+        of Sciences", "ror": "https://ror.org/034t30j35", "country_code": "CN", "type":
+        "government", "lineage": ["https://openalex.org/I19820366"]}, {"id": "https://openalex.org/I4210106882",
+        "display_name": "Wuhan Institute of Virology", "ror": "https://ror.org/01jxjav08",
+        "country_code": "CN", "type": "facility", "lineage": ["https://openalex.org/I19820366",
+        "https://openalex.org/I4210106882"]}], "countries": ["CN"], "is_corresponding":
+        true, "raw_author_name": "Zheng-Li Shi", "raw_affiliation_strings": ["CAS
+        Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center for
+        Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China. zlshi@wh.iov.cn",
+        "CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
+        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China"], "raw_orcid":
+        null, "affiliations": [{"raw_affiliation_string": "CAS Key Laboratory of Special
+        Pathogens, Wuhan Institute of Virology, Center for Biosafety Mega-Science,
+        Chinese Academy of Sciences, Wuhan, China. zlshi@wh.iov.cn", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}, {"raw_affiliation_string":
+        "CAS Key Laboratory of Special Pathogens, Wuhan Institute of Virology, Center
+        for Biosafety Mega-Science, Chinese Academy of Sciences, Wuhan, China", "institution_ids":
+        ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"]}]}],
         "institutions": [], "countries_distinct_count": 1, "institutions_distinct_count":
-        29, "corresponding_author_ids": ["https://openalex.org/A5083165835"], "corresponding_institution_ids":
+        5, "corresponding_author_ids": ["https://openalex.org/A5100689158"], "corresponding_institution_ids":
         ["https://openalex.org/I19820366", "https://openalex.org/I4210106882"], "apc_list":
-        {"value": 9750, "currency": "EUR", "value_usd": 11690}, "apc_paid": {"value":
-        9750, "currency": "EUR", "value_usd": 11690}, "fwci": 526.8703, "has_fulltext":
-        true, "cited_by_count": 23075, "citation_normalized_percentile": {"value":
-        0.99993298, "is_in_top_1_percent": true, "is_in_top_10_percent": true}, "cited_by_percentile_year":
+        {"value": 12690, "currency": "USD", "value_usd": 12690}, "apc_paid": {"value":
+        12690, "currency": "USD", "value_usd": 12690}, "fwci": 515.1906, "has_fulltext":
+        true, "cited_by_count": 23447, "citation_normalized_percentile": {"value":
+        0.99992633, "is_in_top_1_percent": true, "is_in_top_10_percent": true}, "cited_by_percentile_year":
         {"min": 89, "max": 100}, "biblio": {"volume": "579", "issue": "7798", "first_page":
         "270", "last_page": "273"}, "is_retracted": false, "is_paratext": false, "is_xpac":
         false, "primary_topic": {"id": "https://openalex.org/T10118", "display_name":
@@ -598,69 +571,54 @@ interactions:
         {"id": "https://openalex.org/subfields/1103", "display_name": "Animal Science
         and Zoology"}, "field": {"id": "https://openalex.org/fields/11", "display_name":
         "Agricultural and Biological Sciences"}, "domain": {"id": "https://openalex.org/domains/1",
-        "display_name": "Life Sciences"}}], "keywords": [{"id": "https://openalex.org/keywords/outbreak",
-        "display_name": "Outbreak", "score": 0.8033957481384277}, {"id": "https://openalex.org/keywords/pneumonia",
-        "display_name": "Pneumonia", "score": 0.6770981550216675}, {"id": "https://openalex.org/keywords/coronavirus",
-        "display_name": "Coronavirus", "score": 0.6759994029998779}, {"id": "https://openalex.org/keywords/virology",
-        "display_name": "Virology", "score": 0.6506088376045227}, {"id": "https://openalex.org/keywords/biology",
-        "display_name": "Biology", "score": 0.5862823128700256}, {"id": "https://openalex.org/keywords/severe-acute-respiratory-syndrome",
-        "display_name": "Severe acute respiratory syndrome", "score": 0.5615421533584595},
-        {"id": "https://openalex.org/keywords/virus", "display_name": "Virus", "score":
-        0.504320502281189}, {"id": "https://openalex.org/keywords/severe-acute-respiratory-syndrome-coronavirus-2",
-        "display_name": "Severe acute respiratory syndrome coronavirus 2 (SARS-CoV-2)",
-        "score": 0.46436259150505066}, {"id": "https://openalex.org/keywords/betacoronavirus",
-        "display_name": "Betacoronavirus", "score": 0.4414023458957672}, {"id": "https://openalex.org/keywords/genome",
-        "display_name": "Genome", "score": 0.42919105291366577}, {"id": "https://openalex.org/keywords/bronchoalveolar-lavage",
-        "display_name": "Bronchoalveolar lavage", "score": 0.41837385296821594}, {"id":
-        "https://openalex.org/keywords/coronavirus-disease-2019", "display_name":
-        "Coronavirus disease 2019 (COVID-19)", "score": 0.3645526170730591}, {"id":
-        "https://openalex.org/keywords/immunology", "display_name": "Immunology",
-        "score": 0.3442884087562561}, {"id": "https://openalex.org/keywords/medicine",
-        "display_name": "Medicine", "score": 0.30591416358947754}, {"id": "https://openalex.org/keywords/gene",
-        "display_name": "Gene", "score": 0.28539493680000305}, {"id": "https://openalex.org/keywords/genetics",
-        "display_name": "Genetics", "score": 0.21642139554023743}, {"id": "https://openalex.org/keywords/lung",
-        "display_name": "Lung", "score": 0.1687903106212616}, {"id": "https://openalex.org/keywords/infectious-disease",
-        "display_name": "Infectious disease (medical specialty)", "score": 0.09393376111984253},
-        {"id": "https://openalex.org/keywords/pathology", "display_name": "Pathology",
-        "score": 0.0930757224559784}, {"id": "https://openalex.org/keywords/internal-medicine",
-        "display_name": "Internal medicine", "score": 0.08694839477539062}, {"id":
-        "https://openalex.org/keywords/disease", "display_name": "Disease", "score":
-        0.07391458749771118}], "concepts": [{"id": "https://openalex.org/C116675565",
-        "wikidata": "https://www.wikidata.org/wiki/Q3241045", "display_name": "Outbreak",
-        "level": 2, "score": 0.8033957481384277}, {"id": "https://openalex.org/C2777914695",
-        "wikidata": "https://www.wikidata.org/wiki/Q12192", "display_name": "Pneumonia",
-        "level": 2, "score": 0.6770981550216675}, {"id": "https://openalex.org/C2777648638",
-        "wikidata": "https://www.wikidata.org/wiki/Q57751738", "display_name": "Coronavirus",
-        "level": 5, "score": 0.6759994029998779}, {"id": "https://openalex.org/C159047783",
-        "wikidata": "https://www.wikidata.org/wiki/Q7215", "display_name": "Virology",
-        "level": 1, "score": 0.6506088376045227}, {"id": "https://openalex.org/C86803240",
-        "wikidata": "https://www.wikidata.org/wiki/Q420", "display_name": "Biology",
-        "level": 0, "score": 0.5862823128700256}, {"id": "https://openalex.org/C2778859668",
-        "wikidata": "https://www.wikidata.org/wiki/Q103177", "display_name": "Severe
-        acute respiratory syndrome", "level": 5, "score": 0.5615421533584595}, {"id":
-        "https://openalex.org/C2522874641", "wikidata": "https://www.wikidata.org/wiki/Q808",
-        "display_name": "Virus", "level": 2, "score": 0.504320502281189}, {"id": "https://openalex.org/C3007834351",
-        "wikidata": "https://www.wikidata.org/wiki/Q82069695", "display_name": "Severe
-        acute respiratory syndrome coronavirus 2 (SARS-CoV-2)", "level": 5, "score":
-        0.46436259150505066}, {"id": "https://openalex.org/C2778137277", "wikidata":
-        "https://www.wikidata.org/wiki/Q16532287", "display_name": "Betacoronavirus",
-        "level": 5, "score": 0.4414023458957672}, {"id": "https://openalex.org/C141231307",
-        "wikidata": "https://www.wikidata.org/wiki/Q7020", "display_name": "Genome",
-        "level": 3, "score": 0.42919105291366577}, {"id": "https://openalex.org/C2777961210",
-        "wikidata": "https://www.wikidata.org/wiki/Q927148", "display_name": "Bronchoalveolar
-        lavage", "level": 3, "score": 0.41837385296821594}, {"id": "https://openalex.org/C3008058167",
-        "wikidata": "https://www.wikidata.org/wiki/Q84263196", "display_name": "Coronavirus
-        disease 2019 (COVID-19)", "level": 4, "score": 0.3645526170730591}, {"id":
-        "https://openalex.org/C203014093", "wikidata": "https://www.wikidata.org/wiki/Q101929",
-        "display_name": "Immunology", "level": 1, "score": 0.3442884087562561}, {"id":
-        "https://openalex.org/C71924100", "wikidata": "https://www.wikidata.org/wiki/Q11190",
-        "display_name": "Medicine", "level": 0, "score": 0.30591416358947754}, {"id":
-        "https://openalex.org/C104317684", "wikidata": "https://www.wikidata.org/wiki/Q7187",
-        "display_name": "Gene", "level": 2, "score": 0.28539493680000305}, {"id":
-        "https://openalex.org/C54355233", "wikidata": "https://www.wikidata.org/wiki/Q7162",
-        "display_name": "Genetics", "level": 1, "score": 0.21642139554023743}, {"id":
-        "https://openalex.org/C2777714996", "wikidata": "https://www.wikidata.org/wiki/Q7886",
-        "display_name": "Lung", "level": 2, "score": 0.1687903106212616}, {"id": "https://openalex.org/C524204448",
+        "display_name": "Life Sciences"}}], "keywords": [{"id": "https://openalex.org/keywords/sars-cov-2",
+        "display_name": "SARS-CoV-2", "score": 0.9679999947547913}, {"id": "https://openalex.org/keywords/coronavirus-outbreak",
+        "display_name": "coronavirus outbreak", "score": 0.6349999904632568}, {"id":
+        "https://openalex.org/keywords/bat-coronaviruses", "display_name": "bat coronaviruses",
+        "score": 0.5690000057220459}, {"id": "https://openalex.org/keywords/zoonotic-transmission",
+        "display_name": "zoonotic transmission", "score": 0.800000011920929}, {"id":
+        "https://openalex.org/keywords/sars-related-coronaviruses", "display_name":
+        "SARS-related coronaviruses", "score": 0.7490000128746033}, {"id": "https://openalex.org/keywords/complete-genome-sequence",
+        "display_name": "complete genome sequence", "score": 0.6230000257492065},
+        {"id": "https://openalex.org/keywords/neutralizing-antibodies", "display_name":
+        "neutralizing antibodies", "score": 0.8299999833106995}, {"id": "https://openalex.org/keywords/ace2-receptor",
+        "display_name": "ACE2 receptor", "score": 0.8550000190734863}], "concepts":
+        [{"id": "https://openalex.org/C116675565", "wikidata": "https://www.wikidata.org/wiki/Q3241045",
+        "display_name": "Outbreak", "level": 2, "score": 0.8033957481384277}, {"id":
+        "https://openalex.org/C2777914695", "wikidata": "https://www.wikidata.org/wiki/Q12192",
+        "display_name": "Pneumonia", "level": 2, "score": 0.6770981550216675}, {"id":
+        "https://openalex.org/C2777648638", "wikidata": "https://www.wikidata.org/wiki/Q57751738",
+        "display_name": "Coronavirus", "level": 5, "score": 0.6759994029998779}, {"id":
+        "https://openalex.org/C159047783", "wikidata": "https://www.wikidata.org/wiki/Q7215",
+        "display_name": "Virology", "level": 1, "score": 0.6506088376045227}, {"id":
+        "https://openalex.org/C86803240", "wikidata": "https://www.wikidata.org/wiki/Q420",
+        "display_name": "Biology", "level": 0, "score": 0.5862823128700256}, {"id":
+        "https://openalex.org/C2778859668", "wikidata": "https://www.wikidata.org/wiki/Q103177",
+        "display_name": "Severe acute respiratory syndrome", "level": 5, "score":
+        0.5615421533584595}, {"id": "https://openalex.org/C2522874641", "wikidata":
+        "https://www.wikidata.org/wiki/Q808", "display_name": "Virus", "level": 2,
+        "score": 0.504320502281189}, {"id": "https://openalex.org/C3007834351", "wikidata":
+        "https://www.wikidata.org/wiki/Q82069695", "display_name": "Severe acute respiratory
+        syndrome coronavirus 2 (SARS-CoV-2)", "level": 5, "score": 0.46436259150505066},
+        {"id": "https://openalex.org/C2778137277", "wikidata": "https://www.wikidata.org/wiki/Q16532287",
+        "display_name": "Betacoronavirus", "level": 5, "score": 0.4414023458957672},
+        {"id": "https://openalex.org/C141231307", "wikidata": "https://www.wikidata.org/wiki/Q7020",
+        "display_name": "Genome", "level": 3, "score": 0.42919105291366577}, {"id":
+        "https://openalex.org/C2777961210", "wikidata": "https://www.wikidata.org/wiki/Q927148",
+        "display_name": "Bronchoalveolar lavage", "level": 3, "score": 0.41837385296821594},
+        {"id": "https://openalex.org/C3008058167", "wikidata": "https://www.wikidata.org/wiki/Q84263196",
+        "display_name": "Coronavirus disease 2019 (COVID-19)", "level": 4, "score":
+        0.3645526170730591}, {"id": "https://openalex.org/C203014093", "wikidata":
+        "https://www.wikidata.org/wiki/Q101929", "display_name": "Immunology", "level":
+        1, "score": 0.3442884087562561}, {"id": "https://openalex.org/C71924100",
+        "wikidata": "https://www.wikidata.org/wiki/Q11190", "display_name": "Medicine",
+        "level": 0, "score": 0.30591416358947754}, {"id": "https://openalex.org/C104317684",
+        "wikidata": "https://www.wikidata.org/wiki/Q7187", "display_name": "Gene",
+        "level": 2, "score": 0.28539493680000305}, {"id": "https://openalex.org/C54355233",
+        "wikidata": "https://www.wikidata.org/wiki/Q7162", "display_name": "Genetics",
+        "level": 1, "score": 0.21642139554023743}, {"id": "https://openalex.org/C2777714996",
+        "wikidata": "https://www.wikidata.org/wiki/Q7886", "display_name": "Lung",
+        "level": 2, "score": 0.1687903106212616}, {"id": "https://openalex.org/C524204448",
         "wikidata": "https://www.wikidata.org/wiki/Q788926", "display_name": "Infectious
         disease (medical specialty)", "level": 3, "score": 0.09393376111984253}, {"id":
         "https://openalex.org/C142724271", "wikidata": "https://www.wikidata.org/wiki/Q7208",
@@ -885,14 +843,15 @@ interactions:
         "qualifier_ui": "Q000235", "qualifier_name": "genetics", "is_major_topic":
         false}, {"descriptor_ui": "D045473", "descriptor_name": "Severe acute respiratory
         syndrome-related coronavirus", "qualifier_ui": "Q000235", "qualifier_name":
-        "genetics", "is_major_topic": false}], "locations_count": 5, "locations":
+        "genetics", "is_major_topic": false}], "locations_count": 8, "locations":
         [{"id": "doi:10.1038/s41586-020-2012-7", "is_oa": true, "landing_page_url":
         "https://doi.org/10.1038/s41586-020-2012-7", "pdf_url": "https://www.nature.com/articles/s41586-020-2012-7.pdf",
         "source": {"id": "https://openalex.org/S137773608", "display_name": "Nature",
         "issn_l": "0028-0836", "issn": ["0028-0836", "1476-4687"], "is_oa": false,
-        "is_in_doaj": false, "is_core": true, "host_organization": "https://openalex.org/P4310319908",
-        "host_organization_name": "Nature Portfolio", "host_organization_lineage":
-        ["https://openalex.org/P4310319908", "https://openalex.org/P4310319965"],
+        "is_in_doaj": false, "is_core": true, "listed_in": ["cwts-core", "doyens",
+        "erih-plus", "jufo-3", "ki-jl-3", "medline", "norway-2"], "host_organization":
+        "https://openalex.org/P4310319908", "host_organization_name": "Nature Portfolio",
+        "host_organization_lineage": ["https://openalex.org/P4310319908", "https://openalex.org/P4310319965"],
         "host_organization_lineage_names": ["Nature Portfolio", "Springer Nature"],
         "type": "journal"}, "license": "cc-by", "license_id": "https://openalex.org/licenses/cc-by",
         "version": "publishedVersion", "is_accepted": true, "is_published": true,
@@ -900,57 +859,95 @@ interactions:
         "is_oa": false, "landing_page_url": "https://pubmed.ncbi.nlm.nih.gov/32015507",
         "pdf_url": null, "source": {"id": "https://openalex.org/S4306525036", "display_name":
         "PubMed", "issn_l": null, "issn": null, "is_oa": false, "is_in_doaj": false,
-        "is_core": false, "host_organization": "https://openalex.org/I1299303238",
+        "is_core": false, "listed_in": [], "host_organization": "https://openalex.org/I1299303238",
         "host_organization_name": "National Institutes of Health", "host_organization_lineage":
         ["https://openalex.org/I1299303238"], "host_organization_lineage_names": [],
         "type": "repository"}, "license": null, "license_id": null, "version": "publishedVersion",
         "is_accepted": true, "is_published": true, "raw_source_name": "Nature", "raw_type":
-        null}, {"id": "pmh:oai:repositorio.unal.edu.co:unal/81628", "is_oa": true,
-        "landing_page_url": "https://repositorio.unal.edu.co/handle/unal/81628", "pdf_url":
-        "https://repositorio.unal.edu.co/handle/unal/81628", "source": {"id": "https://openalex.org/S4306402641",
-        "display_name": "LA Referencia (Red Federada de Repositorios Institucionales
-        de Publicaciones Cient\u00edficas)", "issn_l": null, "issn": null, "is_oa":
-        false, "is_in_doaj": false, "is_core": false, "host_organization": "https://openalex.org/I4383465926",
+        "Journal Article"}, {"id": "pmh:oai:repositorio.ufla.br:1/39411", "is_oa":
+        true, "landing_page_url": "https://repositorio.ufla.br/handle/1/39411", "pdf_url":
+        null, "source": {"id": "https://openalex.org/S4306402641", "display_name":
+        "LA Referencia (Red Federada de Repositorios Institucionales de Publicaciones
+        Cient\u00edficas)", "issn_l": null, "issn": null, "is_oa": false, "is_in_doaj":
+        false, "is_core": false, "listed_in": [], "host_organization": "https://openalex.org/I4383465926",
+        "host_organization_name": "LA Referencia", "host_organization_lineage": ["https://openalex.org/I4383465926"],
+        "host_organization_lineage_names": [], "type": "repository"}, "license": "cc-by",
+        "license_id": "https://openalex.org/licenses/cc-by", "version": "publishedVersion",
+        "is_accepted": true, "is_published": true, "raw_source_name": "instacron:UFLA",
+        "raw_type": "info:eu-repo/semantics/publishedVersion"}, {"id": "pmh:oai:repositorio.unal.edu.co:unal/81628",
+        "is_oa": true, "landing_page_url": "https://repositorio.unal.edu.co/handle/unal/81628",
+        "pdf_url": "https://repositorio.unal.edu.co/handle/unal/81628", "source":
+        {"id": "https://openalex.org/S4306402641", "display_name": "LA Referencia
+        (Red Federada de Repositorios Institucionales de Publicaciones Cient\u00edficas)",
+        "issn_l": null, "issn": null, "is_oa": false, "is_in_doaj": false, "is_core":
+        false, "listed_in": [], "host_organization": "https://openalex.org/I4383465926",
         "host_organization_name": "LA Referencia", "host_organization_lineage": ["https://openalex.org/I4383465926"],
         "host_organization_lineage_names": [], "type": "repository"}, "license": "cc-by",
         "license_id": "https://openalex.org/licenses/cc-by", "version": "submittedVersion",
         "is_accepted": false, "is_published": false, "raw_source_name": "reponame:Repositorio
-        UN", "raw_type": "Trabajo de grado - Maestr\u00eda"}, {"id": "pmh:oai:digitalcommons.usf.edu:kip_articles-7680",
+        UN", "raw_type": "info:eu-repo/semantics/masterThesis"}, {"id": "pmh:oai:pubmedcentral.nih.gov:7095418",
+        "is_oa": true, "landing_page_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/7095418",
+        "pdf_url": null, "source": {"id": "https://openalex.org/S2764455111", "display_name":
+        "PubMed Central", "issn_l": null, "issn": null, "is_oa": true, "is_in_doaj":
+        false, "is_core": false, "listed_in": [], "host_organization": "https://openalex.org/I1299303238",
+        "host_organization_name": "National Institutes of Health", "host_organization_lineage":
+        ["https://openalex.org/I1299303238"], "host_organization_lineage_names": [],
+        "type": "repository"}, "license": "cc-by", "license_id": "https://openalex.org/licenses/cc-by",
+        "version": "submittedVersion", "is_accepted": false, "is_published": false,
+        "raw_source_name": "Nature", "raw_type": "Text"}, {"id": "pmh:oai:digitalcommons.usf.edu:kip_articles-7680",
         "is_oa": false, "landing_page_url": "https://digitalcommons.usf.edu/kip_articles/6680",
         "pdf_url": null, "source": {"id": "https://openalex.org/S4377196272", "display_name":
         "Digital Commons - University of South Florida (University of South Florida)",
         "issn_l": null, "issn": null, "is_oa": false, "is_in_doaj": false, "is_core":
-        false, "host_organization": "https://openalex.org/I2613432", "host_organization_name":
-        "University of South Florida", "host_organization_lineage": ["https://openalex.org/I2613432"],
+        false, "listed_in": [], "host_organization": "https://openalex.org/I2613432",
+        "host_organization_name": "University of South Florida", "host_organization_lineage":
+        ["https://openalex.org/I2613432"], "host_organization_lineage_names": [],
+        "type": "repository"}, "license": null, "license_id": null, "version": "submittedVersion",
+        "is_accepted": false, "is_published": false, "raw_source_name": "KIP Articles",
+        "raw_type": "text"}, {"id": "pmh:oai:RePEc:nat:nature:v:579:y:2020:i:7798:d:10.1038_s41586-020-2012-7",
+        "is_oa": false, "landing_page_url": "https://www.nature.com/articles/s41586-020-2012-7",
+        "pdf_url": null, "source": {"id": "https://openalex.org/S4306401271", "display_name":
+        "RePEc: Research Papers in Economics", "issn_l": null, "issn": null, "is_oa":
+        false, "is_in_doaj": false, "is_core": false, "listed_in": [], "host_organization":
+        "https://openalex.org/I77793887", "host_organization_name": "Federal Reserve
+        Bank of St. Louis", "host_organization_lineage": ["https://openalex.org/I77793887"],
         "host_organization_lineage_names": [], "type": "repository"}, "license": null,
         "license_id": null, "version": "submittedVersion", "is_accepted": false, "is_published":
-        false, "raw_source_name": "KIP Articles", "raw_type": "text"}, {"id": "pmh:oai:pubmedcentral.nih.gov:7095418",
-        "is_oa": true, "landing_page_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/7095418",
-        "pdf_url": null, "source": {"id": "https://openalex.org/S2764455111", "display_name":
-        "PubMed Central", "issn_l": null, "issn": null, "is_oa": false, "is_in_doaj":
-        false, "is_core": false, "host_organization": "https://openalex.org/I1299303238",
-        "host_organization_name": "National Institutes of Health", "host_organization_lineage":
-        ["https://openalex.org/I1299303238"], "host_organization_lineage_names": [],
-        "type": "repository"}, "license": "other-oa", "license_id": "https://openalex.org/licenses/other-oa",
-        "version": "submittedVersion", "is_accepted": false, "is_published": false,
-        "raw_source_name": "Nature", "raw_type": "Text"}], "best_oa_location": {"id":
-        "doi:10.1038/s41586-020-2012-7", "is_oa": true, "landing_page_url": "https://doi.org/10.1038/s41586-020-2012-7",
-        "pdf_url": "https://www.nature.com/articles/s41586-020-2012-7.pdf", "source":
-        {"id": "https://openalex.org/S137773608", "display_name": "Nature", "issn_l":
-        "0028-0836", "issn": ["0028-0836", "1476-4687"], "is_oa": false, "is_in_doaj":
-        false, "is_core": true, "host_organization": "https://openalex.org/P4310319908",
-        "host_organization_name": "Nature Portfolio", "host_organization_lineage":
-        ["https://openalex.org/P4310319908", "https://openalex.org/P4310319965"],
+        false, "raw_source_name": null, "raw_type": "article"}, {"id": "pmh:oai:localhost:1/39411",
+        "is_oa": true, "landing_page_url": "http://repositorio.ufla.br/jspui/handle/1/39411",
+        "pdf_url": null, "source": {"id": "https://openalex.org/S4306402641", "display_name":
+        "LA Referencia (Red Federada de Repositorios Institucionales de Publicaciones
+        Cient\u00edficas)", "issn_l": null, "issn": null, "is_oa": false, "is_in_doaj":
+        false, "is_core": false, "listed_in": [], "host_organization": "https://openalex.org/I4383465926",
+        "host_organization_name": "LA Referencia", "host_organization_lineage": ["https://openalex.org/I4383465926"],
+        "host_organization_lineage_names": [], "type": "repository"}, "license": "cc-by",
+        "license_id": "https://openalex.org/licenses/cc-by", "version": "submittedVersion",
+        "is_accepted": false, "is_published": false, "raw_source_name": "Nature",
+        "raw_type": "info:eu-repo/semantics/publishedVersion"}], "best_oa_location":
+        {"id": "doi:10.1038/s41586-020-2012-7", "is_oa": true, "landing_page_url":
+        "https://doi.org/10.1038/s41586-020-2012-7", "pdf_url": "https://www.nature.com/articles/s41586-020-2012-7.pdf",
+        "source": {"id": "https://openalex.org/S137773608", "display_name": "Nature",
+        "issn_l": "0028-0836", "issn": ["0028-0836", "1476-4687"], "is_oa": false,
+        "is_in_doaj": false, "is_core": true, "listed_in": ["cwts-core", "doyens",
+        "erih-plus", "jufo-3", "ki-jl-3", "medline", "norway-2"], "host_organization":
+        "https://openalex.org/P4310319908", "host_organization_name": "Nature Portfolio",
+        "host_organization_lineage": ["https://openalex.org/P4310319908", "https://openalex.org/P4310319965"],
         "host_organization_lineage_names": ["Nature Portfolio", "Springer Nature"],
         "type": "journal"}, "license": "cc-by", "license_id": "https://openalex.org/licenses/cc-by",
         "version": "publishedVersion", "is_accepted": true, "is_published": true,
         "raw_source_name": "Nature", "raw_type": "journal-article"}, "sustainable_development_goals":
-        [{"display_name": "Good health and well-being", "score": 0.8899999856948853,
-        "id": "https://metadata.un.org/sdg/3"}], "awards": [], "funders": [{"id":
+        [{"score": 0.9476000070571899, "id": "https://metadata.un.org/sdg/3", "display_name":
+        "Good health and well-being"}], "sustainable_development_goals_aurora": [{"score":
+        0.8899999856948853, "id": "https://metadata.un.org/sdg/3", "display_name":
+        "Good health and well-being"}], "study_designs": [], "awards": [{"id": "https://openalex.org/G326118793",
+        "display_name": null, "funder_award_id": "XDB29010101", "funder_id": "https://openalex.org/F4320321133",
+        "funder_display_name": "Chinese Academy of Sciences"}, {"id": "https://openalex.org/G6357129724",
+        "display_name": null, "funder_award_id": "2019328", "funder_id": "https://openalex.org/F4320321133",
+        "funder_display_name": "Chinese Academy of Sciences"}], "funders": [{"id":
         "https://openalex.org/F4320321133", "display_name": "Chinese Academy of Sciences",
         "ror": "https://ror.org/034t30j35"}, {"id": "https://openalex.org/F4320335892",
         "display_name": "Youth Innovation Promotion Association", "ror": null}], "has_content":
-        {"pdf": true, "grobid_xml": true}, "content_urls": {"pdf": "https://content.openalex.org/works/W3004280078.pdf",
+        {"grobid_xml": true, "pdf": true}, "content_urls": {"pdf": "https://content.openalex.org/works/W3004280078.pdf",
         "grobid_xml": "https://content.openalex.org/works/W3004280078.grobid-xml"},
         "referenced_works_count": 20, "referenced_works": ["https://openalex.org/W1966238900",
         "https://openalex.org/W1993577573", "https://openalex.org/W2103503670", "https://openalex.org/W2122576818",
@@ -963,70 +960,122 @@ interactions:
         "https://openalex.org/W3202542776", "https://openalex.org/W3195606942", "https://openalex.org/W3092226650",
         "https://openalex.org/W3008839683", "https://openalex.org/W3148870232", "https://openalex.org/W3015085447",
         "https://openalex.org/W3011586138", "https://openalex.org/W3021591496", "https://openalex.org/W2033307125"],
-        "abstract_inverted_index": null, "counts_by_year": [{"year": 2026, "cited_by_count":
-        75}, {"year": 2025, "cited_by_count": 770}, {"year": 2024, "cited_by_count":
-        1449}, {"year": 2023, "cited_by_count": 2137}, {"year": 2022, "cited_by_count":
-        3855}, {"year": 2021, "cited_by_count": 6473}, {"year": 2020, "cited_by_count":
-        8272}, {"year": 2019, "cited_by_count": 13}, {"year": 2018, "cited_by_count":
-        4}, {"year": 2017, "cited_by_count": 1}, {"year": 2015, "cited_by_count":
-        1}, {"year": 2014, "cited_by_count": 1}, {"year": 2013, "cited_by_count":
-        3}, {"year": 2012, "cited_by_count": 1}], "updated_date": "2026-02-28T09:26:25.869077",
+        "abstract_inverted_index": {"Abstract": [0], "Since": [1], "the": [2, 40,
+        50, 105, 128, 151, 161, 184], "outbreak": [3], "of": [4, 16, 54, 63, 104,
+        139, 153, 165], "severe": [5], "acute": [6, 64], "respiratory": [7, 65], "syndrome":
+        [8, 66], "(SARS)": [9], "18": [10], "years": [11], "ago,": [12], "a": [13,
+        55, 132, 166], "large": [14], "number": [15], "SARS-related": [17], "coronaviruses":
+        [18], "(SARSr-CoVs)": [19], "have": [20, 33, 39], "been": [21], "discovered":
+        [22], "in": [23, 67, 69], "their": [24], "natural": [25], "reservoir": [26],
+        "host,": [27], "bats": [28], "1\u20134": [29], ".": [30, 46, 154], "Previous":
+        [31], "studies": [32], "shown": [34], "that": [35, 122, 146, 181], "some":
+        [36], "bat": [37, 133], "SARSr-CoVs": [38], "potential": [41], "to": [42,
+        117, 131, 150], "infect": [43], "humans": [44, 68], "5\u20137": [45], "Here":
+        [47], "we": [48, 120, 179], "report": [49], "identification": [51], "and":
+        [52, 112], "characterization": [53], "new": [56], "coronavirus": [57], "(2019-nCoV),":
+        [58], "which": [59, 74], "caused": [60, 81], "an": [61, 101], "epidemic":
+        [62], "Wuhan,": [70], "China.": [71], "The": [72, 107], "epidemic,": [73],
+        "started": [75], "on": [76], "12": [77], "December": [78], "2019,": [79],
+        "had": [80], "2,794": [82], "laboratory-confirmed": [83], "infections": [84],
+        "including": [85], "80": [86], "deaths": [87], "by": [88, 173], "26": [89],
+        "January": [90], "2020.": [91], "Full-length": [92], "genome": [93], "sequences":
+        [94, 108], "were": [95], "obtained": [96], "from": [97, 160, 175], "five":
+        [98], "patients": [99], "at": [100, 127], "early": [102], "stage": [103],
+        "outbreak.": [106], "are": [109], "almost": [110], "identical": [111, 126],
+        "share": [113], "79.6%": [114], "sequence": [115, 137], "identity": [116],
+        "SARS-CoV.": [118, 193], "Furthermore,": [119], "show": [121, 145], "2019-nCoV":
+        [123, 157, 182], "is": [124], "96%": [125], "whole-genome": [129], "level":
+        [130], "coronavirus.": [134], "Pairwise": [135], "protein": [136], "analysis":
+        [138], "seven": [140], "conserved": [141], "non-structural": [142], "proteins":
+        [143], "domains": [144], "this": [147], "virus": [148, 158], "belongs": [149],
+        "species": [152], "In": [155], "addition,": [156], "isolated": [159], "bronchoalveolar":
+        [162], "lavage": [163], "fluid": [164], "critically": [167], "ill": [168],
+        "patient": [169], "could": [170], "be": [171], "neutralized": [172], "sera":
+        [174], "several": [176], "patients.": [177], "Notably,": [178], "confirmed":
+        [180], "uses": [183], "same": [185], "cell": [186], "entry": [187], "receptor\u2014angiotensin":
+        [188], "converting": [189], "enzyme": [190], "II": [191], "(ACE2)\u2014as":
+        [192]}, "counts_by_year": [{"year": 2026, "cited_by_count": 327}, {"year":
+        2025, "cited_by_count": 771}, {"year": 2024, "cited_by_count": 1452}, {"year":
+        2023, "cited_by_count": 2150}, {"year": 2022, "cited_by_count": 3876}, {"year":
+        2021, "cited_by_count": 6527}, {"year": 2020, "cited_by_count": 8298}, {"year":
+        2019, "cited_by_count": 13}, {"year": 2018, "cited_by_count": 4}, {"year":
+        2017, "cited_by_count": 1}, {"year": 2015, "cited_by_count": 1}, {"year":
+        2014, "cited_by_count": 1}, {"year": 2013, "cited_by_count": 3}, {"year":
+        2012, "cited_by_count": 1}], "updated_date": "2026-10-04T09:36:47.201465",
         "created_date": "2025-10-10T00:00:00"}], "group_by": []}'
     headers:
-      Access-Control-Allow-Headers:
-      - Accept, Accept-Language, Accept-Encoding, Authorization, Content-Type
-      Access-Control-Allow-Methods:
-      - GET, HEAD, POST, OPTIONS
-      Access-Control-Allow-Origin:
+      access-control-allow-headers:
+      - Accept, Accept-Language, Accept-Encoding, Authorization, Content-Type, X-OpenAlex-UI,
+        X-Impersonate-User
+      access-control-allow-methods:
+      - GET, HEAD, POST, PATCH, DELETE, OPTIONS
+      access-control-allow-origin:
       - '*'
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 9d6e3134e8844d4a-FRA
-      Connection:
-      - keep-alive
-      Content-Type:
-      - application/json
-      Date:
-      - Wed, 04 Mar 2026 04:38:35 GMT
-      Nel:
-      - '{"report_to":"heroku-nel","response_headers":["Via"],"max_age":3600,"success_fraction":0.01,"failure_fraction":0.1}'
-      Report-To:
-      - '{"group":"heroku-nel","endpoints":[{"url":"https://nel.heroku.com/reports?s=yezVM681jbRQkSZEMlYW1U4GBiX86Z%2F0jbwZsvXKpm4%3D\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\u0026ts=1772599115"}],"max_age":3600}'
-      Reporting-Endpoints:
-      - heroku-nel="https://nel.heroku.com/reports?s=yezVM681jbRQkSZEMlYW1U4GBiX86Z%2F0jbwZsvXKpm4%3D&sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&ts=1772599115"
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      Via:
-      - 1.1 heroku-router
-      X-RateLimit-Cost-USD:
-      - '0.0001'
-      X-RateLimit-Credits-Used:
-      - '1'
-      X-RateLimit-Limit:
-      - '10000'
-      X-RateLimit-Limit-USD:
-      - '1'
-      X-RateLimit-Onetime-Remaining:
-      - '0'
-      X-RateLimit-Prepaid-Remaining-USD:
-      - '0'
-      X-RateLimit-Remaining:
-      - '9988'
-      X-RateLimit-Remaining-USD:
-      - '0.9988'
-      X-RateLimit-Reset:
-      - '69685'
       access-control-expose-headers:
       - Cache-Control, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Onetime-Remaining,
         X-RateLimit-Credits-Used, X-RateLimit-Credits-Required, X-RateLimit-Reset,
         X-RateLimit-Limit-USD, X-RateLimit-Remaining-USD, X-RateLimit-Prepaid-Remaining-USD,
-        X-RateLimit-Cost-USD, X-RateLimit-Cost-Required-USD, Retry-After
+        X-RateLimit-Cost-USD, X-RateLimit-Cost-Required-USD, Retry-After, Location,
+        Content-Disposition
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a461d278aec72af3-LAX
+      connection:
+      - keep-alive
       content-length:
-      - '74592'
+      - '81786'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Oct 2026 04:11:27 GMT
+      nel:
+      - '{"report_to":"heroku-nel","response_headers":["Via"],"max_age":3600,"success_fraction":0.01,"failure_fraction":0.1}'
+      report-to:
+      - '{"group":"heroku-nel","endpoints":[{"url":"https://nel.heroku.com/reports?s=2%2FwENtjqUOBYiolNdTQCoyEuwCMlj0mL7Tkol6RcyZg%3D\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\u0026ts=1791259887"}],"max_age":3600}'
+      reporting-endpoints:
+      - heroku-nel="https://nel.heroku.com/reports?s=2%2FwENtjqUOBYiolNdTQCoyEuwCMlj0mL7Tkol6RcyZg%3D&sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&ts=1791259887"
+      server:
+      - cloudflare
+      transfer-encoding:
+      - chunked
+      via:
+      - 2.0 heroku-router
+      x-ratelimit-cost-usd:
+      - '0.0001'
+      x-ratelimit-credits-used:
+      - '1'
+      x-ratelimit-limit:
+      - '1000'
+      x-ratelimit-limit-usd:
+      - '0.1'
+      x-ratelimit-onetime-remaining:
+      - '0'
+      x-ratelimit-prepaid-remaining-usd:
+      - '0'
+      x-ratelimit-remaining:
+      - '979'
+      x-ratelimit-remaining-usd:
+      - '0.0979'
+      x-ratelimit-reset:
+      - '71313'
     status:
       code: 200
       message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      host:
+      - api.openalex.org
+      user-agent:
+      - python-httpx/0.28.1
+    method: GET
+    uri: https://api.openalex.org/works?filter=doi%3A10.1038%2Fs41586-020-2012-7&per-page=1
+  response: *id001
 version: 1

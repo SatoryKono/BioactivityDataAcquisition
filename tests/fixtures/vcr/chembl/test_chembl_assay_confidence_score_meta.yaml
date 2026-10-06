@@ -3,6 +3,6 @@ provider: chembl
 cassette_rel_path: tests/fixtures/vcr/chembl/test_chembl_assay_confidence_score.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: bc5e5889d021c1bee89659af05535d5a79971a04bfdf9279a70cfa1552b07e6c
-recorded_at: '2026-07-03'
+cassette_sha256: 54e2ce65e799fecbafbd5b7058b2b5700ba07263e96b5b46c7a24d1e358335d9
+recorded_at: '2026-10-06'
 staleness_ready: true

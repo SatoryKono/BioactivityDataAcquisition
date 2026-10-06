@@ -1,0 +1,10 @@
+{
+  "archive_sha256": "565bcc17f1a618632f630d52a0fee467fb4d9ac08b1abba2cef42d571a87b85f",
+  "validated_files": 43,
+  "validation": "canonical validate_local_measurement after extraction",
+  "counts": {
+    "passed": 32972,
+    "skipped": 187
+  },
+  "status": "PASS"
+}

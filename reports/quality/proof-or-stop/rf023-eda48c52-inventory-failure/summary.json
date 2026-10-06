@@ -1,0 +1,19 @@
+{
+  "source_commit": "eda48c52e1b0dd995f0035a541a6d8dc75228a5d",
+  "outcome": "FAIL",
+  "full_suite_verified": false,
+  "counts": {
+    "tests": 3573,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 73
+  },
+  "cause": "Scripts inventory reference_count stale after main CI workflow documentation merge: check_links 39->38; replay_parity_inputs 1->0; active335 unchanged",
+  "archive_sha256": "fafd62d6a8294bf2ef480ecf55a65e72fc070d6f9cae69af5608debae7d222a4",
+  "files": {
+    "execution.json": "f9a6c76688cece705fdd9f7581cf3177f2516b2b299dbacdd38173d5c00e06f3",
+    "junit.xml": "c27d637bd0cc7d8cf6158e95f3425544d759eabc7fb90c86e5b0ee3adc317325",
+    "pytest.log": "7fd04c245d27ac543c5e58482b88b6c4c40d46c38aef1e881c962386744ef2b0",
+    "resource-samples.jsonl": "b0d76e747610d025e381333334addc1cff3a539aab788eee301a3be784a10452"
+  }
+}

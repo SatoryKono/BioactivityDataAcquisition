@@ -1,6 +1,6 @@
 {
-  "additive_coverage_xml_path": "reports/quality/ci-11929-11931-preparation/job3363/proof-or-stop/circleci-closeout-3363-886a32e8bd71/coverage/coverage.xml",
-  "additive_coverage_xml_sha256": "e6bf9b79b094d9c709c825574d8e29b439e8d8a29b1d38805fd2b19b5efce4c2",
+  "additive_coverage_xml_path": "reports/quality/rf023-coverage-7a850b42-utf8/coverage.xml",
+  "additive_coverage_xml_sha256": "e562fc662dbdcd721565c589d58784c02fc874491c35d338c8f8a099150e0e71",
   "additive_measured_module_count": 2470,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
@@ -8439,24 +8439,24 @@
       "source_lines": 232
     },
     {
-      "coverage_percent": 94.64,
+      "coverage_percent": 94.92,
       "coverage_status": "partially_covered",
-      "covered_lines": 53,
-      "executable_lines": 56,
+      "covered_lines": 56,
+      "executable_lines": 59,
       "missing_lines": 3,
       "module": "bioetl.composition.bootstrap.runtime.assay_replay",
       "path": "src/bioetl/composition/bootstrap/runtime/assay_replay.py",
-      "source_lines": 155
+      "source_lines": 160
     },
     {
-      "coverage_percent": 98.57,
+      "coverage_percent": 98.63,
       "coverage_status": "partially_covered",
-      "covered_lines": 69,
-      "executable_lines": 70,
+      "covered_lines": 72,
+      "executable_lines": 73,
       "missing_lines": 1,
       "module": "bioetl.composition.bootstrap.runtime.assay_replay_capture",
       "path": "src/bioetl/composition/bootstrap/runtime/assay_replay_capture.py",
-      "source_lines": 159
+      "source_lines": 149
     },
     {
       "coverage_percent": 100.0,
@@ -13601,12 +13601,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 110,
-      "executable_lines": 110,
+      "covered_lines": 117,
+      "executable_lines": 117,
       "missing_lines": 0,
       "module": "bioetl.domain.mapping.protein_class_target_type",
       "path": "src/bioetl/domain/mapping/protein_class_target_type.py",
-      "source_lines": 291
+      "source_lines": 305
     },
     {
       "coverage_percent": 100.0,
@@ -19971,12 +19971,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 26,
-      "executable_lines": 26,
+      "covered_lines": 48,
+      "executable_lines": 48,
       "missing_lines": 0,
       "module": "bioetl.infrastructure.config.protein_class_target_type_loader",
       "path": "src/bioetl/infrastructure/config/protein_class_target_type_loader.py",
-      "source_lines": 53
+      "source_lines": 104
     },
     {
       "coverage_percent": 100.0,
@@ -20529,14 +20529,14 @@
       "source_lines": 136
     },
     {
-      "coverage_percent": 89.13,
+      "coverage_percent": 89.47,
       "coverage_status": "partially_covered",
-      "covered_lines": 82,
-      "executable_lines": 92,
+      "covered_lines": 85,
+      "executable_lines": 95,
       "missing_lines": 10,
       "module": "bioetl.infrastructure.control_plane.replay_object_verifier",
       "path": "src/bioetl/infrastructure/control_plane/replay_object_verifier.py",
-      "source_lines": 144
+      "source_lines": 151
     },
     {
       "coverage_percent": 100.0,
@@ -22329,14 +22329,14 @@
       "source_lines": 305
     },
     {
-      "coverage_percent": 98.63,
+      "coverage_percent": 98.75,
       "coverage_status": "partially_covered",
-      "covered_lines": 72,
-      "executable_lines": 73,
+      "covered_lines": 79,
+      "executable_lines": 80,
       "missing_lines": 1,
       "module": "bioetl.infrastructure.storage.composite_replay_bundle",
       "path": "src/bioetl/infrastructure/storage/composite_replay_bundle.py",
-      "source_lines": 134
+      "source_lines": 144
     },
     {
       "coverage_percent": 93.75,
@@ -33961,24 +33961,24 @@
       "source_lines": 232
     },
     {
-      "coverage_percent": 94.64,
+      "coverage_percent": 94.92,
       "coverage_status": "partially_covered",
-      "covered_lines": 53,
-      "executable_lines": 56,
+      "covered_lines": 56,
+      "executable_lines": 59,
       "missing_lines": 3,
       "module": "bioetl.composition.bootstrap.runtime.assay_replay",
       "path": "src/bioetl/composition/bootstrap/runtime/assay_replay.py",
-      "source_lines": 155
+      "source_lines": 160
     },
     {
-      "coverage_percent": 98.57,
+      "coverage_percent": 98.63,
       "coverage_status": "partially_covered",
-      "covered_lines": 69,
-      "executable_lines": 70,
+      "covered_lines": 72,
+      "executable_lines": 73,
       "missing_lines": 1,
       "module": "bioetl.composition.bootstrap.runtime.assay_replay_capture",
       "path": "src/bioetl/composition/bootstrap/runtime/assay_replay_capture.py",
-      "source_lines": 159
+      "source_lines": 149
     },
     {
       "coverage_percent": 100.0,
@@ -39123,12 +39123,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 110,
-      "executable_lines": 110,
+      "covered_lines": 117,
+      "executable_lines": 117,
       "missing_lines": 0,
       "module": "bioetl.domain.mapping.protein_class_target_type",
       "path": "src/bioetl/domain/mapping/protein_class_target_type.py",
-      "source_lines": 291
+      "source_lines": 305
     },
     {
       "coverage_percent": 100.0,
@@ -45493,12 +45493,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 26,
-      "executable_lines": 26,
+      "covered_lines": 48,
+      "executable_lines": 48,
       "missing_lines": 0,
       "module": "bioetl.infrastructure.config.protein_class_target_type_loader",
       "path": "src/bioetl/infrastructure/config/protein_class_target_type_loader.py",
-      "source_lines": 53
+      "source_lines": 104
     },
     {
       "coverage_percent": 100.0,
@@ -46051,14 +46051,14 @@
       "source_lines": 136
     },
     {
-      "coverage_percent": 89.13,
+      "coverage_percent": 89.47,
       "coverage_status": "partially_covered",
-      "covered_lines": 82,
-      "executable_lines": 92,
+      "covered_lines": 85,
+      "executable_lines": 95,
       "missing_lines": 10,
       "module": "bioetl.infrastructure.control_plane.replay_object_verifier",
       "path": "src/bioetl/infrastructure/control_plane/replay_object_verifier.py",
-      "source_lines": 144
+      "source_lines": 151
     },
     {
       "coverage_percent": 100.0,
@@ -47851,14 +47851,14 @@
       "source_lines": 305
     },
     {
-      "coverage_percent": 98.63,
+      "coverage_percent": 98.75,
       "coverage_status": "partially_covered",
-      "covered_lines": 72,
-      "executable_lines": 73,
+      "covered_lines": 79,
+      "executable_lines": 80,
       "missing_lines": 1,
       "module": "bioetl.infrastructure.storage.composite_replay_bundle",
       "path": "src/bioetl/infrastructure/storage/composite_replay_bundle.py",
-      "source_lines": 134
+      "source_lines": 144
     },
     {
       "coverage_percent": 93.75,
@@ -51053,7 +51053,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "6de85b6b390eb245580e3cb6a2b85955700250ff09e9623bf83f437a024b2648",
+  "source_tree_sha256": "10c473140c6f2c68ad212428c3208c03b3b21933cd63103edb317f0a0548a35f",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -51120,7 +51120,7 @@
       "composition_bootstrap_runtime": {
         "allowlisted_unmeasured_module_count": 0,
         "allowlisted_unmeasured_modules": [],
-        "coverage_percent_avg": 99.74,
+        "coverage_percent_avg": 99.75,
         "coverage_percent_min": 94.12,
         "covered_line_percent": 99.58,
         "covered_module_count": 49,

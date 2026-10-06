@@ -276,7 +276,7 @@ def input_fingerprints(root: Path) -> dict[str, str]:
 def composite_report_coverage(
     case: Case, config_root: Path, paths: list[Path]
 ) -> list[str]:
-    """Require exact configured child coverage, including optional enrichers."""
+    """Require every child unless immutable inputs prove an optional empty stage."""
     config = yaml.safe_load(
         (
             config_root / "composites" / f"{case.name.removeprefix('composite_')}.yaml"
@@ -289,12 +289,19 @@ def composite_report_coverage(
     ]
     actual = [path.parent.parent.name for path in paths]
     failures = []
-    if sorted(actual) != sorted([case.name, *expected]):
-        failures.append("composite_report_coverage_mismatch")
     parents = [path for path in paths if path.parent.parent.name == case.name]
     if len(parents) != 1:
         return failures + ["composite_parent_report_missing_or_ambiguous"]
     parent = json.loads(parents[0].read_text(encoding="utf-8"))
+    missing = set(expected) - set(actual)
+    if missing:
+        try:
+            skipped = verified_empty_optional_stages(config, parent, parents[0])
+            expected = [name for name in expected if name not in missing & skipped]
+        except (ValueError, OSError, KeyError, TypeError) as exc:
+            failures.append(f"composite_optional_skip_unverified:{type(exc).__name__}")
+    if sorted(actual) != sorted([case.name, *expected]):
+        failures.append("composite_report_coverage_mismatch")
     children = parent.get("io", {}).get("child_runs", [])
     bound = sorted(
         (row.get("pipeline_name", ""), row.get("run_id", "")) for row in children
@@ -387,6 +394,8 @@ def _execute_case(
         raise ValueError("input_snapshot_changed_during_copy")
     write_receipt(folder / RESULT_FILENAME, receipt)
     environment = _case_environment(root, folder, env_file)
+    receipt["runtime_policy"] = _runtime_policy(folder, environment)
+    write_receipt(folder / RESULT_FILENAME, receipt)
     failures = []
     launch_cases = [Case("pipeline", name) for name in case.prerequisites] + [case]
     launches = [command(launch_case, limit) for launch_case in launch_cases]
@@ -450,6 +459,7 @@ def _case_environment(root: Path, folder: Path, env_file: Path) -> dict[str, str
         },
     }
     environment.update(
+        BIOETL_TEST_MODE="false",
         BIOETL_DATA_DIR=str(data),
         BIOETL_REPORT_ROOT=str(reports),
         BIOETL_CONFIGS_ROOT=str(folder / "configs"),
@@ -472,6 +482,23 @@ def _case_environment(root: Path, folder: Path, env_file: Path) -> dict[str, str
             "BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__PLAIN_WRITE_PROCESS_ISOLATION"
         ] = "true"
     return environment
+
+
+def _runtime_policy(folder: Path, environment: dict[str, str]) -> dict:
+    """Verify resolved production settings in the actual child environment."""
+    entrypoint = Path(__file__).resolve()
+    result = subprocess.run(
+        [sys.executable, str(entrypoint), "--runtime-policy"],
+        cwd=folder,
+        env=environment,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=60,
+    )
+    (folder / "runtime-policy.stderr.log").write_text(result.stderr, encoding="utf-8")
+    result.check_returncode()
+    return json.loads(result.stdout)
 
 
 def _stop_launch_process(process: subprocess.Popen, log: TextIO) -> None:
@@ -541,7 +568,7 @@ def run_launch(
             receipt["finished_at"] = timestamp()
 
 
-COMPOSITE_ORDER = ("activity", "assay", "molecule", "target", "publication")
+COMPOSITE_ORDER = ("activity", "assay", "molecule", "target")
 
 
 def _validate_campaign_output(root: Path, output: Path, limit: int) -> None:
@@ -556,7 +583,7 @@ def _validate_campaign_output(root: Path, output: Path, limit: int) -> None:
 def execute_campaign(
     root: Path, output: Path, env_file: Path, *, limit: int = 10
 ) -> list[str]:
-    """Run the five RF-022 cases sequentially under one exclusive worktree lease.
+    """Run the four RF-022 cases sequentially under one exclusive worktree lease.
 
     Local checks are preparation evidence. HTTP and offline replay acceptance
     remain separate obligations even if every local check passes.
@@ -577,6 +604,11 @@ def execute_campaign(
     ]
     manifest = {
         "source_commit": source,
+        "scope": {
+            "issue": 11906,
+            "composites": [case.name for case in cases],
+            "excluded": {"composite_publication": "Tracked separately in #11947"},
+        },
         "limit": limit,
         "started_at": timestamp(),
         "status": "running",
@@ -688,3 +720,131 @@ def inspect_composite_parents(case: Case, data: Path, paths: list[Path]) -> list
                 f"composite_parent_report_missing:{manifest.get('pipeline_name')}"
             )
     return failures
+
+
+def verified_empty_optional_stages(config: dict, parent: dict, path: Path) -> set[str]:
+    """Accept only declared skips whose captured join keys are all ineligible."""
+    import asyncio
+
+    from bioetl.infrastructure.storage.composite_replay_bundle import (
+        confined_path,
+        verify_bundle,
+    )
+    from bioetl.infrastructure.storage.composite_replay_inputs import (
+        CompositeReplayInputReader,
+    )
+
+    artifacts = [
+        item
+        for item in parent.get("artifacts", [])
+        if item.get("kind") == "composite_exact_replay"
+    ]
+    if len(artifacts) != 1:
+        raise ValueError("optional_skip_envelope_missing_or_ambiguous")
+    artifact = artifacts[0]
+    envelope_path = confined_path(path.parent, artifact["ref"])
+    if envelope_path.name != "parent.json":
+        raise ValueError("optional_skip_envelope_invalid")
+    envelope = verify_bundle(envelope_path.parent, artifact["sha256"])
+    if (envelope["pipeline"], envelope["run_id"]) != (
+        path.parent.parent.name,
+        path.parent.name,
+    ):
+        raise ValueError("optional_skip_identity_mismatch")
+    request = envelope["request"]
+    if request["seed_pipeline"] != config["seed"]["pipeline"]:
+        raise ValueError("optional_skip_seed_mismatch")
+    reader = CompositeReplayInputReader(
+        envelope_path.parent / "inputs",
+        envelope_sha256=envelope["input_snapshot_fingerprint"],
+    )
+    seed = asyncio.run(reader.read_table(request["seed_table"]))
+    return {
+        row["pipeline"]
+        for row in config.get("enrichers", [])
+        if row.get("required", False) is False
+        and request.get("outcomes", {}).get(row["pipeline"]) == "skipped"
+        and _has_no_eligible_keys(seed, config["seed"].get("output_keys", []), row)
+    }
+
+
+def _has_no_eligible_keys(seed, keys: list[str], enricher: dict) -> bool:
+    """Replay the runtime normalization and filter before certifying a skip."""
+    import polars as pl
+
+    from bioetl.application.composite.coordinator_planning import (
+        apply_enricher_filter,
+        find_column_case_insensitive,
+    )
+    from bioetl.application.composite.join_key_normalization import (
+        normalize_join_key_dataframe_columns,
+    )
+    from bioetl.domain.composite import EnricherConfig
+    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+
+    join_keys = enricher.get("join_keys", [])
+    if not keys or not join_keys or not set(join_keys).issubset(keys):
+        return False
+    if not set(keys).issubset(seed.column_names):
+        return False
+    frame = normalize_join_key_dataframe_columns(
+        df=pl.from_arrow(seed.select(keys)), join_keys=keys
+    )
+    frame = frame.filter(pl.any_horizontal(pl.col(key).is_not_null() for key in keys))
+    filtered = apply_enricher_filter(
+        logger=NoOpLogger(),
+        keys=frame,
+        enricher=EnricherConfig(
+            pipeline=enricher["pipeline"],
+            join_keys=tuple(join_keys),
+            filter_condition=enricher.get("filter_condition"),
+        ),
+        find_column=find_column_case_insensitive,
+        filter_errors=(),
+    )
+    return filtered.is_empty()
+
+
+def runtime_policy() -> dict:
+    """Reject test-mode contamination and expose only an explicit safe allowlist."""
+    from bioetl.composition.factories.datasource.http_client import HttpClientFactory
+    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+    from bioetl.infrastructure.config.config_root import resolve_config_subdir
+    from bioetl.infrastructure.config.settings_api import get_settings
+    from bioetl.infrastructure.control_plane._durability import (
+        should_fsync_control_plane_writes,
+    )
+
+    settings = get_settings()
+    fsync = should_fsync_control_plane_writes()
+    if settings.test_mode or not fsync:
+        raise ValueError("live_acceptance_requires_production_runtime")
+    providers = {}
+    for path in sorted(resolve_config_subdir("providers").glob("*.yaml")):
+        client = HttpClientFactory.create_for_provider(path.stem, settings)
+        if not isinstance(client.rate_limiter, TokenBucketRateLimiter):
+            raise TypeError("live_acceptance_rate_limiter_not_inspectable")
+        providers[path.stem] = {
+            "timeout_seconds": client.timeout,
+            "read_timeout_seconds": client.timeout * client.read_timeout_multiplier,
+            "max_attempts": client.retry_config.max_attempts,
+            "retry_base_delay_seconds": client.retry_config.base_delay,
+            "retry_max_delay_seconds": client.retry_config.max_delay,
+            "retry_after_cap_seconds": client.retry_config.max_retry_after_seconds,
+            "rate_per_second": client.rate_limiter.rate,
+            "burst": client.rate_limiter.capacity,
+            "circuit_recovery_seconds": client.circuit_breaker.get_recovery_timeout(),
+        }
+    return {
+        "test_mode": settings.test_mode,
+        "control_plane_fsync": fsync,
+        "providers": providers,
+    }
+
+
+if __name__ == "__main__":
+    if sys.argv[1:] != ["--runtime-policy"]:
+        raise SystemExit(
+            "Use --runtime-policy, or the pytest live acceptance entrypoint"
+        )
+    print(json.dumps(runtime_policy(), sort_keys=True))

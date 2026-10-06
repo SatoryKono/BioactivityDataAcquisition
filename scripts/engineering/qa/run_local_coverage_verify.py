@@ -32,6 +32,7 @@ from scripts.engineering.ci.update_test_telemetry_baseline import (
 )
 
 ROOT = Path(__file__).resolve().parents[3]
+MANIFEST_NAME = "manifest.json"
 COMMON_UNIT_MARKER = (
     "not serial and not memory and not fs_contract and not subprocess_backed"
 )
@@ -229,7 +230,7 @@ def _windows_bash() -> str:
     return "bash"
 
 
-def _command(shard: Shard, junit: Path) -> list[str]:
+def _command(shard: Shard, junit: Path, *, max_workers: int = 2) -> list[str]:
     command = [
         _windows_bash(),
         "scripts/engineering/dev/run_pytest.sh",
@@ -245,18 +246,30 @@ def _command(shard: Shard, junit: Path) -> list[str]:
         f"--junitxml={_bash_safe_path(junit)}",
     ]
     if shard.parallel:
-        command.extend(("-n", "2", "--dist=loadscope", "--max-worker-restart=0"))
+        command.extend(
+            ("-n", str(max_workers), "--dist=loadscope", "--max-worker-restart=0")
+        )
     else:
         command.extend(("-p", "no:xdist"))
     return command
 
 
+def _scratch_path(path: Path) -> Path:
+    resolved = path.resolve()
+    roots = (ROOT / "reports", Path(tempfile.gettempdir()))
+    if not any(resolved.is_relative_to(root.resolve()) for root in roots):
+        raise ValueError("Coverage scratch must be under reports/ or system temp")
+    return resolved
+
+
 def _write_manifest(path: Path, payload: dict[str, object]) -> None:
-    temporary = path.with_suffix(".tmp")
-    temporary.write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
-    temporary.replace(path)
+    directory = _scratch_path(path.parent)
+    if path.name != MANIFEST_NAME:
+        raise ValueError("Unexpected coverage manifest name")
+    temporary = directory / "manifest.tmp"
+    with temporary.open("x", encoding="utf-8") as stream:
+        stream.write(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    temporary.replace(directory / MANIFEST_NAME)
 
 
 def _run_logged(command: list[str], log: Path, *, env: dict[str, str]) -> int:
@@ -276,6 +289,11 @@ def _load_shard_group(path: Path, expected: dict[str, object]) -> dict[str, Any]
     payload = json.loads(path.read_text(encoding="utf-8"))
     if payload.get("shards_complete") is not True:
         raise ValueError("Incomplete shard group")
+    workers = payload.get("max_workers", 2)
+    if type(workers) is not int or workers not in (1, 2):
+        raise ValueError("Invalid shard worker limit")
+    if workers != expected.get("max_workers", 2):
+        raise ValueError("Foreign shard group: max_workers")
     for key in (
         "head",
         "source_tree_sha256",
@@ -313,7 +331,9 @@ def _copy_shard_row(
 ) -> dict[str, object]:
     row = dict(original)
     name = shard.name
-    if row["command"] != _command(shard, Path(row["junit_file"])):
+    if row["command"] != _command(
+        shard, Path(row["junit_file"]), max_workers=payload.get("max_workers", 2)
+    ):
         raise ValueError("Noncanonical shard command")
     origin = Path(payload["scratch_dir"])
     artifacts = (
@@ -366,7 +386,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--scratch-dir",
         type=Path,
-        help="New empty run directory (default: system temp)",
+        help="New directory under reports/ or system temp (default: system temp)",
+    )
+    parser.add_argument(
+        "--max-workers",
+        type=int,
+        choices=(1, 2),
+        default=2,
+        help="Worker limit for parallel shards; use 1 on memory-constrained hosts",
     )
     parser.add_argument("--shard", action="append", choices=[s.name for s in SHARDS])
     parser.add_argument(
@@ -383,7 +410,8 @@ def main(argv: list[str] | None = None) -> int:
         raise RuntimeError("Local coverage plan must have 17 distinct shards")
     if args.list:
         for shard in SHARDS:
-            print(f"{shard.name}: {' '.join(_command(shard, Path('<junit>')))}")
+            command = _command(shard, Path("<junit>"), max_workers=args.max_workers)
+            print(f"{shard.name}: {' '.join(command)}")
         return 0
 
     if _git(
@@ -405,7 +433,7 @@ def main(argv: list[str] | None = None) -> int:
     source_sha = compute_source_tree_sha256(repo_root=ROOT)
     test_sha = compute_test_telemetry_source_tree_sha256(repo_root=ROOT)
     if args.scratch_dir:
-        scratch = args.scratch_dir.resolve()
+        scratch = _scratch_path(args.scratch_dir)
         scratch.mkdir(parents=True, exist_ok=False)
     else:
         scratch = Path(tempfile.mkdtemp(prefix="bioetl-local-coverage-"))
@@ -414,7 +442,7 @@ def main(argv: list[str] | None = None) -> int:
     logs_dir = scratch / "logs"
     for directory in (shards_dir, junit_dir, logs_dir):
         directory.mkdir()
-    manifest_path = scratch / "manifest.json"
+    manifest_path = scratch / MANIFEST_NAME
     manifest: dict[str, object] = {
         "schema_version": 1,
         "producer": "run_local_coverage_verify.py",
@@ -424,6 +452,7 @@ def main(argv: list[str] | None = None) -> int:
         "test_tree_sha256": test_sha,
         "started_at_utc": datetime.now(UTC).isoformat(),
         "python": sys.version.split()[0],
+        "max_workers": args.max_workers,
         "scratch_dir": str(scratch),
         "required_shards": [shard.name for shard in SHARDS],
         "shards": [],
@@ -470,7 +499,7 @@ def main(argv: list[str] | None = None) -> int:
             coverage_file = shards_dir / f".coverage.{shard.name}"
             junit = junit_dir / f"{shard.name}.xml"
             log = logs_dir / f"{shard.name}.log"
-            command = _command(shard, junit)
+            command = _command(shard, junit, max_workers=args.max_workers)
             env["COVERAGE_FILE"] = _bash_safe_path(coverage_file)
             print(f"[local-coverage] start {shard.name}", flush=True)
             started = time.monotonic()

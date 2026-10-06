@@ -21,6 +21,7 @@ from bioetl.domain.composite.result import (
 from bioetl.domain.ports import DeltaReaderPort, LoggerPort
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.settings_api import Settings
+import bioetl.infrastructure.config.protein_class_target_type_loader as mapping
 from bioetl.infrastructure.storage.composite_replay_bundle import (
     digest_bytes,
     implementation_fingerprint,
@@ -36,6 +37,7 @@ from bioetl.infrastructure.time import SystemClock
 from bioetl.composition.bootstrap.runtime.assay_replay import replay_assay
 from bioetl.application.composite.helpers.replay_context import (
     freeze_field_groups,
+    freeze_merge_request,
     required_replay_tables,
     output_table_name,
 )
@@ -118,6 +120,10 @@ def prepare_assay_replay(
         objects["field-groups.json"] = publish_json(
             root, "field-groups.json", freeze_field_groups(field_group_registry)
         )
+        if config.name == "composite_target":
+            objects["target-mapping.json"] = publish_json(
+                root, "target-mapping.json", mapping.freeze_target_mapping()
+            )
         output_reader = DeltaReader(Path(settings.data_dir) / "output", logger)
         for layer in ("silver", "gold"):
             table_name = output_table_name(
@@ -134,23 +140,7 @@ def prepare_assay_replay(
             "implementation": implementation_fingerprint(),
             "input_snapshot_fingerprint": input_hash,
             "objects": objects,
-            "request": {
-                "seed_table": resolved.seed_table,
-                "seed_pipeline": resolved.seed_pipeline,
-                "metadata_timestamp": (
-                    resolved.metadata_timestamp or SystemClock().now()
-                ).isoformat(),
-                "enrichers": [enricher.pipeline for enricher in resolved.enrichers],
-                "outcomes": {
-                    name: outcome.status.value
-                    for name, outcome in resolved.enrichment_results.items()
-                },
-                "dependencies": [item.pipeline for item in resolved.dependencies or ()],
-                "dependency_outcomes": {
-                    name: outcome.status.value
-                    for name, outcome in (resolved.dependency_results or {}).items()
-                },
-            },
+            "request": freeze_merge_request(resolved),
         }
         envelope_hash = publish_json(root, "parent.json", envelope)
         await replay_assay(root, envelope_hash, root / "verification", logger=logger)

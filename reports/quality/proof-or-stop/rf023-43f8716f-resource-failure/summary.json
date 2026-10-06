@@ -1,0 +1,24 @@
+{
+  "source_commit": "43f8716f11d485fecbb776d2359dbc9692b9707f",
+  "canonical_full_suite": "FAIL",
+  "exit_code": 1,
+  "dirty_after": false,
+  "junit_complete": false,
+  "root_cause": "Windows virtual memory exhaustion (System Event 2004); pytest-timeout RuntimeError cannot start new thread; JUnit write failed",
+  "assertion_failure_confirmed": false,
+  "acceptance": "NOT_QUALIFIED",
+  "additional_blockers": [
+    "ChEMBL health deadline exceeded",
+    "178 historical VCR sidecars exceed unchanged 90-day freshness threshold"
+  ],
+  "archive_sha256": "3581de2776038f000f802357e1278fa219d7b615f2dd5d825acaa3e696d5876e",
+  "files": {
+    "execution.json": "1d9ddadd0bffa6747fff56de0f9413ad9cd776bb9f6295ec614b6720a816f2e6",
+    "junit.xml": "86e0a4d4f900f574d917587d8767680fdedc64da8e542a31f08b5a06c3fe389b",
+    "pytest.log": "6281e5409e99a797b31447eb5dea2fac41bf75ddb5932cb59031ba8b7c332df2",
+    "windows-memory-after.json": "40b3f43a9a7db236cc795cd94340417d87cb620c6f8601a1fbfc69636e63a16c",
+    "windows-resource-exhaustion.json": "8a46304a4eea7c44db0f510d8a391ef7943b1b0385f1659465af13bc36061520",
+    "vcr-freshness.log": "bb5c51dcb832858714e2dd9114c960c8f4a56c33df603d6e508b7e63fb342420",
+    "chembl-probe.json": "4225158c258adfbb5f9e5db77e0ffadd81972f90ea92dea30179eb538360f7d2"
+  }
+}

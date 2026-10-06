@@ -186,7 +186,8 @@ def campaign_stubs(monkeypatch):
         runner,
         "discover",
         lambda root: tuple(
-            Case("composite", f"composite_{name}") for name in runner.COMPOSITE_ORDER
+            Case("composite", f"composite_{name}")
+            for name in ("activity", "assay", "molecule", "target", "publication")
         ),
     )
     return runner
@@ -209,7 +210,10 @@ def test_campaign_is_ordered_pinned_and_not_final_acceptance(tmp_path, monkeypat
         "composite-composite_assay:Provider WARN"
     ]
     assert [name for name, _ in launches] == [
-        f"composite_{name}" for name in runner.COMPOSITE_ORDER
+        "composite_activity",
+        "composite_assay",
+        "composite_molecule",
+        "composite_target",
     ]
     assert all(
         kwargs == {"limit": 10, "expected_source": "pinned-sha"}
@@ -218,10 +222,15 @@ def test_campaign_is_ordered_pinned_and_not_final_acceptance(tmp_path, monkeypat
     receipt = json.loads((output / "campaign.json").read_text())
     assert receipt["local_checks_passed"] is False
     assert receipt["acceptance_status"] == "PENDING_HTTP_AND_OFFLINE_REPLAY"
+    assert receipt["scope"] == {
+        "issue": 11906,
+        "composites": [name for name, _ in launches],
+        "excluded": {"composite_publication": "Tracked separately in #11947"},
+    }
     assert not (tmp_path / "reports/quality/green-acceptance.lock").exists()
     with pytest.raises(FileExistsError):
         runner.execute_campaign(tmp_path, output, tmp_path / "env")
-    assert len(launches) == 5
+    assert len(launches) == 4
 
 
 @pytest.mark.parametrize("error", [KeyboardInterrupt(), OSError("setup")])
@@ -244,7 +253,7 @@ def test_campaign_cancel_records_unstarted_cases_and_releases_lease(
     assert receipt["status"] == expected
     assert [row["status"] for row in receipt["cases"]] == [expected] + [
         "not_started"
-    ] * 4
+    ] * 3
     assert receipt["local_checks_passed"] is False
     assert not (tmp_path / "reports/quality/green-acceptance.lock").exists()
 
@@ -427,6 +436,7 @@ def test_case_uses_copied_configs_and_same_limit_for_prerequisites(
         return []
 
     monkeypatch.setattr(runner, "run_launch", launch)
+    monkeypatch.setattr(runner, "_runtime_policy", lambda *args: {"test_mode": False})
     folder = tmp_path / "reports/case"
     folder.mkdir(parents=True)
     receipt = {"processes": []}
@@ -442,6 +452,50 @@ def test_case_uses_copied_configs_and_same_limit_for_prerequisites(
     assert len(launches) == 2
     assert all(args[args.index("--limit") + 1] == "10" for args in launches)
     assert receipt["launch_timeout_seconds"] == [1800, 1800]
+    assert receipt["runtime_policy"] == {"test_mode": False}
+
+
+@pytest.mark.parametrize("dotenv_mode", [None, "true"])
+def test_live_child_restores_production_http_and_durability(
+    tmp_path, monkeypatch, dotenv_mode
+):
+    import dotenv
+    from scripts.ops.observability import green_acceptance as runner
+
+    root = Path(__file__).resolve().parents[5]
+    monkeypatch.setenv("BIOETL_TEST_MODE", "true")
+    monkeypatch.setattr(
+        dotenv, "dotenv_values", lambda _: {"BIOETL_TEST_MODE": dotenv_mode}
+    )
+    environment = runner._case_environment(root, tmp_path, tmp_path / "unused-env")
+    environment["BIOETL_CONFIGS_ROOT"] = str(root / "configs")
+    assert environment["BIOETL_TEST_MODE"] == "false"
+    policy = runner._runtime_policy(tmp_path, environment)
+    assert policy["test_mode"] is False
+    assert policy["control_plane_fsync"] is True
+    chembl = policy["providers"]["chembl"]
+    from bioetl.infrastructure.config.source_config_loader import load_source_config
+
+    config = load_source_config("chembl")
+    assert chembl["timeout_seconds"] == config.timeout_sec
+    assert chembl["read_timeout_seconds"] > chembl["timeout_seconds"]
+    assert chembl["retry_base_delay_seconds"] == config.retry_base_delay
+    assert chembl["retry_after_cap_seconds"] is None
+    assert chembl["rate_per_second"] == config.rate_limit.requests_per_second
+    assert chembl["circuit_recovery_seconds"] == config.circuit_breaker.recovery_timeout
+
+
+def test_live_runtime_probe_rejects_test_mode(tmp_path, monkeypatch):
+    import subprocess
+    from scripts.ops.observability import green_acceptance as runner
+
+    root = Path(__file__).resolve().parents[5]
+    environment = runner._case_environment(root, tmp_path, tmp_path / "unused-env")
+    environment["BIOETL_TEST_MODE"] = "true"
+    with pytest.raises(subprocess.CalledProcessError) as error:
+        runner._runtime_policy(tmp_path, environment)
+    assert "live_acceptance_requires_production_runtime" in error.value.stderr
+    assert (tmp_path / "runtime-policy.stderr.log").read_text() == error.value.stderr
 
 
 @pytest.mark.parametrize(

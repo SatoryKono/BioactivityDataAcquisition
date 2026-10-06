@@ -65,12 +65,6 @@ _CASSETTE_NAME_OVERRIDES = {
     "test_fetch_with_query": (
         "TestSemanticScholarAdapterIntegration.test_fetch_with_query"
     ),
-    "test_fetch_filtered_with_fallback": (
-        "TestSemanticScholarAdapterIntegration.test_fetch_filtered_with_fallback"
-    ),
-    "test_title_only_lookup": (
-        "TestSemanticScholarAdapterIntegration.test_title_only_lookup"
-    ),
 }
 
 

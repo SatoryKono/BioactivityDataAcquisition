@@ -1,0 +1,23 @@
+{
+  "source_commit": "8c0109b63aadde8736e342b55ab204eeb384953a",
+  "source_job": "https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/4929",
+  "reason": "Dependency security update; real CI locked builds and complete image/plugin parity passed before rebinding inputs.",
+  "previous_build_input_sha256": {
+    "grafana/plugins/bioetl-scenes-app/package-lock.json": "7f4689bd9e83713d35ebbaed23695d04628e92a71cb83a07a493a36c57f61610",
+    "grafana/plugins/bioetl-selectorshell-panel/package-lock.json": "6ebdda3b42f09093ba3ce8443653e9e035133c18ba004eb53791a39dde8addfd"
+  },
+  "verified_build_input_sha256": {
+    "grafana/plugins/bioetl-scenes-app/package-lock.json": "2f84090b0dc4584cab18cb605126b1c8b7ca01a25de2bc6063e27288f860b89e",
+    "grafana/plugins/bioetl-selectorshell-panel/package-lock.json": "7401462aea0bab87c20d580cb19d82f3a2cf7f25b801cfd058c72a370cf96f4e"
+  },
+  "receipt_sha256": {
+    "reports/quality/grafana-lock-revalidation-20261006/router-v7-plugin-bundles.json": "0fd30817038f9a7cbc31cce870d7b7cd9aa3ebdfdd492e4cd09bd8a351ea241e",
+    "reports/quality/grafana-lock-revalidation-20261006/router-v7-managed-image-parity.json": "42184927d9136c2adac48a481aa15cc3afddcadf148798e530d445369f178210"
+  },
+  "rebuilt_plugin_files_verified": {
+    "bioetl-scenes-app": 53,
+    "bioetl-selectorshell-panel": 7
+  },
+  "image_digest_unchanged": true,
+  "qualification": "Build and filesystem parity only. Does not establish new browser acceptance or RF-023 lifecycle ADMIT."
+}

@@ -1165,9 +1165,9 @@
     "scope_file_counts": {
       "fixture": 84,
       "golden": 30,
-      "vcr": 356
+      "vcr": 346
     },
-    "total_files": 470,
+    "total_files": 460,
     "tracked_extensions": [
       ".json",
       ".yaml",
@@ -2016,9 +2016,9 @@
       "scope_file_counts": {
         "fixture": 84,
         "golden": 30,
-        "vcr": 356
+        "vcr": 346
       },
-      "total_files": 470,
+      "total_files": 460,
       "tracked_extensions": [
         ".json",
         ".yaml",
@@ -2044,8 +2044,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3015,
-      "test_python_file_count": 3250,
+      "test_glob_file_count": 3016,
+      "test_python_file_count": 3251,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2086,13 +2086,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3015,
-    "total_test_functions": 29467,
+    "total_test_files": 3016,
+    "total_test_functions": 29490,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "4676376ad16e8db8281a92741eace898a4f58c0aa09d92f3bed020c2f4cd111d",
+  "source_tree_sha256": "bc003d9c4fe2272f8218a049b0e68c967986f3e581b0d040e6920c09e1d2f5da",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2112,8 +2112,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3015,
-    "test_python_file_count": 3250,
+    "test_glob_file_count": 3016,
+    "test_python_file_count": 3251,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2154,8 +2154,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3015,
-  "total_test_functions": 29467,
+  "total_test_files": 3016,
+  "total_test_functions": 29490,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
