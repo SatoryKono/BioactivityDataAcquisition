@@ -8,7 +8,7 @@ import sys
 
 import pytest
 
-from scripts.engineering.ci import proof_closeout_runner as runner
+from memory import proof_ci as runner
 
 pytestmark = pytest.mark.unit
 
@@ -139,3 +139,36 @@ def test_quality_requires_architecture_evidence_before_launch(evidence, monkeypa
     with pytest.raises(ValueError, match="Missing architecture"):
         runner.produce("quality")
     assert checked == ["coverage", "architecture"]
+
+
+def test_ci_actions_use_existing_proof_cli(monkeypatch):
+    from memory import proof_cli
+
+    received = []
+    monkeypatch.setattr(runner, "main", lambda argv: received.append(argv) or 0)
+    assert proof_cli.main(["ci", "validate", "--check", "architecture"]) == 0
+    assert received == [["validate", "--check", "architecture"]]
+
+
+def test_sanitizer_rejects_directory_outside_evidence(evidence, tmp_path):
+    foreign = tmp_path / "foreign"
+    foreign.mkdir()
+    report = foreign / "producer.log"
+    report.write_text("untouched")
+    with pytest.raises(ValueError):
+        runner.sanitize_outputs(foreign)
+    assert report.read_text() == "untouched"
+
+
+def test_sanitizer_rejects_symlink_before_writing(evidence, tmp_path):
+    foreign = tmp_path / "foreign.log"
+    foreign.write_text("untouched")
+    folder = runner.EVIDENCE / "example"
+    folder.mkdir(parents=True)
+    try:
+        (folder / "producer.log").symlink_to(foreign)
+    except OSError:
+        pytest.skip("Host does not permit symlink creation")
+    with pytest.raises(ValueError, match="Symlink"):
+        runner.sanitize_outputs(folder)
+    assert foreign.read_text() == "untouched"

@@ -56,7 +56,8 @@ docker image inspect "bioetl:$baselineSha" --format '{{.Id}} {{json .RepoDigests
 ```
 
 The Dockerfile pins one immutable Wolfi base digest for its builder and runtime
-root stages. Direct Wolfi packages pin Python `3.13.15-r6` and `uv 0.11.26-r0`;
+root stages. Direct Wolfi packages pin Python `3.13.16_git20261002-r2`, zlib
+`1.3.2.1_rc20260917-r0` and `uv 0.11.26-r0`;
 the final scratch stage copies the audited runtime root and locked environment.
 
 ### Runtime versions
@@ -75,8 +76,8 @@ installed packages, Trivy version/DB metadata, and the GitHub Trivy alert
 snapshot used to populate `alert_number` where an existing alert identity is
 available. The current least-privilege runtime image has no `pip` module;
 package inventory is read through `importlib.metadata` instead. The runtime is
-shell-less, has no package manager, and runs as the Chainguard non-root account
-`65532:65532`; Compose therefore invokes `bioetl` directly instead of using
+shell-less, has no package manager, and runs as the `bioetl` non-root account
+`999:999`; Compose therefore invokes `bioetl` directly instead of using
 `/bin/sh -c`. Its private `/tmp` is owned by the runtime account with mode
 `0700`, preventing cross-user writes while preserving Python temporary-file
 support.
@@ -150,3 +151,36 @@ treat `reports/security/` outputs as tracked evidence.
 Docker remains optional under ADR-010. This runbook documents command names and
 artifact filenames only; it MUST NOT record secret values, `.env` contents, or
 registry credentials. Generated evidence stays in gitignored `reports/security/`.
+
+## CircleCI protected publication preparation
+
+The `docker-publish` lane is opt-in and restricted to `main`. Its security job
+uses `bioetl-github-read-only`, persists the exact scanned image and its complete
+checksum manifest, then stops at `docker-publish-approval`. The publication job
+requires that approval and a separate `bioetl-ghcr-publish` context. This lane is
+prepared for migration acceptance; production publication is not yet verified.
+
+Configure the publication context with project restriction
+`9f037fd7-4fd9-41af-9916-33ca1e56cf7b` and an expression restriction requiring
+`pipeline.git.branch == "main"` and the canonical configuration source. Keep
+fork secret access disabled. The context needs `GHCR_USER` and a dedicated
+`GHCR_TOKEN` with package write permission for
+`ghcr.io/satorykono/bioactivitydataacquisition`. Enter credentials through the
+CircleCI secret UI; never place them in a repository file, command argument,
+issue or chat. The read-only GitHub context must remain read-only.
+
+Before registry writes, the publication script verifies the current main SHA,
+complete manifest, image/scan identity, canonical blocking findings and the
+server-side approval plus successful producer job in the same workflow. It
+rejects an existing SHA tag that points to another image. Publication reuses the
+scanned archive without rebuilding. Cosign obtains a short-lived CircleCI OIDC
+token with audience `sigstore`; the token is never printed or persisted.
+
+Promotion of `main` follows verification of both SLSA provenance and SPDX SBOM
+attestations against the pinned CircleCI issuer and pipeline-definition identity.
+The script verifies the signed predicates and subject digest, then checks current
+main again. A serial group prevents concurrent promotions. Retain
+`approval.json`, `publication.json`, both attestation verification files and the
+security baseline as evidence. No successful local dry-run substitutes for this
+protected remote acceptance. SARIF upload and release promotion remain separate
+migration requirements.

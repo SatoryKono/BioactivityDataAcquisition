@@ -27,7 +27,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 if __package__ in {None, ""}:
-    from scripts.engineering.ci._compatibility_telemetry import (  # type: ignore[import-not-found]
+    from scripts.engineering.ci._compatibility_telemetry import (
         CompatibilitySurfaceSnapshot,
         DebtGovernanceSnapshot,
         collect_debt_governance_snapshot,

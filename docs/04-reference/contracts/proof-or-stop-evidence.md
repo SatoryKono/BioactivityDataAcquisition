@@ -107,7 +107,7 @@ are stored alongside the separate ingestion actor provenance.
 
 `configs/quality/proof_closeout_checks.yaml` owns the exact closeout command
 set and branch activation list. The CircleCI adapter is
-`scripts/engineering/ci/proof_closeout_runner.py`. Each producer executes once
+`src/memory/proof_ci.py`. Each producer executes once
 and writes its command, source binding, workflow identity, job URL, exit code,
 sanitized log, and artifact digests under
 `reports/quality/proof-or-stop/shared/<check>/`. Log sanitization precedes
@@ -146,7 +146,10 @@ through the workflow workspace and are not public artifacts.
 
 Rollout verification must compare the complete test selection and successful
 17-shard manifest before assessing latency. Parallel groups are initially
-static; a claim of twofold speedup requires measured comparable CI runs and
+static and balanced using successful workflow 9d7b1b52-4ac5-4e3b-aebb-e7cd30a756e3
+shard durations (jobs 5148, 5150, 5172, 5177). The adapter is invoked through
+`python -m scripts.engineering.qa proof-or-stop ci`; it does not add a standalone
+script entrypoint. A claim of twofold speedup requires measured comparable CI runs and
 sufficient executor concurrency. Local adapter tests do not prove CI latency
 or qualify a CI-trust `ready_to_merge` claim.
 

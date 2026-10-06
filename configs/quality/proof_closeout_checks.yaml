@@ -95,15 +95,13 @@ checks:
     - --scratch-dir
     - '{out}/measurement'
     - --shard
+    - integration
+    - --shard
+    - unit-scripts-tooling-debt-governance
+    - --shard
     - smoke
     - --shard
     - repo-backed-unit-ops
-    - --shard
-    - unit-filesystem-contracts
-    - --shard
-    - unit-infrastructure
-    - --shard
-    - serial
   coverage-1:
     argv:
     - python
@@ -112,13 +110,13 @@ checks:
     - --scratch-dir
     - '{out}/measurement'
     - --shard
-    - contract-confidence
+    - unit-domain
     - --shard
-    - unit-scripts-tooling-passport
+    - unit-scripts-tooling-other
     - --shard
-    - unit-subprocess-backed
+    - unit-application
     - --shard
-    - unit-other
+    - repo-backed-unit-product
   coverage-2:
     argv:
     - python
@@ -127,13 +125,15 @@ checks:
     - --scratch-dir
     - '{out}/measurement'
     - --shard
-    - repo-backed-unit-product
+    - unit-subprocess-backed
     - --shard
-    - unit-scripts-tooling-debt-governance
+    - serial
     - --shard
-    - unit-domain
+    - repo-backed-unit-tooling
     - --shard
-    - integration
+    - unit-scripts-tooling-passport
+    - --shard
+    - security
   coverage-3:
     argv:
     - python
@@ -142,10 +142,10 @@ checks:
     - --scratch-dir
     - '{out}/measurement'
     - --shard
-    - repo-backed-unit-tooling
+    - unit-filesystem-contracts
     - --shard
-    - unit-scripts-tooling-other
+    - contract-confidence
     - --shard
-    - unit-application
+    - unit-other
     - --shard
-    - security
+    - unit-infrastructure

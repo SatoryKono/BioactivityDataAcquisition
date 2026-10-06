@@ -52,7 +52,7 @@ def test_proof_waits_for_producers_in_the_same_workflow():
         for s in closeout["steps"]
         if isinstance(s, dict) and "run" in s
     )
-    assert "proof_closeout_runner assemble" in commands
+    assert "proof-or-stop ci assemble" in commands
     assert "pytest" not in commands
     assert "run_local_coverage_verify" not in commands
     assert "produce --check" not in commands

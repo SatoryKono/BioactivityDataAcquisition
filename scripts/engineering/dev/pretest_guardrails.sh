@@ -708,7 +708,7 @@ run_architecture_checks() {
             return 2
         fi
         run_step architecture-evidence-reuse \
-            "$PYTHON_BIN" -m scripts.engineering.ci.proof_closeout_runner \
+            "$PYTHON_BIN" -m scripts.engineering.qa proof-or-stop ci \
             validate --check architecture
         return 0
     fi

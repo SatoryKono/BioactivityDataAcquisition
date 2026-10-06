@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import argparse
-from datetime import UTC, datetime
 import json
 import os
-from pathlib import Path
 import shutil
 import subprocess
 import time
+from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 import yaml
@@ -26,13 +26,14 @@ from memory.proof import (
     verify_bundle,
 )
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[2]
 CATALOG = ROOT / "configs/quality/proof_closeout_checks.yaml"
 EVIDENCE = ROOT / "reports/quality/proof-or-stop/shared"
 
 
-def receive(workspace: Path = Path("/tmp/proof-workspace")) -> None:
+def receive(workspace: Path | None = None) -> None:
     """Copy only proof evidence; classifier workspace files must not dirty checkout."""
+    workspace = workspace or Path.home() / ".bioetl-proof-workspace"
     source = workspace / "reports/quality/proof-or-stop/shared"
     if source.is_symlink() or any(path.is_symlink() for path in source.rglob("*")):
         raise ValueError("Symlink in transported evidence")
@@ -86,6 +87,12 @@ def command_for(name: str) -> list[str]:
 
 
 def sanitize_outputs(folder: Path) -> None:
+    if folder.is_symlink():
+        raise ValueError("Symlink in producer evidence")
+    folder = folder.resolve()
+    evidence_root = EVIDENCE.resolve()
+    evidence_root.relative_to(ROOT.resolve())
+    folder.relative_to(evidence_root)
     secrets = sorted(
         {
             v
@@ -100,6 +107,10 @@ def sanitize_outputs(folder: Path) -> None:
         reverse=True,
     )
     for path in folder.rglob("*"):
+        if path.is_symlink():
+            raise ValueError("Symlink in producer evidence")
+        path = path.resolve()
+        path.relative_to(folder)
         if path.is_file() and path.suffix in {".json", ".xml", ".log"}:
             original = path.read_text(encoding="utf-8", errors="replace")
             text = original
@@ -338,7 +349,3 @@ def main(argv: list[str] | None = None) -> int:
             )
         print(f"[proof] STOP: {exc}")
         return 2
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
