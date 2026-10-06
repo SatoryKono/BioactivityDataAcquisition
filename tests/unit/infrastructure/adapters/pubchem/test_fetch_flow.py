@@ -91,7 +91,10 @@ def fetch_flow(
 
 @pytest.mark.unit
 class TestFetchFlowExecute:
-    @pytest.mark.parametrize("retry_after,expected", [("12", 12.0), ("invalid", None)])
+    @pytest.mark.parametrize(
+        "retry_after,expected",
+        [("12", 12.0), ("60", 60.0), ("invalid", None)],
+    )
     async def test_sdk_retry_after_is_honored(
         self,
         fetch_flow: PubChemFetchFlow,
@@ -146,7 +149,14 @@ class TestFetchFlowExecute:
                 )
         assert raised.value is error
         sleep.assert_not_awaited()
-        fetch_flow.logger.warning.assert_not_called()
+        fetch_flow.logger.warning.assert_called_once_with(
+            "pubchem_retry_after_over_budget",
+            provider="pubchem",
+            endpoint="/compound/smiles/JSON",
+            status_code=429,
+            retry_after=1000.0,
+            over_budget=True,
+        )
 
     async def test_sdk_retry_budget_is_not_exceeded(
         self,
