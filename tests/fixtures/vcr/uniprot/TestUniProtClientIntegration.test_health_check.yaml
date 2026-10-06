@@ -2,77 +2,77 @@ interactions:
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - '*/*'
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - rest.uniprot.org
-      User-Agent:
-      - BioETL/0.1.0 (contact@example.com)
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://rest.uniprot.org/uniprotkb/search?query=accession%3AP62988&size=1&format=json
   response:
     body:
-      string: '{"results":[{"entryType":"Inactive","primaryAccession":"P62988","uniProtkbId":"UBIQ_HUMAN","annotationScore":0.0,"inactiveReason":{"inactiveReasonType":"DEMERGED","mergeDemergeTo":["P62987","P62979","P0CG48","P0CG47"]}}]}'
+      string: '{"results":[{"entryType":"Inactive","primaryAccession":"P62988","uniProtkbId":"UBIQ_HUMAN","annotationScore":0.0,"inactiveReason":{"inactiveReasonType":"DEMERGED","mergeDemergeTo":["P0CG47","P0CG48","P62979","P62987"]},"extraAttributes":{"uniParcId":"UPI00000006C4"}}]}'
     headers:
-      Access-Control-Allow-Credentials:
+      access-control-allow-credentials:
       - 'true'
-      Access-Control-Allow-Headers:
+      access-control-allow-headers:
       - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
-      Access-Control-Allow-Methods:
+      access-control-allow-methods:
       - GET, PUT, POST, DELETE, PATCH, OPTIONS
-      Access-Control-Allow-Origin:
+      access-control-allow-origin:
       - '*'
-      Access-Control-Expose-Headers:
+      access-control-expose-headers:
       - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
-      Access-Control-Max-Age:
+      access-control-max-age:
       - '1728000'
-      Cache-Control:
+      cache-control:
       - public, max-age=43200
-      Connection:
+      connection:
       - keep-alive
-      Content-Type:
+      content-length:
+      - '269'
+      content-type:
       - application/json
-      Date:
-      - Mon, 22 Dec 2025 06:33:09 GMT
-      Strict-Transport-Security:
-      - max-age=31536000; includeSubDomains
-      Transfer-Encoding:
+      date:
+      - Tue, 06 Oct 2026 04:12:06 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      transfer-encoding:
       - chunked
-      Vary:
+      vary:
       - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent,
         Accept-Encoding
-      X-API-Deployment-Date:
-      - 11-December-2025
-      X-Total-Results:
-      - '1'
-      X-UniProt-Release:
-      - '2025_04'
-      X-UniProt-Release-Date:
-      - 15-October-2025
-      content-length:
-      - '221'
+      x-api-deployment-date:
+      - 23-September-2026
       x-cache:
       - miss cached
+      x-total-results:
+      - '1'
+      x-uniprot-release:
+      - '2026_03'
+      x-uniprot-release-date:
+      - 02-September-2026
     status:
       code: 200
       message: OK
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - '*/*'
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - rest.uniprot.org
-      User-Agent:
-      - BioETL/0.1.0 (contact@example.com)
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://rest.uniprot.org/uniprotkb/search?query=accession%3AP622988&size=1&format=json
   response:
@@ -81,43 +81,43 @@ interactions:
         ''accession'' filter value ''P622988'' has invalid format. It should be a
         valid UniProtKB accession"]}'
     headers:
-      Access-Control-Allow-Credentials:
+      access-control-allow-credentials:
       - 'true'
-      Access-Control-Allow-Headers:
+      access-control-allow-headers:
       - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
-      Access-Control-Allow-Methods:
+      access-control-allow-methods:
       - GET, PUT, POST, DELETE, PATCH, OPTIONS
-      Access-Control-Allow-Origin:
+      access-control-allow-origin:
       - '*'
-      Access-Control-Expose-Headers:
+      access-control-expose-headers:
       - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
-      Access-Control-Max-Age:
+      access-control-max-age:
       - '1728000'
-      Cache-Control:
+      cache-control:
       - public, max-age=43200
-      Connection:
+      connection:
       - close
-      Content-Type:
-      - application/json
-      Date:
-      - Mon, 22 Dec 2025 06:39:46 GMT
-      Strict-Transport-Security:
-      - max-age=31536000; includeSubDomains
-      Transfer-Encoding:
-      - chunked
-      Vary:
-      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent,
-        Accept-Encoding
-      X-API-Deployment-Date:
-      - 11-December-2025
-      X-UniProt-Release:
-      - '2025_04'
-      X-UniProt-Release-Date:
-      - 15-October-2025
       content-length:
       - '165'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Oct 2026 04:12:07 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent,
+        Accept-Encoding
+      x-api-deployment-date:
+      - 23-September-2026
       x-cache:
       - miss uncacheable
+      x-uniprot-release:
+      - '2026_03'
+      x-uniprot-release-date:
+      - 02-September-2026
     status:
       code: 400
       message: Bad Request

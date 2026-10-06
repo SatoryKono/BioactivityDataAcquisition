@@ -2,423 +2,293 @@ interactions:
 - request:
     body: ''
     headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
+      accept:
+      - application/json
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - rest.uniprot.org
-      User-Agent:
-      - BioETL/0.1.0 (contact@example.com)
+      user-agent:
+      - BioETL/6.1.0
     method: GET
-    uri: https://rest.uniprot.org/uniprotkb/search?query=%2A&size=5&format=json&fields=accession%2Cid%2Cgene_names%2Corganism_name%2Corganism_id%2Cprotein_name%2Clength%2Csequence%2Ccc_function%2Cft_domain%2Cxref_pdb%2Cxref_chembl
+    uri: https://rest.uniprot.org/uniprotkb/search?format=json&query=accession%3AP62988&size=1
   response:
     body:
-      string: '{"results":[{"entryType":"UniProtKB reviewed (Swiss-Prot)","primaryAccession":"A0A0C5B5G6","uniProtkbId":"MOTSC_HUMAN","organism":{"scientificName":"Homo
-        sapiens","commonName":"Human","taxonId":9606,"evidences":[{"evidenceCode":"ECO:0000312","source":"EMBL","id":"AJM13597.1"}],"lineage":["Eukaryota","Metazoa","Chordata","Craniata","Vertebrata","Euteleostomi","Mammalia","Eutheria","Euarchontoglires","Primates","Haplorrhini","Catarrhini","Hominidae","Homo"]},"proteinDescription":{"recommendedName":{"fullName":{"evidences":[{"evidenceCode":"ECO:0000303","source":"PubMed","id":"25738459"}],"value":"Mitochondrial-derived
-        peptide MOTS-c"}},"alternativeNames":[{"fullName":{"evidences":[{"evidenceCode":"ECO:0000303","source":"PubMed","id":"25738459"}],"value":"Mitochondrial
-        open reading frame of the 12S rRNA-c"}}]},"genes":[{"geneName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:7470"}],"value":"MT-RNR1"}}],"comments":[{"texts":[{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"25738459"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"29886458"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"29983246"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"30468456"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"31081069"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"33468709"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"33554779"}],"value":"Regulates
-        insulin sensitivity and metabolic homeostasis (PubMed:25738459, PubMed:33468709).
-        Inhibits the folate cycle, thereby reducing de novo purine biosynthesis which
-        leads to the accumulation of the de novo purine synthesis intermediate 5-aminoimidazole-4-carboxamide
-        (AICAR) and the activation of the metabolic regulator 5''-AMP-activated protein
-        kinase (AMPK) (PubMed:25738459). Protects against age-dependent and diet-induced
-        insulin resistance as well as diet-induced obesity (PubMed:25738459). In response
-        to metabolic stress, translocates to the nucleus where it binds to antioxidant
-        response elements (ARE) present in the promoter regions of a number of genes
-        and plays a role in regulating nuclear gene expression in an NFE2L2-dependent
-        manner and increasing cellular resistance to metabolic stress (PubMed:29983246).
-        Increases mitochondrial respiration and levels of CPT1A and cytokines IL1B,
-        IL6, IL8, IL10 and TNF in senescent cells (PubMed:29886458). Increases activity
-        of the serine/threonine protein kinase complex mTORC2 and reduces activity
-        of the PTEN phosphatase, thus promoting phosphorylation of AKT (PubMed:33554779).
-        This promotes AKT-mediated phosphorylation of transcription factor FOXO1 which
-        reduces FOXO1 activity, leading to reduced levels of MSTN and promotion of
-        skeletal muscle growth (PubMed:33554779). Promotes osteogenic differentiation
-        of bone marrow mesenchymal stem cells via the TGFB/SMAD pathway (PubMed:30468456).
-        Promotes osteoblast proliferation and osteoblast synthesis of type I collagens
-        COL1A1 and COL1A2 via the TGFB/SMAD pathway (PubMed:31081069)"}],"commentType":"FUNCTION"}],"features":[],"uniProtKBCrossReferences":[],"sequence":{"value":"MRWQEMGYIFYPRKLR","length":16,"molWeight":2175,"crc64":"361DE748426DD505","md5":"AE72B6C4E87692429C0D558B92BD7B3D"},"extraAttributes":{"uniParcId":"UPI0005D734FE"}},
-
-        {"entryType":"UniProtKB reviewed (Swiss-Prot)","primaryAccession":"A0A1B0GTW7","uniProtkbId":"CIROP_HUMAN","organism":{"scientificName":"Homo
-        sapiens","commonName":"Human","taxonId":9606,"lineage":["Eukaryota","Metazoa","Chordata","Craniata","Vertebrata","Euteleostomi","Mammalia","Eutheria","Euarchontoglires","Primates","Haplorrhini","Catarrhini","Hominidae","Homo"]},"proteinDescription":{"recommendedName":{"fullName":{"evidences":[{"evidenceCode":"ECO:0000303","source":"PubMed","id":"34903892"}],"value":"Ciliated
-        left-right organizer metallopeptidase"},"ecNumbers":[{"evidences":[{"evidenceCode":"ECO:0000250","source":"UniProtKB","id":"Q9VH19"}],"value":"3.4.24.-"}]},"alternativeNames":[{"fullName":{"evidences":[{"evidenceCode":"ECO:0000305"}],"value":"Leishmanolysin-like
-        peptidase 2"}}],"flag":"Precursor"},"genes":[{"geneName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:53647"}],"value":"CIROP"},"synonyms":[{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:53647"}],"value":"LMLN2"}]}],"comments":[{"texts":[{"evidences":[{"evidenceCode":"ECO:0000250","source":"UniProtKB","id":"A0A1D5NSK0"}],"value":"Putative
-        metalloproteinase that plays a role in left-right patterning process"}],"commentType":"FUNCTION"}],"features":[],"uniProtKBCrossReferences":[],"sequence":{"value":"MLLLLLLLLLLPPLVLRVAASRCLHDETQKSVSLLRPPFSQLPSKSRSSSLTLPSSRDPQPLRIQSCYLGDHISDGAWDPEGEGMRGGSRALAAVREATQRIQAVLAVQGPLLLSRDPAQYCHAVWGDPDSPNYHRCSLLNPGYKGESCLGAKIPDTHLRGYALWPEQGPPQLVQPDGPGVQNTDFLLYVRVAHTSKCHQETVSLCCPGWSTAAQSQLTAALTSWAQRRGFVMLPRLCLKLLGSSNLPTLASQSIRITGPSVIAYAACCQLDSEDRPLAGTIVYCAQHLTSPSLSHSDIVMATLHELLHALGFSGQLFKKWRDCPSGFSVRENCSTRQLVTRQDEWGQLLLTTPAVSLSLAKHLGVSGASLGVPLEEEEGLLSSHWEARLLQGSLMTATFDGAQRTRLDPITLAAFKDSGWYQVNHSAAEELLWGQGSGPEFGLVTTCGTGSSDFFCTGSGLGCHYLHLDKGSCSSDPMLEGCRMYKPLANGSECWKKENGFPAGVDNPHGEIYHPQSRCFFANLTSQLLPGDKPRHPSLTPHLKEAELMGRCYLHQCTGRGAYKVQVEGSPWVPCLPGKVIQIPGYYGLLFCPRGRLCQTNEDINAVTSPPVSLSTPDPLFQLSLELAGPPGHSLGKEQQEGLAEAVLEALASKGGTGRCYFHGPSITTSLVFTVHMWKSPGCQGPSVATLHKALTLTLQKKPLEVYHGGANFTTQPSKLLVTSDHNPSMTHLRLSMGLCLMLLILVGVMGTTAYQKRATLPVRPSASYHSPELHSTRVPVRGIREV","length":788,"molWeight":85397,"crc64":"8051E168BBD3EAF8","md5":"968606C5A000BA3567548A567BD5CDAC"},"extraAttributes":{"uniParcId":"UPI0007E52C07"}},
-
-        {"entryType":"UniProtKB reviewed (Swiss-Prot)","primaryAccession":"A0JNW5","uniProtkbId":"BLT3B_HUMAN","organism":{"scientificName":"Homo
-        sapiens","commonName":"Human","taxonId":9606,"lineage":["Eukaryota","Metazoa","Chordata","Craniata","Vertebrata","Euteleostomi","Mammalia","Eutheria","Euarchontoglires","Primates","Haplorrhini","Catarrhini","Hominidae","Homo"]},"proteinDescription":{"recommendedName":{"fullName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:29102"}],"value":"Bridge-like
-        lipid transfer protein family member 3B"}},"alternativeNames":[{"fullName":{"evidences":[{"evidenceCode":"ECO:0000303","source":"PubMed","id":"20163565"}],"value":"Syntaxin-6
-        Habc-interacting protein of 164 kDa"}},{"fullName":{"value":"UHRF1-binding
-        protein 1-like"}}]},"genes":[{"geneName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:29102"}],"value":"BLTP3B"},"synonyms":[{"evidences":[{"evidenceCode":"ECO:0000312","source":"EMBL","id":"BAA31676.2"}],"value":"KIAA0701"},{"evidences":[{"evidenceCode":"ECO:0000303","source":"PubMed","id":"20163565"}],"value":"SHIP164"},{"value":"UHRF1BP1L"}]}],"comments":[{"texts":[{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"20163565"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"35499567"}],"value":"Tube-forming
-        lipid transport protein which mediates the transfer of lipids between membranes
-        at organelle contact sites (PubMed:35499567). Required for retrograde traffic
-        of vesicle clusters in the early endocytic pathway to the Golgi complex (PubMed:20163565,
-        PubMed:35499567)"}],"commentType":"FUNCTION"}],"features":[{"type":"Domain","location":{"start":{"value":3,"modifier":"EXACT"},"end":{"value":94,"modifier":"EXACT"}},"description":"Chorein
-        N-terminal","evidences":[{"evidenceCode":"ECO:0000255"}]}],"uniProtKBCrossReferences":[],"sequence":{"value":"MAGIIKKQILKHLSRFTKNLSPDKINLSTLKGEGELKNLELDEEVLQNMLDLPTWLAINKVFCNKASIRIPWTKLKTHPICLSLDKVIMEMSTCEEPRSPNGPSPIATASGQSEYGFAEKVVEGISVSVNSIVIRIGAKAFNASFELSQLRIYSVNAHWEHGDLRFTRIQDPQRGEVLTFKEINWQMIRIEADATQSSHLEIMCAPVRLITNQSKIRVTLKRRLKDCNVIATKLVLILDDLLWVLTDSQLKAMVQYAKSLSEAIEKSTEQRKSMAPEPTQSSTVVASAQQVKTTQTSNAPDVNDAIVKLFNDFDVKETSHHLVISHLDLHICDDIHAKEKESNRRITGGAMQLSFTQLTIDYYPYHKAGDSCNHWMYFSDATKTKNGWANELLHEFECNVEMLKQAVKDHNVGSPPKSPTHASPQHTQTEKDYPLKGTCRTPSVLSQQSKAKLMSSSVVVRLADFNIYQVSTAEQCRSSPKSMICCNKKSLYLPQEMSAVYIEFTEYYYPDGKDFPIPSPNLYSQLNALQFTVDERSILWLNQFLLDLKQSLNQFMAVYKLNDNSKSDEHVDVRVDGLMLKFVIPSEVKSECHQDQPRAISIQSSEMIATNTRHCPNCRHSDLEALFQDFKDCDFFSKTYTSFPKSCDNFNLLHPIFQRHAHEQDTKMHEIYKGNITPQLNKNTLKTSAATDVWAVYFSQFWIDYEGMKSGKGRPISFVDSFPLSIWICQPTRYAESQKEPQTCNQVSLNTSQSESSDLAGRLKRKKLLKEYYSTESEPLTNGGQKPSSSDTFFRFSPSSSEADIHLLVHVHKHVSMQINHYQYLLLLFLHESLILLSENLRKDVEAVTGSPASQTSICIGILLRSAELALLLHPVDQANTLKSPVSESVSPVVPDYLPTENGDFLSSKRKQISRDINRIRSVTVNHMSDNRSMSVDLSHIPLKDPLLFKSASDTNLQKGISFMDYLSDKHLGKISEDESSGLVYKSGSGEIGSETSDKKDSFYTDSSSILNYREDSNILSFDSDGNQNILSSTLTSKGNETIESIFKAEDLLPEAASLSENLDISKEETPPVRTLKSQSSLSGKPKERCPPNLAPLCVSYKNMKRSSSQMSLDTISLDSMILEEQLLESDGSDSHMFLEKGNKKNSTTNYRGTAESVNAGANLQNYGETSPDAISTNSEGAQENHDDLMSVVVFKITGVNGEIDIRGEDTEICLQVNQVTPDQLGNISLRHYLCNRPVGSDQKAVIHSKSSPEISLRFESGPGAVIHSLLAEKNGFLQCHIENFSTEFLTSSLMNIQHFLEDETVATVMPMKIQVSNTKINLKDDSPRSSTVSLEPAPVTVHIDHLVVERSDDGSFHIRDSHMLNTGNDLKENVKSDSVLLTSGKYDLKKQRSVTQATQTSPGVPWPSQSANFPEFSFDFTREQLMEENESLKQELAKAKMALAEAHLEKDALLHHIKKMTVE","length":1464,"molWeight":164199,"crc64":"5FBED173B50F16B9","md5":"5A9981A3B88B257702F4DF8E51691DFF"},"extraAttributes":{"uniParcId":"UPI0000160563"}},
-
-        {"entryType":"UniProtKB reviewed (Swiss-Prot)","primaryAccession":"A0JP26","uniProtkbId":"POTB3_HUMAN","organism":{"scientificName":"Homo
-        sapiens","commonName":"Human","taxonId":9606,"evidences":[{"evidenceCode":"ECO:0000312","source":"EMBL","id":"AAI27124.1"}],"lineage":["Eukaryota","Metazoa","Chordata","Craniata","Vertebrata","Euteleostomi","Mammalia","Eutheria","Euarchontoglires","Primates","Haplorrhini","Catarrhini","Hominidae","Homo"]},"proteinDescription":{"recommendedName":{"fullName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:51240"}],"value":"POTE
-        ankyrin domain family member B3"}}},"genes":[{"geneName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:51240"}],"value":"POTEB3"}}],"comments":[],"features":[],"uniProtKBCrossReferences":[],"sequence":{"value":"MVAEVCSMPAASAVKKPFDLRSKMGKWCHHRFPCCRGSGKSNMGTSGDHDDSFMKTLRSKMGKCCHHCFPCCRGSGTSNVGTSGDHDNSFMKTLRSKMGKWCCHCFPCCRGSGKSNVGTWGDYDDSAFMEPRYHVRREDLDKLHRAAWWGKVPRKDLIVMLRDTDMNKRDKQKRTALHLASANGNSEVVQLLLDRRCQLNVLDNKKRTALIKAVQCQEDECVLMLLEHGADGNIQDEYGNTALHYAIYNEDKLMAKALLLYGADIESKNKCGLTPLLLGVHEQKQQVVKFLIKKKANLNALDRYGRTALILAVCCGSASIVNLLLEQNVDVSSQDLSGQTAREYAVSSHHHVICELLSDYKEKQMLKISSENSNPEQDLKLTSEEESQRLKVSENSQPEKMSQEPEINKDCDREVEEEIKKHGSNPVGLPENLTNGASAGNGDDGLIPQRKSRKPENQQFPDTENEEYHSDEQNDTQKQLSEEQNTGISQDEILTNKQKQIEVAEKEMNSKLSLSHKKEEDLLRENSMLREEIAMLRLELDETKHQNQLRENKILEEIESVKEKLLKAIQLNEEALTKTSI","length":581,"molWeight":65710,"crc64":"86D1E88F98BD22DF","md5":"85C271D17796BC25D386048681AE7F0F"},"extraAttributes":{"uniParcId":"UPI0000197FCA"}},
-
-        {"entryType":"UniProtKB reviewed (Swiss-Prot)","primaryAccession":"A0PK11","uniProtkbId":"CLRN2_HUMAN","organism":{"scientificName":"Homo
-        sapiens","commonName":"Human","taxonId":9606,"lineage":["Eukaryota","Metazoa","Chordata","Craniata","Vertebrata","Euteleostomi","Mammalia","Eutheria","Euarchontoglires","Primates","Haplorrhini","Catarrhini","Hominidae","Homo"]},"proteinDescription":{"recommendedName":{"fullName":{"value":"Clarin-2"}}},"genes":[{"geneName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:33939"}],"value":"CLRN2"}}],"comments":[{"texts":[{"evidences":[{"evidenceCode":"ECO:0000250","source":"UniProtKB","id":"B2RVW2"}],"value":"Plays
-        a key role to hearing function. Required for normal organization and maintenance
-        of the stereocilia bundle and for mechano-electrical transduction"}],"commentType":"FUNCTION"}],"features":[],"uniProtKBCrossReferences":[],"sequence":{"value":"MPGWFKKAWYGLASLLSFSSFILIIVALVVPHWLSGKILCQTGVDLVNATDRELVKFIGDIYYGLFRGCKVRQCGLGGRQSQFTIFPHLVKELNAGLHVMILLLLFLALALALVSMGFAILNMIQVPYRAVSGPGGICLWNVLAGGVVALAIASFVAAVKFHDLTERIANFQEKLFQFVVVEEQYEESFWICVASASAHAANLVVVAISQIPLPEIKTKIEEATVTAEDILY","length":232,"molWeight":25446,"crc64":"B6521162BA9B14A6","md5":"3B3263AF56F7EBFE3835748874613C91"},"extraAttributes":{"uniParcId":"UPI0000D6154A"}}]}'
+      string: !!binary |
+        H4sIAAAAAAAA/1yOT4vCQAzFv0vOZSmL2Oqta4vbQ6Xrn9Miy3QMMqzOlEwqltLvbkZ7MpeE98h7
+        vwEIfXdhD8vfAdAy9fu+RVhCaZVmc0OIoCVzVdRnWqP3xllx6/nnIk3F66ypyfF/U55EPnyVP3/f
+        hyrbiKWsdaxYHnbakWTGH3EEZsrdovIhanhTpvq8qIrtusgl54p0xhyfa+8EFOp4tZ4lYj2PgBF4
+        ksV0pAkcxwjwzqQyZjJNx+hDVaBVpF+sdRm/Zr6awTg+AAAA//+KrQUAAAD//wMATytkaw0BAAA=
     headers:
-      Accept-Ranges:
-      - bytes
-      Access-Control-Allow-Credentials:
+      access-control-allow-credentials:
       - 'true'
-      Access-Control-Allow-Headers:
+      access-control-allow-headers:
       - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
-      Access-Control-Allow-Methods:
+      access-control-allow-methods:
       - GET, PUT, POST, DELETE, PATCH, OPTIONS
-      Access-Control-Allow-Origin:
+      access-control-allow-origin:
       - '*'
-      Access-Control-Expose-Headers:
+      access-control-expose-headers:
       - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
-      Access-Control-Max-Age:
+      access-control-max-age:
       - '1728000'
-      Cache-Control:
+      cache-control:
       - public, max-age=43200
-      Connection:
-      - Keep-Alive
-      Content-Type:
+      connection:
+      - keep-alive
+      content-encoding:
+      - gzip
+      content-length:
+      - '227'
+      content-type:
       - application/json
-      Date:
-      - Tue, 23 Dec 2025 15:32:54 GMT
-      Link:
-      - <https://rest.uniprot.org/uniprotkb/search?format=json&fields=accession,id,gene_names,organism_name,organism_id,protein_name,length,sequence,cc_function,ft_domain,xref_pdb,xref_chembl&query=%2A&cursor=8q347cwgp85m8pydjzpgj9ie5xsqk298jc&size=5>;
-        rel="next"
-      Strict-Transport-Security:
-      - max-age=31536000; includeSubDomains
-      Vary:
+      date:
+      - Tue, 06 Oct 2026 03:54:44 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent,
         Accept-Encoding
-      X-API-Deployment-Date:
-      - 11-December-2025
-      X-Total-Results:
-      - '199579900'
-      X-UniProt-Release:
-      - '2025_04'
-      X-UniProt-Release-Date:
-      - 15-October-2025
-      content-length:
-      - '11941'
+      x-api-deployment-date:
+      - 23-September-2026
       x-cache:
       - hit cached
-    status:
-      code: 200
-      message: OK
-- request:
-    body: ''
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate, zstd
-      Connection:
-      - keep-alive
-      Host:
-      - rest.uniprot.org
-      User-Agent:
-      - BioETL/5.0.0
-    method: GET
-    uri: https://rest.uniprot.org/uniprotkb/search?query=accession%3AP62988&size=1&format=json
-  response:
-    body:
-      string: '{"results":[{"entryType":"Inactive","primaryAccession":"P62988","uniProtkbId":"UBIQ_HUMAN","annotationScore":0.0,"inactiveReason":{"inactiveReasonType":"DEMERGED","mergeDemergeTo":["P62987","P62979","P0CG48","P0CG47"]}}]}'
-    headers:
-      Access-Control-Allow-Credentials:
-      - 'true'
-      Access-Control-Allow-Headers:
-      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
-      Access-Control-Allow-Methods:
-      - GET, PUT, POST, DELETE, PATCH, OPTIONS
-      Access-Control-Allow-Origin:
-      - '*'
-      Access-Control-Expose-Headers:
-      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
-      Access-Control-Max-Age:
-      - '1728000'
-      Cache-Control:
-      - public, max-age=43200
-      Connection:
-      - Keep-Alive
-      Content-Type:
-      - application/json
-      Date:
-      - Thu, 25 Dec 2025 06:06:56 GMT
-      Strict-Transport-Security:
-      - max-age=31536000; includeSubDomains
-      Vary:
-      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent,
-        Accept-Encoding
-      X-API-Deployment-Date:
-      - 11-December-2025
-      X-Total-Results:
+      x-total-results:
       - '1'
-      X-UniProt-Release:
-      - '2025_04'
-      X-UniProt-Release-Date:
-      - 15-October-2025
-      content-length:
-      - '221'
-      x-cache:
-      - hit cached
+      x-uniprot-release:
+      - '2026_03'
+      x-uniprot-release-date:
+      - 02-September-2026
     status:
       code: 200
       message: OK
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - rest.uniprot.org
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - BioETL/6.1.0
     method: GET
-    uri: https://rest.uniprot.org/uniprotkb/search?query=%2A&size=5&format=json&fields=accession%2Cid%2Cprotein_name%2Cgene_names%2Corganism_name%2Corganism_id%2Clineage%2Csequence%2Clength%2Cmass%2Cprotein_existence%2Cannotation_score%2Creviewed%2Cdate_created%2Cdate_modified%2Cversion%2Ccc_function%2Ccc_catalytic_activity%2Ccc_activity_regulation%2Ccc_subunit%2Ccc_pathway%2Ccc_subcellular_location%2Ccc_tissue_specificity%2Ccc_alternative_products%2Ccc_disease%2Ccc_cofactor%2Cph_dependence%2Ctemp_dependence%2Ckinetics%2Cabsorption%2Credox_potential%2Ccc_induction%2Ccc_caution%2Ccc_similarity%2Ccc_pharmaceutical%2Cft_domain%2Cft_binding%2Cft_site%2Cft_act_site%2Cft_mod_res%2Cxref_pdb%2Cxref_chembl%2Cxref_drugbank%2Cxref_guidetopharmacology%2Cgo_id%2Cxref_interpro%2Cxref_pfam%2Cxref_reactome%2Ckeyword
+    uri: https://rest.uniprot.org/uniprotkb/search?fields=accession%2Cid%2Cprotein_name%2Cgene_names%2Corganism_name%2Corganism_id%2Clineage%2Csequence%2Clength%2Cmass%2Cprotein_existence%2Cannotation_score%2Creviewed%2Cdate_created%2Cdate_modified%2Cversion%2Ccc_function%2Ccc_catalytic_activity%2Ccc_activity_regulation%2Ccc_subunit%2Ccc_pathway%2Ccc_subcellular_location%2Ccc_tissue_specificity%2Ccc_alternative_products%2Ccc_disease%2Ccc_cofactor%2Cph_dependence%2Ctemp_dependence%2Ckinetics%2Cabsorption%2Credox_potential%2Ccc_induction%2Ccc_caution%2Ccc_similarity%2Ccc_pharmaceutical%2Cft_domain%2Cft_binding%2Cft_site%2Cft_act_site%2Cft_mod_res%2Cxref_pdb%2Cxref_chembl%2Cxref_drugbank%2Cxref_guidetopharmacology%2Cgo_id%2Cxref_interpro%2Cxref_pfam%2Cxref_reactome%2Ckeyword&format=json&query=%2A&size=5
   response:
     body:
-      string: '{"results":[{"entryType":"UniProtKB reviewed (Swiss-Prot)","primaryAccession":"A0A0C5B5G6","uniProtkbId":"MOTSC_HUMAN","entryAudit":{"firstPublicDate":"2016-04-13","lastAnnotationUpdateDate":"2026-01-28","entryVersion":30},"annotationScore":5.0,"organism":{"scientificName":"Homo
-        sapiens","commonName":"Human","taxonId":9606,"evidences":[{"evidenceCode":"ECO:0000312","source":"EMBL","id":"AJM13597.1"}],"lineage":["Eukaryota","Metazoa","Chordata","Craniata","Vertebrata","Euteleostomi","Mammalia","Eutheria","Euarchontoglires","Primates","Haplorrhini","Catarrhini","Hominidae","Homo"]},"proteinExistence":"1:
-        Evidence at protein level","proteinDescription":{"recommendedName":{"fullName":{"evidences":[{"evidenceCode":"ECO:0000303","source":"PubMed","id":"25738459"}],"value":"Mitochondrial-derived
-        peptide MOTS-c"}},"alternativeNames":[{"fullName":{"evidences":[{"evidenceCode":"ECO:0000303","source":"PubMed","id":"25738459"}],"value":"Mitochondrial
-        open reading frame of the 12S rRNA-c"}}]},"genes":[{"geneName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:7470"}],"value":"MT-RNR1"}}],"comments":[{"texts":[{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"25738459"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"29886458"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"29983246"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"30468456"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"31081069"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"33468709"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"33554779"}],"value":"Regulates
-        insulin sensitivity and metabolic homeostasis (PubMed:25738459, PubMed:33468709).
-        Inhibits the folate cycle, thereby reducing de novo purine biosynthesis which
-        leads to the accumulation of the de novo purine synthesis intermediate 5-aminoimidazole-4-carboxamide
-        (AICAR) and the activation of the metabolic regulator 5''-AMP-activated protein
-        kinase (AMPK) (PubMed:25738459). Protects against age-dependent and diet-induced
-        insulin resistance as well as diet-induced obesity (PubMed:25738459). In response
-        to metabolic stress, translocates to the nucleus where it binds to antioxidant
-        response elements (ARE) present in the promoter regions of a number of genes
-        and plays a role in regulating nuclear gene expression in an NFE2L2-dependent
-        manner and increasing cellular resistance to metabolic stress (PubMed:29983246).
-        Increases mitochondrial respiration and levels of CPT1A and cytokines IL1B,
-        IL6, IL8, IL10 and TNF in senescent cells (PubMed:29886458). Increases activity
-        of the serine/threonine protein kinase complex mTORC2 and reduces activity
-        of the PTEN phosphatase, thus promoting phosphorylation of AKT (PubMed:33554779).
-        This promotes AKT-mediated phosphorylation of transcription factor FOXO1 which
-        reduces FOXO1 activity, leading to reduced levels of MSTN and promotion of
-        skeletal muscle growth (PubMed:33554779). Promotes osteogenic differentiation
-        of bone marrow mesenchymal stem cells via the TGFB/SMAD pathway (PubMed:30468456).
-        Promotes osteoblast proliferation and osteoblast synthesis of type I collagens
-        COL1A1 and COL1A2 via the TGFB/SMAD pathway (PubMed:31081069)"}],"commentType":"FUNCTION"},{"texts":[{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"29983246"}],"value":"Interacts
-        with transcription factors ATF1 and NFE2L2/NRF2; the interactions occur in
-        the nucleus following metabolic stress (PubMed:29983246). Also interacts with
-        transcription factor NFE2L1/NRF1 (PubMed:29983246)"}],"commentType":"SUBUNIT"},{"commentType":"SUBCELLULAR
-        LOCATION","note":{"texts":[{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"29983246"}],"value":"Translocates
-        to the nucleus in response to metabolic stress in an AMPK-dependent manner"}]},"subcellularLocations":[{"location":{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"25738459"}],"value":"Secreted","id":"SL-0243"}},{"location":{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"29983246"}],"value":"Mitochondrion","id":"SL-0173"}},{"location":{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"29983246"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"33473109"}],"value":"Nucleus","id":"SL-0191"}}]},{"texts":[{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"25738459"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"32182209"}],"value":"Detected
-        in plasma (at protein level) (PubMed:25738459, PubMed:32182209). Also expressed
-        in skeletal muscle (at protein level) (PubMed:32182209)"}],"commentType":"TISSUE
-        SPECIFICITY"},{"texts":[{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"29886458"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"33473109"}],"value":"By
-        exercise (PubMed:33473109). Up-regulated during cellular senescence (PubMed:29886458)"}],"commentType":"INDUCTION"},{"texts":[{"evidences":[{"evidenceCode":"ECO:0000305","source":"PubMed","id":"25738459"}],"value":"This
-        peptide has been shown to be biologically active but is the product of a mitochondrial
-        gene. Usage of the mitochondrial genetic code yields tandem start and stop
-        codons so translation must occur in the cytoplasm. The mechanisms allowing
-        the production and secretion of the peptide remain unclear"}],"commentType":"CAUTION"}],"features":[],"keywords":[{"id":"KW-0238","category":"Molecular
-        function","name":"DNA-binding"},{"id":"KW-0496","category":"Cellular component","name":"Mitochondrion"},{"id":"KW-0539","category":"Cellular
-        component","name":"Nucleus"},{"id":"KW-0892","category":"Biological process","name":"Osteogenesis"},{"id":"KW-1185","category":"Technical
-        term","name":"Reference proteome"},{"id":"KW-0964","category":"Cellular component","name":"Secreted"},{"id":"KW-0804","category":"Biological
-        process","name":"Transcription"},{"id":"KW-0805","category":"Biological process","name":"Transcription
-        regulation"}],"uniProtKBCrossReferences":[{"database":"GO","id":"GO:0005615","properties":[{"key":"GoTerm","value":"C:extracellular
-        space"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"25738459"}]},{"database":"GO","id":"GO:0005739","properties":[{"key":"GoTerm","value":"C:mitochondrion"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"29983246"}]},{"database":"GO","id":"GO:0005634","properties":[{"key":"GoTerm","value":"C:nucleus"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"29983246"}]},{"database":"GO","id":"GO:0003677","properties":[{"key":"GoTerm","value":"F:DNA
-        binding"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"29983246"}]},{"database":"GO","id":"GO:0140297","properties":[{"key":"GoTerm","value":"F:DNA-binding
-        transcription factor binding"},{"key":"GoEvidenceType","value":"IPI:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000353","source":"PubMed","id":"29983246"}]},{"database":"GO","id":"GO:0032147","properties":[{"key":"GoTerm","value":"P:activation
-        of protein kinase activity"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"25738459"}]},{"database":"GO","id":"GO:2001145","properties":[{"key":"GoTerm","value":"P:negative
-        regulation of phosphatidylinositol-3,4,5-trisphosphate 5-phosphatase activity"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"33554779"}]},{"database":"GO","id":"GO:0001649","properties":[{"key":"GoTerm","value":"P:osteoblast
-        differentiation"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"30468456"}]},{"database":"GO","id":"GO:0033687","properties":[{"key":"GoTerm","value":"P:osteoblast
-        proliferation"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"31081069"}]},{"database":"GO","id":"GO:0071902","properties":[{"key":"GoTerm","value":"P:positive
-        regulation of protein serine/threonine kinase activity"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"33554779"}]},{"database":"GO","id":"GO:0072522","properties":[{"key":"GoTerm","value":"P:purine-containing
-        compound biosynthetic process"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"25738459"}]},{"database":"GO","id":"GO:0043610","properties":[{"key":"GoTerm","value":"P:regulation
-        of carbohydrate utilization"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"25738459"}]},{"database":"GO","id":"GO:0006357","properties":[{"key":"GoTerm","value":"P:regulation
-        of transcription by RNA polymerase II"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"29983246"}]},{"database":"GO","id":"GO:0048630","properties":[{"key":"GoTerm","value":"P:skeletal
-        muscle tissue growth"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"33554779"}]},{"database":"InterPro","id":"IPR054130","properties":[{"key":"EntryName","value":"MT-RNR1"}]},{"database":"Pfam","id":"PF21945","properties":[{"key":"EntryName","value":"MT-RNR1"},{"key":"MatchStatus","value":"1"}]}],"sequence":{"value":"MRWQEMGYIFYPRKLR","length":16,"molWeight":2175,"crc64":"361DE748426DD505","md5":"AE72B6C4E87692429C0D558B92BD7B3D"},"lineages":[{"scientificName":"cellular
-        organisms","taxonId":131567,"rank":"no rank","hidden":true},{"scientificName":"Eukaryota","commonName":"eukaryotes","taxonId":2759,"rank":"domain","hidden":false},{"scientificName":"Opisthokonta","taxonId":33154,"rank":"clade","hidden":true},{"scientificName":"Metazoa","commonName":"animals","taxonId":33208,"rank":"kingdom","hidden":false},{"scientificName":"Eumetazoa","taxonId":6072,"rank":"clade","hidden":true},{"scientificName":"Bilateria","taxonId":33213,"rank":"clade","hidden":true},{"scientificName":"Deuterostomia","taxonId":33511,"rank":"clade","hidden":true},{"scientificName":"Chordata","commonName":"chordates","taxonId":7711,"rank":"phylum","hidden":false},{"scientificName":"Craniata","taxonId":89593,"rank":"subphylum","hidden":false},{"scientificName":"Vertebrata","commonName":"vertebrates","taxonId":7742,"rank":"clade","hidden":false},{"scientificName":"Gnathostomata","commonName":"jawed
-        vertebrates","taxonId":7776,"rank":"clade","hidden":true},{"scientificName":"Teleostomi","taxonId":117570,"rank":"clade","hidden":true},{"scientificName":"Euteleostomi","commonName":"bony
-        vertebrates","taxonId":117571,"rank":"clade","hidden":false},{"scientificName":"Sarcopterygii","taxonId":8287,"rank":"superclass","hidden":true},{"scientificName":"Dipnotetrapodomorpha","taxonId":1338369,"rank":"clade","hidden":true},{"scientificName":"Tetrapoda","commonName":"tetrapods","taxonId":32523,"rank":"clade","hidden":true},{"scientificName":"Amniota","commonName":"amniotes","taxonId":32524,"rank":"clade","hidden":true},{"scientificName":"Mammalia","commonName":"mammals","taxonId":40674,"rank":"class","hidden":false},{"scientificName":"Theria","taxonId":32525,"rank":"clade","hidden":true},{"scientificName":"Eutheria","commonName":"placentals","taxonId":9347,"rank":"clade","hidden":false},{"scientificName":"Boreoeutheria","taxonId":1437010,"rank":"clade","hidden":true},{"scientificName":"Euarchontoglires","taxonId":314146,"rank":"superorder","hidden":false},{"scientificName":"Primates","commonName":"primates","taxonId":9443,"rank":"order","hidden":false},{"scientificName":"Haplorrhini","taxonId":376913,"rank":"suborder","hidden":false},{"scientificName":"Simiiformes","taxonId":314293,"rank":"infraorder","hidden":true},{"scientificName":"Catarrhini","taxonId":9526,"rank":"parvorder","hidden":false},{"scientificName":"Hominoidea","commonName":"apes","taxonId":314295,"rank":"superfamily","hidden":true},{"scientificName":"Hominidae","commonName":"great
-        apes","taxonId":9604,"rank":"family","hidden":false},{"scientificName":"Homininae","taxonId":207598,"rank":"subfamily","hidden":true},{"scientificName":"Homo","taxonId":9605,"rank":"genus","hidden":false}],"extraAttributes":{"uniParcId":"UPI0005D734FE"}},
-
-        {"entryType":"UniProtKB reviewed (Swiss-Prot)","primaryAccession":"A0A1B0GTW7","uniProtkbId":"CIROP_HUMAN","entryAudit":{"firstPublicDate":"2018-09-12","lastAnnotationUpdateDate":"2026-01-28","entryVersion":41},"annotationScore":5.0,"organism":{"scientificName":"Homo
-        sapiens","commonName":"Human","taxonId":9606,"lineage":["Eukaryota","Metazoa","Chordata","Craniata","Vertebrata","Euteleostomi","Mammalia","Eutheria","Euarchontoglires","Primates","Haplorrhini","Catarrhini","Hominidae","Homo"]},"proteinExistence":"1:
-        Evidence at protein level","proteinDescription":{"recommendedName":{"fullName":{"evidences":[{"evidenceCode":"ECO:0000303","source":"PubMed","id":"34903892"}],"value":"Ciliated
-        left-right organizer metallopeptidase"},"ecNumbers":[{"evidences":[{"evidenceCode":"ECO:0000250","source":"UniProtKB","id":"Q9VH19"}],"value":"3.4.24.-"}]},"alternativeNames":[{"fullName":{"evidences":[{"evidenceCode":"ECO:0000305"}],"value":"Leishmanolysin-like
-        peptidase 2"}}],"flag":"Precursor"},"genes":[{"geneName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:53647"}],"value":"CIROP"},"synonyms":[{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:53647"}],"value":"LMLN2"}]}],"comments":[{"texts":[{"evidences":[{"evidenceCode":"ECO:0000250","source":"UniProtKB","id":"A0A1D5NSK0"}],"value":"Putative
-        metalloproteinase that plays a role in left-right patterning process"}],"commentType":"FUNCTION"},{"commentType":"COFACTOR","cofactors":[{"name":"Zn(2+)","evidences":[{"evidenceCode":"ECO:0000250","source":"UniProtKB","id":"P08148"}],"cofactorCrossReference":{"database":"ChEBI","id":"CHEBI:29105"}}],"note":{"texts":[{"evidences":[{"evidenceCode":"ECO:0000250","source":"UniProtKB","id":"P08148"}],"value":"Binds
-        1 zinc ion per subunit."}]}},{"commentType":"SUBCELLULAR LOCATION","subcellularLocations":[{"location":{"evidences":[{"evidenceCode":"ECO:0000255"}],"value":"Membrane","id":"SL-0162"},"topology":{"evidences":[{"evidenceCode":"ECO:0000255"}],"value":"Single-pass
-        type I membrane protein","id":"SL-9905"}}]},{"commentType":"ALTERNATIVE PRODUCTS","events":["Alternative
-        splicing"],"isoforms":[{"name":{"value":"1"},"isoformIds":["A0A1B0GTW7-1"],"isoformSequenceStatus":"Displayed"},{"name":{"value":"2"},"isoformIds":["A0A1B0GTW7-2"],"sequenceIds":["VSP_061525"],"isoformSequenceStatus":"Described"},{"name":{"value":"3"},"isoformIds":["A0A1B0GTW7-3"],"sequenceIds":["VSP_061523","VSP_061524","VSP_061526"],"isoformSequenceStatus":"Described"}]},{"commentType":"DISEASE","disease":{"diseaseId":"Heterotaxy,
-        visceral, 12, autosomal","diseaseAccession":"DI-06243","acronym":"HTX12","description":"A
-        form of visceral heterotaxy, a complex disorder due to disruption of the normal
-        left-right asymmetry of the thoracoabdominal organs. Visceral heterotaxy or
-        situs ambiguus results in randomization of the placement of visceral organs,
-        including the heart, lungs, liver, spleen, and stomach. The organs are oriented
-        randomly with respect to the left-right axis and with respect to one another.
-        It can be associated with a variety of congenital defects including cardiac
-        malformations. Early death may occur. HTX12 inheritance is autosomal recessive.","diseaseCrossReference":{"database":"MIM","id":"619702"},"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"34903892"}]},"note":{"texts":[{"value":"The
-        disease is caused by variants affecting the gene represented in this entry"}]}},{"texts":[{"evidences":[{"evidenceCode":"ECO:0000305"}],"value":"Belongs
-        to the peptidase M8 family"}],"commentType":"SIMILARITY"}],"features":[{"type":"Active
-        site","location":{"start":{"value":306,"modifier":"EXACT"},"end":{"value":306,"modifier":"EXACT"}},"description":"","evidences":[{"evidenceCode":"ECO:0000255","source":"PROSITE-ProRule","id":"PRU10095"}]},{"type":"Binding
-        site","location":{"start":{"value":305,"modifier":"EXACT"},"end":{"value":305,"modifier":"EXACT"}},"description":"","featureCrossReferences":[{"database":"ChEBI","id":"CHEBI:29105"}],"evidences":[{"evidenceCode":"ECO:0000255","source":"PROSITE-ProRule","id":"PRU10095"}],"ligand":{"name":"Zn(2+)","id":"ChEBI:CHEBI:29105","note":"catalytic"}},{"type":"Binding
-        site","location":{"start":{"value":309,"modifier":"EXACT"},"end":{"value":309,"modifier":"EXACT"}},"description":"","featureCrossReferences":[{"database":"ChEBI","id":"CHEBI:29105"}],"evidences":[{"evidenceCode":"ECO:0000255","source":"PROSITE-ProRule","id":"PRU10095"}],"ligand":{"name":"Zn(2+)","id":"ChEBI:CHEBI:29105","note":"catalytic"}},{"type":"Binding
-        site","location":{"start":{"value":385,"modifier":"EXACT"},"end":{"value":385,"modifier":"EXACT"}},"description":"","featureCrossReferences":[{"database":"ChEBI","id":"CHEBI:29105"}],"evidences":[{"evidenceCode":"ECO:0000255","source":"PROSITE-ProRule","id":"PRU10095"}],"ligand":{"name":"Zn(2+)","id":"ChEBI:CHEBI:29105","note":"catalytic"}}],"keywords":[{"id":"KW-0025","category":"Coding
-        sequence diversity","name":"Alternative splicing"},{"id":"KW-0225","category":"Disease","name":"Disease
-        variant"},{"id":"KW-0325","category":"PTM","name":"Glycoprotein"},{"id":"KW-1056","category":"Disease","name":"Heterotaxy"},{"id":"KW-0378","category":"Molecular
-        function","name":"Hydrolase"},{"id":"KW-0472","category":"Cellular component","name":"Membrane"},{"id":"KW-0479","category":"Ligand","name":"Metal-binding"},{"id":"KW-0482","category":"Molecular
-        function","name":"Metalloprotease"},{"id":"KW-0645","category":"Molecular
-        function","name":"Protease"},{"id":"KW-1267","category":"Technical term","name":"Proteomics
-        identification"},{"id":"KW-1185","category":"Technical term","name":"Reference
-        proteome"},{"id":"KW-0732","category":"Domain","name":"Signal"},{"id":"KW-0812","category":"Domain","name":"Transmembrane"},{"id":"KW-1133","category":"Domain","name":"Transmembrane
-        helix"},{"id":"KW-0862","category":"Ligand","name":"Zinc"}],"uniProtKBCrossReferences":[{"database":"GO","id":"GO:0005737","properties":[{"key":"GoTerm","value":"C:cytoplasm"},{"key":"GoEvidenceType","value":"IBA:GO_Central"}]},{"database":"GO","id":"GO:0016020","properties":[{"key":"GoTerm","value":"C:membrane"},{"key":"GoEvidenceType","value":"IEA:UniProtKB-SubCell"}]},{"database":"GO","id":"GO:0046872","properties":[{"key":"GoTerm","value":"F:metal
-        ion binding"},{"key":"GoEvidenceType","value":"IEA:UniProtKB-KW"}]},{"database":"GO","id":"GO:0004222","properties":[{"key":"GoTerm","value":"F:metalloendopeptidase
-        activity"},{"key":"GoEvidenceType","value":"IEA:InterPro"}]},{"database":"GO","id":"GO:0008233","properties":[{"key":"GoTerm","value":"F:peptidase
-        activity"},{"key":"GoEvidenceType","value":"IBA:GO_Central"}]},{"database":"GO","id":"GO:0007155","properties":[{"key":"GoTerm","value":"P:cell
-        adhesion"},{"key":"GoEvidenceType","value":"IEA:InterPro"}]},{"database":"GO","id":"GO:0061966","properties":[{"key":"GoTerm","value":"P:establishment
-        of left/right asymmetry"},{"key":"GoEvidenceType","value":"ISS:UniProtKB"}]},{"database":"GO","id":"GO:0006508","properties":[{"key":"GoTerm","value":"P:proteolysis"},{"key":"GoEvidenceType","value":"IEA:UniProtKB-KW"}]},{"database":"InterPro","id":"IPR001577","properties":[{"key":"EntryName","value":"Peptidase_M8"}]},{"database":"Pfam","id":"PF01457","properties":[{"key":"EntryName","value":"Peptidase_M8"},{"key":"MatchStatus","value":"1"}]}],"sequence":{"value":"MLLLLLLLLLLPPLVLRVAASRCLHDETQKSVSLLRPPFSQLPSKSRSSSLTLPSSRDPQPLRIQSCYLGDHISDGAWDPEGEGMRGGSRALAAVREATQRIQAVLAVQGPLLLSRDPAQYCHAVWGDPDSPNYHRCSLLNPGYKGESCLGAKIPDTHLRGYALWPEQGPPQLVQPDGPGVQNTDFLLYVRVAHTSKCHQETVSLCCPGWSTAAQSQLTAALTSWAQRRGFVMLPRLCLKLLGSSNLPTLASQSIRITGPSVIAYAACCQLDSEDRPLAGTIVYCAQHLTSPSLSHSDIVMATLHELLHALGFSGQLFKKWRDCPSGFSVRENCSTRQLVTRQDEWGQLLLTTPAVSLSLAKHLGVSGASLGVPLEEEEGLLSSHWEARLLQGSLMTATFDGAQRTRLDPITLAAFKDSGWYQVNHSAAEELLWGQGSGPEFGLVTTCGTGSSDFFCTGSGLGCHYLHLDKGSCSSDPMLEGCRMYKPLANGSECWKKENGFPAGVDNPHGEIYHPQSRCFFANLTSQLLPGDKPRHPSLTPHLKEAELMGRCYLHQCTGRGAYKVQVEGSPWVPCLPGKVIQIPGYYGLLFCPRGRLCQTNEDINAVTSPPVSLSTPDPLFQLSLELAGPPGHSLGKEQQEGLAEAVLEALASKGGTGRCYFHGPSITTSLVFTVHMWKSPGCQGPSVATLHKALTLTLQKKPLEVYHGGANFTTQPSKLLVTSDHNPSMTHLRLSMGLCLMLLILVGVMGTTAYQKRATLPVRPSASYHSPELHSTRVPVRGIREV","length":788,"molWeight":85397,"crc64":"8051E168BBD3EAF8","md5":"968606C5A000BA3567548A567BD5CDAC"},"lineages":[{"scientificName":"cellular
-        organisms","taxonId":131567,"rank":"no rank","hidden":true},{"scientificName":"Eukaryota","commonName":"eukaryotes","taxonId":2759,"rank":"domain","hidden":false},{"scientificName":"Opisthokonta","taxonId":33154,"rank":"clade","hidden":true},{"scientificName":"Metazoa","commonName":"animals","taxonId":33208,"rank":"kingdom","hidden":false},{"scientificName":"Eumetazoa","taxonId":6072,"rank":"clade","hidden":true},{"scientificName":"Bilateria","taxonId":33213,"rank":"clade","hidden":true},{"scientificName":"Deuterostomia","taxonId":33511,"rank":"clade","hidden":true},{"scientificName":"Chordata","commonName":"chordates","taxonId":7711,"rank":"phylum","hidden":false},{"scientificName":"Craniata","taxonId":89593,"rank":"subphylum","hidden":false},{"scientificName":"Vertebrata","commonName":"vertebrates","taxonId":7742,"rank":"clade","hidden":false},{"scientificName":"Gnathostomata","commonName":"jawed
-        vertebrates","taxonId":7776,"rank":"clade","hidden":true},{"scientificName":"Teleostomi","taxonId":117570,"rank":"clade","hidden":true},{"scientificName":"Euteleostomi","commonName":"bony
-        vertebrates","taxonId":117571,"rank":"clade","hidden":false},{"scientificName":"Sarcopterygii","taxonId":8287,"rank":"superclass","hidden":true},{"scientificName":"Dipnotetrapodomorpha","taxonId":1338369,"rank":"clade","hidden":true},{"scientificName":"Tetrapoda","commonName":"tetrapods","taxonId":32523,"rank":"clade","hidden":true},{"scientificName":"Amniota","commonName":"amniotes","taxonId":32524,"rank":"clade","hidden":true},{"scientificName":"Mammalia","commonName":"mammals","taxonId":40674,"rank":"class","hidden":false},{"scientificName":"Theria","taxonId":32525,"rank":"clade","hidden":true},{"scientificName":"Eutheria","commonName":"placentals","taxonId":9347,"rank":"clade","hidden":false},{"scientificName":"Boreoeutheria","taxonId":1437010,"rank":"clade","hidden":true},{"scientificName":"Euarchontoglires","taxonId":314146,"rank":"superorder","hidden":false},{"scientificName":"Primates","commonName":"primates","taxonId":9443,"rank":"order","hidden":false},{"scientificName":"Haplorrhini","taxonId":376913,"rank":"suborder","hidden":false},{"scientificName":"Simiiformes","taxonId":314293,"rank":"infraorder","hidden":true},{"scientificName":"Catarrhini","taxonId":9526,"rank":"parvorder","hidden":false},{"scientificName":"Hominoidea","commonName":"apes","taxonId":314295,"rank":"superfamily","hidden":true},{"scientificName":"Hominidae","commonName":"great
-        apes","taxonId":9604,"rank":"family","hidden":false},{"scientificName":"Homininae","taxonId":207598,"rank":"subfamily","hidden":true},{"scientificName":"Homo","taxonId":9605,"rank":"genus","hidden":false}],"extraAttributes":{"uniParcId":"UPI0007E52C07"}},
-
-        {"entryType":"UniProtKB reviewed (Swiss-Prot)","primaryAccession":"A0JNW5","uniProtkbId":"BLT3B_HUMAN","entryAudit":{"firstPublicDate":"2007-07-24","lastAnnotationUpdateDate":"2026-01-28","entryVersion":132},"annotationScore":5.0,"organism":{"scientificName":"Homo
-        sapiens","commonName":"Human","taxonId":9606,"lineage":["Eukaryota","Metazoa","Chordata","Craniata","Vertebrata","Euteleostomi","Mammalia","Eutheria","Euarchontoglires","Primates","Haplorrhini","Catarrhini","Hominidae","Homo"]},"proteinExistence":"1:
-        Evidence at protein level","proteinDescription":{"recommendedName":{"fullName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:29102"}],"value":"Bridge-like
-        lipid transfer protein family member 3B"}},"alternativeNames":[{"fullName":{"evidences":[{"evidenceCode":"ECO:0000303","source":"PubMed","id":"20163565"}],"value":"Syntaxin-6
-        Habc-interacting protein of 164 kDa"}},{"fullName":{"value":"UHRF1-binding
-        protein 1-like"}}]},"genes":[{"geneName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:29102"}],"value":"BLTP3B"},"synonyms":[{"evidences":[{"evidenceCode":"ECO:0000312","source":"EMBL","id":"BAA31676.2"}],"value":"KIAA0701"},{"evidences":[{"evidenceCode":"ECO:0000303","source":"PubMed","id":"20163565"}],"value":"SHIP164"},{"value":"UHRF1BP1L"}]}],"comments":[{"texts":[{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"20163565"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"35499567"}],"value":"Tube-forming
-        lipid transport protein which mediates the transfer of lipids between membranes
-        at organelle contact sites (PubMed:35499567). Required for retrograde traffic
-        of vesicle clusters in the early endocytic pathway to the Golgi complex (PubMed:20163565,
-        PubMed:35499567)"}],"commentType":"FUNCTION"},{"texts":[{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"20163565"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"35499567"}],"value":"Monomer.
-        Homodimer (via N-terminus). Associates with the Golgi-associated retrograde
-        protein (GARP) complex. Interacts with GARP complex component VPS52 (PubMed:20163565).
-        Interacts (via C-terminal coiled-coil domain) with STX6 (PubMed:20163565,
-        PubMed:35499567)"}],"commentType":"SUBUNIT"},{"commentType":"SUBCELLULAR LOCATION","note":{"texts":[{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"35499567"}],"value":"Localizes
-        on a subpopulation of vesicle clusters in the early endocytic pathway"}]},"subcellularLocations":[{"location":{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"20163565"}],"value":"Cytoplasm,
-        cytosol","id":"SL-0091"}},{"location":{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"20163565"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"35499567"}],"value":"Early
-        endosome","id":"SL-0094"}}]},{"commentType":"ALTERNATIVE PRODUCTS","events":["Alternative
-        splicing"],"isoforms":[{"name":{"value":"1"},"isoformIds":["A0JNW5-1"],"isoformSequenceStatus":"Displayed"},{"name":{"value":"2"},"isoformIds":["A0JNW5-2"],"sequenceIds":["VSP_027014","VSP_027015"],"isoformSequenceStatus":"Described"}]}],"features":[{"type":"Domain","location":{"start":{"value":3,"modifier":"EXACT"},"end":{"value":94,"modifier":"EXACT"}},"description":"Chorein
-        N-terminal","evidences":[{"evidenceCode":"ECO:0000255"}]},{"type":"Modified
-        residue","location":{"start":{"value":414,"modifier":"EXACT"},"end":{"value":414,"modifier":"EXACT"}},"description":"Phosphoserine","evidences":[{"evidenceCode":"ECO:0007744","source":"PubMed","id":"21406692"},{"evidenceCode":"ECO:0007744","source":"PubMed","id":"24275569"}]},{"type":"Modified
-        residue","location":{"start":{"value":418,"modifier":"EXACT"},"end":{"value":418,"modifier":"EXACT"}},"description":"Phosphoserine","evidences":[{"evidenceCode":"ECO:0007744","source":"PubMed","id":"24275569"}]},{"type":"Modified
-        residue","location":{"start":{"value":774,"modifier":"EXACT"},"end":{"value":774,"modifier":"EXACT"}},"description":"Phosphoserine","evidences":[{"evidenceCode":"ECO:0007744","source":"PubMed","id":"23186163"}]},{"type":"Modified
-        residue","location":{"start":{"value":935,"modifier":"EXACT"},"end":{"value":935,"modifier":"EXACT"}},"description":"Phosphoserine","evidences":[{"evidenceCode":"ECO:0000250","source":"UniProtKB","id":"A2RSJ4"}]},{"type":"Modified
-        residue","location":{"start":{"value":1009,"modifier":"EXACT"},"end":{"value":1009,"modifier":"EXACT"}},"description":"Phosphoserine","evidences":[{"evidenceCode":"ECO:0000250","source":"UniProtKB","id":"A2RSJ4"}]}],"keywords":[{"id":"KW-0025","category":"Coding
-        sequence diversity","name":"Alternative splicing"},{"id":"KW-0175","category":"Domain","name":"Coiled
-        coil"},{"id":"KW-0963","category":"Cellular component","name":"Cytoplasm"},{"id":"KW-0967","category":"Cellular
-        component","name":"Endosome"},{"id":"KW-0597","category":"PTM","name":"Phosphoprotein"},{"id":"KW-1267","category":"Technical
-        term","name":"Proteomics identification"},{"id":"KW-1185","category":"Technical
-        term","name":"Reference proteome"}],"uniProtKBCrossReferences":[{"database":"Reactome","id":"R-HSA-9696270","properties":[{"key":"PathwayName","value":"RND2
-        GTPase cycle"}]},{"database":"GO","id":"GO:0005829","properties":[{"key":"GoTerm","value":"C:cytosol"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"20163565"}]},{"database":"GO","id":"GO:0005769","properties":[{"key":"GoTerm","value":"C:early
-        endosome"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"20163565"},{"evidenceCode":"ECO:0000314","source":"PubMed","id":"35499567"}]},{"database":"GO","id":"GO:0062069","properties":[{"key":"GoTerm","value":"F:GARP
-        complex binding"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"20163565"}]},{"database":"GO","id":"GO:0120013","properties":[{"key":"GoTerm","value":"F:lipid
-        transfer activity"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"35499567"}]},{"database":"GO","id":"GO:0042803","properties":[{"key":"GoTerm","value":"F:protein
-        homodimerization activity"},{"key":"GoEvidenceType","value":"IPI:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000353","source":"PubMed","id":"20163565"}]},{"database":"GO","id":"GO:0034498","properties":[{"key":"GoTerm","value":"P:early
-        endosome to Golgi transport"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"35499567"}]},{"database":"GO","id":"GO:0120009","properties":[{"key":"GoTerm","value":"P:intermembrane
-        lipid transfer"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"35499567"}]},{"database":"InterPro","id":"IPR026728","properties":[{"key":"EntryName","value":"BLTP3A/B"}]},{"database":"Pfam","id":"PF24917","properties":[{"key":"EntryName","value":"BLTP3A_B"},{"key":"MatchStatus","value":"1"}]}],"sequence":{"value":"MAGIIKKQILKHLSRFTKNLSPDKINLSTLKGEGELKNLELDEEVLQNMLDLPTWLAINKVFCNKASIRIPWTKLKTHPICLSLDKVIMEMSTCEEPRSPNGPSPIATASGQSEYGFAEKVVEGISVSVNSIVIRIGAKAFNASFELSQLRIYSVNAHWEHGDLRFTRIQDPQRGEVLTFKEINWQMIRIEADATQSSHLEIMCAPVRLITNQSKIRVTLKRRLKDCNVIATKLVLILDDLLWVLTDSQLKAMVQYAKSLSEAIEKSTEQRKSMAPEPTQSSTVVASAQQVKTTQTSNAPDVNDAIVKLFNDFDVKETSHHLVISHLDLHICDDIHAKEKESNRRITGGAMQLSFTQLTIDYYPYHKAGDSCNHWMYFSDATKTKNGWANELLHEFECNVEMLKQAVKDHNVGSPPKSPTHASPQHTQTEKDYPLKGTCRTPSVLSQQSKAKLMSSSVVVRLADFNIYQVSTAEQCRSSPKSMICCNKKSLYLPQEMSAVYIEFTEYYYPDGKDFPIPSPNLYSQLNALQFTVDERSILWLNQFLLDLKQSLNQFMAVYKLNDNSKSDEHVDVRVDGLMLKFVIPSEVKSECHQDQPRAISIQSSEMIATNTRHCPNCRHSDLEALFQDFKDCDFFSKTYTSFPKSCDNFNLLHPIFQRHAHEQDTKMHEIYKGNITPQLNKNTLKTSAATDVWAVYFSQFWIDYEGMKSGKGRPISFVDSFPLSIWICQPTRYAESQKEPQTCNQVSLNTSQSESSDLAGRLKRKKLLKEYYSTESEPLTNGGQKPSSSDTFFRFSPSSSEADIHLLVHVHKHVSMQINHYQYLLLLFLHESLILLSENLRKDVEAVTGSPASQTSICIGILLRSAELALLLHPVDQANTLKSPVSESVSPVVPDYLPTENGDFLSSKRKQISRDINRIRSVTVNHMSDNRSMSVDLSHIPLKDPLLFKSASDTNLQKGISFMDYLSDKHLGKISEDESSGLVYKSGSGEIGSETSDKKDSFYTDSSSILNYREDSNILSFDSDGNQNILSSTLTSKGNETIESIFKAEDLLPEAASLSENLDISKEETPPVRTLKSQSSLSGKPKERCPPNLAPLCVSYKNMKRSSSQMSLDTISLDSMILEEQLLESDGSDSHMFLEKGNKKNSTTNYRGTAESVNAGANLQNYGETSPDAISTNSEGAQENHDDLMSVVVFKITGVNGEIDIRGEDTEICLQVNQVTPDQLGNISLRHYLCNRPVGSDQKAVIHSKSSPEISLRFESGPGAVIHSLLAEKNGFLQCHIENFSTEFLTSSLMNIQHFLEDETVATVMPMKIQVSNTKINLKDDSPRSSTVSLEPAPVTVHIDHLVVERSDDGSFHIRDSHMLNTGNDLKENVKSDSVLLTSGKYDLKKQRSVTQATQTSPGVPWPSQSANFPEFSFDFTREQLMEENESLKQELAKAKMALAEAHLEKDALLHHIKKMTVE","length":1464,"molWeight":164199,"crc64":"5FBED173B50F16B9","md5":"5A9981A3B88B257702F4DF8E51691DFF"},"lineages":[{"scientificName":"cellular
-        organisms","taxonId":131567,"rank":"no rank","hidden":true},{"scientificName":"Eukaryota","commonName":"eukaryotes","taxonId":2759,"rank":"domain","hidden":false},{"scientificName":"Opisthokonta","taxonId":33154,"rank":"clade","hidden":true},{"scientificName":"Metazoa","commonName":"animals","taxonId":33208,"rank":"kingdom","hidden":false},{"scientificName":"Eumetazoa","taxonId":6072,"rank":"clade","hidden":true},{"scientificName":"Bilateria","taxonId":33213,"rank":"clade","hidden":true},{"scientificName":"Deuterostomia","taxonId":33511,"rank":"clade","hidden":true},{"scientificName":"Chordata","commonName":"chordates","taxonId":7711,"rank":"phylum","hidden":false},{"scientificName":"Craniata","taxonId":89593,"rank":"subphylum","hidden":false},{"scientificName":"Vertebrata","commonName":"vertebrates","taxonId":7742,"rank":"clade","hidden":false},{"scientificName":"Gnathostomata","commonName":"jawed
-        vertebrates","taxonId":7776,"rank":"clade","hidden":true},{"scientificName":"Teleostomi","taxonId":117570,"rank":"clade","hidden":true},{"scientificName":"Euteleostomi","commonName":"bony
-        vertebrates","taxonId":117571,"rank":"clade","hidden":false},{"scientificName":"Sarcopterygii","taxonId":8287,"rank":"superclass","hidden":true},{"scientificName":"Dipnotetrapodomorpha","taxonId":1338369,"rank":"clade","hidden":true},{"scientificName":"Tetrapoda","commonName":"tetrapods","taxonId":32523,"rank":"clade","hidden":true},{"scientificName":"Amniota","commonName":"amniotes","taxonId":32524,"rank":"clade","hidden":true},{"scientificName":"Mammalia","commonName":"mammals","taxonId":40674,"rank":"class","hidden":false},{"scientificName":"Theria","taxonId":32525,"rank":"clade","hidden":true},{"scientificName":"Eutheria","commonName":"placentals","taxonId":9347,"rank":"clade","hidden":false},{"scientificName":"Boreoeutheria","taxonId":1437010,"rank":"clade","hidden":true},{"scientificName":"Euarchontoglires","taxonId":314146,"rank":"superorder","hidden":false},{"scientificName":"Primates","commonName":"primates","taxonId":9443,"rank":"order","hidden":false},{"scientificName":"Haplorrhini","taxonId":376913,"rank":"suborder","hidden":false},{"scientificName":"Simiiformes","taxonId":314293,"rank":"infraorder","hidden":true},{"scientificName":"Catarrhini","taxonId":9526,"rank":"parvorder","hidden":false},{"scientificName":"Hominoidea","commonName":"apes","taxonId":314295,"rank":"superfamily","hidden":true},{"scientificName":"Hominidae","commonName":"great
-        apes","taxonId":9604,"rank":"family","hidden":false},{"scientificName":"Homininae","taxonId":207598,"rank":"subfamily","hidden":true},{"scientificName":"Homo","taxonId":9605,"rank":"genus","hidden":false}],"extraAttributes":{"uniParcId":"UPI0000160563"}},
-
-        {"entryType":"UniProtKB reviewed (Swiss-Prot)","primaryAccession":"A0JP26","uniProtkbId":"POTB3_HUMAN","entryAudit":{"firstPublicDate":"2015-03-04","lastAnnotationUpdateDate":"2026-01-28","entryVersion":124},"annotationScore":5.0,"organism":{"scientificName":"Homo
-        sapiens","commonName":"Human","taxonId":9606,"evidences":[{"evidenceCode":"ECO:0000312","source":"EMBL","id":"AAI27124.1"}],"lineage":["Eukaryota","Metazoa","Chordata","Craniata","Vertebrata","Euteleostomi","Mammalia","Eutheria","Euarchontoglires","Primates","Haplorrhini","Catarrhini","Hominidae","Homo"]},"proteinExistence":"1:
-        Evidence at protein level","proteinDescription":{"recommendedName":{"fullName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:51240"}],"value":"POTE
-        ankyrin domain family member B3"}}},"genes":[{"geneName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:51240"}],"value":"POTEB3"}}],"comments":[{"commentType":"ALTERNATIVE
-        PRODUCTS","events":["Alternative splicing"],"isoforms":[{"name":{"value":"1"},"isoformIds":["A0JP26-1"],"isoformSequenceStatus":"Displayed"},{"name":{"value":"2"},"isoformIds":["A0JP26-2"],"sequenceIds":["VSP_059381","VSP_059382"],"isoformSequenceStatus":"Described"},{"name":{"value":"3"},"isoformIds":["A0JP26-3"],"sequenceIds":["VSP_059380"],"isoformSequenceStatus":"Described"}]},{"texts":[{"evidences":[{"evidenceCode":"ECO:0000305"}],"value":"Belongs
-        to the POTE family"}],"commentType":"SIMILARITY"},{"texts":[{"evidences":[{"evidenceCode":"ECO:0000305"}],"value":"Maps
-        to a duplicated region on chromosome 15; the gene is present in at least 3
-        almost identical copies"}],"commentType":"CAUTION"}],"features":[],"keywords":[{"id":"KW-0025","category":"Coding
-        sequence diversity","name":"Alternative splicing"},{"id":"KW-0040","category":"Domain","name":"ANK
-        repeat"},{"id":"KW-0175","category":"Domain","name":"Coiled coil"},{"id":"KW-1185","category":"Technical
-        term","name":"Reference proteome"},{"id":"KW-0677","category":"Domain","name":"Repeat"}],"uniProtKBCrossReferences":[{"database":"InterPro","id":"IPR050657","properties":[{"key":"EntryName","value":"Ankyrin_repeat_domain"}]},{"database":"InterPro","id":"IPR002110","properties":[{"key":"EntryName","value":"Ankyrin_rpt"}]},{"database":"InterPro","id":"IPR036770","properties":[{"key":"EntryName","value":"Ankyrin_rpt-contain_sf"}]},{"database":"InterPro","id":"IPR039497","properties":[{"key":"EntryName","value":"CC144C-like_CC_dom"}]},{"database":"Pfam","id":"PF12796","properties":[{"key":"EntryName","value":"Ank_2"},{"key":"MatchStatus","value":"2"}]},{"database":"Pfam","id":"PF14915","properties":[{"key":"EntryName","value":"CCDC144C"},{"key":"MatchStatus","value":"1"}]}],"sequence":{"value":"MVAEVCSMPAASAVKKPFDLRSKMGKWCHHRFPCCRGSGKSNMGTSGDHDDSFMKTLRSKMGKCCHHCFPCCRGSGTSNVGTSGDHDNSFMKTLRSKMGKWCCHCFPCCRGSGKSNVGTWGDYDDSAFMEPRYHVRREDLDKLHRAAWWGKVPRKDLIVMLRDTDMNKRDKQKRTALHLASANGNSEVVQLLLDRRCQLNVLDNKKRTALIKAVQCQEDECVLMLLEHGADGNIQDEYGNTALHYAIYNEDKLMAKALLLYGADIESKNKCGLTPLLLGVHEQKQQVVKFLIKKKANLNALDRYGRTALILAVCCGSASIVNLLLEQNVDVSSQDLSGQTAREYAVSSHHHVICELLSDYKEKQMLKISSENSNPEQDLKLTSEEESQRLKVSENSQPEKMSQEPEINKDCDREVEEEIKKHGSNPVGLPENLTNGASAGNGDDGLIPQRKSRKPENQQFPDTENEEYHSDEQNDTQKQLSEEQNTGISQDEILTNKQKQIEVAEKEMNSKLSLSHKKEEDLLRENSMLREEIAMLRLELDETKHQNQLRENKILEEIESVKEKLLKAIQLNEEALTKTSI","length":581,"molWeight":65710,"crc64":"86D1E88F98BD22DF","md5":"85C271D17796BC25D386048681AE7F0F"},"lineages":[{"scientificName":"cellular
-        organisms","taxonId":131567,"rank":"no rank","hidden":true},{"scientificName":"Eukaryota","commonName":"eukaryotes","taxonId":2759,"rank":"domain","hidden":false},{"scientificName":"Opisthokonta","taxonId":33154,"rank":"clade","hidden":true},{"scientificName":"Metazoa","commonName":"animals","taxonId":33208,"rank":"kingdom","hidden":false},{"scientificName":"Eumetazoa","taxonId":6072,"rank":"clade","hidden":true},{"scientificName":"Bilateria","taxonId":33213,"rank":"clade","hidden":true},{"scientificName":"Deuterostomia","taxonId":33511,"rank":"clade","hidden":true},{"scientificName":"Chordata","commonName":"chordates","taxonId":7711,"rank":"phylum","hidden":false},{"scientificName":"Craniata","taxonId":89593,"rank":"subphylum","hidden":false},{"scientificName":"Vertebrata","commonName":"vertebrates","taxonId":7742,"rank":"clade","hidden":false},{"scientificName":"Gnathostomata","commonName":"jawed
-        vertebrates","taxonId":7776,"rank":"clade","hidden":true},{"scientificName":"Teleostomi","taxonId":117570,"rank":"clade","hidden":true},{"scientificName":"Euteleostomi","commonName":"bony
-        vertebrates","taxonId":117571,"rank":"clade","hidden":false},{"scientificName":"Sarcopterygii","taxonId":8287,"rank":"superclass","hidden":true},{"scientificName":"Dipnotetrapodomorpha","taxonId":1338369,"rank":"clade","hidden":true},{"scientificName":"Tetrapoda","commonName":"tetrapods","taxonId":32523,"rank":"clade","hidden":true},{"scientificName":"Amniota","commonName":"amniotes","taxonId":32524,"rank":"clade","hidden":true},{"scientificName":"Mammalia","commonName":"mammals","taxonId":40674,"rank":"class","hidden":false},{"scientificName":"Theria","taxonId":32525,"rank":"clade","hidden":true},{"scientificName":"Eutheria","commonName":"placentals","taxonId":9347,"rank":"clade","hidden":false},{"scientificName":"Boreoeutheria","taxonId":1437010,"rank":"clade","hidden":true},{"scientificName":"Euarchontoglires","taxonId":314146,"rank":"superorder","hidden":false},{"scientificName":"Primates","commonName":"primates","taxonId":9443,"rank":"order","hidden":false},{"scientificName":"Haplorrhini","taxonId":376913,"rank":"suborder","hidden":false},{"scientificName":"Simiiformes","taxonId":314293,"rank":"infraorder","hidden":true},{"scientificName":"Catarrhini","taxonId":9526,"rank":"parvorder","hidden":false},{"scientificName":"Hominoidea","commonName":"apes","taxonId":314295,"rank":"superfamily","hidden":true},{"scientificName":"Hominidae","commonName":"great
-        apes","taxonId":9604,"rank":"family","hidden":false},{"scientificName":"Homininae","taxonId":207598,"rank":"subfamily","hidden":true},{"scientificName":"Homo","taxonId":9605,"rank":"genus","hidden":false}],"extraAttributes":{"uniParcId":"UPI0000197FCA"}},
-
-        {"entryType":"UniProtKB reviewed (Swiss-Prot)","primaryAccession":"A0PK11","uniProtkbId":"CLRN2_HUMAN","entryAudit":{"firstPublicDate":"2007-02-06","lastAnnotationUpdateDate":"2026-01-28","entryVersion":107},"annotationScore":5.0,"organism":{"scientificName":"Homo
-        sapiens","commonName":"Human","taxonId":9606,"lineage":["Eukaryota","Metazoa","Chordata","Craniata","Vertebrata","Euteleostomi","Mammalia","Eutheria","Euarchontoglires","Primates","Haplorrhini","Catarrhini","Hominidae","Homo"]},"proteinExistence":"1:
-        Evidence at protein level","proteinDescription":{"recommendedName":{"fullName":{"value":"Clarin-2"}}},"genes":[{"geneName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:33939"}],"value":"CLRN2"}}],"comments":[{"texts":[{"evidences":[{"evidenceCode":"ECO:0000250","source":"UniProtKB","id":"B2RVW2"}],"value":"Plays
-        a key role to hearing function. Required for normal organization and maintenance
-        of the stereocilia bundle and for mechano-electrical transduction"}],"commentType":"FUNCTION"},{"commentType":"SUBCELLULAR
-        LOCATION","subcellularLocations":[{"location":{"evidences":[{"evidenceCode":"ECO:0000250","source":"UniProtKB","id":"B2RVW2"}],"value":"Cell
-        projection, stereocilium membrane","id":"SL-0303"},"topology":{"evidences":[{"evidenceCode":"ECO:0000255"}],"value":"Multi-pass
-        membrane protein","id":"SL-9909"}}]},{"commentType":"DISEASE","disease":{"diseaseId":"Deafness,
-        autosomal recessive, 117","diseaseAccession":"DI-06028","acronym":"DFNB117","description":"A
-        form of non-syndromic deafness characterized by prelingual, moderate-to-profound
-        sensorineural hearing loss. Sensorineural hearing loss results from damage
-        to the neural receptors of the inner ear, the nerve pathways to the brain,
-        or the area of the brain that receives sound information.","diseaseCrossReference":{"database":"MIM","id":"619174"},"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"33496845"}]},"note":{"texts":[{"value":"The
-        disease is caused by variants affecting the gene represented in this entry"}]}},{"texts":[{"evidences":[{"evidenceCode":"ECO:0000305"}],"value":"Belongs
-        to the clarin family"}],"commentType":"SIMILARITY"}],"features":[],"keywords":[{"id":"KW-1003","category":"Cellular
-        component","name":"Cell membrane"},{"id":"KW-0966","category":"Cellular component","name":"Cell
-        projection"},{"id":"KW-0209","category":"Disease","name":"Deafness"},{"id":"KW-0225","category":"Disease","name":"Disease
-        variant"},{"id":"KW-0325","category":"PTM","name":"Glycoprotein"},{"id":"KW-1009","category":"Biological
-        process","name":"Hearing"},{"id":"KW-0472","category":"Cellular component","name":"Membrane"},{"id":"KW-1010","category":"Disease","name":"Non-syndromic
-        deafness"},{"id":"KW-1185","category":"Technical term","name":"Reference proteome"},{"id":"KW-0812","category":"Domain","name":"Transmembrane"},{"id":"KW-1133","category":"Domain","name":"Transmembrane
-        helix"}],"uniProtKBCrossReferences":[{"database":"GO","id":"GO:0032421","properties":[{"key":"GoTerm","value":"C:stereocilium
-        bundle"},{"key":"GoEvidenceType","value":"ISS:UniProtKB"}]},{"database":"GO","id":"GO:0060171","properties":[{"key":"GoTerm","value":"C:stereocilium
-        membrane"},{"key":"GoEvidenceType","value":"IEA:UniProtKB-SubCell"}]},{"database":"GO","id":"GO:0060088","properties":[{"key":"GoTerm","value":"P:auditory
-        receptor cell stereocilium organization"},{"key":"GoEvidenceType","value":"ISS:UniProtKB"}]},{"database":"GO","id":"GO:0007605","properties":[{"key":"GoTerm","value":"P:sensory
-        perception of sound"},{"key":"GoEvidenceType","value":"IMP:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000315","source":"PubMed","id":"33496845"}]},{"database":"GO","id":"GO:0120045","properties":[{"key":"GoTerm","value":"P:stereocilium
-        maintenance"},{"key":"GoEvidenceType","value":"ISS:UniProtKB"}]},{"database":"InterPro","id":"IPR026748","properties":[{"key":"EntryName","value":"Clarin"}]},{"database":"Pfam","id":"PF25807","properties":[{"key":"EntryName","value":"Clarin-2"},{"key":"MatchStatus","value":"1"}]}],"sequence":{"value":"MPGWFKKAWYGLASLLSFSSFILIIVALVVPHWLSGKILCQTGVDLVNATDRELVKFIGDIYYGLFRGCKVRQCGLGGRQSQFTIFPHLVKELNAGLHVMILLLLFLALALALVSMGFAILNMIQVPYRAVSGPGGICLWNVLAGGVVALAIASFVAAVKFHDLTERIANFQEKLFQFVVVEEQYEESFWICVASASAHAANLVVVAISQIPLPEIKTKIEEATVTAEDILY","length":232,"molWeight":25446,"crc64":"B6521162BA9B14A6","md5":"3B3263AF56F7EBFE3835748874613C91"},"lineages":[{"scientificName":"cellular
-        organisms","taxonId":131567,"rank":"no rank","hidden":true},{"scientificName":"Eukaryota","commonName":"eukaryotes","taxonId":2759,"rank":"domain","hidden":false},{"scientificName":"Opisthokonta","taxonId":33154,"rank":"clade","hidden":true},{"scientificName":"Metazoa","commonName":"animals","taxonId":33208,"rank":"kingdom","hidden":false},{"scientificName":"Eumetazoa","taxonId":6072,"rank":"clade","hidden":true},{"scientificName":"Bilateria","taxonId":33213,"rank":"clade","hidden":true},{"scientificName":"Deuterostomia","taxonId":33511,"rank":"clade","hidden":true},{"scientificName":"Chordata","commonName":"chordates","taxonId":7711,"rank":"phylum","hidden":false},{"scientificName":"Craniata","taxonId":89593,"rank":"subphylum","hidden":false},{"scientificName":"Vertebrata","commonName":"vertebrates","taxonId":7742,"rank":"clade","hidden":false},{"scientificName":"Gnathostomata","commonName":"jawed
-        vertebrates","taxonId":7776,"rank":"clade","hidden":true},{"scientificName":"Teleostomi","taxonId":117570,"rank":"clade","hidden":true},{"scientificName":"Euteleostomi","commonName":"bony
-        vertebrates","taxonId":117571,"rank":"clade","hidden":false},{"scientificName":"Sarcopterygii","taxonId":8287,"rank":"superclass","hidden":true},{"scientificName":"Dipnotetrapodomorpha","taxonId":1338369,"rank":"clade","hidden":true},{"scientificName":"Tetrapoda","commonName":"tetrapods","taxonId":32523,"rank":"clade","hidden":true},{"scientificName":"Amniota","commonName":"amniotes","taxonId":32524,"rank":"clade","hidden":true},{"scientificName":"Mammalia","commonName":"mammals","taxonId":40674,"rank":"class","hidden":false},{"scientificName":"Theria","taxonId":32525,"rank":"clade","hidden":true},{"scientificName":"Eutheria","commonName":"placentals","taxonId":9347,"rank":"clade","hidden":false},{"scientificName":"Boreoeutheria","taxonId":1437010,"rank":"clade","hidden":true},{"scientificName":"Euarchontoglires","taxonId":314146,"rank":"superorder","hidden":false},{"scientificName":"Primates","commonName":"primates","taxonId":9443,"rank":"order","hidden":false},{"scientificName":"Haplorrhini","taxonId":376913,"rank":"suborder","hidden":false},{"scientificName":"Simiiformes","taxonId":314293,"rank":"infraorder","hidden":true},{"scientificName":"Catarrhini","taxonId":9526,"rank":"parvorder","hidden":false},{"scientificName":"Hominoidea","commonName":"apes","taxonId":314295,"rank":"superfamily","hidden":true},{"scientificName":"Hominidae","commonName":"great
-        apes","taxonId":9604,"rank":"family","hidden":false},{"scientificName":"Homininae","taxonId":207598,"rank":"subfamily","hidden":true},{"scientificName":"Homo","taxonId":9605,"rank":"genus","hidden":false}],"extraAttributes":{"uniParcId":"UPI0000D6154A"}}]}'
+      string: !!binary |
+        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
     headers:
-      Access-Control-Allow-Credentials:
+      accept-ranges:
+      - bytes
+      access-control-allow-credentials:
       - 'true'
-      Access-Control-Allow-Headers:
+      access-control-allow-headers:
       - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
-      Access-Control-Allow-Methods:
+      access-control-allow-methods:
       - GET, PUT, POST, DELETE, PATCH, OPTIONS
-      Access-Control-Allow-Origin:
+      access-control-allow-origin:
       - '*'
-      Access-Control-Expose-Headers:
+      access-control-expose-headers:
       - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
-      Access-Control-Max-Age:
+      access-control-max-age:
       - '1728000'
-      Cache-Control:
+      cache-control:
       - public, max-age=43200
-      Connection:
-      - Keep-Alive
-      Content-Type:
+      connection:
+      - keep-alive
+      content-encoding:
+      - gzip
+      content-length:
+      - '9228'
+      content-type:
       - application/json
-      Date:
-      - Tue, 03 Feb 2026 12:27:15 GMT
-      Link:
-      - <https://rest.uniprot.org/uniprotkb/search?format=json&fields=accession,id,protein_name,gene_names,organism_name,organism_id,lineage,sequence,length,mass,protein_existence,annotation_score,reviewed,date_created,date_modified,version,cc_function,cc_catalytic_activity,cc_activity_regulation,cc_subunit,cc_pathway,cc_subcellular_location,cc_tissue_specificity,cc_alternative_products,cc_disease,cc_cofactor,ph_dependence,temp_dependence,kinetics,absorption,redox_potential,cc_induction,cc_caution,cc_similarity,cc_pharmaceutical,ft_domain,ft_binding,ft_site,ft_act_site,ft_mod_res,xref_pdb,xref_chembl,xref_drugbank,xref_guidetopharmacology,go_id,xref_interpro,xref_pfam,xref_reactome,keyword&query=%2A&cursor=8q347cwgp85m8w5qa1bgc4nmpzvlxea7aw&size=5>;
+      date:
+      - Tue, 06 Oct 2026 03:54:44 GMT
+      link:
+      - <https://rest.uniprot.org/uniprotkb/search?format=json&fields=accession,id,protein_name,gene_names,organism_name,organism_id,lineage,sequence,length,mass,protein_existence,annotation_score,reviewed,date_created,date_modified,version,cc_function,cc_catalytic_activity,cc_activity_regulation,cc_subunit,cc_pathway,cc_subcellular_location,cc_tissue_specificity,cc_alternative_products,cc_disease,cc_cofactor,ph_dependence,temp_dependence,kinetics,absorption,redox_potential,cc_induction,cc_caution,cc_similarity,cc_pharmaceutical,ft_domain,ft_binding,ft_site,ft_act_site,ft_mod_res,xref_pdb,xref_chembl,xref_drugbank,xref_guidetopharmacology,go_id,xref_interpro,xref_pfam,xref_reactome,keyword&query=%2A&cursor=8q347cwgp85m9ba9edl43oitlsk4hyt56g&size=5>;
         rel="next"
-      Strict-Transport-Security:
-      - max-age=31536000; includeSubDomains
-      Transfer-Encoding:
-      - chunked
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent,
         Accept-Encoding
-      X-API-Deployment-Date:
-      - 28-January-2026
-      X-Total-Results:
-      - '203130940'
-      X-UniProt-Release:
-      - '2026_01'
-      X-UniProt-Release-Date:
-      - 28-January-2026
-      content-length:
-      - '48421'
+      x-api-deployment-date:
+      - 23-September-2026
       x-cache:
-      - miss cached
+      - hit cached
+      x-total-results:
+      - '150006383'
+      x-uniprot-release:
+      - '2026_03'
+      x-uniprot-release-date:
+      - 02-September-2026
     status:
       code: 200
       message: OK

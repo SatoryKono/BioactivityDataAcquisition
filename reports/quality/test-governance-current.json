@@ -1145,9 +1145,9 @@
     "scope_file_counts": {
       "fixture": 84,
       "golden": 30,
-      "vcr": 356
+      "vcr": 350
     },
-    "total_files": 470,
+    "total_files": 464,
     "tracked_extensions": [
       ".json",
       ".yaml",
@@ -1982,9 +1982,9 @@
       "scope_file_counts": {
         "fixture": 84,
         "golden": 30,
-        "vcr": 356
+        "vcr": 350
       },
-      "total_files": 470,
+      "total_files": 464,
       "tracked_extensions": [
         ".json",
         ".yaml",
@@ -2058,7 +2058,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "dbe5cfc280ea8dec760a2fd4fd04194b1ea5b6be499b6dbacb09d62530f21af7",
+  "source_tree_sha256": "da0589239a570d35cb8d69728a38cfcbe05fea7ca376614d3fb2f0ab02273c9f",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 83,

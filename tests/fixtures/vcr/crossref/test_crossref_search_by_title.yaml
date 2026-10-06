@@ -2,350 +2,226 @@ interactions:
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - api.crossref.org
-      User-Agent:
-      - BioETL/1.0 (mailto:test@example.com)
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://api.crossref.org/works?query=title%3A%22Crystal+structure+of+rhodopsin%22&rows=3&cursor=*&mailto=test@example.com
   response:
     body:
-      string: '{"status":"ok","message-type":"work-list","message-version":"1.0.0","message":{"items-per-page":3,"total-results":15,"next-cursor":null,"items":[{"DOI":"10.1038/nature12373","title":["Crystal
-        structure of rhodopsin bound to arrestin by femtosecond X-ray laser"],"author":[{"given":"Yanyong","family":"Kang"}],"container-title":["Nature"],"publisher":"Springer
-        Science and Business Media LLC","published-print":{"date-parts":[[2015,7,30]]},"is-referenced-by-count":892,"type":"journal-article"},{"DOI":"10.1126/science.1219218","title":["Crystal
-        structure of metarhodopsin II"],"author":[{"given":"Hui-Woog","family":"Choe"}],"container-title":["Science"],"publisher":"American
-        Association for the Advancement of Science (AAAS)","published-print":{"date-parts":[[2011,7,22]]},"is-referenced-by-count":623,"type":"journal-article"},{"DOI":"10.1073/pnas.0804276105","title":["Crystal
-        structure of a photoactivated deprotonated intermediate of rhodopsin"],"author":[{"given":"Midori","family":"Murakami"}],"container-title":["Proceedings
-        of the National Academy of Sciences"],"publisher":"Proceedings of the National
-        Academy of Sciences","published-print":{"date-parts":[[2008,7,8]]},"is-referenced-by-count":201,"type":"journal-article"}]}}'
+      string: '{"status":"ok","message-type":"work-list","message-version":"1.0.0","message":{"facets":{},"next-cursor":"MTAyNzU1NjQxMzAwMCwxMC4xMDY3JTJGbW9lLjIwMDAuMTA3MjI1","total-results":2891714,"items":[{"indexed":{"date-parts":[[2026,7,1]],"date-time":"2026-07-01T16:40:07Z","timestamp":1782924007454,"version":"3.54.5"},"reference-count":15,"publisher":"Elsevier
+        BV","issue":"2","license":[{"start":{"date-parts":[[2001,2,1]],"date-time":"2001-02-01T00:00:00Z","timestamp":980985600000},"content-version":"tdm","delay-in-days":0,"URL":"https:\/\/www.elsevier.com\/tdm\/userlicense\/1.0\/"},{"start":{"date-parts":[[2016,7,6]],"date-time":"2016-07-06T00:00:00Z","timestamp":1467763200000},"content-version":"vor","delay-in-days":5634,"URL":"https:\/\/www.elsevier.com\/open-access\/userlicense\/1.0\/"}],"content-domain":{"domain":[],"crossmark-restriction":false},"short-container-title":["The
+        Journal of Thoracic and Cardiovascular Surgery"],"published-print":{"date-parts":[[2001,2]]},"DOI":"10.1067\/mtc.2001.111655","type":"journal-article","created":{"date-parts":[[2002,7,25]],"date-time":"2002-07-25T00:18:43Z","timestamp":1027556323000},"page":"331-335","source":"Crossref","is-referenced-by-count":41,"title":["Heparin
+        antibodies and thromboembolism in heparin-coated and noncoated ventricular
+        assist devices"],"prefix":"10.25013","volume":"121","author":[{"given":"Andreas","family":"Koster","sequence":"first","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Matthias","family":"Loebe","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Ralf","family":"Sodian","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Evgenij
+        V.","family":"Potapov","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Roland","family":"Hansen","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Johannes","family":"M\u00fcller","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Fritz","family":"Mertzlufft","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"George
+        J.","family":"Crystal","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Herrmann","family":"Kuppe","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Roland","family":"Hetzer","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]}],"member":"78","reference":[{"key":"10.1067\/mtc.2001.111655_bib1","doi-asserted-by":"crossref","first-page":"M790","DOI":"10.1097\/00002480-199507000-00122","article-title":"Pathophysiologic
+        role of contact activation in bleeding followed by thromboembolic complications
+        after implantation of a ventricular assist device","volume":"41","author":"Himmelreich","year":"1995","journal-title":"ASAIO
+        J"},{"key":"10.1067\/mtc.2001.111655_bib2","doi-asserted-by":"crossref","first-page":"829","DOI":"10.1016\/S0022-5223(95)70117-6","article-title":"Reduced
+        complement activation and improved postoperative performance after cardiopulmonary
+        bypass with heparin-coated circuits","volume":"110","author":"Jansen","year":"1995","journal-title":"J
+        Thorac Cardiovasc Surg"},{"key":"10.1067\/mtc.2001.111655_bib3","doi-asserted-by":"crossref","first-page":"117","DOI":"10.1016\/S0022-5223(97)70124-7","article-title":"Heparin
+        coating of extracorporeal circuits inhibits contact activation during cardiac
+        operations","volume":"114","author":"te Velthuis","year":"1997","journal-title":"J
+        Thorac Cardiovasc Surg"},{"key":"10.1067\/mtc.2001.111655_bib4","doi-asserted-by":"crossref","first-page":"767","DOI":"10.1111\/j.1525-1594.1996.tb04538.x","article-title":"Changes
+        in platelet, granulocyte, and complement activation during cardiopulmonary
+        bypass using heparin coated equipment","volume":"20","author":"Fukotomi","year":"1996","journal-title":"Artif
+        Organs"},{"key":"10.1067\/mtc.2001.111655_bib5","doi-asserted-by":"crossref","first-page":"95","DOI":"10.1055\/s-0038-1656329","article-title":"Platelet
+        factor 4 complexed to heparin is the target for antibodies generated in heparin-induced
+        thrombocytopenia","volume":"68","author":"Amiral","year":"1992","journal-title":"Thromb
+        Haemost"},{"key":"10.1067\/mtc.2001.111655_bib6","doi-asserted-by":"crossref","first-page":"667","DOI":"10.1097\/00000542-199709000-00029","article-title":"Heparin-induced
+        thrombocytopenia and thrombosis implications for perioperative management","volume":"87","author":"Slaughter","year":"1997","journal-title":"Anesthesiology"},{"key":"10.1067\/mtc.2001.111655_bib7","doi-asserted-by":"crossref","first-page":"521","DOI":"10.1016\/S1053-0770(05)80018-7","article-title":"Heparin-induced
+        thrombocytopenia","volume":"10","author":"Shorten","year":"1996","journal-title":"J
+        Cardiothorac Vasc Anesth"},{"key":"10.1067\/mtc.2001.111655_bib8","doi-asserted-by":"crossref","first-page":"734","DOI":"10.1055\/s-0038-1646493","article-title":"A
+        rapid and sensitive test for diagnosing heparin-induced thrombocytopenia","volume":"66","author":"Greinacher","year":"1991","journal-title":"Thromb
+        Haemost"},{"key":"10.1067\/mtc.2001.111655_bib9","doi-asserted-by":"crossref","first-page":"73","DOI":"10.1161\/01.CIR.99.1.73","article-title":"Recombinant
+        hirudin (lepirudin) provides safe and effective anticoagulation in patients
+        with heparin-induced thrombocytopenia: a prospective study","volume":"99","author":"Greinacher","year":"1999","journal-title":"Circualtion"},{"key":"10.1067\/mtc.2001.111655_bib10","doi-asserted-by":"crossref","first-page":"1242","DOI":"10.1161\/01.CIR.95.5.1242","article-title":"Prevalence
+        of heparin-associated antibodies without thrombosis in patients undergoing
+        cardiopulmonary bypass surgery","volume":"95","author":"Bauer","year":"1997","journal-title":"Circulation"},{"key":"10.1067\/mtc.2001.111655_bib11","doi-asserted-by":"crossref","first-page":"653","DOI":"10.1046\/j.1365-2141.1998.00750.x","article-title":"High
+        incidence of antiheparin\/platelet factor 4 antibodies after cardiopulmonary
+        bypass surgery","volume":"101","author":"Trossa\u00e9rt","year":"1998","journal-title":"Br
+        J Haematol"},{"key":"10.1067\/mtc.2001.111655_bib12","doi-asserted-by":"crossref","first-page":"2530","DOI":"10.1161\/01.CIR.99.19.2530","article-title":"Antibodies
+        to platelet factor 4-heparin after cardiopulmonary bypass in patients anticoagulated
+        with unfractionated heparin or a low-molecular-weight heparin: clinical implications
+        for heparin-induced thrombocytopenia","volume":"99","author":"Pouplard","year":"1999","journal-title":"Circulation"},{"key":"10.1067\/mtc.2001.111655_bib13","doi-asserted-by":"crossref","first-page":"376","DOI":"10.1016\/S0022-2143(96)80009-6","article-title":"Patients
+        treated with unfractionated heparin during open heart surgery are at high
+        risk to form antibodies with heparin: platelet factor 4 complexes","volume":"128","author":"Visentin","year":"1996","journal-title":"J
+        Lab Clin Med"},{"key":"10.1067\/mtc.2001.111655_bib14","doi-asserted-by":"crossref","first-page":"439","DOI":"10.1016\/S0741-5214(98)70129-6","article-title":"The
+        incidence of heparin-induced antibodies in patients undergoing vascular surgery:
+        a prospective study","volume":"28","author":"Jackson","year":"1998","journal-title":"J
+        Vasc Surg"},{"key":"10.1067\/mtc.2001.111655_bib15","doi-asserted-by":"crossref","first-page":"916","DOI":"10.1182\/blood.V91.3.916","article-title":"Antibodies
+        from patients with heparin-induced thrombocytopenia\/thrombosis recognize
+        different epitopes on heparin: platelet factor 4","volume":"91","author":"Suh","year":"1998","journal-title":"Blood"}],"container-title":["The
+        Journal of Thoracic and Cardiovascular Surgery"],"language":"en","link":[{"URL":"https:\/\/api.elsevier.com\/content\/article\/PII:S0022522301029208?httpAccept=text\/xml","content-type":"text\/xml","content-version":"vor","intended-application":"text-mining"},{"URL":"https:\/\/api.elsevier.com\/content\/article\/PII:S0022522301029208?httpAccept=text\/plain","content-type":"text\/plain","content-version":"vor","intended-application":"text-mining"}],"deposited":{"date-parts":[[2019,12,15]],"date-time":"2019-12-15T21:44:51Z","timestamp":1576446291000},"score":4.536514,"resource":{"primary":{"URL":"https:\/\/linkinghub.elsevier.com\/retrieve\/pii\/S0022522301029208"}},"issued":{"date-parts":[[2001,2]]},"references-count":15,"journal-issue":{"issue":"2","published-print":{"date-parts":[[2001,2]]}},"alternative-id":["S0022522301029208"],"URL":"https:\/\/doi.org\/10.1067\/mtc.2001.111655","ISSN":["0022-5223"],"issn-type":[{"value":"0022-5223","type":"print"}],"published":{"date-parts":[[2001,2]]}},{"indexed":{"date-parts":[[2026,8,19]],"date-time":"2026-08-19T17:49:13Z","timestamp":1787161753518,"version":"build-2736575974"},"reference-count":29,"publisher":"Elsevier
+        BV","issue":"1","license":[{"start":{"date-parts":[[2000,7,1]],"date-time":"2000-07-01T00:00:00Z","timestamp":962409600000},"content-version":"tdm","delay-in-days":0,"URL":"https:\/\/www.elsevier.com\/tdm\/userlicense\/1.0\/"}],"content-domain":{"domain":[],"crossmark-restriction":false},"short-container-title":["American
+        Journal of Obstetrics and Gynecology"],"published-print":{"date-parts":[[2000,7]]},"DOI":"10.1067\/mob.2000.105684","type":"journal-article","created":{"date-parts":[[2002,7,25]],"date-time":"2002-07-25T00:20:13Z","timestamp":1027556413000},"page":"140-147","source":"Crossref","is-referenced-by-count":11,"title":["Relationship
+        of systemic hemodynamics, left ventricular structure and function, and plasma
+        natriuretic peptide concentrations during pregnancy complicated by preeclampsia"],"prefix":"10.1067","volume":"183","author":[{"given":"Claudio","family":"Borghi","sequence":"first","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Daniela
+        Degli","family":"Esposti","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Vincenzo","family":"Immordino","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Alberto","family":"Cassani","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Stefano","family":"Boschi","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Luciano","family":"Bovicelli","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Ettore","family":"Ambrosioni","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]}],"member":"78","reference":[{"key":"10.1067\/mob.2000.105684_bib1","doi-asserted-by":"crossref","first-page":"609","DOI":"10.1136\/bmj.311.7005.609","article-title":"The
+        hypertensive disorders of pregnancy","volume":"311","author":"Broughton Pipkin","year":"1995","journal-title":"BMJ"},{"key":"10.1067\/mob.2000.105684_bib2","doi-asserted-by":"crossref","first-page":"115","DOI":"10.1146\/annurev.med.48.1.115","article-title":"Hypertension
+        in pregnancy: current concepts of preeclampsia","volume":"48","author":"Witlin","year":"1997","journal-title":"Annu
+        Rev Med"},{"key":"10.1067\/mob.2000.105684_bib3","first-page":"71","article-title":"Cardiovascular
+        changes in pregnancy","volume":"4","author":"Chesley","year":"1975","journal-title":"Obstet
+        Gynecol Annu"},{"key":"10.1067\/mob.2000.105684_bib4","doi-asserted-by":"crossref","first-page":"53","DOI":"10.1016\/S0002-8703(97)70247-3","article-title":"Effects
+        of physiologic load of pregnancy on left ventricular contractility and remodeling","volume":"133","author":"Geva","year":"1997","journal-title":"Am
+        Heart J"},{"key":"10.1067\/mob.2000.105684_bib5","doi-asserted-by":"crossref","first-page":"1469","DOI":"10.1016\/S0002-9149(97)00738-8","article-title":"Cardiovascular
+        function before, during, and after the first and subsequent pregnancies","volume":"80","author":"Clapp","year":"1997","journal-title":"Am
+        J Cardiol"},{"key":"10.1067\/mob.2000.105684_bib6","doi-asserted-by":"crossref","first-page":"40","DOI":"10.1016\/0029-7844(96)00069-5","article-title":"A
+        longitudinal study of maternal hemodynamics during normal pregnancy","volume":"88","author":"van
+        Oppen","year":"1996","journal-title":"Obstet Gynecol"},{"key":"10.1067\/mob.2000.105684_bib7","doi-asserted-by":"crossref","first-page":"534","DOI":"10.1016\/0002-9149(77)90068-6","article-title":"Cardiac
+        size and performance during pregnancy estimated with echocardiography","volume":"40","author":"Rubler","year":"1977","journal-title":"Am
+        J Cardiol"},{"key":"10.1067\/mob.2000.105684_bib8","doi-asserted-by":"crossref","first-page":"430","DOI":"10.1016\/0002-9378(82)90249-6","article-title":"Echocardiographic
+        estimation of hemodynamics in hypertensive pregnancy","volume":"144","author":"Kuzniar","year":"1982","journal-title":"Am
+        J Obstet Gynecol"},{"key":"10.1067\/mob.2000.105684_bib9","doi-asserted-by":"crossref","first-page":"400","DOI":"10.1016\/0002-9378(83)90820-7","article-title":"Left
+        ventricular function in preeclamptic patients: an echocardiographic study","volume":"146","author":"Kuzniar","year":"1983","journal-title":"Am
+        J Obstet Gynecol"},{"issue":"6 Pt 2","key":"10.1067\/mob.2000.105684_bib10","first-page":"129","article-title":"Vascular,
+        volume, and cardiac response to normal and hypertensive pregnancy","volume":"6","author":"Hunyor","year":"1984","journal-title":"Hypertension"},{"key":"10.1067\/mob.2000.105684_bib11","doi-asserted-by":"crossref","first-page":"994","DOI":"10.1016\/0002-9378(86)90333-9","article-title":"Echocardiographic
+        left ventricular mass to differentiate chronic hypertension from preeclampsia
+        during pregnancy","volume":"155","author":"Thompson","year":"1986","journal-title":"Am
+        J Obstet Gynecol"},{"key":"10.1067\/mob.2000.105684_bib12","doi-asserted-by":"crossref","first-page":"443","DOI":"10.1016\/S0002-9378(84)90418-6","article-title":"Cardiac
+        size and function in pregnancy-induced hypertension","volume":"150,5","author":"Veille","year":"1984","journal-title":"Am
+        J Obstet Gynecol"},{"key":"10.1067\/mob.2000.105684_bib13","doi-asserted-by":"crossref","first-page":"914","DOI":"10.1016\/S0002-8703(98)70054-7","article-title":"Natriuretic
+        peptides: physiology, therapeutic potential, and risk stratification in ischemic
+        heart disease","volume":"135","author":"Stein","year":"1998","journal-title":"Am
+        Heart J"},{"key":"10.1067\/mob.2000.105684_bib14","doi-asserted-by":"crossref","first-page":"321","DOI":"10.1056\/NEJM199807303390507","article-title":"Natriuretic
+        peptides","volume":"339","author":"Levin","year":"1998","journal-title":"N
+        Engl J Med"},{"key":"10.1067\/mob.2000.105684_bib15","doi-asserted-by":"crossref","first-page":"631","DOI":"10.1161\/01.HYP.25.4.631","article-title":"Atrial
+        natriuretic peptide and hemodynamic changes during normal human pregnancy","volume":"25","author":"Sala","year":"1995","journal-title":"Hypertension"},{"key":"10.1067\/mob.2000.105684_bib16","doi-asserted-by":"crossref","first-page":"1642","DOI":"10.1016\/0002-9378(94)90416-2","article-title":"Plasma
+        levels of atrial natriuretic peptide in normal and hypertensive pregnancies:
+        a meta-analysis","volume":"171","author":"Castro","year":"1994","journal-title":"Am
+        J Obstet Gynecol"},{"issue":"3 Pt 2","key":"10.1067\/mob.2000.105684_bib17","first-page":"F483","article-title":"Atrial
+        natriuretic peptide in preeclampsia: metabolic clearance, sodium excretion
+        and renal hemodynamics","volume":"273","author":"Irons","year":"1997","journal-title":"Am
+        J Physiol"},{"key":"10.1067\/mob.2000.105684_bib18","doi-asserted-by":"crossref","first-page":"389","DOI":"10.1507\/endocrj.44.389","article-title":"Impaired
+        guanosine 3'',5''-cyclic phosphate production in severe pregnancy-induced
+        hypertension with high plasma levels of atrial and brain natriuretic peptides","volume":"44","author":"Itoh","year":"1997","journal-title":"Endocr
+        J"},{"key":"10.1067\/mob.2000.105684_bib19","doi-asserted-by":"crossref","first-page":"747","DOI":"10.1016\/S0029-7844(97)00082-3","article-title":"An
+        increase of the plasma N-terminal peptide of proatrial natriuretic peptide
+        in preeclampsia","volume":"89","author":"Pouta","year":"1997","journal-title":"Obstet
+        Gynecol"},{"key":"10.1067\/mob.2000.105684_bib20","doi-asserted-by":"crossref","first-page":"73","DOI":"10.1159\/000292452","article-title":"Brain
+        natriuretic peptide and atrial natriuretic peptide levels in normal pregnancy
+        and preeclampsia","volume":"38","author":"Furuhashi","year":"1994","journal-title":"Gynecol
+        Obstet Invest"},{"key":"10.1067\/mob.2000.105684_bib21","first-page":"85","article-title":"Plasma
+        atrial natriuretic peptide levels in preeclampsia and eclampsia","volume":"8","author":"Adam","year":"1998","journal-title":"J
+        Matern Fetal Invest"},{"key":"10.1067\/mob.2000.105684_bib22","series-title":"Classification
+        of hypertensive disorders of pregnancy","author":"National High Blood Pressure
+        Education Program Working Group on High Blood Pressure in Pregnancy","year":"1991"},{"key":"10.1067\/mob.2000.105684_bib23","doi-asserted-by":"crossref","first-page":"97","DOI":"10.1161\/01.HYP.9.2_Pt_2.II97","article-title":"Recommendations
+        concerning use of echocardiography in hypertension and general population
+        research","volume":"9","author":"Devereux","year":"1987","journal-title":"Hypertension"},{"key":"10.1067\/mob.2000.105684_bib24","doi-asserted-by":"crossref","first-page":"613","DOI":"10.1161\/01.CIR.55.4.613","article-title":"Ecocardiographic
+        determination of left ventricular mass in man: anatomic validation of the
+        method","volume":"55","author":"Devereux","year":"1977","journal-title":"Circulation"},{"key":"10.1067\/mob.2000.105684_bib25","doi-asserted-by":"crossref","first-page":"425","DOI":"10.1161\/01.CIR.70.3.425","article-title":"Pulsed
+        Doppler echocardiographic determination of stroke volume and cardiac output:
+        clinical validation of two new methods using apical windows","volume":"70","author":"Lewis","year":"1984","journal-title":"Circulation"},{"key":"10.1067\/mob.2000.105684_bib26","doi-asserted-by":"crossref","first-page":"246","DOI":"10.1016\/S0894-7317(97)70062-2","article-title":"The
+        noninvasive assessment of left ventricular diastolic function with two-dimensional
+        and Doppler echocardiography","volume":"10","author":"Oh","year":"1997","journal-title":"J
+        Am Soc Echocardiogr"},{"key":"10.1067\/mob.2000.105684_bib27","doi-asserted-by":"crossref","first-page":"339","DOI":"10.3109\/10641969309032938","article-title":"Atrial
+        natriuretic factor response to acute volume expansion in borderline hypertension:
+        ole of ACE-inhibition and changes in peripheral venous tone","volume":"15","author":"Borghi","year":"1993","journal-title":"Clin
+        Exp Hypertens"},{"key":"10.1067\/mob.2000.105684_bib28","doi-asserted-by":"crossref","first-page":"502","DOI":"10.7326\/0003-4819-117-6-502","article-title":"Left
+        ventricular diastolic dysfunction as a cause of congestive heart failure:
+        echanisms and management","volume":"117","author":"Bonow","year":"1992","journal-title":"Ann
+        Intern Med"},{"key":"10.1067\/mob.2000.105684_bib29","doi-asserted-by":"crossref","first-page":"53","DOI":"10.1016\/S0002-8703(97)70247-3","article-title":"Effects
+        of physiologic load of pregnancy on left ventricular contractility and remodeling","volume":"133","author":"Geva","year":"1997","journal-title":"Am
+        Heart J"}],"container-title":["American Journal of Obstetrics and Gynecology"],"language":"en","link":[{"URL":"https:\/\/api.elsevier.com\/content\/article\/PII:S0002937800248540?httpAccept=text\/xml","content-type":"text\/xml","content-version":"vor","intended-application":"text-mining"},{"URL":"https:\/\/api.elsevier.com\/content\/article\/PII:S0002937800248540?httpAccept=text\/plain","content-type":"text\/plain","content-version":"vor","intended-application":"text-mining"}],"deposited":{"date-parts":[[2019,5,9]],"date-time":"2019-05-09T08:20:18Z","timestamp":1557390018000},"score":3.66719,"resource":{"primary":{"URL":"https:\/\/linkinghub.elsevier.com\/retrieve\/pii\/S0002937800248540"}},"issued":{"date-parts":[[2000,7]]},"references-count":29,"journal-issue":{"issue":"1","published-print":{"date-parts":[[2000,7]]}},"alternative-id":["S0002937800248540"],"URL":"https:\/\/doi.org\/10.1067\/mob.2000.105684","ISSN":["0002-9378"],"issn-type":[{"value":"0002-9378","type":"print"}],"published":{"date-parts":[[2000,7]]}},{"indexed":{"date-parts":[[2022,4,2]],"date-time":"2022-04-02T20:22:57Z","timestamp":1648930977660},"reference-count":14,"publisher":"Elsevier
+        BV","issue":"1","license":[{"start":{"date-parts":[[2000,7,1]],"date-time":"2000-07-01T00:00:00Z","timestamp":962409600000},"content-version":"tdm","delay-in-days":0,"URL":"https:\/\/www.elsevier.com\/tdm\/userlicense\/1.0\/"}],"content-domain":{"domain":[],"crossmark-restriction":false},"short-container-title":["Oral
+        Surgery, Oral Medicine, Oral Pathology, Oral Radiology, and Endodontology"],"published-print":{"date-parts":[[2000,7]]},"DOI":"10.1067\/moe.2000.107225","type":"journal-article","created":{"date-parts":[[2002,7,25]],"date-time":"2002-07-25T00:20:13Z","timestamp":1027556413000},"page":"25-32","source":"Crossref","is-referenced-by-count":0,"title":["Neuronal
+        structure of microvascular transplants with and without neuronal anastomosis"],"prefix":"10.1067","volume":"90","author":[{"given":"Alexander","family":"Gaggl","sequence":"first","affiliation":[],"role":[{"role":"author","vocabulary":"crossref"}]},{"given":"G\u00fcnter","family":"Schultes","sequence":"additional","affiliation":[],"role":[{"role":"author","vocabulary":"crossref"}]},{"given":"Hans","family":"K\u00e4rcher","sequence":"additional","affiliation":[],"role":[{"role":"author","vocabulary":"crossref"}]},{"given":"Reinhold","family":"Kleinert","sequence":"additional","affiliation":[],"role":[{"role":"author","vocabulary":"crossref"}]}],"member":"78","reference":[{"key":"10.1067\/moe.2000.107225_bib1","doi-asserted-by":"crossref","first-page":"616","DOI":"10.1007\/s001060050066","article-title":"Frei
+        transplantierte, mikrovaskul\u00e4r reanastomosierte Unterarmlappen zur Rekonstruktion
+        in Mundh\u00f6hle und Oropharynx. Klinische und morphologische Befunde unter
+        besonderer Ber\u00fccksichtigung der Resensibilisierung","volume":"44","author":"Baumann","year":"1996","journal-title":"HNO"},{"key":"10.1067\/moe.2000.107225_bib2","doi-asserted-by":"crossref","first-page":"1350","DOI":"10.1097\/00006534-199406000-00003","article-title":"Reinnervated
+        lateral antebrachial cutaneous neurosome flaps in oral reconstruction: are
+        we making sense?","volume":"93","author":"Boyd","year":"1994","journal-title":"Plast
+        Reconstr Surg"},{"key":"10.1067\/moe.2000.107225_bib3","doi-asserted-by":"crossref","first-page":"467","DOI":"10.1055\/s-2007-1006732","article-title":"Reinnervated
+        radial forearm free flaps in head and neck reconstruction","volume":"8","author":"Dubner","year":"1992","journal-title":"J
+        Reconstr Microsurg"},{"key":"10.1067\/moe.2000.107225_bib4","doi-asserted-by":"crossref","first-page":"161","DOI":"10.1288\/00005537-199002000-00011","article-title":"The
+        neurofasciocutaneous radial forearm flap in head and neck reconstruction.
+        A preliminary report","volume":"100","author":"Urken","year":"1990","journal-title":"Laryngoscope"},{"key":"10.1067\/moe.2000.107225_bib5","first-page":"44","article-title":"Latissimus
+        dorsi musculocutaneous flap used as a pedicled or free microvascular graft","volume":"71","author":"Asko-Seljavaara","year":"1982","journal-title":"Ann
+        Chir Gynaecol"},{"key":"10.1067\/moe.2000.107225_bib6","doi-asserted-by":"crossref","first-page":"238","DOI":"10.1007\/s100060050067","article-title":"Postoperative
+        sensibilit\u00e4t des gef\u00e4\u00dfgestielten m.-latissimus-dorsi-transplantates
+        ohne neuronale anastomose","volume":"2","author":"Schultes","year":"1998","journal-title":"Mund
+        Kiefer Gesichtschir"},{"key":"10.1067\/moe.2000.107225_bib7","first-page":"403","article-title":"Anatomische
+        studie des gef\u00e4\u00dfgestielten nervus thoracicus longus","volume":"95","author":"Schultes","year":"1998","journal-title":"Stomatol"},{"key":"10.1067\/moe.2000.107225_bib8","doi-asserted-by":"crossref","first-page":"638","DOI":"10.1016\/S1079-2104(05)80243-4","article-title":"Intraoral
+        reconstruction with inervated forearm flap: a comparison of sensibility and
+        reinnervation in innervated versus noninnervated forearm flap","volume":"80","author":"Katou","year":"1995","journal-title":"Oral
+        Surg Oral Med Oral Pathol Oral Radiol Endod"},{"key":"10.1067\/moe.2000.107225_bib9","first-page":"624","article-title":"Electron
+        microscopic observation of the denervated flap reinnervation after implantation
+        of the sensory nerve","volume":"74","author":"Li","year":"1994","journal-title":"Chung-Hua-I-Hsueh-Tsa-Chih"},{"key":"10.1067\/moe.2000.107225_bib10","doi-asserted-by":"crossref","first-page":"358","DOI":"10.1016\/S0363-5023(88)80008-X","article-title":"Experimental
+        comparison of vascularized and non vascularized nerve grafting","volume":"13","author":"Shibata","year":"1988","journal-title":"J
+        Hand Surg Am"},{"key":"10.1067\/moe.2000.107225_bib11","first-page":"264","article-title":"Vascularized
+        nerve grafts. A review","volume":"14","author":"Terzis","year":"1995","journal-title":"Int
+        Angiol"},{"key":"10.1067\/moe.2000.107225_bib12","doi-asserted-by":"crossref","first-page":"26","DOI":"10.1097\/00000637-199507000-00006","article-title":"Serratus
+        anterior intercostal nerve graft: a new vascularized nerve graft","volume":"35","author":"Gailliot","year":"1995","journal-title":"Ann
+        Plast Surg"},{"key":"10.1067\/moe.2000.107225_bib13","doi-asserted-by":"crossref","first-page":"461","DOI":"10.1097\/00000637-199711000-00004","article-title":"A
+        comparison of donor and recipient site sensation in free tissue reconstruction
+        of the oral cavity","volume":"39","author":"Cordeiro","year":"1997","journal-title":"Ann
+        Plast Surg"},{"key":"10.1067\/moe.2000.107225_bib14","first-page":"159","article-title":"The
+        current state of nerve microsurgery","author":"Millesi","year":"1989"}],"container-title":["Oral
+        Surgery, Oral Medicine, Oral Pathology, Oral Radiology, and Endodontology"],"language":"en","link":[{"URL":"https:\/\/api.elsevier.com\/content\/article\/PII:S1079210400476572?httpAccept=text\/xml","content-type":"text\/xml","content-version":"vor","intended-application":"text-mining"},{"URL":"https:\/\/api.elsevier.com\/content\/article\/PII:S1079210400476572?httpAccept=text\/plain","content-type":"text\/plain","content-version":"vor","intended-application":"text-mining"}],"deposited":{"date-parts":[[2019,5,9]],"date-time":"2019-05-09T08:27:17Z","timestamp":1557390437000},"score":3.9737806,"resource":{"primary":{"URL":"https:\/\/linkinghub.elsevier.com\/retrieve\/pii\/S1079210400476572"}},"issued":{"date-parts":[[2000,7]]},"references-count":14,"journal-issue":{"issue":"1","published-print":{"date-parts":[[2000,7]]}},"alternative-id":["S1079210400476572"],"URL":"https:\/\/doi.org\/10.1067\/moe.2000.107225","ISSN":["1079-2104"],"issn-type":[{"value":"1079-2104","type":"print"}],"published":{"date-parts":[[2000,7]]}}],"items-per-page":3,"query":{"start-index":0,"search-terms":"title:\"Crystal
+        structure of rhodopsin\""}}}'
     headers:
-      Access-Control-Allow-Origin:
+      access-control-allow-headers:
+      - X-Requested-With, Accept, Accept-Encoding, Accept-Charset, Accept-Language,
+        Accept-Ranges, Cache-Control
+      access-control-allow-origin:
       - '*'
-      Connection:
+      access-control-expose-headers:
+      - Link
+      connection:
       - keep-alive
-      Content-Type:
+      content-length:
+      - '27451'
+      content-type:
       - application/json
-      Date:
-      - Sun, 05 Jan 2026 12:00:00 GMT
-      X-Rate-Limit-Interval:
+      date:
+      - Tue, 06 Oct 2026 04:11:21 GMT
+      permissions-policy:
+      - interest-cohort=()
+      server:
+      - Jetty(9.4.40.v20210413)
+      vary:
+      - Accept-Encoding
+      x-api-pool:
+      - polite-array
+      x-concurrency-limit:
+      - '3'
+      x-rate-limit-interval:
       - 1s
-      X-Rate-Limit-Limit:
-      - '50'
+      x-rate-limit-limit:
+      - '3'
     status:
       code: 200
       message: OK
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - api.crossref.org
-      User-Agent:
-      - BioETL/1.0 (mailto:default@example.com)
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://api.crossref.org/works?rows=1&mailto=default%40example.com
   response:
     body:
-      string: '{"status":"ok","message-type":"work-list","message-version":"1.0.0","message":{"facets":{},"total-results":179629323,"items":[{"indexed":{"date-parts":[[2025,3,28]],"date-time":"2025-03-28T05:01:47Z","timestamp":1743138107987,"version":"3.40.3"},"publisher-location":"Wiesbaden","reference-count":66,"publisher":"Springer
-        Fachmedien Wiesbaden","isbn-type":[{"type":"print","value":"9783658176716"},{"type":"electronic","value":"9783658176716"}],"license":[{"start":{"date-parts":[[2018,11,3]],"date-time":"2018-11-03T00:00:00Z","timestamp":1541203200000},"content-version":"tdm","delay-in-days":0,"URL":"http:\/\/www.springer.com\/tdm"}],"content-domain":{"domain":["link.springer.com"],"crossmark-restriction":false},"published-print":{"date-parts":[[2019]]},"DOI":"10.1007\/978-3-658-17671-6_18-1","type":"book-chapter","created":{"date-parts":[[2018,11,15]],"date-time":"2018-11-15T06:01:17Z","timestamp":1542261677000},"page":"1-17","update-policy":"https:\/\/doi.org\/10.1007\/springer_crossmark_policy","source":"Crossref","is-referenced-by-count":2,"title":["Soziale
-        Innovation"],"prefix":"10.1007","author":[{"given":"J\u00fcrgen","family":"Howaldt","sequence":"first","affiliation":[]},{"given":"Michael","family":"Schwarz","sequence":"additional","affiliation":[]}],"member":"297","published-online":{"date-parts":[[2018,11,3]]},"reference":[{"key":"18-1_CR1","first-page":"14","volume-title":"Neu!
-        Besser! Billiger! Soziale Innovation als leeres Versprechen?","author":"J
-        Aderhold","year":"2016","unstructured":"Aderhold, Jens. 2016. Im Labyrinth
-        sozialer Innovation. Deutungsprobleme politischer EntscheiderInnen, wissenschaftlicher
-        Institutionen und gesellschaftlicher AkteurInnen. In Neu! Besser! Billiger!
-        Soziale Innovation als leeres Versprechen? Hrsg. Katharina Meichenitsch, Michaela
-        Neumayer und Martin Schenk, 14\u201345. Wien: Mandelbaum Verlag."},{"key":"18-1_CR2","doi-asserted-by":"publisher","DOI":"10.1007\/978-3-319-13773-5","volume-title":"Generative
-        mechanisms transforming the social order","author":"MS Archer","year":"2015","unstructured":"Archer,
-        Margaret S. 2015. Generative mechanisms transforming the social order. Cham\/Heidelberg\/New
-        York\/Dordrecht\/London: Springer."},{"key":"18-1_CR3","unstructured":"Avelino,
-        Flor, Julia Wittmayer, Alex Haxeltine, Ren\u00e9 Kemp, Tim O\u2019Riordan,
-        Paul Weaver, Derk Loorbach, und Jan Rotman. 2014. Game-changers and transformative
-        social innovation. The case of the economic crisis and the new economy, TRANSIT
-        working paper. http:\/\/www.transitsocialinnovation.eu\/content\/original\/TRANSIT%20outputs\/91%20Gamechangers_TSI_Avelino_etal_TRANSIT_workingpaper_2014.pdf
-        . Zugegriffen am 08.04.2016."},{"issue":"4","key":"18-1_CR4","doi-asserted-by":"publisher","first-page":"635","DOI":"10.1017\/S004727941600009X","volume":"45","author":"N
-        Ayob","year":"2016","unstructured":"Ayob, Noorseha, Simon Teasdale, und Kylie
-        Fagan. 2016. How social innovation \u201acame to be\u2018: Tracing the evolution
-        of a contested concept. Journal of Social Policy 45(4): 635\u2013653.","journal-title":"Journal
-        of Social Policy"},{"key":"18-1_CR5","unstructured":"BEPA Report. 2010. Empowering
-        people, driving change. Social innovation in the European Union. Bureau of
-        European Policy Advisers, European Commission. http:\/\/www.transitsocialinnovation.eu\/resource-hub\/empowering-people-driving-change-social-innovation-in-the-european-union
-        . Zugegriffen am 08.04.2016."},{"issue":"4","key":"18-1_CR6","doi-asserted-by":"publisher","first-page":"415","DOI":"10.1111\/ijcs.12351","volume":"41","author":"B
-        Bl\u00e4ttel-Mink","year":"2017","unstructured":"Bl\u00e4ttel-Mink, Birgit,
-        Moritz Boddenberg, Lenard Gunkel, Sarah Schmitz, und Franziska Vaessen. 2017.
-        Beyond the market \u2013 New practices of supply in times of crisis: The example
-        community-supported agriculture. International Journal of Consumer Studies
-        41(4): 415\u2013421.","journal-title":"International Journal of Consumer Studies"},{"key":"18-1_CR7","doi-asserted-by":"publisher","first-page":"125","DOI":"10.1007\/978-3-658-16545-1_6","volume-title":"Soziale
-        Innovationen f\u00fcr nachhaltigen Konsum","author":"M Boddenberg","year":"2017","unstructured":"Boddenberg,
-        Moritz, Max H. Frauenlob, Lenard Gunkel, Sarah Schmitz, Franziska Vaessen,
-        und Birgit Bl\u00e4ttel-Mink. 2017. Solidarische Landwirtschaft als innovative
-        Praxis \u2013 Potenziale f\u00fcr einen sozial-\u00f6kologischen Wandel. In
-        Soziale Innovationen f\u00fcr nachhaltigen Konsum, Hrsg. Melanie Jaeger-Erben,
-        Jana R\u00fcckert-John und Martina Sch\u00e4fer, 125\u2013148. Wiesbaden:
-        Springer VS\/Innovation + Gesellschaft."},{"key":"18-1_CR8","doi-asserted-by":"publisher","first-page":"173","DOI":"10.1007\/978-3-531-93097-8_9","volume-title":"Handbuch
-        Umweltsoziologie","author":"K-W Brand","year":"2011","unstructured":"Brand,
-        Karl-Werner. 2011. Umweltsoziologie und der praxistheoretische Zugang. In
-        Handbuch Umweltsoziologie, Hrsg. Matthias Gro\u00df, 173\u2013198. Wiesbaden:
-        Springer VS."},{"key":"18-1_CR9","first-page":"1","volume-title":"Managing
-        innovation","author":"H Brooks","year":"1982","unstructured":"Brooks, Harvey.
-        1982. Social and technological innovation. In Managing innovation, Hrsg. E.
-        William Colglazier und Sven B. Lundtstedt, 1\u201330. Elmsford\/New York:
-        Pergamon Press."},{"key":"18-1_CR10","unstructured":"Bundesministerium f\u00fcr
-        Bildung und Forschung (BMBF). 2014. Die neue Hightech-Strategie. Innovationen
-        f\u00fcr Deutschland. http:\/\/www.bmbf.de\/pub_hts\/HTS_Broschure_Web.pdf
-        . Zugegriffen am 08.07.2015."},{"key":"18-1_CR11","doi-asserted-by":"publisher","first-page":"42","DOI":"10.1016\/j.techfore.2013.05.008","volume":"82","author":"G
-        Cajaiba-Santana","year":"2014","unstructured":"Cajaiba-Santana, Giovany. 2014.
-        Social innovation: Moving the field forward. A conceptual framework. Technological
-        Forecasting and Social Change 82:42\u201351.","journal-title":"Technological
-        Forecasting and Social Change"},{"key":"18-1_CR12","unstructured":"Chiappero-Martinetti,
-        Enrica, und Nadia von Jacobi. 2015. How can Sen\u2019s \u201aCapabilities
-        Approach\u2018 contribute to understanding the role for social innovations
-        for the marginalized? CRESSI Working Papers. http:\/\/www.sbs.ox.ac.uk\/sites\/default\/files\/research-projects\/CRESSI\/docs\/CRESSI_Working_Paper_3_D1.1_Chp3_18Nov2014.pdf
-        . Zugegriffen am 13.07.2015."},{"key":"18-1_CR13","doi-asserted-by":"crossref","first-page":"7","DOI":"10.1007\/978-81-322-2071-8_2","volume-title":"Technology
-        and innovation for social change","author":"N Choi","year":"2015","unstructured":"Choi,
-        Nia, und Satyajit Majumdar. 2015. Social innovation: Towards a conceptualisation.
-        In Technology and innovation for social change, Hrsg. Satyajit Majumdar, Samapti
-        Guha und Nadiya Marakkath, 7\u201334. New Delhi: Springer."},{"key":"18-1_CR14","first-page":"60","volume-title":"Theoretical
-        approaches to social innovation: A critical literature review","author":"A
-        Davies","year":"2014","unstructured":"Davies, Anna. 2014. Social innovation
-        process and social entrepreneurship. In Theoretical approaches to social innovation:
-        A critical literature review, Hrsg. J\u00fcrgen Howaldt, Anna Butzin, Dmitri
-        Domanski und Christoph Kaletka, 60\u201378. http:\/\/www.si-drive.eu\/wp-content\/uploads\/2014\/11\/D1_1-Critical-Literature-Review_final.pdf
-        . Zugegriffen am 29.03.2016."},{"key":"18-1_CR15","volume-title":"Landmarks
-        of tomorrow","author":"PF Drucker","year":"1957","unstructured":"Drucker,
-        Peter F. 1957. Landmarks of tomorrow. New York: Harper and Brothers."},{"key":"18-1_CR16","volume-title":"Social
-        innovation, participation and the development of society: Soziale Innovation,
-        Partizipation und die Entwicklung der Gesellschaft","author":"S Elsen","year":"2014","unstructured":"Elsen,
-        Susanne, und Walter Lorenz. 2014. Social innovation, participation and the
-        development of society: Soziale Innovation, Partizipation und die Entwicklung
-        der Gesellschaft. Bolzano: University Press."},{"key":"18-1_CR17","unstructured":"European
-        Commission. 2010. Europe 2020. A strategy for smart, sustainable and inclusive
-        growth. Br\u00fcssel."},{"key":"18-1_CR18","doi-asserted-by":"publisher","first-page":"218","DOI":"10.1016\/j.respol.2008.12.006","volume":"38","author":"J
-        Fagerberg","year":"2009","unstructured":"Fagerberg, Jan, und Bat Verspagen.
-        2009. Innovation studies \u2013 The emerging structure of a new scientific
-        field. Research Policy 38:218\u2013233.","journal-title":"Research Policy"},{"key":"18-1_CR19","volume-title":"Methods
-        for experimental social innovation","author":"GW Fairweather","year":"1967","unstructured":"Fairweather,
-        George W. 1967. Methods for experimental social innovation. New York: Wiley."},{"key":"18-1_CR20","unstructured":"Gillwald,
-        Katrin. 2000. Konzepte sozialer Innovation. WZB Paper: Querschnittsgruppe
-        Arbeit und \u00d6kologie. Wissenschaftszentrum Berlin f\u00fcr Sozialforschung.
-        Berlin. http:\/\/stages-online.info\/pdfs\/soziale-innovationen.pdf . Zugegriffen
-        am 08.07.2015."},{"key":"18-1_CR21","unstructured":"Godin, Benoit. 2012. Social
-        innovation: Utopias of innovation from c.1830 to the present. Project on the
-        intellectual history of innovation. Working paper no. 11. http:\/\/www.csiic.ca\/PDF\/SocialInnovation_2012.pdf
-        . Zugegriffen am 08.07.2015."},{"key":"18-1_CR22","doi-asserted-by":"publisher","first-page":"86","DOI":"10.1007\/978-3-531-92806-7_5","volume-title":"Social
-        entrepreneurship \u2013 Social business: F\u00fcr die Gesellschaft unternehmen","author":"RG
-        Heinze","year":"2011","unstructured":"Heinze, Rolf G., Katrin Schneiders,
-        und Stephan Grohs. 2011. Social Entrepreneurship im deutschen Wohlfahrtsstaat
-        \u2013 Hybride Organisationen zwischen Markt, Staat und Gemeinschaft. In Social
-        entrepreneurship \u2013 Social business: F\u00fcr die Gesellschaft unternehmen,
-        Hrsg. Helga Hackenberg und Stefan Empter, 86\u2013102. Wiesbaden: Springer
-        VS."},{"key":"18-1_CR23","first-page":"12","volume-title":"Social innovation.
-        New forms of organisation in knowledge-based societies","author":"J Hochgerner","year":"2013","unstructured":"Hochgerner,
-        Josef. 2013. Social innovation and the advancement of the general concept
-        of innovation. In Social innovation. New forms of organisation in knowledge-based
-        societies, Hrsg. Carmen Ruiz Vi\u00f1als und Carmen Parra Rodr\u00edguez,
-        12\u201328. Oxon: Routledge."},{"key":"18-1_CR24","doi-asserted-by":"publisher","DOI":"10.14361\/transcript.9783839415351","volume-title":"\u201eSoziale
-        Innovation\u201c im Fokus. Skizze eines gesellschaftstheoretisch inspirierten
-        Forschungskonzepts","author":"J Howaldt","year":"2010","unstructured":"Howaldt,
-        J\u00fcrgen, und Michael Schwarz. 2010. \u201eSoziale Innovation\u201c im
-        Fokus. Skizze eines gesellschaftstheoretisch inspirierten Forschungskonzepts.
-        Bielefeld: transcript."},{"issue":"2","key":"18-1_CR25","first-page":"159","volume":"38","author":"J
-        Howaldt","year":"2015","unstructured":"Howaldt, J\u00fcrgen, und Michael Schwarz.
-        2015. Innovation neu denken \u2013 \u201eSoziale Innovation\u201c als Kern
-        eines neuen Innovationsverst\u00e4ndnisses. Sozialwissenschaften und Berufspraxis
-        38(2): 159\u2013176.","journal-title":"Sozialwissenschaften und Berufspraxis"},{"key":"18-1_CR26","unstructured":"Howaldt,
-        J\u00fcrgen, und Michael Schwarz. 2016. Social innovation and its relationship
-        to social change. Verifying existing social theories in reference to social
-        innovation and its relationship to social change. SI-Drive Report D 1.3. https:\/\/www.si-drive.eu\/wp-content\/uploads\/2016\/07\/SI-DRIVE-D1-3-Social-Change-final-260416-2.pdf
-        . Zugegriffen am 13.11.2017."},{"issue":"3","key":"18-1_CR27","first-page":"239","volume":"26","author":"J
-        Howaldt","year":"2017","unstructured":"Howaldt, J\u00fcrgen, und Michael Schwarz.
-        2017a. Die Mechanismen transformativen Wandels erfassen. Pl\u00e4doyer f\u00fcr
-        ein praxistheoretisches Konzept sozialer Innovationen. GAiA \u2013 \u00d6kologische
-        Perspektiven f\u00fcr Wissenschaft und Gesellschaft 26(3): 239\u2013244.","journal-title":"GAiA
-        \u2013 \u00d6kologische Perspektiven f\u00fcr Wissenschaft und Gesellschaft"},{"issue":"2","key":"18-1_CR28","doi-asserted-by":"publisher","first-page":"163","DOI":"10.1080\/19452829.2016.1251401","volume":"18","author":"J\u00fcrgen
-        Howaldt","year":"2017","unstructured":"Howaldt, J\u00fcrgen, und Michael Schwarz.
-        2017b. Social innovation and human development \u2013 How the capabilities
-        approach and social innovation theory mutually support each other. Journal
-        of Human Development and Capabilities 18(2): 163\u2013180.","journal-title":"Journal
-        of Human Development and Capabilities"},{"key":"18-1_CR29","unstructured":"Howaldt,
-        J\u00fcrgen, Anna Butzin, Dmitri Domanski, und Christoph Kaletka. 2014a. Theoretical
-        approaches to social innovation: A critical literature review. http:\/\/www.si-drive.eu\/wp-content\/uploads\/2014\/11\/D1_1-Critical-Literature-Review_final.pdf
-        . Zugegriffen am 29.03.2016."},{"key":"18-1_CR30","volume-title":"Zur Theorie
-        sozialer Innovationen. Tardes vernachl\u00e4ssigter Beitrag zur Entwicklung
-        einer soziologischen Innovationstheorie","author":"J Howaldt","year":"2014","unstructured":"Howaldt,
-        J\u00fcrgen, Ralf Kopp, und Michael Schwarz. 2014b. Zur Theorie sozialer Innovationen.
-        Tardes vernachl\u00e4ssigter Beitrag zur Entwicklung einer soziologischen
-        Innovationstheorie. Weinheim\/Basel: Beltz Juventa."},{"key":"18-1_CR31","first-page":"88","volume":"1","author":"J
-        Howaldt","year":"2015","unstructured":"Howaldt, J\u00fcrgen, Dmitri Domanski,
-        und Michael Schwarz. 2015. Rethinking social entrepreneurship: The concept
-        of social entrepreneurship under the perspective of socio-scientific innovation
-        research. Journal of Creativity and Business Innovation 1:88\u201398.","journal-title":"Journal
-        of Creativity and Business Innovation"},{"key":"18-1_CR32","doi-asserted-by":"publisher","DOI":"10.1007\/978-3-531-92819-7","volume-title":"Social
-        entrepreneurship","author":"P J\u00e4hnke","year":"2011","unstructured":"J\u00e4hnke,
-        Petra, Gabriela Christmann, und Karsten Balgar. 2011. Social entrepreneurship.
-        Wiesbaden: Springer VS."},{"key":"18-1_CR33","doi-asserted-by":"publisher","DOI":"10.2307\/j.ctt1f1163h","volume-title":"La
-        transformation sociale par l\u2019innovation sociale","author":"J-L Klein","year":"2016","unstructured":"Klein,
-        Juan-Luis, Christian Jett\u00e9, Annie Camus, Christine Champagne, und Matthieu
-        Roy. 2016. La transformation sociale par l\u2019innovation sociale. Quebec:
-        Presses de l\u2019Universite du Quebec."},{"key":"18-1_CR34","volume-title":"Vivre
-        sans \u00e9tat? Essai sur le pouvoir politique et l\u2019innovation sociale","author":"J-W
-        Lapierre","year":"1977","unstructured":"Lapierre, Jean-William. 1977. Vivre
-        sans \u00e9tat? Essai sur le pouvoir politique et l\u2019innovation sociale.
-        Paris: Seuil."},{"key":"18-1_CR35","first-page":"15","volume-title":"Handbook
-        of research on social entrepreneurship","author":"J Mair","year":"2010","unstructured":"Mair,
-        Johanna. 2010. Social entrepreneurship: Taking stock and looking ahead. In
-        Handbook of research on social entrepreneurship, Hrsg. Alain Fayolle und Harry
-        Matlay, 15\u201328. Cheltenham: Edward Elgar."},{"key":"18-1_CR36","volume-title":"Die
-        neue Macht der B\u00fcrger. Was motiviert die Protestbewegungen? BP-Gesellschaftsstudie","author":"S
-        Marg","year":"2013","unstructured":"Marg, Stine, Lars Geiges, Felix Butzlaff,
-        und Franz Walter. 2013. Die neue Macht der B\u00fcrger. Was motiviert die
-        Protestbewegungen? BP-Gesellschaftsstudie. Bonn: Bundeszentrale f\u00fcr Politische
-        Bildung."},{"key":"18-1_CR37","doi-asserted-by":"publisher","first-page":"52","DOI":"10.1057\/9781137506801_3","volume-title":"New
-        frontiers in social innovation research","author":"K McGowan","year":"2015","unstructured":"McGowan,
-        Katharine, und Frances Westley. 2015. At the root of change: The history of
-        social innovation. In New frontiers in social innovation research, Hrsg. Alex
-        Nicholls, Julie Simon und Madeleine Gabriel, 52\u201368. Basingstoke: Palgrave
-        Macmillan."},{"key":"18-1_CR38","volume-title":"Social theory and social structure","author":"RK
-        Merton","year":"1968","unstructured":"Merton, Robert K. 1968 [1949]. Social
-        theory and social structure. New York\/London: Free Press."},{"key":"18-1_CR39","doi-asserted-by":"publisher","first-page":"114","DOI":"10.1057\/9780230367098_5","volume-title":"Social
-        innovation: Blurring boundaries to reconfigure markets","author":"M-L Moore","year":"2012","unstructured":"Moore,
-        Michele-Lee, Frances Westley, Ola Tjornbo, und Carin Holroyd. 2012. The loop,
-        the lens, and the lesson: Using resilience theory to examine public policy
-        and social innovation. In Social innovation: Blurring boundaries to reconfigure
-        markets, Hrsg. Alex Nicholls und Alex Murdock, 114\u2013136. New York: Palgrave
-        Macmillan."},{"issue":"11","key":"18-1_CR40","doi-asserted-by":"publisher","first-page":"1969","DOI":"10.1080\/00420980500279893","volume":"42","author":"F
-        Moulaert","year":"2005","unstructured":"Moulaert, Frank, Flavia Martinelli,
-        Erik Swyngedouw, und Sara Gonz\u00e1lez. 2005. Towards alternative model(s)
-        of local innovation. Urban Studies 42(11): 1969\u20131990.","journal-title":"Urban
-        Studies"},{"key":"18-1_CR41","doi-asserted-by":"publisher","first-page":"1","DOI":"10.4337\/9781849809993","volume-title":"The
-        international handbook on social innovation. Collective action, social learning
-        and transdisciplinary research","author":"F Moulaert","year":"2013","unstructured":"Moulaert,
-        Frank, Diana MacCallum, Abid Mehmood, und Abdelillah Hamdouch. 2013a. General
-        introduction: The return of social innovation as a scientific concept and
-        a social practice. In The international handbook on social innovation. Collective
-        action, social learning and transdisciplinary research, Hrsg. Frank Moulaert,
-        Diana MacCallum, Abid Mehmood und Abdelillah Hamdouch, 1\u20136. Cheltenham\/Northhampton:
-        Edward Elgar."},{"key":"18-1_CR42","doi-asserted-by":"publisher","DOI":"10.4337\/9781849809993","volume-title":"The
-        international handbook on social innovation. Collective action, social learning
-        and transdisciplinary research","author":"F Moulaert","year":"2013","unstructured":"Moulaert,
-        Frank, Diana MacCallum, Abid Mehmood, und Abdelillah Hamdouch. 2013b. The
-        international handbook on social innovation. Collective action, social learning
-        and transdisciplinary research. Cheltenham\/Northhampton: Edward Elgar."},{"key":"18-1_CR43","doi-asserted-by":"crossref","first-page":"19","DOI":"10.1007\/978-3-642-32879-4_2","volume-title":"Challenge
-        social innovation. Potentials for business, social entrepreneurship, welfare
-        and civil society","author":"G Mulgan","year":"2012","unstructured":"Mulgan,
-        Geoff. 2012. Social innovation theories: Can theory catch up with practice?
-        In Challenge social innovation. Potentials for business, social entrepreneurship,
-        welfare and civil society, Hrsg. Hans-Werner Franz, Josef Hochgerner und J\u00fcrgen
-        Howaldt, 19\u201342. Berlin\/New York: Springer."},{"key":"18-1_CR44","volume-title":"The
-        open book of social innovation, social innovator series: Ways to design, develop
-        and grow social innovation","author":"R Murray","year":"2010","unstructured":"Murray,
-        Robin, Julie Caulier-Grice, und Geoff Mulgan. 2010. The open book of social
-        innovation, social innovator series: Ways to design, develop and grow social
-        innovation. London: The Young Foundation."},{"key":"18-1_CR45","volume-title":"Soziale
-        Innovationen und sozialer Konflikt","author":"O Neuloh","year":"1977","unstructured":"Neuloh,
-        Otto. 1977. Soziale Innovationen und sozialer Konflikt. G\u00f6ttingen: Vandenhoeck
-        und Ruprecht."},{"key":"18-1_CR46","doi-asserted-by":"publisher","first-page":"222","DOI":"10.1057\/9781137035301_11","volume-title":"Social
-        enterprises: An organisational perspective","author":"A Nicholls","year":"2012","unstructured":"Nicholls,
-        Alex. 2012. The legitimacy of social entrepreneurship: Reflexive isomorphism
-        in a pre-paradigmatic field. In Social enterprises: An organisational perspective,
-        Hrsg. Benjamin Gidron und Yeheskel Hasenfeld, 222\u2013247. New York: Palgrave
-        Macmillan."},{"key":"18-1_CR47","doi-asserted-by":"publisher","DOI":"10.1057\/9781137506801","volume-title":"New
-        frontiers in social innovation research","author":"A Nicholls","year":"2015","unstructured":"Nicholls,
-        Alex, Julie Simon, und Madeleine Gabriel. 2015. New frontiers in social innovation
-        research. New York: Palgrave."},{"key":"18-1_CR48","first-page":"50","volume-title":"Soziologische
-        Texte. Band 56. William F. Ogburn. Kultur und Sozialer Wandel. Ausgew\u00e4hlte
-        Schriften","author":"WF Ogburn","year":"1969","unstructured":"Ogburn, William
-        Fielding. 1969. Erneute Betrachtung des Problems der sozialen Evolution. In
-        Soziologische Texte. Band 56. William F. Ogburn. Kultur und Sozialer Wandel.
-        Ausgew\u00e4hlte Schriften, Hrsg. Otis D. Duncan, 50\u201367. Berlin: Luchterhand."},{"issue":"4","key":"18-1_CR49","first-page":"34","volume":"6","author":"JA
-        Phills","year":"2008","unstructured":"Phills, James A., Kriss Deiglmeier,
-        und Dale T. Miller. 2008. Rediscovering social innovation. Stanford Social
-        Innovation Review 6(4): 34\u201343.","journal-title":"Stanford Social Innovation
-        Review"},{"key":"18-1_CR50","doi-asserted-by":"publisher","first-page":"878","DOI":"10.1016\/j.socec.2009.02.011","volume":"38","author":"E
-        Pol","year":"2009","unstructured":"Pol, Eduardo, und Simon Ville. 2009. Social
-        innovation: Buzz word or enduring term? The Journal of Socio-Economics 38:878\u2013885.","journal-title":"The
-        Journal of Socio-Economics"},{"key":"18-1_CR51","volume-title":"Innovation
-        policy lab white paper 2016\u201301, Munk School of Global Affairs","author":"K
-        Pue","year":"2016","unstructured":"Pue, Kristen, Christian Vandergeest, und
-        Dan Breznitz. 2016. Toward a theory of social innovation. In Innovation policy
-        lab white paper 2016\u201301, Munk School of Global Affairs. Toronto: University
-        of Toronto."},{"key":"18-1_CR52","doi-asserted-by":"publisher","first-page":"291","DOI":"10.1007\/978-3-531-90905-9_15","volume-title":"Handbuch
-        der Wirtschaftssoziologie","author":"W Rammert","year":"2008","unstructured":"Rammert,
-        Werner. 2008. Technik und Innovation. In Handbuch der Wirtschaftssoziologie,
-        Hrsg. Andrea Maurer, 291\u2013319. Wiesbaden: VS-Verlag f\u00fcr Sozialwissenschaften."},{"key":"18-1_CR53","first-page":"21","volume-title":"Soziale
-        Innovation. Auf dem Weg zu einem postindustriellen Innovationsparadigma","author":"W
-        Rammert","year":"2010","unstructured":"Rammert, Werner. 2010. Die Innovationen
-        in der Gesellschaft. In Soziale Innovation. Auf dem Weg zu einem postindustriellen
-        Innovationsparadigma, Hrsg. J\u00fcrgen Howaldt und Heike Jacobsen, 21\u201352.
-        Wiesbaden: Springer VS."},{"key":"18-1_CR54","doi-asserted-by":"publisher","DOI":"10.1007\/978-3-658-10874-8","volume-title":"Innovationsgesellschaft
-        heute. Perspektiven, Felder und F\u00e4lle","author":"W Rammert","year":"2016","unstructured":"Rammert,
-        Werner, Arnold Windeler, Hubert Knoblauch, und Michael Hutter. 2016. Innovationsgesellschaft
-        heute. Perspektiven, Felder und F\u00e4lle. Wiesbaden: Springer VS."},{"issue":"4","key":"18-1_CR55","doi-asserted-by":"publisher","first-page":"282","DOI":"10.1515\/zfsoz-2003-0401","volume":"32","author":"A
-        Reckwitz","year":"2003","unstructured":"Reckwitz, Andreas. 2003. Grundelemente
-        einer Theorie sozialer Praktiken. Eine sozialtheoretische Perspektive. Zeitschrift
-        f\u00fcr Soziologie 32(4): 282\u2013301.","journal-title":"Zeitschrift f\u00fcr
-        Soziologie"},{"key":"18-1_CR56","doi-asserted-by":"crossref","unstructured":"R\u00fcede,
-        Dominik, und Kathrin Lurtz. 2012. Mapping the various meanings of social innovation:
-        Towards a differentiated understanding of an emerging concept. EBS Business
-        School. http:\/\/papers.ssrn.com\/sol3\/papers.cfm?abstract_id=2091039 . Zugegriffen
-        am 08.07.2015.","DOI":"10.2139\/ssrn.2091039"},{"key":"18-1_CR57","volume-title":"The
-        quality of life","author":"A Sen","year":"1993","unstructured":"Sen, Amartya,
-        und Martha Nussbaum. 1993. The quality of life. Oxford: Clarendon Press."},{"key":"18-1_CR58","volume-title":"Enabling
-        social innovation ecosystems for community-LED territorial development","author":"F
-        Sgaragli","year":"2014","unstructured":"Sgaragli, Fabio. 2014. Enabling social
-        innovation ecosystems for community-LED territorial development. Rome: Fondazione
-        Giacomo Brodolini."},{"issue":"3","key":"18-1_CR59","doi-asserted-by":"publisher","first-page":"161","DOI":"10.1002\/sej.69","volume":"3","author":"J
-        Short","year":"2009","unstructured":"Short, Jeremy, Todd W. Moss, und G. T.
-        Lumpkin. 2009. Research in social entrepreneurship. Past contributions and
-        future opportunities. Strategic Entrepreneurship Journal 3(3): 161\u2013194.","journal-title":"Strategic
-        Entrepreneurship Journal"},{"key":"18-1_CR60","doi-asserted-by":"publisher","DOI":"10.4135\/9781446250655","volume-title":"The
-        dynamics of social practice. Everyday life and how it changes","author":"E
-        Shove","year":"2012","unstructured":"Shove, Elizabeth, Mika Pantzar, und Matt
-        Watson. 2012. The dynamics of social practice. Everyday life and how it changes.
-        Los Angeles: SAGE."},{"key":"18-1_CR61","volume-title":"Muhammad Yunus \u2013
-        Banker der Armen. Der Friedensnobelpreistr\u00e4ger. Sein Leben. Seine Vision.
-        Seine Wirkung","author":"P Spiegel","year":"2006","unstructured":"Spiegel,
-        Peter. 2006. Muhammad Yunus \u2013 Banker der Armen. Der Friedensnobelpreistr\u00e4ger.
-        Sein Leben. Seine Vision. Seine Wirkung. Freiburg im Breisgau\/Basel\/Wien:
-        Herder-Verlag."},{"key":"18-1_CR62","volume-title":"Die sozialen Gesetze.
-        Skizze einer Soziologie (1898)","author":"G Tarde","year":"2009","unstructured":"Tarde,
-        Gabriel. 2009 [1898]. Die sozialen Gesetze. Skizze einer Soziologie (1898).
-        Marburg: Metropolis-Verlag."},{"key":"18-1_CR63","doi-asserted-by":"crossref","DOI":"10.1093\/oso\/9780199240531.001.0001","volume-title":"The
-        intellectual and social organization of the sciences","author":"R Whitley","year":"2000","unstructured":"Whitley,
-        Richard. 2000. The intellectual and social organization of the sciences. Oxford:
-        Oxford University Press."},{"key":"18-1_CR64","first-page":"111","volume-title":"Innovationsgesellschaft
-        heute. Perspektiven, Felder, F\u00e4lle","author":"A Windeler","year":"2016","unstructured":"Windeler,
-        Arnold. 2016. Reflexive Innovation. Zur Innovation in der radikalisierten
-        Moderne. In Innovationsgesellschaft heute. Perspektiven, Felder, F\u00e4lle,
-        Hrsg. Werner Rammert, Arnold Windeler, Hubert Knoblauch und Michael Huter,
-        111\u2013132. Wiesbaden: Springer VS."},{"key":"18-1_CR65","first-page":"170","volume":"40","author":"W
-        Zapf","year":"1989","unstructured":"Zapf, Wolfgang. 1989. \u00dcber soziale
-        Innovationen. Soziale Welt 40:170\u2013183.","journal-title":"Soziale Welt"},{"key":"18-1_CR66","first-page":"31","volume-title":"Entwicklung.
-        Die Perspektive der Entwicklungssoziologie","author":"W Zapf","year":"1997","unstructured":"Zapf,
-        Wolfgang. 1997. Entwicklung als Modernisierung. In Entwicklung. Die Perspektive
-        der Entwicklungssoziologie, Hrsg. Manfred Schulz, 31\u201345. Opladen: Westdeutscher
-        Verlag."}],"container-title":["Handbuch Innovationsforschung"],"language":"de","link":[{"URL":"http:\/\/link.springer.com\/content\/pdf\/10.1007\/978-3-658-17671-6_18-1","content-type":"unspecified","content-version":"vor","intended-application":"similarity-checking"}],"deposited":{"date-parts":[[2024,7,12]],"date-time":"2024-07-12T11:34:36Z","timestamp":1720784076000},"score":1.0,"resource":{"primary":{"URL":"http:\/\/link.springer.com\/10.1007\/978-3-658-17671-6_18-1"}},"issued":{"date-parts":[[2018,11,3]]},"ISBN":["9783658176716","9783658176716"],"references-count":66,"URL":"https:\/\/doi.org\/10.1007\/978-3-658-17671-6_18-1","published":{"date-parts":[[2018,11,3]]},"assertion":[{"value":"17
-        November 2017, 00:00:00","order":1,"name":"received","label":"Received","group":{"name":"ChapterHistory","label":"Chapter
-        History"}},{"value":"29 May 2018, 00:00:00","order":2,"name":"accepted","label":"Accepted","group":{"name":"ChapterHistory","label":"Chapter
-        History"}},{"value":"3 November 2018","order":3,"name":"first_online","label":"First
-        Online","group":{"name":"ChapterHistory","label":"Chapter History"}}]}],"items-per-page":1,"query":{"start-index":0,"search-terms":null}}}'
+      string: '{"status":"ok","message-type":"work-list","message-version":"1.0.0","message":{"facets":{},"total-results":187322808,"items":[{"indexed":{"date-parts":[[2024,5,12]],"date-time":"2024-05-12T19:25:42Z","timestamp":1715541942479},"edition-number":"1","reference-count":0,"publisher":"Wiley","isbn-type":[{"value":"9781119584339","type":"print"},{"value":"9781119584414","type":"electronic"}],"license":[{"start":{"date-parts":[[2021,6,11]],"date-time":"2021-06-11T00:00:00Z","timestamp":1623369600000},"content-version":"tdm","delay-in-days":0,"URL":"http:\/\/doi.wiley.com\/10.1002\/tdm_license_1.1"},{"start":{"date-parts":[[2021,6,11]],"date-time":"2021-06-11T00:00:00Z","timestamp":1623369600000},"content-version":"tdm","delay-in-days":0,"URL":"http:\/\/doi.wiley.com\/10.1002\/tdm_license_1.1"}],"content-domain":{"domain":[],"crossmark-restriction":false},"published-print":{"date-parts":[[2021,9,3]]},"DOI":"10.1002\/9781119584414.ch4","type":"other","created":{"date-parts":[[2021,6,11]],"date-time":"2021-06-11T22:03:10Z","timestamp":1623448990000},"page":"47-54","source":"Crossref","is-referenced-by-count":0,"title":["Complete
+        Dental Cleaning"],"prefix":"10.1002","member":"311","published-online":{"date-parts":[[2021,6,11]]},"container-title":["Blackwell''s
+        Five\u2010Minute Veterinary Consult Clinical Companion"],"language":"en","link":[{"URL":"https:\/\/api.wiley.com\/onlinelibrary\/tdm\/v1\/articles\/10.1002%2F9781119584414.ch4","content-type":"application\/pdf","content-version":"vor","intended-application":"text-mining"},{"URL":"https:\/\/onlinelibrary.wiley.com\/doi\/pdf\/10.1002\/9781119584414.ch4","content-type":"application\/pdf","content-version":"vor","intended-application":"text-mining"},{"URL":"https:\/\/onlinelibrary.wiley.com\/doi\/pdf\/10.1002\/9781119584414.ch4","content-type":"unspecified","content-version":"vor","intended-application":"similarity-checking"}],"deposited":{"date-parts":[[2023,8,19]],"date-time":"2023-08-19T12:01:53Z","timestamp":1692446513000},"score":0.0,"resource":{"primary":{"URL":"https:\/\/onlinelibrary.wiley.com\/doi\/10.1002\/9781119584414.ch4"}},"issued":{"date-parts":[[2021,6,11]]},"ISBN":["9781119584339","9781119584414"],"references-count":0,"alternative-id":["10.1002\/9781119584414.ch4","10.1002\/9781119584414"],"URL":"https:\/\/doi.org\/10.1002\/9781119584414.ch4","archive":["Portico"],"published":{"date-parts":[[2021,6,11]]}}],"items-per-page":1,"query":{"start-index":0,"search-terms":null}}}'
     headers:
-      Connection:
-      - keep-alive
-      Content-Type:
-      - application/json
-      Date:
-      - Wed, 04 Mar 2026 04:30:11 GMT
       access-control-allow-headers:
       - X-Requested-With, Accept, Accept-Encoding, Accept-Charset, Accept-Language,
         Accept-Ranges, Cache-Control
@@ -353,8 +229,14 @@ interactions:
       - '*'
       access-control-expose-headers:
       - Link
+      connection:
+      - keep-alive
       content-length:
-      - '28327'
+      - '2472'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Oct 2026 04:11:22 GMT
       permissions-policy:
       - interest-cohort=()
       server:
@@ -362,45 +244,81 @@ interactions:
       vary:
       - Accept-Encoding
       x-api-pool:
-      - polite
+      - polite-array
       x-concurrency-limit:
       - '3'
       x-rate-limit-interval:
       - 1s
       x-rate-limit-limit:
-      - '10'
+      - '3'
     status:
       code: 200
       message: OK
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - api.crossref.org
-      User-Agent:
-      - BioETL/1.0 (mailto:default@example.com)
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://api.crossref.org/works?query=rhodopsin+crystal+structure&rows=1&cursor=%2A&mailto=default%40example.com
   response:
     body:
-      string: '{"status":"ok","message-type":"work-list","message-version":"1.0.0","message":{"facets":{},"next-cursor":"DnF1ZXJ5VGhlbkZldGNoJAAAAACvgyvrFlV1U25DZFJ2U2JLRVVuNjdsaVhxWkEAAAAAr4Mr7BZVdVNuQ2RSdlNiS0VVbjY3bGlYcVpBAAAAAK-hJlAWTWpkc1RvTlBTMUdQeGFHUVJGLTgwZwAAAACzednlFkNTcEFMQXBqUlotS2NVR2U1ZnBpeWcAAAAAuBF8hxZnOGNRZlJTclJBZWtPYm04eDVPWEFBAAAAALfGHBsWN085TWY0SHJReld1bHh5SmdoTWlkZwAAAACzednnFkNTcEFMQXBqUlotS2NVR2U1ZnBpeWcAAAAAr6EmUhZNamRzVG9OUFMxR1B4YUdRUkYtODBnAAAAALB9DHMWdXZSSjM5a0VTajI2bnA2N0tJVGdZZwAAAACzednmFkNTcEFMQXBqUlotS2NVR2U1ZnBpeWcAAAAAtEZicxZPWmJKeEJxRlNnUy1sZ2pKd0d3THN3AAAAALDhS8YWTkU2UEFBOTFTcjJ5U1M3WkM5b21QUQAAAACvgyvuFlV1U25DZFJ2U2JLRVVuNjdsaVhxWkEAAAAAtKv1ghZWZWc5bFc5dFRIU2llSC00NUR3bzFnAAAAALSF02cWQWhSeXczSFhUNWVPdVVZMC1ZZ3RFZwAAAAC0q_WEFlZlZzlsVzl0VEhTaWVILTQ1RHdvMWcAAAAAtIXTaBZBaFJ5dzNIWFQ1ZU91VVkwLVlndEVnAAAAALB9DHQWdXZSSjM5a0VTajI2bnA2N0tJVGdZZwAAAAC3xhwdFjdPOU1mNEhyUXpXdWx4eUpnaE1pZGcAAAAAuxZesxZSUy1mNHlpVlE4aXFROG8xREdqd2RRAAAAAK-hJlEWTWpkc1RvTlBTMUdQeGFHUVJGLTgwZwAAAAC4cEW_FlN2NFkzT0EzU0hPamsxZUxrRHJWQncAAAAAspIO8BZFNUVLNG44RlM2ZW8wXzI5dUpWUm9BAAAAALfRv40Wb0FYVXlYV0hUbzJqdy1ua2pYM2VyUQAAAACzednkFkNTcEFMQXBqUlotS2NVR2U1ZnBpeWcAAAAAsH0MdhZ1dlJKMzlrRVNqMjZucDY3S0lUZ1lnAAAAALB9DHUWdXZSSjM5a0VTajI2bnA2N0tJVGdZZwAAAAC0q_WDFlZlZzlsVzl0VEhTaWVILTQ1RHdvMWcAAAAAtHBUdhYyem9obE83aFRMNnZLRjlTbXFNWkh3AAAAALfRv44Wb0FYVXlYV0hUbzJqdy1ua2pYM2VyUQAAAACvgyvtFlV1U25DZFJ2U2JLRVVuNjdsaVhxWkEAAAAAtIXTaRZBaFJ5dzNIWFQ1ZU91VVkwLVlndEVnAAAAALfGHBwWN085TWY0SHJReld1bHh5SmdoTWlkZwAAAAC0q_WBFlZlZzlsVzl0VEhTaWVILTQ1RHdvMWcAAAAAtIXTahZBaFJ5dzNIWFQ1ZU91VVkwLVlndEVnAAAAAK-hJlMWTWpkc1RvTlBTMUdQeGFHUVJGLTgwZw==","total-results":2584108,"items":[{"indexed":{"date-parts":[[2025,5,14]],"date-time":"2025-05-14T05:00:39Z","timestamp":1747198839700,"version":"3.40.5"},"description":"x-ray
-        diffraction structure","reference-count":0,"publisher":"Worldwide Protein
-        Data Bank","content-domain":{"domain":[],"crossmark-restriction":false},"DOI":"10.2210\/pdb2z73\/pdb","type":"component","created":{"date-parts":[[2008,5,13]],"date-time":"2008-05-13T19:00:18Z","timestamp":1210705218000},"source":"Crossref","is-referenced-by-count":0,"title":["Crystal
-        structure of squid rhodopsin"],"prefix":"10.2210","author":[{"given":"M.","family":"Murakami","sequence":"first","affiliation":[]},{"given":"T.","family":"Kouyama","sequence":"additional","affiliation":[]}],"member":"7763","published-online":{"date-parts":[[2008,5,13]]},"deposited":{"date-parts":[[2024,10,15]],"date-time":"2024-10-15T18:14:38Z","timestamp":1729016078000},"score":28.251984,"resource":{"primary":{"URL":"https:\/\/www.wwpdb.org\/pdb?id=pdb_00002z73"}},"issued":{"date-parts":[[2008,5,13]]},"references-count":0,"URL":"https:\/\/doi.org\/10.2210\/pdb2z73\/pdb","published":{"date-parts":[[2008,5,13]]}}],"items-per-page":1,"query":{"start-index":0,"search-terms":"rhodopsin
+      string: '{"status":"ok","message-type":"work-list","message-version":"1.0.0","message":{"facets":{},"next-cursor":"MTAyNzU1NjMyMzAwMCwxMC4xMDY3JTJGbXRjLjIwMDEuMTExNjU1","total-results":2665723,"items":[{"indexed":{"date-parts":[[2026,7,1]],"date-time":"2026-07-01T16:40:07Z","timestamp":1782924007454,"version":"3.54.5"},"reference-count":15,"publisher":"Elsevier
+        BV","issue":"2","license":[{"start":{"date-parts":[[2001,2,1]],"date-time":"2001-02-01T00:00:00Z","timestamp":980985600000},"content-version":"tdm","delay-in-days":0,"URL":"https:\/\/www.elsevier.com\/tdm\/userlicense\/1.0\/"},{"start":{"date-parts":[[2016,7,6]],"date-time":"2016-07-06T00:00:00Z","timestamp":1467763200000},"content-version":"vor","delay-in-days":5634,"URL":"https:\/\/www.elsevier.com\/open-access\/userlicense\/1.0\/"}],"content-domain":{"domain":[],"crossmark-restriction":false},"short-container-title":["The
+        Journal of Thoracic and Cardiovascular Surgery"],"published-print":{"date-parts":[[2001,2]]},"DOI":"10.1067\/mtc.2001.111655","type":"journal-article","created":{"date-parts":[[2002,7,25]],"date-time":"2002-07-25T00:18:43Z","timestamp":1027556323000},"page":"331-335","source":"Crossref","is-referenced-by-count":41,"title":["Heparin
+        antibodies and thromboembolism in heparin-coated and noncoated ventricular
+        assist devices"],"prefix":"10.25013","volume":"121","author":[{"given":"Andreas","family":"Koster","sequence":"first","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Matthias","family":"Loebe","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Ralf","family":"Sodian","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Evgenij
+        V.","family":"Potapov","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Roland","family":"Hansen","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Johannes","family":"M\u00fcller","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Fritz","family":"Mertzlufft","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"George
+        J.","family":"Crystal","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Herrmann","family":"Kuppe","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]},{"given":"Roland","family":"Hetzer","sequence":"additional","affiliation":[],"role":[{"vocabulary":"crossref","role":"author"}]}],"member":"78","reference":[{"key":"10.1067\/mtc.2001.111655_bib1","doi-asserted-by":"crossref","first-page":"M790","DOI":"10.1097\/00002480-199507000-00122","article-title":"Pathophysiologic
+        role of contact activation in bleeding followed by thromboembolic complications
+        after implantation of a ventricular assist device","volume":"41","author":"Himmelreich","year":"1995","journal-title":"ASAIO
+        J"},{"key":"10.1067\/mtc.2001.111655_bib2","doi-asserted-by":"crossref","first-page":"829","DOI":"10.1016\/S0022-5223(95)70117-6","article-title":"Reduced
+        complement activation and improved postoperative performance after cardiopulmonary
+        bypass with heparin-coated circuits","volume":"110","author":"Jansen","year":"1995","journal-title":"J
+        Thorac Cardiovasc Surg"},{"key":"10.1067\/mtc.2001.111655_bib3","doi-asserted-by":"crossref","first-page":"117","DOI":"10.1016\/S0022-5223(97)70124-7","article-title":"Heparin
+        coating of extracorporeal circuits inhibits contact activation during cardiac
+        operations","volume":"114","author":"te Velthuis","year":"1997","journal-title":"J
+        Thorac Cardiovasc Surg"},{"key":"10.1067\/mtc.2001.111655_bib4","doi-asserted-by":"crossref","first-page":"767","DOI":"10.1111\/j.1525-1594.1996.tb04538.x","article-title":"Changes
+        in platelet, granulocyte, and complement activation during cardiopulmonary
+        bypass using heparin coated equipment","volume":"20","author":"Fukotomi","year":"1996","journal-title":"Artif
+        Organs"},{"key":"10.1067\/mtc.2001.111655_bib5","doi-asserted-by":"crossref","first-page":"95","DOI":"10.1055\/s-0038-1656329","article-title":"Platelet
+        factor 4 complexed to heparin is the target for antibodies generated in heparin-induced
+        thrombocytopenia","volume":"68","author":"Amiral","year":"1992","journal-title":"Thromb
+        Haemost"},{"key":"10.1067\/mtc.2001.111655_bib6","doi-asserted-by":"crossref","first-page":"667","DOI":"10.1097\/00000542-199709000-00029","article-title":"Heparin-induced
+        thrombocytopenia and thrombosis implications for perioperative management","volume":"87","author":"Slaughter","year":"1997","journal-title":"Anesthesiology"},{"key":"10.1067\/mtc.2001.111655_bib7","doi-asserted-by":"crossref","first-page":"521","DOI":"10.1016\/S1053-0770(05)80018-7","article-title":"Heparin-induced
+        thrombocytopenia","volume":"10","author":"Shorten","year":"1996","journal-title":"J
+        Cardiothorac Vasc Anesth"},{"key":"10.1067\/mtc.2001.111655_bib8","doi-asserted-by":"crossref","first-page":"734","DOI":"10.1055\/s-0038-1646493","article-title":"A
+        rapid and sensitive test for diagnosing heparin-induced thrombocytopenia","volume":"66","author":"Greinacher","year":"1991","journal-title":"Thromb
+        Haemost"},{"key":"10.1067\/mtc.2001.111655_bib9","doi-asserted-by":"crossref","first-page":"73","DOI":"10.1161\/01.CIR.99.1.73","article-title":"Recombinant
+        hirudin (lepirudin) provides safe and effective anticoagulation in patients
+        with heparin-induced thrombocytopenia: a prospective study","volume":"99","author":"Greinacher","year":"1999","journal-title":"Circualtion"},{"key":"10.1067\/mtc.2001.111655_bib10","doi-asserted-by":"crossref","first-page":"1242","DOI":"10.1161\/01.CIR.95.5.1242","article-title":"Prevalence
+        of heparin-associated antibodies without thrombosis in patients undergoing
+        cardiopulmonary bypass surgery","volume":"95","author":"Bauer","year":"1997","journal-title":"Circulation"},{"key":"10.1067\/mtc.2001.111655_bib11","doi-asserted-by":"crossref","first-page":"653","DOI":"10.1046\/j.1365-2141.1998.00750.x","article-title":"High
+        incidence of antiheparin\/platelet factor 4 antibodies after cardiopulmonary
+        bypass surgery","volume":"101","author":"Trossa\u00e9rt","year":"1998","journal-title":"Br
+        J Haematol"},{"key":"10.1067\/mtc.2001.111655_bib12","doi-asserted-by":"crossref","first-page":"2530","DOI":"10.1161\/01.CIR.99.19.2530","article-title":"Antibodies
+        to platelet factor 4-heparin after cardiopulmonary bypass in patients anticoagulated
+        with unfractionated heparin or a low-molecular-weight heparin: clinical implications
+        for heparin-induced thrombocytopenia","volume":"99","author":"Pouplard","year":"1999","journal-title":"Circulation"},{"key":"10.1067\/mtc.2001.111655_bib13","doi-asserted-by":"crossref","first-page":"376","DOI":"10.1016\/S0022-2143(96)80009-6","article-title":"Patients
+        treated with unfractionated heparin during open heart surgery are at high
+        risk to form antibodies with heparin: platelet factor 4 complexes","volume":"128","author":"Visentin","year":"1996","journal-title":"J
+        Lab Clin Med"},{"key":"10.1067\/mtc.2001.111655_bib14","doi-asserted-by":"crossref","first-page":"439","DOI":"10.1016\/S0741-5214(98)70129-6","article-title":"The
+        incidence of heparin-induced antibodies in patients undergoing vascular surgery:
+        a prospective study","volume":"28","author":"Jackson","year":"1998","journal-title":"J
+        Vasc Surg"},{"key":"10.1067\/mtc.2001.111655_bib15","doi-asserted-by":"crossref","first-page":"916","DOI":"10.1182\/blood.V91.3.916","article-title":"Antibodies
+        from patients with heparin-induced thrombocytopenia\/thrombosis recognize
+        different epitopes on heparin: platelet factor 4","volume":"91","author":"Suh","year":"1998","journal-title":"Blood"}],"container-title":["The
+        Journal of Thoracic and Cardiovascular Surgery"],"language":"en","link":[{"URL":"https:\/\/api.elsevier.com\/content\/article\/PII:S0022522301029208?httpAccept=text\/xml","content-type":"text\/xml","content-version":"vor","intended-application":"text-mining"},{"URL":"https:\/\/api.elsevier.com\/content\/article\/PII:S0022522301029208?httpAccept=text\/plain","content-type":"text\/plain","content-version":"vor","intended-application":"text-mining"}],"deposited":{"date-parts":[[2019,12,15]],"date-time":"2019-12-15T21:44:51Z","timestamp":1576446291000},"score":4.536518,"resource":{"primary":{"URL":"https:\/\/linkinghub.elsevier.com\/retrieve\/pii\/S0022522301029208"}},"issued":{"date-parts":[[2001,2]]},"references-count":15,"journal-issue":{"issue":"2","published-print":{"date-parts":[[2001,2]]}},"alternative-id":["S0022522301029208"],"URL":"https:\/\/doi.org\/10.1067\/mtc.2001.111655","ISSN":["0022-5223"],"issn-type":[{"value":"0022-5223","type":"print"}],"published":{"date-parts":[[2001,2]]}}],"items-per-page":1,"query":{"start-index":0,"search-terms":"rhodopsin
         crystal structure"}}}'
     headers:
-      Connection:
-      - keep-alive
-      Content-Type:
-      - application/json
-      Date:
-      - Wed, 04 Mar 2026 04:30:12 GMT
       access-control-allow-headers:
       - X-Requested-With, Accept, Accept-Encoding, Accept-Charset, Accept-Language,
         Accept-Ranges, Cache-Control
@@ -408,8 +326,14 @@ interactions:
       - '*'
       access-control-expose-headers:
       - Link
+      connection:
+      - keep-alive
       content-length:
-      - '2866'
+      - '8967'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Oct 2026 04:11:24 GMT
       permissions-policy:
       - interest-cohort=()
       server:
@@ -417,13 +341,13 @@ interactions:
       vary:
       - Accept-Encoding
       x-api-pool:
-      - polite
+      - polite-array
       x-concurrency-limit:
       - '3'
       x-rate-limit-interval:
       - 1s
       x-rate-limit-limit:
-      - '10'
+      - '3'
     status:
       code: 200
       message: OK

@@ -2,37 +2,53 @@ interactions:
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - api.crossref.org
-      User-Agent:
-      - BioETL/1.0 (mailto:test@example.com)
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://api.crossref.org/works?rows=1&mailto=test@example.com
   response:
     body:
-      string: '{"status":"ok","message-type":"work-list","message-version":"1.0.0","message":{"items-per-page":1,"query":{"start-index":0,"search-terms":null},"total-results":163456789,"items":[{"DOI":"10.1000/test","title":["Test Publication"],"type":"journal-article"}]}}'
+      string: '{"status":"ok","message-type":"work-list","message-version":"1.0.0","message":{"facets":{},"total-results":187322808,"items":[{"indexed":{"date-parts":[[2024,5,12]],"date-time":"2024-05-12T19:25:42Z","timestamp":1715541942479},"edition-number":"1","reference-count":0,"publisher":"Wiley","isbn-type":[{"value":"9781119584339","type":"print"},{"value":"9781119584414","type":"electronic"}],"license":[{"start":{"date-parts":[[2021,6,11]],"date-time":"2021-06-11T00:00:00Z","timestamp":1623369600000},"content-version":"tdm","delay-in-days":0,"URL":"http:\/\/doi.wiley.com\/10.1002\/tdm_license_1.1"},{"start":{"date-parts":[[2021,6,11]],"date-time":"2021-06-11T00:00:00Z","timestamp":1623369600000},"content-version":"tdm","delay-in-days":0,"URL":"http:\/\/doi.wiley.com\/10.1002\/tdm_license_1.1"}],"content-domain":{"domain":[],"crossmark-restriction":false},"published-print":{"date-parts":[[2021,9,3]]},"DOI":"10.1002\/9781119584414.ch4","type":"other","created":{"date-parts":[[2021,6,11]],"date-time":"2021-06-11T22:03:10Z","timestamp":1623448990000},"page":"47-54","source":"Crossref","is-referenced-by-count":0,"title":["Complete
+        Dental Cleaning"],"prefix":"10.1002","member":"311","published-online":{"date-parts":[[2021,6,11]]},"container-title":["Blackwell''s
+        Five\u2010Minute Veterinary Consult Clinical Companion"],"language":"en","link":[{"URL":"https:\/\/api.wiley.com\/onlinelibrary\/tdm\/v1\/articles\/10.1002%2F9781119584414.ch4","content-type":"application\/pdf","content-version":"vor","intended-application":"text-mining"},{"URL":"https:\/\/onlinelibrary.wiley.com\/doi\/pdf\/10.1002\/9781119584414.ch4","content-type":"application\/pdf","content-version":"vor","intended-application":"text-mining"},{"URL":"https:\/\/onlinelibrary.wiley.com\/doi\/pdf\/10.1002\/9781119584414.ch4","content-type":"unspecified","content-version":"vor","intended-application":"similarity-checking"}],"deposited":{"date-parts":[[2023,8,19]],"date-time":"2023-08-19T12:01:53Z","timestamp":1692446513000},"score":0.0,"resource":{"primary":{"URL":"https:\/\/onlinelibrary.wiley.com\/doi\/10.1002\/9781119584414.ch4"}},"issued":{"date-parts":[[2021,6,11]]},"ISBN":["9781119584339","9781119584414"],"references-count":0,"alternative-id":["10.1002\/9781119584414.ch4","10.1002\/9781119584414"],"URL":"https:\/\/doi.org\/10.1002\/9781119584414.ch4","archive":["Portico"],"published":{"date-parts":[[2021,6,11]]}}],"items-per-page":1,"query":{"start-index":0,"search-terms":null}}}'
     headers:
-      Access-Control-Allow-Headers:
+      access-control-allow-headers:
       - X-Requested-With, Accept, Accept-Encoding, Accept-Charset, Accept-Language,
         Accept-Ranges, Cache-Control
-      Access-Control-Allow-Origin:
+      access-control-allow-origin:
       - '*'
-      Connection:
+      access-control-expose-headers:
+      - Link
+      connection:
       - keep-alive
-      Content-Type:
+      content-length:
+      - '2472'
+      content-type:
       - application/json
-      Date:
-      - Sun, 05 Jan 2026 12:00:00 GMT
-      X-Rate-Limit-Interval:
+      date:
+      - Tue, 06 Oct 2026 04:11:20 GMT
+      permissions-policy:
+      - interest-cohort=()
+      server:
+      - Jetty(9.4.40.v20210413)
+      vary:
+      - Accept-Encoding
+      x-api-pool:
+      - polite-array
+      x-concurrency-limit:
+      - '3'
+      x-rate-limit-interval:
       - 1s
-      X-Rate-Limit-Limit:
-      - '50'
+      x-rate-limit-limit:
+      - '3'
     status:
       code: 200
       message: OK
