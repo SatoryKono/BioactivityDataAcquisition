@@ -3,6 +3,7 @@
 import io
 import tarfile
 import unittest
+from unittest.mock import patch
 
 from scripts.ops.observability.grafana import router_rootfs as rootfs
 
@@ -44,6 +45,44 @@ def archive(
 
 
 class RootfsFingerprintTests(unittest.TestCase):
+    def test_cli_rejects_option_injection_without_spawning_docker(self):
+        for args in (
+            ["--privileged"],
+            ["--help"],
+            ["bioetl-router-host:acceptance", "--privileged"],
+            ["bioetl-router-host:acceptance --privileged"],
+            ["sha256:" + "a" * 64 + "\n--privileged"],
+        ):
+            with (
+                self.subTest(args=args),
+                patch.object(rootfs.subprocess, "check_output") as command,
+            ):
+                with self.assertRaisesRegex(ValueError, "Unsupported image reference"):
+                    rootfs.main(args)
+                command.assert_not_called()
+
+    def test_valid_image_is_one_positional_argument_after_option_terminator(self):
+        for image in (
+            "bioetl-router-host:acceptance",
+            "sha256:" + "a" * 64,
+            "satorykono/bioetl-grafana-router7-canvas@sha256:" + "b" * 64,
+        ):
+            with (
+                self.subTest(image=image),
+                patch.object(
+                    rootfs.subprocess,
+                    "check_output",
+                    return_value="invalid-container-id",
+                ) as command,
+            ):
+                with self.assertRaisesRegex(ValueError, "Invalid container ID"):
+                    rootfs.main([image])
+                self.assertEqual(
+                    command.call_args.args[0][1:],
+                    ["create", "--entrypoint", "/bin/true", "--", image],
+                )
+                self.assertEqual(command.call_args.kwargs, {"text": True})
+
     def test_only_timestamp_differences_are_accepted(self):
         self.assertEqual(
             rootfs.fingerprint(archive(mtime=1)),

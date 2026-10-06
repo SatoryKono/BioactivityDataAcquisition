@@ -61,7 +61,7 @@ def main(argv: list[str] | None = None):
         else "/usr/bin/docker"
     )
     container = subprocess.check_output(
-        [docker, "create", "--entrypoint", "/bin/true", args[0]], text=True
+        [docker, "create", "--entrypoint", "/bin/true", "--", args[0]], text=True
     ).strip()
     if not re.fullmatch(r"[0-9a-f]{64}", container):
         raise ValueError("Invalid container ID")
