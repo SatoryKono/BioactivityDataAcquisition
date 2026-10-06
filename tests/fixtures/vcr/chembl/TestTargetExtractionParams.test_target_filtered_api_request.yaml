@@ -2,22 +2,22 @@ interactions:
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/target?format=json&limit=5&offset=0&target_type=SINGLE+PROTEIN&organism__isnull=false&tax_id__isnull=false
   response:
     body:
       string: '{"page_meta": {"limit": 5, "next": "/chembl/api/data/target.json?limit=5&offset=5&target_type=SINGLE+PROTEIN&organism__isnull=false&tax_id__isnull=false",
-        "offset": 0, "previous": null, "total_count": 10962}, "targets": [{"cross_references":
+        "offset": 0, "previous": null, "total_count": 11055}, "targets": [{"cross_references":
         [], "organism": "Homo sapiens", "pref_name": "Maltase-glucoamylase", "species_group_flag":
         false, "target_chembl_id": "CHEMBL2074", "target_components": [{"accession":
         "O43451", "component_description": "Maltase-glucoamylase", "component_id":
@@ -59,45 +59,45 @@ interactions:
         "xref_src_db": "InterPro"}, {"xref_id": "IPR000519", "xref_name": "P_trefoil_dom",
         "xref_src_db": "InterPro"}, {"xref_id": "IPR011013", "xref_name": "Gal_mutarotase_sf_dom",
         "xref_src_db": "InterPro"}, {"xref_id": "IPR013780", "xref_name": "Glyco_hydro_b",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR017853", "xref_name": "Glycoside_hydrolase_SF",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR017957", "xref_name": "P_trefoil_CS",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR025887", "xref_name": "Glyco_hydro_31_N_dom",
+        "xref_src_db": "InterPro"}, {"xref_id": "IPR017853", "xref_name": "GH", "xref_src_db":
+        "InterPro"}, {"xref_id": "IPR017957", "xref_name": "P_trefoil_CS", "xref_src_db":
+        "InterPro"}, {"xref_id": "IPR025887", "xref_name": "Glyco_hydro_31_N_dom",
         "xref_src_db": "InterPro"}, {"xref_id": "IPR030458", "xref_name": "Glyco_hydro_31_AS",
         "xref_src_db": "InterPro"}, {"xref_id": "IPR030459", "xref_name": "Glyco_hydro_31_CS",
         "xref_src_db": "InterPro"}, {"xref_id": "IPR044913", "xref_name": "P_trefoil_dom_sf",
         "xref_src_db": "InterPro"}, {"xref_id": "IPR048395", "xref_name": "Glyco_hydro_31_C",
         "xref_src_db": "InterPro"}, {"xref_id": "PTHR22762", "xref_name": "ALPHA-GLUCOSIDASE",
-        "xref_src_db": "PANTHER"}, {"xref_id": "PTHR22762:SF133", "xref_name": "P-TYPE
-        DOMAIN-CONTAINING PROTEIN", "xref_src_db": "PANTHER"}, {"xref_id": "2QLY",
-        "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "2QMJ", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "3CTT", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "3L4T", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "3L4U", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4V", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "3L4W", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "3L4X", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "3L4Y", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4Z", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "3TON", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "3TOP", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "2QLY", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "2QMJ", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "3CTT", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "3L4T", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "3L4U", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4V", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4W", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "3L4X", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "3L4Y", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4Z", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "3TON", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "3TOP", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "PF00088", "xref_name": "Trefoil", "xref_src_db": "Pfam"}, {"xref_id": "PF01055",
-        "xref_name": "Glyco_hydro_31_2nd", "xref_src_db": "Pfam"}, {"xref_id": "PF13802",
-        "xref_name": "Gal_mutarotas_2", "xref_src_db": "Pfam"}, {"xref_id": "PF21365",
-        "xref_name": "Glyco_hydro_31_3rd", "xref_src_db": "Pfam"}, {"xref_id": "PA30778",
-        "xref_name": "maltase-glucoamylase", "xref_src_db": "PharmGKB"}, {"xref_id":
-        "O43451", "xref_name": null, "xref_src_db": "Pharos"}, {"xref_id": "R-HSA-189085",
-        "xref_name": "Digestion of dietary carbohydrate", "xref_src_db": "Reactome"},
-        {"xref_id": "R-HSA-6798695", "xref_name": "Neutrophil degranulation", "xref_src_db":
-        "Reactome"}, {"xref_id": "E7ER45", "xref_name": "Maltase-glucoamylase", "xref_src_db":
-        "UniProt"}, {"xref_id": "O43451", "xref_name": "Maltase-glucoamylase", "xref_src_db":
-        "UniProt"}, {"xref_id": "Q0VAX6", "xref_name": "Maltase-glucoamylase", "xref_src_db":
+        "xref_src_db": "PANTHER"}, {"xref_id": "PTHR22762:SF63", "xref_name": "MALTASE-GLUCOAMYLASE",
+        "xref_src_db": "PANTHER"}, {"xref_id": "2QLY", "xref_name": null, "xref_src_db":
+        "PDB"}, {"xref_id": "2QMJ", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
+        "3CTT", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4T", "xref_name":
+        null, "xref_src_db": "PDB"}, {"xref_id": "3L4U", "xref_name": null, "xref_src_db":
+        "PDB"}, {"xref_id": "3L4V", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
+        "3L4W", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4X", "xref_name":
+        null, "xref_src_db": "PDB"}, {"xref_id": "3L4Y", "xref_name": null, "xref_src_db":
+        "PDB"}, {"xref_id": "3L4Z", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
+        "3TON", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3TOP", "xref_name":
+        null, "xref_src_db": "PDB"}, {"xref_id": "2QLY", "xref_name": "A", "xref_src_db":
+        "PDBe"}, {"xref_id": "2QMJ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
+        "3CTT", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4T", "xref_name":
+        "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4U", "xref_name": "A", "xref_src_db":
+        "PDBe"}, {"xref_id": "3L4V", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
+        "3L4W", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4X", "xref_name":
+        "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4Y", "xref_name": "A", "xref_src_db":
+        "PDBe"}, {"xref_id": "3L4Z", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
+        "3TON", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3TOP", "xref_name":
+        "A", "xref_src_db": "PDBe"}, {"xref_id": "PF00088", "xref_name": "Trefoil",
+        "xref_src_db": "Pfam"}, {"xref_id": "PF01055", "xref_name": "Glyco_hydro_31_2nd",
+        "xref_src_db": "Pfam"}, {"xref_id": "PF13802", "xref_name": "Gal_mutarotas_2",
+        "xref_src_db": "Pfam"}, {"xref_id": "PF21365", "xref_name": "Glyco_hydro_31_3rd",
+        "xref_src_db": "Pfam"}, {"xref_id": "PA30778", "xref_name": "maltase-glucoamylase",
+        "xref_src_db": "PharmGKB"}, {"xref_id": "O43451", "xref_name": null, "xref_src_db":
+        "Pharos"}, {"xref_id": "R-HSA-189085", "xref_name": "Digestion of dietary
+        carbohydrate", "xref_src_db": "Reactome"}, {"xref_id": "R-HSA-6798695", "xref_name":
+        "Neutrophil degranulation", "xref_src_db": "Reactome"}, {"xref_id": "E7ER45",
+        "xref_name": "Maltase-glucoamylase", "xref_src_db": "UniProt"}, {"xref_id":
+        "O43451", "xref_name": "Maltase-glucoamylase", "xref_src_db": "UniProt"},
+        {"xref_id": "Q0VAX6", "xref_name": "Maltase-glucoamylase", "xref_src_db":
         "UniProt"}, {"xref_id": "Q75ME7", "xref_name": "Maltase-glucoamylase", "xref_src_db":
         "UniProt"}, {"xref_id": "Q86UM5", "xref_name": "Maltase-glucoamylase", "xref_src_db":
         "UniProt"}]}], "target_type": "SINGLE PROTEIN", "tax_id": 9606}, {"cross_references":
@@ -304,42 +304,45 @@ interactions:
         null, "xref_src_db": "PDB"}, {"xref_id": "8W4T", "xref_name": null, "xref_src_db":
         "PDB"}, {"xref_id": "8WKF", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
         "8WKG", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "8XWW", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "1RKP", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "1T9R", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "1T9S", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1TBF", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "1UDT", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "1UDU", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "1UHO", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1XOZ", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "1XP0", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "2CHM", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "2H40", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "2H42", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "2H44", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "2XSS", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "3B2R", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3BJC", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "3HC8", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "3HDZ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "3JWQ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3JWR", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "3LFV", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "3MF0", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "3SHY", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3SHZ", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "3SIE", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "3TGE", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "3TGG", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4G2W", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "4G2Y", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "4I9Z", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "4IA0", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4MD6", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "4OEW", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "4OEX", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "5JO3", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "5ZZ2", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "6ACB", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "6IWI", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "6L6E", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "6VBI", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "7FAQ", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "7FAR", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "8W4S", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "8W4T", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "8WKF", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "8WKG", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "8XWW", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "PF00233", "xref_name":
+        null, "xref_src_db": "PDB"}, {"xref_id": "9LSL", "xref_name": null, "xref_src_db":
+        "PDB"}, {"xref_id": "9LSM", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
+        "1RKP", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1T9R", "xref_name":
+        "A", "xref_src_db": "PDBe"}, {"xref_id": "1T9S", "xref_name": "A", "xref_src_db":
+        "PDBe"}, {"xref_id": "1TBF", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
+        "1UDT", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1UDU", "xref_name":
+        "A", "xref_src_db": "PDBe"}, {"xref_id": "1UHO", "xref_name": "A", "xref_src_db":
+        "PDBe"}, {"xref_id": "1XOZ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
+        "1XP0", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "2CHM", "xref_name":
+        "A", "xref_src_db": "PDBe"}, {"xref_id": "2H40", "xref_name": "A", "xref_src_db":
+        "PDBe"}, {"xref_id": "2H42", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
+        "2H44", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "2XSS", "xref_name":
+        "A", "xref_src_db": "PDBe"}, {"xref_id": "3B2R", "xref_name": "A", "xref_src_db":
+        "PDBe"}, {"xref_id": "3BJC", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
+        "3HC8", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3HDZ", "xref_name":
+        "A", "xref_src_db": "PDBe"}, {"xref_id": "3JWQ", "xref_name": "A", "xref_src_db":
+        "PDBe"}, {"xref_id": "3JWR", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
+        "3LFV", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3MF0", "xref_name":
+        "A", "xref_src_db": "PDBe"}, {"xref_id": "3SHY", "xref_name": "A", "xref_src_db":
+        "PDBe"}, {"xref_id": "3SHZ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
+        "3SIE", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3TGE", "xref_name":
+        "A", "xref_src_db": "PDBe"}, {"xref_id": "3TGG", "xref_name": "A", "xref_src_db":
+        "PDBe"}, {"xref_id": "4G2W", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
+        "4G2Y", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4I9Z", "xref_name":
+        "A", "xref_src_db": "PDBe"}, {"xref_id": "4IA0", "xref_name": "A", "xref_src_db":
+        "PDBe"}, {"xref_id": "4MD6", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
+        "4OEW", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4OEX", "xref_name":
+        "A", "xref_src_db": "PDBe"}, {"xref_id": "5JO3", "xref_name": "A", "xref_src_db":
+        "PDBe"}, {"xref_id": "5ZZ2", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
+        "6ACB", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "6IWI", "xref_name":
+        "A", "xref_src_db": "PDBe"}, {"xref_id": "6L6E", "xref_name": "A", "xref_src_db":
+        "PDBe"}, {"xref_id": "6VBI", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
+        "7FAQ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "7FAR", "xref_name":
+        "A", "xref_src_db": "PDBe"}, {"xref_id": "8W4S", "xref_name": "A", "xref_src_db":
+        "PDBe"}, {"xref_id": "8W4T", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
+        "8WKF", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "8WKG", "xref_name":
+        "A", "xref_src_db": "PDBe"}, {"xref_id": "8XWW", "xref_name": "A", "xref_src_db":
+        "PDBe"}, {"xref_id": "9LSL", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
+        "9LSM", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "PF00233", "xref_name":
         "PDEase_I", "xref_src_db": "Pfam"}, {"xref_id": "PF01590", "xref_name": "GAF",
         "xref_src_db": "Pfam"}, {"xref_id": "PA33132", "xref_name": "phosphodiesterase
         5A", "xref_src_db": "PharmGKB"}, {"xref_id": "O76074", "xref_name": null,
@@ -475,28 +478,28 @@ interactions:
         null, "xref_src_db": "UniProt"}]}], "target_type": "SINGLE PROTEIN", "tax_id":
         6253}]}'
     headers:
-      Cache-Control:
+      cache-control:
       - max-age=30000000, s-maxage=30000000
-      Connection:
+      connection:
       - Keep-Alive
-      Content-Disposition:
+      content-disposition:
       - inline
-      Content-Length:
-      - '37105'
-      Content-Type:
+      content-length:
+      - '37320'
+      content-type:
       - application/json
-      Date:
-      - Tue, 03 Mar 2026 18:43:37 GMT
-      Server:
+      date:
+      - Tue, 06 Oct 2026 05:03:23 GMT
+      server:
       - gunicorn/20.0.4
-      Strict-Transport-Security:
-      - max-age=0
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - Accept, Origin
-      X-ChEMBL-in-cache:
+      x-chembl-in-cache:
       - 'True'
-      X-ChEMBL-retrieval-time:
-      - '2.4415552616119385'
+      x-chembl-retrieval-time:
+      - '2.0280380249023438'
     status:
       code: 200
       message: OK
