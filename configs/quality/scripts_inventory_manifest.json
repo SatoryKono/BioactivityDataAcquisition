@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-06T08:01:49.086870+00:00",
+  "generated_at": "2026-10-06T08:15:16.264039+00:00",
   "summary": {
     "total_scripts": 639,
     "status_counts": {
@@ -10599,13 +10599,13 @@
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 75,
+          "line": 78,
           "source_group": "docs",
           "text": "| S7-d `test_committed_test_telemetry_baseline_is_populated` | telemetry | `pytest tests/architecture/test_test_telemetry_governance.py tests/architecture/test_test_telemetry_baseline.py` | `python -m"
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 138,
+          "line": 141,
           "source_group": "docs",
           "text": "| Committed test telemetry | `pytest tests/architecture/test_test_telemetry_baseline.py tests/architecture/test_test_telemetry_governance.py` | `python -m scripts.engineering.ci.update_test_telemetry_"
         }
@@ -15548,7 +15548,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 141,
+          "line": 144,
           "source_group": "docs",
           "text": "| Architecture artifact duplication | `python -m scripts.engineering.qa.report_artifact_duplication_audit --check` | `python -m scripts.engineering.qa.report_artifact_duplication_audit --json-out repo"
         },
@@ -15780,7 +15780,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 129,
+          "line": 132,
           "source_group": "docs",
           "text": "| Config duplication/backlog audit | `pytest tests/architecture/test_config_surface_entity_residual_plateau.py` | `python -m scripts.engineering.qa.report_config_surface_backlog` |"
         },
@@ -16141,7 +16141,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 144,
+          "line": 147,
           "source_group": "docs",
           "text": "| Debt-governance rollup | `python -m scripts.engineering.qa.report_debt_governance_gates --check` | `python -m scripts.engineering.qa.report_debt_governance_gates --update` |"
         },
@@ -16311,7 +16311,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 142,
+          "line": 145,
           "source_group": "docs",
           "text": "| Flaky-test burndown review | `python -m scripts.engineering.qa.report_flaky_test_burndown_review --check` | `python -m scripts.engineering.qa.report_flaky_test_burndown_review` |"
         },
@@ -16514,7 +16514,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 143,
+          "line": 146,
           "source_group": "docs",
           "text": "| Live residual snapshot | `python -m scripts.engineering.qa.report_live_residual_snapshot --check` | `python -m scripts.engineering.qa.report_live_residual_snapshot` |"
         },
@@ -16925,13 +16925,13 @@
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 77,
+          "line": 80,
           "source_group": "docs",
           "text": "| test-governance `--check` | governance snapshot | `python -m scripts.engineering.qa.report_test_governance_audit --check` | `python -m scripts.engineering.qa.report_test_governance_audit --json-out "
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 135,
+          "line": 138,
           "source_group": "docs",
           "text": "| Test governance snapshots | `python -m scripts.engineering.qa.report_test_governance_audit --check` | `python -m scripts.engineering.qa.report_test_governance_audit --json-out reports/quality/test-g"
         },
@@ -17258,7 +17258,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 133,
+          "line": 136,
           "source_group": "docs",
           "text": "| Module coverage measurements | `python -m scripts.engineering.qa.run_local_coverage_verify` completes all 17 local shards on one committed source tree; its manifest records every exit code and the c"
         },

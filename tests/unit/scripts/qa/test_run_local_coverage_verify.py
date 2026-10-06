@@ -90,6 +90,42 @@ def test_worker_limit_cannot_disable_execution_or_raise_resource_budget(
     assert error.value.code == 2
 
 
+def test_scratch_path_rejects_escape_without_creating_files(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "ROOT", tmp_path / "repo")
+    monkeypatch.setattr(runner.tempfile, "gettempdir", lambda: str(tmp_path / "temp"))
+    outside = tmp_path / "repo" / "reports" / ".." / "outside"
+
+    with pytest.raises(ValueError, match="Coverage scratch"):
+        runner._scratch_path(outside)
+
+    assert not outside.resolve().exists()
+
+
+@pytest.mark.parametrize("folder", ("repo/reports/run", "temp/run"))
+def test_scratch_path_allows_owned_output_roots(tmp_path, monkeypatch, folder):
+    monkeypatch.setattr(runner, "ROOT", tmp_path / "repo")
+    monkeypatch.setattr(runner.tempfile, "gettempdir", lambda: str(tmp_path / "temp"))
+
+    assert runner._scratch_path(tmp_path / folder) == (tmp_path / folder).resolve()
+
+
+def test_manifest_writer_does_not_overwrite_existing_temporary_file(tmp_path):
+    temporary = tmp_path / "manifest.tmp"
+    temporary.write_text("preserve existing evidence", encoding="utf-8")
+
+    with pytest.raises(FileExistsError):
+        runner._write_manifest(tmp_path / "manifest.json", {"complete": False})
+
+    assert temporary.read_text(encoding="utf-8") == "preserve existing evidence"
+    assert not (tmp_path / "manifest.json").exists()
+
+
+def test_manifest_writer_rejects_arbitrary_name(tmp_path):
+    with pytest.raises(ValueError, match="manifest name"):
+        runner._write_manifest(tmp_path / "other.json", {})
+    assert not (tmp_path / "other.json").exists()
+
+
 def test_single_worker_is_recorded_and_used_without_accepting_failed_run(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

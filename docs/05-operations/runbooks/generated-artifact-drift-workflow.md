@@ -64,6 +64,9 @@ The default and upper limit remain two workers. The manifest records the chosen
 limit and each executed command; all 17 shard selections, timeouts and coverage
 thresholds remain unchanged. Preserve an incomplete run before restarting in a
 new empty scratch directory. A passing subset never substitutes for all shards.
+An explicit scratch directory must be under the repository's `reports/` directory
+or the system temporary directory. Paths escaping these roots are rejected before
+directory creation; an existing temporary manifest is never overwritten.
 
 After `git fetch origin main`, do **not** use
 `git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main` in a

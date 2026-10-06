@@ -253,12 +253,22 @@ def _command(shard: Shard, junit: Path, *, max_workers: int = 2) -> list[str]:
     return command
 
 
+def _scratch_path(path: Path) -> Path:
+    resolved = path.resolve()
+    roots = (ROOT / "reports", Path(tempfile.gettempdir()))
+    if not any(resolved.is_relative_to(root.resolve()) for root in roots):
+        raise ValueError("Coverage scratch must be under reports/ or system temp")
+    return resolved
+
+
 def _write_manifest(path: Path, payload: dict[str, object]) -> None:
-    temporary = path.with_suffix(".tmp")
-    temporary.write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
-    temporary.replace(path)
+    directory = _scratch_path(path.parent)
+    if path.name != "manifest.json":
+        raise ValueError("Unexpected coverage manifest name")
+    temporary = directory / "manifest.tmp"
+    with temporary.open("x", encoding="utf-8") as stream:
+        stream.write(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    temporary.replace(directory / "manifest.json")
 
 
 def _run_logged(command: list[str], log: Path, *, env: dict[str, str]) -> int:
@@ -375,7 +385,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--scratch-dir",
         type=Path,
-        help="New empty run directory (default: system temp)",
+        help="New directory under reports/ or system temp (default: system temp)",
     )
     parser.add_argument(
         "--max-workers",
@@ -422,7 +432,7 @@ def main(argv: list[str] | None = None) -> int:
     source_sha = compute_source_tree_sha256(repo_root=ROOT)
     test_sha = compute_test_telemetry_source_tree_sha256(repo_root=ROOT)
     if args.scratch_dir:
-        scratch = args.scratch_dir.resolve()
+        scratch = _scratch_path(args.scratch_dir)
         scratch.mkdir(parents=True, exist_ok=False)
     else:
         scratch = Path(tempfile.mkdtemp(prefix="bioetl-local-coverage-"))
