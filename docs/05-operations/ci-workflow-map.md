@@ -80,8 +80,13 @@ Remaining event parity and external acceptance are pending.
 The prepared `performance` lane preserves benchmark budgets and the five-sample
 window, emits JUnit/observations/JSON/Markdown artifacts, and fails on missing,
 empty or over-budget evidence. Main job 3365 passed 70 tests and all five budgets.
-`bioetl-performance-nightly` is registered for 03:00–03:59 UTC daily; its first
-scheduled execution remains pending.
+`bioetl-performance-nightly` is registered for 03:00–03:59 UTC daily. Its first
+scheduled pipeline 272 failed the CrossRef median budget (0.479 ms against
+0.4125 ms); a single diagnostic rerun on the same main SHA passed all 70 tests
+with CrossRef at 0.268 ms. Both attempts are retained; scheduling is demonstrated,
+but stable performance acceptance remains pending. The prepared evidence gate
+requires all five registered benchmarks, rejects duplicate/missing/failed rows,
+and records CPU identity, quota and throttling counters for diagnosis.
 The prepared `replay-parity` lane retains the determinism, idempotency, composite
 resume and independent determinism recheck, with nonempty checksum comparison
 and replay artifacts. `memory-freshness` checks and publishes evidence without
@@ -177,7 +182,7 @@ Artifact digests and terminal job evidence were collected before recording resul
 | Memory freshness | [2605](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2605) | SUCCESS; report and contract checks; notifications and scheduled execution pending |
 | Port contracts | [2606](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2606) | SUCCESS; 188 tests including Hypothesis, both JUnit artifacts; event parity pending |
 | Skills consistency | [3364](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/3364) | SUCCESS; verify-only drift report has no drift, Junie parity passes; approved synchronization and event parity pending |
-| Performance | [3365](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/3365) | SUCCESS; 70 tests, zero skips/failures; all five hotspot budgets pass, CrossRef median 0.243 ms; budgets unchanged; schedule pending |
+| Performance | [3365](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/3365) | SUCCESS; 70 tests, zero skips/failures; all five hotspot budgets pass, CrossRef median 0.243 ms; budgets unchanged; first scheduled pipeline 272 failed, diagnostic rerun 4566 passed; stability pending |
 | Replay parity | [3366](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/3366) | SUCCESS; four runs and nine artifacts; independent determinism checksum inventories match; schedule pending |
 
 On main `95ca0a67f21a7055ad1b671f9ff57bd5ff39b1fb`, GitHub settings job
@@ -255,7 +260,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `no-partial-tree-commits.yml` | — | Full-tree guard in root governance | Integrated into root-hygiene; main jobs 3500, 3529, 3549 passed the full-tree guard alongside strict root checks |
 | `opencode-pr-review.yml` | — | Retain disabled review stub policy | Do not activate unpinned installer or write paths |
 | `opencode-triage.yml` | — | Retain disabled triage stub policy | Do not activate unpinned installer or write paths |
-| `performance-nightly.yml` | `0 3 * * *` | CircleCI performance | Main job 3365 passes 70 tests without skips and all five budgets; daily 03 UTC trigger registered, scheduled execution pending |
+| `performance-nightly.yml` | `0 3 * * *` | CircleCI performance | Scheduled pipeline 272 on 303ced3: job 4565 failed CrossRef latency; one diagnostic rerun 4566 passed 70 tests/0 skips and all five budgets. Artifacts retained from both; runner variability and stable acceptance pending |
 | `port-contracts.yml` | — | CircleCI port-contracts | Main run 2606 passed 188 tests including 24 Hypothesis cases; run 4425/pipeline 262 passed 164 tests with include-hypothesis=false on 303ced3; push/PR event parity pending |
 | `pr-hygiene.yml` | — | Retain disabled PR maintenance | Preserve #10263; canonical 21-day draft/report-noise policy remains manual |
 | `pr-required.yml` | — | CircleCI classify/pr-gate-complete | Main pipelines 218–220 pass all 81 jobs on a34558b918b5; both production rulesets active/read back; legacy owner references retained until #11930 |
@@ -532,3 +537,16 @@ OSV scan failures cannot reach the HIGH/CRITICAL severity policy: only exit 0
 or 1 from the checksum-verified v2.6.0 binary is accepted as a completed scan.
 Infrastructure, network, and no-package exits fail the job before the policy
 reads a partial or empty report. Severity thresholds are unchanged.
+
+
+Performance schedule diagnostic: [pipeline 272](https://app.circleci.com/pipelines/github/SatoryKono/BioactivityDataAcquisition/272)
+on main `303ced3b8e5c6fff04b061bfa5caf4b1674893af` was genuinely scheduled.
+Jobs 4565 and 4566 used the same source, tests, lockfile, Python 3.13.16 and
+performance job configuration as the earlier successful job 3365. Four
+artifacts from each attempt were downloaded and hashed. The failed JUnit
+contains 69 passes and one failure; the rerun contains 70 passes and zero skips.
+The first JSON omitted the failed CrossRef observation because budget assertions
+run before observation recording; its four passing entries cannot qualify as
+complete evidence. The stricter CircleCI evidence gate rejects that actual
+partial report without changing benchmark thresholds. CPU variability is a
+working diagnosis, not a proven code regression or a stability closeout.

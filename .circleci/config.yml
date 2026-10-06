@@ -1402,6 +1402,18 @@ jobs:
           python-version: "3.13"
           extras: "dev tracing performance"
       - run:
+          name: Record performance runner identity
+          command: |
+            set -euo pipefail
+            mkdir -p reports/performance
+            {
+              uv run --frozen --no-build python -c 'import os,platform; print("python=" + platform.python_version()); print("platform=" + platform.platform()); print("cpu_count=" + str(os.cpu_count())); print("cpu_affinity=" + str(sorted(os.sched_getaffinity(0))))'
+              lscpu
+              for path in /sys/fs/cgroup/cpu.max /sys/fs/cgroup/cpu.stat /sys/fs/cgroup/cpu/cpu.cfs_quota_us /sys/fs/cgroup/cpu/cpu.cfs_period_us; do
+                if [ -r "$path" ]; then printf '\n%s\n' "$path"; cat "$path"; fi
+              done
+            } > reports/performance/runner-identity.txt
+      - run:
           name: Run performance benchmarks with existing budgets
           no_output_timeout: 35m
           command: |
@@ -1411,6 +1423,14 @@ jobs:
               -m "benchmark or performance" -p benchmark -p no:xdist -v --tb=short \
               --perf-obs-out reports/performance/hotspot-observations.jsonl \
               --junitxml=reports/performance/hotspot-budgets.xml
+      - run:
+          name: Record performance CPU throttling after benchmarks
+          when: always
+          command: |
+            mkdir -p reports/performance
+            for path in /sys/fs/cgroup/cpu.stat /sys/fs/cgroup/cpu/cpu.stat; do
+              if [ -r "$path" ]; then printf '\n%s\n' "$path"; cat "$path"; fi
+            done > reports/performance/runner-cpu-after.txt
       - run:
           name: Build performance degradation evidence
           when: always
@@ -1426,6 +1446,27 @@ jobs:
           when: always
           command: |
             uv run --frozen --no-build python -c 'import json,sys; d=json.load(open("reports/performance/hotspot-degradation.json")); s=d["summary"]; sys.exit(0 if s["total"] > 0 and s["failed"] == 0 else 1)'
+      - run:
+          name: Require every registered performance benchmark
+          when: always
+          command: |
+            uv run --frozen --no-build python - \<<'PERFORMANCE_EVIDENCE'
+            import json
+            from pathlib import Path
+
+            budgets = json.loads(Path("tests/performance/hotspot_budgets.json").read_text())
+            report = json.loads(Path("reports/performance/hotspot-degradation.json").read_text())
+            expected = set(budgets["benchmarks"])
+            rows = report["benchmarks"]
+            actual = [row["benchmark_key"] for row in rows]
+            if not expected or len(actual) != len(expected) or set(actual) != expected:
+                raise SystemExit("Performance evidence is incomplete or contains duplicate/unknown benchmarks")
+            if report["summary"] != {"total": len(expected), "passed": len(expected), "failed": 0}:
+                raise SystemExit("Performance evidence includes failed or inconsistent results")
+            if not all(row["within_budget"] is True and row["samples"] > 0 for row in rows):
+                raise SystemExit("Performance evidence contains a failing or empty observation")
+            print(f"All {len(expected)} benchmark budgets have complete passing evidence")
+            PERFORMANCE_EVIDENCE
       - store_test_results:
           path: reports/performance
       - store_artifacts:
