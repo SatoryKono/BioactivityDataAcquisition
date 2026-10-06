@@ -78,12 +78,27 @@ class SilverThresholdChecker:
         """
         violations: list[JsonDict] = []  # Any: DQ check values vary by check type
 
+        columns = set(df.columns)
+        fields = list(
+            dict.fromkeys(
+                str(rule.get("field", ""))
+                for rule in key_nullability_rules
+                if not rule.get("nullable", False)
+                and str(rule.get("field", "")) in columns
+            )
+        )
+        null_counts = (
+            df.select(pl.col(field).null_count() for field in fields).row(0, named=True)
+            if fields
+            else {}
+        )
+
         for rule in key_nullability_rules:
             if rule.get("nullable", False):
                 continue
             field = str(rule.get("field", ""))
             key_type = str(rule.get("key_type", "merge"))
-            if field not in df.columns:
+            if field not in columns:
                 violations.append(
                     {
                         "field": field,
@@ -92,7 +107,7 @@ class SilverThresholdChecker:
                     }
                 )
                 continue
-            null_count = int(df[field].null_count())
+            null_count = int(null_counts[field])
             if null_count > 0:
                 violations.append(
                     {
