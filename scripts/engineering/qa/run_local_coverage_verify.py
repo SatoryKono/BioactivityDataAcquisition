@@ -183,7 +183,8 @@ def _bash_safe_path(path: Path) -> str:
     relative (no drive prefix, no conversion); out-of-tree paths keep their
     POSIX spelling as a best-effort fallback.
     """
-    resolved = path.resolve()
+    # Rendering a manifest path must not inspect the producer filesystem.
+    resolved = Path(os.path.abspath(path))
     try:
         return resolved.relative_to(ROOT).as_posix()
     except ValueError:
