@@ -124,3 +124,31 @@ class TestSilverThresholdChecker:
 
         assert result["status"] == DQCheckStatus.PASS.value
         assert result["violations"] == []
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("values", [[None, "x"], []])
+def test_batched_null_counts_preserve_rule_order_and_repeated_fields(values):
+    df = pl.DataFrame({"key": values}, schema={"key": pl.String})
+    rules = [
+        {"field": "key", "key_type": "merge", "nullable": False},
+        {"field": "missing", "key_type": "partition", "nullable": False},
+        {"field": "key", "key_type": "partition", "nullable": False},
+        {"field": "key", "key_type": "ignored", "nullable": True},
+    ]
+    result = SilverThresholdChecker().check_key_nullability(df, rules)
+    missing = {"field": "missing", "key_type": "partition", "missing_column": True}
+    expected = (
+        [
+            {"field": "key", "key_type": "merge", "null_count": 1},
+            missing,
+            {"field": "key", "key_type": "partition", "null_count": 1},
+        ]
+        if values
+        else [missing]
+    )
+    assert result == {
+        "status": DQCheckStatus.FAIL.value,
+        "violations": expected,
+        "rules_checked": 4,
+    }
