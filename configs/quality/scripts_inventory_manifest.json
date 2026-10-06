@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-06T07:49:49.085384+00:00",
+  "generated_at": "2026-10-06T08:01:49.086870+00:00",
   "summary": {
     "total_scripts": 639,
     "status_counts": {
@@ -17288,7 +17288,7 @@
         },
         {
           "path": "tests/architecture/test_proof_closeout_workflow_contract.py",
-          "line": 9,
+          "line": 11,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.run_local_coverage_verify import SHARDS"
         }
