@@ -52,6 +52,7 @@ evidence_kinds:
       - pretest_guardrails
     command_families:
       - python -m scripts.docs verify
+      - python -m scripts.docs check-links
       - bash scripts/ai/junie/check_junie_mirror.sh --check
   debt:
     authorized_producers:
