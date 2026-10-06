@@ -29,6 +29,9 @@ from memory.proof import (
 ROOT = Path(__file__).resolve().parents[2]
 CATALOG = ROOT / "configs/quality/proof_closeout_checks.yaml"
 EVIDENCE = ROOT / "reports/quality/proof-or-stop/shared"
+EXECUTION_FILE = "execution.json"
+PRODUCER_LOG = "producer.log"
+SYMLINK_ERROR = "Symlink in producer evidence"
 
 
 def receive(workspace: Path | None = None) -> None:
@@ -86,9 +89,21 @@ def command_for(name: str) -> list[str]:
     return [arg.format(**substitutions) for arg in catalog()["checks"][name]["argv"]]
 
 
+def _sanitize_file(path: Path, secrets: list[str]) -> None:
+    with path.open("r+", encoding="utf-8", errors="replace") as stream:
+        original = stream.read()
+        text = original
+        for secret in secrets:
+            text = text.replace(secret, "[REDACTED_CI_SECRET]")
+        if text != original:
+            stream.seek(0)
+            stream.write(text)
+            stream.truncate()
+
+
 def sanitize_outputs(folder: Path) -> None:
     if folder.is_symlink():
-        raise ValueError("Symlink in producer evidence")
+        raise ValueError(SYMLINK_ERROR)
     folder = folder.resolve()
     evidence_root = EVIDENCE.resolve()
     evidence_root.relative_to(ROOT.resolve())
@@ -108,16 +123,11 @@ def sanitize_outputs(folder: Path) -> None:
     )
     for path in folder.rglob("*"):
         if path.is_symlink():
-            raise ValueError("Symlink in producer evidence")
+            raise ValueError(SYMLINK_ERROR)
         path = path.resolve()
         path.relative_to(folder)
         if path.is_file() and path.suffix in {".json", ".xml", ".log"}:
-            original = path.read_text(encoding="utf-8", errors="replace")
-            text = original
-            for secret in secrets:
-                text = text.replace(secret, "[REDACTED_CI_SECRET]")
-            if text != original:
-                path.write_text(text, encoding="utf-8")
+            _sanitize_file(path, secrets)
 
 
 def artifact_hashes(folder: Path) -> dict[str, str]:
@@ -128,8 +138,8 @@ def artifact_hashes(folder: Path) -> dict[str, str]:
         if any(part in {"pycache", "hypothesis"} for part in relative.parts):
             continue
         if path.is_symlink():
-            raise ValueError("Symlink in producer evidence")
-        if path.is_file() and relative.as_posix() != "execution.json":
+            raise ValueError(SYMLINK_ERROR)
+        if path.is_file() and relative.as_posix() != EXECUTION_FILE:
             result[relative.as_posix()] = file_digest(path)
     return result
 
@@ -154,7 +164,7 @@ def produce(name: str) -> int:
     command = command_for(name)
     started = datetime.now(UTC).isoformat()
     clock = time.monotonic()
-    log = folder / "producer.log"
+    log = folder / PRODUCER_LOG
     env = dict(os.environ)
     env.pop("BASH_ENV", None)
     with log.open("w", encoding="utf-8") as stream:
@@ -200,7 +210,7 @@ def produce(name: str) -> int:
         )
         write_json(folder / "receipt.json", receipt)
     write_json(
-        folder / "execution.json",
+        folder / EXECUTION_FILE,
         {
             "check": name,
             "catalog_digest": canonical_digest(plan),
@@ -223,7 +233,7 @@ def validate_execution(
     name: str, ci_run: str, source: dict[str, Any]
 ) -> dict[str, Any]:
     folder = EVIDENCE / name
-    record = json.loads((folder / "execution.json").read_text(encoding="utf-8"))
+    record = json.loads((folder / EXECUTION_FILE).read_text(encoding="utf-8"))
     if not isinstance(record, dict):
         raise ValueError("Invalid producer execution record")
     if (
@@ -237,7 +247,7 @@ def validate_execution(
         raise ValueError(f"Incomplete or foreign producer: {name}")
     if (
         record["artifacts"] != artifact_hashes(folder)
-        or "producer.log" not in record["artifacts"]
+        or PRODUCER_LOG not in record["artifacts"]
     ):
         raise ValueError(f"Producer artifact mismatch: {name}")
     return record
@@ -264,7 +274,7 @@ def assemble() -> int:
                 or receipt["producer"] != spec["producer"]
                 or receipt["evidence_kind"] != spec["kind"]
                 or receipt["output_digest"]
-                != file_digest(EVIDENCE / name / "producer.log")
+                != file_digest(EVIDENCE / name / PRODUCER_LOG)
             ):
                 raise ValueError(f"Receipt does not describe producer: {name}")
             receipts.append(receipt)

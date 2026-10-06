@@ -16,7 +16,7 @@ import sys
 import tempfile
 import xml.etree.ElementTree as ET
 from collections.abc import Mapping
-from dataclasses import asdict, dataclass, replace
+from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -315,8 +315,13 @@ def _resolve_architecture_stats(args: argparse.Namespace) -> ArchitectureTestSta
         stats = _parse_architecture_junit(args.architecture_junit, returncode=0)
         if stats.tests <= 0:
             raise ValueError("Architecture JUnit is missing or empty")
-        return replace(
-            stats, owner="junit", returncode=int(bool(stats.failures or stats.errors))
+        return ArchitectureTestStats(
+            tests=stats.tests,
+            failures=stats.failures,
+            errors=stats.errors,
+            skipped=stats.skipped,
+            owner="junit",
+            returncode=int(bool(stats.failures or stats.errors)),
         )
     if args.architecture_owner == "lint-architecture-workflow":
         return ArchitectureTestStats(

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-06T06:38:01.862819+00:00",
+  "generated_at": "2026-10-06T06:48:56.432250+00:00",
   "summary": {
     "total_scripts": 639,
     "status_counts": {
@@ -10175,7 +10175,7 @@
         },
         {
           "path": "scripts/engineering/qa/run_local_coverage_verify.py",
-          "line": 28,
+          "line": 29,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.local_test_telemetry import junit_telemetry_sha256"
         },
