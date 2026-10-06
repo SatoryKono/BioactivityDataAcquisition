@@ -190,7 +190,7 @@ jobs:
           )
           (
           cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
-          /usr/bin/python3 fingerprint-rootfs.test.py
+          PYTHONPATH=../../.. /usr/bin/python3 ../../../tests/unit/scripts/ops/test_router_rootfs.py
           )
           (
           cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
@@ -2195,6 +2195,7 @@ jobs:
             uv run --frozen --no-build python -m scripts.engineering.repo check-cleanup-governance
             uv run --frozen --no-build python -m scripts.engineering.repo check-root-governance-docs
             uv run --frozen --no-build python -m scripts.engineering.repo check-root-review-registry
+            uv run --frozen --no-build python -m scripts.engineering.diagnostics audit-structure --path .
             uv run --frozen --no-build python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD
       - run:
           name: Export cleanup classification evidence
@@ -2929,14 +2930,14 @@ jobs:
       - run:
           name: Verify managed Router host preserves the complete pinned filesystem
           command: |
-            python grafana/tooling/router-v7-bridge/verify-managed-image.test.py
+            PYTHONPATH=. python tests/unit/scripts/ops/test_router_managed_image.py
             PARENT=$(python -c "import json; print(json.load(open('grafana/tooling/router-v7-bridge/managed-image.json'))['parent_image'])")
             docker pull "$PARENT"
             docker build --platform linux/amd64 -f grafana/tooling/router-v7-bridge/Dockerfile.managed -t bioetl-router-host:managed-ci .
             DECLARED=$(python -c "import json; print(json.load(open('grafana/tooling/router-v7-bridge/managed-image.json'))['image'])")
             docker pull "$DECLARED"
             BUILT=$(docker image inspect bioetl-router-host:managed-ci --format '{{.Id}}')
-            python grafana/tooling/router-v7-bridge/verify-managed-image.py "$BUILT"
+            python -m scripts.ops verify-router-managed-image "$BUILT"
       - store_artifacts:
           path: reports/qa/router-v7-managed-image-parity.json
           destination: router-v7-managed-image-parity.json

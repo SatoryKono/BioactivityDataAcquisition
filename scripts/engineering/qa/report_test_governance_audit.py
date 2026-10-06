@@ -47,6 +47,11 @@ COMPATIBILITY_FILE_RE = re.compile(
     re.IGNORECASE,
 )
 ASSERT_METHOD_NAMES = {
+    "assertEqual",
+    "assertNotEqual",
+    "assertTrue",
+    "assertRaises",
+    "assertRaisesRegex",
     "assert_any_call",
     "assert_called",
     "assert_called_once",

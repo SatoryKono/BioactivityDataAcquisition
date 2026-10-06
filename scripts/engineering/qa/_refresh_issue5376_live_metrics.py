@@ -12,8 +12,8 @@ import sys
 from copy import deepcopy
 from pathlib import Path
 
-root = Path(__file__).resolve().parents[4]
-proof = Path(__file__).parent
+root = Path(__file__).resolve().parents[3]
+proof = root / "reports/quality/proof-or-stop/config-root-11899"
 inventory_path = root / "reports/quality/module-coverage-inventory.json"
 record_path = root / "reports/quality/issue-5376-coverage-tail-closeout.json"
 inventory = json.loads(inventory_path.read_text(encoding="utf-8"))

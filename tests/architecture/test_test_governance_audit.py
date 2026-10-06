@@ -1316,3 +1316,24 @@ def test_tracing_emission_contract_test_remains_present() -> None:
     assert "class RecordingTracing" in text
     for test_name in cast(list[str], tracing["required_test_names"]):
         assert f"def {test_name}" in text
+
+
+@pytest.mark.architecture
+def test_unittest_assertions_are_recognized_without_accepting_subtest_only():
+    """Relocated stdlib tests retain real assertions in governance accounting."""
+    import ast
+    from scripts.engineering.qa.report_test_governance_audit import _TestBodyVisitor
+
+    for expression in (
+        "self.assertEqual(a, b)",
+        "self.assertNotEqual(a, b)",
+        "self.assertTrue(value)",
+        "self.assertRaises(ValueError)",
+        "self.assertRaisesRegex(ValueError, 'message')",
+    ):
+        visitor = _TestBodyVisitor()
+        visitor.visit(ast.parse(expression))
+        assert visitor.has_assertion_signal, expression
+    visitor = _TestBodyVisitor()
+    visitor.visit(ast.parse("self.subTest(case='missing assertion')"))
+    assert not visitor.has_assertion_signal

@@ -277,7 +277,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `release.yml` | — | CircleCI release-validation plus protected promotion | Main pipeline339 on d9f5b026 SUCCESS, all five jobs: security6133, tests6136 (182 passed, no skips), build6134, install6135 and gate6137. Syft1.54.0 completes in1.556s; wheel/sdist/SPDX2.3 digests and source identity independently verified, install consumes the same archives. Signed provenance, TestPyPI/PyPI and release assets remain pending; published=false |
 | `reusable-mermaid-setup.yml` | — | Shared pinned Mermaid tooling | Pinned Mermaid10.6.1 consumer accepted by PR409: all580 diagrams pass syntax validation, targeted render and drift checks pass; lockfile remains covered by OSV. Disabled full-render policy is preserved |
 | `reusable-setup.yml` | — | CircleCI setup-python-uv | Checksum-pinned uv 0.11.26 and explicit UV_PYTHON prepared; remote runtime/cache parity pending |
-| `root-hygiene.yml` | — | CircleCI root-hygiene | Main7936 on005a7dc6 accepts full-tree/strict checks, cleanup diagnostics and legacy regression selectors; three artifacts independently hashed. Separate structure-audit port remains blocked: local audit identifies eight tracked Python files outside allowed roots |
+| `root-hygiene.yml` | — | CircleCI root-hygiene | Main7936 on005a7dc6 accepts full-tree/strict checks, cleanup diagnostics and legacy regression selectors; three artifacts independently hashed. Structure-audit is now a required root-hygiene command; eight misplaced Python files were moved to scripts/tests. Local audit passes with zero MUST/SHOULD findings; remote acceptance of the new command remains pending |
 | `router-v7-bridge.yml` | — | Router bridge candidate acceptance | Manual main lane accepted in374; automatic path-filtered PR409 and main411 each pass all four jobs. Main7922–7925 on005a7dc6 has74 independently downloaded and hashed artifacts. Managed host evidence remains separate |
 | `schema-governance.yml` | — | CircleCI schema-governance | Prepared required gate; canonical generation/parity preserved |
 | `scorecard.yml` | `30 7 * * 1` | CircleCI scorecard plus SARIF publication | Scheduled pipeline354/job6380 on main c644f2e4 succeeds with all18 checks; five artifacts and source/JSON/SARIF digests independently verified. Monday07UTC restored. sarif_uploaded=false and public_results_published=false; restricted writer credentials and publication acceptance pending; legacy public-results workflow retained |
@@ -644,3 +644,16 @@ main pushes, including CI configuration changes for acceptance. It runs without
 credential contexts, and skips unrelated changes before dependencies or Docker.
 The host check requires bridge and both plugin jobs. Manual Router execution
 continues to enforce main. Event acceptance is separate from pipeline374.
+
+
+### Historical diagnostic scripts retained outside report artifacts
+
+The September 25 CodeRabbit report can be reconstructed manually with the archived
+[findings normalizer](../../scripts/engineering/diagnostics/legacy/coderabbit_20260925/normalize_findings.py),
+[triage classifier](../../scripts/engineering/diagnostics/legacy/coderabbit_20260925/triage_findings.py),
+and [relevance report builder](../../scripts/engineering/diagnostics/legacy/coderabbit_20260925/build_relevance_report.py).
+These scripts retain their original report paths and historical assumptions; they
+are not CI entry points and must not be used to refresh current governance.
+The [issue 5376 metric snapshot helper](../../scripts/engineering/qa/_refresh_issue5376_live_metrics.py)
+also remains a manual historical utility for its config-root proof directory.
+Current CI refreshes use the canonical engineering dispatchers.

@@ -1,4 +1,5 @@
 """Hash Docker-export contents on the trusted host, without extracting tar paths."""
+
 import hashlib
 import json
 import re
@@ -21,10 +22,21 @@ def filesystem_records(stream):
                 while chunk := source.read(1024 * 1024):
                     digest.update(chunk)
                 content = digest.hexdigest()
-            records[name] = [entry.type.decode("ascii"), entry.mode, entry.uid, entry.gid,
-                             entry.linkname, entry.devmajor, entry.devminor, content,
-                             {key: value for key, value in entry.pax_headers.items()
-                              if key not in {"mtime", "atime", "ctime"}}]
+            records[name] = [
+                entry.type.decode("ascii"),
+                entry.mode,
+                entry.uid,
+                entry.gid,
+                entry.linkname,
+                entry.devmajor,
+                entry.devminor,
+                content,
+                {
+                    key: value
+                    for key, value in entry.pax_headers.items()
+                    if key not in {"mtime", "atime", "ctime"}
+                },
+            ]
     if not records:
         raise ValueError("Empty rootfs export")
     return records
@@ -36,17 +48,27 @@ def fingerprint(stream):
     return hashlib.sha256(encoded).hexdigest()
 
 
-def main():
-    if len(sys.argv) != 2 or not re.fullmatch(
-        r"bioetl-router-host:acceptance|sha256:[0-9a-f]{64}|satorykono/bioetl-grafana-router7-canvas@sha256:[0-9a-f]{64}", sys.argv[1]
+def main(argv: list[str] | None = None):
+    args = sys.argv[1:] if argv is None else argv
+    if len(args) != 1 or not re.fullmatch(
+        r"bioetl-router-host:acceptance|sha256:[0-9a-f]{64}|satorykono/bioetl-grafana-router7-canvas@sha256:[0-9a-f]{64}",
+        args[0],
     ):
         raise ValueError("Unsupported image reference")
-    docker = "C:/Program Files/Docker/Docker/resources/bin/docker.exe" if sys.platform == "win32" else "/usr/bin/docker"
-    container = subprocess.check_output([docker, "create", "--entrypoint", "/bin/true", sys.argv[1]], text=True).strip()
+    docker = (
+        "C:/Program Files/Docker/Docker/resources/bin/docker.exe"
+        if sys.platform == "win32"
+        else "/usr/bin/docker"
+    )
+    container = subprocess.check_output(
+        [docker, "create", "--entrypoint", "/bin/true", args[0]], text=True
+    ).strip()
     if not re.fullmatch(r"[0-9a-f]{64}", container):
         raise ValueError("Invalid container ID")
     try:
-        with subprocess.Popen([docker, "export", container], stdout=subprocess.PIPE) as process:
+        with subprocess.Popen(
+            [docker, "export", container], stdout=subprocess.PIPE
+        ) as process:
             try:
                 result = fingerprint(process.stdout)
             except BaseException:
@@ -56,7 +78,9 @@ def main():
                 raise RuntimeError("Docker export failed")
         print(result)
     finally:
-        subprocess.run([docker, "rm", "-v", container], check=True, stdout=subprocess.DEVNULL)
+        subprocess.run(
+            [docker, "rm", "-v", container], check=True, stdout=subprocess.DEVNULL
+        )
 
 
 if __name__ == "__main__":

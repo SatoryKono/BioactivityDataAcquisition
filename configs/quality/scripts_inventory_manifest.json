@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-06T14:44:14.566252+00:00",
+  "generated_at": "2026-10-06T16:22:18.128807+00:00",
   "summary": {
-    "total_scripts": 639,
+    "total_scripts": 645,
     "status_counts": {
       "active": 335,
-      "supporting": 304
+      "supporting": 310
     },
     "reference_group_coverage": {
       "agents": 11,
       "build": 18,
       "ci": 93,
-      "docs": 275,
+      "docs": 279,
       "other": 50,
-      "scripts": 535,
+      "scripts": 537,
       "skills": 13,
-      "tests": 451
+      "tests": 453
     }
   },
   "scripts": [
@@ -276,7 +276,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 86,
+          "line": 100,
           "source_group": "scripts",
           "text": "\"diagnose-codex-wsl\": \"../ai/codex/diagnose_wsl.sh\","
         },
@@ -1615,7 +1615,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 87,
+          "line": 101,
           "source_group": "scripts",
           "text": "\"setup-agents\": \"../ai/codex/setup_agents.sh\","
         },
@@ -6163,13 +6163,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2800,
+          "line": 2801,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3230,
+          "line": 3231,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check"
         },
@@ -6277,7 +6277,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2494,
+          "line": 2495,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
@@ -6483,7 +6483,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2497,
+          "line": 2498,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
@@ -7204,7 +7204,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2465,
+          "line": 2466,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/lint_diagrams.py \"${lint_targets[@]}\" --json > /tmp/diagram-lint.json"
         },
@@ -7261,7 +7261,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2468,
+          "line": 2469,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -7492,13 +7492,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2809,
+          "line": 2810,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3239,
+          "line": 3240,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check"
         },
@@ -8015,13 +8015,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2395,
+          "line": 2396,
           "source_group": "ci",
           "text": "# Export so validate_mermaid_syntax.sh resolve_chrome_headless_shell and"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2429,
+          "line": 2430,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -8167,13 +8167,13 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2801,
+          "line": 2802,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.docs passports check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3231,
+          "line": 3232,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.docs passports check"
         },
@@ -10569,13 +10569,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 3056,
+          "line": 3057,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest reports/quality/proof-or-stop/shared/coverage/coverage/manifest.json"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3405,
+          "line": 3406,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest \"$ROOT/coverage/manifest.json\""
         },
@@ -10626,7 +10626,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2742,
+          "line": 2743,
           "source_group": "ci",
           "text": "check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_contract_identity.py"
         },
@@ -10653,7 +10653,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2743,
+          "line": 2744,
           "source_group": "ci",
           "text": "check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_contract_registry.py"
         },
@@ -10713,7 +10713,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2747,
+          "line": 2748,
           "source_group": "ci",
           "text": "check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_registry_dq_refs.py"
         },
@@ -10770,7 +10770,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2746,
+          "line": 2747,
           "source_group": "ci",
           "text": "check_contract uv run --frozen --no-build python -m scripts.engineering.ci.validate_schema_classifier_gate --base-sha \"$BASE\" --head-sha \"$CIRCLE_SHA1\""
         },
@@ -11311,13 +11311,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2982,
+          "line": 2983,
           "source_group": "ci",
           "text": "(\"governance\", \"pretest_guardrails\", [\"bash\", \"scripts/engineering/dev/pretest_guardrails.sh\", \"--mode\", \"check\", \"--scope\", \"governance\"]),"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3373,
+          "line": 3374,
           "source_group": "ci",
           "text": ", \\\"pretest_guardrails\\\", [\\\"bash\\\", \\\"scripts/engineering/dev/pretest_guardrails.sh\\\",\\n              \\"
         },
@@ -12458,8 +12458,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 15,
       "references": [
+        {
+          "path": ".circleci/config.yml",
+          "line": 2198,
+          "source_group": "ci",
+          "text": "uv run --frozen --no-build python -m scripts.engineering.diagnostics audit-structure --path ."
+        },
         {
           "path": ".github/workflows/root-hygiene.yml",
           "line": 44,
@@ -12501,12 +12507,6 @@
           "line": 180,
           "source_group": "docs",
           "text": "| `make clean`                                   | Local-only cleanup через `python -m scripts.engineering.diagnostics cleanup`    |"
-        },
-        {
-          "path": "docs/05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md",
-          "line": 132,
-          "source_group": "docs",
-          "text": "uv run python -m scripts.engineering.diagnostics audit-structure --path ."
         }
       ]
     },
@@ -12722,6 +12722,63 @@
       "next_step": "Retain only as a bounded manual diagnostics utility for refactor evidence packs; route any recurring use through a governed QA report before promoting it back to active inventory. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17."
     },
     {
+      "path": "scripts/engineering/diagnostics/legacy/coderabbit_20260925/build_relevance_report.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/05-operations/ci-workflow-map.md",
+          "line": 654,
+          "source_group": "docs",
+          "text": "and [relevance report builder](../../scripts/engineering/diagnostics/legacy/coderabbit_20260925/build_relevance_report.py)."
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-11-05",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
+    },
+    {
+      "path": "scripts/engineering/diagnostics/legacy/coderabbit_20260925/normalize_findings.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/05-operations/ci-workflow-map.md",
+          "line": 652,
+          "source_group": "docs",
+          "text": "[findings normalizer](../../scripts/engineering/diagnostics/legacy/coderabbit_20260925/normalize_findings.py),"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-11-05",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
+    },
+    {
+      "path": "scripts/engineering/diagnostics/legacy/coderabbit_20260925/triage_findings.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/05-operations/ci-workflow-map.md",
+          "line": 653,
+          "source_group": "docs",
+          "text": "[triage classifier](../../scripts/engineering/diagnostics/legacy/coderabbit_20260925/triage_findings.py),"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-11-05",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
+    },
+    {
       "path": "scripts/engineering/find_complex_functions.py",
       "type": "py",
       "status": "active",
@@ -12787,7 +12844,7 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2663,
+          "line": 2664,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-duplication-complexity-exemptions"
         }
@@ -12817,6 +12874,25 @@
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain as a bounded generator of zero-arg Grok workflow cards; keep it supporting until the workflow catalog is owned by a governed scripts.engineering.qa command."
+    },
+    {
+      "path": "scripts/engineering/qa/_refresh_issue5376_live_metrics.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/05-operations/ci-workflow-map.md",
+          "line": 657,
+          "source_group": "docs",
+          "text": "The [issue 5376 metric snapshot helper](../../scripts/engineering/qa/_refresh_issue5376_live_metrics.py)"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-11-05",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
     },
     {
       "path": "scripts/engineering/qa/analyze_duplicate_functions.py",
@@ -16897,7 +16973,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 17,
       "references": [
         {
           "path": ".github/ISSUES/TEST-SYS-13-Refresh-Test-Governance-Source-Hash.md",
@@ -17898,7 +17974,7 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2232,
+          "line": 2233,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-cleanliness"
         }
@@ -18154,7 +18230,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2296,
+          "line": 2297,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
@@ -18211,19 +18287,19 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2198,
+          "line": 2199,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3213,
+          "line": 3214,
           "source_group": "ci",
           "text": "python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3325,
+          "line": 3326,
           "source_group": "ci",
           "text": "\\ scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD\\n\""
         },
@@ -19116,8 +19192,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 68,
+      "reference_count": 72,
       "references": [
+        {
+          "path": ".circleci/config.yml",
+          "line": 2940,
+          "source_group": "ci",
+          "text": "python -m scripts.ops verify-router-managed-image \"$BUILT\""
+        },
         {
           "path": ".github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md",
           "line": 119,
@@ -19159,12 +19241,6 @@
           "line": 48,
           "source_group": "other",
           "text": ".venv/bin/python -m scripts.ops rerender-grafana"
-        },
-        {
-          "path": ".github/ISSUES/_grafana_runtime_render_bodies/GRA-RT-04.md",
-          "line": 49,
-          "source_group": "other",
-          "text": ".venv/bin/python -m scripts.ops check-grafana-audit-preflight"
         }
       ]
     },
@@ -20219,7 +20295,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 54,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"salt-rotate\": \"maintenance/security/salt_rotate.py\","
         },
@@ -20430,7 +20506,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 69,
+          "line": 72,
           "source_group": "scripts",
           "text": "\"archive-control-plane\": \"observability/archive_control_plane.py\","
         },
@@ -20455,7 +20531,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 67,
+          "line": 70,
           "source_group": "scripts",
           "text": "\"observability/check_bioetl_prometheus_scrape.py\""
         },
@@ -20513,7 +20589,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 55,
+          "line": 58,
           "source_group": "scripts",
           "text": "\"check-observability-ports\": \"observability/check_published_observability_endpoints.py\","
         },
@@ -21094,7 +21170,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 59,
+          "line": 62,
           "source_group": "scripts",
           "text": "\"audit-live-grafana\": \"observability/grafana/audit_live_grafana_panels.py\","
         },
@@ -21139,7 +21215,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 58,
+          "line": 61,
           "source_group": "scripts",
           "text": "\"assess-grafana-captures\": \"observability/grafana/capture_acceptance.py\","
         },
@@ -21256,7 +21332,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 61,
+          "line": 64,
           "source_group": "scripts",
           "text": "\"observability/grafana/check_dashboard_panel_fill.py\""
         },
@@ -21311,7 +21387,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 64,
+          "line": 67,
           "source_group": "scripts",
           "text": "\"observability/grafana/check_grafana_dashboard_audit_preflight.py\""
         },
@@ -21442,7 +21518,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 71,
+          "line": 74,
           "source_group": "scripts",
           "text": "\"observability/grafana/ensure_quarantine_explorer.py\""
         }
@@ -21789,7 +21865,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 56,
+          "line": 59,
           "source_group": "scripts",
           "text": "\"rerender-grafana\": \"observability/grafana/rerender_grafana_screenshots.py\","
         },
@@ -21820,6 +21896,62 @@
       ]
     },
     {
+      "path": "scripts/ops/observability/grafana/router_managed_image.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 91,
+          "source_group": "scripts",
+          "text": "\"scripts.ops.observability.grafana.router_managed_image\""
+        },
+        {
+          "path": "tests/unit/scripts/ops/test_router_managed_image.py",
+          "line": 7,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana import router_managed_image as managed"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-05",
+      "next_step": "Keep the Router host verification backend behind python -m scripts.ops; preserve immutable image, trusted host and full rootfs checks."
+    },
+    {
+      "path": "scripts/ops/observability/grafana/router_rootfs.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 88,
+          "source_group": "scripts",
+          "text": "\"scripts.ops.observability.grafana.router_rootfs\""
+        },
+        {
+          "path": "scripts/ops/observability/grafana/router_managed_image.py",
+          "line": 15,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana import router_rootfs as module"
+        },
+        {
+          "path": "tests/unit/scripts/ops/test_router_rootfs.py",
+          "line": 7,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana import router_rootfs as rootfs"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-05",
+      "next_step": "Keep the Router host verification backend behind python -m scripts.ops; preserve immutable image, trusted host and full rootfs checks."
+    },
+    {
       "path": "scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py",
       "type": "py",
       "status": "active",
@@ -21828,7 +21960,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 74,
+          "line": 77,
           "source_group": "scripts",
           "text": "\"observability/grafana/run_grafana_dashboard_audit_cycle.py\""
         },
@@ -21873,7 +22005,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 57,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"render-grafana-matrix\": (\"observability/grafana/run_grafana_render_matrix.py\"),"
         },
@@ -22356,7 +22488,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 92,
+          "line": 106,
           "source_group": "scripts",
           "text": "\"deploy\": \"runtime/deploy/deploy-bioetl.sh\","
         }
@@ -23813,7 +23945,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2202,
+          "line": 2203,
           "source_group": "ci",
           "text": "mkdir -p reports/quality && uv run --frozen --no-build python scripts/ops/support/repo/cleanup_repository.py --dry-run --detail-limit 0 --report-json reports/quality/root-hygiene-cleanup-classificatio"
         },
@@ -23900,7 +24032,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 90,
+          "line": 104,
           "source_group": "scripts",
           "text": "\"check-skills\": \"support/skills/check_ai_skills_layout.sh\","
         }
@@ -24004,13 +24136,13 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2729,
+          "line": 2730,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.schema generate-artifacts --check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2730,
+          "line": 2731,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.schema verify-schema-parity --mode blocking"
         },

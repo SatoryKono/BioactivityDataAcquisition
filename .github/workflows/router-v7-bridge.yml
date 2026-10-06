@@ -50,7 +50,7 @@ jobs:
         run: node --test verify-host-image.test.mjs
       - name: Test trusted rootfs timestamp normalization
         working-directory: grafana/tooling/router-v7-bridge
-        run: /usr/bin/python3 fingerprint-rootfs.test.py
+        run: PYTHONPATH=../../.. /usr/bin/python3 ../../../tests/unit/scripts/ops/test_router_rootfs.py
       - name: Check exported TypeScript API
         run: npm run typecheck
       - name: Build browser candidate
