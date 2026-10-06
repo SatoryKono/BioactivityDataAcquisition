@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-06T16:33:34.027861+00:00",
+  "generated_at": "2026-10-06T17:03:40.024105+00:00",
   "summary": {
     "total_scripts": 645,
     "status_counts": {
@@ -10,7 +10,7 @@
     "reference_group_coverage": {
       "agents": 11,
       "build": 18,
-      "ci": 93,
+      "ci": 95,
       "docs": 279,
       "other": 50,
       "scripts": 537,
@@ -16973,7 +16973,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 18,
       "references": [
         {
           "path": ".github/ISSUES/TEST-SYS-13-Refresh-Test-Governance-Source-Hash.md",
@@ -19192,8 +19192,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 72,
+      "reference_count": 76,
       "references": [
+        {
+          "path": ".circleci/config.yml",
+          "line": 147,
+          "source_group": "ci",
+          "text": "git diff --name-only \"$base\"...HEAD -- 'grafana/tooling/router-v7-bridge/**' 'grafana/plugins/bioetl-scenes-app/**' 'grafana/plugins/bioetl-selectorshell-panel/**' '.github/workflows/router-v7-bridge."
+        },
         {
           "path": ".circleci/config.yml",
           "line": 2940,
@@ -19235,12 +19241,6 @@
           "line": 56,
           "source_group": "other",
           "text": ".venv/bin/python -m scripts.ops audit-live-grafana"
-        },
-        {
-          "path": ".github/ISSUES/_grafana_runtime_render_bodies/GRA-RT-03.md",
-          "line": 48,
-          "source_group": "other",
-          "text": ".venv/bin/python -m scripts.ops rerender-grafana"
         }
       ]
     },
@@ -21900,13 +21900,37 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 6,
       "references": [
+        {
+          "path": ".circleci/config.yml",
+          "line": 147,
+          "source_group": "ci",
+          "text": "git diff --name-only \"$base\"...HEAD -- 'grafana/tooling/router-v7-bridge/**' 'grafana/plugins/bioetl-scenes-app/**' 'grafana/plugins/bioetl-selectorshell-panel/**' '.github/workflows/router-v7-bridge."
+        },
+        {
+          "path": ".github/workflows/router-v7-bridge.yml",
+          "line": 14,
+          "source_group": "ci",
+          "text": "- \"scripts/ops/observability/grafana/router_managed_image.py\""
+        },
+        {
+          "path": ".github/workflows/router-v7-bridge.yml",
+          "line": 26,
+          "source_group": "ci",
+          "text": "- \"scripts/ops/observability/grafana/router_managed_image.py\""
+        },
         {
           "path": "scripts/ops/__main__.py",
           "line": 91,
           "source_group": "scripts",
           "text": "\"scripts.ops.observability.grafana.router_managed_image\""
+        },
+        {
+          "path": "tests/architecture/test_circleci_migration_contract.py",
+          "line": 443,
+          "source_group": "tests",
+          "text": "\"scripts/ops/observability/grafana/router_managed_image.py\","
         },
         {
           "path": "tests/unit/scripts/ops/test_router_managed_image.py",
@@ -21925,8 +21949,26 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 7,
       "references": [
+        {
+          "path": ".circleci/config.yml",
+          "line": 147,
+          "source_group": "ci",
+          "text": "git diff --name-only \"$base\"...HEAD -- 'grafana/tooling/router-v7-bridge/**' 'grafana/plugins/bioetl-scenes-app/**' 'grafana/plugins/bioetl-selectorshell-panel/**' '.github/workflows/router-v7-bridge."
+        },
+        {
+          "path": ".github/workflows/router-v7-bridge.yml",
+          "line": 13,
+          "source_group": "ci",
+          "text": "- \"scripts/ops/observability/grafana/router_rootfs.py\""
+        },
+        {
+          "path": ".github/workflows/router-v7-bridge.yml",
+          "line": 25,
+          "source_group": "ci",
+          "text": "- \"scripts/ops/observability/grafana/router_rootfs.py\""
+        },
         {
           "path": "scripts/ops/__main__.py",
           "line": 88,
@@ -21938,6 +21980,12 @@
           "line": 15,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import router_rootfs as module"
+        },
+        {
+          "path": "tests/architecture/test_circleci_migration_contract.py",
+          "line": 442,
+          "source_group": "tests",
+          "text": "\"scripts/ops/observability/grafana/router_rootfs.py\","
         },
         {
           "path": "tests/unit/scripts/ops/test_router_rootfs.py",

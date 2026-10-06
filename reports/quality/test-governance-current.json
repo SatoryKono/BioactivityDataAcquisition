@@ -27,7 +27,7 @@
       "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
       "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
     ],
-    "scanned_test_count": 374,
+    "scanned_test_count": 375,
     "unreviewed_count": 0
   },
   "assertion_branch_reachability_percent": 100.0,
@@ -1124,7 +1124,7 @@
       "test_count": 45
     },
     "test_governance": {
-      "assertion_backed_tests": 43,
+      "assertion_backed_tests": 44,
       "assertion_examples": [
         "tests/architecture/test_test_governance_audit.py:115",
         "tests/architecture/test_test_governance_audit.py:134",
@@ -1142,7 +1142,7 @@
       "paths": [
         "tests/architecture/test_test_governance_audit.py"
       ],
-      "test_count": 43
+      "test_count": 44
     }
   },
   "date_today_call_sites": 0,
@@ -1217,7 +1217,7 @@
         "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
         "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
       ],
-      "scanned_test_count": 374,
+      "scanned_test_count": 375,
       "unreviewed_count": 0
     },
     "assertion_branch_reachability_percent": 100.0,
@@ -1975,7 +1975,7 @@
         "test_count": 45
       },
       "test_governance": {
-        "assertion_backed_tests": 43,
+        "assertion_backed_tests": 44,
         "assertion_examples": [
           "tests/architecture/test_test_governance_audit.py:115",
           "tests/architecture/test_test_governance_audit.py:134",
@@ -1993,7 +1993,7 @@
         "paths": [
           "tests/architecture/test_test_governance_audit.py"
         ],
-        "test_count": 43
+        "test_count": 44
       }
     },
     "date_today_call_sites": 0,
@@ -2087,12 +2087,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3018,
-    "total_test_functions": 29494,
+    "total_test_functions": 29496,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "3241733f607c46de0144426c6d1bd3ccecccda037aa51b01e9b936d2f1525db0",
+  "source_tree_sha256": "f472c019aa231a11920a83146e4946240f582ddee04ca5fe3f217333b8c6c044",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2155,7 +2155,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3018,
-  "total_test_functions": 29494,
+  "total_test_functions": 29496,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

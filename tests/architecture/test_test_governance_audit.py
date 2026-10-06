@@ -1328,8 +1328,8 @@ def test_unittest_assertions_are_recognized_without_accepting_subtest_only():
         "self.assertEqual(a, b)",
         "self.assertNotEqual(a, b)",
         "self.assertTrue(value)",
-        "self.assertRaises(ValueError)",
-        "self.assertRaisesRegex(ValueError, 'message')",
+        "self.assertRaises(ValueError, operation)",
+        "self.assertRaisesRegex(ValueError, 'message', operation)",
     ):
         visitor = _TestBodyVisitor()
         visitor.visit(ast.parse(expression))
@@ -1337,3 +1337,29 @@ def test_unittest_assertions_are_recognized_without_accepting_subtest_only():
     visitor = _TestBodyVisitor()
     visitor.visit(ast.parse("self.subTest(case='missing assertion')"))
     assert not visitor.has_assertion_signal
+
+
+@pytest.mark.architecture
+def test_unittest_exception_assertions_require_execution():
+    import ast
+    from scripts.engineering.qa.report_test_governance_audit import (
+        _TestBodyVisitor,
+        _direct_assertion_signal,
+    )
+
+    cases = {
+        "self.assertRaises(ValueError)": False,
+        "self.assertRaisesRegex(ValueError, 'message')": False,
+        "unused = self.assertRaises(ValueError)": False,
+        "self.assertRaises(ValueError, operation)": True,
+        "self.assertRaisesRegex(ValueError, 'message', operation)": True,
+        "with self.assertRaises(ValueError):\n    operation()": True,
+        "with self.assertRaisesRegex(ValueError, 'message'):\n    operation()": True,
+        "self.assertRaises(ValueError, *unknown)": False,
+    }
+    for source, expected in cases.items():
+        tree = ast.parse(source)
+        visitor = _TestBodyVisitor()
+        visitor.visit(tree)
+        assert visitor.has_assertion_signal is expected, source
+        assert _direct_assertion_signal(tree.body[0]) is expected, source

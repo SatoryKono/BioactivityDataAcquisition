@@ -432,3 +432,37 @@ def test_mutation_score_rejects_invalid_missing_or_insufficient_evidence(
         [sys.executable, "-c", script], cwd=tmp_path, capture_output=True, check=False
     )
     assert result.returncode == expected, result.stderr.decode(errors="replace")
+
+
+def test_relocated_router_verifiers_trigger_both_ci_event_filters():
+    import fnmatch
+    import shlex
+
+    paths = (
+        "scripts/ops/observability/grafana/router_rootfs.py",
+        "scripts/ops/observability/grafana/router_managed_image.py",
+        "scripts/ops/__main__.py",
+        "tests/unit/scripts/ops/test_router_rootfs.py",
+        "tests/unit/scripts/ops/test_router_managed_image.py",
+    )
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows/router-v7-bridge.yml").read_text()
+    )
+    events = workflow.get("on", workflow.get(True))
+    source = (ROOT / ".circleci/config.yml").read_text()
+    command = next(
+        line.strip()
+        for line in source.splitlines()
+        if 'git diff --name-only "$base"...HEAD' in line
+    )
+    words = shlex.split(command)
+    filters = words[words.index("--") + 1 : words.index(">")]
+    for path in paths:
+        for event in ("pull_request", "push"):
+            assert any(
+                fnmatch.fnmatchcase(path, pattern) for pattern in events[event]["paths"]
+            ), (event, path)
+        assert any(fnmatch.fnmatchcase(path, pattern) for pattern in filters), path
+    assert not any(
+        fnmatch.fnmatchcase("docs/unrelated.md", pattern) for pattern in filters
+    )
