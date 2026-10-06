@@ -560,6 +560,38 @@ def test_test_governance_source_hash_fails_closed_on_unreadable_input(
 
 
 @pytest.mark.architecture
+def test_governance_check_rejects_corrupt_counts_with_matching_source_hash(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A valid source fingerprint must not authenticate saved report contents."""
+    from scripts.engineering.common import repo_paths
+
+    monkeypatch.setattr(repo_paths, "REPO_ROOT", tmp_path)
+    test_file = tmp_path / "tests" / "test_sample.py"
+    test_file.parent.mkdir()
+    test_file.write_text("def test_sample():\n    assert True\n", encoding="utf-8")
+    output = tmp_path / governance_audit.DEFAULT_JSON_ARTIFACT
+    fixture_output = tmp_path / "fixtures.json"
+    args = [
+        "--root",
+        str(tmp_path),
+        "--config",
+        str(tmp_path / "missing.yaml"),
+        "--json-out",
+        str(output),
+        "--fixture-duplication-out",
+        str(fixture_output),
+    ]
+    assert governance_audit.main(args) == 0
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    payload["report"]["total_test_functions"] += 17
+    output.write_text(_canonical_json(payload), encoding="utf-8")
+    assert governance_audit.main([*args, "--check"]) == 1
+    assert governance_audit.main(args) == 0
+    assert governance_audit.main([*args, "--check"]) == 0
+
+
+@pytest.mark.architecture
 @pytest.mark.parametrize("workers", [1, 4])
 def test_governance_hash_releases_payloads_without_changing_digest(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, workers: int

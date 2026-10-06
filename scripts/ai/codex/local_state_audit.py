@@ -112,8 +112,11 @@ def _parse_rule(line: str) -> tuple[list[str], str] | None:
     if match is None:
         return None
     try:
-        pattern = ast.literal_eval(match.group(1))
-    except (SyntaxError, ValueError):
+        raw_pattern = match.group(1)
+        if len(raw_pattern) > 4096:
+            return None
+        pattern = ast.literal_eval(raw_pattern)
+    except (SyntaxError, ValueError, RecursionError, MemoryError):
         return None
     if not isinstance(pattern, list) or not all(
         isinstance(item, str) for item in pattern

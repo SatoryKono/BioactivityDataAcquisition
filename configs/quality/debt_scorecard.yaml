@@ -668,7 +668,7 @@ oversized_source_module_inventory:
     owner: '@bioetl-config'
     target_split: separate config discovery, validation, and environment resolution helpers
   - path: src/bioetl/infrastructure/control_plane/file_run_ledger_store.py
-    lines: 174
+    lines: 187
     owner: '@bioetl-control-plane'
     target_split: separate file IO, record serialization, and query helpers
   - path: src/bioetl/application/services/quality/data_quality_service.py
