@@ -1,5 +1,7 @@
 """CI closeout consumes complete producer evidence without repeating test commands."""
 
+from __future__ import annotations
+
 from pathlib import Path
 from collections import Counter
 
@@ -10,6 +12,21 @@ from scripts.engineering.qa.run_local_coverage_verify import SHARDS
 
 pytestmark = pytest.mark.architecture
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def test_rf023_keeps_its_own_task_identity_and_branch():
+    config = yaml.safe_load((ROOT / ".circleci/config.yml").read_text(encoding="utf-8"))
+    catalog = yaml.safe_load(
+        (ROOT / "configs/quality/proof_closeout_checks.yaml").read_text()
+    )
+    job = config["workflows"]["rf023-closeout"]["jobs"][0]["rf023-proof-closeout"]
+    assert job["task-id"] == "rf023-11906-11907"
+    assert job["filters"]["branches"]["only"] == (
+        "codex/pipeline-green-gates-rf022-snapshot-fix"
+    )
+    assert job["task-id"] != catalog["task_id"]
+    assert job["filters"]["branches"]["only"] not in catalog["branches"]
+    assert "task-id" in config["jobs"]["rf023-proof-closeout"]["parameters"]
 
 
 def test_all_coverage_shards_have_one_owner():

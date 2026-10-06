@@ -41,6 +41,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.asyncio]
 
 @pytest.mark.parametrize("pipeline", ["chembl_activity", "composite_activity"])
 @pytest.mark.parametrize("portable_ref", [False, True])
+@pytest.mark.parametrize("qualified_snapshot", [False, True])
 @pytest.mark.parametrize(
     "damage,expected",
     [
@@ -63,7 +64,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.asyncio]
     ],
 )
 async def test_production_http_verifies_saved_replay_objects(
-    tmp_path, monkeypatch, damage, expected, pipeline, portable_ref
+    tmp_path, monkeypatch, damage, expected, pipeline, portable_ref, qualified_snapshot
 ):
     data, reports = tmp_path / "data", tmp_path / "reports"
     settings = SimpleNamespace(
@@ -115,7 +116,11 @@ async def test_production_http_verifies_saved_replay_objects(
                     RunInputSnapshotRef(
                         snapshot_id="batch",
                         content_hash=sha256(bronze_bytes).hexdigest(),
-                        immutable_uri="bronze://batch.jsonl",
+                        immutable_uri=(
+                            "bronze://chembl/activity/batch.jsonl"
+                            if qualified_snapshot
+                            else "bronze://batch.jsonl"
+                        ),
                     ),
                 ),
             ),

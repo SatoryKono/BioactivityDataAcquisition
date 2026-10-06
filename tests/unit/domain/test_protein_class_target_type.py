@@ -401,3 +401,72 @@ def test_helper_module_covers_fallback_and_none_paths() -> None:
         is None
     )
     assert helper_module.first_present_value({"l1": None}, ("l1", "l2")) is None
+
+
+@pytest.mark.parametrize("canonical", ["", " ", "\t\n"])
+def test_mapping_entry_rejects_blank_canonical_label(canonical):
+    with pytest.raises(ValueError, match="canonical_l1 must not be blank"):
+        ProteinClassTopLevelMappingEntry("enzyme", canonical, True)
+
+
+def test_mapping_scope_restores_nested_and_uninitialized_context(monkeypatch):
+    from dataclasses import replace
+
+    monkeypatch.setattr(mapping_module, "_mapping_data", None)
+    outer = _mapping_data()
+    inner = replace(outer, mapping_version="historical-v2")
+    with mapping_module.scoped_protein_class_target_type_mapping(outer):
+        assert is_protein_class_target_type_mapping_initialized()
+        with pytest.raises(ValueError, match="replay failed"):
+            with mapping_module.scoped_protein_class_target_type_mapping(inner):
+                assert current_protein_class_target_type_mapping() is inner
+                raise ValueError("replay failed")
+        assert current_protein_class_target_type_mapping() is outer
+    assert not is_protein_class_target_type_mapping_initialized()
+    with pytest.raises(RuntimeError, match="not initialized"):
+        current_protein_class_target_type_mapping()
+
+
+async def test_mapping_scopes_isolate_concurrent_tasks_and_cancellation(monkeypatch):
+    import asyncio
+    from dataclasses import replace
+
+    default = _mapping_data()
+    monkeypatch.setattr(mapping_module, "_mapping_data", default)
+    arrived = 0
+    ready = asyncio.Event()
+
+    async def worker(data):
+        nonlocal arrived
+        with mapping_module.scoped_protein_class_target_type_mapping(data):
+            arrived += 1
+            if arrived == 2:
+                ready.set()
+            await ready.wait()
+            await asyncio.sleep(0)
+            assert current_protein_class_target_type_mapping() is data
+        assert current_protein_class_target_type_mapping() is default
+
+    await asyncio.gather(
+        worker(replace(default, mapping_version="first")),
+        worker(replace(default, mapping_version="second")),
+    )
+    entered = asyncio.Event()
+
+    async def cancelled_worker():
+        try:
+            with mapping_module.scoped_protein_class_target_type_mapping(
+                replace(default, mapping_version="cancelled")
+            ):
+                entered.set()
+                await asyncio.Event().wait()
+        finally:
+            assert current_protein_class_target_type_mapping() is default
+
+    task = asyncio.create_task(cancelled_worker())
+    await entered.wait()
+    assert current_protein_class_target_type_mapping() is default
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+    assert current_protein_class_target_type_mapping() is default

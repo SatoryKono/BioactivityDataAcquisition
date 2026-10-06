@@ -2,16 +2,16 @@ interactions:
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - rest.uniprot.org
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - BioETL/6.1.0
     method: GET
     uri: https://rest.uniprot.org/configure/idmapping/fields
   response:
@@ -26,8 +26,7 @@ interactions:
         Protein","name":"RefSeq_Protein","from":true,"to":true,"ruleId":7,"uriLink":"https://www.ncbi.nlm.nih.gov/protein/%id"}]},{"groupName":"3D
         structure databases","items":[{"displayName":"PDB","name":"PDB","from":true,"to":true,"ruleId":8,"uriLink":"https://www.ebi.ac.uk/pdbe-srv/view/entry/%id"}]},{"groupName":"Protein-protein
         interaction databases","items":[{"displayName":"BioGRID","name":"BioGRID","from":true,"to":true,"ruleId":8,"uriLink":"https://thebiogrid.org/%id"},{"displayName":"ComplexPortal","name":"ComplexPortal","from":true,"to":true,"ruleId":8,"uriLink":"https://www.ebi.ac.uk/complexportal/complex/%id"},{"displayName":"DIP","name":"DIP","from":true,"to":true,"ruleId":8,"uriLink":"https://dip.doe-mbi.ucla.edu/dip/Browse.cgi?ID=%id"},{"displayName":"STRING","name":"STRING","from":true,"to":true,"ruleId":8,"uriLink":"https://string-db.org/network/%id"}]},{"groupName":"Chemistry","items":[{"displayName":"ChEMBL","name":"ChEMBL","from":true,"to":true,"ruleId":8,"uriLink":"https://www.ebi.ac.uk/chembl/target_report_card/%id"},{"displayName":"DrugBank","name":"DrugBank","from":true,"to":true,"ruleId":8,"uriLink":"https://www.drugbank.ca/drugs/%id"},{"displayName":"GuidetoPHARMACOLOGY","name":"GuidetoPHARMACOLOGY","from":true,"to":true,"ruleId":8,"uriLink":"https://www.guidetopharmacology.org/GRAC/ObjectDisplayForward?objectId=%id"},{"displayName":"SwissLipids","name":"SwissLipids","from":true,"to":true,"ruleId":8,"uriLink":"https://www.swisslipids.org/#/entity/%id/"}]},{"groupName":"Protein
-        family/group databases","items":[{"displayName":"Allergome","name":"Allergome","from":true,"to":true,"ruleId":8,"uriLink":"https://www.allergome.org/script/dettaglio.php?id_molecule=%id"},{"displayName":"ESTHER","name":"ESTHER","from":true,"to":true,"ruleId":8,"uriLink":"https://bioweb.supagro.inra.fr/ESTHER/gene_locus?name=%id&class=Gene_locus"},{"displayName":"MEROPS","name":"MEROPS","from":true,"to":true,"ruleId":8,"uriLink":"https://www.ebi.ac.uk/merops/cgi-bin/pepsum?mid=%id"},{"displayName":"PeroxiBase","name":"PeroxiBase","from":true,"to":true,"ruleId":8,"uriLink":"https://peroxibase.toulouse.inra.fr/display_perox/view_perox/%id"},{"displayName":"REBASE","name":"REBASE","from":true,"to":true,"ruleId":8,"uriLink":"https://rebase.neb.com/rebase/enz/%id.html"},{"displayName":"TCDB","name":"TCDB","from":true,"to":true,"ruleId":8,"uriLink":"https://www.tcdb.org/search/result.php?tc=%id"}]},{"groupName":"PTM
-        databases","items":[{"displayName":"GlyConnect","name":"GlyConnect","from":true,"to":true,"ruleId":8,"uriLink":"https://glyconnect.expasy.org/gcx/search/view/glycome/Protein/%id"}]},{"groupName":"Genetic
+        family/group databases","items":[{"displayName":"Allergome","name":"Allergome","from":true,"to":true,"ruleId":8,"uriLink":"https://www.allergome.org/script/dettaglio.php?id_molecule=%id"},{"displayName":"ESTHER","name":"ESTHER","from":true,"to":true,"ruleId":8,"uriLink":"https://bioweb.supagro.inra.fr/ESTHER/gene_locus?name=%id&class=Gene_locus"},{"displayName":"MEROPS","name":"MEROPS","from":true,"to":true,"ruleId":8,"uriLink":"https://www.ebi.ac.uk/merops/cgi-bin/pepsum?mid=%id"},{"displayName":"PeroxiBase","name":"PeroxiBase","from":true,"to":true,"ruleId":8,"uriLink":"https://peroxibase.toulouse.inra.fr/display_perox/view_perox/%id"},{"displayName":"REBASE","name":"REBASE","from":true,"to":true,"ruleId":8,"uriLink":"https://rebase.neb.com/rebase/enz/%id.html"},{"displayName":"TCDB","name":"TCDB","from":true,"to":true,"ruleId":8,"uriLink":"https://www.tcdb.org/search/result.php?tc=%id"}]},{"groupName":"Genetic
         variation databases","items":[{"displayName":"BioMuta","name":"BioMuta","from":true,"to":true,"ruleId":8,"uriLink":"https://hive.biochemistry.gwu.edu/tools/biomuta/biomuta.php?gene=%id"},{"displayName":"DMDM","name":"DMDM","from":true,"to":true,"ruleId":8,"uriLink":"https://bioinf.umbc.edu/dmdm/gene_prot_page.php?search_type=protein&id=%id"}]},{"groupName":"Proteomic
         databases","items":[{"displayName":"CPTAC","name":"CPTAC","from":true,"to":true,"ruleId":8,"uriLink":"https://assays.cancer.gov/%id"},{"displayName":"ProteomicsDB","name":"ProteomicsDB","from":true,"to":true,"ruleId":8,"uriLink":"https://www.proteomicsdb.org/proteomicsdb/#protein/proteinDetails/%id"}]},{"groupName":"Protocols
         and materials databases","items":[{"displayName":"DNASU","name":"DNASU","from":true,"to":true,"ruleId":8,"uriLink":"https://dnasu.org/DNASU/AdvancedSearchOptions.do?geneName=%id"}]},{"groupName":"Genome
@@ -44,46 +43,46 @@ interactions:
         databases","items":[{"displayName":"eggNOG","name":"eggNOG","from":true,"to":true,"ruleId":8,"uriLink":"http://eggnog.embl.de/search/ogs/%id"},{"displayName":"GeneTree","name":"GeneTree","from":true,"to":true,"ruleId":8,"uriLink":"https://www.ensemblgenomes.org/id-genetree/%id"},{"displayName":"HOGENOM","name":"HOGENOM","from":true,"to":true,"ruleId":8,"uriLink":"http://hogenom.univ-lyon1.fr/query_sequence?seq=%primaryAccession"},{"displayName":"OMA","name":"OMA","from":true,"to":true,"ruleId":8,"uriLink":"https://omabrowser.org/oma/group/%primaryAccession"},{"displayName":"OrthoDB","name":"OrthoDB","from":true,"to":true,"ruleId":8,"uriLink":"https://www.orthodb.org/?gene=%primaryAccession"}]},{"groupName":"Enzyme
         and pathway databases","items":[{"displayName":"BioCyc","name":"BioCyc","from":true,"to":true,"ruleId":8,"uriLink":"https://biocyc.org/getid?id=%id"},{"displayName":"PlantReactome","name":"PlantReactome","from":true,"to":true,"ruleId":8,"uriLink":"https://plantreactome.gramene.org/PathwayBrowser/#/%id&FLG=%primaryAccession"},{"displayName":"Reactome","name":"Reactome","from":true,"to":true,"ruleId":8,"uriLink":"https://reactome.org/PathwayBrowser/#%id&FLG=%primaryAccession"},{"displayName":"UniPathway","name":"UniPathway","from":true,"to":true,"ruleId":8,"uriLink":null}]},{"groupName":"Miscellaneous","items":[{"displayName":"ChiTaRS","name":"ChiTaRS","from":true,"to":true,"ruleId":8,"uriLink":"http://biosrv.org/chmb/search?GEN=%id"},{"displayName":"GeneWiki","name":"GeneWiki","from":true,"to":true,"ruleId":8,"uriLink":"https://en.wikipedia.org/wiki/%id"},{"displayName":"GenomeRNAi","name":"GenomeRNAi","from":true,"to":true,"ruleId":8,"uriLink":"http://genomernai.org/genedetails/%id"},{"displayName":"PHI-base","name":"PHI-base","from":true,"to":true,"ruleId":8,"uriLink":"http://www.phi-base.org/searchFacet.htm?queryTerm=%id"}]},{"groupName":"Gene
         expression databases","items":[{"displayName":"CollecTF","name":"CollecTF","from":true,"to":true,"ruleId":8,"uriLink":"http://www.collectf.org/%id"}]},{"groupName":"Family
-        and domain databases","items":[{"displayName":"DisProt","name":"DisProt","from":true,"to":true,"ruleId":8,"uriLink":"https://disprot.org/%id"},{"displayName":"IDEAL","name":"IDEAL","from":true,"to":true,"ruleId":8,"uriLink":"https://www.ideal-db.org/ideal.php?id=%id"}]}],"rules":[{"ruleId":1,"tos":["CCDS","PIR","PDB","BioGRID","ComplexPortal","DIP","STRING","ChEMBL","DrugBank","GuidetoPHARMACOLOGY","SwissLipids","Allergome","ESTHER","MEROPS","PeroxiBase","REBASE","TCDB","GlyConnect","BioMuta","DMDM","CPTAC","ProteomicsDB","DNASU","Ensembl","GeneID","KEGG","PATRIC","UCSC","WBParaSite","ArachnoServer","Araport","CGD","ConoServer","dictyBase","EchoBASE","euHCVdb","VEuPathDB","FlyBase","GeneCards","GeneReviews","HGNC","LegioList","Leproma","MaizeGDB","MGI","MIM","OpenTargets","Orphanet","ClinPGx","PomBase","PseudoCAP","RGD","SGD","TubercuList","VGNC","WormBase","Xenbase","ZFIN","eggNOG","GeneTree","HOGENOM","OMA","OrthoDB","BioCyc","Reactome","UniPathway","PlantReactome","ChiTaRS","GeneWiki","GenomeRNAi","PHI-base","CollecTF","IDEAL","DisProt","UniProtKB","UniProtKB-Swiss-Prot","UniParc","UniRef50","UniRef90","UniRef100","Gene_Name","CRC64","EMBL-GenBank-DDBJ","EMBL-GenBank-DDBJ_CDS","GI_number","RefSeq_Nucleotide","RefSeq_Protein","Ensembl_Protein","Ensembl_Transcript","Ensembl_Genomes","Ensembl_Genomes_Protein","Ensembl_Genomes_Transcript","WBParaSite_Transcript-Protein","WormBase_Protein","WormBase_Transcript"],"defaultTo":"UniProtKB","taxonId":false},{"ruleId":2,"tos":["UniProtKB","UniProtKB-Swiss-Prot","UniParc"],"defaultTo":"UniProtKB","taxonId":false},{"ruleId":3,"tos":["UniProtKB","UniProtKB-Swiss-Prot","UniRef50"],"defaultTo":"UniProtKB","taxonId":false},{"ruleId":4,"tos":["UniProtKB","UniProtKB-Swiss-Prot","UniRef90"],"defaultTo":"UniProtKB","taxonId":false},{"ruleId":5,"tos":["UniProtKB","UniProtKB-Swiss-Prot","UniRef100"],"defaultTo":"UniProtKB","taxonId":false},{"ruleId":6,"tos":["UniProtKB","UniProtKB-Swiss-Prot"],"defaultTo":"UniProtKB","taxonId":true},{"ruleId":7,"tos":["UniProtKB","UniProtKB-Swiss-Prot","UniParc"],"defaultTo":"UniProtKB","taxonId":false},{"ruleId":8,"tos":["UniProtKB","UniProtKB-Swiss-Prot"],"defaultTo":"UniProtKB","taxonId":false}]}'
+        and domain databases","items":[{"displayName":"DisProt","name":"DisProt","from":true,"to":true,"ruleId":8,"uriLink":"https://disprot.org/%id"},{"displayName":"IDEAL","name":"IDEAL","from":true,"to":true,"ruleId":8,"uriLink":"https://www.ideal-db.org/ideal.php?id=%id"}]}],"rules":[{"ruleId":1,"tos":["CCDS","PIR","PDB","BioGRID","ComplexPortal","DIP","STRING","ChEMBL","DrugBank","GuidetoPHARMACOLOGY","SwissLipids","Allergome","ESTHER","MEROPS","PeroxiBase","REBASE","TCDB","BioMuta","DMDM","CPTAC","ProteomicsDB","DNASU","Ensembl","GeneID","KEGG","PATRIC","UCSC","WBParaSite","ArachnoServer","Araport","CGD","ConoServer","dictyBase","EchoBASE","euHCVdb","VEuPathDB","FlyBase","GeneCards","GeneReviews","HGNC","LegioList","Leproma","MaizeGDB","MGI","MIM","OpenTargets","Orphanet","ClinPGx","PomBase","PseudoCAP","RGD","SGD","TubercuList","VGNC","WormBase","Xenbase","ZFIN","eggNOG","GeneTree","HOGENOM","OMA","OrthoDB","BioCyc","Reactome","UniPathway","PlantReactome","ChiTaRS","GeneWiki","GenomeRNAi","PHI-base","CollecTF","IDEAL","DisProt","UniProtKB","UniProtKB-Swiss-Prot","UniParc","UniRef50","UniRef90","UniRef100","Gene_Name","CRC64","EMBL-GenBank-DDBJ","EMBL-GenBank-DDBJ_CDS","GI_number","RefSeq_Nucleotide","RefSeq_Protein","Ensembl_Protein","Ensembl_Transcript","Ensembl_Genomes","Ensembl_Genomes_Protein","Ensembl_Genomes_Transcript","WBParaSite_Transcript-Protein","WormBase_Protein","WormBase_Transcript"],"defaultTo":"UniProtKB","taxonId":false},{"ruleId":2,"tos":["UniProtKB","UniProtKB-Swiss-Prot","UniParc"],"defaultTo":"UniProtKB","taxonId":false},{"ruleId":3,"tos":["UniProtKB","UniProtKB-Swiss-Prot","UniRef50"],"defaultTo":"UniProtKB","taxonId":false},{"ruleId":4,"tos":["UniProtKB","UniProtKB-Swiss-Prot","UniRef90"],"defaultTo":"UniProtKB","taxonId":false},{"ruleId":5,"tos":["UniProtKB","UniProtKB-Swiss-Prot","UniRef100"],"defaultTo":"UniProtKB","taxonId":false},{"ruleId":6,"tos":["UniProtKB","UniProtKB-Swiss-Prot"],"defaultTo":"UniProtKB","taxonId":true},{"ruleId":7,"tos":["UniProtKB","UniProtKB-Swiss-Prot","UniParc"],"defaultTo":"UniProtKB","taxonId":false},{"ruleId":8,"tos":["UniProtKB","UniProtKB-Swiss-Prot"],"defaultTo":"UniProtKB","taxonId":false}]}'
     headers:
-      Accept-Ranges:
+      accept-ranges:
       - bytes
-      Access-Control-Allow-Credentials:
+      access-control-allow-credentials:
       - 'true'
-      Access-Control-Allow-Headers:
+      access-control-allow-headers:
       - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
-      Access-Control-Allow-Methods:
+      access-control-allow-methods:
       - GET, PUT, POST, DELETE, PATCH, OPTIONS
-      Access-Control-Allow-Origin:
+      access-control-allow-origin:
       - '*'
-      Access-Control-Expose-Headers:
+      access-control-expose-headers:
       - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
-      Access-Control-Max-Age:
+      access-control-max-age:
       - '1728000'
-      Cache-Control:
+      cache-control:
       - no-cache
-      Connection:
+      connection:
       - keep-alive
-      Content-Type:
-      - application/json
-      Date:
-      - Mon, 15 Jun 2026 10:27:56 GMT
-      Strict-Transport-Security:
-      - max-age=31536000; includeSubDomains
-      Transfer-Encoding:
-      - chunked
-      Vary:
-      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
-      X-API-Deployment-Date:
-      - 14-June-2026
-      X-UniProt-Release:
-      - '2026_02'
-      X-UniProt-Release-Date:
-      - 10-June-2026
       content-length:
-      - '16065'
+      - '15852'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Oct 2026 03:58:44 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 23-September-2026
       x-cache:
       - miss uncacheable
+      x-uniprot-release:
+      - '2026_03'
+      x-uniprot-release-date:
+      - 02-September-2026
     status:
       code: 200
       message: OK

@@ -1,58 +1,48 @@
 interactions:
-    -   request:
-            body: ''
-            headers:
-                Accept:
-                    - application/json
-                Accept-Encoding:
-                    - gzip, deflate, zstd
-                Connection:
-                    - keep-alive
-                Content-Type:
-                    - application/json
-                Host:
-                    - api.semanticscholar.org
-                User-Agent:
-                    - BioETL/1.0
-            method: GET
-            uri: https://api.semanticscholar.org/graph/v1/paper/search?query=test&limit=1&fields=paperId
-        response:
-            body:
-                string: '{"total": 15328030, "offset": 0, "next": 1, "data": [{"paperId": "ef8a8bd193b1a0a5e2c834a7a28869a2ec85bab7"}]}
-
-        '
-            headers:
-                Access-Control-Allow-Origin:
-                    - '*'
-                Connection:
-                    - keep-alive
-                Content-Length:
-                    - '111'
-                Content-Type:
-                    - application/json
-                Date:
-                    - Fri, 06 Mar 2026 13:18:32 GMT
-                Via:
-                    - 1.1 a0565e445b44a5fbf1495bee6cb4182c.cloudfront.net (CloudFront)
-                X-Amz-Cf-Id:
-                    - Ovs--QvMDU8rLox9gTrVtBzntkgc7UpGfJ7GtzB_MYHcnoTBPjnayw==
-                X-Amz-Cf-Pop:
-                    - VIE50-P4
-                X-Cache:
-                    - Miss from cloudfront
-                x-amz-apigw-id:
-                    - ZzYWXHJJvHcEkRw=
-                x-amzn-Remapped-Connection:
-                    - keep-alive
-                x-amzn-Remapped-Content-Length:
-                    - '111'
-                x-amzn-Remapped-Date:
-                    - Fri, 06 Mar 2026 13:18:32 GMT
-                x-amzn-Remapped-Server:
-                    - gunicorn
-                x-amzn-RequestId:
-                    - 40630446-3dde-4763-8251-f3e6797960b5
-            status:
-                code: 200
-                message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      content-type:
+      - application/json
+      host:
+      - api.semanticscholar.org
+      user-agent:
+      - python-httpx/0.28.1
+    method: GET
+    uri: https://api.semanticscholar.org/graph/v1/paper/search?query=test&limit=1&fields=paperId
+  response:
+    body:
+      string: '{"message": "Too Many Requests. Please wait and try again or apply for a key for higher rate limits. https://www.semanticscholar.org/product/api#api-key-form", "code": "429"}'
+    headers:
+      connection:
+      - keep-alive
+      content-length:
+      - '174'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Oct 2026 06:14:11 GMT
+      via:
+      - 1.1 e772230a2b03c1d3d61ef5473331452c.cloudfront.net (CloudFront)
+      x-amz-apigw-id:
+      - Ezu0KGoiPHcEDhA=
+      x-amz-cf-id:
+      - jkRCWPUoCGLPHIVqd55jg5gQB2o_LqhnZ6ajFODsRhLRVudVaVXv3Q==
+      x-amz-cf-pop:
+      - SFO53-P10
+      x-amzn-errortype:
+      - TooManyRequestsException
+      x-amzn-requestid:
+      - 87ff7915-4081-41dc-9952-689b46b601f6
+      x-cache:
+      - Error from cloudfront
+    status:
+      code: 429
+      message: ''
 version: 1

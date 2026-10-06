@@ -1,5 +1,7 @@
 """ADR-062: Re-execute the assay merge from sealed inputs with live reads disabled."""
 
+from __future__ import annotations
+
 from bioetl.composition.bootstrap.runtime.assay_replay_capture import (
     prepare_assay_replay,
 )
@@ -121,11 +123,35 @@ async def test_other_composite_families_replay_physical_outputs(
             dependency.pipeline, 1, 1
         )
     if family == "target":
+        from bioetl.domain.mapping import protein_class_target_type as mapping
+
+        monkeypatch.setattr(
+            mapping,
+            "_mapping_data",
+            mapping.ProteinClassTargetTypeMappingData(
+                "captured-v1",
+                (mapping.ProteinClassTopLevelMappingEntry("enzyme", "enzyme", True),),
+            ),
+        )
         dependencies = config.dependencies
         dependency_results = {
             item.pipeline: DependencyResult(item.pipeline, DependencyStatus.FAILED)
             for item in dependencies
         }
+        name = "chembl_target_protein_classification"
+        dependency_results[name] = DependencyResult.success(name, 1, 1)
+        tables["silver/chembl/target_protein_classification"] = pa.Table.from_pylist(
+            [
+                {
+                    "target_id": "CHEMBL1",
+                    "classification_status": "resolved",
+                    "protein_class_id": "1",
+                    "canonical_l1": "enzyme",
+                    "l1_counts_for_target_type": True,
+                    "l1_mapping_version": "captured-v1",
+                }
+            ]
+        )
     live = AsyncMock(read_table=AsyncMock(side_effect=lambda name: tables[name]))
     reader, hook = prepare_assay_replay(
         config=config,
@@ -170,9 +196,35 @@ async def test_other_composite_families_replay_physical_outputs(
     digest = digest_bytes((root / "parent.json").read_bytes())
     tables.clear()
     live.read_table.side_effect = AssertionError("Live input during replay")
+    if family == "target":
+        default_mapping = mapping.ProteinClassTargetTypeMappingData(
+            "current-v2",
+            (
+                mapping.ProteinClassTopLevelMappingEntry(
+                    "enzyme", "current-enzyme", True
+                ),
+            ),
+        )
+        monkeypatch.setattr(mapping, "_mapping_data", default_mapping)
     receipt = await replay_assay(root, digest, tmp_path / "offline")
     assert receipt["silver_equal"] is True and receipt["gold_equal"] is True
     assert receipt["records"] == 1
+    if family == "target":
+        import asyncio
+        import bioetl.composition.bootstrap.runtime.assay_replay as replay_module
+
+        assert mapping.current_protein_class_target_type_mapping() is default_mapping
+        for failure in (ValueError, asyncio.CancelledError):
+            monkeypatch.setattr(
+                replay_module,
+                "verify_replay_outputs",
+                AsyncMock(side_effect=failure("replay verification failed")),
+            )
+            with pytest.raises(failure, match="replay verification failed"):
+                await replay_assay(root, digest, tmp_path / failure.__name__)
+            assert (
+                mapping.current_protein_class_target_type_mapping() is default_mapping
+            )
 
 
 async def test_assay_merge_replays_nullable_foreign_keys_without_live_reads(tmp_path):

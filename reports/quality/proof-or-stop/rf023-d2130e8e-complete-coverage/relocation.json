@@ -1,0 +1,10 @@
+{
+  "archive_sha256": "d1d286164cfef114080d9dacdc061b535245631a523d9afdbf8db9c97fe5fd93",
+  "digests_verified": 43,
+  "canonical_validator": "PASS",
+  "counts": {
+    "passed": 32979,
+    "skipped": 187
+  },
+  "trust_tier": "local_single_host"
+}

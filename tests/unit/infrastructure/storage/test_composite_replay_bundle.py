@@ -1,5 +1,7 @@
 """ADR-062: Fail-closed integrity checks for the parent envelope and verification receipt."""
 
+from __future__ import annotations
+
 import json
 
 import pyarrow as pa
@@ -22,6 +24,116 @@ from bioetl.infrastructure.storage.composite_replay_evidence import (
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_target_mapping_round_trip_uses_captured_lookup(monkeypatch):
+    from bioetl.infrastructure.config.protein_class_target_type_loader import (
+        freeze_target_mapping,
+        restore_target_mapping,
+    )
+    from bioetl.domain.mapping import protein_class_target_type as mapping
+
+    original = mapping.ProteinClassTargetTypeMappingData(
+        "captured-custom-v1",
+        (mapping.ProteinClassTopLevelMappingEntry("enzyme", "custom-enzyme", True),),
+        frozenset({"custom-ignored"}),
+    )
+    monkeypatch.setattr(mapping, "_mapping_data", original)
+    payload = json.loads(json.dumps(freeze_target_mapping()))
+    monkeypatch.setattr(mapping, "_mapping_data", None)
+    restored = restore_target_mapping(payload)
+    mapping.initialize_protein_class_target_type_mapping(restored)
+    assert mapping.current_protein_class_target_type_mapping() == original
+    assert (
+        mapping.normalize_protein_class_top_level("enzyme").canonical_l1
+        == "custom-enzyme"
+    )
+
+
+@pytest.mark.parametrize(
+    "damage", ["absent", "missing", "changed", "invalid_structure"]
+)
+def test_target_requires_digest_bound_mapping(bundle, damage):
+    root, envelope, _ = bundle
+    envelope.update(version="composite-parent-replay-v2", pipeline="composite_target")
+    envelope["objects"]["field-groups.json"] = publish_json(
+        root, "field-groups.json", {}
+    )
+    if damage != "absent":
+        envelope["objects"]["target-mapping.json"] = publish_json(
+            root,
+            "target-mapping.json",
+            {
+                "mapping_version": "captured-v1",
+                "entries": [
+                    {
+                        "raw_label": "enzyme",
+                        "canonical_l1": "enzyme",
+                        "counts_for_target_type": True,
+                    }
+                ],
+                "non_counting_classes": [],
+            }
+            if damage != "invalid_structure"
+            else {},
+        )
+    path = root / "parent.json"
+    path.write_text(json.dumps(envelope))
+    digest = digest_bytes(path.read_bytes())
+    if damage not in {"absent", "invalid_structure"}:
+        assert verify_bundle(root, digest)["pipeline"] == "composite_target"
+        if damage == "missing":
+            (root / "target-mapping.json").unlink()
+        else:
+            (root / "target-mapping.json").write_bytes(b"changed")
+    expected_type, expected_message = {
+        "absent": (ValueError, "composite_replay_required_object_missing"),
+        "missing": (FileNotFoundError, "target-mapping"),
+        "changed": (ValueError, "composite_replay_object_digest_mismatch"),
+        "invalid_structure": (ValueError, "composite_replay_target_mapping_invalid"),
+    }[damage]
+    with pytest.raises(expected_type, match=expected_message):
+        verify_bundle(root, digest)
+
+
+@pytest.mark.parametrize(
+    "damage",
+    ["version", "empty", "duplicate", "ignored", "entry_type", "boolean", "canonical"],
+)
+def test_sealed_target_mapping_must_restore_domain_invariants(bundle, damage):
+    root, envelope, _ = bundle
+    entry = {
+        "raw_label": "enzyme",
+        "canonical_l1": "enzyme",
+        "counts_for_target_type": True,
+    }
+    mapping = {"mapping_version": "v1", "entries": [entry], "non_counting_classes": []}
+    if damage == "version":
+        mapping["mapping_version"] = " "
+    elif damage == "empty":
+        mapping["entries"] = []
+    elif damage == "duplicate":
+        mapping["entries"] = [entry, dict(entry, raw_label=" ENZYME ")]
+    elif damage == "ignored":
+        mapping["non_counting_classes"] = "not-an-array"
+    elif damage == "entry_type":
+        mapping["entries"] = ["not-an-object"]
+    elif damage == "canonical":
+        entry["canonical_l1"] = "  "
+    else:
+        entry["counts_for_target_type"] = "false"
+    envelope.update(version="composite-parent-replay-v2", pipeline="composite_target")
+    for name, value in (("field-groups.json", {}), ("target-mapping.json", mapping)):
+        envelope["objects"][name] = publish_json(root, name, value)
+    (root / "parent.json").write_text(json.dumps(envelope))
+    expected_message = {
+        "version": "mapping_version must not be blank",
+        "empty": "protein class target type mapping must not be empty",
+        "duplicate": "protein class target type mapping has duplicate labels",
+        "canonical": "protein class mapping canonical_l1 must not be blank",
+    }.get(damage, "composite_replay_target_mapping_invalid")
+    with pytest.raises(ValueError, match=expected_message):
+        verify_bundle(root, digest_bytes((root / "parent.json").read_bytes()))
 
 
 @pytest.fixture

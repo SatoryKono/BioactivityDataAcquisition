@@ -3,6 +3,6 @@ provider: uniprot
 cassette_rel_path: tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_fetch_proteins.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 3b8fc0805df3542921cbce25109a933e4869b7b40db5b4516dad467bc4256880
-recorded_at: '2026-07-03'
+cassette_sha256: ad270f54dc1c408223dc3b9d4a9da0eec9486999a3b2e29c49faa25f07452d04
+recorded_at: '2026-10-06'
 staleness_ready: true

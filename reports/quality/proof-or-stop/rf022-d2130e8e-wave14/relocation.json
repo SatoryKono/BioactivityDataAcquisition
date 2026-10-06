@@ -1,0 +1,8 @@
+{
+  "archive_sha256": "cb64003d56060eeebfece97c76fd65b1418cf9e3ed6e5d0f9236c459b3ce4ed1",
+  "verified_digests": 1997,
+  "target_replay": "PASS",
+  "target_rows": 10,
+  "silver_gold_equal": true,
+  "runtime_network_attempts": []
+}

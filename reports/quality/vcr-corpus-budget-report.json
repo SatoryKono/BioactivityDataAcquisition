@@ -1,7 +1,7 @@
 {
   "schema_version": "vcr-corpus-budget-report-v1",
   "linked_issue": "#8337",
-  "generated_at_utc": "2026-08-07T13:33:23.533762+00:00",
+  "generated_at_utc": "2026-10-05T14:35:53.830957+00:00",
   "canonical_root": "tests/fixtures/vcr",
   "budget": {
     "soft_max_total_bytes": 150000000,
@@ -28,7 +28,7 @@
     "providers": {
       "chembl": {
         "files": 102,
-        "bytes": 112825466
+        "bytes": 112955851
       },
       "crossref": {
         "files": 48,
@@ -43,8 +43,8 @@
         "bytes": 7848853
       },
       "pubchem": {
-        "files": 62,
-        "bytes": 803016
+        "files": 24,
+        "bytes": 762761
       },
       "pubmed": {
         "files": 48,
@@ -59,13 +59,13 @@
         "bytes": 2155665
       }
     },
-    "total_bytes": 126346660,
-    "total_files": 394
+    "total_bytes": 126436790,
+    "total_files": 356
   },
   "status": {
     "within_soft_byte_budget": true,
     "within_soft_file_budget": true,
-    "byte_utilization": 0.8423
+    "byte_utilization": 0.8429
   },
   "policy_note": "Default action is retain. Deletion requires owner sign-off and replay proof."
 }

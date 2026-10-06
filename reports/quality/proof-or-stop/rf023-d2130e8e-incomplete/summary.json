@@ -1,0 +1,24 @@
+{
+  "source_commit": "d2130e8e6a03a6fd8d60078a26b8ff0019d3a8e7",
+  "complete": false,
+  "accepted": false,
+  "passed_shards": 16,
+  "failed_shards": [
+    "integration"
+  ],
+  "failure": "integration: pytest-timeout 300 seconds while waiting for git diff origin/main...HEAD",
+  "diagnosis": "First isolated git diff took 40.49 seconds; warmed repeated comparisons with and without rename detection both took about 0.06 seconds. No evidence that rename detection is the cause. Shared repository I/O latency suspected, not proven.",
+  "focused_validation": {
+    "passed": 4,
+    "skipped": 1,
+    "reason": "No dashboard JSON changes"
+  },
+  "retry": "Fresh canonical17 run on unchanged d2130e8e; historical failed manifest preserved.",
+  "archive_sha256": "f379cf79043363c4b03f56b84292cdb7fcae12f9c1b3c513e208464869c398c0",
+  "files": {
+    "reports/quality/rf023-coverage-d2130e8e-utf8/manifest.json": "181a6fbd0972ac0577fa5c50822cc71092d27085415c967771de7cf4b75cf23e",
+    "reports/quality/rf023-coverage-d2130e8e-utf8/logs/integration.log": "8c741e3d14d390d6aac9c46d25e47782bf07a47a0eead4ae62b77a424e646060",
+    "reports/quality/rf022-preparation/git-diff-d213-diagnostic.json": "e4f92ad4d46d851c2045253f81fb517df881f77bc11746cfbfa56ed71567af87",
+    "reports/quality/rf022-preparation/dashboard-git-d213.xml": "87260ecc70c323a441d6ce88a561ec235de91dc25ea8e9d26475a5308552fabc"
+  }
+}

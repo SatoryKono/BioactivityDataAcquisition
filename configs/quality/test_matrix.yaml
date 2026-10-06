@@ -1056,13 +1056,13 @@ fixture_governance:
     stale_age_checker: scripts/engineering/qa/vcr/check_vcr_metadata_age.py
     provider_expected_sidecar_counts:
       chembl: 51
-      crossref: 24
+      crossref: 23
       multi_provider: 1
       openalex: 25
       pubchem: 12
-      pubmed: 24
-      semanticscholar: 24
-      uniprot: 17
+      pubmed: 23
+      semanticscholar: 22
+      uniprot: 16
   rollout:
     cassette_metadata: enforced
     cassette_staleness_age: enforced

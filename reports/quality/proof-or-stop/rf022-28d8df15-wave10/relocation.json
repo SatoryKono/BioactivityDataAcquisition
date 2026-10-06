@@ -1,0 +1,11 @@
+{
+  "source_commit": "28d8df1530aa15644811b251e7963e028d93d120",
+  "archive_sha256": "1517251e58faf78e24a315cd9d9cbe26841c41b40fbad6c431b9106cf6e44543",
+  "verified_file_count": 2926,
+  "relocated_replay_exit_codes": {
+    "activity": 0,
+    "assay": 0,
+    "molecule": 0,
+    "target": 0
+  }
+}

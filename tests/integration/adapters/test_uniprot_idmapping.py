@@ -21,7 +21,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -200,9 +200,11 @@ class TestUniProtIDMappingIntegration:
             assert "CHEMBL99999999999" in result
             assert result["CHEMBL99999999999"] is None
 
-    @pytest.mark.vcr
     async def test_map_empty_list(
-        self, uniprot_http_client: Any, mock_logger: MagicMock
+        self,
+        uniprot_http_client: Any,
+        mock_logger: MagicMock,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """Test mapping empty list returns empty dict.
 
@@ -212,6 +214,10 @@ class TestUniProtIDMappingIntegration:
             UniProtIDMappingClient,
         )
 
+        post = AsyncMock(
+            side_effect=AssertionError("Empty mapping must not submit an HTTP job")
+        )
+        monkeypatch.setattr(uniprot_http_client, "post", post)
         async with uniprot_http_client:
             client = UniProtIDMappingClient(
                 http_client=uniprot_http_client,
@@ -221,6 +227,7 @@ class TestUniProtIDMappingIntegration:
             result = await client.map_ids("ChEMBL", "UniProtKB", [])
 
             assert result == {}
+            post.assert_not_awaited()
 
     @pytest.mark.vcr
     async def test_map_mixed_results(

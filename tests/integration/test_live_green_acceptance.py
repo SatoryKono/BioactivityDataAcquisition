@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 from scripts.ops.observability.green_acceptance import (
+    COMPOSITE_ORDER,
     discover,
     execute,
     execute_campaign,
@@ -57,6 +58,7 @@ def test_live_run_is_green(case):
         launch_timeout(case, ROOT) + 1800 * len(case.prerequisites)
         for case in CASES
         if case.kind == "composite"
+        and case.name.removeprefix("composite_") in COMPOSITE_ORDER
     )
     + 120
 )

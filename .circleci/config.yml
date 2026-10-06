@@ -2953,6 +2953,145 @@ jobs:
       group:
         type: string
 
+  rf023-proof-closeout:
+    parameters:
+      task-id:
+        type: string
+        default: architecture-coverage-11854-11899
+    docker:
+    - image: cimg/python:3.12
+    resource_class: medium
+    steps:
+    - checkout
+    - setup-python-uv:
+        extras: dev tracing docs
+    - run:
+        name: Verify complete source history and current main base
+        command: "export PATH=\"$PWD/.venv/bin:$HOME/.local/bin:$PATH\"\ngit fetch --no-tags origin main:refs/remotes/origin/main\n\
+          if [ \"$(git rev-parse --is-shallow-repository)\" = true ]; then\n  git fetch --unshallow origin\nfi\npython\
+          \ scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD\n"
+    - run:
+        name: Source-bound full coverage and Proof-or-Stop acceptance
+        no_output_timeout: 30m
+        command: "export PATH=\"$PWD/.venv/bin:$HOME/.local/bin:$PATH\"\nexport PYTHONPATH=\"$PWD/src\" PYTHONUTF8=1\n\
+          export BIOETL_AI_MEMORY_MODE=off BIOETL_SKIP_PREFLIGHT=1 BIOETL_SKIP_SETUP_PLUGINS=1\nexport OPENBLAS_NUM_THREADS=1\
+          \ OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1\n# Preserve resolved PATH; isolate child shell probes from CircleCI BASH_ENV.\nunset BASH_ENV\npython - \\<<'CLOSEOUT_PY'\n\"\"\"Candidate\
+          \ embedded runner; execute only in a genuine CircleCI checkout.\"\"\"\nfrom datetime import UTC, datetime\n\
+          from pathlib import Path\nimport json\nimport hashlib\nimport os\nimport subprocess\nimport time\n\nroot\
+          \ = Path.cwd().resolve()\nhead = subprocess.check_output([\"git\", \"rev-parse\", \"HEAD\"], text=True).strip()\n\
+          assert os.environ.get(\"CIRCLECI\") == \"true\", \"A local execution cannot emit CI receipts\"\nassert os.environ.get(\"\
+          CIRCLE_SHA1\") == head\nassert os.environ.get(\"CIRCLE_PROJECT_USERNAME\") == \"SatoryKono\"\nassert os.environ.get(\"\
+          CIRCLE_PROJECT_REPONAME\") == \"BioactivityDataAcquisition\"\nci_id = os.environ[\"CIRCLE_BUILD_URL\"]\n\
+          assert ci_id.startswith(\"https://\") and os.environ[\"CIRCLE_WORKFLOW_ID\"]\nrun_id = \"circleci-closeout-\"\
+          \ + os.environ[\"CIRCLE_BUILD_NUM\"] + \"-\" + head[:12]\nout = root / \"reports/quality/proof-or-stop\"\
+          \ / run_id\nout.mkdir(parents=True, exist_ok=False)\nsecret_values = sorted({value for key, value in os.environ.items()\n\
+          \                        if len(value) >= 8 and any(part in key.upper() for part in\n                  \
+          \      (\"TOKEN\", \"PASSWORD\", \"SECRET\", \"API_KEY\", \"ACCESS_KEY\"))}, key=len, reverse=True)\n\n\
+          def sanitize(path):\n    original = path.read_text(encoding=\"utf-8\", errors=\"replace\")\n    clean =\
+          \ original\n    for value in secret_values:\n        clean = clean.replace(value, \"[REDACTED_CI_SECRET]\"\
+          )\n    if clean != original:\n        path.write_text(clean, encoding=\"utf-8\")\n\ndef execute(name, command):\n\
+          \    log = out / (name + \".log\")\n    started = datetime.now(UTC).isoformat()\n    clock = time.monotonic()\n\
+          \    print(\"[closeout] start \" + name, flush=True)\n    with log.open(\"w\", encoding=\"utf-8\") as stream:\n\
+          \        result = subprocess.Popen(command, stdout=stream, stderr=subprocess.STDOUT)\n        while True:\n            try:\n                result.wait(timeout=60)\n                break\n            except subprocess.TimeoutExpired:\n                print(f\"[closeout] {name} running {int(time.monotonic() - clock)}s\", flush=True)\n    duration\
+          \ = round((time.monotonic() - clock) * 1000)\n    sanitize(log)\n    assert subprocess.check_output([\"\
+          git\", \"rev-parse\", \"HEAD\"], text=True).strip() == head\n    record = dict(command=command, cwd=str(root),\
+          \ started_at=started,\n                  duration_ms=duration, exit_code=result.returncode,\n          \
+          \        head_before=head, head_after=head, log=str(log))\n    (out / (name + \".record.json\")).write_text(json.dumps(record,\
+          \ indent=2) + \"\\n\", encoding=\"utf-8\")\n    print(f\"[closeout] {name} exit={result.returncode}\", flush=True)\n\
+          \    return record\n\nprefix = [\"python\", \"-m\", \"scripts.engineering.qa\", \"proof-or-stop\"]\ncommon\
+          \ = [\"--run-id\", run_id, \"--task-id\", \"<< parameters.task-id >>\",\n          \"--claim\"\
+          , \"ready_to_merge\", \"--ci-run-id\", ci_id]\nassert execute(\"plan\", prefix + [\"plan\", *common, \"\
+          --output\", str(out / \"plan.json\")])[\"exit_code\"] == 0\n(out / \"ci-identity.json\").write_text(json.dumps({\n\
+          \    key: os.environ[key] for key in (\"CIRCLE_SHA1\", \"CIRCLE_BUILD_URL\", \"CIRCLE_BUILD_NUM\",\n   \
+          \                                \"CIRCLE_WORKFLOW_ID\", \"CIRCLE_PROJECT_USERNAME\",\n                \
+          \                   \"CIRCLE_PROJECT_REPONAME\", \"CIRCLE_BRANCH\")\n}, indent=2) + \"\\n\", encoding=\"\
+          utf-8\")\ncoverage = out / \"coverage\"\ncoverage_record = execute(\"coverage-17\", [\"python\", \"-m\"\
+          , \"scripts.engineering.qa.run_local_coverage_verify\",\n                                         \"--scratch-dir\"\
+          , str(coverage)])\nfor path in coverage.rglob(\"*\"):\n    if path.is_file() and path.suffix in {\".log\"\
+          , \".xml\", \".json\"}:\n        sanitize(path)\nassert coverage_record[\"exit_code\"] == 0, \"Incomplete\
+          \ coverage cannot qualify closeout\"\nmanifest = json.loads((coverage / \"manifest.json\").read_text(encoding=\"\
+          utf-8\"))\nassert manifest[\"complete\"] is True and manifest[\"head\"] == head\nassert len(manifest[\"\
+          required_shards\"]) == len(manifest[\"shards\"]) == 17\nassert {row[\"name\"] for row in manifest[\"shards\"\
+          ]} == set(manifest[\"required_shards\"])\nassert all(row[\"exit_code\"] == 0 and row[\"junit_file\"] and\
+          \ row[\"coverage_sha256\"]\n           for row in manifest[\"shards\"])\nassert hashlib.sha256((coverage\
+          \ / \"coverage.xml\").read_bytes()).hexdigest() == manifest[\"coverage_xml_sha256\"]\nchecks = [\n    (\"\
+          tests\", \"test_health\", [\"python\", \"-m\", \"pytest\", \"tests/architecture\", \"-q\", \"--no-cov\"\
+          ,\n                              \"--junitxml=\" + str(out / \"architecture.xml\")]),\n    (\"governance\"\
+          , \"pretest_guardrails\", [\"bash\", \"scripts/engineering/dev/pretest_guardrails.sh\",\n              \
+          \                            \"--mode\", \"check\", \"--scope\", \"governance\", \"--skip-cleanup\",\n \
+          \                                         \"--report-json\", str(out / \"governance.json\")]),\n    (\"\
+          docs_runtime\", \"docs_runtime_checks\", [\"python\", \"-m\", \"scripts.docs\", \"verify\"]),\n    (\"debt\"\
+          , \"debt_governance_gates\", [\"python\", \"-m\", \"scripts.engineering.qa\",\n                        \
+          \               \"report-debt-governance-gates\", \"--check\"]),\n    (\"quality\", \"quality_integral_gate\"\
+          , [\"python\", \"-m\", \"scripts.engineering.ci.quality_integral_gate\",\n                             \
+          \             \"--coverage-xml\", str(coverage / \"coverage.xml\"),\n                                  \
+          \        \"--output\", str(out / \"quality.json\")]),\n]\nreceipts = []\nfor kind, producer, command in\
+          \ checks:\n    record = execute(kind, command)\n    receipt = out / \"receipts\" / (kind + \".json\")\n\
+          \    arguments = [\"receipt\", *common, \"--receipt-id\", kind, \"--producer\", producer,\n            \
+          \     \"--evidence-kind\", kind, \"--command\", \" \".join(command),\n                 \"--cwd\", str(root),\
+          \ \"--started-at\", record[\"started_at\"],\n                 \"--duration-ms\", str(record[\"duration_ms\"\
+          ]), \"--exit-code\", str(record[\"exit_code\"]),\n                 \"--status\", \"pass\" if record[\"exit_code\"\
+          ] == 0 else \"fail\",\n                 \"--output-artifact\", record[\"log\"], \"--trust-tier\", \"ci\"\
+          , \"--output\", str(receipt)]\n    arguments.extend(\"--argv=\" + arg for arg in command)\n    assert execute(\"\
+          receipt-\" + kind, prefix + arguments)[\"exit_code\"] == 0\n    receipts.extend([\"--receipt\", str(receipt)])\n\
+          assert execute(\"assemble\", prefix + [\"assemble\", *common, \"--actor\", \"circleci\",\n             \
+          \                        \"--runtime\", \"ci\", \"--trust-tier\", \"ci\", *receipts,\n                 \
+          \                    \"--output\", str(out / \"bundle.json\")])[\"exit_code\"] == 0\nverification = execute(\"\
+          verify\", prefix + [\"verify\", \"--bundle\", str(out / \"bundle.json\"),\n                            \
+          \               \"--output\", str(out / \"verification.json\")])\nraise SystemExit(verification[\"exit_code\"\
+          ] or coverage_record[\"exit_code\"])\nCLOSEOUT_PY\n"
+    - run:
+        name: Export telemetry candidate from the complete producer
+        when: always
+        command: |
+          set -euo pipefail
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          export PYTHONPATH="$PWD/src" PYTHONUTF8=1
+          ROOT="reports/quality/proof-or-stop/circleci-closeout-${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:12}"
+          # Canonical validation rejects failed, partial, stale or substituted evidence.
+          python -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest "$ROOT/coverage/manifest.json"
+          mkdir -p "$ROOT/telemetry/configs/quality" "$ROOT/telemetry/docs/05-engineering" "$ROOT/telemetry/reports"
+          cp configs/quality/test_telemetry_baseline.yaml "$ROOT/telemetry/configs/quality/"
+          cp docs/05-engineering/test-telemetry-baseline.md "$ROOT/telemetry/docs/05-engineering/"
+          cp -R reports/test-telemetry "$ROOT/telemetry/reports/"
+    - run:
+        name: Publish bounded sanitized execution evidence
+        when: always
+        command: "python - \\<<'ARTIFACT_PY'\nfrom pathlib import Path\nimport os\nimport shutil\nfrom xml.etree import\
+          \ ElementTree as ET\n\nroot = Path(\"reports/quality/proof-or-stop\")\nname = \"circleci-closeout-\" + os.environ[\"\
+          CIRCLE_BUILD_NUM\"] + \"-\" + os.environ[\"CIRCLE_SHA1\"][:12]\nsource = root / name\ndestination = root\
+          \ / \"circleci-artifacts\"\nsecrets = sorted({value for key, value in os.environ.items() if len(value) >=\
+          \ 8 and\n                  any(part in key.upper() for part in (\"TOKEN\", \"PASSWORD\", \"SECRET\", \"\
+          API_KEY\", \"ACCESS_KEY\"))}, key=len, reverse=True)\nfor path in source.rglob(\"*\"):\n    relative = path.relative_to(source)\n\
+          \    if path.is_symlink() or not path.is_file() or path.suffix not in {\".json\", \".xml\", \".log\"}:\n\
+          \        continue\n    if any(part in {\"pycache\", \"hypothesis\", \"shards\", \"combined\"} for part in\
+          \ relative.parts):\n        continue\n    text = path.read_text(encoding=\"utf-8\", errors=\"replace\")\n\
+          \    for value in secrets:\n        text = text.replace(value, \"[REDACTED_CI_SECRET]\")\n    target = destination\
+          \ / \"evidence\" / name / relative\n    target.parent.mkdir(parents=True, exist_ok=True)\n    target.write_text(text,\
+          \ encoding=\"utf-8\")\n    junit_root = None\n    if path.suffix == \".xml\":\n        try:\n          \
+          \  junit_root = ET.fromstring(text).tag\n        except ET.ParseError:\n            print(\"Retained incomplete\
+          \ XML as diagnostics:\", relative)\n    if junit_root in {\"testsuites\", \"testsuite\"}:\n        junit\
+          \ = destination / \"junit\" / relative\n        junit.parent.mkdir(parents=True, exist_ok=True)\n      \
+          \  shutil.copyfile(target, junit)\nprint(\"Published actual JSON/XML/log evidence; raw coverage SQLite and\
+          \ caches remain on the CI host\")\nARTIFACT_PY\n"
+    - run:
+        name: Collect validated telemetry proposal
+        when: always
+        command: |
+          ROOT="reports/quality/proof-or-stop/circleci-closeout-${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:12}"
+          if [ -d "$ROOT/telemetry" ]; then
+            cp -R "$ROOT/telemetry" reports/quality/proof-or-stop/telemetry-candidate
+          fi
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/telemetry-candidate
+        destination: telemetry-candidate
+    - store_test_results:
+        path: reports/quality/proof-or-stop/circleci-artifacts/junit
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/circleci-artifacts/evidence
+        destination: proof-or-stop
+
+
 workflows:
   retained-actions-online:
     when:
@@ -3465,3 +3604,11 @@ workflows:
             - release-install
             - security-scans
             - release-tests
+
+  rf023-closeout:
+    jobs:
+      - rf023-proof-closeout:
+          task-id: rf023-11906-11907
+          filters:
+            branches:
+              only: codex/pipeline-green-gates-rf022-snapshot-fix

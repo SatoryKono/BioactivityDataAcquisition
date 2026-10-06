@@ -1,24 +1,26 @@
 interactions:
-    -   request:
-            body: ''
-            headers:
-                Accept:
-                    - application/json
-                Accept-Encoding:
-                    - gzip, deflate, zstd
-                Connection:
-                    - keep-alive
-                Host:
-                    - eutils.ncbi.nlm.nih.gov
-                User-Agent:
-                    - BioETL/5.0.0
-            method: GET
-            uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/einfo.fcgi?db=pubmed&retmode=json&email=bioetl-test%40example.com
-        response:
-            body:
-                string: '{"header":{"type":"einfo","version":"0.3"},"einforesult":{"dbinfo":[{"dbname":"pubmed","menuname":"PubMed","description":"PubMed
-        bibliographic record","dbbuild":"Build-2026.03.05.13.46","count":"40206625","lastupdate":"2026/03/05
-        13:46","fieldlist":[{"name":"ALL","fullname":"All Fields","description":"All
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      cookie:
+      - ncbi_sid=EAF2838E39E28187_E095SID
+      host:
+      - eutils.ncbi.nlm.nih.gov
+      user-agent:
+      - BioETL/6.1.0
+    method: GET
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/einfo.fcgi?db=pubmed&retmode=json&email=bioetl-test%40example.com
+  response:
+    body:
+      string: '{"header":{"type":"einfo","version":"0.3"},"einforesult":{"dbinfo":[{"dbname":"pubmed","menuname":"PubMed","description":"PubMed
+        bibliographic record","dbbuild":"Build-2026.10.05.18.09","count":"41244386","lastupdate":"2026/10/05
+        18:09","fieldlist":[{"name":"ALL","fullname":"All Fields","description":"All
         terms from all searchable fields","termcount":"","isdate":"N","isnumerical":"N","singletoken":"N","hierarchy":"N","ishidden":"N"},{"name":"UID","fullname":"UID","description":"Unique
         number assigned to publication","termcount":"","isdate":"N","isnumerical":"Y","singletoken":"Y","hierarchy":"N","ishidden":"Y"},{"name":"FILT","fullname":"Filter","description":"Limits
         the records","termcount":"","isdate":"N","isnumerical":"N","singletoken":"Y","hierarchy":"N","ishidden":"N"},{"name":"TITL","fullname":"Title","description":"Words
@@ -65,15 +67,12 @@ interactions:
         - Identifier","description":"Author Identifier","termcount":"","isdate":"N","isnumerical":"N","singletoken":"Y","hierarchy":"N","ishidden":"N"},{"name":"PS","fullname":"Subject
         - Personal Name","description":"Personal Name as Subject","termcount":"","isdate":"N","isnumerical":"N","singletoken":"Y","hierarchy":"N","ishidden":"N"},{"name":"COIS","fullname":"Conflict
         of Interest Statements","description":"Conflict of Interest Statements","termcount":"","isdate":"N","isnumerical":"N","singletoken":"N","hierarchy":"N","ishidden":"N"},{"name":"WORD","fullname":"Text
-        Word","description":"Free text associated with publication","termcount":"","isdate":"N","isnumerical":"N","singletoken":"N","hierarchy":"N","ishidden":"N"},{"name":"P1DAT","fullname":"P1DAT","description":"Date
-        publication first accessible through Solr","termcount":"","isdate":"Y","isnumerical":"N","singletoken":"Y","hierarchy":"N","ishidden":"Y"}],"linklist":[{"name":"pubmed_assembly","menu":"Assembly","description":"Assembly","dbto":"assembly"},{"name":"pubmed_bioproject","menu":"Project
+        Word","description":"Free text associated with publication","termcount":"","isdate":"N","isnumerical":"N","singletoken":"N","hierarchy":"N","ishidden":"N"}],"linklist":[{"name":"pubmed_assembly","menu":"Assembly","description":"Assembly","dbto":"assembly"},{"name":"pubmed_bioproject","menu":"Project
         Links","description":"Related Projects","dbto":"bioproject"},{"name":"pubmed_biosample","menu":"BioSample
         Links","description":"BioSample links","dbto":"biosample"},{"name":"pubmed_books_refs","menu":"Cited
         in Books","description":"PubMed links associated with Books","dbto":"books"},{"name":"pubmed_cdd","menu":"Conserved
         Domain Links","description":"Link to related CDD entry","dbto":"cdd"},{"name":"pubmed_clinvar","menu":"ClinVar","description":"Clinical
-        variations associated with publication","dbto":"clinvar"},{"name":"pubmed_clinvar_calculated","menu":"ClinVar
-        (calculated)","description":"Clinical variations calculated to be associated
-        with publication","dbto":"clinvar"},{"name":"pubmed_dbvar","menu":"dbVar","description":"Link
+        variations associated with publication","dbto":"clinvar"},{"name":"pubmed_dbvar","menu":"dbVar","description":"Link
         from PubMed to dbVar","dbto":"dbvar"},{"name":"pubmed_gap","menu":"dbGaP Links","description":"Related
         dbGaP record","dbto":"gap"},{"name":"pubmed_gds","menu":"GEO DataSet Links","description":"Related
         GEO DataSets","dbto":"gds"},{"name":"pubmed_gene","menu":"Gene Links","description":"Link
@@ -124,49 +123,49 @@ interactions:
         Links","description":"Published 3D structures","dbto":"structure"}]}]}}
 
         '
-            headers:
-                Access-Control-Allow-Origin:
-                    - '*'
-                Access-Control-Expose-Headers:
-                    - X-RateLimit-Limit,X-RateLimit-Remaining
-                Cache-Control:
-                    - private
-                Connection:
-                    - Keep-Alive
-                Content-Security-Policy:
-                    - upgrade-insecure-requests
-                Content-Type:
-                    - application/json; charset=UTF-8
-                Date:
-                    - Fri, 06 Mar 2026 13:18:12 GMT
-                Keep-Alive:
-                    - timeout=4, max=40
-                NCBI-PHID:
-                    - 1D323371B13E5FF500005799D83703AE.1.1.m_1
-                NCBI-SID:
-                    - 72E7AF42AF17F2DC_BDE6SID
-                Referrer-Policy:
-                    - origin-when-cross-origin
-                Server:
-                    - Finatra
-                Set-Cookie:
-                    - ncbi_sid=72E7AF42AF17F2DC_BDE6SID; domain=.nih.gov; path=/; expires=Sat, 06
-                        Mar 2027 13:18:13 GMT
-                Strict-Transport-Security:
-                    - max-age=31536000; includeSubDomains; preload
-                Transfer-Encoding:
-                    - chunked
-                X-RateLimit-Limit:
-                    - '3'
-                X-RateLimit-Remaining:
-                    - '1'
-                X-UA-Compatible:
-                    - IE=Edge
-                X-XSS-Protection:
-                    - 1; mode=block
-                content-length:
-                    - '15364'
-            status:
-                code: 200
-                message: OK
+    headers:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - X-RateLimit-Limit,X-RateLimit-Remaining
+      alt-svc:
+      - clear
+      cache-control:
+      - private
+      content-length:
+      - '15005'
+      content-security-policy:
+      - upgrade-insecure-requests
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Tue, 06 Oct 2026 04:01:37 GMT
+      ncbi-phid:
+      - 1D32099356568F3500003AE7C08C058E.1.1.m_1
+      ncbi-sid:
+      - EAF2838E39E28187_E095SID
+      referrer-policy:
+      - origin-when-cross-origin
+      server:
+      - Finatra
+      set-cookie:
+      - ncbi_sid=EAF2838E39E28187_E095SID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 04:01:37 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      transfer-encoding:
+      - chunked
+      via:
+      - 1.1 google
+      x-ratelimit-limit:
+      - '3'
+      x-ratelimit-remaining:
+      - '0'
+      x-ua-compatible:
+      - IE=Edge
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
 version: 1
