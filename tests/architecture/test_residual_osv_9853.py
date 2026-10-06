@@ -151,6 +151,7 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
     assert selector_pkg["overrides"] == {
         "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
         "braces": "$braces",
+        "@istanbuljs/load-nyc-config": {"js-yaml": "4.3.2"},
     }
     scenes_pkg = _json(SCENES_PKG)
     bridge_ref = (
@@ -162,6 +163,7 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
         "@grafana/scenes": {"react-router-dom": "7.18.4"},
         "braces": "$braces",
         "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
+        "@istanbuljs/load-nyc-config": {"js-yaml": "4.3.2"},
     }
     # This candidate has a real adapter for Grafana's legacy history contract;
     # a lockfile major alone is never host/runtime qualification evidence.
@@ -185,6 +187,16 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
     assert "uuid" not in scenes_pkg["overrides"]
     assert scenes["node_modules/uuid"]["version"] == "11.1.1"
     selector = _lock_packages(SELECTOR_LOCK)
+    # NYC consumes only YAML's load API. Its compatibility/security fixtures
+    # run in each installed plugin graph; the removed formatter must stay absent.
+    for package, locked in ((scenes_pkg, scenes), (selector_pkg, selector)):
+        assert "nyc-yaml-compat.test.cjs" in package["scripts"]["test:ci"]
+        assert locked["node_modules/js-yaml"]["version"] == "4.3.2"
+        assert not any(key.endswith("/sprintf-js") for key in locked)
+        assert not any(
+            key.endswith("/js-yaml") and row["version"].startswith("3.")
+            for key, row in locked.items()
+        )
     selector_bridge = selector["node_modules/react-router-dom-v5-compat"]
     assert selector_bridge["name"] == bridge["name"]
     assert selector_bridge["version"] == bridge["version"]

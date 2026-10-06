@@ -1971,3 +1971,4 @@ workflows:
                 - codex/config-root-postmerge-20261005
                 - codex/architecture-meta-closeout-20261005
                 - codex/grafana-managed-closeout-20261005
+                - codex/grafana-postmerge-security-20261006
