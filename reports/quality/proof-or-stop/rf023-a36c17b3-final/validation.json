@@ -1,0 +1,18 @@
+{
+  "sidecar_digest_matches": true,
+  "recorded_at_unchanged": true,
+  "response_digest_matches": true,
+  "capture_digest_matches": true,
+  "offline_replay": {
+    "network": "IPv4/IPv6 socket connects blocked in test process",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "exit_code": 0,
+    "scope": "Existing successful fixture, not freshness acceptance of new HTTP429"
+  },
+  "initial_pytest_invocation": "pytest-socket option unavailable; no tests ran; rerun used explicit socket guard",
+  "runtime_mirrors": "not changed",
+  "debt_budgets": "unchanged",
+  "freshness": "BLOCKED_HTTP_429; fixture and sidecar preserved"
+}

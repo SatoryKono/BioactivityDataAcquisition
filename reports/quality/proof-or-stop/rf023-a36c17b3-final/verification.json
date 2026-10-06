@@ -1,0 +1,39 @@
+{
+  "capture_sha256": "426527aa4e556ce747f1d403844fd40857e551019b13be3c23b39dd73a560c8a",
+  "request_matches_existing_success_fixture": true,
+  "secret_scan": "PASS",
+  "decision": "HTTP429 evidence only; successful fixture and freshness metadata unchanged",
+  "full_suite": {
+    "command": [
+      "E:\\github\\BioactivityDataAcquisition\\.venv-win\\Scripts\\python.exe",
+      "-m",
+      "scripts.engineering.dev",
+      "run-tests",
+      "all",
+      "--junitxml=C:\\Users\\Fedor\\.codex\\worktrees\\rf022-runner-preparation\\BioactivityDataAcquisition\\reports\\quality\\test-runs\\rf023-final-a36c17b3-20261006\\junit.xml",
+      "-p",
+      "no:cacheprovider",
+      "--basetemp=C:\\Users\\Fedor\\AppData\\Local\\Temp\\rf023-final-a36c17b3-20261006"
+    ],
+    "head_before": "a36c17b3fb1aace4bd45c666f3b79b05f49da449",
+    "started_at": "2026-10-06T12:06:30.883903+00:00",
+    "status": "fail",
+    "exit_code": 1,
+    "head_after": "a36c17b3fb1aace4bd45c666f3b79b05f49da449",
+    "dirty_after": false,
+    "duration_seconds": 2322.893,
+    "finished_at": "2026-10-06T12:45:13.777260+00:00"
+  },
+  "junit_counts": {
+    "tests": 6473,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 191
+  },
+  "failures": [
+    {
+      "test": "tests.e2e.test_uniprot_idmapping_e2e::test_uniprot_idmapping_full_cycle_normalizes_mapping_gate_fields",
+      "message": "bioetl.domain.exceptions.storage._base.InfrastructureError: Health check failed for: unknown. Details: unknown: Can't overwrite existing cassette ('C:\\\\Users\\\\Fedor\\\\.codex\\\\worktrees\\\\rf022-runner-preparation\\\\BioactivityDataAcquisition\\\\tests\\\\fixtures\\\\vcr\\\\uniprot\\\\TestUniProtIDMappingIntegration.test_map_single_id.yaml') in your current record mode (<RecordMode.NONE: 'none'>).\nNo match for the request (<Request (GET) https://rest.uniprot.org/configure/idmapping/fields>) was found.\nFound 3 similar requests with 1 different matcher(s) :\n\n1 - (<Request (GET) https://rest.uniprot.org/idmapping/status/2VlLqloTrO>).\nMatchers succeeded : ['method', 'scheme', 'host', 'port', 'query']\nMatchers failed :\npath - assertion failure :\n/configure/idmapping/fields != /idmapping/status/2VlLqloTrO\n\n2 - "
+    }
+  ]
+}
