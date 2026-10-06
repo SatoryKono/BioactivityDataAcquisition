@@ -1,103 +1,98 @@
 {
-  "source_branch": "codex/ci-11929-11931-preparation",
-  "source_commit": "a63090e110ecf290d7a4d5dc8d84e75e7307ab1a",
+  "source_branch": "main",
+  "source_commit": "005a7dc6f77b792f6857b5880ca1af4cdbdd2adc",
   "source_run_id": "local-coverage",
   "source_event": "local_coverage_verify",
   "source_run_url": null,
   "source_tree_sha256": "a1be027f03352d6ae870f2d54033c7adedf5bca49125905c67265c8158f98dd8",
-  "refreshed_at_utc": "2026-10-06T14:59:22.731141+00:00",
+  "refreshed_at_utc": "2026-10-06T15:39:14.383123+00:00",
   "refresh_status": "captured",
   "total_cases": 33138,
   "top_slowest": [
     {
       "source": "unit-other.xml",
       "test": "tests.unit.interfaces.http.test_health_server_routing_pure_helpers::test_filter_options_deadline_does_not_send_late_success",
-      "duration_s": 20.024
+      "duration_s": 20.025
     },
     {
       "source": "unit-scripts-tooling-debt-governance.xml",
       "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing",
-      "duration_s": 17.203
+      "duration_s": 17.777
     },
     {
       "source": "integration.xml",
       "test": "tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline::test_chembl_target_component_happy_path",
-      "duration_s": 11.181
+      "duration_s": 10.951
     },
     {
       "source": "integration.xml",
       "test": "tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path",
-      "duration_s": 11.147
+      "duration_s": 10.923
     },
     {
       "source": "integration.xml",
       "test": "tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_source_fields",
-      "duration_s": 10.756
+      "duration_s": 10.59
     },
     {
       "source": "integration.xml",
       "test": "tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_happy_path",
-      "duration_s": 10.613
-    },
-    {
-      "source": "integration.xml",
-      "test": "tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline::test_chembl_compound_record_happy_path",
-      "duration_s": 10.56
+      "duration_s": 10.561
     },
     {
       "source": "unit-scripts-tooling-debt-governance.xml",
       "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale",
-      "duration_s": 9.788
+      "duration_s": 10.546
     },
     {
       "source": "unit-scripts-tooling-debt-governance.xml",
       "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact",
-      "duration_s": 9.683
+      "duration_s": 10.52
     },
     {
-      "source": "unit-infrastructure.xml",
-      "test": "tests.unit.infrastructure.test_issue_10469_stream_a_infra_thirteen.TestExemptionsDebtReductionAndFormatter::test_exemptions_policy_outside_src_and_required_registry_shapes",
-      "duration_s": 8.286
-    },
-    {
-      "source": "unit-scripts-tooling-other.xml",
-      "test": "tests.unit.scripts.qa.test_check_quality_exemptions::test_check_quality_exemptions_passes_current_zero_budget_registry",
-      "duration_s": 7.986
+      "source": "integration.xml",
+      "test": "tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline::test_chembl_compound_record_happy_path",
+      "duration_s": 10.499
     },
     {
       "source": "integration.xml",
       "test": "tests.integration.composite.test_assay_snapshot_merge_replay::test_assay_replay_compares_physical_production_outputs",
-      "duration_s": 7.917
+      "duration_s": 9.718
     },
     {
-      "source": "integration.xml",
-      "test": "tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts",
-      "duration_s": 7.411
+      "source": "unit-scripts-tooling-other.xml",
+      "test": "tests.unit.scripts.qa.test_check_quality_exemptions::test_check_quality_exemptions_passes_current_zero_budget_registry",
+      "duration_s": 8.492
     },
     {
-      "source": "unit-other.xml",
-      "test": "tests.unit.composition.test_registry_protocol.TestDataSourceCreatorHelper::test_provider_registry_has_list_keys",
-      "duration_s": 7.091
-    },
-    {
-      "source": "unit-scripts-tooling-passport.xml",
-      "test": "tests.unit.scripts.docs.passports.test_passport_projector::test_workflow_operations_are_classified",
-      "duration_s": 6.825
-    },
-    {
-      "source": "repo-backed-unit-product.xml",
-      "test": "tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures::test_cached_populated_isolated_registry_contains_pipeline_factories",
-      "duration_s": 6.324
+      "source": "unit-infrastructure.xml",
+      "test": "tests.unit.infrastructure.test_issue_10469_stream_a_infra_thirteen.TestExemptionsDebtReductionAndFormatter::test_exemptions_policy_outside_src_and_required_registry_shapes",
+      "duration_s": 8.139
     },
     {
       "source": "unit-other.xml",
       "test": "tests.unit.composition.factories.pipeline.test_registry::test_registry_completeness",
-      "duration_s": 6.133
+      "duration_s": 7.853
     },
     {
-      "source": "contract-confidence.xml",
-      "test": "tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]",
-      "duration_s": 6.056
+      "source": "integration.xml",
+      "test": "tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts",
+      "duration_s": 7.742
+    },
+    {
+      "source": "repo-backed-unit-product.xml",
+      "test": "tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures::test_cached_populated_isolated_registry_contains_pipeline_factories",
+      "duration_s": 7.281
+    },
+    {
+      "source": "unit-scripts-tooling-passport.xml",
+      "test": "tests.unit.scripts.docs.passports.test_passport_projector::test_workflow_operations_are_classified",
+      "duration_s": 6.291
+    },
+    {
+      "source": "unit-other.xml",
+      "test": "tests.unit.composition.bootstrap.test_runner_bootstrap.TestBootstrapPipelineRunnerServiceIntegration::test_bootstrapped_service_can_list_pipelines",
+      "duration_s": 6.142
     },
     {
       "source": "unit-scripts-tooling-other.xml",
@@ -105,126 +100,126 @@
       "duration_s": 6.005
     },
     {
-      "source": "smoke.xml",
-      "test": "tests.smoke.test_control_plane_rollout_smoke::test_control_plane_rollout_smoke_emits_artifacts_and_aggregate_metrics",
-      "duration_s": 5.31
-    },
-    {
       "source": "contract-confidence.xml",
-      "test": "tests.contract.test_gold_pk_consistency.TestGoldPkConsistency::test_pipeline_configs_use_new_pk_naming",
-      "duration_s": 4.974
+      "test": "tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]",
+      "duration_s": 5.947
     },
     {
       "source": "unit-scripts-tooling-other.xml",
       "test": "tests.unit.scripts.qa.test_generate_semantic_pipeline_audit::test_build_current_member_facts_exposes_composite_inherited_field_types",
-      "duration_s": 4.941
+      "duration_s": 5.245
     },
     {
-      "source": "repo-backed-unit-tooling.xml",
-      "test": "tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix::test_build_field_matrix_rows_covers_entity_profile_and_generic_rules",
-      "duration_s": 4.657
+      "source": "smoke.xml",
+      "test": "tests.smoke.test_control_plane_rollout_smoke::test_control_plane_rollout_smoke_emits_artifacts_and_aggregate_metrics",
+      "duration_s": 5.122
     },
     {
       "source": "integration.xml",
       "test": "tests.integration.test_runtime_metric_emission_consistency::test_critical_observability_metric_families_are_runtime_emitted",
-      "duration_s": 4.605
+      "duration_s": 5.116
     },
     {
-      "source": "security.xml",
-      "test": "tests.security.test_sql_injection_prevention.TestSQLInjectionPrevention::test_no_string_concatenation_in_sql_queries",
-      "duration_s": 4.604
+      "source": "contract-confidence.xml",
+      "test": "tests.contract.test_gold_pk_consistency.TestGoldPkConsistency::test_pipeline_configs_use_new_pk_naming",
+      "duration_s": 5.026
+    },
+    {
+      "source": "integration.xml",
+      "test": "tests.integration.composite.test_assay_snapshot_merge_replay::test_other_composite_families_replay_physical_outputs[target]",
+      "duration_s": 4.688
+    },
+    {
+      "source": "contract-confidence.xml",
+      "test": "tests.contract.test_normalization_cross_layer_contracts::test_profile_matrix_distinguishes_provider_universe_from_project_policy_scope",
+      "duration_s": 4.435
     }
   ],
   "top_slowest_tests": [
     {
       "source": "unit-other.xml",
       "test": "tests.unit.interfaces.http.test_health_server_routing_pure_helpers::test_filter_options_deadline_does_not_send_late_success",
-      "duration_s": 20.024
+      "duration_s": 20.025
     },
     {
       "source": "unit-scripts-tooling-debt-governance.xml",
       "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing",
-      "duration_s": 17.203
+      "duration_s": 17.777
     },
     {
       "source": "integration.xml",
       "test": "tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline::test_chembl_target_component_happy_path",
-      "duration_s": 11.181
+      "duration_s": 10.951
     },
     {
       "source": "integration.xml",
       "test": "tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path",
-      "duration_s": 11.147
+      "duration_s": 10.923
     },
     {
       "source": "integration.xml",
       "test": "tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_source_fields",
-      "duration_s": 10.756
+      "duration_s": 10.59
     },
     {
       "source": "integration.xml",
       "test": "tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_happy_path",
-      "duration_s": 10.613
-    },
-    {
-      "source": "integration.xml",
-      "test": "tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline::test_chembl_compound_record_happy_path",
-      "duration_s": 10.56
+      "duration_s": 10.561
     },
     {
       "source": "unit-scripts-tooling-debt-governance.xml",
       "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale",
-      "duration_s": 9.788
+      "duration_s": 10.546
     },
     {
       "source": "unit-scripts-tooling-debt-governance.xml",
       "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact",
-      "duration_s": 9.683
+      "duration_s": 10.52
     },
     {
-      "source": "unit-infrastructure.xml",
-      "test": "tests.unit.infrastructure.test_issue_10469_stream_a_infra_thirteen.TestExemptionsDebtReductionAndFormatter::test_exemptions_policy_outside_src_and_required_registry_shapes",
-      "duration_s": 8.286
-    },
-    {
-      "source": "unit-scripts-tooling-other.xml",
-      "test": "tests.unit.scripts.qa.test_check_quality_exemptions::test_check_quality_exemptions_passes_current_zero_budget_registry",
-      "duration_s": 7.986
+      "source": "integration.xml",
+      "test": "tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline::test_chembl_compound_record_happy_path",
+      "duration_s": 10.499
     },
     {
       "source": "integration.xml",
       "test": "tests.integration.composite.test_assay_snapshot_merge_replay::test_assay_replay_compares_physical_production_outputs",
-      "duration_s": 7.917
+      "duration_s": 9.718
     },
     {
-      "source": "integration.xml",
-      "test": "tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts",
-      "duration_s": 7.411
+      "source": "unit-scripts-tooling-other.xml",
+      "test": "tests.unit.scripts.qa.test_check_quality_exemptions::test_check_quality_exemptions_passes_current_zero_budget_registry",
+      "duration_s": 8.492
     },
     {
-      "source": "unit-other.xml",
-      "test": "tests.unit.composition.test_registry_protocol.TestDataSourceCreatorHelper::test_provider_registry_has_list_keys",
-      "duration_s": 7.091
-    },
-    {
-      "source": "unit-scripts-tooling-passport.xml",
-      "test": "tests.unit.scripts.docs.passports.test_passport_projector::test_workflow_operations_are_classified",
-      "duration_s": 6.825
-    },
-    {
-      "source": "repo-backed-unit-product.xml",
-      "test": "tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures::test_cached_populated_isolated_registry_contains_pipeline_factories",
-      "duration_s": 6.324
+      "source": "unit-infrastructure.xml",
+      "test": "tests.unit.infrastructure.test_issue_10469_stream_a_infra_thirteen.TestExemptionsDebtReductionAndFormatter::test_exemptions_policy_outside_src_and_required_registry_shapes",
+      "duration_s": 8.139
     },
     {
       "source": "unit-other.xml",
       "test": "tests.unit.composition.factories.pipeline.test_registry::test_registry_completeness",
-      "duration_s": 6.133
+      "duration_s": 7.853
     },
     {
-      "source": "contract-confidence.xml",
-      "test": "tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]",
-      "duration_s": 6.056
+      "source": "integration.xml",
+      "test": "tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts",
+      "duration_s": 7.742
+    },
+    {
+      "source": "repo-backed-unit-product.xml",
+      "test": "tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures::test_cached_populated_isolated_registry_contains_pipeline_factories",
+      "duration_s": 7.281
+    },
+    {
+      "source": "unit-scripts-tooling-passport.xml",
+      "test": "tests.unit.scripts.docs.passports.test_passport_projector::test_workflow_operations_are_classified",
+      "duration_s": 6.291
+    },
+    {
+      "source": "unit-other.xml",
+      "test": "tests.unit.composition.bootstrap.test_runner_bootstrap.TestBootstrapPipelineRunnerServiceIntegration::test_bootstrapped_service_can_list_pipelines",
+      "duration_s": 6.142
     },
     {
       "source": "unit-scripts-tooling-other.xml",
@@ -232,96 +227,101 @@
       "duration_s": 6.005
     },
     {
-      "source": "smoke.xml",
-      "test": "tests.smoke.test_control_plane_rollout_smoke::test_control_plane_rollout_smoke_emits_artifacts_and_aggregate_metrics",
-      "duration_s": 5.31
-    },
-    {
       "source": "contract-confidence.xml",
-      "test": "tests.contract.test_gold_pk_consistency.TestGoldPkConsistency::test_pipeline_configs_use_new_pk_naming",
-      "duration_s": 4.974
+      "test": "tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]",
+      "duration_s": 5.947
     },
     {
       "source": "unit-scripts-tooling-other.xml",
       "test": "tests.unit.scripts.qa.test_generate_semantic_pipeline_audit::test_build_current_member_facts_exposes_composite_inherited_field_types",
-      "duration_s": 4.941
+      "duration_s": 5.245
     },
     {
-      "source": "repo-backed-unit-tooling.xml",
-      "test": "tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix::test_build_field_matrix_rows_covers_entity_profile_and_generic_rules",
-      "duration_s": 4.657
+      "source": "smoke.xml",
+      "test": "tests.smoke.test_control_plane_rollout_smoke::test_control_plane_rollout_smoke_emits_artifacts_and_aggregate_metrics",
+      "duration_s": 5.122
     },
     {
       "source": "integration.xml",
       "test": "tests.integration.test_runtime_metric_emission_consistency::test_critical_observability_metric_families_are_runtime_emitted",
-      "duration_s": 4.605
+      "duration_s": 5.116
     },
     {
-      "source": "security.xml",
-      "test": "tests.security.test_sql_injection_prevention.TestSQLInjectionPrevention::test_no_string_concatenation_in_sql_queries",
-      "duration_s": 4.604
+      "source": "contract-confidence.xml",
+      "test": "tests.contract.test_gold_pk_consistency.TestGoldPkConsistency::test_pipeline_configs_use_new_pk_naming",
+      "duration_s": 5.026
+    },
+    {
+      "source": "integration.xml",
+      "test": "tests.integration.composite.test_assay_snapshot_merge_replay::test_other_composite_families_replay_physical_outputs[target]",
+      "duration_s": 4.688
+    },
+    {
+      "source": "contract-confidence.xml",
+      "test": "tests.contract.test_normalization_cross_layer_contracts::test_profile_matrix_distinguishes_provider_universe_from_project_policy_scope",
+      "duration_s": 4.435
     }
   ],
   "top_slowest_zones": [
     {
       "zone": "tests.unit.scripts.qa.test_report_debt_governance_gates",
       "test_count": 3,
-      "total_duration_s": 36.674,
-      "max_duration_s": 17.203
+      "total_duration_s": 38.843,
+      "max_duration_s": 17.777
     },
     {
       "zone": "tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline",
       "test_count": 2,
-      "total_duration_s": 21.369,
-      "max_duration_s": 10.756
+      "total_duration_s": 21.151,
+      "max_duration_s": 10.59
     },
     {
       "zone": "tests.unit.interfaces.http.test_health_server_routing_pure_helpers",
       "test_count": 1,
-      "total_duration_s": 20.024,
-      "max_duration_s": 20.024
+      "total_duration_s": 20.025,
+      "max_duration_s": 20.025
+    },
+    {
+      "zone": "tests.integration.composite.test_assay_snapshot_merge_replay",
+      "test_count": 2,
+      "total_duration_s": 14.406,
+      "max_duration_s": 9.718
     },
     {
       "zone": "tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline",
       "test_count": 1,
-      "total_duration_s": 11.181,
-      "max_duration_s": 11.181
+      "total_duration_s": 10.951,
+      "max_duration_s": 10.951
     },
     {
       "zone": "tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline",
       "test_count": 1,
-      "total_duration_s": 11.147,
-      "max_duration_s": 11.147
+      "total_duration_s": 10.923,
+      "max_duration_s": 10.923
     },
     {
       "zone": "tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline",
       "test_count": 1,
-      "total_duration_s": 10.56,
-      "max_duration_s": 10.56
-    },
-    {
-      "zone": "tests.unit.infrastructure.test_issue_10469_stream_a_infra_thirteen.TestExemptionsDebtReductionAndFormatter",
-      "test_count": 1,
-      "total_duration_s": 8.286,
-      "max_duration_s": 8.286
+      "total_duration_s": 10.499,
+      "max_duration_s": 10.499
     },
     {
       "zone": "tests.unit.scripts.qa.test_check_quality_exemptions",
       "test_count": 1,
-      "total_duration_s": 7.986,
-      "max_duration_s": 7.986
+      "total_duration_s": 8.492,
+      "max_duration_s": 8.492
     },
     {
-      "zone": "tests.integration.composite.test_assay_snapshot_merge_replay",
+      "zone": "tests.unit.infrastructure.test_issue_10469_stream_a_infra_thirteen.TestExemptionsDebtReductionAndFormatter",
       "test_count": 1,
-      "total_duration_s": 7.917,
-      "max_duration_s": 7.917
+      "total_duration_s": 8.139,
+      "max_duration_s": 8.139
     },
     {
-      "zone": "tests.integration.ci.test_track_d_fixture_control_plane_linkage",
+      "zone": "tests.unit.composition.factories.pipeline.test_registry",
       "test_count": 1,
-      "total_duration_s": 7.411,
-      "max_duration_s": 7.411
+      "total_duration_s": 7.853,
+      "max_duration_s": 7.853
     }
   ],
   "execution_context": {
@@ -348,23 +348,23 @@
     "executed_count": 33138,
     "worker_mode": "canonical local 17-shard plan; per-shard command recorded",
     "junit_testcase_duration_sum_s": {
-      "smoke.xml": 14.649,
-      "contract-confidence.xml": 81.047,
-      "repo-backed-unit-product.xml": 18.607,
-      "repo-backed-unit-tooling.xml": 95.165,
-      "repo-backed-unit-ops.xml": 6.58,
-      "unit-scripts-tooling-passport.xml": 13.854,
-      "unit-scripts-tooling-debt-governance.xml": 41.315,
-      "unit-scripts-tooling-other.xml": 114.493,
-      "unit-filesystem-contracts.xml": 3.536,
-      "unit-subprocess-backed.xml": 0.273,
-      "unit-domain.xml": 159.87,
-      "unit-application.xml": 73.586,
-      "unit-infrastructure.xml": 86.923,
-      "unit-other.xml": 106.686,
-      "integration.xml": 249.684,
-      "security.xml": 18.735,
-      "serial.xml": 0.118
+      "smoke.xml": 13.578,
+      "contract-confidence.xml": 86.586,
+      "repo-backed-unit-product.xml": 21.964,
+      "repo-backed-unit-tooling.xml": 84.081,
+      "repo-backed-unit-ops.xml": 6.588,
+      "unit-scripts-tooling-passport.xml": 12.524,
+      "unit-scripts-tooling-debt-governance.xml": 44.128,
+      "unit-scripts-tooling-other.xml": 118.479,
+      "unit-filesystem-contracts.xml": 3.179,
+      "unit-subprocess-backed.xml": 0.194,
+      "unit-domain.xml": 158.944,
+      "unit-application.xml": 65.014,
+      "unit-infrastructure.xml": 86.919,
+      "unit-other.xml": 110.352,
+      "integration.xml": 250.8,
+      "security.xml": 12.439,
+      "serial.xml": 0.09
     },
     "explicit_exclusions": [
       {
@@ -390,23 +390,23 @@
     ],
     "skipped_count": 175,
     "lane_wall_time_s": {
-      "smoke": 21.6,
-      "contract-confidence": 97.18,
-      "repo-backed-unit-product": 37.22,
-      "repo-backed-unit-tooling": 108.0,
-      "repo-backed-unit-ops": 12.0,
-      "unit-scripts-tooling-passport": 18.3,
-      "unit-scripts-tooling-debt-governance": 44.59,
-      "unit-scripts-tooling-other": 134.64,
-      "unit-filesystem-contracts": 160.79,
-      "unit-subprocess-backed": 168.32,
-      "unit-domain": 124.74,
-      "unit-application": 101.83,
-      "unit-infrastructure": 73.61,
-      "unit-other": 86.79,
-      "integration": 282.36,
-      "security": 18.89,
-      "serial": 139.32
+      "smoke": 20.93,
+      "contract-confidence": 105.0,
+      "repo-backed-unit-product": 44.42,
+      "repo-backed-unit-tooling": 94.6,
+      "repo-backed-unit-ops": 12.06,
+      "unit-scripts-tooling-passport": 16.27,
+      "unit-scripts-tooling-debt-governance": 47.91,
+      "unit-scripts-tooling-other": 140.41,
+      "unit-filesystem-contracts": 165.01,
+      "unit-subprocess-backed": 115.02,
+      "unit-domain": 125.56,
+      "unit-application": 90.37,
+      "unit-infrastructure": 71.64,
+      "unit-other": 89.57,
+      "integration": 285.8,
+      "security": 12.41,
+      "serial": 108.35
     },
     "lane_wall_time_source": "producer_monotonic_clock"
   },
@@ -415,11 +415,11 @@
     "trust_tier": "local_single_host",
     "ci_status": "BLOCKED_EXTERNAL_PERMANENT",
     "complete": true,
-    "manifest_sha256": "e6b7196cc48c1be4fe45a93a0b3d8c4e1ea4dc03d4aef8f8af73845d9dedf5ea",
-    "coverage_xml_sha256": "200c5c13502d2f6f8c591151f85def2324b3da618b0dab69d23c7b6da84c06a2",
+    "manifest_sha256": "7cb6cd195038a4d8c40909dd32214bd72f669305a063ec3c8b549eab8c7b6ad5",
+    "coverage_xml_sha256": "2cee1b3c2dfdfe30ef708340773c26a1ad9f6bf96a3fce1818bcb4ab393cd2dc",
     "source_tree_sha256": "2f462961d6e80105c964f5d536a956def9a7b4c66af316bad70abfb0f6b226a1",
     "test_tree_sha256": "a1be027f03352d6ae870f2d54033c7adedf5bca49125905c67265c8158f98dd8",
-    "head": "a63090e110ecf290d7a4d5dc8d84e75e7307ab1a",
+    "head": "005a7dc6f77b792f6857b5880ca1af4cdbdd2adc",
     "required_shards": [
       "smoke",
       "contract-confidence",
@@ -439,127 +439,127 @@
       "security",
       "serial"
     ],
-    "started_at_utc": "2026-10-06T14:58:46.232494+00:00",
-    "finished_at_utc": "2026-10-06T14:59:22.731141+00:00",
+    "started_at_utc": "2026-10-06T15:38:28.571779+00:00",
+    "finished_at_utc": "2026-10-06T15:39:14.383123+00:00",
     "shards": [
       {
         "name": "smoke",
         "exit_code": 0,
-        "seconds": 21.6,
+        "seconds": 20.93,
         "coverage_sha256": "f48d6701ebfd75eaac0383b6b07ebd5984e8172b32490b6285ba24d40c9f18ff",
-        "junit_telemetry_sha256": "a08d6feb73d8df8daddd073231f830fda611a29dd0f49f8438755be75f75b1a9"
+        "junit_telemetry_sha256": "bf23c2c7ea4836667b210fc5721e51fcbfe680cd6b26fc31c4c9a6a57dc8b665"
       },
       {
         "name": "contract-confidence",
         "exit_code": 0,
-        "seconds": 97.18,
-        "coverage_sha256": "81bf9ccc313f4dd37212d16c5f65e813495b1cdf609f46432f7c86f9eeb3858c",
-        "junit_telemetry_sha256": "30e837ee39188ce9649254d2183aaca3a0de6f7bc6acf7e3d5bd5bf33877f9f9"
+        "seconds": 105.0,
+        "coverage_sha256": "ca77caf35b458b392a80c9e41c14bdb76724b1e030677c12db9ab1fe3dafa6da",
+        "junit_telemetry_sha256": "bb967fce1e09b98f38b8cd829e98ad1f7934d83dea6e1886382a350d63625739"
       },
       {
         "name": "repo-backed-unit-product",
         "exit_code": 0,
-        "seconds": 37.22,
+        "seconds": 44.42,
         "coverage_sha256": "7448ac5adee1126bb19c3387bc91b1a62dc997ceee75726e8e9cdcdb7e6e3273",
-        "junit_telemetry_sha256": "4d751523351bd7c157162ee31d14f169b78212d7222752a32e3c94fd4ed5be8a"
+        "junit_telemetry_sha256": "ed8224ee05fabc45af6b7de4a3fd449674b47e257b33e10fbde2d4e3db60f107"
       },
       {
         "name": "repo-backed-unit-tooling",
         "exit_code": 0,
-        "seconds": 108.0,
+        "seconds": 94.6,
         "coverage_sha256": "02bdf89a8ef8340bedf8dd57aa768a2351b439536ba40f0b27603d13f5373515",
-        "junit_telemetry_sha256": "2c41ad208d5ab0516c12b8844f34b7711ac267dc6c43a4ace5145579e1048685"
+        "junit_telemetry_sha256": "0d8118fdbe99c17172d9afc7efa5cb09158448bb9f69ae441b25b945669767ca"
       },
       {
         "name": "repo-backed-unit-ops",
         "exit_code": 0,
-        "seconds": 12.0,
+        "seconds": 12.06,
         "coverage_sha256": "2247d2d1b41167784eb4d9c6dc8b8d9f4265457b52d89e87104f84350d4d234e",
-        "junit_telemetry_sha256": "5fff10ed9e9b67b0bf04b5de91ac5e99949613a2df375ef1e724d8d0652b4f5a"
+        "junit_telemetry_sha256": "e9dddbf4313020c8e957c6a4e8b7a9e25f8720c9a0d0585f195135be5d695e7b"
       },
       {
         "name": "unit-scripts-tooling-passport",
         "exit_code": 0,
-        "seconds": 18.3,
-        "coverage_sha256": "78a6f4e23de4094a87f0d05a2c877a909f1c62c844ef698b1d5245849a04a6bd",
-        "junit_telemetry_sha256": "67cc66ecb0b1e98ec6ead74b4c652eb77769da3ef95691bfe6535a0229542150"
+        "seconds": 16.27,
+        "coverage_sha256": "74a262c1ac13a97f759f21ff8d22845508cdf10a9ec7bdc13897d79367fdf888",
+        "junit_telemetry_sha256": "f80d16ae80ab01760422c488e049ad8e48007aa142c047f4a0f0dff7338c2ae2"
       },
       {
         "name": "unit-scripts-tooling-debt-governance",
         "exit_code": 0,
-        "seconds": 44.59,
+        "seconds": 47.91,
         "coverage_sha256": "c370c28da87a671130d280cb81e0e0a37ea05ad1e1b1254528db91a222984f0e",
-        "junit_telemetry_sha256": "dd68d8a5a7cd3baa491b8de9ab57e2764d85c729813cf3b9acb1c24883840ad6"
+        "junit_telemetry_sha256": "02cab8c5603f66f83d665ff1436ae5b06e81d7f7fee96a03919b21a6e90b4e74"
       },
       {
         "name": "unit-scripts-tooling-other",
         "exit_code": 0,
-        "seconds": 134.64,
+        "seconds": 140.41,
         "coverage_sha256": "583eb1abee41547b56d1af1f43ab8c5b1de47a6862a4b17815e0ee6f4c07a34a",
-        "junit_telemetry_sha256": "19662f7f52362b1334635e279bf80536deae39e3ddcc5eb7993dd5e8275813a1"
+        "junit_telemetry_sha256": "1ceb451e6c458e95d2817d842564c5c9633f3be37e2d076e91e501510c091678"
       },
       {
         "name": "unit-filesystem-contracts",
         "exit_code": 0,
-        "seconds": 160.79,
+        "seconds": 165.01,
         "coverage_sha256": "28f8bbf3761da90f0df956d97a951764ea0e4afad9084b28577bc4ba15a318cb",
-        "junit_telemetry_sha256": "84865d6ff5271c5ed390958fc453a38fb08b64517af734566b8eac48c2c5134a"
+        "junit_telemetry_sha256": "6e4fa3dac3469773d14511e3b04eead5185997cae393e2fe6ae234d2d2a120b8"
       },
       {
         "name": "unit-subprocess-backed",
         "exit_code": 0,
-        "seconds": 168.32,
+        "seconds": 115.02,
         "coverage_sha256": "4fa64052377b6d56056bd2c40a0c8ce6ada9365a91adbbf4e93ae6200ac3e0e0",
-        "junit_telemetry_sha256": "e1363776735de777329f8863fe61b6253b03f7b1cc3772ea3a57e320a47999ed"
+        "junit_telemetry_sha256": "d3362c84c822a4bb18b78c00b1ef6584c9377f96c579612ef09092e6e22c5ede"
       },
       {
         "name": "unit-domain",
         "exit_code": 0,
-        "seconds": 124.74,
-        "coverage_sha256": "4341dce41a343a2e98f6e8dfb709c5598fa06784de5e065a92725e3923bec8bb",
-        "junit_telemetry_sha256": "53acb240b06c848ba572498c525fc703149a14503f2abd0356109284faefa815"
+        "seconds": 125.56,
+        "coverage_sha256": "f370b0a66eff87ef90779029cd3ebef497951468a25dfa274e192ef4ca5786e3",
+        "junit_telemetry_sha256": "b22b60345092a3097de6e5b917d9f1061a42f9289f68bcf435554305cc210232"
       },
       {
         "name": "unit-application",
         "exit_code": 0,
-        "seconds": 101.83,
-        "coverage_sha256": "65ff628c78ae781a27330171cc42673fe500c311eaf1b7eaed61d279ee8d29cf",
-        "junit_telemetry_sha256": "01060bf735494084c4c0fb0818ea1945f05c58d54ffb428caef91ed6e83e628a"
+        "seconds": 90.37,
+        "coverage_sha256": "b90f03b5da8dc1e5e504026cebf78d65b624cda03f65420b0947630f0bc17334",
+        "junit_telemetry_sha256": "c2137067b5ed3c868704166bdbf6fbcf261eb0b3a4a68bea67fb4915543c6d55"
       },
       {
         "name": "unit-infrastructure",
         "exit_code": 0,
-        "seconds": 73.61,
-        "coverage_sha256": "8a6625286d01a123241a91c3612b2ade9b6aab95f18b020d669c0d6d831b1f3b",
-        "junit_telemetry_sha256": "dfb370b2759bba9f7f0be3d7f1efbe63c56dc59727db0110dd99c60ec522ce7e"
+        "seconds": 71.64,
+        "coverage_sha256": "c0bcdacb2aa320575c4a469b1aebfdd5a04f1b5616d93d313ca3b93a4fad1c0d",
+        "junit_telemetry_sha256": "e0b70dfc0dfbf563823fa410c803796752c1566760a7c005b660e02405b347da"
       },
       {
         "name": "unit-other",
         "exit_code": 0,
-        "seconds": 86.79,
-        "coverage_sha256": "7aef94813d8f759d7644f58e903512d38c51d2105e832a660eda20f115ae8129",
-        "junit_telemetry_sha256": "ed1a34e9837a334429b0f754a584fbb9cd797aa8d84114f710b31983ebe9e74f"
+        "seconds": 89.57,
+        "coverage_sha256": "b387dada3739f023faa7e5af822d57eacc361f99646a8474bec6b3431b226ca7",
+        "junit_telemetry_sha256": "f4a542d1a1e1cedf18aaabbcc26f63a5515406571d31dc5477a8839d66df246f"
       },
       {
         "name": "integration",
         "exit_code": 0,
-        "seconds": 282.36,
-        "coverage_sha256": "5fdd4b53673d9118e0a7d8c7a563ed2ad3223244fa7b0a5b1212275a20daae47",
-        "junit_telemetry_sha256": "fa5793d8716a68b1b696228411de658f10dfc2b648da4fdde94f5d0fddcebb2e"
+        "seconds": 285.8,
+        "coverage_sha256": "b11d24e977c742e147c1195372f974de6a21c0ead513be0a270ab04b8eabdeda",
+        "junit_telemetry_sha256": "77011d9bb8fa2bfba9b05754209e55a7f38d48f9722a9ff9224f98cd9b870d02"
       },
       {
         "name": "security",
         "exit_code": 0,
-        "seconds": 18.89,
-        "coverage_sha256": "ce349f20eeb75c7e919e64be3f75ddc05063bbd52c6ad4c47c7c73ce09d39c0f",
-        "junit_telemetry_sha256": "46ed2de4e138daa46dc591dfe85b86fe437be0adef6cd345202f54e32b907bae"
+        "seconds": 12.41,
+        "coverage_sha256": "2a410f4651904fa2378229f7c4f9028824d7428f512c6a95bc9a8d1553d7dbbf",
+        "junit_telemetry_sha256": "5ce49a4c317a3fb206cb07af3347bb35af5a621c8e110d34b5fddfbb4f6874dc"
       },
       {
         "name": "serial",
         "exit_code": 0,
-        "seconds": 139.32,
+        "seconds": 108.35,
         "coverage_sha256": "c73f072a5bd2ef642d7612ab11e3c03f0173a92cb8d850454238ef8dc1a58676",
-        "junit_telemetry_sha256": "ba54586def807567b2798a30dac4b5f1459d95178e112cf62e5814f32114abef"
+        "junit_telemetry_sha256": "2fe5cc0598208cb7ac1019d499da137d1113bd88033e53829dc9b602593223ec"
       }
     ]
   }
