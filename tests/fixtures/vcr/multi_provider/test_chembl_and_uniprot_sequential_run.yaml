@@ -2,39 +2,37 @@ interactions:
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/status
   response:
     body:
-      string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date":
-        "2025-07-28", "compound_records": 3774137, "disinct_compounds": 2878135, "publications":
-        99142, "status": "UP", "targets": 17803}'
+      string: '{"activities": 24527044, "chembl_db_version": "ChEMBL_37", "chembl_release_date": "2026-05-01", "compound_records": 3824604, "disinct_compounds": 2921148, "publications": 101100, "status": "UP", "targets": 18552}'
     headers:
-      Cache-Control:
+      cache-control:
       - max-age=30000000, s-maxage=30000000
-      Connection:
+      connection:
       - Keep-Alive
-      Content-Length:
-      - '211'
-      Content-Type:
+      content-length:
+      - '212'
+      content-type:
       - application/json
-      Date:
-      - Fri, 13 Feb 2026 06:35:59 GMT
-      Server:
+      date:
+      - Tue, 06 Oct 2026 06:29:31 GMT
+      server:
       - gunicorn/20.0.4
-      Strict-Transport-Security:
-      - max-age=0
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - Accept, Origin
     status:
       code: 200
@@ -42,605 +40,261 @@ interactions:
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/target?format=json&limit=3&offset=0&organism__isnull=false&target_type=SINGLE+PROTEIN&tax_id__isnull=false
+    uri: https://www.ebi.ac.uk/chembl/api/data/target?format=json&limit=3&offset=0&target_type=SINGLE+PROTEIN&organism__isnull=false&tax_id__isnull=false
   response:
     body:
-      string: '{"page_meta": {"limit": 3, "next": "/chembl/api/data/target.json?limit=3&offset=3&target_type=SINGLE+PROTEIN&organism__isnull=false&tax_id__isnull=false",
-        "offset": 0, "previous": null, "total_count": 10962}, "targets": [{"cross_references":
-        [], "organism": "Homo sapiens", "pref_name": "Maltase-glucoamylase", "species_group_flag":
-        false, "target_chembl_id": "CHEMBL2074", "target_components": [{"accession":
-        "O43451", "component_description": "Maltase-glucoamylase", "component_id":
-        434, "component_type": "PROTEIN", "relationship": "SINGLE PROTEIN", "target_component_synonyms":
-        [{"component_synonym": "3.2.1.20", "syn_type": "EC_NUMBER"}, {"component_synonym":
-        "Alpha-1,4-glucosidase", "syn_type": "UNIPROT"}, {"component_synonym": "Maltase-glucoamylase",
-        "syn_type": "UNIPROT"}, {"component_synonym": "MGA", "syn_type": "GENE_SYMBOL_OTHER"},
-        {"component_synonym": "MGAM", "syn_type": "GENE_SYMBOL"}, {"component_synonym":
-        "MGAML", "syn_type": "GENE_SYMBOL_OTHER"}, {"component_synonym": "Synonyms=MGA",
-        "syn_type": "GENE_SYMBOL_OTHER"}], "target_component_xrefs": [{"xref_id":
-        "O43451", "xref_name": null, "xref_src_db": "AlphaFoldDB"}, {"xref_id": "O43451",
-        "xref_name": null, "xref_src_db": "ExpressionAtlas"}, {"xref_id": "GO:0005886",
-        "xref_name": "plasma membrane", "xref_src_db": "GoComponent"}, {"xref_id":
-        "GO:0016324", "xref_name": "apical plasma membrane", "xref_src_db": "GoComponent"},
-        {"xref_id": "GO:0070062", "xref_name": "extracellular exosome", "xref_src_db":
-        "GoComponent"}, {"xref_id": "GO:0070821", "xref_name": "tertiary granule membrane",
-        "xref_src_db": "GoComponent"}, {"xref_id": "GO:0101003", "xref_name": "ficolin-1-rich
-        granule membrane", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0003824",
-        "xref_name": "catalytic activity", "xref_src_db": "GoFunction"}, {"xref_id":
-        "GO:0004339", "xref_name": "glucan 1,4-alpha-glucosidase activity", "xref_src_db":
-        "GoFunction"}, {"xref_id": "GO:0004553", "xref_name": "hydrolase activity,
-        hydrolyzing O-glycosyl compounds", "xref_src_db": "GoFunction"}, {"xref_id":
-        "GO:0004558", "xref_name": "alpha-1,4-glucosidase activity", "xref_src_db":
-        "GoFunction"}, {"xref_id": "GO:0004574", "xref_name": "oligo-1,6-glucosidase
-        activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0005515", "xref_name":
-        "protein binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0016160",
-        "xref_name": "amylase activity", "xref_src_db": "GoFunction"}, {"xref_id":
-        "GO:0016798", "xref_name": "hydrolase activity, acting on glycosyl bonds",
-        "xref_src_db": "GoFunction"}, {"xref_id": "GO:0030246", "xref_name": "carbohydrate
-        binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0090599", "xref_name":
-        "alpha-glucosidase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0000025",
-        "xref_name": "maltose catabolic process", "xref_src_db": "GoProcess"}, {"xref_id":
-        "GO:0005975", "xref_name": "carbohydrate metabolic process", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:0005983", "xref_name": "starch catabolic process",
-        "xref_src_db": "GoProcess"}, {"xref_id": "GO:1901027", "xref_name": "dextrin
-        catabolic process", "xref_src_db": "GoProcess"}, {"xref_id": "HGNC:7043",
-        "xref_name": "MGAM", "xref_src_db": "HGNC"}, {"xref_id": "O43451", "xref_name":
-        null, "xref_src_db": "IntAct"}, {"xref_id": "IPR000322", "xref_name": "Glyco_hydro_31_TIM",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR000519", "xref_name": "P_trefoil_dom",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR011013", "xref_name": "Gal_mutarotase_sf_dom",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR013780", "xref_name": "Glyco_hydro_b",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR017853", "xref_name": "Glycoside_hydrolase_SF",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR017957", "xref_name": "P_trefoil_CS",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR025887", "xref_name": "Glyco_hydro_31_N_dom",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR030458", "xref_name": "Glyco_hydro_31_AS",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR030459", "xref_name": "Glyco_hydro_31_CS",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR044913", "xref_name": "P_trefoil_dom_sf",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR048395", "xref_name": "Glyco_hydro_31_C",
-        "xref_src_db": "InterPro"}, {"xref_id": "PTHR22762", "xref_name": "ALPHA-GLUCOSIDASE",
-        "xref_src_db": "PANTHER"}, {"xref_id": "PTHR22762:SF133", "xref_name": "P-TYPE
-        DOMAIN-CONTAINING PROTEIN", "xref_src_db": "PANTHER"}, {"xref_id": "2QLY",
-        "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "2QMJ", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "3CTT", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "3L4T", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "3L4U", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4V", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "3L4W", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "3L4X", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "3L4Y", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4Z", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "3TON", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "3TOP", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "2QLY", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "2QMJ", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "3CTT", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "3L4T", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "3L4U", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4V", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4W", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "3L4X", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "3L4Y", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4Z", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "3TON", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "3TOP", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "PF00088", "xref_name": "Trefoil", "xref_src_db": "Pfam"}, {"xref_id": "PF01055",
-        "xref_name": "Glyco_hydro_31_2nd", "xref_src_db": "Pfam"}, {"xref_id": "PF13802",
-        "xref_name": "Gal_mutarotas_2", "xref_src_db": "Pfam"}, {"xref_id": "PF21365",
-        "xref_name": "Glyco_hydro_31_3rd", "xref_src_db": "Pfam"}, {"xref_id": "PA30778",
-        "xref_name": "maltase-glucoamylase", "xref_src_db": "PharmGKB"}, {"xref_id":
-        "O43451", "xref_name": null, "xref_src_db": "Pharos"}, {"xref_id": "R-HSA-189085",
-        "xref_name": "Digestion of dietary carbohydrate", "xref_src_db": "Reactome"},
-        {"xref_id": "R-HSA-6798695", "xref_name": "Neutrophil degranulation", "xref_src_db":
-        "Reactome"}, {"xref_id": "E7ER45", "xref_name": "Maltase-glucoamylase", "xref_src_db":
-        "UniProt"}, {"xref_id": "O43451", "xref_name": "Maltase-glucoamylase", "xref_src_db":
-        "UniProt"}, {"xref_id": "Q0VAX6", "xref_name": "Maltase-glucoamylase", "xref_src_db":
-        "UniProt"}, {"xref_id": "Q75ME7", "xref_name": "Maltase-glucoamylase", "xref_src_db":
-        "UniProt"}, {"xref_id": "Q86UM5", "xref_name": "Maltase-glucoamylase", "xref_src_db":
-        "UniProt"}]}], "target_type": "SINGLE PROTEIN", "tax_id": 9606}, {"cross_references":
-        [], "organism": "Homo sapiens", "pref_name": "ATP-binding cassette sub-family
-        C member 9", "species_group_flag": false, "target_chembl_id": "CHEMBL1971",
-        "target_components": [{"accession": "O60706", "component_description": "ATP-binding
-        cassette sub-family C member 9", "component_id": 294, "component_type": "PROTEIN",
-        "relationship": "SINGLE PROTEIN", "target_component_synonyms": [{"component_synonym":
-        "ABCC9", "syn_type": "GENE_SYMBOL"}, {"component_synonym": "ATP-binding cassette
-        sub-family C member 9", "syn_type": "UNIPROT"}, {"component_synonym": "Sulfonylurea
-        receptor 2", "syn_type": "UNIPROT"}, {"component_synonym": "SUR2", "syn_type":
-        "GENE_SYMBOL_OTHER"}], "target_component_xrefs": [{"xref_id": "O60706", "xref_name":
-        null, "xref_src_db": "AlphaFoldDB"}, {"xref_id": "O60706", "xref_name": null,
-        "xref_src_db": "ExpressionAtlas"}, {"xref_id": "GO:0005737", "xref_name":
-        "cytoplasm", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0005739", "xref_name":
-        "mitochondrion", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0005886",
-        "xref_name": "plasma membrane", "xref_src_db": "GoComponent"}, {"xref_id":
-        "GO:0008282", "xref_name": "inward rectifying potassium channel", "xref_src_db":
-        "GoComponent"}, {"xref_id": "GO:0016020", "xref_name": "membrane", "xref_src_db":
-        "GoComponent"}, {"xref_id": "GO:0030017", "xref_name": "sarcomere", "xref_src_db":
-        "GoComponent"}, {"xref_id": "GO:0031004", "xref_name": "potassium ion-transporting
-        ATPase complex", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0032991",
-        "xref_name": "protein-containing complex", "xref_src_db": "GoComponent"},
-        {"xref_id": "GO:0042383", "xref_name": "sarcolemma", "xref_src_db": "GoComponent"},
-        {"xref_id": "GO:0005267", "xref_name": "potassium channel activity", "xref_src_db":
-        "GoFunction"}, {"xref_id": "GO:0005524", "xref_name": "ATP binding", "xref_src_db":
-        "GoFunction"}, {"xref_id": "GO:0008281", "xref_name": "sulfonylurea receptor
-        activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0015272", "xref_name":
-        "ATP-activated inward rectifier potassium channel activity", "xref_src_db":
-        "GoFunction"}, {"xref_id": "GO:0016887", "xref_name": "ATP hydrolysis activity",
-        "xref_src_db": "GoFunction"}, {"xref_id": "GO:0019829", "xref_name": "ATPase-coupled
-        monoatomic cation transmembrane transporter activity", "xref_src_db": "GoFunction"},
-        {"xref_id": "GO:0042626", "xref_name": "ATPase-coupled transmembrane transporter
-        activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0043225", "xref_name":
-        "ATPase-coupled inorganic anion transmembrane transporter activity", "xref_src_db":
-        "GoFunction"}, {"xref_id": "GO:0044325", "xref_name": "transmembrane transporter
-        binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0140359", "xref_name":
-        "ABC-type transporter activity", "xref_src_db": "GoFunction"}, {"xref_id":
-        "GO:0000165", "xref_name": "MAPK cascade", "xref_src_db": "GoProcess"}, {"xref_id":
-        "GO:0001508", "xref_name": "action potential", "xref_src_db": "GoProcess"},
-        {"xref_id": "GO:0001568", "xref_name": "blood vessel development", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:0001666", "xref_name": "response to hypoxia",
-        "xref_src_db": "GoProcess"}, {"xref_id": "GO:0003007", "xref_name": "heart
-        morphogenesis", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0003018", "xref_name":
-        "vascular process in circulatory system", "xref_src_db": "GoProcess"}, {"xref_id":
-        "GO:0006813", "xref_name": "potassium ion transport", "xref_src_db": "GoProcess"},
-        {"xref_id": "GO:0006950", "xref_name": "response to stress", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:0007005", "xref_name": "mitochondrion organization",
-        "xref_src_db": "GoProcess"}, {"xref_id": "GO:0007507", "xref_name": "heart
-        development", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0007519", "xref_name":
-        "skeletal muscle tissue development", "xref_src_db": "GoProcess"}, {"xref_id":
-        "GO:0008015", "xref_name": "blood circulation", "xref_src_db": "GoProcess"},
-        {"xref_id": "GO:0008217", "xref_name": "regulation of blood pressure", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:0019395", "xref_name": "fatty acid oxidation",
-        "xref_src_db": "GoProcess"}, {"xref_id": "GO:0035865", "xref_name": "cellular
-        response to potassium ion", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0042311",
-        "xref_name": "vasodilation", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0042391",
-        "xref_name": "regulation of membrane potential", "xref_src_db": "GoProcess"},
-        {"xref_id": "GO:0042542", "xref_name": "response to hydrogen peroxide", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:0043066", "xref_name": "negative regulation
-        of apoptotic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0045333",
-        "xref_name": "cellular respiration", "xref_src_db": "GoProcess"}, {"xref_id":
-        "GO:0045776", "xref_name": "negative regulation of blood pressure", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:0046034", "xref_name": "ATP metabolic process",
-        "xref_src_db": "GoProcess"}, {"xref_id": "GO:0048144", "xref_name": "fibroblast
-        proliferation", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0055085", "xref_name":
-        "transmembrane transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0060976",
-        "xref_name": "coronary vasculature development", "xref_src_db": "GoProcess"},
-        {"xref_id": "GO:0061337", "xref_name": "cardiac conduction", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:0062197", "xref_name": "cellular response to
-        chemical stress", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0071277", "xref_name":
-        "cellular response to calcium ion", "xref_src_db": "GoProcess"}, {"xref_id":
-        "GO:0071318", "xref_name": "cellular response to ATP", "xref_src_db": "GoProcess"},
-        {"xref_id": "GO:0071466", "xref_name": "cellular response to xenobiotic stimulus",
-        "xref_src_db": "GoProcess"}, {"xref_id": "GO:0071805", "xref_name": "potassium
-        ion transmembrane transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0072359",
-        "xref_name": "circulatory system development", "xref_src_db": "GoProcess"},
-        {"xref_id": "GO:0072592", "xref_name": "oxygen metabolic process", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:0086003", "xref_name": "cardiac muscle cell
-        contraction", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0097746", "xref_name":
-        "blood vessel diameter maintenance", "xref_src_db": "GoProcess"}, {"xref_id":
-        "GO:0098655", "xref_name": "monoatomic cation transmembrane transport", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:0098656", "xref_name": "monoatomic anion transmembrane
-        transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0098662", "xref_name":
-        "inorganic cation transmembrane transport", "xref_src_db": "GoProcess"}, {"xref_id":
-        "GO:0150104", "xref_name": "transport across blood-brain barrier", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:1901379", "xref_name": "regulation of potassium
-        ion transmembrane transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:1903409",
-        "xref_name": "reactive oxygen species biosynthetic process", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:1990573", "xref_name": "potassium ion import
-        across plasma membrane", "xref_src_db": "GoProcess"}, {"xref_id": "HGNC:60",
-        "xref_name": "ABCC9", "xref_src_db": "HGNC"}, {"xref_id": "O60706", "xref_name":
-        null, "xref_src_db": "IntAct"}, {"xref_id": "IPR000388", "xref_name": "ABCC8/9",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR001475", "xref_name": "ABCC9",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR003439", "xref_name": "ABC_transporter-like_ATP-bd",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR003593", "xref_name": "AAA+_ATPase",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR011527", "xref_name": "ABC1_TM_dom",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR017871", "xref_name": "ABC_transporter-like_CS",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR027417", "xref_name": "P-loop_NTPase",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR036640", "xref_name": "ABC1_TM_sf",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR047080", "xref_name": "ABCC9_ATP-bd_dom1",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR050173", "xref_name": "ABC_transporter_C-like",
-        "xref_src_db": "InterPro"}, {"xref_id": "PTHR24223", "xref_name": "ATP-BINDING
-        CASSETTE SUB-FAMILY C", "xref_src_db": "PANTHER"}, {"xref_id": "PTHR24223:SF173",
-        "xref_name": "ATP-BINDING CASSETTE SUB-FAMILY C MEMBER 9", "xref_src_db":
-        "PANTHER"}, {"xref_id": "PF00005", "xref_name": "ABC_tran", "xref_src_db":
-        "Pfam"}, {"xref_id": "PF00664", "xref_name": "ABC_membrane", "xref_src_db":
-        "Pfam"}, {"xref_id": "PA396", "xref_name": "ATP binding cassette subfamily
-        C member 9", "xref_src_db": "PharmGKB"}, {"xref_id": "O60706", "xref_name":
-        null, "xref_src_db": "Pharos"}, {"xref_id": "R-HSA-1296025", "xref_name":
-        "ATP sensitive Potassium channels", "xref_src_db": "Reactome"}, {"xref_id":
-        "R-HSA-382556", "xref_name": "ABC-family proteins mediated transport", "xref_src_db":
-        "Reactome"}, {"xref_id": "R-HSA-5578775", "xref_name": "Ion homeostasis",
-        "xref_src_db": "Reactome"}, {"xref_id": "R-HSA-5678420", "xref_name": "Defective
-        ABCC9 causes CMD10, ATFB12 and Cantu syndrome", "xref_src_db": "Reactome"},
-        {"xref_id": "O60706", "xref_name": "ATP-binding cassette sub-family C member
-        9", "xref_src_db": "UniProt"}, {"xref_id": "O60707", "xref_name": "ATP-binding
-        cassette sub-family C member 9", "xref_src_db": "UniProt"}]}], "target_type":
-        "SINGLE PROTEIN", "tax_id": 9606}, {"cross_references": [], "organism": "Homo
-        sapiens", "pref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "species_group_flag":
-        false, "target_chembl_id": "CHEMBL1827", "target_components": [{"accession":
-        "O76074", "component_description": "cGMP-specific 3'',5''-cyclic phosphodiesterase",
-        "component_id": 124, "component_type": "PROTEIN", "relationship": "SINGLE
-        PROTEIN", "target_component_synonyms": [{"component_synonym": "3.1.4.35",
-        "syn_type": "EC_NUMBER"}, {"component_synonym": "CGB-PDE", "syn_type": "UNIPROT"},
-        {"component_synonym": "cGMP-binding cGMP-specific phosphodiesterase", "syn_type":
-        "UNIPROT"}, {"component_synonym": "cGMP-specific 3'',5''-cyclic phosphodiesterase",
-        "syn_type": "UNIPROT"}, {"component_synonym": "PDE5", "syn_type": "GENE_SYMBOL_OTHER"},
-        {"component_synonym": "PDE5A", "syn_type": "GENE_SYMBOL"}], "target_component_xrefs":
-        [{"xref_id": "O76074", "xref_name": null, "xref_src_db": "AlphaFoldDB"}, {"xref_id":
-        "O76074", "xref_name": null, "xref_src_db": "ExpressionAtlas"}, {"xref_id":
-        "GO:0005829", "xref_name": "cytosol", "xref_src_db": "GoComponent"}, {"xref_id":
-        "GO:0004112", "xref_name": "cyclic-nucleotide phosphodiesterase activity",
-        "xref_src_db": "GoFunction"}, {"xref_id": "GO:0004114", "xref_name": "3'',5''-cyclic-nucleotide
-        phosphodiesterase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0004115",
-        "xref_name": "3'',5''-cyclic-AMP phosphodiesterase activity", "xref_src_db":
-        "GoFunction"}, {"xref_id": "GO:0004117", "xref_name": "calmodulin-activated
-        dual specificity 3'',5''-cyclic-GMP, 3'',5''-cyclic-AMP phosphodiesterase
-        activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0005515", "xref_name":
-        "protein binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0016787",
-        "xref_name": "hydrolase activity", "xref_src_db": "GoFunction"}, {"xref_id":
-        "GO:0030553", "xref_name": "cGMP binding", "xref_src_db": "GoFunction"}, {"xref_id":
-        "GO:0046872", "xref_name": "metal ion binding", "xref_src_db": "GoFunction"},
-        {"xref_id": "GO:0047555", "xref_name": "3'',5''-cyclic-GMP phosphodiesterase
-        activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0048101", "xref_name":
-        "calmodulin-activated 3'',5''-cyclic-GMP phosphodiesterase activity", "xref_src_db":
-        "GoFunction"}, {"xref_id": "GO:0007165", "xref_name": "signal transduction",
-        "xref_src_db": "GoProcess"}, {"xref_id": "GO:0010613", "xref_name": "positive
-        regulation of cardiac muscle hypertrophy", "xref_src_db": "GoProcess"}, {"xref_id":
-        "GO:0010749", "xref_name": "regulation of nitric oxide mediated signal transduction",
-        "xref_src_db": "GoProcess"}, {"xref_id": "GO:0019933", "xref_name": "cAMP-mediated
-        signaling", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0042098", "xref_name":
-        "T cell proliferation", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0042130",
-        "xref_name": "negative regulation of T cell proliferation", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:0046068", "xref_name": "cGMP metabolic process",
-        "xref_src_db": "GoProcess"}, {"xref_id": "GO:0046069", "xref_name": "cGMP
-        catabolic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0048599",
-        "xref_name": "oocyte development", "xref_src_db": "GoProcess"}, {"xref_id":
-        "GO:0055118", "xref_name": "negative regulation of cardiac muscle contraction",
-        "xref_src_db": "GoProcess"}, {"xref_id": "GO:0060282", "xref_name": "positive
-        regulation of oocyte development", "xref_src_db": "GoProcess"}, {"xref_id":
-        "HGNC:8784", "xref_name": "PDE5A", "xref_src_db": "HGNC"}, {"xref_id": "O76074",
-        "xref_name": null, "xref_src_db": "IntAct"}, {"xref_id": "IPR002073", "xref_name":
-        "PDEase_catalytic_dom", "xref_src_db": "InterPro"}, {"xref_id": "IPR003018",
-        "xref_name": "GAF", "xref_src_db": "InterPro"}, {"xref_id": "IPR003607", "xref_name":
-        "HD/PDEase_dom", "xref_src_db": "InterPro"}, {"xref_id": "IPR023088", "xref_name":
-        "PDEase", "xref_src_db": "InterPro"}, {"xref_id": "IPR023174", "xref_name":
-        "PDEase_CS", "xref_src_db": "InterPro"}, {"xref_id": "IPR029016", "xref_name":
-        "GAF-like_dom_sf", "xref_src_db": "InterPro"}, {"xref_id": "IPR036971", "xref_name":
-        "PDEase_catalytic_dom_sf", "xref_src_db": "InterPro"}, {"xref_id": "PTHR11347",
-        "xref_name": "CYCLIC NUCLEOTIDE PHOSPHODIESTERASE", "xref_src_db": "PANTHER"},
-        {"xref_id": "1RKP", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "1T9R", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1T9S", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "1TBF", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "1UDT", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "1UDU", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1UHO", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "1XOZ", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "1XP0", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "2CHM", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "2H40", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "2H42", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "2H44", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "2XSS", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3B2R", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "3BJC", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "3HC8", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "3HDZ", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3JWQ", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "3JWR", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "3LFV", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "3MF0", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3SHY", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "3SHZ", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "3SIE", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "3TGE", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3TGG", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "4G2W", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "4G2Y", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "4I9Z", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "4IA0", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "4MD6", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "4OEW", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "4OEX", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "5JO3", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "5ZZ2", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "6ACB", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "6IWI", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "6L6E", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "6VBI", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "7FAQ", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "7FAR", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "8W4S", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "8W4T", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "8WKF", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "8WKG", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "8XWW", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "1RKP", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "1T9R", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "1T9S", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1TBF", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "1UDT", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "1UDU", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "1UHO", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1XOZ", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "1XP0", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "2CHM", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "2H40", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "2H42", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "2H44", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "2XSS", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "3B2R", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3BJC", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "3HC8", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "3HDZ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "3JWQ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3JWR", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "3LFV", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "3MF0", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "3SHY", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3SHZ", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "3SIE", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "3TGE", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "3TGG", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4G2W", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "4G2Y", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "4I9Z", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "4IA0", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4MD6", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "4OEW", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "4OEX", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "5JO3", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "5ZZ2", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "6ACB", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "6IWI", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "6L6E", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "6VBI", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "7FAQ", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "7FAR", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "8W4S", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "8W4T", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "8WKF", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "8WKG", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "8XWW", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "PF00233", "xref_name":
-        "PDEase_I", "xref_src_db": "Pfam"}, {"xref_id": "PF01590", "xref_name": "GAF",
-        "xref_src_db": "Pfam"}, {"xref_id": "PA33132", "xref_name": "phosphodiesterase
-        5A", "xref_src_db": "PharmGKB"}, {"xref_id": "O76074", "xref_name": null,
-        "xref_src_db": "Pharos"}, {"xref_id": "R-HSA-418457", "xref_name": "cGMP effects",
-        "xref_src_db": "Reactome"}, {"xref_id": "R-HSA-445355", "xref_name": "Smooth
-        Muscle Contraction", "xref_src_db": "Reactome"}, {"xref_id": "R-HSA-9013422",
-        "xref_name": "RHOBTB1 GTPase cycle", "xref_src_db": "Reactome"}, {"xref_id":
-        "A0AV69", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db":
-        "UniProt"}, {"xref_id": "A8K2C4", "xref_name": "cGMP-specific 3'',5''-cyclic
-        phosphodiesterase", "xref_src_db": "UniProt"}, {"xref_id": "O75026", "xref_name":
-        "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"},
-        {"xref_id": "O75887", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase",
-        "xref_src_db": "UniProt"}, {"xref_id": "O76074", "xref_name": "cGMP-specific
-        3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"}, {"xref_id":
-        "Q86UI0", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db":
-        "UniProt"}, {"xref_id": "Q86V66", "xref_name": "cGMP-specific 3'',5''-cyclic
-        phosphodiesterase", "xref_src_db": "UniProt"}, {"xref_id": "Q9Y6Z6", "xref_name":
-        "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"}]}],
-        "target_type": "SINGLE PROTEIN", "tax_id": 9606}]}'
+      string: '{"page_meta": {"limit": 3, "next": "/chembl/api/data/target.json?limit=3&offset=3&target_type=SINGLE+PROTEIN&organism__isnull=false&tax_id__isnull=false", "offset": 0, "previous": null, "total_count": 11055}, "targets": [{"cross_references": [], "organism": "Homo sapiens", "pref_name": "Maltase-glucoamylase", "species_group_flag": false, "target_chembl_id": "CHEMBL2074", "target_components": [{"accession": "O43451", "component_description": "Maltase-glucoamylase", "component_id": 434, "component_type": "PROTEIN", "relationship": "SINGLE PROTEIN", "target_component_synonyms": [{"component_synonym": "3.2.1.20", "syn_type": "EC_NUMBER"}, {"component_synonym": "Alpha-1,4-glucosidase", "syn_type": "UNIPROT"}, {"component_synonym": "Maltase-glucoamylase", "syn_type": "UNIPROT"}, {"component_synonym": "MGA", "syn_type": "GENE_SYMBOL_OTHER"}, {"component_synonym": "MGAM", "syn_type": "GENE_SYMBOL"}, {"component_synonym": "MGAML", "syn_type": "GENE_SYMBOL_OTHER"}, {"component_synonym": "Synonyms=MGA", "syn_type": "GENE_SYMBOL_OTHER"}], "target_component_xrefs": [{"xref_id": "O43451", "xref_name": null, "xref_src_db": "AlphaFoldDB"}, {"xref_id": "O43451", "xref_name": null, "xref_src_db": "ExpressionAtlas"}, {"xref_id": "GO:0005886", "xref_name": "plasma membrane", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0016324", "xref_name": "apical plasma membrane", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0070062", "xref_name": "extracellular exosome", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0070821", "xref_name": "tertiary granule membrane", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0101003", "xref_name": "ficolin-1-rich granule membrane", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0003824", "xref_name": "catalytic activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0004339", "xref_name": "glucan 1,4-alpha-glucosidase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0004553", "xref_name": "hydrolase activity, hydrolyzing O-glycosyl compounds", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0004558", "xref_name": "alpha-1,4-glucosidase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0004574", "xref_name": "oligo-1,6-glucosidase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0005515", "xref_name": "protein binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0016160", "xref_name": "amylase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0016798", "xref_name": "hydrolase activity, acting on glycosyl bonds", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0030246", "xref_name": "carbohydrate binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0090599", "xref_name": "alpha-glucosidase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0000025", "xref_name": "maltose catabolic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0005975", "xref_name": "carbohydrate metabolic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0005983", "xref_name": "starch catabolic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:1901027", "xref_name": "dextrin catabolic process", "xref_src_db": "GoProcess"}, {"xref_id": "HGNC:7043", "xref_name": "MGAM", "xref_src_db": "HGNC"}, {"xref_id": "O43451", "xref_name": null, "xref_src_db": "IntAct"}, {"xref_id": "IPR000322", "xref_name": "Glyco_hydro_31_TIM", "xref_src_db": "InterPro"}, {"xref_id": "IPR000519", "xref_name": "P_trefoil_dom", "xref_src_db": "InterPro"}, {"xref_id": "IPR011013", "xref_name": "Gal_mutarotase_sf_dom", "xref_src_db": "InterPro"}, {"xref_id": "IPR013780", "xref_name": "Glyco_hydro_b", "xref_src_db": "InterPro"}, {"xref_id": "IPR017853", "xref_name": "GH", "xref_src_db": "InterPro"}, {"xref_id": "IPR017957", "xref_name": "P_trefoil_CS", "xref_src_db": "InterPro"}, {"xref_id": "IPR025887", "xref_name": "Glyco_hydro_31_N_dom", "xref_src_db": "InterPro"}, {"xref_id": "IPR030458", "xref_name": "Glyco_hydro_31_AS", "xref_src_db": "InterPro"}, {"xref_id": "IPR030459", "xref_name": "Glyco_hydro_31_CS", "xref_src_db": "InterPro"}, {"xref_id": "IPR044913", "xref_name": "P_trefoil_dom_sf", "xref_src_db":
+        "InterPro"}, {"xref_id": "IPR048395", "xref_name": "Glyco_hydro_31_C", "xref_src_db": "InterPro"}, {"xref_id": "PTHR22762", "xref_name": "ALPHA-GLUCOSIDASE", "xref_src_db": "PANTHER"}, {"xref_id": "PTHR22762:SF63", "xref_name": "MALTASE-GLUCOAMYLASE", "xref_src_db": "PANTHER"}, {"xref_id": "2QLY", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "2QMJ", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3CTT", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4T", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4U", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4V", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4W", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4X", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4Y", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4Z", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3TON", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3TOP", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "2QLY", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "2QMJ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3CTT", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4T", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4U", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4V", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4W", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4X", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4Y", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4Z", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3TON", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3TOP", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "PF00088", "xref_name": "Trefoil", "xref_src_db": "Pfam"}, {"xref_id": "PF01055", "xref_name": "Glyco_hydro_31_2nd", "xref_src_db": "Pfam"}, {"xref_id": "PF13802", "xref_name": "Gal_mutarotas_2", "xref_src_db": "Pfam"}, {"xref_id": "PF21365", "xref_name": "Glyco_hydro_31_3rd", "xref_src_db": "Pfam"}, {"xref_id": "PA30778", "xref_name": "maltase-glucoamylase", "xref_src_db": "PharmGKB"}, {"xref_id": "O43451", "xref_name": null, "xref_src_db": "Pharos"}, {"xref_id": "R-HSA-189085", "xref_name": "Digestion of dietary carbohydrate", "xref_src_db": "Reactome"}, {"xref_id": "R-HSA-6798695", "xref_name": "Neutrophil degranulation", "xref_src_db": "Reactome"}, {"xref_id": "E7ER45", "xref_name": "Maltase-glucoamylase", "xref_src_db": "UniProt"}, {"xref_id": "O43451", "xref_name": "Maltase-glucoamylase", "xref_src_db": "UniProt"}, {"xref_id": "Q0VAX6", "xref_name": "Maltase-glucoamylase", "xref_src_db": "UniProt"}, {"xref_id": "Q75ME7", "xref_name": "Maltase-glucoamylase", "xref_src_db": "UniProt"}, {"xref_id": "Q86UM5", "xref_name": "Maltase-glucoamylase", "xref_src_db": "UniProt"}]}], "target_type": "SINGLE PROTEIN", "tax_id": 9606}, {"cross_references": [], "organism": "Homo sapiens", "pref_name": "ATP-binding cassette sub-family C member 9", "species_group_flag": false, "target_chembl_id": "CHEMBL1971", "target_components": [{"accession": "O60706", "component_description": "ATP-binding cassette sub-family C member 9", "component_id": 294, "component_type": "PROTEIN", "relationship": "SINGLE PROTEIN", "target_component_synonyms": [{"component_synonym": "ABCC9", "syn_type": "GENE_SYMBOL"}, {"component_synonym": "ATP-binding cassette sub-family C member 9", "syn_type": "UNIPROT"}, {"component_synonym": "Sulfonylurea receptor 2", "syn_type": "UNIPROT"}, {"component_synonym": "SUR2", "syn_type": "GENE_SYMBOL_OTHER"}], "target_component_xrefs": [{"xref_id": "O60706", "xref_name": null, "xref_src_db": "AlphaFoldDB"}, {"xref_id": "O60706", "xref_name": null, "xref_src_db": "ExpressionAtlas"}, {"xref_id": "GO:0005737", "xref_name": "cytoplasm", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0005739", "xref_name": "mitochondrion", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0005886", "xref_name": "plasma membrane", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0008282", "xref_name":
+        "inward rectifying potassium channel", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0016020", "xref_name": "membrane", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0030017", "xref_name": "sarcomere", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0031004", "xref_name": "potassium ion-transporting ATPase complex", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0032991", "xref_name": "protein-containing complex", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0042383", "xref_name": "sarcolemma", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0005267", "xref_name": "potassium channel activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0005524", "xref_name": "ATP binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0008281", "xref_name": "sulfonylurea receptor activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0015272", "xref_name": "ATP-activated inward rectifier potassium channel activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0016887", "xref_name": "ATP hydrolysis activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0019829", "xref_name": "ATPase-coupled monoatomic cation transmembrane transporter activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0042626", "xref_name": "ATPase-coupled transmembrane transporter activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0043225", "xref_name": "ATPase-coupled inorganic anion transmembrane transporter activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0044325", "xref_name": "transmembrane transporter binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0140359", "xref_name": "ABC-type transporter activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0000165", "xref_name": "MAPK cascade", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0001508", "xref_name": "action potential", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0001568", "xref_name": "blood vessel development", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0001666", "xref_name": "response to hypoxia", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0003007", "xref_name": "heart morphogenesis", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0003018", "xref_name": "vascular process in circulatory system", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0006813", "xref_name": "potassium ion transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0006950", "xref_name": "response to stress", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0007005", "xref_name": "mitochondrion organization", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0007507", "xref_name": "heart development", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0007519", "xref_name": "skeletal muscle tissue development", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0008015", "xref_name": "blood circulation", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0008217", "xref_name": "regulation of blood pressure", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0019395", "xref_name": "fatty acid oxidation", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0035865", "xref_name": "cellular response to potassium ion", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0042311", "xref_name": "vasodilation", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0042391", "xref_name": "regulation of membrane potential", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0042542", "xref_name": "response to hydrogen peroxide", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0043066", "xref_name": "negative regulation of apoptotic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0045333", "xref_name": "cellular respiration", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0045776", "xref_name": "negative regulation of blood pressure", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0046034", "xref_name": "ATP metabolic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0048144", "xref_name": "fibroblast proliferation", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0055085", "xref_name": "transmembrane transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0060976", "xref_name": "coronary vasculature development", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0061337",
+        "xref_name": "cardiac conduction", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0062197", "xref_name": "cellular response to chemical stress", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0071277", "xref_name": "cellular response to calcium ion", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0071318", "xref_name": "cellular response to ATP", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0071466", "xref_name": "cellular response to xenobiotic stimulus", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0071805", "xref_name": "potassium ion transmembrane transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0072359", "xref_name": "circulatory system development", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0072592", "xref_name": "oxygen metabolic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0086003", "xref_name": "cardiac muscle cell contraction", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0097746", "xref_name": "blood vessel diameter maintenance", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0098655", "xref_name": "monoatomic cation transmembrane transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0098656", "xref_name": "monoatomic anion transmembrane transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0098662", "xref_name": "inorganic cation transmembrane transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0150104", "xref_name": "transport across blood-brain barrier", "xref_src_db": "GoProcess"}, {"xref_id": "GO:1901379", "xref_name": "regulation of potassium ion transmembrane transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:1903409", "xref_name": "reactive oxygen species biosynthetic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:1990573", "xref_name": "potassium ion import across plasma membrane", "xref_src_db": "GoProcess"}, {"xref_id": "HGNC:60", "xref_name": "ABCC9", "xref_src_db": "HGNC"}, {"xref_id": "O60706", "xref_name": null, "xref_src_db": "IntAct"}, {"xref_id": "IPR000388", "xref_name": "ABCC8/9", "xref_src_db": "InterPro"}, {"xref_id": "IPR001475", "xref_name": "ABCC9", "xref_src_db": "InterPro"}, {"xref_id": "IPR003439", "xref_name": "ABC_transporter-like_ATP-bd", "xref_src_db": "InterPro"}, {"xref_id": "IPR003593", "xref_name": "AAA+_ATPase", "xref_src_db": "InterPro"}, {"xref_id": "IPR011527", "xref_name": "ABC1_TM_dom", "xref_src_db": "InterPro"}, {"xref_id": "IPR017871", "xref_name": "ABC_transporter-like_CS", "xref_src_db": "InterPro"}, {"xref_id": "IPR027417", "xref_name": "P-loop_NTPase", "xref_src_db": "InterPro"}, {"xref_id": "IPR036640", "xref_name": "ABC1_TM_sf", "xref_src_db": "InterPro"}, {"xref_id": "IPR047080", "xref_name": "ABCC9_ATP-bd_dom1", "xref_src_db": "InterPro"}, {"xref_id": "IPR050173", "xref_name": "ABC_transporter_C-like", "xref_src_db": "InterPro"}, {"xref_id": "PTHR24223", "xref_name": "ATP-BINDING CASSETTE SUB-FAMILY C", "xref_src_db": "PANTHER"}, {"xref_id": "PTHR24223:SF173", "xref_name": "ATP-BINDING CASSETTE SUB-FAMILY C MEMBER 9", "xref_src_db": "PANTHER"}, {"xref_id": "PF00005", "xref_name": "ABC_tran", "xref_src_db": "Pfam"}, {"xref_id": "PF00664", "xref_name": "ABC_membrane", "xref_src_db": "Pfam"}, {"xref_id": "PA396", "xref_name": "ATP binding cassette subfamily C member 9", "xref_src_db": "PharmGKB"}, {"xref_id": "O60706", "xref_name": null, "xref_src_db": "Pharos"}, {"xref_id": "R-HSA-1296025", "xref_name": "ATP sensitive Potassium channels", "xref_src_db": "Reactome"}, {"xref_id": "R-HSA-382556", "xref_name": "ABC-family proteins mediated transport", "xref_src_db": "Reactome"}, {"xref_id": "R-HSA-5578775", "xref_name": "Ion homeostasis", "xref_src_db": "Reactome"}, {"xref_id": "R-HSA-5678420", "xref_name": "Defective ABCC9 causes CMD10, ATFB12 and Cantu syndrome", "xref_src_db": "Reactome"}, {"xref_id": "O60706", "xref_name": "ATP-binding cassette sub-family C member 9", "xref_src_db": "UniProt"}, {"xref_id": "O60707", "xref_name": "ATP-binding cassette sub-family C member 9", "xref_src_db": "UniProt"}]}], "target_type": "SINGLE PROTEIN", "tax_id": 9606}, {"cross_references": [], "organism": "Homo sapiens", "pref_name":
+        "cGMP-specific 3'',5''-cyclic phosphodiesterase", "species_group_flag": false, "target_chembl_id": "CHEMBL1827", "target_components": [{"accession": "O76074", "component_description": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "component_id": 124, "component_type": "PROTEIN", "relationship": "SINGLE PROTEIN", "target_component_synonyms": [{"component_synonym": "3.1.4.35", "syn_type": "EC_NUMBER"}, {"component_synonym": "CGB-PDE", "syn_type": "UNIPROT"}, {"component_synonym": "cGMP-binding cGMP-specific phosphodiesterase", "syn_type": "UNIPROT"}, {"component_synonym": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "syn_type": "UNIPROT"}, {"component_synonym": "PDE5", "syn_type": "GENE_SYMBOL_OTHER"}, {"component_synonym": "PDE5A", "syn_type": "GENE_SYMBOL"}], "target_component_xrefs": [{"xref_id": "O76074", "xref_name": null, "xref_src_db": "AlphaFoldDB"}, {"xref_id": "O76074", "xref_name": null, "xref_src_db": "ExpressionAtlas"}, {"xref_id": "GO:0005829", "xref_name": "cytosol", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0004112", "xref_name": "cyclic-nucleotide phosphodiesterase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0004114", "xref_name": "3'',5''-cyclic-nucleotide phosphodiesterase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0004115", "xref_name": "3'',5''-cyclic-AMP phosphodiesterase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0004117", "xref_name": "calmodulin-activated dual specificity 3'',5''-cyclic-GMP, 3'',5''-cyclic-AMP phosphodiesterase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0005515", "xref_name": "protein binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0016787", "xref_name": "hydrolase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0030553", "xref_name": "cGMP binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0046872", "xref_name": "metal ion binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0047555", "xref_name": "3'',5''-cyclic-GMP phosphodiesterase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0048101", "xref_name": "calmodulin-activated 3'',5''-cyclic-GMP phosphodiesterase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0007165", "xref_name": "signal transduction", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0010613", "xref_name": "positive regulation of cardiac muscle hypertrophy", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0010749", "xref_name": "regulation of nitric oxide mediated signal transduction", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0019933", "xref_name": "cAMP-mediated signaling", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0042098", "xref_name": "T cell proliferation", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0042130", "xref_name": "negative regulation of T cell proliferation", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0046068", "xref_name": "cGMP metabolic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0046069", "xref_name": "cGMP catabolic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0048599", "xref_name": "oocyte development", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0055118", "xref_name": "negative regulation of cardiac muscle contraction", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0060282", "xref_name": "positive regulation of oocyte development", "xref_src_db": "GoProcess"}, {"xref_id": "HGNC:8784", "xref_name": "PDE5A", "xref_src_db": "HGNC"}, {"xref_id": "O76074", "xref_name": null, "xref_src_db": "IntAct"}, {"xref_id": "IPR002073", "xref_name": "PDEase_catalytic_dom", "xref_src_db": "InterPro"}, {"xref_id": "IPR003018", "xref_name": "GAF", "xref_src_db": "InterPro"}, {"xref_id": "IPR003607", "xref_name": "HD/PDEase_dom", "xref_src_db": "InterPro"}, {"xref_id": "IPR023088", "xref_name": "PDEase", "xref_src_db": "InterPro"}, {"xref_id": "IPR023174", "xref_name": "PDEase_CS", "xref_src_db": "InterPro"}, {"xref_id": "IPR029016", "xref_name": "GAF-like_dom_sf", "xref_src_db": "InterPro"}, {"xref_id": "IPR036971", "xref_name": "PDEase_catalytic_dom_sf", "xref_src_db": "InterPro"}, {"xref_id": "PTHR11347", "xref_name":
+        "CYCLIC NUCLEOTIDE PHOSPHODIESTERASE", "xref_src_db": "PANTHER"}, {"xref_id": "1RKP", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1T9R", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1T9S", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1TBF", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1UDT", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1UDU", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1UHO", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1XOZ", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1XP0", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "2CHM", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "2H40", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "2H42", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "2H44", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "2XSS", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3B2R", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3BJC", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3HC8", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3HDZ", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3JWQ", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3JWR", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3LFV", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3MF0", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3SHY", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3SHZ", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3SIE", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3TGE", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3TGG", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "4G2W", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "4G2Y", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "4I9Z", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "4IA0", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "4MD6", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "4OEW", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "4OEX", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "5JO3", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "5ZZ2", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "6ACB", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "6IWI", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "6L6E", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "6VBI", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "7FAQ", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "7FAR", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "8W4S", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "8W4T", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "8WKF", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "8WKG", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "8XWW", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "9LSL", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "9LSM", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1RKP", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1T9R", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1T9S", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1TBF", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1UDT", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1UDU", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1UHO", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1XOZ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1XP0", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "2CHM", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "2H40", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "2H42", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "2H44", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "2XSS", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3B2R", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3BJC", "xref_name": "A", "xref_src_db": "PDBe"},
+        {"xref_id": "3HC8", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3HDZ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3JWQ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3JWR", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3LFV", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3MF0", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3SHY", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3SHZ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3SIE", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3TGE", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3TGG", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4G2W", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4G2Y", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4I9Z", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4IA0", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4MD6", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4OEW", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4OEX", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "5JO3", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "5ZZ2", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "6ACB", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "6IWI", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "6L6E", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "6VBI", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "7FAQ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "7FAR", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "8W4S", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "8W4T", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "8WKF", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "8WKG", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "8XWW", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "9LSL", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "9LSM", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "PF00233", "xref_name": "PDEase_I", "xref_src_db": "Pfam"}, {"xref_id": "PF01590", "xref_name": "GAF", "xref_src_db": "Pfam"}, {"xref_id": "PA33132", "xref_name": "phosphodiesterase 5A", "xref_src_db": "PharmGKB"}, {"xref_id": "O76074", "xref_name": null, "xref_src_db": "Pharos"}, {"xref_id": "R-HSA-418457", "xref_name": "cGMP effects", "xref_src_db": "Reactome"}, {"xref_id": "R-HSA-445355", "xref_name": "Smooth Muscle Contraction", "xref_src_db": "Reactome"}, {"xref_id": "R-HSA-9013422", "xref_name": "RHOBTB1 GTPase cycle", "xref_src_db": "Reactome"}, {"xref_id": "A0AV69", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"}, {"xref_id": "A8K2C4", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"}, {"xref_id": "O75026", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"}, {"xref_id": "O75887", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"}, {"xref_id": "O76074", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"}, {"xref_id": "Q86UI0", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"}, {"xref_id": "Q86V66", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"}, {"xref_id": "Q9Y6Z6", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"}]}], "target_type": "SINGLE PROTEIN", "tax_id": 9606}]}'
     headers:
-      Cache-Control:
+      cache-control:
       - max-age=30000000, s-maxage=30000000
-      Connection:
+      connection:
       - Keep-Alive
-      Content-Disposition:
+      content-disposition:
       - inline
-      Content-Length:
-      - '27865'
-      Content-Type:
+      content-length:
+      - '28080'
+      content-type:
       - application/json
-      Date:
-      - Mon, 02 Mar 2026 05:02:29 GMT
-      Server:
+      date:
+      - Tue, 06 Oct 2026 06:24:41 GMT
+      server:
       - gunicorn/20.0.4
-      Strict-Transport-Security:
-      - max-age=0
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - Accept, Origin
-      X-ChEMBL-in-cache:
+      x-chembl-in-cache:
       - 'True'
-      X-ChEMBL-retrieval-time:
-      - '1.9558131694793701'
+      x-chembl-retrieval-time:
+      - '1.8913350105285645'
     status:
       code: 200
       message: OK
 - request:
     body: ''
     headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
+      accept:
+      - '*/*'
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - rest.uniprot.org
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
-    uri: https://rest.uniprot.org/uniprotkb/search?format=json&query=accession%3AP62988&size=1
+    uri: https://rest.uniprot.org/uniprotkb/search?query=accession%3AP62988&size=1&format=json
   response:
     body:
-      string: !!binary |
-        H4sIAAAAAAAA/1yOT4vCQAzFv0vOZSmL2Oqta4vbQ6Xrn9Miy3QMMqzOlEwqltLvbkZ7MpeE98h7
-        vwEIfXdhD8vfAdAy9fu+RVhCaZVmc0OIoCVzVdRnWqP3xllx6/nnIk3F66ypyfF/U55EPnyVP3/f
-        hyrbiKWsdaxYHnbakWTGH3EEZsrdovIhanhTpvq8qIrtusgl54p0xhyfa+8EFOp4tZ4lYj2PgBF4
-        ksV0pAkcxwjwzqQyZjJNx+hDVaBVpF+sdRm/Zr6awTg+AAAA//+KrQUAAAD//wMATytkaw0BAAA=
+      string: '{"results":[{"entryType":"Inactive","primaryAccession":"P62988","uniProtkbId":"UBIQ_HUMAN","annotationScore":0.0,"inactiveReason":{"inactiveReasonType":"DEMERGED","mergeDemergeTo":["P0CG47","P0CG48","P62979","P62987"]},"extraAttributes":{"uniParcId":"UPI00000006C4"}}]}'
     headers:
-      Access-Control-Allow-Credentials:
+      access-control-allow-credentials:
       - 'true'
-      Access-Control-Allow-Headers:
+      access-control-allow-headers:
       - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
-      Access-Control-Allow-Methods:
+      access-control-allow-methods:
       - GET, PUT, POST, DELETE, PATCH, OPTIONS
-      Access-Control-Allow-Origin:
+      access-control-allow-origin:
       - '*'
-      Access-Control-Expose-Headers:
+      access-control-expose-headers:
       - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
-      Access-Control-Max-Age:
+      access-control-max-age:
       - '1728000'
-      Cache-Control:
+      cache-control:
       - public, max-age=43200
-      Connection:
+      connection:
       - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Type:
+      content-length:
+      - '269'
+      content-type:
       - application/json
-      Date:
-      - Fri, 13 Feb 2026 06:36:04 GMT
-      Strict-Transport-Security:
-      - max-age=31536000; includeSubDomains
-      Transfer-Encoding:
+      date:
+      - Tue, 06 Oct 2026 04:12:06 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      transfer-encoding:
       - chunked
-      Vary:
-      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent,
-        Accept-Encoding
-      X-API-Deployment-Date:
-      - 09-February-2026
-      X-Total-Results:
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent, Accept-Encoding
+      x-api-deployment-date:
+      - 23-September-2026
+      x-cache:
+      - miss cached
+      x-total-results:
       - '1'
-      X-UniProt-Release:
-      - '2026_01'
-      X-UniProt-Release-Date:
-      - 28-January-2026
-      x-cache:
-      - miss cached
+      x-uniprot-release:
+      - '2026_03'
+      x-uniprot-release-date:
+      - 02-September-2026
     status:
       code: 200
       message: OK
 - request:
-    body: ''
+    body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
-      - gzip, deflate, zstd
+      - gzip
       Connection:
       - keep-alive
-      Host:
-      - rest.uniprot.org
       User-Agent:
-      - BioETL/5.0.0
+      - python-requests/2.34.2
     method: GET
-    uri: https://rest.uniprot.org/uniprotkb/search?fields=accession%2Cid%2Cprotein_name%2Cgene_names%2Corganism_name%2Corganism_id%2Clineage%2Csequence%2Clength%2Cmass%2Cprotein_existence%2Cannotation_score%2Creviewed%2Cdate_created%2Cdate_modified%2Cversion%2Ccc_function%2Ccc_catalytic_activity%2Ccc_activity_regulation%2Ccc_subunit%2Ccc_pathway%2Ccc_subcellular_location%2Ccc_tissue_specificity%2Ccc_alternative_products%2Ccc_disease%2Ccc_cofactor%2Cph_dependence%2Ctemp_dependence%2Ckinetics%2Cabsorption%2Credox_potential%2Ccc_induction%2Ccc_caution%2Ccc_similarity%2Ccc_pharmaceutical%2Cft_domain%2Cft_binding%2Cft_site%2Cft_act_site%2Cft_mod_res%2Cxref_pdb%2Cxref_chembl%2Cxref_drugbank%2Cxref_guidetopharmacology%2Cgo_id%2Cxref_interpro%2Cxref_pfam%2Cxref_reactome%2Ckeyword&format=json&query=%2A&size=3
+    uri: https://rest.uniprot.org/uniprotkb/search?query=%2A&size=3&format=json&fields=accession%2Cid%2Cprotein_name%2Cgene_names%2Corganism_name%2Corganism_id%2Clineage%2Csequence%2Clength%2Cmass%2Cprotein_existence%2Cannotation_score%2Creviewed%2Cdate_created%2Cdate_modified%2Cversion%2Ccc_function%2Ccc_catalytic_activity%2Ccc_activity_regulation%2Ccc_subunit%2Ccc_pathway%2Ccc_subcellular_location%2Ccc_tissue_specificity%2Ccc_alternative_products%2Ccc_disease%2Ccc_cofactor%2Cph_dependence%2Ctemp_dependence%2Ckinetics%2Cabsorption%2Credox_potential%2Ccc_induction%2Ccc_caution%2Ccc_similarity%2Ccc_pharmaceutical%2Cft_domain%2Cft_binding%2Cft_site%2Cft_act_site%2Cft_mod_res%2Cxref_pdb%2Cxref_chembl%2Cxref_drugbank%2Cxref_guidetopharmacology%2Cgo_id%2Cxref_interpro%2Cxref_pfam%2Cxref_reactome%2Ckeyword
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAA/+xd63OjuJb/vn8FlS87XRv3GD+wnf0k877ItEA0Gd+tqSlik4RtDL6Au9szNf/7
+        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
-        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
-        IXud+ffvf/8fAAAA//8DALJjwFvjiAAA
+        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
     headers:
       Access-Control-Allow-Credentials:
       - 'true'
@@ -663,25 +317,23 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Fri, 13 Feb 2026 06:36:08 GMT
+      - Tue, 06 Oct 2026 09:21:30 GMT
       Link:
-      - <https://rest.uniprot.org/uniprotkb/search?format=json&fields=accession,id,protein_name,gene_names,organism_name,organism_id,lineage,sequence,length,mass,protein_existence,annotation_score,reviewed,date_created,date_modified,version,cc_function,cc_catalytic_activity,cc_activity_regulation,cc_subunit,cc_pathway,cc_subcellular_location,cc_tissue_specificity,cc_alternative_products,cc_disease,cc_cofactor,ph_dependence,temp_dependence,kinetics,absorption,redox_potential,cc_induction,cc_caution,cc_similarity,cc_pharmaceutical,ft_domain,ft_binding,ft_site,ft_act_site,ft_mod_res,xref_pdb,xref_chembl,xref_drugbank,xref_guidetopharmacology,go_id,xref_interpro,xref_pfam,xref_reactome,keyword&query=%2A&cursor=8e9tj6dnc2zmn891eqzsju4zn2bcf99anl&size=3>;
-        rel="next"
-      Strict-Transport-Security:
-      - max-age=31536000; includeSubDomains
+      - <https://rest.uniprot.org/uniprotkb/search?format=json&fields=accession,id,protein_name,gene_names,organism_name,organism_id,lineage,sequence,length,mass,protein_existence,annotation_score,reviewed,date_created,date_modified,version,cc_function,cc_catalytic_activity,cc_activity_regulation,cc_subunit,cc_pathway,cc_subcellular_location,cc_tissue_specificity,cc_alternative_products,cc_disease,cc_cofactor,ph_dependence,temp_dependence,kinetics,absorption,redox_potential,cc_induction,cc_caution,cc_similarity,cc_pharmaceutical,ft_domain,ft_binding,ft_site,ft_act_site,ft_mod_res,xref_pdb,xref_chembl,xref_drugbank,xref_guidetopharmacology,go_id,xref_interpro,xref_pfam,xref_reactome,keyword&query=%2A&cursor=8e9tj6dnc2zmnndkj39gbe06iuzuzts8j5&size=3>; rel="next"
       Transfer-Encoding:
       - chunked
       Vary:
-      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent,
-        Accept-Encoding
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent, Accept-Encoding
       X-API-Deployment-Date:
-      - 09-February-2026
+      - 23-September-2026
       X-Total-Results:
-      - '203130940'
+      - '150006383'
       X-UniProt-Release:
-      - '2026_01'
+      - '2026_03'
       X-UniProt-Release-Date:
-      - 28-January-2026
+      - 02-September-2026
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
       x-cache:
       - miss cached
     status:
@@ -690,949 +342,535 @@ interactions:
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/target_component?component_id__in=434&format=json&organism__isnull=false&target_type=SINGLE+PROTEIN&tax_id__isnull=false
   response:
     body:
-      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous":
-        null, "total_count": 1}, "target_components": [{"accession": "O43451", "component_id":
-        434, "component_type": "PROTEIN", "description": "Maltase-glucoamylase", "go_slims":
-        [{"go_id": "GO:0003824"}, {"go_id": "GO:0005515"}, {"go_id": "GO:0005886"},
-        {"go_id": "GO:0005975"}, {"go_id": "GO:0009056"}, {"go_id": "GO:0016020"},
-        {"go_id": "GO:0016798"}, {"go_id": "GO:0030246"}, {"go_id": "GO:0043226"}],
-        "organism": "Homo sapiens", "protein_classifications": [{"protein_classification_id":
-        646}], "sequence": "MARKKLKKFTTLEIVLSVLLLVLFIISIVLIVLLAKESLKSTAPDPGTTGTPDPGTTGTPDPGTTGTTHARTTGPPDPGTTGTTPVSAECPVVNELERINCIPDQPPTKATCDQRGCCWNPQGAVSVPWCYYSKNHSYHVEGNLVNTNAGFTARLKNLPSSPVFGSNVDNVLLTAEYQTSNRFHFKLTDQTNNRFEVPHEHVQSFSGNAAASLTYQVEISRQPFSIKVTRRSNNRVLFDSSIGPLLFADQFLQLSTRLPSTNVYGLGEHVHQQYRHDMNWKTWPIFNRDTTPNGNGTNLYGAQTFFLCLEDASGLSFGVFLMNSNAMEVVLQPAPAITYRTIGGILDFYVFLGNTPEQVVQEYLELIGRPALPSYWALGFHLSRYEYGTLDNMREVVERNRAAQLPYDVQHADIDYMDERRDFTYDSVDFKGFPEFVNELHNNGQKLVIIVDPAISNNSSSSKPYGPYDRGSDMKIWVNSSDGVTPLIGEVWPGQTVFPDYTNPNCAVWWTKEFELFHNQVEFDGIWIDMNEVSNFVDGSVSGCSTNNLNNPPFTPRILDGYLFCKTLCMDAVQHWGKQYDIHNLYGYSMAVATAEAAKTVFPNKRSFILTRSTFAGSGKFAAHWLGDNTATWDDLRWSIPGVLEFNLFGIPMVGPDICGFALDTPEELCRRWMQLGAFYPFSRNHNGQGYKDQDPASFGADSLLLNSSRHYLNIRYTLLPYLYTLFFRAHSRGDTVARPLLHEFYEDNSTWDVHQQFLWGPGLLITPVLDEGAEKVMAYVPDAVWYDYETGSQVRWRKQKVEMELPGDKIGLHLRGGYIFPTQQPNTTTLASRKNPLGLIIALDENKEAKGELFWDNGETKDTVANKVYLLCEFSVTQNRLEVNISQSTYKDPNNLAFNEIKILGTEEPSNVTVKHNGVPSQTSPTVTYDSNLKVAIITDIDLLLGEAYTVEWSIKIRDEEKIDCYPDENGASAENCTARGCIWEASNSSGVPFCYFVNDLYSVSDVQYNSHGATADISLKSSVYANAFPSTPVNPLRLDVTYHKNEMLQFKIYDPNKNRYEVPVPLNIPSMPSSTPEGQLYDVLIKKNPFGIEIRRKSTGTIIWDSQLLGFTFSDMFIRISTRLPSKYLYGFGETEHRSYRRDLEWHTWGMFSRDQPPGYKKNSYGVHPYYMGLEEDGSAHGVLLLNSNAMDVTFQPLPALTYRTTGGVLDFYVFLGPTPELVTQQYTELIGRPVMVPYWSLGFQLCRYGYQNDSEIASLYDEMVAAQIPYDVQYSDIDYMERQLDFTLSPKFAGFPALINRMKADGMRVILILDPAISGNETQPYPAFTRGVEDDVFIKYPNDGDIVWGKVWPDFPDVVVNGSLDWDSQVELYRAYVAFPDFFRNSTAKWWKREIEELYNNPQNPERSLKFDGMWIDMNEPSSFVNGAVSPGCRDASLNHPPYMPHLESRDRGLSSKTLCMESQQILPDGSLVQHYNVHNLYGWSQTRPTYEAVQEVTGQRGVVITRSTFPSSGRWAGHWLGDNTAAWDQLKKSIIGMMEFSLFGISYTGADICGFFQDAEYEMCVRWMQLGAFYPFSRNHNTIGTRRQDPVSWDAAFVNISRNVLQTRYTLLPYLYTLMQKAHTEGVTVVRPLLHEFVSDQVTWDIDSQFLLGPAFLVSPVLERNARNVTAYFPRARWYDYYTGVDINARGEWKTLPAPLDHINLHVRGGYILPWQEPALNTHLSRKNPLGLIIALDENKEAKGELFWDDGQTKDTVAKKVYLLCEFSVTQNHLEVTISQSTYKDPNNLAFNEIKILGMEEPSNVTVKHNGVPSQTSPTVTYDSNLKVAIITDINLFLGEAYTVEWSIKIRDEEKIDCYPDENGDSAENCTARGCIWEASNSSGVPFCYFVNDLYSVSDVQYNSHGATADISLKSSVHANAFPSTPVNPLRLDVTYHKNEMLQFKIYDPNNNRYEVPVPLNIPSVPSSTPEGQLYDVLIKKNPFGIEIRRKSTGTIIWDSQLLGFTFNDMFIRISTRLPSKYLYGFGETEHTSYRRDLEWHTWGMFSRDQPPGYKKNSYGVHPYYMGLEEDGSAHGVLLLNSNAMDVTFQPLPALTYRTTGGVLDFYVFLGPTPELVTQQYTELIGRPVMVPYWSLGFQLCRYGYQNDSEISSLYDEMVAAQIPYDVQYSDIDYMERQLDFTLSPKFAGFPALINRMKADGMRVILILDPAISGNETQPYPAFTRGVEDDVFIKYPNDGDIVWGKVWPDFPDVVVNGSLDWDSQVELYRAYVAFPDFFRNSTAKWWKREIEELYNNPQNPERSLKFDGMWIDMNEPSSFVNGAVSPGCRDASLNHPPYMPYLESRDRGLSSKTLCMESQQILPDGSPVQHYNVHNLYGWSQTRPTYEAVQEVTGQRGVVITRSTFPSSGRWAGHWLGDNTAAWDQLKKSIIGMMEFSLFGISYTGADICGFFQDAEYEMCVRWMQLGAFYPFSRNHNTIGTRRQDPVSWDVAFVNISRTVLQTRYTLLPYLYTLMHKAHTEGVTVVRPLLHEFVSDQVTWDIDSQFLLGPAFLVSPVLERNARNVTAYFPRARWYDYYTGVDINARGEWKTLPAPLDHINLHVRGGYILPWQEPALNTHLSRQKFMGFKIALDDEGTAGGWLFWDDGQSIDTYGKGLYYLASFSASQNTMQSHIIFNNYITGTNPLKLGYIEIWGVGSVPVTSVSISVSGMVITPSFNNDPTTQVLSIDVTDRNISLHNFTSLTWISTL",
-        "target_component_synonyms": [{"component_synonym": "3.2.1.20", "syn_type":
-        "EC_NUMBER"}, {"component_synonym": "Alpha-1,4-glucosidase", "syn_type": "UNIPROT"},
-        {"component_synonym": "Maltase-glucoamylase", "syn_type": "UNIPROT"}, {"component_synonym":
-        "MGA", "syn_type": "GENE_SYMBOL_OTHER"}, {"component_synonym": "MGAM", "syn_type":
-        "GENE_SYMBOL"}, {"component_synonym": "MGAML", "syn_type": "GENE_SYMBOL_OTHER"},
-        {"component_synonym": "Synonyms=MGA", "syn_type": "GENE_SYMBOL_OTHER"}], "target_component_xrefs":
-        [{"xref_id": "O43451", "xref_name": null, "xref_src_db": "AlphaFoldDB"}, {"xref_id":
-        "O43451", "xref_name": null, "xref_src_db": "ExpressionAtlas"}, {"xref_id":
-        "GO:0005886", "xref_name": "plasma membrane", "xref_src_db": "GoComponent"},
-        {"xref_id": "GO:0016324", "xref_name": "apical plasma membrane", "xref_src_db":
-        "GoComponent"}, {"xref_id": "GO:0070062", "xref_name": "extracellular exosome",
-        "xref_src_db": "GoComponent"}, {"xref_id": "GO:0070821", "xref_name": "tertiary
-        granule membrane", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0101003",
-        "xref_name": "ficolin-1-rich granule membrane", "xref_src_db": "GoComponent"},
-        {"xref_id": "GO:0003824", "xref_name": "catalytic activity", "xref_src_db":
-        "GoFunction"}, {"xref_id": "GO:0004339", "xref_name": "glucan 1,4-alpha-glucosidase
-        activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0004553", "xref_name":
-        "hydrolase activity, hydrolyzing O-glycosyl compounds", "xref_src_db": "GoFunction"},
-        {"xref_id": "GO:0004558", "xref_name": "alpha-1,4-glucosidase activity", "xref_src_db":
-        "GoFunction"}, {"xref_id": "GO:0004574", "xref_name": "oligo-1,6-glucosidase
-        activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0005515", "xref_name":
-        "protein binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0016160",
-        "xref_name": "amylase activity", "xref_src_db": "GoFunction"}, {"xref_id":
-        "GO:0016798", "xref_name": "hydrolase activity, acting on glycosyl bonds",
-        "xref_src_db": "GoFunction"}, {"xref_id": "GO:0030246", "xref_name": "carbohydrate
-        binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0090599", "xref_name":
-        "alpha-glucosidase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0000025",
-        "xref_name": "maltose catabolic process", "xref_src_db": "GoProcess"}, {"xref_id":
-        "GO:0005975", "xref_name": "carbohydrate metabolic process", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:0005983", "xref_name": "starch catabolic process",
-        "xref_src_db": "GoProcess"}, {"xref_id": "GO:1901027", "xref_name": "dextrin
-        catabolic process", "xref_src_db": "GoProcess"}, {"xref_id": "HGNC:7043",
-        "xref_name": "MGAM", "xref_src_db": "HGNC"}, {"xref_id": "O43451", "xref_name":
-        null, "xref_src_db": "IntAct"}, {"xref_id": "IPR000322", "xref_name": "Glyco_hydro_31_TIM",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR000519", "xref_name": "P_trefoil_dom",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR011013", "xref_name": "Gal_mutarotase_sf_dom",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR013780", "xref_name": "Glyco_hydro_b",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR017853", "xref_name": "GH", "xref_src_db":
-        "InterPro"}, {"xref_id": "IPR017957", "xref_name": "P_trefoil_CS", "xref_src_db":
-        "InterPro"}, {"xref_id": "IPR025887", "xref_name": "Glyco_hydro_31_N_dom",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR030458", "xref_name": "Glyco_hydro_31_AS",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR030459", "xref_name": "Glyco_hydro_31_CS",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR044913", "xref_name": "P_trefoil_dom_sf",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR048395", "xref_name": "Glyco_hydro_31_C",
-        "xref_src_db": "InterPro"}, {"xref_id": "PTHR22762", "xref_name": "ALPHA-GLUCOSIDASE",
-        "xref_src_db": "PANTHER"}, {"xref_id": "PTHR22762:SF63", "xref_name": "MALTASE-GLUCOAMYLASE",
-        "xref_src_db": "PANTHER"}, {"xref_id": "2QLY", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "2QMJ", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "3CTT", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4T", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "3L4U", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "3L4V", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "3L4W", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4X", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "3L4Y", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "3L4Z", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "3TON", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3TOP", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "2QLY", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "2QMJ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "3CTT", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4T", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4U", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "3L4V", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "3L4W", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4X", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4Y", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "3L4Z", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "3TON", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3TOP", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "PF00088", "xref_name": "Trefoil",
-        "xref_src_db": "Pfam"}, {"xref_id": "PF01055", "xref_name": "Glyco_hydro_31_2nd",
-        "xref_src_db": "Pfam"}, {"xref_id": "PF13802", "xref_name": "Gal_mutarotas_2",
-        "xref_src_db": "Pfam"}, {"xref_id": "PF21365", "xref_name": "Glyco_hydro_31_3rd",
-        "xref_src_db": "Pfam"}, {"xref_id": "PA30778", "xref_name": "maltase-glucoamylase",
-        "xref_src_db": "PharmGKB"}, {"xref_id": "O43451", "xref_name": null, "xref_src_db":
-        "Pharos"}, {"xref_id": "R-HSA-189085", "xref_name": "Digestion of dietary
-        carbohydrate", "xref_src_db": "Reactome"}, {"xref_id": "R-HSA-6798695", "xref_name":
-        "Neutrophil degranulation", "xref_src_db": "Reactome"}, {"xref_id": "E7ER45",
-        "xref_name": "Maltase-glucoamylase", "xref_src_db": "UniProt"}, {"xref_id":
-        "O43451", "xref_name": "Maltase-glucoamylase", "xref_src_db": "UniProt"},
-        {"xref_id": "Q0VAX6", "xref_name": "Maltase-glucoamylase", "xref_src_db":
-        "UniProt"}, {"xref_id": "Q75ME7", "xref_name": "Maltase-glucoamylase", "xref_src_db":
-        "UniProt"}, {"xref_id": "Q86UM5", "xref_name": "Maltase-glucoamylase", "xref_src_db":
-        "UniProt"}], "targets": [{"target_chembl_id": "CHEMBL2074"}, {"target_chembl_id":
-        "CHEMBL3833502"}], "tax_id": 9606}]}'
+      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous": null, "total_count": 1}, "target_components": [{"accession": "O43451", "component_id": 434, "component_type": "PROTEIN", "description": "Maltase-glucoamylase", "go_slims": [{"go_id": "GO:0003824"}, {"go_id": "GO:0005515"}, {"go_id": "GO:0005886"}, {"go_id": "GO:0005975"}, {"go_id": "GO:0009056"}, {"go_id": "GO:0016020"}, {"go_id": "GO:0016798"}, {"go_id": "GO:0030246"}, {"go_id": "GO:0043226"}], "organism": "Homo sapiens", "protein_classifications": [{"protein_classification_id": 646}], "sequence": "MARKKLKKFTTLEIVLSVLLLVLFIISIVLIVLLAKESLKSTAPDPGTTGTPDPGTTGTPDPGTTGTTHARTTGPPDPGTTGTTPVSAECPVVNELERINCIPDQPPTKATCDQRGCCWNPQGAVSVPWCYYSKNHSYHVEGNLVNTNAGFTARLKNLPSSPVFGSNVDNVLLTAEYQTSNRFHFKLTDQTNNRFEVPHEHVQSFSGNAAASLTYQVEISRQPFSIKVTRRSNNRVLFDSSIGPLLFADQFLQLSTRLPSTNVYGLGEHVHQQYRHDMNWKTWPIFNRDTTPNGNGTNLYGAQTFFLCLEDASGLSFGVFLMNSNAMEVVLQPAPAITYRTIGGILDFYVFLGNTPEQVVQEYLELIGRPALPSYWALGFHLSRYEYGTLDNMREVVERNRAAQLPYDVQHADIDYMDERRDFTYDSVDFKGFPEFVNELHNNGQKLVIIVDPAISNNSSSSKPYGPYDRGSDMKIWVNSSDGVTPLIGEVWPGQTVFPDYTNPNCAVWWTKEFELFHNQVEFDGIWIDMNEVSNFVDGSVSGCSTNNLNNPPFTPRILDGYLFCKTLCMDAVQHWGKQYDIHNLYGYSMAVATAEAAKTVFPNKRSFILTRSTFAGSGKFAAHWLGDNTATWDDLRWSIPGVLEFNLFGIPMVGPDICGFALDTPEELCRRWMQLGAFYPFSRNHNGQGYKDQDPASFGADSLLLNSSRHYLNIRYTLLPYLYTLFFRAHSRGDTVARPLLHEFYEDNSTWDVHQQFLWGPGLLITPVLDEGAEKVMAYVPDAVWYDYETGSQVRWRKQKVEMELPGDKIGLHLRGGYIFPTQQPNTTTLASRKNPLGLIIALDENKEAKGELFWDNGETKDTVANKVYLLCEFSVTQNRLEVNISQSTYKDPNNLAFNEIKILGTEEPSNVTVKHNGVPSQTSPTVTYDSNLKVAIITDIDLLLGEAYTVEWSIKIRDEEKIDCYPDENGASAENCTARGCIWEASNSSGVPFCYFVNDLYSVSDVQYNSHGATADISLKSSVYANAFPSTPVNPLRLDVTYHKNEMLQFKIYDPNKNRYEVPVPLNIPSMPSSTPEGQLYDVLIKKNPFGIEIRRKSTGTIIWDSQLLGFTFSDMFIRISTRLPSKYLYGFGETEHRSYRRDLEWHTWGMFSRDQPPGYKKNSYGVHPYYMGLEEDGSAHGVLLLNSNAMDVTFQPLPALTYRTTGGVLDFYVFLGPTPELVTQQYTELIGRPVMVPYWSLGFQLCRYGYQNDSEIASLYDEMVAAQIPYDVQYSDIDYMERQLDFTLSPKFAGFPALINRMKADGMRVILILDPAISGNETQPYPAFTRGVEDDVFIKYPNDGDIVWGKVWPDFPDVVVNGSLDWDSQVELYRAYVAFPDFFRNSTAKWWKREIEELYNNPQNPERSLKFDGMWIDMNEPSSFVNGAVSPGCRDASLNHPPYMPHLESRDRGLSSKTLCMESQQILPDGSLVQHYNVHNLYGWSQTRPTYEAVQEVTGQRGVVITRSTFPSSGRWAGHWLGDNTAAWDQLKKSIIGMMEFSLFGISYTGADICGFFQDAEYEMCVRWMQLGAFYPFSRNHNTIGTRRQDPVSWDAAFVNISRNVLQTRYTLLPYLYTLMQKAHTEGVTVVRPLLHEFVSDQVTWDIDSQFLLGPAFLVSPVLERNARNVTAYFPRARWYDYYTGVDINARGEWKTLPAPLDHINLHVRGGYILPWQEPALNTHLSRKNPLGLIIALDENKEAKGELFWDDGQTKDTVAKKVYLLCEFSVTQNHLEVTISQSTYKDPNNLAFNEIKILGMEEPSNVTVKHNGVPSQTSPTVTYDSNLKVAIITDINLFLGEAYTVEWSIKIRDEEKIDCYPDENGDSAENCTARGCIWEASNSSGVPFCYFVNDLYSVSDVQYNSHGATADISLKSSVHANAFPSTPVNPLRLDVTYHKNEMLQFKIYDPNNNRYEVPVPLNIPSVPSSTPEGQLYDVLIKKNPFGIEIRRKSTGTIIWDSQLLGFTFNDMFIRISTRLPSKYLYGFGETEHTSYRRDLEWHTWGMFSRDQPPGYKKNSYGVHPYYMGLEEDGSAHGVLLLNSNAMDVTFQPLPALTYRTTGGVLDFYVFLGPTPELVTQQYTELIGRPVMVPYWSLGFQLCRYGYQNDSEISSLYDEMVAAQIPYDVQYSDIDYMERQLDFTLSPKFAGFPALINRMKADGMRVILILDPAISGNETQPYPAFTRGVEDDVFIKYPNDGDIVWGKVWPDFPDVVVNGSLDWDSQVELYRAYVAFPDFFRNSTAKWWKREIEELYNNPQNPERSLKFDGMWIDMNEPSSFVNGAVSPGCRDASLNHPPYMPYLESRDRGLSSKTLCMESQQILPDGSPVQHYNVHNLYGWSQTRPTYEAVQEVTGQRGVVITRSTFPSSGRWAGHWLGDNTAAWDQLKKSIIGMMEFSLFGISYTGADICGFFQDAEYEMCVRWMQLGAFYPFSRNHNTIGTRRQDPVSWDVAFVNISRTVLQTRYTLLPYLYTLMHKAHTEGVTVVRPLLHEFVSDQVTWDIDSQFLLGPAFLVSPVLERNARNVTAYFPRARWYDYYTGVDINARGEWKTLPAPLDHINLHVRGGYILPWQEPALNTHLSRQKFMGFKIALDDEGTAGGWLFWDDGQSIDTYGKGLYYLASFSASQNTMQSHIIFNNYITGTNPLKLGYIEIWGVGSVPVTSVSISVSGMVITPSFNNDPTTQVLSIDVTDRNISLHNFTSLTWISTL", "target_component_synonyms": [{"component_synonym": "3.2.1.20", "syn_type": "EC_NUMBER"}, {"component_synonym": "Alpha-1,4-glucosidase", "syn_type": "UNIPROT"}, {"component_synonym": "Maltase-glucoamylase", "syn_type": "UNIPROT"}, {"component_synonym": "MGA", "syn_type": "GENE_SYMBOL_OTHER"}, {"component_synonym": "MGAM", "syn_type": "GENE_SYMBOL"}, {"component_synonym": "MGAML", "syn_type": "GENE_SYMBOL_OTHER"}, {"component_synonym": "Synonyms=MGA", "syn_type": "GENE_SYMBOL_OTHER"}], "target_component_xrefs": [{"xref_id": "O43451", "xref_name": null, "xref_src_db": "AlphaFoldDB"}, {"xref_id": "O43451", "xref_name": null, "xref_src_db": "ExpressionAtlas"}, {"xref_id": "GO:0005886", "xref_name": "plasma membrane", "xref_src_db": "GoComponent"}, {"xref_id":
+        "GO:0016324", "xref_name": "apical plasma membrane", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0070062", "xref_name": "extracellular exosome", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0070821", "xref_name": "tertiary granule membrane", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0101003", "xref_name": "ficolin-1-rich granule membrane", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0003824", "xref_name": "catalytic activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0004339", "xref_name": "glucan 1,4-alpha-glucosidase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0004553", "xref_name": "hydrolase activity, hydrolyzing O-glycosyl compounds", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0004558", "xref_name": "alpha-1,4-glucosidase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0004574", "xref_name": "oligo-1,6-glucosidase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0005515", "xref_name": "protein binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0016160", "xref_name": "amylase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0016798", "xref_name": "hydrolase activity, acting on glycosyl bonds", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0030246", "xref_name": "carbohydrate binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0090599", "xref_name": "alpha-glucosidase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0000025", "xref_name": "maltose catabolic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0005975", "xref_name": "carbohydrate metabolic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0005983", "xref_name": "starch catabolic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:1901027", "xref_name": "dextrin catabolic process", "xref_src_db": "GoProcess"}, {"xref_id": "HGNC:7043", "xref_name": "MGAM", "xref_src_db": "HGNC"}, {"xref_id": "O43451", "xref_name": null, "xref_src_db": "IntAct"}, {"xref_id": "IPR000322", "xref_name": "Glyco_hydro_31_TIM", "xref_src_db": "InterPro"}, {"xref_id": "IPR000519", "xref_name": "P_trefoil_dom", "xref_src_db": "InterPro"}, {"xref_id": "IPR011013", "xref_name": "Gal_mutarotase_sf_dom", "xref_src_db": "InterPro"}, {"xref_id": "IPR013780", "xref_name": "Glyco_hydro_b", "xref_src_db": "InterPro"}, {"xref_id": "IPR017853", "xref_name": "GH", "xref_src_db": "InterPro"}, {"xref_id": "IPR017957", "xref_name": "P_trefoil_CS", "xref_src_db": "InterPro"}, {"xref_id": "IPR025887", "xref_name": "Glyco_hydro_31_N_dom", "xref_src_db": "InterPro"}, {"xref_id": "IPR030458", "xref_name": "Glyco_hydro_31_AS", "xref_src_db": "InterPro"}, {"xref_id": "IPR030459", "xref_name": "Glyco_hydro_31_CS", "xref_src_db": "InterPro"}, {"xref_id": "IPR044913", "xref_name": "P_trefoil_dom_sf", "xref_src_db": "InterPro"}, {"xref_id": "IPR048395", "xref_name": "Glyco_hydro_31_C", "xref_src_db": "InterPro"}, {"xref_id": "PTHR22762", "xref_name": "ALPHA-GLUCOSIDASE", "xref_src_db": "PANTHER"}, {"xref_id": "PTHR22762:SF63", "xref_name": "MALTASE-GLUCOAMYLASE", "xref_src_db": "PANTHER"}, {"xref_id": "2QLY", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "2QMJ", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3CTT", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4T", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4U", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4V", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4W", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4X", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4Y", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3L4Z", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3TON", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3TOP", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "2QLY", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "2QMJ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3CTT", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4T", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4U", "xref_name": "A", "xref_src_db":
+        "PDBe"}, {"xref_id": "3L4V", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4W", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4X", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4Y", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3L4Z", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3TON", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3TOP", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "PF00088", "xref_name": "Trefoil", "xref_src_db": "Pfam"}, {"xref_id": "PF01055", "xref_name": "Glyco_hydro_31_2nd", "xref_src_db": "Pfam"}, {"xref_id": "PF13802", "xref_name": "Gal_mutarotas_2", "xref_src_db": "Pfam"}, {"xref_id": "PF21365", "xref_name": "Glyco_hydro_31_3rd", "xref_src_db": "Pfam"}, {"xref_id": "PA30778", "xref_name": "maltase-glucoamylase", "xref_src_db": "PharmGKB"}, {"xref_id": "O43451", "xref_name": null, "xref_src_db": "Pharos"}, {"xref_id": "R-HSA-189085", "xref_name": "Digestion of dietary carbohydrate", "xref_src_db": "Reactome"}, {"xref_id": "R-HSA-6798695", "xref_name": "Neutrophil degranulation", "xref_src_db": "Reactome"}, {"xref_id": "E7ER45", "xref_name": "Maltase-glucoamylase", "xref_src_db": "UniProt"}, {"xref_id": "O43451", "xref_name": "Maltase-glucoamylase", "xref_src_db": "UniProt"}, {"xref_id": "Q0VAX6", "xref_name": "Maltase-glucoamylase", "xref_src_db": "UniProt"}, {"xref_id": "Q75ME7", "xref_name": "Maltase-glucoamylase", "xref_src_db": "UniProt"}, {"xref_id": "Q86UM5", "xref_name": "Maltase-glucoamylase", "xref_src_db": "UniProt"}], "targets": [{"target_chembl_id": "CHEMBL2074"}, {"target_chembl_id": "CHEMBL3833502"}], "tax_id": 9606}]}'
     headers:
-      Cache-Control:
+      cache-control:
       - max-age=30000000, s-maxage=30000000
-      Connection:
+      connection:
       - Keep-Alive
-      Content-Disposition:
+      content-disposition:
       - inline
-      Content-Length:
+      content-length:
       - '9836'
-      Content-Type:
+      content-type:
       - application/json
-      Date:
-      - Mon, 01 Jun 2026 15:16:43 GMT
-      Server:
+      date:
+      - Tue, 06 Oct 2026 08:43:04 GMT
+      server:
       - gunicorn/20.0.4
-      Strict-Transport-Security:
-      - max-age=0
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - Accept, Origin
-      X-ChEMBL-in-cache:
+      x-chembl-in-cache:
       - 'True'
-      X-ChEMBL-retrieval-time:
-      - '0.0042002201080322266'
+      x-chembl-retrieval-time:
+      - '0.01377415657043457'
     status:
       code: 200
       message: OK
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/protein_classification?format=json&organism__isnull=false&protein_class_id__in=646&target_type=SINGLE+PROTEIN&tax_id__isnull=false
   response:
     body:
-      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous":
-        null, "total_count": 1}, "protein_classifications": [{"class_level": 2, "definition":
-        "A group of enzymes that catalyze the hydrolysis of a chemical bond", "parent_id":
-        1, "pref_name": "Hydrolase", "protein_class_desc": "enzyme  hydrolase", "protein_class_id":
-        646, "replaced_by": null, "short_name": "Hydrolase", "sort_order": null}]}'
+      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous": null, "total_count": 1}, "protein_classifications": [{"class_level": 2, "definition": "A group of enzymes that catalyze the hydrolysis of a chemical bond", "parent_id": 1, "pref_name": "Hydrolase", "protein_class_desc": "enzyme  hydrolase", "protein_class_id": 646, "replaced_by": null, "short_name": "Hydrolase", "sort_order": null}]}'
     headers:
-      Cache-Control:
+      cache-control:
       - max-age=30000000, s-maxage=30000000
-      Connection:
+      connection:
       - Keep-Alive
-      Content-Disposition:
+      content-disposition:
       - inline
-      Content-Length:
+      content-length:
       - '402'
-      Content-Type:
+      content-type:
       - application/json
-      Date:
-      - Mon, 01 Jun 2026 15:16:53 GMT
-      Server:
+      date:
+      - Tue, 06 Oct 2026 08:43:16 GMT
+      server:
       - gunicorn/20.0.4
-      Strict-Transport-Security:
-      - max-age=0
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - Accept, Origin
-      X-ChEMBL-in-cache:
+      x-chembl-in-cache:
       - 'True'
-      X-ChEMBL-retrieval-time:
-      - '0.001552581787109375'
+      x-chembl-retrieval-time:
+      - '0.018393278121948242'
     status:
       code: 200
       message: OK
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/protein_classification?format=json&organism__isnull=false&protein_class_id__in=1&target_type=SINGLE+PROTEIN&tax_id__isnull=false
   response:
     body:
-      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous":
-        null, "total_count": 1}, "protein_classifications": [{"class_level": 1, "definition":
-        "Biological molecules that possess catalytic activity. They may occur naturally
-        or be synthetically created. Enzymes are usually proteins, however CATALYTIC
-        RNA and CATALYTIC DNA molecules have also been identified. [MESH:D004798]",
-        "parent_id": 0, "pref_name": "Enzyme", "protein_class_desc": "enzyme", "protein_class_id":
-        1, "replaced_by": null, "short_name": "Enzyme", "sort_order": 1}]}'
+      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous": null, "total_count": 1}, "protein_classifications": [{"class_level": 1, "definition": "Biological molecules that possess catalytic activity. They may occur naturally or be synthetically created. Enzymes are usually proteins, however CATALYTIC RNA and CATALYTIC DNA molecules have also been identified. [MESH:D004798]", "parent_id": 0, "pref_name": "Enzyme", "protein_class_desc": "enzyme", "protein_class_id": 1, "replaced_by": null, "short_name": "Enzyme", "sort_order": 1}]}'
     headers:
-      Cache-Control:
+      cache-control:
       - max-age=30000000, s-maxage=30000000
-      Connection:
+      connection:
       - Keep-Alive
-      Content-Disposition:
+      content-disposition:
       - inline
-      Content-Length:
+      content-length:
       - '543'
-      Content-Type:
+      content-type:
       - application/json
-      Date:
-      - Mon, 01 Jun 2026 15:17:02 GMT
-      Server:
+      date:
+      - Tue, 06 Oct 2026 08:43:28 GMT
+      server:
       - gunicorn/20.0.4
-      Strict-Transport-Security:
-      - max-age=0
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - Accept, Origin
-      X-ChEMBL-in-cache:
+      x-chembl-in-cache:
       - 'True'
-      X-ChEMBL-retrieval-time:
-      - '0.0012612342834472656'
+      x-chembl-retrieval-time:
+      - '0.012530088424682617'
     status:
       code: 200
       message: OK
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/target_component?component_id__in=294&format=json&organism__isnull=false&target_type=SINGLE+PROTEIN&tax_id__isnull=false
   response:
     body:
-      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous":
-        null, "total_count": 1}, "target_components": [{"accession": "O60706", "component_id":
-        294, "component_type": "PROTEIN", "description": "ATP-binding cassette sub-family
-        C member 9", "go_slims": [{"go_id": "GO:0003013"}, {"go_id": "GO:0003674"},
-        {"go_id": "GO:0005575"}, {"go_id": "GO:0005737"}, {"go_id": "GO:0005739"},
-        {"go_id": "GO:0005886"}, {"go_id": "GO:0006091"}, {"go_id": "GO:0006629"},
-        {"go_id": "GO:0006810"}, {"go_id": "GO:0006950"}, {"go_id": "GO:0007005"},
-        {"go_id": "GO:0007165"}, {"go_id": "GO:0008150"}, {"go_id": "GO:0008152"},
-        {"go_id": "GO:0008283"}, {"go_id": "GO:0009058"}, {"go_id": "GO:0016020"},
-        {"go_id": "GO:0016887"}, {"go_id": "GO:0022857"}, {"go_id": "GO:0030554"},
-        {"go_id": "GO:0043167"}, {"go_id": "GO:0044281"}, {"go_id": "GO:0044325"},
-        {"go_id": "GO:0048856"}, {"go_id": "GO:0055085"}], "organism": "Homo sapiens",
-        "protein_classifications": [{"protein_classification_id": 1133}], "sequence":
-        "MSLSFCGNNISSYNINDGVLQNSCFVDALNLVPHVFLLFITFPILFIGWGSQSSKVQIHHNTWLHFPGHNLRWILTFALLFVHVCEIAEGIVSDSRRESRHLHLFMPAVMGFVATTTSIVYYHNIETSNFPKLLLALFLYWVMAFITKTIKLVKYCQSGLDISNLRFCITGMMVILNGLLMAVEINVIRVRRYVFFMNPQKVKPPEDLQDLGVRFLQPFVNLLSKATYWWMNTLIISAHKKPIDLKAIGKLPIAMRAVTNYVCLKDAYEEQKKKVADHPNRTPSIWLAMYRAFGRPILLSSTFRYLADLLGFAGPLCISGIVQRVNETQNGTNNTTGISETLSSKEFLENAYVLAVLLFLALILQRTFLQASYYVTIETGINLRGALLAMIYNKILRLSTSNLSMGEMTLGQINNLVAIETNQLMWFLFLCPNLWAMPVQIIMGVILLYNLLGSSALVGAAVIVLLAPIQYFIATKLAEAQKSTLDYSTERLKKTNEILKGIKLLKLYAWEHIFCKSVEETRMKELSSLKTFALYTSLSIFMNAAIPIAAVLATFVTHAYASGNNLKPAEAFASLSLFHILVTPLFLLSTVVRFAVKAIISVQKLNEFLLSDEIGDDSWRTGESSLPFESCKKHTGVQPKTINRKQPGRYHLDSYEQSTRRLRPAETEDIAIKVTNGYFSWGSGLATLSNIDIRIPTGQLTMIVGQVGCGKSSLLLAILGEMQTLEGKVHWSNVNESEPSFEATRSRNRYSVAYAAQKPWLLNATVEENITFGSPFNKQRYKAVTDACSLQPDIDLLPFGDQTEIGERGINLSGGQRQRICVARALYQNTNIVFLDDPFSALDIHLSDHLMQEGILKFLQDDKRTLVLVTHKLQYLTHADWIIAMKDGSVLREGTLKDIQTKDVELYEHWKTLMNRQDQELEKDMEADQTTLERKTLRRAMYSREAKAQMEDEDEEEEEEEDEDDNMSTVMRLRTKMPWKTCWRYLTSGGFFLLILMIFSKLLKHSVIVAIDYWLATWTSEYSINNTGKADQTYYVAGFSILCGAGIFLCLVTSLTVEWMGLTAAKNLHHNLLNKIILGPIRFFDTTPLGLILNRFSADTNIIDQHIPPTLESLTRSTLLCLSAIGMISYATPVFLVALLPLGVAFYFIQKYFRVASKDLQELDDSTQLPLLCHFSETAEGLTTIRAFRHETRFKQRMLELTDTNNIAYLFLSAANRWLEVRTDYLGACIVLTASIASISGSSNSGLVGLGLLYALTITNYLNWVVRNLADLEVQMGAVKKVNSFLTMESENYEGTMDPSQVPEHWPQEGEIKIHDLCVRYENNLKPVLKHVKAYIKPGQKVGICGRTGSGKSSLSLAFFRMVDIFDGKIVIDGIDISKLPLHTLRSRLSIILQDPILFSGSIRFNLDPECKCTDDRLWEALEIAQLKNMVKSLPGGLDAVVTEGGENFSVGQRQLFCLARAFVRKSSILIMDEATASIDMATENILQKVVMTAFADRTVVTIAHRVSSIMDAGLVLVFSEGILVECDTVPNLLAHKNGLFSTLVMTNK",
-        "target_component_synonyms": [{"component_synonym": "ABCC9", "syn_type": "GENE_SYMBOL"},
-        {"component_synonym": "ATP-binding cassette sub-family C member 9", "syn_type":
-        "UNIPROT"}, {"component_synonym": "Sulfonylurea receptor 2", "syn_type": "UNIPROT"},
-        {"component_synonym": "SUR2", "syn_type": "GENE_SYMBOL_OTHER"}], "target_component_xrefs":
-        [{"xref_id": "O60706", "xref_name": null, "xref_src_db": "AlphaFoldDB"}, {"xref_id":
-        "O60706", "xref_name": null, "xref_src_db": "ExpressionAtlas"}, {"xref_id":
-        "GO:0005737", "xref_name": "cytoplasm", "xref_src_db": "GoComponent"}, {"xref_id":
-        "GO:0005739", "xref_name": "mitochondrion", "xref_src_db": "GoComponent"},
-        {"xref_id": "GO:0005886", "xref_name": "plasma membrane", "xref_src_db": "GoComponent"},
-        {"xref_id": "GO:0008282", "xref_name": "inward rectifying potassium channel",
-        "xref_src_db": "GoComponent"}, {"xref_id": "GO:0016020", "xref_name": "membrane",
-        "xref_src_db": "GoComponent"}, {"xref_id": "GO:0030017", "xref_name": "sarcomere",
-        "xref_src_db": "GoComponent"}, {"xref_id": "GO:0031004", "xref_name": "potassium
-        ion-transporting ATPase complex", "xref_src_db": "GoComponent"}, {"xref_id":
-        "GO:0032991", "xref_name": "protein-containing complex", "xref_src_db": "GoComponent"},
-        {"xref_id": "GO:0042383", "xref_name": "sarcolemma", "xref_src_db": "GoComponent"},
-        {"xref_id": "GO:0005267", "xref_name": "potassium channel activity", "xref_src_db":
-        "GoFunction"}, {"xref_id": "GO:0005524", "xref_name": "ATP binding", "xref_src_db":
-        "GoFunction"}, {"xref_id": "GO:0008281", "xref_name": "sulfonylurea receptor
-        activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0015272", "xref_name":
-        "ATP-activated inward rectifier potassium channel activity", "xref_src_db":
-        "GoFunction"}, {"xref_id": "GO:0016887", "xref_name": "ATP hydrolysis activity",
-        "xref_src_db": "GoFunction"}, {"xref_id": "GO:0019829", "xref_name": "ATPase-coupled
-        monoatomic cation transmembrane transporter activity", "xref_src_db": "GoFunction"},
-        {"xref_id": "GO:0042626", "xref_name": "ATPase-coupled transmembrane transporter
-        activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0043225", "xref_name":
-        "ATPase-coupled inorganic anion transmembrane transporter activity", "xref_src_db":
-        "GoFunction"}, {"xref_id": "GO:0044325", "xref_name": "transmembrane transporter
-        binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0140359", "xref_name":
-        "ABC-type transporter activity", "xref_src_db": "GoFunction"}, {"xref_id":
-        "GO:0000165", "xref_name": "MAPK cascade", "xref_src_db": "GoProcess"}, {"xref_id":
-        "GO:0001508", "xref_name": "action potential", "xref_src_db": "GoProcess"},
-        {"xref_id": "GO:0001568", "xref_name": "blood vessel development", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:0001666", "xref_name": "response to hypoxia",
-        "xref_src_db": "GoProcess"}, {"xref_id": "GO:0003007", "xref_name": "heart
-        morphogenesis", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0003018", "xref_name":
-        "vascular process in circulatory system", "xref_src_db": "GoProcess"}, {"xref_id":
-        "GO:0006813", "xref_name": "potassium ion transport", "xref_src_db": "GoProcess"},
-        {"xref_id": "GO:0006950", "xref_name": "response to stress", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:0007005", "xref_name": "mitochondrion organization",
-        "xref_src_db": "GoProcess"}, {"xref_id": "GO:0007507", "xref_name": "heart
-        development", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0007519", "xref_name":
-        "skeletal muscle tissue development", "xref_src_db": "GoProcess"}, {"xref_id":
-        "GO:0008015", "xref_name": "blood circulation", "xref_src_db": "GoProcess"},
-        {"xref_id": "GO:0008217", "xref_name": "regulation of blood pressure", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:0019395", "xref_name": "fatty acid oxidation",
-        "xref_src_db": "GoProcess"}, {"xref_id": "GO:0035865", "xref_name": "cellular
-        response to potassium ion", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0042311",
-        "xref_name": "vasodilation", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0042391",
-        "xref_name": "regulation of membrane potential", "xref_src_db": "GoProcess"},
-        {"xref_id": "GO:0042542", "xref_name": "response to hydrogen peroxide", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:0043066", "xref_name": "negative regulation
-        of apoptotic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0045333",
-        "xref_name": "cellular respiration", "xref_src_db": "GoProcess"}, {"xref_id":
-        "GO:0045776", "xref_name": "negative regulation of blood pressure", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:0046034", "xref_name": "ATP metabolic process",
-        "xref_src_db": "GoProcess"}, {"xref_id": "GO:0048144", "xref_name": "fibroblast
-        proliferation", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0055085", "xref_name":
-        "transmembrane transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0060976",
-        "xref_name": "coronary vasculature development", "xref_src_db": "GoProcess"},
-        {"xref_id": "GO:0061337", "xref_name": "cardiac conduction", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:0062197", "xref_name": "cellular response to
-        chemical stress", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0071277", "xref_name":
-        "cellular response to calcium ion", "xref_src_db": "GoProcess"}, {"xref_id":
-        "GO:0071318", "xref_name": "cellular response to ATP", "xref_src_db": "GoProcess"},
-        {"xref_id": "GO:0071466", "xref_name": "cellular response to xenobiotic stimulus",
-        "xref_src_db": "GoProcess"}, {"xref_id": "GO:0071805", "xref_name": "potassium
-        ion transmembrane transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0072359",
-        "xref_name": "circulatory system development", "xref_src_db": "GoProcess"},
-        {"xref_id": "GO:0072592", "xref_name": "oxygen metabolic process", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:0086003", "xref_name": "cardiac muscle cell
-        contraction", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0097746", "xref_name":
-        "blood vessel diameter maintenance", "xref_src_db": "GoProcess"}, {"xref_id":
-        "GO:0098655", "xref_name": "monoatomic cation transmembrane transport", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:0098656", "xref_name": "monoatomic anion transmembrane
-        transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0098662", "xref_name":
-        "inorganic cation transmembrane transport", "xref_src_db": "GoProcess"}, {"xref_id":
-        "GO:0150104", "xref_name": "transport across blood-brain barrier", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:1901379", "xref_name": "regulation of potassium
-        ion transmembrane transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:1903409",
-        "xref_name": "reactive oxygen species biosynthetic process", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:1990573", "xref_name": "potassium ion import
-        across plasma membrane", "xref_src_db": "GoProcess"}, {"xref_id": "HGNC:60",
-        "xref_name": "ABCC9", "xref_src_db": "HGNC"}, {"xref_id": "O60706", "xref_name":
-        null, "xref_src_db": "IntAct"}, {"xref_id": "IPR000388", "xref_name": "ABCC8/9",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR001475", "xref_name": "ABCC9",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR003439", "xref_name": "ABC_transporter-like_ATP-bd",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR003593", "xref_name": "AAA+_ATPase",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR011527", "xref_name": "ABC1_TM_dom",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR017871", "xref_name": "ABC_transporter-like_CS",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR027417", "xref_name": "P-loop_NTPase",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR036640", "xref_name": "ABC1_TM_sf",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR047080", "xref_name": "ABCC9_ATP-bd_dom1",
-        "xref_src_db": "InterPro"}, {"xref_id": "IPR050173", "xref_name": "ABC_transporter_C-like",
-        "xref_src_db": "InterPro"}, {"xref_id": "PTHR24223", "xref_name": "ATP-BINDING
-        CASSETTE SUB-FAMILY C", "xref_src_db": "PANTHER"}, {"xref_id": "PTHR24223:SF173",
-        "xref_name": "ATP-BINDING CASSETTE SUB-FAMILY C MEMBER 9", "xref_src_db":
-        "PANTHER"}, {"xref_id": "PF00005", "xref_name": "ABC_tran", "xref_src_db":
-        "Pfam"}, {"xref_id": "PF00664", "xref_name": "ABC_membrane", "xref_src_db":
-        "Pfam"}, {"xref_id": "PA396", "xref_name": "ATP binding cassette subfamily
-        C member 9", "xref_src_db": "PharmGKB"}, {"xref_id": "O60706", "xref_name":
-        null, "xref_src_db": "Pharos"}, {"xref_id": "R-HSA-1296025", "xref_name":
-        "ATP sensitive Potassium channels", "xref_src_db": "Reactome"}, {"xref_id":
-        "R-HSA-382556", "xref_name": "ABC-family proteins mediated transport", "xref_src_db":
-        "Reactome"}, {"xref_id": "R-HSA-5578775", "xref_name": "Ion homeostasis",
-        "xref_src_db": "Reactome"}, {"xref_id": "R-HSA-5678420", "xref_name": "Defective
-        ABCC9 causes CMD10, ATFB12 and Cantu syndrome", "xref_src_db": "Reactome"},
-        {"xref_id": "O60706", "xref_name": "ATP-binding cassette sub-family C member
-        9", "xref_src_db": "UniProt"}, {"xref_id": "O60707", "xref_name": "ATP-binding
-        cassette sub-family C member 9", "xref_src_db": "UniProt"}], "targets": [{"target_chembl_id":
-        "CHEMBL1971"}, {"target_chembl_id": "CHEMBL2095152"}, {"target_chembl_id":
-        "CHEMBL2095198"}], "tax_id": 9606}]}'
+      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous": null, "total_count": 1}, "target_components": [{"accession": "O60706", "component_id": 294, "component_type": "PROTEIN", "description": "ATP-binding cassette sub-family C member 9", "go_slims": [{"go_id": "GO:0003013"}, {"go_id": "GO:0003674"}, {"go_id": "GO:0005575"}, {"go_id": "GO:0005737"}, {"go_id": "GO:0005739"}, {"go_id": "GO:0005886"}, {"go_id": "GO:0006091"}, {"go_id": "GO:0006629"}, {"go_id": "GO:0006810"}, {"go_id": "GO:0006950"}, {"go_id": "GO:0007005"}, {"go_id": "GO:0007165"}, {"go_id": "GO:0008150"}, {"go_id": "GO:0008152"}, {"go_id": "GO:0008283"}, {"go_id": "GO:0009058"}, {"go_id": "GO:0016020"}, {"go_id": "GO:0016887"}, {"go_id": "GO:0022857"}, {"go_id": "GO:0030554"}, {"go_id": "GO:0043167"}, {"go_id": "GO:0044281"}, {"go_id": "GO:0044325"}, {"go_id": "GO:0048856"}, {"go_id": "GO:0055085"}], "organism": "Homo sapiens", "protein_classifications": [{"protein_classification_id": 1133}], "sequence": "MSLSFCGNNISSYNINDGVLQNSCFVDALNLVPHVFLLFITFPILFIGWGSQSSKVQIHHNTWLHFPGHNLRWILTFALLFVHVCEIAEGIVSDSRRESRHLHLFMPAVMGFVATTTSIVYYHNIETSNFPKLLLALFLYWVMAFITKTIKLVKYCQSGLDISNLRFCITGMMVILNGLLMAVEINVIRVRRYVFFMNPQKVKPPEDLQDLGVRFLQPFVNLLSKATYWWMNTLIISAHKKPIDLKAIGKLPIAMRAVTNYVCLKDAYEEQKKKVADHPNRTPSIWLAMYRAFGRPILLSSTFRYLADLLGFAGPLCISGIVQRVNETQNGTNNTTGISETLSSKEFLENAYVLAVLLFLALILQRTFLQASYYVTIETGINLRGALLAMIYNKILRLSTSNLSMGEMTLGQINNLVAIETNQLMWFLFLCPNLWAMPVQIIMGVILLYNLLGSSALVGAAVIVLLAPIQYFIATKLAEAQKSTLDYSTERLKKTNEILKGIKLLKLYAWEHIFCKSVEETRMKELSSLKTFALYTSLSIFMNAAIPIAAVLATFVTHAYASGNNLKPAEAFASLSLFHILVTPLFLLSTVVRFAVKAIISVQKLNEFLLSDEIGDDSWRTGESSLPFESCKKHTGVQPKTINRKQPGRYHLDSYEQSTRRLRPAETEDIAIKVTNGYFSWGSGLATLSNIDIRIPTGQLTMIVGQVGCGKSSLLLAILGEMQTLEGKVHWSNVNESEPSFEATRSRNRYSVAYAAQKPWLLNATVEENITFGSPFNKQRYKAVTDACSLQPDIDLLPFGDQTEIGERGINLSGGQRQRICVARALYQNTNIVFLDDPFSALDIHLSDHLMQEGILKFLQDDKRTLVLVTHKLQYLTHADWIIAMKDGSVLREGTLKDIQTKDVELYEHWKTLMNRQDQELEKDMEADQTTLERKTLRRAMYSREAKAQMEDEDEEEEEEEDEDDNMSTVMRLRTKMPWKTCWRYLTSGGFFLLILMIFSKLLKHSVIVAIDYWLATWTSEYSINNTGKADQTYYVAGFSILCGAGIFLCLVTSLTVEWMGLTAAKNLHHNLLNKIILGPIRFFDTTPLGLILNRFSADTNIIDQHIPPTLESLTRSTLLCLSAIGMISYATPVFLVALLPLGVAFYFIQKYFRVASKDLQELDDSTQLPLLCHFSETAEGLTTIRAFRHETRFKQRMLELTDTNNIAYLFLSAANRWLEVRTDYLGACIVLTASIASISGSSNSGLVGLGLLYALTITNYLNWVVRNLADLEVQMGAVKKVNSFLTMESENYEGTMDPSQVPEHWPQEGEIKIHDLCVRYENNLKPVLKHVKAYIKPGQKVGICGRTGSGKSSLSLAFFRMVDIFDGKIVIDGIDISKLPLHTLRSRLSIILQDPILFSGSIRFNLDPECKCTDDRLWEALEIAQLKNMVKSLPGGLDAVVTEGGENFSVGQRQLFCLARAFVRKSSILIMDEATASIDMATENILQKVVMTAFADRTVVTIAHRVSSIMDAGLVLVFSEGILVECDTVPNLLAHKNGLFSTLVMTNK", "target_component_synonyms": [{"component_synonym": "ABCC9", "syn_type": "GENE_SYMBOL"}, {"component_synonym": "ATP-binding cassette sub-family C member 9", "syn_type": "UNIPROT"}, {"component_synonym": "Sulfonylurea receptor 2", "syn_type": "UNIPROT"}, {"component_synonym": "SUR2", "syn_type": "GENE_SYMBOL_OTHER"}], "target_component_xrefs": [{"xref_id": "O60706", "xref_name": null, "xref_src_db": "AlphaFoldDB"}, {"xref_id": "O60706", "xref_name": null, "xref_src_db": "ExpressionAtlas"}, {"xref_id": "GO:0005737", "xref_name": "cytoplasm", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0005739", "xref_name": "mitochondrion", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0005886", "xref_name": "plasma membrane", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0008282", "xref_name": "inward rectifying potassium channel", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0016020", "xref_name": "membrane", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0030017", "xref_name": "sarcomere", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0031004", "xref_name": "potassium ion-transporting ATPase complex", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0032991", "xref_name": "protein-containing complex", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0042383", "xref_name": "sarcolemma", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0005267", "xref_name": "potassium channel activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0005524", "xref_name": "ATP binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0008281", "xref_name":
+        "sulfonylurea receptor activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0015272", "xref_name": "ATP-activated inward rectifier potassium channel activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0016887", "xref_name": "ATP hydrolysis activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0019829", "xref_name": "ATPase-coupled monoatomic cation transmembrane transporter activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0042626", "xref_name": "ATPase-coupled transmembrane transporter activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0043225", "xref_name": "ATPase-coupled inorganic anion transmembrane transporter activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0044325", "xref_name": "transmembrane transporter binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0140359", "xref_name": "ABC-type transporter activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0000165", "xref_name": "MAPK cascade", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0001508", "xref_name": "action potential", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0001568", "xref_name": "blood vessel development", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0001666", "xref_name": "response to hypoxia", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0003007", "xref_name": "heart morphogenesis", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0003018", "xref_name": "vascular process in circulatory system", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0006813", "xref_name": "potassium ion transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0006950", "xref_name": "response to stress", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0007005", "xref_name": "mitochondrion organization", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0007507", "xref_name": "heart development", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0007519", "xref_name": "skeletal muscle tissue development", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0008015", "xref_name": "blood circulation", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0008217", "xref_name": "regulation of blood pressure", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0019395", "xref_name": "fatty acid oxidation", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0035865", "xref_name": "cellular response to potassium ion", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0042311", "xref_name": "vasodilation", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0042391", "xref_name": "regulation of membrane potential", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0042542", "xref_name": "response to hydrogen peroxide", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0043066", "xref_name": "negative regulation of apoptotic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0045333", "xref_name": "cellular respiration", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0045776", "xref_name": "negative regulation of blood pressure", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0046034", "xref_name": "ATP metabolic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0048144", "xref_name": "fibroblast proliferation", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0055085", "xref_name": "transmembrane transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0060976", "xref_name": "coronary vasculature development", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0061337", "xref_name": "cardiac conduction", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0062197", "xref_name": "cellular response to chemical stress", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0071277", "xref_name": "cellular response to calcium ion", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0071318", "xref_name": "cellular response to ATP", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0071466", "xref_name": "cellular response to xenobiotic stimulus", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0071805", "xref_name": "potassium ion transmembrane transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0072359", "xref_name": "circulatory system development", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0072592", "xref_name": "oxygen metabolic
+        process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0086003", "xref_name": "cardiac muscle cell contraction", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0097746", "xref_name": "blood vessel diameter maintenance", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0098655", "xref_name": "monoatomic cation transmembrane transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0098656", "xref_name": "monoatomic anion transmembrane transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0098662", "xref_name": "inorganic cation transmembrane transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0150104", "xref_name": "transport across blood-brain barrier", "xref_src_db": "GoProcess"}, {"xref_id": "GO:1901379", "xref_name": "regulation of potassium ion transmembrane transport", "xref_src_db": "GoProcess"}, {"xref_id": "GO:1903409", "xref_name": "reactive oxygen species biosynthetic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:1990573", "xref_name": "potassium ion import across plasma membrane", "xref_src_db": "GoProcess"}, {"xref_id": "HGNC:60", "xref_name": "ABCC9", "xref_src_db": "HGNC"}, {"xref_id": "O60706", "xref_name": null, "xref_src_db": "IntAct"}, {"xref_id": "IPR000388", "xref_name": "ABCC8/9", "xref_src_db": "InterPro"}, {"xref_id": "IPR001475", "xref_name": "ABCC9", "xref_src_db": "InterPro"}, {"xref_id": "IPR003439", "xref_name": "ABC_transporter-like_ATP-bd", "xref_src_db": "InterPro"}, {"xref_id": "IPR003593", "xref_name": "AAA+_ATPase", "xref_src_db": "InterPro"}, {"xref_id": "IPR011527", "xref_name": "ABC1_TM_dom", "xref_src_db": "InterPro"}, {"xref_id": "IPR017871", "xref_name": "ABC_transporter-like_CS", "xref_src_db": "InterPro"}, {"xref_id": "IPR027417", "xref_name": "P-loop_NTPase", "xref_src_db": "InterPro"}, {"xref_id": "IPR036640", "xref_name": "ABC1_TM_sf", "xref_src_db": "InterPro"}, {"xref_id": "IPR047080", "xref_name": "ABCC9_ATP-bd_dom1", "xref_src_db": "InterPro"}, {"xref_id": "IPR050173", "xref_name": "ABC_transporter_C-like", "xref_src_db": "InterPro"}, {"xref_id": "PTHR24223", "xref_name": "ATP-BINDING CASSETTE SUB-FAMILY C", "xref_src_db": "PANTHER"}, {"xref_id": "PTHR24223:SF173", "xref_name": "ATP-BINDING CASSETTE SUB-FAMILY C MEMBER 9", "xref_src_db": "PANTHER"}, {"xref_id": "PF00005", "xref_name": "ABC_tran", "xref_src_db": "Pfam"}, {"xref_id": "PF00664", "xref_name": "ABC_membrane", "xref_src_db": "Pfam"}, {"xref_id": "PA396", "xref_name": "ATP binding cassette subfamily C member 9", "xref_src_db": "PharmGKB"}, {"xref_id": "O60706", "xref_name": null, "xref_src_db": "Pharos"}, {"xref_id": "R-HSA-1296025", "xref_name": "ATP sensitive Potassium channels", "xref_src_db": "Reactome"}, {"xref_id": "R-HSA-382556", "xref_name": "ABC-family proteins mediated transport", "xref_src_db": "Reactome"}, {"xref_id": "R-HSA-5578775", "xref_name": "Ion homeostasis", "xref_src_db": "Reactome"}, {"xref_id": "R-HSA-5678420", "xref_name": "Defective ABCC9 causes CMD10, ATFB12 and Cantu syndrome", "xref_src_db": "Reactome"}, {"xref_id": "O60706", "xref_name": "ATP-binding cassette sub-family C member 9", "xref_src_db": "UniProt"}, {"xref_id": "O60707", "xref_name": "ATP-binding cassette sub-family C member 9", "xref_src_db": "UniProt"}], "targets": [{"target_chembl_id": "CHEMBL1971"}, {"target_chembl_id": "CHEMBL2095152"}, {"target_chembl_id": "CHEMBL2095198"}], "tax_id": 9606}]}'
     headers:
-      Cache-Control:
+      cache-control:
       - max-age=30000000, s-maxage=30000000
-      Connection:
+      connection:
       - Keep-Alive
-      Content-Disposition:
+      content-disposition:
       - inline
-      Content-Length:
+      content-length:
       - '11551'
-      Content-Type:
+      content-type:
       - application/json
-      Date:
-      - Mon, 01 Jun 2026 15:17:13 GMT
-      Server:
+      date:
+      - Tue, 06 Oct 2026 08:43:36 GMT
+      server:
       - gunicorn/20.0.4
-      Strict-Transport-Security:
-      - max-age=0
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - Accept, Origin
-      X-ChEMBL-in-cache:
+      x-chembl-in-cache:
       - 'True'
-      X-ChEMBL-retrieval-time:
-      - '0.004206657409667969'
+      x-chembl-retrieval-time:
+      - '0.019858360290527344'
     status:
       code: 200
       message: OK
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/protein_classification?format=json&organism__isnull=false&protein_class_id__in=1133&target_type=SINGLE+PROTEIN&tax_id__isnull=false
   response:
     body:
-      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous":
-        null, "total_count": 1}, "protein_classifications": [{"class_level": 4, "definition":
-        "A sequence-related subfamily of ATP-BINDING CASSETTE TRANSPORTERS that actively
-        transport organic substrates. Although considered organic anion transporters,
-        a subset of proteins in this family have also been shown to convey drug resistance
-        to neutral organic drugs. Their cellular function may have clinical significance
-        for CHEMOTHERAPY in that they transport a variety of ANTINEOPLASTIC AGENTS.
-        Overexpression of proteins in this class by NEOPLASMS is considered a possible
-        mechanism in the development of multidrug resistance (DRUG RESISTANCE, MULTIPLE).
-        Although similar in function to P-GLYCOPROTEINS, the proteins in this class
-        share little sequence homology to the p-glycoprotein family of proteins. [MESH:D027425]",
-        "parent_id": 1104, "pref_name": "ABCC subfamily", "protein_class_desc": "transporter  ntpase  atp
-        binding cassette  mrp", "protein_class_id": 1133, "replaced_by": null, "short_name":
-        "MRP", "sort_order": null}]}'
+      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous": null, "total_count": 1}, "protein_classifications": [{"class_level": 4, "definition": "A sequence-related subfamily of ATP-BINDING CASSETTE TRANSPORTERS that actively transport organic substrates. Although considered organic anion transporters, a subset of proteins in this family have also been shown to convey drug resistance to neutral organic drugs. Their cellular function may have clinical significance for CHEMOTHERAPY in that they transport a variety of ANTINEOPLASTIC AGENTS. Overexpression of proteins in this class by NEOPLASMS is considered a possible mechanism in the development of multidrug resistance (DRUG RESISTANCE, MULTIPLE). Although similar in function to P-GLYCOPROTEINS, the proteins in this class share little sequence homology to the p-glycoprotein family of proteins. [MESH:D027425]", "parent_id": 1104, "pref_name": "ABCC subfamily", "protein_class_desc": "transporter  ntpase  atp binding cassette  mrp", "protein_class_id": 1133, "replaced_by": null, "short_name": "MRP", "sort_order": null}]}'
     headers:
-      Cache-Control:
+      cache-control:
       - max-age=30000000, s-maxage=30000000
-      Connection:
+      connection:
       - Keep-Alive
-      Content-Disposition:
+      content-disposition:
       - inline
-      Content-Length:
+      content-length:
       - '1090'
-      Content-Type:
+      content-type:
       - application/json
-      Date:
-      - Mon, 01 Jun 2026 15:17:22 GMT
-      Server:
+      date:
+      - Tue, 06 Oct 2026 08:43:48 GMT
+      server:
       - gunicorn/20.0.4
-      Strict-Transport-Security:
-      - max-age=0
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - Accept, Origin
-      X-ChEMBL-in-cache:
+      x-chembl-in-cache:
       - 'True'
-      X-ChEMBL-retrieval-time:
-      - '0.0018911361694335938'
+      x-chembl-retrieval-time:
+      - '0.015243768692016602'
     status:
       code: 200
       message: OK
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/protein_classification?format=json&organism__isnull=false&protein_class_id__in=1104&target_type=SINGLE+PROTEIN&tax_id__isnull=false
   response:
     body:
-      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous":
-        null, "total_count": 1}, "protein_classifications": [{"class_level": 3, "definition":
-        "A family of MEMBRANE TRANSPORT PROTEINS that require ATP hydrolysis for the
-        transport of substrates across membranes. The protein family derives its name
-        from the ATP-binding domain found on the protein. [MESH:D018528]", "parent_id":
-        1027, "pref_name": "ATP-binding cassette", "protein_class_desc": "transporter  ntpase  atp
-        binding cassette", "protein_class_id": 1104, "replaced_by": null, "short_name":
-        "ATP binding cassette", "sort_order": null}]}'
+      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous": null, "total_count": 1}, "protein_classifications": [{"class_level": 3, "definition": "A family of MEMBRANE TRANSPORT PROTEINS that require ATP hydrolysis for the transport of substrates across membranes. The protein family derives its name from the ATP-binding domain found on the protein. [MESH:D018528]", "parent_id": 1027, "pref_name": "ATP-binding cassette", "protein_class_desc": "transporter  ntpase  atp binding cassette", "protein_class_id": 1104, "replaced_by": null, "short_name": "ATP binding cassette", "sort_order": null}]}'
     headers:
-      Cache-Control:
+      cache-control:
       - max-age=30000000, s-maxage=30000000
-      Connection:
+      connection:
       - Keep-Alive
-      Content-Disposition:
+      content-disposition:
       - inline
-      Content-Length:
+      content-length:
       - '604'
-      Content-Type:
+      content-type:
       - application/json
-      Date:
-      - Mon, 01 Jun 2026 15:17:31 GMT
-      Server:
+      date:
+      - Tue, 06 Oct 2026 08:43:56 GMT
+      server:
       - gunicorn/20.0.4
-      Strict-Transport-Security:
-      - max-age=0
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - Accept, Origin
-      X-ChEMBL-in-cache:
+      x-chembl-in-cache:
       - 'True'
-      X-ChEMBL-retrieval-time:
-      - '0.0012710094451904297'
+      x-chembl-retrieval-time:
+      - '0.019713878631591797'
     status:
       code: 200
       message: OK
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/protein_classification?format=json&organism__isnull=false&protein_class_id__in=1027&target_type=SINGLE+PROTEIN&tax_id__isnull=false
   response:
     body:
-      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous":
-        null, "total_count": 1}, "protein_classifications": [{"class_level": 2, "definition":
-        null, "parent_id": 1006, "pref_name": "Primary active transporter", "protein_class_desc":
-        "transporter  ntpase", "protein_class_id": 1027, "replaced_by": null, "short_name":
-        "NTPase", "sort_order": null}]}'
+      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous": null, "total_count": 1}, "protein_classifications": [{"class_level": 2, "definition": null, "parent_id": 1006, "pref_name": "Primary active transporter", "protein_class_desc": "transporter  ntpase", "protein_class_id": 1027, "replaced_by": null, "short_name": "NTPase", "sort_order": null}]}'
     headers:
-      Cache-Control:
+      cache-control:
       - max-age=30000000, s-maxage=30000000
-      Connection:
+      connection:
       - Keep-Alive
-      Content-Disposition:
+      content-disposition:
       - inline
-      Content-Length:
+      content-length:
       - '358'
-      Content-Type:
+      content-type:
       - application/json
-      Date:
-      - Mon, 01 Jun 2026 15:17:41 GMT
-      Server:
+      date:
+      - Tue, 06 Oct 2026 09:08:10 GMT
+      server:
       - gunicorn/20.0.4
-      Strict-Transport-Security:
-      - max-age=0
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - Accept, Origin
-      X-ChEMBL-in-cache:
+      x-chembl-in-cache:
       - 'True'
-      X-ChEMBL-retrieval-time:
-      - '0.0018260478973388672'
+      x-chembl-retrieval-time:
+      - '0.01004934310913086'
     status:
       code: 200
       message: OK
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/protein_classification?format=json&organism__isnull=false&protein_class_id__in=1006&target_type=SINGLE+PROTEIN&tax_id__isnull=false
   response:
     body:
-      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous":
-        null, "total_count": 1}, "protein_classifications": [{"class_level": 1, "definition":
-        null, "parent_id": 0, "pref_name": "Transporter", "protein_class_desc": "transporter",
-        "protein_class_id": 1006, "replaced_by": null, "short_name": "Transporter",
-        "sort_order": 4}]}'
+      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous": null, "total_count": 1}, "protein_classifications": [{"class_level": 1, "definition": null, "parent_id": 0, "pref_name": "Transporter", "protein_class_desc": "transporter", "protein_class_id": 1006, "replaced_by": null, "short_name": "Transporter", "sort_order": 4}]}'
     headers:
-      Cache-Control:
+      cache-control:
       - max-age=30000000, s-maxage=30000000
-      Connection:
+      connection:
       - Keep-Alive
-      Content-Disposition:
+      content-disposition:
       - inline
-      Content-Length:
+      content-length:
       - '334'
-      Content-Type:
+      content-type:
       - application/json
-      Date:
-      - Mon, 01 Jun 2026 15:17:51 GMT
-      Server:
+      date:
+      - Tue, 06 Oct 2026 09:08:20 GMT
+      server:
       - gunicorn/20.0.4
-      Strict-Transport-Security:
-      - max-age=0
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - Accept, Origin
-      X-ChEMBL-in-cache:
+      x-chembl-in-cache:
       - 'True'
-      X-ChEMBL-retrieval-time:
-      - '0.0019266605377197266'
+      x-chembl-retrieval-time:
+      - '0.13707709312438965'
     status:
       code: 200
       message: OK
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/target_component?component_id__in=124&format=json&organism__isnull=false&target_type=SINGLE+PROTEIN&tax_id__isnull=false
   response:
     body:
-      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous":
-        null, "total_count": 1}, "target_components": [{"accession": "O76074", "component_id":
-        124, "component_type": "PROTEIN", "description": "cGMP-specific 3'',5''-cyclic
-        phosphodiesterase", "go_slims": [{"go_id": "GO:0000166"}, {"go_id": "GO:0002376"},
-        {"go_id": "GO:0005515"}, {"go_id": "GO:0005829"}, {"go_id": "GO:0007165"},
-        {"go_id": "GO:0008081"}, {"go_id": "GO:0008150"}, {"go_id": "GO:0008152"},
-        {"go_id": "GO:0008283"}, {"go_id": "GO:0016787"}, {"go_id": "GO:0034655"},
-        {"go_id": "GO:0043167"}, {"go_id": "GO:0048856"}], "organism": "Homo sapiens",
-        "protein_classifications": [{"protein_classification_id": 104}], "sequence":
-        "MERAGPSFGQQRQQQQPQQQKQQQRDQDSVEAWLDDHWDFTFSYFVRKATREMVNAWFAERVHTIPVCKEGIRGHTESCSCPLQQSPRADNSAPGTPTRKISASEFDRPLRPIVVKDSEGTVSFLSDSEKKEQMPLTPPRFDHDEGDQCSRLLELVKDISSHLDVTALCHKIFLHIHGLISADRYSLFLVCEDSSNDKFLISRLFDVAEGSTLEEVSNNCIRLEWNKGIVGHVAALGEPLNIKDAYEDPRFNAEVDQITGYKTQSILCMPIKNHREEVVGVAQAINKKSGNGGTFTEKDEKDFAAYLAFCGIVLHNAQLYETSLLENKRNQVLLDLASLIFEEQQSLEVILKKIAATIISFMQVQKCTIFIVDEDCSDSFSSVFHMECEELEKSSDTLTREHDANKINYMYAQYVKNTMEPLNIPDVSKDKRFPWTTENTGNVNQQCIRSLLCTPIKNGKKNKVIGVCQLVNKMEENTGKVKPFNRNDEQFLEAFVIFCGLGIQNTQMYEAVERAMAKQMVTLEVLSYHASAAEEETRELQSLAAAVVPSAQTLKITDFSFSDFELSDLETALCTIRMFTDLNLVQNFQMKHEVLCRWILSVKKNYRKNVAYHNWRHAFNTAQCMFAALKAGKIQNKLTDLEILALLIAALSHDLDHRGVNNSYIQRSEHPLAQLYCHSIMEHHHFDQCLMILNSPGNQILSGLSIEEYKTTLKIIKQAILATDLALYIKRRGEFFELIRKNQFNLEDPHQKELFLAMLMTACDLSAITKPWPIQQRIAELVATEFFDQGDRERKELNIEPTDLMNREKKNKIPSMQVGFIDAICLQLYEALTHVSEDCFPLLDGCRKNRQKWQALAEQQEKMLINGESGQAKRN",
-        "target_component_synonyms": [{"component_synonym": "3.1.4.35", "syn_type":
-        "EC_NUMBER"}, {"component_synonym": "CGB-PDE", "syn_type": "UNIPROT"}, {"component_synonym":
-        "cGMP-binding cGMP-specific phosphodiesterase", "syn_type": "UNIPROT"}, {"component_synonym":
-        "cGMP-specific 3'',5''-cyclic phosphodiesterase", "syn_type": "UNIPROT"},
-        {"component_synonym": "PDE5", "syn_type": "GENE_SYMBOL_OTHER"}, {"component_synonym":
-        "PDE5A", "syn_type": "GENE_SYMBOL"}], "target_component_xrefs": [{"xref_id":
-        "O76074", "xref_name": null, "xref_src_db": "AlphaFoldDB"}, {"xref_id": "O76074",
-        "xref_name": null, "xref_src_db": "ExpressionAtlas"}, {"xref_id": "GO:0005829",
-        "xref_name": "cytosol", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0004112",
-        "xref_name": "cyclic-nucleotide phosphodiesterase activity", "xref_src_db":
-        "GoFunction"}, {"xref_id": "GO:0004114", "xref_name": "3'',5''-cyclic-nucleotide
-        phosphodiesterase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0004115",
-        "xref_name": "3'',5''-cyclic-AMP phosphodiesterase activity", "xref_src_db":
-        "GoFunction"}, {"xref_id": "GO:0004117", "xref_name": "calmodulin-activated
-        dual specificity 3'',5''-cyclic-GMP, 3'',5''-cyclic-AMP phosphodiesterase
-        activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0005515", "xref_name":
-        "protein binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0016787",
-        "xref_name": "hydrolase activity", "xref_src_db": "GoFunction"}, {"xref_id":
-        "GO:0030553", "xref_name": "cGMP binding", "xref_src_db": "GoFunction"}, {"xref_id":
-        "GO:0046872", "xref_name": "metal ion binding", "xref_src_db": "GoFunction"},
-        {"xref_id": "GO:0047555", "xref_name": "3'',5''-cyclic-GMP phosphodiesterase
-        activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0048101", "xref_name":
-        "calmodulin-activated 3'',5''-cyclic-GMP phosphodiesterase activity", "xref_src_db":
-        "GoFunction"}, {"xref_id": "GO:0007165", "xref_name": "signal transduction",
-        "xref_src_db": "GoProcess"}, {"xref_id": "GO:0010613", "xref_name": "positive
-        regulation of cardiac muscle hypertrophy", "xref_src_db": "GoProcess"}, {"xref_id":
-        "GO:0010749", "xref_name": "regulation of nitric oxide mediated signal transduction",
-        "xref_src_db": "GoProcess"}, {"xref_id": "GO:0019933", "xref_name": "cAMP-mediated
-        signaling", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0042098", "xref_name":
-        "T cell proliferation", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0042130",
-        "xref_name": "negative regulation of T cell proliferation", "xref_src_db":
-        "GoProcess"}, {"xref_id": "GO:0046068", "xref_name": "cGMP metabolic process",
-        "xref_src_db": "GoProcess"}, {"xref_id": "GO:0046069", "xref_name": "cGMP
-        catabolic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0048599",
-        "xref_name": "oocyte development", "xref_src_db": "GoProcess"}, {"xref_id":
-        "GO:0055118", "xref_name": "negative regulation of cardiac muscle contraction",
-        "xref_src_db": "GoProcess"}, {"xref_id": "GO:0060282", "xref_name": "positive
-        regulation of oocyte development", "xref_src_db": "GoProcess"}, {"xref_id":
-        "HGNC:8784", "xref_name": "PDE5A", "xref_src_db": "HGNC"}, {"xref_id": "O76074",
-        "xref_name": null, "xref_src_db": "IntAct"}, {"xref_id": "IPR002073", "xref_name":
-        "PDEase_catalytic_dom", "xref_src_db": "InterPro"}, {"xref_id": "IPR003018",
-        "xref_name": "GAF", "xref_src_db": "InterPro"}, {"xref_id": "IPR003607", "xref_name":
-        "HD/PDEase_dom", "xref_src_db": "InterPro"}, {"xref_id": "IPR023088", "xref_name":
-        "PDEase", "xref_src_db": "InterPro"}, {"xref_id": "IPR023174", "xref_name":
-        "PDEase_CS", "xref_src_db": "InterPro"}, {"xref_id": "IPR029016", "xref_name":
-        "GAF-like_dom_sf", "xref_src_db": "InterPro"}, {"xref_id": "IPR036971", "xref_name":
-        "PDEase_catalytic_dom_sf", "xref_src_db": "InterPro"}, {"xref_id": "PTHR11347",
-        "xref_name": "CYCLIC NUCLEOTIDE PHOSPHODIESTERASE", "xref_src_db": "PANTHER"},
-        {"xref_id": "1RKP", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "1T9R", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1T9S", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "1TBF", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "1UDT", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "1UDU", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1UHO", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "1XOZ", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "1XP0", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "2CHM", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "2H40", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "2H42", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "2H44", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "2XSS", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3B2R", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "3BJC", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "3HC8", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "3HDZ", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3JWQ", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "3JWR", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "3LFV", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "3MF0", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3SHY", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "3SHZ", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "3SIE", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "3TGE", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3TGG", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "4G2W", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "4G2Y", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "4I9Z", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "4IA0", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "4MD6", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "4OEW", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "4OEX", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "5JO3", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "5ZZ2", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "6ACB", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "6IWI", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "6L6E", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "6VBI", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "7FAQ", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "7FAR", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "8W4S", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "8W4T", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "8WKF", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "8WKG", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "8XWW", "xref_name":
-        null, "xref_src_db": "PDB"}, {"xref_id": "9LSL", "xref_name": null, "xref_src_db":
-        "PDB"}, {"xref_id": "9LSM", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id":
-        "1RKP", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1T9R", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "1T9S", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "1TBF", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "1UDT", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1UDU", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "1UHO", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "1XOZ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "1XP0", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "2CHM", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "2H40", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "2H42", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "2H44", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "2XSS", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "3B2R", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "3BJC", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "3HC8", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3HDZ", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "3JWQ", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "3JWR", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "3LFV", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3MF0", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "3SHY", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "3SHZ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "3SIE", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3TGE", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "3TGG", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "4G2W", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "4G2Y", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4I9Z", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "4IA0", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "4MD6", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "4OEW", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4OEX", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "5JO3", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "5ZZ2", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "6ACB", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "6IWI", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "6L6E", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "6VBI", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "7FAQ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "7FAR", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "8W4S", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "8W4T", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "8WKF", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "8WKG", "xref_name":
-        "A", "xref_src_db": "PDBe"}, {"xref_id": "8XWW", "xref_name": "A", "xref_src_db":
-        "PDBe"}, {"xref_id": "9LSL", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id":
-        "9LSM", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "PF00233", "xref_name":
-        "PDEase_I", "xref_src_db": "Pfam"}, {"xref_id": "PF01590", "xref_name": "GAF",
-        "xref_src_db": "Pfam"}, {"xref_id": "PA33132", "xref_name": "phosphodiesterase
-        5A", "xref_src_db": "PharmGKB"}, {"xref_id": "O76074", "xref_name": null,
-        "xref_src_db": "Pharos"}, {"xref_id": "R-HSA-418457", "xref_name": "cGMP effects",
-        "xref_src_db": "Reactome"}, {"xref_id": "R-HSA-445355", "xref_name": "Smooth
-        Muscle Contraction", "xref_src_db": "Reactome"}, {"xref_id": "R-HSA-9013422",
-        "xref_name": "RHOBTB1 GTPase cycle", "xref_src_db": "Reactome"}, {"xref_id":
-        "A0AV69", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db":
-        "UniProt"}, {"xref_id": "A8K2C4", "xref_name": "cGMP-specific 3'',5''-cyclic
-        phosphodiesterase", "xref_src_db": "UniProt"}, {"xref_id": "O75026", "xref_name":
-        "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"},
-        {"xref_id": "O75887", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase",
-        "xref_src_db": "UniProt"}, {"xref_id": "O76074", "xref_name": "cGMP-specific
-        3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"}, {"xref_id":
-        "Q86UI0", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db":
-        "UniProt"}, {"xref_id": "Q86V66", "xref_name": "cGMP-specific 3'',5''-cyclic
-        phosphodiesterase", "xref_src_db": "UniProt"}, {"xref_id": "Q9Y6Z6", "xref_name":
-        "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"}],
-        "targets": [{"target_chembl_id": "CHEMBL1827"}, {"target_chembl_id": "CHEMBL2095220"},
-        {"target_chembl_id": "CHEMBL2097161"}, {"target_chembl_id": "CHEMBL2111470"},
-        {"target_chembl_id": "CHEMBL2111340"}, {"target_chembl_id": "CHEMBL2111400"},
-        {"target_chembl_id": "CHEMBL2363066"}, {"target_chembl_id": "CHEMBL4523626"}],
-        "tax_id": 9606}]}'
+      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous": null, "total_count": 1}, "target_components": [{"accession": "O76074", "component_id": 124, "component_type": "PROTEIN", "description": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "go_slims": [{"go_id": "GO:0000166"}, {"go_id": "GO:0002376"}, {"go_id": "GO:0005515"}, {"go_id": "GO:0005829"}, {"go_id": "GO:0007165"}, {"go_id": "GO:0008081"}, {"go_id": "GO:0008150"}, {"go_id": "GO:0008152"}, {"go_id": "GO:0008283"}, {"go_id": "GO:0016787"}, {"go_id": "GO:0034655"}, {"go_id": "GO:0043167"}, {"go_id": "GO:0048856"}], "organism": "Homo sapiens", "protein_classifications": [{"protein_classification_id": 104}], "sequence": "MERAGPSFGQQRQQQQPQQQKQQQRDQDSVEAWLDDHWDFTFSYFVRKATREMVNAWFAERVHTIPVCKEGIRGHTESCSCPLQQSPRADNSAPGTPTRKISASEFDRPLRPIVVKDSEGTVSFLSDSEKKEQMPLTPPRFDHDEGDQCSRLLELVKDISSHLDVTALCHKIFLHIHGLISADRYSLFLVCEDSSNDKFLISRLFDVAEGSTLEEVSNNCIRLEWNKGIVGHVAALGEPLNIKDAYEDPRFNAEVDQITGYKTQSILCMPIKNHREEVVGVAQAINKKSGNGGTFTEKDEKDFAAYLAFCGIVLHNAQLYETSLLENKRNQVLLDLASLIFEEQQSLEVILKKIAATIISFMQVQKCTIFIVDEDCSDSFSSVFHMECEELEKSSDTLTREHDANKINYMYAQYVKNTMEPLNIPDVSKDKRFPWTTENTGNVNQQCIRSLLCTPIKNGKKNKVIGVCQLVNKMEENTGKVKPFNRNDEQFLEAFVIFCGLGIQNTQMYEAVERAMAKQMVTLEVLSYHASAAEEETRELQSLAAAVVPSAQTLKITDFSFSDFELSDLETALCTIRMFTDLNLVQNFQMKHEVLCRWILSVKKNYRKNVAYHNWRHAFNTAQCMFAALKAGKIQNKLTDLEILALLIAALSHDLDHRGVNNSYIQRSEHPLAQLYCHSIMEHHHFDQCLMILNSPGNQILSGLSIEEYKTTLKIIKQAILATDLALYIKRRGEFFELIRKNQFNLEDPHQKELFLAMLMTACDLSAITKPWPIQQRIAELVATEFFDQGDRERKELNIEPTDLMNREKKNKIPSMQVGFIDAICLQLYEALTHVSEDCFPLLDGCRKNRQKWQALAEQQEKMLINGESGQAKRN", "target_component_synonyms": [{"component_synonym": "3.1.4.35", "syn_type": "EC_NUMBER"}, {"component_synonym": "CGB-PDE", "syn_type": "UNIPROT"}, {"component_synonym": "cGMP-binding cGMP-specific phosphodiesterase", "syn_type": "UNIPROT"}, {"component_synonym": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "syn_type": "UNIPROT"}, {"component_synonym": "PDE5", "syn_type": "GENE_SYMBOL_OTHER"}, {"component_synonym": "PDE5A", "syn_type": "GENE_SYMBOL"}], "target_component_xrefs": [{"xref_id": "O76074", "xref_name": null, "xref_src_db": "AlphaFoldDB"}, {"xref_id": "O76074", "xref_name": null, "xref_src_db": "ExpressionAtlas"}, {"xref_id": "GO:0005829", "xref_name": "cytosol", "xref_src_db": "GoComponent"}, {"xref_id": "GO:0004112", "xref_name": "cyclic-nucleotide phosphodiesterase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0004114", "xref_name": "3'',5''-cyclic-nucleotide phosphodiesterase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0004115", "xref_name": "3'',5''-cyclic-AMP phosphodiesterase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0004117", "xref_name": "calmodulin-activated dual specificity 3'',5''-cyclic-GMP, 3'',5''-cyclic-AMP phosphodiesterase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0005515", "xref_name": "protein binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0016787", "xref_name": "hydrolase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0030553", "xref_name": "cGMP binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0046872", "xref_name": "metal ion binding", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0047555", "xref_name": "3'',5''-cyclic-GMP phosphodiesterase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0048101", "xref_name": "calmodulin-activated 3'',5''-cyclic-GMP phosphodiesterase activity", "xref_src_db": "GoFunction"}, {"xref_id": "GO:0007165", "xref_name": "signal transduction", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0010613", "xref_name": "positive regulation of cardiac muscle hypertrophy", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0010749", "xref_name": "regulation of nitric oxide mediated signal transduction", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0019933", "xref_name": "cAMP-mediated signaling", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0042098", "xref_name": "T cell proliferation", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0042130", "xref_name": "negative regulation of T cell proliferation", "xref_src_db": "GoProcess"}, {"xref_id":
+        "GO:0046068", "xref_name": "cGMP metabolic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0046069", "xref_name": "cGMP catabolic process", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0048599", "xref_name": "oocyte development", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0055118", "xref_name": "negative regulation of cardiac muscle contraction", "xref_src_db": "GoProcess"}, {"xref_id": "GO:0060282", "xref_name": "positive regulation of oocyte development", "xref_src_db": "GoProcess"}, {"xref_id": "HGNC:8784", "xref_name": "PDE5A", "xref_src_db": "HGNC"}, {"xref_id": "O76074", "xref_name": null, "xref_src_db": "IntAct"}, {"xref_id": "IPR002073", "xref_name": "PDEase_catalytic_dom", "xref_src_db": "InterPro"}, {"xref_id": "IPR003018", "xref_name": "GAF", "xref_src_db": "InterPro"}, {"xref_id": "IPR003607", "xref_name": "HD/PDEase_dom", "xref_src_db": "InterPro"}, {"xref_id": "IPR023088", "xref_name": "PDEase", "xref_src_db": "InterPro"}, {"xref_id": "IPR023174", "xref_name": "PDEase_CS", "xref_src_db": "InterPro"}, {"xref_id": "IPR029016", "xref_name": "GAF-like_dom_sf", "xref_src_db": "InterPro"}, {"xref_id": "IPR036971", "xref_name": "PDEase_catalytic_dom_sf", "xref_src_db": "InterPro"}, {"xref_id": "PTHR11347", "xref_name": "CYCLIC NUCLEOTIDE PHOSPHODIESTERASE", "xref_src_db": "PANTHER"}, {"xref_id": "1RKP", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1T9R", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1T9S", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1TBF", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1UDT", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1UDU", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1UHO", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1XOZ", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1XP0", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "2CHM", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "2H40", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "2H42", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "2H44", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "2XSS", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3B2R", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3BJC", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3HC8", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3HDZ", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3JWQ", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3JWR", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3LFV", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3MF0", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3SHY", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3SHZ", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3SIE", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3TGE", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "3TGG", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "4G2W", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "4G2Y", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "4I9Z", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "4IA0", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "4MD6", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "4OEW", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "4OEX", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "5JO3", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "5ZZ2", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "6ACB", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "6IWI", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "6L6E", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "6VBI", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "7FAQ", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "7FAR", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "8W4S", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "8W4T", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "8WKF", "xref_name": null, "xref_src_db":
+        "PDB"}, {"xref_id": "8WKG", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "8XWW", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "9LSL", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "9LSM", "xref_name": null, "xref_src_db": "PDB"}, {"xref_id": "1RKP", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1T9R", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1T9S", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1TBF", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1UDT", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1UDU", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1UHO", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1XOZ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "1XP0", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "2CHM", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "2H40", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "2H42", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "2H44", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "2XSS", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3B2R", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3BJC", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3HC8", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3HDZ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3JWQ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3JWR", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3LFV", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3MF0", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3SHY", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3SHZ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3SIE", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3TGE", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "3TGG", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4G2W", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4G2Y", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4I9Z", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4IA0", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4MD6", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4OEW", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "4OEX", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "5JO3", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "5ZZ2", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "6ACB", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "6IWI", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "6L6E", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "6VBI", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "7FAQ", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "7FAR", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "8W4S", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "8W4T", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "8WKF", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "8WKG", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "8XWW", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "9LSL", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "9LSM", "xref_name": "A", "xref_src_db": "PDBe"}, {"xref_id": "PF00233", "xref_name": "PDEase_I", "xref_src_db": "Pfam"}, {"xref_id": "PF01590", "xref_name": "GAF", "xref_src_db": "Pfam"}, {"xref_id": "PA33132", "xref_name": "phosphodiesterase 5A", "xref_src_db": "PharmGKB"}, {"xref_id": "O76074", "xref_name": null, "xref_src_db": "Pharos"}, {"xref_id": "R-HSA-418457", "xref_name": "cGMP effects", "xref_src_db": "Reactome"}, {"xref_id": "R-HSA-445355", "xref_name": "Smooth Muscle Contraction", "xref_src_db": "Reactome"}, {"xref_id": "R-HSA-9013422", "xref_name": "RHOBTB1 GTPase cycle", "xref_src_db": "Reactome"}, {"xref_id": "A0AV69", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"}, {"xref_id": "A8K2C4", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"}, {"xref_id":
+        "O75026", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"}, {"xref_id": "O75887", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"}, {"xref_id": "O76074", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"}, {"xref_id": "Q86UI0", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"}, {"xref_id": "Q86V66", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"}, {"xref_id": "Q9Y6Z6", "xref_name": "cGMP-specific 3'',5''-cyclic phosphodiesterase", "xref_src_db": "UniProt"}], "targets": [{"target_chembl_id": "CHEMBL1827"}, {"target_chembl_id": "CHEMBL2095220"}, {"target_chembl_id": "CHEMBL2097161"}, {"target_chembl_id": "CHEMBL2111470"}, {"target_chembl_id": "CHEMBL2111340"}, {"target_chembl_id": "CHEMBL2111400"}, {"target_chembl_id": "CHEMBL2363066"}, {"target_chembl_id": "CHEMBL4523626"}], "tax_id": 9606}]}'
     headers:
-      Cache-Control:
+      cache-control:
       - max-age=30000000, s-maxage=30000000
-      Connection:
+      connection:
       - Keep-Alive
-      Content-Disposition:
+      content-disposition:
       - inline
-      Content-Length:
+      content-length:
       - '13265'
-      Content-Type:
+      content-type:
       - application/json
-      Date:
-      - Mon, 01 Jun 2026 15:18:01 GMT
-      Server:
+      date:
+      - Tue, 06 Oct 2026 09:08:30 GMT
+      server:
       - gunicorn/20.0.4
-      Strict-Transport-Security:
-      - max-age=0
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - Accept, Origin
-      X-ChEMBL-in-cache:
+      x-chembl-in-cache:
       - 'True'
-      X-ChEMBL-retrieval-time:
-      - '0.005650758743286133'
+      x-chembl-retrieval-time:
+      - '0.021699905395507812'
     status:
       code: 200
       message: OK
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/protein_classification?format=json&organism__isnull=false&protein_class_id__in=104&target_type=SINGLE+PROTEIN&tax_id__isnull=false
   response:
     body:
-      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous":
-        null, "total_count": 1}, "protein_classifications": [{"class_level": 4, "definition":
-        null, "parent_id": 1065, "pref_name": "Phosphodiesterase 5A", "protein_class_desc":
-        "enzyme  phosphodiesterase  pde_5  pde_5a", "protein_class_id": 104, "replaced_by":
-        null, "short_name": "PDE_5A", "sort_order": null}]}'
+      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous": null, "total_count": 1}, "protein_classifications": [{"class_level": 4, "definition": null, "parent_id": 1065, "pref_name": "Phosphodiesterase 5A", "protein_class_desc": "enzyme  phosphodiesterase  pde_5  pde_5a", "protein_class_id": 104, "replaced_by": null, "short_name": "PDE_5A", "sort_order": null}]}'
     headers:
-      Cache-Control:
+      cache-control:
       - max-age=30000000, s-maxage=30000000
-      Connection:
+      connection:
       - Keep-Alive
-      Content-Disposition:
+      content-disposition:
       - inline
-      Content-Length:
+      content-length:
       - '372'
-      Content-Type:
+      content-type:
       - application/json
-      Date:
-      - Mon, 01 Jun 2026 15:18:11 GMT
-      Server:
+      date:
+      - Tue, 06 Oct 2026 09:08:40 GMT
+      server:
       - gunicorn/20.0.4
-      Strict-Transport-Security:
-      - max-age=0
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - Accept, Origin
-      X-ChEMBL-in-cache:
+      x-chembl-in-cache:
       - 'True'
-      X-ChEMBL-retrieval-time:
-      - '0.001146078109741211'
+      x-chembl-retrieval-time:
+      - '0.018776893615722656'
     status:
       code: 200
       message: OK
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/protein_classification?format=json&organism__isnull=false&protein_class_id__in=1065&target_type=SINGLE+PROTEIN&tax_id__isnull=false
   response:
     body:
-      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous":
-        null, "total_count": 1}, "protein_classifications": [{"class_level": 3, "definition":
-        "A cyclic nucleotide phosphodiesterase subfamily that is highly specific for
-        CYCLIC GMP. It is found predominantly in vascular tissue and plays an important
-        role in regulating VASCULAR SMOOTH MUSCLE contraction. [MESH:D054706]", "parent_id":
-        1034, "pref_name": "Phosphodiesterase 5", "protein_class_desc": "enzyme  phosphodiesterase  pde_5",
-        "protein_class_id": 1065, "replaced_by": null, "short_name": "PDE_5", "sort_order":
-        null}]}'
+      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous": null, "total_count": 1}, "protein_classifications": [{"class_level": 3, "definition": "A cyclic nucleotide phosphodiesterase subfamily that is highly specific for CYCLIC GMP. It is found predominantly in vascular tissue and plays an important role in regulating VASCULAR SMOOTH MUSCLE contraction. [MESH:D054706]", "parent_id": 1034, "pref_name": "Phosphodiesterase 5", "protein_class_desc": "enzyme  phosphodiesterase  pde_5", "protein_class_id": 1065, "replaced_by": null, "short_name": "PDE_5", "sort_order": null}]}'
     headers:
-      Cache-Control:
+      cache-control:
       - max-age=30000000, s-maxage=30000000
-      Connection:
+      connection:
       - Keep-Alive
-      Content-Disposition:
+      content-disposition:
       - inline
-      Content-Length:
+      content-length:
       - '586'
-      Content-Type:
+      content-type:
       - application/json
-      Date:
-      - Mon, 01 Jun 2026 15:18:22 GMT
-      Server:
+      date:
+      - Tue, 06 Oct 2026 09:08:50 GMT
+      server:
       - gunicorn/20.0.4
-      Strict-Transport-Security:
-      - max-age=0
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - Accept, Origin
-      X-ChEMBL-in-cache:
+      x-chembl-in-cache:
       - 'True'
-      X-ChEMBL-retrieval-time:
-      - '0.001791238784790039'
+      x-chembl-retrieval-time:
+      - '0.01440882682800293'
     status:
       code: 200
       message: OK
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/protein_classification?format=json&organism__isnull=false&protein_class_id__in=1034&target_type=SINGLE+PROTEIN&tax_id__isnull=false
   response:
     body:
-      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous":
-        null, "total_count": 1}, "protein_classifications": [{"class_level": 2, "definition":
-        "A class of enzymes that catalyze the hydrolysis of one of the two ester bonds
-        in a phosphodiester compound. EC 3.1.4. [MESH:D010727]", "parent_id": 1, "pref_name":
-        "Phosphodiesterase", "protein_class_desc": "enzyme  phosphodiesterase", "protein_class_id":
-        1034, "replaced_by": null, "short_name": "Phosphodiesterase", "sort_order":
-        null}]}'
+      string: '{"page_meta": {"limit": 20, "next": null, "offset": 0, "previous": null, "total_count": 1}, "protein_classifications": [{"class_level": 2, "definition": "A class of enzymes that catalyze the hydrolysis of one of the two ester bonds in a phosphodiester compound. EC 3.1.4. [MESH:D010727]", "parent_id": 1, "pref_name": "Phosphodiesterase", "protein_class_desc": "enzyme  phosphodiesterase", "protein_class_id": 1034, "replaced_by": null, "short_name": "Phosphodiesterase", "sort_order": null}]}'
     headers:
-      Cache-Control:
+      cache-control:
       - max-age=30000000, s-maxage=30000000
-      Connection:
+      connection:
       - Keep-Alive
-      Content-Disposition:
+      content-disposition:
       - inline
-      Content-Length:
+      content-length:
       - '493'
-      Content-Type:
+      content-type:
       - application/json
-      Date:
-      - Mon, 01 Jun 2026 15:18:31 GMT
-      Server:
+      date:
+      - Tue, 06 Oct 2026 09:09:00 GMT
+      server:
       - gunicorn/20.0.4
-      Strict-Transport-Security:
-      - max-age=0
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - Accept, Origin
-      X-ChEMBL-in-cache:
+      x-chembl-in-cache:
       - 'True'
-      X-ChEMBL-retrieval-time:
-      - '0.0022308826446533203'
+      x-chembl-retrieval-time:
+      - '0.11797475814819336'
     status:
       code: 200
       message: OK

@@ -2,39 +2,39 @@ interactions:
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/status
   response:
     body:
-      string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date":
-        "2025-07-28", "compound_records": 3774137, "disinct_compounds": 2878135, "publications":
-        99142, "status": "UP", "targets": 17803}'
+      string: '{"activities": 24527044, "chembl_db_version": "ChEMBL_37", "chembl_release_date":
+        "2026-05-01", "compound_records": 3824604, "disinct_compounds": 2921148, "publications":
+        101100, "status": "UP", "targets": 18552}'
     headers:
-      Cache-Control:
+      cache-control:
       - max-age=30000000, s-maxage=30000000
-      Connection:
+      connection:
       - Keep-Alive
-      Content-Length:
-      - '211'
-      Content-Type:
+      content-length:
+      - '212'
+      content-type:
       - application/json
-      Date:
-      - Wed, 04 Mar 2026 04:28:48 GMT
-      Server:
+      date:
+      - Tue, 06 Oct 2026 06:29:31 GMT
+      server:
       - gunicorn/20.0.4
-      Strict-Transport-Security:
-      - max-age=0
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - Accept, Origin
     status:
       code: 200
@@ -42,16 +42,16 @@ interactions:
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/assay?format=json&assay_chembl_id__in=CHEMBL615178%2CCHEMBL615210
   response:
@@ -82,28 +82,28 @@ interactions:
         "variant_sequence": null}], "page_meta": {"limit": 20, "next": null, "offset":
         0, "previous": null, "total_count": 2}}'
     headers:
-      Cache-Control:
+      cache-control:
       - max-age=30000000, s-maxage=30000000
-      Connection:
+      connection:
       - Keep-Alive
-      Content-Disposition:
+      content-disposition:
       - inline
-      Content-Length:
+      content-length:
       - '2026'
-      Content-Type:
+      content-type:
       - application/json
-      Date:
-      - Wed, 01 Apr 2026 16:12:58 GMT
-      Server:
+      date:
+      - Tue, 06 Oct 2026 08:41:36 GMT
+      server:
       - gunicorn/20.0.4
-      Strict-Transport-Security:
-      - max-age=0
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - Accept, Origin
-      X-ChEMBL-in-cache:
-      - 'False'
-      X-ChEMBL-retrieval-time:
-      - '1.7591683864593506'
+      x-chembl-in-cache:
+      - 'True'
+      x-chembl-retrieval-time:
+      - '0.010781526565551758'
     status:
       code: 200
       message: OK
