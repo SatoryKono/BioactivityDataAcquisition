@@ -100,6 +100,12 @@ def _s03_status():
     return s03_findings, s03_types
 
 
+def _uses_fetched_counts(code: str) -> bool:
+    return "total_fetched" in code or (
+        "fetched" in code and "records_bronze" not in code
+    )
+
+
 def _spot_status(file: str, span: str, needles: list[str], code: str):
     missing = [n for n in needles if n not in code]
     present = [n for n in needles if n in code]
@@ -114,9 +120,7 @@ def _spot_status(file: str, span: str, needles: list[str], code: str):
         still = "_ensure_registrations()" in code and "PROVIDERS" not in code
         evidence = "still bare _ensure_registrations()" if still else "fixed or changed"
     elif "total_fetched" in needles:
-        still = "total_fetched" in code or (
-            "fetched" in code and "records_bronze" not in code
-        )
+        still = _uses_fetched_counts(code)
         evidence = "still uses fetched counts" if still else "uses bronze or changed"
     else:
         evidence = f"present={present} missing={missing}"
