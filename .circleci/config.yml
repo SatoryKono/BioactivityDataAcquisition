@@ -342,7 +342,10 @@ jobs:
           (
           cd "$BIOETL_WORKSPACE/."
           image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').image")
-          docker pull "$image"
+          base_image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').base_image")
+          # BuildKit cache does not register the base reference in the Docker image store.
+          docker pull --platform linux/amd64 "$base_image"
+          docker pull --platform linux/amd64 "$image"
           node grafana/tooling/router-v7-bridge/verify-host-image.mjs \
             bioetl-router-host:acceptance
           )
@@ -3130,8 +3133,24 @@ workflows:
           requires: [classify]
       - docker-build:
           requires: [classify]
+      # Retain the legacy PR/push checks without credentials or nightly heavy jobs.
+      - port-contracts:
+          requires: [classify]
+      - provider-contract-drift:
+          requires: [classify]
+      - memory-freshness:
+          requires: [classify]
+      - skills-consistency:
+          requires: [classify]
+      - e2e-matrix-replay:
+          requires: [classify]
       - pr-gate-complete:
           requires:
+            - port-contracts
+            - provider-contract-drift
+            - memory-freshness
+            - skills-consistency
+            - e2e-matrix-replay
             - lint-ruff
             - lint-arch
             - arch-tests

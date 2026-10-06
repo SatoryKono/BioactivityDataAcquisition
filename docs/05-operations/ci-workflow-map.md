@@ -104,7 +104,7 @@ three matrix runs, the ChEMBL activity smoke, the 15% skip SLO, zero recurrent
 infra/code failures, and a final check of every pytest exit code. Execution is
 bounded to 25 minutes and retains JUnit and diagnostic artifacts. This lane has
 no credential context and cannot record new cassettes. Live/nightly credentials,
-PR event parity still requires acceptance. Manual main replay acceptance is recorded below.
+PR event parity still requires acceptance. Scheduled main replay acceptance is recorded below.
 
 The prepared `mutation` lane additionally requires `pipeline.trigger.type=schedule`;
 manual/API/PR triggers cannot start its four jobs. It preserves the existing four
@@ -257,7 +257,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `docs-kpi-weekly.yml` | `30 4 * * 1` | CircleCI docs-kpi | Scheduled pipeline351/job6374 succeeds on main c644f2e4:118 outside navigation,zero orphans,no breaches; three artifacts verified. Monday04UTC restored; notification parity pending |
 | `docs.yml` | — | CircleCI docs-governance | Prepared required gate; full docs/render parity pending |
 | `duplication-complexity.yml` | — | CircleCI duplication | Prepared required gate; full scan thresholds preserved |
-| `e2e-matrix-health.yml` | `30 2 * * *` | E2E replay and controlled live lanes | Main pipeline330 on3f26965 SUCCESS: full5902 passes159 tests; prompt5900 passes51; matrix5901 passes three11-test runs plus one smoke; strict live5903 passes11. All zero skips/errors,14 artifacts independently verified. Daily02UTC schedule registered with run-live=true; scheduled and PR-event acceptance pending |
+| `e2e-matrix-health.yml` | `30 2 * * *` | E2E replay and controlled live lanes | Scheduled pipeline353 on main c644f2e4 SUCCESS:full6377 passes159,prompt6376 passes52,matrix6378 passes3x11+1,live6379 passes11; zero errors/skips and14verified artifacts. Daily02UTC restored with run-live=true; automatic PR smoke wiring prepared, remote event acceptance pending |
 | `github-settings-quarterly-review.yml` | `23 6 1 1,4,7,10 *` | CircleCI github-settings-review | Scheduled pipeline355/job6381 succeeds on main c644f2e4; JSON/Markdown report verified and policy drift remains explicit. First-day Jan/Apr/Jul/Oct06UTC restored with Scheduling System attribution |
 | `import-linter.yml` | — | CircleCI lint-arch and arch-tests | Prepared gates; full external architecture acceptance pending |
 | `labeler.yml` | — | Retain disabled label maintenance | Preserve #10263/#11234; taxonomy reconciliation is required before any future trusted replacement |
@@ -514,9 +514,11 @@ and 30-minute strict-live limits. `ci-lane=e2e-replay` always runs the three smo
 reruns, full non-smoke replay, and prompt contracts on main. `run-live=true`
 additionally selects `e2e-live`, with test mode false, strict health checks,
 new-episode VCR mode and the unchanged 15% skip-rate SLO. The daily 02 UTC
-schedule is registered with `run-live=true`; successful full, live, scheduled
-and PR-event execution acceptance remains pending. The ordinary PR workflow
-remains separate.
+schedule is registered with `run-live=true`; scheduled pipeline353 on main c644f2e4 passed full159,prompt52,
+matrix3x11+1 and live11 without errors or skips. The ordinary PR workflow
+now includes only the bounded three-run smoke job; full replay, prompts and
+live checks remain in the explicit nightly/manual lane. Remote PR smoke
+acceptance remains pending.
 
 `ci-lane=skills-consistency` retains read-only checks. Setting the typed
 `approve-runtime-sync=true` additionally exposes `runtime-sync-approval` and
@@ -572,5 +574,19 @@ Scheduled acceptance on 2026-10-06 used actual Scheduling System pipelines
 acceptance hours were reverted; API readback matched all twelve original
 timetables, parameters and actors. The quarterly review produced a report with
 explicit drift/unavailable controls; successful collection does not certify
-that all repository settings satisfy policy. Router main pipeline359 is running;
-its remote acceptance is not yet claimed.
+that all repository settings satisfy policy. Router main pipeline359 passed the
+bridge and both plugin jobs; host6414 built the image but failed because the
+verifier could not inspect the pinned base image in the Docker image store.
+The candidate now explicitly pulls that same manifest-pinned base before
+verification; BuildKit cache availability alone does not register its image ref.
+Remote host acceptance remains pending after this fix.
+
+The ordinary `pr-gate` workflow now also requires the existing `port-contracts`,
+`provider-contract-drift`, `memory-freshness`, `skills-consistency` and
+`e2e-matrix-replay` jobs. These use no credential context and preserve their
+existing commands, defaults, assertions and artifacts. The workflow dependency
+DAG prevents `pr-gate-complete` from succeeding if any of them fails or is
+cancelled. Running them for every triggered PR/default-branch pipeline is a
+conservative superset of the retained Actions path filters. Nightly full/live,
+mutation, performance, publication and approved runtime sync stay opt-in.
+Remote PR and main event acceptance is still required for this wiring.
