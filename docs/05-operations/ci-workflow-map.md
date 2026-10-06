@@ -257,7 +257,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `docs-kpi-weekly.yml` | `30 4 * * 1` | CircleCI docs-kpi | Scheduled pipeline351/job6374 succeeds on main c644f2e4:118 outside navigation,zero orphans,no breaches; three artifacts verified. Monday04UTC restored; notification parity pending |
 | `docs.yml` | — | CircleCI docs-governance | Prepared required gate; full docs/render parity pending |
 | `duplication-complexity.yml` | — | CircleCI duplication | Prepared required gate; full scan thresholds preserved |
-| `e2e-matrix-health.yml` | `30 2 * * *` | E2E replay and controlled live lanes | Scheduled pipeline353 on main c644f2e4 SUCCESS:full6377 passes159,prompt6376 passes52,matrix6378 passes3x11+1,live6379 passes11; zero errors/skips and14verified artifacts. Daily02UTC restored with run-live=true; required PR smoke accepted in pipeline362/job6470 (3x11+1, no skips); main event acceptance pending |
+| `e2e-matrix-health.yml` | `30 2 * * *` | E2E replay and controlled live lanes | Scheduled pipeline353 on main c644f2e4 SUCCESS:full6377 passes159,prompt6376 passes52,matrix6378 passes3x11+1,live6379 passes11; zero errors/skips and14verified artifacts. Daily02UTC restored with run-live=true; required PR smoke accepted in pipeline362/job6470 (3x11+1, no skips); main event acceptance passed in pipeline371 on 8291d29c |
 | `github-settings-quarterly-review.yml` | `23 6 1 1,4,7,10 *` | CircleCI github-settings-review | Scheduled pipeline355/job6381 succeeds on main c644f2e4; JSON/Markdown report verified and policy drift remains explicit. First-day Jan/Apr/Jul/Oct06UTC restored with Scheduling System attribution |
 | `import-linter.yml` | — | CircleCI lint-arch and arch-tests | Prepared gates; full external architecture acceptance pending |
 | `labeler.yml` | — | Retain disabled label maintenance | Preserve #10263/#11234; taxonomy reconciliation is required before any future trusted replacement |
@@ -283,7 +283,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `scorecard.yml` | `30 7 * * 1` | CircleCI scorecard plus SARIF publication | Scheduled pipeline354/job6380 on main c644f2e4 succeeds with all18 checks; five artifacts and source/JSON/SARIF digests independently verified. Monday07UTC restored. sarif_uploaded=false and public_results_published=false; restricted writer credentials and publication acceptance pending; legacy public-results workflow retained |
 | `security.yml` | — | CircleCI security-scans | Main security gates 218–220 passed; all tracked lockfiles remain scanned; SARIF publication parity pending |
 | `semantic-governance.yml` | — | CircleCI `semantic-governance` | Seven canonical checks and four regression suites in the PR/main aggregate and an opt-in main lane; main gates 218–220 accepted |
-| `skills-consistency.yml` | — | CircleCI skills-consistency | Main run 3364 passed static doctor, MCP wrapper pairs, mirror checks and drift=false artifact; typed `approve-runtime-sync=false` prepares a separate approval-gated report/patch job without push; approved no-op sync364/job6514 and required PR job6476 accepted; main event acceptance pending; artifact retention verified at 30 days |
+| `skills-consistency.yml` | — | CircleCI skills-consistency | Main run 3364 passed static doctor, MCP wrapper pairs, mirror checks and drift=false artifact; typed `approve-runtime-sync=false` prepares a separate approval-gated report/patch job without push; approved no-op sync364/job6514 and required PR job6476 accepted; main event acceptance passed in pipeline371 on 8291d29c; artifact retention verified at 30 days |
 | `stale.yml` | — | Retain disabled stale maintenance | Preserve #10263; legacy 14/7-day automation contradicts the canonical draft-only policy |
 | `tests.yml` | — | CircleCI test-fast/test-integration | Main gates 218–220 accepted; historical producer 3363 completed 17 shards with overall STOP; test-tree changes require a new complete 17-shard producer, followed by another main producer after squash integration |
 | `type-checking.yml` | — | CircleCI mypy | Strict mypy gate accepted in main pipelines 218–220 |
@@ -417,10 +417,13 @@ Local guard checks do not qualify as registry or attestation acceptance.
 
 Architecture Metrics retains its manual fast default through the boolean
 `run-heavy` parameter. The heavy profile preserves the legacy pytest selection,
-85% coverage threshold and 25-minute execution limit; it uses the four-core Linux
+85% coverage threshold and 25-minute execution limit; it uses a 16 GiB Linux
 executor with four pytest workers and one numerical-library thread per worker.
 Main pipeline347/job6307 reached the full 8 GiB limit during worker startup with
-`-n auto`; the bounded-worker fix still needs remote acceptance. Windows
+`-n auto`. Job6702 on main8291d29c also reached the 8 GiB limit with four
+workers and lost one worker. The follow-up retains four workers on 16 GiB,
+unsets BASH_ENV after step initialization so child shells preserve their PATH,
+and separates JUnit from coverage XML; full heavy acceptance remains pending. Windows
 job 6308 on f36e2c27 passed both stress tests with zero skips/errors; both artifacts
 were downloaded and the JUnit independently verified. The Windows Server 2022
 job installs checksum-pinned uv
@@ -518,7 +521,9 @@ schedule is registered with `run-live=true`; scheduled pipeline353 on main c644f
 matrix3x11+1 and live11 without errors or skips. The ordinary PR workflow
 now includes only the bounded three-run smoke job; full replay, prompts and
 live checks remain in the explicit nightly/manual lane. Remote PR smoke
-acceptance remains pending.
+acceptance is recorded in pipeline362/job6470 (three runs of 11 tests plus one
+smoke case, without skips or failures); main event acceptance is recorded in
+pipeline371 on 8291d29c (all 32 jobs succeeded).
 
 `ci-lane=skills-consistency` retains read-only checks. Setting the typed
 `approve-runtime-sync=true` additionally exposes `runtime-sync-approval` and
@@ -578,7 +583,9 @@ bridge and both plugin jobs; host6414 built the image but failed because the
 verifier could not inspect the pinned base image in the Docker image store.
 The candidate now explicitly pulls that same manifest-pinned base before
 verification; BuildKit cache availability alone does not register its image ref.
-Remote host acceptance remains pending after this fix.
+Remote host acceptance succeeded in pipeline374 on main8291d29c:
+bridge6703, scenes6704, selector6705 and host6706 all passed. All 66 artifacts
+were downloaded and checksummed; automatic path-trigger acceptance is separate.
 
 The ordinary `pr-gate` workflow now also requires the existing `port-contracts`,
 `provider-contract-drift`, `memory-freshness`, `skills-consistency` and

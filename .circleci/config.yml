@@ -2272,12 +2272,18 @@ jobs:
               export ZIZMOR_OFFLINE=true
             fi
             printf '%s\n' "$CIRCLE_SHA1" > reports/actions-audit/source-sha.txt
+            set +e
             "$HOME/.local/bin/zizmor" \
               --min-severity high --min-confidence high --config .github/zizmor.yml \
               --format json .github/workflows .github/actions > reports/actions-audit/findings.json
+            json_status=$?
             "$HOME/.local/bin/zizmor" \
               --min-severity high --min-confidence high --config .github/zizmor.yml \
               --format sarif .github/workflows .github/actions > reports/actions-audit/findings.sarif
+            sarif_status=$?
+            set -e
+            if [ "$json_status" -ne 0 ]; then exit "$json_status"; fi
+            exit "$sarif_status"
             BIOETL_ACTIONS_AUDIT
             timeout --signal=TERM --kill-after=30s 9m bash /tmp/actions-audit.sh
       - store_artifacts:
