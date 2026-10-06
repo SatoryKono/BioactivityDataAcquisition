@@ -92,9 +92,10 @@ def fetch_flow(
 @pytest.mark.unit
 class TestFetchFlowExecute:
     @pytest.mark.parametrize(
-        "retry_after,expected", [("12", 12.0), ("1000", 60.0), ("invalid", None)]
+        "retry_after,expected",
+        [("12", 12.0), ("60", 60.0), ("invalid", None)],
     )
-    async def test_sdk_retry_after_is_honored_with_policy_cap(
+    async def test_sdk_retry_after_is_honored(
         self,
         fetch_flow: PubChemFetchFlow,
         mock_circuit_breaker: AsyncMock,
@@ -123,6 +124,39 @@ class TestFetchFlowExecute:
             )
         sleep.assert_awaited_once_with(expected)
         assert fetch_flow.logger.warning.call_args.kwargs["status_code"] == 429
+
+    async def test_sdk_retry_after_over_budget_raises(
+        self,
+        fetch_flow: PubChemFetchFlow,
+        mock_circuit_breaker: AsyncMock,
+    ) -> None:
+        error = pcp.PubChemHTTPError(429, "Too Many Requests", [])
+        error.__cause__ = HTTPError(
+            "https://pubchem.ncbi.nlm.nih.gov",
+            429,
+            "throttled",
+            {"Retry-After": "1000"},
+            None,
+        )
+        mock_circuit_breaker.call.side_effect = error
+        fetch_flow.logger = MagicMock()
+        with patch("asyncio.sleep", new_callable=AsyncMock) as sleep:
+            with pytest.raises(pcp.PubChemHTTPError) as raised:
+                await fetch_flow.execute(
+                    endpoint="/compound/smiles/JSON",
+                    pubchem_callable=MagicMock(),
+                    pubchem_args=(),
+                )
+        assert raised.value is error
+        sleep.assert_not_awaited()
+        fetch_flow.logger.warning.assert_called_once_with(
+            "pubchem_retry_after_over_budget",
+            provider="pubchem",
+            endpoint="/compound/smiles/JSON",
+            status_code=429,
+            retry_after=1000.0,
+            over_budget=True,
+        )
 
     async def test_sdk_retry_budget_is_not_exceeded(
         self,
