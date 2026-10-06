@@ -14,7 +14,8 @@ The active PR/default-main provider is CircleCI `.circleci/config.yml`, workflow
 `pr-gate`, with GitHub required context `ci/circleci: pr-gate-complete`.
 The canonical applicability catalog is `configs/quality/github_required_checks.yaml`.
 Its `deployment` block identifies CircleCI; retained `coordinator_workflow` and
-`owner_workflow` fields describe the legacy Actions definitions until #11930.
+`owner_workflow` fields describe the retained legacy Actions definitions.
+The owner cancelled deletion in #11930; its status is not_planned.
 GitHub Actions are disabled; billing restoration is out of scope.
 
 The legacy inventory below contains 52 tracked workflow files, including 13
@@ -95,15 +96,15 @@ remain pending. Both lanes are opt-in and main-only.
 On 2026-10-05, CircleCI confirmed creation of `bioetl-memory-freshness-weekly`:
 branch `main`, `ci-lane=memory-freshness`, Monday, every month, one run during
 05:00–05:59 UTC, Scheduled Actor. This replaces the legacy 05:17 minute with
-an hourly window. The first scheduled run and failure-notification parity remain
-pending; trigger registration alone is not execution acceptance.
+an hourly window. Scheduled pipeline352/job6375 on main c644f2e4 passed all four freshness checks.
+Failure-notification parity remains pending.
 
 The main-only `e2e-replay` lane retains the five legacy replay commands:
 three matrix runs, the ChEMBL activity smoke, the 15% skip SLO, zero recurrent
 infra/code failures, and a final check of every pytest exit code. Execution is
 bounded to 25 minutes and retains JUnit and diagnostic artifacts. This lane has
 no credential context and cannot record new cassettes. Live/nightly credentials,
-PR event parity still requires acceptance. Manual main replay acceptance is recorded below.
+PR event parity still requires acceptance. Scheduled main replay acceptance is recorded below.
 
 The prepared `mutation` lane additionally requires `pipeline.trigger.type=schedule`;
 manual/API/PR triggers cannot start its four jobs. It preserves the existing four
@@ -127,14 +128,15 @@ On 2026-10-05, `bioetl-docs-kpi-weekly` was registered for `main`,
 Manual pipeline 264/job 4453 passed on `303ced3b8e5c6fff04b061bfa5caf4b1674893af`
 on 2026-10-06: 118 documents outside navigation (target 120, hard limit 135),
 zero orphan candidates, no breaches. The JSON and Markdown artifacts were
-downloaded and verified. The first scheduled execution and notification parity
-remain pending; the legacy 04:30 minute is represented by an hourly window.
+downloaded and verified. Scheduled pipeline351/job6374 on main c644f2e4 repeated those passing KPI
+results with three verified artifacts. Notification parity remains pending;
+the legacy 04:30 minute is represented by an hourly window.
 On 2026-10-05, the CircleCI UI confirmed creation of
 `bioetl-memory-retention-weekly`: branch `main`, `ci-lane=memory-retention`,
 Monday, every month, one run during 04:00–04:59 UTC, Scheduled Actor.
 The hour-based trigger replaces the legacy 04:17 minute with a weekly window.
-Its first run and exact-SHA acceptance remain pending; integrate the prepared
-configuration before that scheduled window.
+Scheduled pipeline356/job6383 on main c644f2e4 passed with apply=false,
+zero candidates/removals and no policy violation; its artifact was verified.
 
 The `consolidation` lane preserves the manual canonical source/test hash artifacts
 with a ten-minute command limit. `branch-hygiene` preserves the report-only branch
@@ -143,8 +145,8 @@ it does not delete branches. Both are opt-in and main-only. The branch inventory
 `bioetl-branch-hygiene-weekly` trigger was created in CircleCI on 2026-10-05:
 `main`, `ci-lane=branch-hygiene`, Monday, every month, one run during
 03:00–03:59 UTC, Scheduled Actor. This replaces the legacy 03:15 minute with
-an hourly window. Authenticated main run 3084 passed; scheduled execution and PR
-branch-name event handling remain pending. The organization storage controls were verified on 2026-10-05: artifacts are
+an hourly window. Authenticated scheduled pipeline357/job6382 on main c644f2e4 passed and
+its read-only inventory was verified. PR branch-name event handling remains pending. The organization storage controls were verified on 2026-10-05: artifacts are
 retained for thirty days, satisfying these lanes' fourteen-day minimum.
 
 The `architecture-docs` lane preserves passport generation/validation, class-diagram
@@ -237,8 +239,8 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | Source workflow | UTC schedule | Successor / disposition | Remaining acceptance |
 | --- | --- | --- | --- |
 | `architecture-docs-nightly.yml` | `15 2 * * *` | CircleCI architecture-docs | Scheduled pipeline 267/job 4482 SUCCESS on main 303ced3: 27 tests, 54 complete passports, zero blocking diagnostics; 118 artifacts independently downloaded and hashed |
-| `architecture.yml` | `20 2 * * *` | CircleCI architecture-metrics | Main-only typed run-heavy=false fast baseline; run-heavy=true keeps heavy coverage 85% and Windows stress; daily 02 UTC window registered with run-heavy=true; local Windows 2/2 PASS, remote and scheduled execution acceptance pending |
-| `branch-hygiene.yml` | `15 3 * * 1` | CircleCI branch-hygiene inventory | Weekly trigger and restricted context created; authenticated main run 3084 passes; scheduled run and PR branch-name events pending; artifact retention verified at 30 days |
+| `architecture.yml` | `20 2 * * *` | CircleCI architecture-metrics | Main-only typed run-heavy=false fast baseline; run-heavy=true keeps heavy coverage 85% and Windows stress; daily 02 UTC window registered with run-heavy=true; CircleCI Windows job6308 passes2/2 without skips; Linux job6307 reached8GiB during worker startup, bounded-worker remediation and scheduled acceptance pending |
+| `branch-hygiene.yml` | `15 3 * * 1` | CircleCI branch-hygiene inventory | Scheduled pipeline357/job6382 succeeds on main c644f2e4 with authenticated read-only branch inventory; Monday03UTC restored and verified. PR branch-name event parity remains pending; no branches deleted |
 | `chembl-baseline-smoke.yml` | — | `dq-consistency` validates configurations; `arch-tests` and unit/integration groups cover all nine legacy test selectors; manual `ci-lane=pr-gate` | Nine test selectors and configuration steps accepted on main (DQ jobs 3488, 3505, 3554); legacy event parity acceptance pending |
 | `codeql.yml` | `17 4 * * 1` | Retain disabled Actions definition | Not required; optional analysis lifecycle remains explicit |
 | `coderabbit.yml` | — | Local CodeRabbit launcher | Retain local; external integration/event policy pending |
@@ -249,24 +251,24 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `contract-tests.yml` | — | Local live-provider contract runner | Retain local-only policy #11190; preserve inputs and failure evidence |
 | `dashboard-first-window-noscroll.yml` | — | CircleCI integration matrix | Nine static dashboard contract cases passed without skips in producer 4282 on 84524a90deab; no Grafana host is required for this source workflow. Retain legacy workflow-path assertions; browser/render acceptance remains separate |
 | `dashboard-render-host.yml` | — | Local render host runner | Retain local host; Grafana/render secrets never on ordinary PR |
-| `dependency-review.yml` | — | Dependency diff security review | Pending replacement; do not drop HIGH/CRITICAL diff coverage |
+| `dependency-review.yml` | — | Dependency diff security review | Prepared combination: required uv lock check, every tracked npm manifest/lock parity check, all-lockfile OSV HIGH/CRITICAL gate and Docker security baseline. Remote acceptance pending; no advisory threshold reduction |
 | `diagram-nightly.yml` | — | Diagram lint plus local full render | Keep disabled full-render surface; port only active checks |
 | `docker.yml` | — | CircleCI docker-build plus opt-in main-only `docker-baseline` | Main eb265863 pipeline 310/job5420 SUCCESS: build/runtime/health and strict Trivy audit with zero findings; all15 artifacts downloaded,12 baseline checksums and scanned archive digest independently verified. Protected GHCR promotion and SARIF publication remain pending |
-| `docs-kpi-weekly.yml` | `30 4 * * 1` | CircleCI docs-kpi | Registered `bioetl-docs-kpi-weekly`; first scheduled execution pending |
+| `docs-kpi-weekly.yml` | `30 4 * * 1` | CircleCI docs-kpi | Scheduled pipeline351/job6374 succeeds on main c644f2e4:118 outside navigation,zero orphans,no breaches; three artifacts verified. Monday04UTC restored; notification parity pending |
 | `docs.yml` | — | CircleCI docs-governance | Prepared required gate; full docs/render parity pending |
 | `duplication-complexity.yml` | — | CircleCI duplication | Prepared required gate; full scan thresholds preserved |
-| `e2e-matrix-health.yml` | `30 2 * * *` | E2E replay and controlled live lanes | Main pipeline330 on3f26965 SUCCESS: full5902 passes159 tests; prompt5900 passes51; matrix5901 passes three11-test runs plus one smoke; strict live5903 passes11. All zero skips/errors,14 artifacts independently verified. Daily02UTC schedule registered with run-live=true; scheduled and PR-event acceptance pending |
-| `github-settings-quarterly-review.yml` | `23 6 1 1,4,7,10 *` | CircleCI github-settings-review | Authenticated main run 2773 completed report collection (policy drift remains explicit); quarterly first-day Jan/Apr/Jul/Oct 06 UTC schedule registered with Scheduling System; scheduled execution pending |
+| `e2e-matrix-health.yml` | `30 2 * * *` | E2E replay and controlled live lanes | Scheduled pipeline353 on main c644f2e4 SUCCESS:full6377 passes159,prompt6376 passes52,matrix6378 passes3x11+1,live6379 passes11; zero errors/skips and14verified artifacts. Daily02UTC restored with run-live=true; required PR smoke accepted in pipeline362/job6470 (3x11+1, no skips); main event acceptance passed in pipeline371 on 8291d29c |
+| `github-settings-quarterly-review.yml` | `23 6 1 1,4,7,10 *` | CircleCI github-settings-review | Scheduled pipeline355/job6381 succeeds on main c644f2e4; JSON/Markdown report verified and policy drift remains explicit. First-day Jan/Apr/Jul/Oct06UTC restored with Scheduling System attribution |
 | `import-linter.yml` | — | CircleCI lint-arch and arch-tests | Prepared gates; full external architecture acceptance pending |
 | `labeler.yml` | — | Retain disabled label maintenance | Preserve #10263/#11234; taxonomy reconciliation is required before any future trusted replacement |
-| `memory-freshness.yml` | `17 5 * * 1` | CircleCI memory-freshness | Prepared check-only lane; PR parity and scheduled failure notification pending |
-| `memory-retention.yml` | `17 4 * * 1` | CircleCI memory-retention | Weekly trigger registered; main run 2604 passed check-only retention; scheduled execution pending, no prune mutation |
-| `mutation-testing.yml` | `0 0 * * 0` | Scheduled-only mutation lane | Sunday00UTC schedule restored after actual scheduled pipeline340 started on main d9f5b026. Domain6140 and control-plane6139 use verified large4CPU/8GB and four workers; workflow-runner6138 and export-manifests6141 retain medium/one worker. Terminal acceptance pending; full mutant scope,60-minute timeout and70/60/60/60 thresholds unchanged |
+| `memory-freshness.yml` | `17 5 * * 1` | CircleCI memory-freshness | Scheduled pipeline352/job6375 succeeds on main c644f2e4:all four freshness checks pass. Monday05UTC restored; PR parity and scheduled failure notification pending |
+| `memory-retention.yml` | `17 4 * * 1` | CircleCI memory-retention | Scheduled pipeline356/job6383 succeeds on main c644f2e4:apply=false,zero candidates/removals,no policy violation. Monday04UTC restored; no pruning |
+| `mutation-testing.yml` | `0 0 * * 0` | Scheduled-only mutation lane | Actual scheduled pipeline340 on main d9f5b026 SUCCESS, all four targets: domain6140 72.01%, control-plane6139 78.26%, workflow-runner6138 73.42%, export-manifests6141 64.22%. All eight artifacts and complete statistics independently verified. Large targets use large4CPU/8GB and four workers; small targets retain medium/one worker. Sunday00UTC restored and read back; full scope,60-minute timeout and70/60/60/60 thresholds unchanged |
 | `nightly-replay-parity.yml` | `30 2 * * *` | CircleCI replay-parity | Main job 3366 passes four-run checksum parity; daily 02 UTC trigger accepted by scheduled pipeline 266/job 4481 on main 303ced3 (16 tests, no skips, repeated checksum files identical) |
 | `no-partial-tree-commits.yml` | — | Full-tree guard in root governance | Integrated into root-hygiene; main jobs 3500, 3529, 3549 passed the full-tree guard alongside strict root checks |
 | `opencode-pr-review.yml` | — | Retain disabled review stub policy | Do not activate unpinned installer or write paths |
 | `opencode-triage.yml` | — | Retain disabled triage stub policy | Do not activate unpinned installer or write paths |
-| `performance-nightly.yml` | `0 3 * * *` | CircleCI performance | Scheduled pipeline 272 on 303ced3: job 4565 failed CrossRef latency; one diagnostic rerun 4566 passed 70 tests/0 skips and all five budgets. Artifacts retained from both; runner variability and stable acceptance pending |
+| `performance-nightly.yml` | `0 3 * * *` | CircleCI performance | Scheduled pipeline 272 on 303ced3: job 4565 failed CrossRef latency; diagnostic4566 and manual361 pass. Scheduled370/job6640 on main ba9c80e7 passes70 tests/0 skips and all five unchanged budgets; all six artifacts verified, daily03UTC restored. Prior failed observation retained; this is not five independent samples |
 | `port-contracts.yml` | — | CircleCI port-contracts | Main run 2606 passed 188 tests including 24 Hypothesis cases; run 4425/pipeline 262 passed 164 tests with include-hypothesis=false on 303ced3; push/PR event parity pending |
 | `pr-hygiene.yml` | — | Retain disabled PR maintenance | Preserve #10263; canonical 21-day draft/report-noise policy remains manual |
 | `pr-required.yml` | — | CircleCI classify/pr-gate-complete | Main pipelines 218–220 pass all 81 jobs on a34558b918b5; both production rulesets active/read back; legacy owner references retained by the owner decision cancelling #11930 |
@@ -278,16 +280,16 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `root-hygiene.yml` | — | CircleCI root-hygiene | Main full-tree/strict checks accepted; cleanup diagnostic artifacts and dedicated legacy regression selectors added for next acceptance; structure-audit port is blocked by six tracked Python paths outside allowed roots |
 | `router-v7-bridge.yml` | — | Router bridge candidate acceptance | Prepared main-only router-bridge lane: Node 24 bridge tests, both plugin builds and pinned host image parity; remote and path-trigger acceptance pending; managed host evidence remains separate |
 | `schema-governance.yml` | — | CircleCI schema-governance | Prepared required gate; canonical generation/parity preserved |
-| `scorecard.yml` | `30 7 * * 1` | CircleCI scorecard plus SARIF publication | Main pipeline 298/job 5184 on eb265863 successfully runs all 18 checks; five artifacts independently downloaded, JSON/SARIF hashes verified. Monday 07 UTC schedule registered. sarif_uploaded=false and public_results_published=false; restricted writer credentials, scheduled execution and publication acceptance pending; legacy public-results workflow retained |
+| `scorecard.yml` | `30 7 * * 1` | CircleCI scorecard plus SARIF publication | Scheduled pipeline354/job6380 on main c644f2e4 succeeds with all18 checks; five artifacts and source/JSON/SARIF digests independently verified. Monday07UTC restored. sarif_uploaded=false and public_results_published=false; restricted writer credentials and publication acceptance pending; legacy public-results workflow retained |
 | `security.yml` | — | CircleCI security-scans | Main security gates 218–220 passed; all tracked lockfiles remain scanned; SARIF publication parity pending |
 | `semantic-governance.yml` | — | CircleCI `semantic-governance` | Seven canonical checks and four regression suites in the PR/main aggregate and an opt-in main lane; main gates 218–220 accepted |
-| `skills-consistency.yml` | — | CircleCI skills-consistency | Main run 3364 passed static doctor, MCP wrapper pairs, mirror checks and drift=false artifact; typed `approve-runtime-sync=false` prepares a separate approval-gated report/patch job without push; sync and event acceptance pending; artifact retention verified at 30 days |
+| `skills-consistency.yml` | — | CircleCI skills-consistency | Main run 3364 passed static doctor, MCP wrapper pairs, mirror checks and drift=false artifact; typed `approve-runtime-sync=false` prepares a separate approval-gated report/patch job without push; approved no-op sync364/job6514 and required PR job6476 accepted; main event acceptance passed in pipeline371 on 8291d29c; artifact retention verified at 30 days |
 | `stale.yml` | — | Retain disabled stale maintenance | Preserve #10263; legacy 14/7-day automation contradicts the canonical draft-only policy |
 | `tests.yml` | — | CircleCI test-fast/test-integration | Main gates 218–220 accepted; historical producer 3363 completed 17 shards with overall STOP; test-tree changes require a new complete 17-shard producer, followed by another main producer after squash integration |
 | `type-checking.yml` | — | CircleCI mypy | Strict mypy gate accepted in main pipelines 218–220 |
 | `vacuum.yml` | — | Local maintenance command | Retain manual/local operation; no automatic destructive schedule |
 | `validate-vendored-mermaid-assets.yml` | — | CircleCI docs-governance | Both legacy MkDocs asset existence checks folded into the docs gate; remote acceptance pending |
-| `zizmor.yml` | — | Remaining Actions YAML audit | Retain while composite action YAML exists; retirement depends on actual removal |
+| `zizmor.yml` | — | Remaining Actions YAML audit | Retained Actions audit: pinned zizmor1.29.0, unchanged high severity/confidence and config; required credential-free offline PR audit plus protected main online audit with read-only context. JSON/SARIF transport prepared; remote acceptance pending |
 
 Local-only and intentionally disabled surfaces retain their operating policy;
 disabled Actions stubs are not treated as missing credentials to be bypassed.
@@ -415,12 +417,20 @@ Local guard checks do not qualify as registry or attestation acceptance.
 
 Architecture Metrics retains its manual fast default through the boolean
 `run-heavy` parameter. The heavy profile preserves the legacy pytest selection,
-85% coverage threshold and 25-minute execution limit; it uses the four-core Linux
-executor. Its separate Windows Server 2022 job installs checksum-pinned uv
+85% coverage threshold and 25-minute execution limit; it uses a 16 GiB Linux
+executor with four pytest workers and one numerical-library thread per worker.
+Main pipeline347/job6307 reached the full 8 GiB limit during worker startup with
+`-n auto`. Job6702 on main8291d29c also reached the 8 GiB limit with four
+workers and lost one worker. The follow-up retains four workers on 16 GiB,
+unsets BASH_ENV after step initialization so child shells preserve their PATH,
+and separates JUnit from coverage XML; full heavy acceptance remains pending. Windows
+job 6308 on f36e2c27 passed both stress tests with zero skips/errors; both artifacts
+were downloaded and the JUnit independently verified. The Windows Server 2022
+job installs checksum-pinned uv
 0.11.26 and frozen Python 3.12 dependencies, runs both atomic lock stress tests,
 and rejects missing, failed or skipped JUnit cases. The nightly trigger must set
-`ci-lane=architecture-metrics` and `run-heavy=true`; schedule registration and
-remote acceptance are still pending.
+`ci-lane=architecture-metrics` and `run-heavy=true`. The daily 02 UTC window is
+registered; Linux heavy and scheduled execution acceptance remain pending.
 
 
 The `scorecard` lane runs the complete default OpenSSF check set on main and
@@ -470,7 +480,7 @@ remain disabled under `.github/PULL_REQUEST_HYGIENE.md`: only draft report-noise
 PRs inactive for at least 21 days may qualify for closure. The legacy stale
 workflow's 14-day stale/7-day close settings must not be copied into an active
 replacement. Preserve `.github/labeler.yml`, the label taxonomy, and the manual
-hygiene policy when #11930 removes the disabled workflow transports. Any future
+hygiene policy alongside the retained disabled workflow transports. Any future
 write automation needs its own policy-aligned implementation and acceptance.
 
 Publication implementations are supporting backends of the existing
@@ -507,17 +517,20 @@ and 30-minute strict-live limits. `ci-lane=e2e-replay` always runs the three smo
 reruns, full non-smoke replay, and prompt contracts on main. `run-live=true`
 additionally selects `e2e-live`, with test mode false, strict health checks,
 new-episode VCR mode and the unchanged 15% skip-rate SLO. The daily 02 UTC
-schedule is registered with `run-live=true`; successful full, live, scheduled
-and PR-event execution acceptance remains pending. The ordinary PR workflow
-remains separate.
+schedule is registered with `run-live=true`; scheduled pipeline353 on main c644f2e4 passed full159,prompt52,
+matrix3x11+1 and live11 without errors or skips. The ordinary PR workflow
+now includes only the bounded three-run smoke job; full replay, prompts and
+live checks remain in the explicit nightly/manual lane. Remote PR smoke
+acceptance is recorded in pipeline362/job6470 (three runs of 11 tests plus one
+smoke case, without skips or failures); main event acceptance is recorded in
+pipeline371 on 8291d29c (all 32 jobs succeeded).
 
 `ci-lane=skills-consistency` retains read-only checks. Setting the typed
 `approve-runtime-sync=true` additionally exposes `runtime-sync-approval` and
 then produces the canonical one-way sync report plus a binary patch. The job
 runs Codex–Junie and skill mirror checks after sync, has a five-minute execution
 limit, and never commits or pushes. Both the parameter and approval are required;
-non-main branches cannot select this workflow. Remote patch acceptance remains
-pending.
+non-main branches cannot select this workflow. Approved no-op synchronization passed on main c644f2e4 in pipeline364/job6514: drift_before/drift_after and Devin issues are empty, Junie mirror parity passes. The JSON report is verified; no binary patch is produced when the tree is unchanged.
 
 
 E2E smoke replay acceptance: [pipeline 261](https://app.circleci.com/pipelines/github/SatoryKono/BioactivityDataAcquisition/261),
@@ -559,3 +572,53 @@ run before observation recording; its four passing entries cannot qualify as
 complete evidence. The stricter CircleCI evidence gate rejects that actual
 partial report without changing benchmark thresholds. CPU variability is a
 working diagnosis, not a proven code regression or a stability closeout.
+
+Scheduled acceptance on 2026-10-06 used actual Scheduling System pipelines
+351–357 on main `c644f2e4f347ed6642bc22b8fece33bbb829386d`. The temporary
+acceptance hours were reverted; API readback matched all twelve original
+timetables, parameters and actors. The quarterly review produced a report with
+explicit drift/unavailable controls; successful collection does not certify
+that all repository settings satisfy policy. Router main pipeline359 passed the
+bridge and both plugin jobs; host6414 built the image but failed because the
+verifier could not inspect the pinned base image in the Docker image store.
+The candidate now explicitly pulls that same manifest-pinned base before
+verification; BuildKit cache availability alone does not register its image ref.
+Remote host acceptance succeeded in pipeline374 on main8291d29c:
+bridge6703, scenes6704, selector6705 and host6706 all passed. All 66 artifacts
+were downloaded and checksummed; automatic path-trigger acceptance is separate.
+
+The ordinary `pr-gate` workflow now also requires the existing `port-contracts`,
+`provider-contract-drift`, `memory-freshness`, `skills-consistency` and
+`e2e-matrix-replay` jobs. These use no credential context and preserve their
+existing commands, defaults, assertions and artifacts. The workflow dependency
+DAG prevents `pr-gate-complete` from succeeding if any of them fails or is
+cancelled. Running them for every triggered PR/default-branch pipeline is a
+conservative superset of the retained Actions path filters. Nightly full/live,
+mutation, performance, publication and approved runtime sync stay opt-in.
+Remote PR and main event acceptance is still required for this wiring.
+
+
+Acceptance continuation on 2026-10-06: PR11963 merged as main
+`8291d29c236459f19344c581d1fb676819442240` after pipeline367 passed
+32/32 jobs and exact-head Sonar/review/required-status checks. PR pipeline362
+independently accepted the five supplemental jobs, including port contracts
+164+24, provider replay48 and E2E smoke3x11+1, all without errors or skips.
+Main event pipeline371 and heavy pipeline373 are the post-merge checks.
+
+Actual scheduled performance pipeline370/job6640 on main
+`ba9c80e7b8e1007e984851ea2b40aa6818df3645` passes70 tests without skips;
+all five budget rows pass, with CrossRef median0.242484ms. All six artifacts
+were downloaded and hashed. The schedule was restored to daily03UTC and API
+readback matched all twelve original timetables, parameters and actors.
+The earlier failing scheduled272 result remains part of the evidence; neither
+thresholds nor the existing observation-window contract changed.
+
+The next event-parity candidate validates PR head names using the exact retained
+branch-hygiene patterns. Dependency review combines the existing required full
+HIGH/CRITICAL OSV scan with Python lock validation and `npm ci --dry-run
+--ignore-scripts` for every tracked npm lockfile. Seven real manifests pass;
+a deliberately incomplete lockfile is rejected. Retained Actions receive a
+checksum-pinned zizmor1.29.0 audit at the same high severity/confidence. PRs
+receive no context; the additional online main audit uses only the already
+restricted read-only context. SARIF artifact generation and SARIF publication
+are separate; publication is still not accepted.
