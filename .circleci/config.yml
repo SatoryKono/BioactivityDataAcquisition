@@ -1172,9 +1172,16 @@ jobs:
         type: string
       threshold:
         type: string
+      executor-size:
+        type: enum
+        enum: [medium, large]
+        default: medium
+      max-children:
+        type: integer
+        default: 1
     docker:
     - image: cimg/python:3.13
-    resource_class: medium
+    resource_class: << parameters.executor-size >>
     environment:
       OPENBLAS_NUM_THREADS: '1'
       POLARS_MAX_THREADS: '2'
@@ -1226,8 +1233,8 @@ jobs:
           # under the frozen CI environment (bare `mutmut` is not on runner PATH).
           export PYTHONPATH="${WORKSPACE_ROOT}/src:${WORKSPACE_ROOT}${PYTHONPATH:+:$PYTHONPATH}"
           uv run --frozen --no-build python -c "import bioetl.domain, scripts; print('"'"'mutation import preflight ok'"'"')"
-          # Bound fork concurrency to the 4 GB executor; host CPU count is not its quota.
-          uv run --frozen --no-build mutmut run --max-children 1
+          # Bound fork concurrency explicitly; host CPU count is not the executor quota.
+          uv run --frozen --no-build mutmut run --max-children << parameters.max-children >>
           '
         no_output_timeout: 65m
     - run:
@@ -3251,12 +3258,16 @@ workflows:
     jobs:
     - mutation-testing:
         name: mutation-domain
+        executor-size: large
+        max-children: 4
         target: domain
         source-path: src/bioetl/domain/
         tests-dir: tests/unit/domain/
         threshold: '70.0'
     - mutation-testing:
         name: mutation-application-control-plane
+        executor-size: large
+        max-children: 4
         target: application-control-plane
         source-path: src/bioetl/application/services/control_plane/
         tests-dir: tests/unit/application/
