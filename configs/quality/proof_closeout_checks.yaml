@@ -79,6 +79,10 @@ checks:
     - python
     - -m
     - scripts.engineering.ci.quality_integral_gate
+    - --architecture-owner
+    - junit
+    - --architecture-junit
+    - '{root}/architecture/junit.xml'
     - --coverage-xml
     - '{root}/coverage/coverage/coverage.xml'
     - --output

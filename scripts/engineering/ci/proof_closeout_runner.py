@@ -137,7 +137,7 @@ def produce(name: str) -> int:
     if name == "coverage":
         prerequisites = [key for key in plan["checks"] if key.startswith("coverage-")]
     elif name == "quality":
-        prerequisites = ["coverage"]
+        prerequisites = ["coverage", "architecture"]
     for prerequisite in prerequisites:
         validate_execution(prerequisite, ci_run, source)
     command = command_for(name)

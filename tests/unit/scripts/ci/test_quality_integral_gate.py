@@ -591,6 +591,55 @@ def test_resolve_architecture_stats_external_owner_skips_pytest(
     assert stats.skipped == 0
 
 
+@pytest.mark.parametrize("failures,errors,skipped", [(0, 0, 2), (1, 0, 0), (0, 1, 0)])
+def test_junit_owner_preserves_counters_without_running_tests(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    failures: int,
+    errors: int,
+    skipped: int,
+) -> None:
+    from argparse import Namespace
+    from scripts.engineering.ci import quality_integral_gate as gate
+
+    report = tmp_path / "architecture.xml"
+    report.write_text(
+        f'<testsuites><testsuite tests="10" failures="{failures}" '
+        f'errors="{errors}" skipped="{skipped}"/></testsuites>'
+    )
+    monkeypatch.setattr(
+        gate, "_run_architecture_tests", lambda _: pytest.fail("Unexpected pytest run")
+    )
+    stats = gate._resolve_architecture_stats(
+        Namespace(architecture_owner="junit", architecture_junit=report)
+    )
+    assert (stats.tests, stats.failures, stats.errors, stats.skipped) == (
+        10,
+        failures,
+        errors,
+        skipped,
+    )
+    assert stats.returncode == int(bool(failures or errors))
+    assert stats.owner == "junit"
+
+
+@pytest.mark.parametrize("content", [None, "<testsuites/>", "<broken"])
+def test_junit_owner_rejects_missing_empty_or_corrupt_report(
+    tmp_path: Path, content
+) -> None:
+    from argparse import Namespace
+    import xml.etree.ElementTree as ET
+    from scripts.engineering.ci import quality_integral_gate as gate
+
+    report = tmp_path / "architecture.xml"
+    if content is not None:
+        report.write_text(content)
+    with pytest.raises((ValueError, ET.ParseError)):
+        gate._resolve_architecture_stats(
+            Namespace(architecture_owner="junit", architecture_junit=report)
+        )
+
+
 def test_architecture_junit_skips_fails_on_empty_collection(tmp_path: Path) -> None:
     from scripts.engineering.ci.quality_integral_gate import main as skips_main
 

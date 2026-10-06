@@ -80,6 +80,29 @@ ingestion is a separate, explicitly authorized operation requiring
 outcomes as immutable evidence events only; it cannot create decisions or
 override a stop.
 
+The explicit adapter re-verifies the live repository, task, worktree, policy,
+schema, receipt digests, and the binding between `bundle.json` and
+`verification.json` before the first durable write:
+
+```bash
+BIOETL_AI_MEMORY_MODE=read-write \
+BIOETL_AI_RUNTIME=codex \
+BIOETL_AI_AGENT=<authorized-agent> \
+python -m scripts.engineering.qa proof-or-stop ingest \
+  --repo-root . \
+  --task-id <task-id> \
+  --bundle reports/quality/proof-or-stop/<run-id>/bundle.json \
+  --verification reports/quality/proof-or-stop/<run-id>/verification.json \
+  --storage-root <authorized-memory-root> \
+  --actor <authorized-agent> \
+  --runtime codex
+```
+
+Valid `pass`, `fail`, `skip`, and `unavailable` receipt outcomes are preserved
+as evidence. Corrupt, tampered, stale, unauthorized, or cross-scope material is
+rejected before ingestion. Bundle producer provenance and source/output digests
+are stored alongside the separate ingestion actor provenance.
+
 ### CircleCI producer reuse
 
 `configs/quality/proof_closeout_checks.yaml` owns the exact closeout command
@@ -107,7 +130,9 @@ local coverage command still executes all shards sequentially.
 Governance uses `pretest_guardrails.sh --reuse-ci-architecture` to validate the
 full architecture execution before reusing it for its own targeted subset.
 The flag is incompatible with architecture skips and dry runs. Local pretest
-behavior without this explicit CI flag is unchanged. The coverage job also
+behavior without this explicit CI flag is unchanged. The quality gate reads
+the verified architecture JUnit with `--architecture-owner junit`; actual
+failure, error, and skip counters are retained without another pytest run. The coverage job also
 exports a telemetry candidate artifact after persisting immutable measurement
 evidence; candidate generation does not replace committed currentness checks.
 
@@ -124,29 +149,6 @@ Rollout verification must compare the complete test selection and successful
 static; a claim of twofold speedup requires measured comparable CI runs and
 sufficient executor concurrency. Local adapter tests do not prove CI latency
 or qualify a CI-trust `ready_to_merge` claim.
-
-The explicit adapter re-verifies the live repository, task, worktree, policy,
-schema, receipt digests, and the binding between `bundle.json` and
-`verification.json` before the first durable write:
-
-```bash
-BIOETL_AI_MEMORY_MODE=read-write \
-BIOETL_AI_RUNTIME=codex \
-BIOETL_AI_AGENT=<authorized-agent> \
-python -m scripts.engineering.qa proof-or-stop ingest \
-  --repo-root . \
-  --task-id <task-id> \
-  --bundle reports/quality/proof-or-stop/<run-id>/bundle.json \
-  --verification reports/quality/proof-or-stop/<run-id>/verification.json \
-  --storage-root <authorized-memory-root> \
-  --actor <authorized-agent> \
-  --runtime codex
-```
-
-Valid `pass`, `fail`, `skip`, and `unavailable` receipt outcomes are preserved
-as evidence. Corrupt, tampered, stale, unauthorized, or cross-scope material is
-rejected before ingestion. Bundle producer provenance and source/output digests
-are stored alongside the separate ingestion actor provenance.
 
 ## Staged enforcement and rollback
 

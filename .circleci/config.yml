@@ -1960,6 +1960,7 @@ workflows:
     - proof-quality:
         requires:
         - proof-coverage
+        - arch-tests
     - proof-closeout:
         requires:
         - arch-tests
@@ -2127,6 +2128,7 @@ workflows:
       - proof-quality:
           requires:
           - proof-coverage
+          - arch-tests
           filters: *id001
       - proof-closeout:
           requires:

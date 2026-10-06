@@ -16,7 +16,7 @@ import sys
 import tempfile
 import xml.etree.ElementTree as ET
 from collections.abc import Mapping
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -171,13 +171,18 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--architecture-owner",
-        choices=("pytest", "lint-architecture-workflow"),
+        choices=("pytest", "lint-architecture-workflow", "junit"),
         default="pytest",
         help=(
             "Where architecture pytest is executed. "
             "'pytest' runs tests/architecture in-process. "
             "'lint-architecture-workflow' reuses Lint and Architecture Gates."
         ),
+    )
+    parser.add_argument(
+        "--architecture-junit",
+        type=Path,
+        help="Existing architecture JUnit; the CI adapter verifies its source binding.",
     )
     parser.add_argument(
         "--vcr-root",
@@ -304,6 +309,15 @@ def _junit_suites(root: ET.Element) -> list[ET.Element]:
 
 def _resolve_architecture_stats(args: argparse.Namespace) -> ArchitectureTestStats:
     """Run architecture pytest or reuse the Lint and Architecture Gates owner."""
+    if args.architecture_owner == "junit":
+        if args.architecture_junit is None:
+            raise ValueError("JUnit architecture owner requires --architecture-junit")
+        stats = _parse_architecture_junit(args.architecture_junit, returncode=0)
+        if stats.tests <= 0:
+            raise ValueError("Architecture JUnit is missing or empty")
+        return replace(
+            stats, owner="junit", returncode=int(bool(stats.failures or stats.errors))
+        )
     if args.architecture_owner == "lint-architecture-workflow":
         return ArchitectureTestStats(
             tests=0,

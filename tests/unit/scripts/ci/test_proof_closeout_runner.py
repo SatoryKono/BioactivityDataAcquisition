@@ -120,3 +120,22 @@ def test_secrets_are_redacted_before_artifact_digests(evidence, monkeypatch):
         not in (runner.EVIDENCE / "example/producer.log").read_text()
     )
     runner.validate_execution("example", "workflow:1", source)
+
+
+def test_quality_requires_architecture_evidence_before_launch(evidence, monkeypatch):
+    plan, _ = evidence
+    plan["checks"]["quality"] = plan["checks"]["example"]
+    checked = []
+
+    def validate(name, *args):
+        checked.append(name)
+        if name == "architecture":
+            raise ValueError("Missing architecture evidence")
+
+    monkeypatch.setattr(runner, "validate_execution", validate)
+    monkeypatch.setattr(
+        runner.subprocess, "Popen", lambda *a, **kw: pytest.fail("Unexpected execution")
+    )
+    with pytest.raises(ValueError, match="Missing architecture"):
+        runner.produce("quality")
+    assert checked == ["coverage", "architecture"]

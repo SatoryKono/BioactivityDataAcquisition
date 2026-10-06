@@ -41,7 +41,10 @@ def test_proof_waits_for_producers_in_the_same_workflow():
             "proof-debt",
             "proof-quality",
         }
-        assert by_name["proof-quality"]["requires"] == ["proof-coverage"]
+        assert set(by_name["proof-quality"]["requires"]) == {
+            "proof-coverage",
+            "arch-tests",
+        }
         assert by_name["proof-coverage"]["requires"] == ["proof-coverage-shards"]
     closeout = config["jobs"]["proof-closeout"]
     commands = "\n".join(
