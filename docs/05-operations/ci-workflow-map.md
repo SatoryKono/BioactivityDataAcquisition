@@ -501,3 +501,14 @@ runs Codex–Junie and skill mirror checks after sync, has a five-minute executi
 limit, and never commits or pushes. Both the parameter and approval are required;
 non-main branches cannot select this workflow. Remote patch acceptance remains
 pending.
+
+
+E2E smoke replay acceptance: [pipeline 261](https://app.circleci.com/pipelines/github/SatoryKono/BioactivityDataAcquisition/261),
+job 4424 on main `303ced3b8e5c6fff04b061bfa5caf4b1674893af`, completed
+successfully. All nine artifacts were retrieved: each of the three matrix
+JUnit reports contains 11 passing cases and no skips; the representative ChEMBL
+activity report contains one passing case. All three pytest exits are zero,
+recurrent infra/code failures are zero, and the final skip rate is zero against
+the unchanged 15% SLO. This accepts the existing smoke replay lane; the newly
+prepared full replay, prompt, live and approved-sync jobs still need remote
+acceptance after integration.
