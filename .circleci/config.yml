@@ -13,11 +13,21 @@ version: 2.1
 parameters:
   ci-lane:
     type: enum
-    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance, e2e-replay, coverage-closeout, docker-baseline]
+    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance, e2e-replay, coverage-closeout, docker-baseline, docker-publish, architecture-metrics, scorecard, scorecard-publish, release-validation, router-bridge]
     default: pr-gate
   include-hypothesis:
     type: boolean
     default: true
+
+  run-heavy:
+    type: boolean
+    default: false
+  run-live:
+    type: boolean
+    default: false
+  approve-runtime-sync:
+    type: boolean
+    default: false
 
 commands:
   # Port of .github/actions/setup-python-uv (uv 0.11.26, uv cache, uv sync).
@@ -34,8 +44,21 @@ commands:
       - run:
           name: Install uv 0.11.26
           command: |
-            curl -LsSf https://astral.sh/uv/install.sh | sh
+            set -euo pipefail
+            test "$(uname -m)" = x86_64
+            archive="$(mktemp)"
+            extracted="$(mktemp -d)"
+            trap 'rm -f "$archive"; rm -rf "$extracted"' EXIT
+            curl --fail --location --retry 3 \
+              https://github.com/astral-sh/uv/releases/download/0.11.26/uv-x86_64-unknown-linux-gnu.tar.gz \
+              --output "$archive"
+            printf '%s  %s\n' 6426a73c3837e6e2483ee344cbc00f36394d179afcba6183cb77437e67db4af0 "$archive" | sha256sum --check -
+            tar -xzf "$archive" -C "$extracted"
+            mkdir -p "$HOME/.local/bin"
+            install -m 0755 "$extracted/uv-x86_64-unknown-linux-gnu/uv" "$HOME/.local/bin/uv"
+            install -m 0755 "$extracted/uv-x86_64-unknown-linux-gnu/uvx" "$HOME/.local/bin/uvx"
             echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$BASH_ENV"
+            echo 'export UV_PYTHON="<< parameters.python-version >>"' >> "$BASH_ENV"
             "$HOME/.local/bin/uv" --version
       - restore_cache:
           name: Restore uv cache
@@ -50,6 +73,10 @@ commands:
             for extra in << parameters.extras >>; do CMD="$CMD --extra $extra"; done
             echo "Running: $CMD"
             $CMD
+            # Keep the exact extras/environment produced by the successful frozen sync.
+            export UV_NO_SYNC=1
+            echo 'export UV_NO_SYNC=1' >> "$BASH_ENV"
+            uv run --frozen --no-build python -c 'import os, sys; actual = ".".join(map(str, sys.version_info[:2])); expected = os.environ["UV_PYTHON"]; assert actual == expected, f"Python mismatch: {actual} != {expected}"; print(f"Python {actual} matches requested runtime")'
       - save_cache:
           name: Save uv cache
           key: uv-v1-{{ checksum "uv.lock" }}-py<< parameters.python-version >>
@@ -77,6 +104,659 @@ commands:
             fi
 
 jobs:
+  router-bridge-tests:
+    docker:
+    - image: cimg/node:24.21.0@sha256:2944a8d6bea9d71395f670ee689ca63a02b34a846ad9a5d617d21eefe57a9209
+    resource_class: medium
+    steps:
+    - checkout
+    - run:
+        name: Verify Router bridge behavior, types, build and dependency audit
+        no_output_timeout: 11m
+        command: |
+          set -euo pipefail
+          [[ "$CIRCLE_BRANCH" == main ]]
+          mkdir -p reports/qa/router-v7-circleci
+          cat > /tmp/bridge-tests.sh \<<'BIOETL_ROUTER_SCRIPT'
+          set -euo pipefail
+          export BIOETL_WORKSPACE="$PWD"
+          [[ "$(node -p 'process.versions.node.split(".")[0]')" == 24 ]]
+          python3 --version
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          npm ci --ignore-scripts
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          node verify-packed-bridge.mjs
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          npm test
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          node --test runtime-probe/module.test.mjs
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          node --test verify-host-image.test.mjs
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          /usr/bin/python3 fingerprint-rootfs.test.py
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          npm run typecheck
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          npm run build
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          npm audit --audit-level=moderate
+          )
+          BIOETL_ROUTER_SCRIPT
+          timeout --signal=TERM --kill-after=30s 10m bash /tmp/bridge-tests.sh 2>&1 | tee reports/qa/router-v7-circleci/bridge-tests.log
+    - store_artifacts:
+        path: reports/qa/router-v7-circleci
+        destination: router-v7-bridge
+  router-plugin-tests:
+    parameters:
+      plugin:
+        type: enum
+        enum:
+        - bioetl-scenes-app
+        - bioetl-selectorshell-panel
+    docker:
+    - image: cimg/node:24.21.0@sha256:2944a8d6bea9d71395f670ee689ca63a02b34a846ad9a5d617d21eefe57a9209
+    resource_class: medium
+    environment:
+      BIOETL_PLUGIN: << parameters.plugin >>
+    steps:
+    - checkout
+    - run:
+        name: Verify plugin and transfer SHA-256 checked build
+        no_output_timeout: 16m
+        command: |
+          set -euo pipefail
+          [[ "$CIRCLE_BRANCH" == main ]]
+          mkdir -p reports/qa/router-v7-circleci
+          cat > /tmp/plugin-tests.sh \<<'BIOETL_ROUTER_SCRIPT'
+          set -euo pipefail
+          export BIOETL_WORKSPACE="$PWD"
+          [[ "$(node -p 'process.versions.node.split(".")[0]')" == 24 ]]
+          python3 --version
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          npm ci --ignore-scripts
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          npm audit --audit-level=moderate
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          npm run typecheck
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          npm run lint
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          npm run test:ci
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          npm run build
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          python3 - \<<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ["BIOETL_WORKSPACE"])
+          plugin = os.environ["BIOETL_PLUGIN"]
+          assert plugin in ("bioetl-scenes-app", "bioetl-selectorshell-panel"), plugin
+          manifest = json.loads((root / "grafana/tooling/router-v7-bridge/host-image.json").read_text())
+          for filename in ("module.js", "plugin.json"):
+              relative = f"grafana/plugins/{plugin}/dist/{filename}"
+              bundle = root / relative
+              assert bundle.is_file(), f"Missing built artifact: {relative}"
+              expected = manifest["artifact_sha256"][relative]
+              actual = hashlib.sha256(bundle.read_bytes()).hexdigest()
+              assert actual == expected, f"Artifact SHA-256 mismatch: {relative}: {actual} != {expected}"
+              print(f"Verified {relative}: {actual}")
+          metadata = json.loads((root / f"grafana/plugins/{plugin}/dist/plugin.json").read_text())
+          assert metadata["info"]["updated"] == manifest["plugin_release_date"]
+          PY
+          )
+          mkdir -p "/tmp/router-v7-ws/router-v7-image-context/$BIOETL_PLUGIN"
+          cp -a "grafana/plugins/$BIOETL_PLUGIN/dist/." "/tmp/router-v7-ws/router-v7-image-context/$BIOETL_PLUGIN/"
+          BIOETL_ROUTER_SCRIPT
+          timeout --signal=TERM --kill-after=30s 15m bash /tmp/plugin-tests.sh 2>&1 | tee reports/qa/router-v7-circleci/plugin-tests.log
+    - persist_to_workspace:
+        root: /tmp/router-v7-ws
+        paths:
+        - router-v7-image-context/<< parameters.plugin >>
+    - store_artifacts:
+        path: reports/qa/router-v7-circleci
+        destination: router-v7-<< parameters.plugin >>
+    - store_artifacts:
+        path: grafana/plugins/<< parameters.plugin >>/dist
+        destination: host-plugin-<< parameters.plugin >>
+  router-host-build:
+    docker:
+    - image: cimg/node:24.21.0@sha256:2944a8d6bea9d71395f670ee689ca63a02b34a846ad9a5d617d21eefe57a9209
+    resource_class: large
+    environment:
+      NODE_OPTIONS: --max-old-space-size=4096
+      GOMAXPROCS: '2'
+      NODE_ENV: production
+      NO_SOURCEMAP: '0'
+    steps:
+    - checkout
+    - attach_workspace:
+        at: /tmp/router-v7-ws
+    - setup_remote_docker:
+        version: default
+    - run:
+        name: Build pinned Grafana candidate and verify image parity
+        no_output_timeout: 46m
+        command: |
+          set -euo pipefail
+          [[ "$CIRCLE_BRANCH" == main ]]
+          mkdir -p reports/qa/router-v7-circleci
+          cat > /tmp/host-build.sh \<<'BIOETL_ROUTER_SCRIPT'
+          set -euo pipefail
+          export BIOETL_WORKSPACE="$PWD"
+          [[ "$(node -p 'process.versions.node.split(".")[0]')" == 24 ]]
+          python3 --version
+          mkdir -p reports/qa/router-v7-grafana-host reports/qa/router-v7-image-context
+          cp -a /tmp/router-v7-ws/router-v7-image-context/. reports/qa/router-v7-image-context/
+          git -C reports/qa/router-v7-grafana-host init
+          git -C reports/qa/router-v7-grafana-host remote add origin https://github.com/grafana/grafana.git
+          git -C reports/qa/router-v7-grafana-host -c core.autocrlf=false fetch --depth=1 origin 6193dc03311b631b9727b560d24369e683dc396e
+          git -C reports/qa/router-v7-grafana-host -c core.autocrlf=false checkout --detach FETCH_HEAD
+          [[ "$(git -C reports/qa/router-v7-grafana-host rev-parse HEAD)" == 6193dc03311b631b9727b560d24369e683dc396e ]]
+          (
+          cd "$BIOETL_WORKSPACE/reports/qa/router-v7-grafana-host"
+          git -c core.autocrlf=false apply --check "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-v13.2.3.patch"
+          git -c core.autocrlf=false apply "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-v13.2.3.patch"
+          git -c core.autocrlf=false apply --check "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-canvas-query-error.patch"
+          git -c core.autocrlf=false apply "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-canvas-query-error.patch"
+          git -c core.autocrlf=false apply --check "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-router-jest-esm.patch"
+          git -c core.autocrlf=false apply "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-router-jest-esm.patch"
+          cmp packages/bioetl-router-v7-bridge/index.mjs "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/index.mjs"
+          cmp packages/bioetl-router-v7-bridge/index.d.ts "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/index.d.ts"
+          )
+          (
+          cd "$BIOETL_WORKSPACE/reports/qa/router-v7-grafana-host"
+          grep -F "'react-dom/client': () => import('react-dom/client')" public/app/features/plugins/loader/sharedDependencies.ts
+          )
+          (
+          cd "$BIOETL_WORKSPACE/reports/qa/router-v7-grafana-host"
+          node .yarn/releases/yarn-4.17.1.cjs install --immutable --mode=skip-build
+          )
+          (
+          cd "$BIOETL_WORKSPACE/reports/qa/router-v7-grafana-host"
+          export NODE_ENV=test
+          node node_modules/jest/bin/jest.js public/app/plugins/panel/canvas/CanvasPanel.integration.test.tsx --runInBand --watch=false --testNamePattern="query error"
+          )
+          (
+          cd "$BIOETL_WORKSPACE/reports/qa/router-v7-grafana-host"
+          cat > scripts/webpack/webpack.router-security.mjs \<<'EOF'
+          import original from './webpack.prod.ts';
+          export default (env = {}) => {
+            const configs = original(env);
+            configs.parallelism = 1;
+            for (const config of configs) {
+              config.parallelism = 2;
+              for (const plugin of config.optimization?.minimizer ?? []) {
+                if (plugin.constructor.name === 'CssMinimizerPlugin') plugin.options.parallel = 1;
+              }
+            }
+            return configs;
+          };
+          EOF
+          node node_modules/webpack-cli/bin/cli.js --config scripts/webpack/webpack.router-security.mjs
+          )
+          (
+          cd "$BIOETL_WORKSPACE/."
+          cp -a reports/qa/router-v7-grafana-host/public/build reports/qa/router-v7-image-context/host-build
+          docker buildx build --platform linux/amd64 --load --provenance=false \
+            --metadata-file reports/qa/router-v7-image-build.json \
+            -f grafana/tooling/router-v7-bridge/Dockerfile.host \
+            -t bioetl-router-host:acceptance reports/qa/router-v7-image-context
+          )
+          (
+          cd "$BIOETL_WORKSPACE/."
+          image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').image")
+          docker pull "$image"
+          node grafana/tooling/router-v7-bridge/verify-host-image.mjs \
+            bioetl-router-host:acceptance
+          )
+          BIOETL_ROUTER_SCRIPT
+          timeout --signal=TERM --kill-after=30s 45m bash /tmp/host-build.sh 2>&1 | tee reports/qa/router-v7-circleci/host-build.log
+    - store_artifacts:
+        path: reports/qa/router-v7-circleci
+        destination: router-v7-host-logs
+    - store_artifacts:
+        path: reports/qa/router-v7-image-build.json
+        destination: router-v7-image-build.json
+    - store_artifacts:
+        path: reports/qa/router-v7-image-parity.json
+        destination: router-v7-image-parity.json
+  release-dist-build:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+          extras: dev
+      - run:
+          name: Verify release source and passport history
+          command: |
+            set -euo pipefail
+            test "$CIRCLE_BRANCH" = main
+            test "$(git rev-parse HEAD)" = "$CIRCLE_SHA1"
+            if test "$(git rev-parse --is-shallow-repository)" = true; then
+              git fetch --unshallow --no-tags origin
+            fi
+            uv run --frozen --no-build python -m scripts.engineering.repo check-versions
+            uv run --frozen --no-build python -m scripts.docs passports check --require-clean-source
+      - run:
+          name: Build and verify wheel and source distribution
+          no_output_timeout: 11m
+          command: |
+            set -euo pipefail
+            timeout --signal=TERM --kill-after=30s 10m bash -euo pipefail -c '
+              uv run --frozen --no-build python -m build --outdir /tmp/bioetl-release/dist
+              uv run --frozen --no-build twine check /tmp/bioetl-release/dist/*
+            '
+            python3 - \<<'PY'
+            import hashlib, json, os
+            from pathlib import Path
+            root = Path('/tmp/bioetl-release')
+            files = sorted((root / 'dist').iterdir())
+            assert len(files) == 2 and len(list((root / 'dist').glob('*.whl'))) == len(list((root / 'dist').glob('*.tar.gz'))) == 1
+            identity = {'source_sha': os.environ['CIRCLE_SHA1'], 'workflow_id': os.environ['CIRCLE_WORKFLOW_ID'], 'job_number': os.environ['CIRCLE_BUILD_NUM'], 'published': False, 'sha256': {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in files}}
+            (root / 'identity.json').write_text(json.dumps(identity, sort_keys=True) + '\n', encoding='utf-8')
+            PY
+      - run:
+          name: Generate source-bound distribution SPDX inventory
+          no_output_timeout: 11m
+          command: |
+            set -euo pipefail
+            curl -fsSL --proto '=https' --tlsv1.2 \
+              https://github.com/anchore/syft/releases/download/v1.54.0/syft_1.54.0_linux_amd64.tar.gz \
+              -o /tmp/syft.tar.gz
+            printf '%s  %s\n' '54a87372498168b2d033e876fd41fa4e8035b872699e525a57046e1f2f09c860' /tmp/syft.tar.gz | sha256sum -c -
+            tar -xzf /tmp/syft.tar.gz -C "$HOME/.local/bin" syft
+            python3 - \<<'PY'
+            import hashlib, json, tarfile, zipfile
+            from pathlib import Path
+            root = Path('/tmp/bioetl-release')
+            identity = json.loads((root / 'identity.json').read_text())
+            for name, digest in identity['sha256'].items():
+                archive = root / 'dist' / name
+                assert archive.is_file() and not archive.is_symlink()
+                assert hashlib.sha256(archive.read_bytes()).hexdigest() == digest
+                target = Path('/tmp/bioetl-dist-sbom-input') / name
+                target.mkdir(parents=True, exist_ok=False)
+                if name.endswith('.whl'):
+                    with zipfile.ZipFile(archive) as stream:
+                        for member in stream.infolist():
+                            assert (target / member.filename).resolve().is_relative_to(target.resolve())
+                            assert (member.external_attr >> 16) & 0o170000 != 0o120000
+                        stream.extractall(target)
+                else:
+                    with tarfile.open(archive) as stream:
+                        stream.extractall(target, filter='data')
+            PY
+            timeout --signal=TERM --kill-after=30s 10m "$HOME/.local/bin/syft" scan \
+              dir:/tmp/bioetl-dist-sbom-input --source-name bioetl \
+              -o spdx-json=/tmp/bioetl-release/bioetl-dist.spdx.json
+            python3 - \<<'PY'
+            import hashlib, json
+            from pathlib import Path
+            root = Path('/tmp/bioetl-release')
+            path = root / 'bioetl-dist.spdx.json'
+            sbom = json.loads(path.read_text())
+            version = next((root / 'dist').glob('*.whl')).name.split('-')[1]
+            assert sbom['spdxVersion'] == 'SPDX-2.3'
+            assert any(p['name'] == 'bioetl' and p.get('versionInfo') == version for p in sbom['packages'])
+            assert sbom.get('files'), 'Empty distribution catalog is not acceptance'
+            identity = json.loads((root / 'identity.json').read_text())
+            identity['sbom_sha256'] = hashlib.sha256(path.read_bytes()).hexdigest()
+            identity['sbom_tool'] = 'syft 1.54.0'
+            (root / 'identity.json').write_text(json.dumps(identity, sort_keys=True) + '\n', encoding='utf-8')
+            PY
+      - persist_to_workspace:
+          root: /tmp/bioetl-release
+          paths:
+            - dist
+            - identity.json
+            - bioetl-dist.spdx.json
+      - store_artifacts:
+          path: /tmp/bioetl-release
+          destination: release-build
+
+  release-install:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+          extras: dev
+      - attach_workspace:
+          at: /tmp/bioetl-release
+      - run:
+          name: Install exact wheel into isolated locked runtime
+          no_output_timeout: 16m
+          command: |
+            set -euo pipefail
+            timeout --signal=TERM --kill-after=30s 15m bash -euo pipefail \<<'INSTALL'
+            python3 - \<<'PY'
+            import hashlib, json, os
+            from pathlib import Path
+            root = Path('/tmp/bioetl-release')
+            identity = json.loads((root / 'identity.json').read_text())
+            assert identity['source_sha'] == os.environ['CIRCLE_SHA1'] and identity['workflow_id'] == os.environ['CIRCLE_WORKFLOW_ID']
+            assert hashlib.sha256((root / 'bioetl-dist.spdx.json').read_bytes()).hexdigest() == identity['sbom_sha256']
+            files = sorted((root / 'dist').iterdir())
+            assert len(files) == 2 and {p.name for p in files} == set(identity['sha256'])
+            assert all(p.is_file() and not p.is_symlink() and hashlib.sha256(p.read_bytes()).hexdigest() == identity['sha256'][p.name] for p in files)
+            wheels = list((root / 'dist').glob('*.whl'))
+            assert len(wheels) == 1
+            name, version, *_ = wheels[0].name.split('-')
+            assert name == 'bioetl'
+            requirement = f"{name}=={version} --hash=sha256:{identity['sha256'][wheels[0].name]}\n"
+            (root / 'wheel-requirements.txt').write_text(requirement, encoding='utf-8')
+            PY
+            uv venv --python 3.13 /tmp/bioetl-release-installed
+            uv export --frozen --no-dev --no-emit-project --format requirements-txt --output-file /tmp/bioetl-release/runtime-requirements.txt
+            uv pip install --python /tmp/bioetl-release-installed/bin/python --require-hashes --only-binary=:all: -r /tmp/bioetl-release/runtime-requirements.txt
+            uv pip install --python /tmp/bioetl-release-installed/bin/python --require-hashes --only-binary=:all: --no-deps --no-index --find-links=/tmp/bioetl-release/dist -r /tmp/bioetl-release/wheel-requirements.txt
+            unset PYTHONPATH
+            cd /tmp
+            /tmp/bioetl-release-installed/bin/python -I -c 'import bioetl, sys; from pathlib import Path; assert Path(bioetl.__file__).resolve().is_relative_to(Path(sys.prefix).resolve()); print(bioetl.__file__)'
+            /tmp/bioetl-release-installed/bin/bioetl --help
+            /tmp/bioetl-release-installed/bin/bioetl --version
+            INSTALL
+      - store_artifacts:
+          path: /tmp/bioetl-release
+          destination: release-install
+
+  release-tests:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: medium
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+          extras: dev
+      - run:
+          name: Same-SHA release smoke and supply-chain contracts
+          no_output_timeout: 21m
+          command: |
+            set -euo pipefail
+            timeout --signal=TERM --kill-after=30s 20m bash -euo pipefail -c '
+              mkdir -p reports/release-tests
+              uv run --frozen --no-build pytest tests/smoke/ -m "not memory" -q --tb=line --junitxml=reports/release-tests/smoke.xml
+              uv run --frozen --no-build pytest tests/architecture/test_github_actions_runtime_policy.py tests/architecture/test_docker_runtime_contracts.py -q --tb=line --junitxml=reports/release-tests/supply-chain.xml
+            '
+      - store_test_results:
+          path: reports/release-tests
+      - store_artifacts:
+          path: reports/release-tests
+
+  release-validation-complete:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/bioetl-release
+      - run:
+          name: Record verified release preflight without a publication claim
+          command: |
+            python3 - \<<'PY'
+            import json, os, urllib.request
+            from pathlib import Path
+            root = Path('/tmp/bioetl-release')
+            identity = json.loads((root / 'identity.json').read_text())
+            assert os.environ['CIRCLE_BRANCH'] == 'main'
+            assert identity['source_sha'] == os.environ['CIRCLE_SHA1'] and identity['workflow_id'] == os.environ['CIRCLE_WORKFLOW_ID']
+            with urllib.request.urlopen('https://circleci.com/api/v2/workflow/' + identity['workflow_id'] + '/job', timeout=30) as response:
+                payload = json.load(response)
+            assert not payload.get('next_page_token'), 'Unexpected workflow pagination'
+            jobs = payload['items']
+            required = {'release-dist-build', 'release-install', 'release-tests', 'security-scans'}
+            accepted = [job for job in jobs if job['name'] in required]
+            assert len(accepted) == len(required) and {job['name'] for job in accepted} == required
+            assert all(job['status'] == 'success' for job in accepted)
+            assert str(next(job for job in accepted if job['name'] == 'release-dist-build')['job_number']) == str(identity['job_number'])
+            receipt = {'source_sha': identity['source_sha'], 'workflow_id': identity['workflow_id'], 'distribution_validation': 'passed', 'published': False, 'publication_ready': False, 'sbom_sha256': identity['sbom_sha256'], 'pending': ['signed provenance', 'protected TestPyPI/PyPI promotion', 'release assets'], 'jobs': {job['name']: job['job_number'] for job in accepted}}
+            (root / 'validation.json').write_text(json.dumps(receipt, sort_keys=True) + '\n', encoding='utf-8')
+            PY
+      - store_artifacts:
+          path: /tmp/bioetl-release/validation.json
+          destination: release-validation
+
+  scorecard-analysis:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Pinned OpenSSF Scorecard informational analysis
+          no_output_timeout: 16m
+          command: |
+            set -euo pipefail
+            set +x
+            test "$CIRCLE_BRANCH" = main
+            test "$(git rev-parse HEAD)" = "$CIRCLE_SHA1"
+            : "${GITHUB_TOKEN:?Missing read-only GitHub credential}"
+            export GITHUB_AUTH_TOKEN="$GITHUB_TOKEN"
+            timeout --signal=TERM --kill-after=30s 15m bash -euo pipefail -c '
+              umask 077
+              mkdir -p /home/circleci/bioetl-scorecard/tools /home/circleci/bioetl-scorecard/reports
+              curl --fail --location --retry 3 https://github.com/ossf/scorecard/releases/download/v5.5.0/scorecard_5.5.0_linux_amd64.tar.gz -o /home/circleci/bioetl-scorecard/scorecard.tar.gz
+              echo "83b90a05c1540ef1390db1cd5711e5fd04be9c1d8537fb84d39d02092d6a8dff  /home/circleci/bioetl-scorecard/scorecard.tar.gz" | sha256sum --check -
+              tar -xzf /home/circleci/bioetl-scorecard/scorecard.tar.gz -C /home/circleci/bioetl-scorecard/tools scorecard
+              curl --fail --location --retry 3 https://raw.githubusercontent.com/ossf/scorecard-action/2d1146689b8cda280b9bc96326124645441f03bc/policies/template.yml -o /home/circleci/bioetl-scorecard/reports/policy.yml
+              echo "6e75dcc0df989d333492c0e1f6e484fc5b4d26ab768333ddcd0e3788539689b0  /home/circleci/bioetl-scorecard/reports/policy.yml" | sha256sum --check -
+              /home/circleci/bioetl-scorecard/tools/scorecard --repo=github.com/SatoryKono/BioactivityDataAcquisition --format=json --show-details --output=/home/circleci/bioetl-scorecard/reports/results.json
+              ENABLE_SARIF=true /home/circleci/bioetl-scorecard/tools/scorecard --repo=github.com/SatoryKono/BioactivityDataAcquisition --format=sarif --show-details --policy=/home/circleci/bioetl-scorecard/reports/policy.yml --output=/home/circleci/bioetl-scorecard/reports/results.raw.sarif
+            '
+            python3 - \<<'PY'
+            import json, os
+            from pathlib import Path
+            path = Path('/home/circleci/bioetl-scorecard/reports/results.json')
+            result = json.loads(path.read_text(encoding='utf-8'))
+            assert result['repo']['commit'] == os.environ['CIRCLE_SHA1'], 'Default branch changed during analysis'
+            assert result['repo']['name'] == 'github.com/SatoryKono/BioactivityDataAcquisition'
+            assert result['scorecard']['version'] == 'v5.5.0'
+            expected = {'Binary-Artifacts', 'Branch-Protection', 'CI-Tests', 'CII-Best-Practices', 'Code-Review', 'Contributors', 'Dangerous-Workflow', 'Dependency-Update-Tool', 'Fuzzing', 'License', 'Maintained', 'Packaging', 'Pinned-Dependencies', 'SAST', 'Security-Policy', 'Signed-Releases', 'Token-Permissions', 'Vulnerabilities'}
+            checks = result['checks']
+            assert len(checks) == len(expected) and {row['name'] for row in checks} == expected
+            assert all(isinstance(row['score'], int) and -1 <= row['score'] <= 10 and isinstance(row['reason'], str) for row in checks)
+            import urllib.request
+            request = urllib.request.Request('https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/git/ref/heads/main', headers={'Authorization': 'Bearer ' + os.environ['GITHUB_TOKEN'], 'Accept': 'application/vnd.github+json'})
+            with urllib.request.urlopen(request, timeout=30) as response:
+                assert json.load(response)['object']['sha'] == os.environ['CIRCLE_SHA1'], 'Main changed during SARIF analysis'
+            sarif = json.loads(path.with_name('results.raw.sarif').read_text(encoding='utf-8'))
+            assert sarif['version'] == '2.1.0' and sarif['runs']
+            from urllib.parse import quote
+            for run in sarif['runs']:
+                # Upstream project-wide findings use a placeholder containing spaces.
+                # Preserve its value as a valid URI reference for GitHub's strict parser.
+                for finding in run.get('results', []):
+                    for location in finding.get('locations', []):
+                        artifact = location.get('physicalLocation', {}).get('artifactLocation', {})
+                        if 'uri' in artifact:
+                            artifact['uri'] = quote(artifact['uri'], safe="/:#?&=%@[]!$'()*+,;~-._")
+                assert run['tool']['driver']['name'] == 'Scorecard'
+                assert run['tool']['driver']['semanticVersion'] == 'v5.5.0'
+                run['tool']['driver']['semanticVersion'] = '5.5.0'
+                run['versionControlProvenance'] = [{'repositoryUri': 'https://github.com/SatoryKono/BioactivityDataAcquisition', 'revisionId': os.environ['CIRCLE_SHA1'], 'branch': 'main'}]
+            path.with_name('results.sarif').write_text(json.dumps(sarif, sort_keys=True) + '\n', encoding='utf-8')
+            # Scores and unsupported checks stay visible; the legacy lane is informational.
+            identity = {'source_sha': os.environ['CIRCLE_SHA1'], 'workflow_id': os.environ['CIRCLE_WORKFLOW_ID'], 'job_number': os.environ['CIRCLE_BUILD_NUM'], 'check_count': len(checks), 'sarif_uploaded': False, 'public_results_published': False}
+            import hashlib
+            identity['sha256'] = {name: hashlib.sha256(path.with_name(name).read_bytes()).hexdigest() for name in ('results.json', 'results.sarif')}
+            path.with_name('identity.json').write_text(json.dumps(identity, sort_keys=True) + '\n', encoding='utf-8')
+            PY
+      - persist_to_workspace:
+          root: /home/circleci/bioetl-scorecard
+          paths:
+            - reports
+      - store_artifacts:
+          path: /home/circleci/bioetl-scorecard/reports
+          destination: scorecard-analysis
+
+  scorecard-publish:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circleci/bioetl-scorecard
+      - run:
+          name: Upload approved source-bound Scorecard SARIF
+          no_output_timeout: 11m
+          command: |
+            set -euo pipefail
+            set +x
+            timeout --signal=TERM --kill-after=30s 10m python3 -m scripts.engineering.ci publish-scorecard \
+              --directory /home/circleci/bioetl-scorecard/reports \
+              --output /home/circleci/bioetl-scorecard/publication/receipt.json
+      - store_artifacts:
+          path: /home/circleci/bioetl-scorecard/publication
+          destination: scorecard-publication
+
+  architecture-fast-baseline:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: medium
+    environment:
+      HYPOTHESIS_PROFILE: ci
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: Restore history for ancestor gates
+          command: |
+            if [ "$(git rev-parse --is-shallow-repository)" = true ]; then git fetch --unshallow --filter=blob:none --no-tags; fi
+            git fetch --no-prune origin main
+      - run:
+          name: Canonical architecture fast baseline
+          no_output_timeout: 11m
+          command: timeout --signal=TERM --kill-after=30s 10m make qa-arch-fast
+      - store_artifacts:
+          path: reports/quality/test-runs
+          destination: architecture-fast-baseline
+      - store_test_results:
+          path: reports/quality/test-runs/junit
+  architecture-heavy-nightly:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: large
+    environment:
+      HYPOTHESIS_PROFILE: ci
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - checkout
+      - setup-python-uv:
+          extras: dev tracing performance
+      - run:
+          name: Restore source and LFS history
+          command: |
+            if [ "$(git rev-parse --is-shallow-repository)" = true ]; then git fetch --unshallow --filter=blob:none --no-tags; fi
+            git fetch --no-prune origin main
+            git lfs pull
+      - run:
+          name: Architecture complexity and heavy coverage
+          no_output_timeout: 26m
+          command: |
+            timeout --signal=TERM --kill-after=30s 25m bash -euo pipefail -c '
+              mkdir -p /tmp/architecture-metrics
+              uv run --frozen --no-build radon cc src/bioetl --min C --show-closures | tee /tmp/architecture-metrics/radon.txt
+              uv run --frozen --no-build pytest tests/ -m "not e2e and not benchmark and not serial" \
+                --ignore=tests/e2e --ignore=tests/contract \
+                -n auto --dist loadscope --max-worker-restart=0 \
+                --cov=src/bioetl --cov-report=term-missing \
+                --cov-report=xml:/tmp/architecture-metrics/coverage.xml \
+                --junitxml=/tmp/architecture-metrics/junit.xml --cov-fail-under=85
+            '
+      - store_test_results:
+          path: /tmp/architecture-metrics
+      - store_artifacts:
+          path: /tmp/architecture-metrics
+          destination: architecture-metrics
+  windows-atomic-write-stress-nightly:
+    machine:
+      image: windows-server-2022-gui:2026.05.1
+      shell: powershell.exe -ExecutionPolicy Bypass
+    resource_class: windows.medium
+    environment:
+      HYPOTHESIS_PROFILE: ci
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONUNBUFFERED: '1'
+      UV_PYTHON: '3.12'
+      PYTHONUTF8: '1'
+    steps:
+      - checkout
+      - run:
+          name: Pinned uv and locked Windows environment
+          command: |
+            $ErrorActionPreference = 'Stop'
+            $archive = Join-Path $env:TEMP 'bioetl-uv-0.11.26.zip'
+            $toolDir = Join-Path $env:TEMP 'bioetl-uv-0.11.26'
+            Invoke-WebRequest -Uri 'https://github.com/astral-sh/uv/releases/download/0.11.26/uv-x86_64-pc-windows-msvc.zip' -OutFile $archive
+            if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne '4e1278ede866be6c0bf32d2f466cc6de7a9fb399ecf20c9ce2d186e52424be47') { throw 'uv checksum mismatch' }
+            Expand-Archive -LiteralPath $archive -DestinationPath $toolDir -Force
+            & (Join-Path $toolDir 'uv.exe') sync --frozen --extra dev --extra tracing
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            & .venv/Scripts/python.exe -c "import sys; assert sys.version_info[:2] == (3, 12)"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - run:
+          name: Windows atomic lock stress with terminal evidence
+          no_output_timeout: 16m
+          command: |
+            $ErrorActionPreference = 'Stop'
+            New-Item -ItemType Directory -Path reports/quality/windows-atomic-stress -Force | Out-Null
+            $process = Start-Process -FilePath .venv/Scripts/python.exe -ArgumentList @('-m', 'pytest', 'tests/integration/infrastructure/storage/test_atomic.py', '-k', 'windows_lock_stress', '-m', '"slow and serial"', '-q', '--tb=short', '--junitxml=reports/quality/windows-atomic-stress/junit.xml') -PassThru -WindowStyle Hidden -RedirectStandardOutput reports/quality/windows-atomic-stress/stdout.log -RedirectStandardError reports/quality/windows-atomic-stress/stderr.log
+            if (-not $process.WaitForExit(900000)) { Stop-Process -Id $process.Id; throw 'Windows stress exceeded 15-minute limit' }
+            $process.Refresh()
+            Get-Content reports/quality/windows-atomic-stress/stdout.log
+            Get-Content reports/quality/windows-atomic-stress/stderr.log
+            if ($process.ExitCode -ne 0) { exit $process.ExitCode }
+            [xml]$junit = Get-Content -LiteralPath reports/quality/windows-atomic-stress/junit.xml -Raw
+            $cases = @($junit.SelectNodes('//testcase'))
+            if ($cases.Count -ne 2 -or $junit.SelectNodes('//failure|//error|//skipped').Count -ne 0) { throw 'Windows stress requires both real tests to pass without skips' }
+      - store_test_results:
+          path: reports/quality/windows-atomic-stress
+      - store_artifacts:
+          path: reports/quality/windows-atomic-stress
+          destination: windows-atomic-stress
   docker-security-baseline:
     docker:
       - image: cimg/python:3.13
@@ -93,6 +773,9 @@ jobs:
           command: |
             mkdir -p "$HOME/.local/bin"
             curl -fsSL --proto '=https' --tlsv1.2 https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz -o /tmp/docker-baseline-cli.tgz
+            # SHA256 recorded from the official HTTPS archive on 2026-10-05.
+            # This is a content pin, not an independently signed vendor checksum.
+            echo "9b4f6fe406e50f9085ee474c451e2bb5adb119a03591f467922d3b4e2ddf31d3  /tmp/docker-baseline-cli.tgz" | sha256sum --check -
             tar -xzf /tmp/docker-baseline-cli.tgz -C /tmp
             install /tmp/docker/docker "$HOME/.local/bin/docker"
             echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$BASH_ENV"
@@ -171,12 +854,13 @@ jobs:
             {
               echo "source_sha=${CIRCLE_SHA1}"
               echo "wolfi_base_image=chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
-              echo "runtime_python=python-3.13=3.13.15-r6"
+              echo "runtime_python=python-3.13=3.13.16_git20261002-r2"
+              echo "runtime_zlib=zlib=1.3.2.1_rc20260917-r0"
               echo "builder_uv=uv=0.11.26-r0"
               echo "setuptools_build_constraint=setuptools==83.0.0"
               docker image inspect "${IMAGE_REF}" --format 'image_id={{.Id}} repo_digests={{json .RepoDigests}}'
               docker run --rm --entrypoint python "${IMAGE_REF}" --version
-              docker run --rm --entrypoint python "${IMAGE_REF}" -c 'import grp, importlib.util, os, pwd, shutil, stat, sys, tempfile; assert sys.version_info[:3] == (3, 13, 15); assert (os.getuid(), os.getgid()) == (999, 999); assert pwd.getpwuid(999).pw_name == "bioetl"; assert pwd.getpwuid(999).pw_shell == "/sbin/nologin"; assert grp.getgrgid(999).gr_name == "bioetl"; assert importlib.util.find_spec("pip") is None; assert stat.S_IMODE(os.stat("/tmp").st_mode) == 0o700; assert (os.stat("/tmp").st_uid, os.stat("/tmp").st_gid) == (999, 999); assert (os.stat("/app/configs").st_uid, os.stat("/app/configs").st_gid) == (0, 0); assert not os.access("/app/configs", os.W_OK); forbidden_paths = ("/bin/sh", "/bin/ash", "/bin/bash", "/bin/busybox", "/usr/bin/sh", "/usr/bin/ash", "/usr/bin/bash", "/usr/bin/busybox", "/sbin/apk", "/usr/bin/apk"); assert not any(os.path.lexists(path) for path in forbidden_paths); assert all(shutil.which(name) is None for name in ("sh", "ash", "bash", "busybox", "apk", "pip", "pip3", "pip3.13")); handle = tempfile.NamedTemporaryFile(dir="/tmp", delete=True); handle.close(); marker = "/app/logs/.runtime-security-probe"; open(marker, "wb").close(); os.unlink(marker); print("python=3.13.15 uid=999 gid=999 identity=bioetl shell=absent apk=absent pip=absent tmp=00700 tmp_owner=999:999 configs=root-readonly logs=writable")'
+              docker run --rm --entrypoint python "${IMAGE_REF}" -c 'import grp, importlib.util, os, pwd, shutil, stat, sys, tempfile, zlib; assert sys.version_info[:3] == (3, 13, 16); assert zlib.ZLIB_RUNTIME_VERSION == "1.3.2.1-motley"; assert (os.getuid(), os.getgid()) == (999, 999); assert pwd.getpwuid(999).pw_name == "bioetl"; assert pwd.getpwuid(999).pw_shell == "/sbin/nologin"; assert grp.getgrgid(999).gr_name == "bioetl"; assert importlib.util.find_spec("pip") is None; assert stat.S_IMODE(os.stat("/tmp").st_mode) == 0o700; assert (os.stat("/tmp").st_uid, os.stat("/tmp").st_gid) == (999, 999); assert (os.stat("/app/configs").st_uid, os.stat("/app/configs").st_gid) == (0, 0); assert not os.access("/app/configs", os.W_OK); forbidden_paths = ("/bin/sh", "/bin/ash", "/bin/bash", "/bin/busybox", "/usr/bin/sh", "/usr/bin/ash", "/usr/bin/bash", "/usr/bin/busybox", "/sbin/apk", "/usr/bin/apk"); assert not any(os.path.lexists(path) for path in forbidden_paths); assert all(shutil.which(name) is None for name in ("sh", "ash", "bash", "busybox", "apk", "pip", "pip3", "pip3.13")); handle = tempfile.NamedTemporaryFile(dir="/tmp", delete=True); handle.close(); marker = "/app/logs/.runtime-security-probe"; open(marker, "wb").close(); os.unlink(marker); print("python=3.13.16 uid=999 gid=999 identity=bioetl shell=absent apk=absent pip=absent tmp=00700 tmp_owner=999:999 configs=root-readonly logs=writable")'
             } > reports/security/bioetl-image-provenance.txt 2>&1
             docker image inspect "${IMAGE_REF}" --format '{{.Id}}' \
               > reports/security/bioetl-image-id.txt
@@ -296,6 +980,58 @@ jobs:
       - store_artifacts:
           path: /tmp/bioetl-docker-baseline/reports/security
           destination: docker-security-baseline
+      - persist_to_workspace:
+          root: /tmp/bioetl-docker-baseline
+          paths:
+            - reports/security
+
+  docker-publish:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: medium
+    environment:
+      CIRCLE_ORGANIZATION_ID: 116af377-246c-4269-b48e-63c2a8b9dd0e
+      CIRCLE_PROJECT_ID: 9f037fd7-4fd9-41af-9916-33ca1e56cf7b
+      PIPELINE_DEFINITION_ID: a2ed9130-99bb-5001-9dc8-b4d1b6fae071
+      SCANNED_IMAGE_DIRECTORY: /tmp/bioetl-publication/reports/security
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: '3.13'
+          extras: dev
+      - setup_remote_docker:
+          version: default
+      - attach_workspace:
+          at: /tmp/bioetl-publication
+      - run:
+          name: Install checksum-pinned publication tools
+          command: |
+            set -euo pipefail
+            install_dir="$(mktemp -d)"
+            trap 'rm -rf "$install_dir"' EXIT
+            cd "$install_dir"
+            curl --fail --location --retry 3 https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz -o docker.tgz
+            curl --fail --location --retry 3 https://github.com/sigstore/cosign/releases/download/v3.1.3/cosign-linux-amd64 -o cosign
+            curl --fail --location --retry 3 https://github.com/CircleCI-Public/circleci-cli/releases/download/v1.0.51932/circleci-cli_1.0.51932_linux_amd64.tar.gz -o circleci.tgz
+            # Docker SHA256 is a recorded official-HTTPS content pin (2026-10-05),
+            # not an independently signed vendor checksum.
+            echo '9b4f6fe406e50f9085ee474c451e2bb5adb119a03591f467922d3b4e2ddf31d3  docker.tgz' | sha256sum --check -
+            echo '4629c757b7618056f8ddd7e2625ae9fdd94c0372a65049520bc7d9df9efc7f71  cosign' | sha256sum --check -
+            echo 'd7be00a2818566dfbea0ffea2aad715d20a3681461fe8cd15961ba7e3f2cd37b  circleci.tgz' | sha256sum --check -
+            tar -xzf docker.tgz
+            tar -xzf circleci.tgz circleci
+            mkdir -p "$HOME/.local/bin"
+            install -m 0755 docker/docker cosign circleci "$HOME/.local/bin/"
+            echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$BASH_ENV"
+            sudo apt-get update
+            sudo apt-get install --no-install-recommends -y zstd
+      - run:
+          name: Verify approved scanned image and publish signed provenance
+          no_output_timeout: 30m
+          command: timeout --signal=TERM --kill-after=30s 25m python3 -m scripts.engineering.ci publish-docker
+      - store_artifacts:
+          path: /tmp/bioetl-publication/reports/security
+          destination: docker-publication
 
   architecture-docs:
     docker:
@@ -483,7 +1219,8 @@ jobs:
           # under the frozen CI environment (bare `mutmut` is not on runner PATH).
           export PYTHONPATH="${WORKSPACE_ROOT}/src:${WORKSPACE_ROOT}${PYTHONPATH:+:$PYTHONPATH}"
           uv run --frozen --no-build python -c "import bioetl.domain, scripts; print('"'"'mutation import preflight ok'"'"')"
-          uv run --frozen --no-build mutmut run
+          # Bound fork concurrency to the 4 GB executor; host CPU count is not its quota.
+          uv run --frozen --no-build mutmut run --max-children 1
           '
         no_output_timeout: 65m
     - run:
@@ -665,6 +1402,18 @@ jobs:
           python-version: "3.13"
           extras: "dev tracing performance"
       - run:
+          name: Record performance runner identity
+          command: |
+            set -euo pipefail
+            mkdir -p reports/performance
+            {
+              uv run --frozen --no-build python -c 'import os,platform; print("python=" + platform.python_version()); print("platform=" + platform.platform()); print("cpu_count=" + str(os.cpu_count())); print("cpu_affinity=" + str(sorted(os.sched_getaffinity(0))))'
+              lscpu
+              for path in /sys/fs/cgroup/cpu.max /sys/fs/cgroup/cpu.stat /sys/fs/cgroup/cpu/cpu.cfs_quota_us /sys/fs/cgroup/cpu/cpu.cfs_period_us; do
+                if [ -r "$path" ]; then printf '\n%s\n' "$path"; cat "$path"; fi
+              done
+            } > reports/performance/runner-identity.txt
+      - run:
           name: Run performance benchmarks with existing budgets
           no_output_timeout: 35m
           command: |
@@ -674,6 +1423,14 @@ jobs:
               -m "benchmark or performance" -p benchmark -p no:xdist -v --tb=short \
               --perf-obs-out reports/performance/hotspot-observations.jsonl \
               --junitxml=reports/performance/hotspot-budgets.xml
+      - run:
+          name: Record performance CPU throttling after benchmarks
+          when: always
+          command: |
+            mkdir -p reports/performance
+            for path in /sys/fs/cgroup/cpu.stat /sys/fs/cgroup/cpu/cpu.stat; do
+              if [ -r "$path" ]; then printf '\n%s\n' "$path"; cat "$path"; fi
+            done > reports/performance/runner-cpu-after.txt
       - run:
           name: Build performance degradation evidence
           when: always
@@ -689,6 +1446,27 @@ jobs:
           when: always
           command: |
             uv run --frozen --no-build python -c 'import json,sys; d=json.load(open("reports/performance/hotspot-degradation.json")); s=d["summary"]; sys.exit(0 if s["total"] > 0 and s["failed"] == 0 else 1)'
+      - run:
+          name: Require every registered performance benchmark
+          when: always
+          command: |
+            uv run --frozen --no-build python - \<<'PERFORMANCE_EVIDENCE'
+            import json
+            from pathlib import Path
+
+            budgets = json.loads(Path("tests/performance/hotspot_budgets.json").read_text())
+            report = json.loads(Path("reports/performance/hotspot-degradation.json").read_text())
+            expected = set(budgets["benchmarks"])
+            rows = report["benchmarks"]
+            actual = [row["benchmark_key"] for row in rows]
+            if not expected or len(actual) != len(expected) or set(actual) != expected:
+                raise SystemExit("Performance evidence is incomplete or contains duplicate/unknown benchmarks")
+            if report["summary"] != {"total": len(expected), "passed": len(expected), "failed": 0}:
+                raise SystemExit("Performance evidence includes failed or inconsistent results")
+            if not all(row["within_budget"] is True and row["samples"] > 0 for row in rows):
+                raise SystemExit("Performance evidence contains a failing or empty observation")
+            print(f"All {len(expected)} benchmark budgets have complete passing evidence")
+            PERFORMANCE_EVIDENCE
       - store_test_results:
           path: reports/performance
       - store_artifacts:
@@ -773,6 +1551,132 @@ jobs:
               --mode check --report reports/ai/runtime-skill-drift.json
       - store_artifacts:
           path: reports/ai/runtime-skill-drift.json
+
+  approved-runtime-skill-sync:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+      - run:
+          name: Produce approved runtime sync patch without publishing
+          no_output_timeout: 6m
+          command: |
+            timeout --signal=TERM --kill-after=30s 5m bash -euo pipefail \<<'SYNC'
+            [[ "$CIRCLE_BRANCH" == main ]]
+            uv run --frozen --no-build python -m scripts.ai.sync.runtime_skills \
+              --mode sync --approved --report reports/ai/runtime-skill-sync.json
+            git diff --binary > reports/ai/runtime-skill-sync.patch
+            bash scripts/ai/junie/check_junie_mirror.sh --check
+            bash scripts/ops/support/skills/check_skills_mirror.sh --check
+            SYNC
+      - store_artifacts:
+          path: reports/ai
+          destination: approved-runtime-sync
+
+  e2e-nightly-full-replay:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: medium
+    environment:
+      BIOETL_TEST_MODE: "true"
+      BIOETL_PIPELINE__HEALTH_CHECK_MODE: probe
+      VCR_RECORD_MODE: none
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: Run complete non-smoke E2E playback
+          no_output_timeout: 41m
+          command: |
+            timeout --signal=TERM --kill-after=30s 40m bash -euo pipefail \<<'REPLAY'
+            [[ "$CIRCLE_BRANCH" == main ]]
+            if git grep -q 'git-lfs.github.com/spec/v1' -- tests/fixtures/vcr; then
+              echo 'LFS pointer cassette blocks full E2E replay' >&2
+              exit 1
+            fi
+            mkdir -p reports/e2e
+            uv run --frozen --no-build pytest tests/e2e \
+              -m "e2e and not e2e_smoke and not benchmark and not memory" \
+              --record-mode=none -p no:xdist -q --tb=short \
+              --junitxml=reports/e2e/e2e-nightly-full.xml
+            [[ -s reports/e2e/e2e-nightly-full.xml ]]
+            REPLAY
+      - store_test_results:
+          path: reports/e2e
+      - store_artifacts:
+          path: reports/e2e
+          destination: e2e-nightly-full
+
+  prompt-tests-nightly:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: Run nightly prompt contracts
+          no_output_timeout: 16m
+          command: |
+            timeout --signal=TERM --kill-after=30s 15m bash -euo pipefail \<<'PROMPTS'
+            [[ "$CIRCLE_BRANCH" == main ]]
+            mkdir -p reports/e2e
+            uv run --frozen --no-build pytest tests/prompts \
+              -m "not benchmark and not memory" -p no:xdist -q --tb=short \
+              --junitxml=reports/e2e/prompt-tests-nightly.xml
+            [[ -s reports/e2e/prompt-tests-nightly.xml ]]
+            PROMPTS
+      - store_test_results:
+          path: reports/e2e
+      - store_artifacts:
+          path: reports/e2e
+          destination: prompt-tests-nightly
+
+  e2e-matrix-live:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: medium
+    environment:
+      BIOETL_TEST_MODE: "false"
+      BIOETL_PIPELINE__HEALTH_CHECK_MODE: strict
+      VCR_RECORD_MODE: new_episodes
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+      - run:
+          name: Run explicitly selected strict live provider matrix
+          no_output_timeout: 31m
+          command: |
+            timeout --signal=TERM --kill-after=30s 30m bash -euo pipefail \<<'LIVE'
+            [[ "$CIRCLE_BRANCH" == main ]]
+            [[ "$BIOETL_TEST_MODE" == false ]]
+            [[ "$BIOETL_PIPELINE__HEALTH_CHECK_MODE" == strict ]]
+            mkdir -p reports/e2e
+            set +e
+            uv run --frozen --no-build pytest tests/e2e/test_pipeline_matrix_e2e.py \
+              -k test_pipeline_matrix_smoke -m "e2e_smoke and not benchmark and not memory" \
+              --vcr-record=new_episodes -q --tb=short \
+              --junitxml=reports/e2e/matrix-smoke-live.xml
+            result=$?
+            set -e
+            printf '%s\n' "$result" > reports/e2e/pytest_exit_code_live.txt
+            [[ "$result" == 0 ]]
+            EXPECTED_TOTAL="$(uv run --frozen --no-build python -c 'from tests.e2e.test_pipeline_matrix_e2e import ACTIVE_PIPELINE_CASES; print(len(ACTIVE_PIPELINE_CASES))')"
+            MAX_SKIPS="$(uv run --frozen --no-build python -c "print(int(${EXPECTED_TOTAL} * 0.15))")"
+            uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \
+              --junit reports/e2e/matrix-smoke-live.xml --expected-total "$EXPECTED_TOTAL" \
+              --max-skips "$MAX_SKIPS" --max-skip-rate 0.15 \
+              --markdown-out reports/e2e/matrix-smoke-live-summary.md
+            LIVE
+      - store_test_results:
+          path: reports/e2e
+      - store_artifacts:
+          path: reports/e2e
+          destination: e2e-live
 
   e2e-matrix-replay:
     docker:
@@ -1163,6 +2067,20 @@ jobs:
             uv run --frozen --no-build python -m scripts.engineering.repo check-root-governance-docs
             uv run --frozen --no-build python -m scripts.engineering.repo check-root-review-registry
             uv run --frozen --no-build python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD
+      - run:
+          name: Export cleanup classification evidence
+          command: |
+            mkdir -p reports/quality && uv run --frozen --no-build python scripts/ops/support/repo/cleanup_repository.py --dry-run --detail-limit 0 --report-json reports/quality/root-hygiene-cleanup-classification.json --report-root-review-json reports/quality/root-hygiene-review-evidence.json --report-reports-workspace-json reports/quality/reports-workspace-review.json
+      - run:
+          name: Run root hygiene unit tests
+          command: |
+            uv run --frozen --no-build pytest tests/unit/scripts/repo/test_audit_root_cleanliness.py tests/unit/scripts/repo/test_check_cleanup_governance.py tests/unit/scripts/repo/test_check_root_governance_docs.py tests/unit/scripts/repo/test_audit_structure.py tests/unit/scripts/repo/test_check_root_hygiene_review_registry.py tests/unit/scripts/repo/test_cleanup_repository.py tests/unit/scripts/repo/test_cleanup_root_local_clutter.py tests/architecture/test_root_hygiene_workflow.py tests/architecture/test_root_hygiene_review_registry.py tests/architecture/test_env_example_reference_policy.py -q
+      - store_artifacts:
+          path: reports/quality/root-hygiene-cleanup-classification.json
+      - store_artifacts:
+          path: reports/quality/root-hygiene-review-evidence.json
+      - store_artifacts:
+          path: reports/quality/reports-workspace-review.json
 
   # --- Gate: compiled-artifacts (always_required) -------------------------------
   # Mirrors compiled-artifacts-block.yml `no-pyc-check`.
@@ -1217,15 +2135,19 @@ jobs:
             curl -fsSL --proto '=https' --tlsv1.2 \
               https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz \
               -o /tmp/gitleaks.tar.gz
+            printf '%s  %s\n' '551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb' /tmp/gitleaks.tar.gz | sha256sum -c -
             mkdir -p "$HOME/.local/bin" && tar -xzf /tmp/gitleaks.tar.gz -C "$HOME/.local/bin" gitleaks
-            "$HOME/.local/bin/gitleaks" detect --config .gitleaks.toml --no-git -v
+            "$HOME/.local/bin/gitleaks" detect --config .gitleaks.toml --no-git -v --redact=100
       - run:
           name: osv-scanner (binary v2.6.0, lockfiles)
           command: |
+            set -euo pipefail
             curl -fsSL --proto '=https' --tlsv1.2 \
               https://github.com/google/osv-scanner/releases/download/v2.6.0/osv-scanner_linux_amd64 \
               -o "$HOME/.local/bin/osv-scanner"
+            printf '%s  %s\n' ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108 "$HOME/.local/bin/osv-scanner" | sha256sum --check -
             chmod 0755 "$HOME/.local/bin/osv-scanner"
+            scan_exit=0
             "$HOME/.local/bin/osv-scanner" \
               --lockfile=uv.lock \
               --lockfile=package-lock.json \
@@ -1235,7 +2157,12 @@ jobs:
               --lockfile=grafana/plugins/bioetl-scenes-app/package-lock.json \
               --lockfile=grafana/plugins/bioetl-selectorshell-panel/package-lock.json \
               --lockfile=grafana/tooling/router-v7-bridge/package-lock.json \
-              --format=json --output-file=osv-results.json || true
+              --format=json --output-file=osv-results.json || scan_exit=$?
+            # Only a completed scan can reach the severity policy.
+            case "$scan_exit" in
+              0|1) ;;
+              *) echo "OSV scan failed or found no packages (exit=$scan_exit)" >&2; exit "$scan_exit" ;;
+            esac
             export PATH="$HOME/.local/bin:$PATH"
             uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json
       - store_artifacts:
@@ -1719,6 +2646,26 @@ jobs:
         destination: proof-or-stop
 
 workflows:
+  router-bridge:
+    when:
+      and:
+      - equal:
+        - router-bridge
+        - << pipeline.parameters.ci-lane >>
+      - equal:
+        - main
+        - << pipeline.git.branch >>
+    jobs:
+    - router-bridge-tests
+    - router-plugin-tests:
+        matrix:
+          parameters:
+            plugin:
+            - bioetl-scenes-app
+            - bioetl-selectorshell-panel
+    - router-host-build:
+        requires:
+        - router-plugin-tests
   version: 2
   docker-baseline:
     when:
@@ -1728,6 +2675,32 @@ workflows:
     jobs:
       - docker-security-baseline:
           context: bioetl-github-read-only
+  docker-publish:
+    when:
+      and:
+        - equal: [docker-publish, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - docker-security-baseline:
+          context: bioetl-github-read-only
+      - docker-publish-approval:
+          type: approval
+          requires:
+            - docker-security-baseline
+      - docker-publish:
+          context: bioetl-ghcr-publish
+          serial-group: 9f037fd7-4fd9-41af-9916-33ca1e56cf7b/docker-publication
+          requires:
+            - docker-publish-approval
+  # Temporary #11931 measurement: remove after branch baseline adoption.
+  # https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11931
+  migration-coverage-closeout:
+    when:
+      and:
+        - equal: [coverage-closeout, << pipeline.parameters.ci-lane >>]
+        - equal: [codex/ci-11929-11931-preparation, << pipeline.git.branch >>]
+    jobs:
+      - proof-closeout
   main-coverage-closeout:
     when:
       and:
@@ -1742,6 +2715,27 @@ workflows:
         - equal: [main, << pipeline.git.branch >>]
     jobs:
       - e2e-matrix-replay
+      - e2e-nightly-full-replay
+      - prompt-tests-nightly
+  e2e-live:
+    when:
+      and:
+        - equal: [e2e-replay, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+        - equal: [true, << pipeline.parameters.run-live >>]
+    jobs:
+      - e2e-matrix-live
+  approved-runtime-sync:
+    when:
+      and:
+        - equal: [skills-consistency, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+        - equal: [true, << pipeline.parameters.approve-runtime-sync >>]
+    jobs:
+      - runtime-sync-approval:
+          type: approval
+      - approved-runtime-skill-sync:
+          requires: [runtime-sync-approval]
   semantic-governance:
     when:
       and:
@@ -1972,3 +2966,63 @@ workflows:
                 - codex/config-root-postmerge-20261005
                 - codex/architecture-meta-closeout-20261005
                 - codex/grafana-managed-closeout-20261005
+  architecture-metrics-fast:
+    when:
+      and:
+        - equal: [architecture-metrics, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+        - not: << pipeline.parameters.run-heavy >>
+    jobs:
+      - architecture-fast-baseline
+  architecture-metrics-heavy:
+    when:
+      and:
+        - equal: [architecture-metrics, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+        - << pipeline.parameters.run-heavy >>
+    jobs:
+      - architecture-heavy-nightly
+      - windows-atomic-write-stress-nightly
+  scorecard:
+    when:
+      and:
+        - equal: [scorecard, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - scorecard-analysis:
+          context: bioetl-github-read-only
+  scorecard-publish:
+    when:
+      and:
+        - equal: [scorecard-publish, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - scorecard-analysis:
+          context: bioetl-github-read-only
+      - scorecard-publish-approval:
+          type: approval
+          requires:
+            - scorecard-analysis
+      - scorecard-publish:
+          context: bioetl-security-events-write
+          requires:
+            - scorecard-publish-approval
+          serial-group: 9f037fd7-4fd9-41af-9916-33ca1e56cf7b/scorecard-publication
+  release-validation:
+    when:
+      and:
+        - equal: [release-validation, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - release-dist-build
+      - release-install:
+          requires:
+            - release-dist-build
+      - security-scans
+      - release-tests
+      - release-validation-complete:
+          requires:
+            - release-dist-build
+            - release-install
+            - security-scans
+            - release-tests
