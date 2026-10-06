@@ -96,6 +96,35 @@ def test_ci_receipt_admits_matching_tested_claim(proof_repo: Path) -> None:
     assert result.claim_qualified is True
 
 
+@pytest.mark.parametrize("other_worktree", [False, True])
+def test_ci_receipt_from_another_workflow_is_rejected(
+    proof_repo: Path, other_worktree: bool
+) -> None:
+    bundle = _bundle(proof_repo)
+    receipt = bundle["receipts"][0]
+    receipt["repository"]["ci_run_id"] = "another-workflow"
+    if other_worktree:
+        receipt["repository"]["worktree_id"] = "another-checkout"
+    _resign(bundle)
+    result = verify_bundle(
+        bundle=bundle, repo_root=proof_repo, policy=load_policy(), schema=load_schema()
+    )
+    assert result.outcome == "STOP"
+    assert "cross_scope:ci_run_id" in result.errors
+
+
+def test_ci_receipt_from_same_workflow_other_checkout_is_accepted(
+    proof_repo: Path,
+) -> None:
+    bundle = _bundle(proof_repo)
+    bundle["receipts"][0]["repository"]["worktree_id"] = "another-checkout"
+    _resign(bundle)
+    result = verify_bundle(
+        bundle=bundle, repo_root=proof_repo, policy=load_policy(), schema=load_schema()
+    )
+    assert result.outcome == "ADMIT"
+
+
 def test_local_digest_only_receipt_is_degraded(proof_repo: Path) -> None:
     result = verify_bundle(
         bundle=_bundle(proof_repo, trust_tier="local_single_host"),
