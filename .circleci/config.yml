@@ -2264,7 +2264,7 @@ jobs:
               test -n "${GITHUB_TOKEN:-}"
               unset GH_TOKEN ZIZMOR_OFFLINE ZIZMOR_NO_ONLINE_AUDITS
             else
-              export ZIZMOR_OFFLINE=1
+              export ZIZMOR_OFFLINE=true
             fi
             printf '%s\n' "$CIRCLE_SHA1" > reports/actions-audit/source-sha.txt
             "$HOME/.local/bin/zizmor" \
