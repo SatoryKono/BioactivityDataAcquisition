@@ -137,7 +137,9 @@ def test_concurrent_logical_event_is_appended_once(
     tmp_path, monkeypatch, separate_instances: bool
 ) -> None:
     store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
-    other = FileRunLedgerStore(base_path=store.base_path) if separate_instances else store
+    other = (
+        FileRunLedgerStore(base_path=store.base_path) if separate_instances else store
+    )
     entry = RunLedgerEntry(
         entry_id="concurrent-entry",
         manifest_id="concurrent-manifest",
@@ -161,7 +163,9 @@ def test_concurrent_logical_event_is_appended_once(
             pass
         return duplicate
 
-    monkeypatch.setattr(ledger_store_module, "has_idempotent_duplicate", synchronized_check)
+    monkeypatch.setattr(
+        ledger_store_module, "has_idempotent_duplicate", synchronized_check
+    )
     with ThreadPoolExecutor(max_workers=2) as executor:
         futures = [executor.submit(writer.append, entry) for writer in (store, other)]
         for future in futures:

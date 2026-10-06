@@ -25,8 +25,7 @@ def _key_null_counts(df: pl.DataFrame, rules: list[JsonDict]) -> dict[str, int]:
         dict.fromkeys(
             str(rule.get("field", ""))
             for rule in rules
-            if not rule.get("nullable", False)
-            and str(rule.get("field", "")) in columns
+            if not rule.get("nullable", False) and str(rule.get("field", "")) in columns
         )
     )
     return (
