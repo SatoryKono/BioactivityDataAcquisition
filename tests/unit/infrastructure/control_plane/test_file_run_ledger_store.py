@@ -31,7 +31,9 @@ from __future__ import annotations
 
 import json
 import os
+from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
+from threading import Barrier, BrokenBarrierError
 from unittest.mock import MagicMock, call
 
 import pytest
@@ -128,6 +130,49 @@ def test_file_store_round_trips_entries_by_manifest_and_run_id(tmp_path) -> None
 
     assert store.list_entries("manifest-1") == [first, second]
     assert store.list_entries_by_run_id(run_id) == [first, second]
+
+
+@pytest.mark.parametrize("separate_instances", [False, True])
+def test_concurrent_logical_event_is_appended_once(
+    tmp_path, monkeypatch, separate_instances: bool
+) -> None:
+    store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
+    other = (
+        FileRunLedgerStore(base_path=store.base_path) if separate_instances else store
+    )
+    entry = RunLedgerEntry(
+        entry_id="concurrent-entry",
+        manifest_id="concurrent-manifest",
+        run_id=RunID(deterministic_uuid_from_callsite("concurrent-ledger")),
+        event_type="run_finished",
+        occurred_at=_FIXED_TIME,
+        status="success",
+        idempotency_key="sha256:concurrent-logical-event",
+    )
+    checked = Barrier(2)
+    original_check = ledger_store_module.has_idempotent_duplicate
+
+    def synchronized_check(entries, *, idempotency_key):
+        duplicate = original_check(entries, idempotency_key=idempotency_key)
+        # Without serialization both callers observe the empty ledger before
+        # either can write. With serialization the first caller times out and
+        # writes before the second caller can read the committed entry.
+        try:
+            checked.wait(timeout=0.5)
+        except BrokenBarrierError:
+            pass
+        return duplicate
+
+    monkeypatch.setattr(
+        ledger_store_module, "has_idempotent_duplicate", synchronized_check
+    )
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        futures = [executor.submit(writer.append, entry) for writer in (store, other)]
+        for future in futures:
+            future.result(timeout=15)
+
+    assert store.list_entries(entry.manifest_id) == [entry]
+    assert store.list_entries_by_run_id(entry.run_id) == [entry]
 
 
 def test_file_store_emits_ledger_append_metric(tmp_path) -> None:

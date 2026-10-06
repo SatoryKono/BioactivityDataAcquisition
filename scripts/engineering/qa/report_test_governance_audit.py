@@ -1294,13 +1294,15 @@ def _assemble_test_governance_payload(
     }
 
 
-def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
+def _collect_test_governance_report_cached(
+    root_str: str, *, force_rescan: bool = False
+) -> dict[str, Any]:
     """Collect deterministic static counts used as remediation budgets.
 
     NOSONAR - S3776: complexity 32 exceeds 15; extraction would obscure test governance scan logic
     """
     root = Path(root_str).resolve()
-    fresh_artifact = _load_current_artifact_if_fresh(root)
+    fresh_artifact = None if force_rescan else _load_current_artifact_if_fresh(root)
     if fresh_artifact is not None:
         return fresh_artifact
     test_files = _iter_test_files(root)
@@ -1390,12 +1392,16 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
     )
 
 
-def collect_test_governance_report(root: Path = ROOT) -> dict[str, Any]:
+def collect_test_governance_report(
+    root: Path = ROOT, *, force_rescan: bool = False
+) -> dict[str, Any]:
     """Collect deterministic static counts used as remediation budgets."""
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
     safe_root = resolve_output_path(root, root=REPO_ROOT)
-    return _collect_test_governance_report_cached(str(safe_root))
+    return _collect_test_governance_report_cached(
+        str(safe_root), force_rescan=force_rescan
+    )
 
 
 def load_config(path: Path) -> dict[str, Any]:
@@ -1579,7 +1585,8 @@ def main(argv: list[str] | None = None) -> int:
 
     safe_root = resolve_output_path(args.root, root=REPO_ROOT)
     safe_config = resolve_output_path(args.config, root=REPO_ROOT)
-    payload = collect_test_governance_report(safe_root)
+    # Verification and regeneration must not trust the artifact being checked.
+    payload = collect_test_governance_report(safe_root, force_rescan=True)
     json_out, fixture_duplication_out, duplicate_name_inventory_out = (
         _resolve_check_default_paths(
             check=args.check,

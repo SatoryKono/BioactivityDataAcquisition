@@ -29,9 +29,14 @@
 
 from __future__ import annotations
 
+import asyncio
+import asyncio.threads
+import threading
+
+
 from datetime import UTC, datetime
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from tests.helpers.deterministic_ids import deterministic_uuid_string_from_callsite
 
 import pytest
@@ -58,6 +63,9 @@ from bioetl.domain.models.metadata import (
 )
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
+from bioetl.infrastructure.storage.metadata_writer_operations_impl import (
+    _MetadataWriterOperations,
+)
 
 
 pytestmark = pytest.mark.unit
@@ -501,3 +509,127 @@ async def test_write_metadata_fails_when_control_plane_artifact_id_is_missing() 
                 provider="chembl",
                 entity="activity",
             )
+
+
+@pytest.fixture
+def publication_operations(tmp_path, monkeypatch):
+    """Use real thread dispatch while isolating the earlier metadata write."""
+    monkeypatch.setattr(asyncio, "to_thread", asyncio.threads.to_thread)
+    recorder = Mock()
+    operations = _MetadataWriterOperations(
+        logger=Mock(),
+        metrics=Mock(),
+        retry_policy=Mock(),
+        artifact_recorder_provider=lambda: recorder,
+    )
+    operations.write_metadata = AsyncMock(return_value=str(tmp_path / "metadata.json"))
+    return operations, recorder
+
+
+async def test_write_layer_metadata_executes_publication_off_event_loop(
+    publication_operations, tmp_path
+):
+    operations, recorder = publication_operations
+    caller_thread = threading.get_ident()
+    observed_threads = []
+    recorder.side_effect = lambda *args, **kwargs: observed_threads.append(
+        threading.get_ident()
+    )
+
+    result = await operations.write_layer_metadata(
+        base_path=tmp_path, metadata=_make_bronze_metadata(), layer="bronze"
+    )
+
+    assert result == str(tmp_path / "metadata.json")
+    assert len(observed_threads) == 1
+    assert observed_threads[0] != caller_thread
+
+
+async def test_write_layer_metadata_propagates_worker_failure(
+    publication_operations, tmp_path
+):
+    operations, recorder = publication_operations
+    error = RuntimeError("publication failed")
+    recorder.side_effect = error
+
+    with pytest.raises(RuntimeError) as raised:
+        await operations.write_layer_metadata(
+            base_path=tmp_path, metadata=_make_bronze_metadata(), layer="bronze"
+        )
+    assert raised.value is error
+
+
+@pytest.mark.parametrize("worker_fails", [False, True])
+async def test_write_layer_metadata_drains_repeated_cancellation(
+    publication_operations, tmp_path, monkeypatch, worker_fails
+):
+    operations, recorder = publication_operations
+    loop = asyncio.get_running_loop()
+    started = asyncio.Event()
+    release = threading.Event()
+    drain_entered = [asyncio.Event(), asyncio.Event()]
+    real_shield = asyncio.shield
+    shield_calls = 0
+    error = RuntimeError("publication failed during drain")
+
+    def tracked_shield(task):
+        nonlocal shield_calls
+        shield_calls += 1
+        if 2 <= shield_calls <= 3:
+            drain_entered[shield_calls - 2].set()
+        return real_shield(task)
+
+    def blocked_recorder(*args, **kwargs):
+        loop.call_soon_threadsafe(started.set)
+        if not release.wait(timeout=10):
+            raise TimeoutError("test did not release publication worker")
+        if worker_fails:
+            raise error
+
+    monkeypatch.setattr(asyncio, "shield", tracked_shield)
+    recorder.side_effect = blocked_recorder
+    task = asyncio.create_task(
+        operations.write_layer_metadata(
+            base_path=tmp_path, metadata=_make_bronze_metadata(), layer="bronze"
+        )
+    )
+    try:
+        await asyncio.wait_for(started.wait(), timeout=10)
+        task.cancel()
+        await asyncio.wait_for(drain_entered[0].wait(), timeout=10)
+        task.cancel()
+        await asyncio.wait_for(drain_entered[1].wait(), timeout=10)
+        assert not task.done()
+    finally:
+        release.set()
+
+    expected = RuntimeError if worker_fails else asyncio.CancelledError
+    with pytest.raises(expected) as raised:
+        await task
+    if worker_fails:
+        assert raised.value is error
+    recorder.assert_called_once()
+
+
+async def test_write_layer_metadata_retrieves_error_before_cancel_handler(
+    publication_operations, tmp_path, monkeypatch
+):
+    """Force the worker to finish before cancellation reaches the drain loop."""
+    operations, recorder = publication_operations
+    error = RuntimeError("worker already failed")
+    recorder.side_effect = error
+    real_shield = asyncio.shield
+
+    async def cancel_after_worker_completion(task):
+        with pytest.raises(RuntimeError) as worker_error:
+            await real_shield(task)
+        assert task.done()
+        assert worker_error.value is error
+        raise asyncio.CancelledError
+
+    monkeypatch.setattr(asyncio, "shield", cancel_after_worker_completion)
+    with pytest.raises(RuntimeError) as raised:
+        await operations.write_layer_metadata(
+            base_path=tmp_path, metadata=_make_bronze_metadata(), layer="bronze"
+        )
+    assert raised.value is error
