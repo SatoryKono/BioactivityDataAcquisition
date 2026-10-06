@@ -58,7 +58,10 @@ class PubChemFetchFlow:
             if isinstance(value, str):
                 delay = parse_retry_after(value)
                 if delay is not None:
-                    return self.retry_config.clamp_retry_after(delay)
+                    clamped_delay = self.retry_config.clamp_retry_after(delay)
+                    if clamped_delay < delay:
+                        raise error
+                    return clamped_delay
         return self.retry_config.calculate_delay(attempt, endpoint)
 
     async def execute(
