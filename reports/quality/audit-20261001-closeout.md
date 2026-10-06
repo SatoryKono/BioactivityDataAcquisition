@@ -56,6 +56,61 @@ The earlier eight-stage matrix and actual-main architecture receipts retain thei
 ## Preserved historical snapshots — not current closeout claims
 
 
+## Architecture acceptance evidence: 2026-10-05
+
+The eight closed RF stages and their immutable issue evidence are recorded in the
+[verified child matrix](proof-or-stop/architecture-coverage-11854-11899/architecture-program-child-matrix-verified.json).
+All eight merged commits were rechecked as ancestors of `3b11b223774c0b7bef4f306fd8cc45326a635b53`.
+The architecture scope remains explicit dependencies, source-bound governance,
+and the existing layer/port/hotspot contracts. No new score targets, debt budgets,
+thresholds or exemptions are introduced.
+
+The latest complete producer measured the integrated tree
+`3b11b223774c0b7bef4f306fd8cc45326a635b53`, including main `95ca0a67f21a7055ad1b671f9ff57bd5ff39b1fb`
+and the reviewed VCR whole-token matching repair. All 17 groups passed:
+32,877 passed, 187 skipped, zero failures/errors, 99.70% line and 94.34% branch
+coverage. The [integrated measurement summary](proof-or-stop/architecture-11854-postmerge/measurement-3b11b22.summary.json)
+binds the untouched raw coverage, XML, JUnit and manifest archive. Trust remains
+`local_single_host`. The 139 owning tests passed with no skips after integration;
+they include the repair of a test that evicted a parent package while retaining
+cached child modules. Previous measurements below retain their original SHAs.
+
+The complete W48 producer measured main `c61913580698f70b181ae3e9ac852c631f02a878`:
+17 successful groups, 32,866 passed, 187 skipped, no failures/errors, 99.70% line
+and 94.34% branch coverage. Its source and test hashes matched the postmerge
+acceptance branch before the prompt-contract repair below. The [W48 checksum summary](proof-or-stop/architecture-11854-postmerge/measurement-w48-summary.json)
+identifies the archive containing the original manifest, XML, JUnit and raw
+coverage databases. This is `local_single_host` measurement evidence; it does
+not itself establish independent CI admission.
+
+The complete follow-up producer on `27feb6c1f57110f77452670a4dac569c0872ce35`
+repeated all 17 groups after aligning the prompt contracts with the 18 scenarios
+and 28 overlays already merged in #11919. It recorded 32,866 passed, 187 skipped,
+zero failures/errors, 99.70% line and 94.34% branch coverage. The
+[measurement checksum summary](proof-or-stop/architecture-11854-postmerge/measurement-27feb6c.summary.json)
+identifies its original manifest, XML, JUnit and raw coverage archive. This is
+`local_single_host` evidence; W48 remains historical evidence with its original
+identity. All 51 prompt tests passed separately with no skips.
+
+On `e51699ee734832bfae4bd850cc4f9ae48b67232e`, the 50 owning telemetry/skip/cleanup
+tests passed, full `python -m scripts.docs verify` exited 0, and both
+`python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check`
+and `python -m scripts.engineering.qa report-debt-governance-gates --check`
+exited 0 without `--changed-from-ref`. The full-tree guard also exited 0.
+Runtime AI sources were unchanged; mirror synchronization is not applicable.
+
+The final source-bound architecture, full-suite and independent proof decision
+are recorded in [PR #11945](https://github.com/SatoryKono/BioactivityDataAcquisition/pull/11945)
+and the [#11854 acceptance record](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11854).
+Only completed, successful receipts qualify closure; partial runs and a merge
+alone do not. GitHub Actions billing remains a separate external blocker;
+CircleCI provides the independent execution route.
+
+Config-root measured coverage and module-inventory adoption belong to #11899.
+The 81 other historical module comparisons in its published ledger remain a
+separate residual; retained historical floors are not newly measured coverage.
+The older sections below retain their original measurement and acceptance state.
+
 ## W40: final source measurement (2026-10-04)
 
 Complete canonical 17-group producer on `72905b3fdb289e7229f17ce36727f2b815241361`: 33,005 cases, 32,823 PASS, 182 SKIP, zero failures/errors; lines 99.70%, branches 94.34%. `config_root`: 40/40 lines and 18/18 branches, line 32 executed. XML SHA-256 `150f069397a0081aee4338dae9c64a1dbef05a1ad776f0271b768b7d9e8b959a`.
