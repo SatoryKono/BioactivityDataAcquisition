@@ -241,7 +241,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `docs-kpi-weekly.yml` | `30 4 * * 1` | CircleCI docs-kpi | Registered `bioetl-docs-kpi-weekly`; first scheduled execution pending |
 | `docs.yml` | — | CircleCI docs-governance | Prepared required gate; full docs/render parity pending |
 | `duplication-complexity.yml` | — | CircleCI duplication | Prepared required gate; full scan thresholds preserved |
-| `e2e-matrix-health.yml` | `30 2 * * *` | E2E replay and controlled live lanes | Main-only `e2e-replay` prepared with three reruns and skip SLO; live/nightly and PR event parity pending |
+| `e2e-matrix-health.yml` | `30 2 * * *` | E2E replay and controlled live lanes | Main-only `e2e-replay` includes smoke reruns, full replay and prompt contracts; typed `run-live=false` enables the separate strict live workflow only when true; remote/scheduled and PR event acceptance pending |
 | `github-settings-quarterly-review.yml` | `23 6 1 1,4,7,10 *` | CircleCI github-settings-review | Authenticated main run 2773 completed report collection (policy drift remains explicit); quarterly first-day Jan/Apr/Jul/Oct 06 UTC schedule registered with Scheduling System; scheduled execution pending |
 | `import-linter.yml` | — | CircleCI lint-arch and arch-tests | Prepared gates; full external architecture acceptance pending |
 | `labeler.yml` | — | Retain disabled label maintenance | Preserve #10263/#11234; taxonomy reconciliation is required before any future trusted replacement |
@@ -267,7 +267,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `scorecard.yml` | `30 7 * * 1` | CircleCI scorecard plus SARIF publication | Main-only JSON/SARIF analysis and protected writer prepared; pinned v5.5.0 and all 18 checks; local Linux 7.8/10 on 303ced3b and processed SARIF; restricted empty write context exists, credentials/remote acceptance/schedule and public result decision pending |
 | `security.yml` | — | CircleCI security-scans | Main security gates 218–220 passed; all tracked lockfiles remain scanned; SARIF publication parity pending |
 | `semantic-governance.yml` | — | CircleCI `semantic-governance` | Seven canonical checks and four regression suites in the PR/main aggregate and an opt-in main lane; main gates 218–220 accepted |
-| `skills-consistency.yml` | — | CircleCI skills-consistency | Main run 3364 passed static doctor, MCP wrapper pairs, mirror checks and drift=false artifact; approved sync and event parity pending; artifact retention verified at 30 days |
+| `skills-consistency.yml` | — | CircleCI skills-consistency | Main run 3364 passed static doctor, MCP wrapper pairs, mirror checks and drift=false artifact; typed `approve-runtime-sync=false` prepares a separate approval-gated report/patch job without push; sync and event acceptance pending; artifact retention verified at 30 days |
 | `stale.yml` | — | Retain disabled stale maintenance | Preserve #10263; legacy 14/7-day automation contradicts the canonical draft-only policy |
 | `tests.yml` | — | CircleCI test-fast/test-integration | Main gates 218–220 accepted; historical producer 3363 completed 17 shards with overall STOP; test-tree changes require a new complete 17-shard producer, followed by another main producer after squash integration |
 | `type-checking.yml` | — | CircleCI mypy | Strict mypy gate accepted in main pipelines 218–220 |
@@ -484,3 +484,20 @@ requested `bioetl-github-read-only`, `bioetl-ghcr-publish`, and
 (4366, 4368, 4367) returned `unauthorized` with zero duration; the probe never
 reads or prints environment variables. This proves the tested non-main denial,
 not successful publication or acceptance of every fork/trigger combination.
+
+
+Manual E2E parity preserves the legacy 40-minute full-playback, 15-minute prompt,
+and 30-minute strict-live limits. `ci-lane=e2e-replay` always runs the three smoke
+reruns, full non-smoke replay, and prompt contracts on main. `run-live=true`
+additionally selects `e2e-live`, with test mode false, strict health checks,
+new-episode VCR mode and the unchanged 15% skip-rate SLO. The nightly schedule
+must explicitly select that flag; registration and actual live acceptance are
+pending. The ordinary PR workflow remains separate.
+
+`ci-lane=skills-consistency` retains read-only checks. Setting the typed
+`approve-runtime-sync=true` additionally exposes `runtime-sync-approval` and
+then produces the canonical one-way sync report plus a binary patch. The job
+runs Codex–Junie and skill mirror checks after sync, has a five-minute execution
+limit, and never commits or pushes. Both the parameter and approval are required;
+non-main branches cannot select this workflow. Remote patch acceptance remains
+pending.

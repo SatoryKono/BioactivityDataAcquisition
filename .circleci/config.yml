@@ -22,6 +22,12 @@ parameters:
   run-heavy:
     type: boolean
     default: false
+  run-live:
+    type: boolean
+    default: false
+  approve-runtime-sync:
+    type: boolean
+    default: false
 
 commands:
   # Port of .github/actions/setup-python-uv (uv 0.11.26, uv cache, uv sync).
@@ -1256,6 +1262,132 @@ jobs:
       - store_artifacts:
           path: reports/ai/runtime-skill-drift.json
 
+  approved-runtime-skill-sync:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+      - run:
+          name: Produce approved runtime sync patch without publishing
+          no_output_timeout: 6m
+          command: |
+            timeout --signal=TERM --kill-after=30s 5m bash -euo pipefail \<<'SYNC'
+            [[ "$CIRCLE_BRANCH" == main ]]
+            uv run --frozen --no-build python -m scripts.ai.sync.runtime_skills \
+              --mode sync --approved --report reports/ai/runtime-skill-sync.json
+            git diff --binary > reports/ai/runtime-skill-sync.patch
+            bash scripts/ai/junie/check_junie_mirror.sh --check
+            bash scripts/ops/support/skills/check_skills_mirror.sh --check
+            SYNC
+      - store_artifacts:
+          path: reports/ai
+          destination: approved-runtime-sync
+
+  e2e-nightly-full-replay:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: medium
+    environment:
+      BIOETL_TEST_MODE: "true"
+      BIOETL_PIPELINE__HEALTH_CHECK_MODE: probe
+      VCR_RECORD_MODE: none
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: Run complete non-smoke E2E playback
+          no_output_timeout: 41m
+          command: |
+            timeout --signal=TERM --kill-after=30s 40m bash -euo pipefail \<<'REPLAY'
+            [[ "$CIRCLE_BRANCH" == main ]]
+            if git grep -q 'git-lfs.github.com/spec/v1' -- tests/fixtures/vcr; then
+              echo 'LFS pointer cassette blocks full E2E replay' >&2
+              exit 1
+            fi
+            mkdir -p reports/e2e
+            uv run --frozen --no-build pytest tests/e2e \
+              -m "e2e and not e2e_smoke and not benchmark and not memory" \
+              --record-mode=none -p no:xdist -q --tb=short \
+              --junitxml=reports/e2e/e2e-nightly-full.xml
+            [[ -s reports/e2e/e2e-nightly-full.xml ]]
+            REPLAY
+      - store_test_results:
+          path: reports/e2e
+      - store_artifacts:
+          path: reports/e2e
+          destination: e2e-nightly-full
+
+  prompt-tests-nightly:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: Run nightly prompt contracts
+          no_output_timeout: 16m
+          command: |
+            timeout --signal=TERM --kill-after=30s 15m bash -euo pipefail \<<'PROMPTS'
+            [[ "$CIRCLE_BRANCH" == main ]]
+            mkdir -p reports/e2e
+            uv run --frozen --no-build pytest tests/prompts \
+              -m "not benchmark and not memory" -p no:xdist -q --tb=short \
+              --junitxml=reports/e2e/prompt-tests-nightly.xml
+            [[ -s reports/e2e/prompt-tests-nightly.xml ]]
+            PROMPTS
+      - store_test_results:
+          path: reports/e2e
+      - store_artifacts:
+          path: reports/e2e
+          destination: prompt-tests-nightly
+
+  e2e-matrix-live:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: medium
+    environment:
+      BIOETL_TEST_MODE: "false"
+      BIOETL_PIPELINE__HEALTH_CHECK_MODE: strict
+      VCR_RECORD_MODE: new_episodes
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+      - run:
+          name: Run explicitly selected strict live provider matrix
+          no_output_timeout: 31m
+          command: |
+            timeout --signal=TERM --kill-after=30s 30m bash -euo pipefail \<<'LIVE'
+            [[ "$CIRCLE_BRANCH" == main ]]
+            [[ "$BIOETL_TEST_MODE" == false ]]
+            [[ "$BIOETL_PIPELINE__HEALTH_CHECK_MODE" == strict ]]
+            mkdir -p reports/e2e
+            set +e
+            uv run --frozen --no-build pytest tests/e2e/test_pipeline_matrix_e2e.py \
+              -k test_pipeline_matrix_smoke -m "e2e_smoke and not benchmark and not memory" \
+              --vcr-record=new_episodes -q --tb=short \
+              --junitxml=reports/e2e/matrix-smoke-live.xml
+            result=$?
+            set -e
+            printf '%s\n' "$result" > reports/e2e/pytest_exit_code_live.txt
+            [[ "$result" == 0 ]]
+            EXPECTED_TOTAL="$(uv run --frozen --no-build python -c 'from tests.e2e.test_pipeline_matrix_e2e import ACTIVE_PIPELINE_CASES; print(len(ACTIVE_PIPELINE_CASES))')"
+            MAX_SKIPS="$(uv run --frozen --no-build python -c "print(int(${EXPECTED_TOTAL} * 0.15))")"
+            uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \
+              --junit reports/e2e/matrix-smoke-live.xml --expected-total "$EXPECTED_TOTAL" \
+              --max-skips "$MAX_SKIPS" --max-skip-rate 0.15 \
+              --markdown-out reports/e2e/matrix-smoke-live-summary.md
+            LIVE
+      - store_test_results:
+          path: reports/e2e
+      - store_artifacts:
+          path: reports/e2e
+          destination: e2e-live
+
   e2e-matrix-replay:
     docker:
       - image: cimg/python:3.13
@@ -2208,6 +2340,27 @@ workflows:
         - equal: [main, << pipeline.git.branch >>]
     jobs:
       - e2e-matrix-replay
+      - e2e-nightly-full-replay
+      - prompt-tests-nightly
+  e2e-live:
+    when:
+      and:
+        - equal: [e2e-replay, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+        - equal: [true, << pipeline.parameters.run-live >>]
+    jobs:
+      - e2e-matrix-live
+  approved-runtime-sync:
+    when:
+      and:
+        - equal: [skills-consistency, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+        - equal: [true, << pipeline.parameters.approve-runtime-sync >>]
+    jobs:
+      - runtime-sync-approval:
+          type: approval
+      - approved-runtime-skill-sync:
+          requires: [runtime-sync-approval]
   semantic-governance:
     when:
       and:
