@@ -342,7 +342,10 @@ jobs:
           (
           cd "$BIOETL_WORKSPACE/."
           image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').image")
-          docker pull "$image"
+          base_image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').base_image")
+          # BuildKit cache does not register the base reference in the Docker image store.
+          docker pull --platform linux/amd64 "$base_image"
+          docker pull --platform linux/amd64 "$image"
           node grafana/tooling/router-v7-bridge/verify-host-image.mjs \
             bioetl-router-host:acceptance
           )
@@ -689,6 +692,10 @@ jobs:
       HYPOTHESIS_PROFILE: ci
       PYTHONDONTWRITEBYTECODE: '1'
       PYTHONUNBUFFERED: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
     steps:
       - checkout
       - setup-python-uv:
@@ -708,7 +715,7 @@ jobs:
               uv run --frozen --no-build radon cc src/bioetl --min C --show-closures | tee /tmp/architecture-metrics/radon.txt
               uv run --frozen --no-build pytest tests/ -m "not e2e and not benchmark and not serial" \
                 --ignore=tests/e2e --ignore=tests/contract \
-                -n auto --dist loadscope --max-worker-restart=0 \
+                -n 4 --dist loadscope --max-worker-restart=0 \
                 --cov=src/bioetl --cov-report=term-missing \
                 --cov-report=xml:/tmp/architecture-metrics/coverage.xml \
                 --junitxml=/tmp/architecture-metrics/junit.xml --cov-fail-under=85
@@ -3126,8 +3133,24 @@ workflows:
           requires: [classify]
       - docker-build:
           requires: [classify]
+      # Retain the legacy PR/push checks without credentials or nightly heavy jobs.
+      - port-contracts:
+          requires: [classify]
+      - provider-contract-drift:
+          requires: [classify]
+      - memory-freshness:
+          requires: [classify]
+      - skills-consistency:
+          requires: [classify]
+      - e2e-matrix-replay:
+          requires: [classify]
       - pr-gate-complete:
           requires:
+            - port-contracts
+            - provider-contract-drift
+            - memory-freshness
+            - skills-consistency
+            - e2e-matrix-replay
             - lint-ruff
             - lint-arch
             - arch-tests
