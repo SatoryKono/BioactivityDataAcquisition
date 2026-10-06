@@ -270,6 +270,77 @@ def _run_logged(command: list[str], log: Path, *, env: dict[str, str]) -> int:
     return result.returncode
 
 
+def import_shards(
+    groups: Path, scratch: Path, expected: dict[str, object]
+) -> list[dict[str, object]]:
+    """Validate all canonical shards before combining transported measurements."""
+    rows: dict[str, dict[str, object]] = {}
+    by_name = {shard.name: shard for shard in SHARDS}
+    for path in sorted(groups.glob("coverage-*/measurement/manifest.json")):
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if payload.get("shards_complete") is not True:
+            raise ValueError("Incomplete shard group")
+        for key in (
+            "head",
+            "source_tree_sha256",
+            "test_tree_sha256",
+            "python",
+            "ci_workflow_id",
+            "required_shards",
+        ):
+            if payload.get(key) != expected.get(key):
+                raise ValueError(f"Foreign shard group: {key}")
+        for original in payload["shards"]:
+            row = dict(original)
+            name = row["name"]
+            if name not in by_name or name in rows or row["exit_code"] != 0:
+                raise ValueError("Failed, duplicate or unknown shard")
+            original_junit = Path(row["junit_file"])
+            if row["command"] != _command(by_name[name], original_junit):
+                raise ValueError("Noncanonical shard command")
+            origin = Path(payload["scratch_dir"])
+            for field, subdir in (
+                ("coverage_file", "shards"),
+                ("junit_file", "junit"),
+                ("log_file", "logs"),
+            ):
+                relative = Path(row[field]).relative_to(origin)
+                filename = {
+                    "coverage_file": f".coverage.{name}",
+                    "junit_file": f"{name}.xml",
+                    "log_file": f"{name}.log",
+                }[field]
+                if relative != Path(subdir) / filename:
+                    raise ValueError("Noncanonical shard artifact path")
+                source = (path.parent / relative).resolve(strict=True)
+                if (
+                    not source.is_relative_to(path.parent.resolve())
+                    or source.is_symlink()
+                ):
+                    raise ValueError("Shard artifact escaped measurement directory")
+                if (
+                    field == "coverage_file"
+                    and _sha256(source) != row["coverage_sha256"]
+                ):
+                    raise ValueError("Coverage digest mismatch")
+                if field == "junit_file":
+                    if junit_telemetry_sha256(source) != row["junit_telemetry_sha256"]:
+                        raise ValueError("JUnit digest mismatch")
+                    cases = list(ElementTree.parse(source).getroot().iter("testcase"))
+                    if not cases or any(
+                        c.find("failure") is not None or c.find("error") is not None
+                        for c in cases
+                    ):
+                        raise ValueError("Failed or empty JUnit")
+                target = scratch / subdir / source.name
+                shutil.copyfile(source, target)
+                row[field] = str(target)
+            rows[name] = row
+    if set(rows) != set(by_name):
+        raise ValueError("Coverage requires all 17 canonical shards")
+    return [rows[shard.name] for shard in SHARDS]
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -280,7 +351,17 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         help="New empty run directory (default: system temp)",
     )
+    parser.add_argument("--shard", action="append", choices=[s.name for s in SHARDS])
+    parser.add_argument(
+        "--merge-dir",
+        type=Path,
+        help="Combine transported shard groups without running tests",
+    )
     args = parser.parse_args(argv)
+    if args.shard and args.merge_dir:
+        parser.error("--shard and --merge-dir are mutually exclusive")
+    if args.shard and len(args.shard) != len(set(args.shard)):
+        parser.error("duplicate shard selection")
     if len(SHARDS) != 17 or len({shard.name for shard in SHARDS}) != 17:
         raise RuntimeError("Local coverage plan must have 17 distinct shards")
     if args.list:
@@ -330,6 +411,7 @@ def main(argv: list[str] | None = None) -> int:
         "required_shards": [shard.name for shard in SHARDS],
         "shards": [],
         "complete": False,
+        "ci_workflow_id": os.environ.get("CIRCLE_WORKFLOW_ID"),
     }
     _write_manifest(manifest_path, manifest)
     print(
@@ -363,39 +445,43 @@ def main(argv: list[str] | None = None) -> int:
         if not any(e.split("/")[0] == entry.split("/")[0] for e in wslenv_entries):
             wslenv_entries.append(entry)
     env["WSLENV"] = ":".join(wslenv_entries)
-    for shard in SHARDS:
-        coverage_file = shards_dir / f".coverage.{shard.name}"
-        junit = junit_dir / f"{shard.name}.xml"
-        log = logs_dir / f"{shard.name}.log"
-        command = _command(shard, junit)
-        env["COVERAGE_FILE"] = _bash_safe_path(coverage_file)
-        print(f"[local-coverage] start {shard.name}", flush=True)
-        started = time.monotonic()
-        exit_code = _run_logged(command, log, env=env)
-        row = {
-            "name": shard.name,
-            "command": command,
-            "exit_code": exit_code,
-            "seconds": round(time.monotonic() - started, 2),
-            "coverage_file": str(coverage_file),
-            "coverage_sha256": (
-                _sha256(coverage_file)
-                if coverage_file.is_file() and coverage_file.stat().st_size > 0
-                else None
-            ),
-            "junit_file": str(junit) if junit.is_file() else None,
-            "junit_telemetry_sha256": junit_telemetry_sha256(junit)
-            if junit.is_file()
-            else None,
-            "log_file": str(log),
-        }
-        assert isinstance(manifest["shards"], list)
-        manifest["shards"].append(row)
-        _write_manifest(manifest_path, manifest)
-        print(
-            f"[local-coverage] {shard.name} exit={exit_code} coverage={'yes' if row['coverage_sha256'] else 'no'}",
-            flush=True,
-        )
+    selected = [shard for shard in SHARDS if not args.shard or shard.name in args.shard]
+    if args.merge_dir:
+        manifest["shards"] = import_shards(args.merge_dir, scratch, manifest)
+    else:
+        for shard in selected:
+            coverage_file = shards_dir / f".coverage.{shard.name}"
+            junit = junit_dir / f"{shard.name}.xml"
+            log = logs_dir / f"{shard.name}.log"
+            command = _command(shard, junit)
+            env["COVERAGE_FILE"] = _bash_safe_path(coverage_file)
+            print(f"[local-coverage] start {shard.name}", flush=True)
+            started = time.monotonic()
+            exit_code = _run_logged(command, log, env=env)
+            row = {
+                "name": shard.name,
+                "command": command,
+                "exit_code": exit_code,
+                "seconds": round(time.monotonic() - started, 2),
+                "coverage_file": str(coverage_file),
+                "coverage_sha256": (
+                    _sha256(coverage_file)
+                    if coverage_file.is_file() and coverage_file.stat().st_size > 0
+                    else None
+                ),
+                "junit_file": str(junit) if junit.is_file() else None,
+                "junit_telemetry_sha256": junit_telemetry_sha256(junit)
+                if junit.is_file()
+                else None,
+                "log_file": str(log),
+            }
+            assert isinstance(manifest["shards"], list)
+            manifest["shards"].append(row)
+            _write_manifest(manifest_path, manifest)
+            print(
+                f"[local-coverage] {shard.name} exit={exit_code} coverage={'yes' if row['coverage_sha256'] else 'no'}",
+                flush=True,
+            )
 
     if (
         _git("rev-parse", "HEAD") != head
@@ -429,6 +515,12 @@ def main(argv: list[str] | None = None) -> int:
             f"[local-coverage] incomplete; evidence: {manifest_path}", file=sys.stderr
         )
         return 1
+
+    if args.shard:
+        manifest["shards_complete"] = True
+        manifest["finished_at_utc"] = datetime.now(UTC).isoformat()
+        _write_manifest(manifest_path, manifest)
+        return 0
 
     combined = scratch / "combined"
     combined.mkdir()
