@@ -223,6 +223,12 @@ Manual successes do not establish scheduler, notification or release acceptance.
 
 ## Migration disposition ledger (#11930 / #11931)
 
+On 2026-10-06 the owner cancelled GitHub Actions deletion. Issue #11930 is
+closed as `not planned`; all 52 workflow definitions and composite actions are
+retained. Actions remain disabled. CircleCI implementation and acceptance under
+#11931 continue independently. Retention does not establish functional parity,
+authorize public OpenSSF channel retirement, or enable legacy workflows.
+
 Current source inventory contains 52 workflows. Every row records the intended
 replacement or retained local/disabled policy; "prepared" is not external acceptance.
 No pending replacement authorizes deleting its source workflow. Scheduled entries
@@ -234,14 +240,14 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `architecture.yml` | `20 2 * * *` | CircleCI architecture-metrics | Main-only typed run-heavy=false fast baseline; run-heavy=true keeps heavy coverage 85% and Windows stress; local Windows 2/2 PASS, remote and scheduled acceptance pending |
 | `branch-hygiene.yml` | `15 3 * * 1` | CircleCI branch-hygiene inventory | Weekly trigger and restricted context created; authenticated main run 3084 passes; scheduled run and PR branch-name events pending; artifact retention verified at 30 days |
 | `chembl-baseline-smoke.yml` | — | `dq-consistency` validates configurations; `arch-tests` and unit/integration groups cover all nine legacy test selectors; manual `ci-lane=pr-gate` | Nine test selectors and configuration steps accepted on main (DQ jobs 3488, 3505, 3554); legacy event parity acceptance pending |
-| `codeql.yml` | `17 4 * * 1` | Retire Actions definition at #11930 cutover | Not required; optional analysis lifecycle remains explicit |
+| `codeql.yml` | `17 4 * * 1` | Retain disabled Actions definition | Not required; optional analysis lifecycle remains explicit |
 | `coderabbit.yml` | — | Local CodeRabbit launcher | Retain local; external integration/event policy pending |
 | `commit-lint.yml` | — | CircleCI commit-lint | Main gates 218–220 accepted; locked tooling refresh in #11955 merged as 303ced3 after all 27 CircleCI checks passed |
-| `compiled-artifacts-block.yml` | — | CircleCI compiled-artifacts | Main gates 218–220 accepted; remaining legacy trigger parity must be checked before retirement |
+| `compiled-artifacts-block.yml` | — | CircleCI compiled-artifacts | Main gates 218–220 accepted; remaining legacy trigger parity must be checked for CircleCI acceptance |
 | `consolidation-gates.yml` | — | CircleCI consolidation | Main run 3170 passes with both hash artifacts; artifact retention verified at 30 days |
 | `contract-governance-fast-check.yml` | — | CircleCI schema-governance | Six canonical contract checks and diagnostics folded into the schema gate; any failure blocks the aggregate; main gates 218–220 accepted |
 | `contract-tests.yml` | — | Local live-provider contract runner | Retain local-only policy #11190; preserve inputs and failure evidence |
-| `dashboard-first-window-noscroll.yml` | — | CircleCI integration matrix | Nine static dashboard contract cases passed without skips in producer 4282 on 84524a90deab; no Grafana host is required for this source workflow. Retarget legacy workflow-path assertions at #11930; browser/render acceptance remains separate |
+| `dashboard-first-window-noscroll.yml` | — | CircleCI integration matrix | Nine static dashboard contract cases passed without skips in producer 4282 on 84524a90deab; no Grafana host is required for this source workflow. Retain legacy workflow-path assertions; browser/render acceptance remains separate |
 | `dashboard-render-host.yml` | — | Local render host runner | Retain local host; Grafana/render secrets never on ordinary PR |
 | `dependency-review.yml` | — | Dependency diff security review | Pending replacement; do not drop HIGH/CRITICAL diff coverage |
 | `diagram-nightly.yml` | — | Diagram lint plus local full render | Keep disabled full-render surface; port only active checks |
@@ -263,7 +269,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `performance-nightly.yml` | `0 3 * * *` | CircleCI performance | Scheduled pipeline 272 on 303ced3: job 4565 failed CrossRef latency; one diagnostic rerun 4566 passed 70 tests/0 skips and all five budgets. Artifacts retained from both; runner variability and stable acceptance pending |
 | `port-contracts.yml` | — | CircleCI port-contracts | Main run 2606 passed 188 tests including 24 Hypothesis cases; run 4425/pipeline 262 passed 164 tests with include-hypothesis=false on 303ced3; push/PR event parity pending |
 | `pr-hygiene.yml` | — | Retain disabled PR maintenance | Preserve #10263; canonical 21-day draft/report-noise policy remains manual |
-| `pr-required.yml` | — | CircleCI classify/pr-gate-complete | Main pipelines 218–220 pass all 81 jobs on a34558b918b5; both production rulesets active/read back; legacy owner references retained until #11930 |
+| `pr-required.yml` | — | CircleCI classify/pr-gate-complete | Main pipelines 218–220 pass all 81 jobs on a34558b918b5; both production rulesets active/read back; legacy owner references retained by the owner decision cancelling #11930 |
 | `provider-contract-drift.yml` | — | CircleCI provider-contract-drift | Main run 3112 passes replay, matrix/xwalk and breaking-drift gates; push/PR parity pending; artifact retention verified at 30 days |
 | `quality-debt-weekly.yml` | — | Retain disabled debt review policy | Do not activate job with existing if:false; local audits retained |
 | `release.yml` | — | CircleCI release-validation plus protected promotion | Build/install/release-test/security preflight prepared; source-bound SPDX prepared; remote acceptance, signed provenance, TestPyPI/PyPI and release assets remain pending |
@@ -285,7 +291,8 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 
 Local-only and intentionally disabled surfaces retain their operating policy;
 disabled Actions stubs are not treated as missing credentials to be bypassed.
-Triggers, contexts, approved publication and exact-SHA evidence remain cutover gates.
+Triggers, contexts, approved publication and exact-SHA evidence remain CircleCI
+acceptance gates; workflow deletion is no longer a completion criterion.
 
 ## How to use
 
