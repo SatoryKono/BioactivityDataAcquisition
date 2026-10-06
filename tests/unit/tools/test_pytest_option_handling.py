@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from types import SimpleNamespace
 from unittest.mock import Mock
 
@@ -69,7 +70,7 @@ def test_snapshot_diff_option_preserves_enum_and_renders_mismatch(
     )
 
     assert explanation is not None
-    details = "\n".join(explanation[1:])
+    details = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", "\n".join(explanation[1:]))
     if mode is DiffMode.DETAILED:
         assert "actual-marker" in details
         assert "expected-marker" in details
