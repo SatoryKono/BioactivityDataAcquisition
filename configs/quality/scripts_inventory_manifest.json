@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-05T20:09:42.259105+00:00",
+  "generated_at": "2026-10-06T03:47:56.269022+00:00",
   "summary": {
     "total_scripts": 637,
     "status_counts": {
@@ -10206,7 +10206,7 @@
           "path": "docs/05-operations/ci-workflow-map.md",
           "line": 378,
           "source_group": "docs",
-          "text": "[`scripts.engineering.ci.replay_parity_inputs`](../../scripts/engineering/ci/replay_parity_inputs.py) explicitly"
+          "text": "[`replay_parity_inputs.py` pytest plugin](../../scripts/engineering/ci/replay_parity_inputs.py)"
         }
       ],
       "owner": "@bioetl-platform",
