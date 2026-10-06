@@ -60,7 +60,7 @@ from bioetl.application.services.dq._checks_statistical import (
     check_anomaly_detection,
     check_statistical_profile,
 )
-from bioetl.application.services.dq.dq_report_assembly import (
+from bioetl.application.services.dq.dq_report_builders import (
     convert_value,
     update_counts,
 )

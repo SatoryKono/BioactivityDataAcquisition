@@ -121,7 +121,7 @@ __all__ = [
 ]
 
 _SERVICES_MODULE = "bioetl.composition._services"
-_WORKFLOW_SERVICES_MODULE = "bioetl.composition.factories.services.workflow_services"
+_WORKFLOW_SERVICES_MODULE = "bioetl.composition._workflow_services"
 _RESOURCE_MANAGEMENT_MODULE = "bioetl.composition._resource_management"
 _CLI_CONTROL_PLANE_LIFECYCLE_MODULE = "bioetl.composition.bootstrap.cli"
 _RUN_MANIFEST_BOOTSTRAP_MODULE = "bioetl.composition.bootstrap.cli.run_manifest"

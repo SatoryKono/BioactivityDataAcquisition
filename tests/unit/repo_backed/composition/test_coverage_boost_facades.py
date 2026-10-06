@@ -39,9 +39,7 @@ from unittest import mock
 import pytest
 
 from bioetl.composition import _services
-from bioetl.composition.factories.services import (
-    workflow_services as _workflow_services,
-)
+from bioetl.composition import _workflow_services
 from bioetl.composition import factories as factories_pkg
 from bioetl.composition.bootstrap import cli as cli_bootstrap
 from bioetl.composition.factories import __getattr__ as factories_getattr
@@ -148,7 +146,7 @@ def _install_workflow_runner_service_dependencies(
             created["silver_writer"] = kwargs
 
     monkeypatch.setattr(
-        "bioetl.composition.bootstrap.assembly.workflow_transforms.SilverWriter",
+        "bioetl.composition._workflow_transform_registry.SilverWriter",
         _SilverWriter,
     )
 

@@ -2004,8 +2004,7 @@
         "scripts/ops/observability/grafana/generate_dux4_issue_pack.py",
         "tests/architecture/test_adr_enforcement_matrix.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_dashboard_scenes_contract.py",
-        "tests/architecture/test_grafana_overview_v2_semantics.py"
+        "tests/architecture/test_dashboard_scenes_contract.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
@@ -2037,8 +2036,7 @@
         "scripts/ops/observability/grafana/generate_dux4_issue_pack.py",
         "tests/architecture/test_adr_enforcement_matrix.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_dashboard_scenes_contract.py",
-        "tests/architecture/test_grafana_overview_v2_semantics.py"
+        "tests/architecture/test_dashboard_scenes_contract.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",
@@ -2238,13 +2236,15 @@
       "decision_date": "2026-09-16",
       "decision_path": "docs/02-architecture/decisions/ADR-061-persisted-selected-run-assessment.md",
       "enforcement_owner_paths": [
-        "tests/architecture/test_adr_registry_governance_sync.py"
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/unit/scripts/test_documentation_governance_check.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/RULES.md",
         "docs/04-reference/selected-run-status.md",
-        "tests/architecture/test_adr_registry_governance_sync.py"
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/unit/scripts/test_documentation_governance_check.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",
@@ -2257,20 +2257,14 @@
       "decision_date": "2026-10-03",
       "decision_path": "docs/02-architecture/decisions/ADR-062-assay-parent-exact-replay.md",
       "enforcement_owner_paths": [
-        "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/integration/composite/test_assay_snapshot_merge_replay.py",
-        "tests/unit/infrastructure/storage/test_composite_replay_bundle.py",
-        "tests/unit/scripts/test_documentation_governance_check.py"
+        "tests/unit/infrastructure/storage/test_composite_replay_bundle.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
-        "docs/00-project/RULES.md",
-        "docs/04-reference/cli.md",
         "src/bioetl/composition/bootstrap/runtime/assay_replay.py",
-        "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/integration/composite/test_assay_snapshot_merge_replay.py",
-        "tests/unit/infrastructure/storage/test_composite_replay_bundle.py",
-        "tests/unit/scripts/test_documentation_governance_check.py"
+        "tests/unit/infrastructure/storage/test_composite_replay_bundle.py"
       ],
       "manual_exception": null,
       "owner": "BioETL maintainers",

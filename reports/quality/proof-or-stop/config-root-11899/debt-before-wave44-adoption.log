@@ -1,5 +1,0 @@
-Debt governance gate JSON artifact is stale: E:\github\bda-config-root-closeout-11899\reports\quality\debt-governance-gates.json
-Debt governance gate Markdown artifact is stale: E:\github\bda-config-root-closeout-11899\reports\quality\debt-governance-gates.md
-Debt governance gates have 2 failing gate(s): module_coverage_scorecard_coherence, generated_artifact_drift
-  - module_coverage_scorecard_coherence: current={'source_module_count': 2563, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '17f16934030345e14ea024d327a1b991f0dd361c9e5c10599290e9c98da7bd1e'}; Refresh architecture-quality scorecard and module coverage inventory until counts and source-tree hash match.
-  - generated_artifact_drift: current={'count': 3, 'artifacts': ['adr_enforcement_matrix', 'architecture_quality_scorecard', 'remote_main_baseline']}; Regenerate stale quality artifacts with their canonical QA commands: adr_enforcement_matrix, architecture_quality_scorecard, remote_main_baseline

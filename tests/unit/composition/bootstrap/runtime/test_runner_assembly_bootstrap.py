@@ -35,7 +35,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.composition.factories.services.composite_support_services_factory import (
+from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
     CompositeSupportServices,
 )
 from bioetl.composition.bootstrap.runtime._runner_assembly_support import (

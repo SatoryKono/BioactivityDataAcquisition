@@ -88,8 +88,14 @@ gate. Use `--sync` to regenerate only `local/`; it does not rewrite
 
 ## Global Snapshot
 
-The [global snapshot directory](global/README.md) is a tracked documentation
-entrypoint. No third-party snapshots or system-skill copies are currently
-committed there. Machine-local global skills remain in their installed runtime
-catalogue; CI does not import them. Repository-local skills continue to use the
-canonical runtime sources and generated `local/` mirrors described above.
+- `docs/00-project/ai/skills/global/` is a documentation snapshot of selected global skills.
+- It is not the canonical source for repository-local skill behavior.
+- **LICENSE thinning:** exact-duplicate Apache-2.0 license bodies are stored once
+  under `global/_licenses/`; per-skill `LICENSE.txt` / `license.txt` files are
+  short pointers. This does **not** break `local/` skill-mirrors generated from
+  `.codex/skills` (`check_skills_mirror.sh` / `scripts/ai/sync/governance.py`).
+
+### System Skill References
+
+- Internal system skills are mirrored under `docs/00-project/ai/skills/global/.system/`.
+- These files are intentionally excluded from the published docs site.

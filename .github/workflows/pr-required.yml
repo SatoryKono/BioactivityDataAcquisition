@@ -44,6 +44,8 @@ jobs:
       type-checking-reason: ${{ steps.decide.outputs['type-checking-reason'] }}
       security: ${{ steps.decide.outputs['security'] }}
       security-reason: ${{ steps.decide.outputs['security-reason'] }}
+      codeql: ${{ steps.decide.outputs['codeql'] }}
+      codeql-reason: ${{ steps.decide.outputs['codeql-reason'] }}
       docker: ${{ steps.decide.outputs['docker'] }}
       docker-reason: ${{ steps.decide.outputs['docker-reason'] }}
       duplication: ${{ steps.decide.outputs['duplication'] }}
@@ -142,6 +144,14 @@ jobs:
     uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/security.yml@47691d8c4acdf68f4ad8bafaeaa46473caf72394
     permissions:
       contents: read
+
+  codeql:
+    needs: classify-changes
+    if: ${{ needs['classify-changes'].outputs['codeql'] == 'required' }}
+    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/codeql.yml@55307990f2a12256d4833126d5b8327473d453a0
+    permissions:
+      contents: read
+      security-events: write
 
   docker:
     needs: classify-changes
@@ -305,6 +315,7 @@ jobs:
       - tests
       - type-checking
       - security
+      - codeql
       - docker
       - docker-not-applicable
       - duplication
@@ -341,6 +352,7 @@ jobs:
             "tests": {"required": "${{ needs['tests'].result }}", "not_applicable": "skipped"},
             "type-checking": {"required": "${{ needs['type-checking'].result }}", "not_applicable": "skipped"},
             "security": {"required": "${{ needs['security'].result }}", "not_applicable": "skipped"},
+            "codeql": {"required": "${{ needs['codeql'].result }}", "not_applicable": "skipped"},
             "docker": {"required": "${{ needs['docker'].result }}", "not_applicable": "${{ needs['docker-not-applicable'].result }}", "na_head_sha": "${{ needs['docker-not-applicable'].outputs.head_sha }}", "na_reason": "${{ needs['docker-not-applicable'].outputs.reason }}"},
             "duplication": {"required": "${{ needs['duplication'].result }}", "not_applicable": "skipped"},
             "root-hygiene": {"required": "${{ needs['root-hygiene'].result }}", "not_applicable": "skipped"},

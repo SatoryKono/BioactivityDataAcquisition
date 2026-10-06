@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, NoReturn, Protocol, cast
 
 from bioetl.domain.types import BatchID, JsonDict, RunID, RunType
-from bioetl.infrastructure.storage.bronze.metadata_assembly import (
+from bioetl.infrastructure.storage.bronze.metadata_builders import (
     BronzeLineageMetadataRequest,
     build_bronze_lineage_metadata,
 )

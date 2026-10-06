@@ -14,7 +14,6 @@ SKIP_CLEANUP=0
 SKIP_REPO=0
 SKIP_DOCS=0
 SKIP_ARCHITECTURE=0
-REUSE_CI_ARCHITECTURE=0
 SKIP_MEMORY=0
 DRY_RUN=0
 REPORT_JSON=""
@@ -55,7 +54,6 @@ Options:
   --skip-repo                   Skip inventory/catalog governance checks
   --skip-docs                   Skip docs identity + docs verification
   --skip-architecture           Skip targeted architecture fail-fast checks
-  --reuse-ci-architecture       Validate full architecture evidence from this CI workflow
   --skip-memory                 Skip memory validation + refresh smoke checks
   --report-json PATH            Write machine-readable summary to PATH
   --dry-run                     Print commands without executing them
@@ -480,10 +478,6 @@ parse_args() {
                 SKIP_ARCHITECTURE=1
                 shift
                 ;;
-            --reuse-ci-architecture)
-                REUSE_CI_ARCHITECTURE=1
-                shift
-                ;;
             --skip-memory)
                 SKIP_MEMORY=1
                 shift
@@ -702,16 +696,6 @@ run_memory_checks() {
 }
 
 run_architecture_checks() {
-    if [[ "$REUSE_CI_ARCHITECTURE" == "1" ]]; then
-        if [[ "$SKIP_ARCHITECTURE" == "1" || "$DRY_RUN" == "1" ]]; then
-            echo "[pretest-guardrails][error] CI evidence reuse cannot be combined with skip or dry-run" >&2
-            return 2
-        fi
-        run_step architecture-evidence-reuse \
-            "$PYTHON_BIN" -m scripts.engineering.qa proof-or-stop ci \
-            validate --check architecture
-        return 0
-    fi
     if [[ "$SKIP_ARCHITECTURE" != "0" || -z "$ARCHITECTURE_GROUP" ]]; then
         record_skip architecture-checks "architecture checks disabled by option or profile" "rerun without --skip-architecture using a profile with an architecture group"
         return 0

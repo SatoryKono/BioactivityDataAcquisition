@@ -37,7 +37,7 @@ from datetime import UTC, datetime
 from bioetl.application.services.lineage._fragment_finalization import (
     finalize_lineage_fragment,
 )
-from bioetl.application.services.lineage.metadata_lineage_node_assembly import (
+from bioetl.application.services.lineage.metadata_lineage_node_builders import (
     build_semantic_fragment_id,
 )
 from bioetl.domain.lineage import (

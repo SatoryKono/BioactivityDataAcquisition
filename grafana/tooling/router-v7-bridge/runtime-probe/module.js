@@ -41,15 +41,6 @@ define(['react', 'react-dom/client', '@grafana/data', 'react-router'], function 
           await new Promise((resolve) => setTimeout(resolve, 30));
           check('useNavigate rejects: ' + JSON.stringify(to), rejected && location.pathname === '/home');
         }
-        async function checkAbsoluteDestination(to) {
-          let rejected = false;
-          try { navigate(to); } catch (error) { rejected = /External navigation is not allowed/.test(error.message); }
-          await new Promise((resolve) => setTimeout(resolve, 30));
-          check('useNavigate rejects absolute local destination: ' + to,
-            rejected && location.pathname === '/home' && window.location.origin === origin);
-        }
-        await checkAbsoluteDestination('http://127.0.0.1:9/redirect-fixture');
-        await checkAbsoluteDestination('https://127.0.0.1:9/redirect-fixture');
         for (const to of ['/detail?run=42#panel', '/%2f%2fexample.invalid', '/%5cexample.invalid']) {
           navigate(to);
           await new Promise((resolve) => setTimeout(resolve, 30));

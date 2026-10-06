@@ -1,5 +1,5 @@
 {
-  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:301b213479446237b6d5ad904890ee34686198633d6dcb4d4f1989202b98772e",
+  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:abace6d89d5f03680f40edcce05b7a05e2dd1b688ecd17a455d19bd9752c3609",
   "grafana_version": "13.2.3",
   "upstream_sha": "6193dc03311b631b9727b560d24369e683dc396e",
   "base_image": "grafana/grafana@sha256:d84563330dc9d2fd2bc096d0fb96021b5319c75bf6ed555566709998e823dec4",
@@ -12,112 +12,22 @@
     "grafana/tooling/router-v7-bridge/index.mjs": "eb4c404b42c0af3f3d1715ad4b191bd9e73564873b0fb650ba807c56ab580c3c",
     "grafana/tooling/router-v7-bridge/package-lock.json": "01a8eaf5b0e18140f2f79a9146124a2b4826f729f04ababc2ca9f41c08343bde",
     "grafana/tooling/router-v7-bridge/Dockerfile.host": "72133efc2b4e64b20730131a7da8597bca90d59bef964025e3ab9a9011f95812",
-    "grafana/plugins/bioetl-scenes-app/package-lock.json": "c56f2850804134ff41ca2025a1f9a27e81617d8257e3625adcb820de6ea8f408",
-    "grafana/plugins/bioetl-scenes-app/dist/module.js": "3c1658de4e2dd9d26c314893410293263c1b08fad22afba52678f0e654cfab61",
-    "grafana/plugins/bioetl-selectorshell-panel/package-lock.json": "435834f1d8f1cf6a60884c8f7b68bd1f96bef134a8b6de9bf57f40907cb4d608",
-    "grafana/plugins/bioetl-selectorshell-panel/dist/module.js": "a06740fd20cb0fb19cf4db1e1b5ecd71dfad0f7a19f2c6a16f292a32362ab727",
+    "grafana/plugins/bioetl-scenes-app/package-lock.json": "93e7098b7b4e52879d651cc1abcc41ecfc6fbed796d33bc75eab73c8731f64c1",
+    "grafana/plugins/bioetl-scenes-app/dist/module.js": "2cb847b82284b3c5792051ad5f7b7ee67be4364bebfd2353616c71667bceabd2",
+    "grafana/plugins/bioetl-selectorshell-panel/package-lock.json": "b54aa78812a040b46f45110c1bda1b0dc52cb16446dd0590900c844354aa3af4",
+    "grafana/plugins/bioetl-selectorshell-panel/dist/module.js": "006f192a786c3f4fe760b62db24039c445aeb3f35f267d3195532e3887757065",
     "grafana/plugins/bioetl-scenes-app/src/plugin.json": "459150fe22d8fd0adbe3e02fa7db7c6c417a17ea674199b69b4a2f7098b7e623",
     "grafana/plugins/bioetl-selectorshell-panel/src/plugin.json": "4ec6a2e5d73f919bdd3ce543b9ce4bbd2c95aba7cd5350700b61aa49e96bde00",
     "grafana/plugins/bioetl-scenes-app/dist/plugin.json": "81111da9a83dbc49c5aab904ea3ff6406b897295469368449d9959a8097c0a72",
     "grafana/plugins/bioetl-selectorshell-panel/dist/plugin.json": "928a540525d8996d35459bbc54849026ae859ea3a8730a97c224cd97e8b33e15",
-    "grafana/plugins/bioetl-scenes-app/package.json": "b46d79f92b40f3daedf5801a215d31bfcf4775d6716708464f6e5c5e05ae0e11",
+    "grafana/plugins/bioetl-scenes-app/package.json": "b18d45d0ec67c782612d08a04bc89afede0d5bbbb53ccff29392da9116512617",
     "grafana/plugins/bioetl-scenes-app/src/kernel/contracts.ts": "608e41ad10a3ab888d9f9e497d2cfcf268f295892eae0e672e847eac8de28a95",
     "grafana/plugins/bioetl-scenes-app/src/kernel/presentation.ts": "d9148fd2a974b6d9d972887f25fe3578ca34f0511a995ecf61a113f93e168c0e",
-    "grafana/plugins/bioetl-selectorshell-panel/package.json": "eb02e638c55a126ccb8e28154ddbb43e73bac64b756f7071ee9c32291de64da5",
+    "grafana/plugins/bioetl-selectorshell-panel/package.json": "2576275f50476d856b59a9d6f9a362557f2010d714fe76e81a87f9680820c100",
     "grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.tsx": "9f8962b1bbe000247a588fa2c1b6cb91e0ab22f96b03beb1e9dcb2ec939a5222",
-    "grafana/plugins/bioetl-selectorshell-panel/webpack.config.ts": "4db8eb4dfc7042637cdcd201dafb0152be2d30b52fa97d497b1aabd98e552411",
-    "grafana/plugins/bioetl-scenes-app/webpack.config.ts": "eab04a1aa4c728716d91db3d9fdd4c2fd7e9ec6beeaa98f7a0e95df1b0bc9426",
-    "grafana/tooling/router-v7-bridge/webpack-public-path.cjs": "e938b87e3750165c9cb90b666ddfe0ad15a22a3a9db8c846ca3b3b20c6a0feb0",
-    "grafana/plugins/bioetl-scenes-app/dist/module.js.map": "f08f919ebb16e86313f56065140cd117405f9202c3baf3489187786159aee5ef",
-    "grafana/plugins/bioetl-scenes-app/dist/528.js.map": "4bac095f1320f11c8f602ae4b80f79c264dc4e7b07a5183323589118e0f9212a",
-    ".github/tooling/nyc-yaml-compat.test.cjs": "5dd76d4eb3ead1a9fd6ad75b166960aebc776101c9d9475450da2d45fb35b0ef"
+    "grafana/plugins/bioetl-selectorshell-panel/webpack.config.ts": "f3aa79b3c8ae7294b712f58c45ba933b5d366bc0094cd10b9f9b1b87efd8ef69",
+    "grafana/plugins/bioetl-scenes-app/webpack.config.ts": "65597035c1de632dffae6f607e7520abe83c0e1ce1233723aa97ef7df4bc0172"
   },
-  "acceptance": "Verified original source-built frontend with complete CI-reproduced plugin trees; managed rollout and post-merge runtime acceptance remain pending.",
-  "plugin_release_date": "2026-10-03",
-  "build_input_revalidation": {
-    "source_commit": "5c4b9758939b345ae153047db1201173e58217bc",
-    "reason": "Security updates for source-map-js and postcss-selector-parser; scoped NYC YAML 4 override removes sprintf-js. Fresh locked Linux builds, behavioral compatibility tests, typecheck and lint pass; all 53 Scenes and 7 SelectorShell output files remain byte-identical to the immutable parent. Managed rollout remains pending.",
-    "commands": [
-      "npm ci --ignore-scripts --no-fund --no-audit",
-      "npm run test:ci",
-      "npm run typecheck",
-      "npm run lint",
-      "npm run build"
-    ],
-    "previous_build_input_sha256": {
-      "grafana/plugins/bioetl-scenes-app/package-lock.json": "7f4689bd9e83713d35ebbaed23695d04628e92a71cb83a07a493a36c57f61610",
-      "grafana/plugins/bioetl-selectorshell-panel/package-lock.json": "6ebdda3b42f09093ba3ce8443653e9e035133c18ba004eb53791a39dde8addfd"
-    },
-    "unchanged_plugin_artifact_sha256": {
-      "grafana/plugins/bioetl-scenes-app/dist/module.js": "3c1658de4e2dd9d26c314893410293263c1b08fad22afba52678f0e654cfab61",
-      "grafana/plugins/bioetl-selectorshell-panel/dist/module.js": "a06740fd20cb0fb19cf4db1e1b5ecd71dfad0f7a19f2c6a16f292a32362ab727",
-      "grafana/plugins/bioetl-scenes-app/dist/plugin.json": "81111da9a83dbc49c5aab904ea3ff6406b897295469368449d9959a8097c0a72",
-      "grafana/plugins/bioetl-selectorshell-panel/dist/plugin.json": "928a540525d8996d35459bbc54849026ae859ea3a8730a97c224cd97e8b33e15",
-      "grafana/plugins/bioetl-scenes-app/dist/module.js.map": "f08f919ebb16e86313f56065140cd117405f9202c3baf3489187786159aee5ef",
-      "grafana/plugins/bioetl-scenes-app/dist/528.js.map": "4bac095f1320f11c8f602ae4b80f79c264dc4e7b07a5183323589118e0f9212a"
-    },
-    "complete_plugin_file_counts": {
-      "bioetl-scenes-app": 53,
-      "bioetl-selectorshell-panel": 7
-    },
-    "image_digest_unchanged": true,
-    "verified_input_sha256": {
-      "grafana/plugins/bioetl-scenes-app/package.json": "b46d79f92b40f3daedf5801a215d31bfcf4775d6716708464f6e5c5e05ae0e11",
-      "grafana/plugins/bioetl-scenes-app/package-lock.json": "c56f2850804134ff41ca2025a1f9a27e81617d8257e3625adcb820de6ea8f408",
-      "grafana/plugins/bioetl-selectorshell-panel/package.json": "eb02e638c55a126ccb8e28154ddbb43e73bac64b756f7071ee9c32291de64da5",
-      "grafana/plugins/bioetl-selectorshell-panel/package-lock.json": "435834f1d8f1cf6a60884c8f7b68bd1f96bef134a8b6de9bf57f40907cb4d608",
-      ".github/tooling/nyc-yaml-compat.test.cjs": "5dd76d4eb3ead1a9fd6ad75b166960aebc776101c9d9475450da2d45fb35b0ef"
-    }
-  },
-  "lockfile_security_revalidation": {
-    "base_commit": "4e724d6aecc26fc61a22fab1d6bdc4166a1003ac",
-    "reason": "source-map-js 1.2.2 security patch (GHSA-68fv-2mgg-jv7q); built plugin module.js and plugin.json are byte-identical to the pinned artifacts",
-    "commands": [
-      "npm ci --ignore-scripts --no-audit --no-fund",
-      "npm run typecheck",
-      "npm run test:ci -- --maxWorkers=2",
-      "npm run build"
-    ],
-    "previous_build_input_sha256": {
-      "grafana/plugins/bioetl-scenes-app/package-lock.json": "7f4689bd9e83713d35ebbaed23695d04628e92a71cb83a07a493a36c57f61610",
-      "grafana/plugins/bioetl-selectorshell-panel/package-lock.json": "6ebdda3b42f09093ba3ce8443653e9e035133c18ba004eb53791a39dde8addfd"
-    },
-    "unchanged_plugin_artifact_sha256": {
-      "grafana/plugins/bioetl-scenes-app/dist/module.js": "2cb847b82284b3c5792051ad5f7b7ee67be4364bebfd2353616c71667bceabd2",
-      "grafana/plugins/bioetl-selectorshell-panel/dist/module.js": "006f192a786c3f4fe760b62db24039c445aeb3f35f267d3195532e3887757065",
-      "grafana/plugins/bioetl-scenes-app/dist/plugin.json": "81111da9a83dbc49c5aab904ea3ff6406b897295469368449d9959a8097c0a72",
-      "grafana/plugins/bioetl-selectorshell-panel/dist/plugin.json": "928a540525d8996d35459bbc54849026ae859ea3a8730a97c224cd97e8b33e15"
-    },
-    "image_digest_unchanged": true,
-    "runtime_acceptance": "pending; local rebuild does not establish host image or render acceptance",
-    "scope": "Historical upstream rebuild receipt retained; current delivery parity is governed by build_input_revalidation and artifact_sha256."
-  },
-  "moderate_audit_revalidation": {
-    "base_commit": "88d4a0df2e3b71f2ae0272f0d8f53745c49d7873",
-    "reason": "postcss-selector-parser 7.1.6 fixes GHSA-rj75-hqrm-r3gf; js-yaml 4.3.2 replaces the obsolete argparse/sprintf-js chain (GHSA-hp3w-g68c-fv3c), preserving the MODERATE audit threshold",
-    "commands": [
-      "npm ci --ignore-scripts --no-audit --no-fund",
-      "npm audit --audit-level=moderate",
-      "npm run typecheck",
-      "npm run test:ci -- --maxWorkers=2",
-      "npm run build"
-    ],
-    "compatibility_check": "load-nyc-config YAML extends, scalar/array fields and package settings pass; sprintf-js absent",
-    "previous_build_input_sha256": {
-      "grafana/plugins/bioetl-scenes-app/package.json": "ec946d1f14826946e35ce81a53afd0607fad7221f743ac12fdf7e17b77ef39fa",
-      "grafana/plugins/bioetl-scenes-app/package-lock.json": "2f84090b0dc4584cab18cb605126b1c8b7ca01a25de2bc6063e27288f860b89e",
-      "grafana/plugins/bioetl-selectorshell-panel/package.json": "b24d19356ec98f54e76743f1d7194f237ee22316bb0f4b348fef8b1996f626d4",
-      "grafana/plugins/bioetl-selectorshell-panel/package-lock.json": "7401462aea0bab87c20d580cb19d82f3a2cf7f25b801cfd058c72a370cf96f4e"
-    },
-    "unchanged_plugin_artifact_sha256": {
-      "grafana/plugins/bioetl-scenes-app/dist/module.js": "2cb847b82284b3c5792051ad5f7b7ee67be4364bebfd2353616c71667bceabd2",
-      "grafana/plugins/bioetl-selectorshell-panel/dist/module.js": "006f192a786c3f4fe760b62db24039c445aeb3f35f267d3195532e3887757065",
-      "grafana/plugins/bioetl-scenes-app/dist/plugin.json": "81111da9a83dbc49c5aab904ea3ff6406b897295469368449d9959a8097c0a72",
-      "grafana/plugins/bioetl-selectorshell-panel/dist/plugin.json": "928a540525d8996d35459bbc54849026ae859ea3a8730a97c224cd97e8b33e15"
-    },
-    "image_digest_unchanged": true,
-    "runtime_acceptance": "pending; local rebuild does not establish host image or render acceptance",
-    "source_byte_contract": "Hashes bind LF Git blob bytes under .gitattributes; no platform-dependent CRLF receipt.",
-    "scope": "Historical upstream rebuild receipt retained; current delivery parity is governed by build_input_revalidation and artifact_sha256."
-  }
+  "acceptance": "Scenes 0.1.3 and SelectorShell 1.0.1 reactivity candidate; fresh complete acceptance and trust-tier ADMIT required before managed rollout.",
+  "plugin_release_date": "2026-10-03"
 }

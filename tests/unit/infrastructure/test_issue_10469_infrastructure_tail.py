@@ -30,7 +30,7 @@ from bioetl.infrastructure.adapters.decorators._data_source_delegation import (
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
 )
-from bioetl.infrastructure.adapters.http.client_retry_policy import (
+from bioetl.infrastructure.adapters.http._client_retry_policy import (
     _record_request_metrics,
 )
 from bioetl.infrastructure.adapters.openalex.query_execution import (

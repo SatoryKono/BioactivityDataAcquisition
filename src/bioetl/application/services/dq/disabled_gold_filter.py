@@ -6,7 +6,7 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import JsonDict
 
 
-class DisabledGoldFilterService:
+class DisabledGoldFilter:
     """Signal that Gold is intentionally omitted for this pipeline phase."""
 
     def __call__(self, context: PipelineContext, record: JsonDict) -> bool:

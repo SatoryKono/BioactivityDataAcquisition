@@ -20,7 +20,6 @@ from bioetl.composition.factories.pipeline.runner_constructor import (
     RunnerAssemblyParts,
     RunnerConstructorPayload,
 )
-from bioetl.composition.factories.pipeline_support import checkpoint_policy_helpers
 from bioetl.composition.factories.pipeline_support.checkpoint_policy_helpers import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     _resolve_required_persistence_profile,
@@ -55,7 +54,7 @@ def test_fail_fast_cached_bronze_requires_snapshot_refs(
 ) -> None:
     captured: dict[str, object] = {}
     monkeypatch.setattr(
-        checkpoint_policy_helpers,
+        pipeline_runtime,
         "require_cached_bronze_input_snapshot_refs",
         lambda **kwargs: captured.update(kwargs),
     )

@@ -407,8 +407,8 @@ class TestResolvedHttpConfig:
         configured = load_source_config("semanticscholar")
         resolved = HttpClientFactory._resolve_config("semanticscholar", settings)
         retry = HttpClientFactory._build_retry_config(resolved, settings)
-        assert retry.max_attempts == configured.max_retries == 2
-        assert retry.effective_retry_budget() == 1
+        assert retry.max_attempts == configured.max_retries == 5
+        assert retry.effective_retry_budget() == 4
         if not authenticated:
             assert (resolved.rate, resolved.capacity) == (0.01, 1)
 

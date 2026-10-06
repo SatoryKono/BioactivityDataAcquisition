@@ -1,9 +1,0 @@
-{
-  "head": "e4181fd47bdbfee8e537a5c5edc78631bbc197a6",
-  "complete": false,
-  "junit_available": false,
-  "exit_code": null,
-  "progress_percent": 54,
-  "outcome": "INCOMPLETE",
-  "reason": "Process absent after active execution changed; terminating exit and JUnit unavailable"
-}

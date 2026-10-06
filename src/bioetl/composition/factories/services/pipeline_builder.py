@@ -26,7 +26,7 @@ from bioetl.application.services.checkpoint.checkpoint_compatibility_service imp
     CheckpointCompatibilityService,
 )
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
-from bioetl.composition.factories.services.pipeline_batch_executor_builder import (
+from bioetl.composition.factories.services._pipeline_batch_executor_types import (
     BatchExecutorBuildRequest,
     BatchProcessingComponentsFactory,
 )

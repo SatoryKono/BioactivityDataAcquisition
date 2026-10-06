@@ -1,9 +1,0 @@
-{
-  "CIRCLE_SHA1": "f1f3784bb91a6a71e861d49ea347fc0878fcd96a",
-  "CIRCLE_BUILD_URL": "https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2193",
-  "CIRCLE_BUILD_NUM": "2193",
-  "CIRCLE_WORKFLOW_ID": "fea49fb9-94b2-45b9-b6ee-d7f29feb3038",
-  "CIRCLE_PROJECT_USERNAME": "SatoryKono",
-  "CIRCLE_PROJECT_REPONAME": "BioactivityDataAcquisition",
-  "CIRCLE_BRANCH": "codex/config-root-postmerge-20261005"
-}

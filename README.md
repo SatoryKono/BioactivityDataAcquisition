@@ -4,8 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
-[![CI: CircleCI](https://img.shields.io/badge/CI-CircleCI-blue)](https://app.circleci.com/pipelines/github/SatoryKono/BioactivityDataAcquisition?branch=main)
-[![Coverage gate: >=85%](https://img.shields.io/badge/coverage_gate-%E2%89%A585%25-blue)](docs/05-operations/ci-workflow-map.md)
+[![Coverage](https://img.shields.io/badge/coverage-%E2%89%A585%25-brightgreen)](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/workflows/tests.yml)
 [![Version](https://img.shields.io/badge/version-6.1.0-blue)](CHANGELOG.md)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](.github/SECURITY.md)
 

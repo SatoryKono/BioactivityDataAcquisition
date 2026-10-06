@@ -19,8 +19,6 @@ Commands:
     pr-gate-timing  Report PR Gate Complete timing and capacity evidence
     debt-report     Generate weekly quality debt report
     apply-ci-fixes  Apply one-off hosted GitHub workflow fixes
-    publish-scorecard  Publish approved source-bound Scorecard SARIF
-    publish-docker  Publish the approved same-workflow scanned image
 """
 
 from __future__ import annotations
@@ -30,9 +28,7 @@ from pathlib import Path
 
 from scripts.engineering.common.cli_dispatch import (
     dispatch_cli,
-    module_command,
     python_command,
-    shell_command,
 )
 
 COMMANDS = {
@@ -50,14 +46,6 @@ COMMANDS = {
     "apply-ci-fixes": "apply_ci_fixes.py",
 }
 COMMAND_SPECS = {name: python_command(script) for name, script in COMMANDS.items()}
-COMMAND_SPECS.update(
-    {
-        "publish-scorecard": module_command(
-            "scripts.engineering.ci.publish_scorecard_sarif"
-        ),
-        "publish-docker": shell_command("publish_docker_image.sh"),
-    }
-)
 
 _DIR = Path(__file__).parent
 

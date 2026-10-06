@@ -40,13 +40,7 @@ STORAGE_ASSEMBLY = (
     ROOT / "src" / "bioetl" / "composition" / "bootstrap" / "assembly" / "storage.py"
 )
 WORKFLOW_TRANSFORM_REGISTRY = (
-    ROOT
-    / "src"
-    / "bioetl"
-    / "composition"
-    / "bootstrap"
-    / "assembly"
-    / "workflow_transforms.py"
+    ROOT / "src" / "bioetl" / "composition" / "_workflow_transform_registry.py"
 )
 SILVER_FINALIZATION_MODELS = (
     ROOT

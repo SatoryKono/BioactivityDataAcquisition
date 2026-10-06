@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, Field
-
 
 def _normalize_fk_required_name(value: str, field_name: str) -> str:
     normalized = str(value).strip()
@@ -103,13 +101,3 @@ def _validate_fk_composite_alignment(
         reference_keys,
         field_label="reference_key",
     )
-
-
-class WorkflowReferenceCohortSchema(BaseModel):
-    """Strict selection binding; no independently sampled reference universe."""
-
-    model_config = ConfigDict(extra="forbid")
-    step_id: str = Field(..., min_length=1)
-    table: str = Field(..., pattern=r"^[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*$")
-    column: str = Field(..., min_length=1)
-    filter_field: str = Field(..., min_length=1)

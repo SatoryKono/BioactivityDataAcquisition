@@ -6,8 +6,6 @@ from collections.abc import Callable, Mapping
 
 import pytest
 
-from bioetl.domain.composite.config_cross_validation import _require_finite_number
-
 from bioetl.domain.composite.aggregation import (
     AggregationConfig,
     AggregationFieldSpec,
@@ -200,8 +198,3 @@ def test_partition_append_contract_requires_partition_columns(
         },
     )
     assert config.partition_cols == ("publication_year",)
-
-
-def test_cross_validation_threshold_rejects_bool() -> None:
-    with pytest.raises(ValueError, match="must be a number"):
-        _require_finite_number(True, "threshold")

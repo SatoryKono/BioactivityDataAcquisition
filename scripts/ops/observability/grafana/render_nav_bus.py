@@ -85,21 +85,6 @@ FILE_BY_UID = {
 _NAV_HIDDEN_UIDS = frozenset({"bioetl-dq-v2"})
 
 
-def write_dashboard_source(path: Path, serialized: str, *, root: Path) -> None:
-    """Persist generated JSON only within either canonical dashboard profile."""
-    target = path.resolve()
-    allowed = {
-        (root / "grafana/dashboards").resolve(),
-        (root / "grafana/dashboards-prometheus-only").resolve(),
-    }
-    if target.parent not in allowed or target.suffix != ".json":
-        raise ValueError("Dashboard generator output must stay in a canonical profile")
-    if not isinstance(json.loads(serialized), dict):
-        raise ValueError("Dashboard generator output must be a JSON object")
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(serialized, encoding="utf-8")
-
-
 def _validate_action_route_uids() -> None:
     """Fail closed when an action target points outside the shipped portfolio."""
     unknown = set(ACTION_DASHBOARD_UID_BY_TARGET.values()) - set(FILE_BY_UID)

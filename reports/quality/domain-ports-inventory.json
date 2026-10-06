@@ -129,26 +129,20 @@
       "runtime_checkable": true
     },
     {
-      "line": 24,
+      "line": 23,
       "name": "DataSourcePort",
       "path": "src/bioetl/domain/ports/data_source.py",
       "runtime_checkable": true
     },
     {
-      "line": 99,
+      "line": 98,
       "name": "FilterableDataSourcePort",
       "path": "src/bioetl/domain/ports/data_source.py",
       "runtime_checkable": true
     },
     {
-      "line": 204,
+      "line": 203,
       "name": "DataSourceFactoryPort",
-      "path": "src/bioetl/domain/ports/data_source.py",
-      "runtime_checkable": true
-    },
-    {
-      "line": 234,
-      "name": "PublicationTermEnrichmentPort",
       "path": "src/bioetl/domain/ports/data_source.py",
       "runtime_checkable": true
     },
@@ -546,11 +540,11 @@
   "ports_root": "src/bioetl/domain/ports",
   "schema_version": 1,
   "summary": {
-    "port_module_files": 71,
-    "port_protocol_classes": 89,
+    "port_module_files": 72,
+    "port_protocol_classes": 88,
     "runtime_checkable_coverage_pct": 100.0,
     "runtime_checkable_decorator_count": 101,
-    "runtime_checkable_port_count": 89,
-    "scanned_python_files": 80
+    "runtime_checkable_port_count": 88,
+    "scanned_python_files": 81
   }
 }

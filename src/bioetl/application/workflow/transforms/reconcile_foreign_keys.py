@@ -96,9 +96,10 @@ def _build_reconcile_payload(
         "quarantine_rows_written": r.quarantine_rows_written,
         "quarantine_error_code": r.quarantine_error_code,
         "reference_completeness": request.reference_completeness,
-        "closed_cohort_verified": _closed_cohort_verified(
-            request, retained=r.retained_rows, scanned=r.scanned_rows, mutated=r.mutated
-        ),
+        "closed_cohort_verified": request.require_closed_cohort
+        and request.reconciliation_mode == "complete-reference"
+        and r.retained_rows == r.scanned_rows
+        and not r.mutated,
         "unproven_unmatched_rows": getattr(r, "unproven_unmatched_rows", 0),
     }
     if request.reconciliation_mode == "selected-snapshot":
@@ -116,22 +117,6 @@ def _build_reconcile_payload(
     if getattr(r, "source_snapshot", None) is not None:
         payload["source_snapshot"] = dict(r.source_snapshot)
     return payload
-
-
-def _closed_cohort_verified(
-    request: ForeignKeyReconciliationRequest,
-    *,
-    retained: int,
-    scanned: int,
-    mutated: bool,
-) -> bool:
-    """Selected snapshots never imply complete-reference cohort verification."""
-    return bool(
-        request.require_closed_cohort
-        and request.reconciliation_mode == "complete-reference"
-        and retained == scanned
-        and not mutated
-    )
 
 
 def _record_reconcile_destructive_commit(

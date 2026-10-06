@@ -152,6 +152,7 @@ tracked_suite_inventory:
     - tests/integration/run_reports/test_query.py
     - tests/integration/run_reports/test_workflow_runner_reports.py
     - tests/integration/run_reports/test_writer.py
+    - tests/integration/test_composite_report.py
     - tests/integration/test_cross_pipeline_normalization.py
     - tests/integration/test_cross_provider_doi_normalization.py
     - tests/integration/test_dashboard_collapsed_rows.py
@@ -221,16 +222,12 @@ tracked_suite_inventory:
       - tests/integration/ci/test_silver_gold_filter_parity.py
       - tests/integration/ci/test_track_d_fixture_control_plane_linkage.py
       - tests/integration/config/test_activity_hash_policy_alignment.py
-      - tests/integration/config/test_activity_raw_compound_units.py
-      - tests/integration/config/test_live_chembl_regressions.py
-      - tests/integration/config/test_live_uniprot_pubchem_regressions.py
       - tests/integration/test_preflight_health_modes.py
       - tests/integration/test_runner_lifecycle.py
       data_quality:
       - tests/integration/config/test_non_chembl_identifier_dq_parity.py
       - tests/integration/test_dq_monitor_integration.py
       - tests/integration/test_dq_report_integration.py
-      - tests/integration/test_live_green_acceptance.py
       docker_integration:
       - tests/integration/test_docker_compose_smoke.py
       grafana:

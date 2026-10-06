@@ -82,7 +82,6 @@ def _backend_result(
 
 
 def test_rerender_config_uses_env_defaults(monkeypatch: Any, tmp_path: Path) -> None:
-    monkeypatch.delenv("GF_SECURITY_ADMIN_PASSWORD", raising=False)
     monkeypatch.setenv("GRAFANA_BASE_URL", "http://grafana.local:3000")
     monkeypatch.setenv("GRAFANA_USERNAME", "viewer")
     monkeypatch.setenv("GRAFANA_PASSWORD", "secret")

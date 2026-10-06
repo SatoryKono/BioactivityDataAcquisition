@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from bioetl.domain.workflow._delete_orphans_scope import (
-    apply_reconciliation_mode,
     mark_delete_orphans_current_run_scope,
     reject_delete_orphans_after_limited_extracts,
 )
@@ -46,7 +45,6 @@ __all__ = [
     "WorkflowStep",
     "WorkflowStepConfig",
     "WorkflowTransformSpec",
-    "apply_reconciliation_mode",
     "build_workflow_transform_fingerprint",
     "mark_delete_orphans_current_run_scope",
     "reject_delete_orphans_after_limited_extracts",

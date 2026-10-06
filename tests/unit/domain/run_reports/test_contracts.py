@@ -89,9 +89,7 @@ def test_golden_json_is_canonically_ordered() -> None:
 
 @pytest.mark.parametrize("dry_run", [False, True])
 def test_reconciliation_report_keeps_last_table_count_and_expiry(dry_run: bool) -> None:
-    from bioetl.domain.run_reports.workflow_report_assembly import (
-        build_workflow_run_report,
-    )
+    from bioetl.domain.run_reports.workflow_builder import build_workflow_run_report
 
     execution = [
         {

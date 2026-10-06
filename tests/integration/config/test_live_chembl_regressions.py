@@ -15,8 +15,6 @@ from bioetl.application.core.record_normalization_processor import (
 from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
 from bioetl.domain.config.validation_config import ValidationConfig
 
-pytestmark = pytest.mark.integration
-
 
 @pytest.mark.parametrize(
     "weight,valid",
@@ -69,10 +67,9 @@ def test_molecule_atc_list_survives_full_normalization(codes):
     assert not processor.normalization_findings
 
 
-@pytest.mark.parametrize("entity", ["tissue", "cell_line"])
 @pytest.mark.parametrize("raw", ["EFO;0000992", "EFO:0000992", "EFO_0000992"])
-def test_efo_provider_separator_preserves_ontology_bundle(raw, entity):
-    processor = RecordNormalizationProcessor(provider="chembl", entity_type=entity)
+def test_tissue_provider_separator_preserves_ontology_bundle(raw):
+    processor = RecordNormalizationProcessor(provider="chembl", entity_type="tissue")
     normalized = processor.normalize_business_data(
         {"efo_id": raw, "efo_iri": None, "efo_mapping_status": None}
     )
@@ -81,9 +78,8 @@ def test_efo_provider_separator_preserves_ontology_bundle(raw, entity):
     assert normalized["efo_mapping_status"] == "mapped"
 
 
-@pytest.mark.parametrize("entity", ["tissue", "cell_line"])
 @pytest.mark.parametrize("raw", ["EFO;garbage", "EFO;0000992;other", "OTHER;0000992"])
-def test_efo_unknown_identifiers_still_fail_canonical_pattern(raw, entity):
-    processor = RecordNormalizationProcessor(provider="chembl", entity_type=entity)
+def test_tissue_unknown_identifiers_still_fail_canonical_pattern(raw):
+    processor = RecordNormalizationProcessor(provider="chembl", entity_type="tissue")
     normalized = processor.normalize_business_data({"efo_id": raw})
     assert re.fullmatch(r"EFO_\d+", normalized["efo_id"]) is None

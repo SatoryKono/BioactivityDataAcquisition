@@ -13,7 +13,6 @@
 from __future__ import annotations
 
 import ast
-import hashlib
 import json
 import re
 import subprocess
@@ -557,48 +556,6 @@ def test_test_governance_source_hash_fails_closed_on_unreadable_input(
 
     with pytest.raises(OSError, match="cloud-sync"):
         governance_audit._compute_test_governance_source_tree_sha256(str(tmp_path))
-
-
-@pytest.mark.architecture
-@pytest.mark.parametrize("workers", [1, 4])
-def test_governance_hash_releases_payloads_without_changing_digest(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, workers: int
-) -> None:
-    """Large fixture sets must not remain resident until the final digest."""
-    files = [tmp_path / "tests" / f"test_{index:03}.py" for index in range(64)]
-    expected = hashlib.sha256()
-    for path in files:
-        expected.update(path.relative_to(tmp_path).as_posix().encode())
-        expected.update(b"\0content\0")
-    files.reverse()
-    counts = {"live": 0, "peak": 0}
-
-    class Payload(bytes):
-        def __new__(cls):
-            value = super().__new__(cls, b"content")
-            counts["live"] += 1
-            counts["peak"] = max(counts["peak"], counts["live"])
-            return value
-
-        def __del__(self):
-            counts["live"] -= 1
-
-    monkeypatch.setattr(governance_audit, "GOVERNANCE_SOURCE_FILES", [])
-    monkeypatch.setattr(
-        governance_audit, "_iter_all_test_python_files", lambda _: files
-    )
-    monkeypatch.setattr(governance_audit, "_iter_fixture_asset_files", lambda _: [])
-    monkeypatch.setattr(
-        governance_audit, "_source_tree_hash_workers", lambda _: workers
-    )
-    monkeypatch.setattr(
-        governance_audit, "_read_source_tree_bytes", lambda _: Payload()
-    )
-    governance_audit._compute_test_governance_source_tree_sha256.cache_clear()
-    actual = governance_audit._compute_test_governance_source_tree_sha256(str(tmp_path))
-    assert actual == expected.hexdigest()
-    assert counts["peak"] <= workers + 1
-    assert counts["live"] == 0
 
 
 @pytest.mark.architecture

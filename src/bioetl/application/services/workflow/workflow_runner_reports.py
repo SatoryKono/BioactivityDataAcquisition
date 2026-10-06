@@ -180,7 +180,7 @@ def attach_workflow_run_report(
         from bioetl.application.services.run_reports.writer import (
             write_workflow_run_report,
         )
-        from bioetl.domain.run_reports.workflow_report_assembly import (
+        from bioetl.domain.run_reports.workflow_builder import (
             build_workflow_run_report,
         )
 

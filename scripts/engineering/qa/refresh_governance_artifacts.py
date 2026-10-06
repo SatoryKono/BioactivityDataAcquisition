@@ -27,12 +27,6 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from scripts.engineering.qa.technical_debt_audit_registry import (
-        TechnicalDebtAuditRecord,
-    )
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -439,10 +433,7 @@ def _refresh_targeted_coverage_closeout() -> None:
         f"--junitxml={junit}",
     ]
     _run(command)
-    root = ET.parse(junit).getroot()
-    if root is None:
-        raise SystemExit("Targeted coverage closeout requires a JUnit root element")
-    suites = root.findall("testsuite")
+    suites = ET.parse(junit).getroot().findall("testsuite")
     if not suites or any(int(s.get("skipped", "0")) for s in suites):
         raise SystemExit(
             "Targeted coverage closeout requires executed, non-skipped tests"
@@ -532,12 +523,7 @@ def _replace_current_evidence_hash(
     return registry_text[:start] + block.replace(old, live, 1) + registry_text[end:]
 
 
-def _rewrite_current_audit_report(
-    *,
-    old: str,
-    live: str,
-    current: TechnicalDebtAuditRecord,
-) -> None:
+def _rewrite_current_audit_report(*, old: str, live: str, current: object) -> None:
     from scripts.engineering.qa.technical_debt_audit_registry import (
         SEMANTIC_SUMMARY_END,
         SEMANTIC_SUMMARY_START,
@@ -546,7 +532,7 @@ def _rewrite_current_audit_report(
         render_current_audit_semantic_summary,
     )
 
-    report_path = ROOT / current.report_path
+    report_path = ROOT / current.report_path  # type: ignore[attr-defined]
     report = report_path.read_text(encoding="utf-8")
     report = report.replace(
         f"Evidence surface SHA-256: `{old}`",
@@ -566,15 +552,7 @@ def _rewrite_current_audit_report(
         _, suffix = rest.split(headline_end, 1)
         markers = _headline_markers(build_current_audit_semantic_summary(ROOT, current))
         headlines = "\n\n".join(markers)
-        report = (
-            prefix
-            + headline_start
-            + "\n\n"
-            + headlines
-            + "\n\n"
-            + headline_end
-            + suffix
-        )
+        report = prefix + headline_start + "\n\n" + headlines + "\n\n" + headline_end + suffix
     if not report.endswith("\n"):
         report += "\n"
     _write_text_atomically(report_path, report)
@@ -695,29 +673,6 @@ def _run_telemetry(*, check_only: bool, telemetry: argparse.Namespace) -> int:
                 "--tb=short",
             ]
         )
-    local_manifest = getattr(telemetry, "local_manifest", None)
-    if local_manifest:
-        if any(
-            getattr(telemetry, key, None) not in (None, "")
-            for key in (
-                "coverage_percent",
-                "source_commit",
-                "source_run_id",
-                "source_run_url",
-            )
-        ):
-            raise SystemExit(
-                "Local telemetry identity and inputs must come from the manifest"
-            )
-        return _run(
-            [
-                sys.executable,
-                "-m",
-                "scripts.engineering.ci.update_test_telemetry_baseline",
-                "--local-manifest",
-                str(local_manifest),
-            ]
-        )
     missing = [
         name
         for name, value in (
@@ -818,7 +773,6 @@ def run_ci_drift_families(argv: list[str]) -> int:
         help="Pipeline name for --dataflow (default: chembl_activity).",
     )
     parser.add_argument("--coverage-percent", type=float, default=None)
-    parser.add_argument("--local-manifest", type=Path, default=None)
     parser.add_argument("--source-branch", default="main")
     parser.add_argument("--source-commit", default="")
     parser.add_argument("--source-run-id", default="")

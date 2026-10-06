@@ -13,9 +13,12 @@ from bioetl.infrastructure.adapters.http._client_retry_flow import (
     handle_response_attempt,
 )
 from bioetl.infrastructure.adapters.http._client_retry_models import (
-    _HTTPClientRetryHost,
     _RequestAttemptOutcome,
     _RetryRequestState,
+)
+from bioetl.infrastructure.adapters.http._client_retry_policy import (
+    _is_retryable_error,
+    _status_code_from_error,
 )
 from bioetl.infrastructure.adapters.http.client_retry_observability import (
     SpanLike,
@@ -23,10 +26,6 @@ from bioetl.infrastructure.adapters.http.client_retry_observability import (
     handle_circuit_breaker_trip,
     raise_retry_exhausted,
     start_request_span,
-)
-from bioetl.infrastructure.adapters.http.client_retry_policy import (
-    _is_retryable_error,
-    _status_code_from_error,
 )
 
 if TYPE_CHECKING:
@@ -43,7 +42,7 @@ class HTTPClientRetryRequestFlow(_RetryRequestBase):
     """Request, attempt, and exception flow for the HTTP retry mixin."""
 
     async def _request_with_retry(
-        self: _HTTPClientRetryHost,
+        self,
         method: str,
         url: str,
         **kwargs: Any,  # Any: forwarding arbitrary request kwargs to underlying HTTP client
@@ -80,12 +79,12 @@ class HTTPClientRetryRequestFlow(_RetryRequestBase):
                 record_metrics=self._record_request_metrics,
             )
 
-    def _is_retryable_error(self: _HTTPClientRetryHost, exc: Exception) -> bool:
+    def _is_retryable_error(self, exc: Exception) -> bool:
         """Check if the given exception is retryable according to retry policy."""
         return _is_retryable_error(self.retry_config, exc)
 
     async def _attempt_request(
-        self: _HTTPClientRetryHost,
+        self,
         client: httpx.AsyncClient,
         method: str,
         url: str,
@@ -144,7 +143,7 @@ class HTTPClientRetryRequestFlow(_RetryRequestBase):
             return outcome
 
     async def _handle_response_attempt(
-        self: _HTTPClientRetryHost,
+        self,
         response: httpx.Response,
         *,
         method: str,
@@ -170,7 +169,7 @@ class HTTPClientRetryRequestFlow(_RetryRequestBase):
         )
 
     async def _handle_request_exception(
-        self: _HTTPClientRetryHost,
+        self,
         exc: Exception,
         *,
         method: str,

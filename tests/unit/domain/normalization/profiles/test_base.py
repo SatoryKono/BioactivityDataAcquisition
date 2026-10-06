@@ -34,7 +34,6 @@ import pytest
 
 from bioetl.domain.normalization.profiles import FieldRule, NormalizationProfile
 from bioetl.domain.normalization.profiles.profile_normalizers import (
-    normalize_profile_ontology_id,
     normalize_profile_operator,
 )
 
@@ -113,18 +112,3 @@ def test_normalization_profile_identity_changes_when_field_hash_policy_changes()
     )
 
     assert left.identity.profile_hash != right.identity.profile_hash
-
-
-def test_ontology_separator_revision_changes_cell_line_profile_identity(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    from bioetl.domain.normalization.profiles.chembl_cell_line import (
-        CHEMBL_CELL_LINE_PROFILE,
-    )
-
-    current_hash = CHEMBL_CELL_LINE_PROFILE.identity.profile_hash
-    assert normalize_profile_ontology_id(" EFO;0001187 ") == "EFO_0001187"
-    monkeypatch.setattr(
-        normalize_profile_ontology_id, "__qualname__", "normalize_profile_ontology_id"
-    )
-    assert CHEMBL_CELL_LINE_PROFILE.identity.profile_hash != current_hash

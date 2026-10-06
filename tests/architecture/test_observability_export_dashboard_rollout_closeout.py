@@ -260,11 +260,8 @@ def test_dashboard_and_rule_promql_do_not_use_forbidden_identifier_labels() -> N
         forbidden_labels = _forbidden_selector_labels(expr)
         if forbidden_labels:
             offenders.append(f"{source}::{title}: {sorted(forbidden_labels)}")
-        # Grafana URL interpolation preserves selected run identity without
-        # creating a Prometheus label. Selector and grouping identifiers remain forbidden.
-        label_expression = re.sub(r"\$\$?\{run_id:queryparam\}", "", expr)
         for token in FORBIDDEN_PROM_LABELS:
-            if re.search(rf"\b{re.escape(token)}\b", label_expression):
+            if re.search(rf"\b{re.escape(token)}\b", expr):
                 offenders.append(f"{source}::{title}: token={token}")
 
     assert not offenders, "\n".join(offenders[:40])

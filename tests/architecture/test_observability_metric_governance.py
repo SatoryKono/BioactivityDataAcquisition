@@ -252,7 +252,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
 
     http_targets = report["http_targets"]
     assert (
-        len(http_targets) == 33
+        len(http_targets) == 32
     )  # Five dashboards; summaries reuse saved domain responses.
     assert any(
         target["dashboard_uid"] == "bioetl-control-plane-v1"
@@ -265,7 +265,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     )
     assert report["typed_target_counts"] == {
         "promql": 105,  # Retained fleet panels live in Incident Workspace.
-        "http": 33,
+        "http": 32,
         "loki": 0,
         "tempo": 0,
         "unknown": 0,

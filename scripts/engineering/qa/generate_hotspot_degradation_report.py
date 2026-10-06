@@ -318,7 +318,7 @@ def _write_markdown_report(
     write_text_confined(path, markdown, root=root, allow_external_absolute=True)
 
 
-def main(argv: list[str] | None = None) -> int:
+def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--observations",
@@ -350,7 +350,7 @@ def main(argv: list[str] | None = None) -> int:
         required=True,
         help="Output path for markdown degradation report.",
     )
-    args = parser.parse_args(argv)
+    args = parser.parse_args()
     from scripts.engineering.common.repo_paths import REPO_ROOT
 
     root = REPO_ROOT

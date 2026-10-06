@@ -15,7 +15,7 @@ from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adap
 from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
     CompositeFilterExtractor,
 )
-from bioetl.composition.factories.services.composite_support_services_factory import (
+from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
     CompositeSupportServicesFactory,
 )
 from bioetl.composition.bootstrap.runtime.observability import (
@@ -49,7 +49,7 @@ if TYPE_CHECKING:
     from bioetl.composition.bootstrap.composite_infrastructure_context import (
         CompositeInfrastructureContext,
     )
-    from bioetl.composition.factories.services.composite_support_services_factory import (
+    from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
         CompositeSupportServices,
     )
     from bioetl.domain.composite import CompositeConfig

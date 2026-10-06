@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-10-04",
+  "snapshot_date": "2026-09-22",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
@@ -79,11 +79,10 @@
       "usage_classification": "stable_public_api_zero_first_party_src",
       "src_importers": [],
       "test_importers": [
-        "tests/unit/interfaces/cli/commands/test_run_composite.py",
-        "tests/unit/scripts/ops/observability/test_green_acceptance.py"
+        "tests/unit/interfaces/cli/commands/test_run_composite.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 2,
+      "test_importer_count": 1,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing"
@@ -122,11 +121,10 @@
       "test_importers": [
         "tests/unit/interfaces/cli/commands/test_commands_package.py",
         "tests/unit/interfaces/cli/commands/test_diagnostics.py",
-        "tests/unit/interfaces/test_issue_10520_interfaces_tail.py",
-        "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py"
+        "tests/unit/interfaces/test_issue_10520_interfaces_tail.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 4,
+      "test_importer_count": 3,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing"
@@ -284,13 +282,9 @@
       "src_importers": [],
       "test_importers": [
         "tests/e2e/conftest.py",
-        "tests/unit/composition/factories/datasource/test_http_client_factory.py",
-        "tests/unit/composition/runtime_builders/test_run_manifest_contract_identity_edges.py",
-        "tests/unit/composition/test_issue_10469_composition_tail_two.py",
         "tests/unit/infrastructure/config/test_composite_config_api.py",
         "tests/unit/infrastructure/config/test_config_ci_contract.py",
         "tests/unit/infrastructure/config/test_config_package_root_contract.py",
-        "tests/unit/infrastructure/config/test_config_root.py",
         "tests/unit/infrastructure/config/test_contract_registry_loader_additional.py",
         "tests/unit/infrastructure/config/test_pipeline_payload_normalization.py",
         "tests/unit/infrastructure/config/test_public_config_surfaces.py",
@@ -301,7 +295,7 @@
         "tests/unit/infrastructure/test_issue_10469_two_line_residuals_three.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 16,
+      "test_importer_count": 12,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
@@ -386,6 +380,7 @@
         "tests/unit/application/composite/test_merger_orchestration.py",
         "tests/unit/application/composite/test_merger_post_join.py",
         "tests/unit/application/test_issue_10518_application_compwf_a.py",
+        "tests/unit/application/test_issue_10518_application_compwf_b.py",
         "tests/unit/application/test_issue_10518_application_tail2a.py",
         "tests/unit/composite/test_merge_golden.py",
         "tests/unit/domain/composite/test_composite_config.py",
@@ -402,7 +397,7 @@
         "tests/unit/repo_backed/application/composite/test_publication_schema_columns.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 43,
+      "test_importer_count": 44,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing"
@@ -487,11 +482,10 @@
       "usage_classification": "stable_public_api_zero_first_party_src",
       "src_importers": [],
       "test_importers": [
-        "tests/unit/interfaces/cli/commands/test_run_composite.py",
-        "tests/unit/scripts/ops/observability/test_green_acceptance.py"
+        "tests/unit/interfaces/cli/commands/test_run_composite.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 2,
+      "test_importer_count": 1,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing"
@@ -530,11 +524,10 @@
       "test_importers": [
         "tests/unit/interfaces/cli/commands/test_commands_package.py",
         "tests/unit/interfaces/cli/commands/test_diagnostics.py",
-        "tests/unit/interfaces/test_issue_10520_interfaces_tail.py",
-        "tests/unit/interfaces/test_issue_11244_11249_coderabbit.py"
+        "tests/unit/interfaces/test_issue_10520_interfaces_tail.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 4,
+      "test_importer_count": 3,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing"
@@ -692,13 +685,9 @@
       "src_importers": [],
       "test_importers": [
         "tests/e2e/conftest.py",
-        "tests/unit/composition/factories/datasource/test_http_client_factory.py",
-        "tests/unit/composition/runtime_builders/test_run_manifest_contract_identity_edges.py",
-        "tests/unit/composition/test_issue_10469_composition_tail_two.py",
         "tests/unit/infrastructure/config/test_composite_config_api.py",
         "tests/unit/infrastructure/config/test_config_ci_contract.py",
         "tests/unit/infrastructure/config/test_config_package_root_contract.py",
-        "tests/unit/infrastructure/config/test_config_root.py",
         "tests/unit/infrastructure/config/test_contract_registry_loader_additional.py",
         "tests/unit/infrastructure/config/test_pipeline_payload_normalization.py",
         "tests/unit/infrastructure/config/test_public_config_surfaces.py",
@@ -709,7 +698,7 @@
         "tests/unit/infrastructure/test_issue_10469_two_line_residuals_three.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 16,
+      "test_importer_count": 12,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
@@ -794,6 +783,7 @@
         "tests/unit/application/composite/test_merger_orchestration.py",
         "tests/unit/application/composite/test_merger_post_join.py",
         "tests/unit/application/test_issue_10518_application_compwf_a.py",
+        "tests/unit/application/test_issue_10518_application_compwf_b.py",
         "tests/unit/application/test_issue_10518_application_tail2a.py",
         "tests/unit/composite/test_merge_golden.py",
         "tests/unit/domain/composite/test_composite_config.py",
@@ -810,7 +800,7 @@
         "tests/unit/repo_backed/application/composite/test_publication_schema_columns.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 43,
+      "test_importer_count": 44,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing"
@@ -980,7 +970,7 @@
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 16
+      "test_importer_count": 12
     }
   ],
   "retained_public_export_owner_usage_map": [
@@ -1124,7 +1114,7 @@
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 16
+      "test_importer_count": 12
     }
   ],
   "first_safe_removal_wave": {

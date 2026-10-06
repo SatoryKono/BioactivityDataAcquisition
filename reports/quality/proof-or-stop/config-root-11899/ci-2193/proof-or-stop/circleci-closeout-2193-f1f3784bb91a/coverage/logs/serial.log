@@ -1,5 +1,0 @@
-ss..                                                                     [100%]
-=========================== short test summary info ============================
-SKIPPED [1] tests/integration/test_deployed_replay_readiness.py:18: requires a pinned deployed-run catalog
-SKIPPED [1] tests/integration/infrastructure/storage/test_atomic.py:279: Windows-only lock semantics
-SKIPPED [1] tests/integration/infrastructure/storage/test_atomic.py:327: Windows-only lock semantics

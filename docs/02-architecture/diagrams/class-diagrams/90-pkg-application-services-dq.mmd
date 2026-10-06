@@ -1,11 +1,11 @@
 %% Title: Package Family: application/services/dq
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/dq; modules: bronze_analyzer, disabled_gold_filter, dq_report_assembly, gold_analyzer, silver_analyzer, silver_check_executor.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/dq; modules: bronze_analyzer, dq_report_builders, gold_analyzer, silver_analyzer, silver_check_executor, silver_statistics.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-09-02
 %% @level   Package Family / Inventory Slice
-%% @nodes   8
+%% @nodes   7
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -13,11 +13,7 @@ classDiagram
         class BronzeDQAnalyzer
     }
 
-    namespace disabled_gold_filter {
-        class DisabledGoldFilterService
-    }
-
-    namespace dq_report_assembly {
+    namespace dq_report_builders {
         class _HasDQStatus
     }
 

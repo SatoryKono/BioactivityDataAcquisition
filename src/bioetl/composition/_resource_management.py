@@ -27,12 +27,12 @@ from bioetl.composition.contracts.resources import (
     MedallionLifecycleServiceProtocol,
     QuarantineRuntimeServiceProtocol,
 )
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.pipeline_config_api import (
     load_pipeline_config as impl,
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import JsonDict
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 

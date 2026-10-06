@@ -425,14 +425,8 @@ def test_run_manifest_config_hash_legacy_alias_contract_is_documented_and_wired(
 def test_strict_persistence_profile_set_is_centralized_in_domain_policy() -> None:
     """Prevent new local replay_ready/forensic_grade gates in launch paths."""
     allowed = {
-        Path("src/bioetl/domain/control_plane/_reproducibility_policy_persistence.py"),
+        Path("src/bioetl/domain/control_plane/reproducibility_policy.py"),
     }
-    from bioetl.domain.control_plane import reproducibility_policy
-    from bioetl.domain.control_plane import _reproducibility_policy_persistence
-
-    assert reproducibility_policy.STRICT_PERSISTENCE_PROFILES is (
-        _reproducibility_policy_persistence.STRICT_PERSISTENCE_PROFILES
-    )
     strict_profiles = {"replay_ready", "forensic_grade"}
     violations: list[str] = []
 

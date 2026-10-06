@@ -91,7 +91,16 @@ class ForeignKeyReconciliationRequest:
         require_source_scope(self.source_scope)
         require_reconciliation_mode(self.reconciliation_mode)
         if self.reconciliation_mode == "selected-snapshot":
-            self._validate_selected_snapshot_scope()
+            if (
+                self.source_scope != "current_run"
+                or not self.workflow_run_id
+                or not self.source_run_ids
+            ):
+                raise ValueError(
+                    "selected-snapshot requires current_run scope and workflow/producer run identities"
+                )
+            if not self.selected_snapshots:
+                raise ValueError("selected-snapshot requires pinned producer snapshots")
         object.__setattr__(
             self,
             "source_run_ids",
@@ -111,21 +120,6 @@ class ForeignKeyReconciliationRequest:
         require_optional_str(
             self.completeness_evidence_ref, "completeness_evidence_ref"
         )
-        self._validate_complete_reference_evidence(completeness)
-
-    def _validate_selected_snapshot_scope(self) -> None:
-        if (
-            self.source_scope != "current_run"
-            or not self.workflow_run_id
-            or not self.source_run_ids
-        ):
-            raise ValueError(
-                "selected-snapshot requires current_run scope and workflow/producer run identities"
-            )
-        if not self.selected_snapshots:
-            raise ValueError("selected-snapshot requires pinned producer snapshots")
-
-    def _validate_complete_reference_evidence(self, completeness: str) -> None:
         if completeness == "complete" and (
             self.reference_identity is None or self.completeness_evidence_ref is None
         ):

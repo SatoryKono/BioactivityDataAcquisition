@@ -1,20 +1,16 @@
 %% Title: Package Family: infrastructure/storage/silver/operations (Part 2/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/silver/operations; part 2/2; modules: maintenance_operations, metadata_audit_operations, metadata_finalization_operations, metadata_finalization_support, metadata_operations, metadata_write_facade.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/silver/operations; part 2/2; modules: metadata_context_facade, metadata_finalization_operations, metadata_finalization_support, metadata_operations, metadata_write_facade, metadata_write_operations.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-09-02
 %% @level   Package Family / Inventory Slice
-%% @nodes   8
+%% @nodes   7
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
 
-    namespace maintenance_operations {
-        class SilverMaintenanceOperations
-    }
-
-    namespace metadata_audit_operations {
-        class _SilverMetadataAuditOps
+    namespace metadata_context_facade {
+        class _SilverMetadataContextFacade
     }
 
     namespace metadata_finalization_operations {
@@ -41,4 +37,5 @@ classDiagram
         class SilverPostwriteOperations
     }
 
+    _SilverMetadataContextFacade <|-- _SilverMetadataWriteFacade
     _SilverMetadataWriteFacade <|-- SilverMetadataOperations

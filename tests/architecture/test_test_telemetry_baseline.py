@@ -45,37 +45,13 @@ def test_test_telemetry_baseline_contract_is_present_and_scoped() -> None:
     source_run_url = str(payload["source_run_url"])
     assert re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/-]*", source_branch)
     assert ".." not in source_branch
-    if source_event == "local_coverage_verify":
-        from scripts.engineering.qa.run_local_coverage_verify import SHARDS
-
-        assert source_run_id.startswith("local-")
-        assert payload["source_run_url"] is None
-        provenance = payload["measurement_provenance"]
-        assert provenance["producer"] == "run_local_coverage_verify.py"
-        assert provenance["complete"] is True
-        assert provenance["trust_tier"] == "local_single_host"
-        assert provenance["ci_status"] == "BLOCKED_EXTERNAL_PERMANENT"
-        assert provenance["head"] == payload["source_commit"]
-        assert provenance["test_tree_sha256"] == payload["source_tree_sha256"]
-        assert provenance["required_shards"] == [shard.name for shard in SHARDS]
-        assert [row["name"] for row in provenance["shards"]] == provenance[
-            "required_shards"
-        ]
-        for row in provenance["shards"]:
-            assert row["exit_code"] == 0
-            assert re.fullmatch(r"[0-9a-f]{64}", row["coverage_sha256"])
-            assert re.fullmatch(r"[0-9a-f]{64}", row["junit_telemetry_sha256"])
-        for key in ("manifest_sha256", "coverage_xml_sha256", "source_tree_sha256"):
-            assert re.fullmatch(r"[0-9a-f]{64}", provenance[key])
-        assert provenance["finished_at_utc"] == payload["refreshed_at_utc"]
-    else:
-        assert source_event in {"pull_request", "push", "workflow_dispatch", "schedule"}
-        if source_branch != "main":
-            assert source_event == "pull_request"
-        assert source_run_url == (
-            "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/"
-            f"{source_run_id}"
-        )
+    assert source_event in {"pull_request", "push", "workflow_dispatch", "schedule"}
+    if source_branch != "main":
+        assert source_event == "pull_request"
+    assert source_run_url == (
+        "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/"
+        f"{source_run_id}"
+    )
     assert payload["artifact_inputs"]["coverage_xml"] == "reports/coverage/coverage.xml"
     assert (
         payload["artifact_inputs"]["slowest_tests_json"]

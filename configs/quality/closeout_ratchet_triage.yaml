@@ -23,11 +23,6 @@ policy:
     entries may use retain_nightly so PR architecture fast boundary stays free of
     historical freezes (TEST-SYS-03).
 entries:
-- path: tests/architecture/test_proof_closeout_workflow_contract.py
-  disposition: retain_active
-  classification: active_architecture_guard
-  live_guard: Closeout reuses source-bound evidence and assigns each coverage shard once.
-  rationale: Prevents duplicate test execution and incomplete workflow dependencies.
 - path: tests/architecture/test_architecture_audit_closeout_gates.py
   disposition: retain_active
   classification: active_architecture_guard

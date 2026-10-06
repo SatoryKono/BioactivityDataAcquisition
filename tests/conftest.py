@@ -1279,16 +1279,6 @@ def _bioetl_test_silver_validator(
     """
     if request.node.get_closest_marker("require_silver_validator") is not None:
         return
-    # Static architecture checks do not construct storage collaborators. Keep
-    # the SilverWriter injection for architecture tests that explicitly use it.
-    if request.node.get_closest_marker("architecture") is not None:
-        module_path = getattr(getattr(request.node, "module", None), "__file__", None)
-        if isinstance(module_path, str):
-            module_text = Path(module_path).read_text(
-                encoding="utf-8", errors="replace"
-            )
-            if "SilverWriter" not in module_text and "silver_writer" not in module_text:
-                return
     from bioetl.infrastructure.storage.silver import runtime_helpers as rh
     from bioetl.infrastructure.storage.silver.runtime_helpers import (
         SilverWriterRuntimeServicesRequest,

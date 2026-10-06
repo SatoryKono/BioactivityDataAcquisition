@@ -22,7 +22,7 @@ write_entry_points:
 - src/bioetl/infrastructure/storage/bronze/__init__.py
 - src/bioetl/infrastructure/storage/bronze/facade_contracts.py
 - src/bioetl/infrastructure/storage/bronze/io_mixin.py
-- src/bioetl/infrastructure/storage/bronze/metadata_assembly.py
+- src/bioetl/infrastructure/storage/bronze/metadata_builders.py
 - src/bioetl/infrastructure/storage/bronze/metadata_mixin.py
 - src/bioetl/infrastructure/storage/bronze/metadata_operations.py
 - src/bioetl/infrastructure/storage/bronze/metadata_paths.py

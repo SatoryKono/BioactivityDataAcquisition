@@ -1035,7 +1035,6 @@ nav:
           - "Unified Rules": 00-project/ai/rules/bioetl-ai-rules.md
       - "Skills":
           - "Overview": 00-project/ai/skills/README.md
-          - "Global Snapshot": 00-project/ai/skills/global/README.md
           - "Practical Index": 00-project/ai/skills/SKILLS-PRACTICAL-INDEX.md
           - "Local Skills":
               - "Skills Catalog": 00-project/ai/skills/local/SKILLS-CATALOG.md

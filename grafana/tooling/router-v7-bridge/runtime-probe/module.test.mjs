@@ -73,7 +73,7 @@ test('probe rejects no-op internal navigation', async () => {
     useNavigate() {
       const navigate = bridge.useNavigate();
       return (to) => {
-        if (/^https?:\/\//.test(to) || (to.includes('example.invalid') && !to.startsWith('/%'))) return navigate(to);
+        if (to.includes('example.invalid') && !to.startsWith('/%')) return navigate(to);
       };
     },
   });

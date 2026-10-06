@@ -99,16 +99,3 @@ async def probe_chembl_status(
             )
             return HealthStatus.DEGRADED
         raise
-
-
-def max_health_status(
-    left: HealthStatus,
-    right: HealthStatus,
-) -> HealthStatus:
-    """Return the more severe of two health signals."""
-    severity = {
-        HealthStatus.HEALTHY: 0,
-        HealthStatus.DEGRADED: 1,
-        HealthStatus.UNHEALTHY: 2,
-    }
-    return left if severity[left] >= severity[right] else right

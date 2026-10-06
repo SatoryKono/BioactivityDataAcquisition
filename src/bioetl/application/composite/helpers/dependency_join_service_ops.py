@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.dependency_join_context_assembly import (
+from bioetl.application.composite.dependency_join_context_builders import (
     build_prepared_dependency_join_context,
 )
 from bioetl.application.composite.dependency_join_execution import (

@@ -23,7 +23,11 @@ def _apply_completed_step_state(
     last_event_id: str,
 ) -> WorkflowExecutionState:
     # Resume-skipped steps retain the producer evidence from their original completion.
-    if _retains_completed_evidence(result, _find_step_state(state, result.step_id)):
+    if (
+        result.status == "skipped"
+        and result.error_type == "AlreadyCompletedOnResume"
+        and _find_step_state(state, result.step_id) is not None
+    ):
         return state
     previous = _find_step_state(state, result.step_id)
     pending = bool(
@@ -53,17 +57,6 @@ def _apply_completed_step_state(
             fingerprint=fingerprint,
         )
     return state if pending else _clear_ambiguous_step(state, result.step_id)
-
-
-def _retains_completed_evidence(
-    result: WorkflowStepExecutionResult, previous: WorkflowStepState | None
-) -> bool:
-    """Keep the original receipt when resume deliberately skips a completed step."""
-    return (
-        result.status == "skipped"
-        and result.error_type == "AlreadyCompletedOnResume"
-        and previous is not None
-    )
 
 
 def _record_step_state(

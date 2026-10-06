@@ -7,19 +7,19 @@ Canonical live ADR index: `docs/02-architecture/decisions/README.md`.
 This page is a generated governance mirror and MUST be regenerated via
 `python3 scripts/generate_adr_registry.py` after ADR additions or metadata changes.
 
-**Total ADRs**: 62
-**Last Updated**: 2026-10-04
+**Total ADRs**: 61
+**Last Updated**: 2026-09-22
 
 ## 📊 Status Summary
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| `accepted` | 60 | 96.8% |
-| `superseded` | 2 | 3.2% |
+| `accepted` | 59 | 96.7% |
+| `superseded` | 2 | 3.3% |
 
 ## 🟢 Accepted ADRs
 
-### 60 decisions
+### 59 decisions
 
 ### ADR-001: Delta Lake vs Parquet
 
@@ -730,17 +730,6 @@ stay un...
 coverage. They cannot define the outcome of a completed run. A successf...
 
 [📄 View Full ADR](decisions/ADR-061-persisted-selected-run-assessment.md)
-
----
-
-### ADR-062: Immutable Composite Parent Merge Replay
-
-**Status**: `accepted` | **Category**: `Replay` | **Owner**: `BioETL maintainers`
-
-**Context**: The composite rebuild-only boundary does not support exact parent replay.
-Successful child processing and intact child reports cannot establish that t...
-
-[📄 View Full ADR](decisions/ADR-062-assay-parent-exact-replay.md)
 
 ---
 

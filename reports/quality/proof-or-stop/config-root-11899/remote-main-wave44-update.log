@@ -1,3 +1,0 @@
-CI drift families update: remote-main
-+ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update
-CI drift families complete (no budget ratchet)

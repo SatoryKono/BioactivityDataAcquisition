@@ -18,7 +18,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-TARGET_MODULE = "bioetl.infrastructure.storage.bronze.metadata_assembly"
+TARGET_MODULE = "bioetl.infrastructure.storage.bronze.metadata_builders"
 ALLOWED_IMPORTERS = {
     "src/bioetl/infrastructure/storage/bronze/metadata_mixin.py",
 }

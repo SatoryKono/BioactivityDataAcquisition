@@ -38,12 +38,13 @@ from uuid import UUID
 
 from bioetl.application.runtime_timestamps import capture_runtime_timing_anchor
 from bioetl.application.services.execution._pipeline_runner_support import (
+    _require_execution_runner,
     build_dry_run_result,
     build_pipeline_run_result,
     complete_pipeline_dry_run,
     constructor_failure_recorder,
     finalize_pipeline_run_report,
-    prepare_execution_runner,
+    is_empty_cached_bronze_provenance_error,
 )
 from bioetl.application.services.execution._pipeline_runner_support import (
     missing_run_id_factory as _missing_run_id_factory,
@@ -207,12 +208,13 @@ class PipelineRunnerService:
         accounting_token = bind_stage_accounting(accounting)
         runner = None
         try:
-            prepared_runner = await prepare_execution_runner(
-                self.runner_factory, context, record_constructor_failure
-            )
-            if isinstance(prepared_runner, RunResult):
-                return prepared_runner
-            runner = prepared_runner
+            try:
+                runner = _require_execution_runner(self.runner_factory.create(context))
+            except Exception as exc:
+                failed_result = await record_constructor_failure(exc)
+                if is_empty_cached_bronze_provenance_error(exc):
+                    return failed_result
+                raise
             return await self._execute_pipeline(
                 runner=runner,
                 run_logger=run_logger,

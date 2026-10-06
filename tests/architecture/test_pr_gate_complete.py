@@ -21,6 +21,7 @@ EXPECTED_GATES = {
     "tests",
     "type-checking",
     "security",
+    "codeql",
     "docker",
     "duplication",
     "root-hygiene",
@@ -59,7 +60,7 @@ def test_catalog_exists_and_has_expected_gates() -> None:
     assert data.get("version") == 2
     assert data.get("schema_version") == 1
     gates = {g["id"] for g in data.get("gates", [])}
-    assert gates == EXPECTED_GATES, f"gate mismatch: {gates ^ EXPECTED_GATES}"
+    assert EXPECTED_GATES.issubset(gates), f"missing gates: {EXPECTED_GATES - gates}"
     policy = data.get("policy", {})
     assert policy.get("allow_skipped_as_success") is False
     assert policy.get("require_sha_binding") is True

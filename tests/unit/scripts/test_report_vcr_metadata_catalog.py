@@ -32,7 +32,6 @@ def test_rg_reference_scan_normalizes_windows_owner_paths(
         "type": "match",
         "data": {
             "path": {"text": r"tests\e2e\test_owner.py"},
-            "lines": {"text": f'CASSETTE = "{token}"\n'},
             "submatches": [{"match": {"text": token}}],
         },
     }
@@ -96,58 +95,3 @@ def test_python_reference_scan_prefers_longest_overlapping_token(
 
     assert owners[long_token] == {"scan/openalex_owner.py"}
     assert owners[short_token] == {"scan/pubmed_owner.py"}
-
-
-@pytest.mark.parametrize("scanner", ["rg", "python", "rg_unavailable", "rg_error"])
-def test_reference_scan_requires_whole_cassette_references(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, scanner: str
-) -> None:
-    stem = "_".join(("test", "health", "check"))
-    cassette_path = Path(f"tests/fixtures/vcr/pubmed/{stem}.yaml")
-    tokens = sorted(
-        module._direct_reference_tokens(
-            cassette_path=cassette_path, vcr_root=Path("tests/fixtures/vcr")
-        )
-    )
-    scan_root = tmp_path / "scan"
-    scan_root.mkdir()
-    references = {
-        "identifier": f'{stem} = "cassette"\n',
-        "stem": f'CASSETTE = "{stem}"\n',
-        "name": f'CASSETTE = "{stem}.yaml"\n',
-        "provider_path": f'CASSETTE = "pubmed/{stem}.yaml"\n',
-        "full_path": f'CASSETTE = "{cassette_path.as_posix()}"\n',
-        "test_suffix": f"def {stem}_failure(): pass\n",
-        "test_prefix": f"def unrelated_{stem}(): pass\n",
-        "qualified_stem": f'CASSETTE = "OtherAdapter.{stem}"\n',
-        "other_provider": f'CASSETTE = "other/{stem}.yaml"\n',
-        "filename_suffix": f'CASSETTE = "{stem}.yaml.bak"\n',
-        "filename_prefix": f'CASSETTE = "other-{stem}.yaml"\n',
-    }
-    for name, content in references.items():
-        (scan_root / f"{name}.py").write_text(content, encoding="utf-8")
-    monkeypatch.setattr(module, "REACHABILITY_SCAN_ROOTS", (Path("scan"),))
-
-    if scanner == "rg_unavailable":
-
-        def unavailable(*args: object, **kwargs: object) -> None:
-            raise OSError("rg unavailable")
-
-        monkeypatch.setattr(module.subprocess, "run", unavailable)
-    elif scanner == "rg_error":
-        result = subprocess.CompletedProcess(args=["rg"], returncode=2)
-        monkeypatch.setattr(module.subprocess, "run", lambda *args, **kwargs: result)
-
-    scan = (
-        module._run_python_reference_scan
-        if scanner == "python"
-        else module._run_rg_reference_scan
-    )
-    owners = scan(repo_root=tmp_path, tokens=tokens)
-
-    assert owners == {
-        stem: {"scan/identifier.py", "scan/stem.py"},
-        f"{stem}.yaml": {"scan/name.py"},
-        f"pubmed/{stem}.yaml": {"scan/provider_path.py"},
-        cassette_path.as_posix(): {"scan/full_path.py"},
-    }

@@ -38,11 +38,11 @@
   "pattern_file_counts": {
     "configs/**/*.csv": 2,
     "configs/**/*.json": 17,
-    "configs/**/*.yaml": 234,
+    "configs/**/*.yaml": 233,
     "docs/04-reference/contracts/**/*.md": 11,
-    "reports/quality/*contract*.json": 5,
+    "reports/quality/*contract*.json": 4,
     "reports/quality/*contract*.md": 2,
-    "reports/quality/*matrix*.json": 3,
+    "reports/quality/*matrix*.json": 2,
     "reports/quality/*matrix*.md": 2,
     "reports/quality/*ownership*.json": 2,
     "reports/quality/*ownership*.md": 1,
@@ -55,13 +55,13 @@
   "scan_root": ".",
   "schema_version": 1,
   "scope_file_counts": {
-    "config": 202,
+    "config": 201,
     "contract": 50,
     "golden": 27,
-    "quality_report": 8,
+    "quality_report": 7,
     "registry": 26
   },
-  "total_files": 313,
+  "total_files": 311,
   "tracked_extensions": [
     ".csv",
     ".json",

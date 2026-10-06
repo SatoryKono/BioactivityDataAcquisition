@@ -1081,8 +1081,7 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         )
         == 2
     )
-    assert dockerfile.count("python-3.13=3.13.16_git20261002-r2") == 2
-    assert dockerfile.count("zlib=1.3.2.1_rc20260917-r0") == 2
+    assert "python-3.13=3.13.15-r6" in dockerfile
     assert "python-3.14" not in dockerfile
     assert "FROM scratch" in dockerfile
     assert "COPY --from=runtime-root /etc /etc" in dockerfile

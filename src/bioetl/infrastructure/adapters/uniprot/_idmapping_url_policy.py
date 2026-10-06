@@ -36,17 +36,3 @@ def trusted_idmapping_url(base_url: str, candidate: str) -> str:
     if not decoded_path.startswith(allowed_prefix):
         raise ValueError("URL is outside the UniProt ID mapping API")
     return joined
-
-
-def resolve_idmapping_result_redirect(
-    *, base_url: str, status_code: int, location: str | None, redirect_count: int
-) -> tuple[str, int] | None:
-    """Validate the result redirect origin, API path and three-hop bound."""
-    if status_code not in {301, 302, 303, 307, 308}:
-        return None
-    next_count = redirect_count + 1
-    if next_count > 3:
-        raise ValueError("UniProt ID mapping redirect limit exceeded")
-    if not location:
-        raise ValueError("UniProt ID mapping redirect omitted Location")
-    return trusted_idmapping_url(base_url, location), next_count

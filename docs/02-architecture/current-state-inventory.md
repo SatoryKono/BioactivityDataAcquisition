@@ -28,19 +28,19 @@ truth; existing documentation is evidence only when it matches those sources.
 | Error catalog | 1 | `configs/contracts/errors/error_catalog.yaml` | Canonical error-code taxonomy; not counted as an entity data contract. |
 | Provider configs | 7 | `configs/providers/*.yaml` | ChEMBL, CrossRef, OpenAlex, PubChem, PubMed, Semantic Scholar, UniProt. |
 | Grafana dashboards | 7 | `grafana/dashboards/*.json` | Trust/control-plane, overview, runtime, provider health, DQ, incident, run-explorer (Silver Reject Explorer removed 2026-07-23). |
-| Domain port files | 80 | `src/bioetl/domain/ports/**/*.py` | 71 port modules + 9 package `__init__.py` (inventory: `reports/quality/domain-ports-inventory.json`); 23 top-level `*.py` including `__init__.py` and `_facade_support.py`. |
+| Domain port files | 81 | `src/bioetl/domain/ports/**/*.py` | 72 port modules + 9 package `__init__.py` (inventory: `reports/quality/domain-ports-inventory.json`); 24 top-level `*.py` including `__init__.py` and `_facade_support.py`. |
 
 ## Architecture Quality Evidence
 
-The source inventory has been rebound after the approved LoggerPort alias removal; this is not a new coverage measurement. Coverage values below retain the accepted inventory after a complete 17-group local measurement on `c4071c0eeecd6b06f18bc781a0435ee128e0e994`. Canonical nonregressing adoption preserves historical rows where fresh raw coverage is lower. The raw comparison records 80 remaining module regressions; accepted inventory values are not a claim of fresh global nonregression. `config_root` was freshly measured at 40/40 lines and 18/18 branches. Final architecture acceptance and publication remain separate checks.
+Current committed quality artifacts agree on the following architecture evidence:
 
 | Artifact | Current value | Source |
 | --- | ---: | --- |
-| Architecture quality score | `10.00` (`excellent`) | `reports/quality/architecture-quality-scorecard.json` |
+| Architecture quality score | `9.47` (`good_targeted_improvements`) | `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2552` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2563` | `reports/quality/module-coverage-inventory.json` |
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, `reports/quality/debt-governance-gates.json` |
-| Coverage inventory status counts | `2513` fully covered, `38` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
+| Coverage inventory status counts | `2518` fully covered, `44` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Families at fan-in budget | `0` | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
 | Module-boundaries coupling | `10.0` (`control-plane` fan-in `1/2`, `runtime_builders` fan-in `2/3`) | `reports/quality/architecture-quality-scorecard.json`, `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py` |
@@ -57,7 +57,7 @@ drift is currently clear (`stale_artifacts` are all false in
 release-gate failures rather than hidden warning-only coverage drift. Module
 coverage currently reports `0` unmeasured and `0` uncovered source modules
 from the committed coverage inventory (debt-governance gates). That is a module-inventory fact, not
-a blanket line/branch coverage guarantee: `38` modules
+a blanket line/branch coverage guarantee: `44` modules
 remain partially covered and line/branch coverage must be read from the
 `coverage-verify` artifacts. Read-only
 audit evidence should use
@@ -301,7 +301,7 @@ by storage technology. Current owner boundaries:
 | Domain context exposed direct wall-clock creation | `src/bioetl/domain/context.py` no longer defines `current_utc_time`; effective-config domain artifacts use deterministic sentinel defaults. | `src/bioetl/application/runtime_clock.py`, `src/bioetl/infrastructure/time/system_clock.py`, `tests/architecture/test_time_seam_normalization.py`. | Moved runtime clock helpers to application/infrastructure seams and guarded domain defaults against wall-clock regressions. |
 | Runtime Gold Pandera strictness had no production-path non-strict guard | `tests/architecture/test_gold_validator_strict_runtime_paths.py` scans `src/bioetl` for `PanderaGoldValidator(..., strict=False)` and `ContractAwareGoldValidator(..., strict=False)`. | `src/bioetl/infrastructure/storage/silver/merged_operations.py`; `src/bioetl/infrastructure/validation/pandera_validator.py`. | Replaced the Silver merged-write non-strict Gold validator with `PanderaSilverValidator(strict=False)` and added the runtime guard. |
 | Quarantine payload immutability evidence stopped at aggregate/mock level | `tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineUpdateStatus::test_update_status_preserves_persisted_payload_and_hash` writes a real Delta table, updates status, and checks persisted `payload`, `payload_hash`, and `metadata`. | `src/bioetl/infrastructure/quarantine/unified.py`. | Added persisted immutability coverage and a read fallback for Delta string-view filter failures after status updates. |
-| Test governance refined assertless residuals are now fully eliminated while compatibility coverage stays bounded | `reports/quality/test-governance-current.json` now reports `assertless_total_candidates=85`, `refined_assertless_tests=0`, `compatibility_test_files=0`, and zero budget violations. | Contract schema tests under `tests/contract/**` plus governance inventory under `tests/architecture/**`. | Tightened observable assertions and governance classification so the refined assertless residual count is zero without regrowing compatibility-test scope. |
+| Test governance refined assertless residuals are now fully eliminated while compatibility coverage stays bounded | `reports/quality/test-governance-current.json` now reports `assertless_total_candidates=83`, `refined_assertless_tests=0`, `compatibility_test_files=0`, and zero budget violations. | Contract schema tests under `tests/contract/**` plus governance inventory under `tests/architecture/**`. | Tightened observable assertions and governance classification so the refined assertless residual count is zero without regrowing compatibility-test scope. |
 | Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `10.0`, `46` passing gates, and zero failing gates; `reports/quality/module-coverage-inventory.json` reports `2491` source modules with `0` unmeasured, `0` uncovered, and `7` partially covered modules; `module_boundaries_coupling` is `10.0` with `families_at_budget_count=0`. | Current committed `reports/quality/*.json` artifacts and `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py`. | Refreshed the current-state table for #11080 while keeping module inventory distinct from full line/branch coverage and preserving shrink-only budgets. |
 
 ## Open Questions

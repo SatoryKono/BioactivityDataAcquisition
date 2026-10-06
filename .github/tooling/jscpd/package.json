@@ -4,11 +4,5 @@
   "description": "Pinned jscpd CLI for duplication-complexity.yml (Scorecard PinnedDependencies, Sonar S8543).",
   "dependencies": {
     "jscpd": "4.0.8"
-  },
-  "overrides": {
-    "braces": "$braces"
-  },
-  "devDependencies": {
-    "braces": "file:../braces-backport/braces-3.0.4-bioetl.1.tgz"
   }
 }

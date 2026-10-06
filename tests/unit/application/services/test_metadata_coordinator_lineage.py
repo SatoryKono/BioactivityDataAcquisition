@@ -544,7 +544,7 @@ class TestLineageFragments:
 
         gold_attrs = mapping_to_plain(gold_dataset.attributes)
         assert gold_attrs["composite_run_id"] == "comp-run-123"
-        assert gold_attrs["composite_name"] == "composite_publication"
+        assert gold_attrs["composite_name"] == "composite.publication"
         assert gold_attrs["source_providers"] == ["seed", "openalex"]
         assert gold_attrs["seed_record_id"] == "seed-001"
         assert gold_attrs["field_sources"] == {

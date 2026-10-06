@@ -342,7 +342,7 @@ def build_diagram_text(slice_: FamilySlice) -> str:
         lines.extend(sorted(set(relationships)))
         lines.append("")
 
-    return "\n".join(lines).rstrip() + "\n"
+    return "\n".join(lines) + "\n"
 
 
 def _generation_date_line(text: str) -> str | None:

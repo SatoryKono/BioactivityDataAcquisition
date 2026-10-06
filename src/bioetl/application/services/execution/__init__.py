@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.execution._pipeline_runner_support import (
-    finalize_terminal_evidence,
-)
 from bioetl.application.services.execution.cli_run_orchestration_contracts import (
     MetricsFlushCallable,
     RunCoroutineCallable,
@@ -45,5 +42,4 @@ __all__ = [
     "RunPreparedPipelineCallable",
     "RunResult",
     "StartOffsetValidationResult",
-    "finalize_terminal_evidence",
 ]

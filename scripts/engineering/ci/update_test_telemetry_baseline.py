@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Write telemetry from CI artifacts or a verified complete local measurement."""
+"""Write a committed test-telemetry baseline from CI artifacts."""
 
 from __future__ import annotations
 
@@ -21,13 +21,7 @@ CANONICAL_COVERAGE_XML = "reports/coverage/coverage.xml"
 CANONICAL_SLOWEST_TESTS_JSON = "reports/test-telemetry/slowest-tests.json"
 TELEMETRY_FRESHNESS_MAX_AGE_DAYS = 45
 UNKNOWN_LABEL = "<unknown>"
-SUPPORTED_SOURCE_EVENTS = (
-    "pull_request",
-    "push",
-    "workflow_dispatch",
-    "schedule",
-    "local_coverage_verify",
-)
+SUPPORTED_SOURCE_EVENTS = ("pull_request", "push", "workflow_dispatch", "schedule")
 
 # Coverage, JUnit, YAML, and JSON inputs are heterogeneous external artifacts.
 # Keep their dynamic values confined to this report-materialization boundary.
@@ -69,11 +63,6 @@ def _parse_args() -> argparse.Namespace:
             "Materialize a committed telemetry baseline from coverage.xml and "
             "slowest-tests.json, or from resilient CI diagnostics artifacts."
         )
-    )
-    parser.add_argument(
-        "--local-manifest",
-        type=Path,
-        help="Complete canonical 17-shard manifest; derives local identity and all inputs.",
     )
     parser.add_argument(
         "--coverage-xml",
@@ -343,7 +332,6 @@ def build_baseline_payload(
     source_tree_sha256: str | None = None,
     source_event: str = "push",
     source_run_url: str = "",
-    prefer_junit: bool = False,
 ) -> TelemetryPayload:
     resolved_coverage_percent = (
         _read_coverage_percent(coverage_xml_path)
@@ -354,7 +342,7 @@ def build_baseline_payload(
         resolved_coverage_percent = _read_coverage_percent_from_log(coverage_log_path)
 
     slowest_summary = _read_slowest_summary(slowest_json_path)
-    if prefer_junit or (slowest_summary["total_cases"] is None and junit_paths):
+    if slowest_summary["total_cases"] is None and junit_paths:
         slowest_summary = _derive_slowest_summary_from_junit_paths(junit_paths)
     top_slowest = slowest_summary["top_slowest"]
     status = (
@@ -513,15 +501,8 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
         "  and rejects future/stale `refreshed_at_utc` values.",
         "- `source_commit` must remain an ancestor of HEAD; exact `source_commit == HEAD`",
         "  is opt-in via `BIOETL_REQUIRE_TELEMETRY_SOURCE_COMMIT_EQUALS_HEAD=1`.",
-        "- GitHub evidence from a non-main branch requires `pull_request`;",
-        "  its run URL and id remain independently auditable.",
-        "- `--local-manifest <path>` accepts only a complete canonical 17-shard run",
-        "  with matching source/test hashes, reachable commit, XML/JUnit digests,",
-        "  zero failures/errors and both 85% gates passed. Identity and inputs",
-        "  are derived from that manifest; cached CI summaries are never reused.",
-        "- Local captures use `source_event: local_coverage_verify`, a `local-` run",
-        "  id and no GitHub run URL. Trust remains `local_single_host`;",
-        "  `CI=BLOCKED_EXTERNAL_PERMANENT` never becomes CI PASS or lifecycle ADMIT.",
+        "- A non-main source branch is accepted only for a `pull_request` run;",
+        "  the run URL and id keep that pre-merge evidence independently auditable.",
         "- Refresh command:",
         "  `python -m scripts.engineering.ci.update_test_telemetry_baseline`",
         "  `--source-commit <sha> --source-run-id <run-id>`",
@@ -629,11 +610,6 @@ def build_branch_telemetry_reports(payload: TelemetryPayload) -> dict[str, str]:
         coverage.get("actual_percent") if isinstance(coverage, dict) else None
     )
     top_slowest = duration["top_slowest"]
-    provenance = (
-        {"measurement_provenance": payload["measurement_provenance"]}
-        if "measurement_provenance" in payload
-        else {}
-    )
     return {
         "coverage-summary.json": json.dumps(
             {
@@ -647,7 +623,6 @@ def build_branch_telemetry_reports(payload: TelemetryPayload) -> dict[str, str]:
                 "refresh_status": payload["refresh_status"],
                 "coverage_percent": coverage_percent,
                 "coverage": coverage,
-                **provenance,
             },
             indent=2,
         )
@@ -667,7 +642,6 @@ def build_branch_telemetry_reports(payload: TelemetryPayload) -> dict[str, str]:
                 "top_slowest_tests": top_slowest,
                 "top_slowest_zones": duration["top_slowest_zones"],
                 "execution_context": duration.get("execution_context", {}),
-                **provenance,
             },
             indent=2,
         )
@@ -690,25 +664,9 @@ def merge_existing_baseline_supplemental_fields(
         return payload
 
     merged: TelemetryPayload = dict(payload)
-    for field_name in (
-        "slow_governance_cache_probe",
-        "branch_accurate_guard",
-        "historical_snapshots",
-    ):
+    for field_name in ("slow_governance_cache_probe", "branch_accurate_guard"):
         if field_name not in merged and field_name in existing_payload:
             merged[field_name] = existing_payload[field_name]
-    if payload.get("source_event") == "local_coverage_verify" and (
-        existing_payload.get("source_event") != "local_coverage_verify"
-    ):
-        historical = dict(existing_payload)
-        historical.pop("historical_snapshots", None)
-        merged["historical_snapshots"] = [
-            *merged.get("historical_snapshots", []),
-            {
-                "provenance_status": "historical_unverified_ci_binding",
-                "baseline": historical,
-            },
-        ]
     return merged
 
 
@@ -747,8 +705,6 @@ def main() -> int:
     from scripts.engineering.common.repo_paths import resolve_output_path
 
     args = _parse_args()
-    if args.source_event == "local_coverage_verify" and not args.local_manifest:
-        raise ValueError("local_coverage_verify requires --local-manifest")
     coverage_xml_path = resolve_output_path(args.coverage_xml)
     coverage_log_path = (
         resolve_output_path(args.coverage_log) if args.coverage_log else None
@@ -757,40 +713,20 @@ def main() -> int:
     junit_paths = [resolve_output_path(path) for path in args.junit]
     output_yaml_path = resolve_output_path(args.output_yaml)
     output_md_path = resolve_output_path(args.output_md)
-    if args.local_manifest:
-        from scripts.engineering.ci.local_test_telemetry import build_local_baseline
-
-        if any(
-            (
-                args.source_commit,
-                args.source_run_id,
-                args.source_run_url,
-                args.coverage_percent is not None,
-                args.coverage_log,
-                args.junit,
-            )
-        ):
-            raise ValueError(
-                "Local telemetry identity and inputs must come from the manifest"
-            )
-        payload = build_local_baseline(
-            resolve_output_path(str(args.local_manifest)), repo_root=REPO_ROOT
-        )
-    else:
-        payload = build_baseline_payload(
-            coverage_xml_path=coverage_xml_path,
-            coverage_percent=args.coverage_percent,
-            coverage_log_path=coverage_log_path,
-            slowest_json_path=slowest_json_path,
-            junit_paths=junit_paths,
-            source_branch=args.source_branch,
-            source_commit=args.source_commit,
-            source_run_id=args.source_run_id,
-            source_event=args.source_event,
-            source_run_url=args.source_run_url,
-            coverage_threshold=args.coverage_threshold,
-            source_tree_sha256=compute_test_telemetry_source_tree_sha256(),
-        )
+    payload = build_baseline_payload(
+        coverage_xml_path=coverage_xml_path,
+        coverage_percent=args.coverage_percent,
+        coverage_log_path=coverage_log_path,
+        slowest_json_path=slowest_json_path,
+        junit_paths=junit_paths,
+        source_branch=args.source_branch,
+        source_commit=args.source_commit,
+        source_run_id=args.source_run_id,
+        source_event=args.source_event,
+        source_run_url=args.source_run_url,
+        coverage_threshold=args.coverage_threshold,
+        source_tree_sha256=compute_test_telemetry_source_tree_sha256(),
+    )
     payload = merge_existing_baseline_supplemental_fields(
         payload,
         existing_yaml_path=output_yaml_path,

@@ -2,52 +2,51 @@
 
 Quick overview of ADR status and distribution.
 
-**Last Updated**: 2026-10-04 10:33:34
+**Last Updated**: 2026-09-22 09:32:15
 
 ## 📈 Status Distribution
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| `accepted` | 60 | 96.8% |
-| `superseded` | 2 | 3.2% |
+| `accepted` | 59 | 96.7% |
+| `superseded` | 2 | 3.3% |
 
 ## 🏷️  Category Distribution
 
 | Category | Count | Percentage |
 |----------|-------|------------|
-| `Architecture` | 15 | 24.2% |
-| `Configuration` | 5 | 8.1% |
+| `Architecture` | 15 | 24.6% |
+| `Configuration` | 5 | 8.2% |
 | `Data Contracts` | 1 | 1.6% |
-| `Data Fetching` | 2 | 3.2% |
-| `Data Loading` | 2 | 3.2% |
-| `Data Modeling` | 3 | 4.8% |
-| `Data Quality` | 6 | 9.7% |
+| `Data Fetching` | 2 | 3.3% |
+| `Data Loading` | 2 | 3.3% |
+| `Data Modeling` | 3 | 4.9% |
+| `Data Quality` | 6 | 9.8% |
 | `Deployment` | 1 | 1.6% |
-| `Documentation` | 3 | 4.8% |
+| `Documentation` | 3 | 4.9% |
 | `Domain Model` | 1 | 1.6% |
 | `Governance` | 1 | 1.6% |
 | `HTTP/Networking` | 1 | 1.6% |
-| `Lifecycle` | 2 | 3.2% |
+| `Lifecycle` | 2 | 3.3% |
 | `Locking` | 1 | 1.6% |
-| `Observability` | 7 | 11.3% |
-| `Replay` | 1 | 1.6% |
-| `Reproducibility` | 4 | 6.5% |
-| `Resilience` | 2 | 3.2% |
-| `Storage` | 3 | 4.8% |
+| `Observability` | 7 | 11.5% |
+| `Reproducibility` | 4 | 6.6% |
+| `Resilience` | 2 | 3.3% |
+| `Storage` | 3 | 4.9% |
 | `Testing` | 1 | 1.6% |
 
 ## 🕒 Recent Activity
 
 Last 5 updated ADRs:
 
-- **ADR-062**: Immutable Composite Parent Merge Replay (2026-10-03)
-- **ADR-001**: Delta Lake vs Parquet (2026-09-25)
-- **ADR-002**: Medallion Architecture (2026-09-25)
-- **ADR-003**: In-Memory Locking (MemoryLock) (2026-09-25)
-- **ADR-005**: Composition Layer Separation (2026-09-25)
+- **ADR-059**: Package Cohesion Budgets (2026-09-22)
+- **ADR-061**: Persisted Selected Run Assessment (2026-09-16)
+- **ADR-060**: Prompt Kernel and Overlay Architecture (2026-08-28)
+- **ADR-058**: Layered Port Registries (2026-08-25)
+- **ADR-057**: Deterministic Runtime Config Authority and Identity (2026-08-10)
 
 ## 🎯 Health Metrics
 
-- **Accepted ADRs**: 60/62 (96.8%)
-- **Maintenance Ratio**: 60:2
-- **Average ADRs/Year**: 20.7 (assuming 3-year project)
+- **Accepted ADRs**: 59/61 (96.7%)
+- **Maintenance Ratio**: 59:2
+- **Average ADRs/Year**: 20.3 (assuming 3-year project)

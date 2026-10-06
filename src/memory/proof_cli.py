@@ -572,18 +572,9 @@ def _ingest(args: argparse.Namespace) -> int:
     return 0
 
 
-def _ci(args: argparse.Namespace) -> int:
-    from memory.proof_ci import main as run_ci
-
-    return run_ci(args.ci_args)
-
-
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
-    ci = subparsers.add_parser("ci", help="Produce or reuse workflow-bound CI evidence")
-    ci.add_argument("ci_args", nargs=argparse.REMAINDER)
-    ci.set_defaults(handler=_ci)
 
     plan = subparsers.add_parser("plan", help="Plan required source-bound receipts")
     _common_parser(plan)

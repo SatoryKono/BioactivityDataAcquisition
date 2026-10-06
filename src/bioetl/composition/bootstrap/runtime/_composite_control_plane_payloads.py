@@ -2,13 +2,10 @@
 
 from __future__ import annotations
 
-from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-from bioetl.domain.composite import CompositeConfig
-from bioetl.domain.types import RunType
-
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.composition.runtime_builders.input_snapshot_resolution import (
     resolve_cached_bronze_input_snapshot_refs,
     resolve_manifest_input_snapshot_refs,
@@ -16,12 +13,16 @@ from bioetl.composition.runtime_builders.input_snapshot_resolution import (
 from bioetl.composition.snapshot_serialization import (
     to_serializable_mapping,
 )
+from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.control_plane import (
     RunArtifactRef,
     RunInputSnapshotRef,
     RunSourceRef,
 )
 from bioetl.domain.context import CachedBronzeContext
+from ._composite_control_plane_payloads_build_composite_launch_context_snapshot import (
+    build_composite_launch_context_snapshot,
+)
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
@@ -161,39 +162,3 @@ def _resolve_composite_bronze_root(
     if pipeline_root.exists():
         return pipeline_root
     return base_root
-
-
-def build_composite_launch_context_snapshot(
-    config: CompositeConfig,
-    runtime: CompositeRuntimeConfig,
-    *,
-    required_persistence_profile: str,
-    run_ledger_enabled: bool = True,
-) -> dict[str, object]:
-    """Capture launch-time options that materially affect composite execution."""
-    return {
-        "pipeline_name": config.name,
-        "run_type": RunType.INCREMENTAL.value,
-        "resume": runtime.resume,
-        "dry_run": runtime.dry_run,
-        "required_only": runtime.required_only,
-        "force_enricher": runtime.force_enricher,
-        "seed_limit": runtime.seed_limit,
-        "enrich_only": list(runtime.enrich_only or ()),
-        "use_cached_bronze": runtime.use_cached_bronze,
-        "cached_bronze_path": runtime.cached_bronze_path,
-        "cached_bronze_date": runtime.cached_bronze_date,
-        "cached_bronze_enrichers": runtime.cached_bronze_enrichers,
-        "cached_bronze_dependencies": runtime.cached_bronze_dependencies,
-        "execution_context": "composite",
-        "exact_replay": False,
-        "strict_exact_replay_supported": False,
-        "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
-        "composite_replay_semantics": "rebuild_resume_only",
-        "replay_mode": "resume" if runtime.resume else "rebuild",
-        "replay_boundary_reason": (
-            "composite_execution_outside_strict_exact_replay_boundary"
-        ),
-        "required_persistence_profile": required_persistence_profile,
-        "run_ledger_enabled": run_ledger_enabled,
-    }

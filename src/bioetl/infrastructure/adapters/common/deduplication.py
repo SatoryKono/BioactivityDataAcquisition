@@ -35,7 +35,14 @@ else:
 
 def deduplicate_preserving_order(values: Iterable[str]) -> list[str]:
     """Return unique values while preserving the original order."""
-    return list(dict.fromkeys(values))
+    unique_values: list[str] = []
+    seen_values: set[str] = set()
+    for value in values:
+        if value in seen_values:
+            continue
+        seen_values.add(value)
+        unique_values.append(value)
+    return unique_values
 
 
 def iter_deduplicated_records(

@@ -1,30 +1,22 @@
-# Canonical applicability catalog shared by the CircleCI and retained Actions coordinators.
-# deployment records the live execution provider; owner_workflow and
-# coordinator_workflow retain legacy definitions until their retirement in #11930.
-# They are compatibility references, not runnable GitHub Actions declarations.
+# Canonical required-check catalog for pr-gate-complete aggregator.
+# RF-001 of #9975. One source of truth for GitHub PR gate decisions.
+# GitHub ruleset 13643213 names job `pr-gate-complete` from
+# .github/workflows/pr-required.yml (not leaf names / `PR Gate Complete / …`).
+# Ruleset enforcement is DISABLED (#11180, Actions billing). Catalog `status`
+# values are advisory until billing and ruleset 13643213 are restored.
 schema_version: 1
 version: 2
 aggregator: pr-gate-complete
 coordinator_workflow: .github/workflows/pr-required.yml
-deployment:
-  provider: circleci
-  config_path: .circleci/config.yml
-  workflow: pr-gate
-  github_status_transport: commit_status
-  github_app_binding: unavailable
-  required_context: 'ci/circleci: pr-gate-complete'
-  root_hygiene_context: 'ci/circleci: root-hygiene'
-  legacy_owner_retirement_issue: 11930
 policy:
   allow_skipped_as_success: false
   allow_cancelled_as_success: false
   require_sha_binding: true
   not_applicable_requires_reason: true
-  github_ruleset_13643213_enforcement: active
-  github_ruleset_15730586_enforcement: active
-  catalog_check_status: enforced
-  enforcement_provider: circleci
-  enforcement_verified_date: "2026-10-05"
+  github_ruleset_13643213_enforcement: disabled
+  github_ruleset_enforcement_disabled_reason: "Actions billing will not return (#11180); enabling would block main without runnable checks."
+  catalog_check_status: advisory
+  catalog_advisory_until: "GitHub Actions billing and ruleset 13643213 enforcement are restored"
 canonical_checks:
   - id: ruff
     owner_workflow: .github/workflows/import-linter.yml
@@ -177,7 +169,7 @@ gates:
     legacy_context: docker-build
     decision: path_scoped
     paths:
-      include: [grafana/tooling/router-v7-bridge/**, grafana/plugins/**, Dockerfile.bioetl, pyproject.toml, uv.lock, src/**, configs/**, docker-compose*.yml, scripts/ops/runtime/docker/**, scripts/engineering/qa/docker_stability_campaign/**, scripts/engineering/qa/run_docker_stability_campaign.py, scripts/engineering/ci/pr_gate.py, configs/quality/docker_runtime_contracts.yaml, configs/quality/github_required_checks.yaml, tests/architecture/test_docker_runtime_contracts.py, tests/unit/repo_backed/scripts/ops/docker/**, tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py, .dockerignore, .github/workflows/docker.yml, .github/workflows/pr-required.yml, .github/actions/setup-python-uv/**, .github/actions/install-trivy/**]
+      include: [Dockerfile.bioetl, pyproject.toml, uv.lock, src/**, configs/**, docker-compose*.yml, scripts/ops/runtime/docker/**, scripts/engineering/qa/docker_stability_campaign/**, scripts/engineering/qa/run_docker_stability_campaign.py, scripts/engineering/ci/pr_gate.py, configs/quality/docker_runtime_contracts.yaml, configs/quality/github_required_checks.yaml, tests/architecture/test_docker_runtime_contracts.py, tests/unit/repo_backed/scripts/ops/docker/**, tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py, .dockerignore, .github/workflows/docker.yml, .github/workflows/pr-required.yml, .github/actions/setup-python-uv/**, .github/actions/install-trivy/**]
     allowed_results: [success, not_applicable]
     not_applicable_allowed: true
     not_applicable_reason_required: true
@@ -212,7 +204,7 @@ gates:
     legacy_context: schema-governance-status
     decision: path_scoped
     paths:
-      include: [src/bioetl/domain/schemas/**, src/bioetl/domain/contracts/**, src/bioetl/domain/entities/**, src/bioetl/infrastructure/schemas/**, tests/contract/silver_schemas/**, scripts/schema/**, scripts/engineering/ci/pr_gate.py, configs/quality/github_required_checks.yaml, docs/03-guides/silver-schema-testing-guide.md, docs/03-data-model/json-field-typing-inventory.md, .github/workflows/schema-governance.yml, .github/workflows/pr-required.yml, configs/base/contract_registry.yaml, configs/contracts/**, configs/entities/**, reports/quality/contract-coverage-matrix.json, reports/quality/pipeline-config-contract-ownership-map.json, scripts/engineering/qa/report_contract_coverage_matrix.py, scripts/engineering/qa/report_pipeline_config_contract_ownership.py, scripts/engineering/ci/validate_contract_*.py, scripts/engineering/ci/validate_registry_dq_refs.py, scripts/engineering/ci/validate_schema_classifier_gate.py, tests/architecture/test_contract_coverage_matrix_*.py, tests/architecture/test_pipeline_config_contract_ownership_map_*.py, .github/workflows/contract-governance-*.yml]
+      include: [src/bioetl/domain/schemas/**, src/bioetl/domain/contracts/**, src/bioetl/domain/entities/**, src/bioetl/infrastructure/schemas/**, tests/contract/silver_schemas/**, scripts/schema/**, scripts/engineering/ci/pr_gate.py, configs/quality/github_required_checks.yaml, docs/03-guides/silver-schema-testing-guide.md, docs/03-data-model/json-field-typing-inventory.md, .github/workflows/schema-governance.yml, .github/workflows/pr-required.yml]
     allowed_results: [success, not_applicable]
     not_applicable_allowed: true
     not_applicable_reason_required: true

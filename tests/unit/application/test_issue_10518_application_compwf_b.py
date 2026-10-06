@@ -33,19 +33,15 @@ from bioetl.application.composite.join_key_normalization import (
 from bioetl.application.composite.runner_pkg.runner_stage_mixin import (
     CompositeRunnerStageMixin,
 )
-from bioetl.domain.composite import (
-    CompositeConfig,
-    DependencyConfig,
-    EnricherConfig,
-    SeedConfig,
-    LayerColumnConfig,
-)
+from bioetl.domain.composite import CompositeConfig, DependencyConfig
 from bioetl.domain.composite.aggregation import (
     AggregationConfig,
     AggregationFieldSpec,
     AggregationFunction,
     EnricherCardinality,
 )
+from bioetl.domain.composite.config import EnricherConfig, SeedConfig
+from bioetl.domain.composite.config_schema import LayerColumnConfig
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.normalization.join_keys import JoinKeyNormalizationPolicy
@@ -278,7 +274,7 @@ def _join_config() -> CompositeConfig:
         output_keys=("molecule_id", "doi", "pmid"),
         silver_table="silver/chembl/activity",
     )
-    from bioetl.domain.composite import MergeConfig
+    from bioetl.domain.composite.config import MergeConfig
 
     merge = MergeConfig(
         strategy=MergeStrategy.LEFT_OUTER,

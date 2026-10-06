@@ -60,36 +60,11 @@ Dockerfile.host packages the compiled frontend and both owned plugins against
 the pinned official 13.2.3 base. Plugins use Grafana's bundled-plugin directory;
 the managed data volume therefore cannot mask them. host-image.json binds the
 delivered digest to patch, lock and bundle hashes. The default monitoring compose
-selects the managed JSON-dashboard variant and does not install or enable the
-Scenes shadow app. This pin must not be deployed until the exact delivery commit
-passes required CI and Proof-or-Stop gates. Explicitly layer compose.acceptance.yml on a separate acceptance host and
+retains the accepted 12.2.5 image and does not install or enable the Scenes shadow
+app. Explicitly layer compose.acceptance.yml on a separate acceptance host and
 database to select the candidate and allow the two owned unsigned plugins.
 Enable Scenes manually for shadow review; this does not authorize a cutover.
 The acceptance-only runtime-probe is never shipped in the image.
-
-`Dockerfile.managed` derives the JSON-dashboard host from the same immutable
-candidate, removing the Scenes package. `managed-image.json` binds this variant
-to its parent and recipe. `compose.managed-acceptance.yml` selects it for an
-isolated database. The default compose uses this same managed image with only
-SelectorShell permitted as an unsigned plugin; the temporary probe is excluded.
-An isolated acceptance receipt does not establish default-host delivery. Preserve
-a fresh database backup before deployment and repeat browser acceptance on the
-default host after deployment before closing #11888, #11889 or #11895.
-`verify-managed-image.py` checks the trusted parent layer prefix and compares
-every exported filesystem record against exactly the parent minus Scenes.
-The registry image and independently rebuilt image must both match, including
-backend, libraries, frontend, SelectorShell, owners, modes and symlink targets.
-Host Python reads the tar streams without extracting paths or running image
-executables. Only timestamps are excluded. CircleCI preserves the resulting
-receipt; this image parity check does not itself establish browser acceptance.
-
-The active CircleCI Docker gate also rebuilds both locked plugin graphs and
-compares every resulting file with the parent image's exported plugin trees.
-This includes source maps, metadata and other assets; missing, extra or changed
-files block delivery even when module.js and plugin.json hashes match. Release
-plugin artifacts must reproduce the CI build tree. A local build in a different
-working directory is diagnostic evidence until the complete file comparison
-passes, because webpack source-map metadata can depend on that directory.
 
 The runtime-probe plugin executes navigation and hydration fixtures through
 Grafana's shared react-router external. Install it only on the acceptance host,
@@ -118,9 +93,3 @@ docker compose -f docker-compose.monitoring.yml -f grafana/tooling/router-v7-bri
 This removes both the probe mount and its unsigned allowlist entry. Do not add
 the probe to `.env` or the default compose. Keep the candidate opt-in isolated
 until acceptance, SBOM, backup/rollback and proof gates admit managed rollout.
-
-For the JSON-dashboard variant, use `compose.managed-acceptance.yml` in place of
-`compose.acceptance.yml`, and `compose.managed-probe.yml` in place of
-`compose.probe.yml`. This temporary allowlist contains only SelectorShell and
-the probe. After capture, recreate with the managed acceptance layer alone;
-Scenes remains absent and the probe mount and permission are removed.

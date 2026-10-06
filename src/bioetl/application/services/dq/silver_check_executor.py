@@ -10,7 +10,7 @@ from typing import Any
 
 import polars as pl
 
-from bioetl.application.services.dq.dq_report_assembly import (
+from bioetl.application.services.dq.dq_report_builders import (
     run_serialized_checks,
     update_counts,
 )

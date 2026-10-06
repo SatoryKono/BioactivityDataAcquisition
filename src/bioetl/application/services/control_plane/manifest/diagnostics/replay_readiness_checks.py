@@ -35,11 +35,13 @@ def _check(
 
 
 def _present(value: object) -> bool:
+    if value is None:
+        return False
     if isinstance(value, str):
         return bool(value.strip())
     if isinstance(value, (list, tuple, dict, set)):
         return bool(value)
-    return value is not None
+    return True
 
 
 def _capability(source: Mapping[str, object]) -> tuple[ReplayCapability, bool]:
@@ -70,8 +72,14 @@ def _manifest_checks(
     manifest: Mapping[str, object] | None,
 ) -> list[dict[str, str]]:
     if manifest is None:
-        code = "manifest_not_recorded"
-        return [_check(code, "unknown", code, "#/manifest")]
+        return [
+            _check(
+                "manifest_not_recorded",
+                "unknown",
+                "manifest_not_recorded",
+                "#/manifest",
+            )
+        ]
     checks = [
         _recorded_object_check(manifest, code)
         for code in (
@@ -91,9 +99,13 @@ def _family_supported(manifest: Mapping[str, object]) -> bool | None:
         supported = manifest.get("strict_exact_replay_supported")
     if supported is None:
         return None
+    if isinstance(supported, bool):
+        return supported
     token = str(supported).strip().lower()
-    if token in {"true", "1", "yes", "false", "0", "no"}:
-        return token in {"true", "1", "yes"}
+    if token in {"true", "1", "yes"}:
+        return True
+    if token in {"false", "0", "no"}:
+        return False
     return None
 
 

@@ -15,7 +15,7 @@ from datetime import datetime
 import polars as pl
 import pyarrow as pa
 
-from bioetl.application.services.dq.dq_report_assembly import build_summary
+from bioetl.application.services.dq.dq_report_builders import build_summary
 from bioetl.application.services.dq.silver_check_executor import SilverCheckExecutor
 from bioetl.application.services.dq.silver_statistics import SilverStatisticsCalculator
 from bioetl.application.services.dq.silver_threshold import SilverThresholdChecker

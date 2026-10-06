@@ -14,7 +14,7 @@
   "schema_version": 1,
   "source": "grafana/dashboards/*.json",
   "target_counts": {
-    "http": 33,
+    "http": 32,
     "loki": 0,
     "promql": 105,
     "tempo": 0,
@@ -4089,37 +4089,12 @@
       "kind": "http",
       "panel_id": 9482,
       "panel_title": "Review Data Quality",
-      "query": "/ops/observability/selected-run-status?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&run_type=${run_type:csv}&workflow=${workflow:csv}",
+      "query": "/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=pipeline_run_report_json",
       "query_tokens": [
-        "/ops/observability/selected-run-status",
+        "/ops/observability/pipeline-run-report-artifact",
         "pipeline",
         "run_id",
-        "run_type",
-        "workflow"
-      ],
-      "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [],
-      "unit": ""
-    },
-    {
-      "coverage_class": null,
-      "dashboard_uid": "bioetl-overview-v2",
-      "datasource_type": "yesoreyeram-infinity-datasource",
-      "documents_backend_down": true,
-      "documents_valid_empty": true,
-      "empty_state": "valid_empty",
-      "formula": "",
-      "kind": "http",
-      "panel_id": 9483,
-      "panel_title": "Review FK Comparison Scope",
-      "query": "/ops/observability/selected-run-status?pipeline=${pipeline}&run_id=${run_id}&run_type=${run_type:csv}&workflow=${workflow:csv}",
-      "query_tokens": [
-        "/ops/observability/selected-run-status",
-        "pipeline",
-        "run_id",
-        "run_type",
-        "workflow"
+        "format"
       ],
       "ref_id": "A",
       "runbook_urls": [],

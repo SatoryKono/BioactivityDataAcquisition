@@ -13,7 +13,7 @@ import os
 import tempfile
 from pathlib import Path, PurePosixPath, PureWindowsPath
 
-from bioetl.infrastructure.checkpoint import (
+from bioetl.infrastructure.checkpoint._local_checkpoint_integrity import (
     compute_checkpoint_payload_sha256,
 )
 

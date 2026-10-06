@@ -37,7 +37,7 @@ from tests.helpers.deterministic_ids import (
 
 import pytest
 
-from bioetl.application.services.lineage.metadata_lineage_node_assembly import (
+from bioetl.application.services.lineage.metadata_lineage_node_builders import (
     fragment_timestamp,
     source_request_node,
     source_system_node,

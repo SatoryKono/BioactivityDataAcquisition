@@ -5,9 +5,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pyarrow as pa
 import pytest
 
-from bioetl.composition.bootstrap.assembly.workflow_transforms import (
-    WorkflowCohortResolver,
-)
+from bioetl.composition.workflow_cohort import WorkflowCohortResolver
 from bioetl.application.services.execution.pipeline_runner_models import (
     RunResult,
     PipelineRunResult,

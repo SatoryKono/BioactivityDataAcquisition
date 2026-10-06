@@ -8,10 +8,10 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import json
 from pathlib import Path
 from typing import override
 
-import orjson
 import pyarrow as pa
 
 from bioetl.domain.ports import DeltaReaderPort
@@ -109,14 +109,15 @@ class CompositeInputCapture:
             filename = f"{len(entries):04d}-{digest}.arrow"
             _publish(self._root / filename, payload)
             entries.append({"table": name, "file": filename, "sha256": digest})
-        envelope = orjson.dumps(
+        envelope = json.dumps(
             {
                 "version": "composite-inputs-v1",
                 "required_tables": sorted(required_tables),
                 "inputs": entries,
             },
-            option=orjson.OPT_SORT_KEYS,
-        )
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
         _publish(self._root / "inputs.json", envelope)
         self._sealed = True
         return _digest(envelope)
@@ -130,7 +131,7 @@ class CompositeReplayInputReader(DeltaReaderPort):
         envelope = (root / "inputs.json").read_bytes()
         if _digest(envelope) != envelope_sha256:
             raise ValueError("composite_input_envelope_digest_mismatch")
-        payload = orjson.loads(envelope)
+        payload = json.loads(envelope)
         if payload.get("version") != "composite-inputs-v1":
             raise ValueError("composite_input_envelope_version_invalid")
         for item in payload["inputs"]:

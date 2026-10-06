@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
-from threading import Barrier, Event
+from threading import Event
 from typing import cast
 from uuid import UUID
 
@@ -784,16 +784,7 @@ def test_expired_deadline_stops_ledger_refill_mid_flight(monkeypatch) -> None:
     )
 
     manifests = tuple(_manifest(index) for index in range(1, 7))
-    started = Barrier(4)
-
-    class _StartedLedger(_Ledger):
-        def list_entries_by_run_id(self, run_id):
-            # Exercise expiry after every initial read starts, independently
-            # of whether the executor could otherwise cancel queued work.
-            started.wait(timeout=5)
-            return super().list_entries_by_run_id(run_id)
-
-    ledger = _StartedLedger({})
+    ledger = _Ledger({})
     checks = {"count": 0}
 
     def _deadline() -> bool:

@@ -1,4 +1,0 @@
-docker compose config validation
-error while interpolating services.bioetl.environment.[]: required variable NEO4J_PASSWORD is missing a value: Set NEO4J_PASSWORD
-
-Exited with code exit status 1

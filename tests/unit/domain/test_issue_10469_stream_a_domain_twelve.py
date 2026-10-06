@@ -88,7 +88,7 @@ from bioetl.domain.run_reports._stage_bucket import _StageBucket
 from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
 from bioetl.domain.run_reports.models import TrackingCoverage, WorkflowExecutionRow
 from bioetl.domain.run_reports.reason_catalog import ReasonCatalog
-from bioetl.domain.run_reports.workflow_report_assembly import _payload_mapping
+from bioetl.domain.run_reports.workflow_builder import _payload_mapping
 from bioetl.domain.run_reports.workflow_totals import _measured_current
 from bioetl.domain.types._gold_contracts_support import (
     normalize_column_name,

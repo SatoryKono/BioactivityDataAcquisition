@@ -34,7 +34,7 @@ TARGETS: tuple[Path, ...] = (
     Path("src/bioetl/application/services/control_plane"),
     Path("src/bioetl/application/services/control_plane/manifest/service.py"),
     Path("src/bioetl/application/services/lineage/metadata_lineage_fragment_ids.py"),
-    Path("src/bioetl/application/services/lineage/metadata_lineage_node_assembly.py"),
+    Path("src/bioetl/application/services/lineage/metadata_lineage_node_builders.py"),
     Path("src/bioetl/application/services/ops/bronze_cleanup_service.py"),
     Path("src/bioetl/application/services/workflow/control_plane/execution_service.py"),
     Path("src/bioetl/composition/_pipeline_execution.py"),

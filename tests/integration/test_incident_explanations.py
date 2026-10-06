@@ -11,7 +11,7 @@ pytestmark = pytest.mark.integration
 
 def _panels():
     dashboard = json.loads(
-        Path("grafana/dashboards/bioetl-incident-v1.json").read_text(encoding="utf-8")
+        Path("grafana/dashboards/bioetl-incident-v1.json").read_text()
     )
 
     def walk(items):

@@ -295,10 +295,6 @@ def _contract_test_paths(
         if (PROJECT_ROOT / path).is_file()
     }
     for relative_path, lowered_path in test_index:
-        # Publishing CI reports/images is unrelated to the publication entity.
-        # CI-tool tests cannot establish a data entity's contract coverage.
-        if "/scripts/ci/" in "/" + lowered_path:
-            continue
         if relative_path in paths:
             continue
         if any(needle.lower() in lowered_path for needle in needles):

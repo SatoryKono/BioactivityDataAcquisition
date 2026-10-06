@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from bioetl.domain.normalization.chembl import (
     BTO_ONTOLOGY_VERSION,
     EFO_ONTOLOGY_VERSION,
@@ -23,6 +25,7 @@ from bioetl.domain.schemas.chembl.tissue import TissueSchema
 from ._chembl_reference_identifier_rules import chembl_reference_identifier_rules
 from ._chembl_vocab import chembl_enum
 from .chembl_policy_registry import chembl_ontology_family_fields
+from .profile_normalizers import normalize_profile_ontology_id
 
 __all__ = [
     "CHEMBL_TISSUE_PROFILE",
@@ -64,8 +67,21 @@ _OBO_COMPANION_SPECS = {
 _REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("tissue")
 
 
+def _normalize_tissue_efo_id(value: object) -> object:
+    """Repair the provider's EFO semicolon separator without accepting other junk."""
+    if isinstance(value, str) and re.fullmatch(r"EFO;\d+", value.strip()):
+        value = value.strip().replace(";", ":", 1)
+    return normalize_profile_ontology_id(value)
+
+
 _SPECIAL_RULES = (
     _REFERENCE_IDENTIFIER_RULES
+    | {
+        "efo_id": (
+            _normalize_tissue_efo_id,
+            "Canonicalize EFO IDs, including the ChEMBL EFO;digits separator variant.",
+        )
+    }
     | {
         f"{family}_iri": (
             build_obo_companion_iri_normalizer(

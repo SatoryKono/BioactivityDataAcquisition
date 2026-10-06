@@ -1,9 +1,0 @@
-{
-  "before_head": "00bb08174dacc7884e5272b1b647ed34fed12265",
-  "source_revision": "c61913580698f70b181ae3e9ac852c631f02a878",
-  "changed_outputs": 82,
-  "json_semantic_hashes_unchanged": 54,
-  "generator": "python -m scripts.docs passports generate --require-clean-source",
-  "check_exit": 0,
-  "observed_ci_failure_job": 2047
-}

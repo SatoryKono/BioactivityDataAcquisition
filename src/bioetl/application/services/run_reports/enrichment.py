@@ -278,35 +278,3 @@ def _hash_ids(values: Sequence[str]) -> str:
         digest.update(value.encode("utf-8"))
         digest.update(b"\0")
     return digest.hexdigest()[:16]
-
-
-def build_run_identity(
-    result: RunResult,
-    *,
-    options: RunOptions | None,
-    duration: float | None,
-) -> dict[str, Any]:  # Any: report/json payload shape is dynamic
-    identity: dict[str, Any] = {  # Any: report/json payload shape is dynamic
-        "run_id": result.run_id,
-        "manifest_id": result.manifest_id,
-        "pipeline_name": result.pipeline_name,
-        "provider": None,
-        "entity": None,
-        "run_type": result.run_type,
-        "status": result.status.value,
-        "started_at": (
-            result.started_at.isoformat() if result.started_at is not None else None
-        ),
-        "completed_at": (
-            result.completed_at.isoformat() if result.completed_at is not None else None
-        ),
-        "duration_seconds": duration,
-        "workflow_id": options.workflow_id if options is not None else None,
-        "workflow_run_id": options.workflow_run_id if options is not None else None,
-        "workflow_step_id": options.workflow_step_id if options is not None else None,
-    }
-    if "_" in result.pipeline_name:
-        provider, _sep, entity = result.pipeline_name.partition("_")
-        identity["provider"] = provider or None
-        identity["entity"] = entity or None
-    return identity

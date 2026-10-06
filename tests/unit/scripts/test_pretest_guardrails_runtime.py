@@ -68,43 +68,6 @@ def test_pretest_guardrails_accepts_runtime_with_required_yaml(
     assert "[pretest-guardrails] OK" in result.stdout
 
 
-def test_ci_architecture_reuse_cannot_be_a_dry_run(tmp_path: Path) -> None:
-    env = os.environ.copy()
-    env["BIOETL_PYTEST_RUNTIME_PYTHON"] = sys.executable
-    result = subprocess.run(
-        [*_command(tmp_path / "reuse.json"), "--reuse-ci-architecture"],
-        cwd=ROOT,
-        env=env,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    assert result.returncode != 0
-    assert "CI evidence reuse cannot be combined with skip or dry-run" in result.stderr
-
-
-def test_ci_architecture_reuse_requires_real_ci_evidence(tmp_path: Path) -> None:
-    env = os.environ.copy()
-    env["BIOETL_PYTEST_RUNTIME_PYTHON"] = sys.executable
-    env["PYTHONPATH"] = str(ROOT / "src")
-    env.pop("CIRCLECI", None)
-    command = [
-        arg
-        for arg in _command(tmp_path / "missing-reuse.json")
-        if arg not in {"--dry-run", "--skip-architecture"}
-    ]
-    result = subprocess.run(
-        [*command, "--reuse-ci-architecture"],
-        cwd=ROOT,
-        env=env,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    assert result.returncode != 0
-    assert "CI receipts require a CircleCI execution" in result.stdout
-
-
 def test_pretest_guardrails_rejects_runtime_without_required_yaml(
     tmp_path: Path,
 ) -> None:
@@ -149,7 +112,7 @@ def test_architecture_targets_do_not_leak_line_terminators(line_ending: str) -> 
         + function
         + 'config_architecture_targets() { printf "%s" "$TARGET_OUTPUT"; }\n'
         + 'run_step() { printf "%s\\0" "$@"; }\n'
-        + "SKIP_ARCHITECTURE=0\nREUSE_CI_ARCHITECTURE=0\nARCHITECTURE_GROUP=fixture\n"
+        + "SKIP_ARCHITECTURE=0\nARCHITECTURE_GROUP=fixture\n"
         + "run_architecture_checks\n"
     )
     result = subprocess.run(

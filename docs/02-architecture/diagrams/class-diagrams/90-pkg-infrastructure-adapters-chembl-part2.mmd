@@ -1,28 +1,13 @@
 %% Title: Package Family: infrastructure/adapters/chembl (Part 2/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/chembl; part 2/2; modules: models_activity, _fetch_paging_filtered, _fetch_resilience_error, _models_common_page, _protein_classification_node, client.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/chembl; part 2/2; modules: _models_common_page, _protein_classification_node, client, entity_mapper, fetch_adapter_mixin, fetch_multi_filter_mixin.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-10-04
+%% @date    2026-09-02
 %% @level   Package Family / Inventory Slice
-%% @nodes   18
+%% @nodes   11
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
-
-    namespace models_activity {
-        class ActionType
-        class ChemblActivityRecord
-        class ChemblActivityResponse
-        class LigandEfficiency
-    }
-
-    namespace fetch_paging_filtered {
-        class _ChemblFetchPagingFilteredMixin
-    }
-
-    namespace fetch_resilience_error {
-        class ChemblErrorHost
-    }
 
     namespace models_common_page {
         class ChemblPageMeta
@@ -68,14 +53,9 @@ classDiagram
         class ChEMBLProteinClassificationGraph
     }
 
-    namespace target_protein_classification_data_source {
-        class TargetProteinClassificationSnapshotDataSource
-    }
-
     ChemblFetchAdapterMixin <|-- ChemblAdapter
     ChemblFetchMultiFilterMixin <|-- ChemblFetchAdapterMixin
     ChemblFetchPagingMixin <|-- ChemblFetchAdapterMixin
     ChemblFetchResilienceMixin <|-- ChemblFetchAdapterMixin
     ChemblHealthMixin <|-- ChemblAdapter
     ChemblMetadataMixin <|-- ChemblAdapter
-    _ChemblFetchPagingFilteredMixin <|-- ChemblFetchPagingMixin

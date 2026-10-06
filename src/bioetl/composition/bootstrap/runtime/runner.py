@@ -1,4 +1,9 @@
-"""Bootstrap PipelineRunnerService for CLI and other orchestration layers."""
+"""Bootstrap functions for pipeline runner service.
+
+Provides bootstrap functions for PipelineRunnerService assembly.
+This service provides a unified interface for running pipelines
+from any orchestration layer (CLI, REST API, etc.).
+"""
 
 from __future__ import annotations
 
@@ -8,9 +13,7 @@ from bioetl.application.observability.control_plane_archive import (
     resolve_control_plane_archive_root,
 )
 from bioetl.composition.control_plane_archive import archive_successful_run
-from bioetl.composition.bootstrap.runtime.run_status_capture import (
-    create_run_status_capture,
-)
+from bioetl.composition.bootstrap.runtime.run_status import create_run_status_capture
 
 from bioetl.application.services.execution.pipeline_run_context_service import (
     PipelineRunContextService,

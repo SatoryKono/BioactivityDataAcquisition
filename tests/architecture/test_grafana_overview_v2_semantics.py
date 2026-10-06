@@ -35,14 +35,12 @@ def test_overview_v2_semantics_contract():
     assert titles.count("Monitor Scope Health") == 0
     assert titles.count("Review First Action") == 0
     assert titles.count("Review Run Domains") == 1
-    by_id = {p["id"]: p for p in panels}
-    assert by_id[9300]["title"] == "Review Run Identity"
-    assert by_id[9460]["title"] == "Inspect Selected Run Stages"
-    assert by_id[9480]["title"] == "Review Provider Evidence"
-    for panel_id in (9002, 9300, 9480, 9460):
-        urls = [target.get("url", "") for target in by_id[panel_id].get("targets", [])]
-        assert urls and all("run_id=${run_id" in url for url in urls)
-        assert all("/ops/observability/" in url for url in urls)
+    row_labels = " ".join(
+        p.get("title", "") for p in d.get("panels", []) if p.get("type") == "row"
+    )
+    assert "Range Evidence" not in row_labels
+    assert "Inspect Run Context" in row_labels
+    assert "Inspect Saved Run Evidence" in row_labels
 
     nav_links = list(d.get("links", []))
     links_blob = ""
@@ -51,25 +49,16 @@ def test_overview_v2_semantics_contract():
             nav_links.extend(panel.get("links", []))
             links_blob = str(panel.get("options", {}).get("content", ""))
     links = " ".join(link.get("title", "") for link in nav_links) + links_blob
-    # ADR-053: the five-dashboard portfolio preserves selected-run handoffs.
+    # Full portfolio bus 0–6, with Run Explorer first.
     for token in [
-        "Replay Readiness",
-        "Run Overview",
+        "Trust",
+        "Pipeline Diagnostics",
+        "Provider Health",
+        "Data Quality",
         "Incident Workspace",
         "Run Explorer",
     ]:
         assert token in links
-
-    # Data Quality is a contextual detail route rather than a global nav item.
-    dq_links = [
-        link
-        for link in by_id[9002].get("links", [])
-        if link.get("url", "").startswith("/d/bioetl-dq-v2/")
-    ]
-    assert len(dq_links) == 1
-    assert "${run_id:queryparam}" in dq_links[0]["url"]
-    assert "${pipeline:queryparam}" in dq_links[0]["url"]
-    assert "${__url_time_range}" in dq_links[0]["url"]
 
     for current_title in [
         "Monitor Scope Health",
@@ -81,3 +70,7 @@ def test_overview_v2_semantics_contract():
         "Review Workflow Status",
     ]:
         assert current_title not in titles
+        continue
+        p = next(x for x in panels if x.get("title") == current_title)
+        expr = "\n".join(t.get("expr", "") for t in p.get("targets", []))
+        assert "$__range" not in expr

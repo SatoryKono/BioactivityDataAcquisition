@@ -2,7 +2,7 @@
 
 Provider and runtime links resolve to Run Overview and preserve run identity
 and time range. Provider alert links target evidence panel 9480. The
-validation artifact `docs/reports/dashboard-ux-checks/2026-10-02.md` records
+[validation report](../../reports/dashboard-ux-checks/2026-10-02.md) records
 static checks and outstanding full-suite and browser acceptance gaps.
 
 ______________________________________________________________________
@@ -17,7 +17,7 @@ coverage or debt thresholds. Earlier dated entries below describe their original
 surfaces and are not current routing requirements.
 
 Static UX evidence and explicit live-render limitations:
-2026-10-02 UX check
+[2026-10-02 UX check](../../reports/dashboard-ux-checks/2026-10-02.md)
 (`docs/reports/dashboard-ux-checks/2026-10-02.md`).
 
 ## UX report artifact requirement

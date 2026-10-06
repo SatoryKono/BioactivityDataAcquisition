@@ -5,16 +5,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
+
+from pydantic import ValidationError
 
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
-
-from pydantic import ValidationError
-
 from bioetl.infrastructure.config.composite_config_api import (
     load_composite_config as _load_composite_config_impl,
+)
+from bioetl.composition.bootstrap.runtime._composite_plan_runtime_support_coerce_named_runtime_bundle import (
+    _coerce_named_runtime_bundle,
 )
 
 if TYPE_CHECKING:
@@ -154,31 +156,4 @@ def create_composite_runner_from_plan_impl(
         enricher_runner_factory=plan.enricher_runner_factory,
         support_services=plan.support_services,
         runner_factory=runner_factory,
-    )
-
-
-def _coerce_named_runtime_bundle(
-    resolved_bundle: object,
-) -> CompositeInfrastructureContext | None:
-    field_names = (
-        "run_id",
-        "settings",
-        "logger",
-        "metrics",
-        "tracer",
-        "storage",
-        "lock",
-    )
-    if not all(hasattr(resolved_bundle, field_name) for field_name in field_names):
-        return None
-    bundle = cast("CompositeInfrastructureContext", resolved_bundle)
-    return CompositeInfrastructureContext(
-        run_id=bundle.run_id,
-        settings=bundle.settings,
-        logger=bundle.logger,
-        metrics=bundle.metrics,
-        tracer=bundle.tracer,
-        storage=bundle.storage,
-        lock=bundle.lock,
-        clock=getattr(bundle, "clock", None),
     )

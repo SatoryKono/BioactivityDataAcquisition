@@ -48,11 +48,11 @@ from bioetl.application.services.run_reports.writer import (
 )
 from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
 from bioetl.domain.run_reports.models import StageId
-from bioetl.domain.run_reports.pipeline_report_assembly import (
+from bioetl.domain.run_reports.pipeline_builder import (
     PipelineRunReportOptionalBlocks,
     build_pipeline_run_report,
 )
-from bioetl.domain.run_reports.workflow_report_assembly import build_workflow_run_report
+from bioetl.domain.run_reports.workflow_builder import build_workflow_run_report
 
 
 def test_write_pipeline_run_report(tmp_path: Path) -> None:

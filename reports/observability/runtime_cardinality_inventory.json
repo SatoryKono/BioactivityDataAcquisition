@@ -4635,13 +4635,13 @@
       "src/bioetl/infrastructure/adapters/_health_check_observability.py"
     ],
     "bioetl_http_request_duration_seconds": [
-      "src/bioetl/infrastructure/adapters/http/client_retry_policy.py"
+      "src/bioetl/infrastructure/adapters/http/_client_retry_policy.py"
     ],
     "bioetl_http_request_errors_total": [
-      "src/bioetl/infrastructure/adapters/http/client_retry_policy.py"
+      "src/bioetl/infrastructure/adapters/http/_client_retry_policy.py"
     ],
     "bioetl_http_retries_total": [
-      "src/bioetl/infrastructure/adapters/http/client_retry_policy.py"
+      "src/bioetl/infrastructure/adapters/http/_client_retry_policy.py"
     ],
     "bioetl_http_retry_budget_exhausted_total": [
       "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py"

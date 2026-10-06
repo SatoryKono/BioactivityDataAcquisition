@@ -20,10 +20,7 @@ Every wrapper skill must state:
 1. Read `AGENTS.md`, `docs/00-project/NORMATIVE_SOURCES.md`,
    `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`, and
    `docs/00-project/ai/memory/agent-memory.md`.
-1. Run `python -m memory.tooling.workflow pre-task ...`. Skip this step for
-   hash-only work (generated-artifact rebind, date stamp, remote-main refresh):
-   use `BIOETL_AI_MEMORY_MODE=off` per `AGENTS.md` instead of the full
-   pre-task RAG.
+1. Run `python -m memory.tooling.workflow pre-task ...`.
 1. Read the primary profile or workflow file named by the wrapper.
 1. Use repo search to find related tests, docs, configs, contracts, mirrors,
    evidence, and validation gates.

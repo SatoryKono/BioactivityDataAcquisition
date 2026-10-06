@@ -88,7 +88,11 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
         self._fields = fields
 
     def _build_headers(self) -> dict[str, str]:
-        """Build headers with optional x-api-key, omitting placeholder keys."""
+        """Build request headers with API key if available.
+
+        Returns:
+            Dictionary of HTTP headers including optional x-api-key if configured.
+        """
         return build_semanticscholar_headers(
             self._api_key,
             include_content_type=False,

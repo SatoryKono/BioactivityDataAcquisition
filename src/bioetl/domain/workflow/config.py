@@ -75,19 +75,17 @@ class WorkflowConfig:
     def __post_init__(self) -> None:
         topologically_sorted_step_ids(cast("Sequence[_WorkflowStepLike]", self.steps))
         for step in self.pipeline_steps:
-            self._validate_reference_cohort(step)
-
-    def _validate_reference_cohort(self, step: WorkflowStepConfig) -> None:
-        cohort = step.reference_cohort
-        if cohort is None:
-            return
-        if cohort.step_id not in step.depends_on:
-            raise ValueError("reference_cohort requires a direct upstream dependency")
-        source = self.get_step(cohort.step_id)
-        if not isinstance(source, WorkflowStepConfig):
-            raise ValueError("reference_cohort requires a pipeline producer")
-        if source.pipeline_name != cohort.table.replace(".", "_", 1):
-            raise ValueError("reference_cohort table must match its producer")
+            if step.reference_cohort is not None:
+                cohort = step.reference_cohort
+                if cohort.step_id not in step.depends_on:
+                    raise ValueError(
+                        "reference_cohort requires a direct upstream dependency"
+                    )
+                source = self.get_step(cohort.step_id)
+                if not isinstance(source, WorkflowStepConfig):
+                    raise ValueError("reference_cohort requires a pipeline producer")
+                if source.pipeline_name != cohort.table.replace(".", "_", 1):
+                    raise ValueError("reference_cohort table must match its producer")
 
     @property
     def step_ids(self) -> tuple[str, ...]:

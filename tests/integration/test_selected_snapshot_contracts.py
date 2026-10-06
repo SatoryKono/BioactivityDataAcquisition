@@ -32,7 +32,7 @@ from bioetl.application.workflow.transforms.selected_snapshot_inputs import (
     selected_snapshot_inputs,
 )
 from bioetl.domain.control_plane import WorkflowExecutionState, WorkflowStepState
-from bioetl.domain.run_reports.workflow_report_assembly import _reconciliation_details
+from bioetl.domain.run_reports.workflow_builder import _reconciliation_details
 from bioetl.domain.workflow import (
     WorkflowConfig,
     TransformStepConfig,

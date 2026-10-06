@@ -753,8 +753,8 @@ ALLOWED_MERGE_SERVICE_SRC_FILES = frozenset(
         / "src"
         / "bioetl"
         / "composition"
-        / "factories"
-        / "services"
+        / "bootstrap"
+        / "runtime"
         / "composite_support_services_factory.py",
     }
 )
