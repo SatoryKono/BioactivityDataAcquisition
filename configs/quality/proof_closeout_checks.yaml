@@ -1,0 +1,151 @@
+schema_version: 1
+task_id: architecture-coverage-11854-11899
+claim: ready_to_merge
+branches:
+- codex/architecture-coverage-final-20261004
+- codex/config-root-main-acceptance-20261005
+- codex/config-root-postmerge-20261005
+- codex/architecture-meta-closeout-20261005
+- codex/grafana-managed-closeout-20261005
+- codex/proof-closeout-reuse-evidence
+checks:
+  architecture:
+    kind: tests
+    producer: test_health
+    argv:
+    - python
+    - -m
+    - pytest
+    - tests/architecture
+    - -q
+    - --tb=short
+    - --no-cov
+    - --junitxml={out}/junit.xml
+  governance:
+    kind: governance
+    producer: pretest_guardrails
+    argv:
+    - bash
+    - scripts/engineering/dev/pretest_guardrails.sh
+    - --mode
+    - check
+    - --scope
+    - governance
+    - --skip-cleanup
+    - --report-json
+    - '{out}/governance.json'
+    - --reuse-ci-architecture
+  docs-links:
+    kind: docs_runtime
+    producer: docs_runtime_checks
+    argv:
+    - python
+    - -m
+    - scripts.docs
+    - check-links
+    - --report-json
+    - '{out}/links.json'
+  docs-runtime:
+    kind: docs_runtime
+    producer: docs_runtime_checks
+    argv:
+    - python
+    - -m
+    - scripts.docs
+    - verify
+    - --skip-links
+  debt:
+    kind: debt
+    producer: debt_governance_gates
+    argv:
+    - python
+    - -m
+    - scripts.engineering.qa
+    - report-debt-governance-gates
+    - --check
+  coverage:
+    argv:
+    - python
+    - -m
+    - scripts.engineering.qa.run_local_coverage_verify
+    - --scratch-dir
+    - '{out}/coverage'
+    - --merge-dir
+    - '{root}'
+  quality:
+    kind: quality
+    producer: quality_integral_gate
+    argv:
+    - python
+    - -m
+    - scripts.engineering.ci.quality_integral_gate
+    - --architecture-owner
+    - junit
+    - --architecture-junit
+    - '{root}/architecture/junit.xml'
+    - --coverage-xml
+    - '{root}/coverage/coverage/coverage.xml'
+    - --output
+    - '{out}/quality.json'
+  coverage-0:
+    argv:
+    - python
+    - -m
+    - scripts.engineering.qa.run_local_coverage_verify
+    - --scratch-dir
+    - '{out}/measurement'
+    - --shard
+    - integration
+    - --shard
+    - unit-scripts-tooling-debt-governance
+    - --shard
+    - smoke
+    - --shard
+    - repo-backed-unit-ops
+  coverage-1:
+    argv:
+    - python
+    - -m
+    - scripts.engineering.qa.run_local_coverage_verify
+    - --scratch-dir
+    - '{out}/measurement'
+    - --shard
+    - unit-domain
+    - --shard
+    - unit-scripts-tooling-other
+    - --shard
+    - unit-application
+    - --shard
+    - repo-backed-unit-product
+  coverage-2:
+    argv:
+    - python
+    - -m
+    - scripts.engineering.qa.run_local_coverage_verify
+    - --scratch-dir
+    - '{out}/measurement'
+    - --shard
+    - unit-subprocess-backed
+    - --shard
+    - serial
+    - --shard
+    - repo-backed-unit-tooling
+    - --shard
+    - unit-scripts-tooling-passport
+    - --shard
+    - security
+  coverage-3:
+    argv:
+    - python
+    - -m
+    - scripts.engineering.qa.run_local_coverage_verify
+    - --scratch-dir
+    - '{out}/measurement'
+    - --shard
+    - unit-filesystem-contracts
+    - --shard
+    - contract-confidence
+    - --shard
+    - unit-other
+    - --shard
+    - unit-infrastructure
