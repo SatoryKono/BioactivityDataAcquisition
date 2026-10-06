@@ -6,16 +6,17 @@ for adapters that support server-side filtering.
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Sequence
 from types import TracebackType
 from typing import Protocol, Self, runtime_checkable
 
-from bioetl.domain.types import HealthStatus, JsonDict
+from bioetl.domain.types import BronzeRecord, HealthStatus, JsonDict
 
 __all__ = [
     "DataSourceFactoryPort",
     "DataSourcePort",
     "FilterableDataSourcePort",
+    "PublicationTermEnrichmentPort",
 ]
 
 
@@ -226,4 +227,15 @@ class DataSourceFactoryPort(Protocol):
         Returns:
             Newly created data source instance.
         """
+        ...
+
+
+@runtime_checkable
+class PublicationTermEnrichmentPort(Protocol):
+    """Optional async enricher that attaches ``mesh_terms`` / ``keywords``."""
+
+    async def enrich_many(
+        self, records: Sequence[BronzeRecord]
+    ) -> Sequence[BronzeRecord]:
+        """Return one record per input, possibly with PubMed MeSH attached."""
         ...

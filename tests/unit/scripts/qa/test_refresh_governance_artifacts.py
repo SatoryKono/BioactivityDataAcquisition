@@ -13,6 +13,34 @@ from scripts.engineering.qa import refresh_governance_artifacts as refresh
 pytestmark = pytest.mark.unit
 
 
+def test_local_telemetry_refresh_uses_verified_manifest_only(monkeypatch) -> None:
+    calls = []
+    monkeypatch.setattr(refresh, "_run", lambda command: calls.append(command) or 0)
+    args = SimpleNamespace(local_manifest=Path("complete/manifest.json"))
+    assert refresh._run_telemetry(check_only=False, telemetry=args) == 0
+    assert calls[0][1:] == [
+        "-m",
+        "scripts.engineering.ci.update_test_telemetry_baseline",
+        "--local-manifest",
+        str(args.local_manifest),
+    ]
+
+
+@pytest.mark.parametrize(
+    "override", ["coverage_percent", "source_commit", "source_run_id", "source_run_url"]
+)
+def test_local_telemetry_refresh_rejects_ci_identity_overrides(
+    monkeypatch, override
+) -> None:
+    calls = []
+    monkeypatch.setattr(refresh, "_run", lambda command: calls.append(command) or 0)
+    args = SimpleNamespace(local_manifest=Path("complete/manifest.json"))
+    setattr(args, override, 99.9 if override == "coverage_percent" else "invented")
+    with pytest.raises(SystemExit, match="must come from the manifest"):
+        refresh._run_telemetry(check_only=False, telemetry=args)
+    assert calls == []
+
+
 def test_check_routes_every_governed_artifact_through_fail_closed_runner(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

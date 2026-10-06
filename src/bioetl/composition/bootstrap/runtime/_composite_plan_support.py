@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
         CompositeFilterExtractor,
     )
-    from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
+    from bioetl.composition.factories.services.composite_support_services_factory import (
         CompositeSupportServices,
         CompositeSupportServicesFactory,
     )

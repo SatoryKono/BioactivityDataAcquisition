@@ -1,12 +1,8 @@
 from bioetl.domain.ports.adr import AdrDocument as AdrDocument
 from bioetl.domain.ports.adr import AdrInfo as AdrInfo
 from bioetl.domain.ports.adr import AdrIssueSeverity as AdrIssueSeverity
-from bioetl.domain.ports.adr import (
-    AdrServicePort as AdrServicePort,
-)
-from bioetl.domain.ports.adr import (
-    AdrValidationIssue as AdrValidationIssue,
-)
+from bioetl.domain.ports.adr import AdrServicePort as AdrServicePort
+from bioetl.domain.ports.adr import AdrValidationIssue as AdrValidationIssue
 from bioetl.domain.ports.adr import (
     AdrValidationReport as AdrValidationReport,
 )
@@ -83,6 +79,9 @@ from bioetl.domain.ports.data_source import (
 )
 from bioetl.domain.ports.data_source import (
     FilterableDataSourcePort as FilterableDataSourcePort,
+)
+from bioetl.domain.ports.data_source import (
+    PublicationTermEnrichmentPort as PublicationTermEnrichmentPort,
 )
 from bioetl.domain.ports.delta_reader import DeltaReaderPort as DeltaReaderPort
 from bioetl.domain.ports.export import (

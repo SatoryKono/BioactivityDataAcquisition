@@ -17,16 +17,16 @@
 %%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
 %% @uniform width=200 height=72 max_title_len=20 max_desc_lines=2
 flowchart TB
-    ProviderAPIs["🌐 Provider APIs<br/>ChEMBL + PubChem + UniProt + PubMed"]:::size-md
+    ProviderAPIs["Provider APIs<br/>ChEMBL + PubChem + UniProt + PubMed"]:::size-md
 
     subgraph Local["Local Machine (Single Instance)"]
         subgraph Orchestration["CLI Execution"]
-            CLI["🖥️ CLI / Manual run<br/>PipelineRunner"]
-            Schedule["⏰ Local scheduler<br/>(cron/systemd)"]
+            CLI["CLI / Manual run<br/>PipelineRunner"]
+            Schedule["Local scheduler<br/>(cron/systemd)"]
         end
 
         subgraph Runtime["Local Pipeline Workers"]
-            Workers["📦 Local pipelines<br/>chembl_* + pubchem_compound +<br/>uniprot_protein"]:::size-md
+            Workers["Local pipelines<br/>chembl_* + pubchem_compound +<br/>uniprot_protein"]:::size-md
         end
 
         subgraph Locking["In-Process Locking"]
@@ -34,17 +34,17 @@ flowchart TB
         end
 
         subgraph Data["Local filesystem (data/)"]
-            Bronze[("📁 bronze/<br/>JSONL+zstd")]
-            Silver[("📁 silver/<br/>Delta Lake")]
-            Gold[("📁 gold/<br/>Delta")]
-            Quarantine[("📁 quarantine/<br/>Delta")]
-            Checkpoints[("📁 checkpoints/<br/>JSON")]
-            Lineage[("📁 lineage/<br/>JSONL")]
+            Bronze[("bronze/<br/>JSONL+zstd")]
+            Silver[("silver/<br/>Delta Lake")]
+            Gold[("gold/<br/>Delta")]
+            Quarantine[("quarantine/<br/>Delta")]
+            Checkpoints[("checkpoints/<br/>JSON")]
+            Lineage[("lineage/<br/>JSONL")]
         end
 
         subgraph Observability["Local Observability"]
-            Logs["📋 Local logs<br/>stdout/file"]
-            Metrics["📊 In-process metrics<br/>"]
+            Logs["Local logs<br/>stdout/file"]
+            Metrics["In-process metrics<br/>"]
         end
     end
 

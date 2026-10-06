@@ -21,8 +21,8 @@ from httpx._types import (
 )
 
 from bioetl.domain.ports import CircuitBreakerPort, LoggerPort, RateLimiterPort
-from bioetl.domain.types import RunID
-from bioetl.infrastructure.adapters.http._client_retry_policy import _parse_retry_after
+from bioetl.domain.types import JsonDict, RunID
+from bioetl.infrastructure.adapters.http.client_retry_policy import parse_retry_after
 
 
 class _RequestKwargs(TypedDict, total=False):
@@ -55,7 +55,7 @@ async def execute_timed_request(
     client: httpx.AsyncClient,
     method: str,
     url: str,
-    request_kwargs: dict[str, object],
+    request_kwargs: JsonDict,  # Heterogeneous kwargs forwarded to the HTTP client.
     *,
     request_timeout: float | None = None,
     attempt_number: int = 1,
@@ -86,7 +86,7 @@ async def execute_timed_request(
         response = await host.circuit_breaker.call(send)
         response.extensions["bioetl_transport_seconds"] = time.monotonic() - admitted
         if response.status_code in (429, 503):
-            retry_after = _parse_retry_after(response.headers.get("Retry-After", ""))
+            retry_after = parse_retry_after(response.headers.get("Retry-After", ""))
             if retry_after is not None:
                 host._request_not_before = max(
                     host._request_not_before, time.monotonic() + retry_after

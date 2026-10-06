@@ -16,7 +16,7 @@ from bioetl.domain.run_reports.reason_catalog import (
     UNKNOWN_REASON,
     normalize_reason_code,
 )
-from bioetl.domain.run_reports.workflow_builder import build_workflow_run_report
+from bioetl.domain.run_reports.workflow_report_assembly import build_workflow_run_report
 from bioetl.domain.run_reports.workflow_reasons import (
     _as_int,
     _optional_reason_text,

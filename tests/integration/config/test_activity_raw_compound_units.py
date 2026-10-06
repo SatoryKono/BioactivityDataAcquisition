@@ -8,6 +8,8 @@ from pathlib import Path
 import pytest
 import yaml
 
+pytestmark = pytest.mark.integration
+
 
 @pytest.mark.parametrize(
     "value,valid",

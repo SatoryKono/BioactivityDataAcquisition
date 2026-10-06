@@ -1,0 +1,12 @@
+{
+  "bundle": "/home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-2356-6536a1934d1c/bundle.json",
+  "bundle_digest": "04bbbbc8d518942a0b6003587e24f95b315cfd23c2fc4297ce7928c5e04eed49",
+  "claim": "ready_to_merge",
+  "claim_qualified": true,
+  "degradations": [],
+  "errors": [],
+  "exit_code": 0,
+  "outcome": "ADMIT",
+  "run_id": "circleci-closeout-2356-6536a1934d1c",
+  "schema_version": 1
+}

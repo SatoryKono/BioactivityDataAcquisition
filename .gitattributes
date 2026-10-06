@@ -51,3 +51,23 @@ reports/audit/grafana/rf004-ai-1895351a8a-20260908/** -text
 
 # Preserve the original bytes of the sealed RF-005/RF-006 evidence bundle.
 reports/audit/grafana/rf005-rf006-d62d78a0-20260908/** -text
+
+# Preserve captured bytes of config-root main acceptance evidence.
+reports/quality/proof-or-stop/config-root-11899/ci-1401/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+reports/quality/proof-or-stop/config-root-11899/full-coverage-wave-46/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+reports/quality/proof-or-stop/config-root-11899/*main-acceptance* -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+reports/quality/proof-or-stop/config-root-11899/ci1401-*.log -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+reports/quality/proof-or-stop/config-root-11899/full-coverage-wave-47/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+reports/quality/proof-or-stop/config-root-11899/*integrated-acceptance* -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+reports/quality/proof-or-stop/config-root-11899/full-coverage-wave-48/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+reports/quality/proof-or-stop/config-root-11899/*repaired-acceptance* -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+reports/quality/proof-or-stop/config-root-11899/*interrupted-acceptance* -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+reports/quality/proof-or-stop/config-root-11899/*postmerge-acceptance* -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+reports/quality/proof-or-stop/config-root-11899/circleci-2047-docs.log -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+
+# Preserve original successful and failed final CI receipts.
+reports/quality/proof-or-stop/config-root-11899/ci-2193/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+reports/quality/proof-or-stop/config-root-11899/ci-2356/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+reports/quality/proof-or-stop/config-root-11899/post-main-2d4507f5/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+reports/quality/proof-or-stop/architecture-meta-closeout-20261005/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+/reports/quality/proof-or-stop/config-root-11899/ci-2772/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol

@@ -1387,10 +1387,10 @@ def _inventory_date_source(args: argparse.Namespace) -> Path | None:
     to the output artifact being refreshed in place.
     """
     if args.check:
-        return args.json_out
+        return Path(args.json_out)
     if args.baseline_json:
-        return args.baseline_json
-    return args.json_out
+        return Path(args.baseline_json)
+    return Path(args.json_out)
 
 
 def _snapshot_date_from_inventory(path: Path | None, *, repo_root: Path) -> str | None:

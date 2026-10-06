@@ -34,7 +34,7 @@ from bioetl.infrastructure.storage.composite_replay_inputs import (
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 from bioetl.infrastructure.time import SystemClock
 from bioetl.composition.bootstrap.runtime.assay_replay import replay_assay
-from bioetl.composition.bootstrap.runtime.composite_replay_context import (
+from bioetl.application.composite.helpers.replay_context import (
     freeze_field_groups,
     required_replay_tables,
     output_table_name,

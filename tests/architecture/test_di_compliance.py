@@ -590,7 +590,14 @@ class TestCompositionRootIntegrity:
         src_dir: Path,
     ) -> None:
         """Workflow assembly must not depend back on the aggregate service facade."""
-        workflow_services = src_dir / "bioetl" / "composition" / "_workflow_services.py"
+        workflow_services = (
+            src_dir
+            / "bioetl"
+            / "composition"
+            / "factories"
+            / "services"
+            / "workflow_services.py"
+        )
         content = workflow_services.read_text(encoding="utf-8")
 
         assert "bioetl.composition._services" not in content

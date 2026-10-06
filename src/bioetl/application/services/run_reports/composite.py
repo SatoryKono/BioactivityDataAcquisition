@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import sys
 from collections.abc import Awaitable, Callable
 from contextlib import AbstractContextManager, nullcontext
 from contextvars import ContextVar
@@ -183,14 +184,18 @@ class CompositeRunReportService:
                     error=error,
                     children=children,
                 )
-            except Exception as report_error:
-                if error is None:
-                    raise
-                self.logger.error(
-                    "composite_report_write_failed", error=str(report_error)
-                )
             finally:
-                _children.reset(children_token)
-                reset_run_observations(observations_token)
+                try:
+                    report_error = sys.exception()
+                    if error is not None and report_error is not error:
+                        try:
+                            self.logger.error(
+                                "composite_report_write_failed", error=str(report_error)
+                            )
+                        finally:
+                            raise error
+                finally:
+                    _children.reset(children_token)
+                    reset_run_observations(observations_token)
         assert result is not None
         return result

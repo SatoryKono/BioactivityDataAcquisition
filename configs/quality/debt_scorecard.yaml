@@ -461,7 +461,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 200
-      total_loc: 24796
+      total_loc: 24786
       files_ge_250_loc: 0
       helper_function_ratio: 0.388
       max_internal_fan_in: 5
@@ -488,10 +488,10 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
-      files: 53
-      total_loc: 6444
+      files: 49
+      total_loc: 6442
       files_ge_250_loc: 0
-      helper_function_ratio: 0.301
+      helper_function_ratio: 0.289
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.tracing_bootstrap
     trend:
@@ -543,7 +543,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 130
-      total_loc: 15562
+      total_loc: 15559
       files_ge_250_loc: 0
       helper_function_ratio: 0.399
       max_internal_fan_in: 1
@@ -690,15 +690,15 @@ oversized_source_module_inventory:
   - issue: '#4679'
     source: src/bioetl/domain/ports/__init__.py
     extracted_surface: src/bioetl/domain/ports/__init__.pyi
-    source_lines_after_split: 218
-    extracted_surface_lines: 410
+    source_lines_after_split: 216
+    extracted_surface_lines: 409
     rationale: Runtime lazy export resolution remains in the Python module while static re-export type
       declarations live in the adjacent stub, preserving the public API and reducing the governed source
-      module from 579 to 218 lines after adding typed facade exports; the tracked shrink-only value is
+      module from 579 to 216 lines after adding typed facade exports; the tracked shrink-only value is
       tightened to the current source size.
   - issue: '#6478'
-    source: src/bioetl/application/services/lineage/metadata_lineage_node_builders.py
-    extracted_surface: src/bioetl/application/services/lineage/metadata_lineage_node_builders.py
+    source: src/bioetl/application/services/lineage/metadata_lineage_node_assembly.py
+    extracted_surface: src/bioetl/application/services/lineage/metadata_lineage_node_assembly.py
     source_lines_after_split: 51
     extracted_surface_lines: 51
     rationale: Active top-list entry retired after prior extractions left the module well under the practical
@@ -735,7 +735,7 @@ hotspot_family_coverage_thresholds:
       min_covered_line_percent: 96.34
       allowlisted_unmeasured_paths: []
     composition_bootstrap_runtime:
-      min_measured_module_count: 50
+      min_measured_module_count: 49
       max_unmeasured_module_count: 0
       min_covered_module_count: 49
       min_covered_line_percent: 95.65
