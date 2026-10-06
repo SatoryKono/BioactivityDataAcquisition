@@ -290,4 +290,115 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      host:
+      - rest.uniprot.org
+      user-agent:
+      - BioETL/6.1.0
+    method: GET
+    uri: https://rest.uniprot.org/uniprotkb/search?query=%2A&size=1&format=json&fields=accession%2Cid%2Cprotein_name%2Cgene_names%2Corganism_name%2Corganism_id%2Clineage%2Csequence%2Clength%2Cmass%2Cprotein_existence%2Cannotation_score%2Creviewed%2Cdate_created%2Cdate_modified%2Cversion%2Ccc_function%2Ccc_catalytic_activity%2Ccc_activity_regulation%2Ccc_subunit%2Ccc_pathway%2Ccc_subcellular_location%2Ccc_tissue_specificity%2Ccc_alternative_products%2Ccc_disease%2Ccc_cofactor%2Cph_dependence%2Ctemp_dependence%2Ckinetics%2Cabsorption%2Credox_potential%2Ccc_induction%2Ccc_caution%2Ccc_similarity%2Ccc_pharmaceutical%2Cft_domain%2Cft_binding%2Cft_site%2Cft_act_site%2Cft_mod_res%2Cxref_pdb%2Cxref_chembl%2Cxref_drugbank%2Cxref_guidetopharmacology%2Cgo_id%2Cxref_interpro%2Cxref_pfam%2Cxref_reactome%2Ckeyword
+  response:
+    body:
+      string: '{"results":[{"entryType":"UniProtKB unreviewed (TrEMBL)","primaryAccession":"A0A022Y8G1","uniProtkbId":"A0A022Y8G1_TRISD","entryAudit":{"firstPublicDate":"2014-06-11","lastAnnotationUpdateDate":"2026-09-02","entryVersion":51},"annotationScore":5.0,"organism":{"scientificName":"Trichophyton
+        soudanense CBS 452.61","taxonId":1215331,"evidences":[{"evidenceCode":"ECO:0000313","source":"EMBL","id":"EZF78928.1"},{"evidenceCode":"ECO:0000313","source":"Proteomes","id":"UP000023623"}],"lineage":["Eukaryota","Fungi","Dikarya","Ascomycota","Pezizomycotina","Eurotiomycetes","Eurotiomycetidae","Onygenales","Arthrodermataceae","Trichophyton"]},"proteinExistence":"3:
+        Inferred from homology","proteinDescription":{"recommendedName":{"fullName":{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00068309"}],"value":"Fatty
+        acid synthase subunit beta"},"ecNumbers":[{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00012996"}],"value":"1.3.1.9"},{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00013256"}],"value":"2.3.1.38"},{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00013258"}],"value":"2.3.1.39"},{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00012878"}],"value":"2.3.1.86"},{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00012480"}],"value":"3.1.2.14"},{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00013167"}],"value":"4.2.1.59"}]}},"genes":[{"orfNames":[{"evidences":[{"evidenceCode":"ECO:0000313","source":"EMBL","id":"EZF78928.1"}],"value":"H105_00065"}]}],"comments":[{"texts":[{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00058855"}],"value":"Fatty
+        acid synthetase catalyzes the formation of long-chain fatty acids from acetyl-CoA,
+        malonyl-CoA and NADPH. The beta subunit contains domains for: [acyl-carrier-protein]
+        acetyltransferase and malonyltransferase, S-acyl fatty acid synthase thioesterase,
+        enoyl-[acyl-carrier-protein] reductase, and 3-hydroxypalmitoyl-[acyl-carrier-protein]
+        dehydratase"}],"commentType":"FUNCTION"},{"commentType":"CATALYTIC ACTIVITY","reaction":{"name":"(9Z)-octadecenoyl-[ACP]
+        + H2O = (9Z)-octadecenoate + holo-[ACP] + H(+)","reactionCrossReferences":[{"database":"Rhea","id":"RHEA:15057"},{"database":"Rhea","id":"RHEA-COMP:9685"},{"database":"Rhea","id":"RHEA-COMP:9924"},{"database":"ChEBI","id":"CHEBI:15377"},{"database":"ChEBI","id":"CHEBI:15378"},{"database":"ChEBI","id":"CHEBI:30823"},{"database":"ChEBI","id":"CHEBI:64479"},{"database":"ChEBI","id":"CHEBI:78783"}],"ecNumber":"3.1.2.14","evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00048536"}]}},{"commentType":"CATALYTIC
+        ACTIVITY","reaction":{"name":"a (3R)-hydroxyacyl-[ACP] = a (2E)-enoyl-[ACP]
+        + H2O","reactionCrossReferences":[{"database":"Rhea","id":"RHEA:13097"},{"database":"Rhea","id":"RHEA-COMP:9925"},{"database":"Rhea","id":"RHEA-COMP:9945"},{"database":"ChEBI","id":"CHEBI:15377"},{"database":"ChEBI","id":"CHEBI:78784"},{"database":"ChEBI","id":"CHEBI:78827"}],"ecNumber":"4.2.1.59","evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00001055"}]}},{"commentType":"CATALYTIC
+        ACTIVITY","reaction":{"name":"a 2,3-saturated acyl-[ACP] + NAD(+) = a (2E)-enoyl-[ACP]
+        + NADH + H(+)","reactionCrossReferences":[{"database":"Rhea","id":"RHEA:10240"},{"database":"Rhea","id":"RHEA-COMP:9925"},{"database":"Rhea","id":"RHEA-COMP:9926"},{"database":"ChEBI","id":"CHEBI:15378"},{"database":"ChEBI","id":"CHEBI:57540"},{"database":"ChEBI","id":"CHEBI:57945"},{"database":"ChEBI","id":"CHEBI:78784"},{"database":"ChEBI","id":"CHEBI:78785"}],"ecNumber":"1.3.1.9","evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00048572"}]}},{"commentType":"CATALYTIC
+        ACTIVITY","reaction":{"name":"acetyl-CoA + n malonyl-CoA + 2n NADPH + 4n H(+)
+        = a long-chain-acyl-CoA + n CoA + n CO2 + 2n NADP(+).","ecNumber":"2.3.1.86","evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00048237"}]}},{"commentType":"CATALYTIC
+        ACTIVITY","reaction":{"name":"holo-[ACP] + acetyl-CoA = acetyl-[ACP] + CoA","reactionCrossReferences":[{"database":"Rhea","id":"RHEA:41788"},{"database":"Rhea","id":"RHEA-COMP:9621"},{"database":"Rhea","id":"RHEA-COMP:9685"},{"database":"ChEBI","id":"CHEBI:57287"},{"database":"ChEBI","id":"CHEBI:57288"},{"database":"ChEBI","id":"CHEBI:64479"},{"database":"ChEBI","id":"CHEBI:78446"}],"ecNumber":"2.3.1.38","evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00048835"}]}},{"commentType":"CATALYTIC
+        ACTIVITY","reaction":{"name":"holo-[ACP] + malonyl-CoA = malonyl-[ACP] + CoA","reactionCrossReferences":[{"database":"Rhea","id":"RHEA:41792"},{"database":"Rhea","id":"RHEA-COMP:9623"},{"database":"Rhea","id":"RHEA-COMP:9685"},{"database":"ChEBI","id":"CHEBI:57287"},{"database":"ChEBI","id":"CHEBI:57384"},{"database":"ChEBI","id":"CHEBI:64479"},{"database":"ChEBI","id":"CHEBI:78449"}],"ecNumber":"2.3.1.39","evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00048462"}]}},{"texts":[{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00005179"}],"value":"Secondary
+        metabolite biosynthesis"}],"commentType":"PATHWAY"},{"texts":[{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00033756"}],"value":"[Alpha(6)beta(6)]
+        hexamers of two multifunctional subunits (alpha and beta)"}],"commentType":"SUBUNIT"},{"texts":[{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00010009"},{"evidenceCode":"ECO:0000256","source":"PIRNR","id":"PIRNR005562"}],"value":"Belongs
+        to the fungal fatty acid synthetase subunit beta family"}],"commentType":"SIMILARITY"}],"features":[{"type":"Domain","location":{"start":{"value":1693,"modifier":"EXACT"},"end":{"value":1993,"modifier":"EXACT"}},"description":"Malonyl-CoA:ACP
+        transacylase (MAT)","evidences":[{"evidenceCode":"ECO:0000259","source":"SMART","id":"SM00827"}]},{"type":"Active
+        site","location":{"start":{"value":286,"modifier":"EXACT"},"end":{"value":286,"modifier":"EXACT"}},"description":"For
+        acetyltransferase activity","evidences":[{"evidenceCode":"ECO:0000256","source":"PIRSR","id":"PIRSR005562-1"}]},{"type":"Active
+        site","location":{"start":{"value":1837,"modifier":"EXACT"},"end":{"value":1837,"modifier":"EXACT"}},"description":"For
+        malonyltransferase activity","evidences":[{"evidenceCode":"ECO:0000256","source":"PIRSR","id":"PIRSR005562-1"}]}],"keywords":[{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00023160"}],"id":"KW-0275","category":"Biological
+        process","name":"Fatty acid biosynthesis"},{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00022832"}],"id":"KW-0276","category":"Biological
+        process","name":"Fatty acid metabolism"},{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00022801"},{"evidenceCode":"ECO:0000256","source":"PIRNR","id":"PIRNR005562"}],"id":"KW-0378","category":"Molecular
+        function","name":"Hydrolase"},{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00022516"}],"id":"KW-0444","category":"Biological
+        process","name":"Lipid biosynthesis"},{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00023098"}],"id":"KW-0443","category":"Biological
+        process","name":"Lipid metabolism"},{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00023239"}],"id":"KW-0456","category":"Molecular
+        function","name":"Lyase"},{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00023268"}],"id":"KW-0511","category":"Molecular
+        function","name":"Multifunctional enzyme"},{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00023027"},{"evidenceCode":"ECO:0000256","source":"PIRNR","id":"PIRNR005562"}],"id":"KW-0520","category":"Ligand","name":"NAD"},{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00022857"},{"evidenceCode":"ECO:0000256","source":"PIRNR","id":"PIRNR005562"}],"id":"KW-0521","category":"Ligand","name":"NADP"},{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00023002"},{"evidenceCode":"ECO:0000256","source":"PIRNR","id":"PIRNR005562"}],"id":"KW-0560","category":"Molecular
+        function","name":"Oxidoreductase"},{"evidences":[{"evidenceCode":"ECO:0000313","source":"Proteomes","id":"UP000023623"}],"id":"KW-1185","category":"Technical
+        term","name":"Reference proteome"},{"evidences":[{"evidenceCode":"ECO:0000256","source":"ARBA","id":"ARBA00022679"},{"evidenceCode":"ECO:0000256","source":"PIRNR","id":"PIRNR005562"}],"id":"KW-0808","category":"Molecular
+        function","name":"Transferase"}],"uniProtKBCrossReferences":[{"database":"GO","id":"GO:0005835","properties":[{"key":"GoTerm","value":"C:fatty
+        acid synthase complex"},{"key":"GoEvidenceType","value":"IEA:UniProtKB-UniRule"}]},{"database":"GO","id":"GO:0019171","properties":[{"key":"GoTerm","value":"F:(3R)-hydroxyacyl-[acyl-carrier-protein]
+        dehydratase activity"},{"key":"GoEvidenceType","value":"IEA:UniProtKB-EC"}]},{"database":"GO","id":"GO:0004313","properties":[{"key":"GoTerm","value":"F:[acyl-carrier-protein]
+        S-acetyltransferase activity"},{"key":"GoEvidenceType","value":"IEA:UniProtKB-EC"}]},{"database":"GO","id":"GO:0004314","properties":[{"key":"GoTerm","value":"F:[acyl-carrier-protein]
+        S-malonyltransferase activity"},{"key":"GoEvidenceType","value":"IEA:UniProtKB-EC"}]},{"database":"GO","id":"GO:0004318","properties":[{"key":"GoTerm","value":"F:enoyl-[acyl-carrier-protein]
+        reductase (NADH) activity"},{"key":"GoEvidenceType","value":"IEA:UniProtKB-UniRule"}]},{"database":"GO","id":"GO:0004312","properties":[{"key":"GoTerm","value":"F:fatty
+        acid synthase activity"},{"key":"GoEvidenceType","value":"IEA:InterPro"}]},{"database":"GO","id":"GO:0016297","properties":[{"key":"GoTerm","value":"F:fatty
+        acyl-[ACP] hydrolase activity"},{"key":"GoEvidenceType","value":"IEA:UniProtKB-EC"}]},{"database":"GO","id":"GO:0004321","properties":[{"key":"GoTerm","value":"F:fatty-acyl-CoA
+        synthase activity"},{"key":"GoEvidenceType","value":"IEA:UniProtKB-EC"}]},{"database":"GO","id":"GO:0006633","properties":[{"key":"GoTerm","value":"P:fatty
+        acid biosynthetic process"},{"key":"GoEvidenceType","value":"IEA:InterPro"}]},{"database":"InterPro","id":"IPR001227","properties":[{"key":"EntryName","value":"Ac_transferase_dom_sf"}]},{"database":"InterPro","id":"IPR014043","properties":[{"key":"EntryName","value":"Acyl_transferase_dom"}]},{"database":"InterPro","id":"IPR016035","properties":[{"key":"EntryName","value":"Acyl_Trfase/lysoPLipase"}]},{"database":"InterPro","id":"IPR013785","properties":[{"key":"EntryName","value":"Aldolase_TIM"}]},{"database":"InterPro","id":"IPR039569","properties":[{"key":"EntryName","value":"FAS1-like_DH_region"}]},{"database":"InterPro","id":"IPR016452","properties":[{"key":"EntryName","value":"Fas1/AflB-like"}]},{"database":"InterPro","id":"IPR013565","properties":[{"key":"EntryName","value":"Fas1/AflB-like_central"}]},{"database":"InterPro","id":"IPR041099","properties":[{"key":"EntryName","value":"FAS1_N"}]},{"database":"InterPro","id":"IPR040883","properties":[{"key":"EntryName","value":"FAS_meander"}]},{"database":"InterPro","id":"IPR003965","properties":[{"key":"EntryName","value":"Fatty_acid_synthase"}]},{"database":"InterPro","id":"IPR050830","properties":[{"key":"EntryName","value":"Fungal_FAS"}]},{"database":"InterPro","id":"IPR029069","properties":[{"key":"EntryName","value":"HotDog_dom_sf"}]},{"database":"InterPro","id":"IPR002539","properties":[{"key":"EntryName","value":"MaoC-like_dom"}]},{"database":"InterPro","id":"IPR032088","properties":[{"key":"EntryName","value":"SAT"}]},{"database":"Pfam","id":"PF00698","properties":[{"key":"EntryName","value":"Acyl_transf_1"},{"key":"MatchStatus","value":"1"}]},{"database":"Pfam","id":"PF08354","properties":[{"key":"EntryName","value":"Fas1-AflB-like_hel"},{"key":"MatchStatus","value":"1"}]},{"database":"Pfam","id":"PF13452","properties":[{"key":"EntryName","value":"FAS1_DH_region"},{"key":"MatchStatus","value":"1"}]},{"database":"Pfam","id":"PF22235","properties":[{"key":"EntryName","value":"FAS1_thioest_ins"},{"key":"MatchStatus","value":"1"}]},{"database":"Pfam","id":"PF17951","properties":[{"key":"EntryName","value":"FAS_meander"},{"key":"MatchStatus","value":"1"}]},{"database":"Pfam","id":"PF17828","properties":[{"key":"EntryName","value":"FAS_N"},{"key":"MatchStatus","value":"1"}]},{"database":"Pfam","id":"PF01575","properties":[{"key":"EntryName","value":"MaoC_dehydratas"},{"key":"MatchStatus","value":"1"}]},{"database":"Pfam","id":"PF16073","properties":[{"key":"EntryName","value":"SAT"},{"key":"MatchStatus","value":"1"}]}],"sequence":{"value":"MFGPSTGPQTGINTPRSSQSLRPLNLSHGSLEFSFLVATSLHFHASQLKDSFAASLPEPTDELAQDDEPSSVPDLVARYLGFIAHEVEEGEDDSLGSYIEVLKLVLNEFERAFMRGNDVHAVAGSIPGIPAKKLLMVENYYAARAAVNRPTKPHDSALLRAATEGNAKLYSIYGGQGNIEEYFDELREIYNTYPSFVEDLISSSAELLQSLARDLDAIKLYSKGMDILRWLHDRDTQPDTDYLVSAPVSLPLIGLVQLAHFMATCKAMGKEPGDVLDAFSGTTGHSQGIITAAAIATVTTWESFAKAARAALTMLFWIGLRSQQAYPRTSLAPSLLQDSIENGEGVPTPMLSIRDLHRSAVQEHIDATNQHLPEDRHIAISLVNSPRNFVVTGPPISLYGLNLRLRKVKAATGLDQNRVPFTQRKIRFVNRFLPITAPFHSQYLASAFEAIAEDVEDIKIPARSLRIPVYDTNTGKDISKLGDEDIVPALIRMITSDPVDWEKATVFSKATHIVDFGPGGISGLGVLTNRNKDGTGVRVILGGLIDGTNAEVGYKPELFDRDEDHAVKYAVDWVEVYGPRLVKTSVGQTFVDTKMSRLLGVPPIMVAGMTPTTVPWDFVAATMNAGYQIELGGGGYYNAKSMTAALTKIEKAIPPGRGITVNLIYVNPRAMAWQIPLLAKLRADGVPIEGLVIGAGVPSIEVANEYIETLGIKHIGFKPGSLDAIQQVINIAKANPSFPVILQWTGGRGGGHHSFEDFHQPVLQMYSRIRKCDNIVLVAGSGFGGSTDTYPYLTGSWSRQFGYPPMPFDGCLFGSRMMVAKEAHTSKAAKEAIVAAPGVDDAKWEDTYKGAAGGVITVRSEMGEPIHKLATRGVLFWAEMDQKIFSLDKAKRLPALKKHREYIIKKLNDDFQKVWFGRNSKGVTVDLEDMTYAEVVHRMVELMYVKHEARWIDDSLKRFTGDFLRRVEERFTTEKNQESLLQSYSQLDTPYPTVQEILDAYPASADQLINAQDVQHFLQLCQRRGQKPVPFVPSLDENFEFWFKKDSLWQSEDIEAVVGQDVGRVCILQGPMAAKYSTVIDEPIKSILDGIHQDHIKGLIQDVYNGDESKVPTVEYFGGRLALVDDEDRDIDGLIISEDATRVSYRLSSSPSANLPELDRWLHLLAGNIYSWRYALFTTEVFIQGQRFQTNPIKRILAPTRGMFVEITNPNDSLKTVISMREPCQSGKLVKTVEIRLIEKNRIALTLFEGRTAESGVVPLPFYFTYHPETGYAPIREVMEGRNDRIKEFYYRVWFGERTVPFDTPAAAIFDGGRTTVTAQAIADFVHAVGNTGEAFVERQGKETFAPMDFAIVAGWKAITKPIFPRTIDGDLLKLVHLSNGFRMVPGAEPLKVGDILDTTAQINAIVNQDSGKMVEVCGTIKRDGEPIMHVTSQFLYRGNYTDYETTFLRKDEVPMQVHLATSKDVAVLQSKEWFRLDEGNVELLGQTLTFRLQSLVRYKDKTVFQSMQTTGQVLVELPTKEIIQVGSVDYDAGVSHGNPVIDYLQRHGSAIEQPVNFENPIPLSKSPLVLKAPASNETYARVSGDYNPIHVSRVFSSYANLPGTITHGMYTSAAVRSLVETWAAENNIGRVRSFHASLVGMVLPNDDLVVKLQHVGMIAGRKIIQVETSSQNTEEKVLIGEAEVEQPVSSYVFTGQGSQEQGMGMDLYATSPVAKEVWDRADRHFMENYGFSIIDIVKNNPQELTVHFGGPRGKNIRQNYMSMTFETVNADGSIKSEKIFKEVDEKTASYTYKSPTGLLSATQFTQPALTLMEKASFEDMRSKGLVQRDSSFAGHSLGEYSALAALAEVMPIESLVSVVFYRGLTMQVAVERDEQGRSNYSMCAVNPSRISQTFNEQALQYVVENVSETTGWLLEIVNYNVANMQYVCAGDLRALDSLTNVLNVLKAQKIDIPALMQTMSLEDVKSHLVQIIDECVKQTNAKPQPIVLERGFATIPLKGIDVPFHSTFLRSGVKPFRSFLLKKINKTTIDPSKLIGKYIPNVTARPFELTREYFEDVYRLTNSPRIGNILANWDKYEEPQDTPTESTDSP","length":2091,"molWeight":232151,"crc64":"1A3EB9EF99313D7B","md5":"807033FBCF3346FAED4E45041987606B"},"lineages":[{"scientificName":"cellular
+        organisms","taxonId":131567,"rank":"no rank","hidden":true},{"scientificName":"Eukaryota","commonName":"eukaryotes","taxonId":2759,"rank":"domain","hidden":false},{"scientificName":"Opisthokonta","taxonId":33154,"rank":"clade","hidden":true},{"scientificName":"Fungi","taxonId":4751,"rank":"kingdom","hidden":false},{"scientificName":"Dikarya","taxonId":451864,"rank":"subkingdom","hidden":false},{"scientificName":"Ascomycota","commonName":"ascomycete
+        fungi","taxonId":4890,"rank":"phylum","hidden":false},{"scientificName":"saccharomyceta","taxonId":716545,"rank":"clade","hidden":true},{"scientificName":"Pezizomycotina","taxonId":147538,"rank":"subphylum","hidden":false},{"scientificName":"leotiomyceta","taxonId":716546,"rank":"clade","hidden":true},{"scientificName":"Eurotiomycetes","taxonId":147545,"rank":"class","hidden":false},{"scientificName":"Eurotiomycetidae","taxonId":451871,"rank":"subclass","hidden":false},{"scientificName":"Onygenales","taxonId":33183,"rank":"order","hidden":false},{"scientificName":"Arthrodermataceae","commonName":"dermatophytes","taxonId":34384,"rank":"family","hidden":false},{"scientificName":"Trichophyton","taxonId":5550,"rank":"genus","hidden":false},{"scientificName":"Trichophyton
+        soudanense","taxonId":69891,"rank":"species","hidden":true}],"extraAttributes":{"uniParcId":"UPI000442913D"}}]}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - public, max-age=43200
+      connection:
+      - keep-alive
+      content-length:
+      - '16248'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Oct 2026 07:27:47 GMT
+      link:
+      - <https://rest.uniprot.org/uniprotkb/search?format=json&fields=accession,id,protein_name,gene_names,organism_name,organism_id,lineage,sequence,length,mass,protein_existence,annotation_score,reviewed,date_created,date_modified,version,cc_function,cc_catalytic_activity,cc_activity_regulation,cc_subunit,cc_pathway,cc_subcellular_location,cc_tissue_specificity,cc_alternative_products,cc_disease,cc_cofactor,ph_dependence,temp_dependence,kinetics,absorption,redox_potential,cc_induction,cc_caution,cc_similarity,cc_pharmaceutical,ft_domain,ft_binding,ft_site,ft_act_site,ft_mod_res,xref_pdb,xref_chembl,xref_drugbank,xref_guidetopharmacology,go_id,xref_interpro,xref_pfam,xref_reactome,keyword&query=%2A&cursor=verqtw3fkc1pwbk05m3og31pnypavakuknyqc3wa5yqq7x&size=1>;
+        rel="next"
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent,
+        Accept-Encoding
+      x-api-deployment-date:
+      - 23-September-2026
+      x-cache:
+      - miss cached
+      x-total-results:
+      - '150006383'
+      x-uniprot-release:
+      - '2026_03'
+      x-uniprot-release-date:
+      - 02-September-2026
+    status:
+      code: 200
+      message: OK
 version: 1

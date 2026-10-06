@@ -2,48 +2,97 @@ interactions:
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/status
   response:
     body:
-      string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date": "2025-07-28", "compound_records": 3774137, "disinct_compounds": 2878135, "publications": 99142, "status": "UP", "targets": 17803}'
+      string: '{"activities": 24527044, "chembl_db_version": "ChEMBL_37", "chembl_release_date":
+        "2026-05-01", "compound_records": 3824604, "disinct_compounds": 2921148, "publications":
+        101100, "status": "UP", "targets": 18552}'
     headers:
-      Content-Type:
+      cache-control:
+      - max-age=30000000, s-maxage=30000000
+      connection:
+      - Keep-Alive
+      content-length:
+      - '212'
+      content-type:
       - application/json
+      date:
+      - Tue, 06 Oct 2026 06:27:21 GMT
+      server:
+      - gunicorn/20.0.4
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
+      - Accept, Origin
     status:
       code: 200
       message: OK
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/assay?format=json&limit=1&offset=0
   response:
     body:
-      string: '{"assays": [{"assay_param_id": 1001, "assay_id": "CHEMBL615361", "type": "CONC", "relation": "=", "value": 10.0, "units": "uM", "text_value": null, "comments": null, "standard_type": "CONC", "standard_relation": "=", "standard_value": 10.0, "standard_units": "uM", "standard_text_value": null}], "page_meta": {"limit": 1, "next": null, "offset": 0, "previous": null, "total_count": 1}}'
+      string: '{"assays": [{"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL615117", "assay_classifications": [], "assay_group":
+        null, "assay_organism": null, "assay_parameters": [], "assay_strain": null,
+        "assay_subcellular_fraction": null, "assay_tax_id": null, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000019", "bao_label": "assay format", "cell_chembl_id":
+        null, "confidence_description": "Homologous single protein target assigned",
+        "confidence_score": 8, "description": "The compound was tested for the in
+        vitro inhibition of platelet 12-lipoxygenase at a concentration of 30 uM",
+        "document_chembl_id": "CHEMBL1125582", "relationship_description": "Homologous
+        protein target assigned", "relationship_type": "H", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL2741", "tissue_chembl_id": null, "variant_sequence":
+        null}], "page_meta": {"limit": 1, "next": "/chembl/api/data/assay.json?limit=1&offset=1",
+        "offset": 0, "previous": null, "total_count": 1970438}}'
     headers:
-      Content-Type:
+      cache-control:
+      - max-age=30000000, s-maxage=30000000
+      connection:
+      - Keep-Alive
+      content-disposition:
+      - inline
+      content-length:
+      - '1087'
+      content-type:
       - application/json
+      date:
+      - Tue, 06 Oct 2026 06:27:29 GMT
+      server:
+      - gunicorn/20.0.4
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
+      - Accept, Origin
+      x-chembl-in-cache:
+      - 'True'
+      x-chembl-retrieval-time:
+      - '0.21933317184448242'
     status:
       code: 200
       message: OK
