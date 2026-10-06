@@ -204,3 +204,24 @@ def test_grafana_plugins_do_not_force_router_or_uuid_majors() -> None:
     assert selector["node_modules/react-router"]["version"] == "5.3.4"
     assert selector["node_modules/react-router-dom"]["version"] == "5.3.4"
     assert selector["node_modules/react-router-v7"]["version"] == "7.18.4"
+
+
+@pytest.mark.parametrize("lock_path", [SCENES_LOCK, SELECTOR_LOCK])
+def test_grafana_locks_remove_vulnerable_legacy_yaml_chain(lock_path: Path) -> None:
+    """Keep the audited YAML replacement and patched parser/source-map versions."""
+    packages = _lock_packages(lock_path)
+    expected = {
+        "js-yaml": "4.3.2",
+        "argparse": "2.0.1",
+        "postcss-selector-parser": "7.1.6",
+        "source-map-js": "1.2.2",
+    }
+    for name, version in expected.items():
+        entries = [
+            package
+            for path, package in packages.items()
+            if path.endswith(f"node_modules/{name}")
+        ]
+        assert entries, f"Missing audited dependency: {name}"
+        assert all(package["version"] == version for package in entries), name
+    assert not any(path.endswith("node_modules/sprintf-js") for path in packages)
