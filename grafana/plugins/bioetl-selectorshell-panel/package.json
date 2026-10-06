@@ -75,6 +75,7 @@
   "packageManager": "npm@10.8.2",
   "overrides": {
     "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
-    "braces": "$braces"
+    "braces": "$braces",
+    "js-yaml": "4.3.2"
   }
 }
