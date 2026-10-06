@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -151,8 +152,6 @@ class _MetadataWriterOperations:
         except asyncio.CancelledError:
             # Drain the pending publication worker to ensure we don't leave
             # orphaned thread state running after cancellation propagation.
-            import contextlib
-
             while not publication_task.done():
                 with contextlib.suppress(asyncio.CancelledError):
                     await asyncio.shield(publication_task)

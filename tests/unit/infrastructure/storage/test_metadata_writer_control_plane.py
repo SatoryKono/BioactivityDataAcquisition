@@ -1,9 +1,3 @@
-import threading
-from unittest.mock import Mock
-from bioetl.infrastructure.storage.metadata_writer_operations_impl import (
-    _MetadataWriterOperations,
-)
-
 # pyright: reportArgumentType=false
 # pyright: reportAttributeAccessIssue=false
 # pyright: reportCallIssue=false
@@ -33,10 +27,16 @@ from bioetl.infrastructure.storage.metadata_writer_operations_impl import (
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Focused tests for MetadataWriter control-plane artifact recording."""
 
+from __future__ import annotations
+
+import asyncio
+import asyncio.threads
+import threading
+
 
 from datetime import UTC, datetime
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from tests.helpers.deterministic_ids import deterministic_uuid_string_from_callsite
 
 import pytest
@@ -63,6 +63,9 @@ from bioetl.domain.models.metadata import (
 )
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
+from bioetl.infrastructure.storage.metadata_writer_operations_impl import (
+    _MetadataWriterOperations,
+)
 
 
 pytestmark = pytest.mark.unit
@@ -508,256 +511,125 @@ async def test_write_metadata_fails_when_control_plane_artifact_id_is_missing() 
             )
 
 
+@pytest.fixture
+def publication_operations(tmp_path, monkeypatch):
+    """Use real thread dispatch while isolating the earlier metadata write."""
+    monkeypatch.setattr(asyncio, "to_thread", asyncio.threads.to_thread)
+    recorder = Mock()
+    operations = _MetadataWriterOperations(
+        logger=Mock(),
+        metrics=Mock(),
+        retry_policy=Mock(),
+        artifact_recorder_provider=lambda: recorder,
+    )
+    operations.write_metadata = AsyncMock(return_value=str(tmp_path / "metadata.json"))
+    return operations, recorder
+
+
 async def test_write_layer_metadata_executes_publication_off_event_loop(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Verify that metadata artifact publication does not block the asyncio event loop thread."""
-    import asyncio
-    import asyncio.threads
-    from unittest.mock import Mock
-
-    loop = asyncio.get_running_loop()
+    publication_operations, tmp_path
+):
+    operations, recorder = publication_operations
     caller_thread = threading.get_ident()
-    recorder_thread = None
-
-    recorder_started = threading.Event()
-    recorder_release = threading.Event()
-
-    def blocking_recorder(*args: object, **kwargs: object) -> None:
-        nonlocal recorder_thread
-        recorder_thread = threading.get_ident()
-        loop.call_soon_threadsafe(recorder_started.set)
-        recorder_release.wait(timeout=5.0)
-
-    class FakeRecorder:
-        def __call__(self, *args, **kwargs):
-            blocking_recorder(*args, **kwargs)
-
-        def record_artifact_published(self, *args, **kwargs):
-            pass  # fallback
-
-    recorder_mock = FakeRecorder()
-
-    operations = _MetadataWriterOperations(
-        logger=Mock(),
-        metrics=Mock(),
-        retry_policy=Mock(),
-        artifact_recorder_provider=lambda: recorder_mock,
+    observed_threads = []
+    recorder.side_effect = lambda *args, **kwargs: observed_threads.append(
+        threading.get_ident()
     )
 
-    async def dummy_write(*args: object, **kwargs: object) -> str:
-        return str(tmp_path / "metadata.json")
-
-    operations.write_metadata = dummy_write  # type: ignore[method-assign]
-    mock_metadata = _make_bronze_metadata()
-
-    with monkeypatch.context() as m:
-        m.setattr(asyncio, "to_thread", asyncio.threads.to_thread)
-
-        task = asyncio.create_task(
-            operations.write_layer_metadata(
-                base_path=str(tmp_path),
-                metadata=mock_metadata,
-                layer="bronze",
-            )
-        )
-
-        for _ in range(500):
-            if recorder_started.is_set():
-                break
-            await asyncio.sleep(0.01)
-
-        assert recorder_started.is_set(), "Timeout waiting for recorder thread to start"
-
-        recorder_release.set()
-
-        result_path = await task
-
-        assert recorder_thread is not None
-        assert recorder_thread != caller_thread
-        assert result_path == str(tmp_path / "metadata.json")
-
-
-async def test_write_layer_metadata_drains_publication_on_cancellation(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Verify that metadata artifact publication completes even if the caller is repeatedly cancelled."""
-    import asyncio
-    import asyncio.threads
-    from unittest.mock import Mock
-
-    loop = asyncio.get_running_loop()
-    recorder_started = threading.Event()
-    recorder_release = threading.Event()
-
-    def blocking_recorder(*args: object, **kwargs: object) -> None:
-        loop.call_soon_threadsafe(recorder_started.set)
-        recorder_release.wait(timeout=5.0)
-
-    class FakeRecorder:
-        def __call__(self, *args, **kwargs):
-            blocking_recorder(*args, **kwargs)
-
-    recorder_mock = FakeRecorder()
-
-    operations = _MetadataWriterOperations(
-        logger=Mock(),
-        metrics=Mock(),
-        retry_policy=Mock(),
-        artifact_recorder_provider=lambda: recorder_mock,
+    result = await operations.write_layer_metadata(
+        base_path=tmp_path, metadata=_make_bronze_metadata(), layer="bronze"
     )
 
-    async def dummy_write(*args: object, **kwargs: object) -> str:
-        return str(tmp_path / "metadata.json")
-
-    operations.write_metadata = dummy_write  # type: ignore[method-assign]
-    mock_metadata = _make_bronze_metadata()
-
-    with monkeypatch.context() as m:
-        m.setattr(asyncio, "to_thread", asyncio.threads.to_thread)
-
-        task = asyncio.create_task(
-            operations.write_layer_metadata(
-                base_path=str(tmp_path),
-                metadata=mock_metadata,
-                layer="bronze",
-            )
-        )
-
-        for _ in range(500):
-            if recorder_started.is_set():
-                break
-            await asyncio.sleep(0.01)
-
-        assert recorder_started.is_set(), "Timeout waiting for recorder thread to start"
-
-        task.cancel()
-
-        # Test double-cancellation
-        await asyncio.sleep(0.01)
-        task.cancel()
-
-        # Give the loop a chance to process the cancellation
-        await asyncio.sleep(0.01)
-
-        assert not task.done(), "Task completed prematurely before worker release"
-
-        recorder_release.set()
-
-        try:
-            await task
-            raise AssertionError("Expected CancelledError")
-        except asyncio.CancelledError:
-            pass
+    assert result == str(tmp_path / "metadata.json")
+    assert len(observed_threads) == 1
+    assert observed_threads[0] != caller_thread
 
 
 async def test_write_layer_metadata_propagates_worker_failure(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Verify that an ordinary failure in the publication worker is correctly propagated."""
-    import asyncio
-    import asyncio.threads
+    publication_operations, tmp_path
+):
+    operations, recorder = publication_operations
+    error = RuntimeError("publication failed")
+    recorder.side_effect = error
 
-    class FakeRecorder:
-        def __call__(self, *args, **kwargs):
-            raise RuntimeError("Ordinary worker error")
-
-    recorder_mock = FakeRecorder()
-
-    operations = _MetadataWriterOperations(
-        logger=Mock(),
-        metrics=Mock(),
-        retry_policy=Mock(),
-        artifact_recorder_provider=lambda: recorder_mock,
-    )
-
-    async def dummy_write(*args: object, **kwargs: object) -> str:
-        return str(tmp_path / "metadata.json")
-
-    operations.write_metadata = dummy_write  # type: ignore[method-assign]
-    mock_metadata = _make_bronze_metadata()
-
-    with monkeypatch.context() as m:
-        m.setattr(asyncio, "to_thread", asyncio.threads.to_thread)
-
-        try:
-            await operations.write_layer_metadata(
-                base_path=str(tmp_path),
-                metadata=mock_metadata,
-                layer="bronze",
-            )
-            raise AssertionError("Expected RuntimeError")
-        except RuntimeError as e:
-            assert str(e) == "Ordinary worker error"
-
-
-async def test_write_layer_metadata_cancellation_propagates_worker_error(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Verify that a worker failure during cancellation is properly propagated instead of just raising CancelledError."""
-    import asyncio
-    import threading
-    import asyncio.threads
-    from unittest.mock import Mock
-
-    loop = asyncio.get_running_loop()
-    recorder_started = threading.Event()
-    recorder_release = threading.Event()
-
-    def blocking_recorder(*args: object, **kwargs: object) -> None:
-        loop.call_soon_threadsafe(recorder_started.set)
-        recorder_release.wait(timeout=5.0)
-        raise RuntimeError("Ordinary worker error during drain")
-
-    class FakeRecorder:
-        def __call__(self, *args, **kwargs):
-            blocking_recorder(*args, **kwargs)
-
-    recorder_mock = FakeRecorder()
-
-    operations = _MetadataWriterOperations(
-        logger=Mock(),
-        metrics=Mock(),
-        retry_policy=Mock(),
-        artifact_recorder_provider=lambda: recorder_mock,
-    )
-
-    async def dummy_write(*args: object, **kwargs: object) -> str:
-        return str(tmp_path / "metadata.json")
-
-    operations.write_metadata = dummy_write  # type: ignore[method-assign]
-    mock_metadata = _make_bronze_metadata()
-
-    with monkeypatch.context() as m:
-        m.setattr(asyncio, "to_thread", asyncio.threads.to_thread)
-
-        task = asyncio.create_task(
-            operations.write_layer_metadata(
-                base_path=str(tmp_path),
-                metadata=mock_metadata,
-                layer="bronze",
-            )
+    with pytest.raises(RuntimeError) as raised:
+        await operations.write_layer_metadata(
+            base_path=tmp_path, metadata=_make_bronze_metadata(), layer="bronze"
         )
+    assert raised.value is error
 
-        for _ in range(500):
-            if recorder_started.is_set():
-                break
-            await asyncio.sleep(0.01)
 
-        assert recorder_started.is_set(), "Timeout waiting for recorder thread to start"
+@pytest.mark.parametrize("worker_fails", [False, True])
+async def test_write_layer_metadata_drains_repeated_cancellation(
+    publication_operations, tmp_path, monkeypatch, worker_fails
+):
+    operations, recorder = publication_operations
+    loop = asyncio.get_running_loop()
+    started = asyncio.Event()
+    release = threading.Event()
+    drain_entered = [asyncio.Event(), asyncio.Event()]
+    real_shield = asyncio.shield
+    shield_calls = 0
+    error = RuntimeError("publication failed during drain")
 
-        # Cancel the task while the background thread is blocked
+    def tracked_shield(task):
+        nonlocal shield_calls
+        shield_calls += 1
+        if 2 <= shield_calls <= 3:
+            drain_entered[shield_calls - 2].set()
+        return real_shield(task)
+
+    def blocked_recorder(*args, **kwargs):
+        loop.call_soon_threadsafe(started.set)
+        if not release.wait(timeout=10):
+            raise TimeoutError("test did not release publication worker")
+        if worker_fails:
+            raise error
+
+    monkeypatch.setattr(asyncio, "shield", tracked_shield)
+    recorder.side_effect = blocked_recorder
+    task = asyncio.create_task(
+        operations.write_layer_metadata(
+            base_path=tmp_path, metadata=_make_bronze_metadata(), layer="bronze"
+        )
+    )
+    try:
+        await asyncio.wait_for(started.wait(), timeout=10)
         task.cancel()
+        await asyncio.wait_for(drain_entered[0].wait(), timeout=10)
+        task.cancel()
+        await asyncio.wait_for(drain_entered[1].wait(), timeout=10)
+        assert not task.done()
+    finally:
+        release.set()
 
-        # Release the background thread so it can raise its exception
-        recorder_release.set()
+    expected = RuntimeError if worker_fails else asyncio.CancelledError
+    with pytest.raises(expected) as raised:
+        await task
+    if worker_fails:
+        assert raised.value is error
+    recorder.assert_called_once()
 
-        try:
-            await task
-            raise AssertionError("Expected RuntimeError")
-        except RuntimeError as e:
-            assert str(e) == "Ordinary worker error during drain"
+
+async def test_write_layer_metadata_retrieves_error_before_cancel_handler(
+    publication_operations, tmp_path, monkeypatch
+):
+    """Force the worker to finish before cancellation reaches the drain loop."""
+    operations, recorder = publication_operations
+    error = RuntimeError("worker already failed")
+    recorder.side_effect = error
+    real_shield = asyncio.shield
+
+    async def cancel_after_worker_completion(task):
+        with pytest.raises(RuntimeError) as worker_error:
+            await real_shield(task)
+        assert task.done()
+        assert worker_error.value is error
+        raise asyncio.CancelledError
+
+    monkeypatch.setattr(asyncio, "shield", cancel_after_worker_completion)
+    with pytest.raises(RuntimeError) as raised:
+        await operations.write_layer_metadata(
+            base_path=tmp_path, metadata=_make_bronze_metadata(), layer="bronze"
+        )
+    assert raised.value is error
