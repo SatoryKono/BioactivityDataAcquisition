@@ -687,7 +687,9 @@ jobs:
   architecture-heavy-nightly:
     docker:
       - image: cimg/python:3.12
-    resource_class: large
+    # Four coverage workers exhausted 8 GiB in job 6702; retain four workers
+    # with 16 GiB so the full selector completes without worker restarts.
+    resource_class: xlarge
     environment:
       HYPOTHESIS_PROFILE: ci
       PYTHONDONTWRITEBYTECODE: '1'
@@ -710,18 +712,21 @@ jobs:
           name: Architecture complexity and heavy coverage
           no_output_timeout: 26m
           command: |
+            # CircleCI has already sourced BASH_ENV for this step. Child shells
+            # must preserve caller-provided PATH (including executable fixtures).
+            unset BASH_ENV
             timeout --signal=TERM --kill-after=30s 25m bash -euo pipefail -c '
-              mkdir -p /tmp/architecture-metrics
+              mkdir -p /tmp/architecture-metrics/junit
               uv run --frozen --no-build radon cc src/bioetl --min C --show-closures | tee /tmp/architecture-metrics/radon.txt
               uv run --frozen --no-build pytest tests/ -m "not e2e and not benchmark and not serial" \
                 --ignore=tests/e2e --ignore=tests/contract \
                 -n 4 --dist loadscope --max-worker-restart=0 \
                 --cov=src/bioetl --cov-report=term-missing \
                 --cov-report=xml:/tmp/architecture-metrics/coverage.xml \
-                --junitxml=/tmp/architecture-metrics/junit.xml --cov-fail-under=85
+                --junitxml=/tmp/architecture-metrics/junit/results.xml --cov-fail-under=85
             '
       - store_test_results:
-          path: /tmp/architecture-metrics
+          path: /tmp/architecture-metrics/junit
       - store_artifacts:
           path: /tmp/architecture-metrics
           destination: architecture-metrics
