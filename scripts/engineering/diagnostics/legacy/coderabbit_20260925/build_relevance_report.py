@@ -9,18 +9,22 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[5]
 ROOT = REPO / "reports/quality/coderabbit/20260925_085141"
 ALL_FILES_IGNORED = "all files ignored"
+MISSING_SOURCE = "<MISSING>"
+MISSING_SPAN = "<NO SPAN>"
+OUTSIDE_REPO = "<OUTSIDE REPO>"
+UNAVAILABLE_EVIDENCE = frozenset({MISSING_SOURCE, MISSING_SPAN, OUTSIDE_REPO})
 TRIAGED = json.loads((ROOT / "findings_triage.json").read_text(encoding="utf-8"))
 
 
 def read_span(rel: str, span: str, pad: int = 5) -> str:
     path = (REPO / rel).resolve()
     if Path(rel).is_absolute() or not path.is_relative_to(REPO.resolve()):
-        return "<OUTSIDE REPO>"
+        return OUTSIDE_REPO
     if not path.is_file():
-        return "<MISSING>"
+        return MISSING_SOURCE
     nums = [int(x) for x in re.findall(r"\d+", span)]
     if not nums:
-        return "<NO SPAN>"
+        return MISSING_SPAN
     start, end = nums[0], nums[-1]
     lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
     lo, hi = max(1, start - pad), min(len(lines), end + pad)
@@ -28,7 +32,7 @@ def read_span(rel: str, span: str, pad: int = 5) -> str:
 
 
 def _critical_evidence(body: str, code: str) -> list[str]:
-    if not code or code in {"<MISSING>", "<NO SPAN>", "<OUTSIDE REPO>"}:
+    if not code or code in UNAVAILABLE_EVIDENCE:
         return []
     evidence = []
     if "records_bronze" in body or "confirmed" in body or "total_fetched" in body:
@@ -60,7 +64,7 @@ def verify_critical() -> list[dict]:
                 "still_current": bool(evidence),
                 "evidence_status": (
                     "unavailable"
-                    if not code or code in {"<MISSING>", "<NO SPAN>", "<OUTSIDE REPO>"}
+                    if not code or code in UNAVAILABLE_EVIDENCE
                     else "available"
                 ),
                 "evidence": evidence,
