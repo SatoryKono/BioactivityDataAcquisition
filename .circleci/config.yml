@@ -3804,6 +3804,7 @@ workflows:
               - codex/proof-closeout-reuse-evidence
               - codex/grafana-postmerge-security-20261006
               - codex/pr-eight-integration
+              - codex/ci-11931-main-acceptance-20261007
           requires:
           - proof-coverage-shards
       - proof-governance:
