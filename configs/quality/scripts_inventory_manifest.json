@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-06T08:13:29.482395+00:00",
+  "generated_at": "2026-10-06T09:55:54.616881+00:00",
   "summary": {
     "total_scripts": 639,
     "status_counts": {
@@ -21561,7 +21561,7 @@
         },
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 303,
+          "line": 316,
           "source_group": "tests",
           "text": "recover_ps1 = Path(\"scripts/ops/observability/grafana/recover_renderer.ps1\")"
         }
@@ -21629,7 +21629,7 @@
       "references": [
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 304,
+          "line": 317,
           "source_group": "tests",
           "text": "recover_sh = Path(\"scripts/ops/observability/grafana/recover_renderer.sh\")"
         }
