@@ -119,8 +119,11 @@ it is not accepted. Each job retains its own target report directory.
 
 On 2026-10-05, `bioetl-docs-kpi-weekly` was registered for `main`,
 `ci-lane=docs-kpi`, Monday 04:00–04:59 UTC, one run, all months, Scheduled Actor.
-The first scheduled execution and notification parity remain pending; the legacy
-04:30 minute is represented by an hourly window.
+Manual pipeline 264/job 4453 passed on `303ced3b8e5c6fff04b061bfa5caf4b1674893af`
+on 2026-10-06: 118 documents outside navigation (target 120, hard limit 135),
+zero orphan candidates, no breaches. The JSON and Markdown artifacts were
+downloaded and verified. The first scheduled execution and notification parity
+remain pending; the legacy 04:30 minute is represented by an hourly window.
 On 2026-10-05, the CircleCI UI confirmed creation of
 `bioetl-memory-retention-weekly`: branch `main`, `ci-lane=memory-retention`,
 Monday, every month, one run during 04:00–04:59 UTC, Scheduled Actor.
