@@ -1,0 +1,59 @@
+{
+  "kind": "focused_merge_and_repair_evidence",
+  "candidate_commit": "7a850b422f5d88b838ff424eb490d57c5d9a5208",
+  "qualification": "Focused checks during preparation/merge; not a final clean-tree full-suite or CI ADMIT",
+  "checks": [
+    {
+      "label": "d9f5-merge-guards",
+      "tests": 88,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "label": "0d25ef90-adoption-guards",
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "label": "f36e-merge-guards",
+      "tests": 74,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "label": "c644-merge-guards",
+      "tests": 92,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 2
+    }
+  ],
+  "full_suite_status": "INCOMPLETE",
+  "external_probe_status": 429,
+  "archive_sha256": "db5718c631b124777133c718a5b3bac60a6c789e87e9d9dcbe0a6ba914c8e8b9",
+  "files": {
+    "d9f5-merge-guards.xml": "3c884f4d09c6ba2a1e85b2a91ed6d6c928bd11f08ee9fc7c747dff2b98776608",
+    "d9f5-merge-guards.log": "049c03dd9968c4040ed81826c6917e9afe3e0628c650e32a591989746b221b29",
+    "0d25ef90-adoption-guards.xml": "e64b7e21d2b2481023344643e7542edfcb8fa790ab526ccb643d6afe88f9c0a5",
+    "0d25ef90-adoption-guards.log": "d99cd6a203c4081e96697f8a2863e9155d78d633d9eb71d8d73ec6f445a0fc26",
+    "f36e-merge-guards.xml": "1b8da22f102c18ef98d5d575c2cf296a965c8b8aa9e86bdbd4cb1aea300b8a9a",
+    "f36e-merge-guards.log": "7b5aebbd1529a8125437acf2b40579543562e8a7c23bc6019db9bd2586be2624",
+    "c644-merge-guards.xml": "4a60fc7d3ffe49fbdcb77ad07812f51530c883a8ac18dfbaee38c0c8ff9363c1",
+    "c644-merge-guards.log": "8e8c8efe22f3e2410ced23f22cd2fbbc2e31ddee97eb1ed5fddbe5be4a8f7ae9",
+    "ci-6262-failed.log": "14b1f5578c843c5984bf62f5f92023a917d1201b45e3a73bf6fccaf1b71fefa1",
+    "full-suite-incomplete/execution.json": "76ad94c08fb2ed64fe525d82930b793d844ec839719e5b3322b73a776cc3843e",
+    "full-suite-incomplete/interruption.json": "e28b78b04efac7d099dd599c730ede6514ab94914ec77f4bfd2a8059db845467",
+    "semantic-scholar-1033/capture.yaml": "2c8f39ce9a21985e3da02a8ad83fce45e57f5c15f322f10cf59926a2d7735381",
+    "semantic-scholar-1033/summary.json": "2695d5df870d757043f293fdddf1ce97acfd9e3407414592e23ef8412e324ffc",
+    "semantic-scholar-1137/capture.yaml": "bc8d1af51ff5eb5b6d3646e3be124661671b4851c06e6849355eb6f11c0f9eb3",
+    "semantic-scholar-1137/summary.json": "4e4748ba40a629c57ff39d3add426c5b21eced003d5d632a5490b61eb6d2f1fc",
+    "semantic-scholar-production-headers/capture.yaml": "cc723559822a03cb43b5a4c883491e2ec4459586284f743ea2aae97499a4ac22",
+    "semantic-scholar-production-headers/summary.json": "1cd7533271cefd5362b91040f4a3e7692749d962dd1239c849e3287d0f825017",
+    "provider-access-summary.json": "d1a6ec1f01644be9fe083832e437c82f36bb036549697502681b58e8b5873ff0"
+  },
+  "provider_blocker": "BLOCKED_EXTERNAL_RATE_LIMIT"
+}
