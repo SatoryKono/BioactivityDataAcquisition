@@ -342,7 +342,10 @@ jobs:
           (
           cd "$BIOETL_WORKSPACE/."
           image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').image")
-          docker pull "$image"
+          base_image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').base_image")
+          # BuildKit cache does not register the base reference in the Docker image store.
+          docker pull --platform linux/amd64 "$base_image"
+          docker pull --platform linux/amd64 "$image"
           node grafana/tooling/router-v7-bridge/verify-host-image.mjs \
             bioetl-router-host:acceptance
           )
@@ -684,11 +687,17 @@ jobs:
   architecture-heavy-nightly:
     docker:
       - image: cimg/python:3.12
-    resource_class: large
+    # Four coverage workers exhausted 8 GiB in job 6702; retain four workers
+    # with 16 GiB so the full selector completes without worker restarts.
+    resource_class: xlarge
     environment:
       HYPOTHESIS_PROFILE: ci
       PYTHONDONTWRITEBYTECODE: '1'
       PYTHONUNBUFFERED: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
     steps:
       - checkout
       - setup-python-uv:
@@ -703,18 +712,21 @@ jobs:
           name: Architecture complexity and heavy coverage
           no_output_timeout: 26m
           command: |
+            # CircleCI has already sourced BASH_ENV for this step. Child shells
+            # must preserve caller-provided PATH (including executable fixtures).
+            unset BASH_ENV
             timeout --signal=TERM --kill-after=30s 25m bash -euo pipefail -c '
-              mkdir -p /tmp/architecture-metrics
+              mkdir -p /tmp/architecture-metrics/junit
               uv run --frozen --no-build radon cc src/bioetl --min C --show-closures | tee /tmp/architecture-metrics/radon.txt
               uv run --frozen --no-build pytest tests/ -m "not e2e and not benchmark and not serial" \
                 --ignore=tests/e2e --ignore=tests/contract \
-                -n auto --dist loadscope --max-worker-restart=0 \
+                -n 4 --dist loadscope --max-worker-restart=0 \
                 --cov=src/bioetl --cov-report=term-missing \
                 --cov-report=xml:/tmp/architecture-metrics/coverage.xml \
-                --junitxml=/tmp/architecture-metrics/junit.xml --cov-fail-under=85
+                --junitxml=/tmp/architecture-metrics/junit/results.xml --cov-fail-under=85
             '
       - store_test_results:
-          path: /tmp/architecture-metrics
+          path: /tmp/architecture-metrics/junit
       - store_artifacts:
           path: /tmp/architecture-metrics
           destination: architecture-metrics
@@ -1850,6 +1862,15 @@ jobs:
           command: |
             export PATH="$HOME/.local/bin:$PATH"
             HEAD_SHA="$CIRCLE_SHA1"
+            if [ -n "${CIRCLE_PULL_REQUEST:-${CIRCLE_PULL_REQUESTS:-}}" ]; then
+              pattern='^(feat|fix|refactor|docs|test|chore|ci)/[a-z0-9]+([.-][a-z0-9]+)*$'
+              master_pattern='^master[0-9-]+$'
+              automation='^(dependabot|renovate|devin|bolt|copilot|codex)/.+'
+              if [[ ! "$CIRCLE_BRANCH" =~ $pattern && ! "$CIRCLE_BRANCH" =~ $master_pattern && ! "$CIRCLE_BRANCH" =~ $automation ]]; then
+                echo "Non-compliant PR head branch name: $CIRCLE_BRANCH" >&2
+                exit 1
+              fi
+            fi
             if [ "$CIRCLE_BRANCH" = "main" ] || [ "$CIRCLE_BRANCH" = "master" ]; then
               echo "Default-branch push: all gates required (fail-closed)."
               uv run --frozen --no-build python - "$HEAD_SHA" \<<'EOF' > /tmp/pr-gate-decisions.json
@@ -1993,7 +2014,7 @@ jobs:
   # --- Gate: tests (always_required) ------------------------------------------
   dependency-lock:
     docker:
-      - image: cimg/python:3.12
+      - image: cimg/python:3.12-node
     resource_class: small
     steps:
       - checkout
@@ -2003,6 +2024,21 @@ jobs:
           command: |
             export PATH="$HOME/.local/bin:$PATH"
             uv lock --check
+      - run:
+          name: Validate every tracked npm manifest against its lockfile
+          command: |
+            set -euo pipefail
+            mkdir -p reports/dependency-review
+            git ls-files -z -- package-lock.json '**/package-lock.json' > /tmp/npm-lockfiles
+            test -s /tmp/npm-lockfiles
+            while IFS= read -r -d '' lockfile; do
+              directory="$(dirname "$lockfile")"
+              test -f "$directory/package.json"
+              npm ci --prefix "$directory" --dry-run --ignore-scripts --no-audit --no-fund
+              printf '%s\n' "$lockfile" >> reports/dependency-review/validated-lockfiles.txt
+            done < /tmp/npm-lockfiles
+      - store_artifacts:
+          path: reports/dependency-review
 
   # Mirrors tests.yml `test-fast` (4 unit groups, fast markers, no xdist).
   # NOTE: CircleCI matrix is a cartesian product, so name+path are packed into
@@ -2205,6 +2241,53 @@ jobs:
             uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json
       - store_artifacts:
           path: osv-results.json
+
+  actions-audit:
+    parameters:
+      online:
+        type: boolean
+        default: false
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Audit retained Actions with pinned zizmor 1.29.0
+          no_output_timeout: 11m
+          command: |
+            cat > /tmp/actions-audit.sh \<<'BIOETL_ACTIONS_AUDIT'
+            set -euo pipefail
+            mkdir -p reports/actions-audit "$HOME/.local/bin"
+            curl --fail --location --retry 3 --proto '=https' --tlsv1.2 \
+              https://github.com/zizmorcore/zizmor/releases/download/v1.29.0/zizmor-x86_64-unknown-linux-gnu.tar.gz \
+              --output /tmp/zizmor.tar.gz
+            printf '%s  %s\n' dd96df044a6e8538d5f423790f453bdd03d49e5b2bcc38214acc41a2f1297839 /tmp/zizmor.tar.gz | sha256sum --check -
+            tar -xzf /tmp/zizmor.tar.gz -C "$HOME/.local/bin" zizmor
+            if << parameters.online >>; then
+              [[ "$CIRCLE_BRANCH" == main ]]
+              test -n "${GITHUB_TOKEN:-}"
+              unset GH_TOKEN ZIZMOR_OFFLINE ZIZMOR_NO_ONLINE_AUDITS
+            else
+              export ZIZMOR_OFFLINE=true
+            fi
+            printf '%s\n' "$CIRCLE_SHA1" > reports/actions-audit/source-sha.txt
+            set +e
+            "$HOME/.local/bin/zizmor" \
+              --min-severity high --min-confidence high --config .github/zizmor.yml \
+              --format json .github/workflows .github/actions > reports/actions-audit/findings.json
+            json_status=$?
+            "$HOME/.local/bin/zizmor" \
+              --min-severity high --min-confidence high --config .github/zizmor.yml \
+              --format sarif .github/workflows .github/actions > reports/actions-audit/findings.sarif
+            sarif_status=$?
+            set -e
+            if [ "$json_status" -ne 0 ]; then exit "$json_status"; fi
+            exit "$sarif_status"
+            BIOETL_ACTIONS_AUDIT
+            timeout --signal=TERM --kill-after=30s 9m bash /tmp/actions-audit.sh
+      - store_artifacts:
+          path: reports/actions-audit
 
   # --- Gate: duplication (always_required) ---------------------------------------
   # Mirrors duplication-complexity.yml (radon + jscpd).
@@ -3010,6 +3093,20 @@ jobs:
 
 
 workflows:
+  retained-actions-online:
+    when:
+      and:
+        - equal: [pr-gate, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - actions-audit:
+          name: actions-audit-online
+          online: true
+          context: bioetl-github-read-only
+          filters:
+            branches:
+              only: main
+
   router-bridge:
     when:
       and:
@@ -3253,6 +3350,8 @@ workflows:
           requires: [classify]
       - security-scans:
           requires: [classify]
+      - actions-audit:
+          requires: [classify]
       - duplication:
           requires: [classify]
       - schema-governance:
@@ -3265,8 +3364,24 @@ workflows:
           requires: [classify]
       - docker-build:
           requires: [classify]
+      # Retain the legacy PR/push checks without credentials or nightly heavy jobs.
+      - port-contracts:
+          requires: [classify]
+      - provider-contract-drift:
+          requires: [classify]
+      - memory-freshness:
+          requires: [classify]
+      - skills-consistency:
+          requires: [classify]
+      - e2e-matrix-replay:
+          requires: [classify]
       - pr-gate-complete:
           requires:
+            - port-contracts
+            - provider-contract-drift
+            - memory-freshness
+            - skills-consistency
+            - e2e-matrix-replay
             - lint-ruff
             - lint-arch
             - arch-tests
@@ -3278,6 +3393,7 @@ workflows:
             - root-hygiene
             - compiled-artifacts
             - security-scans
+            - actions-audit
             - duplication
             - schema-governance
             - semantic-governance
