@@ -1,0 +1,35 @@
+{
+  "source_commit": "5f42a28a31725c84c8d7a733a0652f095634f5c1",
+  "qualification": "Focused repair and merge validation; CI5697 is historical FAILED; local canonical full suite INCOMPLETE; neither current complete17 nor ADMIT claimed.",
+  "contract_repair_before_main_merge": {
+    "passed": 1192,
+    "skipped": 2,
+    "deselected": 69,
+    "pilot_soak_separate_passed": 2
+  },
+  "clean_generated_guards": {
+    "passed": 61,
+    "skipped": 2,
+    "skip_reason": "Existing Windows VCR catalog performance skips; actual canonical catalog check ran separately."
+  },
+  "docs_verify_exit": 0,
+  "freshness_exit": 1,
+  "archive_sha256": "f3059d36003144ac1d73e8fbf0b961fa45fce4a0199657b4c3228d101060bb35",
+  "files": {
+    "ci5697-repairs.xml": "cd47a57df238d07e77210dc8d2b2de20c13bbd8b6e6fa1aa6ad03a6b0e2486fd",
+    "contract-confidence-repaired.xml": "9fb52c286b16f590a7fb0329a31eb26dc09a32cfefc8674212d9e27dc7b5259a",
+    "s2-pilot-contract-repaired.xml": "e46c7c3b54fc3e4296a5fca0d7cf1e6f61840a70be00afc8c2e27c25c294150c",
+    "main3f-merge-validation.xml": "76cef32712dd4287fb5246954559259c4f78148dbd11fad8537b9e93c296593f",
+    "5f42a28a-clean-guards.xml": "2f085e5707d7f32a811f9b9a359187819e68d75889dfca27fedba470a59c0fec",
+    "5f42a28a-docs-verify.log": "9d3baf14d521cb61672dcce44f84b9a4ee697b5bf612309de2651fccc5cebbaf",
+    "5f42a28a-vcr-age90.log": "152270cfc9cfc9c0831392afbeb05c4ff4561a0f011142f10c3b04adfcc454dc",
+    "ci-5697/artifact-paths.json": "6c2d4e2a22f538811f63c4550e38ea2fc0eb1dc53d49c75f9c3ac9cea6a5144d",
+    "ci-5697/contract-confidence.log": "32456970d2738209043c6758520d2e15883d7e56c0434c4bfe083b465d5f45b5",
+    "ci-5697/coverage-17.log": "5a5f8680b372b695f988f8e49e10f0ba42086beab86cbea751e13e39df4961de",
+    "ci-5697/manifest.json": "c69aeb6b9c73e5d363aafadc238ca14f2a7ccb735e8de359b7f66c8c643e46e0",
+    "semantic-recovery-probe-0927/capture.yaml": "e42652875f64f3ea9383f2a93e301d026be41960225aed0c7ac6e4a04e163ea3",
+    "semantic-recovery-probe-0927/summary.json": "ad741d086d5db50b961b4668c524df6d7e86345e7f19deb4f81752675fc8494d",
+    "interrupted-full-suite/execution.json": "c968601d47c84c646fc3f43723008a0047c7331d1df4d86faf1a1d4a50d5d256",
+    "interrupted-full-suite/interruption.json": "2b0ba9c2dd76e8670d215beb591cbe8a421abc71392b906a1c45958d0a6d6ed1"
+  }
+}
