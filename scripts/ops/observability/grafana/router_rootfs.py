@@ -48,20 +48,34 @@ def fingerprint(stream):
     return hashlib.sha256(encoded).hexdigest()
 
 
+def canonical_image_reference(value: str) -> str:
+    """Build Docker's positional operand from a fixed prefix and parsed digest."""
+    if value == "bioetl-router-host:acceptance":
+        return "bioetl-router-host:acceptance"
+    match = re.fullmatch(
+        r"(sha256:|satorykono/bioetl-grafana-router7-canvas@sha256:)([0-9a-f]{64})",
+        value,
+    )
+    if match is None:
+        raise ValueError("Unsupported image reference")
+    digest = bytes.fromhex(match.group(2)).hex()
+    if match.group(1) == "sha256:":
+        return "sha256:" + digest
+    return "satorykono/bioetl-grafana-router7-canvas@sha256:" + digest
+
+
 def main(argv: list[str] | None = None):
     args = sys.argv[1:] if argv is None else argv
-    if len(args) != 1 or not re.fullmatch(
-        r"bioetl-router-host:acceptance|sha256:[0-9a-f]{64}|satorykono/bioetl-grafana-router7-canvas@sha256:[0-9a-f]{64}",
-        args[0],
-    ):
+    if len(args) != 1:
         raise ValueError("Unsupported image reference")
+    image = canonical_image_reference(args[0])
     docker = (
         "C:/Program Files/Docker/Docker/resources/bin/docker.exe"
         if sys.platform == "win32"
         else "/usr/bin/docker"
     )
     container = subprocess.check_output(
-        [docker, "create", "--entrypoint", "/bin/true", "--", args[0]], text=True
+        [docker, "create", "--entrypoint", "/bin/true", "--", image], text=True
     ).strip()
     if not re.fullmatch(r"[0-9a-f]{64}", container):
         raise ValueError("Invalid container ID")

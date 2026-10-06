@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Extract and triage CodeRabbit findings from 20260925 audit."""
+
 from __future__ import annotations
 
 import json
@@ -9,6 +10,28 @@ from pathlib import Path
 
 ROOT = Path("reports/quality/coderabbit/20260925_085141")
 REPO = Path(".")
+
+
+def _finding(obj: dict, leaf: str) -> dict:
+    text = obj.get("codegenInstructions") or obj.get("message") or ""
+    m = re.search(r"In @([^\s]+) around lines? ([\d -]+), (.+)", text, re.S)
+    m2 = re.search(r"In @([^\s]+) at line (\d+), (.+)", text, re.S)
+    if m:
+        file_name, lines, body = m.group(1), m.group(2), m.group(3).strip()
+    elif m2:
+        file_name, lines, body = m2.group(1), m2.group(2), m2.group(3).strip()
+    else:
+        file_name = obj.get("fileName") or "?"
+        lines = "?"
+        body = text.split("\n\n")[-1][:600] if text else ""
+    return {
+        "leaf": leaf,
+        "severity": obj.get("severity") or "unknown",
+        "file": file_name,
+        "lines": lines.replace(" ", ""),
+        "body": body[:800],
+        "full": text,
+    }
 
 
 def extract() -> list[dict]:
@@ -24,27 +47,7 @@ def extract() -> list[dict]:
                 continue
             if obj.get("type") != "finding":
                 continue
-            text = obj.get("codegenInstructions") or obj.get("message") or ""
-            m = re.search(r"In @([^\s]+) around lines? ([0-9 -]+), (.+)", text, re.S)
-            m2 = re.search(r"In @([^\s]+) at line ([0-9]+), (.+)", text, re.S)
-            if m:
-                file_name, lines, body = m.group(1), m.group(2), m.group(3).strip()
-            elif m2:
-                file_name, lines, body = m2.group(1), m2.group(2), m2.group(3).strip()
-            else:
-                file_name = obj.get("fileName") or "?"
-                lines = "?"
-                body = text.split("\n\n")[-1][:600] if text else ""
-            findings.append(
-                {
-                    "leaf": leaf,
-                    "severity": obj.get("severity") or "unknown",
-                    "file": file_name,
-                    "lines": lines.replace(" ", ""),
-                    "body": body[:800],
-                    "full": text,
-                }
-            )
+            findings.append(_finding(obj, leaf))
     return findings
 
 
@@ -64,7 +67,7 @@ def snippet(path: Path, start: int, end: int, pad: int = 3) -> str:
         return ""
     lo = max(1, start - pad)
     hi = min(len(lines), end + pad)
-    return "\n".join(f"{i}:{lines[i-1]}" for i in range(lo, hi + 1))
+    return "\n".join(f"{i}:{lines[i - 1]}" for i in range(lo, hi + 1))
 
 
 def keyword_hits(body: str, code: str) -> list[str]:
@@ -80,7 +83,20 @@ def keyword_hits(body: str, code: str) -> list[str]:
     interesting = []
     seen = set()
     for t in tokens:
-        if t.lower() in {"update", "replace", "move", "keep", "leave", "ensure", "preserve", "treat", "verify", "finding", "composition", "application"}:
+        if t.lower() in {
+            "update",
+            "replace",
+            "move",
+            "keep",
+            "leave",
+            "ensure",
+            "preserve",
+            "treat",
+            "verify",
+            "finding",
+            "composition",
+            "application",
+        }:
             continue
         if t in seen or len(t) < 5:
             continue
@@ -92,45 +108,58 @@ def keyword_hits(body: str, code: str) -> list[str]:
     return interesting
 
 
+def _classify_span(body: str, code: str, hits: list[str]) -> tuple[str, str]:
+    body_l = body.lower()
+    if not code.strip():
+        status = "stale_lines_moved"
+        reason = "line span empty / beyond EOF"
+    elif "move" in body_l and (
+        "application" in body_l or "infrastructure" in body_l or "observer" in body_l
+    ):
+        status = "likely_current_arch" if hits else "needs_manual"
+        reason = "layering recommendation; symbols " + (
+            ",".join(hits) if hits else "not near span"
+        )
+    elif hits:
+        status = "likely_current"
+        reason = "keywords near span: " + ",".join(hits)
+    else:
+        status = "needs_manual"
+        reason = "no strong keyword hit near cited lines"
+    return status, reason
+
+
+def _triage_finding(f: dict) -> dict:
+    rel = f["file"]
+    path = REPO / rel
+    reason = ""
+    code = ""
+    hits: list[str] = []
+    span = parse_line_span(f["lines"])
+    if not path.exists():
+        status = "stale_missing_file"
+        reason = "file missing on HEAD"
+    elif span is None:
+        status = "needs_manual"
+        reason = "no line span"
+        code = path.read_text(encoding="utf-8", errors="replace")[:2000]
+        hits = keyword_hits(f["body"], code)
+    else:
+        start, end = span
+        code = snippet(path, start, end, pad=8)
+        hits = keyword_hits(f["body"], code)
+        status, reason = _classify_span(f["body"], code, hits)
+    item = dict(f)
+    item.update(
+        {"status": status, "reason": reason, "hits": hits, "snippet": code[:1200]}
+    )
+    return item
+
+
 def triage(findings: list[dict]) -> list[dict]:
     out: list[dict] = []
     for f in findings:
-        rel = f["file"]
-        path = REPO / rel
-        status = "unknown"
-        reason = ""
-        code = ""
-        hits: list[str] = []
-        span = parse_line_span(f["lines"])
-        if not path.exists():
-            status = "stale_missing_file"
-            reason = "file missing on HEAD"
-        elif span is None:
-            status = "needs_manual"
-            reason = "no line span"
-            code = path.read_text(encoding="utf-8", errors="replace")[:2000]
-            hits = keyword_hits(f["body"], code)
-        else:
-            start, end = span
-            code = snippet(path, start, end, pad=8)
-            hits = keyword_hits(f["body"], code)
-            # Heuristics for common "move layer" architectural findings:
-            # still current if cited symbols/paths still exist near the span.
-            body_l = f["body"].lower()
-            if not code.strip():
-                status = "stale_lines_moved"
-                reason = "line span empty / beyond EOF"
-            elif "move" in body_l and ("application" in body_l or "infrastructure" in body_l or "observer" in body_l):
-                status = "likely_current_arch" if hits else "needs_manual"
-                reason = "layering recommendation; symbols " + (",".join(hits) if hits else "not near span")
-            elif hits:
-                status = "likely_current"
-                reason = "keywords near span: " + ",".join(hits)
-            else:
-                status = "needs_manual"
-                reason = "no strong keyword hit near cited lines"
-        item = dict(f)
-        item.update({"status": status, "reason": reason, "hits": hits, "snippet": code[:1200]})
+        item = _triage_finding(f)
         out.append(item)
     return out
 
