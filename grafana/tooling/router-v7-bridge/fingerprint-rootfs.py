@@ -7,7 +7,7 @@ import sys
 import tarfile
 
 
-def fingerprint(stream):
+def filesystem_records(stream):
     records = {}
     with tarfile.open(fileobj=stream, mode="r|") as archive:
         for entry in archive:
@@ -27,6 +27,11 @@ def fingerprint(stream):
                               if key not in {"mtime", "atime", "ctime"}}]
     if not records:
         raise ValueError("Empty rootfs export")
+    return records
+
+
+def fingerprint(stream):
+    records = filesystem_records(stream)
     encoded = json.dumps(records, sort_keys=True, separators=(",", ":")).encode()
     return hashlib.sha256(encoded).hexdigest()
 
