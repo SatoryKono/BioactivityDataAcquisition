@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-06T03:47:56.269022+00:00",
+  "generated_at": "2026-10-06T06:01:07.592142+00:00",
   "summary": {
     "total_scripts": 637,
     "status_counts": {
@@ -16928,7 +16928,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 10,
       "references": [
         {
           "path": "scripts/engineering/ci/local_test_telemetry.py",

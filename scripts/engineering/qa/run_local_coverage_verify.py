@@ -227,7 +227,7 @@ def _windows_bash() -> str:
     return "bash"
 
 
-def _command(shard: Shard, junit: Path) -> list[str]:
+def _command(shard: Shard, junit: Path, *, max_workers: int = 2) -> list[str]:
     command = [
         _windows_bash(),
         "scripts/engineering/dev/run_pytest.sh",
@@ -243,7 +243,9 @@ def _command(shard: Shard, junit: Path) -> list[str]:
         f"--junitxml={_bash_safe_path(junit)}",
     ]
     if shard.parallel:
-        command.extend(("-n", "2", "--dist=loadscope", "--max-worker-restart=0"))
+        command.extend(
+            ("-n", str(max_workers), "--dist=loadscope", "--max-worker-restart=0")
+        )
     else:
         command.extend(("-p", "no:xdist"))
     return command
@@ -280,12 +282,20 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         help="New empty run directory (default: system temp)",
     )
+    parser.add_argument(
+        "--max-workers",
+        type=int,
+        choices=(1, 2),
+        default=2,
+        help="Worker limit for parallel shards; use 1 on memory-constrained hosts",
+    )
     args = parser.parse_args(argv)
     if len(SHARDS) != 17 or len({shard.name for shard in SHARDS}) != 17:
         raise RuntimeError("Local coverage plan must have 17 distinct shards")
     if args.list:
         for shard in SHARDS:
-            print(f"{shard.name}: {' '.join(_command(shard, Path('<junit>')))}")
+            command = _command(shard, Path("<junit>"), max_workers=args.max_workers)
+            print(f"{shard.name}: {' '.join(command)}")
         return 0
 
     if _git(
@@ -326,6 +336,7 @@ def main(argv: list[str] | None = None) -> int:
         "test_tree_sha256": test_sha,
         "started_at_utc": datetime.now(UTC).isoformat(),
         "python": sys.version.split()[0],
+        "max_workers": args.max_workers,
         "scratch_dir": str(scratch),
         "required_shards": [shard.name for shard in SHARDS],
         "shards": [],
@@ -367,7 +378,7 @@ def main(argv: list[str] | None = None) -> int:
         coverage_file = shards_dir / f".coverage.{shard.name}"
         junit = junit_dir / f"{shard.name}.xml"
         log = logs_dir / f"{shard.name}.log"
-        command = _command(shard, junit)
+        command = _command(shard, junit, max_workers=args.max_workers)
         env["COVERAGE_FILE"] = _bash_safe_path(coverage_file)
         print(f"[local-coverage] start {shard.name}", flush=True)
         started = time.monotonic()

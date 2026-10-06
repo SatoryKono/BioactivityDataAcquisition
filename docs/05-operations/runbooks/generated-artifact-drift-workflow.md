@@ -58,6 +58,13 @@ identity and inputs from the manifest, emits no GitHub run URL, and keeps
 `local_single_host` trust with `CI=BLOCKED_EXTERNAL_PERMANENT`. This is neither
 CI PASS nor lifecycle ADMIT. Do not invent coverage from partial local XML.
 
+On memory-constrained hosts, run the local producer with `--max-workers 1`:
+`python -m scripts.engineering.qa.run_local_coverage_verify --max-workers 1`.
+The default and upper limit remain two workers. The manifest records the chosen
+limit and each executed command; all 17 shard selections, timeouts and coverage
+thresholds remain unchanged. Preserve an incomplete run before restarting in a
+new empty scratch directory. A passing subset never substitutes for all shards.
+
 After `git fetch origin main`, do **not** use
 `git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main` in a
 local worktree (it can delete `origin/main` and fail

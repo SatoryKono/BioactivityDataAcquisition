@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from pathlib import Path
+import json
 import subprocess
 
 import pytest
 
+from scripts.engineering.qa import run_local_coverage_verify as runner
 from scripts.engineering.qa.run_local_coverage_verify import (
     SHARDS,
     _command,
@@ -66,6 +68,55 @@ def test_local_coverage_list_is_read_only(capsys) -> None:
     assert len(lines) == 17
     assert lines[0].startswith("smoke:")
     assert lines[-1].startswith("serial:")
+
+
+@pytest.mark.parametrize("shard", SHARDS, ids=lambda shard: shard.name)
+def test_single_worker_preserves_every_shard_selection_and_gate(shard) -> None:
+    expected = _command(shard, Path("junit.xml"))
+    if shard.parallel:
+        expected[expected.index("-n") + 1] = "1"
+    assert _command(shard, Path("junit.xml"), max_workers=1) == expected
+
+
+@pytest.mark.parametrize("workers", ("0", "3", "-1"))
+def test_worker_limit_cannot_disable_execution_or_raise_resource_budget(
+    workers,
+) -> None:
+    with pytest.raises(SystemExit) as error:
+        main(["--list", "--max-workers", workers])
+    assert error.value.code == 2
+
+
+def test_single_worker_is_recorded_and_used_without_accepting_failed_run(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        runner, "_git", lambda *args: "" if args[0] == "status" else "a" * 40
+    )
+    monkeypatch.setattr(runner, "compute_source_tree_sha256", lambda **kwargs: "b" * 64)
+    monkeypatch.setattr(
+        runner, "compute_test_telemetry_source_tree_sha256", lambda **kwargs: "c" * 64
+    )
+    executed = []
+
+    def failed_shard(command, log, *, env):
+        executed.append(command)
+        return 1
+
+    monkeypatch.setattr(runner, "_run_logged", failed_shard)
+    scratch = tmp_path / "measurement"
+    assert main(["--scratch-dir", str(scratch), "--max-workers", "1"]) == 1
+    manifest = json.loads((scratch / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["max_workers"] == 1
+    assert manifest["complete"] is False
+    assert len(executed) == len(manifest["shards"]) == 17
+    for shard, command, row in zip(SHARDS, executed, manifest["shards"], strict=True):
+        assert row["command"] == command
+        assert row["exit_code"] == 1
+        if shard.parallel:
+            assert command[command.index("-n") + 1] == "1"
+        else:
+            assert command[-2:] == ["-p", "no:xdist"]
 
 
 @pytest.mark.subprocess_backed
