@@ -1,0 +1,1905 @@
+{
+  "summary": {
+    "snapshot_date": "2026-07-23",
+    "targets": 2,
+    "total_duplicate_clusters": 103,
+    "total_raw_duplicate_clusters": 107,
+    "total_excluded_duplicate_clusters": 4
+  },
+  "normalization": {
+    "exclude_module_patterns": [],
+    "exclude_actionability_categories": []
+  },
+  "trend": {
+    "status": "no_prior_snapshot",
+    "snapshot_date": "2026-07-23"
+  },
+  "reduction_leverage_ranking": [
+    {
+      "target": "src/bioetl/composition",
+      "duplicate_clusters": 35,
+      "dominant_actionability_category": "composition_runtime_wiring_pattern",
+      "dominant_actionability_cluster_count": 35,
+      "low_risk_cluster_count": 35,
+      "low_risk_cluster_share": 1.0,
+      "recommended_first_wave": false
+    },
+    {
+      "target": "src/bioetl/application",
+      "duplicate_clusters": 68,
+      "dominant_actionability_category": "export_facade_or_package_barrel",
+      "dominant_actionability_cluster_count": 65,
+      "low_risk_cluster_count": 65,
+      "low_risk_cluster_share": 0.9559,
+      "recommended_first_wave": false
+    }
+  ],
+  "first_wave": {
+    "status": "selected",
+    "target": "src/bioetl/composition",
+    "duplicate_clusters": 35,
+    "dominant_actionability_category": "composition_runtime_wiring_pattern",
+    "selection_rule": "prefer low-risk actionability families with bounded cluster counts, then maximize duplicate reduction leverage"
+  },
+  "targets": [
+    {
+      "target": "src/bioetl/composition",
+      "returncode": 8,
+      "duplicate_count": 35,
+      "raw_duplicate_count": 35,
+      "excluded_duplicate_count": 0,
+      "actionability": [
+        {
+          "category": "composition_runtime_wiring_pattern",
+          "duplicate_clusters": 35
+        }
+      ],
+      "top_pairs": [
+        {
+          "modules": [
+            "bioetl.composition.bootstrap.runtime._composite_control_plane_builder_support",
+            "bioetl.composition.runtime_builders.run_manifest_support"
+          ],
+          "duplicate_clusters": 2
+        },
+        {
+          "modules": [
+            "bioetl.composition.factories.services.builder",
+            "bioetl.composition.factories.services.pipeline_builder"
+          ],
+          "duplicate_clusters": 2
+        },
+        {
+          "modules": [
+            "bioetl.composition.providers._creation",
+            "bioetl.composition.providers.provider_registry"
+          ],
+          "duplicate_clusters": 2
+        },
+        {
+          "modules": [
+            "bioetl.composition.runtime_builders._run_manifest_control_plane_paths",
+            "bioetl.composition.runtime_builders._run_manifest_data_roots"
+          ],
+          "duplicate_clusters": 2
+        },
+        {
+          "modules": [
+            "bioetl.composition._pipeline_execution",
+            "bioetl.composition.execution_api"
+          ],
+          "duplicate_clusters": 1
+        }
+      ],
+      "clusters": [
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.control_plane_api",
+              "start_line": 116,
+              "end_line": 138
+            },
+            {
+              "module": "bioetl.composition.control_plane_service_access",
+              "start_line": 52,
+              "end_line": 73
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.runtime_builders._run_manifest_control_plane_paths",
+              "start_line": 21,
+              "end_line": 39
+            },
+            {
+              "module": "bioetl.composition.runtime_builders._run_manifest_data_roots",
+              "start_line": 88,
+              "end_line": 106
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.factories.services.builder",
+              "start_line": 84,
+              "end_line": 114
+            },
+            {
+              "module": "bioetl.composition.factories.services.pipeline_builder",
+              "start_line": 71,
+              "end_line": 99
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.factories.pipeline.control_plane_artifacts",
+              "start_line": 24,
+              "end_line": 35
+            },
+            {
+              "module": "bioetl.composition.pipeline_runner_request",
+              "start_line": 52,
+              "end_line": 63
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.factories.dq.__init__",
+              "start_line": 21,
+              "end_line": 39
+            },
+            {
+              "module": "bioetl.composition.providers.__init__",
+              "start_line": 72,
+              "end_line": 90
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.runtime_builders._run_manifest_control_plane_paths",
+              "start_line": 37,
+              "end_line": 51
+            },
+            {
+              "module": "bioetl.composition.runtime_builders._run_manifest_data_roots",
+              "start_line": 114,
+              "end_line": 133
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.factories.pipeline.factory_method_helpers",
+              "start_line": 121,
+              "end_line": 131
+            },
+            {
+              "module": "bioetl.composition.factories.transformer_factory",
+              "start_line": 118,
+              "end_line": 128
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.factories.storage._bronze",
+              "start_line": 55,
+              "end_line": 65
+            },
+            {
+              "module": "bioetl.composition.factories.storage._gold",
+              "start_line": 59,
+              "end_line": 69
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition._resource_management",
+              "start_line": 27,
+              "end_line": 38
+            },
+            {
+              "module": "bioetl.composition.resources_api",
+              "start_line": 21,
+              "end_line": 31
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.bootstrap.cli.checkpoint",
+              "start_line": 157,
+              "end_line": 178
+            },
+            {
+              "module": "bioetl.composition.bootstrap.cli.health",
+              "start_line": 72,
+              "end_line": 87
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.bootstrap.runtime.observability_bundle",
+              "start_line": 212,
+              "end_line": 219
+            },
+            {
+              "module": "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases",
+              "start_line": 105,
+              "end_line": 112
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.bootstrap.runtime._composite_control_plane_builder_support",
+              "start_line": 44,
+              "end_line": 51
+            },
+            {
+              "module": "bioetl.composition.runtime_builders.run_manifest_contract_identity",
+              "start_line": 30,
+              "end_line": 46
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.factories.datasource.data_source_factory",
+              "start_line": 76,
+              "end_line": 84
+            },
+            {
+              "module": "bioetl.composition.factories.services.bundle",
+              "start_line": 175,
+              "end_line": 196
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.factories.pipeline._creation_wiring",
+              "start_line": 97,
+              "end_line": 104
+            },
+            {
+              "module": "bioetl.composition.factories.pipeline._factory_method_types",
+              "start_line": 50,
+              "end_line": 59
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.factories.services.builder",
+              "start_line": 120,
+              "end_line": 133
+            },
+            {
+              "module": "bioetl.composition.factories.services.pipeline_builder",
+              "start_line": 105,
+              "end_line": 125
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.factories.storage.factory",
+              "start_line": 31,
+              "end_line": 40
+            },
+            {
+              "module": "bioetl.composition.factories.storage.storage_factory",
+              "start_line": 16,
+              "end_line": 23
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.providers._creation",
+              "start_line": 49,
+              "end_line": 62
+            },
+            {
+              "module": "bioetl.composition.providers.provider_registry",
+              "start_line": 150,
+              "end_line": 161
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.providers._creation",
+              "start_line": 178,
+              "end_line": 186
+            },
+            {
+              "module": "bioetl.composition.providers.provider_registry",
+              "start_line": 181,
+              "end_line": 188
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.runtime_builders._runner_control_plane_policy",
+              "start_line": 108,
+              "end_line": 127
+            },
+            {
+              "module": "bioetl.composition.runtime_builders._runner_control_plane_policy_support",
+              "start_line": 153,
+              "end_line": 171
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.entrypoints",
+              "start_line": 35,
+              "end_line": 41
+            },
+            {
+              "module": "bioetl.composition.execution_api",
+              "start_line": 30,
+              "end_line": 36
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition._pipeline_execution",
+              "start_line": 119,
+              "end_line": 133
+            },
+            {
+              "module": "bioetl.composition.execution_api",
+              "start_line": 104,
+              "end_line": 110
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.bootstrap.assembly.health_server",
+              "start_line": 41,
+              "end_line": 47
+            },
+            {
+              "module": "bioetl.composition.health_api",
+              "start_line": 73,
+              "end_line": 85
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.bootstrap.__init__",
+              "start_line": 105,
+              "end_line": 111
+            },
+            {
+              "module": "bioetl.composition.registry_api",
+              "start_line": 44,
+              "end_line": 50
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.bootstrap.runtime._composite_control_plane_builder_support",
+              "start_line": 184,
+              "end_line": 190
+            },
+            {
+              "module": "bioetl.composition.runtime_builders.run_manifest_support",
+              "start_line": 93,
+              "end_line": 99
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.factories.observability_api",
+              "start_line": 11,
+              "end_line": 17
+            },
+            {
+              "module": "bioetl.composition.factories.services.observability_api",
+              "start_line": 11,
+              "end_line": 17
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.factories.datasource.data_source_factory",
+              "start_line": 76,
+              "end_line": 82
+            },
+            {
+              "module": "bioetl.composition.providers.registration_biblio",
+              "start_line": 171,
+              "end_line": 177
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.providers._models",
+              "start_line": 8,
+              "end_line": 19
+            },
+            {
+              "module": "bioetl.composition.providers.provider_registry",
+              "start_line": 34,
+              "end_line": 45
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.entrypoints",
+              "start_line": 86,
+              "end_line": 91
+            },
+            {
+              "module": "bioetl.composition.observability_api",
+              "start_line": 125,
+              "end_line": 130
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.pipeline_runner_request",
+              "start_line": 57,
+              "end_line": 62
+            },
+            {
+              "module": "bioetl.composition.runtime_builders._run_manifest_refs",
+              "start_line": 104,
+              "end_line": 109
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.bootstrap.runtime._composite_control_plane_builder_support",
+              "start_line": 203,
+              "end_line": 208
+            },
+            {
+              "module": "bioetl.composition.runtime_builders.run_manifest_support",
+              "start_line": 101,
+              "end_line": 106
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.factories._observability_wiring",
+              "start_line": 148,
+              "end_line": 153
+            },
+            {
+              "module": "bioetl.composition.factories.services.bundle",
+              "start_line": 174,
+              "end_line": 179
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.factories.pipeline._creation_wiring",
+              "start_line": 112,
+              "end_line": 117
+            },
+            {
+              "module": "bioetl.composition.factories.services._bundle_support",
+              "start_line": 124,
+              "end_line": 129
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.factories.services.bundle",
+              "start_line": 88,
+              "end_line": 93
+            },
+            {
+              "module": "bioetl.composition.factories.services.factory",
+              "start_line": 114,
+              "end_line": 119
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.providers._chembl_target_protein_classification_helpers",
+              "start_line": 175,
+              "end_line": 190
+            },
+            {
+              "module": "bioetl.composition.runtime_builders.input_snapshot_resolution",
+              "start_line": 120,
+              "end_line": 128
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\composition\\services\\__init__.py",
+          "line": 1,
+          "actionability_category": "composition_runtime_wiring_pattern",
+          "modules": [
+            {
+              "module": "bioetl.composition.runtime_builders._manifest_publication_context_support",
+              "start_line": 158,
+              "end_line": 163
+            },
+            {
+              "module": "bioetl.composition.runtime_builders.run_manifest_builder",
+              "start_line": 185,
+              "end_line": 190
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target": "src/bioetl/application",
+      "returncode": 8,
+      "duplicate_count": 68,
+      "raw_duplicate_count": 72,
+      "excluded_duplicate_count": 4,
+      "actionability": [
+        {
+          "category": "export_facade_or_package_barrel",
+          "duplicate_clusters": 65
+        },
+        {
+          "category": "pipeline_transformer_contract_pattern",
+          "duplicate_clusters": 3
+        }
+      ],
+      "top_pairs": [
+        {
+          "modules": [
+            "bioetl.application.services.lineage.metadata_lineage_dataset_nodes",
+            "bioetl.application.services.lineage.metadata_output_support"
+          ],
+          "duplicate_clusters": 4
+        },
+        {
+          "modules": [
+            "bioetl.application.services.lineage.metadata_lineage_fragments_gold",
+            "bioetl.application.services.lineage.metadata_lineage_fragments_silver"
+          ],
+          "duplicate_clusters": 4
+        },
+        {
+          "modules": [
+            "bioetl.application.workflow.transforms.reconcile_foreign_keys",
+            "bioetl.application.workflow.transforms.reconcile_rows"
+          ],
+          "duplicate_clusters": 3
+        },
+        {
+          "modules": [
+            "bioetl.application.composite.dependency_join_context_builders",
+            "bioetl.application.composite.enricher_join_execution"
+          ],
+          "duplicate_clusters": 2
+        },
+        {
+          "modules": [
+            "bioetl.application.services._checkpoint_compatibility_runtime_identity",
+            "bioetl.application.services._checkpoint_compatibility_runtime_identity_details"
+          ],
+          "duplicate_clusters": 2
+        }
+      ],
+      "clusters": [
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.workflow.transforms.reconcile_foreign_keys",
+              "start_line": 182,
+              "end_line": 214
+            },
+            {
+              "module": "bioetl.application.workflow.transforms.reconcile_rows",
+              "start_line": 162,
+              "end_line": 199
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.lineage.metadata_lineage_node_builders",
+              "start_line": 42,
+              "end_line": 62
+            },
+            {
+              "module": "bioetl.application.services.lineage.metadata_lineage_nodes",
+              "start_line": 25,
+              "end_line": 45
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services._checkpoint_compatibility_runtime_identity",
+              "start_line": 127,
+              "end_line": 144
+            },
+            {
+              "module": "bioetl.application.services._checkpoint_compatibility_runtime_identity_details",
+              "start_line": 95,
+              "end_line": 112
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.composite.runner_pkg.runner_support_mixin",
+              "start_line": 68,
+              "end_line": 86
+            },
+            {
+              "module": "bioetl.application.composite.runner_pkg.runner_support_types",
+              "start_line": 42,
+              "end_line": 61
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.composite.runner_pkg.runner_support_runtime",
+              "start_line": 112,
+              "end_line": 135
+            },
+            {
+              "module": "bioetl.application.core.batch_checkpoint_recovery_service",
+              "start_line": 170,
+              "end_line": 192
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.workflow.transforms.reconcile_foreign_keys",
+              "start_line": 169,
+              "end_line": 181
+            },
+            {
+              "module": "bioetl.application.workflow.transforms.reconcile_rows",
+              "start_line": 149,
+              "end_line": 161
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services._checkpoint_compatibility_runtime_identity",
+              "start_line": 178,
+              "end_line": 189
+            },
+            {
+              "module": "bioetl.application.services._checkpoint_compatibility_runtime_identity_details",
+              "start_line": 73,
+              "end_line": 84
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.lineage.metadata_lineage_fragments_gold",
+              "start_line": 234,
+              "end_line": 255
+            },
+            {
+              "module": "bioetl.application.services.lineage.metadata_lineage_fragments_silver",
+              "start_line": 168,
+              "end_line": 190
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.execution.cli_run_orchestration_models",
+              "start_line": 45,
+              "end_line": 57
+            },
+            {
+              "module": "bioetl.application.services.execution.pipeline_runner_models",
+              "start_line": 86,
+              "end_line": 96
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.lineage.metadata_lineage_dataset_nodes",
+              "start_line": 99,
+              "end_line": 109
+            },
+            {
+              "module": "bioetl.application.services.lineage.metadata_output_support",
+              "start_line": 63,
+              "end_line": 73
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.lineage.metadata_lineage_fragments_gold",
+              "start_line": 222,
+              "end_line": 232
+            },
+            {
+              "module": "bioetl.application.services.lineage.metadata_lineage_fragments_silver",
+              "start_line": 145,
+              "end_line": 155
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.composite.coordinator",
+              "start_line": 57,
+              "end_line": 67
+            },
+            {
+              "module": "bioetl.application.composite.dependency_coordinator",
+              "start_line": 46,
+              "end_line": 57
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.composite.join_key_normalization",
+              "start_line": 105,
+              "end_line": 116
+            },
+            {
+              "module": "bioetl.application.composite.join_key_resolution_helpers",
+              "start_line": 75,
+              "end_line": 95
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.composite.merge_service",
+              "start_line": 167,
+              "end_line": 176
+            },
+            {
+              "module": "bioetl.application.composite.merger_orchestration",
+              "start_line": 207,
+              "end_line": 216
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.composite.checkpoint._anchor_context",
+              "start_line": 20,
+              "end_line": 44
+            },
+            {
+              "module": "bioetl.application.composite.checkpoint.state",
+              "start_line": 51,
+              "end_line": 60
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.export_execution",
+              "start_line": 133,
+              "end_line": 156
+            },
+            {
+              "module": "bioetl.application.services.export_service",
+              "start_line": 245,
+              "end_line": 264
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.workflow.transforms.reconcile_foreign_keys",
+              "start_line": 100,
+              "end_line": 122
+            },
+            {
+              "module": "bioetl.application.workflow.transforms.reconcile_rows",
+              "start_line": 39,
+              "end_line": 56
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.composite.runner_pkg.runner_stage_support_mixin",
+              "start_line": 48,
+              "end_line": 62
+            },
+            {
+              "module": "bioetl.application.composite.runner_pkg.runner_stage_support_types",
+              "start_line": 38,
+              "end_line": 50
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.core.quarantine_manager",
+              "start_line": 71,
+              "end_line": 79
+            },
+            {
+              "module": "bioetl.application.services.data_quality_service",
+              "start_line": 42,
+              "end_line": 72
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services._observability_workflow_quarantine_support",
+              "start_line": 32,
+              "end_line": 48
+            },
+            {
+              "module": "bioetl.application.services._quarantine_service_filtered_helpers",
+              "start_line": 29,
+              "end_line": 41
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services._quarantine_service_replay_purge_sync",
+              "start_line": 83,
+              "end_line": 92
+            },
+            {
+              "module": "bioetl.application.services._quarantine_service_status_sync",
+              "start_line": 124,
+              "end_line": 133
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.lineage.metadata_lineage_fragments_gold",
+              "start_line": 30,
+              "end_line": 48
+            },
+            {
+              "module": "bioetl.application.services.lineage.metadata_lineage_fragments_silver",
+              "start_line": 29,
+              "end_line": 47
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.composite.dependency_join_context_builders",
+              "start_line": 126,
+              "end_line": 133
+            },
+            {
+              "module": "bioetl.application.composite.dependency_joiner",
+              "start_line": 250,
+              "end_line": 264
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.composite.dependency_join_context_builders",
+              "start_line": 89,
+              "end_line": 96
+            },
+            {
+              "module": "bioetl.application.composite.enricher_join_execution",
+              "start_line": 91,
+              "end_line": 98
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "pipeline_transformer_contract_pattern",
+          "modules": [
+            {
+              "module": "bioetl.application.composite.target_protein_classification_summary",
+              "start_line": 12,
+              "end_line": 19
+            },
+            {
+              "module": "bioetl.application.pipelines.chembl.target_protein_classification_summary",
+              "start_line": 19,
+              "end_line": 27
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.composite.runner_pkg.runner_merge_stage_runtime",
+              "start_line": 76,
+              "end_line": 83
+            },
+            {
+              "module": "bioetl.application.composite.runner_pkg.runner_stage_dependency_state_flow",
+              "start_line": 81,
+              "end_line": 88
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.core.batch_executor_runtime_state",
+              "start_line": 17,
+              "end_line": 24
+            },
+            {
+              "module": "bioetl.application.services.execution.pipeline_runner_models",
+              "start_line": 29,
+              "end_line": 36
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.core.lifecycle.shutdown",
+              "start_line": 86,
+              "end_line": 110
+            },
+            {
+              "module": "bioetl.application.services.shutdown_service",
+              "start_line": 174,
+              "end_line": 202
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.observability.observer",
+              "start_line": 53,
+              "end_line": 61
+            },
+            {
+              "module": "bioetl.application.observability.observer_context_mixin",
+              "start_line": 33,
+              "end_line": 41
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.checkpoint_service",
+              "start_line": 76,
+              "end_line": 92
+            },
+            {
+              "module": "bioetl.application.services.quarantine_service",
+              "start_line": 95,
+              "end_line": 111
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.dq_report_models",
+              "start_line": 16,
+              "end_line": 25
+            },
+            {
+              "module": "bioetl.application.services.health_service",
+              "start_line": 36,
+              "end_line": 45
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.dq_report_models",
+              "start_line": 15,
+              "end_line": 24
+            },
+            {
+              "module": "bioetl.application.services.medallion_lifecycle",
+              "start_line": 51,
+              "end_line": 60
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services._metrics_service_gateway_support",
+              "start_line": 20,
+              "end_line": 29
+            },
+            {
+              "module": "bioetl.application.services.metrics_service",
+              "start_line": 44,
+              "end_line": 53
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.lineage.metadata_lineage_dataset_nodes",
+              "start_line": 118,
+              "end_line": 127
+            },
+            {
+              "module": "bioetl.application.services.lineage.metadata_output_support",
+              "start_line": 96,
+              "end_line": 105
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.lineage.metadata_lineage_fragments_gold",
+              "start_line": 58,
+              "end_line": 65
+            },
+            {
+              "module": "bioetl.application.services.lineage.metadata_lineage_fragments_silver",
+              "start_line": 61,
+              "end_line": 68
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.composite.dependency_join_context_builders",
+              "start_line": 120,
+              "end_line": 126
+            },
+            {
+              "module": "bioetl.application.composite.enricher_join_execution",
+              "start_line": 92,
+              "end_line": 98
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.composite.join_planner_helpers",
+              "start_line": 68,
+              "end_line": 80
+            },
+            {
+              "module": "bioetl.application.composite.merger_output_mixin",
+              "start_line": 30,
+              "end_line": 41
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.composite.checkpoint.load_service",
+              "start_line": 194,
+              "end_line": 200
+            },
+            {
+              "module": "bioetl.application.core.lifecycle.checkpoint_manager",
+              "start_line": 70,
+              "end_line": 76
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.core.batch_operation_errors",
+              "start_line": 9,
+              "end_line": 19
+            },
+            {
+              "module": "bioetl.application.services.dq_report_models",
+              "start_line": 16,
+              "end_line": 24
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "pipeline_transformer_contract_pattern",
+          "modules": [
+            {
+              "module": "bioetl.application.core.pre_silver_adapter_mixin",
+              "start_line": 60,
+              "end_line": 66
+            },
+            {
+              "module": "bioetl.application.pipelines.common.publication_assembly",
+              "start_line": 167,
+              "end_line": 173
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "pipeline_transformer_contract_pattern",
+          "modules": [
+            {
+              "module": "bioetl.application.core.pre_silver_finalization_flow",
+              "start_line": 62,
+              "end_line": 68
+            },
+            {
+              "module": "bioetl.application.pipelines.common.publication_transformer_records",
+              "start_line": 156,
+              "end_line": 162
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.core.lifecycle.cleanup_service",
+              "start_line": 227,
+              "end_line": 233
+            },
+            {
+              "module": "bioetl.application.services.medallion_lifecycle",
+              "start_line": 133,
+              "end_line": 139
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.core.wiring.__init__",
+              "start_line": 37,
+              "end_line": 46
+            },
+            {
+              "module": "bioetl.application.services.control_plane.replay.__init__",
+              "start_line": 132,
+              "end_line": 141
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.debug_export_collector_helpers",
+              "start_line": 117,
+              "end_line": 138
+            },
+            {
+              "module": "bioetl.application.services.debug_export_helpers",
+              "start_line": 262,
+              "end_line": 292
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.dq_report_generation_mixin",
+              "start_line": 39,
+              "end_line": 49
+            },
+            {
+              "module": "bioetl.application.services.dq_report_service",
+              "start_line": 32,
+              "end_line": 48
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.dq_report_models",
+              "start_line": 15,
+              "end_line": 21
+            },
+            {
+              "module": "bioetl.application.services.vacuum_service",
+              "start_line": 31,
+              "end_line": 37
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.export_service",
+              "start_line": 46,
+              "end_line": 54
+            },
+            {
+              "module": "bioetl.application.services.vacuum_service",
+              "start_line": 33,
+              "end_line": 45
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.health_service",
+              "start_line": 36,
+              "end_line": 44
+            },
+            {
+              "module": "bioetl.application.services.medallion_lifecycle",
+              "start_line": 52,
+              "end_line": 60
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.medallion_maintenance_mixin",
+              "start_line": 14,
+              "end_line": 22
+            },
+            {
+              "module": "bioetl.application.services.metrics_service",
+              "start_line": 44,
+              "end_line": 52
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.workflow_runner_service",
+              "start_line": 62,
+              "end_line": 72
+            },
+            {
+              "module": "bioetl.application.services.workflow_transform_service",
+              "start_line": 38,
+              "end_line": 46
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services._metrics_service_gateway_support",
+              "start_line": 20,
+              "end_line": 28
+            },
+            {
+              "module": "bioetl.application.services.execution.pipeline_run_execution_service",
+              "start_line": 22,
+              "end_line": 30
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services._quarantine_service_replay_purge_sync",
+              "start_line": 76,
+              "end_line": 82
+            },
+            {
+              "module": "bioetl.application.services._quarantine_service_status_sync",
+              "start_line": 117,
+              "end_line": 123
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.dq.gold_analyzer",
+              "start_line": 143,
+              "end_line": 149
+            },
+            {
+              "module": "bioetl.application.services.dq.silver_check_executor",
+              "start_line": 147,
+              "end_line": 162
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.dq._checks_basic",
+              "start_line": 36,
+              "end_line": 56
+            },
+            {
+              "module": "bioetl.application.services.dq._checks_integrity",
+              "start_line": 30,
+              "end_line": 44
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.lineage.__init__",
+              "start_line": 14,
+              "end_line": 20
+            },
+            {
+              "module": "bioetl.application.services.lineage.lineage_inspection_service",
+              "start_line": 23,
+              "end_line": 29
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.lineage.metadata_lineage_dataset_nodes",
+              "start_line": 103,
+              "end_line": 109
+            },
+            {
+              "module": "bioetl.application.services.lineage.metadata_output_support",
+              "start_line": 99,
+              "end_line": 105
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.lineage.metadata_lineage_dataset_nodes",
+              "start_line": 121,
+              "end_line": 127
+            },
+            {
+              "module": "bioetl.application.services.lineage.metadata_output_support",
+              "start_line": 67,
+              "end_line": 73
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.composite.join_key_resolution",
+              "start_line": 131,
+              "end_line": 136
+            },
+            {
+              "module": "bioetl.application.composite.join_key_resolution_helpers",
+              "start_line": 116,
+              "end_line": 121
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.composite.runner_pkg.runner_stage_support_types",
+              "start_line": 34,
+              "end_line": 39
+            },
+            {
+              "module": "bioetl.application.composite.runner_pkg.runner_stage_types",
+              "start_line": 26,
+              "end_line": 31
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.core.batch_operation_errors",
+              "start_line": 9,
+              "end_line": 14
+            },
+            {
+              "module": "bioetl.application.services.vacuum_service",
+              "start_line": 32,
+              "end_line": 37
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.core._batch_tracing_support",
+              "start_line": 12,
+              "end_line": 17
+            },
+            {
+              "module": "bioetl.application.observability.span_attribute_values",
+              "start_line": 6,
+              "end_line": 11
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.core._runner_observability",
+              "start_line": 29,
+              "end_line": 34
+            },
+            {
+              "module": "bioetl.application.services.data_quality_anomalies",
+              "start_line": 215,
+              "end_line": 220
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.core.lifecycle.checkpoint_identity_overrides",
+              "start_line": 28,
+              "end_line": 33
+            },
+            {
+              "module": "bioetl.application.services._checkpoint_compatibility_runtime_identity",
+              "start_line": 32,
+              "end_line": 37
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services._observability_workflow_checkpoint_support",
+              "start_line": 18,
+              "end_line": 23
+            },
+            {
+              "module": "bioetl.application.services.checkpoint_compatibility_policy",
+              "start_line": 11,
+              "end_line": 16
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.checkpoint_service",
+              "start_line": 93,
+              "end_line": 107
+            },
+            {
+              "module": "bioetl.application.services.quarantine_service",
+              "start_line": 112,
+              "end_line": 126
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.contract_migration_models",
+              "start_line": 6,
+              "end_line": 11
+            },
+            {
+              "module": "bioetl.application.services.contract_migration_service",
+              "start_line": 4,
+              "end_line": 9
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.export_execution",
+              "start_line": 113,
+              "end_line": 118
+            },
+            {
+              "module": "bioetl.application.services.export_service",
+              "start_line": 245,
+              "end_line": 250
+            }
+          ]
+        },
+        {
+          "path": "src\\bioetl\\application\\workflow\\transforms\\__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.application.services.dq._checks_integrity",
+              "start_line": 172,
+              "end_line": 195
+            },
+            {
+              "module": "bioetl.application.services.dq._checks_statistical",
+              "start_line": 98,
+              "end_line": 111
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

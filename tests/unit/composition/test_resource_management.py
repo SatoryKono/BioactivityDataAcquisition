@@ -621,3 +621,23 @@ class TestResourceBootstrapLazyImports:
         assert resource_management.load_pipeline_config("chembl_activity") == {
             "name": "chembl_activity"
         }
+
+
+@pytest.mark.unit
+def test_resource_bootstrap_uses_providers_scope() -> None:
+    """#11222: bootstrap/cleanup register providers without pipeline registry."""
+    with (
+        patch(
+            "bioetl.composition._resource_management.ensure_runtime_registrations"
+        ) as ensure,
+        patch(
+            "bioetl.composition._resource_management.bootstrap_lifecycle_service",
+            return_value=MagicMock(),
+        ),
+    ):
+        from bioetl.composition._registration import RuntimeRegistrationScope
+        from bioetl.composition.resources_runtime import get_lifecycle_service
+
+        get_lifecycle_service()
+
+    ensure.assert_called_once_with(scope=RuntimeRegistrationScope.PROVIDERS)

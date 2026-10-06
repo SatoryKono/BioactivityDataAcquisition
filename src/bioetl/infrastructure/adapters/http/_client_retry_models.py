@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
-import httpx
+if TYPE_CHECKING:
+    import httpx
 
-from bioetl.domain.ports import LoggerPort, TracingPort
-from bioetl.domain.resilience import RetryConfig
-from bioetl.domain.types import RunID
+    from bioetl.domain.ports import LoggerPort, TracingPort
+    from bioetl.domain.resilience import RetryConfig
+    from bioetl.domain.types import JsonDict, RunID
+    from bioetl.infrastructure.adapters.http.client_retry_observability import SpanLike
 
 
 @dataclass(frozen=True, slots=True)
@@ -43,14 +45,14 @@ class _RetryRequestState:
         return outcome.should_retry
 
 
-class _RetryRequestHost(Protocol):
-    """Static host contract implemented by the concrete HTTP retry mixin."""
+class _HTTPClientRetryHost(Protocol):
+    """Concrete host requirements shared by retry flow and policy orchestration."""
 
-    retry_config: RetryConfig
     provider: str
-    logger: LoggerPort | None
-    _tracer: TracingPort | None
     run_id: RunID | None
+    logger: LoggerPort | None
+    retry_config: RetryConfig
+    _tracer: TracingPort | None
 
     def _get_client(self) -> httpx.AsyncClient: ...
 
@@ -59,7 +61,10 @@ class _RetryRequestHost(Protocol):
     def _can_retry(self, attempt: int, retries_used: int) -> bool: ...
 
     async def _handle_retry_delay(
-        self, attempt: int, url: str = "", response: httpx.Response | None = None
+        self,
+        attempt: int,
+        url: str = "",
+        response: httpx.Response | None = None,
     ) -> float: ...
 
     def _log_retry(
@@ -73,8 +78,6 @@ class _RetryRequestHost(Protocol):
         reason: str | None = None,
     ) -> None: ...
 
-    def _record_retry_budget_exhausted(self, method: str, url: str) -> None: ...
-
     def _record_request_metrics(
         self,
         method: str,
@@ -84,11 +87,7 @@ class _RetryRequestHost(Protocol):
         last_error: Exception | None,
     ) -> None: ...
 
-    def _should_continue_retry(
-        self,
-        result: httpx.Response | _RequestAttemptOutcome,
-        retry_state: _RetryRequestState,
-    ) -> bool: ...
+    def _record_retry_budget_exhausted(self, method: str, url: str) -> None: ...
 
     async def _execute_single_attempt(
         self,
@@ -98,3 +97,49 @@ class _RetryRequestHost(Protocol):
         attempt_number: int = 1,
         **kwargs: object,
     ) -> httpx.Response: ...
+
+    def _should_continue_retry(
+        self,
+        result: httpx.Response | _RequestAttemptOutcome,
+        retry_state: _RetryRequestState,
+    ) -> bool: ...
+
+    def _is_retryable_error(self, exc: Exception) -> bool: ...
+
+    async def _attempt_request(
+        self,
+        client: httpx.AsyncClient,
+        method: str,
+        url: str,
+        attempt: int,
+        retries_used: int,
+        span: SpanLike,
+        kwargs: JsonDict,
+    ) -> httpx.Response | _RequestAttemptOutcome: ...
+
+    async def _handle_response_attempt(
+        self,
+        response: httpx.Response,
+        *,
+        method: str,
+        url: str,
+        attempt: int,
+        retries_used: int,
+        span: SpanLike,
+        allow_redirect_response: bool = False,
+    ) -> httpx.Response | _RequestAttemptOutcome: ...
+
+    async def _handle_request_exception(
+        self,
+        exc: Exception,
+        *,
+        method: str,
+        url: str,
+        attempt: int,
+        retries_used: int,
+        span: SpanLike,
+    ) -> _RequestAttemptOutcome | None: ...
+
+
+# Both retry flows share the complete host contract.
+_RetryRequestHost = _HTTPClientRetryHost

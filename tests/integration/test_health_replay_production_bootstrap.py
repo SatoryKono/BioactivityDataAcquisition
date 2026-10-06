@@ -21,7 +21,9 @@ from bioetl.domain.control_plane import (
     RunSourceRef,
 )
 from bioetl.domain.normalization.json import stable_json_hash
-from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
+from bioetl.domain.run_reports.pipeline_report_assembly import (
+    build_pipeline_run_report,
+)
 from bioetl.domain.run_reports.selected_status import DOMAINS
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane.file_effective_config_artifact_store import (

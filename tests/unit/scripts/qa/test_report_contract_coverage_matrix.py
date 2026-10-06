@@ -23,6 +23,22 @@ from scripts.engineering.qa import report_contract_coverage_matrix as matrix
 pytestmark = pytest.mark.unit
 
 
+def test_ci_publishing_does_not_count_as_publication_entity_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(matrix, "PROJECT_ROOT", tmp_path)
+    paths = [
+        "tests/unit/scripts/ci/test_docker_publication_guards.py",
+        "tests/unit/repo_backed/scripts/ci/test_scorecard_publication.py",
+        "tests/contract/test_chembl_publication.py",
+        "tests/unit/domain/test_publication.py",
+    ]
+    actual = matrix._contract_test_paths(
+        "chembl", "publication", [(path, path.lower()) for path in paths]
+    )
+    assert actual == sorted(paths[2:])
+
+
 def test_existing_snapshot_date_reads_committed_value(tmp_path: Path) -> None:
     artifact = tmp_path / "contract-coverage-matrix.json"
     artifact.write_text(

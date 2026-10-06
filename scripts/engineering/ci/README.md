@@ -2,6 +2,13 @@
 
 CI orchestration, resiliency runners, and periodic quality reports.
 
+CircleCI migration (#11929): CodeQL is excluded from the canonical required-check
+catalog. Default-branch classification reads that catalog; the retained Actions
+coordinator no longer invokes CodeQL. Historical timing reports may still contain
+CodeQL owner paths and must not be rewritten as current evidence. Actions remain
+disabled. This preparation is isolated from the architecture/coverage acceptance
+branch; remote runs and workflow retirement are separate acceptance steps.
+
 ## Unified Entry Point
 
 ```bash

@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import hashlib
-import json
 from pathlib import Path
 from typing import cast
 
+import orjson
 import pyarrow as pa
 
+from bioetl.domain.normalization.json import serialize_json_canonical
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.storage.composite_replay_inputs import _table_bytes
 
@@ -57,9 +58,7 @@ def publish_json(root: Path, name: str, payload: JsonDict) -> str:
     return publish_bytes(
         root,
         name,
-        json.dumps(
-            payload, sort_keys=True, separators=(",", ":"), allow_nan=False
-        ).encode(),
+        serialize_json_canonical(payload).encode(),
     )
 
 
@@ -68,7 +67,7 @@ def load_verified_json(root: Path, name: str, digest: str) -> JsonDict:
     content = confined_path(root, name).read_bytes()
     if digest_bytes(content) != digest:
         raise ValueError("composite_replay_digest_mismatch")
-    value = json.loads(content)
+    value = orjson.loads(content)
     if not isinstance(value, dict):
         raise ValueError("composite_replay_envelope_invalid")
     return cast(JsonDict, value)

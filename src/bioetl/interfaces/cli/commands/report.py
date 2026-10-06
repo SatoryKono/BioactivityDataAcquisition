@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import click
 
@@ -19,7 +19,6 @@ from bioetl.application.services.run_reports.query import (
     prune_reports,
 )
 from bioetl.composition.observability_runtime import create_run_report_store
-from bioetl.domain.ports import RunReportStorePort
 from bioetl.interfaces.cli.commands.domains.shared.click_options import (
     typed_click_group,
     typed_click_option,
@@ -27,6 +26,9 @@ from bioetl.interfaces.cli.commands.domains.shared.click_options import (
     typed_pass_context,
 )
 from bioetl.interfaces.http.report_root_config import configured_report_root
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import RunReportStorePort
 
 
 @dataclass(frozen=True, slots=True)

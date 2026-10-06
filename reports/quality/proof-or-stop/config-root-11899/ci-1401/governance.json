@@ -1,0 +1,153 @@
+{
+  "tool": "pretest_guardrails",
+  "mode": "check",
+  "scope": "governance",
+  "strict_docs": false,
+  "status": "ok",
+  "started_at": "2026-10-04T20:27:07Z",
+  "completed_at": "2026-10-04T20:28:06.985613+00:00",
+  "steps": [
+    {
+      "label": "cleanup",
+      "status": "skip",
+      "proof_status": "skip",
+      "duration_seconds": 0.0,
+      "command": "not executed",
+      "skip_reason": "cleanup disabled by option or profile",
+      "follow_up": "rerun without --skip-cleanup when cleanup evidence is required"
+    },
+    {
+      "label": "auto-fix",
+      "status": "skip",
+      "proof_status": "skip",
+      "duration_seconds": 0.0,
+      "command": "not executed",
+      "skip_reason": "write-capable auto-fix is not selected",
+      "follow_up": "rerun with --mode auto only when deterministic refresh is authorized"
+    },
+    {
+      "label": "inventory-check",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 24.576,
+      "command": ".venv/bin/python -m scripts.engineering.repo check-inventory --check --manifest configs/quality/scripts_inventory_manifest.json --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json",
+      "skip_reason": null,
+      "follow_up": null
+    },
+    {
+      "label": "catalog-check",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 0.158,
+      "command": ".venv/bin/python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml",
+      "skip_reason": null,
+      "follow_up": null
+    },
+    {
+      "label": "hotspot-family-baseline-check",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 1.138,
+      "command": ".venv/bin/python -m scripts.engineering.qa report-family-baseline --check",
+      "skip_reason": null,
+      "follow_up": null
+    },
+    {
+      "label": "repo-identity-check",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 0.202,
+      "command": ".venv/bin/python -m scripts.docs sync-repo-identity --check",
+      "skip_reason": null,
+      "follow_up": null
+    },
+    {
+      "label": "integration-vcr-policy-check",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 0.155,
+      "command": ".venv/bin/python -m scripts.engineering.qa sync-integration-vcr-policy --check",
+      "skip_reason": null,
+      "follow_up": null
+    },
+    {
+      "label": "docs-verify",
+      "status": "skip",
+      "proof_status": "skip",
+      "duration_seconds": 0.0,
+      "command": "not executed",
+      "skip_reason": "docs verification disabled by option or profile",
+      "follow_up": "rerun with --scope full or --scope strict"
+    },
+    {
+      "label": "memory-validate",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 0.232,
+      "command": "env PYTHONPATH=/home/circleci/project/src:/home/circleci/project:/home/circleci/project/src .venv/bin/python -m memory.tooling.validate",
+      "skip_reason": null,
+      "follow_up": null
+    },
+    {
+      "label": "memory-workflow-smoke",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 1.18,
+      "command": "env BIOETL_AI_RUNTIME=pretest-guardrails BIOETL_AI_AGENT=memory-workflow-smoke PYTHONPATH=/home/circleci/project/src:/home/circleci/project:/home/circleci/project/src .venv/bin/python -m memory.tooling.workflow smoke --validation-timeout-seconds 15 --json",
+      "skip_reason": null,
+      "follow_up": null
+    },
+    {
+      "label": "memory-refresh-smoke",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 18.953,
+      "command": "env PYTHONPATH=/home/circleci/project/src:/home/circleci/project:/home/circleci/project/src .venv/bin/python -m memory.tooling.refresh_all --root /home/circleci/project --output-root /tmp/tmp.4uR0g67axi --rag-build-scope full --json",
+      "skip_reason": null,
+      "follow_up": null
+    },
+    {
+      "label": "memory-rag-manifest-validate",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 4.653,
+      "command": "capture_json_output /tmp/tmp.y7srct716s env PYTHONPATH=/home/circleci/project/src:/home/circleci/project:/home/circleci/project/src .venv/bin/python -m memory.rag.validation --root /home/circleci/project --manifest-dir /tmp/tmp.4uR0g67axi/rag/manifests --require-build-scope full --json",
+      "skip_reason": null,
+      "follow_up": null
+    },
+    {
+      "label": "memory-prune-dry-run",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 0.101,
+      "command": "env PYTHONPATH=/home/circleci/project/src:/home/circleci/project:/home/circleci/project/src .venv/bin/python -m memory.tooling.prune --json --check",
+      "skip_reason": null,
+      "follow_up": null
+    },
+    {
+      "label": "architecture-fail-fast",
+      "status": "ok",
+      "proof_status": "pass",
+      "duration_seconds": 7.583,
+      "command": "env BIOETL_SKIP_PREFLIGHT=1 BIOETL_PREFLIGHT_DONE=1 bash scripts/engineering/dev/run_pytest.sh --skip-preflight --narrow tests/architecture/test_integration_vcr_policy.py::TestIntegrationVcrPolicy::test_every_test_surface_under_integration_and_e2e_is_in_tracked_inventory tests/architecture/test_integration_vcr_policy.py::TestIntegrationVcrPolicy::test_testing_guide_matches_current_fixture_governance_and_live_contract_policy tests/architecture/test_documentation_sync.py::test_no_legacy_repo_slug_in_active_docs_and_workflows tests/architecture/test_documentation_sync.py::test_no_legacy_contract_path_in_active_docs tests/architecture/test_generated_artifact_routing.py tests/architecture/test_scripts_catalog_governance.py::test_scripts_catalog_governance_check_passes -q -x --tb=short",
+      "skip_reason": null,
+      "follow_up": null
+    }
+  ],
+  "auto_fixed": [],
+  "failed_steps": [],
+  "memory_rag_validation": {
+    "build_scope": "full",
+    "chunk_count": 58566,
+    "eligible_source_count": 7515,
+    "generator_version": 2,
+    "git_head_sha": "cd50cf3ca72783c49ecdd8a3825b2199101f7c2b",
+    "indexed_source_count": 7515,
+    "issue_codes": [],
+    "missing_path_count": 0,
+    "ok": true,
+    "source_surface_sha256": "3ac933ede1ad239ca20a8aca9d8fd8bd786bb0a14af91e83fb560c3c2b81728d",
+    "stale_chunk_count": 0,
+    "working_tree_state": "clean"
+  }
+}

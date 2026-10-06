@@ -1,0 +1,41 @@
+{
+  "argv": [
+    "python",
+    "-m",
+    "pytest",
+    "tests/architecture",
+    "-q",
+    "--no-cov",
+    "--junitxml=/home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-2193-f1f3784bb91a/architecture.xml"
+  ],
+  "command": "python -m pytest tests/architecture -q --no-cov --junitxml=/home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-2193-f1f3784bb91a/architecture.xml",
+  "cwd": "/home/circleci/project",
+  "duration_ms": 966152,
+  "evidence_kind": "tests",
+  "execution_attestation": "ci_identity",
+  "exit_code": 1,
+  "follow_up": null,
+  "output_digest": "a3e97a8b67eba4a6eaba26db26cf79a62a05289faecfcd305c0a1cd33b6298c4",
+  "producer": "test_health",
+  "receipt_digest": "ff08ed3cf14a84122f6de1030101c7a65f7e57f15a338eb8aedb1687e30d9b69",
+  "receipt_id": "tests",
+  "repository": {
+    "branch": "codex/config-root-postmerge-20261005",
+    "ci_run_id": "https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2193",
+    "repo_id": "bioactivitydataacquisition",
+    "worktree_id": "dda4ac9a21114761"
+  },
+  "skip_reason": null,
+  "source": {
+    "command_set_hash": "011a92ddf89dff93f4280e5689dd904c1c7d88aa3c808bb6adc255f80ec8a209",
+    "dirty": false,
+    "head_sha": "f1f3784bb91a6a71e861d49ea347fc0878fcd96a",
+    "material_hash": "287a4ed138546a54ac20385388662b34edf432cc1ac041836aa1d8a6e72916a7",
+    "policy_hash": "c4432025d75ea8fc9bf1c55dc655273239715b7cc94366e8eadb5c085a127c2b",
+    "task_diff_hash": "b47deb3f0905ea0363728a0946a31463e794f7ae42d3c6652f24fb557fa7e7f0",
+    "untracked_paths": []
+  },
+  "started_at": "2026-10-05T10:13:45.289980+00:00",
+  "status": "fail",
+  "task_id": "architecture-coverage-11854-11899"
+}

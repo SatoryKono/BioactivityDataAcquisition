@@ -9,8 +9,10 @@ from unittest.mock import Mock
 import pytest
 
 from bioetl.composition.bootstrap.runtime.pipeline import (
-    _coerce_optional_str,
     _fail_fast_empty_explicit_cached_bronze,
+)
+from bioetl.composition.factories.pipeline_support.checkpoint_policy_helpers import (
+    _coerce_optional_str,
 )
 from bioetl.composition.factories import transformer_dependencies
 from bioetl.composition.factories.datasource.http_client import HttpClientFactory
@@ -83,9 +85,19 @@ def test_http_api_key_mapping_rejects_non_key_setting() -> None:
     assert HttpClientFactory._api_key_setting_name("BIOETL_TOKEN") is None
 
 
-def test_semanticscholar_unauthenticated_retry_budget_is_capped() -> None:
+def test_semanticscholar_unauthenticated_retries_follow_paced_source_policy() -> None:
+    # #11920 removed the old anonymous retry clamp; requests share the paced
+    # provider budget, while retry counts and waits retain their YAML contract.
+    from bioetl.infrastructure.config.source_config_loader import load_source_config
+
+    source = load_source_config("semanticscholar")
     cfg = HttpClientFactory._resolve_config("semanticscholar", None)
+    assert cfg.max_retries == source.max_retries == 2
     assert cfg.max_retries <= 2
+    assert cfg.base_delay == source.retry_base_delay == 30.0
+    assert cfg.max_delay == source.retry_max_delay == 300.0
+    assert cfg.rate == source.rate_limit.requests_per_second
+    assert cfg.capacity == source.rate_limit.burst == 1
 
 
 def test_checkpoint_context_and_snapshots_are_empty_without_runtime_services(

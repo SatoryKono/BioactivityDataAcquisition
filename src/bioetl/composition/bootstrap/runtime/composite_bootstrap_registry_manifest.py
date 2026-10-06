@@ -14,7 +14,7 @@ COMPOSITE_BOOTSTRAP_BUILDER_MODULES: Mapping[str, str] = {
         "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder"
     ),
     "support_services": (
-        "bioetl.composition.bootstrap.runtime.composite_support_services_factory"
+        "bioetl.composition.factories.services.composite_support_services_factory"
     ),
 }
 

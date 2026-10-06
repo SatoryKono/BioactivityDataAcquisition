@@ -202,6 +202,9 @@ def test_branch_consumable_test_telemetry_reports_match_committed_baseline() -> 
     assert coverage["source_run_id"] == payload["source_run_id"]
     assert coverage["source_tree_sha256"] == payload["source_tree_sha256"]
     assert coverage["coverage"] == payload["coverage"]
+    if payload["source_event"] == "local_coverage_verify":
+        assert slowest["measurement_provenance"] == payload["measurement_provenance"]
+        assert coverage["measurement_provenance"] == payload["measurement_provenance"]
     assert "Slowest Tests" in slowest_md
     assert "Top Slow Zones" in slowest_md
 

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "webpack -c ./webpack.config.ts --env production",
-    "test:ci": "jest --maxWorkers 4",
+    "test:ci": "jest --maxWorkers 4 && node --test ../../../.github/tooling/nyc-yaml-compat.test.cjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint --cache ."
   },
@@ -56,7 +56,8 @@
     "webpack-cli": "^6.0.0",
     "webpack-livereload-plugin": "^3.0.2",
     "webpack-subresource-integrity": "^5.1.0",
-    "webpack-virtual-modules": "^0.6.2"
+    "webpack-virtual-modules": "^0.6.2",
+    "braces": "file:../../../.github/tooling/braces-backport/braces-3.0.4-bioetl.1.tgz"
   },
   "dependencies": {
     "@emotion/css": "11.10.6",
@@ -76,6 +77,10 @@
     "@grafana/scenes": {
       "react-router-dom": "7.18.4"
     },
-    "react-router-dom-v5-compat": "$react-router-dom-v5-compat"
+    "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
+    "braces": "$braces",
+    "@istanbuljs/load-nyc-config": {
+      "js-yaml": "4.3.2"
+    }
   }
 }

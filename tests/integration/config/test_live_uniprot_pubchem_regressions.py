@@ -11,6 +11,8 @@ from bioetl.application.core.base_transformer import FilteredOutError
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
+pytestmark = pytest.mark.integration
+
 
 def pattern(provider, entity, field):
     root = Path(__file__).resolve().parents[3]

@@ -12,8 +12,6 @@ packages:
   responsibility: private composition helpers
 - package: _services.py
   responsibility: private composition helpers
-- package: _workflow_services.py
-  responsibility: private composition helpers
 - package: bootstrap
   responsibility: DI factories and runtime bootstrap (no domain policy)
 - package: bootstrap_contexts.py

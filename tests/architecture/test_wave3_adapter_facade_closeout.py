@@ -30,7 +30,7 @@ FACADE_RATCHETS: dict[str, tuple[int, set[str]]] = {
         335,
         {
             "bioetl.infrastructure.adapters.http._client_retry_models",
-            "bioetl.infrastructure.adapters.http._client_retry_policy",
+            "bioetl.infrastructure.adapters.http.client_retry_policy",
             "bioetl.infrastructure.adapters.http._client_retry_request_flow",
         },
     ),

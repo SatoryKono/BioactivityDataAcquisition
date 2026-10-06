@@ -1,0 +1,6 @@
+[quality-integral-gate] quarter=2026-Q4; arch_failures=3; total_exemptions=0/0; base_score=100.0; bonus=2.0; adjusted_score=100.0; min_required=76.0
+[quality-integral-gate] compatibility_surface=curated=12; measured=12; measured_only=0; compat_shims=0; mixed=0; retained=0; public=12
+[quality-integral-gate] debt_governance=uuid_seams=0; replay_critical_uuid=0; triaged_dead_code=17; untriaged_zero_import=0; compatibility_tests=0
+[quality-integral-gate] test_health=non_green; test_health_semantics=derived_from_blocking_ci; arch_skipped=7; skip_classes=6; live_enforced=7; live_pilot=0; live_vcr_only=0; staged_flags=2
+[quality-integral-gate] wrote metrics: /home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-1401-cd50cf3ca727/quality.json
+[quality-integral-gate] PASS

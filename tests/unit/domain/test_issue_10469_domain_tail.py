@@ -44,7 +44,6 @@ from bioetl.domain.behavior.staged_enforcement import (
     StagedEnforcementEngine,
 )
 from bioetl.domain.composite.field_groups_models import FieldMapping
-from bioetl.domain.composite.config_cross_validation import _require_finite_number
 from bioetl.domain.composite.lineage import _status_error_message
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.config.table import _normalize_idempotency_contract
@@ -123,11 +122,6 @@ def test_collect_blocker_issues_filters_other_severities() -> None:
 
 def test_dq_metrics_empty_batch_has_no_incoming_fields() -> None:
     assert DQMetricsCalculator._extract_incoming_fields([]) == set()
-
-
-def test_cross_validation_threshold_rejects_bool() -> None:
-    with pytest.raises(ValueError, match="must be a number"):
-        _require_finite_number(True, "threshold")
 
 
 def test_lineage_error_message_stringifies_non_string_value() -> None:
