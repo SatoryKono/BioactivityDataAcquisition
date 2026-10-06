@@ -13,7 +13,7 @@ version: 2.1
 parameters:
   ci-lane:
     type: enum
-    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance, e2e-replay, coverage-closeout, docker-baseline, docker-publish, architecture-metrics, scorecard, scorecard-publish, release-validation]
+    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance, e2e-replay, coverage-closeout, docker-baseline, docker-publish, architecture-metrics, scorecard, scorecard-publish, release-validation, router-bridge]
     default: pr-gate
   include-hypothesis:
     type: boolean
@@ -104,6 +104,255 @@ commands:
             fi
 
 jobs:
+  router-bridge-tests:
+    docker:
+    - image: cimg/node:24.21.0@sha256:2944a8d6bea9d71395f670ee689ca63a02b34a846ad9a5d617d21eefe57a9209
+    resource_class: medium
+    steps:
+    - checkout
+    - run:
+        name: Verify Router bridge behavior, types, build and dependency audit
+        no_output_timeout: 11m
+        command: |
+          set -euo pipefail
+          [[ "$CIRCLE_BRANCH" == main ]]
+          mkdir -p reports/qa/router-v7-circleci
+          cat > /tmp/bridge-tests.sh \<<'BIOETL_ROUTER_SCRIPT'
+          set -euo pipefail
+          export BIOETL_WORKSPACE="$PWD"
+          [[ "$(node -p 'process.versions.node.split(".")[0]')" == 24 ]]
+          python3 --version
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          npm ci --ignore-scripts
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          node verify-packed-bridge.mjs
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          npm test
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          node --test runtime-probe/module.test.mjs
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          node --test verify-host-image.test.mjs
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          /usr/bin/python3 fingerprint-rootfs.test.py
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          npm run typecheck
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          npm run build
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          npm audit --audit-level=moderate
+          )
+          BIOETL_ROUTER_SCRIPT
+          timeout --signal=TERM --kill-after=30s 10m bash /tmp/bridge-tests.sh 2>&1 | tee reports/qa/router-v7-circleci/bridge-tests.log
+    - store_artifacts:
+        path: reports/qa/router-v7-circleci
+        destination: router-v7-bridge
+  router-plugin-tests:
+    parameters:
+      plugin:
+        type: enum
+        enum:
+        - bioetl-scenes-app
+        - bioetl-selectorshell-panel
+    docker:
+    - image: cimg/node:24.21.0@sha256:2944a8d6bea9d71395f670ee689ca63a02b34a846ad9a5d617d21eefe57a9209
+    resource_class: medium
+    environment:
+      BIOETL_PLUGIN: << parameters.plugin >>
+    steps:
+    - checkout
+    - run:
+        name: Verify plugin and transfer SHA-256 checked build
+        no_output_timeout: 16m
+        command: |
+          set -euo pipefail
+          [[ "$CIRCLE_BRANCH" == main ]]
+          mkdir -p reports/qa/router-v7-circleci
+          cat > /tmp/plugin-tests.sh \<<'BIOETL_ROUTER_SCRIPT'
+          set -euo pipefail
+          export BIOETL_WORKSPACE="$PWD"
+          [[ "$(node -p 'process.versions.node.split(".")[0]')" == 24 ]]
+          python3 --version
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          npm ci --ignore-scripts
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          npm audit --audit-level=moderate
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          npm run typecheck
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          npm run lint
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          npm run test:ci
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          npm run build
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          python3 - \<<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ["BIOETL_WORKSPACE"])
+          plugin = os.environ["BIOETL_PLUGIN"]
+          assert plugin in ("bioetl-scenes-app", "bioetl-selectorshell-panel"), plugin
+          manifest = json.loads((root / "grafana/tooling/router-v7-bridge/host-image.json").read_text())
+          for filename in ("module.js", "plugin.json"):
+              relative = f"grafana/plugins/{plugin}/dist/{filename}"
+              bundle = root / relative
+              assert bundle.is_file(), f"Missing built artifact: {relative}"
+              expected = manifest["artifact_sha256"][relative]
+              actual = hashlib.sha256(bundle.read_bytes()).hexdigest()
+              assert actual == expected, f"Artifact SHA-256 mismatch: {relative}: {actual} != {expected}"
+              print(f"Verified {relative}: {actual}")
+          metadata = json.loads((root / f"grafana/plugins/{plugin}/dist/plugin.json").read_text())
+          assert metadata["info"]["updated"] == manifest["plugin_release_date"]
+          PY
+          )
+          mkdir -p "/tmp/router-v7-ws/router-v7-image-context/$BIOETL_PLUGIN"
+          cp -a "grafana/plugins/$BIOETL_PLUGIN/dist/." "/tmp/router-v7-ws/router-v7-image-context/$BIOETL_PLUGIN/"
+          BIOETL_ROUTER_SCRIPT
+          timeout --signal=TERM --kill-after=30s 15m bash /tmp/plugin-tests.sh 2>&1 | tee reports/qa/router-v7-circleci/plugin-tests.log
+    - persist_to_workspace:
+        root: /tmp/router-v7-ws
+        paths:
+        - router-v7-image-context/<< parameters.plugin >>
+    - store_artifacts:
+        path: reports/qa/router-v7-circleci
+        destination: router-v7-<< parameters.plugin >>
+    - store_artifacts:
+        path: grafana/plugins/<< parameters.plugin >>/dist
+        destination: host-plugin-<< parameters.plugin >>
+  router-host-build:
+    docker:
+    - image: cimg/node:24.21.0@sha256:2944a8d6bea9d71395f670ee689ca63a02b34a846ad9a5d617d21eefe57a9209
+    resource_class: large
+    environment:
+      NODE_OPTIONS: --max-old-space-size=4096
+      GOMAXPROCS: '2'
+      NODE_ENV: production
+      NO_SOURCEMAP: '0'
+    steps:
+    - checkout
+    - attach_workspace:
+        at: /tmp/router-v7-ws
+    - setup_remote_docker:
+        version: default
+    - run:
+        name: Build pinned Grafana candidate and verify image parity
+        no_output_timeout: 46m
+        command: |
+          set -euo pipefail
+          [[ "$CIRCLE_BRANCH" == main ]]
+          mkdir -p reports/qa/router-v7-circleci
+          cat > /tmp/host-build.sh \<<'BIOETL_ROUTER_SCRIPT'
+          set -euo pipefail
+          export BIOETL_WORKSPACE="$PWD"
+          [[ "$(node -p 'process.versions.node.split(".")[0]')" == 24 ]]
+          python3 --version
+          mkdir -p reports/qa/router-v7-grafana-host reports/qa/router-v7-image-context
+          cp -a /tmp/router-v7-ws/router-v7-image-context/. reports/qa/router-v7-image-context/
+          git -C reports/qa/router-v7-grafana-host init
+          git -C reports/qa/router-v7-grafana-host remote add origin https://github.com/grafana/grafana.git
+          git -C reports/qa/router-v7-grafana-host -c core.autocrlf=false fetch --depth=1 origin 6193dc03311b631b9727b560d24369e683dc396e
+          git -C reports/qa/router-v7-grafana-host -c core.autocrlf=false checkout --detach FETCH_HEAD
+          [[ "$(git -C reports/qa/router-v7-grafana-host rev-parse HEAD)" == 6193dc03311b631b9727b560d24369e683dc396e ]]
+          (
+          cd "$BIOETL_WORKSPACE/reports/qa/router-v7-grafana-host"
+          git -c core.autocrlf=false apply --check "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-v13.2.3.patch"
+          git -c core.autocrlf=false apply "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-v13.2.3.patch"
+          git -c core.autocrlf=false apply --check "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-canvas-query-error.patch"
+          git -c core.autocrlf=false apply "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-canvas-query-error.patch"
+          git -c core.autocrlf=false apply --check "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-router-jest-esm.patch"
+          git -c core.autocrlf=false apply "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-router-jest-esm.patch"
+          cmp packages/bioetl-router-v7-bridge/index.mjs "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/index.mjs"
+          cmp packages/bioetl-router-v7-bridge/index.d.ts "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/index.d.ts"
+          )
+          (
+          cd "$BIOETL_WORKSPACE/reports/qa/router-v7-grafana-host"
+          grep -F "'react-dom/client': () => import('react-dom/client')" public/app/features/plugins/loader/sharedDependencies.ts
+          )
+          (
+          cd "$BIOETL_WORKSPACE/reports/qa/router-v7-grafana-host"
+          node .yarn/releases/yarn-4.17.1.cjs install --immutable --mode=skip-build
+          )
+          (
+          cd "$BIOETL_WORKSPACE/reports/qa/router-v7-grafana-host"
+          export NODE_ENV=test
+          node node_modules/jest/bin/jest.js public/app/plugins/panel/canvas/CanvasPanel.integration.test.tsx --runInBand --watch=false --testNamePattern="query error"
+          )
+          (
+          cd "$BIOETL_WORKSPACE/reports/qa/router-v7-grafana-host"
+          cat > scripts/webpack/webpack.router-security.mjs \<<'EOF'
+          import original from './webpack.prod.ts';
+          export default (env = {}) => {
+            const configs = original(env);
+            configs.parallelism = 1;
+            for (const config of configs) {
+              config.parallelism = 2;
+              for (const plugin of config.optimization?.minimizer ?? []) {
+                if (plugin.constructor.name === 'CssMinimizerPlugin') plugin.options.parallel = 1;
+              }
+            }
+            return configs;
+          };
+          EOF
+          node node_modules/webpack-cli/bin/cli.js --config scripts/webpack/webpack.router-security.mjs
+          )
+          (
+          cd "$BIOETL_WORKSPACE/."
+          cp -a reports/qa/router-v7-grafana-host/public/build reports/qa/router-v7-image-context/host-build
+          docker buildx build --platform linux/amd64 --load --provenance=false \
+            --metadata-file reports/qa/router-v7-image-build.json \
+            -f grafana/tooling/router-v7-bridge/Dockerfile.host \
+            -t bioetl-router-host:acceptance reports/qa/router-v7-image-context
+          )
+          (
+          cd "$BIOETL_WORKSPACE/."
+          image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').image")
+          docker pull "$image"
+          node grafana/tooling/router-v7-bridge/verify-host-image.mjs \
+            bioetl-router-host:acceptance
+          )
+          BIOETL_ROUTER_SCRIPT
+          timeout --signal=TERM --kill-after=30s 45m bash /tmp/host-build.sh 2>&1 | tee reports/qa/router-v7-circleci/host-build.log
+    - store_artifacts:
+        path: reports/qa/router-v7-circleci
+        destination: router-v7-host-logs
+    - store_artifacts:
+        path: reports/qa/router-v7-image-build.json
+        destination: router-v7-image-build.json
+    - store_artifacts:
+        path: reports/qa/router-v7-image-parity.json
+        destination: router-v7-image-parity.json
   release-dist-build:
     docker:
       - image: cimg/python:3.13
@@ -1851,10 +2100,13 @@ jobs:
       - run:
           name: osv-scanner (binary v2.6.0, lockfiles)
           command: |
+            set -euo pipefail
             curl -fsSL --proto '=https' --tlsv1.2 \
               https://github.com/google/osv-scanner/releases/download/v2.6.0/osv-scanner_linux_amd64 \
               -o "$HOME/.local/bin/osv-scanner"
+            printf '%s  %s\n' ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108 "$HOME/.local/bin/osv-scanner" | sha256sum --check -
             chmod 0755 "$HOME/.local/bin/osv-scanner"
+            scan_exit=0
             "$HOME/.local/bin/osv-scanner" \
               --lockfile=uv.lock \
               --lockfile=package-lock.json \
@@ -1864,7 +2116,12 @@ jobs:
               --lockfile=grafana/plugins/bioetl-scenes-app/package-lock.json \
               --lockfile=grafana/plugins/bioetl-selectorshell-panel/package-lock.json \
               --lockfile=grafana/tooling/router-v7-bridge/package-lock.json \
-              --format=json --output-file=osv-results.json || true
+              --format=json --output-file=osv-results.json || scan_exit=$?
+            # Only a completed scan can reach the severity policy.
+            case "$scan_exit" in
+              0|1) ;;
+              *) echo "OSV scan failed or found no packages (exit=$scan_exit)" >&2; exit "$scan_exit" ;;
+            esac
             export PATH="$HOME/.local/bin:$PATH"
             uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json
       - store_artifacts:
@@ -2291,6 +2548,26 @@ jobs:
         destination: proof-or-stop
 
 workflows:
+  router-bridge:
+    when:
+      and:
+      - equal:
+        - router-bridge
+        - << pipeline.parameters.ci-lane >>
+      - equal:
+        - main
+        - << pipeline.git.branch >>
+    jobs:
+    - router-bridge-tests
+    - router-plugin-tests:
+        matrix:
+          parameters:
+            plugin:
+            - bioetl-scenes-app
+            - bioetl-selectorshell-panel
+    - router-host-build:
+        requires:
+        - router-plugin-tests
   version: 2
   docker-baseline:
     when:

@@ -253,7 +253,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `opencode-pr-review.yml` | — | Retain disabled review stub policy | Do not activate unpinned installer or write paths |
 | `opencode-triage.yml` | — | Retain disabled triage stub policy | Do not activate unpinned installer or write paths |
 | `performance-nightly.yml` | `0 3 * * *` | CircleCI performance | Main job 3365 passes 70 tests without skips and all five budgets; daily 03 UTC trigger registered, scheduled execution pending |
-| `port-contracts.yml` | — | CircleCI port-contracts | Main run 2606 passed 188 tests including 24 Hypothesis cases; push/PR event parity pending |
+| `port-contracts.yml` | — | CircleCI port-contracts | Main run 2606 passed 188 tests including 24 Hypothesis cases; run 4425/pipeline 262 passed 164 tests with include-hypothesis=false on 303ced3; push/PR event parity pending |
 | `pr-hygiene.yml` | — | Retain disabled PR maintenance | Preserve #10263; canonical 21-day draft/report-noise policy remains manual |
 | `pr-required.yml` | — | CircleCI classify/pr-gate-complete | Main pipelines 218–220 pass all 81 jobs on a34558b918b5; both production rulesets active/read back; legacy owner references retained until #11930 |
 | `provider-contract-drift.yml` | — | CircleCI provider-contract-drift | Main run 3112 passes replay, matrix/xwalk and breaking-drift gates; push/PR parity pending; artifact retention verified at 30 days |
@@ -262,7 +262,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `reusable-mermaid-setup.yml` | — | Shared pinned Mermaid tooling | Pending consumer migration; keep lockfile scanned by OSV |
 | `reusable-setup.yml` | — | CircleCI setup-python-uv | Checksum-pinned uv 0.11.26 and explicit UV_PYTHON prepared; remote runtime/cache parity pending |
 | `root-hygiene.yml` | — | CircleCI root-hygiene | Main full-tree/strict checks accepted; cleanup diagnostic artifacts and dedicated legacy regression selectors added for next acceptance; structure-audit port is blocked by six tracked Python paths outside allowed roots |
-| `router-v7-bridge.yml` | — | Router bridge candidate acceptance | Pending port; managed host evidence remains separate |
+| `router-v7-bridge.yml` | — | Router bridge candidate acceptance | Prepared main-only router-bridge lane: Node 24 bridge tests, both plugin builds and pinned host image parity; remote and path-trigger acceptance pending; managed host evidence remains separate |
 | `schema-governance.yml` | — | CircleCI schema-governance | Prepared required gate; canonical generation/parity preserved |
 | `scorecard.yml` | `30 7 * * 1` | CircleCI scorecard plus SARIF publication | Main-only JSON/SARIF analysis and protected writer prepared; pinned v5.5.0 and all 18 checks; local Linux 7.8/10 on 303ced3b and processed SARIF; restricted empty write context exists, credentials/remote acceptance/schedule and public result decision pending |
 | `security.yml` | — | CircleCI security-scans | Main security gates 218–220 passed; all tracked lockfiles remain scanned; SARIF publication parity pending |
@@ -512,3 +512,20 @@ recurrent infra/code failures are zero, and the final skip rate is zero against
 the unchanged 15% SLO. This accepts the existing smoke replay lane; the newly
 prepared full replay, prompt, live and approved-sync jobs still need remote
 acceptance after integration.
+
+
+Router candidate preparation uses `ci-lane=router-bridge` on main only. The
+bridge and two plugin jobs retain the legacy Node 24 commands, moderate npm
+audit gate, committed archive and bundle digest checks, and 10/15-minute
+limits. The dependent host job fetches the exact Grafana source commit, applies
+the same three patches, runs the Canvas regression, builds the complete image
+and validates filesystem/artifact parity within 45 minutes. Verified plugin
+outputs cross jobs through the workspace; build/parity receipts and logs are
+retained as artifacts. The Node 24.21.0 executor is digest-pinned. Its local
+bridge acceptance passed all 26 tests, typecheck, build and vulnerability audit;
+actual CircleCI plugin/host and automatic path-trigger acceptance remain pending.
+
+OSV scan failures cannot reach the HIGH/CRITICAL severity policy: only exit 0
+or 1 from the checksum-verified v2.6.0 binary is accepted as a completed scan.
+Infrastructure, network, and no-package exits fail the job before the policy
+reads a partial or empty report. Severity thresholds are unchanged.
