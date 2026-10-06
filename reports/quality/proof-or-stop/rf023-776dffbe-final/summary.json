@@ -1,0 +1,21 @@
+{
+  "source_commit": "776dffbefff9ddf7afb464e259b9046bd74528c9",
+  "sonar_issue": "AaEQQCgBpmgze-4K1g-t",
+  "targeted_tests": {
+    "coverage_runner_passed": 41,
+    "generated_guards_passed": 54
+  },
+  "tested_before_commit": true,
+  "changes_after_tests": "None to tested source; commit and push only",
+  "qualification": "Targeted validation, new remote Sonar verdict and complete17 still pending; not lifecycle ADMIT",
+  "files": {
+    "scratch-boundary.xml": "fc6d22e52076b31d432e3005b6a61a28bb1227c5f0188b2227b2b1740c578d44",
+    "scratch-boundary.log": "ac8c66c6b91065b34337a434919730fbc84aa27b58e2974598296601fe9f6154",
+    "scratch-boundary-guards.xml": "d8645cb13db05519f40dd460c81fbd9232518ca8f1e353d36d9c1b8ab80d25d9",
+    "scratch-boundary-guards.log": "f9abfe61272bb3a6944f2e3313b214d4b0ac1e6a1f23ec46c54026beab37a353",
+    "af1280ab-sonar-issues.json": "8b70a1213f0c67a31610be859d7739d23a3601f6317e1219d94f9fb1955e00d8",
+    "af1280ab-sonar-gate.json": "9d27e621fbd5c304c491cb7df3ed7e1874e83d200d8c2a7a2563e105a892040f",
+    "scratch-boundary-publication.json": "9c7b413fe0393405b6a07f760dc161b549e6350e23f1761f91cb9adf282aa107"
+  },
+  "archive_sha256": "98e9c59d5c394c0cff49e691bd91001438b3ff483ab65a405329272cd3cb0c27"
+}
