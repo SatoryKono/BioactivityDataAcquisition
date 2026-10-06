@@ -1,8 +1,0 @@
-{
-  "archive": "isolated-acceptance-artifacts.tar.gz",
-  "sha256": "34d0c8eabd77de28ba42687667473b9688de6380ccf8f81bc4f800c656a0ce1d",
-  "bytes": 1364387,
-  "format": "tar.gz",
-  "members": 88,
-  "preservation": "Original receipts, JUnit, browser DOM/JPEG and command logs stored byte-exact; no database or credentials. artifact-index.json hashes archive members, not LF-normalized Git projections."
-}

@@ -102,7 +102,10 @@ class SilverThresholdChecker:
 
         if fields_to_check:
             import polars.selectors as cs
-            null_counts = df.select(cs.by_name(fields_to_check)).null_count().row(0, named=True)
+
+            null_counts = (
+                df.select(cs.by_name(fields_to_check)).null_count().row(0, named=True)
+            )
             for field, null_count in null_counts.items():
                 if null_count > 0:
                     violations.append(

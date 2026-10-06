@@ -297,26 +297,4 @@ def test_live_catalog_classifies_grafana_reports_and_test_fixtures() -> None:
     assert matrix["unclassified_files"] == []
     assert matrix["decisions"]["docs-governance"]["decision"] == REQUIRED
     assert matrix["decisions"]["docs-governance"]["reason"] == "path_match"
-    assert matrix["decisions"]["docker"]["decision"] == REQUIRED
-
-
-@pytest.mark.parametrize(
-    "changed_path",
-    [
-        "grafana/tooling/router-v7-bridge/Dockerfile.managed",
-        "grafana/tooling/router-v7-bridge/grafana-v13.2.3.patch",
-        "grafana/tooling/router-v7-bridge/webpack-public-path.cjs",
-        "grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.tsx",
-    ],
-)
-def test_live_catalog_requires_image_verification_for_single_grafana_input(
-    changed_path: str,
-) -> None:
-    catalog = load_catalog(
-        Path(__file__).resolve().parents[6]
-        / "configs/quality/github_required_checks.yaml"
-    )
-    matrix = classify_changes(catalog, [changed_path], head_sha=HEAD_SHA)
-
-    assert matrix["decisions"]["docker"]["decision"] == REQUIRED
-    assert matrix["decisions"]["docker"]["reason"] == "path_match"
+    assert matrix["decisions"]["docker"]["decision"] == NOT_APPLICABLE

@@ -108,7 +108,9 @@ class TestSilverThresholdChecker:
                 "missing_column": True,
             },
         ]
-        assert sorted(result["violations"], key=lambda x: str(x["field"])) == sorted(expected_violations, key=lambda x: str(x["field"]))
+        assert sorted(result["violations"], key=lambda x: str(x["field"])) == sorted(
+            expected_violations, key=lambda x: str(x["field"])
+        )
 
     def test_check_key_nullability_returns_pass_without_violations(self) -> None:
         checker = SilverThresholdChecker()

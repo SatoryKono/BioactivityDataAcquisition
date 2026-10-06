@@ -1,7 +1,0 @@
-# Temporary probe for the JSON-dashboard managed variant; remove after capture.
-services:
-  grafana:
-    environment:
-      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=bioetl-selectorshell-panel,bioetl-router-security-probe
-    volumes:
-      - ./grafana/tooling/router-v7-bridge/runtime-probe:/var/lib/grafana/plugins/bioetl-router-security-probe:ro

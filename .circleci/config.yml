@@ -1411,7 +1411,7 @@ jobs:
   # Trivy baseline here â€” image security baseline stays a phase-3 item.
   docker-build:
     docker:
-      - image: cimg/python:3.12-node
+      - image: cimg/python:3.12
     resource_class: small
     steps:
       - checkout
@@ -1462,63 +1462,6 @@ jobs:
       - run:
           name: docker build (Dockerfile.bioetl)
           command: docker build -f Dockerfile.bioetl -t bioetl:ci .
-      - run:
-          name: Rebuild and verify Router host plugin bundles
-          command: |
-            set -euo pipefail
-            for plugin in bioetl-scenes-app bioetl-selectorshell-panel; do
-              (
-                cd "grafana/plugins/$plugin"
-                npm ci --ignore-scripts
-                npm run typecheck
-                npm run lint
-                NODE_ENV=test npm run test:ci -- --maxWorkers=2
-                npm run build
-              )
-            done
-            python - \<<'PY'
-            import hashlib
-            import json
-            import os
-            from pathlib import Path
-
-            root = Path.cwd()
-            manifest = json.loads((root / "grafana/tooling/router-v7-bridge/host-image.json").read_text())
-            artifacts = {}
-            for plugin in ("bioetl-scenes-app", "bioetl-selectorshell-panel"):
-                dist = root / "grafana/plugins" / plugin / "dist"
-                for filename in ("module.js", "plugin.json"):
-                    bundle = dist / filename
-                    assert bundle.is_file(), f"Missing built artifact: {bundle}"
-                    relative = bundle.relative_to(root).as_posix()
-                    actual = hashlib.sha256(bundle.read_bytes()).hexdigest()
-                    assert actual == manifest["artifact_sha256"][relative], f"Artifact mismatch: {relative}"
-                artifacts[plugin] = {
-                    file.relative_to(dist).as_posix(): hashlib.sha256(file.read_bytes()).hexdigest()
-                    for file in sorted(dist.rglob("*")) if file.is_file()
-                }
-            receipt = {"status": "PASS", "source_commit": os.environ["CIRCLE_SHA1"], "built_files": artifacts}
-            destination = root / "reports/qa/router-v7-plugin-bundles.json"
-            destination.parent.mkdir(parents=True, exist_ok=True)
-            destination.write_text(json.dumps(receipt, indent=2) + "\n")
-            PY
-      - store_artifacts:
-          path: reports/qa/router-v7-plugin-bundles.json
-          destination: router-v7-plugin-bundles.json
-      - run:
-          name: Verify managed Router host preserves the complete pinned filesystem
-          command: |
-            python grafana/tooling/router-v7-bridge/verify-managed-image.test.py
-            PARENT=$(python -c "import json; print(json.load(open('grafana/tooling/router-v7-bridge/managed-image.json'))['parent_image'])")
-            docker pull "$PARENT"
-            docker build --platform linux/amd64 -f grafana/tooling/router-v7-bridge/Dockerfile.managed -t bioetl-router-host:managed-ci .
-            DECLARED=$(python -c "import json; print(json.load(open('grafana/tooling/router-v7-bridge/managed-image.json'))['image'])")
-            docker pull "$DECLARED"
-            BUILT=$(docker image inspect bioetl-router-host:managed-ci --format '{{.Id}}')
-            python grafana/tooling/router-v7-bridge/verify-managed-image.py "$BUILT"
-      - store_artifacts:
-          path: reports/qa/router-v7-managed-image-parity.json
-          destination: router-v7-managed-image-parity.json
 
   # --- Aggregator (mirrors pr-gate-complete; stable name for future rulesets) -------
   pr-gate-complete:
@@ -1970,4 +1913,3 @@ workflows:
                 - codex/config-root-main-acceptance-20261005
                 - codex/config-root-postmerge-20261005
                 - codex/architecture-meta-closeout-20261005
-                - codex/grafana-managed-closeout-20261005

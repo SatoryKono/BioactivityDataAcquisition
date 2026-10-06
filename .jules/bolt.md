@@ -1,3 +1,0 @@
-## 2023-10-05 - Polars Vectorized Selection Over Single Call Aggregation
-**Learning:** In Polars, checking multiple column properties iteratively (e.g. `df[col].null_count()` in a loop over many columns) incurs massive FFI overhead. Grouping conditions via `df.select([pl.col(c).null_count() ...])` or `df.select(cs.by_name(...)).null_count()` drastically reduces Python execution time, even if we are checking over 100 columns.
-**Action:** When operating on multiple columns independently to fetch single statistics like null counts or unique values, extract logic entirely outside Python loops and use native Polars selectors combined with row extraction (e.g., `row(0, named=True)`).
