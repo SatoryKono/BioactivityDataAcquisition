@@ -48,6 +48,7 @@ from pathlib import Path
 
 import pyarrow as pa
 import pytest
+import yaml
 from deltalake import write_deltalake
 from deltalake.exceptions import DeltaError, TableNotFoundError
 
@@ -63,7 +64,7 @@ pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
 
 # VCR cassette directory for ChEMBL E2E tests
 CASSETTE_DIR = Path(__file__).parent.parent / "fixtures" / "vcr" / "chembl"
-TERM_PAYLOAD_MARKERS = ('"mesh_terms"', '"keywords"')
+TERM_PAYLOAD_MARKERS = ('"mesh_terms"', '"keywords"', "<MeshHeading>", "<Keyword ")
 SILVER_READ_SKIP_ERRORS: tuple[type[Exception], ...] = (
     DeltaError,
     OSError,
@@ -92,9 +93,14 @@ def _cassette_has_term_payload(test_name: str) -> bool:
     for cassette_path in (CASSETTE_DIR / test_name, CASSETTE_DIR / f"{test_name}.yaml"):
         if not cassette_path.exists():
             continue
-        payload = cassette_path.read_text(encoding="utf-8", errors="ignore")
-        if any(marker in payload for marker in TERM_PAYLOAD_MARKERS):
-            return True
+        cassette = yaml.safe_load(cassette_path.read_text(encoding="utf-8"))
+        for interaction in cassette["interactions"]:
+            payload = interaction["response"]["body"].get("string", "")
+            if isinstance(payload, bytes):
+                payload = payload.decode("utf-8")
+            # Terms can arrive through the PubMed XML enrichment response.
+            if any(marker in payload for marker in TERM_PAYLOAD_MARKERS):
+                return True
     return False
 
 

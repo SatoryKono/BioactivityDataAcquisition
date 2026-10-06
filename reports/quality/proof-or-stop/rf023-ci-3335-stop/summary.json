@@ -1,0 +1,19 @@
+{
+  "source_commit": "43f8716f11d485fecbb776d2359dbc9692b9707f",
+  "job_url": "https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/3335",
+  "outcome": "STOP",
+  "claim_qualified": false,
+  "error": "failed_receipt:debt",
+  "root_cause": "remote_main_baseline drift after main advanced",
+  "debt_log_digest_verified": true,
+  "diagnostics_only": true,
+  "archive_sha256": "c7f8ebc4a1b6778dbd7bded03d9491816f370719d9698fda14f17e9e36e27c2b",
+  "files": {
+    "debt.json": "1d6f6f8960f2bc7a21fc3c8c7b819df826813222564ed14ccb410d44ec10b66f",
+    "debt.log": "dd78149b3f214e6eec46e0dcc8c6a007b7dad3991d4e41bc578bd15b0eb05b23",
+    "debt.record.json": "1c992cfb0cc197c8a04b69af1c837eb4e34acef794479cfd850c812f9c3d322b",
+    "receipt-debt.log": "4a31cf265580ec45640dd68c01b6d944f9762c3d52a597ea9a6173a8ebcce609",
+    "receipt-debt.record.json": "392c7d30f438eb678571cdf5a07c243288a56389226ce9e15d6696630e297647",
+    "verification.json": "4c11e56a9a75f53b8ed177a731d5154b1530d30f1b32a8c482a8482f845cb0d8"
+  }
+}

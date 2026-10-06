@@ -1,0 +1,6 @@
+{
+  "guard": "python_audit_network_and_subprocess",
+  "self_probe_denied": true,
+  "runtime_attempts": [],
+  "exit_code": 0
+}

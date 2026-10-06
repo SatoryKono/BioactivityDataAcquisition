@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "declared_image": "satorykono/bioetl-grafana-router7-canvas@sha256:2b258e26410093577e524761ebdcfbd0ba36c7ba460692d277e1333c39b53a14",
+  "built_image_config_digest": "sha256:40f8232b81323cf82d19128006dcf71da99a14e84e0ad5d722e251adf5961589",
+  "declared_image_config_digest": "sha256:aace95605f9c66849d52bc0494b04ffbb5dec2678ba73719c80c57a0cd57cf77",
+  "rootfs_sha256": "6adb9df88385d2bd0803abe00eb7ad8b8c1df511a1501c32358182cb7e09ac24",
+  "paths_verified": 15478,
+  "scenes_installed": false,
+  "trust_tier": "image_artifact_parity",
+  "rebuilt_plugin_files_verified": {
+    "bioetl-scenes-app": 53,
+    "bioetl-selectorshell-panel": 7
+  }
+}

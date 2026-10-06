@@ -3,6 +3,6 @@ provider: openalex
 cassette_rel_path: tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_with_fallback.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: f49110ec5fb5544b442099a68f2ad7f0f45c32c9303e94b477add62fd6406187
-recorded_at: '2026-07-03'
+cassette_sha256: 070fec780069bd17084f0ea81e5d6f6088bc0ebc6b66880a5ccfba8e769c6b47
+recorded_at: '2026-10-06'
 staleness_ready: true

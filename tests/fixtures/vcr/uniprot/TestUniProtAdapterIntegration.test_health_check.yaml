@@ -2,59 +2,65 @@ interactions:
 - request:
     body: ''
     headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
+      accept:
+      - application/json
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - rest.uniprot.org
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - BioETL/6.1.0
     method: GET
-    uri: https://rest.uniprot.org/uniprotkb/search?query=accession%3AP62988&size=1&format=json
+    uri: https://rest.uniprot.org/uniprotkb/search?format=json&query=accession%3AP62988&size=1
   response:
     body:
-      string: '{"results":[{"entryType":"Inactive","primaryAccession":"P62988","uniProtkbId":"UBIQ_HUMAN","annotationScore":0.0,"inactiveReason":{"inactiveReasonType":"DEMERGED","mergeDemergeTo":["P62987","P62979","P0CG48","P0CG47"]}}]}'
+      string: !!binary |
+        H4sIAAAAAAAA/1yOT4vCQAzFv0vOZSmL2Oqta4vbQ6Xrn9Miy3QMMqzOlEwqltLvbkZ7MpeE98h7
+        vwEIfXdhD8vfAdAy9fu+RVhCaZVmc0OIoCVzVdRnWqP3xllx6/nnIk3F66ypyfF/U55EPnyVP3/f
+        hyrbiKWsdaxYHnbakWTGH3EEZsrdovIhanhTpvq8qIrtusgl54p0xhyfa+8EFOp4tZ4lYj2PgBF4
+        ksV0pAkcxwjwzqQyZjJNx+hDVaBVpF+sdRm/Zr6awTg+AAAA//+KrQUAAAD//wMATytkaw0BAAA=
     headers:
-      Access-Control-Allow-Credentials:
+      access-control-allow-credentials:
       - 'true'
-      Access-Control-Allow-Headers:
+      access-control-allow-headers:
       - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
-      Access-Control-Allow-Methods:
+      access-control-allow-methods:
       - GET, PUT, POST, DELETE, PATCH, OPTIONS
-      Access-Control-Allow-Origin:
+      access-control-allow-origin:
       - '*'
-      Access-Control-Expose-Headers:
+      access-control-expose-headers:
       - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
-      Access-Control-Max-Age:
+      access-control-max-age:
       - '1728000'
-      Cache-Control:
+      cache-control:
       - public, max-age=43200
-      Connection:
+      connection:
       - keep-alive
-      Content-Type:
+      content-encoding:
+      - gzip
+      content-type:
       - application/json
-      Date:
-      - Wed, 24 Dec 2025 19:27:15 GMT
-      Strict-Transport-Security:
-      - max-age=31536000; includeSubDomains
-      Vary:
+      date:
+      - Tue, 06 Oct 2026 03:48:36 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      transfer-encoding:
+      - chunked
+      vary:
       - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent,
         Accept-Encoding
-      X-API-Deployment-Date:
-      - 11-December-2025
-      X-Total-Results:
-      - '1'
-      X-UniProt-Release:
-      - '2025_04'
-      X-UniProt-Release-Date:
-      - 15-October-2025
-      content-length:
-      - '221'
+      x-api-deployment-date:
+      - 23-September-2026
       x-cache:
-      - hit cached
+      - miss cached
+      x-total-results:
+      - '1'
+      x-uniprot-release:
+      - '2026_03'
+      x-uniprot-release-date:
+      - 02-September-2026
     status:
       code: 200
       message: OK

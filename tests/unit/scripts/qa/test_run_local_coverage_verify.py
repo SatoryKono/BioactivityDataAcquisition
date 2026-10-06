@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 from pathlib import Path
-import subprocess
 import json
+import subprocess
 
 import pytest
 
+from scripts.engineering.qa import run_local_coverage_verify as runner
 from scripts.engineering.qa.run_local_coverage_verify import (
     SHARDS,
     _command,
@@ -70,6 +71,91 @@ def test_local_coverage_list_is_read_only(capsys) -> None:
     assert len(lines) == 17
     assert lines[0].startswith("smoke:")
     assert lines[-1].startswith("serial:")
+
+
+@pytest.mark.parametrize("shard", SHARDS, ids=lambda shard: shard.name)
+def test_single_worker_preserves_every_shard_selection_and_gate(shard) -> None:
+    expected = _command(shard, Path("junit.xml"))
+    if shard.parallel:
+        expected[expected.index("-n") + 1] = "1"
+    assert _command(shard, Path("junit.xml"), max_workers=1) == expected
+
+
+@pytest.mark.parametrize("workers", ("0", "3", "-1"))
+def test_worker_limit_cannot_disable_execution_or_raise_resource_budget(
+    workers,
+) -> None:
+    with pytest.raises(SystemExit) as error:
+        main(["--list", "--max-workers", workers])
+    assert error.value.code == 2
+
+
+def test_scratch_path_rejects_escape_without_creating_files(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "ROOT", tmp_path / "repo")
+    monkeypatch.setattr(runner.tempfile, "gettempdir", lambda: str(tmp_path / "temp"))
+    outside = tmp_path / "repo" / "reports" / ".." / "outside"
+
+    with pytest.raises(ValueError, match="Coverage scratch"):
+        runner._scratch_path(outside)
+
+    assert not outside.resolve().exists()
+
+
+@pytest.mark.parametrize("folder", ("repo/reports/run", "temp/run"))
+def test_scratch_path_allows_owned_output_roots(tmp_path, monkeypatch, folder):
+    monkeypatch.setattr(runner, "ROOT", tmp_path / "repo")
+    monkeypatch.setattr(runner.tempfile, "gettempdir", lambda: str(tmp_path / "temp"))
+
+    assert runner._scratch_path(tmp_path / folder) == (tmp_path / folder).resolve()
+
+
+def test_manifest_writer_does_not_overwrite_existing_temporary_file(tmp_path):
+    temporary = tmp_path / "manifest.tmp"
+    temporary.write_text("preserve existing evidence", encoding="utf-8")
+
+    with pytest.raises(FileExistsError):
+        runner._write_manifest(tmp_path / "manifest.json", {"complete": False})
+
+    assert temporary.read_text(encoding="utf-8") == "preserve existing evidence"
+    assert not (tmp_path / "manifest.json").exists()
+
+
+def test_manifest_writer_rejects_arbitrary_name(tmp_path):
+    with pytest.raises(ValueError, match="manifest name"):
+        runner._write_manifest(tmp_path / "other.json", {})
+    assert not (tmp_path / "other.json").exists()
+
+
+def test_single_worker_is_recorded_and_used_without_accepting_failed_run(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        runner, "_git", lambda *args: "" if args[0] == "status" else "a" * 40
+    )
+    monkeypatch.setattr(runner, "compute_source_tree_sha256", lambda **kwargs: "b" * 64)
+    monkeypatch.setattr(
+        runner, "compute_test_telemetry_source_tree_sha256", lambda **kwargs: "c" * 64
+    )
+    executed = []
+
+    def failed_shard(command, log, *, env):
+        executed.append(command)
+        return 1
+
+    monkeypatch.setattr(runner, "_run_logged", failed_shard)
+    scratch = tmp_path / "measurement"
+    assert main(["--scratch-dir", str(scratch), "--max-workers", "1"]) == 1
+    manifest = json.loads((scratch / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["max_workers"] == 1
+    assert manifest["complete"] is False
+    assert len(executed) == len(manifest["shards"]) == 17
+    for shard, command, row in zip(SHARDS, executed, manifest["shards"], strict=True):
+        assert row["command"] == command
+        assert row["exit_code"] == 1
+        if shard.parallel:
+            assert command[command.index("-n") + 1] == "1"
+        else:
+            assert command[-2:] == ["-p", "no:xdist"]
 
 
 @pytest.fixture()
@@ -140,6 +226,27 @@ def test_import_all_shards_without_executing_tests(transported_shards, monkeypat
     assert all(Path(row["junit_file"]).is_relative_to(scratch) for row in rows)
 
 
+def test_import_single_worker_shards_preserves_actual_commands(transported_shards):
+    groups, scratch, expected, manifests = transported_shards
+    expected["max_workers"] = 1
+    by_name = {shard.name: shard for shard in SHARDS}
+    for path in manifests:
+        payload = json.loads(path.read_text())
+        payload["max_workers"] = 1
+        for row in payload["shards"]:
+            row["command"] = _command(
+                by_name[row["name"]], Path(row["junit_file"]), max_workers=1
+            )
+        path.write_text(json.dumps(payload))
+
+    rows = import_shards(groups, scratch, expected)
+
+    assert len(rows) == 17
+    for row in rows:
+        if by_name[row["name"]].parallel:
+            assert row["command"][row["command"].index("-n") + 1] == "1"
+
+
 @pytest.mark.parametrize(
     "damage",
     [
@@ -151,6 +258,7 @@ def test_import_all_shards_without_executing_tests(transported_shards, monkeypat
         "failed",
         "selector",
         "junit",
+        "workers",
     ],
 )
 def test_import_rejects_invalid_shard_evidence(transported_shards, damage):
@@ -172,6 +280,8 @@ def test_import_rejects_invalid_shard_evidence(transported_shards, damage):
         row["exit_code"] = 1
     elif damage == "selector":
         row["command"] = ["true"]
+    elif damage == "workers":
+        payload["max_workers"] = 1
     else:
         Path(row["junit_file"]).write_text(
             "<testsuite><testcase><failure/></testcase></testsuite>"

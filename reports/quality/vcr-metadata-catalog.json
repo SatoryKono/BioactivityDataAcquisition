@@ -3,12 +3,12 @@
   "catalog_kind": "vcr_metadata_catalog",
   "vcr_root": "tests/fixtures/vcr",
   "totals": {
-    "cassette_count": 178,
-    "metadata_sidecar_count": 178,
+    "cassette_count": 173,
+    "metadata_sidecar_count": 173,
     "provider_count": 8,
     "duplicate_scenario_stem_count": 0,
-    "direct_reachable_cassette_count": 109,
-    "generated_reachable_cassette_count": 69,
+    "direct_reachable_cassette_count": 105,
+    "generated_reachable_cassette_count": 68,
     "metadata_review_required_cassette_count": 0,
     "unowned_cassette_count": 0
   },
@@ -26,8 +26,8 @@
       "metadata_coverage_percent": 100.0
     },
     "crossref": {
-      "cassette_count": 24,
-      "metadata_sidecar_count": 24,
+      "cassette_count": 23,
+      "metadata_sidecar_count": 23,
       "without_metadata_count": 0,
       "metadata_coverage_percent": 100.0
     },
@@ -50,20 +50,20 @@
       "metadata_coverage_percent": 100.0
     },
     "pubmed": {
-      "cassette_count": 24,
-      "metadata_sidecar_count": 24,
+      "cassette_count": 23,
+      "metadata_sidecar_count": 23,
       "without_metadata_count": 0,
       "metadata_coverage_percent": 100.0
     },
     "semanticscholar": {
-      "cassette_count": 24,
-      "metadata_sidecar_count": 24,
+      "cassette_count": 22,
+      "metadata_sidecar_count": 22,
       "without_metadata_count": 0,
       "metadata_coverage_percent": 100.0
     },
     "uniprot": {
-      "cassette_count": 17,
-      "metadata_sidecar_count": 17,
+      "cassette_count": 16,
+      "metadata_sidecar_count": 16,
       "without_metadata_count": 0,
       "metadata_coverage_percent": 100.0
     }
@@ -962,19 +962,6 @@
     },
     {
       "provider": "crossref",
-      "scenario_stem": "test_crossref_batch_fetch",
-      "cassette_rel_path": "tests/fixtures/vcr/crossref/test_crossref_batch_fetch.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/crossref/test_crossref_batch_fetch_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "generated_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_crossref.py"
-      ]
-    },
-    {
-      "provider": "crossref",
       "scenario_stem": "test_crossref_fetch_by_doi",
       "cassette_rel_path": "tests/fixtures/vcr/crossref/test_crossref_fetch_by_doi.yaml",
       "cassette_extension": ".yaml",
@@ -1792,19 +1779,6 @@
     },
     {
       "provider": "pubmed",
-      "scenario_stem": "test_fetch_publications",
-      "cassette_rel_path": "tests/fixtures/vcr/pubmed/test_fetch_publications.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/pubmed/test_fetch_publications_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_pubmed.py"
-      ]
-    },
-    {
-      "provider": "pubmed",
       "scenario_stem": "test_health_check",
       "cassette_rel_path": "tests/fixtures/vcr/pubmed/test_health_check.yaml",
       "cassette_extension": ".yaml",
@@ -2150,19 +2124,6 @@
     },
     {
       "provider": "semanticscholar",
-      "scenario_stem": "TestSemanticScholarAdapterIntegration.test_fetch_filtered_with_fallback",
-      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_filtered_with_fallback.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_filtered_with_fallback_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_semanticscholar.py"
-      ]
-    },
-    {
-      "provider": "semanticscholar",
       "scenario_stem": "TestSemanticScholarAdapterIntegration.test_fetch_with_query",
       "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_with_query.yaml",
       "cassette_extension": ".yaml",
@@ -2183,19 +2144,6 @@
       "cassette_extension": ".yaml",
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_health_check_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_semanticscholar.py"
-      ]
-    },
-    {
-      "provider": "semanticscholar",
-      "scenario_stem": "TestSemanticScholarAdapterIntegration.test_title_only_lookup",
-      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_title_only_lookup.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_title_only_lookup_meta.yaml",
       "metadata_status": "managed_inventory",
       "reachability_status": "direct_reference",
       "reachability_owner_paths": [
@@ -2344,19 +2292,6 @@
       "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_health_check_meta.yaml",
       "metadata_status": "managed_inventory",
       "reachability_status": "generated_reference",
-      "reachability_owner_paths": [
-        "tests/integration/adapters/test_uniprot_idmapping.py"
-      ]
-    },
-    {
-      "provider": "uniprot",
-      "scenario_stem": "TestUniProtIDMappingIntegration.test_map_empty_list",
-      "cassette_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_empty_list.yaml",
-      "cassette_extension": ".yaml",
-      "has_metadata_sidecar": true,
-      "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_empty_list_meta.yaml",
-      "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
       "reachability_owner_paths": [
         "tests/integration/adapters/test_uniprot_idmapping.py"
       ]

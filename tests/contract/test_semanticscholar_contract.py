@@ -48,8 +48,8 @@ REPLAY_SNAPSHOT_PROBES = ("paper_search_endpoint", "paper_batch_lookup_by_doi")
 pytestmark = pytest.mark.no_api
 
 EXPECTED_BATCH_IDENTITIES = {
-    "10.1038/nature12373": "a88fbdb9b47a8e8aef2b8cabd1fe0adfb96a9f25",
-    "10.1016/j.cell.2019.03.025": "b2c8f1d3e4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9",
+    "10.1038/nature12373": "a5de30adc5c22bc86e8cfabe7fbd07c052d196a8",
+    "10.1016/j.cell.2019.03.025": "8b3b3a0fc1f833419b87575bee1d1227aa9f5ed4",
 }
 
 

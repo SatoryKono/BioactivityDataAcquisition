@@ -97,6 +97,27 @@ def _successful_dependency_tables(request: MergeExecutionRequest) -> frozenset[s
     )
 
 
+def freeze_merge_request(request: MergeExecutionRequest) -> JsonDict:
+    """Serialize resolved selections and statuses for symmetric offline restoration."""
+    if request.metadata_timestamp is None:
+        raise ValueError("composite_replay_request_timestamp_missing")
+    return {
+        "seed_table": request.seed_table,
+        "seed_pipeline": request.seed_pipeline,
+        "metadata_timestamp": request.metadata_timestamp.isoformat(),
+        "enrichers": [item.pipeline for item in request.enrichers],
+        "outcomes": {
+            name: result.status.value
+            for name, result in request.enrichment_results.items()
+        },
+        "dependencies": [item.pipeline for item in request.dependencies or ()],
+        "dependency_outcomes": {
+            name: result.status.value
+            for name, result in (request.dependency_results or {}).items()
+        },
+    }
+
+
 def restore_merge_request(
     config: CompositeConfig, payload: JsonDict, run_id: str
 ) -> MergeExecutionRequest:

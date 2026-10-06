@@ -3,6 +3,6 @@ provider: chembl
 cassette_rel_path: tests/fixtures/vcr/chembl/test_vacuum_respects_retention_days.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 6264a8ced756a756529898977b58147519b468d7007e5258ebad735d47456e4e
-recorded_at: '2026-07-03'
+cassette_sha256: e0a59e6e77db60e14a1645c929940f0265c145f12e574811fd1786284d4667ea
+recorded_at: '2026-10-06'
 staleness_ready: true

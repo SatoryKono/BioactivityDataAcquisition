@@ -1,0 +1,18 @@
+{
+  "archive_sha256": "5c9d926f158bf36070719b3fd4c350926ffc69c5600e2d52680f6913c40634c0",
+  "digests_verified": 2927,
+  "replay_passed": [
+    "activity",
+    "assay",
+    "molecule",
+    "target"
+  ],
+  "rows": {
+    "activity": 9,
+    "assay": 10,
+    "molecule": 12,
+    "target": 10
+  },
+  "silver_gold_equal": true,
+  "runtime_network_attempts": []
+}

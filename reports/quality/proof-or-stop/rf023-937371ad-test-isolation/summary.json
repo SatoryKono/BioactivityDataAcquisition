@@ -1,0 +1,33 @@
+{
+  "source_commit": "937371ad4de906d0739c969206dace55cbacd63b",
+  "kind": "remaining-suite-diagnostic-not-full-acceptance",
+  "outcome": "FAIL",
+  "counts": {
+    "tests": 29050,
+    "failures": 2,
+    "errors": 0,
+    "skipped": 125
+  },
+  "cause": "Bootstrap export test evicted parent from sys.modules while child modules remained cached; later monkeypatch dotted path could not resolve assembly",
+  "repair": "Preserve package identity and scope lazy-export cache changes with monkeypatch",
+  "minimal_before": {
+    "passed": 1,
+    "failed": 2
+  },
+  "related_files_after": {
+    "passed": 21,
+    "failed": 0
+  },
+  "full_suite_verified": false,
+  "archive_sha256": "de1b32c44bd28164e1a54ea396b51691e4ba2f9bccacf9365b69863ebe3f6156",
+  "files": {
+    "execution.json": "4a02f0f63664be410d3166a32c31837e7540fd6e3c2bdc7037a164d4ca8df1aa",
+    "junit.xml": "269e3fabd9e668f6d4748ff4b1701579b6181e7955d1efd8dd6546d2a6331f7f",
+    "pytest.log": "687958e5afc8a0c1c3e02d68f3604795c5903f54d8f6660feb4fcbaf71ba2d6c",
+    "bootstrap-order-before.xml": "bf5ac0dbc6dbd62b9fcbee49cd986ca2b47e9fed0c9e95720dc21944e6444489",
+    "bootstrap-order-before.log": "36b2a2a2a50749fbe181d1b1611951da493b6eb083c6a40663f84e1a8dbc4871",
+    "bootstrap-order-after.xml": "e7fa61103d8e4bb872f399b1110713d05ebb3a1eb7bcb8eceb91896f8f96030e",
+    "bootstrap-order-after.log": "c5726dee82d842a695196088e90afec67583ea558d06a9a2af73552a7441b8ff",
+    "repair.diff": "dbff8018a21cbc939d0df760a8f455bcf72134ca08fbcdbe0b43da20eec7b106"
+  }
+}

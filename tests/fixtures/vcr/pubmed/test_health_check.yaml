@@ -2,67 +2,71 @@ interactions:
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      cookie:
+      - ncbi_sid=90C6ABF3AC474F51_0000SID
+      host:
       - eutils.ncbi.nlm.nih.gov
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&email=test%40example.com&retmax=1&retmode=json&term=health
   response:
     body:
-      string: !!binary | # pragma: allowlist secret
-        H4sIAAAAAAAAALyPPQvCQAyGd3/FkcWlSMv5UdxcxEUEddMOh01p4dpqchWl9L+bokIVdBHc7smT
-        l3tTQ4omRoJpDe56RJgCMho6pODBGYmzspCZP9DQeE9FyJV1beRQVoU8YBLqQA9DyRC63FxkFNyB
-        naF2wxfMYpuxwA6GwVhPRjqEyANHpmBrnPzE2NoaEipzyUg169oirhTaP3gPuyVuFmqLlHOkVmvV
-        MTNr1TxDG7+aPn92SWW/ygL5S/pNQSMXnSqka+esH8ur/5VvejcAAAD//wMADc5tTRECAAA=
+      string: '{"header":{"type":"esearch","version":"0.3"},"esearchresult":{"count":"8253289","retmax":"1","retstart":"0","idlist":["42834020"],"translationset":[{"from":"health","to":"\"health\"[MeSH
+        Terms] OR \"health\"[All Fields] OR \"health''s\"[All Fields] OR \"healthful\"[All
+        Fields] OR \"healthfulness\"[All Fields] OR \"healths\"[All Fields]"}],"querytranslation":"\"health\"[MeSH
+        Terms] OR \"health\"[All Fields] OR \"health s\"[All Fields] OR \"healthful\"[All
+        Fields] OR \"healthfulness\"[All Fields] OR \"healths\"[All Fields]"}}
+
+        '
     headers:
-      Access-Control-Allow-Origin:
+      access-control-allow-origin:
       - '*'
-      Access-Control-Expose-Headers:
+      access-control-expose-headers:
       - X-RateLimit-Limit,X-RateLimit-Remaining
-      Cache-Control:
+      alt-svc:
+      - clear
+      cache-control:
       - private
-      Connection:
-      - Keep-Alive
-      Content-Security-Policy:
+      content-length:
+      - '529'
+      content-security-policy:
       - upgrade-insecure-requests
-      Content-Type:
+      content-type:
       - application/json; charset=UTF-8
-      Date:
-      - Fri, 13 Feb 2026 06:29:44 GMT
-      Keep-Alive:
-      - timeout=4, max=40
-      NCBI-PHID:
-      - 1D3451B828C5E0A50000381C651F9B9E.1.1.m_1
-      NCBI-SID:
-      - 233A2EEFADC21C4D_948DSID
-      Referrer-Policy:
+      date:
+      - Tue, 06 Oct 2026 04:11:57 GMT
+      ncbi-phid:
+      - 1D34B17B56A0D055000060038788C13E.1.1.m_1
+      ncbi-sid:
+      - 90C6ABF3AC474F51_0000SID
+      referrer-policy:
       - origin-when-cross-origin
-      Server:
+      server:
       - Finatra
-      Set-Cookie:
-      - ncbi_sid=233A2EEFADC21C4D_948DSID; domain=.nih.gov; path=/; expires=Sat, 13
-        Feb 2027 06:29:44 GMT
-      Strict-Transport-Security:
+      set-cookie:
+      - ncbi_sid=90C6ABF3AC474F51_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 04:11:58 GMT
+      strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
-      Transfer-Encoding:
+      transfer-encoding:
       - chunked
-      X-RateLimit-Limit:
+      via:
+      - 1.1 google
+      x-ratelimit-limit:
       - '3'
-      X-RateLimit-Remaining:
+      x-ratelimit-remaining:
       - '2'
-      X-UA-Compatible:
+      x-ua-compatible:
       - IE=Edge
-      X-XSS-Protection:
+      x-xss-protection:
       - 1; mode=block
-      content-encoding:
-      - gzip
     status:
       code: 200
       message: OK

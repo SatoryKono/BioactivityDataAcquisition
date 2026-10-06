@@ -1,58 +1,48 @@
 interactions:
-    -   request:
-            body: ''
-            headers:
-                Accept:
-                    - application/json
-                Accept-Encoding:
-                    - gzip, deflate, zstd
-                Connection:
-                    - keep-alive
-                Content-Type:
-                    - application/json
-                Host:
-                    - api.semanticscholar.org
-                User-Agent:
-                    - BioETL/1.0
-            method: GET
-            uri: https://api.semanticscholar.org/graph/v1/paper/search?query=test&limit=1&fields=paperId
-        response:
-            body:
-                string: '{"message": "Internal Server Error"}
-
-        '
-            headers:
-                Access-Control-Allow-Origin:
-                    - '*'
-                Connection:
-                    - keep-alive
-                Content-Length:
-                    - '37'
-                Content-Type:
-                    - application/json
-                Date:
-                    - Fri, 06 Mar 2026 13:10:12 GMT
-                Via:
-                    - 1.1 cc68b19bcd92c4253eb5b0efca585390.cloudfront.net (CloudFront)
-                X-Amz-Cf-Id:
-                    - B0QH9N4gYucG59x8Skjs9nLxVzTDt7Jfxk7oVplp7vkPcEuo2MvUuQ==
-                X-Amz-Cf-Pop:
-                    - VIE50-P4
-                X-Cache:
-                    - Error from cloudfront
-                x-amz-apigw-id:
-                    - ZzXH2FCNPHcEv7A=
-                x-amzn-Remapped-Connection:
-                    - keep-alive
-                x-amzn-Remapped-Content-Length:
-                    - '37'
-                x-amzn-Remapped-Date:
-                    - Fri, 06 Mar 2026 13:10:12 GMT
-                x-amzn-Remapped-Server:
-                    - gunicorn
-                x-amzn-RequestId:
-                    - 6c03af09-eab7-4493-ab15-7678f2eefc99
-            status:
-                code: 500
-                message: Internal Server Error
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      content-type:
+      - application/json
+      host:
+      - api.semanticscholar.org
+      user-agent:
+      - python-httpx/0.28.1
+    method: GET
+    uri: https://api.semanticscholar.org/graph/v1/paper/search?query=test&limit=1&fields=paperId
+  response:
+    body:
+      string: '{"message": "Too Many Requests. Please wait and try again or apply for a key for higher rate limits. https://www.semanticscholar.org/product/api#api-key-form", "code": "429"}'
+    headers:
+      connection:
+      - keep-alive
+      content-length:
+      - '174'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Oct 2026 06:16:42 GMT
+      via:
+      - 1.1 1fd3242984ceacb561c135f27536c5da.cloudfront.net (CloudFront)
+      x-amz-apigw-id:
+      - EzvLqGd_PHcEkzw=
+      x-amz-cf-id:
+      - 2LPHJZjV0b-2YnMjtxvaprDdKzt_eRcqo4WnSsZIdOuP9Ebno2az5Q==
+      x-amz-cf-pop:
+      - SFO53-P10
+      x-amzn-errortype:
+      - TooManyRequestsException
+      x-amzn-requestid:
+      - a060ffa4-98ff-43bd-95d9-1ab8686fabc3
+      x-cache:
+      - Error from cloudfront
+    status:
+      code: 429
+      message: ''
 version: 1
