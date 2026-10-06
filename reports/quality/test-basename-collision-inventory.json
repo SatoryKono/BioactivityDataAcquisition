@@ -1,5 +1,5 @@
 {
-  "duplicate_basename_count": 73,
+  "duplicate_basename_count": 72,
   "duplicate_basenames": {
     "test_adapter.py": [
       "tests/integration/adapters/openalex/test_adapter.py",
@@ -174,10 +174,6 @@
     "test_merged_metadata_explainability.py": [
       "tests/unit/domain/behavior/test_merged_metadata_explainability.py",
       "tests/unit/domain/services/test_merged_metadata_explainability.py"
-    ],
-    "test_metadata_lineage_node_builders.py": [
-      "tests/unit/application/services/lineage/test_metadata_lineage_node_builders.py",
-      "tests/unit/application/services/test_metadata_lineage_node_builders.py"
     ],
     "test_metrics.py": [
       "tests/unit/composition/bootstrap/cli/test_metrics.py",

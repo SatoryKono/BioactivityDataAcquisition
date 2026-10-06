@@ -29,7 +29,9 @@ from __future__ import annotations
 import pytest
 
 import ast
+import inspect
 import re
+import textwrap
 from pathlib import Path
 
 
@@ -368,18 +370,34 @@ class TestRunnerFSMOwnership:
             "application/composite/runner_pkg/runner.py not found"
         )
 
-        content = runner_file.read_text(encoding="utf-8")
-
-        # Check for FSM transition logging
-        has_fsm_logging = "_log_fsm_transition" in content or "fsm" in content.lower()
-
-        # Check for state changes
-        has_state_changes = "with_state(" in content
-
-        assert has_fsm_logging or has_state_changes, (
-            "CompositePipelineRunner should manage FSM state transitions.\n"
-            "Expected: _log_fsm_transition() calls or with_state() usage."
+        from bioetl.application.composite.runner_pkg.runner import (
+            CompositePipelineRunner,
         )
+
+        # Follow the actual inherited seam, rather than assuming its implementation
+        # lives in the facade. Both validation and logging remain mandatory.
+        transition = CompositePipelineRunner._transition_state_with_fsm_log
+        wrapper = ast.parse(textwrap.dedent(inspect.getsource(transition)))
+        assert any(
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "transition_state_with_fsm_log"
+            for node in ast.walk(wrapper)
+        )
+        helper = transition.__globals__["transition_state_with_fsm_log"]
+        implementation = ast.parse(textwrap.dedent(inspect.getsource(helper)))
+        calls = {
+            node.func.attr if isinstance(node.func, ast.Attribute) else node.func.id
+            for node in ast.walk(implementation)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, (ast.Name, ast.Attribute))
+        }
+        assert {
+            "validate_fsm_transition",
+            "apply_validated_checkpoint_transition",
+            "apply_recovery_checkpoint_transition",
+            "log_fsm_transition",
+        } <= calls
 
 
 class TestCheckpointFSMIntegration:

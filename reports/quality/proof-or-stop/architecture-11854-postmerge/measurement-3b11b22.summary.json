@@ -1,0 +1,18 @@
+{
+  "producer_head": "3b11b223774c0b7bef4f306fd8cc45326a635b53",
+  "source_tree_sha256": "3786dc15afe014d3827d7f940c7cec030d02c993d78487b403eee55b4bdae29b",
+  "test_tree_sha256": "f4e9e6a38b9899e5158fa3209e772db8affe200dae0190f73129c5611ab3f237",
+  "counts": {
+    "passed": 32877,
+    "skipped": 187,
+    "failures": 0,
+    "errors": 0
+  },
+  "complete": true,
+  "line_percent": 99.7,
+  "branch_percent": 94.34,
+  "coverage_xml_sha256": "baa0d321d4db994d81a276238f593d1a875ed7f6ef6593faf28171362444a9af",
+  "archive": "measurement-3b11b22.zip",
+  "archive_sha256": "8a65f559bc6ffa9736c91f4130866430a7c0fb1bb7f1bffa7209470a8c9b0202",
+  "trust_tier": "local_single_host"
+}

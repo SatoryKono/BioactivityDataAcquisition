@@ -12,7 +12,7 @@ from bioetl.composition.bootstrap.runtime.composite import (
 from bioetl.composition.bootstrap.runtime.assay_replay import (
     replay_assay as replay_assay,
 )
-from bioetl.composition.bootstrap.runtime.assay_replay_evidence import (
+from bioetl.infrastructure.storage.composite_replay_evidence import (
     project_assay_replay as project_assay_replay,
 )
 from bioetl.infrastructure.config.config_root import resolve_config_subdir

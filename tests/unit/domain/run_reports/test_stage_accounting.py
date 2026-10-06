@@ -41,9 +41,9 @@ from typing import cast
 from bioetl.domain.ports import StageAccountingPort
 from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
 from bioetl.domain.run_reports.models import StageId, TrackingCoverage
-from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
+from bioetl.domain.run_reports.pipeline_report_assembly import build_pipeline_run_report
 from bioetl.domain.run_reports.reason_catalog import default_reason_catalog
-from bioetl.domain.run_reports.workflow_builder import build_workflow_run_report
+from bioetl.domain.run_reports.workflow_report_assembly import build_workflow_run_report
 
 
 def test_conservation_invariant_ok() -> None:

@@ -79,6 +79,19 @@ async def iter_uniprot_fallback_records(
 
 
 __all__ = [
+    "extract_uniprot_accession",
     "iter_uniprot_fallback_records",
     "resolve_uniprot_missing_ids",
 ]
+
+
+def extract_uniprot_accession(record: BronzeRecord) -> str | None:
+    """Return a normalized accession from primaryAccession or accession."""
+    for key in ("primaryAccession", "accession"):
+        value = record.get(key)
+        if not isinstance(value, str):
+            continue
+        normalized = value.strip()
+        if normalized:
+            return normalized
+    return None

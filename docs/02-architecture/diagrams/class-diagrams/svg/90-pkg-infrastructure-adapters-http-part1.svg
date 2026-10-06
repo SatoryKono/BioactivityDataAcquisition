@@ -1,0 +1,495 @@
+<svg aria-roledescription="classDiagram" role="graphics-document document" viewBox="0 -8 3193.5625 1129" style="max-width: 3193.56px; background-color: white;" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" width="100%" id="my-svg"><style>#my-svg{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;fill:#212121;}#my-svg .error-icon{fill:#f0fdf4;}#my-svg .error-text{fill:#212121;stroke:#212121;}#my-svg .edge-thickness-normal{stroke-width:2px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#475569;stroke:#475569;}#my-svg .marker.cross{stroke:#475569;}#my-svg svg{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;}#my-svg g.classGroup text{fill:#2563eb;stroke:none;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:10px;}#my-svg g.classGroup text .title{font-weight:bolder;}#my-svg .nodeLabel,#my-svg .edgeLabel{color:#212121;}#my-svg .edgeLabel .label rect{fill:#eff6ff;}#my-svg .label text{fill:#212121;}#my-svg .edgeLabel .label span{background:#eff6ff;}#my-svg .classTitle{font-weight:bolder;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#eff6ff;stroke:#2563eb;stroke-width:1px;}#my-svg .divider{stroke:#2563eb;stroke-width:1;}#my-svg g.clickable{cursor:pointer;}#my-svg g.classGroup rect{fill:#eff6ff;stroke:#2563eb;}#my-svg g.classGroup line{stroke:#2563eb;stroke-width:1;}#my-svg .classLabel .box{stroke:none;stroke-width:0;fill:#eff6ff;opacity:0.5;}#my-svg .classLabel .label{fill:#2563eb;font-size:10px;}#my-svg .relation{stroke:#475569;stroke-width:1;fill:none;}#my-svg .dashed-line{stroke-dasharray:3;}#my-svg .dotted-line{stroke-dasharray:1 2;}#my-svg #compositionStart,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #compositionEnd,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionStart,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionEnd,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationStart,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationEnd,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopStart,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopEnd,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg .edgeTerminals{font-size:11px;}#my-svg .classTitleText{text-anchor:middle;font-size:18px;fill:#212121;}#my-svg :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="18" class="marker aggregation classDiagram" id="my-svg_classDiagram-aggregationStart"><path d="M 18,7 L9,13 L1,7 L9,1 Z"/></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="1" class="marker aggregation classDiagram" id="my-svg_classDiagram-aggregationEnd"><path d="M 18,7 L9,13 L1,7 L9,1 Z"/></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="18" class="marker extension classDiagram" id="my-svg_classDiagram-extensionStart"><path d="M 1,7 L18,13 V 1 Z"/></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="1" class="marker extension classDiagram" id="my-svg_classDiagram-extensionEnd"><path d="M 1,1 V 13 L18,7 Z"/></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="18" class="marker composition classDiagram" id="my-svg_classDiagram-compositionStart"><path d="M 18,7 L9,13 L1,7 L9,1 Z"/></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="1" class="marker composition classDiagram" id="my-svg_classDiagram-compositionEnd"><path d="M 18,7 L9,13 L1,7 L9,1 Z"/></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="6" class="marker dependency classDiagram" id="my-svg_classDiagram-dependencyStart"><path d="M 5,7 L9,13 L1,7 L9,1 Z"/></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="13" class="marker dependency classDiagram" id="my-svg_classDiagram-dependencyEnd"><path d="M 18,7 L9,13 L14,7 L9,1 Z"/></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="13" class="marker lollipop classDiagram" id="my-svg_classDiagram-lollipopStart"><circle r="6" cy="7" cx="7" fill="transparent" stroke="black"/></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="1" class="marker lollipop classDiagram" id="my-svg_classDiagram-lollipopEnd"><circle r="6" cy="7" cx="7" fill="transparent" stroke="black"/></marker></defs><g class="root"><g class="clusters"><g id="client_request_methods_mixin" class="cluster"><rect height="114" width="1129.765625" y="832" x="950.984375" style="fill: none; stroke: black"/><g transform="translate(1410.3515625, 832)" class="cluster-label"><foreignObject height="21" width="211.03125"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">client_request_methods_mixin</span></div></foreignObject></g></g><g id="request_timing" class="cluster"><rect height="779" width="437.6875" y="8" x="1819.15625" style="fill: none; stroke: black"/><g transform="translate(1985.46875, 8)" class="cluster-label"><foreignObject height="21" width="105.0625"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">request_timing</span></div></foreignObject></g></g><g id="client" class="cluster"><rect height="114" width="481.6875" y="991" x="712" style="fill: none; stroke: black"/><g transform="translate(933.8515625, 991)" class="cluster-label"><foreignObject height="21" width="37.984375"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">client</span></div></foreignObject></g></g><g id="client_context_mixin" class="cluster"><rect height="114" width="281.046875" y="832" x="649.9375" style="fill: none; stroke: black"/><g transform="translate(719.671875, 832)" class="cluster-label"><foreignObject height="21" width="141.578125"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">client_context_mixin</span></div></foreignObject></g></g></g><g class="edgePaths"><path marker-start="url(#my-svg_classDiagram-extensionStart)" style="fill:none" class="edge-pattern-solid relation" id="id1" d="M790.4609375,941.5L790.4609375,942.25C790.4609375,943,790.4609375,944.5,790.4609375,949C790.4609375,953.5,790.4609375,961,790.4609375,968.5C790.4609375,976,790.4609375,983.5,804.7044270833334,992.1004317386231C818.9479166666666,1000.7008634772461,847.4348958333334,1010.4017269544923,861.6783854166666,1015.2521586931153L875.921875,1020.1025904317386"/><path marker-start="url(#my-svg_classDiagram-extensionStart)" style="fill:none" class="edge-pattern-solid relation" id="id2" d="M1125.2265625,941.5L1125.2265625,942.25C1125.2265625,943,1125.2265625,944.5,1125.2265625,949C1125.2265625,953.5,1125.2265625,961,1125.2265625,968.5C1125.2265625,976,1125.2265625,983.5,1110.9830729166667,992.1004317386231C1096.7395833333333,1000.7008634772461,1068.2526041666667,1010.4017269544923,1054.0091145833333,1015.2521586931153L1039.765625,1020.1025904317386"/><path marker-start="url(#my-svg_classDiagram-extensionStart)" style="fill:none" class="edge-pattern-solid relation" id="id3" d="M1940.2734375,450L1940.2734375,506.1666666666667C1940.2734375,562.3333333333334,1940.2734375,674.6666666666666,1940.2734375,734.5833333333334C1940.2734375,794.5,1940.2734375,802,1940.2734375,809.5C1940.2734375,817,1940.2734375,824.5,1940.2734375,832C1940.2734375,839.5,1940.2734375,847,1940.2734375,850.75L1940.2734375,854.5"/></g><g class="edgeLabels"><g class="edgeLabel"><g transform="translate(0, 0)" class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g transform="translate(0, 0)" class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g transform="translate(0, 0)" class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g transform="translate(8, 22.5)" class="root"><g class="clusters"><g id="client_retry_flow" class="cluster"><rect height="734" width="243.21875" y="8" x="8" style="fill: none; stroke: black"/><g transform="translate(72.734375, 8)" class="cluster-label"><foreignObject height="21" width="113.75"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">client_retry_flow</span></div></foreignObject></g></g></g><g class="edgePaths"/><g class="edgeLabels"/><g class="nodes"><g transform="translate(129.609375, 77.5)" id="classId-_CanRetryCheck-0" class="node default"><rect height="69" width="144.359375" y="-34.5" x="-72.1796875" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="72.1796875" x1="-72.1796875" class="divider"/><line y2="14.5" y1="14.5" x2="72.1796875" x1="-72.1796875" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -60.1796875, -22.5)" height="21" width="120.359375" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">_CanRetryCheck</span></div></foreignObject></g></g><g transform="translate(129.609375, 196.5)" id="classId-_RetryBudgetRecorder-1" class="node default"><rect height="69" width="193.21875" y="-34.5" x="-96.609375" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="96.609375" x1="-96.609375" class="divider"/><line y2="14.5" y1="14.5" x2="96.609375" x1="-96.609375" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -84.609375, -22.5)" height="21" width="169.21875" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">_RetryBudgetRecorder</span></div></foreignObject></g></g><g transform="translate(129.609375, 315.5)" id="classId-_RetryDelayHandler-2" class="node default"><rect height="69" width="173.4375" y="-34.5" x="-86.71875" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="86.71875" x1="-86.71875" class="divider"/><line y2="14.5" y1="14.5" x2="86.71875" x1="-86.71875" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -74.71875, -22.5)" height="21" width="149.4375" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">_RetryDelayHandler</span></div></foreignObject></g></g><g transform="translate(129.609375, 434.5)" id="classId-_RetryLogger-3" class="node default"><rect height="69" width="123.984375" y="-34.5" x="-61.9921875" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="61.9921875" x1="-61.9921875" class="divider"/><line y2="14.5" y1="14.5" x2="61.9921875" x1="-61.9921875" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -49.9921875, -22.5)" height="21" width="99.984375" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">_RetryLogger</span></div></foreignObject></g></g><g transform="translate(129.609375, 553.5)" id="classId-_RetryableErrorCheck-4" class="node default"><rect height="69" width="185.15625" y="-34.5" x="-92.578125" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="92.578125" x1="-92.578125" class="divider"/><line y2="14.5" y1="14.5" x2="92.578125" x1="-92.578125" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -80.578125, -22.5)" height="21" width="161.15625" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">_RetryableErrorCheck</span></div></foreignObject></g></g><g transform="translate(129.609375, 672.5)" id="classId-_StatusCodeResolver-5" class="node default"><rect height="69" width="178.9375" y="-34.5" x="-89.46875" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="89.46875" x1="-89.46875" class="divider"/><line y2="14.5" y1="14.5" x2="89.46875" x1="-89.46875" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -77.46875, -22.5)" height="21" width="154.9375" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">_StatusCodeResolver</span></div></foreignObject></g></g></g></g><g transform="translate(301.21875, 141.5)" class="root"><g class="clusters"><g id="client_retry_observability" class="cluster"><rect height="496" width="188.09375" y="8" x="8" style="fill: none; stroke: black"/><g transform="translate(15.3359375, 8)" class="cluster-label"><foreignObject height="21" width="173.421875"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">client_retry_observability</span></div></foreignObject></g></g></g><g class="edgePaths"/><g class="edgeLabels"/><g class="nodes"><g transform="translate(102.046875, 77.5)" id="classId-RetryStateLike-6" class="node default"><rect height="69" width="132.875" y="-34.5" x="-66.4375" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="66.4375" x1="-66.4375" class="divider"/><line y2="14.5" y1="14.5" x2="66.4375" x1="-66.4375" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -54.4375, -22.5)" height="21" width="108.875" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">RetryStateLike</span></div></foreignObject></g></g><g transform="translate(102.046875, 196.5)" id="classId-SpanLike-7" class="node default"><rect height="69" width="91.125" y="-34.5" x="-45.5625" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="45.5625" x1="-45.5625" class="divider"/><line y2="14.5" y1="14.5" x2="45.5625" x1="-45.5625" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -33.5625, -22.5)" height="21" width="67.125" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">SpanLike</span></div></foreignObject></g></g><g transform="translate(102.046875, 315.5)" id="classId-_NoOpSpan-8" class="node default"><rect height="69" width="112.140625" y="-34.5" x="-56.0703125" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="56.0703125" x1="-56.0703125" class="divider"/><line y2="14.5" y1="14.5" x2="56.0703125" x1="-56.0703125" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -44.0703125, -22.5)" height="21" width="88.140625" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">_NoOpSpan</span></div></foreignObject></g></g><g transform="translate(102.046875, 434.5)" id="classId-_OtelTracerLike-9" class="node default"><rect height="69" width="138.09375" y="-34.5" x="-69.046875" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="69.046875" x1="-69.046875" class="divider"/><line y2="14.5" y1="14.5" x2="69.046875" x1="-69.046875" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -57.046875, -22.5)" height="21" width="114.09375" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">_OtelTracerLike</span></div></foreignObject></g></g></g></g><g transform="translate(539.3125, 201)" class="root"><g class="clusters"><g id="client_retry_models" class="cluster"><rect height="377" width="272.390625" y="8" x="8" style="fill: none; stroke: black"/><g transform="translate(76.4296875, 8)" class="cluster-label"><foreignObject height="21" width="135.53125"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">client_retry_models</span></div></foreignObject></g></g></g><g class="edgePaths"/><g class="edgeLabels"/><g class="nodes"><g transform="translate(144.1953125, 77.5)" id="classId-_HTTPClientRetryHost-10" class="node default"><rect height="69" width="191.296875" y="-34.5" x="-95.6484375" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="95.6484375" x1="-95.6484375" class="divider"/><line y2="14.5" y1="14.5" x2="95.6484375" x1="-95.6484375" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -83.6484375, -22.5)" height="21" width="167.296875" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">_HTTPClientRetryHost</span></div></foreignObject></g></g><g transform="translate(144.1953125, 196.5)" id="classId-_RequestAttemptOutcome-11" class="node default"><rect height="69" width="222.390625" y="-34.5" x="-111.1953125" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="111.1953125" x1="-111.1953125" class="divider"/><line y2="14.5" y1="14.5" x2="111.1953125" x1="-111.1953125" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -99.1953125, -22.5)" height="21" width="198.390625" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">_RequestAttemptOutcome</span></div></foreignObject></g></g><g transform="translate(144.1953125, 315.5)" id="classId-_RetryRequestState-12" class="node default"><rect height="69" width="169.625" y="-34.5" x="-84.8125" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="84.8125" x1="-84.8125" class="divider"/><line y2="14.5" y1="14.5" x2="84.8125" x1="-84.8125" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -72.8125, -22.5)" height="21" width="145.625" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">_RetryRequestState</span></div></foreignObject></g></g></g></g><g transform="translate(861.703125, 201)" class="root"><g class="clusters"><g id="health_monitor_models" class="cluster"><rect height="377" width="313.5" y="8" x="8" style="fill: none; stroke: black"/><g transform="translate(82.125, 8)" class="cluster-label"><foreignObject height="21" width="165.25"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">health_monitor_models</span></div></foreignObject></g></g></g><g class="edgePaths"/><g class="edgeLabels"/><g class="nodes"><g transform="translate(164.75, 77.5)" id="classId-HealthAdjustedConfig-13" class="node default"><rect height="69" width="191.109375" y="-34.5" x="-95.5546875" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="95.5546875" x1="-95.5546875" class="divider"/><line y2="14.5" y1="14.5" x2="95.5546875" x1="-95.5546875" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -83.5546875, -22.5)" height="21" width="167.109375" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">HealthAdjustedConfig</span></div></foreignObject></g></g><g transform="translate(164.75, 196.5)" id="classId-ProviderHealthMonitorProtocol-14" class="node default"><rect height="69" width="263.5" y="-34.5" x="-131.75" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="131.75" x1="-131.75" class="divider"/><line y2="14.5" y1="14.5" x2="131.75" x1="-131.75" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -119.75, -22.5)" height="21" width="239.5" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">ProviderHealthMonitorProtocol</span></div></foreignObject></g></g><g transform="translate(164.75, 315.5)" id="classId-ProviderHealthStateView-15" class="node default"><rect height="69" width="212.859375" y="-34.5" x="-106.4296875" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="106.4296875" x1="-106.4296875" class="divider"/><line y2="14.5" y1="14.5" x2="106.4296875" x1="-106.4296875" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -94.4296875, -22.5)" height="21" width="188.859375" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">ProviderHealthStateView</span></div></foreignObject></g></g></g></g><g transform="translate(1225.203125, 201)" class="root"><g class="clusters"><g id="health" class="cluster"><rect height="377" width="259.328125" y="8" x="8" style="fill: none; stroke: black"/><g transform="translate(115.703125, 8)" class="cluster-label"><foreignObject height="21" width="43.921875"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">health</span></div></foreignObject></g></g></g><g class="edgePaths"/><g class="edgeLabels"/><g class="nodes"><g transform="translate(137.6640625, 77.5)" id="classId-HealthProbeCoordinator-16" class="node default"><rect height="69" width="209.328125" y="-34.5" x="-104.6640625" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="104.6640625" x1="-104.6640625" class="divider"/><line y2="14.5" y1="14.5" x2="104.6640625" x1="-104.6640625" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -92.6640625, -22.5)" height="21" width="185.328125" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">HealthProbeCoordinator</span></div></foreignObject></g></g><g transform="translate(137.6640625, 196.5)" id="classId-ProviderResources-17" class="node default"><rect height="69" width="162.953125" y="-34.5" x="-81.4765625" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="81.4765625" x1="-81.4765625" class="divider"/><line y2="14.5" y1="14.5" x2="81.4765625" x1="-81.4765625" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -69.4765625, -22.5)" height="21" width="138.953125" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">ProviderResources</span></div></foreignObject></g></g><g transform="translate(137.6640625, 315.5)" id="classId-_Probe-18" class="node default"><rect height="69" width="75.140625" y="-34.5" x="-37.5703125" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="37.5703125" x1="-37.5703125" class="divider"/><line y2="14.5" y1="14.5" x2="37.5703125" x1="-37.5703125" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -25.5703125, -22.5)" height="21" width="51.140625" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">_Probe</span></div></foreignObject></g></g></g></g><g transform="translate(1125.2265625, 889)" id="classId-HTTPClientRequestMethodsMixin-19" class="node default"><rect height="69" width="278.484375" y="-34.5" x="-139.2421875" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="139.2421875" x1="-139.2421875" class="divider"/><line y2="14.5" y1="14.5" x2="139.2421875" x1="-139.2421875" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -127.2421875, -22.5)" height="21" width="254.484375" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">HTTPClientRequestMethodsMixin</span></div></foreignObject></g></g><g transform="translate(1940.2734375, 889)" id="classId-_HTTPClientRequestHost-20" class="node default"><rect height="69" width="210.953125" y="-34.5" x="-105.4765625" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="105.4765625" x1="-105.4765625" class="divider"/><line y2="14.5" y1="14.5" x2="105.4765625" x1="-105.4765625" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -93.4765625, -22.5)" height="21" width="186.953125" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">_HTTPClientRequestHost</span></div></foreignObject></g></g><g transform="translate(1534.53125, 260.5)" class="root"><g class="clusters"><g id="health_monitor" class="cluster"><rect height="258" width="249.625" y="8" x="8" style="fill: none; stroke: black"/><g transform="translate(79.3125, 8)" class="cluster-label"><foreignObject height="21" width="107"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">health_monitor</span></div></foreignObject></g></g></g><g class="edgePaths"/><g class="edgeLabels"/><g class="nodes"><g transform="translate(132.8125, 77.5)" id="classId-ProviderHealthMonitor-21" class="node default"><rect height="69" width="199.625" y="-34.5" x="-99.8125" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="99.8125" x1="-99.8125" class="divider"/><line y2="14.5" y1="14.5" x2="99.8125" x1="-99.8125" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -87.8125, -22.5)" height="21" width="175.625" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">ProviderHealthMonitor</span></div></foreignObject></g></g><g transform="translate(132.8125, 196.5)" id="classId-ProviderHealthState-22" class="node default"><rect height="69" width="176.21875" y="-34.5" x="-88.109375" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="88.109375" x1="-88.109375" class="divider"/><line y2="14.5" y1="14.5" x2="88.109375" x1="-88.109375" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -76.109375, -22.5)" height="21" width="152.21875" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">ProviderHealthState</span></div></foreignObject></g></g></g></g><g transform="translate(1940.2734375, 397.5)" id="classId-RequestTimingHost-23" class="node default"><rect height="69" width="172.234375" y="-34.5" x="-86.1171875" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="86.1171875" x1="-86.1171875" class="divider"/><line y2="14.5" y1="14.5" x2="86.1171875" x1="-86.1171875" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -74.1171875, -22.5)" height="21" width="148.234375" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">RequestTimingHost</span></div></foreignObject></g></g><g transform="translate(2149.1171875, 397.5)" id="classId-_RequestKwargs-24" class="node default"><rect height="69" width="145.453125" y="-34.5" x="-72.7265625" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="72.7265625" x1="-72.7265625" class="divider"/><line y2="14.5" y1="14.5" x2="72.7265625" x1="-72.7265625" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -60.7265625, -22.5)" height="21" width="121.453125" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">_RequestKwargs</span></div></foreignObject></g></g><g transform="translate(2291.84375, 320)" class="root"><g class="clusters"><g id="client_retry_request_flow" class="cluster"><rect height="139" width="294.96875" y="8" x="8" style="fill: none; stroke: black"/><g transform="translate(68.796875, 8)" class="cluster-label"><foreignObject height="21" width="173.375"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">client_retry_request_flow</span></div></foreignObject></g></g></g><g class="edgePaths"/><g class="edgeLabels"/><g class="nodes"><g transform="translate(155.484375, 77.5)" id="classId-HTTPClientRetryRequestFlow-25" class="node default"><rect height="69" width="244.96875" y="-34.5" x="-122.484375" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="122.484375" x1="-122.484375" class="divider"/><line y2="14.5" y1="14.5" x2="122.484375" x1="-122.484375" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -110.484375, -22.5)" height="21" width="220.96875" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">HTTPClientRetryRequestFlow</span></div></foreignObject></g></g></g></g><g transform="translate(2636.8125, 320)" class="root"><g class="clusters"><g id="health_monitor_transitions" class="cluster"><rect height="139" width="256.328125" y="8" x="8" style="fill: none; stroke: black"/><g transform="translate(42.6640625, 8)" class="cluster-label"><foreignObject height="21" width="187"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">health_monitor_transitions</span></div></foreignObject></g></g></g><g class="edgePaths"/><g class="edgeLabels"/><g class="nodes"><g transform="translate(136.1640625, 77.5)" id="classId-ProviderHealthStateLike-26" class="node default"><rect height="69" width="206.328125" y="-34.5" x="-103.1640625" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="103.1640625" x1="-103.1640625" class="divider"/><line y2="14.5" y1="14.5" x2="103.1640625" x1="-103.1640625" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -91.1640625, -22.5)" height="21" width="182.328125" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">ProviderHealthStateLike</span></div></foreignObject></g></g></g></g><g transform="translate(2943.140625, 320)" class="root"><g class="clusters"><g id="circuit_breaker" class="cluster"><rect height="139" width="226.421875" y="8" x="8" style="fill: none; stroke: black"/><g transform="translate(69.921875, 8)" class="cluster-label"><foreignObject height="21" width="102.578125"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">circuit_breaker</span></div></foreignObject></g></g></g><g class="edgePaths"/><g class="edgeLabels"/><g class="nodes"><g transform="translate(121.2109375, 77.5)" id="classId-CircuitBreakerGuard-27" class="node default"><rect height="69" width="176.421875" y="-34.5" x="-88.2109375" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="88.2109375" x1="-88.2109375" class="divider"/><line y2="14.5" y1="14.5" x2="88.2109375" x1="-88.2109375" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -76.2109375, -22.5)" height="21" width="152.421875" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">CircuitBreakerGuard</span></div></foreignObject></g></g></g></g><g transform="translate(957.84375, 1048)" id="classId-UnifiedHTTPClient-28" class="node default"><rect height="69" width="163.84375" y="-34.5" x="-81.921875" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="81.921875" x1="-81.921875" class="divider"/><line y2="14.5" y1="14.5" x2="81.921875" x1="-81.921875" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -69.921875, -22.5)" height="21" width="139.84375" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">UnifiedHTTPClient</span></div></foreignObject></g></g><g transform="translate(790.4609375, 889)" id="classId-HTTPClientContextMixin-29" class="node default"><rect height="69" width="211.046875" y="-34.5" x="-105.5234375" class="outer title-state"/><line y2="-1.5" y1="-1.5" x2="105.5234375" x1="-105.5234375" class="divider"/><line y2="14.5" y1="14.5" x2="105.5234375" x1="-105.5234375" class="divider"/><g class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel"></span></div></foreignObject><foreignObject transform="translate( -93.5234375, -22.5)" height="21" width="187.046875" class="classTitle"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">HTTPClientContextMixin</span></div></foreignObject></g></g></g></g></g><style>/*
+ * Пользовательские стили диаграмм BioETL (структурированная копия)
+ * Источник: custom.css
+ * Цель: сгруппировать правила по типам элементов и документировать назначение каждого CSS-параметра.
+ */
+
+/* =========================================================
+ * 1) Глобальная типографика и базовое поведение текста
+ * ========================================================= */
+svg {
+    /* Задаёт основной стек шрифтов для всего текста в SVG. */
+    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen, Ubuntu, sans-serif;
+}
+
+
+
+/* =========================================================
+ * 2) Общая геометрия узлов (для нескольких типов диаграмм)
+ * ========================================================= */
+.node rect,
+.node circle,
+.node ellipse,
+.node polygon,
+.node path {
+    /* Единая толщина контура для фигур узлов. */
+    stroke-width: 1.5px !important;
+    /* Скругляет углы по горизонтали для более мягкого вида. */
+    rx: 8;
+    /* Скругляет углы по вертикали в паре с rx. */
+    ry: 8;
+    /* Добавляет лёгкую тень и отделяет узлы от фона. */
+    filter:  none; /*  drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));*/
+}
+
+/* =========================================================
+ * 3) Контейнеры subgraph / cluster
+ * ========================================================= */
+.cluster rect,
+.cluster path {
+    /* Увеличивает радиус углов у контейнеров-групп. */
+    rx: 10;
+    /* Поддерживает симметрию скругления по вертикали. */
+    ry: 10;
+    /* Нейтральная заливка контейнера для снижения визуального шума. */
+    fill: #f8fafc;
+    /* Приглушённая обводка, чтобы границы были заметны, но не доминировали. */
+    stroke: #94a3b8;
+    /* Толщина границы контейнера в тон большинству узлов. */
+    stroke-width: 1.5px;
+    /* Убирает пунктир у рамок контейнеров. */
+    stroke-dasharray: none;
+    /* Делает фон контейнера полностью непрозрачным. */
+    fill-opacity: 1;
+    /* Отключает тень контейнера, чтобы акцент оставался на узлах. */
+    filter: none;
+}
+
+.cluster text {
+    /* Нормальный вес шрифта для заголовков групп. */
+    font-weight: 400;
+    /* Увеличенный размер заголовка относительно текста узлов. */
+    font-size: 16px;
+}
+
+/* =========================================================
+ * 4) Стили линий связей (edges/links)
+ * ========================================================= */
+.edgePath .path {
+    /* Делает основные ребра более заметными в плотных графах. */
+    stroke-width: 2.5px;
+    /* Скругляет соединения сегментов линий. */
+    stroke-linejoin: round;
+    /* Скругляет окончания линий. */
+    stroke-linecap: round;
+}
+
+.edgePath path,
+.flowchart-link,
+.relation,
+.messageLine0,
+.messageLine1,
+.transition path {
+    /* Унифицированные скруглённые соединения для всех типов линий. */
+    stroke-linejoin: round;
+    /* Унифицированные скруглённые окончания для всех типов линий. */
+    stroke-linecap: round;
+}
+
+.transition path {
+    /* Выравнивает толщину переходов state diagram с основными ребрами. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 5) Подписи ребер и fallback-текст
+ * ========================================================= */
+.edgeLabel {
+    /* Компактный размер шрифта для подписей на связях. */
+    font-size: 12px;
+    /* Плотная межстрочность для экономии места. */
+    line-height: 1.1;
+    /* Базовый непрозрачный фон под подписью. */
+    background-color: #ffffff;
+    /* Небольшие внутренние отступы вокруг текста. */
+    padding: 1px 3px;
+    /* Мягкое скругление фона подписи. */
+    border-radius: 2px;
+}
+
+.edgeLabel span,
+.edgeLabel p,
+text.fo-fallback {
+    /* Принудительный тёмный fill для контраста в SVG-рендерах. */
+    fill: #111827 !important;
+    /* Принудительный тёмный цвет для HTML-подписей. */
+    color: #111827 !important;
+    /* Полная непрозрачность текста. */
+    opacity: 1 !important;
+    /* Компактная межстрочность для многострочных подписей. */
+    line-height: 1.1;
+    /* Убирает стандартные внешние отступы HTML-параграфов. */
+    margin: 0;
+    /* Убирает стандартные внутренние отступы HTML-параграфов. */
+    padding: 0;
+}
+
+.edgeLabel .labelBkg,
+.labelBkg {
+    /* Жёстко задаёт белый фон под текстом подписей. */
+    background-color: #ffffff !important;
+    /* Делает фон полностью непрозрачным во всех просмотрщиках. */
+    opacity: 1 !important;
+}
+
+.edgeLabel rect {
+    /* Переопределяет полупрозрачный фон по умолчанию у Mermaid. */
+    opacity: 1 !important;
+    /* Жёстко фиксирует белую заливку прямоугольника под подписью. */
+    fill: #ffffff !important;
+}
+
+/* =========================================================
+ * 6) Элементы sequence diagram
+ * ========================================================= */
+.actor {
+    /* Толщина границы actor-блоков. */
+    stroke-width: 1.5px;
+    /* Скругление углов actor-блоков по горизонтали. */
+    rx: 4;
+    /* Скругление углов actor-блоков по вертикали. */
+    ry: 4;
+}
+
+.messageLine0,
+.messageLine1 {
+    /* Толщина линий сообщений в sequence diagram. */
+    stroke-width: 1.6px;
+}
+
+.messageText {
+    /* Базовый размер текста сообщений. */
+    font-size: 13px;
+}
+
+.activation0 {
+    /* Более тонкая линия activation bar, чтобы не перегружать схему. */
+    stroke-width: 1px;
+}
+
+.note {
+    /* Скругление углов заметки по горизонтали. */
+    rx: 4;
+    /* Скругление углов заметки по вертикали. */
+    ry: 4;
+    /* Тонкая граница для вторичных блоков. */
+    stroke-width: 1px;
+    /* Лёгкая тень для визуального отделения заметок. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+/* =========================================================
+ * 7) Базовые элементы class diagram
+ * ========================================================= */
+g.classGroup rect {
+    /* Скругление углов class box по горизонтали. */
+    rx: 10;
+    /* Скругление углов class box по вертикали. */
+    ry: 10;
+    /* Толщина границы class box. */
+    stroke-width: 1.5px;
+    /* Мягкая тень у class box без агрессивного контраста. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+g.classGroup text {
+    /* Базовый размер текста внутри class diagram. */
+    font-size: 14px;
+    padding: 10px 10px;
+}
+
+g.classGroup line {
+    /* Толщина внутренних разделителей класса. */
+    stroke-width: 1px;
+}
+
+.relation {
+    /* Толщина связей между классами на уровне основных ребер. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 8) Типографика HTML-лейблов class diagram
+ * ========================================================= */
+g.label-group .nodeLabel {
+    /* Увеличенный размер названия класса для иерархии. */
+    font-size: 16px !important;
+    /* Полужирный акцент на имени класса. */
+    font-weight: 200 !important;
+    /* Лёгкое межбуквенное расстояние для читаемости заголовка. */
+    letter-spacing: 0.01em;
+}
+
+g.annotation-group .nodeLabel {
+    /* Уменьшенный размер для стереотипов/аннотаций. */
+    font-size: 11px !important;
+    /* Курсив для визуального отделения аннотаций. */
+    font-style: italic !important;
+    /* Небольшое ослабление контраста вторичного текста. */
+    opacity: 0.8;
+}
+
+g.members-group .nodeLabel,
+g.methods-group .nodeLabel {
+    /* Компактный размер для атрибутов и методов. */
+    font-size: 12px !important;
+    /* Нормальный вес шрифта для плотного структурного текста. */
+    font-weight: 400 !important;
+}
+
+/* =========================================================
+ * 9) Помощники размеров foreignObject (class/flowchart)
+ * ========================================================= */
+g.members-group foreignObject,
+g.methods-group foreignObject {
+    /* Минимальная высота областей members/methods. */
+    min-height: 40px;
+}
+
+.node foreignObject &gt; div,
+g.classGroup foreignObject &gt; div {
+    /* Стабилизирует вычисление размеров с учётом отступов/границ. */
+    box-sizing: border-box;
+}
+
+.node.size-sm foreignObject &gt; div {
+    /* Минимальная высота для малого размерного уровня узла. */
+    min-height: 80px;
+    /* Минимальная ширина для малого размерного уровня узла. */
+    min-width: 180px;
+}
+
+.node.size-md foreignObject &gt; div {
+    /* Минимальная высота для среднего размерного уровня узла. */
+    min-height: 140px;
+    /* Минимальная ширина для среднего размерного уровня узла. */
+    min-width: 260px;
+}
+
+.node.size-lg foreignObject &gt; div {
+    /* Минимальная высота для большого размерного уровня узла. */
+    min-height: 200px;
+    /* Минимальная ширина для большого размерного уровня узла. */
+    min-width: 340px;
+}
+
+/* =========================================================
+ * 10) Элементы state diagram
+ * ========================================================= */
+g.stateGroup rect {
+    /* Скругление углов контейнеров состояний по горизонтали. */
+    rx: 8;
+    /* Скругление углов контейнеров состояний по вертикали. */
+    ry: 8;
+}
+
+.statediagram-state rect {
+    /* Скругление углов узлов состояния по горизонтали. */
+    rx: 8;
+    /* Скругление углов узлов состояния по вертикали. */
+    ry: 8;
+    /* Толщина границы узла состояния. */
+    stroke-width: 1.5px;
+    /* Лёгкая тень для визуального отделения state box. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 11) Элементы ER diagram
+ * ========================================================= */
+.er.entityBox {
+    /* Толщина границы сущности ER-диаграммы. */
+    stroke-width: 1.5px;
+    /* Скругление углов сущности по горизонтали. */
+    rx: 4;
+    /* Скругление углов сущности по вертикали. */
+    ry: 4;
+    /* Лёгкая тень для отделения блоков сущностей. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 12) Узлы mindmap
+ * ========================================================= */
+.mindmap-node rect,
+.mindmap-node circle {
+    /* Толщина контура узлов mindmap. */
+    stroke-width: 1.5px;
+    /* Чуть более выраженная тень для плотных радиальных веток. */
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* =========================================================
+ * 13) Маркеры стрелок
+ * ========================================================= */
+marker path {
+    /* Единый нейтральный цвет наконечников стрелок. */
+    fill: #475569;
+}
+
+/* =========================================================
+ * 14) Цветовая карта архитектурных слоёв (fallback-селекторы)
+ * ========================================================= */
+[id*="Domain"] &gt; rect,
+[id*="Domain"] &gt; path {
+    /* Цвет фона для доменного слоя. */
+    fill: #f5f3ff !important;
+    /* Цвет границы для доменного слоя. */
+    stroke: #7c3aed !important;
+}
+
+.cluster[id*="Domain"] &gt; rect,
+.cluster[id*="Domain"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Application"] &gt; rect,
+[id*="Application"] &gt; path {
+    /* Цвет фона для application-слоя. */
+    fill: #f0fdf4 !important;
+    /* Цвет границы для application-слоя. */
+    stroke: #16a34a !important;
+}
+
+.cluster[id*="Application"] &gt; rect,
+.cluster[id*="Application"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Infrastructure"] &gt; rect,
+[id*="Infrastructure"] &gt; path {
+    /* Цвет фона для infrastructure-слоя. */
+    fill: #fff1f2 !important;
+    /* Цвет границы для infrastructure-слоя. */
+    stroke: #dc2626 !important;
+}
+
+.cluster[id*="Infrastructure"] &gt; rect,
+.cluster[id*="Infrastructure"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Composition"] &gt; rect,
+[id*="Composition"] &gt; path {
+    /* Цвет фона для composition-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы для composition-слоя. */
+    stroke: #f59e0b !important;
+}
+
+.cluster[id*="Composition"] &gt; rect,
+.cluster[id*="Composition"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Interfaces"] &gt; rect,
+[id*="Interfaces"] &gt; path {
+    /* Цвет фона для слоя интерфейсов. */
+    fill: #eff6ff !important;
+    /* Цвет границы для слоя интерфейсов. */
+    stroke: #2563eb !important;
+}
+
+.cluster[id*="Interfaces"] &gt; rect,
+.cluster[id*="Interfaces"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="External"] &gt; rect,
+[id*="External"] &gt; path {
+    /* Цвет фона для внешних систем. */
+    fill: #f1f5f9 !important;
+    /* Цвет границы для внешних систем. */
+    stroke: #64748b !important;
+}
+
+.cluster[id*="External"] &gt; rect,
+.cluster[id*="External"] &gt; path {
+    fill: #ffffff !important;
+}
+
+/* Белая подложка под подписи всех архитектурных/medallion слоёв */
+g.cluster[id*="Domain"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Application"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Infrastructure"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Composition"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Interfaces"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="External"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Bronze"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Silver"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Gold"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Quarantine"] .cluster-label foreignObject &gt; div {
+    background: #ffffff !important;
+    padding: 0 6px !important;
+    border-radius: 4px;
+}
+
+/* Fallback для рендеров без foreignObject: не рисуем толстую обводку */
+g.cluster[id*="Domain"] .cluster-label text.fo-fallback,
+g.cluster[id*="Application"] .cluster-label text.fo-fallback,
+g.cluster[id*="Infrastructure"] .cluster-label text.fo-fallback,
+g.cluster[id*="Composition"] .cluster-label text.fo-fallback,
+g.cluster[id*="Interfaces"] .cluster-label text.fo-fallback,
+g.cluster[id*="External"] .cluster-label text.fo-fallback,
+g.cluster[id*="Bronze"] .cluster-label text.fo-fallback,
+g.cluster[id*="Silver"] .cluster-label text.fo-fallback,
+g.cluster[id*="Gold"] .cluster-label text.fo-fallback,
+g.cluster[id*="Quarantine"] .cluster-label text.fo-fallback {
+    fill: #111827 !important;
+    stroke: none !important;
+}
+
+/* =========================================================
+ * 15) Цветовая карта слоёв Medallion
+ * ========================================================= */
+[id*="Bronze"] &gt; rect,
+[id*="Bronze"] &gt; path {
+    /* Цвет фона Bronze-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы Bronze-слоя. */
+    stroke: #f59e0b !important;
+}
+
+[id*="Silver"] &gt; rect,
+[id*="Silver"] &gt; path {
+    /* Цвет фона Silver-слоя. */
+    fill: #f8fafc !important;
+    /* Цвет границы Silver-слоя. */
+    stroke: #475569 !important;
+}
+
+[id*="Gold"] &gt; rect,
+[id*="Gold"] &gt; path {
+    /* Цвет фона Gold-слоя. */
+    fill: #fefce8 !important;
+    /* Цвет границы Gold-слоя. */
+    stroke: #ca8a04 !important;
+}
+
+[id*="Quarantine"] &gt; rect,
+[id*="Quarantine"] &gt; path {
+    /* Цвет фона для карантинных/проблемных потоков данных. */
+    fill: #ffe4e6 !important;
+    /* Цвет границы для карантинных/проблемных потоков данных. */
+    stroke: #e11d48 !important;
+}
+/* Нормализует вес текста в узлах и заголовках слоёв (без полужирного акцента). */
+.node .label text,
+.node .label tspan,
+.node .label .nodeLabel,
+text.fo-fallback {
+    stroke: none !important;
+    stroke-width: 0 !important;
+    fill: #111827 !important;
+    font-weight: 400 !important;
+}
+/* Single text layer (fallback-only) */
+text.fo-fallback {
+    display: inline !important;
+}
+
+foreignObject {
+    display: none !important;
+}
+</style></svg>

@@ -1,0 +1,5 @@
+........................................................................ [ 45%]
+.........................s.............................................. [ 91%]
+.............                                                            [100%]
+=========================== short test summary info ===========================
+SKIPPED [1] tests\architecture\test_scripts_inventory_zero_reference_ratchet.py:44: Scripts inventory governance check requires full repo walk which is prohibitively slow on Windows

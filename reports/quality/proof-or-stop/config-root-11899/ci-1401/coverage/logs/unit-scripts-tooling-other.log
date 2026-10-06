@@ -1,0 +1,32 @@
+.......................................................sssssss.......... [  4%]
+........................................................................ [  9%]
+........................................................................ [ 14%]
+........................................................................ [ 19%]
+........................................................................ [ 24%]
+.......s................................................................ [ 29%]
+........................................................................ [ 34%]
+...sssssssssssss.ssss................................................... [ 39%]
+........................................................................ [ 43%]
+........................................................................ [ 48%]
+........................................................................ [ 53%]
+........................................................................ [ 58%]
+........................................................................ [ 63%]
+........................................................................ [ 68%]
+........................s............................................... [ 73%]
+........................................................................ [ 78%]
+........................................................................ [ 82%]
+........................................................................ [ 87%]
+........................................................................ [ 92%]
+........................................................................ [ 97%]
+....................................                                     [100%]
+=========================== short test summary info ============================
+SKIPPED [1] tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py:192: PowerShell (pwsh or powershell) is required to run export_mcp_env_from_dotenv.ps1
+SKIPPED [1] tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py:201: PowerShell (pwsh or powershell) is required to run export_mcp_env_from_dotenv.ps1
+SKIPPED [1] tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py:212: PowerShell (pwsh or powershell) is required to run export_mcp_env_from_dotenv.ps1
+SKIPPED [1] tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py:265: PowerShell (pwsh or powershell) is required to run export_mcp_env_from_dotenv.ps1
+SKIPPED [1] tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py:275: PowerShell (pwsh or powershell) is required to run export_mcp_env_from_dotenv.ps1
+SKIPPED [1] tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py:284: PowerShell (pwsh or powershell) is required to run export_mcp_env_from_dotenv.ps1
+SKIPPED [1] tests/unit/scripts/ai/mcp/test_export_mcp_env_from_dotenv.py:301: PowerShell (pwsh or powershell) is required to run export_mcp_env_from_dotenv.ps1
+SKIPPED [1] tests/unit/scripts/ops/observability/test_grafana_browser_model_observer.py:21: Node.js is unavailable
+SKIPPED [17] tests/unit/scripts/ops/observability/test_grafana_panel_containment.py:35: Node.js is unavailable
+SKIPPED [1] tests/unit/scripts/qa/test_report_non_chembl_observed_value_inventory.py:53: generated non-ChEMBL inventory artifacts are not present in this checkout (gitignored docs/reports/generated outputs)

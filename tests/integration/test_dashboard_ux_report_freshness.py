@@ -7,7 +7,7 @@
 # pyright: reportOptionalMemberAccess=false
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
-# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+# PD5 test mock/fixture surface â€” product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Lightweight guard for dashboard UX report artifacts on dashboard JSON changes."""
 
 from __future__ import annotations
@@ -26,13 +26,26 @@ _CHANGE_NOTES_PATH = Path("docs/03-guides/dashboards/dashboard-v2-updates.md")
 
 
 def _git_changed_files() -> list[str]:
+    base_command = ["git", "diff", "--name-only", "origin/main...HEAD"]
+    committed = subprocess.run(
+        base_command, capture_output=True, text=True, check=False
+    )
+    if committed.returncode != 0:
+        committed = subprocess.run(
+            ["git", "diff", "--name-only", "HEAD~1..HEAD"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    changed: set[str] = set()
+    if committed.returncode == 0:
+        changed.update(
+            line.strip() for line in committed.stdout.splitlines() if line.strip()
+        )
     commands = (
-        ["git", "diff", "--name-only", "origin/main...HEAD"],
-        ["git", "diff", "--name-only", "HEAD~1..HEAD"],
         ["git", "diff", "--name-only", "--cached"],
         ["git", "diff", "--name-only"],
     )
-    changed: set[str] = set()
     for cmd in commands:
         result = subprocess.run(cmd, capture_output=True, text=True, check=False)
         if result.returncode == 0:
@@ -100,7 +113,6 @@ def test_ux_freshness_combines_committed_staged_and_working_tree_changes(monkeyp
     outputs = iter(
         [
             "docs/README.md\n",
-            "",
             "tests/example.py\n",
             "grafana/dashboards/example.json\n",
         ]
@@ -115,3 +127,33 @@ def test_ux_freshness_combines_committed_staged_and_working_tree_changes(monkeyp
         "grafana/dashboards/example.json",
         "tests/example.py",
     ]
+
+
+def test_ux_freshness_uses_authoritative_base_without_first_parent(monkeypatch):
+    calls = []
+
+    def run(command, **kwargs):
+        calls.append(command)
+        assert "HEAD~1..HEAD" not in command
+        return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+
+    monkeypatch.setattr(subprocess, "run", run)
+    assert _git_changed_files() == []
+    assert len(calls) == 3
+
+
+def test_ux_freshness_falls_back_when_remote_base_unavailable(monkeypatch):
+    calls = []
+
+    def run(command, **kwargs):
+        calls.append(command)
+        if "origin/main...HEAD" in command:
+            return subprocess.CompletedProcess(
+                command, 128, stdout="", stderr="missing ref"
+            )
+        text = "grafana/dashboards/example.json\n" if "HEAD~1..HEAD" in command else ""
+        return subprocess.CompletedProcess(command, 0, stdout=text, stderr="")
+
+    monkeypatch.setattr(subprocess, "run", run)
+    assert _git_changed_files() == ["grafana/dashboards/example.json"]
+    assert len(calls) == 4

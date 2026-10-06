@@ -17,7 +17,7 @@ from bioetl.domain.run_reports.context import (
     bind_stage_accounting,
     reset_stage_accounting,
 )
-from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
+from bioetl.domain.run_reports.pipeline_report_assembly import build_pipeline_run_report
 
 
 pytestmark = pytest.mark.unit

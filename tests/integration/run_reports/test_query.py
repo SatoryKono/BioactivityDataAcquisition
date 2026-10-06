@@ -60,7 +60,7 @@ from bioetl.application.services.run_reports.query import (
 from bioetl.application.services.run_reports.writer import write_pipeline_run_report
 from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
 from bioetl.domain.run_reports.models import StageId
-from bioetl.domain.run_reports.pipeline_builder import build_pipeline_run_report
+from bioetl.domain.run_reports.pipeline_report_assembly import build_pipeline_run_report
 
 
 def _write_simple(tmp_path: Path, *, run_id: str, silver: int) -> None:

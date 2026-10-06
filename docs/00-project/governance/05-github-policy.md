@@ -29,7 +29,7 @@ ______________________________________________________________________
 
 | Branch           | Purpose                         | Protection                                             |
 | ---------------- | ------------------------------- | ------------------------------------------------------ |
-| `main`           | Production-ready code           | Ruleset `main` (13643213) **active** as of `2026-09-10T02:53:01+03:00` (#10267). GitHub required context is exactly `pr-gate-complete`. Companion `root-hygiene-required-check` (15730586) stays **disabled** with stored legacy `checks-complete` + `root-hygiene`. See §3. |
+| `main`           | Production-ready code           | Rulesets 13643213 and 15730586 are **active** as of 2026-10-05 (#11928), requiring `ci/circleci: pr-gate-complete` and companion `ci/circleci: root-hygiene`, with strict freshness and no bypass actors. See §3. |
 | `develop`        | Integration branch (optional)   | Commit lint enforced                                   |
 | Feature branches | `feat/*`, `fix/*`, `refactor/*` | None                                                   |
 
@@ -138,7 +138,10 @@ from checks that run only for matching paths.
 
 ### 2.3.1 CodeQL ownership and alert triage
 
-BioETL uses **advanced CodeQL setup** owned by `.github/workflows/codeql.yml`.
+CodeQL is excluded from required checks by owner decision (#11929). Its legacy
+**advanced CodeQL setup** is retained in `.github/workflows/codeql.yml` until
+workflow retirement (#11930). GitHub Actions are disabled; this retained YAML
+does not prove active scanning. Optional external analysis is a separate decision.
 GitHub code-scanning **default setup MUST remain `not-configured`**. Do not
 enable default setup in parallel: that would duplicate Python scans and split
 alert ownership.
@@ -208,7 +211,7 @@ weaken gates, raise tech-debt budgets, or force Grafana npm majors
 | `secret_scanning_non_provider_patterns` | disabled | Intentionally off (noisy). Do not enable without a dated issue. |
 | Unused environments | absent | `staging` MUST NOT exist. `copilot` is an **agent-runtime** environment (`GH-ENV-003`, #10371), not unused. Live GET `2026-09-11`: `copilot` present with required reviewers + custom branch policy `copilot/**`; `staging` absent. Publish environments stay `ghcr-publish`, `observability-render-host`, `pypi`, `testpypi`. `GH-ENV-002.known_issue: null`. |
 | Agent-runtime environment | protected, non-publish | `copilot`: reviewer `@SatoryKono`, custom refs `copilot/**` only, zero environment secrets, no tracked workflow `environment: copilot`. Must not overlap `protected_environments`. `#10311` DELETE is superseded. |
-| `allow_auto_merge` | `true` | Allowed after #10267: live `GET .../rules/branches/main` applies required context `pr-gate-complete`. Do not treat a disabled companion ruleset as a merge wall. |
+| `allow_auto_merge` | `true` | Subject to the active CircleCI contexts and strict rulesets in §3; auto-merge cannot bypass them. |
 
 Controls live in [`github_governance_policy.json`](../../../configs/quality/github_governance_policy.json): `GH-SECRET-002`, `GH-SECRET-003`, `GH-ACTIONS-002`, `GH-ACTIONS-003`, `GH-ENV-002`, `GH-ENV-003`.
 
@@ -257,6 +260,30 @@ TestPyPI+PyPI, when that optional lane is re-enabled for an actual release.
 ______________________________________________________________________
 
 ## 3. Status Checks and Ruleset Contract
+
+### Current CircleCI protection — #11928
+
+As of 2026-10-05, the active provider is `.circleci/config.yml`, workflow
+`pr-gate`. Ruleset `main` (13643213) requires
+`ci/circleci: pr-gate-complete`; active companion
+`root-hygiene-required-check` (15730586) additionally requires
+`ci/circleci: root-hygiene`. Both target only `refs/heads/main`, retain strict
+freshness and have no bypass actors. Deletion, non-fast-forward and PR
+protections are preserved. Missing, failed, canceled or stale evidence must
+block merge. Main pipelines 218–220 passed all 81 jobs on
+`a34558b918b56984a185c0e4956d735b43483780`; isolated negative PR #11954
+confirmed merge rejection. The [live GET receipt](../../../reports/governance/ruleset-11928-closeout-get-2026-10-05.json)
+records both rulesets and the applied branch rules.
+
+The canonical catalog's `deployment` block identifies CircleCI. Legacy
+`coordinator_workflow` and `owner_workflow` fields retain source definitions
+until #11930. They do not declare runnable Actions: Actions are disabled and
+billing restoration is out of scope. CircleCI emits commit statuses without a
+GitHub App identity, so no integration_id binding is claimed. The following
+Actions-era contract and historical receipts remain migration references;
+where execution/enforcement differs, this current contract takes precedence.
+
+### Historical Actions protection — #10267
 
 Updates to `main` **are blocked** by repository ruleset `main` (13643213)
 with `enforcement: active` as of `2026-09-10T02:53:01+03:00` (#10267 owner-approved
@@ -421,6 +448,10 @@ To remove drift between workflow-specific job names and governance language, Bio
 | `docker.yml` | Supporting gate: `docker-build` | `.github/workflows/docker.yml` |
 
 ### Branch Protection Verification
+
+The current protection is the CircleCI #11928 contract above. The dated
+verification history below preserves prior states and must not be interpreted
+as the current required-check set.
 
 PR merges and direct pushes to `main` **are** blocked by repository ruleset
 `main` (13643213) while its enforcement is `active`. Repo-side evidence is the
@@ -757,7 +788,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 ```
 
-Required push workflows on `main` (Tests, Lint and Architecture Gates, CodeQL)
+Retained push workflow definitions on `main` (Tests, Lint and Architecture Gates, CodeQL)
 MUST NOT share a ref-wide group. Queued runs for an older SHA are otherwise
 discarded when a newer `main` SHA arrives, even with `cancel-in-progress: false`.
 Those three workflows use:
@@ -793,15 +824,15 @@ ______________________________________________________________________
 *See also: [CONTRIBUTING.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/CONTRIBUTING.md) | [SECURITY.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/SECURITY.md) | [RULES.md](../RULES.md)*
 
 
-### Main rulesets (RF-008 / GH-RULESET-001 — `pr-gate-complete` on `main`)
+### Historical main rulesets snapshot (2026-09-10; #10267)
 
-SSOT for live GitHub enforcement is §3 plus this block. Ruleset `main`
-(13643213) is **`enforcement: active`**. Companion `root-hygiene-required-check`
-(15730586) stays **`enforcement: disabled`**. Applied rules on `refs/heads/main`
-come only from `13643213`. Closed `#9975` / `#9979` are history; live activation
-is [#10267](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/10267).
+This dated snapshot is historical; the current SSOT is §3 above. At that time,
+ruleset `main` (13643213) was **`enforcement: active`** and companion
+`root-hygiene-required-check` (15730586) was **`enforcement: disabled`**.
+Applied rules on `refs/heads/main` came only from `13643213`. Closed
+`#9975` / `#9979` preceded the activation in [#10267](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/10267).
 
-Live GET `2026-09-10T02:53:01+03:00`:
+Historical GET `2026-09-10T02:53:01+03:00`:
 
 - `13643213` `main`: `enforcement: active` (required check `[pr-gate-complete]`,
   `strict_required_status_checks_policy: true`, `required_approving_review_count: 0`).
@@ -809,8 +840,9 @@ Live GET `2026-09-10T02:53:01+03:00`:
   `[checks-complete, root-hygiene]`; no PUT in #10267).
 - No bypass actors (`current_user_can_bypass: never`).
 
-Rollback is an explicitly approved PUT of
-`reports/governance/ruleset-10267-rollback-13643213.json`. Tracking: #10267,
+The historical rollback payload was
+`reports/governance/ruleset-10267-rollback-13643213.json`; it is not a rollback
+plan for the current CircleCI protection. Historical tracking: #10267,
 Scorecard #1272 (BranchProtection), #1295 (CodeReview), #1296 (CIIBestPractices).
 
 ### Quarterly Read-Only Review Runbook (read-only, no mutations)
@@ -818,7 +850,7 @@ Scorecard #1272 (BranchProtection), #1295 (CodeReview), #1296 (CIIBestPractices)
 Owner: @SatoryKono · Cadence: quarterly · Last: 2026-08-28 → Next: 2026-11-28 · Due: +5 days after quarter (Q4 due `2026-12-05`, cron `23 6 1 1,4,7,10`) · Evidence: `reports/governance/quarterly-review-YYYY-QN.md` + `reports/quality/github-settings-review*.json` (30d retention, `automation_mutated_github:false`).
 
 Checklist (read-only `GET`, `--paginate` where paginated, no `PUT/PATCH/POST/DELETE`):
-`GET /repos/{owner}/{repo}/rulesets` → `GET /rulesets/{id}` (expect 13643213 **`enforcement: active`** with required context `pr-gate-complete`; 15730586 **`enforcement: disabled`**) → `GET /rules/branches/main` (expect `pr-gate-complete`) → `GET /code-scanning/alerts?per_page=100` → `GET /labels?per_page=100 --paginate` (209 labels) → `GET /repos/{repo} --jq '{has_wiki,default_branch}'`.
+`GET /repos/{owner}/{repo}/rulesets` → `GET /rulesets/{id}` (expect both 13643213 and 15730586 **`enforcement: active`**, strict freshness and no bypass; required contexts `ci/circleci: pr-gate-complete` and companion `ci/circleci: root-hygiene`) → `GET /rules/branches/main` (expect both CircleCI contexts) → `GET /code-scanning/alerts?per_page=100` → `GET /labels?per_page=100 --paginate` (record the current label count) → `GET /repos/{repo} --jq '{has_wiki,default_branch}'`.
 Escalation: drift → open/update governance issue (high-risk → Security lane/Release engineering day of review); do not expand token scopes.
 Verification (no token, dry-run): `pytest tests/architecture/test_github_governance_review.py` (`READ_ONLY_GH_COMMANDS` + `workflow_dispatch` + `cron 23 6 1 1,4,7,10`).
 

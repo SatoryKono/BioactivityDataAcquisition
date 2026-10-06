@@ -53,7 +53,7 @@ from bioetl.domain.run_reports.models import (
     LayerCounts,
     TrackingCoverage,
 )
-from bioetl.domain.run_reports.pipeline_builder import (
+from bioetl.domain.run_reports.pipeline_report_assembly import (
     PipelineRunReportOptionalBlocks,
     _derive_performance,
     _has_contract_activity,

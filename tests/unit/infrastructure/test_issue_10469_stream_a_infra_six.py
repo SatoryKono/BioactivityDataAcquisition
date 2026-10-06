@@ -32,7 +32,7 @@ from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
 from bioetl.infrastructure.adapters.crossref.query_builder import (
     validate_crossref_entity_type,
 )
-from bioetl.infrastructure.adapters.http._client_retry_policy import (
+from bioetl.infrastructure.adapters.http.client_retry_policy import (
     _status_code_from_error,
 )
 from bioetl.infrastructure.adapters.openalex._filter_fetch_flow import (
