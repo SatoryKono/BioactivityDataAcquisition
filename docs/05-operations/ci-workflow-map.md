@@ -506,9 +506,10 @@ Manual E2E parity preserves the legacy 40-minute full-playback, 15-minute prompt
 and 30-minute strict-live limits. `ci-lane=e2e-replay` always runs the three smoke
 reruns, full non-smoke replay, and prompt contracts on main. `run-live=true`
 additionally selects `e2e-live`, with test mode false, strict health checks,
-new-episode VCR mode and the unchanged 15% skip-rate SLO. The nightly schedule
-must explicitly select that flag; registration and actual live acceptance are
-pending. The ordinary PR workflow remains separate.
+new-episode VCR mode and the unchanged 15% skip-rate SLO. The daily 02 UTC
+schedule is registered with `run-live=true`; successful full, live, scheduled
+and PR-event execution acceptance remains pending. The ordinary PR workflow
+remains separate.
 
 `ci-lane=skills-consistency` retains read-only checks. Setting the typed
 `approve-runtime-sync=true` additionally exposes `runtime-sync-approval` and
