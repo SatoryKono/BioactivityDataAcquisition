@@ -30,12 +30,12 @@
     "grafana/tooling/router-v7-bridge/webpack-public-path.cjs": "e938b87e3750165c9cb90b666ddfe0ad15a22a3a9db8c846ca3b3b20c6a0feb0",
     "grafana/plugins/bioetl-scenes-app/dist/module.js.map": "f08f919ebb16e86313f56065140cd117405f9202c3baf3489187786159aee5ef",
     "grafana/plugins/bioetl-scenes-app/dist/528.js.map": "4bac095f1320f11c8f602ae4b80f79c264dc4e7b07a5183323589118e0f9212a",
-    ".github/tooling/nyc-yaml-compat.test.cjs": "5adb52be84550a7eda3a7351bd74c5742a2bd1c19e3e323137d2de288ccd81c3"
+    ".github/tooling/nyc-yaml-compat.test.cjs": "5dd76d4eb3ead1a9fd6ad75b166960aebc776101c9d9475450da2d45fb35b0ef"
   },
   "acceptance": "Verified original source-built frontend with complete CI-reproduced plugin trees; managed rollout and post-merge runtime acceptance remain pending.",
   "plugin_release_date": "2026-10-03",
   "build_input_revalidation": {
-    "source_commit": "fb2809937aca7d0047f1b20355b18f750580679c",
+    "source_commit": "5c4b9758939b345ae153047db1201173e58217bc",
     "reason": "Security updates for source-map-js and postcss-selector-parser; scoped NYC YAML 4 override removes sprintf-js. Fresh locked Linux builds, behavioral compatibility tests, typecheck and lint pass; all 53 Scenes and 7 SelectorShell output files remain byte-identical to the immutable parent. Managed rollout remains pending.",
     "commands": [
       "npm ci --ignore-scripts --no-fund --no-audit",
@@ -66,7 +66,7 @@
       "grafana/plugins/bioetl-scenes-app/package-lock.json": "c56f2850804134ff41ca2025a1f9a27e81617d8257e3625adcb820de6ea8f408",
       "grafana/plugins/bioetl-selectorshell-panel/package.json": "eb02e638c55a126ccb8e28154ddbb43e73bac64b756f7071ee9c32291de64da5",
       "grafana/plugins/bioetl-selectorshell-panel/package-lock.json": "435834f1d8f1cf6a60884c8f7b68bd1f96bef134a8b6de9bf57f40907cb4d608",
-      ".github/tooling/nyc-yaml-compat.test.cjs": "5adb52be84550a7eda3a7351bd74c5742a2bd1c19e3e323137d2de288ccd81c3"
+      ".github/tooling/nyc-yaml-compat.test.cjs": "5dd76d4eb3ead1a9fd6ad75b166960aebc776101c9d9475450da2d45fb35b0ef"
     }
   },
   "lockfile_security_revalidation": {
