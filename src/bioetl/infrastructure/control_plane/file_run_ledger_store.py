@@ -7,6 +7,7 @@ import os
 from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
+from threading import RLock
 from time import perf_counter
 from typing import TYPE_CHECKING
 
@@ -40,6 +41,9 @@ if TYPE_CHECKING:
 _LEDGER_APPEND_OPEN_FLAGS = os.O_APPEND | os.O_CREAT | os.O_WRONLY
 _RUN_LEDGER_MESSAGE_PREFIX = "Run ledger"
 _RunLedgerCorruptionError = RunLedgerCorruptionError
+# Stores may share a ledger directory. Keep duplicate detection, append, index
+# publication and rollback in one process-local transaction across instances.
+_LEDGER_APPEND_LOCK = RLock()
 
 
 def _should_fsync_control_plane_writes() -> bool:
@@ -84,6 +88,11 @@ class FileRunLedgerStore(FileRunLedgerQueriesMixin, RunLedgerPort):
 
     def append(self, entry: RunLedgerEntry) -> None:
         """Append one JSONL ledger entry and maintain run-id index."""
+        with _LEDGER_APPEND_LOCK:
+            self._append_locked(entry)
+
+    def _append_locked(self, entry: RunLedgerEntry) -> None:
+        """Publish or roll back an entry while holding the shared writer lock."""
         started_at = perf_counter()
         ledger_path = self.base_path / f"{entry.manifest_id}.jsonl"
         run_index_dir = self.base_path / "_by_run_id"

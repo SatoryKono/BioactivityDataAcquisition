@@ -18,6 +18,24 @@ from bioetl.domain.value_objects.dq_report import (
 )
 
 
+def _key_null_counts(df: pl.DataFrame, rules: list[JsonDict]) -> dict[str, int]:
+    """Count each existing nonnullable key once without collapsing its rules."""
+    columns = set(df.columns)
+    fields = list(
+        dict.fromkeys(
+            str(rule.get("field", ""))
+            for rule in rules
+            if not rule.get("nullable", False)
+            and str(rule.get("field", "")) in columns
+        )
+    )
+    return (
+        df.select(pl.col(field).null_count() for field in fields).row(0, named=True)
+        if fields
+        else {}
+    )
+
+
 class SilverThresholdChecker:
     """Stateless checker for Silver layer DQ thresholds and key constraints."""
 
@@ -79,19 +97,7 @@ class SilverThresholdChecker:
         violations: list[JsonDict] = []  # Any: DQ check values vary by check type
 
         columns = set(df.columns)
-        fields = list(
-            dict.fromkeys(
-                str(rule.get("field", ""))
-                for rule in key_nullability_rules
-                if not rule.get("nullable", False)
-                and str(rule.get("field", "")) in columns
-            )
-        )
-        null_counts = (
-            df.select(pl.col(field).null_count() for field in fields).row(0, named=True)
-            if fields
-            else {}
-        )
+        null_counts = _key_null_counts(df, key_nullability_rules)
 
         for rule in key_nullability_rules:
             if rule.get("nullable", False):

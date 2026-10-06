@@ -1,4 +1,4 @@
-Source-only refresh (2026-10-06, integration with main 480a54241e04): reviewed repairs and replay mapping are bound to `source_tree_sha256=10c473140c6f2c68ad212428c3208c03b3b21933cd63103edb317f0a0548a35f`. Historical measurements below are unchanged; this stamp is not new coverage evidence.
+Source-only refresh (2026-10-06, integration with main 480a54241e04): reviewed repairs and replay mapping are bound to `source_tree_sha256=688100af42bdc9c0f32d496247b6f2f92ffeddb79227ea370922a4fedfd1c814`. Historical measurements below are unchanged; this stamp is not new coverage evidence.
 
 Coverage refresh (2026-10-05, RF-023 after main merge): complete 17-shard measurement on `54c7c9d5b5dad9077054081484275fc93a8be83e`, source `2f462961d6e80105c964f5d536a956def9a7b4c66af316bad70abfb0f6b226a1`. 32979 PASS / 187 SKIP; line 99.70%, branch 94.34%. Canonical nonregressing adoption retains 81 visible raw module regressions as historical values. Portable evidence: `reports/quality/proof-or-stop/rf023-54c7c9d5-complete-coverage`. This local measurement does not claim full-suite acceptance or CI ADMIT.
 
@@ -16,7 +16,7 @@ Source-only refresh (2026-10-05, direct owner imports): source_tree_sha256 `0d66
 
 # Сводка evidence: project-package-topology
 
-Source-only refresh (2026-10-06): reviewed PubChem, metadata and Polars repairs are bound to the current source tree. Historical coverage and topology measurements remain unchanged.
+Historical source-only snapshot (2026-10-06, before merging main 480a54241e04): the hash below identifies the earlier PubChem, metadata and Polars tree. It is not the current source binding; use the first entry in this document.
 
 `source_tree_sha256=6de85b6b390eb245580e3cb6a2b85955700250ff09e9623bf83f437a024b2648`
 Source-only refresh (2026-10-05, RF-023): sealed target mapping codecs now use the existing infrastructure config loader. Runtime cross-layer group edges are 330, within the unchanged 330 budget. This source binding is not a new coverage measurement or a complete topology re-audit; historical evidence below is preserved.
