@@ -398,6 +398,8 @@ jobs:
       - run:
           name: Generate source-bound distribution SPDX inventory
           no_output_timeout: 11m
+          environment:
+            SYFT_CHECK_FOR_APP_UPDATE: "false"
           command: |
             set -euo pipefail
             curl -fsSL --proto '=https' --tlsv1.2 \
@@ -426,9 +428,10 @@ jobs:
                     with tarfile.open(archive) as stream:
                         stream.extractall(target, filter='data')
             PY
-            timeout --signal=TERM --kill-after=30s 10m "$HOME/.local/bin/syft" scan \
+            timeout --signal=TERM --kill-after=30s 10m "$HOME/.local/bin/syft" scan -vv \
               dir:/tmp/bioetl-dist-sbom-input --source-name bioetl \
-              -o spdx-json=/tmp/bioetl-release/bioetl-dist.spdx.json
+              -o spdx-json=/tmp/bioetl-release/bioetl-dist.spdx.json \
+              2>&1 | tee /tmp/bioetl-release/syft.log
             python3 - \<<'PY'
             import hashlib, json
             from pathlib import Path
@@ -1169,9 +1172,16 @@ jobs:
         type: string
       threshold:
         type: string
+      executor-size:
+        type: enum
+        enum: [medium, large]
+        default: medium
+      max-children:
+        type: integer
+        default: 1
     docker:
     - image: cimg/python:3.13
-    resource_class: medium
+    resource_class: << parameters.executor-size >>
     environment:
       OPENBLAS_NUM_THREADS: '1'
       POLARS_MAX_THREADS: '2'
@@ -1223,8 +1233,8 @@ jobs:
           # under the frozen CI environment (bare `mutmut` is not on runner PATH).
           export PYTHONPATH="${WORKSPACE_ROOT}/src:${WORKSPACE_ROOT}${PYTHONPATH:+:$PYTHONPATH}"
           uv run --frozen --no-build python -c "import bioetl.domain, scripts; print('"'"'mutation import preflight ok'"'"')"
-          # Bound fork concurrency to the 4 GB executor; host CPU count is not its quota.
-          uv run --frozen --no-build mutmut run --max-children 1
+          # Bound fork concurrency explicitly; host CPU count is not the executor quota.
+          uv run --frozen --no-build mutmut run --max-children << parameters.max-children >>
           '
         no_output_timeout: 65m
     - run:
@@ -2620,6 +2630,7 @@ jobs:
         path: reports/quality/proof-or-stop/shared/coverage/coverage/junit
     - store_artifacts:
         path: reports/quality/proof-or-stop/shared/coverage/coverage/junit
+        destination: coverage-junit
     - store_artifacts:
         path: reports/quality/proof-or-stop/shared/coverage/coverage/logs
     - store_artifacts:
@@ -2914,7 +2925,36 @@ workflows:
         - equal: [coverage-closeout, << pipeline.parameters.ci-lane >>]
         - equal: [codex/ci-11929-11931-preparation, << pipeline.git.branch >>]
     jobs:
-      - proof-closeout
+    - arch-tests
+    - proof-docs
+    - proof-coverage:
+        requires:
+        - proof-coverage-shards
+    - proof-governance:
+        requires:
+        - arch-tests
+    - proof-debt
+    - proof-quality:
+        requires:
+        - proof-coverage
+        - arch-tests
+    - proof-closeout:
+        requires:
+        - arch-tests
+        - proof-docs
+        - proof-governance
+        - proof-debt
+        - proof-quality
+    - proof-coverage-shard:
+        matrix:
+          alias: proof-coverage-shards
+          parameters:
+            group:
+            - '0'
+            - '1'
+            - '2'
+            - '3'
+
   main-coverage-closeout:
     when:
       and:
@@ -3222,12 +3262,16 @@ workflows:
     jobs:
     - mutation-testing:
         name: mutation-domain
+        executor-size: large
+        max-children: 4
         target: domain
         source-path: src/bioetl/domain/
         tests-dir: tests/unit/domain/
         threshold: '70.0'
     - mutation-testing:
         name: mutation-application-control-plane
+        executor-size: large
+        max-children: 4
         target: application-control-plane
         source-path: src/bioetl/application/services/control_plane/
         tests-dir: tests/unit/application/
