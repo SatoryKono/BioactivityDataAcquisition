@@ -13,8 +13,10 @@ TRIAGED = json.loads((ROOT / "findings_triage.json").read_text(encoding="utf-8")
 
 
 def read_span(rel: str, span: str, pad: int = 5) -> str:
-    path = REPO / rel
-    if not path.exists():
+    path = (REPO / rel).resolve()
+    if Path(rel).is_absolute() or not path.is_relative_to(REPO.resolve()):
+        return "<OUTSIDE REPO>"
+    if not path.is_file():
         return "<MISSING>"
     nums = [int(x) for x in re.findall(r"\d+", span)]
     if not nums:
@@ -26,6 +28,8 @@ def read_span(rel: str, span: str, pad: int = 5) -> str:
 
 
 def _critical_evidence(body: str, code: str) -> list[str]:
+    if not code or code in {"<MISSING>", "<NO SPAN>", "<OUTSIDE REPO>"}:
+        return []
     evidence = []
     if "records_bronze" in body or "confirmed" in body or "total_fetched" in body:
         # checkpoint count issue
@@ -54,6 +58,11 @@ def verify_critical() -> list[dict]:
                 "leaf": f["leaf"],
                 "body": f["body"],
                 "still_current": bool(evidence),
+                "evidence_status": (
+                    "unavailable"
+                    if not code or code in {"<MISSING>", "<NO SPAN>", "<OUTSIDE REPO>"}
+                    else "available"
+                ),
                 "evidence": evidence,
                 "code": code,
             }

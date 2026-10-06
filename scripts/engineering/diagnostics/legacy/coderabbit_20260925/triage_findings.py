@@ -131,12 +131,15 @@ def _classify_span(body: str, code: str, hits: list[str]) -> tuple[str, str]:
 
 def _triage_finding(f: dict) -> dict:
     rel = f["file"]
-    path = REPO / rel
+    path = (REPO / rel).resolve()
     reason = ""
     code = ""
     hits: list[str] = []
     span = parse_line_span(f["lines"])
-    if not path.exists():
+    if Path(rel).is_absolute() or not path.is_relative_to(REPO.resolve()):
+        status = "needs_manual"
+        reason = "path outside repository or absolute path"
+    elif not path.is_file():
         status = "stale_missing_file"
         reason = "file missing on HEAD"
     elif span is None:
