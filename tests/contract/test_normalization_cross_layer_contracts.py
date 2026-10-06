@@ -79,10 +79,12 @@ pytestmark = [pytest.mark.contracts, pytest.mark.no_api]
 _HASH_A = "a" * 64
 
 
-def _matrix_row(pipeline_name: str, field_name: str) -> dict[str, str]:
+def _matrix_row(
+    matrix: list[dict[str, str]], pipeline_name: str, field_name: str
+) -> dict[str, str]:
     return next(
         row
-        for row in build_field_matrix_rows()
+        for row in matrix
         if row["pipeline_name"] == pipeline_name and row["field_name"] == field_name
     )
 
@@ -701,8 +703,9 @@ def test_profile_matrix_exposes_strict_json_semantics_for_chembl_structured_fiel
     None
 ):
     """Field-matrix output must surface strict JSON semantics without reading profile code."""
-    assay_parameters_row = _matrix_row("chembl_assay", "assay_parameters")
-    publication_authors_row = _matrix_row("chembl_publication", "authors")
+    matrix = list(build_field_matrix_rows())
+    assay_parameters_row = _matrix_row(matrix, "chembl_assay", "assay_parameters")
+    publication_authors_row = _matrix_row(matrix, "chembl_publication", "authors")
 
     assert assay_parameters_row["normalizer"] == "normalize_profile_json_string_strict"
     assert assay_parameters_row["strictness"] == "strict_json"
@@ -723,9 +726,12 @@ def test_profile_matrix_exposes_strict_json_semantics_for_chembl_structured_fiel
 
 def test_profile_matrix_exposes_shared_chembl_policy_surfaces() -> None:
     """Field-matrix output must expose governed non-strict ChEMBL policy surfaces."""
-    activity_units_row = _matrix_row("chembl_activity", "units")
-    bao_format_row = _matrix_row("chembl_activity", "bao_format")
-    publication_class_row = _matrix_row("chembl_publication", "publication_class")
+    matrix = list(build_field_matrix_rows())
+    activity_units_row = _matrix_row(matrix, "chembl_activity", "units")
+    bao_format_row = _matrix_row(matrix, "chembl_activity", "bao_format")
+    publication_class_row = _matrix_row(
+        matrix, "chembl_publication", "publication_class"
+    )
 
     assert activity_units_row["semantic_category"] == "controlled_vocabulary"
     assert (
@@ -750,9 +756,13 @@ def test_profile_matrix_distinguishes_provider_universe_from_project_policy_scop
     None
 ):
     """Generated semantics must separate provider universes from project subsets."""
-    assay_type_row = _matrix_row("chembl_activity", "assay_type")
-    publication_term_type_row = _matrix_row("chembl_publication_term", "term_type")
+    matrix = list(build_field_matrix_rows())
+    assay_type_row = _matrix_row(matrix, "chembl_activity", "assay_type")
+    publication_term_type_row = _matrix_row(
+        matrix, "chembl_publication_term", "term_type"
+    )
     confidence_description_row = _matrix_row(
+        matrix,
         "chembl_assay",
         "confidence_description",
     )
@@ -874,8 +884,9 @@ def test_chembl_activity_meta_passthrough_contract_is_aligned_across_profile_mat
         is normalize_profile_passthrough
     )
 
-    run_id_row = _matrix_row("chembl_activity", "_run_id")
-    entity_id_row = _matrix_row("chembl_activity", "entity_id")
+    matrix = list(build_field_matrix_rows())
+    run_id_row = _matrix_row(matrix, "chembl_activity", "_run_id")
+    entity_id_row = _matrix_row(matrix, "chembl_activity", "entity_id")
     assert run_id_row["normalizer"] == "normalize_profile_passthrough"
     assert entity_id_row["normalizer"] == "normalize_profile_passthrough"
     assert run_id_row["include_in_content_hash"] == "false"
@@ -903,8 +914,11 @@ def test_chembl_activity_business_and_set_like_fields_follow_profile_family_cont
         is normalize_profile_json_string_strict
     )
 
-    activity_id_row = _matrix_row("chembl_activity", "activity_id")
-    activity_properties_row = _matrix_row("chembl_activity", "activity_properties")
+    matrix = list(build_field_matrix_rows())
+    activity_id_row = _matrix_row(matrix, "chembl_activity", "activity_id")
+    activity_properties_row = _matrix_row(
+        matrix, "chembl_activity", "activity_properties"
+    )
     assert activity_id_row["normalizer"] == "normalize_profile_text"
     assert (
         activity_properties_row["normalizer"] == "normalize_profile_json_string_strict"
@@ -939,7 +953,8 @@ def test_chembl_activity_standard_units_fail_closed_while_raw_units_remain_revie
     assert units_rule.normalizer(" uM ") == "µM"
     assert units_rule.normalizer("mystery-unit") == "mystery-unit"
 
-    standard_units_row = _matrix_row("chembl_activity", "standard_units")
+    matrix = list(build_field_matrix_rows())
+    standard_units_row = _matrix_row(matrix, "chembl_activity", "standard_units")
     assert standard_units_row["normalizer"] == "normalize_activity_standard_units"
     assert standard_units_row["strictness"] == "strict_enum"
 
@@ -956,9 +971,12 @@ def test_chembl_activity_standard_units_fail_closed_while_raw_units_remain_revie
 def test_chembl_publication_prefixed_identifiers_and_raw_type_are_schema_visible() -> (
     None
 ):
-    publication_doi_row = _matrix_row("chembl_publication", "publication_doi")
-    publication_pmid_row = _matrix_row("chembl_publication", "publication_pmid")
-    publication_type_raw_row = _matrix_row("chembl_publication", "publication_type_raw")
+    matrix = list(build_field_matrix_rows())
+    publication_doi_row = _matrix_row(matrix, "chembl_publication", "publication_doi")
+    publication_pmid_row = _matrix_row(matrix, "chembl_publication", "publication_pmid")
+    publication_type_raw_row = _matrix_row(
+        matrix, "chembl_publication", "publication_type_raw"
+    )
 
     assert "domain_schema:present" in publication_doi_row["schema_coverage"]
     assert "domain_schema:present" in publication_pmid_row["schema_coverage"]
@@ -966,9 +984,10 @@ def test_chembl_publication_prefixed_identifiers_and_raw_type_are_schema_visible
 
 
 def test_chembl_target_controlled_json_arrays_are_set_like_for_hash_contracts() -> None:
-    component_types_row = _matrix_row("chembl_target", "component_types")
+    matrix = list(build_field_matrix_rows())
+    component_types_row = _matrix_row(matrix, "chembl_target", "component_types")
     component_relationships_row = _matrix_row(
-        "chembl_target", "component_relationships"
+        matrix, "chembl_target", "component_relationships"
     )
 
     assert component_types_row["set_like"] == "true"
