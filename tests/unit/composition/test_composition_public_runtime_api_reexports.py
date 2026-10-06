@@ -62,14 +62,17 @@ def test_bootstrap_package_root_reexports_curated_lazy_helpers(
 ) -> None:
     """Package bootstrap root should expose only the curated bootstrap surface."""
     bootstrap_module = importlib.import_module("bioetl.composition.bootstrap")
-    # Keep package identity: child modules may already be cached in sys.modules.
-    # E2E autouse may leave stale lazy exports; restore them after this test.
+    # Keep the parent package identity: its children may already be cached.
+    # Reset only the tested exports and restore their prior state after the test.
     for name in (
         "bootstrap_pipeline_runner",
         "bootstrap_composite_runner",
         "load_pipeline_config",
     ):
-        monkeypatch.delitem(bootstrap_module.__dict__, name, raising=False)
+        monkeypatch.setitem(
+            bootstrap_module.__dict__, name, bootstrap_module.__dict__.get(name)
+        )
+        monkeypatch.delitem(bootstrap_module.__dict__, name)
     runtime_pipeline_module = importlib.import_module(
         "bioetl.composition.bootstrap.runtime.pipeline"
     )
