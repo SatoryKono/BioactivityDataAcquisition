@@ -237,7 +237,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | Source workflow | UTC schedule | Successor / disposition | Remaining acceptance |
 | --- | --- | --- | --- |
 | `architecture-docs-nightly.yml` | `15 2 * * *` | CircleCI architecture-docs | Scheduled pipeline 267/job 4482 SUCCESS on main 303ced3: 27 tests, 54 complete passports, zero blocking diagnostics; 118 artifacts independently downloaded and hashed |
-| `architecture.yml` | `20 2 * * *` | CircleCI architecture-metrics | Main-only typed run-heavy=false fast baseline; run-heavy=true keeps heavy coverage 85% and Windows stress; daily 02 UTC window registered with run-heavy=true; local Windows 2/2 PASS, remote and scheduled execution acceptance pending |
+| `architecture.yml` | `20 2 * * *` | CircleCI architecture-metrics | Main-only typed run-heavy=false fast baseline; run-heavy=true keeps heavy coverage 85% and Windows stress; daily 02 UTC window registered with run-heavy=true; CircleCI Windows job6308 passes2/2 without skips; Linux job6307 reached8GiB during worker startup, bounded-worker remediation and scheduled acceptance pending |
 | `branch-hygiene.yml` | `15 3 * * 1` | CircleCI branch-hygiene inventory | Weekly trigger and restricted context created; authenticated main run 3084 passes; scheduled run and PR branch-name events pending; artifact retention verified at 30 days |
 | `chembl-baseline-smoke.yml` | — | `dq-consistency` validates configurations; `arch-tests` and unit/integration groups cover all nine legacy test selectors; manual `ci-lane=pr-gate` | Nine test selectors and configuration steps accepted on main (DQ jobs 3488, 3505, 3554); legacy event parity acceptance pending |
 | `codeql.yml` | `17 4 * * 1` | Retain disabled Actions definition | Not required; optional analysis lifecycle remains explicit |
@@ -261,7 +261,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `labeler.yml` | — | Retain disabled label maintenance | Preserve #10263/#11234; taxonomy reconciliation is required before any future trusted replacement |
 | `memory-freshness.yml` | `17 5 * * 1` | CircleCI memory-freshness | Prepared check-only lane; PR parity and scheduled failure notification pending |
 | `memory-retention.yml` | `17 4 * * 1` | CircleCI memory-retention | Weekly trigger registered; main run 2604 passed check-only retention; scheduled execution pending, no prune mutation |
-| `mutation-testing.yml` | `0 0 * * 0` | Scheduled-only mutation lane | Sunday00UTC schedule restored after actual scheduled pipeline340 started on main d9f5b026. Domain6140 and control-plane6139 use verified large4CPU/8GB and four workers; workflow-runner6138 and export-manifests6141 retain medium/one worker. Terminal acceptance pending; full mutant scope,60-minute timeout and70/60/60/60 thresholds unchanged |
+| `mutation-testing.yml` | `0 0 * * 0` | Scheduled-only mutation lane | Actual scheduled pipeline340 on main d9f5b026 SUCCESS, all four targets: domain6140 72.01%, control-plane6139 78.26%, workflow-runner6138 73.42%, export-manifests6141 64.22%. All eight artifacts and complete statistics independently verified. Large targets use large4CPU/8GB and four workers; small targets retain medium/one worker. Sunday00UTC restored and read back; full scope,60-minute timeout and70/60/60/60 thresholds unchanged |
 | `nightly-replay-parity.yml` | `30 2 * * *` | CircleCI replay-parity | Main job 3366 passes four-run checksum parity; daily 02 UTC trigger accepted by scheduled pipeline 266/job 4481 on main 303ced3 (16 tests, no skips, repeated checksum files identical) |
 | `no-partial-tree-commits.yml` | — | Full-tree guard in root governance | Integrated into root-hygiene; main jobs 3500, 3529, 3549 passed the full-tree guard alongside strict root checks |
 | `opencode-pr-review.yml` | — | Retain disabled review stub policy | Do not activate unpinned installer or write paths |
@@ -416,11 +416,16 @@ Local guard checks do not qualify as registry or attestation acceptance.
 Architecture Metrics retains its manual fast default through the boolean
 `run-heavy` parameter. The heavy profile preserves the legacy pytest selection,
 85% coverage threshold and 25-minute execution limit; it uses the four-core Linux
-executor. Its separate Windows Server 2022 job installs checksum-pinned uv
+executor with four pytest workers and one numerical-library thread per worker.
+Main pipeline347/job6307 reached the full 8 GiB limit during worker startup with
+`-n auto`; the bounded-worker fix still needs remote acceptance. Windows
+job 6308 on f36e2c27 passed both stress tests with zero skips/errors; both artifacts
+were downloaded and the JUnit independently verified. The Windows Server 2022
+job installs checksum-pinned uv
 0.11.26 and frozen Python 3.12 dependencies, runs both atomic lock stress tests,
 and rejects missing, failed or skipped JUnit cases. The nightly trigger must set
-`ci-lane=architecture-metrics` and `run-heavy=true`; schedule registration and
-remote acceptance are still pending.
+`ci-lane=architecture-metrics` and `run-heavy=true`. The daily 02 UTC window is
+registered; Linux heavy and scheduled execution acceptance remain pending.
 
 
 The `scorecard` lane runs the complete default OpenSSF check set on main and
