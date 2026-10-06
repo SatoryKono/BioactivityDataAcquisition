@@ -1582,4 +1582,261 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      cookie:
+      - ncbi_sid=DD823FC2C468CDC4_B8A0SID
+      host:
+      - eutils.ncbi.nlm.nih.gov
+      user-agent:
+      - BioETL/6.1.0
+    method: GET
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=pharmacogenomics%5BTitle%2FAbstract%5D&retmax=1&usehistory=y&retmode=json&email=default%40example.com
+  response:
+    body:
+      string: '{"header":{"type":"esearch","version":"0.3"},"esearchresult":{"count":"9365","retmax":"1","retstart":"0","querykey":"1","webenv":"MCID_6ac4a2dc46364ca9f50d84cb","idlist":["42832827"],"translationset":[],"querytranslation":"\"pharmacogenomics\"[Title/Abstract]"}}
+
+        '
+    headers:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - X-RateLimit-Limit,X-RateLimit-Remaining
+      alt-svc:
+      - clear
+      cache-control:
+      - private
+      content-length:
+      - '263'
+      content-security-policy:
+      - upgrade-insecure-requests
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Tue, 06 Oct 2026 07:27:23 GMT
+      ncbi-phid:
+      - 1D328C8C3EF3BD85000048305195D35C.1.1.m_1
+      ncbi-sid:
+      - DD823FC2C468CDC4_B8A0SID
+      referrer-policy:
+      - origin-when-cross-origin
+      server:
+      - Finatra
+      set-cookie:
+      - ncbi_sid=DD823FC2C468CDC4_B8A0SID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 07:27:24 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      transfer-encoding:
+      - chunked
+      via:
+      - 1.1 google
+      x-ratelimit-limit:
+      - '3'
+      x-ratelimit-remaining:
+      - '2'
+      x-ua-compatible:
+      - IE=Edge
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      cookie:
+      - ncbi_sid=DD823FC2C468CDC4_B8A0SID
+      host:
+      - eutils.ncbi.nlm.nih.gov
+      user-agent:
+      - BioETL/6.1.0
+    method: GET
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=42832827&retmode=xml&rettype=abstract&email=default%40example.com
+  response:
+    body:
+      string: '<?xml version="1.0" ?>
+
+        <!DOCTYPE PubmedArticleSet PUBLIC "-//NLM//DTD PubMedArticle, 1st January
+        2025//EN" "https://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_250101.dtd">
+
+        <PubmedArticleSet>
+
+        <PubmedArticle><MedlineCitation Status="Publisher" Owner="NLM"><PMID Version="1">42832827</PMID><DateRevised><Year>2026</Year><Month>10</Month><Day>05</Day></DateRevised><Article
+        PubModel="Print-Electronic"><Journal><ISSN IssnType="Electronic">1873-5126</ISSN><JournalIssue
+        CitedMedium="Internet"><Volume>153</Volume><PubDate><Year>2026</Year><Month>Oct</Month><Day>01</Day></PubDate></JournalIssue><Title>Parkinsonism
+        &amp; related disorders</Title><ISOAbbreviation>Parkinsonism Relat Disord</ISOAbbreviation></Journal><ArticleTitle>Disentangling
+        amantadine response variability in levodopa related dyskinesias: Role of clinical
+        and genetic factors.</ArticleTitle><Pagination><StartPage>109000</StartPage><MedlinePgn>109000</MedlinePgn></Pagination><ELocationID
+        EIdType="doi" ValidYN="Y">10.1016/j.parkreldis.2026.109000</ELocationID><ELocationID
+        EIdType="pii" ValidYN="Y">S1353-8020(26)00827-8</ELocationID><Abstract><AbstractText
+        Label="BACKGROUND" NlmCategory="BACKGROUND">Amantadine is the most commonly
+        used pharmacologic treatment for levodopa-related dyskinesias (LRD), yet its
+        efficacy and tolerability vary substantially, challenging clinical decision-making.</AbstractText><AbstractText
+        Label="OBJECTIVE" NlmCategory="OBJECTIVE">To explore clinical, demographic,
+        and genetic factors associated with variability in amantadine treatment outcomes.</AbstractText><AbstractText
+        Label="METHODS" NlmCategory="METHODS">Cross-sectional study of Parkinson''s
+        disease (PD) patients treated with amantadine for LRD. Participants were classified
+        as responders or non-responders; with non-responders further subdivided according
+        to the presence of intolerable side effects. Clinical and demographic data
+        were collected and participants underwent genotyping. Polygenic risk scores
+        for PD risk (PD-PRS) and genetic variants associated with levodopa or amantadine
+        metabolism and LRD susceptibility were assessed.</AbstractText><AbstractText
+        Label="RESULTS" NlmCategory="RESULTS">A total of 146 participants were included
+        (male 57%, mean age 66.9 years); 94 provided biological samples and 86 passed
+        quality control. Responders had a longer interval from PD diagnosis to amantadine
+        initiation (median 5.5 vs. 3 years, p&#x202f;=&#x202f;0.005) and higher levodopa
+        equivalent daily dose (LEDD) (1057.6&#x202f;mg&#x202f;&#xb1;&#x202f;431.5
+        vs. 831.1&#x202f;mg&#x202f;&#xb1;&#x202f;504.7, p&#x202f;=&#x202f;0.006).
+        Among non-responders, LEDD was lower in those experiencing side effects (725.2&#x202f;mg&#x202f;&#xb1;&#x202f;397.5
+        vs. 1013.5&#x202f;mg&#x202f;&#xb1;&#x202f;613.6, p&#x202f;=&#x202f;0.015).
+        The DRD1 rs4532-C allele was nominally associated with favorable response,
+        whereas ANKK1, DRD2, and COMT variants were nominally associated with side
+        effects. PD-PRS showed no association with response.</AbstractText><AbstractText
+        Label="CONCLUSIONS" NlmCategory="CONCLUSIONS">Clinical and genetic factors
+        may influence amantadine response. Earlier amantadine initiation and lower
+        LEDD were associated with a poorer response to amantadine. Genetic markers
+        in the dopaminergic pathways may facilitate a personalized treatment approach
+        in PD.</AbstractText><CopyrightInformation>Copyright &#xa9; 2026 The Authors.
+        Published by Elsevier Ltd.. All rights reserved.</CopyrightInformation></Abstract><AuthorList
+        CompleteYN="Y"><Author ValidYN="Y"><LastName>Chaparro-Solano</LastName><ForeName>Henry
+        Mauricio</ForeName><Initials>HM</Initials><AffiliationInfo><Affiliation>Genomic
+        Sciences and Systems Biology, Cleveland Clinic Research, Cleveland Clinic,
+        9500 Euclid Avenue, Cleveland, OH, 44195, USA; Department of Molecular Medicine,
+        Cleveland Clinic Lerner College of Medicine, Case Western Reserve University,
+        Cleveland, OH, 44195, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Saadatpour</LastName><ForeName>Leila</ForeName><Initials>L</Initials><AffiliationInfo><Affiliation>Center
+        for Neurological Restoration, Neurological Institute, Cleveland Clinic, 9500
+        Euclid Avenue, Cleveland, OH, 44195, USA; Movement Disorders Division, Department
+        of Neurology, University of Texas Health Science Center at San Antonio, 7703
+        Floyrd Curl Dr, San Antonio, TX, 78229, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Yu</LastName><ForeName>Jeryl Ritzi T</ForeName><Initials>JRT</Initials><AffiliationInfo><Affiliation>Center
+        for Neurological Restoration, Neurological Institute, Cleveland Clinic, 9500
+        Euclid Avenue, Cleveland, OH, 44195, USA; Institute for Neurosciences, St.
+        Lukes Medical Center, 5th Ave, Metro Manila, Global City, Taguig, 1634, Philippines;
+        Cardinal Santos Medical Center, 10 Wilson, Greenhills West, Metro Manila,
+        San Juan City, 1502, Philippines; Department of Neurosciences, University
+        of the East, Ramon Magsaysay Memorial Medical Center, 64 Aurora Boulevard,
+        Barangay Do&#xf1;a Imelda, Quezon City, 1113, Philippines.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Sonneborn</LastName><ForeName>Claire</ForeName><Initials>C</Initials><AffiliationInfo><Affiliation>Department
+        of Quantitative Health Sciences, Cleveland Clinic, 9500 Euclid Avenue, Cleveland,
+        OH, 44195, USA.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Peixoto-Leal</LastName><ForeName>Thiago</ForeName><Initials>T</Initials><AffiliationInfo><Affiliation>Genomic
+        Sciences and Systems Biology, Cleveland Clinic Research, Cleveland Clinic,
+        9500 Euclid Avenue, Cleveland, OH, 44195, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Piccinin</LastName><ForeName>Camila C</ForeName><Initials>CC</Initials><AffiliationInfo><Affiliation>Center
+        for Neurological Restoration, Neurological Institute, Cleveland Clinic, 9500
+        Euclid Avenue, Cleveland, OH, 44195, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Anis</LastName><ForeName>Saar</ForeName><Initials>S</Initials><AffiliationInfo><Affiliation>Center
+        for Neurological Restoration, Neurological Institute, Cleveland Clinic, 9500
+        Euclid Avenue, Cleveland, OH, 44195, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Kaur</LastName><ForeName>Harpreet</ForeName><Initials>H</Initials><AffiliationInfo><Affiliation>Center
+        for Neurological Restoration, Neurological Institute, Cleveland Clinic, 9500
+        Euclid Avenue, Cleveland, OH, 44195, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Assaedi</LastName><ForeName>Ekhlas</ForeName><Initials>E</Initials><AffiliationInfo><Affiliation>Center
+        for Neurological Restoration, Neurological Institute, Cleveland Clinic, 9500
+        Euclid Avenue, Cleveland, OH, 44195, USA; College of Medicine, Taibah University,
+        Medinah, Saudi Arabia.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Mata</LastName><ForeName>Ignacio
+        F</ForeName><Initials>IF</Initials><AffiliationInfo><Affiliation>Genomic Sciences
+        and Systems Biology, Cleveland Clinic Research, Cleveland Clinic, 9500 Euclid
+        Avenue, Cleveland, OH, 44195, USA; Department of Molecular Medicine, Cleveland
+        Clinic Lerner College of Medicine, Case Western Reserve University, Cleveland,
+        OH, 44195, USA. Electronic address: matai@ccf.org.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Fernandez</LastName><ForeName>Hubert H</ForeName><Initials>HH</Initials><AffiliationInfo><Affiliation>Center
+        for Neurological Restoration, Neurological Institute, Cleveland Clinic, 9500
+        Euclid Avenue, Cleveland, OH, 44195, USA.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><PublicationTypeList><PublicationType
+        UI="D016428">Journal Article</PublicationType></PublicationTypeList><ArticleDate
+        DateType="Electronic"><Year>2026</Year><Month>10</Month><Day>01</Day></ArticleDate></Article><MedlineJournalInfo><Country>England</Country><MedlineTA>Parkinsonism
+        Relat Disord</MedlineTA><NlmUniqueID>9513583</NlmUniqueID><ISSNLinking>1353-8020</ISSNLinking></MedlineJournalInfo><CitationSubset>IM</CitationSubset><KeywordList
+        Owner="NOTNLM"><Keyword MajorTopicYN="N">Amantadine</Keyword><Keyword MajorTopicYN="N">Dyskinesias</Keyword><Keyword
+        MajorTopicYN="N">Genetics</Keyword><Keyword MajorTopicYN="N">Levodopa</Keyword><Keyword
+        MajorTopicYN="N">Parkinson''s disease</Keyword><Keyword MajorTopicYN="N">Pharmacogenomics</Keyword></KeywordList><CoiStatement>Declaration
+        of competing interest The authors declare the following financial interests/personal
+        relationships which may be considered as potential competing interests:Hubert
+        H. Fernandez reports a relationship with The Michael J Fox Foundation for
+        Parkinson''s Research that includes: funding grants. Hubert H. Fernandez reports
+        a relationship with National Institutes of Health that includes: funding grants.
+        Hubert H. Fernandez reports a relationship with Parkinson Study Group that
+        includes: funding grants. Hubert H. Fernandez reports a relationship with
+        Biogen Inc that includes: funding grants. Hubert H. Fernandez reports a relationship
+        with Roche Diagnostics Corporation that includes: funding grants. Hubert H.
+        Fernandez reports a relationship with Neurocrine Biosciences Inc that includes:
+        consulting or advisory. Hubert H. Fernandez reports a relationship with AbbVie
+        Inc that includes: consulting or advisory. Hubert H. Fernandez reports a relationship
+        with Amneal Pharmaceuticals LLC that includes: consulting or advisory. Hubert
+        H. Fernandez reports a relationship with Dannce AI that includes: consulting
+        or advisory. Hubert H. Fernandez receives a stipend from Elsevier serving
+        as Editor-in-Chief of Parkinsonism &amp; Related Disorders. Given his role
+        as Editor-in-Chief of Parkinsonism &amp; Related Disorders, had no involvement
+        in the peer review of this article and had no access to information regarding
+        its peer review. Full responsibility for the editorial process for this article
+        was delegated to another journal editor. If there are other authors, they
+        declare that they have no known competing financial interests or personal
+        relationships that could have appeared to influence the work reported in this
+        paper.</CoiStatement></MedlineCitation><PubmedData><History><PubMedPubDate
+        PubStatus="medline"><Year>2026</Year><Month>10</Month><Day>5</Day><Hour>23</Hour><Minute>30</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="pubmed"><Year>2026</Year><Month>10</Month><Day>5</Day><Hour>23</Hour><Minute>30</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="received"><Year>2026</Year><Month>2</Month><Day>16</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="revised"><Year>2026</Year><Month>9</Month><Day>1</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="accepted"><Year>2026</Year><Month>9</Month><Day>25</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="entrez"><Year>2026</Year><Month>10</Month><Day>5</Day><Hour>17</Hour><Minute>59</Minute></PubMedPubDate></History><PublicationStatus>aheadofprint</PublicationStatus><ArticleIdList><ArticleId
+        IdType="pubmed">42832827</ArticleId><ArticleId IdType="doi">10.1016/j.parkreldis.2026.109000</ArticleId><ArticleId
+        IdType="pii">S1353-8020(26)00827-8</ArticleId></ArticleIdList></PubmedData></PubmedArticle></PubmedArticleSet>'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - X-RateLimit-Limit,X-RateLimit-Remaining
+      alt-svc:
+      - clear
+      cache-control:
+      - private
+      content-length:
+      - '11292'
+      content-security-policy:
+      - upgrade-insecure-requests
+      content-type:
+      - text/xml; charset=UTF-8
+      date:
+      - Tue, 06 Oct 2026 07:27:24 GMT
+      ncbi-phid:
+      - 1D328C8C3EF3BD85000053305211D826.1.1.m_6
+      ncbi-sid:
+      - DD823FC2C468CDC4_B8A0SID
+      referrer-policy:
+      - origin-when-cross-origin
+      server:
+      - Finatra
+      set-cookie:
+      - ncbi_sid=DD823FC2C468CDC4_B8A0SID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 07:27:24 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      transfer-encoding:
+      - chunked
+      via:
+      - 1.1 google
+      x-ratelimit-limit:
+      - '3'
+      x-ratelimit-remaining:
+      - '1'
+      x-ua-compatible:
+      - IE=Edge
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
 version: 1

@@ -1061,7 +1061,7 @@ fixture_governance:
       openalex: 25
       pubchem: 12
       pubmed: 23
-      semanticscholar: 24
+      semanticscholar: 22
       uniprot: 16
   rollout:
     cassette_metadata: enforced

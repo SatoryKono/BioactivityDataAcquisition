@@ -3,6 +3,6 @@ provider: uniprot
 cassette_rel_path: tests/fixtures/vcr/uniprot/test_uniprot_protein_full_cycle.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: ecd56ee92e7c22ddb3483c0861e14b9999a118bcccc64e65ada1363f9cec8fca
+cassette_sha256: 00cc3aaf0d779be79fb5f49c168b069da4fe3bddc5b9f1149121b3f1e2465846
 recorded_at: '2026-10-06'
 staleness_ready: true

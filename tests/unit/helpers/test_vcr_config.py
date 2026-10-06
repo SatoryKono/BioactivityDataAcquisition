@@ -6,10 +6,36 @@ from typing import Any, cast
 import pytest
 from vcr.request import Request
 
-from tests.helpers.vcr_config import build_base_vcr_config, is_vcr_recording_mode
+from tests.helpers.vcr_config import (
+    build_base_vcr_config,
+    is_vcr_recording_mode,
+    query_ignore_email,
+)
 
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize(
+    ("left", "right", "expected"),
+    [
+        ("query=protein&size=1&format=json", "format=json&query=protein&size=1", True),
+        ("query=a&email=one&api_key=secret", "key=other&query=a", True),
+        ("query=a+b", "query=a%20b", True),
+        ("retmax=1", "retmax=5", False),
+        ("query=", "", False),
+        ("id=1&id=1", "id=1", False),
+        ("id=1&id=2", "id=2&id=1", False),
+        ("id=1&format=json&id=2", "format=json&id=1&id=2", True),
+    ],
+)
+def test_query_matcher_preserves_values_and_repeated_key_order(
+    left: str, right: str, expected: bool
+) -> None:
+    first = Request("GET", f"https://example.org/search?{left}", b"", {})
+    second = Request("GET", f"https://example.org/search?{right}", b"", {})
+
+    assert query_ignore_email(first, second) is expected
 
 
 def test_is_vcr_recording_mode_uses_env(monkeypatch) -> None:

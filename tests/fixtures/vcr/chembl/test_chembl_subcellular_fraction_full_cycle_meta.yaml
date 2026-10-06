@@ -3,6 +3,6 @@ provider: chembl
 cassette_rel_path: tests/fixtures/vcr/chembl/test_chembl_subcellular_fraction_full_cycle.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 0b475806f95aa7bedef302dbc2c42b83836544f5c761c91df9cfd9792c6be13d
-recorded_at: '2026-07-03'
+cassette_sha256: 814228e529ce211b399c5af7023e62de62fe2ebb086c27e59cc3fd66a2c6c8c3
+recorded_at: '2026-10-06'
 staleness_ready: true

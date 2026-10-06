@@ -2,16 +2,16 @@ interactions:
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - '*/*'
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/0.1.0 (contact@example.com)
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/activity?limit=10&offset=0&format=json
   response:
@@ -24,9 +24,9 @@ interactions:
         "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "c1ccc(-c2nc3c(-c4nc5ccccc5o4)cccc3o2)cc1",
         "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
         "CHEMBL1137930", "document_journal": "Bioorg Med Chem Lett", "document_year":
-        2004, "ligand_efficiency": null, "molecule_chembl_id": "CHEMBL113081", "molecule_pref_name":
-        null, "parent_molecule_chembl_id": "CHEMBL113081", "pchembl_value": null,
-        "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        2004, "ligand_efficiency": null, "modality": null, "molecule_chembl_id": "CHEMBL113081",
+        "molecule_pref_name": null, "parent_molecule_chembl_id": "CHEMBL113081", "pchembl_value":
+        null, "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
         "record_id": 206172, "relation": ">", "src_id": 1, "standard_flag": 1, "standard_relation":
         ">", "standard_text_value": null, "standard_type": "IC50", "standard_units":
         "nM", "standard_upper_value": null, "standard_value": "100000.0", "target_chembl_id":
@@ -42,10 +42,10 @@ interactions:
         "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
         "CHEMBL1146658", "document_journal": "Bioorg Med Chem Lett", "document_year":
         2004, "ligand_efficiency": {"bei": "14.06", "le": "0.26", "lle": "1.30", "sei":
-        "5.56"}, "molecule_chembl_id": "CHEMBL324340", "molecule_pref_name": null,
-        "parent_molecule_chembl_id": "CHEMBL324340", "pchembl_value": "5.60", "potential_duplicate":
-        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
-        208970, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "5.56"}, "modality": null, "molecule_chembl_id": "CHEMBL324340", "molecule_pref_name":
+        null, "parent_molecule_chembl_id": "CHEMBL324340", "pchembl_value": "5.60",
+        "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 208970, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
         "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
         "nM", "standard_upper_value": null, "standard_value": "2500.0", "target_chembl_id":
         "CHEMBL3921", "target_organism": "Homo sapiens", "target_pref_name": "Heparanase",
@@ -59,9 +59,9 @@ interactions:
         "canonical_smiles": "Cc1ccc2oc(-c3cccc(N4C(=O)c5ccc(C(=O)O)cc5C4=O)c3)nc2c1",
         "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
         "CHEMBL1146658", "document_journal": "Bioorg Med Chem Lett", "document_year":
-        2004, "ligand_efficiency": null, "molecule_chembl_id": "CHEMBL324340", "molecule_pref_name":
-        null, "parent_molecule_chembl_id": "CHEMBL324340", "pchembl_value": null,
-        "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        2004, "ligand_efficiency": null, "modality": null, "molecule_chembl_id": "CHEMBL324340",
+        "molecule_pref_name": null, "parent_molecule_chembl_id": "CHEMBL324340", "pchembl_value":
+        null, "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
         "record_id": 208970, "relation": ">", "src_id": 1, "standard_flag": 1, "standard_relation":
         ">", "standard_text_value": null, "standard_type": "IC50", "standard_units":
         "nM", "standard_upper_value": null, "standard_value": "50000.0", "target_chembl_id":
@@ -77,10 +77,10 @@ interactions:
         "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
         "CHEMBL1146658", "document_journal": "Bioorg Med Chem Lett", "document_year":
         2004, "ligand_efficiency": {"bei": "9.69", "le": "0.18", "lle": "-0.63", "sei":
-        "4.23"}, "molecule_chembl_id": "CHEMBL109600", "molecule_pref_name": null,
-        "parent_molecule_chembl_id": "CHEMBL109600", "pchembl_value": "5.05", "potential_duplicate":
-        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
-        208987, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "4.23"}, "modality": null, "molecule_chembl_id": "CHEMBL109600", "molecule_pref_name":
+        null, "parent_molecule_chembl_id": "CHEMBL109600", "pchembl_value": "5.05",
+        "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 208987, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
         "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
         "nM", "standard_upper_value": null, "standard_value": "9000.0", "target_chembl_id":
         "CHEMBL3921", "target_organism": "Homo sapiens", "target_pref_name": "Heparanase",
@@ -94,9 +94,9 @@ interactions:
         "BAO_0000218", "bao_label": "organism-based format", "canonical_smiles": "COc1ccccc1-c1ccc2oc(-c3ccc(OC)c(N4C(=O)c5ccc(C(=O)O)cc5C4=O)c3)nc2c1",
         "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
         "CHEMBL1146658", "document_journal": "Bioorg Med Chem Lett", "document_year":
-        2004, "ligand_efficiency": null, "molecule_chembl_id": "CHEMBL109600", "molecule_pref_name":
-        null, "parent_molecule_chembl_id": "CHEMBL109600", "pchembl_value": null,
-        "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        2004, "ligand_efficiency": null, "modality": null, "molecule_chembl_id": "CHEMBL109600",
+        "molecule_pref_name": null, "parent_molecule_chembl_id": "CHEMBL109600", "pchembl_value":
+        null, "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
         "record_id": 208987, "relation": null, "src_id": 1, "standard_flag": 0, "standard_relation":
         null, "standard_text_value": null, "standard_type": "IC50", "standard_units":
         "nM", "standard_upper_value": null, "standard_value": null, "target_chembl_id":
@@ -112,10 +112,10 @@ interactions:
         "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
         "CHEMBL1148425", "document_journal": "Bioorg Med Chem Lett", "document_year":
         2004, "ligand_efficiency": {"bei": "9.94", "le": "0.20", "lle": "1.13", "sei":
-        "6.93"}, "molecule_chembl_id": "CHEMBL357278", "molecule_pref_name": null,
-        "parent_molecule_chembl_id": "CHEMBL357278", "pchembl_value": "5.40", "potential_duplicate":
-        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
-        297547, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "6.93"}, "modality": null, "molecule_chembl_id": "CHEMBL357278", "molecule_pref_name":
+        null, "parent_molecule_chembl_id": "CHEMBL357278", "pchembl_value": "5.40",
+        "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 297547, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
         "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
         "nM", "standard_upper_value": null, "standard_value": "4000.0", "target_chembl_id":
         "CHEMBL4632", "target_organism": "Rattus norvegicus", "target_pref_name":
@@ -129,9 +129,9 @@ interactions:
         "BAO_0000019", "bao_label": "assay format", "canonical_smiles": "Cc1nc2cc(OC[C@H](O)CN3CCN(CC(=O)Nc4ccc(Cl)c(C(F)(F)F)c4)CC3)ccc2s1",
         "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
         "CHEMBL1148425", "document_journal": "Bioorg Med Chem Lett", "document_year":
-        2004, "ligand_efficiency": null, "molecule_chembl_id": "CHEMBL357278", "molecule_pref_name":
-        null, "parent_molecule_chembl_id": "CHEMBL357278", "pchembl_value": null,
-        "potential_duplicate": 0, "qudt_units": "http://qudt.org/vocab/unit#Percent",
+        2004, "ligand_efficiency": null, "modality": null, "molecule_chembl_id": "CHEMBL357278",
+        "molecule_pref_name": null, "parent_molecule_chembl_id": "CHEMBL357278", "pchembl_value":
+        null, "potential_duplicate": 0, "qudt_units": "http://qudt.org/vocab/unit#Percent",
         "record_id": 297547, "relation": "=", "src_id": 1, "standard_flag": 0, "standard_relation":
         "=", "standard_text_value": null, "standard_type": "% remaining", "standard_units":
         "%", "standard_upper_value": null, "standard_value": "25.0", "target_chembl_id":
@@ -147,10 +147,10 @@ interactions:
         "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
         "CHEMBL1148425", "document_journal": "Bioorg Med Chem Lett", "document_year":
         2004, "ligand_efficiency": {"bei": "10.18", "le": "0.20", "lle": "2.45", "sei":
-        "6.12"}, "molecule_chembl_id": "CHEMBL357119", "molecule_pref_name": null,
-        "parent_molecule_chembl_id": "CHEMBL357119", "pchembl_value": "4.77", "potential_duplicate":
-        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
-        297563, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "6.12"}, "modality": null, "molecule_chembl_id": "CHEMBL357119", "molecule_pref_name":
+        null, "parent_molecule_chembl_id": "CHEMBL357119", "pchembl_value": "4.77",
+        "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 297563, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
         "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
         "nM", "standard_upper_value": null, "standard_value": "17000.0", "target_chembl_id":
         "CHEMBL4632", "target_organism": "Rattus norvegicus", "target_pref_name":
@@ -164,9 +164,9 @@ interactions:
         "BAO_0000019", "bao_label": "assay format", "canonical_smiles": "Cc1nc2cc(OC[C@H](O)CN3CCN(CC(=O)NCCc4ccccc4)CC3)ccc2s1",
         "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
         "CHEMBL1148425", "document_journal": "Bioorg Med Chem Lett", "document_year":
-        2004, "ligand_efficiency": null, "molecule_chembl_id": "CHEMBL357119", "molecule_pref_name":
-        null, "parent_molecule_chembl_id": "CHEMBL357119", "pchembl_value": null,
-        "potential_duplicate": 0, "qudt_units": "http://qudt.org/vocab/unit#Percent",
+        2004, "ligand_efficiency": null, "modality": null, "molecule_chembl_id": "CHEMBL357119",
+        "molecule_pref_name": null, "parent_molecule_chembl_id": "CHEMBL357119", "pchembl_value":
+        null, "potential_duplicate": 0, "qudt_units": "http://qudt.org/vocab/unit#Percent",
         "record_id": 297563, "relation": "=", "src_id": 1, "standard_flag": 0, "standard_relation":
         "=", "standard_text_value": null, "standard_type": "% remaining", "standard_units":
         "%", "standard_upper_value": null, "standard_value": "27.0", "target_chembl_id":
@@ -182,57 +182,57 @@ interactions:
         "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
         "CHEMBL1148425", "document_journal": "Bioorg Med Chem Lett", "document_year":
         2004, "ligand_efficiency": {"bei": "13.05", "le": "0.25", "lle": "2.47", "sei":
-        "8.65"}, "molecule_chembl_id": "CHEMBL152968", "molecule_pref_name": null,
-        "parent_molecule_chembl_id": "CHEMBL152968", "pchembl_value": "6.75", "potential_duplicate":
-        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
-        297580, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "8.65"}, "modality": null, "molecule_chembl_id": "CHEMBL152968", "molecule_pref_name":
+        null, "parent_molecule_chembl_id": "CHEMBL152968", "pchembl_value": "6.75",
+        "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 297580, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
         "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
         "nM", "standard_upper_value": null, "standard_value": "180.0", "target_chembl_id":
         "CHEMBL4632", "target_organism": "Rattus norvegicus", "target_pref_name":
         "Peroxisomal acyl-coenzyme A oxidase 1", "target_tax_id": "10116", "text_value":
         null, "toid": null, "type": "IC50", "units": "nM", "uo_units": "UO_0000065",
         "upper_value": null, "value": "180.0"}], "page_meta": {"limit": 10, "next":
-        "/chembl/api/data/activity?limit=10&offset=10", "offset": 0, "previous":
-        null, "total_count": 24267312}}'
+        "/chembl/api/data/activity.json?limit=10&offset=10", "offset": 0, "previous":
+        null, "total_count": 24527044}}'
     headers:
-      Cache-Control:
+      cache-control:
       - max-age=30000000, s-maxage=30000000
-      Connection:
+      connection:
       - Keep-Alive
-      Content-Disposition:
+      content-disposition:
       - inline
-      Content-Length:
-      - '14673'
-      Content-Type:
+      content-length:
+      - '14853'
+      content-type:
       - application/json
-      Date:
-      - Mon, 15 Dec 2025 18:52:09 GMT
-      Server:
+      date:
+      - Tue, 06 Oct 2026 06:05:53 GMT
+      server:
       - gunicorn/20.0.4
-      Strict-Transport-Security:
-      - max-age=0
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - Accept, Origin
-      X-ChEMBL-in-cache:
+      x-chembl-in-cache:
       - 'True'
-      X-ChEMBL-retrieval-time:
-      - '0.2539975643157959'
+      x-chembl-retrieval-time:
+      - '0.20242047309875488'
     status:
       code: 200
       message: OK
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - '*/*'
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/activity?limit=5&offset=0&format=json
   response:
@@ -245,9 +245,9 @@ interactions:
         "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "c1ccc(-c2nc3c(-c4nc5ccccc5o4)cccc3o2)cc1",
         "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
         "CHEMBL1137930", "document_journal": "Bioorg Med Chem Lett", "document_year":
-        2004, "ligand_efficiency": null, "molecule_chembl_id": "CHEMBL113081", "molecule_pref_name":
-        null, "parent_molecule_chembl_id": "CHEMBL113081", "pchembl_value": null,
-        "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        2004, "ligand_efficiency": null, "modality": null, "molecule_chembl_id": "CHEMBL113081",
+        "molecule_pref_name": null, "parent_molecule_chembl_id": "CHEMBL113081", "pchembl_value":
+        null, "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
         "record_id": 206172, "relation": ">", "src_id": 1, "standard_flag": 1, "standard_relation":
         ">", "standard_text_value": null, "standard_type": "IC50", "standard_units":
         "nM", "standard_upper_value": null, "standard_value": "100000.0", "target_chembl_id":
@@ -263,10 +263,10 @@ interactions:
         "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
         "CHEMBL1146658", "document_journal": "Bioorg Med Chem Lett", "document_year":
         2004, "ligand_efficiency": {"bei": "14.06", "le": "0.26", "lle": "1.30", "sei":
-        "5.56"}, "molecule_chembl_id": "CHEMBL324340", "molecule_pref_name": null,
-        "parent_molecule_chembl_id": "CHEMBL324340", "pchembl_value": "5.60", "potential_duplicate":
-        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
-        208970, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "5.56"}, "modality": null, "molecule_chembl_id": "CHEMBL324340", "molecule_pref_name":
+        null, "parent_molecule_chembl_id": "CHEMBL324340", "pchembl_value": "5.60",
+        "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 208970, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
         "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
         "nM", "standard_upper_value": null, "standard_value": "2500.0", "target_chembl_id":
         "CHEMBL3921", "target_organism": "Homo sapiens", "target_pref_name": "Heparanase",
@@ -280,9 +280,9 @@ interactions:
         "canonical_smiles": "Cc1ccc2oc(-c3cccc(N4C(=O)c5ccc(C(=O)O)cc5C4=O)c3)nc2c1",
         "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
         "CHEMBL1146658", "document_journal": "Bioorg Med Chem Lett", "document_year":
-        2004, "ligand_efficiency": null, "molecule_chembl_id": "CHEMBL324340", "molecule_pref_name":
-        null, "parent_molecule_chembl_id": "CHEMBL324340", "pchembl_value": null,
-        "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        2004, "ligand_efficiency": null, "modality": null, "molecule_chembl_id": "CHEMBL324340",
+        "molecule_pref_name": null, "parent_molecule_chembl_id": "CHEMBL324340", "pchembl_value":
+        null, "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
         "record_id": 208970, "relation": ">", "src_id": 1, "standard_flag": 1, "standard_relation":
         ">", "standard_text_value": null, "standard_type": "IC50", "standard_units":
         "nM", "standard_upper_value": null, "standard_value": "50000.0", "target_chembl_id":
@@ -298,10 +298,10 @@ interactions:
         "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
         "CHEMBL1146658", "document_journal": "Bioorg Med Chem Lett", "document_year":
         2004, "ligand_efficiency": {"bei": "9.69", "le": "0.18", "lle": "-0.63", "sei":
-        "4.23"}, "molecule_chembl_id": "CHEMBL109600", "molecule_pref_name": null,
-        "parent_molecule_chembl_id": "CHEMBL109600", "pchembl_value": "5.05", "potential_duplicate":
-        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
-        208987, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "4.23"}, "modality": null, "molecule_chembl_id": "CHEMBL109600", "molecule_pref_name":
+        null, "parent_molecule_chembl_id": "CHEMBL109600", "pchembl_value": "5.05",
+        "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 208987, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
         "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
         "nM", "standard_upper_value": null, "standard_value": "9000.0", "target_chembl_id":
         "CHEMBL3921", "target_organism": "Homo sapiens", "target_pref_name": "Heparanase",
@@ -315,40 +315,40 @@ interactions:
         "BAO_0000218", "bao_label": "organism-based format", "canonical_smiles": "COc1ccccc1-c1ccc2oc(-c3ccc(OC)c(N4C(=O)c5ccc(C(=O)O)cc5C4=O)c3)nc2c1",
         "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
         "CHEMBL1146658", "document_journal": "Bioorg Med Chem Lett", "document_year":
-        2004, "ligand_efficiency": null, "molecule_chembl_id": "CHEMBL109600", "molecule_pref_name":
-        null, "parent_molecule_chembl_id": "CHEMBL109600", "pchembl_value": null,
-        "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        2004, "ligand_efficiency": null, "modality": null, "molecule_chembl_id": "CHEMBL109600",
+        "molecule_pref_name": null, "parent_molecule_chembl_id": "CHEMBL109600", "pchembl_value":
+        null, "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
         "record_id": 208987, "relation": null, "src_id": 1, "standard_flag": 0, "standard_relation":
         null, "standard_text_value": null, "standard_type": "IC50", "standard_units":
         "nM", "standard_upper_value": null, "standard_value": null, "target_chembl_id":
         "CHEMBL3879801", "target_organism": null, "target_pref_name": "NON-PROTEIN
         TARGET", "target_tax_id": null, "text_value": null, "toid": null, "type":
         "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value": null, "value":
-        null}], "page_meta": {"limit": 5, "next": "/chembl/api/data/activity?limit=5&offset=5",
-        "offset": 0, "previous": null, "total_count": 24267312}}'
+        null}], "page_meta": {"limit": 5, "next": "/chembl/api/data/activity.json?limit=5&offset=5",
+        "offset": 0, "previous": null, "total_count": 24527044}}'
     headers:
-      Cache-Control:
+      cache-control:
       - max-age=30000000, s-maxage=30000000
-      Connection:
+      connection:
       - Keep-Alive
-      Content-Disposition:
+      content-disposition:
       - inline
-      Content-Length:
-      - '7336'
-      Content-Type:
+      content-length:
+      - '7426'
+      content-type:
       - application/json
-      Date:
-      - Thu, 25 Dec 2025 06:42:27 GMT
-      Server:
+      date:
+      - Tue, 06 Oct 2026 06:06:03 GMT
+      server:
       - gunicorn/20.0.4
-      Strict-Transport-Security:
-      - max-age=0
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - Accept, Origin
-      X-ChEMBL-in-cache:
+      x-chembl-in-cache:
       - 'True'
-      X-ChEMBL-retrieval-time:
-      - '0.2837224006652832'
+      x-chembl-retrieval-time:
+      - '0.0757911205291748'
     status:
       code: 200
       message: OK

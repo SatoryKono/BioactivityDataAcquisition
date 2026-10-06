@@ -2,16 +2,16 @@ interactions:
 - request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - www.ebi.ac.uk
-      User-Agent:
-      - BioETL/5.0.0
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/molecule?format=json&limit=5&offset=0&molecule_type=Small+molecule&structure_type=MOL&inorganic_flag=0
   response:
@@ -280,30 +280,30 @@ interactions:
         "narcotic agonists/antagonists (normorphine type)", "usan_substem": "nal-",
         "usan_year": 1962, "veterinary": 0, "withdrawn_flag": false}], "page_meta":
         {"limit": 5, "next": "/chembl/api/data/molecule.json?limit=5&offset=5&molecule_type=Small+molecule&structure_type=MOL&inorganic_flag=0",
-        "offset": 0, "previous": null, "total_count": 14041}}'
+        "offset": 0, "previous": null, "total_count": 14036}}'
     headers:
-      Cache-Control:
+      cache-control:
       - max-age=30000000, s-maxage=30000000
-      Connection:
+      connection:
       - Keep-Alive
-      Content-Disposition:
+      content-disposition:
       - inline
-      Content-Length:
+      content-length:
       - '25039'
-      Content-Type:
+      content-type:
       - application/json
-      Date:
-      - Tue, 03 Mar 2026 18:43:33 GMT
-      Server:
+      date:
+      - Tue, 06 Oct 2026 06:06:24 GMT
+      server:
       - gunicorn/20.0.4
-      Strict-Transport-Security:
-      - max-age=0
-      Vary:
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
       - Accept, Origin
-      X-ChEMBL-in-cache:
+      x-chembl-in-cache:
       - 'True'
-      X-ChEMBL-retrieval-time:
-      - '0.8121981620788574'
+      x-chembl-retrieval-time:
+      - '0.7799360752105713'
     status:
       code: 200
       message: OK

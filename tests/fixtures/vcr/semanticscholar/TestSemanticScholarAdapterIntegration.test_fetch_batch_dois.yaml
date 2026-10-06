@@ -2,83 +2,59 @@ interactions:
 - request:
     body: '{"ids": ["DOI:10.1038/nature12373", "DOI:10.1016/j.cell.2019.03.025"]}'
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
       - keep-alive
-      Content-Type:
+      content-length:
+      - '70'
+      content-type:
       - application/json
-      User-Agent:
-      - BioETL/1.0
+      host:
+      - api.semanticscholar.org
+      user-agent:
+      - python-httpx/0.28.1
     method: POST
     uri: https://api.semanticscholar.org/graph/v1/paper/batch?fields=paperId,externalIds,title,abstract,year,publicationDate,venue,authors,authors.externalIds,authors.hIndex,authors.authorId,citationCount,referenceCount,isOpenAccess,openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal
   response:
     body:
-      string: |
-        [
-          {
-            "paperId": "a88fbdb9b47a8e8aef2b8cabd1fe0adfb96a9f25",
-            "externalIds": {
-              "PubMed": "23868264",
-              "DOI": "10.1038/nature12373",
-              "CorpusId": 4463122
-            },
-            "title": "Crystal structure of rhodopsin bound to arrestin by femtosecond X-ray laser",
-            "abstract": "G-protein-coupled receptors (GPCRs) signal primarily through G proteins or arrestins.",
-            "year": 2015,
-            "publicationDate": "2015-07-22",
-            "venue": "Nature",
-            "authors": [
-              {"authorId": "4713315", "name": "Yanyong Kang", "externalIds": {"ORCID": "0000-0001-2345-6789"}, "hIndex": 25}
-            ],
-            "citationCount": 892,
-            "referenceCount": 50,
-            "isOpenAccess": true,
-            "openAccessPdf": null,
-            "tldr": null,
-            "fieldsOfStudy": ["Biology"],
-            "publicationTypes": ["JournalArticle"],
-            "journal": {
-              "name": "Nature",
-              "volume": "523"
-            }
-          },
-          {
-            "paperId": "b2c8f1d3e4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9",
-            "externalIds": {
-              "PubMed": "30955886",
-              "DOI": "10.1016/j.cell.2019.03.025",
-              "CorpusId": 102352455
-            },
-            "title": "Structure of the human serotonin receptor in complex with two antidepressants",
-            "abstract": "Serotonin (5-hydroxytryptamine, 5-HT) is a key neurotransmitter implicated in mood regulation.",
-            "year": 2019,
-            "publicationDate": "2019-04-18",
-            "venue": "Cell",
-            "authors": [
-              {"authorId": "1234567", "name": "John Smith", "externalIds": null, "hIndex": 42}
-            ],
-            "citationCount": 245,
-            "referenceCount": 60,
-            "isOpenAccess": false,
-            "openAccessPdf": null,
-            "tldr": {
-              "model": "tldr@v2.0.0",
-              "text": "The structure reveals the binding mode of antidepressants."
-            },
-            "fieldsOfStudy": ["Biology", "Medicine"],
-            "publicationTypes": ["JournalArticle"],
-            "journal": {
-              "name": "Cell",
-              "volume": "177"
-            }
-          }
-        ]
+      string: '[{"paperId": "a5de30adc5c22bc86e8cfabe7fbd07c052d196a8", "externalIds": {"MAG": "2159974629", "ArXiv": "1304.1068", "PubMedCentral": "4221854", "DOI": "10.1038/nature12373", "CorpusId": 4314121, "PubMed": "23903748"}, "title": "Nanometer scale thermometry in a living cell", "venue": "Nature", "year": 2013, "referenceCount": 42, "citationCount": 1827, "isOpenAccess": true, "openAccessPdf": {"url": "https://www.nature.com/articles/nature12373.pdf", "status": "BRONZE", "license": null, "disclaimer": "Notice: Paper or abstract available at https://arxiv.org/abs/1304.1068, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."}, "fieldsOfStudy": ["Medicine", "Physics", "Materials Science"], "tldr": {"model": "tldr@v2.0.0", "text": "A new approach to nanoscale thermometry is demonstrated that uses coherent manipulation of the electronic spin associated with nitrogen\u2013vacancy colour centres in diamond to detect temperature variations as small as 1.8\u2009mK in an ultrapure bulk diamond sample and demonstrate temperature-gradient control and mapping at the subcellular level."}, "publicationTypes": ["JournalArticle"], "publicationDate": "2013-04-03", "journal": {"name": "Nature", "pages": "54 - 58", "volume": "500"}, "authors": [{"authorId": "4301543", "externalIds": {}, "hIndex": 10}, {"authorId": "47762783", "externalIds": {"DBLP": ["Peter Maurer"]}, "hIndex": 15}, {"authorId": "4138853", "externalIds": {}, "hIndex": 55}, {"authorId": "2068210745", "externalIds": {}, "hIndex": 2}, {"authorId": "2250179130", "externalIds": {"DBLP": ["Hyungrae Noh"]}, "hIndex": 7}, {"authorId": "47472726", "externalIds": {}, "hIndex": 1}, {"authorId": "9236657", "externalIds": {}, "hIndex": 69}, {"authorId": "145572474", "externalIds": {"DBLP": ["Mikhail D. Lukin"]}, "hIndex": 150}], "abstract": "Sensitive probing of temperature variations on nanometre scales is an outstanding challenge in many areas of modern science and technology. In particular, a thermometer capable of subdegree temperature resolution over a large range of temperatures as well as integration within a living system could provide a powerful new tool in many areas of biological, physical and chemical research. Possibilities range from the temperature-induced control of gene expression and tumour metabolism to the cell-selective treatment of disease and the study of heat dissipation in integrated circuits. By combining local light-induced heat sources with sensitive nanoscale thermometry, it may also be possible to engineer biological processes at the subcellular level. Here we demonstrate a new approach to nanoscale thermometry that uses coherent manipulation of the electronic spin associated with nitrogen\u2013vacancy colour centres in diamond. Our technique makes it possible to detect temperature variations as small as 1.8\u2009mK (a sensitivity of 9\u2009mK\u2009Hz\u22121/2) in an ultrapure bulk diamond sample. Using nitrogen\u2013vacancy centres in diamond nanocrystals (nanodiamonds), we directly measure the local thermal environment on length scales as short as 200\u2009nanometres. Finally, by introducing both nanodiamonds and gold nanoparticles into a single human embryonic fibroblast, we demonstrate temperature-gradient control and mapping at the subcellular level, enabling unique potential applications in life sciences."}, {"paperId": "8b3b3a0fc1f833419b87575bee1d1227aa9f5ed4", "externalIds": {"PubMedCentral": "6525024", "MAG": "2942376604", "DOI": "10.1016/j.cell.2019.03.025", "CorpusId": 131777763, "PubMed": "31031009"}, "title": "Adaptive Immune Resistance Emerges from Tumor-Initiating Stem Cells", "venue": "Cell", "year": 2019, "referenceCount": 51, "citationCount": 275, "isOpenAccess": true, "openAccessPdf": {"url": "http://www.cell.com/article/S0092867419302879/pdf", "status": "BRONZE", "license": "publisher-specific-oa", "disclaimer": "Notice: Paper or abstract available at https://pmc.ncbi.nlm.nih.gov/articles/PMC6525024, which
+        is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."}, "fieldsOfStudy": ["Biology", "Medicine"], "tldr": {"model": "tldr@v2.0.0", "text": "A skin cancer model for squamous cell carcinoma that can be effectively challenged by adoptive cytotoxic T cell transfer (ACT)-based immunotherapy is designed and it is found that TGF\u03b2-responding tSCs are superior at resisting ACT and form the root of tumor relapse."}, "publicationTypes": ["JournalArticle"], "publicationDate": "2019-04-25", "journal": {"name": "Cell", "pages": "1172 - 1186.e14", "volume": "177"}, "authors": [{"authorId": "5846674", "externalIds": {}, "hIndex": 13}, {"authorId": "46402634", "externalIds": {}, "hIndex": 18}, {"authorId": "3654400", "externalIds": {}, "hIndex": 32}, {"authorId": "6583296", "externalIds": {}, "hIndex": 16}, {"authorId": "32517467", "externalIds": {}, "hIndex": 34}, {"authorId": "1397116673", "externalIds": {}, "hIndex": 4}, {"authorId": "1452212300", "externalIds": {}, "hIndex": 76}, {"authorId": "50725494", "externalIds": {}, "hIndex": 50}, {"authorId": "143906655", "externalIds": {}, "hIndex": 162}], "abstract": "SUMMARY Our bodies are equipped with powerful immune surveillance to clear cancerous cells as they emerge. How tumor-initiating stem cells (tSCs) that form and propagate cancers equip themselves to overcome this barrier remains poorly understood. To tackle this problem, we designed a skin cancer model for squamous cell carcinoma (SCC) that can be effectively challenged by adoptive cytotoxic T cell transfer (ACT)-based immunotherapy. Using single cell-RNA-seq and lineage-tracing, we found that TGF\u03b2-responding tSCs are superior at resisting ACT and form the root of tumor relapse. Probing mechanism, we discovered that during malignancy, tSCs selectively acquire CD80, a surface ligand previously identified on immune cells. Moreover, upon engaging cytotoxic T lymphocyte antigen-4 (CTLA4), CD80-expressing tSCs directly dampen cytotoxic T cell activity. Conversely, upon CTLA4 or TGF\u03b2-blocking immunotherapies, or Cd80- ablation, tSCs become vulnerable, diminishing tumor relapse after ACT treatment. Our findings place tSCs at the crux of how immune checkpoint pathways are activated."}]
+
+        '
     headers:
-      Content-Type:
+      access-control-allow-origin:
+      - '*'
+      connection:
+      - keep-alive
+      content-length:
+      - '6433'
+      content-type:
       - application/json
+      date:
+      - Tue, 06 Oct 2026 06:35:23 GMT
+      via:
+      - 1.1 e772230a2b03c1d3d61ef5473331452c.cloudfront.net (CloudFront)
+      x-amz-apigw-id:
+      - Ezx61E3-PHcEo1g=
+      x-amz-cf-id:
+      - HC4tiPokf7fR429S2ij1TT5o8XLkt21FX6Z_fcgdjfm93N8nBzV5yw==
+      x-amz-cf-pop:
+      - SFO53-P10
+      x-amzn-remapped-connection:
+      - keep-alive
+      x-amzn-remapped-content-length:
+      - '6433'
+      x-amzn-remapped-date:
+      - Tue, 06 Oct 2026 06:35:23 GMT
+      x-amzn-remapped-server:
+      - gunicorn
+      x-amzn-requestid:
+      - 2de4a806-1b0f-40e7-a300-f5dfdbfca494
+      x-cache:
+      - Miss from cloudfront
     status:
       code: 200
       message: OK
