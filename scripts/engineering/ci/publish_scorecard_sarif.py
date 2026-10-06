@@ -17,6 +17,7 @@ import urllib.request
 REPOSITORY = "SatoryKono/BioactivityDataAcquisition"
 GITHUB_API = "https://api.github.com/repos/" + REPOSITORY
 REPORT_DIRECTORY = Path("/home/circleci/bioetl-scorecard/reports")
+RECEIPT_NAME = "receipt.json"
 PUBLICATION_RECEIPT = Path("/home/circleci/bioetl-scorecard/publication/receipt.json")
 
 
@@ -100,7 +101,7 @@ def validate_inputs(directory: Path, environment: dict[str, str]) -> tuple[dict,
         _require(isinstance(driver, dict), "SARIF driver must be an object")
         _require(driver.get("name") == "Scorecard", "Unexpected analysis tool")
         _require(
-            driver.get("semanticVersion") == "v5.5.0", "Unexpected Scorecard version"
+            driver.get("semanticVersion") == "5.5.0", "Unexpected Scorecard version"
         )
         _require(
             run.get("versionControlProvenance") == provenance, "Foreign SARIF source"
@@ -139,7 +140,7 @@ def publish(directory: Path, output: Path, environment: dict[str, str]) -> dict:
     identity, raw = validate_inputs(directory, environment)
     report_root = directory.resolve(strict=True)
     _require(
-        output.name == "receipt.json" and not output.is_symlink(),
+        output.name == RECEIPT_NAME and not output.is_symlink(),
         "Invalid receipt path",
     )
     _require(
@@ -148,9 +149,9 @@ def publish(directory: Path, output: Path, environment: dict[str, str]) -> dict:
     )
     # Write through a canonical workspace path, never the caller's spelling.
     output = (
-        report_root / "receipt.json"
+        report_root / RECEIPT_NAME
         if output.parent.resolve() == report_root
-        else report_root.parent / "publication" / "receipt.json"
+        else report_root.parent / "publication" / RECEIPT_NAME
     )
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     _require(head == identity["source_sha"], "Checkout differs from producer")

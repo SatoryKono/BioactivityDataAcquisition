@@ -3,17 +3,17 @@
 set -euo pipefail
 set +x
 unset PYTHONOPTIMIZE
-test "${CIRCLECI:-}" = true
-test "${CIRCLE_PROJECT_USERNAME:-}" = SatoryKono
-test "${CIRCLE_PROJECT_REPONAME:-}" = BioactivityDataAcquisition
+[[ "${CIRCLECI:-}" = true ]]
+[[ "${CIRCLE_PROJECT_USERNAME:-}" = SatoryKono ]]
+[[ "${CIRCLE_PROJECT_REPONAME:-}" = BioactivityDataAcquisition ]]
 : "${CIRCLE_SHA1:?Missing source SHA}"
 : "${CIRCLE_BRANCH:?Missing source branch}"
 : "${CIRCLE_WORKFLOW_ID:?Missing workflow identity}"
 : "${GHCR_USER:?Missing registry user}"
 : "${GHCR_TOKEN:?Missing registry credential}"
-test "$CIRCLE_BRANCH" = main
+[[ "$CIRCLE_BRANCH" = main ]]
 [[ "$CIRCLE_SHA1" =~ ^[0-9a-f]{40}$ ]]
-test "$(git rev-parse HEAD)" = "$CIRCLE_SHA1"
+[[ "$(git rev-parse HEAD)" = "$CIRCLE_SHA1" ]]
 repo_root="$(git rev-parse --show-toplevel)"
 export PATH="$repo_root/.venv/bin:$PATH"
 export PYTHONPATH="$repo_root/src:$repo_root"
@@ -90,7 +90,7 @@ APPROVAL
 zstd --decompress --stdout bioetl-scanned-image.tar.zst | docker load
 image_ref="bioetl:${CIRCLE_SHA1}"
 expected_id="$(cat bioetl-image-id.txt)"
-test "$(docker image inspect "$image_ref" --format '{{.Id}}')" = "$expected_id"
+[[ "$(docker image inspect "$image_ref" --format '{{.Id}}')" = "$expected_id" ]]
 image_base='ghcr.io/satorykono/bioactivitydataacquisition'
 sha_ref="$image_base:$CIRCLE_SHA1"
 # Isolated config prevents credentials leaking into persisted security artifacts.
@@ -131,7 +131,7 @@ IMAGE
 # The pinned cosign and CircleCI CLI installation belongs to the job setup.
 # Read no token from files or browser state; request a short-lived Sigstore audience.
 SIGSTORE_ID_TOKEN="$(circleci run oidc get --claims '{"aud":"sigstore"}')"
-test -n "$SIGSTORE_ID_TOKEN"
+[[ -n "$SIGSTORE_ID_TOKEN" ]]
 export SIGSTORE_ID_TOKEN
 export CIRCLE_ORGANIZATION_ID="${CIRCLE_ORGANIZATION_ID:?Missing OIDC issuer identity}"
 export CIRCLE_PROJECT_ID="${CIRCLE_PROJECT_ID:?Missing OIDC project identity}"

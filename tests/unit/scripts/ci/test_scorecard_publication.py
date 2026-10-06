@@ -33,7 +33,7 @@ def publication(tmp_path, monkeypatch):
         "version": "2.1.0",
         "runs": [
             {
-                "tool": {"driver": {"name": "Scorecard", "semanticVersion": "v5.5.0"}},
+                "tool": {"driver": {"name": "Scorecard", "semanticVersion": "5.5.0"}},
                 "versionControlProvenance": [
                     {
                         "repositoryUri": "https://github.com/" + publisher.REPOSITORY,
@@ -251,3 +251,20 @@ def test_writer_is_main_only_and_requires_approved_read_only_analysis():
     assert jobs["scorecard-publish"]["context"] == "bioetl-security-events-write"
     assert jobs["scorecard-publish"]["requires"] == ["scorecard-publish-approval"]
     assert jobs["scorecard-publish"]["serial-group"].endswith("/scorecard-publication")
+
+
+@pytest.mark.parametrize("version", ["v5.5.0", "5.4.0", "5.5.0-dev", None])
+def test_unexpected_scorecard_version_never_uploads(publication, version):
+    path, environment, identity, _, calls, _ = publication
+    report = path / "results.sarif"
+    sarif = json.loads(report.read_text(encoding="utf-8"))
+    sarif["runs"][0]["tool"]["driver"]["semanticVersion"] = version
+    report.write_text(json.dumps(sarif), encoding="utf-8")
+    identity["sha256"]["results.sarif"] = hashlib.sha256(
+        report.read_bytes()
+    ).hexdigest()
+    (path / "identity.json").write_text(json.dumps(identity), encoding="utf-8")
+    with pytest.raises(ValueError, match="Unexpected Scorecard version"):
+        publisher.publish(path, path / "receipt.json", environment)
+    assert calls == []
+    assert not (path / "receipt.json").exists()

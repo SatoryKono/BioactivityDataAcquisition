@@ -356,6 +356,7 @@ jobs:
                             artifact['uri'] = quote(artifact['uri'], safe="/:#?&=%@[]!$'()*+,;~-._")
                 assert run['tool']['driver']['name'] == 'Scorecard'
                 assert run['tool']['driver']['semanticVersion'] == 'v5.5.0'
+                run['tool']['driver']['semanticVersion'] = '5.5.0'
                 run['versionControlProvenance'] = [{'repositoryUri': 'https://github.com/SatoryKono/BioactivityDataAcquisition', 'revisionId': os.environ['CIRCLE_SHA1'], 'branch': 'main'}]
             path.with_name('results.sarif').write_text(json.dumps(sarif, sort_keys=True) + '\n', encoding='utf-8')
             # Scores and unsupported checks stay visible; the legacy lane is informational.
