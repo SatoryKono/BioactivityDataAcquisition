@@ -394,6 +394,8 @@ jobs:
       - run:
           name: Generate source-bound distribution SPDX inventory
           no_output_timeout: 11m
+          environment:
+            SYFT_CHECK_FOR_APP_UPDATE: "false"
           command: |
             set -euo pipefail
             curl -fsSL --proto '=https' --tlsv1.2 \
@@ -422,9 +424,10 @@ jobs:
                     with tarfile.open(archive) as stream:
                         stream.extractall(target, filter='data')
             PY
-            timeout --signal=TERM --kill-after=30s 10m "$HOME/.local/bin/syft" scan \
+            timeout --signal=TERM --kill-after=30s 10m "$HOME/.local/bin/syft" scan -vv \
               dir:/tmp/bioetl-dist-sbom-input --source-name bioetl \
-              -o spdx-json=/tmp/bioetl-release/bioetl-dist.spdx.json
+              -o spdx-json=/tmp/bioetl-release/bioetl-dist.spdx.json \
+              2>&1 | tee /tmp/bioetl-release/syft.log
             python3 - \<<'PY'
             import hashlib, json
             from pathlib import Path
