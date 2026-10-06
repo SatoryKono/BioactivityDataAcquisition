@@ -1857,6 +1857,15 @@ jobs:
           command: |
             export PATH="$HOME/.local/bin:$PATH"
             HEAD_SHA="$CIRCLE_SHA1"
+            if [ -n "${CIRCLE_PULL_REQUEST:-${CIRCLE_PULL_REQUESTS:-}}" ]; then
+              pattern='^(feat|fix|refactor|docs|test|chore|ci)/[a-z0-9]+([.-][a-z0-9]+)*$'
+              master_pattern='^master[0-9-]+$'
+              automation='^(dependabot|renovate|devin|bolt|copilot|codex)/.+'
+              if [[ ! "$CIRCLE_BRANCH" =~ $pattern && ! "$CIRCLE_BRANCH" =~ $master_pattern && ! "$CIRCLE_BRANCH" =~ $automation ]]; then
+                echo "Non-compliant PR head branch name: $CIRCLE_BRANCH" >&2
+                exit 1
+              fi
+            fi
             if [ "$CIRCLE_BRANCH" = "main" ] || [ "$CIRCLE_BRANCH" = "master" ]; then
               echo "Default-branch push: all gates required (fail-closed)."
               uv run --frozen --no-build python - "$HEAD_SHA" \<<'EOF' > /tmp/pr-gate-decisions.json
@@ -2000,7 +2009,7 @@ jobs:
   # --- Gate: tests (always_required) ------------------------------------------
   dependency-lock:
     docker:
-      - image: cimg/python:3.12
+      - image: cimg/python:3.12-node
     resource_class: small
     steps:
       - checkout
@@ -2010,6 +2019,21 @@ jobs:
           command: |
             export PATH="$HOME/.local/bin:$PATH"
             uv lock --check
+      - run:
+          name: Validate every tracked npm manifest against its lockfile
+          command: |
+            set -euo pipefail
+            mkdir -p reports/dependency-review
+            git ls-files -z -- package-lock.json '**/package-lock.json' > /tmp/npm-lockfiles
+            test -s /tmp/npm-lockfiles
+            while IFS= read -r -d '' lockfile; do
+              directory="$(dirname "$lockfile")"
+              test -f "$directory/package.json"
+              npm ci --prefix "$directory" --dry-run --ignore-scripts --no-audit --no-fund
+              printf '%s\n' "$lockfile" >> reports/dependency-review/validated-lockfiles.txt
+            done < /tmp/npm-lockfiles
+      - store_artifacts:
+          path: reports/dependency-review
 
   # Mirrors tests.yml `test-fast` (4 unit groups, fast markers, no xdist).
   # NOTE: CircleCI matrix is a cartesian product, so name+path are packed into
@@ -2212,6 +2236,47 @@ jobs:
             uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json
       - store_artifacts:
           path: osv-results.json
+
+  actions-audit:
+    parameters:
+      online:
+        type: boolean
+        default: false
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Audit retained Actions with pinned zizmor 1.29.0
+          no_output_timeout: 11m
+          command: |
+            cat > /tmp/actions-audit.sh \<<'BIOETL_ACTIONS_AUDIT'
+            set -euo pipefail
+            mkdir -p reports/actions-audit "$HOME/.local/bin"
+            curl --fail --location --retry 3 --proto '=https' --tlsv1.2 \
+              https://github.com/zizmorcore/zizmor/releases/download/v1.29.0/zizmor-x86_64-unknown-linux-gnu.tar.gz \
+              --output /tmp/zizmor.tar.gz
+            printf '%s  %s\n' dd96df044a6e8538d5f423790f453bdd03d49e5b2bcc38214acc41a2f1297839 /tmp/zizmor.tar.gz | sha256sum --check -
+            tar -xzf /tmp/zizmor.tar.gz -C "$HOME/.local/bin" zizmor
+            if << parameters.online >>; then
+              [[ "$CIRCLE_BRANCH" == main ]]
+              test -n "${GITHUB_TOKEN:-}"
+              unset GH_TOKEN ZIZMOR_OFFLINE ZIZMOR_NO_ONLINE_AUDITS
+            else
+              export ZIZMOR_OFFLINE=1
+            fi
+            printf '%s\n' "$CIRCLE_SHA1" > reports/actions-audit/source-sha.txt
+            "$HOME/.local/bin/zizmor" \
+              --min-severity high --min-confidence high --config .github/zizmor.yml \
+              --format json .github/workflows .github/actions > reports/actions-audit/findings.json
+            "$HOME/.local/bin/zizmor" \
+              --min-severity high --min-confidence high --config .github/zizmor.yml \
+              --format sarif .github/workflows .github/actions > reports/actions-audit/findings.sarif
+            BIOETL_ACTIONS_AUDIT
+            timeout --signal=TERM --kill-after=30s 9m bash /tmp/actions-audit.sh
+      - store_artifacts:
+          path: reports/actions-audit
 
   # --- Gate: duplication (always_required) ---------------------------------------
   # Mirrors duplication-complexity.yml (radon + jscpd).
@@ -2878,6 +2943,20 @@ jobs:
         type: string
 
 workflows:
+  retained-actions-online:
+    when:
+      and:
+        - equal: [pr-gate, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - actions-audit:
+          name: actions-audit-online
+          online: true
+          context: bioetl-github-read-only
+          filters:
+            branches:
+              only: main
+
   router-bridge:
     when:
       and:
@@ -3121,6 +3200,8 @@ workflows:
           requires: [classify]
       - security-scans:
           requires: [classify]
+      - actions-audit:
+          requires: [classify]
       - duplication:
           requires: [classify]
       - schema-governance:
@@ -3162,6 +3243,7 @@ workflows:
             - root-hygiene
             - compiled-artifacts
             - security-scans
+            - actions-audit
             - duplication
             - schema-governance
             - semantic-governance
