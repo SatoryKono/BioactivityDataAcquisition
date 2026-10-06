@@ -170,14 +170,23 @@ def test_issue_5705_vcr_catalog_has_no_metadata_reviewed_backlog() -> None:
     assert not any(
         cassette["reachability_status"] == "metadata_reviewed" for cassette in cassettes
     )
+    # Historical closeout counts remain immutable as unused fixtures retire.
+    # The live catalog must still account for every cassette with a real owner.
+    totals = catalog["totals"]
+    assert totals["metadata_review_required_cassette_count"] == 0
+    assert totals["unowned_cassette_count"] == 0
+    for kind in ("generated", "direct"):
+        assert totals[f"{kind}_reachable_cassette_count"] == sum(
+            cassette["reachability_status"] == f"{kind}_reference"
+            for cassette in cassettes
+        )
     assert (
-        catalog["totals"]["generated_reachable_cassette_count"]
-        == payload["generated_reachable_cassette_count"]
+        totals["generated_reachable_cassette_count"]
+        + totals["direct_reachable_cassette_count"]
+        == totals["cassette_count"]
+        == len(cassettes)
     )
-    assert (
-        catalog["totals"]["direct_reachable_cassette_count"]
-        == payload["direct_reachable_cassette_count"]
-    )
+    assert all(cassette["reachability_owner_paths"] for cassette in cassettes)
 
 
 def test_issue_5706_coverage_tail_head_is_explicit_and_matches_inventory() -> None:
