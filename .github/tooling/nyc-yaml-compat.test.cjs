@@ -56,7 +56,7 @@ test('YAML extensions retain inherited configuration and explicit overrides', as
 test('invalid YAML rejects and resets the loading state', async () => {
   await fixture(async (cwd) => {
     await fs.writeFile(path.join(cwd, '.nycrc.yaml'), 'include: [unfinished');
-    await assert.rejects(loadNycConfig({ cwd, nycrcPath: '.nycrc.yaml' }), /unexpected end/);
+    await assert.rejects(loadNycConfig({ cwd, nycrcPath: '.nycrc.yaml' }), { name: 'YAMLException', message: /unexpected end/ });
     assert.equal(isLoading(), false);
   });
 });
@@ -64,13 +64,13 @@ test('invalid YAML rejects and resets the loading state', async () => {
 test('duplicate YAML keys reject instead of silently changing coverage options', async () => {
   await fixture(async (cwd) => {
     await fs.writeFile(path.join(cwd, '.nycrc.yaml'), 'lines: 80\nlines: 0\n');
-    await assert.rejects(loadNycConfig({ cwd, nycrcPath: '.nycrc.yaml' }), /duplicated mapping key/);
+    await assert.rejects(loadNycConfig({ cwd, nycrcPath: '.nycrc.yaml' }), { name: 'YAMLException', message: /duplicated mapping key/ });
   });
 });
 
 test('unsafe JavaScript YAML tags reject', async () => {
   await fixture(async (cwd) => {
     await fs.writeFile(path.join(cwd, '.nycrc.yaml'), 'all: !!js/function "function () { return true; }"');
-    await assert.rejects(loadNycConfig({ cwd, nycrcPath: '.nycrc.yaml' }), /unknown tag/);
+    await assert.rejects(loadNycConfig({ cwd, nycrcPath: '.nycrc.yaml' }), { name: 'YAMLException', message: /unknown tag/ });
   });
 });
