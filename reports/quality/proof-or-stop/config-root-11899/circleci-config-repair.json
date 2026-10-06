@@ -1,0 +1,15 @@
+{
+  "observed_pipeline": 119,
+  "pipeline_id": "64214095-1732-44de-8cb7-21326041ee43",
+  "observed_state": "errored",
+  "error": "duplicate key environment at test-integration",
+  "upstream_main": "c6191358",
+  "repair": "remove duplicate two-line environment block; preserve complete three-variable environment",
+  "unique_key_parse": "PASS",
+  "circleci_contract_tests": 39,
+  "contract_test_exit": 0,
+  "config_sha256": "942bdcc332fd8bd882fe0803fc9887e2cc79c019e2014343202f15054b8aa21a",
+  "verified_at_utc": "2026-10-05T08:27:27.952238+00:00",
+  "trust": "local_single_host",
+  "ci_acceptance": "pending"
+}

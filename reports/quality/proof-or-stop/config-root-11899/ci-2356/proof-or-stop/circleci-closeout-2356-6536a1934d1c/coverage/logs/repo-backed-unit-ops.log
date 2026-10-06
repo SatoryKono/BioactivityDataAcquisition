@@ -1,0 +1,17 @@
+.............................ssssssssss................................. [ 25%]
+....................................................................s.s. [ 51%]
+........................................................................ [ 77%]
+................................................................         [100%]
+=========================== short test summary info ============================
+SKIPPED [1] tests/unit/repo_backed/scripts/ops/docker/test_restart_docker_recovery.py:288: pwsh is required for behavioral fixtures
+SKIPPED [1] tests/unit/repo_backed/scripts/ops/docker/test_restart_docker_recovery.py:299: pwsh is required for behavioral fixtures
+SKIPPED [1] tests/unit/repo_backed/scripts/ops/docker/test_restart_docker_recovery.py:316: pwsh is required for behavioral fixtures
+SKIPPED [1] tests/unit/repo_backed/scripts/ops/docker/test_restart_docker_recovery.py:329: pwsh is required for behavioral fixtures
+SKIPPED [1] tests/unit/repo_backed/scripts/ops/docker/test_restart_docker_recovery.py:362: pwsh is required for behavioral fixtures
+SKIPPED [1] tests/unit/repo_backed/scripts/ops/docker/test_restart_docker_recovery.py:385: pwsh is required for behavioral fixtures
+SKIPPED [1] tests/unit/repo_backed/scripts/ops/docker/test_restart_docker_recovery.py:392: pwsh is required for behavioral fixtures
+SKIPPED [1] tests/unit/repo_backed/scripts/ops/docker/test_restart_docker_recovery.py:403: pwsh is required for behavioral fixtures
+SKIPPED [1] tests/unit/repo_backed/scripts/ops/docker/test_restart_docker_recovery.py:422: pwsh is required for behavioral fixtures
+SKIPPED [1] tests/unit/repo_backed/scripts/ops/docker/test_restart_docker_recovery.py:440: pwsh is required for behavioral fixtures
+SKIPPED [1] tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py:799: Node.js is unavailable
+SKIPPED [1] tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py:840: Node.js is unavailable

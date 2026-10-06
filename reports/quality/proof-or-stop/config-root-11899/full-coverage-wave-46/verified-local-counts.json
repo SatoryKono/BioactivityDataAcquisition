@@ -1,0 +1,15 @@
+{
+  "head": "090d7a74c56e9de8db2f96d9a183a9058a55ccc8",
+  "counts": {
+    "passed": 32830,
+    "skipped": 186,
+    "failures": 0,
+    "errors": 0
+  },
+  "shards": 17,
+  "config_root_lines": "40/40",
+  "config_root_branches": "18/18",
+  "line_percent": 99.7,
+  "branch_percent": 94.34,
+  "trust": "local_single_host"
+}

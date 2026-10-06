@@ -1,4 +1,115 @@
-# Audit issue batch: implementation and remaining acceptance
+# Audit issue batch: architecture program closeout
+
+## Current architecture program acceptance — 2026-10-05
+
+Scope: #11854 and its eight merged stages. #11899 is CLOSED after independent coverage acceptance; global fresh per-module nonregression is outside this bounded closeout. Historical snapshots below retain their original source identities and failed diagnostics.
+
+Actual main verified: `2d4507f595d03591c3db72b2aa554d7f41329ce3`. Its complete Git tree `6ad9cf9281fd8bb7bfa8c273784ef6f8b27afdfb` equals the delivery tree of real CircleCI acceptance #2356 (`6536a1934d1ce4459a9ed25f4f1eade134dd5ba3`). Receipts keep the original execution SHA; squash ancestry is not fabricated.
+
+Full architecture directly on this actual main: **4928 PASS, 76 SKIP, 0 failures/errors, exit 0**; HEAD before/after unchanged. Native Windows skips are preserved. The independent Linux full suite has **4997 PASS, 7 SKIP**, exit 0. See the [main execution record](proof-or-stop/architecture-meta-closeout-20261005/main-architecture.record.json) and [original main JUnit](proof-or-stop/architecture-meta-closeout-20261005/main-architecture.xml).
+
+[Original CI #2356 bundle](proof-or-stop/config-root-11899/ci-2356/proof-or-stop/circleci-closeout-2356-6536a1934d1c/bundle.json) and [verification](proof-or-stop/config-root-11899/ci-2356/proof-or-stop/circleci-closeout-2356-6536a1934d1c/verification.json): **ADMIT**, ready_to_merge qualified, no errors/degradations. A separate canonical verifier reproduced ADMIT on a clean exact-SHA checkout with source checking enabled. Tests, governance, docs, debt, quality records all exit 0; the 26 ordinary pipeline jobs passed.
+
+### Eight-stage merged/evidence matrix
+
+All child states were queried live on 2026-10-05; every merged SHA is an ancestor of the verified actual main. Each current owning scope below is included in the complete architecture and/or canonical 17-shard coverage acceptance. Historical child closure evidence remains linked in the preserved matrix below.
+
+| Child / requirement | Merged SHA | State / ancestry | Current owning scope |
+| --- | --- | --- | --- |
+| [#11846](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11846) — [refactoring][P0] RF-001: согласовать audit baseline и provenance quality reports | `d311a17e17c52f2f50b9f1020ed5e4181ff75b36` | CLOSED / PASS | `test_rf_001_architecture_evidence_baseline.py; test_architecture_quality_scorecard.py` |
+| [#11847](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11847) — [refactoring][P1] RF-002: заменить PD4 host defaults типизированными контрактами Merge и Gold | `8f024f97cb10d87d2d12b31f7a4282aac1cf895c` | CLOSED / PASS | `test_any_budget.py; canonical unit-application coverage shard` |
+| [#11848](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11848) — [refactoring][P1] RF-003: отделить выбор replay snapshots от Composition wiring | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED / PASS | `test_composition_runtime_boundary_policy.py` |
+| [#11849](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11849) — [refactoring][P2] RF-004: проверить и сократить избыточные forwarding seams Composition/Core | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED / PASS | `test_di_compliance.py; test_application_core_lifecycle_boundary_usage.py` |
+| [#11850](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11850) — [refactoring][P2] RF-005: провести reference-based retirement scripts без смены статусов ради метрик | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED / PASS | `test_scripts_inventory_zero_reference_ratchet.py` |
+| [#11851](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11851) — [architecture][P2] RF-006: уточнить семантику DDD/ports/cycles evidence без дублирования gates | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED / PASS | `test_architecture_quality_scorecard.py; test_layer_dependencies.py; test_port_adapter_factory_coverage_matrix.py` |
+| [#11852](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11852) — [bug][P0] Закрыть красные fan-in тесты application_core и composition_runtime_builders | `dbc2ee7f257b8f8e7866383e1e05361555faf5de` | CLOSED / PASS | `test_hotspot_fan_in_family_ratchets.py; test_hotspot_growth_family_ratchets.py; test_hotspot_duplication_family_ratchets.py` |
+| [#11853](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11853) — [refactoring][P1] Распространить typed host contract на оставшиеся PD4 mixins census | `294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2` | CLOSED / PASS | `test_any_budget.py; canonical unit-application coverage shard` |
+
+[Machine-readable live matrix](proof-or-stop/architecture-meta-closeout-20261005/child-matrix.json) records source/test cohort identity and ancestor checks. Shared full-suite commands and exits are recorded in the execution artifacts, rather than invented per-child reruns.
+
+### Canonical evidence and limits
+
+Canonical census refresh corrected seven stale line references in `chembl/health.py`; classification and counts are unchanged: total 304, justified 241, unjustified 63, PD4 pending-host-default count 0. No new casts, caps, thresholds or exemptions are introduced. Hotspot and remote-main checks pass; debt governance is 46/46 PASS. CI-family checks complete without budget ratchet. DDD/ports/cycles remain the documented selected invariant, tracked-universe and import-time SCC proxies, not proof of semantic completeness or deferred-import behavior.
+
+Canonical coverage #2356: **17/17 shards, 32878 PASS, 175 SKIP, 0 failures/errors**, lines 99.70%, branches 94.35%; `config_root` **40/40 lines and 18/18 branches**. Source SHA-256 `4db123e5e95045405ceb710e2425c1cd0e733fb6a225dccc7fc4146c63eaacb5`; test SHA-256 `8eda05d84247514c788836919a2df950d4bc92ac06948537a8040b6c9942f9f6`. Raw XML and all 17 JUnit semantic hashes independently checked. Published CI artifacts do not include raw SQLite databases; original manifest database hashes are attested, not claimed locally recomputed.
+
+The current inventory roster has exactly 2552 paths. Historical floors are preserved. The [direct raw comparison ledger](proof-or-stop/config-root-11899/ci-2193/comparison-ledger.json) retains 81 rows below accepted coverage; the direct regression guard remains FAIL. The measured line/branch metrics of #2193/#2356 are identical for all 2552 classes. This closeout does not claim freshly measured global per-module nonregression. W48 remains a main-bound local_single_host measurement, not an invented CI receipt.
+
+Post-main config-root/inventory/telemetry/CircleCI owning checks: **121 PASS, 0 SKIP**, exit 0, on unchanged `2d4507f5`. Full-tree guard and W48 ancestor check pass. [Post-main execution record](proof-or-stop/config-root-11899/post-main-2d4507f5/owning.record.json).
+
+### Preserved failures and publication boundary
+
+[Original #2193 STOP](proof-or-stop/config-root-11899/ci-2193/proof-or-stop/circleci-closeout-2193-f1f3784bb91a/verification.json) is immutable: one stale VCR owner catalog failure, subsequently fixed canonically. The separate API repair-agent chunk-task hit max-turns/HTTP429 and committed nothing; it is not a product test regression. GitHub Actions billing remains an external limitation; the real CircleCI ADMIT is distinct from local_single_host. Historical broad strict-typing failed diagnostics below are not relabeled as global zero-error typing.
+
+This publication changes generated evidence and archival metadata only. Product/test sources, budgets and selection remain unchanged. The branch is included in the existing full Proof-or-Stop workflow so its new materialization receives fresh independent acceptance before merge and issue closure. Runtime mirror sync is N/A because .codex/.junie sources are unchanged. .env is untouched.
+
+## Main-bound telemetry repair after base advancement — 2026-10-05
+
+Main advanced to `95ca0a67f21a7055ad1b671f9ff57bd5ff39b1fb` through PR #11943. Its telemetry referenced the original feature producer `0eabda84`, which squash did not retain as an ancestor. The assertion remains unchanged; no measured SHA was relabeled. Fresh telemetry is adopted byte-exact from the canonical exporter of the actual-main CircleCI job #2772.
+
+[Original main coverage manifest](proof-or-stop/config-root-11899/ci-2772/proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/manifest.json) has **17/17 successful shards, 32885 PASS, 175 SKIP, zero failures/errors**, lines 99.70%, branches 94.35%; `config_root` remains **40/40 lines and 18/18 branches**. Source SHA-256 is `3786dc15afe014d3827d7f940c7cec030d02c993d78487b403eee55b4bdae29b`; test SHA-256 is `7ccb3fdf058e6b26c2a50c97bf44a7ecaa8443bb986e5f06b59101426155846e`. [Independent check](proof-or-stop/config-root-11899/ci-2772/coverage-independent-check.json) verifies source/test cohorts, raw XML SHA-256 `b66a8ae41d576142a583f127f04c51224d76502c3cac0ff9af6ff04b7ea21f0d`, all 17 semantic JUnit hashes and both 85% gates. Original SQLite hashes remain manifest-attested; the databases were not published.
+
+[Original #2772 verification](proof-or-stop/config-root-11899/ci-2772/proof-or-stop/circleci-closeout-2772-95ca0a67f21a/verification.json) remains **STOP**, with failed tests (unreachable old telemetry source) and debt (stale remote-main baseline). Governance, docs and quality exit 0. These failures are not rewritten as acceptance. The baseline now references measured actual main `95ca0a67`, already an ancestor of the publication branch; its `local_coverage_verify` classification is preserved. Exported S7 hotspots are identical and were not adopted as unrelated changes.
+
+The earlier eight-stage matrix and actual-main architecture receipts retain their original execution identities. Final independent delivery acceptance, merge and post-main checks are still required for #11854. The new telemetry snapshot does not fabricate fresh inventory rows or claim global per-module nonregression.
+
+## Preserved historical snapshots — not current closeout claims
+
+
+## Architecture acceptance evidence: 2026-10-05
+
+The eight closed RF stages and their immutable issue evidence are recorded in the
+[verified child matrix](proof-or-stop/architecture-coverage-11854-11899/architecture-program-child-matrix-verified.json).
+All eight merged commits were rechecked as ancestors of `3b11b223774c0b7bef4f306fd8cc45326a635b53`.
+The architecture scope remains explicit dependencies, source-bound governance,
+and the existing layer/port/hotspot contracts. No new score targets, debt budgets,
+thresholds or exemptions are introduced.
+
+The latest complete producer measured the integrated tree
+`3b11b223774c0b7bef4f306fd8cc45326a635b53`, including main `95ca0a67f21a7055ad1b671f9ff57bd5ff39b1fb`
+and the reviewed VCR whole-token matching repair. All 17 groups passed:
+32,877 passed, 187 skipped, zero failures/errors, 99.70% line and 94.34% branch
+coverage. The [integrated measurement summary](proof-or-stop/architecture-11854-postmerge/measurement-3b11b22.summary.json)
+binds the untouched raw coverage, XML, JUnit and manifest archive. Trust remains
+`local_single_host`. The 139 owning tests passed with no skips after integration;
+they include the repair of a test that evicted a parent package while retaining
+cached child modules. Previous measurements below retain their original SHAs.
+
+The complete W48 producer measured main `c61913580698f70b181ae3e9ac852c631f02a878`:
+17 successful groups, 32,866 passed, 187 skipped, no failures/errors, 99.70% line
+and 94.34% branch coverage. Its source and test hashes matched the postmerge
+acceptance branch before the prompt-contract repair below. The [W48 checksum summary](proof-or-stop/architecture-11854-postmerge/measurement-w48-summary.json)
+identifies the archive containing the original manifest, XML, JUnit and raw
+coverage databases. This is `local_single_host` measurement evidence; it does
+not itself establish independent CI admission.
+
+The complete follow-up producer on `27feb6c1f57110f77452670a4dac569c0872ce35`
+repeated all 17 groups after aligning the prompt contracts with the 18 scenarios
+and 28 overlays already merged in #11919. It recorded 32,866 passed, 187 skipped,
+zero failures/errors, 99.70% line and 94.34% branch coverage. The
+[measurement checksum summary](proof-or-stop/architecture-11854-postmerge/measurement-27feb6c.summary.json)
+identifies its original manifest, XML, JUnit and raw coverage archive. This is
+`local_single_host` evidence; W48 remains historical evidence with its original
+identity. All 51 prompt tests passed separately with no skips.
+
+On `e51699ee734832bfae4bd850cc4f9ae48b67232e`, the 50 owning telemetry/skip/cleanup
+tests passed, full `python -m scripts.docs verify` exited 0, and both
+`python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check`
+and `python -m scripts.engineering.qa report-debt-governance-gates --check`
+exited 0 without `--changed-from-ref`. The full-tree guard also exited 0.
+Runtime AI sources were unchanged; mirror synchronization is not applicable.
+
+The final source-bound architecture, full-suite and independent proof decision
+are recorded in [PR #11945](https://github.com/SatoryKono/BioactivityDataAcquisition/pull/11945)
+and the [#11854 acceptance record](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11854).
+Only completed, successful receipts qualify closure; partial runs and a merge
+alone do not. GitHub Actions billing remains a separate external blocker;
+CircleCI provides the independent execution route.
+
+Config-root measured coverage and module-inventory adoption belong to #11899.
+The 81 other historical module comparisons in its published ledger remain a
+separate residual; retained historical floors are not newly measured coverage.
+The older sections below retain their original measurement and acceptance state.
 
 ## W40: final source measurement (2026-10-04)
 

@@ -121,6 +121,7 @@ shards:
   - name: S7-crosscutting-architecture-a3
     wave: 2
     paths:
+      - tests/architecture/test_proof_closeout_workflow_contract.py
       - tests/architecture
     workers_override: 0
     extra_pytest_args:

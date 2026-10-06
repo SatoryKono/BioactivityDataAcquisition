@@ -13,6 +13,15 @@ ______________________________________________________________________
 
 # GitHub Actions Workflow Inventory
 
+## Current migration status
+
+GitHub Actions are disabled. The tables below retain the historical inventory and
+API-state snapshot; `active` in a historical row does not mean jobs currently run.
+CodeQL is excluded from required checks (#11929). Its workflow definition remains
+until retirement (#11930); optional analysis is a separate decision. Trivy and
+Scorecard SARIF upload functions must survive migration even though the old upload
+transport uses `github/codeql-action/upload-sarif`.
+
 ## Purpose
 
 This page is the canonical published inventory of the **52** live GitHub Actions

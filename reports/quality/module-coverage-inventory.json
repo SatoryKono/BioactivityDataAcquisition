@@ -1,7 +1,7 @@
 {
-  "additive_coverage_xml_path": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-42/coverage.xml",
-  "additive_coverage_xml_sha256": "af5afe13756f2d73aaeef7a30796fded2116c9ae7fbc4058d66b13156fe23ef9",
-  "additive_measured_module_count": 2472,
+  "additive_coverage_xml_path": "reports/quality/ci-11929-11931-preparation/job3363/proof-or-stop/circleci-closeout-3363-886a32e8bd71/coverage/coverage.xml",
+  "additive_coverage_xml_sha256": "e6bf9b79b094d9c709c825574d8e29b439e8d8a29b1d38805fd2b19b5efce4c2",
+  "additive_measured_module_count": 2470,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
   "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
@@ -14481,12 +14481,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 26,
-      "executable_lines": 26,
+      "covered_lines": 20,
+      "executable_lines": 20,
       "missing_lines": 0,
       "module": "bioetl.domain.normalization.profiles.chembl_tissue",
       "path": "src/bioetl/domain/normalization/profiles/chembl_tissue.py",
-      "source_lines": 148
+      "source_lines": 132
     },
     {
       "coverage_percent": 100.0,
@@ -14511,12 +14511,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 29,
-      "executable_lines": 29,
+      "covered_lines": 33,
+      "executable_lines": 33,
       "missing_lines": 0,
       "module": "bioetl.domain.normalization.profiles.profile_normalizers",
       "path": "src/bioetl/domain/normalization/profiles/profile_normalizers.py",
-      "source_lines": 245
+      "source_lines": 253
     },
     {
       "coverage_percent": 100.0,
@@ -40003,12 +40003,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 26,
-      "executable_lines": 26,
+      "covered_lines": 20,
+      "executable_lines": 20,
       "missing_lines": 0,
       "module": "bioetl.domain.normalization.profiles.chembl_tissue",
       "path": "src/bioetl/domain/normalization/profiles/chembl_tissue.py",
-      "source_lines": 148
+      "source_lines": 132
     },
     {
       "coverage_percent": 100.0,
@@ -40033,12 +40033,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 29,
-      "executable_lines": 29,
+      "covered_lines": 33,
+      "executable_lines": 33,
       "missing_lines": 0,
       "module": "bioetl.domain.normalization.profiles.profile_normalizers",
       "path": "src/bioetl/domain/normalization/profiles/profile_normalizers.py",
-      "source_lines": 245
+      "source_lines": 253
     },
     {
       "coverage_percent": 100.0,
@@ -51053,7 +51053,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "4db123e5e95045405ceb710e2425c1cd0e733fb6a225dccc7fc4146c63eaacb5",
+  "source_tree_sha256": "3786dc15afe014d3827d7f940c7cec030d02c993d78487b403eee55b4bdae29b",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

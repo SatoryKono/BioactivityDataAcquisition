@@ -1,0 +1,16 @@
+{
+  "job_status": "failed",
+  "producer_head": "95ca0a67f21a7055ad1b671f9ff57bd5ff39b1fb",
+  "complete_shards": 17,
+  "passed": 32885,
+  "skipped": 175,
+  "line_percent": 99.7,
+  "branch_percent": 94.35,
+  "config_root_lines": "40/40",
+  "config_root_branches": "18/18",
+  "raw_xml_sha256": "b66a8ae41d576142a583f127f04c51224d76502c3cac0ff9af6ff04b7ea21f0d",
+  "source_tree_sha256": "3786dc15afe014d3827d7f940c7cec030d02c993d78487b403eee55b4bdae29b",
+  "test_tree_sha256": "7ccb3fdf058e6b26c2a50c97bf44a7ecaa8443bb986e5f06b59101426155846e",
+  "downloaded_artifacts": 89,
+  "sqlite_hashes": "manifest-attested; raw SQLite absent from published artifacts"
+}

@@ -1,0 +1,447 @@
+[
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/architecture.xml",
+    "sha256": "82adb62ed42a88efc323f61a557f523bc5e8a735769eb7d187942e0f20b1626b",
+    "bytes": 856788
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/assemble.log",
+    "sha256": "5d334b604f2e4b33b2b14a2e6845db0680b7713cd119a2bce6dbe932468dc846",
+    "bytes": 147
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/assemble.record.json",
+    "sha256": "76fa14d1035615a796c91bb58b7ed07fa1e382ad06dab52425db0bed230787a6",
+    "bytes": 1613
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/bundle.json",
+    "sha256": "73fe31e8239370cfaba74e07f06726fc862f434e2de2839ed6b595f4216014e8",
+    "bytes": 10224
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/ci-identity.json",
+    "sha256": "3a85de2ddcad0d9bab67625740760ec197e44a2edb3386eff462ffac267b4e4f",
+    "bytes": 379
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage-17.log",
+    "sha256": "327d0e3fb0b936b9ee54e3b0f6c4c0f20a2f4c4cf1137039bd9db83a014bcdae",
+    "bytes": 2271
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage-17.record.json",
+    "sha256": "fe76a679937aeaecb1d81b828bf28696635f7aef043ca5ae3d4c2fff13eb92da",
+    "bytes": 597
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/debt.log",
+    "sha256": "dd78149b3f214e6eec46e0dcc8c6a007b7dad3991d4e41bc578bd15b0eb05b23",
+    "bytes": 476
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/debt.record.json",
+    "sha256": "b5a78cce3ba8d94db5f07dff956da14c47cb58db5343c47a7de99123d0575ffa",
+    "bytes": 487
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/docs_runtime.log",
+    "sha256": "10ce36d4bd7d8f522ac3cf786c34eacdb15de2456198ae3addeab8a77f222271",
+    "bytes": 44869
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/docs_runtime.record.json",
+    "sha256": "d779f458f9dd03e261e92f45b5893a00a52d19ff9a35fd78a014d9f1605729d5",
+    "bytes": 448
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/governance.json",
+    "sha256": "64e865425d64208a73d6ed755be794316ac2f2580b22232459b992d323ea0a99",
+    "bytes": 6369
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/governance.log",
+    "sha256": "c52a3d50c391d12d333dc785acc6d82edb25409eee109cc268065e738d9a3d7c",
+    "bytes": 5370
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/governance.record.json",
+    "sha256": "cd95e749683d0eb7400d4f6159d2728c85746f999f9719b35fed3e7854651fb2",
+    "bytes": 668
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/plan.json",
+    "sha256": "8bdc4d2f4d6b5a7f166b1d73a2459622884d3585c79c9e64e7126b86fdb4f404",
+    "bytes": 2323
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/plan.log",
+    "sha256": "0e7367e8c14626e7e59ad6d358465cfc680f67386890d73fb78ee1899c6bfdd9",
+    "bytes": 172
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/plan.record.json",
+    "sha256": "b91ccf1d7b0bf7378f8ddce04783671297597ddb72e1ae7afaf964f0fc172a91",
+    "bytes": 837
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/quality.json",
+    "sha256": "4fd30af0737e1bbc4488b84415666193f7cddb8fadd14f6aca78408505a95467",
+    "bytes": 16906
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/quality.log",
+    "sha256": "4c1907df24f4e7fa10f877eb8aa73882fd6a15ed95bacdd32ad8ec56b33fcd80",
+    "bytes": 791
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/quality.record.json",
+    "sha256": "1ca18b43ab49b5040ea8d1c32a49bfe1637f7ea6b9483ea3eb0807669962c24d",
+    "bytes": 728
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/receipt-debt.log",
+    "sha256": "cf18a403c3facd4919e255515dd19905de42542da54c180773fef09d5babb082",
+    "bytes": 135
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/receipt-debt.record.json",
+    "sha256": "655adbfb4eb23b72aae00004ac4908cc6bfa8e149214378deae6478535e01c2b",
+    "bytes": 1558
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/receipt-docs_runtime.log",
+    "sha256": "f41398577da10e98a091fe2db6d81a323d3479b251d7b738e360d66eebcfdf81",
+    "bytes": 143
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/receipt-docs_runtime.record.json",
+    "sha256": "9f0d00021cd303fd15d24c78e6140c4bb5e7a6f571ffa92b3ea3912c91e266c2",
+    "bytes": 1502
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/receipt-governance.log",
+    "sha256": "9f00775c405dc13363e40dac92392dceda2234734f53a68fafc74deae68646fc",
+    "bytes": 141
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/receipt-governance.record.json",
+    "sha256": "0e3980eb6b562c3e64986a953eaf3cfc90856f7b4e590913e14e19fe2623af2a",
+    "bytes": 1935
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/receipt-quality.log",
+    "sha256": "13cee2e2edea31d87bef74c2f136e40c761d16e4a44c8ec5034ae9b9e08b736c",
+    "bytes": 138
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/receipt-quality.record.json",
+    "sha256": "d8f9b75f9c69e6465992601cfc874bb5f5df4012c232b795a9b6ce05ad4de292",
+    "bytes": 2047
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/receipt-tests.log",
+    "sha256": "6dab48fa2f6255e829945119d0356fa81ef1fdedac5c17e6156e611e6549576c",
+    "bytes": 136
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/receipt-tests.record.json",
+    "sha256": "d33a062a818a291cc16f089213c4b10a6d204ee2fe5783d2d7b77be63bdc7e51",
+    "bytes": 1772
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/tests.log",
+    "sha256": "bbc94adf9317ae5d5a0680571fc7de417a9c2fe879aecddb76bf9eb1071b4d8c",
+    "bytes": 8934
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/tests.record.json",
+    "sha256": "4c2e6893cdf203e49db82e447c8226c811a209dc40ff4e152249d3365a28731f",
+    "bytes": 598
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/verification.json",
+    "sha256": "bcfcbc8bea4e8baa949b77e25a0b18b0e8bf0024c3d7bab3236fd4482cfbc3d8",
+    "bytes": 471
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/verify.log",
+    "sha256": "568375597cf1719a8462ff1d9b2ae1f1a5faf875bf623f63b66d5af602140b7b",
+    "bytes": 437
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/verify.record.json",
+    "sha256": "37ae6ae983d9c06e13dfb3f29638deab31e8369799426cb9d05d04bb457ce8df",
+    "bytes": 726
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/coverage.xml",
+    "sha256": "b66a8ae41d576142a583f127f04c51224d76502c3cac0ff9af6ff04b7ea21f0d",
+    "bytes": 5175439
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/manifest.json",
+    "sha256": "3df34d780be71bdf43af791304c0e9a9f75daa88a3f4423ddb85e4267c6c0aa2",
+    "bytes": 23890
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/receipts/debt.json",
+    "sha256": "425362288157eb4e308a9f0a97995b1b030522d5b483e251d597eca1d6a7be4c",
+    "bytes": 1458
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/receipts/docs_runtime.json",
+    "sha256": "4092cccdf539cf7c4ea45aa4fcb21f79de15e38d4c48e05adf10f5ea313cc9cf",
+    "bytes": 1385
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/receipts/governance.json",
+    "sha256": "4e8e801e9b93f8da432e8ebc1bc01bc2d39f25d87fdb463541e96cef5c0876a3",
+    "bytes": 1789
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/receipts/quality.json",
+    "sha256": "d6dd9e8dc0173154ec9d6c576d2e111847429bbe1d35d30f46d32037eada2399",
+    "bytes": 1924
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/receipts/tests.json",
+    "sha256": "d156857c46922e5880138cede7fdad22472d2436894401afb7194c87c91a5811",
+    "bytes": 1655
+  },
+  {
+    "path": "telemetry-candidate/configs/quality/test_telemetry_baseline.yaml",
+    "sha256": "bb5959f16c0ad91bcb1ef353029c38a8fa8e4547c885a3e9b239f85fa994f946",
+    "bytes": 30268
+  },
+  {
+    "path": "telemetry-candidate/docs/05-engineering/test-telemetry-baseline.md",
+    "sha256": "3f5d106ea5287d11a015819e18c57b5af4c3aed707146d2956b041ceabc4878f",
+    "bytes": 6278
+  },
+  {
+    "path": "telemetry-candidate/reports/test-telemetry/coverage-summary.json",
+    "sha256": "2b3e059c939b35dee2a969be3d291c12af2cd97191ed4d126662032e9a209263",
+    "bytes": 6919
+  },
+  {
+    "path": "telemetry-candidate/reports/test-telemetry/s7-governance-hotspots.json",
+    "sha256": "e061de0553b40efbbba674005b1deb92480407a03876685d479f84935b8dcb18",
+    "bytes": 4718
+  },
+  {
+    "path": "telemetry-candidate/reports/test-telemetry/slowest-tests.json",
+    "sha256": "be7d6b50ba3749afd44aa4df1807cf5a9bb2d9ffed5d75e45e9a36aa83da724e",
+    "bytes": 22897
+  },
+  {
+    "path": "telemetry-candidate/reports/test-telemetry/slowest-tests.md",
+    "sha256": "377828fe72b853a0f2a4545559549bea3b441ab2113c67bcbc6cb5c094951660",
+    "bytes": 5714
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/junit/contract-confidence.xml",
+    "sha256": "be1929bf9b0b339255f3a5b8abc27cd49a07bcfc46a5f96dc02307d3bb1453f9",
+    "bytes": 235793
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/junit/integration.xml",
+    "sha256": "20fa530f7294d0a55b908b44d9b21aca7e988ec1a84c62eeb236467d4cea337f",
+    "bytes": 491521
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/junit/repo-backed-unit-ops.xml",
+    "sha256": "9741fcac4e8f1e9986ce1d9adfac99121adefbbd290b44810f7d0b40bbcb43c2",
+    "bytes": 55976
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/junit/repo-backed-unit-product.xml",
+    "sha256": "fc662fef30d400bdb2652f3cd0f25a48e40e1e3492f2b9fccb6b63db8d6602bc",
+    "bytes": 74259
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/junit/repo-backed-unit-tooling.xml",
+    "sha256": "6fa7f04309a41f52c06c99749b1a21dbd87d3821bc0f393725472075126fa3ea",
+    "bytes": 79552
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/junit/security.xml",
+    "sha256": "a5674b662467c282fb76521cf13216d66951293086aec8291b1af7e8b784d46c",
+    "bytes": 12412
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/junit/serial.xml",
+    "sha256": "e4bcde533633c0899a35587372667536ca90d0497ccfa3d6473c370404118a10",
+    "bytes": 1598
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/junit/smoke.xml",
+    "sha256": "fdf4f928834ae8d9d5ce493271610534d659ba5ec63e2facae2a61e78e01b7a8",
+    "bytes": 10393
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/junit/unit-application.xml",
+    "sha256": "9f6064e5ed01a513c7563694c55ca4cd2d7c10ce6fdaa485f2c2df22e0e4f323",
+    "bytes": 1290022
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/junit/unit-domain.xml",
+    "sha256": "4c4a44d6ec7867f60e1864cfafee79093b802036f715bc20d7102031576bf9f4",
+    "bytes": 1356902
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/junit/unit-filesystem-contracts.xml",
+    "sha256": "71a9832f62935802dfae8d264d3536b101ce955a30692676386cfa962d518efe",
+    "bytes": 60735
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/junit/unit-infrastructure.xml",
+    "sha256": "b2be7295e44ee37f0edd602f75584ccf1e83c1c76fb76e5c76df3ab859cc2bbf",
+    "bytes": 900669
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/junit/unit-other.xml",
+    "sha256": "180d0a67ba25721480309d661503bd17e7059652de4e10827f08520d18b99b98",
+    "bytes": 767473
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/junit/unit-scripts-tooling-debt-governance.xml",
+    "sha256": "c3c9d109ff3f0a3006b1dde2625e692fc7cbf318a9341d76396a04d27c28577b",
+    "bytes": 7173
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/junit/unit-scripts-tooling-other.xml",
+    "sha256": "c5a5261cefbe8a710052bc4001e40ad3c93721b3b4b3b450881b5298fefe7170",
+    "bytes": 249734
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/junit/unit-scripts-tooling-passport.xml",
+    "sha256": "6162773e036d405628ff64699c6abba5d7beeb7d723469b0afaeb8bd0e1d34a0",
+    "bytes": 3092
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/junit/unit-subprocess-backed.xml",
+    "sha256": "1593b52f38117eda698746952ece1477c9c9d6743fef26cc287740970c062c42",
+    "bytes": 1682
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/branch-gate.log",
+    "sha256": "3d2fe3a87cef90e27e77ea22526f0cb1726bfe93d7d0ef0298f5eeb956d1da38",
+    "bytes": 74
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/combine.log",
+    "sha256": "357488414db32f587485bb898f0978c1c51c9dcbef15b3c491d39eaf6d2585c8",
+    "bytes": 18
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/contract-confidence.log",
+    "sha256": "5b7548521f01a4a757772b0e95d85e8788beef50227f5132a34dc07ef6ef2dc1",
+    "bytes": 1749
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/integration.log",
+    "sha256": "cc4de71cdbe77c8fd50c0dfa2c3698a2fc67b4224c2ce2ab9a0106e8e2c56bd4",
+    "bytes": 4919
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/line-gate.log",
+    "sha256": "edf4775967f2c865abfc072780b010a48e6fb0ce15abd3781f940c96a87ce8d5",
+    "bytes": 484649
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/repo-backed-unit-ops.log",
+    "sha256": "91cd8a46aa025f85e47851eef7b9721181c1cd7216d898ae3afd40a9a7339fc3",
+    "bytes": 1967
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/repo-backed-unit-product.log",
+    "sha256": "0b7de05ea22290837498056d1d3db12b1dc6f558331cb9a8fd1aa799b3b9c78f",
+    "bytes": 582
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/repo-backed-unit-tooling.log",
+    "sha256": "7144655ae268888f2360a11516de1f243ec684fc182c48019d1cd311d0e2a529",
+    "bytes": 4196
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/security.log",
+    "sha256": "8d295fbd9030838da73d7e3df77528c5d252e75cd7a88a1d30e8c279fa16d436",
+    "bytes": 203
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/serial.log",
+    "sha256": "6de21cddaeab19c5dbabbc055f761c660c6cdc4e314db9e27ffa86be9345f54c",
+    "bytes": 470
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/smoke.log",
+    "sha256": "09efabbe841d5a8f293aba74741670e19f3bd0993cd9cbbc9f6011f34f0a683e",
+    "bytes": 160
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/unit-application.log",
+    "sha256": "3b9874f3c494994a995425c0c11ddd414d7c89ffe6c8199092f3a4f82489f905",
+    "bytes": 8603
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/unit-domain.log",
+    "sha256": "04f380395aa152bca0547697eb85997a88d2bdee5c95ae9ccb12561981553ad7",
+    "bytes": 9709
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/unit-filesystem-contracts.log",
+    "sha256": "caec7aa8109ecb187c6fbef1105b6d27a36a5189fb4516bf5d6f08b9570309d4",
+    "bytes": 400
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/unit-infrastructure.log",
+    "sha256": "b6630f2bd0be699217f370232c71c488220682f3b3f5d5459d5eba5f38f39da3",
+    "bytes": 6603
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/unit-other.log",
+    "sha256": "cc071f9edaec44fed5d338f4fca695af9a8624e9ba89860f06b41aa5a141d1ec",
+    "bytes": 5579
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/unit-scripts-tooling-debt-governance.log",
+    "sha256": "8876c9830608f9c64826246c16b2934e04138061819f176caaad11a1cf8ba140",
+    "bytes": 80
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/unit-scripts-tooling-other.log",
+    "sha256": "76304733f6a5d02e36b547dac932bea119c2ed7634db165e89edd302ac37433b",
+    "bytes": 3314
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/unit-scripts-tooling-passport.log",
+    "sha256": "341d5dca33250b815baddbafb6001e174c20bf1716bb74f3d612e77777db8938",
+    "bytes": 80
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/unit-subprocess-backed.log",
+    "sha256": "585ba42829657b9e2d56f8614be6c3365a8405474eed008559511ab50f2ffcfb",
+    "bytes": 80
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/coverage/logs/xml.log",
+    "sha256": "0b43ae9c424941ddfc935b5ff2446b987b9da5c337e20960b25494930c3cc374",
+    "bytes": 131
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/telemetry/reports/test-telemetry/coverage-summary.json",
+    "sha256": "2b3e059c939b35dee2a969be3d291c12af2cd97191ed4d126662032e9a209263",
+    "bytes": 6919
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/telemetry/reports/test-telemetry/s7-governance-hotspots.json",
+    "sha256": "e061de0553b40efbbba674005b1deb92480407a03876685d479f84935b8dcb18",
+    "bytes": 4718
+  },
+  {
+    "path": "proof-or-stop/circleci-closeout-2772-95ca0a67f21a/telemetry/reports/test-telemetry/slowest-tests.json",
+    "sha256": "be7d6b50ba3749afd44aa4df1807cf5a9bb2d9ffed5d75e45e9a36aa83da724e",
+    "bytes": 22897
+  }
+]
