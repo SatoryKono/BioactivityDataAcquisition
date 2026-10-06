@@ -107,6 +107,47 @@ commands:
               circleci-agent step halt
             fi
 
+  check-router-event:
+    parameters:
+      event-mode:
+        type: boolean
+        default: false
+    steps:
+    - run:
+        name: Apply Router event paths or enforce manual main boundary
+        command: |
+          set -euo pipefail
+          if ! << parameters.event-mode >>; then
+            [[ "$CIRCLE_BRANCH" == main ]]
+            exit 0
+          fi
+          if [ "$(git rev-parse --is-shallow-repository)" = true ]; then git fetch --unshallow --filter=blob:none --no-tags; fi
+          base=HEAD~1
+          if [ -n "${CIRCLE_PULL_REQUEST:-${CIRCLE_PULL_REQUESTS:-}}" ]; then
+            python3 - \<<'PY'
+          import json, os, re, urllib.request
+          from pathlib import Path
+          url = os.environ.get('CIRCLE_PULL_REQUEST') or os.environ['CIRCLE_PULL_REQUESTS'].split(',')[0]
+          match = re.fullmatch(r'https://github.com/SatoryKono/BioactivityDataAcquisition/pull/([0-9]+)', url)
+          assert match, 'Unexpected PR URL'
+          with urllib.request.urlopen('https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/' + match[1], timeout=30) as response:
+              pr = json.load(response)
+          assert pr['head']['sha'] == os.environ['CIRCLE_SHA1'], 'Stale PR head'
+          assert pr['base']['ref'] in {'main', 'develop'}, 'Unsupported base branch'
+          Path('/tmp/router-ci-base').write_text(pr['base']['ref'])
+          PY
+            base_ref="$(cat /tmp/router-ci-base)"
+            git fetch --no-tags origin "$base_ref"
+            base="origin/$base_ref"
+          elif [ "$CIRCLE_BRANCH" != main ]; then
+            circleci-agent step halt
+            exit 0
+          fi
+          mkdir -p reports/qa/router-v7-circleci
+          git diff --name-only "$base"...HEAD -- 'grafana/tooling/router-v7-bridge/**' 'grafana/plugins/bioetl-scenes-app/**' 'grafana/plugins/bioetl-selectorshell-panel/**' '.github/workflows/router-v7-bridge.yml' '.circleci/config.yml' > reports/qa/router-v7-circleci/event-changes.txt
+          printf '%s\n' "$CIRCLE_SHA1" > reports/qa/router-v7-circleci/source-sha.txt
+          if [ ! -s reports/qa/router-v7-circleci/event-changes.txt ]; then circleci-agent step halt; fi
+
 jobs:
   router-bridge-tests:
     docker:
@@ -114,12 +155,13 @@ jobs:
     resource_class: medium
     steps:
     - checkout
+    - check-router-event:
+        event-mode: << parameters.event-mode >>
     - run:
         name: Verify Router bridge behavior, types, build and dependency audit
         no_output_timeout: 11m
         command: |
           set -euo pipefail
-          [[ "$CIRCLE_BRANCH" == main ]]
           mkdir -p reports/qa/router-v7-circleci
           cat > /tmp/bridge-tests.sh \<<'BIOETL_ROUTER_SCRIPT'
           set -euo pipefail
@@ -167,6 +209,10 @@ jobs:
     - store_artifacts:
         path: reports/qa/router-v7-circleci
         destination: router-v7-bridge
+    parameters:
+      event-mode:
+        type: boolean
+        default: false
   router-plugin-tests:
     parameters:
       plugin:
@@ -174,6 +220,9 @@ jobs:
         enum:
         - bioetl-scenes-app
         - bioetl-selectorshell-panel
+      event-mode:
+        type: boolean
+        default: false
     docker:
     - image: cimg/node:24.21.0@sha256:2944a8d6bea9d71395f670ee689ca63a02b34a846ad9a5d617d21eefe57a9209
     resource_class: medium
@@ -181,12 +230,13 @@ jobs:
       BIOETL_PLUGIN: << parameters.plugin >>
     steps:
     - checkout
+    - check-router-event:
+        event-mode: << parameters.event-mode >>
     - run:
         name: Verify plugin and transfer SHA-256 checked build
         no_output_timeout: 16m
         command: |
           set -euo pipefail
-          [[ "$CIRCLE_BRANCH" == main ]]
           mkdir -p reports/qa/router-v7-circleci
           cat > /tmp/plugin-tests.sh \<<'BIOETL_ROUTER_SCRIPT'
           set -euo pipefail
@@ -266,6 +316,8 @@ jobs:
       NO_SOURCEMAP: '0'
     steps:
     - checkout
+    - check-router-event:
+        event-mode: << parameters.event-mode >>
     - attach_workspace:
         at: /tmp/router-v7-ws
     - setup_remote_docker:
@@ -275,7 +327,6 @@ jobs:
         no_output_timeout: 46m
         command: |
           set -euo pipefail
-          [[ "$CIRCLE_BRANCH" == main ]]
           mkdir -p reports/qa/router-v7-circleci
           cat > /tmp/host-build.sh \<<'BIOETL_ROUTER_SCRIPT'
           set -euo pipefail
@@ -360,6 +411,10 @@ jobs:
     - store_artifacts:
         path: reports/qa/router-v7-image-parity.json
         destination: router-v7-image-parity.json
+    parameters:
+      event-mode:
+        type: boolean
+        default: false
   release-dist-build:
     docker:
       - image: cimg/python:3.13
@@ -2242,6 +2297,304 @@ jobs:
       - store_artifacts:
           path: osv-results.json
 
+  docs-diagrams:
+    parameters:
+      mode:
+        type: enum
+        enum:
+        - syntax
+        - targeted
+        - drift
+    docker:
+    - image: cimg/node:20.19.0-browsers@sha256:35b064b2efd3583e568aa1c5eee04f2ba3bc377da9a51c977fb7296a5d5f2964
+    resource_class: medium
+    environment:
+      RUNNER_TEMP: /tmp/diagram-tools
+      MERMAID_VERSION: 10.6.1
+      INSTALL_LIBRSVG: 'true'
+      ACTION_DIR: /home/circleci/project/.github/actions/setup-mermaid
+      GITHUB_ENV: /tmp/diagram-ci/setup-env
+      GITHUB_PATH: /tmp/diagram-ci/setup-path
+      REQUIRE_SVGO: '1'
+    steps:
+    - checkout
+    - setup-python-uv:
+        extras: dev
+    - run:
+        name: Classify diagram validation and rendering scope
+        command: |
+          set -euo pipefail
+          mkdir -p /tmp/diagram-ci "$RUNNER_TEMP"
+          if [ "$(git rev-parse --is-shallow-repository)" = true ]; then git fetch --unshallow --filter=blob:none --no-tags; fi
+          git fetch --no-tags origin main
+          export EVENT_NAME=push BASE_REF=main
+          base=HEAD~1
+          if [ -n "${CIRCLE_PULL_REQUEST:-${CIRCLE_PULL_REQUESTS:-}}" ]; then
+            export EVENT_NAME=pull_request
+            uv run --frozen --no-build python - \<<'PY'
+          import json, os, re, urllib.request
+          from pathlib import Path
+          url = os.environ.get('CIRCLE_PULL_REQUEST') or os.environ['CIRCLE_PULL_REQUESTS'].split(',')[0]
+          match = re.fullmatch(r'https://github.com/SatoryKono/BioactivityDataAcquisition/pull/([0-9]+)', url)
+          assert match, 'Unexpected PR URL'
+          with urllib.request.urlopen('https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/' + match[1], timeout=30) as response:
+              pr = json.load(response)
+          assert pr['head']['sha'] == os.environ['CIRCLE_SHA1'], 'Stale PR head'
+          assert pr['base']['ref'] in {'main', 'develop'}, 'Unsupported base branch'
+          Path('/tmp/diagram-ci/base-ref').write_text(pr['base']['ref'])
+          PY
+            BASE_REF="$(cat /tmp/diagram-ci/base-ref)"
+            git fetch --no-tags origin "$BASE_REF"
+            base="origin/$BASE_REF"
+          fi
+          printf 'export EVENT_NAME=%q\nexport BASE_REF=%q\n' "$EVENT_NAME" "$BASE_REF" >> "$BASH_ENV"
+          git diff --name-only "$base"...HEAD -- '*.mmd' '*.mermaid' ':(glob)docs/**/*.md' 'scripts/diagrams/**' 'tests/architecture/test_diagram*.py' '.github/actions/setup-mermaid/**' 'docs/02-architecture/diagrams/theme/**' 'docs/02-architecture/diagrams/tooling/**' 'docs/02-architecture/diagrams/manifests/**' '.circleci/config.yml' > /tmp/diagram-ci/changed.txt
+          git diff --name-only "$base"...HEAD -- '*.mmd' '*.mermaid' 'scripts/diagrams/**' '.github/actions/setup-mermaid/**' 'docs/02-architecture/diagrams/theme/**' 'docs/02-architecture/diagrams/tooling/**' 'docs/02-architecture/diagrams/manifests/**' '.circleci/config.yml' > /tmp/diagram-ci/render-sources.txt
+          printf '%s\n' "$CIRCLE_SHA1" > /tmp/diagram-ci/source-sha.txt
+          case '<< parameters.mode >>' in
+            syntax) test -s /tmp/diagram-ci/changed.txt || circleci-agent step halt ;;
+            targeted) test -s /tmp/diagram-ci/render-sources.txt || circleci-agent step halt ;;
+            drift) if [ "$EVENT_NAME" != pull_request ] || [ ! -s /tmp/diagram-ci/render-sources.txt ]; then circleci-agent step halt; fi ;;
+          esac
+    - run:
+        name: Install canonical lockfile-pinned Mermaid renderer
+        no_output_timeout: 16m
+        command: |
+          set -euo pipefail
+          cat > /tmp/diagram-ci/run.sh \<<'DIAGRAM_CI'
+          set -euo pipefail
+          node -e 'if (process.versions.node.split(".")[0] !== "20") process.exit(1)'
+          set -euo pipefail
+          # Lockfile-backed install from the action's package-lock.json (Sonar S8543).
+          # Default mermaid-version is 10.6.1 and must match package.json/package-lock.json.
+          TOOL_DIR="${RUNNER_TEMP}/mermaid-cli"
+          mkdir -p "${TOOL_DIR}"
+          cp "${ACTION_DIR}/package.json" "${ACTION_DIR}/package-lock.json" "${TOOL_DIR}/"
+          # Vendored extract-zip (CVE-2026-56876) is a file: override; copy it
+          # next to package.json so npm ci in RUNNER_TEMP can resolve it.
+          mkdir -p "${TOOL_DIR}/vendor"
+          cp -R "${ACTION_DIR}/vendor/." "${TOOL_DIR}/vendor/"
+          cd "${TOOL_DIR}"
+          if [ "${MERMAID_VERSION}" != "10.6.1" ]; then
+            echo "setup-mermaid currently pins @mermaid-js/mermaid-cli@10.6.1 via package-lock.json" >&2
+            echo "requested mermaid-version=${MERMAID_VERSION}; refusing unlocked install" >&2
+            exit 1
+          fi
+          # Install from action-local package.json + package-lock.json (S8543).
+          # Exact versions are pinned in package.json; lockfile records resolved URLs.
+          # Full tree refresh: cd .github/actions/setup-mermaid && npm install --ignore-scripts
+          npm ci --ignore-scripts --no-fund --no-audit
+          # `--ignore-scripts` deliberately suppresses lifecycle hooks. Run the
+          # pinned CLI's own Puppeteer installer explicitly, then fail closed if
+          # its exact browser revision is unavailable.
+          node node_modules/puppeteer/install.js
+          PUPPETEER_EXECUTABLE="$(
+            node -e 'process.stdout.write(require("puppeteer").executablePath())'
+          )"
+          test -x "${PUPPETEER_EXECUTABLE}"
+          # Export so validate_mermaid_syntax.sh resolve_chrome_headless_shell and
+          # prepare_puppeteer_cfg can inject executablePath + --no-sandbox args.
+          echo "PUPPETEER_EXECUTABLE_PATH=${PUPPETEER_EXECUTABLE}" >> "$GITHUB_ENV"
+          if [ "$INSTALL_LIBRSVG" = "true" ]; then
+            # svgo is already present via the locked package.json dependencies.
+            sudo apt-get update -qq && sudo apt-get install -y -qq librsvg2-bin
+          fi
+          echo "${TOOL_DIR}/node_modules/.bin" >> "$GITHUB_PATH"
+
+          cat > /tmp/puppeteer-config.json \<< 'EOF'
+          {
+            "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
+          }
+          EOF
+
+          PUPPETEER_EXECUTABLE_PATH="$(cd "$RUNNER_TEMP/mermaid-cli" && node -e 'process.stdout.write(require("puppeteer").executablePath())')"
+          printf 'export PUPPETEER_EXECUTABLE_PATH=%q\n' "$PUPPETEER_EXECUTABLE_PATH" >> "$BASH_ENV"
+          printf 'export PATH=%q:$PATH\n' "$RUNNER_TEMP/mermaid-cli/node_modules/.bin" >> "$BASH_ENV"
+
+          DIAGRAM_CI
+          timeout --signal=TERM --kill-after=30s 15m bash /tmp/diagram-ci/run.sh
+    - when:
+        condition:
+          equal:
+          - syntax
+          - << parameters.mode >>
+        steps:
+        - run:
+            name: Canonical diagram syntax validation
+            no_output_timeout: 26m
+            command: |
+              set -euo pipefail
+              cat > /tmp/diagram-ci/run.sh \<<'DIAGRAM_CI'
+              set -euo pipefail
+              bash scripts/diagrams/validate_mermaid_syntax.sh \
+                --include-embedded \
+                --puppeteer /tmp/puppeteer-config.json
+
+              set -euo pipefail
+              # Source-only PRs lint existing changed destinations. Tooling changes
+              # own the full diagram corpus because they can affect every source.
+              lint_targets=(docs/02-architecture/diagrams)
+              if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+                if [[ "${BASE_REF}" != "main" && "${BASE_REF}" != "develop" ]]; then
+                  echo "unsupported pull-request base ref" >&2
+                  exit 1
+                fi
+                git fetch --no-tags origin "${BASE_REF}"
+                if git diff --quiet "origin/${BASE_REF}"...HEAD -- \
+                  scripts/diagrams .github/actions/setup-mermaid; then
+                  changed_targets="${RUNNER_TEMP}/changed-diagram-targets.txt"
+                  git diff --diff-filter=ACMRTUXB --name-only \
+                    "origin/${BASE_REF}"...HEAD -- '*.mmd' '*.mermaid' \
+                    > "${changed_targets}"
+                  mapfile -t lint_targets < "${changed_targets}"
+                  if (( ${#lint_targets[@]} == 0 )); then
+                    mkdir -p "${RUNNER_TEMP}/empty-diagram-lint-scope"
+                    lint_targets=("${RUNNER_TEMP}/empty-diagram-lint-scope")
+                  fi
+                else
+                  diff_status=$?
+                  if [[ "${diff_status}" -gt 1 ]]; then
+                    exit "${diff_status}"
+                  fi
+                fi
+                printf 'PR diagram lint targets:\n'
+                printf '  %s\n' "${lint_targets[@]}"
+              fi
+
+              set +e
+              python3 scripts/diagrams/lint/lint_diagrams.py "${lint_targets[@]}" --json > /tmp/diagram-lint.json
+              lint_status=$?
+              set -e
+              python3 scripts/diagrams/lint/summarize_diagram_lint.py /tmp/diagram-lint.json
+              if [ "$lint_status" -ne 0 ]; then
+                echo "::error::Diagram lint failed for the owned PR scope."
+                exit "$lint_status"
+              fi
+
+              DIAGRAM_CI
+              timeout --signal=TERM --kill-after=30s 25m bash /tmp/diagram-ci/run.sh
+    - when:
+        condition:
+          equal:
+          - targeted
+          - << parameters.mode >>
+        steps:
+        - run:
+            name: Canonical diagram targeted validation
+            no_output_timeout: 21m
+            command: |
+              set -euo pipefail
+              cat > /tmp/diagram-ci/run.sh \<<'DIAGRAM_CI'
+              set -euo pipefail
+              bash docs/02-architecture/diagrams/tooling/render.sh \
+                --dir docs/02-architecture/diagrams/architecture \
+                --filter '*chembl-pipeline-activity*' \
+                --puppeteer /tmp/puppeteer-config.json
+
+              python3 scripts/diagrams/check/check_diagram_artifacts.py \
+                --manifest docs/02-architecture/diagrams/manifests/chembl-pipeline-activity-dataflow.txt \
+                --require-png
+              python3 scripts/diagrams/check/check_svg_text_visibility.py \
+                --manifest docs/02-architecture/diagrams/manifests/chembl-pipeline-activity-dataflow.txt
+
+              mkdir -p /tmp/diagram-ci/rendered
+              cp docs/02-architecture/diagrams/architecture/svg/*chembl-pipeline-activity*.svg /tmp/diagram-ci/rendered/
+              cp docs/02-architecture/diagrams/architecture/png/*chembl-pipeline-activity*.png /tmp/diagram-ci/rendered/
+
+              DIAGRAM_CI
+              timeout --signal=TERM --kill-after=30s 20m bash /tmp/diagram-ci/run.sh
+    - when:
+        condition:
+          equal:
+          - drift
+          - << parameters.mode >>
+        steps:
+        - run:
+            name: Canonical diagram drift validation
+            no_output_timeout: 31m
+            command: |
+              set -euo pipefail
+              cat > /tmp/diagram-ci/run.sh \<<'DIAGRAM_CI'
+              set -euo pipefail
+              echo "Checking if diagram sources changed without updating rendered outputs..."
+              if [[ "${BASE_REF}" != "main" && "${BASE_REF}" != "develop" ]]; then
+                echo "unsupported pull-request base ref" >&2
+                exit 1
+              fi
+              base_ref="origin/${BASE_REF}"
+              git fetch --no-tags --depth=1 origin "${BASE_REF}"
+
+              changed_diagrams=$(
+                git diff --diff-filter=ACMRTUXB --name-only "${base_ref}"...HEAD -- \
+                  ':(glob)docs/02-architecture/diagrams/architecture/*.mmd' \
+                  ':(glob)docs/02-architecture/diagrams/foundation/*.mmd' \
+                  ':(glob)docs/02-architecture/diagrams/class-diagrams/*.mmd' \
+                  ':(glob)docs/02-architecture/diagrams/views/*.mermaid' \
+                  ':(glob)docs/02-architecture/diagrams/providers/**/*.mmd' \
+                  ':(glob)docs/02-architecture/diagrams/sequence/*.mmd' \
+                  ':(glob)docs/02-architecture/diagrams/state-machines/*.mmd'
+              )
+              if [ -z "$changed_diagrams" ]; then
+                echo "No diagram source files changed — skipping drift check."
+                exit 0
+              fi
+
+              echo "Changed diagram sources:"
+              echo "$changed_diagrams"
+
+              changed_rendered=$(
+                git diff --diff-filter=ACMRTUXB --name-only "${base_ref}"...HEAD -- \
+                  ':(glob)docs/**/svg/*.svg' \
+                  ':(glob)docs/**/png/*.png'
+              )
+
+              missing=""
+              while IFS= read -r source_path; do
+                [ -z "$source_path" ] && continue
+                source_dir="${source_path%/*}"
+                source_file="${source_path##*/}"
+                stem="${source_file%.*}"
+                expected_svg="${source_dir}/svg/${stem}.svg"
+                if ! grep -Fxq "$expected_svg" <\<< "$changed_rendered"; then
+                  missing="${missing}${expected_svg}\n"
+                fi
+              done <\<< "$changed_diagrams"
+
+              if [ -n "$missing" ]; then
+                echo "::error::Diagram sources changed without corresponding rendered SVG outputs."
+                printf "%b" "$missing"
+                echo "Run 'bash docs/02-architecture/diagrams/tooling/render.sh --svg-only --dir <changed-source-dir> --filter <stem>' and commit sibling svg/ outputs."
+                exit 1
+              fi
+
+              echo "Re-rendering changed sources and comparing sibling SVG bytes..."
+              while IFS= read -r source_path; do
+                [ -z "$source_path" ] && continue
+                source_dir="${source_path%/*}"
+                source_file="${source_path##*/}"
+                stem="${source_file%.*}"
+                expected_svg="${source_dir}/svg/${stem}.svg"
+                bash docs/02-architecture/diagrams/tooling/render.sh \
+                  --svg-only \
+                  --puppeteer /tmp/puppeteer-config.json \
+                  --dir "${source_dir}" \
+                  --filter "${stem}"
+                if ! git diff --exit-code -- "${expected_svg}"; then
+                  echo "::error::Rendered SVG bytes do not match the committed sibling ${expected_svg}."
+                  exit 1
+                fi
+              done <\<< "$changed_diagrams"
+              echo "Rendered SVG bytes match the committed siblings."
+
+              DIAGRAM_CI
+              timeout --signal=TERM --kill-after=30s 30m bash /tmp/diagram-ci/run.sh
+    - store_artifacts:
+        path: /tmp/diagram-ci
+        destination: diagram-ci
+    - store_artifacts:
+        path: /tmp/diagram-lint.json
+        destination: diagram-lint.json
+
   actions-audit:
     parameters:
       online:
@@ -2968,6 +3321,27 @@ workflows:
             branches:
               only: main
 
+  router-bridge-events:
+    when:
+      equal:
+      - pr-gate
+      - << pipeline.parameters.ci-lane >>
+    jobs:
+    - router-bridge-tests:
+        event-mode: true
+    - router-plugin-tests:
+        event-mode: true
+        matrix:
+          parameters:
+            plugin:
+            - bioetl-scenes-app
+            - bioetl-selectorshell-panel
+    - router-host-build:
+        event-mode: true
+        requires:
+        - router-bridge-tests
+        - router-plugin-tests
+
   router-bridge:
     when:
       and:
@@ -3213,6 +3587,18 @@ workflows:
           requires: [classify]
       - actions-audit:
           requires: [classify]
+      - docs-diagrams:
+          name: docs-diagram-syntax
+          mode: syntax
+          requires: [classify]
+      - docs-diagrams:
+          name: docs-diagram-targeted
+          mode: targeted
+          requires: [classify]
+      - docs-diagrams:
+          name: docs-diagram-drift
+          mode: drift
+          requires: [classify]
       - duplication:
           requires: [classify]
       - schema-governance:
@@ -3255,6 +3641,9 @@ workflows:
             - compiled-artifacts
             - security-scans
             - actions-audit
+            - docs-diagram-syntax
+            - docs-diagram-targeted
+            - docs-diagram-drift
             - duplication
             - schema-governance
             - semantic-governance

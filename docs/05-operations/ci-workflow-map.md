@@ -278,7 +278,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `reusable-mermaid-setup.yml` | — | Shared pinned Mermaid tooling | Pending consumer migration; keep lockfile scanned by OSV |
 | `reusable-setup.yml` | — | CircleCI setup-python-uv | Checksum-pinned uv 0.11.26 and explicit UV_PYTHON prepared; remote runtime/cache parity pending |
 | `root-hygiene.yml` | — | CircleCI root-hygiene | Main full-tree/strict checks accepted; cleanup diagnostic artifacts and dedicated legacy regression selectors added for next acceptance; structure-audit port is blocked by six tracked Python paths outside allowed roots |
-| `router-v7-bridge.yml` | — | Router bridge candidate acceptance | Prepared main-only router-bridge lane: Node 24 bridge tests, both plugin builds and pinned host image parity; remote and path-trigger acceptance pending; managed host evidence remains separate |
+| `router-v7-bridge.yml` | — | Router bridge candidate acceptance | Manual main Router lane accepted in pipeline374; automatic PR/main path-filtered workflow prepared, remote event acceptance pending; managed host evidence remains separate |
 | `schema-governance.yml` | — | CircleCI schema-governance | Prepared required gate; canonical generation/parity preserved |
 | `scorecard.yml` | `30 7 * * 1` | CircleCI scorecard plus SARIF publication | Scheduled pipeline354/job6380 on main c644f2e4 succeeds with all18 checks; five artifacts and source/JSON/SARIF digests independently verified. Monday07UTC restored. sarif_uploaded=false and public_results_published=false; restricted writer credentials and publication acceptance pending; legacy public-results workflow retained |
 | `security.yml` | — | CircleCI security-scans | Main security gates 218–220 passed; all tracked lockfiles remain scanned; SARIF publication parity pending |
@@ -622,3 +622,25 @@ checksum-pinned zizmor1.29.0 audit at the same high severity/confidence. PRs
 receive no context; the additional online main audit uses only the already
 restricted read-only context. SARIF artifact generation and SARIF publication
 are separate; publication is still not accepted.
+
+
+PR11966 merged as main `38433be0c32be9fe70a489173f153c773e214916`
+after pipeline378 passed33/33 jobs, exact-head Sonar and resolved review.
+The main online Actions audit6839 passed. Heavy acceptance continues in
+pipeline380 with four workers,16GiB, unchanged scope and85% coverage threshold;
+this launch does not establish acceptance.
+
+The diagram event candidate restores the three active retained docs checks:
+syntax with embedded diagrams and owned lint, targeted ChEMBL rendering with
+artifact/visibility checks, and PR source-to-SVG byte drift. Canonical commands
+and the Mermaid10.6.1 lockfile are retained; Node20 uses a digest-pinned browser
+image. Tool installation is outside the artifact directory. Full-corpus nightly
+rendering remains disabled by its existing policy. All three jobs gate PRs,
+with path-based early exits; drift runs only for pull requests. Remote acceptance
+is pending.
+
+The Router event workflow applies the retained Router/plugin paths to PRs and
+main pushes, including CI configuration changes for acceptance. It runs without
+credential contexts, and skips unrelated changes before dependencies or Docker.
+The host check requires bridge and both plugin jobs. Manual Router execution
+continues to enforce main. Event acceptance is separate from pipeline374.
