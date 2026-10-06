@@ -32,6 +32,7 @@ from scripts.engineering.ci.update_test_telemetry_baseline import (
 )
 
 ROOT = Path(__file__).resolve().parents[3]
+MANIFEST_NAME = "manifest.json"
 COMMON_UNIT_MARKER = (
     "not serial and not memory and not fs_contract and not subprocess_backed"
 )
@@ -263,12 +264,12 @@ def _scratch_path(path: Path) -> Path:
 
 def _write_manifest(path: Path, payload: dict[str, object]) -> None:
     directory = _scratch_path(path.parent)
-    if path.name != "manifest.json":
+    if path.name != MANIFEST_NAME:
         raise ValueError("Unexpected coverage manifest name")
     temporary = directory / "manifest.tmp"
     with temporary.open("x", encoding="utf-8") as stream:
         stream.write(json.dumps(payload, indent=2, sort_keys=True) + "\n")
-    temporary.replace(directory / "manifest.json")
+    temporary.replace(directory / MANIFEST_NAME)
 
 
 def _run_logged(command: list[str], log: Path, *, env: dict[str, str]) -> int:
@@ -441,7 +442,7 @@ def main(argv: list[str] | None = None) -> int:
     logs_dir = scratch / "logs"
     for directory in (shards_dir, junit_dir, logs_dir):
         directory.mkdir()
-    manifest_path = scratch / "manifest.json"
+    manifest_path = scratch / MANIFEST_NAME
     manifest: dict[str, object] = {
         "schema_version": 1,
         "producer": "run_local_coverage_verify.py",
