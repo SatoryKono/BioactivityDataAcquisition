@@ -1,6 +1,6 @@
 {
-  "additive_coverage_xml_path": "reports/quality/rf023-coverage-d57aae40-utf8/coverage.xml",
-  "additive_coverage_xml_sha256": "7fdc74b15fd7ea6bfa9edf3205599c4c81b6cd7085ea3a2a5f52fb1b551c6986",
+  "additive_coverage_xml_path": "reports/quality/rf023-coverage-6a1ec3ec-utf8/coverage.xml",
+  "additive_coverage_xml_sha256": "e562fc662dbdcd721565c589d58784c02fc874491c35d338c8f8a099150e0e71",
   "additive_measured_module_count": 2470,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
