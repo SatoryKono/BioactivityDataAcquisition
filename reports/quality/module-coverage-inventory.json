@@ -1,5 +1,5 @@
 {
-  "additive_coverage_xml_path": "reports/quality/rf023-coverage-0d25ef90-utf8/coverage.xml",
+  "additive_coverage_xml_path": "reports/quality/rf023-coverage-7a850b42-utf8/coverage.xml",
   "additive_coverage_xml_sha256": "e562fc662dbdcd721565c589d58784c02fc874491c35d338c8f8a099150e0e71",
   "additive_measured_module_count": 2470,
   "canonical_coverage_lane": "coverage-verify",
