@@ -1,0 +1,68 @@
+{
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "observed_at": "2026-10-06T12:18:56.330364+00:00",
+  "status": "PASS",
+  "host": "http://127.0.0.1:3000",
+  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:2b258e26410093577e524761ebdcfbd0ba36c7ba460692d277e1333c39b53a14",
+  "scope": "standard Grafana bootstrap, owned Scenes and SelectorShell; not every third-party plugin",
+  "prior_assessment_sha256": "6dbde773bae2e6306fa9c2b30311a80d7af9a14cb26140737f24093e6f0dc959",
+  "prior_assessment_source_commit": "bc2edfc743d15e4435aaa9028ae5d0a5844eecdd",
+  "not_a_new_upstream_source_trace": true,
+  "owned_inputs": [
+    {
+      "path": "grafana/tooling/router-v7-bridge/index.mjs",
+      "sha256": "eb4c404b42c0af3f3d1715ad4b191bd9e73564873b0fb650ba807c56ab580c3c",
+      "matches_assessed_input": true
+    },
+    {
+      "path": "grafana/tooling/router-v7-bridge/grafana-v13.2.3.patch",
+      "sha256": "66c5f4d7cf91284963fa35876a56c70c6ba0acc0f0f9c0829612ee08734ca269",
+      "matches_assessed_input": true
+    },
+    {
+      "path": "grafana/tooling/router-v7-bridge/runtime-probe/module.js",
+      "sha256": "288741b2d5a660c7b0badb1bc57082b299da43f44c246020d5941e4f17063800",
+      "matches_assessed_input": true
+    },
+    {
+      "path": "grafana/plugins/bioetl-scenes-app/src/components/App.tsx",
+      "sha256": "4bd4bbca18df7b289340ba4cb88fbe46b99f611b573f20df438ba1a055b86935",
+      "matches_assessed_input": true
+    },
+    {
+      "path": "grafana/plugins/bioetl-scenes-app/src/routes/registry.ts",
+      "sha256": "b8c626e1344a17ddc63009b8b330d755af5d021ca0ef65dd644e6033c8689b5f",
+      "matches_assessed_input": true
+    },
+    {
+      "path": "grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.tsx",
+      "sha256": "9f8962b1bbe000247a588fa2c1b6cb91e0ab22f96b03beb1e9dcb2ec939a5222",
+      "matches_assessed_input": true
+    },
+    {
+      "path": "grafana/plugins/bioetl-selectorshell-panel/src/sync.ts",
+      "sha256": "5d7e0110529dad52a4d206a4b503a0c62e3b9b733acf64f23c8e79ea167a037c",
+      "matches_assessed_input": true
+    }
+  ],
+  "default_host_browser_receipt_sha256": "4311ef0f660243965dc36c68d95bd0c17bf65034e38a5d12eee736edbe66b93b",
+  "hydration_fixtures": [
+    {
+      "name": "hydration ignores arbitrary constructor: BioETLHarmlessProbe",
+      "pass": true
+    },
+    {
+      "name": "hydration ignores arbitrary constructor: constructor",
+      "pass": true
+    },
+    {
+      "name": "hydration ignores arbitrary constructor: __proto__",
+      "pass": true
+    },
+    {
+      "name": "hydration ignores arbitrary constructor: TypeError",
+      "pass": true
+    }
+  ],
+  "limits": "Bounded standard-bootstrap/owned-plugin source assessment plus actual default-host constructor fixtures; does not prove every third-party plugin is client-only"
+}

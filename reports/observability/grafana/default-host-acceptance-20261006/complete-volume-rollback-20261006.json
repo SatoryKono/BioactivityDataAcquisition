@@ -1,0 +1,23 @@
+{
+  "created_at": "2026-10-06T12:13:33.737418+00:00",
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "status": "PASS",
+  "scope": "Isolated complete-volume restore and stock-host startup; production unchanged",
+  "backup_archive_sha256": "5fe1dd6e5f90a1c28f09a1e91c66a0ba86029676d62f43bd0a7d1acb59280d52",
+  "restored_database_sha256": "3202c0949539bc991f3c4ac7c5a316451a928213a89f68380fa079ae651e212c",
+  "plugin_manifests": [
+    "plugins/grafana-exploretraces-app/plugin.json",
+    "plugins/grafana-lokiexplore-app/plugin.json",
+    "plugins/grafana-metricsdrilldown-app/plugin.json",
+    "plugins/grafana-pyroscope-app/plugin.json",
+    "plugins/yesoreyeram-infinity-datasource/plugin.json"
+  ],
+  "container_id": "5d1f812dd64ec73051f45536298302a97a22634197866dab8608b14aef706346",
+  "isolated_volume": "bioetl-grafana-full-rollback-20261006-8d750e85c506",
+  "image": "mirror.gcr.io/grafana/grafana:12.2.5@sha256:e67fa772c14a0c728df61d7ac1b46d0da24e557efa729dbe1c404bf4403d6f35",
+  "health": {
+    "database": "ok",
+    "version": "12.2.5",
+    "commit": "ecff0d88680cea4ad32709cb3b94b790a7f58d25"
+  }
+}

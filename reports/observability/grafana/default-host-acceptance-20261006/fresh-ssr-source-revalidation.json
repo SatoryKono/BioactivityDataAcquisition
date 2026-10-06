@@ -1,0 +1,147 @@
+{
+  "captured_at": "2026-10-05T20:29:55.223636+00:00",
+  "source_commit": "bc2edfc743d15e4435aaa9028ae5d0a5844eecdd",
+  "scope": "standard Grafana bootstrap, owned Scenes and SelectorShell; not every third-party plugin",
+  "upstream_sha": "6193dc03311b631b9727b560d24369e683dc396e",
+  "archive_sha256": "222f8cd14b5345d024ab460d592c63c1e7432cb20a89e2dbcc86d7bfd83df3ac",
+  "raw_upstream": [
+    {
+      "path": "public/app/AppWrapper.tsx",
+      "sha256": "89f940c739cdc978f207f48fba79daf334fc28dd80f1645c316889c4c0906af2",
+      "git_blob": "88d65bc9ace4c6f94a49fb8a69e30acc843e2477",
+      "verified_against_fresh_archive": true
+    },
+    {
+      "path": "public/app/app.ts",
+      "sha256": "fddd518c5005bb504b66633ffffeb631dc884c6e06032bb45a1d855f636dd605",
+      "git_blob": "cf6a39f1b0d23493b1e2719e5183f79bbfb5862c",
+      "verified_against_fresh_archive": true
+    },
+    {
+      "path": "public/app/index.ts",
+      "sha256": "2a66632064d15b0a696688d2b3b1cc4a77309dcf1159ae0f7952ea005bfc1b66",
+      "git_blob": "e2ed20e094c8de17855832ad7cbc99a5a1f98843",
+      "verified_against_fresh_archive": true
+    },
+    {
+      "path": "public/app/core/navigation/GrafanaRoute.tsx",
+      "sha256": "961bb3793534a2427dd9e92cc524e2d6760a5bb0f2c4e084d5696b1e9a886cff",
+      "git_blob": "d0830c5a29a55c2c01949aeaf05fe68c08e4a976",
+      "verified_against_fresh_archive": true
+    },
+    {
+      "path": "public/app/features/plugins/loader/sharedDependencies.ts",
+      "sha256": "9892c29f1a69341b0eab74bb1b3cbac0ba344f8ba53fbf9d00b385020bcac3a3",
+      "git_blob": "3f2261d87d6c964dcbe5e0802238ecb12343103f",
+      "verified_against_fresh_archive": true
+    },
+    {
+      "path": "public/views/index.html",
+      "sha256": "338c8f4589d7c365f8e29ce431ba328265d688f46e400d9b7a9c2bf31df55066",
+      "git_blob": "a0761f80306a0112a4193a6546f65abb563d66d3",
+      "verified_against_fresh_archive": true
+    },
+    {
+      "path": "public/app/routes/RoutesWrapper.tsx",
+      "sha256": "3fe23c3c20c87a6a516490028c1a41c2996cb33352da5c0b55632070b2986c20",
+      "git_blob": "771c8a058e73f9f340e62dc574feb0284517e9b7",
+      "verified_against_fresh_archive": true
+    }
+  ],
+  "actual_patched_build_sources": [
+    {
+      "path": "public/app/AppWrapper.tsx",
+      "sha256": "fa054d0fcd4898345d9c46d66f60e96a7ed15e94d46dd3c136576756839c8081",
+      "hydrateRoot_occurrences": 0,
+      "createRoot_occurrences": 0
+    },
+    {
+      "path": "public/app/app.ts",
+      "sha256": "fddd518c5005bb504b66633ffffeb631dc884c6e06032bb45a1d855f636dd605",
+      "hydrateRoot_occurrences": 0,
+      "createRoot_occurrences": 2
+    },
+    {
+      "path": "public/app/index.ts",
+      "sha256": "2a66632064d15b0a696688d2b3b1cc4a77309dcf1159ae0f7952ea005bfc1b66",
+      "hydrateRoot_occurrences": 0,
+      "createRoot_occurrences": 0
+    },
+    {
+      "path": "public/app/core/navigation/GrafanaRoute.tsx",
+      "sha256": "c412f1d903f4f50ed586514bf1f3ad3ab1fb4979c5a430a5efb41cf06ccb407d",
+      "hydrateRoot_occurrences": 0,
+      "createRoot_occurrences": 0
+    },
+    {
+      "path": "public/app/features/plugins/loader/sharedDependencies.ts",
+      "sha256": "bbdd546db94795fe3cbe33da1ac8754e715bc470072da51ff51fd13eb106ed2a",
+      "hydrateRoot_occurrences": 0,
+      "createRoot_occurrences": 0
+    },
+    {
+      "path": "public/views/index.html",
+      "sha256": "338c8f4589d7c365f8e29ce431ba328265d688f46e400d9b7a9c2bf31df55066",
+      "hydrateRoot_occurrences": 0,
+      "createRoot_occurrences": 0
+    },
+    {
+      "path": "public/app/routes/RoutesWrapper.tsx",
+      "sha256": "0eedcd0726a834603f82a2909715f8c19c2beced3d35c44b809505b51b5faa25",
+      "hydrateRoot_occurrences": 0,
+      "createRoot_occurrences": 0
+    }
+  ],
+  "owned_sources": [
+    {
+      "path": "grafana/tooling/router-v7-bridge/index.mjs",
+      "sha256": "eb4c404b42c0af3f3d1715ad4b191bd9e73564873b0fb650ba807c56ab580c3c",
+      "unchanged": true
+    },
+    {
+      "path": "grafana/tooling/router-v7-bridge/grafana-v13.2.3.patch",
+      "sha256": "66c5f4d7cf91284963fa35876a56c70c6ba0acc0f0f9c0829612ee08734ca269",
+      "unchanged": true
+    },
+    {
+      "path": "grafana/tooling/router-v7-bridge/runtime-probe/module.js",
+      "sha256": "288741b2d5a660c7b0badb1bc57082b299da43f44c246020d5941e4f17063800",
+      "unchanged": true
+    },
+    {
+      "path": "grafana/plugins/bioetl-scenes-app/src/components/App.tsx",
+      "sha256": "4bd4bbca18df7b289340ba4cb88fbe46b99f611b573f20df438ba1a055b86935",
+      "unchanged": true
+    },
+    {
+      "path": "grafana/plugins/bioetl-scenes-app/src/routes/registry.ts",
+      "sha256": "b8c626e1344a17ddc63009b8b330d755af5d021ca0ef65dd644e6033c8689b5f",
+      "unchanged": true
+    },
+    {
+      "path": "grafana/plugins/bioetl-selectorshell-panel/src/components/SimplePanel.tsx",
+      "sha256": "9f8962b1bbe000247a588fa2c1b6cb91e0ab22f96b03beb1e9dcb2ec939a5222",
+      "unchanged": true
+    },
+    {
+      "path": "grafana/plugins/bioetl-selectorshell-panel/src/sync.ts",
+      "sha256": "5d7e0110529dad52a4d206a4b503a0c62e3b9b733acf64f23c8e79ea167a037c",
+      "unchanged": true
+    }
+  ],
+  "observations": [
+    "index.html supplies an empty reactRoot and app.ts mounts AppWrapper with createRoot().render(), not hydrateRoot().",
+    "AppWrapper renders routes through RoutesWrapper; pinned upstream wraps declarative legacy Router with CompatRouter; the committed patch and packed bridge replace the compat implementation with Router 7.18.4.",
+    "Scenes builds fixed registered routes under host-shared react-router; query variables are query parameters and are not constructor names.",
+    "SelectorShell consumes selected-run JSON, constructs URLSearchParams, and updates only four var-* values through locationService.partial. It does not feed serialized errors to a hydration API.",
+    "No attacker-selected serialized SSR error producer was found on this bounded bootstrap/caller trace. This is not a universal assertion that Grafana or arbitrary third-party plugins cannot use data-router hydration.",
+    "The acceptance probe deliberately enters createBrowserRouter error hydration on the actual shared host, with BioETLHarmlessProbe, constructor, __proto__ and TypeError. All four decoded as Error with no arbitrary constructor calls.",
+    "Fix is the supplied 7.18.4 dependency/runtime, not an absence-of-exploit claim. The private bridge is not an official Grafana backport."
+  ],
+  "fresh_host_receipt": {
+    "path": "fresh-host-security.json",
+    "sha256": "19b92da4b8d21958729315e30eb37910f052ef09e37a8da2920eeae8d487dc29"
+  },
+  "managed_rollout": "pending",
+  "closure": "NOT CLOSED"
+}

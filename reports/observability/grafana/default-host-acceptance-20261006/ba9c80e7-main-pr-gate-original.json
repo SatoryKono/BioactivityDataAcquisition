@@ -1,0 +1,377 @@
+{
+  "next_page_token" : null,
+  "items" : [ {
+    "job_number" : 6516,
+    "stopped_at" : "2026-10-06T11:42:45Z",
+    "started_at" : "2026-10-06T11:41:53Z",
+    "name" : "classify",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : { },
+    "status" : "success",
+    "id" : "3fec5a75-036a-40cb-b01c-bb689ef6d493",
+    "dependencies" : [ ]
+  }, {
+    "job_number" : 6533,
+    "stopped_at" : "2026-10-06T11:43:27Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "commit-lint",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "59385e35-6cf4-4d32-967c-ea9c322769a8",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6529,
+    "stopped_at" : "2026-10-06T11:43:29Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "compiled-artifacts",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "ba94e1ad-c3f1-4b7f-8973-1e7e83ce9412",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6538,
+    "stopped_at" : "2026-10-06T11:43:25Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "dependency-lock",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "70c0e128-8aa9-4e4d-b842-6158931b8e5a",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6519,
+    "stopped_at" : "2026-10-06T11:45:43Z",
+    "started_at" : "2026-10-06T11:43:14Z",
+    "name" : "docker-build",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "ed1a49f6-1a9c-40c8-ac54-e4ba06bc4845",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6537,
+    "stopped_at" : "2026-10-06T11:45:16Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "docs-governance",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "75a404c8-836f-4799-92dd-5bcdd3fed702",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6522,
+    "stopped_at" : "2026-10-06T11:43:48Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "dq-consistency",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "0ffc4e7b-b367-4571-9858-99b59de1446f",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6518,
+    "stopped_at" : "2026-10-06T11:46:01Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "duplication",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "6c3bfb50-c11c-4144-aed5-73d5283dfad6",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6528,
+    "stopped_at" : "2026-10-06T11:43:24Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "lint-arch",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "e61730e1-391c-4edc-8b7f-3991a98672e6",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6541,
+    "stopped_at" : "2026-10-06T11:43:30Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "lint-ruff",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "d98c20eb-3cf3-4b60-9f74-eae282560f6b",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6523,
+    "stopped_at" : "2026-10-06T11:44:15Z",
+    "started_at" : "2026-10-06T11:42:48Z",
+    "name" : "mypy",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "43e080a7-2082-46c2-a927-6ea4b6c472ea",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6531,
+    "stopped_at" : "2026-10-06T11:43:45Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "root-hygiene",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "852a6508-893f-4dab-9562-3bf3db84d4c6",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6534,
+    "stopped_at" : "2026-10-06T11:43:52Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "schema-governance",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "53663aac-4e9f-4ecf-b769-e36a2868f6ed",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6527,
+    "stopped_at" : "2026-10-06T11:48:45Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "security-scans",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "f5679933-78e7-4e53-8293-7b259fdd710a",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6524,
+    "stopped_at" : "2026-10-06T11:43:59Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "semantic-governance",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "0662dd5b-795d-4237-8206-e2eb832fe5b3",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6530,
+    "stopped_at" : "2026-10-06T11:45:19Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "test-fast-unit-application|tests/unit/application/",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "f9619213-e1ca-4fa2-8ed2-d70bb9672bbf",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6536,
+    "stopped_at" : "2026-10-06T11:46:11Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "test-fast-unit-domain|tests/unit/domain/",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "66b28e22-c934-4497-91b2-409f0f5d697a",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6525,
+    "stopped_at" : "2026-10-06T11:44:37Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "test-fast-unit-infrastructure|tests/unit/infrastructure/",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "a5522408-b87e-4f5a-8787-859a3b2c98e4",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6526,
+    "stopped_at" : "2026-10-06T11:44:59Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "test-fast-unit-other|tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/application/ --ignore=tests/unit/infrastructure/ --ignore=tests/unit/scripts/ --ignore=tests/unit/repo_backed/",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "b022f18c-d1d1-4b29-8ec1-aedb108dc189",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6540,
+    "stopped_at" : "2026-10-06T11:47:13Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "test-integration-integration|tests/integration/|-p no:xdist",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "0fad73ed-8ee0-4403-975b-e3a0413beec5",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6539,
+    "stopped_at" : "2026-10-06T11:43:43Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "test-integration-security|tests/security/|-n auto --dist loadscope",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "fa3d1e46-93f0-42d3-b0cd-a037ec755e8d",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6532,
+    "stopped_at" : "2026-10-06T11:44:41Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "test-integration-unit-application|tests/unit/application/|-n auto --dist loadscope",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "3219e86a-b804-4c1a-ba15-f3bf68073f71",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6521,
+    "stopped_at" : "2026-10-06T11:44:53Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "test-integration-unit-domain|tests/unit/domain/|-n auto --dist loadscope",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "a13f2e5a-39a2-49f5-a93b-2648fdb357b4",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6535,
+    "stopped_at" : "2026-10-06T11:44:47Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "test-integration-unit-infrastructure|tests/unit/infrastructure/|-n auto --dist loadscope",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "9dc7f954-fb30-41d9-8acd-d09b2e126d4a",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6520,
+    "stopped_at" : "2026-10-06T11:44:36Z",
+    "started_at" : "2026-10-06T11:42:48Z",
+    "name" : "test-integration-unit-other|tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/application/ --ignore=tests/unit/infrastructure/ --ignore=tests/unit/scripts/ --ignore=tests/unit/repo_backed/|-n auto --dist loadscope",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "ebaf1ea0-34b3-499c-b428-b1bbc3cd7773",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6517,
+    "stopped_at" : "2026-10-06T11:57:06Z",
+    "started_at" : "2026-10-06T11:42:47Z",
+    "name" : "arch-tests",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "3fec5a75-036a-40cb-b01c-bb689ef6d493" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "b1de9c1f-d480-430b-aaad-d01b8fde6781",
+    "dependencies" : [ "3fec5a75-036a-40cb-b01c-bb689ef6d493" ]
+  }, {
+    "job_number" : 6542,
+    "stopped_at" : "2026-10-06T11:57:14Z",
+    "started_at" : "2026-10-06T11:57:08Z",
+    "name" : "pr-gate-complete",
+    "project_slug" : "gh/SatoryKono/BioactivityDataAcquisition",
+    "type" : "build",
+    "requires" : {
+      "d98c20eb-3cf3-4b60-9f74-eae282560f6b" : [ "success" ],
+      "0fad73ed-8ee0-4403-975b-e3a0413beec5" : [ "success" ],
+      "fa3d1e46-93f0-42d3-b0cd-a037ec755e8d" : [ "success" ],
+      "70c0e128-8aa9-4e4d-b842-6158931b8e5a" : [ "success" ],
+      "75a404c8-836f-4799-92dd-5bcdd3fed702" : [ "success" ],
+      "66b28e22-c934-4497-91b2-409f0f5d697a" : [ "success" ],
+      "9dc7f954-fb30-41d9-8acd-d09b2e126d4a" : [ "success" ],
+      "53663aac-4e9f-4ecf-b769-e36a2868f6ed" : [ "success" ],
+      "59385e35-6cf4-4d32-967c-ea9c322769a8" : [ "success" ],
+      "3219e86a-b804-4c1a-ba15-f3bf68073f71" : [ "success" ],
+      "852a6508-893f-4dab-9562-3bf3db84d4c6" : [ "success" ],
+      "f9619213-e1ca-4fa2-8ed2-d70bb9672bbf" : [ "success" ],
+      "ba94e1ad-c3f1-4b7f-8973-1e7e83ce9412" : [ "success" ],
+      "e61730e1-391c-4edc-8b7f-3991a98672e6" : [ "success" ],
+      "f5679933-78e7-4e53-8293-7b259fdd710a" : [ "success" ],
+      "b022f18c-d1d1-4b29-8ec1-aedb108dc189" : [ "success" ],
+      "a5522408-b87e-4f5a-8787-859a3b2c98e4" : [ "success" ],
+      "0662dd5b-795d-4237-8206-e2eb832fe5b3" : [ "success" ],
+      "43e080a7-2082-46c2-a927-6ea4b6c472ea" : [ "success" ],
+      "0ffc4e7b-b367-4571-9858-99b59de1446f" : [ "success" ],
+      "a13f2e5a-39a2-49f5-a93b-2648fdb357b4" : [ "success" ],
+      "ebaf1ea0-34b3-499c-b428-b1bbc3cd7773" : [ "success" ],
+      "ed1a49f6-1a9c-40c8-ac54-e4ba06bc4845" : [ "success" ],
+      "6c3bfb50-c11c-4144-aed5-73d5283dfad6" : [ "success" ],
+      "b1de9c1f-d480-430b-aaad-d01b8fde6781" : [ "success" ]
+    },
+    "status" : "success",
+    "id" : "92643afb-7bec-4cd0-b80c-9a8e5df0d75d",
+    "dependencies" : [ "852a6508-893f-4dab-9562-3bf3db84d4c6", "9dc7f954-fb30-41d9-8acd-d09b2e126d4a", "a13f2e5a-39a2-49f5-a93b-2648fdb357b4", "a5522408-b87e-4f5a-8787-859a3b2c98e4", "b022f18c-d1d1-4b29-8ec1-aedb108dc189", "b1de9c1f-d480-430b-aaad-d01b8fde6781", "ba94e1ad-c3f1-4b7f-8973-1e7e83ce9412", "d98c20eb-3cf3-4b60-9f74-eae282560f6b", "e61730e1-391c-4edc-8b7f-3991a98672e6", "ebaf1ea0-34b3-499c-b428-b1bbc3cd7773", "ed1a49f6-1a9c-40c8-ac54-e4ba06bc4845", "f5679933-78e7-4e53-8293-7b259fdd710a", "f9619213-e1ca-4fa2-8ed2-d70bb9672bbf", "fa3d1e46-93f0-42d3-b0cd-a037ec755e8d", "0662dd5b-795d-4237-8206-e2eb832fe5b3", "0fad73ed-8ee0-4403-975b-e3a0413beec5", "0ffc4e7b-b367-4571-9858-99b59de1446f", "3219e86a-b804-4c1a-ba15-f3bf68073f71", "43e080a7-2082-46c2-a927-6ea4b6c472ea", "53663aac-4e9f-4ecf-b769-e36a2868f6ed", "59385e35-6cf4-4d32-967c-ea9c322769a8", "66b28e22-c934-4497-91b2-409f0f5d697a", "6c3bfb50-c11c-4144-aed5-73d5283dfad6", "70c0e128-8aa9-4e4d-b842-6158931b8e5a", "75a404c8-836f-4799-92dd-5bcdd3fed702" ]
+  } ]
+}

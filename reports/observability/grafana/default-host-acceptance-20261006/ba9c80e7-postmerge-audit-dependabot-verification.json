@@ -1,0 +1,123 @@
+{
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "observed_at": "2026-10-06T11:43:53.640631+00:00",
+  "status": "PASS",
+  "audit_count": 7,
+  "audits": [
+    {
+      "path": ".",
+      "original": "ba9c80e7-postmerge-audit-root.json",
+      "original_sha256": "899309c3d316d85d6e46affdc879713528e72a1bdb8d78c1c56436e0c88a0c2e",
+      "lock_sha256": "74dc8302d70dfff7d620225b6f2417190cf79f3a22d443b4cf47b3e0516097d4",
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      }
+    },
+    {
+      "path": ".github/actions/setup-mermaid",
+      "original": "ba9c80e7-postmerge-audit-.github-actions-setup-mermaid.json",
+      "original_sha256": "57f372f43090b43b3b42263c399e9647eb00016c9652d0a8bc7b0e85c5b765c6",
+      "lock_sha256": "573e067e8534486de58d099d1d826695ab790cdd253ca4380602f3e2c9e54fb6",
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      }
+    },
+    {
+      "path": ".github/tooling/jscpd",
+      "original": "ba9c80e7-postmerge-audit-.github-tooling-jscpd.json",
+      "original_sha256": "7c00d15fa2bb6891c6e217fcea4b68ada42135fbdb39d6c6c39eb65795df4ad4",
+      "lock_sha256": "2a345ac766e101d2f125fc0d1b4f2aa1546fbfcefc069c902d2cdcc562475eb1",
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      }
+    },
+    {
+      "path": "scripts/ai/gemini/npm-tooling",
+      "original": "ba9c80e7-postmerge-audit-scripts-ai-gemini-npm-tooling.json",
+      "original_sha256": "6b97f3c81fd919a0a5d525cb69cec3569bde0a53ecbcc246ceb533cbd1833ea6",
+      "lock_sha256": "1358fd8c5c86d859ccff8bd1bb4aac1b336b0c14b9d384b4bb6dd5d47891a3ef",
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      }
+    },
+    {
+      "path": "grafana/plugins/bioetl-scenes-app",
+      "original": "ba9c80e7-postmerge-audit-grafana-plugins-bioetl-scenes-app.json",
+      "original_sha256": "235b01e4c2d33876cc0da51c91a6c8b9e208485a501833b28733fa954fc25f21",
+      "lock_sha256": "c56f2850804134ff41ca2025a1f9a27e81617d8257e3625adcb820de6ea8f408",
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      }
+    },
+    {
+      "path": "grafana/plugins/bioetl-selectorshell-panel",
+      "original": "ba9c80e7-postmerge-audit-grafana-plugins-bioetl-selectorshell-panel.json",
+      "original_sha256": "3bcff81cf0ea5da2ba017d0dc7f1519521c2188a897f727bd3b7915390b0c245",
+      "lock_sha256": "435834f1d8f1cf6a60884c8f7b68bd1f96bef134a8b6de9bf57f40907cb4d608",
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      }
+    },
+    {
+      "path": "grafana/tooling/router-v7-bridge",
+      "original": "ba9c80e7-postmerge-audit-grafana-tooling-router-v7-bridge.json",
+      "original_sha256": "af482eb48158cc8f344935a5e989030fb3fabf4fd6d3145a537a76b7a53c05b9",
+      "lock_sha256": "01a8eaf5b0e18140f2f79a9146124a2b4826f729f04ababc2ca9f41c08343bde",
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      }
+    }
+  ],
+  "open_dependabot_alerts": 0,
+  "dependabot_original": "ba9c80e7-postmerge-dependabot-open.json",
+  "target_fixed": [
+    {
+      "number": 75,
+      "state": "fixed",
+      "ghsa": "GHSA-wrjc-x8rr-h8h6",
+      "manifest": "grafana/plugins/bioetl-selectorshell-panel/package-lock.json"
+    },
+    {
+      "number": 74,
+      "state": "fixed",
+      "ghsa": "GHSA-337j-9hxr-rhxg",
+      "manifest": "grafana/plugins/bioetl-selectorshell-panel/package-lock.json"
+    }
+  ],
+  "scope": "Post-merge exact-lock audits and live Dependabot state; runtime and image SBOM are separate receipts"
+}

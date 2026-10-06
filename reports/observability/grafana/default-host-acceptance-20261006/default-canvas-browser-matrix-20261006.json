@@ -1,0 +1,5109 @@
+{
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "observed_at": "2026-10-06T12:23:34.598Z",
+  "status": "PASS",
+  "host": "http://127.0.0.1:3000",
+  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:2b258e26410093577e524761ebdcfbd0ba36c7ba460692d277e1333c39b53a14",
+  "container_id": "a471f5ccac3f6820d34206b009621115c05e807882b32825d6bdb8183499c2db",
+  "case_count": 6,
+  "capture_count": 24,
+  "rows": [
+    {
+      "case": "no-run",
+      "mode": "dashboard",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-canvas-no-run-20261006/bioetl-owned-default-canvas-no-run?from=now-12h&to=now&timezone=browser",
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - generic \"BioETL owned default Canvas no-run\"\n  - button \"Mark \\\"BioETL owned default Canvas no-run\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"SELECT RUN\":\n        - generic: SELECT RUN\n      - button \"Choose a run\":\n        - generic: Choose a run\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-no-run-dashboard-1280.png",
+      "pass": true
+    },
+    {
+      "case": "no-run",
+      "mode": "fullscreen",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-canvas-no-run-20261006/bioetl-owned-default-canvas-no-run?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+      "expected": [
+        "SELECT RUN",
+        "Choose a run"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 44,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 545.28125,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 778,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 1132,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1193,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1238,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 702.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 736.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 897.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 931.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 975.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1072,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1114,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1150,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 1194,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 1169,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 995,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 16,
+              "width": 16,
+              "x": 1164,
+              "y": 128
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 1192,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 207,
+              "x": 999,
+              "y": 176
+            },
+            "text": "Back to dashboard"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 201
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 258
+            },
+            "text": ""
+          }
+        ],
+        "height": 720,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas no-run\nView panel\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nSELECT RUN\nChoose a run\nView panel\nBack to dashboard",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-canvas-no-run-20261006/bioetl-owned-default-canvas-no-run?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+        "width": 1280
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - link \"BioETL owned default Canvas no-run\":\n        - /url: /d/bioetl-default-canvas-no-run-20261006/bioetl-owned-default-canvas-no-run?from=now-12h&to=now&timezone=browser\n      - generic \"View panel\"\n  - button \"Mark \\\"BioETL owned default Canvas no-run\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"SELECT RUN\":\n        - generic: SELECT RUN\n      - button \"Choose a run\":\n        - generic: Choose a run\n  - button \"Go back\" [disabled]:\n  - generic: View panel\n  - button \"Dock\":\n  - button \"Close\":\n  - button \"Back to dashboard\":\n    - generic: Back to dashboard\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"View panel controls\" [expanded]:\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-no-run-fullscreen-1280.png",
+      "pass": true
+    },
+    {
+      "case": "no-run",
+      "mode": "fullscreen",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-canvas-no-run-20261006/bioetl-owned-default-canvas-no-run?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+      "expected": [
+        "SELECT RUN",
+        "Choose a run"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 40.15625,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 468,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 522,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 876,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 937,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 982,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 446.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 480.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 641.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 675.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 719.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 816,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 858,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 894,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 938,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 913,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 739,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 16,
+              "width": 16,
+              "x": 908,
+              "y": 128
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 936,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 207,
+              "x": 743,
+              "y": 176
+            },
+            "text": "Back to dashboard"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 201
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 258
+            },
+            "text": ""
+          }
+        ],
+        "height": 768,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas no-run\nView panel\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nSELECT RUN\nChoose a run\nView panel\nBack to dashboard",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-canvas-no-run-20261006/bioetl-owned-default-canvas-no-run?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+        "width": 1024
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - link \"BioETL owned default Canvas no-run\":\n        - /url: /d/bioetl-default-canvas-no-run-20261006/bioetl-owned-default-canvas-no-run?from=now-12h&to=now&timezone=browser\n      - generic \"View panel\"\n  - button \"Mark \\\"BioETL owned default Canvas no-run\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"SELECT RUN\":\n        - generic: SELECT RUN\n      - button \"Choose a run\":\n        - generic: Choose a run\n  - button \"Go back\" [disabled]:\n  - generic: View panel\n  - button \"Dock\":\n  - button \"Close\":\n  - button \"Back to dashboard\":\n    - generic: Back to dashboard\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"View panel controls\" [expanded]:\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-no-run-fullscreen-1024.png",
+      "pass": true
+    },
+    {
+      "case": "no-run",
+      "mode": "dashboard",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-canvas-no-run-20261006/bioetl-owned-default-canvas-no-run?from=now-12h&to=now&timezone=browser",
+      "expected": [
+        "SELECT RUN",
+        "Choose a run"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 44,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 447.03125,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 522,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 876,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 937,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 982,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 446.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 480.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 641.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 675.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 719.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 816,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 858,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 894,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 938,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 913,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 218
+            },
+            "text": ""
+          }
+        ],
+        "height": 768,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas no-run\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nSELECT RUN\nChoose a run",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-canvas-no-run-20261006/bioetl-owned-default-canvas-no-run?from=now-12h&to=now&timezone=browser",
+        "width": 1024
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - generic \"BioETL owned default Canvas no-run\"\n  - button \"Mark \\\"BioETL owned default Canvas no-run\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"Menu for panel Review Data Quality\":\n      - button \"SELECT RUN\":\n        - generic: SELECT RUN\n      - button \"Choose a run\":\n        - generic: Choose a run\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-no-run-dashboard-1024.png",
+      "pass": true
+    },
+    {
+      "case": "missing-tree",
+      "mode": "dashboard",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-c-missing-tree-20261006/bioetl-owned-default-canvas-missing-tree?from=now-12h&to=now&timezone=browser",
+      "expected": [
+        "UNKNOWN",
+        "excluded UNKNOWN"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 42.984375,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 468,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 522,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 876,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 937,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 982,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 446.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 480.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 641.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 675.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 719.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 816,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 858,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 894,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 938,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 913,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 218
+            },
+            "text": ""
+          }
+        ],
+        "height": 768,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas missing-tree\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nUNKNOWN\nexcluded UNKNOWN",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-c-missing-tree-20261006/bioetl-owned-default-canvas-missing-tree?from=now-12h&to=now&timezone=browser",
+        "width": 1024
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - generic \"BioETL owned default Canvas missing-tree\"\n  - button \"Mark \\\"BioETL owned default Canvas missing-tree\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"UNKNOWN\":\n        - generic: UNKNOWN\n      - button \"excluded UNKNOWN\":\n        - generic: excluded UNKNOWN\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-missing-tree-dashboard-1024.png",
+      "pass": true
+    },
+    {
+      "case": "missing-tree",
+      "mode": "fullscreen",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-c-missing-tree-20261006/bioetl-owned-default-canvas-missing-tree?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+      "expected": [
+        "UNKNOWN",
+        "excluded UNKNOWN"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 38.65625,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 468,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 522,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 876,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 937,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 982,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 446.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 480.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 641.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 675.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 719.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 816,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 858,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 894,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 938,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 913,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 739,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 16,
+              "width": 16,
+              "x": 908,
+              "y": 128
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 936,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 207,
+              "x": 743,
+              "y": 176
+            },
+            "text": "Back to dashboard"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 201
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 258
+            },
+            "text": ""
+          }
+        ],
+        "height": 768,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas missing-tree\nView panel\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nUNKNOWN\nexcluded UNKNOWN\nView panel\nBack to dashboard",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-c-missing-tree-20261006/bioetl-owned-default-canvas-missing-tree?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+        "width": 1024
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - link \"BioETL owned default Canvas missing-tree\":\n        - /url: /d/bioetl-default-c-missing-tree-20261006/bioetl-owned-default-canvas-missing-tree?from=now-12h&to=now&timezone=browser\n      - generic \"View panel\"\n  - button \"Mark \\\"BioETL owned default Canvas missing-tree\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"UNKNOWN\":\n        - generic: UNKNOWN\n      - button \"excluded UNKNOWN\":\n        - generic: excluded UNKNOWN\n  - button \"Go back\" [disabled]:\n  - generic: View panel\n  - button \"Dock\":\n  - button \"Close\":\n  - button \"Back to dashboard\":\n    - generic: Back to dashboard\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"View panel controls\" [expanded]:\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-missing-tree-fullscreen-1024.png",
+      "pass": true
+    },
+    {
+      "case": "missing-tree",
+      "mode": "fullscreen",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-c-missing-tree-20261006/bioetl-owned-default-canvas-missing-tree?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+      "expected": [
+        "UNKNOWN",
+        "excluded UNKNOWN"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 44,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 584.3125,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 778,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 1132,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1193,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1238,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 702.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 736.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 897.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 931.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 975.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1072,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1114,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1150,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 1194,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 1169,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 995,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 16,
+              "width": 16,
+              "x": 1164,
+              "y": 128
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 1192,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 207,
+              "x": 999,
+              "y": 176
+            },
+            "text": "Back to dashboard"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 201
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 258
+            },
+            "text": ""
+          }
+        ],
+        "height": 720,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas missing-tree\nView panel\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nUNKNOWN\nexcluded UNKNOWN\nView panel\nBack to dashboard",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-c-missing-tree-20261006/bioetl-owned-default-canvas-missing-tree?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+        "width": 1280
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - link \"BioETL owned default Canvas missing-tree\":\n        - /url: /d/bioetl-default-c-missing-tree-20261006/bioetl-owned-default-canvas-missing-tree?from=now-12h&to=now&timezone=browser\n      - generic \"View panel\"\n  - button \"Mark \\\"BioETL owned default Canvas missing-tree\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"Menu for panel Review Data Quality\":\n      - button \"UNKNOWN\":\n        - generic: UNKNOWN\n      - button \"excluded UNKNOWN\":\n        - generic: excluded UNKNOWN\n  - button \"Go back\" [disabled]:\n  - generic: View panel\n  - button \"Dock\":\n  - button \"Close\":\n  - button \"Back to dashboard\":\n    - generic: Back to dashboard\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"View panel controls\" [expanded]:\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-missing-tree-fullscreen-1280.png",
+      "pass": true
+    },
+    {
+      "case": "missing-tree",
+      "mode": "dashboard",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-c-missing-tree-20261006/bioetl-owned-default-canvas-missing-tree?from=now-12h&to=now&timezone=browser",
+      "expected": [
+        "UNKNOWN",
+        "excluded UNKNOWN"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 44,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 486.0625,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 778,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 1132,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1193,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1238,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 702.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 736.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 897.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 931.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 975.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1072,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1114,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1150,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 1194,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 1169,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 218
+            },
+            "text": ""
+          }
+        ],
+        "height": 720,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas missing-tree\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nUNKNOWN\nexcluded UNKNOWN",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-c-missing-tree-20261006/bioetl-owned-default-canvas-missing-tree?from=now-12h&to=now&timezone=browser",
+        "width": 1280
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - generic \"BioETL owned default Canvas missing-tree\"\n  - button \"Mark \\\"BioETL owned default Canvas missing-tree\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"Menu for panel Review Data Quality\":\n      - button \"UNKNOWN\":\n        - generic: UNKNOWN\n      - button \"excluded UNKNOWN\":\n        - generic: excluded UNKNOWN\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-missing-tree-dashboard-1280.png",
+      "pass": true
+    },
+    {
+      "case": "missing-report",
+      "mode": "dashboard",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-c-missing-report-20261006/bioetl-owned-default-canvas-missing-report?from=now-12h&to=now&timezone=browser",
+      "expected": [
+        "UNKNOWN",
+        "excluded UNKNOWN"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 42.21875,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 468,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 522,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 876,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 937,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 982,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 446.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 480.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 641.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 675.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 719.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 816,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 858,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 894,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 938,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 913,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 218
+            },
+            "text": ""
+          }
+        ],
+        "height": 768,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas missing-report\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nUNKNOWN\nexcluded UNKNOWN",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-c-missing-report-20261006/bioetl-owned-default-canvas-missing-report?from=now-12h&to=now&timezone=browser",
+        "width": 1024
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - generic \"BioETL owned default Canvas missing-report\"\n  - button \"Mark \\\"BioETL owned default Canvas missing-report\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"UNKNOWN\":\n        - generic: UNKNOWN\n      - button \"excluded UNKNOWN\":\n        - generic: excluded UNKNOWN\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-missing-report-dashboard-1024.png",
+      "pass": true
+    },
+    {
+      "case": "missing-report",
+      "mode": "fullscreen",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-c-missing-report-20261006/bioetl-owned-default-canvas-missing-report?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+      "expected": [
+        "UNKNOWN",
+        "excluded UNKNOWN"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 38.140625,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 468,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 522,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 876,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 937,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 982,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 446.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 480.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 641.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 675.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 719.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 816,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 858,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 894,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 938,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 913,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 739,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 16,
+              "width": 16,
+              "x": 908,
+              "y": 128
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 936,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 207,
+              "x": 743,
+              "y": 176
+            },
+            "text": "Back to dashboard"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 201
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 258
+            },
+            "text": ""
+          }
+        ],
+        "height": 768,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas missing-report\nView panel\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nUNKNOWN\nexcluded UNKNOWN\nView panel\nBack to dashboard",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-c-missing-report-20261006/bioetl-owned-default-canvas-missing-report?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+        "width": 1024
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - link \"BioETL owned default Canvas missing-report\":\n        - /url: /d/bioetl-default-c-missing-report-20261006/bioetl-owned-default-canvas-missing-report?from=now-12h&to=now&timezone=browser\n      - generic \"View panel\"\n  - button \"Mark \\\"BioETL owned default Canvas missing-report\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"UNKNOWN\":\n        - generic: UNKNOWN\n      - button \"excluded UNKNOWN\":\n        - generic: excluded UNKNOWN\n  - button \"Go back\" [disabled]:\n  - generic: View panel\n  - button \"Dock\":\n  - button \"Close\":\n  - button \"Back to dashboard\":\n    - generic: Back to dashboard\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"View panel controls\" [expanded]:\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-missing-report-fullscreen-1024.png",
+      "pass": true
+    },
+    {
+      "case": "missing-report",
+      "mode": "fullscreen",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-c-missing-report-20261006/bioetl-owned-default-canvas-missing-report?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+      "expected": [
+        "UNKNOWN",
+        "excluded UNKNOWN"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 43.875,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 596,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 778,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 1132,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1193,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1238,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 702.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 736.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 897.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 931.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 975.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1072,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1114,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1150,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 1194,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 1169,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 995,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 16,
+              "width": 16,
+              "x": 1164,
+              "y": 128
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 1192,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 207,
+              "x": 999,
+              "y": 176
+            },
+            "text": "Back to dashboard"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 201
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 258
+            },
+            "text": ""
+          }
+        ],
+        "height": 720,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas missing-report\nView panel\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nUNKNOWN\nexcluded UNKNOWN\nView panel\nBack to dashboard",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-c-missing-report-20261006/bioetl-owned-default-canvas-missing-report?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+        "width": 1280
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - link \"BioETL owned default Canvas missing-report\":\n        - /url: /d/bioetl-default-c-missing-report-20261006/bioetl-owned-default-canvas-missing-report?from=now-12h&to=now&timezone=browser\n      - generic \"View panel\"\n  - button \"Mark \\\"BioETL owned default Canvas missing-report\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"Menu for panel Review Data Quality\":\n      - button \"UNKNOWN\":\n        - generic: UNKNOWN\n      - button \"excluded UNKNOWN\":\n        - generic: excluded UNKNOWN\n  - button \"Go back\" [disabled]:\n  - generic: View panel\n  - button \"Dock\":\n  - button \"Close\":\n  - button \"Back to dashboard\":\n    - generic: Back to dashboard\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"View panel controls\" [expanded]:\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-missing-report-fullscreen-1280.png",
+      "pass": true
+    },
+    {
+      "case": "missing-report",
+      "mode": "dashboard",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-c-missing-report-20261006/bioetl-owned-default-canvas-missing-report?from=now-12h&to=now&timezone=browser",
+      "expected": [
+        "UNKNOWN",
+        "excluded UNKNOWN"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 44,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 500.65625,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 778,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 1132,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1193,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1238,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 702.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 736.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 897.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 931.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 975.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1072,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1114,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1150,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 1194,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 1169,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 218
+            },
+            "text": ""
+          }
+        ],
+        "height": 720,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas missing-report\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nUNKNOWN\nexcluded UNKNOWN",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-c-missing-report-20261006/bioetl-owned-default-canvas-missing-report?from=now-12h&to=now&timezone=browser",
+        "width": 1280
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - generic \"BioETL owned default Canvas missing-report\"\n  - button \"Mark \\\"BioETL owned default Canvas missing-report\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"Menu for panel Review Data Quality\":\n      - button \"UNKNOWN\":\n        - generic: UNKNOWN\n      - button \"excluded UNKNOWN\":\n        - generic: excluded UNKNOWN\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-missing-report-dashboard-1280.png",
+      "pass": true
+    },
+    {
+      "case": "real-run",
+      "mode": "dashboard",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-canvas-real-run-20261006/bioetl-owned-default-canvas-real-run?from=now-12h&to=now&timezone=browser",
+      "expected": [
+        "OK",
+        "excluded 0%"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 44,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 455.25,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 522,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 876,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 937,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 982,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 446.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 480.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 641.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 675.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 719.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 816,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 858,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 894,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 938,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 913,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 218
+            },
+            "text": ""
+          }
+        ],
+        "height": 768,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas real-run\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nOK\nexcluded 0%",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-canvas-real-run-20261006/bioetl-owned-default-canvas-real-run?from=now-12h&to=now&timezone=browser",
+        "width": 1024
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - generic \"BioETL owned default Canvas real-run\"\n  - button \"Mark \\\"BioETL owned default Canvas real-run\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"OK\":\n        - generic: OK\n      - button \"excluded 0%\":\n        - generic: excluded 0%\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-real-run-dashboard-1024.png",
+      "pass": true
+    },
+    {
+      "case": "real-run",
+      "mode": "fullscreen",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-canvas-real-run-20261006/bioetl-owned-default-canvas-real-run?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+      "expected": [
+        "OK",
+        "excluded 0%"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 39.828125,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 468,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 522,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 876,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 937,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 982,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 446.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 480.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 641.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 675.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 719.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 816,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 858,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 894,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 938,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 913,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 739,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 16,
+              "width": 16,
+              "x": 908,
+              "y": 128
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 936,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 207,
+              "x": 743,
+              "y": 176
+            },
+            "text": "Back to dashboard"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 201
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 258
+            },
+            "text": ""
+          }
+        ],
+        "height": 768,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas real-run\nView panel\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nOK\nexcluded 0%\nView panel\nBack to dashboard",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-canvas-real-run-20261006/bioetl-owned-default-canvas-real-run?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+        "width": 1024
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - link \"BioETL owned default Canvas real-run\":\n        - /url: /d/bioetl-default-canvas-real-run-20261006/bioetl-owned-default-canvas-real-run?from=now-12h&to=now&timezone=browser\n      - generic \"View panel\"\n  - button \"Mark \\\"BioETL owned default Canvas real-run\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"OK\":\n        - generic: OK\n      - button \"excluded 0%\":\n        - generic: excluded 0%\n  - button \"Go back\" [disabled]:\n  - generic: View panel\n  - button \"Dock\":\n  - button \"Close\":\n  - button \"Back to dashboard\":\n    - generic: Back to dashboard\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"View panel controls\" [expanded]:\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-real-run-fullscreen-1024.png",
+      "pass": true
+    },
+    {
+      "case": "real-run",
+      "mode": "fullscreen",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-canvas-real-run-20261006/bioetl-owned-default-canvas-real-run?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+      "expected": [
+        "OK",
+        "excluded 0%"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 44,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 553.5,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 778,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 1132,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1193,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1238,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 702.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 736.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 897.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 931.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 975.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1072,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1114,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1150,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 1194,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 1169,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 995,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 16,
+              "width": 16,
+              "x": 1164,
+              "y": 128
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 1192,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 207,
+              "x": 999,
+              "y": 176
+            },
+            "text": "Back to dashboard"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 201
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 258
+            },
+            "text": ""
+          }
+        ],
+        "height": 720,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas real-run\nView panel\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nOK\nexcluded 0%\nView panel\nBack to dashboard",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-canvas-real-run-20261006/bioetl-owned-default-canvas-real-run?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+        "width": 1280
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - link \"BioETL owned default Canvas real-run\":\n        - /url: /d/bioetl-default-canvas-real-run-20261006/bioetl-owned-default-canvas-real-run?from=now-12h&to=now&timezone=browser\n      - generic \"View panel\"\n  - button \"Mark \\\"BioETL owned default Canvas real-run\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"Menu for panel Review Data Quality\":\n      - button \"OK\":\n        - generic: OK\n      - button \"excluded 0%\":\n        - generic: excluded 0%\n  - button \"Go back\" [disabled]:\n  - generic: View panel\n  - button \"Dock\":\n  - button \"Close\":\n  - button \"Back to dashboard\":\n    - generic: Back to dashboard\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"View panel controls\" [expanded]:\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-real-run-fullscreen-1280.png",
+      "pass": true
+    },
+    {
+      "case": "real-run",
+      "mode": "dashboard",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-canvas-real-run-20261006/bioetl-owned-default-canvas-real-run?from=now-12h&to=now&timezone=browser",
+      "expected": [
+        "OK",
+        "excluded 0%"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 44,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 455.25,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 778,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 1132,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1193,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1238,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 702.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 736.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 897.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 931.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 975.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1072,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1114,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1150,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 1194,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 1169,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 218
+            },
+            "text": ""
+          }
+        ],
+        "height": 720,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas real-run\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nOK\nexcluded 0%",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-canvas-real-run-20261006/bioetl-owned-default-canvas-real-run?from=now-12h&to=now&timezone=browser",
+        "width": 1280
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - generic \"BioETL owned default Canvas real-run\"\n  - button \"Mark \\\"BioETL owned default Canvas real-run\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"Menu for panel Review Data Quality\":\n      - button \"OK\":\n        - generic: OK\n      - button \"excluded 0%\":\n        - generic: excluded 0%\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-real-run-dashboard-1280.png",
+      "pass": true
+    },
+    {
+      "case": "http-error",
+      "mode": "dashboard",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error?from=now-12h&to=now&timezone=browser",
+      "expected": [
+        "QUERY ERROR",
+        "404 Not Found"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 44,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 467.15625,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 522,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 876,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 937,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 982,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 446.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 480.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 641.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 675.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 719.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 816,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 858,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 894,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 938,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 22,
+              "x": 25,
+              "y": 122.09375
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 913,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 218
+            },
+            "text": ""
+          }
+        ],
+        "height": 768,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas http-error\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nQUERY ERROR\nerror while performing the infinity query. unsuccessful HTTP response code status code : 404 Not Found",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error?from=now-12h&to=now&timezone=browser",
+        "width": 1024
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - generic \"BioETL owned default Canvas http-error\"\n  - button \"Mark \\\"BioETL owned default Canvas http-error\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - button \"Panel status\":\n      - heading \"Review Data Quality\" [level=2]\n      - alert \"QUERY ERROR\":\n        - text: QUERY ERROR\n        - generic: \"error while performing the infinity query. unsuccessful HTTP response code status code : 404 Not Found\"\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-http-error-dashboard-1024.png",
+      "pass": true
+    },
+    {
+      "case": "http-error",
+      "mode": "fullscreen",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+      "expected": [
+        "QUERY ERROR",
+        "404 Not Found"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 39.359375,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 468,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 522,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 876,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 937,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 982,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 446.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 480.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 641.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 675.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 719.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 816,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 858,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 894,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 938,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 22,
+              "x": 25,
+              "y": 122.09375
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 913,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 739,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 16,
+              "width": 16,
+              "x": 908,
+              "y": 128
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 936,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 207,
+              "x": 743,
+              "y": 176
+            },
+            "text": "Back to dashboard"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 201
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 258
+            },
+            "text": ""
+          }
+        ],
+        "height": 768,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas http-error\nView panel\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nQUERY ERROR\nerror while performing the infinity query. unsuccessful HTTP response code status code : 404 Not Found\nView panel\nBack to dashboard",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+        "width": 1024
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - link \"BioETL owned default Canvas http-error\":\n        - /url: /d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error?from=now-12h&to=now&timezone=browser\n      - generic \"View panel\"\n  - button \"Mark \\\"BioETL owned default Canvas http-error\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - button \"Panel status\":\n      - heading \"Review Data Quality\" [level=2]\n      - alert \"QUERY ERROR\":\n        - text: QUERY ERROR\n        - generic: \"error while performing the infinity query. unsuccessful HTTP response code status code : 404 Not Found\"\n  - button \"Go back\" [disabled]:\n  - generic: View panel\n  - button \"Dock\":\n  - button \"Close\":\n  - button \"Back to dashboard\":\n    - generic: Back to dashboard\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"View panel controls\" [expanded]:\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-http-error-fullscreen-1024.png",
+      "pass": true
+    },
+    {
+      "case": "http-error",
+      "mode": "fullscreen",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+      "expected": [
+        "QUERY ERROR",
+        "404 Not Found"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 44,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 565.40625,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 778,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 1132,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1193,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1238,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 702.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 736.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 897.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 931.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 975.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1072,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1114,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1150,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 1194,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 22,
+              "x": 25,
+              "y": 122.09375
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 1169,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 995,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 16,
+              "width": 16,
+              "x": 1164,
+              "y": 128
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 1192,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 207,
+              "x": 999,
+              "y": 176
+            },
+            "text": "Back to dashboard"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 201
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 258
+            },
+            "text": ""
+          }
+        ],
+        "height": 720,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas http-error\nView panel\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nQUERY ERROR\nerror while performing the infinity query. unsuccessful HTTP response code status code : 404 Not Found\nView panel\nBack to dashboard",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+        "width": 1280
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - link \"BioETL owned default Canvas http-error\":\n        - /url: /d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error?from=now-12h&to=now&timezone=browser\n      - generic \"View panel\"\n  - button \"Mark \\\"BioETL owned default Canvas http-error\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - button \"Panel status\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"Menu for panel Review Data Quality\":\n      - alert \"QUERY ERROR\":\n        - text: QUERY ERROR\n        - generic: \"error while performing the infinity query. unsuccessful HTTP response code status code : 404 Not Found\"\n  - button \"Go back\" [disabled]:\n  - generic: View panel\n  - button \"Dock\":\n  - button \"Close\":\n  - button \"Back to dashboard\":\n    - generic: Back to dashboard\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"View panel controls\" [expanded]:\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-http-error-fullscreen-1280.png",
+      "pass": true
+    },
+    {
+      "case": "http-error",
+      "mode": "dashboard",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error?from=now-12h&to=now&timezone=browser",
+      "expected": [
+        "QUERY ERROR",
+        "404 Not Found"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 44,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 467.15625,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 778,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 1132,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1193,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1238,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 702.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 736.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 897.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 931.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 975.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1072,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1114,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1150,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 1194,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 22,
+              "x": 25,
+              "y": 122.09375
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 1169,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 218
+            },
+            "text": ""
+          }
+        ],
+        "height": 720,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas http-error\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nQUERY ERROR\nerror while performing the infinity query. unsuccessful HTTP response code status code : 404 Not Found",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error?from=now-12h&to=now&timezone=browser",
+        "width": 1280
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - generic \"BioETL owned default Canvas http-error\"\n  - button \"Mark \\\"BioETL owned default Canvas http-error\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - button \"Panel status\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"Menu for panel Review Data Quality\":\n      - alert \"QUERY ERROR\":\n        - text: QUERY ERROR\n        - generic: \"error while performing the infinity query. unsuccessful HTTP response code status code : 404 Not Found\"\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-http-error-dashboard-1280.png",
+      "pass": true
+    },
+    {
+      "case": "recovery",
+      "mode": "dashboard",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error?from=now-12h&to=now&timezone=browser",
+      "expected": [
+        "OK",
+        "excluded 0%"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 44,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 467.15625,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 522,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 876,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 937,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 982,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 446.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 480.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 641.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 675.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 719.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 816,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 858,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 894,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 938,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 913,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 218
+            },
+            "text": ""
+          }
+        ],
+        "height": 768,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas http-error\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nOK\nexcluded 0%",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error?from=now-12h&to=now&timezone=browser",
+        "width": 1024
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - generic \"BioETL owned default Canvas http-error\"\n  - button \"Mark \\\"BioETL owned default Canvas http-error\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"OK\":\n        - generic: OK\n      - button \"excluded 0%\":\n        - generic: excluded 0%\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-recovery-dashboard-1024.png",
+      "pass": true
+    },
+    {
+      "case": "recovery",
+      "mode": "fullscreen",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+      "expected": [
+        "OK",
+        "excluded 0%"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 39.359375,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 468,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 522,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 876,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 937,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 982,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 446.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 480.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 641.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 675.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 719.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 816,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 858,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 894,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 938,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 913,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 739,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 16,
+              "width": 16,
+              "x": 908,
+              "y": 128
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 936,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 207,
+              "x": 743,
+              "y": 176
+            },
+            "text": "Back to dashboard"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 201
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 967,
+              "y": 258
+            },
+            "text": ""
+          }
+        ],
+        "height": 768,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas http-error\nView panel\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nOK\nexcluded 0%\nView panel\nBack to dashboard",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+        "width": 1024
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - link \"BioETL owned default Canvas http-error\":\n        - /url: /d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error?from=now-12h&to=now&timezone=browser\n      - generic \"View panel\"\n  - button \"Mark \\\"BioETL owned default Canvas http-error\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"OK\":\n        - generic: OK\n      - button \"excluded 0%\":\n        - generic: excluded 0%\n  - button \"Go back\" [disabled]:\n  - generic: View panel\n  - button \"Dock\":\n  - button \"Close\":\n  - button \"Back to dashboard\":\n    - generic: Back to dashboard\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"View panel controls\" [expanded]:\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-recovery-fullscreen-1024.png",
+      "pass": true
+    },
+    {
+      "case": "recovery",
+      "mode": "fullscreen",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+      "expected": [
+        "OK",
+        "excluded 0%"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 44,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 565.40625,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 778,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 1132,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1193,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1238,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 702.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 736.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 897.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 931.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 975.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1072,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1114,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1150,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 1194,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 1169,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 995,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 16,
+              "width": 16,
+              "x": 1164,
+              "y": 128
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 18,
+              "width": 18,
+              "x": 1192,
+              "y": 127
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 207,
+              "x": 999,
+              "y": 176
+            },
+            "text": "Back to dashboard"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 201
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 258
+            },
+            "text": ""
+          }
+        ],
+        "height": 720,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas http-error\nView panel\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nOK\nexcluded 0%\nView panel\nBack to dashboard",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error?from=now-12h&to=now&timezone=browser&viewPanel=panel-9482",
+        "width": 1280
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - link \"BioETL owned default Canvas http-error\":\n        - /url: /d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error?from=now-12h&to=now&timezone=browser\n      - generic \"View panel\"\n  - button \"Mark \\\"BioETL owned default Canvas http-error\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"Menu for panel Review Data Quality\":\n      - button \"OK\":\n        - generic: OK\n      - button \"excluded 0%\":\n        - generic: excluded 0%\n  - button \"Go back\" [disabled]:\n  - generic: View panel\n  - button \"Dock\":\n  - button \"Close\":\n  - button \"Back to dashboard\":\n    - generic: Back to dashboard\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"View panel controls\" [expanded]:\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-recovery-fullscreen-1280.png",
+      "pass": true
+    },
+    {
+      "case": "recovery",
+      "mode": "dashboard",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error?from=now-12h&to=now&timezone=browser",
+      "expected": [
+        "OK",
+        "excluded 0%"
+      ],
+      "observed": {
+        "buttons": [
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 44,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 467.15625,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 350,
+              "x": 778,
+              "y": 7.5
+            },
+            "text": "Search..."
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 52,
+              "x": 1132,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1193,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1238,
+              "y": 7.5
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 702.90625,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 160.28125,
+              "x": 736.90625,
+              "y": 64
+            },
+            "text": "Last 12 hours"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 897.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 931.1875,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 96.8125,
+              "x": 975.1875,
+              "y": 64
+            },
+            "text": "Refresh"
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 34,
+              "x": 1072,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1114,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 36,
+              "x": 1150,
+              "y": 64
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 32,
+              "width": 70,
+              "x": 1194,
+              "y": 64
+            },
+            "text": "Edit"
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 20,
+              "x": 1169,
+              "y": 122
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 121
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 161
+            },
+            "text": ""
+          },
+          {
+            "rect": {
+              "height": 24,
+              "width": 40,
+              "x": 1223,
+              "y": 218
+            },
+            "text": ""
+          }
+        ],
+        "height": 720,
+        "origin": "http://127.0.0.1:3000",
+        "text": "Skip to main content\nDashboards\nBioETL owned default Canvas http-error\nSearch...\nctrl+k\nLast 12 hours\nRefresh\nEdit\nReview Data Quality\nOK\nexcluded 0%",
+        "url": "http://127.0.0.1:3000/d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error?from=now-12h&to=now&timezone=browser",
+        "width": 1280
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - generic \"BioETL owned default Canvas http-error\"\n  - button \"Mark \\\"BioETL owned default Canvas http-error\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Review Data Quality\":\n      - heading \"Review Data Quality\" [level=2]\n      - button \"Menu for panel Review Data Quality\":\n      - button \"OK\":\n        - generic: OK\n      - button \"excluded 0%\":\n        - generic: excluded 0%\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"Hide\":\n- log",
+      "screenshot": "default-canvas-recovery-dashboard-1280.png",
+      "pass": true
+    }
+  ],
+  "scope": "Actual default host: five fixture states plus recovery of the same HTTP-error panel after restoring its real saved-run query and reloading the dashboard; dashboard/fullscreen at 1280x720 and 1024x768; no fabricated report"
+}

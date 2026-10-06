@@ -1,0 +1,17 @@
+{
+  "job": 6553,
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "status": "success",
+  "artifacts": [
+    {
+      "path": "reports/quality/proof-or-stop/shared/closeout/bundle.json",
+      "bytes": 12195,
+      "sha256": "8a2fc2a3580100524c3e5078de83d57ddc1ae35355a8efa9ea2a5b7b04ef7ce5"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/closeout/verification.json",
+      "bytes": 131,
+      "sha256": "e78ff8e030b5bda5be35813d42e95cb8a3f2b5b33db91c946737fdec8a7efd9c"
+    }
+  ]
+}

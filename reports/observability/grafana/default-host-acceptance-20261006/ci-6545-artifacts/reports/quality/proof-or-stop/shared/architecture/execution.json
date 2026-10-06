@@ -1,0 +1,39 @@
+{
+  "argv": [
+    "python",
+    "-m",
+    "pytest",
+    "tests/architecture",
+    "-q",
+    "--tb=short",
+    "--no-cov",
+    "--junitxml=/home/circleci/project/reports/quality/proof-or-stop/shared/architecture/junit.xml"
+  ],
+  "artifacts": {
+    "junit.xml": "1b1f0ebd8a017fec88a52a81c06becb139d6e7cb5722c125815ad5fcf0b778ca",
+    "producer.log": "ae506e7252d93ef5514200be052d6ea4decd78c5520c89176d74de48a5e2fbb9",
+    "receipt.json": "d91d09a74843f50b5fb96fd3b3ccb4d317fb9cb8608c499c2f7fedb5168ec264"
+  },
+  "catalog_digest": "e48c60532e44eac1e77533b827d66f251411af2ef446cec0d4937f7a1d15c577",
+  "check": "architecture",
+  "duration_ms": 1010927,
+  "exit_code": 0,
+  "job_id": "6545",
+  "job_url": "https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/6545",
+  "repository": {
+    "branch": "main",
+    "ci_run_id": "circleci-workflow:949c8814-7251-4e2d-828f-703645a33385",
+    "repo_id": "bioactivitydataacquisition",
+    "worktree_id": "dda4ac9a21114761"
+  },
+  "source": {
+    "command_set_hash": "22128d3c4a169c422d048d99479d4ed740c208042bfc5da291eac15afae80a53",
+    "dirty": false,
+    "head_sha": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+    "material_hash": "b12cd0a4e006902955ee61aeabefa732b3c19b55b571b19b6a4eec454df45d62",
+    "policy_hash": "6df38c89e080f8d3ac38dd7709d17f281949233095fd9356aca6fbad94e89e6c",
+    "task_diff_hash": "ceeb2813130c921d607c1be9277c19ff7b9d38883a08319c1adfa993180ae756",
+    "untracked_paths": []
+  },
+  "started_at": "2026-10-06T11:43:48.173736+00:00"
+}

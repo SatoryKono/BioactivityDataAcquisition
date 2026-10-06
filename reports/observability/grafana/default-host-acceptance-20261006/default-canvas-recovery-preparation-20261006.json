@@ -1,0 +1,12 @@
+{
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "observed_at": "2026-10-06T12:22:18.089332+00:00",
+  "host": "http://127.0.0.1:3000",
+  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:2b258e26410093577e524761ebdcfbd0ba36c7ba460692d277e1333c39b53a14",
+  "fixture_uid": "bioetl-default-c-http-error-20261006",
+  "query_before": "/ops/observability/intentionally-missing-acceptance-20261006",
+  "query_after": "/ops/observability/selected-run-status?pipeline=chembl_assay&run_type=All&workflow=All&run_id=317440c1-dc5c-5575-9103-1e163f460bdf",
+  "real_report_sha256": "59ba61937bb9ae98f769e033d080b4901b95bc1ee606d2fb18c41d20d14ddb3d",
+  "status": "PREPARED_BROWSER_RECOVERY_PENDING",
+  "scope": "Changed only the owned HTTP-error fixture query to the existing real report; no report mutation"
+}

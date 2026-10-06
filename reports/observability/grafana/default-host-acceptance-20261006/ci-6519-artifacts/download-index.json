@@ -1,0 +1,17 @@
+{
+  "job": 6519,
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "status": "success",
+  "artifacts": [
+    {
+      "path": "router-v7-managed-image-parity.json",
+      "bytes": 665,
+      "sha256": "50a57d72f8faa89a22cdaaa7c838537164524974d206a7d203a7a147c33b838c"
+    },
+    {
+      "path": "router-v7-plugin-bundles.json",
+      "bytes": 5388,
+      "sha256": "78d6fbec99f10650f0955bcaafe8e49fdb85a20bf50c1301db238e05feeb9d8d"
+    }
+  ]
+}

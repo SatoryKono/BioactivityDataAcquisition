@@ -1,0 +1,60 @@
+{
+  "created_at": "2026-10-06T12:25:09.646830+00:00",
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "status": "PASS",
+  "scope": "Actual delivered default-host panel inputs match canonical panel except declared fixture selection/layout",
+  "canonical_dashboard_sha256": "9a3cc257082fbe8d897174ba33066fe8b959c604f370ce4f2a08d34099fb0366",
+  "container_id": "a471f5ccac3f6820d34206b009621115c05e807882b32825d6bdb8183499c2db",
+  "rows": [
+    {
+      "case": "no-run",
+      "canonical_panel_parity": "PASS",
+      "allowed_differences": [
+        "gridPos",
+        "datasource.uid",
+        "targets[].datasource.uid",
+        "targets[].url"
+      ]
+    },
+    {
+      "case": "missing-tree",
+      "canonical_panel_parity": "PASS",
+      "allowed_differences": [
+        "gridPos",
+        "datasource.uid",
+        "targets[].datasource.uid",
+        "targets[].url"
+      ]
+    },
+    {
+      "case": "missing-report",
+      "canonical_panel_parity": "PASS",
+      "allowed_differences": [
+        "gridPos",
+        "datasource.uid",
+        "targets[].datasource.uid",
+        "targets[].url"
+      ]
+    },
+    {
+      "case": "real-run",
+      "canonical_panel_parity": "PASS",
+      "allowed_differences": [
+        "gridPos",
+        "datasource.uid",
+        "targets[].datasource.uid",
+        "targets[].url"
+      ]
+    },
+    {
+      "case": "http-error",
+      "canonical_panel_parity": "PASS",
+      "allowed_differences": [
+        "gridPos",
+        "datasource.uid",
+        "targets[].datasource.uid",
+        "targets[].url"
+      ]
+    }
+  ]
+}

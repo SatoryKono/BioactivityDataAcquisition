@@ -1,0 +1,10 @@
+{
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "workflow": "54fdff8a-1358-43b5-8609-2b9ae986452d",
+  "status": "PASS",
+  "jobs": 27,
+  "observed_at": "2026-10-06T12:01:13.325457+00:00",
+  "original": "ba9c80e7-main-pr-gate-original.json",
+  "sha256": "91a871f1fd47ea975a7471516f1cfb88a5945d1c76cd34919f6d370b4901d3a2",
+  "scope": "All 27 canonical CircleCI pr-gate jobs; not global SonarCloud or browser acceptance"
+}

@@ -1,0 +1,80 @@
+{
+  "observed_at": "2026-10-06T11:55:45.130893+00:00",
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "status": "PREEXISTING_MAIN_SONAR_FAILURE",
+  "checks": [
+    {
+      "source_commit": "c644f2e4f347ed6642bc22b8fece33bbb829386d",
+      "conclusion": "failure",
+      "original": "c644f2e4-sonar-github-original.json",
+      "sha256": "9ccda825925b351c15706047a1c6429f150b4cc7a3665a2b455f06b11b544f23"
+    },
+    {
+      "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+      "conclusion": "failure",
+      "original": "ba9c80e7-sonar-github-original.json",
+      "sha256": "6844428b2cd0545dd8b92543111f103d56937b40bac6b1741c63bdc92d280fe6"
+    }
+  ],
+  "quality_gate": {
+    "projectStatus": {
+      "status": "ERROR",
+      "conditions": [
+        {
+          "status": "ERROR",
+          "metricKey": "reliability_rating",
+          "comparator": "GT",
+          "errorThreshold": "3",
+          "actualValue": "5"
+        },
+        {
+          "status": "ERROR",
+          "metricKey": "security_rating",
+          "comparator": "GT",
+          "errorThreshold": "1",
+          "actualValue": "5"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_duplicated_lines_density",
+          "comparator": "GT",
+          "periodIndex": 1,
+          "errorThreshold": "3",
+          "actualValue": "1.0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_security_hotspots_reviewed",
+          "comparator": "LT",
+          "periodIndex": 1,
+          "errorThreshold": "100",
+          "actualValue": "100.0"
+        },
+        {
+          "status": "ERROR",
+          "metricKey": "new_violations",
+          "comparator": "GT",
+          "periodIndex": 1,
+          "errorThreshold": "0",
+          "actualValue": "166"
+        },
+        {
+          "status": "OK",
+          "metricKey": "security_hotspots_reviewed",
+          "comparator": "LT",
+          "errorThreshold": "100",
+          "actualValue": "100.0"
+        }
+      ],
+      "periods": [
+        {
+          "index": 1,
+          "mode": "previous_version",
+          "date": "2026-04-15T07:36:24+0000"
+        }
+      ],
+      "ignoredConditions": false
+    }
+  },
+  "scope": "Unchanged global main gate failure is retained, not waived or counted as PASS. Targeted Router remediation and canonical CI proof remain separate claims."
+}

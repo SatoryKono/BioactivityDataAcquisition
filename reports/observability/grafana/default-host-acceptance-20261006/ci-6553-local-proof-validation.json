@@ -1,0 +1,25 @@
+{
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "job": 6553,
+  "status": "ADMIT",
+  "claim_qualified": true,
+  "bundle_digest": "bf1112c108bef207818ff622fa40d064d7a2514124a0317c56d4f46a114d55aa",
+  "original_verification": "E:\\github\\bda-ci-verify-11899\\reports\\quality\\proof-or-stop\\grafana-managed-closeout-20261005\\ci-6553-artifacts\\reports\\quality\\proof-or-stop\\shared\\closeout\\verification.json",
+  "original_artifact_count": 2,
+  "canonical_local_verification": {
+    "schema_version": 1,
+    "outcome": "ADMIT",
+    "claim_qualified": true,
+    "errors": [],
+    "degradations": [],
+    "exit_code": 0
+  },
+  "architecture_counts": {
+    "passed": 5006,
+    "skipped": 7,
+    "failed": 0,
+    "errors": 0
+  },
+  "architecture_job": 6545,
+  "scope": "Canonical current-source verification of original complete CI bundle; runtime browser acceptance remains separate"
+}

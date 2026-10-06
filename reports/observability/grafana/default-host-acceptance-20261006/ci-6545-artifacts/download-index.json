@@ -1,0 +1,27 @@
+{
+  "job": 6545,
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "status": "success",
+  "artifacts": [
+    {
+      "path": "reports/quality/proof-or-stop/shared/architecture/execution.json",
+      "bytes": 1510,
+      "sha256": "952c81c4c8fcea84409273d1ba37ea1a0db2b9cc1b32fdd6b0a2f0612dcb9778"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/architecture/junit.xml",
+      "bytes": 855195,
+      "sha256": "1b1f0ebd8a017fec88a52a81c06becb139d6e7cb5722c125815ad5fcf0b778ca"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/architecture/producer.log",
+      "bytes": 6369,
+      "sha256": "ae506e7252d93ef5514200be052d6ea4decd78c5520c89176d74de48a5e2fbb9"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/architecture/receipt.json",
+      "bytes": 1634,
+      "sha256": "d91d09a74843f50b5fb96fd3b3ccb4d317fb9cb8608c499c2f7fedb5168ec264"
+    }
+  ]
+}

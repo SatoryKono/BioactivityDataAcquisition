@@ -1,0 +1,57 @@
+{
+  "created_at": "2026-10-06T12:17:39.417950+00:00",
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "host": "http://127.0.0.1:3000",
+  "container_id": "a471f5ccac3f6820d34206b009621115c05e807882b32825d6bdb8183499c2db",
+  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:2b258e26410093577e524761ebdcfbd0ba36c7ba460692d277e1333c39b53a14",
+  "cases": [
+    {
+      "case": "no-run",
+      "uid": "bioetl-default-canvas-no-run-20261006",
+      "dashboard_url": "/d/bioetl-default-canvas-no-run-20261006/bioetl-owned-default-canvas-no-run",
+      "query": "/ops/observability/selected-run-status?pipeline=chembl_assay&run_type=All&workflow=All&run_id=-",
+      "datasource_uid": "bioetl-ops-http",
+      "panel_id": 9482
+    },
+    {
+      "case": "missing-tree",
+      "uid": "bioetl-default-c-missing-tree-20261006",
+      "dashboard_url": "/d/bioetl-default-c-missing-tree-20261006/bioetl-owned-default-canvas-missing-tree",
+      "query": "/ops/observability/selected-run-status?pipeline=chembl_assay&run_type=All&workflow=All&run_id=317440c1-dc5c-5575-9103-1e163f460bdf",
+      "datasource_uid": "bioetl-ops-default-tree-20261006",
+      "panel_id": 9482
+    },
+    {
+      "case": "missing-report",
+      "uid": "bioetl-default-c-missing-report-20261006",
+      "dashboard_url": "/d/bioetl-default-c-missing-report-20261006/bioetl-owned-default-canvas-missing-report",
+      "query": "/ops/observability/selected-run-status?pipeline=chembl_assay&run_type=All&workflow=All&run_id=00000000-0000-4000-8000-000000000001",
+      "datasource_uid": "bioetl-ops-http",
+      "panel_id": 9482
+    },
+    {
+      "case": "real-run",
+      "uid": "bioetl-default-canvas-real-run-20261006",
+      "dashboard_url": "/d/bioetl-default-canvas-real-run-20261006/bioetl-owned-default-canvas-real-run",
+      "query": "/ops/observability/selected-run-status?pipeline=chembl_assay&run_type=All&workflow=All&run_id=317440c1-dc5c-5575-9103-1e163f460bdf",
+      "datasource_uid": "bioetl-ops-http",
+      "panel_id": 9482
+    },
+    {
+      "case": "http-error",
+      "uid": "bioetl-default-c-http-error-20261006",
+      "dashboard_url": "/d/bioetl-default-c-http-error-20261006/bioetl-owned-default-canvas-http-error",
+      "query": "/ops/observability/intentionally-missing-acceptance-20261006",
+      "datasource_uid": "bioetl-ops-http",
+      "panel_id": 9482
+    }
+  ],
+  "tree_url": "/d/bioetl-default-tree-missing-20261006/bioetl-owned-default-tree-missing-acceptance",
+  "security_url": "/d/bioetl-default-security-20261006/bioetl-owned-default-security-acceptance",
+  "datasource_uid": "bioetl-ops-default-tree-20261006",
+  "real_saved_run": "317440c1-dc5c-5575-9103-1e163f460bdf",
+  "real_report_sha256_before": "59ba61937bb9ae98f769e033d080b4901b95bc1ee606d2fb18c41d20d14ddb3d",
+  "fabricated_reports": false,
+  "ownership_tag": "bioetl-owned-acceptance-20261006",
+  "status": "PREPARED_BROWSER_ACCEPTANCE_PENDING"
+}

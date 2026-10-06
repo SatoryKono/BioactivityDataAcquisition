@@ -1,0 +1,118 @@
+{
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "observed_at": "2026-10-06T12:18:50.421Z",
+  "status": "PASS",
+  "host": "http://127.0.0.1:3000",
+  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:2b258e26410093577e524761ebdcfbd0ba36c7ba460692d277e1333c39b53a14",
+  "container_id": "a471f5ccac3f6820d34206b009621115c05e807882b32825d6bdb8183499c2db",
+  "url": "http://127.0.0.1:3000/d/bioetl-default-security-20261006/bioetl-owned-default-security-acceptance?from=now-1h&to=now&timezone=browser",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "receipt": {
+    "status": "PASS",
+    "origin": "http://127.0.0.1:3000",
+    "results": [
+      {
+        "name": "host exports patched bridge",
+        "pass": true
+      },
+      {
+        "name": "host router fixture mounted",
+        "pass": true
+      },
+      {
+        "name": "resolvePath origin: \"//example.invalid\"",
+        "pass": true
+      },
+      {
+        "name": "InternalLink origin: \"//example.invalid\"",
+        "pass": true
+      },
+      {
+        "name": "useNavigate rejects: \"//example.invalid\"",
+        "pass": true
+      },
+      {
+        "name": "resolvePath origin: \"\\\\\\\\example.invalid\"",
+        "pass": true
+      },
+      {
+        "name": "InternalLink origin: \"\\\\\\\\example.invalid\"",
+        "pass": true
+      },
+      {
+        "name": "useNavigate rejects: \"\\\\\\\\example.invalid\"",
+        "pass": true
+      },
+      {
+        "name": "resolvePath origin: \"/\\\\example.invalid\"",
+        "pass": true
+      },
+      {
+        "name": "InternalLink origin: \"/\\\\example.invalid\"",
+        "pass": true
+      },
+      {
+        "name": "useNavigate rejects: \"/\\\\example.invalid\"",
+        "pass": true
+      },
+      {
+        "name": "resolvePath origin: \"\\\\/example.invalid\"",
+        "pass": true
+      },
+      {
+        "name": "InternalLink origin: \"\\\\/example.invalid\"",
+        "pass": true
+      },
+      {
+        "name": "useNavigate rejects: \"\\\\/example.invalid\"",
+        "pass": true
+      },
+      {
+        "name": "useNavigate rejects absolute local destination: http://127.0.0.1:9/redirect-fixture",
+        "pass": true
+      },
+      {
+        "name": "useNavigate rejects absolute local destination: https://127.0.0.1:9/redirect-fixture",
+        "pass": true
+      },
+      {
+        "name": "internal/encoded navigation: /detail?run=42#panel",
+        "pass": true
+      },
+      {
+        "name": "internal/encoded navigation: /%2f%2fexample.invalid",
+        "pass": true
+      },
+      {
+        "name": "internal/encoded navigation: /%5cexample.invalid",
+        "pass": true
+      },
+      {
+        "name": "hydration ignores arbitrary constructor: BioETLHarmlessProbe",
+        "pass": true
+      },
+      {
+        "name": "hydration ignores arbitrary constructor: constructor",
+        "pass": true
+      },
+      {
+        "name": "hydration ignores arbitrary constructor: __proto__",
+        "pass": true
+      },
+      {
+        "name": "hydration ignores arbitrary constructor: TypeError",
+        "pass": true
+      },
+      {
+        "name": "browser remains on host origin",
+        "pass": true
+      }
+    ],
+    "dependency": "Grafana shared react-router external; no bundled router copy"
+  },
+  "screenshot": "default-security-browser-20261006.png",
+  "scope": "Actual delivered default Grafana shared-router navigation and hydration fixtures; not a Node simulation or blanket third-party SSR assessment"
+}

@@ -1,0 +1,25 @@
+{
+  "created_at": "2026-10-06T12:08:12.844245+00:00",
+  "source_image": "mirror.gcr.io/grafana/grafana:12.2.5@sha256:e67fa772c14a0c728df61d7ac1b46d0da24e557efa729dbe1c404bf4403d6f35",
+  "archive_sha256": "5fe1dd6e5f90a1c28f09a1e91c66a0ba86029676d62f43bd0a7d1acb59280d52",
+  "bytes": 148787200,
+  "gate_receipt_sha256": "e78ff8e030b5bda5be35813d42e95cb8a3f2b5b33db91c946737fdec8a7efd9c",
+  "integrity": "ok",
+  "tables": 84,
+  "member_count": 581,
+  "plugin_manifests": [
+    "plugins/grafana-exploretraces-app/plugin.json",
+    "plugins/grafana-lokiexplore-app/plugin.json",
+    "plugins/grafana-metricsdrilldown-app/plugin.json",
+    "plugins/grafana-pyroscope-app/plugin.json",
+    "plugins/yesoreyeram-infinity-datasource/plugin.json"
+  ],
+  "volume_root": {
+    "uid": 472,
+    "gid": 0,
+    "mode": 511
+  },
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "status": "PASS",
+  "scope": "Quiesced complete default Grafana volume backup with successful isolated restore; private database/archive/configuration are not published"
+}

@@ -1,0 +1,22 @@
+{
+  "created_at": "2026-10-06T12:25:51.972050+00:00",
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "status": "PASS",
+  "host": "http://127.0.0.1:3000",
+  "container_id": "cc97a934bc646893baa71df43aca6b1e1d4d51cf734edb1d3fba70b239dd13b1",
+  "removed_owned_dashboard_uids": [
+    "bioetl-default-canvas-no-run-20261006",
+    "bioetl-default-c-missing-tree-20261006",
+    "bioetl-default-c-missing-report-20261006",
+    "bioetl-default-canvas-real-run-20261006",
+    "bioetl-default-c-http-error-20261006",
+    "bioetl-default-tree-missing-20261006",
+    "bioetl-default-security-20261006"
+  ],
+  "removed_owned_datasource_uid": "bioetl-ops-default-tree-20261006",
+  "real_report_sha256_after": "59ba61937bb9ae98f769e033d080b4901b95bc1ee606d2fb18c41d20d14ddb3d",
+  "probe_installed": false,
+  "scenes_installed": false,
+  "allowlist": "bioetl-selectorshell-panel",
+  "scope": "Owned acceptance fixtures removed after browser capture; production reports unchanged"
+}

@@ -1,0 +1,24 @@
+{
+  "created_at": "2026-10-06T12:25:43.996473+00:00",
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "mode": "disable",
+  "status": "PASS",
+  "container_id": "cc97a934bc646893baa71df43aca6b1e1d4d51cf734edb1d3fba70b239dd13b1",
+  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:2b258e26410093577e524761ebdcfbd0ba36c7ba460692d277e1333c39b53a14",
+  "host": "http://127.0.0.1:3000",
+  "health": {
+    "database": "ok",
+    "version": "13.2.3",
+    "commit": "90ffed056f0884267356c12a0eeb72a022af53f1"
+  },
+  "allowlist": "bioetl-selectorshell-panel",
+  "read_only_probe_mount": false,
+  "preserved_service_ids": {
+    "bioetl": "f6d74a26ca30336523d8c292fbbc42bdcd66e20543ada6c652eed735794fe762",
+    "bioetl-prometheus": "b108e0fe35ff7b1cb93bcb71f5fdee64ef02b2f96ad27201fbf8bd0eeed5b04d",
+    "bioetl-pushgateway": "82f5578f3a99223cab4edbd8eb9135fcfb870466a215357406fab1e48a509e9b",
+    "bioetl-alertmanager-alertmanager-1": "90d4739314b934e7b1bf536662466a87e2d92f56e41f1f496a982e6dce5ad5e3",
+    "bioetl-monitoring-renderer-1": "18c47d3abf5c460e96d6fa7b8a053e8955bc59101b7d0cd240a999749a494212"
+  },
+  "scope": "Temporary probe configuration only; browser security assertions are separate"
+}

@@ -1,0 +1,242 @@
+{
+  "job": 6551,
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "status": "success",
+  "artifacts": [
+    {
+      "path": "coverage-junit/contract-confidence.xml",
+      "bytes": 235793,
+      "sha256": "d541bcaff0e2c51159bfc42df9d7107d4ff4fa740095d095de6e73453d3d89dd"
+    },
+    {
+      "path": "coverage-junit/integration.xml",
+      "bytes": 491521,
+      "sha256": "00f9098e8168a7134e8fd847e08d1f85a3b05b14188f2b44dd0e1b838661be65"
+    },
+    {
+      "path": "coverage-junit/repo-backed-unit-ops.xml",
+      "bytes": 55977,
+      "sha256": "56d501e395e2da8d1727fc6c461ea5ec80c373ccab2ac96924a9be36f428fc4a"
+    },
+    {
+      "path": "coverage-junit/repo-backed-unit-product.xml",
+      "bytes": 74259,
+      "sha256": "2c52405ce3b362be686698be20a5cebde5189c45c3d23ad95096bb5dfba88672"
+    },
+    {
+      "path": "coverage-junit/repo-backed-unit-tooling.xml",
+      "bytes": 80490,
+      "sha256": "a195deb1fc48fcac5d736f0af9ca09f4665c09d3cc2403a03e193bd1b2b0d584"
+    },
+    {
+      "path": "coverage-junit/security.xml",
+      "bytes": 12412,
+      "sha256": "7aa0ff0d10b02e8c354a8ab7c3f92e7635c877aeeeb7a937cbd717edf8ba52fe"
+    },
+    {
+      "path": "coverage-junit/serial.xml",
+      "bytes": 1598,
+      "sha256": "2666bf3cc5acb26daf9cd64c99c6fe882801b695f8460e6c30a31fde2da8febd"
+    },
+    {
+      "path": "coverage-junit/smoke.xml",
+      "bytes": 10393,
+      "sha256": "a63d772e1a2f8a3bdce3a050b6337456759fc1b8225e3f30bf3050ed3830611b"
+    },
+    {
+      "path": "coverage-junit/unit-application.xml",
+      "bytes": 1290022,
+      "sha256": "fb65f86515a6c238a196c9f8719aec4139b3822815922a5940a45db55cdd9329"
+    },
+    {
+      "path": "coverage-junit/unit-domain.xml",
+      "bytes": 1356902,
+      "sha256": "4b6eae3cf6dac01224f5a8f1c57ad54f0995e256f8da08a65c4691a86ffd12d9"
+    },
+    {
+      "path": "coverage-junit/unit-filesystem-contracts.xml",
+      "bytes": 60735,
+      "sha256": "2c01bdef97d1d2d3fe31da81849fdacbb2b1e6d63f1071ed1d830931ca913e70"
+    },
+    {
+      "path": "coverage-junit/unit-infrastructure.xml",
+      "bytes": 900669,
+      "sha256": "d38898a29a91f87cc401a8fb398df8fe6d36ce904be4567875a640c3c852f403"
+    },
+    {
+      "path": "coverage-junit/unit-other.xml",
+      "bytes": 767473,
+      "sha256": "3e02ed02c4f66f916359fedbf768ad35cd063359794330932802a34bb0b327cf"
+    },
+    {
+      "path": "coverage-junit/unit-scripts-tooling-debt-governance.xml",
+      "bytes": 7173,
+      "sha256": "451796f9a508d6cc69e72da2c664738449a3d2cc398f4d32ee0597c4555a0fb8"
+    },
+    {
+      "path": "coverage-junit/unit-scripts-tooling-other.xml",
+      "bytes": 264999,
+      "sha256": "5b5a8cedb5afb3eb705a3e22bd51d01f09119d7d3241d0457d0df1d96b716530"
+    },
+    {
+      "path": "coverage-junit/unit-scripts-tooling-passport.xml",
+      "bytes": 3092,
+      "sha256": "862a2cf85518cb2d43e3f097929e92629ce098b3f589844665c264744486419a"
+    },
+    {
+      "path": "coverage-junit/unit-subprocess-backed.xml",
+      "bytes": 1683,
+      "sha256": "82b10234ab902f3a635c7bb8f2886f2eacb3d8695f382813c1c0cde4da6ad7c5"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/coverage.xml",
+      "bytes": 5175439,
+      "sha256": "41d6f5366b7b50ac47c418a6ed86c7a42ba79c3c0c446ff7834c284b7ca61714"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/branch-gate.log",
+      "bytes": 74,
+      "sha256": "3d2fe3a87cef90e27e77ea22526f0cb1726bfe93d7d0ef0298f5eeb956d1da38"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/combine.log",
+      "bytes": 18,
+      "sha256": "357488414db32f587485bb898f0978c1c51c9dcbef15b3c491d39eaf6d2585c8"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/contract-confidence.log",
+      "bytes": 1749,
+      "sha256": "5b7548521f01a4a757772b0e95d85e8788beef50227f5132a34dc07ef6ef2dc1"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/integration.log",
+      "bytes": 4919,
+      "sha256": "cc4de71cdbe77c8fd50c0dfa2c3698a2fc67b4224c2ce2ab9a0106e8e2c56bd4"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/line-gate.log",
+      "bytes": 484649,
+      "sha256": "edf4775967f2c865abfc072780b010a48e6fb0ce15abd3781f940c96a87ce8d5"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/repo-backed-unit-ops.log",
+      "bytes": 1967,
+      "sha256": "91cd8a46aa025f85e47851eef7b9721181c1cd7216d898ae3afd40a9a7339fc3"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/repo-backed-unit-product.log",
+      "bytes": 582,
+      "sha256": "0b7de05ea22290837498056d1d3db12b1dc6f558331cb9a8fd1aa799b3b9c78f"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/repo-backed-unit-tooling.log",
+      "bytes": 4196,
+      "sha256": "7442a90bd93ec7054087bc0f1f33e200a208fcd1c3f97a0af5a254a32c23ed8f"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/security.log",
+      "bytes": 203,
+      "sha256": "8d295fbd9030838da73d7e3df77528c5d252e75cd7a88a1d30e8c279fa16d436"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/serial.log",
+      "bytes": 470,
+      "sha256": "6de21cddaeab19c5dbabbc055f761c660c6cdc4e314db9e27ffa86be9345f54c"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/smoke.log",
+      "bytes": 160,
+      "sha256": "09efabbe841d5a8f293aba74741670e19f3bd0993cd9cbbc9f6011f34f0a683e"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/unit-application.log",
+      "bytes": 8603,
+      "sha256": "3b9874f3c494994a995425c0c11ddd414d7c89ffe6c8199092f3a4f82489f905"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/unit-domain.log",
+      "bytes": 9709,
+      "sha256": "35d8e1f9f61a26daa2a62f9dcd797f9fa934a47ae58364fa1ee13f8fcf49ba9d"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/unit-filesystem-contracts.log",
+      "bytes": 400,
+      "sha256": "caec7aa8109ecb187c6fbef1105b6d27a36a5189fb4516bf5d6f08b9570309d4"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/unit-infrastructure.log",
+      "bytes": 6603,
+      "sha256": "26949d099768b4af77a9c8927adbf2668c83c9cf51d18324d36d2c13cfdcdf6a"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/unit-other.log",
+      "bytes": 5579,
+      "sha256": "3e6aa409a980485920fb53f36620b0b2e4a5d1c01fffe5de28d7d40a083273d7"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/unit-scripts-tooling-debt-governance.log",
+      "bytes": 80,
+      "sha256": "8876c9830608f9c64826246c16b2934e04138061819f176caaad11a1cf8ba140"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/unit-scripts-tooling-other.log",
+      "bytes": 3474,
+      "sha256": "981a484a75bbfb9c94c13110354f6548550b17992fe613164d77dfc6cd1e02a4"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/unit-scripts-tooling-passport.log",
+      "bytes": 80,
+      "sha256": "341d5dca33250b815baddbafb6001e174c20bf1716bb74f3d612e77777db8938"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/unit-subprocess-backed.log",
+      "bytes": 80,
+      "sha256": "585ba42829657b9e2d56f8614be6c3365a8405474eed008559511ab50f2ffcfb"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/logs/xml.log",
+      "bytes": 111,
+      "sha256": "4981479e52cdec3127f0ed216d7212ffdbf2f676aa4524b0fdb8510630b650b3"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/coverage/manifest.json",
+      "bytes": 22636,
+      "sha256": "24cfdb72cf9da04eb1d3cca6134a9d69731cf053364becead0d801bc212f3d58"
+    },
+    {
+      "path": "reports/quality/proof-or-stop/shared/coverage/producer.log",
+      "bytes": 555,
+      "sha256": "6ca49a4aa4e7b7a569f290ed907a5af2adff92dc7ea81fd49cefdb09e749c9b2"
+    },
+    {
+      "path": "telemetry-candidate/configs/quality/test_telemetry_baseline.yaml",
+      "bytes": 29817,
+      "sha256": "b8f48163ba5fa28ef9e1aa3eef1179f1534ba06d217bd0db9824d65b717e7647"
+    },
+    {
+      "path": "telemetry-candidate/docs/05-engineering/test-telemetry-baseline.md",
+      "bytes": 6289,
+      "sha256": "d6e9fbb5b2a63ccd0bee78df76fefeaacca256d357929c5bc5ea7806a43545d8"
+    },
+    {
+      "path": "telemetry-candidate/reports/test-telemetry/coverage-summary.json",
+      "bytes": 6920,
+      "sha256": "e216b48c60bed585819407a46d2c3f8dcbd8f11fb08e4ece5a1082af2bc19e3d"
+    },
+    {
+      "path": "telemetry-candidate/reports/test-telemetry/s7-governance-hotspots.json",
+      "bytes": 4718,
+      "sha256": "e061de0553b40efbbba674005b1deb92480407a03876685d479f84935b8dcb18"
+    },
+    {
+      "path": "telemetry-candidate/reports/test-telemetry/slowest-tests.json",
+      "bytes": 22663,
+      "sha256": "3961c88d5fde56340a08790cce7be70cd9a58911d5f0e57df0fd1b8e73e29388"
+    },
+    {
+      "path": "telemetry-candidate/reports/test-telemetry/slowest-tests.md",
+      "bytes": 5602,
+      "sha256": "adfd125ffef97ad2c35771364ff50433ca042d5c9b4171808c6265da18e77eef"
+    }
+  ]
+}

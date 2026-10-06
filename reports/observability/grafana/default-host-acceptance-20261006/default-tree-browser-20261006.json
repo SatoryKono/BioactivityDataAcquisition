@@ -1,0 +1,193 @@
+{
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "observed_at": "2026-10-06T12:24:45.994Z",
+  "status": "PASS",
+  "host": "http://127.0.0.1:3000",
+  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:2b258e26410093577e524761ebdcfbd0ba36c7ba460692d277e1333c39b53a14",
+  "container_id": "a471f5ccac3f6820d34206b009621115c05e807882b32825d6bdb8183499c2db",
+  "panel_id": 3010,
+  "fixture_endpoint": "http://127.0.0.1:8030",
+  "captures": [
+    {
+      "mode": "dashboard",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-tree-missing-20261006/bioetl-owned-default-tree-missing-acceptance?from=now-12h&to=now&timezone=browser&refresh=60s",
+      "geometry": {
+        "cell": {
+          "bottom": 224,
+          "height": 36,
+          "right": 1189,
+          "width": 180,
+          "x": 1009,
+          "y": 188
+        },
+        "clientWidth": 103,
+        "link": {
+          "bottom": 216.5,
+          "height": 22,
+          "right": 1117.671875,
+          "width": 102.671875,
+          "x": 1015,
+          "y": 194.5
+        },
+        "scrollWidth": 103,
+        "text": "TREE_MISSING",
+        "textOverflow": "clip",
+        "textRect": {
+          "bottom": 213.5,
+          "height": 17,
+          "right": 1117.671875,
+          "width": 102.671875,
+          "x": 1015,
+          "y": 196.5
+        },
+        "viewport": {
+          "height": 720,
+          "width": 1280
+        }
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - generic \"BioETL owned default TREE_MISSING acceptance\"\n  - button \"Mark \\\"BioETL owned default TREE_MISSING acceptance\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Inspect Recent Runs (last 10)\":\n      - heading \"Inspect Recent Runs (last 10)\" [level=2]\n      - button \"Panel links\":\n      - grid:\n        - row \"Workflow Pipeline Run ID Overview\":\n          - columnheader \"Workflow\":\n            - button \"Workflow\"\n          - columnheader \"Pipeline\":\n            - button \"Pipeline\"\n          - columnheader \"Run ID\":\n            - button \"Run ID\"\n          - columnheader \"Overview\":\n            - button \"Overview\"\n        - row \"— chembl_assay - TREE_MISSING\":\n          - gridcell \"—\":\n            - link \"—\":\n              - /url: https://github.com/SatoryKono/BioactivityDataAcquisition/\n          - gridcell \"chembl_assay\":\n            - link \"chembl_assay\":\n              - /url: https://github.com/SatoryKono/BioactivityDataAcquisition/\n          - gridcell \"-\":\n            - generic \"view data links and actions\": \"-\"\n          - gridcell \"TREE_MISSING\":\n            - link \"TREE_MISSING\":\n              - /url: /d/bioetl-overview-v2/2-overview?var-workflow=&var-pipeline=chembl_assay&var-run_type=&var-run_id=-&from=now-12h&to=now&timezone=browser\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"Hide\":\n- log",
+      "screenshot": "default-tree-dashboard-1280.png",
+      "pass": true
+    },
+    {
+      "mode": "fullscreen",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-tree-missing-20261006/bioetl-owned-default-tree-missing-acceptance?from=now-12h&to=now&timezone=browser&refresh=60s&viewPanel=panel-3010",
+      "geometry": {
+        "cell": {
+          "bottom": 224,
+          "height": 36,
+          "right": 1189,
+          "width": 180,
+          "x": 1009,
+          "y": 188
+        },
+        "clientWidth": 103,
+        "link": {
+          "bottom": 216.5,
+          "height": 22,
+          "right": 1117.671875,
+          "width": 102.671875,
+          "x": 1015,
+          "y": 194.5
+        },
+        "scrollWidth": 103,
+        "text": "TREE_MISSING",
+        "textOverflow": "clip",
+        "textRect": {
+          "bottom": 213.5,
+          "height": 17,
+          "right": 1117.671875,
+          "width": 102.671875,
+          "x": 1015,
+          "y": 196.5
+        },
+        "viewport": {
+          "height": 720,
+          "width": 1280
+        }
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - link \"BioETL owned default TREE_MISSING acceptance\":\n        - /url: /d/bioetl-default-tree-missing-20261006/bioetl-owned-default-tree-missing-acceptance?from=now-12h&to=now&timezone=browser&refresh=60s\n      - generic \"View panel\"\n  - button \"Mark \\\"BioETL owned default TREE_MISSING acceptance\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Inspect Recent Runs (last 10)\":\n      - heading \"Inspect Recent Runs (last 10)\" [level=2]\n      - button \"Panel links\":\n      - grid:\n        - row \"Workflow Pipeline Run ID Overview\":\n          - columnheader \"Workflow\":\n            - button \"Workflow\"\n          - columnheader \"Pipeline\":\n            - button \"Pipeline\"\n          - columnheader \"Run ID\":\n            - button \"Run ID\"\n          - columnheader \"Overview\":\n            - button \"Overview\"\n        - row \"— chembl_assay - TREE_MISSING\":\n          - gridcell \"—\":\n            - link \"—\":\n              - /url: https://github.com/SatoryKono/BioactivityDataAcquisition/\n          - gridcell \"chembl_assay\":\n            - link \"chembl_assay\":\n              - /url: https://github.com/SatoryKono/BioactivityDataAcquisition/\n          - gridcell \"-\":\n            - generic \"view data links and actions\": \"-\"\n          - gridcell \"TREE_MISSING\":\n            - link \"TREE_MISSING\":\n              - /url: /d/bioetl-overview-v2/2-overview?var-workflow=&var-pipeline=chembl_assay&var-run_type=&var-run_id=-&from=now-12h&to=now&timezone=browser\n  - button \"Go back\" [disabled]:\n  - generic: View panel\n  - button \"Dock\":\n  - button \"Close\":\n  - button \"Back to dashboard\":\n    - generic: Back to dashboard\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"View panel controls\" [expanded]:\n  - button \"Hide\":\n- log",
+      "screenshot": "default-tree-fullscreen-1280.png",
+      "pass": true
+    },
+    {
+      "mode": "fullscreen",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-tree-missing-20261006/bioetl-owned-default-tree-missing-acceptance?from=now-12h&to=now&timezone=browser&refresh=60s&viewPanel=panel-3010",
+      "geometry": {
+        "cell": {
+          "bottom": 224,
+          "height": 36,
+          "right": 933,
+          "width": 180,
+          "x": 753,
+          "y": 188
+        },
+        "clientWidth": 103,
+        "link": {
+          "bottom": 216.5,
+          "height": 22,
+          "right": 861.671875,
+          "width": 102.671875,
+          "x": 759,
+          "y": 194.5
+        },
+        "scrollWidth": 103,
+        "text": "TREE_MISSING",
+        "textOverflow": "clip",
+        "textRect": {
+          "bottom": 213.5,
+          "height": 17,
+          "right": 861.671875,
+          "width": 102.671875,
+          "x": 759,
+          "y": 196.5
+        },
+        "viewport": {
+          "height": 768,
+          "width": 1024
+        }
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - link \"BioETL owned default TREE_MISSING acceptance\":\n        - /url: /d/bioetl-default-tree-missing-20261006/bioetl-owned-default-tree-missing-acceptance?from=now-12h&to=now&timezone=browser&refresh=60s\n      - generic \"View panel\"\n  - button \"Mark \\\"BioETL owned default TREE_MISSING acceptance\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Inspect Recent Runs (last 10)\":\n      - heading \"Inspect Recent Runs (last 10)\" [level=2]\n      - button \"Panel links\":\n      - grid:\n        - row \"Workflow Pipeline Run ID Overview\":\n          - columnheader \"Workflow\":\n            - button \"Workflow\"\n          - columnheader \"Pipeline\":\n            - button \"Pipeline\"\n          - columnheader \"Run ID\":\n            - button \"Run ID\"\n          - columnheader \"Overview\":\n            - button \"Overview\"\n        - row \"— chembl_assay - TREE_MISSING\":\n          - gridcell \"—\":\n            - link \"—\":\n              - /url: https://github.com/SatoryKono/BioactivityDataAcquisition/\n          - gridcell \"chembl_assay\":\n            - link \"chembl_assay\":\n              - /url: https://github.com/SatoryKono/BioactivityDataAcquisition/\n          - gridcell \"-\":\n            - generic \"view data links and actions\": \"-\"\n          - gridcell \"TREE_MISSING\":\n            - link \"TREE_MISSING\":\n              - /url: /d/bioetl-overview-v2/2-overview?var-workflow=&var-pipeline=chembl_assay&var-run_type=&var-run_id=-&from=now-12h&to=now&timezone=browser\n  - button \"Go back\" [disabled]:\n  - generic: View panel\n  - button \"Dock\":\n  - button \"Close\":\n  - button \"Back to dashboard\":\n    - generic: Back to dashboard\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"View panel controls\" [expanded]:\n  - button \"Hide\":\n- log",
+      "screenshot": "default-tree-fullscreen-1024.png",
+      "pass": true
+    },
+    {
+      "mode": "dashboard",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "url": "http://127.0.0.1:3000/d/bioetl-default-tree-missing-20261006/bioetl-owned-default-tree-missing-acceptance?from=now-12h&to=now&timezone=browser&refresh=60s",
+      "geometry": {
+        "cell": {
+          "bottom": 224,
+          "height": 36,
+          "right": 933,
+          "width": 180,
+          "x": 753,
+          "y": 188
+        },
+        "clientWidth": 103,
+        "link": {
+          "bottom": 216.5,
+          "height": 22,
+          "right": 861.671875,
+          "width": 102.671875,
+          "x": 759,
+          "y": 194.5
+        },
+        "scrollWidth": 103,
+        "text": "TREE_MISSING",
+        "textOverflow": "clip",
+        "textRect": {
+          "bottom": 213.5,
+          "height": 17,
+          "right": 861.671875,
+          "width": 102.671875,
+          "x": 759,
+          "y": 196.5
+        },
+        "viewport": {
+          "height": 768,
+          "width": 1024
+        }
+      },
+      "dom": "- link \"Skip to main content\":\n  - /url: \"#pageContent\"\n  - generic: Skip to main content\n- banner:\n  - link \"Grafana\":\n    - /url: /\n    - img \"Grafana\"\n  - button \"Main menu\":\n  - navigation \"Breadcrumbs\":\n    - list:\n      - link \"Dashboards\":\n        - /url: /dashboards\n      - generic \"BioETL owned default TREE_MISSING acceptance\"\n  - button \"Mark \\\"BioETL owned default TREE_MISSING acceptance\\\" as favorite\":\n  - button \"Search...\"\n  - generic: ctrl+k\n  - button \"New\":\n  - button \"Help\":\n  - button \"Profile\":\n    - img \"User avatar\"\n- main:\n  - button \"Move 6h backward\":\n  - 'button \"Time range selected: Last 12 hours\"':\n    - generic: Last 12 hours\n  - button \"Move time range forwards\":\n  - button \"Zoom out time range\":\n  - button \"Refresh\":\n    - generic: Refresh\n  - button \"Auto refresh turned off. Choose refresh time interval\":\n  - button \"Copy link\":\n  - button \"Share\":\n  - button \"Enter edit mode\":\n    - generic: Edit\n  - generic \"Dashboard content\":\n    - region \"Inspect Recent Runs (last 10)\":\n      - heading \"Inspect Recent Runs (last 10)\" [level=2]\n      - button \"Panel links\":\n      - button \"Menu for panel Inspect Recent Runs (last 10)\":\n      - grid:\n        - row \"Workflow Pipeline Run ID Overview\":\n          - columnheader \"Workflow\":\n            - button \"Workflow\"\n          - columnheader \"Pipeline\":\n            - button \"Pipeline\"\n          - columnheader \"Run ID\":\n            - button \"Run ID\"\n          - columnheader \"Overview\":\n            - button \"Overview\"\n        - row \"— chembl_assay - TREE_MISSING\":\n          - gridcell \"—\":\n            - link \"—\":\n              - /url: https://github.com/SatoryKono/BioactivityDataAcquisition/\n          - gridcell \"chembl_assay\":\n            - link \"chembl_assay\":\n              - /url: https://github.com/SatoryKono/BioactivityDataAcquisition/\n          - gridcell \"-\":\n            - generic \"view data links and actions\": \"-\"\n          - gridcell \"TREE_MISSING\":\n            - link \"TREE_MISSING\":\n              - /url: /d/bioetl-overview-v2/2-overview?var-workflow=&var-pipeline=chembl_assay&var-run_type=&var-run_id=-&from=now-12h&to=now&timezone=browser\n  - button \"Export\":\n  - button \"Outline\":\n  - button \"Hide\":\n- log",
+      "screenshot": "default-tree-dashboard-1024.png",
+      "pass": true
+    }
+  ],
+  "scope": "Actual delivered default host, real missing-tree fixture, full TREE_MISSING glyph/cell/viewport bounds in dashboard/fullscreen at two viewports"
+}

@@ -1,0 +1,28 @@
+{
+  "created_at": "2026-10-06T12:16:39.778194+00:00",
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "status": "DELIVERED_BROWSER_ACCEPTANCE_PENDING",
+  "host": "http://127.0.0.1:3000",
+  "old_container_id": "c9ab0514e52d2dffc79d23e64670cf7d4ea97faf83be4f7e9d0e2f8c98b0c0d1",
+  "container_id": "8c1bfe466047cefedcd599c2473506b4cf7e800f321f4697b78ddf561c6fa344",
+  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:2b258e26410093577e524761ebdcfbd0ba36c7ba460692d277e1333c39b53a14",
+  "image_config": "sha256:aace95605f9c66849d52bc0494b04ffbb5dec2678ba73719c80c57a0cd57cf77",
+  "health": {
+    "database": "ok",
+    "version": "13.2.3",
+    "commit": "90ffed056f0884267356c12a0eeb72a022af53f1"
+  },
+  "backup_archive_sha256": "5fe1dd6e5f90a1c28f09a1e91c66a0ba86029676d62f43bd0a7d1acb59280d52",
+  "gate_bundle_digest": "bf1112c108bef207818ff622fa40d064d7a2514124a0317c56d4f46a114d55aa",
+  "preserved_service_ids": {
+    "bioetl": "f6d74a26ca30336523d8c292fbbc42bdcd66e20543ada6c652eed735794fe762",
+    "bioetl-prometheus": "b108e0fe35ff7b1cb93bcb71f5fdee64ef02b2f96ad27201fbf8bd0eeed5b04d",
+    "bioetl-pushgateway": "82f5578f3a99223cab4edbd8eb9135fcfb870466a215357406fab1e48a509e9b",
+    "bioetl-alertmanager-alertmanager-1": "90d4739314b934e7b1bf536662466a87e2d92f56e41f1f496a982e6dce5ad5e3",
+    "bioetl-monitoring-renderer-1": "18c47d3abf5c460e96d6fa7b8a053e8955bc59101b7d0cd240a999749a494212"
+  },
+  "runtime_source_id": "876cef277e7904abd18fe549b99c74818573875bd4ff3e7531c76140d68339f5",
+  "temporary_probe_enabled": false,
+  "image_parity_receipt_sha256": "50a57d72f8faa89a22cdaaa7c838537164524974d206a7d203a7a147c33b838c",
+  "image_rootfs_sha256": "6adb9df88385d2bd0803abe00eb7ad8b8c1df511a1501c32358182cb7e09ac24"
+}

@@ -1,0 +1,41 @@
+{
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "observed_at": "2026-10-06T12:35:54.406519+00:00",
+  "status": "PASS",
+  "host": "http://127.0.0.1:3000",
+  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:2b258e26410093577e524761ebdcfbd0ba36c7ba460692d277e1333c39b53a14",
+  "container_id": "cc97a934bc646893baa71df43aca6b1e1d4d51cf734edb1d3fba70b239dd13b1",
+  "rows": [
+    {
+      "uid": "bioetl-control-plane-v1",
+      "canonical_sha256": "3828f74ee3d57bc136cc03c88228b39324e0fa3b4a6d76a0521c3a9ae638ce82",
+      "panels": 8,
+      "panels_variables_links_parity": "PASS"
+    },
+    {
+      "uid": "bioetl-dq-v2",
+      "canonical_sha256": "73bbd0f3dde6d84dfbf55a4ebfc96697d2b09b45c4c62a20a8b33372f1525101",
+      "panels": 6,
+      "panels_variables_links_parity": "PASS"
+    },
+    {
+      "uid": "bioetl-incident-v1",
+      "canonical_sha256": "b749fdbc08d7786d9429f1e59b9175ecc901ac9931091d753bce91eadfdc936d",
+      "panels": 14,
+      "panels_variables_links_parity": "PASS"
+    },
+    {
+      "uid": "bioetl-overview-v2",
+      "canonical_sha256": "9a3cc257082fbe8d897174ba33066fe8b959c604f370ce4f2a08d34099fb0366",
+      "panels": 11,
+      "panels_variables_links_parity": "PASS"
+    },
+    {
+      "uid": "bioetl-run-explorer-v1",
+      "canonical_sha256": "09b4c578a25c4bc4ce377b8e902047eebae46136e5cc8a97d9b81ae227c3e1ea",
+      "panels": 2,
+      "panels_variables_links_parity": "PASS"
+    }
+  ],
+  "scope": "Actual five provisioned dashboard panels, variables and links compared with exact accepted canonical sources; separate from browser visual acceptance"
+}

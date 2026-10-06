@@ -1,0 +1,187 @@
+{
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "status": "PASS",
+  "job": 6551,
+  "observed_at": "2026-10-06T11:59:50.395123+00:00",
+  "original_artifact_count": 47,
+  "canonical_junit_count": 17,
+  "counts": {
+    "passed": 32990,
+    "skipped": 175,
+    "failed": 0,
+    "errors": 0
+  },
+  "shards": [
+    {
+      "path": "coverage-junit/contract-confidence.xml",
+      "sha256": "d541bcaff0e2c51159bfc42df9d7107d4ff4fa740095d095de6e73453d3d89dd",
+      "counts": {
+        "passed": 1192,
+        "skipped": 2,
+        "failed": 0,
+        "errors": 0
+      }
+    },
+    {
+      "path": "coverage-junit/integration.xml",
+      "sha256": "00f9098e8168a7134e8fd847e08d1f85a3b05b14188f2b44dd0e1b838661be65",
+      "counts": {
+        "passed": 2798,
+        "skipped": 63,
+        "failed": 0,
+        "errors": 0
+      }
+    },
+    {
+      "path": "coverage-junit/repo-backed-unit-ops.xml",
+      "sha256": "56d501e395e2da8d1727fc6c461ea5ec80c373ccab2ac96924a9be36f428fc4a",
+      "counts": {
+        "passed": 268,
+        "skipped": 12,
+        "failed": 0,
+        "errors": 0
+      }
+    },
+    {
+      "path": "coverage-junit/repo-backed-unit-product.xml",
+      "sha256": "2c52405ce3b362be686698be20a5cebde5189c45c3d23ad95096bb5dfba88672",
+      "counts": {
+        "passed": 380,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      }
+    },
+    {
+      "path": "coverage-junit/repo-backed-unit-tooling.xml",
+      "sha256": "a195deb1fc48fcac5d736f0af9ca09f4665c09d3cc2403a03e193bd1b2b0d584",
+      "counts": {
+        "passed": 302,
+        "skipped": 53,
+        "failed": 0,
+        "errors": 0
+      }
+    },
+    {
+      "path": "coverage-junit/security.xml",
+      "sha256": "7aa0ff0d10b02e8c354a8ab7c3f92e7635c877aeeeb7a937cbd717edf8ba52fe",
+      "counts": {
+        "passed": 80,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      }
+    },
+    {
+      "path": "coverage-junit/serial.xml",
+      "sha256": "2666bf3cc5acb26daf9cd64c99c6fe882801b695f8460e6c30a31fde2da8febd",
+      "counts": {
+        "passed": 2,
+        "skipped": 3,
+        "failed": 0,
+        "errors": 0
+      }
+    },
+    {
+      "path": "coverage-junit/smoke.xml",
+      "sha256": "a63d772e1a2f8a3bdce3a050b6337456759fc1b8225e3f30bf3050ed3830611b",
+      "counts": {
+        "passed": 76,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      }
+    },
+    {
+      "path": "coverage-junit/unit-application.xml",
+      "sha256": "fb65f86515a6c238a196c9f8719aec4139b3822815922a5940a45db55cdd9329",
+      "counts": {
+        "passed": 7676,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      }
+    },
+    {
+      "path": "coverage-junit/unit-domain.xml",
+      "sha256": "4b6eae3cf6dac01224f5a8f1c57ad54f0995e256f8da08a65c4691a86ffd12d9",
+      "counts": {
+        "passed": 8245,
+        "skipped": 10,
+        "failed": 0,
+        "errors": 0
+      }
+    },
+    {
+      "path": "coverage-junit/unit-filesystem-contracts.xml",
+      "sha256": "2c01bdef97d1d2d3fe31da81849fdacbb2b1e6d63f1071ed1d830931ca913e70",
+      "counts": {
+        "passed": 343,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      }
+    },
+    {
+      "path": "coverage-junit/unit-infrastructure.xml",
+      "sha256": "d38898a29a91f87cc401a8fb398df8fe6d36ce904be4567875a640c3c852f403",
+      "counts": {
+        "passed": 5338,
+        "skipped": 4,
+        "failed": 0,
+        "errors": 0
+      }
+    },
+    {
+      "path": "coverage-junit/unit-other.xml",
+      "sha256": "3e02ed02c4f66f916359fedbf768ad35cd063359794330932802a34bb0b327cf",
+      "counts": {
+        "passed": 4635,
+        "skipped": 2,
+        "failed": 0,
+        "errors": 0
+      }
+    },
+    {
+      "path": "coverage-junit/unit-scripts-tooling-debt-governance.xml",
+      "sha256": "451796f9a508d6cc69e72da2c664738449a3d2cc398f4d32ee0597c4555a0fb8",
+      "counts": {
+        "passed": 41,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      }
+    },
+    {
+      "path": "coverage-junit/unit-scripts-tooling-other.xml",
+      "sha256": "5b5a8cedb5afb3eb705a3e22bd51d01f09119d7d3241d0457d0df1d96b716530",
+      "counts": {
+        "passed": 1587,
+        "skipped": 26,
+        "failed": 0,
+        "errors": 0
+      }
+    },
+    {
+      "path": "coverage-junit/unit-scripts-tooling-passport.xml",
+      "sha256": "862a2cf85518cb2d43e3f097929e92629ce098b3f589844665c264744486419a",
+      "counts": {
+        "passed": 18,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      }
+    },
+    {
+      "path": "coverage-junit/unit-subprocess-backed.xml",
+      "sha256": "82b10234ab902f3a635c7bb8f2886f2eacb3d8695f382813c1c0cde4da6ad7c5",
+      "counts": {
+        "passed": 9,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      }
+    }
+  ],
+  "scope": "Original canonical 17-shard JUnit evidence; not the final architecture/proof or browser receipt"
+}

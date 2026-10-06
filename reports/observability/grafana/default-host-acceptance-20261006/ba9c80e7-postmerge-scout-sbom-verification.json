@@ -1,0 +1,94 @@
+{
+  "source_commit": "ba9c80e7b8e1007e984851ea2b40aa6818df3645",
+  "status": "PASS",
+  "observed_at": "2026-10-06T11:43:38.002585+00:00",
+  "source_sboms": [
+    {
+      "path": "grafana/plugins/bioetl-scenes-app",
+      "inputs": {
+        "package.json": "b46d79f92b40f3daedf5801a215d31bfcf4775d6716708464f6e5c5e05ae0e11",
+        "package-lock.json": "c56f2850804134ff41ca2025a1f9a27e81617d8257e3625adcb820de6ea8f408"
+      },
+      "original": "ba9c80e7-postmerge-scout-lock-sbom-bioetl-scenes-app.json",
+      "sha256": "00161e401214cf3ef5ebed8fc7fce3611cc9c72737ac17b95481c48a6bc7e5b4",
+      "component_count": 467,
+      "routers": [
+        {
+          "name": "react-router-dom",
+          "version": "5.3.4"
+        },
+        {
+          "name": "react-router-dom",
+          "version": "7.18.4"
+        },
+        {
+          "name": "react-router",
+          "version": "5.3.4"
+        },
+        {
+          "name": "react-router",
+          "version": "7.18.4"
+        }
+      ],
+      "scope": "Exact committed npm lock graph; not installed peer-compatibility validation"
+    },
+    {
+      "path": "grafana/plugins/bioetl-selectorshell-panel",
+      "inputs": {
+        "package.json": "eb02e638c55a126ccb8e28154ddbb43e73bac64b756f7071ee9c32291de64da5",
+        "package-lock.json": "435834f1d8f1cf6a60884c8f7b68bd1f96bef134a8b6de9bf57f40907cb4d608"
+      },
+      "original": "ba9c80e7-postmerge-scout-lock-sbom-bioetl-selectorshell-panel.json",
+      "sha256": "9dfa5ec4c47bd926fe277344ed55609861a7b46055303afd8a2216cf66f670a7",
+      "component_count": 460,
+      "routers": [
+        {
+          "name": "react-router-dom",
+          "version": "5.3.4"
+        },
+        {
+          "name": "react-router",
+          "version": "5.3.4"
+        },
+        {
+          "name": "react-router",
+          "version": "7.18.4"
+        }
+      ],
+      "scope": "Exact committed npm lock graph; not installed peer-compatibility validation"
+    },
+    {
+      "path": "grafana/tooling/router-v7-bridge",
+      "inputs": {
+        "package.json": "a084b859aca0f34fb7530c265c3d78577e976c8c923dd880802b0a58bd8471e4",
+        "package-lock.json": "01a8eaf5b0e18140f2f79a9146124a2b4826f729f04ababc2ca9f41c08343bde"
+      },
+      "original": "ba9c80e7-postmerge-scout-lock-sbom-router-v7-bridge.json",
+      "sha256": "269a47f2729f4a106ca1bfecadc2377d63a82cbd57722cadd897fa238e9c918f",
+      "component_count": 29,
+      "routers": [
+        {
+          "name": "react-router-dom",
+          "version": "5.3.4"
+        },
+        {
+          "name": "react-router",
+          "version": "5.3.4"
+        },
+        {
+          "name": "react-router",
+          "version": "7.18.4"
+        }
+      ],
+      "scope": "Exact committed npm lock graph; not installed peer-compatibility validation"
+    }
+  ],
+  "image_sbom": {
+    "image": "satorykono/bioetl-grafana-router7-canvas@sha256:2b258e26410093577e524761ebdcfbd0ba36c7ba460692d277e1333c39b53a14",
+    "original": "ba9c80e7-postmerge-managed-image-sbom.json",
+    "sha256": "0cc5ff709e4eef9391f67191f4aaa7deaef636a31d9e436433c8f45097a53078",
+    "package_count": 769,
+    "scope": "Delivered candidate image catalog; webpack Router provenance is separately bound by exact lock and CI image parity"
+  },
+  "npm_sbom_limitation": "npm serializer rejects existing SDK transitive peer constraints; original failed attempts retained, not counted as PASS"
+}
