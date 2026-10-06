@@ -9,6 +9,7 @@ branches:
 - codex/architecture-meta-closeout-20261005
 - codex/grafana-managed-closeout-20261005
 - codex/proof-closeout-reuse-evidence
+- codex/grafana-postmerge-security-20261006
 checks:
   architecture:
     kind: tests
