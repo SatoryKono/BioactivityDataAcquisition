@@ -1,50 +1,25 @@
 interactions:
 - request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - BioETL/1.0 (mailto:bioetl-test@example.com)
-    method: GET
-    uri: https://api.openalex.org/works?per-page=1
-  response:
-    body:
-      string: "{\n  \"meta\": {\"count\": 1000000, \"db_response_time_ms\": 5, \"page\":
-        null, \"per_page\": 1},\n  \"results\": [\n    {\n      \"id\": \"https://openalex.org/W1234567890\",\n
-        \     \"doi\": \"https://doi.org/10.1000/test\",\n      \"title\": \"Health
-        check test\",\n      \"publication_year\": 2024,\n      \"type\": \"article\"\n
-        \   }\n  ]\n}\n"
-    headers:
-      Content-Type:
-      - application/json
-    status:
-      code: 200
-      message: OK
-- request:
     body: ''
     headers:
-      Accept:
+      accept:
       - application/json
-      Accept-Encoding:
+      accept-encoding:
       - gzip, deflate, zstd
-      Connection:
+      connection:
       - keep-alive
-      Host:
+      host:
       - api.openalex.org
-      User-Agent:
-      - BioETL/1.0 (mailto:bioetl-test@example.com)
+      user-agent:
+      - python-httpx/0.28.1
     method: GET
     uri: https://api.openalex.org/works?per-page=1
-  response:
+  response: &id001
     body:
-      string: '{"meta": {"count": 291522349, "db_response_time_ms": 144, "page": 1,
-        "per_page": 1, "groups_count": null, "cost_usd": 0.0001}, "results": [{"id":
-        "https://openalex.org/W3038568908", "doi": "https://doi.org/10.1585/pfr.15.2402039",
+      string: '{"meta": {"count": 332066364, "db_response_time_ms": 164, "page": 1,
+        "per_page": 1, "groups_count": null, "x_query": {"oql": "get works", "oqo":
+        {"get_rows": "works"}, "url": "/works?per_page=1"}, "cost_usd": 0.0001}, "results":
+        [{"id": "https://openalex.org/W3038568908", "doi": "https://doi.org/10.1585/pfr.15.2402039",
         "title": "Radiation Resistant Camera System for Monitoring Deuterium Plasma
         Discharges in the Large Helical Device", "display_name": "Radiation Resistant
         Camera System for Monitoring Deuterium Plasma Discharges in the Large Helical
@@ -55,33 +30,34 @@ interactions:
         "pdf_url": "https://www.jstage.jst.go.jp/article/pfr/15/0/15_2402039/_pdf",
         "source": {"id": "https://openalex.org/S46033839", "display_name": "Plasma
         and Fusion Research", "issn_l": "1880-6821", "issn": ["1880-6821"], "is_oa":
-        true, "is_in_doaj": false, "is_core": true, "host_organization": "https://openalex.org/P4328135220",
-        "host_organization_name": "Japan Society of Plasma Science and Nuclear Fusion
-        Research", "host_organization_lineage": ["https://openalex.org/P4328135220"],
-        "host_organization_lineage_names": ["Japan Society of Plasma Science and Nuclear
-        Fusion Research"], "type": "journal"}, "license": null, "license_id": null,
-        "version": "publishedVersion", "is_accepted": true, "is_published": true,
-        "raw_source_name": "Plasma and Fusion Research", "raw_type": "journal-article"},
-        "type": "article", "indexed_in": ["crossref"], "open_access": {"is_oa": true,
-        "oa_status": "diamond", "oa_url": "https://www.jstage.jst.go.jp/article/pfr/15/0/15_2402039/_pdf",
-        "any_repository_has_fulltext": false}, "authorships": [{"author_position":
+        true, "is_in_doaj": false, "is_core": true, "listed_in": ["cwts-core", "jufo-1",
+        "norway-1"], "host_organization": "https://openalex.org/P4328135220", "host_organization_name":
+        "Japan Society of Plasma Science and Nuclear Fusion Research", "host_organization_lineage":
+        ["https://openalex.org/P4328135220"], "host_organization_lineage_names": ["Japan
+        Society of Plasma Science and Nuclear Fusion Research"], "type": "journal"},
+        "license": null, "license_id": null, "version": "publishedVersion", "is_accepted":
+        true, "is_published": true, "raw_source_name": "Plasma and Fusion Research",
+        "raw_type": "journal-article"}, "type": "article", "indexed_in": ["crossref"],
+        "open_access": {"is_oa": true, "oa_status": "diamond", "oa_url": "https://www.jstage.jst.go.jp/article/pfr/15/0/15_2402039/_pdf",
+        "any_repository_has_fulltext": true}, "authorships": [{"author_position":
         "first", "author": {"id": "https://openalex.org/A5039600762", "display_name":
-        "M. Shoji", "orcid": "https://orcid.org/0000-0003-0655-7347"}, "institutions":
-        [{"id": "https://openalex.org/I199525922", "display_name": "National Institutes
-        of Natural Sciences", "ror": "https://ror.org/055n47h92", "country_code":
-        "JP", "type": "facility", "lineage": ["https://openalex.org/I1319490839",
+        "M. Shoji", "orcid": "https://orcid.org/0000-0003-0655-7347", "observed_orcids":
+        ["https://orcid.org/0000-0003-0655-7347"]}, "institutions": [{"id": "https://openalex.org/I199525922",
+        "display_name": "National Institutes of Natural Sciences", "ror": "https://ror.org/055n47h92",
+        "country_code": "JP", "type": "facility", "lineage": ["https://openalex.org/I1319490839",
         "https://openalex.org/I199525922"]}, {"id": "https://openalex.org/I4210108322",
         "display_name": "National Institute for Fusion Science", "ror": "https://ror.org/01t3wyv61",
         "country_code": "JP", "type": "facility", "lineage": ["https://openalex.org/I1319490839",
         "https://openalex.org/I199525922", "https://openalex.org/I4210108322"]}],
         "countries": ["JP"], "is_corresponding": true, "raw_author_name": "Mamoru
         SHOJI", "raw_affiliation_strings": ["National Institute for Fusion Science,
-        National Institutes of Natural Sciences"], "affiliations": [{"raw_affiliation_string":
-        "National Institute for Fusion Science, National Institutes of Natural Sciences",
-        "institution_ids": ["https://openalex.org/I4210108322", "https://openalex.org/I199525922"]}]},
-        {"author_position": "last", "author": {"id": null, "display_name": "LHD Experiment
-        Group", "orcid": null}, "institutions": [{"id": "https://openalex.org/I199525922",
-        "display_name": "National Institutes of Natural Sciences", "ror": "https://ror.org/055n47h92",
+        National Institutes of Natural Sciences"], "raw_orcid": null, "affiliations":
+        [{"raw_affiliation_string": "National Institute for Fusion Science, National
+        Institutes of Natural Sciences", "institution_ids": ["https://openalex.org/I199525922",
+        "https://openalex.org/I4210108322"]}]}, {"author_position": "last", "author":
+        {"id": null, "display_name": "LHD Experiment Group", "orcid": null, "observed_orcids":
+        []}, "institutions": [{"id": "https://openalex.org/I199525922", "display_name":
+        "National Institutes of Natural Sciences", "ror": "https://ror.org/055n47h92",
         "country_code": "JP", "type": "facility", "lineage": ["https://openalex.org/I1319490839",
         "https://openalex.org/I199525922"]}, {"id": "https://openalex.org/I4210108322",
         "display_name": "National Institute for Fusion Science", "ror": "https://ror.org/01t3wyv61",
@@ -89,16 +65,16 @@ interactions:
         "https://openalex.org/I199525922", "https://openalex.org/I4210108322"]}],
         "countries": ["JP"], "is_corresponding": false, "raw_author_name": "LHD Experiment
         Group", "raw_affiliation_strings": ["National Institute for Fusion Science,
-        National Institutes of Natural Sciences"], "affiliations": [{"raw_affiliation_string":
-        "National Institute for Fusion Science, National Institutes of Natural Sciences",
-        "institution_ids": ["https://openalex.org/I4210108322", "https://openalex.org/I199525922"]}]}],
-        "institutions": [], "countries_distinct_count": 1, "institutions_distinct_count":
-        2, "corresponding_author_ids": ["https://openalex.org/A5039600762"], "corresponding_institution_ids":
-        ["https://openalex.org/I199525922", "https://openalex.org/I4210108322"], "apc_list":
-        null, "apc_paid": null, "fwci": 1.1233, "has_fulltext": true, "cited_by_count":
-        801216, "citation_normalized_percentile": {"value": 0.86309923, "is_in_top_1_percent":
+        National Institutes of Natural Sciences"], "raw_orcid": null, "affiliations":
+        [{"raw_affiliation_string": "National Institute for Fusion Science, National
+        Institutes of Natural Sciences", "institution_ids": ["https://openalex.org/I199525922",
+        "https://openalex.org/I4210108322"]}]}], "institutions": [], "countries_distinct_count":
+        1, "institutions_distinct_count": 2, "corresponding_author_ids": ["https://openalex.org/A5039600762"],
+        "corresponding_institution_ids": ["https://openalex.org/I199525922", "https://openalex.org/I4210108322"],
+        "apc_list": null, "apc_paid": null, "fwci": 0.929, "has_fulltext": true, "cited_by_count":
+        801217, "citation_normalized_percentile": {"value": 0.83788761, "is_in_top_1_percent":
         false, "is_in_top_10_percent": false}, "cited_by_percentile_year": {"min":
-        89, "max": 100}, "biblio": {"volume": "15", "issue": "0", "first_page": "2402039",
+        88, "max": 100}, "biblio": {"volume": "15", "issue": "0", "first_page": "2402039",
         "last_page": "2402039"}, "is_retracted": false, "is_paratext": false, "is_xpac":
         false, "primary_topic": {"id": "https://openalex.org/T10346", "display_name":
         "Magnetic confinement fusion research", "score": 0.9991000294685364, "subfield":
@@ -120,69 +96,91 @@ interactions:
         "subfield": {"id": "https://openalex.org/subfields/2505", "display_name":
         "Materials Chemistry"}, "field": {"id": "https://openalex.org/fields/25",
         "display_name": "Materials Science"}, "domain": {"id": "https://openalex.org/domains/3",
-        "display_name": "Physical Sciences"}}], "keywords": [{"id": "https://openalex.org/keywords/radiation",
-        "display_name": "Radiation", "score": 0.7057818174362183}, {"id": "https://openalex.org/keywords/plasma",
-        "display_name": "Plasma", "score": 0.5598242878913879}, {"id": "https://openalex.org/keywords/materials-science",
-        "display_name": "Materials science", "score": 0.5517664551734924}, {"id":
-        "https://openalex.org/keywords/optics", "display_name": "Optics", "score":
-        0.5239154100418091}, {"id": "https://openalex.org/keywords/shield", "display_name":
-        "Shield", "score": 0.5098416209220886}, {"id": "https://openalex.org/keywords/neutron",
-        "display_name": "Neutron", "score": 0.4559711515903473}, {"id": "https://openalex.org/keywords/nuclear-engineering",
-        "display_name": "Nuclear engineering", "score": 0.3836207985877991}, {"id":
-        "https://openalex.org/keywords/physics", "display_name": "Physics", "score":
-        0.32291728258132935}, {"id": "https://openalex.org/keywords/nuclear-physics",
-        "display_name": "Nuclear physics", "score": 0.13794386386871338}, {"id": "https://openalex.org/keywords/geology",
-        "display_name": "Geology", "score": 0.05549171566963196}], "concepts": [{"id":
-        "https://openalex.org/C153385146", "wikidata": "https://www.wikidata.org/wiki/Q18335",
-        "display_name": "Radiation", "level": 2, "score": 0.7057818174362183}, {"id":
-        "https://openalex.org/C82706917", "wikidata": "https://www.wikidata.org/wiki/Q10251",
-        "display_name": "Plasma", "level": 2, "score": 0.5598242878913879}, {"id":
-        "https://openalex.org/C192562407", "wikidata": "https://www.wikidata.org/wiki/Q228736",
-        "display_name": "Materials science", "level": 0, "score": 0.5517664551734924},
-        {"id": "https://openalex.org/C120665830", "wikidata": "https://www.wikidata.org/wiki/Q14620",
-        "display_name": "Optics", "level": 1, "score": 0.5239154100418091}, {"id":
-        "https://openalex.org/C138081364", "wikidata": "https://www.wikidata.org/wiki/Q852013",
-        "display_name": "Shield", "level": 2, "score": 0.5098416209220886}, {"id":
-        "https://openalex.org/C152568617", "wikidata": "https://www.wikidata.org/wiki/Q2348",
-        "display_name": "Neutron", "level": 2, "score": 0.4559711515903473}, {"id":
-        "https://openalex.org/C116915560", "wikidata": "https://www.wikidata.org/wiki/Q83504",
-        "display_name": "Nuclear engineering", "level": 1, "score": 0.3836207985877991},
-        {"id": "https://openalex.org/C121332964", "wikidata": "https://www.wikidata.org/wiki/Q413",
-        "display_name": "Physics", "level": 0, "score": 0.32291728258132935}, {"id":
-        "https://openalex.org/C185544564", "wikidata": "https://www.wikidata.org/wiki/Q81197",
-        "display_name": "Nuclear physics", "level": 1, "score": 0.13794386386871338},
-        {"id": "https://openalex.org/C127313418", "wikidata": "https://www.wikidata.org/wiki/Q1069",
-        "display_name": "Geology", "level": 0, "score": 0.05549171566963196}, {"id":
-        "https://openalex.org/C5900021", "wikidata": "https://www.wikidata.org/wiki/Q163082",
-        "display_name": "Petrology", "level": 1, "score": 0.0}, {"id": "https://openalex.org/C127413603",
-        "wikidata": "https://www.wikidata.org/wiki/Q11023", "display_name": "Engineering",
-        "level": 0, "score": 0.0}], "mesh": [], "locations_count": 1, "locations":
-        [{"id": "doi:10.1585/pfr.15.2402039", "is_oa": true, "landing_page_url": "https://doi.org/10.1585/pfr.15.2402039",
+        "display_name": "Physical Sciences"}}], "keywords": [{"id": "https://openalex.org/keywords/large-helical-device",
+        "display_name": "Large Helical Device", "score": 1.0}, {"id": "https://openalex.org/keywords/borated-polyethylene",
+        "display_name": "borated polyethylene", "score": 0.921999990940094}, {"id":
+        "https://openalex.org/keywords/ccd-image-sensor", "display_name": "CCD image
+        sensor", "score": 0.7239999771118164}, {"id": "https://openalex.org/keywords/self-annealing",
+        "display_name": "self-annealing", "score": 0.8799999952316284}, {"id": "https://openalex.org/keywords/plasma-imaging",
+        "display_name": "plasma imaging", "score": 0.5}], "concepts": [{"id": "https://openalex.org/C153385146",
+        "wikidata": "https://www.wikidata.org/wiki/Q18335", "display_name": "Radiation",
+        "level": 2, "score": 0.7057818174362183}, {"id": "https://openalex.org/C82706917",
+        "wikidata": "https://www.wikidata.org/wiki/Q10251", "display_name": "Plasma",
+        "level": 2, "score": 0.5598242878913879}, {"id": "https://openalex.org/C192562407",
+        "wikidata": "https://www.wikidata.org/wiki/Q228736", "display_name": "Materials
+        science", "level": 0, "score": 0.5517664551734924}, {"id": "https://openalex.org/C120665830",
+        "wikidata": "https://www.wikidata.org/wiki/Q14620", "display_name": "Optics",
+        "level": 1, "score": 0.5239154100418091}, {"id": "https://openalex.org/C138081364",
+        "wikidata": "https://www.wikidata.org/wiki/Q852013", "display_name": "Shield",
+        "level": 2, "score": 0.5098416209220886}, {"id": "https://openalex.org/C152568617",
+        "wikidata": "https://www.wikidata.org/wiki/Q2348", "display_name": "Neutron",
+        "level": 2, "score": 0.4559711515903473}, {"id": "https://openalex.org/C116915560",
+        "wikidata": "https://www.wikidata.org/wiki/Q83504", "display_name": "Nuclear
+        engineering", "level": 1, "score": 0.3836207985877991}, {"id": "https://openalex.org/C121332964",
+        "wikidata": "https://www.wikidata.org/wiki/Q413", "display_name": "Physics",
+        "level": 0, "score": 0.32291728258132935}, {"id": "https://openalex.org/C185544564",
+        "wikidata": "https://www.wikidata.org/wiki/Q81197", "display_name": "Nuclear
+        physics", "level": 1, "score": 0.13794386386871338}, {"id": "https://openalex.org/C127313418",
+        "wikidata": "https://www.wikidata.org/wiki/Q1069", "display_name": "Geology",
+        "level": 0, "score": 0.05549171566963196}, {"id": "https://openalex.org/C5900021",
+        "wikidata": "https://www.wikidata.org/wiki/Q163082", "display_name": "Petrology",
+        "level": 1, "score": 0.0}, {"id": "https://openalex.org/C127413603", "wikidata":
+        "https://www.wikidata.org/wiki/Q11023", "display_name": "Engineering", "level":
+        0, "score": 0.0}], "mesh": [], "locations_count": 3, "locations": [{"id":
+        "doi:10.1585/pfr.15.2402039", "is_oa": true, "landing_page_url": "https://doi.org/10.1585/pfr.15.2402039",
         "pdf_url": "https://www.jstage.jst.go.jp/article/pfr/15/0/15_2402039/_pdf",
         "source": {"id": "https://openalex.org/S46033839", "display_name": "Plasma
         and Fusion Research", "issn_l": "1880-6821", "issn": ["1880-6821"], "is_oa":
-        true, "is_in_doaj": false, "is_core": true, "host_organization": "https://openalex.org/P4328135220",
-        "host_organization_name": "Japan Society of Plasma Science and Nuclear Fusion
-        Research", "host_organization_lineage": ["https://openalex.org/P4328135220"],
-        "host_organization_lineage_names": ["Japan Society of Plasma Science and Nuclear
-        Fusion Research"], "type": "journal"}, "license": null, "license_id": null,
-        "version": "publishedVersion", "is_accepted": true, "is_published": true,
-        "raw_source_name": "Plasma and Fusion Research", "raw_type": "journal-article"}],
-        "best_oa_location": {"id": "doi:10.1585/pfr.15.2402039", "is_oa": true, "landing_page_url":
-        "https://doi.org/10.1585/pfr.15.2402039", "pdf_url": "https://www.jstage.jst.go.jp/article/pfr/15/0/15_2402039/_pdf",
+        true, "is_in_doaj": false, "is_core": true, "listed_in": ["cwts-core", "jufo-1",
+        "norway-1"], "host_organization": "https://openalex.org/P4328135220", "host_organization_name":
+        "Japan Society of Plasma Science and Nuclear Fusion Research", "host_organization_lineage":
+        ["https://openalex.org/P4328135220"], "host_organization_lineage_names": ["Japan
+        Society of Plasma Science and Nuclear Fusion Research"], "type": "journal"},
+        "license": null, "license_id": null, "version": "publishedVersion", "is_accepted":
+        true, "is_published": true, "raw_source_name": "Plasma and Fusion Research",
+        "raw_type": "journal-article"}, {"id": "pmh:oai:nifs-repository.repo.nii.ac.jp:00011278",
+        "is_oa": false, "landing_page_url": "https://nifs-repository.repo.nii.ac.jp/record/11278/files/12081_PFR.pdf",
+        "pdf_url": "https://nifs-repository.repo.nii.ac.jp/record/11278/files/12081_PFR.pdf",
+        "source": {"id": "https://openalex.org/S4306401138", "display_name": "National
+        Institute for Fusion Science Repository (National Institute for Fusion Science)",
+        "issn_l": null, "issn": null, "is_oa": false, "is_in_doaj": false, "is_core":
+        false, "listed_in": [], "host_organization": "https://openalex.org/I4210108322",
+        "host_organization_name": "National Institute for Fusion Science", "host_organization_lineage":
+        ["https://openalex.org/I4210108322"], "host_organization_lineage_names": [],
+        "type": "repository"}, "license": null, "license_id": null, "version": "submittedVersion",
+        "is_accepted": false, "is_published": false, "raw_source_name": "", "raw_type":
+        "VoR"}, {"id": "pmh:oai:irdb.nii.ac.jp:01130:0005371079", "is_oa": true, "landing_page_url":
+        "https://nifs-repository.repo.nii.ac.jp/records/11278", "pdf_url": null, "source":
+        {"id": "https://openalex.org/S7407056385", "display_name": "Institutional
+        Repositories DataBase (IRDB)", "issn_l": null, "issn": null, "is_oa": false,
+        "is_in_doaj": false, "is_core": false, "listed_in": [], "host_organization":
+        "https://openalex.org/I184597095", "host_organization_name": "National Institute
+        of Informatics", "host_organization_lineage": ["https://openalex.org/I184597095"],
+        "host_organization_lineage_names": [], "type": "repository"}, "license": "cc-by-nc-nd",
+        "license_id": "https://openalex.org/licenses/cc-by-nc-nd", "version": "submittedVersion",
+        "is_accepted": false, "is_published": false, "raw_source_name": "Plasma and
+        Fusion Research", "raw_type": "journal article"}], "best_oa_location": {"id":
+        "doi:10.1585/pfr.15.2402039", "is_oa": true, "landing_page_url": "https://doi.org/10.1585/pfr.15.2402039",
+        "pdf_url": "https://www.jstage.jst.go.jp/article/pfr/15/0/15_2402039/_pdf",
         "source": {"id": "https://openalex.org/S46033839", "display_name": "Plasma
         and Fusion Research", "issn_l": "1880-6821", "issn": ["1880-6821"], "is_oa":
-        true, "is_in_doaj": false, "is_core": true, "host_organization": "https://openalex.org/P4328135220",
-        "host_organization_name": "Japan Society of Plasma Science and Nuclear Fusion
-        Research", "host_organization_lineage": ["https://openalex.org/P4328135220"],
-        "host_organization_lineage_names": ["Japan Society of Plasma Science and Nuclear
-        Fusion Research"], "type": "journal"}, "license": null, "license_id": null,
-        "version": "publishedVersion", "is_accepted": true, "is_published": true,
-        "raw_source_name": "Plasma and Fusion Research", "raw_type": "journal-article"},
-        "sustainable_development_goals": [{"id": "https://metadata.un.org/sdg/7",
-        "score": 0.8799999952316284, "display_name": "Affordable and clean energy"}],
-        "awards": [], "funders": [], "has_content": {"pdf": true, "grobid_xml": true},
-        "content_urls": {"pdf": "https://content.openalex.org/works/W3038568908.pdf",
+        true, "is_in_doaj": false, "is_core": true, "listed_in": ["cwts-core", "jufo-1",
+        "norway-1"], "host_organization": "https://openalex.org/P4328135220", "host_organization_name":
+        "Japan Society of Plasma Science and Nuclear Fusion Research", "host_organization_lineage":
+        ["https://openalex.org/P4328135220"], "host_organization_lineage_names": ["Japan
+        Society of Plasma Science and Nuclear Fusion Research"], "type": "journal"},
+        "license": null, "license_id": null, "version": "publishedVersion", "is_accepted":
+        true, "is_published": true, "raw_source_name": "Plasma and Fusion Research",
+        "raw_type": "journal-article"}, "sustainable_development_goals": [], "sustainable_development_goals_aurora":
+        [{"score": 0.8799999952316284, "display_name": "Affordable and clean energy",
+        "id": "https://metadata.un.org/sdg/7"}], "study_designs": [], "awards": [{"id":
+        "https://openalex.org/G4452778246", "display_name": "Development of an innovative
+        concept for reducing divertor heat load by recycling dust and deposition layers",
+        "funder_award_id": "16H04619", "funder_id": "https://openalex.org/F4320334764",
+        "funder_display_name": "Japan Society for the Promotion of Science"}], "funders":
+        [{"id": "https://openalex.org/F4320334764", "display_name": "Japan Society
+        for the Promotion of Science", "ror": "https://ror.org/00hhkn466"}], "has_content":
+        {"pdf": true, "grobid_xml": true}, "content_urls": {"pdf": "https://content.openalex.org/works/W3038568908.pdf",
         "grobid_xml": "https://content.openalex.org/works/W3038568908.grobid-xml"},
         "referenced_works_count": 8, "referenced_works": ["https://openalex.org/W2069091362",
         "https://openalex.org/W2151240562", "https://openalex.org/W2527753843", "https://openalex.org/W2590699823",
@@ -222,65 +220,83 @@ interactions:
         [167], "disappear": [172], "self-annealing": [175], "process": [176], "sensor.":
         [180], "phenomenon": [182], "highly": [184], "contributes": [185], "further":
         [188], "cameras.": [197]}, "counts_by_year": [{"year": 2026, "cited_by_count":
-        1}, {"year": 2025, "cited_by_count": 801210}, {"year": 2024, "cited_by_count":
+        2}, {"year": 2025, "cited_by_count": 801210}, {"year": 2024, "cited_by_count":
         2}, {"year": 2022, "cited_by_count": 2}, {"year": 2021, "cited_by_count":
-        1}], "updated_date": "2025-11-06T03:46:38.306776", "created_date": "2025-10-10T00:00:00"}],
+        1}], "updated_date": "2026-09-04T10:56:28.161419", "created_date": "2025-10-10T00:00:00"}],
         "group_by": []}'
     headers:
-      Access-Control-Allow-Headers:
-      - Accept, Accept-Language, Accept-Encoding, Authorization, Content-Type
-      Access-Control-Allow-Methods:
-      - GET, HEAD, POST, OPTIONS
-      Access-Control-Allow-Origin:
+      access-control-allow-headers:
+      - Accept, Accept-Language, Accept-Encoding, Authorization, Content-Type, X-OpenAlex-UI,
+        X-Impersonate-User
+      access-control-allow-methods:
+      - GET, HEAD, POST, PATCH, DELETE, OPTIONS
+      access-control-allow-origin:
       - '*'
-      CF-Cache-Status:
-      - DYNAMIC
-      CF-RAY:
-      - 9d6e3149ddc55d7f-FRA
-      Connection:
-      - keep-alive
-      Content-Type:
-      - application/json
-      Date:
-      - Wed, 04 Mar 2026 04:38:38 GMT
-      Nel:
-      - '{"report_to":"heroku-nel","response_headers":["Via"],"max_age":3600,"success_fraction":0.01,"failure_fraction":0.1}'
-      Report-To:
-      - '{"group":"heroku-nel","endpoints":[{"url":"https://nel.heroku.com/reports?s=G2Ntu%2F5gdF1kyrsHVdVsh%2B%2FCcfgJOAQr7PbtvGezoQE%3D\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\u0026ts=1772599118"}],"max_age":3600}'
-      Reporting-Endpoints:
-      - heroku-nel="https://nel.heroku.com/reports?s=G2Ntu%2F5gdF1kyrsHVdVsh%2B%2FCcfgJOAQr7PbtvGezoQE%3D&sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&ts=1772599118"
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      Via:
-      - 1.1 heroku-router
-      X-RateLimit-Cost-USD:
-      - '0.0001'
-      X-RateLimit-Credits-Used:
-      - '1'
-      X-RateLimit-Limit:
-      - '10000'
-      X-RateLimit-Limit-USD:
-      - '1'
-      X-RateLimit-Onetime-Remaining:
-      - '0'
-      X-RateLimit-Prepaid-Remaining-USD:
-      - '0'
-      X-RateLimit-Remaining:
-      - '9976'
-      X-RateLimit-Remaining-USD:
-      - '0.9976'
-      X-RateLimit-Reset:
-      - '69682'
       access-control-expose-headers:
       - Cache-Control, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Onetime-Remaining,
         X-RateLimit-Credits-Used, X-RateLimit-Credits-Required, X-RateLimit-Reset,
         X-RateLimit-Limit-USD, X-RateLimit-Remaining-USD, X-RateLimit-Prepaid-Remaining-USD,
-        X-RateLimit-Cost-USD, X-RateLimit-Cost-Required-USD, Retry-After
+        X-RateLimit-Cost-USD, X-RateLimit-Cost-Required-USD, Retry-After, Location,
+        Content-Disposition
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a461d28529552af3-LAX
+      connection:
+      - keep-alive
       content-length:
-      - '15223'
+      - '17381'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Oct 2026 04:11:29 GMT
+      nel:
+      - '{"report_to":"heroku-nel","response_headers":["Via"],"max_age":3600,"success_fraction":0.01,"failure_fraction":0.1}'
+      report-to:
+      - '{"group":"heroku-nel","endpoints":[{"url":"https://nel.heroku.com/reports?s=5gaI57mrBK79Yxa9LeelFbOJgZ0JcxsIL6bwUslx9Tg%3D\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\u0026ts=1791259889"}],"max_age":3600}'
+      reporting-endpoints:
+      - heroku-nel="https://nel.heroku.com/reports?s=5gaI57mrBK79Yxa9LeelFbOJgZ0JcxsIL6bwUslx9Tg%3D&sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&ts=1791259889"
+      server:
+      - cloudflare
+      transfer-encoding:
+      - chunked
+      via:
+      - 2.0 heroku-router
+      x-ratelimit-cost-usd:
+      - '0.0001'
+      x-ratelimit-credits-used:
+      - '1'
+      x-ratelimit-limit:
+      - '1000'
+      x-ratelimit-limit-usd:
+      - '0.1'
+      x-ratelimit-onetime-remaining:
+      - '0'
+      x-ratelimit-prepaid-remaining-usd:
+      - '0'
+      x-ratelimit-remaining:
+      - '968'
+      x-ratelimit-remaining-usd:
+      - '0.0968'
+      x-ratelimit-reset:
+      - '71311'
     status:
       code: 200
       message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      host:
+      - api.openalex.org
+      user-agent:
+      - python-httpx/0.28.1
+    method: GET
+    uri: https://api.openalex.org/works?per-page=1
+  response: *id001
 version: 1

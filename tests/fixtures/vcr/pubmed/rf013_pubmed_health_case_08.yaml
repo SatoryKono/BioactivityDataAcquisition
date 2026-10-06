@@ -11,14 +11,14 @@ interactions:
       host:
       - eutils.ncbi.nlm.nih.gov
       user-agent:
-      - BioETL/6.1.0
+      - python-httpx/0.28.1
     method: GET
     uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/einfo.fcgi?db=pubmed&retmode=json&email=bioetl-test%40example.com
   response:
     body:
       string: '{"header":{"type":"einfo","version":"0.3"},"einforesult":{"dbinfo":[{"dbname":"pubmed","menuname":"PubMed","description":"PubMed
-        bibliographic record","dbbuild":"Build-2026.10.05.18.22","count":"41244386","lastupdate":"2026/10/05
-        18:22","fieldlist":[{"name":"ALL","fullname":"All Fields","description":"All
+        bibliographic record","dbbuild":"Build-2026.10.05.18.09","count":"41244386","lastupdate":"2026/10/05
+        18:09","fieldlist":[{"name":"ALL","fullname":"All Fields","description":"All
         terms from all searchable fields","termcount":"","isdate":"N","isnumerical":"N","singletoken":"N","hierarchy":"N","ishidden":"N"},{"name":"UID","fullname":"UID","description":"Unique
         number assigned to publication","termcount":"","isdate":"N","isnumerical":"Y","singletoken":"Y","hierarchy":"N","ishidden":"Y"},{"name":"FILT","fullname":"Filter","description":"Limits
         the records","termcount":"","isdate":"N","isnumerical":"N","singletoken":"Y","hierarchy":"N","ishidden":"N"},{"name":"TITL","fullname":"Title","description":"Words
@@ -137,18 +137,18 @@ interactions:
       content-type:
       - application/json; charset=UTF-8
       date:
-      - Tue, 06 Oct 2026 04:01:30 GMT
+      - Tue, 06 Oct 2026 04:36:22 GMT
       ncbi-phid:
-      - 1D33A74F3F48EFB5000028E89A448B36.1.1.m_1
+      - 1D3311480BFF76F500005209D100A523.1.1.m_1
       ncbi-sid:
-      - EAF2838E39E28187_E095SID
+      - 2BCD4555A729A73F_E6BFSID
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Finatra
       set-cookie:
-      - ncbi_sid=EAF2838E39E28187_E095SID; domain=.nih.gov; path=/; expires=Wed, 06
-        Oct 2027 04:01:31 GMT
+      - ncbi_sid=2BCD4555A729A73F_E6BFSID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 04:36:22 GMT
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:

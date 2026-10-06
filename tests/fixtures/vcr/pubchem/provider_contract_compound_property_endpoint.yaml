@@ -1,37 +1,69 @@
-{
-  "interactions": [
-    {
-      "request": {
-        "body": null,
-        "headers": {
-          "Accept": [
-            "application/json"
-          ],
-          "User-Agent": [
-            "BioETL/1.0"
-          ]
-        },
-        "method": "GET",
-        "uri": "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/2244/property/MolecularFormula,MolecularWeight,CanonicalSMILES/JSON"
-      },
-      "response": {
-        "body": {
-          "string": "{\"PropertyTable\": {\"Properties\": [{\"CID\": 2244, \"MolecularFormula\": \"C9H8O4\", \"MolecularWeight\": \"180.16\", \"ConnectivitySMILES\": \"CC(=O)OC1=CC=CC=C1C(=O)O\"}]}}"
-        },
-        "headers": {
-          "Content-Type": [
-            "application/json"
-          ],
-          "Date": [
-            "Tue, 07 Apr 2026 10:51:52 GMT"
-          ]
-        },
-        "status": {
-          "code": 200,
-          "message": "OK"
-        }
-      }
-    }
-  ],
-  "version": 1
-}
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      host:
+      - pubchem.ncbi.nlm.nih.gov
+      user-agent:
+      - python-httpx/0.28.1
+    method: GET
+    uri: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/2244/property/MolecularFormula,MolecularWeight,CanonicalSMILES/JSON
+  response:
+    body:
+      string: "{\n  \"PropertyTable\": {\n    \"Properties\": [\n      {\n        \"CID\":
+        2244,\n        \"MolecularFormula\": \"C9H8O4\",\n        \"MolecularWeight\":
+        \"180.16\",\n        \"ConnectivitySMILES\": \"CC(=O)OC1=CC=CC=C1C(=O)O\"\n
+        \     }\n    ]\n  }\n}\n"
+    headers:
+      access-control-allow-origin:
+      - '*'
+      alt-svc:
+      - clear
+      cache-control:
+      - private
+      content-length:
+      - '224'
+      content-security-policy:
+      - upgrade-insecure-requests
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Oct 2026 04:11:33 GMT
+      expires:
+      - Tue, 06 Oct 2026 05:11:33 GMT
+      ncbi-phid:
+      - 90C6ABF3AC474F510000000000000001.m_1
+      ncbi-sid:
+      - 90C6ABF3AC474F51_0000SID
+      referrer-policy:
+      - origin-when-cross-origin
+      server:
+      - Apache
+      set-cookie:
+      - ncbi_sid=90C6ABF3AC474F51_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 04:11:33 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      via:
+      - 1.1 google
+      x-throttling-control:
+      - 'Request Count status: Green (0%), Request Time status: Green (0%), Service
+        status: Green (33%)'
+      x-ua-compatible:
+      - IE=Edge
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1

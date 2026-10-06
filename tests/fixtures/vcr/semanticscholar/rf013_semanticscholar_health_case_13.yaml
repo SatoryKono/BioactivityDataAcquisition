@@ -1,50 +1,50 @@
 interactions:
-- request:
-    body: ''
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate, zstd
-      connection:
-      - keep-alive
-      content-type:
-      - application/json
-      host:
-      - api.semanticscholar.org
-      user-agent:
-      - BioETL/6.1.0
-    method: GET
-    uri: https://api.semanticscholar.org/graph/v1/paper/search?query=test&limit=1&fields=paperId
-  response:
-    body:
-      string: '{"message": "Too Many Requests. Please wait and try again or apply
+    -   request:
+            body: ''
+            headers:
+                Accept:
+                    - application/json
+                Accept-Encoding:
+                    - gzip, deflate, zstd
+                Connection:
+                    - keep-alive
+                Content-Type:
+                    - application/json
+                Host:
+                    - api.semanticscholar.org
+                User-Agent:
+                    - BioETL/1.0
+            method: GET
+            uri: https://api.semanticscholar.org/graph/v1/paper/search?query=test&limit=1&fields=paperId
+        response:
+            body:
+                string: '{"message": "Too Many Requests. Please wait and try again or apply
         for a key for higher rate limits. https://www.semanticscholar.org/product/api#api-key-form",
         "code": "429"}'
-    headers:
-      connection:
-      - keep-alive
-      content-length:
-      - '174'
-      content-type:
-      - application/json
-      date:
-      - Tue, 06 Oct 2026 04:01:49 GMT
-      via:
-      - 1.1 61bc5c2437da1cb95629df175a99fca2.cloudfront.net (CloudFront)
-      x-amz-apigw-id:
-      - EzbbHFZWvHcEvbA=
-      x-amz-cf-id:
-      - -xwfLwA0pbidy4U8xn8ACsE2OM2OZftfytAMXBFyEwBNomcraZ5DUQ==
-      x-amz-cf-pop:
-      - SFO53-P10
-      x-amzn-errortype:
-      - TooManyRequestsException
-      x-amzn-requestid:
-      - 77bc023e-54b3-4979-bc5a-625c6962f3c3
-      x-cache:
-      - Error from cloudfront
-    status:
-      code: 429
-      message: ''
+            headers:
+                Connection:
+                    - keep-alive
+                Content-Length:
+                    - '174'
+                Content-Type:
+                    - application/json
+                Date:
+                    - Fri, 06 Mar 2026 13:18:31 GMT
+                Via:
+                    - 1.1 b7075c622fd67069b6000be3ca11a46a.cloudfront.net (CloudFront)
+                X-Amz-Cf-Id:
+                    - mw3CUc7KeuKItxToQUI-b6sIMgNJKs5UI7nM23v4tFoFFWyTJDtVWg==
+                X-Amz-Cf-Pop:
+                    - VIE50-P4
+                X-Cache:
+                    - Error from cloudfront
+                x-amz-apigw-id:
+                    - ZzYWNGT2PHcElqA=
+                x-amzn-ErrorType:
+                    - TooManyRequestsException
+                x-amzn-RequestId:
+                    - ae86048b-a4be-4313-8a83-cbdc30baaf7a
+            status:
+                code: 429
+                message: ''
 version: 1

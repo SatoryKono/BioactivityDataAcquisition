@@ -14,9 +14,9 @@ interactions:
       - BioETL/6.1.0 (mailto:bioetl-test@example.com)
     method: GET
     uri: https://api.openalex.org/works?mailto=bioetl-test%40example.com&per-page=1
-  response: &id001
+  response:
     body:
-      string: '{"meta": {"count": 332066364, "db_response_time_ms": 179, "page": 1,
+      string: '{"meta": {"count": 332066364, "db_response_time_ms": 209, "page": 1,
         "per_page": 1, "groups_count": null, "x_query": {"oql": "get works", "oqo":
         {"get_rows": "works"}, "url": "/works?per_page=1"}, "cost_usd": 0.0001}, "results":
         [{"id": "https://openalex.org/W3038568908", "doi": "https://doi.org/10.1585/pfr.15.2402039",
@@ -172,16 +172,15 @@ interactions:
         "license": null, "license_id": null, "version": "publishedVersion", "is_accepted":
         true, "is_published": true, "raw_source_name": "Plasma and Fusion Research",
         "raw_type": "journal-article"}, "sustainable_development_goals": [], "sustainable_development_goals_aurora":
-        [{"score": 0.8799999952316284, "display_name": "Affordable and clean energy",
-        "id": "https://metadata.un.org/sdg/7"}], "study_designs": [], "awards": [{"id":
-        "https://openalex.org/G4452778246", "display_name": "Development of an innovative
-        concept for reducing divertor heat load by recycling dust and deposition layers",
-        "funder_award_id": "16H04619", "funder_id": "https://openalex.org/F4320334764",
-        "funder_display_name": "Japan Society for the Promotion of Science"}], "funders":
-        [{"id": "https://openalex.org/F4320334764", "display_name": "Japan Society
-        for the Promotion of Science", "ror": "https://ror.org/00hhkn466"}], "has_content":
-        {"pdf": true, "grobid_xml": true}, "content_urls": {"pdf": "https://content.openalex.org/works/W3038568908.pdf",
-        "grobid_xml": "https://content.openalex.org/works/W3038568908.grobid-xml"},
+        [{"id": "https://metadata.un.org/sdg/7", "score": 0.8799999952316284, "display_name":
+        "Affordable and clean energy"}], "study_designs": [], "awards": [{"id": "https://openalex.org/G4452778246",
+        "display_name": "Development of an innovative concept for reducing divertor
+        heat load by recycling dust and deposition layers", "funder_award_id": "16H04619",
+        "funder_id": "https://openalex.org/F4320334764", "funder_display_name": "Japan
+        Society for the Promotion of Science"}], "funders": [{"id": "https://openalex.org/F4320334764",
+        "display_name": "Japan Society for the Promotion of Science", "ror": "https://ror.org/00hhkn466"}],
+        "has_content": {"grobid_xml": true, "pdf": true}, "content_urls": {"pdf":
+        "https://content.openalex.org/works/W3038568908.pdf", "grobid_xml": "https://content.openalex.org/works/W3038568908.grobid-xml"},
         "referenced_works_count": 8, "referenced_works": ["https://openalex.org/W2069091362",
         "https://openalex.org/W2151240562", "https://openalex.org/W2527753843", "https://openalex.org/W2590699823",
         "https://openalex.org/W2783171299", "https://openalex.org/W2806477398", "https://openalex.org/W2922014310",
@@ -241,7 +240,7 @@ interactions:
       cf-cache-status:
       - DYNAMIC
       cf-ray:
-      - a461c3749e42fda5-LAX
+      - a461c398acaefda5-LAX
       connection:
       - keep-alive
       content-length:
@@ -249,13 +248,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 06 Oct 2026 04:01:12 GMT
+      - Tue, 06 Oct 2026 04:01:18 GMT
       nel:
       - '{"report_to":"heroku-nel","response_headers":["Via"],"max_age":3600,"success_fraction":0.01,"failure_fraction":0.1}'
       report-to:
-      - '{"group":"heroku-nel","endpoints":[{"url":"https://nel.heroku.com/reports?s=TckMagT%2BJiqrnsPuX%2FRoMfiN6%2FnJ1rzvme8cwSRd%2B8I%3D\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\u0026ts=1791259272"}],"max_age":3600}'
+      - '{"group":"heroku-nel","endpoints":[{"url":"https://nel.heroku.com/reports?s=enahw5wIjX3ys5Wv7MX1p3p1ZjmDxtUbdkcBOhEWCcI%3D\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\u0026ts=1791259278"}],"max_age":3600}'
       reporting-endpoints:
-      - heroku-nel="https://nel.heroku.com/reports?s=TckMagT%2BJiqrnsPuX%2FRoMfiN6%2FnJ1rzvme8cwSRd%2B8I%3D&sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&ts=1791259272"
+      - heroku-nel="https://nel.heroku.com/reports?s=enahw5wIjX3ys5Wv7MX1p3p1ZjmDxtUbdkcBOhEWCcI%3D&sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&ts=1791259278"
       server:
       - cloudflare
       transfer-encoding:
@@ -275,28 +274,12 @@ interactions:
       x-ratelimit-prepaid-remaining-usd:
       - '0'
       x-ratelimit-remaining:
-      - '995'
+      - '986'
       x-ratelimit-remaining-usd:
-      - '0.0995'
+      - '0.0986'
       x-ratelimit-reset:
-      - '71928'
+      - '71922'
     status:
       code: 200
       message: OK
-- request:
-    body: ''
-    headers:
-      accept:
-      - application/json
-      accept-encoding:
-      - gzip, deflate, zstd
-      connection:
-      - keep-alive
-      host:
-      - api.openalex.org
-      user-agent:
-      - BioETL/6.1.0 (mailto:bioetl-test@example.com)
-    method: GET
-    uri: https://api.openalex.org/works?mailto=bioetl-test%40example.com&per-page=1
-  response: *id001
 version: 1

@@ -1,37 +1,69 @@
-{
-  "interactions": [
-    {
-      "request": {
-        "body": null,
-        "headers": {
-          "Accept": [
-            "application/json"
-          ],
-          "User-Agent": [
-            "BioETL/1.0 (contact@example.com)"
-          ]
-        },
-        "method": "GET",
-        "uri": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/einfo.fcgi?retmode=json"
-      },
-      "response": {
-        "body": {
-          "string": "{\"header\": {\"type\": \"einfo\", \"version\": \"0.3\"}, \"einforesult\": {\"dblist\": [\"pubmed\", \"protein\", \"nuccore\", \"ipg\", \"nucleotide\", \"structure\", \"genome\", \"annotinfo\", \"assembly\", \"bioproject\", \"biosample\", \"blastdbinfo\", \"books\", \"cdd\", \"clinvar\", \"gap\", \"gapplus\", \"grasp\", \"dbvar\", \"gene\", \"gds\", \"geoprofiles\", \"medgen\", \"mesh\", \"nlmcatalog\", \"omim\", \"orgtrack\", \"pmc\", \"proteinclusters\", \"pcassay\", \"protfam\", \"pccompound\", \"pcsubstance\", \"seqannot\", \"snp\", \"sra\", \"taxonomy\", \"biocollections\", \"gtr\"], \"dbinfo\": []}}"
-        },
-        "headers": {
-          "Content-Type": [
-            "application/json; charset=UTF-8"
-          ],
-          "Date": [
-            "Tue, 07 Apr 2026 10:55:42 GMT"
-          ]
-        },
-        "status": {
-          "code": 200,
-          "message": "OK"
-        }
-      }
-    }
-  ],
-  "version": 1
-}
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      cookie:
+      - ncbi_sid=90C6ABF3AC474F51_0000SID
+      host:
+      - eutils.ncbi.nlm.nih.gov
+      user-agent:
+      - python-httpx/0.28.1
+    method: GET
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/einfo.fcgi?retmode=json
+  response:
+    body:
+      string: '{"header":{"type":"einfo","version":"0.3"},"einforesult":{"dblist":["pubmed","protein","nuccore","ipg","nucleotide","structure","genome","gap","grasp","annotinfo","assembly","bioproject","biosample","blastdbinfo","books","cdd","clinvar","dbvar","gene","gds","geoprofiles","medgen","mesh","nlmcatalog","omim","orgtrack","pmc","proteinclusters","pcassay","protfam","pccompound","pcsubstance","seqannot","snp","sra","taxonomy","biocollections","gtr"],"dbinfo":[]}}
+
+        '
+    headers:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - X-RateLimit-Limit,X-RateLimit-Remaining
+      alt-svc:
+      - clear
+      cache-control:
+      - private
+      content-length:
+      - '462'
+      content-security-policy:
+      - upgrade-insecure-requests
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Tue, 06 Oct 2026 04:11:53 GMT
+      ncbi-phid:
+      - 1D34B17B56A0D05500003303822BB33F.1.1.m_1
+      ncbi-sid:
+      - 90C6ABF3AC474F51_0000SID
+      referrer-policy:
+      - origin-when-cross-origin
+      server:
+      - Finatra
+      set-cookie:
+      - ncbi_sid=90C6ABF3AC474F51_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 04:11:54 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      transfer-encoding:
+      - chunked
+      via:
+      - 1.1 google
+      x-ratelimit-limit:
+      - '3'
+      x-ratelimit-remaining:
+      - '2'
+      x-ua-compatible:
+      - IE=Edge
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1
