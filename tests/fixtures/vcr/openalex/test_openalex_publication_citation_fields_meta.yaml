@@ -3,6 +3,6 @@ provider: openalex
 cassette_rel_path: tests/fixtures/vcr/openalex/test_openalex_publication_citation_fields.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 4df1e5e1c5c21443c4e83c7d8d12e9a1923ce3b1e79d3510db4549d08922709b
-recorded_at: '2026-07-03'
+cassette_sha256: d259612ddb72bd2057122358a2a06b2cb492f9103cbbdd2c2054136f2dd52b17
+recorded_at: '2026-10-06'
 staleness_ready: true
