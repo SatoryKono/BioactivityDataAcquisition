@@ -99,25 +99,27 @@ def reconciliation_display(payload: dict[str, object]) -> list[dict[str, str]]:
             rows.append(_display_row(step, recon))
     if rows:
         return rows
-    plan = payload.get("plan")
-    steps = plan.get("steps") if isinstance(plan, dict) else None
-    if (
-        isinstance(steps, list)
-        and steps
-        and all(
-            isinstance(step, dict)
-            and (
-                step.get("kind") == "pipeline"
-                or (
-                    step.get("kind") == "transform"
-                    and step.get("transform_name") == "summarize_upstream_outputs"
-                )
-            )
-            for step in steps
-        )
-    ):
+    if _plan_has_no_fk_comparison(payload.get("plan")):
         return _not_applicable("No FK comparison in persisted workflow plan")
     return unavailable_reconciliation("FK reconciliation evidence not recorded")
+
+
+def _plan_has_no_fk_comparison(plan: object) -> bool:
+    """Require a nonempty persisted plan containing only known non-FK steps."""
+    steps = plan.get("steps") if isinstance(plan, dict) else None
+    if not isinstance(steps, list) or not steps:
+        return False
+    return all(
+        isinstance(step, dict)
+        and (
+            step.get("kind") == "pipeline"
+            or (
+                step.get("kind") == "transform"
+                and step.get("transform_name") == "summarize_upstream_outputs"
+            )
+        )
+        for step in steps
+    )
 
 
 def _workflow_binding(report: dict[str, object]) -> dict[str, object]:
