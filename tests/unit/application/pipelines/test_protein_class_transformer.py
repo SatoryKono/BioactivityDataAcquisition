@@ -39,6 +39,12 @@ from bioetl.application.pipelines.chembl.protein_class_transformer import (
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.entities import ProteinClassification
+from bioetl.domain.run_reports import build_pipeline_run_report
+from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
+from bioetl.domain.run_reports.context import (
+    bind_stage_accounting,
+    reset_stage_accounting,
+)
 from bioetl.domain.types import RunType
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
@@ -59,6 +65,32 @@ def mock_context():
 @pytest.mark.unit
 class TestProteinClassTransformer:
     """Tests for ProteinClassTransformer."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("entrypoint", ["transform", "transform_pre_silver"])
+    async def test_root_filter_conserves_stage_counts(
+        self, transformer, mock_context, entrypoint
+    ):
+        accounting = StageAccountingAccumulator()
+        token = bind_stage_accounting(accounting)
+        try:
+            result = await getattr(transformer, entrypoint)(
+                mock_context, {"protein_class_id": 0}, 0
+            )
+        finally:
+            reset_stage_accounting(token)
+        assert result is None
+        report = build_pipeline_run_report(
+            identity={},
+            metrics={"records_bronze": 905, "records_silver": 904, "records_gold": 904},
+            accounting=accounting,
+        )
+        silver = next(row for row in report.funnel if row.stage_id == "silver")
+        assert silver.balance_status.value == "OK"
+        assert silver.unaccounted == 0
+        assert silver.removed_total == 1
+        assert silver.removals[0].reason_code == "FILTERED_OUT_SILVER:protein_class_id"
+        assert report.layers.silver_filtered_out == 1
 
     @pytest.fixture
     def transformer(self):
