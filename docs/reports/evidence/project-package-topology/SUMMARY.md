@@ -1,5 +1,9 @@
 # Сводка evidence: project-package-topology
 
+Source-only refresh (2026-10-06): reviewed PubChem, metadata and Polars repairs are bound to the current source tree. Historical coverage and topology measurements remain unchanged.
+
+`source_tree_sha256=6de85b6b390eb245580e3cb6a2b85955700250ff09e9623bf83f437a024b2648`
+
 Source-only refresh (2026-10-05): shared EFO normalization identity revision is bound to the current source tree. This is not a new coverage measurement or topology audit. Historical measurements below are unchanged.
 
 `source_tree_sha256=3786dc15afe014d3827d7f940c7cec030d02c993d78487b403eee55b4bdae29b`
