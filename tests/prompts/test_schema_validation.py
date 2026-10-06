@@ -40,11 +40,40 @@ def _validate(data: dict) -> list[str]:
     ]
 
 
-def test_all_28_overlays_validate() -> None:
+def test_all_registered_overlays_validate() -> None:
     schema_text = SCHEMA_PATH.read_text(encoding="utf-8")
     assert schema_text  # schema exists
     domains = _domains()
-    assert len(domains) == 28, f"expected 28 domains, got {len(domains)}"
+    assert set(domains) == {
+        "agents-memory",
+        "architecture",
+        "cli-compat",
+        "coderabbit",
+        "composite-workflow",
+        "configs",
+        "control-plane",
+        "dashboards",
+        "diagrams",
+        "docs",
+        "dq-contracts",
+        "github-actions",
+        "http-clients",
+        "medallion",
+        "normalization",
+        "ops-runbooks",
+        "performance",
+        "providers",
+        "qa-gates",
+        "repo-hygiene",
+        "reproducibility",
+        "requirements-trace",
+        "scripts-inventory",
+        "security-secrets",
+        "tech-debt",
+        "telemetry",
+        "tests",
+        "vcr-http",
+    }
     for name, data in sorted(domains.items()):
         errs = _validate(data)
         assert not errs, f"{name} schema errors: {errs}"

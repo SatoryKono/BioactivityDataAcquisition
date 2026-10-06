@@ -29,7 +29,11 @@ def test_all_coverage_shards_have_one_owner():
 
 def test_proof_waits_for_producers_in_the_same_workflow():
     config = yaml.safe_load((ROOT / ".circleci/config.yml").read_text(encoding="utf-8"))
-    for workflow in ("pr-gate", "main-coverage-closeout"):
+    for workflow in (
+        "pr-gate",
+        "main-coverage-closeout",
+        "migration-coverage-closeout",
+    ):
         jobs = config["workflows"][workflow]["jobs"]
         by_name = {
             next(iter(j)): next(iter(j.values())) for j in jobs if isinstance(j, dict)
