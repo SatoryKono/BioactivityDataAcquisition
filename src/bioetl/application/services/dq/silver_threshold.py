@@ -78,12 +78,16 @@ class SilverThresholdChecker:
         """
         violations: list[JsonDict] = []  # Any: DQ check values vary by check type
 
+        fields_to_check: list[str] = []
+        rule_map: dict[str, str] = {}
+        df_cols = set(df.columns)
+
         for rule in key_nullability_rules:
             if rule.get("nullable", False):
                 continue
             field = str(rule.get("field", ""))
             key_type = str(rule.get("key_type", "merge"))
-            if field not in df.columns:
+            if field not in df_cols:
                 violations.append(
                     {
                         "field": field,
@@ -92,15 +96,22 @@ class SilverThresholdChecker:
                     }
                 )
                 continue
-            null_count = int(df[field].null_count())
-            if null_count > 0:
-                violations.append(
-                    {
-                        "field": field,
-                        "key_type": key_type,
-                        "null_count": null_count,
-                    }
-                )
+
+            fields_to_check.append(field)
+            rule_map[field] = key_type
+
+        if fields_to_check:
+            import polars.selectors as cs
+            null_counts = df.select(cs.by_name(fields_to_check)).null_count().row(0, named=True)
+            for field, null_count in null_counts.items():
+                if null_count > 0:
+                    violations.append(
+                        {
+                            "field": field,
+                            "key_type": rule_map[field],
+                            "null_count": null_count,
+                        }
+                    )
 
         status = DQCheckStatus.FAIL if violations else DQCheckStatus.PASS
         return {

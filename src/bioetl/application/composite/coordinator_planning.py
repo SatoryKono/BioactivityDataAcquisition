@@ -53,6 +53,9 @@ class _CoordinatorPlanningHost(Protocol):
 
 def find_column_case_insensitive(df: pl.DataFrame, column: str) -> str | None:
     """Resolve a column name using case-insensitive matching."""
+    if column in df.columns:
+        return column
+
     column_lower = column.lower()
     for col_name in df.columns:
         resolved_name = str(col_name)

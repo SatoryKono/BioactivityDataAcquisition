@@ -99,7 +99,8 @@ class TestSilverThresholdChecker:
 
         assert result["status"] == DQCheckStatus.FAIL.value
         assert result["rules_checked"] == 3
-        assert result["violations"] == [
+
+        expected_violations = [
             {"field": "entity_id", "key_type": "merge", "null_count": 1},
             {
                 "field": "partition_date",
@@ -107,6 +108,7 @@ class TestSilverThresholdChecker:
                 "missing_column": True,
             },
         ]
+        assert sorted(result["violations"], key=lambda x: str(x["field"])) == sorted(expected_violations, key=lambda x: str(x["field"]))
 
     def test_check_key_nullability_returns_pass_without_violations(self) -> None:
         checker = SilverThresholdChecker()
