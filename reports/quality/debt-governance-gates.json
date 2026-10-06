@@ -379,7 +379,7 @@
       "status": "pass"
     },
     {
-      "current": 19,
+      "current": 20,
       "limit": 21,
       "metric": "generated_at_age_days",
       "name": "observability_release_review_freshness",
