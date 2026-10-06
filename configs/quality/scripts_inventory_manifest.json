@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-06T10:25:23.044236+00:00",
+  "generated_at": "2026-10-06T11:16:01.595243+00:00",
   "summary": {
     "total_scripts": 639,
     "status_counts": {
@@ -10569,7 +10569,7 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2967,
+          "line": 2969,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest \"$ROOT/coverage/manifest.json\""
         },
@@ -11311,7 +11311,7 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2935,
+          "line": 2937,
           "source_group": "ci",
           "text": ", \\\"pretest_guardrails\\\", [\\\"bash\\\", \\\"scripts/engineering/dev/pretest_guardrails.sh\\\",\\n              \\"
         },
@@ -18217,7 +18217,7 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2887,
+          "line": 2889,
           "source_group": "ci",
           "text": "\\ scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD\\n\""
         },
@@ -21567,7 +21567,7 @@
         },
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 303,
+          "line": 316,
           "source_group": "tests",
           "text": "recover_ps1 = Path(\"scripts/ops/observability/grafana/recover_renderer.ps1\")"
         }
@@ -21635,7 +21635,7 @@
       "references": [
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 304,
+          "line": 317,
           "source_group": "tests",
           "text": "recover_sh = Path(\"scripts/ops/observability/grafana/recover_renderer.sh\")"
         }
