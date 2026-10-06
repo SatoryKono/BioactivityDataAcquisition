@@ -469,8 +469,13 @@ The inventory scanner treats `.circleci/` as a CI caller and recognizes pytest
 preserves the real replay fixture ownership when Actions workflows are retired.
 The current security job verifies the Gitleaks binary checksum and redacts
 findings in logs. Git-history scan parity remains pending: directory scanning
-alone does not replace the legacy commit-range scan, and unsuccessful local
-history scans are not acceptance evidence.
+alone does not replace the legacy commit-range scan. A local pinned Gitleaks
+8.30.1 diagnostic covered 52 first-parent, non-merge commits from main
+`303ced3b8e5c6fff04b061bfa5caf4b1674893af` through
+`8f4ce4bc4a154ef77545ebc06e0188d400a3c0c4`: exit 0, zero findings,
+unchanged rules and no OOM. This is evidence for that PR range only. The legacy
+manual security entry can scan full history; its earlier resource failures and
+the unimplemented CircleCI history transport remain open requirements.
 
 Context boundary acceptance: [CircleCI pipeline 257](https://app.circleci.com/pipelines/github/SatoryKono/BioactivityDataAcquisition/257)
 on disposable full-tree source `55a943181692bf8a891c13db5af489c6bfd1ea20`
