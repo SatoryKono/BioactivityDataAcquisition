@@ -6,6 +6,7 @@ from contextlib import redirect_stdout
 from io import StringIO
 import json
 from pathlib import Path
+import re
 import sys
 
 import pytest
@@ -18,7 +19,37 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def _config():
+    document = yaml.compose((ROOT / ".circleci/config.yml").read_text(encoding="utf-8"))
+    _assert_unique_keys(document)
     return yaml.safe_load((ROOT / ".circleci/config.yml").read_text(encoding="utf-8"))
+
+
+def _assert_unique_keys(node):
+    """Do not silently accept YAML that CircleCI's compiler rejects."""
+    if isinstance(node, yaml.MappingNode):
+        seen = set()
+        for key, value in node.value:
+            assert key.value not in seen, (
+                f"Duplicate YAML key {key.value!r} at line {key.start_mark.line + 1}"
+            )
+            seen.add(key.value)
+            _assert_unique_keys(value)
+    elif isinstance(node, yaml.SequenceNode):
+        for value in node.value:
+            _assert_unique_keys(value)
+
+
+def test_circleci_config_rejects_duplicate_nested_keys():
+    document = yaml.compose(
+        "jobs:\n  test:\n    environment: {}\n    environment: {}\n"
+    )
+    with pytest.raises(AssertionError, match="Duplicate YAML key 'environment'"):
+        _assert_unique_keys(document)
+
+
+def test_circleci_heredocs_escape_compiler_interpolation():
+    source = (ROOT / ".circleci/config.yml").read_text(encoding="utf-8")
+    assert not re.search(r"(?<!\\)<<[ \t]*['\"]", source)
 
 
 def _default_branch_matrix(monkeypatch):
@@ -347,9 +378,21 @@ def test_mutation_preserves_targets_and_requires_schedule_trigger():
     for old, new in zip(legacy, actual, strict=True):
         assert new["target"] == old["id"]
         assert new["source-path"] == old["paths_to_mutate"]
-        assert new["tests-dir"] == old["tests_dir"]
+        # A replacement may include additional existing tests, never drop the legacy set.
+        assert (ROOT / old["tests_dir"]).is_relative_to(ROOT / new["tests-dir"])
         assert new["threshold"] == old["threshold"]
     assert "pipeline.trigger_source" not in str(workflow)
+    # Control-plane callers and regression tests also live outside its subdirectory.
+    control_plane = next(
+        job for job in actual if job["target"] == "application-control-plane"
+    )
+    selected_root = ROOT / control_plane["tests-dir"]
+    for caller_test in (
+        "tests/unit/application/services/test_run_manifest_service.py",
+        "tests/unit/application/services/test_control_plane_service_seams.py",
+        "tests/unit/application/test_issue_10469_stream_a_lt75_control_plane.py",
+    ):
+        assert (ROOT / caller_test).is_relative_to(selected_root)
 
 
 @pytest.mark.parametrize(
@@ -376,7 +419,7 @@ def test_mutation_score_rejects_invalid_missing_or_insufficient_evidence(
         if isinstance(step, dict)
         and step.get("run", {}).get("name") == "Check mutation score threshold"
     )
-    script = command.split("python - <<'PY'\n", 1)[1].rsplit("\nPY", 1)[0]
+    script = command.split("python - \\<<'PY'\n", 1)[1].rsplit("\nPY", 1)[0]
     monkeypatch.setenv("MUTATION_TARGET", "domain")
     monkeypatch.setenv("MUTATION_SCORE_THRESHOLD", "60.0")
     monkeypatch.setenv("PYTHONIOENCODING", "utf-8")

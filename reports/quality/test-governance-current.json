@@ -27,7 +27,7 @@
       "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
       "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
     ],
-    "scanned_test_count": 372,
+    "scanned_test_count": 373,
     "unreviewed_count": 0
   },
   "assertion_branch_reachability_percent": 100.0,
@@ -1104,25 +1104,25 @@
       "test_count": 45
     },
     "test_governance": {
-      "assertion_backed_tests": 41,
+      "assertion_backed_tests": 42,
       "assertion_examples": [
-        "tests/architecture/test_test_governance_audit.py:114",
-        "tests/architecture/test_test_governance_audit.py:133",
-        "tests/architecture/test_test_governance_audit.py:149",
-        "tests/architecture/test_test_governance_audit.py:168",
-        "tests/architecture/test_test_governance_audit.py:179",
-        "tests/architecture/test_test_governance_audit.py:220",
-        "tests/architecture/test_test_governance_audit.py:283",
-        "tests/architecture/test_test_governance_audit.py:377",
-        "tests/architecture/test_test_governance_audit.py:405",
-        "tests/architecture/test_test_governance_audit.py:423"
+        "tests/architecture/test_test_governance_audit.py:115",
+        "tests/architecture/test_test_governance_audit.py:134",
+        "tests/architecture/test_test_governance_audit.py:150",
+        "tests/architecture/test_test_governance_audit.py:169",
+        "tests/architecture/test_test_governance_audit.py:180",
+        "tests/architecture/test_test_governance_audit.py:221",
+        "tests/architecture/test_test_governance_audit.py:284",
+        "tests/architecture/test_test_governance_audit.py:378",
+        "tests/architecture/test_test_governance_audit.py:406",
+        "tests/architecture/test_test_governance_audit.py:424"
       ],
       "assertless_tests": [],
       "intentional_no_exception_tests": 0,
       "paths": [
         "tests/architecture/test_test_governance_audit.py"
       ],
-      "test_count": 41
+      "test_count": 42
     }
   },
   "date_today_call_sites": 0,
@@ -1197,7 +1197,7 @@
         "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
         "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
       ],
-      "scanned_test_count": 372,
+      "scanned_test_count": 373,
       "unreviewed_count": 0
     },
     "assertion_branch_reachability_percent": 100.0,
@@ -1941,25 +1941,25 @@
         "test_count": 45
       },
       "test_governance": {
-        "assertion_backed_tests": 41,
+        "assertion_backed_tests": 42,
         "assertion_examples": [
-          "tests/architecture/test_test_governance_audit.py:114",
-          "tests/architecture/test_test_governance_audit.py:133",
-          "tests/architecture/test_test_governance_audit.py:149",
-          "tests/architecture/test_test_governance_audit.py:168",
-          "tests/architecture/test_test_governance_audit.py:179",
-          "tests/architecture/test_test_governance_audit.py:220",
-          "tests/architecture/test_test_governance_audit.py:283",
-          "tests/architecture/test_test_governance_audit.py:377",
-          "tests/architecture/test_test_governance_audit.py:405",
-          "tests/architecture/test_test_governance_audit.py:423"
+          "tests/architecture/test_test_governance_audit.py:115",
+          "tests/architecture/test_test_governance_audit.py:134",
+          "tests/architecture/test_test_governance_audit.py:150",
+          "tests/architecture/test_test_governance_audit.py:169",
+          "tests/architecture/test_test_governance_audit.py:180",
+          "tests/architecture/test_test_governance_audit.py:221",
+          "tests/architecture/test_test_governance_audit.py:284",
+          "tests/architecture/test_test_governance_audit.py:378",
+          "tests/architecture/test_test_governance_audit.py:406",
+          "tests/architecture/test_test_governance_audit.py:424"
         ],
         "assertless_tests": [],
         "intentional_no_exception_tests": 0,
         "paths": [
           "tests/architecture/test_test_governance_audit.py"
         ],
-        "test_count": 41
+        "test_count": 42
       }
     },
     "date_today_call_sites": 0,
@@ -2053,12 +2053,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3011,
-    "total_test_functions": 29403,
+    "total_test_functions": 29408,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "f5e25b789d1230aa7c5fe308383c055ad755c42c78366e8da8fef5dd45078efa",
+  "source_tree_sha256": "bbb66d6f57c70d5532757063c027ad91dbb673d07b8922dde4a2468ecbd60ace",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 83,
@@ -2121,7 +2121,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3011,
-  "total_test_functions": 29403,
+  "total_test_functions": 29408,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

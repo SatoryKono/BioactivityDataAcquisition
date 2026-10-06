@@ -16,3 +16,18 @@ circleci-732-failure.log -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 circleci-741-failure.log -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 owning-inventory-wave44-clean.log -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 owning-inventory-wave44-clean.xml -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+
+# Match tracked root rules for new captured acceptance artifacts.
+*integrated-acceptance* -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+*repaired-acceptance* -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+*interrupted-acceptance* -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+*postmerge-acceptance* -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+full-coverage-wave-47/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+full-coverage-wave-48/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+circleci-2047-docs.log -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+
+# Preserve original successful and failed final CI receipts.
+ci-2193/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+ci-2356/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+post-main-2d4507f5/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+ci-2772/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol

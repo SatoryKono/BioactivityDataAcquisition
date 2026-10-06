@@ -1,0 +1,11 @@
+{
+  "image": "satorykono/bioetl-grafana-router7-canvas@sha256:2b258e26410093577e524761ebdcfbd0ba36c7ba460692d277e1333c39b53a14",
+  "parent_image": "satorykono/bioetl-grafana-router7-canvas@sha256:301b213479446237b6d5ad904890ee34686198633d6dcb4d4f1989202b98772e",
+  "grafana_version": "13.2.3",
+  "router_version": "7.18.4",
+  "dockerfile_sha256": "bc6947d3623f00e51d842a007599fa65f5bad3444593c736b31df53c1c86d59d",
+  "installed_bioetl_plugins": [
+    "bioetl-selectorshell-panel"
+  ],
+  "acceptance": "Complete CI plugin parity verified in the parent; managed filesystem remains unchanged, with rollout and post-merge acceptance pending."
+}
