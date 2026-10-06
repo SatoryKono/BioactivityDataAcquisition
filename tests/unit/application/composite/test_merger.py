@@ -1139,6 +1139,16 @@ class TestInferPipelineFromTable:
 class TestCheckDuplicates:
     """Tests for EnricherDeduplicatorService._check_duplicates helper."""
 
+    @pytest.mark.parametrize(
+        "keys,expected",
+        [(["doi"], True), (["doi", "pmid"], False), (["missing"], False)],
+    )
+    def test_null_keys_preserve_duplicate_semantics(self, deduplicator, keys, expected):
+        import polars as pl
+
+        df = pl.DataFrame({"doi": [None, None, "x"], "pmid": ["1", "2", "3"]})
+        assert deduplicator._check_duplicates(df, keys) is expected
+
     def test_no_duplicates(self, deduplicator):
         """Test returns False when no duplicates."""
         import polars as pl
