@@ -162,31 +162,22 @@ def test_issue_5703_cached_governance_scans_stay_isolated() -> None:
 def test_issue_5705_vcr_catalog_has_no_metadata_reviewed_backlog() -> None:
     payload = _load_json(CLOSEOUT)["outcomes"]["5705"]
     catalog = _load_json(VCR_CATALOG)
-    cassettes = catalog["cassettes"]
-
+    cassettes, totals = catalog["cassettes"], catalog["totals"]
     assert payload["metadata_reviewed_count"] == 0
-    assert payload["metadata_review_required_cassette_count"] == 0
-    assert payload["unowned_cassette_count"] == 0
-    assert not any(
-        cassette["reachability_status"] == "metadata_reviewed" for cassette in cassettes
-    )
-    # Historical closeout counts remain immutable as unused fixtures retire.
-    # The live catalog must still account for every cassette with a real owner.
-    totals = catalog["totals"]
-    assert totals["metadata_review_required_cassette_count"] == 0
-    assert totals["unowned_cassette_count"] == 0
+    for field in ("metadata_review_required_cassette_count", "unowned_cassette_count"):
+        assert payload[field] == totals[field] == 0
+    # Retired fixtures may change live counts; historical evidence stays immutable.
+    assert totals["cassette_count"] == len(cassettes)
     for kind in ("generated", "direct"):
         assert totals[f"{kind}_reachable_cassette_count"] == sum(
             cassette["reachability_status"] == f"{kind}_reference"
             for cassette in cassettes
         )
-    assert (
-        totals["generated_reachable_cassette_count"]
-        + totals["direct_reachable_cassette_count"]
-        == totals["cassette_count"]
-        == len(cassettes)
+    assert all(
+        cassette["reachability_status"] in ("generated_reference", "direct_reference")
+        and cassette["reachability_owner_paths"]
+        for cassette in cassettes
     )
-    assert all(cassette["reachability_owner_paths"] for cassette in cassettes)
 
 
 def test_issue_5706_coverage_tail_head_is_explicit_and_matches_inventory() -> None:
