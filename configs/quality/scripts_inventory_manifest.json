@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-05T14:29:35.135792+00:00",
+  "generated_at": "2026-10-05T20:17:51.870233+00:00",
   "summary": {
     "total_scripts": 637,
     "status_counts": {
@@ -10204,9 +10204,9 @@
       "references": [
         {
           "path": "docs/05-operations/ci-workflow-map.md",
-          "line": 163,
+          "line": 378,
           "source_group": "docs",
-          "text": "| Replay parity | [2690](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/2690) | FAILED: missing basetemp parent directories. Parent creation repaired; four local test runs pass. The opt"
+          "text": "[`replay_parity_inputs.py` pytest plugin](../../scripts/engineering/ci/replay_parity_inputs.py)"
         }
       ],
       "owner": "@bioetl-platform",
@@ -17834,7 +17834,7 @@
         },
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 555,
+          "line": 583,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -19801,7 +19801,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 475,
+          "line": 503,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }
