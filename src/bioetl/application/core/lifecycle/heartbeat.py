@@ -10,6 +10,7 @@ import asyncio
 import contextlib
 from typing import TYPE_CHECKING
 
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.domain.types import RunID
 
@@ -108,9 +109,11 @@ class HeartbeatTask:
                 success = await self._lock_port.heartbeat(
                     self._lock_key, self._owner_id, exclusive=self._exclusive
                 )
-            except Exception as exc:
+            except (BioETLError, OSError, RuntimeError) as exc:
                 self._logger.error(
-                    "Heartbeat failed during execution", error_type=type(exc).__name__
+                    "Heartbeat failed during execution",
+                    error_type=type(exc).__name__,
+                    reason_code="LOCK_HEARTBEAT_FAILED",
                 )
                 self._shutdown_signal.request()
                 return

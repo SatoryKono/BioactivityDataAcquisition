@@ -49,9 +49,14 @@ Do **not** copy `source_tree_sha256` between families. Telemetry hashing is
 `reports/quality/test-governance-current.json`.
 
 `source_commit` must be an ancestor of HEAD (`git merge-base --is-ancestor`).
-A non-`main` `source_branch` is valid only with `source_event: pull_request`
-(`tests/architecture/test_test_telemetry_baseline.py`). Do not invent coverage
-percent from a partial local `coverage.xml`.
+GitHub telemetry from a non-`main` `source_branch` requires
+`source_event: pull_request`. Complete local evidence uses the separate
+`source_event: local_coverage_verify` contract with `--local-manifest <path>`;
+the updater validates all 17 canonical shards, source/test hashes, reachable
+commit, coverage XML and JUnit telemetry digests, and both 85% gates. It derives
+identity and inputs from the manifest, emits no GitHub run URL, and keeps
+`local_single_host` trust with `CI=BLOCKED_EXTERNAL_PERMANENT`. This is neither
+CI PASS nor lifecycle ADMIT. Do not invent coverage from partial local XML.
 
 After `git fetch origin main`, do **not** use
 `git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main` in a
@@ -91,7 +96,9 @@ python -m scripts.engineering.qa refresh-ci-drift-families --update \
 `--update --telemetry` additionally requires `--coverage-percent`,
 `--source-commit` (Tests-run ancestor of HEAD), `--source-run-id`,
 `--source-event`, and `--source-run-url`. Do not copy `source_tree_sha256`
-from `test-governance-current.json`.
+from `test-governance-current.json`. A complete local capture instead uses
+`--update --telemetry --local-manifest <path>`; CI identity and coverage
+overrides are not accepted by the local updater.
 
 Order: test-gov → flaky fingerprint → telemetry → evidence_surface →
 remote-main → dataflow.

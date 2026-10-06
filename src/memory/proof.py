@@ -530,6 +530,10 @@ def _receipt_scope_errors(receipt: dict[str, Any], bundle: dict[str, Any]) -> li
         errors.append("cross_scope:task_id")
     receipt_repo = receipt.get("repository", {})
     bundle_repo = bundle.get("repository", {})
+    if bundle.get("trust_tier") == "ci":
+        ci_run = bundle_repo.get("ci_run_id")
+        if not ci_run or receipt_repo.get("ci_run_id") != ci_run:
+            errors.append("cross_scope:ci_run_id")
     for field in ("repo_id", "branch"):
         if receipt_repo.get(field) != bundle_repo.get(field):
             errors.append(f"cross_scope:{field}")

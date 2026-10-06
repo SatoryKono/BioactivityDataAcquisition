@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "17f16934030345e14ea024d327a1b991f0dd361c9e5c10599290e9c98da7bd1e",
-      "limit": "17f16934030345e14ea024d327a1b991f0dd361c9e5c10599290e9c98da7bd1e",
+      "current": "3786dc15afe014d3827d7f940c7cec030d02c993d78487b403eee55b4bdae29b",
+      "limit": "3786dc15afe014d3827d7f940c7cec030d02c993d78487b403eee55b4bdae29b",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -56,14 +56,14 @@
     },
     {
       "current": {
-        "source_module_count": 2563,
-        "source_tree_sha256": "17f16934030345e14ea024d327a1b991f0dd361c9e5c10599290e9c98da7bd1e",
+        "source_module_count": 2552,
+        "source_tree_sha256": "3786dc15afe014d3827d7f940c7cec030d02c993d78487b403eee55b4bdae29b",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
-        "source_module_count": 2563,
-        "source_tree_sha256": "17f16934030345e14ea024d327a1b991f0dd361c9e5c10599290e9c98da7bd1e",
+        "source_module_count": 2552,
+        "source_tree_sha256": "3786dc15afe014d3827d7f940c7cec030d02c993d78487b403eee55b4bdae29b",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -379,7 +379,7 @@
       "status": "pass"
     },
     {
-      "current": 17,
+      "current": 19,
       "limit": 21,
       "metric": "generated_at_age_days",
       "name": "observability_release_review_freshness",
@@ -415,7 +415,7 @@
       "status": "pass"
     },
     {
-      "current": "18d6c181b4b32bd93751298ecba2be4225d778ede047e0782040449b614b9499",
+      "current": "79c9ee3087849d8de0d71be41411b7f45cf2974280b37a4f7f6346900519b849",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -472,8 +472,8 @@
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 9.36,
-    "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
+    "architecture_quality_scorecard_integral_score": 10.0,
+    "architecture_quality_scorecard_interpretation": "excellent",
     "fail_count": 0,
     "failing_gates": [],
     "gate_count": 46,

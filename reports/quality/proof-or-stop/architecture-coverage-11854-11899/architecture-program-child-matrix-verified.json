@@ -1,0 +1,122 @@
+[
+  {
+    "issue": 11846,
+    "state": "CLOSED",
+    "title": "[refactoring][P0] RF-001: согласовать audit baseline и provenance quality reports",
+    "evidence_urls": [
+      "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11846#issuecomment-5946567048",
+      "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11846#issuecomment-5948670893"
+    ],
+    "sha_anchors": [
+      "d311a17e17c52f2f50b9f1020ed5e4181ff75b36"
+    ],
+    "scope_note": "Verify current architecture gates; closed state is not fresh test execution.",
+    "merged_commit": "d311a17e17c52f2f50b9f1020ed5e4181ff75b36",
+    "ancestor_of_pinned_head": true
+  },
+  {
+    "issue": 11847,
+    "state": "CLOSED",
+    "title": "[refactoring][P1] RF-002: заменить PD4 host defaults типизированными контрактами Merge и Gold",
+    "evidence_urls": [
+      "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11847#issuecomment-5947798826"
+    ],
+    "sha_anchors": [
+      "8f024f97cb10d87d2d12b31f7a4282aac1cf895c"
+    ],
+    "scope_note": "Verify current architecture gates; closed state is not fresh test execution.",
+    "merged_commit": "8f024f97cb10d87d2d12b31f7a4282aac1cf895c",
+    "ancestor_of_pinned_head": true
+  },
+  {
+    "issue": 11848,
+    "state": "CLOSED",
+    "title": "[refactoring][P1] RF-003: отделить выбор replay snapshots от Composition wiring",
+    "evidence_urls": [
+      "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11848#issuecomment-5953970678"
+    ],
+    "sha_anchors": [
+      "294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2",
+      "cc5657d8e24aeaae28f98478b38967d0e4b77106",
+      "cf0fda583ead5872b80795c2bf6a596c36d3efcf"
+    ],
+    "scope_note": "Verify current architecture gates; closed state is not fresh test execution.",
+    "merged_commit": "294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2",
+    "ancestor_of_pinned_head": true
+  },
+  {
+    "issue": 11849,
+    "state": "CLOSED",
+    "title": "[refactoring][P2] RF-004: проверить и сократить избыточные forwarding seams Composition/Core",
+    "evidence_urls": [
+      "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11849#issuecomment-5953958374"
+    ],
+    "sha_anchors": [
+      "294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2",
+      "cc5657d8e24aeaae28f98478b38967d0e4b77106",
+      "cf0fda583ead5872b80795c2bf6a596c36d3efcf"
+    ],
+    "scope_note": "Verify current architecture gates; closed state is not fresh test execution.",
+    "merged_commit": "294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2",
+    "ancestor_of_pinned_head": true
+  },
+  {
+    "issue": 11850,
+    "state": "CLOSED",
+    "title": "[refactoring][P2] RF-005: провести reference-based retirement scripts без смены статусов ради метрик",
+    "evidence_urls": [
+      "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11850#issuecomment-5953960202"
+    ],
+    "sha_anchors": [
+      "294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2",
+      "cc5657d8e24aeaae28f98478b38967d0e4b77106",
+      "cf0fda583ead5872b80795c2bf6a596c36d3efcf"
+    ],
+    "scope_note": "Verify current architecture gates; closed state is not fresh test execution.",
+    "merged_commit": "294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2",
+    "ancestor_of_pinned_head": true
+  },
+  {
+    "issue": 11851,
+    "state": "CLOSED",
+    "title": "[architecture][P2] RF-006: уточнить семантику DDD/ports/cycles evidence без дублирования gates",
+    "evidence_urls": [
+      "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11851#issuecomment-5953962311"
+    ],
+    "sha_anchors": [
+      "294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2",
+      "cc5657d8e24aeaae28f98478b38967d0e4b77106",
+      "cf0fda583ead5872b80795c2bf6a596c36d3efcf"
+    ],
+    "scope_note": "Verify current architecture gates; closed state is not fresh test execution.",
+    "merged_commit": "294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2",
+    "ancestor_of_pinned_head": true
+  },
+  {
+    "issue": 11852,
+    "state": "CLOSED",
+    "title": "[bug][P0] Закрыть красные fan-in тесты application_core и composition_runtime_builders",
+    "evidence_urls": [],
+    "sha_anchors": [],
+    "scope_note": "Verify current architecture gates; closed state is not fresh test execution.",
+    "merged_commit": "dbc2ee7f257b8f8e7866383e1e05361555faf5de",
+    "ancestor_of_pinned_head": true
+  },
+  {
+    "issue": 11853,
+    "state": "CLOSED",
+    "title": "[refactoring][P1] Распространить typed host contract на оставшиеся PD4 mixins census",
+    "evidence_urls": [
+      "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11853#issuecomment-5951017215",
+      "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11853#issuecomment-5953972399"
+    ],
+    "sha_anchors": [
+      "294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2",
+      "cc5657d8e24aeaae28f98478b38967d0e4b77106",
+      "cf0fda583ead5872b80795c2bf6a596c36d3efcf"
+    ],
+    "scope_note": "Verify current architecture gates; closed state is not fresh test execution.",
+    "merged_commit": "294c90e7210bff8d63d489f6bf3b1e0d76fd8ef2",
+    "ancestor_of_pinned_head": true
+  }
+]

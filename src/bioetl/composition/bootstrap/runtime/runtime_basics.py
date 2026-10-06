@@ -21,7 +21,7 @@ from bioetl.composition.bootstrap.runtime._dependency_runner_support import (
 from bioetl.composition.bootstrap.runtime.composite_child_runner import (
     build_reported_child_runner,
 )
-from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
+from bioetl.composition.factories.services.composite_support_services_factory import (
     build_support_services,
 )
 from bioetl.composition.bootstrap.runtime.enum_loader_wiring import (

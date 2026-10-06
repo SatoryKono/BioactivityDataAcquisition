@@ -1,0 +1,22 @@
+{
+  "ci_job": 1401,
+  "measured_head": "cd50cf3ca72783c49ecdd8a3825b2199101f7c2b",
+  "main_head": "090d7a74c56e9de8db2f96d9a183a9058a55ccc8",
+  "both_git_tree": "a58149d611dcf1af98e732b25c945dbf088b58cb",
+  "coverage_xml_sha256": "3042209f3c21178fd37af41b460c288fb09c6496fcfb652442710244ba88c6ef",
+  "source_tree_sha256": "4db123e5e95045405ceb710e2425c1cd0e733fb6a225dccc7fc4146c63eaacb5",
+  "test_tree_sha256": "89fd40d116eb824b6430cc0d89cd0baf88c3edda4d18677c79d06491e70f60da",
+  "counts": {
+    "passed": 32842,
+    "skipped": 174,
+    "failures": 0,
+    "errors": 0
+  },
+  "config_root_lines": 40,
+  "config_root_branch_rate": 1,
+  "overall_proof": "STOP",
+  "remaining": [
+    "tests telemetry freshness",
+    "debt remote-main drift"
+  ]
+}

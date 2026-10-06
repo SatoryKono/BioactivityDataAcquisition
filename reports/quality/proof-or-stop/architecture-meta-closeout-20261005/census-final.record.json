@@ -1,0 +1,10 @@
+{
+  "command": [
+    "E:/github/BioactivityDataAcquisition/.venv-win/Scripts/python.exe",
+    "-m",
+    "scripts.engineering.qa.report_cast_any_typing_census",
+    "--check"
+  ],
+  "exit_code": 0,
+  "head": "2d4507f595d03591c3db72b2aa554d7f41329ce3"
+}

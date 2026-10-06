@@ -195,9 +195,22 @@ def test_grafana_compose_pins_compatible_infinity_plugin() -> None:
 def test_monitoring_images_are_pinned_and_pushgateway_is_not_a_datasource() -> None:
     monitoring = _load_monitoring_compose()
     assert monitoring["services"]["grafana"]["image"] == (
-        "mirror.gcr.io/grafana/grafana:12.2.5@sha256:"
-        "e67fa772c14a0c728df61d7ac1b46d0da24e557efa729dbe1c404bf4403d6f35"
+        "satorykono/bioetl-grafana-router7-canvas@sha256:"
+        "2b258e26410093577e524761ebdcfbd0ba36c7ba460692d277e1333c39b53a14"
     )
+    managed = json.loads(
+        Path("grafana/tooling/router-v7-bridge/managed-image.json").read_text()
+    )
+    assert monitoring["services"]["grafana"]["image"] == managed["image"]
+    assert managed["installed_bioetl_plugins"] == ["bioetl-selectorshell-panel"]
+    unsigned = [
+        entry
+        for entry in monitoring["services"]["grafana"]["environment"]
+        if entry.startswith("GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=")
+    ]
+    assert unsigned == [
+        "GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=bioetl-selectorshell-panel"
+    ]
     assert monitoring["services"]["prometheus"]["image"] == (
         "prom/prometheus:v3.13.1@sha256:3c42b892cf723fa54d2f262c37a0e1f80aa8c8ddb1da7b9b0df9455a35a7f893"
     )

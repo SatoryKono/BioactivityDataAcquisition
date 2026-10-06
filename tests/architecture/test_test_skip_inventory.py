@@ -205,7 +205,10 @@ def _has_guard_ancestor(node: ast.AST, parents: dict[ast.AST, ast.AST]) -> bool:
 
 def _unconditional_skip_lines(source: str) -> list[int]:
     """Line numbers of pytest.skip / pytest.mark.skip that are not guarded."""
-    tree = ast.parse(source)
+    return _unconditional_skip_lines_from_tree(ast.parse(source))
+
+
+def _unconditional_skip_lines_from_tree(tree: ast.AST) -> list[int]:
     parents = _parent_map(tree)
     lines: list[int] = []
     for node in ast.walk(tree):
@@ -219,12 +222,13 @@ def _unconditional_skip_lines(source: str) -> list[int]:
     return lines
 
 
-def _unit_unconditional_skip_paths() -> set[str]:
-    found: set[str] = set()
-    for path in sorted((ROOT / "tests" / "unit").rglob("*.py")):
-        if _unconditional_skip_lines(path.read_text(encoding="utf-8")):
-            found.add(path.relative_to(ROOT).as_posix())
-    return found
+def _unit_unconditional_skip_paths(test_ast_cache: dict[Path, ast.Module]) -> set[str]:
+    unit_root = ROOT / "tests" / "unit"
+    return {
+        path.relative_to(ROOT).as_posix()
+        for path, tree in test_ast_cache.items()
+        if path.is_relative_to(unit_root) and _unconditional_skip_lines_from_tree(tree)
+    }
 
 
 @pytest.mark.parametrize(
@@ -254,13 +258,15 @@ def test_unconditional_skip_classifier_ignores_skipif_and_guards(
     assert _unconditional_skip_lines(source) == expected
 
 
-def test_unit_unconditional_skips_match_inventory() -> None:
+def test_unit_unconditional_skips_match_inventory(
+    test_ast_cache: dict[Path, ast.Module],
+) -> None:
     """Unconditional unit skips fail closed unless listed (#11173)."""
     payload = _load_inventory()
     entries = payload["unit_unconditional_skips"]
     assert isinstance(entries, list)
     tracked = {str(entry["path"]) for entry in entries}
-    live = _unit_unconditional_skip_paths()
+    live = _unit_unconditional_skip_paths(test_ast_cache)
     assert live == tracked, (
         "Unconditional pytest.skip / pytest.mark.skip in tests/unit must be "
         "listed in unit_unconditional_skips. skipif stays unlisted. "

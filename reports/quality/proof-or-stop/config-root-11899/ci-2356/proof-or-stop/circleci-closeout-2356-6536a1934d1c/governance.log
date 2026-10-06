@@ -1,0 +1,87 @@
+[pretest-guardrails] mode=check scope=governance strict_docs=0
+[pretest-guardrails] inventory-check: .venv/bin/python -m scripts.engineering.repo check-inventory --check --manifest configs/quality/scripts_inventory_manifest.json --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json 
+[OK] Scripts inventory is in sync: /home/circleci/project/configs/quality/scripts_inventory_manifest.json
+[OK] Lifecycle registry covers non-active scripts: /home/circleci/project/configs/quality/scripts_lifecycle_registry.json
+[INFO] scripts=636 active=335 unknown=0 orphan=0 legacy=0
+[pretest-guardrails] catalog-check: .venv/bin/python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml 
+[OK] Scripts catalog governance is valid: scripts/engineering/repo/catalog.yaml
+[pretest-guardrails] hotspot-family-baseline-check: .venv/bin/python -m scripts.engineering.qa report-family-baseline --check 
+[ok] hotspot-family baseline artifacts are up to date
+[pretest-guardrails] repo-identity-check: .venv/bin/python -m scripts.docs sync-repo-identity --check 
+[sync-repo-identity] repo identity is already synchronized
+[pretest-guardrails] integration-vcr-policy-check: .venv/bin/python -m scripts.engineering.qa sync-integration-vcr-policy --check 
+[sync-integration-vcr-policy] inventory is already synchronized
+[pretest-guardrails] memory-validate: env PYTHONPATH=/home/circleci/project/src:/home/circleci/project:/home/circleci/project/src .venv/bin/python -m memory.tooling.validate 
+Memory scaffold validation passed.
+[pretest-guardrails] memory-workflow-smoke: env BIOETL_AI_RUNTIME=pretest-guardrails BIOETL_AI_AGENT=memory-workflow-smoke PYTHONPATH=/home/circleci/project/src:/home/circleci/project:/home/circleci/project/src .venv/bin/python -m memory.tooling.workflow smoke --validation-timeout-seconds 15 --json 
+{
+  "actor": {
+    "agent": "memory-workflow-smoke",
+    "runtime": "smoke"
+  },
+  "generated_artifacts": "temporary_directory_removed",
+  "kind": "smoke",
+  "ok": true,
+  "post_task_degraded": false,
+  "post_task_ok": true,
+  "post_task_validation_status": "completed",
+  "pre_task_ok": true,
+  "python_executable": "/home/circleci/project/.venv/bin/python",
+  "repo_root": "/home/circleci/project"
+}
+[pretest-guardrails] memory-refresh-smoke: env PYTHONPATH=/home/circleci/project/src:/home/circleci/project:/home/circleci/project/src .venv/bin/python -m memory.tooling.refresh_all --root /home/circleci/project --output-root /tmp/tmp.JJoa5BdXXI --rag-build-scope full --json 
+{
+  "artifacts": [
+    {
+      "build_scope": "full",
+      "focus_query": null,
+      "kind": "rag",
+      "max_sources": null,
+      "paths": [
+        "/tmp/tmp.JJoa5BdXXI/rag/manifests/corpus_catalog.json",
+        "/tmp/tmp.JJoa5BdXXI/rag/manifests/chunks.jsonl"
+      ]
+    },
+    {
+      "kind": "timeline",
+      "paths": [
+        "/tmp/tmp.JJoa5BdXXI/timeline/events/runs.jsonl",
+        "/tmp/tmp.JJoa5BdXXI/timeline/events/ci.jsonl",
+        "/tmp/tmp.JJoa5BdXXI/timeline/events/incidents.jsonl",
+        "/tmp/tmp.JJoa5BdXXI/timeline/events/timeline_manifest.json"
+      ]
+    }
+  ],
+  "ok": true
+}
+[pretest-guardrails] memory-rag-manifest-validate: capture_json_output /tmp/tmp.aOHvYtZQBf env PYTHONPATH=/home/circleci/project/src:/home/circleci/project:/home/circleci/project/src .venv/bin/python -m memory.rag.validation --root /home/circleci/project --manifest-dir /tmp/tmp.JJoa5BdXXI/rag/manifests --require-build-scope full --json 
+{
+  "build_scope": "full",
+  "chunk_count": 58606,
+  "eligible_source_count": 7516,
+  "indexed_source_count": 7516,
+  "issues": [],
+  "missing_path_count": 0,
+  "ok": true,
+  "source_surface_sha256": "ee4e4fab30a59cb8831d553c0fd43f384d3541169109ca22d2271c93a02d019d",
+  "stale_chunk_count": 0
+}
+[pretest-guardrails] memory-prune-dry-run: env PYTHONPATH=/home/circleci/project/src:/home/circleci/project:/home/circleci/project/src .venv/bin/python -m memory.tooling.prune --json --check 
+{
+  "active_count": 6,
+  "apply": false,
+  "candidate_count": 0,
+  "candidates": [],
+  "density_excess": 0,
+  "density_status": "ok",
+  "invalid_metadata": [],
+  "max_active": 1000,
+  "policy_violation": false,
+  "removed_count": 0,
+  "removed_paths": [],
+  "total_count": 6
+}
+[pretest-guardrails] architecture-fail-fast: env BIOETL_SKIP_PREFLIGHT=1 BIOETL_PREFLIGHT_DONE=1 bash scripts/engineering/dev/run_pytest.sh --skip-preflight --narrow tests/architecture/test_integration_vcr_policy.py::TestIntegrationVcrPolicy::test_every_test_surface_under_integration_and_e2e_is_in_tracked_inventory tests/architecture/test_integration_vcr_policy.py::TestIntegrationVcrPolicy::test_testing_guide_matches_current_fixture_governance_and_live_contract_policy tests/architecture/test_documentation_sync.py::test_no_legacy_repo_slug_in_active_docs_and_workflows tests/architecture/test_documentation_sync.py::test_no_legacy_contract_path_in_active_docs tests/architecture/test_generated_artifact_routing.py tests/architecture/test_scripts_catalog_governance.py::test_scripts_catalog_governance_check_passes -q -x --tb=short 
+...........................                                              [100%]
+[pretest-guardrails] OK
+[pretest-guardrails] report: /home/circleci/project/reports/quality/proof-or-stop/circleci-closeout-2356-6536a1934d1c/governance.json

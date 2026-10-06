@@ -36,7 +36,9 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import sentinel
 
-from bioetl.composition import _workflow_services
+from bioetl.composition.factories.services import (
+    workflow_services as _workflow_services,
+)
 
 
 pytestmark = pytest.mark.unit

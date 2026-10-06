@@ -18,7 +18,7 @@ from bioetl.domain.workflow import (
     ForeignKeyReconciliationRequest,
 )
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-from bioetl.infrastructure.storage.bronze.metadata_builders import (
+from bioetl.infrastructure.storage.bronze.metadata_assembly import (
     BronzeLineageMetadataRequest,
     BronzeMetadataPayloadRequest,
     build_bronze_lineage_metadata,

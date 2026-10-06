@@ -7,7 +7,6 @@ from pathlib import Path
 from uuid import UUID
 from typing import cast
 
-import pyarrow as pa
 
 from bioetl.application.ports.storage import CompositeMergeStorageProtocol
 from bioetl.application.services.run_reports.observations import (
@@ -24,7 +23,6 @@ from bioetl.composition.bootstrap.runtime.composite_merge_service_builder import
     SYSTEM_COLUMNS_TO_DROP,
 )
 
-from bioetl.composition.factories.storage import StorageBundle
 from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
@@ -37,18 +35,21 @@ from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.composite_replay_bundle import (
     SUPPORTED_COMPOSITES,
-    canonical_table,
     digest_bytes,
     load_verified_json,
     publish_json,
     verify_bundle,
+)
+from bioetl.infrastructure.storage.composite_replay_evidence import (
+    verify_replay_outputs,
+    verification_receipt,
 )
 from bioetl.infrastructure.storage.composite_replay_inputs import (
     CompositeReplayInputReader,
 )
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 from bioetl.infrastructure.time import SystemClock
-from bioetl.composition.bootstrap.runtime.composite_replay_context import (
+from bioetl.application.composite.helpers.replay_context import (
     output_table_name,
     restore_field_groups,
     restore_merge_request,
@@ -56,50 +57,6 @@ from bioetl.composition.bootstrap.runtime.composite_replay_context import (
 
 
 _FIELD_GROUPS_FILE = "field-groups.json"
-
-
-async def _verify_outputs(
-    root: Path,
-    output_reader: DeltaReader,
-    storage: StorageBundle,
-    config: CompositeConfig,
-) -> None:
-    """Compare canonical logical tables read back from both physical layers."""
-    for layer in ("silver", "gold"):
-        actual = canonical_table(
-            await output_reader.read_table(
-                str(
-                    storage.get_table_path(
-                        output_table_name(
-                            getattr(config.merge, f"output_{layer}_path"), layer
-                        ),
-                        layer=layer,
-                    )
-                )
-            )
-        )
-        expected = pa.ipc.open_file(root / f"expected/{layer}.arrow").read_all()
-        if not actual.equals(expected, check_metadata=True):
-            raise ValueError(f"assay_replay_{layer}_mismatch")
-
-
-def _verification_receipt(
-    destination: Path, envelope_hash: str, run_id: str, records: int
-) -> JsonDict:
-    """Bind the verified outputs to immutable physical file digests."""
-    return {
-        "version": "assay-replay-verification-v1",
-        "envelope_sha256": envelope_hash,
-        "run_id": run_id,
-        "records": records,
-        "objects": {
-            path.relative_to(destination).as_posix(): digest_bytes(path.read_bytes())
-            for path in sorted((destination / "output").rglob("*"))
-            if path.is_file()
-        },
-        "silver_equal": True,
-        "gold_equal": True,
-    }
 
 
 async def replay_assay(
@@ -178,8 +135,15 @@ async def replay_assay(
         )
         result = await merger.execute_request(request)
         output_reader = DeltaReader(destination / "output", logger)
-        await _verify_outputs(root, output_reader, storage, config)
-        receipt = _verification_receipt(
+        paths = {
+            layer: storage.get_table_path(
+                output_table_name(getattr(config.merge, f"output_{layer}_path"), layer),
+                layer=layer,
+            )
+            for layer in ("silver", "gold")
+        }
+        await verify_replay_outputs(root, output_reader, paths)
+        receipt = verification_receipt(
             destination, envelope_hash, request.run_id, result.records_merged
         )
         publish_json(destination, "verification.json", receipt)

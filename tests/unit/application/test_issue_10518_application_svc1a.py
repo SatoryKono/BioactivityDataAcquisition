@@ -1436,7 +1436,7 @@ class TestAttachWorkflowRunReport:
 
     def test_happy_path_attaches_paths(self, monkeypatch):
         import bioetl.application.services.run_reports.writer as _writer
-        import bioetl.domain.run_reports.workflow_builder as _builder
+        import bioetl.domain.run_reports.workflow_report_assembly as _builder
 
         monkeypatch.setattr(
             _builder,

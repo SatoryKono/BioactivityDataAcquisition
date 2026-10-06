@@ -1,4 +1,4 @@
-"""Contract tests for the 17 Prompt Library scenarios (epic #10081 / #10082)."""
+"""Contract tests for registered Prompt Library scenarios."""
 
 from __future__ import annotations
 
@@ -18,6 +18,31 @@ pytestmark = pytest.mark.unit
 SCENARIOS = load_scenarios()
 
 
+def test_registered_scenario_identities() -> None:
+    ids = [str(scenario["id"]) for scenario in SCENARIOS]
+    assert len(ids) == len(set(ids)), "Scenario IDs must be unique"
+    assert set(ids) == {
+        "session-bootstrap",
+        "audit-cycle",
+        "audit-tech-debt",
+        "plan-scoped",
+        "agent-efficiency",
+        "test-cycle",
+        "test-fix-retest",
+        "config-validate",
+        "doc-audit",
+        "debug-isolate",
+        "closeout",
+        "github-actions",
+        "agents-runtime",
+        "architecture-cycle",
+        "dashboard-audit",
+        "sequential-run",
+        "test-loop",
+        "comprehensive-audit",
+    }
+
+
 def _jsonschema_validate(instance: dict) -> list[str]:
     try:
         from jsonschema import Draft202012Validator  # type: ignore[import-untyped]
@@ -33,7 +58,6 @@ def _jsonschema_validate(instance: dict) -> list[str]:
 
 @pytest.mark.parametrize("scenario", SCENARIOS, ids=lambda item: str(item["id"]))
 def test_scenario_prompt_contract(scenario: dict) -> None:
-    assert len(SCENARIOS) == 17
     assert scenario["scenario"]
     assert scenario["role"]
     assert scenario["schema"] == "_schema/prompt.schema.json" or str(

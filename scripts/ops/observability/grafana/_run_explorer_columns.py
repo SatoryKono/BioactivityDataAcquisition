@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import argparse
-import json
-from pathlib import Path
 from typing import Any
 
 from copy import deepcopy
@@ -488,28 +485,3 @@ def _apply_run_explorer_templating(payload: dict[str, Any]) -> None:
             "Pipeline is All ($__all / .*). Table Provider handoff uses the row field."
         )
     payload["templating"]["list"] = list(variables.values())
-
-
-def main() -> int:
-    """Refresh this scoped presentation without unrelated layout migrations."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--check", action="store_true")
-    args = parser.parse_args()
-    directory = Path(__file__).resolve().parents[4] / "grafana" / "dashboards"
-    drift = False
-    for path in sorted(directory.glob("*.json")):
-        original = path.read_text(encoding="utf-8")
-        payload = json.loads(original)
-        apply_run_explorer_columns(payload)
-        rendered = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
-        if args.check:
-            if original != rendered:
-                print(f"drift {path.name}")
-                drift = True
-        else:
-            path.write_text(rendered, encoding="utf-8")
-    return int(drift)
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

@@ -152,6 +152,7 @@ jobs:
           set -euo pipefail
           mkdir -p reports/jscpd
           npm ci --ignore-scripts --no-fund --no-audit --prefix "${GITHUB_WORKSPACE}/.github/tooling/jscpd"
+          node .github/tooling/braces-backport/test.cjs .github/tooling/jscpd
           "${GITHUB_WORKSPACE}/.github/tooling/jscpd/node_modules/.bin/jscpd" \
             "${GITHUB_WORKSPACE}/src" "${GITHUB_WORKSPACE}/tests" \
             --config "${GITHUB_WORKSPACE}/.jscpd.json" \

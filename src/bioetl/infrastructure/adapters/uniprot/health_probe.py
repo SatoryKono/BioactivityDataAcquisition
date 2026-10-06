@@ -9,7 +9,7 @@ from httpx import HTTPError
 
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base_metrics import ADAPTER_REQUEST_ERRORS
-from bioetl.infrastructure.adapters.uniprot.query_builder import (
+from bioetl.infrastructure.adapters.uniprot.query_planning import (
     build_uniprot_health_probe_params,
 )
 

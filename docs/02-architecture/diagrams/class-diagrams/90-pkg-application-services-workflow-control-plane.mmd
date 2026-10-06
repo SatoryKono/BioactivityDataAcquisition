@@ -1,11 +1,11 @@
 %% Title: Package Family: application/services/workflow/control_plane
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/workflow/control_plane; modules: _execution_resume_support, _execution_recording_finish, execution_preparation, execution_service.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/workflow/control_plane; modules: _execution_resume_support, _execution_recording_finish, execution_preparation, execution_service, selected_snapshot_resume.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-09-02
+%% @date    2026-10-04
 %% @level   Package Family / Inventory Slice
-%% @nodes   5
+%% @nodes   6
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -26,3 +26,6 @@ classDiagram
         class WorkflowExecutionService
     }
 
+    namespace selected_snapshot_resume {
+        class SelectedSnapshotResumeOptions
+    }

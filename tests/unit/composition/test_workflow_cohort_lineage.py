@@ -26,8 +26,12 @@ from bioetl.application.services.workflow.workflow_runner_models import (
 from bioetl.application.workflow.transforms.reconcile_foreign_keys import (
     _build_reconcile_payload,
 )
-from bioetl.composition.workflow_cohort import WorkflowCohortResolver
-from bioetl.composition.workflow_cohort_lineage import resolve_cohort_lineage
+from bioetl.composition.bootstrap.assembly.workflow_transforms import (
+    WorkflowCohortResolver,
+)
+from bioetl.application.workflow.transforms.selected_snapshot_inputs import (
+    resolve_cohort_lineage,
+)
 from bioetl.domain.control_plane import WorkflowStepState
 from bioetl.domain.workflow import (
     TransformStepConfig,
