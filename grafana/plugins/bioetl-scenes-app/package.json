@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "webpack -c ./webpack.config.ts --env production",
-    "test:ci": "jest --maxWorkers 4",
+    "test:ci": "jest --maxWorkers 4 && node --test ../../../.github/tooling/nyc-yaml-compat.test.cjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint --cache ."
   },
@@ -78,6 +78,9 @@
       "react-router-dom": "7.18.4"
     },
     "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
-    "braces": "$braces"
+    "braces": "$braces",
+    "@istanbuljs/load-nyc-config": {
+      "js-yaml": "4.3.2"
+    }
   }
 }

@@ -60,8 +60,9 @@ Dockerfile.host packages the compiled frontend and both owned plugins against
 the pinned official 13.2.3 base. Plugins use Grafana's bundled-plugin directory;
 the managed data volume therefore cannot mask them. host-image.json binds the
 delivered digest to patch, lock and bundle hashes. The default monitoring compose
-retains the accepted 12.2.5 image and does not install or enable the Scenes shadow
-app. Explicitly layer compose.acceptance.yml on a separate acceptance host and
+selects the managed JSON-dashboard variant and does not install or enable the
+Scenes shadow app. This pin must not be deployed until the exact delivery commit
+passes required CI and Proof-or-Stop gates. Explicitly layer compose.acceptance.yml on a separate acceptance host and
 database to select the candidate and allow the two owned unsigned plugins.
 Enable Scenes manually for shadow review; this does not authorize a cutover.
 The acceptance-only runtime-probe is never shipped in the image.
@@ -69,7 +70,11 @@ The acceptance-only runtime-probe is never shipped in the image.
 `Dockerfile.managed` derives the JSON-dashboard host from the same immutable
 candidate, removing the Scenes package. `managed-image.json` binds this variant
 to its parent and recipe. `compose.managed-acceptance.yml` selects it for an
-isolated database; the default remains unchanged until managed acceptance.
+isolated database. The default compose uses this same managed image with only
+SelectorShell permitted as an unsigned plugin; the temporary probe is excluded.
+An isolated acceptance receipt does not establish default-host delivery. Preserve
+a fresh database backup before deployment and repeat browser acceptance on the
+default host after deployment before closing #11888, #11889 or #11895.
 `verify-managed-image.py` checks the trusted parent layer prefix and compares
 every exported filesystem record against exactly the parent minus Scenes.
 The registry image and independently rebuilt image must both match, including

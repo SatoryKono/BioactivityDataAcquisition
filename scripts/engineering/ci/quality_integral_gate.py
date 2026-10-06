@@ -27,7 +27,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 if __package__ in {None, ""}:
-    from scripts.engineering.ci._compatibility_telemetry import (  # type: ignore[import-not-found]
+    from scripts.engineering.ci._compatibility_telemetry import (
         CompatibilitySurfaceSnapshot,
         DebtGovernanceSnapshot,
         collect_debt_governance_snapshot,
@@ -171,13 +171,18 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--architecture-owner",
-        choices=("pytest", "lint-architecture-workflow"),
+        choices=("pytest", "lint-architecture-workflow", "junit"),
         default="pytest",
         help=(
             "Where architecture pytest is executed. "
             "'pytest' runs tests/architecture in-process. "
             "'lint-architecture-workflow' reuses Lint and Architecture Gates."
         ),
+    )
+    parser.add_argument(
+        "--architecture-junit",
+        type=Path,
+        help="Existing architecture JUnit; the CI adapter verifies its source binding.",
     )
     parser.add_argument(
         "--vcr-root",
@@ -304,6 +309,20 @@ def _junit_suites(root: ET.Element) -> list[ET.Element]:
 
 def _resolve_architecture_stats(args: argparse.Namespace) -> ArchitectureTestStats:
     """Run architecture pytest or reuse the Lint and Architecture Gates owner."""
+    if args.architecture_owner == "junit":
+        if args.architecture_junit is None:
+            raise ValueError("JUnit architecture owner requires --architecture-junit")
+        stats = _parse_architecture_junit(args.architecture_junit, returncode=0)
+        if stats.tests <= 0:
+            raise ValueError("Architecture JUnit is missing or empty")
+        return ArchitectureTestStats(
+            tests=stats.tests,
+            failures=stats.failures,
+            errors=stats.errors,
+            skipped=stats.skipped,
+            owner="junit",
+            returncode=int(bool(stats.failures or stats.errors)),
+        )
     if args.architecture_owner == "lint-architecture-workflow":
         return ArchitectureTestStats(
             tests=0,
