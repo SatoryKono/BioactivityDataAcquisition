@@ -60,6 +60,15 @@ class PubChemFetchFlow:
                 if delay is not None:
                     clamped_delay = self.retry_config.clamp_retry_after(delay)
                     if clamped_delay < delay:
+                        if self.logger is not None:
+                            self.logger.warning(
+                                "pubchem_retry_after_over_budget",
+                                provider="pubchem",
+                                endpoint=endpoint,
+                                status_code=error.code,
+                                retry_after=delay,
+                                over_budget=True,
+                            )
                         raise error
                     return clamped_delay
         return self.retry_config.calculate_delay(attempt, endpoint)
