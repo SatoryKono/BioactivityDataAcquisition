@@ -5,7 +5,7 @@
     "build": "webpack -c ./webpack.config.ts --env production",
     "dev": "webpack -w -c ./webpack.config.ts --env development",
     "test": "jest --watch --onlyChanged",
-    "test:ci": "jest --maxWorkers 4",
+    "test:ci": "jest --maxWorkers 4 && node --test ../../../.github/tooling/nyc-yaml-compat.test.cjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint --cache .",
     "lint:fix": "npm run lint -- --fix && prettier --write --list-different ."
@@ -75,6 +75,9 @@
   "packageManager": "npm@10.8.2",
   "overrides": {
     "react-router-dom-v5-compat": "$react-router-dom-v5-compat",
-    "braces": "$braces"
+    "braces": "$braces",
+    "@istanbuljs/load-nyc-config": {
+      "js-yaml": "4.3.2"
+    }
   }
 }

@@ -13,11 +13,21 @@ version: 2.1
 parameters:
   ci-lane:
     type: enum
-    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance, e2e-replay, coverage-closeout, docker-baseline]
+    enum: [pr-gate, docs-kpi, memory-retention, port-contracts, skills-consistency, github-settings-review, performance, replay-parity, memory-freshness, mutation, consolidation, branch-hygiene, architecture-docs, provider-contract-drift, semantic-governance, e2e-replay, coverage-closeout, docker-baseline, docker-publish, architecture-metrics, scorecard, scorecard-publish, release-validation, router-bridge]
     default: pr-gate
   include-hypothesis:
     type: boolean
     default: true
+
+  run-heavy:
+    type: boolean
+    default: false
+  run-live:
+    type: boolean
+    default: false
+  approve-runtime-sync:
+    type: boolean
+    default: false
 
 commands:
   # Port of .github/actions/setup-python-uv (uv 0.11.26, uv cache, uv sync).
@@ -34,8 +44,21 @@ commands:
       - run:
           name: Install uv 0.11.26
           command: |
-            curl -LsSf https://astral.sh/uv/install.sh | sh
+            set -euo pipefail
+            test "$(uname -m)" = x86_64
+            archive="$(mktemp)"
+            extracted="$(mktemp -d)"
+            trap 'rm -f "$archive"; rm -rf "$extracted"' EXIT
+            curl --fail --location --retry 3 \
+              https://github.com/astral-sh/uv/releases/download/0.11.26/uv-x86_64-unknown-linux-gnu.tar.gz \
+              --output "$archive"
+            printf '%s  %s\n' 6426a73c3837e6e2483ee344cbc00f36394d179afcba6183cb77437e67db4af0 "$archive" | sha256sum --check -
+            tar -xzf "$archive" -C "$extracted"
+            mkdir -p "$HOME/.local/bin"
+            install -m 0755 "$extracted/uv-x86_64-unknown-linux-gnu/uv" "$HOME/.local/bin/uv"
+            install -m 0755 "$extracted/uv-x86_64-unknown-linux-gnu/uvx" "$HOME/.local/bin/uvx"
             echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$BASH_ENV"
+            echo 'export UV_PYTHON="<< parameters.python-version >>"' >> "$BASH_ENV"
             "$HOME/.local/bin/uv" --version
       - restore_cache:
           name: Restore uv cache
@@ -50,6 +73,10 @@ commands:
             for extra in << parameters.extras >>; do CMD="$CMD --extra $extra"; done
             echo "Running: $CMD"
             $CMD
+            # Keep the exact extras/environment produced by the successful frozen sync.
+            export UV_NO_SYNC=1
+            echo 'export UV_NO_SYNC=1' >> "$BASH_ENV"
+            uv run --frozen --no-build python -c 'import os, sys; actual = ".".join(map(str, sys.version_info[:2])); expected = os.environ["UV_PYTHON"]; assert actual == expected, f"Python mismatch: {actual} != {expected}"; print(f"Python {actual} matches requested runtime")'
       - save_cache:
           name: Save uv cache
           key: uv-v1-{{ checksum "uv.lock" }}-py<< parameters.python-version >>
@@ -69,6 +96,10 @@ commands:
       - run:
           name: Check gate decision (<< parameters.gate >>)
           command: |
+            export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+            if [ "<< parameters.gate >>" = "docs-governance" ] && PYTHONPATH=src python -m scripts.engineering.qa proof-or-stop ci enabled; then
+              exit 0
+            fi
             DECISION=$(python3 -c "import json; print(json.load(open('/tmp/cci-ws/pr-gate-decisions.json'))['decisions']['<< parameters.gate >>']['decision'])")
             echo "gate << parameters.gate >> decision: $DECISION"
             if [ "$DECISION" != "required" ]; then
@@ -77,6 +108,674 @@ commands:
             fi
 
 jobs:
+  router-bridge-tests:
+    docker:
+    - image: cimg/node:24.21.0@sha256:2944a8d6bea9d71395f670ee689ca63a02b34a846ad9a5d617d21eefe57a9209
+    resource_class: medium
+    steps:
+    - checkout
+    - run:
+        name: Verify Router bridge behavior, types, build and dependency audit
+        no_output_timeout: 11m
+        command: |
+          set -euo pipefail
+          [[ "$CIRCLE_BRANCH" == main ]]
+          mkdir -p reports/qa/router-v7-circleci
+          cat > /tmp/bridge-tests.sh \<<'BIOETL_ROUTER_SCRIPT'
+          set -euo pipefail
+          export BIOETL_WORKSPACE="$PWD"
+          [[ "$(node -p 'process.versions.node.split(".")[0]')" == 24 ]]
+          python3 --version
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          npm ci --ignore-scripts
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          node verify-packed-bridge.mjs
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          npm test
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          node --test runtime-probe/module.test.mjs
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          node --test verify-host-image.test.mjs
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          /usr/bin/python3 fingerprint-rootfs.test.py
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          npm run typecheck
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          npm run build
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
+          npm audit --audit-level=moderate
+          )
+          BIOETL_ROUTER_SCRIPT
+          timeout --signal=TERM --kill-after=30s 10m bash /tmp/bridge-tests.sh 2>&1 | tee reports/qa/router-v7-circleci/bridge-tests.log
+    - store_artifacts:
+        path: reports/qa/router-v7-circleci
+        destination: router-v7-bridge
+  router-plugin-tests:
+    parameters:
+      plugin:
+        type: enum
+        enum:
+        - bioetl-scenes-app
+        - bioetl-selectorshell-panel
+    docker:
+    - image: cimg/node:24.21.0@sha256:2944a8d6bea9d71395f670ee689ca63a02b34a846ad9a5d617d21eefe57a9209
+    resource_class: medium
+    environment:
+      BIOETL_PLUGIN: << parameters.plugin >>
+    steps:
+    - checkout
+    - run:
+        name: Verify plugin and transfer SHA-256 checked build
+        no_output_timeout: 16m
+        command: |
+          set -euo pipefail
+          [[ "$CIRCLE_BRANCH" == main ]]
+          mkdir -p reports/qa/router-v7-circleci
+          cat > /tmp/plugin-tests.sh \<<'BIOETL_ROUTER_SCRIPT'
+          set -euo pipefail
+          export BIOETL_WORKSPACE="$PWD"
+          [[ "$(node -p 'process.versions.node.split(".")[0]')" == 24 ]]
+          python3 --version
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          npm ci --ignore-scripts
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          npm audit --audit-level=moderate
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          npm run typecheck
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          npm run lint
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          npm run test:ci
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          npm run build
+          )
+          (
+          cd "$BIOETL_WORKSPACE/grafana/plugins/$BIOETL_PLUGIN"
+          python3 - \<<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ["BIOETL_WORKSPACE"])
+          plugin = os.environ["BIOETL_PLUGIN"]
+          assert plugin in ("bioetl-scenes-app", "bioetl-selectorshell-panel"), plugin
+          manifest = json.loads((root / "grafana/tooling/router-v7-bridge/host-image.json").read_text())
+          for filename in ("module.js", "plugin.json"):
+              relative = f"grafana/plugins/{plugin}/dist/{filename}"
+              bundle = root / relative
+              assert bundle.is_file(), f"Missing built artifact: {relative}"
+              expected = manifest["artifact_sha256"][relative]
+              actual = hashlib.sha256(bundle.read_bytes()).hexdigest()
+              assert actual == expected, f"Artifact SHA-256 mismatch: {relative}: {actual} != {expected}"
+              print(f"Verified {relative}: {actual}")
+          metadata = json.loads((root / f"grafana/plugins/{plugin}/dist/plugin.json").read_text())
+          assert metadata["info"]["updated"] == manifest["plugin_release_date"]
+          PY
+          )
+          mkdir -p "/tmp/router-v7-ws/router-v7-image-context/$BIOETL_PLUGIN"
+          cp -a "grafana/plugins/$BIOETL_PLUGIN/dist/." "/tmp/router-v7-ws/router-v7-image-context/$BIOETL_PLUGIN/"
+          BIOETL_ROUTER_SCRIPT
+          timeout --signal=TERM --kill-after=30s 15m bash /tmp/plugin-tests.sh 2>&1 | tee reports/qa/router-v7-circleci/plugin-tests.log
+    - persist_to_workspace:
+        root: /tmp/router-v7-ws
+        paths:
+        - router-v7-image-context/<< parameters.plugin >>
+    - store_artifacts:
+        path: reports/qa/router-v7-circleci
+        destination: router-v7-<< parameters.plugin >>
+    - store_artifacts:
+        path: grafana/plugins/<< parameters.plugin >>/dist
+        destination: host-plugin-<< parameters.plugin >>
+  router-host-build:
+    docker:
+    - image: cimg/node:24.21.0@sha256:2944a8d6bea9d71395f670ee689ca63a02b34a846ad9a5d617d21eefe57a9209
+    resource_class: large
+    environment:
+      NODE_OPTIONS: --max-old-space-size=4096
+      GOMAXPROCS: '2'
+      NODE_ENV: production
+      NO_SOURCEMAP: '0'
+    steps:
+    - checkout
+    - attach_workspace:
+        at: /tmp/router-v7-ws
+    - setup_remote_docker:
+        version: default
+    - run:
+        name: Build pinned Grafana candidate and verify image parity
+        no_output_timeout: 46m
+        command: |
+          set -euo pipefail
+          [[ "$CIRCLE_BRANCH" == main ]]
+          mkdir -p reports/qa/router-v7-circleci
+          cat > /tmp/host-build.sh \<<'BIOETL_ROUTER_SCRIPT'
+          set -euo pipefail
+          export BIOETL_WORKSPACE="$PWD"
+          [[ "$(node -p 'process.versions.node.split(".")[0]')" == 24 ]]
+          python3 --version
+          mkdir -p reports/qa/router-v7-grafana-host reports/qa/router-v7-image-context
+          cp -a /tmp/router-v7-ws/router-v7-image-context/. reports/qa/router-v7-image-context/
+          git -C reports/qa/router-v7-grafana-host init
+          git -C reports/qa/router-v7-grafana-host remote add origin https://github.com/grafana/grafana.git
+          git -C reports/qa/router-v7-grafana-host -c core.autocrlf=false fetch --depth=1 origin 6193dc03311b631b9727b560d24369e683dc396e
+          git -C reports/qa/router-v7-grafana-host -c core.autocrlf=false checkout --detach FETCH_HEAD
+          [[ "$(git -C reports/qa/router-v7-grafana-host rev-parse HEAD)" == 6193dc03311b631b9727b560d24369e683dc396e ]]
+          (
+          cd "$BIOETL_WORKSPACE/reports/qa/router-v7-grafana-host"
+          git -c core.autocrlf=false apply --check "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-v13.2.3.patch"
+          git -c core.autocrlf=false apply "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-v13.2.3.patch"
+          git -c core.autocrlf=false apply --check "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-canvas-query-error.patch"
+          git -c core.autocrlf=false apply "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-canvas-query-error.patch"
+          git -c core.autocrlf=false apply --check "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-router-jest-esm.patch"
+          git -c core.autocrlf=false apply "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/grafana-router-jest-esm.patch"
+          cmp packages/bioetl-router-v7-bridge/index.mjs "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/index.mjs"
+          cmp packages/bioetl-router-v7-bridge/index.d.ts "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge/index.d.ts"
+          )
+          (
+          cd "$BIOETL_WORKSPACE/reports/qa/router-v7-grafana-host"
+          grep -F "'react-dom/client': () => import('react-dom/client')" public/app/features/plugins/loader/sharedDependencies.ts
+          )
+          (
+          cd "$BIOETL_WORKSPACE/reports/qa/router-v7-grafana-host"
+          node .yarn/releases/yarn-4.17.1.cjs install --immutable --mode=skip-build
+          )
+          (
+          cd "$BIOETL_WORKSPACE/reports/qa/router-v7-grafana-host"
+          export NODE_ENV=test
+          node node_modules/jest/bin/jest.js public/app/plugins/panel/canvas/CanvasPanel.integration.test.tsx --runInBand --watch=false --testNamePattern="query error"
+          )
+          (
+          cd "$BIOETL_WORKSPACE/reports/qa/router-v7-grafana-host"
+          cat > scripts/webpack/webpack.router-security.mjs \<<'EOF'
+          import original from './webpack.prod.ts';
+          export default (env = {}) => {
+            const configs = original(env);
+            configs.parallelism = 1;
+            for (const config of configs) {
+              config.parallelism = 2;
+              for (const plugin of config.optimization?.minimizer ?? []) {
+                if (plugin.constructor.name === 'CssMinimizerPlugin') plugin.options.parallel = 1;
+              }
+            }
+            return configs;
+          };
+          EOF
+          node node_modules/webpack-cli/bin/cli.js --config scripts/webpack/webpack.router-security.mjs
+          )
+          (
+          cd "$BIOETL_WORKSPACE/."
+          cp -a reports/qa/router-v7-grafana-host/public/build reports/qa/router-v7-image-context/host-build
+          docker buildx build --platform linux/amd64 --load --provenance=false \
+            --metadata-file reports/qa/router-v7-image-build.json \
+            -f grafana/tooling/router-v7-bridge/Dockerfile.host \
+            -t bioetl-router-host:acceptance reports/qa/router-v7-image-context
+          )
+          (
+          cd "$BIOETL_WORKSPACE/."
+          image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').image")
+          base_image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').base_image")
+          # BuildKit cache does not register the base reference in the Docker image store.
+          docker pull --platform linux/amd64 "$base_image"
+          docker pull --platform linux/amd64 "$image"
+          node grafana/tooling/router-v7-bridge/verify-host-image.mjs \
+            bioetl-router-host:acceptance
+          )
+          BIOETL_ROUTER_SCRIPT
+          timeout --signal=TERM --kill-after=30s 45m bash /tmp/host-build.sh 2>&1 | tee reports/qa/router-v7-circleci/host-build.log
+    - store_artifacts:
+        path: reports/qa/router-v7-circleci
+        destination: router-v7-host-logs
+    - store_artifacts:
+        path: reports/qa/router-v7-image-build.json
+        destination: router-v7-image-build.json
+    - store_artifacts:
+        path: reports/qa/router-v7-image-parity.json
+        destination: router-v7-image-parity.json
+  release-dist-build:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+          extras: dev
+      - run:
+          name: Verify release source and passport history
+          command: |
+            set -euo pipefail
+            test "$CIRCLE_BRANCH" = main
+            test "$(git rev-parse HEAD)" = "$CIRCLE_SHA1"
+            if test "$(git rev-parse --is-shallow-repository)" = true; then
+              git fetch --unshallow --no-tags origin
+            fi
+            uv run --frozen --no-build python -m scripts.engineering.repo check-versions
+            uv run --frozen --no-build python -m scripts.docs passports check --require-clean-source
+      - run:
+          name: Build and verify wheel and source distribution
+          no_output_timeout: 11m
+          command: |
+            set -euo pipefail
+            timeout --signal=TERM --kill-after=30s 10m bash -euo pipefail -c '
+              uv run --frozen --no-build python -m build --outdir /tmp/bioetl-release/dist
+              uv run --frozen --no-build twine check /tmp/bioetl-release/dist/*
+            '
+            python3 - \<<'PY'
+            import hashlib, json, os
+            from pathlib import Path
+            root = Path('/tmp/bioetl-release')
+            files = sorted((root / 'dist').iterdir())
+            assert len(files) == 2 and len(list((root / 'dist').glob('*.whl'))) == len(list((root / 'dist').glob('*.tar.gz'))) == 1
+            identity = {'source_sha': os.environ['CIRCLE_SHA1'], 'workflow_id': os.environ['CIRCLE_WORKFLOW_ID'], 'job_number': os.environ['CIRCLE_BUILD_NUM'], 'published': False, 'sha256': {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in files}}
+            (root / 'identity.json').write_text(json.dumps(identity, sort_keys=True) + '\n', encoding='utf-8')
+            PY
+      - run:
+          name: Generate source-bound distribution SPDX inventory
+          no_output_timeout: 11m
+          environment:
+            SYFT_CHECK_FOR_APP_UPDATE: "false"
+          command: |
+            set -euo pipefail
+            curl -fsSL --proto '=https' --tlsv1.2 \
+              https://github.com/anchore/syft/releases/download/v1.54.0/syft_1.54.0_linux_amd64.tar.gz \
+              -o /tmp/syft.tar.gz
+            printf '%s  %s\n' '54a87372498168b2d033e876fd41fa4e8035b872699e525a57046e1f2f09c860' /tmp/syft.tar.gz | sha256sum -c -
+            tar -xzf /tmp/syft.tar.gz -C "$HOME/.local/bin" syft
+            python3 - \<<'PY'
+            import hashlib, json, tarfile, zipfile
+            from pathlib import Path
+            root = Path('/tmp/bioetl-release')
+            identity = json.loads((root / 'identity.json').read_text())
+            for name, digest in identity['sha256'].items():
+                archive = root / 'dist' / name
+                assert archive.is_file() and not archive.is_symlink()
+                assert hashlib.sha256(archive.read_bytes()).hexdigest() == digest
+                target = Path('/tmp/bioetl-dist-sbom-input') / name
+                target.mkdir(parents=True, exist_ok=False)
+                if name.endswith('.whl'):
+                    with zipfile.ZipFile(archive) as stream:
+                        for member in stream.infolist():
+                            assert (target / member.filename).resolve().is_relative_to(target.resolve())
+                            assert (member.external_attr >> 16) & 0o170000 != 0o120000
+                        stream.extractall(target)
+                else:
+                    with tarfile.open(archive) as stream:
+                        stream.extractall(target, filter='data')
+            PY
+            timeout --signal=TERM --kill-after=30s 10m "$HOME/.local/bin/syft" scan -vv \
+              dir:/tmp/bioetl-dist-sbom-input --source-name bioetl \
+              -o spdx-json=/tmp/bioetl-release/bioetl-dist.spdx.json \
+              2>&1 | tee /tmp/bioetl-release/syft.log
+            python3 - \<<'PY'
+            import hashlib, json
+            from pathlib import Path
+            root = Path('/tmp/bioetl-release')
+            path = root / 'bioetl-dist.spdx.json'
+            sbom = json.loads(path.read_text())
+            version = next((root / 'dist').glob('*.whl')).name.split('-')[1]
+            assert sbom['spdxVersion'] == 'SPDX-2.3'
+            assert any(p['name'] == 'bioetl' and p.get('versionInfo') == version for p in sbom['packages'])
+            assert sbom.get('files'), 'Empty distribution catalog is not acceptance'
+            identity = json.loads((root / 'identity.json').read_text())
+            identity['sbom_sha256'] = hashlib.sha256(path.read_bytes()).hexdigest()
+            identity['sbom_tool'] = 'syft 1.54.0'
+            (root / 'identity.json').write_text(json.dumps(identity, sort_keys=True) + '\n', encoding='utf-8')
+            PY
+      - persist_to_workspace:
+          root: /tmp/bioetl-release
+          paths:
+            - dist
+            - identity.json
+            - bioetl-dist.spdx.json
+      - store_artifacts:
+          path: /tmp/bioetl-release
+          destination: release-build
+
+  release-install:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+          extras: dev
+      - attach_workspace:
+          at: /tmp/bioetl-release
+      - run:
+          name: Install exact wheel into isolated locked runtime
+          no_output_timeout: 16m
+          command: |
+            set -euo pipefail
+            timeout --signal=TERM --kill-after=30s 15m bash -euo pipefail \<<'INSTALL'
+            python3 - \<<'PY'
+            import hashlib, json, os
+            from pathlib import Path
+            root = Path('/tmp/bioetl-release')
+            identity = json.loads((root / 'identity.json').read_text())
+            assert identity['source_sha'] == os.environ['CIRCLE_SHA1'] and identity['workflow_id'] == os.environ['CIRCLE_WORKFLOW_ID']
+            assert hashlib.sha256((root / 'bioetl-dist.spdx.json').read_bytes()).hexdigest() == identity['sbom_sha256']
+            files = sorted((root / 'dist').iterdir())
+            assert len(files) == 2 and {p.name for p in files} == set(identity['sha256'])
+            assert all(p.is_file() and not p.is_symlink() and hashlib.sha256(p.read_bytes()).hexdigest() == identity['sha256'][p.name] for p in files)
+            wheels = list((root / 'dist').glob('*.whl'))
+            assert len(wheels) == 1
+            name, version, *_ = wheels[0].name.split('-')
+            assert name == 'bioetl'
+            requirement = f"{name}=={version} --hash=sha256:{identity['sha256'][wheels[0].name]}\n"
+            (root / 'wheel-requirements.txt').write_text(requirement, encoding='utf-8')
+            PY
+            uv venv --python 3.13 /tmp/bioetl-release-installed
+            uv export --frozen --no-dev --no-emit-project --format requirements-txt --output-file /tmp/bioetl-release/runtime-requirements.txt
+            uv pip install --python /tmp/bioetl-release-installed/bin/python --require-hashes --only-binary=:all: -r /tmp/bioetl-release/runtime-requirements.txt
+            uv pip install --python /tmp/bioetl-release-installed/bin/python --require-hashes --only-binary=:all: --no-deps --no-index --find-links=/tmp/bioetl-release/dist -r /tmp/bioetl-release/wheel-requirements.txt
+            unset PYTHONPATH
+            cd /tmp
+            /tmp/bioetl-release-installed/bin/python -I -c 'import bioetl, sys; from pathlib import Path; assert Path(bioetl.__file__).resolve().is_relative_to(Path(sys.prefix).resolve()); print(bioetl.__file__)'
+            /tmp/bioetl-release-installed/bin/bioetl --help
+            /tmp/bioetl-release-installed/bin/bioetl --version
+            INSTALL
+      - store_artifacts:
+          path: /tmp/bioetl-release
+          destination: release-install
+
+  release-tests:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: medium
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+          extras: dev
+      - run:
+          name: Same-SHA release smoke and supply-chain contracts
+          no_output_timeout: 21m
+          command: |
+            set -euo pipefail
+            timeout --signal=TERM --kill-after=30s 20m bash -euo pipefail -c '
+              mkdir -p reports/release-tests
+              uv run --frozen --no-build pytest tests/smoke/ -m "not memory" -q --tb=line --junitxml=reports/release-tests/smoke.xml
+              uv run --frozen --no-build pytest tests/architecture/test_github_actions_runtime_policy.py tests/architecture/test_docker_runtime_contracts.py -q --tb=line --junitxml=reports/release-tests/supply-chain.xml
+            '
+      - store_test_results:
+          path: reports/release-tests
+      - store_artifacts:
+          path: reports/release-tests
+
+  release-validation-complete:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/bioetl-release
+      - run:
+          name: Record verified release preflight without a publication claim
+          command: |
+            python3 - \<<'PY'
+            import json, os, urllib.request
+            from pathlib import Path
+            root = Path('/tmp/bioetl-release')
+            identity = json.loads((root / 'identity.json').read_text())
+            assert os.environ['CIRCLE_BRANCH'] == 'main'
+            assert identity['source_sha'] == os.environ['CIRCLE_SHA1'] and identity['workflow_id'] == os.environ['CIRCLE_WORKFLOW_ID']
+            with urllib.request.urlopen('https://circleci.com/api/v2/workflow/' + identity['workflow_id'] + '/job', timeout=30) as response:
+                payload = json.load(response)
+            assert not payload.get('next_page_token'), 'Unexpected workflow pagination'
+            jobs = payload['items']
+            required = {'release-dist-build', 'release-install', 'release-tests', 'security-scans'}
+            accepted = [job for job in jobs if job['name'] in required]
+            assert len(accepted) == len(required) and {job['name'] for job in accepted} == required
+            assert all(job['status'] == 'success' for job in accepted)
+            assert str(next(job for job in accepted if job['name'] == 'release-dist-build')['job_number']) == str(identity['job_number'])
+            receipt = {'source_sha': identity['source_sha'], 'workflow_id': identity['workflow_id'], 'distribution_validation': 'passed', 'published': False, 'publication_ready': False, 'sbom_sha256': identity['sbom_sha256'], 'pending': ['signed provenance', 'protected TestPyPI/PyPI promotion', 'release assets'], 'jobs': {job['name']: job['job_number'] for job in accepted}}
+            (root / 'validation.json').write_text(json.dumps(receipt, sort_keys=True) + '\n', encoding='utf-8')
+            PY
+      - store_artifacts:
+          path: /tmp/bioetl-release/validation.json
+          destination: release-validation
+
+  scorecard-analysis:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Pinned OpenSSF Scorecard informational analysis
+          no_output_timeout: 16m
+          command: |
+            set -euo pipefail
+            set +x
+            test "$CIRCLE_BRANCH" = main
+            test "$(git rev-parse HEAD)" = "$CIRCLE_SHA1"
+            : "${GITHUB_TOKEN:?Missing read-only GitHub credential}"
+            export GITHUB_AUTH_TOKEN="$GITHUB_TOKEN"
+            timeout --signal=TERM --kill-after=30s 15m bash -euo pipefail -c '
+              umask 077
+              mkdir -p /home/circleci/bioetl-scorecard/tools /home/circleci/bioetl-scorecard/reports
+              curl --fail --location --retry 3 https://github.com/ossf/scorecard/releases/download/v5.5.0/scorecard_5.5.0_linux_amd64.tar.gz -o /home/circleci/bioetl-scorecard/scorecard.tar.gz
+              echo "83b90a05c1540ef1390db1cd5711e5fd04be9c1d8537fb84d39d02092d6a8dff  /home/circleci/bioetl-scorecard/scorecard.tar.gz" | sha256sum --check -
+              tar -xzf /home/circleci/bioetl-scorecard/scorecard.tar.gz -C /home/circleci/bioetl-scorecard/tools scorecard
+              curl --fail --location --retry 3 https://raw.githubusercontent.com/ossf/scorecard-action/2d1146689b8cda280b9bc96326124645441f03bc/policies/template.yml -o /home/circleci/bioetl-scorecard/reports/policy.yml
+              echo "6e75dcc0df989d333492c0e1f6e484fc5b4d26ab768333ddcd0e3788539689b0  /home/circleci/bioetl-scorecard/reports/policy.yml" | sha256sum --check -
+              /home/circleci/bioetl-scorecard/tools/scorecard --repo=github.com/SatoryKono/BioactivityDataAcquisition --format=json --show-details --output=/home/circleci/bioetl-scorecard/reports/results.json
+              ENABLE_SARIF=true /home/circleci/bioetl-scorecard/tools/scorecard --repo=github.com/SatoryKono/BioactivityDataAcquisition --format=sarif --show-details --policy=/home/circleci/bioetl-scorecard/reports/policy.yml --output=/home/circleci/bioetl-scorecard/reports/results.raw.sarif
+            '
+            python3 - \<<'PY'
+            import json, os
+            from pathlib import Path
+            path = Path('/home/circleci/bioetl-scorecard/reports/results.json')
+            result = json.loads(path.read_text(encoding='utf-8'))
+            assert result['repo']['commit'] == os.environ['CIRCLE_SHA1'], 'Default branch changed during analysis'
+            assert result['repo']['name'] == 'github.com/SatoryKono/BioactivityDataAcquisition'
+            assert result['scorecard']['version'] == 'v5.5.0'
+            expected = {'Binary-Artifacts', 'Branch-Protection', 'CI-Tests', 'CII-Best-Practices', 'Code-Review', 'Contributors', 'Dangerous-Workflow', 'Dependency-Update-Tool', 'Fuzzing', 'License', 'Maintained', 'Packaging', 'Pinned-Dependencies', 'SAST', 'Security-Policy', 'Signed-Releases', 'Token-Permissions', 'Vulnerabilities'}
+            checks = result['checks']
+            assert len(checks) == len(expected) and {row['name'] for row in checks} == expected
+            assert all(isinstance(row['score'], int) and -1 <= row['score'] <= 10 and isinstance(row['reason'], str) for row in checks)
+            import urllib.request
+            request = urllib.request.Request('https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/git/ref/heads/main', headers={'Authorization': 'Bearer ' + os.environ['GITHUB_TOKEN'], 'Accept': 'application/vnd.github+json'})
+            with urllib.request.urlopen(request, timeout=30) as response:
+                assert json.load(response)['object']['sha'] == os.environ['CIRCLE_SHA1'], 'Main changed during SARIF analysis'
+            sarif = json.loads(path.with_name('results.raw.sarif').read_text(encoding='utf-8'))
+            assert sarif['version'] == '2.1.0' and sarif['runs']
+            from urllib.parse import quote
+            for run in sarif['runs']:
+                # Upstream project-wide findings use a placeholder containing spaces.
+                # Preserve its value as a valid URI reference for GitHub's strict parser.
+                for finding in run.get('results', []):
+                    for location in finding.get('locations', []):
+                        artifact = location.get('physicalLocation', {}).get('artifactLocation', {})
+                        if 'uri' in artifact:
+                            artifact['uri'] = quote(artifact['uri'], safe="/:#?&=%@[]!$'()*+,;~-._")
+                assert run['tool']['driver']['name'] == 'Scorecard'
+                assert run['tool']['driver']['semanticVersion'] == 'v5.5.0'
+                run['tool']['driver']['semanticVersion'] = '5.5.0'
+                run['versionControlProvenance'] = [{'repositoryUri': 'https://github.com/SatoryKono/BioactivityDataAcquisition', 'revisionId': os.environ['CIRCLE_SHA1'], 'branch': 'main'}]
+            path.with_name('results.sarif').write_text(json.dumps(sarif, sort_keys=True) + '\n', encoding='utf-8')
+            # Scores and unsupported checks stay visible; the legacy lane is informational.
+            identity = {'source_sha': os.environ['CIRCLE_SHA1'], 'workflow_id': os.environ['CIRCLE_WORKFLOW_ID'], 'job_number': os.environ['CIRCLE_BUILD_NUM'], 'check_count': len(checks), 'sarif_uploaded': False, 'public_results_published': False}
+            import hashlib
+            identity['sha256'] = {name: hashlib.sha256(path.with_name(name).read_bytes()).hexdigest() for name in ('results.json', 'results.sarif')}
+            path.with_name('identity.json').write_text(json.dumps(identity, sort_keys=True) + '\n', encoding='utf-8')
+            PY
+      - persist_to_workspace:
+          root: /home/circleci/bioetl-scorecard
+          paths:
+            - reports
+      - store_artifacts:
+          path: /home/circleci/bioetl-scorecard/reports
+          destination: scorecard-analysis
+
+  scorecard-publish:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circleci/bioetl-scorecard
+      - run:
+          name: Upload approved source-bound Scorecard SARIF
+          no_output_timeout: 11m
+          command: |
+            set -euo pipefail
+            set +x
+            timeout --signal=TERM --kill-after=30s 10m python3 -m scripts.engineering.ci publish-scorecard \
+              --directory /home/circleci/bioetl-scorecard/reports \
+              --output /home/circleci/bioetl-scorecard/publication/receipt.json
+      - store_artifacts:
+          path: /home/circleci/bioetl-scorecard/publication
+          destination: scorecard-publication
+
+  architecture-fast-baseline:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: medium
+    environment:
+      HYPOTHESIS_PROFILE: ci
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: Restore history for ancestor gates
+          command: |
+            if [ "$(git rev-parse --is-shallow-repository)" = true ]; then git fetch --unshallow --filter=blob:none --no-tags; fi
+            git fetch --no-prune origin main
+      - run:
+          name: Canonical architecture fast baseline
+          no_output_timeout: 11m
+          command: timeout --signal=TERM --kill-after=30s 10m make qa-arch-fast
+      - store_artifacts:
+          path: reports/quality/test-runs
+          destination: architecture-fast-baseline
+      - store_test_results:
+          path: reports/quality/test-runs/junit
+  architecture-heavy-nightly:
+    docker:
+      - image: cimg/python:3.12
+    # Four coverage workers exhausted 8 GiB in job 6702; retain four workers
+    # with 16 GiB so the full selector completes without worker restarts.
+    resource_class: xlarge
+    environment:
+      HYPOTHESIS_PROFILE: ci
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONUNBUFFERED: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - checkout
+      - setup-python-uv:
+          extras: dev tracing performance
+      - run:
+          name: Restore source and LFS history
+          command: |
+            if [ "$(git rev-parse --is-shallow-repository)" = true ]; then git fetch --unshallow --filter=blob:none --no-tags; fi
+            git fetch --no-prune origin main
+            git lfs pull
+      - run:
+          name: Architecture complexity and heavy coverage
+          no_output_timeout: 26m
+          command: |
+            # CircleCI has already sourced BASH_ENV for this step. Child shells
+            # must preserve caller-provided PATH (including executable fixtures).
+            unset BASH_ENV
+            timeout --signal=TERM --kill-after=30s 25m bash -euo pipefail -c '
+              mkdir -p /tmp/architecture-metrics/junit
+              uv run --frozen --no-build radon cc src/bioetl --min C --show-closures | tee /tmp/architecture-metrics/radon.txt
+              uv run --frozen --no-build pytest tests/ -m "not e2e and not benchmark and not serial" \
+                --ignore=tests/e2e --ignore=tests/contract \
+                -n 4 --dist loadscope --max-worker-restart=0 \
+                --cov=src/bioetl --cov-report=term-missing \
+                --cov-report=xml:/tmp/architecture-metrics/coverage.xml \
+                --junitxml=/tmp/architecture-metrics/junit/results.xml --cov-fail-under=85
+            '
+      - store_test_results:
+          path: /tmp/architecture-metrics/junit
+      - store_artifacts:
+          path: /tmp/architecture-metrics
+          destination: architecture-metrics
+  windows-atomic-write-stress-nightly:
+    machine:
+      image: windows-server-2022-gui:2026.05.1
+      shell: powershell.exe -ExecutionPolicy Bypass
+    resource_class: windows.medium
+    environment:
+      HYPOTHESIS_PROFILE: ci
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONUNBUFFERED: '1'
+      UV_PYTHON: '3.12'
+      PYTHONUTF8: '1'
+    steps:
+      - checkout
+      - run:
+          name: Pinned uv and locked Windows environment
+          command: |
+            $ErrorActionPreference = 'Stop'
+            $archive = Join-Path $env:TEMP 'bioetl-uv-0.11.26.zip'
+            $toolDir = Join-Path $env:TEMP 'bioetl-uv-0.11.26'
+            Invoke-WebRequest -Uri 'https://github.com/astral-sh/uv/releases/download/0.11.26/uv-x86_64-pc-windows-msvc.zip' -OutFile $archive
+            if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne '4e1278ede866be6c0bf32d2f466cc6de7a9fb399ecf20c9ce2d186e52424be47') { throw 'uv checksum mismatch' }
+            Expand-Archive -LiteralPath $archive -DestinationPath $toolDir -Force
+            & (Join-Path $toolDir 'uv.exe') sync --frozen --extra dev --extra tracing
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            & .venv/Scripts/python.exe -c "import sys; assert sys.version_info[:2] == (3, 12)"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - run:
+          name: Windows atomic lock stress with terminal evidence
+          no_output_timeout: 16m
+          command: |
+            $ErrorActionPreference = 'Stop'
+            New-Item -ItemType Directory -Path reports/quality/windows-atomic-stress -Force | Out-Null
+            $process = Start-Process -FilePath .venv/Scripts/python.exe -ArgumentList @('-m', 'pytest', 'tests/integration/infrastructure/storage/test_atomic.py', '-k', 'windows_lock_stress', '-m', '"slow and serial"', '-q', '--tb=short', '--junitxml=reports/quality/windows-atomic-stress/junit.xml') -PassThru -WindowStyle Hidden -RedirectStandardOutput reports/quality/windows-atomic-stress/stdout.log -RedirectStandardError reports/quality/windows-atomic-stress/stderr.log
+            if (-not $process.WaitForExit(900000)) { Stop-Process -Id $process.Id; throw 'Windows stress exceeded 15-minute limit' }
+            $process.Refresh()
+            Get-Content reports/quality/windows-atomic-stress/stdout.log
+            Get-Content reports/quality/windows-atomic-stress/stderr.log
+            if ($process.ExitCode -ne 0) { exit $process.ExitCode }
+            [xml]$junit = Get-Content -LiteralPath reports/quality/windows-atomic-stress/junit.xml -Raw
+            $cases = @($junit.SelectNodes('//testcase'))
+            if ($cases.Count -ne 2 -or $junit.SelectNodes('//failure|//error|//skipped').Count -ne 0) { throw 'Windows stress requires both real tests to pass without skips' }
+      - store_test_results:
+          path: reports/quality/windows-atomic-stress
+      - store_artifacts:
+          path: reports/quality/windows-atomic-stress
+          destination: windows-atomic-stress
   docker-security-baseline:
     docker:
       - image: cimg/python:3.13
@@ -93,6 +792,9 @@ jobs:
           command: |
             mkdir -p "$HOME/.local/bin"
             curl -fsSL --proto '=https' --tlsv1.2 https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz -o /tmp/docker-baseline-cli.tgz
+            # SHA256 recorded from the official HTTPS archive on 2026-10-05.
+            # This is a content pin, not an independently signed vendor checksum.
+            echo "9b4f6fe406e50f9085ee474c451e2bb5adb119a03591f467922d3b4e2ddf31d3  /tmp/docker-baseline-cli.tgz" | sha256sum --check -
             tar -xzf /tmp/docker-baseline-cli.tgz -C /tmp
             install /tmp/docker/docker "$HOME/.local/bin/docker"
             echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$BASH_ENV"
@@ -171,12 +873,13 @@ jobs:
             {
               echo "source_sha=${CIRCLE_SHA1}"
               echo "wolfi_base_image=chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
-              echo "runtime_python=python-3.13=3.13.15-r6"
+              echo "runtime_python=python-3.13=3.13.16_git20261002-r2"
+              echo "runtime_zlib=zlib=1.3.2.1_rc20260917-r0"
               echo "builder_uv=uv=0.11.26-r0"
               echo "setuptools_build_constraint=setuptools==83.0.0"
               docker image inspect "${IMAGE_REF}" --format 'image_id={{.Id}} repo_digests={{json .RepoDigests}}'
               docker run --rm --entrypoint python "${IMAGE_REF}" --version
-              docker run --rm --entrypoint python "${IMAGE_REF}" -c 'import grp, importlib.util, os, pwd, shutil, stat, sys, tempfile; assert sys.version_info[:3] == (3, 13, 15); assert (os.getuid(), os.getgid()) == (999, 999); assert pwd.getpwuid(999).pw_name == "bioetl"; assert pwd.getpwuid(999).pw_shell == "/sbin/nologin"; assert grp.getgrgid(999).gr_name == "bioetl"; assert importlib.util.find_spec("pip") is None; assert stat.S_IMODE(os.stat("/tmp").st_mode) == 0o700; assert (os.stat("/tmp").st_uid, os.stat("/tmp").st_gid) == (999, 999); assert (os.stat("/app/configs").st_uid, os.stat("/app/configs").st_gid) == (0, 0); assert not os.access("/app/configs", os.W_OK); forbidden_paths = ("/bin/sh", "/bin/ash", "/bin/bash", "/bin/busybox", "/usr/bin/sh", "/usr/bin/ash", "/usr/bin/bash", "/usr/bin/busybox", "/sbin/apk", "/usr/bin/apk"); assert not any(os.path.lexists(path) for path in forbidden_paths); assert all(shutil.which(name) is None for name in ("sh", "ash", "bash", "busybox", "apk", "pip", "pip3", "pip3.13")); handle = tempfile.NamedTemporaryFile(dir="/tmp", delete=True); handle.close(); marker = "/app/logs/.runtime-security-probe"; open(marker, "wb").close(); os.unlink(marker); print("python=3.13.15 uid=999 gid=999 identity=bioetl shell=absent apk=absent pip=absent tmp=00700 tmp_owner=999:999 configs=root-readonly logs=writable")'
+              docker run --rm --entrypoint python "${IMAGE_REF}" -c 'import grp, importlib.util, os, pwd, shutil, stat, sys, tempfile, zlib; assert sys.version_info[:3] == (3, 13, 16); assert zlib.ZLIB_RUNTIME_VERSION == "1.3.2.1-motley"; assert (os.getuid(), os.getgid()) == (999, 999); assert pwd.getpwuid(999).pw_name == "bioetl"; assert pwd.getpwuid(999).pw_shell == "/sbin/nologin"; assert grp.getgrgid(999).gr_name == "bioetl"; assert importlib.util.find_spec("pip") is None; assert stat.S_IMODE(os.stat("/tmp").st_mode) == 0o700; assert (os.stat("/tmp").st_uid, os.stat("/tmp").st_gid) == (999, 999); assert (os.stat("/app/configs").st_uid, os.stat("/app/configs").st_gid) == (0, 0); assert not os.access("/app/configs", os.W_OK); forbidden_paths = ("/bin/sh", "/bin/ash", "/bin/bash", "/bin/busybox", "/usr/bin/sh", "/usr/bin/ash", "/usr/bin/bash", "/usr/bin/busybox", "/sbin/apk", "/usr/bin/apk"); assert not any(os.path.lexists(path) for path in forbidden_paths); assert all(shutil.which(name) is None for name in ("sh", "ash", "bash", "busybox", "apk", "pip", "pip3", "pip3.13")); handle = tempfile.NamedTemporaryFile(dir="/tmp", delete=True); handle.close(); marker = "/app/logs/.runtime-security-probe"; open(marker, "wb").close(); os.unlink(marker); print("python=3.13.16 uid=999 gid=999 identity=bioetl shell=absent apk=absent pip=absent tmp=00700 tmp_owner=999:999 configs=root-readonly logs=writable")'
             } > reports/security/bioetl-image-provenance.txt 2>&1
             docker image inspect "${IMAGE_REF}" --format '{{.Id}}' \
               > reports/security/bioetl-image-id.txt
@@ -296,6 +999,58 @@ jobs:
       - store_artifacts:
           path: /tmp/bioetl-docker-baseline/reports/security
           destination: docker-security-baseline
+      - persist_to_workspace:
+          root: /tmp/bioetl-docker-baseline
+          paths:
+            - reports/security
+
+  docker-publish:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: medium
+    environment:
+      CIRCLE_ORGANIZATION_ID: 116af377-246c-4269-b48e-63c2a8b9dd0e
+      CIRCLE_PROJECT_ID: 9f037fd7-4fd9-41af-9916-33ca1e56cf7b
+      PIPELINE_DEFINITION_ID: a2ed9130-99bb-5001-9dc8-b4d1b6fae071
+      SCANNED_IMAGE_DIRECTORY: /tmp/bioetl-publication/reports/security
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: '3.13'
+          extras: dev
+      - setup_remote_docker:
+          version: default
+      - attach_workspace:
+          at: /tmp/bioetl-publication
+      - run:
+          name: Install checksum-pinned publication tools
+          command: |
+            set -euo pipefail
+            install_dir="$(mktemp -d)"
+            trap 'rm -rf "$install_dir"' EXIT
+            cd "$install_dir"
+            curl --fail --location --retry 3 https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz -o docker.tgz
+            curl --fail --location --retry 3 https://github.com/sigstore/cosign/releases/download/v3.1.3/cosign-linux-amd64 -o cosign
+            curl --fail --location --retry 3 https://github.com/CircleCI-Public/circleci-cli/releases/download/v1.0.51932/circleci-cli_1.0.51932_linux_amd64.tar.gz -o circleci.tgz
+            # Docker SHA256 is a recorded official-HTTPS content pin (2026-10-05),
+            # not an independently signed vendor checksum.
+            echo '9b4f6fe406e50f9085ee474c451e2bb5adb119a03591f467922d3b4e2ddf31d3  docker.tgz' | sha256sum --check -
+            echo '4629c757b7618056f8ddd7e2625ae9fdd94c0372a65049520bc7d9df9efc7f71  cosign' | sha256sum --check -
+            echo 'd7be00a2818566dfbea0ffea2aad715d20a3681461fe8cd15961ba7e3f2cd37b  circleci.tgz' | sha256sum --check -
+            tar -xzf docker.tgz
+            tar -xzf circleci.tgz circleci
+            mkdir -p "$HOME/.local/bin"
+            install -m 0755 docker/docker cosign circleci "$HOME/.local/bin/"
+            echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$BASH_ENV"
+            sudo apt-get update
+            sudo apt-get install --no-install-recommends -y zstd
+      - run:
+          name: Verify approved scanned image and publish signed provenance
+          no_output_timeout: 30m
+          command: timeout --signal=TERM --kill-after=30s 25m python3 -m scripts.engineering.ci publish-docker
+      - store_artifacts:
+          path: /tmp/bioetl-publication/reports/security
+          destination: docker-publication
 
   architecture-docs:
     docker:
@@ -429,9 +1184,16 @@ jobs:
         type: string
       threshold:
         type: string
+      executor-size:
+        type: enum
+        enum: [medium, large]
+        default: medium
+      max-children:
+        type: integer
+        default: 1
     docker:
     - image: cimg/python:3.13
-    resource_class: medium
+    resource_class: << parameters.executor-size >>
     environment:
       OPENBLAS_NUM_THREADS: '1'
       POLARS_MAX_THREADS: '2'
@@ -483,7 +1245,8 @@ jobs:
           # under the frozen CI environment (bare `mutmut` is not on runner PATH).
           export PYTHONPATH="${WORKSPACE_ROOT}/src:${WORKSPACE_ROOT}${PYTHONPATH:+:$PYTHONPATH}"
           uv run --frozen --no-build python -c "import bioetl.domain, scripts; print('"'"'mutation import preflight ok'"'"')"
-          uv run --frozen --no-build mutmut run
+          # Bound fork concurrency explicitly; host CPU count is not the executor quota.
+          uv run --frozen --no-build mutmut run --max-children << parameters.max-children >>
           '
         no_output_timeout: 65m
     - run:
@@ -665,6 +1428,18 @@ jobs:
           python-version: "3.13"
           extras: "dev tracing performance"
       - run:
+          name: Record performance runner identity
+          command: |
+            set -euo pipefail
+            mkdir -p reports/performance
+            {
+              uv run --frozen --no-build python -c 'import os,platform; print("python=" + platform.python_version()); print("platform=" + platform.platform()); print("cpu_count=" + str(os.cpu_count())); print("cpu_affinity=" + str(sorted(os.sched_getaffinity(0))))'
+              lscpu
+              for path in /sys/fs/cgroup/cpu.max /sys/fs/cgroup/cpu.stat /sys/fs/cgroup/cpu/cpu.cfs_quota_us /sys/fs/cgroup/cpu/cpu.cfs_period_us; do
+                if [ -r "$path" ]; then printf '\n%s\n' "$path"; cat "$path"; fi
+              done
+            } > reports/performance/runner-identity.txt
+      - run:
           name: Run performance benchmarks with existing budgets
           no_output_timeout: 35m
           command: |
@@ -674,6 +1449,14 @@ jobs:
               -m "benchmark or performance" -p benchmark -p no:xdist -v --tb=short \
               --perf-obs-out reports/performance/hotspot-observations.jsonl \
               --junitxml=reports/performance/hotspot-budgets.xml
+      - run:
+          name: Record performance CPU throttling after benchmarks
+          when: always
+          command: |
+            mkdir -p reports/performance
+            for path in /sys/fs/cgroup/cpu.stat /sys/fs/cgroup/cpu/cpu.stat; do
+              if [ -r "$path" ]; then printf '\n%s\n' "$path"; cat "$path"; fi
+            done > reports/performance/runner-cpu-after.txt
       - run:
           name: Build performance degradation evidence
           when: always
@@ -689,6 +1472,27 @@ jobs:
           when: always
           command: |
             uv run --frozen --no-build python -c 'import json,sys; d=json.load(open("reports/performance/hotspot-degradation.json")); s=d["summary"]; sys.exit(0 if s["total"] > 0 and s["failed"] == 0 else 1)'
+      - run:
+          name: Require every registered performance benchmark
+          when: always
+          command: |
+            uv run --frozen --no-build python - \<<'PERFORMANCE_EVIDENCE'
+            import json
+            from pathlib import Path
+
+            budgets = json.loads(Path("tests/performance/hotspot_budgets.json").read_text())
+            report = json.loads(Path("reports/performance/hotspot-degradation.json").read_text())
+            expected = set(budgets["benchmarks"])
+            rows = report["benchmarks"]
+            actual = [row["benchmark_key"] for row in rows]
+            if not expected or len(actual) != len(expected) or set(actual) != expected:
+                raise SystemExit("Performance evidence is incomplete or contains duplicate/unknown benchmarks")
+            if report["summary"] != {"total": len(expected), "passed": len(expected), "failed": 0}:
+                raise SystemExit("Performance evidence includes failed or inconsistent results")
+            if not all(row["within_budget"] is True and row["samples"] > 0 for row in rows):
+                raise SystemExit("Performance evidence contains a failing or empty observation")
+            print(f"All {len(expected)} benchmark budgets have complete passing evidence")
+            PERFORMANCE_EVIDENCE
       - store_test_results:
           path: reports/performance
       - store_artifacts:
@@ -773,6 +1577,132 @@ jobs:
               --mode check --report reports/ai/runtime-skill-drift.json
       - store_artifacts:
           path: reports/ai/runtime-skill-drift.json
+
+  approved-runtime-skill-sync:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+      - run:
+          name: Produce approved runtime sync patch without publishing
+          no_output_timeout: 6m
+          command: |
+            timeout --signal=TERM --kill-after=30s 5m bash -euo pipefail \<<'SYNC'
+            [[ "$CIRCLE_BRANCH" == main ]]
+            uv run --frozen --no-build python -m scripts.ai.sync.runtime_skills \
+              --mode sync --approved --report reports/ai/runtime-skill-sync.json
+            git diff --binary > reports/ai/runtime-skill-sync.patch
+            bash scripts/ai/junie/check_junie_mirror.sh --check
+            bash scripts/ops/support/skills/check_skills_mirror.sh --check
+            SYNC
+      - store_artifacts:
+          path: reports/ai
+          destination: approved-runtime-sync
+
+  e2e-nightly-full-replay:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: medium
+    environment:
+      BIOETL_TEST_MODE: "true"
+      BIOETL_PIPELINE__HEALTH_CHECK_MODE: probe
+      VCR_RECORD_MODE: none
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: Run complete non-smoke E2E playback
+          no_output_timeout: 41m
+          command: |
+            timeout --signal=TERM --kill-after=30s 40m bash -euo pipefail \<<'REPLAY'
+            [[ "$CIRCLE_BRANCH" == main ]]
+            if git grep -q 'git-lfs.github.com/spec/v1' -- tests/fixtures/vcr; then
+              echo 'LFS pointer cassette blocks full E2E replay' >&2
+              exit 1
+            fi
+            mkdir -p reports/e2e
+            uv run --frozen --no-build pytest tests/e2e \
+              -m "e2e and not e2e_smoke and not benchmark and not memory" \
+              --record-mode=none -p no:xdist -q --tb=short \
+              --junitxml=reports/e2e/e2e-nightly-full.xml
+            [[ -s reports/e2e/e2e-nightly-full.xml ]]
+            REPLAY
+      - store_test_results:
+          path: reports/e2e
+      - store_artifacts:
+          path: reports/e2e
+          destination: e2e-nightly-full
+
+  prompt-tests-nightly:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - setup-python-uv
+      - run:
+          name: Run nightly prompt contracts
+          no_output_timeout: 16m
+          command: |
+            timeout --signal=TERM --kill-after=30s 15m bash -euo pipefail \<<'PROMPTS'
+            [[ "$CIRCLE_BRANCH" == main ]]
+            mkdir -p reports/e2e
+            uv run --frozen --no-build pytest tests/prompts \
+              -m "not benchmark and not memory" -p no:xdist -q --tb=short \
+              --junitxml=reports/e2e/prompt-tests-nightly.xml
+            [[ -s reports/e2e/prompt-tests-nightly.xml ]]
+            PROMPTS
+      - store_test_results:
+          path: reports/e2e
+      - store_artifacts:
+          path: reports/e2e
+          destination: prompt-tests-nightly
+
+  e2e-matrix-live:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: medium
+    environment:
+      BIOETL_TEST_MODE: "false"
+      BIOETL_PIPELINE__HEALTH_CHECK_MODE: strict
+      VCR_RECORD_MODE: new_episodes
+    steps:
+      - checkout
+      - setup-python-uv:
+          python-version: "3.13"
+      - run:
+          name: Run explicitly selected strict live provider matrix
+          no_output_timeout: 31m
+          command: |
+            timeout --signal=TERM --kill-after=30s 30m bash -euo pipefail \<<'LIVE'
+            [[ "$CIRCLE_BRANCH" == main ]]
+            [[ "$BIOETL_TEST_MODE" == false ]]
+            [[ "$BIOETL_PIPELINE__HEALTH_CHECK_MODE" == strict ]]
+            mkdir -p reports/e2e
+            set +e
+            uv run --frozen --no-build pytest tests/e2e/test_pipeline_matrix_e2e.py \
+              -k test_pipeline_matrix_smoke -m "e2e_smoke and not benchmark and not memory" \
+              --vcr-record=new_episodes -q --tb=short \
+              --junitxml=reports/e2e/matrix-smoke-live.xml
+            result=$?
+            set -e
+            printf '%s\n' "$result" > reports/e2e/pytest_exit_code_live.txt
+            [[ "$result" == 0 ]]
+            EXPECTED_TOTAL="$(uv run --frozen --no-build python -c 'from tests.e2e.test_pipeline_matrix_e2e import ACTIVE_PIPELINE_CASES; print(len(ACTIVE_PIPELINE_CASES))')"
+            MAX_SKIPS="$(uv run --frozen --no-build python -c "print(int(${EXPECTED_TOTAL} * 0.15))")"
+            uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \
+              --junit reports/e2e/matrix-smoke-live.xml --expected-total "$EXPECTED_TOTAL" \
+              --max-skips "$MAX_SKIPS" --max-skip-rate 0.15 \
+              --markdown-out reports/e2e/matrix-smoke-live-summary.md
+            LIVE
+      - store_test_results:
+          path: reports/e2e
+      - store_artifacts:
+          path: reports/e2e
+          destination: e2e-live
 
   e2e-matrix-replay:
     docker:
@@ -932,6 +1862,15 @@ jobs:
           command: |
             export PATH="$HOME/.local/bin:$PATH"
             HEAD_SHA="$CIRCLE_SHA1"
+            if [ -n "${CIRCLE_PULL_REQUEST:-${CIRCLE_PULL_REQUESTS:-}}" ]; then
+              pattern='^(feat|fix|refactor|docs|test|chore|ci)/[a-z0-9]+([.-][a-z0-9]+)*$'
+              master_pattern='^master[0-9-]+$'
+              automation='^(dependabot|renovate|devin|bolt|copilot|codex)/.+'
+              if [[ ! "$CIRCLE_BRANCH" =~ $pattern && ! "$CIRCLE_BRANCH" =~ $master_pattern && ! "$CIRCLE_BRANCH" =~ $automation ]]; then
+                echo "Non-compliant PR head branch name: $CIRCLE_BRANCH" >&2
+                exit 1
+              fi
+            fi
             if [ "$CIRCLE_BRANCH" = "main" ] || [ "$CIRCLE_BRANCH" = "master" ]; then
               echo "Default-branch push: all gates required (fail-closed)."
               uv run --frozen --no-build python - "$HEAD_SHA" \<<'EOF' > /tmp/pr-gate-decisions.json
@@ -1003,14 +1942,20 @@ jobs:
   # Mirrors import-linter.yml `arch-tests` (canonical selector from catalog).
   arch-tests:
     docker:
-      - image: cimg/python:3.12
+    - image: cimg/python:3.12
     resource_class: medium
     steps:
-      - checkout
-      - setup-python-uv
-      - run:
-          name: architecture tests
-          command: |
+    - checkout
+    - setup-python-uv
+    - run:
+        name: architecture tests
+        command: |
+          set -euo pipefail
+          mkdir -p reports/quality/proof-or-stop/shared
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          if python -m scripts.engineering.qa proof-or-stop ci enabled; then
+            python -m scripts.engineering.qa proof-or-stop ci produce --check architecture
+          else
             export PATH="$HOME/.local/bin:$PATH"
             mkdir -p reports/test-telemetry
             HYPOTHESIS_PROFILE=fast \
@@ -1018,11 +1963,29 @@ jobs:
               -m "not slow and not benchmark and not memory" \
               -q --tb=short --no-cov \
               --junitxml=reports/test-telemetry/junit-arch.xml
-      - store_test_results:
-          path: reports/test-telemetry
+          fi
+          mkdir -p reports/quality/proof-or-stop/shared/architecture
+    - store_test_results:
+        path: reports/test-telemetry
+    - persist_to_workspace:
+        root: .
+        paths:
+        - reports/quality/proof-or-stop/shared/architecture
+    - store_test_results:
+        path: reports/quality/proof-or-stop/shared/architecture
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/architecture
+    environment:
+      PYTHONPATH: src
+      PROOF_CI_LANE: << pipeline.parameters.ci-lane >>
+      BIOETL_AI_MEMORY_MODE: 'off'
+      BIOETL_SKIP_PREFLIGHT: '1'
+      BIOETL_SKIP_SETUP_PLUGINS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
 
-  # --- Gate: type-checking (always_required) ----------------------------------
-  # Mirrors type-checking.yml `type-check` (mypy --strict, 30m budget).
   mypy:
     docker:
       - image: cimg/python:3.12
@@ -1051,7 +2014,7 @@ jobs:
   # --- Gate: tests (always_required) ------------------------------------------
   dependency-lock:
     docker:
-      - image: cimg/python:3.12
+      - image: cimg/python:3.12-node
     resource_class: small
     steps:
       - checkout
@@ -1061,6 +2024,21 @@ jobs:
           command: |
             export PATH="$HOME/.local/bin:$PATH"
             uv lock --check
+      - run:
+          name: Validate every tracked npm manifest against its lockfile
+          command: |
+            set -euo pipefail
+            mkdir -p reports/dependency-review
+            git ls-files -z -- package-lock.json '**/package-lock.json' > /tmp/npm-lockfiles
+            test -s /tmp/npm-lockfiles
+            while IFS= read -r -d '' lockfile; do
+              directory="$(dirname "$lockfile")"
+              test -f "$directory/package.json"
+              npm ci --prefix "$directory" --dry-run --ignore-scripts --no-audit --no-fund
+              printf '%s\n' "$lockfile" >> reports/dependency-review/validated-lockfiles.txt
+            done < /tmp/npm-lockfiles
+      - store_artifacts:
+          path: reports/dependency-review
 
   # Mirrors tests.yml `test-fast` (4 unit groups, fast markers, no xdist).
   # NOTE: CircleCI matrix is a cartesian product, so name+path are packed into
@@ -1163,6 +2141,20 @@ jobs:
             uv run --frozen --no-build python -m scripts.engineering.repo check-root-governance-docs
             uv run --frozen --no-build python -m scripts.engineering.repo check-root-review-registry
             uv run --frozen --no-build python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD
+      - run:
+          name: Export cleanup classification evidence
+          command: |
+            mkdir -p reports/quality && uv run --frozen --no-build python scripts/ops/support/repo/cleanup_repository.py --dry-run --detail-limit 0 --report-json reports/quality/root-hygiene-cleanup-classification.json --report-root-review-json reports/quality/root-hygiene-review-evidence.json --report-reports-workspace-json reports/quality/reports-workspace-review.json
+      - run:
+          name: Run root hygiene unit tests
+          command: |
+            uv run --frozen --no-build pytest tests/unit/scripts/repo/test_audit_root_cleanliness.py tests/unit/scripts/repo/test_check_cleanup_governance.py tests/unit/scripts/repo/test_check_root_governance_docs.py tests/unit/scripts/repo/test_audit_structure.py tests/unit/scripts/repo/test_check_root_hygiene_review_registry.py tests/unit/scripts/repo/test_cleanup_repository.py tests/unit/scripts/repo/test_cleanup_root_local_clutter.py tests/architecture/test_root_hygiene_workflow.py tests/architecture/test_root_hygiene_review_registry.py tests/architecture/test_env_example_reference_policy.py -q
+      - store_artifacts:
+          path: reports/quality/root-hygiene-cleanup-classification.json
+      - store_artifacts:
+          path: reports/quality/root-hygiene-review-evidence.json
+      - store_artifacts:
+          path: reports/quality/reports-workspace-review.json
 
   # --- Gate: compiled-artifacts (always_required) -------------------------------
   # Mirrors compiled-artifacts-block.yml `no-pyc-check`.
@@ -1217,15 +2209,19 @@ jobs:
             curl -fsSL --proto '=https' --tlsv1.2 \
               https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz \
               -o /tmp/gitleaks.tar.gz
+            printf '%s  %s\n' '551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb' /tmp/gitleaks.tar.gz | sha256sum -c -
             mkdir -p "$HOME/.local/bin" && tar -xzf /tmp/gitleaks.tar.gz -C "$HOME/.local/bin" gitleaks
-            "$HOME/.local/bin/gitleaks" detect --config .gitleaks.toml --no-git -v
+            "$HOME/.local/bin/gitleaks" detect --config .gitleaks.toml --no-git -v --redact=100
       - run:
           name: osv-scanner (binary v2.6.0, lockfiles)
           command: |
+            set -euo pipefail
             curl -fsSL --proto '=https' --tlsv1.2 \
               https://github.com/google/osv-scanner/releases/download/v2.6.0/osv-scanner_linux_amd64 \
               -o "$HOME/.local/bin/osv-scanner"
+            printf '%s  %s\n' ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108 "$HOME/.local/bin/osv-scanner" | sha256sum --check -
             chmod 0755 "$HOME/.local/bin/osv-scanner"
+            scan_exit=0
             "$HOME/.local/bin/osv-scanner" \
               --lockfile=uv.lock \
               --lockfile=package-lock.json \
@@ -1235,11 +2231,63 @@ jobs:
               --lockfile=grafana/plugins/bioetl-scenes-app/package-lock.json \
               --lockfile=grafana/plugins/bioetl-selectorshell-panel/package-lock.json \
               --lockfile=grafana/tooling/router-v7-bridge/package-lock.json \
-              --format=json --output-file=osv-results.json || true
+              --format=json --output-file=osv-results.json || scan_exit=$?
+            # Only a completed scan can reach the severity policy.
+            case "$scan_exit" in
+              0|1) ;;
+              *) echo "OSV scan failed or found no packages (exit=$scan_exit)" >&2; exit "$scan_exit" ;;
+            esac
             export PATH="$HOME/.local/bin:$PATH"
             uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json
       - store_artifacts:
           path: osv-results.json
+
+  actions-audit:
+    parameters:
+      online:
+        type: boolean
+        default: false
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Audit retained Actions with pinned zizmor 1.29.0
+          no_output_timeout: 11m
+          command: |
+            cat > /tmp/actions-audit.sh \<<'BIOETL_ACTIONS_AUDIT'
+            set -euo pipefail
+            mkdir -p reports/actions-audit "$HOME/.local/bin"
+            curl --fail --location --retry 3 --proto '=https' --tlsv1.2 \
+              https://github.com/zizmorcore/zizmor/releases/download/v1.29.0/zizmor-x86_64-unknown-linux-gnu.tar.gz \
+              --output /tmp/zizmor.tar.gz
+            printf '%s  %s\n' dd96df044a6e8538d5f423790f453bdd03d49e5b2bcc38214acc41a2f1297839 /tmp/zizmor.tar.gz | sha256sum --check -
+            tar -xzf /tmp/zizmor.tar.gz -C "$HOME/.local/bin" zizmor
+            if << parameters.online >>; then
+              [[ "$CIRCLE_BRANCH" == main ]]
+              test -n "${GITHUB_TOKEN:-}"
+              unset GH_TOKEN ZIZMOR_OFFLINE ZIZMOR_NO_ONLINE_AUDITS
+            else
+              export ZIZMOR_OFFLINE=true
+            fi
+            printf '%s\n' "$CIRCLE_SHA1" > reports/actions-audit/source-sha.txt
+            set +e
+            "$HOME/.local/bin/zizmor" \
+              --min-severity high --min-confidence high --config .github/zizmor.yml \
+              --format json .github/workflows .github/actions > reports/actions-audit/findings.json
+            json_status=$?
+            "$HOME/.local/bin/zizmor" \
+              --min-severity high --min-confidence high --config .github/zizmor.yml \
+              --format sarif .github/workflows .github/actions > reports/actions-audit/findings.sarif
+            sarif_status=$?
+            set -e
+            if [ "$json_status" -ne 0 ]; then exit "$json_status"; fi
+            exit "$sarif_status"
+            BIOETL_ACTIONS_AUDIT
+            timeout --signal=TERM --kill-after=30s 9m bash /tmp/actions-audit.sh
+      - store_artifacts:
+          path: reports/actions-audit
 
   # --- Gate: duplication (always_required) ---------------------------------------
   # Mirrors duplication-complexity.yml (radon + jscpd).
@@ -1383,32 +2431,52 @@ jobs:
   # Mirrors docs.yml (docs-governance + validate-mkdocs essentials).
   docs-governance:
     docker:
-      - image: cimg/python:3.12
+    - image: cimg/python:3.12
     resource_class: small
     steps:
-      - checkout
-      - setup-python-uv:
-          extras: dev tracing docs
-      - check-gate:
-          gate: docs-governance
-      - run:
-          name: docs governance checks
-          command: |
-            export PATH="$HOME/.local/bin:$PATH"
-            uv run --frozen --no-build python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check
-            uv run --frozen --no-build python -m scripts.docs passports check
-            test -f docs/assets/javascripts/mermaid-init.js
-            test -f docs/assets/stylesheets/mermaid-responsive.css
-            uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog
-            uv run --frozen --no-build python -m scripts.engineering.qa report-dashboard-inventory --check --json
-            uv run --frozen --no-build python -m scripts.engineering.repo check-versions
-            uv run --frozen --no-build python -m scripts.docs check-links --report-json reports/docs-link-check-report.json
-            uv run --frozen --no-build python -m scripts.docs verify --skip-links
-            uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check
+    - checkout
+    - setup-python-uv:
+        extras: dev tracing docs
+    - check-gate:
+        gate: docs-governance
+    - run:
+        name: docs governance checks
+        command: |
+          set -euo pipefail
+          export PATH="$HOME/.local/bin:$PATH"
+          uv run --frozen --no-build python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check
+          uv run --frozen --no-build python -m scripts.docs passports check
+          test -f docs/assets/javascripts/mermaid-init.js
+          test -f docs/assets/stylesheets/mermaid-responsive.css
+          uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog
+          uv run --frozen --no-build python -m scripts.engineering.qa report-dashboard-inventory --check --json
+          uv run --frozen --no-build python -m scripts.engineering.repo check-versions
+          uv run --frozen --no-build python -m scripts.engineering.qa proof-or-stop ci produce --check docs-links
+          uv run --frozen --no-build python -m scripts.engineering.qa proof-or-stop ci produce --check docs-runtime
+          uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check
+    - persist_to_workspace:
+        root: .
+        paths:
+        - reports/quality/proof-or-stop/shared/docs-links
+    - persist_to_workspace:
+        root: .
+        paths:
+        - reports/quality/proof-or-stop/shared/docs-runtime
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/docs-links
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/docs-runtime
+    environment:
+      PYTHONPATH: src
+      PROOF_CI_LANE: << pipeline.parameters.ci-lane >>
+      BIOETL_AI_MEMORY_MODE: 'off'
+      BIOETL_SKIP_PREFLIGHT: '1'
+      BIOETL_SKIP_SETUP_PLUGINS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
 
-  # --- Gate: docker (path_scoped) ----------------------------------------------------
-  # Mirrors docker.yml validation part only (lint + compose + build). No push, no
-  # Trivy baseline here â€” image security baseline stays a phase-3 item.
   docker-build:
     docker:
       - image: cimg/python:3.12-node
@@ -1584,141 +2652,342 @@ jobs:
           path: reports/quality/proof-or-stop
           destination: composite-closeout
 
-  proof-closeout:
+  proof-coverage:
     docker:
     - image: cimg/python:3.12
     resource_class: medium
+    environment:
+      PYTHONPATH: src
+      PROOF_CI_LANE: << pipeline.parameters.ci-lane >>
+      BIOETL_AI_MEMORY_MODE: 'off'
+      BIOETL_SKIP_PREFLIGHT: '1'
+      BIOETL_SKIP_SETUP_PLUGINS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+    - checkout
+    - setup-python-uv:
+        extras: dev tracing docs
+    - attach_workspace:
+        at: /home/circleci/.bioetl-proof-workspace
+    - run:
+        name: Receive isolated proof evidence
+        command: |
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          python -m scripts.engineering.qa proof-or-stop ci receive
+    - run:
+        name: Capture coverage evidence
+        no_output_timeout: 30m
+        command: |-
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          python -m scripts.engineering.qa proof-or-stop ci produce --check coverage
+    - persist_to_workspace:
+        root: .
+        paths:
+        - reports/quality/proof-or-stop/shared/coverage/execution.json
+        - reports/quality/proof-or-stop/shared/coverage/producer.log
+        - reports/quality/proof-or-stop/shared/coverage/coverage/manifest.json
+        - reports/quality/proof-or-stop/shared/coverage/coverage/shards
+        - reports/quality/proof-or-stop/shared/coverage/coverage/junit
+        - reports/quality/proof-or-stop/shared/coverage/coverage/logs
+        - reports/quality/proof-or-stop/shared/coverage/coverage/coverage.xml
+        - reports/quality/proof-or-stop/shared/coverage/coverage/combined
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/coverage/producer.log
+    - run:
+        name: Export validated telemetry candidate
+        command: |
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          python -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest reports/quality/proof-or-stop/shared/coverage/coverage/manifest.json
+          DEST=reports/quality/proof-or-stop/telemetry-candidate
+          mkdir -p "$DEST/configs/quality" "$DEST/docs/05-engineering" "$DEST/reports"
+          cp configs/quality/test_telemetry_baseline.yaml "$DEST/configs/quality/"
+          cp docs/05-engineering/test-telemetry-baseline.md "$DEST/docs/05-engineering/"
+          cp -R reports/test-telemetry "$DEST/reports/"
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/telemetry-candidate
+        destination: telemetry-candidate
+    - store_test_results:
+        path: reports/quality/proof-or-stop/shared/coverage/coverage/junit
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/coverage/coverage/junit
+        destination: coverage-junit
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/coverage/coverage/logs
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/coverage/coverage/manifest.json
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/coverage/coverage/coverage.xml
+
+  proof-governance:
+    docker:
+    - image: cimg/python:3.12
+    resource_class: medium
+    environment:
+      PYTHONPATH: src
+      PROOF_CI_LANE: << pipeline.parameters.ci-lane >>
+      BIOETL_AI_MEMORY_MODE: 'off'
+      BIOETL_SKIP_PREFLIGHT: '1'
+      BIOETL_SKIP_SETUP_PLUGINS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+    - checkout
+    - setup-python-uv:
+        extras: dev tracing docs
+    - attach_workspace:
+        at: /home/circleci/.bioetl-proof-workspace
+    - run:
+        name: Receive isolated proof evidence
+        command: |
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          python -m scripts.engineering.qa proof-or-stop ci receive
+    - run:
+        name: Capture governance evidence
+        no_output_timeout: 30m
+        command: |-
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          python -m scripts.engineering.qa proof-or-stop ci produce --check governance
+    - persist_to_workspace:
+        root: .
+        paths:
+        - reports/quality/proof-or-stop/shared/governance
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/governance
+  proof-debt:
+    docker:
+    - image: cimg/python:3.12
+    resource_class: medium
+    environment:
+      PYTHONPATH: src
+      PROOF_CI_LANE: << pipeline.parameters.ci-lane >>
+      BIOETL_AI_MEMORY_MODE: 'off'
+      BIOETL_SKIP_PREFLIGHT: '1'
+      BIOETL_SKIP_SETUP_PLUGINS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
     steps:
     - checkout
     - setup-python-uv:
         extras: dev tracing docs
     - run:
-        name: Verify complete source history and current main base
-        command: "export PATH=\"$PWD/.venv/bin:$HOME/.local/bin:$PATH\"\ngit fetch --no-tags origin main:refs/remotes/origin/main\n\
-          if [ \"$(git rev-parse --is-shallow-repository)\" = true ]; then\n  git fetch --unshallow origin\nfi\npython\
-          \ scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD\n"
-    - run:
-        name: Source-bound full coverage and Proof-or-Stop acceptance
+        name: Capture debt evidence
         no_output_timeout: 30m
-        command: "export PATH=\"$PWD/.venv/bin:$HOME/.local/bin:$PATH\"\nexport PYTHONPATH=\"$PWD/src\" PYTHONUTF8=1\n\
-          export BIOETL_AI_MEMORY_MODE=off BIOETL_SKIP_PREFLIGHT=1 BIOETL_SKIP_SETUP_PLUGINS=1\nexport OPENBLAS_NUM_THREADS=1\
-          \ OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1\n# Preserve resolved PATH; isolate child shell probes from CircleCI BASH_ENV.\nunset BASH_ENV\npython - \\<<'CLOSEOUT_PY'\n\"\"\"Candidate\
-          \ embedded runner; execute only in a genuine CircleCI checkout.\"\"\"\nfrom datetime import UTC, datetime\n\
-          from pathlib import Path\nimport json\nimport hashlib\nimport os\nimport subprocess\nimport time\n\nroot\
-          \ = Path.cwd().resolve()\nhead = subprocess.check_output([\"git\", \"rev-parse\", \"HEAD\"], text=True).strip()\n\
-          assert os.environ.get(\"CIRCLECI\") == \"true\", \"A local execution cannot emit CI receipts\"\nassert os.environ.get(\"\
-          CIRCLE_SHA1\") == head\nassert os.environ.get(\"CIRCLE_PROJECT_USERNAME\") == \"SatoryKono\"\nassert os.environ.get(\"\
-          CIRCLE_PROJECT_REPONAME\") == \"BioactivityDataAcquisition\"\nci_id = os.environ[\"CIRCLE_BUILD_URL\"]\n\
-          assert ci_id.startswith(\"https://\") and os.environ[\"CIRCLE_WORKFLOW_ID\"]\nrun_id = \"circleci-closeout-\"\
-          \ + os.environ[\"CIRCLE_BUILD_NUM\"] + \"-\" + head[:12]\nout = root / \"reports/quality/proof-or-stop\"\
-          \ / run_id\nout.mkdir(parents=True, exist_ok=False)\nsecret_values = sorted({value for key, value in os.environ.items()\n\
-          \                        if len(value) >= 8 and any(part in key.upper() for part in\n                  \
-          \      (\"TOKEN\", \"PASSWORD\", \"SECRET\", \"API_KEY\", \"ACCESS_KEY\"))}, key=len, reverse=True)\n\n\
-          def sanitize(path):\n    original = path.read_text(encoding=\"utf-8\", errors=\"replace\")\n    clean =\
-          \ original\n    for value in secret_values:\n        clean = clean.replace(value, \"[REDACTED_CI_SECRET]\"\
-          )\n    if clean != original:\n        path.write_text(clean, encoding=\"utf-8\")\n\ndef execute(name, command):\n\
-          \    log = out / (name + \".log\")\n    started = datetime.now(UTC).isoformat()\n    clock = time.monotonic()\n\
-          \    print(\"[closeout] start \" + name, flush=True)\n    with log.open(\"w\", encoding=\"utf-8\") as stream:\n\
-          \        result = subprocess.Popen(command, stdout=stream, stderr=subprocess.STDOUT)\n        while True:\n            try:\n                result.wait(timeout=60)\n                break\n            except subprocess.TimeoutExpired:\n                print(f\"[closeout] {name} running {int(time.monotonic() - clock)}s\", flush=True)\n    duration\
-          \ = round((time.monotonic() - clock) * 1000)\n    sanitize(log)\n    assert subprocess.check_output([\"\
-          git\", \"rev-parse\", \"HEAD\"], text=True).strip() == head\n    record = dict(command=command, cwd=str(root),\
-          \ started_at=started,\n                  duration_ms=duration, exit_code=result.returncode,\n          \
-          \        head_before=head, head_after=head, log=str(log))\n    (out / (name + \".record.json\")).write_text(json.dumps(record,\
-          \ indent=2) + \"\\n\", encoding=\"utf-8\")\n    print(f\"[closeout] {name} exit={result.returncode}\", flush=True)\n\
-          \    return record\n\nprefix = [\"python\", \"-m\", \"scripts.engineering.qa\", \"proof-or-stop\"]\ncommon\
-          \ = [\"--run-id\", run_id, \"--task-id\", \"architecture-coverage-11854-11899\",\n          \"--claim\"\
-          , \"ready_to_merge\", \"--ci-run-id\", ci_id]\nassert execute(\"plan\", prefix + [\"plan\", *common, \"\
-          --output\", str(out / \"plan.json\")])[\"exit_code\"] == 0\n(out / \"ci-identity.json\").write_text(json.dumps({\n\
-          \    key: os.environ[key] for key in (\"CIRCLE_SHA1\", \"CIRCLE_BUILD_URL\", \"CIRCLE_BUILD_NUM\",\n   \
-          \                                \"CIRCLE_WORKFLOW_ID\", \"CIRCLE_PROJECT_USERNAME\",\n                \
-          \                   \"CIRCLE_PROJECT_REPONAME\", \"CIRCLE_BRANCH\")\n}, indent=2) + \"\\n\", encoding=\"\
-          utf-8\")\ncoverage = out / \"coverage\"\ncoverage_record = execute(\"coverage-17\", [\"python\", \"-m\"\
-          , \"scripts.engineering.qa.run_local_coverage_verify\",\n                                         \"--scratch-dir\"\
-          , str(coverage)])\nfor path in coverage.rglob(\"*\"):\n    if path.is_file() and path.suffix in {\".log\"\
-          , \".xml\", \".json\"}:\n        sanitize(path)\nassert coverage_record[\"exit_code\"] == 0, \"Incomplete\
-          \ coverage cannot qualify closeout\"\nmanifest = json.loads((coverage / \"manifest.json\").read_text(encoding=\"\
-          utf-8\"))\nassert manifest[\"complete\"] is True and manifest[\"head\"] == head\nassert len(manifest[\"\
-          required_shards\"]) == len(manifest[\"shards\"]) == 17\nassert {row[\"name\"] for row in manifest[\"shards\"\
-          ]} == set(manifest[\"required_shards\"])\nassert all(row[\"exit_code\"] == 0 and row[\"junit_file\"] and\
-          \ row[\"coverage_sha256\"]\n           for row in manifest[\"shards\"])\nassert hashlib.sha256((coverage\
-          \ / \"coverage.xml\").read_bytes()).hexdigest() == manifest[\"coverage_xml_sha256\"]\nchecks = [\n    (\"\
-          tests\", \"test_health\", [\"python\", \"-m\", \"pytest\", \"tests/architecture\", \"-q\", \"--no-cov\"\
-          ,\n                              \"--junitxml=\" + str(out / \"architecture.xml\")]),\n    (\"governance\"\
-          , \"pretest_guardrails\", [\"bash\", \"scripts/engineering/dev/pretest_guardrails.sh\",\n              \
-          \                            \"--mode\", \"check\", \"--scope\", \"governance\", \"--skip-cleanup\",\n \
-          \                                         \"--report-json\", str(out / \"governance.json\")]),\n    (\"\
-          docs_runtime\", \"docs_runtime_checks\", [\"python\", \"-m\", \"scripts.docs\", \"verify\"]),\n    (\"debt\"\
-          , \"debt_governance_gates\", [\"python\", \"-m\", \"scripts.engineering.qa\",\n                        \
-          \               \"report-debt-governance-gates\", \"--check\"]),\n    (\"quality\", \"quality_integral_gate\"\
-          , [\"python\", \"-m\", \"scripts.engineering.ci.quality_integral_gate\",\n                             \
-          \             \"--coverage-xml\", str(coverage / \"coverage.xml\"),\n                                  \
-          \        \"--output\", str(out / \"quality.json\")]),\n]\nreceipts = []\nfor kind, producer, command in\
-          \ checks:\n    record = execute(kind, command)\n    receipt = out / \"receipts\" / (kind + \".json\")\n\
-          \    arguments = [\"receipt\", *common, \"--receipt-id\", kind, \"--producer\", producer,\n            \
-          \     \"--evidence-kind\", kind, \"--command\", \" \".join(command),\n                 \"--cwd\", str(root),\
-          \ \"--started-at\", record[\"started_at\"],\n                 \"--duration-ms\", str(record[\"duration_ms\"\
-          ]), \"--exit-code\", str(record[\"exit_code\"]),\n                 \"--status\", \"pass\" if record[\"exit_code\"\
-          ] == 0 else \"fail\",\n                 \"--output-artifact\", record[\"log\"], \"--trust-tier\", \"ci\"\
-          , \"--output\", str(receipt)]\n    arguments.extend(\"--argv=\" + arg for arg in command)\n    assert execute(\"\
-          receipt-\" + kind, prefix + arguments)[\"exit_code\"] == 0\n    receipts.extend([\"--receipt\", str(receipt)])\n\
-          assert execute(\"assemble\", prefix + [\"assemble\", *common, \"--actor\", \"circleci\",\n             \
-          \                        \"--runtime\", \"ci\", \"--trust-tier\", \"ci\", *receipts,\n                 \
-          \                    \"--output\", str(out / \"bundle.json\")])[\"exit_code\"] == 0\nverification = execute(\"\
-          verify\", prefix + [\"verify\", \"--bundle\", str(out / \"bundle.json\"),\n                            \
-          \               \"--output\", str(out / \"verification.json\")])\nraise SystemExit(verification[\"exit_code\"\
-          ] or coverage_record[\"exit_code\"])\nCLOSEOUT_PY\n"
+        command: |-
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          python -m scripts.engineering.qa proof-or-stop ci produce --check debt
+    - persist_to_workspace:
+        root: .
+        paths:
+        - reports/quality/proof-or-stop/shared/debt
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/debt
+  proof-quality:
+    docker:
+    - image: cimg/python:3.12
+    resource_class: medium
+    environment:
+      PYTHONPATH: src
+      PROOF_CI_LANE: << pipeline.parameters.ci-lane >>
+      BIOETL_AI_MEMORY_MODE: 'off'
+      BIOETL_SKIP_PREFLIGHT: '1'
+      BIOETL_SKIP_SETUP_PLUGINS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+    - checkout
+    - setup-python-uv:
+        extras: dev tracing docs
+    - attach_workspace:
+        at: /home/circleci/.bioetl-proof-workspace
     - run:
-        name: Export telemetry candidate from the complete producer
-        when: always
+        name: Receive isolated proof evidence
+        command: |
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          python -m scripts.engineering.qa proof-or-stop ci receive
+    - run:
+        name: Capture quality evidence
+        no_output_timeout: 30m
+        command: |-
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          python -m scripts.engineering.qa proof-or-stop ci produce --check quality
+    - persist_to_workspace:
+        root: .
+        paths:
+        - reports/quality/proof-or-stop/shared/quality
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/quality
+  proof-closeout:
+    docker:
+    - image: cimg/python:3.12
+    resource_class: small
+    environment:
+      PYTHONPATH: src
+      PROOF_CI_LANE: << pipeline.parameters.ci-lane >>
+      BIOETL_AI_MEMORY_MODE: 'off'
+      BIOETL_SKIP_PREFLIGHT: '1'
+      BIOETL_SKIP_SETUP_PLUGINS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+    - checkout
+    - setup-python-uv:
+        extras: dev tracing docs
+    - attach_workspace:
+        at: /home/circleci/.bioetl-proof-workspace
+    - run:
+        name: Receive isolated proof evidence
+        command: |
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          python -m scripts.engineering.qa proof-or-stop ci receive
+    - run:
+        name: Verify transported producer evidence
+        no_output_timeout: 30m
+        command: |-
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          if [ "$(git rev-parse --is-shallow-repository)" = true ]; then git fetch --unshallow origin; fi
+          python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD
+          python -m scripts.engineering.qa proof-or-stop ci assemble
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/closeout
+  proof-docs:
+    docker:
+    - image: cimg/python:3.12
+    resource_class: small
+    steps:
+    - checkout
+    - setup-python-uv:
+        extras: dev tracing docs
+    - run:
+        name: docs governance checks
         command: |
           set -euo pipefail
+          export PATH="$HOME/.local/bin:$PATH"
+          uv run --frozen --no-build python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check
+          uv run --frozen --no-build python -m scripts.docs passports check
+          test -f docs/assets/javascripts/mermaid-init.js
+          test -f docs/assets/stylesheets/mermaid-responsive.css
+          uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog
+          uv run --frozen --no-build python -m scripts.engineering.qa report-dashboard-inventory --check --json
+          uv run --frozen --no-build python -m scripts.engineering.repo check-versions
+          uv run --frozen --no-build python -m scripts.engineering.qa proof-or-stop ci produce --check docs-links
+          uv run --frozen --no-build python -m scripts.engineering.qa proof-or-stop ci produce --check docs-runtime
+          uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check
+    - persist_to_workspace:
+        root: .
+        paths:
+        - reports/quality/proof-or-stop/shared/docs-links
+    - persist_to_workspace:
+        root: .
+        paths:
+        - reports/quality/proof-or-stop/shared/docs-runtime
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/docs-links
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/docs-runtime
+    environment:
+      PYTHONPATH: src
+      PROOF_CI_LANE: << pipeline.parameters.ci-lane >>
+      BIOETL_AI_MEMORY_MODE: 'off'
+      BIOETL_SKIP_PREFLIGHT: '1'
+      BIOETL_SKIP_SETUP_PLUGINS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+  proof-coverage-shard:
+    docker:
+    - image: cimg/python:3.12
+    resource_class: medium
+    environment:
+      PYTHONPATH: src
+      PROOF_CI_LANE: << pipeline.parameters.ci-lane >>
+      BIOETL_AI_MEMORY_MODE: 'off'
+      BIOETL_SKIP_PREFLIGHT: '1'
+      BIOETL_SKIP_SETUP_PLUGINS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+    - checkout
+    - setup-python-uv:
+        extras: dev tracing docs
+    - run:
+        name: Capture coverage evidence
+        no_output_timeout: 30m
+        command: |-
           export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
-          export PYTHONPATH="$PWD/src" PYTHONUTF8=1
-          ROOT="reports/quality/proof-or-stop/circleci-closeout-${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:12}"
-          # Canonical validation rejects failed, partial, stale or substituted evidence.
-          python -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest "$ROOT/coverage/manifest.json"
-          mkdir -p "$ROOT/telemetry/configs/quality" "$ROOT/telemetry/docs/05-engineering" "$ROOT/telemetry/reports"
-          cp configs/quality/test_telemetry_baseline.yaml "$ROOT/telemetry/configs/quality/"
-          cp docs/05-engineering/test-telemetry-baseline.md "$ROOT/telemetry/docs/05-engineering/"
-          cp -R reports/test-telemetry "$ROOT/telemetry/reports/"
-    - run:
-        name: Publish bounded sanitized execution evidence
-        when: always
-        command: "python - \\<<'ARTIFACT_PY'\nfrom pathlib import Path\nimport os\nimport shutil\nfrom xml.etree import\
-          \ ElementTree as ET\n\nroot = Path(\"reports/quality/proof-or-stop\")\nname = \"circleci-closeout-\" + os.environ[\"\
-          CIRCLE_BUILD_NUM\"] + \"-\" + os.environ[\"CIRCLE_SHA1\"][:12]\nsource = root / name\ndestination = root\
-          \ / \"circleci-artifacts\"\nsecrets = sorted({value for key, value in os.environ.items() if len(value) >=\
-          \ 8 and\n                  any(part in key.upper() for part in (\"TOKEN\", \"PASSWORD\", \"SECRET\", \"\
-          API_KEY\", \"ACCESS_KEY\"))}, key=len, reverse=True)\nfor path in source.rglob(\"*\"):\n    relative = path.relative_to(source)\n\
-          \    if path.is_symlink() or not path.is_file() or path.suffix not in {\".json\", \".xml\", \".log\"}:\n\
-          \        continue\n    if any(part in {\"pycache\", \"hypothesis\", \"shards\", \"combined\"} for part in\
-          \ relative.parts):\n        continue\n    text = path.read_text(encoding=\"utf-8\", errors=\"replace\")\n\
-          \    for value in secrets:\n        text = text.replace(value, \"[REDACTED_CI_SECRET]\")\n    target = destination\
-          \ / \"evidence\" / name / relative\n    target.parent.mkdir(parents=True, exist_ok=True)\n    target.write_text(text,\
-          \ encoding=\"utf-8\")\n    junit_root = None\n    if path.suffix == \".xml\":\n        try:\n          \
-          \  junit_root = ET.fromstring(text).tag\n        except ET.ParseError:\n            print(\"Retained incomplete\
-          \ XML as diagnostics:\", relative)\n    if junit_root in {\"testsuites\", \"testsuite\"}:\n        junit\
-          \ = destination / \"junit\" / relative\n        junit.parent.mkdir(parents=True, exist_ok=True)\n      \
-          \  shutil.copyfile(target, junit)\nprint(\"Published actual JSON/XML/log evidence; raw coverage SQLite and\
-          \ caches remain on the CI host\")\nARTIFACT_PY\n"
-    - run:
-        name: Collect validated telemetry proposal
-        when: always
-        command: |
-          ROOT="reports/quality/proof-or-stop/circleci-closeout-${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:12}"
-          if [ -d "$ROOT/telemetry" ]; then
-            cp -R "$ROOT/telemetry" reports/quality/proof-or-stop/telemetry-candidate
-          fi
+          python -m scripts.engineering.qa proof-or-stop ci produce --check coverage-<< parameters.group >>
+    - persist_to_workspace:
+        root: .
+        paths:
+        - reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/execution.json
+        - reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/producer.log
+        - reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/measurement/manifest.json
+        - reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/measurement/shards
+        - reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/measurement/junit
+        - reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/measurement/logs
     - store_artifacts:
-        path: reports/quality/proof-or-stop/telemetry-candidate
-        destination: telemetry-candidate
+        path: reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/producer.log
     - store_test_results:
-        path: reports/quality/proof-or-stop/circleci-artifacts/junit
+        path: reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/measurement/junit
     - store_artifacts:
-        path: reports/quality/proof-or-stop/circleci-artifacts/evidence
-        destination: proof-or-stop
+        path: reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/measurement/junit
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/measurement/logs
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/measurement/manifest.json
+    parameters:
+      group:
+        type: string
 
 workflows:
+  retained-actions-online:
+    when:
+      and:
+        - equal: [pr-gate, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - actions-audit:
+          name: actions-audit-online
+          online: true
+          context: bioetl-github-read-only
+          filters:
+            branches:
+              only: main
+
+  router-bridge:
+    when:
+      and:
+      - equal:
+        - router-bridge
+        - << pipeline.parameters.ci-lane >>
+      - equal:
+        - main
+        - << pipeline.git.branch >>
+    jobs:
+    - router-bridge-tests
+    - router-plugin-tests:
+        matrix:
+          parameters:
+            plugin:
+            - bioetl-scenes-app
+            - bioetl-selectorshell-panel
+    - router-host-build:
+        requires:
+        - router-plugin-tests
   version: 2
   docker-baseline:
     when:
@@ -1728,13 +2997,101 @@ workflows:
     jobs:
       - docker-security-baseline:
           context: bioetl-github-read-only
-  main-coverage-closeout:
+  docker-publish:
+    when:
+      and:
+        - equal: [docker-publish, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - docker-security-baseline:
+          context: bioetl-github-read-only
+      - docker-publish-approval:
+          type: approval
+          requires:
+            - docker-security-baseline
+      - docker-publish:
+          context: bioetl-ghcr-publish
+          serial-group: 9f037fd7-4fd9-41af-9916-33ca1e56cf7b/docker-publication
+          requires:
+            - docker-publish-approval
+  # Temporary #11931 measurement: remove after branch baseline adoption.
+  # https://github.com/SatoryKono/BioactivityDataAcquisition/issues/11931
+  migration-coverage-closeout:
     when:
       and:
         - equal: [coverage-closeout, << pipeline.parameters.ci-lane >>]
-        - equal: [main, << pipeline.git.branch >>]
+        - equal: [codex/ci-11929-11931-preparation, << pipeline.git.branch >>]
     jobs:
-      - proof-closeout
+    - arch-tests
+    - proof-docs
+    - proof-coverage:
+        requires:
+        - proof-coverage-shards
+    - proof-governance:
+        requires:
+        - arch-tests
+    - proof-debt
+    - proof-quality:
+        requires:
+        - proof-coverage
+        - arch-tests
+    - proof-closeout:
+        requires:
+        - arch-tests
+        - proof-docs
+        - proof-governance
+        - proof-debt
+        - proof-quality
+    - proof-coverage-shard:
+        matrix:
+          alias: proof-coverage-shards
+          parameters:
+            group:
+            - '0'
+            - '1'
+            - '2'
+            - '3'
+
+  main-coverage-closeout:
+    when:
+      and:
+      - equal:
+        - coverage-closeout
+        - << pipeline.parameters.ci-lane >>
+      - equal:
+        - main
+        - << pipeline.git.branch >>
+    jobs:
+    - arch-tests
+    - proof-docs
+    - proof-coverage:
+        requires:
+        - proof-coverage-shards
+    - proof-governance:
+        requires:
+        - arch-tests
+    - proof-debt
+    - proof-quality:
+        requires:
+        - proof-coverage
+        - arch-tests
+    - proof-closeout:
+        requires:
+        - arch-tests
+        - proof-docs
+        - proof-governance
+        - proof-debt
+        - proof-quality
+    - proof-coverage-shard:
+        matrix:
+          alias: proof-coverage-shards
+          parameters:
+            group:
+            - '0'
+            - '1'
+            - '2'
+            - '3'
+
   e2e-replay:
     when:
       and:
@@ -1742,6 +3099,27 @@ workflows:
         - equal: [main, << pipeline.git.branch >>]
     jobs:
       - e2e-matrix-replay
+      - e2e-nightly-full-replay
+      - prompt-tests-nightly
+  e2e-live:
+    when:
+      and:
+        - equal: [e2e-replay, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+        - equal: [true, << pipeline.parameters.run-live >>]
+    jobs:
+      - e2e-matrix-live
+  approved-runtime-sync:
+    when:
+      and:
+        - equal: [skills-consistency, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+        - equal: [true, << pipeline.parameters.approve-runtime-sync >>]
+    jobs:
+      - runtime-sync-approval:
+          type: approval
+      - approved-runtime-skill-sync:
+          requires: [runtime-sync-approval]
   semantic-governance:
     when:
       and:
@@ -1833,6 +3211,8 @@ workflows:
           requires: [classify]
       - security-scans:
           requires: [classify]
+      - actions-audit:
+          requires: [classify]
       - duplication:
           requires: [classify]
       - schema-governance:
@@ -1845,8 +3225,24 @@ workflows:
           requires: [classify]
       - docker-build:
           requires: [classify]
+      # Retain the legacy PR/push checks without credentials or nightly heavy jobs.
+      - port-contracts:
+          requires: [classify]
+      - provider-contract-drift:
+          requires: [classify]
+      - memory-freshness:
+          requires: [classify]
+      - skills-consistency:
+          requires: [classify]
+      - e2e-matrix-replay:
+          requires: [classify]
       - pr-gate-complete:
           requires:
+            - port-contracts
+            - provider-contract-drift
+            - memory-freshness
+            - skills-consistency
+            - e2e-matrix-replay
             - lint-ruff
             - lint-arch
             - arch-tests
@@ -1858,12 +3254,57 @@ workflows:
             - root-hygiene
             - compiled-artifacts
             - security-scans
+            - actions-audit
             - duplication
             - schema-governance
             - semantic-governance
             - commit-lint
             - docs-governance
             - docker-build
+      - proof-coverage:
+          filters: &id001
+            branches:
+              only:
+              - codex/architecture-coverage-final-20261004
+              - codex/architecture-11854-postmerge-20261005
+              - codex/config-root-main-acceptance-20261005
+              - codex/config-root-postmerge-20261005
+              - codex/architecture-meta-closeout-20261005
+              - codex/grafana-managed-closeout-20261005
+              - codex/proof-closeout-reuse-evidence
+              - codex/grafana-postmerge-security-20261006
+          requires:
+          - proof-coverage-shards
+      - proof-governance:
+          filters: *id001
+          requires:
+          - arch-tests
+      - proof-debt:
+          filters: *id001
+      - proof-quality:
+          requires:
+          - proof-coverage
+          - arch-tests
+          filters: *id001
+      - proof-closeout:
+          requires:
+          - arch-tests
+          - docs-governance
+          - proof-governance
+          - proof-debt
+          - proof-quality
+          filters: *id001
+      - proof-coverage-shard:
+          matrix:
+            alias: proof-coverage-shards
+            parameters:
+              group:
+              - '0'
+              - '1'
+              - '2'
+              - '3'
+          filters: *id001
+
   docs-kpi:
     when:
       and:
@@ -1937,12 +3378,16 @@ workflows:
     jobs:
     - mutation-testing:
         name: mutation-domain
+        executor-size: large
+        max-children: 4
         target: domain
         source-path: src/bioetl/domain/
         tests-dir: tests/unit/domain/
         threshold: '70.0'
     - mutation-testing:
         name: mutation-application-control-plane
+        executor-size: large
+        max-children: 4
         target: application-control-plane
         source-path: src/bioetl/application/services/control_plane/
         tests-dir: tests/unit/application/
@@ -1960,14 +3405,63 @@ workflows:
         tests-dir: tests/unit/repo_backed/application/services/test_workflow_runner_service.py
         threshold: '60.0'
 
-  architecture-coverage-closeout:
+  architecture-metrics-fast:
+    when:
+      and:
+        - equal: [architecture-metrics, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+        - not: << pipeline.parameters.run-heavy >>
     jobs:
-      - proof-closeout:
-          filters:
-            branches:
-              only:
-                - codex/architecture-coverage-final-20261004
-                - codex/config-root-main-acceptance-20261005
-                - codex/config-root-postmerge-20261005
-                - codex/architecture-meta-closeout-20261005
-                - codex/grafana-managed-closeout-20261005
+      - architecture-fast-baseline
+  architecture-metrics-heavy:
+    when:
+      and:
+        - equal: [architecture-metrics, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+        - << pipeline.parameters.run-heavy >>
+    jobs:
+      - architecture-heavy-nightly
+      - windows-atomic-write-stress-nightly
+  scorecard:
+    when:
+      and:
+        - equal: [scorecard, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - scorecard-analysis:
+          context: bioetl-github-read-only
+  scorecard-publish:
+    when:
+      and:
+        - equal: [scorecard-publish, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - scorecard-analysis:
+          context: bioetl-github-read-only
+      - scorecard-publish-approval:
+          type: approval
+          requires:
+            - scorecard-analysis
+      - scorecard-publish:
+          context: bioetl-security-events-write
+          requires:
+            - scorecard-publish-approval
+          serial-group: 9f037fd7-4fd9-41af-9916-33ca1e56cf7b/scorecard-publication
+  release-validation:
+    when:
+      and:
+        - equal: [release-validation, << pipeline.parameters.ci-lane >>]
+        - equal: [main, << pipeline.git.branch >>]
+    jobs:
+      - release-dist-build
+      - release-install:
+          requires:
+            - release-dist-build
+      - security-scans
+      - release-tests
+      - release-validation-complete:
+          requires:
+            - release-dist-build
+            - release-install
+            - security-scans
+            - release-tests
