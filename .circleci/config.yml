@@ -96,6 +96,10 @@ commands:
       - run:
           name: Check gate decision (<< parameters.gate >>)
           command: |
+            export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+            if [ "<< parameters.gate >>" = "docs-governance" ] && PYTHONPATH=src python -m scripts.engineering.qa proof-or-stop ci enabled; then
+              exit 0
+            fi
             DECISION=$(python3 -c "import json; print(json.load(open('/tmp/cci-ws/pr-gate-decisions.json'))['decisions']['<< parameters.gate >>']['decision'])")
             echo "gate << parameters.gate >> decision: $DECISION"
             if [ "$DECISION" != "required" ]; then
@@ -1907,14 +1911,20 @@ jobs:
   # Mirrors import-linter.yml `arch-tests` (canonical selector from catalog).
   arch-tests:
     docker:
-      - image: cimg/python:3.12
+    - image: cimg/python:3.12
     resource_class: medium
     steps:
-      - checkout
-      - setup-python-uv
-      - run:
-          name: architecture tests
-          command: |
+    - checkout
+    - setup-python-uv
+    - run:
+        name: architecture tests
+        command: |
+          set -euo pipefail
+          mkdir -p reports/quality/proof-or-stop/shared
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          if python -m scripts.engineering.qa proof-or-stop ci enabled; then
+            python -m scripts.engineering.qa proof-or-stop ci produce --check architecture
+          else
             export PATH="$HOME/.local/bin:$PATH"
             mkdir -p reports/test-telemetry
             HYPOTHESIS_PROFILE=fast \
@@ -1922,11 +1932,29 @@ jobs:
               -m "not slow and not benchmark and not memory" \
               -q --tb=short --no-cov \
               --junitxml=reports/test-telemetry/junit-arch.xml
-      - store_test_results:
-          path: reports/test-telemetry
+          fi
+          mkdir -p reports/quality/proof-or-stop/shared/architecture
+    - store_test_results:
+        path: reports/test-telemetry
+    - persist_to_workspace:
+        root: .
+        paths:
+        - reports/quality/proof-or-stop/shared/architecture
+    - store_test_results:
+        path: reports/quality/proof-or-stop/shared/architecture
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/architecture
+    environment:
+      PYTHONPATH: src
+      PROOF_CI_LANE: << pipeline.parameters.ci-lane >>
+      BIOETL_AI_MEMORY_MODE: 'off'
+      BIOETL_SKIP_PREFLIGHT: '1'
+      BIOETL_SKIP_SETUP_PLUGINS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
 
-  # --- Gate: type-checking (always_required) ----------------------------------
-  # Mirrors type-checking.yml `type-check` (mypy --strict, 30m budget).
   mypy:
     docker:
       - image: cimg/python:3.12
@@ -2310,32 +2338,52 @@ jobs:
   # Mirrors docs.yml (docs-governance + validate-mkdocs essentials).
   docs-governance:
     docker:
-      - image: cimg/python:3.12
+    - image: cimg/python:3.12
     resource_class: small
     steps:
-      - checkout
-      - setup-python-uv:
-          extras: dev tracing docs
-      - check-gate:
-          gate: docs-governance
-      - run:
-          name: docs governance checks
-          command: |
-            export PATH="$HOME/.local/bin:$PATH"
-            uv run --frozen --no-build python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check
-            uv run --frozen --no-build python -m scripts.docs passports check
-            test -f docs/assets/javascripts/mermaid-init.js
-            test -f docs/assets/stylesheets/mermaid-responsive.css
-            uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog
-            uv run --frozen --no-build python -m scripts.engineering.qa report-dashboard-inventory --check --json
-            uv run --frozen --no-build python -m scripts.engineering.repo check-versions
-            uv run --frozen --no-build python -m scripts.docs check-links --report-json reports/docs-link-check-report.json
-            uv run --frozen --no-build python -m scripts.docs verify --skip-links
-            uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check
+    - checkout
+    - setup-python-uv:
+        extras: dev tracing docs
+    - check-gate:
+        gate: docs-governance
+    - run:
+        name: docs governance checks
+        command: |
+          set -euo pipefail
+          export PATH="$HOME/.local/bin:$PATH"
+          uv run --frozen --no-build python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check
+          uv run --frozen --no-build python -m scripts.docs passports check
+          test -f docs/assets/javascripts/mermaid-init.js
+          test -f docs/assets/stylesheets/mermaid-responsive.css
+          uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog
+          uv run --frozen --no-build python -m scripts.engineering.qa report-dashboard-inventory --check --json
+          uv run --frozen --no-build python -m scripts.engineering.repo check-versions
+          uv run --frozen --no-build python -m scripts.engineering.qa proof-or-stop ci produce --check docs-links
+          uv run --frozen --no-build python -m scripts.engineering.qa proof-or-stop ci produce --check docs-runtime
+          uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check
+    - persist_to_workspace:
+        root: .
+        paths:
+        - reports/quality/proof-or-stop/shared/docs-links
+    - persist_to_workspace:
+        root: .
+        paths:
+        - reports/quality/proof-or-stop/shared/docs-runtime
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/docs-links
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/docs-runtime
+    environment:
+      PYTHONPATH: src
+      PROOF_CI_LANE: << pipeline.parameters.ci-lane >>
+      BIOETL_AI_MEMORY_MODE: 'off'
+      BIOETL_SKIP_PREFLIGHT: '1'
+      BIOETL_SKIP_SETUP_PLUGINS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
 
-  # --- Gate: docker (path_scoped) ----------------------------------------------------
-  # Mirrors docker.yml validation part only (lint + compose + build). No push, no
-  # Trivy baseline here â€” image security baseline stays a phase-3 item.
   docker-build:
     docker:
       - image: cimg/python:3.12-node
@@ -2511,7 +2559,303 @@ jobs:
           path: reports/quality/proof-or-stop
           destination: composite-closeout
 
+  proof-coverage:
+    docker:
+    - image: cimg/python:3.12
+    resource_class: medium
+    environment:
+      PYTHONPATH: src
+      PROOF_CI_LANE: << pipeline.parameters.ci-lane >>
+      BIOETL_AI_MEMORY_MODE: 'off'
+      BIOETL_SKIP_PREFLIGHT: '1'
+      BIOETL_SKIP_SETUP_PLUGINS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+    - checkout
+    - setup-python-uv:
+        extras: dev tracing docs
+    - attach_workspace:
+        at: /home/circleci/.bioetl-proof-workspace
+    - run:
+        name: Receive isolated proof evidence
+        command: |
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          python -m scripts.engineering.qa proof-or-stop ci receive
+    - run:
+        name: Capture coverage evidence
+        no_output_timeout: 30m
+        command: |-
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          python -m scripts.engineering.qa proof-or-stop ci produce --check coverage
+    - persist_to_workspace:
+        root: .
+        paths:
+        - reports/quality/proof-or-stop/shared/coverage/execution.json
+        - reports/quality/proof-or-stop/shared/coverage/producer.log
+        - reports/quality/proof-or-stop/shared/coverage/coverage/manifest.json
+        - reports/quality/proof-or-stop/shared/coverage/coverage/shards
+        - reports/quality/proof-or-stop/shared/coverage/coverage/junit
+        - reports/quality/proof-or-stop/shared/coverage/coverage/logs
+        - reports/quality/proof-or-stop/shared/coverage/coverage/coverage.xml
+        - reports/quality/proof-or-stop/shared/coverage/coverage/combined
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/coverage/producer.log
+    - run:
+        name: Export validated telemetry candidate
+        command: |
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          python -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest reports/quality/proof-or-stop/shared/coverage/coverage/manifest.json
+          DEST=reports/quality/proof-or-stop/telemetry-candidate
+          mkdir -p "$DEST/configs/quality" "$DEST/docs/05-engineering" "$DEST/reports"
+          cp configs/quality/test_telemetry_baseline.yaml "$DEST/configs/quality/"
+          cp docs/05-engineering/test-telemetry-baseline.md "$DEST/docs/05-engineering/"
+          cp -R reports/test-telemetry "$DEST/reports/"
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/telemetry-candidate
+        destination: telemetry-candidate
+    - store_test_results:
+        path: reports/quality/proof-or-stop/shared/coverage/coverage/junit
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/coverage/coverage/logs
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/coverage/coverage/manifest.json
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/coverage/coverage/coverage.xml
+
+  proof-governance:
+    docker:
+    - image: cimg/python:3.12
+    resource_class: medium
+    environment:
+      PYTHONPATH: src
+      PROOF_CI_LANE: << pipeline.parameters.ci-lane >>
+      BIOETL_AI_MEMORY_MODE: 'off'
+      BIOETL_SKIP_PREFLIGHT: '1'
+      BIOETL_SKIP_SETUP_PLUGINS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+    - checkout
+    - setup-python-uv:
+        extras: dev tracing docs
+    - attach_workspace:
+        at: /home/circleci/.bioetl-proof-workspace
+    - run:
+        name: Receive isolated proof evidence
+        command: |
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          python -m scripts.engineering.qa proof-or-stop ci receive
+    - run:
+        name: Capture governance evidence
+        no_output_timeout: 30m
+        command: |-
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          python -m scripts.engineering.qa proof-or-stop ci produce --check governance
+    - persist_to_workspace:
+        root: .
+        paths:
+        - reports/quality/proof-or-stop/shared/governance
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/governance
+  proof-debt:
+    docker:
+    - image: cimg/python:3.12
+    resource_class: medium
+    environment:
+      PYTHONPATH: src
+      PROOF_CI_LANE: << pipeline.parameters.ci-lane >>
+      BIOETL_AI_MEMORY_MODE: 'off'
+      BIOETL_SKIP_PREFLIGHT: '1'
+      BIOETL_SKIP_SETUP_PLUGINS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+    - checkout
+    - setup-python-uv:
+        extras: dev tracing docs
+    - run:
+        name: Capture debt evidence
+        no_output_timeout: 30m
+        command: |-
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          python -m scripts.engineering.qa proof-or-stop ci produce --check debt
+    - persist_to_workspace:
+        root: .
+        paths:
+        - reports/quality/proof-or-stop/shared/debt
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/debt
+  proof-quality:
+    docker:
+    - image: cimg/python:3.12
+    resource_class: medium
+    environment:
+      PYTHONPATH: src
+      PROOF_CI_LANE: << pipeline.parameters.ci-lane >>
+      BIOETL_AI_MEMORY_MODE: 'off'
+      BIOETL_SKIP_PREFLIGHT: '1'
+      BIOETL_SKIP_SETUP_PLUGINS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+    - checkout
+    - setup-python-uv:
+        extras: dev tracing docs
+    - attach_workspace:
+        at: /home/circleci/.bioetl-proof-workspace
+    - run:
+        name: Receive isolated proof evidence
+        command: |
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          python -m scripts.engineering.qa proof-or-stop ci receive
+    - run:
+        name: Capture quality evidence
+        no_output_timeout: 30m
+        command: |-
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          python -m scripts.engineering.qa proof-or-stop ci produce --check quality
+    - persist_to_workspace:
+        root: .
+        paths:
+        - reports/quality/proof-or-stop/shared/quality
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/quality
   proof-closeout:
+    docker:
+    - image: cimg/python:3.12
+    resource_class: small
+    environment:
+      PYTHONPATH: src
+      PROOF_CI_LANE: << pipeline.parameters.ci-lane >>
+      BIOETL_AI_MEMORY_MODE: 'off'
+      BIOETL_SKIP_PREFLIGHT: '1'
+      BIOETL_SKIP_SETUP_PLUGINS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+    - checkout
+    - setup-python-uv:
+        extras: dev tracing docs
+    - attach_workspace:
+        at: /home/circleci/.bioetl-proof-workspace
+    - run:
+        name: Receive isolated proof evidence
+        command: |
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          python -m scripts.engineering.qa proof-or-stop ci receive
+    - run:
+        name: Verify transported producer evidence
+        no_output_timeout: 30m
+        command: |-
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          if [ "$(git rev-parse --is-shallow-repository)" = true ]; then git fetch --unshallow origin; fi
+          python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD
+          python -m scripts.engineering.qa proof-or-stop ci assemble
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/closeout
+  proof-docs:
+    docker:
+    - image: cimg/python:3.12
+    resource_class: small
+    steps:
+    - checkout
+    - setup-python-uv:
+        extras: dev tracing docs
+    - run:
+        name: docs governance checks
+        command: |
+          set -euo pipefail
+          export PATH="$HOME/.local/bin:$PATH"
+          uv run --frozen --no-build python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check
+          uv run --frozen --no-build python -m scripts.docs passports check
+          test -f docs/assets/javascripts/mermaid-init.js
+          test -f docs/assets/stylesheets/mermaid-responsive.css
+          uv run --frozen --no-build python -m scripts.engineering.qa check-xwalk-missing-backlog
+          uv run --frozen --no-build python -m scripts.engineering.qa report-dashboard-inventory --check --json
+          uv run --frozen --no-build python -m scripts.engineering.repo check-versions
+          uv run --frozen --no-build python -m scripts.engineering.qa proof-or-stop ci produce --check docs-links
+          uv run --frozen --no-build python -m scripts.engineering.qa proof-or-stop ci produce --check docs-runtime
+          uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check
+    - persist_to_workspace:
+        root: .
+        paths:
+        - reports/quality/proof-or-stop/shared/docs-links
+    - persist_to_workspace:
+        root: .
+        paths:
+        - reports/quality/proof-or-stop/shared/docs-runtime
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/docs-links
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/docs-runtime
+    environment:
+      PYTHONPATH: src
+      PROOF_CI_LANE: << pipeline.parameters.ci-lane >>
+      BIOETL_AI_MEMORY_MODE: 'off'
+      BIOETL_SKIP_PREFLIGHT: '1'
+      BIOETL_SKIP_SETUP_PLUGINS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+  proof-coverage-shard:
+    docker:
+    - image: cimg/python:3.12
+    resource_class: medium
+    environment:
+      PYTHONPATH: src
+      PROOF_CI_LANE: << pipeline.parameters.ci-lane >>
+      BIOETL_AI_MEMORY_MODE: 'off'
+      BIOETL_SKIP_PREFLIGHT: '1'
+      BIOETL_SKIP_SETUP_PLUGINS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+    - checkout
+    - setup-python-uv:
+        extras: dev tracing docs
+    - run:
+        name: Capture coverage evidence
+        no_output_timeout: 30m
+        command: |-
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          python -m scripts.engineering.qa proof-or-stop ci produce --check coverage-<< parameters.group >>
+    - persist_to_workspace:
+        root: .
+        paths:
+        - reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/execution.json
+        - reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/producer.log
+        - reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/measurement/manifest.json
+        - reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/measurement/shards
+        - reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/measurement/junit
+        - reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/measurement/logs
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/producer.log
+    - store_test_results:
+        path: reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/measurement/junit
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/measurement/logs
+    - store_artifacts:
+        path: reports/quality/proof-or-stop/shared/coverage-<< parameters.group >>/measurement/manifest.json
+    parameters:
+      group:
+        type: string
+
+  rf023-proof-closeout:
     parameters:
       task-id:
         type: string
@@ -2649,6 +2993,7 @@ jobs:
         path: reports/quality/proof-or-stop/circleci-artifacts/evidence
         destination: proof-or-stop
 
+
 workflows:
   router-bridge:
     when:
@@ -2708,10 +3053,43 @@ workflows:
   main-coverage-closeout:
     when:
       and:
-        - equal: [coverage-closeout, << pipeline.parameters.ci-lane >>]
-        - equal: [main, << pipeline.git.branch >>]
+      - equal:
+        - coverage-closeout
+        - << pipeline.parameters.ci-lane >>
+      - equal:
+        - main
+        - << pipeline.git.branch >>
     jobs:
-      - proof-closeout
+    - arch-tests
+    - proof-docs
+    - proof-coverage:
+        requires:
+        - proof-coverage-shards
+    - proof-governance:
+        requires:
+        - arch-tests
+    - proof-debt
+    - proof-quality:
+        requires:
+        - proof-coverage
+        - arch-tests
+    - proof-closeout:
+        requires:
+        - arch-tests
+        - proof-docs
+        - proof-governance
+        - proof-debt
+        - proof-quality
+    - proof-coverage-shard:
+        matrix:
+          alias: proof-coverage-shards
+          parameters:
+            group:
+            - '0'
+            - '1'
+            - '2'
+            - '3'
+
   e2e-replay:
     when:
       and:
@@ -2862,6 +3240,48 @@ workflows:
             - commit-lint
             - docs-governance
             - docker-build
+      - proof-coverage:
+          filters: &id001
+            branches:
+              only:
+              - codex/architecture-coverage-final-20261004
+              - codex/config-root-main-acceptance-20261005
+              - codex/config-root-postmerge-20261005
+              - codex/architecture-meta-closeout-20261005
+              - codex/grafana-managed-closeout-20261005
+              - codex/proof-closeout-reuse-evidence
+          requires:
+          - proof-coverage-shards
+      - proof-governance:
+          filters: *id001
+          requires:
+          - arch-tests
+      - proof-debt:
+          filters: *id001
+      - proof-quality:
+          requires:
+          - proof-coverage
+          - arch-tests
+          filters: *id001
+      - proof-closeout:
+          requires:
+          - arch-tests
+          - docs-governance
+          - proof-governance
+          - proof-debt
+          - proof-quality
+          filters: *id001
+      - proof-coverage-shard:
+          matrix:
+            alias: proof-coverage-shards
+            parameters:
+              group:
+              - '0'
+              - '1'
+              - '2'
+              - '3'
+          filters: *id001
+
   docs-kpi:
     when:
       and:
@@ -2958,25 +3378,6 @@ workflows:
         tests-dir: tests/unit/repo_backed/application/services/test_workflow_runner_service.py
         threshold: '60.0'
 
-  architecture-coverage-closeout:
-    jobs:
-      - proof-closeout:
-          filters:
-            branches:
-              only:
-                - codex/architecture-coverage-final-20261004
-                - codex/config-root-main-acceptance-20261005
-                - codex/config-root-postmerge-20261005
-                - codex/architecture-meta-closeout-20261005
-                - codex/grafana-managed-closeout-20261005
-
-  rf023-closeout:
-    jobs:
-      - proof-closeout:
-          task-id: rf023-11906-11907
-          filters:
-            branches:
-              only: codex/pipeline-green-gates-rf022-snapshot-fix
   architecture-metrics-fast:
     when:
       and:
@@ -3037,3 +3438,11 @@ workflows:
             - release-install
             - security-scans
             - release-tests
+
+  rf023-closeout:
+    jobs:
+      - rf023-proof-closeout:
+          task-id: rf023-11906-11907
+          filters:
+            branches:
+              only: codex/pipeline-green-gates-rf022-snapshot-fix

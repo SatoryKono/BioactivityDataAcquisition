@@ -253,7 +253,8 @@ def test_architecture_selector_includes_ordinary_tests_and_excludes_heavy_ones(
         if isinstance(step, dict) and "run" in step
     )
     arguments = shlex.split(command.replace("\\\n", " "))
-    selector = arguments[arguments.index("-m") + 1]
+    pytest_arguments = arguments[arguments.index("pytest") + 1 :]
+    selector = pytest_arguments[pytest_arguments.index("-m") + 1]
     assert (
         Expression.compile(selector).evaluate(lambda name, **kwargs: name in markers)
         is selected
