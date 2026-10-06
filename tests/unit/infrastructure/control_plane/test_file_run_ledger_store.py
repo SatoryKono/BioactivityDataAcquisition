@@ -158,7 +158,7 @@ def test_concurrent_logical_event_is_appended_once(
         # either can write. With serialization the first caller times out and
         # writes before the second caller can read the committed entry.
         try:
-            checked.wait(timeout=5)
+            checked.wait(timeout=0.5)
         except BrokenBarrierError:
             pass
         return duplicate

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-06T15:33:17.023606+00:00",
+  "generated_at": "2026-10-06T16:36:31.737096+00:00",
   "summary": {
     "total_scripts": 639,
     "status_counts": {
@@ -10966,7 +10966,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 268,
+      "reference_count": 269,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",

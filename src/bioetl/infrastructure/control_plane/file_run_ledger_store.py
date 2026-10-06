@@ -81,7 +81,11 @@ def _truncate_ledger_to_offset(path: Path, *, offset: int) -> None:
 
 @dataclass(slots=True)
 class FileRunLedgerStore(FileRunLedgerQueriesMixin, RunLedgerPort):
-    """Append ledger entries to one JSONL file per manifest."""
+    """Append ledger entries to one JSONL file per manifest.
+
+    Instances may share a base_path within one process. Separate processes must
+    not write to the same base_path; the writer lock is process-local only.
+    """
 
     base_path: Path
     metrics: MetricsPort | None = None

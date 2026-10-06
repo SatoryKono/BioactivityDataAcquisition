@@ -1,4 +1,6 @@
-Source-only refresh (2026-10-06, integration with main 480a54241e04): reviewed repairs and replay mapping are bound to `source_tree_sha256=341fe0a795d7a024d3686f8b382ffb96b0eaf72ad5fff2b4a932efecfa06a882`. Historical measurements below are unchanged; this stamp is not new coverage evidence.
+# Сводка evidence: project-package-topology
+
+Source-only refresh (2026-10-06, integration with main 480a54241e04): reviewed repairs and replay mapping are bound to `source_tree_sha256=63b3eb109cc22123be824a42b6b0c1fc2c9564406c5a702d914c3d74a2f10689`. Historical measurements below are unchanged; this stamp is not new coverage evidence.
 
 Coverage refresh (2026-10-05, RF-023 after main merge): complete 17-shard measurement on `54c7c9d5b5dad9077054081484275fc93a8be83e`, source `2f462961d6e80105c964f5d536a956def9a7b4c66af316bad70abfb0f6b226a1`. 32979 PASS / 187 SKIP; line 99.70%, branch 94.34%. Canonical nonregressing adoption retains 81 visible raw module regressions as historical values. Portable evidence: `reports/quality/proof-or-stop/rf023-54c7c9d5-complete-coverage`. This local measurement does not claim full-suite acceptance or CI ADMIT.
 
@@ -13,8 +15,6 @@ Source-only refresh (2026-10-05, replay field key deduplication): source_tree_sh
 Source-only refresh (2026-10-05, scoped replay mapping): source_tree_sha256 `f8bfe58a0ddae76ef8e49d056ae14067951cc15736f2a126ce65199b4124e9a4`. Replay mapping is context-local and canonical labels are validated. This rebind does not claim a new coverage measurement.
 
 Source-only refresh (2026-10-05, direct owner imports): source_tree_sha256 `0d662d51438a2eee9bad3b02099e5a4d94c2938948ff83093ca6c968d50c55f7`. The three mapping codec imports now address their module owner directly; root-facade importers remain zero. This is a source binding update, not a new coverage measurement.
-
-# Сводка evidence: project-package-topology
 
 Historical source-only snapshot (2026-10-06, before merging main 480a54241e04): the hash below identifies the earlier PubChem, metadata and Polars tree. It is not the current source binding; use the first entry in this document.
 
