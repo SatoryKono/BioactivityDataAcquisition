@@ -6,8 +6,8 @@ import re
 from collections import Counter, defaultdict
 from pathlib import Path
 
-ROOT = Path("reports/quality/coderabbit/20260925_085141")
-REPO = Path(".")
+REPO = Path(__file__).resolve().parents[5]
+ROOT = REPO / "reports/quality/coderabbit/20260925_085141"
 ALL_FILES_IGNORED = "all files ignored"
 TRIAGED = json.loads((ROOT / "findings_triage.json").read_text(encoding="utf-8"))
 
@@ -109,7 +109,7 @@ def _uses_fetched_counts(code: str) -> bool:
 def _spot_status(file: str, span: str, needles: list[str], code: str):
     missing = [n for n in needles if n not in code]
     present = [n for n in needles if n in code]
-    still = bool(present) and Path(file).exists()
+    still = bool(present) and (REPO / file).exists()
     # special cases
     if file.endswith("metrics.py") and span == "108":
         still = "127.0.0.1" not in code and ("addr" in code or "start" in code)

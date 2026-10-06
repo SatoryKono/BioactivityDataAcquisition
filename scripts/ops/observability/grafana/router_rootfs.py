@@ -1,5 +1,7 @@
 """Hash Docker-export contents on the trusted host, without extracting tar paths."""
 
+from __future__ import annotations
+
 import hashlib
 import json
 import re

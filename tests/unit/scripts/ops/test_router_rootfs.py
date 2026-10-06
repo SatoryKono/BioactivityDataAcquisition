@@ -1,5 +1,7 @@
 """Behavior fixtures for the trusted, extraction-free rootfs comparison."""
 
+from __future__ import annotations
+
 import io
 import tarfile
 import unittest

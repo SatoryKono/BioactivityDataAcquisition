@@ -191,6 +191,7 @@ jobs:
           (
           cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"
           PYTHONPATH=../../.. /usr/bin/python3 ../../../tests/unit/scripts/ops/test_router_rootfs.py
+          PYTHONPATH=../../.. /usr/bin/python3 ../../../tests/unit/scripts/ops/test_router_managed_image.py
           )
           (
           cd "$BIOETL_WORKSPACE/grafana/tooling/router-v7-bridge"

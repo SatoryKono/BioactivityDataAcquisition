@@ -1,5 +1,7 @@
 """Behavior regressions for the managed image delivery contract."""
 
+from __future__ import annotations
+
 import copy
 import unittest
 from unittest.mock import patch

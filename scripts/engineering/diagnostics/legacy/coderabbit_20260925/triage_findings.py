@@ -8,8 +8,8 @@ import re
 from collections import Counter
 from pathlib import Path
 
-ROOT = Path("reports/quality/coderabbit/20260925_085141")
-REPO = Path(".")
+REPO = Path(__file__).resolve().parents[5]
+ROOT = REPO / "reports/quality/coderabbit/20260925_085141"
 
 
 def _finding(obj: dict, leaf: str) -> dict:

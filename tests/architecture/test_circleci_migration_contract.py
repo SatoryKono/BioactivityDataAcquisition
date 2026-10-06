@@ -466,3 +466,17 @@ def test_relocated_router_verifiers_trigger_both_ci_event_filters():
     assert not any(
         fnmatch.fnmatchcase("docs/unrelated.md", pattern) for pattern in filters
     )
+
+    circle_commands = yaml.safe_load(source)["jobs"]["router-bridge-tests"]["steps"]
+    circle_runs = "\n".join(
+        step["run"]["command"] for step in circle_commands if isinstance(step, dict) and "run" in step
+    )
+    github_runs = "\n".join(
+        step.get("run", "")
+        for job in workflow["jobs"].values()
+        for step in job.get("steps", [])
+    )
+    for test_name in ("test_router_rootfs.py", "test_router_managed_image.py"):
+        invocation = f"/usr/bin/python3 ../../../tests/unit/scripts/ops/{test_name}"
+        assert invocation in circle_runs
+        assert invocation in github_runs
