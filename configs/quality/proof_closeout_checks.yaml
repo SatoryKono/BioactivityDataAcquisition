@@ -3,6 +3,7 @@ task_id: architecture-coverage-11854-11899
 claim: ready_to_merge
 branches:
 - codex/architecture-coverage-final-20261004
+- codex/architecture-11854-postmerge-20261005
 - codex/config-root-main-acceptance-20261005
 - codex/config-root-postmerge-20261005
 - codex/architecture-meta-closeout-20261005
