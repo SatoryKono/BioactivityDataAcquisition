@@ -103,6 +103,56 @@ as evidence. Corrupt, tampered, stale, unauthorized, or cross-scope material is
 rejected before ingestion. Bundle producer provenance and source/output digests
 are stored alongside the separate ingestion actor provenance.
 
+### CircleCI producer reuse
+
+`configs/quality/proof_closeout_checks.yaml` owns the exact closeout command
+set and branch activation list. The CircleCI adapter is
+`src/memory/proof_ci.py`. Each producer executes once
+and writes its command, source binding, workflow identity, job URL, exit code,
+sanitized log, and artifact digests under
+`reports/quality/proof-or-stop/shared/<check>/`. Log sanitization precedes
+receipt creation; transferred evidence must not be rewritten afterward.
+
+The shared `ci_run_id` is `circleci-workflow:<CIRCLE_WORKFLOW_ID>`, not an
+individual job URL. Receipts from another workflow are rejected even when
+both jobs used the same checkout path. Jobs currently share CircleCI's
+checkout path; raw coverage paths and recorded argv are checked exactly.
+Evidence reuse across arbitrary filesystem layouts is not supported by this
+adapter. Producer job identities remain in their execution records.
+
+On closeout branches, the existing architecture job executes the complete
+architecture suite once. Ordinary PRs retain their fast selector. Docs link
+and runtime checks emit receipts from the existing docs job. Coverage runs
+the unchanged 17 canonical shards across four isolated groups, followed by a
+combine job with the existing line and branch thresholds. The standalone
+local coverage command still executes all shards sequentially.
+
+Governance uses `pretest_guardrails.sh --reuse-ci-architecture` to validate the
+full architecture execution before reusing it for its own targeted subset.
+The flag is incompatible with architecture skips and dry runs. Local pretest
+behavior without this explicit CI flag is unchanged. The quality gate reads
+the verified architecture JUnit with `--architecture-owner junit`; actual
+failure, error, and skip counters are retained without another pytest run. The coverage job also
+exports a telemetry candidate artifact after persisting immutable measurement
+evidence; candidate generation does not replace committed currentness checks.
+
+The final `proof-closeout` job only validates transported evidence and
+assembles/verifies the bundle. A missing check, changed command, foreign
+workflow or SHA, damaged artifact, failed producer, duplicate/missing shard,
+or incomplete coverage blocks admission. Failed upstream jobs block the
+aggregator through workflow dependencies and retain their diagnostic logs;
+they never become a successful closeout. Raw coverage databases travel only
+through the workflow workspace and are not public artifacts.
+
+Rollout verification must compare the complete test selection and successful
+17-shard manifest before assessing latency. Parallel groups are initially
+static and balanced using successful workflow 9d7b1b52-4ac5-4e3b-aebb-e7cd30a756e3
+shard durations (jobs 5148, 5150, 5172, 5177). The adapter is invoked through
+`python -m scripts.engineering.qa proof-or-stop ci`; it does not add a standalone
+script entrypoint. A claim of twofold speedup requires measured comparable CI runs and
+sufficient executor concurrency. Local adapter tests do not prove CI latency
+or qualify a CI-trust `ready_to_merge` claim.
+
 ## Staged enforcement and rollback
 
 The `proof_or_stop_closeout` entry in
