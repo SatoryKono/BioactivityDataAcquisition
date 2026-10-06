@@ -47,6 +47,9 @@ COMPATIBILITY_FILE_RE = re.compile(
     re.IGNORECASE,
 )
 ASSERT_METHOD_NAMES = {
+    "assertEqual",
+    "assertNotEqual",
+    "assertTrue",
     "assert_any_call",
     "assert_called",
     "assert_called_once",
@@ -613,13 +616,16 @@ class _TestBodyVisitor(ast.NodeVisitor):
         self.has_assertion_signal = True
         self.generic_visit(node)
 
+    def visit_With(self, node: ast.With) -> None:
+        if _direct_assertion_signal(node):
+            self.has_assertion_signal = True
+        self.generic_visit(node)
+
     def visit_Call(self, node: ast.Call) -> None:
         qualified = _qualified_name(node.func)
         leaf = qualified.rsplit(".", 1)[-1]
 
-        if qualified in PYTEST_ASSERTION_HELPERS:
-            self.has_assertion_signal = True
-        if leaf in ASSERT_METHOD_NAMES or leaf.startswith(("assert_", "_assert_")):
+        if _call_is_assertion_signal(node):
             self.has_assertion_signal = True
         if leaf.startswith(("check_", "validate_", "verify_", "expect_")):
             self.has_assertion_signal = True
@@ -636,9 +642,14 @@ class _TestBodyVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
 
-def _call_is_assertion_signal(call: ast.Call) -> bool:
+def _call_is_assertion_signal(call: ast.Call, *, context_manager: bool = False) -> bool:
     qualified = _qualified_name(call.func)
     leaf = qualified.rsplit(".", 1)[-1]
+    if leaf in {"assertRaises", "assertRaisesRegex"}:
+        required = 1 if leaf == "assertRaises" else 2
+        if any(isinstance(arg, ast.Starred) for arg in call.args[: required + 1]):
+            return False
+        return len(call.args) >= required + (0 if context_manager else 1)
     return (
         qualified in PYTEST_ASSERTION_HELPERS
         or leaf in ASSERT_METHOD_NAMES
@@ -660,7 +671,7 @@ def _direct_assertion_signal(statement: ast.stmt) -> bool:
     if isinstance(statement, (ast.With, ast.AsyncWith)):
         return any(
             isinstance(item.context_expr, ast.Call)
-            and _call_is_assertion_signal(item.context_expr)
+            and _call_is_assertion_signal(item.context_expr, context_manager=True)
             for item in statement.items
         )
     return False
