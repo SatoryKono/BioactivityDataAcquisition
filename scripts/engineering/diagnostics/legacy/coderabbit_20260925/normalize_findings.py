@@ -1,7 +1,12 @@
 """Normalize CodeRabbit NDJSON leaf logs into a single findings table."""
-import json, os, re, sys, glob
+import json
+import os
+import re
+import sys
+import glob
+from pathlib import Path
 
-OUT = os.path.dirname(os.path.abspath(__file__))
+OUT = str(Path(__file__).resolve().parents[5] / "reports/quality/coderabbit/20260925_085141")
 
 
 def parse_leaf(path):
