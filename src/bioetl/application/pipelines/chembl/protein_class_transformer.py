@@ -13,9 +13,7 @@ __all__ = ["ProteinClassTransformer"]
 
 from typing import TYPE_CHECKING, override
 
-from bioetl.application.core.batch_metrics_accounting import (
-    _record_silver_removal_accounting,
-)
+from bioetl.application.core.base_transformer import FilteredOutError
 from bioetl.application.core.field_specs import (
     FieldGroup,
     int_fields,
@@ -73,17 +71,19 @@ class ProteinClassTransformer(BaseChemblTransformer):
     primary_id_field = "protein_class_id"
 
     @staticmethod
-    def _should_skip_record(record: BronzeRecord) -> bool:
-        """Skip the synthetic ChEMBL root node that violates domain invariants."""
+    def _reject_synthetic_root(record: BronzeRecord) -> None:
+        """Classify the provider sentinel before entity inflation."""
         protein_class_id = safe_int(record.get("protein_class_id"))
         if protein_class_id is None or protein_class_id > 0:
-            return False
-        _record_silver_removal_accounting(
-            outcome="filtered_out",
-            reason_code="FILTERED_OUT_SILVER:protein_class_id",
-            count=1,
+            return
+        raise FilteredOutError(
+            "Synthetic ChEMBL protein classification root",
+            details={
+                "field": "protein_class_id",
+                "reason_code": "FILTERED_OUT_SILVER:protein_class_id",
+            },
+            skip_quarantine=True,
         )
-        return True
 
     async def transform_pre_silver(
         self,
@@ -92,8 +92,7 @@ class ProteinClassTransformer(BaseChemblTransformer):
         index: int,
     ) -> PreSilverRecord | None:
         """Skip ChEMBL's root classification before entity inflation."""
-        if self._should_skip_record(record):
-            return None
+        self._reject_synthetic_root(record)
         return await super().transform_pre_silver(context, record, index)
 
     async def _transform_impl(
@@ -103,8 +102,7 @@ class ProteinClassTransformer(BaseChemblTransformer):
         index: int,
     ) -> SilverRecord | None:
         """Skip invalid root classifications in legacy direct-transform flows."""
-        if self._should_skip_record(record):
-            return None
+        self._reject_synthetic_root(record)
         return await super()._transform_impl(context, record, index)
 
     @override
