@@ -18,9 +18,9 @@
       ],
       "duplication_clusters": 0,
       "files": 202,
-      "total_loc": 25231,
+      "total_loc": 25348,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.381,
+      "helper_function_ratio": 0.382,
       "max_internal_fan_in": 6,
       "max_internal_fan_in_module": "bioetl.application.core.batch_processing_contracts",
       "bounded_growth_budgets": {
@@ -30,8 +30,8 @@
       "internal_fan_in_census": {
         "distribution": {
           "0": 19,
-          "1": 106,
-          "2": 40,
+          "1": 105,
+          "2": 41,
           "3": 16,
           "4": 8,
           "5": 12,
@@ -1287,9 +1287,10 @@
           },
           {
             "module": "bioetl.application.core.preflight.health_aggregator_runtime",
-            "fan_in": 1,
+            "fan_in": 2,
             "runtime_importers": [
-              "bioetl.application.core.preflight.health_aggregator"
+              "bioetl.application.core.preflight.health_aggregator",
+              "bioetl.application.core.preflight.service"
             ]
           },
           {
@@ -1587,7 +1588,7 @@
       ],
       "duplication_clusters": 0,
       "files": 49,
-      "total_loc": 6440,
+      "total_loc": 6452,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.284,
       "max_internal_fan_in": 2,
@@ -1985,7 +1986,7 @@
       ],
       "duplication_clusters": 0,
       "files": 32,
-      "total_loc": 3869,
+      "total_loc": 3882,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.358,
       "max_internal_fan_in": 2,
@@ -3265,7 +3266,7 @@
       ],
       "duplication_clusters": 0,
       "files": 55,
-      "total_loc": 6641,
+      "total_loc": 6649,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.342,
       "max_internal_fan_in": 2,
