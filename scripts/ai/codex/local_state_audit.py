@@ -115,6 +115,16 @@ def _parse_rule(line: str) -> tuple[list[str], str] | None:
         raw_pattern = match.group(1)
         if len(raw_pattern) > 4096:
             return None
+
+        depth = 0
+        for char in raw_pattern:
+            if char in "[{(":
+                depth += 1
+                if depth > 10:
+                    return None
+            elif char in "]})":
+                depth = max(0, depth - 1)
+
         pattern = ast.literal_eval(raw_pattern)
     except (SyntaxError, ValueError, RecursionError, MemoryError):
         return None
