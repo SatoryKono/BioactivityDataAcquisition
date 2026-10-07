@@ -51,7 +51,10 @@ from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.batch_extraction_loop_service import (
     BatchExtractionLoopService,
 )
-from bioetl.application.core.batch_processing_contracts import BatchProcessingOutcome
+from bioetl.application.core.batch_processing_contracts import (
+    BatchProcessingOutcome,
+    LayerWriteOutcome,
+)
 from bioetl.application.services.quality.dq_report_service import (
     DQReportContext,
     DQReportResult,
@@ -480,6 +483,7 @@ class TestBatchExecutorDQCollection:
         executor._last_bronze_path = "bronze/file.jsonl.zst"
         executor.records_fetched = 100
         executor.records_quarantined = 2
+        executor.records_quarantined_silver = 2
         executor._build_dataframe_from_records = MagicMock(return_value=None)
 
         context = executor.get_dq_context()
@@ -510,6 +514,15 @@ class TestBatchExecutorDQCollection:
                 gold_records=[],
                 quarantined_count=2,
                 filtered_out_count=0,
+                silver_write=LayerWriteOutcome(
+                    layer="silver",
+                    status="written",
+                    candidate_count=1,
+                    confirmed_count=1,
+                ),
+                gold_write=LayerWriteOutcome(
+                    layer="gold", status="skipped", candidate_count=0
+                ),
             )
         )
 
