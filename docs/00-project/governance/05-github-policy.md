@@ -239,13 +239,19 @@ Required scheduled lanes stay `active`. Optional scheduled lanes stay
 `keep-disabled` until a measured spend/safety decision. Do not enable heavy
 nightlies from this section.
 
+`mutation-testing.yml` is the explicit #10263 exception and stays `active`.
+It is the sole Sunday mutation owner. Push and pull_request stay off.
+CircleCI workflow `mutation` stays in `.circleci/config.yml` as the manual
+`ci-lane=mutation` backup on `main`; keep its Sunday schedule paused. Thresholds stay
+70/60/60/60.
+
 | Workflow | File | YAML cadence | Lane class | GitHub live state | Decision |
 | --- | --- | --- | --- | --- | --- |
 | Architecture Metrics | `architecture.yml` | `schedule` + `workflow_dispatch` | required | `active` | `active` |
 | Diagram Nightly Regression | `diagram-nightly.yml` | `schedule` + `workflow_dispatch` | required | `active` | `active` |
 | OpenSSF Scorecard | `scorecard.yml` | weekly + `push` + `workflow_dispatch` | required | `active` | `active` |
 | Quarterly GitHub Settings Review | `github-settings-quarterly-review.yml` | quarterly + `workflow_dispatch` | required | `active` | `active` |
-| Mutation Testing | `mutation-testing.yml` | Weekly (Sun 00:00 UTC) + PR (YAML only) | optional | `disabled_manually` | `keep-disabled` |
+| Mutation Testing | `mutation-testing.yml` | Weekly (Sun 00:00 UTC) + `workflow_dispatch` | Sunday owner | `active` | `active` |
 | Contract Tests | `contract-tests.yml` | Monthly 1st 02:00 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
 | Weekly VACUUM | `vacuum.yml` | Weekly Sun 02:00 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
 | Docs KPI Weekly | `docs-kpi-weekly.yml` | Weekly Mon 04:30 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |

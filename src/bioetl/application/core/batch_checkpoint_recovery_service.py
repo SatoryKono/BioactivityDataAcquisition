@@ -41,6 +41,15 @@ class BatchCheckpointRecoveryService:
         self._pipeline_name = pipeline_name
         self._memory_manager = memory_manager
         self._checkpoint_save_errors = checkpoint_manager._operation_errors
+        # Per-run progress watermark: highest ``records_fetched`` persisted
+        # by ANY checkpoint operation in this run. Periodic saves trigger
+        # when confirmed progress advanced at least ``checkpoint_interval``
+        # past it, so saves land on every interval of *confirmed* progress
+        # regardless of batch-size alignment. All save operations share the
+        # watermark — they persist the same boundary. A failed save never
+        # advances it; a manual resume_offset does not seed it (no durable
+        # boundary is proven for a manually chosen offset).
+        self._last_saved_progress: int = 0
 
     async def save_periodic_checkpoint(
         self,
@@ -49,15 +58,22 @@ class BatchCheckpointRecoveryService:
         resume_offset: int,
         checkpoint_interval: int,
     ) -> None:
-        """Save a periodic checkpoint when the interval threshold is reached."""
-        # Guard before modulo: zero woul
+        """Save a periodic checkpoint when confirmed progress >= interval.
+
+        The guard is the delta model ``records_fetched - last_saved >=
+        checkpoint_interval`` in per-run progress units — not exact modulo —
+        so a batch size that does not divide the interval cannot starve
+        checkpointing.
+        """
         if checkpoint_interval <= 0 or records_fetched <= 0:
             return
-        if records_fetched % checkpoint_interval != 0:
+        if records_fetched - self._last_saved_progress < checkpoint_interval:
             self._emit_checkpoint_save_event(operation="periodic", status="skipped")
             return
         total = self._total_processed(records_fetched, resume_offset)
-        await self._save_checkpoint(total, operation="periodic")
+        await self._save_checkpoint(
+            total, operation="periodic", progress=records_fetched
+        )
 
     async def save_checkpoint_on_exception(
         self,
@@ -75,7 +91,9 @@ class BatchCheckpointRecoveryService:
                     status="skipped",
                 )
                 return
-            await self._save_checkpoint(total, operation="exception")
+            await self._save_checkpoint(
+                total, operation="exception", progress=records_fetched
+            )
             self._logger.warning(
                 "Checkpoint saved on exception for recovery",
                 records_processed=total,
@@ -99,7 +117,9 @@ class BatchCheckpointRecoveryService:
         """Persist an emergency checkpoint during graceful shutdown."""
         try:
             total = self._total_processed(records_fetched, resume_offset)
-            await self._save_checkpoint(total, operation="shutdown")
+            await self._save_checkpoint(
+                total, operation="shutdown", progress=records_fetched
+            )
         except self._checkpoint_save_errors as checkpoint_error:
             self._logger.warning(
                 "Emergency checkpoint save failed during shutdown",
@@ -116,7 +136,7 @@ class BatchCheckpointRecoveryService:
     ) -> None:
         """Persist a checkpoint immediately without recovery wrappers."""
         total = self._total_processed(records_fetched, resume_offset)
-        await self._save_checkpoint(total, operation="manual")
+        await self._save_checkpoint(total, operation="manual", progress=records_fetched)
 
     @staticmethod
     def _total_processed(records_fetched: int, resume_offset: int) -> int:
@@ -200,7 +220,9 @@ class BatchCheckpointRecoveryService:
         span.__exit__(None, None, None)
         # Lifecycle/end-of-run paths own
 
-    async def _save_checkpoint(self, total: int, *, operation: str) -> None:
+    async def _save_checkpoint(
+        self, total: int, *, operation: str, progress: int
+    ) -> None:
         started_at = time.monotonic()
         span = self._start_checkpoint_save_span(
             operation=operation,
@@ -210,6 +232,7 @@ class BatchCheckpointRecoveryService:
             await self._checkpoint_manager.save_checkpoint(
                 self._checkpoint_payload(total)
             )
+            self._last_saved_progress = progress
         except self._checkpoint_save_errors as error:
             duration_seconds = time.monotonic() - started_at
             self._emit_checkpoint_save_event(

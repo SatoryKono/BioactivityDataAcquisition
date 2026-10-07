@@ -118,7 +118,7 @@ new spend/safety decision.
 | `github-settings-quarterly-review.yml` | `Quarterly GitHub Settings Review` | `schedule`, `workflow_dispatch` | `active` | `active` | Read-only quarterly GitHub settings review |
 | `memory-freshness.yml` | `Memory freshness` | `pull_request`, `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Repository memory freshness and contract checks |
 | `memory-retention.yml` | `Memory Retention Policy` | `schedule`, `pull_request`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Weekly and change-triggered non-destructive episodic-memory retention policy check |
-| `mutation-testing.yml` | `Mutation Testing` | `push`, `pull_request`, `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Mutation-testing lane with scheduled coverage |
+| `mutation-testing.yml` | `Mutation Testing` | `schedule`, `workflow_dispatch` | `active` | `active` | Sole Sunday mutation owner (#10263 exception); push and pull_request stay off |
 | `nightly-replay-parity.yml` | `nightly-replay-parity` | `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Replay/determinism parity validation |
 | `performance-nightly.yml` | `Performance Nightly` | `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Performance-regression gate |
 | `pr-hygiene.yml` | `PR Hygiene` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Stale report-noise draft PR cleanup under repository hygiene policy |
@@ -162,7 +162,6 @@ enable heavy nightlies without Actions spend evidence. Do not reopen #9975 or
 | `labeler.yml` | `pull_request_target`; re-enable only after live GitHub labels match `.github/labeler.yml` and `docs/00-project/governance/github-label-taxonomy.md` |
 | `memory-freshness.yml` | Optional memory lane; not a `pr-required.yml` owner |
 | `memory-retention.yml` | Optional memory lane; extra scheduled spend |
-| `mutation-testing.yml` | Heavy weekly/PR mutation campaign; extra spend |
 | `nightly-replay-parity.yml` | Heavy nightly replay; extra spend |
 | `performance-nightly.yml` | Heavy nightly benchmarks; extra spend |
 | `port-contracts.yml` | Supporting contracts lane; not invoked by `pr-required.yml` |
@@ -186,6 +185,7 @@ Route only to **active** GitHub lanes. Keep-disabled files above do not run.
 | --- | --- |
 | Main PR required-check coordinator | `pr-required.yml` |
 | Test matrix owner | `tests.yml` |
+| Weekly mutation (Sunday 00:00 UTC) | `mutation-testing.yml` |
 | Docs, MkDocs, Mermaid, diagram drift | `docs.yml` |
 | Dashboard first-window no-scroll (DASH-FIT-004) | `dashboard-first-window-noscroll.yml` |
 | Schema and generated-artifact drift | `schema-governance.yml` |
@@ -206,6 +206,9 @@ Route only to **active** GitHub lanes. Keep-disabled files above do not run.
   `keep-disabled`.
 - YAML `on.schedule` on a `keep-disabled` workflow is a cadence claim only; it
   does **not** run while GitHub `state` is `disabled_manually`.
+- `mutation-testing.yml` is the #10263 exception: GitHub `state` is `active`,
+  and the Sunday cron is the live mutation owner. CircleCI `mutation` is the
+  manual backup.
 - If a workflow file is added, removed, renamed, or materially repurposed,
   update this page together with any workflow-specific governance docs. The
   focused parity command above must report neither missing nor extra workflow
