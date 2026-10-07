@@ -138,7 +138,7 @@ jobs:
         uses: ./.github/actions/setup-python-uv
         with:
           python-version: "3.12"
-          uv-extras: "dev"
+          uv-extras: "dev docs"
 
       - name: Validate repository root allowlist
         id: cleanliness
