@@ -187,7 +187,7 @@ jobs:
         if: needs['classify-changes'].outputs['compiled-artifacts'] == 'required'
         run: |
           set -euo pipefail
-          found="$(find . \( -path './.venv' -o -path './.git' \) -prune -o \( -name '*.pyc' -o -name '__pycache__' \) -print -quit)"
+          found="$(git ls-files -- ':(glob)**/*.pyc' ':(glob)**/__pycache__/**' | head -n 1 || true)"
           if [[ -n "$found" ]]; then
             echo "::error::compiled artifact found: $found"
             exit 1
@@ -270,8 +270,10 @@ jobs:
           OUTCOMES="$(tr -d '\r\n' < reports/quality/lane-step-outcomes.json)"
           export OUTCOMES
           uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results assert-steps \
-            --decision-matrix-env DECISION_MATRIX \
-            --outcomes-env OUTCOMES \
+            --decision-matrix DECISION_MATRIX \
+            --decision-matrix-env \
+            --outcomes OUTCOMES \
+            --outcomes-env \
             --owner "$LANE_OWNER"
 
   class-lane:
@@ -671,8 +673,10 @@ jobs:
           OUTCOMES="$(tr -d '\r\n' < reports/quality/lane-step-outcomes.json)"
           export OUTCOMES
           uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results assert-steps \
-            --decision-matrix-env DECISION_MATRIX \
-            --outcomes-env OUTCOMES \
+            --decision-matrix DECISION_MATRIX \
+            --decision-matrix-env \
+            --outcomes OUTCOMES \
+            --outcomes-env \
             --owner "$LANE_OWNER"
 
   pr-gate-complete:
@@ -713,7 +717,8 @@ jobs:
           test "${{ needs['classify-changes'].result }}" = "success"
           mkdir -p reports/quality
           uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \
-            --decision-matrix-env DECISION_MATRIX \
+            --decision-matrix DECISION_MATRIX \
+            --decision-matrix-env \
             --head-sha "${EXPECTED_HEAD_SHA}" \
             --job-result "fast-governance=${FAST_RESULT}" \
             --job-result "class-lane=${CLASS_RESULT}" \
