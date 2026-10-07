@@ -11,6 +11,8 @@ from scripts.engineering.ci.pr_lane_results import (
     build_results,
 )
 
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
+
 HEAD = "a" * 40
 
 

@@ -40,7 +40,6 @@ from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 from click.testing import CliRunner
-
 from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestDiffEntry,
     RunManifestDiffResult,
@@ -55,6 +54,8 @@ from bioetl.domain.control_plane import (
 )
 from bioetl.domain.types import RunType
 from bioetl.interfaces.cli.main import cli
+
+pytestmark = pytest.mark.unit
 
 _SNAPSHOT_IDENTITY_FINGERPRINT = (
     "f29f1a5c18e94a4fe614b59ae8e68c5c65afd078155b95d1e7c4aa32f6291dcd"
