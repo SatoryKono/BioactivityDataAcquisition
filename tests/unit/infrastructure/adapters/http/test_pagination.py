@@ -39,6 +39,7 @@ from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 
 class MockFetcher(PaginatedFetcherMixin):
     def __init__(self):
+        """Attach a mock logger for pagination warning assertions."""
         self._logger = MagicMock()
 
 
@@ -173,10 +174,12 @@ async def test_paginated_fetch_respects_max_pages():
 
 @pytest.mark.asyncio
 async def test_paginated_fetch_warns_on_max_pages_truncation():
+    """Stop at the page ceiling and log the omitted continuation cursor."""
     fetcher = MockFetcher()
     calls = 0
 
     async def fetch_page(cursor, _):
+        """Return a numbered item and a fresh continuation cursor."""
         nonlocal calls
         calls += 1
         return [calls], f"c{calls}"
@@ -195,10 +198,12 @@ async def test_paginated_fetch_warns_on_max_pages_truncation():
 
 @pytest.mark.asyncio
 async def test_paginated_fetch_warns_on_repeated_cursor():
+    """Stop a cursor loop and report its page count and repeated cursor."""
     fetcher = MockFetcher()
     calls = 0
 
     async def fetch_page(cursor, _):
+        """Repeat the same cursor while counting page requests."""
         nonlocal calls
         calls += 1
         return [calls], "same-cursor"
@@ -217,10 +222,12 @@ async def test_paginated_fetch_warns_on_repeated_cursor():
 
 @pytest.mark.asyncio
 async def test_paginated_fetch_warns_before_refetching_initial_cursor():
+    """Detect a cycle back to the initial cursor before fetching it again."""
     fetcher = MockFetcher()
     calls: list[object] = []
 
     async def fetch_page(cursor, _):
+        """Simulate a cycle from the initial cursor through a second page."""
         calls.append(cursor)
         next_cursor = "b" if cursor == "start" else "start"
         return [len(calls)], next_cursor
@@ -245,9 +252,11 @@ async def test_paginated_fetch_warns_before_refetching_initial_cursor():
 
 @pytest.mark.asyncio
 async def test_paginated_fetch_no_warning_on_clean_end():
+    """Finish an exhausted result set without a truncation warning."""
     fetcher = MockFetcher()
 
     async def fetch_page(cursor, _):
+        """Return an empty final page."""
         return [], None
 
     results = [item async for item in fetcher.paginated_fetch(fetch_page)]

@@ -179,11 +179,13 @@ class TestConfigureLogging:
         assert "timestamp" in payload
 
     def test_pagination_warning_preserves_fields_in_rendered_json(self, capsys) -> None:
+        """Preserve truncation details and run identity in structured log output."""
         from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
         from bioetl.infrastructure.observability.logging import create_logger
 
         class PaginationHost(PaginatedFetcherMixin):
             def __init__(self):
+                """Attach a structured logger carrying the test pipeline and run ID."""
                 self._logger = create_logger(
                     "test", "00000000-0000-0000-0000-000000000001"
                 )

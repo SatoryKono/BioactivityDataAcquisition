@@ -256,6 +256,7 @@ class _SearchPaginateAdapter(_SemanticScholarSearchFetchMixin):
     """Minimal host exercising the real _paginate_search loop."""
 
     def __init__(self, pages: list[tuple[list[dict[str, object]], int | None]]) -> None:
+        """Initialize prepared search pages, request count, and a mock logger."""
         self._logger = MagicMock()
         self._pages = pages
         self.calls = 0
@@ -263,6 +264,7 @@ class _SearchPaginateAdapter(_SemanticScholarSearchFetchMixin):
     async def _fetch_search_page(
         self, *, query, page_size, current_offset
     ) -> tuple[list[dict[str, object]], int | None]:
+        """Count the request and return the next prepared Semantic Scholar page."""
         self.calls += 1
         return self._pages[self.calls - 1]
 

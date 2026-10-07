@@ -93,6 +93,7 @@ def test_build_base_vcr_config_sanitizes_request_headers_and_query() -> None:
 def test_build_base_vcr_config_before_record_request_fails_closed_on_unexpected_request() -> (
     None
 ):
+    """Reject unsupported request objects instead of bypassing secret filtering."""
     from tests.helpers.vcr_config import VCRRequestSanitizationError
 
     config = build_base_vcr_config(
@@ -140,6 +141,7 @@ def test_build_base_vcr_config_preserves_successful_json_response() -> None:
 def test_build_base_vcr_config_before_record_response_drops_unexpected_response() -> (
     None
 ):
+    """Drop unsupported response objects before cassette recording."""
     config = build_base_vcr_config()
     before_record_response = cast(
         Callable[[Any], Any], config["before_record_response"]
@@ -152,6 +154,7 @@ def test_build_base_vcr_config_before_record_response_drops_unexpected_response(
 
 @pytest.mark.parametrize("cookie_header", ["Set-Cookie", "set-cookie", "SET-COOKIE2"])
 def test_response_sanitizer_removes_secrets_without_mutating_response(cookie_header):
+    """Strip credential headers case-insensitively while preserving the input."""
     hook = cast(Callable[[Any], Any], build_base_vcr_config()["before_record_response"])
     response = {
         "status": {"code": 200},
@@ -174,6 +177,7 @@ def test_response_sanitizer_removes_secrets_without_mutating_response(cookie_hea
 
 @pytest.mark.parametrize("headers", [None, "invalid", ["Set-Cookie"]])
 def test_response_sanitizer_drops_unsupported_headers(headers):
+    """Drop responses whose headers cannot be safely inspected."""
     hook = cast(Callable[[Any], Any], build_base_vcr_config()["before_record_response"])
 
     assert hook({"status": {"code": 200}, "headers": headers}) is None
@@ -238,6 +242,7 @@ def test_build_base_vcr_config_sanitizer_is_always_installed() -> None:
 def test_sanitizer_fails_closed_with_missing_required_surface(
     missing_attribute: str,
 ) -> None:
+    """Reject requests missing either headers or a sanitizable URI."""
     from types import SimpleNamespace
 
     from tests.helpers.vcr_config import VCRRequestSanitizationError
@@ -256,6 +261,7 @@ def test_sanitizer_fails_closed_with_missing_required_surface(
 def test_sanitizer_fails_closed_on_httpx_request_instead_of_retaining_query_secret() -> (
     None
 ):
+    """Reject incompatible HTTPX requests before query credentials can escape."""
     import httpx
 
     from tests.helpers.vcr_config import VCRRequestSanitizationError
@@ -295,6 +301,7 @@ def test_build_base_vcr_config_sanitizer_logs_failure_only_once(
     )
 
     def _explode(*args: Any, **kwargs: Any) -> Any:
+        """Simulate a VCR filter failure on a malformed request."""
         raise TypeError("malformed request surface")
 
     monkeypatch.setattr(vcr.filters, "replace_headers", _explode)

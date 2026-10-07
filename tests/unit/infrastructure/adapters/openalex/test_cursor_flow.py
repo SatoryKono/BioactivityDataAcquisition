@@ -56,6 +56,7 @@ def _build_flow() -> OpenAlexCursorFlow:
 
 @pytest.mark.asyncio
 async def test_iter_query_results_paginates_and_honors_limit() -> None:
+    """Satisfy the result limit without requesting an unnecessary second page."""
     flow = _build_flow()
     flow.query_executor.request_works_payload.side_effect = [{"page": 1}, {"page": 2}]
     flow.response_mapper.extract_results.side_effect = [
@@ -270,6 +271,7 @@ async def test_iter_query_results_warns_on_page_ceiling(monkeypatch) -> None:
 @pytest.mark.asyncio
 @pytest.mark.parametrize("limit", [None, 3])
 async def test_iter_query_results_stops_before_refetching_initial_cursor(limit) -> None:
+    """Stop when OpenAlex returns its initial cursor and report truncation."""
     flow = _build_flow()
     flow.query_executor.request_works_payload.side_effect = [{"page": 1}, {"page": 2}]
     flow.response_mapper.extract_results.side_effect = [[{"id": "A"}], [{"id": "B"}]]
@@ -285,6 +287,7 @@ async def test_iter_query_results_stops_before_refetching_initial_cursor(limit) 
 
 @pytest.mark.asyncio
 async def test_iter_query_results_exact_limit_at_ceiling_finishes_cleanly(monkeypatch):
+    """Treat a satisfied result limit at the page ceiling as normal completion."""
     from bioetl.infrastructure.adapters.openalex import cursor_flow as module
 
     monkeypatch.setattr(module, "_DEFAULT_MAX_PAGES", 1)
@@ -303,6 +306,7 @@ async def test_iter_query_results_exact_limit_at_ceiling_finishes_cleanly(monkey
 @pytest.mark.asyncio
 @pytest.mark.parametrize("limit", [0, -1])
 async def test_iter_query_results_nonpositive_limit_does_not_request_page(limit):
+    """Return no results or warnings when the requested limit is nonpositive."""
     flow = _build_flow()
     rows = await collect_async_iterator(flow.iter_query_results(query="q", limit=limit))
     assert rows == []

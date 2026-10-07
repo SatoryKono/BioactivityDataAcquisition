@@ -233,6 +233,7 @@ def _build_before_record_request_sanitizer(
     query_replacements = _normalize_vcr_replacements(filter_query_parameters)
 
     def before_record_request(request: Any) -> Any:
+        """Sanitize credentials or raise before VCR can record or send the request."""
         if request is None:
             return None
 
@@ -274,6 +275,7 @@ def _build_before_record_response_filter() -> Callable[[Any], Any]:
     """Remove response secrets and skip transient upstream HTML errors."""
 
     def before_record_response(response: Any) -> Any:
+        """Return a response without secret headers, or drop an unsafe response."""
         if _is_transient_html_server_error(response):
             return None
         if not isinstance(response, Mapping) or not isinstance(

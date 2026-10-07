@@ -485,6 +485,7 @@ async def test_search_warns_and_stops_on_cursor_cycle(
     )
 
     async def _get(url, params=None, headers=None):
+        """Return the next prepared CrossRef page without a network request."""
         return next(pages)
 
     mock_http.get.side_effect = _get
@@ -509,6 +510,7 @@ async def test_search_warns_and_stops_on_immediate_cursor_repeat(
     pages = iter([_works_response([{"DOI": "10.1/a"}], "*")])
 
     async def _get(url, params=None, headers=None):
+        """Return the next prepared CrossRef page without a network request."""
         return next(pages)
 
     mock_http.get.side_effect = _get
@@ -541,6 +543,7 @@ async def test_search_warns_on_page_ceiling(
     )
 
     async def _get(url, params=None, headers=None):
+        """Return the next prepared CrossRef page without a network request."""
         return next(pages)
 
     mock_http.get.side_effect = _get

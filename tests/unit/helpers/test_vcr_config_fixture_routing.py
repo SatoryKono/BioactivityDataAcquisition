@@ -79,6 +79,7 @@ def test_every_in_tree_vcr_config_fixture_routes_through_base_helper() -> None:
 
 
 def test_rebalance_wrapper_returns_canonical_base_helper() -> None:
+    """Require the rebalance wrapper to return the approved VCR configuration."""
     path = _TESTS_ROOT / "integration/adapters/vcr_rebalance_support.py"
     tree = ast.parse(path.read_text(encoding="utf-8"))
     function = next(
@@ -101,6 +102,7 @@ def test_rebalance_wrapper_returns_canonical_base_helper() -> None:
     ],
 )
 def test_routing_rejects_unused_or_discarded_helper(body: str) -> None:
+    """Reject fixtures that call or mention the helper but bypass its result."""
     source = (
         "from tests.helpers.vcr_config import build_base_vcr_config\n"
         f"def vcr_config():\n    {body}\n"
@@ -112,6 +114,7 @@ def test_routing_rejects_unused_or_discarded_helper(body: str) -> None:
 
 
 def test_routing_accepts_canonical_import_alias() -> None:
+    """Accept an alias imported from the canonical helper module."""
     tree = ast.parse(
         "from tests.helpers.vcr_config import build_base_vcr_config as base\n"
         "def vcr_config():\n    return base()\n"
@@ -122,6 +125,7 @@ def test_routing_accepts_canonical_import_alias() -> None:
 
 
 def test_routing_rejects_unapproved_helper_origin() -> None:
+    """Reject a matching helper name imported from an unapproved module."""
     tree = ast.parse(
         "from elsewhere import build_base_vcr_config\n"
         "def vcr_config():\n    return build_base_vcr_config()\n"
