@@ -632,7 +632,7 @@ def test_application_layer_no_common_infrastructure_adapter_imports(
         "bioetl.infrastructure.adapters.pubmed",
         "bioetl.infrastructure.locking.memory_lock",
         "bioetl.infrastructure.checkpoint.local_checkpoint",
-        "bioetl.infrastructure.quarantine.unified_quarantine",
+        "bioetl.infrastructure.quarantine.unified",
     }
 
     all_errors = _import_errors_under(
