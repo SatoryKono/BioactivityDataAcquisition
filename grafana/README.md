@@ -66,7 +66,7 @@ Deployed Grafana JSON must match repo after stripping volatile `id` / `version` 
 `Review Provider Evidence`, вне сворачиваемого `Inspect Saved Run Evidence`.
 Пункт `Data Quality` убран из общей навигации; сама страница доступна через
 контекстные ссылки на результаты качества выбранного запуска.
-Справа `Review Data Quality` показывает число `excluded_by_contract` и его
+Справа `Review Contract Exclusions` показывает число `excluded_by_contract` и его
 долю от Bronze records out: ниже soft limit — `OK`, начиная с soft limit —
 `WARN`, начиная с hard limit — `ERROR`. Пороги загружаются из объединённой
 конфигурации pipeline при генерации dashboard; исторические overrides запуска
