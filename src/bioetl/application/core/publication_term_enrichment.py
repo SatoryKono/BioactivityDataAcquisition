@@ -57,6 +57,40 @@ async def _attach_pubmed_payloads(
     return [replacements.get(id(record), record) for record in records]
 
 
+async def _publication_term_batches(
+    publications: AsyncIterator[BronzeRecord], *, scan_limit: int
+) -> AsyncIterator[list[BronzeRecord]]:
+    buffer: list[BronzeRecord] = []
+    async for publication in bounded_source_records(
+        publications, max_records=scan_limit
+    ):
+        buffer.append(publication)
+        if len(buffer) < PUBLICATION_TERM_PUBMED_ENRICH_BATCH_SIZE:
+            continue
+        yield buffer
+        buffer = []
+    if buffer:
+        yield buffer
+
+
+async def _terms_for_publication_batch(
+    batch: list[BronzeRecord],
+    *,
+    extract_terms: _ExtractTerms,
+    enricher: PublicationTermEnrichmentPort | None,
+) -> AsyncIterator[BronzeRecord]:
+    prepared = batch
+    if enricher is not None:
+        prepared = await _attach_pubmed_payloads(
+            batch, extract_terms=extract_terms, enricher=enricher
+        )
+    for record in prepared:
+        publication_id = _publication_id(record)
+        if publication_id is not None:
+            for term in extract_terms(record, publication_id):
+                yield term
+
+
 async def yield_terms_from_publications(
     publications: AsyncIterator[BronzeRecord],
     *,
@@ -68,39 +102,16 @@ async def yield_terms_from_publications(
 ) -> AsyncIterator[BronzeRecord]:
     """Expand publications into term records, enriching empty PubMed-linked docs."""
     term_count = 0
-    buffer: list[BronzeRecord] = []
-
-    async def emit(batch: list[BronzeRecord]) -> AsyncIterator[BronzeRecord]:
-        nonlocal term_count
-        prepared = batch
-        if enricher is not None:
-            prepared = await _attach_pubmed_payloads(
+    try:
+        async for batch in _publication_term_batches(
+            publications, scan_limit=scan_limit
+        ):
+            async for term in _terms_for_publication_batch(
                 batch, extract_terms=extract_terms, enricher=enricher
-            )
-        for record in prepared:
-            publication_id = _publication_id(record)
-            if publication_id is None:
-                continue
-            for term in extract_terms(record, publication_id):
+            ):
                 yield term
                 term_count += 1
                 if limit is not None and term_count >= limit:
                     return
-
-    try:
-        async for publication in bounded_source_records(
-            publications, max_records=scan_limit
-        ):
-            buffer.append(publication)
-            if len(buffer) < PUBLICATION_TERM_PUBMED_ENRICH_BATCH_SIZE:
-                continue
-            async for term in emit(buffer):
-                yield term
-                if limit is not None and term_count >= limit:
-                    return
-            buffer = []
-        if buffer:
-            async for term in emit(buffer):
-                yield term
     finally:
         await close_publications(publications)
