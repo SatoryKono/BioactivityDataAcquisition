@@ -290,12 +290,15 @@ def _verify_host_source(
     else:
         print(f"OK: host marker {marker_path}")
 
-    host_check = inspect_report_root_marker(report_root=host_root)
+    store = create_run_report_store()
+    host_check = inspect_report_root_marker(report_root=host_root, store=store)
     print(f"host_marker_check={json.dumps(host_check, sort_keys=True)}")
     if host_check.get("status") != "healthy":
         state.fail(f"FAIL: {host_check.get('message')}")
     source_check = inspect_report_root_source_identity(
-        report_root=host_root, expected_source_id=expected_source_id
+        report_root=host_root,
+        expected_source_id=expected_source_id,
+        store=store,
     )
     print(f"host_source_check={json.dumps(source_check, sort_keys=True)}")
     if source_check.get("source_identity_status") != "healthy":
