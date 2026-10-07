@@ -9,7 +9,10 @@ __all__ = ["PaginatedFetcherMixin", "T"]
 
 
 from collections.abc import AsyncIterator, Awaitable, Callable
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import LoggerPort
 
 T = TypeVar("T")
 
@@ -19,6 +22,40 @@ class PaginatedFetcherMixin:
 
     # Hard ceiling against runaway providers (cursor loops / empty pages).
     _DEFAULT_MAX_PAGES: int = 10_000
+    _logger: LoggerPort
+
+    def _log_pagination_truncation(
+        self, *, reason: str, page_count: int, page_limit: int, next_cursor: object
+    ) -> None:
+        """Report abnormal termination through the host's injected logger."""
+        self._logger.warning(
+            "pagination_truncated",
+            truncation_reason=reason,
+            page_count=page_count,
+            page_limit=page_limit,
+            next_cursor=repr(next_cursor),
+        )
+
+    def _advance_or_report_truncation(
+        self,
+        *,
+        next_cursor: object,
+        seen_cursors: set[object],
+        page_count: int,
+        page_limit: int,
+    ) -> object | None:
+        """Advance a cursor, reporting repeats without marking clean exhaustion."""
+        advanced = self._advance_pagination_cursor(
+            next_cursor=next_cursor, seen_cursors=seen_cursors
+        )
+        if advanced is None and next_cursor is not None:
+            self._log_pagination_truncation(
+                reason="repeated_cursor",
+                page_count=page_count,
+                page_limit=page_limit,
+                next_cursor=next_cursor,
+            )
+        return advanced
 
     @staticmethod
     def _should_stop_fetching(fetched: int, limit: int | None) -> bool:
@@ -87,6 +124,12 @@ class PaginatedFetcherMixin:
 
         while not self._should_stop_fetching(fetched, limit):
             if page_count >= page_limit:
+                self._log_pagination_truncation(
+                    reason="max_pages",
+                    page_count=page_count,
+                    page_limit=page_limit,
+                    next_cursor=cursor,
+                )
                 break
             page_count += 1
 
@@ -101,9 +144,11 @@ class PaginatedFetcherMixin:
                 if self._should_stop_fetching(fetched, limit):
                     return
 
-            advanced = self._advance_pagination_cursor(
+            advanced = self._advance_or_report_truncation(
                 next_cursor=next_cursor,
                 seen_cursors=seen_cursors,
+                page_count=page_count,
+                page_limit=page_limit,
             )
             if advanced is None:
                 break

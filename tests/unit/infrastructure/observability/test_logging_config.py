@@ -178,6 +178,27 @@ class TestConfigureLogging:
         assert payload["level"] == "info"
         assert "timestamp" in payload
 
+    def test_pagination_warning_preserves_fields_in_rendered_json(self, capsys) -> None:
+        from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
+        from bioetl.infrastructure.observability.logging import create_logger
+
+        class PaginationHost(PaginatedFetcherMixin):
+            def __init__(self):
+                self._logger = create_logger(
+                    "test", "00000000-0000-0000-0000-000000000001"
+                )
+
+        PaginationHost()._log_pagination_truncation(
+            reason="max_pages", page_count=2, page_limit=2, next_cursor="C"
+        )
+        payload = json.loads(capsys.readouterr().out.strip())
+        assert payload["event"] == "pagination_truncated"
+        assert payload["truncation_reason"] == "max_pages"
+        assert payload["page_count"] == payload["page_limit"] == 2
+        assert payload["next_cursor"] == "'C'"
+        assert payload["pipeline"] == "test"
+        assert payload["run_id"] == "00000000-0000-0000-0000-000000000001"
+
 
 @pytest.mark.unit
 class TestIsLoggingConfigured:

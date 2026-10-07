@@ -22,6 +22,9 @@ from bioetl.infrastructure.adapters.semanticscholar.constants import (
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
+# Hard ceiling against runaway offset loops from misbehaving providers (CF-034).
+_DEFAULT_MAX_PAGES: int = 10_000
+
 
 class _SemanticScholarSearchFetchMixin:
     """Search/page flow helpers kept separate from DOI/fallback paths."""
@@ -37,7 +40,20 @@ class _SemanticScholarSearchFetchMixin:
         current_offset = 0
         page_size = min(100, limit or 100)
         fetched = 0
+        page_count = 0
+        seen_offsets: set[int] = set()
         while True:
+            if page_count >= _DEFAULT_MAX_PAGES:
+                as_mixin_host(self)._logger.warning(  # Any: mixin host
+                    "semanticscholar_search_truncated",
+                    reason="max_pages",
+                    query=search_query[:100],
+                    page_count=page_count,
+                    page_limit=_DEFAULT_MAX_PAGES,
+                    next_offset=current_offset,
+                )
+                return
+            page_count += 1
             records, next_offset = await as_mixin_host(
                 self
             )._fetch_search_page(  # Any: mixin host
@@ -50,9 +66,45 @@ class _SemanticScholarSearchFetchMixin:
                     return
                 yield record
                 fetched += 1
-            if next_offset is None or (limit and fetched >= limit):
+            if not self._search_pagination_has_next(
+                next_offset=next_offset,
+                current_offset=current_offset,
+                seen_offsets=seen_offsets,
+                fetched=fetched,
+                limit=limit,
+                query=search_query,
+                page_count=page_count,
+            ):
                 return
+            assert next_offset is not None
+            seen_offsets.add(current_offset)
             current_offset = next_offset
+
+    def _search_pagination_has_next(
+        self,
+        *,
+        next_offset: int | None,
+        current_offset: int,
+        seen_offsets: set[int],
+        fetched: int,
+        limit: int | None,
+        query: str,
+        page_count: int,
+    ) -> bool:
+        """Distinguish normal exhaustion/limit completion from repeated offsets."""
+        if next_offset is None or (limit and fetched >= limit):
+            return False
+        if next_offset in seen_offsets or next_offset == current_offset:
+            as_mixin_host(self)._logger.warning(
+                "semanticscholar_search_truncated",
+                reason="repeated_offset",
+                query=query[:100],
+                page_count=page_count,
+                page_limit=_DEFAULT_MAX_PAGES,
+                next_offset=next_offset,
+            )
+            return False
+        return True
 
     @staticmethod
     def _require_search_query(query: str | None) -> str:

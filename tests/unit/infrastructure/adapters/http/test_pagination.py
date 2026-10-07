@@ -30,6 +30,7 @@
 from __future__ import annotations
 
 import asyncio
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -37,7 +38,8 @@ from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 
 
 class MockFetcher(PaginatedFetcherMixin):
-    pass
+    def __init__(self):
+        self._logger = MagicMock()
 
 
 @pytest.mark.asyncio
@@ -167,3 +169,59 @@ async def test_paginated_fetch_respects_max_pages():
 
     assert results == [1, 2, 3]
     assert calls == 3
+
+
+@pytest.mark.asyncio
+async def test_paginated_fetch_warns_on_max_pages_truncation():
+    fetcher = MockFetcher()
+    calls = 0
+
+    async def fetch_page(cursor, _):
+        nonlocal calls
+        calls += 1
+        return [calls], f"c{calls}"
+
+    results = [item async for item in fetcher.paginated_fetch(fetch_page, max_pages=2)]
+    assert results == [1, 2]
+    assert calls == 2
+    fetcher._logger.warning.assert_called_once_with(
+        "pagination_truncated",
+        truncation_reason="max_pages",
+        page_count=2,
+        page_limit=2,
+        next_cursor="'c2'",
+    )
+
+
+@pytest.mark.asyncio
+async def test_paginated_fetch_warns_on_repeated_cursor():
+    fetcher = MockFetcher()
+    calls = 0
+
+    async def fetch_page(cursor, _):
+        nonlocal calls
+        calls += 1
+        return [calls], "same-cursor"
+
+    results = [item async for item in fetcher.paginated_fetch(fetch_page, limit=100)]
+    assert results == [1, 2]
+    assert calls == 2
+    fetcher._logger.warning.assert_called_once_with(
+        "pagination_truncated",
+        truncation_reason="repeated_cursor",
+        page_count=2,
+        page_limit=10000,
+        next_cursor="'same-cursor'",
+    )
+
+
+@pytest.mark.asyncio
+async def test_paginated_fetch_no_warning_on_clean_end():
+    fetcher = MockFetcher()
+
+    async def fetch_page(cursor, _):
+        return [], None
+
+    results = [item async for item in fetcher.paginated_fetch(fetch_page)]
+    assert results == []
+    fetcher._logger.warning.assert_not_called()

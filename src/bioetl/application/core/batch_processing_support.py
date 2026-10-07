@@ -37,9 +37,6 @@ from bioetl.domain.aggregates.events import DomainEvent
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BatchID, BronzeRecord, RunID
 
-# RF-005: keep support surface routed through shared runtime failure policy.
-_SHARED_FAILURE_POLICY = _RF005_SHARED_FAILURE_POLICY
-
 __all__ = [
     "BatchProcessingSupportService",
     "build_bronze_refs",
@@ -67,7 +64,7 @@ if TYPE_CHECKING:
 class BatchProcessingSupportService:
     """Encapsulate per-batch transform/write tracing choreography."""
 
-    _failure_policy = _SHARED_FAILURE_POLICY
+    _failure_policy = _RF005_SHARED_FAILURE_POLICY
 
     def __init__(
         self,
