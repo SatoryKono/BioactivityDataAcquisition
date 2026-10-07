@@ -1024,7 +1024,9 @@ def test_inspect_source_identity_missing_expected(tmp_path: Path) -> None:
     )
 
     payload = inspect_report_root_source_identity(
-        report_root=tmp_path, expected_source_id=None
+        report_root=tmp_path,
+        expected_source_id=None,
+        store=MagicMock(),
     )
     assert payload["source_identity"] == "expected_missing"
     assert payload["source_identity_status"] == "unhealthy"

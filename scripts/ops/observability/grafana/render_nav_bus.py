@@ -2631,7 +2631,7 @@ def apply_to_dashboard(
             9604: "Review Overall Verdict",
             9480: "Review Provider Evidence",
             9481: "Review Provider Check",
-            9482: "Review Data Quality",
+            9482: "Review Contract Exclusions",
         }
         for panel in payload["panels"]:
             if panel.get("id") in titles:

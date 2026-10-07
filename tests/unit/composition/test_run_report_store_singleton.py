@@ -56,7 +56,9 @@ def test_shared_run_report_store_exposes_port_surface() -> None:
     for method in (
         "mkdir",
         "write_text",
+        "write_synced_text",
         "read_text",
+        "read_text_prefix",
         "read_identity_text",
         "is_file",
         "is_dir",
