@@ -87,27 +87,23 @@ def _sha(value: object) -> str:
 
 
 def _source_revision() -> str:
-    """Resolve the latest revision touching canonical runtime/config inputs.
+    """Fingerprint canonical source blobs independently of commit ancestry.
 
-    Using the containing commit would make tracked generated output
-    self-referential: committing the output changes HEAD again. Restricting the
-    revision to canonical fact owners keeps `--check` reproducible while still
-    identifying the source snapshot.
+    Squash/merge commits preserve source content but replace commit identities.
+    Hash the canonical Git tree entries so generated-only commits and history
+    rewrites keep the revision stable, while any source blob change invalidates it.
+    Explicit revision overrides remain available for SHA-bound CI artifacts.
     """
     override = os.environ.get("BIOETL_PASSPORT_SOURCE_REVISION")
     if override:
         return override
-    start_ref = (
-        "HEAD^2" if os.environ.get("GITHUB_EVENT_NAME") == "pull_request" else "HEAD"
-    )
     result = subprocess.run(
         [
             "git",
-            "log",
-            "--no-merges",
-            "-1",
-            "--format=%H",
-            start_ref,
+            "ls-tree",
+            "-r",
+            "--full-tree",
+            "HEAD",
             "--",
             "configs/entities",
             "configs/providers",
@@ -128,7 +124,7 @@ def _source_revision() -> str:
         capture_output=True,
         text=True,
     )
-    return result.stdout.strip()
+    return f"sha256:{hashlib.sha256(result.stdout.encode('utf-8')).hexdigest()}"
 
 
 def _contract_path(provider: str, entity: str) -> Path:

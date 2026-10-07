@@ -13,6 +13,7 @@ from dataclasses import replace
 from datetime import datetime
 from typing import Any, cast
 
+from bioetl.domain.models.metadata import validate_utc_datetime
 from bioetl.domain.ports import ClockPort, SilverWriteRequest
 from bioetl.domain.types import BronzeRecord
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
@@ -208,6 +209,7 @@ class SilverWriterRuntimeFacade(
         )
         if invocation.started_at is None:
             invocation = replace(invocation, started_at=self._clock.now())
+        validate_utc_datetime(invocation.started_at)
         if self._should_dual_write():
             return await self._write_dual_targets(invocation=invocation)
         return await self._write_single_target(

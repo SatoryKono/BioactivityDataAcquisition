@@ -43,13 +43,13 @@ REVISION = "0123456789abcdef0123456789abcdef01234567"
 
 
 @pytest.fixture(scope="module")
-def _passport_projection_bundle(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, dict[Path, bytes]]:
+def _passport_projection_bundle(
+    tmp_path_factory: pytest.TempPathFactory,
+) -> tuple[Path, dict[Path, bytes]]:
     """Build full passport outputs once per module (hotspot cost amortisation #8327)."""
     root = tmp_path_factory.mktemp("passport-projector")
     outputs = build_all_outputs(output_root=root, source_revision=REVISION)
     return root, outputs
-
-
 
 
 @dataclass(frozen=True)
@@ -125,22 +125,41 @@ def test_generation_is_byte_deterministic(tmp_path: Path) -> None:
     assert check_outputs(second) == []
 
 
-def test_source_revision_excludes_ephemeral_merge_commits(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    captured: list[str] = []
+def test_source_revision_survives_squash_and_generated_only_commits(
+    tmp_path, monkeypatch
+):
+    from scripts.docs.passports import projector
 
-    def _run(command: list[str], **_: object) -> subprocess.CompletedProcess[str]:
-        captured.extend(command)
-        return subprocess.CompletedProcess(command, 0, stdout=f"{REVISION}\n")
+    def git(*args):
+        return subprocess.run(
+            ["git", *args], cwd=tmp_path, check=True, capture_output=True, text=True
+        ).stdout.strip()
 
+    git("init")
+    git("config", "user.name", "Passport regression")
+    git("config", "user.email", "passport-test@example.invalid")
+    monkeypatch.setattr(projector, "PROJECT_ROOT", tmp_path)
     monkeypatch.delenv("BIOETL_PASSPORT_SOURCE_REVISION", raising=False)
-    monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
-    monkeypatch.setattr(subprocess, "run", _run)
-
+    source = tmp_path / "configs/entities/test/entity.yaml"
+    source.parent.mkdir(parents=True)
+    source.write_text("version: 1\n", encoding="utf-8")
+    git("add", ".")
+    git("commit", "-m", "canonical source")
+    before = _source_revision()
+    assert before.startswith("sha256:")
+    (tmp_path / "generated.json").write_text("{}\n", encoding="utf-8")
+    git("add", ".")
+    git("commit", "-m", "generated output")
+    assert _source_revision() == before
+    squashed = git("commit-tree", "HEAD^{tree}", "-m", "squashed source and output")
+    git("checkout", "--detach", squashed)
+    assert _source_revision() == before
+    source.write_text("version: 2\n", encoding="utf-8")
+    git("add", ".")
+    git("commit", "-m", "changed canonical source")
+    assert _source_revision() != before
+    monkeypatch.setenv("BIOETL_PASSPORT_SOURCE_REVISION", REVISION)
     assert _source_revision() == REVISION
-    assert captured[:4] == ["git", "log", "--no-merges", "-1"]
-    assert captured[4:6] == ["--format=%H", "HEAD^2"]
 
 
 @pytest.mark.slow

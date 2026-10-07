@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from unittest.mock import Mock
 
 import pyarrow as pa
@@ -19,6 +19,30 @@ from bioetl.infrastructure.storage.silver.metadata_result_finalization import (
 from tests.helpers.clock import StepClock, fixed_test_clock
 
 pytestmark = [pytest.mark.integration]
+
+
+def _make_metadata_coordinator(start):
+    from uuid import UUID
+    from bioetl.application.services.lineage import MetadataCoordinator
+    from bioetl.domain.value_objects.run_context import RunContext
+    from bioetl.domain.types import RunType
+
+    return MetadataCoordinator(
+        RunContext.create(
+            run_id=UUID("00000000-0000-0000-0000-000000012016"),
+            run_type=RunType.INCREMENTAL,
+            started_at=start - timedelta(days=2),
+            provider="test",
+            entity="activity",
+            manifest_id="manifest-canonical",
+            execution_fingerprint="fingerprint-canonical",
+            effective_config_hash="effective-config-canonical",
+            effective_config_artifact_id="effective-config-artifact-canonical",
+            contract_ref="contracts/test/activity",
+            contract_version="1.0.0",
+            dq_contract_compatibility_hash="dq-compat-canonical",
+        )
+    )
 
 
 @pytest.mark.asyncio
@@ -107,32 +131,13 @@ def test_clock_is_required(tmp_path):
 async def test_real_delta_metadata_records_injected_clock_provenance(
     tmp_path, explicit_start, clock_step
 ):
-    from uuid import UUID
     from unittest.mock import AsyncMock
-    from bioetl.application.services.lineage import MetadataCoordinator
-    from bioetl.domain.value_objects.run_context import RunContext
-    from bioetl.domain.types import RunType
     from bioetl.infrastructure.storage.silver.runtime_helpers import (
         SilverWriterRuntimeServicesRequest,
     )
 
     start = datetime(2026, 10, 7, tzinfo=UTC)
-    coordinator = MetadataCoordinator(
-        RunContext.create(
-            run_id=UUID("00000000-0000-0000-0000-000000012016"),
-            run_type=RunType.INCREMENTAL,
-            started_at=start - timedelta(days=2),
-            provider="test",
-            entity="activity",
-            manifest_id="manifest-canonical",
-            execution_fingerprint="fingerprint-canonical",
-            effective_config_hash="effective-config-canonical",
-            effective_config_artifact_id="effective-config-artifact-canonical",
-            contract_ref="contracts/test/activity",
-            contract_version="1.0.0",
-            dq_contract_compatibility_hash="dq-compat-canonical",
-        )
-    )
+    coordinator = _make_metadata_coordinator(start)
     metadata_writer = Mock()
     metadata_writer.write_silver_metadata = AsyncMock()
     clock = StepClock(start, clock_step)
@@ -169,3 +174,68 @@ async def test_real_delta_metadata_records_injected_clock_provenance(
         metadata.output_ext.delta_version_after
         == DeltaTable(str(tmp_path / "test_activity")).version()
     )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "started_at",
+    [
+        datetime(2026, 10, 7),
+        datetime(2026, 10, 7, tzinfo=timezone(timedelta(hours=2))),
+    ],
+)
+async def test_invalid_explicit_timestamp_is_rejected_before_delta_commit(
+    tmp_path, started_at
+):
+    from unittest.mock import AsyncMock
+    from bioetl.infrastructure.storage.silver.runtime_helpers import (
+        SilverWriterRuntimeServicesRequest,
+    )
+
+    metadata_writer = Mock()
+    metadata_writer.write_silver_metadata = AsyncMock()
+    writer = SilverWriter(
+        tmp_path,
+        Mock(),
+        clock=fixed_test_clock(),
+        runtime_request=SilverWriterRuntimeServicesRequest(
+            clock=fixed_test_clock(),
+            metadata_writer=metadata_writer,
+            metadata_coordinator=_make_metadata_coordinator(fixed_test_clock().now()),
+        ),
+    )
+    schema = pa.schema([("id", pa.string()), ("content_hash", pa.string())])
+    records = [{"id": "1", "content_hash": "a" * 64}]
+    with pytest.raises(ValueError, match="timezone-aware UTC"):
+        await writer.write_silver(
+            table_name="test_activity",
+            records=records,
+            primary_keys=["id"],
+            schema=schema,
+            mode="append",
+            started_at=started_at,
+        )
+    assert not (tmp_path / "test_activity").exists()
+    metadata_writer.write_silver_metadata.assert_not_awaited()
+
+    await writer.write_silver(
+        table_name="test_activity",
+        records=records,
+        primary_keys=["id"],
+        schema=schema,
+        mode="append",
+    )
+    path = str(tmp_path / "test_activity")
+    version = DeltaTable(path).version()
+    before = DeltaTable(path).to_pyarrow_table().to_pylist()
+    with pytest.raises(ValueError, match="timezone-aware UTC"):
+        await writer.write_silver(
+            table_name="test_activity",
+            records=records,
+            primary_keys=["id"],
+            schema=schema,
+            mode="append",
+            started_at=started_at,
+        )
+    assert DeltaTable(path).version() == version
+    assert DeltaTable(path).to_pyarrow_table().to_pylist() == before
