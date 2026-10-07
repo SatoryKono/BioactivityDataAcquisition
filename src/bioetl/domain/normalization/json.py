@@ -5,13 +5,16 @@ from __future__ import annotations
 
 import hashlib
 import json
-import math
 import re
 from collections.abc import Mapping, Sequence
 from dataclasses import asdict, is_dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, TypeGuard, cast
 
+from bioetl.domain.normalization.canonical_json_profile import (
+    CanonicalJsonProfile,
+    validate_canonical_json_value,
+)
 from bioetl.domain.types.dq_contracts import DQDisposition
 
 if TYPE_CHECKING:
@@ -28,6 +31,7 @@ except ImportError:
     _orjson_available = False
 
 __all__ = [
+    "CanonicalJsonProfile",
     "canonicalize_json_string",
     "deserialize_json_value",
     "lookup_mapping_path",
@@ -75,7 +79,8 @@ def _serialize_with_orjson(
     ensure_ascii: bool = True,
 ) -> str:
     """Serialize using orjson with optional ASCII escaping."""
-    assert orjson is not None
+    if orjson is None:
+        raise ImportError("domain-orjson-v1 requires the locked orjson dependency")
     result = orjson.dumps(data, option=_get_orjson_options(sort_keys)).decode("utf-8")
     return (
         _escape_non_ascii(result) if ensure_ascii and _has_non_ascii(result) else result
@@ -95,83 +100,6 @@ def _serialize_with_stdlib(
         separators=(",", ":"),
         ensure_ascii=ensure_ascii,
         allow_nan=False,
-    )
-
-
-def _validate_canonical_json_value(value: object) -> None:
-    """Reject values whose canonical output would depend on the JSON backend."""
-    _reject_numpy_like_array(value)
-    if isinstance(value, float):
-        _assert_finite_float(value)
-        return
-    if _is_json_scalar(value):
-        return
-    _validate_canonical_json_container(value)
-
-
-def _reject_numpy_like_array(value: object) -> None:
-    if not _is_numpy_like_array(value):
-        return
-    raise TypeError(
-        "Canonical JSON serialization requires JSON-compatible values; "
-        f"got {type(value).__name__}"
-    )
-
-
-def _validate_canonical_json_container(value: object) -> None:
-    if isinstance(value, dict):
-        _validate_json_mapping(value)
-        return
-    if _is_nested_json_sequence(value):
-        _validate_json_sequence(cast(Sequence[object], value))
-        return
-    raise TypeError(
-        f"Canonical JSON serialization requires JSON-compatible values; "
-        f"got {type(value).__name__}"
-    )
-
-
-def _assert_finite_float(value: float) -> None:
-    """Reject one non-finite float value."""
-    if math.isfinite(value):
-        return
-    raise ValueError("Canonical JSON serialization does not allow NaN or Infinity")
-
-
-def _is_json_scalar(value: object) -> bool:
-    """Return whether *value* is a backend-independent JSON scalar."""
-    return value is None or isinstance(value, (str, int, bool))
-
-
-def _validate_json_mapping(value: dict[object, object]) -> None:
-    """Validate mapping keys and values for canonical JSON serialization."""
-    for key, nested_value in value.items():
-        if not isinstance(key, str):
-            raise TypeError("Canonical JSON serialization requires string keys")
-        _validate_canonical_json_value(nested_value)
-
-
-def _validate_json_sequence(value: Sequence[object]) -> None:
-    """Validate every item in a JSON-like sequence."""
-    for nested_value in value:
-        _validate_canonical_json_value(nested_value)
-
-
-def _is_nested_json_sequence(value: object) -> bool:
-    """Return whether the value is a JSON-like sequence."""
-    return (
-        isinstance(value, Sequence)
-        and not isinstance(value, (str, bytes, bytearray))
-        and not _is_numpy_like_array(value)
-    )
-
-
-def _is_numpy_like_array(value: object) -> bool:
-    """Return whether value looks like a NumPy / pandas array, not JSON."""
-    return (
-        hasattr(value, "dtype")
-        and hasattr(value, "shape")
-        and not isinstance(value, (str, bytes, bytearray, memoryview))
     )
 
 
@@ -264,18 +192,38 @@ def to_jsonable(value: object) -> object:
     return value
 
 
-def stable_json_hash(payload: object) -> str:
+def stable_json_hash(
+    payload: object,
+    *,
+    profile: CanonicalJsonProfile = CanonicalJsonProfile.DOMAIN_V1,
+) -> str:
     """Return a SHA-256 hex digest of the canonical JSON form of ``payload``."""
-    serialized = serialize_json_canonical(cast(JsonDict, to_jsonable(payload)))
+    serialized = serialize_json_canonical(
+        cast(JsonDict, to_jsonable(payload)), profile=profile
+    )
     return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
 
-def serialize_json_canonical(data: JsonDict | Sequence[object]) -> str:
-    """Serialize data to deterministic canonical JSON string."""
-    _validate_canonical_json_value(data)
-    if _orjson_available:
+def serialize_json_canonical(
+    data: JsonDict | Sequence[object],
+    *,
+    profile: CanonicalJsonProfile = CanonicalJsonProfile.DOMAIN_V1,
+) -> str:
+    """Serialize with an explicit byte contract, never an availability fallback.
+
+    The default preserves existing domain bytes. Historical replay must supply a
+    profile established from stored bytes/provenance; unknown profiles fail.
+    """
+    resolved = CanonicalJsonProfile(profile)
+    validate_canonical_json_value(data)
+    if resolved == CanonicalJsonProfile.DOMAIN_V1:
         return _serialize_with_orjson(data, sort_keys=True, ensure_ascii=True)
-    return _serialize_with_stdlib(data, sort_keys=True, ensure_ascii=True)
+    if resolved in {
+        CanonicalJsonProfile.PORT_V1,
+        CanonicalJsonProfile.DOMAIN_STDLIB_V1,
+    }:
+        return _serialize_with_stdlib(data, sort_keys=True, ensure_ascii=True)
+    raise ValueError(f"Unsupported canonical JSON profile: {resolved}")
 
 
 def deserialize_json_value(data: str | bytes) -> JsonDict | list[object]:

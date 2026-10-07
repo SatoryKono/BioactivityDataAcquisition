@@ -1,5 +1,7 @@
 # Сводка evidence: project-package-topology
 
+Source-only refresh (2026-10-07, P02 F1-F7): `source_tree_sha256=cc4794d43f7eafd81b502be79c2890c47a34db412cb8eff06794a242b791a8da` binds event/result snapshots, prepared transitions and explicit canonical byte profiles. This stamp is derived from the canonical module inventory; it is not a new coverage measurement. Historical measurements below remain unchanged.
+
 Source-only refresh (2026-10-07, PR #11972 filtered batch outcome): `source_tree_sha256=696182570b4993b98acd1fa0ced60a7d33520910642560737e6d6eb2346e1086` binds the classified synthetic-root exclusion and batch/streaming counters. This is not a new coverage measurement; prior measurements below remain historical.
 
 Source-only refresh (2026-10-07, PR #11972 merged with main 62c33a2f3491): the canonical source manifest binds Silver removal accounting and ChEMBL health negotiation to `source_tree_sha256=2816e16c865d5563146ca94243b1c465adf8830e53a5d7d849055955787f6f48`. This binding is not a new coverage measurement.

@@ -2,17 +2,17 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum
-from typing import TYPE_CHECKING
 
-from bioetl.domain.aggregates.events import PipelineFailed
-from bioetl.domain.exceptions import InvalidStateError
-
-if TYPE_CHECKING:
-    from bioetl.domain.aggregates.events import DomainEvent
-    from bioetl.domain.types import JsonDict, RunID, RunType
+from bioetl.domain.immutability import (
+    FrozenDict,
+    FrozenList,
+    deep_freeze_json,
+    deep_thaw_json,
+)
 
 
 class StageStatus(StrEnum):
@@ -77,13 +77,21 @@ def _validate_terminal_has_completion(
     )
 
 
+def utc_instant(value: datetime) -> datetime:
+    """Compare aware instants without changing their identity representation."""
+    if value.tzinfo is None or value.utcoffset() is None:
+        raise ValueError("timestamp must be timezone-aware")
+    return value.astimezone(UTC)
+
+
 def _validate_completion_order(
     completed_at: datetime | None,
     started_at: datetime,
 ) -> None:
+    start = utc_instant(started_at)
     if completed_at is None:
         return
-    if completed_at >= started_at:
+    if utc_instant(completed_at) >= start:
         return
     raise ValueError(
         "completed_at cannot be earlier than started_at: "
@@ -111,7 +119,11 @@ def _validate_stage_result(
 
 @dataclass(frozen=True, slots=True)
 class StageResult:
-    """Immutable value object representing the result of a pipeline stage."""
+    """Stage evidence with detached results.
+
+    JSON collections are exposed as immutable snapshots. Other copyable domain
+    values retain their type and are defensively copied on construction/access.
+    """
 
     stage: str
     status: StageStatus
@@ -132,6 +144,24 @@ class StageResult:
             self.records_processed,
             self.started_at,
         )
+        value = object.__getattribute__(self, "result")
+        snapshot = (
+            deep_thaw_json(value)
+            if isinstance(value, (FrozenDict, FrozenList))
+            else deepcopy(value)
+        )
+        object.__setattr__(self, "result", snapshot)
+
+    def __getattribute__(self, name: str) -> object:
+        """Never expose a stored result alias, including complex value objects."""
+        value = object.__getattribute__(self, name)
+        if name != "result":
+            return value
+        # Dataclass copying/pickling can restore the accessor's frozen snapshot.
+        # Thaw it first so nested copyable values cannot become stored aliases.
+        if isinstance(value, (FrozenDict, FrozenList)):
+            value = deep_thaw_json(value)
+        return deep_freeze_json(value)
 
     @property
     def duration_seconds(self) -> float | None:
@@ -140,7 +170,9 @@ class StageResult:
             return None
         if self.status in {StageStatus.PENDING, StageStatus.RUNNING}:
             return None
-        duration = (self.completed_at - self.started_at).total_seconds()
+        duration = (
+            utc_instant(self.completed_at) - utc_instant(self.started_at)
+        ).total_seconds()
         if duration < 0:
             return None
         return duration
@@ -179,125 +211,4 @@ class StageResult:
         )
 
 
-class _PipelineRunStageMixin:
-    """Stage recording behavior for PipelineRun.
-
-    Slots and annotations live on this class so mypy sees mixin methods as
-    mutating the same instance layout as ``PipelineRun``.
-    """
-
-    __slots__ = (
-        "_ended_at",
-        "_events",
-        "_manifest_id",
-        "_metadata",
-        "_pipeline_name",
-        "_run_id",
-        "_run_type",
-        "_stages",
-        "_started_at",
-        "_status",
-    )
-    _run_id: RunID
-    _run_type: RunType
-    _pipeline_name: str
-    _status: PipelineRunState
-    _stages: list[StageResult]
-    _started_at: datetime | None
-    _ended_at: datetime | None
-    _events: list[DomainEvent]
-    _manifest_id: str | None
-    _metadata: JsonDict
-
-    def record_stage_start(self, stage: str, started_at: datetime) -> None:
-        """Record the start of a pipeline stage."""
-        self._assert_running("record_stage_start")
-        self._stages.append(
-            StageResult(stage=stage, status=StageStatus.RUNNING, started_at=started_at)
-        )
-
-    def record_stage_success(
-        self,
-        stage: str,
-        result: object = None,
-        records_processed: int = 0,
-        *,
-        started_at: datetime,
-        completed_at: datetime,
-    ) -> None:
-        """Record a successful stage."""
-        self._assert_running("record_stage_success")
-        completed = StageResult(
-            stage=stage,
-            status=StageStatus.SUCCESS,
-            started_at=started_at,
-            completed_at=completed_at,
-            result=result,
-            records_processed=records_processed,
-        )
-        if self._replace_running_stage(stage, completed):
-            return
-        if self._has_stage_status(stage, StageStatus.SUCCESS):
-            return
-        self._stages.append(completed)
-
-    def _replace_running_stage(self, stage: str, completed: StageResult) -> bool:
-        for index in range(len(self._stages) - 1, -1, -1):
-            current = self._stages[index]
-            if current.stage == stage and current.status == StageStatus.RUNNING:
-                self._stages[index] = completed
-                return True
-        return False
-
-    def _has_stage_status(self, stage: str, status: StageStatus) -> bool:
-        return any(
-            item.stage == stage and item.status == status for item in self._stages
-        )
-
-    def record_stage_failure(
-        self,
-        stage: str,
-        error: str | Exception,
-        error_type: str | None = None,
-        *,
-        started_at: datetime,
-        completed_at: datetime,
-    ) -> None:
-        """Record a failed stage and fail the run."""
-        self._assert_running("record_stage_failure")
-        error_message = str(error) if isinstance(error, Exception) else error
-        failed = StageResult(
-            stage=stage,
-            status=StageStatus.FAILED,
-            started_at=started_at,
-            completed_at=completed_at,
-            error=error_message,
-            error_type=error_type,
-        )
-        if not self._replace_running_stage(stage, failed):
-            if self._has_stage_status(stage, StageStatus.FAILED):
-                return
-            self._stages.append(failed)
-        self._status = PipelineRunState.FAILED
-        self._ended_at = completed_at
-        self._events.append(
-            PipelineFailed(
-                occurred_at=completed_at,
-                run_id=self._run_id,
-                pipeline_name=self._pipeline_name,
-                failed_stage=stage,
-                error=error_message,
-                error_type=error_type,
-            )
-        )
-
-    def _assert_running(self, operation: str) -> None:
-        if self._status != PipelineRunState.RUNNING:
-            raise InvalidStateError(
-                f"Cannot {operation}: run is in status {self._status.value}",
-                current_state=self._status.value,
-                attempted_operation=operation,
-            )
-
-
-__all__ = ["PipelineRunState", "StageResult", "StageStatus"]
+__all__ = ["PipelineRunState", "StageResult", "StageStatus", "utc_instant"]

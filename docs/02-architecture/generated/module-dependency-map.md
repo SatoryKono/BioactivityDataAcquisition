@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `2550`
-- Internal import edges (raw): `8150`
+- Scanned modules: `2552`
+- Internal import edges (raw): `8160`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `330`
@@ -27,8 +27,8 @@ flowchart LR
     composition -->|643 OK| composition
     composition -->|308 OK| domain
     composition -->|292 OK| infrastructure
-    domain -->|1283 OK| domain
-    infrastructure -->|786 OK| domain
+    domain -->|1292 OK| domain
+    infrastructure -->|787 OK| domain
     infrastructure -->|1258 OK| infrastructure
     interfaces -->|72 OK| application
     interfaces -->|60 OK| composition
@@ -46,8 +46,8 @@ flowchart LR
 | `composition`    | `composition`    |     643 | allowed |
 | `composition`    | `domain`         |     308 | allowed |
 | `composition`    | `infrastructure` |     292 | allowed |
-| `domain`         | `domain`         |    1283 | allowed |
-| `infrastructure` | `domain`         |     786 | allowed |
+| `domain`         | `domain`         |    1292 | allowed |
+| `infrastructure` | `domain`         |     787 | allowed |
 | `infrastructure` | `infrastructure` |    1258 | allowed |
 | `interfaces`     | `application`    |      72 | allowed |
 | `interfaces`     | `composition`    |      60 | allowed |
@@ -92,11 +92,11 @@ flowchart LR
 | `composition.bootstrap`        | `application.composite`                    |      22 |
 | `composition.factories`        | `domain.schemas`                           |      22 |
 | `interfaces.http`              | `domain.control_plane`                     |      22 |
+| `application.services`         | `domain.normalization`                     |      21 |
 | `composition.runtime_builders` | `infrastructure.config`                    |      21 |
 | `interfaces.cli`               | `composition.control_plane_service_access` |      21 |
 | `application.core`             | `domain.normalization`                     |      20 |
 | `application.services`         | `domain.exceptions`                        |      20 |
-| `application.services`         | `domain.normalization`                     |      20 |
 | `composition.bootstrap`        | `infrastructure.config`                    |      20 |
 | `composition.factories`        | `application.services`                     |      20 |
 | `composition.factories`        | `infrastructure.storage`                   |      20 |
