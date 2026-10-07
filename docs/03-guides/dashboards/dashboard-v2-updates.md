@@ -4,7 +4,7 @@ Run Overview records the synthetic ChEMBL protein-class root as one filtered
 Silver record. Confirmed standalone runs display `N/A` for workflow FK scope;
 missing workflow evidence continues to display `UNKNOWN`. Panel 9482 is named
 `Review Contract Exclusions` to identify the scope of its verdict.
-The [UX check](../../reports/dashboard-ux-checks/2026-10-06.md) records the
+The evidence artifact `docs/reports/dashboard-ux-checks/2026-10-06.md` records the
 browser observation and its evidence limitations.
 
 ## Retirement route corrections — 2026-10-02
