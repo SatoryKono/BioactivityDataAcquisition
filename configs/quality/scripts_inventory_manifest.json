@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-07T00:22:09.320164+00:00",
+  "generated_at": "2026-10-07T07:29:09.496483+00:00",
   "summary": {
     "total_scripts": 640,
     "status_counts": {
@@ -14829,7 +14829,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 12,
       "references": [
         {
           "path": "scripts/engineering/qa/report_compatibility_importer_census.py",
@@ -15221,7 +15221,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/engineering/qa/report_private_import_inventory.py",
@@ -15232,6 +15232,12 @@
         {
           "path": "tests/architecture/test_private_module_imports.py",
           "line": 27,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.private_import_exception_metadata import ("
+        },
+        {
+          "path": "tests/unit/scripts/qa/test_private_import_exception_metadata.py",
+          "line": 10,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.private_import_exception_metadata import ("
         }
