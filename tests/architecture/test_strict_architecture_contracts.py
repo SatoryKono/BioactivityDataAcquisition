@@ -693,6 +693,17 @@ def test_silver_schemas_match_domain_entities():
         pytest.fail(f"Could not import schemas or entities: {e}")
 
     aliases = _schema_field_aliases()
+    expected_system_aliases = {
+        "_run_id": "run_id",
+        "_run_type": "run_type",
+        "_source_batch_id": "source_batch_id",
+        "_ingestion_ts": "ingestion_ts",
+    }
+    assert {
+        field: aliases.get(field) for field in expected_system_aliases
+    } == expected_system_aliases, (
+        "System schema aliases must match their canonical entity fields"
+    )
 
     violations = []
 
