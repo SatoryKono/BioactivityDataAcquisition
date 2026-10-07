@@ -59,6 +59,8 @@ class _BatchExecutorDQMixin:
     _dq_reservoir_ranks: dict[str, list[str]]  # pyright: ignore[reportUninitializedInstanceVariable]
     records_fetched: int  # pyright: ignore[reportUninitializedInstanceVariable]
     records_quarantined: int  # pyright: ignore[reportUninitializedInstanceVariable]
+    records_quarantined_silver: int  # pyright: ignore[reportUninitializedInstanceVariable]
+    records_quarantined_gold: int  # pyright: ignore[reportUninitializedInstanceVariable]
 
     def should_collect_dq_data(self) -> bool:
         """Return True when DQ report service is configured."""
@@ -220,6 +222,7 @@ class _BatchExecutorDQMixin:
             source_batch_ids=self.source_batch_ids,
             last_bronze_path=self._last_bronze_path,
             records_fetched=self.records_fetched,
-            records_quarantined=self.records_quarantined,
+            silver_quarantined_count=self.records_quarantined_silver,
+            gold_quarantined_count=self.records_quarantined_gold,
             build_dataframe=self._build_dataframe_from_records,
         )

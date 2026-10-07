@@ -194,7 +194,7 @@ class BatchProcessingService:
             sealed_at=ingestion_ts,
         )
         self._publish_batch_events(batch)
-        await self._support.write_silver_gold_concurrent(
+        write_outcome = await self._support.write_silver_gold_concurrent(
             transform_result=transform_result,
             batch_id=batch_id,
             ingestion_ts=ingestion_ts,
@@ -203,9 +203,13 @@ class BatchProcessingService:
         self._tracing.set_batch_result(
             span,
             bronze_count=len(records),
-            silver_count=len(transform_result.silver_records),
-            gold_count=len(transform_result.gold_records),
-            quarantined_count=transform_result.quarantined_count,
+            silver_count=write_outcome.silver.confirmed_count,
+            gold_count=write_outcome.gold.confirmed_count,
+            quarantined_count=(
+                transform_result.quarantined_count
+                + write_outcome.silver.quarantined_count
+                + write_outcome.gold.quarantined_count
+            ),
         )
         return BatchProcessingOutcome(
             batch_id=batch_id,
@@ -214,6 +218,8 @@ class BatchProcessingService:
             gold_records=transform_result.gold_records,
             quarantined_count=transform_result.quarantined_count,
             filtered_out_count=transform_result.filtered_out_count,
+            silver_write=write_outcome.silver,
+            gold_write=write_outcome.gold,
             gold_excluded_by_contract_count=(
                 transform_result.gold_excluded_by_contract_count
             ),
