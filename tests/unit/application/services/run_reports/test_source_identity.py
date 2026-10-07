@@ -234,16 +234,18 @@ def test_repository_env_loader_is_whitelisted_and_local_overrides(
     tmp_path: Path,
 ) -> None:
     (tmp_path / ".env").write_text(
-        f"{RUNTIME_SOURCE_ID_ENV}={'a' * 64}\nSECRET_VALUE=do-not-read\n",
-        encoding="utf-8",
-    )
-    (tmp_path / ".env.local").write_text(
-        f"{RUNTIME_SOURCE_ID_ENV}={'b' * 64}\n",
+        f"{RUNTIME_SOURCE_ID_ENV}={'c' * 64}\nSECRET_VALUE=on-disk\n",
         encoding="utf-8",
     )
     loaded = load_repository_source_environment(
         tmp_path,
         names=(RUNTIME_SOURCE_ID_ENV,),
+        file_texts={
+            str(tmp_path / ".env"): (
+                f"{RUNTIME_SOURCE_ID_ENV}={'a' * 64}\nSECRET_VALUE=do-not-read\n"
+            ),
+            str(tmp_path / ".env.local"): f"{RUNTIME_SOURCE_ID_ENV}={'b' * 64}\n",
+        },
     )
     assert loaded == {RUNTIME_SOURCE_ID_ENV: "b" * 64}
 
@@ -262,14 +264,31 @@ def test_repository_env_loader_preserves_hash_literal_semantics(
     raw_value: str,
     expected: str,
 ) -> None:
-    (tmp_path / ".env").write_text(
-        f"TEST_VALUE={raw_value}\n",
-        encoding="utf-8",
-    )
-
     loaded = load_repository_source_environment(
         tmp_path,
         names=("TEST_VALUE",),
+        file_texts={str(tmp_path / ".env"): f"TEST_VALUE={raw_value}\n"},
     )
 
     assert loaded == {"TEST_VALUE": expected}
+
+
+def test_composition_repository_env_reader_overrides_from_files(
+    tmp_path: Path,
+) -> None:
+    from bioetl.composition.observability_runtime import (
+        load_repository_source_environment as load_from_files,
+    )
+
+    (tmp_path / ".env").write_text(
+        f"{RUNTIME_SOURCE_ID_ENV}={'a' * 64}\nSECRET_VALUE=do-not-read\n",
+        encoding="utf-8",
+    )
+    (tmp_path / ".env.local").write_text(
+        f"{RUNTIME_SOURCE_ID_ENV}={'b' * 64}\n",
+        encoding="utf-8",
+    )
+
+    assert load_from_files(tmp_path, names=(RUNTIME_SOURCE_ID_ENV,)) == {
+        RUNTIME_SOURCE_ID_ENV: "b" * 64
+    }

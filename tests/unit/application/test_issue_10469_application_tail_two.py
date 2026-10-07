@@ -163,7 +163,11 @@ async def test_bronze_cleanup_rejects_negative_retention_before_io() -> None:
 
 def test_report_source_identity_rejects_non_digest(tmp_path: Any) -> None:
     with pytest.raises(ValueError, match="64-character lowercase hex digest"):
-        write_report_root_source_identity(report_root=tmp_path, source_id="invalid")
+        write_report_root_source_identity(
+            report_root=tmp_path,
+            source_id="invalid",
+            store=MagicMock(),
+        )
 
 
 def test_workflow_transform_registry_reports_membership() -> None:
