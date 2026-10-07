@@ -124,6 +124,42 @@ def _resolve_pubmed_email(
     return None
 
 
+def _extract_unique_pmids(records: Sequence[BronzeRecord]) -> list[str]:
+    pmids: list[str] = []
+    seen: set[str] = set()
+    for record in records:
+        pmid = publication_pubmed_id(record)
+        if pmid is None or pmid in seen:
+            continue
+        seen.add(pmid)
+        pmids.append(pmid)
+    return pmids
+
+
+def _attach_pubmed_terms(
+    records: Sequence[BronzeRecord], pubmed_by_pmid: dict[str, BronzeRecord]
+) -> list[BronzeRecord]:
+    enriched: list[BronzeRecord] = []
+    for record in records:
+        pmid = publication_pubmed_id(record)
+        matched_record = pubmed_by_pmid.get(pmid) if pmid is not None else None
+        if matched_record is None:
+            enriched.append(record)
+            continue
+        headings, keywords = pubmed_term_payload(matched_record)
+        mesh_terms, keyword_terms = mesh_terms_from_pubmed_headings(headings, keywords)
+        if not mesh_terms and not keyword_terms:
+            enriched.append(record)
+            continue
+        attached = dict(record)
+        if mesh_terms:
+            attached["mesh_terms"] = mesh_terms
+        if keyword_terms:
+            attached["keywords"] = keyword_terms
+        enriched.append(attached)
+    return enriched
+
+
 class PubMedPublicationTermPayloadEnricher:
     """Attach PubMed MeSH/keywords onto ChEMBL document records via ``pubmed_id``."""
 
@@ -135,20 +171,9 @@ class PubMedPublicationTermPayloadEnricher:
         self._pubmed_source = pubmed_source
         self._logger = logger
 
-    async def enrich_many(
-        self, records: Sequence[BronzeRecord]
-    ) -> Sequence[BronzeRecord]:
-        pmids: list[str] = []
-        seen: set[str] = set()
-        for record in records:
-            pmid = publication_pubmed_id(record)
-            if pmid is None or pmid in seen:
-                continue
-            seen.add(pmid)
-            pmids.append(pmid)
-        if not pmids:
-            return list(records)
-
+    async def _fetch_pubmed_records_by_pmid(
+        self, pmids: list[str]
+    ) -> dict[str, BronzeRecord] | None:
         pubmed_by_pmid: dict[str, BronzeRecord] = {}
         try:
             async with AsyncExitStack() as stack:
@@ -170,29 +195,21 @@ class PubMedPublicationTermPayloadEnricher:
                 error=str(exc),
                 pmid_count=len(pmids),
             )
+            return None
+        return pubmed_by_pmid
+
+    async def enrich_many(
+        self, records: Sequence[BronzeRecord]
+    ) -> Sequence[BronzeRecord]:
+        pmids = _extract_unique_pmids(records)
+        if not pmids:
             return list(records)
 
-        enriched: list[BronzeRecord] = []
-        for record in records:
-            pmid = publication_pubmed_id(record)
-            matched_record = pubmed_by_pmid.get(pmid) if pmid is not None else None
-            if matched_record is None:
-                enriched.append(record)
-                continue
-            headings, keywords = pubmed_term_payload(matched_record)
-            mesh_terms, keyword_terms = mesh_terms_from_pubmed_headings(
-                headings, keywords
-            )
-            if not mesh_terms and not keyword_terms:
-                enriched.append(record)
-                continue
-            attached = dict(record)
-            if mesh_terms:
-                attached["mesh_terms"] = mesh_terms
-            if keyword_terms:
-                attached["keywords"] = keyword_terms
-            enriched.append(attached)
-        return enriched
+        pubmed_by_pmid = await self._fetch_pubmed_records_by_pmid(pmids)
+        if pubmed_by_pmid is None:
+            return list(records)
+
+        return _attach_pubmed_terms(records, pubmed_by_pmid)
 
 
 def create_pubmed_publication_term_enricher(

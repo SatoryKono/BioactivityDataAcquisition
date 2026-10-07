@@ -9,6 +9,8 @@ import pytest
 
 from bioetl.composition.providers.publication_term_pubmed_enricher import (
     PubMedPublicationTermPayloadEnricher,
+    _attach_pubmed_terms,
+    _extract_unique_pmids,
     create_pubmed_publication_term_enricher,
     parse_pubmed_mesh_xml,
     pubmed_term_payload,
@@ -69,6 +71,53 @@ def test_pubmed_term_payload_prefers_structured_headings() -> None:
     )
     assert headings[0]["descriptor_name"] == "Neoplasms"
     assert keywords == ["tumor"]
+
+
+def test_extract_unique_pmids() -> None:
+    records = [
+        {"pubmed_id": 123},
+        {"pubmed_id": "456"},
+        {"pubmed_id": 123},
+        {"publication_id": "CHEMBL1"},
+        {"pubmed_id": None},
+        {"pubmed_id": " 789 "},
+    ]
+    pmids = _extract_unique_pmids(records)
+    assert pmids == ["123", "456", "789"]
+
+
+def test_attach_pubmed_terms() -> None:
+    records = [
+        {"publication_id": "CHEMBL1", "pubmed_id": 123},
+        {"publication_id": "CHEMBL2", "pubmed_id": 456},
+        {"publication_id": "CHEMBL3", "pubmed_id": 789},
+        {"publication_id": "CHEMBL4"},
+    ]
+    pubmed_by_pmid = {
+        "123": {
+            "mesh_headings": [{"descriptor_name": "Humans", "descriptor_ui": "D006801"}]
+        },
+        "456": {"keywords": ["bioactivity"]},
+        "789": {"mesh_headings": [], "keywords": []},
+    }
+
+    enriched = _attach_pubmed_terms(records, pubmed_by_pmid)
+
+    assert len(enriched) == 4
+
+    assert "mesh_terms" in enriched[0]
+    assert enriched[0]["mesh_terms"][0]["mesh_heading"] == "Humans"
+    assert "keywords" not in enriched[0]
+
+    assert "keywords" in enriched[1]
+    assert enriched[1]["keywords"] == ["bioactivity"]
+    assert "mesh_terms" not in enriched[1]
+
+    assert "mesh_terms" not in enriched[2]
+    assert "keywords" not in enriched[2]
+    assert enriched[2] == records[2]
+
+    assert enriched[3] == records[3]
 
 
 class _PubmedSource:
