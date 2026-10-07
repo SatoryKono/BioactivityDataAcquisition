@@ -80,19 +80,23 @@ def canonicalize_layer_path(path: str) -> str:
 
 def validate_path_uniqueness(
     *,
-    bronze_path: str,
-    silver_path: str,
-    gold_path: str,
+    bronze_path: str | None,
+    silver_path: str | None,
+    gold_path: str | None,
 ) -> list[ConfigValidationError]:
     """Validate that bronze/silver/gold use distinct paths."""
     errors: list[ConfigValidationError] = []
-    canon_bronze = canonicalize_layer_path(bronze_path)
-    canon_silver = canonicalize_layer_path(silver_path)
-    canon_gold = canonicalize_layer_path(gold_path)
+    canon_bronze = (
+        canonicalize_layer_path(bronze_path) if bronze_path is not None else None
+    )
+    canon_silver = (
+        canonicalize_layer_path(silver_path) if silver_path is not None else None
+    )
+    canon_gold = canonicalize_layer_path(gold_path) if gold_path is not None else None
     paths = {canon_bronze, canon_silver, canon_gold}
     if len(paths) >= 3:
         return errors
-    if canon_bronze == canon_silver:
+    if canon_bronze is not None and canon_bronze == canon_silver:
         errors.append(
             ConfigValidationError(
                 field=_LAYER_PATHS_FIELD,
@@ -101,7 +105,7 @@ def validate_path_uniqueness(
                 rule=_DISTINCT_LAYER_PATHS_RULE,
             )
         )
-    if canon_silver == canon_gold:
+    if canon_silver is not None and canon_silver == canon_gold:
         errors.append(
             ConfigValidationError(
                 field=_LAYER_PATHS_FIELD,
@@ -110,7 +114,7 @@ def validate_path_uniqueness(
                 rule=_DISTINCT_LAYER_PATHS_RULE,
             )
         )
-    if canon_bronze == canon_gold:
+    if canon_bronze is not None and canon_bronze == canon_gold:
         errors.append(
             ConfigValidationError(
                 field=_LAYER_PATHS_FIELD,

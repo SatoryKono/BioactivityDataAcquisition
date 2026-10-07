@@ -17,6 +17,8 @@ from bioetl.composition.factories.pipeline._preflight_health_monitor import (
     build_preflight_health_monitor,
 )
 from bioetl.domain.medallion import WriteModePolicy
+from bioetl.application.core.preflight.service import PreflightLayerConfig
+from bioetl.composition.factories.dq.context_resolver import extract_dq_output_paths
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
@@ -39,6 +41,10 @@ def build_preflight_service(context: RunnerAssemblyContext) -> PreflightService:
         logger=context.logger_port,
         write_mode_policy=WriteModePolicy(),
     )
+    paths = extract_dq_output_paths(context.yaml_config)
+    sink = context.yaml_config.sink if context.yaml_config is not None else {}
+    silver = sink.get("silver")
+    gold = sink.get("gold")
     return PreflightService(
         config=pipeline.config,
         context=pipeline.context,
@@ -46,6 +52,13 @@ def build_preflight_service(context: RunnerAssemblyContext) -> PreflightService:
         metrics=pipeline.services.metrics,
         health_aggregator=health_aggregator,
         medallion_validator=medallion_validator,
+        layer_config=PreflightLayerConfig(
+            bronze_path=paths.bronze_path,
+            silver_path=paths.silver_path,
+            gold_path=paths.gold_path,
+            silver_format=silver.format if silver is not None else None,
+            gold_format=gold.format if gold is not None else None,
+        ),
     )
 
 

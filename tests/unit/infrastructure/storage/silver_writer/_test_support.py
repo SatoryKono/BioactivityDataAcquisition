@@ -29,6 +29,8 @@
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 import tempfile
 from collections.abc import Iterator
 from contextlib import ExitStack, contextmanager
@@ -67,11 +69,13 @@ def make_silver_writer(
 
     if runtime_services is None and runtime_request is None:
         runtime_request = SilverWriterRuntimeServicesRequest(
+            clock=fixed_test_clock(),
             logger=logger,  # type: ignore[arg-type]
             silver_validator=NoOpValidator(),
         )
     elif runtime_request is not None and runtime_request.silver_validator is None:
         runtime_request = SilverWriterRuntimeServicesRequest(
+            clock=fixed_test_clock(),
             csv_exporter=runtime_request.csv_exporter,
             tracing=runtime_request.tracing,
             write_policy=runtime_request.write_policy,
@@ -91,6 +95,7 @@ def make_silver_writer(
         )
 
     return SilverWriter(
+        clock=fixed_test_clock(),
         base_path=str(SILVER_BASE_PATH if base_path is None else base_path),
         logger=logger,
         runtime_services=runtime_services,

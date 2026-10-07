@@ -13,6 +13,7 @@ from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.ports import (
     AuditPort,
+    ClockPort,
     LineageStorePort,
     LoggerPort,
     MetadataCoordinatorPort,
@@ -93,6 +94,7 @@ class SilverWriterRuntimeServices:
 class SilverWriterRuntimeServicesRequest:
     """Inputs required to build grouped Silver runtime collaborators."""
 
+    clock: ClockPort
     csv_exporter: CsvExporterProtocol | None = None
     tracing: TracingPort | None = None
     write_policy: WriteModePolicy | None = None
@@ -175,6 +177,7 @@ def _build_metadata_operations(
     logger = _resolve_operation_logger(request.logger)
     return SilverMetadataOperations(
         _logger=logger,
+        _clock=request.clock,
         _metrics=request.metrics,
         _audit=request.audit,
         _metadata_writer=metadata_writer,

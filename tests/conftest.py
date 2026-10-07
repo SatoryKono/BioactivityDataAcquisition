@@ -1300,6 +1300,8 @@ def _bioetl_test_silver_validator(
         flat_structure: bool = False,
         pipeline_name: object = None,
         runtime_request: object = None,
+        *,
+        clock: object,
     ) -> None:
         if runtime_services is None:
             request_obj = runtime_request
@@ -1309,11 +1311,13 @@ def _bioetl_test_silver_validator(
             ):
                 if request_obj is None:
                     runtime_request = SilverWriterRuntimeServicesRequest(
+                        clock=clock,
                         logger=logger,  # type: ignore[arg-type]
                         silver_validator=NoOpValidator(),
                     )
                 else:
                     runtime_request = SilverWriterRuntimeServicesRequest(
+                        clock=clock,
                         csv_exporter=request_obj.csv_exporter,
                         tracing=request_obj.tracing,
                         write_policy=request_obj.write_policy,
@@ -1341,6 +1345,7 @@ def _bioetl_test_silver_validator(
             flat_structure=flat_structure,
             pipeline_name=pipeline_name,
             runtime_request=runtime_request,
+            clock=clock,
         )
 
     monkeypatch.setattr(SilverWriter, "__init__", _init)

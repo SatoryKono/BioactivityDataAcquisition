@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 import subprocess
 from pathlib import Path
 from types import SimpleNamespace
@@ -229,7 +231,7 @@ async def test_runtime_helpers_and_invocation_compat() -> None:
     logger = NoOpLogger()
     assert _resolve_operation_logger(logger) is logger
     assert isinstance(_resolve_operation_logger(None), NoOpLogger)
-    request = SilverWriterRuntimeServicesRequest()
+    request = SilverWriterRuntimeServicesRequest(clock=fixed_test_clock())
     assert _build_merged_operations(request) is None
     assert (
         _build_validation_operations(
@@ -241,6 +243,7 @@ async def test_runtime_helpers_and_invocation_compat() -> None:
     )
 
     with_path = SilverWriterRuntimeServicesRequest(
+        clock=fixed_test_clock(),
         base_path=".",
         logger=NoOpLogger(),
     )

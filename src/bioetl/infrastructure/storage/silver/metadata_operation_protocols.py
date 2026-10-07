@@ -7,6 +7,7 @@ from typing import Protocol
 
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports import (
+    ClockPort,
     LineageStorePort,
     MetadataCoordinatorPort,
     MetricsPort,
@@ -56,6 +57,8 @@ class _SilverMetadataWriteHostProtocol(Protocol):
 
 class _SilverWriteFinalizationHostProtocol(Protocol):
     """Host contract for DQ/version finalization before metadata persistence."""
+
+    _clock: ClockPort
 
     async def _compute_dq_metrics(
         self,

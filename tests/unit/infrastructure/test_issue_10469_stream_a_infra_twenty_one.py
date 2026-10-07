@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 import errno
 import json
 import os
@@ -399,7 +401,9 @@ async def test_validation_facade_wrappers_and_schema_wrapper(
         _schema,
     )
     built = _build_validation_operations(
-        SilverWriterRuntimeServicesRequest(base_path=tmp_path, logger=NoOpLogger()),
+        SilverWriterRuntimeServicesRequest(
+            clock=fixed_test_clock(), base_path=tmp_path, logger=NoOpLogger()
+        ),
         write_policy=WriteModePolicy(),
         silver_validator=MagicMock(),
     )

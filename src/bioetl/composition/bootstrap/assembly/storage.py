@@ -11,6 +11,8 @@ Note:
 
 from __future__ import annotations
 
+from bioetl.infrastructure.time import SystemClock
+
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -122,6 +124,7 @@ def bootstrap_storage_adapter(
         StorageBundle configured for the current environment.
     """
     effective_settings = settings if settings is not None else get_settings()
+    silver_clock = SystemClock()
 
     # ADR-025: Use data/output/ hierarchy for consistency with pipeline configs
     output_dir = Path(effective_settings.data_dir) / "output"
@@ -154,10 +157,12 @@ def bootstrap_storage_adapter(
             lineage_store=lineage_store,
         ),
         silver_writer=SilverWriter(
+            clock=silver_clock,
             base_path=output_dir / "silver",  # data/output/silver
             logger=logger,
             runtime_services=build_silver_writer_runtime_services(
                 SilverWriterRuntimeServicesRequest(
+                    clock=silver_clock,
                     csv_exporter=silver_csv_exporter,
                     tracing=tracing,
                     write_policy=None,

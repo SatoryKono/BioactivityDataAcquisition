@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import inspect
 import time
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core.preflight._observability import (
@@ -90,6 +91,18 @@ async def validate_infrastructure(host: _PreflightExecutionHostProtocol) -> None
         runner_stage=_PREFLIGHT_STAGE_NAME,
     )
     host._preflight_service.assert_infrastructure_healthy(report)
+    host._preflight_service.validate_runtime_configuration(report, host._runtime)
+
+
+@dataclass(frozen=True, slots=True)
+class PreflightLayerConfig:
+    """Resolved sink declarations supplied by composition for startup validation."""
+
+    bronze_path: str | None = None
+    silver_path: str | None = None
+    gold_path: str | None = None
+    silver_format: str | None = None
+    gold_format: str | None = None
 
 
 class PreflightService:
@@ -103,6 +116,8 @@ class PreflightService:
         metrics: MetricsPort,
         health_aggregator: HealthAggregator,
         medallion_validator: MedallionConfigValidator,
+        *,
+        layer_config: PreflightLayerConfig | None = None,
     ) -> None:
         self._config = config
         self._context = context
@@ -110,6 +125,7 @@ class PreflightService:
         self._metrics = metrics
         self._health_aggregator = health_aggregator
         self._medallion_validator = medallion_validator
+        self._layer_config = layer_config or PreflightLayerConfig()
 
     async def validate_infrastructure(
         self,
@@ -137,9 +153,9 @@ class PreflightService:
     def validate_medallion_config(
         self,
         runtime: RuntimeConfig,
-        bronze_path: str,
-        silver_path: str,
-        gold_path: str,
+        bronze_path: str | None,
+        silver_path: str | None,
+        gold_path: str | None,
         silver_format: str | None = None,
         gold_format: str | None = None,
     ) -> list[ConfigValidationError]:
@@ -174,9 +190,9 @@ class PreflightService:
         self,
         services: PipelineHealthServicesProtocol,
         runtime: RuntimeConfig,
-        bronze_path: str,
-        silver_path: str,
-        gold_path: str,
+        bronze_path: str | None,
+        silver_path: str | None,
+        gold_path: str | None,
         silver_format: str | None = None,
         gold_format: str | None = None,
     ) -> PreflightReport:
@@ -212,6 +228,29 @@ class PreflightService:
             health_report=health_report,
             medallion_policy_valid=medallion_policy_valid,
             config_errors=config_errors,
+            checked_at=health_report.checked_at or self._context.started_at,
+        )
+        self._raise_if_strict_blocking(report, runtime)
+        return report
+
+    def validate_runtime_configuration(
+        self, health_report: HealthReport, runtime: RuntimeConfig
+    ) -> PreflightReport:
+        """Enforce bound Medallion configuration before preparation or extraction."""
+        layers = self._layer_config
+        errors = self.validate_medallion_config(
+            runtime,
+            layers.bronze_path,
+            layers.silver_path,
+            layers.gold_path,
+            layers.silver_format,
+            layers.gold_format,
+        )
+        errors.extend(self.validate_write_modes())
+        report = PreflightReport(
+            health_report=health_report,
+            medallion_policy_valid=not errors,
+            config_errors=errors,
             checked_at=health_report.checked_at or self._context.started_at,
         )
         self._raise_if_strict_blocking(report, runtime)

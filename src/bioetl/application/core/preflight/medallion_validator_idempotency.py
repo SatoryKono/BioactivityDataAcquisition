@@ -84,7 +84,9 @@ def _expected_contract_for_mode(*, layer: Layer, mode: str) -> str | None:
         return "merge_upsert"
     if layer is Layer.GOLD and mode == "scd2":
         return "scd2"
-    if layer is Layer.GOLD and mode == "overwrite":
+    if (layer is Layer.SILVER and mode == "delete") or (
+        layer is Layer.GOLD and mode == "overwrite"
+    ):
         return "overwrite_rebuild"
     return None
 

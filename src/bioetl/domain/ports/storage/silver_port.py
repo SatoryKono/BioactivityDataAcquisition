@@ -41,6 +41,7 @@ class SilverWriteRequest:
     run_type: RunType | None = None
     source_batch_id: BatchID | None = None
     ingestion_ts: datetime | None = None
+    started_at: datetime | None = None
     quarantined_count: int | None = None
     validation_errors: tuple[str, ...] | None = None
 
@@ -74,6 +75,7 @@ _SILVER_WRITE_DEFAULTS: dict[str, object] = {
     "run_type": None,
     "source_batch_id": None,
     "ingestion_ts": None,
+    "started_at": None,
     "quarantined_count": None,
     "validation_errors": None,
 }
@@ -124,6 +126,7 @@ def coerce_silver_write_request(
         run_type=cast("RunType | None", resolved_kwargs["run_type"]),
         source_batch_id=cast("BatchID | None", resolved_kwargs["source_batch_id"]),
         ingestion_ts=cast("datetime | None", resolved_kwargs["ingestion_ts"]),
+        started_at=cast("datetime | None", resolved_kwargs["started_at"]),
         quarantined_count=cast(
             int | None,
             resolved_kwargs["quarantined_count"],

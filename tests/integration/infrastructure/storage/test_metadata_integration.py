@@ -11,6 +11,8 @@
 """Integration tests for metadata writing with Silver and Gold writers."""
 
 from __future__ import annotations
+
+from tests.helpers.clock import fixed_test_clock
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -364,9 +366,11 @@ class TestSilverWriterMetadataIntegration:
         silver_schema: pa.Schema,
     ) -> None:
         writer = SilverWriter(
+            clock=fixed_test_clock(),
             base_path=tmp_path,
             logger=mock_logger,
             runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock(),
                 metadata_writer=mock_metadata_writer,
                 metadata_coordinator=mock_metadata_coordinator_with_records,
             ),
@@ -399,6 +403,7 @@ class TestSilverWriterMetadataIntegration:
         silver_schema: pa.Schema,
     ) -> None:
         writer = SilverWriter(
+            clock=fixed_test_clock(),
             base_path=tmp_path,
             logger=mock_logger,
         )

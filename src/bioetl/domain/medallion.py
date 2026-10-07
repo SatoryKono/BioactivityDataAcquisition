@@ -26,6 +26,7 @@ class WriteMode(StrEnum):
     APPEND = "append"
     MERGE = "merge"
     OVERWRITE = "overwrite"
+    DELETE = "delete"
 
 
 class SilverWriteMode(StrEnum):
@@ -85,7 +86,7 @@ class WriteModePolicy:
 
     ALLOWED_MODES: ClassVar[dict[Layer, set[WriteMode]]] = {
         Layer.BRONZE: {WriteMode.APPEND},
-        Layer.SILVER: {WriteMode.MERGE, WriteMode.APPEND},
+        Layer.SILVER: {WriteMode.MERGE, WriteMode.APPEND, WriteMode.DELETE},
         Layer.GOLD: {WriteMode.OVERWRITE, WriteMode.APPEND},
     }
 

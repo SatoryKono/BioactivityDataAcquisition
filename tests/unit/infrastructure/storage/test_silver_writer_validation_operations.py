@@ -186,9 +186,9 @@ class TestToPolicyWriteModeImpl:
         """SilverWriteMode.APPEND should map to WriteMode.APPEND."""
         assert _to_policy_write_mode_impl(SilverWriteMode.APPEND) == WriteMode.APPEND
 
-    def test_delete_maps_to_overwrite(self) -> None:
-        """SilverWriteMode.DELETE should map to WriteMode.OVERWRITE."""
-        assert _to_policy_write_mode_impl(SilverWriteMode.DELETE) == WriteMode.OVERWRITE
+    def test_delete_maps_to_delete(self) -> None:
+        """SilverWriteMode.DELETE should map to WriteMode.DELETE."""
+        assert _to_policy_write_mode_impl(SilverWriteMode.DELETE) == WriteMode.DELETE
 
 
 @pytest.mark.unit

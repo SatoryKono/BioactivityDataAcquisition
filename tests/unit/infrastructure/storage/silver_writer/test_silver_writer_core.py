@@ -29,6 +29,8 @@
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 import asyncio
 from tests.helpers.synthetic_paths import synthetic_test_root
 from unittest.mock import AsyncMock, MagicMock
@@ -57,7 +59,9 @@ class TestSilverWriterInit:
         """Test that trailing slash is stripped from base_path."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path="s3://bucket/path/", logger=noop_logger)
+        writer = SilverWriter(
+            clock=fixed_test_clock(), base_path="s3://bucket/path/", logger=noop_logger
+        )
         assert writer.base_path == "s3://bucket/path"
 
     def test_silver_writer_init__with_csv_exporter__9233c03f(self, noop_logger):
@@ -68,9 +72,11 @@ class TestSilverWriterInit:
 
         mock_exporter = MagicMock()
         writer = SilverWriter(
+            clock=fixed_test_clock(),
             base_path=SILVER_ROOT,
             logger=noop_logger,
             runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock(),
                 csv_exporter=mock_exporter,
             ),
         )
@@ -80,7 +86,9 @@ class TestSilverWriterInit:
         """Test initialization without CSV exporter."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path=SILVER_ROOT, logger=noop_logger)
+        writer = SilverWriter(
+            clock=fixed_test_clock(), base_path=SILVER_ROOT, logger=noop_logger
+        )
         assert writer.csv_exporter is None
 
     @pytest.mark.require_silver_validator
@@ -155,7 +163,9 @@ class TestSilverWriterValidation:
             _SilverWritePreparationRequest,
         )
 
-        writer = SilverWriter(base_path=SILVER_ROOT, logger=noop_logger)
+        writer = SilverWriter(
+            clock=fixed_test_clock(), base_path=SILVER_ROOT, logger=noop_logger
+        )
         schema = pa.schema(
             [
                 pa.field("entity_id", pa.string()),
@@ -552,7 +562,9 @@ class TestSilverWriterValidation:
             _PreparedSilverWritePayload,
         )
 
-        writer = SilverWriter(base_path=SILVER_ROOT, logger=noop_logger)
+        writer = SilverWriter(
+            clock=fixed_test_clock(), base_path=SILVER_ROOT, logger=noop_logger
+        )
         payload_records = [
             {
                 "entity_id": "CHEMBL123",
@@ -653,7 +665,9 @@ class TestSilverWriterValidation:
 
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path="s3://bucket", logger=noop_logger)
+        writer = SilverWriter(
+            clock=fixed_test_clock(), base_path="s3://bucket", logger=noop_logger
+        )
         schema = pa.schema(
             [
                 pa.field("entity_id", pa.string()),
@@ -681,7 +695,9 @@ class TestSilverWriterValidation:
 
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path="s3://bucket", logger=noop_logger)
+        writer = SilverWriter(
+            clock=fixed_test_clock(), base_path="s3://bucket", logger=noop_logger
+        )
 
         dummy_schema = pa.schema([pa.field("entity_id", pa.string())])
 
@@ -702,7 +718,9 @@ class TestSilverWriterValidation:
 
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path="s3://bucket", logger=noop_logger)
+        writer = SilverWriter(
+            clock=fixed_test_clock(), base_path="s3://bucket", logger=noop_logger
+        )
         records = [{"entity_id": "CHEMBL123", "value": 5.5}]
 
         import pyarrow as pa
@@ -730,7 +748,9 @@ class TestSilverWriterValidation:
         from bioetl.domain.types import BatchID, RunID, RunType
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path="s3://bucket", logger=noop_logger)
+        writer = SilverWriter(
+            clock=fixed_test_clock(), base_path="s3://bucket", logger=noop_logger
+        )
         records = [{"entity_id": "CHEMBL123"}]
 
         import pyarrow as pa
@@ -770,7 +790,9 @@ class TestSilverWriterValidation:
 
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path="s3://bucket", logger=noop_logger)
+        writer = SilverWriter(
+            clock=fixed_test_clock(), base_path="s3://bucket", logger=noop_logger
+        )
         records = [
             {
                 "entity_id": "CHEMBL123",
@@ -856,7 +878,9 @@ class TestSilverWriterWriteModeEnum:
             SilverWriter,
         )
 
-        writer = SilverWriter(base_path=SILVER_ROOT, logger=noop_logger)
+        writer = SilverWriter(
+            clock=fixed_test_clock(), base_path=SILVER_ROOT, logger=noop_logger
+        )
 
         assert writer._validate_write_mode("merge") == SilverWriteMode.MERGE
         assert writer._validate_write_mode("append") == SilverWriteMode.APPEND
@@ -877,7 +901,9 @@ class TestSilverWriterTablePath:
         """Test table path is constructed correctly."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
+        writer = SilverWriter(
+            clock=fixed_test_clock(), base_path="s3://bucket/silver", logger=noop_logger
+        )
 
         # Access internal path construction
         table_name = "chembl.activity"
@@ -890,7 +916,9 @@ class TestSilverWriterTablePath:
         """Test table path with nested table name."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
+        writer = SilverWriter(
+            clock=fixed_test_clock(), base_path="s3://bucket/silver", logger=noop_logger
+        )
 
         table_name = "provider.schema.table"
         expected_path = "s3://bucket/silver/provider/schema/table"

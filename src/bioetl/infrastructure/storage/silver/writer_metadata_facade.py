@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Sequence
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Literal, cast
 
 import polars as pl
@@ -15,6 +15,7 @@ from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
+from bioetl.domain.ports import ClockPort
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.dq_metrics import (
@@ -50,6 +51,8 @@ from bioetl.infrastructure.storage.silver.prepared_operation_models import (
 
 class SilverWriterMetadataFacade:
     """Writer-level metadata helper methods backed by composition services."""
+
+    _clock: ClockPort
 
     _metadata: SilverMetadataOperations | None = None
 
@@ -270,15 +273,10 @@ class SilverWriterMetadataFacade:
             quarantined_count=request.quarantined_count or 0,
             validation_errors=request.validation_errors,
         )
-        from bioetl.infrastructure.storage.silver import metadata_mixin
-
         return _PreparedSilverWriteFinalizationContext(
             dq_metrics=dq_metrics,
             version_after=await self._get_delta_version(request.table_path),
-            completed_at=request.started_at
-            + timedelta(
-                seconds=metadata_mixin.time.perf_counter() - request.start_perf
-            ),
+            completed_at=self._clock.now(),
         )
 
     async def _finalize_silver_write_result(

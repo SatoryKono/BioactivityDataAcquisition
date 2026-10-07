@@ -63,6 +63,7 @@ def assemble_runtime_config(
     vacuum: ResolvedVacuumSettings,
     health_check_mode: Literal["strict", "probe"],
     skip_gold: bool,
+    strict_validation: bool = True,
 ) -> RuntimeConfig:
     return _assemble_runtime_config_impl(
         ctx=ctx,
@@ -71,6 +72,7 @@ def assemble_runtime_config(
         vacuum_retention_days=vacuum.retention_days,
         health_check_mode=health_check_mode,
         skip_gold=skip_gold,
+        strict_validation=strict_validation,
     )
 
 

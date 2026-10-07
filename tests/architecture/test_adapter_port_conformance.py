@@ -12,6 +12,8 @@
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 import inspect
 from dataclasses import dataclass
 from pathlib import Path
@@ -252,7 +254,7 @@ def _storage_adapter_instances(tmp_path: Path) -> tuple[object, ...]:
     metrics = NoOpMetrics(warn_on_use=False)
     return (
         BronzeWriter(tmp_path / "bronze", logger, metrics),
-        SilverWriter(tmp_path / "silver", logger),
+        SilverWriter(tmp_path / "silver", logger, clock=fixed_test_clock()),
         GoldWriter(tmp_path / "gold", logger),
     )
 

@@ -39,9 +39,9 @@ class MedallionConfigValidator:
     def validate_medallion_config(
         self,
         runtime: RuntimeConfig,
-        bronze_path: str,
-        silver_path: str,
-        gold_path: str,
+        bronze_path: str | None,
+        silver_path: str | None,
+        gold_path: str | None,
         silver_format: str | None = None,
         gold_format: str | None = None,
     ) -> list[ConfigValidationError]:

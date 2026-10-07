@@ -30,6 +30,7 @@ class ResolvedRuntimeProjection:
     heartbeat_interval: int
     health_check_mode: Literal["strict", "probe"]
     skip_gold: bool
+    strict_validation: bool = True
 
 
 def resolve_heartbeat_interval_policy(*, settings: Settings) -> int:
@@ -121,6 +122,7 @@ def resolve_runtime_projection(
     """Resolve explicit runtime policy before RuntimeConfig assembly."""
     return ResolvedRuntimeProjection(
         heartbeat_interval=resolve_heartbeat_interval_policy(settings=settings),
+        strict_validation=bool(getattr(settings.pipeline, "strict_validation", True)),
         health_check_mode=resolve_health_check_mode_policy(
             settings=settings,
             default_health_check_mode=default_health_check_mode,
@@ -147,4 +149,5 @@ def build_runtime_config(
         vacuum=vacuum,
         health_check_mode=runtime_projection.health_check_mode,
         skip_gold=runtime_projection.skip_gold,
+        strict_validation=runtime_projection.strict_validation,
     )

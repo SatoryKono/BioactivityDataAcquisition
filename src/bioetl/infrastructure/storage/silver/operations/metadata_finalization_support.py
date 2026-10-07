@@ -4,11 +4,10 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable, Sequence
-from datetime import timedelta
 from typing import Protocol
 
 from bioetl.domain.models import SilverMetadata
-from bioetl.domain.ports import MetadataCoordinatorPort, SilverMetadataInput
+from bioetl.domain.ports import ClockPort, MetadataCoordinatorPort, SilverMetadataInput
 from bioetl.domain.types import BronzeRecord
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
@@ -30,6 +29,9 @@ __all__ = [
 
 class _MetadataFinalizationOps(Protocol):
     """Minimal host surface needed by finalization helpers."""
+
+    @property
+    def _clock(self) -> ClockPort: ...
 
     @property
     def _metadata_coordinator(self) -> MetadataCoordinatorPort | None: ...
@@ -110,9 +112,7 @@ async def _prepare_silver_write_finalization_context(
         validation_errors=request.validation_errors,
     )
     version_after = await metadata_ops._resolve_version_after(request.table_path)
-    completed_at = request.started_at + timedelta(
-        seconds=perf_counter() - request.start_perf
-    )
+    completed_at = metadata_ops._clock.now()
     return _PreparedSilverWriteFinalizationContext(
         dq_metrics=dq_metrics,
         version_after=version_after,

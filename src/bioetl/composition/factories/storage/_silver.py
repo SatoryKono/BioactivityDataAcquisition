@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.time import SystemClock
+
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -102,8 +105,10 @@ def create_silver_writer(request: CreateSilverWriterRequest) -> SilverWriter:
             "SilverWriter requires explicit tracing injection. "
             "Build NoOpTracing in composition when tracing is disabled."
         )
+    clock = SystemClock()
     runtime_services = build_silver_writer_runtime_services(
         SilverWriterRuntimeServicesRequest(
+            clock=clock,
             csv_exporter=request.csv_exporter,
             tracing=request.tracing,
             write_policy=None,
@@ -122,6 +127,7 @@ def create_silver_writer(request: CreateSilverWriterRequest) -> SilverWriter:
         )
     )
     return request.writer_cls(
+        clock=clock,
         base_path=request.base_path,
         logger=request.logger,
         transform_version=request.transform_version,

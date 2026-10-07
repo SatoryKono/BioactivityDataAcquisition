@@ -15,6 +15,8 @@ latency is inherently noisier on shared CI runners.
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 import asyncio
 import json
 import math
@@ -373,7 +375,11 @@ def test_silver_prepare_arrow_data_budget(
     budgets = _load_budgets()
     budget = budgets["silver_prepare_arrow_2000"]
 
-    writer = SilverWriter(base_path=tmp_path / "silver_prepare", logger=NoOpLogger())
+    writer = SilverWriter(
+        clock=fixed_test_clock(),
+        base_path=tmp_path / "silver_prepare",
+        logger=NoOpLogger(),
+    )
     schema = _build_silver_schema()
     records = _build_silver_records(
         2000,
@@ -409,7 +415,11 @@ def test_silver_write_append_budget(
     budgets = _load_budgets()
     budget = budgets["silver_write_append_600"]
 
-    writer = SilverWriter(base_path=tmp_path / "silver_append", logger=NoOpLogger())
+    writer = SilverWriter(
+        clock=fixed_test_clock(),
+        base_path=tmp_path / "silver_append",
+        logger=NoOpLogger(),
+    )
     schema = _build_silver_schema()
 
     async def op() -> float:
@@ -465,7 +475,11 @@ def test_silver_write_merge_budget(
     budgets = _load_budgets()
     budget = budgets["silver_write_merge_600"]
 
-    writer = SilverWriter(base_path=tmp_path / "silver_merge", logger=NoOpLogger())
+    writer = SilverWriter(
+        clock=fixed_test_clock(),
+        base_path=tmp_path / "silver_merge",
+        logger=NoOpLogger(),
+    )
     schema = _build_silver_schema()
 
     async def op() -> float:

@@ -12,6 +12,8 @@
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 import asyncio
 from pathlib import Path
 from types import SimpleNamespace
@@ -81,10 +83,12 @@ def _create_dual_write_writer(
 ) -> SilverWriter:
     """Build a SilverWriter wired for contract dual-write tests."""
     return SilverWriter(
+        clock=fixed_test_clock(),
         base_path=temp_delta_path,
         logger=noop_logger,
         runtime_services=build_silver_writer_runtime_services(
             SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock(),
                 csv_exporter=None,
                 tracing=None,
                 write_policy=None,
@@ -165,7 +169,9 @@ def temp_delta_path(tmp_path):
 
 @pytest.fixture
 def silver_writer(temp_delta_path, noop_logger):
-    return SilverWriter(base_path=temp_delta_path, logger=noop_logger)
+    return SilverWriter(
+        clock=fixed_test_clock(), base_path=temp_delta_path, logger=noop_logger
+    )
 
 
 @pytest.fixture
@@ -684,7 +690,9 @@ async def test_write_silver_merged_strips_runtime_occurrence_fields(
 async def test_write_silver_merged_empty_records(temp_delta_path: str):
     """Test write_silver_merged handles empty records gracefully."""
     logger = RecordingLogger()
-    silver_writer = SilverWriter(base_path=temp_delta_path, logger=logger)
+    silver_writer = SilverWriter(
+        clock=fixed_test_clock(), base_path=temp_delta_path, logger=logger
+    )
 
     # Should not raise, just log warning
     await silver_writer.write_silver_merged(

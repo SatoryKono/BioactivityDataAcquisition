@@ -16,6 +16,8 @@ and documented in ADR-025.
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 import pytest
 
 import re
@@ -78,7 +80,9 @@ def test_bronze_path_contract() -> None:
 
 def test_silver_path_contract() -> None:
     """Silver Delta tables MUST expose stable provider/entity contract paths."""
-    writer = SilverWriter(base_path="data/output/silver", logger=Mock())
+    writer = SilverWriter(
+        clock=fixed_test_clock(), base_path="data/output/silver", logger=Mock()
+    )
     path = writer._resolve_table_path("chembl.activity")
     normalized = path.replace("\\", "/")
     assert normalized == "data/output/silver/chembl/activity"

@@ -10,6 +10,7 @@ from deltalake import DeltaTable, write_deltalake
 
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.ports import (
+    ClockPort,
     LoggerPort,
     TracingPort,
 )
@@ -37,7 +38,6 @@ from bioetl.infrastructure.storage.silver.writer_runtime_support import (
     _resolve_runtime_services_for_writer,
     _rewire_runtime_services,
 )
-from bioetl.infrastructure.time import SystemClock
 
 __all__ = ["SilverWriteMode", "SilverWriter", "_SilverWriteExecutionContext"]
 
@@ -74,13 +74,19 @@ class SilverWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         flat_structure: bool = False,
         pipeline_name: str | None = None,
         runtime_request: SilverWriterRuntimeServicesRequest | None = None,
+        *,
+        clock: ClockPort,
     ) -> None:
         """Initialize Silver writer."""
+        if clock is None:
+            raise TypeError("SilverWriter requires an explicit ClockPort")
+        self._clock = clock
         self._pipeline_name = pipeline_name
 
         if runtime_request is None:
             runtime_request = SilverWriterRuntimeServicesRequest(
                 logger=logger,
+                clock=clock,
             )
 
         super().__init__(base_path, logger, flat_structure=flat_structure)
@@ -92,7 +98,6 @@ class SilverWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         )
         _assign_runtime_services(self, services)
         _rewire_runtime_services(self)
-        self._clock = SystemClock()
         self._transform_version = transform_version
         self._transform_steps = transform_steps or ()
         self._host = self

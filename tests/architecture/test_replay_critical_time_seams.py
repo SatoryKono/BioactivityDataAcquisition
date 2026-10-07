@@ -28,6 +28,11 @@ pytestmark = pytest.mark.architecture
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TARGETS: tuple[Path, ...] = (
+    Path("src/bioetl/infrastructure/storage/silver_writer.py"),
+    Path("src/bioetl/infrastructure/storage/silver/writer_runtime_support.py"),
+    Path("src/bioetl/infrastructure/storage/silver/metadata_result_finalization.py"),
+    Path("src/bioetl/infrastructure/storage/silver/runtime_helpers.py"),
+    Path("src/bioetl/infrastructure/storage/silver/operations/metadata_operations.py"),
     Path("src/bioetl/domain/transformations"),
     Path("src/bioetl/application/runtime_timestamps.py"),
     Path("src/bioetl/application/composite/checkpoint"),
@@ -105,17 +110,30 @@ def _current_utc_time_refs(py_file: Path) -> list[str]:
 
 
 def _system_clock_constructor_refs(py_file: Path) -> list[str]:
-    if _relative_path(py_file) != (
-        "src/bioetl/composition/bootstrap/runtime/pipeline_context_builder.py"
+    relative = _relative_path(py_file)
+    if not (
+        relative
+        == "src/bioetl/composition/bootstrap/runtime/pipeline_context_builder.py"
+        or relative.startswith("src/bioetl/infrastructure/storage/silver")
     ):
         return []
     source = py_file.read_text(encoding="utf-8")
     tree = ast.parse(source)
+    aliases = {
+        alias.asname or alias.name
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ImportFrom)
+        for alias in node.names
+        if alias.name == "SystemClock"
+    }
+    aliases.add("SystemClock")
     refs: list[str] = []
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
             continue
-        if isinstance(node.func, ast.Name) and node.func.id == "SystemClock":
+        if (isinstance(node.func, ast.Name) and node.func.id in aliases) or (
+            isinstance(node.func, ast.Attribute) and node.func.attr == "SystemClock"
+        ):
             refs.append(f"{_relative_path(py_file)}:{node.lineno}: SystemClock()")
     return refs
 
@@ -134,3 +152,28 @@ def test_replay_critical_time_seams_do_not_read_wall_clock_directly() -> None:
         + "\n".join(f"  - {item}" for item in violations)
         + "\n\nInject ClockPort or explicit timestamps into runtime/checkpoint/control-plane seams."
     )
+
+
+def test_silver_infrastructure_does_not_construct_system_clock() -> None:
+    files = _iter_python_files(Path("src/bioetl/infrastructure/storage/silver"))
+    files += _iter_python_files(
+        Path("src/bioetl/infrastructure/storage/silver_writer.py")
+    )
+    assert not [ref for file in files for ref in _system_clock_constructor_refs(file)]
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "from bioetl.infrastructure.time import SystemClock as ConcreteClock\nclock = ConcreteClock()",
+        "import bioetl.infrastructure.time as timing\nclock = timing.SystemClock()",
+    ],
+)
+def test_silver_clock_guard_detects_aliased_construction(tmp_path, monkeypatch, source):
+    monkeypatch.setitem(
+        _system_clock_constructor_refs.__globals__, "REPO_ROOT", tmp_path
+    )
+    path = tmp_path / "src/bioetl/infrastructure/storage/silver_writer.py"
+    path.parent.mkdir(parents=True)
+    path.write_text(source, encoding="utf-8")
+    assert len(_system_clock_constructor_refs(path)) == 1

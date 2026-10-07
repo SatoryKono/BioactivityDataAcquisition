@@ -6,6 +6,7 @@ from collections.abc import Callable
 from datetime import datetime
 
 from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.ports import ClockPort
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
@@ -55,6 +56,8 @@ def _resolve_execute_silver_metadata_write() -> _ExecuteSilverMetadataWrite:
 
 class _SilverMetadataWriteFacade(_SilverMetadataContextFacade):
     """Write, audit, and finalization methods for metadata services."""
+
+    _clock: ClockPort
 
     async def _write_silver_metadata(
         self: _SilverMetadataWriteOps,

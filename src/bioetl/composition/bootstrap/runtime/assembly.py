@@ -150,6 +150,7 @@ def assemble_runtime_config(
     debug_export_dir: str | None = None,
     workflow_id: str = "standalone",
     health_check_mode: Literal["strict", "probe"] = "strict",
+    strict_validation: bool = True,
 ) -> RuntimeConfig:
     """Build ``RuntimeConfig`` from already-resolved runtime inputs."""
     return RuntimeConfig(
@@ -167,5 +168,6 @@ def assemble_runtime_config(
         debug_export_dir=debug_export_dir,
         workflow_id=workflow_id,
         health_check_mode=health_check_mode,
+        strict_validation=strict_validation,
         silver_filter_compatibility_mode=resolve_silver_filter_compatibility_mode(),
     )

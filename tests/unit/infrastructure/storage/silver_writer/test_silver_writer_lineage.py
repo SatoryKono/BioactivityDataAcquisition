@@ -29,6 +29,8 @@
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 import asyncio
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
@@ -143,7 +145,9 @@ class TestSilverWriterAudit:
         mock_audit = MagicMock()
         writer = make_silver_writer(
             logger=noop_logger,
-            runtime_request=SilverWriterRuntimeServicesRequest(audit=mock_audit),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock(), audit=mock_audit
+            ),
         )
 
         with pytest.raises(ValueError, match="run_id is required"):
@@ -174,7 +178,9 @@ class TestSilverWriterAudit:
 
         writer = make_silver_writer(
             logger=noop_logger,
-            runtime_request=SilverWriterRuntimeServicesRequest(audit=mock_audit),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock(), audit=mock_audit
+            ),
         )
 
         valid_uuid = deterministic_uuid_from_callsite("replay-sensitive")
@@ -205,7 +211,9 @@ class TestSilverWriterAudit:
 
         writer = make_silver_writer(
             logger=noop_logger,
-            runtime_request=SilverWriterRuntimeServicesRequest(audit=mock_audit),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock(), audit=mock_audit
+            ),
         )
 
         valid_uuid = deterministic_uuid_from_callsite("replay-sensitive")
@@ -237,7 +245,9 @@ class TestSilverWriterAudit:
 
         writer = make_silver_writer(
             logger=noop_logger,
-            runtime_request=SilverWriterRuntimeServicesRequest(audit=mock_audit),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock(), audit=mock_audit
+            ),
         )
 
         valid_uuid = deterministic_uuid_from_callsite("replay-sensitive")
@@ -272,6 +282,7 @@ class TestSilverWriterCsvExport:
             writer = make_silver_writer(
                 logger=noop_logger,
                 runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock(),
                     csv_exporter=mock_exporter,
                 ),
             )
@@ -305,6 +316,7 @@ class TestSilverWriterCsvExport:
                 logger=noop_logger,
                 base_path=tmp_path / "silver",
                 runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock(),
                     csv_exporter=mock_exporter,
                 ),
             )
@@ -414,6 +426,7 @@ class TestSilverWriterLineage:
         writer = make_silver_writer(
             logger=noop_logger,
             runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock(),
                 metadata_writer=mock_metadata_writer,
                 metadata_coordinator=mock_metadata_coordinator,
             ),
@@ -454,6 +467,7 @@ class TestSilverWriterLineage:
         writer = make_silver_writer(
             logger=noop_logger,
             runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock(),
                 metadata_writer=mock_metadata_writer,
                 metadata_coordinator=mock_metadata_coordinator,
             ),
@@ -507,6 +521,7 @@ class TestSilverWriterLineage:
         writer = make_silver_writer(
             logger=noop_logger,
             runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock(),
                 metadata_writer=mock_metadata_writer,
                 metadata_coordinator=mock_metadata_coordinator,
             ),
@@ -563,6 +578,7 @@ class TestSilverWriterLineage:
         writer = make_silver_writer(
             logger=noop_logger,
             runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock(),
                 metadata_writer=MagicMock(),
                 metadata_coordinator=mock_metadata_coordinator,
             ),
@@ -623,6 +639,7 @@ class TestSilverWriterLineage:
         writer = make_silver_writer(
             logger=noop_logger,
             runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock(),
                 metadata_writer=MagicMock(),
                 metadata_coordinator=_Coordinator(),
                 lineage_store=lineage_store,
@@ -676,6 +693,7 @@ class TestSilverWriterLineage:
         writer = make_silver_writer(
             logger=noop_logger,
             runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock(),
                 metadata_writer=mock_metadata_writer,
                 metadata_coordinator=_Coordinator(),
             ),
@@ -732,6 +750,7 @@ class TestSilverWriterLineage:
         writer = make_silver_writer(
             logger=noop_logger,
             runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock(),
                 metadata_writer=MagicMock(),
                 metadata_coordinator=_Coordinator(),
             ),
@@ -792,6 +811,7 @@ class TestSilverWriterLineage:
         writer = make_silver_writer(
             logger=noop_logger,
             runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock(),
                 metadata_writer=MagicMock(),
                 metadata_coordinator=_Coordinator(),
                 lineage_store=lineage_store,
