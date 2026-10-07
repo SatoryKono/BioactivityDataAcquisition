@@ -49,19 +49,19 @@ def _load_scoped_pyarrow_table(
     dt: DeltaTable,
     *,
     pipeline_single: str,
-    filters: list[tuple[str, str, object]],
+    filters: list[tuple[str, str, object]] | None = None,
     columns: list[str] | None = None,
 ) -> pa.Table:
     """Read rows scoped by pipeline for partitioned and legacy non-partitioned tables."""
     if "pipeline" in _delta_partition_columns(dt):
         return dt.to_pyarrow_table(
             partitions=[("pipeline", "=", pipeline_single)],
-            filters=filters,
+            filters=filters or None,
             columns=columns,
         )
     return dt.to_pyarrow_table(
         partitions=None,
-        filters=[*filters, ("pipeline", "=", pipeline_single)],
+        filters=[*(filters or []), ("pipeline", "=", pipeline_single)],
         columns=columns,
     )
 
