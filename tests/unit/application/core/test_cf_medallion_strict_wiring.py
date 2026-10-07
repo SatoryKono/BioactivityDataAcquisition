@@ -1,4 +1,4 @@
-"""Regression coverage for reachable DELETE and settings-bound strict preflight."""
+"""Regression coverage for batch-safe Silver modes and settings-bound strict preflight."""
 
 from __future__ import annotations
 
@@ -11,7 +11,10 @@ from bioetl.application.core.preflight.medallion_validator import (
     MedallionConfigValidator,
 )
 from bioetl.application.core.preflight.service import PreflightService
-from bioetl.composition.bootstrap.runtime.assembly import assemble_runtime_config
+from bioetl.composition.bootstrap.runtime.assembly import (
+    PreflightRuntimeSettings,
+    assemble_runtime_config,
+)
 from bioetl.composition.runtime_builders import (
     inputs_runtime_assembly,
     inputs_runtime_helpers,
@@ -35,16 +38,21 @@ def _config() -> PipelineConfig:
         entity_type="activity",
         table=TableConfig(
             primary_keys=("id",),
-            silver_write_mode=SilverWriteMode.DELETE,
+            silver_write_mode=SilverWriteMode.MERGE,
             gold_write_mode=GoldWriteMode.OVERWRITE,
-            silver_idempotency_contract="overwrite_rebuild",
+            silver_idempotency_contract="merge_upsert",
             gold_idempotency_contract="overwrite_rebuild",
         ),
     )
 
 
-def test_delete_passes_both_gates_but_overwrite_remains_forbidden():
-    WriteModePolicy().validate(Layer.SILVER, WriteMode.DELETE)
+def test_removed_delete_cannot_enter_ssot_and_overwrite_remains_forbidden():
+    for mode in ("delete", "overwrite"):
+        with pytest.raises(ValueError):
+            SilverWriteMode.from_string(mode)
+        with pytest.raises(ValueError):
+            TableConfig(silver_write_mode=mode)
+    WriteModePolicy().validate(Layer.SILVER, WriteMode.MERGE)
     from bioetl.domain.exceptions import PolicyViolationError
 
     with pytest.raises(PolicyViolationError):
@@ -130,7 +138,7 @@ async def test_runner_startup_reaches_gate_before_preparation_and_extraction(str
         dry_run=False,
         heartbeat_interval=30,
         vacuum=SimpleNamespace(enabled=False, retention_days=7),
-        strict_validation=strict,
+        preflight=PreflightRuntimeSettings(strict_validation=strict),
     )
     health = Mock()
     health.assert_healthy = Mock()
@@ -159,6 +167,7 @@ async def test_runner_startup_reaches_gate_before_preparation_and_extraction(str
     if strict:
         with pytest.raises(ValueError, match="sink.silver.format"):
             await stages[0].operation()
+        health.check_all.assert_not_awaited()
     else:
         await stages[0].operation()
     extraction.assert_not_awaited()
@@ -176,3 +185,72 @@ def test_env_setting_and_effective_snapshot_record_gate_policy(monkeypatch, stri
     assert settings.pipeline.strict_validation is strict
     snapshot = build_execution_settings_snapshot(settings)
     assert snapshot["pipeline"]["strict_validation"] is strict
+
+
+def test_all_shipped_pipeline_configs_preserve_partitions_and_pass_preflight():
+    from pathlib import Path
+    from bioetl.infrastructure.config.domain_config_resolver import (
+        load_domain_pipeline_config,
+    )
+    from bioetl.infrastructure.config.pipeline_config_api import (
+        load_pipeline_config_from_root,
+    )
+    from bioetl.domain.config import RuntimeConfig
+
+    root = Path("configs").resolve()
+    pipelines = sorted((root / "entities").rglob("*.yaml"))
+    assert pipelines
+    for path in pipelines:
+        name = f"{path.parent.name}_{path.stem}"
+        yaml_config = load_pipeline_config_from_root(name, configs_root=root)
+        config = load_domain_pipeline_config(name, configs_root=root)
+        silver = yaml_config.sink.get("silver")
+        assert config.table.partition_cols == tuple(
+            silver.partition_by if silver else ()
+        ), name
+        validator = MedallionConfigValidator(config, Mock(), WriteModePolicy())
+        runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, strict_validation=True)
+        assert (
+            validator.validate_medallion_config(
+                runtime, "bronze", "silver", "gold", "delta", "delta"
+            )
+            == []
+        ), name
+
+
+def test_preflight_binds_resolved_storage_paths_instead_of_nullable_yaml_paths(
+    tmp_path,
+):
+    from bioetl.composition.factories.pipeline._runner_preflight_observer import (
+        build_preflight_service,
+    )
+    from bioetl.domain.config import RuntimeConfig
+
+    shared = tmp_path / "silver-default"
+    pipeline = SimpleNamespace(
+        config=_config(),
+        context=Mock(),
+        runtime=RuntimeConfig(run_type=RunType.INCREMENTAL, strict_validation=True),
+        services=SimpleNamespace(
+            metrics=Mock(),
+            storage=SimpleNamespace(
+                bronze=SimpleNamespace(base_path=shared),
+                silver=SimpleNamespace(base_path=shared),
+                gold=SimpleNamespace(base_path=tmp_path / "gold"),
+            ),
+        ),
+    )
+    context = SimpleNamespace(
+        pipeline=pipeline,
+        logger_port=Mock(),
+        yaml_config=SimpleNamespace(
+            sink={
+                "bronze": SimpleNamespace(path=str(shared)),
+                "silver": SimpleNamespace(path=None, format="delta"),
+                "gold": SimpleNamespace(path=None, format="delta"),
+            }
+        ),
+    )
+    service = build_preflight_service(context)
+    with pytest.raises(ValueError, match="strict mode"):
+        service.validate_runtime_configuration(pipeline.runtime)

@@ -94,7 +94,7 @@ class TestWriteModePolicyAllowedModes:
         assert WriteModePolicy.ALLOWED_MODES[Layer.BRONZE] == {WriteMode.APPEND}
 
     def test_silver_allowed_modes(self):
-        """Test Silver layer allows APPEND and MERGE."""
+        """Test Silver layer allows APPEND, MERGE and DELETE."""
         assert WriteModePolicy.ALLOWED_MODES[Layer.SILVER] == {
             WriteMode.APPEND,
             WriteMode.MERGE,

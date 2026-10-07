@@ -135,6 +135,17 @@ def assemble_cached_bronze_context(
     return ctx.cached_bronze
 
 
+@dataclass(frozen=True, slots=True)
+class PreflightRuntimeSettings:
+    """Resolved infrastructure health and Medallion escalation policy."""
+
+    health_check_mode: Literal["strict", "probe"] = "strict"
+    strict_validation: bool = True
+
+
+_DEFAULT_PREFLIGHT_SETTINGS = PreflightRuntimeSettings()
+
+
 def assemble_runtime_config(
     *,
     run_type: RunType,
@@ -149,8 +160,7 @@ def assemble_runtime_config(
     debug_export_formats: tuple[str, ...] = (),
     debug_export_dir: str | None = None,
     workflow_id: str = "standalone",
-    health_check_mode: Literal["strict", "probe"] = "strict",
-    strict_validation: bool = True,
+    preflight: PreflightRuntimeSettings = _DEFAULT_PREFLIGHT_SETTINGS,
 ) -> RuntimeConfig:
     """Build ``RuntimeConfig`` from already-resolved runtime inputs."""
     return RuntimeConfig(
@@ -167,7 +177,7 @@ def assemble_runtime_config(
         debug_export_formats=debug_export_formats,
         debug_export_dir=debug_export_dir,
         workflow_id=workflow_id,
-        health_check_mode=health_check_mode,
-        strict_validation=strict_validation,
+        health_check_mode=preflight.health_check_mode,
+        strict_validation=preflight.strict_validation,
         silver_filter_compatibility_mode=resolve_silver_filter_compatibility_mode(),
     )

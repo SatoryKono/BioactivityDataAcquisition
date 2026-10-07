@@ -65,6 +65,7 @@ def _supports_raise_on_unhealthy(validate_fn: object) -> bool:
 
 async def validate_infrastructure(host: _PreflightExecutionHostProtocol) -> None:
     """Validate infrastructure health before pipeline execution."""
+    host._preflight_service.validate_runtime_configuration(host._runtime)
     start_time = time.perf_counter()
     validate_fn = host._preflight_service.validate_infrastructure
     if _supports_raise_on_unhealthy(validate_fn):
@@ -91,7 +92,6 @@ async def validate_infrastructure(host: _PreflightExecutionHostProtocol) -> None
         runner_stage=_PREFLIGHT_STAGE_NAME,
     )
     host._preflight_service.assert_infrastructure_healthy(report)
-    host._preflight_service.validate_runtime_configuration(report, host._runtime)
 
 
 @dataclass(frozen=True, slots=True)
@@ -208,6 +208,7 @@ class PreflightService:
         Returns:
             PreflightReport aggregating infrastructure health and config validation results.
         """
+        self.validate_runtime_configuration(runtime)
         health_report = await self.validate_infrastructure(
             services,
             raise_on_unhealthy=False,
@@ -234,9 +235,11 @@ class PreflightService:
         return report
 
     def validate_runtime_configuration(
-        self, health_report: HealthReport, runtime: RuntimeConfig
+        self, runtime: RuntimeConfig, health_report: HealthReport | None = None
     ) -> PreflightReport:
         """Enforce bound Medallion configuration before preparation or extraction."""
+        if health_report is None:
+            health_report = HealthReport(results=[])
         layers = self._layer_config
         errors = self.validate_medallion_config(
             runtime,

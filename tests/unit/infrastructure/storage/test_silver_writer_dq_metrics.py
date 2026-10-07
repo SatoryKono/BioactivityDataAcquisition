@@ -712,7 +712,7 @@ class TestSilverWriterDQMetrics:
         started_at = datetime(2026, 3, 11, 12, 0, tzinfo=UTC)
 
         with patch(
-            "bioetl.infrastructure.storage.silver.metadata_mixin.time.perf_counter",
+            "bioetl.infrastructure.storage.silver.writer_runtime_support.time.perf_counter",
             return_value=5.5,
         ):
             context = await writer._prepare_silver_write_finalization_context(

@@ -86,8 +86,10 @@ class SilverMetadataService:
             record_count=record_count,
             run_context=self.run_context,
         )
-        duration_seconds = _build_runtime_duration(
-            input_data.started_at, input_data.completed_at
+        duration_seconds = (
+            input_data.duration_seconds
+            if input_data.duration_seconds is not None
+            else _build_runtime_duration(input_data.started_at, input_data.completed_at)
         )
 
         output = BaseOutputMetadata(

@@ -989,7 +989,7 @@ class TestValidateWriteModes:
     ):
         """Test that invalid write modes are logged as warnings.
 
-        A DELETE contract declared as merge_upsert must remain invalid.
+        A MERGE contract declared as overwrite_rebuild must remain invalid.
         """
         from bioetl.domain.medallion import SilverWriteMode
 
@@ -1000,8 +1000,8 @@ class TestValidateWriteModes:
             table=TableConfig(
                 primary_keys=["id"],
                 silver_table="silver",
-                silver_write_mode=SilverWriteMode.DELETE,
-                silver_idempotency_contract="merge_upsert",
+                silver_write_mode=SilverWriteMode.MERGE,
+                silver_idempotency_contract="overwrite_rebuild",
                 gold_write_mode="scd2",
                 gold_idempotency_contract="scd2",
             ),
@@ -1137,7 +1137,7 @@ class TestValidatePreflight:
     ):
         """Test validate_preflight includes write mode validation errors.
 
-        A DELETE contract declared as merge_upsert must remain invalid.
+        A MERGE contract declared as overwrite_rebuild must remain invalid.
         """
         from bioetl.domain.medallion import SilverWriteMode
 
@@ -1148,8 +1148,8 @@ class TestValidatePreflight:
             table=TableConfig(
                 primary_keys=["id"],
                 silver_table="silver",
-                silver_write_mode=SilverWriteMode.DELETE,
-                silver_idempotency_contract="merge_upsert",
+                silver_write_mode=SilverWriteMode.MERGE,
+                silver_idempotency_contract="overwrite_rebuild",
                 gold_write_mode="scd2",
                 gold_idempotency_contract="scd2",
             ),

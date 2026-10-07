@@ -29,6 +29,8 @@
 
 from __future__ import annotations
 
+from bioetl.domain.medallion import WriteMode
+
 import pytest
 
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
@@ -216,7 +218,7 @@ class TestSilverMetadata:
                 {"id": 2, "_cv_error": True, "_cv_quarantine": True},
             ],
             primary_keys=["id"],
-            mode=SilverWriteMode.DELETE,
+            mode=WriteMode.OVERWRITE,
             dq_report_path="reports/dq/composite-publication.json",
         )
 
@@ -287,7 +289,7 @@ class TestSilverMetadata:
             table_path="/data/silver/t",
             records=records,
             primary_keys=["id"],
-            mode=SilverWriteMode.DELETE,
+            mode=WriteMode.OVERWRITE,
         )
         assert (
             coordinator.create_silver_metadata(input_delete).delta.operation

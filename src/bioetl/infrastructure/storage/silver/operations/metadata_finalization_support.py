@@ -117,6 +117,7 @@ async def _prepare_silver_write_finalization_context(
         dq_metrics=dq_metrics,
         version_after=version_after,
         completed_at=completed_at,
+        duration_seconds=perf_counter() - request.start_perf,
     )
 
 
@@ -157,6 +158,7 @@ async def _finalize_silver_write_result(
             partition_by=request.partition_cols,
             started_at=request.started_at,
             completed_at=context.completed_at,
+            duration_seconds=context.duration_seconds,
         )
     )
     await metadata_ops._persist_silver_metadata(

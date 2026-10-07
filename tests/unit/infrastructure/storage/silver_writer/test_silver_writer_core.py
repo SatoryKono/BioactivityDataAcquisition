@@ -29,6 +29,7 @@
 
 from __future__ import annotations
 
+
 from tests.helpers.clock import fixed_test_clock
 
 import asyncio
@@ -851,7 +852,7 @@ class TestSilverWriterWriteModeEnum:
 
         assert SilverWriteMode.MERGE.value == "merge"
         assert SilverWriteMode.APPEND.value == "append"
-        assert SilverWriteMode.DELETE.value == "delete"
+        assert {m.value for m in SilverWriteMode} == {"merge", "append"}
 
     def test_writer_write_mode_enum__mode_from_string__a1a1b7ae(self):
         """Test creating SilverWriteMode from string."""
@@ -859,7 +860,8 @@ class TestSilverWriterWriteModeEnum:
 
         assert SilverWriteMode("merge") == SilverWriteMode.MERGE
         assert SilverWriteMode("append") == SilverWriteMode.APPEND
-        assert SilverWriteMode("delete") == SilverWriteMode.DELETE
+        with pytest.raises(ValueError):
+            SilverWriteMode("delete")
 
     def test_silver_write_mode_invalid_raises(self):
         """Test invalid mode string raises ValueError."""
@@ -884,7 +886,8 @@ class TestSilverWriterWriteModeEnum:
 
         assert writer._validate_write_mode("merge") == SilverWriteMode.MERGE
         assert writer._validate_write_mode("append") == SilverWriteMode.APPEND
-        assert writer._validate_write_mode("delete") == SilverWriteMode.DELETE
+        with pytest.raises(ValueError):
+            writer._validate_write_mode("delete")
 
         with pytest.raises(ValueError, match="Invalid Silver write mode 'invalid'"):
             writer._validate_write_mode("invalid")

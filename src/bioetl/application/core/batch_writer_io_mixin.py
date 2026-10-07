@@ -53,7 +53,7 @@ class BatchWriterIOMixin:
     _gold_schema_policy_by_version: GoldSchemaPolicyByVersion | None
     _gold_validator: GoldValidatorPort
     _table_config: TableConfig
-    _silver_mode: Literal["merge", "append", "delete"]
+    _silver_mode: Literal["merge", "append"]
     _gold_mode: Literal["overwrite", "append", "scd2"]
     _validate_lock: Callable[[str], Awaitable[None]]
     _start_span: Callable[..., object | None]

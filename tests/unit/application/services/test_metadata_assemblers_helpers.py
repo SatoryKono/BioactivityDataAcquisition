@@ -29,6 +29,8 @@
 
 from __future__ import annotations
 
+from bioetl.domain.medallion import WriteMode
+
 from datetime import UTC, datetime
 
 import pytest
@@ -292,7 +294,7 @@ def test_resolve_record_count_prefers_total_records() -> None:
     [
         (SilverWriteMode.MERGE, "merge"),
         (SilverWriteMode.APPEND, "append"),
-        (SilverWriteMode.DELETE, "overwrite"),
+        (WriteMode.OVERWRITE, "overwrite"),
     ],
 )
 def test_build_silver_delta_maps_modes(mode: SilverWriteMode, operation: str) -> None:

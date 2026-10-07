@@ -396,7 +396,7 @@ async def test_write_silver_persisted_rows_strip_runtime_occurrence_fields(
 async def test_write_silver_delete_mode(
     silver_writer, temp_delta_path, sample_records, sample_schema
 ):
-    """Test delete mode (replaces all existing data)."""
+    """The removed batch mode must fail before a Delta mutation."""
     await silver_writer.write_silver(
         table_name="test_delete",
         records=sample_records,
@@ -405,19 +405,17 @@ async def test_write_silver_delete_mode(
         mode="append",
     )
     path = f"{temp_delta_path}/test_delete"
-    before = DeltaTable(path).version()
-    await silver_writer.write_silver(
-        table_name="test_delete",
-        records=sample_records[:1],
-        primary_keys=["id"],
-        schema=sample_schema,
-        mode="delete",
-    )
-    assert DeltaTable(path).version() == before + 1
-    assert DeltaTable(path).to_pyarrow_table().num_rows == 1
-    assert DeltaTable(path, version=before).to_pyarrow_table().num_rows == len(
-        sample_records
-    )
+    version = DeltaTable(path).version()
+    with pytest.raises(ValueError, match="Invalid Silver write mode"):
+        await silver_writer.write_silver(
+            table_name="test_delete",
+            records=sample_records[:1],
+            primary_keys=["id"],
+            schema=sample_schema,
+            mode="delete",
+        )
+    assert DeltaTable(path).version() == version
+    assert DeltaTable(path).to_pyarrow_table().num_rows == len(sample_records)
 
 
 @pytest.mark.asyncio

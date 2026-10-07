@@ -14,7 +14,14 @@ pytestmark = pytest.mark.unit
 
 def _context() -> SimpleNamespace:
     pipeline = SimpleNamespace(
-        services=SimpleNamespace(metrics=MagicMock(name="metrics")),
+        services=SimpleNamespace(
+            metrics=MagicMock(name="metrics"),
+            storage=SimpleNamespace(
+                bronze=SimpleNamespace(base_path="bronze"),
+                silver=SimpleNamespace(base_path="silver"),
+                gold=SimpleNamespace(base_path="gold"),
+            ),
+        ),
         runtime=SimpleNamespace(health_check_mode="off", run_type="backfill"),
         config=SimpleNamespace(
             pipeline_name="chembl_activity",

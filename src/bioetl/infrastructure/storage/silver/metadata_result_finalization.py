@@ -63,4 +63,5 @@ async def _prepare_silver_write_finalization_context(
         dq_metrics=dq_metrics,
         version_after=version_after,
         completed_at=completed_at,
+        duration_seconds=perf_counter() - request.start_perf,
     )

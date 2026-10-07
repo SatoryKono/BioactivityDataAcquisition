@@ -81,6 +81,7 @@ class _ExecutionHost:
         self._preflight_service = SimpleNamespace(
             validate_infrastructure=self._validate_infrastructure,
             assert_infrastructure_healthy=self._assert_infrastructure_healthy,
+            validate_runtime_configuration=lambda runtime: None,
         )
         self._postrun_service = SimpleNamespace(
             OPERATION_ERRORS=PostrunService.OPERATION_ERRORS,

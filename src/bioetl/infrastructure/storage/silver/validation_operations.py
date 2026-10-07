@@ -172,7 +172,6 @@ def _to_policy_write_mode_impl(mode: SilverWriteMode) -> WriteMode:
     mapping = {
         SilverWriteMode.MERGE: WriteMode.MERGE,
         SilverWriteMode.APPEND: WriteMode.APPEND,
-        SilverWriteMode.DELETE: WriteMode.DELETE,
     }
     return mapping[mode]
 

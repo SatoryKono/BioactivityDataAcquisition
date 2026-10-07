@@ -22,42 +22,34 @@ pytestmark = [pytest.mark.integration]
 
 
 @pytest.mark.asyncio
-async def test_delete_atomically_replaces_real_delta_and_preserves_old_version(
-    tmp_path,
-):
+async def test_unsupported_delete_and_overwrite_preserve_all_prior_batches(tmp_path):
     writer = SilverWriter(tmp_path, Mock(), clock=fixed_test_clock())
     schema = pa.schema([("id", pa.string()), ("content_hash", pa.string())])
     first = [{"id": "old", "content_hash": "a" * 64}]
     second = [{"id": "new", "content_hash": "b" * 64}]
-    await writer.write_silver(
-        table_name="test_activity",
-        records=first,
-        primary_keys=["id"],
-        schema=schema,
-        mode="append",
-    )
-    path = str(tmp_path / "test_activity")
-    version = DeltaTable(path).version()
-    await writer.write_silver(
-        table_name="test_activity",
-        records=second,
-        primary_keys=["id"],
-        schema=schema,
-        mode="delete",
-    )
-    current = DeltaTable(path)
-    assert current.version() == version + 1
-    assert current.to_pyarrow_table().to_pylist() == second
-    assert DeltaTable(path, version=version).to_pyarrow_table().to_pylist() == first
-    with pytest.raises(ValueError, match="Invalid Silver write mode"):
+    for batch in (first, second):
         await writer.write_silver(
             table_name="test_activity",
-            records=first,
+            records=batch,
             primary_keys=["id"],
             schema=schema,
-            mode="overwrite",
+            mode="append",
         )
-    assert DeltaTable(path).version() == version + 1
+    path = str(tmp_path / "test_activity")
+    version = DeltaTable(path).version()
+    for unsupported in ("delete", "overwrite"):
+        with pytest.raises(ValueError, match="Invalid Silver write mode"):
+            await writer.write_silver(
+                table_name="test_activity",
+                records=second,
+                primary_keys=["id"],
+                schema=schema,
+                mode=unsupported,
+            )
+        assert DeltaTable(path).version() == version
+        assert sorted(
+            DeltaTable(path).to_pyarrow_table().to_pylist(), key=lambda r: r["id"]
+        ) == sorted(first + second, key=lambda r: r["id"])
 
 
 @pytest.mark.asyncio
@@ -91,9 +83,7 @@ async def test_injected_clock_controls_start_and_completion_without_wallclock_pa
 
     ops._host._compute_dq_metrics = AsyncMock(return_value=Mock())
     ops._host._get_delta_version = AsyncMock(return_value=1)
-    context = await _prepare_silver_write_finalization_context(
-        ops, request, perf_counter=lambda: 1e9
-    )
+    context = await _prepare_silver_write_finalization_context(ops, request)
     assert context.completed_at == start + timedelta(seconds=2)
     explicit = start - timedelta(days=1)
     await writer.write_silver(
@@ -113,8 +103,9 @@ def test_clock_is_required(tmp_path):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("explicit_start", [False, True])
+@pytest.mark.parametrize("clock_step", [timedelta(seconds=2), timedelta(seconds=-2)])
 async def test_real_delta_metadata_records_injected_clock_provenance(
-    tmp_path, explicit_start
+    tmp_path, explicit_start, clock_step
 ):
     from uuid import UUID
     from unittest.mock import AsyncMock
@@ -144,7 +135,7 @@ async def test_real_delta_metadata_records_injected_clock_provenance(
     )
     metadata_writer = Mock()
     metadata_writer.write_silver_metadata = AsyncMock()
-    clock = StepClock(start, timedelta(seconds=2))
+    clock = StepClock(start, clock_step)
     writer = SilverWriter(
         tmp_path,
         Mock(),
@@ -161,7 +152,7 @@ async def test_real_delta_metadata_records_injected_clock_provenance(
         records=[{"id": "new", "content_hash": "b" * 64}],
         primary_keys=["id"],
         schema=pa.schema([("id", pa.string()), ("content_hash", pa.string())]),
-        mode="delete",
+        mode="append",
         **arguments,
     )
     metadata_writer.write_silver_metadata.assert_awaited_once()
@@ -170,9 +161,10 @@ async def test_real_delta_metadata_records_injected_clock_provenance(
         start - timedelta(days=1) if explicit_start else start
     )
     assert metadata.runtime.completed_at_utc == (
-        start if explicit_start else start + timedelta(seconds=2)
+        start if explicit_start else start + clock_step
     )
-    assert metadata.delta.operation == "overwrite"
+    assert metadata.delta.operation == "append"
+    assert 0 <= metadata.runtime.duration_seconds < 60
     assert (
         metadata.output_ext.delta_version_after
         == DeltaTable(str(tmp_path / "test_activity")).version()

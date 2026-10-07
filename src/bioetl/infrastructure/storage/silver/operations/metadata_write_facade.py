@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from datetime import datetime
 
-from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.medallion import SilverOperationMode, SilverWriteMode
 from bioetl.domain.ports import ClockPort
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
@@ -101,7 +100,7 @@ class _SilverMetadataWriteFacade(_SilverMetadataContextFacade):
         records: list[BronzeRecord],
         bronze_refs: list[BronzeWriteResult] | None = None,
         mode: str = "merge",
-        validated_mode: SilverWriteMode = SilverWriteMode.MERGE,
+        validated_mode: SilverOperationMode = SilverWriteMode.MERGE,
         run_id: RunID | None = None,
         run_type: RunType | None = None,
         source_batch_id: BatchID | None = None,
@@ -131,7 +130,7 @@ class _SilverMetadataWriteFacade(_SilverMetadataContextFacade):
         table_name: str,
         records: list[BronzeRecord],
         mode: str,
-        validated_mode: SilverWriteMode,
+        validated_mode: SilverOperationMode,
         run_id: RunID | None = None,
         run_type: RunType | None = None,
         source_batch_id: BatchID | None = None,
@@ -165,14 +164,11 @@ class _SilverMetadataWriteFacade(_SilverMetadataContextFacade):
     async def _prepare_silver_write_finalization_context(
         self,
         request: _SilverWriteFinalizationPreparationRequest,
-        *,
-        perf_counter: Callable[[], float] | None = None,
     ) -> _PreparedSilverWriteFinalizationContext:
         """Prepare DQ/version/timing context before Silver metadata persistence."""
         return await prepare_silver_write_finalization_context_operation(
             self,
             request,
-            perf_counter=perf_counter,
         )
 
     async def _finalize_silver_write_result(

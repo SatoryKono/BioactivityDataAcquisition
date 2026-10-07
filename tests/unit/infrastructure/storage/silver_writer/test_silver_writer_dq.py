@@ -29,6 +29,8 @@
 
 from __future__ import annotations
 
+from bioetl.domain.medallion import WriteMode
+
 from dataclasses import replace
 
 from tests.helpers.clock import fixed_test_clock
@@ -96,12 +98,10 @@ class TestSilverWriterWriteModePolicy:
         [
             pytest.param("MERGE", "MERGE", id="merge"),
             pytest.param("APPEND", "APPEND", id="append"),
-            pytest.param("DELETE", "DELETE", id="delete"),
         ],
     )
     def test_to_policy_write_mode(self, noop_logger, mode: str, expected_mode: str):
         """Public Silver modes should map to the expected policy modes."""
-        from bioetl.domain.medallion import WriteMode
         from bioetl.infrastructure.storage.silver_writer import SilverWriteMode
 
         writer = make_silver_writer(logger=noop_logger)
@@ -130,14 +130,14 @@ class TestSilverWriterWriteModePolicy:
         writer = make_silver_writer(logger=noop_logger)
         writer._write_policy = MagicMock()
         writer._write_policy.validate.side_effect = PolicyViolationError(
-            "custom Silver policy rejects delete"
+            "custom Silver policy rejects append"
         )
         writer._validation = replace(
             writer._validation, _write_policy=writer._write_policy
         )
         with pytest.raises(PolicyViolationError) as exc_info:
-            writer._enforce_write_policy(SilverWriteMode.DELETE, "test.table")
-        assert "custom Silver policy rejects delete" in str(exc_info.value)
+            writer._enforce_write_policy(SilverWriteMode.APPEND, "test.table")
+        assert "custom Silver policy rejects append" in str(exc_info.value)
 
     def test_enforce_write_policy_increments_metric_on_violation(self, noop_logger):
         """Test policy violation increments policy_violations_total metric."""
@@ -154,18 +154,18 @@ class TestSilverWriterWriteModePolicy:
 
         writer._write_policy = MagicMock()
         writer._write_policy.validate.side_effect = PolicyViolationError(
-            "custom Silver policy rejects delete"
+            "custom Silver policy rejects append"
         )
         writer._validation = replace(
             writer._validation, _write_policy=writer._write_policy
         )
         with pytest.raises(PolicyViolationError):
-            writer._enforce_write_policy(SilverWriteMode.DELETE, "test.table")
+            writer._enforce_write_policy(SilverWriteMode.APPEND, "test.table")
 
         mock_metrics.increment_counter.assert_called_once_with(
             "bioetl_policy_violations_total",
             1,
-            {"layer": "silver", "mode": "delete"},
+            {"layer": "silver", "mode": "append"},
         )
 
     def test_enforce_write_policy_logs_error_on_violation(self, noop_logger):
@@ -178,20 +178,20 @@ class TestSilverWriterWriteModePolicy:
 
         writer._write_policy = MagicMock()
         writer._write_policy.validate.side_effect = PolicyViolationError(
-            "custom Silver policy rejects delete"
+            "custom Silver policy rejects append"
         )
         writer._validation = replace(
             writer._validation, _write_policy=writer._write_policy
         )
         with pytest.raises(PolicyViolationError):
-            writer._enforce_write_policy(SilverWriteMode.DELETE, "test.table")
+            writer._enforce_write_policy(SilverWriteMode.APPEND, "test.table")
 
         mock_logger.error.assert_called_once()
         call_args = mock_logger.error.call_args
         assert call_args[0][0] == "Write mode policy violation"
         assert call_args[1]["layer"] == "silver"
-        assert call_args[1]["mode"] == "delete"
-        assert call_args[1]["policy_mode"] == "delete"
+        assert call_args[1]["mode"] == "append"
+        assert call_args[1]["policy_mode"] == "append"
         assert call_args[1]["table"] == "test.table"
 
     @pytest.mark.asyncio
@@ -205,7 +205,7 @@ class TestSilverWriterWriteModePolicy:
 
         writer._write_policy = MagicMock()
         writer._write_policy.validate.side_effect = PolicyViolationError(
-            "custom Silver policy rejects delete"
+            "custom Silver policy rejects append"
         )
         writer._validation = replace(
             writer._validation, _write_policy=writer._write_policy
@@ -214,9 +214,9 @@ class TestSilverWriterWriteModePolicy:
             await write_standard_silver(
                 writer,
                 records=valid_records,
-                mode="delete",
+                mode="append",
             )
-        assert "custom Silver policy rejects delete" in str(exc_info.value)
+        assert "custom Silver policy rejects append" in str(exc_info.value)
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
@@ -257,7 +257,7 @@ class TestSilverWriterWriteModePolicy:
 
         writer._write_policy = MagicMock()
         writer._write_policy.validate.side_effect = PolicyViolationError(
-            "custom Silver policy rejects delete"
+            "custom Silver policy rejects append"
         )
         writer._validation = replace(
             writer._validation, _write_policy=writer._write_policy
@@ -266,11 +266,11 @@ class TestSilverWriterWriteModePolicy:
             await write_standard_silver(
                 writer,
                 records=valid_records,
-                mode="delete",
+                mode="append",
             )
 
         mock_metrics.increment_counter.assert_called_once_with(
             "bioetl_policy_violations_total",
             1,
-            {"layer": "silver", "mode": "delete"},
+            {"layer": "silver", "mode": "append"},
         )
