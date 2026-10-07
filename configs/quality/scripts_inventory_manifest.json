@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-06T22:18:32.682298+00:00",
+  "generated_at": "2026-10-07T10:05:34.435570+00:00",
   "summary": {
-    "total_scripts": 645,
+    "total_scripts": 646,
     "status_counts": {
       "active": 335,
-      "supporting": 310
+      "supporting": 311
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -13,9 +13,9 @@
       "ci": 95,
       "docs": 279,
       "other": 50,
-      "scripts": 537,
+      "scripts": 538,
       "skills": 13,
-      "tests": 453
+      "tests": 454
     }
   },
   "scripts": [
@@ -3598,7 +3598,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 971,
+          "line": 975,
           "source_group": "tests",
           "text": "powershell_wrapper = (ROOT / \"scripts/ai/mcp/mcp_docker_wrapper.ps1\").read_text("
         }
@@ -4420,7 +4420,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 951,
+          "line": 955,
           "source_group": "tests",
           "text": "smoke = ROOT / \"scripts/ai/mcp/protocol_smoke.py\""
         },
@@ -4457,7 +4457,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 961,
+          "line": 965,
           "source_group": "tests",
           "text": "powershell = (ROOT / \"scripts/ai/mcp/support/docker_cli_resolver.ps1\").read_text("
         }
@@ -10022,7 +10022,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1024,
+          "line": 1028,
           "source_group": "tests",
           "text": "helper = (ROOT / \"scripts/engineering/ci/apply_ci_fixes.py\").read_text("
         }
@@ -13493,7 +13493,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/docker_runtime_preflight.py",
-          "line": 938,
+          "line": 941,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa import check_prometheus_rules as cpr"
         },
@@ -14475,7 +14475,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/import_graph_inventory.py",
-          "line": 16,
+          "line": 24,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.file_discovery import discover_files"
         },
@@ -14905,7 +14905,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 12,
       "references": [
         {
           "path": "scripts/engineering/qa/report_compatibility_importer_census.py",
@@ -14924,6 +14924,12 @@
           "line": 30,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.import_graph_inventory import ("
+        },
+        {
+          "path": "tests/architecture/test_runtime_import_scc.py",
+          "line": 32,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.import_graph_inventory import PROJECTION_OWNERSHIP"
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5565_5569_closeout.py",
@@ -14946,12 +14952,6 @@
         {
           "path": "tests/architecture/test_tech_debt_issues_5811_5816_closeout.py",
           "line": 25,
-          "source_group": "tests",
-          "text": "from scripts.engineering.qa.import_graph_inventory import ("
-        },
-        {
-          "path": "tests/unit/scripts/qa/test_import_graph_inventory_reports.py",
-          "line": 17,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.import_graph_inventory import ("
         }
@@ -15291,6 +15291,37 @@
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-10-31",
       "next_step": "Retain as the shared typed report/allowlist helpers behind report_observability_metric_inventory.py; keep it supporting and do not expose it as a standalone command."
+    },
+    {
+      "path": "scripts/engineering/qa/private_import_exception_metadata.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/report_private_import_inventory.py",
+          "line": 23,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa.private_import_exception_metadata import ("
+        },
+        {
+          "path": "tests/architecture/test_private_module_imports.py",
+          "line": 27,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.private_import_exception_metadata import ("
+        },
+        {
+          "path": "tests/unit/scripts/qa/test_private_import_exception_metadata.py",
+          "line": 10,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.private_import_exception_metadata import ("
+        }
+      ],
+      "owner": "@bioetl-architecture",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-17",
+      "next_step": "Retain as the metadata checker behind the private-import architecture ratchet; keep the architecture test as the entrypoint and do not promote this module to a standalone command."
     },
     {
       "path": "scripts/engineering/qa/reduce_architecture_debt.py",
@@ -16884,7 +16915,7 @@
         },
         {
           "path": "tests/architecture/test_private_module_imports.py",
-          "line": 26,
+          "line": 30,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_private_import_inventory import ("
         },
@@ -21221,7 +21252,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
-          "line": 1920,
+          "line": 1922,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.capture_acceptance import ("
         },
@@ -21301,7 +21332,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
-          "line": 1909,
+          "line": 1911,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.capture_provenance import verify_capture"
         },
@@ -21692,7 +21723,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 2431,
+          "line": 2433,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import recover_renderer as rr"
         },
@@ -22731,7 +22762,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 655,
+          "line": 657,
           "source_group": "scripts",
           "text": "str(ROOT / \"scripts/ops/runtime/docker/docker_runtime_preflight.py\"),"
         },
@@ -22776,7 +22807,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1271,
+          "line": 1275,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         },
@@ -22915,7 +22946,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 1524,
+          "line": 1526,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/docker/recover-neo4j.ps1 \""
         }
@@ -23628,7 +23659,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 722,
+          "line": 726,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1\","
         }
@@ -23689,7 +23720,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 721,
+          "line": 725,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/runtime/neo4j/neo4j_quick_start.sh\","
         }
@@ -24926,13 +24957,13 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 946,
+          "line": 950,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1208,
+          "line": 1212,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -24963,7 +24994,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 946,
+          "line": 950,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },
@@ -24994,13 +25025,13 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 946,
+          "line": 950,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1208,
+          "line": 1212,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -25037,7 +25068,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 946,
+          "line": 950,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
         },

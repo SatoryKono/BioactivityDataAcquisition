@@ -1,18 +1,18 @@
 {
   "summary": {
-    "scanned_modules": 2550,
-    "total_internal_imports": 8149,
+    "scanned_modules": 2551,
+    "total_internal_imports": 8170,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "eda0e4f8c92946f7cde4125d9ba1ff0cd32f6484e3ad36e5ce3f3a12b1c76eb6"
+    "source_fingerprint": "0c128c3a7bc2b17bfa78d6f7791065f1c03280af77577ff09c90dc24b5db7675"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1602,
+      "imports": 1606,
       "allowed": true
     },
     {
@@ -24,31 +24,31 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 225,
+      "imports": 226,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 643,
+      "imports": 647,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 308,
+      "imports": 310,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 292,
+      "imports": 293,
       "allowed": true
     },
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1283,
+      "imports": 1290,
       "allowed": true
     },
     {
@@ -72,13 +72,13 @@
     {
       "source": "interfaces",
       "target": "composition",
-      "imports": 60,
+      "imports": 61,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 84,
+      "imports": 85,
       "allowed": true
     },
     {
@@ -140,14 +140,14 @@
       "imports": 55
     },
     {
-      "source": "composition.factories",
-      "target": "application.core",
+      "source": "composition.bootstrap",
+      "target": "application.services",
       "imports": 47
     },
     {
-      "source": "composition.bootstrap",
-      "target": "application.services",
-      "imports": 46
+      "source": "composition.factories",
+      "target": "application.core",
+      "imports": 47
     },
     {
       "source": "infrastructure.storage",
@@ -210,6 +210,11 @@
       "imports": 26
     },
     {
+      "source": "composition.factories",
+      "target": "infrastructure.config",
+      "imports": 26
+    },
+    {
       "source": "infrastructure.adapters",
       "target": "domain.ports",
       "imports": 26
@@ -227,11 +232,6 @@
     {
       "source": "composition.bootstrap",
       "target": "infrastructure.control_plane",
-      "imports": 25
-    },
-    {
-      "source": "composition.factories",
-      "target": "infrastructure.config",
       "imports": 25
     },
     {

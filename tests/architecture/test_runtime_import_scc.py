@@ -8,7 +8,13 @@
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Architecture regression tests for runtime import SCC drift."""
+"""Architecture regression tests for runtime import SCC drift.
+
+The scanner enforces the ownership projection: import-time and deferred
+function/class imports under ``src/bioetl`` ``*.py``, excluding
+``TYPE_CHECKING``. It is not the import-time-only, type-only, or dynamic
+projection, and it does not scan ``src/memory``.
+"""
 
 from __future__ import annotations
 
@@ -23,12 +29,18 @@ from pathlib import Path
 
 import pytest
 
+from scripts.engineering.qa.import_graph_inventory import PROJECTION_OWNERSHIP
+
 SRC_ROOT = Path("src/bioetl")
 _MIN_PARALLEL_READ_FILES = 64
 _DEFAULT_READ_WORKERS = 8
 _MAX_READ_WORKERS = 16
 REVIEWED_RUNTIME_SCC_BUDGET_MAX = 1
 REVIEWED_RUNTIME_SCC_MIN_REVIEW_DATE = date(2026, 7, 1)
+# src/bioetl *.py only. TYPE_CHECKING is excluded; function and class imports
+# are included. That is the ownership projection, not import-time runtime,
+# type-only, or dynamic, and it does not scan src/memory.
+ENFORCED_IMPORT_GRAPH_PROJECTION = PROJECTION_OWNERSHIP
 ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
     frozenset(
         {
@@ -257,7 +269,7 @@ def _iter_runtime_sccs(edges: dict[str, set[str]]) -> Iterable[frozenset[str]]:
 
 @pytest.mark.architecture
 def test_runtime_import_graph_has_no_forbidden_sccs() -> None:
-    """Runtime import SCC scan must stay clear of confirmed intra-layer cycles."""
+    """Ownership-projection SCC scan must stay clear of confirmed cycles."""
     edges = _build_runtime_import_graph()
     actual_sccs = tuple(_iter_runtime_sccs(edges))
     blocked = [
@@ -267,14 +279,15 @@ def test_runtime_import_graph_has_no_forbidden_sccs() -> None:
     ]
     assert not blocked, (
         "Runtime import SCC scan found forbidden strongly connected components "
-        "(TYPE_CHECKING imports are ignored):\n"
+        f"(projection={ENFORCED_IMPORT_GRAPH_PROJECTION}; "
+        "TYPE_CHECKING imports are ignored):\n"
         + "\n".join(f"- {', '.join(component)}" for component in blocked)
     )
 
 
 @pytest.mark.architecture
 def test_runtime_import_graph_has_no_unreviewed_sccs() -> None:
-    """Same-layer runtime import SCCs must be explicitly owned and reviewed."""
+    """Ownership-projection SCCs must be explicitly owned and reviewed."""
     edges = _build_runtime_import_graph()
     actual_sccs = tuple(_iter_runtime_sccs(edges))
     accepted_sccs = set(ACCEPTED_RUNTIME_SCCS)
@@ -286,7 +299,8 @@ def test_runtime_import_graph_has_no_unreviewed_sccs() -> None:
     ]
 
     assert not unreviewed, (
-        "Runtime import SCC scan found unreviewed strongly connected components. "
+        "Runtime import SCC scan found unreviewed strongly connected components "
+        f"(projection={ENFORCED_IMPORT_GRAPH_PROJECTION}). "
         "Either remove the cycle or add an owner/rationale/review_date entry to "
         "ACCEPTED_RUNTIME_SCCS:\n"
         + "\n".join(f"- {', '.join(component)}" for component in unreviewed)
@@ -296,6 +310,13 @@ def test_runtime_import_graph_has_no_unreviewed_sccs() -> None:
         "breaking the cycles:\n"
         + "\n".join(f"- {', '.join(component)}" for component in stale_acceptances)
     )
+
+
+@pytest.mark.architecture
+def test_runtime_import_scc_enforces_ownership_projection() -> None:
+    """The historical runtime SCC scan enforces the ownership projection."""
+    assert ENFORCED_IMPORT_GRAPH_PROJECTION == "ownership"
+    assert ENFORCED_IMPORT_GRAPH_PROJECTION == PROJECTION_OWNERSHIP
 
 
 @pytest.mark.architecture
