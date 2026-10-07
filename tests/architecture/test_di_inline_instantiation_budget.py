@@ -13,7 +13,8 @@
 REQ-ARCH-001:
 - Application code must avoid ``self.attr = ClassName(...)`` assignments.
 - Dependencies should be assembled in composition and injected.
-- Temporary exceptions may be annotated inline with ``EXC-002``/``EXC-003``.
+- ``EXC-002`` / ``EXC-003`` suppresses a hit only together with a PIM id
+  that exists in ``configs/quality/private_import_ratchet.yaml``.
 """
 
 from __future__ import annotations
@@ -24,11 +25,14 @@ import ast
 from pathlib import Path
 from typing import NamedTuple
 
+from tests.architecture.test_di_runtime_inline_construction import (
+    line_has_metadata_waiver,
+)
+
 
 pytestmark = pytest.mark.architecture
 
 APPLICATION_DIR = Path("src/bioetl/application")
-EXCEPTION_MARKERS = ("EXC-002", "EXC-003")
 
 
 class InlineInstantiationViolation(NamedTuple):
@@ -133,7 +137,7 @@ class _InlineInstantiationFinder(ast.NodeVisitor):
             return
 
         source_line = self._source_lines[lineno - 1]
-        if any(marker in source_line for marker in EXCEPTION_MARKERS):
+        if line_has_metadata_waiver(source_line):
             return
 
         self.violations.append(
@@ -183,7 +187,7 @@ def test_application_inline_instantiation_budget_is_zero() -> None:
         "REQ-ARCH-001 violation: inline class instantiations found in application "
         "layer (`self.attr = ClassName(...)`).\n"
         "Move creation to composition/factory or inject constructor/factory callable.\n"
-        "For temporary exceptions annotate line with EXC-002 or EXC-003.\n\n"
+        "A temporary exception needs EXC-002 or EXC-003 plus an existing PIM id.\n\n"
         "Violations:\n"
         + "\n".join(
             "  - "
