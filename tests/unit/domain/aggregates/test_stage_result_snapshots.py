@@ -78,3 +78,22 @@ def test_success_copy_also_snapshots_result() -> None:
     success = pending.with_success(NOW, payload, records_processed=1)
     payload["rows"].append(2)
     assert success.result == {"rows": [1]}
+
+
+def test_result_with_non_string_keys_can_be_read() -> None:
+    stage = StageResult("extract", StageStatus.SUCCESS, NOW, NOW, result={1: 2})
+    obtained = stage.result
+    assert obtained == {1: 2}
+    assert isinstance(obtained, dict)
+    obtained[1] = 3
+    assert stage.result == {1: 2}
+
+
+def test_non_json_result_copies_are_deeply_detached() -> None:
+    original = {"nested": [{1: [2]}]}
+    stage = StageResult("extract", StageStatus.SUCCESS, NOW, NOW, result=original)
+    original["nested"][0][1].append(3)
+    obtained = stage.result
+    assert isinstance(obtained, dict)
+    obtained["nested"][0][1].append(4)
+    assert stage.result == {"nested": [{1: [2]}]}

@@ -127,7 +127,10 @@ class StageResult:
         # Thaw restored frozen snapshots to avoid aliases to nested copyable values.
         if isinstance(value, (FrozenDict, FrozenList)):
             value = deep_thaw_json(value)
-        return deep_freeze_json(value)
+        try:
+            return deep_freeze_json(value)
+        except TypeError:
+            return deepcopy(value)
 
     @property
     def duration_seconds(self) -> float | None:

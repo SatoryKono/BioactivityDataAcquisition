@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
+from enum import Enum
 from uuid import UUID
 
 import pytest
@@ -73,6 +74,73 @@ def test_factory_event_and_real_json_projection_are_independent() -> None:
     assert event.event_id == identity
     envelope.context["metadata"]["nested"].append(3)
     assert event.metadata == {"nested": [1]}
+
+
+def test_metadata_projection_normalizes_nested_identity_scalars() -> None:
+    class IdentityValue(Enum):
+        TIMESTAMP = NOW
+        IDENTIFIER = UUID("ABCDEF01-2345-6789-ABCD-EF0123456789")
+
+    metadata = {
+        "timestamp": NOW,
+        "identifier": IdentityValue.IDENTIFIER.value,
+        "nested": [{"values": (IdentityValue.TIMESTAMP, IdentityValue.IDENTIFIER)}],
+        "primitives": [None, True, 3, 1.5, "text"],
+    }
+    event = QuarantineEntryCreated(
+        occurred_at=NOW,
+        run_id=RUN,
+        batch_id=BATCH,
+        pipeline_name="p",
+        error_code="E",
+        payload_hash=ContentHash("a" * 64),
+        metadata=metadata,
+        event_id="persisted-event-id",
+    )
+    identity = event.event_id
+    envelope = map_domain_event_to_observability_event(event)
+    expected = {
+        "timestamp": NOW.isoformat(),
+        "identifier": "abcdef01-2345-6789-abcd-ef0123456789",
+        "nested": [
+            {"values": [NOW.isoformat(), "abcdef01-2345-6789-abcd-ef0123456789"]}
+        ],
+        "primitives": [None, True, 3, 1.5, "text"],
+    }
+    assert envelope.context["metadata"] == expected
+    assert json.loads(json.dumps(envelope.context))["metadata"] == expected
+    assert (
+        json.loads(JSONRenderer()(None, "warning", dict(envelope.context)))["metadata"]
+        == expected
+    )
+    assert event.metadata == metadata
+    assert event.event_id == identity
+
+
+@pytest.mark.parametrize("explicit_id", ["", "persisted-event-id"])
+@pytest.mark.parametrize(
+    ("value", "error"),
+    [
+        (float("nan"), ValueError),
+        (float("inf"), ValueError),
+        ({1: 2}, TypeError),
+        (object(), TypeError),
+    ],
+)
+def test_event_metadata_validation_is_preserved(
+    explicit_id: str, value: object, error: type[Exception]
+) -> None:
+    with pytest.raises(error):
+        QuarantineEntryCreated(
+            occurred_at=NOW,
+            run_id=RUN,
+            batch_id=BATCH,
+            pipeline_name="p",
+            error_code="E",
+            payload_hash=ContentHash("a" * 64),
+            metadata={"nested": [value]},
+            event_id=explicit_id,
+        )
 
 
 @pytest.mark.parametrize("review", [False, True])
