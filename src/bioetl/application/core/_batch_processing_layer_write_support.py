@@ -45,6 +45,61 @@ class LayerSpanRunner(Protocol):
     ) -> Awaitable[object]: ...
 
 
+async def _write_silver_stage(
+    *,
+    execute_with_span: LayerSpanRunner,
+    writer: BatchWriter,
+    quarantine_manager: QuarantineRuntimeService,
+    logger: LoggerPort,
+    batch_metrics: BatchMetricsRecorderService,
+    run_id: RunID | None,
+    domain_event_emitter: DomainEventEmitterProtocol | None,
+    transform_result: TransformResult,
+    batch_id: BatchID,
+    ingestion_ts: datetime,
+    bronze_refs: list[BronzeWriteResult] | None,
+) -> tuple[LayerWriteOutcome, LayerWriteOutcome | None]:
+    """Write Silver; return a blocked Gold outcome when Silver did not land."""
+    silver_outcome = LayerWriteOutcome(
+        layer="silver",
+        status="skipped",
+        candidate_count=len(transform_result.silver_records),
+    )
+    if not transform_result.silver_records:
+        return silver_outcome, None
+    silver_outcome = await safe_write_layer(
+        execute_with_span=execute_with_span,
+        writer=writer,
+        quarantine_manager=quarantine_manager,
+        logger=logger,
+        run_id=run_id,
+        domain_event_emitter=domain_event_emitter,
+        layer="silver",
+        records=transform_result.silver_records,
+        batch_id=batch_id,
+        ingestion_ts=ingestion_ts,
+        bronze_refs=bronze_refs,
+        operation_errors=_OPERATION_ERRORS,
+    )
+    silver_written = (
+        silver_outcome.confirmed_count if silver_outcome.status == "written" else 0
+    )
+    track_storage_write_metrics(
+        batch_metrics,
+        transform_result=transform_result,
+        silver_written=silver_written,
+        gold_written=0,
+    )
+    if silver_outcome.status == "written":
+        return silver_outcome, None
+    blocked_gold = LayerWriteOutcome(
+        layer="gold",
+        status="blocked" if transform_result.gold_records else "skipped",
+        candidate_count=len(transform_result.gold_records),
+    )
+    return silver_outcome, blocked_gold
+
+
 async def write_silver_then_gold(
     *,
     execute_with_span: LayerSpanRunner,

@@ -20,6 +20,11 @@ from bioetl.application.core._batch_write_support import safe_write_layer
 from bioetl.application.core._record_processor_span_support import (
     RecordProcessorSpanExecutor,
 )
+from bioetl.application.core._record_processor_write_support import (
+    RecordProcessorWriteDeps,
+    write_gold_layer,
+    write_silver_layer,
+)
 from bioetl.application.core.batch_executor import BatchResult
 from bioetl.application.core.batch_processing_contracts import LayerWriteOutcome
 from bioetl.application.core.batch_shared_operation_errors import (
@@ -42,7 +47,6 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import TracingPort
     from bioetl.domain.types import BatchID
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
-    from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
 class RecordProcessor:
