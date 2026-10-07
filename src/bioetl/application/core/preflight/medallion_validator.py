@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.preflight.medallion_validator_runtime import (
@@ -13,14 +14,27 @@ from bioetl.application.core.preflight.medallion_validator_runtime import (
     validate_single_write_mode,
 )
 from bioetl.domain.medallion import Layer, MedallionPolicy, WriteModePolicy
-from bioetl.domain.types import ConfigValidationError
+from bioetl.domain.types import ConfigValidationError, HealthReport, PreflightReport
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.ports import LoggerPort
 
 _GOLD_SEMANTIC_WRITE_MODES = frozenset({"append", "overwrite", "scd2"})
 _GOLD_SEMANTIC_WRITE_MODES_EXPECTED = "one of: append, overwrite, scd2"
+
+
+@dataclass(frozen=True, slots=True)
+class PreflightLayerConfig:
+    """Resolved sink declarations supplied by composition for startup validation."""
+
+    bronze_path: str | None = None
+    silver_path: str | None = None
+    gold_path: str | None = None
+    silver_format: str | None = None
+    gold_format: str | None = None
 
 
 class MedallionConfigValidator:
@@ -173,3 +187,42 @@ class MedallionConfigValidator:
 _MedallionConfigValidator = MedallionConfigValidator
 
 __all__ = ["MedallionConfigValidator", "_MedallionConfigValidator"]
+
+
+def build_runtime_validation_report(
+    validator: MedallionConfigValidator,
+    runtime: RuntimeConfig,
+    layers: PreflightLayerConfig,
+    health_report: HealthReport | None,
+    *,
+    checked_at: datetime,
+) -> PreflightReport:
+    """Collect bound startup policy results without running infrastructure probes."""
+    if health_report is None:
+        health_report = HealthReport(results=[])
+    errors = validator.validate_medallion_config(
+        runtime,
+        layers.bronze_path,
+        layers.silver_path,
+        layers.gold_path,
+        layers.silver_format,
+        layers.gold_format,
+    )
+    errors.extend(validator.validate_write_modes())
+    return PreflightReport(
+        health_report=health_report,
+        medallion_policy_valid=not errors,
+        config_errors=errors,
+        checked_at=health_report.checked_at or checked_at,
+    )
+
+
+def raise_if_strict_blocking(report: PreflightReport, runtime: RuntimeConfig) -> None:
+    """Escalate invalid configuration according to the resolved runtime policy."""
+    if not (report.should_block_startup and runtime.strict_validation):
+        return
+    errors = [
+        f"{error.field}: {error.actual} (expected: {error.expected})"
+        for error in report.config_errors
+    ]
+    raise ValueError("Preflight validation failed (strict mode): " + ", ".join(errors))

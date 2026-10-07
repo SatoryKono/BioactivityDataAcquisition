@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import Mapping
 from dataclasses import asdict
 from enum import Enum
 from pathlib import Path
@@ -57,7 +58,7 @@ def _convert_for_json(obj: Any) -> Any:
         return obj.value  # Convert Enum to its value
     if isinstance(obj, frozenset):
         return sorted(obj)  # Convert to sorted list for stable comparisons
-    if isinstance(obj, dict):
+    if isinstance(obj, Mapping):
         return {k: _convert_for_json(v) for k, v in obj.items()}
     if isinstance(obj, (list, tuple)):
         return [_convert_for_json(item) for item in obj]

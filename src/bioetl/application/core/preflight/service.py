@@ -2,17 +2,21 @@
 
 from __future__ import annotations
 
-import inspect
 import time
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core.preflight._observability import (
     emit_preflight_health_results,
 )
 from bioetl.application.core.preflight.health_aggregator import HealthAggregator
+from bioetl.application.core.preflight.health_aggregator_runtime import (
+    _supports_raise_on_unhealthy,
+)
 from bioetl.application.core.preflight.medallion_validator import (
     MedallionConfigValidator,
+    PreflightLayerConfig,
+    build_runtime_validation_report,
+    raise_if_strict_blocking,
 )
 from bioetl.domain.control_plane.run_ledger import ORDINARY_RUN_LEDGER_STAGE_NAMES
 from bioetl.domain.types import (
@@ -50,19 +54,6 @@ class _PreflightExecutionHostProtocol(Protocol):
     def _observer(self) -> PipelineObserver: ...
 
 
-def _supports_raise_on_unhealthy(validate_fn: object) -> bool:
-    """Return True when ``validate_infrastructure`` accepts raise_on_unhealthy."""
-    try:
-        from typing import Any, cast
-
-        signature = inspect.signature(
-            cast(Any, validate_fn)
-        )  # Any: inspect accepts arbitrary callables
-    except (TypeError, ValueError):
-        return False
-    return "raise_on_unhealthy" in signature.parameters
-
-
 async def validate_infrastructure(host: _PreflightExecutionHostProtocol) -> None:
     """Validate infrastructure health before pipeline execution."""
     host._preflight_service.validate_runtime_configuration(host._runtime)
@@ -92,17 +83,6 @@ async def validate_infrastructure(host: _PreflightExecutionHostProtocol) -> None
         runner_stage=_PREFLIGHT_STAGE_NAME,
     )
     host._preflight_service.assert_infrastructure_healthy(report)
-
-
-@dataclass(frozen=True, slots=True)
-class PreflightLayerConfig:
-    """Resolved sink declarations supplied by composition for startup validation."""
-
-    bronze_path: str | None = None
-    silver_path: str | None = None
-    gold_path: str | None = None
-    silver_format: str | None = None
-    gold_format: str | None = None
 
 
 class PreflightService:
@@ -238,42 +218,20 @@ class PreflightService:
         self, runtime: RuntimeConfig, health_report: HealthReport | None = None
     ) -> PreflightReport:
         """Enforce bound Medallion configuration before preparation or extraction."""
-        if health_report is None:
-            health_report = HealthReport(results=[])
-        layers = self._layer_config
-        errors = self.validate_medallion_config(
+        report = build_runtime_validation_report(
+            self._medallion_validator,
             runtime,
-            layers.bronze_path,
-            layers.silver_path,
-            layers.gold_path,
-            layers.silver_format,
-            layers.gold_format,
-        )
-        errors.extend(self.validate_write_modes())
-        report = PreflightReport(
-            health_report=health_report,
-            medallion_policy_valid=not errors,
-            config_errors=errors,
-            checked_at=health_report.checked_at or self._context.started_at,
+            self._layer_config,
+            health_report,
+            checked_at=self._context.started_at,
         )
         self._raise_if_strict_blocking(report, runtime)
         return report
 
     def _raise_if_strict_blocking(
-        self,
-        report: PreflightReport,
-        runtime: RuntimeConfig,
+        self, report: PreflightReport, runtime: RuntimeConfig
     ) -> None:
-        """Raise strict-mode preflight error when startup should be blocked."""
-        if not (report.should_block_startup and runtime.strict_validation):
-            return
-        error_messages = [
-            f"{error.field}: {error.actual} (expected: {error.expected})"
-            for error in report.config_errors
-        ]
-        raise ValueError(
-            "Preflight validation failed (strict mode): " + ", ".join(error_messages)
-        )
+        raise_if_strict_blocking(report, runtime)
 
 
 __all__ = [

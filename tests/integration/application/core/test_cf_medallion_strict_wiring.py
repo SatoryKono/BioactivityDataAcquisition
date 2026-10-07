@@ -30,6 +30,8 @@ from bioetl.domain.medallion import (
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.config._pipeline_settings import PipelineSettings
 
+pytestmark = pytest.mark.integration
+
 
 def _config() -> PipelineConfig:
     return PipelineConfig(
@@ -165,7 +167,7 @@ async def test_runner_startup_reaches_gate_before_preparation_and_extraction(str
     )
     stages = _managed_pipeline_stages(host)
     if strict:
-        with pytest.raises(ValueError, match="sink.silver.format"):
+        with pytest.raises(ValueError, match=r"sink\.silver\.format"):
             await stages[0].operation()
         health.check_all.assert_not_awaited()
     else:

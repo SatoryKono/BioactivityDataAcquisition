@@ -110,6 +110,8 @@ class SilverWriterRuntimeServicesRequest:
     contract_rollout_policy: ContractRolloutPolicy | None = None
     base_path: str | Path | None = None
     pipeline_name: str | None = None
+    transform_version: str | None = None
+    transform_steps: tuple[str, ...] | None = None
     delta_module_loader: Callable[[], object] | None = None
 
 

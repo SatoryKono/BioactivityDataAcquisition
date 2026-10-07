@@ -213,7 +213,7 @@
       "runtime_checkable": true
     },
     {
-      "line": 212,
+      "line": 213,
       "name": "MetadataCoordinatorPort",
       "path": "src/bioetl/domain/ports/metadata/coordinator.py",
       "runtime_checkable": true
@@ -519,7 +519,7 @@
       "runtime_checkable": true
     },
     {
-      "line": 192,
+      "line": 195,
       "name": "SilverStoragePort",
       "path": "src/bioetl/domain/ports/storage/silver_port.py",
       "runtime_checkable": true

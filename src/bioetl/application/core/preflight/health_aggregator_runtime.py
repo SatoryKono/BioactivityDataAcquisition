@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import inspect
+
 from bioetl.domain.types import ComponentHealthResult, HealthStatus
 
 
@@ -101,3 +103,16 @@ __all__ = [
     "normalize_data_source_status",
     "resolve_probe_fallback_reason",
 ]
+
+
+def _supports_raise_on_unhealthy(validate_fn: object) -> bool:
+    """Return True when ``validate_infrastructure`` accepts raise_on_unhealthy."""
+    try:
+        from typing import Any, cast
+
+        signature = inspect.signature(
+            cast(Any, validate_fn)
+        )  # Any: inspect accepts arbitrary callables
+    except (TypeError, ValueError):
+        return False
+    return "raise_on_unhealthy" in signature.parameters

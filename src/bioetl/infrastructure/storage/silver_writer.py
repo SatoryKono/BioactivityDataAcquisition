@@ -68,8 +68,6 @@ class SilverWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         self,
         base_path: str | Path,
         logger: LoggerPort,
-        transform_version: str | None = None,
-        transform_steps: tuple[str, ...] | None = None,
         runtime_services: SilverWriterRuntimeServices | None = None,
         flat_structure: bool = False,
         pipeline_name: str | None = None,
@@ -98,8 +96,8 @@ class SilverWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         )
         _assign_runtime_services(self, services)
         _rewire_runtime_services(self)
-        self._transform_version = transform_version
-        self._transform_steps = transform_steps or ()
+        self._transform_version = runtime_request.transform_version
+        self._transform_steps = runtime_request.transform_steps or ()
         self._host = self
 
     @override
