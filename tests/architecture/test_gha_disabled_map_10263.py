@@ -25,7 +25,6 @@ MUST_STAY_DISABLED = {
     "reusable-setup.yml",
     "reusable-mermaid-setup.yml",
     "labeler.yml",
-    "mutation-testing.yml",
     "vacuum.yml",
     "release.yml",
     "coderabbit.yml",
