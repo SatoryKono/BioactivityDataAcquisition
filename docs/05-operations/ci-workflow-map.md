@@ -18,7 +18,7 @@ Its `deployment` block identifies CircleCI; retained `coordinator_workflow` and
 The owner cancelled deletion in #11930; its status is not_planned.
 GitHub Actions are disabled; billing restoration is out of scope.
 
-The legacy inventory below contains 52 tracked workflow files, including 13
+The legacy inventory below contains 54 tracked workflow files, including 13
 scheduled and 34 manual surfaces. These categories overlap. Retained YAML defines
 the behavior to preserve; presence in the repository does not prove a running lane.
 Optional CodeQL and inactive OpenCode stubs remain separate from required checks.
@@ -226,12 +226,12 @@ Manual successes do not establish scheduler, notification or release acceptance.
 ## Migration disposition ledger (#11930 / #11931)
 
 On 2026-10-06 the owner cancelled GitHub Actions deletion. Issue #11930 is
-closed as `not planned`; all 52 workflow definitions and composite actions are
+closed as `not planned`; all 54 workflow definitions and composite actions are
 retained. Actions remain disabled. CircleCI implementation and acceptance under
 #11931 continue independently. Retention does not establish functional parity,
 authorize public OpenSSF channel retirement, or enable legacy workflows.
 
-Current source inventory contains 52 workflows. Every row records the intended
+Current source inventory contains 54 workflows. Every row records the intended
 replacement or retained local/disabled policy; "prepared" is not external acceptance.
 No pending replacement authorizes deleting its source workflow. Scheduled entries
 are UTC cron expressions from the source definitions, not registered CircleCI triggers.
@@ -321,7 +321,9 @@ acceptance gates; workflow deletion is no longer a completion criterion.
 | `e2e-matrix-health.yml` | E2E Matrix Health | End-to-end matrix health |
 | `github-settings-quarterly-review.yml` | Quarterly GitHub Settings Review | Read-only quarterly GitHub settings review |
 | `import-linter.yml` | Lint and Architecture Gates | import-linter + layer architecture |
+| `main-integrity.yml` | Main Integrity | Post-merge smoke, root hygiene, and Docker image gate |
 | `mutation-testing.yml` | Mutation Testing | Sole Sunday mutation owner (#10263 exception); push and pull_request stay off |
+| `nightly.yml` | Nightly | Single schedule for full tests, E2E, weekly mutation, and Monday lanes |
 | `no-partial-tree-commits.yml` | No partial-tree commits | Reject incomplete Git trees (#11709) |
 | `opencode-pr-review.yml` | opencode-pr-review | Dispatch-only stub (#11012); remote OpenCode installer removed |
 | `opencode-triage.yml` | opencode-triage | Dispatch-only stub (#11012); remote OpenCode installer removed |

@@ -446,10 +446,10 @@ def test_relocated_router_verifiers_trigger_both_ci_event_filters():
         "tests/unit/scripts/ops/test_router_managed_image.py",
     )
     workflow = yaml.safe_load(
-        (ROOT / ".github/workflows/router-v7-bridge.yml").read_text()
+        (ROOT / ".github/workflows/router-v7-bridge.yml").read_text(encoding="utf-8")
     )
     events = workflow.get("on", workflow.get(True))
-    source = (ROOT / ".circleci/config.yml").read_text()
+    source = (ROOT / ".circleci/config.yml").read_text(encoding="utf-8")
     command = next(
         line.strip()
         for line in source.splitlines()
@@ -457,11 +457,9 @@ def test_relocated_router_verifiers_trigger_both_ci_event_filters():
     )
     words = shlex.split(command)
     filters = words[words.index("--") + 1 : words.index(">")]
+    assert "pull_request" not in events
+    assert "push" not in events
     for path in paths:
-        for event in ("pull_request", "push"):
-            assert any(
-                fnmatch.fnmatchcase(path, pattern) for pattern in events[event]["paths"]
-            ), (event, path)
         assert any(fnmatch.fnmatchcase(path, pattern) for pattern in filters), path
     assert not any(
         fnmatch.fnmatchcase("docs/unrelated.md", pattern) for pattern in filters
