@@ -415,7 +415,7 @@
       "status": "pass"
     },
     {
-      "current": "98ffa71bb28cb5368ff09aadca1a802c08a3334adae7d535ca055ef8b6a5c6c8",
+      "current": "1d79c927fd64dcf2c64a6a10369bdd313f21515446ff5ebe1f14a7ce75334959",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
