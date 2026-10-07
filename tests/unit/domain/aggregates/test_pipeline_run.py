@@ -300,8 +300,8 @@ class TestPipelineRunCompletionInvariants:
         """Completed runs should expose deterministic duration from stored state."""
         started_run.record_stage_success(
             "preflight",
-            started_at=_ts(1),
-            completed_at=_ts(2),
+            started_at=_ts(seconds=1),
+            completed_at=_ts(seconds=2),
         )
         started_run.complete(_ts(seconds=6))
 

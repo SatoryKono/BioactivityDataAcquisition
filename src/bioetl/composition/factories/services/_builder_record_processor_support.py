@@ -6,6 +6,10 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal, cast
 
+from bioetl.application.core._record_processor_write_support import (
+    RecordProcessorWriteDeps,
+)
+from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
 from bioetl.application.core.wiring.runtime import RecordProcessor
 from bioetl.domain.config import TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -131,6 +135,13 @@ def create_record_processor_impl(
         tracer=effective_tracer,
         lock_validator=request.lock_validator,
     )
+    quarantine_manager = QuarantineRuntimeService(
+        quarantine_port=request.services.quarantine,
+        pipeline_name=request.pipeline_name,
+        metrics=request.services.metrics,
+        batch_metrics=components.batch_metrics,
+        run_type=request.context.run_type.value,
+    )
     return request.record_processor_cls(
         context=request.context,
         batch_metrics=components.batch_metrics,
@@ -138,4 +149,5 @@ def create_record_processor_impl(
         writer=components.writer,
         config=processor_config,
         tracer=effective_tracer,
+        write_deps=RecordProcessorWriteDeps(quarantine_manager=quarantine_manager),
     )

@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `2551`
-- Internal import edges (raw): `8170`
+- Scanned modules: `2553`
+- Internal import edges (raw): `8181`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `330`
@@ -21,9 +21,9 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1606 OK| application
+    application -->|1615 OK| application
     application -->|1083 OK| domain
-    composition -->|226 OK| application
+    composition -->|228 OK| application
     composition -->|647 OK| composition
     composition -->|310 OK| domain
     composition -->|293 OK| infrastructure
@@ -40,9 +40,9 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1606 | allowed |
+| `application`    | `application`    |    1615 | allowed |
 | `application`    | `domain`         |    1083 | allowed |
-| `composition`    | `application`    |     226 | allowed |
+| `composition`    | `application`    |     228 | allowed |
 | `composition`    | `composition`    |     647 | allowed |
 | `composition`    | `domain`         |     310 | allowed |
 | `composition`    | `infrastructure` |     293 | allowed |
@@ -68,8 +68,8 @@ flowchart LR
 | `application.pipelines`        | `domain.types`                             |      57 |
 | `application.composite`        | `domain.ports`                             |      55 |
 | `application.services`         | `domain.ports`                             |      55 |
+| `composition.factories`        | `application.core`                         |      49 |
 | `composition.bootstrap`        | `application.services`                     |      47 |
-| `composition.factories`        | `application.core`                         |      47 |
 | `infrastructure.storage`       | `domain.value_objects`                     |      43 |
 | `composition.factories`        | `domain.ports`                             |      35 |
 | `application.composite`        | `domain.exceptions`                        |      34 |
