@@ -124,7 +124,7 @@ class StageResult:
         value = object.__getattribute__(self, name)
         if name != "result":
             return value
-        # Thaw restored frozen snapshots to avoid aliases to nested copyable values.
+        # Thaw restored snapshots to keep nested copyable values detached.
         if isinstance(value, (FrozenDict, FrozenList)):
             value = deep_thaw_json(value)
         try:
@@ -252,9 +252,7 @@ class _PipelineRunStageMixin:
         return False
 
     def _has_stage_status(self, stage: str, status: StageStatus) -> bool:
-        return any(
-            item.stage == stage and item.status == status for item in self._stages
-        )
+        return any(s.stage == stage and s.status == status for s in self._stages)
 
     def record_stage_failure(
         self,

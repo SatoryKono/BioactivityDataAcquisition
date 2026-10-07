@@ -43,7 +43,6 @@ __all__ = [
     "QuarantineEntryCreated",
     "QuarantineEntryResolved",
     "RecordQuarantined",
-    "event_metadata_to_jsonable",
 ]
 
 
@@ -80,21 +79,6 @@ def _validate_metadata_scalar(value: object) -> None:
     if value is None or isinstance(value, (str, int, float, datetime, UUID)):
         return
     raise TypeError(f"Unsupported event metadata value: {type(value).__name__}")
-
-
-def event_metadata_to_jsonable(value: object) -> object:
-    """Project validated metadata into JSON scalars and containers."""
-    if isinstance(value, Enum):
-        return event_metadata_to_jsonable(value.value)
-    if isinstance(value, datetime):
-        return value.isoformat()
-    if isinstance(value, UUID):
-        return str(value)
-    if isinstance(value, (dict, FrozenDict)):
-        return {key: event_metadata_to_jsonable(item) for key, item in value.items()}
-    if isinstance(value, (list, tuple, FrozenList)):
-        return [event_metadata_to_jsonable(item) for item in value]
-    return value
 
 
 def _validate_metadata_float(value: object) -> None:

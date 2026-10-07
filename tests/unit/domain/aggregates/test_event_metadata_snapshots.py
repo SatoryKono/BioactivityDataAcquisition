@@ -76,7 +76,7 @@ def test_factory_event_and_real_json_projection_are_independent() -> None:
     assert event.metadata == {"nested": [1]}
 
 
-def test_metadata_projection_normalizes_nested_identity_scalars() -> None:
+def test_metadata_projection_preserves_historical_identity_scalar_json() -> None:
     class IdentityValue(Enum):
         TIMESTAMP = NOW
         IDENTIFIER = UUID("ABCDEF01-2345-6789-ABCD-EF0123456789")
@@ -100,15 +100,20 @@ def test_metadata_projection_normalizes_nested_identity_scalars() -> None:
     identity = event.event_id
     envelope = map_domain_event_to_observability_event(event)
     expected = {
-        "timestamp": NOW.isoformat(),
-        "identifier": "abcdef01-2345-6789-abcd-ef0123456789",
+        "timestamp": "datetime.datetime(2026, 10, 7, 0, 0, tzinfo=datetime.timezone.utc)",
+        "identifier": "UUID('abcdef01-2345-6789-abcd-ef0123456789')",
         "nested": [
-            {"values": [NOW.isoformat(), "abcdef01-2345-6789-abcd-ef0123456789"]}
+            {
+                "values": [
+                    "<IdentityValue.TIMESTAMP: datetime.datetime(2026, 10, 7, 0, 0, tzinfo=datetime.timezone.utc)>",
+                    "<IdentityValue.IDENTIFIER: UUID('abcdef01-2345-6789-abcd-ef0123456789')>",
+                ]
+            }
         ],
         "primitives": [None, True, 3, 1.5, "text"],
     }
-    assert envelope.context["metadata"] == expected
-    assert json.loads(json.dumps(envelope.context))["metadata"] == expected
+    assert envelope.context["metadata"]["timestamp"] == NOW
+    assert envelope.context["metadata"]["identifier"] == IdentityValue.IDENTIFIER.value
     assert (
         json.loads(JSONRenderer()(None, "warning", dict(envelope.context)))["metadata"]
         == expected
@@ -191,3 +196,23 @@ def test_copy_failure_does_not_replace_existing_metadata() -> None:
     with pytest.raises(ValueError, match="cannot snapshot"):
         entry.add_metadata("context", Uncopyable())
     assert entry.metadata["context"] == {"original": True}
+
+
+def test_identity_scalars_preserve_historical_automatic_id() -> None:
+    event = QuarantineEntryCreated(
+        occurred_at=NOW,
+        run_id=RUN,
+        batch_id=BATCH,
+        pipeline_name="p",
+        error_code="E",
+        payload_hash=ContentHash("a" * 64),
+        metadata={"when": NOW, "uuid": UUID(int=3)},
+    )
+    assert event.event_id == "36876b9d-2738-5e67-a232-ce37093fac9a"
+    rendered = JSONRenderer()(
+        None, "warning", dict(map_domain_event_to_observability_event(event).context)
+    )
+    assert json.loads(rendered)["metadata"] == {
+        "when": "datetime.datetime(2026, 10, 7, 0, 0, tzinfo=datetime.timezone.utc)",
+        "uuid": "UUID('00000000-0000-0000-0000-000000000003')",
+    }
