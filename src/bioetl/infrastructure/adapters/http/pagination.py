@@ -57,6 +57,24 @@ class PaginatedFetcherMixin:
             )
         return advanced
 
+    async def _fetch_page_and_advance(
+        self,
+        page: Awaitable[tuple[list[T], Any | None]],
+        *,
+        seen_cursors: set[object],
+        page_count: int,
+        page_limit: int,
+    ) -> tuple[list[T], object | None]:
+        """Fetch one page and validate its continuation cursor."""
+        items, next_cursor = await page
+        advanced = self._advance_or_report_truncation(
+            next_cursor=next_cursor,
+            seen_cursors=seen_cursors,
+            page_count=page_count,
+            page_limit=page_limit,
+        )
+        return items, advanced
+
     @staticmethod
     def _should_stop_fetching(fetched: int, limit: int | None) -> bool:
         """Check if we've reached the global fetch limit.
@@ -135,10 +153,12 @@ class PaginatedFetcherMixin:
                 break
             page_count += 1
 
-            items, next_cursor = await fetch_func(cursor, fetched)
-
-            if not items and next_cursor is None:
-                break
+            items, next_cursor = await self._fetch_page_and_advance(
+                fetch_func(cursor, fetched),
+                seen_cursors=seen_cursors,
+                page_count=page_count,
+                page_limit=page_limit,
+            )
 
             for item in items:
                 yield item
@@ -146,12 +166,6 @@ class PaginatedFetcherMixin:
                 if self._should_stop_fetching(fetched, limit):
                     return
 
-            advanced = self._advance_or_report_truncation(
-                next_cursor=next_cursor,
-                seen_cursors=seen_cursors,
-                page_count=page_count,
-                page_limit=page_limit,
-            )
-            if advanced is None:
+            if next_cursor is None:
                 break
-            cursor = advanced
+            cursor = next_cursor
