@@ -240,9 +240,7 @@ def _build_before_record_request_sanitizer(
             from vcr import filters
         except Exception:  # pragma: no cover - vcr import is environment-owned
             _log_sanitizer_failure_once("vcr_import_unavailable")
-            raise VCRRequestSanitizationError(
-                "vcr_import_unavailable"
-            ) from None
+            raise VCRRequestSanitizationError("vcr_import_unavailable") from None
 
         try:
             sanitized = request

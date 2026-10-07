@@ -90,7 +90,9 @@ def test_build_base_vcr_config_sanitizes_request_headers_and_query() -> None:
     assert "query=test" in sanitized.uri
 
 
-def test_build_base_vcr_config_before_record_request_fails_closed_on_unexpected_request() -> None:
+def test_build_base_vcr_config_before_record_request_fails_closed_on_unexpected_request() -> (
+    None
+):
     from tests.helpers.vcr_config import VCRRequestSanitizationError
 
     config = build_base_vcr_config(
@@ -251,7 +253,9 @@ def test_sanitizer_fails_closed_with_missing_required_surface(
         hook(request)
 
 
-def test_sanitizer_fails_closed_on_httpx_request_instead_of_retaining_query_secret() -> None:
+def test_sanitizer_fails_closed_on_httpx_request_instead_of_retaining_query_secret() -> (
+    None
+):
     import httpx
 
     from tests.helpers.vcr_config import VCRRequestSanitizationError

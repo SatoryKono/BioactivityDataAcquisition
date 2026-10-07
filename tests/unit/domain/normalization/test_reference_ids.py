@@ -208,9 +208,7 @@ def test_ror_reference_identifier_canonicalizes_only_ror_inputs() -> None:
 
     # Bare ROR id and ROR URLs canonicalize to the https URL form.
     assert normalizer("0ABCDEF12") == "https://ror.org/0abcdef12"
-    assert normalizer("https://ror.org/0ABCDEF12/") == (
-        "https://ror.org/0abcdef12"
-    )
+    assert normalizer("https://ror.org/0ABCDEF12/") == ("https://ror.org/0abcdef12")
     assert normalizer("ror.org/02mhbdp94") == "https://ror.org/02mhbdp94"
 
     # Arbitrary URLs, DOI links, and free text pass through unchanged.
@@ -223,7 +221,5 @@ def test_ror_reference_identifier_canonicalizes_only_ror_inputs() -> None:
     assert normalizer("not-a-ror") == "not-a-ror"
 
     # Malformed ROR-shaped strings are preserved, not canonicalized.
-    assert normalizer("https://ror.org/not-a-ror") == (
-        "https://ror.org/not-a-ror"
-    )
+    assert normalizer("https://ror.org/not-a-ror") == ("https://ror.org/not-a-ror")
     assert normalizer("0abcdef123") == "0abcdef123"
