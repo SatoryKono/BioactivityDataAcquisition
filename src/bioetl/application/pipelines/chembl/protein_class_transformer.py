@@ -23,6 +23,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import ProteinClassification
+from bioetl.domain.run_reports.context import get_stage_accounting
 from bioetl.domain.transformations import safe_int
 
 if TYPE_CHECKING:
@@ -73,7 +74,16 @@ class ProteinClassTransformer(BaseChemblTransformer):
     def _should_skip_record(record: BronzeRecord) -> bool:
         """Skip the synthetic ChEMBL root node that violates domain invariants."""
         protein_class_id = safe_int(record.get("protein_class_id"))
-        return protein_class_id is not None and protein_class_id <= 0
+        if protein_class_id is None or protein_class_id > 0:
+            return False
+        accounting = get_stage_accounting()
+        if accounting is not None:
+            accounting.record_removal(
+                "silver",
+                outcome="filtered_out",
+                reason_code="FILTERED_OUT_SILVER:protein_class_id",
+            )
+        return True
 
     async def transform_pre_silver(
         self,
