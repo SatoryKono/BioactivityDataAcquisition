@@ -12,6 +12,7 @@ branches:
 - codex/grafana-postmerge-security-20261006
 - codex/pr-eight-integration
 - codex/ci-11931-main-acceptance-20261007
+- fix/p02-domain-12087-12093
 checks:
   architecture:
     kind: tests
