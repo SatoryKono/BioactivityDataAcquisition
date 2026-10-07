@@ -893,7 +893,9 @@ def test_zizmor_workflow_is_path_filtered_and_sha_pinned() -> None:
     labeler = (ROOT / ".github/workflows/labeler.yml").read_text(encoding="utf-8")
     zizmor_config = (ROOT / ".github/zizmor.yml").read_text(encoding="utf-8")
 
-    coordinator = (ROOT / ".github/workflows/pr-required.yml").read_text(encoding="utf-8")
+    coordinator = (ROOT / ".github/workflows/pr-required.yml").read_text(
+        encoding="utf-8"
+    )
     assert set(triggers) == {"workflow_call", "workflow_dispatch"}
     assert "pull_request" not in triggers
     assert "push" not in triggers
