@@ -397,19 +397,27 @@ async def test_write_silver_delete_mode(
     silver_writer, temp_delta_path, sample_records, sample_schema
 ):
     """Test delete mode (replaces all existing data)."""
-    # Silver layer does not support 'delete' mode (overwrite).
-    # It only supports 'append' and 'merge'.
-    # This test verifies that PolicyViolationError is raised.
-    from bioetl.domain.exceptions import PolicyViolationError
-
-    with pytest.raises(PolicyViolationError, match="silver does not allow overwrite"):
-        await silver_writer.write_silver(
-            table_name="test_overwrite",
-            records=sample_records,
-            primary_keys=["id"],
-            schema=sample_schema,
-            mode="delete",
-        )
+    await silver_writer.write_silver(
+        table_name="test_delete",
+        records=sample_records,
+        primary_keys=["id"],
+        schema=sample_schema,
+        mode="append",
+    )
+    path = f"{temp_delta_path}/test_delete"
+    before = DeltaTable(path).version()
+    await silver_writer.write_silver(
+        table_name="test_delete",
+        records=sample_records[:1],
+        primary_keys=["id"],
+        schema=sample_schema,
+        mode="delete",
+    )
+    assert DeltaTable(path).version() == before + 1
+    assert DeltaTable(path).to_pyarrow_table().num_rows == 1
+    assert DeltaTable(path, version=before).to_pyarrow_table().num_rows == len(
+        sample_records
+    )
 
 
 @pytest.mark.asyncio
@@ -418,7 +426,7 @@ async def test_write_silver_partitioning(
     silver_writer, temp_delta_path, sample_records, sample_schema
 ):
     """Test partitioning."""
-    # Silver layer does not support 'delete' mode, so we use 'append' for partitioning test
+    # APPEND preserves existing partitions while adding this batch.
     await silver_writer.write_silver(
         table_name="test_partition",
         records=sample_records,

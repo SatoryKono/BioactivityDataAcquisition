@@ -33,6 +33,7 @@ def _context() -> SimpleNamespace:
     )
     return SimpleNamespace(
         pipeline=pipeline,
+        yaml_config=None,
         logger_port=MagicMock(name="logger"),
         observability=SimpleNamespace(tracer=MagicMock(name="tracer")),
     )
