@@ -46,10 +46,10 @@ def refresh_archived_assessment[ObservationToken](
     if verified is not True:
         return verified, reason
     sources = selected_report_sources(report_root, manifest)
-    report_paths = [p for p in sources.values() if p.name == "pipeline-run-report.json"]
-    if not report_paths:
+    report_key = f"run-reports/pipeline/{manifest.pipeline_name}/{manifest.run_id}/pipeline-run-report.json"
+    report_path = sources.get(report_key)
+    if report_path is None:
         return verified, reason
-    report_path = report_paths[0]
     original = report_path.read_bytes()
     report = json.loads(original)
     if not isinstance(report.get("selected_run_snapshot"), dict):
