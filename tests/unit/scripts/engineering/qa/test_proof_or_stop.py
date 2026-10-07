@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+
 import memory.proof as proof
 from memory.proof import (
     DEFAULT_SCHEMA_PATH,
@@ -24,6 +25,7 @@ from memory.proof import (
 from memory.proof_cli import main
 from tests.helpers.clock import FIXED_TEST_TIME
 from tests.helpers.isolated_git import init_tracked_fixture_repo
+
 
 pytestmark = pytest.mark.unit
 
