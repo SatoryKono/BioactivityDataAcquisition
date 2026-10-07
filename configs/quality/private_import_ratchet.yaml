@@ -1,55 +1,150 @@
-# S20 / #9626 — shrink-only ratchet for cross-owner private-module imports.
+# S20 / #9626 / #11978 — shrink-only ratchet for cross-owner private-module imports.
 # max_count may only decrease. New pairs require an ADR exemption and a
 # target_removal_wave; they must not raise max_count.
+# Each pair is temporary debt. A source comment is not a waiver.
+# Permanent public facades stay in their own inventories and are not listed here.
 
-schema_version: 1
+schema_version: 2
 strict_mode: false
 max_count: 11
 owner: "@bioetl-architecture"
-linked_issue: "9626"
+linked_issue: "11978"
 ratchet_policy: fail on growth; shrink max_count to live observed_count
+metadata_policy:
+  classification_allowed:
+    - temporary
+  review_horizon_days: 120
+  waiver_source: yaml-pair-metadata
 pairs:
-  - importer: bioetl/application/composite/helpers/preflight_schema_field_extraction.py
+  - id: PIM-APP-001
+    importer: bioetl/application/composite/helpers/preflight_schema_field_extraction.py
     target: bioetl.application.composite._preflight_types
     owner: "@bioetl-application"
+    scope: "bioetl/application/composite/helpers/preflight_schema_field_extraction.py -> bioetl.application.composite._preflight_types"
+    rationale: "Schema-field extraction still shares the composite preflight type contract that lives in the private preflight types module."
+    sanction: "private-import ratchet #9626; no additional ADR waiver"
+    enforcement: tests/architecture/test_private_module_imports.py
+    classification: temporary
+    next_review: "2027-01-06"
+    exit_condition: "Move the shared preflight types to a public composite preflight contract module and point this helper at that module so the private edge disappears."
     target_removal_wave: residual
-  - importer: bioetl/application/composite/helpers/preflight_type_and_aggregation.py
+  - id: PIM-APP-002
+    importer: bioetl/application/composite/helpers/preflight_type_and_aggregation.py
     target: bioetl.application.composite._preflight_types
     owner: "@bioetl-application"
+    scope: "bioetl/application/composite/helpers/preflight_type_and_aggregation.py -> bioetl.application.composite._preflight_types"
+    rationale: "Type and aggregation preflight still shares the same private preflight type contract as schema-field extraction."
+    sanction: "private-import ratchet #9626; no additional ADR waiver"
+    enforcement: tests/architecture/test_private_module_imports.py
+    classification: temporary
+    next_review: "2027-01-06"
+    exit_condition: "Move the shared preflight types to a public composite preflight contract module and point this helper at that module so the private edge disappears."
     target_removal_wave: residual
-  - importer: bioetl/application/services/control_plane/run_manifest_reproducibility_claims.py
+  - id: PIM-APP-003
+    importer: bioetl/application/services/control_plane/run_manifest_reproducibility_claims.py
     target: bioetl.application.services.control_plane.replay._historical_claim_reason
     owner: "@bioetl-application"
+    scope: "bioetl/application/services/control_plane/run_manifest_reproducibility_claims.py -> bioetl.application.services.control_plane.replay._historical_claim_reason"
+    rationale: "Manifest reproducibility claims call a pure historical-claim reason helper that still lives in a private replay module."
+    sanction: "private-import ratchet #9626; no additional ADR waiver"
+    enforcement: tests/architecture/test_private_module_imports.py
+    classification: temporary
+    next_review: "2027-01-06"
+    exit_condition: "Move the pure historical-claim reason helper to a public replay or manifest semantic module and delete this private import."
     target_removal_wave: residual
-  - importer: bioetl/composition/factories/services/common_service_wiring.py
+  - id: PIM-COMP-001
+    importer: bioetl/composition/factories/services/common_service_wiring.py
     target: bioetl.composition.factories.dq._context_resolver_support
     owner: "@bioetl-composition"
+    scope: "bioetl/composition/factories/services/common_service_wiring.py -> bioetl.composition.factories.dq._context_resolver_support"
+    rationale: "Common service wiring constructs the DQ context through a private resolver helper instead of a responsibility-specific public factory."
+    sanction: "private-import ratchet #9626; no additional ADR waiver"
+    enforcement: tests/architecture/test_private_module_imports.py
+    classification: temporary
+    next_review: "2027-01-06"
+    exit_condition: "Expose a public DQ context-resolver factory seam and switch common service wiring to that seam so the private helper import disappears."
     target_removal_wave: residual
-  - importer: bioetl/composition/health_service_access.py
+  - id: PIM-COMP-002
+    importer: bioetl/composition/health_service_access.py
     target: bioetl.composition.factories.pipeline._preflight_health_monitor
     owner: "@bioetl-composition"
+    scope: "bioetl/composition/health_service_access.py -> bioetl.composition.factories.pipeline._preflight_health_monitor"
+    rationale: "Health service access builds the preflight monitor through a private pipeline factory helper."
+    sanction: "private-import ratchet #9626; no additional ADR waiver"
+    enforcement: tests/architecture/test_private_module_imports.py
+    classification: temporary
+    next_review: "2027-01-06"
+    exit_condition: "Expose a public preflight health-monitor factory and switch health service access to that factory so the private import disappears."
     target_removal_wave: residual
-  - importer: bioetl/domain/lineage/_shared.py
+  - id: PIM-DOM-001
+    importer: bioetl/domain/lineage/_shared.py
     target: bioetl.domain.normalization._control_plane_primitives
     owner: "@bioetl-domain"
+    scope: "bioetl/domain/lineage/_shared.py -> bioetl.domain.normalization._control_plane_primitives"
+    rationale: "Lineage shares pure control-plane normalization primitives that still live in a private normalization module, creating a reverse domain edge."
+    sanction: "private-import ratchet #9626; no additional ADR waiver"
+    enforcement: tests/architecture/test_private_module_imports.py
+    classification: temporary
+    next_review: "2027-01-06"
+    exit_condition: "Move only the shared pure primitives to a neutral domain module and delete the lineage import of the private normalization module."
     target_removal_wave: residual
-  - importer: bioetl/infrastructure/adapters/_error_handling_support.py
+  - id: PIM-INF-001
+    importer: bioetl/infrastructure/adapters/_error_handling_support.py
     target: bioetl.infrastructure.adapters.decorators._retry_support
     owner: "@bioetl-infrastructure"
+    scope: "bioetl/infrastructure/adapters/_error_handling_support.py -> bioetl.infrastructure.adapters.decorators._retry_support"
+    rationale: "Error-handling support depends on retry mechanics that still live in a private decorator module."
+    sanction: "private-import ratchet #9626; no additional ADR waiver"
+    enforcement: tests/architecture/test_private_module_imports.py
+    classification: temporary
+    next_review: "2027-01-06"
+    exit_condition: "Move the shared retry mechanics to a public infrastructure retry owner and delete this private decorator import."
     target_removal_wave: residual
-  - importer: bioetl/infrastructure/adapters/_health_check_observability.py
+  - id: PIM-INF-002
+    importer: bioetl/infrastructure/adapters/_health_check_observability.py
     target: bioetl.infrastructure.adapters.decorators._retry_support
     owner: "@bioetl-infrastructure"
+    scope: "bioetl/infrastructure/adapters/_health_check_observability.py -> bioetl.infrastructure.adapters.decorators._retry_support"
+    rationale: "Health-check observability depends on the same private retry mechanics as error handling."
+    sanction: "private-import ratchet #9626; no additional ADR waiver"
+    enforcement: tests/architecture/test_private_module_imports.py
+    classification: temporary
+    next_review: "2027-01-06"
+    exit_condition: "Move the shared retry mechanics to a public infrastructure retry owner and delete this private decorator import."
     target_removal_wave: residual
-  - importer: bioetl/infrastructure/adapters/http/_client_retry_flow.py
+  - id: PIM-INF-003
+    importer: bioetl/infrastructure/adapters/http/_client_retry_flow.py
     target: bioetl.infrastructure.adapters.decorators._retry_support
     owner: "@bioetl-infrastructure"
+    scope: "bioetl/infrastructure/adapters/http/_client_retry_flow.py -> bioetl.infrastructure.adapters.decorators._retry_support"
+    rationale: "HTTP client retry flow depends on retry mechanics that still live in a private decorator module."
+    sanction: "private-import ratchet #9626; no additional ADR waiver"
+    enforcement: tests/architecture/test_private_module_imports.py
+    classification: temporary
+    next_review: "2027-01-06"
+    exit_condition: "Move the shared retry mechanics to a public infrastructure retry owner and delete this private decorator import."
     target_removal_wave: residual
-  - importer: bioetl/infrastructure/control_plane/_file_artifact_lifecycle_refs.py
+  - id: PIM-INF-004
+    importer: bioetl/infrastructure/control_plane/_file_artifact_lifecycle_refs.py
     target: bioetl.infrastructure.checkpoint._local_checkpoint_io
     owner: "@bioetl-infrastructure"
+    scope: "bioetl/infrastructure/control_plane/_file_artifact_lifecycle_refs.py -> bioetl.infrastructure.checkpoint._local_checkpoint_io"
+    rationale: "Artifact lifecycle reads checkpoint path, index, and payload operations from a private checkpoint I/O module."
+    sanction: "private-import ratchet #9626; no additional ADR waiver"
+    enforcement: tests/architecture/test_private_module_imports.py
+    classification: temporary
+    next_review: "2027-01-06"
+    exit_condition: "Publish the used checkpoint path, index, and read operations on a checkpoint-owned public API and delete this private import."
     target_removal_wave: residual
-  - importer: bioetl/infrastructure/control_plane/provider_health_evidence.py
+  - id: PIM-INF-005
+    importer: bioetl/infrastructure/control_plane/provider_health_evidence.py
     target: bioetl.infrastructure.adapters.http._health_monitor_observability
     owner: "@bioetl-infrastructure"
+    scope: "bioetl/infrastructure/control_plane/provider_health_evidence.py -> bioetl.infrastructure.adapters.http._health_monitor_observability"
+    rationale: "Provider health evidence restores monitor observations through a private HTTP observability helper."
+    sanction: "private-import ratchet #9626; no additional ADR waiver"
+    enforcement: tests/architecture/test_private_module_imports.py
+    classification: temporary
+    next_review: "2027-01-06"
+    exit_condition: "Expose an explicit public health-monitor restoration contract and switch provider health evidence to that contract so the private import disappears."
     target_removal_wave: residual

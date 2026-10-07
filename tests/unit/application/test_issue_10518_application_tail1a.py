@@ -1024,7 +1024,9 @@ def test_inspect_source_identity_missing_expected(tmp_path: Path) -> None:
     )
 
     payload = inspect_report_root_source_identity(
-        report_root=tmp_path, expected_source_id=None
+        report_root=tmp_path,
+        expected_source_id=None,
+        store=MagicMock(),
     )
     assert payload["source_identity"] == "expected_missing"
     assert payload["source_identity_status"] == "unhealthy"
@@ -1181,7 +1183,6 @@ def test_build_aggregation_expr_unknown_function_passthrough() -> None:
 
 def test_emit_saved_at_without_timestamps_is_noop() -> None:
     from bioetl.application.composite.checkpoint.persistence_service import (
-        CompositeCheckpointPersistenceParams,
         CompositeCheckpointPersistenceService,
     )
     from bioetl.application.composite.checkpoint.state import (
@@ -1189,14 +1190,12 @@ def test_emit_saved_at_without_timestamps_is_noop() -> None:
     )
 
     service = CompositeCheckpointPersistenceService(
-        CompositeCheckpointPersistenceParams(
-            composite_name="c",
-            checkpoint_filename="ckpt.json",
-            glob_pattern="ckpt*",
-            storage=MagicMock(),
-            logger=MagicMock(),
-            metrics=MagicMock(),
-        )
+        composite_name="c",
+        checkpoint_filename="ckpt.json",
+        glob_pattern="ckpt*",
+        storage=MagicMock(),
+        logger=MagicMock(),
+        metrics=MagicMock(),
     )
     state = CompositeCheckpointState(
         composite_name="c", run_id="r", created_at=None, updated_at=None
@@ -1207,7 +1206,6 @@ def test_emit_saved_at_without_timestamps_is_noop() -> None:
 
 def test_save_unexpected_domain_error_reraises() -> None:
     from bioetl.application.composite.checkpoint.persistence_service import (
-        CompositeCheckpointPersistenceParams,
         CompositeCheckpointPersistenceService,
     )
     from bioetl.application.composite.checkpoint.state import (
@@ -1216,13 +1214,11 @@ def test_save_unexpected_domain_error_reraises() -> None:
     from bioetl.domain.exceptions import BioETLError
 
     service = CompositeCheckpointPersistenceService(
-        CompositeCheckpointPersistenceParams(
-            composite_name="c",
-            checkpoint_filename="ckpt.json",
-            glob_pattern="ckpt*",
-            storage=MagicMock(),
-            logger=MagicMock(),
-        )
+        composite_name="c",
+        checkpoint_filename="ckpt.json",
+        glob_pattern="ckpt*",
+        storage=MagicMock(),
+        logger=MagicMock(),
     )
     service._storage.write_atomic.side_effect = BioETLError("boom")
     state = CompositeCheckpointState(composite_name="c", run_id="r")

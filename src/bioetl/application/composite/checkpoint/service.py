@@ -15,7 +15,6 @@ from bioetl.application.composite.checkpoint.load_service import (
     CompositeCheckpointLoadService,
 )
 from bioetl.application.composite.checkpoint.persistence_service import (
-    CompositeCheckpointPersistenceParams,
     CompositeCheckpointPersistenceService,
 )
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
@@ -109,14 +108,12 @@ class CompositeCheckpointService:
             )
         )
         self._persistence_service = params.persistence_service_factory(
-            CompositeCheckpointPersistenceParams(
-                composite_name=params.composite_name,
-                checkpoint_filename=self._checkpoint_filename,
-                glob_pattern=self._glob_pattern_value,
-                storage=params.storage,
-                logger=params.logger,
-                metrics=params.metrics,
-            )
+            composite_name=params.composite_name,
+            checkpoint_filename=self._checkpoint_filename,
+            glob_pattern=self._glob_pattern_value,
+            storage=params.storage,
+            logger=params.logger,
+            metrics=params.metrics,
         )
 
     def _make_filename(self, run_id: str) -> str:

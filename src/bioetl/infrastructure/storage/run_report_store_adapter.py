@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import shutil
+import tempfile
 from pathlib import Path
 
 import orjson
@@ -40,8 +42,41 @@ class FileRunReportStoreAdapter:
         self.mkdir(str(target.parent))
         atomic_write_text(target, content)
 
+    def write_synced_text(self, path: str, content: str) -> None:
+        """Publish marker text in the target directory, then fsync and replace.
+
+        The temp file stays beside ``path`` so replace cannot cross filesystems
+        or leave the marker parent. A failed fsync or replace deletes the temp.
+        """
+        target = Path(path)
+        self.mkdir(str(target.parent))
+        temporary_path: Path | None = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8",
+                dir=target.parent,
+                prefix=f"{target.name}.",
+                suffix=".tmp",
+                delete=False,
+            ) as handle:
+                temporary_path = Path(handle.name)
+                handle.write(content)
+                handle.flush()
+                os.fsync(handle.fileno())
+            temporary_path.replace(target)
+        finally:
+            if temporary_path is not None and temporary_path.exists():
+                temporary_path.unlink()
+
     def read_text(self, path: str) -> str:
         return Path(path).read_text(encoding="utf-8")
+
+    def read_text_prefix(self, path: str, *, limit: int) -> str:
+        if limit < 0:
+            raise ValueError("limit must be non-negative")
+        with Path(path).open(encoding="utf-8") as stream:
+            return stream.read(limit)
 
     def sha256(self, path: str) -> str:
         """Preserve persisted newline bytes when computing artifact identity."""
