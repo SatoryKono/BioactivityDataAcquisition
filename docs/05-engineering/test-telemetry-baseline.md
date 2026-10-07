@@ -27,8 +27,8 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `fix/dep-11973-architecture-ownership`
-- Source commit: `348c29184670c53d11a039305c2594cef7e79f39`
+- Source branch: `main`
+- Source commit: `398899f9c7ce527ddf73d421b9681ef5ff21d2c1`
 - Source run id: `local-bioetl-local-coverage-n3j855qy`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
