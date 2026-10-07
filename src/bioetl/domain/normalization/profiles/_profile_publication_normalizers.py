@@ -4,8 +4,10 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
+from bioetl.domain.mapping.classification_data import ClassificationData
 from bioetl.domain.mapping.publication_type_classification import (
     build_publication_type_classification_payload,
+    classification_install,
     normalize_publication_classification_field,
 )
 from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
@@ -79,26 +81,28 @@ def normalize_profile_chembl_publication_classification_field(
     record: Mapping[str, object] | None = None,
 ) -> object:
     """Derive one ChEMBL publication classification field from raw provider type."""
-    payload = _chembl_publication_classification_payload(record)
-    if payload is not None:
-        derived = payload.get(field_name)
-        return normalize_publication_classification_field(field_name, derived)
-    return normalize_publication_classification_field(field_name, value)
+    data = classification_install.data
+    payload = _chembl_publication_classification_payload(record, data)
+    candidate = payload.get(field_name) if payload is not None else value
+    return normalize_publication_classification_field(
+        field_name,
+        candidate,
+        data=data,
+    )
 
 
 def _chembl_publication_classification_payload(
     record: Mapping[str, object] | None,
+    data: ClassificationData | None,
 ) -> Mapping[str, object] | None:
     source_value = _publication_type_source_value(None, record=record)
-    if source_value is None:
+    if source_value is None or data is None:
         return None
-    try:
-        return build_publication_type_classification_payload(
-            "chembl",
-            raw_type=source_value,
-        )
-    except RuntimeError:
-        return None
+    return build_publication_type_classification_payload(
+        "chembl",
+        raw_type=source_value,
+        data=data,
+    )
 
 
 def normalize_profile_publication_type_raw(value: object) -> object:

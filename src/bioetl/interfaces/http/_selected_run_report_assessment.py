@@ -15,8 +15,10 @@ from bioetl.application.services.run_reports.query import list_pipeline_reports
 from bioetl.composition.observability_runtime import create_run_report_store
 from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.run_reports.selected_status import (
+    accounting_conflicts,
     assess_report,
     evidence_digest,
+    saved_trust_fields,
     verify_snapshot,
 )
 from bioetl.interfaces.http import run_report_ops
@@ -36,19 +38,8 @@ class _IdentityMismatchError(LookupError):
 
 
 def _accounting_conflicts(reconciliation: object, verdict: object) -> list[str]:
-    if not isinstance(reconciliation, dict):
-        return []
-    conflicts: list[str] = []
-    for stage in ("silver", "gold"):
-        prior = "bronze" if stage == "silver" else "silver"
-        key = f"{stage}_vs_{prior}_status"
-        if reconciliation.get(key) == "FAILING":
-            conflicts.append(
-                f"Saved report accounting conflict: {key}=FAILING, "
-                f"delta={reconciliation.get(f'{stage}_delta', 'UNKNOWN')}. "
-                f"Saved Trust verdict: {verdict}; inspect report and ledger."
-            )
-    return conflicts
+    """Compatibility export. The predicate owner is domain selected_status."""
+    return accounting_conflicts(reconciliation, verdict)
 
 
 def _saved_trust(
@@ -67,16 +58,16 @@ def _saved_trust(
     ):
         reasons = reasons.get(key) if isinstance(reasons, dict) else None
     reasons_text = reasons if isinstance(reasons, str) else str(control["reason"])
-    conflicts = _accounting_conflicts(report.get("reconciliation"), control["verdict"])
-    if conflicts:
-        reasons_text = "\n".join(filter(None, (reasons_text, *conflicts)))
+    projected = saved_trust_fields(
+        verdict=control["verdict"],
+        reasons_text=reasons_text,
+        reconciliation=report.get("reconciliation"),
+    )
+    reasons_text = str(projected["reasons_text"])
     reasons_count = sum(bool(line.strip()) for line in reasons_text.splitlines())
     return {
         "processing_status": str(summary["execution_state"]).lower(),
-        "trust_status": "ERROR" if conflicts else control["verdict"],
-        "saved_trust_status": control["verdict"],
-        "accounting_integrity": "CONFLICT" if conflicts else "NO REPORTED CONFLICT",
-        "reasons_text": reasons_text,
+        **projected,
         "reasons_display": display_reasons_text(reasons_text),
         "reasons_count": reasons_count,
         "trust_reasons_action": "View trust reasons" if reasons_count > 0 else None,

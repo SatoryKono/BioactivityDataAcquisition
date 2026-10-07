@@ -4,7 +4,18 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from bioetl.domain.run_reports.selected_status import (
+    parent_binding_gap,
+    resolve_child_workflow_binding,
+)
 from bioetl.interfaces.http.run_report_ops import load_workflow_run_report_payload
+
+_BINDING_CAPTIONS = {
+    "binding_not_recorded": "Parent workflow binding not recorded",
+    "identity_not_recorded": "Parent workflow identity not recorded",
+    "identity_mismatch": "Parent workflow identity mismatch",
+    "child_binding_mismatch": "Parent workflow child binding mismatch",
+}
 
 
 def unavailable_reconciliation(reason: str) -> list[dict[str, str]]:
@@ -110,13 +121,14 @@ def linked_reconciliation_display(
     child's independently verified Saved Evidence or replay assessment.
     """
     facts = _workflow_binding(report)
-    bound = facts.get("identity")
-    child = report.get("identity")
-    if not isinstance(bound, dict) or not isinstance(child, dict):
-        return unavailable_reconciliation("Parent workflow binding not recorded")
-    name, run_id = bound.get("workflow_name"), bound.get("workflow_run_id")
-    if not isinstance(name, str) or not isinstance(run_id, str):
-        return unavailable_reconciliation("Parent workflow identity not recorded")
+    resolved = resolve_child_workflow_binding(
+        facts.get("identity"),
+        report.get("identity"),
+        facts.get("step_id"),
+    )
+    if isinstance(resolved, str):
+        return unavailable_reconciliation(_BINDING_CAPTIONS[resolved])
+    name, run_id, step_id, child_run_id, child_pipeline_name = resolved
     try:
         parent = load_workflow_run_report_payload(
             workflow_name=name, workflow_run_id=run_id, root=root
@@ -127,19 +139,15 @@ def linked_reconciliation_display(
         )
     if parent is None:
         return unavailable_reconciliation("Parent workflow report missing")
-    identity, execution = parent.get("identity"), parent.get("execution")
-    if (
-        not isinstance(identity, dict)
-        or identity.get("workflow_name") != name
-        or identity.get("workflow_run_id") != run_id
-    ):
-        return unavailable_reconciliation("Parent workflow identity mismatch")
-    if not isinstance(execution, list) or not any(
-        isinstance(step, dict)
-        and step.get("step_id") == facts.get("step_id")
-        and step.get("pipeline_run_id") == child.get("run_id")
-        and step.get("pipeline_name") == child.get("pipeline_name")
-        for step in execution
-    ):
-        return unavailable_reconciliation("Parent workflow child binding mismatch")
+    gap = parent_binding_gap(
+        workflow_name=name,
+        workflow_run_id=run_id,
+        parent_identity=parent.get("identity"),
+        parent_execution=parent.get("execution"),
+        step_id=step_id,
+        child_run_id=child_run_id,
+        child_pipeline_name=child_pipeline_name,
+    )
+    if gap is not None:
+        return unavailable_reconciliation(_BINDING_CAPTIONS[gap])
     return reconciliation_display(parent)

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.pipelines.common.transformer_initialization import (
@@ -46,6 +46,8 @@ class BasePublicationTransformerContext:
     identifier_resolver: IdentifierResolverStrategy | None = None
     metadata_strategy: PublicationMetadataStrategy | None = None
     record_normalizer: RecordNormalizationProcessor | None = None
+    publication_vocabulary: object | None = None
+    publication_classification: object | None = None
 
 
 def publication_transformer_kwargs(
@@ -68,6 +70,8 @@ def coerce_publication_transformer_init(
     Optional DI fields (``provider``, ``tracer``, filters, strategies, ...) are
     accepted via ``**fields`` to keep this surface under the Sonar S107 budget.
     """
+    publication_vocabulary = fields.pop("publication_vocabulary", None)
+    publication_classification = fields.pop("publication_classification", None)
     if isinstance(init, BasePublicationTransformerContext):
         unexpected = ", ".join(
             sorted(key for key, value in fields.items() if value is not None)
@@ -77,7 +81,11 @@ def coerce_publication_transformer_init(
                 "BasePublicationTransformer received unexpected explicit arguments "
                 f"with init spec: {unexpected}"
             )
-        return init
+        return replace(
+            init,
+            publication_vocabulary=publication_vocabulary,
+            publication_classification=publication_classification,
+        )
 
     provider = fields.get("provider")
     resolved_provider = init if isinstance(init, str) else provider or default_provider
@@ -120,6 +128,8 @@ def coerce_publication_transformer_init(
             "RecordNormalizationProcessor | None",
             fields.get("record_normalizer"),
         ),
+        publication_vocabulary=publication_vocabulary,
+        publication_classification=publication_classification,
     )
 
 

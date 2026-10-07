@@ -152,6 +152,7 @@ class PublicationTransformerHooksMixin:
             pipeline_name=pipeline_name,
             provider=as_mixin_host(self).provider,  # Any: mixin host
             normalized_business_data=normalized_business_data,
+            registry=getattr(self, "_publication_vocabulary", None),
         )
 
     def _classify_publication_type(
@@ -161,7 +162,17 @@ class PublicationTransformerHooksMixin:
         raw_types_list: list[str] | None = None,
     ) -> dict[str, str | None]:
         """Classify publication type using the unified 3-level hierarchy."""
-        return classification_payload(provider, raw_type, raw_types_list)
+        data = getattr(self, "_publication_classification", None)
+        if data is None:
+            raise RuntimeError(
+                "publication classification data must be passed explicitly"
+            )
+        return classification_payload(
+            provider,
+            raw_type,
+            raw_types_list,
+            data=data,
+        )
 
 
 __all__ = ["PublicationTransformerHooksMixin"]

@@ -75,3 +75,38 @@ def _resolve_balance_status(
     if _is_degraded_balance(unaccounted, tracking):
         return BalanceStatus.DEGRADED
     return BalanceStatus.FAILING
+
+
+def accounting_conflicts(reconciliation: object, verdict: object) -> list[str]:
+    """Name saved silver/gold accounting failures. The ERROR override is intentional."""
+    if not isinstance(reconciliation, dict):
+        return []
+    conflicts: list[str] = []
+    for stage in ("silver", "gold"):
+        prior = "bronze" if stage == "silver" else "silver"
+        key = f"{stage}_vs_{prior}_status"
+        if reconciliation.get(key) == "FAILING":
+            conflicts.append(
+                f"Saved report accounting conflict: {key}=FAILING, "
+                f"delta={reconciliation.get(f'{stage}_delta', 'UNKNOWN')}. "
+                f"Saved Trust verdict: {verdict}; inspect report and ledger."
+            )
+    return conflicts
+
+
+def saved_trust_fields(
+    *,
+    verdict: object,
+    reasons_text: str,
+    reconciliation: object,
+) -> dict[str, object]:
+    """Keep the saved control verdict and surface an intentional ERROR override."""
+    conflicts = accounting_conflicts(reconciliation, verdict)
+    if conflicts:
+        reasons_text = "\n".join(filter(None, (reasons_text, *conflicts)))
+    return {
+        "trust_status": "ERROR" if conflicts else verdict,
+        "saved_trust_status": verdict,
+        "accounting_integrity": "CONFLICT" if conflicts else "NO REPORTED CONFLICT",
+        "reasons_text": reasons_text,
+    }

@@ -1,3 +1,15 @@
+Source-only refresh (2026-10-07, architecture ownership LOC split): source_tree_sha256 `51b5b2aaac9d68b32025aee1b8581154792be34c62f42b42b92ae8f648609d9e`. File-size and complexity splits stayed inside the existing domain and application limits. Publication vocabulary wiring and repository env loading sit outside the shrink-only hotspot prefixes. Publication classification view construction lives in the existing _publication_type_classification_support module so the public logic module stays under 250 lines. The module-coverage inventory still records `source_module_count=2553`. This source binding is not a new coverage measurement or a complete topology re-audit; historical evidence below is preserved.
+
+`source_tree_sha256=51b5b2aaac9d68b32025aee1b8581154792be34c62f42b42b92ae8f648609d9e`
+
+`source_module_count=2553`
+
+Source-only refresh (2026-10-07, architecture ownership): source_tree_sha256 `ab36ec7abab20cb5fd4459c44d3bf42e5179adc2d0b4c41612d8249da302c9eb`. The module-coverage inventory now records `source_module_count=2553` after the repository env reader. This source binding is not a new coverage measurement or a complete topology re-audit; historical evidence below is preserved.
+
+`source_tree_sha256=ab36ec7abab20cb5fd4459c44d3bf42e5179adc2d0b4c41612d8249da302c9eb`
+
+`source_module_count=2553`
+
 Coverage refresh (2026-10-05, RF-023 after main merge): complete 17-shard measurement on `54c7c9d5b5dad9077054081484275fc93a8be83e`, source `2f462961d6e80105c964f5d536a956def9a7b4c66af316bad70abfb0f6b226a1`. 32979 PASS / 187 SKIP; line 99.70%, branch 94.34%. Canonical nonregressing adoption retains 81 visible raw module regressions as historical values. Portable evidence: `reports/quality/proof-or-stop/rf023-54c7c9d5-complete-coverage`. This local measurement does not claim full-suite acceptance or CI ADMIT.
 
 Source-only refresh (2026-10-05, main 95ca0a67 merge): source_tree_sha256 `2f462961d6e80105c964f5d536a956def9a7b4c66af316bad70abfb0f6b226a1`. Incoming normalization changes require a fresh complete coverage measurement; previous receipts remain historical.
