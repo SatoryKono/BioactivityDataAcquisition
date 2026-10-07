@@ -100,6 +100,7 @@ def _publication_taxonomy_vocabulary(
     validator_name: str | None,
 ) -> frozenset[str] | None:
     from bioetl.domain.mapping.publication_type_classification import (
+        classification_install,
         publication_classification_values,
     )
 
@@ -113,7 +114,10 @@ def _publication_taxonomy_vocabulary(
     field_name = mapping.get(validator_name)
     if field_name is None:
         return None
-    return publication_classification_values(field_name)
+    data = classification_install.data
+    if data is None:
+        return frozenset()
+    return publication_classification_values(field_name, data)
 
 
 def _target_xref_json_vocabulary(

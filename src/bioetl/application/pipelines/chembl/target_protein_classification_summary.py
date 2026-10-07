@@ -12,7 +12,6 @@ from polars.datatypes import DataTypeClass
 from bioetl.domain.mapping.protein_class_target_type import (
     MAJOR_FAMILY_RULE_VERSION,
     ProteinClassTargetTypeMappingData,
-    current_protein_class_target_type_mapping,
     derive_major_families,
     derive_protein_class_target_type,
 )
@@ -53,6 +52,7 @@ _SUMMARY_SCHEMA: Final[dict[str, DataTypeClass | pl.DataType]] = {
 
 def summarize_target_protein_classification_dependency(
     df: pl.DataFrame,
+    target_type_mapping_data: ProteinClassTargetTypeMappingData | None = None,
 ) -> pl.DataFrame:
     """Collapse target-classification relation rows to one deterministic target row."""
     if "target_id" not in df.columns:
@@ -68,9 +68,19 @@ def summarize_target_protein_classification_dependency(
         if target_id is None:
             continue
         rows_by_target.setdefault(target_id, []).append(row)
+    if not rows_by_target:
+        return pl.DataFrame(schema=_SUMMARY_SCHEMA)
+    if target_type_mapping_data is None:
+        raise RuntimeError(
+            "target protein classification summary requires an explicit mapping"
+        )
 
     summary_rows = [
-        summarize_target_protein_classification_rows(target_id, rows)
+        summarize_target_protein_classification_rows(
+            target_id,
+            rows,
+            target_type_mapping_data,
+        )
         for target_id, rows in sorted(rows_by_target.items())
     ]
     return pl.DataFrame(summary_rows, schema=_SUMMARY_SCHEMA)
@@ -79,11 +89,12 @@ def summarize_target_protein_classification_dependency(
 def summarize_target_protein_classification_rows(
     target_id: str,
     rows: Iterable[Mapping[str, object]],
+    target_type_mapping_data: ProteinClassTargetTypeMappingData,
 ) -> dict[str, object]:
     """Summarize relation-like classification rows for one target."""
     summary = empty_target_protein_classification_summary(target_id)
     resolved_rows = _deduplicate_resolved_rows([dict(row) for row in rows])
-    mapping_data = current_protein_class_target_type_mapping()
+    mapping_data = target_type_mapping_data
     _populate_target_type_summary(summary, resolved_rows, mapping_data)
     if not resolved_rows:
         return summary
