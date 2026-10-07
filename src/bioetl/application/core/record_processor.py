@@ -25,10 +25,10 @@ from bioetl.application.core._record_processor_write_support import (
     write_silver_layer,
 )
 from bioetl.application.core.batch_executor import BatchResult
-from bioetl.application.core.batch_processing_contracts import LayerWriteOutcome
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+    from bioetl.application.core.batch_processing_contracts import LayerWriteOutcome
     from bioetl.application.core.batch_transformer import (
         BatchTransformer,
         TransformResult,

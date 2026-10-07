@@ -13,7 +13,7 @@
   "hotspot_families": {
     "application_core": {
       "files_ge_250_loc": 0,
-      "max_internal_fan_in": 7,
+      "max_internal_fan_in": 6,
       "helper_function_ratio": 0.381,
       "files": 202,
       "total_loc": 25231,
@@ -25,7 +25,7 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.284,
       "files": 49,
-      "total_loc": 6437,
+      "total_loc": 6440,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
