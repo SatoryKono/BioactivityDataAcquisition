@@ -17,9 +17,7 @@ from bioetl.application.core._batch_write_support import (
     emit_batch_written,
     emit_domain_event,
 )
-from bioetl.application.core.batch_processing_contracts import (
-    SilverGoldWriteOutcome,
-)
+from bioetl.application.core.batch_processing_contracts import SilverGoldWriteOutcome
 from bioetl.application.core.batch_processing_runtime import (
     build_bronze_refs as build_bronze_refs,
 )
@@ -201,7 +199,6 @@ class BatchProcessingSupportService:
     ) -> SilverGoldWriteOutcome:
         """Write Silver first, then pass its lineage refs into Gold.
         The historical method name is preserved for caller compatibility.
-        Returns the confirmed per-layer write outcomes.
         """
         return await write_silver_then_gold(
             execute_with_span=cast(

@@ -2575,7 +2575,11 @@ jobs:
                 exit 1
               fi
               base_ref="origin/${BASE_REF}"
-              git fetch --no-tags --depth=1 origin "${BASE_REF}"
+              if [ "$(git rev-parse --is-shallow-repository)" = true ]; then
+                git fetch --unshallow origin
+              fi
+              git fetch --no-tags origin "${BASE_REF}:refs/remotes/origin/${BASE_REF}"
+              git merge-base "${base_ref}" HEAD >/dev/null
 
               changed_diagrams=$(
                 git diff --diff-filter=ACMRTUXB --name-only "${base_ref}"...HEAD -- \
@@ -3384,6 +3388,7 @@ jobs:
           command -v node && node --version
           command -v npm && npm --version
           export PLAYWRIGHT_BROWSERS_PATH=/tmp/rf023-playwright
+          sudo apt-get update -qq
           bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh
           python -c 'import json; from pathlib import Path; locked=json.loads(Path("package-lock.json").read_text())["packages"]["node_modules/playwright"]["version"]; actual=json.loads(Path("node_modules/playwright/package.json").read_text())["version"]; assert actual == locked, (actual, locked)'
           echo 'export PLAYWRIGHT_BROWSERS_PATH=/tmp/rf023-playwright' >> "$BASH_ENV"

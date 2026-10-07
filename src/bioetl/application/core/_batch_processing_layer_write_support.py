@@ -120,54 +120,26 @@ async def write_silver_then_gold(
     invoked and is reported as ``blocked``; a confirmed Silver result and its
     lineage refs survive a later Gold quarantine.
     """
-    silver_outcome = LayerWriteOutcome(
-        layer="silver",
-        status="skipped",
-        candidate_count=len(transform_result.silver_records),
+    silver_outcome, blocked_gold = await _write_silver_stage(
+        execute_with_span=execute_with_span,
+        writer=writer,
+        quarantine_manager=quarantine_manager,
+        logger=logger,
+        batch_metrics=batch_metrics,
+        run_id=run_id,
+        domain_event_emitter=domain_event_emitter,
+        transform_result=transform_result,
+        batch_id=batch_id,
+        ingestion_ts=ingestion_ts,
+        bronze_refs=bronze_refs,
     )
+    if blocked_gold is not None:
+        return SilverGoldWriteOutcome(silver=silver_outcome, gold=blocked_gold)
     gold_outcome = LayerWriteOutcome(
         layer="gold",
         status="skipped",
         candidate_count=len(transform_result.gold_records),
     )
-    if transform_result.silver_records:
-        silver_outcome = await safe_write_layer(
-            execute_with_span=execute_with_span,
-            writer=writer,
-            quarantine_manager=quarantine_manager,
-            logger=logger,
-            run_id=run_id,
-            domain_event_emitter=domain_event_emitter,
-            layer="silver",
-            records=transform_result.silver_records,
-            batch_id=batch_id,
-            ingestion_ts=ingestion_ts,
-            bronze_refs=bronze_refs,
-            operation_errors=_OPERATION_ERRORS,
-        )
-        if silver_outcome.status != "written":
-            track_storage_write_metrics(
-                batch_metrics,
-                transform_result=transform_result,
-                silver_written=0,
-                gold_written=0,
-            )
-            if transform_result.gold_records:
-                gold_outcome = LayerWriteOutcome(
-                    layer="gold",
-                    status="blocked",
-                    candidate_count=len(transform_result.gold_records),
-                )
-            return SilverGoldWriteOutcome(
-                silver=silver_outcome,
-                gold=gold_outcome,
-            )
-        track_storage_write_metrics(
-            batch_metrics,
-            transform_result=transform_result,
-            silver_written=silver_outcome.confirmed_count,
-            gold_written=0,
-        )
     if transform_result.gold_records:
         silver_result = cast("SilverWriteResult | None", silver_outcome.write_result)
         gold_outcome = await safe_write_layer(
@@ -185,7 +157,7 @@ async def write_silver_then_gold(
             silver_refs=[silver_result] if silver_result is not None else None,
             operation_errors=_OPERATION_ERRORS,
         )
-    if not transform_result.gold_records:
+    else:
         record_run_observation(
             "Data Validation",
             verdict="N/A",

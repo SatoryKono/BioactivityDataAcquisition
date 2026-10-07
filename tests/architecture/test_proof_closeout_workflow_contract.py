@@ -123,7 +123,14 @@ def test_rf023_requires_terminal_full_suite_and_preserves_ci_identity():
         "command -v node" in command and "command -v npm" in command
         for command in commands
     )
-    assert any("setup_grafana_screenshot_runtime.sh" in command for command in commands)
+    browser_setup = next(
+        command
+        for command in commands
+        if "setup_grafana_screenshot_runtime.sh" in command
+    )
+    assert browser_setup.index("sudo apt-get update -qq") < browser_setup.index(
+        "bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh"
+    )
     assert any("actual == locked" in command for command in commands)
 
 
@@ -144,3 +151,16 @@ def test_rf023_full_suite_receipt_binds_junit_and_isolates_selection():
     assert '"--output-artifact", output_artifact' in source
     assert 'tempfile.mkdtemp(prefix=run_id + "-full-suite-")' in source
     assert '"--basetemp=" + str(full_suite_tmp)' in source
+
+
+def test_diagram_drift_has_a_reachable_merge_base_before_diff():
+    source = (ROOT / ".circleci/config.yml").read_text()
+    start = source.index("name: Canonical diagram drift validation")
+    drift = source[start : source.index("changed_diagrams=$(", start)]
+    assert "git fetch --unshallow origin" in drift
+    assert (
+        'git fetch --no-tags origin "${BASE_REF}:refs/remotes/origin/${BASE_REF}"'
+        in drift
+    )
+    assert 'git merge-base "${base_ref}" HEAD >/dev/null' in drift
+    assert "--depth=1" not in drift
