@@ -2,17 +2,25 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
 from bioetl.domain.aggregates.events import PipelineFailed
+from bioetl.domain.context_time import utc_instant, validate_completion_order
 from bioetl.domain.exceptions import InvalidStateError
+from bioetl.domain.immutability import (
+    FrozenDict,
+    FrozenList,
+    deep_freeze_json,
+    deep_thaw_json,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.aggregates.events import DomainEvent
-    from bioetl.domain.types import JsonDict, RunID, RunType
+    from bioetl.domain.types import RunID
 
 
 class StageStatus(StrEnum):
@@ -44,74 +52,52 @@ class PipelineRunState(StrEnum):
 
 
 def _validate_failed_has_error(status: StageStatus, error: str | None) -> None:
-    if status != StageStatus.FAILED:
-        return
-    if error:
-        return
-    raise ValueError("Failed stage must have an error message")
+    if status == StageStatus.FAILED and not error:
+        raise ValueError("Failed stage must have an error message")
 
 
 def _validate_in_progress_no_completion(
     status: StageStatus,
     completed_at: datetime | None,
 ) -> None:
-    if status not in {StageStatus.PENDING, StageStatus.RUNNING}:
-        return
-    if completed_at is None:
-        return
-    raise ValueError(
-        f"In-progress stage must not have completed_at timestamp, got status={status.value}"
-    )
+    if (
+        status in {StageStatus.PENDING, StageStatus.RUNNING}
+        and completed_at is not None
+    ):
+        raise ValueError(
+            f"In-progress stage must not have completed_at timestamp, got status={status.value}"
+        )
 
 
 def _validate_terminal_has_completion(
     status: StageStatus,
     completed_at: datetime | None,
 ) -> None:
-    if status not in {StageStatus.SUCCESS, StageStatus.FAILED}:
-        return
-    if completed_at:
-        return
-    raise ValueError(
-        f"Completed/Failed stage must have completed_at timestamp, got status={status.value}"
-    )
+    if status in {StageStatus.SUCCESS, StageStatus.FAILED} and not completed_at:
+        raise ValueError(
+            f"Completed/Failed stage must have completed_at timestamp, got status={status.value}"
+        )
 
 
-def _validate_completion_order(
-    completed_at: datetime | None,
-    started_at: datetime,
-) -> None:
-    if completed_at is None:
-        return
-    if completed_at >= started_at:
-        return
-    raise ValueError(
-        "completed_at cannot be earlier than started_at: "
-        f"started_at={started_at!s}, completed_at={completed_at!s}"
-    )
-
-
-def _validate_stage_result(
-    stage: str,
-    status: StageStatus,
-    error: str | None,
-    completed_at: datetime | None,
-    records_processed: int,
-    started_at: datetime,
-) -> None:
-    if not stage:
+def _validate_stage_result(value: StageResult) -> None:
+    if not value.stage:
         raise ValueError("Stage name cannot be empty")
-    _validate_failed_has_error(status, error)
-    _validate_in_progress_no_completion(status, completed_at)
-    _validate_terminal_has_completion(status, completed_at)
-    _validate_completion_order(completed_at, started_at)
-    if records_processed < 0:
-        raise ValueError(f"records_processed cannot be negative: {records_processed}")
+    _validate_failed_has_error(value.status, value.error)
+    _validate_in_progress_no_completion(value.status, value.completed_at)
+    _validate_terminal_has_completion(value.status, value.completed_at)
+    validate_completion_order(value.completed_at, value.started_at)
+    if value.records_processed < 0:
+        raise ValueError(
+            f"records_processed cannot be negative: {value.records_processed}"
+        )
 
 
 @dataclass(frozen=True, slots=True)
 class StageResult:
-    """Immutable value object representing the result of a pipeline stage."""
+    """Stage evidence with immutable JSON collections and detached domain values.
+
+    Other copyable values retain their type via construction/access copies.
+    """
 
     stage: str
     status: StageStatus
@@ -124,14 +110,27 @@ class StageResult:
 
     def __post_init__(self) -> None:
         """Validate stage result invariants."""
-        _validate_stage_result(
-            self.stage,
-            self.status,
-            self.error,
-            self.completed_at,
-            self.records_processed,
-            self.started_at,
+        _validate_stage_result(self)
+        value = object.__getattribute__(self, "result")
+        snapshot = (
+            deep_thaw_json(value)
+            if isinstance(value, (FrozenDict, FrozenList))
+            else deepcopy(value)
         )
+        object.__setattr__(self, "result", snapshot)
+
+    def __getattribute__(self, name: str) -> object:
+        """Never expose a stored result alias, including complex value objects."""
+        value = object.__getattribute__(self, name)
+        if name != "result":
+            return value
+        # Thaw restored snapshots to keep nested copyable values detached.
+        if isinstance(value, (FrozenDict, FrozenList)):
+            value = deep_thaw_json(value)
+        try:
+            return deep_freeze_json(value)
+        except TypeError:
+            return deepcopy(value)
 
     @property
     def duration_seconds(self) -> float | None:
@@ -140,7 +139,9 @@ class StageResult:
             return None
         if self.status in {StageStatus.PENDING, StageStatus.RUNNING}:
             return None
-        duration = (self.completed_at - self.started_at).total_seconds()
+        duration = (
+            utc_instant(self.completed_at) - utc_instant(self.started_at)
+        ).total_seconds()
         if duration < 0:
             return None
         return duration
@@ -180,11 +181,7 @@ class StageResult:
 
 
 class _PipelineRunStageMixin:
-    """Stage recording behavior for PipelineRun.
-
-    Slots and annotations live on this class so mypy sees mixin methods as
-    mutating the same instance layout as ``PipelineRun``.
-    """
+    """Stage transitions sharing PipelineRun's slot layout and annotations."""
 
     __slots__ = (
         "_ended_at",
@@ -199,15 +196,20 @@ class _PipelineRunStageMixin:
         "_status",
     )
     _run_id: RunID
-    _run_type: RunType
     _pipeline_name: str
     _status: PipelineRunState
     _stages: list[StageResult]
     _started_at: datetime | None
     _ended_at: datetime | None
     _events: list[DomainEvent]
-    _manifest_id: str | None
-    _metadata: JsonDict
+
+    _validate_timestamp = staticmethod(utc_instant)
+
+    def _validate_end_timestamp(self, value: datetime) -> datetime:
+        end = utc_instant(value)
+        if self._started_at is not None and end < utc_instant(self._started_at):
+            raise ValueError("end timestamp cannot be earlier than run started_at")
+        return end
 
     def record_stage_start(self, stage: str, started_at: datetime) -> None:
         """Record the start of a pipeline stage."""
@@ -250,9 +252,7 @@ class _PipelineRunStageMixin:
         return False
 
     def _has_stage_status(self, stage: str, status: StageStatus) -> bool:
-        return any(
-            item.stage == stage and item.status == status for item in self._stages
-        )
+        return any(s.stage == stage and s.status == status for s in self._stages)
 
     def record_stage_failure(
         self,
@@ -274,22 +274,24 @@ class _PipelineRunStageMixin:
             error=error_message,
             error_type=error_type,
         )
+        self._validate_end_timestamp(completed_at)
+        if not self._has_stage_status(
+            stage, StageStatus.RUNNING
+        ) and self._has_stage_status(stage, StageStatus.FAILED):
+            return
+        event = PipelineFailed(
+            occurred_at=completed_at,
+            run_id=self._run_id,
+            pipeline_name=self._pipeline_name,
+            failed_stage=stage,
+            error=error_message,
+            error_type=error_type,
+        )
         if not self._replace_running_stage(stage, failed):
-            if self._has_stage_status(stage, StageStatus.FAILED):
-                return
             self._stages.append(failed)
         self._status = PipelineRunState.FAILED
         self._ended_at = completed_at
-        self._events.append(
-            PipelineFailed(
-                occurred_at=completed_at,
-                run_id=self._run_id,
-                pipeline_name=self._pipeline_name,
-                failed_stage=stage,
-                error=error_message,
-                error_type=error_type,
-            )
-        )
+        self._events.append(event)
 
     def _assert_running(self, operation: str) -> None:
         if self._status != PipelineRunState.RUNNING:
@@ -300,4 +302,4 @@ class _PipelineRunStageMixin:
             )
 
 
-__all__ = ["PipelineRunState", "StageResult", "StageStatus"]
+__all__ = ["PipelineRunState", "StageResult", "StageStatus", "utc_instant"]
