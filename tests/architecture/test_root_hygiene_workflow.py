@@ -27,14 +27,11 @@ def test_root_hygiene_workflow_is_called_once_by_pr_coordinator() -> None:
 
     assert "workflow_call:" in workflow
     assert "pull_request:" not in workflow
-    assert "push:" in workflow
+    assert "push:" not in workflow
     assert "workflow_dispatch:" in workflow
     assert "paths-ignore:" not in workflow
-    assert re.search(
-        r"uses:\s*SatoryKono/BioactivityDataAcquisition/"
-        r"\.github/workflows/root-hygiene\.yml@[0-9a-f]{40}",
-        coordinator,
-    ), "pr-required must pin root-hygiene.yml to a full commit SHA (#11232)"
+    assert "check-cleanliness --strict-untracked" in coordinator
+    assert "root-hygiene.yml@" not in coordinator
 
 
 def test_root_hygiene_workflow_uses_strict_audit_and_unit_tests() -> None:
