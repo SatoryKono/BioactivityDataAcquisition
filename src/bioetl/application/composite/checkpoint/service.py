@@ -7,6 +7,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from bioetl.application.composite.checkpoint._anchor_context import (
+    CheckpointContextParams,
     ExpectedCheckpointContext,
     create_expected_checkpoint_context,
 )
@@ -77,17 +78,19 @@ class CompositeCheckpointService:
             else self._DEFAULT_STALE_THRESHOLD_HOURS
         )
         self._expected_checkpoint_context = create_expected_checkpoint_context(
-            effective_config_hash=params.expected_effective_config_hash,
-            effective_config_artifact_id=params.expected_effective_config_artifact_id,
-            execution_fingerprint=params.expected_execution_fingerprint,
-            dq_contract_compatibility_hash=(
-                params.expected_dq_contract_compatibility_hash
-            ),
-            input_snapshot_fingerprint=params.expected_input_snapshot_fingerprint,
-            contract_ref=params.expected_contract_ref,
-            contract_version=params.expected_contract_version,
-            manifest_id=params.expected_manifest_id,
-            composite_run_identity=params.run_id,
+            CheckpointContextParams(
+                effective_config_hash=params.expected_effective_config_hash,
+                effective_config_artifact_id=params.expected_effective_config_artifact_id,
+                execution_fingerprint=params.expected_execution_fingerprint,
+                dq_contract_compatibility_hash=(
+                    params.expected_dq_contract_compatibility_hash
+                ),
+                input_snapshot_fingerprint=params.expected_input_snapshot_fingerprint,
+                contract_ref=params.expected_contract_ref,
+                contract_version=params.expected_contract_version,
+                manifest_id=params.expected_manifest_id,
+                composite_run_identity=params.run_id,
+            )
         )
         self._checkpoint_filename = self._make_filename(params.run_id)
         self._glob_pattern_value = self._glob_pattern()

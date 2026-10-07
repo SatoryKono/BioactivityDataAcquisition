@@ -16,6 +16,7 @@ Public API remains stable at:
 from __future__ import annotations
 
 from bioetl.application.composite.checkpoint._anchor_context import (
+    CheckpointContextParams,
     ExpectedCheckpointContext,
     create_expected_checkpoint_context,
     fresh_checkpoint_state,
@@ -32,6 +33,7 @@ from bioetl.application.composite.checkpoint.transition_service import (
 )
 
 __all__ = [
+    "CheckpointContextParams",
     "CompositeCheckpointService",
     "CompositeCheckpointServiceContext",
     "CompositeCheckpointState",

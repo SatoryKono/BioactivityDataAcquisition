@@ -29,30 +29,36 @@ class ExpectedCheckpointContext:
     composite_run_identity: str = ""
 
 
+@dataclass(frozen=True, slots=True)
+class CheckpointContextParams:
+    """Parameter object for creating expected checkpoint contexts."""
+
+    effective_config_hash: str | None
+    contract_ref: str | None
+    contract_version: str | None
+    manifest_id: str | None
+    composite_run_identity: str
+    effective_config_artifact_id: str | None = None
+    execution_fingerprint: str | None = None
+    dq_contract_compatibility_hash: str | None = None
+    input_snapshot_fingerprint: str | None = None
+
+
 def create_expected_checkpoint_context(
-    *,
-    effective_config_hash: str | None,
-    effective_config_artifact_id: str | None = None,
-    execution_fingerprint: str | None = None,
-    dq_contract_compatibility_hash: str | None = None,
-    input_snapshot_fingerprint: str | None = None,
-    contract_ref: str | None,
-    contract_version: str | None,
-    manifest_id: str | None,
-    composite_run_identity: str,
+    params: CheckpointContextParams,
 ) -> ExpectedCheckpointContext:
     """Normalize nullable runtime anchors into a comparable checkpoint context."""
     normalized = normalize_runtime_anchor_payload(
         {
-            "effective_config_hash": effective_config_hash,
-            "effective_config_artifact_id": effective_config_artifact_id,
-            "execution_fingerprint": execution_fingerprint,
-            "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
-            "input_snapshot_fingerprint": input_snapshot_fingerprint,
-            "contract_ref": contract_ref,
-            "contract_version": contract_version,
-            "manifest_id": manifest_id,
-            "composite_run_identity": composite_run_identity,
+            "effective_config_hash": params.effective_config_hash,
+            "effective_config_artifact_id": params.effective_config_artifact_id,
+            "execution_fingerprint": params.execution_fingerprint,
+            "dq_contract_compatibility_hash": params.dq_contract_compatibility_hash,
+            "input_snapshot_fingerprint": params.input_snapshot_fingerprint,
+            "contract_ref": params.contract_ref,
+            "contract_version": params.contract_version,
+            "manifest_id": params.manifest_id,
+            "composite_run_identity": params.composite_run_identity,
         }
     )
     return ExpectedCheckpointContext(

@@ -34,6 +34,7 @@ import pytest
 from datetime import UTC, datetime
 
 from bioetl.application.composite.checkpoint import (
+    CheckpointContextParams,
     CompositeCheckpointState,
     ExpectedCheckpointContext,
     create_expected_checkpoint_context,
@@ -49,15 +50,17 @@ pytestmark = pytest.mark.unit
 
 def test_public_facade_exports_anchor_context_helpers() -> None:
     anchors = create_expected_checkpoint_context(
-        effective_config_hash=" sha256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ",
-        effective_config_artifact_id=" artifact-123 ",
-        execution_fingerprint=" fingerprint-123 ",
-        dq_contract_compatibility_hash=" dq-hash-123 ",
-        input_snapshot_fingerprint=" SNAPSHOT-HASH-123 ",
-        contract_ref=" ChemBL.Activity ",
-        contract_version=" v2 ",
-        manifest_id=" manifest-123 ",
-        composite_run_identity=" run-42 ",
+        CheckpointContextParams(
+            effective_config_hash=" sha256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ",
+            effective_config_artifact_id=" artifact-123 ",
+            execution_fingerprint=" fingerprint-123 ",
+            dq_contract_compatibility_hash=" dq-hash-123 ",
+            input_snapshot_fingerprint=" SNAPSHOT-HASH-123 ",
+            contract_ref=" ChemBL.Activity ",
+            contract_version=" v2 ",
+            manifest_id=" manifest-123 ",
+            composite_run_identity=" run-42 ",
+        )
     )
 
     assert isinstance(anchors, ExpectedCheckpointContext)
@@ -74,15 +77,17 @@ def test_public_facade_exports_anchor_context_helpers() -> None:
 
 def test_public_facade_merges_runtime_anchors_into_checkpoint_state() -> None:
     anchors = create_expected_checkpoint_context(
-        effective_config_hash=" sha256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ",
-        effective_config_artifact_id=" artifact-123 ",
-        execution_fingerprint=" fingerprint-123 ",
-        dq_contract_compatibility_hash=" dq-hash-123 ",
-        input_snapshot_fingerprint=" snapshot-hash-123 ",
-        contract_ref=" ChemBL.Activity ",
-        contract_version=" v2 ",
-        manifest_id=" manifest-123 ",
-        composite_run_identity=" run-42 ",
+        CheckpointContextParams(
+            effective_config_hash=" sha256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ",
+            effective_config_artifact_id=" artifact-123 ",
+            execution_fingerprint=" fingerprint-123 ",
+            dq_contract_compatibility_hash=" dq-hash-123 ",
+            input_snapshot_fingerprint=" snapshot-hash-123 ",
+            contract_ref=" ChemBL.Activity ",
+            contract_version=" v2 ",
+            manifest_id=" manifest-123 ",
+            composite_run_identity=" run-42 ",
+        )
     )
     state = CompositeCheckpointState(
         composite_name="composite_publication",
@@ -121,11 +126,13 @@ def test_public_facade_merges_runtime_anchors_into_checkpoint_state() -> None:
 
 def test_public_facade_fresh_state_uses_injected_clock() -> None:
     anchors = create_expected_checkpoint_context(
-        effective_config_hash=" sha256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ",
-        contract_ref=" ChemBL.Activity ",
-        contract_version=" v2 ",
-        manifest_id=" manifest-123 ",
-        composite_run_identity=" run-42 ",
+        CheckpointContextParams(
+            effective_config_hash=" sha256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ",
+            contract_ref=" ChemBL.Activity ",
+            contract_version=" v2 ",
+            manifest_id=" manifest-123 ",
+            composite_run_identity=" run-42 ",
+        )
     )
     fixed_time = datetime(2026, 4, 23, 8, 30, tzinfo=UTC)
 
