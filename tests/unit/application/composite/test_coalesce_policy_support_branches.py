@@ -37,6 +37,7 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite._coalesce_policy_support import (
+    FieldPriorityContext,
     apply_field_priority,
     can_coalesce,
     coalesce_and_drop,
@@ -133,12 +134,14 @@ def test_apply_field_priority_short_circuits_and_coalesces() -> None:
     out = apply_field_priority(
         df,
         provider=provider,
-        field="title",
-        priorities=("chembl",),
-        enrichers=(),
-        available_columns=set(df.columns),
-        seed_pipeline="chembl_activity",
-        can_coalesce_fn=can_coalesce,
+        context=FieldPriorityContext(
+            field="title",
+            priorities=("chembl",),
+            enrichers=(),
+            available_columns=set(df.columns),
+            seed_pipeline="chembl_activity",
+            can_coalesce_fn=can_coalesce,
+        ),
     )
     assert out is df
     provider.order_columns_by_priority.assert_not_called()
@@ -149,12 +152,14 @@ def test_apply_field_priority_short_circuits_and_coalesces() -> None:
     coalesced = apply_field_priority(
         df,
         provider=provider,
-        field="title",
-        priorities=("chembl", "pubchem"),
-        enrichers=(),
-        available_columns=set(df.columns),
-        seed_pipeline="chembl_activity",
-        can_coalesce_fn=can_coalesce,
+        context=FieldPriorityContext(
+            field="title",
+            priorities=("chembl", "pubchem"),
+            enrichers=(),
+            available_columns=set(df.columns),
+            seed_pipeline="chembl_activity",
+            can_coalesce_fn=can_coalesce,
+        ),
     )
     assert "pubchem.compound.title" not in coalesced.columns
 

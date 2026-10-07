@@ -6,6 +6,7 @@ from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite._coalesce_policy_support import (
+    FieldPriorityContext,
     _ColumnPriorityProvider,
     apply_field_priority,
     build_field_groups,
@@ -220,15 +221,18 @@ class CoalescePolicyService:
             self._order_service,
         )
         for field, priorities in field_priorities.items():
-            result = apply_field_priority(
-                result,
-                provider=provider,
+            ctx = FieldPriorityContext(
                 field=field,
                 priorities=priorities,
                 enrichers=enrichers,
                 available_columns=available_columns,
                 seed_pipeline=seed_pipeline,
                 can_coalesce_fn=self.can_coalesce,
+            )
+            result = apply_field_priority(
+                result,
+                provider=provider,
+                context=ctx,
             )
 
         return result
