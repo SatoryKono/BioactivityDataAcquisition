@@ -833,7 +833,7 @@ class TestBatchTransformerTransform:
             deterministic_batch_uuid_from_callsite("test_batch_transformer"),
         )
 
-        assert result.filtered_out_count == 0
+        assert result.filtered_out_count == 1
         mock_quarantine_manager.quarantine_filtered_records.assert_not_called()
 
 

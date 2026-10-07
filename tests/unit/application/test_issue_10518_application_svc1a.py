@@ -1196,45 +1196,58 @@ class TestLoadRepositorySourceEnvironment:
             "BIOETL_RUNTIME_SOURCE_ID=bbb\n", encoding="utf-8"
         )
         values = _sid.load_repository_source_environment(
-            tmp_path, names=["BIOETL_RUNTIME_SOURCE_ID"]
+            tmp_path,
+            names=["BIOETL_RUNTIME_SOURCE_ID"],
+            file_texts={
+                str(tmp_path / ".env"): "BIOETL_RUNTIME_SOURCE_ID=aaa\nOTHER=1\n",
+                str(tmp_path / ".env.local"): "BIOETL_RUNTIME_SOURCE_ID=bbb\n",
+            },
         )
         assert values == {"BIOETL_RUNTIME_SOURCE_ID": "bbb"}
 
     def test_missing_files_return_empty(self, tmp_path):
-        assert _sid.load_repository_source_environment(tmp_path, names=["ANY"]) == {}
+        assert (
+            _sid.load_repository_source_environment(
+                tmp_path, names=["ANY"], file_texts={}
+            )
+            == {}
+        )
 
     def test_skip_env_local(self, tmp_path):
-        (tmp_path / ".env").write_text("MY_KEY=base\n", encoding="utf-8")
-        (tmp_path / ".env.local").write_text("MY_KEY=override\n", encoding="utf-8")
         values = _sid.load_repository_source_environment(
             tmp_path,
             names=["MY_KEY"],
             process_environment={"BIOETL_SKIP_ENV_LOCAL": "1"},
+            file_texts={
+                str(tmp_path / ".env"): "MY_KEY=base\n",
+                str(tmp_path / ".env.local"): "MY_KEY=override\n",
+            },
         )
         assert values == {"MY_KEY": "base"}
 
     def test_custom_env_file(self, tmp_path):
-        custom = tmp_path / "custom.env"
-        custom.write_text("MY_KEY=custom\n", encoding="utf-8")
         values = _sid.load_repository_source_environment(
             tmp_path,
             names=["MY_KEY"],
             process_environment={"BIOETL_ENV_FILE": "custom.env"},
+            file_texts={str(tmp_path / "custom.env"): "MY_KEY=custom\n"},
         )
         assert values == {"MY_KEY": "custom"}
 
     def test_parsing_branches(self, tmp_path):
-        (tmp_path / ".env").write_text(
-            "# comment\n"
-            "NOEQUALS\n"
-            "MY_KEY='single quoted'\n"
-            'MY_OTHER="double quoted"\n'
-            "MY_THIRD=plain # trailing comment\n"
-            "MY_HASH=keep#hash\n",
-            encoding="utf-8",
-        )
         values = _sid.load_repository_source_environment(
-            tmp_path, names=["MY_KEY", "MY_OTHER", "MY_THIRD", "MY_HASH"]
+            tmp_path,
+            names=["MY_KEY", "MY_OTHER", "MY_THIRD", "MY_HASH"],
+            file_texts={
+                str(tmp_path / ".env"): (
+                    "# comment\n"
+                    "NOEQUALS\n"
+                    "MY_KEY='single quoted'\n"
+                    'MY_OTHER="double quoted"\n'
+                    "MY_THIRD=plain # trailing comment\n"
+                    "MY_HASH=keep#hash\n"
+                )
+            },
         )
         assert values == {
             "MY_KEY": "single quoted",

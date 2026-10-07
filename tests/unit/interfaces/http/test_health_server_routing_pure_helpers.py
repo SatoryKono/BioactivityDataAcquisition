@@ -433,6 +433,7 @@ async def test_readiness_fails_closed_for_valid_layout_from_foreign_source(
         REPORT_ROOT_MARKER_VALUE,
         write_report_root_source_identity,
     )
+    from bioetl.composition.observability_runtime import create_run_report_store
     from bioetl.interfaces.http.report_root_config import (
         ENFORCE_REPORT_ROOT_MARKER_ENV,
         REPORT_ROOT_ENV,
@@ -445,7 +446,11 @@ async def test_readiness_fails_closed_for_valid_layout_from_foreign_source(
         REPORT_ROOT_MARKER_VALUE + "\n",
         encoding="utf-8",
     )
-    write_report_root_source_identity(report_root=report_root, source_id="a" * 64)
+    write_report_root_source_identity(
+        report_root=report_root,
+        source_id="a" * 64,
+        store=create_run_report_store(),
+    )
     monkeypatch.setenv(REPORT_ROOT_ENV, str(report_root))
     monkeypatch.setenv(ENFORCE_REPORT_ROOT_MARKER_ENV, "1")
     monkeypatch.setenv(RUNTIME_SOURCE_ID_ENV, "b" * 64)
