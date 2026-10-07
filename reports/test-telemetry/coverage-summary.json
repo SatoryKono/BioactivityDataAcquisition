@@ -4,7 +4,7 @@
   "source_run_id": "local-bioetl-local-coverage-n3j855qy",
   "source_event": "local_coverage_verify",
   "source_run_url": null,
-  "source_tree_sha256": "9b4582fc330c7ac676ed24de9357c1572574ec496236af8a33fe8c5ab5abaae3",
+  "source_tree_sha256": "046a7d20f819451b377c994d29d2b2a7e10fe617df29483c5258a1d5cdc51bab",
   "refreshed_at_utc": "2026-10-07T06:47:38.860998+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.68,
@@ -21,7 +21,7 @@
     "manifest_sha256": "bb1428f085f0a0d6d18124d3103fa0661de8c7599d80f1019e829b9e0d8a83a3",
     "coverage_xml_sha256": "ac1e2b3dd0f317742c3e730663bc9aa207638a91d7ce8144933d6360bc6d8c6e",
     "source_tree_sha256": "0ccfa49e8b4f63e635a615e8c1d88c7090d75a495929d6a1e1472051773a8e27",
-    "test_tree_sha256": "9b4582fc330c7ac676ed24de9357c1572574ec496236af8a33fe8c5ab5abaae3",
+    "test_tree_sha256": "046a7d20f819451b377c994d29d2b2a7e10fe617df29483c5258a1d5cdc51bab",
     "head": "348c29184670c53d11a039305c2594cef7e79f39",
     "required_shards": [
       "smoke",

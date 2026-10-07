@@ -69,17 +69,20 @@ def _context_with_supplied_policy(
 
     if not vocabulary_supplied and not classification_supplied:
         return init
-    return replace(
-        init,
-        publication_vocabulary=(
-            publication_vocabulary
-            if vocabulary_supplied
-            else init.publication_vocabulary
-        ),
-        publication_classification=(
-            publication_classification
-            if classification_supplied
-            else init.publication_classification
+    return cast(
+        BasePublicationTransformerContext,
+        replace(
+            init,
+            publication_vocabulary=(
+                publication_vocabulary
+                if vocabulary_supplied
+                else init.publication_vocabulary
+            ),
+            publication_classification=(
+                publication_classification
+                if classification_supplied
+                else init.publication_classification
+            ),
         ),
     )
 

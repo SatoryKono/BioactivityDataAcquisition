@@ -1,6 +1,6 @@
-Source-only refresh (2026-10-07, architecture ownership LOC split): source_tree_sha256 `45939a32bb1dc7efc297d7a2d3c315a627a1c7bfc80d97031e997b391f595e1d`. File-size and complexity splits stayed inside the existing domain and application limits. Publication vocabulary wiring and repository env loading sit outside the shrink-only hotspot prefixes. Publication classification view construction lives in the existing _publication_type_classification_support module so the public logic module stays under 250 lines. The module-coverage inventory still records `source_module_count=2553`. This source binding is not a new coverage measurement or a complete topology re-audit; historical evidence below is preserved.
+Source-only refresh (2026-10-07, architecture ownership LOC split): source_tree_sha256 `8fd05fc226038b5df50c3d85d56e5030424c47e1b204781d56b6538ccda8c053`. File-size and complexity splits stayed inside the existing domain and application limits. Publication vocabulary wiring and repository env loading sit outside the shrink-only hotspot prefixes. Publication classification view construction lives in the existing _publication_type_classification_support module so the public logic module stays under 250 lines. The module-coverage inventory still records `source_module_count=2553`. This source binding is not a new coverage measurement or a complete topology re-audit; historical evidence below is preserved.
 
-`source_tree_sha256=45939a32bb1dc7efc297d7a2d3c315a627a1c7bfc80d97031e997b391f595e1d`
+`source_tree_sha256=8fd05fc226038b5df50c3d85d56e5030424c47e1b204781d56b6538ccda8c053`
 
 `source_module_count=2553`
 

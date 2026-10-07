@@ -19,6 +19,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, replace
 from functools import cache
 from pathlib import Path
+from typing import cast
 
 from scripts.engineering.qa.file_discovery import discover_files
 
@@ -563,6 +564,68 @@ def _build_parsed_module(
     )
 
 
+def _append_parsed_source(
+    *,
+    scan: PackageScan,
+    source: _SourceRead,
+    repo_root: Path,
+    census_modules: frozenset[str],
+    graph_modules: frozenset[str],
+    prefixes: frozenset[str],
+    parsed_modules: list[ParsedModule],
+    failures: list[ImportGraphFailure],
+) -> None:
+    if source.text is None:
+        failures.append(
+            ImportGraphFailure(
+                file=_relative_posix(repo_root, source.path),
+                reason=source.failure_reason or FAILURE_UNREADABLE,
+                detail=source.failure_detail,
+            )
+        )
+        return
+    parsed, failure = _build_parsed_module(
+        scan_label=scan.label,
+        repo_root=repo_root,
+        py_file=source.path,
+        importer_module=source.module_name,
+        source_text=source.text,
+        existing_modules=census_modules,
+        graph_modules=graph_modules,
+        prefixes=prefixes,
+    )
+    if failure is not None:
+        failures.append(failure)
+    if parsed is not None:
+        parsed_modules.append(parsed)
+
+
+def _parse_scan_modules(
+    *,
+    scans: tuple[PackageScan, ...],
+    repo_root: Path,
+    census_modules: frozenset[str],
+    graph_modules: frozenset[str],
+    prefixes: frozenset[str],
+) -> tuple[list[ParsedModule], list[ImportGraphFailure]]:
+    """Read each scan separately so labels stay src/tests."""
+    parsed_modules: list[ParsedModule] = []
+    failures: list[ImportGraphFailure] = []
+    for scan in scans:
+        for source in _read_module_sources(_iter_import_sources(scan)):
+            _append_parsed_source(
+                scan=scan,
+                source=source,
+                repo_root=repo_root,
+                census_modules=census_modules,
+                graph_modules=graph_modules,
+                prefixes=prefixes,
+                parsed_modules=parsed_modules,
+                failures=failures,
+            )
+    return parsed_modules, failures
+
+
 def _collect_parsed_modules(repo_root_str: str) -> tuple[ParsedModule, ...]:
     """Parse default scan roots once per repo path for reuse across checks."""
     roots_key = _roots_cache_key(default_scan_roots(Path(repo_root_str)))
@@ -602,35 +665,15 @@ def _collect_import_scan(
     if cached is not None:
         return cached
 
-    parsed_modules: list[ParsedModule] = []
-    failures: list[ImportGraphFailure] = []
     # Preserve scan-label grouping: read each scan separately so ParsedModule
     # labels remain src/tests even though the fingerprint covers every root.
-    for scan in scans:
-        for source in _read_module_sources(_iter_import_sources(scan)):
-            if source.text is None:
-                failures.append(
-                    ImportGraphFailure(
-                        file=_relative_posix(repo_root, source.path),
-                        reason=source.failure_reason or FAILURE_UNREADABLE,
-                        detail=source.failure_detail,
-                    )
-                )
-                continue
-            parsed, failure = _build_parsed_module(
-                scan_label=scan.label,
-                repo_root=repo_root,
-                py_file=source.path,
-                importer_module=source.module_name,
-                source_text=source.text,
-                existing_modules=census_modules,
-                graph_modules=frozenset(graph_modules),
-                prefixes=prefixes,
-            )
-            if failure is not None:
-                failures.append(failure)
-            if parsed is not None:
-                parsed_modules.append(parsed)
+    parsed_modules, failures = _parse_scan_modules(
+        scans=scans,
+        repo_root=repo_root,
+        census_modules=census_modules,
+        graph_modules=frozenset(graph_modules),
+        prefixes=prefixes,
+    )
 
     result = _ScanCache(
         version=_PARSED_CACHE_VERSION,
@@ -826,25 +869,36 @@ def _in_scan(module_name: str, prefixes: frozenset[str]) -> bool:
 
 
 def _clear_name(state: _BindState, name: str) -> _BindState:
-    return replace(
-        state,
-        flag_names=state.flag_names - {name},
-        typing_modules=state.typing_modules - {name},
-        import_module_names=state.import_module_names - {name},
-        importlib_modules=state.importlib_modules - {name},
-        dunder_import_bound=state.dunder_import_bound and name != "__import__",
+    return cast(
+        _BindState,
+        replace(
+            state,
+            flag_names=state.flag_names - {name},
+            typing_modules=state.typing_modules - {name},
+            import_module_names=state.import_module_names - {name},
+            importlib_modules=state.importlib_modules - {name},
+            dunder_import_bound=state.dunder_import_bound and name != "__import__",
+        ),
     )
 
 
 def _add_kind(state: _BindState, name: str, kind: str) -> _BindState:
     if kind == "flag":
-        return replace(state, flag_names=state.flag_names | {name})
+        return cast(_BindState, replace(state, flag_names=state.flag_names | {name}))
     if kind == "typing_module":
-        return replace(state, typing_modules=state.typing_modules | {name})
+        return cast(
+            _BindState, replace(state, typing_modules=state.typing_modules | {name})
+        )
     if kind == "importlib_module":
-        return replace(state, importlib_modules=state.importlib_modules | {name})
+        return cast(
+            _BindState,
+            replace(state, importlib_modules=state.importlib_modules | {name}),
+        )
     if kind == "import_module":
-        return replace(state, import_module_names=state.import_module_names | {name})
+        return cast(
+            _BindState,
+            replace(state, import_module_names=state.import_module_names | {name}),
+        )
     return state
 
 
@@ -861,25 +915,33 @@ def _iter_target_names(target: ast.AST) -> list[str]:
     return []
 
 
+def _bound_name_kind(name: str, state: _BindState) -> str | None:
+    if name in state.flag_names:
+        return "flag"
+    if name in state.typing_modules:
+        return "typing_module"
+    if name in state.importlib_modules:
+        return "importlib_module"
+    if name in state.import_module_names:
+        return "import_module"
+    return None
+
+
+def _attribute_kind(expr: ast.Attribute, state: _BindState) -> str | None:
+    if not isinstance(expr.value, ast.Name):
+        return None
+    if expr.attr == "TYPE_CHECKING" and expr.value.id in state.typing_modules:
+        return "flag"
+    if expr.attr == "import_module" and expr.value.id in state.importlib_modules:
+        return "import_module"
+    return None
+
+
 def _expr_kind(expr: ast.AST, state: _BindState) -> str | None:
     if isinstance(expr, ast.Name):
-        if expr.id in state.flag_names:
-            return "flag"
-        if expr.id in state.typing_modules:
-            return "typing_module"
-        if expr.id in state.importlib_modules:
-            return "importlib_module"
-        if expr.id in state.import_module_names:
-            return "import_module"
-        return None
-    if isinstance(expr, ast.Attribute) and isinstance(expr.value, ast.Name):
-        if expr.attr == "TYPE_CHECKING" and expr.value.id in state.typing_modules:
-            return "flag"
-        if (
-            expr.attr == "import_module"
-            and expr.value.id in state.importlib_modules
-        ):
-            return "import_module"
+        return _bound_name_kind(expr.id, state)
+    if isinstance(expr, ast.Attribute):
+        return _attribute_kind(expr, state)
     return None
 
 
@@ -930,16 +992,39 @@ def _bind_from_alias(
     return state
 
 
-def _type_checking_polarity(expr: ast.AST, state: _BindState) -> bool | None:
-    """True when the branch is type-checker-only, False for its negation."""
+def _named_type_checking(expr: ast.AST, state: _BindState) -> bool:
     if isinstance(expr, ast.Name) and expr.id in state.flag_names:
         return True
-    if (
+    return (
         isinstance(expr, ast.Attribute)
         and expr.attr == "TYPE_CHECKING"
         and isinstance(expr.value, ast.Name)
         and expr.value.id in state.typing_modules
-    ):
+    )
+
+
+def _and_type_checking(values: list[bool | None]) -> bool:
+    if not any(value is True for value in values):
+        return False
+    return all(value is True or value is None for value in values)
+
+
+def _or_type_checking(values: list[bool | None]) -> bool:
+    return bool(values) and all(value is True for value in values)
+
+
+def _bool_type_checking(expr: ast.BoolOp, state: _BindState) -> bool | None:
+    values = [_type_checking_polarity(value, state) for value in expr.values]
+    if isinstance(expr.op, ast.And) and _and_type_checking(values):
+        return True
+    if isinstance(expr.op, ast.Or) and _or_type_checking(values):
+        return True
+    return None
+
+
+def _type_checking_polarity(expr: ast.AST, state: _BindState) -> bool | None:
+    """True when the branch is type-checker-only, False for its negation."""
+    if _named_type_checking(expr, state):
         return True
     if isinstance(expr, ast.UnaryOp) and isinstance(expr.op, ast.Not):
         inner = _type_checking_polarity(expr.operand, state)
@@ -947,12 +1032,7 @@ def _type_checking_polarity(expr: ast.AST, state: _BindState) -> bool | None:
             return None
         return not inner
     if isinstance(expr, ast.BoolOp):
-        values = [_type_checking_polarity(value, state) for value in expr.values]
-        if isinstance(expr.op, ast.And) and any(value is True for value in values):
-            if all(value is True or value is None for value in values):
-                return True
-        if isinstance(expr.op, ast.Or) and values and all(value is True for value in values):
-            return True
+        return _bool_type_checking(expr, state)
     return None
 
 
@@ -963,8 +1043,10 @@ def _constant_str(node: ast.AST | None) -> str | None:
 
 
 def _constant_int(node: ast.AST | None) -> int | None:
-    if isinstance(node, ast.Constant) and isinstance(node.value, int) and not isinstance(
-        node.value, bool
+    if (
+        isinstance(node, ast.Constant)
+        and isinstance(node.value, int)
+        and not isinstance(node.value, bool)
     ):
         return node.value
     return None
@@ -1116,6 +1198,60 @@ class _EdgeCollector(ast.NodeVisitor):
                 lineno=node.lineno,
             )
 
+    def _child_modules(self, base: str, imported_names: list[str]) -> list[str]:
+        return [name for name in imported_names if f"{base}.{name}" in self.existing]
+
+    def _skip_package_edge(
+        self,
+        node: ast.ImportFrom,
+        base: str,
+        imported_names: list[str],
+    ) -> bool:
+        # `from . import child` names the child module. Also recording the
+        # parent package closes a cycle with every package __init__ that
+        # imports that child. `from . import TOKEN` still depends on the package.
+        child_modules = self._child_modules(base, imported_names)
+        return (
+            node.module is None
+            and node.level > 0
+            and bool(imported_names)
+            and len(child_modules) == len(imported_names)
+        )
+
+    def _record_from_package(self, node: ast.ImportFrom, base: str) -> bool:
+        """Record the package edge. False means the caller must stop."""
+        if base == self.source:
+            return base in self.existing
+        resolution = (
+            RESOLUTION_RESOLVED if base in self.existing else RESOLUTION_UNRESOLVED
+        )
+        self._add(
+            target=base,
+            syntax=SYNTAX_IMPORT_FROM,
+            resolution=resolution,
+            lineno=node.lineno,
+        )
+        return base in self.existing
+
+    def _record_from_names(self, node: ast.ImportFrom, base: str) -> None:
+        for alias in node.names:
+            if alias.name == "*":
+                continue
+            nested = f"{base}.{alias.name}"
+            if nested == self.source:
+                continue
+            resolution = (
+                RESOLUTION_RESOLVED
+                if nested in self.existing
+                else RESOLUTION_SYMBOL_NOT_MODULE
+            )
+            self._add(
+                target=nested,
+                syntax=SYNTAX_IMPORT_FROM,
+                resolution=resolution,
+                lineno=node.lineno,
+            )
+
     def _record_import_from(self, node: ast.ImportFrom) -> None:
         base = _resolve_relative_module(
             importer_module=self.source,
@@ -1134,55 +1270,10 @@ class _EdgeCollector(ast.NodeVisitor):
         if not _in_scan(base, self.prefixes):
             return
         imported_names = [alias.name for alias in node.names if alias.name != "*"]
-        child_modules = [
-            name
-            for name in imported_names
-            if f"{base}.{name}" in self.existing
-        ]
-        # `from . import child` names the child module. Also recording the
-        # parent package closes a cycle with every package __init__ that
-        # imports that child. `from . import TOKEN` still depends on the package.
-        skip_package_edge = (
-            node.module is None
-            and node.level > 0
-            and bool(imported_names)
-            and len(child_modules) == len(imported_names)
-        )
-        if not skip_package_edge:
-            if base != self.source:
-                if base in self.existing:
-                    self._add(
-                        target=base,
-                        syntax=SYNTAX_IMPORT_FROM,
-                        resolution=RESOLUTION_RESOLVED,
-                        lineno=node.lineno,
-                    )
-                else:
-                    self._add(
-                        target=base,
-                        syntax=SYNTAX_IMPORT_FROM,
-                        resolution=RESOLUTION_UNRESOLVED,
-                        lineno=node.lineno,
-                    )
-                    return
-            elif base not in self.existing:
+        if not self._skip_package_edge(node, base, imported_names):
+            if not self._record_from_package(node, base):
                 return
-        for alias in node.names:
-            if alias.name == "*":
-                continue
-            nested = f"{base}.{alias.name}"
-            if nested == self.source:
-                continue
-            if nested in self.existing:
-                resolution = RESOLUTION_RESOLVED
-            else:
-                resolution = RESOLUTION_SYMBOL_NOT_MODULE
-            self._add(
-                target=nested,
-                syntax=SYNTAX_IMPORT_FROM,
-                resolution=resolution,
-                lineno=node.lineno,
-            )
+        self._record_from_names(node, base)
 
     def _record_unresolved_dynamic(
         self,
@@ -1198,6 +1289,75 @@ class _EdgeCollector(ast.NodeVisitor):
             lineno=node.lineno,
         )
 
+    def _relative_import_module_target(
+        self,
+        node: ast.Call,
+        syntax: str,
+        name: str,
+    ) -> str | None:
+        package = _constant_str(_call_arg(node, 1, "package"))
+        target = None if package is None else _resolve_dynamic_relative(name, package)
+        if target is not None:
+            return target
+        self._record_unresolved_dynamic(
+            node,
+            syntax,
+            target=INVALID_RELATIVE_IMPORT_TARGET,
+        )
+        return None
+
+    def _dunder_level(self, node: ast.Call, syntax: str) -> int | None:
+        level_node = _call_arg(node, 4, "level")
+        if level_node is None:
+            return 0
+        level = _constant_int(level_node)
+        if level is not None:
+            return level
+        self._record_unresolved_dynamic(
+            node,
+            syntax,
+            target=NON_CONSTANT_IMPORT_TARGET,
+        )
+        return None
+
+    def _dunder_import_target(
+        self,
+        node: ast.Call,
+        syntax: str,
+        name: str,
+    ) -> str | None:
+        level = self._dunder_level(node, syntax)
+        if level is None:
+            return None
+        if not level:
+            return name
+        target = _resolve_relative_module(
+            importer_module=self.source,
+            importer_is_package=self.is_package,
+            module=name,
+            level=level,
+        )
+        if target is not None:
+            return target
+        self._record_unresolved_dynamic(
+            node,
+            syntax,
+            target=INVALID_RELATIVE_IMPORT_TARGET,
+        )
+        return None
+
+    def _dynamic_target(
+        self,
+        node: ast.Call,
+        syntax: str,
+        name: str,
+    ) -> str | None:
+        if syntax == SYNTAX_IMPORT_MODULE and name.startswith("."):
+            return self._relative_import_module_target(node, syntax, name)
+        if syntax == SYNTAX_DUNDER_IMPORT:
+            return self._dunder_import_target(node, syntax, name)
+        return name
+
     def _record_dynamic(self, node: ast.Call, syntax: str) -> None:
         name = _constant_str(_call_arg(node, 0, "name"))
         if name is None:
@@ -1207,44 +1367,7 @@ class _EdgeCollector(ast.NodeVisitor):
                 target=NON_CONSTANT_IMPORT_TARGET,
             )
             return
-        target: str | None = name
-        if syntax == SYNTAX_IMPORT_MODULE and name.startswith("."):
-            package = _constant_str(_call_arg(node, 1, "package"))
-            target = None if package is None else _resolve_dynamic_relative(name, package)
-            if target is None:
-                self._record_unresolved_dynamic(
-                    node,
-                    syntax,
-                    target=INVALID_RELATIVE_IMPORT_TARGET,
-                )
-                return
-        elif syntax == SYNTAX_DUNDER_IMPORT:
-            level_node = _call_arg(node, 4, "level")
-            if level_node is None:
-                level = 0
-            else:
-                level = _constant_int(level_node)
-                if level is None:
-                    self._record_unresolved_dynamic(
-                        node,
-                        syntax,
-                        target=NON_CONSTANT_IMPORT_TARGET,
-                    )
-                    return
-            if level:
-                target = _resolve_relative_module(
-                    importer_module=self.source,
-                    importer_is_package=self.is_package,
-                    module=name,
-                    level=level,
-                )
-                if target is None:
-                    self._record_unresolved_dynamic(
-                        node,
-                        syntax,
-                        target=INVALID_RELATIVE_IMPORT_TARGET,
-                    )
-                    return
+        target = self._dynamic_target(node, syntax, name)
         if target is None or not _in_scan(target, self.prefixes):
             return
         resolution = (
@@ -1409,8 +1532,7 @@ def project_import_edges(edges: Iterable[ImportEdge]) -> ImportGraphProjections:
         dynamic_resolved=tuple(
             edge
             for edge in materialized
-            if edge.syntax in _DYNAMIC_SYNTAX
-            and edge.resolution == RESOLUTION_RESOLVED
+            if edge.syntax in _DYNAMIC_SYNTAX and edge.resolution == RESOLUTION_RESOLVED
         ),
         dynamic_unresolved=tuple(
             edge
@@ -1437,7 +1559,11 @@ def collect_import_graph(
     if roots is not None and include_memory:
         raise ValueError("pass either roots or include_memory, not both")
     resolved = repo_root.resolve()
-    selected = roots if roots is not None else scan_roots(resolved, include_memory=include_memory)
+    selected = (
+        roots
+        if roots is not None
+        else scan_roots(resolved, include_memory=include_memory)
+    )
     cached = _collect_import_scan(str(resolved), _roots_cache_key(selected))
     edges = tuple(
         sorted(
@@ -1459,42 +1585,80 @@ def _rotate_cycle(path: tuple[str, ...]) -> tuple[str, ...]:
     return path[start:] + path[:start]
 
 
-def _strongly_connected(outgoing: dict[str, set[str]]) -> list[frozenset[str]]:
-    index = 0
-    stack: list[str] = []
-    on_stack: set[str] = set()
-    indices: dict[str, int] = {}
-    low_links: dict[str, int] = {}
-    components: list[frozenset[str]] = []
+class _Tarjan:
+    """Iterative-free Tarjan SCC. Methods stay under the cognitive-complexity cap."""
 
-    def strongconnect(node: str) -> None:
-        nonlocal index
-        indices[node] = index
-        low_links[node] = index
-        index += 1
-        stack.append(node)
-        on_stack.add(node)
-        for target in sorted(outgoing.get(node, ())):
-            if target not in indices:
-                strongconnect(target)
-                low_links[node] = min(low_links[node], low_links[target])
-            elif target in on_stack:
-                low_links[node] = min(low_links[node], indices[target])
-        if low_links[node] != indices[node]:
+    def __init__(self, outgoing: dict[str, set[str]]) -> None:
+        self.outgoing = outgoing
+        self.index = 0
+        self.stack: list[str] = []
+        self.on_stack: set[str] = set()
+        self.indices: dict[str, int] = {}
+        self.low_links: dict[str, int] = {}
+        self.components: list[frozenset[str]] = []
+
+    def components_of(self) -> list[frozenset[str]]:
+        for node in sorted(self.outgoing):
+            if node not in self.indices:
+                self._connect(node)
+        return self.components
+
+    def _connect(self, node: str) -> None:
+        self.indices[node] = self.index
+        self.low_links[node] = self.index
+        self.index += 1
+        self.stack.append(node)
+        self.on_stack.add(node)
+        self._visit_targets(node)
+        if self.low_links[node] != self.indices[node]:
             return
+        self.components.append(frozenset(self._pop_component(node)))
+
+    def _visit_targets(self, node: str) -> None:
+        for target in sorted(self.outgoing.get(node, ())):
+            if target not in self.indices:
+                self._connect(target)
+                self.low_links[node] = min(self.low_links[node], self.low_links[target])
+            elif target in self.on_stack:
+                self.low_links[node] = min(self.low_links[node], self.indices[target])
+
+    def _pop_component(self, node: str) -> list[str]:
         component: list[str] = []
-        while stack:
-            member = stack.pop()
-            on_stack.remove(member)
+        while self.stack:
+            member = self.stack.pop()
+            self.on_stack.remove(member)
             component.append(member)
             if member == node:
                 break
-        components.append(frozenset(component))
+        return component
 
-    for node in sorted(outgoing):
-        if node not in indices:
-            strongconnect(node)
-    return components
+
+def _strongly_connected(outgoing: dict[str, set[str]]) -> list[frozenset[str]]:
+    return _Tarjan(outgoing).components_of()
+
+
+def _walk_cycle(
+    node: str,
+    path: list[str],
+    seen: set[str],
+    *,
+    neighbors: dict[str, tuple[str, ...]],
+    visited: set[str],
+) -> tuple[str, ...] | None:
+    visited.add(node)
+    path.append(node)
+    seen.add(node)
+    for nxt in neighbors.get(node, ()):
+        if nxt in seen:
+            start = path.index(nxt)
+            return tuple(path[start:])
+        if nxt not in visited:
+            found = _walk_cycle(nxt, path, seen, neighbors=neighbors, visited=visited)
+            if found is not None:
+                return found
+    path.pop()
+    seen.remove(node)
+    return None
 
 
 def _cycle_path(
@@ -1506,30 +1670,53 @@ def _cycle_path(
         for node in component
     }
     visited: set[str] = set()
-
-    def walk(node: str, path: list[str], seen: set[str]) -> tuple[str, ...] | None:
-        visited.add(node)
-        path.append(node)
-        seen.add(node)
-        for nxt in neighbors.get(node, ()):
-            if nxt in seen:
-                start = path.index(nxt)
-                return tuple(path[start:])
-            if nxt not in visited:
-                found = walk(nxt, path, seen)
-                if found is not None:
-                    return found
-        path.pop()
-        seen.remove(node)
-        return None
-
     for start in sorted(component):
         if start in visited:
             continue
-        found = walk(start, [], set())
+        found = _walk_cycle(start, [], set(), neighbors=neighbors, visited=visited)
         if found is not None:
             return _rotate_cycle(found)
     return None
+
+
+def _resolved_graph(
+    edges: Iterable[ImportEdge],
+) -> tuple[dict[tuple[str, str], list[ImportEdge]], dict[str, set[str]]]:
+    pair_edges: dict[tuple[str, str], list[ImportEdge]] = defaultdict(list)
+    outgoing: dict[str, set[str]] = defaultdict(set)
+    for edge in edges:
+        if edge.resolution != RESOLUTION_RESOLVED:
+            continue
+        pair_edges[(edge.source, edge.target)].append(edge)
+        outgoing[edge.source].add(edge.target)
+        outgoing.setdefault(edge.target, set())
+    return pair_edges, outgoing
+
+
+def _trivial_component(
+    component: frozenset[str],
+    outgoing: dict[str, set[str]],
+) -> bool:
+    if len(component) != 1:
+        return False
+    node = next(iter(component))
+    return node not in outgoing.get(node, ())
+
+
+def _edges_along_path(
+    path: tuple[str, ...],
+    pair_edges: dict[tuple[str, str], list[ImportEdge]],
+) -> tuple[ImportEdge, ...] | None:
+    cycle_edges: list[ImportEdge] = []
+    for index, source in enumerate(path):
+        target = path[(index + 1) % len(path)]
+        choices = pair_edges.get((source, target))
+        if not choices:
+            return None
+        cycle_edges.append(min(choices, key=_edge_sort_key))
+    if len(cycle_edges) != len(path):
+        return None
+    return tuple(cycle_edges)
 
 
 def find_import_cycles(
@@ -1545,38 +1732,22 @@ def find_import_cycles(
     """
     if projection not in PROJECTION_NAMES:
         raise ValueError(f"unknown import-graph projection: {projection}")
-    pair_edges: dict[tuple[str, str], list[ImportEdge]] = defaultdict(list)
-    outgoing: dict[str, set[str]] = defaultdict(set)
-    for edge in edges:
-        if edge.resolution != RESOLUTION_RESOLVED:
-            continue
-        pair_edges[(edge.source, edge.target)].append(edge)
-        outgoing[edge.source].add(edge.target)
-        outgoing.setdefault(edge.target, set())
+    pair_edges, outgoing = _resolved_graph(edges)
     cycles: list[ImportCycle] = []
     for component in _strongly_connected(outgoing):
-        if len(component) == 1:
-            node = next(iter(component))
-            if node not in outgoing.get(node, ()):
-                continue
+        if _trivial_component(component, outgoing):
+            continue
         path = _cycle_path(component, outgoing)
         if path is None:
             continue
-        cycle_edges: list[ImportEdge] = []
-        for index, source in enumerate(path):
-            target = path[(index + 1) % len(path)]
-            choices = pair_edges.get((source, target))
-            if not choices:
-                cycle_edges = []
-                break
-            cycle_edges.append(min(choices, key=_edge_sort_key))
-        if len(cycle_edges) != len(path):
+        cycle_edges = _edges_along_path(path, pair_edges)
+        if cycle_edges is None:
             continue
         cycles.append(
             ImportCycle(
                 projection=projection,
                 path=path,
-                edges=tuple(cycle_edges),
+                edges=cycle_edges,
             )
         )
     cycles.sort(
