@@ -18,6 +18,7 @@ from bioetl.application.services.run_reports.paths import (
     REPORT_ROOT_MARKER_VALUE,
     write_report_root_source_identity,
 )
+from bioetl.composition.observability_runtime import create_run_report_store
 
 
 def _attest_reports(tmp_path: Path, *, source_id: str | None = None) -> str:
@@ -28,6 +29,7 @@ def _attest_reports(tmp_path: Path, *, source_id: str | None = None) -> str:
     write_report_root_source_identity(
         report_root=tmp_path / "reports" / "run-reports",
         source_id=expected,
+        store=create_run_report_store(),
     )
     return expected
 

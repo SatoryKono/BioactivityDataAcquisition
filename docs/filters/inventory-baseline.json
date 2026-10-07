@@ -1970,7 +1970,7 @@
       "symbol": "apply_silver_filter",
       "path": "src/bioetl/application/pipelines/common/publication_transformer_records.py",
       "occurrence_count": 4,
-      "first_line": 121,
+      "first_line": 124,
       "role": "Runtime Silver filter application callsite",
       "migration_relevance": "Any new runtime application gate must remain structural-only or be inventoried.",
       "notes": ""

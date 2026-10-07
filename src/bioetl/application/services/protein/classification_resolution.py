@@ -13,7 +13,6 @@ from bioetl.application.services.protein._classification_resolution_support impo
 from bioetl.domain.mapping.protein_class_target_type import (
     PROTEIN_CLASS_TARGET_TYPE_RULE_VERSION,
     ProteinClassTargetTypeMappingData,
-    current_protein_class_target_type_mapping,
     normalize_protein_class_top_level,
 )
 from bioetl.domain.ports import ProteinClassificationPort
@@ -235,11 +234,13 @@ class ProteinClassificationResolutionService:
                 "invalid_record_policy must be one of "
                 f"{sorted(_INVALID_RECORD_POLICIES)}, got {invalid_record_policy!r}"
             )
+        if target_type_mapping_data is None:
+            raise ValueError(
+                "ProteinClassificationResolutionService requires target_type_mapping_data"
+            )
         self._classification_port = classification_port
         self._invalid_record_policy: InvalidRecordPolicy = invalid_record_policy
-        self._target_type_mapping_data = (
-            target_type_mapping_data or current_protein_class_target_type_mapping()
-        )
+        self._target_type_mapping_data = target_type_mapping_data
 
     def resolve_target(
         self,
