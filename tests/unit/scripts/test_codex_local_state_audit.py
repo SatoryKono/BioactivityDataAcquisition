@@ -171,6 +171,48 @@ def test_parse_rule_rejects_maliciously_large_input(
     assert eval_called
 
 
+def test_parse_rule_rejects_deeply_nested_input(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import ast
+
+    eval_called = False
+
+    def mock_eval(node_or_string: str, **kwargs: object) -> list[str]:
+        nonlocal eval_called
+        eval_called = True
+        return ["mocked"]
+
+    monkeypatch.setattr(ast, "literal_eval", mock_eval)
+
+    nested = "[" * 200 + '"A"' + "]" * 200
+    line_deep = f'prefix_rule(pattern={nested}, decision="allow")'
+    assert local_state_audit._parse_rule(line_deep) is None
+    assert not eval_called, "literal_eval should not be called for deeply nested input"
+
+
+def test_parse_rule_rejects_evasion_bypass(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import ast
+
+    eval_called = False
+
+    def mock_eval(node_or_string: str, **kwargs: object) -> list[str]:
+        nonlocal eval_called
+        eval_called = True
+        return ["mocked"]
+
+    monkeypatch.setattr(ast, "literal_eval", mock_eval)
+
+    # Closing brackets inside a string that attempt to underflow the depth tracker
+    # followed by deeply nested brackets to bypass the check.
+    evasion_str = "['" + "]" * 200 + "', " + "[" * 200 + '"A"' + "]" * 200 + "]"
+    line_evasion = f'prefix_rule(pattern={evasion_str}, decision="allow")'
+    assert local_state_audit._parse_rule(line_evasion) is None
+    assert not eval_called, "literal_eval should not be called for evasion payload"
+
+
 def test_parse_rule_rejects_recursion_and_memory_errors(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
