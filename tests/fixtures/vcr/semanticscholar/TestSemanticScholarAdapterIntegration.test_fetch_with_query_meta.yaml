@@ -3,6 +3,6 @@ provider: semanticscholar
 cassette_rel_path: tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_with_query.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 146bd23151ff2acbbe4fb56fcd113aab0507ba9097218eba8a555a1735184b8c
+cassette_sha256: fa7f89b6c7f442db283d4c2801c81627604a2b58f5157d46be2c1afc72dde48b
 recorded_at: '2026-10-07'
 staleness_ready: true
