@@ -215,6 +215,8 @@ def serialize_json_canonical(
     profile established from stored bytes/provenance; unknown profiles fail.
     """
     resolved = CanonicalJsonProfile(profile)
+    if resolved == CanonicalJsonProfile.PORT_ORJSON_V1:
+        return _serialize_historical_orjson_port(data)
     validate_canonical_json_value(data)
     if resolved == CanonicalJsonProfile.DOMAIN_V1:
         return _serialize_with_orjson(data, sort_keys=True, ensure_ascii=True)
@@ -224,6 +226,15 @@ def serialize_json_canonical(
     }:
         return _serialize_with_stdlib(data, sort_keys=True, ensure_ascii=True)
     raise ValueError(f"Unsupported canonical JSON profile: {resolved}")
+
+
+def _serialize_historical_orjson_port(data: JsonDict | Sequence[object]) -> str:
+    """Replay the former port codec, including its non-JSON input admission."""
+    if orjson is None:
+        raise ImportError("port-orjson-v1 requires the locked orjson dependency")
+    encoded = orjson.dumps(data, option=orjson.OPT_SORT_KEYS)
+    normalized = cast(JsonDict, json.loads(encoded))
+    return _serialize_with_stdlib(normalized, sort_keys=True, ensure_ascii=True)
 
 
 def deserialize_json_value(data: str | bytes) -> JsonDict | list[object]:

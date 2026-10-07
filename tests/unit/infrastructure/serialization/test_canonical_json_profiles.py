@@ -33,6 +33,38 @@ pytestmark = pytest.mark.unit
 DOMAIN = CanonicalJsonProfile.DOMAIN_V1
 PORT = CanonicalJsonProfile.PORT_V1
 HISTORICAL = CanonicalJsonProfile.DOMAIN_STDLIB_V1
+HISTORICAL_PORT = CanonicalJsonProfile.PORT_ORJSON_V1
+
+
+@pytest.mark.parametrize("value", [math.nan, math.inf, -math.inf])
+def test_historical_orjson_port_admission_is_explicit(value: float) -> None:
+    payload = {"x": value, "nested": [value]}
+    expected = '{"nested":[null],"x":null}'
+    assert serialize_json_canonical(payload, profile=HISTORICAL_PORT) == expected
+    for encoder in (OrjsonEncoder(), StdLibJsonEncoder()):
+        assert encoder.dumps_canonical(payload, profile=HISTORICAL_PORT) == expected
+        with pytest.raises(ValueError, match="NaN or Infinity"):
+            encoder.dumps_canonical(payload)
+
+
+def test_historical_orjson_port_preserves_extended_types_and_integer_boundary() -> None:
+    payload = {"x": datetime(2026, 10, 7, tzinfo=UTC), "id": UUID(int=1)}
+    expected = (
+        '{"id":"00000000-0000-0000-0000-000000000001","x":"2026-10-07T00:00:00+00:00"}'
+    )
+    for encoder in (OrjsonEncoder(), StdLibJsonEncoder()):
+        assert encoder.dumps_canonical(payload, profile=HISTORICAL_PORT) == expected
+        with pytest.raises(TypeError):
+            encoder.dumps_canonical({"x": 2**64}, profile=HISTORICAL_PORT)
+
+
+def test_historical_orjson_port_never_falls_back_without_codec(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(codec, "orjson", None)
+    with pytest.raises(ImportError, match="port-orjson-v1"):
+        serialize_json_canonical({"x": math.nan}, profile=HISTORICAL_PORT)
+
 
 # Expected literals recorded/reviewed from clean d68fdc3a, not derived from either
 # new implementation. Existing deterministic_identity_v1.json remains untouched.

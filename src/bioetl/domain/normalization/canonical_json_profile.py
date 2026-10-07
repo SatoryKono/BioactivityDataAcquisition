@@ -16,12 +16,14 @@ class CanonicalJsonProfile(StrEnum):
     DOMAIN_V1 preserves domain identities from the locked required-orjson runtime.
     PORT_V1 preserves both canonical port adapters' stdlib re-emission bytes.
     DOMAIN_STDLIB_V1 identifies historical domain fallback when provenance proves it.
+    PORT_ORJSON_V1 replays the former port's backend-specific input admission.
     These names are not additional fields in automatically hashed domain events.
     """
 
     DOMAIN_V1 = "domain-orjson-v1"
     PORT_V1 = "port-stdlib-v1"
     DOMAIN_STDLIB_V1 = "domain-stdlib-v1"
+    PORT_ORJSON_V1 = "port-orjson-v1"
 
 
 def validate_canonical_json_value(value: object) -> None:
