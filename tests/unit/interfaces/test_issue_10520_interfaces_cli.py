@@ -26,6 +26,7 @@ from bioetl.interfaces.cli.commands.lineage import (
     _render_text_payload,
     _resolve_explain_identifier,
 )
+from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import (
     echo_export_preview,
     echo_export_result,
