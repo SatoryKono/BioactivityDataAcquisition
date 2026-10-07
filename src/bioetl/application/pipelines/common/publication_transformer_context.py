@@ -57,6 +57,33 @@ def publication_transformer_kwargs(
     return transformer_init_kwargs(init_locals)
 
 
+def _context_with_supplied_policy(
+    init: BasePublicationTransformerContext,
+    *,
+    vocabulary_supplied: bool,
+    publication_vocabulary: object | None,
+    classification_supplied: bool,
+    publication_classification: object | None,
+) -> BasePublicationTransformerContext:
+    """Keep the original context unless this call supplied policy objects."""
+
+    if not vocabulary_supplied and not classification_supplied:
+        return init
+    return replace(
+        init,
+        publication_vocabulary=(
+            publication_vocabulary
+            if vocabulary_supplied
+            else init.publication_vocabulary
+        ),
+        publication_classification=(
+            publication_classification
+            if classification_supplied
+            else init.publication_classification
+        ),
+    )
+
+
 def coerce_publication_transformer_init(
     init: BasePublicationTransformerContext | str | None,
     /,
@@ -70,6 +97,8 @@ def coerce_publication_transformer_init(
     Optional DI fields (``provider``, ``tracer``, filters, strategies, ...) are
     accepted via ``**fields`` to keep this surface under the Sonar S107 budget.
     """
+    vocabulary_supplied = "publication_vocabulary" in fields
+    classification_supplied = "publication_classification" in fields
     publication_vocabulary = fields.pop("publication_vocabulary", None)
     publication_classification = fields.pop("publication_classification", None)
     if isinstance(init, BasePublicationTransformerContext):
@@ -81,9 +110,11 @@ def coerce_publication_transformer_init(
                 "BasePublicationTransformer received unexpected explicit arguments "
                 f"with init spec: {unexpected}"
             )
-        return replace(
+        return _context_with_supplied_policy(
             init,
+            vocabulary_supplied=vocabulary_supplied,
             publication_vocabulary=publication_vocabulary,
+            classification_supplied=classification_supplied,
             publication_classification=publication_classification,
         )
 
