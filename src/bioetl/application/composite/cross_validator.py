@@ -15,6 +15,7 @@ from bioetl.application.composite.helpers.cross_validator_finalize import (
     parse_pipeline_name,
 )
 from bioetl.domain.composite.cross_validation import (
+    CrossValidationContext,
     CrossValidationStats,
     EnricherCVStats,
 )
@@ -129,10 +130,12 @@ class EnrichmentCrossValidator:
             _count_mismatches_vectorized(
                 df,
                 pairing,
-                seed_provider,
-                seed_entity,
-                enricher_provider,
-                enricher_entity,
+                CrossValidationContext(
+                    seed_provider=seed_provider,
+                    seed_entity=seed_entity,
+                    enricher_provider=enricher_provider,
+                    enricher_entity=enricher_entity,
+                ),
                 logger=self._logger,
             )
         )
