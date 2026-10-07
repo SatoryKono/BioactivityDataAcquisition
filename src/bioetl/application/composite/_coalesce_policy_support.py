@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
+from dataclasses import dataclass
 from typing import Any, Protocol
 
 from bioetl.application.composite.column_service import ColumnOrderService
@@ -166,46 +167,49 @@ def resolve_priority_provider(
     return priority_orderer
 
 
+@dataclass(frozen=True)
+class FieldPriorityContext:
+    """Context holding parameters for applying field priority."""
+
+    field: str
+    priorities: tuple[str, ...]
+    enrichers: Sequence[Any]
+    available_columns: set[str]
+    seed_pipeline: str | None
+    can_coalesce_fn: Callable[[Any, str, str], bool]
+
+
 def apply_field_priority(
     df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
     *,
     provider: _ColumnPriorityProvider,
-    field: str,
-    priorities: tuple[str, ...],
-    enrichers: Sequence[
-        Any  # Any: Enrichers implement provider-specific enrichment protocols.
-    ],
-    available_columns: set[str],
-    seed_pipeline: str | None,
-    can_coalesce_fn: Callable[
-        [Any, str, str], bool  # Any: DataFrame may be Polars/Pandas-like.
-    ],
+    context: FieldPriorityContext,
 ) -> (
     Any  # Any: Return type matches the incoming DataFrame implementation.
 ):
     """Apply one explicit field-priority rule and return updated DataFrame."""
     columns = provider.collect_field_columns(
-        field,
-        enrichers,
-        available_columns,
-        seed_pipeline,
+        context.field,
+        context.enrichers,
+        context.available_columns,
+        context.seed_pipeline,
     )
     if len(columns) <= 1:
         return df
 
     ordered_cols = provider.order_columns_by_priority(
-        field,
+        context.field,
         columns,
-        priorities,
-        seed_pipeline,
+        context.priorities,
+        context.seed_pipeline,
     )
     if not ordered_cols:
         return df
 
     compatible_cols, _incompatible_cols = provider.filter_compatible_columns(
         df,
-        field,
+        context.field,
         ordered_cols,
-        can_coalesce_fn,
+        context.can_coalesce_fn,
     )
     return coalesce_and_drop(df, compatible_cols)

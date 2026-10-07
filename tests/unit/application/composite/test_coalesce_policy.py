@@ -36,6 +36,7 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite._coalesce_policy_support import (
+    FieldPriorityContext,
     apply_field_priority,
     build_field_groups,
     compatible_columns,
@@ -347,12 +348,14 @@ def test_apply_field_priority_skips_when_rule_has_no_coalescing_work() -> None:
     result = apply_field_priority(
         df,
         provider=provider,
-        field="title",
-        priorities=("seed",),
-        enrichers=(),
-        available_columns=set(df.columns),
-        seed_pipeline="chembl_publication",
-        can_coalesce_fn=CoalescePolicyService.can_coalesce,
+        context=FieldPriorityContext(
+            field="title",
+            priorities=("seed",),
+            enrichers=(),
+            available_columns=set(df.columns),
+            seed_pipeline="chembl_publication",
+            can_coalesce_fn=CoalescePolicyService.can_coalesce,
+        ),
     )
 
     assert result.equals(df)
