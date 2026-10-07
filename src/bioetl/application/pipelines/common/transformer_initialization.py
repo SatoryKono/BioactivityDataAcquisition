@@ -52,9 +52,7 @@ def initialize_base_transformer(
     """Initialize a ``BaseTransformer`` subclass through the shared contract."""
     payload = dict(kwargs)
     if "publication_vocabulary" in payload or "publication_classification" in payload:
-        host = cast(
-            Any, transformer
-        )  # Any: publication policy attrs live on the subclass
+        host = as_mixin_host(transformer)
         host._publication_vocabulary = payload.pop("publication_vocabulary", None)
         host._publication_classification = payload.pop(
             "publication_classification", None
