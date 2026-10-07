@@ -226,6 +226,12 @@ cannot be replaced with the current default during exact replay. Callers establi
 it using original bytes or recorded writer/dependency provenance, then select it
 explicitly. Existing data with insufficient provenance remains NOT_PROVEN.
 
+Historical parsing must preserve the selected profile's numeric contract:
+stdlib profiles use the existing stdlib reader for arbitrary-size integers.
+The general orjson reader is not interchangeable for values outside its integer
+range. Verify hashes against the original canonical bytes and preserve the
+recorded profile rather than re-encoding through an unrelated reader/backend.
+
 Identity/content selection remains separate from encoding: entity `content_hash`
 excludes technical fields under the existing hash normalization policy;
 quarantine `payload_hash` covers the complete raw payload; `event_id` covers

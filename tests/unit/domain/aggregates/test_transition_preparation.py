@@ -74,7 +74,7 @@ def test_failed_stage_preparation_does_not_replace_running_stage() -> None:
     run.record_stage_start("extract", NOW)
     before = run_state(run)
     with patch(
-        "bioetl.domain.aggregates.pipeline_run_stage_recording.PipelineFailed",
+        "bioetl.domain.aggregates.pipeline_run_stage_result.PipelineFailed",
         side_effect=ValueError("prepare"),
     ):
         with pytest.raises(ValueError, match="prepare"):

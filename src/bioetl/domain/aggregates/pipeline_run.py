@@ -11,11 +11,11 @@ from bioetl.domain.aggregates.events import (
     PipelineFailed,
     PipelineShutdown,
 )
-from bioetl.domain.aggregates.pipeline_run_stage_recording import _PipelineRunStageMixin
 from bioetl.domain.aggregates.pipeline_run_stage_result import (
     PipelineRunState,
     StageResult,
     StageStatus,
+    _PipelineRunStageMixin,
 )
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import JsonDict, RunID, RunType
@@ -43,6 +43,9 @@ class PipelineRun(_PipelineRunStageMixin):
     """
 
     __slots__ = ()
+    _run_type: RunType
+    _manifest_id: str | None
+    _metadata: JsonDict
 
     def __init__(
         self,

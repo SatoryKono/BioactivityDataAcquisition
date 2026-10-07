@@ -36,6 +36,18 @@ HISTORICAL = CanonicalJsonProfile.DOMAIN_STDLIB_V1
 HISTORICAL_PORT = CanonicalJsonProfile.PORT_ORJSON_V1
 
 
+@pytest.mark.parametrize("profile", [PORT, HISTORICAL])
+def test_stdlib_profile_reader_preserves_historical_large_integer_bytes(
+    profile: CanonicalJsonProfile,
+) -> None:
+    expected = '{"x":18446744073709551617}'
+    reader = StdLibJsonEncoder()
+    restored = reader.loads(expected)
+    assert restored == {"x": 2**64 + 1}
+    assert reader.dumps_canonical(restored, profile=profile) == expected
+    assert OrjsonEncoder().dumps_canonical(restored, profile=profile) == expected
+
+
 @pytest.mark.parametrize("value", [math.nan, math.inf, -math.inf])
 def test_historical_orjson_port_admission_is_explicit(value: float) -> None:
     payload = {"x": value, "nested": [value]}

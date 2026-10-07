@@ -202,14 +202,14 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "617",
+      "line": "623",
       "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_stage_name_accepts_valid"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "638",
+      "line": "670",
       "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_stage_completion_running_allows_none_timestamp"
@@ -660,7 +660,7 @@
     "tests/unit/composition/test_observability_contract.py:431",
     "tests/unit/composition/factories/storage/test_health_mixin.py:72",
     "tests/unit/composition/factories/storage/test_health_mixin.py:103",
-    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:617"
+    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:623"
   ],
   "assertless_families": {
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py": {
@@ -1392,14 +1392,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "617",
+        "line": "623",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_name_accepts_valid"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "638",
+        "line": "670",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_completion_running_allows_none_timestamp"
@@ -1850,7 +1850,7 @@
       "tests/unit/composition/test_observability_contract.py:431",
       "tests/unit/composition/factories/storage/test_health_mixin.py:72",
       "tests/unit/composition/factories/storage/test_health_mixin.py:103",
-      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:617"
+      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:623"
     ],
     "assertless_total_candidates": 85,
     "compatibility_examples": [],
@@ -2087,12 +2087,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3028,
-    "total_test_functions": 29594,
+    "total_test_functions": 29595,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "83c845ca44a335d905f2346ad59d3a06bfb01b757b22145bc8dfe4ed01a4b41f",
+  "source_tree_sha256": "191d60599cdd9d986bb9585377533eae6bf863077be54f41ceafce732fda0071",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2155,7 +2155,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3028,
-  "total_test_functions": 29594,
+  "total_test_functions": 29595,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
