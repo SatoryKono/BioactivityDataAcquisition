@@ -1,5 +1,13 @@
 # Сводка evidence: project-package-topology
 
+Source-only refresh (2026-10-07, PR #11972 filtered batch outcome): `source_tree_sha256=696182570b4993b98acd1fa0ced60a7d33520910642560737e6d6eb2346e1086` binds the classified synthetic-root exclusion and batch/streaming counters. This is not a new coverage measurement; prior measurements below remain historical.
+
+Source-only refresh (2026-10-07, PR #11972 merged with main 62c33a2f3491): the canonical source manifest binds Silver removal accounting and ChEMBL health negotiation to `source_tree_sha256=2816e16c865d5563146ca94243b1c465adf8830e53a5d7d849055955787f6f48`. This binding is not a new coverage measurement.
+
+Historical PR #11972 source binding before that merge: `source_tree_sha256=49d512a9190e2e7a5f84764c42a52a54fe1feb0628ac616983211f0035749a13`. Silver removal accounting reuses the application accounting helper.
+
+Source-only refresh (2026-10-07, ChEMBL health negotiation): current `source_tree_sha256=3d393f7423ab30ea129513e82aa2beaaa163d45c49e50d850d3450dc11d25237` is derived from the canonical source manifest. Historical measurements below remain unchanged; this binding is not a new coverage measurement.
+
 Source-only refresh (2026-10-06, integration with main 480a54241e04): reviewed repairs and replay mapping are bound to `source_tree_sha256=63b3eb109cc22123be824a42b6b0c1fc2c9564406c5a702d914c3d74a2f10689`. Historical measurements below are unchanged; this stamp is not new coverage evidence.
 
 Coverage refresh (2026-10-05, RF-023 after main merge): complete 17-shard measurement on `54c7c9d5b5dad9077054081484275fc93a8be83e`, source `2f462961d6e80105c964f5d536a956def9a7b4c66af316bad70abfb0f6b226a1`. 32979 PASS / 187 SKIP; line 99.70%, branch 94.34%. Canonical nonregressing adoption retains 81 visible raw module regressions as historical values. Portable evidence: `reports/quality/proof-or-stop/rf023-54c7c9d5-complete-coverage`. This local measurement does not claim full-suite acceptance or CI ADMIT.

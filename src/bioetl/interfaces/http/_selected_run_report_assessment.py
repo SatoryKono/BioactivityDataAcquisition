@@ -68,6 +68,15 @@ def _saved_trust(
         reasons = reasons.get(key) if isinstance(reasons, dict) else None
     reasons_text = reasons if isinstance(reasons, str) else str(control["reason"])
     conflicts = _accounting_conflicts(report.get("reconciliation"), control["verdict"])
+    funnel = report.get("funnel")
+    if isinstance(funnel, list):
+        conflicts.extend(
+            f"Saved report stage accounting conflict: {stage.get('stage_id', 'UNKNOWN')} "
+            f"balance=FAILING, unaccounted={stage.get('unaccounted', 'UNKNOWN')}. "
+            f"Saved Trust verdict: {control['verdict']}; inspect report and ledger."
+            for stage in funnel
+            if isinstance(stage, dict) and stage.get("balance_status") == "FAILING"
+        )
     if conflicts:
         reasons_text = "\n".join(filter(None, (reasons_text, *conflicts)))
     reasons_count = sum(bool(line.strip()) for line in reasons_text.splitlines())
