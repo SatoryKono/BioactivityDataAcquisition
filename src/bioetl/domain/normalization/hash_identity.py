@@ -21,6 +21,7 @@ from bioetl.domain.normalization._hash_identity_scalars import (
     normalize_hash_scalar_for_policy,
 )
 from bioetl.domain.normalization.json import (
+    CanonicalJsonProfile,
     deserialize_json_value,
     serialize_json_canonical,
 )
@@ -247,6 +248,8 @@ def normalize_hash_identity_record(
 
 def serialize_hash_identity_canonical_json(
     data: JsonDict | Sequence[object],
+    *,
+    profile: CanonicalJsonProfile = CanonicalJsonProfile.DOMAIN_V1,
 ) -> str:
     """Serialize normalized hash-identity material to canonical JSON bytes."""
-    return serialize_json_canonical(data)
+    return serialize_json_canonical(data, profile=profile)

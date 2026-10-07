@@ -178,6 +178,79 @@ Application и interfaces слои **MUST NOT** импортировать `stru
 1. **Миграция**: Требуется обновление всех вызовов infrastructure компонентов
 1. **API discipline**: replay-critical seams больше нельзя quietly переводить на локальный wall-clock fallback; время должно приходить из `ClockPort` или explicit timestamp parameter
 
+### 7. Canonical byte profiles and historical compatibility (P02 F5)
+
+The canonical hashing profile is explicit, independent of backend availability.
+Existing byte contracts are retained rather than silently rewriting them:
+
+| Profile | Existing consumers/default | Codec and numeric contract |
+| --- | --- | --- |
+| `domain-orjson-v1` | domain facade, deterministic IDs, entity hash material, quarantine factory | locked required `orjson`; sorted keys, compact ASCII JSON; finite floats; integers from `-2**63` through `2**64-1` |
+| `port-stdlib-v1` | both `JsonEncoderPort.dumps_canonical` adapters | stdlib compact ASCII JSON; sorted keys; finite floats; Python integer range subject to the interpreter's decimal conversion limit |
+| `domain-stdlib-v1` | historical domain fallback, only when established by provenance | same stdlib byte algorithm, explicitly requested, never an availability fallback |
+| `port-orjson-v1` | historical OrjsonEncoder port, only when established by provenance | locked required `orjson` sorted encoding, then stdlib ASCII re-emission; preserves the former conversion of NaN/Infinity to `null`, datetime/UUID admission and 64-bit integer limits |
+
+For example, `{ "x": 1e-7 }` produces `{"x":1e-7}` in the domain profile
+and `{"x":1e-07}` in the port profile. These are different historical byte
+contracts, not interchangeable hash material. Both port adapters MUST produce
+identical bytes and validation failures for identical input and profile. Their
+default preserves existing supported port bytes; the domain default preserves
+existing locked-runtime domain bytes and golden IDs. Switching a profile is an
+explicit compatibility event, not a performance/backend switch.
+
+`CanonicalJsonProfile` and the shared domain serializer define these contracts.
+Current profiles accept JSON-like string-keyed mappings/sequences and scalar values;
+non-finite floats, non-string keys, NumPy arrays and unsupported objects fail
+before encoding. The domain integer boundary is checked by its required codec;
+both port adapters share stdlib validation and integer handling. Unicode is
+escaped as valid ASCII JSON, including surrogate pairs for supplementary code
+points. Sequence order, `-0.0` versus `0.0`, and `None` versus empty containers
+remain significant. General-purpose noncanonical `dumps` is not a hashing entry
+point; hashing consumers MUST use a canonical entrypoint and preserve profile
+provenance separately from the domain payload.
+
+The old OrjsonEncoder also admitted backend-specific inputs outside that strict
+JSON contract. Exact replay of those inputs explicitly selects `port-orjson-v1`
+before strict input validation, preserving the old orjson-to-stdlib pipeline.
+Both adapters produce identical bytes or errors under that historical profile.
+The current shared port default rejects non-finite values instead of silently
+turning them into `null`; this admission change is explicit and does not rewrite
+stored hashes. Readers preserve old bytes and writer provenance, and use the
+historical profile only when that provenance identifies the former port codec.
+Unknown provenance remains NOT_PROVEN. Missing orjson fails for this profile too.
+
+Missing required `orjson` raises an early error for `domain-orjson-v1`, never a
+different digest. Availability flags may select a decoding/general-purpose
+backend but MUST NOT select hashing bytes. An unknown/absent historical profile
+cannot be replaced with the current default during exact replay. Callers establish
+it using original bytes or recorded writer/dependency provenance, then select it
+explicitly. Existing data with insufficient provenance remains NOT_PROVEN.
+
+Historical parsing must preserve the selected profile's numeric contract:
+stdlib profiles use the existing stdlib reader for arbitrary-size integers.
+The general orjson reader is not interchangeable for values outside its integer
+range. Verify hashes against the original canonical bytes and preserve the
+recorded profile rather than re-encoding through an unrelated reader/backend.
+
+Identity/content selection remains separate from encoding: entity `content_hash`
+excludes technical fields under the existing hash normalization policy;
+quarantine `payload_hash` covers the complete raw payload; `event_id` covers
+the event's existing identity fields. Datetime normalization policy is a separate
+historical contract. Replay of already normalized entity material must preserve
+that material; a codec profile alone cannot recover unknown historical field
+selection, list sorting or datetime policy. Persisted events use their explicit
+`event_id`; profiles do not become additional automatically hashed event fields.
+
+No historic digest, ID, Bronze record or quarantine payload is rewritten. Readers
+can explicitly reproduce the previous byte algorithms and backend-specific
+admission. Writers keep the domain default and the shared strict JSON port
+default; historical replay uses an explicit profile. No saved-data migration is
+performed by this change.
+A future switch requires an approved migration, proven readers/provenance and
+historical replay. Once such a switch writes data, reverting the writer alone
+is insufficient without verifying reader compatibility. Independent expected
+byte fixtures cover profile differences and historical golden identity values.
+
 ## Implementation
 
 ### Изменённые файлы
