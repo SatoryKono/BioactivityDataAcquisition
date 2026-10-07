@@ -198,17 +198,23 @@ def test_bronze_cleanup_rmdir(tmp_path: Path) -> None:
             *,
             date_dir: Path,
             dry_run: bool,
-        ) -> tuple[int, int]:
-            del date_dir, dry_run
-            return 1, 10
+            root_real: Path,
+        ) -> tuple[int, int, int]:
+            del date_dir, dry_run, root_real
+            return 1, 10, 0
 
-    files, bytes_total, dirs = _Host()._cleanup_old_files_sync(
+    host = _Host()
+    host.base_path = tmp_path
+    host._flat_structure = False
+    host._logger = MagicMock()
+    host._metrics = MagicMock()
+    files, bytes_total, dirs, skipped_f, skipped_d = host._cleanup_old_files_sync(
         "2021-01-01",
         False,
         "chembl",
         "activity",
     )
-    assert (files, bytes_total, dirs) == (1, 10, 1)
+    assert (files, bytes_total, dirs, skipped_f, skipped_d) == (1, 10, 1, 0, 0)
     assert not date_dir.exists()
 
 
