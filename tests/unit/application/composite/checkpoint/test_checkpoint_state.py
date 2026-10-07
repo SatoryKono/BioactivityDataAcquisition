@@ -454,6 +454,35 @@ class TestWithState:
         updated = initial.with_state(CompositePipelineState.FAILED, clock=_FIXED_CLOCK)
         assert updated.state == CompositePipelineState.FAILED
 
+    def test_state_with_merge_completed(self) -> None:
+        """with_merge_completed updates the state to MERGING and sets merge_completed."""
+        initial = CompositeCheckpointState(composite_name="c", run_id="r")
+        result = {"test_key": "test_value"}
+        updated = initial.with_merge_completed(result, clock=_FIXED_CLOCK)
+
+        assert updated.state == CompositePipelineState.MERGING
+        assert updated.merge_completed is True
+        assert updated.merge_result == result
+        assert updated.updated_at is not None
+
+    def test_state_with_state_edge_cases(self) -> None:
+        """with_state covers transitions to NOT_STARTED and COMPLETED."""
+        initial = CompositeCheckpointState(
+            composite_name="c", run_id="r", state=CompositePipelineState.FAILED
+        )
+
+        # Test transition to COMPLETED
+        updated_completed = initial.with_state(
+            CompositePipelineState.COMPLETED, clock=_FIXED_CLOCK
+        )
+        assert updated_completed.state == CompositePipelineState.COMPLETED
+
+        # Test transition to NOT_STARTED
+        updated_not_started = initial.with_state(
+            CompositePipelineState.NOT_STARTED, clock=_FIXED_CLOCK
+        )
+        assert updated_not_started.state == CompositePipelineState.NOT_STARTED
+
 
 # ---------------------------------------------------------------------------
 # 6. is_resumable
