@@ -1229,7 +1229,7 @@ interactions:
     body: ''
     headers:
       accept:
-      - '*/*'
+      - application/json
       accept-encoding:
       - gzip, deflate, zstd
       connection:
@@ -1240,22 +1240,22 @@ interactions:
       - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/status
-  response: &id001
+  response:
     body:
-      string: '<?xml version=''1.0'' encoding=''utf-8''?>
-
-        <response><activities>24527044</activities><chembl_db_version>ChEMBL_37</chembl_db_version><chembl_release_date>2026-05-01</chembl_release_date><compound_records>3824604</compound_records><disinct_compounds>2921148</disinct_compounds><publications>101100</publications><status>UP</status><targets>18552</targets></response>'
+      string: '{"activities": 24527044, "chembl_db_version": "ChEMBL_37", "chembl_release_date":
+        "2026-05-01", "compound_records": 3824604, "disinct_compounds": 2921148, "publications":
+        101100, "status": "UP", "targets": 18552}'
     headers:
       cache-control:
       - max-age=30000000, s-maxage=30000000
       connection:
       - Keep-Alive
       content-length:
-      - '362'
+      - '212'
       content-type:
-      - application/xml; charset=utf-8
+      - application/json
       date:
-      - Tue, 06 Oct 2026 06:23:16 GMT
+      - Wed, 07 Oct 2026 04:45:39 GMT
       server:
       - gunicorn/20.0.4
       strict-transport-security:
@@ -10062,7 +10062,7 @@ interactions:
     body: ''
     headers:
       accept:
-      - '*/*'
+      - application/json
       accept-encoding:
       - gzip, deflate, zstd
       connection:
@@ -10073,7 +10073,31 @@ interactions:
       - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/status
-  response: *id001
+  response:
+    body:
+      string: '{"activities": 24527044, "chembl_db_version": "ChEMBL_37", "chembl_release_date":
+        "2026-05-01", "compound_records": 3824604, "disinct_compounds": 2921148, "publications":
+        101100, "status": "UP", "targets": 18552}'
+    headers:
+      cache-control:
+      - max-age=30000000, s-maxage=30000000
+      connection:
+      - Keep-Alive
+      content-length:
+      - '212'
+      content-type:
+      - application/json
+      date:
+      - Wed, 07 Oct 2026 04:45:39 GMT
+      server:
+      - gunicorn/20.0.4
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
+      - Accept, Origin
+    status:
+      code: 200
+      message: OK
 - request:
     body: ''
     headers:
@@ -10206,7 +10230,7 @@ interactions:
     body: ''
     headers:
       accept:
-      - '*/*'
+      - application/json
       accept-encoding:
       - gzip, deflate, zstd
       connection:
@@ -10217,7 +10241,31 @@ interactions:
       - python-httpx/0.28.1
     method: GET
     uri: https://www.ebi.ac.uk/chembl/api/data/status
-  response: *id001
+  response:
+    body:
+      string: '{"activities": 24527044, "chembl_db_version": "ChEMBL_37", "chembl_release_date":
+        "2026-05-01", "compound_records": 3824604, "disinct_compounds": 2921148, "publications":
+        101100, "status": "UP", "targets": 18552}'
+    headers:
+      cache-control:
+      - max-age=30000000, s-maxage=30000000
+      connection:
+      - Keep-Alive
+      content-length:
+      - '212'
+      content-type:
+      - application/json
+      date:
+      - Wed, 07 Oct 2026 04:45:39 GMT
+      server:
+      - gunicorn/20.0.4
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
+      - Accept, Origin
+    status:
+      code: 200
+      message: OK
 - request:
     body: ''
     headers:
