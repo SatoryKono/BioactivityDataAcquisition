@@ -263,7 +263,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `labeler.yml` | — | Retain disabled label maintenance | Preserve #10263/#11234; taxonomy reconciliation is required before any future trusted replacement |
 | `memory-freshness.yml` | `17 5 * * 1` | CircleCI memory-freshness | Scheduled pipeline352/job6375 succeeds on main c644f2e4:all four freshness checks pass. Monday05UTC restored; required PR/main freshness checks accepted in main371. Scheduled failure issue-notification remains pending |
 | `memory-retention.yml` | `17 4 * * 1` | CircleCI memory-retention | Scheduled pipeline356/job6383 succeeds on main c644f2e4:apply=false,zero candidates/removals,no policy violation. Monday04UTC restored; no pruning |
-| `mutation-testing.yml` | `0 0 * * 0` | Scheduled-only mutation lane | Actual scheduled pipeline340 on main d9f5b026 SUCCESS, all four targets: domain6140 72.01%, control-plane6139 78.26%, workflow-runner6138 73.42%, export-manifests6141 64.22%. All eight artifacts and complete statistics independently verified. Large targets use large4CPU/8GB and four workers; small targets retain medium/one worker. Sunday00UTC restored and read back; full scope,60-minute timeout and70/60/60/60 thresholds unchanged |
+| `mutation-testing.yml` | `0 0 * * 0` | Actions Sunday owner; CircleCI manual ci-lane=mutation backup | Actual scheduled pipeline340 on main d9f5b026 SUCCESS, all four targets: domain6140 72.01%, control-plane6139 78.26%, workflow-runner6138 73.42%, export-manifests6141 64.22%. All eight artifacts and complete statistics independently verified. Large targets use large4CPU/8GB and four workers; small targets retain medium/one worker. Sunday00UTC restored and read back; full scope,60-minute timeout and70/60/60/60 thresholds unchanged. Keep the CircleCI Sunday schedule paused so Actions is the weekly runner |
 | `nightly-replay-parity.yml` | `30 2 * * *` | CircleCI replay-parity | Main job 3366 passes four-run checksum parity; daily 02 UTC trigger accepted by scheduled pipeline 266/job 4481 on main 303ced3 (16 tests, no skips, repeated checksum files identical) |
 | `no-partial-tree-commits.yml` | — | Full-tree guard in root governance | Integrated into root-hygiene; main jobs 3500, 3529, 3549 passed the full-tree guard alongside strict root checks |
 | `opencode-pr-review.yml` | — | Retain disabled review stub policy | Do not activate unpinned installer or write paths |
@@ -321,6 +321,7 @@ acceptance gates; workflow deletion is no longer a completion criterion.
 | `e2e-matrix-health.yml` | E2E Matrix Health | End-to-end matrix health |
 | `github-settings-quarterly-review.yml` | Quarterly GitHub Settings Review | Read-only quarterly GitHub settings review |
 | `import-linter.yml` | Lint and Architecture Gates | import-linter + layer architecture |
+| `mutation-testing.yml` | Mutation Testing | Sole Sunday mutation owner (#10263 exception); push and pull_request stay off |
 | `no-partial-tree-commits.yml` | No partial-tree commits | Reject incomplete Git trees (#11709) |
 | `opencode-pr-review.yml` | opencode-pr-review | Dispatch-only stub (#11012); remote OpenCode installer removed |
 | `opencode-triage.yml` | opencode-triage | Dispatch-only stub (#11012); remote OpenCode installer removed |
@@ -353,7 +354,6 @@ not operator routing targets. Reasons live in
 | `labeler.yml` | Labeler | `keep-disabled` |
 | `memory-freshness.yml` | Memory freshness | `keep-disabled` |
 | `memory-retention.yml` | Memory Retention Policy | `keep-disabled` |
-| `mutation-testing.yml` | Mutation Testing | `keep-disabled` |
 | `nightly-replay-parity.yml` | nightly-replay-parity | `keep-disabled` |
 | `performance-nightly.yml` | Performance Nightly | `keep-disabled` |
 | `port-contracts.yml` | Port Contract Tests | `keep-disabled` |

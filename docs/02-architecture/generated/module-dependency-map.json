@@ -1,18 +1,18 @@
 {
   "summary": {
-    "scanned_modules": 2552,
-    "total_internal_imports": 8179,
+    "scanned_modules": 2553,
+    "total_internal_imports": 8181,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "25da49ced998f4bdcd02c05241417b63107b3e5cb999d0d03f15edb14d9166c5"
+    "source_fingerprint": "376e3b47fefcf64aaabf6e799c1659d007310282998db145e9e38ef9f5bfacb2"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1606,
+      "imports": 1615,
       "allowed": true
     },
     {
@@ -24,7 +24,7 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 226,
+      "imports": 228,
       "allowed": true
     },
     {
@@ -48,13 +48,13 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1298,
+      "imports": 1290,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 787,
+      "imports": 786,
       "allowed": true
     },
     {
@@ -140,13 +140,13 @@
       "imports": 55
     },
     {
-      "source": "composition.bootstrap",
-      "target": "application.services",
-      "imports": 47
-    },
-    {
       "source": "composition.factories",
       "target": "application.core",
+      "imports": 49
+    },
+    {
+      "source": "composition.bootstrap",
+      "target": "application.services",
       "imports": 47
     },
     {
@@ -260,11 +260,6 @@
       "imports": 22
     },
     {
-      "source": "application.services",
-      "target": "domain.normalization",
-      "imports": 21
-    },
-    {
       "source": "composition.runtime_builders",
       "target": "infrastructure.config",
       "imports": 21
@@ -282,6 +277,11 @@
     {
       "source": "application.services",
       "target": "domain.exceptions",
+      "imports": 20
+    },
+    {
+      "source": "application.services",
+      "target": "domain.normalization",
       "imports": 20
     },
     {

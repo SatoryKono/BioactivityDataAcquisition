@@ -14,6 +14,7 @@ from bioetl.application.core._batch_write_events import (
 from bioetl.application.core._batch_write_schema_quarantine import (
     quarantine_schema_violation,
 )
+from bioetl.application.core.batch_processing_contracts import LayerWriteOutcome
 from bioetl.application.core.quarantine_manager import (
     QuarantineRuntimeService,
 )
@@ -90,8 +91,14 @@ async def safe_write_layer(
     bronze_refs: list[BronzeWriteResult] | None,
     silver_refs: list[SilverWriteResult] | None = None,
     operation_errors: tuple[type[BaseException], ...],
-) -> object | None:
-    """Execute one layer write and quarantine schema-invalid outputs."""
+) -> LayerWriteOutcome:
+    """Execute one layer write and quarantine schema-invalid outputs.
+
+    Returns a typed outcome: ``written`` when the writer port call completed
+    (even when the port itself returns ``None``, as Gold does), or
+    ``quarantined`` after the records were persisted to quarantine. Operational
+    errors and quarantine-write failures propagate to the caller.
+    """
     if layer not in {"silver", "gold"}:
         raise ValueError(
             f"safe_write_layer supports only 'silver' or 'gold' layers, got {layer!r}"
@@ -117,8 +124,13 @@ async def safe_write_layer(
             occurred_at=ingestion_ts,
             logger=logger,
         )
-        # Gold returns None on success; use a marker to distinguish quarantine.
-        return write_result if write_result is not None else True
+        return LayerWriteOutcome(
+            layer=layer,
+            status="written",
+            candidate_count=len(records),
+            confirmed_count=len(records),
+            write_result=write_result,
+        )
     except SchemaViolationError as error:
         await quarantine_schema_violation(
             writer=writer,
@@ -132,7 +144,12 @@ async def safe_write_layer(
             ingestion_ts=ingestion_ts,
             error=error,
         )
-        return None
+        return LayerWriteOutcome(
+            layer=layer,
+            status="quarantined",
+            candidate_count=len(records),
+            quarantined_count=len(records),
+        )
     except operation_errors as error:
         if isinstance(error, Exception):
             emit_batch_failed(

@@ -202,14 +202,14 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "623",
+      "line": "617",
       "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_stage_name_accepts_valid"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "670",
+      "line": "638",
       "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_stage_completion_running_allows_none_timestamp"
@@ -660,7 +660,7 @@
     "tests/unit/composition/test_observability_contract.py:431",
     "tests/unit/composition/factories/storage/test_health_mixin.py:72",
     "tests/unit/composition/factories/storage/test_health_mixin.py:103",
-    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:623"
+    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:617"
   ],
   "assertless_families": {
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py": {
@@ -1392,14 +1392,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "623",
+        "line": "617",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_name_accepts_valid"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "670",
+        "line": "638",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_completion_running_allows_none_timestamp"
@@ -1850,7 +1850,7 @@
       "tests/unit/composition/test_observability_contract.py:431",
       "tests/unit/composition/factories/storage/test_health_mixin.py:72",
       "tests/unit/composition/factories/storage/test_health_mixin.py:103",
-      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:623"
+      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:617"
     ],
     "assertless_total_candidates": 85,
     "compatibility_examples": [],
@@ -2044,8 +2044,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3028,
-      "test_python_file_count": 3263,
+      "test_glob_file_count": 3026,
+      "test_python_file_count": 3261,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2086,13 +2086,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3028,
-    "total_test_functions": 29595,
+    "total_test_files": 3024,
+    "total_test_functions": 29568,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "191d60599cdd9d986bb9585377533eae6bf863077be54f41ceafce732fda0071",
+  "source_tree_sha256": "df501b67349713906c85167f6aceaf89fc3e1d2774749ff0acb523510441d93c",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2112,8 +2112,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3028,
-    "test_python_file_count": 3263,
+    "test_glob_file_count": 3026,
+    "test_python_file_count": 3261,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2154,8 +2154,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3028,
-  "total_test_functions": 29595,
+  "total_test_files": 3024,
+  "total_test_functions": 29568,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

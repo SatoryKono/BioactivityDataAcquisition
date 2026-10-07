@@ -148,6 +148,51 @@ commands:
           printf '%s\n' "$CIRCLE_SHA1" > reports/qa/router-v7-circleci/source-sha.txt
           if [ ! -s reports/qa/router-v7-circleci/event-changes.txt ]; then circleci-agent step halt; fi
 
+  # pr-gate only. A dedicated ci-lane keeps the full body for a manual run.
+  halt-unless-pr-gate-paths:
+    description: "On ci-lane=pr-gate, halt when the diff misses these paths"
+    parameters:
+      label:
+        type: string
+      pathspecs:
+        type: string
+    steps:
+    - run:
+        name: Halt unless << parameters.label >> paths changed
+        command: |
+          set -euo pipefail
+          if [ "<< pipeline.parameters.ci-lane >>" != "pr-gate" ]; then
+            echo "ci-lane=<< pipeline.parameters.ci-lane >> keeps the full body"
+            exit 0
+          fi
+          if [ "$(git rev-parse --is-shallow-repository)" = true ]; then git fetch --unshallow --filter=blob:none --no-tags; fi
+          base=HEAD~1
+          if [ -n "${CIRCLE_PULL_REQUEST:-${CIRCLE_PULL_REQUESTS:-}}" ]; then
+            python3 - \<<'PY'
+          import json, os, re, urllib.request
+          from pathlib import Path
+          url = os.environ.get('CIRCLE_PULL_REQUEST') or os.environ['CIRCLE_PULL_REQUESTS'].split(',')[0]
+          match = re.fullmatch(r'https://github.com/SatoryKono/BioactivityDataAcquisition/pull/([0-9]+)', url)
+          assert match, 'Unexpected PR URL'
+          with urllib.request.urlopen('https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/' + match[1], timeout=30) as response:
+              pr = json.load(response)
+          assert pr['head']['sha'] == os.environ['CIRCLE_SHA1'], 'Stale PR head'
+          assert pr['base']['ref'] in {'main', 'develop'}, 'Unsupported base branch'
+          Path('/tmp/cci-path-halt-base').write_text(pr['base']['ref'])
+          PY
+            base_ref="$(cat /tmp/cci-path-halt-base)"
+            git fetch --no-tags origin "$base_ref"
+            base="origin/$base_ref"
+          fi
+          mkdir -p /tmp/cci-path-halt
+          git diff --name-only "$base"...HEAD -- << parameters.pathspecs >> > /tmp/cci-path-halt/changed.txt
+          if [ ! -s /tmp/cci-path-halt/changed.txt ]; then
+            echo "No << parameters.label >> paths in $base...HEAD; skipping the long body."
+            circleci-agent step halt
+          fi
+          echo "Matching << parameters.label >> paths:"
+          cat /tmp/cci-path-halt/changed.txt
+
 jobs:
   router-bridge-tests:
     docker:
@@ -1160,6 +1205,9 @@ jobs:
       VCR_RECORD_MODE: none
     steps:
     - checkout
+    - halt-unless-pr-gate-paths:
+        label: provider contract
+        pathspecs: tests/contract tests/fixtures/vcr tests/unit/application/services/test_export_manifests.py scripts/engineering/qa/report_provider_contract_drift.py scripts/engineering/qa/check_xwalk_missing_backlog.py scripts/docs/matrix docs/04-reference/pipelines configs/quality/xwalk_missing_backlog.yaml src/bioetl/composition/providers .circleci/config.yml
     - setup-python-uv:
         python-version: '3.13'
         extras: dev tracing
@@ -1770,6 +1818,9 @@ jobs:
       VCR_RECORD_MODE: none
     steps:
       - checkout
+      - halt-unless-pr-gate-paths:
+          label: e2e replay matrix
+          pathspecs: tests/e2e tests/fixtures/vcr scripts/engineering/ci/check_e2e_matrix_skip_rate.py scripts/engineering/ci/check_e2e_rerun_stability.py configs/entities .circleci/config.yml
       - setup-python-uv:
           python-version: "3.13"
       - run:
@@ -2126,7 +2177,7 @@ jobs:
       - store_test_results:
           path: reports/test-telemetry
 
-  # Mirrors tests.yml `test-matrix` (6 groups; unit groups with xdist, integration serial).
+  # Unit groups stay on test-fast. This lane keeps integration and security.
   test-integration:
     docker:
       - image: cimg/python:3.13
@@ -2320,8 +2371,6 @@ jobs:
       REQUIRE_SVGO: '1'
     steps:
     - checkout
-    - setup-python-uv:
-        extras: dev
     - run:
         name: Classify diagram validation and rendering scope
         command: |
@@ -2333,7 +2382,7 @@ jobs:
           base=HEAD~1
           if [ -n "${CIRCLE_PULL_REQUEST:-${CIRCLE_PULL_REQUESTS:-}}" ]; then
             export EVENT_NAME=pull_request
-            uv run --frozen --no-build python - \<<'PY'
+            python3 - \<<'PY'
           import json, os, re, urllib.request
           from pathlib import Path
           url = os.environ.get('CIRCLE_PULL_REQUEST') or os.environ['CIRCLE_PULL_REQUESTS'].split(',')[0]
@@ -2358,6 +2407,8 @@ jobs:
             targeted) test -s /tmp/diagram-ci/render-sources.txt || circleci-agent step halt ;;
             drift) if [ "$EVENT_NAME" != pull_request ] || [ ! -s /tmp/diagram-ci/render-sources.txt ]; then circleci-agent step halt; fi ;;
           esac
+    - setup-python-uv:
+        extras: dev
     - run:
         name: Install canonical lockfile-pinned Mermaid renderer
         no_output_timeout: 16m
@@ -3466,6 +3517,8 @@ workflows:
             branches:
               only: main
 
+  # Image parity stays on workflow router-bridge (ci-lane=router-bridge).
+  # pr-gate does not start the large router-host-build executor.
   router-bridge-events:
     when:
       equal:
@@ -3481,11 +3534,6 @@ workflows:
             plugin:
             - bioetl-scenes-app
             - bioetl-selectorshell-panel
-    - router-host-build:
-        event-mode: true
-        requires:
-        - router-bridge-tests
-        - router-plugin-tests
 
   router-bridge:
     when:
@@ -3716,10 +3764,6 @@ workflows:
           matrix:
             parameters:
               test-group:
-                - "unit-domain|tests/unit/domain/|-n auto --dist loadscope"
-                - "unit-application|tests/unit/application/|-n auto --dist loadscope"
-                - "unit-infrastructure|tests/unit/infrastructure/|-n auto --dist loadscope"
-                - "unit-other|tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/application/ --ignore=tests/unit/infrastructure/ --ignore=tests/unit/scripts/ --ignore=tests/unit/repo_backed/|-n auto --dist loadscope"
                 - "integration|tests/integration/|-p no:xdist"
                 - "security|tests/security/|-n auto --dist loadscope"
       - dq-consistency:
@@ -3900,6 +3944,8 @@ workflows:
     jobs:
       - memory-freshness
 
+  # Sunday mutation owner is GitHub Actions. This workflow is the manual
+  # main backup: ci-lane=mutation. Keep the CircleCI schedule paused.
   mutation:
     when:
       and:
@@ -3909,9 +3955,6 @@ workflows:
       - equal:
         - main
         - << pipeline.git.branch >>
-      - equal:
-        - schedule
-        - << pipeline.trigger.type >>
     jobs:
     - mutation-testing:
         name: mutation-domain

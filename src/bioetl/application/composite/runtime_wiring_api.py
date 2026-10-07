@@ -21,6 +21,7 @@ from bioetl.application.composite.coordinator import EnrichmentCoordinatorServic
 from bioetl.application.composite.cross_validator import EnrichmentCrossValidator
 from bioetl.application.composite.deduplication import EnricherDeduplicatorService
 from bioetl.application.composite.dependency_coordinator import (
+    DependencyCoordinatorCollaborators,
     DependencyCoordinatorService,
 )
 from bioetl.application.composite.dependency_joiner import DependencyJoinerService
@@ -80,6 +81,7 @@ __all__ = [
     "CompositePreflightValidationService",
     "CompositeRunnerDependencies",
     "ConflictResolverService",
+    "DependencyCoordinatorCollaborators",
     "DependencyCoordinatorService",
     "DependencyJoinerService",
     "DependencyProgressService",
