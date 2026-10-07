@@ -10,7 +10,6 @@ from pathlib import Path
 from bioetl.domain.mapping.protein_class_target_type import (
     ProteinClassTargetTypeMappingData,
     ProteinClassTopLevelMappingEntry,
-    current_protein_class_target_type_mapping,
 )
 from bioetl.domain.types import JsonDict
 
@@ -60,13 +59,14 @@ def _required_text(raw: Mapping[str, object], key: str) -> str:
     return value.strip()
 
 
-def freeze_target_mapping() -> JsonDict:
-    """Capture the exact initialized mapping consumed by target dependency joins."""
-    mapping = current_protein_class_target_type_mapping()
+def freeze_target_mapping(mapping: ProteinClassTargetTypeMappingData) -> JsonDict:
+    """Capture one explicit mapping. Nested values are copied into the payload."""
+    entries = tuple(mapping.entries)
+    ignored = frozenset(mapping.non_counting_classes)
     return {
         "mapping_version": mapping.mapping_version,
-        "entries": [asdict(entry) for entry in mapping.entries],
-        "non_counting_classes": sorted(mapping.non_counting_classes),
+        "entries": [dict(asdict(entry)) for entry in entries],
+        "non_counting_classes": sorted(ignored),
     }
 
 

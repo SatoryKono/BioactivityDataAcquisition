@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 
 from bioetl.domain.mapping.publication_controlled_vocabulary import (
-    publication_controlled_vocabulary_values,
+    PublicationControlledVocabularyRegistry,
 )
 from bioetl.domain.normalization.json import deserialize_json_value
 from bioetl.domain.normalization.text import normalize_string
@@ -26,6 +26,7 @@ def emit_unknown_publication_vocab_metrics(
     pipeline_name: str,
     provider: str,
     normalized_business_data: Mapping[str, object],
+    registry: PublicationControlledVocabularyRegistry | None = None,
 ) -> None:
     """Emit bounded counters for unknown raw publication vocabulary drift."""
     increment_counter = getattr(metrics, "increment_counter", None)
@@ -33,7 +34,7 @@ def emit_unknown_publication_vocab_metrics(
         return
 
     for field_name in _PROVIDER_FIELD_SPECS.get(provider, ()):
-        allowed_values = _allowed_publication_vocab(provider, field_name)
+        allowed_values = _allowed_publication_vocab(provider, field_name, registry)
         if not allowed_values:
             continue
         for token in _field_tokens(normalized_business_data.get(field_name)):
@@ -91,5 +92,13 @@ def _normalize_token(value: str) -> str | None:
     return normalize_string(value)
 
 
-def _allowed_publication_vocab(provider: str, field_name: str) -> frozenset[str]:
-    return publication_controlled_vocabulary_values(provider, field_name)
+def _allowed_publication_vocab(
+    provider: str,
+    field_name: str,
+    registry: PublicationControlledVocabularyRegistry | None,
+) -> frozenset[str]:
+    if registry is None:
+        raise RuntimeError(
+            "publication controlled vocabulary must be passed explicitly"
+        )
+    return registry.allowed_values(provider, field_name)
