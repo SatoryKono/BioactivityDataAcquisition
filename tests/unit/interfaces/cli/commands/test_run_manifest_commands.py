@@ -1084,7 +1084,7 @@ class TestRunManifestCommands:
 
         result = cli_runner.invoke(cli, ["run-manifest", "show", "missing"])
 
-        assert result.exit_code == 0
+        assert result.exit_code == 1
         assert "Run manifest not found" in result.stderr
 
     def test_show_manifest_store_corruption_prints_forensic_error(
@@ -1096,7 +1096,7 @@ class TestRunManifestCommands:
 
         result = cli_runner.invoke(cli, ["run-manifest", "show", "manifest-corrupt"])
 
-        assert result.exit_code == 0
+        assert result.exit_code == 85
         assert "Run manifest store corruption" in result.stderr
         assert "indexed manifest mismatch" in result.stderr
 
@@ -1240,7 +1240,7 @@ class TestRunManifestCommands:
             ["run-manifest", "verify", "manifest-1", "missing"],
         )
 
-        assert result.exit_code == 0
+        assert result.exit_code == 1
         assert "Run manifest verification failed" in result.stderr
 
     def test_forensic_diff_json_outputs_cross_artifact_report(
@@ -1348,3 +1348,90 @@ class TestRunManifestCommands:
 
         assert result.exit_code != 0
         assert "Authoritative historical replay universe claim" in result.stderr
+
+
+class _MissingManifestService:
+    def show(self, identifier: str) -> object:
+        raise ValueError(f"manifest not found: {identifier}")
+
+    def diff(self, left: str, right: str) -> object:
+        raise ValueError(f"manifest not found: {left}")
+
+    def verify(self, left: str, right: str) -> object:
+        raise ValueError(f"manifest not found: {left}")
+
+
+class _CorruptedStoreManifestService:
+    def show(self, identifier: str) -> object:
+        raise RunManifestInspectionCorruptionError(identifier, "checksum mismatch")
+
+    def diff(self, left: str, right: str) -> object:
+        raise RunManifestInspectionCorruptionError(left, "checksum mismatch")
+
+    def verify(self, left: str, right: str) -> object:
+        raise RunManifestInspectionCorruptionError(left, "checksum mismatch")
+
+
+class TestRunManifestErrorExitCodes:
+    """#12019 (CF-015): run-manifest errors must exit non-zero."""
+
+    def test_show_missing_identifier_exits_fail(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        _patch_run_manifest_service(monkeypatch, _MissingManifestService())
+
+        result = cli_runner.invoke(cli, ["run-manifest", "show", "missing-1"])
+
+        assert result.exit_code == 1
+        assert "Run manifest not found" in (result.stderr or result.output)
+
+    def test_show_corrupted_store_exits_storage_error(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        _patch_run_manifest_service(monkeypatch, _CorruptedStoreManifestService())
+
+        result = cli_runner.invoke(cli, ["run-manifest", "show", "manifest-1"])
+
+        assert result.exit_code == 85
+        assert "corruption" in (result.stderr or result.output)
+
+    def test_score_missing_identifier_exits_fail(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        _patch_run_manifest_service(monkeypatch, _MissingManifestService())
+
+        result = cli_runner.invoke(cli, ["run-manifest", "score", "missing-1"])
+
+        assert result.exit_code == 1
+
+    def test_diff_missing_identifier_exits_fail(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        _patch_run_manifest_service(monkeypatch, _MissingManifestService())
+
+        result = cli_runner.invoke(
+            cli, ["run-manifest", "diff", "missing-1", "missing-2"]
+        )
+
+        assert result.exit_code == 1
+
+    def test_verify_corrupted_store_exits_storage_error(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        _patch_run_manifest_service(monkeypatch, _CorruptedStoreManifestService())
+
+        result = cli_runner.invoke(
+            cli, ["run-manifest", "verify", "manifest-1", "manifest-2"]
+        )
+
+        assert result.exit_code == 85

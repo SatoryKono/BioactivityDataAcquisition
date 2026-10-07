@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-07T16:51:30.419071+00:00",
+  "generated_at": "2026-10-07T17:38:42.063603+00:00",
   "summary": {
     "total_scripts": 646,
     "status_counts": {
@@ -22370,7 +22370,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_start_read_only_audit_stack.py",
-          "line": 27,
+          "line": 26,
           "source_group": "tests",
           "text": "path = Path(\"scripts/ops/observability/start_read_only_audit_stack.py\")"
         }
