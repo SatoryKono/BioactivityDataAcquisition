@@ -3,7 +3,7 @@
     "snapshot_date": "2026-09-11",
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
-    "budget_warnings": 0,
+    "budget_warnings": 1,
     "budget_review_notes": 1
   },
   "families": [
@@ -18,8 +18,8 @@
       ],
       "duplication_clusters": 0,
       "files": 202,
-      "total_loc": 25231,
-      "files_ge_250_loc": 0,
+      "total_loc": 25344,
+      "files_ge_250_loc": 2,
       "helper_function_ratio": 0.381,
       "max_internal_fan_in": 7,
       "max_internal_fan_in_module": "bioetl.application.core.batch_processing_contracts",
@@ -32,9 +32,10 @@
           "0": 19,
           "1": 106,
           "2": 40,
-          "3": 16,
-          "4": 8,
-          "5": 12,
+          "3": 15,
+          "4": 9,
+          "5": 11,
+          "6": 1,
           "7": 1
         },
         "modules": [
@@ -104,11 +105,12 @@
           },
           {
             "module": "bioetl.application.core._batch_write_support",
-            "fan_in": 3,
+            "fan_in": 4,
             "runtime_importers": [
               "bioetl.application.core._batch_processing_layer_write_support",
               "bioetl.application.core._record_processor_write_support",
-              "bioetl.application.core.batch_processing_support"
+              "bioetl.application.core.batch_processing_support",
+              "bioetl.application.core.record_processor"
             ]
           },
           {
@@ -676,13 +678,14 @@
           },
           {
             "module": "bioetl.application.core.batch_shared_operation_errors",
-            "fan_in": 5,
+            "fan_in": 6,
             "runtime_importers": [
               "bioetl.application.core._batch_processing_layer_write_support",
               "bioetl.application.core.batch_pipeline_execution_errors",
               "bioetl.application.core.batch_processing_support",
               "bioetl.application.core.lifecycle.checkpoint_manager",
-              "bioetl.application.core.postrun.service"
+              "bioetl.application.core.postrun.service",
+              "bioetl.application.core.record_processor"
             ]
           },
           {
@@ -1570,7 +1573,9 @@
           "bioetl.application.core.batch_processing_contracts"
         ]
       },
-      "budget_warnings": [],
+      "budget_warnings": [
+        "over_budget:files_ge_250_loc=2/0"
+      ],
       "budget_review_notes": [
         "at_budget:max_internal_fan_in=7/7"
       ],
@@ -1602,7 +1607,7 @@
       ],
       "duplication_clusters": 0,
       "files": 49,
-      "total_loc": 6437,
+      "total_loc": 6440,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.284,
       "max_internal_fan_in": 2,

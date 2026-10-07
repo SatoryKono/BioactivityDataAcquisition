@@ -44,13 +44,11 @@ class BatchCheckpointRecoveryService:
         self._memory_manager = memory_manager
         self._checkpoint_save_errors = checkpoint_manager._operation_errors
         # Per-run progress watermark: highest ``records_fetched`` persisted
-        # by ANY checkpoint operation in this run. Periodic saves trigger
-        # when confirmed progress advanced at least ``checkpoint_interval``
-        # past it, so saves land on every interval of *confirmed* progress
-        # regardless of batch-size alignment. All save operations share the
-        # watermark — they persist the same boundary. A failed save never
-        # advances it; a manual resume_offset does not seed it (no durable
-        # boundary is proven for a manually chosen offset).
+        # by ANY checkpoint operation in this run (they all persist the same
+        # boundary). Periodic saves trigger when confirmed progress advanced
+        # at least ``checkpoint_interval`` past it, regardless of batch-size
+        # alignment. A failed save never advances it; a manual resume_offset
+        # does not seed it (no durable boundary is proven for a manual offset).
         self._last_saved_progress: int = 0
 
     async def save_periodic_checkpoint(
@@ -60,17 +58,11 @@ class BatchCheckpointRecoveryService:
         resume_offset: int,
         checkpoint_interval: int,
     ) -> None:
-        """Save a periodic checkpoint when confirmed progress >= interval.
-
-        The guard is the delta model ``records_fetched - last_saved >=
-        checkpoint_interval`` in per-run progress units — not exact modulo —
-        so a batch size that does not divide the interval cannot starve
-        checkpointing.
-        """
+        """Save a periodic checkpoint when confirmed progress >= interval."""
         if checkpoint_interval <= 0 or records_fetched <= 0:
             return
         if records_fetched - self._last_saved_progress < checkpoint_interval:
-            self._emit_checkpoint_save_event(operation="periodic", status="skipped")
+            self._emit_event(operation="periodic", status="skipped")
             return
         total = self._total_processed(records_fetched, resume_offset)
         await self._save_checkpoint(
