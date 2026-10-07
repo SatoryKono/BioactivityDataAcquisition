@@ -125,6 +125,14 @@ def test_docs_kpi_is_opt_in_main_only_and_preserves_policy():
         "and": [
             {"equal": ["docs-kpi", "<< pipeline.parameters.ci-lane >>"]},
             {"equal": ["main", "<< pipeline.git.branch >>"]},
+            {
+                "not": {
+                    "equal": [
+                        "scheduled_pipeline",
+                        "<< pipeline.trigger_source >>",
+                    ]
+                }
+            },
         ]
     }
     assert docs["jobs"] == ["docs-kpi"]
@@ -200,6 +208,14 @@ def test_independent_lanes_are_opt_in_main_only(lane):
         "and": [
             {"equal": [lane, "<< pipeline.parameters.ci-lane >>"]},
             {"equal": ["main", "<< pipeline.git.branch >>"]},
+            {
+                "not": {
+                    "equal": [
+                        "scheduled_pipeline",
+                        "<< pipeline.trigger_source >>",
+                    ]
+                }
+            },
         ]
     }
     assert len(workflow["jobs"]) == 1
@@ -361,6 +377,27 @@ def test_memory_freshness_preparation_does_not_get_write_context():
     assert "context" not in str(_config()["workflows"]["memory-freshness"])
 
 
+def test_native_schedules_do_not_select_opt_in_lanes():
+    config = _config()
+    excluded = {
+        "not": {"equal": ["scheduled_pipeline", "<< pipeline.trigger_source >>"]}
+    }
+    kept = {
+        "pr-gate",
+        "router-bridge-events",
+        "retained-actions-online",
+        "rf023-closeout",
+    }
+    for name, workflow in config["workflows"].items():
+        if not isinstance(workflow, dict):
+            continue
+        when = workflow.get("when")
+        if name in kept:
+            assert "scheduled_pipeline" not in str(when)
+            continue
+        assert excluded in when["and"]
+
+
 def test_mutation_preserves_targets_and_manual_main_backup():
     config = _config()
     workflow = config["workflows"]["mutation"]
@@ -368,9 +405,19 @@ def test_mutation_preserves_targets_and_manual_main_backup():
         "and": [
             {"equal": ["mutation", "<< pipeline.parameters.ci-lane >>"]},
             {"equal": ["main", "<< pipeline.git.branch >>"]},
+            {
+                "not": {
+                    "equal": [
+                        "scheduled_pipeline",
+                        "<< pipeline.trigger_source >>",
+                    ]
+                }
+            },
         ]
     }
-    assert "schedule" not in str(workflow["when"])
+    assert {"equal": ["scheduled_pipeline", "<< pipeline.trigger_source >>"]} not in (
+        workflow["when"]["and"]
+    )
     legacy = yaml.safe_load(
         (ROOT / ".github/workflows/mutation-testing.yml").read_text(encoding="utf-8")
     )["jobs"]["mutation-testing"]["strategy"]["matrix"]["target"]
@@ -382,7 +429,10 @@ def test_mutation_preserves_targets_and_manual_main_backup():
         # A replacement may include additional existing tests, never drop the legacy set.
         assert (ROOT / old["tests_dir"]).is_relative_to(ROOT / new["tests-dir"])
         assert new["threshold"] == old["threshold"]
-    assert "pipeline.trigger_source" not in str(workflow)
+    # Manual API backup stays available: the lane does not require a schedule.
+    assert {"equal": ["schedule", "<< pipeline.trigger_source >>"]} not in (
+        workflow["when"]["and"]
+    )
     # Control-plane callers and regression tests also live outside its subdirectory.
     control_plane = next(
         job for job in actual if job["target"] == "application-control-plane"

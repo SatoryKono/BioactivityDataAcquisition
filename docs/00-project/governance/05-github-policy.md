@@ -242,8 +242,9 @@ nightlies from this section.
 `mutation-testing.yml` is the explicit #10263 exception and stays `active`.
 The Sunday step is `nightly.yml` calling this workflow. Push and pull_request stay off.
 CircleCI workflow `mutation` stays in `.circleci/config.yml` as the manual
-`ci-lane=mutation` backup on `main`; keep its Sunday schedule paused. Thresholds stay
-70/60/60/60.
+`ci-lane=mutation` backup on `main`. Native `scheduled_pipeline` triggers do not
+start it; keep any Sunday schedule paused so an API-attributed schedule cannot
+double-run it. Thresholds stay 70/60/60/60.
 
 | Workflow | File | YAML cadence | Lane class | GitHub live state | Decision |
 | --- | --- | --- | --- | --- | --- |
