@@ -98,6 +98,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "pii_hasher",
             "author_extractor",
             "date_extractor",
+            "publication_vocabulary",
+            "publication_classification",
         }
         unexpected = sorted(k for k in legacy_collaborators if k not in allowed)
         if unexpected:
@@ -115,7 +117,16 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "identity_service": legacy_collaborators.get("identity_service"),
             "pii_hasher": legacy_collaborators.get("pii_hasher"),
         }
-        super().__init__(provider, **publication_transformer_kwargs(init_locals))
+        forwarded = publication_transformer_kwargs(init_locals)
+        if "publication_vocabulary" in legacy_collaborators:
+            forwarded["publication_vocabulary"] = legacy_collaborators[
+                "publication_vocabulary"
+            ]
+        if "publication_classification" in legacy_collaborators:
+            forwarded["publication_classification"] = legacy_collaborators[
+                "publication_classification"
+            ]
+        super().__init__(provider, **forwarded)
         self._cached_xml_root = None
         author_extractor = legacy_collaborators.get("author_extractor")
         date_extractor = legacy_collaborators.get("date_extractor")
