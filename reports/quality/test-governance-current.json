@@ -160,7 +160,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "319",
+      "line": "326",
       "path": "tests/unit/application/pipelines/crossref/test_crossref_transformer.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_pre_extract_validation_accepts_valid_doi"
@@ -654,7 +654,7 @@
     "tests/unit/application/core/test_otel_spans.py:586",
     "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:129",
     "tests/unit/application/observability/test_pipeline_metrics.py:297",
-    "tests/unit/application/pipelines/crossref/test_crossref_transformer.py:319",
+    "tests/unit/application/pipelines/crossref/test_crossref_transformer.py:326",
     "tests/unit/application/services/test_checkpoint_telemetry_helpers.py:68",
     "tests/unit/composition/test_observability_contract.py:421",
     "tests/unit/composition/test_observability_contract.py:431",
@@ -1350,7 +1350,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "319",
+        "line": "326",
         "path": "tests/unit/application/pipelines/crossref/test_crossref_transformer.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_pre_extract_validation_accepts_valid_doi"
@@ -1844,7 +1844,7 @@
       "tests/unit/application/core/test_otel_spans.py:586",
       "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:129",
       "tests/unit/application/observability/test_pipeline_metrics.py:297",
-      "tests/unit/application/pipelines/crossref/test_crossref_transformer.py:319",
+      "tests/unit/application/pipelines/crossref/test_crossref_transformer.py:326",
       "tests/unit/application/services/test_checkpoint_telemetry_helpers.py:68",
       "tests/unit/composition/test_observability_contract.py:421",
       "tests/unit/composition/test_observability_contract.py:431",
@@ -2044,8 +2044,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3018,
-      "test_python_file_count": 3253,
+      "test_glob_file_count": 3024,
+      "test_python_file_count": 3259,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2086,13 +2086,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3018,
-    "total_test_functions": 29516,
+    "total_test_files": 3024,
+    "total_test_functions": 29567,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "eb6809ff21b22a530e8b40d4171d82fd59f31547548830f3cfaf469c5c6f165c",
+  "source_tree_sha256": "62fafa1e493de48d6177b3a76a73ab34abc20d30ff9cc608b055e9ff9638d4ed",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2112,8 +2112,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3018,
-    "test_python_file_count": 3253,
+    "test_glob_file_count": 3024,
+    "test_python_file_count": 3259,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2154,8 +2154,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3018,
-  "total_test_functions": 29516,
+  "total_test_files": 3024,
+  "total_test_functions": 29567,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

@@ -772,7 +772,7 @@ class TestEmitUnknownVocabMetrics:
         monkeypatch.setattr(
             vocab_obs,
             "_allowed_publication_vocab",
-            lambda provider, field: frozenset({"known"}),
+            lambda provider, field, registry: frozenset({"known"}),
         )
         metrics = SimpleNamespace(increment_counter=MagicMock())
         emit_unknown_publication_vocab_metrics(
@@ -787,7 +787,7 @@ class TestEmitUnknownVocabMetrics:
         monkeypatch.setattr(
             vocab_obs,
             "_allowed_publication_vocab",
-            lambda provider, field: frozenset({"known"}),
+            lambda provider, field, registry: frozenset({"known"}),
         )
         metrics = SimpleNamespace(increment_counter=MagicMock())
         emit_unknown_publication_vocab_metrics(
@@ -809,7 +809,9 @@ class TestEmitUnknownVocabMetrics:
 
     def test_empty_allowed_skips_field(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setattr(
-            vocab_obs, "_allowed_publication_vocab", lambda provider, field: frozenset()
+            vocab_obs,
+            "_allowed_publication_vocab",
+            lambda provider, field, registry: frozenset(),
         )
         metrics = SimpleNamespace(increment_counter=MagicMock())
         emit_unknown_publication_vocab_metrics(
@@ -848,10 +850,19 @@ class TestVocabTokenHelpers:
     def test_normalized_string_tokens_filters(self) -> None:
         assert _normalized_string_tokens([" a ", None, "  ", 3]) == ("a",)
 
-    def test_allowed_vocab_real_fn(self) -> None:
-        assert isinstance(
-            _allowed_publication_vocab("crossref", "publication_type"), frozenset
+    def test_allowed_vocab_requires_explicit_registry(self) -> None:
+        from bioetl.domain.mapping.publication_controlled_vocabulary import (
+            PublicationControlledVocabularyRegistry,
         )
+
+        registry = PublicationControlledVocabularyRegistry(
+            {("crossref", "publication_type"): frozenset({"journal-article"})}
+        )
+        assert _allowed_publication_vocab(
+            "crossref", "publication_type", registry
+        ) == frozenset({"journal-article"})
+        with pytest.raises(RuntimeError, match="passed explicitly"):
+            _allowed_publication_vocab("crossref", "publication_type", None)
 
 
 # ---------------------------------------------------------------------------
@@ -920,9 +931,6 @@ def _patch_summary_derivation(
 
     monkeypatch.setattr(summ, "derive_protein_class_target_type", fake_derive)
     monkeypatch.setattr(summ, "derive_major_families", lambda rows: ("FAM",))
-    monkeypatch.setattr(
-        summ, "current_protein_class_target_type_mapping", lambda: object()
-    )
 
 
 class TestSummarizeDependency:
@@ -945,7 +953,7 @@ class TestSummarizeDependency:
                 {"target_id": "T1", "component_id": 1, "leaf_id": 7},
             ]
         )
-        result = summarize_target_protein_classification_dependency(df)
+        result = summarize_target_protein_classification_dependency(df, object())  # type: ignore[arg-type]
         assert result["target_id"].to_list() == ["T1"]
 
     def test_representative_falls_back_to_first_row(
@@ -954,7 +962,9 @@ class TestSummarizeDependency:
         # Multi-row derive reports primary TOP, but no single row counts as TOP.
         _patch_summary_derivation(monkeypatch)
         summary = summarize_target_protein_classification_rows(
-            "T1", [_summary_row(leaf_id=10), _summary_row(leaf_id=11)]
+            "T1",
+            [_summary_row(leaf_id=10), _summary_row(leaf_id=11)],
+            object(),  # type: ignore[arg-type]
         )
         assert summary["target_id"] == "T1"
         assert summary["target_protein_class_name_L1"] == "Kinase"
@@ -969,6 +979,7 @@ class TestSummarizeDependency:
                 _summary_row(component_id=1, leaf_id=10),
                 _summary_row(component_id=2, leaf_id=11),
             ],
+            object(),  # type: ignore[arg-type]
         )
         assert summary["multifunctional_origin"] == "multi_component_heterogeneity"
 
@@ -982,6 +993,7 @@ class TestSummarizeDependency:
                 _summary_row(component_id=1, leaf_id=10),
                 _summary_row(component_id=1, leaf_id=11),
             ],
+            object(),  # type: ignore[arg-type]
         )
         assert summary["multifunctional_origin"] == "multiple_informative_top_levels"
 
@@ -990,7 +1002,9 @@ class TestSummarizeDependency:
     ) -> None:
         _patch_summary_derivation(monkeypatch)
         summary = summarize_target_protein_classification_rows(
-            "T1", [_summary_row(classification_status="quarantined", leaf_id=10)]
+            "T1",
+            [_summary_row(classification_status="quarantined", leaf_id=10)],
+            object(),  # type: ignore[arg-type]
         )
         assert summary["target_id"] == "T1"
         assert summary["protein_classifications"] is None
@@ -1013,11 +1027,10 @@ class TestSummarizeDependency:
 
         monkeypatch.setattr(summ, "derive_protein_class_target_type", fake_derive)
         monkeypatch.setattr(summ, "derive_major_families", lambda rows: ("FAM",))
-        monkeypatch.setattr(
-            summ, "current_protein_class_target_type_mapping", lambda: object()
-        )
         summary = summarize_target_protein_classification_rows(
-            "T1", [_summary_row(leaf_id=10), _summary_row(leaf_id=11)]
+            "T1",
+            [_summary_row(leaf_id=10), _summary_row(leaf_id=11)],
+            object(),  # type: ignore[arg-type]
         )
         assert (
             summary["target_protein_class_name_L1"] == summ.MULTIFUNCTIONAL_TARGET_NAME

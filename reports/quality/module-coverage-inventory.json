@@ -1,7 +1,7 @@
 {
-  "additive_coverage_xml_path": "reports/quality/rf023-coverage-7a850b42-utf8/coverage.xml",
-  "additive_coverage_xml_sha256": "e562fc662dbdcd721565c589d58784c02fc874491c35d338c8f8a099150e0e71",
-  "additive_measured_module_count": 2470,
+  "additive_coverage_xml_path": "reports/coverage/repository-env-coverage.xml",
+  "additive_coverage_xml_sha256": "685d3ea5b0535b0ad98e48d14da3aba6a9f004843cfaec3febd54dbc70ed5583",
+  "additive_measured_module_count": 1,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
   "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
@@ -20007,6 +20007,16 @@
       "module": "bioetl.infrastructure.config.reason_catalog_loader",
       "path": "src/bioetl/infrastructure/config/reason_catalog_loader.py",
       "source_lines": 61
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 7,
+      "executable_lines": 7,
+      "missing_lines": 0,
+      "module": "bioetl.infrastructure.config.repository_source_environment",
+      "path": "src/bioetl/infrastructure/config/repository_source_environment.py",
+      "source_lines": 19
     },
     {
       "coverage_percent": 100.0,
@@ -45533,6 +45543,16 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
+      "covered_lines": 7,
+      "executable_lines": 7,
+      "missing_lines": 0,
+      "module": "bioetl.infrastructure.config.repository_source_environment",
+      "path": "src/bioetl/infrastructure/config/repository_source_environment.py",
+      "source_lines": 19
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
       "covered_lines": 35,
       "executable_lines": 35,
       "missing_lines": 0,
@@ -51053,7 +51073,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "696182570b4993b98acd1fa0ced60a7d33520910642560737e6d6eb2346e1086",
+  "source_tree_sha256": "fb60ec89b76c2879ca58d49ede04cb894ae74ecd28355d27d83c1d2bccdec68a",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -51208,10 +51228,10 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2552,
+    "source_module_count": 2553,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 2513,
+      "fully_covered": 2514,
       "no_executable_lines": 1,
       "partially_covered": 38,
       "uncovered": 0,
