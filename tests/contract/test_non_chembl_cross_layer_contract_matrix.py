@@ -406,7 +406,7 @@ def test_uniprot_reference_array_dq_rules_match_profile_owned_canonicalization()
             r'^\[("DB\d{5}"(,"DB\d{5}")*)?\]$'
         ),
         ("configs/entities/uniprot/protein.yaml", "go_terms"): (
-            r'^\[(?:(?:"GO:\d{7}"|\{(?:[^"{}]|"(?:[^"\\]|\\.)*")*"id":"GO:\d{7}"(?:[^"{}]|"(?:[^"\\]|\\.)*")*\})(?:,(?:"GO:\d{7}"|\{(?:[^"{}]|"(?:[^"\\]|\\.)*")*"id":"GO:\d{7}"(?:[^"{}]|"(?:[^"\\]|\\.)*")*\}))*)?\]$'
+            r'^\[(("GO:\d{7}"|\{[^\]]*"id":"GO:\d{7}"[^\]]*\})(,("GO:\d{7}"|\{[^\]]*"id":"GO:\d{7}"[^\]]*\}))*)?\]$'
         ),
         ("configs/entities/uniprot/protein.yaml", "interpro_xrefs"): (
             r'^\[(("IPR\d{6}"|\{[^\]]*"id":"IPR\d{6}"[^\]]*\})(,("IPR\d{6}"|\{[^\]]*"id":"IPR\d{6}"[^\]]*\}))*)?\]$'

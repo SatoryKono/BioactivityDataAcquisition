@@ -32,7 +32,6 @@ from __future__ import annotations
 
 import json
 import sys
-from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -1427,31 +1426,14 @@ def test_run_manifest_commands_cover_failure_paths(
     invalid_json = tmp_path / "invalid.json"
     invalid_json.write_text("{bad", encoding="utf-8")
 
-    import click
-
-    def _invoke(cb: Callable[..., object], *args: object) -> None:
-        with pytest.raises(click.exceptions.Exit):
-            cb(*args)
-
-    _invoke(run_manifest_cmd.show_command.callback, "manifest-1", "json")
-    _invoke(run_manifest_cmd.diff_command.callback, "left", "right", "json")
-    _invoke(run_manifest_cmd.verify_command.callback, "left", "right", "json")
-    _invoke(run_manifest_cmd.replay_bundle_command.callback, "manifest-1", "json")
-    _invoke(run_manifest_cmd.forensic_diff_command.callback, "left", "right", "json")
-    _invoke(
-        run_manifest_cmd.certify_historical_bulk_command.callback,
-        invalid_json,
-        "json",
-    )
-    _invoke(run_manifest_cmd.closure_report_command.callback, None, False, "json")
-    _invoke(
-        run_manifest_cmd.universe_report_command.callback,
-        (),
-        False,
-        False,
-        False,
-        "json",
-    )
+    run_manifest_cmd.show_command.callback("manifest-1", "json")
+    run_manifest_cmd.diff_command.callback("left", "right", "json")
+    run_manifest_cmd.verify_command.callback("left", "right", "json")
+    run_manifest_cmd.replay_bundle_command.callback("manifest-1", "json")
+    run_manifest_cmd.forensic_diff_command.callback("left", "right", "json")
+    run_manifest_cmd.certify_historical_bulk_command.callback(invalid_json, "json")
+    run_manifest_cmd.closure_report_command.callback(None, False, "json")
+    run_manifest_cmd.universe_report_command.callback((), False, False, False, "json")
 
     assert not emitted
     assert any(

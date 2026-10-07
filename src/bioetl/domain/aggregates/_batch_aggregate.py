@@ -73,17 +73,18 @@ class _BatchLifecycleMixin(_BatchMutationMixin):
                 current_state=self._status.value,
                 attempted_operation="seal",
             )
-        event = BatchSealed(
-            occurred_at=sealed_at,
-            run_id=self._run_id,
-            batch_id=self._batch_id,
-            record_count=record_count,
-            valid_count=valid_count,
-            quarantined_count=quarantined_count,
+        self._events.append(
+            BatchSealed(
+                occurred_at=sealed_at,
+                run_id=self._run_id,
+                batch_id=self._batch_id,
+                record_count=record_count,
+                valid_count=valid_count,
+                quarantined_count=quarantined_count,
+            )
         )
         self._status, self._sealed_at = BatchStatus.SEALED, sealed_at
         self._sealed_valid_count = valid_count
-        self._events.append(event)
 
     @staticmethod
     def _validate_seal_counts(
@@ -128,15 +129,16 @@ class _BatchLifecycleMixin(_BatchMutationMixin):
                 current_state=self._status.value,
                 attempted_operation="mark_committed",
             )
-        event = BatchWritten(
-            occurred_at=committed_at,
-            run_id=self._run_id,
-            batch_id=self._batch_id,
-            layer=layer,
-            record_count=sealed_valid_count,
+        self._events.append(
+            BatchWritten(
+                occurred_at=committed_at,
+                run_id=self._run_id,
+                batch_id=self._batch_id,
+                layer=layer,
+                record_count=sealed_valid_count,
+            )
         )
         self._status = BatchStatus.COMMITTED
-        self._events.append(event)
 
     def mark_failed(
         self,
@@ -153,16 +155,17 @@ class _BatchLifecycleMixin(_BatchMutationMixin):
                 current_state=self._status.value,
                 attempted_operation="mark_failed",
             )
-        event = BatchFailed(
-            occurred_at=failed_at,
-            run_id=self._run_id,
-            batch_id=self._batch_id,
-            layer=layer,
-            error=error,
-            error_type=error_type,
+        self._events.append(
+            BatchFailed(
+                occurred_at=failed_at,
+                run_id=self._run_id,
+                batch_id=self._batch_id,
+                layer=layer,
+                error=error,
+                error_type=error_type,
+            )
         )
         self._status = BatchStatus.FAILED
-        self._events.append(event)
 
 
 class Batch(_BatchLifecycleMixin):

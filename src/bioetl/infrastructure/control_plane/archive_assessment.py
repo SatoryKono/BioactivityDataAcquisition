@@ -46,15 +46,7 @@ def refresh_archived_assessment[ObservationToken](
     if verified is not True:
         return verified, reason
     sources = selected_report_sources(report_root, manifest)
-    report_base = report_root.resolve()
-    report_relative = (
-        report_base
-        / "pipeline"
-        / manifest.pipeline_name
-        / str(manifest.run_id)
-        / "pipeline-run-report.json"
-    ).relative_to(report_base)
-    report_key = f"run-reports/{report_relative.as_posix()}"
+    report_key = f"run-reports/pipeline/{manifest.pipeline_name}/{manifest.run_id}/pipeline-run-report.json"
     report_path = sources.get(report_key)
     if report_path is None:
         return verified, reason

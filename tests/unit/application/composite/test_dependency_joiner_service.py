@@ -68,25 +68,8 @@ def _no_field_aliases(_pipeline: str) -> None:
     return None
 
 
-def _protein_mapping() -> ProteinClassTargetTypeMappingData:
-    return ProteinClassTargetTypeMappingData(
-        mapping_version="protein_class_l1_map_v1",
-        entries=(
-            ProteinClassTopLevelMappingEntry("Enzyme", "enzyme", True),
-            ProteinClassTopLevelMappingEntry("Transporter", "transporter", True),
-            ProteinClassTopLevelMappingEntry(
-                "Unclassified protein",
-                "unclassified_protein",
-                False,
-            ),
-        ),
-    )
-
-
-def _make_service(
-    target_type_mapping_data: ProteinClassTargetTypeMappingData | None = None,
-) -> DependencyJoinerService:
-    service = DependencyJoinerService(
+def _make_service() -> DependencyJoinerService:
+    return DependencyJoinerService(
         logger=MagicMock(),
         deduplicator=MagicMock(),
         renamer=MagicMock(),
@@ -96,8 +79,6 @@ def _make_service(
         join_executor=MagicMock(),
         system_columns_to_drop=frozenset(),
     )
-    service.bind_target_type_mapping(target_type_mapping_data)
-    return service
 
 
 def _make_dependency(
@@ -177,7 +158,7 @@ def test_apply_dependency_joins_routes_single_key_dependencies_to_single_key_joi
 
 @pytest.mark.unit
 def test_apply_dependency_joins_summarizes_target_classification_dependency() -> None:
-    service = _make_service(_protein_mapping())
+    service = _make_service()
     merged_df = pl.DataFrame({"target_id": ["CHEMBL1"]})
     dep_df = pl.DataFrame(
         {
@@ -298,11 +279,9 @@ def test_apply_loaded_dependency_join_summarizes_target_dependency_before_dispat
         ) as dispatch,
     ):
         result = apply_loaded_dependency_join(
-            dependency_dfs={dependency.pipeline: dep_df},
-            target_type_mapping_data=_protein_mapping(),
-            **kwargs,
+            dependency_dfs={dependency.pipeline: dep_df}, **kwargs
         )
 
     assert result.equals(expected)
-    summarize.assert_called_once_with(dep_df, _protein_mapping())
+    summarize.assert_called_once_with(dep_df)
     assert dispatch.call_args.kwargs["dep_df"] is summarized

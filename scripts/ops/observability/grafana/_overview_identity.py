@@ -343,7 +343,7 @@ def _place_stages_and_quality(payload: dict, row: dict, stages: dict) -> None:
     quality = deepcopy(next(p for p in panels if p.get("id") == 9481))
     quality.update(
         id=9482,
-        title="Review Contract Exclusions",
+        title="Review Data Quality",
         gridPos={"x": 15, "y": y, "w": 9, "h": 6},
         description=(
             "SELECTED RUN · Excluded-by-contract records summed across Bronze, Silver and Gold. "

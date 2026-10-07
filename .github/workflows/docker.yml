@@ -8,6 +8,26 @@ on:
   # Manual runs validate the Docker lane only. Publishing remains guarded below
   # by push-to-main plus the protected ghcr-publish environment.
   workflow_dispatch:
+  push:
+    branches: [main, master, develop]
+    paths:
+      - "Dockerfile.bioetl"
+      - "pyproject.toml"
+      - "uv.lock"
+      - "src/**"
+      - "configs/**"
+      - "docker-compose*.yml"
+      - "scripts/ops/runtime/docker/**"
+      - "scripts/engineering/qa/docker_stability_campaign/**"
+      - "scripts/engineering/qa/run_docker_stability_campaign.py"
+      - "configs/quality/docker_runtime_contracts.yaml"
+      - "tests/architecture/test_docker_runtime_contracts.py"
+      - "tests/unit/repo_backed/scripts/ops/docker/**"
+      - "tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py"
+      - ".dockerignore"
+      - ".github/workflows/docker.yml"
+      - ".github/actions/setup-python-uv/**"
+      - ".github/actions/install-trivy/**"
 concurrency:
   # Only main push validation is run-scoped so protected publish approval cannot
   # block newer main SHA checks. PR and non-main pushes remain ref-scoped.
@@ -344,13 +364,13 @@ jobs:
             --fail-on-blocking
 
       - name: Export exact scanned image for publication
-        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_call')
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         env:
           IMAGE_REF: bioetl:${{ github.sha }}
         run: docker save "${IMAGE_REF}" | zstd -T0 -10 -o reports/security/bioetl-scanned-image.tar.zst
 
       - name: Transfer exact scanned image to publish job
-        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_call')
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: bioetl-scanned-image-${{ github.sha }}
@@ -400,7 +420,7 @@ jobs:
     needs:
       - docker-build
       - docker-complete
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_call')
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment: ghcr-publish
     concurrency:
       group: docker-ghcr-push-${{ github.run_id }}

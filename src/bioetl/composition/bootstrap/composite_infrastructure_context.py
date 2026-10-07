@@ -2,20 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, replace
-from pathlib import Path
+from collections.abc import Callable
 
-from bioetl.application.ports.storage import CompositeRuntimeStorageProtocol
-from bioetl.application.services.run_reports.source_identity import (
-    load_repository_source_environment as _parse_repository_source_environment,
-    repository_env_candidate_paths,
-)
-from bioetl.domain.mapping.protein_class_target_type import (
-    ProteinClassTargetTypeMappingData,
-    current_protein_class_target_type_mapping,
-    is_protein_class_target_type_mapping_initialized,
-)
 from bioetl.domain.ports import (
     ClockPort,
     LockPort,
@@ -24,11 +13,10 @@ from bioetl.domain.ports import (
     PipelineControlPlaneArtifacts,
     TracingPort,
 )
-from bioetl.domain.value_objects.run_context import RunContext
-from bioetl.infrastructure.config.repository_source_environment import (
-    read_repository_env_text,
-)
 from bioetl.infrastructure.config.settings_api import Settings
+from bioetl.domain.value_objects.run_context import RunContext
+
+from bioetl.application.ports.storage import CompositeRuntimeStorageProtocol
 
 
 @dataclass(frozen=True, slots=True)
@@ -90,40 +78,8 @@ def build_manifest_storage_factory(
     return build
 
 
-def load_repository_source_environment(
-    root: str | Path,
-    *,
-    names: Iterable[str],
-    process_environment: Mapping[str, object] | None = None,
-) -> dict[str, str]:
-    """Read whitelisted repository env files and return a parsed mapping."""
-
-    root_path = Path(root)
-    process = process_environment or {}
-    paths = repository_env_candidate_paths(root_path, process)
-    file_texts = {str(path): read_repository_env_text(path) for path in paths}
-    return _parse_repository_source_environment(
-        root_path,
-        names=names,
-        process_environment=process,
-        file_texts=file_texts,
-    )
-
-
-def current_target_protein_classification_mapping() -> (
-    ProteinClassTargetTypeMappingData | None
-):
-    """Return the installed protein-class mapping, or None before install."""
-
-    if not is_protein_class_target_type_mapping_initialized():
-        return None
-    return current_protein_class_target_type_mapping()
-
-
 __all__ = [
     "CompositeInfrastructureContext",
     "CompositeRuntimeStorageProtocol",
     "build_manifest_storage_factory",
-    "current_target_protein_classification_mapping",
-    "load_repository_source_environment",
 ]

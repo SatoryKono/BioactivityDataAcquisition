@@ -48,7 +48,7 @@ from bioetl.application.pipelines.crossref.transformer import (
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
-from tests.helpers.transformer_dependencies import instantiate_test_transformer
+from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 pytestmark = pytest.mark.usefixtures("publication_type_classification_data")
 
@@ -154,9 +154,9 @@ async def test_crossref_transformer_parity(
     crossref_bronze_record: dict[str, Any], mock_context: PipelineContext
 ) -> None:
     """Test CrossRef transformer data parity."""
-    transformer = instantiate_test_transformer(
-        CrossRefPublicationTransformer,
+    transformer = CrossRefPublicationTransformer(
         provider="crossref",
+        dependencies=build_test_transformer_dependencies(),
     )
 
     silver_record = await transformer.transform(
@@ -179,9 +179,9 @@ async def test_pubmed_transformer_parity(
     pubmed_bronze_record: dict[str, Any], mock_context: PipelineContext
 ) -> None:
     """Test PubMed transformer data parity."""
-    transformer = instantiate_test_transformer(
-        PubMedPublicationTransformer,
+    transformer = PubMedPublicationTransformer(
         provider="pubmed",
+        dependencies=build_test_transformer_dependencies(),
     )
 
     silver_record = await transformer.transform(

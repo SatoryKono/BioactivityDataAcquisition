@@ -23,9 +23,6 @@ from bioetl.application.services.control_plane.manifest.diagnostics import (
     replay_state as replay,
 )
 from bioetl.application.services.run_reports import source_identity as src_id
-from bioetl.application.services.run_reports._report_diff_support import (
-    _strip_repository_env_inline_comment,
-)
 
 pytestmark = pytest.mark.unit
 
@@ -129,7 +126,7 @@ def test_source_identity_path_and_env_helpers(tmp_path: Path) -> None:
         )
         is None
     )
-    assert _strip_repository_env_inline_comment("v # c") == "v"
+    assert src_id._strip_repository_env_inline_comment("v # c") == "v"
     assert src_id._parse_repository_env_line("K=v # c", {"K"}) == ("K", "v")
     env_paths = src_id._repository_env_paths(tmp_path, {"BIOETL_SKIP_ENV_LOCAL": "1"})
     assert env_paths == (tmp_path / ".env",)

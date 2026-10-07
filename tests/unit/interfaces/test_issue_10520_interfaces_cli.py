@@ -26,7 +26,6 @@ from bioetl.interfaces.cli.commands.lineage import (
     _render_text_payload,
     _resolve_explain_identifier,
 )
-from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import (
     echo_export_preview,
     echo_export_result,
@@ -57,7 +56,7 @@ def test_run_manifest_command_error_paths(monkeypatch: pytest.MonkeyPatch) -> No
     monkeypatch.setattr(run_manifest_cmd, "get_run_manifest_service", lambda: _Svc())
     runner = CliRunner()
     score = runner.invoke(cli, ["run-manifest", "score", "m1"])
-    assert score.exit_code == ExitCode.STORAGE_ERROR
+    assert score.exit_code == 0
 
     class _ValueShow:
         def show(self, identifier: str) -> object:

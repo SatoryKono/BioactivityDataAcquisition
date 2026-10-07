@@ -22,12 +22,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, fields
 from datetime import datetime
-from enum import Enum
-from math import isfinite
-from uuid import UUID
 
 from bioetl.domain.deterministic_identity import deterministic_id
-from bioetl.domain.immutability import FrozenDict, FrozenList, deep_freeze_json
 from bioetl.domain.medallion import Layer
 from bioetl.domain.types import BatchID, ContentHash, MetaDict, RunID
 
@@ -50,40 +46,6 @@ def _require_layer(value: object, *, event_name: str) -> Layer:
     if isinstance(value, Layer):
         return value
     raise TypeError(f"{event_name}.layer must be a Layer, got {type(value).__name__}")
-
-
-def _validate_metadata_snapshot(value: object) -> None:
-    """Accept immutable identity scalars and recursively snapshottable containers."""
-    if isinstance(value, (dict, FrozenDict)):
-        _validate_metadata_mapping(value)
-        return
-    if isinstance(value, (list, tuple, FrozenList)):
-        for nested in value:
-            _validate_metadata_snapshot(nested)
-        return
-    _validate_metadata_scalar(value)
-
-
-def _validate_metadata_mapping(value: dict[str, object] | FrozenDict) -> None:
-    for key, nested in value.items():
-        if not isinstance(key, str):
-            raise TypeError("Event metadata mappings require string keys")
-        _validate_metadata_snapshot(nested)
-
-
-def _validate_metadata_scalar(value: object) -> None:
-    _validate_metadata_float(value)
-    if isinstance(value, Enum):
-        _validate_metadata_scalar(value.value)
-        return
-    if value is None or isinstance(value, (str, int, float, datetime, UUID)):
-        return
-    raise TypeError(f"Unsupported event metadata value: {type(value).__name__}")
-
-
-def _validate_metadata_float(value: object) -> None:
-    if isinstance(value, float) and not isfinite(value):
-        raise ValueError("Event metadata does not allow NaN or Infinity")
 
 
 @dataclass(frozen=True, slots=True)
@@ -269,12 +231,6 @@ class QuarantineEntryCreated(DomainEvent):
     error_code: str
     payload_hash: ContentHash
     metadata: MetaDict | None = None
-
-    def __post_init__(self) -> None:
-        """Detach nested metadata before identity, including explicit-ID replay."""
-        _validate_metadata_snapshot(self.metadata)
-        object.__setattr__(self, "metadata", deep_freeze_json(self.metadata))
-        DomainEvent.__post_init__(self)
 
 
 @dataclass(frozen=True, slots=True)

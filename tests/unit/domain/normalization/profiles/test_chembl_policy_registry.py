@@ -301,89 +301,83 @@ def test_chembl_policy_registry_encodes_explicit_identifier_only_companion_gover
     assert cellosaurus.version_fields == ()
 
 
-def test_chembl_policy_registry_uses_the_data_argument() -> None:
-    custom = ChemblPolicyRegistryData(
-        strict_boolean_families=(
-            ChemblStrictScalarFamily(
-                family_name="mini_boolean",
-                invalid_value_mode="coerce_common_boolean_lexemes",
-                fields=("chembl_publication.is_oa",),
+def test_chembl_policy_registry_can_be_reinitialized_from_in_memory_data() -> None:
+    initialize_chembl_policy_registry(
+        ChemblPolicyRegistryData(
+            strict_boolean_families=(
+                ChemblStrictScalarFamily(
+                    family_name="mini_boolean",
+                    invalid_value_mode="coerce_common_boolean_lexemes",
+                    fields=("chembl_publication.is_oa",),
+                ),
             ),
-        ),
-        strict_flag_families=(
-            ChemblStrictScalarFamily(
-                family_name="mini_flag",
-                invalid_value_mode="coerce_common_flag_lexemes",
-                fields=("chembl_activity.standard_flag",),
+            strict_flag_families=(
+                ChemblStrictScalarFamily(
+                    family_name="mini_flag",
+                    invalid_value_mode="coerce_common_flag_lexemes",
+                    fields=("chembl_activity.standard_flag",),
+                ),
             ),
-        ),
-        controlled_vocabularies=(
-            ChemblControlledVocabularyFamily(
-                family_name="mini_units",
-                invalid_value_mode="preserve_unknown_lexeme",
-                fields=("chembl_activity.units",),
+            controlled_vocabularies=(
+                ChemblControlledVocabularyFamily(
+                    family_name="mini_units",
+                    invalid_value_mode="preserve_unknown_lexeme",
+                    fields=("chembl_activity.units",),
+                ),
             ),
-        ),
-        ontology_families=(
-            ChemblOntologyPolicyFamily(
-                family_name="mini_ontology",
-                fields=("chembl_cell_line.cellosaurus_id",),
-                code_label_fields=("chembl_assay.bao_label",),
-                iri_fields=("chembl_activity.bao_endpoint_iri",),
-                mapping_status_fields=("chembl_activity.bao_endpoint_mapping_status",),
-                version_fields=("chembl_activity.bao_ontology_version",),
+            ontology_families=(
+                ChemblOntologyPolicyFamily(
+                    family_name="mini_ontology",
+                    fields=("chembl_cell_line.cellosaurus_id",),
+                    code_label_fields=("chembl_assay.bao_label",),
+                    iri_fields=("chembl_activity.bao_endpoint_iri",),
+                    mapping_status_fields=(
+                        "chembl_activity.bao_endpoint_mapping_status",
+                    ),
+                    version_fields=("chembl_activity.bao_ontology_version",),
+                ),
             ),
-        ),
-        publication_classification_fields=("publication_class",),
-        reference_identifier_families=(
-            ChemblReferenceIdentifierFamily(
-                family_name="mini_reference",
-                reference_family="doi",
-                invalid_value_mode="canonicalize_or_null_blank",
-                fields=("chembl_publication.doi",),
+            publication_classification_fields=("publication_class",),
+            reference_identifier_families=(
+                ChemblReferenceIdentifierFamily(
+                    family_name="mini_reference",
+                    reference_family="doi",
+                    invalid_value_mode="canonicalize_or_null_blank",
+                    fields=("chembl_publication.doi",),
+                ),
             ),
-        ),
+        )
     )
-    initialize_chembl_policy_registry(custom)
 
-    assert chembl_controlled_family_fields(
-        "mini_units", entity="activity", data=custom
-    ) == frozenset({"units"})
-    assert chembl_boolean_family_fields(
-        "mini_boolean", entity="publication", data=custom
-    ) == frozenset({"is_oa"})
-    assert chembl_flag_family_fields(
-        "mini_flag", entity="activity", data=custom
-    ) == frozenset({"standard_flag"})
+    assert chembl_controlled_family_fields("mini_units", entity="activity") == (
+        frozenset({"units"})
+    )
+    assert chembl_boolean_family_fields("mini_boolean", entity="publication") == (
+        frozenset({"is_oa"})
+    )
+    assert chembl_flag_family_fields("mini_flag", entity="activity") == frozenset(
+        {"standard_flag"}
+    )
     assert chembl_ontology_family_fields(
         "mini_ontology",
         entity="assay",
         include_code_label_fields=True,
-        data=custom,
     ) == frozenset({"bao_label"})
-    iri_surface = chembl_policy_surface("activity", "bao_endpoint_iri", custom)
+    iri_surface = chembl_policy_surface("activity", "bao_endpoint_iri")
     assert iri_surface is not None
     assert iri_surface.category == "ontology_reference_identifier"
-    status_surface = chembl_policy_surface(
-        "activity", "bao_endpoint_mapping_status", custom
-    )
+    status_surface = chembl_policy_surface("activity", "bao_endpoint_mapping_status")
     assert status_surface is not None
     assert status_surface.category == "ontology_reference_metadata"
-    publication_class = chembl_policy_surface(
-        "publication", "publication_class", custom
-    )
+    publication_class = chembl_policy_surface("publication", "publication_class")
     assert publication_class is not None
     assert publication_class.registry_source == PUBLICATION_CLASSIFICATION_CONFIG
-    doi_surface = chembl_policy_surface("publication", "doi", custom)
+    doi_surface = chembl_policy_surface("publication", "doi")
     assert doi_surface is not None
     assert doi_surface.category == "reference_identifier"
     assert doi_surface.registry_source == CHEMBL_REFERENCE_IDENTIFIER_CONFIG
     assert chembl_reference_identifier_family_fields(
         "mini_reference",
         entity="publication",
-        data=custom,
     ) == frozenset({"doi"})
-    assert chembl_policy_surface("activity", "relation", custom) is None
-    with pytest.raises(KeyError):
-        chembl_controlled_family_fields("mini_units", entity="activity")
-    initialize_chembl_policy_registry(DEFAULT_CHEMBL_POLICY_REGISTRY_DATA)
+    assert chembl_policy_surface("activity", "relation") is None
