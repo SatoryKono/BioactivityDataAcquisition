@@ -16,6 +16,7 @@ import pytest
 
 from scripts.engineering.ci.validate_schema_classifier_gate import (
     _major_transition_issues,
+    _source_without_artifact_issues,
 )
 
 
@@ -33,6 +34,17 @@ def test_major_transition_requires_major_bump_and_migration_key() -> None:
     messages = [issue.message for issue in issues]
     assert any("major version bump" in message for message in messages)
     assert any("migration_guides entry" in message for message in messages)
+
+
+def test_unchanged_published_artifacts_are_not_an_unclassified_schema_diff() -> None:
+    """A helper-only contract edit does not invent a JSON schema diff."""
+    issues = _source_without_artifact_issues(
+        changed_sources=[
+            "src/bioetl/domain/contracts/gold/_publication_common_schema.py"
+        ],
+        changed_artifacts=[],
+    )
+    assert issues == []
 
 
 def test_major_transition_passes_with_major_bump_and_guide() -> None:

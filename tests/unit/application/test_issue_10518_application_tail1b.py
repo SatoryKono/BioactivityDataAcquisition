@@ -1096,12 +1096,11 @@ class TestProteinClassPreSilver:
         transformer = ProteinClassTransformer(
             provider="chembl", dependencies=build_test_transformer_dependencies()
         )
-        assert (
+        with pytest.raises(FilteredOutError) as root:
             await transformer.transform_pre_silver(
                 MagicMock(), {"protein_class_id": 0}, 0
             )
-            is None
-        )
+        assert root.value.skip_quarantine is True
 
     async def test_valid_classification_delegates(
         self, monkeypatch: pytest.MonkeyPatch
