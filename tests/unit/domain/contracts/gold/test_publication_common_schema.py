@@ -137,7 +137,7 @@ def test_publication_gold_contract_fails_closed_when_taxonomy_not_loaded(
     monkeypatch.setattr(
         _publication_common_schema,
         "publication_classification_values",
-        lambda field_name: frozenset(),
+        lambda field_name, data: frozenset(),
     )
 
     # Empty taxonomy must not accept non-null classification values (fail closed).

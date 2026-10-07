@@ -16,8 +16,11 @@ from bioetl.application.services.run_reports.paths import (
 from bioetl.application.services.run_reports.source_identity import (
     RUNTIME_SOURCE_ID_ENV,
     RuntimeSourceIdentityResolutionResult,
-    load_repository_source_environment,
     resolve_runtime_source_identity,
+)
+from bioetl.composition.observability_runtime import (
+    create_run_report_store,
+    load_repository_source_environment,
 )
 from bioetl.composition.runtime_builders.config_access import load_settings
 
@@ -82,12 +85,14 @@ def runtime_source_id_value() -> str | None:
 def report_root_readiness_check(*, root: Path | None = None) -> dict[str, object]:
     """Diagnostic payload for ``/health/ready`` (always included)."""
     resolved = configured_report_root(root=root)
-    check = inspect_report_root_marker(report_root=resolved)
+    store = create_run_report_store()
+    check = inspect_report_root_marker(report_root=resolved, store=store)
     layout_status = check.get("status")
     source_resolution = runtime_source_identity_resolution()
     source_check = inspect_report_root_source_identity(
         report_root=resolved,
         expected_source_id=source_resolution.value,
+        store=store,
     )
     if not source_resolution.is_consistent:
         source_check["source_identity_status"] = "unhealthy"

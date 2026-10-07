@@ -96,6 +96,7 @@ def _materialize_report_source_identity(
     from bioetl.application.services.run_reports.paths import (
         write_report_root_source_identity,
     )
+    from bioetl.composition.observability_runtime import create_run_report_store
 
     reports_root = runtime_preflight.host_filesystem_path(
         reports_source,
@@ -104,6 +105,7 @@ def _materialize_report_source_identity(
     target = write_report_root_source_identity(
         report_root=reports_root / "run-reports",
         source_id=source_id,
+        store=create_run_report_store(),
     )
     # The attestation contains only a schema identifier and a checkout digest.
     # Main runs as a non-host UID and must be able to read the bind-mounted file.

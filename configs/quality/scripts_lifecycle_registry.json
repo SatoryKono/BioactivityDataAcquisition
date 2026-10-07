@@ -1069,6 +1069,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
     },
+    "scripts/engineering/qa/private_import_exception_metadata.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the metadata checker behind the private-import architecture ratchet; keep the architecture test as the entrypoint and do not promote this module to a standalone command.",
+      "owner": "@bioetl-architecture",
+      "review_by": "2026-11-17"
+    },
     "scripts/engineering/qa/observability_closure_campaign_cli.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the CLI orchestration implementation imported by run_observability_closure_campaign.py; keep the routed campaign command as the active surface.",

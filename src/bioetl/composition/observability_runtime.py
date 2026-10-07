@@ -16,6 +16,9 @@ from bioetl.composition.bootstrap.cli.metrics import (
     refresh_control_plane_integrity_metrics,
 )
 from bioetl.composition.bootstrap.runtime.logger_bootstrap import bootstrap_logger
+from bioetl.composition.bootstrap.composite_infrastructure_context import (
+    load_repository_source_environment as load_repository_source_environment,
+)
 from bioetl.composition.bootstrap.runtime_public_exports import (
     AuditInspectionServiceProtocol,
     CheckpointServiceProtocol,
@@ -65,6 +68,7 @@ __all__ = [
     "get_quarantine_service",
     "get_run_manifest_service",
     "inspect_run_dossier",
+    "load_repository_source_environment",
     "push_metrics_to_gateway",
     "start_metrics_server",
 ]

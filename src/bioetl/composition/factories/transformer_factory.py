@@ -13,6 +13,7 @@ from bioetl.composition.factories._transformer_spec_rows import (
 )
 from bioetl.composition.factories.transformer_dependencies import (
     build_transformer_dependencies,
+    publication_vocabulary_kwargs,
 )
 
 if TYPE_CHECKING:
@@ -130,6 +131,7 @@ def create_transformer(
         silver_filters=silver_filters,
         gold_filters=gold_filters,
         dependencies=resolved_dependencies,
+        **publication_vocabulary_kwargs(transformer_class),
     )
 
 
