@@ -1,18 +1,18 @@
 {
   "summary": {
-    "scanned_modules": 2553,
-    "total_internal_imports": 8181,
+    "scanned_modules": 2554,
+    "total_internal_imports": 8189,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "376e3b47fefcf64aaabf6e799c1659d007310282998db145e9e38ef9f5bfacb2"
+    "source_fingerprint": "c759af835be1f724ff2f5fb1bcc66d2e18aeff2ac1b1fa10c05faeaa6da3de27"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1615,
+      "imports": 1614,
       "allowed": true
     },
     {
@@ -48,13 +48,13 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1290,
+      "imports": 1298,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 786,
+      "imports": 787,
       "allowed": true
     },
     {
@@ -260,6 +260,11 @@
       "imports": 22
     },
     {
+      "source": "application.services",
+      "target": "domain.normalization",
+      "imports": 21
+    },
+    {
       "source": "composition.runtime_builders",
       "target": "infrastructure.config",
       "imports": 21
@@ -277,11 +282,6 @@
     {
       "source": "application.services",
       "target": "domain.exceptions",
-      "imports": 20
-    },
-    {
-      "source": "application.services",
-      "target": "domain.normalization",
       "imports": 20
     },
     {

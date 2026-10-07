@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING
 
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
@@ -96,29 +96,17 @@ def resolve_runner_factory_wiring(
 ) -> RunnerFactoryWiring:
     """Return factory wiring with legacy keyword overrides applied."""
     resolved = wiring or RunnerFactoryWiring()
-    if (
-        create_registry_fn is None
-        and ensure_providers_loaded_fn is None
-        and register_all_pipelines_fn is None
-    ):
+    overrides = {
+        "create_registry": create_registry_fn,
+        "ensure_providers_loaded": ensure_providers_loaded_fn,
+        "register_all_pipelines": register_all_pipelines_fn,
+    }
+
+    active_overrides = {k: v for k, v in overrides.items() if v is not None}
+    if not active_overrides:
         return resolved
-    return RunnerFactoryWiring(
-        create_registry=(
-            create_registry_fn
-            if create_registry_fn is not None
-            else resolved.create_registry
-        ),
-        ensure_providers_loaded=(
-            ensure_providers_loaded_fn
-            if ensure_providers_loaded_fn is not None
-            else resolved.ensure_providers_loaded
-        ),
-        register_all_pipelines=(
-            register_all_pipelines_fn
-            if register_all_pipelines_fn is not None
-            else resolved.register_all_pipelines
-        ),
-    )
+
+    return replace(resolved, **active_overrides)
 
 
 def resolve_runner_builder_wiring(
@@ -170,57 +158,22 @@ def resolve_runner_input_wiring(
 ) -> RunnerInputWiring:
     """Return input wiring with legacy keyword overrides applied."""
     resolved = wiring or RunnerInputWiring()
-    if (
-        get_settings_fn is None
-        and load_pipeline_config_fn is None
-        and load_source_config_fn is None
-        and build_observability_bundle_fn is None
-        and assemble_vacuum_settings_fn is None
-        and assemble_runtime_config_fn is None
-        and assemble_filter_config_fn is None
-        and assemble_cached_bronze_context_fn is None
-    ):
+    overrides = {
+        "get_settings": get_settings_fn,
+        "load_pipeline_config": load_pipeline_config_fn,
+        "load_source_config": load_source_config_fn,
+        "build_observability_bundle": build_observability_bundle_fn,
+        "assemble_vacuum_settings": assemble_vacuum_settings_fn,
+        "assemble_runtime_config": assemble_runtime_config_fn,
+        "assemble_filter_config": assemble_filter_config_fn,
+        "assemble_cached_bronze_context": assemble_cached_bronze_context_fn,
+    }
+
+    active_overrides = {k: v for k, v in overrides.items() if v is not None}
+    if not active_overrides:
         return resolved
-    return RunnerInputWiring(
-        get_settings=(
-            get_settings_fn if get_settings_fn is not None else resolved.get_settings
-        ),
-        load_pipeline_config=(
-            load_pipeline_config_fn
-            if load_pipeline_config_fn is not None
-            else resolved.load_pipeline_config
-        ),
-        load_source_config=(
-            load_source_config_fn
-            if load_source_config_fn is not None
-            else resolved.load_source_config
-        ),
-        build_observability_bundle=(
-            build_observability_bundle_fn
-            if build_observability_bundle_fn is not None
-            else resolved.build_observability_bundle
-        ),
-        assemble_vacuum_settings=(
-            assemble_vacuum_settings_fn
-            if assemble_vacuum_settings_fn is not None
-            else resolved.assemble_vacuum_settings
-        ),
-        assemble_runtime_config=(
-            assemble_runtime_config_fn
-            if assemble_runtime_config_fn is not None
-            else resolved.assemble_runtime_config
-        ),
-        assemble_filter_config=(
-            assemble_filter_config_fn
-            if assemble_filter_config_fn is not None
-            else resolved.assemble_filter_config
-        ),
-        assemble_cached_bronze_context=(
-            assemble_cached_bronze_context_fn
-            if assemble_cached_bronze_context_fn is not None
-            else resolved.assemble_cached_bronze_context
-        ),
-    )
+
+    return replace(resolved, **active_overrides)
 
 
 __all__ = [
