@@ -188,8 +188,12 @@ def _merge_canonical_filters(
 _sanitizer_failure_logged = False
 
 
+class VCRRequestSanitizationError(RuntimeError):
+    """Stop a VCR request when secret sanitization cannot be guaranteed."""
+
+
 def _log_sanitizer_failure_once(
-    reason: str, *, event: str = "vcr_request_sanitizer_dropped_request"
+    reason: str, *, event: str = "vcr_request_sanitizer_failed_closed"
 ) -> None:
     """Log the first sanitizer failure; subsequent failures stay silent."""
     global _sanitizer_failure_logged  # intentional once-latch
@@ -219,11 +223,11 @@ def _build_before_record_request_sanitizer(
     """Build one fail-closed sanitizer for VCR request record hooks.
 
     Some adapter transports expose request-like objects that do not fully satisfy
-    vcrpy's built-in filter expectations. In those cases, vcrpy's synthesized
-    before_record_request chain can raise TypeError during test setup. This
-    helper preserves header/query secret filtering for standard VCR Request
-    objects; on any filter failure it logs once and drops the request
-    (returns None) instead of recording it unsanitized (CF-030 / REQ-SECRET-003).
+    vcrpy's built-in filter expectations. On any filter failure, returning None
+    would let vcrpy treat the request as a cassette miss and send it to the real
+    server, even in replay-only mode. This helper therefore logs once and raises
+    an exception so the request stops before either recording or network access
+    (CF-030 / REQ-SECRET-003).
     """
     header_replacements = _normalize_vcr_replacements(filter_headers)
     query_replacements = _normalize_vcr_replacements(filter_query_parameters)
@@ -236,13 +240,17 @@ def _build_before_record_request_sanitizer(
             from vcr import filters
         except Exception:  # pragma: no cover - vcr import is environment-owned
             _log_sanitizer_failure_once("vcr_import_unavailable")
-            return None
+            raise VCRRequestSanitizationError(
+                "vcr_import_unavailable"
+            ) from None
 
         try:
             sanitized = request
             if not hasattr(sanitized, "headers") or not hasattr(sanitized, "uri"):
                 _log_sanitizer_failure_once("unsupported_request_surface")
-                return None
+                raise VCRRequestSanitizationError(
+                    "unsupported_request_surface"
+                ) from None
             if header_replacements:
                 sanitized = filters.replace_headers(
                     sanitized,
@@ -254,9 +262,11 @@ def _build_before_record_request_sanitizer(
                     sanitized,
                     replacements=query_replacements,
                 )
-        except (AttributeError, KeyError, TypeError, ValueError) as error:
+        except Exception as error:
+            if isinstance(error, VCRRequestSanitizationError):
+                raise
             _log_sanitizer_failure_once(type(error).__name__)
-            return None
+            raise VCRRequestSanitizationError(type(error).__name__) from None
         return sanitized
 
     return before_record_request

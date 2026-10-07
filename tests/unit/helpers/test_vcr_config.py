@@ -90,7 +90,9 @@ def test_build_base_vcr_config_sanitizes_request_headers_and_query() -> None:
     assert "query=test" in sanitized.uri
 
 
-def test_build_base_vcr_config_before_record_request_drops_unexpected_request() -> None:
+def test_build_base_vcr_config_before_record_request_fails_closed_on_unexpected_request() -> None:
+    from tests.helpers.vcr_config import VCRRequestSanitizationError
+
     config = build_base_vcr_config(
         filter_headers=["authorization"],
         filter_query_parameters=["api_key"],
@@ -99,7 +101,8 @@ def test_build_base_vcr_config_before_record_request_drops_unexpected_request() 
 
     request = "unexpected-request-surface"
 
-    assert before_record_request(request) is None
+    with pytest.raises(VCRRequestSanitizationError):
+        before_record_request(request)
 
 
 def test_build_base_vcr_config_filters_transient_html_server_errors() -> None:
@@ -230,10 +233,12 @@ def test_build_base_vcr_config_sanitizer_is_always_installed() -> None:
 
 
 @pytest.mark.parametrize("missing_attribute", ["headers", "uri"])
-def test_sanitizer_drops_request_with_missing_required_surface(
+def test_sanitizer_fails_closed_with_missing_required_surface(
     missing_attribute: str,
 ) -> None:
     from types import SimpleNamespace
+
+    from tests.helpers.vcr_config import VCRRequestSanitizationError
 
     attributes = {
         "headers": {"authorization": "synthetic-secret"},
@@ -242,11 +247,14 @@ def test_sanitizer_drops_request_with_missing_required_surface(
     del attributes[missing_attribute]
     request = SimpleNamespace(**attributes)
     hook = cast(Callable[[Any], Any], build_base_vcr_config()["before_record_request"])
-    assert hook(request) is None
+    with pytest.raises(VCRRequestSanitizationError):
+        hook(request)
 
 
-def test_sanitizer_drops_httpx_request_instead_of_retaining_query_secret() -> None:
+def test_sanitizer_fails_closed_on_httpx_request_instead_of_retaining_query_secret() -> None:
     import httpx
+
+    from tests.helpers.vcr_config import VCRRequestSanitizationError
 
     request = httpx.Request(
         "GET",
@@ -254,7 +262,8 @@ def test_sanitizer_drops_httpx_request_instead_of_retaining_query_secret() -> No
         headers={"authorization": "synthetic-secret"},
     )
     hook = cast(Callable[[Any], Any], build_base_vcr_config()["before_record_request"])
-    assert hook(request) is None
+    with pytest.raises(VCRRequestSanitizationError):
+        hook(request)
 
 
 @pytest.mark.parametrize("request_count", [1, 2])
@@ -263,8 +272,13 @@ def test_build_base_vcr_config_sanitizer_logs_failure_only_once(
 ) -> None:
     """CF-030: repeated sanitizer failures stay silent after the first warning."""
     import logging
+    from unittest.mock import Mock
 
     import vcr.filters
+    from vcr.cassette import Cassette, RecordMode
+    from vcr.stubs import VCRHTTPConnection
+
+    from tests.helpers.vcr_config import VCRRequestSanitizationError
 
     config = build_base_vcr_config()
     before_record_request = cast(Callable[[Any], Any], config["before_record_request"])
@@ -284,11 +298,27 @@ def test_build_base_vcr_config_sanitizer_logs_failure_only_once(
 
     with caplog.at_level(logging.WARNING, logger="tests.helpers.vcr_config"):
         for _ in range(request_count):
-            assert before_record_request(request) is None
+            with pytest.raises(VCRRequestSanitizationError):
+                before_record_request(request)
 
     dropped = [
         record
         for record in caplog.records
-        if record.getMessage() == "vcr_request_sanitizer_dropped_request"
+        if record.getMessage() == "vcr_request_sanitizer_failed_closed"
     ]
     assert len(dropped) == 1
+
+    cassette = Cassette(
+        path="unused.yaml",
+        record_mode=RecordMode.NONE,
+        before_record_request=before_record_request,
+    )
+    connection = object.__new__(VCRHTTPConnection)
+    connection.cassette = cassette
+    connection._vcr_request = request
+    connection.real_connection = Mock()
+
+    with pytest.raises(VCRRequestSanitizationError):
+        connection.getresponse()
+
+    connection.real_connection.request.assert_not_called()
