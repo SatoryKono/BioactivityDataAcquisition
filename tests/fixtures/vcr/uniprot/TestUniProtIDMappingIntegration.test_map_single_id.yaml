@@ -1,5 +1,23 @@
 interactions:
 - request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      host:
+      - rest.uniprot.org
+    method: GET
+    uri: https://rest.uniprot.org/configure/idmapping/fields
+  response:
+    body:
+      string: '{}'
+    headers:
+      content-type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+- request:
     body: from=ChEMBL&to=UniProtKB&ids=CHEMBL204
     headers:
       accept:
