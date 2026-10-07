@@ -131,6 +131,7 @@ def test_rf023_requires_terminal_full_suite_and_preserves_ci_identity():
     assert browser_setup.index("sudo apt-get update -qq") < browser_setup.index(
         "bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh"
     )
+    assert "setup_grafana_screenshot_runtime.sh --attempt-system-install" in browser_setup
     assert any("actual == locked" in command for command in commands)
 
 

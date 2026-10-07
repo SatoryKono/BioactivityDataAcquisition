@@ -3389,7 +3389,7 @@ jobs:
           command -v npm && npm --version
           export PLAYWRIGHT_BROWSERS_PATH=/tmp/rf023-playwright
           sudo apt-get update -qq
-          bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh
+          bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh --attempt-system-install
           python -c 'import json; from pathlib import Path; locked=json.loads(Path("package-lock.json").read_text())["packages"]["node_modules/playwright"]["version"]; actual=json.loads(Path("node_modules/playwright/package.json").read_text())["version"]; assert actual == locked, (actual, locked)'
           echo 'export PLAYWRIGHT_BROWSERS_PATH=/tmp/rf023-playwright' >> "$BASH_ENV"
     - run:
