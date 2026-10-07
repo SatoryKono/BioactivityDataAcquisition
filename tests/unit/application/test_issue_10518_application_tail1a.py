@@ -1181,6 +1181,7 @@ def test_build_aggregation_expr_unknown_function_passthrough() -> None:
 
 def test_emit_saved_at_without_timestamps_is_noop() -> None:
     from bioetl.application.composite.checkpoint.persistence_service import (
+        CompositeCheckpointPersistenceParams,
         CompositeCheckpointPersistenceService,
     )
     from bioetl.application.composite.checkpoint.state import (
@@ -1188,12 +1189,14 @@ def test_emit_saved_at_without_timestamps_is_noop() -> None:
     )
 
     service = CompositeCheckpointPersistenceService(
-        composite_name="c",
-        checkpoint_filename="ckpt.json",
-        glob_pattern="ckpt*",
-        storage=MagicMock(),
-        logger=MagicMock(),
-        metrics=MagicMock(),
+        CompositeCheckpointPersistenceParams(
+            composite_name="c",
+            checkpoint_filename="ckpt.json",
+            glob_pattern="ckpt*",
+            storage=MagicMock(),
+            logger=MagicMock(),
+            metrics=MagicMock(),
+        )
     )
     state = CompositeCheckpointState(
         composite_name="c", run_id="r", created_at=None, updated_at=None
@@ -1204,6 +1207,7 @@ def test_emit_saved_at_without_timestamps_is_noop() -> None:
 
 def test_save_unexpected_domain_error_reraises() -> None:
     from bioetl.application.composite.checkpoint.persistence_service import (
+        CompositeCheckpointPersistenceParams,
         CompositeCheckpointPersistenceService,
     )
     from bioetl.application.composite.checkpoint.state import (
@@ -1212,11 +1216,13 @@ def test_save_unexpected_domain_error_reraises() -> None:
     from bioetl.domain.exceptions import BioETLError
 
     service = CompositeCheckpointPersistenceService(
-        composite_name="c",
-        checkpoint_filename="ckpt.json",
-        glob_pattern="ckpt*",
-        storage=MagicMock(),
-        logger=MagicMock(),
+        CompositeCheckpointPersistenceParams(
+            composite_name="c",
+            checkpoint_filename="ckpt.json",
+            glob_pattern="ckpt*",
+            storage=MagicMock(),
+            logger=MagicMock(),
+        )
     )
     service._storage.write_atomic.side_effect = BioETLError("boom")
     state = CompositeCheckpointState(composite_name="c", run_id="r")
