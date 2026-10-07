@@ -17,7 +17,7 @@ from bioetl.composition.factories.pipeline._preflight_health_monitor import (
     build_preflight_health_monitor,
 )
 from bioetl.domain.medallion import WriteModePolicy
-from bioetl.application.core.preflight.service import PreflightLayerConfig
+from bioetl.application.core.preflight.medallion_validator import PreflightLayerConfig
 from bioetl.composition.factories.storage.bundle import StorageBundle
 from bioetl.infrastructure.time import SystemClock
 
