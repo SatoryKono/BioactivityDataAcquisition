@@ -12,32 +12,17 @@ concurrency:
 # Workflow-level token is read-only; jobs may only narrow this further.
 
 on:
-  push:
-    branches: [main, master, develop]
-    paths-ignore:
-      - "docs/**"
-      - "*.md"
-      - ".ai/**"
-      - "LICENSE"
-  pull_request:
-    branches: [main, master, develop]
-    paths-ignore:
-      - "docs/**"
-      - "*.md"
-      - ".ai/**"
-      - "LICENSE"
-  schedule:
-    - cron: "30 2 * * *"
   workflow_dispatch:
     inputs:
       run_live:
         description: "Run nightly live-check job"
         required: false
         default: "false"
+  workflow_call:
 
 jobs:
   matrix-smoke-blocking:
-    if: github.event_name != 'schedule'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
@@ -143,7 +128,7 @@ jobs:
           retention-days: 14
 
   matrix-smoke-nightly-live:
-    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.run_live == 'true')
+    if: github.event_name == 'workflow_call' || (github.event_name == 'workflow_dispatch' && github.event.inputs.run_live == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -221,7 +206,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
   e2e-nightly-full-replay:
-    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch')
+    if: github.event_name == 'workflow_call' || (github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
@@ -269,7 +254,7 @@ jobs:
           retention-days: 14
 
   prompt-tests-nightly:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_call' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions: { contents: read }
@@ -337,7 +322,7 @@ jobs:
             fi
           fi
           # On schedule, nightly jobs must be success
-          if [ "${{ github.event_name }}" = "schedule" ]; then
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event_name }}" = "workflow_call" ]; then
             if [ "${{ needs.matrix-smoke-nightly-live.result }}" != "success" ] || [ "${{ needs.e2e-nightly-full-replay.result }}" != "success" ] || [ "${{ needs.prompt-tests-nightly.result }}" != "success" ]; then
               echo "::error::Schedule requires nightly jobs success"
               exit 1

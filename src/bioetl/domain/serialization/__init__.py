@@ -40,6 +40,9 @@ from functools import lru_cache
 from typing import TYPE_CHECKING, Any, TypeGuard, cast
 
 from bioetl.domain.normalization.json import (
+    CanonicalJsonProfile,
+)
+from bioetl.domain.normalization.json import (
     canonicalize_json_string as _canonicalize_json_string,
 )
 from bioetl.domain.normalization.json import (
@@ -108,6 +111,8 @@ def serialize_to_json(
 
 def serialize_to_json_canonical(
     data: JsonDict,  # Any: JSON values are heterogeneous
+    *,
+    profile: CanonicalJsonProfile = CanonicalJsonProfile.DOMAIN_V1,
 ) -> str:  # Any: JSON values are heterogeneous
     """Serialize data to canonical JSON for content hash computation.
 
@@ -130,11 +135,13 @@ def serialize_to_json_canonical(
         '{"a":1,"b":2}'
 
     """
-    return _serialize_json_canonical(data)
+    return _serialize_json_canonical(data, profile=profile)
 
 
 def serialize_to_canonical_json(
     obj: JsonDict,  # Any: JSON values are heterogeneous
+    *,
+    profile: CanonicalJsonProfile = CanonicalJsonProfile.DOMAIN_V1,
 ) -> str:
     """Serialize a mapping to canonical JSON via the domain hashing contract.
 
@@ -147,7 +154,7 @@ def serialize_to_canonical_json(
     Returns:
         Canonical JSON string suitable for deterministic hashing.
     """
-    return serialize_to_json_canonical(obj)
+    return serialize_to_json_canonical(obj, profile=profile)
 
 
 _NON_ASCII_RE = re.compile(r"[^\x00-\x7F]")

@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:publication_provider_pack`
 - Schema: `1.0.0`
-- Source revision: `398899f9c7ce527ddf73d421b9681ef5ff21d2c1`
+- Source revision: `fb9857b489eac92a62328545d7d906e67d386191`
 
 ## Evidence
 
@@ -93,7 +93,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:b7e1e544b55a11eeecef4fc54abf4e06b2ad905ff604973ee2218f89ff749089",
-    "source_revision": "398899f9c7ce527ddf73d421b9681ef5ff21d2c1"
+    "source_revision": "fb9857b489eac92a62328545d7d906e67d386191"
   },
   "source_references": [
     {
