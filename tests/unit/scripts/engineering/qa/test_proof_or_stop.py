@@ -273,3 +273,147 @@ def test_pilot_covers_adversarial_matrix(proof_repo: Path, tmp_path: Path) -> No
     assert '"reason_code_coverage"' in payload
     assert '"deterministic_replay"' in payload
     assert output.with_suffix(".md").is_file()
+
+
+from typing import Any
+from memory.proof_cli import (
+    _mutate_stale_head,
+    _mutate_missing,
+    _mutate_failed_as_pass,
+    _mutate_invalid_skip,
+    _mutate_unavailable,
+    _mutate_tampered,
+    _mutate_vendor_override,
+    _mutate_cross_scope,
+    _mutate_dirty_full,
+    _mutate_sharded_ci,
+    _mutate_degraded_full,
+    _mutate_partial,
+)
+from memory.proof import command_set_hash
+
+
+def _mock_bundle() -> dict[str, Any]:
+    return {
+        "source": {"head_sha": "original_head"},
+        "receipts": [
+            {
+                "source": {"head_sha": "original_head"},
+                "exit_code": 0,
+                "status": "pass",
+                "skip_reason": "original",
+                "follow_up": "original",
+                "duration_ms": 10,
+                "producer": "original_producer",
+                "task_id": "original-task",
+                "repository": {
+                    "repo_id": "original-repo",
+                    "worktree_id": "original-worktree",
+                    "ci_run_id": "original-ci-run",
+                },
+            }
+        ],
+        "claim": "tested",
+        "acceptance": {"require_full_trust": False},
+    }
+
+
+def _mock_policy() -> dict[str, Any]:
+    return {
+        "claims": {"ready_to_merge": {"required_evidence": ["evidence1", "evidence2"]}},
+        "command_sets": {"ready_to_merge": ["cmd1", "cmd2"]},
+    }
+
+
+def test_mutate_stale_head():
+    b = _mock_bundle()
+    _mutate_stale_head(b, {})
+    assert b["source"]["head_sha"] == "0" * 40
+    assert b["receipts"][0]["source"]["head_sha"] == "0" * 40
+
+
+def test_mutate_missing():
+    b = _mock_bundle()
+    _mutate_missing(b, {})
+    assert b["receipts"] == []
+
+
+def test_mutate_failed_as_pass():
+    b = _mock_bundle()
+    _mutate_failed_as_pass(b, {})
+    assert b["receipts"][0]["exit_code"] == 1
+
+
+def test_mutate_invalid_skip():
+    b = _mock_bundle()
+    _mutate_invalid_skip(b, {})
+    r = b["receipts"][0]
+    assert r["status"] == "skip"
+    assert r["exit_code"] is None
+    assert r["skip_reason"] is None
+    assert r["follow_up"] is None
+
+
+def test_mutate_unavailable():
+    b = _mock_bundle()
+    _mutate_unavailable(b, {})
+    r = b["receipts"][0]
+    assert r["status"] == "unavailable"
+    assert r["exit_code"] is None
+    assert r["skip_reason"] == "runner dependency unavailable"
+    assert r["follow_up"] == "rerun on the supported CI runner"
+
+
+def test_mutate_tampered():
+    b = _mock_bundle()
+    _mutate_tampered(b, {})
+    assert b["receipts"][0]["duration_ms"] == 999
+
+
+def test_mutate_vendor_override():
+    b = _mock_bundle()
+    _mutate_vendor_override(b, {})
+    assert b["receipts"][0]["producer"] == "optional_vendor_evaluator"
+
+
+def test_mutate_cross_scope():
+    b = _mock_bundle()
+    _mutate_cross_scope(b, {})
+    r = b["receipts"][0]
+    assert r["task_id"] == "another-task"
+    assert r["repository"]["repo_id"] == "another-repository"
+    assert r["repository"]["worktree_id"] == "another-worktree"
+    assert r["repository"]["ci_run_id"] == "another-ci-run"
+
+
+def test_mutate_dirty_full():
+    b = _mock_bundle()
+    p = _mock_policy()
+    _mutate_dirty_full(b, p)
+    assert b["source"]["dirty"] is True
+    assert b["source"]["untracked_paths"] == ["untracked.py"]
+    assert b["source"]["command_set_hash"] == command_set_hash(p, "ready_to_merge")
+    assert b["claim"] == "ready_to_merge"
+    assert b["acceptance"]["required_evidence"] == ["evidence1", "evidence2"]
+    assert b["acceptance"]["require_full_trust"] is True
+    assert b["receipts"][0]["source"]["dirty"] is True
+
+
+def test_mutate_sharded_ci():
+    b = _mock_bundle()
+    _mutate_sharded_ci(b, {})
+    assert b["receipts"][0]["repository"]["worktree_id"] == "another-shard"
+
+
+def test_mutate_degraded_full():
+    b = _mock_bundle()
+    _mutate_degraded_full(b, {})
+    assert b["receipts"][0]["status"] == "unavailable"
+    assert b["acceptance"]["require_full_trust"] is True
+
+
+def test_mutate_partial():
+    b = _mock_bundle()
+    _mutate_partial(b, {})
+    assert b["receipts"][0]["status"] == "fail"
+    assert b["receipts"][0]["exit_code"] == 1

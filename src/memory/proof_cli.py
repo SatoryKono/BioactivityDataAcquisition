@@ -225,84 +225,96 @@ def _mutate_source(bundle: dict[str, Any], field: str) -> None:
     _resign(bundle)
 
 
+def _mutate_stale_head(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
+    bundle["source"]["head_sha"] = "0" * 40
+    bundle["receipts"][0]["source"]["head_sha"] = "0" * 40
+    _resign(bundle)
+
+
+def _mutate_missing(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
+    bundle["receipts"] = []
+    _resign(bundle)
+
+
+def _mutate_failed_as_pass(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
+    bundle["receipts"][0]["exit_code"] = 1
+    _resign(bundle)
+
+
+def _mutate_invalid_skip(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
+    receipt = bundle["receipts"][0]
+    receipt.update(status="skip", exit_code=None, skip_reason=None, follow_up=None)
+    _resign(bundle)
+
+
+def _mutate_unavailable(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
+    receipt = bundle["receipts"][0]
+    receipt.update(
+        status="unavailable",
+        exit_code=None,
+        skip_reason="runner dependency unavailable",
+        follow_up="rerun on the supported CI runner",
+    )
+    _resign(bundle)
+
+
+def _mutate_tampered(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
+    bundle["receipts"][0]["duration_ms"] = 999
+    _resign(bundle, receipts=False)
+
+
+def _mutate_vendor_override(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
+    bundle["receipts"][0]["producer"] = "optional_vendor_evaluator"
+    _resign(bundle)
+
+
+def _mutate_cross_scope(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
+    bundle["receipts"][0]["task_id"] = "another-task"
+    bundle["receipts"][0]["repository"]["repo_id"] = "another-repository"
+    bundle["receipts"][0]["repository"]["worktree_id"] = "another-worktree"
+    bundle["receipts"][0]["repository"]["ci_run_id"] = "another-ci-run"
+    _resign(bundle)
+
+
+def _mutate_dirty_full(bundle: dict[str, Any], policy: dict[str, Any]) -> None:
+    source = bundle["source"]
+    source["dirty"] = True
+    source["untracked_paths"] = ["untracked.py"]
+    source["command_set_hash"] = command_set_hash(policy, "ready_to_merge")
+    bundle["claim"] = "ready_to_merge"
+    bundle["acceptance"] = {
+        "required_evidence": list(
+            policy["claims"]["ready_to_merge"]["required_evidence"]
+        ),
+        "require_full_trust": True,
+    }
+    receipt = bundle["receipts"][0]
+    receipt["source"] = copy.deepcopy(source)
+    _resign(bundle)
+
+
+def _mutate_sharded_ci(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
+    bundle["receipts"][0]["repository"]["worktree_id"] = "another-shard"
+    _resign(bundle)
+
+
+def _mutate_degraded_full(bundle: dict[str, Any], policy: dict[str, Any]) -> None:
+    _mutate_unavailable(bundle, policy)
+    bundle["acceptance"]["require_full_trust"] = True
+    _resign(bundle)
+
+
+def _mutate_partial(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
+    bundle["receipts"][0]["status"] = "fail"
+    bundle["receipts"][0]["exit_code"] = 1
+    _resign(bundle)
+
+
 def _scenario_cases() -> list[
     tuple[str, str, bool, Callable[[dict[str, Any], dict[str, Any]], None]]
 ]:
-    def stale_head(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
-        bundle["source"]["head_sha"] = "0" * 40
-        bundle["receipts"][0]["source"]["head_sha"] = "0" * 40
-        _resign(bundle)
-
-    def missing(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
-        bundle["receipts"] = []
-        _resign(bundle)
-
-    def failed_as_pass(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
-        bundle["receipts"][0]["exit_code"] = 1
-        _resign(bundle)
-
-    def invalid_skip(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
-        receipt = bundle["receipts"][0]
-        receipt.update(status="skip", exit_code=None, skip_reason=None, follow_up=None)
-        _resign(bundle)
-
-    def unavailable(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
-        receipt = bundle["receipts"][0]
-        receipt.update(
-            status="unavailable",
-            exit_code=None,
-            skip_reason="runner dependency unavailable",
-            follow_up="rerun on the supported CI runner",
-        )
-        _resign(bundle)
-
-    def tampered(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
-        bundle["receipts"][0]["duration_ms"] = 999
-        _resign(bundle, receipts=False)
-
-    def vendor_override(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
-        bundle["receipts"][0]["producer"] = "optional_vendor_evaluator"
-        _resign(bundle)
-
-    def cross_scope(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
-        bundle["receipts"][0]["task_id"] = "another-task"
-        bundle["receipts"][0]["repository"]["repo_id"] = "another-repository"
-        bundle["receipts"][0]["repository"]["worktree_id"] = "another-worktree"
-        bundle["receipts"][0]["repository"]["ci_run_id"] = "another-ci-run"
-        _resign(bundle)
-
-    def dirty_full(bundle: dict[str, Any], policy: dict[str, Any]) -> None:
-        source = bundle["source"]
-        source["dirty"] = True
-        source["untracked_paths"] = ["untracked.py"]
-        source["command_set_hash"] = command_set_hash(policy, "ready_to_merge")
-        bundle["claim"] = "ready_to_merge"
-        bundle["acceptance"] = {
-            "required_evidence": list(
-                policy["claims"]["ready_to_merge"]["required_evidence"]
-            ),
-            "require_full_trust": True,
-        }
-        receipt = bundle["receipts"][0]
-        receipt["source"] = copy.deepcopy(source)
-        _resign(bundle)
-
-    def sharded_ci(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
-        bundle["receipts"][0]["repository"]["worktree_id"] = "another-shard"
-        _resign(bundle)
-
-    def degraded_full(bundle: dict[str, Any], policy: dict[str, Any]) -> None:
-        unavailable(bundle, policy)
-        bundle["acceptance"]["require_full_trust"] = True
-        _resign(bundle)
-
-    def partial(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
-        bundle["receipts"][0]["status"] = "fail"
-        bundle["receipts"][0]["exit_code"] = 1
-        _resign(bundle)
-
     return [
-        ("stale_source", "STOP", True, stale_head),
+        ("stale_source", "STOP", True, _mutate_stale_head),
         ("stale_diff", "STOP", True, lambda b, _p: _mutate_source(b, "task_diff_hash")),
         ("policy_drift", "STOP", True, lambda b, _p: _mutate_source(b, "policy_hash")),
         (
@@ -311,17 +323,17 @@ def _scenario_cases() -> list[
             True,
             lambda b, _p: _mutate_source(b, "command_set_hash"),
         ),
-        ("missing_receipt", "STOP", True, missing),
-        ("failed_reported_as_pass", "STOP", True, failed_as_pass),
-        ("invalid_skip", "STOP", True, invalid_skip),
-        ("unavailable_not_pass", "DEGRADED", True, unavailable),
-        ("tampered_receipt", "STOP", True, tampered),
-        ("unauthorized_vendor_override", "STOP", True, vendor_override),
-        ("cross_scope_receipt", "STOP", True, cross_scope),
-        ("dirty_untracked_full_claim", "STOP", False, dirty_full),
-        ("sharded_ci_identity", "ADMIT", True, sharded_ci),
-        ("degraded_not_full", "STOP", True, degraded_full),
-        ("partial_fail_fast_receipt", "STOP", True, partial),
+        ("missing_receipt", "STOP", True, _mutate_missing),
+        ("failed_reported_as_pass", "STOP", True, _mutate_failed_as_pass),
+        ("invalid_skip", "STOP", True, _mutate_invalid_skip),
+        ("unavailable_not_pass", "DEGRADED", True, _mutate_unavailable),
+        ("tampered_receipt", "STOP", True, _mutate_tampered),
+        ("unauthorized_vendor_override", "STOP", True, _mutate_vendor_override),
+        ("cross_scope_receipt", "STOP", True, _mutate_cross_scope),
+        ("dirty_untracked_full_claim", "STOP", False, _mutate_dirty_full),
+        ("sharded_ci_identity", "ADMIT", True, _mutate_sharded_ci),
+        ("degraded_not_full", "STOP", True, _mutate_degraded_full),
+        ("partial_fail_fast_receipt", "STOP", True, _mutate_partial),
     ]
 
 
