@@ -245,7 +245,7 @@ nightlies from this section.
 | Diagram Nightly Regression | `diagram-nightly.yml` | `schedule` + `workflow_dispatch` | required | `active` | `active` |
 | OpenSSF Scorecard | `scorecard.yml` | weekly + `push` + `workflow_dispatch` | required | `active` | `active` |
 | Quarterly GitHub Settings Review | `github-settings-quarterly-review.yml` | quarterly + `workflow_dispatch` | required | `active` | `active` |
-| Mutation Testing | `mutation-testing.yml` | Weekly (Sun 00:00 UTC) + PR (YAML only) | optional | `disabled_manually` | `keep-disabled` |
+| Mutation Testing | `mutation-testing.yml` | Weekly (Sun 00:00 UTC) + `workflow_dispatch` (YAML only) | optional | `disabled_manually` | `keep-disabled` |
 | Contract Tests | `contract-tests.yml` | Monthly 1st 02:00 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
 | Weekly VACUUM | `vacuum.yml` | Weekly Sun 02:00 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
 | Docs KPI Weekly | `docs-kpi-weekly.yml` | Weekly Mon 04:30 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
