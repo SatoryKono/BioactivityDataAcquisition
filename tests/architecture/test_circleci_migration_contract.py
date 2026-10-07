@@ -542,7 +542,9 @@ def test_pr_gate_credit_cut_keeps_required_job_names():
     provider_steps = config["jobs"]["provider-contract-drift"]["steps"]
     e2e_keys = keys(e2e_steps)
     provider_keys = keys(provider_steps)
-    assert e2e_keys.index("halt-unless-pr-gate-paths") < e2e_keys.index("setup-python-uv")
+    assert e2e_keys.index("halt-unless-pr-gate-paths") < e2e_keys.index(
+        "setup-python-uv"
+    )
     assert provider_keys.index("halt-unless-pr-gate-paths") < provider_keys.index(
         "setup-python-uv"
     )
