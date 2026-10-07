@@ -147,6 +147,58 @@ def build_symbol_index(project_root: Path) -> dict[str, list[SymbolMetricLocatio
     return symbol_index
 
 
+def _parse_symbol_key(key: str) -> tuple[str | None, str | None]:
+    """Parse a registry key into an optional file path and symbol name."""
+    if "::" in key:
+        raw_path, symbol_name = key.split("::", 1)
+        return raw_path, symbol_name
+    if key.endswith(".py"):
+        return key, None
+    return None, key
+
+
+def _filter_candidates(
+    candidates: list[SymbolMetricLocation],
+    *,
+    target_path: Path | None = None,
+    expected_kind: str | None = None,
+) -> list[SymbolMetricLocation]:
+    """Filter symbol candidates by matching path or expected kind."""
+    if target_path is not None:
+        return [loc for loc in candidates if loc.path == target_path]
+    if expected_kind is not None:
+        return [loc for loc in candidates if loc.kind == expected_kind]
+    return candidates
+
+
+def _select_best_candidate(
+    candidates: list[SymbolMetricLocation],
+    project_root: Path,
+    *,
+    include_notes: bool = False,
+) -> tuple[SymbolMetricLocation, str | None]:
+    """Select the largest candidate and optionally generate alternative notes."""
+    selected = max(candidates, key=lambda item: item.size)
+    if not include_notes or len(candidates) <= 1:
+        return selected, None
+
+    alt_paths = ", ".join(
+        sorted(
+            relative_target(candidate.path, project_root=project_root)
+            for candidate in candidates
+            if candidate != selected
+        )
+    )
+    if not alt_paths:
+        return selected, None
+
+    note_text = (
+        "Multiple symbol matches; selected largest definition. "
+        f"Other candidates: {alt_paths}."
+    )
+    return selected, note_text
+
+
 def select_symbol_location(
     *,
     key: str,
@@ -155,51 +207,37 @@ def select_symbol_location(
     symbol_index: dict[str, list[SymbolMetricLocation]],
 ) -> tuple[SymbolMetricLocation | None, str | None, str | None, str | None]:
     """Resolve one registry key to the best symbol location candidate."""
-    notes: list[str] = []
-    if "::" in key:
-        raw_path, symbol_name = key.split("::", 1)
+    raw_path, symbol_name = _parse_symbol_key(key)
+
+    if raw_path is not None and symbol_name is not None:
         target_path = project_root / raw_path
-        candidates = [
-            location
-            for location in symbol_index.get(symbol_name, [])
-            if location.path == target_path
-        ]
+        candidates = _filter_candidates(
+            symbol_index.get(symbol_name, []), target_path=target_path
+        )
         if not candidates:
             return None, raw_path, symbol_name, None
-        selected = max(candidates, key=lambda item: item.size)
+        selected, _ = _select_best_candidate(
+            candidates, project_root, include_notes=False
+        )
         return selected, raw_path, symbol_name, None
 
-    if key.endswith(".py"):
-        return None, key, None, None
+    if raw_path is not None:
+        return None, raw_path, None, None
 
     expected_kind = (
         "class"
         if registry_name in {"class_size", "class_method_count", "god_object"}
         else "function"
     )
-    candidates = [
-        location
-        for location in symbol_index.get(key, [])
-        if location.kind == expected_kind
-    ]
+    candidates = _filter_candidates(
+        symbol_index.get(key, []), expected_kind=expected_kind
+    )
     if not candidates:
         return None, None, key, None
 
-    selected = max(candidates, key=lambda item: item.size)
-    if len(candidates) > 1:
-        alt_paths = ", ".join(
-            sorted(
-                relative_target(candidate.path, project_root=project_root)
-                for candidate in candidates
-                if candidate != selected
-            )
-        )
-        if alt_paths:
-            notes.append(
-                "Multiple symbol matches; selected largest definition. "
-                f"Other candidates: {alt_paths}."
-            )
-    note_text = " ".join(notes) if notes else None
+    selected, note_text = _select_best_candidate(
+        candidates, project_root, include_notes=True
+    )
     return (
         selected,
         relative_target(selected.path, project_root=project_root),

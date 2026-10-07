@@ -416,6 +416,85 @@ def test_architecture_debt_reduction_helpers_cover_default_paths_and_loading(
         _require_generated_at(None)
 
 
+def test_parse_symbol_key() -> None:
+    from bioetl.infrastructure.quality.architecture_debt_task_support import (
+        _parse_symbol_key,
+    )
+
+    assert _parse_symbol_key("src/file.py::func_name") == (
+        "src/file.py",
+        "func_name",
+    )
+    assert _parse_symbol_key("src/file.py") == ("src/file.py", None)
+    assert _parse_symbol_key("func_name") == (None, "func_name")
+
+
+def test_filter_candidates() -> None:
+    from bioetl.infrastructure.quality.architecture_debt_task_support import (
+        SymbolMetricLocation,
+        _filter_candidates,
+    )
+
+    loc1 = SymbolMetricLocation(
+        name="a",
+        path=Path("p1.py"),
+        kind="function",
+        lineno=1,
+        end_lineno=2,
+        size=2,
+    )
+    loc2 = SymbolMetricLocation(
+        name="b", path=Path("p2.py"), kind="class", lineno=1, end_lineno=2, size=2
+    )
+
+    candidates = [loc1, loc2]
+
+    assert _filter_candidates(candidates, target_path=Path("p1.py")) == [loc1]
+    assert _filter_candidates(candidates, expected_kind="class") == [loc2]
+    assert _filter_candidates(candidates) == candidates
+
+
+def test_select_best_candidate(tmp_path: Path) -> None:
+    from bioetl.infrastructure.quality.architecture_debt_task_support import (
+        SymbolMetricLocation,
+        _select_best_candidate,
+    )
+
+    loc_small = SymbolMetricLocation(
+        name="func",
+        path=tmp_path / "small.py",
+        kind="function",
+        lineno=1,
+        end_lineno=5,
+        size=5,
+    )
+    loc_large = SymbolMetricLocation(
+        name="func",
+        path=tmp_path / "large.py",
+        kind="function",
+        lineno=1,
+        end_lineno=10,
+        size=10,
+    )
+
+    candidates = [loc_small, loc_large]
+
+    # Best candidate without notes
+    selected, note = _select_best_candidate(
+        candidates, tmp_path, include_notes=False
+    )
+    assert selected == loc_large
+    assert note is None
+
+    # Best candidate with notes
+    selected, note = _select_best_candidate(
+        candidates, tmp_path, include_notes=True
+    )
+    assert selected == loc_large
+    assert note is not None
+    assert "small.py" in note
+
+
 def test_select_symbol_location_reports_ambiguous_candidates(tmp_path: Path) -> None:
     app_path = tmp_path / "src" / "bioetl" / "application" / "worker.py"
     infra_path = tmp_path / "src" / "bioetl" / "infrastructure" / "worker.py"
