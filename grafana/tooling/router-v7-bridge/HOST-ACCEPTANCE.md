@@ -75,7 +75,7 @@ SelectorShell permitted as an unsigned plugin; the temporary probe is excluded.
 An isolated acceptance receipt does not establish default-host delivery. Preserve
 a fresh database backup before deployment and repeat browser acceptance on the
 default host after deployment before closing #11888, #11889 or #11895.
-`verify-managed-image.py` checks the trusted parent layer prefix and compares
+`python -m scripts.ops verify-router-managed-image` checks the trusted parent layer prefix and compares
 every exported filesystem record against exactly the parent minus Scenes.
 The registry image and independently rebuilt image must both match, including
 backend, libraries, frontend, SelectorShell, owners, modes and symlink targets.

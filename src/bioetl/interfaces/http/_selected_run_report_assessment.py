@@ -62,6 +62,7 @@ def _saved_trust(
         verdict=control["verdict"],
         reasons_text=reasons_text,
         reconciliation=report.get("reconciliation"),
+        funnel=report.get("funnel"),
     )
     reasons_text = str(projected["reasons_text"])
     reasons_count = sum(bool(line.strip()) for line in reasons_text.splitlines())

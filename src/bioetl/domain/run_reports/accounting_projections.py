@@ -94,14 +94,35 @@ def accounting_conflicts(reconciliation: object, verdict: object) -> list[str]:
     return conflicts
 
 
+def _stage_accounting_conflicts(funnel: object, verdict: object) -> list[str]:
+    """Name funnel rows whose own balance is FAILING."""
+    if not isinstance(funnel, list):
+        return []
+    conflicts: list[str] = []
+    for stage in funnel:
+        if not isinstance(stage, dict) or stage.get("balance_status") != "FAILING":
+            continue
+        conflicts.append(
+            "Saved report stage accounting conflict: "
+            f"{stage.get('stage_id', 'UNKNOWN')} balance=FAILING, "
+            f"unaccounted={stage.get('unaccounted', 'UNKNOWN')}. "
+            f"Saved Trust verdict: {verdict}; inspect report and ledger."
+        )
+    return conflicts
+
+
 def saved_trust_fields(
     *,
     verdict: object,
     reasons_text: str,
     reconciliation: object,
+    funnel: object = None,
 ) -> dict[str, object]:
     """Keep the saved control verdict and surface an intentional ERROR override."""
-    conflicts = accounting_conflicts(reconciliation, verdict)
+    conflicts = [
+        *accounting_conflicts(reconciliation, verdict),
+        *_stage_accounting_conflicts(funnel, verdict),
+    ]
     if conflicts:
         reasons_text = "\n".join(filter(None, (reasons_text, *conflicts)))
     return {

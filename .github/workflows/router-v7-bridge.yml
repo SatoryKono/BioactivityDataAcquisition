@@ -10,6 +10,11 @@ on:
       - "grafana/plugins/bioetl-scenes-app/**"
       - "grafana/plugins/bioetl-selectorshell-panel/**"
       - ".github/workflows/router-v7-bridge.yml"
+      - "scripts/ops/observability/grafana/router_rootfs.py"
+      - "scripts/ops/observability/grafana/router_managed_image.py"
+      - "scripts/ops/__main__.py"
+      - "tests/unit/scripts/ops/test_router_rootfs.py"
+      - "tests/unit/scripts/ops/test_router_managed_image.py"
   push:
     branches: [main]
     paths:
@@ -17,6 +22,11 @@ on:
       - "grafana/plugins/bioetl-scenes-app/**"
       - "grafana/plugins/bioetl-selectorshell-panel/**"
       - ".github/workflows/router-v7-bridge.yml"
+      - "scripts/ops/observability/grafana/router_rootfs.py"
+      - "scripts/ops/observability/grafana/router_managed_image.py"
+      - "scripts/ops/__main__.py"
+      - "tests/unit/scripts/ops/test_router_rootfs.py"
+      - "tests/unit/scripts/ops/test_router_managed_image.py"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -50,7 +60,9 @@ jobs:
         run: node --test verify-host-image.test.mjs
       - name: Test trusted rootfs timestamp normalization
         working-directory: grafana/tooling/router-v7-bridge
-        run: /usr/bin/python3 fingerprint-rootfs.test.py
+        run: |
+          PYTHONPATH=../../.. /usr/bin/python3 ../../../tests/unit/scripts/ops/test_router_rootfs.py
+          PYTHONPATH=../../.. /usr/bin/python3 ../../../tests/unit/scripts/ops/test_router_managed_image.py
       - name: Check exported TypeScript API
         run: npm run typecheck
       - name: Build browser candidate

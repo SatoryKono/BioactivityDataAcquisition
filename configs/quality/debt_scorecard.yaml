@@ -461,7 +461,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 200
-      total_loc: 24786
+      total_loc: 24797
       files_ge_250_loc: 0
       helper_function_ratio: 0.388
       max_internal_fan_in: 5
@@ -668,7 +668,7 @@ oversized_source_module_inventory:
     owner: '@bioetl-config'
     target_split: separate config discovery, validation, and environment resolution helpers
   - path: src/bioetl/infrastructure/control_plane/file_run_ledger_store.py
-    lines: 174
+    lines: 187
     owner: '@bioetl-control-plane'
     target_split: separate file IO, record serialization, and query helpers
   - path: src/bioetl/application/services/quality/data_quality_service.py

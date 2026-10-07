@@ -12,8 +12,8 @@ import sys
 from copy import deepcopy
 from pathlib import Path
 
-root = Path(__file__).resolve().parents[4]
-proof = Path(__file__).parent
+root = Path(__file__).resolve().parents[3]
+proof = root / "reports/quality/proof-or-stop/config-root-11899"
 inventory_path = root / "reports/quality/module-coverage-inventory.json"
 record_path = root / "reports/quality/issue-5376-coverage-tail-closeout.json"
 inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
@@ -51,7 +51,7 @@ record["closeout"].update(
 record["current_live_metrics_provenance"] = {
     "source_inventory_sha256": hashlib.sha256(inventory_path.read_bytes()).hexdigest(),
     "source_tree_sha256": inventory["source_tree_sha256"],
-    "derived_by": "reports/quality/proof-or-stop/config-root-11899/refresh_5376_live_metrics.py",
+    "derived_by": "scripts/engineering/qa/_refresh_issue5376_live_metrics.py",
     "semantics": "Live retained-inventory binding; raw W44 regression ledger is separate.",
 }
 assert record["historical_coverage_inventory_delta"] == historical

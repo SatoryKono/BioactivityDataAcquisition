@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+import contextlib
 from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -134,14 +136,31 @@ class _MetadataWriterOperations:
                 entity=entity,
             )
         )
-        _record_artifact_publication(
-            recorder=self._artifact_recorder_provider(),
-            metrics=self._metrics,
-            layer=layer,
-            base_path=base_path,
-            metadata_path=metadata_path,
-            metadata=metadata,
+        publication_task = asyncio.create_task(
+            asyncio.to_thread(
+                _record_artifact_publication,
+                recorder=self._artifact_recorder_provider(),
+                metrics=self._metrics,
+                layer=layer,
+                base_path=base_path,
+                metadata_path=metadata_path,
+                metadata=metadata,
+            )
         )
+        try:
+            await asyncio.shield(publication_task)
+        except asyncio.CancelledError:
+            # Drain the pending publication worker to ensure we don't leave
+            # orphaned thread state running after cancellation propagation.
+            while not publication_task.done():
+                with contextlib.suppress(asyncio.CancelledError):
+                    await asyncio.shield(publication_task)
+
+            # Explicitly check for and propagate worker errors that occurred
+            # before or during the cancellation drain to prevent swallowing them.
+            publication_task.result()
+
+            raise
         return metadata_path
 
     async def write_metadata(self, request: _MetadataWriteRequest) -> str:

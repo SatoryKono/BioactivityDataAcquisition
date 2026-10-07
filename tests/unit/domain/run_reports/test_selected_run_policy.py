@@ -33,6 +33,25 @@ def test_accounting_conflict_overrides_trust_and_keeps_saved_verdict() -> None:
     assert RULES_VERSION == "selected-run-v2"
 
 
+def test_failing_funnel_overrides_trust_when_coarse_balance_is_clean() -> None:
+    projected = saved_trust_fields(
+        verdict="OK",
+        reasons_text="checked",
+        reconciliation={"silver_vs_bronze_status": "DEGRADED", "silver_delta": 1},
+        funnel=[
+            {
+                "stage_id": "silver",
+                "balance_status": "FAILING",
+                "unaccounted": 1,
+            }
+        ],
+    )
+    assert projected["trust_status"] == "ERROR"
+    assert projected["saved_trust_status"] == "OK"
+    assert projected["accounting_integrity"] == "CONFLICT"
+    assert "unaccounted=1" in str(projected["reasons_text"])
+
+
 def test_clean_accounting_does_not_override_trust() -> None:
     projected = saved_trust_fields(
         verdict="OK",

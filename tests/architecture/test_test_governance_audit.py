@@ -560,6 +560,38 @@ def test_test_governance_source_hash_fails_closed_on_unreadable_input(
 
 
 @pytest.mark.architecture
+def test_governance_check_rejects_corrupt_counts_with_matching_source_hash(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A valid source fingerprint must not authenticate saved report contents."""
+    from scripts.engineering.common import repo_paths
+
+    monkeypatch.setattr(repo_paths, "REPO_ROOT", tmp_path)
+    test_file = tmp_path / "tests" / "test_sample.py"
+    test_file.parent.mkdir()
+    test_file.write_text("def test_sample():\n    assert True\n", encoding="utf-8")
+    output = tmp_path / governance_audit.DEFAULT_JSON_ARTIFACT
+    fixture_output = tmp_path / "fixtures.json"
+    args = [
+        "--root",
+        str(tmp_path),
+        "--config",
+        str(tmp_path / "missing.yaml"),
+        "--json-out",
+        str(output),
+        "--fixture-duplication-out",
+        str(fixture_output),
+    ]
+    assert governance_audit.main(args) == 0
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    payload["report"]["total_test_functions"] += 17
+    output.write_text(_canonical_json(payload), encoding="utf-8")
+    assert governance_audit.main([*args, "--check"]) == 1
+    assert governance_audit.main(args) == 0
+    assert governance_audit.main([*args, "--check"]) == 0
+
+
+@pytest.mark.architecture
 @pytest.mark.parametrize("workers", [1, 4])
 def test_governance_hash_releases_payloads_without_changing_digest(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, workers: int
@@ -1316,3 +1348,50 @@ def test_tracing_emission_contract_test_remains_present() -> None:
     assert "class RecordingTracing" in text
     for test_name in cast(list[str], tracing["required_test_names"]):
         assert f"def {test_name}" in text
+
+
+@pytest.mark.architecture
+def test_unittest_assertions_are_recognized_without_accepting_subtest_only():
+    """Relocated stdlib tests retain real assertions in governance accounting."""
+    import ast
+    from scripts.engineering.qa.report_test_governance_audit import _TestBodyVisitor
+
+    for expression in (
+        "self.assertEqual(a, b)",
+        "self.assertNotEqual(a, b)",
+        "self.assertTrue(value)",
+        "self.assertRaises(ValueError, operation)",
+        "self.assertRaisesRegex(ValueError, 'message', operation)",
+    ):
+        visitor = _TestBodyVisitor()
+        visitor.visit(ast.parse(expression))
+        assert visitor.has_assertion_signal, expression
+    visitor = _TestBodyVisitor()
+    visitor.visit(ast.parse("self.subTest(case='missing assertion')"))
+    assert not visitor.has_assertion_signal
+
+
+@pytest.mark.architecture
+def test_unittest_exception_assertions_require_execution():
+    import ast
+    from scripts.engineering.qa.report_test_governance_audit import (
+        _TestBodyVisitor,
+        _direct_assertion_signal,
+    )
+
+    cases = {
+        "self.assertRaises(ValueError)": False,
+        "self.assertRaisesRegex(ValueError, 'message')": False,
+        "unused = self.assertRaises(ValueError)": False,
+        "self.assertRaises(ValueError, operation)": True,
+        "self.assertRaisesRegex(ValueError, 'message', operation)": True,
+        "with self.assertRaises(ValueError):\n    operation()": True,
+        "with self.assertRaisesRegex(ValueError, 'message'):\n    operation()": True,
+        "self.assertRaises(ValueError, *unknown)": False,
+    }
+    for source, expected in cases.items():
+        tree = ast.parse(source)
+        visitor = _TestBodyVisitor()
+        visitor.visit(tree)
+        assert visitor.has_assertion_signal is expected, source
+        assert _direct_assertion_signal(tree.body[0]) is expected, source

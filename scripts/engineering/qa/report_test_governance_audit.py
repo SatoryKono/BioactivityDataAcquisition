@@ -47,6 +47,9 @@ COMPATIBILITY_FILE_RE = re.compile(
     re.IGNORECASE,
 )
 ASSERT_METHOD_NAMES = {
+    "assertEqual",
+    "assertNotEqual",
+    "assertTrue",
     "assert_any_call",
     "assert_called",
     "assert_called_once",
@@ -613,13 +616,16 @@ class _TestBodyVisitor(ast.NodeVisitor):
         self.has_assertion_signal = True
         self.generic_visit(node)
 
+    def visit_With(self, node: ast.With) -> None:
+        if _direct_assertion_signal(node):
+            self.has_assertion_signal = True
+        self.generic_visit(node)
+
     def visit_Call(self, node: ast.Call) -> None:
         qualified = _qualified_name(node.func)
         leaf = qualified.rsplit(".", 1)[-1]
 
-        if qualified in PYTEST_ASSERTION_HELPERS:
-            self.has_assertion_signal = True
-        if leaf in ASSERT_METHOD_NAMES or leaf.startswith(("assert_", "_assert_")):
+        if _call_is_assertion_signal(node):
             self.has_assertion_signal = True
         if leaf.startswith(("check_", "validate_", "verify_", "expect_")):
             self.has_assertion_signal = True
@@ -636,9 +642,14 @@ class _TestBodyVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
 
-def _call_is_assertion_signal(call: ast.Call) -> bool:
+def _call_is_assertion_signal(call: ast.Call, *, context_manager: bool = False) -> bool:
     qualified = _qualified_name(call.func)
     leaf = qualified.rsplit(".", 1)[-1]
+    if leaf in {"assertRaises", "assertRaisesRegex"}:
+        required = 1 if leaf == "assertRaises" else 2
+        if any(isinstance(arg, ast.Starred) for arg in call.args[: required + 1]):
+            return False
+        return len(call.args) >= required + (0 if context_manager else 1)
     return (
         qualified in PYTEST_ASSERTION_HELPERS
         or leaf in ASSERT_METHOD_NAMES
@@ -660,7 +671,7 @@ def _direct_assertion_signal(statement: ast.stmt) -> bool:
     if isinstance(statement, (ast.With, ast.AsyncWith)):
         return any(
             isinstance(item.context_expr, ast.Call)
-            and _call_is_assertion_signal(item.context_expr)
+            and _call_is_assertion_signal(item.context_expr, context_manager=True)
             for item in statement.items
         )
     return False
@@ -1294,13 +1305,15 @@ def _assemble_test_governance_payload(
     }
 
 
-def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
+def _collect_test_governance_report_cached(
+    root_str: str, *, force_rescan: bool = False
+) -> dict[str, Any]:
     """Collect deterministic static counts used as remediation budgets.
 
     NOSONAR - S3776: complexity 32 exceeds 15; extraction would obscure test governance scan logic
     """
     root = Path(root_str).resolve()
-    fresh_artifact = _load_current_artifact_if_fresh(root)
+    fresh_artifact = None if force_rescan else _load_current_artifact_if_fresh(root)
     if fresh_artifact is not None:
         return fresh_artifact
     test_files = _iter_test_files(root)
@@ -1390,12 +1403,16 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
     )
 
 
-def collect_test_governance_report(root: Path = ROOT) -> dict[str, Any]:
+def collect_test_governance_report(
+    root: Path = ROOT, *, force_rescan: bool = False
+) -> dict[str, Any]:
     """Collect deterministic static counts used as remediation budgets."""
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
     safe_root = resolve_output_path(root, root=REPO_ROOT)
-    return _collect_test_governance_report_cached(str(safe_root))
+    return _collect_test_governance_report_cached(
+        str(safe_root), force_rescan=force_rescan
+    )
 
 
 def load_config(path: Path) -> dict[str, Any]:
@@ -1579,7 +1596,8 @@ def main(argv: list[str] | None = None) -> int:
 
     safe_root = resolve_output_path(args.root, root=REPO_ROOT)
     safe_config = resolve_output_path(args.config, root=REPO_ROOT)
-    payload = collect_test_governance_report(safe_root)
+    # Verification and regeneration must not trust the artifact being checked.
+    payload = collect_test_governance_report(safe_root, force_rescan=True)
     json_out, fixture_duplication_out, duplicate_name_inventory_out = (
         _resolve_check_default_paths(
             check=args.check,
