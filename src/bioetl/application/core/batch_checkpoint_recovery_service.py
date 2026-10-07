@@ -5,13 +5,17 @@ from __future__ import annotations
 __all__ = ["BatchCheckpointRecoveryService"]
 
 import time
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
+from bioetl.application.core.batch_checkpoint_save_observability import (
+    close_checkpoint_save_span,
+    emit_checkpoint_save_event,
+    observe_checkpoint_save_duration,
+    start_checkpoint_save_span,
+)
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
 if TYPE_CHECKING:
-    from opentelemetry.trace import Span
-
     from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
     from bioetl.application.core.lifecycle.checkpoint_manager import (
         CheckpointRuntimeService,
@@ -21,8 +25,6 @@ if TYPE_CHECKING:
 
 class BatchCheckpointRecoveryService:
     """Owns checkpoint save semantics for runtime, shutdown, and recovery."""
-
-    _CHECKPOINT_TRACER_NAME = "bioetl.checkpoint"
 
     def __init__(
         self,
@@ -42,13 +44,11 @@ class BatchCheckpointRecoveryService:
         self._memory_manager = memory_manager
         self._checkpoint_save_errors = checkpoint_manager._operation_errors
         # Per-run progress watermark: highest ``records_fetched`` persisted
-        # by ANY checkpoint operation in this run. Periodic saves trigger
-        # when confirmed progress advanced at least ``checkpoint_interval``
-        # past it, so saves land on every interval of *confirmed* progress
-        # regardless of batch-size alignment. All save operations share the
-        # watermark — they persist the same boundary. A failed save never
-        # advances it; a manual resume_offset does not seed it (no durable
-        # boundary is proven for a manually chosen offset).
+        # by ANY checkpoint operation in this run (they all persist the same
+        # boundary). Periodic saves trigger when confirmed progress advanced
+        # at least ``checkpoint_interval`` past it, regardless of batch-size
+        # alignment. A failed save never advances it; a manual resume_offset
+        # does not seed it (no durable boundary is proven for a manual offset).
         self._last_saved_progress: int = 0
 
     async def save_periodic_checkpoint(
@@ -58,17 +58,11 @@ class BatchCheckpointRecoveryService:
         resume_offset: int,
         checkpoint_interval: int,
     ) -> None:
-        """Save a periodic checkpoint when confirmed progress >= interval.
-
-        The guard is the delta model ``records_fetched - last_saved >=
-        checkpoint_interval`` in per-run progress units — not exact modulo —
-        so a batch size that does not divide the interval cannot starve
-        checkpointing.
-        """
+        """Save a periodic checkpoint when confirmed progress >= interval."""
         if checkpoint_interval <= 0 or records_fetched <= 0:
             return
         if records_fetched - self._last_saved_progress < checkpoint_interval:
-            self._emit_checkpoint_save_event(operation="periodic", status="skipped")
+            self._emit_event(operation="periodic", status="skipped")
             return
         total = self._total_processed(records_fetched, resume_offset)
         await self._save_checkpoint(
@@ -86,10 +80,7 @@ class BatchCheckpointRecoveryService:
         try:
             total = self._total_processed(records_fetched, resume_offset)
             if total <= 0:
-                self._emit_checkpoint_save_event(
-                    operation="exception",
-                    status="skipped",
-                )
+                self._emit_event(operation="exception", status="skipped")
                 return
             await self._save_checkpoint(
                 total, operation="exception", progress=records_fetched
@@ -142,89 +133,18 @@ class BatchCheckpointRecoveryService:
     def _total_processed(records_fetched: int, resume_offset: int) -> int:
         return resume_offset + records_fetched
 
-    def _emit_checkpoint_save_event(self, *, operation: str, status: str) -> None:
-        if self._metrics is None:
-            return
-        self._metrics.increment_counter(
-            "bioetl_checkpoint_save_events_total",
-            1,
-            {
-                "pipeline": self._pipeline_name,
-                "operation": operation,
-                "status": status,
-            },
+    def _emit_event(self, *, operation: str, status: str) -> None:
+        emit_checkpoint_save_event(
+            self._metrics, self._pipeline_name, operation=operation, status=status
         )
-
-    def _observe_checkpoint_save_duration(
-        self,
-        *,
-        operation: str,
-        status: str,
-        duration_seconds: float,
-    ) -> None:
-        if self._metrics is None:
-            return
-        self._metrics.observe_histogram(
-            "bioetl_checkpoint_save_duration_seconds",
-            duration_seconds,
-            {
-                "pipeline": self._pipeline_name,
-                "operation": operation,
-                "status": status,
-            },
-        )
-
-    def _start_checkpoint_save_span(
-        self,
-        *,
-        operation: str,
-        records_processed: int,
-    ) -> Span | None:
-        if self._tracer is None:
-            return None
-        span = cast(
-            "Span",
-            cast(
-                object,
-                self._tracer.get_tracer(
-                    self._CHECKPOINT_TRACER_NAME
-                ).start_as_current_span(
-                    "checkpoint_save",
-                    attributes={
-                        "bioetl.pipeline": self._pipeline_name,
-                        "bioetl.checkpoint.operation": operation,
-                        "bioetl.checkpoint.scope": "ordinary",
-                        "bioetl.checkpoint.records_processed": records_processed,
-                    },
-                ),
-            ),
-        )
-        span.__enter__()
-        return span
-
-    def _close_checkpoint_save_span(
-        self,
-        span: Span | None,
-        *,
-        status: str,
-        error: BaseException | None = None,
-    ) -> None:
-        if span is None:
-            return
-        span.set_attribute("bioetl.checkpoint.status", status)
-        if error is not None:
-            span.set_attribute("error", True)
-            span.set_attribute("error.type", type(error).__name__)
-            if isinstance(error, Exception):
-                span.record_exception(error)
-        span.__exit__(None, None, None)
-        # Lifecycle/end-of-run paths own
 
     async def _save_checkpoint(
         self, total: int, *, operation: str, progress: int
     ) -> None:
         started_at = time.monotonic()
-        span = self._start_checkpoint_save_span(
+        span = start_checkpoint_save_span(
+            self._tracer,
+            self._pipeline_name,
             operation=operation,
             records_processed=total,
         )
@@ -234,36 +154,25 @@ class BatchCheckpointRecoveryService:
             )
             self._last_saved_progress = progress
         except self._checkpoint_save_errors as error:
-            duration_seconds = time.monotonic() - started_at
-            self._emit_checkpoint_save_event(
+            self._emit_event(operation=operation, status="failed")
+            observe_checkpoint_save_duration(
+                self._metrics,
+                self._pipeline_name,
                 operation=operation,
                 status="failed",
+                duration_seconds=time.monotonic() - started_at,
             )
-            self._observe_checkpoint_save_duration(
-                operation=operation,
-                status="failed",
-                duration_seconds=duration_seconds,
-            )
-            self._close_checkpoint_save_span(
-                span,
-                status="failed",
-                error=error,
-            )
+            close_checkpoint_save_span(span, status="failed", error=error)
             raise
-        duration_seconds = time.monotonic() - started_at
-        self._emit_checkpoint_save_event(
+        self._emit_event(operation=operation, status="succeeded")
+        observe_checkpoint_save_duration(
+            self._metrics,
+            self._pipeline_name,
             operation=operation,
             status="succeeded",
+            duration_seconds=time.monotonic() - started_at,
         )
-        self._observe_checkpoint_save_duration(
-            operation=operation,
-            status="succeeded",
-            duration_seconds=duration_seconds,
-        )
-        self._close_checkpoint_save_span(
-            span,
-            status="succeeded",
-        )
+        close_checkpoint_save_span(span, status="succeeded")
 
     def _checkpoint_payload(self, total: int) -> CheckpointMetadata | int:
         from bioetl.application.core._checkpoint_payload import build_checkpoint_payload

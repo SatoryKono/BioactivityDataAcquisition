@@ -4,7 +4,7 @@
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
     "budget_warnings": 0,
-    "budget_review_notes": 0
+    "budget_review_notes": 1
   },
   "families": [
     {
@@ -18,11 +18,11 @@
       ],
       "duplication_clusters": 0,
       "files": 200,
-      "total_loc": 24797,
+      "total_loc": 24965,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.388,
-      "max_internal_fan_in": 5,
-      "max_internal_fan_in_module": "bioetl.application.core.target_data_source_mixins",
+      "helper_function_ratio": 0.383,
+      "max_internal_fan_in": 6,
+      "max_internal_fan_in_module": "bioetl.application.core.batch_processing_contracts",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 7
@@ -31,10 +31,11 @@
         "distribution": {
           "0": 19,
           "1": 104,
-          "2": 42,
+          "2": 41,
           "3": 15,
           "4": 9,
-          "5": 11
+          "5": 11,
+          "6": 1
         },
         "modules": [
           {
@@ -613,10 +614,14 @@
           },
           {
             "module": "bioetl.application.core.batch_processing_contracts",
-            "fan_in": 2,
+            "fan_in": 6,
             "runtime_importers": [
+              "bioetl.application.core._batch_processing_layer_write_support",
+              "bioetl.application.core._batch_write_support",
               "bioetl.application.core.batch_executor_protocols",
-              "bioetl.application.core.batch_processing_service"
+              "bioetl.application.core.batch_processing_service",
+              "bioetl.application.core.batch_processing_support",
+              "bioetl.application.core.record_processor"
             ]
           },
           {
@@ -1543,23 +1548,15 @@
             "runtime_importers": []
           }
         ],
-        "max_fan_in": 5,
+        "max_fan_in": 6,
         "max_modules": [
-          "bioetl.application.core.base_transformer._structural_policy_types",
-          "bioetl.application.core.batch_execution.contracts",
-          "bioetl.application.core.batch_pipeline_execution_errors",
-          "bioetl.application.core.batch_processing_runtime",
-          "bioetl.application.core.batch_shared_operation_errors",
-          "bioetl.application.core.batch_transformer_state",
-          "bioetl.application.core.data_source_mixins",
-          "bioetl.application.core.lifecycle.shutdown",
-          "bioetl.application.core.pipeline_span_lifecycle",
-          "bioetl.application.core.record_processor_config",
-          "bioetl.application.core.target_data_source_mixins"
+          "bioetl.application.core.batch_processing_contracts"
         ]
       },
       "budget_warnings": [],
-      "budget_review_notes": [],
+      "budget_review_notes": [
+        "near_budget:max_internal_fan_in=6/7"
+      ],
       "at_budget_modules": [],
       "at_budget_module_count": 0
     },
