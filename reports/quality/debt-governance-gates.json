@@ -46,24 +46,24 @@
       "status": "pass"
     },
     {
-      "current": "9ac3255b1e110c3ba3604d2d4e183826ff360ac37ce67f3f01d318efbb1a9dbe",
-      "limit": "183c438a29ced0e1a76aefd246832e3c8f449faee60e60b5976cffc4bd77d261",
+      "current": "0822a92286a995a28396ac48af3aeb404bf279abbe373da91940651e547c78ae",
+      "limit": "0822a92286a995a28396ac48af3aeb404bf279abbe373da91940651e547c78ae",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
       "source_artifact": "reports/quality/module-coverage-inventory.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": {
-        "source_module_count": 2553,
-        "source_tree_sha256": "fb60ec89b76c2879ca58d49ede04cb894ae74ecd28355d27d83c1d2bccdec68a",
+        "source_module_count": 2552,
+        "source_tree_sha256": "0822a92286a995a28396ac48af3aeb404bf279abbe373da91940651e547c78ae",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2552,
-        "source_tree_sha256": "183c438a29ced0e1a76aefd246832e3c8f449faee60e60b5976cffc4bd77d261",
+        "source_tree_sha256": "0822a92286a995a28396ac48af3aeb404bf279abbe373da91940651e547c78ae",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -71,7 +71,7 @@
       "name": "module_coverage_scorecard_coherence",
       "remediation": "Refresh architecture-quality scorecard and module coverage inventory until counts and source-tree hash match.",
       "source_artifact": "reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -415,7 +415,7 @@
       "status": "pass"
     },
     {
-      "current": "bdb42fda578d0260d95abbf03f24f2bb4ce16425456ab83d2132f648dc503e2e",
+      "current": "99ad3e460db3b3ae2edbf94b1a9dbc4c6d3f75bfafd3a5628a02f783f72d1bbd",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -425,20 +425,15 @@
     },
     {
       "current": {
-        "artifacts": [
-          "architecture_quality_scorecard",
-          "hotspot_family_baseline",
-          "module_coverage_inventory",
-          "remote_main_baseline"
-        ],
-        "count": 4
+        "artifacts": [],
+        "count": 0
       },
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
-      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: architecture_quality_scorecard, hotspot_family_baseline, module_coverage_inventory, remote_main_baseline",
+      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: none",
       "source_artifact": "reports/quality/*.json",
-      "status": "fail"
+      "status": "pass"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -464,30 +459,26 @@
   "schema_version": 1,
   "stale_artifacts": {
     "adr_enforcement_matrix": false,
-    "architecture_quality_scorecard": true,
+    "architecture_quality_scorecard": false,
     "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
-    "hotspot_family_baseline": true,
-    "module_coverage_inventory": true,
-    "remote_main_baseline": true
+    "hotspot_family_baseline": false,
+    "module_coverage_inventory": false,
+    "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 3,
-    "pass": 43,
+    "fail": 0,
+    "pass": 46,
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 10.0,
+    "architecture_quality_scorecard_integral_score": 9.89,
     "architecture_quality_scorecard_interpretation": "excellent",
-    "fail_count": 3,
-    "failing_gates": [
-      "module_coverage_source_tree_hash_current",
-      "module_coverage_scorecard_coherence",
-      "generated_artifact_drift"
-    ],
+    "fail_count": 0,
+    "failing_gates": [],
     "gate_count": 46,
-    "pass_count": 43,
-    "release_gate_status": "failing",
+    "pass_count": 46,
+    "release_gate_status": "passing",
     "warn_count": 0,
     "warning_gates": []
   }
