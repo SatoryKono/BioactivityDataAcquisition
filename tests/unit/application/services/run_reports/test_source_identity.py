@@ -276,7 +276,7 @@ def test_repository_env_loader_preserves_hash_literal_semantics(
 def test_composition_repository_env_reader_overrides_from_files(
     tmp_path: Path,
 ) -> None:
-    from bioetl.composition.runtime_builders.config_access import (
+    from bioetl.composition.observability_runtime import (
         load_repository_source_environment as load_from_files,
     )
 

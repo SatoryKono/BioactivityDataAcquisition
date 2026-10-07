@@ -98,11 +98,14 @@ def _chembl_publication_classification_payload(
     source_value = _publication_type_source_value(None, record=record)
     if source_value is None or data is None:
         return None
-    return build_publication_type_classification_payload(
-        "chembl",
-        raw_type=source_value,
-        data=data,
-    )
+    try:
+        return build_publication_type_classification_payload(
+            "chembl",
+            raw_type=source_value,
+            data=data,
+        )
+    except RuntimeError:
+        return None
 
 
 def normalize_profile_publication_type_raw(value: object) -> object:

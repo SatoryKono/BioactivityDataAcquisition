@@ -115,9 +115,12 @@ _BASE_PUBLICATION_TRANSFORMER = (
 def _accepts_publication_vocabulary(transformer_class: type[object]) -> bool:
     """Recognize publication transformers without importing their module."""
 
+    lineage = getattr(transformer_class, "__mro__", ())
+    if not isinstance(lineage, tuple):
+        return False
     return any(
         (cls.__module__, cls.__name__) == _BASE_PUBLICATION_TRANSFORMER
-        for cls in transformer_class.__mro__
+        for cls in lineage
     )
 
 
