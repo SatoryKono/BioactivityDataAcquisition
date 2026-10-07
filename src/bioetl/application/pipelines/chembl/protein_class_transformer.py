@@ -13,6 +13,9 @@ __all__ = ["ProteinClassTransformer"]
 
 from typing import TYPE_CHECKING, override
 
+from bioetl.application.core.batch_metrics_accounting import (
+    _record_silver_removal_accounting,
+)
 from bioetl.application.core.field_specs import (
     FieldGroup,
     int_fields,
@@ -23,7 +26,6 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import ProteinClassification
-from bioetl.domain.run_reports.context import get_stage_accounting
 from bioetl.domain.transformations import safe_int
 
 if TYPE_CHECKING:
@@ -76,13 +78,11 @@ class ProteinClassTransformer(BaseChemblTransformer):
         protein_class_id = safe_int(record.get("protein_class_id"))
         if protein_class_id is None or protein_class_id > 0:
             return False
-        accounting = get_stage_accounting()
-        if accounting is not None:
-            accounting.record_removal(
-                "silver",
-                outcome="filtered_out",
-                reason_code="FILTERED_OUT_SILVER:protein_class_id",
-            )
+        _record_silver_removal_accounting(
+            outcome="filtered_out",
+            reason_code="FILTERED_OUT_SILVER:protein_class_id",
+            count=1,
+        )
         return True
 
     async def transform_pre_silver(

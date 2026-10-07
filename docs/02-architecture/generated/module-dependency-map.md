@@ -9,7 +9,7 @@
 - Internal import edges (raw): `8150`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `331`
+- Cross-layer module-group edges (total): `330`
 - Cross-layer module-group edges (top 55): `55`
 
 ## Layer Dependency Graph
@@ -21,8 +21,8 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1602 OK| application
-    application -->|1084 OK| domain
+    application -->|1603 OK| application
+    application -->|1083 OK| domain
     composition -->|225 OK| application
     composition -->|643 OK| composition
     composition -->|308 OK| domain
@@ -40,8 +40,8 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1602 | allowed |
-| `application`    | `domain`         |    1084 | allowed |
+| `application`    | `application`    |    1603 | allowed |
+| `application`    | `domain`         |    1083 | allowed |
 | `composition`    | `application`    |     225 | allowed |
 | `composition`    | `composition`    |     643 | allowed |
 | `composition`    | `domain`         |     308 | allowed |

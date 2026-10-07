@@ -27,6 +27,8 @@ Stable commands:
                        REMOVED stub (exit 2): Quarantine Explorer UI no longer shipped
     run-grafana-audit-cycle
                        Run preflight, screenshot refresh, and live Grafana audit
+    fingerprint-router-rootfs  Hash trusted host Docker exports
+    verify-router-managed-image  Verify managed image delivery against pinned host
     wsl-proxy          Start WSL proxy helper
     codex              Launch Codex via repo-local bootstrap adapter (shell)
     codex-exec         Launch Codex full-auto via repo-local bootstrap adapter (shell)
@@ -47,6 +49,7 @@ from pathlib import Path
 from scripts.engineering.common.cli_dispatch import (
     dispatch_cli,
     python_command,
+    module_command,
     shell_command,
 )
 
@@ -78,6 +81,17 @@ _PYTHON_COMMAND_PATHS = {
 COMMAND_SPECS = {
     name: python_command(script) for name, script in _PYTHON_COMMAND_PATHS.items()
 }
+
+COMMAND_SPECS.update(
+    {
+        "fingerprint-router-rootfs": module_command(
+            "scripts.ops.observability.grafana.router_rootfs"
+        ),
+        "verify-router-managed-image": module_command(
+            "scripts.ops.observability.grafana.router_managed_image"
+        ),
+    }
+)
 
 _SHELL_COMMAND_PATHS = {
     "codex": "launchers/codex/codex.sh",

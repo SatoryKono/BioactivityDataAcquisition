@@ -94,8 +94,8 @@ export function verifyImages(built, manifest, inspect, fingerprint, filesystem, 
 function filesystem(image) {
   const python = process.platform === 'win32'
     ? 'E:/github/BioactivityDataAcquisition/.venv-win/Scripts/python.exe' : '/usr/bin/python3';
-  return execFileSync(python, [fileURLToPath(new URL('./fingerprint-rootfs.py', import.meta.url)),
-    validateImage(image)], { encoding: 'utf8' }).trim();
+  return execFileSync(python, ['-m', 'scripts.ops', 'fingerprint-router-rootfs',
+    validateImage(image)], { encoding: 'utf8', cwd: fileURLToPath(new URL('../../../', import.meta.url)) }).trim();
 }
 
 function inspect(image) {

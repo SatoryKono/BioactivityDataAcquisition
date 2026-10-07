@@ -895,11 +895,35 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
     },
+    "scripts/engineering/diagnostics/legacy/coderabbit_20260925/build_relevance_report.py": {
+      "decision": "legacy_manual_utility",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-05",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
+    },
+    "scripts/engineering/diagnostics/legacy/coderabbit_20260925/normalize_findings.py": {
+      "decision": "legacy_manual_utility",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-05",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
+    },
+    "scripts/engineering/diagnostics/legacy/coderabbit_20260925/triage_findings.py": {
+      "decision": "legacy_manual_utility",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-05",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
+    },
     "scripts/engineering/qa/_gen_cyclic_workflows.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain as a bounded generator of zero-arg Grok workflow cards; keep it supporting until the workflow catalog is owned by a governed scripts.engineering.qa command.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/engineering/qa/_refresh_issue5376_live_metrics.py": {
+      "decision": "legacy_manual_utility",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-05",
+      "next_step": "Retain historical report reproduction source under scripts rather than executable code in reports; no automatic invocation or new public entry point."
     },
     "scripts/engineering/qa/analyze_duplicate_functions.py": {
       "decision": "compatibility_wrapper",
@@ -1584,6 +1608,18 @@
       "next_step": "Retain as a bounded manual dashboard JSON regeneration helper while navigation-bus generation remains owned by the Grafana dashboard extension workflow; keep it supporting until it is exposed through a canonical governed command surface.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/ops/observability/grafana/router_managed_image.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-05",
+      "next_step": "Keep the Router host verification backend behind python -m scripts.ops; preserve immutable image, trusted host and full rootfs checks."
+    },
+    "scripts/ops/observability/grafana/router_rootfs.py": {
+      "decision": "shared_helper_module",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-05",
+      "next_step": "Keep the Router host verification backend behind python -m scripts.ops; preserve immutable image, trusted host and full rootfs checks."
     },
     "scripts/ops/observability/grafana/run_grafana_render_matrix.py": {
       "decision": "shared_helper_module",

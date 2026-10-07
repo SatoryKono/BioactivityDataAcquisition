@@ -255,7 +255,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `diagram-nightly.yml` | — | Diagram lint plus local full render | Keep disabled full-render surface; port only active checks |
 | `docker.yml` | — | CircleCI docker-build plus opt-in main-only `docker-baseline` | Main eb265863 pipeline 310/job5420 SUCCESS: build/runtime/health and strict Trivy audit with zero findings; all15 artifacts downloaded,12 baseline checksums and scanned archive digest independently verified. Protected GHCR promotion and SARIF publication remain pending |
 | `docs-kpi-weekly.yml` | `30 4 * * 1` | CircleCI docs-kpi | Scheduled pipeline351/job6374 succeeds on main c644f2e4:118 outside navigation,zero orphans,no breaches; three artifacts verified. Monday04UTC restored. The source docs-kpi workflow has no issue-notification job; no additional writer is required for its parity |
-| `docs.yml` | — | CircleCI docs-governance | Prepared required gate; full docs/render parity pending |
+| `docs.yml` | — | CircleCI docs-governance | Main7949 on005a7dc6 accepts docs governance with seven verified artifacts; PR409 accepts all580 Mermaid syntax checks, targeted render and drift. Main syntax acceptance remains pending; disabled full render is not activated |
 | `duplication-complexity.yml` | — | CircleCI duplication | Prepared required gate; full scan thresholds preserved |
 | `e2e-matrix-health.yml` | `30 2 * * *` | E2E replay and controlled live lanes | Scheduled pipeline353 on main c644f2e4 SUCCESS:full6377 passes159,prompt6376 passes52,matrix6378 passes3x11+1,live6379 passes11; zero errors/skips and14verified artifacts. Daily02UTC restored with run-live=true; required PR smoke accepted in pipeline362/job6470 (3x11+1, no skips); main event acceptance passed in pipeline371 on 8291d29c |
 | `github-settings-quarterly-review.yml` | `23 6 1 1,4,7,10 *` | CircleCI github-settings-review | Scheduled pipeline355/job6381 succeeds on main c644f2e4; JSON/Markdown report verified and policy drift remains explicit. First-day Jan/Apr/Jul/Oct06UTC restored with Scheduling System attribution |
@@ -269,16 +269,16 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `opencode-pr-review.yml` | — | Retain disabled review stub policy | Do not activate unpinned installer or write paths |
 | `opencode-triage.yml` | — | Retain disabled triage stub policy | Do not activate unpinned installer or write paths |
 | `performance-nightly.yml` | `0 3 * * *` | CircleCI performance | Scheduled pipeline 272 on 303ced3: job 4565 failed CrossRef latency; diagnostic4566 and manual361 pass. Scheduled370/job6640 on main ba9c80e7 passes70 tests/0 skips and all five unchanged budgets; all six artifacts verified, daily03UTC restored. Prior failed observation retained; this is not five independent samples |
-| `port-contracts.yml` | — | CircleCI port-contracts | Main run 2606 passed 188 tests including 24 Hypothesis cases; run 4425/pipeline 262 passed 164 tests with include-hypothesis=false on 303ced3; push/PR event parity pending |
+| `port-contracts.yml` | — | CircleCI port-contracts | PR409 and main411 automatic gates accepted. Main7957 on005a7dc6 passes164 contract tests and24 Hypothesis cases, zero skips/errors; both JUnit artifacts independently hashed. Manual include-hypothesis=false remains accepted by4425/pipeline262 |
 | `pr-hygiene.yml` | — | Retain disabled PR maintenance | Preserve #10263; canonical 21-day draft/report-noise policy remains manual |
 | `pr-required.yml` | — | CircleCI classify/pr-gate-complete | Main pipelines 218–220 pass all 81 jobs on a34558b918b5; both production rulesets active/read back; legacy owner references retained by the owner decision cancelling #11930 |
-| `provider-contract-drift.yml` | — | CircleCI provider-contract-drift | Main run 3112 passes replay, matrix/xwalk and breaking-drift gates; push/PR parity pending; artifact retention verified at 30 days |
+| `provider-contract-drift.yml` | — | CircleCI provider-contract-drift | PR409 and main411 automatic gates accepted. Main7931 on005a7dc6 passes48 replay tests with zero skips/errors plus matrix/xwalk and breaking-drift gates; both artifacts independently hashed,30-day retention preserved |
 | `quality-debt-weekly.yml` | — | Retain disabled debt review policy | Do not activate job with existing if:false; local audits retained |
 | `release.yml` | — | CircleCI release-validation plus protected promotion | Main pipeline339 on d9f5b026 SUCCESS, all five jobs: security6133, tests6136 (182 passed, no skips), build6134, install6135 and gate6137. Syft1.54.0 completes in1.556s; wheel/sdist/SPDX2.3 digests and source identity independently verified, install consumes the same archives. Signed provenance, TestPyPI/PyPI and release assets remain pending; published=false |
-| `reusable-mermaid-setup.yml` | — | Shared pinned Mermaid tooling | Pending consumer migration; keep lockfile scanned by OSV |
+| `reusable-mermaid-setup.yml` | — | Shared pinned Mermaid tooling | Pinned Mermaid10.6.1 consumer accepted by PR409: all580 diagrams pass syntax validation, targeted render and drift checks pass; lockfile remains covered by OSV. Disabled full-render policy is preserved |
 | `reusable-setup.yml` | — | CircleCI setup-python-uv | Checksum-pinned uv 0.11.26 and explicit UV_PYTHON prepared; remote runtime/cache parity pending |
-| `root-hygiene.yml` | — | CircleCI root-hygiene | Main full-tree/strict checks accepted; cleanup diagnostic artifacts and dedicated legacy regression selectors added for next acceptance; structure-audit port is blocked by six tracked Python paths outside allowed roots |
-| `router-v7-bridge.yml` | — | Router bridge candidate acceptance | Manual main Router lane accepted in pipeline374; automatic PR/main path-filtered workflow prepared, remote event acceptance pending; managed host evidence remains separate |
+| `root-hygiene.yml` | — | CircleCI root-hygiene | Main7936 on005a7dc6 accepts full-tree/strict checks, cleanup diagnostics and legacy regression selectors; three artifacts independently hashed. Structure-audit is now a required root-hygiene command; eight misplaced Python files were moved to scripts/tests. Local audit passes with zero MUST/SHOULD findings; remote acceptance of the new command remains pending |
+| `router-v7-bridge.yml` | — | Router bridge candidate acceptance | Manual main lane accepted in374; automatic path-filtered PR409 and main411 each pass all four jobs. Main7922–7925 on005a7dc6 has74 independently downloaded and hashed artifacts. Managed host evidence remains separate |
 | `schema-governance.yml` | — | CircleCI schema-governance | Prepared required gate; canonical generation/parity preserved |
 | `scorecard.yml` | `30 7 * * 1` | CircleCI scorecard plus SARIF publication | Scheduled pipeline354/job6380 on main c644f2e4 succeeds with all18 checks; five artifacts and source/JSON/SARIF digests independently verified. Monday07UTC restored. sarif_uploaded=false and public_results_published=false; restricted writer credentials and publication acceptance pending; legacy public-results workflow retained |
 | `security.yml` | — | CircleCI security-scans | Main security gates 218–220 passed; all tracked lockfiles remain scanned; SARIF publication parity pending |
@@ -289,7 +289,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `type-checking.yml` | — | CircleCI mypy | Strict mypy gate accepted in main pipelines 218–220 |
 | `vacuum.yml` | — | Local maintenance command | Retain manual/local operation; no automatic destructive schedule |
 | `validate-vendored-mermaid-assets.yml` | — | CircleCI docs-governance | Both legacy MkDocs asset existence checks folded into docs-governance and accepted in main371 on8291d29c |
-| `zizmor.yml` | — | Remaining Actions YAML audit | Retained Actions audit: pinned zizmor1.29.0, unchanged high severity/confidence and config; required credential-free offline PR audit plus protected main online audit with read-only context. Offline PR audit accepted in pipeline378; protected online main audit6839 accepted on38433be0, with three downloaded and hashed artifacts. GitHub SARIF upload remains separate |
+| `zizmor.yml` | — | Remaining Actions YAML audit | Retained Actions audit: pinned zizmor1.29.0, unchanged high severity/confidence and config; required credential-free offline PR audit plus protected main online audit with read-only context. Offline PR audit accepted in pipeline409; protected online main audit7921 accepted on005a7dc6, with three downloaded and hashed artifacts. GitHub SARIF upload remains separate |
 
 Local-only and intentionally disabled surfaces retain their operating policy;
 disabled Actions stubs are not treated as missing credentials to be bypassed.
@@ -644,3 +644,16 @@ main pushes, including CI configuration changes for acceptance. It runs without
 credential contexts, and skips unrelated changes before dependencies or Docker.
 The host check requires bridge and both plugin jobs. Manual Router execution
 continues to enforce main. Event acceptance is separate from pipeline374.
+
+
+### Historical diagnostic scripts retained outside report artifacts
+
+The September 25 CodeRabbit report can be reconstructed manually with the archived
+[findings normalizer](../../scripts/engineering/diagnostics/legacy/coderabbit_20260925/normalize_findings.py),
+[triage classifier](../../scripts/engineering/diagnostics/legacy/coderabbit_20260925/triage_findings.py),
+and [relevance report builder](../../scripts/engineering/diagnostics/legacy/coderabbit_20260925/build_relevance_report.py).
+These scripts retain their original report paths and historical assumptions; they
+are not CI entry points and must not be used to refresh current governance.
+The [issue 5376 metric snapshot helper](../../scripts/engineering/qa/_refresh_issue5376_live_metrics.py)
+also remains a manual historical utility for its config-root proof directory.
+Current CI refreshes use the canonical engineering dispatchers.

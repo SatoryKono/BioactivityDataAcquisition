@@ -432,3 +432,53 @@ def test_mutation_score_rejects_invalid_missing_or_insufficient_evidence(
         [sys.executable, "-c", script], cwd=tmp_path, capture_output=True, check=False
     )
     assert result.returncode == expected, result.stderr.decode(errors="replace")
+
+
+def test_relocated_router_verifiers_trigger_both_ci_event_filters():
+    import fnmatch
+    import shlex
+
+    paths = (
+        "scripts/ops/observability/grafana/router_rootfs.py",
+        "scripts/ops/observability/grafana/router_managed_image.py",
+        "scripts/ops/__main__.py",
+        "tests/unit/scripts/ops/test_router_rootfs.py",
+        "tests/unit/scripts/ops/test_router_managed_image.py",
+    )
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows/router-v7-bridge.yml").read_text()
+    )
+    events = workflow.get("on", workflow.get(True))
+    source = (ROOT / ".circleci/config.yml").read_text()
+    command = next(
+        line.strip()
+        for line in source.splitlines()
+        if 'git diff --name-only "$base"...HEAD' in line
+    )
+    words = shlex.split(command)
+    filters = words[words.index("--") + 1 : words.index(">")]
+    for path in paths:
+        for event in ("pull_request", "push"):
+            assert any(
+                fnmatch.fnmatchcase(path, pattern) for pattern in events[event]["paths"]
+            ), (event, path)
+        assert any(fnmatch.fnmatchcase(path, pattern) for pattern in filters), path
+    assert not any(
+        fnmatch.fnmatchcase("docs/unrelated.md", pattern) for pattern in filters
+    )
+
+    circle_commands = yaml.safe_load(source)["jobs"]["router-bridge-tests"]["steps"]
+    circle_runs = "\n".join(
+        step["run"]["command"]
+        for step in circle_commands
+        if isinstance(step, dict) and "run" in step
+    )
+    github_runs = "\n".join(
+        step.get("run", "")
+        for job in workflow["jobs"].values()
+        for step in job.get("steps", [])
+    )
+    for test_name in ("test_router_rootfs.py", "test_router_managed_image.py"):
+        invocation = f"/usr/bin/python3 ../../../tests/unit/scripts/ops/{test_name}"
+        assert invocation in circle_runs
+        assert invocation in github_runs
