@@ -2524,7 +2524,11 @@ jobs:
                 exit 1
               fi
               base_ref="origin/${BASE_REF}"
-              git fetch --no-tags --depth=1 origin "${BASE_REF}"
+              if [[ "$(git rev-parse --is-shallow-repository)" == "true" ]]; then
+                git fetch --no-tags --unshallow origin \
+                  "${BASE_REF}:refs/remotes/origin/${BASE_REF}" "$(git rev-parse HEAD)"
+              fi
+              git fetch --no-tags origin "${BASE_REF}:refs/remotes/origin/${BASE_REF}"
 
               changed_diagrams=$(
                 git diff --diff-filter=ACMRTUXB --name-only "${base_ref}"...HEAD -- \

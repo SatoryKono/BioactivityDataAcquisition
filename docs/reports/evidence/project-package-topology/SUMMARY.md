@@ -1,4 +1,4 @@
-Source-only refresh (2026-10-07, P02 F1-F7): `source_tree_sha256=c73679e3a3cf7ec88aab49399db37fccd38fb4040b06e5ed6b3136cc1792308f`; `source_module_count=2553`. This current binding is derived from the canonical module inventory. It covers event/result snapshots, prepared transitions and explicit canonical byte profiles; it is not a new topology audit or a coverage measurement. The previous bindings and measurements below are historical and superseded for source freshness.
+Source-only refresh (2026-10-07, P02 F1-F7): `source_tree_sha256=c73679e3a3cf7ec88aab49399db37fccd38fb4040b06e5ed6b3136cc1792308f`; `source_module_count=2554`. This current binding is derived from the canonical module inventory. It covers event/result snapshots, prepared transitions and explicit canonical byte profiles; it is not a new topology audit or a coverage measurement. The previous bindings and measurements below are historical and superseded for source freshness.
 
 Historical source-only stamps and measurements (superseded bindings):
 
