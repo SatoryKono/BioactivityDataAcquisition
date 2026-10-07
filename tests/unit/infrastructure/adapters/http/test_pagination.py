@@ -216,6 +216,34 @@ async def test_paginated_fetch_warns_on_repeated_cursor():
 
 
 @pytest.mark.asyncio
+async def test_paginated_fetch_warns_before_refetching_initial_cursor():
+    fetcher = MockFetcher()
+    calls: list[object] = []
+
+    async def fetch_page(cursor, _):
+        calls.append(cursor)
+        next_cursor = "b" if cursor == "start" else "start"
+        return [len(calls)], next_cursor
+
+    results = [
+        item
+        async for item in fetcher.paginated_fetch(
+            fetch_page, limit=100, initial_cursor="start"
+        )
+    ]
+
+    assert results == [1, 2]
+    assert calls == ["start", "b"]
+    fetcher._logger.warning.assert_called_once_with(
+        "pagination_truncated",
+        truncation_reason="repeated_cursor",
+        page_count=2,
+        page_limit=10000,
+        next_cursor="'start'",
+    )
+
+
+@pytest.mark.asyncio
 async def test_paginated_fetch_no_warning_on_clean_end():
     fetcher = MockFetcher()
 
