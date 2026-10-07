@@ -120,8 +120,9 @@ async def test_replay_and_purge_on_legacy_nonpartitioned_table(tmp_path) -> None
     )
     adapter = UnifiedQuarantineAdapter(base_path)
 
+    # Record 2 is 60 days old — outside the default 7-day replay window.
     replayed = list(adapter.replay("pipe_a", now=INGESTION_TS))
-    assert {record["payload"]["id"] for record in replayed} == {1, 2}
+    assert {record["payload"]["id"] for record in replayed} == {1}
 
     purged = adapter.purge("pipe_a", older_than_days=30, now=INGESTION_TS)
     assert purged == 1

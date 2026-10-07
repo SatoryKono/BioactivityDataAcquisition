@@ -38,7 +38,10 @@ __all__ = [
 
 def _delta_partition_columns(dt: DeltaTable) -> frozenset[str]:
     """Return partition columns for historical Delta tables when available."""
-    metadata = dt.metadata()
+    try:
+        metadata = dt.metadata()
+    except (AttributeError, RuntimeError, TypeError, ValueError):
+        return frozenset()
     partition_columns = getattr(metadata, "partition_columns", ())
     if not isinstance(partition_columns, (list, tuple, set, frozenset)):
         return frozenset()
