@@ -838,6 +838,7 @@ def test_run_manifest_verify_errors(monkeypatch: pytest.MonkeyPatch) -> None:
         RunManifestInspectionCorruptionError,
     )
     from bioetl.interfaces.cli.commands import run_manifest as rm
+    from bioetl.interfaces.cli.exit_codes import ExitCode
 
     class _Service:
         def verify(self, *_a: object, **_k: object) -> object:
@@ -846,7 +847,7 @@ def test_run_manifest_verify_errors(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(rm, "get_run_manifest_service", lambda: _Service())
     runner = CliRunner()
     result = runner.invoke(rm.run_manifest, ["verify", "a", "b"])
-    assert result.exit_code == 85
+    assert result.exit_code == ExitCode.STORAGE_ERROR
 
     class _ValueService:
         def verify(self, *_a: object, **_k: object) -> object:
@@ -854,7 +855,7 @@ def test_run_manifest_verify_errors(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr(rm, "get_run_manifest_service", lambda: _ValueService())
     result = runner.invoke(rm.run_manifest, ["verify", "a", "b"])
-    assert result.exit_code == 1
+    assert result.exit_code == ExitCode.FAIL
 
 
 def test_workflow_status_config_error(monkeypatch: pytest.MonkeyPatch) -> None:

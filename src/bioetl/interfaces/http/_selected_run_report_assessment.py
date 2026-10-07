@@ -219,29 +219,14 @@ def _verify_snapshot_objects(manifest: object) -> bool | None:
     return True
 
 
-def _manifest_snapshot_fingerprint(manifest: object) -> str | None:
+def _input_snapshot_fingerprints(manifest: object) -> list[str]:
     fingerprints: list[str] = []
     for source in getattr(manifest, "source_refs", ()) or ():
         for snapshot in getattr(source, "input_snapshots", ()) or ():
             content_hash = getattr(snapshot, "content_hash", None)
             if isinstance(content_hash, str) and content_hash.strip():
                 fingerprints.append(content_hash.strip())
-    return ",".join(fingerprints) if fingerprints else None
-
-
-def _manifest_object_flags(
-    manifest: object, snapshot_verified: bool | None
-) -> dict[str, bool]:
-    recorded = _recorded_object_flags(manifest)
-    flags = (
-        ("effective_config_hash", recorded.get("effective_config_hash")),
-        ("dependency_lock_hash", recorded.get("dependency_lock_hash")),
-        (
-            "input_snapshot_fingerprint",
-            recorded.get("input_snapshot_fingerprint", snapshot_verified),
-        ),
-    )
-    return {code: flag for code, flag in flags if isinstance(flag, bool)}
+    return fingerprints
 
 
 def _manifest_snapshot(port: object, run_id: str) -> dict[str, object] | None:
@@ -259,6 +244,7 @@ def _manifest_snapshot(port: object, run_id: str) -> dict[str, object] | None:
     if manifest is None:
         return None
     provenance = getattr(manifest, "code_provenance", None)
+    fingerprints = _input_snapshot_fingerprints(manifest)
     capability = getattr(manifest, "replay_capability", None)
     capability_value = getattr(capability, "value", capability)
     launch_context = getattr(manifest, "launch_context", None)
@@ -267,9 +253,21 @@ def _manifest_snapshot(port: object, run_id: str) -> dict[str, object] | None:
         family_supported = launch_context.get("strict_exact_replay_supported")
     config_hash = getattr(provenance, "effective_config_hash", None)
     lock_hash = getattr(provenance, "dependency_lock_hash", None)
-    fingerprint = _manifest_snapshot_fingerprint(manifest)
+    fingerprint = ",".join(fingerprints) if fingerprints else None
+    recorded = _recorded_object_flags(manifest)
     snapshot_verified = _verify_snapshot_objects(manifest)
-    objects = _manifest_object_flags(manifest, snapshot_verified)
+    objects = {
+        code: flag
+        for code, flag in (
+            ("effective_config_hash", recorded.get("effective_config_hash")),
+            ("dependency_lock_hash", recorded.get("dependency_lock_hash")),
+            (
+                "input_snapshot_fingerprint",
+                recorded.get("input_snapshot_fingerprint", snapshot_verified),
+            ),
+        )
+        if isinstance(flag, bool)
+    }
     verify_objects = getattr(port, "verify_replay_objects", None)
     if callable(verify_objects):
         verified = verify_objects(manifest)

@@ -227,19 +227,50 @@ def _present_status(
     }
 
 
-def _project_selected_run_status(
+def _load_saved_assessment(
+    path: Path, pipeline: str, run_id: str
+) -> tuple[object, ...] | dict[str, object]:
+    try:
+        return _load_report_assessment(path, pipeline, run_id)
+    except _IdentityMismatchError:
+        return unavailable_status(pipeline, run_id, "ERROR", "identity_mismatch")
+    except _RevisionMissingError:
+        return unavailable_status(pipeline, run_id, "INCOMPLETE", "revision_missing")
+    except (ValueError, TypeError, UnicodeError):
+        return unavailable_status(pipeline, run_id, "ERROR", "evidence_corrupt")
+    except OSError:
+        return unavailable_status(
+            pipeline, run_id, _QUERY_ERROR, "evidence_read_failed"
+        )
+
+
+def load_selected_run_status(
     *,
     pipeline: str,
     run_id: str,
-    root: Path | None,
-    manifest_port: object | None,
-    path: Path,
-    report: dict[str, object],
-    identity: dict[str, object],
-    assessment: dict[str, object],
-    availability: str,
-    revision: str,
+    root: Path | None = None,
+    manifest_port: object | None = None,
+    store: RunReportStorePort | None = None,
 ) -> dict[str, object]:
+    """Load and revalidate the exact report, revision and bound identity each time."""
+    if run_id in {"", "-", "All", "$__all"}:
+        return unavailable_status(pipeline, run_id, _SELECT_RUN, "selection_required")
+    try:
+        selected_pipeline = _selected_pipeline(pipeline, run_id, root, store)
+    except ValueError as exc:
+        return unavailable_status(pipeline, run_id, "ERROR", str(exc))
+    if selected_pipeline is None:
+        return unavailable_status(pipeline, run_id, "UNKNOWN", "run_not_found")
+    pipeline = selected_pipeline
+    path, _ = _validated_artifact_paths(
+        pipeline, run_id, "pipeline_run_report_json", root
+    )
+    if not path.is_file():
+        return unavailable_status(pipeline, run_id, "UNKNOWN", "run_not_found")
+    loaded = _load_saved_assessment(path, pipeline, run_id)
+    if isinstance(loaded, dict):
+        return loaded
+    report, identity, assessment, availability, revision = loaded
     summary = {
         **{key: value for key, value in assessment.items() if key != "domains"},
         "pipeline": pipeline,
@@ -284,57 +315,6 @@ def _project_selected_run_status(
     result = _present_status(summary, report, domain_rows, readiness_fields)
     result["reconciliation_display"] = linked_reconciliation_display(report, root)
     return result
-
-
-def load_selected_run_status(
-    *,
-    pipeline: str,
-    run_id: str,
-    root: Path | None = None,
-    manifest_port: object | None = None,
-    store: RunReportStorePort | None = None,
-) -> dict[str, object]:
-    """Load and revalidate the exact report, revision and bound identity each time."""
-    if run_id in {"", "-", "All", "$__all"}:
-        return unavailable_status(pipeline, run_id, _SELECT_RUN, "selection_required")
-    try:
-        selected_pipeline = _selected_pipeline(pipeline, run_id, root, store)
-    except ValueError as exc:
-        return unavailable_status(pipeline, run_id, "ERROR", str(exc))
-    if selected_pipeline is None:
-        return unavailable_status(pipeline, run_id, "UNKNOWN", "run_not_found")
-    pipeline = selected_pipeline
-    path, _ = _validated_artifact_paths(
-        pipeline, run_id, "pipeline_run_report_json", root
-    )
-    if not path.is_file():
-        return unavailable_status(pipeline, run_id, "UNKNOWN", "run_not_found")
-    try:
-        report, identity, assessment, availability, revision = _load_report_assessment(
-            path, pipeline, run_id
-        )
-    except _IdentityMismatchError:
-        return unavailable_status(pipeline, run_id, "ERROR", "identity_mismatch")
-    except _RevisionMissingError:
-        return unavailable_status(pipeline, run_id, "INCOMPLETE", "revision_missing")
-    except (ValueError, TypeError, UnicodeError):
-        return unavailable_status(pipeline, run_id, "ERROR", "evidence_corrupt")
-    except OSError:
-        return unavailable_status(
-            pipeline, run_id, _QUERY_ERROR, "evidence_read_failed"
-        )
-    return _project_selected_run_status(
-        pipeline=pipeline,
-        run_id=run_id,
-        root=root,
-        manifest_port=manifest_port,
-        path=path,
-        report=report,
-        identity=identity,
-        assessment=assessment,
-        availability=availability,
-        revision=revision,
-    )
 
 
 def _merge_active_diagnostics(
