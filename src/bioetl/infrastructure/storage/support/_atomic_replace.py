@@ -109,6 +109,16 @@ def _replace_prevalidated_with_retry(
             if on_retry is not None:
                 on_retry(retry_count + 1, delay_seconds, error)
             if delay_seconds > 0.0:
+                try:
+                    import asyncio
+
+                    asyncio.get_running_loop()
+                    raise RuntimeError(
+                        "Synchronous atomic replace called from within a running asyncio event loop."
+                    )
+                except RuntimeError as e:
+                    if "Synchronous atomic replace" in str(e):
+                        raise
                 time.sleep(delay_seconds)
             retry_count += 1
 
