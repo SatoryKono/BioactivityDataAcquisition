@@ -27,6 +27,38 @@ from bioetl.interfaces.http.selected_run_status import load_selected_run_status
 pytestmark = pytest.mark.unit
 
 
+def test_explicit_standalone_is_not_applicable_without_mutating_report(tmp_path):
+    report = {
+        "identity": dict.fromkeys(
+            ("workflow_id", "workflow_run_id", "workflow_step_id")
+        )
+    }
+    original = copy.deepcopy(report)
+    row = linked_reconciliation_display(report, tmp_path)[0]
+    assert row["result"] == row["pins"] == row["limit"] == "N/A"
+    assert "Standalone" in row["meaning"]
+    assert report == original
+
+
+@pytest.mark.parametrize(
+    "identity", [{}, {"workflow_run_id": "parent"}, {"workflow_run_id": None}]
+)
+def test_absent_or_incomplete_binding_stays_unknown(tmp_path, identity):
+    assert (
+        linked_reconciliation_display({"identity": identity}, tmp_path)[0]["result"]
+        == "UNKNOWN"
+    )
+
+
+def test_persisted_pipeline_only_plan_is_not_applicable():
+    payload = {"plan": {"steps": [{"kind": "pipeline"}]}, "execution": []}
+    assert reconciliation_display(payload)[0]["result"] == "N/A"
+    payload["plan"]["steps"].append(
+        {"kind": "transform", "transform_name": "reconcile_foreign_keys"}
+    )
+    assert reconciliation_display(payload)[0]["result"] == "UNKNOWN"
+
+
 def _reconciliation(deleted=8, retained=2):
     return {
         "reconciliation_mode": "selected-snapshot",

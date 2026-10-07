@@ -26,6 +26,12 @@ def _count(value: object) -> str:
     return str(value) if type(value) is int and value >= 0 else "UNKNOWN"
 
 
+def _not_applicable(reason: str) -> list[dict[str, str]]:
+    row = dict.fromkeys(("step_id", "mode", "scope", "pins", "limit", "result"), "N/A")
+    row["meaning"] = reason
+    return [row]
+
+
 def _pin(recon: dict[str, object], side: str) -> tuple[str, str]:
     table = str(recon.get(f"{side}_table") or "UNKNOWN")
     layer = str(recon.get(f"{side}_layer") or "UNKNOWN")
@@ -91,7 +97,29 @@ def reconciliation_display(payload: dict[str, object]) -> list[dict[str, str]]:
             rows.append(unknown)
         else:
             rows.append(_display_row(step, recon))
-    return rows or unavailable_reconciliation("FK reconciliation evidence not recorded")
+    if rows:
+        return rows
+    if _plan_has_no_fk_comparison(payload.get("plan")):
+        return _not_applicable("No FK comparison in persisted workflow plan")
+    return unavailable_reconciliation("FK reconciliation evidence not recorded")
+
+
+def _plan_has_no_fk_comparison(plan: object) -> bool:
+    """Require a nonempty persisted plan containing only known non-FK steps."""
+    steps = plan.get("steps") if isinstance(plan, dict) else None
+    if not isinstance(steps, list) or not steps:
+        return False
+    return all(
+        isinstance(step, dict)
+        and (
+            step.get("kind") == "pipeline"
+            or (
+                step.get("kind") == "transform"
+                and step.get("transform_name") == "summarize_upstream_outputs"
+            )
+        )
+        for step in steps
+    )
 
 
 def _workflow_binding(report: dict[str, object]) -> dict[str, object]:
@@ -112,6 +140,17 @@ def linked_reconciliation_display(
     facts = _workflow_binding(report)
     bound = facts.get("identity")
     child = report.get("identity")
+    if (
+        isinstance(child, dict)
+        and all(
+            key in child and child[key] is None
+            for key in ("workflow_id", "workflow_run_id", "workflow_step_id")
+        )
+        and not facts
+    ):
+        return _not_applicable(
+            "Standalone pipeline; parent workflow FK comparison not applicable"
+        )
     if not isinstance(bound, dict) or not isinstance(child, dict):
         return unavailable_reconciliation("Parent workflow binding not recorded")
     name, run_id = bound.get("workflow_name"), bound.get("workflow_run_id")

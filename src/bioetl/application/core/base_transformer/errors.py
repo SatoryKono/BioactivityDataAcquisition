@@ -22,6 +22,9 @@ class FilteredOutError(DataQualityError):
         reason: str = "Record excluded by silver filters",
         *,
         details: JsonDict | None = None,
+        skip_quarantine: bool = False,
     ) -> None:
         super().__init__(reason)
         self.details = details or {}
+        # Provider sentinel rows are intentional exclusions, not invalid data.
+        self.skip_quarantine = skip_quarantine
