@@ -45,6 +45,17 @@ from tests.helpers.clock import FixedClock
 pytestmark = [pytest.mark.integration, pytest.mark.asyncio]
 
 
+def _successful_publication_enricher_inputs(config, tables, record):
+    """Capture every configured publication enricher, including Semantic Scholar."""
+    results = {}
+    for item in config.enrichers:
+        tables[item.silver_table or f"silver/{item.pipeline}"] = pa.Table.from_pylist(
+            [record]
+        )
+        results[item.pipeline] = EnrichmentResult.success(item.pipeline, 1, 1)
+    return results
+
+
 @pytest.mark.parametrize("family", ["activity", "molecule", "publication", "target"])
 @pytest.mark.parametrize(
     "relative_capture,relative_replay",
@@ -128,15 +139,9 @@ async def test_other_composite_families_replay_physical_outputs(
         for item in config.enrichers
     }
     if family == "publication":
-        # Every configured publication enricher, including Semantic Scholar,
-        # contributes a sealed input to this offline merge regression.
-        for item in config.enrichers:
-            tables[item.silver_table or f"silver/{item.pipeline}"] = (
-                pa.Table.from_pylist([record])
-            )
-            enrichment_results[item.pipeline] = EnrichmentResult.success(
-                item.pipeline, 1, 1
-            )
+        enrichment_results = _successful_publication_enricher_inputs(
+            config, tables, record
+        )
     dependency_results = {}
     # Activity's dual-key dependency must be part of the sealed replay inputs.
     dependencies = config.dependencies if family == "activity" else ()
