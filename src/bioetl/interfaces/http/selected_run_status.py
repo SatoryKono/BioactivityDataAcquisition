@@ -250,34 +250,14 @@ def load_selected_run_status(
     )
     if not path.is_file():
         return unavailable_status(pipeline, run_id, "UNKNOWN", "run_not_found")
-    try:
-        report, identity, assessment, availability, revision = _load_report_assessment(
-            path, pipeline, run_id
-        )
-    except _IdentityMismatchError:
-        return unavailable_status(pipeline, run_id, "ERROR", "identity_mismatch")
-    except _RevisionMissingError:
-        return unavailable_status(pipeline, run_id, "INCOMPLETE", "revision_missing")
-    except (ValueError, TypeError, UnicodeError):
-        return unavailable_status(pipeline, run_id, "ERROR", "evidence_corrupt")
-    except OSError:
-        return unavailable_status(
-            pipeline, run_id, _QUERY_ERROR, "evidence_read_failed"
-        )
-    summary = {
-        **{key: value for key, value in assessment.items() if key != "domains"},
-        "pipeline": pipeline,
-        "run_id": run_id,
-        "completed_at": identity.get("completed_at"),
-        "run_type": identity.get("run_type"),
-        "workflow_id": identity.get("workflow_id"),
-        "started_at": identity.get("started_at"),
-        "evaluation_at": report.get("assessment_at", identity.get("completed_at")),
-        "revision": revision,
-        "evidence_availability": availability,
-        "heartbeat_now": _NOT_EVALUATED,
-        "reason": "Saved run evidence; CURRENT and chart coverage are separate",
-    }
+    loaded_data = _try_load_report_assessment(path, pipeline, run_id)
+    if isinstance(loaded_data, dict):
+        return loaded_data
+    report, identity, assessment, availability, revision = loaded_data
+
+    summary = _build_selected_run_summary(
+        assessment, pipeline, run_id, identity, report, revision, availability
+    )
     probes, inventory_present = _artifact_probes(report, path.parent)
     if assessment.get("evidence_completeness") != "COMPLETE":
         probes.append(
@@ -308,6 +288,51 @@ def load_selected_run_status(
     result = _present_status(summary, report, domain_rows, readiness_fields)
     result["reconciliation_display"] = linked_reconciliation_display(report, root)
     return result
+
+
+def _try_load_report_assessment(
+    path: Path, pipeline: str, run_id: str
+) -> (
+    tuple[dict[str, object], dict[str, object], dict[str, object], str, str]
+    | dict[str, object]
+):
+    try:
+        return _load_report_assessment(path, pipeline, run_id)
+    except _IdentityMismatchError:
+        return unavailable_status(pipeline, run_id, "ERROR", "identity_mismatch")
+    except _RevisionMissingError:
+        return unavailable_status(pipeline, run_id, "INCOMPLETE", "revision_missing")
+    except (ValueError, TypeError, UnicodeError):
+        return unavailable_status(pipeline, run_id, "ERROR", "evidence_corrupt")
+    except OSError:
+        return unavailable_status(
+            pipeline, run_id, _QUERY_ERROR, "evidence_read_failed"
+        )
+
+
+def _build_selected_run_summary(
+    assessment: dict[str, object],
+    pipeline: str,
+    run_id: str,
+    identity: dict[str, object],
+    report: dict[str, object],
+    revision: str,
+    availability: str,
+) -> dict[str, object]:
+    return {
+        **{key: value for key, value in assessment.items() if key != "domains"},
+        "pipeline": pipeline,
+        "run_id": run_id,
+        "completed_at": identity.get("completed_at"),
+        "run_type": identity.get("run_type"),
+        "workflow_id": identity.get("workflow_id"),
+        "started_at": identity.get("started_at"),
+        "evaluation_at": report.get("assessment_at", identity.get("completed_at")),
+        "revision": revision,
+        "evidence_availability": availability,
+        "heartbeat_now": _NOT_EVALUATED,
+        "reason": "Saved run evidence; CURRENT and chart coverage are separate",
+    }
 
 
 def _merge_active_diagnostics(

@@ -135,20 +135,7 @@ class PubMedPublicationTermPayloadEnricher:
         self._pubmed_source = pubmed_source
         self._logger = logger
 
-    async def enrich_many(
-        self, records: Sequence[BronzeRecord]
-    ) -> Sequence[BronzeRecord]:
-        pmids: list[str] = []
-        seen: set[str] = set()
-        for record in records:
-            pmid = publication_pubmed_id(record)
-            if pmid is None or pmid in seen:
-                continue
-            seen.add(pmid)
-            pmids.append(pmid)
-        if not pmids:
-            return list(records)
-
+    async def _fetch_pubmed_records(self, pmids: list[str]) -> dict[str, BronzeRecord]:
         pubmed_by_pmid: dict[str, BronzeRecord] = {}
         try:
             async with AsyncExitStack() as stack:
@@ -170,8 +157,14 @@ class PubMedPublicationTermPayloadEnricher:
                 error=str(exc),
                 pmid_count=len(pmids),
             )
-            return list(records)
+            return {}
+        return pubmed_by_pmid
 
+    def _apply_enrichment(
+        self, records: Sequence[BronzeRecord], pubmed_by_pmid: dict[str, BronzeRecord]
+    ) -> list[BronzeRecord]:
+        if not pubmed_by_pmid:
+            return list(records)
         enriched: list[BronzeRecord] = []
         for record in records:
             pmid = publication_pubmed_id(record)
@@ -193,6 +186,23 @@ class PubMedPublicationTermPayloadEnricher:
                 attached["keywords"] = keyword_terms
             enriched.append(attached)
         return enriched
+
+    async def enrich_many(
+        self, records: Sequence[BronzeRecord]
+    ) -> Sequence[BronzeRecord]:
+        pmids: list[str] = []
+        seen: set[str] = set()
+        for record in records:
+            pmid = publication_pubmed_id(record)
+            if pmid is None or pmid in seen:
+                continue
+            seen.add(pmid)
+            pmids.append(pmid)
+        if not pmids:
+            return list(records)
+
+        pubmed_by_pmid = await self._fetch_pubmed_records(pmids)
+        return self._apply_enrichment(records, pubmed_by_pmid)
 
 
 def create_pubmed_publication_term_enricher(
