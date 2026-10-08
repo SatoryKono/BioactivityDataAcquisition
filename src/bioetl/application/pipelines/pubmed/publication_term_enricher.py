@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
 from contextlib import AsyncExitStack
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, TypeVar, overload
 
 import defusedxml.ElementTree as defused_ET
 from defusedxml.common import DefusedXmlException
@@ -19,16 +19,26 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import FilterableDataSourcePort, LoggerPort
     from bioetl.domain.types import BronzeRecord
 
+_DefaultT = TypeVar("_DefaultT")
+
 
 class _XmlElement(Protocol):
     @property
     def text(self) -> str | None: ...
 
-    def get(self, key: str, default: str | None = None) -> str | None: ...
+    @overload
+    def get(self, key: str, default: None = None) -> str | None: ...
 
-    def find(self, path: str) -> _XmlElement | None: ...
+    @overload
+    def get(self, key: str, default: _DefaultT) -> str | _DefaultT: ...
 
-    def findall(self, path: str) -> Iterable[_XmlElement]: ...
+    def find(
+        self, path: str, namespaces: dict[str, str] | None = None
+    ) -> _XmlElement | None: ...
+
+    def findall(
+        self, path: str, namespaces: dict[str, str] | None = None
+    ) -> Iterable[_XmlElement]: ...
 
 
 __all__ = [
