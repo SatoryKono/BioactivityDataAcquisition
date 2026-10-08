@@ -28,13 +28,13 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `codex/pr12096-closeout-20261007`
-- Source commit: `21bd49f1c4e6b4fdd970399b1af8ce8d4522e888`
-- Source run id: `local-local-verify-pr12096-20261008-final4`
+- Source commit: `780933d39a5503b9dbb92ff6f72baa56c7b1c475`
+- Source run id: `local-local-verify-pr12096-20261009-final5`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `f4fb9d75806722dc93740f2f7f574b3ac63c7ca696233cd59bdf328e646ce261`
+- Source tree sha256: `a75f2e7e70e10f389b0550b7c051df6967a6e4dd079326983ecbf2eadf99a174`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-10-08T21:21:57.919042+00:00`
+- Refreshed at (UTC): `2026-10-08T22:37:08.406882+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -74,31 +74,31 @@ trend evidence only.
 
 | Rank | Duration (s) | Test | Source |
 |---:|---:|---|---|
-| 1 | `35.088` | `tests.unit.repo_backed.scripts.ai.mcp.test_repo_env_loaders::test_bash_keeps_openai_and_openrouter_credentials_separate` | `repo-backed-unit-tooling.xml` |
-| 2 | `24.675` | `tests.integration.composite.test_assay_snapshot_merge_replay::test_assay_replay_compares_physical_production_outputs` | `integration.xml` |
-| 3 | `21.694` | `tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures::test_cached_populated_isolated_registry_contains_pipeline_factories` | `repo-backed-unit-product.xml` |
-| 4 | `20.009` | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers::test_filter_options_deadline_does_not_send_late_success` | `unit-other.xml` |
-| 5 | `19.474` | `tests.smoke.test_smoke.TestCoreImports::test_composition_imports` | `smoke.xml` |
-| 6 | `15.564` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `unit-scripts-tooling-debt-governance.xml` |
-| 7 | `11.175` | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline::test_chembl_target_component_happy_path` | `integration.xml` |
-| 8 | `11.063` | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path` | `integration.xml` |
-| 9 | `10.73` | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_happy_path` | `integration.xml` |
-| 10 | `10.719` | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_source_fields` | `integration.xml` |
+| 1 | `258.827` | `tests.smoke.test_control_plane_rollout_smoke::test_control_plane_rollout_smoke_emits_artifacts_and_aggregate_metrics` | `smoke.xml` |
+| 2 | `35.096` | `tests.unit.repo_backed.scripts.ai.mcp.test_repo_env_loaders::test_bash_keeps_openai_and_openrouter_credentials_separate` | `repo-backed-unit-tooling.xml` |
+| 3 | `24.144` | `tests.smoke.test_smoke.TestDevDependencies::test_dev_dependency_importable[hypothesis]` | `smoke.xml` |
+| 4 | `20.013` | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers::test_filter_options_deadline_does_not_send_late_success` | `unit-other.xml` |
+| 5 | `17.129` | `tests.smoke.test_smoke.TestRuntimeDependencies::test_runtime_dependency_importable[prometheus_client]` | `smoke.xml` |
+| 6 | `15.557` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `unit-scripts-tooling-debt-governance.xml` |
+| 7 | `14.414` | `tests.smoke.test_smoke.TestRuntimeDependencies::test_runtime_dependency_importable[structlog]` | `smoke.xml` |
+| 8 | `11.612` | `tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures::test_cached_populated_isolated_registry_contains_pipeline_factories` | `repo-backed-unit-product.xml` |
+| 9 | `11.157` | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline::test_chembl_target_component_happy_path` | `integration.xml` |
+| 10 | `11.047` | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path` | `integration.xml` |
 
 ### Top Slow Zones
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.unit.repo_backed.scripts.ai.mcp.test_repo_env_loaders` | 1 | 35.088 | 35.088 |
-| 2 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 3 | 34.026 | 15.564 |
-| 3 | `tests.integration.composite.test_assay_snapshot_merge_replay` | 1 | 24.675 | 24.675 |
-| 4 | `tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures` | 1 | 21.694 | 21.694 |
-| 5 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 3 | 21.64 | 10.507 |
-| 6 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 21.449 | 10.73 |
-| 7 | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers` | 1 | 20.009 | 20.009 |
-| 8 | `tests.smoke.test_smoke.TestCoreImports` | 1 | 19.474 | 19.474 |
-| 9 | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline` | 1 | 11.175 | 11.175 |
-| 10 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline` | 1 | 11.063 | 11.063 |
+| 1 | `tests.smoke.test_control_plane_rollout_smoke` | 1 | 258.827 | 258.827 |
+| 2 | `tests.unit.repo_backed.scripts.ai.mcp.test_repo_env_loaders` | 1 | 35.096 | 35.096 |
+| 3 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 3 | 33.82 | 15.557 |
+| 4 | `tests.smoke.test_smoke.TestDevDependencies` | 2 | 32.329 | 24.144 |
+| 5 | `tests.smoke.test_smoke.TestRuntimeDependencies` | 2 | 31.543 | 17.129 |
+| 6 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 21.454 | 10.729 |
+| 7 | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers` | 1 | 20.013 | 20.013 |
+| 8 | `tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures` | 1 | 11.612 | 11.612 |
+| 9 | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline` | 1 | 11.157 | 11.157 |
+| 10 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline` | 1 | 11.047 | 11.047 |
 
 ## Refresh Procedure
 
