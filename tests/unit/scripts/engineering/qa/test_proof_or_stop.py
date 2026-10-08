@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -15,13 +16,28 @@ from memory.proof import (
     assemble_bundle,
     build_receipt,
     canonical_digest,
+    command_set_hash,
     discover_context,
     emit_receipt_from_environment,
     load_policy,
     load_schema,
     verify_bundle,
 )
-from memory.proof_cli import main
+from memory.proof_cli import (
+    _mutate_cross_scope,
+    _mutate_degraded_full,
+    _mutate_dirty_full,
+    _mutate_failed_as_pass,
+    _mutate_invalid_skip,
+    _mutate_missing,
+    _mutate_partial,
+    _mutate_sharded_ci,
+    _mutate_stale_head,
+    _mutate_tampered,
+    _mutate_unavailable,
+    _mutate_vendor_override,
+    main,
+)
 from tests.helpers.clock import FIXED_TEST_TIME
 from tests.helpers.isolated_git import init_tracked_fixture_repo
 
@@ -275,22 +291,108 @@ def test_pilot_covers_adversarial_matrix(proof_repo: Path, tmp_path: Path) -> No
     assert output.with_suffix(".md").is_file()
 
 
-from typing import Any
-from memory.proof_cli import (
-    _mutate_stale_head,
-    _mutate_missing,
-    _mutate_failed_as_pass,
-    _mutate_invalid_skip,
-    _mutate_unavailable,
-    _mutate_tampered,
-    _mutate_vendor_override,
-    _mutate_cross_scope,
-    _mutate_dirty_full,
-    _mutate_sharded_ci,
-    _mutate_degraded_full,
-    _mutate_partial,
+def _full_suite_argv() -> list[str]:
+    return [
+        "python",
+        "-m",
+        "scripts.engineering.dev",
+        "run-tests",
+        "all",
+        "--junitxml=reports/full.xml",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/full-suite",
+        "--vcr-record=none",
+    ]
+
+
+def test_canonical_full_suite_wrapper_is_qualified_in_ci(proof_repo: Path) -> None:
+    bundle = _bundle(proof_repo)
+    receipt = bundle["receipts"][0]
+    receipt["argv"] = _full_suite_argv()
+    receipt["command"] = " ".join(receipt["argv"])
+    _resign(bundle)
+    result = verify_bundle(
+        bundle=bundle, repo_root=proof_repo, policy=load_policy(), schema=load_schema()
+    )
+    assert result.outcome == "ADMIT"
+    assert result.claim_qualified is True
+
+
+@pytest.mark.parametrize(
+    "trailing",
+    [
+        ["-k", "one_test"],
+        ["-m", "unit"],
+        ["tests/unit/"],
+        ["--collect-only"],
+        ["--ignore=tests/integration"],
+        ["--vcr-record=all"],
+        [";", "true"],
+        ["--junitxml=other.xml"],
+        ["-p", "no:cacheprovider"],
+    ],
 )
-from memory.proof import command_set_hash
+def test_full_suite_wrapper_rejects_selection_or_extra_arguments(
+    proof_repo: Path, trailing: list[str]
+) -> None:
+    bundle = _bundle(proof_repo)
+    receipt = bundle["receipts"][0]
+    receipt["argv"] = _full_suite_argv() + trailing
+    receipt["command"] = " ".join(receipt["argv"])
+    _resign(bundle)
+    result = verify_bundle(
+        bundle=bundle, repo_root=proof_repo, policy=load_policy(), schema=load_schema()
+    )
+    assert result.outcome == "STOP"
+    assert "command_not_authorized:tests" in result.errors
+
+
+@pytest.mark.parametrize(
+    "damage",
+    [
+        "missing_argv",
+        "different_argv",
+        "different_lane",
+        "prefix_suffix",
+        "missing_junit",
+        "missing_basetemp",
+        "missing_offline",
+        "missing_plugin",
+        "malformed_quotes",
+    ],
+)
+def test_full_suite_wrapper_is_fail_closed(proof_repo: Path, damage: str) -> None:
+    bundle = _bundle(proof_repo)
+    receipt = bundle["receipts"][0]
+    argv = _full_suite_argv()
+    if damage == "different_lane":
+        argv[4] = "unit"
+    elif damage == "prefix_suffix":
+        argv[4] = "all-untrusted"
+    elif damage == "missing_junit":
+        argv.remove("--junitxml=reports/full.xml")
+    elif damage == "missing_basetemp":
+        argv.remove("--basetemp=/tmp/full-suite")
+    elif damage == "missing_offline":
+        argv.remove("--vcr-record=none")
+    elif damage == "missing_plugin":
+        argv.remove("-p")
+        argv.remove("no:cacheprovider")
+    receipt["command"] = " ".join(argv)
+    receipt["argv"] = argv
+    if damage == "missing_argv":
+        receipt["argv"] = []
+    elif damage == "different_argv":
+        receipt["argv"] = [*argv, "--collect-only"]
+    elif damage == "malformed_quotes":
+        receipt["command"] += " '"
+    _resign(bundle)
+    result = verify_bundle(
+        bundle=bundle, repo_root=proof_repo, policy=load_policy(), schema=load_schema()
+    )
+    assert result.outcome == "STOP"
+    assert "command_not_authorized:tests" in result.errors
 
 
 def _mock_bundle() -> dict[str, Any]:
