@@ -163,10 +163,7 @@ def _is_repository_env_comment_start(
     value: str, index: int, character: str, quote: str | None
 ) -> bool:
     return (
-        character == "#"
-        and quote is None
-        and index > 0
-        and value[index - 1].isspace()
+        character == "#" and quote is None and index > 0 and value[index - 1].isspace()
     )
 
 
