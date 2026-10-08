@@ -79,7 +79,7 @@ bioetl workflow status <NAME> [OPTIONS]
 | `--only-steps a,b` | Выполнить только указанные шаги и их обязательные зависимости |
 | `--run-type` | Override для `incremental`, `backfill`, `rebuild` |
 | `--start-offset` | Override для `start_offset` у pipeline steps |
-| `--reconciliation-mode` | Override reconciliation mode у pipeline steps: `complete-reference` (default) или `selected-snapshot` |
+| `--reconciliation-mode` | Override reconciliation mode у pipeline steps: `complete-reference` (default) или `selected-snapshot`. `complete-reference` требует полного соответствия внешних ключей, тогда как `selected-snapshot` допускает использование ограниченного подмножества данных (bounded snapshots) для валидации. Пример: `--reconciliation-mode selected-snapshot` |
 | `--limit` | Override для `limit` у pipeline steps |
 | `--input-csv` | Override для CSV filter input у pipeline steps |
 | `--filter-column` | Override для CSV filter column у pipeline steps |
