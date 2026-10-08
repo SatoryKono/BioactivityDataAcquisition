@@ -107,7 +107,7 @@ class TestBronzeMixins:
         assert host._list_batches_sync("chembl", "activity") == []
         date_dir = tmp_path / "chembl" / "activity" / "2020-01-01"
         date_dir.mkdir(parents=True)
-        stale = date_dir / "batch.jsonl.zst"
+        stale = date_dir / "batch_2020-01-01_001.jsonl.zst"
         stale.write_bytes(b"x")
         assert host._is_old_date_dir(date_dir, "2021-01-01") is True
         previewed = host.preview_cleanup("chembl", "activity")

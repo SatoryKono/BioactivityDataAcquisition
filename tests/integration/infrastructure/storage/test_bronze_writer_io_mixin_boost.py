@@ -360,7 +360,9 @@ class TestPreviewCleanupBronze:
         provider_path = tmp_path / "chembl" / "activity"
         provider_path.mkdir(parents=True)
         (provider_path / "2025-01-15").mkdir()
-        (provider_path / "2025-01-15" / "batch_2024-12-01_001.jsonl.zst").write_bytes(b"data")
+        (provider_path / "2025-01-15" / "batch_2024-12-01_001.jsonl.zst").write_bytes(
+            b"data"
+        )
 
         result = mixin.preview_cleanup(provider="chembl", entity="activity")
 

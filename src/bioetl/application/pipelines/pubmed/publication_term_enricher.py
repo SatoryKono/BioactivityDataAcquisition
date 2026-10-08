@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from contextlib import AsyncExitStack
 from typing import TYPE_CHECKING
+from xml.etree.ElementTree import Element
 
 import defusedxml.ElementTree as defused_ET
 from defusedxml.common import DefusedXmlException
@@ -26,6 +27,29 @@ __all__ = [
 ]
 
 
+def _mesh_qualifiers(heading: Element) -> list[dict[str, str]]:
+    qualifiers: list[dict[str, str]] = []
+    for qualifier in heading.findall("QualifierName"):
+        qualifier_name = (qualifier.text or "").strip()
+        if qualifier_name:
+            qualifiers.append({"name": qualifier_name})
+    return qualifiers
+
+
+def _mesh_heading_entry(heading: Element) -> dict[str, object] | None:
+    descriptor = heading.find("DescriptorName")
+    if descriptor is None:
+        return None
+    name = (descriptor.text or "").strip()
+    if not name:
+        return None
+    return {
+        "descriptor_name": name,
+        "descriptor_ui": descriptor.get("UI"),
+        "qualifiers": _mesh_qualifiers(heading),
+    }
+
+
 def parse_pubmed_mesh_xml(
     xml_text: str,
 ) -> tuple[list[dict[str, object]], list[str]]:
@@ -40,24 +64,9 @@ def parse_pubmed_mesh_xml(
 
     headings: list[dict[str, object]] = []
     for heading in root.findall(".//MeshHeading"):
-        descriptor = heading.find("DescriptorName")
-        if descriptor is None:
-            continue
-        name = (descriptor.text or "").strip()
-        if not name:
-            continue
-        qualifiers: list[dict[str, str]] = []
-        for qualifier in heading.findall("QualifierName"):
-            qualifier_name = (qualifier.text or "").strip()
-            if qualifier_name:
-                qualifiers.append({"name": qualifier_name})
-        headings.append(
-            {
-                "descriptor_name": name,
-                "descriptor_ui": descriptor.get("UI"),
-                "qualifiers": qualifiers,
-            }
-        )
+        entry = _mesh_heading_entry(heading)
+        if entry is not None:
+            headings.append(entry)
 
     keywords: list[str] = []
     for keyword in root.findall(".//Keyword"):

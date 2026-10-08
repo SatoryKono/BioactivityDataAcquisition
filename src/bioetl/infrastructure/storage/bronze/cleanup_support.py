@@ -13,16 +13,19 @@ from __future__ import annotations
 import fnmatch
 import os
 import stat
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 
 __all__ = [
     "date_dir_name_is_older",
+    "find_old_date_dirs",
     "is_fully_resolved",
     "is_owned_artifact",
     "is_within_root",
     "iter_safe_child_dirs",
     "real_root",
+    "safe_named_child_dir",
     "safe_rmdir",
     "safe_unlink",
     "scan_dir_entries",
@@ -47,9 +50,11 @@ _DATE_DIR_FORMAT = "%Y-%m-%d"
 _REPARSE_POINT_ATTR = 0x400
 
 # POSIX anchored operations: dir_fd support is unavailable on Windows.
-_ANCHORED_OPS = (
-    hasattr(os, "O_NOFOLLOW")
-    and hasattr(os, "O_DIRECTORY")
+_O_DIRECTORY = getattr(os, "O_DIRECTORY", 0)
+_O_NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
+_ANCHORED_OPS = bool(
+    _O_DIRECTORY
+    and _O_NOFOLLOW
     and os.unlink in os.supports_dir_fd
     and os.stat in os.supports_dir_fd
 )
@@ -135,7 +140,7 @@ def scan_dir_entries(parent: Path) -> list[os.DirEntry[str]] | None:
 def iter_safe_child_dirs(
     parent: Path,
     *,
-    on_skip: object | None = None,
+    on_skip: Callable[[str, str], None] | None = None,
 ) -> list[Path]:
     """List direct child directories without following links/reparse points."""
     entries = scan_dir_entries(parent)
@@ -156,9 +161,83 @@ def iter_safe_child_dirs(
     return dirs
 
 
-def _notify_skip(on_skip: object | None, path: object, reason: str) -> None:
-    if callable(on_skip):
+def _notify_skip(
+    on_skip: Callable[[str, str], None] | None, path: object, reason: str
+) -> None:
+    if on_skip is not None:
         on_skip(str(path), reason)
+
+
+def safe_named_child_dir(
+    parent: Path,
+    name: str,
+    root_real: Path,
+    *,
+    on_skip: Callable[[str, str], None] | None = None,
+) -> Path | None:
+    """Resolve an explicitly named child dir, refusing links/escapes."""
+    child = parent / name
+    try:
+        st = child.lstat()
+    except OSError:
+        return None
+    if not stat.S_ISDIR(st.st_mode) or stat_is_link_or_reparse(st):
+        _notify_skip(on_skip, child, "link_or_reparse")
+        return None
+    if not is_within_root(child, root_real):
+        _notify_skip(on_skip, child, "outside_root")
+        return None
+    return child
+
+
+def find_old_date_dirs(
+    base_path: Path,
+    *,
+    flat_structure: bool,
+    cutoff_str: str,
+    provider: str | None = None,
+    entity: str | None = None,
+    on_skip: Callable[[str, str], None] | None = None,
+    on_flat_filter: Callable[[], None] | None = None,
+) -> list[Path]:
+    """Find canonical date dirs older than cutoff in flat or nested layout."""
+    if not base_path.exists():
+        return []
+    root_real = real_root(base_path)
+
+    if flat_structure:
+        if provider or entity:
+            if on_flat_filter is not None:
+                on_flat_filter()
+            return []
+        return [
+            date_dir
+            for date_dir in iter_safe_child_dirs(base_path, on_skip=on_skip)
+            if date_dir_name_is_older(date_dir.name, cutoff_str)
+        ]
+
+    provider_dirs = _scope_child_dirs(base_path, provider, root_real, on_skip)
+    old_dirs: list[Path] = []
+    for provider_dir in provider_dirs:
+        entity_dirs = _scope_child_dirs(provider_dir, entity, root_real, on_skip)
+        for entity_dir in entity_dirs:
+            for date_dir in iter_safe_child_dirs(entity_dir, on_skip=on_skip):
+                if date_dir_name_is_older(date_dir.name, cutoff_str):
+                    old_dirs.append(date_dir)
+    return old_dirs
+
+
+def _scope_child_dirs(
+    parent: Path,
+    name: str | None,
+    root_real: Path,
+    on_skip: Callable[[str, str], None] | None,
+) -> list[Path]:
+    """Resolve a named scope dir or enumerate all safe child dirs."""
+    if name is None:
+        return iter_safe_child_dirs(parent, on_skip=on_skip)
+    resolved = safe_named_child_dir(parent, name, root_real, on_skip=on_skip)
+    return [resolved] if resolved is not None else []
 
 
 def safe_unlink(file_path: Path, root_real: Path) -> bool:
@@ -175,9 +254,7 @@ def _unlink_anchored(file_path: Path, root_real: Path) -> bool:
     ):
         return False
     try:
-        parent_fd = os.open(
-            file_path.parent, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
-        )
+        parent_fd = os.open(file_path.parent, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW)
     except OSError:
         return False
     try:

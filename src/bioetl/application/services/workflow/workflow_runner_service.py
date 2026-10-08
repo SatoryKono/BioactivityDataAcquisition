@@ -179,6 +179,31 @@ class WorkflowRunnerService:
                 step_completed_callback=step_completed_callback,
             )
 
+        return self._finalize_run_result(
+            config=config,
+            state=state,
+            workflow_context_labels=workflow_context_labels,
+            workflow_run_id=workflow_run_id,
+            manifest_id=manifest_id,
+            execution_fingerprint=execution_fingerprint,
+            resumed=resumed,
+            started_at=started_at,
+            started_monotonic=started_monotonic,
+        )
+
+    def _finalize_run_result(
+        self,
+        *,
+        config: WorkflowConfig,
+        state: WorkflowExecutionState,
+        workflow_context_labels: Mapping[str, str],
+        workflow_run_id: str | None,
+        manifest_id: str | None,
+        execution_fingerprint: str | None,
+        resumed: bool,
+        started_at: datetime,
+        started_monotonic: float,
+    ) -> WorkflowRunExecutionResult:
         record_workflow_run_metrics(
             metrics=self.metrics,
             workflow_name=config.name,

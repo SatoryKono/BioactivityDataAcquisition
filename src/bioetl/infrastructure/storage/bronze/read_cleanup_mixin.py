@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import asyncio
-import stat
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
@@ -15,14 +14,12 @@ import zstandard as zstd
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.storage.bronze.cleanup_support import (
     date_dir_name_is_older,
+    find_old_date_dirs,
     is_owned_artifact,
-    is_within_root,
-    iter_safe_child_dirs,
     real_root,
     safe_rmdir,
     safe_unlink,
     scan_dir_entries,
-    stat_is_link_or_reparse,
     validate_scope_filter,
 )
 
@@ -120,66 +117,19 @@ class BronzeWriterReadCleanupMixin:
         entity: str | None = None,
     ) -> list[Path]:
         """Find date directories older than cutoff without following links."""
-        if not self.base_path.exists():
-            return []
-        root_real = real_root(self.base_path)
-        on_skip = self._log_cleanup_skip
-
-        if self._flat_structure:
-            if provider or entity:
-                self._logger.warning(
-                    "bronze_cleanup_flat_scope_filter",
-                    provider=provider,
-                    entity=entity,
-                )
-                return []
-            return [
-                date_dir
-                for date_dir in iter_safe_child_dirs(self.base_path, on_skip=on_skip)
-                if date_dir_name_is_older(date_dir.name, cutoff_str)
-            ]
-
-        if provider is not None:
-            provider_dirs = [
-                self._safe_named_child_dir(self.base_path, provider, root_real)
-            ]
-        else:
-            provider_dirs = iter_safe_child_dirs(self.base_path, on_skip=on_skip)
-
-        old_dirs: list[Path] = []
-        for provider_dir in provider_dirs:
-            if provider_dir is None:
-                continue
-            if entity is not None:
-                entity_dirs = [
-                    self._safe_named_child_dir(provider_dir, entity, root_real)
-                ]
-            else:
-                entity_dirs = iter_safe_child_dirs(provider_dir, on_skip=on_skip)
-            for entity_dir in entity_dirs:
-                if entity_dir is None:
-                    continue
-                for date_dir in iter_safe_child_dirs(entity_dir, on_skip=on_skip):
-                    if date_dir_name_is_older(date_dir.name, cutoff_str):
-                        old_dirs.append(date_dir)
-        return old_dirs
-
-    def _safe_named_child_dir(
-        self, parent: Path, name: str, root_real: Path
-    ) -> Path | None:
-        """Resolve an explicitly named child dir, refusing links/escapes."""
-        child = parent / name
-        try:
-            st = child.lstat()
-        except OSError:
-            return None
-        if not stat.S_ISDIR(st.st_mode) or stat_is_link_or_reparse(st):
-            self._log_cleanup_skip(str(child), "link_or_reparse")
-            return None
-        if not is_within_root(child, root_real):
-            self._log_cleanup_skip(str(child), "outside_root")
-            return None
-        return child
+        return find_old_date_dirs(
+            self.base_path,
+            flat_structure=self._flat_structure,
+            cutoff_str=cutoff_str,
+            provider=provider,
+            entity=entity,
+            on_skip=self._log_cleanup_skip,
+            on_flat_filter=lambda: self._logger.warning(
+                "bronze_cleanup_flat_scope_filter",
+                provider=provider,
+                entity=entity,
+            ),
+        )
 
     def _is_old_date_dir(self, path: Path, cutoff_str: str) -> bool:
         """Check if path is a canonical date directory older than cutoff."""
