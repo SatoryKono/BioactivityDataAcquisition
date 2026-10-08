@@ -138,7 +138,7 @@ jobs:
         uses: ./.github/actions/setup-python-uv
         with:
           python-version: "3.12"
-          uv-extras: "dev docs"
+          uv-extras: "dev"
 
       - name: Validate repository root allowlist
         id: cleanliness
@@ -187,7 +187,7 @@ jobs:
         if: needs['classify-changes'].outputs['compiled-artifacts'] == 'required'
         run: |
           set -euo pipefail
-          found="$(git ls-files -- ':(glob)**/*.pyc' ':(glob)**/__pycache__/**' | head -n 1 || true)"
+          found="$(find . \( -path './.venv' -o -path './.git' \) -prune -o \( -name '*.pyc' -o -name '__pycache__' \) -print -quit)"
           if [[ -n "$found" ]]; then
             echo "::error::compiled artifact found: $found"
             exit 1
@@ -270,10 +270,8 @@ jobs:
           OUTCOMES="$(tr -d '\r\n' < reports/quality/lane-step-outcomes.json)"
           export OUTCOMES
           uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results assert-steps \
-            --decision-matrix DECISION_MATRIX \
-            --decision-matrix-env \
-            --outcomes OUTCOMES \
-            --outcomes-env \
+            --decision-matrix-env DECISION_MATRIX \
+            --outcomes-env OUTCOMES \
             --owner "$LANE_OWNER"
 
   class-lane:
@@ -673,10 +671,8 @@ jobs:
           OUTCOMES="$(tr -d '\r\n' < reports/quality/lane-step-outcomes.json)"
           export OUTCOMES
           uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results assert-steps \
-            --decision-matrix DECISION_MATRIX \
-            --decision-matrix-env \
-            --outcomes OUTCOMES \
-            --outcomes-env \
+            --decision-matrix-env DECISION_MATRIX \
+            --outcomes-env OUTCOMES \
             --owner "$LANE_OWNER"
 
   pr-gate-complete:
@@ -717,8 +713,7 @@ jobs:
           test "${{ needs['classify-changes'].result }}" = "success"
           mkdir -p reports/quality
           uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \
-            --decision-matrix DECISION_MATRIX \
-            --decision-matrix-env \
+            --decision-matrix-env DECISION_MATRIX \
             --head-sha "${EXPECTED_HEAD_SHA}" \
             --job-result "fast-governance=${FAST_RESULT}" \
             --job-result "class-lane=${CLASS_RESULT}" \

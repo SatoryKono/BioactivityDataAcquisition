@@ -1,8 +1,9 @@
-import pytest
-pytestmark = [pytest.mark.repo_backed]
 """Unit tests for coordinator job-result mapping."""
 
 from __future__ import annotations
+
+import pytest
+pytestmark = [pytest.mark.repo_backed]
 
 from pathlib import Path
 

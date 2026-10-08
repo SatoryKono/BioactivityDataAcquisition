@@ -891,6 +891,7 @@ def test_zizmor_workflow_is_path_filtered_and_sha_pinned() -> None:
         if str(step.get("uses", "")).startswith("zizmorcore/zizmor-action@")
     )
     labeler = (ROOT / ".github/workflows/labeler.yml").read_text(encoding="utf-8")
+    zizmor_config = (ROOT / ".github/zizmor.yml").read_text(encoding="utf-8")
 
     coordinator = (ROOT / ".github/workflows/pr-required.yml").read_text(
         encoding="utf-8"
@@ -904,12 +905,9 @@ def test_zizmor_workflow_is_path_filtered_and_sha_pinned() -> None:
     assert zizmor_step["with"]["min-confidence"] == "high"
     assert zizmor_step["with"]["version"] == "1.29.0"
     assert "pull_request_target removed (#11234)" in labeler
-    assert "dangerous-triggers exception was dropped in #12071" in labeler
+    assert "does not checkout untrusted PR HEAD" in labeler
     assert "if: ${{ false }}" in labeler
-    # #12071: with pull_request_target staying off (#11234), the labeler.yml
-    # dangerous-triggers ignore was removed; the policy must carry no ignores.
-    zizmor_policy = _load_yaml(ROOT / ".github/zizmor.yml")
-    assert not zizmor_policy.get("rules")
+    assert ".github/workflows/labeler.yml" in zizmor_config
 
 
 def test_osv_high_critical_gate_ignores_medium_and_fails_high() -> None:

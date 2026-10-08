@@ -27,11 +27,11 @@ from bioetl.domain.normalization._reference_id_support import (
     _REACTOME_PREFIXES,
     _REACTOME_RE,
     _ROR_PREFIXES,
-    _ROR_RE,
     _S2_HEX_RE,
     _SEMANTIC_SCHOLAR_PREFIXES,
     _UNIPROT_ACCESSION_RE,
     _canonical_or_text,
+    _normalized_text,
     _strip_prefixes,
 )
 from bioetl.domain.value_objects.identifiers import PubChemCid
@@ -164,18 +164,13 @@ def normalize_semantic_scholar_reference_id(value: object) -> object:
     return _canonical_or_text(value, normalizer=_normalize_semantic_scholar_text)
 
 
-def _normalize_ror_text(value: str) -> str | None:
-    candidate = _strip_prefixes(value, _ROR_PREFIXES)
-    return (
-        f"https://ror.org/{candidate.casefold()}"
-        if _ROR_RE.fullmatch(candidate)
-        else None
-    )
-
-
 def normalize_ror_reference_id(value: object) -> object:
-    """Normalize ROR IDs and ROR URLs to canonical ``https://ror.org/...``."""
-    return _canonical_or_text(value, normalizer=_normalize_ror_text)
+    """Normalize ROR references to canonical ``https://ror.org/...`` URLs."""
+    text = _normalized_text(value)
+    if text is None:
+        return None if isinstance(value, str) or value is None else value
+    suffix = _strip_prefixes(text, _ROR_PREFIXES).casefold()
+    return f"https://ror.org/{suffix}" if suffix else None
 
 
 def _normalize_chembl_text(value: str) -> str | None:

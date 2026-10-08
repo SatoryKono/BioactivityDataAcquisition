@@ -126,11 +126,7 @@ class WorkflowRunnerService:
         created_at_factory: Callable[[], datetime] | None = None,
         restored_step_outputs: Mapping[str, object] | None = None,
     ) -> WorkflowRunExecutionResult:
-        """Run a workflow config; a failed step only skips steps that depend on it.
-
-        Independent steps still run; steps declaring a failed (or blocked) step
-        in ``depends_on`` are failure-skipped instead of executed.
-        """
+        """Run a workflow config and stop on first failed step."""
         started_at = current_utc_time()
         started_monotonic = perf_counter()
         self.record_expected_pipeline_metrics(config)
