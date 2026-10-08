@@ -184,11 +184,12 @@ def test_runtime_import_scc_uses_shared_canonical_collector() -> None:
         for failure in report.failures
     )
     selected = _static_runtime_edges(report)
+    ownership_edges = set(report.projections.ownership)
     assert selected
     assert all(
         edge.resolution == RESOLUTION_RESOLVED
         and edge.syntax in {SYNTAX_IMPORT, SYNTAX_IMPORT_FROM}
-        and edge in report.projections.ownership
+        and edge in ownership_edges
         for edge in selected
     )
 
