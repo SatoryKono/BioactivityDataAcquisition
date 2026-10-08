@@ -57,7 +57,8 @@ async def _attach_pubmed_payloads(
     return [replacements.get(id(record), record) for record in records]
 
 
-async def yield_terms_from_publications(
+async def yield_terms_from_publications(  # noqa: C901
+
     publications: AsyncIterator[BronzeRecord],
     *,
     limit: int | None,

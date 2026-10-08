@@ -225,7 +225,8 @@ def _current_child_probe(
     }
 
 
-def _artifact_probes(
+def _artifact_probes(  # noqa: C901
+
     report: Mapping[str, object], run_root: Path
 ) -> tuple[list[Mapping[str, object]], bool]:
     artifacts = report.get("artifacts")

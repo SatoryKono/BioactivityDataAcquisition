@@ -227,7 +227,8 @@ def _present_status(
     }
 
 
-def load_selected_run_status(
+def load_selected_run_status(  # noqa: C901
+
     *,
     pipeline: str,
     run_id: str,

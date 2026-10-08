@@ -219,7 +219,8 @@ def _verify_snapshot_objects(manifest: object) -> bool | None:
     return True
 
 
-def _manifest_snapshot(port: object, run_id: str) -> dict[str, object] | None:
+def _manifest_snapshot(  # noqa: C901
+port: object, run_id: str) -> dict[str, object] | None:
     """Read manifest fields for this run. A missing port is not report identity."""
     if port is None:
         return None

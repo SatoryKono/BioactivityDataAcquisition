@@ -135,7 +135,8 @@ class PubMedPublicationTermPayloadEnricher:
         self._pubmed_source = pubmed_source
         self._logger = logger
 
-    async def enrich_many(
+    async def enrich_many(  # noqa: C901
+
         self, records: Sequence[BronzeRecord]
     ) -> Sequence[BronzeRecord]:
         pmids: list[str] = []
