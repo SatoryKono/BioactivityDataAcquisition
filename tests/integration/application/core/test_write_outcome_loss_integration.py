@@ -11,7 +11,6 @@ quarantine records.
 
 from __future__ import annotations
 
-import json
 from datetime import UTC, datetime
 from typing import cast
 from unittest.mock import AsyncMock, MagicMock
@@ -110,15 +109,11 @@ async def _run(tmp_path, *, transform_result=None, writer=None) -> object:
 
 
 async def _inspect(tmp_path) -> list[dict]:
-    # Re-open the store and read persisted rows back from the Delta log.
-    # NOTE: UnifiedQuarantineAdapter.inspect() assumes a pipeline-partitioned
-    # table; tables created by _write_records_to_delta are unpartitioned
-    # (the TableNotFoundError branch never fires on first append), so we read
-    # via DeltaTable directly. Recorded as a residual adapter finding.
-    from deltalake import DeltaTable
-
-    table = DeltaTable(str(tmp_path / "quarantine"))
-    return table.to_pyarrow_table().to_pylist()
+    # Re-open the store and read persisted rows back through the canonical
+    # inspection path (#12119: works for partitioned and legacy layouts).
+    return await UnifiedQuarantineAdapter(str(tmp_path / "quarantine")).inspect(
+        pipeline="test_entity"
+    )
 
 
 async def test_silver_schema_quarantine_persists_real_records(tmp_path) -> None:
@@ -135,7 +130,7 @@ async def test_silver_schema_quarantine_persists_real_records(tmp_path) -> None:
 
     persisted = await _inspect(tmp_path)
     assert len(persisted) == 3
-    payloads = {json.loads(entry["payload"])["id"] for entry in persisted}
+    payloads = {entry["payload"]["id"] for entry in persisted}
     assert payloads == {"r0", "r1", "r2"}
     assert {entry["error_code"] for entry in persisted} == {"SCHEMA_VIOLATION"}
     assert {entry["dq_status"] for entry in persisted} == {"NEW"}
@@ -189,9 +184,7 @@ async def test_gold_schema_quarantine_keeps_silver_and_persists_gold(
 
     persisted = await _inspect(tmp_path)
     assert len(persisted) == 3
-    payloads = {json.loads(entry["payload"])["id"] for entry in persisted}
+    payloads = {entry["payload"]["id"] for entry in persisted}
     assert payloads == {"g0", "g1", "g2"}
-    details = {entry["error_details"] for entry in persisted}
-    assert any(
-        "gold" in json.loads(d).get("message", d) or "gold" in d for d in details
-    )
+    details = [entry["error_details"] for entry in persisted]
+    assert any("gold" in str(d) for d in details)

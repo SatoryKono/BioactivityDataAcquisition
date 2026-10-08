@@ -219,8 +219,17 @@ def _verify_snapshot_objects(manifest: object) -> bool | None:
     return True
 
 
-def _manifest_snapshot(  # noqa: C901
-port: object, run_id: str) -> dict[str, object] | None:
+def _input_snapshot_fingerprints(manifest: object) -> list[str]:
+    fingerprints: list[str] = []
+    for source in getattr(manifest, "source_refs", ()) or ():
+        for snapshot in getattr(source, "input_snapshots", ()) or ():
+            content_hash = getattr(snapshot, "content_hash", None)
+            if isinstance(content_hash, str) and content_hash.strip():
+                fingerprints.append(content_hash.strip())
+    return fingerprints
+
+
+def _manifest_snapshot(port: object, run_id: str) -> dict[str, object] | None:
     """Read manifest fields for this run. A missing port is not report identity."""
     if port is None:
         return None
@@ -235,12 +244,7 @@ port: object, run_id: str) -> dict[str, object] | None:
     if manifest is None:
         return None
     provenance = getattr(manifest, "code_provenance", None)
-    fingerprints: list[str] = []
-    for source in getattr(manifest, "source_refs", ()) or ():
-        for snapshot in getattr(source, "input_snapshots", ()) or ():
-            content_hash = getattr(snapshot, "content_hash", None)
-            if isinstance(content_hash, str) and content_hash.strip():
-                fingerprints.append(content_hash.strip())
+    fingerprints = _input_snapshot_fingerprints(manifest)
     capability = getattr(manifest, "replay_capability", None)
     capability_value = getattr(capability, "value", capability)
     launch_context = getattr(manifest, "launch_context", None)

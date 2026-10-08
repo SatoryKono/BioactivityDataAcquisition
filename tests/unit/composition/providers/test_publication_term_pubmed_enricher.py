@@ -7,11 +7,13 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.composition.providers.publication_term_pubmed_enricher import (
+from bioetl.application.pipelines.pubmed.publication_term_enricher import (
     PubMedPublicationTermPayloadEnricher,
-    create_pubmed_publication_term_enricher,
     parse_pubmed_mesh_xml,
     pubmed_term_payload,
+)
+from bioetl.composition.providers.publication_term_pubmed_enricher import (
+    create_pubmed_publication_term_enricher,
 )
 
 pytestmark = pytest.mark.unit
@@ -149,7 +151,7 @@ async def test_enrich_many_enters_pubmed_source_context() -> None:
 
 
 @pytest.mark.asyncio
-async def test_enrich_many_keeps_original_when_pubmed_fetch_fails() -> None:
+async def test_enrich_many_reraises_when_pubmed_fetch_fails() -> None:
     class _FailingPubmed:
         async def fetch_filtered(self, **kwargs: object):
             raise RuntimeError("ncbi down")
@@ -162,9 +164,9 @@ async def test_enrich_many_keeps_original_when_pubmed_fetch_fails() -> None:
     )
     original = {"publication_id": "CHEMBL1", "pubmed_id": "1"}
 
-    enriched = await enricher.enrich_many([original])
+    with pytest.raises(RuntimeError, match="ncbi down"):
+        await enricher.enrich_many([original])
 
-    assert enriched == [original]
     logger.warning.assert_called_once()
 
 
