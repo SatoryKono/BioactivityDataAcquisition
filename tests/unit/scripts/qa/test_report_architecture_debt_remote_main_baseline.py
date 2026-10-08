@@ -102,6 +102,24 @@ def test_json_blob_summary_returns_available_only_for_invalid_json() -> None:
     assert summary == {"available": True}
 
 
+def test_markdown_semantically_equivalent_masks_volatile_local_tracking_ref() -> None:
+    """_markdown_semantically_equivalent should ignore changes to local_tracking_ref_matches_remote."""
+    base_md = """# Title
+- evidence_source: `tree`
+- local_tracking_ref_matches_remote: `{status}`
+| col |
+| --- |
+"""
+    actual_md = base_md.format(status="True")
+    expected_md = base_md.format(status="False")
+
+    assert baseline._markdown_semantically_equivalent(actual_md, expected_md) is True
+
+    # Real content drift should still be detected
+    different_md = base_md.format(status="True") + "| row |\n"
+    assert baseline._markdown_semantically_equivalent(actual_md, different_md) is False
+
+
 def test_json_blob_summary_returns_available_only_for_non_dict_json() -> None:
     """_json_blob_summary should return only availability for blobs whose JSON content is not a dict."""
     blob = json.dumps(["valid", "json", "list"]).encode("utf-8")
