@@ -4,6 +4,17 @@ permissions:
   contents: read
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - Dockerfile.bioetl
+      - pyproject.toml
+      - uv.lock
+      - src/**
+      - configs/**
+      - .dockerignore
+      - .github/actions/install-trivy/**
   workflow_call:
   # Manual runs validate the Docker lane only. Publishing remains guarded below
   # by push-to-main plus the protected ghcr-publish environment.

@@ -84,7 +84,6 @@ def _path_collision_error(
     first_path: str | None,
     first_canonical: str | None,
     second_layer: str,
-    second_path: str | None,
     second_canonical: str | None,
 ) -> ConfigValidationError | None:
     if first_canonical is None or first_canonical != second_canonical:
@@ -112,20 +111,19 @@ def validate_path_uniqueness(
     )
     canon_gold = canonicalize_layer_path(gold_path) if gold_path is not None else None
     pairs = (
-        ("bronze", bronze_path, canon_bronze, "silver", silver_path, canon_silver),
-        ("silver", silver_path, canon_silver, "gold", gold_path, canon_gold),
-        ("bronze", bronze_path, canon_bronze, "gold", gold_path, canon_gold),
+        ("bronze", bronze_path, canon_bronze, "silver", canon_silver),
+        ("silver", silver_path, canon_silver, "gold", canon_gold),
+        ("bronze", bronze_path, canon_bronze, "gold", canon_gold),
     )
     return [
         error
-        for first_layer, first_path, first_canonical, second_layer, second_path, second_canonical in pairs
+        for first_layer, first_path, first_canonical, second_layer, second_canonical in pairs
         if (
             error := _path_collision_error(
                 first_layer=first_layer,
                 first_path=first_path,
                 first_canonical=first_canonical,
                 second_layer=second_layer,
-                second_path=second_path,
                 second_canonical=second_canonical,
             )
         )

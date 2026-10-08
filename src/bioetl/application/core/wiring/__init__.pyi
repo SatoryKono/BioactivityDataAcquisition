@@ -176,6 +176,9 @@ from bioetl.application.core.wiring.runtime import (
     RecordProcessorConfig as RecordProcessorConfig,
 )
 from bioetl.application.core.wiring.runtime import (
+    RecordProcessorWriteDependencies as RecordProcessorWriteDependencies,
+)
+from bioetl.application.core.wiring.runtime import (
     TransformCallback as TransformCallback,
 )
 from bioetl.application.core.wiring.transformer import (

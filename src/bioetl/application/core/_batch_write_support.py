@@ -14,7 +14,10 @@ from bioetl.application.core._batch_write_events import (
 from bioetl.application.core._batch_write_schema_quarantine import (
     quarantine_schema_violation,
 )
-from bioetl.application.core.batch_processing_contracts import LayerWriteOutcome
+from bioetl.application.core.batch_processing_contracts import (
+    LayerWriteOutcome,
+    WriteLayerStatus,
+)
 from bioetl.application.core.quarantine_manager import (
     QuarantineRuntimeService,
 )
@@ -31,11 +34,32 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 __all__ = [
+    "build_layer_write_outcome",
     "emit_batch_failed",
     "emit_batch_written",
     "emit_domain_event",
     "safe_write_layer",
 ]
+
+
+def build_layer_write_outcome(
+    *,
+    layer: str,
+    status: WriteLayerStatus,
+    candidate_count: int,
+    confirmed_count: int = 0,
+    quarantined_count: int = 0,
+    write_result: object | None = None,
+) -> LayerWriteOutcome:
+    """Build the shared immutable result for one Silver or Gold write."""
+    return LayerWriteOutcome(
+        layer=layer,
+        status=status,
+        candidate_count=candidate_count,
+        confirmed_count=confirmed_count,
+        quarantined_count=quarantined_count,
+        write_result=write_result,
+    )
 
 
 async def _execute_layer_write(
@@ -124,7 +148,7 @@ async def safe_write_layer(
             occurred_at=ingestion_ts,
             logger=logger,
         )
-        return LayerWriteOutcome(
+        return build_layer_write_outcome(
             layer=layer,
             status="written",
             candidate_count=len(records),
@@ -144,7 +168,7 @@ async def safe_write_layer(
             ingestion_ts=ingestion_ts,
             error=error,
         )
-        return LayerWriteOutcome(
+        return build_layer_write_outcome(
             layer=layer,
             status="quarantined",
             candidate_count=len(records),

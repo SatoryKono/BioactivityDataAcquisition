@@ -10,6 +10,7 @@ Commands:
     quality-gate    Integral quality gate for CI
     architecture-junit-skips  Fail closed on empty/skipped architecture JUnit
     pr-gate         Classify and aggregate required PR checks
+    pr-lane-results Map coordinator job results onto required PR gates
     e2e-skip-rate   Check E2E matrix skip rate against threshold
     e2e-rerun       Check E2E rerun stability
     gitleaks-boundaries  Verify Gitleaks false-positive exception boundaries
@@ -40,6 +41,7 @@ COMMANDS = {
     "quality-gate": "quality_integral_gate.py",
     "architecture-junit-skips": "quality_integral_gate.py",
     "pr-gate": "pr_gate.py",
+    "pr-lane-results": "pr_lane_results.py",
     "e2e-skip-rate": "check_e2e_matrix_skip_rate.py",
     "e2e-rerun": "check_e2e_rerun_stability.py",
     "neo4j-memory": "check_neo4j_memory_ontology.py",

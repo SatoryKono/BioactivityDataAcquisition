@@ -22,6 +22,8 @@ from bioetl.application.services.run_reports.observations import record_run_obse
 from bioetl.domain.types import BatchID, RunID
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
+OPERATION_ERRORS = _OPERATION_ERRORS
+
 if TYPE_CHECKING:
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.core.batch_writer import BatchWriter
@@ -32,7 +34,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
-__all__ = ["LayerSpanRunner", "write_silver_then_gold"]
+__all__ = ["OPERATION_ERRORS", "LayerSpanRunner", "write_silver_then_gold"]
 
 
 class LayerSpanRunner(Protocol):

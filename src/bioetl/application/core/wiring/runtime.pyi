@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from bioetl.application.core._record_processor_write_support import (
+    RecordProcessorWriteDependencies as RecordProcessorWriteDependencies,
+)
 from bioetl.application.core.base import BasePipeline as BasePipeline
 from bioetl.application.core.batch_checkpoint_recovery_service import (
     BatchCheckpointRecoveryService as BatchCheckpointRecoveryService,

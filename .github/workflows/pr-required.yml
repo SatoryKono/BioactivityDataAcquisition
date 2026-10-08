@@ -269,7 +269,7 @@ jobs:
           '
           OUTCOMES="$(tr -d '\r\n' < reports/quality/lane-step-outcomes.json)"
           export OUTCOMES
-          uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results assert-steps \
+          uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results assert-steps \
             --decision-matrix DECISION_MATRIX \
             --decision-matrix-env \
             --outcomes OUTCOMES \
@@ -353,7 +353,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p reports/quality
-          uv run --quiet --frozen --no-build python -m scripts.engineering.ci.pr_lane_results affected-tests \
+          uv run --quiet --frozen --no-build python -m scripts.engineering.ci pr-lane-results affected-tests \
             --repo-root . \
             --base-sha "$BASE_SHA" \
             --head-sha "$HEAD_SHA" \
@@ -672,7 +672,7 @@ jobs:
           '
           OUTCOMES="$(tr -d '\r\n' < reports/quality/lane-step-outcomes.json)"
           export OUTCOMES
-          uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results assert-steps \
+          uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results assert-steps \
             --decision-matrix DECISION_MATRIX \
             --decision-matrix-env \
             --outcomes OUTCOMES \
@@ -716,7 +716,7 @@ jobs:
           set -euo pipefail
           test "${{ needs['classify-changes'].result }}" = "success"
           mkdir -p reports/quality
-          uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \
+          uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results build \
             --decision-matrix DECISION_MATRIX \
             --decision-matrix-env \
             --head-sha "${EXPECTED_HEAD_SHA}" \

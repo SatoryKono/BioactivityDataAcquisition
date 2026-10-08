@@ -23,6 +23,7 @@ python -m scripts.engineering.ci <command> [args...]
 | `run-tests`      | `scripts/engineering/ci/run_pytest_resilient.py`       | Run pytest with resilient retry logic                                       |
 | `quality-gate`   | `scripts/engineering/ci/quality_integral_gate.py`      | Integral quality gate for CI with descriptive test-health classification    |
 | `pr-gate`         | `scripts/engineering/ci/pr_gate.py`                    | Fail-closed classification and aggregation for required PR checks            |
+| `pr-lane-results` | `scripts/engineering/ci/pr_lane_results.py`            | Internal lane result mapping behind the CI router                            |
 | `e2e-skip-rate`  | `scripts/engineering/ci/check_e2e_matrix_skip_rate.py` | Check E2E matrix skip rate against threshold                                |
 | `e2e-rerun`      | `scripts/engineering/ci/check_e2e_rerun_stability.py`  | Check E2E rerun stability                                                   |
 | `docker-timing`  | `scripts/engineering/ci/report_docker_actions_timing.py` | Collect read-only Docker Actions timing and runner-capacity evidence      |
