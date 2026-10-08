@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -253,6 +254,24 @@ def build_payload(
     return payload
 
 
+def _markdown_semantically_equivalent(actual_md: str, expected_md: str) -> bool:
+    """Return True when Markdown artifacts differ only by volatile remote-ref status."""
+    if actual_md == expected_md:
+        return True
+    pattern = r"^- local_tracking_ref_matches_remote: `(?:True|False)`$"
+    return re.sub(
+        pattern,
+        "- local_tracking_ref_matches_remote: `<MASKED>`",
+        actual_md,
+        flags=re.MULTILINE,
+    ) == re.sub(
+        pattern,
+        "- local_tracking_ref_matches_remote: `<MASKED>`",
+        expected_md,
+        flags=re.MULTILINE,
+    )
+
+
 def render_markdown(payload: dict[str, object]) -> str:
     artifacts = payload["artifacts"]
     assert isinstance(artifacts, list)
@@ -368,12 +387,12 @@ def _check_artifacts(
         json_out, expected_json=expected_json, payload=payload
     ):
         errors.append(f"Remote-main debt baseline JSON artifact is stale: {json_out}")
-    if (
-        not md_out.exists()
-        or md_out.read_text(encoding="utf-8")  # NOSONAR - path confined
-        != expected_md
-    ):
+    if not md_out.exists():
         errors.append(f"Remote-main debt baseline Markdown artifact is stale: {md_out}")
+    else:
+        actual_md = md_out.read_text(encoding="utf-8")  # NOSONAR - path confined
+        if not _markdown_semantically_equivalent(actual_md, expected_md):
+            errors.append(f"Remote-main debt baseline Markdown artifact is stale: {md_out}")
     if payload["evidence_source"] != "remote_main_git_tree":
         errors.append("Remote-main debt baseline evidence_source is not clean")
     if not payload["local_tracking_ref_matches_remote"]:
