@@ -87,7 +87,7 @@ def fallback_complexity(function_node: FunctionDef | AsyncFunctionDef) -> int:
 def function_complexities(source: str) -> dict[str, int]:
     """Build a function-name to complexity map for one source module."""
     try:
-        from radon.complexity import cc_visit  # type: ignore[import-untyped]
+        from radon.complexity import cc_visit
     except ImportError:
         tree = ast.parse(source)
         return {

@@ -79,7 +79,7 @@ def compute_canonical_yaml_sha256(raw_bytes: bytes) -> str:
     try:
         payload = cast(object, loader.get_single_data())
     finally:
-        dispose = cast(Callable[[], None], loader.dispose)
+        dispose: Callable[[], None] = loader.dispose
         dispose()
     canonical_payload = _to_canonical_jsonable(payload)
     serialized = json.dumps(

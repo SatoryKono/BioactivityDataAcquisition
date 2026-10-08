@@ -7,8 +7,8 @@ from contextlib import AsyncExitStack
 from typing import TYPE_CHECKING
 from xml.etree.ElementTree import Element
 
-import defusedxml.ElementTree as defused_ET  # type: ignore[import-untyped]
-from defusedxml.common import DefusedXmlException  # type: ignore[import-untyped]
+import defusedxml.ElementTree as defused_ET
+from defusedxml.common import DefusedXmlException
 
 from bioetl.application.core.publication_term_runtime import (
     mesh_terms_from_pubmed_headings,
