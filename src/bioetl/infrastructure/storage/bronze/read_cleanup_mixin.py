@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
@@ -144,12 +145,14 @@ class BronzeWriterReadCleanupMixin:
     ) -> tuple[int, int, int, int, int]:
         """Sync body for cleanup_old_files with blocking Path I/O."""
         files = bytes_total = dirs = skipped_files = skipped_dirs = 0
+        root_abs = Path(os.path.abspath(self.base_path))  # noqa: PTH100
         root_real = real_root(self.base_path)
 
         for date_dir in self._find_old_date_dirs(cutoff_str, provider, entity):
             removed_files, removed_bytes, skipped = self._remove_old_dir_files(
                 date_dir=date_dir,
                 dry_run=dry_run,
+                root_abs=root_abs,
                 root_real=root_real,
             )
             files += removed_files
@@ -160,7 +163,7 @@ class BronzeWriterReadCleanupMixin:
                     dirs += 1
                 else:
                     skipped_dirs += 1
-            elif safe_rmdir(date_dir, root_real):
+            elif safe_rmdir(date_dir, root_abs, root_real):
                 dirs += 1
             else:
                 skipped_dirs += 1
@@ -173,6 +176,7 @@ class BronzeWriterReadCleanupMixin:
         *,
         date_dir: Path,
         dry_run: bool,
+        root_abs: Path,
         root_real: Path,
     ) -> tuple[int, int, int]:
         """Remove owned Bronze artifacts from one old date directory."""
@@ -192,12 +196,17 @@ class BronzeWriterReadCleanupMixin:
                 self._log_cleanup_skip(entry.path, "unknown_artifact")
                 files_skipped += 1
                 continue
-            size = entry.stat(follow_symlinks=False).st_size
+            try:
+                size = entry.stat(follow_symlinks=False).st_size
+            except OSError:
+                self._log_cleanup_skip(entry.path, "stat_error")
+                files_skipped += 1
+                continue
             if dry_run:
                 files_removed += 1
                 bytes_removed += size
                 continue
-            if safe_unlink(file_path, root_real):
+            if safe_unlink(file_path, root_abs, root_real):
                 files_removed += 1
                 bytes_removed += size
             else:

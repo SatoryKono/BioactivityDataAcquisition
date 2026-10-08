@@ -73,13 +73,14 @@ def is_within_root(path: Path, root_real: Path) -> bool:
         return False
 
 
-def is_fully_resolved(path: Path) -> bool:
-    """True when no path component resolves through a link/reparse."""
+def is_fully_resolved(path: Path, root_abs: Path, root_real: Path) -> bool:
+    """True when no component below the trusted root resolves through a link."""
     try:
         # abspath is required: Path.resolve() would collapse the very links
         # this check is meant to detect.
+        relative = Path(os.path.abspath(path)).relative_to(root_abs)  # noqa: PTH100
         return os.path.normcase(os.path.realpath(path)) == os.path.normcase(
-            os.path.abspath(path)  # noqa: PTH100
+            root_real / relative
         )
     except (OSError, ValueError):
         return False
@@ -267,18 +268,18 @@ def _scope_child_dirs(
     return [resolved] if resolved is not None else []
 
 
-def safe_unlink(file_path: Path, root_real: Path) -> bool:
+def safe_unlink(file_path: Path, root_abs: Path, root_real: Path) -> bool:
     """Unlink a file after re-verifying it is a real file inside the root."""
     if _ANCHORED_OPS:
-        return _unlink_anchored(file_path, root_real)
-    return _unlink_bounded_verify(file_path, root_real)
+        return _unlink_anchored(file_path, root_abs, root_real)
+    return _unlink_bounded_verify(file_path, root_abs, root_real)
 
 
-def _unlink_anchored(file_path: Path, root_real: Path) -> bool:
+def _unlink_anchored(file_path: Path, root_abs: Path, root_real: Path) -> bool:
     """POSIX path: verify parent chain, then unlink via an anchored dir_fd."""
-    if not is_fully_resolved(file_path.parent) or not is_within_root(
-        file_path.parent, root_real
-    ):
+    if not is_fully_resolved(
+        file_path.parent, root_abs, root_real
+    ) or not is_within_root(file_path.parent, root_real):
         return False
     try:
         parent_fd = os.open(file_path.parent, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW)
@@ -296,7 +297,7 @@ def _unlink_anchored(file_path: Path, root_real: Path) -> bool:
         os.close(parent_fd)
 
 
-def _unlink_bounded_verify(file_path: Path, root_real: Path) -> bool:
+def _unlink_bounded_verify(file_path: Path, root_abs: Path, root_real: Path) -> bool:
     """Windows path: bounded re-verify immediately before unlink."""
     try:
         st = file_path.lstat()
@@ -304,9 +305,9 @@ def _unlink_bounded_verify(file_path: Path, root_real: Path) -> bool:
         return False
     if stat_is_link_or_reparse(st) or not stat.S_ISREG(st.st_mode):
         return False
-    if not is_fully_resolved(file_path.parent) or not is_within_root(
-        file_path, root_real
-    ):
+    if not is_fully_resolved(
+        file_path.parent, root_abs, root_real
+    ) or not is_within_root(file_path, root_real):
         return False
     try:
         file_path.unlink()
@@ -315,7 +316,7 @@ def _unlink_bounded_verify(file_path: Path, root_real: Path) -> bool:
         return False
 
 
-def safe_rmdir(dir_path: Path, root_real: Path) -> bool:
+def safe_rmdir(dir_path: Path, root_abs: Path, root_real: Path) -> bool:
     """Remove a directory only when it is real, empty, and inside the root."""
     try:
         st = dir_path.lstat()
@@ -326,7 +327,9 @@ def safe_rmdir(dir_path: Path, root_real: Path) -> bool:
     entries = scan_dir_entries(dir_path)
     if entries is None or entries:
         return False
-    if not is_fully_resolved(dir_path) or not is_within_root(dir_path, root_real):
+    if not is_fully_resolved(dir_path, root_abs, root_real) or not is_within_root(
+        dir_path, root_real
+    ):
         return False
     try:
         dir_path.rmdir()

@@ -20,14 +20,17 @@ import os
 import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
+from unittest.mock import Mock
 
 import pytest
 
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.infrastructure.storage.bronze import cleanup_support, read_cleanup_mixin
 from bioetl.infrastructure.storage.bronze.cleanup_support import (
     is_owned_artifact,
     iter_safe_child_dirs,
+    safe_rmdir,
     safe_unlink,
     validate_scope_filter,
 )
@@ -269,5 +272,113 @@ def test_safe_unlink_refuses_outside_root(tmp_path: Path) -> None:
     outside = tmp_path.parent / f"{tmp_path.name}_victim2"
     outside.write_bytes(b"x")
 
-    assert safe_unlink(outside, tmp_path) is False
+    assert safe_unlink(outside, tmp_path, tmp_path.resolve()) is False
     assert outside.exists()
+
+
+@pytest.mark.parametrize("anchored", [False, True])
+@pytest.mark.parametrize("flat", [False, True])
+@pytest.mark.parametrize("root_link", [False, True])
+async def test_cleanup_accepts_links_at_or_above_trusted_root(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    anchored: bool,
+    flat: bool,
+    root_link: bool,
+) -> None:
+    """A trusted root alias must permit both file and directory removal."""
+    if anchored and not cleanup_support._ANCHORED_OPS:
+        pytest.skip("anchored operations unavailable")
+    monkeypatch.setattr(cleanup_support, "_ANCHORED_OPS", anchored)
+    target = tmp_path / "target"
+    target.mkdir()
+    alias = _symlink_or_skip(tmp_path / "alias", target)
+    root = alias if root_link else alias / "bronze"
+    root.mkdir(exist_ok=True)
+    monkeypatch.chdir(tmp_path)
+    root = root.relative_to(tmp_path)
+    writer = _make_writer(root, flat=flat)
+    date_dir = _date_dir(root, *(() if flat else ("chembl", "activity")))
+    (date_dir / ARTIFACT).write_bytes(b"payload")
+
+    result = await writer.cleanup_old_files(CUTOFF)
+
+    assert result == {
+        "files_removed": 1,
+        "bytes_freed": 7,
+        "directories_removed": 1,
+        "files_skipped": 0,
+        "directories_skipped": 0,
+    }
+    assert not date_dir.exists()
+
+
+@pytest.mark.parametrize("anchored", [False, True])
+@pytest.mark.parametrize("inside", [False, True])
+def test_cleanup_reverification_refuses_links_below_trusted_root(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    anchored: bool,
+    inside: bool,
+) -> None:
+    """Even an internal link below a trusted root alias must be rejected."""
+    if anchored and not cleanup_support._ANCHORED_OPS:
+        pytest.skip("anchored operations unavailable")
+    monkeypatch.setattr(cleanup_support, "_ANCHORED_OPS", anchored)
+    target = tmp_path / "target"
+    target.mkdir()
+    root = _symlink_or_skip(tmp_path / "alias", target)
+    destination = (target if inside else tmp_path) / "destination"
+    date_dir = _date_dir(destination)
+    victim = date_dir / ARTIFACT
+    victim.write_bytes(b"keep")
+    link = _symlink_or_skip(root / "linked", destination)
+
+    assert not safe_unlink(link / OLD_DATE / ARTIFACT, root, target)
+    assert victim.read_bytes() == b"keep"
+    victim.unlink()
+    assert not safe_rmdir(link / OLD_DATE, root, target)
+    assert date_dir.is_dir()
+
+
+@pytest.mark.parametrize("dry_run", [False, True])
+@pytest.mark.parametrize("error", [FileNotFoundError, PermissionError])
+async def test_cleanup_continues_after_entry_stat_error(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    dry_run: bool,
+    error: type[OSError],
+) -> None:
+    """A failed stat preserves partial counts and does not stop later files."""
+    writer = _make_writer(tmp_path)
+    date_dir = _date_dir(tmp_path, "chembl", "activity")
+    for name in (ARTIFACT, SIDECAR, JSON_COPY):
+        (date_dir / name).write_bytes(b"data")
+    with os.scandir(date_dir) as entries:
+        by_name = {entry.name: entry for entry in entries}
+    failed = Mock(wraps=by_name[SIDECAR])
+    failed.name = SIDECAR
+    failed.path = str(date_dir / SIDECAR)
+    failed.stat.side_effect = error("entry inaccessible")
+    monkeypatch.setattr(
+        read_cleanup_mixin,
+        "scan_dir_entries",
+        lambda _: [by_name[ARTIFACT], failed, by_name[JSON_COPY]],
+    )
+    log_skip = Mock()
+    monkeypatch.setattr(writer, "_log_cleanup_skip", log_skip)
+
+    result = await writer.cleanup_old_files(CUTOFF, dry_run=dry_run)
+
+    assert result == {
+        "files_removed": 2,
+        "bytes_freed": 8,
+        "directories_removed": 0,
+        "files_skipped": 1,
+        "directories_skipped": 1,
+    }
+    failed.stat.assert_called_once_with(follow_symlinks=False)
+    log_skip.assert_any_call(str(date_dir / SIDECAR), "stat_error")
+    assert (date_dir / SIDECAR).exists()
+    assert (date_dir / ARTIFACT).exists() is dry_run
+    assert (date_dir / JSON_COPY).exists() is dry_run
