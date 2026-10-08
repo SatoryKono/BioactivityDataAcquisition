@@ -6,6 +6,8 @@ permissions:
 on:
   workflow_call:
   push:
+    branches-ignore:
+      - main
     paths:
       - "Dockerfile.bioetl"
       - "pyproject.toml"

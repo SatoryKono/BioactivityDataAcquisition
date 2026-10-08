@@ -134,7 +134,7 @@ new spend/safety decision.
 | File | Workflow name | Triggers | GitHub live state | Decision | Primary purpose |
 | --- | --- | --- | --- | --- | --- |
 | `dashboard-render-host.yml` | `Dashboard render release evidence (host-only)` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Dashboard rendering and release evidence generation on self-hosted runner |
-| `docker.yml` | `Docker Build & Compose Validation` | `push`, `workflow_call`, `workflow_dispatch` | `active` | `active` | Path-filtered image build and compose validation |
+| `docker.yml` | `Docker Build & Compose Validation` | `push`, `workflow_call`, `workflow_dispatch` | `active` | `active` | Path-filtered non-main push validation; `main-integrity.yml` owns the `main` invocation |
 | `labeler.yml` | `Labeler` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Applies repository labels to PRs |
 | `release.yml` | `Release` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Publish stays outside Actions (#11182) |
 
