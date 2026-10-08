@@ -37,6 +37,7 @@ from bioetl.infrastructure.storage.writer_common import (
     iterate_write_targets,
     validate_write_versions,
 )
+from bioetl.domain.types.gold_contracts import GoldWriteReceipt, GoldWriteCategory
 
 if TYPE_CHECKING:
     from pandera.polars import DataFrameSchema
@@ -53,11 +54,13 @@ async def _write_single_target_impl(
     writer: _GoldWriterHost,
     *,
     request: _GoldWriteRequest,
-) -> None:
+) -> GoldWriteReceipt:
     """Execute one physical Gold write target through the standard pipeline."""
     started_at = perf_counter()
     prepared: _PreparedGoldWriteContext | None = None
     terminal_status = "failure"
+    category = GoldWriteCategory.NOT_COMMITTED
+    contract_version = request.contract_version or "0.0.0"
     GOLD_WRITE_ATTEMPTS_TOTAL.labels(**_gold_write_metric_labels(request)).inc()
     try:
         prepared = await writer._prepare_write_gold(
@@ -75,24 +78,33 @@ async def _write_single_target_impl(
                 request=request,
             )
         )
-        await writer._post_write_gold(
-            _GoldWritePostwriteContext(
-                prepared=prepared,
-                records=request.records,
-                ingestion_ts=request.ingestion_ts,
-                run_id=request.run_id,
-                scd_config=request.scd_config,
-                silver_refs=request.silver_refs,
-                schema=request.schema,
+        category = GoldWriteCategory.COMMITTED_POSTWRITE_PENDING
+        post_write_error: Exception | None = None
+        try:
+            await writer._post_write_gold(
+                _GoldWritePostwriteContext(
+                    prepared=prepared,
+                    records=request.records,
+                    ingestion_ts=request.ingestion_ts,
+                    run_id=request.run_id,
+                    scd_config=request.scd_config,
+                    silver_refs=request.silver_refs,
+                    schema=request.schema,
+                )
             )
-        )
-        terminal_status = "success"
+            terminal_status = "success"
+            category = GoldWriteCategory.COMPLETE
+        except Exception as error:
+            post_write_error = error
     except ValueError as error:
         if prepared is None:
             terminal_status = "validation_failure"
             GOLD_VALIDATION_FAILURES_TOTAL.labels(
                 **_gold_validation_metric_labels(request, error)
             ).inc()
+        raise
+    except Exception:
+        # If it failed before dispatch_write, category is still NOT_COMMITTED
         raise
     finally:
         GOLD_WRITE_OUTCOMES_TOTAL.labels(
@@ -101,6 +113,23 @@ async def _write_single_target_impl(
         GOLD_WRITE_DURATION_SECONDS.labels(
             **_gold_write_metric_labels(request, status=terminal_status)
         ).observe(perf_counter() - started_at)
+
+    if post_write_error:
+        # We must surface the postwrite error to the caller (e.g. `write_gold`),
+        # but attach the receipt to it so dual-write can extract it.
+        if not hasattr(post_write_error, "gold_receipt"):
+            post_write_error.gold_receipt = GoldWriteReceipt(  # type: ignore[attr-defined]
+                physical_table=request.table_name,
+                contract_version=contract_version,
+                category=category,
+            )
+        raise post_write_error
+
+    return GoldWriteReceipt(
+        physical_table=request.table_name,
+        contract_version=contract_version,
+        category=category,
+    )
 
 
 async def _write_dual_targets_impl(
@@ -149,14 +178,23 @@ async def _write_dual_targets_impl(
             contract_version=contract_version,
         )
         try:
-            await writer._write_single_target(request=target_request)
-            committed_targets.append(
-                {
-                    "contract_version": contract_version,
-                    "physical_table": physical_table,
-                }
-            )
-        except (BioETLError, OSError, RuntimeError, ValueError):
+            receipt = await writer._write_single_target(request=target_request)
+            if receipt.category in (GoldWriteCategory.COMPLETE, GoldWriteCategory.COMMITTED_POSTWRITE_PENDING):
+                committed_targets.append(
+                    {
+                        "contract_version": contract_version,
+                        "physical_table": physical_table,
+                    }
+                )
+        except (BioETLError, OSError, RuntimeError, ValueError) as error:
+            receipt = getattr(error, "gold_receipt", None)
+            if receipt and receipt.category in (GoldWriteCategory.COMPLETE, GoldWriteCategory.COMMITTED_POSTWRITE_PENDING):
+                committed_targets.append(
+                    {
+                        "contract_version": contract_version,
+                        "physical_table": physical_table,
+                    }
+                )
             writer.logger.error(
                 "gold_dual_write_failed",
                 logical_table=request.table_name,

@@ -20,6 +20,7 @@ from .gold_contracts_rejects import (
 )
 from .gold_contracts_rules import GoldBusinessRuleSpec
 from .gold_contracts_scd import ScdConfig
+from ._gold_write_receipt import GoldWriteCategory, GoldWriteReceipt
 
 __all__ = [
     "GOLD_CONTRACT_VERSION_UNKNOWN",
@@ -31,6 +32,8 @@ __all__ = [
     "GoldContractValidationError",
     "GoldRejectReason",
     "GoldRejectReasonCode",
+    "GoldWriteCategory",
+    "GoldWriteReceipt",
     "ScdConfig",
     "build_gold_contract_reject_reason",
     "build_gold_semantic_reject_reason",
