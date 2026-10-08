@@ -545,3 +545,78 @@ def test_lineage_index_append_jsonl_payload_rolls_back_partial_write(
     assert fake_os.truncations == [(19, 5)]
     assert fake_os.closed == [19]
     assert flush_calls == [19]
+
+def test_file_store_rolls_back_fragment_and_indexes_when_index_append_fails_with_physical_readback(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store = FileLineageStore(base_path=tmp_path / "lineage")
+    run_id = RunID(deterministic_uuid_value("lineage_store.rollback2"))
+    run_node = LineageNodeRef(
+        node_type=LineageNodeType.RUN,
+        node_id=f"run:{run_id}",
+        label="chembl_activity",
+    )
+    dataset_node = DatasetRef(
+        layer="silver",
+        logical_name="chembl.activity",
+        version=14,
+        provider="chembl",
+        entity="activity",
+        path="data/output/silver/chembl/activity",
+        manifest_id="manifest-rollback",
+        run_id=str(run_id),
+    ).to_node_ref()
+    fragment = LineageGraphFragment(
+        fragment_id="silver:fragment-rollback",
+        nodes=(run_node, dataset_node),
+        edges=(
+            LineageEdge(
+                edge_type=LineageEdgeType.PRODUCED_BY,
+                source=dataset_node,
+                target=run_node,
+                run_id=str(run_id),
+                manifest_id="manifest-rollback",
+                created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+            ),
+        ),
+        run_id=str(run_id),
+        manifest_id="manifest-rollback",
+        created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+    )
+
+    # Do an initial successful save to ensure old bytes exist
+    store.save(fragment)
+    semantic_index_path = store._semantic_fragment_index_path(fragment.fragment_id)
+    old_size = semantic_index_path.stat().st_size
+
+    # Now attempt a new save that fails partway
+    fragment2 = LineageGraphFragment(
+        fragment_id="silver:fragment-rollback", # same semantic ID
+        nodes=(run_node, dataset_node),
+        edges=(),
+        run_id=str(run_id),
+        manifest_id="manifest-rollback",
+        created_at=datetime(2026, 1, 2, 12, 0, tzinfo=UTC),
+    )
+
+    original_append = lineage_store_module._append_jsonl_payload
+    call_count = {"value": 0}
+
+    def _fail_on_second_append(path, payload, **kwargs) -> int:
+        call_count["value"] += 1
+        if call_count["value"] == 2:
+            raise OSError("simulated lineage index append failure")
+        return original_append(path, payload, **kwargs)
+
+    monkeypatch.setattr(
+        lineage_store_module,
+        "_append_jsonl_payload",
+        _fail_on_second_append,
+    )
+
+    with pytest.raises(OSError, match="simulated lineage index append failure"):
+        store.save(fragment2)
+
+    assert semantic_index_path.exists()
+    assert semantic_index_path.stat().st_size == old_size
