@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-08-17",
+  "snapshot_date": "2026-10-08",
   "issue": "#5272",
   "parent_epic": "#5244",
   "title": "Burn down application_core coverage and zero-uncovered module debt",
@@ -12,7 +12,7 @@
   "current_metrics": {
     "repo_uncovered_module_count": 0,
     "repo_unmeasured_module_count": 0,
-    "application_core_covered_line_percent": 99.82,
+    "application_core_covered_line_percent": 99.78,
     "application_core_uncovered_module_count": 0,
     "application_core_unmeasured_module_count": 0
   },
@@ -166,9 +166,9 @@
     }
   ],
   "current_binding_refresh": {
-    "measured_head": "c4071c0eeecd6b06f18bc781a0435ee128e0e994",
-    "source_tree_sha256": "78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db",
-    "evidence": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-42/manifest.json",
-    "semantics": "Current accepted inventory may retain historical nonregressing rows; raw measured candidate remains separate."
+    "measured_head": "3e734a6b872fff524c663cf183ade40aafdaea12",
+    "source_tree_sha256": "20f951f3aa0d2f535a757dca96af0b213f675f0fd74873f80d8c3feded56293c",
+    "evidence": "reports/quality/proof-or-stop/cf-medallion-clock-strict-3e734a6b/manifest.json",
+    "semantics": "Complete 17-shard local measurement; current inventory adopts nonregressing values and may retain historical rows."
   }
 }

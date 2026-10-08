@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # Current State Inventory
 
-This inventory is synchronized against the current worktree on 2026-09-23.
+This inventory is synchronized against the current worktree on 2026-10-08.
 Code, configs, domain contracts, ADRs, and tests are the source of
 truth; existing documentation is evidence only when it matches those sources.
 
@@ -32,15 +32,15 @@ truth; existing documentation is evidence only when it matches those sources.
 
 ## Architecture Quality Evidence
 
-The source inventory has been rebound after the approved LoggerPort alias removal; this is not a new coverage measurement. Coverage values below retain the accepted inventory after a complete 17-group local measurement on `c4071c0eeecd6b06f18bc781a0435ee128e0e994`. Canonical nonregressing adoption preserves historical rows where fresh raw coverage is lower. The raw comparison records 80 remaining module regressions; accepted inventory values are not a claim of fresh global nonregression. `config_root` was freshly measured at 40/40 lines and 18/18 branches. Final architecture acceptance and publication remain separate checks.
+The source inventory is bound to `source_tree_sha256=20f951f3aa0d2f535a757dca96af0b213f675f0fd74873f80d8c3feded56293c`. A complete 17-shard local coverage measurement ran on source commit `3e734a6b872fff524c663cf183ade40aafdaea12`: 99.68% line and 94.26% branch coverage, with both 85% gates passing. The module inventory uses nonregressing adoption, so accepted values may retain historical rows; this local result is not CI admission or final architecture acceptance.
 
 | Artifact | Current value | Source |
 | --- | ---: | --- |
 | Architecture quality score | `10.00` (`excellent`) | `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2552` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2557` | `reports/quality/module-coverage-inventory.json` |
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, `reports/quality/debt-governance-gates.json` |
-| Coverage inventory status counts | `2513` fully covered, `38` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
+| Coverage inventory status counts | `2517` fully covered, `39` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Families at fan-in budget | `0` | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
 | Module-boundaries coupling | `10.0` (`control-plane` fan-in `1/2`, `runtime_builders` fan-in `2/3`) | `reports/quality/architecture-quality-scorecard.json`, `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py` |
@@ -57,7 +57,7 @@ drift is currently clear (`stale_artifacts` are all false in
 release-gate failures rather than hidden warning-only coverage drift. Module
 coverage currently reports `0` unmeasured and `0` uncovered source modules
 from the committed coverage inventory (debt-governance gates). That is a module-inventory fact, not
-a blanket line/branch coverage guarantee: `38` modules
+a blanket line/branch coverage guarantee: `39` modules
 remain partially covered and line/branch coverage must be read from the
 `coverage-verify` artifacts. Read-only
 audit evidence should use
