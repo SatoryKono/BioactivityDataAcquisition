@@ -76,6 +76,10 @@ async def yield_terms_from_publications(
             batch_size=PUBLICATION_TERM_PUBMED_ENRICH_BATCH_SIZE,
             max_records=scan_limit,
         ):
+            # Extraction yields zero or many terms per record, even after
+            # enrichment (missing PubMed matches or empty/invalid payloads).
+            # The remaining term limit therefore cannot bound the records
+            # needed; truncating this batch could discard later usable terms.
             if enricher is not None:
                 batch = await _attach_pubmed_payloads(
                     batch, extract_terms=extract_terms, enricher=enricher

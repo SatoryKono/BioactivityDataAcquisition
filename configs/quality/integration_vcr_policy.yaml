@@ -321,7 +321,6 @@ tracked_suite_inventory:
       - tests/integration/config/test_validate_pipeline_configs.py
       - tests/integration/fixtures/test_non_chembl_edge_fixture_manifest.py
       - tests/integration/infrastructure/export/test_csv_dq_export.py
-      - tests/integration/infrastructure/quarantine/test_unified_quarantine_partition_compat.py
       - tests/integration/infrastructure/storage/test_atomic.py
       - tests/integration/infrastructure/storage/test_atomic_boost.py
       - tests/integration/infrastructure/storage/test_base_delta_writer_filesystem.py

@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "PubMedPublicationTermEnrichmentService",
+    "PubMedPublicationTermPayloadEnricher",
     "parse_pubmed_mesh_xml",
     "pubmed_term_payload",
 ]
@@ -187,3 +188,6 @@ class PubMedPublicationTermEnrichmentService:
             )
             return list(records)
         return _attach_pubmed_terms(records, pubmed_by_pmid)
+
+
+PubMedPublicationTermPayloadEnricher = PubMedPublicationTermEnrichmentService

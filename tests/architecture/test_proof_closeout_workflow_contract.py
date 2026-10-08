@@ -132,8 +132,9 @@ def test_rf023_requires_terminal_full_suite_and_preserves_ci_identity():
         "bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh"
     )
     assert (
-        "setup_grafana_screenshot_runtime.sh --attempt-system-install" in browser_setup
-    )
+        "bash scripts/ops/observability/grafana/"
+        "setup_grafana_screenshot_runtime.sh --attempt-system-install"
+    ) in [line.strip() for line in browser_setup.splitlines()]
     assert any("actual == locked" in command for command in commands)
 
 
