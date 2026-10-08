@@ -74,9 +74,10 @@ async def acquire_lock(host: _LockRuntimeHostProtocol) -> FencingToken | None:
 async def release_lock(host: _LockRuntimeHostProtocol) -> None:
     """Release the runtime lock, stop heartbeat, and clear context state."""
     # Defect fix: wait for physical worker shutdown completion before releasing the lock
-    if host._shutdown_signal.is_requested:
-        if hasattr(host._shutdown_signal, "wait_for_completion"):
-            await host._shutdown_signal.wait_for_completion(timeout_seconds=30.0)
+    if host._shutdown_signal.is_requested and hasattr(
+        host._shutdown_signal, "wait_for_completion"
+    ):
+        await host._shutdown_signal.wait_for_completion(timeout_seconds=30.0)
 
     if (heartbeat := host._heartbeat) is not None:
         await heartbeat.stop()
