@@ -9,6 +9,7 @@ import httpx
 
 from bioetl.domain.exceptions import BioETLError, CircuitBreakerOpenError
 from bioetl.infrastructure.adapters.http._client_retry_flow import (
+    RetryPolicyContext,
     handle_request_exception,
     handle_response_attempt,
 )
@@ -186,11 +187,13 @@ class HTTPClientRetryRequestFlow(_RetryRequestBase):
             attempt=attempt,
             retries_used=retries_used,
             span=span,
-            retry_config=self.retry_config,
-            is_retryable_error=self._is_retryable_error,
-            can_retry=self._can_retry,
-            handle_retry_delay=self._handle_retry_delay,
-            log_retry=self._log_retry,
-            record_retry_budget_exhausted=self._record_retry_budget_exhausted,
-            status_code_from_error=_status_code_from_error,
+            context=RetryPolicyContext(
+                retry_config=self.retry_config,
+                is_retryable_error=self._is_retryable_error,
+                can_retry=self._can_retry,
+                handle_retry_delay=self._handle_retry_delay,
+                log_retry=self._log_retry,
+                record_retry_budget_exhausted=self._record_retry_budget_exhausted,
+                status_code_from_error=_status_code_from_error,
+            ),
         )
