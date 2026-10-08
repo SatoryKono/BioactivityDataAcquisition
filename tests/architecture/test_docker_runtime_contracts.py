@@ -1515,7 +1515,7 @@ def test_docker_workflow_probes_shellless_runtime_and_default_health() -> None:
     )
     probe = str(provenance["run"])
     for required in (
-        "sys.version_info[:3] == (3, 13, 15)",
+        "sys.version_info[:3] == (3, 13, 16)",
         "(os.getuid(), os.getgid()) == (999, 999)",
         'pwd.getpwuid(999).pw_name == "bioetl"',
         'pwd.getpwuid(999).pw_shell == "/sbin/nologin"',
