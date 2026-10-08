@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from contextlib import AsyncExitStack
-from typing import TYPE_CHECKING
-from xml.etree.ElementTree import Element
+from typing import TYPE_CHECKING, Protocol
 
 import defusedxml.ElementTree as defused_ET
 from defusedxml.common import DefusedXmlException
@@ -19,6 +18,17 @@ from bioetl.domain.exceptions import BioETLError
 if TYPE_CHECKING:
     from bioetl.domain.ports import FilterableDataSourcePort, LoggerPort
     from bioetl.domain.types import BronzeRecord
+
+
+class _XmlElement(Protocol):
+    text: str | None
+
+    def get(self, key: str, default: str | None = None) -> str | None: ...
+
+    def find(self, path: str) -> _XmlElement | None: ...
+
+    def findall(self, path: str) -> list[_XmlElement]: ...
+
 
 __all__ = [
     "PubMedPublicationTermEnrichmentService",
@@ -43,7 +53,7 @@ def parse_pubmed_mesh_xml(
     return _parse_mesh_headings(root), _parse_keywords(root)
 
 
-def _parse_mesh_headings(root: Element) -> list[dict[str, object]]:
+def _parse_mesh_headings(root: _XmlElement) -> list[dict[str, object]]:
     """Extract valid MeSH descriptor headings from an efetch root element."""
     headings: list[dict[str, object]] = []
     for heading in root.findall(".//MeshHeading"):
@@ -53,7 +63,7 @@ def _parse_mesh_headings(root: Element) -> list[dict[str, object]]:
     return headings
 
 
-def _parse_mesh_heading(heading: Element) -> dict[str, object] | None:
+def _parse_mesh_heading(heading: _XmlElement) -> dict[str, object] | None:
     """Parse one descriptor and its non-empty qualifiers."""
     descriptor = heading.find("DescriptorName")
     if descriptor is None:
@@ -73,7 +83,7 @@ def _parse_mesh_heading(heading: Element) -> dict[str, object] | None:
     }
 
 
-def _parse_keywords(root: Element) -> list[str]:
+def _parse_keywords(root: _XmlElement) -> list[str]:
     """Extract non-empty keyword strings from an efetch root element."""
     return [
         text

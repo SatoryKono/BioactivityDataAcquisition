@@ -180,22 +180,26 @@ class TestConfigureLogging:
 
     def test_pagination_warning_preserves_fields_in_rendered_json(self, capsys) -> None:
         """Preserve truncation details and run identity in structured log output."""
-        from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
+        from bioetl.infrastructure.adapters.http.pagination import (
+            PaginationTruncatedError,
+            raise_pagination_truncated,
+        )
         from bioetl.infrastructure.observability.logging import create_logger
 
-        class PaginationHost(PaginatedFetcherMixin):
-            def __init__(self):
-                """Attach a structured logger carrying the test pipeline and run ID."""
-                self._logger = create_logger(
-                    "test", "00000000-0000-0000-0000-000000000001"
-                )
-
-        PaginationHost()._log_pagination_truncation(
-            reason="max_pages", page_count=2, page_limit=2, next_cursor="C"
-        )
+        logger = create_logger("test", "00000000-0000-0000-0000-000000000001")
+        with pytest.raises(PaginationTruncatedError):
+            raise_pagination_truncated(
+                logger,
+                event="pagination_truncated",
+                reason="max_pages",
+                page_count=2,
+                page_limit=2,
+                cursor_field="next_cursor",
+                cursor_value=repr("C"),
+            )
         payload = json.loads(capsys.readouterr().out.strip())
         assert payload["event"] == "pagination_truncated"
-        assert payload["truncation_reason"] == "max_pages"
+        assert payload["reason"] == "max_pages"
         assert payload["page_count"] == payload["page_limit"] == 2
         assert payload["next_cursor"] == "'C'"
         assert payload["pipeline"] == "test"
