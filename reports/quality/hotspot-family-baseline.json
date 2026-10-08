@@ -18,7 +18,7 @@
       ],
       "duplication_clusters": 0,
       "files": 202,
-      "total_loc": 25231,
+      "total_loc": 25216,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.381,
       "max_internal_fan_in": 5,
@@ -30,11 +30,11 @@
       "internal_fan_in_census": {
         "distribution": {
           "0": 19,
-          "1": 106,
+          "1": 107,
           "2": 40,
-          "3": 16,
-          "4": 10,
-          "5": 11
+          "3": 15,
+          "4": 11,
+          "5": 10
         },
         "modules": [
           {
@@ -103,11 +103,12 @@
           },
           {
             "module": "bioetl.application.core._batch_write_support",
-            "fan_in": 3,
+            "fan_in": 4,
             "runtime_importers": [
               "bioetl.application.core._batch_processing_layer_write_support",
               "bioetl.application.core._record_processor_write_support",
-              "bioetl.application.core.batch_processing_support"
+              "bioetl.application.core.batch_processing_support",
+              "bioetl.application.core.record_processor"
             ]
           },
           {
@@ -671,13 +672,9 @@
           },
           {
             "module": "bioetl.application.core.batch_shared_operation_errors",
-            "fan_in": 5,
+            "fan_in": 1,
             "runtime_importers": [
-              "bioetl.application.core._batch_processing_layer_write_support",
-              "bioetl.application.core.batch_pipeline_execution_errors",
-              "bioetl.application.core.batch_processing_support",
-              "bioetl.application.core.lifecycle.checkpoint_manager",
-              "bioetl.application.core.postrun.service"
+              "bioetl.application.core.batch_processing_support"
             ]
           },
           {
@@ -1566,7 +1563,6 @@
           "bioetl.application.core.batch_execution.contracts",
           "bioetl.application.core.batch_pipeline_execution_errors",
           "bioetl.application.core.batch_processing_runtime",
-          "bioetl.application.core.batch_shared_operation_errors",
           "bioetl.application.core.batch_transformer_state",
           "bioetl.application.core.data_source_mixins",
           "bioetl.application.core.lifecycle.shutdown",

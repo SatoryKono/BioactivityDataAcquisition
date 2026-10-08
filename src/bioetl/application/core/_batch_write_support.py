@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
+from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
-from bioetl.application.batch_processing_contracts import LayerWriteOutcome
 from bioetl.application.core._batch_write_events import (
     emit_batch_failed,
     emit_batch_written,
@@ -20,6 +20,21 @@ from bioetl.application.core.quarantine_manager import (
 )
 from bioetl.domain.exceptions import SchemaViolationError
 from bioetl.domain.types import BatchID, RunID
+
+WriteLayerStatus = Literal["written", "quarantined", "blocked", "skipped"]
+
+
+@dataclass(frozen=True, slots=True)
+class LayerWriteOutcome:
+    """Typed result of one storage-layer write attempt."""
+
+    layer: str
+    status: WriteLayerStatus
+    candidate_count: int
+    confirmed_count: int = 0
+    quarantined_count: int = 0
+    write_result: object | None = None
+
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_writer import BatchWriter

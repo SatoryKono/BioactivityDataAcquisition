@@ -11,6 +11,9 @@ linked_issues:
   - "9623"
 path: src/bioetl/application/services
 subdomains:
+  batch_processing:
+    owner: "@bioetl-architecture"
+    responsibility: "Shared batch-operation failure policy"
   control_plane:
     owner: "@bioetl-platform"
     responsibility: "Run manifests, ledgers, inspection, and replay evidence"

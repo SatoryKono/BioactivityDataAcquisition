@@ -333,6 +333,7 @@ acceptance gates; workflow deletion is no longer a completion criterion.
 | `schema-governance.yml` | Schema Governance | Schema governance checks |
 | `scorecard.yml` | OpenSSF Scorecard | Weekly non-blocking OpenSSF Scorecard baseline |
 | `security.yml` | Security Scans | Secrets, pip-audit, Bandit, Gitleaks, OSV-Scanner |
+| `skills-consistency.yml` | Skills Consistency | Path-filtered local skill mirrors plus Codex–Junie runtime parity |
 | `tests.yml` | Tests | Primary unit/integration test matrix |
 | `type-checking.yml` | Type Checking (Strict) | basedpyright / type gates |
 | `zizmor.yml` | zizmor | High-confidence GitHub Actions YAML audit |
@@ -366,7 +367,6 @@ not operator routing targets. Reasons live in
 | `reusable-mermaid-setup.yml` | [DEPRECATED] Reusable Mermaid setup | `keep-disabled` |
 | `reusable-setup.yml` | [DEPRECATED] Reusable CI setup | `keep-disabled` |
 | `semantic-governance.yml` | Semantic Pipeline Governance | `keep-disabled` |
-| `skills-consistency.yml` | Skills Consistency | `keep-disabled` |
 | `stale.yml` | Stale | `keep-disabled` |
 | `vacuum.yml` | Weekly VACUUM | `keep-disabled` |
 | `validate-vendored-mermaid-assets.yml` | Validate vendored Mermaid assets | `keep-disabled` |

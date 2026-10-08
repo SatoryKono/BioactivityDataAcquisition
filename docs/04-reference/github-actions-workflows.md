@@ -174,7 +174,6 @@ enable heavy nightlies without Actions spend evidence. Do not reopen #9975 or
 | `reusable-mermaid-setup.yml` | Deprecated; use `.github/actions/setup-mermaid` |
 | `reusable-setup.yml` | Deprecated; use `.github/actions/setup-python-uv` |
 | `semantic-governance.yml` | Overlaps schema/docs governance; not a `pr-required.yml` owner |
-| `skills-consistency.yml` | Optional AI-runtime parity lane; not a `pr-required.yml` owner |
 | `stale.yml` | YAML 14/7 PR stale/close contradicts `.github/PULL_REQUEST_HYGIENE.md` (21 days, draft + report-noise only). Do not enable until days/exemptions match that policy. Do not weaken stale to close non-draft engineering PRs. |
 | `vacuum.yml` | Optional Delta VACUUM. Schedule removed; run locally (#11189) |
 | `validate-vendored-mermaid-assets.yml` | Covered by `docs.yml` Mermaid jobs when that owner is active |

@@ -1,4 +1,4 @@
-"""Shared exception policy for application batch operations."""
+"""Shared error policy for application batch operations."""
 
 from __future__ import annotations
 

@@ -13,9 +13,9 @@ from bioetl.domain.types import JsonDict
 __all__ = ["RecordProcessor"]
 
 from collections.abc import Callable
-from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.core._batch_write_support import LayerWriteOutcome
 from bioetl.application.core._record_processor_span_support import (
     RecordProcessorSpanExecutor,
 )
@@ -26,17 +26,15 @@ from bioetl.application.core._record_processor_write_support import (
 from bioetl.application.core.batch_executor import BatchResult
 
 if TYPE_CHECKING:
-    from bioetl.application.batch_processing_contracts import LayerWriteOutcome
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.core.batch_transformer import (
         BatchTransformer,
         TransformResult,
     )
     from bioetl.application.core.batch_writer import BatchWriter
-    from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
     from bioetl.application.core.record_processor_config import RecordProcessorConfig
-    from bioetl.application.observability.domain_event_emitter import (
-        DomainEventEmitterProtocol,
+    from bioetl.application.services.batch_processing import (
+        RecordProcessorWriteCollaborators,
     )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import TracingPort
@@ -58,24 +56,12 @@ class RecordProcessor:
         span_executor_factory: Callable[
             [TracingPort], RecordProcessorSpanExecutor
         ] = RecordProcessorSpanExecutor,
-        quarantine_manager: QuarantineRuntimeService | None = None,
-        domain_event_emitter: DomainEventEmitterProtocol | None = None,
+        write_runtime: RecordProcessorWriteCollaborators | None = None,
     ) -> None:
-        """Initialize RecordProcessor.
-        Args:
-            context: Pipeline execution context.
-            batch_metrics: Metrics recorder for Bronze/Silver/Gold stages.
-            transformer: Batch transformer for Bronze -> Silver/Gold conversion.
-            writer: Batch writer orchestrating Bronze/Silver/Gold writes.
-            config: Record processor configuration.
-            tracer: Tracing port for distributed tracing.
-            span_executor_factory: Factory for the tracing span executor.
-            quarantine_manager: Optional manager for write-stage quarantine parity.
-            domain_event_emitter: Optional structured event sink for quarantines.
-            When collaborators are
-                provided, schema-violating Silver/Gold records are quarantined
-                with the same semantics as ``safe_write_layer``; when omitted,
-                schema violations propagate (legacy behavior).
+        """Initialize the processor with batch and optional quarantine collaborators.
+
+        ``write_runtime`` applies BatchProcessingService quarantine semantics;
+        omitting it preserves legacy error propagation.
         """
         self._context = context
         self._config = config
@@ -84,8 +70,12 @@ class RecordProcessor:
         self._batch_metrics = batch_metrics
         self._transformer = transformer
         self._writer = writer
-        self._quarantine_manager = quarantine_manager
-        self._domain_event_emitter = domain_event_emitter
+        self._quarantine_manager = (
+            write_runtime.quarantine_manager if write_runtime is not None else None
+        )
+        self._domain_event_emitter = (
+            write_runtime.domain_event_emitter if write_runtime is not None else None
+        )
 
     async def process_batch(
         # Any: record vals vary
@@ -126,7 +116,13 @@ class RecordProcessor:
         )
         typed_bronze_result = cast("BronzeWriteResult | None", bronze_result)
         bronze_refs = [typed_bronze_result] if typed_bronze_result else None
-        silver_outcome = await self._write_silver_layer(
+        silver_outcome = await write_silver_layer(
+            span_executor=self._span_executor,
+            writer=self._writer,
+            quarantine_manager=self._quarantine_manager,
+            logger=self._context.logger,
+            run_id=self._context.run_id,
+            domain_event_emitter=self._domain_event_emitter,
             result=result,
             batch_id=batch_id,
             ingestion_ts=ingestion_ts,
@@ -155,28 +151,6 @@ class RecordProcessor:
             silver_count=silver_outcome.confirmed_count,
             gold_count=gold_outcome.confirmed_count,
             quarantined_count=result.quarantined_count + write_quarantined,
-        )
-
-    async def _write_silver_layer(
-        self,
-        *,
-        result: TransformResult,
-        batch_id: BatchID,
-        ingestion_ts: datetime,
-        bronze_refs: list[BronzeWriteResult] | None,
-    ) -> LayerWriteOutcome:
-        """Write Silver with quarantine parity when a manager is configured."""
-        return await write_silver_layer(
-            span_executor=self._span_executor,
-            writer=self._writer,
-            quarantine_manager=self._quarantine_manager,
-            logger=self._context.logger,
-            run_id=self._context.run_id,
-            domain_event_emitter=self._domain_event_emitter,
-            result=result,
-            batch_id=batch_id,
-            ingestion_ts=ingestion_ts,
-            bronze_refs=bronze_refs,
         )
 
     async def _write_gold_layer(

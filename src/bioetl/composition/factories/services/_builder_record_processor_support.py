@@ -7,7 +7,12 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal, cast
 
 from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
-from bioetl.application.core.wiring.runtime import RecordProcessor
+from bioetl.application.core.wiring.runtime import (
+    RecordProcessor,
+)
+from bioetl.application.services.batch_processing import (
+    RecordProcessorWriteCollaborators,
+)
 from bioetl.domain.config import TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
 
@@ -146,5 +151,7 @@ def create_record_processor_impl(
         writer=components.writer,
         config=processor_config,
         tracer=effective_tracer,
-        quarantine_manager=quarantine_manager,
+        write_runtime=RecordProcessorWriteCollaborators(
+            quarantine_manager=quarantine_manager,
+        ),
     )

@@ -9,9 +9,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.batch_processing_contracts import LayerWriteOutcome
-from bioetl.application.core._batch_write_support import safe_write_layer
-from bioetl.application.services.batch_operation_errors import (
+from bioetl.application.core._batch_write_support import (
+    LayerWriteOutcome,
+    safe_write_layer,
+)
+from bioetl.application.services.batch_processing.operation_errors import (
     OPERATION_ERRORS as _OPERATION_ERRORS,
 )
 
