@@ -130,7 +130,7 @@ def prepare_assay_replay(
                 getattr(config.merge, f"output_{layer}_path"), layer
             )
             path = storage.get_table_path(table_name, layer=layer)
-            table = await output_reader.read_table(str(path))
+            table = await output_reader.read_table(str(path.resolve()))
             name = f"expected/{layer}.arrow"
             objects[name] = publish_table(root, name, table)
         envelope: JsonDict = {
