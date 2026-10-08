@@ -182,6 +182,7 @@ class PubMedPublicationTermPayloadEnricher:
             self._logger.warning(
                 "publication_term_pubmed_enrichment_failed",
                 error=str(exc),
+                reason_code="pubmed_term_fetch_failed",
                 pmid_count=len(pmids),
             )
             return list(records)
