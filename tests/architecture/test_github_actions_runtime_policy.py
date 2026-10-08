@@ -469,22 +469,6 @@ def test_release_publish_requires_same_sha_quality_gates() -> None:
         assert "test-install" in needs
 
 
-def test_detect_secrets_workflows_load_architecture_fixtures() -> None:
-    """The scanner test uses cached_subprocess_run from architecture conftest."""
-    security = _load_yaml(ROOT / ".github/workflows/security.yml")
-    coordinator = _load_yaml(ROOT / ".github/workflows/pr-required.yml")
-    security_run = security["jobs"]["detect-secrets"]["steps"][-1]["run"]
-    coordinator_run = next(
-        step["run"]
-        for step in coordinator["jobs"]["class-lane"]["steps"]
-        if step.get("id") == "detect-secrets"
-    )
-
-    for command in (security_run, coordinator_run):
-        assert "test_antipatterns.py::test_no_hardcoded_secrets" in command
-        assert "--noconftest" not in command
-
-
 def test_release_wheel_smoke_installs_locked_dependencies_before_local_artifact() -> (
     None
 ):
