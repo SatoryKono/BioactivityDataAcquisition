@@ -17,6 +17,7 @@ from bioetl.domain.types import (
     ScdConfig,
     resolve_gold_contract_version,
 )
+from bioetl.domain.types.gold_contracts import GoldWriteReceipt
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
     _clear_delta_tables,
@@ -279,9 +280,9 @@ class GoldWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         self,
         *,
         request: _GoldWriteRequest,
-    ) -> None:
+    ) -> GoldWriteReceipt:
         """Compatibility seam for direct test patching and dual-write orchestration."""
-        await _write_single_target_impl(
+        return await _write_single_target_impl(
             self,
             request=request,
         )

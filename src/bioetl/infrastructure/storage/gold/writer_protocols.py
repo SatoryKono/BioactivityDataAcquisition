@@ -16,6 +16,7 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.types import GoldRecord, ScdConfig
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
+from bioetl.domain.types.gold_contracts import GoldWriteReceipt
 from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     GoldWriteDispatchContext,
     GoldWritePostwriteContext,
@@ -103,4 +104,4 @@ class _GoldWriterHost(Protocol):
 
     async def _post_write_gold(self, context: GoldWritePostwriteContext) -> None: ...
 
-    async def _write_single_target(self, *, request: GoldWriteRequest) -> None: ...
+    async def _write_single_target(self, *, request: GoldWriteRequest) -> GoldWriteReceipt: ...

@@ -1,24 +1,24 @@
 {
   "summary": {
-    "scanned_modules": 2553,
-    "total_internal_imports": 8180,
+    "scanned_modules": 2556,
+    "total_internal_imports": 8198,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 330,
+    "cross_layer_group_edges_total": 331,
     "violations": 0,
-    "source_fingerprint": "c5dcca9aeb1f83eb9a98d6238ec085d8f95593dfe4a7dfbce0de1dd422e0c2e3"
+    "source_fingerprint": "dcc928e9f332f10dba605ba975fd045c890548a89045b133277589842f2781b1"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1614,
+      "imports": 1615,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1083,
+      "imports": 1084,
       "allowed": true
     },
     {
@@ -48,19 +48,19 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1290,
+      "imports": 1299,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 786,
+      "imports": 790,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1258,
+      "imports": 1260,
       "allowed": true
     },
     {
@@ -84,7 +84,7 @@
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 453,
+      "imports": 454,
       "allowed": true
     }
   ],
@@ -117,7 +117,7 @@
     {
       "source": "infrastructure.storage",
       "target": "domain.types",
-      "imports": 74
+      "imports": 77
     },
     {
       "source": "infrastructure.storage",
@@ -260,6 +260,11 @@
       "imports": 22
     },
     {
+      "source": "application.services",
+      "target": "domain.normalization",
+      "imports": 21
+    },
+    {
       "source": "composition.runtime_builders",
       "target": "infrastructure.config",
       "imports": 21
@@ -277,11 +282,6 @@
     {
       "source": "application.services",
       "target": "domain.exceptions",
-      "imports": 20
-    },
-    {
-      "source": "application.services",
-      "target": "domain.normalization",
       "imports": 20
     },
     {
