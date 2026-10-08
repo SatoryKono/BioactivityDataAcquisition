@@ -480,16 +480,12 @@ def test_select_best_candidate(tmp_path: Path) -> None:
     candidates = [loc_small, loc_large]
 
     # Best candidate without notes
-    selected, note = _select_best_candidate(
-        candidates, tmp_path, include_notes=False
-    )
+    selected, note = _select_best_candidate(candidates, tmp_path, include_notes=False)
     assert selected == loc_large
     assert note is None
 
     # Best candidate with notes
-    selected, note = _select_best_candidate(
-        candidates, tmp_path, include_notes=True
-    )
+    selected, note = _select_best_candidate(candidates, tmp_path, include_notes=True)
     assert selected == loc_large
     assert note is not None
     assert "small.py" in note
