@@ -125,6 +125,8 @@ jobs:
     permissions:
       contents: read
       security-events: write
+    env:
+      PYTHONDONTWRITEBYTECODE: 1
     steps:
       - name: Checkout
         id: checkout
@@ -270,8 +272,8 @@ jobs:
           OUTCOMES="$(tr -d '\r\n' < reports/quality/lane-step-outcomes.json)"
           export OUTCOMES
           uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results assert-steps \
-            --decision-matrix-env DECISION_MATRIX \
-            --outcomes-env OUTCOMES \
+            --decision-matrix DECISION_MATRIX --decision-matrix-env \
+            --outcomes OUTCOMES --outcomes-env \
             --owner "$LANE_OWNER"
 
   class-lane:
@@ -671,8 +673,8 @@ jobs:
           OUTCOMES="$(tr -d '\r\n' < reports/quality/lane-step-outcomes.json)"
           export OUTCOMES
           uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results assert-steps \
-            --decision-matrix-env DECISION_MATRIX \
-            --outcomes-env OUTCOMES \
+            --decision-matrix DECISION_MATRIX --decision-matrix-env \
+            --outcomes OUTCOMES --outcomes-env \
             --owner "$LANE_OWNER"
 
   pr-gate-complete:
@@ -713,7 +715,7 @@ jobs:
           test "${{ needs['classify-changes'].result }}" = "success"
           mkdir -p reports/quality
           uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \
-            --decision-matrix-env DECISION_MATRIX \
+            --decision-matrix DECISION_MATRIX --decision-matrix-env \
             --head-sha "${EXPECTED_HEAD_SHA}" \
             --job-result "fast-governance=${FAST_RESULT}" \
             --job-result "class-lane=${CLASS_RESULT}" \
@@ -722,7 +724,7 @@ jobs:
           export AGGREGATE_RESULTS
           uv run --frozen --no-build python -m scripts.engineering.ci pr-gate aggregate \
             --catalog configs/quality/github_required_checks.yaml \
-            --decision-matrix-env DECISION_MATRIX \
+            --decision-matrix DECISION_MATRIX --decision-matrix-env \
             --results-env AGGREGATE_RESULTS \
             --expected-head-sha "${EXPECTED_HEAD_SHA}" \
             --observed-head-sha "${OBSERVED_HEAD_SHA}" \

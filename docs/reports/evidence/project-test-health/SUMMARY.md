@@ -1,6 +1,6 @@
 ---
 status: active-non-canonical
-last_verified: "2026-09-30"
+last_verified: "2026-10-08"
 freshness_window_days: 7
 owner: quality
 canonical_sources:

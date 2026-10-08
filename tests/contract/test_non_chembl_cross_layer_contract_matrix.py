@@ -392,7 +392,6 @@ def _field_validation_validator(path: Path, field_name: str) -> str:
     raise AssertionError(f"{path}:{field_name} missing validation")
 
 
-@pytest.mark.no_api
 def test_uniprot_reference_array_dq_rules_match_profile_owned_canonicalization() -> (
     None
 ):

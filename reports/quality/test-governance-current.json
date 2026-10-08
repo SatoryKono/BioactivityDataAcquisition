@@ -2044,8 +2044,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3032,
-      "test_python_file_count": 3267,
+      "test_glob_file_count": 3031,
+      "test_python_file_count": 3266,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2086,13 +2086,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3032,
-    "total_test_functions": 29646,
+    "total_test_files": 3031,
+    "total_test_functions": 29635,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "50e83fe882288833dbff89abac1c5d40d67d9f0b17ce7a6fec472d704995db54",
+  "source_tree_sha256": "f1d7ca41087792d3207eb4b454e0da0e41e777061b05df7cc04a2c720c967665",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2112,8 +2112,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3032,
-    "test_python_file_count": 3267,
+    "test_glob_file_count": 3031,
+    "test_python_file_count": 3266,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2154,8 +2154,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3032,
-  "total_test_functions": 29646,
+  "total_test_files": 3031,
+  "total_test_functions": 29635,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
