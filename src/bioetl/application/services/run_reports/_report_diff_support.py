@@ -154,14 +154,20 @@ def _strip_repository_env_inline_comment(value: str) -> str:
             elif quote == character:
                 quote = None
             continue
-        if (
-            character == "#"
-            and quote is None
-            and index > 0
-            and value[index - 1].isspace()
-        ):
+        if _is_repository_env_comment_start(value, index, character, quote):
             return value[:index].rstrip()
     return value.rstrip()
+
+
+def _is_repository_env_comment_start(
+    value: str, index: int, character: str, quote: str | None
+) -> bool:
+    return (
+        character == "#"
+        and quote is None
+        and index > 0
+        and value[index - 1].isspace()
+    )
 
 
 def _parse_repository_env_line(raw: str, allowed: set[str]) -> tuple[str, str] | None:

@@ -99,7 +99,9 @@ def test_full_architecture_and_branch_activation_are_preserved():
 
 
 def test_rf023_requires_terminal_full_suite_and_preserves_ci_identity():
-    config = yaml.safe_load((ROOT / ".circleci/config.yml").read_text())
+    config = yaml.safe_load(
+        (ROOT / ".circleci/config.yml").read_text(encoding="utf-8")
+    )
     job = config["jobs"]["rf023-proof-closeout"]
     commands = [
         s["run"]["command"] for s in job["steps"] if isinstance(s, dict) and "run" in s
@@ -136,7 +138,9 @@ def test_rf023_requires_terminal_full_suite_and_preserves_ci_identity():
 
 
 def test_rf023_full_suite_receipt_binds_junit_and_isolates_selection():
-    config = yaml.safe_load((ROOT / ".circleci/config.yml").read_text())
+    config = yaml.safe_load(
+        (ROOT / ".circleci/config.yml").read_text(encoding="utf-8")
+    )
     source = next(
         s["run"]["command"]
         for s in config["jobs"]["rf023-proof-closeout"]["steps"]
@@ -155,10 +159,10 @@ def test_rf023_full_suite_receipt_binds_junit_and_isolates_selection():
 
 
 def test_diagram_drift_has_a_reachable_merge_base_before_diff():
-    source = (ROOT / ".circleci/config.yml").read_text()
+    source = (ROOT / ".circleci/config.yml").read_text(encoding="utf-8")
     start = source.index("name: Canonical diagram drift validation")
     drift = source[start : source.index("changed_diagrams=$(", start)]
-    assert "git fetch --unshallow origin" in drift
+    assert "git fetch --no-tags --unshallow origin" in drift
     assert (
         'git fetch --no-tags origin "${BASE_REF}:refs/remotes/origin/${BASE_REF}"'
         in drift
