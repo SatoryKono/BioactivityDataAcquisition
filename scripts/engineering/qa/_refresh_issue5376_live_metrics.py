@@ -39,6 +39,7 @@ record["current_live_metrics"].update(
     tracked_module_status=tracked["coverage_status"],
 )
 record["closeout"].update(
+    residual_tail_remains=bool(below),
     residual_below_85_module_count=len(below),
     rationale=(
         f"Retained live inventory has {len(below)} measured modules below the default floor; "
