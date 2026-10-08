@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from contextlib import AsyncExitStack
 from typing import TYPE_CHECKING, Protocol
 
@@ -21,13 +21,14 @@ if TYPE_CHECKING:
 
 
 class _XmlElement(Protocol):
-    text: str | None
+    @property
+    def text(self) -> str | None: ...
 
     def get(self, key: str, default: str | None = None) -> str | None: ...
 
     def find(self, path: str) -> _XmlElement | None: ...
 
-    def findall(self, path: str) -> list[_XmlElement]: ...
+    def findall(self, path: str) -> Iterable[_XmlElement]: ...
 
 
 __all__ = [
