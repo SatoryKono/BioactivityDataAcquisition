@@ -461,10 +461,10 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 202
-      total_loc: 25269
+      total_loc: 25231
       files_ge_250_loc: 0
-      helper_function_ratio: 0.383
-      max_internal_fan_in: 6
+      helper_function_ratio: 0.381
+      max_internal_fan_in: 7
       max_internal_fan_in_module: bioetl.application.core.batch_processing_contracts
     trend:
       status: reduced_2026-08-27_debt_cycle_fanin_ratchet
@@ -489,7 +489,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 49
-      total_loc: 6440
+      total_loc: 6437
       files_ge_250_loc: 0
       helper_function_ratio: 0.284
       max_internal_fan_in: 2
