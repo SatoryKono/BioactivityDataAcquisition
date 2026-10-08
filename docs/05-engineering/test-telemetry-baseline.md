@@ -28,11 +28,11 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `main`
-- Source commit: `398899f9c7ce527ddf73d421b9681ef5ff21d2c1`
+- Source commit: `5bd004b1bc931382510e004ced75dd38c54b25ed`
 - Source run id: `local-bioetl-local-coverage-n3j855qy`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `89ccd9e77839a2f79a54376f707dc87e1702982a2915ea575387a81833a9e82a`
+- Source tree sha256: `85cdd6755de0c3126b8cde33ca3a0ae6674192ae1d78edb517ce3445a12ae774`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-10-07T06:47:38.860998+00:00`
 
