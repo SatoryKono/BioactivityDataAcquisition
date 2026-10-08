@@ -3,6 +3,7 @@
 from __future__ import annotations
 # ruff: noqa: I001
 
+from bioetl.application.core.wiring import factory as _factory
 from bioetl.application.core.wiring.factory import (
     BasePipeline as BasePipeline,
     BatchExecutor as BatchExecutor,
@@ -16,15 +17,4 @@ from bioetl.application.core.wiring.factory import (
     ShutdownSignal as ShutdownSignal,
 )
 
-__all__ = [
-    "BasePipeline",
-    "BatchExecutor",
-    "CheckpointRuntimeService",
-    "LockRuntimeService",
-    "PipelineRunner",
-    "PipelineRunnerDependencies",
-    "PipelineService",
-    "PostrunService",
-    "PreflightService",
-    "ShutdownSignal",
-]
+__all__ = _factory.__all__

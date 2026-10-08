@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -89,3 +90,27 @@ def emit_batch_failed(
         ),
         logger=logger,
     )
+
+
+@dataclass(frozen=True, slots=True)
+class BatchFailureEventContext:
+    """Stable write-stage correlation fields for one failure notification."""
+
+    emitter: DomainEventEmitterProtocol | None
+    run_id: RunID | None
+    batch_id: BatchID
+    layer: str
+    occurred_at: datetime
+    logger: LoggerPort | None
+
+    def emit(self, error: Exception) -> None:
+        """Publish a failed-batch event with the captured correlation fields."""
+        emit_batch_failed(
+            emitter=self.emitter,
+            run_id=self.run_id,
+            batch_id=self.batch_id,
+            layer=self.layer,
+            error=error,
+            occurred_at=self.occurred_at,
+            logger=self.logger,
+        )

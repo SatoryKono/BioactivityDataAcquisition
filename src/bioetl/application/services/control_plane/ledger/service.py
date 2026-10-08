@@ -183,15 +183,14 @@ class RunLedgerService(RunLedgerRichEventRecordingMixin):
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Record a published layer artifact tied to this manifest."""
-        return _core_events.record_artifact_published(
-            self,
+        return _core_events.ArtifactPublicationRequest(
             layer=layer,
             artifact_path=artifact_path,
             artifact_content_hash=artifact_content_hash,
             dataset_ref=dataset_ref,
             lineage_fragment_id=lineage_fragment_id,
             details=details,
-        )
+        ).record(self)
 
     def record_dq_policy_applied(
         self,

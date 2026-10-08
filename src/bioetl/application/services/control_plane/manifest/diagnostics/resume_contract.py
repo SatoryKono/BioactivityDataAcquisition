@@ -13,31 +13,31 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_invar
 from bioetl.application.services.control_plane.manifest.diagnostics.resume_contract_resolve_resume_guarantee import (
     _resolve_resume_guarantee,
 )
-from bioetl.domain.control_plane import ReplayCapability, RunManifest
+from bioetl.domain.control_plane import ReplayCapability
 from bioetl.domain.control_plane.execution_context import (
     is_composite_execution_context as _is_composite_execution_context,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
-    ReproducibilityPolicyAssessment,
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context import (
-        ReplayFamilyContext,
+    from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection_payload import (
+        _ReplayProjectionContextKwargs,
     )
 
 
 def _build_resume_contract(
+    replay_projection_context: _ReplayProjectionContextKwargs,
     *,
-    manifest: RunManifest,
-    requested_exact_replay: bool,
-    resume_requested: bool,
     continuation_mode: str,
-    policy_assessment: ReproducibilityPolicyAssessment,
-    replay_family_context: ReplayFamilyContext,
 ) -> dict[str, object]:
     """Return the published checkpoint/resume contract for one manifested run."""
+    manifest = replay_projection_context["manifest"]
+    requested_exact_replay = replay_projection_context["requested_exact_replay"]
+    resume_requested = replay_projection_context["resume_requested"]
+    policy_assessment = replay_projection_context["policy_assessment"]
+    replay_family_context = replay_projection_context["replay_family_context"]
     profile = replay_family_context.profile
     requested_policy = _resolve_requested_checkpoint_compatibility_policy(manifest)
     required_persistence_profile = policy_assessment.required_persistence_profile

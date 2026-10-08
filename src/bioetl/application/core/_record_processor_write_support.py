@@ -14,8 +14,8 @@ from bioetl.application.core._batch_processing_layer_write_support import (
     OPERATION_ERRORS,
 )
 from bioetl.application.core._batch_write_support import (
+    SafeLayerWriteContext,
     build_layer_write_outcome,
-    safe_write_layer,
 )
 
 if TYPE_CHECKING:
@@ -87,19 +87,21 @@ async def write_silver_layer(
             confirmed_count=len(result.silver_records),
             write_result=cast("SilverWriteResult | None", silver_result),
         )
-    return await safe_write_layer(
+    safe_writer = SafeLayerWriteContext(
         execute_with_span=span_executor.execute_with_span,
         writer=writer,
         quarantine_manager=quarantine_manager,
         logger=logger,
         run_id=run_id,
         domain_event_emitter=domain_event_emitter,
-        layer="silver",
-        records=result.silver_records,
         batch_id=batch_id,
         ingestion_ts=ingestion_ts,
-        bronze_refs=bronze_refs,
         operation_errors=operation_errors,
+    )
+    return await safe_writer.write(
+        layer="silver",
+        records=result.silver_records,
+        bronze_refs=bronze_refs,
     )
 
 
@@ -146,18 +148,20 @@ async def write_gold_layer(
             candidate_count=len(result.gold_records),
             confirmed_count=len(result.gold_records),
         )
-    return await safe_write_layer(
+    safe_writer = SafeLayerWriteContext(
         execute_with_span=span_executor.execute_with_span,
         writer=writer,
         quarantine_manager=quarantine_manager,
         logger=logger,
         run_id=run_id,
         domain_event_emitter=domain_event_emitter,
-        layer="gold",
-        records=result.gold_records,
         batch_id=batch_id,
         ingestion_ts=ingestion_ts,
+        operation_errors=operation_errors,
+    )
+    return await safe_writer.write(
+        layer="gold",
+        records=result.gold_records,
         bronze_refs=None,
         silver_refs=silver_refs,
-        operation_errors=operation_errors,
     )

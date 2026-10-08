@@ -15,6 +15,9 @@ from bioetl.application.services.control_plane.effective_config.runtime_override
     normalize_runtime_overrides_for_semantic_identity,
     validate_runtime_environment_provenance,
 )
+from bioetl.application.services.control_plane.effective_config.serialization import (
+    canonical_source_refs,
+)
 from bioetl.domain.behavior.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane.effective_config_artifact import (
@@ -97,16 +100,7 @@ def resolve_resolution_policy(
 def compute_source_fingerprint(source_refs: list[ConfigSourceRef]) -> str:
     if not source_refs:
         return "no_sources"
-    ordered = sorted(
-        source_refs,
-        key=lambda src: (
-            src.priority,
-            src.source_type,
-            src.source_path,
-            src.source_hash or "",
-            src.raw_source_hash or "",
-        ),
-    )
+    ordered = canonical_source_refs(source_refs)
     return stable_json_hash(
         [
             {

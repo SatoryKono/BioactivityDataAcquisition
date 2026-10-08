@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING
 
+from bioetl.application.services.control_plane.input_snapshot_identity import (
+    InputSnapshotIdentity,
+)
 from bioetl.application.services.control_plane.ledger._input_snapshot_manifest import (
     persist_input_snapshots_on_manifest,
 )
@@ -18,47 +22,55 @@ if TYPE_CHECKING:
     )
 
 
-class _SnapshotPublishKwargs(TypedDict):
-    """Publish kwargs for one validated input-snapshot payload."""
+@dataclass(frozen=True, slots=True)
+class _SnapshotPublishRequest(InputSnapshotIdentity):
+    """Validated input-snapshot publication request."""
 
-    provider: str
-    entity: str
-    pipeline_name: str
-    snapshot_id: str
-    content_hash: str
-    immutable_uri: str
-    bronze_batch_ref: str
     query_fingerprint: str | None
     details: Mapping[str, object]
 
+    def publish(self, service: RunLedgerService) -> None:
+        """Append this snapshot through the ledger service port."""
+        service.record_input_snapshot_published(
+            provider=self.provider,
+            entity=self.entity,
+            pipeline_name=self.pipeline_name,
+            snapshot_id=self.snapshot_id,
+            content_hash=self.content_hash,
+            immutable_uri=self.immutable_uri,
+            bronze_batch_ref=self.bronze_batch_ref,
+            query_fingerprint=self.query_fingerprint,
+            details=self.details,
+        )
 
-def _published_snapshot_kwargs(
+
+def _published_snapshot_request(
     snapshot: dict[str, object],
     *,
     details: dict[str, object],
     artifact_path: str,
     snapshot_id: str,
-) -> _SnapshotPublishKwargs:
-    """Build publish kwargs for one validated snapshot payload."""
-    return {
-        "provider": str(details.get("provider") or ""),
-        "entity": str(details.get("entity") or ""),
-        "pipeline_name": str(details.get("pipeline_name") or ""),
-        "snapshot_id": snapshot_id,
-        "content_hash": str(snapshot.get("content_hash") or ""),
-        "immutable_uri": str(snapshot.get("immutable_uri")),
-        "bronze_batch_ref": artifact_path,
-        "query_fingerprint": (
+) -> _SnapshotPublishRequest:
+    """Build a publication request for one validated snapshot payload."""
+    return _SnapshotPublishRequest(
+        provider=str(details.get("provider") or ""),
+        entity=str(details.get("entity") or ""),
+        pipeline_name=str(details.get("pipeline_name") or ""),
+        snapshot_id=snapshot_id,
+        content_hash=str(snapshot.get("content_hash") or ""),
+        immutable_uri=str(snapshot.get("immutable_uri")),
+        bronze_batch_ref=artifact_path,
+        query_fingerprint=(
             None
             if snapshot.get("query_fingerprint") is None
             else str(snapshot.get("query_fingerprint"))
         ),
-        "details": {
+        details={
             key: value
             for key, value in snapshot.items()
             if key not in {"snapshot_id", "content_hash", "immutable_uri"}
         },
-    }
+    )
 
 
 def _record_one_input_snapshot(
@@ -76,14 +88,13 @@ def _record_one_input_snapshot(
     snapshot_id = str(snapshot.get("snapshot_id") or "").strip()
     if not snapshot_id:
         raise ValueError("input snapshot is missing snapshot_id")
-    service.record_input_snapshot_published(
-        **_published_snapshot_kwargs(
-            snapshot,
-            details=details,
-            artifact_path=artifact_path,
-            snapshot_id=snapshot_id,
-        )
+    request = _published_snapshot_request(
+        snapshot,
+        details=details,
+        artifact_path=artifact_path,
+        snapshot_id=snapshot_id,
     )
+    request.publish(service)
     return _snapshot_ref_from_payload(snapshot, snapshot_id=snapshot_id)
 
 

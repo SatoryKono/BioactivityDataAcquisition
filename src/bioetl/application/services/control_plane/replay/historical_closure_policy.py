@@ -6,21 +6,24 @@ import hashlib
 import json
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.replay.closure_claims import (
-    RESIDUAL_BLOCKED_STATUSES as RESIDUAL_BLOCKED_STATUSES,
-)
-from bioetl.application.services.control_plane.replay.closure_claims import (
-    HistoricalReplayClaimScopeMode as HistoricalReplayClaimScopeMode,
-)
-from bioetl.application.services.control_plane.replay.closure_claims import (
-    HistoricalReplayClosureReportRecord as HistoricalReplayClosureReportRecord,
-)
-from bioetl.application.services.control_plane.replay.closure_claims import (
-    HistoricalReplayResidualDispositionRecord as HistoricalReplayResidualDispositionRecord,
+from bioetl.application.services.control_plane.replay import (
+    historical_closure_models as _closure_models,
 )
 from bioetl.application.services.control_plane.replay.closure_claims import (
     build_narrowed_scope_global_claim,
     build_universal_scope_global_claim,
+)
+from bioetl.application.services.control_plane.replay.historical_closure_models import (
+    RESIDUAL_BLOCKED_STATUSES as RESIDUAL_BLOCKED_STATUSES,
+)
+from bioetl.application.services.control_plane.replay.historical_closure_models import (
+    HistoricalReplayClaimScopeMode as HistoricalReplayClaimScopeMode,
+)
+from bioetl.application.services.control_plane.replay.historical_closure_models import (
+    HistoricalReplayClosureReportRecord as HistoricalReplayClosureReportRecord,
+)
+from bioetl.application.services.control_plane.replay.historical_closure_models import (
+    HistoricalReplayResidualDispositionRecord as HistoricalReplayResidualDispositionRecord,
 )
 
 if TYPE_CHECKING:
@@ -32,10 +35,7 @@ if TYPE_CHECKING:
     )
 
 __all__ = [
-    "RESIDUAL_BLOCKED_STATUSES",
-    "HistoricalReplayClaimScopeMode",
-    "HistoricalReplayClosureReportRecord",
-    "HistoricalReplayResidualDispositionRecord",
+    *_closure_models.__all__,
     "build_closure_report_id",
     "build_global_claim_gate",
     "build_retained_corpus_claim",

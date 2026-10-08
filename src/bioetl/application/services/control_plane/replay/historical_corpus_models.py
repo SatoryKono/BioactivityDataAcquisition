@@ -4,6 +4,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.application.services.control_plane.input_snapshot_identity import (
+    InputSnapshotIdentity,
+)
+from bioetl.application.services.control_plane.replay.historical_identity_models import (
+    HistoricalReplayRunIdentityRecord,
+)
+
 CORPUS_MODEL_PUBLIC_NAMES: tuple[str, ...] = (
     "HistoricalReplayBulkCertificationRecord",
     "HistoricalReplayBulkCertificationResult",
@@ -15,16 +22,9 @@ CORPUS_MODEL_PUBLIC_NAMES: tuple[str, ...] = (
 
 
 @dataclass(frozen=True, slots=True)
-class HistoricalReplaySnapshotCertification:
+class HistoricalReplaySnapshotCertification(InputSnapshotIdentity):
     """Immutable snapshot evidence used for historical replay certification."""
 
-    provider: str
-    entity: str
-    pipeline_name: str
-    snapshot_id: str
-    content_hash: str
-    immutable_uri: str
-    bronze_batch_ref: str
     query: str | None = None
     query_fingerprint: str | None = None
     certification_artifact_ref: str | None = None
@@ -34,15 +34,9 @@ class HistoricalReplaySnapshotCertification:
 
 
 @dataclass(frozen=True, slots=True)
-class HistoricalReplayCertifiabilityRecord:
+class HistoricalReplayCertifiabilityRecord(HistoricalReplayRunIdentityRecord):
     """One deterministic certifiability record for a retained manifest."""
 
-    manifest_id: str
-    run_id: str
-    pipeline_name: str
-    provider: str
-    entity: str
-    execution_context: str
     family: str | None
     certification_scope: str | None
     certification_status: str

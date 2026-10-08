@@ -3,6 +3,7 @@
 from __future__ import annotations
 # ruff: noqa: I001
 
+from bioetl.application.core import batch_transformer_dq_thresholds as _thresholds
 from bioetl.application.core.batch_transformer_dq_thresholds import (
     DQThresholdCheckResult as DQThresholdCheckResult,
     ThresholdBreach as ThresholdBreach,
@@ -18,13 +19,7 @@ from bioetl.application.core.batch_transformer_finalization import (
 )
 
 __all__ = [
-    "DQThresholdCheckResult",
-    "ThresholdBreach",
-    "ThresholdBreachReason",
-    "check_dq_thresholds",
-    "classify_dq_threshold_breach",
-    "compute_error_rate",
+    *_thresholds.__all__,
     "finalize_batch_transform_result",
     "finalize_stream_transform_result",
-    "resolve_threshold_value",
 ]
