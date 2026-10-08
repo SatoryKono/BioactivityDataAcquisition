@@ -184,8 +184,8 @@ class TestPanderaSilverValidator:
         result = validator.validate(records)
         assert result.valid is True
 
-    def test_validate_with_ordered_schema_reorders_columns(self):
-        """Columns in wrong order pass validation after reorder."""
+    def test_validate_with_unordered_schema_reorders_columns(self):
+        """Columns in wrong order pass validation after reorder if schema is not ordered."""
         import pandera as pa
 
         schema = pa.DataFrameSchema(
@@ -194,7 +194,7 @@ class TestPanderaSilverValidator:
                 "b": pa.Column(int),
                 "c": pa.Column(float),
             },
-            ordered=True,
+            ordered=False,
             strict=True,
         )
         validator = PanderaSilverValidator(schema=schema)

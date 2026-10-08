@@ -124,12 +124,16 @@ class BasePanderaValidator:
 
         Preserves extra columns at the end so strict=True still catches them.
         Skips reordering for DataFrameModel classes that lack .columns.
+        If the schema enforces strict ordering (ordered=True), reordering
+        is bypassed to preserve the original validation intent.
 
         Returns:
             DataFrame with schema-defined columns first, followed by extra columns.
         """
         assert self._schema is not None
         if not hasattr(self._schema, "columns"):
+            return df
+        if getattr(self._schema, "ordered", False):
             return df
         schema_cols = list(self._schema.columns.keys())
         df_cols = df.columns.tolist()
