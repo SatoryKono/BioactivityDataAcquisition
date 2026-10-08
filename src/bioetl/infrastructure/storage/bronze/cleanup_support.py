@@ -203,28 +203,55 @@ def find_old_date_dirs(
     """Find canonical date dirs older than cutoff in flat or nested layout."""
     if not base_path.exists():
         return []
-    root_real = real_root(base_path)
-
     if flat_structure:
-        if provider or entity:
-            if on_flat_filter is not None:
-                on_flat_filter()
-            return []
-        return [
-            date_dir
-            for date_dir in iter_safe_child_dirs(base_path, on_skip=on_skip)
-            if date_dir_name_is_older(date_dir.name, cutoff_str)
-        ]
+        return _flat_old_date_dirs(
+            base_path, cutoff_str, provider, entity, on_skip, on_flat_filter
+        )
+    return _nested_old_date_dirs(
+        base_path, real_root(base_path), cutoff_str, provider, entity, on_skip
+    )
 
-    provider_dirs = _scope_child_dirs(base_path, provider, root_real, on_skip)
+
+def _flat_old_date_dirs(
+    base_path: Path,
+    cutoff_str: str,
+    provider: str | None,
+    entity: str | None,
+    on_skip: Callable[[str, str], None] | None,
+    on_flat_filter: Callable[[], None] | None,
+) -> list[Path]:
+    if provider or entity:
+        if on_flat_filter is not None:
+            on_flat_filter()
+        return []
+    return _old_date_children(base_path, cutoff_str, on_skip)
+
+
+def _nested_old_date_dirs(
+    base_path: Path,
+    root_real: Path,
+    cutoff_str: str,
+    provider: str | None,
+    entity: str | None,
+    on_skip: Callable[[str, str], None] | None,
+) -> list[Path]:
     old_dirs: list[Path] = []
-    for provider_dir in provider_dirs:
-        entity_dirs = _scope_child_dirs(provider_dir, entity, root_real, on_skip)
-        for entity_dir in entity_dirs:
-            for date_dir in iter_safe_child_dirs(entity_dir, on_skip=on_skip):
-                if date_dir_name_is_older(date_dir.name, cutoff_str):
-                    old_dirs.append(date_dir)
+    for provider_dir in _scope_child_dirs(base_path, provider, root_real, on_skip):
+        for entity_dir in _scope_child_dirs(provider_dir, entity, root_real, on_skip):
+            old_dirs.extend(_old_date_children(entity_dir, cutoff_str, on_skip))
     return old_dirs
+
+
+def _old_date_children(
+    parent: Path,
+    cutoff_str: str,
+    on_skip: Callable[[str, str], None] | None,
+) -> list[Path]:
+    return [
+        date_dir
+        for date_dir in iter_safe_child_dirs(parent, on_skip=on_skip)
+        if date_dir_name_is_older(date_dir.name, cutoff_str)
+    ]
 
 
 def _scope_child_dirs(
