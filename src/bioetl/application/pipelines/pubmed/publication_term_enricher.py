@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from contextlib import AsyncExitStack
 from typing import TYPE_CHECKING
-from xml.etree.ElementTree import Element
+from xml.etree.ElementTree import Element  # nosec B405 - see suppression registry
 
 import defusedxml.ElementTree as defused_ET
 from defusedxml.common import DefusedXmlException
