@@ -1,6 +1,6 @@
 ---
 status: active-non-canonical
-last_verified: "2026-09-30"
+last_verified: "2026-10-08"
 freshness_window_days: 7
 owner: quality
 canonical_sources:
@@ -16,7 +16,7 @@ verification_scope: tracked_test_module_inventory
 ## Current status
 
 The tracked inventory contains 2955 test modules, counted from tracked
-`tests/**/test_*.py` files on 2026-09-30. The GR-DB-CORR broad attempt executed
+`tests/**/test_*.py` files on 2026-10-08. The GR-DB-CORR broad attempt executed
 29,758 tests with 10 failures and 91 skips; it was not a PASS. A subsequent
 integration and affected-runner attempt executed 2885 tests with three failures
 and 12 skips. After fixes, the 108-test recheck of the affected integration
@@ -39,7 +39,7 @@ release acceptance, or the health of the complete repository suite.
 
 ## Freshness note
 
-Re-verified on 2026-09-30 against source HEAD
+Re-verified on 2026-10-08 against source HEAD
 `60779c32172feec3fbfe232c63003329371df40b`:
 all three canonical source paths exist, and `git ls-files tests` contains 2955
 Python modules named `test_*.py`. The scoped campaign selected tracked test

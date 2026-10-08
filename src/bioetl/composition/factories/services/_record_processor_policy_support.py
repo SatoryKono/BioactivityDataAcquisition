@@ -64,6 +64,34 @@ def extract_hash_policy(
     return include_fields, exclude_fields
 
 
+def _extract_contract_policy(pipeline: BasePipeline) -> object | None:
+    """Extract the contract policy from a pipeline's transformer."""
+    transformer = getattr(pipeline, "transformer", None)
+    return getattr(transformer, "_contract_policy", None)
+
+
+def _normalize_version(version: object | None) -> str:
+    """Normalize a version string, returning empty string if invalid."""
+    return str(version).strip() if version is not None else ""
+
+
+def _resolve_write_versions(
+    active_version: str,
+    write_versions: Iterable[object] | None,
+) -> tuple[str, ...]:
+    """Resolve the ordered tuple of write versions, ensuring active_version is included."""
+    if write_versions is None:
+        return (active_version,)
+
+    versions = tuple(
+        _normalize_version(v) for v in write_versions if _normalize_version(v)
+    ) or (active_version,)
+
+    if active_version not in versions:
+        return (active_version, *versions)
+    return versions
+
+
 def extract_hash_policy_by_version(
     pipeline: BasePipeline,
     *,
@@ -71,11 +99,19 @@ def extract_hash_policy_by_version(
     exclude_fields: frozenset[str],
 ) -> ContentHashPolicyByVersion | None:
     """Build ordered per-version hash policies from rollout-aware contract policy."""
-    transformer = getattr(pipeline, "transformer", None)
-    contract_policy = getattr(transformer, "_contract_policy", None)
-    active_version = getattr(contract_policy, "active_version", None)
+    contract_policy = _extract_contract_policy(pipeline)
+    active_version = _normalize_version(
+        getattr(contract_policy, "active_version", None)
+    )
+
+    if not active_version:
+        return None
+
     rollout = getattr(contract_policy, "rollout", None)
-    write_versions = getattr(rollout, "write_versions", None)
+    versions = _resolve_write_versions(
+        active_version, getattr(rollout, "write_versions", None)
+    )
+
     affects_hash = bool(getattr(rollout, "affects_hash", False))
     datetime_policy = str(
         getattr(contract_policy, "hash_datetime_policy", "v2_datetime_utc")
@@ -84,24 +120,8 @@ def extract_hash_policy_by_version(
     if datetime_policy not in {"v1_date", "v2_datetime_utc"}:
         datetime_policy = "v2_datetime_utc"
 
-    normalized_active_version = (
-        str(active_version).strip() if active_version is not None else ""
-    )
-    if not normalized_active_version:
-        return None
-
-    if write_versions is None:
-        versions: tuple[str, ...] = (normalized_active_version,)
-    else:
-        versions = tuple(
-            str(version).strip() for version in write_versions if str(version).strip()
-        ) or (normalized_active_version,)
-
-    if normalized_active_version not in versions:
-        versions = (normalized_active_version, *versions)
-
     return ContentHashPolicyByVersion(
-        active_version=normalized_active_version,
+        active_version=active_version,
         affects_hash=affects_hash,
         policies=tuple(
             ContentHashVersionPolicy(
@@ -121,42 +141,33 @@ def extract_gold_schema_policy_by_version(
     gold_schema: GoldSchemaType,
 ) -> GoldSchemaPolicyByVersion | None:
     """Build ordered per-version Gold schema routing from rollout-aware policy."""
-    transformer = getattr(pipeline, "transformer", None)
-    contract_policy = getattr(transformer, "_contract_policy", None)
-    active_version = getattr(contract_policy, "active_version", None)
-    rollout = getattr(contract_policy, "rollout", None)
-    write_versions = getattr(rollout, "write_versions", None)
-    configured_mapping = getattr(pipeline, "gold_schema_by_version", None)
-
-    normalized_active_version = (
-        str(active_version).strip() if active_version is not None else ""
+    contract_policy = _extract_contract_policy(pipeline)
+    active_version = _normalize_version(
+        getattr(contract_policy, "active_version", None)
     )
-    if not normalized_active_version:
+
+    if not active_version:
         return None
 
-    if write_versions is None:
-        versions: tuple[str, ...] = (normalized_active_version,)
-    else:
-        versions = tuple(
-            str(version).strip() for version in write_versions if str(version).strip()
-        ) or (normalized_active_version,)
+    rollout = getattr(contract_policy, "rollout", None)
+    versions = _resolve_write_versions(
+        active_version, getattr(rollout, "write_versions", None)
+    )
 
-    if normalized_active_version not in versions:
-        versions = (normalized_active_version, *versions)
-
+    configured_mapping = getattr(pipeline, "gold_schema_by_version", None)
     schema_mapping: dict[str, object] = {}
     if isinstance(configured_mapping, Mapping):
         schema_mapping = {
-            str(version).strip(): schema
+            _normalize_version(version): schema
             for version, schema in configured_mapping.items()
-            if str(version).strip() and schema is not None
+            if _normalize_version(version) and schema is not None
         }
 
     for version in versions:
         schema_mapping.setdefault(version, gold_schema)
 
     return GoldSchemaPolicyByVersion(
-        active_version=normalized_active_version,
+        active_version=active_version,
         policies=tuple(
             GoldSchemaVersionPolicy(
                 version=version,
