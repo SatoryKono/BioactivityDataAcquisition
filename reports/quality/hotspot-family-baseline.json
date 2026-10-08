@@ -18,9 +18,9 @@
       ],
       "duplication_clusters": 0,
       "files": 202,
-      "total_loc": 25272,
+      "total_loc": 25223,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.383,
+      "helper_function_ratio": 0.381,
       "max_internal_fan_in": 5,
       "max_internal_fan_in_module": "bioetl.application.core.target_data_source_mixins",
       "bounded_growth_budgets": {
