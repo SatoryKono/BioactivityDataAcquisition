@@ -13,6 +13,10 @@ from bioetl.infrastructure.adapters.crossref._batch_support import (
     perform_timed_crossref_get,
 )
 from bioetl.infrastructure.adapters.crossref.exceptions import CrossRefApiError
+from bioetl.infrastructure.adapters.http.pagination import (
+    PaginationTruncatedError,
+    raise_pagination_truncated,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -118,15 +122,16 @@ class SearchPaginator:
         try:
             while True:
                 if page_count >= _DEFAULT_MAX_PAGES:
-                    self._logger.warning(
-                        "crossref_search_truncated",
+                    raise_pagination_truncated(
+                        self._logger,
+                        event="crossref_search_truncated",
                         reason="max_pages",
-                        query=query[:100],
                         page_count=page_count,
                         page_limit=_DEFAULT_MAX_PAGES,
-                        next_cursor=cursor[:100],
+                        cursor_field="next_cursor",
+                        cursor_value=cursor[:100],
+                        log_context={"query": query[:100]},
                     )
-                    break
                 page_count += 1
                 items, next_cursor = await self._fetch_page(query, rows, cursor)
 
@@ -148,7 +153,7 @@ class SearchPaginator:
                     break
                 cursor = advanced
 
-        except CrossRefApiError:
+        except (CrossRefApiError, PaginationTruncatedError):
             raise
         except CROSSREF_RUNTIME_ERRORS as error:
             self._logger.error("crossref_search_failed", query=query, error=str(error))
@@ -168,14 +173,15 @@ class SearchPaginator:
         if not items or not next_cursor:
             return None
         if next_cursor == current_cursor or next_cursor in seen_cursors:
-            self._logger.warning(
-                "crossref_search_truncated",
+            raise_pagination_truncated(
+                self._logger,
+                event="crossref_search_truncated",
                 reason="repeated_cursor",
-                query=query[:100],
                 page_count=page_count,
                 page_limit=_DEFAULT_MAX_PAGES,
-                next_cursor=next_cursor[:100],
+                cursor_field="next_cursor",
+                cursor_value=next_cursor[:100],
+                log_context={"query": query[:100]},
             )
-            return None
         seen_cursors.add(next_cursor)
         return next_cursor

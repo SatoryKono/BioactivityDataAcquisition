@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, cast
 
 HealthCheckMode = Literal["strict", "probe"]
 
@@ -45,7 +45,7 @@ def resolve_health_check_mode(
     if test_mode:
         return "probe"
     if configured_mode in ("strict", "probe"):
-        return configured_mode
+        return cast(HealthCheckMode, configured_mode)
     return default_health_check_mode
 
 

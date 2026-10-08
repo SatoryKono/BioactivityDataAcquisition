@@ -6,6 +6,7 @@ from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.http.pagination import raise_pagination_truncated
 from bioetl.infrastructure.adapters.openalex.query_builder import (
     build_openalex_search_params,
 )
@@ -43,15 +44,16 @@ async def iter_query_results(
 
     while cursor:
         if page_count >= max_pages:
-            logger.warning(
-                "openalex_query_results_truncated",
+            raise_pagination_truncated(
+                logger,
+                event="openalex_query_results_truncated",
                 reason="max_pages",
-                query=query[:100],
                 page_count=page_count,
                 page_limit=max_pages,
-                next_cursor=cursor[:100],
+                cursor_field="next_cursor",
+                cursor_value=cursor[:100],
+                log_context={"query": query[:100]},
             )
-            break
         page_count += 1
         params = build_openalex_search_params(
             mailto=mailto,
@@ -70,14 +72,15 @@ async def iter_query_results(
         if next_cursor is None:
             break
         if next_cursor in seen_cursors:
-            logger.warning(
-                "openalex_query_results_truncated",
+            raise_pagination_truncated(
+                logger,
+                event="openalex_query_results_truncated",
                 reason="repeated_cursor",
-                query=query[:100],
                 page_count=page_count,
                 page_limit=max_pages,
-                next_cursor=next_cursor[:100],
+                cursor_field="next_cursor",
+                cursor_value=next_cursor[:100],
+                log_context={"query": query[:100]},
             )
-            break
         seen_cursors.add(next_cursor)
         cursor = next_cursor

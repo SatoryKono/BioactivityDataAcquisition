@@ -3,39 +3,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal
 
+from bioetl.application.batch_processing_contracts import (
+    LayerWriteOutcome,
+)
+from bioetl.application.batch_processing_contracts import (
+    WriteLayerStatus as WriteLayerStatus,
+)
 from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
-
-WriteLayerStatus = Literal["written", "quarantined", "blocked", "skipped"]
-"""Disposition of one storage-layer write attempt.
-
-- ``written``: the writer port call completed; ``confirmed_count`` candidate
-  records were accepted by the layer.
-- ``quarantined``: a schema violation was raised and all candidates were
-  persisted to quarantine; nothing was confirmed written.
-- ``blocked``: the layer was not invoked because an upstream layer outcome
-  forbade it (e.g. Gold after a Silver quarantine).
-- ``skipped``: the layer had no candidates and was not invoked.
-"""
-
-
-@dataclass(frozen=True, slots=True)
-class LayerWriteOutcome:
-    """Typed result of one storage-layer write attempt.
-
-    ``candidate_count`` counts layer-derived rows offered to the writer;
-    ``confirmed_count`` counts rows the writer port accepted;
-    ``quarantined_count`` counts rows persisted to quarantine at this stage.
-    """
-
-    layer: str
-    status: WriteLayerStatus
-    candidate_count: int
-    confirmed_count: int = 0
-    quarantined_count: int = 0
-    write_result: object | None = None
 
 
 @dataclass(frozen=True, slots=True)

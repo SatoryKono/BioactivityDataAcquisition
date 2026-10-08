@@ -15,6 +15,7 @@ import httpx
 from bioetl.domain.exceptions.network.service import ApiError
 from bioetl.domain.mixin_host import as_mixin_host
 from bioetl.domain.types import BronzeRecord, JsonDict
+from bioetl.infrastructure.adapters.http.pagination import raise_pagination_truncated
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
 )
@@ -44,15 +45,16 @@ class _SemanticScholarSearchFetchMixin:
         seen_offsets: set[int] = set()
         while True:
             if page_count >= _DEFAULT_MAX_PAGES:
-                as_mixin_host(self)._logger.warning(  # Any: mixin host
-                    "semanticscholar_search_truncated",
+                raise_pagination_truncated(
+                    as_mixin_host(self)._logger,  # Any: mixin host
+                    event="semanticscholar_search_truncated",
                     reason="max_pages",
-                    query=search_query[:100],
                     page_count=page_count,
                     page_limit=_DEFAULT_MAX_PAGES,
-                    next_offset=current_offset,
+                    cursor_field="next_offset",
+                    cursor_value=current_offset,
+                    log_context={"query": search_query[:100]},
                 )
-                return
             page_count += 1
             records, next_offset = await as_mixin_host(
                 self
@@ -95,15 +97,16 @@ class _SemanticScholarSearchFetchMixin:
         if next_offset is None or (limit and fetched >= limit):
             return False
         if next_offset in seen_offsets or next_offset == current_offset:
-            as_mixin_host(self)._logger.warning(
-                "semanticscholar_search_truncated",
+            raise_pagination_truncated(
+                as_mixin_host(self)._logger,
+                event="semanticscholar_search_truncated",
                 reason="repeated_offset",
-                query=query[:100],
                 page_count=page_count,
                 page_limit=_DEFAULT_MAX_PAGES,
-                next_offset=next_offset,
+                cursor_field="next_offset",
+                cursor_value=next_offset,
+                log_context={"query": query[:100]},
             )
-            return False
         return True
 
     @staticmethod

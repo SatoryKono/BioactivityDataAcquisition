@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-07T18:18:52.554641+00:00",
+  "generated_at": "2026-10-08T06:17:05.267587+00:00",
   "summary": {
     "total_scripts": 647,
     "status_counts": {
-      "active": 336,
-      "supporting": 311
+      "active": 335,
+      "supporting": 312
     },
     "reference_group_coverage": {
       "agents": 11,
       "build": 18,
-      "ci": 67,
+      "ci": 69,
       "docs": 279,
       "other": 50,
       "scripts": 538,
@@ -307,7 +307,7 @@
       "agent_usage": [
         "CODEX-RUNTIME"
       ],
-      "reference_count": 17,
+      "reference_count": 19,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -335,7 +335,19 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 29,
+          "line": 15,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/codex/doctor.py\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 27,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/codex/doctor.py\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 53,
           "source_group": "ci",
           "text": "run: python3 scripts/ai/codex/doctor.py static --no-write"
         },
@@ -344,18 +356,6 @@
           "line": 143,
           "source_group": "docs",
           "text": "python scripts/ai/codex/doctor.py static --no-write"
-        },
-        {
-          "path": "docs/00-project/ai/agents/guides/MUSE.md",
-          "line": 115,
-          "source_group": "docs",
-          "text": "python scripts/ai/codex/doctor.py static --no-write"
-        },
-        {
-          "path": "docs/00-project/ai/agents/guides/grok-tui-config-checklist.md",
-          "line": 103,
-          "source_group": "docs",
-          "text": "- [ ] `python scripts/ai/codex/doctor.py static --no-write`"
         }
       ]
     },
@@ -1612,7 +1612,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 71,
+      "reference_count": 73,
       "references": [
         {
           "path": ".github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md",
@@ -1639,6 +1639,18 @@
           "text": "- Update `scripts/ai/codex/setup_mcp.py` so Devin generation follows the chosen"
         },
         {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 16,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/codex/setup_mcp.py\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 28,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/codex/setup_mcp.py\""
+        },
+        {
           "path": "Makefile",
           "line": 165,
           "source_group": "build",
@@ -1649,18 +1661,6 @@
           "line": 85,
           "source_group": "docs",
           "text": "`scripts/ai/codex/setup_mcp.py`; stdio-обёртки `scripts/ai/mcp/*_wrapper.sh`)."
-        },
-        {
-          "path": "docs/00-project/ai/agents/guides/KIMI.md",
-          "line": 144,
-          "source_group": "docs",
-          "text": "python scripts/ai/codex/setup_mcp.py --check"
-        },
-        {
-          "path": "docs/00-project/ai/agents/guides/KIMI.md",
-          "line": 145,
-          "source_group": "docs",
-          "text": "python scripts/ai/codex/setup_mcp.py --check-local"
         }
       ]
     },
@@ -2613,8 +2613,20 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 9,
       "references": [
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 20,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/junie/check_junie_mirror.py\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 32,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/junie/check_junie_mirror.py\""
+        },
         {
           "path": "AGENTS.md",
           "line": 99,
@@ -2650,12 +2662,6 @@
           "line": 43,
           "source_group": "scripts",
           "text": "exec \"$PYTHON_BIN\" \"$SCRIPT_DIR/check_junie_mirror.py\" \"$MODE\""
-        },
-        {
-          "path": "tests/architecture/test_junie_runtime_ci_contract.py",
-          "line": 36,
-          "source_group": "tests",
-          "text": "\"scripts/ai/junie/check_junie_mirror.py\","
         }
       ],
       "owner": "@bioetl-platform",
@@ -2668,7 +2674,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 35,
+      "reference_count": 37,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -2684,7 +2690,19 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 97,
+          "line": 19,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/junie/check_junie_mirror.sh\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 31,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/junie/check_junie_mirror.sh\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 121,
           "source_group": "ci",
           "text": "run: bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -2705,18 +2723,6 @@
           "line": 50,
           "source_group": "docs",
           "text": "`scripts/ai/junie/check_junie_mirror.sh`. Docs mirrors в"
-        },
-        {
-          "path": "docs/00-project/NORMATIVE_SOURCES.md",
-          "line": 108,
-          "source_group": "docs",
-          "text": "- `../../scripts/ai/junie/check_junie_mirror.sh` — `.codex/**` ↔ `.junie/**` parity check"
-        },
-        {
-          "path": "docs/00-project/ai/README.md",
-          "line": 37,
-          "source_group": "docs",
-          "text": "(parity: `bash scripts/ai/junie/check_junie_mirror.sh --check`)."
         }
       ]
     },
@@ -2735,7 +2741,7 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 32,
+          "line": 56,
           "source_group": "ci",
           "text": "run: python3 -m scripts.ai.mcp wrappers check"
         },
@@ -5242,7 +5248,7 @@
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 107,
+          "line": 110,
           "source_group": "docs",
           "text": "| Pipeline factory registry | `src/bioetl/composition/factories/pipeline/registry.py` | Registers provider/composite factories for composition-time lookup. | Composition registry API and pipeline fact"
         },
@@ -5475,13 +5481,13 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 46,
+          "line": 70,
           "source_group": "ci",
           "text": "python -m scripts.ai.sync.runtime_skills"
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 70,
+          "line": 94,
           "source_group": "ci",
           "text": "python -m scripts.ai.sync.runtime_skills"
         },
@@ -9509,7 +9515,7 @@
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 278,
+          "line": 281,
           "source_group": "docs",
           "text": "| Manifest service orchestration | `src/bioetl/application/services/control_plane/manifest/service.py`, `models.py`, `validation.py` | Create/inspect immutable run manifests and enforce application-le"
         },
@@ -9745,7 +9751,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 723,
+          "line": 728,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-gate aggregate \\"
         },
@@ -10195,24 +10201,24 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 354,
+          "line": 356,
           "source_group": "ci",
           "text": "uv run --quiet --frozen --no-build python -m scripts.engineering.ci.pr_lane_results affected-tests \\"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 673,
+          "line": 675,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results assert-steps \\"
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 715,
+          "line": 719,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
         },
         {
-          "path": "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py",
+          "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
           "line": 8,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pr_lane_results import ("
@@ -13006,7 +13012,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 330,
+          "line": 332,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-c901 \\"
         },
@@ -14200,13 +14206,13 @@
         },
         {
           "path": ".github/workflows/docker.yml",
-          "line": 289,
+          "line": 298,
           "source_group": "ci",
           "text": "python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \\"
         },
         {
           "path": ".github/workflows/docker.yml",
-          "line": 341,
+          "line": 350,
           "source_group": "ci",
           "text": "python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \\"
         },
@@ -16089,7 +16095,7 @@
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 302,
+          "line": 305,
           "source_group": "docs",
           "text": "| Generated artifact drift gate did not include module coverage source-tree hash freshness | `report-module-coverage --check` could fail stale source-tree evidence while `report-debt-governance-gates "
         },
@@ -16686,7 +16692,7 @@
     {
       "path": "scripts/engineering/qa/report_pipeline_config_contract_ownership.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -16696,7 +16702,11 @@
           "source_group": "scripts",
           "text": "\"report-pipeline-config-contract-ownership-map\": \"scripts.engineering.qa.report_pipeline_config_contract_ownership\","
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-10-31",
+      "next_step": "Keep the implementation as an internal backend for the canonical scripts.engineering.qa report-pipeline-config-contract-ownership-map command; route standalone use through the unified QA entrypoint."
     },
     {
       "path": "scripts/engineering/qa/report_port_adapter_factory_coverage.py",
@@ -18084,7 +18094,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 556,
+          "line": 558,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
@@ -23886,7 +23896,7 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 112,
+          "line": 136,
           "source_group": "ci",
           "text": "run: bash scripts/ops/support/skills/check_ai_skills_layout.sh"
         },
@@ -23923,7 +23933,7 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 109,
+          "line": 133,
           "source_group": "ci",
           "text": "run: bash scripts/ops/support/skills/check_skills_mirror.sh --check"
         },

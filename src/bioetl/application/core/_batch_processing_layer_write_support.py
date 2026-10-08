@@ -6,12 +6,12 @@ from collections.abc import Awaitable
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol, cast
 
+from bioetl.application.batch_processing_contracts import LayerWriteOutcome
 from bioetl.application.core._batch_processing_metrics_support import (
     track_storage_write_metrics,
 )
 from bioetl.application.core._batch_write_support import safe_write_layer
 from bioetl.application.core.batch_processing_contracts import (
-    LayerWriteOutcome,
     SilverGoldWriteOutcome,
 )
 from bioetl.application.core.batch_shared_operation_errors import (

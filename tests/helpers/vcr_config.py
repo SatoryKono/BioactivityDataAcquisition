@@ -9,7 +9,7 @@ import os
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
-from urllib.parse import parse_qsl, urlparse
+from urllib.parse import parse_qsl, unquote_plus, urlparse
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
@@ -257,9 +257,9 @@ def _build_before_record_request_sanitizer(
                 )
 
             if query_replacements:
-                sanitized = filters.replace_query_parameters(
+                sanitized = _remove_query_parameters_case_insensitive(
                     sanitized,
-                    replacements=query_replacements,
+                    {name for name, _ in query_replacements},
                 )
         except Exception as error:
             if isinstance(error, VCRRequestSanitizationError):
@@ -269,6 +269,29 @@ def _build_before_record_request_sanitizer(
         return sanitized
 
     return before_record_request
+
+
+def _remove_query_parameters_case_insensitive(
+    request: Any, parameter_names: set[str]
+) -> Any:
+    """Remove matching raw query segments without normalizing unrelated values."""
+    parsed_uri = urlparse(request.uri)
+    sensitive_names = {name.casefold() for name in parameter_names}
+    retained_segments = [
+        segment
+        for segment in parsed_uri.query.split("&")
+        if unquote_plus(segment.partition("=")[0]).casefold() not in sensitive_names
+    ]
+    filtered_query = "&".join(retained_segments)
+    if filtered_query == parsed_uri.query:
+        return request
+    filtered_uri = parsed_uri._replace(query=filtered_query).geturl()
+    return type(request)(
+        request.method,
+        filtered_uri,
+        request.body,
+        request.headers,
+    )
 
 
 def _build_before_record_response_filter() -> Callable[[Any], Any]:

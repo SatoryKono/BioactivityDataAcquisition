@@ -5,9 +5,10 @@ from __future__ import annotations
 from collections.abc import Sequence
 from contextlib import AsyncExitStack
 from typing import TYPE_CHECKING
+from xml.etree.ElementTree import Element
 
-import defusedxml.ElementTree as defused_ET
-from defusedxml.common import DefusedXmlException
+import defusedxml.ElementTree as defused_ET  # type: ignore[import-untyped]
+from defusedxml.common import DefusedXmlException  # type: ignore[import-untyped]
 
 from bioetl.application.core.publication_term_runtime import (
     mesh_terms_from_pubmed_headings,
@@ -20,6 +21,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
 
 __all__ = [
+    "PubMedPublicationTermEnrichmentService",
     "PubMedPublicationTermPayloadEnricher",
     "parse_pubmed_mesh_xml",
     "pubmed_term_payload",
@@ -38,33 +40,46 @@ def parse_pubmed_mesh_xml(
     ):
         return [], []
 
+    return _parse_mesh_headings(root), _parse_keywords(root)
+
+
+def _parse_mesh_headings(root: Element) -> list[dict[str, object]]:
+    """Extract valid MeSH descriptor headings from an efetch root element."""
     headings: list[dict[str, object]] = []
     for heading in root.findall(".//MeshHeading"):
-        descriptor = heading.find("DescriptorName")
-        if descriptor is None:
-            continue
-        name = (descriptor.text or "").strip()
-        if not name:
-            continue
-        qualifiers: list[dict[str, str]] = []
-        for qualifier in heading.findall("QualifierName"):
-            qualifier_name = (qualifier.text or "").strip()
-            if qualifier_name:
-                qualifiers.append({"name": qualifier_name})
-        headings.append(
-            {
-                "descriptor_name": name,
-                "descriptor_ui": descriptor.get("UI"),
-                "qualifiers": qualifiers,
-            }
-        )
+        parsed = _parse_mesh_heading(heading)
+        if parsed is not None:
+            headings.append(parsed)
+    return headings
 
-    keywords: list[str] = []
-    for keyword in root.findall(".//Keyword"):
-        text = (keyword.text or "").strip()
-        if text:
-            keywords.append(text)
-    return headings, keywords
+
+def _parse_mesh_heading(heading: Element) -> dict[str, object] | None:
+    """Parse one descriptor and its non-empty qualifiers."""
+    descriptor = heading.find("DescriptorName")
+    if descriptor is None:
+        return None
+    name = (descriptor.text or "").strip()
+    if not name:
+        return None
+    qualifiers = [
+        {"name": qualifier_name}
+        for qualifier in heading.findall("QualifierName")
+        if (qualifier_name := (qualifier.text or "").strip())
+    ]
+    return {
+        "descriptor_name": name,
+        "descriptor_ui": descriptor.get("UI"),
+        "qualifiers": qualifiers,
+    }
+
+
+def _parse_keywords(root: Element) -> list[str]:
+    """Extract non-empty keyword strings from an efetch root element."""
+    return [
+        text
+        for keyword in root.findall(".//Keyword")
+        if (text := (keyword.text or "").strip())
+    ]
 
 
 def pubmed_term_payload(record: BronzeRecord) -> tuple[object, object]:
@@ -131,7 +146,7 @@ def _attach_pubmed_terms(
     return enriched
 
 
-class PubMedPublicationTermPayloadEnricher:
+class PubMedPublicationTermEnrichmentService:
     """Attach PubMed MeSH/keywords onto ChEMBL document records via ``pubmed_id``."""
 
     def __init__(
@@ -173,7 +188,15 @@ class PubMedPublicationTermPayloadEnricher:
             self._logger.warning(
                 "publication_term_pubmed_enrichment_failed",
                 error=str(exc),
+                reason_code=(
+                    exc.get_reason_code()
+                    if isinstance(exc, BioETLError) and exc.get_reason_code()
+                    else "publication_term_enrichment_failed"
+                ),
                 pmid_count=len(pmids),
             )
             return list(records)
         return _attach_pubmed_terms(records, pubmed_by_pmid)
+
+
+PubMedPublicationTermPayloadEnricher = PubMedPublicationTermEnrichmentService

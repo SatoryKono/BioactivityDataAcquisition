@@ -34,7 +34,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
+from bioetl.infrastructure.adapters.http.pagination import (
+    PaginatedFetcherMixin,
+    PaginationTruncatedError,
+)
 
 
 class MockFetcher(PaginatedFetcherMixin):
@@ -143,13 +146,15 @@ async def test_paginated_fetch_stops_on_repeated_cursor():
         return [calls], "same-cursor"
 
     results = []
-    async for item in fetcher.paginated_fetch(fetch_page, limit=100):
-        results.append(item)
+    with pytest.raises(PaginationTruncatedError) as caught:
+        async for item in fetcher.paginated_fetch(fetch_page, limit=100):
+            results.append(item)
 
-    # Page 1 yields + records cursor; page 2 still yields once, then repeated
-    # next_cursor terminates the loop (no infinite fetch).
+    # Page 1 yields + records cursor; page 2 still yields once, then the
+    # repeated cursor fails the incomplete scan instead of looking complete.
     assert results == [1, 2]
     assert calls == 2
+    assert caught.value.reason == "repeated_cursor"
 
 
 @pytest.mark.asyncio
@@ -165,11 +170,13 @@ async def test_paginated_fetch_respects_max_pages():
         return [calls], f"c{calls}"
 
     results = []
-    async for item in fetcher.paginated_fetch(fetch_page, max_pages=3):
-        results.append(item)
+    with pytest.raises(PaginationTruncatedError) as caught:
+        async for item in fetcher.paginated_fetch(fetch_page, max_pages=3):
+            results.append(item)
 
     assert results == [1, 2, 3]
     assert calls == 3
+    assert caught.value.reason == "max_pages"
 
 
 @pytest.mark.asyncio
@@ -184,12 +191,16 @@ async def test_paginated_fetch_warns_on_max_pages_truncation():
         calls += 1
         return [calls], f"c{calls}"
 
-    results = [item async for item in fetcher.paginated_fetch(fetch_page, max_pages=2)]
+    results = []
+    with pytest.raises(PaginationTruncatedError) as caught:
+        async for item in fetcher.paginated_fetch(fetch_page, max_pages=2):
+            results.append(item)
     assert results == [1, 2]
     assert calls == 2
+    assert caught.value.reason == "max_pages"
     fetcher._logger.warning.assert_called_once_with(
         "pagination_truncated",
-        truncation_reason="max_pages",
+        reason="max_pages",
         page_count=2,
         page_limit=2,
         next_cursor="'c2'",
@@ -208,12 +219,16 @@ async def test_paginated_fetch_warns_on_repeated_cursor():
         calls += 1
         return [calls], "same-cursor"
 
-    results = [item async for item in fetcher.paginated_fetch(fetch_page, limit=100)]
+    results = []
+    with pytest.raises(PaginationTruncatedError) as caught:
+        async for item in fetcher.paginated_fetch(fetch_page, limit=100):
+            results.append(item)
     assert results == [1, 2]
     assert calls == 2
+    assert caught.value.reason == "repeated_cursor"
     fetcher._logger.warning.assert_called_once_with(
         "pagination_truncated",
-        truncation_reason="repeated_cursor",
+        reason="repeated_cursor",
         page_count=2,
         page_limit=10000,
         next_cursor="'same-cursor'",
@@ -232,22 +247,42 @@ async def test_paginated_fetch_warns_before_refetching_initial_cursor():
         next_cursor = "b" if cursor == "start" else "start"
         return [len(calls)], next_cursor
 
-    results = [
-        item
+    results = []
+    with pytest.raises(PaginationTruncatedError) as caught:
         async for item in fetcher.paginated_fetch(
             fetch_page, limit=100, initial_cursor="start"
-        )
-    ]
+        ):
+            results.append(item)
 
     assert results == [1, 2]
     assert calls == ["start", "b"]
+    assert caught.value.reason == "repeated_cursor"
     fetcher._logger.warning.assert_called_once_with(
         "pagination_truncated",
-        truncation_reason="repeated_cursor",
+        reason="repeated_cursor",
         page_count=2,
         page_limit=10000,
         next_cursor="'start'",
     )
+
+
+@pytest.mark.asyncio
+async def test_paginated_fetch_limit_wins_over_repeated_cursor() -> None:
+    fetcher = MockFetcher()
+    calls = 0
+
+    async def fetch_page(cursor, _):
+        nonlocal calls
+        calls += 1
+        return [1, 2] if calls == 1 else [3, 4], "same-cursor"
+
+    results = [
+        item async for item in fetcher.paginated_fetch(fetch_page, limit=3)
+    ]
+
+    assert results == [1, 2, 3]
+    assert calls == 2
+    fetcher._logger.warning.assert_not_called()
 
 
 @pytest.mark.asyncio

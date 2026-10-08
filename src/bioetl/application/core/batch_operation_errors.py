@@ -1,29 +1,27 @@
-"""Operation-level exception tuple shared by batch runtime helpers."""
+"""Compatibility re-exports for the application batch-operation error policy."""
 
 from __future__ import annotations
 
-from bioetl.domain.exceptions import BioETLError
-
-OperationErrorTypes = tuple[type[Exception], ...]
-
-OPERATION_ERRORS: OperationErrorTypes = (
-    BioETLError,
-    OSError,
-    RuntimeError,
-    ValueError,
-    TypeError,
+from bioetl.application.batch_operation_errors import (
+    OPERATION_ERRORS,
+    OperationErrorTypes,
+)
+from bioetl.application.batch_operation_errors import (
+    is_operation_error as _is_operation_error,
+)
+from bioetl.application.batch_operation_errors import (
+    operation_error_type_name as _operation_error_type_name,
 )
 
 
 def is_operation_error(exc: BaseException) -> bool:
-    """Return whether an exception belongs to the batch operation policy."""
-    return isinstance(exc, OPERATION_ERRORS)
+    """Compatibility wrapper for the application-level error policy."""
+    return _is_operation_error(exc)
 
 
 def operation_error_type_name(exc: BaseException) -> str:
-    """Return the stable telemetry type name for a batch operation error."""
-    return type(exc).__name__
-
+    """Compatibility wrapper for the application-level error policy."""
+    return _operation_error_type_name(exc)
 
 __all__ = [
     "OPERATION_ERRORS",

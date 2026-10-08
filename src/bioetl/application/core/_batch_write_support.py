@@ -6,6 +6,7 @@ from collections.abc import Awaitable, Callable
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from bioetl.application.batch_processing_contracts import LayerWriteOutcome
 from bioetl.application.core._batch_write_events import (
     emit_batch_failed,
     emit_batch_written,
@@ -14,7 +15,6 @@ from bioetl.application.core._batch_write_events import (
 from bioetl.application.core._batch_write_schema_quarantine import (
     quarantine_schema_violation,
 )
-from bioetl.application.core.batch_processing_contracts import LayerWriteOutcome
 from bioetl.application.core.quarantine_manager import (
     QuarantineRuntimeService,
 )
@@ -59,20 +59,17 @@ async def _execute_layer_write(
     else:
         operation = writer.write_gold(records, silver_refs=silver_refs)
 
-    def _track_write_error(error: Exception) -> None:
-        writer.log_and_track_write_error(
-            layer,
-            error,
-            batch_id,
-            record_count=len(records),
-        )
-
     return await execute_with_span(
         f"write_{layer}",
         operation,
         batch_id,
         len(records),
-        on_error=_track_write_error,
+        on_error=lambda error: writer.log_and_track_write_error(
+            layer,
+            error,
+            batch_id,
+            record_count=len(records),
+        ),
     )
 
 

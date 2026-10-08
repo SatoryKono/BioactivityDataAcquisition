@@ -7,14 +7,13 @@ writer calls are kept unchanged.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.batch_processing_contracts import LayerWriteOutcome
 from bioetl.application.core._batch_write_support import safe_write_layer
-from bioetl.application.core.batch_operation_errors import (
+from bioetl.application.services.batch_operation_errors import (
     OPERATION_ERRORS as _OPERATION_ERRORS,
 )
-from bioetl.application.core.batch_processing_contracts import LayerWriteOutcome
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -32,14 +31,6 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BatchID, RunID
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
-
-
-@dataclass(frozen=True)
-class RecordProcessorWriteDeps:
-    """Optional collaborators for write-stage parity with the canonical path."""
-
-    quarantine_manager: QuarantineRuntimeService | None = None
-    domain_event_emitter: DomainEventEmitterProtocol | None = None
 
 
 async def write_silver_layer(

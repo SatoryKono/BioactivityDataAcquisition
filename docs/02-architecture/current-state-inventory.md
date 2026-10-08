@@ -36,15 +36,18 @@ The current table includes the OpenAlex query paginator extracted in PR #12096. 
 
 The earlier LoggerPort alias-removal source rebind did not constitute a new coverage measurement. Its accepted inventory followed a complete 17-group local measurement on `c4071c0eeecd6b06f18bc781a0435ee128e0e994`; that historical raw comparison recorded 80 remaining module regressions. Accepted inventory values are not a claim of fresh global nonregression. `config_root` was freshly measured at 40/40 lines and 18/18 branches. Final architecture acceptance and publication remain separate checks.
 
+The current source tree contains 2558 eligible modules, all represented in the
+accepted inventory. Its source hash is current, while the coverage rows remain
+the accepted measurements from the previous complete 17-shard run; exact-SHA
+coverage for the current PR head is pending.
+
 | Artifact | Current value | Source |
 | --- | ---: | --- |
 | Architecture quality score | `10.00` (`excellent`) | `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2552` | `reports/quality/module-coverage-inventory.json` |
-
-The merged source tree now contains 2558 eligible modules. The accepted inventory still has 2552 measured rows; `src/bioetl/application/core/_record_processor_write_support.py`, `src/bioetl/application/core/batch_checkpoint_save_observability.py`, `src/bioetl/application/pipelines/pubmed/publication_term_enricher.py`, `src/bioetl/domain/normalization/canonical_json_profile.py`, `src/bioetl/infrastructure/adapters/openalex/_query_pagination.py`, and `src/bioetl/infrastructure/config/repository_source_environment.py` have no authoritative coverage rows yet. The inventory hash is bound to the current source tree, but complete 17-shard coverage and row adoption remain pending.
-| Unmatched live modules / uncovered measured modules | `6` / `0` | `reports/quality/module-coverage-inventory.json`, complete source-module snapshot |
-| Coverage inventory status counts | `2513` fully covered, `38` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2558` | `reports/quality/module-coverage-inventory.json` |
+| Unmatched live modules / uncovered measured modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, complete source-module snapshot |
+| Coverage inventory status counts | `2517` fully covered, `40` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Families at fan-in budget | `0` | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
 | Module-boundaries coupling | `10.0` (`control-plane` fan-in `1/2`, `runtime_builders` fan-in `2/3`) | `reports/quality/architecture-quality-scorecard.json`, `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py` |

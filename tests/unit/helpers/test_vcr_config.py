@@ -206,6 +206,24 @@ def test_build_base_vcr_config_installs_canonical_filters_without_caller_filters
     assert "key=secret" not in sanitized.uri
 
 
+@pytest.mark.parametrize("query_key", ["API_KEY", "Api_Key", "Key", "KEY"])
+def test_build_base_vcr_config_removes_query_secrets_case_insensitively(
+    query_key: str,
+) -> None:
+    hook = cast(Callable[[Any], Any], build_base_vcr_config()["before_record_request"])
+    request = Request(
+        "GET",
+        f"https://example.org/search?{query_key}=secret&query=biology",
+        b"",
+        {},
+    )
+
+    sanitized = hook(request)
+
+    assert "secret" not in sanitized.uri
+    assert "query=biology" in sanitized.uri
+
+
 def test_build_base_vcr_config_caller_filters_extend_but_never_remove_canonical() -> (
     None
 ):

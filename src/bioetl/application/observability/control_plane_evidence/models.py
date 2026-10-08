@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 from bioetl.application.observability.control_plane_evidence.checks import (
     EvidenceCheckResult,
     EvidenceFreshness,
@@ -107,7 +109,7 @@ def _processing_status(
             return "shutdown"
     launch_status = manifest.launch_context.get("processing_status")
     if launch_status in {"success", "failed", "shutdown"}:
-        return launch_status
+        return cast(ProcessingStatus, launch_status)
     return "unknown"
 
 
