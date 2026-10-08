@@ -198,9 +198,10 @@ def test_bronze_cleanup_rmdir(tmp_path: Path) -> None:
             *,
             date_dir: Path,
             dry_run: bool,
+            root_abs: Path,
             root_real: Path,
         ) -> tuple[int, int, int]:
-            del date_dir, dry_run, root_real
+            del date_dir, dry_run, root_abs, root_real
             return 1, 10, 0
 
     host = _Host()
