@@ -18,6 +18,9 @@ on:
     branches: [main, develop]
   workflow_dispatch:
 
+env:
+  PYTHONDONTWRITEBYTECODE: 1
+
 permissions:
   contents: read
 

@@ -206,17 +206,9 @@ def _decision_map(matrix: dict[str, Any]) -> dict[str, Any]:
     return cast(dict[str, Any], decisions)
 
 
-def _env_or_text(value: str, *, from_env: bool) -> str:
-    if from_env:
-        if value not in os.environ:
-            raise ValueError(f"environment variable {value} is missing")
-        return os.environ[value]
-    return value
-
-
 def _build_command(args: argparse.Namespace) -> int:
     matrix = _load_json_object(
-        _env_or_text(args.decision_matrix, from_env=args.decision_matrix_env),
+        os.environ[args.decision_matrix_env],
         label="decision matrix",
     )
     job_results = dict(args.job_result or [])
@@ -234,11 +226,11 @@ def _build_command(args: argparse.Namespace) -> int:
 
 def _assert_command(args: argparse.Namespace) -> int:
     matrix = _load_json_object(
-        _env_or_text(args.decision_matrix, from_env=args.decision_matrix_env),
+        os.environ[args.decision_matrix_env],
         label="decision matrix",
     )
     outcomes = _load_json_object(
-        _env_or_text(args.outcomes, from_env=args.outcomes_env),
+        os.environ[args.outcomes_env],
         label="step outcomes",
     )
     failures = assert_step_outcomes(
@@ -284,8 +276,8 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     build = subparsers.add_parser("build")
-    build.add_argument("--decision-matrix", required=True)
-    build.add_argument("--decision-matrix-env", action="store_true")
+    build.add_argument("--decision-matrix-env", required=True)
+
     build.add_argument("--head-sha", required=True)
     build.add_argument(
         "--job-result",
@@ -297,10 +289,10 @@ def build_parser() -> argparse.ArgumentParser:
     build.set_defaults(handler=_build_command)
 
     assert_steps = subparsers.add_parser("assert-steps")
-    assert_steps.add_argument("--decision-matrix", required=True)
-    assert_steps.add_argument("--decision-matrix-env", action="store_true")
-    assert_steps.add_argument("--outcomes", required=True)
-    assert_steps.add_argument("--outcomes-env", action="store_true")
+    assert_steps.add_argument("--decision-matrix-env", required=True)
+
+    assert_steps.add_argument("--outcomes-env", required=True)
+
     assert_steps.add_argument("--owner", required=True, choices=sorted(OWNER_STEPS))
     assert_steps.set_defaults(handler=_assert_command)
 
