@@ -116,7 +116,7 @@ new spend/safety decision.
 | `contract-tests.yml` | `Monthly Contract Tests` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Live API lane stays local; schedule removed (#11190) |
 | `diagram-nightly.yml` | `Diagram Nightly Regression` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Nightly canary and phase2 stay off; PR lint is docs.yml (#11196) |
 | `docs-kpi-weekly.yml` | `Docs KPI Weekly` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Weekly docs KPI plus calendar runtime-mirror/freshness drift |
-| `github-settings-quarterly-review.yml` | `Quarterly GitHub Settings Review` | `schedule`, `workflow_call`, `workflow_dispatch` | `active` | `active` | Read-only quarterly GitHub settings review |
+| `github-settings-quarterly-review.yml` | `Quarterly GitHub Settings Review` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Read-only quarterly GitHub settings review delegated by `nightly.yml` |
 | `memory-freshness.yml` | `Memory freshness` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Repository memory freshness and contract checks |
 | `memory-retention.yml` | `Memory Retention Policy` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Weekly and change-triggered non-destructive episodic-memory retention policy check |
 | `mutation-testing.yml` | `Mutation Testing` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Sole Sunday mutation owner (#10263 exception); push and pull_request stay off |
