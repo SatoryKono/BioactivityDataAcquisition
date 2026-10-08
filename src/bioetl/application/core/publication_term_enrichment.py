@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator, Awaitable, Callable, Iterator
+from collections.abc import AsyncIterator, Awaitable, Callable
 
 from bioetl.application.core.derived_scan_budget import batched_source_records
 from bioetl.application.core.publication_term_runtime import publication_pubmed_id
@@ -50,15 +50,6 @@ async def _attach_pubmed_payloads(
     return [replacements.get(id(record), record) for record in records]
 
 
-def _iter_terms(
-    records: list[BronzeRecord], *, extract_terms: _ExtractTerms
-) -> Iterator[BronzeRecord]:
-    for record in records:
-        publication_id = _publication_id(record)
-        if publication_id is not None:
-            yield from extract_terms(record, publication_id)
-
-
 async def yield_terms_from_publications(
     publications: AsyncIterator[BronzeRecord],
     *,
@@ -76,15 +67,18 @@ async def yield_terms_from_publications(
             batch_size=PUBLICATION_TERM_PUBMED_ENRICH_BATCH_SIZE,
             max_records=scan_limit,
         ):
-            # Extraction yields zero or many terms per record, even after
-            # enrichment (missing PubMed matches or empty/invalid payloads).
-            # The remaining term limit therefore cannot bound the records
-            # needed; truncating this batch could discard later usable terms.
+            # Term yield is zero-or-many per record, so the term limit cannot
+            # bound records fetched here without discarding usable terms.
             if enricher is not None:
                 batch = await _attach_pubmed_payloads(
                     batch, extract_terms=extract_terms, enricher=enricher
                 )
-            for term in _iter_terms(batch, extract_terms=extract_terms):
+            for term in (
+                term
+                for record in batch
+                if (publication_id := _publication_id(record)) is not None
+                for term in extract_terms(record, publication_id)
+            ):
                 term_count += 1
                 yield term
                 if limit is not None and term_count >= limit:

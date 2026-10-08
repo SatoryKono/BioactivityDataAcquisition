@@ -3206,7 +3206,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.core.publication_term_enrichment",
       "path": "src/bioetl/application/core/publication_term_enrichment.py",
-      "source_lines": 89
+      "source_lines": 87
     },
     {
       "coverage_percent": 100.0,
@@ -4576,7 +4576,7 @@
       "missing_lines": 4,
       "module": "bioetl.application.pipelines.pubmed.publication_term_enricher",
       "path": "src/bioetl/application/pipelines/pubmed/publication_term_enricher.py",
-      "source_lines": 189
+      "source_lines": 193
     },
     {
       "coverage_percent": 100.0,
@@ -28788,7 +28788,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.core.publication_term_enrichment",
       "path": "src/bioetl/application/core/publication_term_enrichment.py",
-      "source_lines": 89
+      "source_lines": 87
     },
     {
       "coverage_percent": 100.0,
@@ -30158,7 +30158,7 @@
       "missing_lines": 4,
       "module": "bioetl.application.pipelines.pubmed.publication_term_enricher",
       "path": "src/bioetl/application/pipelines/pubmed/publication_term_enricher.py",
-      "source_lines": 189
+      "source_lines": 193
     },
     {
       "coverage_percent": 100.0,
@@ -51173,7 +51173,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "91cb432342b7acc2026d43f80fe21a5f71ba608d234cd91fafcdbe37b9757cf3",
+  "source_tree_sha256": "b2c01c22b7ca0b6c152da63102347dcd64f9eba5d1345f517bc307a958735917",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
