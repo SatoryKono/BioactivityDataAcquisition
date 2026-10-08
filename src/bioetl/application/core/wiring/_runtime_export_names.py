@@ -32,6 +32,7 @@ RUNTIME_EXPORT_NAMES: tuple[str, ...] = (
     "QuarantineRuntimeService",
     "RecordNormalizationProcessor",
     "RecordProcessor",
+    "RecordProcessorWriteDependencies",
     "RecordProcessorConfig",
     "ShutdownSignal",
     "TransformCallback",

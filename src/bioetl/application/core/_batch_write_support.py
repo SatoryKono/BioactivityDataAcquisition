@@ -15,6 +15,9 @@ from bioetl.application.core._batch_write_schema_quarantine import (
     quarantine_schema_violation,
 )
 from bioetl.application.core.batch_processing_contracts import LayerWriteOutcome
+from bioetl.application.core.batch_shared_operation_errors import (
+    OPERATION_ERRORS as _OPERATION_ERRORS,
+)
 from bioetl.application.core.quarantine_manager import (
     QuarantineRuntimeService,
 )
@@ -31,6 +34,7 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 __all__ = [
+    "LayerWriteOutcome",
     "emit_batch_failed",
     "emit_batch_written",
     "emit_domain_event",
@@ -90,7 +94,7 @@ async def safe_write_layer(
     ingestion_ts: datetime,
     bronze_refs: list[BronzeWriteResult] | None,
     silver_refs: list[SilverWriteResult] | None = None,
-    operation_errors: tuple[type[BaseException], ...],
+    operation_errors: tuple[type[BaseException], ...] = _OPERATION_ERRORS,
 ) -> LayerWriteOutcome:
     """Execute one layer write and quarantine schema-invalid outputs.
 

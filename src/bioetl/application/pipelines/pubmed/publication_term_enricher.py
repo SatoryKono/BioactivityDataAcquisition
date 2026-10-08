@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
 
 __all__ = [
-    "PubMedPublicationTermPayloadEnricher",
+    "PubMedPublicationTermEnrichmentService",
     "parse_pubmed_mesh_xml",
     "pubmed_term_payload",
 ]
@@ -140,7 +140,7 @@ def _attach_pubmed_terms(
     return enriched
 
 
-class PubMedPublicationTermPayloadEnricher:
+class PubMedPublicationTermEnrichmentService:
     """Attach PubMed MeSH/keywords onto ChEMBL document records via ``pubmed_id``."""
 
     def __init__(
