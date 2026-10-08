@@ -16,6 +16,8 @@ from bioetl.composition.factories.services._bundle_support import (
     resolve_service_bundle_dependencies,
 )
 from bioetl.composition.factories.services._record_processor_policy_support import (
+    _normalize_version,
+    _resolve_write_versions,
     extract_gold_schema_policy_by_version,
     extract_hash_policy_by_version,
 )
@@ -117,6 +119,26 @@ def test_record_processor_policies_default_to_active_write_version() -> None:
     assert tuple(item.version for item in hash_policy.policies) == ("v2",)
     assert schema_policy is not None
     assert schema_policy.policies[0].schema is gold_schema
+
+
+def test_normalize_version_handles_none_and_empty() -> None:
+    assert _normalize_version(None) == ""
+    assert _normalize_version(" ") == ""
+    assert _normalize_version(" v1 ") == "v1"
+
+
+def test_resolve_write_versions_handles_missing_and_empty() -> None:
+    # write_versions is None
+    assert _resolve_write_versions("v2", None) == ("v2",)
+
+    # write_versions has empty string
+    assert _resolve_write_versions("v2", [" ", None]) == ("v2",)
+
+    # write_versions lacks active version
+    assert _resolve_write_versions("v2", ["v1"]) == ("v2", "v1")
+
+    # write_versions has active version
+    assert _resolve_write_versions("v2", ["v1", "v2"]) == ("v1", "v2")
 
 
 def test_storage_health_audit_lookup_rejects_objects_without_dict() -> None:
