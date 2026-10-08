@@ -396,7 +396,7 @@ def test_full_suite_wrapper_is_fail_closed(proof_repo: Path, damage: str) -> Non
 
 
 def _mock_bundle() -> dict[str, Any]:
-    return {
+    bundle: dict[str, Any] = {
         "source": {"head_sha": "original_head"},
         "receipts": [
             {
@@ -418,13 +418,36 @@ def _mock_bundle() -> dict[str, Any]:
         "claim": "tested",
         "acceptance": {"require_full_trust": False},
     }
+    _resign(bundle)
+    return bundle
 
 
 def _mock_policy() -> dict[str, Any]:
     return {
         "claims": {"ready_to_merge": {"required_evidence": ["evidence1", "evidence2"]}},
-        "command_sets": {"ready_to_merge": ["cmd1", "cmd2"]},
+        "evidence_kinds": {
+            "evidence1": {
+                "authorized_producers": ["test_health"],
+                "command_families": ["python -m pytest"],
+            },
+            "evidence2": {
+                "authorized_producers": ["pretest_guardrails"],
+                "command_families": [
+                    "bash scripts/engineering/dev/pretest_guardrails.sh"
+                ],
+            },
+        },
     }
+
+
+def _assert_digests(bundle: dict[str, Any]) -> None:
+    for receipt in bundle["receipts"]:
+        assert receipt["receipt_digest"] == canonical_digest(
+            {key: value for key, value in receipt.items() if key != "receipt_digest"}
+        )
+    assert bundle["bundle_digest"] == canonical_digest(
+        {key: value for key, value in bundle.items() if key != "bundle_digest"}
+    )
 
 
 def test_mutate_stale_head():
@@ -432,18 +455,21 @@ def test_mutate_stale_head():
     _mutate_stale_head(b, {})
     assert b["source"]["head_sha"] == "0" * 40
     assert b["receipts"][0]["source"]["head_sha"] == "0" * 40
+    _assert_digests(b)
 
 
 def test_mutate_missing():
     b = _mock_bundle()
     _mutate_missing(b, {})
     assert b["receipts"] == []
+    _assert_digests(b)
 
 
 def test_mutate_failed_as_pass():
     b = _mock_bundle()
     _mutate_failed_as_pass(b, {})
     assert b["receipts"][0]["exit_code"] == 1
+    _assert_digests(b)
 
 
 def test_mutate_invalid_skip():
@@ -454,6 +480,7 @@ def test_mutate_invalid_skip():
     assert r["exit_code"] is None
     assert r["skip_reason"] is None
     assert r["follow_up"] is None
+    _assert_digests(b)
 
 
 def test_mutate_unavailable():
@@ -464,18 +491,29 @@ def test_mutate_unavailable():
     assert r["exit_code"] is None
     assert r["skip_reason"] == "runner dependency unavailable"
     assert r["follow_up"] == "rerun on the supported CI runner"
+    _assert_digests(b)
 
 
 def test_mutate_tampered():
     b = _mock_bundle()
+    original_receipt_digest = b["receipts"][0]["receipt_digest"]
     _mutate_tampered(b, {})
-    assert b["receipts"][0]["duration_ms"] == 999
+    r = b["receipts"][0]
+    assert r["duration_ms"] == 999
+    assert r["receipt_digest"] == original_receipt_digest
+    assert r["receipt_digest"] != canonical_digest(
+        {key: value for key, value in r.items() if key != "receipt_digest"}
+    )
+    assert b["bundle_digest"] == canonical_digest(
+        {key: value for key, value in b.items() if key != "bundle_digest"}
+    )
 
 
 def test_mutate_vendor_override():
     b = _mock_bundle()
     _mutate_vendor_override(b, {})
     assert b["receipts"][0]["producer"] == "optional_vendor_evaluator"
+    _assert_digests(b)
 
 
 def test_mutate_cross_scope():
@@ -486,6 +524,7 @@ def test_mutate_cross_scope():
     assert r["repository"]["repo_id"] == "another-repository"
     assert r["repository"]["worktree_id"] == "another-worktree"
     assert r["repository"]["ci_run_id"] == "another-ci-run"
+    _assert_digests(b)
 
 
 def test_mutate_dirty_full():
@@ -499,12 +538,21 @@ def test_mutate_dirty_full():
     assert b["acceptance"]["required_evidence"] == ["evidence1", "evidence2"]
     assert b["acceptance"]["require_full_trust"] is True
     assert b["receipts"][0]["source"]["dirty"] is True
+    _assert_digests(b)
+    changed_policy = copy.deepcopy(p)
+    changed_policy["evidence_kinds"]["evidence1"]["command_families"].append(
+        "python -m scripts.engineering.qa run-tests"
+    )
+    assert b["source"]["command_set_hash"] != command_set_hash(
+        changed_policy, "ready_to_merge"
+    )
 
 
 def test_mutate_sharded_ci():
     b = _mock_bundle()
     _mutate_sharded_ci(b, {})
     assert b["receipts"][0]["repository"]["worktree_id"] == "another-shard"
+    _assert_digests(b)
 
 
 def test_mutate_degraded_full():
@@ -512,6 +560,7 @@ def test_mutate_degraded_full():
     _mutate_degraded_full(b, {})
     assert b["receipts"][0]["status"] == "unavailable"
     assert b["acceptance"]["require_full_trust"] is True
+    _assert_digests(b)
 
 
 def test_mutate_partial():
@@ -519,3 +568,4 @@ def test_mutate_partial():
     _mutate_partial(b, {})
     assert b["receipts"][0]["status"] == "fail"
     assert b["receipts"][0]["exit_code"] == 1
+    _assert_digests(b)
