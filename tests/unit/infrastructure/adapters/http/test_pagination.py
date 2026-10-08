@@ -276,9 +276,7 @@ async def test_paginated_fetch_limit_wins_over_repeated_cursor() -> None:
         calls += 1
         return [1, 2] if calls == 1 else [3, 4], "same-cursor"
 
-    results = [
-        item async for item in fetcher.paginated_fetch(fetch_page, limit=3)
-    ]
+    results = [item async for item in fetcher.paginated_fetch(fetch_page, limit=3)]
 
     assert results == [1, 2, 3]
     assert calls == 2

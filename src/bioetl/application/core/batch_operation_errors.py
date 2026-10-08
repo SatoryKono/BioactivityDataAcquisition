@@ -23,6 +23,7 @@ def operation_error_type_name(exc: BaseException) -> str:
     """Compatibility wrapper for the application-level error policy."""
     return _operation_error_type_name(exc)
 
+
 __all__ = [
     "OPERATION_ERRORS",
     "OperationErrorTypes",

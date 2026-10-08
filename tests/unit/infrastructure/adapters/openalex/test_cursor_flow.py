@@ -291,6 +291,7 @@ async def test_iter_query_results_stops_before_refetching_initial_cursor(limit) 
     from bioetl.infrastructure.adapters.http.pagination import (
         PaginationTruncatedError,
     )
+
     flow = _build_flow()
     flow.query_executor.request_works_payload.side_effect = [{"page": 1}, {"page": 2}]
     flow.response_mapper.extract_results.side_effect = [[{"id": "A"}], [{"id": "B"}]]

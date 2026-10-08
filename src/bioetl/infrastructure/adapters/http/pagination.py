@@ -140,7 +140,11 @@ class PaginatedFetcherMixin:
                 )
             page_count += 1
 
-            items, next_cursor, repeated_cursor = await self._fetch_page_and_check_cursor(
+            (
+                items,
+                next_cursor,
+                repeated_cursor,
+            ) = await self._fetch_page_and_check_cursor(
                 fetch_func(cursor, fetched),
                 seen_cursors=seen_cursors,
             )
