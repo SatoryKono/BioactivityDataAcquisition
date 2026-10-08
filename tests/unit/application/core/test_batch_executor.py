@@ -55,10 +55,7 @@ from bioetl.application.core.lifecycle.batch_fsm import (
     BatchExecutionFSM,
     BatchExecutionState,
 )
-from bioetl.application.core.batch_processing_contracts import (
-    BatchProcessingOutcome,
-    LayerWriteOutcome,
-)
+from bioetl.application.core.batch_processing_contracts import BatchProcessingOutcome
 from bioetl.application.core.batch_executor import (
     BatchExecutor,
     BatchExecutorDependencies,
@@ -800,8 +797,6 @@ class TestBatchExecutorProcessBatch:
             "records_gold": 2,
             "records_gold_excluded_by_contract": 1,
             "records_quarantined": 1,
-            "records_quarantined_silver": 0,
-            "records_quarantined_gold": 0,
             "records_filtered_out": 1,
             "source_batch_ids": ["batch-002", "batch-001"],
         }
@@ -1015,18 +1010,6 @@ class TestBatchExecutorHelpers:
             gold_records=[{"id": "1", "score": 0.9}],
             quarantined_count=2,
             filtered_out_count=3,
-            silver_write=LayerWriteOutcome(
-                layer="silver",
-                status="written",
-                candidate_count=1,
-                confirmed_count=1,
-            ),
-            gold_write=LayerWriteOutcome(
-                layer="gold",
-                status="written",
-                candidate_count=1,
-                confirmed_count=1,
-            ),
         )
 
         outcome = build_processed_batch_outcome(records=records, output=output)
@@ -1034,8 +1017,8 @@ class TestBatchExecutorHelpers:
         assert outcome.records == records
         assert outcome.batch_id == batch_id
         assert outcome.bronze_result is output.bronze_result
-        assert outcome.confirmed_silver_records == output.silver_records
-        assert outcome.confirmed_gold_records == output.gold_records
+        assert outcome.silver_records == output.silver_records
+        assert outcome.gold_records == output.gold_records
         assert outcome.state_update == BatchExecutionStateOutcome(
             bronze_count=1,
             silver_count=1,
@@ -1044,8 +1027,6 @@ class TestBatchExecutorHelpers:
             quarantined_count=2,
             filtered_out_count=3,
             source_batch_id=str(batch_id),
-            silver_quarantined_count=2,
-            gold_quarantined_count=0,
         )
 
     def test_apply_batch_execution_state_update_updates_counters(self) -> None:
@@ -1103,15 +1084,6 @@ class TestBatchExecutorHelpers:
                 quarantined_count=4,
                 filtered_out_count=5,
                 gold_excluded_by_contract_count=3,
-                silver_write=LayerWriteOutcome(
-                    layer="silver",
-                    status="written",
-                    candidate_count=1,
-                    confirmed_count=1,
-                ),
-                gold_write=LayerWriteOutcome(
-                    layer="gold", status="skipped", candidate_count=0
-                ),
             ),
         )
 
@@ -1156,12 +1128,6 @@ class TestBatchExecutorHelpers:
                 gold_records=[],
                 quarantined_count=0,
                 filtered_out_count=0,
-                silver_write=LayerWriteOutcome(
-                    layer="silver", status="skipped", candidate_count=0
-                ),
-                gold_write=LayerWriteOutcome(
-                    layer="gold", status="skipped", candidate_count=0
-                ),
             ),
         )
 

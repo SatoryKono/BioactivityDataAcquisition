@@ -19,16 +19,10 @@ from typing import TYPE_CHECKING, cast
 from bioetl.application.core._record_processor_span_support import (
     RecordProcessorSpanExecutor,
 )
-from bioetl.application.core._record_processor_write_support import (
-    RecordProcessorWriteDeps,
-    write_gold_layer,
-    write_silver_layer,
-)
 from bioetl.application.core.batch_executor import BatchResult
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
-    from bioetl.application.core.batch_processing_contracts import LayerWriteOutcome
     from bioetl.application.core.batch_transformer import (
         BatchTransformer,
         TransformResult,
@@ -39,6 +33,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import TracingPort
     from bioetl.domain.types import BatchID
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+    from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
 class RecordProcessor:
@@ -55,7 +50,6 @@ class RecordProcessor:
         span_executor_factory: Callable[
             [TracingPort], RecordProcessorSpanExecutor
         ] = RecordProcessorSpanExecutor,
-        write_deps: RecordProcessorWriteDeps | None = None,
     ) -> None:
         """Initialize RecordProcessor.
         Args:
@@ -66,10 +60,6 @@ class RecordProcessor:
             config: Record processor configuration.
             tracer: Tracing port for distributed tracing.
             span_executor_factory: Factory for the tracing span executor.
-            write_deps: Optional quarantine/domain-event collaborators. When
-                provided, schema-violating Silver/Gold records are quarantined
-                with the same semantics as ``safe_write_layer``; when omitted,
-                schema violations propagate (legacy behavior).
         """
         self._context = context
         self._config = config
@@ -78,7 +68,6 @@ class RecordProcessor:
         self._batch_metrics = batch_metrics
         self._transformer = transformer
         self._writer = writer
-        self._write_deps = write_deps or RecordProcessorWriteDeps()
 
     async def process_batch(
         # Any: record vals vary
@@ -116,35 +105,26 @@ class RecordProcessor:
         )
         self._track_transform_metrics(result)
         bronze_refs = self._build_bronze_refs(bronze_result)
-        silver_outcome = await self._write_silver_layer(
+        silver_result = await self._write_silver_if_present(
             result=result,
             batch_id=batch_id,
             ingestion_ts=ingestion_ts,
             bronze_refs=bronze_refs,
         )
         self._batch_metrics.track_processed_records(
-            "silver", silver_outcome.confirmed_count
+            "silver", len(result.silver_records)
         )
-        gold_outcome = await self._write_gold_layer(
+        await self._write_gold_if_present(
             result=result,
             batch_id=batch_id,
-            silver_outcome=silver_outcome,
+            silver_refs=[silver_result] if silver_result is not None else None,
         )
-        self._batch_metrics.track_processed_records(
-            "gold", gold_outcome.confirmed_count
-        )
-        write_quarantined = (
-            silver_outcome.quarantined_count + gold_outcome.quarantined_count
-        )
-        if write_quarantined:
-            self._batch_metrics.track_processed_records(
-                "quarantined", write_quarantined
-            )
+        self._batch_metrics.track_processed_records("gold", len(result.gold_records))
         return BatchResult(
             bronze_count=len(records),
-            silver_count=silver_outcome.confirmed_count,
-            gold_count=gold_outcome.confirmed_count,
-            quarantined_count=result.quarantined_count + write_quarantined,
+            silver_count=len(result.silver_records),
+            gold_count=len(result.gold_records),
+            quarantined_count=result.quarantined_count,
         )
 
     def _track_transform_metrics(self, result: TransformResult) -> None:
@@ -158,45 +138,47 @@ class RecordProcessor:
         typed_bronze_result = cast("BronzeWriteResult | None", bronze_result)
         return [typed_bronze_result] if typed_bronze_result else None
 
-    async def _write_silver_layer(
+    async def _write_silver_if_present(
         self,
         *,
         result: TransformResult,
         batch_id: BatchID,
         ingestion_ts: datetime,
         bronze_refs: list[BronzeWriteResult] | None,
-    ) -> LayerWriteOutcome:
-        """Write Silver with quarantine parity when a manager is configured."""
-        return await write_silver_layer(
-            span_executor=self._span_executor,
-            writer=self._writer,
-            quarantine_manager=self._write_deps.quarantine_manager,
-            logger=self._context.logger,
-            run_id=self._context.run_id,
-            domain_event_emitter=self._write_deps.domain_event_emitter,
-            result=result,
-            batch_id=batch_id,
-            ingestion_ts=ingestion_ts,
-            bronze_refs=bronze_refs,
+    ) -> SilverWriteResult | None:
+        if not result.silver_records:
+            return None
+        silver_result = await self._span_executor.execute_with_span(
+            "write_silver",
+            self._writer.write_silver(
+                result.silver_records,
+                batch_id,
+                ingestion_ts,
+                bronze_refs=bronze_refs,
+            ),
+            batch_id,
+            len(result.silver_records),
+            on_error=lambda e: self._writer.log_and_track_write_error(
+                "silver", e, batch_id
+            ),
         )
+        return cast("SilverWriteResult | None", silver_result)
 
-    async def _write_gold_layer(
+    async def _write_gold_if_present(
         self,
         *,
         result: TransformResult,
         batch_id: BatchID,
-        silver_outcome: LayerWriteOutcome,
-    ) -> LayerWriteOutcome:
-        """Write Gold after Silver; blocked when Silver was quarantined."""
-        return await write_gold_layer(
-            span_executor=self._span_executor,
-            writer=self._writer,
-            quarantine_manager=self._write_deps.quarantine_manager,
-            logger=self._context.logger,
-            run_id=self._context.run_id,
-            domain_event_emitter=self._write_deps.domain_event_emitter,
-            result=result,
-            batch_id=batch_id,
-            ingestion_ts=self._context.started_at,
-            silver_outcome=silver_outcome,
+        silver_refs: list[SilverWriteResult] | None = None,
+    ) -> None:
+        if not result.gold_records:
+            return
+        await self._span_executor.execute_with_span(
+            "write_gold",
+            self._writer.write_gold(result.gold_records, silver_refs=silver_refs),
+            batch_id,
+            len(result.gold_records),
+            on_error=lambda e: self._writer.log_and_track_write_error(
+                "gold", e, batch_id
+            ),
         )

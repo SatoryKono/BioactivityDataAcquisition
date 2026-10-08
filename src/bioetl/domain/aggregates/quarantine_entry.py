@@ -4,7 +4,8 @@ Aggregate Root for isolated failed records pending analysis.
 
 Invariants:
     1. payload_hash is unique within a pipeline (enforced by storage)
-    2. NEW -> UNDER_REVIEW; NEW or UNDER_REVIEW -> IGNORED|REPROCESSED|EXPIRED
+    2. Status transitions: NEW -> UNDER_REVIEW -> (IGNORED|REPROCESSED|EXPIRED),
+       with direct NEW -> EXPIRED expiry allowed
     3. Resolution metadata is required when marking as resolved
     4. payload cannot be modified after creation
     5. error_code is required and immutable
@@ -28,7 +29,6 @@ from bioetl.domain.aggregates._quarantine_value_objects import (
     _validate_quarantine_required_fields,
 )
 from bioetl.domain.deterministic_identity import deterministic_id
-from bioetl.domain.normalization.canonical_json_profile import CanonicalJsonProfile
 
 if TYPE_CHECKING:
     from bioetl.domain.aggregates.events import DomainEvent
@@ -42,16 +42,13 @@ class QuarantineEntry(QuarantineEntryTransitionsMixin, QuarantineEntryProperties
 
     Invariants:
         1. payload_hash is computed from payload and immutable
-        2. NEW -> UNDER_REVIEW; NEW or UNDER_REVIEW -> IGNORED|REPROCESSED|EXPIRED.
+        2. Status can only transition: NEW -> UNDER_REVIEW -> (IGNORED|REPROCESSED|EXPIRED),
+           with direct NEW -> EXPIRED expiry allowed.
         3. Resolution requires resolution_info
         4. payload and error_code are immutable
 
     Example:
         >>> from datetime import datetime, timezone
-        >>> from uuid import UUID
-        >>> from bioetl.domain.types import BatchID, RunID
-        >>> run_id = RunID(UUID(int=1))
-        >>> batch_id = BatchID(UUID(int=2))
         >>> created_at = datetime(2024, 1, 1, tzinfo=timezone.utc)
         >>> resolved_at = datetime(2024, 1, 2, tzinfo=timezone.utc)
         >>> entry = QuarantineEntry.create(
@@ -65,9 +62,6 @@ class QuarantineEntry(QuarantineEntryTransitionsMixin, QuarantineEntryProperties
         >>> entry.start_review()
         >>> entry.mark_ignored(reason="Known bad data source", resolved_at=resolved_at)
         >>> events = entry.collect_events()
-
-    Canonical FSM: docs/02-architecture/domain/aggregate-invariants.md.
-    Expiry records resolution metadata without an additional domain event.
     """
 
     __slots__ = (
@@ -142,7 +136,6 @@ class QuarantineEntry(QuarantineEntryTransitionsMixin, QuarantineEntryProperties
         *,
         created_at: datetime,
         metadata: MetaDict | None = None,
-        canonical_profile: CanonicalJsonProfile = CanonicalJsonProfile.DOMAIN_V1,
     ) -> QuarantineEntry:
         """Factory method to create a new quarantine entry.
 
@@ -156,7 +149,6 @@ class QuarantineEntry(QuarantineEntryTransitionsMixin, QuarantineEntryProperties
             batch_id: Source batch identifier.
             created_at: Explicit timestamp when the quarantine entry was created.
             metadata: Additional context.
-            canonical_profile: Proven byte profile; historical replay must not guess it.
 
         Returns:
             New QuarantineEntry instance.
@@ -166,7 +158,7 @@ class QuarantineEntry(QuarantineEntryTransitionsMixin, QuarantineEntryProperties
         from bioetl.domain.serialization import serialize_to_json_canonical
 
         # Compute payload hash
-        canonical = serialize_to_json_canonical(payload, profile=canonical_profile)
+        canonical = serialize_to_json_canonical(payload)
         hash_value = hashlib.sha256(canonical.encode()).hexdigest()
         payload_hash = ContentHash(hash_value)
         entry_id = deterministic_id(
@@ -180,7 +172,6 @@ class QuarantineEntry(QuarantineEntryTransitionsMixin, QuarantineEntryProperties
                 "pipeline_name": pipeline_name,
                 "run_id": run_id,
             },
-            profile=canonical_profile,
         )
 
         entry = cls(
@@ -198,20 +189,6 @@ class QuarantineEntry(QuarantineEntryTransitionsMixin, QuarantineEntryProperties
         # Emit creation event
         from bioetl.domain.aggregates.events import QuarantineEntryCreated
 
-        event_metadata = deepcopy(metadata) if metadata is not None else None
-        event_id = deterministic_id(
-            "QuarantineEntryCreated",
-            {
-                "occurred_at": entry._created_at,
-                "run_id": run_id,
-                "batch_id": batch_id,
-                "pipeline_name": pipeline_name,
-                "error_code": error_code,
-                "payload_hash": payload_hash,
-                "metadata": event_metadata,
-            },
-            profile=canonical_profile,
-        )
         entry._events.append(
             QuarantineEntryCreated(
                 occurred_at=entry._created_at,
@@ -220,8 +197,7 @@ class QuarantineEntry(QuarantineEntryTransitionsMixin, QuarantineEntryProperties
                 pipeline_name=pipeline_name,
                 error_code=error_code,
                 payload_hash=payload_hash,
-                metadata=event_metadata,
-                event_id=event_id,
+                metadata=metadata,
             )
         )
 

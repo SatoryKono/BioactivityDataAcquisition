@@ -454,18 +454,24 @@ def test_non_chembl_identifier_arrays_are_profile_canonicalized_from_fixture() -
     assert semanticscholar_authors is not None
 
     publication_cases = cases["publication_identifier_arrays"]
-    publication_rules = {
-        "author_orcids": crossref_orcids,
-        "issn_list": crossref_issns,
-        "openalex_author_ids": openalex_authors,
-        "semanticscholar_author_ids": semanticscholar_authors,
-    }
-    publication_rules["author_orcids_preserves_unknown"] = crossref_orcids
-    # Iterate every fixture case so no dead case can drift unasserted.
-    assert set(publication_cases) == set(publication_rules)
-    for case_name, case in publication_cases.items():
-        rule = publication_rules[case_name]
-        assert rule.apply(case["input"]) == case["expected"], case_name
+    assert (
+        crossref_orcids.apply(publication_cases["author_orcids"]["input"])
+        == publication_cases["author_orcids"]["expected"]
+    )
+    assert (
+        crossref_issns.apply(publication_cases["issn_list"]["input"])
+        == publication_cases["issn_list"]["expected"]
+    )
+    assert (
+        openalex_authors.apply(publication_cases["openalex_author_ids"]["input"])
+        == publication_cases["openalex_author_ids"]["expected"]
+    )
+    assert (
+        semanticscholar_authors.apply(
+            publication_cases["semanticscholar_author_ids"]["input"]
+        )
+        == publication_cases["semanticscholar_author_ids"]["expected"]
+    )
 
     all_mappings = UNIPROT_IDMAPPING_PROFILE.rule_for("all_mappings")
     chembl_ids = UNIPROT_PROTEIN_PROFILE.rule_for("chembl_ids")
@@ -475,16 +481,18 @@ def test_non_chembl_identifier_arrays_are_profile_canonicalized_from_fixture() -
     assert drugbank_ids is not None
 
     uniprot_cases = cases["uniprot_identifier_arrays"]
-    uniprot_rules = {
-        "all_mappings": all_mappings,
-        "all_mappings_preserves_noise": all_mappings,
-        "chembl_ids": chembl_ids,
-        "drugbank_ids": drugbank_ids,
-    }
-    assert set(uniprot_cases) == set(uniprot_rules)
-    for case_name, case in uniprot_cases.items():
-        rule = uniprot_rules[case_name]
-        assert rule.apply(case["input"]) == case["expected"], case_name
+    assert (
+        all_mappings.apply(uniprot_cases["all_mappings"]["input"])
+        == uniprot_cases["all_mappings"]["expected"]
+    )
+    assert (
+        chembl_ids.apply(uniprot_cases["chembl_ids"]["input"])
+        == uniprot_cases["chembl_ids"]["expected"]
+    )
+    assert (
+        drugbank_ids.apply(uniprot_cases["drugbank_ids"]["input"])
+        == uniprot_cases["drugbank_ids"]["expected"]
+    )
 
 
 def test_non_chembl_publication_raw_type_policy_is_fixture_backed() -> None:

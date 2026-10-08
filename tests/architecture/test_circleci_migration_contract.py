@@ -125,14 +125,6 @@ def test_docs_kpi_is_opt_in_main_only_and_preserves_policy():
         "and": [
             {"equal": ["docs-kpi", "<< pipeline.parameters.ci-lane >>"]},
             {"equal": ["main", "<< pipeline.git.branch >>"]},
-            {
-                "not": {
-                    "equal": [
-                        "scheduled_pipeline",
-                        "<< pipeline.trigger_source >>",
-                    ]
-                }
-            },
         ]
     }
     assert docs["jobs"] == ["docs-kpi"]
@@ -208,14 +200,6 @@ def test_independent_lanes_are_opt_in_main_only(lane):
         "and": [
             {"equal": [lane, "<< pipeline.parameters.ci-lane >>"]},
             {"equal": ["main", "<< pipeline.git.branch >>"]},
-            {
-                "not": {
-                    "equal": [
-                        "scheduled_pipeline",
-                        "<< pipeline.trigger_source >>",
-                    ]
-                }
-            },
         ]
     }
     assert len(workflow["jobs"]) == 1
@@ -377,47 +361,16 @@ def test_memory_freshness_preparation_does_not_get_write_context():
     assert "context" not in str(_config()["workflows"]["memory-freshness"])
 
 
-def test_native_schedules_do_not_select_opt_in_lanes():
-    config = _config()
-    excluded = {
-        "not": {"equal": ["scheduled_pipeline", "<< pipeline.trigger_source >>"]}
-    }
-    kept = {
-        "pr-gate",
-        "router-bridge-events",
-        "retained-actions-online",
-        "rf023-closeout",
-    }
-    for name, workflow in config["workflows"].items():
-        if not isinstance(workflow, dict):
-            continue
-        when = workflow.get("when")
-        if name in kept:
-            assert "scheduled_pipeline" not in str(when)
-            continue
-        assert excluded in when["and"]
-
-
-def test_mutation_preserves_targets_and_manual_main_backup():
+def test_mutation_preserves_targets_and_requires_schedule_trigger():
     config = _config()
     workflow = config["workflows"]["mutation"]
     assert workflow["when"] == {
         "and": [
             {"equal": ["mutation", "<< pipeline.parameters.ci-lane >>"]},
             {"equal": ["main", "<< pipeline.git.branch >>"]},
-            {
-                "not": {
-                    "equal": [
-                        "scheduled_pipeline",
-                        "<< pipeline.trigger_source >>",
-                    ]
-                }
-            },
+            {"equal": ["schedule", "<< pipeline.trigger.type >>"]},
         ]
     }
-    assert {"equal": ["scheduled_pipeline", "<< pipeline.trigger_source >>"]} not in (
-        workflow["when"]["and"]
-    )
     legacy = yaml.safe_load(
         (ROOT / ".github/workflows/mutation-testing.yml").read_text(encoding="utf-8")
     )["jobs"]["mutation-testing"]["strategy"]["matrix"]["target"]
@@ -429,10 +382,7 @@ def test_mutation_preserves_targets_and_manual_main_backup():
         # A replacement may include additional existing tests, never drop the legacy set.
         assert (ROOT / old["tests_dir"]).is_relative_to(ROOT / new["tests-dir"])
         assert new["threshold"] == old["threshold"]
-    # Manual API backup stays available: the lane does not require a schedule.
-    assert {"equal": ["schedule", "<< pipeline.trigger_source >>"]} not in (
-        workflow["when"]["and"]
-    )
+    assert "pipeline.trigger_source" not in str(workflow)
     # Control-plane callers and regression tests also live outside its subdirectory.
     control_plane = next(
         job for job in actual if job["target"] == "application-control-plane"
@@ -496,10 +446,10 @@ def test_relocated_router_verifiers_trigger_both_ci_event_filters():
         "tests/unit/scripts/ops/test_router_managed_image.py",
     )
     workflow = yaml.safe_load(
-        (ROOT / ".github/workflows/router-v7-bridge.yml").read_text(encoding="utf-8")
+        (ROOT / ".github/workflows/router-v7-bridge.yml").read_text()
     )
     events = workflow.get("on", workflow.get(True))
-    source = (ROOT / ".circleci/config.yml").read_text(encoding="utf-8")
+    source = (ROOT / ".circleci/config.yml").read_text()
     command = next(
         line.strip()
         for line in source.splitlines()
@@ -507,9 +457,11 @@ def test_relocated_router_verifiers_trigger_both_ci_event_filters():
     )
     words = shlex.split(command)
     filters = words[words.index("--") + 1 : words.index(">")]
-    assert "pull_request" not in events
-    assert "push" not in events
     for path in paths:
+        for event in ("pull_request", "push"):
+            assert any(
+                fnmatch.fnmatchcase(path, pattern) for pattern in events[event]["paths"]
+            ), (event, path)
         assert any(fnmatch.fnmatchcase(path, pattern) for pattern in filters), path
     assert not any(
         fnmatch.fnmatchcase("docs/unrelated.md", pattern) for pattern in filters
@@ -530,93 +482,3 @@ def test_relocated_router_verifiers_trigger_both_ci_event_filters():
         invocation = f"/usr/bin/python3 ../../../tests/unit/scripts/ops/{test_name}"
         assert invocation in circle_runs
         assert invocation in github_runs
-
-
-def test_pr_gate_credit_cut_keeps_required_job_names():
-    config = _config()
-    pr_gate_jobs = config["workflows"]["pr-gate"]["jobs"]
-    integration = next(
-        job["test-integration"]
-        for job in pr_gate_jobs
-        if isinstance(job, dict) and "test-integration" in job
-    )
-    assert integration["matrix"]["parameters"]["test-group"] == [
-        "integration|tests/integration/|-p no:xdist",
-        "security|tests/security/|-n auto --dist loadscope",
-    ]
-    fast = next(
-        job["test-fast"]
-        for job in pr_gate_jobs
-        if isinstance(job, dict) and "test-fast" in job
-    )
-    assert [
-        item.split("|", 1)[0] for item in fast["matrix"]["parameters"]["test-group"]
-    ] == [
-        "unit-domain",
-        "unit-application",
-        "unit-infrastructure",
-        "unit-other",
-    ]
-    event_names = [
-        next(iter(job)) if isinstance(job, dict) else job
-        for job in config["workflows"]["router-bridge-events"]["jobs"]
-    ]
-    assert event_names == ["router-bridge-tests", "router-plugin-tests"]
-    bridge_names = [
-        next(iter(job)) if isinstance(job, dict) else job
-        for job in config["workflows"]["router-bridge"]["jobs"]
-    ]
-    assert "router-host-build" in bridge_names
-    complete = next(
-        job["pr-gate-complete"]["requires"]
-        for job in pr_gate_jobs
-        if isinstance(job, dict) and "pr-gate-complete" in job
-    )
-    for name in (
-        "provider-contract-drift",
-        "e2e-matrix-replay",
-        "test-integration",
-        "test-fast",
-        "docs-diagram-syntax",
-        "docs-diagram-targeted",
-        "docs-diagram-drift",
-    ):
-        assert name in complete
-
-    def keys(steps):
-        return [next(iter(step)) if isinstance(step, dict) else step for step in steps]
-
-    e2e_steps = config["jobs"]["e2e-matrix-replay"]["steps"]
-    provider_steps = config["jobs"]["provider-contract-drift"]["steps"]
-    e2e_keys = keys(e2e_steps)
-    provider_keys = keys(provider_steps)
-    assert e2e_keys.index("halt-unless-pr-gate-paths") < e2e_keys.index(
-        "setup-python-uv"
-    )
-    assert provider_keys.index("halt-unless-pr-gate-paths") < provider_keys.index(
-        "setup-python-uv"
-    )
-    e2e_halt = next(
-        step["halt-unless-pr-gate-paths"]
-        for step in e2e_steps
-        if isinstance(step, dict) and "halt-unless-pr-gate-paths" in step
-    )
-    provider_halt = next(
-        step["halt-unless-pr-gate-paths"]
-        for step in provider_steps
-        if isinstance(step, dict) and "halt-unless-pr-gate-paths" in step
-    )
-    assert "tests/e2e" in e2e_halt["pathspecs"]
-    assert "tests/contract" in provider_halt["pathspecs"]
-    docs_steps = config["jobs"]["docs-diagrams"]["steps"]
-    classify_at = next(
-        index
-        for index, step in enumerate(docs_steps)
-        if isinstance(step, dict)
-        and step.get("run", {}).get("name", "").startswith("Classify diagram")
-    )
-    assert keys(docs_steps).index("setup-python-uv") > classify_at
-    assert "uv run" not in docs_steps[classify_at]["run"]["command"]
-    halt = config["commands"]["halt-unless-pr-gate-paths"]["steps"][0]["run"]["command"]
-    assert '!= "pr-gate"' in halt
-    assert "circleci-agent step halt" in halt

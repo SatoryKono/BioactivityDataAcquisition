@@ -607,13 +607,11 @@ def test_dashboard_data_plane_accepts_exact_managed_mounts(tmp_path: Path) -> No
     from bioetl.application.services.run_reports.paths import (
         write_report_root_source_identity,
     )
-    from bioetl.composition.observability_runtime import create_run_report_store
 
     (tmp_path / "reports" / "run-reports").mkdir(parents=True)
     write_report_root_source_identity(
         report_root=tmp_path / "reports" / "run-reports",
         source_id=environment["BIOETL_RUNTIME_SOURCE_ID"],
-        store=create_run_report_store(),
     )
     containers = [
         {
@@ -657,13 +655,11 @@ def test_dashboard_data_plane_rejects_container_env_label_conflict(
     from bioetl.application.services.run_reports.paths import (
         write_report_root_source_identity,
     )
-    from bioetl.composition.observability_runtime import create_run_report_store
 
     (tmp_path / "reports" / "run-reports").mkdir(parents=True)
     write_report_root_source_identity(
         report_root=tmp_path / "reports" / "run-reports",
         source_id=expected,
-        store=create_run_report_store(),
     )
     containers = [
         {

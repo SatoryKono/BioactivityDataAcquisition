@@ -38,7 +38,6 @@ from bioetl.interfaces.cli.commands.domains.shared.click_options import (
 from bioetl.interfaces.cli.commands.domains.shared.inspection_output import (
     emit_inspection_payload,
 )
-from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
 
 _RUN_MANIFEST_NOT_FOUND_MSG = "Run manifest not found"
@@ -91,10 +90,10 @@ def show_command(identifier: str, output_format: str) -> None:
         result = service.show(identifier)
     except RunManifestInspectionCorruptionError as exc:
         echo_error(RUN_MANIFEST_STORE_CORRUPTION, str(exc))
-        raise click.exceptions.Exit(ExitCode.STORAGE_ERROR) from exc
+        return
     except ValueError as exc:
         echo_error(_RUN_MANIFEST_NOT_FOUND_MSG, str(exc))
-        raise click.exceptions.Exit(ExitCode.FAIL) from exc
+        return
     _emit_payload(result.to_dict(), output_format)
 
 
@@ -114,10 +113,10 @@ def score_command(identifier: str, output_format: str) -> None:
         result = service.show(identifier)
     except RunManifestInspectionCorruptionError as exc:
         echo_error(RUN_MANIFEST_STORE_CORRUPTION, str(exc))
-        raise click.exceptions.Exit(ExitCode.STORAGE_ERROR) from exc
+        return
     except ValueError as exc:
         echo_error(_RUN_MANIFEST_NOT_FOUND_MSG, str(exc))
-        raise click.exceptions.Exit(ExitCode.FAIL) from exc
+        return
     payload = {
         "identifier": identifier,
         "manifest_id": result.manifest.manifest_id,
@@ -155,10 +154,10 @@ def diff_command(
         result = service.diff(left_identifier, right_identifier)
     except RunManifestInspectionCorruptionError as exc:
         echo_error(RUN_MANIFEST_STORE_CORRUPTION, str(exc))
-        raise click.exceptions.Exit(ExitCode.STORAGE_ERROR) from exc
+        return
     except ValueError as exc:
         echo_error("Run manifest diff failed", str(exc))
-        raise click.exceptions.Exit(ExitCode.FAIL) from exc
+        return
     _emit_payload(result.to_dict(), output_format)
 
 
@@ -183,10 +182,10 @@ def verify_command(
         result = service.verify(left_identifier, right_identifier)
     except RunManifestInspectionCorruptionError as exc:
         echo_error(RUN_MANIFEST_STORE_CORRUPTION, str(exc))
-        raise click.exceptions.Exit(ExitCode.STORAGE_ERROR) from exc
+        return
     except ValueError as exc:
         echo_error("Run manifest verification failed", str(exc))
-        raise click.exceptions.Exit(ExitCode.FAIL) from exc
+        return
     _emit_payload(result.to_dict(), output_format)
 
 
@@ -206,10 +205,10 @@ def replay_bundle_command(identifier: str, output_format: str) -> None:
         result = service.show(identifier)
     except RunManifestInspectionCorruptionError as exc:
         echo_error(RUN_MANIFEST_STORE_CORRUPTION, str(exc))
-        raise click.exceptions.Exit(ExitCode.STORAGE_ERROR) from exc
+        return
     except ValueError as exc:
         echo_error(_RUN_MANIFEST_NOT_FOUND_MSG, str(exc))
-        raise click.exceptions.Exit(ExitCode.FAIL) from exc
+        return
     _emit_payload(build_run_replay_bundle_descriptor(result).to_dict(), output_format)
 
 
@@ -234,10 +233,10 @@ def forensic_diff_command(
         result = service.compare(left_identifier, right_identifier)
     except RunManifestInspectionCorruptionError as exc:
         echo_error(RUN_MANIFEST_STORE_CORRUPTION, str(exc))
-        raise click.exceptions.Exit(ExitCode.STORAGE_ERROR) from exc
+        return
     except ValueError as exc:
         echo_error("Forensic run diff failed", str(exc))
-        raise click.exceptions.Exit(ExitCode.FAIL) from exc
+        return
     _emit_payload(result.to_dict(), output_format)
 
 
@@ -279,7 +278,7 @@ def certify_historical_bulk_command(
         result = service.certify_retained_corpus(specs=specs)
     except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
         echo_error("Historical replay bulk certification failed", str(exc))
-        raise click.exceptions.Exit(ExitCode.FAIL) from exc
+        return
     _emit_payload(result.to_dict(), output_format)
 
 
@@ -326,7 +325,7 @@ def closure_report_command(
             payload = {**payload, "artifact_path": str(artifact_path)}
     except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
         echo_error("Historical replay closure report failed", str(exc))
-        raise click.exceptions.Exit(ExitCode.FAIL) from exc
+        return
     _emit_payload(payload, output_format)
 
 
@@ -385,7 +384,7 @@ def universe_report_command(
             payload = {**payload, "artifact_path": str(artifact_path)}
     except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
         echo_error("Historical replay universe report failed", str(exc))
-        raise click.exceptions.Exit(ExitCode.FAIL) from exc
+        return
     if require_universal_claim and not _has_required_universal_exact_replay_claim(
         report
     ):

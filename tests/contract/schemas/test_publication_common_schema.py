@@ -101,7 +101,7 @@ def test_publication_common_schema_fails_closed_when_taxonomy_is_unavailable(
     monkeypatch.setattr(
         publication_common_schema,
         "publication_classification_values",
-        lambda _field_name, _data: [],
+        lambda _field_name: [],
     )
     frame = _minimal_publication_common_df()
     frame.loc[0, "publication_type_unified"] = "Provider Specific Type"
