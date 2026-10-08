@@ -59,6 +59,38 @@ def test_infer_source_metadata_from_repo_paths() -> None:
     assert infer_source_type(Path(".github/workflows/tests.yml")) == "workflow"
     assert infer_source_type(Path("grafana/dashboards/main.json")) == "dashboard"
     assert infer_source_type(Path("scripts/engineering/dev/run.sh")) == "script"
+
+
+def test_infer_source_type_exact_match() -> None:
+    assert infer_source_type(Path(".devin/wiki.json")) == "devin_wiki"
+    assert infer_source_type(Path(".devin/wiki.json.bak")) == "doc"
+
+
+def test_infer_source_type_prefix_only() -> None:
+    assert infer_source_type(Path("docs/plans/2026/migration.md")) == "plan"
+    # Path("docs/plans/").as_posix() yields "docs/plans" which doesn't start with "docs/plans/"
+    assert infer_source_type(Path("docs/plans/index.md")) == "plan"
+
+
+def test_infer_source_type_prefix_and_suffix() -> None:
+    assert infer_source_type(Path("src/bioetl/test.py")) == "code"
+    assert infer_source_type(Path("tests/test_foo.py")) == "test"
+
+
+def test_infer_source_type_prefix_wrong_suffix() -> None:
+    assert infer_source_type(Path("src/bioetl/data.json")) == "doc"
+    assert infer_source_type(Path("tests/fixture.json")) == "doc"
+
+
+def test_infer_source_type_fallback() -> None:
+    assert infer_source_type(Path("docs/00-project/overview.md")) == "doc"
+    assert infer_source_type(Path("src/unknown/file.txt")) == "doc"
+    assert infer_source_type(Path("README.md")) == "doc"
+
+
+def test_infer_source_type_priority() -> None:
+    # memory rule is before code rule. src/memory/*.py is "memory" not "code"
+    assert infer_source_type(Path("src/memory/app.py")) == "memory"
     assert (
         infer_domain(Path("docs/02-architecture/decisions/ADR-043-example.md"))
         == "architecture"

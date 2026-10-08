@@ -285,31 +285,45 @@ def build_chunk_id(source_path: str, title: str, index: int) -> str:
     return f"{source_path}#{_slugify(title)}-{digest}"
 
 
+@dataclass(frozen=True, slots=True)
+class _SourceTypeRule:
+    """A rule mapping a path pattern to a deterministic source type."""
+
+    source_type: str
+    prefix: str | None = None
+    exact: str | None = None
+    suffix: str | None = None
+
+
+_SOURCE_TYPE_RULES = (
+    _SourceTypeRule("adr", prefix="docs/02-architecture/decisions/ADR-"),
+    _SourceTypeRule("runbook", prefix="docs/05-operations/runbooks/"),
+    _SourceTypeRule("plan", prefix="docs/plans/"),
+    _SourceTypeRule("devin_wiki", exact=".devin/wiki.json"),
+    _SourceTypeRule("memory", prefix="src/memory/"),
+    _SourceTypeRule("code", prefix="src/bioetl/", suffix=".py"),
+    _SourceTypeRule("test", prefix="tests/", suffix=".py"),
+    _SourceTypeRule("config", prefix="configs/"),
+    _SourceTypeRule("workflow", prefix=".github/workflows/"),
+    _SourceTypeRule("dashboard", prefix="grafana/"),
+    _SourceTypeRule("script", prefix="scripts/"),
+)
+
+
 def infer_source_type(path: Path) -> str:
     """Classify a repository file into a deterministic RAG source type."""
     normalized = path.as_posix()
-    if normalized.startswith("docs/02-architecture/decisions/ADR-"):
-        return "adr"
-    if normalized.startswith("docs/05-operations/runbooks/"):
-        return "runbook"
-    if normalized.startswith("docs/plans/"):
-        return "plan"
-    if normalized == ".devin/wiki.json":
-        return "devin_wiki"
-    if normalized.startswith("src/memory/"):
-        return "memory"
-    if normalized.startswith("src/bioetl/") and path.suffix == ".py":
-        return "code"
-    if normalized.startswith("tests/") and path.suffix == ".py":
-        return "test"
-    if normalized.startswith("configs/"):
-        return "config"
-    if normalized.startswith(".github/workflows/"):
-        return "workflow"
-    if normalized.startswith("grafana/"):
-        return "dashboard"
-    if normalized.startswith("scripts/"):
-        return "script"
+    suffix = path.suffix
+
+    for rule in _SOURCE_TYPE_RULES:
+        if rule.exact is not None and normalized != rule.exact:
+            continue
+        if rule.prefix is not None and not normalized.startswith(rule.prefix):
+            continue
+        if rule.suffix is not None and suffix != rule.suffix:
+            continue
+        return rule.source_type
+
     return "doc"
 
 
