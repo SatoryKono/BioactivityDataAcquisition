@@ -5,8 +5,6 @@ name: CodeRabbit
 # branches and manual dispatch) so CODERABBIT_API_KEY is never exposed to
 # untrusted pull_request code.
 on:
-  push:
-    branches: [main, master]
   workflow_dispatch:
 
 permissions:

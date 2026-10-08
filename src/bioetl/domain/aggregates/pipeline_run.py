@@ -43,6 +43,9 @@ class PipelineRun(_PipelineRunStageMixin):
     """
 
     __slots__ = ()
+    _run_type: RunType
+    _manifest_id: str | None
+    _metadata: JsonDict
 
     def __init__(
         self,
@@ -72,6 +75,7 @@ class PipelineRun(_PipelineRunStageMixin):
                 current_state=self._status.value,
                 attempted_operation="start",
             )
+        self._validate_timestamp(started_at)
         self._status = PipelineRunState.RUNNING
         self._started_at = started_at
 
@@ -79,23 +83,31 @@ class PipelineRun(_PipelineRunStageMixin):
         """Mark run as COMPLETED if all stages succeeded."""
         self._assert_running("complete")
         self._assert_can_complete()
-        self._status = PipelineRunState.COMPLETED
-        self._ended_at = completed_at
+        end = self._validate_end_timestamp(completed_at)
+        self._assert_completion_timestamp(end)
         duration_seconds = 0.0
         if self._started_at is not None:
-            duration_seconds = (completed_at - self._started_at).total_seconds()
-        self._events.append(
-            PipelineCompleted(
-                occurred_at=completed_at,
-                run_id=self._run_id,
-                pipeline_name=self._pipeline_name,
-                records_processed=sum(
-                    stage.records_processed for stage in self._stages
-                ),
-                duration_seconds=duration_seconds,
-                stages_count=len(self._stages),
-            )
+            duration_seconds = (
+                end - self._validate_timestamp(self._started_at)
+            ).total_seconds()
+        event = PipelineCompleted(
+            occurred_at=completed_at,
+            run_id=self._run_id,
+            pipeline_name=self._pipeline_name,
+            records_processed=sum(stage.records_processed for stage in self._stages),
+            duration_seconds=duration_seconds,
+            stages_count=len(self._stages),
         )
+        self._status = PipelineRunState.COMPLETED
+        self._ended_at = completed_at
+        self._events.append(event)
+
+    def _assert_completion_timestamp(self, end: datetime) -> None:
+        for stage in self._stages:
+            if stage.completed_at is not None and end < self._validate_timestamp(
+                stage.completed_at
+            ):
+                raise ValueError("completed_at cannot be earlier than stage completion")
 
     def fail(
         self,
@@ -106,34 +118,32 @@ class PipelineRun(_PipelineRunStageMixin):
     ) -> None:
         """Mark run as failed without stage-level details."""
         self._assert_running("fail")
+        self._validate_end_timestamp(failed_at)
+        event = PipelineFailed(
+            occurred_at=failed_at,
+            run_id=self._run_id,
+            pipeline_name=self._pipeline_name,
+            failed_stage="unknown",
+            error=error,
+            error_type=error_type,
+        )
         self._status = PipelineRunState.FAILED
         self._ended_at = failed_at
-        self._events.append(
-            PipelineFailed(
-                occurred_at=failed_at,
-                run_id=self._run_id,
-                pipeline_name=self._pipeline_name,
-                failed_stage="unknown",
-                error=error,
-                error_type=error_type,
-            )
-        )
+        self._events.append(event)
 
     def shutdown(self, shutdown_at: datetime) -> None:
         """Mark the run as gracefully shutdown."""
         self._assert_running("shutdown")
+        self._validate_end_timestamp(shutdown_at)
+        event = PipelineShutdown(
+            occurred_at=shutdown_at,
+            run_id=self._run_id,
+            pipeline_name=self._pipeline_name,
+            records_processed=sum(stage.records_processed for stage in self._stages),
+        )
         self._status = PipelineRunState.SHUTDOWN
         self._ended_at = shutdown_at
-        self._events.append(
-            PipelineShutdown(
-                occurred_at=shutdown_at,
-                run_id=self._run_id,
-                pipeline_name=self._pipeline_name,
-                records_processed=sum(
-                    stage.records_processed for stage in self._stages
-                ),
-            )
-        )
+        self._events.append(event)
 
     def _assert_can_complete(self) -> None:
         self._assert_no_failed_stages()
@@ -214,12 +224,18 @@ class PipelineRun(_PipelineRunStageMixin):
     def duration_seconds(self) -> float | None:
         if self._started_at is None or self._ended_at is None:
             return None
-        return (self._ended_at - self._started_at).total_seconds()
+        return (
+            self._validate_timestamp(self._ended_at)
+            - self._validate_timestamp(self._started_at)
+        ).total_seconds()
 
     def duration_seconds_at(self, reference_time: datetime) -> float | None:
         if self._started_at is None:
             return None
-        return ((self._ended_at or reference_time) - self._started_at).total_seconds()
+        return (
+            self._validate_timestamp(self._ended_at or reference_time)
+            - self._validate_timestamp(self._started_at)
+        ).total_seconds()
 
     @property
     def total_records_processed(self) -> int:

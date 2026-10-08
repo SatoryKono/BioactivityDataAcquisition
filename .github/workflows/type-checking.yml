@@ -8,16 +8,6 @@ concurrency:
 
 on:
   workflow_call:
-  push:
-    branches:
-      - main
-      - master
-      - develop
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - 'LICENSE'
   workflow_dispatch:
 
 jobs:

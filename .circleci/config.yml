@@ -2575,8 +2575,9 @@ jobs:
                 exit 1
               fi
               base_ref="origin/${BASE_REF}"
-              if [ "$(git rev-parse --is-shallow-repository)" = true ]; then
-                git fetch --unshallow origin
+              if [[ "$(git rev-parse --is-shallow-repository)" == "true" ]]; then
+                git fetch --no-tags --unshallow origin \
+                  "${BASE_REF}:refs/remotes/origin/${BASE_REF}" "$(git rev-parse HEAD)"
               fi
               git fetch --no-tags origin "${BASE_REF}:refs/remotes/origin/${BASE_REF}"
               git merge-base "${base_ref}" HEAD >/dev/null
@@ -3630,6 +3631,8 @@ workflows:
       - equal:
         - main
         - << pipeline.git.branch >>
+      - not:
+          equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
     - router-bridge-tests
     - router-plugin-tests:
@@ -3647,6 +3650,8 @@ workflows:
       and:
         - equal: [docker-baseline, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - docker-security-baseline:
           context: bioetl-github-read-only
@@ -3655,6 +3660,8 @@ workflows:
       and:
         - equal: [docker-publish, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - docker-security-baseline:
           context: bioetl-github-read-only
@@ -3674,6 +3681,8 @@ workflows:
       and:
         - equal: [coverage-closeout, << pipeline.parameters.ci-lane >>]
         - equal: [codex/ci-11929-11931-preparation, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
     - arch-tests
     - proof-docs
@@ -3714,6 +3723,8 @@ workflows:
       - equal:
         - main
         - << pipeline.git.branch >>
+      - not:
+          equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
     - arch-tests
     - proof-docs
@@ -3750,6 +3761,8 @@ workflows:
       and:
         - equal: [e2e-replay, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - e2e-matrix-replay
       - e2e-nightly-full-replay
@@ -3760,6 +3773,8 @@ workflows:
         - equal: [e2e-replay, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
         - equal: [true, << pipeline.parameters.run-live >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - e2e-matrix-live
   approved-runtime-sync:
@@ -3768,6 +3783,8 @@ workflows:
         - equal: [skills-consistency, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
         - equal: [true, << pipeline.parameters.approve-runtime-sync >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - runtime-sync-approval:
           type: approval
@@ -3778,6 +3795,8 @@ workflows:
       and:
         - equal: [semantic-governance, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - semantic-governance
   architecture-docs:
@@ -3789,6 +3808,8 @@ workflows:
       - equal:
         - main
         - << pipeline.git.branch >>
+      - not:
+          equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
     - architecture-docs
   provider-contract-drift:
@@ -3800,6 +3821,8 @@ workflows:
       - equal:
         - main
         - << pipeline.git.branch >>
+      - not:
+          equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
     - provider-contract-drift
   consolidation:
@@ -3807,6 +3830,8 @@ workflows:
       and:
         - equal: [consolidation, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - consolidation
   branch-hygiene:
@@ -3814,6 +3839,8 @@ workflows:
       and:
         - equal: [branch-hygiene, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - branch-hygiene:
           context: bioetl-github-read-only
@@ -3939,6 +3966,7 @@ workflows:
               - codex/grafana-postmerge-security-20261006
               - codex/pr-eight-integration
               - codex/ci-11931-main-acceptance-20261007
+              - fix/p02-domain-12087-12093
           requires:
           - proof-coverage-shards
       - proof-governance:
@@ -3976,6 +4004,8 @@ workflows:
       and:
         - equal: [docs-kpi, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - docs-kpi
   memory-retention:
@@ -3983,6 +4013,8 @@ workflows:
       and:
         - equal: [memory-retention, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - memory-retention
   port-contracts:
@@ -3990,6 +4022,8 @@ workflows:
       and:
         - equal: [port-contracts, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - port-contracts
   skills-consistency:
@@ -3997,6 +4031,8 @@ workflows:
       and:
         - equal: [skills-consistency, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - skills-consistency
   github-settings-review:
@@ -4004,6 +4040,8 @@ workflows:
       and:
         - equal: [github-settings-review, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - github-settings-review:
           context: bioetl-github-read-only
@@ -4012,6 +4050,8 @@ workflows:
       and:
         - equal: [performance, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - performance
   replay-parity:
@@ -4019,6 +4059,8 @@ workflows:
       and:
         - equal: [replay-parity, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - replay-parity
   memory-freshness:
@@ -4026,11 +4068,14 @@ workflows:
       and:
         - equal: [memory-freshness, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - memory-freshness
 
   # Sunday mutation owner is GitHub Actions. This workflow is the manual
-  # main backup: ci-lane=mutation. Keep the CircleCI schedule paused.
+  # main backup: ci-lane=mutation. Native scheduled_pipeline triggers do not
+  # select it. Keep any Sunday schedule paused so an API schedule cannot.
   mutation:
     when:
       and:
@@ -4040,6 +4085,8 @@ workflows:
       - equal:
         - main
         - << pipeline.git.branch >>
+      - not:
+          equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
     - mutation-testing:
         name: mutation-domain
@@ -4070,12 +4117,16 @@ workflows:
         tests-dir: tests/unit/repo_backed/application/services/test_workflow_runner_service.py
         threshold: '60.0'
 
+  # Opt-in lanes ignore native scheduled_pipeline triggers. Manual API
+  # triggers on main still select them. pr-gate is unchanged.
   architecture-metrics-fast:
     when:
       and:
         - equal: [architecture-metrics, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
         - not: << pipeline.parameters.run-heavy >>
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - architecture-fast-baseline
   architecture-metrics-heavy:
@@ -4084,6 +4135,8 @@ workflows:
         - equal: [architecture-metrics, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
         - << pipeline.parameters.run-heavy >>
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - architecture-heavy-nightly
       - windows-atomic-write-stress-nightly
@@ -4092,6 +4145,8 @@ workflows:
       and:
         - equal: [scorecard, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - scorecard-analysis:
           context: bioetl-github-read-only
@@ -4100,6 +4155,8 @@ workflows:
       and:
         - equal: [scorecard-publish, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - scorecard-analysis:
           context: bioetl-github-read-only
@@ -4117,6 +4174,8 @@ workflows:
       and:
         - equal: [release-validation, << pipeline.parameters.ci-lane >>]
         - equal: [main, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - release-dist-build
       - release-install:

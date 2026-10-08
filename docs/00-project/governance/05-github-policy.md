@@ -93,7 +93,7 @@ ______________________________________________________________________
 
 ## 2. CI/CD Workflows
 
-BioETL uses **52 GitHub Actions workflows** (including reusable helper workflows).
+BioETL uses **54 GitHub Actions workflows** (including reusable helper workflows).
 That number is the tracked `.github/workflows/*.yml` inventory, not GitHub's
 `GET /actions/workflows` `total_count` (live GET `2026-09-17`: **79** objects =
 50 tracked files + hosted `dynamic/**` workflows + GitHub-only orphan/residual
@@ -240,18 +240,19 @@ Required scheduled lanes stay `active`. Optional scheduled lanes stay
 nightlies from this section.
 
 `mutation-testing.yml` is the explicit #10263 exception and stays `active`.
-It is the sole Sunday mutation owner. Push and pull_request stay off.
+The Sunday step is `nightly.yml` calling this workflow. Push and pull_request stay off.
 CircleCI workflow `mutation` stays in `.circleci/config.yml` as the manual
-`ci-lane=mutation` backup on `main`; keep its Sunday schedule paused. Thresholds stay
-70/60/60/60.
+`ci-lane=mutation` backup on `main`. Native `scheduled_pipeline` triggers do not
+start it; keep any Sunday schedule paused so an API-attributed schedule cannot
+double-run it. Thresholds stay 70/60/60/60.
 
 | Workflow | File | YAML cadence | Lane class | GitHub live state | Decision |
 | --- | --- | --- | --- | --- | --- |
-| Architecture Metrics | `architecture.yml` | `schedule` + `workflow_dispatch` | required | `active` | `active` |
+| Architecture Metrics | `architecture.yml` | `workflow_dispatch` (manual heavy) | required | `active` | `active` |
 | Diagram Nightly Regression | `diagram-nightly.yml` | `schedule` + `workflow_dispatch` | required | `active` | `active` |
-| OpenSSF Scorecard | `scorecard.yml` | weekly + `push` + `workflow_dispatch` | required | `active` | `active` |
-| Quarterly GitHub Settings Review | `github-settings-quarterly-review.yml` | quarterly + `workflow_dispatch` | required | `active` | `active` |
-| Mutation Testing | `mutation-testing.yml` | Weekly (Sun 00:00 UTC) + `workflow_dispatch` | Sunday owner | `active` | `active` |
+| OpenSSF Scorecard | `scorecard.yml` | Monday step in `nightly.yml` + `workflow_dispatch` | required | `active` | `active` |
+| Quarterly GitHub Settings Review | `github-settings-quarterly-review.yml` | quarter-day step in `nightly.yml` + `workflow_dispatch` | required | `active` | `active` |
+| Mutation Testing | `mutation-testing.yml` | Weekly Sunday step in `nightly.yml` + `workflow_dispatch` | Sunday owner | `active` | `active` |
 | Contract Tests | `contract-tests.yml` | Monthly 1st 02:00 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
 | Weekly VACUUM | `vacuum.yml` | Weekly Sun 02:00 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
 | Docs KPI Weekly | `docs-kpi-weekly.yml` | Weekly Mon 04:30 UTC (YAML only) | optional | `disabled_manually` | `keep-disabled` |
@@ -325,15 +326,14 @@ or `configs/quality/github_required_checks.yaml`.
 | `zizmor.yml` | Static Actions audit; keep enabled, not a required context |
 
 `e2e-smoke` remains a serial test-matrix lane. It is not PR-blocking and must
-not be added to the merge wall. `e2e-nightly-full-replay` runs only on
-`schedule` and `workflow_dispatch`; pull requests skip it, and it is not a
-`pr-gate-complete` owner.
+not be added to the merge wall. `e2e-nightly-full-replay` runs from the nightly
+coordinator via `workflow_call` and on `workflow_dispatch`. Pull requests skip
+it, and it is not a `pr-gate-complete` owner.
 
 Legacy contexts `checks-complete` and `root-hygiene` remain saved only on disabled
 ruleset `15730586`. Leaf workflows no longer own direct PR triggers after the
 atomic #9975 owner cutover. Every PR targeting `main` materializes
-`pr-gate-complete`, which classifies the exact head SHA, invokes each reusable
-leaf owner once in a distinct owner-namespaced concurrency group, and fails
+`pr-gate-complete`, which classifies the exact head SHA, runs fast-governance and a conditional class lane, and fails
 closed on failure, cancellation, skip, missing result, invalid N/A evidence, or SHA
 mismatch. Rollback is `PUT .../rulesets/13643213` with
 `reports/governance/ruleset-10267-rollback-13643213.json`.
@@ -376,10 +376,11 @@ statuses because ruleset `13643213` requires only the final
 | `commit-lint`              | commit-lint.yml       | Conventional Commits                                          |
 | `type-check`               | type-checking.yml     | mypy strict compliance                                        |
 
-Docs-only PRs go through documentation governance via the reusable `docs.yml`
-owner. Docker and schema owners materialize lightweight SHA-bound N/A jobs when
-the catalog proves those lanes irrelevant; always-required quality/security
-owners continue to run.
+Docs-only PRs run the documentation subset inside the PR coordinator.
+Docker and schema owners stay path-scoped and are not applicable when the
+catalog proves those lanes irrelevant. The full test matrix and coverage-verify
+run from the nightly coordinator; PR gate `tests` is path-scoped, so a
+docs-only diff does not run them.
 
 ### Architecture lane names (`architecture-full`)
 
@@ -397,9 +398,9 @@ independent unconditional GitHub required checks; their results are consumed by 
 | IDE daily | `pytest-architecture` | `architecture and not slow and not benchmark and not memory` | No |
 | IDE / local slow | `pytest-architecture-slow-governance` | `architecture and not benchmark and not memory` (includes slow) | No |
 | `test_matrix` slow lane | `architecture-slow-governance` | same as IDE slow | No (nightly / full audit; not PR `arch-tests`) |
-| `tests.yml` job `test-matrix` | 6 path groups on Python **3.13** | not architecture | Not a leaf required check. Gate `tests` is `always_required`, so this job runs on every PR that materializes `pr-gate-complete`, including docs-only |
+| `tests.yml` job `test-matrix` | 6 path groups on Python **3.13** | not architecture | Not a leaf required check. Gate `tests` is path-scoped, so docs-only does not run it. The nightly coordinator runs the full matrix. `pr-gate-complete` stays the PR aggregator |
 | `tests.yml` job `test-fast` | unit-fast on Python **3.12** | fail-fast compatibility, no coverage | No |
-| `coverage-verify` | combined 85% | `tests.yml` | Not a leaf required check. Gate `tests` is `always_required`, so this job runs on every PR that materializes `pr-gate-complete`, including docs-only |
+| `coverage-verify` | combined 85% | `tests.yml` | Not a leaf required check. Gate `tests` is path-scoped, so docs-only does not run it. The nightly coordinator runs coverage-verify. `pr-gate-complete` stays the PR aggregator |
 
 `test-fast` (3.12, no coverage) and `test-matrix` unit shards (3.13, coverage)
 share unit **paths** on purpose as a version split, not as two copies of the

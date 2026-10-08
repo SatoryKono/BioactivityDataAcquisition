@@ -34,6 +34,7 @@ jobs:
       contents: read
     outputs:
       head_sha: ${{ steps.decide.outputs.head_sha }}
+      base_sha: ${{ steps.decide.outputs.base_sha }}
       config_version: ${{ steps.decide.outputs.config_version }}
       decision_matrix: ${{ steps.decide.outputs.decision_matrix }}
       lint-arch: ${{ steps.decide.outputs['lint-arch'] }}
@@ -97,6 +98,7 @@ jobs:
             classify_args+=(--before-sha "${BEFORE_SHA}")
           fi
           uv run --frozen --no-build python -m scripts.engineering.ci pr-gate classify "${classify_args[@]}"
+          echo "base_sha=${base_sha}" >> "$GITHUB_OUTPUT"
 
       - name: Publish decision matrix summary
         if: always()
@@ -107,192 +109,575 @@ jobs:
           jq -r '.gates[] | "| \(.id) | \(.result) | \(.reason) |"' reports/quality/pr-gate-decisions.json >> "$GITHUB_STEP_SUMMARY" || cat reports/quality/pr-gate-decisions.json >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload decision matrix
-        if: ${{ always() && !cancelled() }}
+        if: ${{ failure() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: pr-gate-decisions-${{ github.event.pull_request.head.sha || github.sha }}
           path: reports/quality/pr-gate-decisions.json
-          if-no-files-found: error
-          retention-days: 7
+          if-no-files-found: ignore
+          retention-days: 3
 
-  lint-arch:
+  fast-governance:
+    name: Fast governance
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
     needs: classify-changes
-    if: ${{ needs['classify-changes'].outputs['lint-arch'] == 'required' }}
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/import-linter.yml@55307990f2a12256d4833126d5b8327473d453a0
     permissions:
       contents: read
-
-  tests:
-    needs: classify-changes
-    if: ${{ needs['classify-changes'].outputs['tests'] == 'required' }}
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/tests.yml@f7c2614dd16824c700f4b5486c529ae97a3ea519
-    permissions:
-      contents: read
-
-  type-checking:
-    needs: classify-changes
-    if: ${{ needs['classify-changes'].outputs['type-checking'] == 'required' }}
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/type-checking.yml@55307990f2a12256d4833126d5b8327473d453a0
-    permissions:
-      contents: read
-
-  security:
-    needs: classify-changes
-    if: ${{ needs['classify-changes'].outputs['security'] == 'required' }}
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/security.yml@47691d8c4acdf68f4ad8bafaeaa46473caf72394
-    permissions:
-      contents: read
-
-  docker:
-    needs: classify-changes
-    if: ${{ needs['classify-changes'].outputs['docker'] == 'required' }}
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docker.yml@55307990f2a12256d4833126d5b8327473d453a0
-    # The reusable workflow declares a main-push-only GHCR job. The PR path
-    # never schedules it, and every executable PR job narrows its own token.
-    permissions:
-      contents: read
-      packages: write
       security-events: write
-      id-token: write
-      attestations: write
-
-  docker-not-applicable:
-    needs: classify-changes
-    if: ${{ needs['classify-changes'].outputs['docker'] == 'not_applicable' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
-    permissions:
-      contents: read
-    outputs:
-      head_sha: ${{ steps.na.outputs.head_sha }}
-      reason: ${{ steps.na.outputs.reason }}
     steps:
-      - name: Materialize docker N/A decision
-        id: na
-        env:
-          HEAD_SHA: ${{ needs['classify-changes'].outputs.head_sha }}
-          REASON: ${{ needs['classify-changes'].outputs['docker-reason'] }}
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set up Python + uv
+        id: setup-python
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+          uv-extras: "dev docs"
+
+      - name: Validate repository root allowlist
+        id: cleanliness
+        if: needs['classify-changes'].outputs['root-hygiene'] == 'required' || needs['classify-changes'].outputs['compiled-artifacts'] == 'required'
+        run: uv run --frozen --no-build python -m scripts.engineering.repo check-cleanliness --strict-untracked --check-local-forbidden-outputs
+
+      - name: Validate cleanup governance guidance
+        id: cleanup-governance
+        if: needs['classify-changes'].outputs['root-hygiene'] == 'required'
+        run: uv run --frozen --no-build python -m scripts.engineering.repo check-cleanup-governance
+
+      - name: Validate root governance docs
+        id: root-docs
+        if: needs['classify-changes'].outputs['root-hygiene'] == 'required'
+        run: uv run --frozen --no-build python -m scripts.engineering.repo check-root-governance-docs
+
+      - name: Validate root-hygiene review registry
+        id: root-registry
+        if: needs['classify-changes'].outputs['root-hygiene'] == 'required'
+        run: uv run --frozen --no-build python -m scripts.engineering.repo check-root-review-registry
+
+      - name: Validate structure audit
+        id: structure-audit
+        if: needs['classify-changes'].outputs['root-hygiene'] == 'required'
+        run: uv run --frozen --no-build python -m scripts.engineering.diagnostics audit-structure --path .
+
+      - name: Run root hygiene unit tests
+        id: hygiene-pytest
+        if: needs['classify-changes'].outputs['root-hygiene'] == 'required'
+        run: >
+          uv run --frozen --no-build pytest
+          tests/unit/scripts/repo/test_audit_root_cleanliness.py
+          tests/unit/scripts/repo/test_check_cleanup_governance.py
+          tests/unit/scripts/repo/test_check_root_governance_docs.py
+          tests/unit/scripts/repo/test_audit_structure.py
+          tests/unit/scripts/repo/test_check_root_hygiene_review_registry.py
+          tests/unit/scripts/repo/test_cleanup_repository.py
+          tests/unit/scripts/repo/test_cleanup_root_local_clutter.py
+          tests/architecture/test_root_hygiene_workflow.py
+          tests/architecture/test_root_hygiene_review_registry.py
+          tests/architecture/test_env_example_reference_policy.py
+          -q --tb=line
+
+      - name: Block compiled Python artifacts
+        id: compiled-artifacts
+        if: needs['classify-changes'].outputs['compiled-artifacts'] == 'required'
         run: |
           set -euo pipefail
-          test -n "${HEAD_SHA}"
-          test -n "${REASON}"
-          echo "head_sha=${HEAD_SHA}" >> "${GITHUB_OUTPUT}"
-          echo "reason=${REASON}" >> "${GITHUB_OUTPUT}"
-          echo "docker=not_applicable reason=${REASON} head_sha=${HEAD_SHA}"
+          found="$(git ls-files -- ':(glob)**/*.pyc' ':(glob)**/__pycache__/**' | head -n 1 || true)"
+          if [[ -n "$found" ]]; then
+            echo "::error::compiled artifact found: $found"
+            exit 1
+          fi
 
-  duplication:
-    needs: classify-changes
-    if: ${{ needs['classify-changes'].outputs['duplication'] == 'required' }}
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/duplication-complexity.yml@55307990f2a12256d4833126d5b8327473d453a0
-    permissions:
-      contents: read
+      - name: Lint commit messages
+        id: commitlint
+        if: needs['classify-changes'].outputs['commit-governance'] == 'required'
+        uses: wagoid/commitlint-github-action@f133a0d95090ef2609192b4a21f54e20af819ea9 # v6
+        with:
+          configFile: commitlint.config.mjs
+          helpURL: https://www.conventionalcommits.org/
 
-  root-hygiene:
-    needs: classify-changes
-    if: ${{ needs['classify-changes'].outputs['root-hygiene'] == 'required' }}
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/root-hygiene.yml@55307990f2a12256d4833126d5b8327473d453a0
-    permissions:
-      contents: read
+      - name: Check documentation passports
+        id: docs-passports
+        if: needs['classify-changes'].outputs['docs-governance'] == 'required'
+        run: uv run --frozen --no-build python -m scripts.docs passports check
 
-  generated-artifacts:
-    needs: classify-changes
-    if: ${{ needs['classify-changes'].outputs['generated-artifacts'] == 'required' }}
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/schema-governance.yml@f7c2614dd16824c700f4b5486c529ae97a3ea519
-    permissions:
-      contents: read
+      - name: Check documentation links
+        id: docs-links
+        if: needs['classify-changes'].outputs['docs-governance'] == 'required'
+        run: uv run --frozen --no-build python -m scripts.docs check-links --report-json reports/docs-link-check-report.json
 
-  generated-artifacts-not-applicable:
-    needs: classify-changes
-    if: ${{ needs['classify-changes'].outputs['generated-artifacts'] == 'not_applicable' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
-    permissions:
-      contents: read
-    outputs:
-      head_sha: ${{ steps.na.outputs.head_sha }}
-      reason: ${{ steps.na.outputs.reason }}
-    steps:
-      - name: Materialize generated-artifacts N/A decision
-        id: na
+      - name: Verify documentation
+        id: docs-verify
+        if: needs['classify-changes'].outputs['docs-governance'] == 'required'
+        run: uv run --frozen --no-build python -m scripts.docs verify --skip-links
+
+      - name: Check MkDocs nav
+        id: mkdocs-nav
+        if: needs['classify-changes'].outputs['docs-governance'] == 'required'
+        run: uv run --frozen --no-build pytest tests/architecture/test_documentation_sync.py::test_mkdocs_nav_references_existing_markdown_files -q --tb=line
+
+      - name: Run zizmor
+        id: zizmor
+        uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
+        with:
+          inputs: |
+            .github/workflows
+            .github/actions
+          min-severity: high
+          min-confidence: high
+          version: "1.29.0"
+          config: .github/zizmor.yml
+          advanced-security: "true"
+
+      - name: Dependency review
+        id: dependency-review
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high
+
+      - name: Record required step outcomes
+        id: record
+        if: always()
         env:
-          HEAD_SHA: ${{ needs['classify-changes'].outputs.head_sha }}
-          REASON: ${{ needs['classify-changes'].outputs['generated-artifacts-reason'] }}
+          DECISION_MATRIX: ${{ needs.classify-changes.outputs.decision_matrix }}
+          STEPS_JSON: ${{ toJson(steps) }}
+          LANE_OWNER: fast-governance
         run: |
           set -euo pipefail
-          test -n "${HEAD_SHA}"
-          test -n "${REASON}"
-          echo "head_sha=${HEAD_SHA}" >> "${GITHUB_OUTPUT}"
-          echo "reason=${REASON}" >> "${GITHUB_OUTPUT}"
-          echo "generated-artifacts=not_applicable reason=${REASON} head_sha=${HEAD_SHA}"
+          mkdir -p reports/quality
+          uv run --frozen --no-build python -c '
+          import json
+          import os
+          from pathlib import Path
+          raw = json.loads(os.environ["STEPS_JSON"])
+          flat = {}
+          for key, value in raw.items():
+              if isinstance(value, dict):
+                  flat[key] = str(value.get("outcome") or value.get("conclusion") or "")
+              else:
+                  flat[key] = str(value)
+          Path("reports/quality/lane-step-outcomes.json").write_text(
+              json.dumps(flat, separators=(",", ":")),
+              encoding="utf-8",
+          )
+          '
+          OUTCOMES="$(tr -d '\r\n' < reports/quality/lane-step-outcomes.json)"
+          export OUTCOMES
+          uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results assert-steps \
+            --decision-matrix DECISION_MATRIX \
+            --decision-matrix-env \
+            --outcomes OUTCOMES \
+            --outcomes-env \
+            --owner "$LANE_OWNER"
 
-  compiled-artifacts:
-    needs: classify-changes
-    if: ${{ needs['classify-changes'].outputs['compiled-artifacts'] == 'required' }}
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/compiled-artifacts-block.yml@f7c2614dd16824c700f4b5486c529ae97a3ea519
-    permissions:
-      contents: read
-
-  commit-governance:
-    needs: classify-changes
-    if: ${{ needs['classify-changes'].outputs['commit-governance'] == 'required' }}
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/commit-lint.yml@55307990f2a12256d4833126d5b8327473d453a0
-    permissions:
-      contents: read
-
-  commit-governance-not-applicable:
-    needs: classify-changes
-    if: ${{ needs['classify-changes'].outputs['commit-governance'] == 'not_applicable' }}
+  class-lane:
+    name: Class lane
     runs-on: ubuntu-latest
-    timeout-minutes: 2
+    timeout-minutes: 90
+    needs: classify-changes
+    if: >-
+      ${{
+        needs['classify-changes'].outputs['lint-arch'] == 'required' ||
+        needs['classify-changes'].outputs['tests'] == 'required' ||
+        needs['classify-changes'].outputs['type-checking'] == 'required' ||
+        needs['classify-changes'].outputs['security'] == 'required' ||
+        needs['classify-changes'].outputs['docker'] == 'required' ||
+        needs['classify-changes'].outputs['generated-artifacts'] == 'required' ||
+        needs['classify-changes'].outputs['duplication'] == 'required'
+      }}
     permissions:
       contents: read
-    outputs:
-      head_sha: ${{ steps.na.outputs.head_sha }}
-      reason: ${{ steps.na.outputs.reason }}
     steps:
-      - name: Materialize commit-governance N/A decision
-        id: na
-        env:
-          HEAD_SHA: ${{ needs['classify-changes'].outputs.head_sha }}
-          REASON: ${{ needs['classify-changes'].outputs['commit-governance-reason'] }}
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set up Python + uv
+        id: setup-python
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+          uv-extras: "dev"
+
+      - name: Ruff check
+        id: ruff
+        if: needs['classify-changes'].outputs['lint-arch'] == 'required'
+        run: uv run --frozen --no-build ruff check src tests --output-format=github
+
+      - name: Ruff format
+        id: ruff-format
+        if: needs['classify-changes'].outputs['lint-arch'] == 'required'
+        run: uv run --frozen --no-build ruff format --check src tests
+
+      - name: Ruff isort
+        id: ruff-isort
+        if: needs['classify-changes'].outputs['lint-arch'] == 'required'
+        run: uv run --frozen --no-build ruff check --select I src tests --output-format=github
+
+      - name: C901 governance
+        id: c901
+        if: needs['classify-changes'].outputs['lint-arch'] == 'required'
         run: |
           set -euo pipefail
-          test -n "${HEAD_SHA}"
-          test -n "${REASON}"
-          echo "head_sha=${HEAD_SHA}" >> "${GITHUB_OUTPUT}"
-          echo "reason=${REASON}" >> "${GITHUB_OUTPUT}"
-          echo "commit-governance=not_applicable reason=${REASON} head_sha=${HEAD_SHA}"
+          mode="${C901_GOVERNANCE_MODE:-block}"
+          uv run --frozen --no-build python -m scripts.engineering.qa check-c901 \
+            --target src/bioetl \
+            --baseline-file scripts/engineering/baselines/c901_baseline.json \
+            --mode "$mode"
 
-  docs-governance:
-    needs: classify-changes
-    if: ${{ needs['classify-changes'].outputs['docs-governance'] == 'required' }}
-    uses: SatoryKono/BioactivityDataAcquisition/.github/workflows/docs.yml@55307990f2a12256d4833126d5b8327473d453a0
-    permissions:
-      contents: read
+      - name: Import contracts
+        id: lint-imports
+        if: needs['classify-changes'].outputs['lint-arch'] == 'required'
+        run: uv run --frozen --no-build lint-imports --config .importlinter
 
-  docs-governance-not-applicable:
-    needs: classify-changes
-    if: ${{ needs['classify-changes'].outputs['docs-governance'] == 'not_applicable' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
-    permissions:
-      contents: read
-    outputs:
-      head_sha: ${{ steps.na.outputs.head_sha }}
-      reason: ${{ steps.na.outputs.reason }}
-    steps:
-      - name: Materialize docs-governance N/A decision
-        id: na
+      - name: Architecture pytest slice
+        id: arch-pytest
+        if: needs['classify-changes'].outputs['lint-arch'] == 'required'
+        run: uv run --frozen --no-build pytest tests/architecture -m "not slow and not benchmark and not memory" -q --tb=line
+
+      - name: Affected pytest
+        id: affected-pytest
+        if: needs['classify-changes'].outputs['tests'] == 'required'
         env:
-          HEAD_SHA: ${{ needs['classify-changes'].outputs.head_sha }}
-          REASON: ${{ needs['classify-changes'].outputs['docs-governance-reason'] }}
+          BASE_SHA: ${{ needs.classify-changes.outputs.base_sha }}
+          HEAD_SHA: ${{ needs.classify-changes.outputs.head_sha }}
         run: |
           set -euo pipefail
-          test -n "${HEAD_SHA}"
-          test -n "${REASON}"
-          echo "head_sha=${HEAD_SHA}" >> "${GITHUB_OUTPUT}"
-          echo "reason=${REASON}" >> "${GITHUB_OUTPUT}"
-          echo "docs-governance=not_applicable reason=${REASON} head_sha=${HEAD_SHA}"
+          mkdir -p reports/quality
+          uv run --quiet --frozen --no-build python -m scripts.engineering.ci.pr_lane_results affected-tests \
+            --repo-root . \
+            --base-sha "$BASE_SHA" \
+            --head-sha "$HEAD_SHA" \
+            > reports/quality/affected-tests.txt
+          mapfile -t targets < reports/quality/affected-tests.txt
+          if [[ ${#targets[@]} -eq 0 ]]; then
+            echo "::error::tests gate has no affected pytest target"
+            exit 1
+          fi
+          uv run --frozen --no-build pytest "${targets[@]}" -q --tb=line
+
+      - name: Run mypy (strict mode, full gate)
+        if: needs['classify-changes'].outputs['type-checking'] == 'required'
+        id: mypy
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -o pipefail
+          mkdir -p reports
+          rm -rf .mypy_cache
+
+          echo "Running full mypy strict gate on src/bioetl + src/memory..."
+          echo "Event: $EVENT_NAME" | tee reports/mypy_strict.log
+
+          set +e
+          timeout --signal=TERM --kill-after=30s 30m \
+            uv run --frozen --no-build mypy --config-file pyproject.toml --strict --no-incremental src/bioetl src/memory \
+            2>&1 | tee -a reports/mypy_strict.log
+          status=${PIPESTATUS[0]}
+          set -e
+
+          echo "$status" > reports/mypy_strict.exit_code
+
+          if [ "$status" -eq 124 ]; then
+            echo "mypy strict gate timed out after 30 minutes" | tee -a reports/mypy_strict.log
+            exit 1
+          fi
+
+          exit "$status"
+
+      - name: Verify NewType and Protocol usage in domain layer
+        if: needs['classify-changes'].outputs['type-checking'] == 'required'
+        id: newtype-protocol
+        run: |
+          echo "Checking for proper type definitions in domain layer..."
+          uv run --frozen --no-build python - <<'PY'
+          import ast
+          import sys
+          from pathlib import Path
+
+          domain_path = Path("src/bioetl/domain")
+          if not domain_path.exists():
+              print("Domain layer not found")
+              sys.exit(1)
+
+          issues = []
+
+          for py_file in domain_path.rglob("*.py"):
+              with open(py_file) as f:
+                  try:
+                      tree = ast.parse(f.read())
+                  except SyntaxError:
+                      continue
+
+              # Check for Protocol imports in ports.py
+              if py_file.name == "ports.py":
+                  has_protocol = False
+                  for node in ast.walk(tree):
+                      if isinstance(node, ast.ImportFrom):
+                          if node.module == "typing" and any(
+                              alias.name == "Protocol" for alias in node.names
+                          ):
+                              has_protocol = True
+                              break
+                  if not has_protocol:
+                      issues.append(f"{py_file}: ports.py should use typing.Protocol")
+
+              # Check for NewType usage in types.py
+              if py_file.name == "types.py":
+                  has_newtype = False
+                  for node in ast.walk(tree):
+                      if isinstance(node, ast.ImportFrom):
+                          if node.module == "typing" and any(
+                              alias.name == "NewType" for alias in node.names
+                          ):
+                              has_newtype = True
+                              break
+                  # NewType is optional but recommended
+                  if not has_newtype:
+                      print(f"ℹ️  {py_file}: Consider using NewType for domain-specific types")
+
+          if issues:
+              print("❌ Type definition issues found:")
+              for issue in issues:
+                  print(f"  {issue}")
+              sys.exit(1)
+          else:
+              print("✅ Domain layer type definitions look good")
+          PY
+
+      - name: Check for Any type usage in domain/application layers
+        if: needs['classify-changes'].outputs['type-checking'] == 'required'
+        id: any-usage
+        run: |
+          echo "Checking for explicit Any type usage (should be minimized)..."
+          uv run --frozen --no-build python - <<'PY'
+          import re
+          import sys
+          from pathlib import Path
+
+          # Patterns that indicate problematic Any usage
+          any_patterns = [
+              r'\bAny\b',  # Direct Any type
+              r':\s*Any\b',  # Type annotation with Any
+              r'->\s*Any\b',  # Return type Any
+          ]
+
+          warnings = []
+          for layer in ["domain", "application"]:
+              layer_path = Path(f"src/bioetl/{layer}")
+              if not layer_path.exists():
+                  continue
+
+              for py_file in layer_path.rglob("*.py"):
+                  with open(py_file) as f:
+                      content = f.read()
+
+                  for i, line in enumerate(content.split('\n'), 1):
+                      # Skip TYPE_CHECKING blocks and comments
+                      if 'TYPE_CHECKING' in line or line.strip().startswith('#'):
+                          continue
+                      for pattern in any_patterns:
+                          if re.search(pattern, line):
+                              warnings.append(f"{py_file}:{i}: {line.strip()}")
+
+          if warnings:
+              print(f"⚠️  Found {len(warnings)} potential Any type usage(s):")
+              for w in warnings[:10]:  # Show first 10
+                  print(f"  {w}")
+              if len(warnings) > 10:
+                  print(f"  ... and {len(warnings) - 10} more")
+              print("\nConsider using more specific types where possible.")
+              # Warning only - don't fail the build
+          else:
+              print("✅ No problematic Any type usage found")
+          PY
+
+
+      - name: Run detect-secrets baseline check
+        id: detect-secrets
+        if: needs['classify-changes'].outputs['security'] == 'required'
+        run: uv run --frozen --no-build pytest tests/architecture/test_antipatterns.py::test_no_hardcoded_secrets -q --noconftest -o "addopts=" -o "filterwarnings=" -o "timeout=0"
+
+      - name: Run pip-audit
+        id: pip-audit
+        if: needs['classify-changes'].outputs['security'] == 'required'
+        run: |
+          # Residual OSV #9853/#9859 (expiry 2026-11-30): mermaid/Grafana only.
+          # pip PYSEC-2026-3721 / CVE-2026-3219 is remediated at pip==26.2.1.
+          # Do not restore --ignore-vuln for that advisory.
+          # Do not add osv-scanner.toml and do not dismiss Scorecard
+          # Vulnerabilities (OpenSSF check #1294).
+          UV_CACHE_DIR=/tmp/.uv-cache uv export --frozen --no-hashes --no-emit-project --all-extras > /tmp/pip-audit-requirements.txt
+          UV_CACHE_DIR=/tmp/.uv-cache uv run --frozen --no-build pip-audit --strict \
+            -r /tmp/pip-audit-requirements.txt --cache-dir /tmp/.pip-audit-cache
+
+      - name: Run Bandit
+        id: bandit
+        if: needs['classify-changes'].outputs['security'] == 'required'
+        run: uv run --frozen --no-build bandit -c pyproject.toml -r src/bioetl
+
+      - name: Run Gitleaks
+        id: gitleaks
+        if: needs['classify-changes'].outputs['security'] == 'required'
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
+          GITLEAKS_ENABLE_COMMENTS: "false"
+          GITLEAKS_ENABLE_SUMMARY: "false"
+
+      - name: Run OSV-Scanner
+        id: osv-scan
+        if: needs['classify-changes'].outputs['security'] == 'required'
+        uses: google/osv-scanner-action/osv-scanner-action@a345acffa64b0eaede81a3d9aae6141214d9c8fc # v2.6.0
+        with:
+          scan-args: |-
+            --lockfile=uv.lock
+            --lockfile=package-lock.json
+            --lockfile=.github/actions/setup-mermaid/package-lock.json
+            --lockfile=.github/tooling/jscpd/package-lock.json
+            --lockfile=scripts/ai/gemini/npm-tooling/package-lock.json
+            --lockfile=grafana/plugins/bioetl-scenes-app/package-lock.json
+            --lockfile=grafana/plugins/bioetl-selectorshell-panel/package-lock.json
+            --lockfile=grafana/tooling/router-v7-bridge/package-lock.json
+            --format=json
+            --output-file=osv-results.json
+
+      - name: Fail on HIGH/CRITICAL OSV findings
+        id: osv-gate
+        if: needs['classify-changes'].outputs['security'] == 'required'
+        run: uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json
+
+      - name: Set up Docker Buildx
+        id: setup-buildx
+        if: needs['classify-changes'].outputs['docker'] == 'required'
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Validate docker-compose.yml syntax
+        id: docker-compose
+        if: needs['classify-changes'].outputs['docker'] == 'required'
+        env:
+          NEO4J_PASSWORD: ci-compose-validation-placeholder
+        run: docker compose config > /dev/null
+
+      - name: Validate docker-compose.monitoring.yml syntax
+        id: docker-monitoring-compose
+        if: needs['classify-changes'].outputs['docker'] == 'required'
+        env:
+          NEO4J_PASSWORD: ci-compose-validation-placeholder
+          GF_SECURITY_ADMIN_PASSWORD: ci-compose-validation-placeholder
+          GF_RENDERING_RENDERER_TOKEN: ci-compose-validation-placeholder
+        run: docker compose -f docker-compose.monitoring.yml config > /dev/null
+
+      - name: Run Docker runtime contracts
+        id: docker-contracts
+        if: needs['classify-changes'].outputs['docker'] == 'required'
+        run: |
+          uv run --frozen --no-build pytest -q --tb=line \
+            tests/architecture/test_docker_runtime_contracts.py \
+            tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py \
+            tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager_recovery_networks.py \
+            tests/unit/repo_backed/scripts/ops/docker/test_docker_runtime_probe.py \
+            tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py
+
+      - name: Check generated schema artifacts
+        id: schema-artifacts
+        if: needs['classify-changes'].outputs['generated-artifacts'] == 'required'
+        run: uv run --frozen --no-build python -m scripts.schema generate-artifacts --check
+
+      - name: Verify schema parity
+        id: schema-parity
+        if: needs['classify-changes'].outputs['generated-artifacts'] == 'required'
+        run: uv run --frozen --no-build python -m scripts.schema verify-schema-parity --mode blocking
+
+      - name: Validate duplication/complexity exemption registry
+        id: duplication-exemptions
+        if: needs['classify-changes'].outputs['duplication'] == 'required'
+        run: uv run --frozen --no-build python -m scripts.engineering.qa check-duplication-complexity-exemptions
+
+      - name: Install Node.js
+        id: setup-node
+        if: needs['classify-changes'].outputs['duplication'] == 'required'
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: .github/tooling/jscpd/package-lock.json
+
+      - name: Run jscpd for duplication detection
+        id: jscpd
+        if: needs['classify-changes'].outputs['duplication'] == 'required'
+        run: |
+          set -euo pipefail
+          mkdir -p reports/jscpd
+          npm ci --ignore-scripts --no-fund --no-audit --prefix "${GITHUB_WORKSPACE}/.github/tooling/jscpd"
+          node .github/tooling/braces-backport/test.cjs .github/tooling/jscpd
+          "${GITHUB_WORKSPACE}/.github/tooling/jscpd/node_modules/.bin/jscpd" \
+            "${GITHUB_WORKSPACE}/src" "${GITHUB_WORKSPACE}/tests" \
+            --config "${GITHUB_WORKSPACE}/.jscpd.json" \
+            --threshold 10 --format python \
+            --reporters "console,html,json" \
+            --output "${GITHUB_WORKSPACE}/reports/jscpd"
+
+      - name: Enforce BioETL hotspot duplication zero ratchet
+        id: duplication-hotspots
+        if: needs['classify-changes'].outputs['duplication'] == 'required'
+        run: |
+          uv run --frozen --no-build python -m scripts.engineering.qa report-duplication-baseline \
+            --targets src/bioetl/application/core src/bioetl/composition/bootstrap/runtime src/bioetl/composition/factories/pipeline src/bioetl/application/services/control_plane src/bioetl/composition/runtime_builders \
+            --json-out reports/quality/hotspot-duplication-baseline.json \
+            --md-out reports/quality/hotspot-duplication-baseline.md \
+            --max-duplicate-clusters 0 \
+            --timeout-seconds 120
+
+      - name: Check constructor argument counts
+        id: constructor-args
+        if: needs['classify-changes'].outputs['duplication'] == 'required'
+        run: uv run --frozen --no-build python -m scripts.engineering.qa check-constructor-args
+
+      - name: Record required step outcomes
+        id: record
+        if: always()
+        env:
+          DECISION_MATRIX: ${{ needs.classify-changes.outputs.decision_matrix }}
+          STEPS_JSON: ${{ toJson(steps) }}
+          LANE_OWNER: class-lane
+        run: |
+          set -euo pipefail
+          mkdir -p reports/quality
+          uv run --frozen --no-build python -c '
+          import json
+          import os
+          from pathlib import Path
+          raw = json.loads(os.environ["STEPS_JSON"])
+          flat = {}
+          for key, value in raw.items():
+              if isinstance(value, dict):
+                  flat[key] = str(value.get("outcome") or value.get("conclusion") or "")
+              else:
+                  flat[key] = str(value)
+          Path("reports/quality/lane-step-outcomes.json").write_text(
+              json.dumps(flat, separators=(",", ":")),
+              encoding="utf-8",
+          )
+          '
+          OUTCOMES="$(tr -d '\r\n' < reports/quality/lane-step-outcomes.json)"
+          export OUTCOMES
+          uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results assert-steps \
+            --decision-matrix DECISION_MATRIX \
+            --decision-matrix-env \
+            --outcomes OUTCOMES \
+            --outcomes-env \
+            --owner "$LANE_OWNER"
 
   pr-gate-complete:
     name: pr-gate-complete
@@ -301,21 +686,8 @@ jobs:
     if: ${{ always() }}
     needs:
       - classify-changes
-      - lint-arch
-      - tests
-      - type-checking
-      - security
-      - docker
-      - docker-not-applicable
-      - duplication
-      - root-hygiene
-      - generated-artifacts
-      - generated-artifacts-not-applicable
-      - compiled-artifacts
-      - commit-governance
-      - commit-governance-not-applicable
-      - docs-governance
-      - docs-governance-not-applicable
+      - fast-governance
+      - class-lane
     permissions:
       contents: read
     steps:
@@ -334,27 +706,25 @@ jobs:
 
       - name: Validate aggregator (fail-closed)
         env:
-          DECISION_MATRIX: "${{ needs['classify-changes'].outputs.decision_matrix }}"
-          AGGREGATE_RESULTS: >-
-            {
-            "lint-arch": {"required": "${{ needs['lint-arch'].result }}", "not_applicable": "skipped"},
-            "tests": {"required": "${{ needs['tests'].result }}", "not_applicable": "skipped"},
-            "type-checking": {"required": "${{ needs['type-checking'].result }}", "not_applicable": "skipped"},
-            "security": {"required": "${{ needs['security'].result }}", "not_applicable": "skipped"},
-            "docker": {"required": "${{ needs['docker'].result }}", "not_applicable": "${{ needs['docker-not-applicable'].result }}", "na_head_sha": "${{ needs['docker-not-applicable'].outputs.head_sha }}", "na_reason": "${{ needs['docker-not-applicable'].outputs.reason }}"},
-            "duplication": {"required": "${{ needs['duplication'].result }}", "not_applicable": "skipped"},
-            "root-hygiene": {"required": "${{ needs['root-hygiene'].result }}", "not_applicable": "skipped"},
-            "generated-artifacts": {"required": "${{ needs['generated-artifacts'].result }}", "not_applicable": "${{ needs['generated-artifacts-not-applicable'].result }}", "na_head_sha": "${{ needs['generated-artifacts-not-applicable'].outputs.head_sha }}", "na_reason": "${{ needs['generated-artifacts-not-applicable'].outputs.reason }}"},
-            "compiled-artifacts": {"required": "${{ needs['compiled-artifacts'].result }}", "not_applicable": "skipped"},
-            "commit-governance": {"required": "${{ needs['commit-governance'].result }}", "not_applicable": "${{ needs['commit-governance-not-applicable'].result }}", "na_head_sha": "${{ needs['commit-governance-not-applicable'].outputs.head_sha }}", "na_reason": "${{ needs['commit-governance-not-applicable'].outputs.reason }}"},
-            "docs-governance": {"required": "${{ needs['docs-governance'].result }}", "not_applicable": "${{ needs['docs-governance-not-applicable'].result }}", "na_head_sha": "${{ needs['docs-governance-not-applicable'].outputs.head_sha }}", "na_reason": "${{ needs['docs-governance-not-applicable'].outputs.reason }}"}
-            }
-          EXPECTED_HEAD_SHA: ${{ needs['classify-changes'].outputs.head_sha }}
+          DECISION_MATRIX: ${{ needs.classify-changes.outputs.decision_matrix }}
+          FAST_RESULT: ${{ needs.fast-governance.result }}
+          CLASS_RESULT: ${{ needs.class-lane.result }}
+          EXPECTED_HEAD_SHA: ${{ needs.classify-changes.outputs.head_sha }}
           OBSERVED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
           test "${{ needs['classify-changes'].result }}" = "success"
+          mkdir -p reports/quality
+          uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \
+            --decision-matrix DECISION_MATRIX \
+            --decision-matrix-env \
+            --head-sha "${EXPECTED_HEAD_SHA}" \
+            --job-result "fast-governance=${FAST_RESULT}" \
+            --job-result "class-lane=${CLASS_RESULT}" \
+            --output reports/quality/pr-gate-aggregate-results.json
+          AGGREGATE_RESULTS="$(tr -d '\r\n' < reports/quality/pr-gate-aggregate-results.json)"
+          export AGGREGATE_RESULTS
           uv run --frozen --no-build python -m scripts.engineering.ci pr-gate aggregate \
             --catalog configs/quality/github_required_checks.yaml \
             --decision-matrix-env DECISION_MATRIX \
