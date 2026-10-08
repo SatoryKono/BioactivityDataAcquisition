@@ -172,7 +172,7 @@ class RecordNormalizationMappingMixin:
             return record
 
         normalized = dict(record)
-        for field_name in normalized:
+        for field_name in tuple(normalized.keys()):
             rule = self._profile_rule(field_name)
             if rule is None or not _profile_rule_accepts_record_context(
                 rule.normalizer

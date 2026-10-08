@@ -38,18 +38,16 @@ def test_target_mapping_round_trip_uses_captured_lookup(monkeypatch):
         (mapping.ProteinClassTopLevelMappingEntry("enzyme", "custom-enzyme", True),),
         frozenset({"custom-ignored"}),
     )
-    payload = freeze_target_mapping(original)
-    sealed = json.loads(json.dumps(payload))
-    payload["entries"][0]["canonical_l1"] = "mutated-after-freeze"
-    restored = restore_target_mapping(sealed)
-    assert restored == original
+    monkeypatch.setattr(mapping, "_mapping_data", original)
+    payload = json.loads(json.dumps(freeze_target_mapping()))
+    monkeypatch.setattr(mapping, "_mapping_data", None)
+    restored = restore_target_mapping(payload)
+    mapping.initialize_protein_class_target_type_mapping(restored)
+    assert mapping.current_protein_class_target_type_mapping() == original
     assert (
-        mapping.normalize_protein_class_top_level("enzyme", restored).canonical_l1
+        mapping.normalize_protein_class_top_level("enzyme").canonical_l1
         == "custom-enzyme"
     )
-    monkeypatch.setattr(mapping, "_mapping_data", None)
-    with pytest.raises(RuntimeError, match="passed explicitly"):
-        mapping.normalize_protein_class_top_level("enzyme")
 
 
 @pytest.mark.parametrize(

@@ -226,15 +226,17 @@ class TestEdgeCases:
         assert '"text"' in result
         assert '"emoji"' in result
 
-    def test_non_bmp_unicode_is_a_valid_surrogate_pair_for_every_backend(self) -> None:
-        """Supplementary characters have identical valid JSON in byte profiles."""
+    def test_non_bmp_unicode_is_a_valid_surrogate_pair_for_every_backend(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Supplementary characters have identical valid JSON on both backends."""
         data = {"emoji": "👋"}
-        stdlib_result = serialize_json_canonical(
-            data, profile=json_normalization.CanonicalJsonProfile.DOMAIN_STDLIB_V1
-        )
+        monkeypatch.setattr(json_normalization, "_orjson_available", False)
+        stdlib_result = serialize_json_canonical(data)
 
         assert stdlib_result == '{"emoji":"\\ud83d\\udc4b"}'
         if json_normalization.orjson is not None:
+            monkeypatch.setattr(json_normalization, "_orjson_available", True)
             assert serialize_json_canonical(data) == stdlib_result
 
     @pytest.mark.parametrize("value", [math.nan, math.inf, -math.inf])

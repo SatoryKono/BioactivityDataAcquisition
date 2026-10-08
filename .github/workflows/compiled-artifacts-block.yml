@@ -11,6 +11,14 @@ concurrency:
 
 on:
   workflow_call:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
 
 jobs:
   no-pyc-check:

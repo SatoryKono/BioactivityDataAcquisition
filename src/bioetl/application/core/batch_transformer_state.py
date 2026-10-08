@@ -33,7 +33,6 @@ class RecordTransformOutcome:
     gold_excluded_by_contract: bool = False
     filtered_entry: FilteredQuarantineEntry | None = None
     dq_entry: DQQuarantineEntry | None = None
-    is_filtered_out: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -97,8 +96,6 @@ def accumulate_transform_outcome(
     if attempt.dq_entry is not None:
         dq_records.append(attempt.dq_entry)
         return 1, 0
-    if attempt.is_filtered_out:
-        return 0, 1
     if attempt.silver_record is not None:
         silver_records.append(attempt.silver_record)
         if attempt.gold_record is not None:

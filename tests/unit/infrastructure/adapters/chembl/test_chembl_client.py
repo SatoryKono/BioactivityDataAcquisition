@@ -297,9 +297,6 @@ async def test_chembl_chembl_client__health_check_healthy__c61c1001(
 
     status = await adapter.health_check()
     assert status == HealthStatus.HEALTHY
-    assert mock_http_client.get_once.await_args.kwargs["headers"] == {
-        "Accept": "application/json"
-    }
 
 
 @pytest.mark.asyncio
@@ -382,10 +379,7 @@ async def test_health_check_probe_timeout_returns_degraded(
 ) -> None:
     """A stuck ChEMBL status probe should fail fast as DEGRADED."""
 
-    async def _hang(
-        _url: str, *, headers: dict[str, str], request_timeout: float
-    ) -> None:
-        assert headers == {"Accept": "application/json"}
+    async def _hang(_url: str, *, request_timeout: float) -> None:
         async with asyncio.timeout(request_timeout):
             await asyncio.sleep(1)
 

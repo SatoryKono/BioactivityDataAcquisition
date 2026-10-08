@@ -1,18 +1,6 @@
-Source-only refresh (2026-10-07, P02 F1-F7): `source_tree_sha256=7e52b9a05c47ce9c79b095f9672fc1615fa4be68d70d36acb74c18012964d4c6`; `source_module_count=2552`. This current binding is derived from the canonical module inventory. It covers event/result snapshots, prepared transitions and explicit canonical byte profiles; it is not a new topology audit or a coverage measurement. The previous bindings and measurements below are historical and superseded for source freshness.
+# Сводка evidence: project-package-topology
 
-Historical source-only stamps and measurements (superseded bindings):
-
-Source-only refresh (2026-10-07, architecture ownership LOC split): source_tree_sha256 `fb60ec89b76c2879ca58d49ede04cb894ae74ecd28355d27d83c1d2bccdec68a`. File-size and complexity splits stayed inside the existing domain and application limits. Publication vocabulary wiring and repository env loading sit outside the shrink-only hotspot prefixes. Publication classification view construction lives in the existing _publication_type_classification_support module so the public logic module stays under 250 lines. The module-coverage inventory still records `source_module_count=2553`. This source binding is not a new coverage measurement or a complete topology re-audit; historical evidence below is preserved.
-
-`source_tree_sha256=fb60ec89b76c2879ca58d49ede04cb894ae74ecd28355d27d83c1d2bccdec68a`
-
-`source_module_count=2553`
-
-Source-only refresh (2026-10-07, architecture ownership): source_tree_sha256 `ab36ec7abab20cb5fd4459c44d3bf42e5179adc2d0b4c41612d8249da302c9eb`. The module-coverage inventory now records `source_module_count=2553` after the repository env reader. This source binding is not a new coverage measurement or a complete topology re-audit; historical evidence below is preserved.
-
-`source_tree_sha256=ab36ec7abab20cb5fd4459c44d3bf42e5179adc2d0b4c41612d8249da302c9eb`
-
-`source_module_count=2553`
+Source-only refresh (2026-10-06, integration with main 480a54241e04): reviewed repairs and replay mapping are bound to `source_tree_sha256=63b3eb109cc22123be824a42b6b0c1fc2c9564406c5a702d914c3d74a2f10689`. Historical measurements below are unchanged; this stamp is not new coverage evidence.
 
 Coverage refresh (2026-10-05, RF-023 after main merge): complete 17-shard measurement on `54c7c9d5b5dad9077054081484275fc93a8be83e`, source `2f462961d6e80105c964f5d536a956def9a7b4c66af316bad70abfb0f6b226a1`. 32979 PASS / 187 SKIP; line 99.70%, branch 94.34%. Canonical nonregressing adoption retains 81 visible raw module regressions as historical values. Portable evidence: `reports/quality/proof-or-stop/rf023-54c7c9d5-complete-coverage`. This local measurement does not claim full-suite acceptance or CI ADMIT.
 
@@ -28,8 +16,9 @@ Source-only refresh (2026-10-05, scoped replay mapping): source_tree_sha256 `f8b
 
 Source-only refresh (2026-10-05, direct owner imports): source_tree_sha256 `0d662d51438a2eee9bad3b02099e5a4d94c2938948ff83093ca6c968d50c55f7`. The three mapping codec imports now address their module owner directly; root-facade importers remain zero. This is a source binding update, not a new coverage measurement.
 
-# Сводка evidence: project-package-topology
+Historical source-only snapshot (2026-10-06, before merging main 480a54241e04): the hash below identifies the earlier PubChem, metadata and Polars tree. It is not the current source binding; use the first entry in this document.
 
+`source_tree_sha256=6de85b6b390eb245580e3cb6a2b85955700250ff09e9623bf83f437a024b2648`
 Source-only refresh (2026-10-05, RF-023): sealed target mapping codecs now use the existing infrastructure config loader. Runtime cross-layer group edges are 330, within the unchanged 330 budget. This source binding is not a new coverage measurement or a complete topology re-audit; historical evidence below is preserved.
 
 `source_tree_sha256=d141e4aaac41d30aa6d90f53dff69fe99d2bf280335a394b41d4ec298485dd08`

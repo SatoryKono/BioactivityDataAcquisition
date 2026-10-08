@@ -106,39 +106,6 @@ def test_saved_accounting_conflict_is_visible_without_rewriting_snapshot(tmp_pat
     assert persisted.json_path.read_bytes() == before
 
 
-def test_failing_funnel_is_visible_even_when_coarse_balance_is_only_degraded(tmp_path):
-    from bioetl.domain.run_reports.models import (
-        BalanceStatus,
-        StageFunnelRow,
-        TrackingCoverage,
-    )
-
-    original = replace(
-        report(),
-        reconciliation={"silver_vs_bronze_status": "DEGRADED", "silver_delta": 1},
-        funnel=(
-            StageFunnelRow(
-                stage_id="silver",
-                records_in=905,
-                records_out=904,
-                removals=(),
-                removed_total=0,
-                balance_status=BalanceStatus.FAILING,
-                tracking=TrackingCoverage.FULL,
-                unaccounted=1,
-            ),
-        ),
-    )
-    persisted = persist(tmp_path, original)
-    before = persisted.json_path.read_bytes()
-    result = read(tmp_path)
-    assert result["trust"][0]["accounting_integrity"] == "CONFLICT"
-    assert result["trust"][0]["trust_status"] == "ERROR"
-    assert "unaccounted=1" in result["trust"][0]["reasons_text"]
-    assert result["trust"][0]["saved_trust_status"] == "OK"
-    assert persisted.json_path.read_bytes() == before
-
-
 def persist(tmp_path, value=None, store=None):
     return write_pipeline_run_report(
         value or report(), root=tmp_path, store=store or FileRunReportStoreAdapter()

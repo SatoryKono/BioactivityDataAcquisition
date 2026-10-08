@@ -46,26 +46,12 @@ UNKNOWN. No API check is distinct from a successful remote probe.
 Table `9460` combines HTTP stage diagnostics with saved pipeline-run accounting.
 Quarantined, excluded, deduplicated, and filtered outcomes remain distinct;
 percentages require a valid stage denominator.
-An unexplained stage balance remains FAILING even when execution succeeded.
-The displayed Trust exposes this conflict without rewriting the saved verdict.
-ChEMBL synthetic protein-class root nodes are counted as Silver filtering with
-reason `FILTERED_OUT_SILVER:protein_class_id` in new reports.
 
-## Review Contract Exclusions
+## Review Data Quality
 
 Native canvas `9482` shows selected-run exclusion status and rate. Limits come
 from the pipeline configuration used at generation, not historical overrides.
 Incomplete counters are UNKNOWN. Quarantine/filter/dedup are separate outcomes.
-An OK exclusion rate does not certify stage accounting integrity.
-
-## Review FK Comparison Scope
-
-Table `9483` reads FK comparison evidence from the exact linked parent workflow.
-Explicit standalone identity is N/A; a persisted plan containing only pipeline
-steps or upstream summaries is also N/A. Missing identity, missing plans,
-expected-but-unrecorded comparisons, and unknown transform kinds remain UNKNOWN.
-Snapshot pins, limits, row scopes and results describe the FK comparison, not the
-pipeline extraction limit. Historical reports remain unchanged.
 
 <!-- BEGIN SHIPPED PANEL INVENTORY -->
 ## Current shipped panel inventory
@@ -82,6 +68,6 @@ Generated from the dashboard JSON. Earlier sections explain panel semantics; thi
 | 9480 | Review Provider Evidence | table |
 | 9481 | Review Provider Check | stat |
 | 9460 | Inspect Selected Run Stages | table |
-| 9482 | Review Contract Exclusions | canvas |
+| 9482 | Review Data Quality | canvas |
 | 9483 | Review FK Comparison Scope | table |
 <!-- END SHIPPED PANEL INVENTORY -->

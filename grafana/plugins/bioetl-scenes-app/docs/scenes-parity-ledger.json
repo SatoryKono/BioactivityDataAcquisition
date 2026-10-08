@@ -23,7 +23,7 @@
     "bioetl-control-plane-v1": "3828f74ee3d57bc136cc03c88228b39324e0fa3b4a6d76a0521c3a9ae638ce82",
     "bioetl-dq-v2": "73bbd0f3dde6d84dfbf55a4ebfc96697d2b09b45c4c62a20a8b33372f1525101",
     "bioetl-incident-v1": "b749fdbc08d7786d9429f1e59b9175ecc901ac9931091d753bce91eadfdc936d",
-    "bioetl-overview-v2": "b7d1f4bd2088e35107975fa17de71e422f1e2b3df6819364dd7baf33e0979d95",
+    "bioetl-overview-v2": "9a3cc257082fbe8d897174ba33066fe8b959c604f370ce4f2a08d34099fb0366",
     "bioetl-run-explorer-v1": "09b4c578a25c4bc4ce377b8e902047eebae46136e5cc8a97d9b81ae227c3e1ea"
   },
   "panels": [
@@ -2311,7 +2311,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-overview-v2",
       "panel_id": 9482,
-      "panel_title": "Review Contract Exclusions",
+      "panel_title": "Review Data Quality",
       "route": "dependency-health",
       "source": {
         "datasource_type": "yesoreyeram-infinity-datasource",

@@ -6,6 +6,13 @@ permissions:
 
 on:
   workflow_call:
+  push:
+    branches: [main, master, develop]
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+      - ".ai/**"
+      - "LICENSE"
 # Workflow-level token is read-only; jobs may only narrow this further.
 
 concurrency:
@@ -1141,10 +1148,10 @@ jobs:
           retention-days: 1
 
   # Coverage-bound shards on CPython 3.13 only. Not a leaf GitHub required
-  # check. Gate tests is path-scoped, so docs-only PRs do not run this job.
-  # The nightly coordinator runs the full matrix and coverage-verify once.
-  # pr-gate-complete stays the PR aggregator. Version split vs test-fast (3.12)
-  # is intentional compatibility vs coverage (#9740). Do not drop coverage-verify.
+  # check. Gate tests is always_required, so this job runs on every PR that
+  # materializes pr-gate-complete, including docs-only
+  # (05-github-policy.md). Version split vs test-fast (3.12) is intentional
+  # compatibility vs coverage (#9740). Do not drop coverage-verify.
   test-matrix:
     runs-on: ubuntu-latest
     timeout-minutes: 15

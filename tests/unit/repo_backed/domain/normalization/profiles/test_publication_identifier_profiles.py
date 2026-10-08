@@ -35,7 +35,6 @@ import pytest
 import yaml
 
 from bioetl.domain.mapping.publication_type_classification import (
-    classification_install,
     classify_publication_type,
 )
 from bioetl.domain.normalization.profiles.crossref_publication import (
@@ -128,11 +127,7 @@ def test_publication_taxonomy_fixture_cases_match_profile_rules() -> None:
 
         raw_value = raw_rule.apply(case["raw_input"])
         provider, _entity = case["profile"].split(".", maxsplit=1)
-        entry = classify_publication_type(
-            provider,
-            raw_type=raw_value,
-            data=classification_install.data,
-        )
+        entry = classify_publication_type(provider, raw_type=raw_value)
 
         if case["unified_expected"] is None:
             assert entry is None

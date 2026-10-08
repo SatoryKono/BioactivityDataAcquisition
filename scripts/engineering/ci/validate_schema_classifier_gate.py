@@ -375,14 +375,19 @@ def _source_without_artifact_issues(
     changed_sources: list[str],
     changed_artifacts: list[str],
 ) -> list[GateIssue]:
-    """Return no issue when published contract JSON did not change.
-
-    ``generate-artifacts --check`` already fails when a published file is stale.
-    A contract module edit that leaves every published artifact byte-identical
-    has no schema diff for this classifier to reject.
-    """
-    del changed_sources, changed_artifacts
-    return []
+    """Return issue when contract source changed without artifact update."""
+    if not changed_sources or changed_artifacts:
+        return []
+    return [
+        GateIssue(
+            contract_ref=None,
+            artifact_path=None,
+            message=(
+                "contract source changed but no published contract artifact changed; "
+                "cannot classify schema diff"
+            ),
+        )
+    ]
 
 
 def _classify_artifact_change(

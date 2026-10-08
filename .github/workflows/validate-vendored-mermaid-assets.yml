@@ -7,7 +7,17 @@ concurrency:
   cancel-in-progress: true
 
 on:
-    workflow_dispatch:
+    pull_request:
+      paths:
+        - 'assets/javascripts/mermaid*'
+        - 'assets/stylesheets/mermaid*'
+        - '.github/workflows/validate-vendored-mermaid-assets.yml'
+    push:
+      branches: [ main ]
+      paths:
+        - 'assets/javascripts/mermaid*'
+        - 'assets/stylesheets/mermaid*'
+        - '.github/workflows/validate-vendored-mermaid-assets.yml'
 
 jobs:
     check-mermaid:

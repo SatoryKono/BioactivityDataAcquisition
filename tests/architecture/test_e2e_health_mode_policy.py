@@ -88,7 +88,7 @@ def test_full_nightly_replay_prompt_and_live_owners_are_fail_closed() -> None:
     assert "pull_request" not in str(full["if"])
     assert "pull_request" not in str(prompt["if"])
     assert full["if"] == (
-        "github.event_name == 'workflow_call' || (github.event_name == 'workflow_dispatch')"
+        "github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch')"
     )
 
 
@@ -121,8 +121,7 @@ def test_e2e_nightly_full_replay_is_documented_as_schedule_or_dispatch() -> None
     description = lane.split("    e2e-nightly-full:", 1)[1].split("runner_backend:", 1)[
         0
     ]
-    assert "workflow_call" in description
-    assert "workflow_dispatch" in description
+    assert "schedule and workflow_dispatch" in description
     assert "skipped on" in description
     assert "pull_request" in description
     policy_text = Path("docs/00-project/governance/05-github-policy.md").read_text(
@@ -133,9 +132,9 @@ def test_e2e_nightly_full_replay_is_documented_as_schedule_or_dispatch() -> None
         "not be added to the merge wall."
     ) in policy_text
     assert (
-        "`e2e-nightly-full-replay` runs from the nightly\n"
-        "coordinator via `workflow_call` and on `workflow_dispatch`. Pull requests skip\n"
-        "it, and it is not a `pr-gate-complete` owner."
+        "`e2e-nightly-full-replay` runs only on\n"
+        "`schedule` and `workflow_dispatch`; pull requests skip it, and it is not a\n"
+        "`pr-gate-complete` owner."
     ) in policy_text
 
 

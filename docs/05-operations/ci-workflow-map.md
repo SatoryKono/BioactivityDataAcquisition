@@ -18,7 +18,7 @@ Its `deployment` block identifies CircleCI; retained `coordinator_workflow` and
 The owner cancelled deletion in #11930; its status is not_planned.
 GitHub Actions are disabled; billing restoration is out of scope.
 
-The legacy inventory below contains 54 tracked workflow files, including 13
+The legacy inventory below contains 52 tracked workflow files, including 13
 scheduled and 34 manual surfaces. These categories overlap. Retained YAML defines
 the behavior to preserve; presence in the repository does not prove a running lane.
 Optional CodeQL and inactive OpenCode stubs remain separate from required checks.
@@ -226,12 +226,12 @@ Manual successes do not establish scheduler, notification or release acceptance.
 ## Migration disposition ledger (#11930 / #11931)
 
 On 2026-10-06 the owner cancelled GitHub Actions deletion. Issue #11930 is
-closed as `not planned`; all 54 workflow definitions and composite actions are
+closed as `not planned`; all 52 workflow definitions and composite actions are
 retained. Actions remain disabled. CircleCI implementation and acceptance under
 #11931 continue independently. Retention does not establish functional parity,
 authorize public OpenSSF channel retirement, or enable legacy workflows.
 
-Current source inventory contains 54 workflows. Every row records the intended
+Current source inventory contains 52 workflows. Every row records the intended
 replacement or retained local/disabled policy; "prepared" is not external acceptance.
 No pending replacement authorizes deleting its source workflow. Scheduled entries
 are UTC cron expressions from the source definitions, not registered CircleCI triggers.
@@ -263,7 +263,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `labeler.yml` | — | Retain disabled label maintenance | Preserve #10263/#11234; taxonomy reconciliation is required before any future trusted replacement |
 | `memory-freshness.yml` | `17 5 * * 1` | CircleCI memory-freshness | Scheduled pipeline352/job6375 succeeds on main c644f2e4:all four freshness checks pass. Monday05UTC restored; required PR/main freshness checks accepted in main371. Scheduled failure issue-notification remains pending |
 | `memory-retention.yml` | `17 4 * * 1` | CircleCI memory-retention | Scheduled pipeline356/job6383 succeeds on main c644f2e4:apply=false,zero candidates/removals,no policy violation. Monday04UTC restored; no pruning |
-| `mutation-testing.yml` | `0 0 * * 0` | Actions Sunday owner; CircleCI manual ci-lane=mutation backup | Actual scheduled pipeline340 on main d9f5b026 SUCCESS, all four targets: domain6140 72.01%, control-plane6139 78.26%, workflow-runner6138 73.42%, export-manifests6141 64.22%. All eight artifacts and complete statistics independently verified. Large targets use large4CPU/8GB and four workers; small targets retain medium/one worker. Sunday00UTC restored and read back; full scope,60-minute timeout and70/60/60/60 thresholds unchanged. Keep the CircleCI Sunday schedule paused so Actions is the weekly runner. Native scheduled_pipeline triggers do not select the CircleCI mutation workflow |
+| `mutation-testing.yml` | `0 0 * * 0` | Scheduled-only mutation lane | Actual scheduled pipeline340 on main d9f5b026 SUCCESS, all four targets: domain6140 72.01%, control-plane6139 78.26%, workflow-runner6138 73.42%, export-manifests6141 64.22%. All eight artifacts and complete statistics independently verified. Large targets use large4CPU/8GB and four workers; small targets retain medium/one worker. Sunday00UTC restored and read back; full scope,60-minute timeout and70/60/60/60 thresholds unchanged |
 | `nightly-replay-parity.yml` | `30 2 * * *` | CircleCI replay-parity | Main job 3366 passes four-run checksum parity; daily 02 UTC trigger accepted by scheduled pipeline 266/job 4481 on main 303ced3 (16 tests, no skips, repeated checksum files identical) |
 | `no-partial-tree-commits.yml` | — | Full-tree guard in root governance | Integrated into root-hygiene; main jobs 3500, 3529, 3549 passed the full-tree guard alongside strict root checks |
 | `opencode-pr-review.yml` | — | Retain disabled review stub policy | Do not activate unpinned installer or write paths |
@@ -321,9 +321,6 @@ acceptance gates; workflow deletion is no longer a completion criterion.
 | `e2e-matrix-health.yml` | E2E Matrix Health | End-to-end matrix health |
 | `github-settings-quarterly-review.yml` | Quarterly GitHub Settings Review | Read-only quarterly GitHub settings review |
 | `import-linter.yml` | Lint and Architecture Gates | import-linter + layer architecture |
-| `main-integrity.yml` | Main Integrity | Post-merge smoke, root hygiene, and Docker image gate |
-| `mutation-testing.yml` | Mutation Testing | Sole Sunday mutation owner (#10263 exception); push and pull_request stay off |
-| `nightly.yml` | Nightly | Single schedule for full tests, E2E, weekly mutation, and Monday lanes |
 | `no-partial-tree-commits.yml` | No partial-tree commits | Reject incomplete Git trees (#11709) |
 | `opencode-pr-review.yml` | opencode-pr-review | Dispatch-only stub (#11012); remote OpenCode installer removed |
 | `opencode-triage.yml` | opencode-triage | Dispatch-only stub (#11012); remote OpenCode installer removed |
@@ -356,6 +353,7 @@ not operator routing targets. Reasons live in
 | `labeler.yml` | Labeler | `keep-disabled` |
 | `memory-freshness.yml` | Memory freshness | `keep-disabled` |
 | `memory-retention.yml` | Memory Retention Policy | `keep-disabled` |
+| `mutation-testing.yml` | Mutation Testing | `keep-disabled` |
 | `nightly-replay-parity.yml` | nightly-replay-parity | `keep-disabled` |
 | `performance-nightly.yml` | Performance Nightly | `keep-disabled` |
 | `port-contracts.yml` | Port Contract Tests | `keep-disabled` |
@@ -431,9 +429,8 @@ were downloaded and the JUnit independently verified. The Windows Server 2022
 job installs checksum-pinned uv
 0.11.26 and frozen Python 3.12 dependencies, runs both atomic lock stress tests,
 and rejects missing, failed or skipped JUnit cases. The nightly trigger must set
-`ci-lane=architecture-metrics` and `run-heavy=true`. A native scheduled_pipeline
-does not select the heavy or fast architecture workflows; an API trigger on main
-still can. Linux heavy acceptance remains pending.
+`ci-lane=architecture-metrics` and `run-heavy=true`. The daily 02 UTC window is
+registered; Linux heavy and scheduled execution acceptance remain pending.
 
 
 The `scorecard` lane runs the complete default OpenSSF check set on main and
