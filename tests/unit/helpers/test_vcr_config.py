@@ -7,6 +7,7 @@ import pytest
 from vcr.request import Request
 
 from tests.helpers.vcr_config import (
+    _log_sanitizer_failure_once,
     build_base_vcr_config,
     is_vcr_recording_mode,
     query_ignore_email,
@@ -323,7 +324,7 @@ def test_build_base_vcr_config_sanitizer_logs_failure_only_once(
         raise TypeError("malformed request surface")
 
     monkeypatch.setattr(vcr.filters, "replace_headers", _explode)
-    monkeypatch.setattr("tests.helpers.vcr_config._sanitizer_failure_logged", False)
+    monkeypatch.setattr("tests.helpers.vcr_config._sanitizer_failures_logged", set())
 
     with caplog.at_level(logging.WARNING, logger="tests.helpers.vcr_config"):
         for _ in range(request_count):
@@ -351,3 +352,25 @@ def test_build_base_vcr_config_sanitizer_logs_failure_only_once(
         connection.getresponse()
 
     connection.real_connection.request.assert_not_called()
+
+
+def test_sanitizer_failure_latch_keeps_distinct_failures(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Deduplicate repeats without hiding another sanitizer surface or reason."""
+    import logging
+
+    monkeypatch.setattr("tests.helpers.vcr_config._sanitizer_failures_logged", set())
+    with caplog.at_level(logging.WARNING, logger="tests.helpers.vcr_config"):
+        _log_sanitizer_failure_once("request-shape")
+        _log_sanitizer_failure_once("request-shape")
+        _log_sanitizer_failure_once(
+            "response-shape",
+            event="vcr_response_sanitizer_dropped_response",
+        )
+
+    assert [record.getMessage() for record in caplog.records] == [
+        "vcr_request_sanitizer_failed_closed",
+        "vcr_response_sanitizer_dropped_response",
+    ]

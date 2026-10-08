@@ -185,7 +185,7 @@ def _merge_canonical_filters(
     return tuple(merged.values())
 
 
-_sanitizer_failure_logged = False
+_sanitizer_failures_logged: set[tuple[str, str]] = set()
 
 
 class VCRRequestSanitizationError(RuntimeError):
@@ -195,11 +195,11 @@ class VCRRequestSanitizationError(RuntimeError):
 def _log_sanitizer_failure_once(
     reason: str, *, event: str = "vcr_request_sanitizer_failed_closed"
 ) -> None:
-    """Log the first sanitizer failure; subsequent failures stay silent."""
-    global _sanitizer_failure_logged  # intentional once-latch
-    if _sanitizer_failure_logged:
+    """Log each distinct sanitizer failure once per process."""
+    failure_key = (event, reason)
+    if failure_key in _sanitizer_failures_logged:
         return
-    _sanitizer_failure_logged = True
+    _sanitizer_failures_logged.add(failure_key)
     _LOGGER.warning(
         event,
         extra={"sanitizer_failure_reason": reason},

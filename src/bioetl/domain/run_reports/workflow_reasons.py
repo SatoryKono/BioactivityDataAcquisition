@@ -100,12 +100,20 @@ def resolve_child_workflow_binding(
     run_id = bound_identity.get("workflow_run_id")
     if not isinstance(name, str) or not isinstance(run_id, str):
         return "identity_not_recorded"
+    child_run_id = child_identity.get("run_id")
+    child_pipeline_name = child_identity.get("pipeline_name")
+    if (
+        not isinstance(step_id, str)
+        or not isinstance(child_run_id, str)
+        or not isinstance(child_pipeline_name, str)
+    ):
+        return "child_identity_not_recorded"
     return (
         name,
         run_id,
         step_id,
-        child_identity.get("run_id"),
-        child_identity.get("pipeline_name"),
+        child_run_id,
+        child_pipeline_name,
     )
 
 

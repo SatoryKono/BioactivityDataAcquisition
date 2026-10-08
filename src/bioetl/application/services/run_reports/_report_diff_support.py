@@ -112,9 +112,12 @@ def _repository_env_paths(
     root_path: Path, process: Mapping[str, object]
 ) -> tuple[Path, ...]:
     configured_env = str(process.get("BIOETL_ENV_FILE") or "").strip()
-    env_path = Path(configured_env) if configured_env else root_path / ".env"
-    if not env_path.is_absolute():
-        env_path = root_path / env_path
+    if configured_env:
+        env_path = Path(configured_env)
+        if not env_path.is_absolute():
+            env_path = root_path / env_path
+    else:
+        env_path = root_path / ".env"
     if str(process.get("BIOETL_SKIP_ENV_LOCAL") or "0").strip() == "1":
         return (env_path,)
     return env_path, root_path / ".env.local"
@@ -135,9 +138,28 @@ def _parse_repository_env_document(
 
 
 def _strip_repository_env_inline_comment(value: str) -> str:
-    """Strip a shell-style inline comment from an unquoted env value."""
+    """Strip a shell-style inline comment outside quoted env text."""
+    quote: str | None = None
+    escaped = False
     for index, character in enumerate(value):
-        if character == "#" and index > 0 and value[index - 1].isspace():
+        if escaped:
+            escaped = False
+            continue
+        if character == "\\" and quote is not None:
+            escaped = True
+            continue
+        if character in {"'", '"'}:
+            if quote is None:
+                quote = character
+            elif quote == character:
+                quote = None
+            continue
+        if (
+            character == "#"
+            and quote is None
+            and index > 0
+            and value[index - 1].isspace()
+        ):
             return value[:index].rstrip()
     return value.rstrip()
 
@@ -147,9 +169,10 @@ def _parse_repository_env_line(raw: str, allowed: set[str]) -> tuple[str, str] |
     if not stripped or stripped.startswith("#") or "=" not in raw:
         return None
     key, value = raw.split("=", 1)
-    key, value = key.strip(), value.strip()
+    key = key.strip()
+    value = _strip_repository_env_inline_comment(value.strip())
     if key not in allowed:
         return None
     if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
         return key, value[1:-1]
-    return key, _strip_repository_env_inline_comment(value)
+    return key, value

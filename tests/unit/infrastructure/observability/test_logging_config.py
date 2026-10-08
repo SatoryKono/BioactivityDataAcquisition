@@ -205,6 +205,27 @@ class TestConfigureLogging:
         assert payload["pipeline"] == "test"
         assert payload["run_id"] == "00000000-0000-0000-0000-000000000001"
 
+    def test_foreign_stdlib_extras_are_preserved_in_rendered_json(self, capsys) -> None:
+        """ProcessorFormatter must retain structured fields from LogRecord extras."""
+        from bioetl.infrastructure.observability.logging_config import configure_logging
+
+        configure_logging(json_format=True, log_level="INFO", force=True)
+        logging.getLogger("bioetl.pagination").warning(
+            "pagination_truncated",
+            extra={
+                "reason": "max_pages",
+                "page_count": 2,
+                "page_limit": 2,
+                "next_cursor": "'C'",
+            },
+        )
+
+        payload = json.loads(capsys.readouterr().out.strip())
+        assert payload["event"] == "pagination_truncated"
+        assert payload["reason"] == "max_pages"
+        assert payload["page_count"] == payload["page_limit"] == 2
+        assert payload["next_cursor"] == "'C'"
+
 
 @pytest.mark.unit
 class TestIsLoggingConfigured:
