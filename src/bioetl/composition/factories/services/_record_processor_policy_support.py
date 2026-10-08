@@ -100,15 +100,16 @@ def extract_hash_policy_by_version(
 ) -> ContentHashPolicyByVersion | None:
     """Build ordered per-version hash policies from rollout-aware contract policy."""
     contract_policy = _extract_contract_policy(pipeline)
-    active_version = _normalize_version(getattr(contract_policy, "active_version", None))
+    active_version = _normalize_version(
+        getattr(contract_policy, "active_version", None)
+    )
 
     if not active_version:
         return None
 
     rollout = getattr(contract_policy, "rollout", None)
     versions = _resolve_write_versions(
-        active_version,
-        getattr(rollout, "write_versions", None)
+        active_version, getattr(rollout, "write_versions", None)
     )
 
     affects_hash = bool(getattr(rollout, "affects_hash", False))
@@ -141,15 +142,16 @@ def extract_gold_schema_policy_by_version(
 ) -> GoldSchemaPolicyByVersion | None:
     """Build ordered per-version Gold schema routing from rollout-aware policy."""
     contract_policy = _extract_contract_policy(pipeline)
-    active_version = _normalize_version(getattr(contract_policy, "active_version", None))
+    active_version = _normalize_version(
+        getattr(contract_policy, "active_version", None)
+    )
 
     if not active_version:
         return None
 
     rollout = getattr(contract_policy, "rollout", None)
     versions = _resolve_write_versions(
-        active_version,
-        getattr(rollout, "write_versions", None)
+        active_version, getattr(rollout, "write_versions", None)
     )
 
     configured_mapping = getattr(pipeline, "gold_schema_by_version", None)
