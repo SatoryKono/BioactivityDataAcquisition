@@ -3,8 +3,8 @@
   "issue": "#5272",
   "parent_epic": "#5244",
   "title": "Burn down application_core coverage and zero-uncovered module debt",
-  "status": "regressed_after_measured_revalidation",
-  "debt_outcome": "current_inventory_regressed",
+  "status": "validated_local_closeable",
+  "debt_outcome": "improved",
   "baseline_metrics": {
     "repo_uncovered_module_count": 68,
     "application_core_covered_line_percent": 49.09
@@ -19,7 +19,7 @@
   "parent_epic_status": {
     "status": "not_closeable_under_current_definition_of_done",
     "remaining_below_85_module_count": 3,
-    "reason": "Issue #5244 requires zero below-tier production modules; the exact-source 17-shard capture now reports 3 measured modules below the default floor. Keep the parent epic open until their coverage is raised without changing the floor."
+    "reason": "Issue #5244 requires zero below-tier production modules; the exact-source capture reports 3 measured modules below the default floor. Keep the parent epic open until they are covered without changing the floor."
   },
   "evidence": [
     "reports/quality/module-coverage-inventory.json",
@@ -34,7 +34,7 @@
     "application_core_uncovered_module_count": "zero",
     "application_core_unmeasured_module_count": "zero"
   },
-  "notes": "Current metrics are rebound to the complete 17-shard capture at aff1f4955c7cb5cc3a9a972ab300b9c4bffcae44 (source_tree_sha256=20ff5954914c50c111d533b89d4a719dbc9c973c51b486d17385fe1dc6e05f26); line=99.68%, branch=94.28%. The measured inventory reports 3 modules below 85%, so #5272/#5244 remain non-closeable under the current definition of done. Earlier current bindings and baselines are preserved.",
+  "notes": "The #5272 application-core closeout is rebound to the complete 17-shard local capture at aff1f4955c7cb5cc3a9a972ab300b9c4bffcae44 (source_tree_sha256=20ff5954914c50c111d533b89d4a719dbc9c973c51b486d17385fe1dc6e05f26); application-core coverage is 99.41%, with no uncovered or unmeasured application-core modules. The separate parent epic #5244 remains open because 3 repository modules are below 85%. Earlier bindings and baselines remain in previous_current_bindings.",
   "previous_current_bindings": [
     {
       "snapshot_date": "2026-08-17",
@@ -182,9 +182,9 @@
     }
   ],
   "current_binding_refresh": {
-    "measured_head": "c4071c0eeecd6b06f18bc781a0435ee128e0e994",
-    "source_tree_sha256": "78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db",
-    "evidence": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-42/manifest.json",
-    "semantics": "Current accepted inventory may retain historical nonregressing rows; raw measured candidate remains separate."
+    "measured_head": "aff1f4955c7cb5cc3a9a972ab300b9c4bffcae44",
+    "source_tree_sha256": "20ff5954914c50c111d533b89d4a719dbc9c973c51b486d17385fe1dc6e05f26",
+    "evidence": "docs/reports/evidence/project-test-health/p02-r6-coverage-manifest.json",
+    "semantics": "Complete exact-source 17-shard measurement; application-core closeout and parent low-coverage floor are tracked separately."
   }
 }
