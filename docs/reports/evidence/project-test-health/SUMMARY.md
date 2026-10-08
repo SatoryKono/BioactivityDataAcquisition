@@ -22,17 +22,24 @@ coverage and 94.28% branch coverage, above both configured 85% gates. The
 capture used one local worker and is local evidence; it does not establish a
 hosted CI PASS, release acceptance, or lifecycle ADMIT.
 
-The captured source and test tree fingerprints are
+The capture source and test tree fingerprints are
 `5d4678d00768d8402c82f230238e3d988c2595731322e4c472f0f716ba5a1bb2` and
 `0800468b7a5f706cecd3fd8dbfbe88cfa2d85ca56d6b51d537e39f98bd2c6c07`.
-Generated module inventory now includes the measured source modules. Three
-retained modules are below the default 85% per-module floor; this residual is
-reported in `reports/quality/issue-5376-coverage-tail-closeout.json`. There are
-no uncovered or unmeasured modules in the refreshed inventory. Existing
-historical module floors were preserved; no technical-debt budget was raised.
+After that capture, a one-file type-annotation repair in
+`selected_run_status.py` changed the source-tree fingerprint to
+`20ff5954914c50c111d533b89d4a719dbc9c973c51b486d17385fe1dc6e05f26` while
+leaving the test tree unchanged. The module inventory was rebound to the new
+source fingerprint with its canonical missing-coverage workflow; its existing
+measured rows and historical floors were retained. The follow-up change passed
+the focused run-status tests and strict full mypy locally. The earlier 17-shard
+capture is therefore evidence for its recorded source fingerprint, not a new
+full-suite capture of the type-only follow-up.
 
-Focused F1–F7 regressions and the selected architecture quality checks passed
-locally. Hosted exact-SHA checks for follow-up PR #12131 remain the acceptance
+Three retained modules are below the default 85% per-module floor; this
+residual is reported in
+`reports/quality/issue-5376-coverage-tail-closeout.json`. There are no uncovered
+or unmeasured modules in the refreshed inventory. No technical-debt budget was
+raised. Hosted exact-SHA checks for follow-up PR #12131 remain the acceptance
 source for the PR and tracker closeout.
 
 ## Required follow-up
@@ -46,13 +53,14 @@ source for the PR and tracker closeout.
 
 ## Freshness note
 
-Re-verified on 2026-10-08 against the P02 R6 source tree captured at
-`846fd4a709a3263de820fd2f3787cf75fabaaf7b`; the final follow-up changes affect
-quality evidence and documentation, not the captured `src/bioetl/**/*.py` or
-`tests/**/*.py` trees. The manifest records all 17 shard exit codes, JUnit and
-coverage digests, and both threshold results. The tracked `tests/**/test_*.py`
-inventory and canonical source files were checked on this revision. This is a
-local backlog signal, not proof of hosted CI or complete repository lifecycle
+Re-verified on 2026-10-08 against the P02 R6 capture at
+`846fd4a709a3263de820fd2f3787cf75fabaaf7b` and its exact recorded source/test
+fingerprints. The manifest records all 17 shard exit codes, JUnit and coverage
+digests, and both threshold results. The later type-only source edit is tracked
+separately above and was checked with focused tests plus full mypy; hosted
+exact-SHA CI remains in progress. The tracked `tests/**/test_*.py` inventory
+and canonical source files were checked on this revision. This is a local
+backlog signal, not proof of hosted CI or complete repository lifecycle
 acceptance.
 
 This summary is a non-canonical repo-only evidence layer. The canonical sources
