@@ -1,4 +1,4 @@
-Source-only refresh (2026-10-07, P02 F1-F7): `source_tree_sha256=7e52b9a05c47ce9c79b095f9672fc1615fa4be68d70d36acb74c18012964d4c6`; `source_module_count=2552`. This current binding is derived from the canonical module inventory. It covers event/result snapshots, prepared transitions and explicit canonical byte profiles; it is not a new topology audit or a coverage measurement. The previous bindings and measurements below are historical and superseded for source freshness.
+Source-only refresh (2026-10-08, P02 R6 exact-source coverage): `source_tree_sha256=20ff5954914c50c111d533b89d4a719dbc9c973c51b486d17385fe1dc6e05f26`; `source_module_count=2557`. The canonical module inventory was regenerated from the complete 17-shard capture on `aff1f4955c7cb5cc3a9a972ab300b9c4bffcae44`. This binding does not constitute a new topology audit. Earlier source bindings and measurements below are historical.
 
 Historical source-only stamps and measurements (superseded bindings):
 
