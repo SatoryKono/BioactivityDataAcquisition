@@ -81,6 +81,15 @@ budget_ratchet:
   expected_direction: downward
   refreshed_on: "2026-07-01"
   stream_g_owner_notes:
+    - issue: "#12119"
+      owner: test-governance
+      status: compatibility_inventory_reclassified_quarantine_partition_layouts_0
+      note:
+        Renamed the unified quarantine partition-layout integration guard out of a compatibility-style
+        filename because it validates active partition-pushdown behavior on both partitioned and legacy
+        non-partitioned Delta tables rather than preserving a deprecated import or compatibility path. The
+        live compatibility filename inventory returned to zero; compatibility_test_file_max stays
+        ratcheted at 0. No technical-debt budget was increased.
     - issue: "#5763"
       owner: test-governance
       status: telemetry_governance_baseline_refresh_then_duplicate_names_zeroed

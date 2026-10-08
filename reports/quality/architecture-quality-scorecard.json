@@ -25,7 +25,7 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2552,
+        "source_module_count": 2558,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
@@ -76,7 +76,7 @@
     },
     {
       "evidence_metrics": {
-        "compatibility_test_file_count": 1,
+        "compatibility_test_file_count": 0,
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -189,7 +189,7 @@
     "accepted_adr_count": 60,
     "adr_enforcement_blocking_gap_count": 0,
     "adr_enforcement_manual_exception_count": 0,
-    "compatibility_test_file_count": 1,
+    "compatibility_test_file_count": 0,
     "composition_module_cap": 295,
     "composition_module_count": 278,
     "composition_util": 0.9424,
@@ -214,7 +214,7 @@
     "retained_public_export_facade_count": 3,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2552,
+    "source_module_count": 2558,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
@@ -277,7 +277,7 @@
       "path": "reports/observability/runtime_cardinality_inventory.json"
     },
     "test_governance_report": {
-      "compatibility_test_files": 1,
+      "compatibility_test_files": 0,
       "path": "reports/quality/test-governance-current.json"
     }
   },
