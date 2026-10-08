@@ -3,13 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
+from bioetl.application.core._batch_write_support import LayerWriteOutcome
 from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
-
-if TYPE_CHECKING:
-    from bioetl.application.core._batch_write_support import LayerWriteOutcome
 
 
 @dataclass(frozen=True, slots=True)
