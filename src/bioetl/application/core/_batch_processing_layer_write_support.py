@@ -151,7 +151,7 @@ async def write_silver_then_gold(
             ingestion_ts=ingestion_ts,
             bronze_refs=None,
             silver_refs=[silver_result] if silver_result is not None else None,
-            )
+        )
     else:
         record_run_observation(
             "Data Validation",
