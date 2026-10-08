@@ -379,13 +379,13 @@
       "status": "pass"
     },
     {
-      "current": 21,
+      "current": 22,
       "limit": 21,
       "metric": "generated_at_age_days",
       "name": "observability_release_review_freshness",
       "remediation": "Regenerate live runtime cardinality review evidence.",
       "source_artifact": "reports/observability/runtime_cardinality_review.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": 0,
@@ -467,19 +467,20 @@
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 1,
-    "pass": 45,
+    "fail": 2,
+    "pass": 44,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 10.0,
     "architecture_quality_scorecard_interpretation": "excellent",
-    "fail_count": 1,
+    "fail_count": 2,
     "failing_gates": [
-      "test_governance_budget_violations"
+      "test_governance_budget_violations",
+      "observability_release_review_freshness"
     ],
     "gate_count": 46,
-    "pass_count": 45,
+    "pass_count": 44,
     "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
