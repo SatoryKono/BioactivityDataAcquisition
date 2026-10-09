@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-09T08:50:17.905263+00:00",
+  "generated_at": "2026-10-09T10:34:17.497922+00:00",
   "summary": {
     "total_scripts": 649,
     "status_counts": {
@@ -22071,7 +22071,7 @@
         },
         {
           "path": "tests/architecture/test_proof_closeout_workflow_contract.py",
-          "line": 224,
+          "line": 225,
           "source_group": "tests",
           "text": "if \"setup_grafana_screenshot_runtime.sh\" in command"
         }

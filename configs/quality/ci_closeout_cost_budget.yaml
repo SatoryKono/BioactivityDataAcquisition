@@ -5,15 +5,15 @@ budget_policy: shrink_only
 telemetry_source: configs/quality/test_telemetry_baseline.yaml
 catalog_source: configs/quality/proof_closeout_checks.yaml
 baseline:
-  source_commit: f48c8d8de81d26b7b4b42a2715ea9f88ad2ee965
-  test_tree_sha256: 7712235905b17fdf34deda8d91a546895d99a2fa3ef27127c409762438b28546
-  total_lane_seconds: 1539.90
-  critical_path_seconds: 484.27
+  source_commit: c99671b01e5d5649c0dff8e3fca8dd0a8b24c17d
+  test_tree_sha256: 6ff16b39fba00c1c668b192f928835257cfa9fc8a66b3e20ac5ece931ef545a3
+  total_lane_seconds: 1595.77
+  critical_path_seconds: 488.30
 limits:
   coverage_job_count: 4
   coverage_resource_class: medium
-  total_lane_seconds: 1539.90
-  critical_path_seconds: 386.99
+  total_lane_seconds: 1595.77
+  critical_path_seconds: 400.55
   additional_coverage_jobs: 0
   resource_class_increase_allowed: false
 runtime_measurement:
