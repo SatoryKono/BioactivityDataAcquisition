@@ -29,8 +29,6 @@ class _DerivedAssayDataSourceBase(
     _WrappedDataSourceDelegationMixin,
     _SourceMetadataDelegationMixin,
 ):
-    """Provide one scan-budget and delegation contract for assay-derived rows."""
-
     SOURCE_ENTITY_TYPE = "assay"
     TARGET_ENTITY_TYPE: str
     ASSAY_LIMIT_MULTIPLIER: ClassVar[int]
@@ -112,7 +110,6 @@ class _DerivedAssayDataSourceBase(
         *,
         limit: int | None,
     ) -> AsyncIterator[JsonDict]:
-        """Return entity-specific records derived from an assay stream."""
         raise NotImplementedError
 
     async def _fetch_target_filtered_records(
@@ -155,7 +152,6 @@ class _DerivedAssayDataSourceBase(
         self,
         assays: AsyncIterator[object],
     ) -> AsyncIterator[JsonDict]:
-        """Yield only mapping-shaped assay records expected by derived sources."""
         async for assay in assays:
             if isinstance(assay, dict):
                 yield cast("JsonDict", assay)
