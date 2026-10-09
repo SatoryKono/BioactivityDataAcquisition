@@ -1,24 +1,24 @@
 {
   "summary": {
-    "scanned_modules": 2559,
-    "total_internal_imports": 8207,
+    "scanned_modules": 2563,
+    "total_internal_imports": 8217,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "0e2e2cfec3aa3db210c06e072f310d1217de58f640752c7bba2ba5d0bfd88d47"
+    "source_fingerprint": "4d08a00f39335caac45dba8606d4c29ea152fe1a623e8e239c0cd241dd4d22fd"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1625,
+      "imports": 1626,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1083,
+      "imports": 1092,
       "allowed": true
     },
     {
@@ -92,7 +92,7 @@
     {
       "source": "application.services",
       "target": "domain.control_plane",
-      "imports": 142
+      "imports": 151
     },
     {
       "source": "infrastructure.adapters",
@@ -107,12 +107,12 @@
     {
       "source": "application.core",
       "target": "domain.types",
-      "imports": 93
+      "imports": 94
     },
     {
       "source": "application.services",
       "target": "domain.types",
-      "imports": 85
+      "imports": 84
     },
     {
       "source": "infrastructure.storage",
