@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import copy
+import json
 import subprocess
 from pathlib import Path
 
 import pytest
 
 from scripts.engineering.ci.test_telemetry_provenance import validate_squash_bridge
+from scripts.engineering.ci import test_telemetry_provenance as provenance
 
 pytestmark = pytest.mark.unit
 
@@ -116,3 +118,105 @@ def test_rejects_wrong_repository(bridge) -> None:
 def test_rejects_merge_not_reachable_from_current_branch(bridge) -> None:
     root, _, payload, receipt, _ = bridge
     assert not validate_squash_bridge(payload, receipt, root, payload["source_commit"])
+
+
+def _pending_live_receipt(root, payload, receipt) -> None:
+    pending = copy.deepcopy(receipt)
+    pending["verification_mode"] = "live_github"
+    pending["github_pull_request"]["merged"] = False
+    pending["github_pull_request"]["merge_commit_sha"] = None
+    path = root / provenance.RECEIPT
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(pending), encoding="utf-8")
+
+
+def test_new_capture_survives_future_squash_without_restamping_source(
+    bridge, monkeypatch
+) -> None:
+    root, head, payload, receipt, _ = bridge
+    payload["source_run_id"] = "local-new-canonical-capture"
+    receipt["source_run_id"] = payload["source_run_id"]
+    _pending_live_receipt(root, payload, receipt)
+    seen = []
+
+    def read(path):
+        seen.append(path)
+        return copy.deepcopy(receipt["github_pull_request"])
+
+    monkeypatch.setattr(provenance, "_read_github_json", read)
+    original = copy.deepcopy(payload)
+    assert provenance.source_commit_is_reachable(payload, root, head)
+    assert payload == original
+    assert seen == ["pulls/42"]
+
+
+@pytest.mark.parametrize("state", ["unmerged", "wrong-pr", "unavailable"])
+def test_live_capture_fails_closed_without_confirmed_github_merge(
+    bridge, monkeypatch, state
+) -> None:
+    root, head, payload, receipt, _ = bridge
+    _pending_live_receipt(root, payload, receipt)
+
+    def read(_path):
+        if state == "unavailable":
+            raise OSError("GitHub access unavailable")
+        pr = copy.deepcopy(receipt["github_pull_request"])
+        if state == "unmerged":
+            pr["merged"] = False
+        else:
+            pr["number"] = 99
+        return pr
+
+    monkeypatch.setattr(provenance, "_read_github_json", read)
+    assert not provenance.source_commit_is_reachable(payload, root, head)
+
+
+def test_live_capture_rejects_a_different_run_before_api_read(
+    bridge, monkeypatch
+) -> None:
+    root, head, payload, receipt, _ = bridge
+    _pending_live_receipt(root, payload, receipt)
+    payload["source_run_id"] = "unrelated-run"
+    monkeypatch.setattr(
+        provenance, "_read_github_json", lambda _path: pytest.fail("must not read API")
+    )
+    assert not provenance.source_commit_is_reachable(payload, root, head)
+
+
+@pytest.mark.parametrize(
+    "file",
+    [
+        {"filename": "reports/coverage-summary.json"},
+        {"filename": "tests/changed.py"},
+        {"filename": "docs/moved.txt", "previous_filename": "src/bioetl/moved.py"},
+    ],
+)
+def test_shallow_clone_checks_remote_ancestry_tree_and_changed_inputs(
+    bridge, monkeypatch, file
+) -> None:
+    root, head, payload, receipt, _ = bridge
+    _pending_live_receipt(root, payload, receipt)
+    pr_head = receipt["github_pull_request"]["head"]["sha"]
+    real_tree = provenance._tree
+    monkeypatch.setattr(
+        provenance,
+        "_tree",
+        lambda root, commit: "" if commit == pr_head else real_tree(root, commit),
+    )
+
+    def read(path):
+        if path == "pulls/42":
+            return copy.deepcopy(receipt["github_pull_request"])
+        if path.startswith("compare/"):
+            return {
+                "status": "ahead",
+                "merge_base_commit": {"sha": payload["source_commit"]},
+                "files": [file],
+            }
+        if path.startswith("git/commits/"):
+            return {"tree": {"sha": receipt["merged_tree"]}}
+        pytest.fail(f"unexpected API path {path}")
+
+    monkeypatch.setattr(provenance, "_read_github_json", read)
+    expected = file["filename"].startswith("reports/")
+    assert provenance.source_commit_is_reachable(payload, root, head) is expected

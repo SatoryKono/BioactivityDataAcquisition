@@ -55,6 +55,13 @@ trend evidence only.
   read-only GitHub GET and verify it independently before accepting the change.
   Missing, unrelated, or mismatched bridges fail closed; they do not refresh
   coverage evidence or claim that newly added tests ran in the captured run.
+- New captures use `verification_mode: live_github`: freeze the real capture
+  identity and its PR number, then resolve that PR's actual merge with a
+  read-only GitHub GET when ancestry is lost after squash. Do not stamp a future
+  merge SHA into the capture. The verifier checks the current PR/merge trees,
+  source ancestry and unchanged runtime/test inputs; shallow clones use bounded
+  GitHub compare/tree reads. API failure, unmerged PRs, changed inputs and
+  incomplete compare responses fail closed. No run/commit/hash is rewritten.
 - GitHub evidence from a non-main branch requires `pull_request`;
   its run URL and id remain independently auditable.
 - `--local-manifest <path>` accepts only a complete canonical 17-shard run

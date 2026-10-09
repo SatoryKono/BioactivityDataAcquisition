@@ -7,18 +7,56 @@ CI execution receipt. Git objects independently bind its commit/tree claims.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
+import urllib.request
 from pathlib import Path
 from typing import Any
 
 REPOSITORY = "SatoryKono/BioactivityDataAcquisition"
 RECEIPT = Path("reports/test-telemetry/squash-provenance.json")
 TEST_INPUTS = (
+    "src/bioetl",
+    "scripts/engineering/ci",
+    "scripts/engineering/qa",
     "tests",
     "pyproject.toml",
     "configs/quality/test_matrix.yaml",
     ".github/workflows/tests.yml",
 )
+
+
+def _read_github_json(path: str) -> dict[str, Any]:
+    """Read the fixed repository API once; access/network failures fail closed."""
+    url = f"https://api.github.com/repos/{REPOSITORY}/{path}"
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "BioETL-telemetry",
+    }
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    request = urllib.request.Request(url, headers=headers)
+    with urllib.request.urlopen(request, timeout=15) as response:
+        payload = json.load(response)
+    if not isinstance(payload, dict):
+        raise ValueError("GitHub response must be an object")
+    return payload
+
+
+def _refresh_live_mapping(receipt: dict[str, Any]) -> dict[str, Any]:
+    """Resolve the merge only when it exists, avoiding a future-SHA stamp."""
+    number = receipt.get("github_pull_request", {}).get("number")
+    if not isinstance(number, int) or isinstance(number, bool) or number <= 0:
+        raise ValueError("Invalid pull request number")
+    url = f"https://api.github.com/repos/{REPOSITORY}/pulls/{number}"
+    if receipt.get("retrieved_from") != url:
+        raise ValueError("Unapproved receipt URL")
+    refreshed = dict(receipt)
+    refreshed["github_pull_request"] = _read_github_json(f"pulls/{number}")
+    # The prior snapshot can predate the final evidence-only commit and squash.
+    refreshed.pop("merged_tree", None)
+    return refreshed
 
 
 def _git(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
@@ -56,11 +94,51 @@ def _github_mapping(receipt: dict[str, Any]) -> tuple[str, str] | None:
     head = pr.get("head", {}).get("sha", "")
     merge = pr.get("merge_commit_sha", "")
     if not all(
-        len(value) == 40 and all(c in "0123456789abcdef" for c in value)
+        isinstance(value, str)
+        and len(value) == 40
+        and all(c in "0123456789abcdef" for c in value)
         for value in (head, merge)
     ):
         return None
     return head, merge
+
+
+def _source_relation(
+    root: Path, source: str, pr_head: str, *, live: bool
+) -> tuple[bool, dict[str, Any] | None]:
+    """Use local objects, or an authoritative bounded compare for a shallow clone."""
+    objects = all(_tree(root, commit) for commit in (source, pr_head))
+    if objects:
+        unchanged = _git(root, "diff", "--quiet", source, pr_head, "--", *TEST_INPUTS)
+        return _ancestor(root, source, pr_head) and unchanged.returncode == 0, None
+    if not live:
+        return False, None
+    comparison = _read_github_json(f"compare/{source}...{pr_head}")
+    files = comparison.get("files")
+    if not isinstance(files, list) or len(files) >= 300:
+        return False, comparison
+    ancestor = comparison.get("merge_base_commit", {}).get("sha") == source
+    ahead = comparison.get("status") in {"ahead", "identical"}
+    paths = [
+        str(item.get(key, ""))
+        for item in files
+        for key in ("filename", "previous_filename")
+    ]
+    changed = any(
+        path == owner or path.startswith(owner + "/")
+        for path in paths
+        for owner in TEST_INPUTS
+    )
+    return ancestor and ahead and not changed, comparison
+
+
+def _pr_tree(root: Path, pr_head: str, *, live: bool) -> str:
+    tree = _tree(root, pr_head)
+    if not tree and live:
+        tree = str(
+            _read_github_json(f"git/commits/{pr_head}").get("tree", {}).get("sha", "")
+        )
+    return tree
 
 
 def validate_squash_bridge(
@@ -74,20 +152,20 @@ def validate_squash_bridge(
         return False
     pr_head, merge = mapping
     source = str(payload["source_commit"])
-    if not _ancestor(root, source, pr_head) or not _ancestor(root, merge, head):
+    live = receipt.get("verification_mode") == "live_github"
+    related, _ = _source_relation(root, source, pr_head, live=live)
+    if not related or not _ancestor(root, merge, head):
         return False
-    tree = _tree(root, pr_head)
-    if not tree or tree != _tree(root, merge) or tree != receipt.get("merged_tree"):
+    tree = _pr_tree(root, pr_head, live=live)
+    if not tree or tree != _tree(root, merge):
+        return False
+    if not live and tree != receipt.get("merged_tree"):
         return False
     number = receipt["github_pull_request"]["number"]
     subject = _git(root, "show", "-s", "--format=%s", merge)
     if subject.returncode or f"(#{number})" not in subject.stdout:
         return False
-    # Generated evidence can differ; maintained test inputs cannot.
-    return (
-        _git(root, "diff", "--quiet", source, pr_head, "--", *TEST_INPUTS).returncode
-        == 0
-    )
+    return True
 
 
 def source_commit_is_reachable(payload: dict[str, Any], root: Path, head: str) -> bool:
@@ -96,6 +174,10 @@ def source_commit_is_reachable(payload: dict[str, Any], root: Path, head: str) -
         return True
     try:
         receipt = json.loads((root / RECEIPT).read_text(encoding="utf-8"))
+        if not _receipt_matches_capture(receipt, payload):
+            return False
+        if receipt.get("verification_mode") == "live_github":
+            receipt = _refresh_live_mapping(receipt)
         return validate_squash_bridge(payload, receipt, root, head)
-    except (OSError, ValueError, KeyError, TypeError):
+    except (OSError, ValueError, KeyError, TypeError, AttributeError):
         return False
