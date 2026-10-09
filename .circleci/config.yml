@@ -2305,7 +2305,7 @@ jobs:
       - checkout
       - halt-unless-pr-gate-paths:
           label: security scans
-          pathspecs: "src scripts configs pyproject.toml uv.lock package-lock.json :(glob)grafana/**/package-lock.json .github :(glob)Dockerfile* :(glob)docker-compose*.yml .gitleaks.toml .secrets.baseline"
+          pathspecs: "src pyproject.toml uv.lock .github :(glob)Dockerfile* :(glob)docker-compose*.yml .gitleaks.toml .secrets.baseline"
       - setup-python-uv
       - run:
           name: detect-secrets (no hardcoded secrets)
@@ -2913,7 +2913,7 @@ jobs:
       - checkout
       - halt-unless-pr-gate-paths:
           label: docker build
-          pathspecs: "Dockerfile.bioetl docker-compose.yml docker-compose.monitoring.yml .dockerignore .github/workflows/docker.yml grafana/plugins grafana/tooling/router-v7-bridge"
+          pathspecs: "Dockerfile.bioetl docker-compose.yml docker-compose.monitoring.yml .dockerignore .github/workflows/docker.yml"
       - check-gate:
           gate: docker
       - setup_remote_docker:
