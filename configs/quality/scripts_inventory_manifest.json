@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-09T13:54:36.281892+00:00",
+  "generated_at": "2026-10-09T14:11:43.199274+00:00",
   "summary": {
     "total_scripts": 649,
     "status_counts": {
@@ -17240,7 +17240,7 @@
         },
         {
           "path": "scripts/engineering/ci/closeout_cost_budget.py",
-          "line": 12,
+          "line": 13,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.run_local_coverage_verify import SHARDS"
         },
