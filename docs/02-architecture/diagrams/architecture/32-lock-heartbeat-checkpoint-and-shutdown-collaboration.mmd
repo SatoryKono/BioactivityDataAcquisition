@@ -1,7 +1,8 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: Lock Heartbeat Checkpoint And Shutdown Collaboration
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.1.0
+%% @date    2026-10-09
+%% Reviewed against main 9a7339dc: core/lifecycle/heartbeat.py, lock_runtime_service.py, lock_lifecycle.py
 %% @type    sequenceDiagram
 %% @level   System / Interaction
 %% @nodes   6
@@ -9,22 +10,28 @@
 sequenceDiagram
     autonumber
     participant Runner as PipelineRunner
-    participant Lock as MemoryLock
-    participant Heartbeat as heartbeat service
-    participant Checkpoint as LocalCheckpointPort
-    participant Shutdown as ShutdownPort
+    participant Lock as LockPort via LockRuntimeService
+    participant Heartbeat as HeartbeatTask
+    participant Checkpoint as CheckpointPort via CheckpointRuntimeService
+    participant Shutdown as ShutdownSignal
     participant Ledger as attached run ledger service
 
     Runner->>Lock: acquire lock:chembl_activity
     Lock-->>Runner: fencing sequence
-    Runner->>Heartbeat: start periodic heartbeat
+    Runner->>Heartbeat: start()
+    Heartbeat->>Lock: initial heartbeat(key, owner_id, exclusive)
+    Note over Heartbeat,Shutdown: Initial lock loss requests shutdown and raises PipelineShutdownError
     Runner->>Checkpoint: load checkpoint state
     Checkpoint-->>Runner: resume marker or empty state
     opt ledger attached
         Runner->>Ledger: attach_run_ledger_service(service)
     end
     loop every heartbeat interval
-        Heartbeat-->>Runner: alive signal
+        Heartbeat->>Lock: heartbeat(key, owner_id, exclusive)
+        opt lock lost or heartbeat raises allowed error
+            Heartbeat->>Shutdown: request()
+            Note over Heartbeat,Shutdown: Background loop returns after requesting shutdown
+        end
         Runner->>Shutdown: check shutdown requested
     end
     alt graceful stop

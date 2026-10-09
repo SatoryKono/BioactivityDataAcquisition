@@ -1,7 +1,8 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: CrossRef Publication Search Fallback And Batch DOI Fetch
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.1.0
+%% @date    2026-10-09
+%% Reviewed against main 9a7339dc: adapters/crossref/fetch_flow.py, batch.py and response_mapper.py
 %% @type    sequenceDiagram
 %% @level   Provider / Interaction
 %% @nodes   7
@@ -16,20 +17,23 @@ sequenceDiagram
     participant Batch as batch.py
     participant Map as response_mapper.py
 
-    Runner->>Adapter: fetch_multi_filtered(...)
-    Adapter->>Query: build search params
-    Query-->>Adapter: request params
-    Adapter->>Fetch: execute request
-    alt direct fetch succeeds
-        Fetch-->>Adapter: response payload
-    else transient or empty path
-        Adapter->>Fallback: resolve fallback strategy
-        Fallback-->>Adapter: alternate search path
-        Adapter->>Batch: issue DOI batch fetch
-        Batch-->>Adapter: batch response payload
+    Runner->>Adapter: fetch / fetch_filtered / fetch_filtered_with_fallback
+    Adapter->>Fetch: delegate selected fetch contract
+    alt DOI filter IDs
+        Fetch->>Batch: fetch_batch(DOIs) in bounded chunks
+        Batch-->>Fetch: BronzeRecord stream
+        Fetch->>Map: with_lookup_method(record, doi)
+    else free-text query without filter IDs
+        Fetch->>Query: search paginator builds query params
+        Query-->>Fetch: search BronzeRecord stream
     end
-    Adapter->>Map: normalize publication records
-    Map-->>Runner: mapped publication entities
+    opt explicit fallback mapping supplied
+        Fetch->>Fallback: execute primary DOI fetch and title fallback for misses
+        Fallback-->>Fetch: BronzeRecord stream with lookup metadata
+    end
+    Fetch-->>Adapter: raw provider publication dictionaries
+    Adapter-->>Runner: BronzeRecord stream
+    Note over Adapter,Map: Silver domain normalization happens downstream, outside this adapter slice.
 %% padding line for readability and stable render budget
 %% padding line for readability and stable render budget
 %% padding line for readability and stable render budget

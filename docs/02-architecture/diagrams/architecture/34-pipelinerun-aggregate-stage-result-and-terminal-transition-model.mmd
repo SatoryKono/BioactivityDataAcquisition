@@ -1,33 +1,28 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: PipelineRun Aggregate Stage Result And Terminal Transition Model
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.1.0
+%% @date    2026-10-09
 %% @type    stateDiagram
 %% @level   Domain / Aggregate
-%% @nodes   6
+%% @nodes   5
+%% Reviewed against main 9a7339dc: domain/aggregates/pipeline_run.py and pipeline_run_stage_result.py
 %% RULES: RULES.md §2.3, ADR-021
 stateDiagram-v2
     [*] --> PENDING
-    PENDING --> RUNNING: start()
-    RUNNING --> STAGE_RECORDED: complete_stage(...)
-    STAGE_RECORDED --> RUNNING: next stage
-    RUNNING --> COMPLETED: complete()
-    RUNNING --> FAILED: fail(...)
-    RUNNING --> CANCELLED: cancel(...)
-    STAGE_RECORDED --> FAILED: fail(...)
-    STAGE_RECORDED --> CANCELLED: cancel(...)
+    PENDING --> RUNNING: start(started_at)
+    RUNNING --> RUNNING: record_stage_start / record_stage_success
+    RUNNING --> COMPLETED: complete(completed_at)
+    RUNNING --> FAILED: fail / record_stage_failure
+    RUNNING --> SHUTDOWN: shutdown(shutdown_at)
     COMPLETED --> [*]
     FAILED --> [*]
-    CANCELLED --> [*]
+    SHUTDOWN --> [*]
 
     note right of RUNNING
-      PipelineRun mixes lifecycle behavior with
-      read-model projection support and stage result tracking.
-    end note
-
-    note right of STAGE_RECORDED
-      Stage results live in pipeline_run_stage_result.py
-      and feed diagnostics / replay surfaces.
+      Stage results do not introduce another run state.
+      Completion requires at least one recorded stage,
+      with every stage SUCCESS and valid explicit timestamps.
+      Terminal states reject further stage mutation.
     end note
 %% padding line for readability and stable render budget
 %% padding line for readability and stable render budget

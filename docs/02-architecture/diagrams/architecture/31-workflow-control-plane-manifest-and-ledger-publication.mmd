@@ -1,17 +1,20 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: Workflow Control Plane Manifest And Ledger Publication
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.1.0
+%% @date    2026-10-09
+%% Reviewed against main 9a7339dc: control_plane/workflow_ledger.py; services/control_plane/workflow/ledger_service.py
 %% @type    flowchart
 %% @level   System / Control Plane
-%% @nodes   9
+%% @nodes   11
 %% RULES: RULES.md §2.1, §2.8, ADR-044, ADR-047
 flowchart TB
     workflow_cmd[workflow CLI command]
     state[workflow execution state]
     step[WorkflowManifestStep]
     manifest[WorkflowManifest]
-    ledger[WorkflowLedger]
+    ledger[WorkflowLedgerEntry]
+    ledger_service[WorkflowLedgerService]
+    ledger_port[WorkflowLedgerPort]
     run_refs[child run manifests]
     checkpoints[workflow checkpoints]
     diagnostics[workflow diagnostics]
@@ -20,7 +23,10 @@ flowchart TB
     workflow_cmd --> state
     state --> step
     step ==> manifest
-    step ==> ledger
+    step --> ledger_service
+    manifest -->|record_manifest_created| ledger_service
+    ledger_service -->|append immutable event| ledger
+    ledger_service -->|persist| ledger_port
     manifest -.-> run_refs
     ledger -.-> run_refs
     manifest --> checkpoints
@@ -30,6 +36,6 @@ flowchart TB
 
     class workflow_cmd,diagnostics,maintenance iface;
     class state,step,manifest,ledger domain;
-    class run_refs,checkpoints app;
+    class run_refs,checkpoints,ledger_service app;
 %% padding line for readability and stable render budget
 %% padding line for readability and stable render budget

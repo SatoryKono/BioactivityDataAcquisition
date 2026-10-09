@@ -1,7 +1,8 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: Historical Replay Universe Inventory And Closure Report
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.1.0
+%% @date    2026-10-09
+%% Reviewed against main 9a7339dc: services/control_plane/replay/historical_universe_service.py
 %% @type    sequenceDiagram
 %% @level   System / Interaction
 %% @nodes   7
@@ -10,25 +11,27 @@ sequenceDiagram
     autonumber
     participant CLI as diagnostics / run_manifest command
     participant Service as HistoricalReplayUniverseService
-    participant Manifest as RunManifest
-    participant Ledger as RunLedgerEntry
+    participant Corpus as HistoricalReplayCorpusService
+    participant External as external archive records
     participant Inventory as HistoricalReplayUniverseInventorySnapshot
     participant Closure as HistoricalReplayUniverseClosureReportRecord
     participant Clock as RuntimeClockService.now
 
     CLI->>Service: build_universe_inventory(...)
-    Service->>Manifest: load manifest refs
-    Service->>Ledger: load ledger evidence
-    Manifest-->>Service: local + archived artifact refs
-    Ledger-->>Service: replay / resume evidence
-    Service->>Clock: now_factory()
-    Clock-->>Service: generated_at
+    Service->>Corpus: build_certifiability_inventory()
+    Corpus-->>Service: local certifiability records
+    External-->>Service: explicitly supplied external_records
+    Service->>Service: build local and external records, deduplicate and sort
     Service->>Inventory: materialize inventory snapshot
     Inventory-->>Service: counts + coverage gaps
+    Service-->>CLI: inventory payload
     CLI->>Service: build_universe_closure_report(...)
+    Service->>Service: build_universe_inventory(external_records)
+    Service->>Service: build truth surface, coverage claims and governed gate
+    Service->>Clock: now_factory()
+    Clock-->>Service: generated_at for closure report only
     Service->>Closure: materialize closure report record
     Closure-->>CLI: closure report payload
-    Inventory-->>CLI: inventory payload
 
     Note over Service,Clock: now_factory injection avoids nondeterministic datetime.now seams during replay-critical diagnostics.
 %% padding line for readability and stable render budget

@@ -1,10 +1,11 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: Effective Config Artifact Domain Model
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.1.0
+%% @date    2026-10-09
+%% Reviewed against main 9a7339dc: domain/control_plane/effective_config_artifact.py
 %% @type    classDiagram
 %% @level   Domain / Model
-%% @nodes   9
+%% @nodes   10
 %% RULES: RULES.md §2.8, ADR-025, ADR-044
 classDiagram
     class EffectiveConfigArtifact
@@ -16,15 +17,17 @@ classDiagram
     class DQPolicySnapshot
     class SourceClassProvenance
     class ConfigResolutionPolicy
+    class EffectiveExecutionConfig
 
-    EffectiveConfigArtifact --> EffectiveConfigHashes
+    EffectiveConfigHashes ..> EffectiveConfigArtifact : derived hash container
     EffectiveConfigArtifact --> ConfigSourceRef
     EffectiveConfigArtifact --> ResolvedConfigSnapshot
     EffectiveConfigArtifact --> RuntimeOverrideSnapshot
     EffectiveConfigArtifact --> ExecutionEnvironmentSnapshot
     EffectiveConfigArtifact --> DQPolicySnapshot
-    ResolvedConfigSnapshot --> SourceClassProvenance
-    ResolvedConfigSnapshot --> ConfigResolutionPolicy
+    EffectiveConfigArtifact --> SourceClassProvenance
+    EffectiveConfigArtifact --> ConfigResolutionPolicy
+    EffectiveConfigArtifact --> EffectiveExecutionConfig
 
     note for EffectiveConfigArtifact "The artifact freezes what runtime<br/>actually executed, not only what YAML<br/>originally requested."
 %% padding line for readability and stable render budget
