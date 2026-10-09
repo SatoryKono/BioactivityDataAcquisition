@@ -214,7 +214,7 @@ def test_issue_5684_governance_freshness_gates_are_passing() -> None:
     gates = _load_json(DEBT_GATES)
     review = _load_json(RUNTIME_CARDINALITY_REVIEW)
     generated_at = review["generated_at"]
-    assert generated_at == "2026-09-16T16:48:20Z"
+    assert generated_at == "2026-10-09T09:49:20Z"
 
     assert gates["summary"]["release_gate_status"] == "passing"
     assert gates["summary"]["fail_count"] == 0
