@@ -1,7 +1,6 @@
-"""Shared immutable identity fields for control-plane input snapshots."""
-
 from __future__ import annotations
 
+# Shared immutable identity fields for control-plane input snapshots.
 from dataclasses import dataclass
 
 
