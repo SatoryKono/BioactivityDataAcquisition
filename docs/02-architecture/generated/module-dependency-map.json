@@ -1,24 +1,24 @@
 {
   "summary": {
-    "scanned_modules": 2555,
-    "total_internal_imports": 8194,
+    "scanned_modules": 2564,
+    "total_internal_imports": 8206,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 331,
     "violations": 0,
-    "source_fingerprint": "a8f153674de4e522adf88517d9501416b211196b1f5d1f397a8b394f60b57a50"
+    "source_fingerprint": "28d166d58ed2ae1dbede4d0f2887ab4e452b4b32ef418dba70849404325cad9e"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1615,
+      "imports": 1620,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1084,
+      "imports": 1087,
       "allowed": true
     },
     {
@@ -48,19 +48,19 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1298,
+      "imports": 1299,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 787,
+      "imports": 788,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1260,
+      "imports": 1262,
       "allowed": true
     },
     {
@@ -97,7 +97,7 @@
     {
       "source": "infrastructure.adapters",
       "target": "domain.types",
-      "imports": 124
+      "imports": 125
     },
     {
       "source": "application.composite",
@@ -107,7 +107,7 @@
     {
       "source": "application.core",
       "target": "domain.types",
-      "imports": 93
+      "imports": 94
     },
     {
       "source": "application.services",
@@ -177,7 +177,7 @@
     {
       "source": "application.core",
       "target": "domain.ports",
-      "imports": 32
+      "imports": 33
     },
     {
       "source": "composition.runtime_builders",
@@ -261,6 +261,11 @@
     },
     {
       "source": "application.services",
+      "target": "domain.exceptions",
+      "imports": 21
+    },
+    {
+      "source": "application.services",
       "target": "domain.normalization",
       "imports": 21
     },
@@ -277,11 +282,6 @@
     {
       "source": "application.core",
       "target": "domain.normalization",
-      "imports": 20
-    },
-    {
-      "source": "application.services",
-      "target": "domain.exceptions",
       "imports": 20
     },
     {

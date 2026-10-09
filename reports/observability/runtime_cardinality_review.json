@@ -6,7 +6,7 @@
     "bioetl_pipeline_runs_total": 500
   },
   "degraded_reasons": [],
-  "generated_at": "2026-09-16T16:48:20Z",
+  "generated_at": "2026-10-09T16:03:28.566677+00:00",
   "label_keys": {
     "bioetl_checkpoint_load_events_total": [
       "pipeline",
