@@ -26,6 +26,6 @@ sequenceDiagram
         Cursor->>Map: map page records
         Map-->>Runner: BronzeRecord works
     end
-    Note over Cursor,Exec: Missing next cursor / record limit ends normally; repeated cursor or page ceiling raises pagination-truncated error (CF-014).
+    Note over Cursor,Exec: Missing next cursor / record limit ends normally. Repeated cursor or page ceiling raises pagination-truncated error (CF-014).
     Note over Cursor,Map: DOI / title fallback uses separate lookup flows, not the query paginator.
 %% padding line for readability and stable render budget

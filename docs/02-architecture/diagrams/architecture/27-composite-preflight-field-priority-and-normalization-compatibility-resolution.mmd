@@ -40,7 +40,7 @@ sequenceDiagram
             Validator->>Report: add normalization_profile_mismatch
         end
     end
-    Validator->>Report: validate aggregation ordering; collect all issues
+    Validator->>Report: validate aggregation ordering, then collect all issues
     Validator-->>Runner: PreflightValidationResult
     Runner-->>CLI: proceed or fail
 

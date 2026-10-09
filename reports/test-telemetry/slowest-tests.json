@@ -1,6 +1,6 @@
 {
   "source_branch": "codex/pr12096-closeout-20261007",
-  "source_commit": "912f483953c76ede75313f762e41a9848369c3bb",
+  "source_commit": "ea9e909e33729c54b5758a1060d081fb0ad390df",
   "source_run_id": "local-local-verify-pr12096-20261009-final16",
   "source_event": "local_coverage_verify",
   "source_run_url": null,
@@ -419,7 +419,7 @@
     "coverage_xml_sha256": "997be9682390485a488bf15552631ee703523c505859d8670fcdbf3cd42bc3db",
     "source_tree_sha256": "6e2bf6d41d2fa7b5df095621c6727b5ef3c8be708137539b62cf7991b815f931",
     "test_tree_sha256": "3a05fb1a5e505a6f4fe74f71db2755e1163be73d3528b035ebf8375d93063c45",
-    "head": "912f483953c76ede75313f762e41a9848369c3bb",
+    "head": "ea9e909e33729c54b5758a1060d081fb0ad390df",
     "required_shards": [
       "smoke",
       "contract-confidence",

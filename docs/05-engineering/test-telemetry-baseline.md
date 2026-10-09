@@ -27,8 +27,8 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `codex/pr12096-closeout-20261007`
-- Source commit: `912f483953c76ede75313f762e41a9848369c3bb`
+- Source branch: `codex/review-architecture-diagrams-20261009`
+- Source commit: `ea9e909e33729c54b5758a1060d081fb0ad390df`
 - Source run id: `local-local-verify-pr12096-20261009-final16`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`

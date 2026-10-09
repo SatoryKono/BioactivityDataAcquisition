@@ -28,7 +28,7 @@ sequenceDiagram
     XML-->>Fetch: extract_all_records(root)
     Fetch-->>Adapter: raw article dictionaries
     Adapter-->>Runner: BronzeRecord stream, bounded by requested limit
-    Note over Adapter,XML: Direct PMID fetch omits search; XML parsing precedes downstream Silver normalization.
+    Note over Adapter,XML: Direct PMID fetch omits search. XML parsing precedes downstream Silver normalization.
 %% padding line for readability and stable render budget
 %% padding line for readability and stable render budget
 %% padding line for readability and stable render budget

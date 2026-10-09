@@ -37,5 +37,5 @@ sequenceDiagram
         Service->>Warn: check allowlist
         Warn-->>Service: log warning and return CompactionResult failed
     end
-    Note over Service,Warn: Errors outside the allowlist propagate; vacuum is a separate retention operation
+    Note over Service,Warn: Errors outside the allowlist propagate. Vacuum is a separate retention operation
     Service-->>Runner: success / skipped / failed result
