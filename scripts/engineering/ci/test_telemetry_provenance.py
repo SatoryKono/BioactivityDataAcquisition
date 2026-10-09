@@ -49,6 +49,8 @@ class _SameOriginAuthRedirectHandler(urllib.request.HTTPRedirectHandler):
         headers: Any,
         newurl: str,
     ) -> urllib.request.Request | None:
+        if urllib.parse.urlsplit(newurl).scheme.lower() != "https":
+            return None
         redirected = super().redirect_request(req, fp, code, msg, headers, newurl)
         if redirected is not None and _url_origin(req.full_url) != _url_origin(
             redirected.full_url

@@ -79,7 +79,6 @@ def bridge(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
 @pytest.mark.parametrize(
     "destination",
     [
-        "http://api.github.com/repos/example",
         "https://uploads.github.com/repos/example",
         "https://api.github.com:8443/repos/example",
     ],
@@ -101,6 +100,24 @@ def test_redirect_handler_strips_authorization_for_another_origin(
     )
     assert redirected is not None
     assert redirected.get_header("Authorization") is None
+
+
+def test_redirect_handler_rejects_https_downgrade() -> None:
+    request = urllib.request.Request(
+        "https://api.github.com/repos/example",
+        headers={"Authorization": "Bearer secret"},
+    )
+
+    redirected = provenance._SameOriginAuthRedirectHandler().redirect_request(
+        request,
+        None,
+        302,
+        "Found",
+        {},
+        "http://api.github.com/repos/example",
+    )
+
+    assert redirected is None
 
 
 def test_redirect_handler_preserves_authorization_for_the_same_origin() -> None:
