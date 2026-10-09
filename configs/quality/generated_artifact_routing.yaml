@@ -540,6 +540,7 @@ routes:
     commit_policy: tracked_quality_evidence
     outputs:
       - reports/test-telemetry/squash-provenance.json
+      - reports/test-telemetry/history/
     notes: Preserves captured run identity and binds it to its reviewed GitHub PR; live verification resolves a future squash without inventing its SHA.
 
   - id: dashboard-scenes-parity-ledger

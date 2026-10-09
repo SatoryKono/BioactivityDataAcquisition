@@ -106781,7 +106781,8 @@
       "notes": "Preserves captured run identity and binds it to its reviewed GitHub PR; live verification resolves a future squash without inventing its SHA.",
       "output_kind": "test_report",
       "outputs": [
-        "reports/test-telemetry/squash-provenance.json"
+        "reports/test-telemetry/squash-provenance.json",
+        "reports/test-telemetry/history/"
       ]
     },
     {
