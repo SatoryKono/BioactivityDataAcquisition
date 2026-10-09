@@ -9,7 +9,7 @@ name: PR Gate Complete
 # diff argument (#11181). Leaf reusable workflows are pinned to a full commit
 # SHA of trusted main (#11232). Coordinator YAML may still come from the PR, so
 # a hostile PR can rewrite these uses: lines; residual risk until org ruleset
-# requires workflows from the default branch (blocked while billing is off).
+# requires workflows from the default branch.
 
 on:
   pull_request:
