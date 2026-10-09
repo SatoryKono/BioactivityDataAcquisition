@@ -28,7 +28,7 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `refactor/architecture-debt-task-support-complexity-10443624345865139538`
-- Source commit: `aca391a3c262102a320e27e7e0a7a8c2fe9a2170`
+- Source commit: `0e36f3a60bbeeae1aed7376e67146eb940b7e9fa`
 - Source run id: `local-local-verify-pr12153-20261009-final17`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
