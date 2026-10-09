@@ -15,6 +15,16 @@ ROOT = Path(__file__).resolve().parents[3]
 BUDGET_PATH = Path("configs/quality/ci_closeout_cost_budget.yaml")
 CIRCLECI_PATH = Path(".circleci/config.yml")
 WORKFLOWS = ("pr-gate", "main-coverage-closeout", "migration-coverage-closeout")
+MEASURED_JOBS = (
+    "arch-tests",
+    "proof-coverage",
+    "proof-governance",
+    "proof-debt",
+    "proof-quality",
+    "proof-closeout",
+    "proof-docs",
+    "proof-coverage-shard",
+)
 
 
 def _yaml(root: Path, path: str | Path) -> dict[str, Any]:
@@ -105,6 +115,16 @@ def evaluate_closeout_cost_budget(root: Path = ROOT) -> dict[str, Any]:
         errors.append("additional_coverage_jobs_allowed")
     if limits["resource_class_increase_allowed"] is not False:
         errors.append("resource_class_increase_allowed")
+
+    runtime_measurement = budget["runtime_measurement"]
+    start_command = runtime_measurement["start_command"]
+    if runtime_measurement["additional_telemetry_jobs"] != 0:
+        errors.append("additional_telemetry_jobs_allowed")
+    if start_command not in circleci["commands"]:
+        errors.append("missing_runtime_measurement_command")
+    for job_name in MEASURED_JOBS:
+        if circleci["jobs"][job_name]["steps"][0] != start_command:
+            errors.append(f"runtime_measurement_not_first:{job_name}")
 
     expected_resource = limits["coverage_resource_class"]
     actual_resource = circleci["jobs"]["proof-coverage-shard"]["resource_class"]

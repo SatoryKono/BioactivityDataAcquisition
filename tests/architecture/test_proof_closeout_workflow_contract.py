@@ -120,6 +120,26 @@ def test_runtime_closeout_cost_budget_is_admissible():
     }
 
 
+def test_proof_jobs_measure_executor_time_without_an_extra_job():
+    config = yaml.safe_load((ROOT / ".circleci/config.yml").read_text(encoding="utf-8"))
+    budget = yaml.safe_load(BUDGET.read_text(encoding="utf-8"))
+    command = budget["runtime_measurement"]["start_command"]
+
+    assert budget["runtime_measurement"]["additional_telemetry_jobs"] == 0
+    assert command in config["commands"]
+    for job_name in (
+        "arch-tests",
+        "proof-coverage",
+        "proof-governance",
+        "proof-debt",
+        "proof-quality",
+        "proof-closeout",
+        "proof-docs",
+        "proof-coverage-shard",
+    ):
+        assert config["jobs"][job_name]["steps"][0] == command
+
+
 def test_proof_waits_for_producers_in_the_same_workflow():
     config = yaml.safe_load((ROOT / ".circleci/config.yml").read_text(encoding="utf-8"))
     for workflow in (

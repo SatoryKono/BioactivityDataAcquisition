@@ -16,3 +16,7 @@ limits:
   critical_path_seconds: 535.54
   additional_coverage_jobs: 0
   resource_class_increase_allowed: false
+runtime_measurement:
+  start_command: record-proof-job-start
+  producer_boundary: execution.json
+  additional_telemetry_jobs: 0

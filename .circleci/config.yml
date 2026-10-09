@@ -30,6 +30,15 @@ parameters:
     default: false
 
 commands:
+  record-proof-job-start:
+    description: "Record executor start without adding a telemetry job"
+    steps:
+      - run:
+          name: Record proof executor start
+          command: |
+            started_ms="$(python3 -c 'import time; print(time.time_ns() // 1000000)')"
+            echo "export BIOETL_CI_JOB_STARTED_EPOCH_MS=$started_ms" >> "$BASH_ENV"
+
   # Port of .github/actions/setup-python-uv (uv 0.11.26, uv cache, uv sync).
   setup-python-uv:
     description: "Install uv, restore cache, sync deps (port of GH composite action)"
@@ -2052,6 +2061,7 @@ jobs:
     - image: cimg/python:3.12
     resource_class: medium
     steps:
+    - record-proof-job-start
     - checkout
     - setup-python-uv
     - run:
@@ -3078,6 +3088,7 @@ jobs:
       MKL_NUM_THREADS: '1'
       NUMEXPR_NUM_THREADS: '1'
     steps:
+    - record-proof-job-start
     - checkout
     - setup-python-uv:
         extras: dev tracing docs
@@ -3147,6 +3158,7 @@ jobs:
       MKL_NUM_THREADS: '1'
       NUMEXPR_NUM_THREADS: '1'
     steps:
+    - record-proof-job-start
     - checkout
     - setup-python-uv:
         extras: dev tracing docs
@@ -3184,6 +3196,7 @@ jobs:
       MKL_NUM_THREADS: '1'
       NUMEXPR_NUM_THREADS: '1'
     steps:
+    - record-proof-job-start
     - checkout
     - setup-python-uv:
         extras: dev tracing docs
@@ -3214,6 +3227,7 @@ jobs:
       MKL_NUM_THREADS: '1'
       NUMEXPR_NUM_THREADS: '1'
     steps:
+    - record-proof-job-start
     - checkout
     - setup-python-uv:
         extras: dev tracing docs
@@ -3251,6 +3265,7 @@ jobs:
       MKL_NUM_THREADS: '1'
       NUMEXPR_NUM_THREADS: '1'
     steps:
+    - record-proof-job-start
     - checkout
     - setup-python-uv:
         extras: dev tracing docs
@@ -3277,6 +3292,7 @@ jobs:
     - image: cimg/python:3.12
     resource_class: small
     steps:
+    - record-proof-job-start
     - checkout
     - setup-python-uv:
         extras: dev tracing docs
@@ -3332,6 +3348,7 @@ jobs:
       MKL_NUM_THREADS: '1'
       NUMEXPR_NUM_THREADS: '1'
     steps:
+    - record-proof-job-start
     - checkout
     - setup-python-uv:
         extras: dev tracing docs

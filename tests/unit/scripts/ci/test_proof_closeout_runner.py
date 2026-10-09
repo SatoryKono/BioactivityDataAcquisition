@@ -63,6 +63,28 @@ def test_real_producer_runs_once_and_reuse_only_reads(evidence, monkeypatch):
     assert (runner.EVIDENCE / "example/producer.log").read_text().strip() == "measured"
 
 
+def test_executor_elapsed_time_is_recorded_without_changing_producer_duration(
+    evidence, monkeypatch
+):
+    monkeypatch.setenv("BIOETL_CI_JOB_STARTED_EPOCH_MS", "1000")
+    monkeypatch.setattr(runner.time, "time_ns", lambda: 2_500_000_000)
+
+    assert runner.produce("example") == 0
+    record = json.loads(
+        (runner.EVIDENCE / "example/execution.json").read_text(encoding="utf-8")
+    )
+    assert record["executor_elapsed_ms"] == 1500
+    assert record["duration_ms"] >= 0
+
+
+def test_executor_elapsed_time_rejects_invalid_ci_start(evidence, monkeypatch):
+    monkeypatch.setenv("CIRCLECI", "true")
+    monkeypatch.delenv("BIOETL_CI_JOB_STARTED_EPOCH_MS", raising=False)
+
+    with pytest.raises(ValueError, match="Missing proof executor start timestamp"):
+        runner.produce("example")
+
+
 def test_failed_producer_is_recorded_and_cannot_be_reused(evidence):
     plan, source = evidence
     plan["checks"]["example"]["argv"] = [sys.executable, "-c", "raise SystemExit(7)"]
