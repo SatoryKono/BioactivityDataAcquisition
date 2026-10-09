@@ -34,7 +34,7 @@ trend evidence only.
 - Source run URL: `pending`
 - Source tree sha256: `486b5d68f468461d6a739290bb91936c30bb5b5a53be4bea3438cdbc2426c6d0`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-10-09T07:14:36.676487+00:00`
+- Refreshed at (UTC): `2026-10-09T07:59:38.193656+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -62,7 +62,7 @@ trend evidence only.
 ## Coverage
 
 - Hard threshold: `85.0%`
-- Actual coverage: `86.66%`
+- Actual coverage: `99.68%`
 - Threshold satisfied: `True`
 
 ## Duration Telemetry
