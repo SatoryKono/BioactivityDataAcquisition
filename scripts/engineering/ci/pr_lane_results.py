@@ -144,6 +144,17 @@ def assert_step_outcomes(
     steps_for_owner = OWNER_STEPS.get(owner)
     if steps_for_owner is None:
         raise ValueError(f"unknown owner {owner!r}")
+    failures = _required_step_failures(decisions, outcomes, steps_for_owner)
+    _append_unreported_step_failures(outcomes, failures)
+    return failures
+
+
+def _required_step_failures(
+    decisions: dict[str, Any],
+    outcomes: dict[str, str],
+    steps_for_owner: dict[str, tuple[str, ...]],
+) -> list[str]:
+    """Report missing or unsuccessful steps for required owned gates."""
     failures: list[str] = []
     for gate_id, step_names in steps_for_owner.items():
         raw_decision = decisions.get(gate_id)
@@ -155,6 +166,13 @@ def assert_step_outcomes(
             outcome = str(outcomes.get(step_name, "")).strip().lower()
             if outcome != SUCCESS:
                 failures.append(f"{gate_id}:{step_name}={outcome or 'missing'}")
+    return failures
+
+
+def _append_unreported_step_failures(
+    outcomes: dict[str, str], failures: list[str]
+) -> None:
+    """Retain unrelated failures without duplicating required-step failures."""
     for key, raw_outcome in outcomes.items():
         outcome = str(raw_outcome).strip().lower()
         if outcome not in {FAILURE, "cancelled"}:
@@ -163,7 +181,6 @@ def assert_step_outcomes(
         if any(token in failure for failure in failures):
             continue
         failures.append(f"step:{token}")
-    return failures
 
 
 def affected_pytest_targets(changed_files: list[str], *, repo_root: Path) -> list[str]:
@@ -171,25 +188,23 @@ def affected_pytest_targets(changed_files: list[str], *, repo_root: Path) -> lis
     targets: list[str] = []
     for raw_path in changed_files:
         path = raw_path.strip().replace("\\", "/")
-        if not path:
-            continue
-        if path.startswith("tests/") and path.endswith(".py"):
-            if (repo_root / path).is_file():
-                targets.append(path)
-            continue
-        if path.startswith("src/bioetl/") and path.endswith(".py"):
-            relative = path.removeprefix("src/bioetl/")
-            first = relative.split("/", 1)[0]
-            candidate = repo_root / "tests" / "unit" / first
-            if candidate.is_dir():
-                targets.append(candidate.relative_to(repo_root).as_posix())
-    ordered: list[str] = []
-    seen: set[str] = set()
-    for target in targets:
-        if target not in seen:
-            seen.add(target)
-            ordered.append(target)
-    return ordered
+        target = _affected_pytest_target(path, repo_root=repo_root)
+        if target is not None and target not in targets:
+            targets.append(target)
+    return targets
+
+
+def _affected_pytest_target(path: str, *, repo_root: Path) -> str | None:
+    """Resolve one maintained source/test path to an existing pytest target."""
+    if path.startswith("tests/") and path.endswith(".py"):
+        return path if (repo_root / path).is_file() else None
+    if path.startswith("src/bioetl/") and path.endswith(".py"):
+        relative = path.removeprefix("src/bioetl/")
+        first = relative.split("/", 1)[0]
+        candidate = repo_root / "tests" / "unit" / first
+        if candidate.is_dir():
+            return candidate.relative_to(repo_root).as_posix()
+    return None
 
 
 def _load_json_object(raw: str, *, label: str) -> dict[str, Any]:
