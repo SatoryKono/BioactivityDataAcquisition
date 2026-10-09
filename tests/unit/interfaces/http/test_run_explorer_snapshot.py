@@ -183,6 +183,91 @@ async def test_periodic_scan_waits_out_the_interval(
 
 
 @pytest.mark.asyncio
+async def test_stop_accepts_expected_child_cancellation() -> None:
+    started = asyncio.Event()
+
+    async def child() -> None:
+        started.set()
+        await asyncio.Future()
+
+    task = asyncio.create_task(child())
+    await started.wait()
+    await stop_run_explorer_snapshot(task)
+    assert task.cancelled()
+
+
+@pytest.mark.asyncio
+async def test_stop_propagates_caller_cancellation_during_child_cleanup() -> None:
+    started = asyncio.Event()
+    cleaning = asyncio.Event()
+    release = asyncio.Event()
+
+    async def child() -> None:
+        started.set()
+        try:
+            await asyncio.Future()
+        finally:
+            cleaning.set()
+            await release.wait()
+
+    task = asyncio.create_task(child())
+    await started.wait()
+    caller = asyncio.create_task(stop_run_explorer_snapshot(task))
+    await cleaning.wait()
+    caller.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await caller
+    assert caller.cancelled()
+    assert task.done()
+
+
+@pytest.mark.asyncio
+async def test_stop_preserves_child_failure() -> None:
+    finished = asyncio.Event()
+
+    async def child() -> None:
+        try:
+            raise RuntimeError("child failed")
+        finally:
+            finished.set()
+
+    task = asyncio.create_task(child())
+    await finished.wait()
+    with pytest.raises(RuntimeError, match="child failed"):
+        await stop_run_explorer_snapshot(task)
+
+
+@pytest.mark.asyncio
+async def test_stop_allows_cleanup_from_already_cancelled_caller() -> None:
+    started = asyncio.Event()
+    waiting = asyncio.Event()
+    server_closed = asyncio.Event()
+
+    async def child() -> None:
+        started.set()
+        await asyncio.Future()
+
+    task = asyncio.create_task(child())
+    await started.wait()
+
+    async def caller() -> None:
+        try:
+            waiting.set()
+            await asyncio.Future()
+        finally:
+            await stop_run_explorer_snapshot(task)
+            server_closed.set()
+
+    owner = asyncio.create_task(caller())
+    await waiting.wait()
+    owner.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await owner
+    assert server_closed.is_set()
+    assert task.cancelled()
+
+
+@pytest.mark.asyncio
 async def test_default_request_uses_snapshot_without_another_scan(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
