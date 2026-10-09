@@ -27,12 +27,12 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `codex/pr12096-closeout-20261007`
-- Source commit: `912f483953c76ede75313f762e41a9848369c3bb`
+- Source branch: `ci/wave-close-green`
+- Source commit: `0150c3fbd805c91dcdaadac9c2e1ce7e2f9b92f5`
 - Source run id: `local-local-verify-pr12096-20261009-final16`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `3a05fb1a5e505a6f4fe74f71db2755e1163be73d3528b035ebf8375d93063c45`
+- Source tree sha256: `3f64c0b07b260b9bd7eca273a9e2572e0839061d6d9baa8a0a8ca0b8a8637d56`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-10-09T13:41:23.537076+00:00`
 
