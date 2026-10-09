@@ -353,6 +353,10 @@ def _schema_entity_pairs():
 
 def _schema_field_aliases() -> dict[str, str]:
     return {
+        "_run_id": "run_id",
+        "_run_type": "run_type",
+        "_source_batch_id": "source_batch_id",
+        "_ingestion_ts": "ingestion_ts",
         "molecule_id": "molecule_id",
         "parent_molecule_id": "parent_molecule_id",
         "journal": "journal",
@@ -688,8 +692,18 @@ def test_silver_schemas_match_domain_entities():
     except ImportError as e:
         pytest.fail(f"Could not import schemas or entities: {e}")
 
-    system_fields_schema = {"_run_id", "_run_type", "_source_batch_id", "_ingestion_ts"}
     aliases = _schema_field_aliases()
+    expected_system_aliases = {
+        "_run_id": "run_id",
+        "_run_type": "run_type",
+        "_source_batch_id": "source_batch_id",
+        "_ingestion_ts": "ingestion_ts",
+    }
+
+    for system_field, entity_field in expected_system_aliases.items():
+        assert aliases.get(system_field) == entity_field, (
+            f"Missing or incorrect alias for system field {system_field}"
+        )
 
     violations = []
 
@@ -698,11 +712,8 @@ def test_silver_schemas_match_domain_entities():
 
         entity_fields = {f.name for f in fields(entity_cls)}
 
-        # Check 1: All non-system Schema fields must exist in Entity (or be aliased)
+        # Check 1: All Schema fields must exist in Entity (or be aliased)
         for field in schema_fields:
-            if field in system_fields_schema:
-                continue
-
             entity_field_name = aliases.get(field, field)
 
             # Regression check: If the schema field name is natively present in the entity,
