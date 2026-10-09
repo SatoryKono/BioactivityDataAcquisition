@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -17,9 +19,36 @@ import yaml
 from jsonschema import Draft202012Validator
 
 from memory.proof import load_policy, load_schema, verify_bundle
+from scripts.engineering.common.repo_paths import (
+    confined_io_path,
+    read_text_confined,
+    write_text_confined,
+)
 
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_MANIFEST_SCHEMA = ROOT / "configs/quality/issue_closeout_batch.schema.json"
+_WINDOWS_RESERVED_NAMES = frozenset(
+    {"CON", "PRN", "AUX", "NUL", "CLOCK$", "CONIN$", "CONOUT$"}
+    | {f"COM{index}" for index in range(1, 10)}
+    | {f"LPT{index}" for index in range(1, 10)}
+)
+_OS_PATH_IS_RESERVED = getattr(os.path, "isreserved", lambda _part: False)
+
+
+@dataclass(frozen=True)
+class _CommandPaths:
+    repo_root: Path
+    bundle: Path
+    manifest: Path
+    manifest_schema: Path
+    output: Path
+
+
+@dataclass(frozen=True)
+class _CommandResult:
+    report: dict[str, Any]
+    output: Path
+    exit_code: int
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -32,15 +61,16 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _read_object(path: Path, *, label: str) -> dict[str, Any]:
-    resolved = path.expanduser().resolve()
+def _read_object(path: Path, *, label: str, repo_root: Path) -> dict[str, Any]:
+    resolved = confined_io_path(path, root=repo_root)
     if not resolved.is_file():
         raise ValueError(f"{label} does not exist: {resolved}")
     try:
+        raw = read_text_confined(resolved, root=repo_root, encoding="utf-8")
         if resolved.suffix.lower() in {".yaml", ".yml"}:
-            payload = yaml.safe_load(resolved.read_text(encoding="utf-8"))
+            payload = yaml.safe_load(raw)
         else:
-            payload = json.loads(resolved.read_text(encoding="utf-8"))
+            payload = json.loads(raw)
     except (json.JSONDecodeError, yaml.YAMLError) as exc:
         raise ValueError(f"{label} is not valid JSON/YAML: {resolved}") from exc
     if not isinstance(payload, dict):
@@ -75,12 +105,63 @@ def _validate_manifest(manifest: dict[str, Any], schema: dict[str, Any]) -> None
             criterion_ids.add(criterion_id)
 
 
+def _trusted_repo_root(requested_root: Path) -> Path:
+    trusted_root = ROOT.expanduser().resolve(strict=True)
+    requested = confined_io_path(requested_root, root=trusted_root)
+    if requested != trusted_root:
+        raise ValueError(f"repo root must match the active checkout: {trusted_root}")
+    return trusted_root
+
+
+def _safe_input(path: Path, *, label: str, repo_root: Path) -> Path:
+    resolved = confined_io_path(path, root=repo_root)
+    relative_input = resolved.relative_to(repo_root.resolve(strict=True))
+    if any(_is_unsafe_path_part(part) for part in relative_input.parts):
+        raise ValueError(f"{label} contains an unsafe path component")
+    if not resolved.is_file():
+        raise ValueError(f"{label} does not exist: {resolved}")
+    return resolved
+
+
+def _is_unsafe_path_part(part: str) -> bool:
+    device_name = part.rstrip(" .").split(".", maxsplit=1)[0].upper()
+    return (
+        not part
+        or part in {".", ".."}
+        or ":" in part
+        or part.endswith((" ", "."))
+        or device_name in _WINDOWS_RESERVED_NAMES
+        or _OS_PATH_IS_RESERVED(part)
+    )
+
+
 def _safe_output(path: Path, repo_root: Path) -> Path:
-    output = path.expanduser().resolve()
-    reports_root = (repo_root / "reports").resolve()
+    reports_root = confined_io_path("reports", root=repo_root)
+    try:
+        output = confined_io_path(path, root=repo_root)
+    except ValueError as exc:
+        raise ValueError("output must be a JSON file below REPO_ROOT/reports") from exc
     if output.suffix.lower() != ".json" or not output.is_relative_to(reports_root):
         raise ValueError("output must be a JSON file below REPO_ROOT/reports")
-    return output
+    relative_output = output.relative_to(reports_root)
+    if any(_is_unsafe_path_part(part) for part in relative_output.parts):
+        raise ValueError("output contains an unsafe path component")
+    return confined_io_path(relative_output, root=reports_root)
+
+
+def _resolve_command_paths(parsed: argparse.Namespace) -> _CommandPaths:
+    repo_root = _trusted_repo_root(parsed.repo_root)
+    return _CommandPaths(
+        repo_root=repo_root,
+        bundle=_safe_input(parsed.bundle, label="bundle", repo_root=repo_root),
+        manifest=_safe_input(parsed.manifest, label="manifest", repo_root=repo_root),
+        manifest_schema=_safe_input(
+            parsed.manifest_schema,
+            label="manifest schema",
+            repo_root=repo_root,
+        ),
+        output=_safe_output(parsed.output, repo_root),
+    )
 
 
 def _matching_receipts(
@@ -195,39 +276,62 @@ def evaluate_batch(
     return report, 0 if report["status"] == "ready" else 2
 
 
-def main(argv: list[str] | None = None) -> int:
-    parsed = _parser().parse_args(argv)
-    try:
-        repo_root = parsed.repo_root.expanduser().resolve()
-        output = _safe_output(parsed.output, repo_root)
-        bundle = _read_object(parsed.bundle, label="bundle")
-        manifest = _read_object(parsed.manifest, label="manifest")
-        manifest_schema = _read_object(parsed.manifest_schema, label="manifest schema")
-        _validate_manifest(manifest, manifest_schema)
-        report, exit_code = evaluate_batch(
-            bundle=bundle,
-            manifest=manifest,
-            repo_root=repo_root,
-        )
-        output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(
-            json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-        )
-    except (OSError, ValueError) as exc:
-        print(json.dumps({"status": "error", "error": str(exc)}, sort_keys=True))
-        return 2
+def _run_command(parsed: argparse.Namespace) -> _CommandResult:
+    paths = _resolve_command_paths(parsed)
+    bundle = _read_object(paths.bundle, label="bundle", repo_root=paths.repo_root)
+    manifest = _read_object(
+        paths.manifest,
+        label="manifest",
+        repo_root=paths.repo_root,
+    )
+    manifest_schema = _read_object(
+        paths.manifest_schema,
+        label="manifest schema",
+        repo_root=paths.repo_root,
+    )
+    _validate_manifest(manifest, manifest_schema)
+    report, exit_code = evaluate_batch(
+        bundle=bundle,
+        manifest=manifest,
+        repo_root=paths.repo_root,
+    )
+    reports_root = confined_io_path("reports", root=paths.repo_root)
+    output = write_text_confined(
+        paths.output,
+        json.dumps(report, indent=2, sort_keys=True) + "\n",
+        root=reports_root,
+        encoding="utf-8",
+    )
+    return _CommandResult(report=report, output=output, exit_code=exit_code)
+
+
+def _emit_error(exc: OSError | ValueError) -> int:
+    print(json.dumps({"status": "error", "error": str(exc)}, sort_keys=True))
+    return 2
+
+
+def _emit_result(result: _CommandResult) -> int:
     print(
         json.dumps(
             {
-                "status": report["status"],
-                "output": str(output),
-                "issues_evaluated": report["execution"]["issues_evaluated"],
+                "status": result.report["status"],
+                "output": str(result.output),
+                "issues_evaluated": result.report["execution"]["issues_evaluated"],
                 "evidence_producer_runs": 0,
             },
             sort_keys=True,
         )
     )
-    return exit_code
+    return result.exit_code
+
+
+def main(argv: list[str] | None = None) -> int:
+    parsed = _parser().parse_args(argv)
+    try:
+        result = _run_command(parsed)
+    except (OSError, ValueError) as exc:
+        return _emit_error(exc)
+    return _emit_result(result)
 
 
 if __name__ == "__main__":

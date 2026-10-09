@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -147,6 +148,110 @@ def test_output_must_stay_below_reports(tmp_path: Path) -> None:
         issue_closeout_batch._safe_output(tmp_path / "outside.json", tmp_path)
 
 
+def test_repo_root_cannot_be_rebased_by_cli(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="refusing path outside"):
+        issue_closeout_batch._trusted_repo_root(tmp_path)
+
+
+def test_input_must_stay_below_repo_root(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    outside = tmp_path / "bundle.json"
+    outside.write_text("{}", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="refusing path outside"):
+        issue_closeout_batch._safe_input(
+            outside,
+            label="bundle",
+            repo_root=repo_root,
+        )
+
+
+def test_output_rejects_parent_escape_from_reports(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    (repo_root / "reports").mkdir(parents=True)
+
+    with pytest.raises(ValueError, match="below REPO_ROOT/reports"):
+        issue_closeout_batch._safe_output(
+            repo_root / "reports" / ".." / "escaped.json",
+            repo_root,
+        )
+
+
+@pytest.mark.parametrize(
+    "relative",
+    ["NUL.json", "CONOUT$.json", "COM¹.json", "report:stream.json"],
+)
+def test_output_rejects_windows_special_names(tmp_path: Path, relative: str) -> None:
+    repo_root = tmp_path / "repo"
+    (repo_root / "reports").mkdir(parents=True)
+
+    with pytest.raises(
+        ValueError,
+        match="unsafe path component|below REPO_ROOT/reports",
+    ):
+        issue_closeout_batch._safe_output(
+            repo_root / "reports" / relative,
+            repo_root,
+        )
+
+
+@pytest.mark.skipif(
+    os.name != "nt", reason="NTFS alternate data streams are Windows-only"
+)
+def test_input_rejects_ntfs_alternate_data_stream(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    carrier = repo_root / "bundle.json"
+    carrier.write_text("{}", encoding="utf-8")
+    alternate_stream = Path(f"{carrier}:payload")
+    alternate_stream.write_text(json.dumps(_bundle()), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="unsafe path component"):
+        issue_closeout_batch._safe_input(
+            alternate_stream,
+            label="bundle",
+            repo_root=repo_root,
+        )
+
+
+def test_output_rejects_symlink_escape(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    reports = repo_root / "reports"
+    outside = tmp_path / "outside"
+    reports.mkdir(parents=True)
+    outside.mkdir()
+    link = reports / "linked"
+    try:
+        link.symlink_to(outside, target_is_directory=True)
+    except OSError as exc:
+        pytest.skip(f"Host does not permit symlink creation: {exc}")
+
+    with pytest.raises(ValueError, match="below REPO_ROOT/reports"):
+        issue_closeout_batch._safe_output(link / "escaped.json", repo_root)
+
+
+def test_cli_rejects_untrusted_repo_root_without_writing(tmp_path: Path) -> None:
+    untrusted_root = tmp_path / "untrusted"
+    output = untrusted_root / "reports/escaped.json"
+
+    exit_code = issue_closeout_batch.main(
+        [
+            "--bundle",
+            "bundle.json",
+            "--manifest",
+            "manifest.yaml",
+            "--output",
+            str(output),
+            "--repo-root",
+            str(untrusted_root),
+        ]
+    )
+
+    assert exit_code == 2
+    assert not output.exists()
+
+
 def test_cli_writes_report_without_running_producers(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -154,8 +259,16 @@ def test_cli_writes_report_without_running_producers(
     repo_root = tmp_path / "repo"
     reports = repo_root / "reports"
     reports.mkdir(parents=True)
-    bundle_path = tmp_path / "bundle.json"
-    manifest_path = tmp_path / "manifest.yaml"
+    inputs = repo_root / "inputs"
+    inputs.mkdir()
+    bundle_path = inputs / "bundle.json"
+    manifest_path = inputs / "manifest.yaml"
+    schema_path = repo_root / "configs/quality/issue_closeout_batch.schema.json"
+    schema_path.parent.mkdir(parents=True)
+    schema_path.write_text(
+        issue_closeout_batch.DEFAULT_MANIFEST_SCHEMA.read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
     output = reports / "quality/issue-closeout/wave-1.json"
     bundle_path.write_text(json.dumps(_bundle()), encoding="utf-8")
     manifest_path.write_text(
@@ -171,17 +284,21 @@ issues:
 """,
         encoding="utf-8",
     )
+    monkeypatch.setattr(issue_closeout_batch, "ROOT", repo_root)
+    monkeypatch.chdir(tmp_path)
 
     exit_code = issue_closeout_batch.main(
         [
             "--bundle",
-            str(bundle_path),
+            str(bundle_path.relative_to(repo_root)),
             "--manifest",
-            str(manifest_path),
+            str(manifest_path.relative_to(repo_root)),
             "--output",
-            str(output),
+            str(output.relative_to(repo_root)),
             "--repo-root",
             str(repo_root),
+            "--manifest-schema",
+            str(schema_path.relative_to(repo_root)),
         ]
     )
 
