@@ -1652,9 +1652,7 @@ def test_docker_security_gate_covers_dependency_build_inputs() -> None:
     # required-checks catalog (CircleCI pr-gate, catalog version 3); main
     # pushes additionally reach docker.yml via main-integrity.yml.
     catalog = _load_yaml(ROOT / "configs/quality/github_required_checks.yaml")
-    docker_gate = next(
-        gate for gate in catalog["gates"] if gate.get("id") == "docker"
-    )
+    docker_gate = next(gate for gate in catalog["gates"] if gate.get("id") == "docker")
     paths = set(docker_gate["paths"]["include"])
     assert {
         "Dockerfile.bioetl",

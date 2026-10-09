@@ -160,6 +160,16 @@ entries:
     rationale: >-
       parse_response uses defused_ET.fromstring; stdlib ET is used for Element
       types and ParseError handling only.
+  - id: SUP-ET-015
+    path: src/bioetl/application/pipelines/pubmed/publication_term_enricher.py
+    line: 5
+    rule: B405
+    symbol: xml.etree.ElementTree
+    owner: stream-b
+    review_date: "2027-03-18"
+    rationale: >-
+      Parses external XML via defused_ET.fromstring; stdlib ET is used for the
+      Element annotation in _parse_mesh_headings only.
   # --- subprocess imports (B404) ---
   - id: SUP-SP-004
     path: src/bioetl/infrastructure/provenance/code_revision.py

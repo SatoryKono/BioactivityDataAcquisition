@@ -327,10 +327,7 @@ def test_policy_and_workflow_preserve_read_only_contract() -> None:
     nightly = (ROOT / ".github" / "workflows" / "nightly.yml").read_text(
         encoding="utf-8"
     )
-    assert (
-        "uses: ./.github/workflows/github-settings-quarterly-review.yml"
-        in nightly
-    )
+    assert "uses: ./.github/workflows/github-settings-quarterly-review.yml" in nightly
     for marker in ("dom == '01'", "'01'", "'04'", "'07'", "'10'"):
         assert marker in nightly
     assert "--fail-on-drift" not in workflow

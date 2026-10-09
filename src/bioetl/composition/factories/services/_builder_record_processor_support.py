@@ -149,5 +149,7 @@ def create_record_processor_impl(
         writer=components.writer,
         config=processor_config,
         tracer=effective_tracer,
-        write_deps=RecordProcessorWriteDependencies(quarantine_manager=quarantine_manager),
+        write_deps=RecordProcessorWriteDependencies(
+            quarantine_manager=quarantine_manager
+        ),
     )
