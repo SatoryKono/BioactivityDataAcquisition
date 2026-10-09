@@ -587,7 +587,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "146",
+      "line": "145",
       "path": "tests/unit/interfaces/test_issue_10520_interfaces_cli.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_formatters_optional_export_and_quarantine"
@@ -1777,7 +1777,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "146",
+        "line": "145",
         "path": "tests/unit/interfaces/test_issue_10520_interfaces_cli.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_formatters_optional_export_and_quarantine"
@@ -2087,12 +2087,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3034,
-    "total_test_functions": 29701,
+    "total_test_functions": 29704,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "c7785f5a60c7f4f771ee577392d24d0d72c4e4f9d77a69609367efda20435cfc",
+  "source_tree_sha256": "eeada2b8a5b378fc342889204c00151cb0edfeabba73b101f3ca9b8414c5d19b",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2155,7 +2155,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3034,
-  "total_test_functions": 29701,
+  "total_test_functions": 29704,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
