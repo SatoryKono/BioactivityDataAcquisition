@@ -137,6 +137,7 @@ def test_proof_jobs_measure_executor_time_without_an_extra_job():
         "proof-quality",
         "proof-closeout",
         "proof-docs",
+        "docs-governance",
         "proof-coverage-shard",
     ):
         assert config["jobs"][job_name]["steps"][0] == command

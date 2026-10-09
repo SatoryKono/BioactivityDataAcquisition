@@ -769,6 +769,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/engineering/ci/closeout_cost_budget.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the fail-closed cost and topology evaluator imported by the canonical Proof-or-Stop closeout path; keep contributor execution routed through that existing workflow rather than treating this backend as a separate active script.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-31"
+    },
     "scripts/engineering/ci/local_test_telemetry.py": {
       "decision": "shared_helper_module",
       "next_step": "Internal evidence-validation functions imported by the canonical telemetry updater and local coverage producer; no CLI, main, or direct invocation exists. Retain as supporting code and expose operations only through those existing entrypoints.",
@@ -1068,6 +1074,12 @@
       "next_step": "Retain as the shared first-party import-graph helper consumed by QA inventory reports; fold it into a broader canonical graph helper surface only if the inventory/reporting pipeline is consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
+    },
+    "scripts/engineering/qa/issue_closeout_batch.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the implementation behind the canonical scripts.engineering.qa issue-closeout-batch router command; keep direct contributor use routed through that public command so the backend is not counted as another active script.",
+      "owner": "@bioetl-quality",
+      "review_by": "2026-12-31"
     },
     "scripts/engineering/qa/observability_closure_campaign_cli.py": {
       "decision": "shared_helper_module",

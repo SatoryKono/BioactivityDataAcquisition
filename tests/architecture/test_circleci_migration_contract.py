@@ -52,6 +52,22 @@ def test_circleci_heredocs_escape_compiler_interpolation():
     assert not re.search(r"(?<!\\)<<[ \t]*['\"]", source)
 
 
+def test_circleci_path_classifiers_support_safe_same_repository_stacked_bases():
+    source = (ROOT / ".circleci/config.yml").read_text(encoding="utf-8")
+
+    assert (
+        source.count(
+            "assert pr['base']['repo']['full_name'] == "
+            "'SatoryKono/BioactivityDataAcquisition'"
+        )
+        == 3
+    )
+    assert "Unsupported base branch" not in source
+    assert source.count("git check-ref-format --branch") >= 5
+    assert "refs/heads/$base_ref:refs/remotes/origin/$base_ref" in source
+    assert "refs/heads/${BASE_REF}:refs/remotes/origin/${BASE_REF}" in source
+
+
 def _default_branch_matrix(monkeypatch):
     steps = _config()["jobs"]["classify"]["steps"]
     command = next(

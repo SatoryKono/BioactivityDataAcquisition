@@ -299,6 +299,7 @@ def _execute_shard(
     """Execute one shard and retry infrastructure instability at most once."""
     canonical_command = _command(shard, junit, max_workers=max_workers)
     attempts: list[dict[str, object]] = []
+    total_seconds = 0.0
     final_exit_code = 1
     final_classification = "unknown_failure"
     final_attempt_log = log
@@ -313,6 +314,7 @@ def _execute_shard(
         started = time.monotonic()
         exit_code = _run_logged(command, attempt_log, env=env)
         seconds = round(time.monotonic() - started, 2)
+        total_seconds += seconds
         output = attempt_log.read_text(encoding="utf-8", errors="replace")
         classification = classify_pytest_failure(exit_code, output)
         attempts.append(
@@ -342,7 +344,7 @@ def _execute_shard(
         "failure_class": final_classification,
         "retry_count": len(attempts) - 1,
         "attempts": attempts,
-        "seconds": round(sum(float(item["seconds"]) for item in attempts), 2),
+        "seconds": round(total_seconds, 2),
         "coverage_file": str(coverage_file),
         "coverage_sha256": (
             _sha256(coverage_file)

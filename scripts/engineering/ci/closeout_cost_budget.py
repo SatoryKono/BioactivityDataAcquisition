@@ -6,7 +6,7 @@ import argparse
 from dataclasses import dataclass
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 
@@ -24,6 +24,7 @@ MEASURED_JOBS = (
     "proof-quality",
     "proof-closeout",
     "proof-docs",
+    "docs-governance",
     "proof-coverage-shard",
 )
 
@@ -185,7 +186,9 @@ def _validate_circleci_topology(
     errors: list[str],
 ) -> str:
     expected_resource = limits["coverage_resource_class"]
-    actual_resource = circleci["jobs"]["proof-coverage-shard"]["resource_class"]
+    actual_resource = cast(
+        str, circleci["jobs"]["proof-coverage-shard"]["resource_class"]
+    )
     if actual_resource != expected_resource:
         errors.append("coverage_resource_class_changed")
     for workflow in WORKFLOWS:
