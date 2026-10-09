@@ -489,6 +489,52 @@ def test_select_best_candidate(tmp_path: Path) -> None:
     assert selected == loc_large
     assert note is not None
     assert "small.py" in note
+    assert "Multiple symbol matches" in note
+
+
+def test_filter_candidates_preserves_registry_kind_coverage(tmp_path: Path) -> None:
+    from bioetl.infrastructure.quality.architecture_debt_task_support import (
+        _filter_candidates,
+    )
+
+    loc1 = SymbolMetricLocation(
+        name="sym",
+        path=tmp_path / "path1.py",
+        kind="function",
+        lineno=1,
+        end_lineno=1,
+        size=1,
+    )
+    loc2 = SymbolMetricLocation(
+        name="sym",
+        path=tmp_path / "path2.py",
+        kind="function",
+        lineno=1,
+        end_lineno=1,
+        size=1,
+    )
+    loc3 = SymbolMetricLocation(
+        name="sym",
+        path=tmp_path / "path3.py",
+        kind="class",
+        lineno=1,
+        end_lineno=1,
+        size=1,
+    )
+
+    index = {"sym": [loc1, loc2, loc3]}
+
+    # Filter by raw path
+    candidates = _filter_candidates(index["sym"], target_path=tmp_path / "path1.py")
+    assert candidates == [loc1]
+
+    # Filter by class
+    candidates = _filter_candidates(index["sym"], expected_kind="class")
+    assert candidates == [loc3]
+
+    # Filter by function
+    candidates = _filter_candidates(index["sym"], expected_kind="function")
+    assert candidates == [loc1, loc2]
 
 
 def test_select_symbol_location_reports_ambiguous_candidates(tmp_path: Path) -> None:
