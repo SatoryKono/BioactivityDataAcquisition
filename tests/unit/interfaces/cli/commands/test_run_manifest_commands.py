@@ -40,7 +40,7 @@ from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
-pytestmark = pytest.mark.cli_unit
+pytestmark = pytest.mark.unit
 from click.testing import CliRunner
 
 from bioetl.application.services.control_plane.manifest.inspection_service import (
