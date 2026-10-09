@@ -202,14 +202,14 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "617",
+      "line": "623",
       "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_stage_name_accepts_valid"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "638",
+      "line": "670",
       "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_stage_completion_running_allows_none_timestamp"
@@ -272,7 +272,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "490",
+      "line": "503",
       "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_expire_gold_empty_key_rows"
@@ -391,7 +391,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1293",
+      "line": "1303",
       "path": "tests/unit/infrastructure/quarantine/test_unified_quarantine.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_aclose_does_nothing"
@@ -587,7 +587,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "145",
+      "line": "146",
       "path": "tests/unit/interfaces/test_issue_10520_interfaces_cli.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_formatters_optional_export_and_quarantine"
@@ -660,7 +660,7 @@
     "tests/unit/composition/test_observability_contract.py:431",
     "tests/unit/composition/factories/storage/test_health_mixin.py:72",
     "tests/unit/composition/factories/storage/test_health_mixin.py:103",
-    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:617"
+    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:623"
   ],
   "assertless_families": {
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py": {
@@ -1001,10 +1001,27 @@
     }
   },
   "assertless_total_candidates": 85,
-  "budget_violations": [],
-  "compatibility_examples": [],
-  "compatibility_files": [],
-  "compatibility_test_files": 0,
+  "budget_violations": [
+    {
+      "actual": 1,
+      "budget": "compatibility_test_file_max",
+      "expected_max": 0,
+      "metric": "compatibility_test_files"
+    },
+    {
+      "actual": 14,
+      "budget": "markerless_test_functions_max",
+      "expected_max": 0,
+      "metric": "markerless_test_functions"
+    }
+  ],
+  "compatibility_examples": [
+    "tests/integration/infrastructure/quarantine/test_unified_quarantine_partition_compat.py"
+  ],
+  "compatibility_files": [
+    "tests/integration/infrastructure/quarantine/test_unified_quarantine_partition_compat.py"
+  ],
+  "compatibility_test_files": 1,
   "critical_behavior_envelope_assertion_gap_count": 0,
   "critical_behavior_envelope_count": 6,
   "critical_behavior_envelopes": {
@@ -1175,8 +1192,23 @@
     ]
   },
   "intentional_no_exception_contract": 85,
-  "markerless_examples": [],
-  "markerless_test_functions": 0,
+  "markerless_examples": [
+    "tests/unit/interfaces/cli/commands/test_run_manifest_commands.py:1378",
+    "tests/unit/interfaces/cli/commands/test_run_manifest_commands.py:1390",
+    "tests/unit/interfaces/cli/commands/test_run_manifest_commands.py:1402",
+    "tests/unit/interfaces/cli/commands/test_run_manifest_commands.py:1413",
+    "tests/unit/interfaces/cli/commands/test_run_manifest_commands.py:1426",
+    "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:17",
+    "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:37",
+    "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:48",
+    "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:58",
+    "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:68",
+    "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:78",
+    "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:92",
+    "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:107",
+    "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:130"
+  ],
+  "markerless_test_functions": 14,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -1185,8 +1217,10 @@
     "marked_test_files": 67,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
-    "test_files": 67,
-    "unmarked_test_files": []
+    "test_files": 68,
+    "unmarked_test_files": [
+      "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py"
+    ]
   },
   "report": {
     "assertion_branch_reachability": {
@@ -1392,14 +1426,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "617",
+        "line": "623",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_name_accepts_valid"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "638",
+        "line": "670",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_completion_running_allows_none_timestamp"
@@ -1462,7 +1496,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "490",
+        "line": "503",
         "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_expire_gold_empty_key_rows"
@@ -1581,7 +1615,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1293",
+        "line": "1303",
         "path": "tests/unit/infrastructure/quarantine/test_unified_quarantine.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_does_nothing"
@@ -1777,7 +1811,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "145",
+        "line": "146",
         "path": "tests/unit/interfaces/test_issue_10520_interfaces_cli.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_formatters_optional_export_and_quarantine"
@@ -1850,12 +1884,16 @@
       "tests/unit/composition/test_observability_contract.py:431",
       "tests/unit/composition/factories/storage/test_health_mixin.py:72",
       "tests/unit/composition/factories/storage/test_health_mixin.py:103",
-      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:617"
+      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:623"
     ],
     "assertless_total_candidates": 85,
-    "compatibility_examples": [],
-    "compatibility_files": [],
-    "compatibility_test_files": 0,
+    "compatibility_examples": [
+      "tests/integration/infrastructure/quarantine/test_unified_quarantine_partition_compat.py"
+    ],
+    "compatibility_files": [
+      "tests/integration/infrastructure/quarantine/test_unified_quarantine_partition_compat.py"
+    ],
+    "compatibility_test_files": 1,
     "critical_behavior_envelope_assertion_gap_count": 0,
     "critical_behavior_envelope_count": 6,
     "critical_behavior_envelopes": {
@@ -2025,8 +2063,23 @@
         ".yml"
       ]
     },
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/interfaces/cli/commands/test_run_manifest_commands.py:1378",
+      "tests/unit/interfaces/cli/commands/test_run_manifest_commands.py:1390",
+      "tests/unit/interfaces/cli/commands/test_run_manifest_commands.py:1402",
+      "tests/unit/interfaces/cli/commands/test_run_manifest_commands.py:1413",
+      "tests/unit/interfaces/cli/commands/test_run_manifest_commands.py:1426",
+      "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:17",
+      "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:37",
+      "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:48",
+      "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:58",
+      "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:68",
+      "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:78",
+      "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:92",
+      "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:107",
+      "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:130"
+    ],
+    "markerless_test_functions": 14,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2035,8 +2088,10 @@
       "marked_test_files": 67,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
-      "test_files": 67,
-      "unmarked_test_files": []
+      "test_files": 68,
+      "unmarked_test_files": [
+        "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py"
+      ]
     },
     "root": ".",
     "test_file_inventory": {
@@ -2044,8 +2099,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3027,
-      "test_python_file_count": 3262,
+      "test_glob_file_count": 3033,
+      "test_python_file_count": 3269,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2086,23 +2141,38 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3027,
-    "total_test_functions": 29603,
+    "total_test_files": 3033,
+    "total_test_functions": 29661,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "33d61b1f625b1b45e70857a6a6ceaf81c1dd4904bad4c3b38ef7d4d2f1bd4fca",
+  "source_tree_sha256": "2de2da03bcd2c6198eaec8405ed10c12ab8fb055c25436d9267661cd78898fe2",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
-    "compatibility_test_files": 0,
+    "compatibility_test_files": 1,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 85,
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/interfaces/cli/commands/test_run_manifest_commands.py:1378",
+      "tests/unit/interfaces/cli/commands/test_run_manifest_commands.py:1390",
+      "tests/unit/interfaces/cli/commands/test_run_manifest_commands.py:1402",
+      "tests/unit/interfaces/cli/commands/test_run_manifest_commands.py:1413",
+      "tests/unit/interfaces/cli/commands/test_run_manifest_commands.py:1426",
+      "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:17",
+      "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:37",
+      "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:48",
+      "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:58",
+      "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:68",
+      "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:78",
+      "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:92",
+      "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:107",
+      "tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py:130"
+    ],
+    "markerless_test_functions": 14,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
@@ -2112,8 +2182,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3027,
-    "test_python_file_count": 3262,
+    "test_glob_file_count": 3033,
+    "test_python_file_count": 3269,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2154,8 +2224,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3027,
-  "total_test_functions": 29603,
+  "total_test_files": 3033,
+  "total_test_functions": 29661,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

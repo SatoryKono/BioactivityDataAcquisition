@@ -114,6 +114,35 @@ def seed_keys() -> pl.DataFrame:
     )
 
 
+class TestDependencyCoordinatorInitialization:
+    """Tests for initialization logic and backward compatibility."""
+
+    def test_dependency_coordinator_legacy_kwargs_deprecation(
+        self,
+        mock_logger: LoggerPort,
+    ) -> None:
+        """Test that legacy kwargs trigger a DeprecationWarning but still initialize correctly."""
+        seed_key_resolver = create_seed_key_resolver(mock_logger)
+        chained_key_resolver = create_chained_key_resolver(mock_logger)
+        progress_service = DependencyProgressService(mock_logger)
+        result_service = DependencyResultService(mock_logger)
+
+        with pytest.warns(DeprecationWarning, match="deprecated"):
+            coordinator = DependencyCoordinatorService(
+                logger=mock_logger,
+                seed_key_resolver=seed_key_resolver,
+                chained_key_resolver=chained_key_resolver,
+                progress_service=progress_service,
+                result_service=result_service,
+                clock=FixedClock(datetime(2026, 4, 28, 12, 0, tzinfo=UTC)),
+            )
+
+        assert coordinator._seed_key_resolver is seed_key_resolver
+        assert coordinator._chained_key_resolver is chained_key_resolver
+        assert coordinator._progress_service is progress_service
+        assert coordinator._result_service is result_service
+
+
 class TestGetEffectiveKeys:
     """Tests for _get_effective_keys method."""
 
