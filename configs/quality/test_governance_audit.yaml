@@ -81,6 +81,15 @@ budget_ratchet:
   expected_direction: downward
   refreshed_on: "2026-07-01"
   stream_g_owner_notes:
+    - issue: "#12119"
+      owner: test-governance
+      status: compatibility_inventory_reclassified_quarantine_partition_layouts_0
+      note:
+        Renamed the unified quarantine partition-layout integration guard out of a compatibility-style
+        filename because it validates active partition-pushdown behavior on both partitioned and legacy
+        non-partitioned Delta tables rather than preserving a deprecated import or compatibility path. The
+        live compatibility filename inventory returned to zero; compatibility_test_file_max stays
+        ratcheted at 0. No technical-debt budget was increased.
     - issue: "#5763"
       owner: test-governance
       status: telemetry_governance_baseline_refresh_then_duplicate_names_zeroed
@@ -1005,6 +1014,9 @@ repo_backed_unit_test_exceptions:
     and run in the repo-backed-unit lane, not unit-fast.
   review_date: "2026-09-30"
   entries:
+    - path: tests/unit/repo_backed/scripts/engineering/ci/test_pr_lane_results.py
+      target_lane: repo-backed-unit
+      protected_surface: scripts/engineering/ci/pr_lane_results.py coordinator gate-result and affected-test selection contracts
     - path: tests/unit/repo_backed/scripts/ai/agent_tools/test_install_contracts.py
       target_lane: repo-backed-unit
       protected_surface: pyproject.toml + uv.lock + scripts/engineering/dev/setup_env_{wsl.sh,windows.ps1} optional AgentDebugX/ProofAgent installer contracts

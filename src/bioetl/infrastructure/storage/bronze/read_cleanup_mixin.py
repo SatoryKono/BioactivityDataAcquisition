@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
@@ -12,6 +13,16 @@ import orjson
 import zstandard as zstd
 
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.storage.bronze.cleanup_support import (
+    date_dir_name_is_older,
+    find_old_date_dirs,
+    is_owned_artifact,
+    real_root,
+    safe_rmdir,
+    safe_unlink,
+    scan_dir_entries,
+    validate_scope_filter,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -92,32 +103,38 @@ class BronzeWriterReadCleanupMixin:
         )
         return result
 
+    def _log_cleanup_skip(self, path: str, reason: str) -> None:
+        """Emit a diagnostic for a skipped cleanup candidate."""
+        self._logger.warning(
+            "bronze_cleanup_skip",
+            path=path,
+            reason=reason,
+        )
+
     def _find_old_date_dirs(
         self,
         cutoff_str: str,
         provider: str | None = None,
         entity: str | None = None,
     ) -> list[Path]:
-        """Find date directories older than cutoff."""
-        if not self.base_path.exists():
-            return []
-
-        pattern = f"{provider or '*'}/{entity or '*'}"
-        old_dirs: list[Path] = []
-
-        for entity_dir in self.base_path.glob(pattern):
-            if not entity_dir.is_dir():
-                continue
-
-            for date_dir in entity_dir.iterdir():
-                if self._is_old_date_dir(date_dir, cutoff_str):
-                    old_dirs.append(date_dir)
-
-        return old_dirs
+        """Find date directories older than cutoff without following links."""
+        return find_old_date_dirs(
+            self.base_path,
+            flat_structure=self._flat_structure,
+            cutoff_str=cutoff_str,
+            provider=provider,
+            entity=entity,
+            on_skip=self._log_cleanup_skip,
+            on_flat_filter=lambda: self._logger.warning(
+                "bronze_cleanup_flat_scope_filter",
+                provider=provider,
+                entity=entity,
+            ),
+        )
 
     def _is_old_date_dir(self, path: Path, cutoff_str: str) -> bool:
-        """Check if path is a date directory older than cutoff."""
-        return path.is_dir() and len(path.name) == 10 and path.name < cutoff_str
+        """Check if path is a canonical date directory older than cutoff."""
+        return date_dir_name_is_older(path.name, cutoff_str)
 
     def _cleanup_old_files_sync(
         self,
@@ -125,41 +142,77 @@ class BronzeWriterReadCleanupMixin:
         dry_run: bool,
         provider: str | None,
         entity: str | None,
-    ) -> tuple[int, int, int]:
+    ) -> tuple[int, int, int, int, int]:
         """Sync body for cleanup_old_files with blocking Path I/O."""
-        files, bytes_total, dirs = 0, 0, 0
+        files = bytes_total = dirs = skipped_files = skipped_dirs = 0
+        root_abs = Path(os.path.abspath(self.base_path))  # noqa: PTH100
+        root_real = real_root(self.base_path)
 
         for date_dir in self._find_old_date_dirs(cutoff_str, provider, entity):
-            removed_files, removed_bytes = self._remove_old_dir_files(
+            removed_files, removed_bytes, skipped = self._remove_old_dir_files(
                 date_dir=date_dir,
                 dry_run=dry_run,
+                root_abs=root_abs,
+                root_real=root_real,
             )
             files += removed_files
             bytes_total += removed_bytes
-            if dry_run or not any(date_dir.iterdir()):
+            skipped_files += skipped
+            if dry_run:
+                if skipped == 0:
+                    dirs += 1
+                else:
+                    skipped_dirs += 1
+            elif safe_rmdir(date_dir, root_abs, root_real):
                 dirs += 1
-                if not dry_run:
-                    date_dir.rmdir()
+            else:
+                skipped_dirs += 1
+                self._log_cleanup_skip(str(date_dir), "rmdir_refused")
 
-        return files, bytes_total, dirs
+        return files, bytes_total, dirs, skipped_files, skipped_dirs
 
     def _remove_old_dir_files(
         self,
         *,
         date_dir: Path,
         dry_run: bool,
-    ) -> tuple[int, int]:
-        """Remove all files from one old Bronze date directory."""
+        root_abs: Path,
+        root_real: Path,
+    ) -> tuple[int, int, int]:
+        """Remove owned Bronze artifacts from one old date directory."""
         files_removed = 0
         bytes_removed = 0
-        for file_path in date_dir.glob("*"):
-            if not file_path.is_file():
+        files_skipped = 0
+        entries = scan_dir_entries(date_dir)
+        if entries is None:
+            return 0, 0, 1
+        for entry in entries:
+            file_path = Path(entry.path)
+            try:
+                is_file = entry.is_file(follow_symlinks=False)
+            except OSError:
+                is_file = False
+            if not is_file or not is_owned_artifact(entry.name):
+                self._log_cleanup_skip(entry.path, "unknown_artifact")
+                files_skipped += 1
                 continue
-            bytes_removed += file_path.stat().st_size
-            files_removed += 1
-            if not dry_run:
-                file_path.unlink()
-        return files_removed, bytes_removed
+            try:
+                size = entry.stat(follow_symlinks=False).st_size
+            except OSError:
+                self._log_cleanup_skip(entry.path, "stat_error")
+                files_skipped += 1
+                continue
+            if dry_run:
+                files_removed += 1
+                bytes_removed += size
+                continue
+            if safe_unlink(file_path, root_abs, root_real):
+                files_removed += 1
+                bytes_removed += size
+            else:
+                self._log_cleanup_skip(entry.path, "unlink_refused")
+                files_skipped += 1
+        return files_removed, bytes_removed, files_skipped
 
     async def cleanup_old_files(
         self,
@@ -169,8 +222,16 @@ class BronzeWriterReadCleanupMixin:
         entity: str | None = None,
     ) -> dict[str, int]:
         """Remove Bronze files older than cutoff date."""
+        validate_scope_filter(provider, "provider")
+        validate_scope_filter(entity, "entity")
         cutoff_str = cutoff_date.strftime("%Y-%m-%d")
-        files, bytes_total, dirs = await asyncio.to_thread(
+        (
+            files,
+            bytes_total,
+            dirs,
+            skipped_files,
+            skipped_dirs,
+        ) = await asyncio.to_thread(
             self._cleanup_old_files_sync,
             cutoff_str,
             dry_run,
@@ -185,6 +246,8 @@ class BronzeWriterReadCleanupMixin:
             files_removed=files,
             bytes_freed=bytes_total,
             dirs_removed=dirs,
+            files_skipped=skipped_files,
+            dirs_skipped=skipped_dirs,
         )
         if not dry_run and files > 0:
             cleanup_labels = {"operation": "cleanup"}
@@ -202,6 +265,8 @@ class BronzeWriterReadCleanupMixin:
             "files_removed": files,
             "bytes_freed": bytes_total,
             "directories_removed": dirs,
+            "files_skipped": skipped_files,
+            "directories_skipped": skipped_dirs,
         }
 
     def preview_cleanup(

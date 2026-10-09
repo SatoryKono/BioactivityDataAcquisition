@@ -669,13 +669,14 @@ class TestBronzeWriterCleanupFiltered:
         )
 
         # Setup
+        artifact = "batch_2024-01-01_12345678-1234-5678-1234-567812345678.jsonl.zst"
         p1_e1 = tmp_path / "p1" / "e1" / "2024-01-01"
         p1_e1.mkdir(parents=True)
-        (p1_e1 / "file").touch()
+        (p1_e1 / artifact).touch()
 
         p2_e1 = tmp_path / "p2" / "e1" / "2024-01-01"
         p2_e1.mkdir(parents=True)
-        (p2_e1 / "file").touch()
+        (p2_e1 / artifact).touch()
 
         cutoff = datetime(2024, 6, 1, tzinfo=UTC)
 

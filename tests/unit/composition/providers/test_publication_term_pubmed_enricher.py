@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.application.pipelines.pubmed.publication_term_enricher import (
-    PubMedPublicationTermPayloadEnricher,
+    PubMedPublicationTermEnrichmentService,
     parse_pubmed_mesh_xml,
     pubmed_term_payload,
 )
@@ -87,7 +87,7 @@ class _PubmedSource:
 @pytest.mark.asyncio
 async def test_enrich_many_attaches_mesh_terms_from_raw_xml() -> None:
     pubmed = _PubmedSource([{"pmid": "17827018", "_raw_xml": _SAMPLE_PUBMED_XML}])
-    enricher = PubMedPublicationTermPayloadEnricher(
+    enricher = PubMedPublicationTermEnrichmentService(
         pubmed_source=pubmed,  # type: ignore[arg-type]
         logger=MagicMock(),
     )
@@ -139,7 +139,7 @@ async def test_enrich_many_enters_pubmed_source_context() -> None:
                 yield record
 
     pubmed = _ContextPubmed()
-    enricher = PubMedPublicationTermPayloadEnricher(
+    enricher = PubMedPublicationTermEnrichmentService(
         pubmed_source=pubmed,  # type: ignore[arg-type]
         logger=MagicMock(),
     )
@@ -158,7 +158,7 @@ async def test_enrich_many_keeps_original_when_pubmed_fetch_fails() -> None:
             yield {}  # pragma: no cover
 
     logger = MagicMock()
-    enricher = PubMedPublicationTermPayloadEnricher(
+    enricher = PubMedPublicationTermEnrichmentService(
         pubmed_source=_FailingPubmed(),  # type: ignore[arg-type]
         logger=logger,
     )
@@ -205,7 +205,7 @@ async def test_enrich_many_propagates_programming_errors() -> None:
             yield {}
 
     logger = MagicMock()
-    enricher = PubMedPublicationTermPayloadEnricher(BrokenSource(), logger)
+    enricher = PubMedPublicationTermEnrichmentService(BrokenSource(), logger)
     with pytest.raises(TypeError, match="invalid provider contract"):
         await enricher.enrich_many([{"publication_id": "CHEMBL1", "pubmed_id": "1"}])
     logger.warning.assert_not_called()
@@ -236,7 +236,7 @@ def test_enricher_factory_binds_email_and_metrics_to_adapter(monkeypatch, email_
         assembly_support=support,
         pipeline_config=config,
     )
-    assert isinstance(enricher, PubMedPublicationTermPayloadEnricher)
+    assert isinstance(enricher, PubMedPublicationTermEnrichmentService)
     assert builder.call_args.kwargs["email"] == f"{email_source}@example.test"
     assert builder.call_args.kwargs["metrics"] is metrics
     assert (
@@ -297,7 +297,7 @@ async def test_provider_ignores_invalid_pmids_and_empty_terms():
         ]
     )
     original = {"publication_id": "CHEMBL1", "pubmed_id": "1"}
-    enricher = PubMedPublicationTermPayloadEnricher(source, MagicMock())
+    enricher = PubMedPublicationTermEnrichmentService(source, MagicMock())
     enriched = await enricher.enrich_many([original])
     assert enriched == [original]
     assert enriched[0] is original

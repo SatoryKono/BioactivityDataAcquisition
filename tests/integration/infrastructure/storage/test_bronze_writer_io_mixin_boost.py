@@ -293,13 +293,13 @@ class TestCleanupOldFiles:
 
         old_dir = tmp_path / "chembl" / "activity" / "2024-12-01"
         old_dir.mkdir(parents=True)
-        (old_dir / "batch.jsonl.zst").write_bytes(b"data")
+        (old_dir / "batch_2024-12-01_001.jsonl.zst").write_bytes(b"data")
 
         cutoff = datetime(2025, 1, 1, tzinfo=UTC)
         result = await mixin.cleanup_old_files(cutoff, dry_run=True)
 
         # File still exists
-        assert (old_dir / "batch.jsonl.zst").exists()
+        assert (old_dir / "batch_2024-12-01_001.jsonl.zst").exists()
         assert result["files_removed"] == 1
         assert result["bytes_freed"] > 0
 
@@ -310,14 +310,14 @@ class TestCleanupOldFiles:
 
         old_dir = tmp_path / "chembl" / "activity" / "2024-12-01"
         old_dir.mkdir(parents=True)
-        (old_dir / "batch1.jsonl.zst").write_bytes(b"data1")
-        (old_dir / "batch2.jsonl.zst").write_bytes(b"data2")
+        (old_dir / "batch_2024-12-01_001.jsonl.zst").write_bytes(b"data1")
+        (old_dir / "batch_2024-12-01_002.jsonl.zst").write_bytes(b"data2")
 
         cutoff = datetime(2025, 1, 1, tzinfo=UTC)
         result = await mixin.cleanup_old_files(cutoff, dry_run=False)
 
         assert result["files_removed"] == 2
-        assert not (old_dir / "batch1.jsonl.zst").exists()
+        assert not (old_dir / "batch_2024-12-01_001.jsonl.zst").exists()
 
     @pytest.mark.asyncio
     async def test_cleanup_increments_metrics(self, tmp_path: Path) -> None:
@@ -328,7 +328,7 @@ class TestCleanupOldFiles:
 
         old_dir = tmp_path / "chembl" / "activity" / "2024-12-01"
         old_dir.mkdir(parents=True)
-        (old_dir / "batch.jsonl.zst").write_bytes(b"data")
+        (old_dir / "batch_2024-12-01_001.jsonl.zst").write_bytes(b"data")
 
         cutoff = datetime(2025, 1, 1, tzinfo=UTC)
         await mixin.cleanup_old_files(cutoff, dry_run=False)
@@ -360,7 +360,9 @@ class TestPreviewCleanupBronze:
         provider_path = tmp_path / "chembl" / "activity"
         provider_path.mkdir(parents=True)
         (provider_path / "2025-01-15").mkdir()
-        (provider_path / "2025-01-15" / "batch.jsonl.zst").write_bytes(b"data")
+        (provider_path / "2025-01-15" / "batch_2024-12-01_001.jsonl.zst").write_bytes(
+            b"data"
+        )
 
         result = mixin.preview_cleanup(provider="chembl", entity="activity")
 

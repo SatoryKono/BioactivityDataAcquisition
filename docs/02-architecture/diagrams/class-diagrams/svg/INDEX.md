@@ -1,6 +1,6 @@
 # BioETL Diagrams — SVG Index
 
-_Generated: 2026-10-01T21:18:22+03:00_
+_Generated: 2026-10-08T18:25:06+03:00_
 
 ## 01adomain Ports Method Catalog
 
@@ -650,13 +650,13 @@ _Generated: 2026-10-01T21:18:22+03:00_
 
 ---
 
-## Pkg Infrastructure Adapters Http Part 1
+## Pkg Infrastructure Adapters Http Part1
 
 ![90-pkg-infrastructure-adapters-http-part1](./90-pkg-infrastructure-adapters-http-part1.svg)
 
 ---
 
-## Pkg Infrastructure Adapters Http Part 2
+## Pkg Infrastructure Adapters Http Part2
 
 ![90-pkg-infrastructure-adapters-http-part2](./90-pkg-infrastructure-adapters-http-part2.svg)
 

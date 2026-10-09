@@ -50,7 +50,10 @@ from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
-from bioetl.application.core.record_processor import RecordProcessor
+from bioetl.application.core.record_processor import (
+    RecordProcessor,
+    RecordProcessorWriteDependencies,
+)
 from bioetl.application.core.record_processor_config import (
     ContentHashPolicyByVersion,
     ContentHashVersionPolicy,
