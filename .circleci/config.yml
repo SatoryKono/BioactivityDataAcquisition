@@ -2576,8 +2576,7 @@ jobs:
               fi
               base_ref="origin/${BASE_REF}"
               if [[ "$(git rev-parse --is-shallow-repository)" == "true" ]]; then
-                git fetch --no-tags --unshallow origin \
-                  "${BASE_REF}:refs/remotes/origin/${BASE_REF}" "$(git rev-parse HEAD)"
+                git fetch --unshallow origin
               fi
               git fetch --no-tags origin "${BASE_REF}:refs/remotes/origin/${BASE_REF}"
               git merge-base "${base_ref}" HEAD >/dev/null

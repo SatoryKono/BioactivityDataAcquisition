@@ -6,6 +6,7 @@ from collections.abc import AsyncIterator, Awaitable, Callable
 
 from bioetl.application.core.derived_scan_budget import bounded_source_records
 from bioetl.application.core.publication_term_runtime import publication_pubmed_id
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.ports import PublicationTermEnrichmentPort
 from bioetl.domain.types import BronzeRecord
 
@@ -47,7 +48,10 @@ async def _attach_pubmed_payloads(
     ]
     if not need:
         return records
-    enriched = list(await enricher.enrich_many(need))
+    try:
+        enriched = list(await enricher.enrich_many(need))
+    except (BioETLError, OSError, RuntimeError, ValueError):
+        return records
     if len(enriched) != len(need):
         return records
     replacements = {

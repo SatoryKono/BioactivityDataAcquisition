@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from contextlib import AsyncExitStack
 from typing import TYPE_CHECKING
+from xml.etree.ElementTree import Element  # nosec B405 - see suppression registry
 
 import defusedxml.ElementTree as defused_ET
 from defusedxml.common import DefusedXmlException
@@ -38,6 +39,10 @@ def parse_pubmed_mesh_xml(
     ):
         return [], []
 
+    return _mesh_headings_from_xml(root), _keywords_from_xml(root)
+
+
+def _mesh_headings_from_xml(root: Element) -> list[dict[str, object]]:
     headings: list[dict[str, object]] = []
     for heading in root.findall(".//MeshHeading"):
         descriptor = heading.find("DescriptorName")
@@ -46,11 +51,7 @@ def parse_pubmed_mesh_xml(
         name = (descriptor.text or "").strip()
         if not name:
             continue
-        qualifiers: list[dict[str, str]] = []
-        for qualifier in heading.findall("QualifierName"):
-            qualifier_name = (qualifier.text or "").strip()
-            if qualifier_name:
-                qualifiers.append({"name": qualifier_name})
+        qualifiers = _qualifier_names(heading)
         headings.append(
             {
                 "descriptor_name": name,
@@ -58,13 +59,25 @@ def parse_pubmed_mesh_xml(
                 "qualifiers": qualifiers,
             }
         )
+    return headings
 
+
+def _qualifier_names(heading: Element) -> list[dict[str, str]]:
+    qualifiers: list[dict[str, str]] = []
+    for qualifier in heading.findall("QualifierName"):
+        qualifier_name = (qualifier.text or "").strip()
+        if qualifier_name:
+            qualifiers.append({"name": qualifier_name})
+    return qualifiers
+
+
+def _keywords_from_xml(root: Element) -> list[str]:
     keywords: list[str] = []
     for keyword in root.findall(".//Keyword"):
         text = (keyword.text or "").strip()
         if text:
             keywords.append(text)
-    return headings, keywords
+    return keywords
 
 
 def pubmed_term_payload(record: BronzeRecord) -> tuple[object, object]:
@@ -175,5 +188,5 @@ class PubMedPublicationTermPayloadEnricher:
                 error=str(exc),
                 pmid_count=len(pmids),
             )
-            return list(records)
+            raise
         return _attach_pubmed_terms(records, pubmed_by_pmid)

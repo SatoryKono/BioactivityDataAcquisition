@@ -37,6 +37,11 @@ import pytest
 from bioetl.application.core.publication_term_data_source import (
     PublicationTermDataSource,
 )
+from bioetl.application.core.publication_term_enrichment import _attach_pubmed_payloads
+from bioetl.application.core.publication_term_runtime import (
+    extract_terms_from_publication,
+)
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.types import HealthStatus
 
 
@@ -982,6 +987,78 @@ class _RecordingEnricher:
 @pytest.mark.unit
 class TestPublicationTermPubmedEnricherHook:
     """Optional PubMed payload enricher is used only when extract is empty."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "error_type", [BioETLError, OSError, RuntimeError, ValueError]
+    )
+    async def test_expected_enrichment_failure_preserves_original_records(
+        self, error_type
+    ):
+        records = [
+            {"publication_id": "CHEMBL1", "pubmed_id": "1"},
+            SAMPLE_DOCUMENT_WITH_TERMS,
+        ]
+        enricher = AsyncMock()
+        enricher.enrich_many.side_effect = error_type("PubMed unavailable")
+
+        prepared = await _attach_pubmed_payloads(
+            records, extract_terms=extract_terms_from_publication, enricher=enricher
+        )
+
+        assert prepared is records
+        enricher.enrich_many.assert_awaited_once_with([records[0]])
+
+    @pytest.mark.asyncio
+    async def test_enrichment_failure_preserves_terms_and_continues_next_batch(
+        self, monkeypatch
+    ):
+        monkeypatch.setattr(
+            "bioetl.application.core.publication_term_enrichment."
+            "PUBLICATION_TERM_PUBMED_ENRICH_BATCH_SIZE",
+            2,
+        )
+        later_record = {"publication_id": "CHEMBL2", "pubmed_id": "2"}
+        source = MockDataSource(
+            documents=[
+                {"publication_id": "CHEMBL1", "pubmed_id": "1"},
+                SAMPLE_DOCUMENT_WITH_TERMS,
+                later_record,
+            ]
+        )
+        enricher = AsyncMock()
+        enricher.enrich_many.side_effect = [
+            OSError("PubMed unavailable"),
+            [{**later_record, "keywords": ["recovered"]}],
+        ]
+        wrapper = PublicationTermDataSource(
+            data_source=source, term_payload_enricher=enricher
+        )
+
+        terms = await _collect_async(wrapper.fetch("publication_term"))
+
+        expected = extract_terms_from_publication(
+            SAMPLE_DOCUMENT_WITH_TERMS, SAMPLE_DOCUMENT_WITH_TERMS["publication_id"]
+        ) + extract_terms_from_publication(
+            {**later_record, "keywords": ["recovered"]}, "CHEMBL2"
+        )
+        assert terms == expected
+        assert enricher.enrich_many.await_count == 2
+        assert enricher.enrich_many.await_args_list[1].args == ([later_record],)
+
+    @pytest.mark.asyncio
+    async def test_enrichment_programming_error_propagates(self):
+        enricher = AsyncMock()
+        enricher.enrich_many.side_effect = TypeError("invalid provider contract")
+        wrapper = PublicationTermDataSource(
+            data_source=MockDataSource(
+                documents=[{"publication_id": "CHEMBL1", "pubmed_id": "1"}]
+            ),
+            term_payload_enricher=enricher,
+        )
+
+        with pytest.raises(TypeError, match="invalid provider contract"):
+            await _collect_async(wrapper.fetch("publication_term"))
 
     @pytest.mark.asyncio
     async def test_enricher_attaches_mesh_when_pubmed_id_present(self):

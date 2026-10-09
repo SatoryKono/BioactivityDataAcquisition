@@ -90,17 +90,25 @@ def record_flow_invariants(
     pipeline_metrics.record_pipeline_stage_expected(
         stage="gold", expected=gold_expected
     )
+    gold_terminal = gold + gold_excluded_by_contract
     ingestion_backlog = max(fetched - bronze, 0)
     validation_backlog = quarantined
-    output_backlog = max(silver - gold - gold_excluded_by_contract, 0)
-    for stage, count in (
-        ("ingestion", ingestion_backlog),
-        ("validation", validation_backlog),
-        ("output", output_backlog),
-    ):
-        pipeline_metrics.record_stage_backlog(
-            run_type=run_type, stage=stage, count=count
-        )
+    output_backlog = max(silver - gold_terminal, 0)
+    pipeline_metrics.record_stage_backlog(
+        run_type=run_type,
+        stage="ingestion",
+        count=ingestion_backlog,
+    )
+    pipeline_metrics.record_stage_backlog(
+        run_type=run_type,
+        stage="validation",
+        count=validation_backlog,
+    )
+    pipeline_metrics.record_stage_backlog(
+        run_type=run_type,
+        stage="output",
+        count=output_backlog,
+    )
     _record_stage_lag_gauges(
         host=host,
         pipeline_metrics=pipeline_metrics,
@@ -195,16 +203,21 @@ def _record_stage_lag_gauges(
         lag_seconds = 0.0
     else:
         lag_seconds = max(0.0, (current_time_fn() - started_at).total_seconds())
-    for stage, backlog in (
-        ("ingestion", ingestion_backlog),
-        ("validation", validation_backlog),
-        ("output", output_backlog),
-    ):
-        pipeline_metrics.record_stage_lag_seconds(
-            run_type=run_type,
-            stage=stage,
-            seconds=lag_seconds if backlog > 0 else 0.0,
-        )
+    pipeline_metrics.record_stage_lag_seconds(
+        run_type=run_type,
+        stage="ingestion",
+        seconds=lag_seconds if ingestion_backlog > 0 else 0.0,
+    )
+    pipeline_metrics.record_stage_lag_seconds(
+        run_type=run_type,
+        stage="validation",
+        seconds=lag_seconds if validation_backlog > 0 else 0.0,
+    )
+    pipeline_metrics.record_stage_lag_seconds(
+        run_type=run_type,
+        stage="output",
+        seconds=lag_seconds if output_backlog > 0 else 0.0,
+    )
 
 
 __all__ = ["record_flow_invariants", "record_output_ready"]
