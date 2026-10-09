@@ -248,8 +248,7 @@ def test_pr_gate_coordinator_materializes_on_every_pr_without_duplicate_owners()
     catalog = _load_yaml(ROOT / "configs" / "quality" / "github_required_checks.yaml")
     gate_ids = {gate["id"] for gate in catalog["gates"]}
     aggregate_needs = set(coordinator["jobs"]["pr-gate-complete"]["needs"])
-    assert aggregate_needs == {"classify-changes", "fast-governance", "class-lane"}
-    assert gate_ids
+    assert gate_ids <= aggregate_needs
     assert {"commit-governance", "docs-governance"} <= gate_ids
     assert "pr-gate-complete" in policy_doc
     assert "configs/quality/github_required_checks.yaml" in policy_doc
@@ -507,19 +506,30 @@ def test_dependency_review_workflow_is_pr_scoped_and_sha_pinned() -> None:
     workflow_path = ROOT / ".github/workflows/dependency-review.yml"
     workflow = _load_yaml(workflow_path)
     triggers = cast(dict[str, Any], workflow.get("on", workflow.get(True)))
-    coordinator = _load_yaml(ROOT / ".github/workflows/pr-required.yml")
+    pull_request = triggers["pull_request"]
+    uses = _step_uses(workflow, "dependency-review")
     review_sha = next(iter(policy.ALLOWED_USES["actions/dependency-review-action"]))
-    review_step = next(
-        step
-        for step in coordinator["jobs"]["fast-governance"]["steps"]
-        if str(step.get("uses", "")).startswith("actions/dependency-review-action@")
-    )
+    checkout_sha = "3d3c42e5aac5ba805825da76410c181273ba90b1"
 
     assert workflow["permissions"] == {"contents": "read"}
-    assert set(triggers) == {"workflow_dispatch"}
-    assert review_step["uses"] == f"actions/dependency-review-action@{review_sha}"
+    assert set(triggers) == {"pull_request"}
+    assert "uv.lock" in pull_request["paths"]
+    assert "pyproject.toml" in pull_request["paths"]
+    for manifest_pattern in (
+        "package.json",
+        "package-lock.json",
+        "**/package.json",
+        "**/package-lock.json",
+    ):
+        assert manifest_pattern in pull_request["paths"]
+    assert f"actions/checkout@{checkout_sha}" in uses
+    assert f"actions/dependency-review-action@{review_sha}" in uses
+    review_step = next(
+        step
+        for step in workflow["jobs"]["dependency-review"]["steps"]
+        if str(step.get("uses", "")).startswith("actions/dependency-review-action@")
+    )
     assert review_step["with"]["fail-on-severity"] == "high"
-    assert review_step["if"] == "github.event_name == 'pull_request'"
 
 
 def test_security_workflow_runs_gitleaks_and_osv_scanner() -> None:
@@ -679,13 +689,9 @@ def test_scorecard_workflow_is_non_blocking_weekly_baseline() -> None:
     scorecard_sha = next(iter(policy.ALLOWED_USES["ossf/scorecard-action"]))
     jobs = cast(dict[str, dict[str, Any]], workflow["jobs"])
 
-    nightly = _load_yaml(ROOT / ".github/workflows/nightly.yml")
     assert "pull_request" not in triggers
-    assert "schedule" not in triggers
-    assert "workflow_call" in triggers
+    assert "schedule" in triggers
     assert "workflow_dispatch" in triggers
-    assert nightly["jobs"]["scorecard"]["uses"].endswith("scorecard.yml")
-    assert nightly["jobs"]["scorecard"]["if"] == "needs.clock.outputs.dow == 'Mon'"
     assert f"ossf/scorecard-action@{scorecard_sha}" in _step_uses(workflow, "analysis")
     upload = next(
         step
@@ -891,25 +897,22 @@ def test_zizmor_workflow_is_path_filtered_and_sha_pinned() -> None:
         if str(step.get("uses", "")).startswith("zizmorcore/zizmor-action@")
     )
     labeler = (ROOT / ".github/workflows/labeler.yml").read_text(encoding="utf-8")
+    zizmor_config = (ROOT / ".github/zizmor.yml").read_text(encoding="utf-8")
 
-    coordinator = (ROOT / ".github/workflows/pr-required.yml").read_text(
-        encoding="utf-8"
-    )
-    assert set(triggers) == {"workflow_call", "workflow_dispatch"}
-    assert "pull_request" not in triggers
-    assert "push" not in triggers
+    assert "pull_request" in triggers
+    assert "push" in triggers
+    assert triggers["push"]["branches"] == ["main"]
+    assert ".github/workflows/**" in triggers["pull_request"]["paths"]
+    assert ".github/actions/**" in triggers["pull_request"]["paths"]
+    assert ".github/workflows/**" in triggers["push"]["paths"]
     assert zizmor_step["uses"] == f"zizmorcore/zizmor-action@{zizmor_sha}"
-    assert f"zizmorcore/zizmor-action@{zizmor_sha}" in coordinator
     assert zizmor_step["with"]["min-severity"] == "high"
     assert zizmor_step["with"]["min-confidence"] == "high"
     assert zizmor_step["with"]["version"] == "1.29.0"
     assert "pull_request_target removed (#11234)" in labeler
-    assert "dangerous-triggers exception was dropped in #12071" in labeler
+    assert "does not checkout untrusted PR HEAD" in labeler
     assert "if: ${{ false }}" in labeler
-    # #12071: with pull_request_target staying off (#11234), the labeler.yml
-    # dangerous-triggers ignore was removed; the policy must carry no ignores.
-    zizmor_policy = _load_yaml(ROOT / ".github/zizmor.yml")
-    assert not zizmor_policy.get("rules")
+    assert ".github/workflows/labeler.yml" in zizmor_config
 
 
 def test_osv_high_critical_gate_ignores_medium_and_fails_high() -> None:
@@ -1238,10 +1241,10 @@ def test_build_provenance_binds_release_files_and_published_ghcr_digest() -> Non
     assert publish["environment"] == "ghcr-publish"
     assert (
         publish["if"]
-        == "github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_call')"
+        == "github.ref == 'refs/heads/main' && github.event_name == 'push'"
     )
     assert release["permissions"] == docker["permissions"] == {"contents": "read"}
-    caller = _load_yaml(ROOT / ".github/workflows/main-integrity.yml")["jobs"]["docker"]
+    caller = _load_yaml(ROOT / ".github/workflows/pr-required.yml")["jobs"]["docker"]
     for permission in ("id-token", "attestations"):
         assert caller["permissions"][permission] == publish["permissions"][permission]
     for name, job in docker["jobs"].items():

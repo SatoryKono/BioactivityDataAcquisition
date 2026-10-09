@@ -38,18 +38,14 @@ surfaces:
   checkpoint:
     description: Runtime checkpoint saves and admin checkpoint workflows are traced.
     files:
-      - path: src/bioetl/application/core/batch_checkpoint_save_observability.py
+      - path: src/bioetl/application/core/batch_checkpoint_recovery_service.py
         required_terms:
-          - CHECKPOINT_TRACER_NAME = "bioetl.checkpoint"
+          - _CHECKPOINT_TRACER_NAME = "bioetl.checkpoint"
           - checkpoint_save
           - bioetl.checkpoint.operation
           - bioetl.checkpoint.scope
           - bioetl.checkpoint.records_processed
           - bioetl.checkpoint.status
-      - path: src/bioetl/application/core/batch_checkpoint_recovery_service.py
-        required_terms:
-          - start_checkpoint_save_span
-          - close_checkpoint_save_span
       - path: src/bioetl/application/services/checkpoint/checkpoint_service.py
         required_terms:
           - TRACER_NAME = "bioetl.checkpoint_admin"

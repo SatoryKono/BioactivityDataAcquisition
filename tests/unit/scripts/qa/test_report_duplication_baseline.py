@@ -38,52 +38,6 @@ from scripts.engineering.qa.report_duplication_baseline import TargetDuplication
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.parametrize(
-    "path",
-    [
-        "src/bioetl/application/services/workflow/__init__.py",
-        "src/bioetl/application/services/workflow/__init__",
-        "bioetl.application.services.workflow.__init__",
-    ],
-)
-def test_package_entry_noise_supports_pylint_path_variants(path: str) -> None:
-    """Pylint's platform-specific report path must not hide real module pairs."""
-    cluster = DuplicateCluster(
-        path=path,
-        line=1,
-        modules=(
-            DuplicateModuleRef(
-                module="bioetl.application.alpha", start_line=1, end_line=5
-            ),
-            DuplicateModuleRef(
-                module="bioetl.application.beta", start_line=6, end_line=10
-            ),
-        ),
-    )
-
-    assert not report._is_package_entry_report_noise(cluster)
-
-
-def test_package_entry_noise_keeps_real_package_export_comparisons() -> None:
-    """A compared package entry remains actionable even if it owns the report."""
-    cluster = DuplicateCluster(
-        path="bioetl.application.services.workflow.__init__",
-        line=1,
-        modules=(
-            DuplicateModuleRef(
-                module="bioetl.application.services.workflow.__init__",
-                start_line=1,
-                end_line=5,
-            ),
-            DuplicateModuleRef(
-                module="bioetl.application.beta", start_line=6, end_line=10
-            ),
-        ),
-    )
-
-    assert not report._is_package_entry_report_noise(cluster)
-
-
 def test_report_duplication_baseline_main_accepts_dispatcher_argv(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

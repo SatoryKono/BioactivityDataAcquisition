@@ -1,3 +1,5 @@
+"""Internal helpers for GenericPipelineFactory orchestration."""
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -40,9 +42,6 @@ from bioetl.composition.factories.pipeline._factory_method_types import (
 )
 from bioetl.composition.factories.pipeline._factory_method_types import (
     resolve_data_source_creator as _resolve_data_source_creator,
-)
-from bioetl.composition.factories.transformer_dependencies import (
-    publication_vocabulary_kwargs,
 )
 from bioetl.composition.factories.pipeline.transformer_dependencies import (
     build_transformer_dependencies,
@@ -109,8 +108,10 @@ def create_transformer_instance(
     contract_policy: ContractPolicyProtocol | None = None,
     dependencies: TransformerDependencyContext | None = None,
 ) -> BaseTransformer | None:
+    """Create transformer instance with resolved dependency context."""
     if transformer_class is None:
         return None
+
     resolved_entity_type = extract_entity_type(pipeline_name)
     resolved_dependencies = (
         dependencies
@@ -132,7 +133,6 @@ def create_transformer_instance(
         silver_filters=silver_filters,
         gold_filters=gold_filters,
         dependencies=resolved_dependencies,
-        **publication_vocabulary_kwargs(transformer_class),
     )
 
 
@@ -141,6 +141,7 @@ def build_factory_services(
     factory_context: _PipelineFactoryContext,
     request: _BuildFactoryServicesRequest,
 ) -> PipelineService:
+    """Build shared pipeline services from context and runtime request values."""
     return build_pipeline_services(
         pipeline_name=factory_context.pipeline_name,
         create_data_source_fn=factory_context.create_data_source_fn,

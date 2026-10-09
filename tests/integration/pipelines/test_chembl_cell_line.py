@@ -15,12 +15,11 @@ Cassettes location: tests/fixtures/vcr/chembl/
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any
 
 import pytest
-
-from tests.helpers.vcr_config import build_base_vcr_config
 
 # VCR cassette directory for ChEMBL pipeline tests
 CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "chembl"
@@ -30,10 +29,12 @@ pytestmark = pytest.mark.integration
 @pytest.fixture(scope="module")
 def vcr_config() -> dict[str, Any]:
     """Configure VCR for ChEMBL Cell Line pipeline tests."""
-    return build_base_vcr_config(
-        cassette_library_dir=CASSETTE_DIR,
-        decode_compressed_response=True,
-    )
+    return {
+        "cassette_library_dir": str(CASSETTE_DIR),
+        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
+        "match_on": ["method", "scheme", "host", "port", "path", "query"],
+        "decode_compressed_response": True,
+    }
 
 
 from bioetl.composition.factories.pipeline.registry import (

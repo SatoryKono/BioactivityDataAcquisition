@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Callable, Mapping
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import date, datetime
 from enum import Enum
@@ -35,11 +35,8 @@ def _construct_unique_mapping(
         return loader.construct_mapping(cast(yaml.MappingNode, node), deep=deep)
 
     seen: set[object] = set()
-    construct_object = cast(
-        Callable[[yaml.Node, bool], object], loader.construct_object
-    )
     for key_node, _ in node.value:
-        key = construct_object(key_node, deep)
+        key: object = loader.construct_object(key_node, deep=deep)
         try:
             already_seen = key in seen
         except TypeError as exc:
@@ -79,8 +76,7 @@ def compute_canonical_yaml_sha256(raw_bytes: bytes) -> str:
     try:
         payload = cast(object, loader.get_single_data())
     finally:
-        dispose: Callable[[], None] = loader.dispose
-        dispose()
+        loader.dispose()
     canonical_payload = _to_canonical_jsonable(payload)
     serialized = json.dumps(
         canonical_payload,

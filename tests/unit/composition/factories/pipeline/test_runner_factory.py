@@ -207,13 +207,7 @@ class TestRunnerFactoryCreate:
 
         def assemble(**kwargs):
             assert policy.is_initialized()
-            data = policy.classification_install.data
-            assert data is not None
-            assert policy.classify_publication_type(
-                "crossref",
-                "journal-article",
-                data=data,
-            )
+            assert policy.classify_publication_type("crossref", "journal-article")
             return runner
 
         with (

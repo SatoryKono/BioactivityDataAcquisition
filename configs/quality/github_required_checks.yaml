@@ -3,7 +3,7 @@
 # coordinator_workflow retain legacy definitions until their retirement in #11930.
 # They are compatibility references, not runnable GitHub Actions declarations.
 schema_version: 1
-version: 3
+version: 2
 aggregator: pr-gate-complete
 coordinator_workflow: .github/workflows/pr-required.yml
 deployment:
@@ -130,12 +130,10 @@ gates:
     owner_workflow: .github/workflows/import-linter.yml
     owner_jobs: [lint, c901-governance, arch-tests, checks-complete]
     legacy_context: checks-complete
-    decision: path_scoped
-    paths:
-      include: [src/**, tests/**, scripts/**, pyproject.toml, uv.lock, .importlinter, configs/**, .github/workflows/import-linter.yml, .github/workflows/pr-required.yml]
-    allowed_results: [success, not_applicable]
-    not_applicable_allowed: true
-    not_applicable_reason_required: true
+    decision: always_required
+    paths: []
+    allowed_results: [success]
+    not_applicable_allowed: false
     artifacts: []
     sha_binding: true
   - id: tests
@@ -143,12 +141,10 @@ gates:
     owner_workflow: .github/workflows/tests.yml
     owner_jobs: [smoke-check, governance-preflight, test-fast, test-matrix, coverage-verify]
     legacy_context: coverage-verify
-    decision: path_scoped
-    paths:
-      include: [src/**, tests/**, scripts/**, pyproject.toml, uv.lock, configs/**, .github/workflows/tests.yml, .github/workflows/pr-required.yml]
-    allowed_results: [success, not_applicable]
-    not_applicable_allowed: true
-    not_applicable_reason_required: true
+    decision: always_required
+    paths: []
+    allowed_results: [success]
+    not_applicable_allowed: false
     artifacts: [coverage-verify]
     sha_binding: true
   - id: type-checking
@@ -156,12 +152,10 @@ gates:
     owner_workflow: .github/workflows/type-checking.yml
     owner_jobs: [type-check]
     legacy_context: type-check
-    decision: path_scoped
-    paths:
-      include: [src/**, pyproject.toml, .github/workflows/type-checking.yml, .github/workflows/pr-required.yml]
-    allowed_results: [success, not_applicable]
-    not_applicable_allowed: true
-    not_applicable_reason_required: true
+    decision: always_required
+    paths: []
+    allowed_results: [success]
+    not_applicable_allowed: false
     artifacts: []
     sha_binding: true
   - id: security
@@ -169,12 +163,10 @@ gates:
     owner_workflow: .github/workflows/security.yml
     owner_jobs: [detect-secrets, pip-audit, bandit, gitleaks, osv-scanner]
     legacy_context: detect-secrets
-    decision: path_scoped
-    paths:
-      include: [src/**, pyproject.toml, uv.lock, .github/**, Dockerfile*, docker-compose*.yml, .github/workflows/security.yml]
-    allowed_results: [success, not_applicable]
-    not_applicable_allowed: true
-    not_applicable_reason_required: true
+    decision: always_required
+    paths: []
+    allowed_results: [success]
+    not_applicable_allowed: false
     artifacts: []
     sha_binding: true
 
@@ -196,12 +188,10 @@ gates:
     owner_workflow: .github/workflows/duplication-complexity.yml
     owner_jobs: [duplication-complexity]
     legacy_context: duplication-complexity
-    decision: path_scoped
-    paths:
-      include: [src/**, scripts/**, tests/**, .github/tooling/**, .github/workflows/duplication-complexity.yml]
-    allowed_results: [success, not_applicable]
-    not_applicable_allowed: true
-    not_applicable_reason_required: true
+    decision: always_required
+    paths: []
+    allowed_results: [success]
+    not_applicable_allowed: false
     artifacts: []
     sha_binding: true
   - id: root-hygiene

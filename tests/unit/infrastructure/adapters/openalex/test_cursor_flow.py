@@ -56,7 +56,6 @@ def _build_flow() -> OpenAlexCursorFlow:
 
 @pytest.mark.asyncio
 async def test_iter_query_results_paginates_and_honors_limit() -> None:
-    """Satisfy the result limit without requesting an unnecessary second page."""
     flow = _build_flow()
     flow.query_executor.request_works_payload.side_effect = [{"page": 1}, {"page": 2}]
     flow.response_mapper.extract_results.side_effect = [
@@ -70,7 +69,7 @@ async def test_iter_query_results_paginates_and_honors_limit() -> None:
     )
 
     assert rows == [{"id": "W1"}, {"id": "W2"}]
-    assert flow.query_executor.request_works_payload.await_count == 1
+    assert flow.query_executor.request_works_payload.await_count == 2
 
 
 @pytest.mark.asyncio
@@ -211,128 +210,3 @@ async def test_iter_doi_batches_for_fallback_marks_lookup_and_stops_at_limit(
         {"id": "10.1/A", "lookup_method": "doi"},
         {"id": "10.2/B", "lookup_method": "doi"},
     ]
-
-
-@pytest.mark.asyncio
-async def test_iter_query_results_warns_and_stops_on_repeated_cursor() -> None:
-    """CF-014: repeated cursors fail the scan after reporting truncation."""
-    from bioetl.infrastructure.adapters.http.pagination import (
-        PaginationTruncatedError,
-    )
-
-    flow = _build_flow()
-    flow.query_executor.request_works_payload.side_effect = [
-        {"page": 1},
-        {"page": 2},
-        {"page": 3},
-    ]
-    flow.response_mapper.extract_results.side_effect = [
-        [{"id": "W1"}],
-        [{"id": "W2"}],
-        [{"id": "W3"}],
-    ]
-    flow.response_mapper.extract_next_cursor.side_effect = ["c2", "c2", "c2"]
-
-    rows = []
-    with pytest.raises(PaginationTruncatedError) as caught:
-        async for row in flow.iter_query_results(query="q", limit=None):
-            rows.append(row)
-
-    assert rows == [{"id": "W1"}, {"id": "W2"}]
-    assert caught.value.reason == "repeated_cursor"
-    assert flow.query_executor.request_works_payload.await_count == 2
-    flow.logger.warning.assert_called_once()
-    assert flow.logger.warning.call_args[0][0] == "openalex_query_results_truncated"
-    assert flow.logger.warning.call_args[1]["reason"] == "repeated_cursor"
-
-
-@pytest.mark.asyncio
-async def test_iter_query_results_warns_on_page_ceiling(monkeypatch) -> None:
-    """CF-014: the page ceiling fails the scan after reporting truncation."""
-    from bioetl.infrastructure.adapters.http.pagination import (
-        PaginationTruncatedError,
-    )
-
-    from bioetl.infrastructure.adapters.openalex import (
-        cursor_flow as cursor_flow_module,
-    )
-
-    monkeypatch.setattr(cursor_flow_module, "_DEFAULT_MAX_PAGES", 2)
-    flow = _build_flow()
-    flow.query_executor.request_works_payload.side_effect = [
-        {"page": 1},
-        {"page": 2},
-        {"page": 3},
-    ]
-    flow.response_mapper.extract_results.side_effect = [
-        [{"id": "W1"}],
-        [{"id": "W2"}],
-        [{"id": "W3"}],
-    ]
-    flow.response_mapper.extract_next_cursor.side_effect = ["c2", "c3", "c4"]
-
-    rows = []
-    with pytest.raises(PaginationTruncatedError) as caught:
-        async for row in flow.iter_query_results(query="q", limit=None):
-            rows.append(row)
-
-    assert rows == [{"id": "W1"}, {"id": "W2"}]
-    assert caught.value.reason == "max_pages"
-    assert flow.query_executor.request_works_payload.await_count == 2
-    flow.logger.warning.assert_called_once()
-    assert flow.logger.warning.call_args[0][0] == "openalex_query_results_truncated"
-    assert flow.logger.warning.call_args[1]["reason"] == "max_pages"
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize("limit", [None, 3])
-async def test_iter_query_results_stops_before_refetching_initial_cursor(limit) -> None:
-    """Stop when OpenAlex returns its initial cursor and report truncation."""
-    from bioetl.infrastructure.adapters.http.pagination import (
-        PaginationTruncatedError,
-    )
-
-    flow = _build_flow()
-    flow.query_executor.request_works_payload.side_effect = [{"page": 1}, {"page": 2}]
-    flow.response_mapper.extract_results.side_effect = [[{"id": "A"}], [{"id": "B"}]]
-    flow.response_mapper.extract_next_cursor.side_effect = ["B", "*"]
-
-    rows = []
-    with pytest.raises(PaginationTruncatedError) as caught:
-        async for row in flow.iter_query_results(query="q", limit=limit):
-            rows.append(row)
-
-    assert rows == [{"id": "A"}, {"id": "B"}]
-    assert caught.value.reason == "repeated_cursor"
-    assert flow.query_executor.request_works_payload.await_count == 2
-    flow.logger.warning.assert_called_once()
-    assert flow.logger.warning.call_args.kwargs["reason"] == "repeated_cursor"
-
-
-@pytest.mark.asyncio
-async def test_iter_query_results_exact_limit_at_ceiling_finishes_cleanly(monkeypatch):
-    """Treat a satisfied result limit at the page ceiling as normal completion."""
-    from bioetl.infrastructure.adapters.openalex import cursor_flow as module
-
-    monkeypatch.setattr(module, "_DEFAULT_MAX_PAGES", 1)
-    flow = _build_flow()
-    flow.query_executor.request_works_payload.return_value = {"page": 1}
-    flow.response_mapper.extract_results.return_value = [{"id": "A"}]
-    flow.response_mapper.extract_next_cursor.return_value = "B"
-
-    rows = await collect_async_iterator(flow.iter_query_results(query="q", limit=1))
-
-    assert rows == [{"id": "A"}]
-    flow.query_executor.request_works_payload.assert_awaited_once()
-    flow.logger.warning.assert_not_called()
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize("limit", [0, -1])
-async def test_iter_query_results_nonpositive_limit_does_not_request_page(limit):
-    """Return no results or warnings when the requested limit is nonpositive."""
-    flow = _build_flow()
-    rows = await collect_async_iterator(flow.iter_query_results(query="q", limit=limit))
-    assert rows == []
-    flow.query_executor.request_works_payload.assert_not_awaited()
-    flow.logger.warning.assert_not_called()

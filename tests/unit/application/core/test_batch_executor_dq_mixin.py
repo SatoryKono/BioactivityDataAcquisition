@@ -123,8 +123,6 @@ class _BatchExecutorDQHarness(_BatchExecutorDQMixin):
         self._dq_reservoir_ranks: dict[int, list[str]] = {}
         self.records_fetched = 10
         self.records_quarantined = 2
-        self.records_quarantined_silver = 2
-        self.records_quarantined_gold = 0
 
 
 def test_should_collect_dq_data_depends_on_report_service_presence() -> None:

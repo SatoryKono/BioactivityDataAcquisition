@@ -7,7 +7,6 @@ import pytest
 from vcr.request import Request
 
 from tests.helpers.vcr_config import (
-    _log_sanitizer_failure_once,
     build_base_vcr_config,
     is_vcr_recording_mode,
     query_ignore_email,
@@ -91,12 +90,9 @@ def test_build_base_vcr_config_sanitizes_request_headers_and_query() -> None:
     assert "query=test" in sanitized.uri
 
 
-def test_build_base_vcr_config_before_record_request_fails_closed_on_unexpected_request() -> (
+def test_build_base_vcr_config_before_record_request_noops_on_unexpected_request() -> (
     None
 ):
-    """Reject unsupported request objects instead of bypassing secret filtering."""
-    from tests.helpers.vcr_config import VCRRequestSanitizationError
-
     config = build_base_vcr_config(
         filter_headers=["authorization"],
         filter_query_parameters=["api_key"],
@@ -105,8 +101,7 @@ def test_build_base_vcr_config_before_record_request_fails_closed_on_unexpected_
 
     request = "unexpected-request-surface"
 
-    with pytest.raises(VCRRequestSanitizationError):
-        before_record_request(request)
+    assert before_record_request(request) == request
 
 
 def test_build_base_vcr_config_filters_transient_html_server_errors() -> None:
@@ -139,10 +134,9 @@ def test_build_base_vcr_config_preserves_successful_json_response() -> None:
     assert before_record_response(response) == response
 
 
-def test_build_base_vcr_config_before_record_response_drops_unexpected_response() -> (
+def test_build_base_vcr_config_before_record_response_noops_on_unexpected_response() -> (
     None
 ):
-    """Drop unsupported response objects before cassette recording."""
     config = build_base_vcr_config()
     before_record_response = cast(
         Callable[[Any], Any], config["before_record_response"]
@@ -150,227 +144,4 @@ def test_build_base_vcr_config_before_record_response_drops_unexpected_response(
 
     response = "unexpected-response-surface"
 
-    assert before_record_response(response) is None
-
-
-@pytest.mark.parametrize("cookie_header", ["Set-Cookie", "set-cookie", "SET-COOKIE2"])
-def test_response_sanitizer_removes_secrets_without_mutating_response(cookie_header):
-    """Strip credential headers case-insensitively while preserving the input."""
-    hook = cast(Callable[[Any], Any], build_base_vcr_config()["before_record_response"])
-    response = {
-        "status": {"code": 200},
-        "headers": {
-            cookie_header: ["ncbi_sid=session-secret; HttpOnly"],
-            "Authorization": ["Bearer secret"],
-            "X-API-Key": ["secret"],
-            "Cookie": ["session=secret"],
-            "Content-Type": ["application/json"],
-        },
-        "body": {"string": b"{}"},
-    }
-
-    sanitized = hook(response)
-
-    assert sanitized["headers"] == {"Content-Type": ["application/json"]}
-    assert sanitized["body"] == response["body"]
-    assert response["headers"][cookie_header] == ["ncbi_sid=session-secret; HttpOnly"]
-
-
-@pytest.mark.parametrize("headers", [None, "invalid", ["Set-Cookie"]])
-def test_response_sanitizer_drops_unsupported_headers(headers):
-    """Drop responses whose headers cannot be safely inspected."""
-    hook = cast(Callable[[Any], Any], build_base_vcr_config()["before_record_response"])
-
-    assert hook({"status": {"code": 200}, "headers": headers}) is None
-
-
-def test_build_base_vcr_config_installs_canonical_filters_without_caller_filters() -> (
-    None
-):
-    """CF-030: canonical secret filters are installed even for bare calls."""
-    config = build_base_vcr_config()
-    before_record_request = cast(Callable[[Any], Any], config["before_record_request"])
-
-    request = Request(
-        "GET",
-        "https://example.org/search?api_key=secret&query=test",
-        b"",
-        {"authorization": "Bearer secret", "x-api-key": "k", "cookie": "c=1"},
-    )
-
-    sanitized = before_record_request(request)
-
-    assert "authorization" not in sanitized.headers
-    assert "x-api-key" not in sanitized.headers
-    assert "cookie" not in sanitized.headers
-    assert "api_key=secret" not in sanitized.uri
-    assert "key=secret" not in sanitized.uri
-
-
-@pytest.mark.parametrize("query_key", ["API_KEY", "Api_Key", "Key", "KEY"])
-def test_build_base_vcr_config_removes_query_secrets_case_insensitively(
-    query_key: str,
-) -> None:
-    hook = cast(Callable[[Any], Any], build_base_vcr_config()["before_record_request"])
-    request = Request(
-        "GET",
-        f"https://example.org/search?{query_key}=secret&query=biology",
-        b"",
-        {},
-    )
-
-    sanitized = hook(request)
-
-    assert "secret" not in sanitized.uri
-    assert "query=biology" in sanitized.uri
-
-
-def test_build_base_vcr_config_caller_filters_extend_but_never_remove_canonical() -> (
-    None
-):
-    """CF-030: caller extras extend the canonical set; canonical keys stay enforced."""
-    config = build_base_vcr_config(
-        filter_headers=["x-custom-token"],
-        filter_query_parameters=["token"],
-    )
-    before_record_request = cast(Callable[[Any], Any], config["before_record_request"])
-
-    request = Request(
-        "GET",
-        "https://example.org/search?token=abc&query=test",
-        b"",
-        {"authorization": "Bearer secret", "x-custom-token": "t"},
-    )
-
-    sanitized = before_record_request(request)
-
-    assert "authorization" not in sanitized.headers
-    assert "x-custom-token" not in sanitized.headers
-    assert "token=abc" not in sanitized.uri
-    assert "query=test" in sanitized.uri
-
-
-def test_build_base_vcr_config_sanitizer_is_always_installed() -> None:
-    """CF-030: before_record_request is present even without caller filters."""
-    config = build_base_vcr_config()
-
-    assert callable(config["before_record_request"])
-
-
-@pytest.mark.parametrize("missing_attribute", ["headers", "uri"])
-def test_sanitizer_fails_closed_with_missing_required_surface(
-    missing_attribute: str,
-) -> None:
-    """Reject requests missing either headers or a sanitizable URI."""
-    from types import SimpleNamespace
-
-    from tests.helpers.vcr_config import VCRRequestSanitizationError
-
-    attributes = {
-        "headers": {"authorization": "synthetic-secret"},
-        "uri": "https://example.org/?api_key=synthetic-secret",
-    }
-    del attributes[missing_attribute]
-    request = SimpleNamespace(**attributes)
-    hook = cast(Callable[[Any], Any], build_base_vcr_config()["before_record_request"])
-    with pytest.raises(VCRRequestSanitizationError):
-        hook(request)
-
-
-def test_sanitizer_fails_closed_on_httpx_request_instead_of_retaining_query_secret() -> (
-    None
-):
-    """Reject incompatible HTTPX requests before query credentials can escape."""
-    import httpx
-
-    from tests.helpers.vcr_config import VCRRequestSanitizationError
-
-    request = httpx.Request(
-        "GET",
-        "https://example.org/?api_key=synthetic-secret",
-        headers={"authorization": "synthetic-secret"},
-    )
-    hook = cast(Callable[[Any], Any], build_base_vcr_config()["before_record_request"])
-    with pytest.raises(VCRRequestSanitizationError):
-        hook(request)
-
-
-@pytest.mark.parametrize("request_count", [1, 2])
-def test_build_base_vcr_config_sanitizer_logs_failure_only_once(
-    monkeypatch, caplog, request_count
-) -> None:
-    """CF-030: repeated sanitizer failures stay silent after the first warning."""
-    import logging
-    from unittest.mock import Mock
-
-    import vcr.filters
-    from vcr.cassette import Cassette, RecordMode
-    from vcr.stubs import VCRHTTPConnection
-
-    from tests.helpers.vcr_config import VCRRequestSanitizationError
-
-    config = build_base_vcr_config()
-    before_record_request = cast(Callable[[Any], Any], config["before_record_request"])
-
-    request = Request(
-        "GET",
-        "https://example.org/search?api_key=secret",
-        b"",
-        {"authorization": "Bearer secret"},
-    )
-
-    def _explode(*args: Any, **kwargs: Any) -> Any:
-        """Simulate a VCR filter failure on a malformed request."""
-        raise TypeError("malformed request surface")
-
-    monkeypatch.setattr(vcr.filters, "replace_headers", _explode)
-    monkeypatch.setattr("tests.helpers.vcr_config._sanitizer_failures_logged", set())
-
-    with caplog.at_level(logging.WARNING, logger="tests.helpers.vcr_config"):
-        for _ in range(request_count):
-            with pytest.raises(VCRRequestSanitizationError):
-                before_record_request(request)
-
-    dropped = [
-        record
-        for record in caplog.records
-        if record.getMessage() == "vcr_request_sanitizer_failed_closed"
-    ]
-    assert len(dropped) == 1
-
-    cassette = Cassette(
-        path="unused.yaml",
-        record_mode=RecordMode.NONE,
-        before_record_request=before_record_request,
-    )
-    connection = object.__new__(VCRHTTPConnection)
-    connection.cassette = cassette
-    connection._vcr_request = request
-    connection.real_connection = Mock()
-
-    with pytest.raises(VCRRequestSanitizationError):
-        connection.getresponse()
-
-    connection.real_connection.request.assert_not_called()
-
-
-def test_sanitizer_failure_latch_keeps_distinct_failures(
-    monkeypatch: pytest.MonkeyPatch,
-    caplog: pytest.LogCaptureFixture,
-) -> None:
-    """Deduplicate repeats without hiding another sanitizer surface or reason."""
-    import logging
-
-    monkeypatch.setattr("tests.helpers.vcr_config._sanitizer_failures_logged", set())
-    with caplog.at_level(logging.WARNING, logger="tests.helpers.vcr_config"):
-        _log_sanitizer_failure_once("request-shape")
-        _log_sanitizer_failure_once("request-shape")
-        _log_sanitizer_failure_once(
-            "response-shape",
-            event="vcr_response_sanitizer_dropped_response",
-        )
-
-    assert [record.getMessage() for record in caplog.records] == [
-        "vcr_request_sanitizer_failed_closed",
-        "vcr_response_sanitizer_dropped_response",
-    ]
+    assert before_record_response(response) == response

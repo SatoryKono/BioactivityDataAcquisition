@@ -8,28 +8,25 @@
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Architecture regression tests for ownership-projection import SCC drift."""
+"""Architecture regression tests for runtime import SCC drift."""
 
 from __future__ import annotations
 
+import ast
+from collections import defaultdict
+from collections.abc import Iterable
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 from functools import cache
+import os
 from pathlib import Path
 
 import pytest
 
-from scripts.engineering.qa.import_graph_inventory import (
-    RESOLUTION_RESOLVED,
-    SYNTAX_IMPORT,
-    SYNTAX_IMPORT_FROM,
-    ImportEdge,
-    ImportGraphReport,
-    collect_import_graph,
-    find_import_sccs,
-)
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
-ENFORCED_IMPORT_GRAPH_PROJECTION = "static_runtime_base_modules"
+SRC_ROOT = Path("src/bioetl")
+_MIN_PARALLEL_READ_FILES = 64
+_DEFAULT_READ_WORKERS = 8
+_MAX_READ_WORKERS = 16
 REVIEWED_RUNTIME_SCC_BUDGET_MAX = 1
 REVIEWED_RUNTIME_SCC_MIN_REVIEW_DATE = date(2026, 7, 1)
 ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
@@ -95,64 +92,191 @@ FORBIDDEN_RUNTIME_SCCS: tuple[frozenset[str], ...] = (
 )
 
 
+def _module_name_from_path(path: Path) -> str:
+    rel = path.relative_to(SRC_ROOT)
+    parts = ["bioetl", *rel.parts]
+    if parts[-1] == "__init__.py":
+        parts = parts[:-1]
+    else:
+        parts[-1] = Path(parts[-1]).stem
+    return ".".join(parts)
+
+
+def _iter_modules() -> dict[str, Path]:
+    return {
+        _module_name_from_path(path): path
+        for path in sorted(SRC_ROOT.rglob("*.py"))
+        if "__pycache__" not in path.parts
+    }
+
+
+def _read_worker_count(total_files: int) -> int:
+    if total_files < _MIN_PARALLEL_READ_FILES:
+        return 1
+    cpu_count = os.cpu_count() or _DEFAULT_READ_WORKERS
+    return min(total_files, _MAX_READ_WORKERS, max(_DEFAULT_READ_WORKERS, cpu_count))
+
+
+def _read_module_source(item: tuple[str, Path]) -> tuple[str, str] | None:
+    module_name, path = item
+    try:
+        return module_name, path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return None
+
+
+def _read_module_sources(modules: dict[str, Path]) -> list[tuple[str, str]]:
+    items = list(modules.items())
+    workers = _read_worker_count(len(items))
+    if workers == 1:
+        return [
+            source
+            for item in items
+            for source in [_read_module_source(item)]
+            if source is not None
+        ]
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        return [source for source in executor.map(_read_module_source, items) if source]
+
+
+def _resolve_relative_import(
+    source_module: str,
+    level: int,
+    module: str | None,
+) -> list[str]:
+    package_parts = source_module.split(".")[:-1]
+    depth = max(level - 1, 0)
+    if depth > len(package_parts):
+        return []
+    base = package_parts if depth == 0 else package_parts[:-depth]
+    if module:
+        return [".".join([*base, module])]
+    return base
+
+
+def _import_targets(node: ast.AST, source_module: str) -> list[str]:
+    if isinstance(node, ast.Import):
+        return [alias.name for alias in node.names]
+    if not isinstance(node, ast.ImportFrom):
+        return []
+    if node.level == 0:
+        if not node.module:
+            return []
+        targets = [node.module]
+        if node.module == "bioetl":
+            targets.extend(
+                f"bioetl.{alias.name}" for alias in node.names if alias.name != "*"
+            )
+        return targets
+    if node.module:
+        return list(_resolve_relative_import(source_module, node.level, node.module))
+    base_parts = list(_resolve_relative_import(source_module, node.level, None))
+    return [
+        ".".join([*base_parts, alias.name]) for alias in node.names if alias.name != "*"
+    ]
+
+
+def _inside_type_checking(
+    node: ast.AST,
+    parents: dict[ast.AST, ast.AST | None],
+) -> bool:
+    current: ast.AST | None = node
+    while current is not None:
+        if isinstance(current, ast.If):
+            test = current.test
+            if isinstance(test, ast.Name) and test.id == "TYPE_CHECKING":
+                return True
+            if isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING":
+                return True
+        current = parents.get(current)
+    return False
+
+
 @cache
-def _runtime_import_report() -> ImportGraphReport:
-    """Collect the canonical first-party graph once for this test process."""
-    return collect_import_graph(REPO_ROOT)
+def _build_runtime_import_graph() -> dict[str, set[str]]:
+    modules = _iter_modules()
+    edges: dict[str, set[str]] = defaultdict(set)
+    for module_name, source_text in _read_module_sources(modules):
+        tree = ast.parse(source_text)
+        parents: dict[ast.AST, ast.AST | None] = {tree: None}
+        stack = [tree]
+        while stack:
+            node = stack.pop()
+            for child in ast.iter_child_nodes(node):
+                parents[child] = node
+                stack.append(child)
+
+        for node in ast.walk(tree):
+            if _inside_type_checking(node, parents):
+                continue
+            for target in _import_targets(node, module_name):
+                if target in modules:
+                    edges[module_name].add(target)
+    return edges
 
 
-def _static_runtime_edges(report: ImportGraphReport) -> tuple[ImportEdge, ...]:
-    """Project canonical ownership edges onto the historical static SCC view.
+def _iter_runtime_sccs(edges: dict[str, set[str]]) -> Iterable[frozenset[str]]:
+    index = 0
+    stack: list[str] = []
+    on_stack: set[str] = set()
+    indices: dict[str, int] = {}
+    low_links: dict[str, int] = {}
 
-    The ratchet predates dynamic-import ownership and follows each ``Import``
-    target plus the base module of ``ImportFrom`` statements. Reusing the shared
-    collector keeps parsing, TYPE_CHECKING handling, and module resolution
-    canonical without silently widening this shrink-only baseline.
-    """
-    grouped: dict[tuple[str, str, int, str], list[ImportEdge]] = {}
-    for edge in report.projections.ownership:
-        if edge.syntax not in {SYNTAX_IMPORT, SYNTAX_IMPORT_FROM}:
-            continue
-        key = (edge.source, edge.file, edge.line, edge.syntax)
-        grouped.setdefault(key, []).append(edge)
+    def strongconnect(node: str) -> Iterable[frozenset[str]]:
+        nonlocal index
+        indices[node] = index
+        low_links[node] = index
+        index += 1
+        stack.append(node)
+        on_stack.add(node)
 
-    selected: list[ImportEdge] = []
-    for key, edges in sorted(grouped.items()):
-        syntax = key[3]
-        if syntax == SYNTAX_IMPORT or any(edge.target == "bioetl" for edge in edges):
-            selected.extend(edges)
-            continue
-        selected.append(
-            min(edges, key=lambda edge: (edge.target.count("."), edge.target))
-        )
-    return tuple(selected)
+        for target in edges.get(node, set()):
+            if target not in indices:
+                yield from strongconnect(target)
+                low_links[node] = min(low_links[node], low_links[target])
+            elif target in on_stack:
+                low_links[node] = min(low_links[node], indices[target])
 
+        if low_links[node] != indices[node]:
+            return
 
-def _runtime_import_sccs() -> tuple[frozenset[str], ...]:
-    report = _runtime_import_report()
-    return find_import_sccs(_static_runtime_edges(report))
+        component: list[str] = []
+        while stack:
+            member = stack.pop()
+            on_stack.remove(member)
+            component.append(member)
+            if member == node:
+                break
+        if len(component) > 1:
+            yield frozenset(component)
+
+    for node in sorted(edges):
+        if node not in indices:
+            yield from strongconnect(node)
 
 
 @pytest.mark.architecture
 def test_runtime_import_graph_has_no_forbidden_sccs() -> None:
-    """Ownership-projection SCC scan must stay clear of confirmed cycles."""
+    """Runtime import SCC scan must stay clear of confirmed intra-layer cycles."""
+    edges = _build_runtime_import_graph()
+    actual_sccs = tuple(_iter_runtime_sccs(edges))
     blocked = [
         sorted(component)
-        for component in _runtime_import_sccs()
+        for component in actual_sccs
         if component in FORBIDDEN_RUNTIME_SCCS
     ]
     assert not blocked, (
         "Runtime import SCC scan found forbidden strongly connected components "
-        f"(projection={ENFORCED_IMPORT_GRAPH_PROJECTION}; "
-        "TYPE_CHECKING imports are ignored):\n"
+        "(TYPE_CHECKING imports are ignored):\n"
         + "\n".join(f"- {', '.join(component)}" for component in blocked)
     )
 
 
 @pytest.mark.architecture
 def test_runtime_import_graph_has_no_unreviewed_sccs() -> None:
-    """Ownership-projection SCCs must be explicitly owned and reviewed."""
-    actual_sccs = _runtime_import_sccs()
+    """Same-layer runtime import SCCs must be explicitly owned and reviewed."""
+    edges = _build_runtime_import_graph()
+    actual_sccs = tuple(_iter_runtime_sccs(edges))
     accepted_sccs = set(ACCEPTED_RUNTIME_SCCS)
     unreviewed = [
         sorted(component) for component in actual_sccs if component not in accepted_sccs
@@ -162,35 +286,15 @@ def test_runtime_import_graph_has_no_unreviewed_sccs() -> None:
     ]
 
     assert not unreviewed, (
-        "Runtime import SCC scan found unreviewed strongly connected components "
-        f"(projection={ENFORCED_IMPORT_GRAPH_PROJECTION}). Either remove the cycle "
-        "or add an "
-        "owner/rationale/review_date entry to ACCEPTED_RUNTIME_SCCS:\n"
+        "Runtime import SCC scan found unreviewed strongly connected components. "
+        "Either remove the cycle or add an owner/rationale/review_date entry to "
+        "ACCEPTED_RUNTIME_SCCS:\n"
         + "\n".join(f"- {', '.join(component)}" for component in unreviewed)
     )
     assert not stale_acceptances, (
         "Runtime import SCC acceptances are stale; remove the entries after "
         "breaking the cycles:\n"
         + "\n".join(f"- {', '.join(component)}" for component in stale_acceptances)
-    )
-
-
-@pytest.mark.architecture
-def test_runtime_import_scc_uses_shared_canonical_collector() -> None:
-    """The historical SCC projection is derived from the shared import inventory."""
-    report = _runtime_import_report()
-    assert not report.failures, "\n".join(
-        f"{failure.file}: {failure.reason}: {failure.detail}"
-        for failure in report.failures
-    )
-    selected = _static_runtime_edges(report)
-    ownership_edges = set(report.projections.ownership)
-    assert selected
-    assert all(
-        edge.resolution == RESOLUTION_RESOLVED
-        and edge.syntax in {SYNTAX_IMPORT, SYNTAX_IMPORT_FROM}
-        and edge in ownership_edges
-        for edge in selected
     )
 
 

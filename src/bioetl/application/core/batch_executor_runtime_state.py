@@ -22,8 +22,6 @@ class BatchExecutorRuntimeState:
     records_gold: int = 0
     records_gold_excluded_by_contract: int = 0
     records_quarantined: int = 0
-    records_quarantined_silver: int = 0
-    records_quarantined_gold: int = 0
     records_filtered_out: int = 0
     bronze_records_for_dq: list[bytes] = field(default_factory=list)
     silver_records_for_dq: list[BronzeRecord] = field(default_factory=list)
@@ -104,26 +102,6 @@ class BatchExecutorRuntimeStateMixin:
     def records_quarantined(self, value: int) -> None:
         """Replace the quarantined-record counter for the current run."""
         self._runtime_state.records_quarantined = value
-
-    @property
-    def records_quarantined_silver(self) -> int:
-        """Rejections on the Silver path (transform + Silver write stage)."""
-        return self._runtime_state.records_quarantined_silver
-
-    @records_quarantined_silver.setter
-    def records_quarantined_silver(self, value: int) -> None:
-        """Replace the Silver-path rejection counter for the current run."""
-        self._runtime_state.records_quarantined_silver = value
-
-    @property
-    def records_quarantined_gold(self) -> int:
-        """Rejections at the Gold write stage."""
-        return self._runtime_state.records_quarantined_gold
-
-    @records_quarantined_gold.setter
-    def records_quarantined_gold(self, value: int) -> None:
-        """Replace the Gold write-stage rejection counter for the run."""
-        self._runtime_state.records_quarantined_gold = value
 
     @property
     def records_filtered_out(self) -> int:

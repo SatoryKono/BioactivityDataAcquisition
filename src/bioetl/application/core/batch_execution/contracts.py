@@ -9,13 +9,7 @@ if TYPE_CHECKING:
 
 
 class BatchExecutionCountersSnapshot(Protocol):
-    """Shared counter snapshot required by batch-execution finalization flows.
-
-    ``records_silver``/``records_gold`` are confirmed persistence counts.
-    ``records_quarantined`` is the run total across transform and write
-    stages; ``records_quarantined_silver``/``records_quarantined_gold`` are
-    the per-layer rejection counters feeding layer-scoped DQ reports.
-    """
+    """Shared counter snapshot required by batch-execution finalization flows."""
 
     records_fetched: int
     records_bronze: int
@@ -23,8 +17,6 @@ class BatchExecutionCountersSnapshot(Protocol):
     records_gold: int
     records_gold_excluded_by_contract: int
     records_quarantined: int
-    records_quarantined_silver: int
-    records_quarantined_gold: int
 
 
 class BatchExecutionStatisticsState(BatchExecutionCountersSnapshot, Protocol):
@@ -69,10 +61,4 @@ class BatchExecutionStateProtocol(BatchExecutionStatisticsState, Protocol):
         bronze_result: object,
         silver_records: list[BronzeRecord],
         gold_records: list[GoldRecord],
-    ) -> None:
-        """Collect persisted-layer payloads for post-run DQ sampling.
-
-        ``silver_records``/``gold_records`` must contain only rows confirmed
-        written to the layer — never transform candidates or blocked output.
-        """
-        ...
+    ) -> None: ...

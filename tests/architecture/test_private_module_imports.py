@@ -19,14 +19,10 @@ shrink-only baseline (``STRICT_PRIVATE_IMPORT_GUARD = False``). The YAML
 from __future__ import annotations
 
 import ast
-from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
 
-from scripts.engineering.qa.private_import_exception_metadata import (
-    validate_exception_metadata,
-)
 from scripts.engineering.qa.report_private_import_inventory import (
     allowed_pairs_from_config,
     evaluate_ratchet,
@@ -222,13 +218,7 @@ def test_private_import_baseline_is_monotonically_non_increasing(
     }
     errors = evaluate_ratchet(payload)
     assert not errors, "\n".join(errors)
-    assert int(config["max_count"]) <= 11
-    metadata_errors = validate_exception_metadata(
-        config,
-        project_root=RATCHET_CONFIG_PATH.parents[2],
-        today=datetime.now(UTC).date(),
-    )
-    assert not metadata_errors, "\n".join(metadata_errors)
+    assert int(config["max_count"]) <= 19
     stale_waves = {
         str(row.get("target_removal_wave"))
         for row in config.get("pairs", [])

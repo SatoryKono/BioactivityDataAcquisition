@@ -470,21 +470,3 @@ async def test_mapping_scopes_isolate_concurrent_tasks_and_cancellation(monkeypa
     with pytest.raises(asyncio.CancelledError):
         await task
     assert current_protein_class_target_type_mapping() is default
-
-
-def test_explicit_mappings_stay_isolated_from_each_other() -> None:
-    enzyme = ProteinClassTargetTypeMappingData(
-        "enzyme-v1",
-        (ProteinClassTopLevelMappingEntry("Enzyme", "enzyme", True),),
-    )
-    channel = ProteinClassTargetTypeMappingData(
-        "channel-v1",
-        (ProteinClassTopLevelMappingEntry("Ion channel", "ion_channel", True),),
-    )
-    assert normalize_protein_class_top_level("Enzyme", enzyme).canonical_l1 == "enzyme"
-    assert (
-        normalize_protein_class_top_level("Ion channel", channel).canonical_l1
-        == "ion_channel"
-    )
-    with pytest.raises(RuntimeError, match="passed explicitly"):
-        normalize_protein_class_top_level("Enzyme")

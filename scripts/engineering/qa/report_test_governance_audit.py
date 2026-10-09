@@ -921,12 +921,13 @@ def _classify_assertless_candidate(
     return "weak_no_value"
 
 
+@cache
 def _parse_test_module_source(
     path: Path,
     *,
     relative: str,
 ) -> tuple[ast.Module | None, dict[str, str] | None]:
-    """Read one current module without retaining the whole test estate as ASTs."""
+    """Read and parse a test module; return (tree, parse_error)."""
     try:
         source = _read_text_file(path)
     except OSError:

@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.composite.runtime_wiring_api import (
     JOIN_KEY_NORMALIZATION_POLICIES,
-    DependencyCoordinatorCollaborators,
     DependencyCoordinatorService,
     DependencyProgressService,
     DependencyResultService,
@@ -43,18 +42,16 @@ def build_execution_support_services(
         ),
         dependency_coordinator=DependencyCoordinatorService(
             logger=logger,
-            collaborators=DependencyCoordinatorCollaborators(
-                seed_key_resolver=create_seed_key_resolver(
-                    logger,
-                    normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
-                ),
-                chained_key_resolver=create_chained_key_resolver(
-                    logger,
-                    normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
-                ),
-                progress_service=DependencyProgressService(logger),
-                result_service=DependencyResultService(logger),
+            seed_key_resolver=create_seed_key_resolver(
+                logger,
+                normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
             ),
+            chained_key_resolver=create_chained_key_resolver(
+                logger,
+                normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
+            ),
+            progress_service=DependencyProgressService(logger),
+            result_service=DependencyResultService(logger),
             delta_reader=delta_reader,
             clock=clock,
         ),

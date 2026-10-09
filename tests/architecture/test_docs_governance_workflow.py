@@ -56,21 +56,9 @@ def test_package_diagram_dates_change_only_with_diagram_content() -> None:
 
 def test_tests_workflow_keeps_docs_only_changes_out_of_heavy_matrix() -> None:
     workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
-    catalog = Path("configs/quality/github_required_checks.yaml").read_text(
-        encoding="utf-8"
-    )
-    nightly = Path(".github/workflows/nightly.yml").read_text(encoding="utf-8")
-    trigger = workflow.split("jobs:", maxsplit=1)[0]
 
-    assert "workflow_call:" in trigger
-    assert "pull_request:" not in trigger
-    assert "push:" not in trigger
-    tests_gate = catalog.rsplit("- id: tests\n", maxsplit=1)[1].split(
-        "\n  - id:", maxsplit=1
-    )[0]
-    assert "decision: path_scoped" in tests_gate
-    assert "docs/**" not in tests_gate
-    assert "./.github/workflows/tests.yml" in nightly
+    assert "paths-ignore:" in workflow
+    assert "'docs/**'" in workflow or '"docs/**"' in workflow
 
 
 def test_docs_workflow_runs_lightweight_docs_governance_profile() -> None:
@@ -81,23 +69,19 @@ def test_docs_workflow_runs_lightweight_docs_governance_profile() -> None:
     assert "generate_package_family_class_diagrams.py --check" not in workflow
     assert "Run docs-governance architecture tests" in workflow
     assert "validate-mkdocs:\n    needs: docs-governance" in workflow
-    catalog = Path("configs/quality/github_required_checks.yaml").read_text(
-        encoding="utf-8"
-    )
-    docs_gate = catalog.rsplit("- id: docs-governance", maxsplit=1)[1]
-    assert "grafana/README.md" in docs_gate
-    assert ".codex/**" in docs_gate
-    assert ".junie/**" in docs_gate
+    assert "'grafana/README.md'" in workflow
+    assert "'.codex/agents/**'" in workflow
+    assert "'.junie/agents/**'" in workflow
 
 
 def test_docs_workflow_path_filters_include_github_workflows_glob() -> None:
-    """The leaf is reusable; the catalog owns PR path decisions (#9975)."""
+    """The leaf is reusable; the coordinator owns PR path decisions (#9975)."""
     workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
     trigger_block = workflow.split("jobs:", maxsplit=1)[0]
 
     assert "workflow_call:" in trigger_block
     assert "pull_request:" not in trigger_block
-    assert "push:" not in trigger_block
+    assert "'.github/workflows/**'" in trigger_block
 
     catalog = Path("configs/quality/github_required_checks.yaml").read_text(
         encoding="utf-8"
@@ -115,6 +99,7 @@ def test_docs_workflow_path_filters_include_github_workflows_glob() -> None:
     )
     assert ".github/workflows/**" in docs_gate
     for path in former_trigger_paths:
+        assert path in trigger_block
         assert path in docs_gate
 
 

@@ -5,7 +5,10 @@
 name: No partial-tree commits
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read

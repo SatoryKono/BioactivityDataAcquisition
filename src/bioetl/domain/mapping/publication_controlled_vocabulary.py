@@ -46,7 +46,8 @@ def is_publication_controlled_vocabulary_initialized() -> bool:
 def publication_controlled_vocabulary_values(
     provider: str,
     field_name: str,
-    registry: PublicationControlledVocabularyRegistry,
 ) -> frozenset[str]:
-    """Return allowed values from the registry the caller was given."""
-    return registry.allowed_values(provider, field_name)
+    """Return allowed values for one provider field, or empty when uninitialized."""
+    if _registry is None:
+        return frozenset()
+    return _registry.allowed_values(provider, field_name)

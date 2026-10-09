@@ -13,7 +13,6 @@
 
 | Package / surface | Responsibility | Primary owner |
 |---|---|---|
-| `batch_processing/` | Shared batch-operation failure policy | `@bioetl-architecture` |
 | `control_plane/` | Run manifests, ledgers, workflow state, resume/replay orchestration | `@bioetl-platform` |
 | `lineage/` | Lineage graph assembly and persistence collaborators | `@bioetl-platform` |
 | `dq/` | DQ report flows, silver statistics helpers | `@bioetl-data-model` |

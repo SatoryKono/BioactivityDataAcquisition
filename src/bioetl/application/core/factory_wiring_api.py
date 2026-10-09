@@ -1,11 +1,30 @@
 """Legacy flat facade for composition-owned pipeline factory wiring."""
 
 from __future__ import annotations
+# ruff: noqa: I001
 
-from bioetl.application.core.wiring import factory as _factory
-from bioetl.application.core.wiring.lazy_export_hooks import (
-    install_lazy_export_facade,
+from bioetl.application.core.wiring.factory import (
+    BasePipeline as BasePipeline,
+    BatchExecutor as BatchExecutor,
+    CheckpointRuntimeService as CheckpointRuntimeService,
+    LockRuntimeService as LockRuntimeService,
+    PipelineRunner as PipelineRunner,
+    PipelineRunnerDependencies as PipelineRunnerDependencies,
+    PipelineService as PipelineService,
+    PostrunService as PostrunService,
+    PreflightService as PreflightService,
+    ShutdownSignal as ShutdownSignal,
 )
 
-_LEGACY_FACTORY_EXPORTS = {name: (_factory.__name__, name) for name in _factory.__all__}
-install_lazy_export_facade(globals(), __name__, _LEGACY_FACTORY_EXPORTS)
+__all__ = [
+    "BasePipeline",
+    "BatchExecutor",
+    "CheckpointRuntimeService",
+    "LockRuntimeService",
+    "PipelineRunner",
+    "PipelineRunnerDependencies",
+    "PipelineService",
+    "PostrunService",
+    "PreflightService",
+    "ShutdownSignal",
+]

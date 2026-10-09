@@ -227,26 +227,6 @@ def _present_status(
     }
 
 
-def _load_saved_assessment(
-    path: Path, pipeline: str, run_id: str
-) -> (
-    tuple[dict[str, object], dict[str, object], dict[str, object], str, str]
-    | dict[str, object]
-):
-    try:
-        return _load_report_assessment(path, pipeline, run_id)
-    except _IdentityMismatchError:
-        return unavailable_status(pipeline, run_id, "ERROR", "identity_mismatch")
-    except _RevisionMissingError:
-        return unavailable_status(pipeline, run_id, "INCOMPLETE", "revision_missing")
-    except (ValueError, TypeError, UnicodeError):
-        return unavailable_status(pipeline, run_id, "ERROR", "evidence_corrupt")
-    except OSError:
-        return unavailable_status(
-            pipeline, run_id, _QUERY_ERROR, "evidence_read_failed"
-        )
-
-
 def load_selected_run_status(
     *,
     pipeline: str,
@@ -270,10 +250,20 @@ def load_selected_run_status(
     )
     if not path.is_file():
         return unavailable_status(pipeline, run_id, "UNKNOWN", "run_not_found")
-    loaded = _load_saved_assessment(path, pipeline, run_id)
-    if isinstance(loaded, dict):
-        return loaded
-    report, identity, assessment, availability, revision = loaded
+    try:
+        report, identity, assessment, availability, revision = _load_report_assessment(
+            path, pipeline, run_id
+        )
+    except _IdentityMismatchError:
+        return unavailable_status(pipeline, run_id, "ERROR", "identity_mismatch")
+    except _RevisionMissingError:
+        return unavailable_status(pipeline, run_id, "INCOMPLETE", "revision_missing")
+    except (ValueError, TypeError, UnicodeError):
+        return unavailable_status(pipeline, run_id, "ERROR", "evidence_corrupt")
+    except OSError:
+        return unavailable_status(
+            pipeline, run_id, _QUERY_ERROR, "evidence_read_failed"
+        )
     summary = {
         **{key: value for key, value in assessment.items() if key != "domains"},
         "pipeline": pipeline,
