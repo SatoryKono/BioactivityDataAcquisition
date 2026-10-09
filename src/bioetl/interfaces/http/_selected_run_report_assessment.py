@@ -15,8 +15,10 @@ from bioetl.application.services.run_reports.query import list_pipeline_reports
 from bioetl.composition.observability_runtime import create_run_report_store
 from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.run_reports.selected_status import (
+    accounting_conflicts,
     assess_report,
     evidence_digest,
+    saved_trust_fields,
     verify_snapshot,
 )
 from bioetl.interfaces.http import run_report_ops
@@ -36,19 +38,8 @@ class _IdentityMismatchError(LookupError):
 
 
 def _accounting_conflicts(reconciliation: object, verdict: object) -> list[str]:
-    if not isinstance(reconciliation, dict):
-        return []
-    conflicts: list[str] = []
-    for stage in ("silver", "gold"):
-        prior = "bronze" if stage == "silver" else "silver"
-        key = f"{stage}_vs_{prior}_status"
-        if reconciliation.get(key) == "FAILING":
-            conflicts.append(
-                f"Saved report accounting conflict: {key}=FAILING, "
-                f"delta={reconciliation.get(f'{stage}_delta', 'UNKNOWN')}. "
-                f"Saved Trust verdict: {verdict}; inspect report and ledger."
-            )
-    return conflicts
+    """Compatibility export. The predicate owner is domain selected_status."""
+    return accounting_conflicts(reconciliation, verdict)
 
 
 def _saved_trust(
@@ -67,16 +58,17 @@ def _saved_trust(
     ):
         reasons = reasons.get(key) if isinstance(reasons, dict) else None
     reasons_text = reasons if isinstance(reasons, str) else str(control["reason"])
-    conflicts = _accounting_conflicts(report.get("reconciliation"), control["verdict"])
-    if conflicts:
-        reasons_text = "\n".join(filter(None, (reasons_text, *conflicts)))
+    projected = saved_trust_fields(
+        verdict=control["verdict"],
+        reasons_text=reasons_text,
+        reconciliation=report.get("reconciliation"),
+        funnel=report.get("funnel"),
+    )
+    reasons_text = str(projected["reasons_text"])
     reasons_count = sum(bool(line.strip()) for line in reasons_text.splitlines())
     return {
         "processing_status": str(summary["execution_state"]).lower(),
-        "trust_status": "ERROR" if conflicts else control["verdict"],
-        "saved_trust_status": control["verdict"],
-        "accounting_integrity": "CONFLICT" if conflicts else "NO REPORTED CONFLICT",
-        "reasons_text": reasons_text,
+        **projected,
         "reasons_display": display_reasons_text(reasons_text),
         "reasons_count": reasons_count,
         "trust_reasons_action": "View trust reasons" if reasons_count > 0 else None,
@@ -227,6 +219,16 @@ def _verify_snapshot_objects(manifest: object) -> bool | None:
     return True
 
 
+def _input_snapshot_fingerprints(manifest: object) -> list[str]:
+    fingerprints: list[str] = []
+    for source in getattr(manifest, "source_refs", ()) or ():
+        for snapshot in getattr(source, "input_snapshots", ()) or ():
+            content_hash = getattr(snapshot, "content_hash", None)
+            if isinstance(content_hash, str) and content_hash.strip():
+                fingerprints.append(content_hash.strip())
+    return fingerprints
+
+
 def _manifest_snapshot(port: object, run_id: str) -> dict[str, object] | None:
     """Read manifest fields for this run. A missing port is not report identity."""
     if port is None:
@@ -242,12 +244,7 @@ def _manifest_snapshot(port: object, run_id: str) -> dict[str, object] | None:
     if manifest is None:
         return None
     provenance = getattr(manifest, "code_provenance", None)
-    fingerprints: list[str] = []
-    for source in getattr(manifest, "source_refs", ()) or ():
-        for snapshot in getattr(source, "input_snapshots", ()) or ():
-            content_hash = getattr(snapshot, "content_hash", None)
-            if isinstance(content_hash, str) and content_hash.strip():
-                fingerprints.append(content_hash.strip())
+    fingerprints = _input_snapshot_fingerprints(manifest)
     capability = getattr(manifest, "replay_capability", None)
     capability_value = getattr(capability, "value", capability)
     launch_context = getattr(manifest, "launch_context", None)

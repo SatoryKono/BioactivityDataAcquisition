@@ -1519,7 +1519,7 @@
       "symbol": "--silver-filter-only",
       "path": "docs/04-reference/cli.md",
       "occurrence_count": 3,
-      "first_line": 1059,
+      "first_line": 1060,
       "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
       "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
       "notes": ""
@@ -1596,7 +1596,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "docs/04-reference/cli.md",
       "occurrence_count": 3,
-      "first_line": 1254,
+      "first_line": 1255,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1662,7 +1662,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "src/bioetl/infrastructure/quarantine/filtered_reads.py",
       "occurrence_count": 2,
-      "first_line": 123,
+      "first_line": 126,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1717,7 +1717,7 @@
       "symbol": "silver_filter_rejects",
       "path": "src/bioetl/infrastructure/quarantine/_statistics.py",
       "occurrence_count": 1,
-      "first_line": 112,
+      "first_line": 113,
       "role": "Operator summary alias for Silver rejects",
       "migration_relevance": "Summary key is a compatibility alias while semantic/business rejects move to Gold taxonomy.",
       "notes": ""
@@ -1970,7 +1970,7 @@
       "symbol": "apply_silver_filter",
       "path": "src/bioetl/application/pipelines/common/publication_transformer_records.py",
       "occurrence_count": 4,
-      "first_line": 121,
+      "first_line": 124,
       "role": "Runtime Silver filter application callsite",
       "migration_relevance": "Any new runtime application gate must remain structural-only or be inventoried.",
       "notes": ""

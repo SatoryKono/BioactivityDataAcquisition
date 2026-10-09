@@ -41,6 +41,19 @@ from bioetl.domain.mapping.publication_type_classification import (
     is_initialized,
     normalize_publication_classification_field,
 )
+from tests.helpers.publication_type_classification import (
+    bind_installed_classification_data,
+)
+
+classify_publication_type = bind_installed_classification_data(
+    classify_publication_type
+)
+build_publication_type_classification_payload = bind_installed_classification_data(
+    build_publication_type_classification_payload
+)
+normalize_publication_classification_field = bind_installed_classification_data(
+    normalize_publication_classification_field
+)
 
 pytestmark = pytest.mark.usefixtures("publication_type_classification_data")
 
@@ -459,3 +472,70 @@ class TestInitializationGuard:
         assert get_classification_table_size() == size_before
         assert set(_PROVIDER_LOOKUPS.keys()) == set(lookups_before.keys())
         assert is_initialized() is True
+
+
+def test_explicit_classification_data_objects_stay_isolated() -> None:
+    """Two taxonomy objects do not observe each other's row-index mutations."""
+    from bioetl.domain.mapping.classification_data import ClassificationData
+    from bioetl.domain.mapping.publication_type_classification import (
+        classify_publication_type as classify,
+    )
+
+    journal = ClassificationData(
+        entry_cores=(("Journal Article", "Original Experimental Data", "EXP"),),
+        openalex_row_index={},
+        crossref_row_index={"journal-article": 1},
+        pubmed_row_index={},
+        s2_row_index={},
+    )
+    preprint = ClassificationData(
+        entry_cores=(("Preprint", "Original Experimental Data", "EXP"),),
+        openalex_row_index={},
+        crossref_row_index={"journal-article": 1},
+        pubmed_row_index={},
+        s2_row_index={},
+    )
+    journal_entry = classify("crossref", raw_type="journal-article", data=journal)
+    preprint_entry = classify("crossref", raw_type="journal-article", data=preprint)
+    assert journal_entry is not None
+    assert preprint_entry is not None
+    assert journal_entry.unified_type == "Journal Article"
+    assert preprint_entry.unified_type == "Preprint"
+    journal.crossref_row_index.clear()
+    cached = classify("crossref", raw_type="journal-article", data=journal)
+    assert cached is not None
+    assert cached.unified_type == "Journal Article"
+    with pytest.raises(RuntimeError, match="passed explicitly"):
+        classify("crossref", raw_type="journal-article")
+
+
+def test_classification_view_cache_checks_source_identity() -> None:
+    """An id-key collision must never return another taxonomy snapshot."""
+    from bioetl.domain.mapping import (
+        _publication_type_classification_support as support,
+    )
+    from bioetl.domain.mapping.classification_data import ClassificationData
+
+    journal = ClassificationData(
+        entry_cores=(("Journal Article", "Original Experimental Data", "EXP"),),
+        openalex_row_index={},
+        crossref_row_index={"journal-article": 1},
+        pubmed_row_index={},
+        s2_row_index={},
+    )
+    preprint = ClassificationData(
+        entry_cores=(("Preprint", "Original Experimental Data", "EXP"),),
+        openalex_row_index={},
+        crossref_row_index={"journal-article": 1},
+        pubmed_row_index={},
+        s2_row_index={},
+    )
+    wrong_views = support._views_for(preprint)
+    support._VIEW_CACHE[id(journal)] = (preprint, wrong_views)
+
+    views = support._views_for(journal)
+
+    assert views is not wrong_views
+    assert views.entries[0].unified_type == "Journal Article"
+    support._VIEW_CACHE.pop(id(journal), None)
+    support._VIEW_CACHE.pop(id(preprint), None)

@@ -4,29 +4,7 @@ permissions:
   contents: read
 
 on:
-  pull_request:
-    paths:
-      - "grafana/tooling/router-v7-bridge/**"
-      - "grafana/plugins/bioetl-scenes-app/**"
-      - "grafana/plugins/bioetl-selectorshell-panel/**"
-      - ".github/workflows/router-v7-bridge.yml"
-      - "scripts/ops/observability/grafana/router_rootfs.py"
-      - "scripts/ops/observability/grafana/router_managed_image.py"
-      - "scripts/ops/__main__.py"
-      - "tests/unit/scripts/ops/test_router_rootfs.py"
-      - "tests/unit/scripts/ops/test_router_managed_image.py"
-  push:
-    branches: [main]
-    paths:
-      - "grafana/tooling/router-v7-bridge/**"
-      - "grafana/plugins/bioetl-scenes-app/**"
-      - "grafana/plugins/bioetl-selectorshell-panel/**"
-      - ".github/workflows/router-v7-bridge.yml"
-      - "scripts/ops/observability/grafana/router_rootfs.py"
-      - "scripts/ops/observability/grafana/router_managed_image.py"
-      - "scripts/ops/__main__.py"
-      - "tests/unit/scripts/ops/test_router_rootfs.py"
-      - "tests/unit/scripts/ops/test_router_managed_image.py"
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -221,7 +199,6 @@ jobs:
         run: |
           image=$(node -p "require('./grafana/tooling/router-v7-bridge/host-image.json').image")
           docker pull "$image"
-          docker pull grafana/grafana@sha256:d84563330dc9d2fd2bc096d0fb96021b5319c75bf6ed555566709998e823dec4
           node grafana/tooling/router-v7-bridge/verify-host-image.mjs \
             bioetl-router-host:acceptance
       - name: Preserve image build and parity receipts

@@ -607,11 +607,13 @@ def test_dashboard_data_plane_accepts_exact_managed_mounts(tmp_path: Path) -> No
     from bioetl.application.services.run_reports.paths import (
         write_report_root_source_identity,
     )
+    from bioetl.composition.observability_runtime import create_run_report_store
 
     (tmp_path / "reports" / "run-reports").mkdir(parents=True)
     write_report_root_source_identity(
         report_root=tmp_path / "reports" / "run-reports",
         source_id=environment["BIOETL_RUNTIME_SOURCE_ID"],
+        store=create_run_report_store(),
     )
     containers = [
         {
@@ -655,11 +657,13 @@ def test_dashboard_data_plane_rejects_container_env_label_conflict(
     from bioetl.application.services.run_reports.paths import (
         write_report_root_source_identity,
     )
+    from bioetl.composition.observability_runtime import create_run_report_store
 
     (tmp_path / "reports" / "run-reports").mkdir(parents=True)
     write_report_root_source_identity(
         report_root=tmp_path / "reports" / "run-reports",
         source_id=expected,
+        store=create_run_report_store(),
     )
     containers = [
         {
@@ -1070,10 +1074,10 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         encoding="utf-8"
     )
     assert "uv=0.11.26-r0" in dockerfile
-    assert dockerfile.count("glibc-2.44=2.44-r6") == 2
-    assert dockerfile.count("glibc-2.44-locale-posix=2.44-r6") == 2
-    assert dockerfile.count("ld-linux-2.44=2.44-r6") == 2
-    assert dockerfile.count("libcrypt1-2.44=2.44-r6") == 2
+    assert dockerfile.count("glibc-2.44=2.44-r8") == 2
+    assert dockerfile.count("glibc-2.44-locale-posix=2.44-r8") == 2
+    assert dockerfile.count("ld-linux-2.44=2.44-r8") == 2
+    assert dockerfile.count("libcrypt1-2.44=2.44-r8") == 2
     assert (
         dockerfile.count(
             "chainguard/wolfi-base@sha256:"
@@ -1511,7 +1515,7 @@ def test_docker_workflow_probes_shellless_runtime_and_default_health() -> None:
     )
     probe = str(provenance["run"])
     for required in (
-        "sys.version_info[:3] == (3, 13, 15)",
+        "sys.version_info[:3] == (3, 13, 16)",
         "(os.getuid(), os.getgid()) == (999, 999)",
         'pwd.getpwuid(999).pw_name == "bioetl"',
         'pwd.getpwuid(999).pw_shell == "/sbin/nologin"',
