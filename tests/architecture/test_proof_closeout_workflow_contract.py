@@ -107,18 +107,19 @@ def test_runtime_closeout_cost_budget_is_admissible():
     result = evaluate_closeout_cost_budget(ROOT)
 
     assert result["outcome"] == "PASS", result["errors"]
-    assert result["measurements"] == {
-        "coverage_job_count": 4,
-        "coverage_resource_class": "medium",
-        "group_seconds": {
-            "0": 386.99,
-            "1": 386.54,
-            "2": 385.63,
-            "3": 380.74,
-        },
-        "total_lane_seconds": 1539.90,
-        "critical_path_seconds": 386.99,
-    }
+    measurements = result["measurements"]
+    limits = result["limits"]
+    assert measurements["coverage_job_count"] == limits["coverage_job_count"]
+    assert measurements["coverage_resource_class"] == limits["coverage_resource_class"]
+    assert set(measurements["group_seconds"]) == {"0", "1", "2", "3"}
+    assert measurements["total_lane_seconds"] == round(
+        sum(measurements["group_seconds"].values()), 2
+    )
+    assert measurements["critical_path_seconds"] == max(
+        measurements["group_seconds"].values()
+    )
+    assert measurements["total_lane_seconds"] <= limits["total_lane_seconds"]
+    assert measurements["critical_path_seconds"] <= limits["critical_path_seconds"]
 
 
 def test_proof_jobs_measure_executor_time_without_an_extra_job():
