@@ -1,36 +1,19 @@
 """Canonical grouping for transform primitives and field-spec helpers."""
 
 from __future__ import annotations
-# ruff: noqa: I001
-
-from types import ModuleType
 
 from bioetl.application.core import dict_transformers as _dict_transformers
-from bioetl.application.core.entity_id import (
-    ENTITY_ID_SCHEME_VERSION as ENTITY_ID_SCHEME_VERSION,
-    compute_publication_term_entity_id as compute_publication_term_entity_id,
-    compute_subcellular_fraction_entity_id as compute_subcellular_fraction_entity_id,
-)
+from bioetl.application.core import entity_id as _entity_id
 from bioetl.application.core import field_specs as _field_specs
+from bioetl.application.core.wiring.lazy_export_hooks import (
+    install_lazy_export_facade,
+)
 
-__all__ = [
-    "ENTITY_ID_SCHEME_VERSION",
-    "compute_publication_term_entity_id",
-    "compute_subcellular_fraction_entity_id",
-    *_dict_transformers.__all__,
-    *_field_specs.__all__,
-]
-
-
-def __getattr__(name: str) -> object:
-    """Resolve field-spec exports from their canonical owner module."""
-    source_module: ModuleType
-    if name in _dict_transformers.__all__:
-        source_module = _dict_transformers
-    elif name in _field_specs.__all__:
-        source_module = _field_specs
-    else:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    value = getattr(source_module, name)
-    globals()[name] = value
-    return value
+_FIELD_TRANSFORM_EXPORTS = {
+    **{
+        name: (_dict_transformers.__name__, name) for name in _dict_transformers.__all__
+    },
+    **{name: (_entity_id.__name__, name) for name in _entity_id.__all__},
+    **{name: (_field_specs.__name__, name) for name in _field_specs.__all__},
+}
+install_lazy_export_facade(globals(), __name__, _FIELD_TRANSFORM_EXPORTS)

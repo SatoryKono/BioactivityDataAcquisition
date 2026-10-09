@@ -3,18 +3,9 @@
 from __future__ import annotations
 
 from bioetl.application.core.wiring import factory as _factory
+from bioetl.application.core.wiring.lazy_export_hooks import (
+    install_lazy_export_facade,
+)
 
-__all__ = [*_factory.__all__]
-
-
-def __getattr__(name: str) -> object:
-    """Resolve legacy factory exports through the canonical lazy facade."""
-    if name not in __all__:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    value = getattr(_factory, name)
-    globals()[name] = value
-    return value
-
-
-def __dir__() -> list[str]:
-    return sorted(set(globals()) | set(__all__))
+_LEGACY_FACTORY_EXPORTS = {name: (_factory.__name__, name) for name in _factory.__all__}
+install_lazy_export_facade(globals(), __name__, _LEGACY_FACTORY_EXPORTS)

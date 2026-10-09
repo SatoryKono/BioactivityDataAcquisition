@@ -2,29 +2,25 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from functools import cache
-
+from pathlib import Path
 
 from bioetl.domain.mapping.classification_data import ClassificationData
 from bioetl.domain.mapping.protein_class_target_type import (
     ProteinClassTargetTypeMappingData,
 )
 
-from bioetl.domain.mapping import publication_type_classification
-from bioetl.domain.mapping import protein_class_target_type
 import bioetl.infrastructure.config.publication_type_classification_loader as publication_type_classification_loader
 import bioetl.infrastructure.config.protein_class_target_type_loader as protein_class_target_type_loader
-
-
-from pathlib import Path
-
 from bioetl.composition.runtime_builders import _config_access_loaders
+from bioetl.domain.mapping import protein_class_target_type
+from bioetl.domain.mapping import publication_type_classification
 import bioetl.infrastructure.config.config_root as _config_root
 import bioetl.infrastructure.config.dq_contract_config_loader as _dq_config_loader
 import bioetl.infrastructure.config.pipeline_config_api as _pipeline_config_api
 import bioetl.infrastructure.config.settings_api as _settings_api
 import bioetl.infrastructure.config.source_config_loader as _source_config_loader
-from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [
     "create_dq_config_loader",
@@ -40,11 +36,16 @@ __all__ = [
 
 
 create_pipeline_config_loader = _config_access_loaders.create_pipeline_config_loader
-create_dq_config_loader = _config_access_loaders.create_dq_config_loader
 create_source_config_loader = _config_access_loaders.create_source_config_loader
 resolve_configs_root = _config_root.resolve_configs_root
 _load_pipeline_config = _pipeline_config_api.load_pipeline_config
 _load_dq_config_for_pipeline = _dq_config_loader.load_dq_config_for_pipeline
+
+
+def create_dq_config_loader(configs_root: Path) -> Callable[[str], object]:
+    """Bind DQ config loading through the canonical root-aware factory."""
+
+    return _config_access_loaders.create_dq_config_loader(configs_root)
 
 
 def get_settings() -> _settings_api.Settings:
@@ -56,7 +57,9 @@ def load_settings() -> _settings_api.Settings:
     return _settings_api.Settings()
 
 
-def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
+def load_pipeline_config(
+    pipeline_name: str,
+) -> _pipeline_config_api.PipelineYamlConfig:
     """Load pipeline YAML through the canonical infrastructure entrypoint."""
 
     return _load_pipeline_config(pipeline_name)

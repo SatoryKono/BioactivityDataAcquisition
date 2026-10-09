@@ -1,6 +1,7 @@
 """Canonical grouping for batch-transformer runtime helpers."""
 
 from __future__ import annotations
+
 # ruff: noqa: I001
 
 from bioetl.application.core.transformer_runtime.attempts import (
@@ -35,6 +36,12 @@ from bioetl.application.core.transformer_runtime import state as _state
 from bioetl.application.core.transformer_runtime.streaming import (
     StreamingBatchProcessor as StreamingBatchProcessor,
 )
+from bioetl.application.core.wiring.lazy_export_hooks import (
+    install_lazy_export_facade,
+)
+
+_STATE_EXPORTS = {name: (_state.__name__, name) for name in _state.__all__}
+install_lazy_export_facade(globals(), __name__, _STATE_EXPORTS)
 
 __all__ = [
     "QUARANTINE_WRITE_WARN_ONLY_ERRORS",
@@ -60,12 +67,3 @@ __all__ = [
     "yield_control_if_needed",
     *_state.__all__,
 ]
-
-
-def __getattr__(name: str) -> object:
-    """Resolve state exports from their canonical submodule."""
-    if name not in _state.__all__:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    value = getattr(_state, name)
-    globals()[name] = value
-    return value
