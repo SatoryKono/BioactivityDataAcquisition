@@ -1,6 +1,6 @@
 {
-  "additive_coverage_xml_path": "reports/coverage/local-verify-pr12096-20261009-final13/coverage.xml",
-  "additive_coverage_xml_sha256": "16948bbcb621fc1e73c14cdc6ed787a5e3d314a24dcec46cc2aad6e07f8dc2d3",
+  "additive_coverage_xml_path": "reports/coverage/local-verify-pr12096-20261009-final14/coverage.xml",
+  "additive_coverage_xml_sha256": "93471ca1c1e8c8ab99b3d07146d680df6c5a8d9221882eea1b1e355f963d53e1",
   "additive_measured_module_count": 2461,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
@@ -6146,7 +6146,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.manifest.replay_taxonomy_fields",
       "path": "src/bioetl/application/services/control_plane/manifest/replay_taxonomy_fields.py",
-      "source_lines": 12
+      "source_lines": 10
     },
     {
       "coverage_percent": 100.0,
@@ -31808,7 +31808,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.manifest.replay_taxonomy_fields",
       "path": "src/bioetl/application/services/control_plane/manifest/replay_taxonomy_fields.py",
-      "source_lines": 12
+      "source_lines": 10
     },
     {
       "coverage_percent": 100.0,
@@ -51333,7 +51333,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "3395b27f33535d384a015e5173f7ccd091af5a79a7e1e0eea7c9b33131e86939",
+  "source_tree_sha256": "5492068cab2e9b7471a4b59111eb8ff015a30431c7b32fc2177a50323eb62049",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
