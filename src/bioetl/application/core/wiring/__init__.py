@@ -42,7 +42,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "OpenAlexPublicationTransformer",
         "ProteinClassTransformer",
         "PubChemCompoundTransformer",
-        "PubMedPublicationTermPayloadEnricherService",
+        "PubMedPublicationTermEnrichmentService",
         "PubMedPublicationTransformer",
         "PublicationSimilarityTransformer",
         "PublicationTermTransformer",

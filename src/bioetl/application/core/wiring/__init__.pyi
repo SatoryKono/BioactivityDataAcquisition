@@ -74,7 +74,7 @@ from bioetl.application.core.wiring.registry import (
     PublicationTransformer as PublicationTransformer,
 )
 from bioetl.application.core.wiring.registry import (
-    PubMedPublicationTermPayloadEnricherService as PubMedPublicationTermPayloadEnricherService,
+    PubMedPublicationTermEnrichmentService as PubMedPublicationTermEnrichmentService,
 )
 from bioetl.application.core.wiring.registry import (
     PubMedPublicationTransformer as PubMedPublicationTransformer,

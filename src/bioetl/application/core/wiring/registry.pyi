@@ -54,7 +54,7 @@ from bioetl.application.pipelines.pubchem.transformer import (
     PubChemCompoundTransformer as PubChemCompoundTransformer,
 )
 from bioetl.application.pipelines.pubmed.publication_term_enricher import (
-    PubMedPublicationTermPayloadEnricherService as PubMedPublicationTermPayloadEnricherService,
+    PubMedPublicationTermEnrichmentService as PubMedPublicationTermEnrichmentService,
 )
 from bioetl.application.pipelines.pubmed.transformer import (
     PubMedPublicationTransformer as PubMedPublicationTransformer,

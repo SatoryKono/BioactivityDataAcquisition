@@ -34,7 +34,7 @@ _PUBLIC_EXPORTS = {
         "bioetl.application.pipelines.chembl.protein_class_transformer"
     ),
     "PubChemCompoundTransformer": "bioetl.application.pipelines.pubchem.transformer",
-    "PubMedPublicationTermPayloadEnricherService": (
+    "PubMedPublicationTermEnrichmentService": (
         "bioetl.application.pipelines.pubmed.publication_term_enricher"
     ),
     "PubMedPublicationTransformer": "bioetl.application.pipelines.pubmed.transformer",
