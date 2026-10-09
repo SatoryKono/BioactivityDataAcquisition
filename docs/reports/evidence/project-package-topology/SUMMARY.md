@@ -1,4 +1,4 @@
-Source-only refresh (2026-10-09, PR #12162 snapshot shutdown merge): the canonical module inventory records `source_tree_sha256=eeeb853b4721c2204da3905cd181caefc8437f640200e51153a50a111ac318c9` and `source_module_count=2566`. This binds the merged PR tree; coverage measurements remain those of the last authoritative 17-shard run recorded below.
+Source-only refresh (2026-10-09, PR #12162 snapshot shutdown merge): the canonical module inventory records `source_tree_sha256=d64d63b944af44501f1e6b40b3dfdf2e8b60dd7679146903a8b6c42f39e07914` and `source_module_count=2566`. This binds the merged PR tree; coverage measurements remain those of the last authoritative 17-shard run recorded below.
 
 Source-only refresh (2026-10-09, PR #11980 merge of origin/main #12153): the canonical module inventory records `source_tree_sha256=8c006b322614aa47c7727a0b2e1d47697cb28df9389c4ca9eba5d143525230e7` and `source_module_count=2566`. This binds the merged PR tree; coverage measurements remain those of the last authoritative 17-shard run recorded below.
 
