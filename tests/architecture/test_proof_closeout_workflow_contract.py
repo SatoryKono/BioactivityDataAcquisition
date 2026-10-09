@@ -12,6 +12,8 @@ from scripts.engineering.qa.run_local_coverage_verify import SHARDS
 
 pytestmark = pytest.mark.architecture
 ROOT = Path(__file__).resolve().parents[2]
+BUDGET = ROOT / "configs/quality/ci_closeout_cost_budget.yaml"
+TELEMETRY = ROOT / "configs/quality/test_telemetry_baseline.yaml"
 
 
 def test_rf023_keeps_its_own_task_identity_and_branch():
@@ -44,6 +46,59 @@ def test_all_coverage_shards_have_one_owner():
             )
     assert Counter(selected) == Counter(s.name for s in SHARDS)
     assert "--merge-dir" in catalog["checks"]["coverage"]["argv"]
+
+
+def test_coverage_closeout_respects_shrink_only_ci_cost_budget():
+    catalog = yaml.safe_load(
+        (ROOT / "configs/quality/proof_closeout_checks.yaml").read_text()
+    )
+    budget = yaml.safe_load(BUDGET.read_text(encoding="utf-8"))
+    telemetry = yaml.safe_load(TELEMETRY.read_text(encoding="utf-8"))
+    config = yaml.safe_load((ROOT / ".circleci/config.yml").read_text(encoding="utf-8"))
+
+    assert budget["schema_version"] == 1
+    assert budget["policy_scope"] == "ci_closeout_cost_budget"
+    assert budget["budget_policy"] == "shrink_only"
+    assert budget["baseline"]["source_commit"] == telemetry["source_commit"]
+    assert (
+        budget["baseline"]["test_tree_sha256"]
+        == telemetry["measurement_provenance"]["test_tree_sha256"]
+    )
+
+    limits = budget["limits"]
+    assert limits["coverage_job_count"] == 4
+    assert limits["additional_coverage_jobs"] == 0
+    assert limits["coverage_resource_class"] == "medium"
+    assert limits["resource_class_increase_allowed"] is False
+    assert config["jobs"]["proof-coverage-shard"]["resource_class"] == "medium"
+
+    lane_seconds = telemetry["duration_telemetry"]["execution_context"][
+        "lane_wall_time_s"
+    ]
+    group_seconds = []
+    selected = []
+    for index in range(limits["coverage_job_count"]):
+        args = catalog["checks"][f"coverage-{index}"]["argv"]
+        shards = [args[i + 1] for i, arg in enumerate(args) if arg == "--shard"]
+        selected.extend(shards)
+        group_seconds.append(round(sum(lane_seconds[name] for name in shards), 2))
+
+    assert Counter(selected) == Counter(shard.name for shard in SHARDS)
+    assert round(sum(group_seconds), 2) <= limits["total_lane_seconds"]
+    assert max(group_seconds) <= limits["critical_path_seconds"]
+    assert limits["total_lane_seconds"] <= budget["baseline"]["total_lane_seconds"]
+    assert (
+        limits["critical_path_seconds"]
+        < budget["baseline"]["critical_path_seconds"]
+    )
+
+    for workflow in ("pr-gate", "main-coverage-closeout", "migration-coverage-closeout"):
+        matrix = next(
+            item["proof-coverage-shard"]["matrix"]["parameters"]["group"]
+            for item in config["workflows"][workflow]["jobs"]
+            if isinstance(item, dict) and "proof-coverage-shard" in item
+        )
+        assert matrix == ["0", "1", "2", "3"]
 
 
 def test_proof_waits_for_producers_in_the_same_workflow():

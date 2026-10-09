@@ -1,0 +1,18 @@
+schema_version: 1
+policy_scope: ci_closeout_cost_budget
+workflow: coverage-closeout
+budget_policy: shrink_only
+telemetry_source: configs/quality/test_telemetry_baseline.yaml
+catalog_source: configs/quality/proof_closeout_checks.yaml
+baseline:
+  source_commit: 2a9d5ad7dd1fb155a80993f1a2f454a4dbc8e518
+  test_tree_sha256: be0b1db79a83b0e7ac10de6b0e44de968a760f5ff1168ef46621d5fcaeb0e44d
+  total_lane_seconds: 2139.08
+  critical_path_seconds: 818.53
+limits:
+  coverage_job_count: 4
+  coverage_resource_class: medium
+  total_lane_seconds: 2139.08
+  critical_path_seconds: 535.54
+  additional_coverage_jobs: 0
+  resource_class_increase_allowed: false
