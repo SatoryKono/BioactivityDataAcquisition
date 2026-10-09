@@ -1,7 +1,7 @@
 name: PR Gate Complete
 # Repo-side #9975 coordinator. Ruleset 13643213 names this job
 # (`name: pr-gate-complete`) as the Actions required context.
-# Enforcement stays disabled: do not flip it to active in this change.
+# Enforcement stays disabled (#11180): do not flip it to active in this change.
 # Actions billing is restored and this workflow runs on pull_request.
 # Next review 2026-12-30 or when enforcement is enabled, whichever is earlier.
 # Each pull request has one owner invocation per gate and one fail-closed result.
