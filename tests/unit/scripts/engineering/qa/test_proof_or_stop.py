@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -32,10 +33,12 @@ from memory.proof_cli import (
     _mutate_missing,
     _mutate_partial,
     _mutate_sharded_ci,
+    _mutate_source,
     _mutate_stale_head,
     _mutate_tampered,
     _mutate_unavailable,
     _mutate_vendor_override,
+    _scenario_cases,
     main,
 )
 from tests.helpers.clock import FIXED_TEST_TIME
@@ -448,6 +451,51 @@ def _assert_digests(bundle: dict[str, Any]) -> None:
     assert bundle["bundle_digest"] == canonical_digest(
         {key: value for key, value in bundle.items() if key != "bundle_digest"}
     )
+
+
+@pytest.mark.parametrize(
+    "name,expected,check_source,mutate",
+    [
+        ("stale_source", "STOP", True, _mutate_stale_head),
+        ("stale_diff", "STOP", True, "task_diff_hash"),
+        ("policy_drift", "STOP", True, "policy_hash"),
+        ("command_set_drift", "STOP", True, "command_set_hash"),
+        ("missing_receipt", "STOP", True, _mutate_missing),
+        ("failed_reported_as_pass", "STOP", True, _mutate_failed_as_pass),
+        ("invalid_skip", "STOP", True, _mutate_invalid_skip),
+        ("unavailable_not_pass", "DEGRADED", True, _mutate_unavailable),
+        ("tampered_receipt", "STOP", True, _mutate_tampered),
+        ("unauthorized_vendor_override", "STOP", True, _mutate_vendor_override),
+        ("cross_scope_receipt", "STOP", True, _mutate_cross_scope),
+        ("dirty_untracked_full_claim", "STOP", False, _mutate_dirty_full),
+        ("sharded_ci_identity", "ADMIT", True, _mutate_sharded_ci),
+        ("degraded_not_full", "STOP", True, _mutate_degraded_full),
+        ("partial_fail_fast_receipt", "STOP", True, _mutate_partial),
+    ],
+)
+def test_scenario_cases_routing(
+    name: str,
+    expected: str,
+    check_source: bool,
+    mutate: str | Callable[[dict[str, Any], dict[str, Any]], None],
+) -> None:
+    cases = _scenario_cases()
+    cases_by_name = {
+        case_name: (outcome, source_check, mutator)
+        for case_name, outcome, source_check, mutator in cases
+    }
+    assert len(cases) == len(cases_by_name) == 15
+    actual_expected, actual_check_source, actual_mutate = cases_by_name[name]
+    assert actual_expected == expected
+    assert actual_check_source is check_source
+    if isinstance(mutate, str):
+        bundle = _mock_bundle()
+        expected_bundle = copy.deepcopy(bundle)
+        _mutate_source(expected_bundle, mutate)
+        actual_mutate(bundle, {})
+        assert bundle == expected_bundle
+    else:
+        assert actual_mutate is mutate
 
 
 def test_mutate_stale_head():
