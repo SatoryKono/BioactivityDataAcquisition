@@ -1,4 +1,4 @@
-"""Compatibility facade for replay-taxonomy field definitions."""
+"""Application-owned replay-taxonomy field definitions."""
 
 from __future__ import annotations
 

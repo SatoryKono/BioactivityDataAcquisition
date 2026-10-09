@@ -38,7 +38,7 @@ The earlier LoggerPort alias-removal source rebind did not constitute a new cove
 
 The current source tree contains 2566 eligible modules, all represented in the
 accepted inventory. A complete local 17-shard measurement on source commit
-`f33e34578ae4c541e2b5c4f433cc4d5fd2697f39` produced 99.67% line and 94.24%
+`912f483953c76ede75313f762e41a9848369c3bb` produced 99.67% line and 94.25%
 branch coverage; nonregressing adoption retains prior accepted values where
 the fresh raw measurement is lower. This is local measurement evidence, not
 CircleCI acceptance or lifecycle ADMIT for the final PR head.
