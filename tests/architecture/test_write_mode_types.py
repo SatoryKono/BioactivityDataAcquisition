@@ -110,7 +110,7 @@ def test_write_mode_enums_exist_in_domain() -> None:
     # Verify enum values
     assert SilverWriteMode.MERGE.value == "merge"
     assert SilverWriteMode.APPEND.value == "append"
-    assert SilverWriteMode.DELETE.value == "delete"
+    assert {m.value for m in SilverWriteMode} == {"merge", "append"}
 
     assert GoldWriteMode.APPEND.value == "append"
     assert GoldWriteMode.SCD2.value == "scd2"
@@ -124,7 +124,8 @@ def test_write_mode_enums_have_from_string() -> None:
     # Test SilverWriteMode.from_string
     assert SilverWriteMode.from_string("merge") == SilverWriteMode.MERGE
     assert SilverWriteMode.from_string("APPEND") == SilverWriteMode.APPEND
-    assert SilverWriteMode.from_string("Delete") == SilverWriteMode.DELETE
+    with pytest.raises(ValueError):
+        SilverWriteMode.from_string("Delete")
 
     # Test GoldWriteMode.from_string
     assert GoldWriteMode.from_string("append") == GoldWriteMode.APPEND
@@ -167,11 +168,11 @@ def test_table_config_accepts_enums_directly() -> None:
     from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 
     config = TableConfig(
-        silver_write_mode=SilverWriteMode.DELETE,
+        silver_write_mode=SilverWriteMode.MERGE,
         gold_write_mode=GoldWriteMode.SCD2,
     )
 
-    assert config.silver_write_mode == SilverWriteMode.DELETE
+    assert config.silver_write_mode == SilverWriteMode.MERGE
     assert config.gold_write_mode == GoldWriteMode.SCD2
 
 
@@ -203,7 +204,7 @@ def test_overwrite_for_silver_raises_error() -> None:
     """silver_write_mode='overwrite' MUST raise ValueError.
 
     The deprecated 'overwrite' alias for Silver layer has been removed.
-    Use SilverWriteMode.DELETE explicitly for rebuild operations.
+    Full snapshot overwrite belongs to write_silver_merged, not batch modes.
     """
     from bioetl.domain.config import TableConfig
 
@@ -230,7 +231,7 @@ def test_no_silent_degradation_in_batch_writer() -> None:
 
     # Check behavior invariant instead of implementation comment marker:
     # Silver mode must not include "overwrite" alias in runtime cast.
-    assert 'Literal["merge", "append", "delete"]' in source, (
-        "BatchWriter silver mode must use explicit delete/append/merge set "
+    assert 'Literal["merge", "append"]' in source, (
+        "BatchWriter silver mode must use explicit append/merge set "
         "without overwrite alias."
     )

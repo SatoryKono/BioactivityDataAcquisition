@@ -8,25 +8,27 @@
 
 | Family | Files | Total LOC | Files >=250 LOC | Helper ratio | Duplication | Max fan-in | Max fan-in module | Budgets | Budget warnings | Budget review notes |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- | --- |
-| `application_core` | 202 | 25231 | 0 | 0.381 | 0 | 6 | `bioetl.application.core.batch_processing_contracts` | `files_ge_250_loc=0, max_internal_fan_in=7` | `-` | `near_budget:max_internal_fan_in=6/7` |
-| `composition_bootstrap_runtime` | 49 | 6440 | 0 | 0.284 | 0 | 2 | `bioetl.composition.bootstrap.runtime.tracing_bootstrap` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
-| `composition_factories_pipeline` | 32 | 3869 | 0 | 0.358 | 0 | 2 | `bioetl.composition.factories.pipeline.runner_constructor` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
-| `application_services_control_plane` | 130 | 15559 | 0 | 0.399 | 0 | 1 | `bioetl.application.services.control_plane.workflow.manifest_models` | `files_ge_250_loc=0, max_internal_fan_in=2` | `-` | `-` |
-| `composition_runtime_builders` | 55 | 6641 | 0 | 0.342 | 0 | 2 | `bioetl.composition.runtime_builders.runner_inputs` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
+| `application_core` | 203 | 25275 | 0 | 0.378 | 0 | 5 | `bioetl.application.core.record_processor_config` | `files_ge_250_loc=0, max_internal_fan_in=7` | `-` | `-` |
+| `composition_bootstrap_runtime` | 49 | 6416 | 0 | 0.286 | 0 | 3 | `bioetl.composition.bootstrap.runtime.observability_bundle` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `at_budget:max_internal_fan_in=3/3` |
+| `composition_factories_pipeline` | 32 | 3882 | 0 | 0.358 | 0 | 2 | `bioetl.composition.factories.pipeline.runner_constructor` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
+| `application_services_control_plane` | 131 | 15528 | 1 | 0.395 | 0 | 2 | `bioetl.application.services.control_plane.replay.historical_identity_models` | `files_ge_250_loc=0, max_internal_fan_in=2` | `over_budget:files_ge_250_loc=1/0` | `at_budget:max_internal_fan_in=2/2` |
+| `composition_runtime_builders` | 55 | 6618 | 0 | 0.348 | 0 | 2 | `bioetl.composition.runtime_builders.runner_inputs` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
 
 ## `application_core` internal fan-in
 
-- distribution: `0:19, 1:106, 2:40, 3:16, 4:8, 5:12, 6:1`
+- distribution: `0:19, 1:104, 2:43, 3:17, 4:10, 5:10`
 - at_budget_module_count: `0` (cap `7`)
 
 No modules currently sit at the fan-in cap.
 
 ## `composition_bootstrap_runtime` internal fan-in
 
-- distribution: `0:6, 1:28, 2:15`
-- at_budget_module_count: `0` (cap `3`)
+- distribution: `0:6, 1:28, 2:14, 3:1`
+- at_budget_module_count: `1` (cap `3`)
 
-No modules currently sit at the fan-in cap.
+| Module | Fan-in | Runtime importers |
+| --- | ---: | --- |
+| `bioetl.composition.bootstrap.runtime.observability_bundle` | 3 | `bioetl.composition.bootstrap.runtime.observability`, `bioetl.composition.bootstrap.runtime.observability_validate_observability_preflight`, `bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases` |
 
 ## `composition_factories_pipeline` internal fan-in
 
@@ -37,10 +39,21 @@ No modules currently sit at the fan-in cap.
 
 ## `application_services_control_plane` internal fan-in
 
-- distribution: `0:23, 1:107`
-- at_budget_module_count: `0` (cap `2`)
+- distribution: `0:23, 1:98, 2:10`
+- at_budget_module_count: `10` (cap `2`)
 
-No modules currently sit at the fan-in cap.
+| Module | Fan-in | Runtime importers |
+| --- | ---: | --- |
+| `bioetl.application.services.control_plane.effective_config.serialization` | 2 | `bioetl.application.services.control_plane.effective_config.context`, `bioetl.application.services.control_plane.effective_config.service` |
+| `bioetl.application.services.control_plane.input_snapshot_identity` | 2 | `bioetl.application.services.control_plane.ledger.input_snapshot_recording`, `bioetl.application.services.control_plane.replay.historical_corpus_models` |
+| `bioetl.application.services.control_plane.ledger.core_events` | 2 | `bioetl.application.services.control_plane.ledger.artifact_recording`, `bioetl.application.services.control_plane.ledger.service` |
+| `bioetl.application.services.control_plane.ledger.entry_diagnostic_details` | 2 | `bioetl.application.services.control_plane.ledger.core_events`, `bioetl.application.services.control_plane.ledger.entry_support` |
+| `bioetl.application.services.control_plane.manifest.artifact_payloads` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.artifact_support`, `bioetl.application.services.control_plane.manifest.diagnostics.ledger_processing` |
+| `bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.replay_projection`, `bioetl.application.services.control_plane.manifest.diagnostics.reproducibility_assessment` |
+| `bioetl.application.services.control_plane.manifest.diagnostics.source_refs` | 2 | `bioetl.application.services.control_plane.manifest.diagnostics.finalization`, `bioetl.application.services.control_plane.manifest.diagnostics.replay_refresh_support` |
+| `bioetl.application.services.control_plane.manifest.replay_taxonomy_fields` | 2 | `bioetl.application.services.control_plane.manifest.identity_graph_assembly`, `bioetl.application.services.control_plane.manifest.replay_taxonomy` |
+| `bioetl.application.services.control_plane.replay.historical_closure_models` | 2 | `bioetl.application.services.control_plane.replay.closure_claims`, `bioetl.application.services.control_plane.replay.historical_closure_policy` |
+| `bioetl.application.services.control_plane.replay.historical_identity_models` | 2 | `bioetl.application.services.control_plane.replay.historical_corpus_models`, `bioetl.application.services.control_plane.replay.historical_universe_service` |
 
 ## `composition_runtime_builders` internal fan-in
 

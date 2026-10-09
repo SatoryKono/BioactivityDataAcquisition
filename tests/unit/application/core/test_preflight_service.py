@@ -812,7 +812,10 @@ class TestValidateWriteModes:
             **_build_preflight_dependencies(config, mock_logger, mock_metrics),
         )
         errors = service.validate_write_modes()
-        assert len([e for e in errors if e.field == "write_mode"]) == 0
+        assert (
+            len([e for e in errors if e.field == "sink.silver.idempotency_contract"])
+            == 0
+        )
 
     def test_silver_append_mode_is_valid(self, mock_context, mock_logger, mock_metrics):
         """Test that Silver 'append' mode is valid."""
@@ -837,7 +840,10 @@ class TestValidateWriteModes:
             **_build_preflight_dependencies(config, mock_logger, mock_metrics),
         )
         errors = service.validate_write_modes()
-        assert len([e for e in errors if e.field == "write_mode"]) == 0
+        assert (
+            len([e for e in errors if e.field == "sink.silver.idempotency_contract"])
+            == 0
+        )
 
     def test_silver_overwrite_mode_is_invalid(
         self, mock_context, mock_logger, mock_metrics
@@ -983,7 +989,7 @@ class TestValidateWriteModes:
     ):
         """Test that invalid write modes are logged as warnings.
 
-        SilverWriteMode.DELETE is valid enum but not allowed by policy.
+        A MERGE contract declared as overwrite_rebuild must remain invalid.
         """
         from bioetl.domain.medallion import SilverWriteMode
 
@@ -994,8 +1000,8 @@ class TestValidateWriteModes:
             table=TableConfig(
                 primary_keys=["id"],
                 silver_table="silver",
-                silver_write_mode=SilverWriteMode.DELETE,
-                silver_idempotency_contract="merge_upsert",
+                silver_write_mode=SilverWriteMode.MERGE,
+                silver_idempotency_contract="overwrite_rebuild",
                 gold_write_mode="scd2",
                 gold_idempotency_contract="scd2",
             ),
@@ -1131,7 +1137,7 @@ class TestValidatePreflight:
     ):
         """Test validate_preflight includes write mode validation errors.
 
-        SilverWriteMode.DELETE is valid enum but not allowed by policy.
+        A MERGE contract declared as overwrite_rebuild must remain invalid.
         """
         from bioetl.domain.medallion import SilverWriteMode
 
@@ -1142,8 +1148,8 @@ class TestValidatePreflight:
             table=TableConfig(
                 primary_keys=["id"],
                 silver_table="silver",
-                silver_write_mode=SilverWriteMode.DELETE,
-                silver_idempotency_contract="merge_upsert",
+                silver_write_mode=SilverWriteMode.MERGE,
+                silver_idempotency_contract="overwrite_rebuild",
                 gold_write_mode="scd2",
                 gold_idempotency_contract="scd2",
             ),
@@ -1167,7 +1173,11 @@ class TestValidatePreflight:
         )
 
         assert report.medallion_policy_valid is False
-        write_mode_errors = [e for e in report.config_errors if e.field == "write_mode"]
+        write_mode_errors = [
+            e
+            for e in report.config_errors
+            if e.field == "sink.silver.idempotency_contract"
+        ]
         assert len(write_mode_errors) == 1
 
 

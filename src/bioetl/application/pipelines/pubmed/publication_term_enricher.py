@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from contextlib import AsyncExitStack
 from typing import TYPE_CHECKING
+from xml.etree.ElementTree import Element  # nosec B405 - see suppression registry
 
 import defusedxml.ElementTree as defused_ET
 from defusedxml.common import DefusedXmlException
@@ -20,24 +21,15 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
 
 __all__ = [
+    "PubMedPublicationTermEnricher",
+    "PubMedPublicationTermEnrichmentService",
     "PubMedPublicationTermPayloadEnricher",
     "parse_pubmed_mesh_xml",
     "pubmed_term_payload",
 ]
 
 
-def parse_pubmed_mesh_xml(
-    xml_text: str,
-) -> tuple[list[dict[str, object]], list[str]]:
-    """Parse MeshHeadingList and KeywordList from a PubMed efetch XML payload."""
-    try:
-        root = defused_ET.fromstring(xml_text)
-    except (
-        defused_ET.ParseError,
-        DefusedXmlException,
-    ):
-        return [], []
-
+def _parse_mesh_headings(root: Element[str]) -> list[dict[str, object]]:
     headings: list[dict[str, object]] = []
     for heading in root.findall(".//MeshHeading"):
         descriptor = heading.find("DescriptorName")
@@ -46,11 +38,11 @@ def parse_pubmed_mesh_xml(
         name = (descriptor.text or "").strip()
         if not name:
             continue
-        qualifiers: list[dict[str, str]] = []
-        for qualifier in heading.findall("QualifierName"):
-            qualifier_name = (qualifier.text or "").strip()
-            if qualifier_name:
-                qualifiers.append({"name": qualifier_name})
+        qualifiers = [
+            {"name": value}
+            for qualifier in heading.findall("QualifierName")
+            if (value := (qualifier.text or "").strip())
+        ]
         headings.append(
             {
                 "descriptor_name": name,
@@ -58,13 +50,26 @@ def parse_pubmed_mesh_xml(
                 "qualifiers": qualifiers,
             }
         )
+    return headings
 
-    keywords: list[str] = []
-    for keyword in root.findall(".//Keyword"):
-        text = (keyword.text or "").strip()
-        if text:
-            keywords.append(text)
-    return headings, keywords
+
+def _parse_pubmed_keywords(root: Element[str]) -> list[str]:
+    return [
+        text
+        for keyword in root.findall(".//Keyword")
+        if (text := (keyword.text or "").strip())
+    ]
+
+
+def parse_pubmed_mesh_xml(
+    xml_text: str,
+) -> tuple[list[dict[str, object]], list[str]]:
+    """Parse MeshHeadingList and KeywordList from a PubMed efetch XML payload."""
+    try:
+        root = defused_ET.fromstring(xml_text)
+    except (defused_ET.ParseError, DefusedXmlException):
+        return [], []
+    return _parse_mesh_headings(root), _parse_pubmed_keywords(root)
 
 
 def pubmed_term_payload(record: BronzeRecord) -> tuple[object, object]:
@@ -131,7 +136,7 @@ def _attach_pubmed_terms(
     return enriched
 
 
-class PubMedPublicationTermPayloadEnricher:
+class PubMedPublicationTermEnrichmentService:
     """Attach PubMed MeSH/keywords onto ChEMBL document records via ``pubmed_id``."""
 
     def __init__(
@@ -173,7 +178,12 @@ class PubMedPublicationTermPayloadEnricher:
             self._logger.warning(
                 "publication_term_pubmed_enrichment_failed",
                 error=str(exc),
+                reason_code="publication_term_pubmed_enrichment_failed",
                 pmid_count=len(pmids),
             )
             return list(records)
         return _attach_pubmed_terms(records, pubmed_by_pmid)
+
+
+PubMedPublicationTermEnricher = PubMedPublicationTermEnrichmentService
+PubMedPublicationTermPayloadEnricher = PubMedPublicationTermEnrichmentService

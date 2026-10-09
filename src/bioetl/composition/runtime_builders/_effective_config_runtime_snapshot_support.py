@@ -83,6 +83,7 @@ def build_execution_settings_snapshot(settings: Settings) -> dict[str, object]:
             ),
             "heartbeat_interval": _setting_attr(pipeline, "heartbeat_interval", None),
             "health_check_mode": _setting_attr(pipeline, "health_check_mode", None),
+            "strict_validation": _setting_attr(pipeline, "strict_validation", True),
         },
         "control_plane": {
             "required_persistence_profile": (

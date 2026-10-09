@@ -29,6 +29,8 @@
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -43,7 +45,9 @@ from bioetl.infrastructure.storage.silver_writer import SilverWriter
 @pytest.fixture
 def silver_writer(noop_logger):
     """Fixture for a SilverWriter."""
-    return SilverWriter(base_path="/fake/path", logger=noop_logger)
+    return SilverWriter(
+        clock=fixed_test_clock(), base_path="/fake/path", logger=noop_logger
+    )
 
 
 @pytest.fixture
@@ -98,7 +102,9 @@ class TestSilverWriterExceptions:
                 mock_delta_table,
             ),
         ):
-            writer = SilverWriter(base_path="/fake/path", logger=noop_logger)
+            writer = SilverWriter(
+                clock=fixed_test_clock(), base_path="/fake/path", logger=noop_logger
+            )
             with pytest.raises(SchemaViolationError):
                 await writer.write_silver(
                     "test.table", [valid_record], ["id"], schema=schema
@@ -147,7 +153,9 @@ class TestSilverWriterExceptions:
                 mock_delta_table,
             ),
         ):
-            writer = SilverWriter(base_path="/fake/path", logger=noop_logger)
+            writer = SilverWriter(
+                clock=fixed_test_clock(), base_path="/fake/path", logger=noop_logger
+            )
             with pytest.raises(MergeConflictError):
                 await writer.write_silver(
                     "test.table", [valid_record], ["id"], schema=schema
@@ -185,7 +193,9 @@ class TestSilverWriterExceptions:
                 side_effect=ArrowTypeError("Arrow type error"),
             ),
         ):
-            writer = SilverWriter(base_path=str(tmp_path), logger=noop_logger)
+            writer = SilverWriter(
+                clock=fixed_test_clock(), base_path=str(tmp_path), logger=noop_logger
+            )
             with pytest.raises(SchemaViolationError):
                 await writer.write_silver(
                     "test.table", [valid_record], ["id"], schema=schema
@@ -198,7 +208,9 @@ class TestSilverWriterExceptions:
             "bioetl.infrastructure.storage.support.retention.DeltaTable",
             side_effect=TableNotFoundError,
         ):
-            writer = SilverWriter(base_path="/fake/path", logger=noop_logger)
+            writer = SilverWriter(
+                clock=fixed_test_clock(), base_path="/fake/path", logger=noop_logger
+            )
 
             with pytest.raises(CustomTableNotFoundError):
                 await writer.vacuum("test.table")

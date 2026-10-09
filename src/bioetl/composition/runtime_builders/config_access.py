@@ -2,13 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-from collections.abc import Callable
 from functools import cache
-
-if TYPE_CHECKING:
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 from bioetl.domain.mapping.classification_data import ClassificationData
@@ -24,10 +18,8 @@ import bioetl.infrastructure.config.protein_class_target_type_loader as protein_
 
 from pathlib import Path
 
-from bioetl.composition.runtime_builders._config_access_loaders import (
-    create_dq_config_loader as _create_dq_config_loader,
-    create_pipeline_config_loader as _create_pipeline_config_loader,
-    create_source_config_loader as _create_source_config_loader,
+from bioetl.composition.runtime_builders import (
+    _config_access_loaders as _config_loaders,
 )
 from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.config.settings_api import Settings
@@ -35,6 +27,7 @@ from bioetl.infrastructure.config.settings_api import get_settings as _get_setti
 from bioetl.infrastructure.config.pipeline_config_api import (
     load_pipeline_config as _load_pipeline_config,
 )
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.config.source_config_loader import (
     load_source_config as _load_source_config,
 )
@@ -55,18 +48,9 @@ __all__ = [
 ]
 
 
-def create_pipeline_config_loader(
-    configs_root: Path,
-) -> Callable[[str], PipelineYamlConfig]:
-    return _create_pipeline_config_loader(configs_root)
-
-
-def create_dq_config_loader(configs_root: Path) -> Callable[[str], object]:
-    return _create_dq_config_loader(configs_root)
-
-
-def create_source_config_loader(configs_root: Path) -> Callable[[str], object]:
-    return _create_source_config_loader(configs_root)
+create_pipeline_config_loader = _config_loaders.create_pipeline_config_loader
+create_dq_config_loader = _config_loaders.create_dq_config_loader
+create_source_config_loader = _config_loaders.create_source_config_loader
 
 
 def get_settings() -> Settings:

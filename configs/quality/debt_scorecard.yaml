@@ -460,12 +460,12 @@ hotspot_family_ratchets:
       max_internal_fan_in: 7
     metrics:
       duplication_clusters: 0
-      files: 202
-      total_loc: 25218
+      files: 203
+      total_loc: 25275
       files_ge_250_loc: 0
-      helper_function_ratio: 0.381
-      max_internal_fan_in: 6
-      max_internal_fan_in_module: bioetl.application.core.batch_processing_contracts
+      helper_function_ratio: 0.378
+      max_internal_fan_in: 5
+      max_internal_fan_in_module: bioetl.application.core.record_processor_config
     trend:
       status: reduced_2026-08-27_debt_cycle_fanin_ratchet
       next_action: '2026-08-27 audit-cycle-tech-debt: ratchet application_core max_internal_fan_in budget
@@ -489,11 +489,11 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 49
-      total_loc: 6440
+      total_loc: 6416
       files_ge_250_loc: 0
-      helper_function_ratio: 0.284
-      max_internal_fan_in: 2
-      max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.tracing_bootstrap
+      helper_function_ratio: 0.286
+      max_internal_fan_in: 3
+      max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.observability_bundle
     trend:
       status: reviewed_2026-07-27_observability_bundle_support_extraction
       next_action: 2026-07-27 refreshes measured bootstrap/runtime metrics after the observability_bundle
@@ -516,7 +516,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 32
-      total_loc: 3869
+      total_loc: 3882
       files_ge_250_loc: 0
       helper_function_ratio: 0.358
       max_internal_fan_in: 2
@@ -542,12 +542,12 @@ hotspot_family_ratchets:
       max_internal_fan_in: 2
     metrics:
       duplication_clusters: 0
-      files: 130
-      total_loc: 15559
-      files_ge_250_loc: 0
-      helper_function_ratio: 0.399
-      max_internal_fan_in: 1
-      max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_models
+      files: 131
+      total_loc: 15528
+      files_ge_250_loc: 1
+      helper_function_ratio: 0.395
+      max_internal_fan_in: 2
+      max_internal_fan_in_module: bioetl.application.services.control_plane.replay.historical_identity_models
     trend:
       status: reduced_2026-09-16_issue_10468_coupling_closeout
       next_action: '2026-09-16 #10468/#10472-#10475: control-plane max_internal_fan_in 2->1 and files
@@ -571,9 +571,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 55
-      total_loc: 6641
+      total_loc: 6618
       files_ge_250_loc: 0
-      helper_function_ratio: 0.342
+      helper_function_ratio: 0.348
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.runtime_builders.runner_inputs
     trend:

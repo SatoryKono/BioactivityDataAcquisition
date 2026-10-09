@@ -1294,12 +1294,12 @@ def _bioetl_test_silver_validator(
         self: object,
         base_path: object,
         logger: object,
-        transform_version: object = None,
-        transform_steps: object = None,
         runtime_services: object = None,
         flat_structure: bool = False,
         pipeline_name: object = None,
         runtime_request: object = None,
+        *,
+        clock: object,
     ) -> None:
         if runtime_services is None:
             request_obj = runtime_request
@@ -1309,11 +1309,13 @@ def _bioetl_test_silver_validator(
             ):
                 if request_obj is None:
                     runtime_request = SilverWriterRuntimeServicesRequest(
+                        clock=clock,
                         logger=logger,  # type: ignore[arg-type]
                         silver_validator=NoOpValidator(),
                     )
                 else:
                     runtime_request = SilverWriterRuntimeServicesRequest(
+                        clock=clock,
                         csv_exporter=request_obj.csv_exporter,
                         tracing=request_obj.tracing,
                         write_policy=request_obj.write_policy,
@@ -1329,18 +1331,19 @@ def _bioetl_test_silver_validator(
                         contract_rollout_policy=request_obj.contract_rollout_policy,
                         base_path=request_obj.base_path,
                         pipeline_name=request_obj.pipeline_name,
+                        transform_version=request_obj.transform_version,
+                        transform_steps=request_obj.transform_steps,
                         delta_module_loader=request_obj.delta_module_loader,
                     )
         original_init(
             self,
             base_path,
             logger,
-            transform_version=transform_version,
-            transform_steps=transform_steps,
             runtime_services=runtime_services,
             flat_structure=flat_structure,
             pipeline_name=pipeline_name,
             runtime_request=runtime_request,
+            clock=clock,
         )
 
     monkeypatch.setattr(SilverWriter, "__init__", _init)

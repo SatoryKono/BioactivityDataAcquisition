@@ -29,6 +29,8 @@
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 from pathlib import Path
 from typing import Any
 
@@ -105,6 +107,7 @@ def _build_rollout_runtime_services(
 ) -> SilverWriterRuntimeServices:
     return build_silver_writer_runtime_services(
         SilverWriterRuntimeServicesRequest(
+            clock=fixed_test_clock(),
             csv_exporter=None,
             tracing=None,
             write_policy=None,
@@ -139,6 +142,7 @@ async def test_contract_rollout_affects_hash_false_dual_write_keeps_same_hash(
 ) -> None:
     logical_table = "chembl.activity"
     writer = SilverWriter(
+        clock=fixed_test_clock(),
         base_path=e2e_data_dir / "silver",
         logger=NoOpLogger(),
         runtime_services=_build_rollout_runtime_services(
@@ -178,6 +182,7 @@ async def test_contract_rollout_affects_hash_true_dual_write_projects_version_ha
 ) -> None:
     logical_table = "chembl.activity"
     writer = SilverWriter(
+        clock=fixed_test_clock(),
         base_path=e2e_data_dir / "silver",
         logger=NoOpLogger(),
         runtime_services=_build_rollout_runtime_services(

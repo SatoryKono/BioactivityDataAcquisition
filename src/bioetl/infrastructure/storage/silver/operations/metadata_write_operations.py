@@ -6,7 +6,7 @@ from collections.abc import Awaitable, Callable
 from datetime import datetime
 from typing import Protocol
 
-from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.medallion import SilverOperationMode, SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports import AuditPort
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
@@ -73,7 +73,7 @@ async def write_silver_metadata_via_support_request(
     records: list[BronzeRecord],
     bronze_refs: list[BronzeWriteResult] | None = None,
     mode: str = "merge",
-    validated_mode: SilverWriteMode = SilverWriteMode.MERGE,
+    validated_mode: SilverOperationMode = SilverWriteMode.MERGE,
     run_id: RunID | None = None,
     run_type: RunType | None = None,
     source_batch_id: BatchID | None = None,

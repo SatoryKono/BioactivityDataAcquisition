@@ -7,6 +7,9 @@ from dataclasses import dataclass
 from typing import cast
 
 from bioetl.application.services.control_plane.ledger import RunLedgerService
+from bioetl.application.services.control_plane.replay import (
+    _historical_certification_upstream as _upstream,
+)
 from bioetl.application.services.control_plane.replay._historical_certification_upstream import (
     DiagnosticsSummaryBuilder as DiagnosticsSummaryBuilder,
 )
@@ -31,10 +34,7 @@ from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.domain.types import RunID
 
 __all__ = [
-    "DiagnosticsSummaryBuilder",
-    "HistoricalReplayCertificationProtocol",
-    "HistoricalReplayCertificationResult",
-    "HistoricalReplayCertificationResultAssembler",
+    *_upstream.CERTIFICATION_SHARED_EXPORTS,
     "HistoricalReplayCertificationValidator",
 ]
 

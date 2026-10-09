@@ -12,6 +12,8 @@
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 from datetime import UTC, datetime
 from pathlib import Path
 import os
@@ -211,6 +213,7 @@ class IntegrationPipelineTestCase:
         adapter = StorageBundle(
             bronze_writer=bronze_writer,
             silver_writer=SilverWriter(
+                clock=fixed_test_clock(),
                 base_path=self.silver_path,
                 logger=logger,
                 # Lock validation at Application layer

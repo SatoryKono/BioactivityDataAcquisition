@@ -84,6 +84,7 @@ def assemble_runtime_config_impl(
     vacuum_retention_days: int,
     health_check_mode: Literal["strict", "probe"],
     skip_gold: bool,
+    strict_validation: bool = True,
 ) -> RuntimeConfig:
     return RuntimeConfig(
         run_type=ctx.run_type,
@@ -103,6 +104,7 @@ def assemble_runtime_config_impl(
         vacuum_after_run=vacuum_enabled,
         vacuum_retention_days=vacuum_retention_days,
         skip_gold=skip_gold,
+        strict_validation=strict_validation,
         debug_export_enabled=bool(getattr(ctx, "debug_export_enabled", False)),
         debug_export_formats=tuple(getattr(ctx, "debug_export_formats", ())),
         debug_export_dir=getattr(ctx, "debug_export_dir", None),

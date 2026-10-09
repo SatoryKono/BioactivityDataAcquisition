@@ -123,7 +123,7 @@ ______________________________________________________________________
 | Canonical Term      | Definition                                                | Values                                             | Avoid                  |
 | ------------------- | --------------------------------------------------------- | -------------------------------------------------- | ---------------------- |
 | **RunType**         | Enum controlling pipeline execution mode and clear policy | `INCREMENTAL`, `BACKFILL`, `REBUILD`               | `mode` (as enum name)  |
-| **SilverWriteMode** | Enum controlling Silver layer write strategy              | `MERGE`, `APPEND`, `DELETE`                        | `write mode` (generic) |
+| **SilverWriteMode** | Enum controlling Silver layer write strategy              | `MERGE`, `APPEND`                        | `write mode` (generic) |
 | **GoldWriteMode**   | Enum controlling Gold layer write strategy                | `APPEND`, `OVERWRITE`, `SCD2`                      | `write mode` (generic) |
 | **HealthStatus**    | Enum representing component availability                  | `HEALTHY`, `DEGRADED`, `UNHEALTHY`                 | `status` (generic)     |
 | **FSMState**        | Enum representing pipeline finite-state-machine states    | `IDLE`, `RUNNING`, `PAUSED`, `FAILED`, `COMPLETED` | `state` (generic)      |

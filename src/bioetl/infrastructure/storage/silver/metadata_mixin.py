@@ -4,16 +4,17 @@
 
 from __future__ import annotations
 
+from bioetl.domain.medallion import SilverOperationMode
+
 __all__ = ["SilverWriterMetadataMixin", "time"]
 
 import asyncio
 import time
-from collections.abc import Callable, Sequence
+from collections.abc import Sequence
 from datetime import datetime
 
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
-from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
@@ -77,7 +78,7 @@ class SilverWriterMetadataMixin:
         self: _SilverWriterMetadataRuntimeProtocol,
         table_name: str,
         records: list[BronzeRecord],
-        mode: SilverWriteMode,
+        mode: SilverOperationMode,
         *,
         run_id: RunID | None,
         run_type: RunType | None,
@@ -200,7 +201,7 @@ class SilverWriterMetadataMixin:
         *,
         table_name: str,
         records: list[BronzeRecord],
-        mode: SilverWriteMode,
+        mode: SilverOperationMode,
         run_id: RunID | None,
         run_type: RunType | None,
         source_batch_id: BatchID | None,
@@ -231,12 +232,9 @@ class SilverWriterMetadataMixin:
     async def _prepare_silver_write_finalization_context(
         self: _SilverWriterMetadataRuntimeProtocol,
         request: _SilverWriteFinalizationPreparationRequest,
-        *,
-        perf_counter: Callable[[], float] | None = None,
     ) -> _PreparedSilverWriteFinalizationContext:
         """Prepare DQ/version/timing context before Silver metadata persistence."""
         return await prepare_silver_write_finalization_context_operation(
             self,
             request,
-            perf_counter=perf_counter or time.perf_counter,
         )

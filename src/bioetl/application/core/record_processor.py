@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from bioetl.domain.types import JsonDict
 
-__all__ = ["RecordProcessor"]
+__all__ = ["RecordProcessor", "RecordProcessorWriteDependencies"]
 
 from collections.abc import Callable
 from datetime import datetime
@@ -20,7 +20,7 @@ from bioetl.application.core._record_processor_span_support import (
     RecordProcessorSpanExecutor,
 )
 from bioetl.application.core._record_processor_write_support import (
-    RecordProcessorWriteDeps,
+    RecordProcessorWriteDependencies,
     write_gold_layer,
     write_silver_layer,
 )
@@ -55,7 +55,7 @@ class RecordProcessor:
         span_executor_factory: Callable[
             [TracingPort], RecordProcessorSpanExecutor
         ] = RecordProcessorSpanExecutor,
-        write_deps: RecordProcessorWriteDeps | None = None,
+        write_deps: RecordProcessorWriteDependencies | None = None,
     ) -> None:
         """Initialize RecordProcessor.
         Args:
@@ -78,7 +78,7 @@ class RecordProcessor:
         self._batch_metrics = batch_metrics
         self._transformer = transformer
         self._writer = writer
-        self._write_deps = write_deps or RecordProcessorWriteDeps()
+        self._write_deps = write_deps or RecordProcessorWriteDependencies()
 
     async def process_batch(
         # Any: record vals vary
@@ -178,6 +178,7 @@ class RecordProcessor:
             batch_id=batch_id,
             ingestion_ts=ingestion_ts,
             bronze_refs=bronze_refs,
+            operation_errors=self._write_deps.operation_errors,
         )
 
     async def _write_gold_layer(
@@ -199,4 +200,5 @@ class RecordProcessor:
             batch_id=batch_id,
             ingestion_ts=self._context.started_at,
             silver_outcome=silver_outcome,
+            operation_errors=self._write_deps.operation_errors,
         )

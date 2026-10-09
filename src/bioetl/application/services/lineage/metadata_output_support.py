@@ -5,7 +5,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal, cast
 
 from bioetl.domain.lineage import DatasetRef
-from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
+from bioetl.domain.medallion import (
+    GoldWriteMode,
+    SilverOperationMode,
+    SilverWriteMode,
+    WriteMode,
+)
 from bioetl.domain.models.metadata import (
     BaseOutputMetadata,
     CompositeOutputExt,
@@ -23,12 +28,14 @@ def build_silver_delta(
     input_data: SilverMetadataInput, rows_inserted: int
 ) -> DeltaMetrics:
     """Build Silver Delta metrics payload."""
-    operation_map: dict[SilverWriteMode, Literal["merge", "overwrite", "append"]] = {
+    operation_map: dict[
+        SilverOperationMode, Literal["merge", "overwrite", "append"]
+    ] = {
         SilverWriteMode.MERGE: "merge",
         SilverWriteMode.APPEND: "append",
-        SilverWriteMode.DELETE: "overwrite",
+        WriteMode.OVERWRITE: "overwrite",
     }
-    mode = cast("SilverWriteMode", input_data.mode)
+    mode = cast("SilverOperationMode", input_data.mode)
     return DeltaMetrics(
         table_path=input_data.table_path,
         operation=operation_map[mode],

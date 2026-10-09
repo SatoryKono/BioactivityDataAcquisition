@@ -50,7 +50,7 @@ class TestSilverWriteMode:
         """Test SilverWriteMode enum has correct string values."""
         assert SilverWriteMode.MERGE == "merge"
         assert SilverWriteMode.APPEND == "append"
-        assert SilverWriteMode.DELETE == "delete"
+        assert {m.value for m in SilverWriteMode} == {"merge", "append"}
 
     def test_from_string_merge(self) -> None:
         """Test converting 'merge' string to SilverWriteMode."""
@@ -64,8 +64,8 @@ class TestSilverWriteMode:
 
     def test_from_string_delete(self) -> None:
         """Test converting 'delete' string to SilverWriteMode."""
-        result = SilverWriteMode.from_string("delete")
-        assert result == SilverWriteMode.DELETE
+        with pytest.raises(ValueError, match="Invalid Silver write mode"):
+            SilverWriteMode.from_string("delete")
 
     def test_silver_write_mode__case_insensitive__05548453(self) -> None:
         """Test from_string is case-insensitive."""
@@ -82,7 +82,7 @@ class TestSilverWriteMode:
         with pytest.raises(ValueError, match="Valid modes"):
             SilverWriteMode.from_string("bad_mode")
 
-    @pytest.mark.parametrize("value", ["merge", "append", "delete"])
+    @pytest.mark.parametrize("value", ["merge", "append"])
     def test_silver_write_mode__string_roundtrip__6511b8d4(self, value: str) -> None:
         """Test that from_string is inverse of .value."""
         mode = SilverWriteMode.from_string(value)

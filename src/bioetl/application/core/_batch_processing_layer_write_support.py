@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Protocol, cast
 from bioetl.application.core._batch_processing_metrics_support import (
     track_storage_write_metrics,
 )
-from bioetl.application.core._batch_write_support import safe_write_layer
+from bioetl.application.core._batch_write_support import SafeLayerWriteContext
 from bioetl.application.core.batch_processing_contracts import (
     LayerWriteOutcome,
     SilverGoldWriteOutcome,
@@ -22,6 +22,8 @@ from bioetl.application.services.run_reports.observations import record_run_obse
 from bioetl.domain.types import BatchID, RunID
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
+OPERATION_ERRORS = _OPERATION_ERRORS
+
 if TYPE_CHECKING:
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.core.batch_writer import BatchWriter
@@ -32,7 +34,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
-__all__ = ["LayerSpanRunner", "write_silver_then_gold"]
+__all__ = ["OPERATION_ERRORS", "LayerSpanRunner", "write_silver_then_gold"]
 
 
 class LayerSpanRunner(Protocol):
@@ -67,19 +69,21 @@ async def _write_silver_stage(
     )
     if not transform_result.silver_records:
         return silver_outcome, None
-    silver_outcome = await safe_write_layer(
-        execute_with_span=execute_with_span,
-        writer=writer,
-        quarantine_manager=quarantine_manager,
-        logger=logger,
-        run_id=run_id,
-        domain_event_emitter=domain_event_emitter,
+    safe_writer = SafeLayerWriteContext(
+        execute_with_span,
+        writer,
+        quarantine_manager,
+        logger,
+        run_id,
+        domain_event_emitter,
+        batch_id,
+        ingestion_ts,
+        _OPERATION_ERRORS,
+    )
+    silver_outcome = await safe_writer.write(
         layer="silver",
         records=transform_result.silver_records,
-        batch_id=batch_id,
-        ingestion_ts=ingestion_ts,
         bronze_refs=bronze_refs,
-        operation_errors=_OPERATION_ERRORS,
     )
     silver_written = (
         silver_outcome.confirmed_count if silver_outcome.status == "written" else 0
@@ -142,20 +146,22 @@ async def write_silver_then_gold(
     )
     if transform_result.gold_records:
         silver_result = cast("SilverWriteResult | None", silver_outcome.write_result)
-        gold_outcome = await safe_write_layer(
-            execute_with_span=execute_with_span,
-            writer=writer,
-            quarantine_manager=quarantine_manager,
-            logger=logger,
-            run_id=run_id,
-            domain_event_emitter=domain_event_emitter,
+        safe_writer = SafeLayerWriteContext(
+            execute_with_span,
+            writer,
+            quarantine_manager,
+            logger,
+            run_id,
+            domain_event_emitter,
+            batch_id,
+            ingestion_ts,
+            _OPERATION_ERRORS,
+        )
+        gold_outcome = await safe_writer.write(
             layer="gold",
             records=transform_result.gold_records,
-            batch_id=batch_id,
-            ingestion_ts=ingestion_ts,
             bronze_refs=None,
             silver_refs=[silver_result] if silver_result is not None else None,
-            operation_errors=_OPERATION_ERRORS,
         )
     else:
         record_run_observation(

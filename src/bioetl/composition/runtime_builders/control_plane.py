@@ -114,13 +114,16 @@ def create_run_manifest_with_effective_config(
         provider=publication_context.provider,
         entity=publication_context.entity,
     )
+    publication_provider = publication_context.provider
+    publication_entity = publication_context.entity
+    reproducibility_context = publication_context.reproducibility_context
     provenance = build_run_manifest_provenance_bundle(
         create_and_persist_effective_config_artifact(
             ctx=ctx,
             inputs=inputs,
-            provider=publication_context.provider,
-            entity=publication_context.entity,
-            reproducibility_context=publication_context.reproducibility_context,
+            provider=publication_provider,
+            entity=publication_entity,
+            reproducibility_context=reproducibility_context,
             contract_identity=publication_context.contract_identity,
         )
     )

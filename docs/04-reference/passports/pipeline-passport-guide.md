@@ -63,3 +63,9 @@ metrics.
 Mermaid diagrams are rendered from the same facts as JSON and Markdown. They
 must remain bounded, deterministic, free of occurrence IDs, and add
 pipeline-specific topology rather than decorative prose.
+
+Default `source_revision` is a `sha256:` fingerprint of canonical Git tree entries,
+including source paths and blob identities. It survives squash merge and
+commits that only refresh generated output; any canonical source change
+invalidates it. `--source-revision` and `BIOETL_PASSPORT_SOURCE_REVISION` may bind
+exported CI artifacts to an explicit commit SHA.

@@ -1,15 +1,14 @@
-"""Extracted validate_observability_preflight for the hotspot coverage floor (#11016)."""
-
 from __future__ import annotations
 
-from collections.abc import Callable
+"""Observability preflight validation bootstrap."""
 
-from bioetl.domain.ports import (
-    AuditPort,
-    LoggerPort,
-    MetricsPort,
-    TracingPort,
+from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
+
+from .observability_bundle import (
+    validate_observability_preflight_impl as _validate_observability_preflight_impl,
 )
+
+__all__ = ["validate_observability_preflight"]
 
 
 def validate_observability_preflight(
@@ -24,10 +23,9 @@ def validate_observability_preflight(
     control_plane: object | None = None,
     yaml_config: object | None = None,
     skip_gold: bool = False,
-    impl: Callable[..., None],
 ) -> None:
     """Validate observability components for production readiness."""
-    impl(
+    _validate_observability_preflight_impl(
         tracer=tracer,
         metrics=metrics,
         environment=environment,

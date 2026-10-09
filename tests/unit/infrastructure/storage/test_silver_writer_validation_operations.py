@@ -29,13 +29,15 @@
 
 from __future__ import annotations
 
+from bioetl.domain.medallion import WriteMode
+
 from unittest.mock import MagicMock
 
 import pyarrow as pa
 import pytest
 
 from bioetl.domain.exceptions import PolicyViolationError, SchemaViolationError
-from bioetl.domain.medallion import SilverWriteMode, WriteMode, WriteModePolicy
+from bioetl.domain.medallion import SilverWriteMode, WriteModePolicy
 from bioetl.domain.normalization import (
     normalize_hash_identity_record,
     serialize_hash_identity_canonical_json,
@@ -186,9 +188,10 @@ class TestToPolicyWriteModeImpl:
         """SilverWriteMode.APPEND should map to WriteMode.APPEND."""
         assert _to_policy_write_mode_impl(SilverWriteMode.APPEND) == WriteMode.APPEND
 
-    def test_delete_maps_to_overwrite(self) -> None:
-        """SilverWriteMode.DELETE should map to WriteMode.OVERWRITE."""
-        assert _to_policy_write_mode_impl(SilverWriteMode.DELETE) == WriteMode.OVERWRITE
+    def test_delete_maps_to_delete(self) -> None:
+        """WriteMode.OVERWRITE should map to WriteMode.DELETE."""
+        with pytest.raises(KeyError):
+            _to_policy_write_mode_impl(WriteMode.OVERWRITE)
 
 
 @pytest.mark.unit
@@ -213,7 +216,7 @@ class TestEnforceWritePolicy:
         host._metrics = MagicMock()
 
         with pytest.raises(PolicyViolationError):
-            _enforce_write_policy(host, SilverWriteMode.DELETE, "test_table")
+            _enforce_write_policy(host, WriteMode.OVERWRITE, "test_table")
         host.logger.error.assert_called_once()
         host._metrics.increment_counter.assert_called_once()
 

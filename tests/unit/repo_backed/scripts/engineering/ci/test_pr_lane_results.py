@@ -13,6 +13,8 @@ from scripts.engineering.ci.pr_lane_results import (
 
 HEAD = "a" * 40
 
+pytestmark = pytest.mark.repo_backed
+
 
 def test_not_applicable_gate_does_not_inherit_job_success() -> None:
     results = build_results(

@@ -10,7 +10,7 @@ from typing import Protocol
 import pyarrow as pa
 
 from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsCalculator
-from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.medallion import SilverOperationMode
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports import (
     AuditPort,
@@ -69,7 +69,7 @@ class _SilverWriterMetadataRuntimeProtocol(
         self,
         table_name: str,
         records: list[BronzeRecord],
-        mode: SilverWriteMode,
+        mode: SilverOperationMode,
         *,
         run_id: RunID | None,
         run_type: RunType | None,
@@ -87,7 +87,7 @@ class _SilverWriterMetadataRuntimeProtocol(
         *,
         table_name: str,
         records: list[BronzeRecord],
-        mode: SilverWriteMode,
+        mode: SilverOperationMode,
         run_id: RunID | None,
         run_type: RunType | None,
         source_batch_id: BatchID | None,
@@ -97,8 +97,6 @@ class _SilverWriterMetadataRuntimeProtocol(
     async def _prepare_silver_write_finalization_context(
         self,
         request: _SilverWriteFinalizationPreparationRequest,
-        *,
-        perf_counter: Callable[[], float] | None = None,
     ) -> _PreparedSilverWriteFinalizationContext: ...
 
     async def _get_delta_version(self, table_path: str) -> int | None: ...

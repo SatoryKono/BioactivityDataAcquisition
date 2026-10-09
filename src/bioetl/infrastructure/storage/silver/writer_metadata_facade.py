@@ -6,15 +6,16 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Sequence
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Literal, cast
 
 import polars as pl
 import pyarrow as pa
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
-from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.medallion import SilverOperationMode, SilverWriteMode, WriteMode
 from bioetl.domain.models.metadata import SilverMetadata
+from bioetl.domain.ports import ClockPort
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.dq_metrics import (
@@ -50,6 +51,8 @@ from bioetl.infrastructure.storage.silver.prepared_operation_models import (
 
 class SilverWriterMetadataFacade:
     """Writer-level metadata helper methods backed by composition services."""
+
+    _clock: ClockPort
 
     _metadata: SilverMetadataOperations | None = None
 
@@ -234,7 +237,7 @@ class SilverWriterMetadataFacade:
         self,
         table_name: str,
         records: list[BronzeRecord],
-        mode: Literal["append", "merge", "overwrite", "delete"] | SilverWriteMode,
+        mode: Literal["append", "merge", "overwrite"] | SilverOperationMode,
         *,
         run_id: RunID | None,
         run_type: RunType | None,
@@ -245,7 +248,9 @@ class SilverWriterMetadataFacade:
         if self._metadata is None:
             raise RuntimeError(self._SILVER_METADATA_OPERATIONS_REQUIRED)
         validated_mode = (
-            mode if isinstance(mode, SilverWriteMode) else SilverWriteMode(mode)
+            mode
+            if isinstance(mode, (SilverWriteMode, WriteMode))
+            else SilverWriteMode(mode)
         )
         await self._metadata._log_silver_audit(
             _SilverMetadataAuditSupportRequest(
@@ -264,22 +269,11 @@ class SilverWriterMetadataFacade:
         request: _SilverWriteFinalizationPreparationRequest,
     ) -> _PreparedSilverWriteFinalizationContext:
         """Prepare DQ/version/timing context before metadata persistence."""
-        dq_metrics = await self._compute_dq_metrics(
-            request.table_name,
-            request.records,
-            quarantined_count=request.quarantined_count or 0,
-            validation_errors=request.validation_errors,
+        from bioetl.infrastructure.storage.silver.metadata_result_finalization import (
+            _prepare_silver_write_finalization_context,
         )
-        from bioetl.infrastructure.storage.silver import metadata_mixin
 
-        return _PreparedSilverWriteFinalizationContext(
-            dq_metrics=dq_metrics,
-            version_after=await self._get_delta_version(request.table_path),
-            completed_at=request.started_at
-            + timedelta(
-                seconds=metadata_mixin.time.perf_counter() - request.start_perf
-            ),
-        )
+        return await _prepare_silver_write_finalization_context(self, request)
 
     async def _finalize_silver_write_result(
         self,
@@ -314,6 +308,7 @@ class SilverWriterMetadataFacade:
                 ),
                 started_at=request.started_at,
                 completed_at=context.completed_at,
+                duration_seconds=context.duration_seconds,
                 version_after=context.version_after,
             )
         )

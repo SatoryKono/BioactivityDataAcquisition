@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
+from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.application.core._batch_write_events import (
+    BatchFailureEventContext,
     emit_batch_failed,
     emit_batch_written,
     emit_domain_event,
@@ -14,7 +16,10 @@ from bioetl.application.core._batch_write_events import (
 from bioetl.application.core._batch_write_schema_quarantine import (
     quarantine_schema_violation,
 )
-from bioetl.application.core.batch_processing_contracts import LayerWriteOutcome
+from bioetl.application.core.batch_processing_contracts import (
+    LayerWriteOutcome,
+    WriteLayerStatus,
+)
 from bioetl.application.core.quarantine_manager import (
     QuarantineRuntimeService,
 )
@@ -31,11 +36,73 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 __all__ = [
+    "SafeLayerWriteContext",
+    "build_layer_write_outcome",
     "emit_batch_failed",
     "emit_batch_written",
     "emit_domain_event",
     "safe_write_layer",
 ]
+
+
+@dataclass(frozen=True, slots=True)
+class SafeLayerWriteContext:
+    """Collaborators shared by Silver and Gold safe-write invocations."""
+
+    execute_with_span: Callable[..., Awaitable[object]]
+    writer: BatchWriter
+    quarantine_manager: QuarantineRuntimeService
+    logger: LoggerPort
+    run_id: RunID | None
+    domain_event_emitter: DomainEventEmitterProtocol | None
+    batch_id: BatchID
+    ingestion_ts: datetime
+    operation_errors: tuple[type[BaseException], ...]
+
+    async def write(
+        self,
+        *,
+        layer: str,
+        records: list[dict[str, object]],
+        bronze_refs: list[BronzeWriteResult] | None,
+        silver_refs: list[SilverWriteResult] | None = None,
+    ) -> LayerWriteOutcome:
+        """Write one layer through the canonical guarded implementation."""
+        return await safe_write_layer(
+            execute_with_span=self.execute_with_span,
+            writer=self.writer,
+            quarantine_manager=self.quarantine_manager,
+            logger=self.logger,
+            run_id=self.run_id,
+            domain_event_emitter=self.domain_event_emitter,
+            layer=layer,
+            records=records,
+            batch_id=self.batch_id,
+            ingestion_ts=self.ingestion_ts,
+            bronze_refs=bronze_refs,
+            silver_refs=silver_refs,
+            operation_errors=self.operation_errors,
+        )
+
+
+def build_layer_write_outcome(
+    *,
+    layer: str,
+    status: WriteLayerStatus,
+    candidate_count: int,
+    confirmed_count: int = 0,
+    quarantined_count: int = 0,
+    write_result: object | None = None,
+) -> LayerWriteOutcome:
+    """Build the shared immutable result for one Silver or Gold write."""
+    return LayerWriteOutcome(
+        layer=layer,
+        status=status,
+        candidate_count=candidate_count,
+        confirmed_count=confirmed_count,
+        quarantined_count=quarantined_count,
+        write_result=write_result,
+    )
 
 
 async def _execute_layer_write(
@@ -103,6 +170,14 @@ async def safe_write_layer(
         raise ValueError(
             f"safe_write_layer supports only 'silver' or 'gold' layers, got {layer!r}"
         )
+    failure_context = BatchFailureEventContext(
+        domain_event_emitter,
+        run_id,
+        batch_id,
+        layer,
+        ingestion_ts,
+        logger,
+    )
     try:
         write_result = await _execute_layer_write(
             execute_with_span=execute_with_span,
@@ -124,7 +199,7 @@ async def safe_write_layer(
             occurred_at=ingestion_ts,
             logger=logger,
         )
-        return LayerWriteOutcome(
+        return build_layer_write_outcome(
             layer=layer,
             status="written",
             candidate_count=len(records),
@@ -136,15 +211,11 @@ async def safe_write_layer(
             writer=writer,
             quarantine_manager=quarantine_manager,
             logger=logger,
-            domain_event_emitter=domain_event_emitter,
-            run_id=run_id,
-            layer=layer,
+            failure_context=failure_context,
             records=records,
-            batch_id=batch_id,
-            ingestion_ts=ingestion_ts,
             error=error,
         )
-        return LayerWriteOutcome(
+        return build_layer_write_outcome(
             layer=layer,
             status="quarantined",
             candidate_count=len(records),
@@ -152,13 +223,5 @@ async def safe_write_layer(
         )
     except operation_errors as error:
         if isinstance(error, Exception):
-            emit_batch_failed(
-                emitter=domain_event_emitter,
-                run_id=run_id,
-                batch_id=batch_id,
-                layer=layer,
-                error=error,
-                occurred_at=ingestion_ts,
-                logger=logger,
-            )
+            failure_context.emit(error)
         raise

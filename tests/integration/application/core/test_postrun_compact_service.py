@@ -134,23 +134,9 @@ async def test_postrun_compact_service_keeps_success_when_optimize_is_allowliste
     ]
 
 
-@pytest.mark.asyncio
-async def test_postrun_compact_service_skips_delete_mode_without_storage_calls() -> (
-    None
-):
+def test_removed_delete_is_rejected_before_compaction_can_start() -> None:
     storage = _RecordingStorage(deduplicate_result=99)
-    logger = _RecordingLogger()
-    service = PostrunCompactService(
-        config=_build_config(silver_write_mode=SilverWriteMode.DELETE),
-        storage=storage,
-        logger=logger,
-        warning_allowlist=(RuntimeError,),
-    )
-
-    result = await service.run_if_needed()
-
-    assert result == CompactionResult(status="skipped")
+    with pytest.raises(ValueError, match="Invalid Silver write mode"):
+        _build_config(silver_write_mode="delete")
     assert storage.deduplicate_calls == []
     assert storage.optimize_calls == []
-    assert logger.info_events == []
-    assert logger.warning_events == []

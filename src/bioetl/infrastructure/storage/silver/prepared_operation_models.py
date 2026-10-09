@@ -52,6 +52,7 @@ class _PreparedSilverWriteFinalizationContext:
     dq_metrics: BatchDQMetrics
     version_after: int | None
     completed_at: datetime
+    duration_seconds: float | None = None
 
 
 @dataclass(frozen=True, slots=True)

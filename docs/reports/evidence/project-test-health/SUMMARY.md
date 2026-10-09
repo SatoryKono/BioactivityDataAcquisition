@@ -1,6 +1,6 @@
 ---
 status: active-non-canonical
-last_verified: "2026-09-30"
+last_verified: "2026-10-08"
 freshness_window_days: 7
 owner: quality
 canonical_sources:
@@ -15,38 +15,42 @@ verification_scope: tracked_test_module_inventory
 
 ## Current status
 
-The tracked inventory contains 2955 test modules, counted from tracked
-`tests/**/test_*.py` files on 2026-09-30. The GR-DB-CORR broad attempt executed
-29,758 tests with 10 failures and 91 skips; it was not a PASS. A subsequent
-integration and affected-runner attempt executed 2885 tests with three failures
-and 12 skips. After fixes, the 108-test recheck of the affected integration
-files passed. The architectural campaign encountered additional drift and a
-timeout and remains incomplete. These local results do not establish CI,
-release acceptance, or the health of the complete repository suite.
+The tracked inventory contains 3034 test modules, counted from tracked
+`tests/**/test_*.py` files on 2026-10-08. A complete local
+`run_local_coverage_verify` campaign on source commit
+`3e734a6b872fff524c663cf183ade40aafdaea12` completed all 17 required shards:
+33,599 tests, 0 failures, 0 errors, and 203 skips. Combined coverage was
+99.68% line and 94.26% branch; both 85% gates passed. The manifest records
+`source_tree_sha256=20f951f3aa0d2f535a757dca96af0b213f675f0fd74873f80d8c3feded56293c`.
+This is local single-host evidence, not CI PASS, release acceptance, or proof
+that the separate architecture campaign is complete.
+
+Historical incomplete campaigns: the GR-DB-CORR broad attempt executed 29,758
+tests with 10 failures and 91 skips; a subsequent integration and
+affected-runner attempt executed 2885 tests with three failures and 12 skips.
+The 108-test recheck of affected integration files passed. Those results are
+retained as historical context and are superseded by the 2026-10-08 local
+coverage measurement where their selections overlap.
 
 ## Required evidence refresh
 
-- Run the targeted unit suites for changed domain and application modules.
-- Run `tests/architecture/` and record failures without weakening guards.
-- Refresh module coverage inventory after source changes.
-- Record skip/xfail counts and VCR freshness results.
+- Run `tests/architecture/` and record its result without weakening guards.
+- Check VCR freshness as a separate acceptance surface.
+- Re-run the complete local 17-shard measurement after any later source-tree change.
 
 ## Open action items
 
-1. Complete remaining lifecycle, contract, and UTC metadata tests.
-2. Add security regression coverage for HTML output and recursive redaction.
-3. Refresh this summary from the next full pytest telemetry artifact.
+1. Close the separate architecture campaign on the exact candidate SHA.
+2. Record VCR freshness independently of the local coverage result.
 
 ## Freshness note
 
-Re-verified on 2026-09-30 against source HEAD
-`60779c32172feec3fbfe232c63003329371df40b`:
-all three canonical source paths exist, and `git ls-files tests` contains 2955
-Python modules named `test_*.py`. The scoped campaign selected tracked test
-paths containing `dashboard` or `grafana`; its local JUnit receipt is
-`reports/local/nav-tests-20260914/final-tests.xml` (1199 passed, 11 skipped).
-Interpretation remains backlog signal only. No full-suite or new coverage
-measurement is claimed. Recurrence of #7419.
+Re-verified on 2026-10-08 against source commit
+`3e734a6b872fff524c663cf183ade40aafdaea12`: all canonical source paths exist,
+the tracked test-module inventory is 3034, and the complete 17-shard local
+manifest is bound to the source hash above. Interpretation remains backlog
+signal only. The local run does not establish CI admission, release acceptance,
+or architecture/VCR closeout.
 
 This is a non-canonical repo-only evidence layer. The canonical sources of truth are:
 - `configs/quality/test_matrix.yaml`

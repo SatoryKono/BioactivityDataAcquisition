@@ -3,6 +3,7 @@
 from __future__ import annotations
 # ruff: noqa: I001
 
+from bioetl.application.core.preflight import service as _service
 from bioetl.application.core.preflight.service import (
     HealthAggregator as HealthAggregator,
     MedallionConfigValidator as MedallionConfigValidator,
@@ -12,11 +13,4 @@ from bioetl.application.core.preflight.service import (
     validate_infrastructure as validate_infrastructure,
 )
 
-__all__ = [
-    "HealthAggregator",
-    "MedallionConfigValidator",
-    "PreflightService",
-    "_HealthAggregator",
-    "_MedallionConfigValidator",
-    "validate_infrastructure",
-]
+__all__ = _service.__all__

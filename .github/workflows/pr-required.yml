@@ -269,7 +269,7 @@ jobs:
           '
           OUTCOMES="$(tr -d '\r\n' < reports/quality/lane-step-outcomes.json)"
           export OUTCOMES
-          uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results assert-steps \
+          uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results assert-steps \
             --decision-matrix DECISION_MATRIX \
             --decision-matrix-env \
             --outcomes OUTCOMES \
@@ -353,7 +353,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p reports/quality
-          uv run --quiet --frozen --no-build python -m scripts.engineering.ci.pr_lane_results affected-tests \
+          uv run --quiet --frozen --no-build python -m scripts.engineering.ci pr-lane-results affected-tests \
             --repo-root . \
             --base-sha "$BASE_SHA" \
             --head-sha "$HEAD_SHA" \
@@ -505,7 +505,7 @@ jobs:
       - name: Run detect-secrets baseline check
         id: detect-secrets
         if: needs['classify-changes'].outputs['security'] == 'required'
-        run: uv run --frozen --no-build pytest tests/architecture/test_antipatterns.py::test_no_hardcoded_secrets -q --noconftest -o "addopts=" -o "filterwarnings=" -o "timeout=0"
+        run: uv run --frozen --no-build pytest tests/architecture/test_antipatterns.py::test_no_hardcoded_secrets -q -o "addopts=" -o "filterwarnings=" -o "timeout=0"
 
       - name: Run pip-audit
         id: pip-audit
@@ -639,6 +639,17 @@ jobs:
             --max-duplicate-clusters 0 \
             --timeout-seconds 120
 
+      - name: Upload hotspot duplication report
+        if: always() && !cancelled() && needs['classify-changes'].outputs['duplication'] == 'required' && hashFiles('reports/quality/hotspot-duplication-baseline.json') != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: hotspot-duplication-${{ github.sha }}
+          path: |
+            reports/quality/hotspot-duplication-baseline.json
+            reports/quality/hotspot-duplication-baseline.md
+          if-no-files-found: error
+          retention-days: 3
+
       - name: Check constructor argument counts
         id: constructor-args
         if: needs['classify-changes'].outputs['duplication'] == 'required'
@@ -672,7 +683,7 @@ jobs:
           '
           OUTCOMES="$(tr -d '\r\n' < reports/quality/lane-step-outcomes.json)"
           export OUTCOMES
-          uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results assert-steps \
+          uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results assert-steps \
             --decision-matrix DECISION_MATRIX \
             --decision-matrix-env \
             --outcomes OUTCOMES \
@@ -716,7 +727,7 @@ jobs:
           set -euo pipefail
           test "${{ needs['classify-changes'].result }}" = "success"
           mkdir -p reports/quality
-          uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \
+          uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results build \
             --decision-matrix DECISION_MATRIX \
             --decision-matrix-env \
             --head-sha "${EXPECTED_HEAD_SHA}" \

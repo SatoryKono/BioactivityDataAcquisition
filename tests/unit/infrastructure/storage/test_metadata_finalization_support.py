@@ -29,6 +29,8 @@
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -99,9 +101,10 @@ def test_build_silver_write_result_helpers_cover_none_and_success_cases() -> Non
 
 
 @pytest.mark.asyncio
-async def test_prepare_metadata_result_context_uses_request_and_perf_counter() -> None:
+async def test_prepare_metadata_result_context_uses_request_and_clock() -> None:
     started_at = datetime(2026, 1, 1, tzinfo=UTC)
     host = SimpleNamespace(
+        _clock=fixed_test_clock(),
         _compute_dq_metrics=AsyncMock(return_value=BatchDQMetrics(total_records=2)),
         _get_delta_version=AsyncMock(return_value=11),
     )
@@ -118,7 +121,6 @@ async def test_prepare_metadata_result_context_uses_request_and_perf_counter() -
     context = await _prepare_metadata_result_context(
         host,
         request,
-        perf_counter=lambda: 14.5,
     )
 
     host._compute_dq_metrics.assert_awaited_once_with(
@@ -129,7 +131,7 @@ async def test_prepare_metadata_result_context_uses_request_and_perf_counter() -
     )
     host._get_delta_version.assert_awaited_once_with("/tmp/silver/chembl/activity")
     assert context.version_after == 11
-    assert context.completed_at == started_at + timedelta(seconds=4.5)
+    assert context.completed_at == host._clock.now()
 
 
 @pytest.mark.unit
@@ -154,6 +156,7 @@ async def test_prepare_silver_write_finalization_context_collects_dq_version_and
     None
 ):
     metadata_ops = SimpleNamespace(
+        _clock=fixed_test_clock(),
         _resolve_finalization_dq_metrics=AsyncMock(
             return_value=BatchDQMetrics(total_records=3)
         ),
@@ -175,7 +178,7 @@ async def test_prepare_silver_write_finalization_context_collects_dq_version_and
     context = await _prepare_silver_write_finalization_context(
         metadata_ops,
         request,
-        perf_counter=lambda: 102.25,
+        perf_counter=lambda: 102.5,
     )
 
     metadata_ops._resolve_finalization_dq_metrics.assert_awaited_once_with(
@@ -190,7 +193,8 @@ async def test_prepare_silver_write_finalization_context_collects_dq_version_and
     assert context == _PreparedSilverWriteFinalizationContext(
         dq_metrics=BatchDQMetrics(total_records=3),
         version_after=5,
-        completed_at=started_at + timedelta(seconds=2.25),
+        completed_at=metadata_ops._clock.now(),
+        duration_seconds=2.5,
     )
 
 

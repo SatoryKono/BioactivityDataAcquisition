@@ -202,14 +202,14 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "617",
+      "line": "623",
       "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_stage_name_accepts_valid"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "638",
+      "line": "670",
       "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_stage_completion_running_allows_none_timestamp"
@@ -265,14 +265,14 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "217",
+      "line": "221",
       "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_silver.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_merged_metadata_skips_when_flagged"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "490",
+      "line": "507",
       "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_expire_gold_empty_key_rows"
@@ -391,7 +391,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1293",
+      "line": "1303",
       "path": "tests/unit/infrastructure/quarantine/test_unified_quarantine.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_aclose_does_nothing"
@@ -468,126 +468,126 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "70",
+      "line": "72",
       "path": "tests/unit/infrastructure/storage/test_silver_writer_maintenance_boost.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_csv_exporter_none_skips_export"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "161",
+      "line": "163",
       "path": "tests/unit/infrastructure/storage/test_silver_writer_maintenance_boost.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_finalize_csv_without_exporter_does_nothing"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "204",
+      "line": "209",
       "path": "tests/unit/infrastructure/storage/test_silver_writer_validation.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_silver_pandera_with_noop_validator"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "214",
+      "line": "219",
       "path": "tests/unit/infrastructure/storage/test_silver_writer_validation.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_silver_pandera_with_valid_records"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "228",
+      "line": "233",
       "path": "tests/unit/infrastructure/storage/test_silver_writer_validation.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_silver_pandera_accepts_target_records_without_removed_fields"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "198",
+      "line": "201",
       "path": "tests/unit/infrastructure/storage/test_silver_writer_validation_operations.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_allowed_mode_passes"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "232",
+      "line": "235",
       "path": "tests/unit/infrastructure/storage/test_silver_writer_validation_operations.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_records_without_runtime_metadata_pass"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "239",
+      "line": "242",
       "path": "tests/unit/infrastructure/storage/test_silver_writer_validation_operations.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_valid_records_pass"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "254",
+      "line": "257",
       "path": "tests/unit/infrastructure/storage/test_silver_writer_validation_operations.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_null_source_batch_id_in_payload_is_ignored"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "269",
+      "line": "272",
       "path": "tests/unit/infrastructure/storage/test_silver_writer_validation_operations.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_blank_source_batch_id_in_payload_is_ignored"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "111",
+      "line": "118",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_dq.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_enforce_write_policy_allows_mode"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "329",
+      "line": "342",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_lineage.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_silver_without_bronze_refs"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "165",
+      "line": "183",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_schema_drift_evolve_mode_does_not_raise"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "190",
+      "line": "212",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_schema_drift_ignore_mode_does_not_raise"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "215",
+      "line": "241",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_schema_drift_no_error_when_no_drift"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "246",
+      "line": "276",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_schema_drift_skipped_for_new_table"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "262",
+      "line": "296",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_schema_drift_skipped_for_empty_records"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "145",
+      "line": "146",
       "path": "tests/unit/interfaces/test_issue_10520_interfaces_cli.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_formatters_optional_export_and_quarantine"
@@ -660,7 +660,7 @@
     "tests/unit/composition/test_observability_contract.py:431",
     "tests/unit/composition/factories/storage/test_health_mixin.py:72",
     "tests/unit/composition/factories/storage/test_health_mixin.py:103",
-    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:617"
+    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:623"
   ],
   "assertless_families": {
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py": {
@@ -1182,10 +1182,10 @@
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
-    "marked_test_files": 67,
+    "marked_test_files": 68,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
-    "test_files": 67,
+    "test_files": 68,
     "unmarked_test_files": []
   },
   "report": {
@@ -1392,14 +1392,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "617",
+        "line": "623",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_name_accepts_valid"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "638",
+        "line": "670",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_completion_running_allows_none_timestamp"
@@ -1455,14 +1455,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "217",
+        "line": "221",
         "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_l12_silver.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_merged_metadata_skips_when_flagged"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "490",
+        "line": "507",
         "path": "tests/unit/infrastructure/test_issue_10469_stream_a_infra_twenty_one.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_expire_gold_empty_key_rows"
@@ -1581,7 +1581,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1293",
+        "line": "1303",
         "path": "tests/unit/infrastructure/quarantine/test_unified_quarantine.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_does_nothing"
@@ -1658,126 +1658,126 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "70",
+        "line": "72",
         "path": "tests/unit/infrastructure/storage/test_silver_writer_maintenance_boost.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_csv_exporter_none_skips_export"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "161",
+        "line": "163",
         "path": "tests/unit/infrastructure/storage/test_silver_writer_maintenance_boost.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_finalize_csv_without_exporter_does_nothing"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "204",
+        "line": "209",
         "path": "tests/unit/infrastructure/storage/test_silver_writer_validation.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_silver_pandera_with_noop_validator"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "214",
+        "line": "219",
         "path": "tests/unit/infrastructure/storage/test_silver_writer_validation.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_silver_pandera_with_valid_records"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "228",
+        "line": "233",
         "path": "tests/unit/infrastructure/storage/test_silver_writer_validation.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_silver_pandera_accepts_target_records_without_removed_fields"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "198",
+        "line": "201",
         "path": "tests/unit/infrastructure/storage/test_silver_writer_validation_operations.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_allowed_mode_passes"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "232",
+        "line": "235",
         "path": "tests/unit/infrastructure/storage/test_silver_writer_validation_operations.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_records_without_runtime_metadata_pass"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "239",
+        "line": "242",
         "path": "tests/unit/infrastructure/storage/test_silver_writer_validation_operations.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_valid_records_pass"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "254",
+        "line": "257",
         "path": "tests/unit/infrastructure/storage/test_silver_writer_validation_operations.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_null_source_batch_id_in_payload_is_ignored"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "269",
+        "line": "272",
         "path": "tests/unit/infrastructure/storage/test_silver_writer_validation_operations.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_blank_source_batch_id_in_payload_is_ignored"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "111",
+        "line": "118",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_dq.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_enforce_write_policy_allows_mode"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "329",
+        "line": "342",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_lineage.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_silver_without_bronze_refs"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "165",
+        "line": "183",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_schema_drift_evolve_mode_does_not_raise"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "190",
+        "line": "212",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_schema_drift_ignore_mode_does_not_raise"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "215",
+        "line": "241",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_schema_drift_no_error_when_no_drift"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "246",
+        "line": "276",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_schema_drift_skipped_for_new_table"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "262",
+        "line": "296",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_schema_drift_skipped_for_empty_records"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "145",
+        "line": "146",
         "path": "tests/unit/interfaces/test_issue_10520_interfaces_cli.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_formatters_optional_export_and_quarantine"
@@ -1850,7 +1850,7 @@
       "tests/unit/composition/test_observability_contract.py:431",
       "tests/unit/composition/factories/storage/test_health_mixin.py:72",
       "tests/unit/composition/factories/storage/test_health_mixin.py:103",
-      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:617"
+      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:623"
     ],
     "assertless_total_candidates": 85,
     "compatibility_examples": [],
@@ -2032,10 +2032,10 @@
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
-      "marked_test_files": 67,
+      "marked_test_files": 68,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
-      "test_files": 67,
+      "test_files": 68,
       "unmarked_test_files": []
     },
     "root": ".",
@@ -2044,8 +2044,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3027,
-      "test_python_file_count": 3262,
+      "test_glob_file_count": 3035,
+      "test_python_file_count": 3271,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2086,13 +2086,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3027,
-    "total_test_functions": 29603,
+    "total_test_files": 3035,
+    "total_test_functions": 29673,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "33d61b1f625b1b45e70857a6a6ceaf81c1dd4904bad4c3b38ef7d4d2f1bd4fca",
+  "source_tree_sha256": "d22422a8f5549240627acfb4d2aedc778dd64fa248708e0aedf9dd171e165c7c",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2112,8 +2112,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3027,
-    "test_python_file_count": 3262,
+    "test_glob_file_count": 3035,
+    "test_python_file_count": 3271,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2154,8 +2154,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3027,
-  "total_test_functions": 29603,
+  "total_test_files": 3035,
+  "total_test_functions": 29673,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

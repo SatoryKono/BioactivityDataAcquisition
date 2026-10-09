@@ -91,7 +91,7 @@ class StorageBundleWriteMixin:
             records: A list of dictionaries, where each dictionary is a transformed record.
             primary_keys: A list of column names that form the primary key.
             schema: The PyArrow schema definition for the records (ArrowSchema alias).
-            mode: The write mode (e.g., 'merge', 'append', 'delete').
+            mode: The write mode (e.g., 'merge', 'append').
             partition_cols: Optional list of columns to partition by.
             on_schema_mismatch: How to handle schema drift.
             column_order: Optional explicit column order to apply.

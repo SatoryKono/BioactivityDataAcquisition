@@ -313,3 +313,13 @@ byte fixtures cover profile differences and historical golden identity values.
 - [ADR-044: RunManifest/RunLedger Control Plane](ADR-044-run-manifest-ledger-control-plane.md)
 - [Runtime Clock Port](../../../src/bioetl/domain/ports/runtime/clock.py)
 - [SystemClock adapter](../../../src/bioetl/infrastructure/time/system_clock.py)
+
+
+### Silver provenance clock (CF-012)
+
+SilverWriter requires an explicit keyword-only ClockPort. Composition creates the
+production SystemClock; tests and replay may inject a deterministic clock. The
+public write entrypoint captures started_at once, preserving an explicit request
+value and sharing it across versioned targets. Calendar completed_at also comes
+from ClockPort; perf_counter measures duration and never synthesizes provenance
+timestamps. The storage adapter does not construct a concrete clock.

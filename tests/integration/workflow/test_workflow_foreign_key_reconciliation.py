@@ -12,6 +12,8 @@
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 import json
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -185,7 +187,9 @@ async def test_reconcile_foreign_keys_is_idempotent(
     tmp_path,
 ) -> None:
     logger = _RecordingLogger()
-    silver_writer = SilverWriter(base_path=tmp_path / "silver", logger=logger)
+    silver_writer = SilverWriter(
+        clock=fixed_test_clock(), base_path=tmp_path / "silver", logger=logger
+    )
     reference_schema = pa.schema(
         [
             ("target_id", pa.string()),
@@ -287,7 +291,9 @@ async def test_reconcile_foreign_keys_sends_orphans_to_quarantine(
     tmp_path,
 ) -> None:
     logger = _RecordingLogger()
-    silver_writer = SilverWriter(base_path=tmp_path / "silver", logger=logger)
+    silver_writer = SilverWriter(
+        clock=fixed_test_clock(), base_path=tmp_path / "silver", logger=logger
+    )
     quarantine = _RecordingQuarantine()
     reference_schema = pa.schema(
         [
@@ -380,7 +386,9 @@ async def test_reconcile_foreign_keys_supports_composite_keys_and_null_policy(
     tmp_path,
 ) -> None:
     logger = _RecordingLogger()
-    silver_writer = SilverWriter(base_path=tmp_path / "silver", logger=logger)
+    silver_writer = SilverWriter(
+        clock=fixed_test_clock(), base_path=tmp_path / "silver", logger=logger
+    )
     reference_schema = pa.schema(
         [
             ("target_record_id", pa.string()),
@@ -506,7 +514,9 @@ async def test_reconcile_foreign_keys_dry_run_previews_without_mutation(
     tmp_path,
 ) -> None:
     logger = _RecordingLogger()
-    silver_writer = SilverWriter(base_path=tmp_path / "silver", logger=logger)
+    silver_writer = SilverWriter(
+        clock=fixed_test_clock(), base_path=tmp_path / "silver", logger=logger
+    )
     reference_schema = pa.schema(
         [
             ("target_id", pa.string()),
@@ -602,7 +612,9 @@ async def test_reconcile_foreign_keys_expires_gold_orphans_without_dropping_hist
 ) -> None:
     logger = _RecordingLogger()
     metrics = _RecordingMetrics()
-    silver_writer = SilverWriter(base_path=tmp_path / "silver", logger=logger)
+    silver_writer = SilverWriter(
+        clock=fixed_test_clock(), base_path=tmp_path / "silver", logger=logger
+    )
     gold_writer = _gold_writer(tmp_path, logger, metrics)
     quarantine = _RecordingQuarantine()
     ingestion_ts = datetime(2026, 7, 6, 12, 0, 0, tzinfo=UTC)
@@ -698,7 +710,9 @@ async def test_reconcile_foreign_keys_persists_result_and_debug_artifacts(
 ) -> None:
     logger = _RecordingLogger()
     metrics = _RecordingMetrics()
-    silver_writer = SilverWriter(base_path=tmp_path / "silver", logger=logger)
+    silver_writer = SilverWriter(
+        clock=fixed_test_clock(), base_path=tmp_path / "silver", logger=logger
+    )
     gold_writer = _gold_writer(tmp_path, logger, metrics)
     quarantine = _RecordingQuarantine()
     artifact_sink = FileWorkflowTransformArtifactStore(
@@ -876,7 +890,9 @@ async def test_inverse_reconcile_foreign_keys_expires_unused_gold_dimensions(
 ) -> None:
     logger = _RecordingLogger()
     metrics = _RecordingMetrics()
-    silver_writer = SilverWriter(base_path=tmp_path / "silver", logger=logger)
+    silver_writer = SilverWriter(
+        clock=fixed_test_clock(), base_path=tmp_path / "silver", logger=logger
+    )
     gold_writer = _gold_writer(tmp_path, logger, metrics)
     quarantine = _RecordingQuarantine()
     ingestion_ts = datetime(2026, 7, 6, 12, 0, 0, tzinfo=UTC)

@@ -151,7 +151,7 @@ class BatchWriter(BatchWriterTracingMixin, BatchWriterColumnsMixin, BatchWriterI
         )
         silver_mode_val = self._table_config.silver_write_mode
         self._silver_mode = cast(
-            Literal["merge", "append", "delete"],
+            Literal["merge", "append"],
             silver_mode_val.value
             if hasattr(silver_mode_val, "value")
             else silver_mode_val,

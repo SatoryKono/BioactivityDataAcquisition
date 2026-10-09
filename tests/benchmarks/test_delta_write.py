@@ -50,6 +50,7 @@ from bioetl.infrastructure.storage.silver.runtime_helpers import (
 )
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from tests.benchmarks.conftest import calculate_payload_size_mb
+from tests.helpers.clock import fixed_test_clock
 from tests.helpers.deterministic_ids import (
     deterministic_uuid_from_callsite,
     deterministic_uuid_string_from_callsite,
@@ -144,9 +145,11 @@ def _prepare_records_for_delta(
 def _create_silver_writer(base_path: Path) -> SilverWriter:
     """Create an isolated Silver writer rooted at one benchmark round path."""
     return SilverWriter(
+        clock=fixed_test_clock(),
         base_path=base_path,
         logger=FakeLogger(),
         runtime_request=SilverWriterRuntimeServicesRequest(
+            clock=fixed_test_clock(),
             merge_resilience_policy=replace(
                 build_default_silver_merge_policy(),
                 execution_timeout_seconds=DELTA_WRITE_TIMEOUT_SECONDS,

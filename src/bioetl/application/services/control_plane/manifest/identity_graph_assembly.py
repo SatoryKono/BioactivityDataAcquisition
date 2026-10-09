@@ -7,6 +7,9 @@ from bioetl.application.services.control_plane.manifest.execution_identity_suppo
     build_execution_identity_payload_from_code_provenance,
     build_identity_graph_core,
 )
+from bioetl.application.services.control_plane.manifest.replay_taxonomy_fields import (
+    REPLAY_TAXONOMY_FIELDS,
+)
 from bioetl.domain.config.runtime import CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.normalization import compute_execution_identity_fingerprint
@@ -123,36 +126,9 @@ class RunManifestIdentityGraphAssembler:
                 manifest.replay_capability.value == "exact_replay_supported"
             ),
         }
+        replay_fields = frozenset(REPLAY_TAXONOMY_FIELDS)
         for key, value in diagnostics.items():
-            if key in payload or key in {
-                "replay_family_contract",
-                "replay_support_state",
-                "post_capture_replayable_parent_supported",
-                "post_capture_replayable_parent_boundary",
-                "historical_live_run_upgrade_policy",
-                "historical_live_run_upgrade_boundary",
-                "historical_live_run_upgrade_reason",
-                "broader_historical_exact_replay_policy",
-                "broader_historical_exact_replay_boundary",
-                "broader_historical_exact_replay_reason",
-                "broader_historical_exact_replay_state",
-                "historical_live_run_upgrade_state",
-                "replay_occurrence_kind",
-                "source_posture",
-                "input_snapshot_missing_source_refs",
-                "replay_capability_reason",
-                "replay_mode",
-                "continuation_mode",
-                "operator_replay_mode",
-                "replay_resume_rebuild_verdict",
-                "replay_next_action",
-                "exact_replay_blockers",
-                "replay_readiness_verdict",
-                "append_mode_semantic_sinks",
-                "resume_contract",
-                "resume_diagnostics",
-                "lineage_closure_boundary",
-            }:
+            if key in payload or key in replay_fields:
                 payload[key] = value
         return payload
 

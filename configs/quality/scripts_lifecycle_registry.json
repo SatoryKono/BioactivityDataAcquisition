@@ -1866,6 +1866,12 @@
       "next_step": "Retain only as the legacy root shell launcher while canonical Docker helper lifecycle management moves to scripts/ops/docker-setup.sh; keep it supporting and do not expand its fixed-delay startup behavior.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/engineering/ci/pr_lane_results.py": {
+      "review_by": "2026-12-31",
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "next_step": "Keep as the internal result-mapping implementation behind the canonical scripts.engineering.ci pr-lane-results command; do not expose a second workflow CLI surface."
     }
   },
   "schema_version": "1.0"

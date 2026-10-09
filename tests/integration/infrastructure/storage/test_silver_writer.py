@@ -12,6 +12,8 @@
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 import asyncio
 from pathlib import Path
 from types import SimpleNamespace
@@ -81,10 +83,12 @@ def _create_dual_write_writer(
 ) -> SilverWriter:
     """Build a SilverWriter wired for contract dual-write tests."""
     return SilverWriter(
+        clock=fixed_test_clock(),
         base_path=temp_delta_path,
         logger=noop_logger,
         runtime_services=build_silver_writer_runtime_services(
             SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock(),
                 csv_exporter=None,
                 tracing=None,
                 write_policy=None,
@@ -165,7 +169,9 @@ def temp_delta_path(tmp_path):
 
 @pytest.fixture
 def silver_writer(temp_delta_path, noop_logger):
-    return SilverWriter(base_path=temp_delta_path, logger=noop_logger)
+    return SilverWriter(
+        clock=fixed_test_clock(), base_path=temp_delta_path, logger=noop_logger
+    )
 
 
 @pytest.fixture
@@ -390,20 +396,26 @@ async def test_write_silver_persisted_rows_strip_runtime_occurrence_fields(
 async def test_write_silver_delete_mode(
     silver_writer, temp_delta_path, sample_records, sample_schema
 ):
-    """Test delete mode (replaces all existing data)."""
-    # Silver layer does not support 'delete' mode (overwrite).
-    # It only supports 'append' and 'merge'.
-    # This test verifies that PolicyViolationError is raised.
-    from bioetl.domain.exceptions import PolicyViolationError
-
-    with pytest.raises(PolicyViolationError, match="silver does not allow overwrite"):
+    """The removed batch mode must fail before a Delta mutation."""
+    await silver_writer.write_silver(
+        table_name="test_delete",
+        records=sample_records,
+        primary_keys=["id"],
+        schema=sample_schema,
+        mode="append",
+    )
+    path = f"{temp_delta_path}/test_delete"
+    version = DeltaTable(path).version()
+    with pytest.raises(ValueError, match="Invalid Silver write mode"):
         await silver_writer.write_silver(
-            table_name="test_overwrite",
-            records=sample_records,
+            table_name="test_delete",
+            records=sample_records[:1],
             primary_keys=["id"],
             schema=sample_schema,
             mode="delete",
         )
+    assert DeltaTable(path).version() == version
+    assert DeltaTable(path).to_pyarrow_table().num_rows == len(sample_records)
 
 
 @pytest.mark.asyncio
@@ -412,7 +424,7 @@ async def test_write_silver_partitioning(
     silver_writer, temp_delta_path, sample_records, sample_schema
 ):
     """Test partitioning."""
-    # Silver layer does not support 'delete' mode, so we use 'append' for partitioning test
+    # APPEND preserves existing partitions while adding this batch.
     await silver_writer.write_silver(
         table_name="test_partition",
         records=sample_records,
@@ -684,7 +696,9 @@ async def test_write_silver_merged_strips_runtime_occurrence_fields(
 async def test_write_silver_merged_empty_records(temp_delta_path: str):
     """Test write_silver_merged handles empty records gracefully."""
     logger = RecordingLogger()
-    silver_writer = SilverWriter(base_path=temp_delta_path, logger=logger)
+    silver_writer = SilverWriter(
+        clock=fixed_test_clock(), base_path=temp_delta_path, logger=logger
+    )
 
     # Should not raise, just log warning
     await silver_writer.write_silver_merged(
