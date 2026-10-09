@@ -486,7 +486,13 @@ def _release_review_freshness_gate(
     age_days = (current_time - generated_at).days
     return Gate(
         name="observability_release_review_freshness",
-        status=("pass" if 0 <= age_days <= RELEASE_REVIEW_MAX_AGE_DAYS else "fail"),
+        status=(
+            "pass"
+            if runtime_review.get("mode") == "live_review"
+            and runtime_review.get("status") == "passed"
+            and 0 <= age_days <= RELEASE_REVIEW_MAX_AGE_DAYS
+            else "fail"
+        ),
         metric="generated_at_age_days",
         current=age_days,
         limit=RELEASE_REVIEW_MAX_AGE_DAYS,

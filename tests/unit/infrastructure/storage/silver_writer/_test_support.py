@@ -75,7 +75,9 @@ def make_silver_writer(
         )
     elif runtime_request is not None and runtime_request.silver_validator is None:
         runtime_request = SilverWriterRuntimeServicesRequest(
-            clock=fixed_test_clock(),
+            clock=runtime_request.clock,
+            transform_version=runtime_request.transform_version,
+            transform_steps=runtime_request.transform_steps,
             csv_exporter=runtime_request.csv_exporter,
             tracing=runtime_request.tracing,
             write_policy=runtime_request.write_policy,
@@ -95,7 +97,9 @@ def make_silver_writer(
         )
 
     return SilverWriter(
-        clock=fixed_test_clock(),
+        clock=runtime_request.clock
+        if runtime_request is not None
+        else fixed_test_clock(),
         base_path=str(SILVER_BASE_PATH if base_path is None else base_path),
         logger=logger,
         runtime_services=runtime_services,

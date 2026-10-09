@@ -812,10 +812,7 @@ class TestValidateWriteModes:
             **_build_preflight_dependencies(config, mock_logger, mock_metrics),
         )
         errors = service.validate_write_modes()
-        assert (
-            len([e for e in errors if e.field == "sink.silver.idempotency_contract"])
-            == 0
-        )
+        assert errors == []
 
     def test_silver_append_mode_is_valid(self, mock_context, mock_logger, mock_metrics):
         """Test that Silver 'append' mode is valid."""
@@ -840,10 +837,7 @@ class TestValidateWriteModes:
             **_build_preflight_dependencies(config, mock_logger, mock_metrics),
         )
         errors = service.validate_write_modes()
-        assert (
-            len([e for e in errors if e.field == "sink.silver.idempotency_contract"])
-            == 0
-        )
+        assert errors == []
 
     def test_silver_overwrite_mode_is_invalid(
         self, mock_context, mock_logger, mock_metrics
@@ -1066,10 +1060,12 @@ class TestValidatePreflight:
         assert report.should_block_startup is True
 
     @pytest.mark.asyncio
+    @pytest.mark.parametrize("duplicate_paths", [False, True])
     async def test_validate_preflight_strict_mode_raises(
-        self, preflight_service, mock_services
+        self, preflight_service, mock_services, duplicate_paths
     ):
-        """Test validate_preflight raises in strict mode on errors."""
+        """Invalid explicit layers stop before any infrastructure checks."""
+        preflight_service.validate_infrastructure = AsyncMock()
         strict_runtime = RuntimeConfig(
             run_type=RunType.INCREMENTAL,
             strict_validation=True,
@@ -1080,11 +1076,15 @@ class TestValidatePreflight:
                 services=mock_services,
                 runtime=strict_runtime,
                 bronze_path="/data/output/bronze",
-                silver_path="/data/output/silver",
+                silver_path="/data/output/bronze"
+                if duplicate_paths
+                else "/data/output/silver",
                 gold_path="/data/output/gold",
-                silver_format="parquet",  # Invalid!
+                silver_format="delta" if duplicate_paths else "parquet",
                 gold_format="delta",
             )
+
+        preflight_service.validate_infrastructure.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def test_validate_preflight_non_strict_mode_returns_report(

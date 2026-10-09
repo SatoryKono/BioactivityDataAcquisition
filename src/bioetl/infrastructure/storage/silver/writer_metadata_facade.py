@@ -247,6 +247,8 @@ class SilverWriterMetadataFacade:
         """Log Silver audit events through metadata operations."""
         if self._metadata is None:
             raise RuntimeError(self._SILVER_METADATA_OPERATIONS_REQUIRED)
+        if mode == "overwrite" and not isinstance(mode, WriteMode):
+            mode = WriteMode.OVERWRITE
         validated_mode = (
             mode
             if isinstance(mode, (SilverWriteMode, WriteMode))

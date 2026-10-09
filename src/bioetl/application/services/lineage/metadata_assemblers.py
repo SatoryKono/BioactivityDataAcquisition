@@ -105,6 +105,7 @@ class SilverMetadataService:
             ),
             write_started_at=input_data.started_at,
             write_completed_at=input_data.completed_at,
+            write_duration_seconds=input_data.duration_seconds,
         )
         output_ext = SilverOutputExt(
             delta_version_before=input_data.version_before,

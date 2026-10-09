@@ -5,7 +5,9 @@
     "bioetl_health_check_latency_seconds": 500,
     "bioetl_pipeline_runs_total": 500
   },
-  "degraded_reasons": [],
+  "degraded_reasons": [
+    "Live Prometheus review unavailable; local fallback is not release evidence."
+  ],
   "generated_at": "2026-10-07T21:28:01Z",
   "label_keys": {
     "bioetl_checkpoint_load_events_total": [
@@ -52,5 +54,5 @@
   "source_revision": "e99c057c5faa51c5c72d2715e0ca0056502a8717",
   "source_worktree_dirty": true,
   "static_threshold_violations": [],
-  "status": "passed"
+  "status": "degraded"
 }

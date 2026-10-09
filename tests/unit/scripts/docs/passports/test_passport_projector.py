@@ -155,9 +155,18 @@ def test_source_revision_survives_squash_and_generated_only_commits(
     git("checkout", "--detach", squashed)
     assert _source_revision() == before
     source.write_text("version: 2\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="uncommitted canonical source"):
+        _source_revision()
     git("add", ".")
+    with pytest.raises(ValueError, match="uncommitted canonical source"):
+        _source_revision()
     git("commit", "-m", "changed canonical source")
     assert _source_revision() != before
+    extra = source.with_name("untracked.yaml")
+    extra.write_text("version: 3\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="uncommitted canonical source"):
+        _source_revision()
+    extra.unlink()
     monkeypatch.setenv("BIOETL_PASSPORT_SOURCE_REVISION", REVISION)
     assert _source_revision() == REVISION
 

@@ -168,11 +168,13 @@ class TestSilverWriterAudit:
         mock_audit.log_write.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_log_silver_audit_with_valid_data(self, noop_logger):
+    @pytest.mark.parametrize(
+        "mode", [SilverWriteMode.MERGE, "overwrite", WriteMode.OVERWRITE]
+    )
+    async def test_log_silver_audit_with_valid_data(self, noop_logger, mode):
         """Test _log_silver_audit logs correctly with valid data."""
         from datetime import UTC, datetime
 
-        from bioetl.domain.medallion import SilverWriteMode
         from bioetl.domain.types import BatchID, RunID, RunType
 
         mock_audit = MagicMock()
@@ -189,7 +191,7 @@ class TestSilverWriterAudit:
         await writer._log_silver_audit(
             table_name="test.table",
             records=[{"entity_id": "CHEMBL1"}],
-            mode=SilverWriteMode.MERGE,
+            mode=mode,
             run_id=RunID(valid_uuid),
             run_type=RunType.INCREMENTAL,
             source_batch_id=BatchID(
@@ -880,3 +882,21 @@ class TestSilverWriterLineage:
                 records=valid_records,
                 primary_keys=["entity_id"],
             )
+
+
+def test_make_silver_writer_preserves_runtime_request(noop_logger):
+    from datetime import UTC, datetime
+    from tests.helpers.clock import FixedClock
+
+    clock = FixedClock(datetime(2020, 1, 1, tzinfo=UTC))
+    writer = make_silver_writer(
+        logger=noop_logger,
+        runtime_request=SilverWriterRuntimeServicesRequest(
+            clock=clock,
+            transform_version="custom-1",
+            transform_steps=("normalize",),
+        ),
+    )
+    assert writer._clock is clock
+    assert writer._transform_version == "custom-1"
+    assert writer._transform_steps == ("normalize",)

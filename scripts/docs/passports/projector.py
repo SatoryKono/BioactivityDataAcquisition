@@ -90,35 +90,49 @@ def _source_revision() -> str:
     """Fingerprint canonical source blobs independently of commit ancestry.
 
     Squash/merge commits preserve source content but replace commit identities.
-    Hash the canonical Git tree entries so generated-only commits and history
-    rewrites keep the revision stable, while any source blob change invalidates it.
+    Reject uncommitted canonical changes before hashing Git tree entries.
+    Generated-only commits and history rewrites keep the revision stable,
+    while any source blob change invalidates it.
     Explicit revision overrides remain available for SHA-bound CI artifacts.
     """
+    canonical_paths = [
+        "configs/entities",
+        "configs/providers",
+        "configs/composites",
+        "configs/workflows",
+        "configs/contracts",
+        "src/bioetl/composition/factories/pipeline",
+        "src/bioetl/application/composite",
+        "src/bioetl/application/services/workflow",
+        "src/bioetl/application/services/control_plane/workflow",
+        "src/bioetl/application/workflow/transforms",
+        "src/bioetl/infrastructure/config",
+        "src/bioetl/domain/contracts",
+        "src/bioetl/domain/workflow",
+    ]
+    dirty = subprocess.run(
+        [
+            "git",
+            "status",
+            "--porcelain",
+            "--untracked-files=all",
+            "--",
+            *canonical_paths,
+        ],
+        cwd=PROJECT_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    if dirty.stdout:
+        raise ValueError(
+            "Cannot generate passports with uncommitted canonical source changes"
+        )
     override = os.environ.get("BIOETL_PASSPORT_SOURCE_REVISION")
     if override:
         return override
     result = subprocess.run(
-        [
-            "git",
-            "ls-tree",
-            "-r",
-            "--full-tree",
-            "HEAD",
-            "--",
-            "configs/entities",
-            "configs/providers",
-            "configs/composites",
-            "configs/workflows",
-            "configs/contracts",
-            "src/bioetl/composition/factories/pipeline",
-            "src/bioetl/application/composite",
-            "src/bioetl/application/services/workflow",
-            "src/bioetl/application/services/control_plane/workflow",
-            "src/bioetl/application/workflow/transforms",
-            "src/bioetl/infrastructure/config",
-            "src/bioetl/domain/contracts",
-            "src/bioetl/domain/workflow",
-        ],
+        ["git", "ls-tree", "-r", "--full-tree", "HEAD", "--", *canonical_paths],
         cwd=PROJECT_ROOT,
         check=True,
         capture_output=True,

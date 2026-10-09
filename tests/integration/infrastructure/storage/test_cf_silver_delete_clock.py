@@ -170,6 +170,11 @@ async def test_real_delta_metadata_records_injected_clock_provenance(
     )
     assert metadata.delta.operation == "append"
     assert 0 <= metadata.runtime.duration_seconds < 60
+    assert metadata.output.write_duration_ms == int(
+        metadata.runtime.duration_seconds * 1000
+    )
+    assert metadata.output.write_started_at == metadata.runtime.started_at_utc
+    assert metadata.output.write_completed_at == metadata.runtime.completed_at_utc
     assert (
         metadata.output_ext.delta_version_after
         == DeltaTable(str(tmp_path / "test_activity")).version()

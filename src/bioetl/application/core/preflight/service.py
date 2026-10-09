@@ -189,11 +189,6 @@ class PreflightService:
             PreflightReport aggregating infrastructure health and config validation results.
         """
         self.validate_runtime_configuration(runtime)
-        health_report = await self.validate_infrastructure(
-            services,
-            raise_on_unhealthy=False,
-        )
-        self.assert_infrastructure_healthy(health_report)
         config_errors = self.validate_medallion_config(
             runtime=runtime,
             bronze_path=bronze_path,
@@ -205,6 +200,20 @@ class PreflightService:
         write_mode_errors = self.validate_write_modes()
         config_errors.extend(write_mode_errors)
         medallion_policy_valid = len(config_errors) == 0
+        if config_errors:
+            report = PreflightReport(
+                health_report=HealthReport(results=[]),
+                medallion_policy_valid=False,
+                config_errors=config_errors,
+                checked_at=self._context.started_at,
+            )
+            self._raise_if_strict_blocking(report, runtime)
+            return report
+        health_report = await self.validate_infrastructure(
+            services,
+            raise_on_unhealthy=False,
+        )
+        self.assert_infrastructure_healthy(health_report)
         report = PreflightReport(
             health_report=health_report,
             medallion_policy_valid=medallion_policy_valid,

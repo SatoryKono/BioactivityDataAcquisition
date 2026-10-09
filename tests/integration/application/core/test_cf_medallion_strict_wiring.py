@@ -199,8 +199,8 @@ def test_all_shipped_pipeline_configs_preserve_partitions_and_pass_preflight():
     )
     from bioetl.domain.config import RuntimeConfig
 
-    root = Path("configs").resolve()
-    pipelines = sorted((root / "entities").rglob("*.yaml"))
+    root = Path(__file__).resolve().parents[4] / "configs"
+    pipelines = sorted((root / "entities").glob("*/*.yaml"))
     assert pipelines
     for path in pipelines:
         name = f"{path.parent.name}_{path.stem}"

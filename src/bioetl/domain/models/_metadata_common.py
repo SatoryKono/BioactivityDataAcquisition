@@ -258,6 +258,11 @@ class BaseOutputMetadata(BaseModel):
         default=None,
         description="UTC timestamp when write operation completed",
     )
+    write_duration_seconds: float | None = Field(
+        default=None,
+        ge=0,
+        description="Measured elapsed write duration, independent of wall-clock timestamps",
+    )
     composite_run_id: str | None = Field(
         default=None,
         description="Composite run identifier mapped from _composite_run_id",
@@ -272,6 +277,8 @@ class BaseOutputMetadata(BaseModel):
     @property
     def write_duration_ms(self) -> int | None:
         """Calculate write duration in milliseconds when timestamps are present."""
+        if self.write_duration_seconds is not None:
+            return int(self.write_duration_seconds * 1000)
         if self.write_started_at and self.write_completed_at:
             delta = self.write_completed_at - self.write_started_at
             return int(delta.total_seconds() * 1000)

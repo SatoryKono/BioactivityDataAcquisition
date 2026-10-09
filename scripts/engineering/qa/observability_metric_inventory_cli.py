@@ -376,6 +376,12 @@ def _write_runtime_cardinality_review_summary(
     from scripts.engineering.common.repo_paths import resolve_output_path
 
     resolved_path = resolve_output_path(output_path, root=repo_root)
+    if (
+        resolved_path.name == "runtime_cardinality_review.json"
+        and summary["mode"] != "live_review"
+    ):
+        resolved_path.unlink(missing_ok=True)
+        resolved_path = resolved_path.with_name("runtime_cardinality_review_pr.json")
     resolved_path.parent.mkdir(parents=True, exist_ok=True)
     resolved_path.write_text(  # NOSONAR - path confined by resolve_output_path
         json.dumps(summary, indent=2, sort_keys=True) + "\n",

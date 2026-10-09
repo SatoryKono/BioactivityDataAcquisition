@@ -202,7 +202,8 @@ def test_build_runtime_cardinality_review_summary_uses_local_fallback_for_pr_gat
         allow_local_cardinality_fallback=True,
     )
 
-    assert summary["status"] == "passed"
+    assert summary["status"] == "degraded"
+    assert summary["degraded_reasons"]
     assert summary["mode"] == "local_cardinality_fallback"
     assert summary["local_observed_series"] == {"bioetl_hotspot_total": 12}
     assert summary["local_threshold_violations"] == []
@@ -688,3 +689,29 @@ def test_direct_module_entrypoint_json_bootstraps_without_circular_import() -> N
     assert completed.returncode == 0, completed.stderr[-2000:]
     payload = json.loads(completed.stdout)
     assert isinstance(payload, dict)
+
+
+@pytest.mark.parametrize(
+    "mode", ["local_cardinality_fallback", "live_review_unavailable", "live_review"]
+)
+def test_release_artifact_is_written_only_for_live_review(tmp_path, mode):
+    from scripts.engineering.qa import observability_metric_inventory_cli as cli
+
+    release = tmp_path / "runtime_cardinality_review.json"
+    release.write_text('{"status": "passed"}', encoding="utf-8")
+    summary = {
+        "mode": mode,
+        "status": "passed" if mode == "live_review" else "degraded",
+    }
+    cli._write_runtime_cardinality_review_summary(
+        summary,
+        repo_root=tmp_path,
+        output_path=release,
+    )
+    target = (
+        release
+        if mode == "live_review"
+        else release.with_name("runtime_cardinality_review_pr.json")
+    )
+    assert json.loads(target.read_text(encoding="utf-8")) == summary
+    assert release.exists() == (mode == "live_review")
