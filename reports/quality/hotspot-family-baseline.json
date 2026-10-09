@@ -18,7 +18,7 @@
       ],
       "duplication_clusters": 0,
       "files": 203,
-      "total_loc": 25107,
+      "total_loc": 25115,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.38,
       "max_internal_fan_in": 5,
@@ -32,8 +32,8 @@
           "0": 19,
           "1": 106,
           "2": 41,
-          "3": 15,
-          "4": 13,
+          "3": 16,
+          "4": 12,
           "5": 9
         },
         "modules": [
@@ -630,10 +630,9 @@
           },
           {
             "module": "bioetl.application.core.batch_processing_contracts",
-            "fan_in": 4,
+            "fan_in": 3,
             "runtime_importers": [
               "bioetl.application.core._batch_processing_layer_write_support",
-              "bioetl.application.core.batch_executor_protocols",
               "bioetl.application.core.batch_processing_service",
               "bioetl.application.core.batch_processing_support"
             ]
