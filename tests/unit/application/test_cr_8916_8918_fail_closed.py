@@ -57,6 +57,23 @@ def test_join_key_strips_literal_dot_zero_after_string_cast() -> None:
     assert result["extra"][0] == "right"
 
 
+def test_join_key_preserves_literal_dot_zero_for_string_keys() -> None:
+    host = JoinExecutorService(logger=MagicMock(), join_type_resolver=lambda: "inner")
+    left_df = pl.DataFrame({"id": ["1.0"], "payload": ["left"]})
+    right_df = pl.DataFrame({"id": [1], "extra": ["right"]})
+
+    result = host.execute_polars_join(
+        left_df=left_df,
+        right_df=right_df,
+        left_key="id",
+        right_key="id",
+        pipeline_name="assay",
+    )
+
+    # Should not join because "1.0" as string is not equal to "1"
+    assert result.height == 0
+
+
 def test_empty_composite_fk_keys_fail_closed() -> None:
     from bioetl.infrastructure.schemas.workflow_config_fk import (
         _normalize_fk_required_names,

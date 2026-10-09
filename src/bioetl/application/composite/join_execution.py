@@ -85,14 +85,16 @@ class JoinExecutorService:
                 right_key=right_key,
                 right_type=str(right_df[right_key].dtype),
             )
-            left_df = left_df.with_columns(
-                pl.col(left_key).cast(pl.String).str.replace(r"\.0$", "", literal=False)
-            )
-            right_df = right_df.with_columns(
-                pl.col(right_key)
-                .cast(pl.String)
-                .str.replace(r"\.0$", "", literal=False)
-            )
+
+            left_cast = pl.col(left_key).cast(pl.String)
+            if left_df[left_key].dtype in (pl.Float32, pl.Float64):
+                left_cast = left_cast.str.replace(r"\.0$", "", literal=False)
+            left_df = left_df.with_columns(left_cast)
+
+            right_cast = pl.col(right_key).cast(pl.String)
+            if right_df[right_key].dtype in (pl.Float32, pl.Float64):
+                right_cast = right_cast.str.replace(r"\.0$", "", literal=False)
+            right_df = right_df.with_columns(right_cast)
 
         if left_key != right_key:
             temp_join_col = f"__temp_join_{pipeline_name}"
