@@ -11,8 +11,14 @@ from bioetl.domain.control_plane import (
     RunManifest,
     RunSourceRef,
 )
+from bioetl.domain.control_plane.composite_replay_evidence import (
+    attach_rich_composite_replay_support as _attach_rich_composite_replay_support,
+)
 
-__all__ = ["_build_effective_source_refs"]
+__all__ = [
+    "_attach_rich_composite_replay_support",
+    "_build_effective_source_refs",
+]
 
 
 def _build_effective_source_refs(

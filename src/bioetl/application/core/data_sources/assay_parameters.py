@@ -13,13 +13,7 @@ from bioetl.domain.types import JsonDict
 
 
 class AssayParametersDataSource(_DerivedAssayDataSourceBase):
-    """Expose the API's nested parameters, never entire assays as parameters.
-
-    The public API has no parameter surrogate key. Its v1 local identity is a
-    positive signed-64-bit UUID-derived content key over assay ID and parameter
-    payload. An identical repeated observation is the same record; changing a
-    parameter value creates a new observation. It is not a ChEMBL database PK.
-    """
+    """Expand nested assay parameters into UUID-keyed content observations."""
 
     TARGET_ENTITY_TYPE = "assay_parameters"
     # Nested parameters are sparse; scale upstream assays for limited runs.
