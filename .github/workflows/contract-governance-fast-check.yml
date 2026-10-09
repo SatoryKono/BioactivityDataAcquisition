@@ -43,6 +43,7 @@ on:
 
 env:
   PYTHON_VERSION: "3.13"
+  PYTHONPATH: "."
 
 jobs:
   fast-check:
