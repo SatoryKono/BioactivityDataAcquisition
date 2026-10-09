@@ -4,8 +4,16 @@ from __future__ import annotations
 
 import ast
 from ast import AsyncFunctionDef, ClassDef, FunctionDef
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
+from importlib import import_module
 from pathlib import Path
+from typing import Protocol, cast
+
+
+class _RadonComplexityResult(Protocol):
+    name: str
+    complexity: int
 
 
 @dataclass(frozen=True)
@@ -87,7 +95,10 @@ def fallback_complexity(function_node: FunctionDef | AsyncFunctionDef) -> int:
 def function_complexities(source: str) -> dict[str, int]:
     """Build a function-name to complexity map for one source module."""
     try:
-        from radon.complexity import cc_visit  # type: ignore[import-untyped]
+        radon_complexity = import_module("radon.complexity")
+        cc_visit = cast(
+            Callable[[str], Iterable[_RadonComplexityResult]], radon_complexity.cc_visit
+        )
     except ImportError:
         tree = ast.parse(source)
         return {

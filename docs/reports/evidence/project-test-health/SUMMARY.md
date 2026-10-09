@@ -1,6 +1,6 @@
 ---
 status: active-non-canonical
-last_verified: "2026-09-30"
+last_verified: "2026-10-08"
 freshness_window_days: 7
 owner: quality
 canonical_sources:
@@ -15,38 +15,47 @@ verification_scope: tracked_test_module_inventory
 
 ## Current status
 
-The tracked inventory contains 2955 test modules, counted from tracked
-`tests/**/test_*.py` files on 2026-09-30. The GR-DB-CORR broad attempt executed
-29,758 tests with 10 failures and 91 skips; it was not a PASS. A subsequent
-integration and affected-runner attempt executed 2885 tests with three failures
-and 12 skips. After fixes, the 108-test recheck of the affected integration
-files passed. The architectural campaign encountered additional drift and a
-timeout and remains incomplete. These local results do not establish CI,
-release acceptance, or the health of the complete repository suite.
+On 2026-10-08, CircleCI run [17286](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/17286)
+completed the canonical 17-shard coverage plan for source commit
+`ceedc671b613ec3c2b25bbbae86b8b950719ddb6` on
+`fix/cf-wave1-pagination-vcr-security`. Its complete manifest binds source
+tree `3cabab41baf177eb6f34163e59cbdb352e4cbbb8d570d3af7551bf66790c7714` and
+test tree `ad43e49af046f215efd16b0b4d629bc452fa1729da73c47e6ec00e48cee800b4`.
+All 17 JUnit inputs report 33,424 passed, 175 skipped, and 0 failed; combined
+coverage is 99.68% line and 94.29% branch. The committed telemetry baseline
+records the associated GitHub PR workflow [37743490942](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37743490942)
+and the exact source commit; its coverage and JUnit inputs come from CircleCI
+run 17286 above.
 
-## Required evidence refresh
+This evidence covers the canonical 17-shard plan, not every repository test
+surface. The manifest excludes architecture, performance, manual E2E,
+live-provider contracts, and memory selectors; those gates have separate
+workflows. The tracked test-module inventory contains 3,033 `test_*.py` files
+as of 2026-10-08. This summary remains a non-canonical backlog signal and does
+not claim lifecycle or release admission.
 
-- Run the targeted unit suites for changed domain and application modules.
-- Run `tests/architecture/` and record failures without weakening guards.
-- Refresh module coverage inventory after source changes.
-- Record skip/xfail counts and VCR freshness results.
+## Historical backlog signals
 
-## Open action items
+The earlier GR-DB-CORR broad attempt executed 29,758 tests with 10 failures
+and 91 skips; a subsequent integration and affected-runner attempt executed
+2,885 tests with three failures and 12 skips. The 108-test recheck of the
+affected integration files passed. The architectural campaign then encountered
+drift and a timeout. These historical attempts were not PASS results.
+
+Older action items remain backlog signals and have not been re-audited by this
+coverage refresh:
 
 1. Complete remaining lifecycle, contract, and UTC metadata tests.
 2. Add security regression coverage for HTML output and recursive redaction.
-3. Refresh this summary from the next full pytest telemetry artifact.
 
 ## Freshness note
 
-Re-verified on 2026-09-30 against source HEAD
-`60779c32172feec3fbfe232c63003329371df40b`:
-all three canonical source paths exist, and `git ls-files tests` contains 2955
-Python modules named `test_*.py`. The scoped campaign selected tracked test
-paths containing `dashboard` or `grafana`; its local JUnit receipt is
-`reports/local/nav-tests-20260914/final-tests.xml` (1199 passed, 11 skipped).
-Interpretation remains backlog signal only. No full-suite or new coverage
-measurement is claimed. Recurrence of #7419.
+Re-verified on 2026-10-08 against source HEAD
+`ceedc671b613ec3c2b25bbbae86b8b950719ddb6`. The manifest is complete, all 17
+required shard selections are present, and its test-tree hash matches the
+working tree. Local evidence at
+`reports/local/nav-tests-20260914/final-tests.xml` (1,199 passed, 11 skipped)
+remains historical. Recurrence of #7419 remains a backlog signal.
 
 This is a non-canonical repo-only evidence layer. The canonical sources of truth are:
 - `configs/quality/test_matrix.yaml`

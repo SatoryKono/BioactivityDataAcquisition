@@ -40,6 +40,7 @@ from scripts.engineering.qa.import_graph_inventory import (
     TIMING_DEFERRED,
     TIMING_MODULE_IMPORT_TIME,
     TIMING_TYPE_CHECKING,
+    ImportEdge,
     _MAX_SOURCE_BYTES,
     _PARSED_CACHE_VERSION,
     _read_module_source,
@@ -47,6 +48,7 @@ from scripts.engineering.qa.import_graph_inventory import (
     collect_import_graph,
     default_scan_roots,
     find_import_cycles,
+    find_import_sccs,
     scan_roots,
 )
 from scripts.engineering.qa.import_graph_inventory import ImportGraphReport
@@ -63,6 +65,43 @@ def _resolved(report: ImportGraphReport, source: str) -> set[str]:
         for edge in report.edges
         if edge.source == source and edge.resolution == RESOLUTION_RESOLVED
     }
+
+
+def test_deep_cycle_detection_uses_explicit_stacks() -> None:
+    """Valid graphs deeper than Python's recursion limit remain analyzable."""
+    node_count = 1_500
+    chain_edges = tuple(
+        ImportEdge(
+            source=f"bioetl.deep.n{index}",
+            target=f"bioetl.deep.n{index + 1}",
+            file=f"src/bioetl/deep/n{index}.py",
+            line=1,
+            syntax=SYNTAX_IMPORT,
+            resolution=RESOLUTION_RESOLVED,
+            timing=TIMING_MODULE_IMPORT_TIME,
+        )
+        for index in range(node_count - 1)
+    )
+    edges = (
+        *chain_edges,
+        ImportEdge(
+            source=f"bioetl.deep.n{node_count - 1}",
+            target="bioetl.deep.n0",
+            file=f"src/bioetl/deep/n{node_count - 1}.py",
+            line=1,
+            syntax=SYNTAX_IMPORT,
+            resolution=RESOLUTION_RESOLVED,
+            timing=TIMING_MODULE_IMPORT_TIME,
+        ),
+    )
+
+    components = find_import_sccs(edges)
+    cycles = find_import_cycles(edges, projection=PROJECTION_OWNERSHIP)
+
+    assert len(components) == 1
+    assert len(components[0]) == node_count
+    assert len(cycles) == 1
+    assert len(cycles[0].path) == node_count
 
 
 def test_projection_names_and_cache_version() -> None:
