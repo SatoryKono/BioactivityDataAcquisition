@@ -13,10 +13,10 @@ ______________________________________________________________________
 The active PR/default-main provider is CircleCI `.circleci/config.yml`, workflow
 `pr-gate`, with GitHub required context `ci/circleci: pr-gate-complete`.
 The canonical applicability catalog is `configs/quality/github_required_checks.yaml`.
-Its `deployment` block identifies CircleCI; retained `coordinator_workflow` and
-`owner_workflow` fields describe the retained legacy Actions definitions.
+Its `deployment` block identifies GitHub Actions; retained `coordinator_workflow` and
+`owner_workflow` fields describe the legacy definitions kept after #11930.
 The owner cancelled deletion in #11930; its status is not_planned.
-GitHub Actions are disabled; billing restoration is out of scope.
+GitHub Actions run the pull-request coordinator. Ruleset enforcement stays disabled.
 
 The legacy inventory below contains 54 tracked workflow files, including 13
 scheduled and 34 manual surfaces. These categories overlap. Retained YAML defines
@@ -57,8 +57,8 @@ This explicit lane runs the canonical 17-shard producer and Proof-or-Stop checks
 it is not part of a normal PR/default-main run. Do not rewrite source identity
 to a squash SHA or weaken the ancestor guard to avoid this measurement.
 
-The map above records the legacy Actions inventory; it is not evidence that
-Actions are running. Actions are disabled and billing restoration is out of scope.
+The map above records the legacy Actions inventory. The pull-request coordinator
+runs in GitHub Actions. Ruleset enforcement stays disabled.
 CodeQL is excluded from required checks; optional analysis and workflow retirement
 remain separate decisions. The CircleCI default-branch matrix reads the canonical
 required-check catalog instead of maintaining a second gate list.
@@ -227,7 +227,7 @@ Manual successes do not establish scheduler, notification or release acceptance.
 
 On 2026-10-06 the owner cancelled GitHub Actions deletion. Issue #11930 is
 closed as `not planned`; all 54 workflow definitions and composite actions are
-retained. Actions remain disabled. CircleCI implementation and acceptance under
+retained. Actions run the pull-request coordinator. CircleCI implementation and acceptance under
 #11931 continue independently. Retention does not establish functional parity,
 authorize public OpenSSF channel retirement, or enable legacy workflows.
 
