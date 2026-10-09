@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 
 from bioetl.application.services.control_plane.ledger.input_snapshot_recording import (
     record_input_snapshots_from_artifact,
@@ -18,6 +18,15 @@ __all__ = [
     "record_input_snapshots_from_artifact",
     "record_published_artifact",
 ]
+
+
+class _ArtifactPublishedArguments(TypedDict):
+    layer: str
+    artifact_path: str
+    artifact_content_hash: str
+    dataset_ref: str | None
+    lineage_fragment_id: str | None
+    details: dict[str, object] | None
 
 
 def canonical_lineage_fragment_id(raw: object) -> str | None:
@@ -50,14 +59,15 @@ def record_published_artifact(
         )
     else:
         artifact_content_hash = ""
-    entry = service.record_artifact_published(
-        layer=layer,
-        artifact_path=artifact_path,
-        artifact_content_hash=artifact_content_hash,
-        dataset_ref=dataset_ref,
-        lineage_fragment_id=lineage_fragment_id,
-        details=details,
-    )
+    recording_arguments: _ArtifactPublishedArguments = {
+        "layer": layer,
+        "artifact_path": artifact_path,
+        "artifact_content_hash": artifact_content_hash,
+        "dataset_ref": dataset_ref,
+        "lineage_fragment_id": lineage_fragment_id,
+        "details": details,
+    }
+    entry = service.record_artifact_published(**recording_arguments)
     record_input_snapshots_from_artifact(
         service,
         layer=layer,

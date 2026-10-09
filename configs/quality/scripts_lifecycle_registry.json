@@ -1069,12 +1069,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
     },
-    "scripts/engineering/qa/private_import_exception_metadata.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the metadata checker behind the private-import architecture ratchet; keep the architecture test as the entrypoint and do not promote this module to a standalone command.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2026-11-17"
-    },
     "scripts/engineering/qa/observability_closure_campaign_cli.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the CLI orchestration implementation imported by run_observability_closure_campaign.py; keep the routed campaign command as the active surface.",
@@ -1116,6 +1110,12 @@
       "next_step": "Retain as the shared typed report/allowlist helpers behind report_observability_metric_inventory.py; keep it supporting and do not expose it as a standalone command.",
       "owner": "@bioetl-observability",
       "review_by": "2026-10-31"
+    },
+    "scripts/engineering/qa/private_import_exception_metadata.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the metadata checker behind the private-import architecture ratchet; keep the architecture test as the entrypoint and do not promote this module to a standalone command.",
+      "owner": "@bioetl-architecture",
+      "review_by": "2026-11-17"
     },
     "scripts/engineering/qa/refresh_test_governance_baseline.py": {
       "decision": "legacy_manual_utility",
@@ -1230,6 +1230,12 @@
       "next_step": "Retain as the deterministic reporting helper for non-ChEMBL observed-value inventory generation while docs-generated inventory artifacts and normalization parity checks still consume this surface; fold it into broader QA/docs generation only if that reporting pipeline is consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
+    },
+    "scripts/engineering/qa/report_pipeline_config_contract_ownership.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Keep the implementation as an internal backend for the canonical scripts.engineering.qa report-pipeline-config-contract-ownership-map command; route standalone use through the unified QA entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-10-31"
     },
     "scripts/engineering/qa/report_port_adapter_factory_coverage.py": {
       "decision": "shared_helper_module",

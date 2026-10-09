@@ -39,6 +39,9 @@ from tests.async_utils import collect_async_iterator
 from bioetl.infrastructure.adapters.semanticscholar.fetch_adapter_mixin import (
     SemanticScholarFetchAdapterMixin,
 )
+from bioetl.infrastructure.adapters.semanticscholar._search_fetch_flow import (
+    _SemanticScholarSearchFetchMixin,
+)
 
 
 pytestmark = pytest.mark.unit
@@ -242,3 +245,111 @@ async def test_search_http_failure_is_normalized_at_adapter_boundary():
         await adapter._fetch_search_page(query="*", page_size=100, current_offset=0)
     assert caught.value.status_code == 429
     assert caught.value.__cause__ is error
+
+
+# =============================================================================
+# CF-034: _paginate_search truncation-signal tests
+# =============================================================================
+
+
+class _SearchPaginateAdapter(_SemanticScholarSearchFetchMixin):
+    """Minimal host exercising the real _paginate_search loop."""
+
+    def __init__(self, pages: list[tuple[list[dict[str, object]], int | None]]) -> None:
+        """Initialize prepared search pages, request count, and a mock logger."""
+        self._logger = MagicMock()
+        self._pages = pages
+        self.calls = 0
+
+    async def _fetch_search_page(
+        self, *, query, page_size, current_offset
+    ) -> tuple[list[dict[str, object]], int | None]:
+        """Count the request and return the next prepared Semantic Scholar page."""
+        self.calls += 1
+        return self._pages[self.calls - 1]
+
+
+@pytest.mark.asyncio
+async def test_paginate_search_warns_and_stops_on_repeated_offset() -> None:
+    """A provider repeating an offset fails the scan after a warning."""
+    from bioetl.infrastructure.adapters.http.pagination import (
+        PaginationTruncatedError,
+    )
+
+    adapter = _SearchPaginateAdapter(
+        [
+            ([{"id": "p1"}], 5),
+            ([{"id": "p2"}], 5),
+            ([{"id": "p3"}], 5),
+        ]
+    )
+
+    rows = []
+    with pytest.raises(PaginationTruncatedError) as caught:
+        async for row in adapter._paginate_search(query="protein", limit=None):
+            rows.append(row)
+
+    assert rows == [{"id": "p1"}, {"id": "p2"}]
+    assert caught.value.reason == "repeated_offset"
+    assert adapter.calls == 2
+    adapter._logger.warning.assert_called_once()
+    assert adapter._logger.warning.call_args[0][0] == "semanticscholar_search_truncated"
+    assert adapter._logger.warning.call_args[1]["reason"] == "repeated_offset"
+
+
+@pytest.mark.asyncio
+async def test_paginate_search_warns_on_page_ceiling(monkeypatch) -> None:
+    """The page ceiling fails the scan after a structured warning."""
+    from bioetl.infrastructure.adapters.http.pagination import (
+        PaginationTruncatedError,
+    )
+
+    from bioetl.infrastructure.adapters.semanticscholar import (
+        _search_fetch_flow as search_fetch_flow_module,
+    )
+
+    monkeypatch.setattr(search_fetch_flow_module, "_DEFAULT_MAX_PAGES", 2)
+    adapter = _SearchPaginateAdapter(
+        [
+            ([{"id": "p1"}], 1),
+            ([{"id": "p2"}], 2),
+            ([{"id": "p3"}], 3),
+        ]
+    )
+
+    rows = []
+    with pytest.raises(PaginationTruncatedError) as caught:
+        async for row in adapter._paginate_search(query="protein", limit=None):
+            rows.append(row)
+
+    assert rows == [{"id": "p1"}, {"id": "p2"}]
+    assert caught.value.reason == "max_pages"
+    assert adapter.calls == 2
+    adapter._logger.warning.assert_called_once()
+    assert adapter._logger.warning.call_args[0][0] == "semanticscholar_search_truncated"
+    assert adapter._logger.warning.call_args[1]["reason"] == "max_pages"
+
+
+@pytest.mark.asyncio
+async def test_paginate_search_no_truncation_warning_on_clean_end() -> None:
+    """Clean end-of-data (next offset is None) emits no truncation warning."""
+    adapter = _SearchPaginateAdapter([([{"id": "p1"}], None)])
+
+    rows = await collect_async_iterator(
+        adapter._paginate_search(query="protein", limit=None)
+    )
+
+    assert rows == [{"id": "p1"}]
+    adapter._logger.warning.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_paginate_search_limit_wins_over_repeated_offset() -> None:
+    adapter = _SearchPaginateAdapter([([{"id": "p1"}, {"id": "p2"}], 0)])
+
+    rows = await collect_async_iterator(
+        adapter._paginate_search(query="protein", limit=2)
+    )
+
+    assert rows == [{"id": "p1"}, {"id": "p2"}]
+    adapter._logger.warning.assert_not_called()
