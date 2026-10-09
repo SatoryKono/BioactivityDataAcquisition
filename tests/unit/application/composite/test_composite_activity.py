@@ -45,6 +45,7 @@ import pyarrow as pa
 import pytest
 
 from bioetl.application.composite.dependency_coordinator import (
+    DependencyCoordinatorCollaborators,
     DependencyCoordinatorService,
 )
 from bioetl.application.composite.dependency_key_resolvers import (
@@ -274,10 +275,12 @@ class TestDependencyWithMoleculeFilter:
         """Dependency should receive unique molecule IDs as filter."""
         coordinator = DependencyCoordinatorService(
             logger=mock_logger,
-            seed_key_resolver=create_seed_key_resolver(mock_logger),
-            chained_key_resolver=create_chained_key_resolver(mock_logger),
-            progress_service=DependencyProgressService(mock_logger),
-            result_service=DependencyResultService(mock_logger),
+            collaborators=DependencyCoordinatorCollaborators(
+                seed_key_resolver=create_seed_key_resolver(mock_logger),
+                chained_key_resolver=create_chained_key_resolver(mock_logger),
+                progress_service=DependencyProgressService(mock_logger),
+                result_service=DependencyResultService(mock_logger),
+            ),
             delta_reader=mock_delta_reader,
             clock=FixedClock(datetime(2026, 4, 28, 12, 0, tzinfo=UTC)),
         )

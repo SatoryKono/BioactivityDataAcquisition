@@ -1,22 +1,14 @@
 """Preflight validation subpackage."""
 
 from __future__ import annotations
-# ruff: noqa: I001
 
-from bioetl.application.core.preflight.service import (
-    HealthAggregator as HealthAggregator,
-    MedallionConfigValidator as MedallionConfigValidator,
-    PreflightService as PreflightService,
-    _HealthAggregator as _HealthAggregator,
-    _MedallionConfigValidator as _MedallionConfigValidator,
-    validate_infrastructure as validate_infrastructure,
-)
+from bioetl.application.core.preflight import service as _service
 
-__all__ = [
-    "HealthAggregator",
-    "MedallionConfigValidator",
-    "PreflightService",
-    "_HealthAggregator",
-    "_MedallionConfigValidator",
-    "validate_infrastructure",
-]
+HealthAggregator = _service.HealthAggregator
+MedallionConfigValidator = _service.MedallionConfigValidator
+PreflightService = _service.PreflightService
+_HealthAggregator = _service._HealthAggregator
+_MedallionConfigValidator = _service._MedallionConfigValidator
+validate_infrastructure = _service.validate_infrastructure
+
+__all__ = [*_service.__all__]

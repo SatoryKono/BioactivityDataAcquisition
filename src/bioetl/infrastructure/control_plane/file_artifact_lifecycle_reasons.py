@@ -28,10 +28,10 @@ def _protected_by(
     payload: dict[str, object],
     protected_refs: _ProtectedRefs,
 ) -> tuple[str, ...]:
-    if surface in {
-        ControlPlaneArtifactSurface.RUN_MANIFEST,
-        ControlPlaneArtifactSurface.RUN_LEDGER,
-    }:
+    if (
+        surface is ControlPlaneArtifactSurface.RUN_MANIFEST
+        or surface is ControlPlaneArtifactSurface.RUN_LEDGER
+    ):
         reasons = _manifest_or_ledger_protected_reasons(
             path=path,
             payload=payload,

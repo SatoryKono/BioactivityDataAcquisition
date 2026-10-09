@@ -20,14 +20,16 @@ from pathlib import Path
 pytestmark = pytest.mark.architecture
 
 
-def test_docs_kpi_workflow_exists_and_is_scheduled() -> None:
+def test_docs_kpi_workflow_stays_manual_and_off_nightly() -> None:
     workflow_path = Path(".github/workflows/docs-kpi-weekly.yml")
     assert workflow_path.exists(), "docs-kpi-weekly workflow file must exist"
 
     workflow = workflow_path.read_text(encoding="utf-8")
-    assert "schedule:" in workflow
-    assert 'cron: "30 4 * * 1"' in workflow
+    nightly = Path(".github/workflows/nightly.yml").read_text(encoding="utf-8")
+    assert "schedule:" not in workflow
+    assert "cron:" not in workflow
     assert "workflow_dispatch:" in workflow
+    assert "docs-kpi-weekly.yml" not in nightly
 
 
 def test_docs_kpi_workflow_runs_kpi_report_script() -> None:
