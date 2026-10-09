@@ -1,10 +1,10 @@
 {
-  "source_branch": "main",
+  "source_branch": "refactor/architecture-debt-task-support-complexity-10443624345865139538",
   "source_commit": "0e36f3a60bbeeae1aed7376e67146eb940b7e9fa",
   "source_run_id": "local-local-verify-pr12153-20261009-final17",
   "source_event": "local_coverage_verify",
   "source_run_url": null,
-  "source_tree_sha256": "8394bac5e4b7d4a52939796921770912f507c705e42288d5f51812ddcc82b42e",
+  "source_tree_sha256": "c35c60f5686ac75bcc49a6b4a3dfafdbe8122ce85cdcbbc90876a57c5808e48a",
   "refreshed_at_utc": "2026-10-09T15:50:44.437361+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.67,
@@ -21,7 +21,7 @@
     "manifest_sha256": "3006efbd354daf361dad4566bc16bc67918abb15dd9d359e29698d9351f5c1bc",
     "coverage_xml_sha256": "cc02c7a69ed90a2e73d45f032919c32671edbac5afab9c97771710f72b28b94c",
     "source_tree_sha256": "605cd7a41e1111420ab749640eb09a8dff101365b4e8df8f6e1df497946bae6a",
-    "test_tree_sha256": "8394bac5e4b7d4a52939796921770912f507c705e42288d5f51812ddcc82b42e",
+    "test_tree_sha256": "c35c60f5686ac75bcc49a6b4a3dfafdbe8122ce85cdcbbc90876a57c5808e48a",
     "head": "0e36f3a60bbeeae1aed7376e67146eb940b7e9fa",
     "required_shards": [
       "smoke",

@@ -587,7 +587,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "146",
+      "line": "145",
       "path": "tests/unit/interfaces/test_issue_10520_interfaces_cli.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_formatters_optional_export_and_quarantine"
@@ -1777,7 +1777,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "146",
+        "line": "145",
         "path": "tests/unit/interfaces/test_issue_10520_interfaces_cli.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_formatters_optional_export_and_quarantine"
@@ -2092,7 +2092,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "1673c9c349b451aa861eec9298f597d3ac197980be3ea894257205132e9e3045",
+  "source_tree_sha256": "8a3f94f076784f53acb0b015fa3ea4cad7a184d346cea8c4afc68d8ca0ef1a46",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,

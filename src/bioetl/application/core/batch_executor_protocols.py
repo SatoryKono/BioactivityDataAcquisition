@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from bioetl.application.core.batch_execution.contracts import BatchResultBuilderProtocol
-from bioetl.application.core.batch_processing_contracts import BatchProcessingOutcome
 from bioetl.domain.types import BronzeRecord
+
+if TYPE_CHECKING:
+    from bioetl.application.core.batch_processing_contracts import (
+        BatchProcessingOutcome,
+    )
 
 
 @runtime_checkable
