@@ -1074,10 +1074,10 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         encoding="utf-8"
     )
     assert "uv=0.11.26-r0" in dockerfile
-    assert dockerfile.count("glibc-2.44=2.44-r6") == 2
-    assert dockerfile.count("glibc-2.44-locale-posix=2.44-r6") == 2
-    assert dockerfile.count("ld-linux-2.44=2.44-r6") == 2
-    assert dockerfile.count("libcrypt1-2.44=2.44-r6") == 2
+    assert dockerfile.count("glibc-2.44=2.44-r8") == 2
+    assert dockerfile.count("glibc-2.44-locale-posix=2.44-r8") == 2
+    assert dockerfile.count("ld-linux-2.44=2.44-r8") == 2
+    assert dockerfile.count("libcrypt1-2.44=2.44-r8") == 2
     assert (
         dockerfile.count(
             "chainguard/wolfi-base@sha256:"
@@ -1515,7 +1515,7 @@ def test_docker_workflow_probes_shellless_runtime_and_default_health() -> None:
     )
     probe = str(provenance["run"])
     for required in (
-        "sys.version_info[:3] == (3, 13, 15)",
+        "sys.version_info[:3] == (3, 13, 16)",
         "(os.getuid(), os.getgid()) == (999, 999)",
         'pwd.getpwuid(999).pw_name == "bioetl"',
         'pwd.getpwuid(999).pw_shell == "/sbin/nologin"',

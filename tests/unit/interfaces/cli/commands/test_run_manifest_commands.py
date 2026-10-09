@@ -41,6 +41,8 @@ from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 import pytest
 from click.testing import CliRunner
 
+pytestmark = pytest.mark.unit
+
 from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestDiffEntry,
     RunManifestDiffResult,

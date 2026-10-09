@@ -78,21 +78,6 @@ def _blocked_step_ids(state: WorkflowExecutionState) -> frozenset[str]:
     return frozenset(blocked)
 
 
-def _cohort_producer_step_ids(config: WorkflowConfig) -> set[str]:
-    """Return step ids that produce reference cohorts for downstream steps."""
-    producers = {
-        producer.reference_cohort.step_id
-        for producer in config.pipeline_steps
-        if producer.reference_cohort is not None
-    }
-    producers.update(
-        producer.step_id
-        for producer in config.pipeline_steps
-        if producer.reference_cohort is not None
-    )
-    return producers
-
-
 def _require_workflow_result(value: object) -> WorkflowRunExecutionResult:
     """Return a concrete workflow result after validating replacement output."""
     if not isinstance(value, WorkflowRunExecutionResult):
@@ -100,6 +85,21 @@ def _require_workflow_result(value: object) -> WorkflowRunExecutionResult:
             "dataclass replacement did not preserve WorkflowRunExecutionResult"
         )
     return value
+
+
+def _cohort_producer_ids(config: WorkflowConfig) -> set[str]:
+    """Return producer and consumer IDs whose snapshots are needed for cohorts."""
+    producers = {
+        step.reference_cohort.step_id
+        for step in config.pipeline_steps
+        if step.reference_cohort is not None
+    }
+    producers.update(
+        step.step_id
+        for step in config.pipeline_steps
+        if step.reference_cohort is not None
+    )
+    return producers
 
 
 @dataclass(slots=True)
@@ -156,7 +156,7 @@ class WorkflowRunnerService:
         effective_dry_run = bool(config.defaults.dry_run)
         debug_export_enabled = bool(config.defaults.debug_export_enabled)
         debug_export_dir = config.defaults.debug_export_dir
-        cohort_producers = _cohort_producer_step_ids(config)
+        cohort_producers = _cohort_producer_ids(config)
 
         for step_id in config.topological_step_ids:
             step = config.get_step(step_id)

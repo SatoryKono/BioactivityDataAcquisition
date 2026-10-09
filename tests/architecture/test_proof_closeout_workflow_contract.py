@@ -17,9 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def test_rf023_keeps_its_own_task_identity_and_branch():
     config = yaml.safe_load((ROOT / ".circleci/config.yml").read_text(encoding="utf-8"))
     catalog = yaml.safe_load(
-        (ROOT / "configs/quality/proof_closeout_checks.yaml").read_text(
-            encoding="utf-8"
-        )
+        (ROOT / "configs/quality/proof_closeout_checks.yaml").read_text()
     )
     job = config["workflows"]["rf023-closeout"]["jobs"][0]["rf023-proof-closeout"]
     assert job["task-id"] == "rf023-11906-11907"
@@ -35,9 +33,7 @@ def test_rf023_keeps_its_own_task_identity_and_branch():
 
 def test_all_coverage_shards_have_one_owner():
     catalog = yaml.safe_load(
-        (ROOT / "configs/quality/proof_closeout_checks.yaml").read_text(
-            encoding="utf-8"
-        )
+        (ROOT / "configs/quality/proof_closeout_checks.yaml").read_text()
     )
     selected = []
     for name, spec in catalog["checks"].items():
@@ -88,9 +84,7 @@ def test_proof_waits_for_producers_in_the_same_workflow():
 def test_full_architecture_and_branch_activation_are_preserved():
     config = yaml.safe_load((ROOT / ".circleci/config.yml").read_text(encoding="utf-8"))
     catalog = yaml.safe_load(
-        (ROOT / "configs/quality/proof_closeout_checks.yaml").read_text(
-            encoding="utf-8"
-        )
+        (ROOT / "configs/quality/proof_closeout_checks.yaml").read_text()
     )
     argv = catalog["checks"]["architecture"]["argv"]
     assert "tests/architecture" in argv
@@ -166,7 +160,7 @@ def test_diagram_drift_has_a_reachable_merge_base_before_diff():
     source = (ROOT / ".circleci/config.yml").read_text(encoding="utf-8")
     start = source.index("name: Canonical diagram drift validation")
     drift = source[start : source.index("changed_diagrams=$(", start)]
-    assert "--unshallow origin" in drift
+    assert "git fetch --no-tags --unshallow origin" in drift
     assert (
         'git fetch --no-tags origin "${BASE_REF}:refs/remotes/origin/${BASE_REF}"'
         in drift

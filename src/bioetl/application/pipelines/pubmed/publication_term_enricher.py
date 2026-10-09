@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET  # nosec B405 - see suppression registry
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from contextlib import AsyncExitStack
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol, TypeVar, overload
 
 import defusedxml.ElementTree as defused_ET
 from defusedxml.common import DefusedXmlException
@@ -20,36 +19,30 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import FilterableDataSourcePort, LoggerPort
     from bioetl.domain.types import BronzeRecord
 
+_DefaultT = TypeVar("_DefaultT")
+
+
+class _XmlElement(Protocol):
+    @property
+    def text(self) -> str | None: ...
+
+    @overload
+    def get(self, key: str, default: None = None) -> str | None: ...
+
+    @overload
+    def get(self, key: str, default: _DefaultT) -> str | _DefaultT: ...
+
+    def find(self, path: str) -> _XmlElement | None: ...
+
+    def findall(self, path: str) -> Iterable[_XmlElement]: ...
+
+
 __all__ = [
-    "PubMedPublicationTermPayloadEnricherService",
+    "PubMedPublicationTermEnrichmentService",
+    "PubMedPublicationTermPayloadEnricher",
     "parse_pubmed_mesh_xml",
     "pubmed_term_payload",
 ]
-
-
-def _parse_mesh_headings(root: ET.Element) -> list[dict[str, object]]:
-    """Extract DescriptorName/QualifierName pairs from a parsed efetch root."""
-    headings: list[dict[str, object]] = []
-    for heading in root.findall(".//MeshHeading"):
-        descriptor = heading.find("DescriptorName")
-        if descriptor is None:
-            continue
-        name = (descriptor.text or "").strip()
-        if not name:
-            continue
-        qualifiers: list[dict[str, str]] = []
-        for qualifier in heading.findall("QualifierName"):
-            qualifier_name = (qualifier.text or "").strip()
-            if qualifier_name:
-                qualifiers.append({"name": qualifier_name})
-        headings.append(
-            {
-                "descriptor_name": name,
-                "descriptor_ui": descriptor.get("UI"),
-                "qualifiers": qualifiers,
-            }
-        )
-    return headings
 
 
 def parse_pubmed_mesh_xml(
@@ -64,12 +57,46 @@ def parse_pubmed_mesh_xml(
     ):
         return [], []
 
-    keywords = [
+    return _parse_mesh_headings(root), _parse_keywords(root)
+
+
+def _parse_mesh_headings(root: _XmlElement) -> list[dict[str, object]]:
+    """Extract valid MeSH descriptor headings from an efetch root element."""
+    headings: list[dict[str, object]] = []
+    for heading in root.findall(".//MeshHeading"):
+        parsed = _parse_mesh_heading(heading)
+        if parsed is not None:
+            headings.append(parsed)
+    return headings
+
+
+def _parse_mesh_heading(heading: _XmlElement) -> dict[str, object] | None:
+    """Parse one descriptor and its non-empty qualifiers."""
+    descriptor = heading.find("DescriptorName")
+    if descriptor is None:
+        return None
+    name = (descriptor.text or "").strip()
+    if not name:
+        return None
+    qualifiers = [
+        {"name": qualifier_name}
+        for qualifier in heading.findall("QualifierName")
+        if (qualifier_name := (qualifier.text or "").strip())
+    ]
+    return {
+        "descriptor_name": name,
+        "descriptor_ui": descriptor.get("UI"),
+        "qualifiers": qualifiers,
+    }
+
+
+def _parse_keywords(root: _XmlElement) -> list[str]:
+    """Extract non-empty keyword strings from an efetch root element."""
+    return [
         text
         for keyword in root.findall(".//Keyword")
         if (text := (keyword.text or "").strip())
     ]
-    return _parse_mesh_headings(root), keywords
 
 
 def pubmed_term_payload(record: BronzeRecord) -> tuple[object, object]:
@@ -136,7 +163,7 @@ def _attach_pubmed_terms(
     return enriched
 
 
-class PubMedPublicationTermPayloadEnricherService:
+class PubMedPublicationTermEnrichmentService:
     """Attach PubMed MeSH/keywords onto ChEMBL document records via ``pubmed_id``."""
 
     def __init__(
@@ -178,8 +205,15 @@ class PubMedPublicationTermPayloadEnricherService:
             self._logger.warning(
                 "publication_term_pubmed_enrichment_failed",
                 error=str(exc),
+                reason_code=(
+                    exc.get_reason_code()
+                    if isinstance(exc, BioETLError) and exc.get_reason_code()
+                    else "publication_term_enrichment_failed"
+                ),
                 pmid_count=len(pmids),
-                reason_code="publication_term_pubmed_enrichment_failed",
             )
             return list(records)
         return _attach_pubmed_terms(records, pubmed_by_pmid)
+
+
+PubMedPublicationTermPayloadEnricher = PubMedPublicationTermEnrichmentService
