@@ -5,6 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+
+pytestmark = pytest.mark.repo_backed
 from scripts.engineering.ci.pr_lane_results import (
     affected_pytest_targets,
     assert_step_outcomes,
