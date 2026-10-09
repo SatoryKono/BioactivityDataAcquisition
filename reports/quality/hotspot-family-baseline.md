@@ -8,7 +8,7 @@
 
 | Family | Files | Total LOC | Files >=250 LOC | Helper ratio | Duplication | Max fan-in | Max fan-in module | Budgets | Budget warnings | Budget review notes |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- | --- |
-| `application_core` | 202 | 25223 | 0 | 0.381 | 0 | 5 | `bioetl.application.core.target_data_source_mixins` | `files_ge_250_loc=0, max_internal_fan_in=7` | `-` | `-` |
+| `application_core` | 202 | 25221 | 0 | 0.381 | 0 | 5 | `bioetl.application.core.target_data_source_mixins` | `files_ge_250_loc=0, max_internal_fan_in=7` | `-` | `-` |
 | `composition_bootstrap_runtime` | 49 | 6440 | 0 | 0.284 | 0 | 2 | `bioetl.composition.bootstrap.runtime.tracing_bootstrap` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
 | `composition_factories_pipeline` | 32 | 3869 | 0 | 0.358 | 0 | 2 | `bioetl.composition.factories.pipeline.runner_constructor` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
 | `application_services_control_plane` | 130 | 15559 | 0 | 0.399 | 0 | 1 | `bioetl.application.services.control_plane.workflow.manifest_models` | `files_ge_250_loc=0, max_internal_fan_in=2` | `-` | `-` |
