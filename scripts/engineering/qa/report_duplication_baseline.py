@@ -30,6 +30,7 @@ _HEADER_RE = re.compile(
 )
 _MODULE_RE = re.compile(r"^==(?P<module>[^:]+):\[(?P<start>\d+):(?P<end>\d+)\]$")
 _MD_TABLE_SEPARATOR_2COL = "| --- | ---: |"
+_PACKAGE_ENTRY_MODULE_SUFFIX = ".__init__"
 
 
 @dataclass(frozen=True)
@@ -120,9 +121,13 @@ def _is_package_entry_report_noise(cluster: DuplicateCluster) -> bool:
     """
     module_names = {module.module for module in cluster.modules}
     normalized_path = cluster.path.replace("\\", "/")
-    package_entry_suffixes = ("/__init__.py", "/__init__", ".__init__")
+    package_entry_suffixes = (
+        "/__init__.py",
+        "/__init__",
+        _PACKAGE_ENTRY_MODULE_SUFFIX,
+    )
     if normalized_path.endswith(package_entry_suffixes) and not any(
-        module.endswith(".__init__") for module in module_names
+        module.endswith(_PACKAGE_ENTRY_MODULE_SUFFIX) for module in module_names
     ):
         return True
     core_fetch_shells = {
