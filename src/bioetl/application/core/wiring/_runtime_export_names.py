@@ -33,6 +33,7 @@ RUNTIME_EXPORT_NAMES: tuple[str, ...] = (
     "RecordNormalizationProcessor",
     "RecordProcessor",
     "RecordProcessorConfig",
+    "RecordProcessorWriteDependencies",
     "ShutdownSignal",
     "TransformCallback",
 )

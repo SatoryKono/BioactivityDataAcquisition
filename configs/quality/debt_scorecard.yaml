@@ -461,11 +461,11 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 202
-      total_loc: 25231
+      total_loc: 25264
       files_ge_250_loc: 0
-      helper_function_ratio: 0.381
-      max_internal_fan_in: 7
-      max_internal_fan_in_module: bioetl.application.core.batch_processing_contracts
+      helper_function_ratio: 0.383
+      max_internal_fan_in: 5
+      max_internal_fan_in_module: bioetl.application.core.target_data_source_mixins
     trend:
       status: reduced_2026-08-27_debt_cycle_fanin_ratchet
       next_action: '2026-08-27 audit-cycle-tech-debt: ratchet application_core max_internal_fan_in budget
@@ -489,7 +489,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 49
-      total_loc: 6437
+      total_loc: 6440
       files_ge_250_loc: 0
       helper_function_ratio: 0.284
       max_internal_fan_in: 2

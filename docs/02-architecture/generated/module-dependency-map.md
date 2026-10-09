@@ -6,10 +6,10 @@
 ## Summary
 
 - Scanned modules: `2555`
-- Internal import edges (raw): `8194`
+- Internal import edges (raw): `8191`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `331`
+- Cross-layer module-group edges (total): `330`
 - Cross-layer module-group edges (top 55): `55`
 
 ## Layer Dependency Graph
@@ -21,9 +21,9 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1615 OK| application
+    application -->|1613 OK| application
     application -->|1084 OK| domain
-    composition -->|228 OK| application
+    composition -->|227 OK| application
     composition -->|647 OK| composition
     composition -->|310 OK| domain
     composition -->|293 OK| infrastructure
@@ -40,9 +40,9 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1615 | allowed |
+| `application`    | `application`    |    1613 | allowed |
 | `application`    | `domain`         |    1084 | allowed |
-| `composition`    | `application`    |     228 | allowed |
+| `composition`    | `application`    |     227 | allowed |
 | `composition`    | `composition`    |     647 | allowed |
 | `composition`    | `domain`         |     310 | allowed |
 | `composition`    | `infrastructure` |     293 | allowed |
@@ -68,7 +68,7 @@ flowchart LR
 | `application.pipelines`        | `domain.types`                             |      57 |
 | `application.composite`        | `domain.ports`                             |      55 |
 | `application.services`         | `domain.ports`                             |      55 |
-| `composition.factories`        | `application.core`                         |      49 |
+| `composition.factories`        | `application.core`                         |      48 |
 | `composition.bootstrap`        | `application.services`                     |      47 |
 | `infrastructure.storage`       | `domain.value_objects`                     |      43 |
 | `composition.factories`        | `domain.ports`                             |      35 |

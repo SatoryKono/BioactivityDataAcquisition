@@ -7,13 +7,9 @@ writer calls are kept unchanged.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core._batch_write_support import safe_write_layer
-from bioetl.application.core.batch_operation_errors import (
-    OPERATION_ERRORS as _OPERATION_ERRORS,
-)
 from bioetl.application.core.batch_processing_contracts import LayerWriteOutcome
 
 if TYPE_CHECKING:
@@ -32,14 +28,6 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BatchID, RunID
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
-
-
-@dataclass(frozen=True)
-class RecordProcessorWriteDeps:
-    """Optional collaborators for write-stage parity with the canonical path."""
-
-    quarantine_manager: QuarantineRuntimeService | None = None
-    domain_event_emitter: DomainEventEmitterProtocol | None = None
 
 
 async def write_silver_layer(
@@ -94,7 +82,6 @@ async def write_silver_layer(
         batch_id=batch_id,
         ingestion_ts=ingestion_ts,
         bronze_refs=bronze_refs,
-        operation_errors=_OPERATION_ERRORS,
     )
 
 
@@ -153,5 +140,4 @@ async def write_gold_layer(
         ingestion_ts=ingestion_ts,
         bronze_refs=None,
         silver_refs=silver_refs,
-        operation_errors=_OPERATION_ERRORS,
     )

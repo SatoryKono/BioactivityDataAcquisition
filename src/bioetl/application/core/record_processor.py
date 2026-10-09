@@ -13,6 +13,7 @@ from bioetl.domain.types import JsonDict
 __all__ = ["RecordProcessor"]
 
 from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
@@ -20,7 +21,6 @@ from bioetl.application.core._record_processor_span_support import (
     RecordProcessorSpanExecutor,
 )
 from bioetl.application.core._record_processor_write_support import (
-    RecordProcessorWriteDeps,
     write_gold_layer,
     write_silver_layer,
 )
@@ -34,11 +34,23 @@ if TYPE_CHECKING:
         TransformResult,
     )
     from bioetl.application.core.batch_writer import BatchWriter
+    from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
     from bioetl.application.core.record_processor_config import RecordProcessorConfig
+    from bioetl.application.observability.domain_event_emitter import (
+        DomainEventEmitterProtocol,
+    )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import TracingPort
     from bioetl.domain.types import BatchID
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+
+
+@dataclass(frozen=True)
+class RecordProcessorWriteDependencies:
+    """Optional collaborators for write-stage parity with the canonical path."""
+
+    quarantine_manager: QuarantineRuntimeService | None = None
+    domain_event_emitter: DomainEventEmitterProtocol | None = None
 
 
 class RecordProcessor:
@@ -55,7 +67,7 @@ class RecordProcessor:
         span_executor_factory: Callable[
             [TracingPort], RecordProcessorSpanExecutor
         ] = RecordProcessorSpanExecutor,
-        write_deps: RecordProcessorWriteDeps | None = None,
+        write_deps: RecordProcessorWriteDependencies | None = None,
     ) -> None:
         """Initialize RecordProcessor.
         Args:
@@ -78,7 +90,7 @@ class RecordProcessor:
         self._batch_metrics = batch_metrics
         self._transformer = transformer
         self._writer = writer
-        self._write_deps = write_deps or RecordProcessorWriteDeps()
+        self._write_deps = write_deps or RecordProcessorWriteDependencies()
 
     async def process_batch(
         # Any: record vals vary

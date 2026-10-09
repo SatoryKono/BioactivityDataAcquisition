@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import xml.etree.ElementTree as ET
 from collections.abc import Sequence
 from contextlib import AsyncExitStack
 from typing import TYPE_CHECKING
@@ -20,24 +21,14 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
 
 __all__ = [
-    "PubMedPublicationTermPayloadEnricher",
+    "PubMedPublicationTermPayloadEnricherService",
     "parse_pubmed_mesh_xml",
     "pubmed_term_payload",
 ]
 
 
-def parse_pubmed_mesh_xml(
-    xml_text: str,
-) -> tuple[list[dict[str, object]], list[str]]:
-    """Parse MeshHeadingList and KeywordList from a PubMed efetch XML payload."""
-    try:
-        root = defused_ET.fromstring(xml_text)
-    except (
-        defused_ET.ParseError,
-        DefusedXmlException,
-    ):
-        return [], []
-
+def _parse_mesh_headings(root: ET.Element) -> list[dict[str, object]]:
+    """Extract DescriptorName/QualifierName pairs from a parsed efetch root."""
     headings: list[dict[str, object]] = []
     for heading in root.findall(".//MeshHeading"):
         descriptor = heading.find("DescriptorName")
@@ -58,13 +49,27 @@ def parse_pubmed_mesh_xml(
                 "qualifiers": qualifiers,
             }
         )
+    return headings
 
-    keywords: list[str] = []
-    for keyword in root.findall(".//Keyword"):
-        text = (keyword.text or "").strip()
-        if text:
-            keywords.append(text)
-    return headings, keywords
+
+def parse_pubmed_mesh_xml(
+    xml_text: str,
+) -> tuple[list[dict[str, object]], list[str]]:
+    """Parse MeshHeadingList and KeywordList from a PubMed efetch XML payload."""
+    try:
+        root = defused_ET.fromstring(xml_text)
+    except (
+        defused_ET.ParseError,
+        DefusedXmlException,
+    ):
+        return [], []
+
+    keywords = [
+        text
+        for keyword in root.findall(".//Keyword")
+        if (text := (keyword.text or "").strip())
+    ]
+    return _parse_mesh_headings(root), keywords
 
 
 def pubmed_term_payload(record: BronzeRecord) -> tuple[object, object]:
@@ -131,7 +136,7 @@ def _attach_pubmed_terms(
     return enriched
 
 
-class PubMedPublicationTermPayloadEnricher:
+class PubMedPublicationTermPayloadEnricherService:
     """Attach PubMed MeSH/keywords onto ChEMBL document records via ``pubmed_id``."""
 
     def __init__(
@@ -174,6 +179,7 @@ class PubMedPublicationTermPayloadEnricher:
                 "publication_term_pubmed_enrichment_failed",
                 error=str(exc),
                 pmid_count=len(pmids),
+                reason_code="publication_term_pubmed_enrichment_failed",
             )
             return list(records)
         return _attach_pubmed_terms(records, pubmed_by_pmid)

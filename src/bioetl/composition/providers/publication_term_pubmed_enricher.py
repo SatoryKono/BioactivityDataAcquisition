@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.pipelines.pubmed.publication_term_enricher import (
-    PubMedPublicationTermPayloadEnricher,
+from bioetl.application.core.wiring.registry import (
+    PubMedPublicationTermPayloadEnricherService,
 )
 from bioetl.composition.providers._registration_biblio_adapters import (
     _build_pubmed_adapter_from_settings,
@@ -54,7 +54,7 @@ def create_pubmed_publication_term_enricher(
     metrics: MetricsPort | None = None,
     assembly_support: ProviderAssemblySupport | None = None,
     pipeline_config: PipelineYamlConfig | None = None,
-) -> PubMedPublicationTermPayloadEnricher | None:
+) -> PubMedPublicationTermPayloadEnricherService | None:
     """Build a PubMed enricher, or skip when email/adapter assembly is unavailable."""
     email = _resolve_pubmed_email(settings, pipeline_config)
     if email is None:
@@ -82,7 +82,7 @@ def create_pubmed_publication_term_enricher(
             error=str(exc),
         )
         return None
-    return PubMedPublicationTermPayloadEnricher(
+    return PubMedPublicationTermPayloadEnricherService(
         pubmed_source=adapter,
         logger=logger,
     )

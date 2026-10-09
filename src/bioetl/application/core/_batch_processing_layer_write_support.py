@@ -14,9 +14,6 @@ from bioetl.application.core.batch_processing_contracts import (
     LayerWriteOutcome,
     SilverGoldWriteOutcome,
 )
-from bioetl.application.core.batch_shared_operation_errors import (
-    OPERATION_ERRORS as _OPERATION_ERRORS,
-)
 from bioetl.application.core.batch_transformer import TransformResult
 from bioetl.application.services.run_reports.observations import record_run_observation
 from bioetl.domain.types import BatchID, RunID
@@ -79,7 +76,6 @@ async def _write_silver_stage(
         batch_id=batch_id,
         ingestion_ts=ingestion_ts,
         bronze_refs=bronze_refs,
-        operation_errors=_OPERATION_ERRORS,
     )
     silver_written = (
         silver_outcome.confirmed_count if silver_outcome.status == "written" else 0
@@ -155,8 +151,7 @@ async def write_silver_then_gold(
             ingestion_ts=ingestion_ts,
             bronze_refs=None,
             silver_refs=[silver_result] if silver_result is not None else None,
-            operation_errors=_OPERATION_ERRORS,
-        )
+            )
     else:
         record_run_observation(
             "Data Validation",

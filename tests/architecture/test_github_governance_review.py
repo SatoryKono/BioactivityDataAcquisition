@@ -322,7 +322,17 @@ def test_policy_and_workflow_preserve_read_only_contract() -> None:
     assert "issues: write" not in workflow
     assert "pull-requests: write" not in workflow
     assert "workflow_dispatch:" in workflow
-    assert "1 1,4,7,10" in workflow
+    # Quarterly cadence now lives in the nightly coordinator gate
+    # (dom=01, months 01/04/07/10) after the leaf-trigger cutover.
+    nightly = (ROOT / ".github" / "workflows" / "nightly.yml").read_text(
+        encoding="utf-8"
+    )
+    assert (
+        "uses: ./.github/workflows/github-settings-quarterly-review.yml"
+        in nightly
+    )
+    for marker in ("dom == '01'", "'01'", "'04'", "'07'", "'10'"):
+        assert marker in nightly
     assert "--fail-on-drift" not in workflow
     job_header = workflow.split("    steps:", 1)[0]
     assert "runner.temp" not in job_header
