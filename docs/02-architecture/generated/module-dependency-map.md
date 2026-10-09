@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `2563`
-- Internal import edges (raw): `8217`
+- Scanned modules: `2564`
+- Internal import edges (raw): `8219`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `330`
@@ -22,12 +22,12 @@ flowchart LR
     composition[composition]
     interfaces[interfaces]
     application -->|1626 OK| application
-    application -->|1092 OK| domain
+    application -->|1093 OK| domain
     composition -->|228 OK| application
     composition -->|647 OK| composition
     composition -->|310 OK| domain
     composition -->|292 OK| infrastructure
-    domain -->|1298 OK| domain
+    domain -->|1299 OK| domain
     infrastructure -->|788 OK| domain
     infrastructure -->|1264 OK| infrastructure
     interfaces -->|72 OK| application
@@ -41,12 +41,12 @@ flowchart LR
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
 | `application`    | `application`    |    1626 | allowed |
-| `application`    | `domain`         |    1092 | allowed |
+| `application`    | `domain`         |    1093 | allowed |
 | `composition`    | `application`    |     228 | allowed |
 | `composition`    | `composition`    |     647 | allowed |
 | `composition`    | `domain`         |     310 | allowed |
 | `composition`    | `infrastructure` |     292 | allowed |
-| `domain`         | `domain`         |    1298 | allowed |
+| `domain`         | `domain`         |    1299 | allowed |
 | `infrastructure` | `domain`         |     788 | allowed |
 | `infrastructure` | `infrastructure` |    1264 | allowed |
 | `interfaces`     | `application`    |      72 | allowed |
@@ -58,7 +58,7 @@ flowchart LR
 
 | From Group                     | To Group                                   | Imports |
 | ------------------------------ | ------------------------------------------ | ------: |
-| `application.services`         | `domain.control_plane`                     |     151 |
+| `application.services`         | `domain.control_plane`                     |     152 |
 | `infrastructure.adapters`      | `domain.types`                             |     125 |
 | `application.composite`        | `domain.composite`                         |     116 |
 | `application.core`             | `domain.types`                             |      94 |
