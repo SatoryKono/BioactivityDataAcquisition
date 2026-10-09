@@ -18,7 +18,7 @@
       ],
       "duplication_clusters": 0,
       "files": 202,
-      "total_loc": 25200,
+      "total_loc": 25109,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.381,
       "max_internal_fan_in": 5,
@@ -30,10 +30,10 @@
       "internal_fan_in_census": {
         "distribution": {
           "0": 19,
-          "1": 107,
+          "1": 106,
           "2": 40,
           "3": 15,
-          "4": 10,
+          "4": 11,
           "5": 11
         },
         "modules": [
@@ -1537,8 +1537,11 @@
           },
           {
             "module": "bioetl.application.core.wiring.lazy_export_hooks",
-            "fan_in": 1,
+            "fan_in": 4,
             "runtime_importers": [
+              "bioetl.application.core.factory_wiring_api",
+              "bioetl.application.core.field_transforms",
+              "bioetl.application.core.transformer_runtime",
               "bioetl.application.core.wiring._lazy_export_facade"
             ]
           },
@@ -1589,7 +1592,7 @@
       ],
       "duplication_clusters": 0,
       "files": 49,
-      "total_loc": 6440,
+      "total_loc": 6451,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.284,
       "max_internal_fan_in": 2,
@@ -3267,9 +3270,9 @@
       ],
       "duplication_clusters": 0,
       "files": 55,
-      "total_loc": 6641,
+      "total_loc": 6632,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.342,
+      "helper_function_ratio": 0.345,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.runtime_builders.runner_inputs",
       "bounded_growth_budgets": {

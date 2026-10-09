@@ -1,18 +1,18 @@
 {
   "summary": {
     "scanned_modules": 2559,
-    "total_internal_imports": 8205,
+    "total_internal_imports": 8207,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "02dcdea4525f848a98309ac158a774849d4896e74636477edbbb1e0f195e78b3"
+    "source_fingerprint": "0e2e2cfec3aa3db210c06e072f310d1217de58f640752c7bba2ba5d0bfd88d47"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1622,
+      "imports": 1625,
       "allowed": true
     },
     {
@@ -42,7 +42,7 @@
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 293,
+      "imports": 292,
       "allowed": true
     },
     {
@@ -275,11 +275,6 @@
       "imports": 21
     },
     {
-      "source": "composition.runtime_builders",
-      "target": "infrastructure.config",
-      "imports": 21
-    },
-    {
       "source": "interfaces.cli",
       "target": "composition.control_plane_service_access",
       "imports": 21
@@ -297,6 +292,11 @@
     {
       "source": "composition.factories",
       "target": "infrastructure.storage",
+      "imports": 20
+    },
+    {
+      "source": "composition.runtime_builders",
+      "target": "infrastructure.config",
       "imports": 20
     },
     {
