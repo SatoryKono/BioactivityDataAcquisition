@@ -255,15 +255,28 @@ def validate_execution(
 
 def assemble() -> int:
     """No subprocess producers here: fail closed if transported evidence is incomplete."""
+    from scripts.engineering.ci.closeout_cost_budget import (
+        evaluate_closeout_cost_budget,
+    )
+
     ci_run = ci_identity()
     plan = catalog()
     policy = load_policy()
     _, source = discover_context(
         ROOT, policy=policy, claim=plan["claim"], ci_run_id=ci_run
     )
+    cost_budget = evaluate_closeout_cost_budget(ROOT)
+    write_json(EVIDENCE / "closeout/cost-budget.json", cost_budget)
+    if cost_budget["outcome"] != "PASS":
+        raise ValueError("CI cost budget failed: " + ", ".join(cost_budget["errors"]))
     receipts = []
+    coverage_producer_seconds: dict[str, float] = {}
     for name, spec in plan["checks"].items():
-        validate_execution(name, ci_run, source)
+        execution = validate_execution(name, ci_run, source)
+        if name.startswith("coverage-"):
+            coverage_producer_seconds[name] = round(
+                float(execution["duration_ms"]) / 1000, 3
+            )
         if "kind" in spec:
             receipt = json.loads(
                 (EVIDENCE / name / "receipt.json").read_text(encoding="utf-8")
@@ -278,6 +291,11 @@ def assemble() -> int:
             ):
                 raise ValueError(f"Receipt does not describe producer: {name}")
             receipts.append(receipt)
+    cost_budget["observed_coverage_producer_seconds"] = coverage_producer_seconds
+    cost_budget["observed_coverage_producer_total_seconds"] = round(
+        sum(coverage_producer_seconds.values()), 3
+    )
+    write_json(EVIDENCE / "closeout/cost-budget.json", cost_budget)
     from scripts.engineering.ci.local_test_telemetry import validate_local_measurement
     from scripts.engineering.ci.update_test_telemetry_baseline import (
         compute_test_telemetry_source_tree_sha256,

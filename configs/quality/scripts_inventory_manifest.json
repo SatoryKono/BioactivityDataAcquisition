@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-09T08:28:54.714093+00:00",
+  "generated_at": "2026-10-09T08:31:41.009152+00:00",
   "summary": {
-    "total_scripts": 647,
+    "total_scripts": 648,
     "status_counts": {
-      "active": 335,
+      "active": 336,
       "supporting": 312
     },
     "reference_group_coverage": {
@@ -15,7 +15,7 @@
       "other": 50,
       "scripts": 538,
       "skills": 13,
-      "tests": 455
+      "tests": 456
     }
   },
   "scripts": [
@@ -10095,6 +10095,21 @@
       ]
     },
     {
+      "path": "scripts/engineering/ci/closeout_cost_budget.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_proof_closeout_workflow_contract.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.closeout_cost_budget import evaluate_closeout_cost_budget"
+        }
+      ]
+    },
+    {
       "path": "scripts/engineering/ci/local_test_telemetry.py",
       "type": "py",
       "status": "supporting",
@@ -17228,7 +17243,7 @@
         },
         {
           "path": "tests/architecture/test_proof_closeout_workflow_contract.py",
-          "line": 11,
+          "line": 12,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.run_local_coverage_verify import SHARDS"
         }
@@ -22035,7 +22050,7 @@
         },
         {
           "path": "tests/architecture/test_proof_closeout_workflow_contract.py",
-          "line": 184,
+          "line": 203,
           "source_group": "tests",
           "text": "if \"setup_grafana_screenshot_runtime.sh\" in command"
         }

@@ -8,6 +8,7 @@ from collections import Counter
 import pytest
 import yaml
 
+from scripts.engineering.ci.closeout_cost_budget import evaluate_closeout_cost_budget
 from scripts.engineering.qa.run_local_coverage_verify import SHARDS
 
 pytestmark = pytest.mark.architecture
@@ -99,6 +100,24 @@ def test_coverage_closeout_respects_shrink_only_ci_cost_budget():
             if isinstance(item, dict) and "proof-coverage-shard" in item
         )
         assert matrix == ["0", "1", "2", "3"]
+
+
+def test_runtime_closeout_cost_budget_is_admissible():
+    result = evaluate_closeout_cost_budget(ROOT)
+
+    assert result["outcome"] == "PASS", result["errors"]
+    assert result["measurements"] == {
+        "coverage_job_count": 4,
+        "coverage_resource_class": "medium",
+        "group_seconds": {
+            "0": 535.54,
+            "1": 535.39,
+            "2": 534.31,
+            "3": 533.84,
+        },
+        "total_lane_seconds": 2139.08,
+        "critical_path_seconds": 535.54,
+    }
 
 
 def test_proof_waits_for_producers_in_the_same_workflow():

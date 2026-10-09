@@ -101,9 +101,33 @@ def test_reuse_rejects_damaged_or_foreign_evidence(evidence, damage):
 
 def test_assembly_rejects_missing_producer_without_running_it(evidence, monkeypatch):
     monkeypatch.setattr(
+        "scripts.engineering.ci.closeout_cost_budget.evaluate_closeout_cost_budget",
+        lambda root: {"outcome": "PASS", "errors": []},
+    )
+    monkeypatch.setattr(
         runner.subprocess, "Popen", lambda *a, **kw: pytest.fail("Unexpected execution")
     )
     assert runner.main(["assemble"]) == 2
+
+
+def test_assembly_stops_before_receipt_validation_when_cost_budget_fails(
+    evidence, monkeypatch
+):
+    monkeypatch.setattr(
+        "scripts.engineering.ci.closeout_cost_budget.evaluate_closeout_cost_budget",
+        lambda root: {"outcome": "STOP", "errors": ["coverage_job_count_changed"]},
+    )
+    monkeypatch.setattr(
+        runner,
+        "validate_execution",
+        lambda *a, **kw: pytest.fail("Budget must stop assembly before reuse"),
+    )
+
+    assert runner.main(["assemble"]) == 2
+    report = json.loads(
+        (runner.EVIDENCE / "closeout/cost-budget.json").read_text(encoding="utf-8")
+    )
+    assert report["outcome"] == "STOP"
 
 
 def test_secrets_are_redacted_before_artifact_digests(evidence, monkeypatch):
