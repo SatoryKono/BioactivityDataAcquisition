@@ -12,6 +12,7 @@ from bioetl.application.services.control_plane.forensic import (
     diagnostics_support as forensic,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics import (
+    finalization,
     source_refs as refs,
 )
 from bioetl.application.services.control_plane.manifest.inspection_service import (
@@ -185,7 +186,7 @@ def test_forensic_and_source_ref_helpers() -> None:
         refs._build_effective_source_refs(manifest=manifest, input_snapshots=["skip"])  # type: ignore[arg-type]
         == ("a",)
     )
-    summary = refs._attach_rich_composite_replay_support({"keep": True}, ())
+    summary = finalization._attach_rich_composite_replay_support({"keep": True}, ())
     assert summary == {"keep": True}
 
 

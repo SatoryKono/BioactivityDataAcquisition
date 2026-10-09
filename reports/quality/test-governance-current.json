@@ -90,7 +90,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1552",
+      "line": "1554",
       "path": "tests/unit/application/test_issue_10518_application_svc2.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_checkpoint_record_metrics_noop_without_sink"
@@ -644,7 +644,7 @@
     "tests/unit/application/test_issue_10518_application_coreobs_b.py:50",
     "tests/unit/application/test_issue_10518_application_pipelines_a.py:753",
     "tests/unit/application/test_issue_10518_application_svc1a.py:915",
-    "tests/unit/application/test_issue_10518_application_svc2.py:1552",
+    "tests/unit/application/test_issue_10518_application_svc2.py:1554",
     "tests/unit/application/test_issue_10518_application_tail1a.py:986",
     "tests/unit/application/core/test_batch_metrics_accounting.py:48",
     "tests/unit/application/core/test_batch_tracing.py:137",
@@ -1280,7 +1280,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1552",
+        "line": "1554",
         "path": "tests/unit/application/test_issue_10518_application_svc2.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_checkpoint_record_metrics_noop_without_sink"
@@ -1834,7 +1834,7 @@
       "tests/unit/application/test_issue_10518_application_coreobs_b.py:50",
       "tests/unit/application/test_issue_10518_application_pipelines_a.py:753",
       "tests/unit/application/test_issue_10518_application_svc1a.py:915",
-      "tests/unit/application/test_issue_10518_application_svc2.py:1552",
+      "tests/unit/application/test_issue_10518_application_svc2.py:1554",
       "tests/unit/application/test_issue_10518_application_tail1a.py:986",
       "tests/unit/application/core/test_batch_metrics_accounting.py:48",
       "tests/unit/application/core/test_batch_tracing.py:137",
@@ -2092,7 +2092,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "8960d53aed4c4ebbaf9026ac570e30305792ad0f7cc73497c83e674e5ae6418a",
+  "source_tree_sha256": "db7023641d6545694ef8781bb9471e9f5f0c2eadd89019146cce28fc59d3d3ee",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
