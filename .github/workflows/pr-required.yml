@@ -505,7 +505,7 @@ jobs:
       - name: Run detect-secrets baseline check
         id: detect-secrets
         if: needs['classify-changes'].outputs['security'] == 'required'
-        run: uv run --frozen --no-build pytest tests/architecture/test_antipatterns.py::test_no_hardcoded_secrets -q --noconftest -o "addopts=" -o "filterwarnings=" -o "timeout=0"
+        run: uv run --frozen --no-build pytest tests/architecture/test_antipatterns.py::test_no_hardcoded_secrets -q
 
       - name: Run pip-audit
         id: pip-audit
