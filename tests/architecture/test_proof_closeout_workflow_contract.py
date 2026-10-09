@@ -111,13 +111,13 @@ def test_runtime_closeout_cost_budget_is_admissible():
         "coverage_job_count": 4,
         "coverage_resource_class": "medium",
         "group_seconds": {
-            "0": 535.54,
-            "1": 535.39,
-            "2": 534.31,
-            "3": 533.84,
+            "0": 386.99,
+            "1": 386.54,
+            "2": 385.63,
+            "3": 380.74,
         },
-        "total_lane_seconds": 2139.08,
-        "critical_path_seconds": 535.54,
+        "total_lane_seconds": 1539.90,
+        "critical_path_seconds": 386.99,
     }
 
 
