@@ -1,9 +1,9 @@
 """Compatibility facade for replay-taxonomy field definitions."""
 
+from __future__ import annotations
+
 from bioetl.domain.control_plane.replay_taxonomy_fields import (
     LIST_DEFAULTS as LIST_DEFAULTS,
-)
-from bioetl.domain.control_plane.replay_taxonomy_fields import (
     REPLAY_TAXONOMY_FIELDS as REPLAY_TAXONOMY_FIELDS,
 )
 
