@@ -35,10 +35,13 @@ from bioetl.application.services.run_reports.source_identity import (
     IDENTITY_STATE_ALIGNED,
     compare_runtime_source_identity,
     compute_runtime_source_id,
-    load_repository_source_environment,
     normalize_runtime_path,
     resolve_runtime_source_identity,
     runtime_path_to_local_path,
+)
+from bioetl.composition.observability_runtime import (
+    create_run_report_store,
+    load_repository_source_environment,
 )
 
 DEFAULT_CONTRACT = Path("configs/quality/docker_runtime_contracts.yaml")
@@ -1782,7 +1785,9 @@ def _dashboard_report_source_findings(
         return []
     report_root = host_filesystem_path(reports_source, root=root) / "run-reports"
     source_check = inspect_report_root_source_identity(
-        report_root=report_root, expected_source_id=expected_identity
+        report_root=report_root,
+        expected_source_id=expected_identity,
+        store=create_run_report_store(),
     )
     if source_check.get("source_identity_status") == "healthy":
         return []

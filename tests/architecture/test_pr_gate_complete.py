@@ -56,7 +56,7 @@ def test_catalog_exists_and_has_expected_gates() -> None:
     data = _load_yaml(CATALOG)
     assert data.get("aggregator") == "pr-gate-complete"
     assert data.get("coordinator_workflow") == ".github/workflows/pr-required.yml"
-    assert data.get("version") == 2
+    assert data.get("version") == 3
     assert data.get("schema_version") == 1
     gates = {g["id"] for g in data.get("gates", [])}
     assert gates == EXPECTED_GATES, f"gate mismatch: {gates ^ EXPECTED_GATES}"
@@ -102,12 +102,8 @@ def test_coordinator_has_classify_and_aggregate_jobs() -> None:
     assert "pr-gate-complete" in jobs
     agg = jobs["pr-gate-complete"]
     assert str(agg.get("if", "")).strip() == "${{ always() }}"
-    needs = agg.get("needs", [])
-    assert "classify-changes" in needs
-    for gate in EXPECTED_GATES:
-        assert gate in needs or f"{gate}-not-applicable" in needs, (
-            f"missing {gate} in pr-gate-complete needs"
-        )
+    needs = set(agg.get("needs", []))
+    assert needs == {"classify-changes", "fast-governance", "class-lane"}
     classify = jobs["classify-changes"]
     assert "head_sha" in str(classify.get("outputs", {}))
     assert int(classify.get("timeout-minutes", 0)) >= 15

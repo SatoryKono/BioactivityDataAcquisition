@@ -189,16 +189,21 @@ def test_emit_batch_failed_without_run_id_is_noop() -> None:
 async def test_safe_write_layer_rejects_unknown_layer() -> None:
     from datetime import UTC, datetime
 
-    from bioetl.application.core._batch_write_support import safe_write_layer
+    from bioetl.application.core._batch_write_support import (
+        LayerWriteContext,
+        safe_write_layer,
+    )
 
     with pytest.raises(ValueError, match="supports only 'silver' or 'gold'"):
         await safe_write_layer(
-            execute_with_span=MagicMock(),
-            writer=MagicMock(),
-            quarantine_manager=MagicMock(),
-            logger=MagicMock(),
-            run_id=None,
-            domain_event_emitter=None,
+            context=LayerWriteContext(
+                execute_with_span=MagicMock(),
+                writer=MagicMock(),
+                quarantine_manager=MagicMock(),
+                logger=MagicMock(),
+                run_id=None,
+                domain_event_emitter=None,
+            ),
             layer="bronze",
             records=[],
             batch_id="b1",  # type: ignore[arg-type]
@@ -1024,7 +1029,9 @@ def test_inspect_source_identity_missing_expected(tmp_path: Path) -> None:
     )
 
     payload = inspect_report_root_source_identity(
-        report_root=tmp_path, expected_source_id=None
+        report_root=tmp_path,
+        expected_source_id=None,
+        store=MagicMock(),
     )
     assert payload["source_identity"] == "expected_missing"
     assert payload["source_identity_status"] == "unhealthy"

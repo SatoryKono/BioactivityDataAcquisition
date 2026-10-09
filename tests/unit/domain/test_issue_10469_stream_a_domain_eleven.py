@@ -298,6 +298,22 @@ def test_publication_classification_uninitialized_and_support_fallbacks(
     ) in {"Journal article", None}
     assert _normalized_raw_type_part(None) is None
     monkeypatch.setattr(publication_classification, "_PROVIDER_LOOKUPS", {})
-    with pytest.raises(RuntimeError, match="not initialized"):
+    with pytest.raises(RuntimeError, match="passed explicitly"):
         classify_publication_type("pubmed", raw_type="journal-article")
     assert _get_lookup("chembl") == {}
+    from bioetl.domain.mapping.classification_data import ClassificationData
+
+    explicit = ClassificationData(
+        entry_cores=(("Journal Article", "Original Experimental Data", "EXP"),),
+        openalex_row_index={},
+        crossref_row_index={},
+        pubmed_row_index={"journal-article": 1},
+        s2_row_index={},
+    )
+    entry = classify_publication_type(
+        "pubmed",
+        raw_type="journal-article",
+        data=explicit,
+    )
+    assert entry is not None
+    assert entry.unified_type == "Journal Article"

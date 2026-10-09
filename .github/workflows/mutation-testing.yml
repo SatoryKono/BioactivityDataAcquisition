@@ -6,26 +6,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Push and pull_request stay omitted so a code change cannot start four
+# 60-minute jobs. The Sunday run is the nightly coordinator calling this
+# workflow, an explicit exception to #10263. CircleCI workflow mutation remains
+# the manual ci-lane=mutation backup; keep its Sunday schedule paused.
 on:
-  push:
-    branches:
-      - main
-      - master
-    paths:
-      - "src/bioetl/domain/**"
-      - "src/bioetl/application/**"
-      - "tests/**"
-      - ".github/workflows/mutation-testing.yml"
-  pull_request:
-    paths:
-      - "src/bioetl/domain/**"
-      - "src/bioetl/application/**"
-      - "tests/**"
-      - ".github/workflows/mutation-testing.yml"
-  schedule:
-    # Run weekly on Sundays at 00:00 UTC
-    - cron: "0 0 * * 0"
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   mutation-testing:

@@ -26,6 +26,8 @@ def classification_payload(
     provider: str,
     raw_type: str | None,
     raw_types_list: list[str] | None,
+    *,
+    data: object,
 ) -> dict[str, str | None]:
     """Build the normalized publication-type classification payload."""
     return build_publication_type_classification_payload(
@@ -33,6 +35,7 @@ def classification_payload(
         raw_type=raw_type,
         raw_types_list=raw_types_list,
         raw_field_name="publication_type",
+        data=data,  # type: ignore[arg-type]
     )
 
 

@@ -208,7 +208,7 @@ class TestRecordProcessorMetrics:
     async def test_gold_failure_does_not_publish_prepared_records_as_written(
         self, record_processor, mock_metrics
     ):
-        record_processor._write_gold_if_present = AsyncMock(
+        record_processor._write_gold_layer = AsyncMock(
             side_effect=OSError("Gold write failed")
         )
         with pytest.raises(OSError, match="Gold write failed"):

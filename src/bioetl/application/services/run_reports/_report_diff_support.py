@@ -1,7 +1,9 @@
-"""Diff helpers for persisted pipeline run reports (Wave-4-style seam)."""
+"""Diff helpers for persisted pipeline run reports and repository env documents."""
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from pathlib import Path
 from typing import Any
 
 MappingLike = dict[str, Any] | Any  # Any: decoded external JSON payload
@@ -96,3 +98,84 @@ def _reasons_delta(
         }
         for code in sorted(set(left_counts) | set(right_counts))
     ]
+
+
+def repository_env_candidate_paths(
+    root: str | Path,
+    process_environment: Mapping[str, object] | None = None,
+) -> tuple[Path, ...]:
+    """Return repository env candidates without reading them."""
+    return _repository_env_paths(Path(root), process_environment or {})
+
+
+def _repository_env_paths(
+    root_path: Path, process: Mapping[str, object]
+) -> tuple[Path, ...]:
+    configured_env = str(process.get("BIOETL_ENV_FILE") or "").strip()
+    if configured_env:
+        env_path = Path(configured_env)
+        if not env_path.is_absolute():
+            env_path = root_path / env_path
+    else:
+        env_path = root_path / ".env"
+    if str(process.get("BIOETL_SKIP_ENV_LOCAL") or "0").strip() == "1":
+        return (env_path,)
+    return env_path, root_path / ".env.local"
+
+
+def _parse_repository_env_document(
+    text: str | None, allowed: set[str]
+) -> dict[str, str]:
+    if not text:
+        return {}
+    values: dict[str, str] = {}
+    for raw in text.splitlines():
+        parsed = _parse_repository_env_line(raw, allowed)
+        if parsed is not None:
+            key, value = parsed
+            values[key] = value
+    return values
+
+
+def _strip_repository_env_inline_comment(value: str) -> str:
+    """Strip a shell-style inline comment outside quoted env text."""
+    quote: str | None = None
+    escaped = False
+    for index, character in enumerate(value):
+        if escaped:
+            escaped = False
+            continue
+        if character == "\\" and quote is not None:
+            escaped = True
+            continue
+        if character in {"'", '"'}:
+            if quote is None:
+                quote = character
+            elif quote == character:
+                quote = None
+            continue
+        if _is_repository_env_comment_start(value, index, character, quote):
+            return value[:index].rstrip()
+    return value.rstrip()
+
+
+def _is_repository_env_comment_start(
+    value: str, index: int, character: str, quote: str | None
+) -> bool:
+    return (
+        character == "#" and quote is None and index > 0 and value[index - 1].isspace()
+    )
+
+
+def _parse_repository_env_line(raw: str, allowed: set[str]) -> tuple[str, str] | None:
+    stripped = raw.strip()
+    if not stripped or stripped.startswith("#") or "=" not in raw:
+        return None
+    key, value = raw.split("=", 1)
+    key = key.strip()
+    value = _strip_repository_env_inline_comment(value.strip())
+    if key not in allowed:
+        return None
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        return key, value[1:-1]
+    return key, value

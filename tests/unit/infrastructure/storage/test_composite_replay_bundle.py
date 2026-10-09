@@ -38,16 +38,18 @@ def test_target_mapping_round_trip_uses_captured_lookup(monkeypatch):
         (mapping.ProteinClassTopLevelMappingEntry("enzyme", "custom-enzyme", True),),
         frozenset({"custom-ignored"}),
     )
-    monkeypatch.setattr(mapping, "_mapping_data", original)
-    payload = json.loads(json.dumps(freeze_target_mapping()))
-    monkeypatch.setattr(mapping, "_mapping_data", None)
-    restored = restore_target_mapping(payload)
-    mapping.initialize_protein_class_target_type_mapping(restored)
-    assert mapping.current_protein_class_target_type_mapping() == original
+    payload = freeze_target_mapping(original)
+    sealed = json.loads(json.dumps(payload))
+    payload["entries"][0]["canonical_l1"] = "mutated-after-freeze"
+    restored = restore_target_mapping(sealed)
+    assert restored == original
     assert (
-        mapping.normalize_protein_class_top_level("enzyme").canonical_l1
+        mapping.normalize_protein_class_top_level("enzyme", restored).canonical_l1
         == "custom-enzyme"
     )
+    monkeypatch.setattr(mapping, "_mapping_data", None)
+    with pytest.raises(RuntimeError, match="passed explicitly"):
+        mapping.normalize_protein_class_top_level("enzyme")
 
 
 @pytest.mark.parametrize(
@@ -239,14 +241,136 @@ def test_field_group_round_trip_keeps_custom_defaults_and_gold_filtering():
         ("data/output/silver/composite/activity", "silver", "composite/activity"),
         ("gold\\composite\\target", "gold", "composite/target"),
         ("composite/molecule", "gold", "composite/molecule"),
+        (
+            "data/silver/archive/silver/composite/publication",
+            "silver",
+            "archive/silver/composite/publication",
+        ),
+        (
+            "data\\gold\\archive\\gold\\composite\\publication",
+            "gold",
+            "archive/gold/composite/publication",
+        ),
     ],
 )
 def test_replay_output_path_matches_writer(path, layer, expected):
     from bioetl.application.composite.helpers.replay_context import (
         output_table_name,
     )
+    from bioetl.application.composite.merger_output_mixin import (
+        MergeOutputWriterMixin,
+    )
 
     assert output_table_name(path, layer) == expected
+    assert output_table_name(path, layer) == MergeOutputWriterMixin._path_to_table_name(
+        path
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("relative", [False, True], ids=["absolute", "relative"])
+async def test_capture_reads_injected_writer_paths_as_absolute(
+    tmp_path, monkeypatch, relative
+):
+    from datetime import UTC, datetime
+    from os.path import relpath
+    from pathlib import Path
+    from unittest.mock import AsyncMock, MagicMock, call, sentinel
+
+    import bioetl.composition.bootstrap.runtime.assay_replay_capture as capture_module
+    from bioetl.application.composite.merger_orchestration import (
+        build_merge_execution_request,
+    )
+    from bioetl.infrastructure.config.composite_config_api import load_composite_config
+    from bioetl.infrastructure.config.settings_api import Settings
+    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+
+    config = load_composite_config("publication")
+    table = pa.table({"entity_id": ["publication-1"]})
+    physical_root = tmp_path / "injected-writer-location"
+    if relative:
+        physical_root = (
+            Path.cwd()
+            / "reports"
+            / "test-scratch"
+            / tmp_path.name
+            / "injected-writer-location"
+        )
+        physical_root = Path(relpath(physical_root))
+    paths = {layer: physical_root / layer for layer in ("silver", "gold")}
+    storage = MagicMock()
+    storage.get_table_path.side_effect = lambda name, *, layer: paths[layer]
+    output_reader = AsyncMock(read_table=AsyncMock(return_value=table))
+    monkeypatch.setattr(capture_module, "DeltaReader", lambda *_: output_reader)
+    offline = AsyncMock()
+    monkeypatch.setattr(capture_module, "replay_assay", offline)
+    reader, hook = capture_module.prepare_assay_replay(
+        config=config,
+        reader=AsyncMock(read_table=AsyncMock(return_value=table)),
+        storage=storage,
+        settings=Settings.model_validate(
+            {"data_dir": tmp_path / "configured", "report_root": tmp_path / "reports"}
+        ),
+        logger=NoOpLogger(),
+    )
+    request = build_merge_execution_request(
+        seed_table=config.seed.silver_table,
+        seed_pipeline=config.seed.pipeline,
+        enrichers=(),
+        enrichment_results={},
+        run_id="22222222-2222-4222-8222-222222222222",
+        metadata_timestamp=datetime(2026, 10, 3, tzinfo=UTC),
+    )
+
+    async def merge(request):
+        await reader.read_table(request.seed_table)
+        return sentinel.merge_result
+
+    assert await hook(request, merge) is sentinel.merge_result
+    assert storage.get_table_path.call_args_list == [
+        call("composite/publication", layer="silver"),
+        call("composite/publication", layer="gold"),
+    ]
+    assert output_reader.read_table.await_args_list == [
+        call(str(path.resolve())) for path in paths.values()
+    ]
+    offline.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("relative", [False, True], ids=["absolute", "relative"])
+async def test_replay_verification_reads_supplied_physical_paths_as_absolute(
+    tmp_path, relative
+):
+    from os.path import relpath
+    from pathlib import Path
+    from unittest.mock import AsyncMock, call
+
+    from bioetl.infrastructure.storage.composite_replay_bundle import publish_table
+    from bioetl.infrastructure.storage.composite_replay_evidence import (
+        verify_replay_outputs,
+    )
+
+    table = pa.table({"entity_id": ["publication-1"]})
+    root = tmp_path / "capture"
+    physical_root = tmp_path / "injected-writer-location"
+    if relative:
+        physical_root = (
+            Path.cwd()
+            / "reports"
+            / "test-scratch"
+            / tmp_path.name
+            / "injected-writer-location"
+        )
+        physical_root = Path(relpath(physical_root))
+    paths = {layer: physical_root / layer for layer in ("silver", "gold")}
+    for layer in paths:
+        publish_table(root, f"expected/{layer}.arrow", table)
+    reader = AsyncMock(read_table=AsyncMock(return_value=table))
+    await verify_replay_outputs(root, reader, paths)
+    assert reader.read_table.await_args_list == [
+        call(str(path.resolve())) for path in paths.values()
+    ]
 
 
 @pytest.mark.parametrize(

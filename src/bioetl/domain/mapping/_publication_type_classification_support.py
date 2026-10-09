@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from typing import Protocol
 
+from bioetl.domain.mapping.classification_data import ClassificationData
 from bioetl.domain.normalization.text import normalize_string
 
 
@@ -184,3 +186,94 @@ def best_chembl_match[PublicationTypeEntryT: PublicationTypeEntryProtocol](
         is not None
     ]
     return max(matches, key=lambda entry: entry.specificity, default=None)
+
+
+@dataclass(frozen=True, slots=True)
+class PublicationTypeEntry:
+    """Single entry in the unified publication type classification."""
+
+    unified_type: str
+    subclass: str
+    class_code: str
+    specificity: int
+
+
+@dataclass(frozen=True, slots=True)
+class _ClassificationViews:
+    """Lookup snapshot copied from one ClassificationData object."""
+
+    entries: tuple[PublicationTypeEntry, ...]
+    by_unified: dict[str, PublicationTypeEntry]
+    lookups: dict[str, dict[str, PublicationTypeEntry]]
+
+
+_VIEW_CACHE: dict[int, tuple[ClassificationData, _ClassificationViews]] = {}
+
+
+def _build_lookup(
+    entries: tuple[PublicationTypeEntry, ...],
+    row_index: dict[str, int],
+) -> dict[str, PublicationTypeEntry]:
+    """Build provider lookup using precomputed row-index mapping."""
+    max_idx = len(entries)
+    return {
+        raw_key: entries[idx - 1]
+        for raw_key, idx in row_index.items()
+        if 0 < idx <= max_idx
+    }
+
+
+def _views_for(data: ClassificationData) -> _ClassificationViews:
+    """Copy one taxonomy object into lookup tables.
+
+    The copy is cached by object identity. Later mutation of the source row
+    indexes does not change a snapshot already built from that object.
+    """
+    cached = _VIEW_CACHE.get(id(data))
+    if cached is not None and cached[0] is data:
+        return cached[1]
+    entries = tuple(
+        PublicationTypeEntry(
+            unified_type=unified_type,
+            subclass=subclass,
+            class_code=class_code,
+            specificity=index,
+        )
+        for index, (unified_type, subclass, class_code) in enumerate(
+            data.entry_cores,
+            start=1,
+        )
+    )
+    by_unified = {
+        canonical_publication_type_key(entry.unified_type): entry for entry in entries
+    }
+    semantic_scholar = _build_lookup(entries, dict(data.s2_row_index))
+    views = _ClassificationViews(
+        entries=entries,
+        by_unified=by_unified,
+        lookups={
+            "openalex": _build_lookup(entries, dict(data.openalex_row_index)),
+            "crossref": _build_lookup(entries, dict(data.crossref_row_index)),
+            "pubmed": _build_lookup(entries, dict(data.pubmed_row_index)),
+            "semanticscholar": semantic_scholar,
+            "semantic_scholar": semantic_scholar,
+            "s2": semantic_scholar,
+        },
+    )
+    _VIEW_CACHE[id(data)] = (data, views)
+    return views
+
+
+def _require_classification_data(
+    data: ClassificationData | None,
+) -> ClassificationData:
+    if data is None:
+        raise RuntimeError("publication classification data must be passed explicitly")
+    return data
+
+
+def refresh_classification_views(data: ClassificationData) -> _ClassificationViews:
+    """Drop the cached snapshot for this object and rebuild it."""
+
+    _VIEW_CACHE.pop(id(data), None)
+    return _views_for(data)

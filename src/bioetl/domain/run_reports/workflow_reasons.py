@@ -88,6 +88,115 @@ def _optional_reason_text(value: object) -> str | None:
     return value if isinstance(value, str) else None
 
 
+def _workflow_binding_coordinates(identity: object) -> tuple[str, str] | None:
+    if not isinstance(identity, dict):
+        return None
+    name = identity.get("workflow_name")
+    run_id = identity.get("workflow_run_id")
+    if not isinstance(name, str):
+        return None
+    if not isinstance(run_id, str):
+        return None
+    return name, run_id
+
+
+def _child_binding_coordinates(
+    identity: object, step_id: object
+) -> tuple[str, str, str] | None:
+    if not isinstance(identity, dict):
+        return None
+    if not isinstance(step_id, str):
+        return None
+    child_run_id = identity.get("run_id")
+    child_pipeline_name = identity.get("pipeline_name")
+    if not isinstance(child_run_id, str):
+        return None
+    if not isinstance(child_pipeline_name, str):
+        return None
+    return step_id, child_run_id, child_pipeline_name
+
+
+def resolve_child_workflow_binding(
+    bound_identity: object,
+    child_identity: object,
+    step_id: object,
+) -> tuple[str, str, object, object, object] | str:
+    """Return parent coordinates, or a gap code when the child binding is incomplete."""
+    if not isinstance(bound_identity, dict) or not isinstance(child_identity, dict):
+        return "binding_not_recorded"
+    parent = _workflow_binding_coordinates(bound_identity)
+    if parent is None:
+        return "identity_not_recorded"
+    child = _child_binding_coordinates(child_identity, step_id)
+    if child is None:
+        return "child_identity_not_recorded"
+    return *parent, *child
+
+
+def _parent_identity_matches(
+    parent_identity: object,
+    workflow_name: str,
+    workflow_run_id: str,
+) -> bool:
+    if not isinstance(parent_identity, dict):
+        return False
+    if parent_identity.get("workflow_name") != workflow_name:
+        return False
+    return parent_identity.get("workflow_run_id") == workflow_run_id
+
+
+def _step_binds_child(
+    step: object,
+    step_id: object,
+    child_run_id: object,
+    child_pipeline_name: object,
+) -> bool:
+    if not isinstance(step, dict):
+        return False
+    if step.get("step_id") != step_id:
+        return False
+    if step.get("pipeline_run_id") != child_run_id:
+        return False
+    return step.get("pipeline_name") == child_pipeline_name
+
+
+def _execution_binds_child(
+    parent_execution: object,
+    step_id: object,
+    child_run_id: object,
+    child_pipeline_name: object,
+) -> bool:
+    if not isinstance(parent_execution, list):
+        return False
+    return any(
+        _step_binds_child(step, step_id, child_run_id, child_pipeline_name)
+        for step in parent_execution
+    )
+
+
+def parent_binding_gap(
+    *,
+    workflow_name: str,
+    workflow_run_id: str,
+    parent_identity: object,
+    parent_execution: object,
+    step_id: object,
+    child_run_id: object,
+    child_pipeline_name: object,
+) -> str | None:
+    """Return why a loaded parent does not apply to this child."""
+    if not _parent_identity_matches(parent_identity, workflow_name, workflow_run_id):
+        return "identity_mismatch"
+    if not _execution_binds_child(
+        parent_execution,
+        step_id,
+        child_run_id,
+        child_pipeline_name,
+    ):
+        return "child_binding_mismatch"
+    return None
+
+
 def _as_int(value: object, default: int = 0) -> int:
     if value is None:
         return default

@@ -41,7 +41,6 @@ from bioetl.infrastructure.storage.delta.resilience import (
     SilverMergeResiliencePolicy,
 )
 from bioetl.infrastructure.storage.silver.delta_merge_helpers import (
-    _MergeExecutionTimeoutError,
     _delta_table_has_parquet_data,
     _execute_merge_inline_with_timeout,
     _should_execute_merge_inline,
@@ -208,10 +207,24 @@ def test_delta_merge_log_skip_inline_timeout(
         return 0.0 if clock["n"] == 1 else 10.0
 
     monkeypatch.setattr(time, "perf_counter", _now)
-    with pytest.raises(_MergeExecutionTimeoutError):
-        _execute_merge_inline_with_timeout(
-            merge_callable=lambda: None, timeout_seconds=0.1
-        )
+    logger = MagicMock()
+    # A completed inline merge is already durable: elapsed>budget must emit
+    # silver_merge_slow telemetry instead of raising a false timeout that
+    # would trigger a redundant committed-merge retry (#12041).
+    _execute_merge_inline_with_timeout(
+        merge_callable=lambda: None,
+        timeout_seconds=0.1,
+        logger=logger,
+        table_path=str(table),
+        primary_keys=["entity_id"],
+    )
+    logger.warning.assert_called_once_with(
+        "silver_merge_slow",
+        table_path=str(table),
+        timeout_seconds=0.1,
+        elapsed_seconds=10.0,
+        primary_keys=["entity_id"],
+    )
 
 
 def test_bronze_chunk_flush_and_eexist_link(
