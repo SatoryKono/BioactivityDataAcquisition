@@ -71,3 +71,45 @@ def test_runtime_builder_public_exports_stay_narrow() -> None:
         "build_pipeline_runner",
         "ensure_providers_loaded",
     }
+
+
+def test_runner_input_wiring_resolves_overrides() -> None:
+    """Input wiring should resolve optional active overrides correctly."""
+    get_settings_mock = MagicMock(name="get_settings")
+    load_pipeline_config_mock = MagicMock(name="load_pipeline_config")
+
+    wiring = runner_builder_wiring.resolve_runner_input_wiring(
+        runner_builder_wiring.RunnerInputWiring(),
+        get_settings_fn=get_settings_mock,
+        load_pipeline_config_fn=load_pipeline_config_mock,
+    )
+
+    assert wiring.get_settings is get_settings_mock
+    assert wiring.load_pipeline_config is load_pipeline_config_mock
+    assert callable(wiring.load_source_config)
+    assert wiring.build_observability_bundle is None
+
+
+def test_runner_factory_wiring_preserves_unmodified_collaborators() -> None:
+    original = runner_builder_wiring.RunnerFactoryWiring()
+    ensure_providers_loaded = MagicMock(name="ensure_providers_loaded")
+    register_all_pipelines = MagicMock(name="register_all_pipelines")
+
+    resolved = runner_builder_wiring.resolve_runner_factory_wiring(
+        original,
+        ensure_providers_loaded_fn=ensure_providers_loaded,
+        register_all_pipelines_fn=register_all_pipelines,
+    )
+
+    assert resolved is not original
+    assert resolved.create_registry is original.create_registry
+    assert resolved.ensure_providers_loaded is ensure_providers_loaded
+    assert resolved.register_all_pipelines is register_all_pipelines
+
+
+def test_runner_wiring_preserves_identity_without_overrides() -> None:
+    factory = runner_builder_wiring.RunnerFactoryWiring()
+    inputs = runner_builder_wiring.RunnerInputWiring()
+
+    assert runner_builder_wiring.resolve_runner_factory_wiring(factory) is factory
+    assert runner_builder_wiring.resolve_runner_input_wiring(inputs) is inputs
