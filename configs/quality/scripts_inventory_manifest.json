@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-08T06:17:05.267587+00:00",
+  "generated_at": "2026-10-09T01:02:02.424439+00:00",
   "summary": {
     "total_scripts": 647,
     "status_counts": {
@@ -10,7 +10,7 @@
     "reference_group_coverage": {
       "agents": 11,
       "build": 18,
-      "ci": 69,
+      "ci": 70,
       "docs": 279,
       "other": 50,
       "scripts": 538,
@@ -5248,7 +5248,7 @@
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 110,
+          "line": 112,
           "source_group": "docs",
           "text": "| Pipeline factory registry | `src/bioetl/composition/factories/pipeline/registry.py` | Registers provider/composite factories for composition-time lookup. | Composition registry API and pipeline fact"
         },
@@ -6085,13 +6085,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2857,
+          "line": 2858,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3287,
+          "line": 3288,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check"
         },
@@ -7414,13 +7414,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2866,
+          "line": 2867,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3296,
+          "line": 3297,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check"
         },
@@ -8089,13 +8089,13 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2858,
+          "line": 2859,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.docs passports check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3288,
+          "line": 3289,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.docs passports check"
         },
@@ -9515,7 +9515,7 @@
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 281,
+          "line": 283,
           "source_group": "docs",
           "text": "| Manifest service orchestration | `src/bioetl/application/services/control_plane/manifest/service.py`, `models.py`, `validation.py` | Create/inspect immutable run manifests and enforce application-le"
         },
@@ -10536,13 +10536,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 3113,
+          "line": 3114,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest reports/quality/proof-or-stop/shared/coverage/coverage/manifest.json"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3462,
+          "line": 3549,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest \"$ROOT/coverage/manifest.json\""
         },
@@ -10593,7 +10593,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2799,
+          "line": 2800,
           "source_group": "ci",
           "text": "check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_contract_identity.py"
         },
@@ -10620,7 +10620,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2800,
+          "line": 2801,
           "source_group": "ci",
           "text": "check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_contract_registry.py"
         },
@@ -10680,7 +10680,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2804,
+          "line": 2805,
           "source_group": "ci",
           "text": "check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_registry_dq_refs.py"
         },
@@ -10737,7 +10737,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2803,
+          "line": 2804,
           "source_group": "ci",
           "text": "check_contract uv run --frozen --no-build python -m scripts.engineering.ci.validate_schema_classifier_gate --base-sha \"$BASE\" --head-sha \"$CIRCLE_SHA1\""
         },
@@ -11254,15 +11254,15 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 3039,
+          "line": 3040,
           "source_group": "ci",
           "text": "(\"governance\", \"pretest_guardrails\", [\"bash\", \"scripts/engineering/dev/pretest_guardrails.sh\", \"--mode\", \"check\", \"--scope\", \"governance\"]),"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3430,
+          "line": 3495,
           "source_group": "ci",
-          "text": ", \\\"pretest_guardrails\\\", [\\\"bash\\\", \\\"scripts/engineering/dev/pretest_guardrails.sh\\\",\\n              \\"
+          "text": "(\"governance\", \"pretest_guardrails\", [\"bash\", \"scripts/engineering/dev/pretest_guardrails.sh\","
         },
         {
           "path": ".github/workflows/tests.yml",
@@ -12787,7 +12787,7 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2720,
+          "line": 2721,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-duplication-complexity-exemptions"
         }
@@ -14206,13 +14206,13 @@
         },
         {
           "path": ".github/workflows/docker.yml",
-          "line": 298,
+          "line": 300,
           "source_group": "ci",
           "text": "python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \\"
         },
         {
           "path": ".github/workflows/docker.yml",
-          "line": 350,
+          "line": 352,
           "source_group": "ci",
           "text": "python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \\"
         },
@@ -14786,9 +14786,9 @@
         },
         {
           "path": "tests/architecture/test_runtime_import_scc.py",
-          "line": 32,
+          "line": 21,
           "source_group": "tests",
-          "text": "from scripts.engineering.qa.import_graph_inventory import PROJECTION_OWNERSHIP"
+          "text": "from scripts.engineering.qa.import_graph_inventory import ("
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5565_5569_closeout.py",
@@ -16095,7 +16095,7 @@
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 305,
+          "line": 307,
           "source_group": "docs",
           "text": "| Generated artifact drift gate did not include module coverage source-tree hash freshness | `report-module-coverage --check` could fail stale source-tree evidence while `report-debt-governance-gates "
         },
@@ -16837,7 +16837,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 19,
       "references": [
         {
           "path": ".github/ISSUES/TEST-SYS-13-Refresh-Test-Governance-Source-Hash.md",
@@ -18151,13 +18151,13 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3270,
+          "line": 3271,
           "source_group": "ci",
           "text": "python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3382,
+          "line": 3383,
           "source_group": "ci",
           "text": "\\ scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD\\n\""
         },
@@ -18605,7 +18605,7 @@
         },
         {
           "path": "tests/architecture/test_github_governance_review.py",
-          "line": 331,
+          "line": 340,
           "source_group": "tests",
           "text": "assert \"python -m scripts.engineering.repo.github_settings_review\" not in workflow"
         }
@@ -19060,7 +19060,7 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2996,
+          "line": 2997,
           "source_group": "ci",
           "text": "python -m scripts.ops verify-router-managed-image \"$BUILT\""
         },
@@ -21989,8 +21989,14 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 12,
       "references": [
+        {
+          "path": ".circleci/config.yml",
+          "line": 3393,
+          "source_group": "ci",
+          "text": "bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh --attempt-system-install"
+        },
         {
           "path": "docs/03-guides/dashboard-guide.md",
           "line": 59,
@@ -22028,16 +22034,10 @@
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh\""
         },
         {
-          "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 516,
+          "path": "tests/architecture/test_proof_closeout_workflow_contract.py",
+          "line": 129,
           "source_group": "tests",
-          "text": "assert \"setup_grafana_screenshot_runtime.sh\" in detail"
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 699,
-          "source_group": "tests",
-          "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh\""
+          "text": "if \"setup_grafana_screenshot_runtime.sh\" in command"
         }
       ],
       "owner": "@bioetl-platform",
@@ -23994,13 +23994,13 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2786,
+          "line": 2787,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.schema generate-artifacts --check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2787,
+          "line": 2788,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.schema verify-schema-parity --mode blocking"
         },
