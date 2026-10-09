@@ -198,7 +198,9 @@ def test_worker_crash_retries_once_with_single_worker(
     assert commands[1][commands[1].index("-n") + 1] == "1"
 
 
-def test_timeout_retries_only_once(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_timeout_retries_only_once(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     shard = SHARDS[0]
     calls = 0
 

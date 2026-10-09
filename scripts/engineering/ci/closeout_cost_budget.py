@@ -92,7 +92,9 @@ def evaluate_closeout_cost_budget(root: Path = ROOT) -> dict[str, Any]:
         if unknown:
             errors.append(f"unknown_shards:{name}:{','.join(unknown)}")
             continue
-        group_seconds[group] = round(sum(float(lane_seconds[item]) for item in shards), 2)
+        group_seconds[group] = round(
+            sum(float(lane_seconds[item]) for item in shards), 2
+        )
 
     if len(selected) != len(set(selected)):
         errors.append("duplicate_shard_assignment")

@@ -335,9 +335,7 @@ def assemble() -> int:
     cost_budget["observed_executor_total_seconds"] = round(
         sum(executor_seconds.values()), 3
     )
-    cost_budget["missing_executor_measurements"] = sorted(
-        missing_executor_measurements
-    )
+    cost_budget["missing_executor_measurements"] = sorted(missing_executor_measurements)
     write_json(EVIDENCE / "closeout/cost-budget.json", cost_budget)
     from scripts.engineering.ci.local_test_telemetry import validate_local_measurement
     from scripts.engineering.ci.update_test_telemetry_baseline import (

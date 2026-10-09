@@ -304,9 +304,7 @@ def _execute_shard(
     final_attempt_log = log
     for attempt in range(1, INFRASTRUCTURE_RETRY_LIMIT + 2):
         command = (
-            canonical_command
-            if attempt == 1
-            else _command(shard, junit, max_workers=1)
+            canonical_command if attempt == 1 else _command(shard, junit, max_workers=1)
         )
         attempt_log = log.with_name(f"{shard.name}.attempt-{attempt}.log")
         if attempt > 1:
@@ -330,7 +328,10 @@ def _execute_shard(
         final_exit_code = exit_code
         final_classification = classification
         final_attempt_log = attempt_log
-        if classification not in {"worker_crash", "timeout"} or attempt > INFRASTRUCTURE_RETRY_LIMIT:
+        if (
+            classification not in {"worker_crash", "timeout"}
+            or attempt > INFRASTRUCTURE_RETRY_LIMIT
+        ):
             break
 
     shutil.copyfile(final_attempt_log, log)

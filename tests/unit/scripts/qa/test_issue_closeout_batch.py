@@ -99,9 +99,7 @@ def test_missing_receipt_keeps_only_affected_issue_not_ready(
 ) -> None:
     monkeypatch.setattr(issue_closeout_batch, "verify_bundle", _admit)
     manifest = _manifest()
-    manifest["issues"][1]["criteria"][0]["requires"] = {
-        "receipt_id": "missing"
-    }
+    manifest["issues"][1]["criteria"][0]["requires"] = {"receipt_id": "missing"}
 
     report, exit_code = issue_closeout_batch.evaluate_batch(
         bundle=_bundle(), manifest=manifest, repo_root=Path.cwd()

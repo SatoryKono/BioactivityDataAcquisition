@@ -48,9 +48,7 @@ def _read_object(path: Path, *, label: str) -> dict[str, Any]:
     return payload
 
 
-def _validate_manifest(
-    manifest: dict[str, Any], schema: dict[str, Any]
-) -> None:
+def _validate_manifest(manifest: dict[str, Any], schema: dict[str, Any]) -> None:
     validator = Draft202012Validator(schema)
     errors = sorted(validator.iter_errors(manifest), key=lambda item: list(item.path))
     if errors:
@@ -166,7 +164,8 @@ def evaluate_batch(
             {
                 "number": issue["number"],
                 "status": (
-                    "ready" if all(item["status"] == "pass" for item in criteria)
+                    "ready"
+                    if all(item["status"] == "pass" for item in criteria)
                     else "not_ready"
                 ),
                 "criteria": criteria,
@@ -203,9 +202,7 @@ def main(argv: list[str] | None = None) -> int:
         output = _safe_output(parsed.output, repo_root)
         bundle = _read_object(parsed.bundle, label="bundle")
         manifest = _read_object(parsed.manifest, label="manifest")
-        manifest_schema = _read_object(
-            parsed.manifest_schema, label="manifest schema"
-        )
+        manifest_schema = _read_object(parsed.manifest_schema, label="manifest schema")
         _validate_manifest(manifest, manifest_schema)
         report, exit_code = evaluate_batch(
             bundle=bundle,

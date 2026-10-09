@@ -88,12 +88,13 @@ def test_coverage_closeout_respects_shrink_only_ci_cost_budget():
     assert round(sum(group_seconds), 2) <= limits["total_lane_seconds"]
     assert max(group_seconds) <= limits["critical_path_seconds"]
     assert limits["total_lane_seconds"] <= budget["baseline"]["total_lane_seconds"]
-    assert (
-        limits["critical_path_seconds"]
-        < budget["baseline"]["critical_path_seconds"]
-    )
+    assert limits["critical_path_seconds"] < budget["baseline"]["critical_path_seconds"]
 
-    for workflow in ("pr-gate", "main-coverage-closeout", "migration-coverage-closeout"):
+    for workflow in (
+        "pr-gate",
+        "main-coverage-closeout",
+        "migration-coverage-closeout",
+    ):
         matrix = next(
             item["proof-coverage-shard"]["matrix"]["parameters"]["group"]
             for item in config["workflows"][workflow]["jobs"]

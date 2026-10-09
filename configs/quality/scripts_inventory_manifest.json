@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-09T08:41:55.317901+00:00",
+  "generated_at": "2026-10-09T08:50:17.905263+00:00",
   "summary": {
     "total_scripts": 649,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 50,
       "scripts": 539,
       "skills": 13,
-      "tests": 456
+      "tests": 457
     }
   },
   "scripts": [
@@ -14840,13 +14840,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
           "line": 199,
           "source_group": "scripts",
           "text": "\"issue-closeout-batch\": \"scripts.engineering.qa.issue_closeout_batch\","
+        },
+        {
+          "path": "tests/unit/scripts/qa/test_issue_closeout_batch.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import issue_closeout_batch"
         }
       ]
     },
@@ -22065,7 +22071,7 @@
         },
         {
           "path": "tests/architecture/test_proof_closeout_workflow_contract.py",
-          "line": 223,
+          "line": 224,
           "source_group": "tests",
           "text": "if \"setup_grafana_screenshot_runtime.sh\" in command"
         }
