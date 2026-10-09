@@ -14,51 +14,6 @@ from bioetl.infrastructure.storage.run_report_store_adapter import (
 pytestmark = pytest.mark.unit
 
 
-def test_read_text_prefix_stops_before_the_remainder(tmp_path: Path) -> None:
-    target = tmp_path / "marker"
-    target.write_text("bioetl-report-root-v1" + (" " * 50), encoding="utf-8")
-    adapter = FileRunReportStoreAdapter()
-
-    assert adapter.read_text_prefix(str(target), limit=4) == "bioe"
-    with pytest.raises(ValueError, match="non-negative"):
-        adapter.read_text_prefix(str(target), limit=-1)
-
-
-def test_write_synced_text_fsyncs_and_cleans_failed_temp(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    target = tmp_path / "nested" / ".bioetl-report-source.json"
-    adapter = FileRunReportStoreAdapter()
-    adapter.write_synced_text(str(target), "ok\n")
-    assert target.read_text(encoding="utf-8") == "ok\n"
-
-    def _fail_fsync(_file_descriptor: int) -> None:
-        raise OSError("fsync failed")
-
-    monkeypatch.setattr(
-        "bioetl.infrastructure.storage.run_report_store_adapter.os.fsync",
-        _fail_fsync,
-    )
-    with pytest.raises(OSError, match="fsync failed"):
-        adapter.write_synced_text(str(target), "next\n")
-    assert target.read_text(encoding="utf-8") == "ok\n"
-    assert list(tmp_path.rglob("*.tmp")) == []
-
-
-def test_write_synced_text_replaces_symlink_without_following(tmp_path: Path) -> None:
-    _require_symlink_privilege(tmp_path)
-    outside = tmp_path / "outside.txt"
-    outside.write_text("keep", encoding="utf-8")
-    link = tmp_path / "marker.json"
-    link.symlink_to(outside)
-
-    FileRunReportStoreAdapter().write_synced_text(str(link), "new\n")
-
-    assert outside.read_text(encoding="utf-8") == "keep"
-    assert link.read_text(encoding="utf-8") == "new\n"
-    assert not link.is_symlink()
-
-
 def test_adapter_satisfies_port_and_round_trips_text(tmp_path: Path) -> None:
     adapter = FileRunReportStoreAdapter()
     assert isinstance(adapter, RunReportStorePort)

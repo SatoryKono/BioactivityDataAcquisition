@@ -74,9 +74,7 @@ async def probe_chembl_status(
     try:
         with adapter_metrics.measure_request("/status"):
             response = await http_client.get_once(
-                CHEMBL_STATUS_URL,
-                headers={"Accept": "application/json"},
-                request_timeout=timeout_seconds,
+                CHEMBL_STATUS_URL, request_timeout=timeout_seconds
             )
         return handle_response(response)
     except health_errors as exc:

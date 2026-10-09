@@ -30,13 +30,7 @@ __all__ = [
 
 @dataclass(frozen=True, slots=True)
 class BatchExecutionStateOutcome:
-    """Counter deltas and metadata produced by one processed batch.
-
-    ``silver_count``/``gold_count`` are confirmed persistence counts.
-    ``quarantined_count`` is the batch total across transform and write
-    stages; ``silver_quarantined_count``/``gold_quarantined_count`` carry the
-    per-layer write rejections for per-layer DQ accounting.
-    """
+    """Counter deltas and metadata produced by one processed batch."""
 
     bronze_count: int
     silver_count: int
@@ -45,25 +39,18 @@ class BatchExecutionStateOutcome:
     quarantined_count: int
     filtered_out_count: int
     source_batch_id: str
-    silver_quarantined_count: int = 0
-    gold_quarantined_count: int = 0
 
 
 @dataclass(frozen=True, slots=True)
 class BatchProcessedOutcome:
-    """One processed batch projected into state-update and DQ payloads.
-
-    ``confirmed_silver_records``/``confirmed_gold_records`` contain only the
-    rows the storage layer actually persisted (empty when the layer was
-    quarantined, blocked, or skipped).
-    """
+    """One processed batch projected into state-update and DQ payloads."""
 
     records: list[BronzeRecord]
     state_update: BatchExecutionStateOutcome
     batch_id: BatchID
     bronze_result: object
-    confirmed_silver_records: list[BronzeRecord]
-    confirmed_gold_records: list[GoldRecord]
+    silver_records: list[BronzeRecord]
+    gold_records: list[GoldRecord]
 
 
 def build_batch_execution_state_update(
@@ -74,14 +61,12 @@ def build_batch_execution_state_update(
     """Project batch-processing output into executor-level state deltas."""
     return BatchExecutionStateOutcome(
         bronze_count=input_record_count,
-        silver_count=output.silver_write.confirmed_count,
-        gold_count=output.gold_write.confirmed_count,
+        silver_count=len(output.silver_records),
+        gold_count=len(output.gold_records),
         gold_excluded_by_contract_count=output.gold_excluded_by_contract_count,
-        quarantined_count=output.total_quarantined_count,
+        quarantined_count=output.quarantined_count,
         filtered_out_count=output.filtered_out_count,
         source_batch_id=str(output.batch_id),
-        silver_quarantined_count=output.silver_quarantined_count,
-        gold_quarantined_count=output.gold_quarantined_count,
     )
 
 
@@ -99,8 +84,8 @@ def build_processed_batch_outcome(
         ),
         batch_id=output.batch_id,
         bronze_result=output.bronze_result,
-        confirmed_silver_records=output.confirmed_silver_records,
-        confirmed_gold_records=output.confirmed_gold_records,
+        silver_records=output.silver_records,
+        gold_records=output.gold_records,
     )
 
 
@@ -117,8 +102,6 @@ def apply_batch_execution_state_update(
         state_update.gold_excluded_by_contract_count
     )
     state.records_quarantined += state_update.quarantined_count
-    state.records_quarantined_silver += state_update.silver_quarantined_count
-    state.records_quarantined_gold += state_update.gold_quarantined_count
     state.records_filtered_out += state_update.filtered_out_count
     state.source_batch_ids.append(state_update.source_batch_id)
 
@@ -139,8 +122,8 @@ def apply_processed_batch_outcome(
         records=outcome.records,
         batch_id=outcome.batch_id,
         bronze_result=outcome.bronze_result,
-        silver_records=outcome.confirmed_silver_records,
-        gold_records=outcome.confirmed_gold_records,
+        silver_records=outcome.silver_records,
+        gold_records=outcome.gold_records,
     )
 
 
@@ -171,8 +154,6 @@ def build_run_statistics(
     records_quarantined: int,
     records_filtered_out: int,
     source_batch_ids: list[str],
-    records_quarantined_silver: int = 0,
-    records_quarantined_gold: int = 0,
 ) -> dict[str, int | list[str]]:
     """Build deterministic run statistics from executor-level counters."""
     return {
@@ -182,8 +163,6 @@ def build_run_statistics(
         "records_gold": records_gold,
         "records_gold_excluded_by_contract": records_gold_excluded_by_contract,
         "records_quarantined": records_quarantined,
-        "records_quarantined_silver": records_quarantined_silver,
-        "records_quarantined_gold": records_quarantined_gold,
         "records_filtered_out": records_filtered_out,
         "source_batch_ids": list(dict.fromkeys(source_batch_ids)),
     }

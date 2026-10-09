@@ -90,7 +90,6 @@ class DQReportContext:
     silver_primary_keys: list[str] | None = None
     silver_input_count: int | None = None
     silver_quarantined_count: int = 0
-    gold_quarantined_count: int = 0
     silver_previous_schema: dict[str, str] | None = None
     silver_output_path: str | None = None
     silver_key_nullability_rules: (

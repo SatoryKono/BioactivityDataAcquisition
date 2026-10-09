@@ -2,7 +2,7 @@ version: 1
 policy_scope: non_canonical_evidence_summary
 summary_path: docs/reports/evidence/project-test-health/SUMMARY.md
 owner: "@bioetl-quality"
-last_verified: "2026-10-08"
+last_verified: "2026-07-13"
 freshness_window_days: 30
 verification_scope: tracked_test_module_inventory
 source_ref: c9d639733928a2b699be2cc5031a38c4b3a3707e

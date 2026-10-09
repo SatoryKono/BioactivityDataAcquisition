@@ -91,36 +91,6 @@ def instantiate_test_transformer[TTransformer](
     if context_kwargs:
         dependencies = dataclasses.replace(dependencies, **context_kwargs)
 
-    from bioetl.application.pipelines.common.base_publication_transformer import (
-        BasePublicationTransformer,
-    )
-
-    if (
-        issubclass(transformer_class, BasePublicationTransformer)
-        and "publication_classification" not in kwargs
-    ):
-        from bioetl.domain.mapping.publication_type_classification import (
-            classification_install,
-        )
-        from tests.helpers.publication_type_classification import (
-            initialize_test_publication_type_classification,
-        )
-
-        if classification_install.data is None:
-            initialize_test_publication_type_classification()
-        kwargs["publication_classification"] = classification_install.data
-        if "publication_vocabulary" not in kwargs:
-            from pathlib import Path
-
-            from bioetl.infrastructure.config.publication_controlled_vocabulary_loader import (
-                PublicationControlledVocabularyLoader,
-            )
-
-            configs_root = Path(__file__).resolve().parents[2] / "configs"
-            kwargs["publication_vocabulary"] = PublicationControlledVocabularyLoader(
-                configs_root
-            ).load()
-
     constructor = cast(Callable[..., TTransformer], transformer_class)
     return constructor(
         dependencies=dependencies,

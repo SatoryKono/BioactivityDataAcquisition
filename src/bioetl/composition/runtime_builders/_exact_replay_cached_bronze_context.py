@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import is_dataclass, replace
 from pathlib import Path, PurePosixPath
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
 from bioetl.composition.control_plane_paths import control_plane_root
@@ -63,7 +63,7 @@ def bind_cached_bronze_context[T](
     if is_dataclass(ctx):
         if isinstance(ctx, type):
             raise TypeError("cached_bronze binding requires a dataclass instance")
-        return replace(ctx, cached_bronze=cached_bronze)
+        return cast("T", replace(ctx, cached_bronze=cached_bronze))
     # Bind in place so callers retain the original context type and methods.
     try:
         object.__setattr__(ctx, "cached_bronze", cached_bronze)

@@ -1,17 +1,7 @@
-"""Shared batch-operation policy exports."""
+"""Shared OPERATION_ERRORS re-export for RF-005 batch runtime consumers."""
 
 from __future__ import annotations
 
 from bioetl.application.core.batch_operation_errors import (
-    OPERATION_ERRORS,
-    OperationErrorTypes,
-    is_operation_error,
-    operation_error_type_name,
+    OPERATION_ERRORS as OPERATION_ERRORS,
 )
-
-__all__ = [
-    "OPERATION_ERRORS",
-    "OperationErrorTypes",
-    "is_operation_error",
-    "operation_error_type_name",
-]

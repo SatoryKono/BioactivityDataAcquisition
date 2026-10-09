@@ -50,9 +50,6 @@ from bioetl.composition.providers._chembl_target_protein_classification_data_sou
 from bioetl.composition.providers.publication_term_pubmed_enricher import (
     create_pubmed_publication_term_enricher,
 )
-from bioetl.composition.bootstrap.composite_infrastructure_context import (
-    current_target_protein_classification_mapping,
-)
 from bioetl.composition.providers.registration_bio_uniprot import (
     _extract_uniprot_mapping_seed_ids,
     _resolve_uniprot_mapping_base_url,
@@ -97,7 +94,6 @@ def _create_chembl_data_source(
                     logger=logger,
                 ),
                 logger=logger,
-                target_type_mapping_data=current_target_protein_classification_mapping(),
             ),
             filter_config,
             logger,

@@ -2,27 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from typing import Protocol
-
-from bioetl.domain.control_plane.historical_replay_identity import (
-    HistoricalReplayRunIdentityRecord,
-)
-from bioetl.domain.control_plane.historical_replay_identity import (
-    build_historical_certification_payload as _build_historical_certification_payload,
-)
-from bioetl.domain.control_plane.historical_replay_identity import (
-    build_historical_certified_identity_payload as _build_historical_certified_identity_payload,
-)
-from bioetl.domain.control_plane.historical_replay_identity import (
-    build_historical_certified_identity_payload_from_record as _build_historical_certified_identity_payload_from_record,
-)
-from bioetl.domain.control_plane.historical_replay_identity import (
-    build_historical_identity_core_payload as _build_historical_identity_core_payload,
-)
-from bioetl.domain.control_plane.historical_replay_identity import (
-    build_historical_run_identity_payload as _build_historical_run_identity_payload,
-)
 
 __all__ = [
     "HistoricalReplayRunIdentity",
@@ -35,6 +16,18 @@ __all__ = [
     "build_historical_identity_core_payload",
     "build_historical_run_identity_payload",
 ]
+
+
+@dataclass(frozen=True, slots=True)
+class HistoricalReplayRunIdentityRecord:
+    """Core run identity anchors shared by historical replay inventory records."""
+
+    manifest_id: str
+    run_id: str
+    pipeline_name: str
+    provider: str
+    entity: str
+    execution_context: str
 
 
 HistoricalReplayRunIdentity = HistoricalReplayRunIdentityRecord
@@ -116,17 +109,32 @@ def build_historical_certified_identity_payload_from_record(
     **extra_fields: object,
 ) -> dict[str, object]:
     """Build one JSON-safe historical replay row from its identity record."""
-    return _build_historical_certified_identity_payload_from_record(
-        record,
-        **extra_fields,
+    payload = build_historical_identity_core_payload(record)
+    payload.update(
+        {
+            "certification_status": record.certification_status,
+            "replay_occurrence_kind": record.replay_occurrence_kind,
+            "blocking_reasons": list(record.blocking_reasons),
+        }
     )
+    conflicting_fields = set(extra_fields).intersection(payload)
+    if conflicting_fields:
+        raise ValueError(
+            "Extra fields cannot override certified identity fields: "
+            f"{sorted(conflicting_fields)}"
+        )
+    payload.update(extra_fields)
+    return payload
 
 
 def build_historical_identity_core_payload(
     identity: HistoricalReplayRunIdentity | _HistoricalReplayCertifiedIdentity,
 ) -> dict[str, object]:
     """Return the shared core payload for one historical replay identity row."""
-    return _build_historical_identity_core_payload(identity)
+    return {
+        field.name: getattr(identity, field.name)
+        for field in fields(HistoricalReplayRunIdentityRecord)
+    }
 
 
 def build_historical_run_identity_payload(
@@ -143,18 +151,19 @@ def build_historical_run_identity_payload(
     **extra_fields: object,
 ) -> dict[str, object]:
     """Return one JSON-safe historical run identity payload."""
-    return _build_historical_run_identity_payload(
-        manifest_id=manifest_id,
-        run_id=run_id,
-        pipeline_name=pipeline_name,
-        provider=provider,
-        entity=entity,
-        execution_context=execution_context,
-        certification_status=certification_status,
-        replay_occurrence_kind=replay_occurrence_kind,
-        blocking_reasons=blocking_reasons,
-        **extra_fields,
-    )
+    payload: dict[str, object] = {
+        "manifest_id": manifest_id,
+        "run_id": run_id,
+        "pipeline_name": pipeline_name,
+        "provider": provider,
+        "entity": entity,
+        "execution_context": execution_context,
+        "certification_status": certification_status,
+        "replay_occurrence_kind": replay_occurrence_kind,
+        "blocking_reasons": list(blocking_reasons),
+    }
+    payload.update(extra_fields)
+    return payload
 
 
 def build_historical_certification_payload(
@@ -164,11 +173,11 @@ def build_historical_certification_payload(
     blocking_reasons: tuple[str, ...] = (),
 ) -> dict[str, object]:
     """Return common certification fields shared by historical replay rows."""
-    return _build_historical_certification_payload(
-        certification_status=certification_status,
-        replay_occurrence_kind=replay_occurrence_kind,
-        blocking_reasons=blocking_reasons,
-    )
+    return {
+        "certification_status": certification_status,
+        "replay_occurrence_kind": replay_occurrence_kind,
+        "blocking_reasons": blocking_reasons,
+    }
 
 
 def build_historical_certified_identity_payload(
@@ -180,8 +189,13 @@ def build_historical_certified_identity_payload(
     **extra_fields: object,
 ) -> dict[str, object]:
     """Return one JSON-safe historical replay row with shared identity anchors."""
-    return _build_historical_certified_identity_payload(
-        identity,
+    return build_historical_run_identity_payload(
+        manifest_id=identity.manifest_id,
+        run_id=identity.run_id,
+        pipeline_name=identity.pipeline_name,
+        provider=identity.provider,
+        entity=identity.entity,
+        execution_context=identity.execution_context,
         certification_status=certification_status,
         replay_occurrence_kind=replay_occurrence_kind,
         blocking_reasons=blocking_reasons,

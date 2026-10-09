@@ -290,10 +290,7 @@ def configure_logging(
         )
 
         formatter = structlog.stdlib.ProcessorFormatter(
-            foreign_pre_chain=[
-                structlog.stdlib.ExtraAdder(),
-                *shared_processors,
-            ],
+            foreign_pre_chain=shared_processors,
             processors=[
                 structlog.stdlib.ProcessorFormatter.remove_processors_meta,
                 renderer,

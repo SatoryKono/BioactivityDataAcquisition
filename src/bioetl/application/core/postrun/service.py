@@ -8,6 +8,9 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.batch_shared_operation_errors import (
+    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
+)
 from bioetl.application.core.pipeline_span_lifecycle import (
     build_pipeline_span_attributes,
     start_current_span,
@@ -20,9 +23,6 @@ from bioetl.application.core.postrun._service_collaborators import (
 )
 from bioetl.application.core.postrun._service_support import (
     PostrunServiceSupportMixin,
-)
-from bioetl.application.services.batch_processing.operation_errors import (
-    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
 from bioetl.application.services.medallion.medallion_types import VacuumResult
 from bioetl.application.services.quality.data_quality_service import DataQualityService

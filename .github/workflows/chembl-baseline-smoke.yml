@@ -1,6 +1,54 @@
 name: ChemblBaseline Smoke
 
 on:
+  push:
+    branches: [main, master, develop]
+    paths:
+      - ".github/workflows/chembl-baseline-smoke.yml"
+      - ".github/actions/setup-python-uv/**"
+      - "configs/workflows/chembl_baseline.yaml"
+      - "docs/03-guides/workflows.md"
+      - "docs/05-operations/runbooks/workflow-control-plane.md"
+      - "src/bioetl/application/services/control_plane/workflow/**"
+      - "src/bioetl/application/services/workflow_runner_service.py"
+      - "src/bioetl/application/services/workflow_transform_service.py"
+      - "src/bioetl/application/workflow/transforms/**"
+      - "src/bioetl/domain/ports/workflow_foreign_key_reconciliation.py"
+      - "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py"
+      - "src/bioetl/interfaces/cli/commands/_workflow_support.py"
+      - "src/bioetl/interfaces/cli/commands/workflow.py"
+      - "tests/architecture/test_chembl_baseline_smoke_workflow.py"
+      - "tests/integration/workflow/test_workflow_foreign_key_reconciliation.py"
+      - "tests/unit/application/services/control_plane/test_workflow_execution_service.py"
+      - "tests/unit/application/services/test_workflow_runner_service.py"
+      - "tests/unit/application/services/test_workflow_transform_service.py"
+      - "tests/unit/application/workflow/test_reconcile_foreign_keys.py"
+      - "tests/unit/infrastructure/config/test_workflow_config_api.py"
+      - "tests/unit/interfaces/cli/test_workflow_cli.py"
+  pull_request:
+    branches: [main, master, develop]
+    paths:
+      - ".github/workflows/chembl-baseline-smoke.yml"
+      - ".github/actions/setup-python-uv/**"
+      - "configs/workflows/chembl_baseline.yaml"
+      - "docs/03-guides/workflows.md"
+      - "docs/05-operations/runbooks/workflow-control-plane.md"
+      - "src/bioetl/application/services/control_plane/workflow/**"
+      - "src/bioetl/application/services/workflow_runner_service.py"
+      - "src/bioetl/application/services/workflow_transform_service.py"
+      - "src/bioetl/application/workflow/transforms/**"
+      - "src/bioetl/domain/ports/workflow_foreign_key_reconciliation.py"
+      - "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py"
+      - "src/bioetl/interfaces/cli/commands/_workflow_support.py"
+      - "src/bioetl/interfaces/cli/commands/workflow.py"
+      - "tests/architecture/test_chembl_baseline_smoke_workflow.py"
+      - "tests/integration/workflow/test_workflow_foreign_key_reconciliation.py"
+      - "tests/unit/application/services/control_plane/test_workflow_execution_service.py"
+      - "tests/unit/application/services/test_workflow_runner_service.py"
+      - "tests/unit/application/services/test_workflow_transform_service.py"
+      - "tests/unit/application/workflow/test_reconcile_foreign_keys.py"
+      - "tests/unit/infrastructure/config/test_workflow_config_api.py"
+      - "tests/unit/interfaces/cli/test_workflow_cli.py"
   workflow_dispatch:
 
 concurrency:

@@ -42,29 +42,6 @@ class ManifestPublicationIdentityKwargs(TypedDict):
     reproducibility_context: ManifestReproducibilityContext | None
 
 
-class EffectiveConfigArtifactKwargs(ManifestPublicationIdentityKwargs):
-    """Keyword payload for effective-config artifact persistence."""
-
-    contract_identity: RunManifestContractIdentity
-
-
-def build_effective_config_artifact_kwargs(
-    *,
-    ctx: PipelineRunContext,
-    inputs: RunnerInputs,
-    publication_context: ResolvedManifestPublicationContext,
-) -> EffectiveConfigArtifactKwargs:
-    """Build the stable artifact-builder call contract from one resolved context."""
-    return {
-        "ctx": ctx,
-        "inputs": inputs,
-        "provider": publication_context.provider,
-        "entity": publication_context.entity,
-        "reproducibility_context": publication_context.reproducibility_context,
-        "contract_identity": publication_context.contract_identity,
-    }
-
-
 def _resolve_provider_entity(
     *,
     pipeline_name: str,

@@ -20,9 +20,6 @@ class MemoryReportStore:
         self.files[path] = content
         self.times[path] = float(len(self.times))
 
-    def write_synced_text(self, path: str, content: str) -> None:
-        self.write_text(path, content)
-
     def read_identity_text(self, path: str) -> str:
         """The in-memory adapter has no filesystem I/O to avoid."""
         return self.read_text(path)
@@ -31,11 +28,6 @@ class MemoryReportStore:
         if path not in self.files:
             raise FileNotFoundError(path)
         return self.files[path]
-
-    def read_text_prefix(self, path: str, *, limit: int) -> str:
-        if limit < 0:
-            raise ValueError("limit must be non-negative")
-        return self.read_text(path)[:limit]
 
     def sha256(self, path: str) -> str:
         return hashlib.sha256(self.read_text(path).encode("utf-8")).hexdigest()

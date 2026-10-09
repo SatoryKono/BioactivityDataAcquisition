@@ -29,6 +29,7 @@ if TYPE_CHECKING:
 
 
 def _build_resume_contract(
+    *,
     manifest: RunManifest,
     requested_exact_replay: bool,
     resume_requested: bool,

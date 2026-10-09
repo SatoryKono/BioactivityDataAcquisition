@@ -24,7 +24,7 @@ transport uses `github/codeql-action/upload-sarif`.
 
 ## Purpose
 
-This page is the canonical published inventory of the **54** live GitHub Actions
+This page is the canonical published inventory of the **52** live GitHub Actions
 workflow files tracked under `.github/workflows/` on the default branch.
 The count is derived from those tracked `*.yml` files; it is not a separately
 maintained target and it is **not** equal to the GitHub Actions API
@@ -34,7 +34,7 @@ Live GET `2026-09-17`: API `total_count` is **79**.
 
 | Bucket | Count | Meaning |
 | --- | --- | --- |
-| Tracked `.github/workflows/*.yml` | 54 | Canonical inventory on `main`; this page |
+| Tracked `.github/workflows/*.yml` | 52 | Canonical inventory on `main`; this page |
 | GitHub-hosted `dynamic/**` | 10 | Dependabot, CodeQL default, agent reviewers; not PR gates |
 | GitHub-only orphan temp/codex IDs | 16 | Files left `main`; `disabled_manually` after #10265 |
 | GitHub-only residual deleted files | 3 | Former tracked workflows; `disabled_manually`; not gates |
@@ -75,57 +75,55 @@ new spend/safety decision.
 
 | File | Workflow name | Triggers | GitHub live state | Decision | Primary purpose |
 | --- | --- | --- | --- | --- | --- |
-| `branch-hygiene.yml` | `Branch Hygiene` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Validates PR branch names and generates the periodic branch-cleanup inventory |
-| `chembl-baseline-smoke.yml` | `ChemblBaseline Smoke` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | ChEMBL baseline smoke and reconciliation checks |
+| `branch-hygiene.yml` | `Branch Hygiene` | `pull_request`, `schedule`, `workflow_dispatch` | `active` | `active` | Validates PR branch names and generates the periodic branch-cleanup inventory |
+| `chembl-baseline-smoke.yml` | `ChemblBaseline Smoke` | `push`, `pull_request`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | ChEMBL baseline smoke and reconciliation checks |
 | `commit-lint.yml` | `Commit Lint` | `workflow_call` | `active` | `active` | Conventional-commit policy gate |
-| `compiled-artifacts-block.yml` | `Block Compiled Python Artifacts` | `workflow_call` | `active` | `active` | Blocks checked-in `.pyc` and similar compiled artifacts; re-enabled #10263 as `pr-required.yml` owner |
+| `compiled-artifacts-block.yml` | `Block Compiled Python Artifacts` | `workflow_call`, `push` | `active` | `active` | Blocks checked-in `.pyc` and similar compiled artifacts; re-enabled #10263 as `pr-required.yml` owner |
 | `consolidation-gates.yml` | `consolidation-gates` | `workflow_dispatch` | `active` | `active` | Merge-campaign quality/architecture gate |
-| `contract-governance-fast-check.yml` | `Contract Governance Fast Check` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Fast contract-registry and schema governance checks |
-| `dashboard-first-window-noscroll.yml` | `Dashboard first-window no-scroll` | `workflow_dispatch` | `active` | `active` | First-window no-scroll gate for all seven shipped dashboard UIDs (DASH-FIT-004) |
-| `docs.yml` | `Docs & Diagrams` | `workflow_call` | `active` | `active` | Docs governance, MkDocs validation, Mermaid validation, diagram drift; re-enabled #10263 as `pr-required.yml` owner |
-| `duplication-complexity.yml` | `Duplication and Complexity Checks` | `workflow_call` | `active` | `active` | Duplication, constructor-args, and complexity gates |
-| `e2e-matrix-health.yml` | `E2E Matrix Health` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Blocking and nightly E2E matrix smoke lanes |
-| `import-linter.yml` | `Lint and Architecture Gates` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Ruff/import-linter/architecture fast gates |
-| `main-integrity.yml` | `Main Integrity` | `push`, `workflow_dispatch` | `active` | `active` | Post-merge smoke, root hygiene, and Docker image gate |
-| `no-partial-tree-commits.yml` | `No partial-tree commits` | `workflow_dispatch` | `active` | `active` | Rejects partial-tree commits that would collapse history for downstream PRs (#11709) |
+| `contract-governance-fast-check.yml` | `Contract Governance Fast Check` | `push`, `pull_request` | `disabled_manually` | `keep-disabled` | Fast contract-registry and schema governance checks |
+| `dashboard-first-window-noscroll.yml` | `Dashboard first-window no-scroll` | `push`, `pull_request` | `active` | `active` | First-window no-scroll gate for all seven shipped dashboard UIDs (DASH-FIT-004) |
+| `docs.yml` | `Docs & Diagrams` | `workflow_call`, `push` | `active` | `active` | Docs governance, MkDocs validation, Mermaid validation, diagram drift; re-enabled #10263 as `pr-required.yml` owner |
+| `duplication-complexity.yml` | `Duplication and Complexity Checks` | `workflow_call`, `push` | `active` | `active` | Duplication, constructor-args, and complexity gates |
+| `e2e-matrix-health.yml` | `E2E Matrix Health` | `push`, `pull_request`, `schedule`, `workflow_dispatch` | `active` | `active` | Blocking and nightly E2E matrix smoke lanes |
+| `import-linter.yml` | `Lint and Architecture Gates` | `workflow_call`, `push`, `workflow_dispatch` | `active` | `active` | Ruff/import-linter/architecture fast gates |
+| `no-partial-tree-commits.yml` | `No partial-tree commits` | `push`, `pull_request` | `active` | `active` | Rejects partial-tree commits that would collapse history for downstream PRs (#11709) |
 | `opencode-pr-review.yml` | `opencode-pr-review` | `workflow_dispatch` | `active` | `active` | Dispatch-only stub (#11012); remote OpenCode installer removed until a digest pin exists |
 | `opencode-triage.yml` | `opencode-triage` | `workflow_dispatch` | `active` | `active` | Dispatch-only stub (#11012); remote OpenCode installer removed until a digest pin exists |
 | `pr-required.yml` | `PR Gate Complete` | `pull_request`, `workflow_dispatch` | `active` | `active` | Always-materialized fail-closed coordinator; GitHub required context is job `pr-gate-complete` (ruleset 13643213) |
-| `port-contracts.yml` | `Port Contract Tests` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Port-protocol and hypothesis contract tests |
-| `provider-contract-drift.yml` | `Provider Contract Drift` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Provider contract replay/drift gate |
-| `router-v7-bridge.yml` | `Router 7 bridge candidate` | `workflow_dispatch` | `active` | `active` | Path-filtered migration candidate tests, browser build, and dependency audit; host acceptance remains separate |
-| `root-hygiene.yml` | `Root Hygiene` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Root-surface cleanliness and governance checks |
-| `schema-governance.yml` | `Schema Governance` | `workflow_call` | `active` | `active` | Generated artifacts, schema parity, schema drift |
-| `codeql.yml` | `CodeQL` | `workflow_call` | `active` | `active` | Advanced Python CodeQL SAST; default setup off |
-| `dependency-review.yml` | `Dependency review` | `workflow_dispatch` | `active` | `active` | PR-time HIGH/CRITICAL dependency review on lockfile/manifest changes |
-| `security.yml` | `Security Scans` | `workflow_call` | `active` | `active` | Secrets, pip-audit, Bandit, Gitleaks, OSV-Scanner |
-| `zizmor.yml` | `zizmor` | `workflow_call`, `workflow_dispatch` | `active` | `active` | High-confidence GitHub Actions YAML audit |
-| `semantic-governance.yml` | `Semantic Pipeline Governance` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Semantic pipeline contract/policy governance |
-| `skills-consistency.yml` | `Skills Consistency` | `push`, `pull_request`, `workflow_dispatch` | `active` | `active` | Path-filtered local skill mirrors plus Codex–Junie runtime parity |
-| `tests.yml` | `Tests` | `workflow_call` | `active` | `active` | Main test matrix, DQ gates, coverage, telemetry, control-plane E2E |
-| `type-checking.yml` | `Type Checking (Strict)` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Strict mypy lane |
-| `validate-vendored-mermaid-assets.yml` | `Validate vendored Mermaid assets` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Vendored Mermaid asset presence check |
-| `coderabbit.yml` | `CodeRabbit` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | CodeRabbit CLI automated code review |
+| `port-contracts.yml` | `Port Contract Tests` | `push`, `pull_request`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Port-protocol and hypothesis contract tests |
+| `provider-contract-drift.yml` | `Provider Contract Drift` | `push`, `pull_request`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Provider contract replay/drift gate |
+| `router-v7-bridge.yml` | `Router 7 bridge candidate` | `push`, `pull_request` | `active` | `active` | Path-filtered migration candidate tests, browser build, and dependency audit; host acceptance remains separate |
+| `root-hygiene.yml` | `Root Hygiene` | `workflow_call`, `push`, `workflow_dispatch` | `active` | `active` | Root-surface cleanliness and governance checks |
+| `schema-governance.yml` | `Schema Governance` | `workflow_call`, `push` | `active` | `active` | Generated artifacts, schema parity, schema drift |
+| `codeql.yml` | `CodeQL` | `workflow_call`, `push`, `schedule` | `active` | `active` | Advanced Python CodeQL SAST; default setup off |
+| `dependency-review.yml` | `Dependency review` | `pull_request` | `active` | `active` | PR-time HIGH/CRITICAL dependency review on lockfile/manifest changes |
+| `security.yml` | `Security Scans` | `workflow_call`, `push` | `active` | `active` | Secrets, pip-audit, Bandit, Gitleaks, OSV-Scanner |
+| `zizmor.yml` | `zizmor` | `push`, `pull_request` | `active` | `active` | High-confidence GitHub Actions YAML audit |
+| `semantic-governance.yml` | `Semantic Pipeline Governance` | `push`, `pull_request` | `disabled_manually` | `keep-disabled` | Semantic pipeline contract/policy governance |
+| `skills-consistency.yml` | `Skills Consistency` | `push`, `pull_request`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Local skill mirrors plus Codex–Junie runtime parity |
+| `tests.yml` | `Tests` | `workflow_call`, `push` | `active` | `active` | Main test matrix, DQ gates, coverage, telemetry, control-plane E2E |
+| `type-checking.yml` | `Type Checking (Strict)` | `workflow_call`, `push`, `workflow_dispatch` | `active` | `active` | Strict mypy lane |
+| `validate-vendored-mermaid-assets.yml` | `Validate vendored Mermaid assets` | `push`, `pull_request` | `disabled_manually` | `keep-disabled` | Vendored Mermaid asset presence check |
+| `coderabbit.yml` | `CodeRabbit` | `push`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | CodeRabbit CLI automated code review |
 
 ### Scheduled / periodic workflows
 
 | File | Workflow name | Triggers | GitHub live state | Decision | Primary purpose |
 | --- | --- | --- | --- | --- | --- |
-| `architecture-docs-nightly.yml` | `Architecture Docs Nightly` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Regenerates architecture dependency-doc artifacts |
-| `architecture.yml` | `Architecture Metrics` | `workflow_dispatch` | `active` | `active` | Heavy architecture metrics and periodic boundary baselines |
+| `architecture-docs-nightly.yml` | `Architecture Docs Nightly` | `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Regenerates architecture dependency-doc artifacts |
+| `architecture.yml` | `Architecture Metrics` | `schedule`, `workflow_dispatch` | `active` | `active` | Heavy architecture metrics and periodic boundary baselines |
 | `contract-tests.yml` | `Monthly Contract Tests` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Live API lane stays local; schedule removed (#11190) |
 | `diagram-nightly.yml` | `Diagram Nightly Regression` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Nightly canary and phase2 stay off; PR lint is docs.yml (#11196) |
-| `docs-kpi-weekly.yml` | `Docs KPI Weekly` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Weekly docs KPI plus calendar runtime-mirror/freshness drift |
-| `github-settings-quarterly-review.yml` | `Quarterly GitHub Settings Review` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Read-only quarterly GitHub settings review delegated by `nightly.yml` |
-| `memory-freshness.yml` | `Memory freshness` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Repository memory freshness and contract checks |
-| `memory-retention.yml` | `Memory Retention Policy` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Weekly and change-triggered non-destructive episodic-memory retention policy check |
-| `mutation-testing.yml` | `Mutation Testing` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Sole Sunday mutation owner (#10263 exception); push and pull_request stay off |
-| `nightly.yml` | `Nightly` | `schedule`, `workflow_dispatch` | `active` | `active` | Single schedule for full tests, E2E, weekly mutation, and Monday lanes |
-| `nightly-replay-parity.yml` | `nightly-replay-parity` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Replay/determinism parity validation |
-| `performance-nightly.yml` | `Performance Nightly` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Performance-regression gate |
+| `docs-kpi-weekly.yml` | `Docs KPI Weekly` | `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Weekly docs KPI plus calendar runtime-mirror/freshness drift |
+| `github-settings-quarterly-review.yml` | `Quarterly GitHub Settings Review` | `schedule`, `workflow_dispatch` | `active` | `active` | Read-only quarterly GitHub settings review |
+| `memory-freshness.yml` | `Memory freshness` | `pull_request`, `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Repository memory freshness and contract checks |
+| `memory-retention.yml` | `Memory Retention Policy` | `schedule`, `pull_request`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Weekly and change-triggered non-destructive episodic-memory retention policy check |
+| `mutation-testing.yml` | `Mutation Testing` | `push`, `pull_request`, `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Mutation-testing lane with scheduled coverage |
+| `nightly-replay-parity.yml` | `nightly-replay-parity` | `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Replay/determinism parity validation |
+| `performance-nightly.yml` | `Performance Nightly` | `schedule`, `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Performance-regression gate |
 | `pr-hygiene.yml` | `PR Hygiene` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Stale report-noise draft PR cleanup under repository hygiene policy |
 | `quality-debt-weekly.yml` | `Quality Debt Weekly` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Weekly quality-debt scorecard/report lane |
-| `scorecard.yml` | `OpenSSF Scorecard` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Weekly non-blocking OpenSSF Scorecard baseline |
+| `scorecard.yml` | `OpenSSF Scorecard` | `schedule`, `workflow_dispatch`, `push` | `active` | `active` | Weekly non-blocking OpenSSF Scorecard baseline |
 | `stale.yml` | `Stale` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Issue/PR staleness automation |
 | `vacuum.yml` | `Weekly VACUUM` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Schedule removed; local vacuum only (#11189) |
 
@@ -134,7 +132,7 @@ new spend/safety decision.
 | File | Workflow name | Triggers | GitHub live state | Decision | Primary purpose |
 | --- | --- | --- | --- | --- | --- |
 | `dashboard-render-host.yml` | `Dashboard render release evidence (host-only)` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Dashboard rendering and release evidence generation on self-hosted runner |
-| `docker.yml` | `Docker Build & Compose Validation` | `push`, `workflow_call`, `workflow_dispatch` | `active` | `active` | Path-filtered non-main push validation; `main-integrity.yml` owns the `main` invocation |
+| `docker.yml` | `Docker Build & Compose Validation` | `workflow_call`, `push`, `workflow_dispatch` | `active` | `active` | Optional helper-image and compose validation |
 | `labeler.yml` | `Labeler` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Applies repository labels to PRs |
 | `release.yml` | `Release` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Publish stays outside Actions (#11182) |
 
@@ -164,6 +162,7 @@ enable heavy nightlies without Actions spend evidence. Do not reopen #9975 or
 | `labeler.yml` | `pull_request_target`; re-enable only after live GitHub labels match `.github/labeler.yml` and `docs/00-project/governance/github-label-taxonomy.md` |
 | `memory-freshness.yml` | Optional memory lane; not a `pr-required.yml` owner |
 | `memory-retention.yml` | Optional memory lane; extra scheduled spend |
+| `mutation-testing.yml` | Heavy weekly/PR mutation campaign; extra spend |
 | `nightly-replay-parity.yml` | Heavy nightly replay; extra spend |
 | `performance-nightly.yml` | Heavy nightly benchmarks; extra spend |
 | `port-contracts.yml` | Supporting contracts lane; not invoked by `pr-required.yml` |
@@ -174,6 +173,7 @@ enable heavy nightlies without Actions spend evidence. Do not reopen #9975 or
 | `reusable-mermaid-setup.yml` | Deprecated; use `.github/actions/setup-mermaid` |
 | `reusable-setup.yml` | Deprecated; use `.github/actions/setup-python-uv` |
 | `semantic-governance.yml` | Overlaps schema/docs governance; not a `pr-required.yml` owner |
+| `skills-consistency.yml` | Optional AI-runtime parity lane; not a `pr-required.yml` owner |
 | `stale.yml` | YAML 14/7 PR stale/close contradicts `.github/PULL_REQUEST_HYGIENE.md` (21 days, draft + report-noise only). Do not enable until days/exemptions match that policy. Do not weaken stale to close non-draft engineering PRs. |
 | `vacuum.yml` | Optional Delta VACUUM. Schedule removed; run locally (#11189) |
 | `validate-vendored-mermaid-assets.yml` | Covered by `docs.yml` Mermaid jobs when that owner is active |
@@ -186,7 +186,6 @@ Route only to **active** GitHub lanes. Keep-disabled files above do not run.
 | --- | --- |
 | Main PR required-check coordinator | `pr-required.yml` |
 | Test matrix owner | `tests.yml` |
-| Weekly mutation (Sunday 00:00 UTC) | `mutation-testing.yml` |
 | Docs, MkDocs, Mermaid, diagram drift | `docs.yml` |
 | Dashboard first-window no-scroll (DASH-FIT-004) | `dashboard-first-window-noscroll.yml` |
 | Schema and generated-artifact drift | `schema-governance.yml` |
@@ -207,9 +206,6 @@ Route only to **active** GitHub lanes. Keep-disabled files above do not run.
   `keep-disabled`.
 - YAML `on.schedule` on a `keep-disabled` workflow is a cadence claim only; it
   does **not** run while GitHub `state` is `disabled_manually`.
-- `mutation-testing.yml` is the #10263 exception: GitHub `state` is `active`,
-  and the Sunday cron is the live mutation owner. CircleCI `mutation` is the
-  manual backup.
 - If a workflow file is added, removed, renamed, or materially repurposed,
   update this page together with any workflow-specific governance docs. The
   focused parity command above must report neither missing nor extra workflow
