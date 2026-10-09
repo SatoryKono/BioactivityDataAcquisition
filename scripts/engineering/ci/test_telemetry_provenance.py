@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -26,6 +27,36 @@ TEST_INPUTS = (
 )
 
 
+def _url_origin(url: str) -> tuple[str, str | None, int | None]:
+    """Return the normalized origin used to decide whether auth may be reused."""
+    parsed = urllib.parse.urlsplit(url)
+    scheme = parsed.scheme.lower()
+    port = parsed.port
+    if port is None:
+        port = {"http": 80, "https": 443}.get(scheme)
+    return scheme, parsed.hostname, port
+
+
+class _SameOriginAuthRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Keep authorization only when urllib redirects within the same origin."""
+
+    def redirect_request(
+        self,
+        req: urllib.request.Request,
+        fp: Any,
+        code: int,
+        msg: str,
+        headers: Any,
+        newurl: str,
+    ) -> urllib.request.Request | None:
+        redirected = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if redirected is not None and _url_origin(req.full_url) != _url_origin(
+            redirected.full_url
+        ):
+            redirected.remove_header("Authorization")
+        return redirected
+
+
 def _read_github_json(path: str) -> dict[str, Any]:
     """Read the fixed repository API once; access/network failures fail closed."""
     url = f"https://api.github.com/repos/{REPOSITORY}/{path}"
@@ -37,7 +68,8 @@ def _read_github_json(path: str) -> dict[str, Any]:
     if token:
         headers["Authorization"] = f"Bearer {token}"
     request = urllib.request.Request(url, headers=headers)
-    with urllib.request.urlopen(request, timeout=15) as response:
+    opener = urllib.request.build_opener(_SameOriginAuthRedirectHandler())
+    with opener.open(request, timeout=15) as response:
         payload = json.load(response)
     if not isinstance(payload, dict):
         raise ValueError("GitHub response must be an object")

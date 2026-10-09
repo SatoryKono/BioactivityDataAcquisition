@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import subprocess
+import urllib.request
 from pathlib import Path
 
 import pytest
@@ -16,9 +18,23 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
-def bridge(tmp_path: Path):
+def bridge(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", os.devnull)
+    monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
+
     def git(*args: str) -> str:
-        return subprocess.check_output(["git", *args], cwd=tmp_path, text=True).strip()
+        return subprocess.check_output(
+            [
+                "git",
+                "-c",
+                "commit.gpgsign=false",
+                "-c",
+                f"core.hooksPath={os.devnull}",
+                *args,
+            ],
+            cwd=tmp_path,
+            text=True,
+        ).strip()
 
     git("init", "-q")
     git("config", "user.name", "Provenance fixture")
@@ -58,6 +74,50 @@ def bridge(tmp_path: Path):
         },
     }
     return tmp_path, merge, payload, receipt, git
+
+
+@pytest.mark.parametrize(
+    "destination",
+    [
+        "http://api.github.com/repos/example",
+        "https://uploads.github.com/repos/example",
+        "https://api.github.com:8443/repos/example",
+    ],
+)
+def test_redirect_handler_strips_authorization_for_another_origin(
+    destination: str,
+) -> None:
+    request = urllib.request.Request(
+        "https://api.github.com/repos/example",
+        headers={"Authorization": "Bearer secret"},
+    )
+    redirected = provenance._SameOriginAuthRedirectHandler().redirect_request(
+        request,
+        None,
+        302,
+        "Found",
+        {},
+        destination,
+    )
+    assert redirected is not None
+    assert redirected.get_header("Authorization") is None
+
+
+def test_redirect_handler_preserves_authorization_for_the_same_origin() -> None:
+    request = urllib.request.Request(
+        "https://api.github.com/repos/example",
+        headers={"Authorization": "Bearer secret"},
+    )
+    redirected = provenance._SameOriginAuthRedirectHandler().redirect_request(
+        request,
+        None,
+        302,
+        "Found",
+        {},
+        "https://api.github.com:443/repos/renamed",
+    )
+    assert redirected is not None
+    assert redirected.get_header("Authorization") == "Bearer secret"
 
 
 def test_accepts_equal_inputs_and_confirmed_squash_tree(bridge) -> None:
