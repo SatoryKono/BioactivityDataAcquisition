@@ -1,11 +1,9 @@
 name: PR Gate Complete
 # Repo-side #9975 coordinator. Ruleset 13643213 names this job
-# (`name: pr-gate-complete`) as the only GitHub required context (#10267).
-# Enforcement stays disabled (#11180): Actions billing will not return, so do
-# not enable the ruleset. A required check that cannot run would block main.
-# Accepted-risk (advisory, reviewed 2026-09-30): merge-truth stays the CI lane
-# results aggregated here, not the GitHub ruleset, until billing returns.
-# Next review 2026-12-30 or when #11180 closes, whichever is earlier.
+# (`name: pr-gate-complete`) as the Actions required context.
+# Enforcement stays disabled: do not flip it to active in this change.
+# Actions billing is restored and this workflow runs on pull_request.
+# Next review 2026-12-30 or when enforcement is enabled, whichever is earlier.
 # Each pull request has one owner invocation per gate and one fail-closed result.
 # Classify and aggregate check out the base ref. The PR head SHA is only a
 # diff argument (#11181). Leaf reusable workflows are pinned to a full commit

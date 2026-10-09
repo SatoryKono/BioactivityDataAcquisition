@@ -2053,6 +2053,9 @@ jobs:
     resource_class: medium
     steps:
     - checkout
+    - halt-unless-pr-gate-paths:
+        label: architecture tests
+        pathspecs: "src/bioetl tests/architecture :(glob)configs/**/*.yaml"
     - setup-python-uv
     - run:
         name: architecture tests
@@ -2292,6 +2295,9 @@ jobs:
     resource_class: small
     steps:
       - checkout
+      - halt-unless-pr-gate-paths:
+          label: security scans
+          pathspecs: "src pyproject.toml uv.lock .github :(glob)Dockerfile* :(glob)docker-compose*.yml .gitleaks.toml .secrets.baseline"
       - setup-python-uv
       - run:
           name: detect-secrets (no hardcoded secrets)
@@ -2711,6 +2717,9 @@ jobs:
       NODE_OPTIONS: --max-old-space-size=3072
     steps:
       - checkout
+      - halt-unless-pr-gate-paths:
+          label: duplication
+          pathspecs: "src scripts tests .github/tooling .github/workflows/duplication-complexity.yml .jscpd.json configs/quality/duplication_complexity_exemptions.yaml"
       - setup-python-uv
       - run:
           name: radon complexity (CC <= 10; domain <= 5)
@@ -2894,6 +2903,9 @@ jobs:
     resource_class: small
     steps:
       - checkout
+      - halt-unless-pr-gate-paths:
+          label: docker build
+          pathspecs: "Dockerfile.bioetl docker-compose.yml docker-compose.monitoring.yml .dockerignore .github/workflows/docker.yml"
       - check-gate:
           gate: docker
       - setup_remote_docker:
