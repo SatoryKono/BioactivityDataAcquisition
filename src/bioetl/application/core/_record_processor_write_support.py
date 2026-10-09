@@ -10,8 +10,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core._batch_write_support import (
+    LayerWriteContext,
     LayerWriteOutcome,
-    safe_write_layer,
+    safe_write_gold,
+    safe_write_silver,
+)
+from bioetl.application.services.batch_processing.operation_errors import (
+    OPERATION_ERRORS as _OPERATION_ERRORS,
 )
 
 if TYPE_CHECKING:
@@ -72,18 +77,17 @@ async def write_silver_layer(
             confirmed_count=len(result.silver_records),
             write_result=cast("SilverWriteResult | None", silver_result),
         )
-    return await safe_write_layer(
-        execute_with_span=span_executor.execute_with_span,
-        writer=writer,
-        quarantine_manager=quarantine_manager,
-        logger=logger,
-        run_id=run_id,
-        domain_event_emitter=domain_event_emitter,
-        layer="silver",
-        records=result.silver_records,
-        batch_id=batch_id,
-        ingestion_ts=ingestion_ts,
-        bronze_refs=bronze_refs,
+    span_run = span_executor.execute_with_span
+    write_context = LayerWriteContext(
+        span_run, writer, quarantine_manager, logger, run_id, domain_event_emitter
+    )
+    return await safe_write_silver(
+        write_context,
+        result.silver_records,
+        batch_id,
+        ingestion_ts,
+        bronze_refs,
+        _OPERATION_ERRORS,
     )
 
 
@@ -129,17 +133,15 @@ async def write_gold_layer(
             candidate_count=len(result.gold_records),
             confirmed_count=len(result.gold_records),
         )
-    return await safe_write_layer(
-        execute_with_span=span_executor.execute_with_span,
-        writer=writer,
-        quarantine_manager=quarantine_manager,
-        logger=logger,
-        run_id=run_id,
-        domain_event_emitter=domain_event_emitter,
-        layer="gold",
-        records=result.gold_records,
-        batch_id=batch_id,
-        ingestion_ts=ingestion_ts,
-        bronze_refs=None,
-        silver_refs=silver_refs,
+    span_run = span_executor.execute_with_span
+    write_context = LayerWriteContext(
+        span_run, writer, quarantine_manager, logger, run_id, domain_event_emitter
+    )
+    return await safe_write_gold(
+        write_context,
+        result.gold_records,
+        batch_id,
+        ingestion_ts,
+        silver_refs,
+        _OPERATION_ERRORS,
     )

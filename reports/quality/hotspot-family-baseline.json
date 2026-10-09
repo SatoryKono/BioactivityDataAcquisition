@@ -17,12 +17,12 @@
         "src/bioetl/application/core/"
       ],
       "duplication_clusters": 0,
-      "files": 202,
-      "total_loc": 25221,
+      "files": 203,
+      "total_loc": 25081,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.381,
+      "helper_function_ratio": 0.378,
       "max_internal_fan_in": 5,
-      "max_internal_fan_in_module": "bioetl.application.core.target_data_source_mixins",
+      "max_internal_fan_in_module": "bioetl.application.core.record_processor_config",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 7
@@ -31,10 +31,10 @@
         "distribution": {
           "0": 19,
           "1": 106,
-          "2": 40,
+          "2": 41,
           "3": 16,
-          "4": 9,
-          "5": 12
+          "4": 12,
+          "5": 9
         },
         "modules": [
           {
@@ -103,11 +103,13 @@
           },
           {
             "module": "bioetl.application.core._batch_write_support",
-            "fan_in": 3,
+            "fan_in": 5,
             "runtime_importers": [
               "bioetl.application.core._batch_processing_layer_write_support",
               "bioetl.application.core._record_processor_write_support",
-              "bioetl.application.core.batch_processing_support"
+              "bioetl.application.core.batch_processing_contracts",
+              "bioetl.application.core.batch_processing_support",
+              "bioetl.application.core.record_processor"
             ]
           },
           {
@@ -628,11 +630,9 @@
           },
           {
             "module": "bioetl.application.core.batch_processing_contracts",
-            "fan_in": 5,
+            "fan_in": 3,
             "runtime_importers": [
               "bioetl.application.core._batch_processing_layer_write_support",
-              "bioetl.application.core._batch_write_support",
-              "bioetl.application.core.batch_executor_protocols",
               "bioetl.application.core.batch_processing_service",
               "bioetl.application.core.batch_processing_support"
             ]
@@ -672,13 +672,9 @@
           },
           {
             "module": "bioetl.application.core.batch_shared_operation_errors",
-            "fan_in": 5,
+            "fan_in": 1,
             "runtime_importers": [
-              "bioetl.application.core._batch_write_support",
-              "bioetl.application.core.batch_pipeline_execution_errors",
-              "bioetl.application.core.batch_processing_support",
-              "bioetl.application.core.lifecycle.checkpoint_manager",
-              "bioetl.application.core.postrun.service"
+              "bioetl.application.core.batch_processing_support"
             ]
           },
           {
@@ -806,12 +802,11 @@
           },
           {
             "module": "bioetl.application.core.data_source_mixins",
-            "fan_in": 5,
+            "fan_in": 4,
             "runtime_importers": [
-              "bioetl.application.core.data_sources.assay_parameters",
+              "bioetl.application.core.data_sources._derived_assay_source",
               "bioetl.application.core.data_sources.filtered",
               "bioetl.application.core.data_sources.publication_term",
-              "bioetl.application.core.data_sources.subcellular_fraction",
               "bioetl.application.core.filtered_data_source_mixins"
             ]
           },
@@ -819,6 +814,14 @@
             "module": "bioetl.application.core.data_sources",
             "fan_in": 0,
             "runtime_importers": []
+          },
+          {
+            "module": "bioetl.application.core.data_sources._derived_assay_source",
+            "fan_in": 2,
+            "runtime_importers": [
+              "bioetl.application.core.data_sources.assay_parameters",
+              "bioetl.application.core.data_sources.subcellular_fraction"
+            ]
           },
           {
             "module": "bioetl.application.core.data_sources.assay_parameters",
@@ -861,7 +864,7 @@
             "module": "bioetl.application.core.derived_scan_budget",
             "fan_in": 4,
             "runtime_importers": [
-              "bioetl.application.core.data_sources.assay_parameters",
+              "bioetl.application.core.data_sources._derived_assay_source",
               "bioetl.application.core.data_sources.subcellular_fraction",
               "bioetl.application.core.publication_term_enrichment",
               "bioetl.application.core.publication_term_extraction_mixin"
@@ -1446,12 +1449,11 @@
           },
           {
             "module": "bioetl.application.core.target_data_source_mixins",
-            "fan_in": 5,
+            "fan_in": 4,
             "runtime_importers": [
               "bioetl.application.core.data_source_mixins",
-              "bioetl.application.core.data_sources.assay_parameters",
+              "bioetl.application.core.data_sources._derived_assay_source",
               "bioetl.application.core.data_sources.publication_term",
-              "bioetl.application.core.data_sources.subcellular_fraction",
               "bioetl.application.core.publication_term_filtering_mixin"
             ]
           },
@@ -1540,8 +1542,11 @@
           },
           {
             "module": "bioetl.application.core.wiring.lazy_export_hooks",
-            "fan_in": 1,
+            "fan_in": 4,
             "runtime_importers": [
+              "bioetl.application.core.factory_wiring_api",
+              "bioetl.application.core.field_transforms",
+              "bioetl.application.core.transformer_runtime",
               "bioetl.application.core.wiring._lazy_export_facade"
             ]
           },
@@ -1563,18 +1568,15 @@
         ],
         "max_fan_in": 5,
         "max_modules": [
+          "bioetl.application.core._batch_write_support",
           "bioetl.application.core.base_transformer._structural_policy_types",
           "bioetl.application.core.batch_execution.contracts",
           "bioetl.application.core.batch_pipeline_execution_errors",
-          "bioetl.application.core.batch_processing_contracts",
           "bioetl.application.core.batch_processing_runtime",
-          "bioetl.application.core.batch_shared_operation_errors",
           "bioetl.application.core.batch_transformer_state",
-          "bioetl.application.core.data_source_mixins",
           "bioetl.application.core.lifecycle.shutdown",
           "bioetl.application.core.pipeline_span_lifecycle",
-          "bioetl.application.core.record_processor_config",
-          "bioetl.application.core.target_data_source_mixins"
+          "bioetl.application.core.record_processor_config"
         ]
       },
       "budget_warnings": [],
@@ -1593,7 +1595,7 @@
       ],
       "duplication_clusters": 0,
       "files": 49,
-      "total_loc": 6440,
+      "total_loc": 6451,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.284,
       "max_internal_fan_in": 2,
@@ -2264,9 +2266,9 @@
       ],
       "duplication_clusters": 0,
       "files": 130,
-      "total_loc": 15559,
+      "total_loc": 15305,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.399,
+      "helper_function_ratio": 0.397,
       "max_internal_fan_in": 1,
       "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.manifest_models",
       "bounded_growth_budgets": {
@@ -3271,9 +3273,9 @@
       ],
       "duplication_clusters": 0,
       "files": 55,
-      "total_loc": 6641,
+      "total_loc": 6632,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.342,
+      "helper_function_ratio": 0.345,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.runtime_builders.runner_inputs",
       "bounded_growth_budgets": {

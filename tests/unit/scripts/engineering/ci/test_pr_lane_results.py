@@ -11,13 +11,13 @@ from scripts.engineering.ci.pr_lane_results import (
     build_results,
 )
 
-pytestmark = pytest.mark.repo_backed
+pytestmark = pytest.mark.unit
 
 HEAD = "a" * 40
 
 
-@pytest.mark.unit
 def test_not_applicable_gate_does_not_inherit_job_success() -> None:
+    """Keep a nonapplicable gate skipped even when its owner job succeeds."""
     results = build_results(
         {
             "docs-governance": {
@@ -37,8 +37,8 @@ def test_not_applicable_gate_does_not_inherit_job_success() -> None:
     }
 
 
-@pytest.mark.unit
 def test_required_gate_is_red_when_owner_job_is_skipped() -> None:
+    """Keep required evidence missing when the owning CI job is skipped."""
     results = build_results(
         {"tests": {"decision": "required", "reason": "path_match"}},
         {"class-lane": "skipped"},
@@ -49,8 +49,8 @@ def test_required_gate_is_red_when_owner_job_is_skipped() -> None:
     assert results["tests"]["not_applicable"] == "skipped"
 
 
-@pytest.mark.unit
 def test_required_gate_passes_only_when_owner_job_succeeds() -> None:
+    """Map a successful owner job to a successful required gate."""
     results = build_results(
         {"lint-arch": {"decision": "required", "reason": "path_match"}},
         {"class-lane": "success"},
@@ -60,8 +60,8 @@ def test_required_gate_passes_only_when_owner_job_succeeds() -> None:
     assert results["lint-arch"]["required"] == "success"
 
 
-@pytest.mark.unit
 def test_cancelled_job_is_failure() -> None:
+    """Treat a cancelled owner job as failure for its required gate."""
     results = build_results(
         {"security": {"decision": "required", "reason": "path_match"}},
         {"class-lane": "cancelled"},
@@ -71,8 +71,8 @@ def test_cancelled_job_is_failure() -> None:
     assert results["security"]["required"] == "failure"
 
 
-@pytest.mark.unit
 def test_assert_steps_ignores_not_applicable_gates() -> None:
+    """Allow missing step evidence for gates classified as nonapplicable."""
     failures = assert_step_outcomes(
         {"docker": {"decision": "not_applicable", "reason": "no_path_match"}},
         {},
@@ -82,8 +82,8 @@ def test_assert_steps_ignores_not_applicable_gates() -> None:
     assert failures == []
 
 
-@pytest.mark.unit
 def test_assert_steps_fails_when_required_step_is_skipped() -> None:
+    """Report a skipped required type-checking step as a failure."""
     failures = assert_step_outcomes(
         {"type-checking": {"decision": "required", "reason": "path_match"}},
         {
@@ -97,8 +97,8 @@ def test_assert_steps_fails_when_required_step_is_skipped() -> None:
     assert failures == ["type-checking:mypy=skipped"]
 
 
-@pytest.mark.unit
 def test_assert_steps_fails_on_unrelated_step_failure() -> None:
+    """Report failed job steps even when all required gate steps pass."""
     failures = assert_step_outcomes(
         {"type-checking": {"decision": "required", "reason": "path_match"}},
         {
@@ -113,8 +113,8 @@ def test_assert_steps_fails_on_unrelated_step_failure() -> None:
     assert "step:checkout=failure" in failures
 
 
-@pytest.mark.unit
 def test_affected_targets_map_source_and_existing_tests(tmp_path: Path) -> None:
+    """Select source-layer tests and existing test paths, excluding missing paths."""
     unit_domain = tmp_path / "tests" / "unit" / "domain"
     unit_domain.mkdir(parents=True)
     test_file = tmp_path / "tests" / "unit" / "domain" / "test_sample.py"
@@ -137,8 +137,8 @@ def test_affected_targets_map_source_and_existing_tests(tmp_path: Path) -> None:
     ]
 
 
-@pytest.mark.unit
 def test_build_rejects_unknown_decision() -> None:
+    """Reject gate decisions outside the coordinator decision vocabulary."""
     with pytest.raises(ValueError, match="unknown decision"):
         build_results(
             {"tests": {"decision": "maybe"}},

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.pipelines.pubmed.publication_term_enricher import (
+from bioetl.application.core.wiring.registry import (
     PubMedPublicationTermEnrichmentService,
 )
 from bioetl.composition.providers._registration_biblio_adapters import (
