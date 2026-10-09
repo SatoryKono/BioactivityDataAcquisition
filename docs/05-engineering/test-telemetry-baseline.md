@@ -43,8 +43,18 @@ trend evidence only.
   `.github/workflows/tests.yml`.
 - Freshness uses live UTC (injectable via `BIOETL_TELEMETRY_REFERENCE_NOW`)
   and rejects future/stale `refreshed_at_utc` values.
-- `source_commit` must remain an ancestor of HEAD; exact `source_commit == HEAD`
-  is opt-in via `BIOETL_REQUIRE_TELEMETRY_SOURCE_COMMIT_EQUALS_HEAD=1`.
+- `source_commit` must remain an ancestor of HEAD, or have a reviewed squash
+  bridge in `reports/test-telemetry/squash-provenance.json`. The bridge preserves
+  the captured commit/run, records the GitHub PR mapping, and validates source
+  ancestry in the PR, merge ancestry in HEAD, equal PR/merge Git trees, and
+  unchanged maintained test inputs between source and PR head. The live test
+  fingerprint and freshness guards still apply. Exact `source_commit == HEAD`
+  remains opt-in via `BIOETL_REQUIRE_TELEMETRY_SOURCE_COMMIT_EQUALS_HEAD=1`.
+- A bridge is repository-reviewed `local_single_host` evidence, not a signed
+  GitHub attestation or a CI execution receipt. Collect its PR mapping with a
+  read-only GitHub GET and verify it independently before accepting the change.
+  Missing, unrelated, or mismatched bridges fail closed; they do not refresh
+  coverage evidence or claim that newly added tests ran in the captured run.
 - GitHub evidence from a non-main branch requires `pull_request`;
   its run URL and id remain independently auditable.
 - `--local-manifest <path>` accepts only a complete canonical 17-shard run
