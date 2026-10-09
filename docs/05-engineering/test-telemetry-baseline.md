@@ -27,12 +27,12 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `main`
+- Source branch: `refactor/architecture-debt-task-support-complexity-10443624345865139538`
 - Source commit: `0e36f3a60bbeeae1aed7376e67146eb940b7e9fa`
 - Source run id: `local-local-verify-pr12153-20261009-final17`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `8394bac5e4b7d4a52939796921770912f507c705e42288d5f51812ddcc82b42e`
+- Source tree sha256: `c35c60f5686ac75bcc49a6b4a3dfafdbe8122ce85cdcbbc90876a57c5808e48a`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-10-09T15:50:44.437361+00:00`
 
