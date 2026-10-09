@@ -144,6 +144,23 @@ def artifact_hashes(folder: Path) -> dict[str, str]:
     return result
 
 
+def executor_elapsed_ms() -> int | None:
+    """Return elapsed executor time when the CircleCI start command is present."""
+    raw = os.environ.get("BIOETL_CI_JOB_STARTED_EPOCH_MS")
+    if raw is None:
+        if os.environ.get("CIRCLECI") == "true":
+            raise ValueError("Missing proof executor start timestamp")
+        return None
+    try:
+        started_ms = int(raw)
+    except ValueError as exc:
+        raise ValueError("Invalid proof executor start timestamp") from exc
+    elapsed = time.time_ns() // 1_000_000 - started_ms
+    if elapsed < 0:
+        raise ValueError("Proof executor start timestamp is in the future")
+    return elapsed
+
+
 def produce(name: str) -> int:
     ci_run = ci_identity()
     plan = catalog()
@@ -220,6 +237,7 @@ def produce(name: str) -> int:
             "exit_code": process.returncode,
             "started_at": started,
             "duration_ms": duration,
+            "executor_elapsed_ms": executor_elapsed_ms(),
             "job_url": os.environ["CIRCLE_BUILD_URL"],
             "job_id": os.environ["CIRCLE_BUILD_NUM"],
             "artifacts": artifact_hashes(folder),
@@ -255,15 +273,30 @@ def validate_execution(
 
 def assemble() -> int:
     """No subprocess producers here: fail closed if transported evidence is incomplete."""
+    from scripts.engineering.ci.closeout_cost_budget import (
+        evaluate_closeout_cost_budget,
+    )
+
     ci_run = ci_identity()
     plan = catalog()
     policy = load_policy()
     _, source = discover_context(
         ROOT, policy=policy, claim=plan["claim"], ci_run_id=ci_run
     )
+    cost_budget = evaluate_closeout_cost_budget(ROOT)
+    write_json(EVIDENCE / "closeout/cost-budget.json", cost_budget)
+    if cost_budget["outcome"] != "PASS":
+        raise ValueError("CI cost budget failed: " + ", ".join(cost_budget["errors"]))
     receipts = []
+    executions: dict[str, dict[str, Any]] = {}
+    coverage_producer_seconds: dict[str, float] = {}
     for name, spec in plan["checks"].items():
-        validate_execution(name, ci_run, source)
+        execution = validate_execution(name, ci_run, source)
+        executions[name] = execution
+        if name.startswith("coverage-"):
+            coverage_producer_seconds[name] = round(
+                float(execution["duration_ms"]) / 1000, 3
+            )
         if "kind" in spec:
             receipt = json.loads(
                 (EVIDENCE / name / "receipt.json").read_text(encoding="utf-8")
@@ -278,6 +311,32 @@ def assemble() -> int:
             ):
                 raise ValueError(f"Receipt does not describe producer: {name}")
             receipts.append(receipt)
+    cost_budget["observed_coverage_producer_seconds"] = coverage_producer_seconds
+    cost_budget["observed_coverage_producer_total_seconds"] = round(
+        sum(coverage_producer_seconds.values()), 3
+    )
+    executor_seconds: dict[str, float] = {}
+    missing_executor_measurements: list[str] = []
+    for name, execution in executions.items():
+        elapsed = execution.get("executor_elapsed_ms")
+        if elapsed is None:
+            missing_executor_measurements.append(name)
+            continue
+        job_id = str(execution["job_id"])
+        executor_seconds[job_id] = max(
+            executor_seconds.get(job_id, 0.0), round(float(elapsed) / 1000, 3)
+        )
+    closeout_elapsed = executor_elapsed_ms()
+    if closeout_elapsed is not None:
+        executor_seconds[str(os.environ["CIRCLE_BUILD_NUM"])] = round(
+            closeout_elapsed / 1000, 3
+        )
+    cost_budget["observed_executor_seconds_by_job"] = executor_seconds
+    cost_budget["observed_executor_total_seconds"] = round(
+        sum(executor_seconds.values()), 3
+    )
+    cost_budget["missing_executor_measurements"] = sorted(missing_executor_measurements)
+    write_json(EVIDENCE / "closeout/cost-budget.json", cost_budget)
     from scripts.engineering.ci.local_test_telemetry import validate_local_measurement
     from scripts.engineering.ci.update_test_telemetry_baseline import (
         compute_test_telemetry_source_tree_sha256,

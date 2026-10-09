@@ -76,6 +76,7 @@ Commands:
     summarize-junit      Aggregate existing JUnit XML into test-health JSON
     test-health          Summarize recent test-health run JSON artifacts
     proof-or-stop        Plan, assemble, verify, pilot, or ingest source-bound evidence
+    issue-closeout-batch Evaluate many issue criteria from one verified evidence bundle
     check-dashboard-visual-semantics Validate Grafana status-panel visual semantic invariants
     check-dashboard-performance-budgets Validate dashboard performance budget invariants
     check-prometheus-rules Validate Prometheus rules with deterministic promtool preflight
@@ -195,6 +196,7 @@ COMMAND_MODULES: dict[str, str] = {
     "analyze-duplicate-functions": "scripts.engineering.qa.analyze_duplicate_functions",
     "calibrate-hotspots": "scripts.engineering.qa.calibrate_hotspot_budgets",
     "proof-or-stop": "memory.proof_cli",
+    "issue-closeout-batch": "scripts.engineering.qa.issue_closeout_batch",
     "check-dashboard-visual-semantics": "scripts.engineering.qa.check_dashboard_visual_semantics",
     "check-dashboard-performance-budgets": (
         "scripts.engineering.qa.check_dashboard_performance_budgets"

@@ -14,7 +14,7 @@ from bioetl.application.pipelines.chembl.target_transformer import TargetTransfo
 from bioetl.application.pipelines.pubmed.extractors.identifier import (
     IdentifierExtractor,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.source_refs import (
+from bioetl.application.services.control_plane.manifest.diagnostics.finalization import (
     _attach_rich_composite_replay_support,
 )
 from bioetl.application.services.control_plane.manifest.validation_provenance import (

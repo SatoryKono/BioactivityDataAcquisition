@@ -30,6 +30,15 @@ parameters:
     default: false
 
 commands:
+  record-proof-job-start:
+    description: "Record executor start without adding a telemetry job"
+    steps:
+      - run:
+          name: Record proof executor start
+          command: |
+            started_ms="$(python3 -c 'import time; print(time.time_ns() // 1000000)')"
+            echo "export BIOETL_CI_JOB_STARTED_EPOCH_MS=$started_ms" >> "$BASH_ENV"
+
   # Port of .github/actions/setup-python-uv (uv 0.11.26, uv cache, uv sync).
   setup-python-uv:
     description: "Install uv, restore cache, sync deps (port of GH composite action)"
@@ -133,11 +142,12 @@ commands:
           with urllib.request.urlopen('https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/' + match[1], timeout=30) as response:
               pr = json.load(response)
           assert pr['head']['sha'] == os.environ['CIRCLE_SHA1'], 'Stale PR head'
-          assert pr['base']['ref'] in {'main', 'develop'}, 'Unsupported base branch'
+          assert pr['base']['repo']['full_name'] == 'SatoryKono/BioactivityDataAcquisition', 'Unsupported base repository'
           Path('/tmp/router-ci-base').write_text(pr['base']['ref'])
           PY
             base_ref="$(cat /tmp/router-ci-base)"
-            git fetch --no-tags origin "$base_ref"
+            git check-ref-format --branch "$base_ref" >/dev/null
+            git fetch --no-tags origin "refs/heads/$base_ref:refs/remotes/origin/$base_ref"
             base="origin/$base_ref"
           elif [ "$CIRCLE_BRANCH" != main ]; then
             circleci-agent step halt
@@ -177,11 +187,12 @@ commands:
           with urllib.request.urlopen('https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/' + match[1], timeout=30) as response:
               pr = json.load(response)
           assert pr['head']['sha'] == os.environ['CIRCLE_SHA1'], 'Stale PR head'
-          assert pr['base']['ref'] in {'main', 'develop'}, 'Unsupported base branch'
+          assert pr['base']['repo']['full_name'] == 'SatoryKono/BioactivityDataAcquisition', 'Unsupported base repository'
           Path('/tmp/cci-path-halt-base').write_text(pr['base']['ref'])
           PY
             base_ref="$(cat /tmp/cci-path-halt-base)"
-            git fetch --no-tags origin "$base_ref"
+            git check-ref-format --branch "$base_ref" >/dev/null
+            git fetch --no-tags origin "refs/heads/$base_ref:refs/remotes/origin/$base_ref"
             base="origin/$base_ref"
           fi
           mkdir -p /tmp/cci-path-halt
@@ -2052,6 +2063,7 @@ jobs:
     - image: cimg/python:3.12
     resource_class: medium
     steps:
+    - record-proof-job-start
     - checkout
     - setup-python-uv
     - run:
@@ -2391,11 +2403,12 @@ jobs:
           with urllib.request.urlopen('https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/' + match[1], timeout=30) as response:
               pr = json.load(response)
           assert pr['head']['sha'] == os.environ['CIRCLE_SHA1'], 'Stale PR head'
-          assert pr['base']['ref'] in {'main', 'develop'}, 'Unsupported base branch'
+          assert pr['base']['repo']['full_name'] == 'SatoryKono/BioactivityDataAcquisition', 'Unsupported base repository'
           Path('/tmp/diagram-ci/base-ref').write_text(pr['base']['ref'])
           PY
             BASE_REF="$(cat /tmp/diagram-ci/base-ref)"
-            git fetch --no-tags origin "$BASE_REF"
+            git check-ref-format --branch "$BASE_REF" >/dev/null
+            git fetch --no-tags origin "refs/heads/$BASE_REF:refs/remotes/origin/$BASE_REF"
             base="origin/$BASE_REF"
           fi
           printf 'export EVENT_NAME=%q\nexport BASE_REF=%q\n' "$EVENT_NAME" "$BASE_REF" >> "$BASH_ENV"
@@ -2488,11 +2501,8 @@ jobs:
               # own the full diagram corpus because they can affect every source.
               lint_targets=(docs/02-architecture/diagrams)
               if [[ "${EVENT_NAME}" == "pull_request" ]]; then
-                if [[ "${BASE_REF}" != "main" && "${BASE_REF}" != "develop" ]]; then
-                  echo "unsupported pull-request base ref" >&2
-                  exit 1
-                fi
-                git fetch --no-tags origin "${BASE_REF}"
+                git check-ref-format --branch "${BASE_REF}" >/dev/null
+                git fetch --no-tags origin "refs/heads/${BASE_REF}:refs/remotes/origin/${BASE_REF}"
                 if git diff --quiet "origin/${BASE_REF}"...HEAD -- \
                   scripts/diagrams .github/actions/setup-mermaid; then
                   changed_targets="${RUNNER_TEMP}/changed-diagram-targets.txt"
@@ -2570,10 +2580,7 @@ jobs:
               cat > /tmp/diagram-ci/run.sh \<<'DIAGRAM_CI'
               set -euo pipefail
               echo "Checking if diagram sources changed without updating rendered outputs..."
-              if [[ "${BASE_REF}" != "main" && "${BASE_REF}" != "develop" ]]; then
-                echo "unsupported pull-request base ref" >&2
-                exit 1
-              fi
+              git check-ref-format --branch "${BASE_REF}" >/dev/null
               base_ref="origin/${BASE_REF}"
               if [[ "$(git rev-parse --is-shallow-repository)" == "true" ]]; then
                 git fetch --no-tags --unshallow origin \
@@ -2845,6 +2852,7 @@ jobs:
     - image: cimg/python:3.12
     resource_class: small
     steps:
+    - record-proof-job-start
     - checkout
     - setup-python-uv:
         extras: dev tracing docs
@@ -3078,6 +3086,7 @@ jobs:
       MKL_NUM_THREADS: '1'
       NUMEXPR_NUM_THREADS: '1'
     steps:
+    - record-proof-job-start
     - checkout
     - setup-python-uv:
         extras: dev tracing docs
@@ -3147,6 +3156,7 @@ jobs:
       MKL_NUM_THREADS: '1'
       NUMEXPR_NUM_THREADS: '1'
     steps:
+    - record-proof-job-start
     - checkout
     - setup-python-uv:
         extras: dev tracing docs
@@ -3184,6 +3194,7 @@ jobs:
       MKL_NUM_THREADS: '1'
       NUMEXPR_NUM_THREADS: '1'
     steps:
+    - record-proof-job-start
     - checkout
     - setup-python-uv:
         extras: dev tracing docs
@@ -3214,6 +3225,7 @@ jobs:
       MKL_NUM_THREADS: '1'
       NUMEXPR_NUM_THREADS: '1'
     steps:
+    - record-proof-job-start
     - checkout
     - setup-python-uv:
         extras: dev tracing docs
@@ -3251,6 +3263,7 @@ jobs:
       MKL_NUM_THREADS: '1'
       NUMEXPR_NUM_THREADS: '1'
     steps:
+    - record-proof-job-start
     - checkout
     - setup-python-uv:
         extras: dev tracing docs
@@ -3277,6 +3290,7 @@ jobs:
     - image: cimg/python:3.12
     resource_class: small
     steps:
+    - record-proof-job-start
     - checkout
     - setup-python-uv:
         extras: dev tracing docs
@@ -3332,6 +3346,7 @@ jobs:
       MKL_NUM_THREADS: '1'
       NUMEXPR_NUM_THREADS: '1'
     steps:
+    - record-proof-job-start
     - checkout
     - setup-python-uv:
         extras: dev tracing docs

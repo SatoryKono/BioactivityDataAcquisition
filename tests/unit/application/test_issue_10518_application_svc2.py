@@ -376,8 +376,10 @@ from bioetl.domain.control_plane.run_ledger import (
     COMPOSITE_ENRICHER_COMPLETED_EVENT,
     COMPOSITE_MERGE_COMPLETED_EVENT,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.source_refs import (
+from bioetl.application.services.control_plane.manifest.diagnostics.finalization import (
     _attach_rich_composite_replay_support,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.source_refs import (
     _build_effective_source_refs,
 )
 
