@@ -12,7 +12,7 @@
   "current_metrics": {
     "repo_uncovered_module_count": 0,
     "repo_unmeasured_module_count": 0,
-    "application_core_covered_line_percent": 99.78,
+    "application_core_covered_line_percent": 99.79,
     "application_core_uncovered_module_count": 0,
     "application_core_unmeasured_module_count": 0
   },
@@ -166,9 +166,9 @@
     }
   ],
   "current_binding_refresh": {
-    "measured_head": "c4071c0eeecd6b06f18bc781a0435ee128e0e994",
-    "source_tree_sha256": "78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db",
-    "evidence": "reports/quality/proof-or-stop/architecture-coverage-11854-11899/full-coverage-wave-42/manifest.json",
+    "measured_head": "f33e34578ae4c541e2b5c4f433cc4d5fd2697f39",
+    "source_tree_sha256": "5492068cab2e9b7471a4b59111eb8ff015a30431c7b32fc2177a50323eb62049",
+    "evidence": "reports/coverage/local-verify-pr12096-20261009-final15/manifest.json",
     "semantics": "Current accepted inventory may retain historical nonregressing rows; raw measured candidate remains separate."
   }
 }
