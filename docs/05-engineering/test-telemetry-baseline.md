@@ -29,12 +29,17 @@ trend evidence only.
 
 - Source branch: `fix/bronze-cleanup-fs001`
 - Source commit: `f5a7e5594fbd5f9ff8b9aeea80ab85f07be3cf1e`
-- Source run id: `37743186705`
+- Source run id: `pending`
 - Source event: `pull_request`
-- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37743186705`
+- Source run URL: `pending`
 - Source tree sha256: `e6a327c470a9721dcfafaa32c3d0db8cb2497b24b39b8ea5dda05e475fcf4574`
-- Refresh status: `captured`
+- Refresh status: `incomplete`
 - Refreshed at (UTC): `2026-10-08T07:56:29.159867+00:00`
+
+The snapshot is incomplete: coverage and the 17 JUnit sources have no verified
+association with `tests.yml`. The previously cited run `37743186705` belongs to
+`pr-required.yml` and exposes no artifacts. Measurements are retained as
+unverified historical data until their producing run can be confirmed.
 
 ## Branch-accurate provenance (#5729)
 

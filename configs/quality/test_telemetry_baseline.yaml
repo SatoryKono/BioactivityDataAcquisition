@@ -3,11 +3,13 @@ policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: fix/bronze-cleanup-fs001
 refreshed_at_utc: '2026-10-08T07:56:29.159867+00:00'
-refresh_status: captured
+# Coverage and 17 JUnit sources could not be verified against tests.yml.
+# Previously cited run 37743186705 belongs to pr-required.yml and has no artifacts.
+refresh_status: incomplete
 source_commit: f5a7e5594fbd5f9ff8b9aeea80ab85f07be3cf1e
-source_run_id: '37743186705'
+source_run_id: null
 source_event: pull_request
-source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37743186705
+source_run_url: null
 source_tree_sha256: e6a327c470a9721dcfafaa32c3d0db8cb2497b24b39b8ea5dda05e475fcf4574
 freshness_guard:
   timestamp_field: refreshed_at_utc
