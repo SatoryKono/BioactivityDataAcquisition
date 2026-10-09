@@ -655,6 +655,12 @@ def test_pr_gate_credit_cut_keeps_required_job_names():
     )
     assert keys(docs_steps).index("setup-python-uv") > classify_at
     assert "uv run" not in docs_steps[classify_at]["run"]["command"]
-    halt = config["commands"]["halt-unless-pr-gate-paths"]["steps"][0]["run"]["command"]
+    halt_run = config["commands"]["halt-unless-pr-gate-paths"]["steps"][0]["run"]
+    halt = halt_run["command"]
     assert '!= "pr-gate"' in halt
     assert "circleci-agent step halt" in halt
+    assert (
+        halt_run["environment"]["BIOETL_HALT_PATHSPECS"] == "<< parameters.pathspecs >>"
+    )
+    assert "<< parameters.pathspecs >>" not in halt
+    assert '"${pathspec_args[@]}"' in halt
