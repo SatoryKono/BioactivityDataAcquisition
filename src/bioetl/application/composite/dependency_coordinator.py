@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
@@ -64,6 +65,12 @@ class DependencyCoordinatorService:
         result_service: Service for mapping execution outcomes.
         delta_reader: Reader for Silver tables (for chained dependencies).
 
+    .. deprecated:: 1.x
+       The arguments `seed_key_resolver`, `chained_key_resolver`, `progress_service`,
+       and `result_service` are deprecated in favor of passing a single `collaborators`
+       bundle of type `DependencyCoordinatorCollaborators`. They will be removed in a
+       future release.
+
     Example:
         >>> coordinator = DependencyCoordinatorService(
         ...     logger=logger,
@@ -81,9 +88,14 @@ class DependencyCoordinatorService:
     def __init__(
         self,
         logger: LoggerPort,
-        collaborators: DependencyCoordinatorCollaborators,
+        collaborators: DependencyCoordinatorCollaborators | None = None,
         delta_reader: DeltaReaderPort | None = None,
         clock: ClockPort | None = None,
+        *,
+        seed_key_resolver: SeedKeyResolver | None = None,
+        chained_key_resolver: ChainedKeyResolver | None = None,
+        progress_service: DependencyProgressService | None = None,
+        result_service: DependencyResultService | None = None,
     ) -> None:
         """Initialize dependency coordinator.
 
@@ -94,6 +106,32 @@ class DependencyCoordinatorService:
         """
         self._logger = logger
         self._delta_reader = delta_reader
+        if collaborators is None:
+            if (
+                seed_key_resolver is None
+                or chained_key_resolver is None
+                or progress_service is None
+                or result_service is None
+            ):
+                raise TypeError(
+                    "Either 'collaborators' or all of 'seed_key_resolver', "
+                    "'chained_key_resolver', 'progress_service', and "
+                    "'result_service' must be provided."
+                )
+            warnings.warn(
+                "Passing 'seed_key_resolver', 'chained_key_resolver', 'progress_service', "
+                "and 'result_service' directly is deprecated. Please pass a single "
+                "'collaborators' argument of type DependencyCoordinatorCollaborators.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            collaborators = DependencyCoordinatorCollaborators(
+                seed_key_resolver=seed_key_resolver,
+                chained_key_resolver=chained_key_resolver,
+                progress_service=progress_service,
+                result_service=result_service,
+            )
+
         self._seed_key_resolver = collaborators.seed_key_resolver
         self._chained_key_resolver = collaborators.chained_key_resolver
         self._result_service = collaborators.result_service

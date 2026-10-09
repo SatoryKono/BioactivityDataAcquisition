@@ -25,7 +25,7 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2552,
+        "source_module_count": 2557,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
@@ -76,7 +76,7 @@
     },
     {
       "evidence_metrics": {
-        "compatibility_test_file_count": 0,
+        "compatibility_test_file_count": 1,
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -189,7 +189,7 @@
     "accepted_adr_count": 60,
     "adr_enforcement_blocking_gap_count": 0,
     "adr_enforcement_manual_exception_count": 0,
-    "compatibility_test_file_count": 0,
+    "compatibility_test_file_count": 1,
     "composition_module_cap": 295,
     "composition_module_count": 278,
     "composition_util": 0.9424,
@@ -214,7 +214,7 @@
     "retained_public_export_facade_count": 3,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2552,
+    "source_module_count": 2557,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
@@ -250,7 +250,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "376e3b47fefcf64aaabf6e799c1659d007310282998db145e9e38ef9f5bfacb2"
+      "source_fingerprint": "882cf4e2d1338b3b57eeae10d8882b9d96bd78e0aa112facf7ab1522b8962423"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -269,7 +269,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "9a5941a1e3e845209e0b5369d74edf3b0eed47998219ef30a70bea5e5e7f0b54"
+      "source_tree_sha256": "c9e63ed700d5a0ead4a7fc3a82c599fc2c0c298f9489a1cfa85e9c94eca3da61"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
@@ -277,7 +277,7 @@
       "path": "reports/observability/runtime_cardinality_inventory.json"
     },
     "test_governance_report": {
-      "compatibility_test_files": 0,
+      "compatibility_test_files": 1,
       "path": "reports/quality/test-governance-current.json"
     }
   },
