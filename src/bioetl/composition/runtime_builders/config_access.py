@@ -2,13 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-from collections.abc import Callable
 from functools import cache
-
-if TYPE_CHECKING:
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 from bioetl.domain.mapping.classification_data import ClassificationData
@@ -24,23 +18,13 @@ import bioetl.infrastructure.config.protein_class_target_type_loader as protein_
 
 from pathlib import Path
 
-from bioetl.composition.runtime_builders._config_access_loaders import (
-    create_dq_config_loader as _create_dq_config_loader,
-    create_pipeline_config_loader as _create_pipeline_config_loader,
-    create_source_config_loader as _create_source_config_loader,
-)
-from bioetl.infrastructure.config.config_root import resolve_configs_root
-from bioetl.infrastructure.config.settings_api import Settings
-from bioetl.infrastructure.config.settings_api import get_settings as _get_settings
-from bioetl.infrastructure.config.pipeline_config_api import (
-    load_pipeline_config as _load_pipeline_config,
-)
-from bioetl.infrastructure.config.source_config_loader import (
-    load_source_config as _load_source_config,
-)
-from bioetl.infrastructure.config.dq_contract_config_loader import (
-    load_dq_config_for_pipeline as _load_dq_config_for_pipeline,
-)
+from bioetl.composition.runtime_builders import _config_access_loaders
+import bioetl.infrastructure.config.config_root as _config_root
+import bioetl.infrastructure.config.dq_contract_config_loader as _dq_config_loader
+import bioetl.infrastructure.config.pipeline_config_api as _pipeline_config_api
+import bioetl.infrastructure.config.settings_api as _settings_api
+import bioetl.infrastructure.config.source_config_loader as _source_config_loader
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [
     "create_dq_config_loader",
@@ -55,27 +39,21 @@ __all__ = [
 ]
 
 
-def create_pipeline_config_loader(
-    configs_root: Path,
-) -> Callable[[str], PipelineYamlConfig]:
-    return _create_pipeline_config_loader(configs_root)
+create_pipeline_config_loader = _config_access_loaders.create_pipeline_config_loader
+create_dq_config_loader = _config_access_loaders.create_dq_config_loader
+create_source_config_loader = _config_access_loaders.create_source_config_loader
+resolve_configs_root = _config_root.resolve_configs_root
+_load_pipeline_config = _pipeline_config_api.load_pipeline_config
+_load_dq_config_for_pipeline = _dq_config_loader.load_dq_config_for_pipeline
 
 
-def create_dq_config_loader(configs_root: Path) -> Callable[[str], object]:
-    return _create_dq_config_loader(configs_root)
+def get_settings() -> _settings_api.Settings:
+
+    return _settings_api.get_settings()
 
 
-def create_source_config_loader(configs_root: Path) -> Callable[[str], object]:
-    return _create_source_config_loader(configs_root)
-
-
-def get_settings() -> Settings:
-
-    return _get_settings()
-
-
-def load_settings() -> Settings:
-    return Settings()
+def load_settings() -> _settings_api.Settings:
+    return _settings_api.Settings()
 
 
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
@@ -86,7 +64,7 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
 
 def load_source_config(provider: str) -> object:
 
-    return _load_source_config(provider)
+    return _source_config_loader.load_source_config(provider)
 
 
 def load_dq_config_for_pipeline(
@@ -98,7 +76,10 @@ def load_dq_config_for_pipeline(
 
     if configs_root is None:
         configs_root = resolve_configs_root(None)
-    return _load_dq_config_for_pipeline(pipeline_name, configs_root=configs_root)
+    return _load_dq_config_for_pipeline(
+        pipeline_name,
+        configs_root=configs_root,
+    )
 
 
 @cache

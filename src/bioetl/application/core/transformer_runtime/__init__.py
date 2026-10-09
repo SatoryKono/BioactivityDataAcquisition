@@ -31,18 +31,7 @@ from bioetl.application.core.transformer_runtime.quarantine import (
     flush_filtered_records as flush_filtered_records,
     route_single_transform_attempt as route_single_transform_attempt,
 )
-from bioetl.application.core.transformer_runtime.state import (
-    RecordTransformOutcome as RecordTransformOutcome,
-    TransformAggregationState as TransformAggregationState,
-    TransformResult as TransformResult,
-    TransformedRecord as TransformedRecord,
-    accumulate_stream_transform_result as accumulate_stream_transform_result,
-    accumulate_transform_outcome as accumulate_transform_outcome,
-    apply_stream_transform_result_to_state as apply_stream_transform_result_to_state,
-    apply_transform_outcome_to_state as apply_transform_outcome_to_state,
-    build_transform_result as build_transform_result,
-    create_transform_aggregation_state as create_transform_aggregation_state,
-)
+from bioetl.application.core.transformer_runtime import state as _state
 from bioetl.application.core.transformer_runtime.streaming import (
     StreamingBatchProcessor as StreamingBatchProcessor,
 )
@@ -52,25 +41,15 @@ __all__ = [
     "TRANSFORM_PROCESSING_ERRORS",
     "YIELD_INTERVAL_SECONDS",
     "DQThresholdCheckResult",
-    "RecordTransformOutcome",
     "StreamingBatchProcessor",
     "ThresholdBreach",
     "ThresholdBreachReason",
-    "TransformAggregationState",
-    "TransformResult",
-    "TransformedRecord",
-    "accumulate_stream_transform_result",
-    "accumulate_transform_outcome",
-    "apply_stream_transform_result_to_state",
-    "apply_transform_outcome_to_state",
     "bind_record_context",
-    "build_transform_result",
     "check_dq_thresholds",
     "classify_dq_threshold_breach",
     "collect_batch_transform_state",
     "collect_stream_transform_state",
     "compute_error_rate",
-    "create_transform_aggregation_state",
     "finalize_batch_transform_result",
     "finalize_stream_transform_result",
     "flush_dq_records",
@@ -79,4 +58,14 @@ __all__ = [
     "route_single_transform_attempt",
     "transform_record_attempt",
     "yield_control_if_needed",
+    *_state.__all__,
 ]
+
+
+def __getattr__(name: str) -> object:
+    """Resolve state exports from their canonical submodule."""
+    if name not in _state.__all__:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    value = getattr(_state, name)
+    globals()[name] = value
+    return value

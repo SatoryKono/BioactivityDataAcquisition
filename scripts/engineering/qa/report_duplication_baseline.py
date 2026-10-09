@@ -120,7 +120,8 @@ def _is_package_entry_report_noise(cluster: DuplicateCluster) -> bool:
     """
     module_names = {module.module for module in cluster.modules}
     normalized_path = cluster.path.replace("\\", "/")
-    if normalized_path.endswith("/__init__.py") and not any(
+    package_entry_suffixes = ("/__init__.py", "/__init__", ".__init__")
+    if normalized_path.endswith(package_entry_suffixes) and not any(
         module.endswith(".__init__") for module in module_names
     ):
         return True
