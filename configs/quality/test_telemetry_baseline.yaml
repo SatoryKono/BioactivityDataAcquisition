@@ -4,7 +4,7 @@ workflow_path: .github/workflows/tests.yml
 source_branch: codex/pr12096-closeout-20261007
 refreshed_at_utc: '2026-10-09T13:41:23.537076+00:00'
 refresh_status: captured
-source_commit: 912f483953c76ede75313f762e41a9848369c3bb
+source_commit: 9a7339dc05912455fb769d21e91be8f763a72f98
 source_run_id: local-local-verify-pr12096-20261009-final16
 source_event: local_coverage_verify
 source_run_url: null
@@ -241,7 +241,7 @@ measurement_provenance:
   coverage_xml_sha256: 997be9682390485a488bf15552631ee703523c505859d8670fcdbf3cd42bc3db
   source_tree_sha256: 6e2bf6d41d2fa7b5df095621c6727b5ef3c8be708137539b62cf7991b815f931
   test_tree_sha256: 6145d9fe4ac62f6f199e68468d6bcca726c11bc6666be206ad2ee88c1432a102
-  head: 912f483953c76ede75313f762e41a9848369c3bb
+  head: 9a7339dc05912455fb769d21e91be8f763a72f98
   required_shards:
   - smoke
   - contract-confidence
