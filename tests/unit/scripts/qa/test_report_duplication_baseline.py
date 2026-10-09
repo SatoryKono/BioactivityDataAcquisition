@@ -47,7 +47,7 @@ pytestmark = pytest.mark.unit
     ],
 )
 def test_package_entry_noise_supports_pylint_path_variants(path: str) -> None:
-    """Pylint path rendering must not change package-entry normalization."""
+    """Pylint's platform-specific report path must not hide real module pairs."""
     cluster = DuplicateCluster(
         path=path,
         line=1,
@@ -61,7 +61,7 @@ def test_package_entry_noise_supports_pylint_path_variants(path: str) -> None:
         ),
     )
 
-    assert report._is_package_entry_report_noise(cluster)
+    assert not report._is_package_entry_report_noise(cluster)
 
 
 def test_package_entry_noise_keeps_real_package_export_comparisons() -> None:

@@ -3,33 +3,16 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
-from typing import Any, ClassVar, cast
+from typing import ClassVar
 
-from bioetl.application.core.data_source_mixins import (
-    _SourceMetadataDelegationMixin,
-    _WrappedDataSourceDelegationMixin,
-)
-from bioetl.application.core.derived_scan_budget import (
-    iter_derived_source,
-    resolve_derived_upstream_limit,
-)
-from bioetl.application.core.target_data_source_mixins import (
-    _FallbackFilterableTargetFetchMixin,
-    _FilterableTargetDelegationMixin,
-    _TargetEntityFetchDelegationMixin,
+from bioetl.application.core.data_sources._derived_assay_source import (
+    _DerivedAssayDataSourceBase,
 )
 from bioetl.domain.deterministic_identity import deterministic_uuid
-from bioetl.domain.ports import DataSourcePort
 from bioetl.domain.types import JsonDict
 
 
-class AssayParametersDataSource(
-    _FallbackFilterableTargetFetchMixin,
-    _FilterableTargetDelegationMixin,
-    _TargetEntityFetchDelegationMixin,
-    _WrappedDataSourceDelegationMixin,
-    _SourceMetadataDelegationMixin,
-):
+class AssayParametersDataSource(_DerivedAssayDataSourceBase):
     """Expose the API's nested parameters, never entire assays as parameters.
 
     The public API has no parameter surrogate key. Its v1 local identity is a
@@ -38,24 +21,9 @@ class AssayParametersDataSource(
     parameter value creates a new observation. It is not a ChEMBL database PK.
     """
 
-    SOURCE_ENTITY_TYPE = "assay"
     TARGET_ENTITY_TYPE = "assay_parameters"
     # Nested parameters are sparse; scale upstream assays for limited runs.
     ASSAY_LIMIT_MULTIPLIER: ClassVar[int] = 20
-
-    def __init__(self, data_source: DataSourcePort) -> None:
-        self._data_source = data_source
-
-    def _upstream_limit(
-        self,
-        limit: int | None,
-        filter_ids: list[str] | None = None,
-    ) -> int:
-        return resolve_derived_upstream_limit(
-            limit,
-            multiplier=self.ASSAY_LIMIT_MULTIPLIER,
-            filter_ids=filter_ids,
-        )
 
     async def _fetch_target_records(
         self,
@@ -67,75 +35,26 @@ class AssayParametersDataSource(
     ) -> AsyncIterator[JsonDict]:
         if limit is not None and limit <= 0:
             return
-        scan_limit = self._upstream_limit(limit, filter_ids)
-        source = self._data_source.fetch(
-            entity_type=self.SOURCE_ENTITY_TYPE,
-            limit=scan_limit,
+        source = self._iter_assays(
+            limit=limit,
             query=query,
             filter_ids=filter_ids,
             filter_field=filter_field,
         )
         async for parameter in self._expand_parameters(
-            iter_derived_source(source, output_limit=limit, scan_limit=scan_limit),
+            source,
             limit=limit,
             offset=offset,
         ):
             yield parameter
 
-    async def _fetch_target_filtered_records(
+    def _iter_derived_records(
         self,
-        filterable: Any,  # Any: mixin provides a duck-typed filtered fetch surface.
-        filter_ids: list[str],
-        filter_field: str,
-        limit: int | None = None,
+        assays: AsyncIterator[JsonDict],
+        *,
+        limit: int | None,
     ) -> AsyncIterator[JsonDict]:
-        scan_limit = self._upstream_limit(limit, filter_ids)
-        async for parameter in self._expand_parameters(
-            iter_derived_source(
-                filterable.fetch_filtered(
-                    entity_type=self.SOURCE_ENTITY_TYPE,
-                    filter_ids=filter_ids,
-                    filter_field=filter_field,
-                    limit=scan_limit,
-                ),
-                output_limit=limit,
-                scan_limit=scan_limit,
-            ),
-            limit=limit,
-        ):
-            yield parameter
-
-    async def _fetch_target_multi_filtered_records(
-        self,
-        filterable: Any,  # Any: mixin accepts multiple runtime filterable adapters.
-        filters: dict[str, list[str]],
-        limit: int | None = None,
-    ) -> AsyncIterator[JsonDict]:
-        id_count = sum(len(values) for values in filters.values())
-        scan_limit = resolve_derived_upstream_limit(
-            limit,
-            multiplier=self.ASSAY_LIMIT_MULTIPLIER,
-            filter_id_count=id_count,
-        )
-        async for parameter in self._expand_parameters(
-            iter_derived_source(
-                filterable.fetch_multi_filtered(
-                    entity_type=self.SOURCE_ENTITY_TYPE,
-                    filters=filters,
-                    limit=scan_limit,
-                ),
-                output_limit=limit,
-                scan_limit=scan_limit,
-            ),
-            limit=limit,
-        ):
-            yield parameter
-
-    def _resolve_target_fallback_upstream_limit(
-        self,
-        limit: int | None = None,
-    ) -> int | None:
-        return self._upstream_limit(limit)
+        return self._expand_parameters(assays, limit=limit)
 
     def _yield_target_records_from_fallback_source_records(
         self,
@@ -148,14 +67,6 @@ class AssayParametersDataSource(
             self._coerce_assay_records(source_records),
             limit=limit,
         )
-
-    async def _coerce_assay_records(
-        self,
-        assays: AsyncIterator[object],
-    ) -> AsyncIterator[JsonDict]:
-        async for assay in assays:
-            if isinstance(assay, dict):
-                yield cast("JsonDict", assay)
 
     async def _expand_parameters(
         self,

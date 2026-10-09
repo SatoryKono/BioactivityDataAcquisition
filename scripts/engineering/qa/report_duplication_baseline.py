@@ -109,27 +109,17 @@ def _is_self_module_cluster(cluster: DuplicateCluster) -> bool:
 
 
 def _is_package_entry_report_noise(cluster: DuplicateCluster) -> bool:
-    """Return True when pylint attributes multi-module dupes to a package ``__init__``.
+    """Return True for reviewed fetch-shell pairs that are scanner noise.
 
-    Pylint sometimes reports the comparison path as a package entry module even
-    when neither compared module is that package root. Those findings are not
-    actionable residual debt for hotspot family ratchets.
-
-    Linux pylint often attributes the same thin fetch-signature shells to one of
-    the concrete modules instead of ``__init__.py``; treat those known
-    application.core fetch-contract pairs as wiring noise as well.
+    The path attached to ``R0801`` is the module on which Pylint emits its
+    aggregate message; it is not necessarily one of the compared modules.  In
+    particular, Windows frequently reports every package scan on
+    ``__init__.py`` while Linux reports the same pairs on concrete modules.
+    Classifying by that path therefore hides real duplication on Windows and
+    makes the zero ratchet platform-dependent.  Only the compared module names
+    are stable enough to identify reviewed scanner noise.
     """
     module_names = {module.module for module in cluster.modules}
-    normalized_path = cluster.path.replace("\\", "/")
-    package_entry_suffixes = (
-        "/__init__.py",
-        "/__init__",
-        _PACKAGE_ENTRY_MODULE_SUFFIX,
-    )
-    if normalized_path.endswith(package_entry_suffixes) and not any(
-        module.endswith(_PACKAGE_ENTRY_MODULE_SUFFIX) for module in module_names
-    ):
-        return True
     core_fetch_shells = {
         "bioetl.application.core._fetch_forwarding",
         "bioetl.application.core.filtered_data_source_mixins",
