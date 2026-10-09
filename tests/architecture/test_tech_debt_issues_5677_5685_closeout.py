@@ -213,8 +213,9 @@ def test_issue_5683_dead_code_inventory_has_no_untriaged_candidates() -> None:
 def test_issue_5684_governance_freshness_gates_are_passing() -> None:
     gates = _load_json(DEBT_GATES)
     review = _load_json(RUNTIME_CARDINALITY_REVIEW)
-    generated_at = review["generated_at"]
-    assert generated_at == "2026-09-16T16:48:20Z"
+    generated_at = datetime.fromisoformat(review["generated_at"])
+    assert generated_at.tzinfo is not None
+    assert 0 <= (datetime.now(UTC) - generated_at).days <= 21
 
     assert gates["summary"]["release_gate_status"] == "passing"
     assert gates["summary"]["fail_count"] == 0
