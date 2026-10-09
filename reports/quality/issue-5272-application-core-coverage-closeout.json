@@ -166,9 +166,9 @@
     }
   ],
   "current_binding_refresh": {
-    "measured_head": "f33e34578ae4c541e2b5c4f433cc4d5fd2697f39",
-    "source_tree_sha256": "5492068cab2e9b7471a4b59111eb8ff015a30431c7b32fc2177a50323eb62049",
-    "evidence": "reports/coverage/local-verify-pr12096-20261009-final15/manifest.json",
+    "measured_head": "912f483953c76ede75313f762e41a9848369c3bb",
+    "source_tree_sha256": "6e2bf6d41d2fa7b5df095621c6727b5ef3c8be708137539b62cf7991b815f931",
+    "evidence": "reports/coverage/local-verify-pr12096-20261009-final16/manifest.json",
     "semantics": "Current accepted inventory may retain historical nonregressing rows; raw measured candidate remains separate."
   }
 }
