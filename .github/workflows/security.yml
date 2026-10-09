@@ -24,7 +24,7 @@ jobs:
           python-version: "3.13"
           uv-extras: "dev"
       - name: Run detect-secrets baseline check
-        run: uv run --frozen --no-build pytest tests/architecture/test_antipatterns.py::test_no_hardcoded_secrets -q --noconftest -o "addopts=" -o "filterwarnings=" -o "timeout=0"
+        run: uv run --frozen --no-build pytest tests/architecture/test_antipatterns.py::test_no_hardcoded_secrets -q
 
   pip-audit:
     runs-on: ubuntu-latest
