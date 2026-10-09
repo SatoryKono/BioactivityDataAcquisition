@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-09T01:02:02.424439+00:00",
+  "generated_at": "2026-10-09T08:28:54.714093+00:00",
   "summary": {
     "total_scripts": 647,
     "status_counts": {
@@ -10133,7 +10133,7 @@
         },
         {
           "path": "tests/unit/scripts/qa/test_run_local_coverage_verify.py",
-          "line": 20,
+          "line": 22,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.local_test_telemetry import junit_telemetry_sha256"
         }
@@ -10475,7 +10475,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -10508,6 +10508,12 @@
           "text": "\"run-tests\": \"run_pytest_resilient.py\","
         },
         {
+          "path": "scripts/engineering/qa/run_local_coverage_verify.py",
+          "line": 30,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.ci.run_pytest_resilient import classify_pytest_failure"
+        },
+        {
           "path": "tests/architecture/test_ci_heavy_lane_rebalance.py",
           "line": 141,
           "source_group": "tests",
@@ -10518,12 +10524,6 @@
           "line": 85,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/run_pytest_resilient.py\","
-        },
-        {
-          "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 216,
-          "source_group": "tests",
-          "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"run_pytest_resilient.py\""
         }
       ]
     },
@@ -22035,7 +22035,7 @@
         },
         {
           "path": "tests/architecture/test_proof_closeout_workflow_contract.py",
-          "line": 129,
+          "line": 184,
           "source_group": "tests",
           "text": "if \"setup_grafana_screenshot_runtime.sh\" in command"
         }

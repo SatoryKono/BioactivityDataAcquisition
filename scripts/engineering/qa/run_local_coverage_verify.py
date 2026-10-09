@@ -27,12 +27,14 @@ from scripts.engineering.qa.report_module_coverage_inventory import (
     compute_source_tree_sha256,
 )
 from scripts.engineering.ci.local_test_telemetry import junit_telemetry_sha256
+from scripts.engineering.ci.run_pytest_resilient import classify_pytest_failure
 from scripts.engineering.ci.update_test_telemetry_baseline import (
     compute_test_telemetry_source_tree_sha256,
 )
 
 ROOT = Path(__file__).resolve().parents[3]
 MANIFEST_NAME = "manifest.json"
+INFRASTRUCTURE_RETRY_LIMIT = 1
 COMMON_UNIT_MARKER = (
     "not serial and not memory and not fs_contract and not subprocess_backed"
 )
@@ -285,6 +287,75 @@ def _run_logged(command: list[str], log: Path, *, env: dict[str, str]) -> int:
     return result.returncode
 
 
+def _execute_shard(
+    shard: Shard,
+    *,
+    coverage_file: Path,
+    junit: Path,
+    log: Path,
+    env: dict[str, str],
+    max_workers: int,
+) -> dict[str, object]:
+    """Execute one shard and retry infrastructure instability at most once."""
+    canonical_command = _command(shard, junit, max_workers=max_workers)
+    attempts: list[dict[str, object]] = []
+    final_exit_code = 1
+    final_classification = "unknown_failure"
+    final_attempt_log = log
+    for attempt in range(1, INFRASTRUCTURE_RETRY_LIMIT + 2):
+        command = (
+            canonical_command
+            if attempt == 1
+            else _command(shard, junit, max_workers=1)
+        )
+        attempt_log = log.with_name(f"{shard.name}.attempt-{attempt}.log")
+        if attempt > 1:
+            coverage_file.unlink(missing_ok=True)
+            junit.unlink(missing_ok=True)
+        started = time.monotonic()
+        exit_code = _run_logged(command, attempt_log, env=env)
+        seconds = round(time.monotonic() - started, 2)
+        output = attempt_log.read_text(encoding="utf-8", errors="replace")
+        classification = classify_pytest_failure(exit_code, output)
+        attempts.append(
+            {
+                "attempt": attempt,
+                "command": command,
+                "exit_code": exit_code,
+                "failure_class": classification,
+                "seconds": seconds,
+                "log_file": str(attempt_log),
+            }
+        )
+        final_exit_code = exit_code
+        final_classification = classification
+        final_attempt_log = attempt_log
+        if classification not in {"worker_crash", "timeout"} or attempt > INFRASTRUCTURE_RETRY_LIMIT:
+            break
+
+    shutil.copyfile(final_attempt_log, log)
+    return {
+        "name": shard.name,
+        "command": canonical_command,
+        "exit_code": final_exit_code,
+        "failure_class": final_classification,
+        "retry_count": len(attempts) - 1,
+        "attempts": attempts,
+        "seconds": round(sum(float(item["seconds"]) for item in attempts), 2),
+        "coverage_file": str(coverage_file),
+        "coverage_sha256": (
+            _sha256(coverage_file)
+            if coverage_file.is_file() and coverage_file.stat().st_size > 0
+            else None
+        ),
+        "junit_file": str(junit) if junit.is_file() else None,
+        "junit_telemetry_sha256": (
+            junit_telemetry_sha256(junit) if junit.is_file() else None
+        ),
+        "log_file": str(log),
+    }
+
+
 def _load_shard_group(path: Path, expected: dict[str, object]) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if payload.get("shards_complete") is not True:
@@ -453,6 +524,7 @@ def main(argv: list[str] | None = None) -> int:
         "started_at_utc": datetime.now(UTC).isoformat(),
         "python": sys.version.split()[0],
         "max_workers": args.max_workers,
+        "infrastructure_retry_limit": INFRASTRUCTURE_RETRY_LIMIT,
         "scratch_dir": str(scratch),
         "required_shards": [shard.name for shard in SHARDS],
         "shards": [],
@@ -499,35 +571,29 @@ def main(argv: list[str] | None = None) -> int:
             coverage_file = shards_dir / f".coverage.{shard.name}"
             junit = junit_dir / f"{shard.name}.xml"
             log = logs_dir / f"{shard.name}.log"
-            command = _command(shard, junit, max_workers=args.max_workers)
             env["COVERAGE_FILE"] = _bash_safe_path(coverage_file)
             print(f"[local-coverage] start {shard.name}", flush=True)
-            started = time.monotonic()
-            exit_code = _run_logged(command, log, env=env)
-            row = {
-                "name": shard.name,
-                "command": command,
-                "exit_code": exit_code,
-                "seconds": round(time.monotonic() - started, 2),
-                "coverage_file": str(coverage_file),
-                "coverage_sha256": (
-                    _sha256(coverage_file)
-                    if coverage_file.is_file() and coverage_file.stat().st_size > 0
-                    else None
-                ),
-                "junit_file": str(junit) if junit.is_file() else None,
-                "junit_telemetry_sha256": junit_telemetry_sha256(junit)
-                if junit.is_file()
-                else None,
-                "log_file": str(log),
-            }
+            row = _execute_shard(
+                shard,
+                coverage_file=coverage_file,
+                junit=junit,
+                log=log,
+                env=env,
+                max_workers=args.max_workers,
+            )
             assert isinstance(manifest["shards"], list)
             manifest["shards"].append(row)
             _write_manifest(manifest_path, manifest)
             print(
-                f"[local-coverage] {shard.name} exit={exit_code} coverage={'yes' if row['coverage_sha256'] else 'no'}",
+                f"[local-coverage] {shard.name} exit={row['exit_code']} "
+                f"class={row['failure_class']} retries={row['retry_count']} "
+                f"coverage={'yes' if row['coverage_sha256'] else 'no'}",
                 flush=True,
             )
+            if row["exit_code"] != 0:
+                manifest["stopped_after_shard"] = shard.name
+                _write_manifest(manifest_path, manifest)
+                break
 
     if (
         _git("rev-parse", "HEAD") != head

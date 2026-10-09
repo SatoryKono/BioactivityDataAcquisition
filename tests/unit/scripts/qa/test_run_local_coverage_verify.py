@@ -10,8 +10,10 @@ import pytest
 
 from scripts.engineering.qa import run_local_coverage_verify as runner
 from scripts.engineering.qa.run_local_coverage_verify import (
+    INFRASTRUCTURE_RETRY_LIMIT,
     SHARDS,
     _command,
+    _execute_shard,
     _measurement_environment,
     main,
     import_shards,
@@ -126,7 +128,7 @@ def test_manifest_writer_rejects_arbitrary_name(tmp_path):
     assert not (tmp_path / "other.json").exists()
 
 
-def test_single_worker_is_recorded_and_used_without_accepting_failed_run(
+def test_stable_failure_stops_group_without_retry(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setattr(
@@ -140,6 +142,7 @@ def test_single_worker_is_recorded_and_used_without_accepting_failed_run(
 
     def failed_shard(command, log, *, env):
         executed.append(command)
+        log.write_text("FAILED tests/unit/test_example.py::test_case")
         return 1
 
     monkeypatch.setattr(runner, "_run_logged", failed_shard)
@@ -148,14 +151,91 @@ def test_single_worker_is_recorded_and_used_without_accepting_failed_run(
     manifest = json.loads((scratch / "manifest.json").read_text(encoding="utf-8"))
     assert manifest["max_workers"] == 1
     assert manifest["complete"] is False
-    assert len(executed) == len(manifest["shards"]) == 17
-    for shard, command, row in zip(SHARDS, executed, manifest["shards"], strict=True):
-        assert row["command"] == command
-        assert row["exit_code"] == 1
-        if shard.parallel:
-            assert command[command.index("-n") + 1] == "1"
-        else:
-            assert command[-2:] == ["-p", "no:xdist"]
+    assert manifest["infrastructure_retry_limit"] == INFRASTRUCTURE_RETRY_LIMIT
+    assert manifest["stopped_after_shard"] == "smoke"
+    assert len(executed) == len(manifest["shards"]) == 1
+    row = manifest["shards"][0]
+    assert row["command"] == executed[0]
+    assert row["exit_code"] == 1
+    assert row["failure_class"] == "stable_test_failure"
+    assert row["retry_count"] == 0
+
+
+def test_worker_crash_retries_once_with_single_worker(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    shard = next(item for item in SHARDS if item.name == "unit-domain")
+    coverage = tmp_path / ".coverage.unit-domain"
+    junit = tmp_path / "unit-domain.xml"
+    log = tmp_path / "unit-domain.log"
+    commands = []
+
+    def run_attempt(command, attempt_log, *, env):
+        commands.append(command)
+        if len(commands) == 1:
+            attempt_log.write_text("[gw0] node down: not properly terminated")
+            return 1
+        attempt_log.write_text("passed")
+        coverage.write_bytes(b"coverage")
+        junit.write_text('<testsuite><testcase name="ok" time="0.1"/></testsuite>')
+        return 0
+
+    monkeypatch.setattr(runner, "_run_logged", run_attempt)
+    row = _execute_shard(
+        shard,
+        coverage_file=coverage,
+        junit=junit,
+        log=log,
+        env={},
+        max_workers=2,
+    )
+
+    assert row["exit_code"] == 0
+    assert row["failure_class"] == "pass"
+    assert row["retry_count"] == 1
+    assert len(row["attempts"]) == 2
+    assert commands[0][commands[0].index("-n") + 1] == "2"
+    assert commands[1][commands[1].index("-n") + 1] == "1"
+
+
+def test_timeout_retries_only_once(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    shard = SHARDS[0]
+    calls = 0
+
+    def timed_out(command, attempt_log, *, env):
+        nonlocal calls
+        calls += 1
+        attempt_log.write_text("Failed: Timeout (>300.0s)")
+        return 1
+
+    monkeypatch.setattr(runner, "_run_logged", timed_out)
+    row = _execute_shard(
+        shard,
+        coverage_file=tmp_path / ".coverage.smoke",
+        junit=tmp_path / "smoke.xml",
+        log=tmp_path / "smoke.log",
+        env={},
+        max_workers=2,
+    )
+
+    assert calls == 2
+    assert row["exit_code"] == 1
+    assert row["failure_class"] == "timeout"
+    assert row["retry_count"] == 1
+
+
+@pytest.mark.parametrize(
+    ("exit_code", "output", "expected"),
+    [
+        (0, "", "pass"),
+        (1, "FAILED tests/unit/test_example.py::test_case", "stable_test_failure"),
+        (1, "worker terminated unexpectedly", "worker_crash"),
+        (1, "Failed: Timeout (>300.0s)", "timeout"),
+        (2, "pytest usage error", "unknown_failure"),
+    ],
+)
+def test_shared_pytest_failure_classifier(exit_code, output, expected) -> None:
+    assert runner.classify_pytest_failure(exit_code, output) == expected
 
 
 @pytest.fixture()

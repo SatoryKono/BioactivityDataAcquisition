@@ -25,6 +25,11 @@ _WORKER_CRASH_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"worker.+(crash|terminated unexpectedly)", re.IGNORECASE),
     re.compile(r"xdist.+(internal error|Interrupted)", re.IGNORECASE),
 )
+_TIMEOUT_PATTERNS: tuple[re.Pattern[str], ...] = (
+    re.compile(r"timed out after\s+\d", re.IGNORECASE),
+    re.compile(r"timeout\s*\(>\s*[\d.]+s\)", re.IGNORECASE),
+    re.compile(r"pytest-timeout", re.IGNORECASE),
+)
 SUMMARY_FILENAME = "summary.txt"
 
 
@@ -60,9 +65,24 @@ def _extract_failed_nodeids(output: str) -> list[str]:
     return sorted(set(nodeids))
 
 
-def _detect_worker_crash(output: str) -> bool:
+def detect_worker_crash(output: str) -> bool:
     """Return True if output indicates xdist worker crash/termination."""
     return any(pattern.search(output) for pattern in _WORKER_CRASH_PATTERNS)
+
+
+def classify_pytest_failure(
+    return_code: int, output: str, *, timed_out: bool = False
+) -> str:
+    """Classify whether a failed pytest invocation is safe to retry once."""
+    if return_code == 0:
+        return "pass"
+    if timed_out or any(pattern.search(output) for pattern in _TIMEOUT_PATTERNS):
+        return "timeout"
+    if detect_worker_crash(output):
+        return "worker_crash"
+    if return_code == 1:
+        return "stable_test_failure"
+    return "unknown_failure"
 
 
 def _effective_exit_code(result: PassResult, *, allow_no_tests: bool = False) -> int:
@@ -169,7 +189,7 @@ def _run_pass(
         junit_path=junit_path,
         log_path=log_path,
         failed_nodeids=_extract_failed_nodeids(output),
-        worker_crash_detected=_detect_worker_crash(output),
+        worker_crash_detected=detect_worker_crash(output),
         timed_out=timed_out,
     )
 
