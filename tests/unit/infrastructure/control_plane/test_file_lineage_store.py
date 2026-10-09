@@ -28,6 +28,8 @@
 """Unit tests for file-backed lineage fragment storage."""
 
 from __future__ import annotations
+import pathlib
+import typing
 
 from datetime import UTC, datetime
 from pathlib import Path
@@ -53,7 +55,7 @@ from tests.helpers.deterministic_ids import deterministic_uuid_value
 pytestmark = pytest.mark.unit
 
 
-def test_file_store_round_trips_fragments_by_id_run_manifest_and_node(tmp_path) -> None:
+def test_file_store_round_trips_fragments_by_id_run_manifest_and_node(tmp_path: pathlib.Path) -> None:
     store = FileLineageStore(base_path=tmp_path / "lineage")
     run_id = RunID(deterministic_uuid_value("lineage_store.round_trip"))
     run_node = LineageNodeRef(
@@ -103,7 +105,7 @@ def test_file_store_round_trips_fragments_by_id_run_manifest_and_node(tmp_path) 
     assert store.list_by_node_id(dataset_node.node_id) == [loaded_by_semantic_id]
 
 
-def test_file_store_emits_lineage_read_metric_on_manifest_lookup(tmp_path) -> None:
+def test_file_store_emits_lineage_read_metric_on_manifest_lookup(tmp_path: pathlib.Path) -> None:
     metrics = MagicMock()
     store = FileLineageStore(
         base_path=tmp_path / "lineage",
@@ -163,7 +165,7 @@ def test_file_store_emits_lineage_read_metric_on_manifest_lookup(tmp_path) -> No
 
 
 def test_file_store_preserves_occurrence_specific_history_for_semantically_equivalent_fragments(
-    tmp_path,
+    tmp_path: pathlib.Path,
 ) -> None:
     store = FileLineageStore(base_path=tmp_path / "lineage")
     first_run_id = RunID(deterministic_uuid_value("lineage_store.first_history"))
@@ -240,7 +242,7 @@ def test_file_store_preserves_occurrence_specific_history_for_semantically_equiv
 
 
 def test_file_store_rolls_back_fragment_and_indexes_when_index_append_fails(
-    tmp_path,
+    tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     store = FileLineageStore(base_path=tmp_path / "lineage")
@@ -280,7 +282,7 @@ def test_file_store_rolls_back_fragment_and_indexes_when_index_append_fails(
     original_append = lineage_store_module._append_jsonl_payload
     call_count = {"value": 0}
 
-    def _fail_on_second_append(path, payload) -> int:
+    def _fail_on_second_append(path: pathlib.Path, payload: bytes) -> int:
         call_count["value"] += 1
         if call_count["value"] == 2:
             raise OSError("simulated lineage index append failure")
@@ -307,7 +309,7 @@ def test_file_store_rolls_back_fragment_and_indexes_when_index_append_fails(
     assert store.list_by_node_id(dataset_node.node_id) == []
 
 
-def test_file_store_get_fails_closed_on_truncated_semantic_index_tail(tmp_path) -> None:
+def test_file_store_get_fails_closed_on_truncated_semantic_index_tail(tmp_path: pathlib.Path) -> None:
     store = FileLineageStore(base_path=tmp_path / "lineage")
     semantic_index = store._semantic_fragment_index_path("silver:fragment-broken")
     semantic_index.parent.mkdir(parents=True, exist_ok=True)
@@ -317,7 +319,7 @@ def test_file_store_get_fails_closed_on_truncated_semantic_index_tail(tmp_path) 
         store.get("silver:fragment-broken")
 
 
-def test_file_store_fails_closed_on_truncated_index_tail(tmp_path) -> None:
+def test_file_store_fails_closed_on_truncated_index_tail(tmp_path: pathlib.Path) -> None:
     store = FileLineageStore(base_path=tmp_path / "lineage")
     run_id = RunID(deterministic_uuid_value("lineage_store.truncated_tail"))
     index_path = store._run_index_path(str(run_id))
@@ -332,7 +334,7 @@ def test_file_store_fails_closed_on_truncated_index_tail(tmp_path) -> None:
 
 
 def test_lineage_store_append_jsonl_payload_uses_control_plane_flush_policy(
-    tmp_path,
+    tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     flush_calls: list[int] = []
@@ -361,7 +363,7 @@ def test_lineage_index_build_stored_fragment_id_preserves_semantic_id_without_oc
 
 
 def test_lineage_index_load_fragment_ids_handles_blank_and_duplicate_entries(
-    tmp_path,
+    tmp_path: pathlib.Path,
 ) -> None:
     index_path = tmp_path / "lineage" / "index.jsonl"
     index_path.parent.mkdir(parents=True)
@@ -394,7 +396,7 @@ def test_lineage_index_load_fragment_ids_handles_blank_and_duplicate_entries(
     ),
 )
 def test_lineage_index_load_fragment_ids_rejects_malformed_records(
-    tmp_path,
+    tmp_path: pathlib.Path,
     payload: str,
     message: str,
 ) -> None:
@@ -427,7 +429,7 @@ class _RecordingTruncateOs:
         self.calls.append(("close", file_descriptor))
 
 
-def test_lineage_index_truncate_to_offset_is_noop_for_missing_path(tmp_path) -> None:
+def test_lineage_index_truncate_to_offset_is_noop_for_missing_path(tmp_path: pathlib.Path) -> None:
     recording_os = _RecordingTruncateOs()
     flush_calls: list[int] = []
 
@@ -443,7 +445,7 @@ def test_lineage_index_truncate_to_offset_is_noop_for_missing_path(tmp_path) -> 
 
 
 def test_lineage_index_truncate_to_offset_truncates_and_flushes_existing_path(
-    tmp_path,
+    tmp_path: pathlib.Path,
 ) -> None:
     index_path = tmp_path / "lineage" / "index.jsonl"
     index_path.parent.mkdir(parents=True)
@@ -487,7 +489,7 @@ class _ZeroWriteOs:
         self.closed.append(file_descriptor)
 
 
-def test_lineage_index_append_jsonl_payload_rejects_empty_write(tmp_path) -> None:
+def test_lineage_index_append_jsonl_payload_rejects_empty_write(tmp_path: pathlib.Path) -> None:
     fake_os = _ZeroWriteOs()
 
     with pytest.raises(OSError, match="empty write"):
@@ -528,7 +530,7 @@ class _PartialWriteFailingOs:
 
 
 def test_lineage_index_append_jsonl_payload_rolls_back_partial_write(
-    tmp_path,
+    tmp_path: pathlib.Path,
 ) -> None:
     fake_os = _PartialWriteFailingOs()
     flush_calls: list[int] = []
@@ -547,7 +549,7 @@ def test_lineage_index_append_jsonl_payload_rolls_back_partial_write(
     assert flush_calls == [19]
 
 def test_file_store_rolls_back_fragment_and_indexes_when_index_append_fails_with_physical_readback(
-    tmp_path,
+    tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     store = FileLineageStore(base_path=tmp_path / "lineage")
@@ -603,7 +605,7 @@ def test_file_store_rolls_back_fragment_and_indexes_when_index_append_fails_with
     original_append = lineage_store_module._append_jsonl_payload
     call_count = {"value": 0}
 
-    def _fail_on_second_append(path, payload, **kwargs) -> int:
+    def _fail_on_second_append(path: pathlib.Path, payload: bytes, **kwargs: typing.Any) -> int:
         call_count["value"] += 1
         if call_count["value"] == 2:
             raise OSError("simulated lineage index append failure")
