@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `codex/integrate-telemetry-cancellation-20261009`
-- Source commit: `c6549b1772667ecbc1e98f9b429d0d71a49df976`
-- Source run id: `local-pr12164-main-sync-c6549b1-w2`
+- Source branch: `fix/cf-061-join-key-stripping-redo-11277222212696677457`
+- Source commit: `79b02358f5f86fa5fcfdfb9a6b1690ec9abe7b88`
+- Source run id: `local-pr12154-merge-79b0235-final`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `3fd6bbdc9324b8c41ebb95db8613e47ec5cde3aec66dc04b4ad444c66166ab46`
+- Source tree sha256: `04c846c17ed22519805c416541861649c4aa373f031724fdae4797949f56e2f2`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-10-10T00:12:30.304249+00:00`
+- Refreshed at (UTC): `2026-10-10T10:21:55.002037+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -76,38 +76,38 @@ trend evidence only.
 
 ## Duration Telemetry
 
-- Total collected test cases: `33495`
+- Total collected test cases: `33496`
 - Freshness guard: `<=45 days` via `refreshed_at_utc`
 
 ### Top Slowest Tests
 
 | Rank | Duration (s) | Test | Source |
 |---:|---:|---|---|
-| 1 | `20.826` | `tests.integration.composite.test_assay_snapshot_merge_replay::test_other_composite_families_replay_physical_outputs[relative-both-target]` | `integration.xml` |
-| 2 | `20.006` | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers::test_filter_options_deadline_does_not_send_late_success` | `unit-other.xml` |
-| 3 | `17.757` | `tests.unit.infrastructure.export.test_export_adapters::test_write_pack_records_successful_xlsx_artifact` | `unit-infrastructure.xml` |
-| 4 | `17.027` | `tests.integration.composite.test_assay_snapshot_merge_replay::test_other_composite_families_replay_physical_outputs[relative-replay-target]` | `integration.xml` |
-| 5 | `16.027` | `tests.unit.scripts.qa.test_run_local_coverage_verify::test_import_rejects_invalid_shard_evidence[junit]` | `unit-scripts-tooling-other.xml` |
-| 6 | `15.792` | `tests.integration.composite.test_assay_snapshot_merge_replay::test_other_composite_families_replay_physical_outputs[relative-both-publication]` | `integration.xml` |
-| 7 | `15.74` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `unit-scripts-tooling-debt-governance.xml` |
-| 8 | `15.701` | `tests.integration.composite.test_assay_snapshot_merge_replay::test_other_composite_families_replay_physical_outputs[relative-capture-publication]` | `integration.xml` |
-| 9 | `15.641` | `tests.integration.composite.test_assay_snapshot_merge_replay::test_other_composite_families_replay_physical_outputs[relative-replay-molecule]` | `integration.xml` |
-| 10 | `15.415` | `tests.integration.composite.test_assay_snapshot_merge_replay::test_other_composite_families_replay_physical_outputs[relative-replay-publication]` | `integration.xml` |
+| 1 | `20.015` | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers::test_filter_options_deadline_does_not_send_late_success` | `unit-other.xml` |
+| 2 | `17.852` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `unit-scripts-tooling-debt-governance.xml` |
+| 3 | `14.271` | `tests.smoke.test_smoke.TestCoreImports::test_composition_imports` | `smoke.xml` |
+| 4 | `11.463` | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline::test_chembl_target_component_happy_path` | `integration.xml` |
+| 5 | `11.161` | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path` | `integration.xml` |
+| 6 | `10.826` | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_source_fields` | `integration.xml` |
+| 7 | `10.759` | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_happy_path` | `integration.xml` |
+| 8 | `10.696` | `tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline::test_chembl_compound_record_happy_path` | `integration.xml` |
+| 9 | `10.519` | `tests.integration.test_grafana_render_first_remediation::test_scrolling_capture_preserves_layout_viewport` | `integration.xml` |
+| 10 | `10.478` | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation` | `repo-backed-unit-ops.xml` |
 
 ### Top Slow Zones
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.integration.composite.test_assay_snapshot_merge_replay` | 11 | 170.242 | 20.826 |
-| 2 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 3 | 34.458 | 15.74 |
-| 3 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 21.407 | 10.721 |
-| 4 | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers` | 1 | 20.006 | 20.006 |
-| 5 | `tests.unit.infrastructure.export.test_export_adapters` | 1 | 17.757 | 17.757 |
-| 6 | `tests.unit.scripts.qa.test_run_local_coverage_verify` | 1 | 16.027 | 16.027 |
-| 7 | `tests.unit.infrastructure.test_issue_10469_stream_a_infra_thirteen.TestExemptionsDebtReductionAndFormatter` | 1 | 11.24 | 11.24 |
-| 8 | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline` | 1 | 11.122 | 11.122 |
-| 9 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline` | 1 | 11.008 | 11.008 |
-| 10 | `tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline` | 1 | 10.644 | 10.644 |
+| 1 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 3 | 38.513 | 17.852 |
+| 2 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 21.585 | 10.826 |
+| 3 | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers` | 1 | 20.015 | 20.015 |
+| 4 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 2 | 16.426 | 10.478 |
+| 5 | `tests.smoke.test_smoke.TestCoreImports` | 1 | 14.271 | 14.271 |
+| 6 | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline` | 1 | 11.463 | 11.463 |
+| 7 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline` | 1 | 11.161 | 11.161 |
+| 8 | `tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline` | 1 | 10.696 | 10.696 |
+| 9 | `tests.integration.test_grafana_render_first_remediation` | 1 | 10.519 | 10.519 |
+| 10 | `tests.unit.composition.factories.pipeline.test_registry_consistency.TestFactoryValidity` | 1 | 9.044 | 9.044 |
 
 ## Refresh Procedure
 
