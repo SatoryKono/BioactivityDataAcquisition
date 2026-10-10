@@ -8,6 +8,7 @@ inherits a sibling job result.
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import os
 import subprocess
@@ -216,10 +217,19 @@ def affected_pytest_targets(changed_files: list[str], *, repo_root: Path) -> lis
                 for test_dir in direct_test_dirs
                 if (candidate := test_dir / direct_test_name).is_file()
             )
-            if direct_tests:
+            module_name = ".".join(("scripts", *relative.with_suffix("").parts))
+            importing_tests = sorted(
+                test_path
+                for test_root in scripts_test_roots
+                if test_root.is_dir()
+                for test_path in test_root.rglob("test_*.py")
+                if _imports_module(test_path, module_name)
+            )
+            selected_tests = sorted({*direct_tests, *importing_tests})
+            if selected_tests:
                 targets.extend(
                     test_path.relative_to(repo_root).as_posix()
-                    for test_path in direct_tests
+                    for test_path in selected_tests
                 )
             else:
                 targets.extend(
@@ -234,6 +244,26 @@ def affected_pytest_targets(changed_files: list[str], *, repo_root: Path) -> lis
             seen.add(target)
             ordered.append(target)
     return ordered
+
+
+def _imports_module(test_path: Path, module_name: str) -> bool:
+    """Return whether a test statically imports the selected script module."""
+    tree = ast.parse(test_path.read_text(encoding="utf-8"), filename=str(test_path))
+    parent_module, _, leaf_name = module_name.rpartition(".")
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            if any(
+                alias.name == module_name or alias.name.startswith(f"{module_name}.")
+                for alias in node.names
+            ):
+                return True
+        elif isinstance(node, ast.ImportFrom):
+            if node.module == module_name or (
+                node.module == parent_module
+                and any(alias.name == leaf_name for alias in node.names)
+            ):
+                return True
+    return False
 
 
 def _load_json_object(raw: str, *, label: str) -> dict[str, Any]:
