@@ -534,6 +534,15 @@ routes:
       - reports/test-telemetry/slowest-tests.md
     notes: Branch-consumable telemetry summaries are regenerated alongside the committed baseline refresh workflow.
 
+  - id: captured-test-telemetry-squash-provenance
+    generator: reviewed read-only GitHub PR capture
+    output_kind: test_report
+    commit_policy: tracked_quality_evidence
+    outputs:
+      - reports/test-telemetry/squash-provenance.json
+      - reports/test-telemetry/history/
+    notes: Preserves captured run identity and binds it to its reviewed GitHub PR; live verification resolves a future squash without inventing its SHA.
+
   - id: dashboard-scenes-parity-ledger
     generator: scripts/engineering/qa/report_dashboard_scenes_parity.py
     output_kind: observability_evidence

@@ -12,6 +12,7 @@ import tomllib
 from pathlib import Path
 
 import pytest
+import yaml
 
 pytestmark = pytest.mark.architecture
 ROOT = Path(__file__).resolve().parents[2]
@@ -341,17 +342,27 @@ def test_mcp_doctor_writes_only_to_explicit_quality_report(
 
 
 def test_native_runtime_workflow_has_complete_path_filters_and_static_job() -> None:
+    """Codex runtime checks stay gated via the CircleCI lane.
+
+    After the coordinator cutover, automatic coverage moved from leaf
+    workflow path filters to the unconditional ``skills-consistency`` job in
+    ``pr-gate``; the Actions workflow keeps the manual dispatch path.
+    """
+    config = yaml.safe_load(
+        (ROOT / ".circleci" / "config.yml").read_text(encoding="utf-8")
+    )
+    job = config["jobs"]["skills-consistency"]
+    commands = " ".join(
+        step["run"]["command"]
+        for step in job["steps"]
+        if isinstance(step, dict) and isinstance(step.get("run"), dict)
+    )
+    assert "python scripts/ai/codex/doctor.py static --no-write" in commands
+    assert "python -m scripts.ai.mcp wrappers check" in commands
     workflow = (ROOT / ".github/workflows/skills-consistency.yml").read_text(
         encoding="utf-8"
     )
-    for owner_path in (
-        ".codex/config.toml",
-        ".codex/agents/**",
-        ".codex/skills/**",
-        "scripts/ai/codex/doctor.py",
-        "scripts/ai/codex/setup_mcp.py",
-    ):
-        assert workflow.count(f'"{owner_path}"') == 2
+    assert "workflow_dispatch:" in workflow
     assert "python3 scripts/ai/codex/doctor.py static --no-write" in workflow
 
 

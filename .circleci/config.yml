@@ -159,6 +159,8 @@ commands:
     steps:
     - run:
         name: Halt unless << parameters.label >> paths changed
+        environment:
+          BIOETL_HALT_PATHSPECS: << parameters.pathspecs >>
         command: |
           set -euo pipefail
           if [ "<< pipeline.parameters.ci-lane >>" != "pr-gate" ]; then
@@ -185,7 +187,13 @@ commands:
             base="origin/$base_ref"
           fi
           mkdir -p /tmp/cci-path-halt
-          git diff --name-only "$base"...HEAD -- << parameters.pathspecs >> > /tmp/cci-path-halt/changed.txt
+          printf "%s\n" "$BIOETL_HALT_PATHSPECS" | tr " " "\n" > /tmp/cci-path-halt/args
+          mapfile -t pathspec_args < /tmp/cci-path-halt/args
+          if [ "${#pathspec_args[@]}" -eq 0 ]; then
+            echo "halt pathspecs are empty" >&2
+            exit 1
+          fi
+          git diff --name-only "$base"...HEAD -- "${pathspec_args[@]}" > /tmp/cci-path-halt/changed.txt
           if [ ! -s /tmp/cci-path-halt/changed.txt ]; then
             echo "No << parameters.label >> paths in $base...HEAD; skipping the long body."
             circleci-agent step halt
@@ -2050,6 +2058,9 @@ jobs:
     resource_class: medium
     steps:
     - checkout
+    - halt-unless-pr-gate-paths:
+        label: architecture tests
+        pathspecs: "src/bioetl tests/architecture :(glob)configs/**/*.yaml"
     - setup-python-uv
     - run:
         name: architecture tests
@@ -2289,6 +2300,9 @@ jobs:
     resource_class: small
     steps:
       - checkout
+      - halt-unless-pr-gate-paths:
+          label: security scans
+          pathspecs: "src pyproject.toml uv.lock .github :(glob)Dockerfile* :(glob)docker-compose*.yml .gitleaks.toml .secrets.baseline"
       - setup-python-uv
       - run:
           name: detect-secrets (no hardcoded secrets)
@@ -2577,6 +2591,7 @@ jobs:
                   "${BASE_REF}:refs/remotes/origin/${BASE_REF}" "$(git rev-parse HEAD)"
               fi
               git fetch --no-tags origin "${BASE_REF}:refs/remotes/origin/${BASE_REF}"
+              git merge-base "${base_ref}" HEAD >/dev/null
 
               changed_diagrams=$(
                 git diff --diff-filter=ACMRTUXB --name-only "${base_ref}"...HEAD -- \
@@ -2707,6 +2722,9 @@ jobs:
       NODE_OPTIONS: --max-old-space-size=3072
     steps:
       - checkout
+      - halt-unless-pr-gate-paths:
+          label: duplication
+          pathspecs: "src scripts tests .github/tooling .github/workflows/duplication-complexity.yml .jscpd.json configs/quality/duplication_complexity_exemptions.yaml"
       - setup-python-uv
       - run:
           name: radon complexity (CC <= 10; domain <= 5)
@@ -2890,6 +2908,9 @@ jobs:
     resource_class: small
     steps:
       - checkout
+      - halt-unless-pr-gate-paths:
+          label: docker build
+          pathspecs: "Dockerfile.bioetl docker-compose.yml docker-compose.monitoring.yml .dockerignore .github/workflows/docker.yml"
       - check-gate:
           gate: docker
       - setup_remote_docker:
@@ -3366,87 +3387,173 @@ jobs:
         type: string
         default: architecture-coverage-11854-11899
     docker:
-    - image: cimg/python:3.12
-    resource_class: medium
+    - image: cimg/python:3.12-node
+    resource_class: large
     steps:
     - checkout
     - setup-python-uv:
-        extras: dev tracing docs
+        extras: dev tracing docs tests tests_full export
     - run:
         name: Verify complete source history and current main base
         command: "export PATH=\"$PWD/.venv/bin:$HOME/.local/bin:$PATH\"\ngit fetch --no-tags origin main:refs/remotes/origin/main\n\
           if [ \"$(git rev-parse --is-shallow-repository)\" = true ]; then\n  git fetch --unshallow origin\nfi\npython\
           \ scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD\n"
     - run:
+        name: Prepare the locked headless browser test runtime
+        no_output_timeout: 20m
+        command: |
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          command -v node && node --version
+          command -v npm && npm --version
+          export PLAYWRIGHT_BROWSERS_PATH=/tmp/rf023-playwright
+          sudo apt-get update -qq
+          bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh --attempt-system-install
+          python -c 'import json; from pathlib import Path; locked=json.loads(Path("package-lock.json").read_text())["packages"]["node_modules/playwright"]["version"]; actual=json.loads(Path("node_modules/playwright/package.json").read_text())["version"]; assert actual == locked, (actual, locked)'
+          echo 'export PLAYWRIGHT_BROWSERS_PATH=/tmp/rf023-playwright' >> "$BASH_ENV"
+    - run:
         name: Source-bound full coverage and Proof-or-Stop acceptance
         no_output_timeout: 30m
-        command: "export PATH=\"$PWD/.venv/bin:$HOME/.local/bin:$PATH\"\nexport PYTHONPATH=\"$PWD/src\" PYTHONUTF8=1\n\
-          export BIOETL_AI_MEMORY_MODE=off BIOETL_SKIP_PREFLIGHT=1 BIOETL_SKIP_SETUP_PLUGINS=1\nexport OPENBLAS_NUM_THREADS=1\
-          \ OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1\n# Preserve resolved PATH; isolate child shell probes from CircleCI BASH_ENV.\nunset BASH_ENV\npython - \\<<'CLOSEOUT_PY'\n\"\"\"Candidate\
-          \ embedded runner; execute only in a genuine CircleCI checkout.\"\"\"\nfrom datetime import UTC, datetime\n\
-          from pathlib import Path\nimport json\nimport hashlib\nimport os\nimport subprocess\nimport time\n\nroot\
-          \ = Path.cwd().resolve()\nhead = subprocess.check_output([\"git\", \"rev-parse\", \"HEAD\"], text=True).strip()\n\
-          assert os.environ.get(\"CIRCLECI\") == \"true\", \"A local execution cannot emit CI receipts\"\nassert os.environ.get(\"\
-          CIRCLE_SHA1\") == head\nassert os.environ.get(\"CIRCLE_PROJECT_USERNAME\") == \"SatoryKono\"\nassert os.environ.get(\"\
-          CIRCLE_PROJECT_REPONAME\") == \"BioactivityDataAcquisition\"\nci_id = os.environ[\"CIRCLE_BUILD_URL\"]\n\
-          assert ci_id.startswith(\"https://\") and os.environ[\"CIRCLE_WORKFLOW_ID\"]\nrun_id = \"circleci-closeout-\"\
-          \ + os.environ[\"CIRCLE_BUILD_NUM\"] + \"-\" + head[:12]\nout = root / \"reports/quality/proof-or-stop\"\
-          \ / run_id\nout.mkdir(parents=True, exist_ok=False)\nsecret_values = sorted({value for key, value in os.environ.items()\n\
-          \                        if len(value) >= 8 and any(part in key.upper() for part in\n                  \
-          \      (\"TOKEN\", \"PASSWORD\", \"SECRET\", \"API_KEY\", \"ACCESS_KEY\"))}, key=len, reverse=True)\n\n\
-          def sanitize(path):\n    original = path.read_text(encoding=\"utf-8\", errors=\"replace\")\n    clean =\
-          \ original\n    for value in secret_values:\n        clean = clean.replace(value, \"[REDACTED_CI_SECRET]\"\
-          )\n    if clean != original:\n        path.write_text(clean, encoding=\"utf-8\")\n\ndef execute(name, command):\n\
-          \    log = out / (name + \".log\")\n    started = datetime.now(UTC).isoformat()\n    clock = time.monotonic()\n\
-          \    print(\"[closeout] start \" + name, flush=True)\n    with log.open(\"w\", encoding=\"utf-8\") as stream:\n\
-          \        result = subprocess.Popen(command, stdout=stream, stderr=subprocess.STDOUT)\n        while True:\n            try:\n                result.wait(timeout=60)\n                break\n            except subprocess.TimeoutExpired:\n                print(f\"[closeout] {name} running {int(time.monotonic() - clock)}s\", flush=True)\n    duration\
-          \ = round((time.monotonic() - clock) * 1000)\n    sanitize(log)\n    assert subprocess.check_output([\"\
-          git\", \"rev-parse\", \"HEAD\"], text=True).strip() == head\n    record = dict(command=command, cwd=str(root),\
-          \ started_at=started,\n                  duration_ms=duration, exit_code=result.returncode,\n          \
-          \        head_before=head, head_after=head, log=str(log))\n    (out / (name + \".record.json\")).write_text(json.dumps(record,\
-          \ indent=2) + \"\\n\", encoding=\"utf-8\")\n    print(f\"[closeout] {name} exit={result.returncode}\", flush=True)\n\
-          \    return record\n\nprefix = [\"python\", \"-m\", \"scripts.engineering.qa\", \"proof-or-stop\"]\ncommon\
-          \ = [\"--run-id\", run_id, \"--task-id\", \"<< parameters.task-id >>\",\n          \"--claim\"\
-          , \"ready_to_merge\", \"--ci-run-id\", ci_id]\nassert execute(\"plan\", prefix + [\"plan\", *common, \"\
-          --output\", str(out / \"plan.json\")])[\"exit_code\"] == 0\n(out / \"ci-identity.json\").write_text(json.dumps({\n\
-          \    key: os.environ[key] for key in (\"CIRCLE_SHA1\", \"CIRCLE_BUILD_URL\", \"CIRCLE_BUILD_NUM\",\n   \
-          \                                \"CIRCLE_WORKFLOW_ID\", \"CIRCLE_PROJECT_USERNAME\",\n                \
-          \                   \"CIRCLE_PROJECT_REPONAME\", \"CIRCLE_BRANCH\")\n}, indent=2) + \"\\n\", encoding=\"\
-          utf-8\")\ncoverage = out / \"coverage\"\ncoverage_record = execute(\"coverage-17\", [\"python\", \"-m\"\
-          , \"scripts.engineering.qa.run_local_coverage_verify\",\n                                         \"--scratch-dir\"\
-          , str(coverage)])\nfor path in coverage.rglob(\"*\"):\n    if path.is_file() and path.suffix in {\".log\"\
-          , \".xml\", \".json\"}:\n        sanitize(path)\nassert coverage_record[\"exit_code\"] == 0, \"Incomplete\
-          \ coverage cannot qualify closeout\"\nmanifest = json.loads((coverage / \"manifest.json\").read_text(encoding=\"\
-          utf-8\"))\nassert manifest[\"complete\"] is True and manifest[\"head\"] == head\nassert len(manifest[\"\
-          required_shards\"]) == len(manifest[\"shards\"]) == 17\nassert {row[\"name\"] for row in manifest[\"shards\"\
-          ]} == set(manifest[\"required_shards\"])\nassert all(row[\"exit_code\"] == 0 and row[\"junit_file\"] and\
-          \ row[\"coverage_sha256\"]\n           for row in manifest[\"shards\"])\nassert hashlib.sha256((coverage\
-          \ / \"coverage.xml\").read_bytes()).hexdigest() == manifest[\"coverage_xml_sha256\"]\nchecks = [\n    (\"\
-          tests\", \"test_health\", [\"python\", \"-m\", \"pytest\", \"tests/architecture\", \"-q\", \"--no-cov\"\
-          ,\n                              \"--junitxml=\" + str(out / \"architecture.xml\")]),\n    (\"governance\"\
-          , \"pretest_guardrails\", [\"bash\", \"scripts/engineering/dev/pretest_guardrails.sh\",\n              \
-          \                            \"--mode\", \"check\", \"--scope\", \"governance\", \"--skip-cleanup\",\n \
-          \                                         \"--report-json\", str(out / \"governance.json\")]),\n    (\"\
-          docs_runtime\", \"docs_runtime_checks\", [\"python\", \"-m\", \"scripts.docs\", \"verify\"]),\n    (\"debt\"\
-          , \"debt_governance_gates\", [\"python\", \"-m\", \"scripts.engineering.qa\",\n                        \
-          \               \"report-debt-governance-gates\", \"--check\"]),\n    (\"quality\", \"quality_integral_gate\"\
-          , [\"python\", \"-m\", \"scripts.engineering.ci.quality_integral_gate\",\n                             \
-          \             \"--coverage-xml\", str(coverage / \"coverage.xml\"),\n                                  \
-          \        \"--output\", str(out / \"quality.json\")]),\n]\nreceipts = []\nfor kind, producer, command in\
-          \ checks:\n    record = execute(kind, command)\n    receipt = out / \"receipts\" / (kind + \".json\")\n\
-          \    arguments = [\"receipt\", *common, \"--receipt-id\", kind, \"--producer\", producer,\n            \
-          \     \"--evidence-kind\", kind, \"--command\", \" \".join(command),\n                 \"--cwd\", str(root),\
-          \ \"--started-at\", record[\"started_at\"],\n                 \"--duration-ms\", str(record[\"duration_ms\"\
-          ]), \"--exit-code\", str(record[\"exit_code\"]),\n                 \"--status\", \"pass\" if record[\"exit_code\"\
-          ] == 0 else \"fail\",\n                 \"--output-artifact\", record[\"log\"], \"--trust-tier\", \"ci\"\
-          , \"--output\", str(receipt)]\n    arguments.extend(\"--argv=\" + arg for arg in command)\n    assert execute(\"\
-          receipt-\" + kind, prefix + arguments)[\"exit_code\"] == 0\n    receipts.extend([\"--receipt\", str(receipt)])\n\
-          assert execute(\"assemble\", prefix + [\"assemble\", *common, \"--actor\", \"circleci\",\n             \
-          \                        \"--runtime\", \"ci\", \"--trust-tier\", \"ci\", *receipts,\n                 \
-          \                    \"--output\", str(out / \"bundle.json\")])[\"exit_code\"] == 0\nverification = execute(\"\
-          verify\", prefix + [\"verify\", \"--bundle\", str(out / \"bundle.json\"),\n                            \
-          \               \"--output\", str(out / \"verification.json\")])\nraise SystemExit(verification[\"exit_code\"\
-          ] or coverage_record[\"exit_code\"])\nCLOSEOUT_PY\n"
+        command: |
+          export PATH="$PWD/.venv/bin:$HOME/.local/bin:$PATH"
+          export PYTHONPATH="$PWD/src" PYTHONUTF8=1
+          export BIOETL_AI_MEMORY_MODE=off BIOETL_SKIP_PREFLIGHT=1 BIOETL_SKIP_SETUP_PLUGINS=1
+          export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
+          # Preserve resolved PATH; isolate child shell probes from CircleCI BASH_ENV.
+          unset BASH_ENV PYTEST_ADDOPTS
+          python - \<<'CLOSEOUT_PY'
+          """Candidate embedded runner; execute only in a genuine CircleCI checkout."""
+          from datetime import UTC, datetime
+          from pathlib import Path
+          import json
+          import hashlib
+          import os
+          import subprocess
+          import time
+          import tempfile
+          from xml.etree import ElementTree
+
+          root = Path.cwd().resolve()
+          head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          assert os.environ.get("CIRCLECI") == "true", "A local execution cannot emit CI receipts"
+          assert os.environ.get("CIRCLE_SHA1") == head
+          assert os.environ.get("CIRCLE_PROJECT_USERNAME") == "SatoryKono"
+          assert os.environ.get("CIRCLE_PROJECT_REPONAME") == "BioactivityDataAcquisition"
+          ci_id = os.environ["CIRCLE_BUILD_URL"]
+          assert ci_id.startswith("https://") and os.environ["CIRCLE_WORKFLOW_ID"]
+          run_id = "circleci-closeout-" + os.environ["CIRCLE_BUILD_NUM"] + "-" + head[:12]
+          out = root / "reports/quality/proof-or-stop" / run_id
+          out.mkdir(parents=True, exist_ok=False)
+          secret_values = sorted({value for key, value in os.environ.items()
+                                  if len(value) >= 8 and any(part in key.upper() for part in
+                                  ("TOKEN", "PASSWORD", "SECRET", "API_KEY", "ACCESS_KEY"))}, key=len, reverse=True)
+
+          def sanitize(path):
+              original = path.read_text(encoding="utf-8", errors="replace")
+              clean = original
+              for value in secret_values:
+                  clean = clean.replace(value, "[REDACTED_CI_SECRET]")
+              if clean != original:
+                  path.write_text(clean, encoding="utf-8")
+
+          def execute(name, command):
+              log = out / (name + ".log")
+              started = datetime.now(UTC).isoformat()
+              clock = time.monotonic()
+              print("[closeout] start " + name, flush=True)
+              with log.open("w", encoding="utf-8") as stream:
+                  result = subprocess.Popen(command, stdout=stream, stderr=subprocess.STDOUT)
+                  while True:
+                      try:
+                          result.wait(timeout=60)
+                          break
+                      except subprocess.TimeoutExpired:
+                          print(f"[closeout] {name} running {int(time.monotonic() - clock)}s", flush=True)
+              duration = round((time.monotonic() - clock) * 1000)
+              sanitize(log)
+              assert subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip() == head
+              record = dict(command=command, cwd=str(root), started_at=started,
+                            duration_ms=duration, exit_code=result.returncode,
+                            head_before=head, head_after=head, log=str(log))
+              (out / (name + ".record.json")).write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+              print(f"[closeout] {name} exit={result.returncode}", flush=True)
+              return record
+
+          prefix = ["python", "-m", "scripts.engineering.qa", "proof-or-stop"]
+          common = ["--run-id", run_id, "--task-id", "<< parameters.task-id >>",
+                    "--claim", "ready_to_merge", "--ci-run-id", ci_id]
+          assert execute("plan", prefix + ["plan", *common, "--output", str(out / "plan.json")])["exit_code"] == 0
+          (out / "ci-identity.json").write_text(json.dumps({
+              key: os.environ[key] for key in ("CIRCLE_SHA1", "CIRCLE_BUILD_URL", "CIRCLE_BUILD_NUM",
+                                             "CIRCLE_WORKFLOW_ID", "CIRCLE_PROJECT_USERNAME",
+                                             "CIRCLE_PROJECT_REPONAME", "CIRCLE_BRANCH")
+          }, indent=2) + "\n", encoding="utf-8")
+          coverage = out / "coverage"
+          coverage_record = execute("coverage-17", ["python", "-m", "scripts.engineering.qa.run_local_coverage_verify",
+                                                   "--scratch-dir", str(coverage)])
+          for path in coverage.rglob("*"):
+              if path.is_file() and path.suffix in {".log", ".xml", ".json"}:
+                  sanitize(path)
+          assert coverage_record["exit_code"] == 0, "Incomplete coverage cannot qualify closeout"
+          manifest = json.loads((coverage / "manifest.json").read_text(encoding="utf-8"))
+          assert manifest["complete"] is True and manifest["head"] == head
+          assert len(manifest["required_shards"]) == len(manifest["shards"]) == 17
+          assert {row["name"] for row in manifest["shards"]} == set(manifest["required_shards"])
+          assert all(row["exit_code"] == 0 and row["junit_file"] and row["coverage_sha256"]
+                     for row in manifest["shards"])
+          assert hashlib.sha256((coverage / "coverage.xml").read_bytes()).hexdigest() == manifest["coverage_xml_sha256"]
+          full_suite_tmp = Path(tempfile.mkdtemp(prefix=run_id + "-full-suite-"))
+          checks = [
+              ("full-suite", "test_health", ["python", "-m", "scripts.engineering.dev", "run-tests", "all",
+                                              "--junitxml=" + str(out / "full-suite.xml"),
+                                              "-p", "no:cacheprovider", "--basetemp=" + str(full_suite_tmp),
+                                              "--vcr-record=none"]),
+              ("tests", "test_health", ["python", "-m", "pytest", "tests/architecture", "-q", "--no-cov",
+                                        "--junitxml=" + str(out / "architecture.xml")]),
+              ("governance", "pretest_guardrails", ["bash", "scripts/engineering/dev/pretest_guardrails.sh",
+                                                    "--mode", "check", "--scope", "governance", "--skip-cleanup",
+                                                    "--report-json", str(out / "governance.json")]),
+              ("docs_runtime", "docs_runtime_checks", ["python", "-m", "scripts.docs", "verify"]),
+              ("debt", "debt_governance_gates", ["python", "-m", "scripts.engineering.qa",
+                                                 "report-debt-governance-gates", "--check"]),
+              ("quality", "quality_integral_gate", ["python", "-m", "scripts.engineering.ci.quality_integral_gate",
+                                                    "--coverage-xml", str(coverage / "coverage.xml"),
+                                                    "--output", str(out / "quality.json")]),
+          ]
+          receipts = []
+          for kind, producer, command in checks:
+              record = execute(kind, command)
+              output_artifact = record["log"]
+              if kind == "full-suite":
+                  junit = out / "full-suite.xml"
+                  if junit.is_file():
+                      sanitize(junit)
+                      record["junit"] = str(junit)
+                      record["junit_sha256"] = hashlib.sha256(junit.read_bytes()).hexdigest()
+                  if record["exit_code"] == 0:
+                      cases = list(ElementTree.parse(junit).getroot().iter("testcase"))
+                      assert cases and all(case.find("failure") is None and case.find("error") is None for case in cases), "Full-suite JUnit is incomplete or failed"
+                  record["log_sha256"] = hashlib.sha256(Path(record["log"]).read_bytes()).hexdigest()
+                  output_artifact = str(out / (kind + ".record.json"))
+                  Path(output_artifact).write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+              evidence_kind = "tests" if kind == "full-suite" else kind
+              receipt = out / "receipts" / (kind + ".json")
+              arguments = ["receipt", *common, "--receipt-id", kind, "--producer", producer,
+                           "--evidence-kind", evidence_kind, "--command", " ".join(command),
+                           "--cwd", str(root), "--started-at", record["started_at"],
+                           "--duration-ms", str(record["duration_ms"]), "--exit-code", str(record["exit_code"]),
+                           "--status", "pass" if record["exit_code"] == 0 else "fail",
+                           "--output-artifact", output_artifact, "--trust-tier", "ci", "--output", str(receipt)]
+              arguments.extend("--argv=" + arg for arg in command)
+              assert execute("receipt-" + kind, prefix + arguments)["exit_code"] == 0
+              receipts.extend(["--receipt", str(receipt)])
+          assert execute("assemble", prefix + ["assemble", *common, "--actor", "circleci",
+                                               "--runtime", "ci", "--trust-tier", "ci", *receipts,
+                                               "--output", str(out / "bundle.json")])["exit_code"] == 0
+          verification = execute("verify", prefix + ["verify", "--bundle", str(out / "bundle.json"),
+                                                     "--output", str(out / "verification.json")])
+          raise SystemExit(verification["exit_code"] or coverage_record["exit_code"])
+          CLOSEOUT_PY
+
     - run:
         name: Export telemetry candidate from the complete producer
         when: always
@@ -3866,6 +3973,7 @@ workflows:
           filters: &id001
             branches:
               only:
+              - fix/cf-wave1-pagination-vcr-security
               - codex/architecture-coverage-final-20261004
               - codex/architecture-11854-postmerge-20261005
               - codex/config-root-main-acceptance-20261005
@@ -4106,4 +4214,6 @@ workflows:
           task-id: rf023-11906-11907
           filters:
             branches:
-              only: codex/pipeline-green-gates-rf022-snapshot-fix
+              only:
+                - codex/pipeline-green-gates-rf022-snapshot-fix
+                - codex/issue-11907-rf023-closeout-20261007

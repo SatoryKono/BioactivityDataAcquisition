@@ -32,37 +32,31 @@ jobs:
           echo "month=$(LC_ALL=C date -u +%m)" >> "$GITHUB_OUTPUT"
 
   tests:
-    timeout-minutes: 180
     uses: ./.github/workflows/tests.yml
     permissions:
       contents: read
 
   e2e:
-    timeout-minutes: 120
     uses: ./.github/workflows/e2e-matrix-health.yml
     permissions:
       contents: read
 
   security:
-    timeout-minutes: 45
     uses: ./.github/workflows/security.yml
     permissions:
       contents: read
 
   duplication:
-    timeout-minutes: 45
     uses: ./.github/workflows/duplication-complexity.yml
     permissions:
       contents: read
 
   import-linter:
-    timeout-minutes: 90
     uses: ./.github/workflows/import-linter.yml
     permissions:
       contents: read
 
   zizmor:
-    timeout-minutes: 20
     uses: ./.github/workflows/zizmor.yml
     permissions:
       contents: read
@@ -71,7 +65,6 @@ jobs:
   codeql:
     needs: clock
     if: needs.clock.outputs.dow == 'Mon'
-    timeout-minutes: 45
     uses: ./.github/workflows/codeql.yml
     permissions:
       contents: read
@@ -80,7 +73,6 @@ jobs:
   scorecard:
     needs: clock
     if: needs.clock.outputs.dow == 'Mon'
-    timeout-minutes: 20
     uses: ./.github/workflows/scorecard.yml
     permissions:
       contents: read
@@ -90,7 +82,6 @@ jobs:
   branch-hygiene:
     needs: clock
     if: needs.clock.outputs.dow == 'Mon'
-    timeout-minutes: 20
     uses: ./.github/workflows/branch-hygiene.yml
     permissions:
       contents: read
@@ -104,7 +95,6 @@ jobs:
         (needs.clock.outputs.month == '01' || needs.clock.outputs.month == '04' ||
          needs.clock.outputs.month == '07' || needs.clock.outputs.month == '10')
       }}
-    timeout-minutes: 20
     uses: ./.github/workflows/github-settings-quarterly-review.yml
     permissions:
       actions: read
@@ -115,7 +105,6 @@ jobs:
   mutation:
     needs: clock
     if: needs.clock.outputs.dow == 'Sun'
-    timeout-minutes: 90
     uses: ./.github/workflows/mutation-testing.yml
     permissions:
       contents: read

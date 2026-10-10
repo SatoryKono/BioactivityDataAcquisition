@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.core.batch_shared_operation_errors import (
+from bioetl.application.services.batch_processing.operation_errors import (
     OPERATION_ERRORS as OPERATION_ERRORS,
 )
 
