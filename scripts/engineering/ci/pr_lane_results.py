@@ -21,6 +21,16 @@ SKIPPED = "skipped"
 REQUIRED = "required"
 NOT_APPLICABLE = "not_applicable"
 
+AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    ".circleci/config.yml": ("tests/architecture/test_circleci_migration_contract.py",),
+    "scripts/engineering/ci/publish_docker_image.sh": (
+        "tests/unit/scripts/ci/test_docker_publication_guards.py",
+    ),
+    "scripts/engineering/ci/pr_lane_results.py": (
+        "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
+    ),
+}
+
 FAST_GOVERNANCE = "fast-governance"
 CLASS_LANE = "class-lane"
 
@@ -173,6 +183,9 @@ def affected_pytest_targets(changed_files: list[str], *, repo_root: Path) -> lis
         path = raw_path.strip().replace("\\", "/")
         if not path:
             continue
+        for candidate_path in AFFECTED_TESTS_BY_PATH.get(path, ()):
+            if (repo_root / candidate_path).is_file():
+                targets.append(candidate_path)
         if path.startswith("tests/") and path.endswith(".py"):
             if (repo_root / path).is_file():
                 targets.append(path)
