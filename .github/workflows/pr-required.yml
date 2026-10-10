@@ -108,7 +108,7 @@ jobs:
 
       - name: Upload decision matrix
         if: ${{ failure() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: pr-gate-decisions-${{ github.event.pull_request.head.sha || github.sha }}
           path: reports/quality/pr-gate-decisions.json
@@ -194,7 +194,7 @@ jobs:
       - name: Lint commit messages
         id: commitlint
         if: needs['classify-changes'].outputs['commit-governance'] == 'required'
-        uses: wagoid/commitlint-github-action@f133a0d95090ef2609192b4a21f54e20af819ea9 # v6
+        uses: wagoid/commitlint-github-action@b948419dd99f3fd78a6548d48f94e3df7f6bf3ed # v6
         with:
           configFile: commitlint.config.mjs
           helpURL: https://www.conventionalcommits.org/

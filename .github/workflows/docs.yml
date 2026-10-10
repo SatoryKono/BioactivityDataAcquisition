@@ -117,7 +117,7 @@ jobs:
         run: uv run --frozen --no-build python -m scripts.docs check-links --report-json reports/docs-link-check-report.json
 
       - name: Upload docs link-check report artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: docs-link-check-report
           path: reports/docs-link-check-report.json
@@ -251,7 +251,7 @@ jobs:
             --manifest docs/02-architecture/diagrams/manifests/chembl-pipeline-activity-dataflow.txt
 
       - name: Upload generated ChEMBL activity renders
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: chembl-pipeline-activity-dataflow-renders
           path: |
@@ -330,7 +330,7 @@ jobs:
 
       - name: Upload diagram lint report
         if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: diagram-lint-report
           path: /tmp/diagram-lint.json
@@ -392,7 +392,7 @@ jobs:
             --markdown-out reports/diagrams/diagram-quality-report.md
 
       - name: Upload SVG artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: diagrams-svg
           path: |
@@ -400,7 +400,7 @@ jobs:
           retention-days: 7
 
       - name: Upload PNG artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: diagrams-png
           path: |
@@ -408,7 +408,7 @@ jobs:
           retention-days: 7
 
       - name: Upload diagram quality report
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: diagrams-quality-report
           path: |
