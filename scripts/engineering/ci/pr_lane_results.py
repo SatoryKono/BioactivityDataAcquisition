@@ -250,21 +250,37 @@ def _imports_module(test_path: Path, module_name: str) -> bool:
     """Return whether a test statically imports the selected script module."""
     tree = ast.parse(test_path.read_text(encoding="utf-8"), filename=str(test_path))
     parent_module, _, leaf_name = module_name.rpartition(".")
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import) and any(
+    return any(
+        _matches_module_import(
+            node,
+            module_name=module_name,
+            parent_module=parent_module,
+            leaf_name=leaf_name,
+        )
+        for node in ast.walk(tree)
+    )
+
+
+def _matches_module_import(
+    node: ast.AST,
+    *,
+    module_name: str,
+    parent_module: str,
+    leaf_name: str,
+) -> bool:
+    """Return whether one AST node imports the selected module."""
+    if isinstance(node, ast.Import):
+        return any(
             alias.name == module_name or alias.name.startswith(f"{module_name}.")
             for alias in node.names
-        ):
-            return True
-        elif isinstance(node, ast.ImportFrom) and (
-            node.module == module_name
-            or (
-                node.module == parent_module
-                and any(alias.name == leaf_name for alias in node.names)
-            )
-        ):
-            return True
-    return False
+        )
+    return isinstance(node, ast.ImportFrom) and (
+        node.module == module_name
+        or (
+            node.module == parent_module
+            and any(alias.name == leaf_name for alias in node.names)
+        )
+    )
 
 
 def _load_json_object(raw: str, *, label: str) -> dict[str, Any]:
