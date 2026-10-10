@@ -13,8 +13,8 @@ from bioetl.domain.models.metadata import (
     SilverMetadata,
     SourceMetadata,
 )
+from bioetl.domain.normalization.json import serialize_json_canonical
 from bioetl.domain.ports import BronzeMetadataInput
-from bioetl.domain.serialization import serialize_to_canonical_json
 
 
 def validate_records_present(
@@ -111,5 +111,5 @@ def build_bronze_output_content_hash(input_data: BronzeMetadataInput) -> str:
             }
         ]
     }
-    canonical = serialize_to_canonical_json(payload)
+    canonical = serialize_json_canonical(payload)
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()

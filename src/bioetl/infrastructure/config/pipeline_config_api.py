@@ -22,7 +22,9 @@ from bioetl.infrastructure.config.pipeline_payload_normalization import (
     normalize_pipeline_payload,
 )
 from bioetl.infrastructure.config_merge import config_merge
-from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.infrastructure.schemas.pipeline_config import (
+    PipelineYamlConfig as PipelineYamlConfig,
+)
 
 __all__ = [
     "PipelineConfigReadPayload",
