@@ -1,7 +1,7 @@
 {
-  "additive_coverage_xml_path": "reports/coverage/coverage.xml",
-  "additive_coverage_xml_sha256": "a467736766121680e9cd5d7e49c5c243a77265dcae968710957a4d5dd5c88fc8",
-  "additive_measured_module_count": 2460,
+  "additive_coverage_xml_path": "reports/coverage/local-verify-pr12096-20261009-final16/coverage.xml",
+  "additive_coverage_xml_sha256": "0928d5524f15d0b97ac418d6a56de6d031a98b479a6f424be8bcb34bd3179d27",
+  "additive_measured_module_count": 2461,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
   "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
@@ -2151,12 +2151,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 11,
-      "executable_lines": 11,
+      "covered_lines": 12,
+      "executable_lines": 12,
       "missing_lines": 0,
       "module": "bioetl.application.core.batch_executor_protocols",
       "path": "src/bioetl/application/core/batch_executor_protocols.py",
-      "source_lines": 66
+      "source_lines": 62
     },
     {
       "coverage_percent": 100.0,
@@ -3446,7 +3446,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.wiring",
       "path": "src/bioetl/application/core/wiring/__init__.py",
-      "source_lines": 87
+      "source_lines": 86
     },
     {
       "coverage_percent": 100.0,
@@ -3496,7 +3496,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.wiring.registry",
       "path": "src/bioetl/application/core/wiring/registry.py",
-      "source_lines": 69
+      "source_lines": 66
     },
     {
       "coverage_percent": 100.0,
@@ -6676,7 +6676,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.dq.silver_threshold",
       "path": "src/bioetl/application/services/dq/silver_threshold.py",
-      "source_lines": 131
+      "source_lines": 133
     },
     {
       "coverage_percent": 100.0,
@@ -25561,12 +25561,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 133,
-      "executable_lines": 133,
+      "covered_lines": 132,
+      "executable_lines": 132,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http.health_server",
       "path": "src/bioetl/interfaces/http/health_server.py",
-      "source_lines": 417
+      "source_lines": 414
     },
     {
       "coverage_percent": 100.0,
@@ -27813,12 +27813,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 11,
-      "executable_lines": 11,
+      "covered_lines": 12,
+      "executable_lines": 12,
       "missing_lines": 0,
       "module": "bioetl.application.core.batch_executor_protocols",
       "path": "src/bioetl/application/core/batch_executor_protocols.py",
-      "source_lines": 66
+      "source_lines": 62
     },
     {
       "coverage_percent": 100.0,
@@ -29108,7 +29108,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.wiring",
       "path": "src/bioetl/application/core/wiring/__init__.py",
-      "source_lines": 87
+      "source_lines": 86
     },
     {
       "coverage_percent": 100.0,
@@ -29158,7 +29158,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.wiring.registry",
       "path": "src/bioetl/application/core/wiring/registry.py",
-      "source_lines": 69
+      "source_lines": 66
     },
     {
       "coverage_percent": 100.0,
@@ -32338,7 +32338,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.dq.silver_threshold",
       "path": "src/bioetl/application/services/dq/silver_threshold.py",
-      "source_lines": 131
+      "source_lines": 133
     },
     {
       "coverage_percent": 100.0,
@@ -51223,12 +51223,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 133,
-      "executable_lines": 133,
+      "covered_lines": 132,
+      "executable_lines": 132,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http.health_server",
       "path": "src/bioetl/interfaces/http/health_server.py",
-      "source_lines": 417
+      "source_lines": 414
     },
     {
       "coverage_percent": 100.0,
@@ -51333,7 +51333,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "633508ed5fc1a0024adf57c03d3e631af47461a53f525e03f36f145d95b8c8c7",
+  "source_tree_sha256": "a328f3311ab0958bb47c1d79532e9b655db90ffb6cece4bc4d7af89485a9f265",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

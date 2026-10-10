@@ -1,11 +1,11 @@
 {
-  "source_branch": "HEAD",
-  "source_commit": "1bfc36a0c6bf9cbd101e1e8e8bc82bbb03a33cba",
-  "source_run_id": "local-pr12131-final-1bfc36a-w2",
+  "source_branch": "codex/integrate-telemetry-cancellation-20261009",
+  "source_commit": "d28436d5f78c911d68f6fbbf91314578bdcb897c",
+  "source_run_id": "local-pr12164-main-sync-c6549b1-w2",
   "source_event": "local_coverage_verify",
   "source_run_url": null,
-  "source_tree_sha256": "3fd6bbdc9324b8c41ebb95db8613e47ec5cde3aec66dc04b4ad444c66166ab46",
-  "refreshed_at_utc": "2026-10-10T11:26:51.088638+00:00",
+  "source_tree_sha256": "ec74973999343716c76d00aa0cd21ede054f1bdbb7b8f51b6741bf89e5f393bc",
+  "refreshed_at_utc": "2026-10-10T00:12:30.304249+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.67,
   "coverage": {
@@ -18,11 +18,11 @@
     "trust_tier": "local_single_host",
     "ci_status": "BLOCKED_EXTERNAL_PERMANENT",
     "complete": true,
-    "manifest_sha256": "99d76309fba53fac2ebaf22ef622a5945dd1ec66745b270655f3fb0510bfc7d7",
-    "coverage_xml_sha256": "c72b6e7836945f1f8783c3155a4bce502031effe5032cbdd7363f6f3f8740648",
+    "manifest_sha256": "571d0ce15ae9e51b1faf48042568f030a99a4c3e765690649e01cdb92d28c152",
+    "coverage_xml_sha256": "b6d1a70a67d657b314dd9660b7f172319015ffeb49b2e1e2ab1e7bf7e73f9e22",
     "source_tree_sha256": "633508ed5fc1a0024adf57c03d3e631af47461a53f525e03f36f145d95b8c8c7",
-    "test_tree_sha256": "3fd6bbdc9324b8c41ebb95db8613e47ec5cde3aec66dc04b4ad444c66166ab46",
-    "head": "1bfc36a0c6bf9cbd101e1e8e8bc82bbb03a33cba",
+    "test_tree_sha256": "ec74973999343716c76d00aa0cd21ede054f1bdbb7b8f51b6741bf89e5f393bc",
+    "head": "d28436d5f78c911d68f6fbbf91314578bdcb897c",
     "required_shards": [
       "smoke",
       "contract-confidence",
@@ -42,127 +42,127 @@
       "security",
       "serial"
     ],
-    "started_at_utc": "2026-10-10T10:44:18.029392+00:00",
-    "finished_at_utc": "2026-10-10T11:26:51.088638+00:00",
+    "started_at_utc": "2026-10-09T23:33:24.040258+00:00",
+    "finished_at_utc": "2026-10-10T00:12:30.304249+00:00",
     "shards": [
       {
         "name": "smoke",
         "exit_code": 0,
-        "seconds": 40.68,
+        "seconds": 23.92,
         "coverage_sha256": "266819ae613b786277eea71506d903c4038c077fedc61be8ab3d912234c22f14",
-        "junit_telemetry_sha256": "71e70c19efe046369b31bd7d106c9add023d0e861fb5f45ec5733ecebe2961ad"
+        "junit_telemetry_sha256": "21cd619b26c728034b5ea86a91d2bbc33370485f0822c6d31a039142a247dec4"
       },
       {
         "name": "contract-confidence",
         "exit_code": 0,
-        "seconds": 87.31,
+        "seconds": 81.83,
         "coverage_sha256": "7997416c2587c51742aa32e163244fe2d4be35c1799eeaa3680652c5bae5c616",
-        "junit_telemetry_sha256": "37af69f386496ea320b1868a9d60907d36dbf778ceba6868f93ac6dba77bd1ca"
+        "junit_telemetry_sha256": "b73ff8335987e056df5b34d87aca07f2eda2b69b1715ebadda850124c46bc37e"
       },
       {
         "name": "repo-backed-unit-product",
         "exit_code": 0,
-        "seconds": 29.73,
+        "seconds": 27.3,
         "coverage_sha256": "b1f68e561acf91e739dc0d53f1f4e10a656f9a6eaf9037da7012edc0ec5721a0",
-        "junit_telemetry_sha256": "bc6e48b90bff6d5b20cb07c78d35ffd4e39bf983c03d9fb6405f4931b8e2d5e6"
+        "junit_telemetry_sha256": "9d55fd9d4700d2c89435e8968b6fc1638e73ef1650a0d7b62d3664d293e11790"
       },
       {
         "name": "repo-backed-unit-tooling",
         "exit_code": 0,
-        "seconds": 123.74,
+        "seconds": 118.2,
         "coverage_sha256": "838684c674b02543af74078c832f6a7d366e79190de49cf4879f71cf744e9cb6",
-        "junit_telemetry_sha256": "6a2f8dee7728f5461f7425fd50c93e89ae0d5a738f05f27d33d790671a764d03"
+        "junit_telemetry_sha256": "74011d6070e3518afc6b3b7790557671cef6446e61ae82d66ca205165a00e744"
       },
       {
         "name": "repo-backed-unit-ops",
         "exit_code": 0,
-        "seconds": 50.2,
+        "seconds": 48.91,
         "coverage_sha256": "58605b93563357e6b4fca5479264d259aba4fa62eb7e8575e7ba85454760dab1",
-        "junit_telemetry_sha256": "4d39da96db37541b917b5a0b7942185d250d6c1908a06bad024f7ae317880521"
+        "junit_telemetry_sha256": "a6d23d565b91292e6f670eadf03f938b0e2a3051288391ada889306c2604774f"
       },
       {
         "name": "unit-scripts-tooling-passport",
         "exit_code": 0,
-        "seconds": 16.38,
+        "seconds": 16.47,
         "coverage_sha256": "9b4d9f879f2ba6f720c35aa18f8c830b1d5cda3820a73d79375a9cf049ae4c65",
-        "junit_telemetry_sha256": "1d677dd14fd6d4073e396c1d19742ba18f13d2f8bedbd11ce29b697df50e1c28"
+        "junit_telemetry_sha256": "f18f5576a25299503680354db7f90aef2b773cbda3f22d9f287eae36f18240f7"
       },
       {
         "name": "unit-scripts-tooling-debt-governance",
         "exit_code": 0,
-        "seconds": 42.09,
+        "seconds": 42.1,
         "coverage_sha256": "5ff2950d34bd70b6bac6f955d8803dd9ba46214043d77cb456d27e027da6b5a0",
-        "junit_telemetry_sha256": "31be413af16bea7194e354641d049fe751b91fd48eb1d1f27afbd7c07201d0cf"
+        "junit_telemetry_sha256": "128ec353b32463d52106e3831b036992a40771670f66c36139a8fddbde64db2b"
       },
       {
         "name": "unit-scripts-tooling-other",
         "exit_code": 0,
-        "seconds": 200.81,
+        "seconds": 191.68,
         "coverage_sha256": "bb041cc6b66a9aa576c8e62a5a42aaece28d74feed2899e07a98749216bd61cc",
-        "junit_telemetry_sha256": "1ed0b1ed393c75a554471b4cf073d9ac43f052001d7dfcbc7aef8dc99eb378ad"
+        "junit_telemetry_sha256": "9d8768ffbbfac2e552c907e090c3b10710a843aebb2016669ec1b5aa676495ab"
       },
       {
         "name": "unit-filesystem-contracts",
         "exit_code": 0,
-        "seconds": 1026.62,
+        "seconds": 629.11,
         "coverage_sha256": "2de3d5f88a8a45c55da09a762356932dcbe3bd8ebe628caf5db3fd0801808e52",
-        "junit_telemetry_sha256": "d6ab6f5d63fee08777567e01c6ba49e2be20184e5d2e651427cc9e03fc760e61"
+        "junit_telemetry_sha256": "cd538a8e3977f3e3ce4db6c612a52bd10d76eb90326f8cfc57f6be72f75109be"
       },
       {
         "name": "unit-subprocess-backed",
         "exit_code": 0,
-        "seconds": 75.77,
+        "seconds": 55.75,
         "coverage_sha256": "eb75939ccb48565516a68793bb5f3991da42569a001edcabee4680512dffcb60",
-        "junit_telemetry_sha256": "306e070d73e08a17fe95107674fbce8a4cf23d629efa7b6f9894a8744f374a2f"
+        "junit_telemetry_sha256": "efa2b45f69a831cfe55ac551f717052a3dd5877757f25c13802eeddb51f8c6b0"
       },
       {
         "name": "unit-domain",
         "exit_code": 0,
-        "seconds": 98.76,
-        "coverage_sha256": "54c97c26b96e835c10eb7141ca39cd49d45082716f6af1f4a7ee3a60920990a5",
-        "junit_telemetry_sha256": "719444edec4cc3861a81b3b1fa4d8e04c6f07870b4cb139d9279cf101f54d507"
+        "seconds": 103.52,
+        "coverage_sha256": "f6c458f487ff731f4b6703ff4c6b81838387fc72e5511cd97b9ab33e4d4bd7be",
+        "junit_telemetry_sha256": "c0aa7d8abcf6cbccfc5a0ae5d4a97f94a9a63269820d4f1b3184a7cb9f994979"
       },
       {
         "name": "unit-application",
         "exit_code": 0,
-        "seconds": 68.5,
-        "coverage_sha256": "e86c4b72ed2f643099ddfb6681658992a59fd9b4a52d7085f709e306d8d92f77",
-        "junit_telemetry_sha256": "defd20e33cb85f3a2b064b57a42b85efbc9d3bb0f4615d97907c248e7e4d38c8"
+        "seconds": 68.49,
+        "coverage_sha256": "be544cf609de8f680afadddd3e9645e89de9bcebc1d117ba5f1ada0255b6db81",
+        "junit_telemetry_sha256": "6eb9556f373b1e6b34dff86cb21ba3c8cd7450b1b472c0bac2a2166fc59dfbb5"
       },
       {
         "name": "unit-infrastructure",
         "exit_code": 0,
-        "seconds": 72.83,
-        "coverage_sha256": "a01fd978fb629d1e88549b1c663ba56f3eeed5a90bd725114597895025ef6a08",
-        "junit_telemetry_sha256": "5a6fa1c4bb5111377033b3e67e2c491f287258b78e1cbfb0fc4e2f56cd9fec69"
+        "seconds": 84.79,
+        "coverage_sha256": "bd24c4c2a942b1c80145613ee43bdd35dba86e0463b9755326740ccd94b71660",
+        "junit_telemetry_sha256": "c8e93f40bef0a2b3c7eb563990f1b2135d97fcb8d42cd6b7080f4898d8d08d71"
       },
       {
         "name": "unit-other",
         "exit_code": 0,
-        "seconds": 83.04,
-        "coverage_sha256": "fc6ec80709e39c3d50a63d4ccba2e256cfa7afad3b2485b41e22b516763a3773",
-        "junit_telemetry_sha256": "bd59a69ecf5aca188d01ef9f5d70c477cce3ea292b7f43f67f45e8ddce72673d"
+        "seconds": 87.56,
+        "coverage_sha256": "0d8d47c98c1ffa58c400ab0f7957451d8a7500652b72f2f7dc02d0449513a599",
+        "junit_telemetry_sha256": "d228bdb82387eba0e116da11bda3feecadeaca57c8eaf5ff7fede6fca29de0ab"
       },
       {
         "name": "integration",
         "exit_code": 0,
-        "seconds": 384.3,
-        "coverage_sha256": "ad9b4f81578b3efee3f88a6f6bf2a34b8672c07149a612f8e8cef8a34b0b748b",
-        "junit_telemetry_sha256": "c258b552f0730add78bedb5b6913d79946c882f0d06b38c4e198a69edea91b4f"
+        "seconds": 598.02,
+        "coverage_sha256": "c3a582365925269d2aaf43ee7a4e42f6a7e082adc216d5cc355a2bfddb288b3a",
+        "junit_telemetry_sha256": "19623d09604331ef72ca25c55b77ca475aab71b5a25509874c5c00590fe3a5be"
       },
       {
         "name": "security",
         "exit_code": 0,
-        "seconds": 14.28,
+        "seconds": 18.82,
         "coverage_sha256": "97980676d84d1ee9da615ec54391af0765b067a241ad083aaa57ac511dfd7f9e",
-        "junit_telemetry_sha256": "f33fc6e360191e707403cd45986fe7904b61c6ec0635e538ca33a08a0adb3161"
+        "junit_telemetry_sha256": "b93ace4b5e9b4ee4ffe934eee16824f7b773b1ce1e41f3ab414a0775761b02e2"
       },
       {
         "name": "serial",
         "exit_code": 0,
-        "seconds": 108.59,
-        "coverage_sha256": "8fc94fd4593265c93079eb09ece76797584e7dd570a7e80d1a6d672665f5e68b",
-        "junit_telemetry_sha256": "93916391c34e267336b9d33fa5c1f1f8c88506984dfae69788f277aaf251685c"
+        "seconds": 112.61,
+        "coverage_sha256": "b947d2aae919c5626cb8d6ac1dea131e0dedff6ffe49a21df3dad9e36bd0fe08",
+        "junit_telemetry_sha256": "1920bdc37b20921b7ae83be72e5934175c904cc2f2f88ab565f04e5871925999"
       }
     ]
   }
