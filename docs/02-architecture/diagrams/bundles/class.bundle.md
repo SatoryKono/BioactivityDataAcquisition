@@ -1,6 +1,6 @@
 # BioETL Class Diagrams Bundle
 
-- Generated: 2026-10-05T09:05:43+00:00
+- Generated: 2026-10-07T06:33:01+00:00
 - Diagram count: 147
 
 ## Table of Contents
@@ -1738,13 +1738,13 @@
 ![90-pkg-domain-mapping](../class-diagrams/svg/90-pkg-domain-mapping.svg)
 
 ### Описание
-Диаграмма «Package Family: domain/mapping» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/domain/mapping; modules: protein_class_target_type, protein_class_target_type_helpers, _publication_type_classification_support, classification_data, organism_classification, publication_controlled_vocabulary.. Схема имеет плотность порядка 13 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: protein class target type, protein class target type helpers, publication type classification support, classification data, organism classification, publication controlled vocabulary. Показательные узлы для быстрого чтения: NormalizedProteinClassTopLevel, ProteinClassTargetTypeMappingData, ProteinClassTargetTypeResult, ProteinClassTopLevelMappingEntry, protein_class_target_type__NormalizedTopLevelLike, _NormalizedTopLevelConstructor. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: domain/mapping» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/domain/mapping; modules: protein_class_target_type, protein_class_target_type_helpers, _publication_type_classification_support, classification_data, organism_classification, publication_controlled_vocabulary.. Схема имеет плотность порядка 12 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: protein class target type, protein class target type helpers, publication type classification support, classification data, organism classification, publication controlled vocabulary. Показательные узлы для быстрого чтения: NormalizedProteinClassTopLevel, ProteinClassTargetTypeMappingData, ProteinClassTargetTypeResult, ProteinClassTopLevelMappingEntry, _NormalizedTopLevelConstructor, _NormalizedTopLevelLike. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Package Family / Inventory Slice`
-- Дата: `2026-10-04`
-- Узлы (metadata): `13`
+- Дата: `2026-10-06`
+- Узлы (metadata): `12`
 
 \newpage
 
