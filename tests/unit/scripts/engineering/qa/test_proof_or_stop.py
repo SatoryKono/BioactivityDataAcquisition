@@ -292,6 +292,7 @@ def test_pilot_covers_adversarial_matrix(proof_repo: Path, tmp_path: Path) -> No
     assert '"reason_code_coverage"' in payload
     assert '"deterministic_replay"' in payload
     assert output.with_suffix(".md").is_file()
+    _assert_scenario_routing()
 
 
 def _full_suite_argv() -> list[str]:
@@ -453,52 +454,93 @@ def _assert_digests(bundle: dict[str, Any]) -> None:
     )
 
 
+_HASH_FIELD_MUTATORS = frozenset({"task_diff_hash", "policy_hash", "command_set_hash"})
+_SCENARIO_ROUTING_SPEC: tuple[tuple[str, str, bool, str], ...] = (
+    ("stale_source", "STOP", True, "stale_head"),
+    ("stale_diff", "STOP", True, "task_diff_hash"),
+    ("policy_drift", "STOP", True, "policy_hash"),
+    ("command_set_drift", "STOP", True, "command_set_hash"),
+    ("missing_receipt", "STOP", True, "missing"),
+    ("failed_reported_as_pass", "STOP", True, "failed_as_pass"),
+    ("invalid_skip", "STOP", True, "invalid_skip"),
+    ("unavailable_not_pass", "DEGRADED", True, "unavailable"),
+    ("tampered_receipt", "STOP", True, "tampered"),
+    ("unauthorized_vendor_override", "STOP", True, "vendor_override"),
+    ("cross_scope_receipt", "STOP", True, "cross_scope"),
+    ("dirty_untracked_full_claim", "STOP", False, "dirty_full"),
+    ("sharded_ci_identity", "ADMIT", True, "sharded_ci"),
+    ("degraded_not_full", "STOP", True, "degraded_full"),
+    ("partial_fail_fast_receipt", "STOP", True, "partial"),
+)
+
+
+def _scenario_mutators() -> dict[str, Callable[[dict[str, Any], dict[str, Any]], None]]:
+    return {
+        "cross_scope": _mutate_cross_scope,
+        "degraded_full": _mutate_degraded_full,
+        "dirty_full": _mutate_dirty_full,
+        "failed_as_pass": _mutate_failed_as_pass,
+        "invalid_skip": _mutate_invalid_skip,
+        "missing": _mutate_missing,
+        "partial": _mutate_partial,
+        "sharded_ci": _mutate_sharded_ci,
+        "stale_head": _mutate_stale_head,
+        "tampered": _mutate_tampered,
+        "unavailable": _mutate_unavailable,
+        "vendor_override": _mutate_vendor_override,
+    }
+
+
+def _assert_one_scenario(
+    name: str,
+    expected: str,
+    check_source: bool,
+    mutator_key: str,
+) -> None:
+    cases = {
+        case_name: (outcome, source_check, mutator)
+        for case_name, outcome, source_check, mutator in _scenario_cases()
+    }
+    actual_expected, actual_check_source, actual_mutate = cases[name]
+    assert actual_expected == expected
+    assert actual_check_source is check_source
+    if mutator_key in _HASH_FIELD_MUTATORS:
+        bundle = _mock_bundle()
+        expected_bundle = copy.deepcopy(bundle)
+        _mutate_source(expected_bundle, mutator_key)
+        actual_mutate(bundle, {})
+        assert bundle == expected_bundle
+        return
+    assert actual_mutate is _scenario_mutators()[mutator_key]
+
+
+def _assert_scenario_routing() -> None:
+    cases = _scenario_cases()
+    spec_names = [
+        name for name, _expected, _check_source, _key in _SCENARIO_ROUTING_SPEC
+    ]
+    case_names = [name for name, _expected, _check_source, _mutate in cases]
+    assert len(cases) == len(spec_names) == 15
+    assert len(set(spec_names)) == 15
+    assert case_names == spec_names
+    for name, expected, check_source, mutator_key in _SCENARIO_ROUTING_SPEC:
+        _assert_one_scenario(name, expected, check_source, mutator_key)
+
+
 @pytest.mark.parametrize(
-    "name,expected,check_source,mutate",
-    [
-        ("stale_source", "STOP", True, _mutate_stale_head),
-        ("stale_diff", "STOP", True, "task_diff_hash"),
-        ("policy_drift", "STOP", True, "policy_hash"),
-        ("command_set_drift", "STOP", True, "command_set_hash"),
-        ("missing_receipt", "STOP", True, _mutate_missing),
-        ("failed_reported_as_pass", "STOP", True, _mutate_failed_as_pass),
-        ("invalid_skip", "STOP", True, _mutate_invalid_skip),
-        ("unavailable_not_pass", "DEGRADED", True, _mutate_unavailable),
-        ("tampered_receipt", "STOP", True, _mutate_tampered),
-        ("unauthorized_vendor_override", "STOP", True, _mutate_vendor_override),
-        ("cross_scope_receipt", "STOP", True, _mutate_cross_scope),
-        ("dirty_untracked_full_claim", "STOP", False, _mutate_dirty_full),
-        ("sharded_ci_identity", "ADMIT", True, _mutate_sharded_ci),
-        ("degraded_not_full", "STOP", True, _mutate_degraded_full),
-        ("partial_fail_fast_receipt", "STOP", True, _mutate_partial),
-    ],
+    ("name", "expected", "check_source", "mutator_key"),
+    _SCENARIO_ROUTING_SPEC,
 )
 def test_scenario_cases_routing(
     name: str,
     expected: str,
     check_source: bool,
-    mutate: str | Callable[[dict[str, Any], dict[str, Any]], None],
+    mutator_key: str,
 ) -> None:
-    cases = _scenario_cases()
-    cases_by_name = {
-        case_name: (outcome, source_check, mutator)
-        for case_name, outcome, source_check, mutator in cases
-    }
-    assert len(cases) == len(cases_by_name) == 15
-    actual_expected, actual_check_source, actual_mutate = cases_by_name[name]
-    assert actual_expected == expected
-    assert actual_check_source is check_source
-    if isinstance(mutate, str):
-        bundle = _mock_bundle()
-        expected_bundle = copy.deepcopy(bundle)
-        _mutate_source(expected_bundle, mutate)
-        actual_mutate(bundle, {})
-        assert bundle == expected_bundle
-    else:
-        assert actual_mutate is mutate
+    _assert_one_scenario(name, expected, check_source, mutator_key)
 
 
-def test_mutate_stale_head():
+def test_mutate_stale_head() -> None:
     b = _mock_bundle()
     _mutate_stale_head(b, {})
     assert b["source"]["head_sha"] == "0" * 40
@@ -506,21 +548,21 @@ def test_mutate_stale_head():
     _assert_digests(b)
 
 
-def test_mutate_missing():
+def test_mutate_missing() -> None:
     b = _mock_bundle()
     _mutate_missing(b, {})
     assert b["receipts"] == []
     _assert_digests(b)
 
 
-def test_mutate_failed_as_pass():
+def test_mutate_failed_as_pass() -> None:
     b = _mock_bundle()
     _mutate_failed_as_pass(b, {})
     assert b["receipts"][0]["exit_code"] == 1
     _assert_digests(b)
 
 
-def test_mutate_invalid_skip():
+def test_mutate_invalid_skip() -> None:
     b = _mock_bundle()
     _mutate_invalid_skip(b, {})
     r = b["receipts"][0]
@@ -531,7 +573,7 @@ def test_mutate_invalid_skip():
     _assert_digests(b)
 
 
-def test_mutate_unavailable():
+def test_mutate_unavailable() -> None:
     b = _mock_bundle()
     _mutate_unavailable(b, {})
     r = b["receipts"][0]
@@ -542,7 +584,7 @@ def test_mutate_unavailable():
     _assert_digests(b)
 
 
-def test_mutate_tampered():
+def test_mutate_tampered() -> None:
     b = _mock_bundle()
     original_receipt_digest = b["receipts"][0]["receipt_digest"]
     _mutate_tampered(b, {})
@@ -557,14 +599,14 @@ def test_mutate_tampered():
     )
 
 
-def test_mutate_vendor_override():
+def test_mutate_vendor_override() -> None:
     b = _mock_bundle()
     _mutate_vendor_override(b, {})
     assert b["receipts"][0]["producer"] == "optional_vendor_evaluator"
     _assert_digests(b)
 
 
-def test_mutate_cross_scope():
+def test_mutate_cross_scope() -> None:
     b = _mock_bundle()
     _mutate_cross_scope(b, {})
     r = b["receipts"][0]
@@ -575,7 +617,7 @@ def test_mutate_cross_scope():
     _assert_digests(b)
 
 
-def test_mutate_dirty_full():
+def test_mutate_dirty_full() -> None:
     b = _mock_bundle()
     p = _mock_policy()
     _mutate_dirty_full(b, p)
@@ -596,14 +638,14 @@ def test_mutate_dirty_full():
     )
 
 
-def test_mutate_sharded_ci():
+def test_mutate_sharded_ci() -> None:
     b = _mock_bundle()
     _mutate_sharded_ci(b, {})
     assert b["receipts"][0]["repository"]["worktree_id"] == "another-shard"
     _assert_digests(b)
 
 
-def test_mutate_degraded_full():
+def test_mutate_degraded_full() -> None:
     b = _mock_bundle()
     _mutate_degraded_full(b, {})
     assert b["receipts"][0]["status"] == "unavailable"
@@ -611,7 +653,7 @@ def test_mutate_degraded_full():
     _assert_digests(b)
 
 
-def test_mutate_partial():
+def test_mutate_partial() -> None:
     b = _mock_bundle()
     _mutate_partial(b, {})
     assert b["receipts"][0]["status"] == "fail"
