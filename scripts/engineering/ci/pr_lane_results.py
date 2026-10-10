@@ -251,12 +251,11 @@ def _imports_module(test_path: Path, module_name: str) -> bool:
     tree = ast.parse(test_path.read_text(encoding="utf-8"), filename=str(test_path))
     parent_module, _, leaf_name = module_name.rpartition(".")
     for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            if any(
-                alias.name == module_name or alias.name.startswith(f"{module_name}.")
-                for alias in node.names
-            ):
-                return True
+        if isinstance(node, ast.Import) and any(
+            alias.name == module_name or alias.name.startswith(f"{module_name}.")
+            for alias in node.names
+        ):
+            return True
         elif isinstance(node, ast.ImportFrom):
             if node.module == module_name or (
                 node.module == parent_module
