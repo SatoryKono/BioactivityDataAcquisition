@@ -1,4 +1,4 @@
-Source-only refresh (2026-10-10, PR #12162 conflict merge): the canonical module inventory records `source_tree_sha256=9ec4cb5df1f7209f56cde4a61c86474e5adae832dc7b5aa20a6f2a8ae40cb397` and `source_module_count=2566`. This binds the merged tree. Coverage measurements remain those of the PR #12164 17-shard run recorded below.
+Source-only refresh (2026-10-10, PR #12162 conflict merge): the canonical module inventory records `source_tree_sha256=d8a3c9a59accb4902f4e2aa88853578e73324ba2eee0749833c6d3835a50dbc3` and `source_module_count=2566`. This binds the merged tree. Coverage measurements remain those of the PR #12164 17-shard run recorded below.
 
 Coverage refresh (2026-10-10, PR #12164 latest-main integration): the canonical module inventory records `source_tree_sha256=633508ed5fc1a0024adf57c03d3e631af47461a53f525e03f36f145d95b8c8c7` and `source_module_count=2566`. The complete local 17-shard measurement on merge commit `c6549b1772667ecbc1e98f9b429d0d71a49df976` passed all shards and both coverage gates at 99.67% line / 94.25% branch. Remote CI acceptance for the final PR head remains separate.
 

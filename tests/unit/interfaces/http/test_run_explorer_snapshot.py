@@ -308,7 +308,6 @@ async def test_server_stop_closes_listener_when_metrics_stop_fails(
     assert server._server is None
 
 
-
 @pytest.mark.asyncio
 async def test_stop_allows_cleanup_from_already_cancelled_caller() -> None:
     started = asyncio.Event()

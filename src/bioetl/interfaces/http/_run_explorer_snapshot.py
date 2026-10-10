@@ -165,7 +165,7 @@ async def stop_run_explorer_snapshot(task: asyncio.Task[None] | None) -> None:
         while not joined.done():
             try:
                 await asyncio.shield(joined)
-            except asyncio.CancelledError:
+            except asyncio.CancelledError:  # NOSONAR python:S7497 - re-raised below
                 continue
         joined.result()
         raise
