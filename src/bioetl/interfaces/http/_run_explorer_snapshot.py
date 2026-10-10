@@ -150,10 +150,11 @@ async def stop_run_explorer_snapshot(task: asyncio.Task[None] | None) -> None:
     if task is None:
         return
     _ = task.cancel()
-    try:
-        await task
-    except asyncio.CancelledError:
-        return
+    # Collect the child's expected cancellation without swallowing a new
+    # cancellation of this caller while it waits for the child's cleanup.
+    await asyncio.gather(task, return_exceptions=True)
+    if not task.cancelled():
+        task.result()
 
 
 def _without_timing(payload: dict[str, object]) -> dict[str, object]:

@@ -1612,7 +1612,6 @@ ______________________________________________________________________
 
 - `BIOETL_UNIPROT_API_KEY` — optional higher-throughput UniProt profile
 - `BIOETL_OPENALEX_API_KEY` — required for production-like OpenAlex runs
-- `BIOETL_OPENALEX_EMAIL` — optional OpenAlex contact attribution
 - `BIOETL_SEMANTICSCHOLAR_API_KEY`
 
 ______________________________________________________________________

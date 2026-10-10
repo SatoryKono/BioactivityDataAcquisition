@@ -541,7 +541,7 @@ def test_pr_gate_credit_cut_keeps_required_job_names():
         if isinstance(job, dict) and "test-integration" in job
     )
     assert integration["matrix"]["parameters"]["test-group"] == [
-        "integration|tests/integration/|-p no:xdist",
+        "integration|tests/integration/|-n 2",
         "security|tests/security/|-n auto --dist loadscope",
     ]
     fast = next(

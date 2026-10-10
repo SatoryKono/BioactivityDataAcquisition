@@ -106524,6 +106524,34 @@
       "duplicate_resolution": null,
       "extension": ".json",
       "freshness": "regenerate",
+      "generated_route": "captured-test-telemetry-squash-provenance",
+      "generated_route_exception": null,
+      "generator": "reviewed read-only GitHub PR capture",
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "generated_test_run_evidence",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/test-telemetry/history/pr12096-capture.json",
+      "recommended_action": "generate-automatically",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Generated",
+      "surface_family": "generated",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": "tracked_quality_evidence",
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".json",
+      "freshness": "regenerate",
       "generated_route": "targeted-s7-governance-hotspot-telemetry",
       "generated_route_exception": null,
       "generator": "manual closeout from bounded pytest JUnit telemetry",
@@ -106590,6 +106618,34 @@
       "outbound_links": 0,
       "owner": "BioETL Team",
       "path": "reports/test-telemetry/slowest-tests.md",
+      "recommended_action": "generate-automatically",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Generated",
+      "surface_family": "generated",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": "tracked_quality_evidence",
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".json",
+      "freshness": "regenerate",
+      "generated_route": "captured-test-telemetry-squash-provenance",
+      "generated_route_exception": null,
+      "generator": "reviewed read-only GitHub PR capture",
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "generated_test_run_evidence",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/test-telemetry/squash-provenance.json",
       "recommended_action": "generate-automatically",
       "root_doc_kind": null,
       "section": "reports",
@@ -106744,6 +106800,17 @@
         "docs/02-architecture/diagrams/foundation/svg/",
         "docs/02-architecture/diagrams/views/png/",
         "docs/02-architecture/diagrams/views/svg/"
+      ]
+    },
+    {
+      "commit_policy": "tracked_quality_evidence",
+      "generator": "reviewed read-only GitHub PR capture",
+      "id": "captured-test-telemetry-squash-provenance",
+      "notes": "Preserves captured run identity and binds it to its reviewed GitHub PR; live verification resolves a future squash without inventing its SHA.",
+      "output_kind": "test_report",
+      "outputs": [
+        "reports/test-telemetry/squash-provenance.json",
+        "reports/test-telemetry/history/"
       ]
     },
     {
@@ -107410,7 +107477,7 @@
       "docs_reports_generated_or_route_owned": 7,
       "docs_reports_retention_sensitive_evidence": 21,
       "generated_skill_reference_mirror": 19,
-      "generated_test_run_evidence": 4,
+      "generated_test_run_evidence": 6,
       "guide": 4,
       "index": 4,
       "issue_pack": 60,
@@ -107423,7 +107490,7 @@
     "by_recommended_action": {
       "archive-after-github-state-check": 338,
       "archive-after-migration": 1068,
-      "generate-automatically": 1060,
+      "generate-automatically": 1062,
       "keep": 1333,
       "reconcile-with-github-state": 8
     },
@@ -107449,29 +107516,29 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 1324,
+      "reports": 1326,
       "security": 2
     },
     "by_status": {
       "Active": 749,
       "Archived": 283,
       "Canonical": 75,
-      "Generated": 1060,
+      "Generated": 1062,
       "Working": 1640
     },
     "by_surface_family": {
       "active": 749,
       "archive": 283,
       "canonical": 75,
-      "generated": 1060,
+      "generated": 1062,
       "working": 1640
     },
     "by_tracking_state": {
-      "tracked": 3807
+      "tracked": 3809
     },
     "docs_reports_local_count": 58,
     "duplicate_group_count": 7,
-    "generated_route_count": 72,
+    "generated_route_count": 73,
     "generated_without_route_count": 214,
     "generated_without_route_or_exception_count": 0,
     "github_issue_lifecycle_counts": {
@@ -107483,8 +107550,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3807,
+    "total_doc_like": 3809,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3807
+    "total_doc_like_tracked": 3809
   }
 }

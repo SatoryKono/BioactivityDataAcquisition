@@ -25,25 +25,17 @@ The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-lev
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `BIOETL_OPENALEX_API_KEY` | API key for production-like OpenAlex runs. This is the production access boundary, not only a higher rate limit. | Yes for production-like runs |
-| `BIOETL_OPENALEX_EMAIL` | Optional contact attribution. It does not replace the API key. | No |
 
-A `mailto` value without `BIOETL_OPENALEX_API_KEY` is only a legacy adapter fallback (`api_key or mailto`). It is not the production boundary.
 
 ### PubMed
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
 | `BIOETL_PUBMED_API_KEY` | PubMed API key for higher rate limits | - | No |
-| `BIOETL_PUBMED_EMAIL` | Email for polite pool attribution | empty / unset (adapter returns `None`; no fake identity) | No |
 
 ### Semantic Scholar
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `BIOETL_SEMANTICSCHOLAR_API_KEY` | Semantic Scholar API key | No |
-
-### CrossRef
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `BIOETL_CROSSREF_EMAIL` | Email for polite pool attribution | No |
 
 ## Observability
 
@@ -53,26 +45,6 @@ A `mailto` value without `BIOETL_OPENALEX_API_KEY` is only a legacy adapter fall
 | `BIOETL_PROMETHEUS_URL` | Optional Prometheus base URL for local HTTP probes | unset (`http://localhost:9090` loopback default in health/processed-records) | No |
 | `BIOETL_OBSERVABILITY__TRACING_ENABLED` | Enable OpenTelemetry tracing | `false` | No |
 | `BIOETL_OBSERVABILITY__ALLOW_NOOP_OBSERVABILITY_IN_PROD` | Allow NoOp observability in prod | `false` | No |
-
-## Docker Helper (Optional)
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `BIOETL_DOCKER_HELPER_ADR010_ADJUNCT` | Local-Only Docker helpers governed by ADR-010 | No |
-
-## MCP Shared Runtime (Optional)
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `BIOETL_MCP_SHARED_API_KEY` | Auth token for MCP shared plane | No |
-
-## Grafana Ops HTTP (Optional)
-
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `BIOETL_GRAFANA_REQUIRE_OPS_HTTP` | Require Ops HTTP provisioning | - | No |
-| `BIOETL_GRAFANA_OPS_READY_ATTEMPTS` | Ops ready check attempts | - | No |
-| `BIOETL_GRAFANA_OPS_READY_SLEEP_SEC` | Ops ready check sleep seconds | - | No |
 
 ## Runtime Identity
 
@@ -85,13 +57,6 @@ A `mailto` value without `BIOETL_OPENALEX_API_KEY` is only a legacy adapter fall
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
 | `BIOETL_ENFORCE_REPORT_ROOT_MARKER` | Enforce report root marker for Grafana | `true` (in docker-compose.yml) | No |
-
-## Telemetry (Optional)
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `BIOETL_TELEMETRY_REFERENCE_NOW` | Injectable reference time for telemetry freshness | No |
-| `BIOETL_REQUIRE_TELEMETRY_SOURCE_COMMIT_EQUALS_HEAD` | Require source_commit == HEAD for telemetry | No |
 
 ## Windows + WSL Mixed Checkout
 

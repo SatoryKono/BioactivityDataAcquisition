@@ -1,0 +1,25 @@
+{
+  "source_commit": "912f483953c76ede75313f762e41a9848369c3bb",
+  "source_run_id": "local-local-verify-pr12096-20261009-final16",
+  "source_tree_sha256": "3a05fb1a5e505a6f4fe74f71db2755e1163be73d3528b035ebf8375d93063c45",
+  "schema_version": 1,
+  "trust_tier": "local_single_host",
+  "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/12096",
+  "retrieved_at_utc": "2026-10-09T15:46:23.800096+00:00",
+  "github_pull_request": {
+    "base": {
+      "repo": {
+        "full_name": "SatoryKono/BioactivityDataAcquisition"
+      }
+    },
+    "head": {
+      "ref": "fix/cf-wave1-pagination-vcr-security",
+      "sha": "7e40f2787eff9d94269ae93638711e539338f47c"
+    },
+    "html_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/pull/12096",
+    "merge_commit_sha": "9a7339dc05912455fb769d21e91be8f763a72f98",
+    "merged": true,
+    "number": 12096
+  },
+  "merged_tree": "9a0730a487a6c38672dd0ce29a90ee122bbda18a"
+}
