@@ -1,11 +1,11 @@
 {
   "dependencies": {
-    "@modelcontextprotocol/server-filesystem": "^2026.1.14",
-    "neo4j-driver": "^6.0.1",
+    "@modelcontextprotocol/server-filesystem": "^2026.8.31",
+    "neo4j-driver": "^6.2.0",
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
-    "playwright": "^1.60.0",
+    "playwright": "^1.63.0",
     "@commitlint/cli": "21.2.3",
     "@commitlint/config-conventional": "21.2.3"
   },
