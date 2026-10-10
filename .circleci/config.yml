@@ -159,6 +159,8 @@ commands:
     steps:
     - run:
         name: Halt unless << parameters.label >> paths changed
+        environment:
+          BIOETL_HALT_PATHSPECS: << parameters.pathspecs >>
         command: |
           set -euo pipefail
           if [ "<< pipeline.parameters.ci-lane >>" != "pr-gate" ]; then
@@ -185,7 +187,13 @@ commands:
             base="origin/$base_ref"
           fi
           mkdir -p /tmp/cci-path-halt
-          git diff --name-only "$base"...HEAD -- << parameters.pathspecs >> > /tmp/cci-path-halt/changed.txt
+          printf "%s\n" "$BIOETL_HALT_PATHSPECS" | tr " " "\n" > /tmp/cci-path-halt/args
+          mapfile -t pathspec_args < /tmp/cci-path-halt/args
+          if [ "${#pathspec_args[@]}" -eq 0 ]; then
+            echo "halt pathspecs are empty" >&2
+            exit 1
+          fi
+          git diff --name-only "$base"...HEAD -- "${pathspec_args[@]}" > /tmp/cci-path-halt/changed.txt
           if [ ! -s /tmp/cci-path-halt/changed.txt ]; then
             echo "No << parameters.label >> paths in $base...HEAD; skipping the long body."
             circleci-agent step halt
@@ -2053,6 +2061,9 @@ jobs:
     resource_class: medium
     steps:
     - checkout
+    - halt-unless-pr-gate-paths:
+        label: architecture tests
+        pathspecs: "src/bioetl tests/architecture :(glob)configs/**/*.yaml"
     - setup-python-uv
     - run:
         name: architecture tests
@@ -2292,6 +2303,9 @@ jobs:
     resource_class: small
     steps:
       - checkout
+      - halt-unless-pr-gate-paths:
+          label: security scans
+          pathspecs: "src pyproject.toml uv.lock .github :(glob)Dockerfile* :(glob)docker-compose*.yml .gitleaks.toml .secrets.baseline"
       - setup-python-uv
       - run:
           name: detect-secrets (no hardcoded secrets)
@@ -2711,6 +2725,9 @@ jobs:
       NODE_OPTIONS: --max-old-space-size=3072
     steps:
       - checkout
+      - halt-unless-pr-gate-paths:
+          label: duplication
+          pathspecs: "src scripts tests .github/tooling .github/workflows/duplication-complexity.yml .jscpd.json configs/quality/duplication_complexity_exemptions.yaml"
       - setup-python-uv
       - run:
           name: radon complexity (CC <= 10; domain <= 5)
@@ -2894,6 +2911,9 @@ jobs:
     resource_class: small
     steps:
       - checkout
+      - halt-unless-pr-gate-paths:
+          label: docker build
+          pathspecs: "Dockerfile.bioetl docker-compose.yml docker-compose.monitoring.yml .dockerignore .github/workflows/docker.yml"
       - check-gate:
           gate: docker
       - setup_remote_docker:
@@ -3956,6 +3976,7 @@ workflows:
           filters: &id001
             branches:
               only:
+              - fix/cf-wave1-pagination-vcr-security
               - codex/architecture-coverage-final-20261004
               - codex/architecture-11854-postmerge-20261005
               - codex/config-root-main-acceptance-20261005
