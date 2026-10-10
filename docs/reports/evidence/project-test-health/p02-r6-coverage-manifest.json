@@ -1,5 +1,16 @@
 {
   "all_shards_exit_zero": true,
+  "artifact_provenance": {
+    "artifact_index_url": "https://circleci.com/api/v1.1/project/github/SatoryKono/BioactivityDataAcquisition/17286/artifacts",
+    "coverage_xml_artifact_path": "reports/quality/proof-or-stop/shared/coverage/coverage/coverage.xml",
+    "job_number": 17286,
+    "job_url": "https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/17286",
+    "junit_artifact_path_template": "coverage-junit/{shard}.xml",
+    "project_slug": "gh/SatoryKono/BioactivityDataAcquisition",
+    "provider": "circleci",
+    "raw_manifest_artifact_path": "reports/quality/proof-or-stop/shared/coverage/coverage/manifest.json",
+    "verified_at_utc": "2026-10-10T14:19:26+00:00"
+  },
   "branch": "fix/cf-wave1-pagination-vcr-security",
   "commit": "ceedc671b613ec3c2b25bbbae86b8b950719ddb6",
   "complete": true,

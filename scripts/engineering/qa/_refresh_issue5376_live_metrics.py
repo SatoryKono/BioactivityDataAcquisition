@@ -50,7 +50,9 @@ record["closeout"].update(
     ),
 )
 record["current_live_metrics_provenance"] = {
-    "source_inventory_sha256": hashlib.sha256(inventory_path.read_bytes()).hexdigest(),
+    "source_inventory_sha256": hashlib.sha256(
+        inventory_path.read_text(encoding="utf-8").encode("utf-8")
+    ).hexdigest(),
     "source_tree_sha256": inventory["source_tree_sha256"],
     "derived_by": "scripts/engineering/qa/_refresh_issue5376_live_metrics.py",
     "semantics": "Live retained-inventory binding; raw W44 regression ledger is separate.",

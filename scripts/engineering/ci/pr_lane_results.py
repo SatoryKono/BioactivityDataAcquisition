@@ -204,11 +204,17 @@ def affected_pytest_targets(changed_files: list[str], *, repo_root: Path) -> lis
                 repo_root / "tests" / "unit" / "repo_backed" / "scripts",
             )
             direct_test_name = f"test_{relative.name.lstrip('_')}"
+            direct_test_dirs = [
+                test_root / relative.parent for test_root in scripts_test_roots
+            ]
+            if relative.parts[0] == "engineering":
+                direct_test_dirs.append(
+                    scripts_test_roots[0] / Path(*relative.parts[1:-1])
+                )
             direct_tests = sorted(
-                test_path
-                for test_root in scripts_test_roots
-                if test_root.is_dir()
-                for test_path in test_root.rglob(direct_test_name)
+                candidate
+                for test_dir in direct_test_dirs
+                if (candidate := test_dir / direct_test_name).is_file()
             )
             if direct_tests:
                 targets.extend(
