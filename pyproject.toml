@@ -169,7 +169,7 @@ dev = [
     # Exact pins: reproducible sdist/wheel build + upload toolchain.
     # Reviewed 2026-09-19; re-review by 2027-03-19. (AUD-006)
     "build==1.2.2.post1",
-    "twine==6.1.0",
+    "twine==7.0.0",
     # Dead code detection
     "vulture>=2.11",
     # Mutation testing
