@@ -17,7 +17,6 @@ Tests real API behavior with recorded cassettes.
 from __future__ import annotations
 
 import asyncio
-import os
 from pathlib import Path
 
 import pytest
@@ -28,6 +27,7 @@ from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+from tests.helpers.vcr_config import build_base_vcr_config
 from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
@@ -57,13 +57,11 @@ _CASSETTE_NAME_OVERRIDES = {
 @pytest.fixture(scope="module")
 def vcr_config():
     """Configure VCR for OpenAlex tests."""
-    return {
-        "cassette_library_dir": str(CASSETTE_DIR),
-        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
-        "match_on": ["method", "scheme", "host", "port", "path", "query"],
-        "filter_query_parameters": ["mailto"],  # Don't record mailto
-        "decode_compressed_response": True,
-    }
+    return build_base_vcr_config(
+        cassette_library_dir=CASSETTE_DIR,
+        filter_query_parameters=["mailto"],  # Don't record mailto
+        decode_compressed_response=True,
+    )
 
 
 @pytest.fixture

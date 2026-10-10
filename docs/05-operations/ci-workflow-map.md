@@ -13,10 +13,10 @@ ______________________________________________________________________
 The active PR/default-main provider is CircleCI `.circleci/config.yml`, workflow
 `pr-gate`, with GitHub required context `ci/circleci: pr-gate-complete`.
 The canonical applicability catalog is `configs/quality/github_required_checks.yaml`.
-Its `deployment` block identifies CircleCI; retained `coordinator_workflow` and
-`owner_workflow` fields describe the retained legacy Actions definitions.
+Its `deployment` block identifies GitHub Actions; retained `coordinator_workflow` and
+`owner_workflow` fields describe the legacy definitions kept after #11930.
 The owner cancelled deletion in #11930; its status is not_planned.
-GitHub Actions are disabled; billing restoration is out of scope.
+GitHub Actions run the pull-request coordinator. Ruleset enforcement stays disabled.
 
 The legacy inventory below contains 54 tracked workflow files, including 13
 scheduled and 34 manual surfaces. These categories overlap. Retained YAML defines
@@ -57,8 +57,8 @@ This explicit lane runs the canonical 17-shard producer and Proof-or-Stop checks
 it is not part of a normal PR/default-main run. Do not rewrite source identity
 to a squash SHA or weaken the ancestor guard to avoid this measurement.
 
-The map above records the legacy Actions inventory; it is not evidence that
-Actions are running. Actions are disabled and billing restoration is out of scope.
+The map above records the legacy Actions inventory. The pull-request coordinator
+runs in GitHub Actions. Ruleset enforcement stays disabled.
 CodeQL is excluded from required checks; optional analysis and workflow retirement
 remain separate decisions. The CircleCI default-branch matrix reads the canonical
 required-check catalog instead of maintaining a second gate list.
@@ -227,7 +227,7 @@ Manual successes do not establish scheduler, notification or release acceptance.
 
 On 2026-10-06 the owner cancelled GitHub Actions deletion. Issue #11930 is
 closed as `not planned`; all 54 workflow definitions and composite actions are
-retained. Actions remain disabled. CircleCI implementation and acceptance under
+retained. Actions run the pull-request coordinator. CircleCI implementation and acceptance under
 #11931 continue independently. Retention does not establish functional parity,
 authorize public OpenSSF channel retirement, or enable legacy workflows.
 
@@ -258,7 +258,7 @@ are UTC cron expressions from the source definitions, not registered CircleCI tr
 | `docs.yml` | — | CircleCI docs-governance | Main7949 on005a7dc6 accepts docs governance with seven verified artifacts; PR409 accepts all580 Mermaid syntax checks, targeted render and drift. Main syntax acceptance remains pending; disabled full render is not activated |
 | `duplication-complexity.yml` | — | CircleCI duplication | Prepared required gate; full scan thresholds preserved |
 | `e2e-matrix-health.yml` | `30 2 * * *` | E2E replay and controlled live lanes | Scheduled pipeline353 on main c644f2e4 SUCCESS:full6377 passes159,prompt6376 passes52,matrix6378 passes3x11+1,live6379 passes11; zero errors/skips and14verified artifacts. Daily02UTC restored with run-live=true; required PR smoke accepted in pipeline362/job6470 (3x11+1, no skips); main event acceptance passed in pipeline371 on 8291d29c |
-| `github-settings-quarterly-review.yml` | `23 6 1 1,4,7,10 *` | CircleCI github-settings-review | Scheduled pipeline355/job6381 succeeds on main c644f2e4; JSON/Markdown report verified and policy drift remains explicit. First-day Jan/Apr/Jul/Oct06UTC restored with Scheduling System attribution |
+| `github-settings-quarterly-review.yml` | quarter-day gate in `nightly.yml` | CircleCI github-settings-review | Scheduled pipeline355/job6381 succeeds on main c644f2e4; JSON/Markdown report verified and policy drift remains explicit. The reusable workflow has no direct schedule; `nightly.yml` is the single GitHub Actions schedule owner and calls it on the first day of Jan/Apr/Jul/Oct |
 | `import-linter.yml` | — | CircleCI lint-arch and arch-tests | Prepared gates; full external architecture acceptance pending |
 | `labeler.yml` | — | Retain disabled label maintenance | Preserve #10263/#11234; taxonomy reconciliation is required before any future trusted replacement |
 | `memory-freshness.yml` | `17 5 * * 1` | CircleCI memory-freshness | Scheduled pipeline352/job6375 succeeds on main c644f2e4:all four freshness checks pass. Monday05UTC restored; required PR/main freshness checks accepted in main371. Scheduled failure issue-notification remains pending |
@@ -315,7 +315,7 @@ acceptance gates; workflow deletion is no longer a completion criterion.
 | `consolidation-gates.yml` | consolidation-gates | Consolidation / cleanup governance gates |
 | `dashboard-first-window-noscroll.yml` | Dashboard first-window no-scroll | First-window no-scroll gate for all seven shipped dashboard UIDs (DASH-FIT-004) |
 | `dependency-review.yml` | Dependency review | PR-time HIGH/CRITICAL lockfile/manifest review |
-| `docker.yml` | Docker Build & Compose Validation | Optional Docker contract (ADR-010 adjunct), reproducible Trivy/SBOM baseline, blocking CRITICAL+HIGH+MEDIUM image gate, and no-rebuild promotion of the scanned image |
+| `docker.yml` | Docker Build & Compose Validation | Optional Docker contract (ADR-010 adjunct), reproducible Trivy/SBOM baseline, blocking CRITICAL+HIGH+MEDIUM image gate, and no-rebuild promotion of the scanned image; direct pushes exclude `main`, whose single invocation is owned by `main-integrity.yml` |
 | `docs.yml` | Docs & Diagrams | MkDocs, links, Mermaid lint, targeted ChEMBL render, drift; `pr-required.yml` owner (re-enabled #10263) |
 | `duplication-complexity.yml` | Duplication and Complexity Checks | Dup/complexity quality gates |
 | `e2e-matrix-health.yml` | E2E Matrix Health | End-to-end matrix health |
@@ -333,6 +333,7 @@ acceptance gates; workflow deletion is no longer a completion criterion.
 | `schema-governance.yml` | Schema Governance | Schema governance checks |
 | `scorecard.yml` | OpenSSF Scorecard | Weekly non-blocking OpenSSF Scorecard baseline |
 | `security.yml` | Security Scans | Secrets, pip-audit, Bandit, Gitleaks, OSV-Scanner |
+| `skills-consistency.yml` | Skills Consistency | Path-filtered local skill mirrors plus Codex–Junie runtime parity |
 | `tests.yml` | Tests | Primary unit/integration test matrix |
 | `type-checking.yml` | Type Checking (Strict) | basedpyright / type gates |
 | `zizmor.yml` | zizmor | High-confidence GitHub Actions YAML audit |
@@ -366,7 +367,6 @@ not operator routing targets. Reasons live in
 | `reusable-mermaid-setup.yml` | [DEPRECATED] Reusable Mermaid setup | `keep-disabled` |
 | `reusable-setup.yml` | [DEPRECATED] Reusable CI setup | `keep-disabled` |
 | `semantic-governance.yml` | Semantic Pipeline Governance | `keep-disabled` |
-| `skills-consistency.yml` | Skills Consistency | `keep-disabled` |
 | `stale.yml` | Stale | `keep-disabled` |
 | `vacuum.yml` | Weekly VACUUM | `keep-disabled` |
 | `validate-vendored-mermaid-assets.yml` | Validate vendored Mermaid assets | `keep-disabled` |
