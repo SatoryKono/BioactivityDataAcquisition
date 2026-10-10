@@ -243,6 +243,73 @@ async def test_stop_preserves_child_failure() -> None:
 
 
 @pytest.mark.asyncio
+async def test_server_stop_closes_remaining_resources_when_snapshot_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    snapshot_stop = AsyncMock(side_effect=RuntimeError("snapshot failed"))
+    control_plane_stop = AsyncMock()
+    monkeypatch.setattr(
+        "bioetl.interfaces.http.health_server.stop_run_explorer_snapshot",
+        snapshot_stop,
+    )
+    monkeypatch.setattr(
+        "bioetl.interfaces.http.health_server.stop_control_plane_metrics_refresh",
+        control_plane_stop,
+    )
+    listener = Mock()
+    listener.wait_closed = AsyncMock()
+    server = HealthServer()
+    server._run_explorer_refresh_task = Mock()
+    server._control_plane_integrity_refresh_task = Mock()
+    server._server = listener
+
+    with pytest.raises(RuntimeError, match="snapshot failed"):
+        await server.stop()
+
+    snapshot_stop.assert_awaited_once()
+    control_plane_stop.assert_awaited_once()
+    listener.close.assert_called_once_with()
+    listener.wait_closed.assert_awaited_once_with()
+    assert server._run_explorer_refresh_task is None
+    assert server._control_plane_integrity_refresh_task is None
+    assert server._server is None
+
+
+@pytest.mark.asyncio
+async def test_server_stop_closes_listener_when_metrics_stop_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    snapshot_stop = AsyncMock()
+    metrics_stop = AsyncMock(side_effect=RuntimeError("metrics failed"))
+    monkeypatch.setattr(
+        "bioetl.interfaces.http.health_server.stop_run_explorer_snapshot",
+        snapshot_stop,
+    )
+    monkeypatch.setattr(
+        "bioetl.interfaces.http.health_server.stop_control_plane_metrics_refresh",
+        metrics_stop,
+    )
+    listener = Mock()
+    listener.wait_closed = AsyncMock()
+    server = HealthServer()
+    server._run_explorer_refresh_task = Mock()
+    server._control_plane_integrity_refresh_task = Mock()
+    server._server = listener
+
+    with pytest.raises(RuntimeError, match="metrics failed"):
+        await server.stop()
+
+    snapshot_stop.assert_awaited_once()
+    metrics_stop.assert_awaited_once()
+    listener.close.assert_called_once_with()
+    listener.wait_closed.assert_awaited_once_with()
+    assert server._run_explorer_refresh_task is None
+    assert server._control_plane_integrity_refresh_task is None
+    assert server._server is None
+
+
+
+@pytest.mark.asyncio
 async def test_stop_allows_cleanup_from_already_cancelled_caller() -> None:
     started = asyncio.Event()
     waiting = asyncio.Event()
