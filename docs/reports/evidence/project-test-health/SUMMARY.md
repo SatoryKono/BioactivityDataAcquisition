@@ -15,57 +15,51 @@ verification_scope: tracked_test_module_inventory
 
 ## Current status
 
-The tracked test-module inventory remains the verification scope for this
-summary. Its canonical inputs and machine-readable inventory record remain in
-the companion metadata. This page is a non-canonical evidence layer and does
-not replace those sources.
+On 2026-10-08, CircleCI run [17286](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/17286)
+completed the canonical 17-shard coverage plan for source commit
+`ceedc671b613ec3c2b25bbbae86b8b950719ddb6` on
+`fix/cf-wave1-pagination-vcr-security`. Its complete manifest binds source
+tree `3cabab41baf177eb6f34163e59cbdb352e4cbbb8d570d3af7551bf66790c7714` and
+test tree `ad43e49af046f215efd16b0b4d629bc452fa1729da73c47e6ec00e48cee800b4`.
+All 17 JUnit inputs report 33,424 passed, 175 skipped, and 0 failed; combined
+coverage is 99.68% line and 94.29% branch. The committed telemetry baseline
+records the associated GitHub PR workflow [37743490942](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37743490942)
+and the exact source commit; its coverage and JUnit inputs come from CircleCI
+run 17286 above.
 
-The P02 R6 local coverage capture ran on commit
-`aff1f4955c7cb5cc3a9a972ab300b9c4bffcae44`, source tree
-`20ff5954914c50c111d533b89d4a719dbc9c973c51b486d17385fe1dc6e05f26`, and test
-tree `0800468b7a5f706cecd3fd8dbfbe88cfa2d85ca56d6b51d537e39f98bd2c6c07`.
-All 17 canonical shards completed with exit code 0: 33,583 JUnit testcase rows,
-0 failures, 0 errors, and 205 skips. The combined report measured 99.68% line coverage and
-94.28% branch coverage; both configured aggregate gates passed. The run used
-one local worker. Its portable, path-free evidence manifest is
-[`p02-r6-coverage-manifest.json`](p02-r6-coverage-manifest.json).
+This evidence covers the canonical 17-shard plan, not every repository test
+surface. The manifest excludes architecture, performance, manual E2E,
+live-provider contracts, and memory selectors; those gates have separate
+workflows. The tracked test-module inventory contains 3,033 `test_*.py` files
+as of 2026-10-08. This summary remains a non-canonical backlog signal and does
+not claim lifecycle or release admission.
 
-This local capture does not establish hosted CI acceptance or make the
-architecture suite green. Exact-SHA hosted architecture gates and the full
-local architecture suite still report independent governance and code-quality
-failures; tracker #12094 remains open. The complete measured module inventory
-is bound to the same source hash. It contains no uncovered or unmeasured
-modules, and three modules remain below the default 85% per-module floor. These
-residuals are preserved rather than hidden by changing thresholds or
-historical measurements.
+## Historical backlog signals
 
-## Required follow-up
+The earlier GR-DB-CORR broad attempt executed 29,758 tests with 10 failures
+and 91 skips; a subsequent integration and affected-runner attempt executed
+2,885 tests with three failures and 12 skips. The 108-test recheck of the
+affected integration files passed. The architectural campaign then encountered
+drift and a timeout. These historical attempts were not PASS results.
 
-- Keep tracker #12094 open until required hosted checks and final review pass.
-- Review the three measured modules below 85% as separate coverage work.
-- Reconcile older lifecycle, contract, UTC metadata, and security backlog
-  signals against their current owners and issues before changing their status.
+Older action items remain backlog signals and have not been re-audited by this
+coverage refresh:
+
+1. Complete remaining lifecycle, contract, and UTC metadata tests.
+2. Add security regression coverage for HTML output and recursive redaction.
 
 ## Freshness note
 
-Re-verified on 2026-10-08. The path-free manifest records all 17 shard exit
-codes, per-shard coverage and JUnit digests, the raw runner-manifest digest,
-source/test fingerprints, and aggregate threshold results. The local runner
-also retains raw JUnit, log, coverage, and SQLite files under its ignored
-scratch directory; those machine-local files are not required to verify the
-tracked manifest's recorded outcomes. The tracked `tests/**/test_*.py`
-inventory and canonical source files were checked on this revision. This
-summary remains backlog signal only, not proof of hosted CI or complete
-repository lifecycle acceptance. A fresh evidence-pack rebaseline is required
-before it can support broader test-health conclusions.
+Re-verified on 2026-10-08 against source HEAD
+`ceedc671b613ec3c2b25bbbae86b8b950719ddb6`. The manifest is complete, all 17
+required shard selections are present, and its test-tree hash matches the
+working tree. Local evidence at
+`reports/local/nav-tests-20260914/final-tests.xml` (1,199 passed, 11 skipped)
+remains historical. Recurrence of #7419 remains a backlog signal.
 
-This summary is a non-canonical repo-only evidence layer. The canonical sources
-of truth are:
-
+This is a non-canonical repo-only evidence layer. The canonical sources of truth are:
 - `configs/quality/test_matrix.yaml`
 - `configs/quality/test_health_reporting.yaml`
 - `configs/quality/fixture_governance_ledger.yaml`
 
-Refresh this summary from the next significant test campaign or infrastructure
-change, while preserving the distinction between local evidence and hosted
-acceptance.
+This summary provides a backlog signal only and must be rebalanced with fresh evidence-pack rebaseline after any significant test campaign or infrastructure change.

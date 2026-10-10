@@ -230,13 +230,7 @@ def _present_status(
 def _load_saved_assessment(
     path: Path, pipeline: str, run_id: str
 ) -> (
-    tuple[
-        dict[str, object],
-        dict[str, object],
-        dict[str, object],
-        str,
-        str,
-    ]
+    tuple[dict[str, object], dict[str, object], dict[str, object], str, str]
     | dict[str, object]
 ):
     try:

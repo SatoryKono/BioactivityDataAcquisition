@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:pubchem_compound`
 - Schema: `1.0.0`
-- Source revision: `fb9857b489eac92a62328545d7d906e67d386191`
+- Source revision: `9a7339dc05912455fb769d21e91be8f763a72f98`
 
 ## Evidence
 
@@ -75,7 +75,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:a589b3d2dccc5c58d72f52421153e318f063a0cd7a7f7a39c9e25c7c7460db9c",
-    "source_revision": "fb9857b489eac92a62328545d7d906e67d386191"
+    "source_revision": "9a7339dc05912455fb769d21e91be8f763a72f98"
   },
   "source_references": [
     {

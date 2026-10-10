@@ -629,7 +629,8 @@ occur before 2026-11-30.
 ### Quarterly settings review
 
 `.github/workflows/github-settings-quarterly-review.yml` performs a read-only
-review on the first day of each quarter and on manual dispatch. It discovers
+review when `nightly.yml` calls it on the first day of each quarter and on
+manual dispatch. It discovers
 the repository/default branch dynamically, writes evidence, and does not edit
 settings, secrets, branches, labels, environments, or issues. Follow
 [Quarterly read-only GitHub settings review](../../05-operations/runbooks/github-settings-quarterly-review.md)
@@ -854,12 +855,12 @@ Scorecard #1272 (BranchProtection), #1295 (CodeReview), #1296 (CIIBestPractices)
 
 ### Quarterly Read-Only Review Runbook (read-only, no mutations)
 
-Owner: @SatoryKono · Cadence: quarterly · Last: 2026-08-28 → Next: 2026-11-28 · Due: +5 days after quarter (Q4 due `2026-12-05`, cron `23 6 1 1,4,7,10`) · Evidence: `reports/governance/quarterly-review-YYYY-QN.md` + `reports/quality/github-settings-review*.json` (30d retention, `automation_mutated_github:false`).
+Owner: @SatoryKono · Cadence: quarterly · Last: 2026-08-28 → Next: 2026-11-28 · Due: +5 days after quarter (Q4 due `2026-12-05`; `nightly.yml` calls the reusable workflow on the first day of Jan/Apr/Jul/Oct) · Evidence: `reports/governance/quarterly-review-YYYY-QN.md` + `reports/quality/github-settings-review*.json` (30d retention, `automation_mutated_github:false`).
 
 Checklist (read-only `GET`, `--paginate` where paginated, no `PUT/PATCH/POST/DELETE`):
 `GET /repos/{owner}/{repo}/rulesets` → `GET /rulesets/{id}` (expect both 13643213 and 15730586 **`enforcement: active`**, strict freshness and no bypass; required contexts `ci/circleci: pr-gate-complete` and companion `ci/circleci: root-hygiene`) → `GET /rules/branches/main` (expect both CircleCI contexts) → `GET /code-scanning/alerts?per_page=100` → `GET /labels?per_page=100 --paginate` (record the current label count) → `GET /repos/{repo} --jq '{has_wiki,default_branch}'`.
 Escalation: drift → open/update governance issue (high-risk → Security lane/Release engineering day of review); do not expand token scopes.
-Verification (no token, dry-run): `pytest tests/architecture/test_github_governance_review.py` (`READ_ONLY_GH_COMMANDS` + `workflow_dispatch` + `cron 23 6 1 1,4,7,10`).
+Verification (no token, dry-run): `pytest tests/architecture/test_github_governance_review.py` (`READ_ONLY_GH_COMMANDS` + `workflow_dispatch` + the quarterly `nightly.yml` delegation guard).
 
 ### Evidence (2026-08-28)
 
