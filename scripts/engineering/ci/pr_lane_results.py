@@ -256,12 +256,14 @@ def _imports_module(test_path: Path, module_name: str) -> bool:
             for alias in node.names
         ):
             return True
-        elif isinstance(node, ast.ImportFrom):
-            if node.module == module_name or (
+        elif isinstance(node, ast.ImportFrom) and (
+            node.module == module_name
+            or (
                 node.module == parent_module
                 and any(alias.name == leaf_name for alias in node.names)
-            ):
-                return True
+            )
+        ):
+            return True
     return False
 
 
