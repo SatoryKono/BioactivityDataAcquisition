@@ -169,6 +169,38 @@ def test_coalesce_prefer_enricher_prioritizes_non_seed_column(
 
 
 @pytest.mark.unit
+def test_coalesce_first_non_null_forwards_to_prefer_seed(
+    policy: CoalescePolicyService,
+) -> None:
+    df = pl.DataFrame(
+        {
+            "chembl.publication.title": [None, "seed", None, None, "seed2", None],
+            "crossref.publication.title": ["crossref", None, "enricher", None, "crossref2", None],
+            "openalex.publication.title": [None, "openalex", None, "openalex2", None, None],
+            "pubmed.publication.title": [None, "pubmed", None, "pubmed2", None, None],
+            "semanticscholar.publication.title": [None, "ss", None, "ss2", None, None],
+        }
+    )
+
+    result = policy.coalesce_first_non_null(
+        df,
+        enrichers=(),
+        seed_pipeline="chembl_publication",
+    )
+
+    assert "chembl.publication.title" in result.columns
+    assert "crossref.publication.title" not in result.columns
+    assert result["chembl.publication.title"].to_list() == [
+        "crossref",
+        "seed",
+        "enricher",
+        "openalex2",
+        "seed2",
+        None,
+    ]
+
+
+@pytest.mark.unit
 def test_coalesce_prefer_latest_timestamp_prefers_newest_timestamped_source(
     policy: CoalescePolicyService,
 ) -> None:
