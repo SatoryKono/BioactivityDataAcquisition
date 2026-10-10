@@ -183,6 +183,12 @@ def affected_pytest_targets(changed_files: list[str], *, repo_root: Path) -> lis
             candidate = repo_root / "tests" / "unit" / first
             if candidate.is_dir():
                 targets.append(candidate.relative_to(repo_root).as_posix())
+            continue
+        if path.startswith("scripts/") and path.endswith(".py"):
+            relative = Path(path.removeprefix("scripts/"))
+            candidate = repo_root / "tests" / "unit" / "scripts" / relative.parent
+            if candidate.is_dir():
+                targets.append(candidate.relative_to(repo_root).as_posix())
     ordered: list[str] = []
     seen: set[str] = set()
     for target in targets:
