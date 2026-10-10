@@ -23,7 +23,8 @@ sequenceDiagram
     Registry->>Config: get(name)
     Config-->>Registry: ProviderConfig
     Registry->>Creator: create_data_source(ProviderDataSourceCreationRequest)
-    Creator->>DS: create_provider_data_source(request)
+    Creator->>Creator: create_provider_data_source(request)
+    Creator->>DS: request.config.data_source_creator(settings, pipeline_config, logger, filter_config, metrics, pipeline_name)
     DS-->>Creator: configured DataSourcePort
     Creator-->>Registry: configured DataSourcePort
     Registry-->>CLI: DataSourcePort

@@ -25,8 +25,8 @@ flowchart TB
     step ==> manifest
     step --> ledger_service
     manifest -->|record_manifest_created| ledger_service
-    ledger_service -->|append immutable event| ledger
-    ledger_service -->|persist| ledger_port
+    ledger_service -->|create WorkflowLedgerEntry| ledger
+    ledger_service -->|"append(entry)"| ledger_port
     manifest -.-> run_refs
     ledger -.-> run_refs
     manifest --> checkpoints

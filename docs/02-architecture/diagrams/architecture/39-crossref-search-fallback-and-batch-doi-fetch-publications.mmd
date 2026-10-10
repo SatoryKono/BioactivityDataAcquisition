@@ -11,25 +11,30 @@ sequenceDiagram
     autonumber
     participant Runner as publication pipeline
     participant Adapter as CrossRefAdapter
-    participant Query as query_builder.py
+    participant Search as search_paginator
     participant Fetch as fetch_flow.py
     participant Fallback as fallback.py
     participant Batch as batch.py
     participant Map as response_mapper.py
 
     Runner->>Adapter: fetch / fetch_filtered / fetch_filtered_with_fallback
-    Adapter->>Fetch: delegate selected fetch contract
     alt DOI filter IDs
-        Fetch->>Batch: fetch_batch(DOIs) in bounded chunks
-        Batch-->>Fetch: BronzeRecord stream
-        Fetch->>Map: with_lookup_method(record, doi)
+        alt fetch_filtered_with_fallback
+            Adapter->>Fetch: fetch_filtered_with_fallback(entity_type, filter_ids, filter_field, fallback_mapping, limit)
+            opt explicit fallback mapping supplied
+                Fetch->>Fallback: execute primary DOI fetch and title fallback for misses
+                Fallback-->>Fetch: BronzeRecord stream with lookup metadata
+            end
+        else fetch / fetch_filtered
+            Adapter->>Fetch: fetch / fetch_filtered
+            Fetch->>Batch: fetch_batch(DOIs) in bounded chunks
+            Batch-->>Fetch: BronzeRecord stream
+            Fetch->>Map: with_lookup_method(record, doi)
+        end
     else free-text query without filter IDs
-        Fetch->>Query: search paginator builds query params
-        Query-->>Fetch: search BronzeRecord stream
-    end
-    opt explicit fallback mapping supplied
-        Fetch->>Fallback: execute primary DOI fetch and title fallback for misses
-        Fallback-->>Fetch: BronzeRecord stream with lookup metadata
+        Adapter->>Fetch: fetch(entity_type, query, limit)
+        Fetch->>Search: search_paginator.search(query, limit)
+        Search-->>Fetch: found publication records
     end
     Fetch-->>Adapter: raw provider publication dictionaries
     Adapter-->>Runner: BronzeRecord stream

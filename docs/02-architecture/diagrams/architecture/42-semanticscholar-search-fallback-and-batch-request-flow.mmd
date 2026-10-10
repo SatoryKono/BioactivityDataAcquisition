@@ -28,7 +28,8 @@ sequenceDiagram
         Adapter->>Batch: _fetch_batch_with_nulls(DOIs)
         Batch->>HTTP: execute batch request
         HTTP-->>Batch: detailed records and unresolved IDs
-        Batch-->>Adapter: BronzeRecord stream
+        Batch-->>Adapter: list[BronzeRecord | None] (None for unresolved DOIs)
+        Adapter->>Adapter: process batch results and yield non-null BronzeRecord stream
         opt fetch_filtered_with_fallback and mapping supplied
             Adapter->>Fallback: recover unresolved DOI records by title
             Fallback-->>Adapter: fallback BronzeRecord stream

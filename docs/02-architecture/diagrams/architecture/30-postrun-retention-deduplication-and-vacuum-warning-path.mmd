@@ -5,20 +5,23 @@
 %% Reviewed against main 9a7339dc: storage/support/retention.py, retention_dedup.py; core/postrun/compact_orchestrator.py
 %% @type    sequenceDiagram
 %% @level   System / Interaction
-%% @nodes   6
+%% @nodes   7
 %% RULES: RULES.md §2.1, §2.8, ADR-013, ADR-014
 sequenceDiagram
     autonumber
-    participant Runner as PipelineRunner / postrun
+    participant Runner as PipelineRunner
     participant Builder as build_postrun_service
+    participant Postrun as PostrunService
     participant Service as PostrunCompactService
     participant Retention as retention.py
     participant Delta as runtime_delta_table
     participant Warn as warning allowlist
 
     Builder->>Service: construct with warning allowlist
-    Builder-->>Runner: service
-    Runner->>Service: execute postrun tasks
+    Builder->>Postrun: construct with PostrunCompactService
+    Builder-->>Runner: PostrunService
+    Runner->>Postrun: run(executor, dq_context)
+    Postrun->>Service: run_if_needed()
     Note over Service,Retention: Compaction applies to APPEND / MERGE with table and primary keys
     Service->>Retention: storage.deduplicate_silver(table, primary_keys)
     Retention->>Retention: _resolve_deduplication_timeout_seconds()
@@ -38,4 +41,5 @@ sequenceDiagram
         Warn-->>Service: log warning and return CompactionResult failed
     end
     Note over Service,Warn: Errors outside the allowlist propagate. Vacuum is a separate retention operation
-    Service-->>Runner: success / skipped / failed result
+    Service-->>Postrun: CompactionResult (success / skipped / failed)
+    Postrun-->>Runner: PostrunResult
