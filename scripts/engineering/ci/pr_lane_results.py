@@ -199,16 +199,28 @@ def affected_pytest_targets(changed_files: list[str], *, repo_root: Path) -> lis
             continue
         if path.startswith("scripts/") and path.endswith(".py"):
             relative = Path(path.removeprefix("scripts/"))
-            scripts_test_root = repo_root / "tests" / "unit" / "scripts"
+            scripts_test_roots = (
+                repo_root / "tests" / "unit" / "scripts",
+                repo_root / "tests" / "unit" / "repo_backed" / "scripts",
+            )
             direct_test_name = f"test_{relative.name.lstrip('_')}"
-            direct_tests = sorted(scripts_test_root.rglob(direct_test_name))
+            direct_tests = sorted(
+                test_path
+                for test_root in scripts_test_roots
+                if test_root.is_dir()
+                for test_path in test_root.rglob(direct_test_name)
+            )
             if direct_tests:
                 targets.extend(
                     test_path.relative_to(repo_root).as_posix()
                     for test_path in direct_tests
                 )
-            elif scripts_test_root.is_dir():
-                targets.append(scripts_test_root.relative_to(repo_root).as_posix())
+            else:
+                targets.extend(
+                    test_root.relative_to(repo_root).as_posix()
+                    for test_root in scripts_test_roots
+                    if test_root.is_dir()
+                )
     ordered: list[str] = []
     seen: set[str] = set()
     for target in targets:
