@@ -4,11 +4,23 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable
+from dataclasses import dataclass
 
 from bioetl.domain.composite import ColumnGroupConfig
 from bioetl.domain.ports import LoggerPort
 
 _SortFn = Callable[[list[str], tuple[str, ...]], list[str]]
+
+
+@dataclass(frozen=True)
+class FieldCollectionContext:
+    """Context object for explicitly collecting group columns."""
+
+    group: ColumnGroupConfig
+    field_to_cols: dict[str, list[str]]
+    col_order: dict[str, int]
+    sort_fn: _SortFn
+    resolve_aliases_fn: Callable[[str], set[str]]
 
 
 def sort_columns_by_provider(
@@ -92,7 +104,7 @@ def collect_explicit_group_columns(
         extract_field_fn=extract_field_fn,
     )
 
-    return _collect_group_field_columns(
+    context = FieldCollectionContext(
         group=group,
         field_to_cols=field_to_cols,
         col_order=col_order,
@@ -100,28 +112,22 @@ def collect_explicit_group_columns(
         resolve_aliases_fn=resolve_aliases_fn,
     )
 
+    return _collect_group_field_columns(context=context)
+
 
 def _collect_group_field_columns(
     *,
-    group: ColumnGroupConfig,
-    field_to_cols: dict[str, list[str]],
-    col_order: dict[str, int],
-    sort_fn: _SortFn,
-    resolve_aliases_fn: Callable[[str], set[str]],
+    context: FieldCollectionContext,
 ) -> tuple[list[str], set[str]]:
     """Collect group fields while preserving declaration order and de-duplication."""
     ordered: list[str] = []
     used: set[str] = set()
 
-    for field_name in group.fields:
+    for field_name in context.group.fields:
         ordered.extend(
             _collect_ordered_field_matches(
+                context=context,
                 field_name=field_name,
-                group=group,
-                field_to_cols=field_to_cols,
-                col_order=col_order,
-                sort_fn=sort_fn,
-                resolve_aliases_fn=resolve_aliases_fn,
                 used=used,
             )
         )
@@ -131,22 +137,18 @@ def _collect_group_field_columns(
 
 def _collect_ordered_field_matches(
     *,
+    context: FieldCollectionContext,
     field_name: str,
-    group: ColumnGroupConfig,
-    field_to_cols: dict[str, list[str]],
-    col_order: dict[str, int],
-    sort_fn: _SortFn,
-    resolve_aliases_fn: Callable[[str], set[str]],
     used: set[str],
 ) -> list[str]:
     """Collect one field's matches, then normalize ordering inside that field."""
     field_matches = _collect_alias_matches(
-        field_to_cols=field_to_cols,
-        aliases=resolve_aliases_fn(field_name),
+        field_to_cols=context.field_to_cols,
+        aliases=context.resolve_aliases_fn(field_name),
         used=used,
     )
-    field_matches.sort(key=lambda c: col_order[c])
-    return sort_fn(field_matches, group.provider_order)
+    field_matches.sort(key=lambda c: context.col_order[c])
+    return context.sort_fn(field_matches, context.group.provider_order)
 
 
 def _index_columns_by_field(
