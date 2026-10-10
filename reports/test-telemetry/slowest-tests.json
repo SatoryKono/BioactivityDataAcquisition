@@ -1,10 +1,10 @@
 {
   "source_branch": "codex/integrate-telemetry-cancellation-20261009",
-  "source_commit": "c6549b1772667ecbc1e98f9b429d0d71a49df976",
+  "source_commit": "d28436d5f78c911d68f6fbbf91314578bdcb897c",
   "source_run_id": "local-pr12164-main-sync-c6549b1-w2",
   "source_event": "local_coverage_verify",
   "source_run_url": null,
-  "source_tree_sha256": "1650ced0b9ac8360fb83e1d1f22a06e2c7dec334d2d37ae700671ac6f7c9953a",
+  "source_tree_sha256": "984a583c3508456dc3ceefc24e0c004cc5f217d7f3f081e10c60834ef4c2601b",
   "refreshed_at_utc": "2026-10-10T00:12:30.304249+00:00",
   "refresh_status": "captured",
   "total_cases": 33495,
@@ -418,8 +418,8 @@
     "manifest_sha256": "571d0ce15ae9e51b1faf48042568f030a99a4c3e765690649e01cdb92d28c152",
     "coverage_xml_sha256": "b6d1a70a67d657b314dd9660b7f172319015ffeb49b2e1e2ab1e7bf7e73f9e22",
     "source_tree_sha256": "633508ed5fc1a0024adf57c03d3e631af47461a53f525e03f36f145d95b8c8c7",
-    "test_tree_sha256": "1650ced0b9ac8360fb83e1d1f22a06e2c7dec334d2d37ae700671ac6f7c9953a",
-    "head": "c6549b1772667ecbc1e98f9b429d0d71a49df976",
+    "test_tree_sha256": "984a583c3508456dc3ceefc24e0c004cc5f217d7f3f081e10c60834ef4c2601b",
+    "head": "d28436d5f78c911d68f6fbbf91314578bdcb897c",
     "required_shards": [
       "smoke",
       "contract-confidence",

@@ -37,6 +37,7 @@ from .config_models import (
 )
 from .cross_validation import (
     ComparisonMethod,
+    CrossValidationContext,
     CrossValidationStats,
     CrossValidationVerdict,
     EnricherCVStats,
@@ -92,6 +93,7 @@ __all__ = [
     "CompositeResult",
     "ConflictResolution",
     "CrossValidationConfig",
+    "CrossValidationContext",
     "CrossValidationStats",
     "CrossValidationVerdict",
     "DQOverrideConfig",
