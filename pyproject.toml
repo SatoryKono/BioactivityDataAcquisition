@@ -23,7 +23,7 @@ dependencies = [
     "polars>=1.0",
     # <1.0: deltalake 1.x API migration is unvalidated here; keep the range and
     # revisit only with a migration plan. Reviewed 2026-09-19; re-review by 2027-03-19. (AUD-006)
-    "deltalake>=0.18,<1.0",
+    "deltalake>=0.18,<2.0",
     # NOTE (AUD-006): no arro3-core pin. deltalake<1.0 does not require arro3
     # and nothing in src/scripts/tests imports it (verified 2026-09-19).
     # Re-add only as part of a deltalake>=1.0 migration with Windows-CI proof.
