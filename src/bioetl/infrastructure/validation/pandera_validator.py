@@ -124,12 +124,16 @@ class BasePanderaValidator:
 
         Preserves extra columns at the end so strict=True still catches them.
         Skips reordering for DataFrameModel classes that lack .columns.
+        If the schema enforces strict ordering (ordered=True), reordering
+        is bypassed to preserve the original validation intent.
 
         Returns:
             DataFrame with schema-defined columns first, followed by extra columns.
         """
         assert self._schema is not None
         if not hasattr(self._schema, "columns"):
+            return df
+        if getattr(self._schema, "ordered", False):
             return df
         schema_cols = list(self._schema.columns.keys())
         df_cols = df.columns.tolist()
@@ -232,14 +236,21 @@ class BasePanderaValidator:
         try:
             df_to_validate = df
             if hasattr(self._schema, "columns"):
-                missing = [
-                    name for name in self._schema.columns if name not in df.columns
-                ]
+                schema_names = list(self._schema.columns.keys())
+                missing = [name for name in schema_names if name not in df.columns]
                 if missing:
                     df_to_validate = df.copy()
                     for name in missing:
                         column = self._schema.columns[name]
-                        if getattr(column, "nullable", False):
+                        if not getattr(column, "nullable", False):
+                            continue
+                        if getattr(self._schema, "ordered", False):
+                            loc = min(
+                                schema_names.index(name),
+                                len(df_to_validate.columns),
+                            )
+                            df_to_validate.insert(loc=loc, column=name, value=None)
+                        else:
                             df_to_validate[name] = None
             df_to_validate = self._normalize_nullable_integer_columns(df_to_validate)
             df_to_validate = self._normalize_nullable_boolean_columns(df_to_validate)
@@ -290,13 +301,22 @@ class PanderaSilverValidator(BasePanderaValidator):
     def _seed_missing_nullable_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         if self._schema is None or not hasattr(self._schema, "columns"):
             return df
-        missing = [name for name in self._schema.columns if name not in df.columns]
+        schema_names = list(self._schema.columns.keys())
+        missing = [name for name in schema_names if name not in df.columns]
         if not missing:
             return df
         seeded = df.copy()
         for name in missing:
             column = self._schema.columns[name]
-            if getattr(column, "nullable", False):
+            if not getattr(column, "nullable", False):
+                continue
+            if getattr(self._schema, "ordered", False):
+                # ordered=True schemas check column positions; appending a
+                # seeded column at the end can never satisfy that check, so
+                # insert at the schema-declared position instead.
+                loc = min(schema_names.index(name), len(seeded.columns))
+                seeded.insert(loc=loc, column=name, value=None)
+            else:
                 seeded[name] = None
         return seeded
 
@@ -376,14 +396,20 @@ class PanderaGoldValidator(BasePanderaValidator):
             # This way we validate that columns KNOWN to the schema are correct,
             # and ignore extra ones (pass them through).
             if not self._strict and hasattr(self._schema, "columns"):
-                schema_columns = set(self._schema.columns.keys())
+                schema_columns = list(self._schema.columns.keys())
                 # Also include index columns if any
                 if self._schema.index:
-                    schema_columns.update(self._schema.index.names)
+                    schema_columns.extend(
+                        name
+                        for name in self._schema.index.names
+                        if name is not None and name not in schema_columns
+                    )
 
                 # Filter DF to only schema columns
                 # Handle case where schema column is NOT in df (missing column) - Pandera handles that.
-                cols_to_keep = list(schema_columns.intersection(df.columns))
+                # Keep schema-declared order: set.intersection yields
+                # hash-dependent order that breaks ordered=True schemas.
+                cols_to_keep = [c for c in schema_columns if c in df.columns]
                 df_to_validate = self._reorder_to_schema(df[cols_to_keep])  # pyright: ignore[reportArgumentType]
 
                 self._schema.validate(df_to_validate, lazy=True)

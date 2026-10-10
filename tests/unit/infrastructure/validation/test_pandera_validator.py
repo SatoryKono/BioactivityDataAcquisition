@@ -36,15 +36,14 @@ from __future__ import annotations
 import warnings
 
 import pytest
-from hypothesis import HealthCheck, given, settings
-from hypothesis import strategies as st
-
 from bioetl.domain.types import ValidationResult
 from bioetl.infrastructure.validation.pandera_validator import (
     NoOpValidator,
     PanderaGoldValidator,
     PanderaSilverValidator,
 )
+from hypothesis import HealthCheck, given, settings
+from hypothesis import strategies as st
 
 
 @pytest.fixture(autouse=True)
@@ -184,8 +183,50 @@ class TestPanderaSilverValidator:
         result = validator.validate(records)
         assert result.valid is True
 
-    def test_validate_with_ordered_schema_reorders_columns(self):
-        """Columns in wrong order pass validation after reorder."""
+    def test_validate_with_unordered_schema_reorders_columns(self):
+        """Columns in wrong order pass validation after reorder if schema is not ordered."""
+        import pandera as pa
+
+        schema = pa.DataFrameSchema(
+            columns={
+                "a": pa.Column(str),
+                "b": pa.Column(int),
+                "c": pa.Column(float),
+            },
+            ordered=False,
+            strict=True,
+        )
+        validator = PanderaSilverValidator(schema=schema)
+        # Records with columns in WRONG order (c, a, b instead of a, b, c)
+        records = [{"c": 1.0, "a": "x", "b": 1}]
+        result = validator.validate(records)
+        assert result.valid is True
+
+    def test_validate_with_ordered_schema_seeds_nullable_at_schema_position(self):
+        """Missing nullable columns land at schema position for ordered=True.
+
+        Regression for CF-055: seeding appended the column at the end, so a
+        frame missing a middle nullable column could never satisfy Pandera's
+        ordered=True positional check.
+        """
+        import pandera as pa
+
+        schema = pa.DataFrameSchema(
+            columns={
+                "a": pa.Column(str),
+                "b": pa.Column("Int64", nullable=True),
+                "c": pa.Column(float),
+            },
+            ordered=True,
+            strict=True,
+        )
+        validator = PanderaSilverValidator(schema=schema)
+        # Column "b" (middle, nullable) absent; a and c arrive in schema order.
+        result = validator.validate([{"a": "x", "c": 1.0}])
+        assert result.valid is True
+
+    def test_validate_with_ordered_schema_rejects_wrong_column_order(self):
+        """ordered=True must still reject genuinely misordered frames."""
         import pandera as pa
 
         schema = pa.DataFrameSchema(
@@ -198,10 +239,8 @@ class TestPanderaSilverValidator:
             strict=True,
         )
         validator = PanderaSilverValidator(schema=schema)
-        # Records with columns in WRONG order (c, a, b instead of a, b, c)
-        records = [{"c": 1.0, "a": "x", "b": 1}]
-        result = validator.validate(records)
-        assert result.valid is True
+        result = validator.validate([{"c": 1.0, "a": "x", "b": 1}])
+        assert result.valid is False
 
     def test_validate_chembl_target_batch_without_removed_legacy_fields(self):
         """chembl.target accepts batches after legacy field removal."""
@@ -375,6 +414,31 @@ class TestPanderaGoldValidator:
         )
         result = validator.validate(records)
         assert result.valid is True, result.errors
+
+    def test_gold_non_strict_ordered_schema_keeps_schema_column_order(self):
+        """Non-strict Gold keeps schema order for ordered=True schemas.
+
+        Regression for CF-055: cols_to_keep was built via set.intersection,
+        so the surviving column order depended on set hashing and could not
+        satisfy Pandera's ordered=True positional check.
+        """
+        import pandera as pa
+
+        schema = pa.DataFrameSchema(
+            columns={
+                "a": pa.Column(str),
+                "b": pa.Column(int),
+                "c": pa.Column(float),
+            },
+            ordered=True,
+            strict=False,
+        )
+        validator = PanderaGoldValidator(schema=schema, strict=False)
+        # Extra column plus all schema columns already in schema order.
+        result = validator.validate(
+            [{"a": "x", "b": 1, "c": 1.0, "extra_col": "kept-out"}]
+        )
+        assert result.valid is True
 
 
 @pytest.mark.unit
