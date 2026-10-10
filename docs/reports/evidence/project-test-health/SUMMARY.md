@@ -22,10 +22,13 @@ completed the canonical 17-shard coverage plan for source commit
 tree `3cabab41baf177eb6f34163e59cbdb352e4cbbb8d570d3af7551bf66790c7714` and
 test tree `ad43e49af046f215efd16b0b4d629bc452fa1729da73c47e6ec00e48cee800b4`.
 All 17 JUnit inputs report 33,424 passed, 175 skipped, and 0 failed; combined
-coverage is 99.68% line and 94.29% branch. The committed telemetry baseline
-records the associated GitHub PR workflow [37743490942](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37743490942)
-and the exact source commit; its coverage and JUnit inputs come from CircleCI
-run 17286 above.
+coverage is 99.68% line and 94.29% branch. The portable manifest records the
+public CircleCI artifact index, raw manifest path and SHA-256, and SHA-256 for
+every JUnit and coverage input; those bindings were re-verified from run 17286
+on 2026-10-10. The committed telemetry baseline separately retains GitHub PR
+workflow [37743490942](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37743490942)
+for the same source commit as a `historical_unverified_ci_binding`; that entry
+is not used as provenance for this CircleCI capture.
 
 This evidence covers the canonical 17-shard plan, not every repository test
 surface. The manifest excludes architecture, performance, manual E2E,
