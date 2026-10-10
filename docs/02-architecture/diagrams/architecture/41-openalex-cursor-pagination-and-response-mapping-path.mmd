@@ -1,10 +1,11 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: OpenAlex Cursor Pagination And Response Mapping Path
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.1.0
+%% @date    2026-10-09
+%% Reviewed against main 9a7339dc: adapters/openalex/cursor_flow.py, _query_pagination.py and query_execution.py
 %% @type    sequenceDiagram
 %% @level   Provider / Interaction
-%% @nodes   7
+%% @nodes   6
 %% RULES: RULES.md §2.1, ADR-031
 sequenceDiagram
     autonumber
@@ -13,23 +14,18 @@ sequenceDiagram
     participant Query as query_builder.py
     participant Cursor as cursor_flow.py
     participant Exec as query_execution.py
-    participant Fallback as fallback_orchestrator.py
     participant Map as response_mapping.py
 
     Runner->>Adapter: filtered publication fetch
     Adapter->>Query: build OpenAlex filters
     Query-->>Adapter: cursor-ready query
     Adapter->>Cursor: initialize cursor
-    loop while next cursor exists
+    loop unique cursors, below 10000 pages and requested record limit
         Cursor->>Exec: execute cursor request
-        alt normal response
-            Exec-->>Cursor: page payload
-        else transient degradation
-            Exec->>Fallback: consult fallback orchestrator
-            Fallback-->>Exec: adjusted request path
-            Exec-->>Cursor: recovered page payload
-        end
+        Exec-->>Cursor: page payload from HTTP works endpoint
         Cursor->>Map: map page records
-        Map-->>Runner: publication entities
+        Map-->>Runner: BronzeRecord works
     end
+    Note over Cursor,Exec: Missing next cursor / record limit ends normally. Repeated cursor or page ceiling raises pagination-truncated error (CF-014).
+    Note over Cursor,Map: DOI / title fallback uses separate lookup flows, not the query paginator.
 %% padding line for readability and stable render budget

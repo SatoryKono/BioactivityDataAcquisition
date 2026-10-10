@@ -1,7 +1,8 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: Composite Preflight Field Priority And Normalization Compatibility Resolution
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.1.0
+%% @date    2026-10-09
+%% Reviewed against main 9a7339dc: composite/preflight_validator.py, _preflight_field_priority.py and _preflight_orchestration.py
 %% @type    sequenceDiagram
 %% @level   System / Interaction
 %% @nodes   7
@@ -16,26 +17,30 @@ sequenceDiagram
     participant Schema as PreflightSchemaOrchestrationMixin
     participant Report as PreflightValidationReportingMixin
 
-    CLI->>Runner: validate composite config
+    CLI->>Runner: run composite config
     Runner->>Validator: validate(config)
     Validator->>Schema: collect schema / profile refs
     Schema-->>Validator: schema field refs
-    Validator->>Profiles: load source profiles
+    Validator->>Schema: _load_source_profiles(config)
+    Schema->>Profiles: resolve normalization profile identities
     Profiles-->>Validator: profile identities
     Validator->>Validator: _get_valid_sources(config)
     Validator->>Validator: _validate_field_priority(...)
-    alt field priority source missing
-        Validator->>Report: add missing-source issue
-    else field missing in source
-        Validator->>Report: add missing-field issue
-    else profile mismatch found
+    loop each field priority
+        Validator->>Validator: scan_field_priority(...)
+        Validator->>Report: accumulate unknown_source / missing_field issues
+        opt no available field dtype
+            Validator->>Report: add missing-from-all-sources issue
+        end
+        opt more than one source dtype
+            Validator->>Report: check_type_compatibility / accumulate issue
+        end
         Validator->>Overrides: consult reviewed overrides
-        alt override exists
-            Overrides-->>Validator: allow mismatch
-        else no override
+        opt incompatible profiles without override
             Validator->>Report: add normalization_profile_mismatch
         end
     end
+    Validator->>Report: validate aggregation ordering, then collect all issues
     Validator-->>Runner: PreflightValidationResult
     Runner-->>CLI: proceed or fail
 

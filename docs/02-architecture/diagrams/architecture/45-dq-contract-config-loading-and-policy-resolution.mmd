@@ -1,32 +1,40 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: DQ Contract Config Loading And Policy Resolution
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.1.0
+%% @date    2026-10-09
+%% Reviewed against main 9a7339dc: config/dq_config_resolution.py; behavior/dq_policy_resolver.py, dq_rule_evaluator.py; effective_config/context.py
 %% @type    flowchart
 %% @level   Configuration / Component
-%% @nodes   8
+%% @nodes   10
 %% RULES: RULES.md §2.6, ADR-027, ADR-045
 flowchart LR
     yaml[DQ YAML policies]
     loader[dq_config_loader.py]
     normalize[_dq_config_normalization.py]
-    merge[_dq_config_validation_merge.py]
+    merge[dq_config_resolution.py hierarchy merge]
+    config[DQConfig]
+    artifact[effective-config artifact context]
     snapshot[DQPolicySnapshot]
     service[dq_policy_resolver.py]
     evaluator[dq_rule_evaluator.py]
     report[DQ report writers]
 
     yaml --> loader
-    loader --> normalize
-    normalize --> merge
-    merge --> snapshot
-    snapshot --> service
-    service --> evaluator
-    evaluator --> report
+    loader --> merge
+    merge --> normalize
+    normalize -->|validate and map| config
+    config --> service
+    config --> evaluator
+    evaluator -->|resolve violation disposition| service
+    config --> artifact
+    service -->|policy ref| artifact
+    artifact -->|build_dq_components| snapshot
+    evaluator -->|DQRuleOutcome through application orchestration| report
 
     class yaml ext;
     class loader,normalize,merge infra;
-    class snapshot,service,evaluator domain;
+    class config,snapshot,service,evaluator domain;
+    class artifact app;
     class report app;
 %% padding line for readability and stable render budget
 %% padding line for readability and stable render budget

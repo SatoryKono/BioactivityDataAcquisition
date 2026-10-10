@@ -1,17 +1,21 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: Observability Bootstrap Bundle From Settings To Ports
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.1.0
+%% @date    2026-10-09
+%% Reviewed against main 9a7339dc: bootstrap/runtime/observability_bundle.py and _observability_bundle_support.py
 %% @type    flowchart
 %% @level   System / Observability
-%% @nodes   13
+%% @nodes   16
 %% RULES: RULES.md §2.4, ADR-017, ADR-019, ADR-022
 flowchart TB
     settings[Runtime settings]
+    context[Pipeline name / run_id / log_level]
     logger_fn[bootstrap_logger]
     tracer_fn[bootstrap_tracer]
     metrics_fn[bootstrap_metrics]
     dq_fn[bootstrap_dq_monitor]
+    audit_fn[audit_bootstrapper or NoOpAudit]
+    audit[AuditPort]
     bundle_fn[bootstrap_observability_bundle]
     server_fn[maybe_start_metrics_server]
     logger[StructlogLogger]
@@ -21,18 +25,25 @@ flowchart TB
     server[metrics server]
     app[PipelineRunner / CompositePipelineRunner]
 
-    settings --> logger_fn
+    context --> logger_fn
     settings --> tracer_fn
     settings --> metrics_fn
     settings --> dq_fn
+    settings --> audit_fn
     logger_fn --> logger
     tracer_fn --> tracer
     metrics_fn --> metrics
     dq_fn --> dq
+    logger --> audit_fn
+    tracer --> audit_fn
+    metrics --> audit_fn
+    audit_fn --> audit
+    logger --> dq_fn
     logger -.-> bundle_fn
     tracer -.-> bundle_fn
     metrics -.-> bundle_fn
     dq -.-> bundle_fn
+    audit -.-> bundle_fn
     settings --> server_fn
     server_fn --> server
     bundle_fn ==> app

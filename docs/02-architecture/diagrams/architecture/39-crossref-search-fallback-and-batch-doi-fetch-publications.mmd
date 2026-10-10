@@ -1,7 +1,8 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: CrossRef Publication Search Fallback And Batch DOI Fetch
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.1.0
+%% @date    2026-10-09
+%% Reviewed against main 9a7339dc: adapters/crossref/fetch_flow.py, batch.py and response_mapper.py
 %% @type    sequenceDiagram
 %% @level   Provider / Interaction
 %% @nodes   7
@@ -10,26 +11,34 @@ sequenceDiagram
     autonumber
     participant Runner as publication pipeline
     participant Adapter as CrossRefAdapter
-    participant Query as query_builder.py
+    participant Search as search_paginator
     participant Fetch as fetch_flow.py
     participant Fallback as fallback.py
     participant Batch as batch.py
     participant Map as response_mapper.py
 
-    Runner->>Adapter: fetch_multi_filtered(...)
-    Adapter->>Query: build search params
-    Query-->>Adapter: request params
-    Adapter->>Fetch: execute request
-    alt direct fetch succeeds
-        Fetch-->>Adapter: response payload
-    else transient or empty path
-        Adapter->>Fallback: resolve fallback strategy
-        Fallback-->>Adapter: alternate search path
-        Adapter->>Batch: issue DOI batch fetch
-        Batch-->>Adapter: batch response payload
+    Runner->>Adapter: fetch / fetch_filtered / fetch_filtered_with_fallback
+    alt DOI filter IDs
+        alt fetch_filtered_with_fallback
+            Adapter->>Fetch: fetch_filtered_with_fallback(entity_type, filter_ids, filter_field, fallback_mapping, limit)
+            opt explicit fallback mapping supplied
+                Fetch->>Fallback: execute primary DOI fetch and title fallback for misses
+                Fallback-->>Fetch: BronzeRecord stream with lookup metadata
+            end
+        else fetch / fetch_filtered
+            Adapter->>Fetch: fetch / fetch_filtered
+            Fetch->>Batch: fetch_batch(DOIs) in bounded chunks
+            Batch-->>Fetch: BronzeRecord stream
+            Fetch->>Map: with_lookup_method(record, doi)
+        end
+    else free-text query without filter IDs
+        Adapter->>Fetch: fetch(entity_type, query, limit)
+        Fetch->>Search: search_paginator.search(query, limit)
+        Search-->>Fetch: found publication records
     end
-    Adapter->>Map: normalize publication records
-    Map-->>Runner: mapped publication entities
+    Fetch-->>Adapter: raw provider publication dictionaries
+    Adapter-->>Runner: BronzeRecord stream
+    Note over Adapter,Map: Silver domain normalization happens downstream, outside this adapter slice.
 %% padding line for readability and stable render budget
 %% padding line for readability and stable render budget
 %% padding line for readability and stable render budget

@@ -1,7 +1,8 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: Reproducible Run Contract Across Manifest Ledger And Output Metadata
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.1.0
+%% @date    2026-10-09
+%% Reviewed against main 9a7339dc: control_plane/run_manifest.py and run_ledger.py; storage/bronze/metadata_assembly.py; effective_config_artifact.py
 %% @type    flowchart
 %% @level   System / Control Plane
 %% @nodes   11
@@ -10,7 +11,7 @@ flowchart LR
     manifest[RunManifest]
     ledger[RunLedgerEntry]
     effcfg[EffectiveConfigArtifact]
-    context[run_id / manifest_id / batch_id]
+    context[runtime run_id / manifest_id plus batch-level batch_id]
     bronze_meta[bronze metadata yaml]
     silver_meta[silver metadata yaml]
     gold_meta[gold metadata yaml]
@@ -21,8 +22,8 @@ flowchart LR
 
     manifest ==> context
     ledger ==> context
-    effcfg ==> context
-    context --> batch
+    manifest -.->|code_provenance effective_config_artifact_id / hashes| effcfg
+    batch -->|run_id and batch_id| context
     context ==> bronze_meta
     context ==> silver_meta
     context ==> gold_meta
@@ -41,3 +42,5 @@ flowchart LR
     class silver_meta silver;
     class gold_meta gold;
     class replay,inspect app;
+    %% Ownership overview: manifest and effective config do not own batch_id; batch identity is added at publication boundaries.
+    %% Exact replay requires retained snapshots and verified artifacts, not merely the presence of these identifiers.

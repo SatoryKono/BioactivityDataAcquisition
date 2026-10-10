@@ -1,37 +1,45 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: Postrun Retention Deduplication And Vacuum Warning Path
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.1.0
+%% @date    2026-10-09
+%% Reviewed against main 9a7339dc: storage/support/retention.py, retention_dedup.py; core/postrun/compact_orchestrator.py
 %% @type    sequenceDiagram
 %% @level   System / Interaction
-%% @nodes   6
+%% @nodes   7
 %% RULES: RULES.md §2.1, §2.8, ADR-013, ADR-014
 sequenceDiagram
     autonumber
-    participant Runner as PipelineRunner / postrun
+    participant Runner as PipelineRunner
     participant Builder as build_postrun_service
-    participant Service as postrun service
+    participant Postrun as PostrunService
+    participant Service as PostrunCompactService
     participant Retention as retention.py
     participant Delta as runtime_delta_table
     participant Warn as warning allowlist
 
-    Runner->>Builder: build_postrun_service(...)
-    Builder-->>Runner: service
-    Runner->>Service: execute postrun tasks
-    Service->>Retention: apply retention + dedup
-    Retention->>Retention: _resolve_deduplication_timeout_seconds(settings)
-    alt test_mode with default timeout
-        Retention->>Retention: clamp to 10 seconds
-    else custom timeout
+    Builder->>Service: construct with warning allowlist
+    Builder->>Postrun: construct with PostrunCompactService
+    Builder-->>Runner: PostrunService
+    Runner->>Postrun: run(executor, dq_context)
+    Postrun->>Service: run_if_needed()
+    Note over Service,Retention: Compaction applies to APPEND / MERGE with table and primary keys
+    Service->>Retention: storage.deduplicate_silver(table, primary_keys)
+    Retention->>Retention: _resolve_deduplication_timeout_seconds()
+    alt test_mode and configured timeout at least 60 seconds
+        Retention->>Retention: 10 seconds on other platforms / 60 on Windows
+    else smaller custom timeout or normal mode
         Retention->>Retention: keep configured value
     end
-    Retention->>Delta: to_pyarrow_table()
+    Retention->>Delta: to_pyarrow_dataset().scanner().head(row_count)
     alt dedup succeeds
         Delta-->>Retention: rows
-        Retention-->>Service: compacted result
+        Retention-->>Service: duplicates removed
+        Service->>Retention: storage.optimize(table)
     else TimeoutError
         Delta-->>Retention: timeout
         Service->>Warn: check allowlist
-        Warn-->>Service: degrade to warning
+        Warn-->>Service: log warning and return CompactionResult failed
     end
-    Service-->>Runner: success or warning outcome
+    Note over Service,Warn: Errors outside the allowlist propagate. Vacuum is a separate retention operation
+    Service-->>Postrun: CompactionResult (success / skipped / failed)
+    Postrun-->>Runner: PostrunResult

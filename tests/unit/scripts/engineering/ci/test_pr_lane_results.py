@@ -137,6 +137,29 @@ def test_affected_targets_map_source_and_existing_tests(tmp_path: Path) -> None:
     ]
 
 
+def test_affected_targets_map_telemetry_baseline(tmp_path: Path) -> None:
+    """Telemetry baseline edits select the governance test and leave other configs unmapped."""
+    governance = tmp_path / "tests/architecture/test_test_telemetry_governance.py"
+    governance.parent.mkdir(parents=True)
+    governance.write_text(
+        "def test_identity() -> None:\n    assert True\n", encoding="utf-8"
+    )
+    targets = affected_pytest_targets(
+        [
+            "configs/quality/test_telemetry_baseline.yaml",
+            "docs/readme.md",
+        ],
+        repo_root=tmp_path,
+    )
+    untouched = affected_pytest_targets(
+        ["configs/quality/github_required_checks.yaml"],
+        repo_root=tmp_path,
+    )
+
+    assert targets == ["tests/architecture/test_test_telemetry_governance.py"]
+    assert untouched == []
+
+
 def test_build_rejects_unknown_decision() -> None:
     """Reject gate decisions outside the coordinator decision vocabulary."""
     with pytest.raises(ValueError, match="unknown decision"):

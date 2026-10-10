@@ -166,6 +166,18 @@ def assert_step_outcomes(
     return failures
 
 
+_TELEMETRY_BASELINE_FILES = frozenset(
+    {
+        "configs/quality/test_telemetry_baseline.yaml",
+        "docs/05-engineering/test-telemetry-baseline.md",
+        "reports/test-telemetry/coverage-summary.json",
+        "reports/test-telemetry/slowest-tests.json",
+        "reports/test-telemetry/slowest-tests.md",
+    }
+)
+_TELEMETRY_GOVERNANCE_TEST = "tests/architecture/test_test_telemetry_governance.py"
+
+
 def affected_pytest_targets(changed_files: list[str], *, repo_root: Path) -> list[str]:
     """Map a diff to existing unit tests. Empty means the caller must fail closed."""
     targets: list[str] = []
@@ -183,6 +195,11 @@ def affected_pytest_targets(changed_files: list[str], *, repo_root: Path) -> lis
             candidate = repo_root / "tests" / "unit" / first
             if candidate.is_dir():
                 targets.append(candidate.relative_to(repo_root).as_posix())
+            continue
+        if path in _TELEMETRY_BASELINE_FILES:
+            candidate = repo_root / _TELEMETRY_GOVERNANCE_TEST
+            if candidate.is_file():
+                targets.append(_TELEMETRY_GOVERNANCE_TEST)
     ordered: list[str] = []
     seen: set[str] = set()
     for target in targets:

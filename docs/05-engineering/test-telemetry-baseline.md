@@ -28,11 +28,11 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `codex/integrate-telemetry-cancellation-20261009`
-- Source commit: `c6549b1772667ecbc1e98f9b429d0d71a49df976`
+- Source commit: `d28436d5f78c911d68f6fbbf91314578bdcb897c`
 - Source run id: `local-pr12164-main-sync-c6549b1-w2`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `3fd6bbdc9324b8c41ebb95db8613e47ec5cde3aec66dc04b4ad444c66166ab46`
+- Source tree sha256: `b422c514cecc2750bed2957ec20895d6c063e7ed4aee1e6c9f4af109876c19fc`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-10-10T00:12:30.304249+00:00`
 
