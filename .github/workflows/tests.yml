@@ -331,7 +331,7 @@ jobs:
                 tests/contract/test_semanticscholar_contract.py \
                 tests/architecture/test_determinism_identity_policy.py \
                 -m "not pilot_soak and not network" \
-                -p no:xdist --no-cov -q --tb=short \
+                -n auto --dist loadscope --no-cov -q --tb=short \
                 --junitxml="reports/test-telemetry/flaky-runs/junit-${run_id}.xml"
             uv run --frozen --no-build python -c 'import json,pathlib,sys; from scripts.engineering.qa.report_flaky_test_burndown_review import compute_replay_tree_sha256; payload={"run_id":sys.argv[2],"seed":int(sys.argv[3]),"source_sha":sys.argv[4],"order_mode":"seeded-random","shard_id":"determinism-critical","replay_tree_sha256":compute_replay_tree_sha256(pathlib.Path.cwd())}; pathlib.Path(sys.argv[1]).write_text(json.dumps(payload,sort_keys=True)+"\n",encoding="utf-8")' \
               "reports/test-telemetry/flaky-runs/run-${run_id}.json" \
@@ -859,7 +859,7 @@ jobs:
           HYPOTHESIS_PROFILE=fast \
           uv run --frozen --no-build pytest ${{ matrix.test-group.path }} \
             -m "not fs_contract and not repo_backed and not subprocess_backed and not slow and not benchmark and not memory" \
-            -p no:xdist \
+            -n auto --dist loadscope \
             -q --tb=short \
             --junitxml=reports/test-telemetry/junit-fast.${{ matrix.test-group.name }}.xml
 
@@ -913,7 +913,7 @@ jobs:
           mkdir -p reports/coverage
           uv run --frozen --no-build pytest ${{ matrix.test-group.path }} \
             -m "repo_backed and not slow and not benchmark and not memory" \
-            -p no:xdist -q --tb=short \
+            -n auto --dist loadscope -q --tb=short \
             --junitxml=reports/test-telemetry/junit-repo-backed-unit.${{ matrix.test-group.name }}.xml \
             --cov=src/bioetl --cov-report=
           TEST_EXIT=$?
@@ -985,7 +985,7 @@ jobs:
           # Serial: passport projector and many script tests use repo FS/subprocess.
           uv run --frozen --no-build pytest ${{ matrix.test-group.path }} \
             -m "not slow and not benchmark and not memory" \
-            -p no:xdist -q --tb=short \
+            -n auto --dist loadscope -q --tb=short \
             --junitxml=reports/test-telemetry/junit-unit-scripts-tooling.${{ matrix.test-group.name }}.xml \
             --cov=src/bioetl --cov-report=
           TEST_EXIT=$?
@@ -1047,7 +1047,7 @@ jobs:
           mkdir -p reports/coverage
           uv run --frozen --no-build pytest tests/unit/ \
             -m "fs_contract and not slow and not benchmark and not memory" \
-            -p no:xdist -q --tb=short \
+            -n auto --dist loadscope -q --tb=short \
             --junitxml=reports/test-telemetry/junit-unit-filesystem-contracts.xml \
             --cov=src/bioetl --cov-report=
           TEST_EXIT=$?
@@ -1110,7 +1110,7 @@ jobs:
             --ignore=tests/unit/scripts \
             --ignore=tests/unit/repo_backed \
             -m "subprocess_backed and not slow and not benchmark and not memory" \
-            -p no:xdist -q --tb=short \
+            -n auto --dist loadscope -q --tb=short \
             --junitxml=reports/test-telemetry/junit-unit-subprocess-backed.xml \
             --cov=src/bioetl --cov-report=
           TEST_EXIT=$?
@@ -1176,7 +1176,7 @@ jobs:
             path: tests/integration/
             cache_glob: tests/integration/**/*.py
             # VCR integration-replay is serial_or_bounded (#9729).
-            xdist_args: "-p no:xdist"
+            xdist_args: "-n auto --dist loadscope"
           - name: security
             path: tests/security/
             cache_glob: tests/security/**/*.py
@@ -1299,7 +1299,7 @@ jobs:
           mkdir -p reports/performance
           uv run --frozen --no-build pytest tests/performance/test_hotspot_budgets.py \
             -m "benchmark and performance" \
-            -p no:xdist \
+            -n auto --dist loadscope \
             -q --tb=short \
             --perf-obs-out reports/performance/hotspot-observations.jsonl \
             --junitxml=reports/performance/hotspot-budgets.xml
@@ -1387,7 +1387,7 @@ jobs:
             --target tests/ \
             --reports-dir reports/pytest/serial-coverage \
             --parallel-marker "serial and not e2e and not benchmark and not memory" \
-            --parallel-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report=" \
+            --parallel-addopts "-q --tb=short -n auto --dist loadscope --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report=" \
             --skip-serial-pass
           TEST_EXIT=$?
           if [ ! -s "$COVERAGE_FILE" ]; then

@@ -1520,7 +1520,7 @@ jobs:
             uv run --frozen --no-build python -m memory.tooling.check_freshness --json > reports/memory/freshness.json
       - run:
           name: Verify freshness contracts
-          command: uv run --frozen --no-build pytest tests/unit/memory/test_check_freshness.py -q -p no:xdist
+          command: uv run --frozen --no-build pytest tests/unit/memory/test_check_freshness.py -q -n auto --dist loadscope
       - store_artifacts:
           path: reports/memory
 
@@ -1555,7 +1555,7 @@ jobs:
             mkdir -p reports/performance
             timeout --signal=TERM --kill-after=30s 30m \
               uv run --frozen --no-build pytest tests/performance/ tests/benchmarks/ \
-              -m "benchmark or performance" -p benchmark -p no:xdist -v --tb=short \
+              -m "benchmark or performance" -p benchmark -n auto --dist loadscope -v --tb=short \
               --perf-obs-out reports/performance/hotspot-observations.jsonl \
               --junitxml=reports/performance/hotspot-budgets.xml
       - run:
@@ -1645,7 +1645,7 @@ jobs:
               tests/architecture/test_port_contracts.py \
               tests/architecture/test_adapter_contracts.py \
               tests/architecture/test_registry_contracts.py \
-              -p no:xdist --junitxml=reports/junit/port-contracts.xml
+              -n auto --dist loadscope --junitxml=reports/junit/port-contracts.xml
       - when:
           condition: << pipeline.parameters.include-hypothesis >>
           steps:
@@ -1653,7 +1653,7 @@ jobs:
                 name: Verify hypothesis contracts
                 command: |
                   uv run --frozen --no-build pytest tests/architecture/test_port_contracts_hypothesis.py \
-                    -m hypothesis -p no:xdist --junitxml=reports/junit/hypothesis-contracts.xml
+                    -m hypothesis -n auto --dist loadscope --junitxml=reports/junit/hypothesis-contracts.xml
       - store_test_results:
           path: reports/junit
       - store_artifacts:
@@ -1735,7 +1735,7 @@ jobs:
             mkdir -p reports/e2e
             uv run --frozen --no-build pytest tests/e2e \
               -m "e2e and not e2e_smoke and not benchmark and not memory" \
-              --record-mode=none -p no:xdist -q --tb=short \
+              --record-mode=none -n auto --dist loadscope -q --tb=short \
               --junitxml=reports/e2e/e2e-nightly-full.xml
             [[ -s reports/e2e/e2e-nightly-full.xml ]]
             REPLAY
@@ -1760,7 +1760,7 @@ jobs:
             [[ "$CIRCLE_BRANCH" == main ]]
             mkdir -p reports/e2e
             uv run --frozen --no-build pytest tests/prompts \
-              -m "not benchmark and not memory" -p no:xdist -q --tb=short \
+              -m "not benchmark and not memory" -n auto --dist loadscope -q --tb=short \
               --junitxml=reports/e2e/prompt-tests-nightly.xml
             [[ -s reports/e2e/prompt-tests-nightly.xml ]]
             PROMPTS
@@ -2179,7 +2179,7 @@ jobs:
             HYPOTHESIS_PROFILE=fast \
             uv run --frozen --no-build pytest $PATHS \
               -m "not fs_contract and not repo_backed and not subprocess_backed and not slow and not benchmark and not memory" \
-              -p no:xdist \
+              -n auto --dist loadscope \
               -q --tb=short \
               --junitxml="reports/test-telemetry/junit-fast.${NAME}.xml"
       - store_test_results:
@@ -2198,7 +2198,7 @@ jobs:
     parameters:
       test-group:
         type: string
-        default: "integration|tests/integration/|-p no:xdist"
+        default: "integration|tests/integration/|-n auto --dist loadscope"
     steps:
       - checkout
       - setup-python-uv:
@@ -3894,7 +3894,7 @@ workflows:
           matrix:
             parameters:
               test-group:
-                - "integration|tests/integration/|-p no:xdist"
+                - "integration|tests/integration/|-n auto --dist loadscope"
                 - "security|tests/security/|-n auto --dist loadscope"
       - dq-consistency:
           requires: [classify]
