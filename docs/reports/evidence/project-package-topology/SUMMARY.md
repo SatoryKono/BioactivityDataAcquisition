@@ -1,4 +1,4 @@
-Source-only refresh (2026-10-10, PR #12145 merge of origin/main + CF-055 fix): the canonical module inventory records `source_tree_sha256=1c98dd46cef0fb88312983efe5349ec72fa219e4fe04d8de0a3277198c70c979` and `source_module_count=2566`. This binds the merged PR tree; coverage measurements remain those of the last authoritative run recorded below.
+Source-only refresh (2026-10-10, PR #12145 merge of origin/main + CF-055 fix): the canonical module inventory records `source_tree_sha256=70037f5d3f83da51dbd88f9b8b1f47f33a7c6d70871b48c0d430f71403d65aa8` and `source_module_count=2566`. This binds the merged PR tree; coverage measurements remain those of the last authoritative run recorded below.
 
 Source-only refresh (2026-10-09, PR #11992 merge of origin/main): the canonical module inventory records `source_tree_sha256=a328f3311ab0958bb47c1d79532e9b655db90ffb6cece4bc4d7af89485a9f265` and `source_module_count=2566`. This binds the merged PR tree; coverage measurements remain those of the last authoritative run recorded below.
 

@@ -215,6 +215,32 @@ class BasePanderaValidator:
 
         return normalized
 
+    def _seed_missing_nullable_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Seed missing nullable schema columns before validation.
+
+        For ordered=True schemas the seeded column must land at its
+        schema-declared position: appending at the end can never satisfy
+        Pandera's positional check (CF-055).
+        """
+        if self._schema is None or not hasattr(self._schema, "columns"):
+            return df
+        schema_names = list(self._schema.columns.keys())
+        missing = [name for name in schema_names if name not in df.columns]
+        if not missing:
+            return df
+        seeded = df.copy()
+        ordered = getattr(self._schema, "ordered", False)
+        for name in missing:
+            column = self._schema.columns[name]
+            if not getattr(column, "nullable", False):
+                continue
+            if ordered:
+                loc = min(schema_names.index(name), len(seeded.columns))
+                seeded.insert(loc=loc, column=name, value=None)
+            else:
+                seeded[name] = None
+        return seeded
+
     def _validate_with_schema(self, df: pd.DataFrame) -> ValidationResult:
         """Validate DataFrame against schema.
 
@@ -234,24 +260,7 @@ class BasePanderaValidator:
         from pandera.errors import SchemaError, SchemaErrors
 
         try:
-            df_to_validate = df
-            if hasattr(self._schema, "columns"):
-                schema_names = list(self._schema.columns.keys())
-                missing = [name for name in schema_names if name not in df.columns]
-                if missing:
-                    df_to_validate = df.copy()
-                    for name in missing:
-                        column = self._schema.columns[name]
-                        if not getattr(column, "nullable", False):
-                            continue
-                        if getattr(self._schema, "ordered", False):
-                            loc = min(
-                                schema_names.index(name),
-                                len(df_to_validate.columns),
-                            )
-                            df_to_validate.insert(loc=loc, column=name, value=None)
-                        else:
-                            df_to_validate[name] = None
+            df_to_validate = self._seed_missing_nullable_columns(df)
             df_to_validate = self._normalize_nullable_integer_columns(df_to_validate)
             df_to_validate = self._normalize_nullable_boolean_columns(df_to_validate)
             df_to_validate = self._reorder_to_schema(df_to_validate)
@@ -297,28 +306,6 @@ class PanderaSilverValidator(BasePanderaValidator):
             if df_to_validate[name].isna().all():
                 df_to_validate[name] = default
         return df_to_validate
-
-    def _seed_missing_nullable_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        if self._schema is None or not hasattr(self._schema, "columns"):
-            return df
-        schema_names = list(self._schema.columns.keys())
-        missing = [name for name in schema_names if name not in df.columns]
-        if not missing:
-            return df
-        seeded = df.copy()
-        for name in missing:
-            column = self._schema.columns[name]
-            if not getattr(column, "nullable", False):
-                continue
-            if getattr(self._schema, "ordered", False):
-                # ordered=True schemas check column positions; appending a
-                # seeded column at the end can never satisfy that check, so
-                # insert at the schema-declared position instead.
-                loc = min(schema_names.index(name), len(seeded.columns))
-                seeded.insert(loc=loc, column=name, value=None)
-            else:
-                seeded[name] = None
-        return seeded
 
     def _validate_with_schema(self, df: pd.DataFrame) -> ValidationResult:
         """Validate Silver frames; non-strict mode ignores extra columns.
