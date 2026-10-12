@@ -16,17 +16,24 @@ rejection, root containment, filter validation, flat layout.
 
 from __future__ import annotations
 
+import asyncio
 import os
 import subprocess
 import threading
+from collections.abc import Callable
+from contextlib import contextmanager
 from datetime import UTC, datetime
+from functools import partial
 from pathlib import Path
 from unittest.mock import Mock
+from uuid import UUID
 
 import pytest
 
 from bioetl.domain.ports.noop import NoOpMetrics
+from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.infrastructure.storage import bronze_writer as bronze_writer_module
 from bioetl.infrastructure.storage.bronze import cleanup_support, read_cleanup_mixin
 from bioetl.infrastructure.storage.bronze.cleanup_support import (
     bronze_tree_lock,
@@ -896,6 +903,122 @@ def test_writer_lock_waits_for_exclusive_cleaner(tmp_path: Path) -> None:
         assert not entered.is_set()
     thread.join(2)
     assert not thread.is_alive() and entered.is_set()
+
+
+@_APPLY_POSIX
+async def test_cancelled_writer_keeps_lock_until_io_finishes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Cancellation cannot release the shared lock ahead of in-flight I/O."""
+    import fcntl
+
+    writer = _make_writer(tmp_path)
+    batch_id = BatchID(UUID(int=1))
+    run_id = RunID(UUID(int=2))
+    run_type = RunType.INCREMENTAL
+    writing = asyncio.Event()
+    release_write = asyncio.Event()
+    waiting_after_cancel = asyncio.Event()
+    original_wait = bronze_writer_module._wait_for_task_completion
+
+    async def watched_wait(task: asyncio.Task[object]) -> bool:
+        waiting_after_cancel.set()
+        return await original_wait(task)
+
+    async def blocked_write(_request: object) -> object:
+        writing.set()
+        await release_write.wait()
+        return Mock()
+
+    monkeypatch.setattr(bronze_writer_module, "_wait_for_task_completion", watched_wait)
+    monkeypatch.setattr(writer, "_write_bronze_with_tracing", blocked_write)
+    write_task = asyncio.create_task(
+        writer.write_bronze(
+            records=iter([b"{}"]),
+            provider="chembl",
+            entity="activity",
+            date=CUTOFF,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=CUTOFF,
+        )
+    )
+    await asyncio.wait_for(writing.wait(), 3)
+    write_task.cancel()
+    await asyncio.wait_for(waiting_after_cancel.wait(), 3)
+    probe = os.open(tmp_path / ".bronze-cleanup.lock", os.O_RDONLY)
+    try:
+        with pytest.raises(BlockingIOError):
+            fcntl.flock(probe, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    finally:
+        os.close(probe)
+    release_write.set()
+    with pytest.raises(asyncio.CancelledError):
+        await asyncio.wait_for(write_task, 3)
+    with bronze_tree_lock(tmp_path, exclusive=True):
+        pass
+
+
+@_APPLY_POSIX
+async def test_cancelled_writer_waiting_for_lock_does_not_leak_it(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An acquire already running in a thread is released after cancellation."""
+    import fcntl
+
+    tmp_path.mkdir(exist_ok=True)
+    writer = _make_writer(tmp_path)
+    batch_id = BatchID(UUID(int=1))
+    run_id = RunID(UUID(int=2))
+    run_type = RunType.INCREMENTAL
+    attempted = threading.Event()
+    acquired = threading.Event()
+    original_lock = bronze_tree_lock
+
+    async def real_to_thread(
+        func: Callable[..., object], /, *args: object, **kwargs: object
+    ) -> object:
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, partial(func, *args, **kwargs))
+
+    # Repository test setup inlines asyncio.to_thread by default. This case
+    # explicitly needs a blocked worker and event-loop progress at the same time.
+    monkeypatch.setattr(asyncio, "to_thread", real_to_thread)
+
+    @contextmanager
+    def observed_lock(base_path: Path, *, exclusive: bool):
+        attempted.set()
+        with original_lock(base_path, exclusive=exclusive):
+            acquired.set()
+            yield
+
+    monkeypatch.setattr(bronze_writer_module, "bronze_tree_lock", observed_lock)
+    with bronze_tree_lock(tmp_path, exclusive=True):
+        write_task = asyncio.create_task(
+            writer.write_bronze(
+                records=iter([b"{}"]),
+                provider="chembl",
+                entity="activity",
+                date=CUTOFF,
+                batch_id=batch_id,
+                run_id=run_id,
+                run_type=run_type,
+                ingestion_ts=CUTOFF,
+            )
+        )
+        assert await asyncio.wait_for(asyncio.to_thread(attempted.wait), 3)
+        write_task.cancel()
+    assert await asyncio.wait_for(asyncio.to_thread(acquired.wait), 3)
+    with pytest.raises(asyncio.CancelledError):
+        await asyncio.wait_for(write_task, 3)
+    probe = os.open(tmp_path / ".bronze-cleanup.lock", os.O_RDONLY)
+    try:
+        fcntl.flock(probe, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    finally:
+        os.close(probe)
 
 
 @pytest.mark.skipif(os.name != "nt", reason="Windows-specific fail-closed gate")

@@ -62,6 +62,20 @@ __all__ = ["BRONZE_WRITE_ERRORS", "BronzeWriter"]
 BRONZE_ATOMIC_WRITE_CONTRACT = "atomic_write_bytes via bronze.write_execution"
 
 
+async def _wait_for_task_completion[T](task: asyncio.Task[T]) -> bool:
+    """Finish a shielded I/O task before releasing its filesystem lock."""
+    interrupted = False
+    while not task.done():
+        try:
+            await asyncio.shield(task)
+        except asyncio.CancelledError:
+            interrupted = True
+        except Exception:
+            # The caller retrieves the completed task's result or exception.
+            pass
+    return interrupted
+
+
 class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
     BronzeWriterValidationMixin,
     BronzeWriterMetadataMixin,
@@ -203,11 +217,35 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         self._validate_bronze_request_inputs(request)
         self.base_path.mkdir(parents=True, exist_ok=True)
         lock = bronze_tree_lock(self.base_path, exclusive=False)
-        await asyncio.to_thread(lock.__enter__)
+        entering = asyncio.create_task(asyncio.to_thread(lock.__enter__))
         try:
-            return await self._write_bronze_with_tracing(request)
+            await asyncio.shield(entering)
+        except asyncio.CancelledError:
+            await _wait_for_task_completion(entering)
+            if not entering.cancelled() and entering.exception() is None:
+                leaving = asyncio.create_task(
+                    asyncio.to_thread(lock.__exit__, None, None, None)
+                )
+                await _wait_for_task_completion(leaving)
+                leaving.result()
+            raise
+        try:
+            writing = asyncio.create_task(self._write_bronze_with_tracing(request))
+            try:
+                return await asyncio.shield(writing)
+            except asyncio.CancelledError:
+                await _wait_for_task_completion(writing)
+                if not writing.cancelled():
+                    writing.exception()
+                raise
         finally:
-            await asyncio.to_thread(lock.__exit__, None, None, None)
+            leaving = asyncio.create_task(
+                asyncio.to_thread(lock.__exit__, None, None, None)
+            )
+            interrupted = await _wait_for_task_completion(leaving)
+            leaving.result()
+            if interrupted:
+                raise asyncio.CancelledError
 
     async def cleanup_bronze(
         self,
