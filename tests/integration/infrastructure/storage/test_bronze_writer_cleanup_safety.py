@@ -546,6 +546,36 @@ def test_same_name_replacement_before_unlink_keeps_foreign_file(
 
 
 @_APPLY_POSIX
+def test_same_name_replacement_at_unlink_only_removes_staged_inode(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The actual unlink targets the isolated old inode, not a new name entry."""
+    root = tmp_path / "bronze"
+    date_dir = _date_dir(root, "chembl", "activity")
+    target = date_dir / ARTIFACT
+    target.write_bytes(b"planned")
+    planned = target.stat()
+    outside = tmp_path / "outside-sentinel"
+    outside.write_bytes(b"outside")
+    original_unlink = cleanup_support.os.unlink
+    replaced = False
+
+    def replace_at_unlink(name: object, **kwargs: object) -> None:
+        nonlocal replaced
+        if name == ARTIFACT and not replaced:
+            replaced = True
+            target.write_bytes(b"new writer content")
+        original_unlink(name, **kwargs)
+
+    monkeypatch.setattr(cleanup_support.os, "unlink", replace_at_unlink)
+    assert safe_unlink(target, root, root, planned)
+    assert replaced
+    assert target.read_bytes() == b"new writer content"
+    assert target.stat().st_ino != planned.st_ino
+    assert outside.read_bytes() == b"outside"
+
+
+@_APPLY_POSIX
 @pytest.mark.parametrize("component", ["root", "chembl", "activity", OLD_DATE])
 def test_component_swap_before_open_does_not_delete_outside(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, component: str
@@ -628,6 +658,38 @@ def test_open_date_renamed_before_unlink_retains_original(
     assert sentinel.read_bytes() == b"outside"
 
 
+@_APPLY_POSIX
+def test_open_date_renamed_at_unlink_cannot_redirect_staged_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A late directory rename does not redirect unlink to its new location."""
+    root = tmp_path / "bronze"
+    date_dir = _date_dir(root, "chembl", "activity")
+    target = date_dir / ARTIFACT
+    target.write_bytes(b"planned")
+    planned = target.stat()
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    sentinel = outside / "sentinel"
+    sentinel.write_bytes(b"outside")
+    moved = outside / "moved_date"
+    original_unlink = cleanup_support.os.unlink
+    renamed = False
+
+    def rename_at_unlink(name: object, **kwargs: object) -> None:
+        nonlocal renamed
+        if name == ARTIFACT and not renamed:
+            renamed = True
+            date_dir.rename(moved)
+        original_unlink(name, **kwargs)
+
+    monkeypatch.setattr(cleanup_support.os, "unlink", rename_at_unlink)
+    assert safe_unlink(target, root, root, planned)
+    assert renamed and moved.is_dir()
+    assert not (moved / ARTIFACT).exists()
+    assert sentinel.read_bytes() == b"outside"
+
+
 @pytest.mark.skipif(
     not destructive_cleanup_supported(), reason="POSIX handle capability required"
 )
@@ -655,6 +717,33 @@ def test_same_name_empty_directory_replacement_is_not_removed(
     assert not safe_rmdir(date_dir, root, root, planned)
     assert swapped
     assert date_dir.is_dir() and original.is_dir() and outside_empty.is_dir()
+
+
+@_APPLY_POSIX
+def test_same_name_directory_replacement_at_rmdir_is_retained(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The actual rmdir removes the isolated directory, not its replacement."""
+    root = tmp_path / "bronze"
+    date_dir = _date_dir(root, "chembl", "activity")
+    planned = date_dir.stat()
+    outside_empty = tmp_path / "outside_empty"
+    outside_empty.mkdir()
+    original_rmdir = cleanup_support.os.rmdir
+    replaced = False
+
+    def replace_at_rmdir(name: object, **kwargs: object) -> None:
+        nonlocal replaced
+        if name == OLD_DATE and not replaced:
+            replaced = True
+            date_dir.mkdir()
+        original_rmdir(name, **kwargs)
+
+    monkeypatch.setattr(cleanup_support.os, "rmdir", replace_at_rmdir)
+    assert safe_rmdir(date_dir, root, root, planned)
+    assert replaced
+    assert date_dir.is_dir() and date_dir.stat().st_ino != planned.st_ino
+    assert outside_empty.is_dir()
 
 
 @pytest.mark.skipif(
