@@ -913,7 +913,7 @@ jobs:
           mkdir -p reports/coverage
           uv run --frozen --no-build pytest ${{ matrix.test-group.path }} \
             -m "repo_backed and not slow and not benchmark and not memory" \
-            -n auto --dist loadscope -q --tb=short \
+            -p no:xdist -q --tb=short \
             --junitxml=reports/test-telemetry/junit-repo-backed-unit.${{ matrix.test-group.name }}.xml \
             --cov=src/bioetl --cov-report=
           TEST_EXIT=$?
@@ -985,7 +985,7 @@ jobs:
           # Serial: passport projector and many script tests use repo FS/subprocess.
           uv run --frozen --no-build pytest ${{ matrix.test-group.path }} \
             -m "not slow and not benchmark and not memory" \
-            -n auto --dist loadscope -q --tb=short \
+            -p no:xdist -q --tb=short \
             --junitxml=reports/test-telemetry/junit-unit-scripts-tooling.${{ matrix.test-group.name }}.xml \
             --cov=src/bioetl --cov-report=
           TEST_EXIT=$?
@@ -1047,7 +1047,7 @@ jobs:
           mkdir -p reports/coverage
           uv run --frozen --no-build pytest tests/unit/ \
             -m "fs_contract and not slow and not benchmark and not memory" \
-            -n auto --dist loadscope -q --tb=short \
+            -p no:xdist -q --tb=short \
             --junitxml=reports/test-telemetry/junit-unit-filesystem-contracts.xml \
             --cov=src/bioetl --cov-report=
           TEST_EXIT=$?
@@ -1110,7 +1110,7 @@ jobs:
             --ignore=tests/unit/scripts \
             --ignore=tests/unit/repo_backed \
             -m "subprocess_backed and not slow and not benchmark and not memory" \
-            -n auto --dist loadscope -q --tb=short \
+            -p no:xdist -q --tb=short \
             --junitxml=reports/test-telemetry/junit-unit-subprocess-backed.xml \
             --cov=src/bioetl --cov-report=
           TEST_EXIT=$?
@@ -1176,7 +1176,7 @@ jobs:
             path: tests/integration/
             cache_glob: tests/integration/**/*.py
             # VCR integration-replay is serial_or_bounded (#9729).
-            xdist_args: "-n auto --dist loadscope"
+            xdist_args: "-p no:xdist"
           - name: security
             path: tests/security/
             cache_glob: tests/security/**/*.py
@@ -1299,7 +1299,7 @@ jobs:
           mkdir -p reports/performance
           uv run --frozen --no-build pytest tests/performance/test_hotspot_budgets.py \
             -m "benchmark and performance" \
-            -n auto --dist loadscope \
+            -p no:xdist \
             -q --tb=short \
             --perf-obs-out reports/performance/hotspot-observations.jsonl \
             --junitxml=reports/performance/hotspot-budgets.xml
@@ -1387,7 +1387,7 @@ jobs:
             --target tests/ \
             --reports-dir reports/pytest/serial-coverage \
             --parallel-marker "serial and not e2e and not benchmark and not memory" \
-            --parallel-addopts "-q --tb=short -n auto --dist loadscope --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report=" \
+            --parallel-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report=" \
             --skip-serial-pass
           TEST_EXIT=$?
           if [ ! -s "$COVERAGE_FILE" ]; then

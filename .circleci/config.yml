@@ -1555,7 +1555,7 @@ jobs:
             mkdir -p reports/performance
             timeout --signal=TERM --kill-after=30s 30m \
               uv run --frozen --no-build pytest tests/performance/ tests/benchmarks/ \
-              -m "benchmark or performance" -p benchmark -n auto --dist loadscope -v --tb=short \
+              -m "benchmark or performance" -p benchmark -p no:xdist -v --tb=short \
               --perf-obs-out reports/performance/hotspot-observations.jsonl \
               --junitxml=reports/performance/hotspot-budgets.xml
       - run:
@@ -1735,7 +1735,7 @@ jobs:
             mkdir -p reports/e2e
             uv run --frozen --no-build pytest tests/e2e \
               -m "e2e and not e2e_smoke and not benchmark and not memory" \
-              --record-mode=none -n auto --dist loadscope -q --tb=short \
+              --record-mode=none -p no:xdist -q --tb=short \
               --junitxml=reports/e2e/e2e-nightly-full.xml
             [[ -s reports/e2e/e2e-nightly-full.xml ]]
             REPLAY
@@ -2198,7 +2198,7 @@ jobs:
     parameters:
       test-group:
         type: string
-        default: "integration|tests/integration/|-n auto --dist loadscope"
+        default: "integration|tests/integration/|-p no:xdist"
     steps:
       - checkout
       - setup-python-uv:
@@ -3894,7 +3894,7 @@ workflows:
           matrix:
             parameters:
               test-group:
-                - "integration|tests/integration/|-n auto --dist loadscope"
+                - "integration|tests/integration/|-p no:xdist"
                 - "security|tests/security/|-n auto --dist loadscope"
       - dq-consistency:
           requires: [classify]
