@@ -392,7 +392,9 @@ def _check_artifacts(
     else:
         actual_md = md_out.read_text(encoding="utf-8")  # NOSONAR - path confined
         if not _markdown_semantically_equivalent(actual_md, expected_md):
-            errors.append(f"Remote-main debt baseline Markdown artifact is stale: {md_out}")
+            errors.append(
+                f"Remote-main debt baseline Markdown artifact is stale: {md_out}"
+            )
     if payload["evidence_source"] != "remote_main_git_tree":
         errors.append("Remote-main debt baseline evidence_source is not clean")
     if not payload["local_tracking_ref_matches_remote"]:
