@@ -87,6 +87,21 @@ def _require_workflow_result(value: object) -> WorkflowRunExecutionResult:
     return value
 
 
+def _cohort_producer_ids(config: WorkflowConfig) -> set[str]:
+    """Return producer and consumer IDs whose snapshots are needed for cohorts."""
+    producers = {
+        step.reference_cohort.step_id
+        for step in config.pipeline_steps
+        if step.reference_cohort is not None
+    }
+    producers.update(
+        step.step_id
+        for step in config.pipeline_steps
+        if step.reference_cohort is not None
+    )
+    return producers
+
+
 @dataclass(slots=True)
 class WorkflowRunnerService:
     """Execute workflow pipeline and transform steps in topological order."""
@@ -126,7 +141,11 @@ class WorkflowRunnerService:
         created_at_factory: Callable[[], datetime] | None = None,
         restored_step_outputs: Mapping[str, object] | None = None,
     ) -> WorkflowRunExecutionResult:
-        """Run a workflow config and stop on first failed step."""
+        """Run a workflow config; a failed step only skips steps that depend on it.
+
+        Independent steps still run; steps declaring a failed (or blocked) step
+        in ``depends_on`` are failure-skipped instead of executed.
+        """
         started_at = current_utc_time()
         started_monotonic = perf_counter()
         self.record_expected_pipeline_metrics(config)
@@ -137,16 +156,7 @@ class WorkflowRunnerService:
         effective_dry_run = bool(config.defaults.dry_run)
         debug_export_enabled = bool(config.defaults.debug_export_enabled)
         debug_export_dir = config.defaults.debug_export_dir
-        cohort_producers = {
-            producer.reference_cohort.step_id
-            for producer in config.pipeline_steps
-            if producer.reference_cohort is not None
-        }
-        cohort_producers.update(
-            producer.step_id
-            for producer in config.pipeline_steps
-            if producer.reference_cohort is not None
-        )
+        cohort_producers = _cohort_producer_ids(config)
 
         for step_id in config.topological_step_ids:
             step = config.get_step(step_id)

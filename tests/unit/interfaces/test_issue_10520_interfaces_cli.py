@@ -7,8 +7,6 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 import pytest
-from click.testing import CliRunner
-
 from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionCorruptionError,
 )
@@ -26,6 +24,7 @@ from bioetl.interfaces.cli.commands.lineage import (
     _render_text_payload,
     _resolve_explain_identifier,
 )
+from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import (
     echo_export_preview,
     echo_export_result,
@@ -36,6 +35,7 @@ from bioetl.interfaces.http._health_server_identity_routing_support import (
     _require_run_manifest_port,
     _timeout_identity_payload,
 )
+from click.testing import CliRunner
 
 pytestmark = pytest.mark.unit
 
@@ -56,7 +56,7 @@ def test_run_manifest_command_error_paths(monkeypatch: pytest.MonkeyPatch) -> No
     monkeypatch.setattr(run_manifest_cmd, "get_run_manifest_service", lambda: _Svc())
     runner = CliRunner()
     score = runner.invoke(cli, ["run-manifest", "score", "m1"])
-    assert score.exit_code == 0
+    assert score.exit_code == ExitCode.STORAGE_ERROR
 
     class _ValueShow:
         def show(self, identifier: str) -> object:

@@ -20,6 +20,7 @@ from bioetl.domain.aggregates.events import (
     RecordQuarantined,
 )
 from bioetl.domain.events import PipelineEvent
+from bioetl.domain.immutability import deep_thaw_json
 
 __all__ = [
     "DomainEventObservabilityEnvelope",
@@ -220,7 +221,7 @@ def _build_quarantine_entry_created(
             "batch_id": str(typed.batch_id),
             "error_code": typed.error_code,
             "payload_hash": str(typed.payload_hash),
-            "metadata": typed.metadata,
+            "metadata": deep_thaw_json(typed.metadata),
         },
     )
 

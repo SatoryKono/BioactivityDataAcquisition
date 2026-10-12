@@ -4,16 +4,7 @@ permissions:
   contents: read
 
 on:
-  pull_request:
-    paths:
-      - "uv.lock"
-      - "pyproject.toml"
-      - "package.json"
-      - "package-lock.json"
-      - "**/package.json"
-      - "**/package-lock.json"
-      - "Dockerfile.bioetl"
-      - ".github/workflows/dependency-review.yml"
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

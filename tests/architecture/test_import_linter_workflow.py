@@ -20,13 +20,13 @@ import pytest
 pytestmark = pytest.mark.architecture
 
 
-def test_import_linter_workflow_runs_as_reusable_pr_owner_and_on_push() -> None:
-    """Import-linter must be called once by the PR coordinator and run on push."""
+def test_import_linter_workflow_is_reusable_without_push() -> None:
+    """Import-linter stays callable and no longer starts on push."""
     workflow = Path(".github/workflows/import-linter.yml").read_text(encoding="utf-8")
 
     assert "workflow_call:" in workflow
     assert "pull_request:" not in workflow
-    assert "push:" in workflow
+    assert "push:" not in workflow
     assert "workflow_dispatch:" in workflow
     assert "paths-ignore:" not in workflow
 
