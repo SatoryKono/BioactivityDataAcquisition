@@ -29,6 +29,11 @@ import types
 from functools import lru_cache
 from typing import TYPE_CHECKING
 
+from bioetl.domain.normalization.json import (
+    CanonicalJsonProfile,
+    serialize_json_canonical,
+)
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import JsonEncoderPort
     from bioetl.domain.types import JsonDict
@@ -88,6 +93,8 @@ class StdLibJsonEncoder:
     def dumps_canonical(
         self,
         obj: JsonDict,
+        *,
+        profile: CanonicalJsonProfile = CanonicalJsonProfile.PORT_V1,
     ) -> str:
         """Serialize object to canonical JSON for hashing.
 
@@ -99,12 +106,7 @@ class StdLibJsonEncoder:
         Returns:
             Canonical JSON string suitable for hashing
         """
-        return json.dumps(
-            obj,
-            sort_keys=True,
-            separators=(",", ":"),
-            ensure_ascii=True,
-        )
+        return serialize_json_canonical(obj, profile=profile)
 
     def loads(self, data: str | bytes) -> JsonDict | list[object]:
         """Deserialize JSON string to Python object.
@@ -178,6 +180,8 @@ class OrjsonEncoder:
     def dumps_canonical(
         self,
         obj: JsonDict,
+        *,
+        profile: CanonicalJsonProfile = CanonicalJsonProfile.PORT_V1,
     ) -> str:
         """Serialize object to canonical JSON for hashing.
 
@@ -189,10 +193,8 @@ class OrjsonEncoder:
         Returns:
             Canonical JSON string suitable for hashing
         """
-        # For canonical output, we need ensure_ascii=True for hashing consistency
-        assert _orjson is not None
-        result: str = _orjson.dumps(obj, option=_orjson.OPT_SORT_KEYS).decode("utf-8")
-        return _to_ascii_json(result, sort_keys=True)
+        # Both canonical adapters use the same historical port byte contract.
+        return serialize_json_canonical(obj, profile=profile)
 
     def loads(self, data: str | bytes) -> JsonDict | list[object]:
         """Deserialize JSON string to Python object using orjson.

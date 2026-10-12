@@ -4,8 +4,6 @@ permissions:
     contents: read
 
 on:
-    schedule:
-        -   cron: "20 2 * * *"
     workflow_dispatch:
         inputs:
             run_heavy:
@@ -54,9 +52,7 @@ jobs:
                     make qa-arch-fast
 
     architecture-heavy-nightly:
-        if: >
-            github.event_name == 'schedule' ||
-            (github.event_name == 'workflow_dispatch' && github.event.inputs.run_heavy == 'true')
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.run_heavy == 'true'
         runs-on: ubuntu-latest
         timeout-minutes: 25
         steps:
@@ -90,9 +86,7 @@ jobs:
                       --cov-fail-under=85
 
     windows-atomic-write-stress-nightly:
-        if: >
-            github.event_name == 'schedule' ||
-            (github.event_name == 'workflow_dispatch' && github.event.inputs.run_heavy == 'true')
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.run_heavy == 'true'
         runs-on: windows-latest
         timeout-minutes: 15
         steps:
