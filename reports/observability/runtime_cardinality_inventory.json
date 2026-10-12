@@ -4446,11 +4446,11 @@
     ],
     "bioetl_checkpoint_save_duration_seconds": [
       "src/bioetl/application/composite/runner_pkg/runner_checkpoint_save_observability.py",
-      "src/bioetl/application/core/batch_checkpoint_save_observability.py"
+      "src/bioetl/application/core/batch_checkpoint_recovery_service.py"
     ],
     "bioetl_checkpoint_save_events_total": [
       "src/bioetl/application/composite/runner_pkg/runner_checkpoint_save_observability.py",
-      "src/bioetl/application/core/batch_checkpoint_save_observability.py"
+      "src/bioetl/application/core/batch_checkpoint_recovery_service.py"
     ],
     "bioetl_checkpoint_saved_at_seconds": [
       "src/bioetl/application/composite/checkpoint/_checkpoint_runtime.py",

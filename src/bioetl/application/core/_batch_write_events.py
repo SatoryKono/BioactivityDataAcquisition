@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -18,42 +17,6 @@ if TYPE_CHECKING:
         DomainEventEmitterProtocol,
     )
     from bioetl.domain.ports import LoggerPort
-
-
-@dataclass(frozen=True, slots=True)
-class BatchWriteEventContext:
-    """Stable event coordinates shared by one storage-layer write attempt."""
-
-    emitter: DomainEventEmitterProtocol | None
-    run_id: RunID | None
-    batch_id: BatchID
-    layer: str
-    occurred_at: datetime
-    logger: LoggerPort
-
-    def emit_failed(self, error: Exception) -> None:
-        """Publish one failed-write event for this layer attempt."""
-        emit_batch_failed(
-            emitter=self.emitter,
-            run_id=self.run_id,
-            batch_id=self.batch_id,
-            layer=self.layer,
-            error=error,
-            occurred_at=self.occurred_at,
-            logger=self.logger,
-        )
-
-    def emit_written(self, record_count: int) -> None:
-        """Publish one successful-write event for this layer attempt."""
-        emit_batch_written(
-            emitter=self.emitter,
-            run_id=self.run_id,
-            batch_id=self.batch_id,
-            layer=self.layer,
-            record_count=record_count,
-            occurred_at=self.occurred_at,
-            logger=self.logger,
-        )
 
 
 def emit_domain_event(

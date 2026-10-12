@@ -8,10 +8,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.core._batch_write_support import (
-    LayerWriteContext,
-    safe_write_layer,
-)
+from bioetl.application.core._batch_write_support import safe_write_layer
 
 pytestmark = pytest.mark.unit
 
@@ -42,14 +39,12 @@ async def test_safe_write_layer_does_not_double_track_batch_failed() -> None:
 
     with pytest.raises(RuntimeError, match="write failed"):
         await safe_write_layer(
-            context=LayerWriteContext(
-                execute_with_span=execute_with_span,
-                writer=writer,
-                quarantine_manager=MagicMock(),
-                logger=MagicMock(),
-                run_id="run-1",  # type: ignore[arg-type]
-                domain_event_emitter=None,
-            ),
+            execute_with_span=execute_with_span,
+            writer=writer,
+            quarantine_manager=MagicMock(),
+            logger=MagicMock(),
+            run_id="run-1",  # type: ignore[arg-type]
+            domain_event_emitter=None,
             layer="silver",
             records=[{"id": 1}],
             batch_id="batch-1",  # type: ignore[arg-type]

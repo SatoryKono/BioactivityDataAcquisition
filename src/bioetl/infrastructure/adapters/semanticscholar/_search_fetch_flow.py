@@ -15,16 +15,12 @@ import httpx
 from bioetl.domain.exceptions.network.service import ApiError
 from bioetl.domain.mixin_host import as_mixin_host
 from bioetl.domain.types import BronzeRecord, JsonDict
-from bioetl.infrastructure.adapters.http.pagination import raise_pagination_truncated
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
 )
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
-
-# Hard ceiling against runaway offset loops from misbehaving providers (CF-034).
-_DEFAULT_MAX_PAGES: int = 10_000
 
 
 class _SemanticScholarSearchFetchMixin:
@@ -41,21 +37,7 @@ class _SemanticScholarSearchFetchMixin:
         current_offset = 0
         page_size = min(100, limit or 100)
         fetched = 0
-        page_count = 0
-        seen_offsets: set[int] = set()
         while True:
-            if page_count >= _DEFAULT_MAX_PAGES:
-                raise_pagination_truncated(
-                    as_mixin_host(self)._logger,  # Any: mixin host
-                    event="semanticscholar_search_truncated",
-                    reason="max_pages",
-                    page_count=page_count,
-                    page_limit=_DEFAULT_MAX_PAGES,
-                    cursor_field="next_offset",
-                    cursor_value=current_offset,
-                    log_context={"query": search_query[:100]},
-                )
-            page_count += 1
             records, next_offset = await as_mixin_host(
                 self
             )._fetch_search_page(  # Any: mixin host
@@ -68,46 +50,9 @@ class _SemanticScholarSearchFetchMixin:
                     return
                 yield record
                 fetched += 1
-            if not self._search_pagination_has_next(
-                next_offset=next_offset,
-                current_offset=current_offset,
-                seen_offsets=seen_offsets,
-                fetched=fetched,
-                limit=limit,
-                query=search_query,
-                page_count=page_count,
-            ):
+            if next_offset is None or (limit and fetched >= limit):
                 return
-            assert next_offset is not None
-            seen_offsets.add(current_offset)
             current_offset = next_offset
-
-    def _search_pagination_has_next(
-        self,
-        *,
-        next_offset: int | None,
-        current_offset: int,
-        seen_offsets: set[int],
-        fetched: int,
-        limit: int | None,
-        query: str,
-        page_count: int,
-    ) -> bool:
-        """Distinguish normal exhaustion/limit completion from repeated offsets."""
-        if next_offset is None or (limit and fetched >= limit):
-            return False
-        if next_offset in seen_offsets or next_offset == current_offset:
-            raise_pagination_truncated(
-                as_mixin_host(self)._logger,
-                event="semanticscholar_search_truncated",
-                reason="repeated_offset",
-                page_count=page_count,
-                page_limit=_DEFAULT_MAX_PAGES,
-                cursor_field="next_offset",
-                cursor_value=next_offset,
-                log_context={"query": query[:100]},
-            )
-        return True
 
     @staticmethod
     def _require_search_query(query: str | None) -> str:

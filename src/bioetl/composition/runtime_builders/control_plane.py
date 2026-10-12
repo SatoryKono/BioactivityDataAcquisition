@@ -7,7 +7,6 @@ from dataclasses import is_dataclass, replace
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.composition.runtime_builders._manifest_publication_context_support import (
-    build_effective_config_artifact_kwargs,
     resolve_manifest_publication_context,
 )
 from bioetl.composition.runtime_builders._run_manifest_context_updates import (
@@ -109,21 +108,20 @@ def create_run_manifest_with_effective_config(
 ) -> tuple[_ManifestControlPlaneRefs, RunLedgerService | None]:
     """Create immutable manifest before pipeline assembly begins."""
     publication_context = resolve_manifest_publication_context(ctx=ctx, inputs=inputs)
-    provider = publication_context.provider
-    entity = publication_context.entity
     _preflight_pipeline_input_snapshots(
         ctx=ctx,
         inputs=inputs,
-        provider=provider,
-        entity=entity,
+        provider=publication_context.provider,
+        entity=publication_context.entity,
     )
     provenance = build_run_manifest_provenance_bundle(
         create_and_persist_effective_config_artifact(
-            **build_effective_config_artifact_kwargs(
-                ctx=ctx,
-                inputs=inputs,
-                publication_context=publication_context,
-            )
+            ctx=ctx,
+            inputs=inputs,
+            provider=publication_context.provider,
+            entity=publication_context.entity,
+            reproducibility_context=publication_context.reproducibility_context,
+            contract_identity=publication_context.contract_identity,
         )
     )
     return create_run_manifest(
