@@ -131,8 +131,25 @@ def test_source_identity_path_and_env_helpers(tmp_path: Path) -> None:
     )
     assert _strip_repository_env_inline_comment("v # c") == "v"
     assert src_id._parse_repository_env_line("K=v # c", {"K"}) == ("K", "v")
+    assert src_id._parse_repository_env_line('K="value" # c', {"K"}) == (
+        "K",
+        "value",
+    )
+    assert src_id._parse_repository_env_line('K="value # kept" # c', {"K"}) == (
+        "K",
+        "value # kept",
+    )
     env_paths = src_id._repository_env_paths(tmp_path, {"BIOETL_SKIP_ENV_LOCAL": "1"})
     assert env_paths == (tmp_path / ".env",)
+
+
+def test_repository_env_default_does_not_duplicate_relative_root() -> None:
+    root = Path("relative-repository")
+
+    assert src_id._repository_env_paths(
+        root,
+        {"BIOETL_SKIP_ENV_LOCAL": "1"},
+    ) == (root / ".env",)
 
 
 def test_chained_key_filter_error_and_non_dataframe(

@@ -18,6 +18,7 @@ from bioetl.application.composite.runner_pkg.runner_stage_mixin import (
     CompositeRunnerStageMixin,
 )
 from bioetl.application.core._batch_write_support import (
+    LayerWriteContext,
     emit_batch_failed,
     emit_domain_event,
     safe_write_layer,
@@ -111,12 +112,14 @@ def test_emit_domain_event_logs_and_invalid_layer() -> None:
 async def test_safe_write_rejects_unknown_layer() -> None:
     with pytest.raises(ValueError, match="silver"):
         await safe_write_layer(
-            execute_with_span=AsyncMock(),
-            writer=SimpleNamespace(),  # type: ignore[arg-type]
-            quarantine_manager=SimpleNamespace(),  # type: ignore[arg-type]
-            logger=MagicMock(),
-            run_id="r1",  # type: ignore[arg-type]
-            domain_event_emitter=None,
+            context=LayerWriteContext(
+                execute_with_span=AsyncMock(),
+                writer=SimpleNamespace(),  # type: ignore[arg-type]
+                quarantine_manager=SimpleNamespace(),  # type: ignore[arg-type]
+                logger=MagicMock(),
+                run_id="r1",  # type: ignore[arg-type]
+                domain_event_emitter=None,
+            ),
             layer="bronze",
             records=[],
             batch_id="b1",  # type: ignore[arg-type]

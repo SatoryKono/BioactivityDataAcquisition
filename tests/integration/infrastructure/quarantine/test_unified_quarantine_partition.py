@@ -37,6 +37,7 @@ BATCH_ID = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
 
 
 def _request(pipeline: str, record_id: int, **overrides):
+    """Build a deterministic quarantine write request with optional overrides."""
     return {
         "pipeline": pipeline,
         "error_code": "SCHEMA_VIOLATION",

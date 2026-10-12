@@ -9,6 +9,7 @@ from bioetl.composition.bootstrap.runtime.assay_replay_capture import (
 from datetime import UTC, datetime
 from os.path import relpath
 from pathlib import Path
+from shutil import rmtree
 from unittest.mock import AsyncMock, MagicMock
 
 import pyarrow as pa
@@ -63,7 +64,7 @@ def _successful_publication_enricher_inputs(config, tables, record):
     ids=["absolute", "relative-capture", "relative-replay", "relative-both"],
 )
 async def test_other_composite_families_replay_physical_outputs(
-    tmp_path, family, monkeypatch, relative_capture, relative_replay
+    tmp_path, family, monkeypatch, request, relative_capture, relative_replay
 ):
     """Exercise each real family config and production writer without network I/O."""
     from uuid import UUID
@@ -95,8 +96,12 @@ async def test_other_composite_families_replay_physical_outputs(
     run_id = "22222222-2222-4222-8222-222222222222"
     logger = NoOpLogger()
     registry = _load_field_group_registry(config.name, logger)
-    capture_root = Path(relpath(tmp_path)) if relative_capture else tmp_path
-    replay_root = Path(relpath(tmp_path)) if relative_replay else tmp_path
+    physical_root = tmp_path
+    if relative_capture or relative_replay:
+        physical_root = Path.cwd() / "reports" / "test-scratch" / tmp_path.name
+        request.addfinalizer(lambda: rmtree(physical_root, ignore_errors=True))
+    capture_root = Path(relpath(physical_root)) if relative_capture else physical_root
+    replay_root = Path(relpath(physical_root)) if relative_replay else physical_root
     settings = Settings.model_validate(
         {"data_dir": capture_root / "live", "report_root": capture_root / "reports"}
     )
