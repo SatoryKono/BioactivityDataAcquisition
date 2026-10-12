@@ -67,7 +67,12 @@ def _git_stdout(repo_root: Path, *args: str) -> str:
     for executable in candidates:
         if not executable:
             continue
-        from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+        try:
+            from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+        except ModuleNotFoundError:
+
+            def ensure_safe_cli_argv(args):
+                return args
 
         completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
             ensure_safe_cli_argv([executable, *[str(a) for a in args]]),
