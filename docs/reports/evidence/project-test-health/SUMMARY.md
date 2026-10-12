@@ -1,6 +1,6 @@
 ---
 status: active-non-canonical
-last_verified: "2026-10-08"
+last_verified: "2026-10-13"
 freshness_window_days: 7
 owner: quality
 canonical_sources:
@@ -33,8 +33,10 @@ is not used as provenance for this CircleCI capture.
 This evidence covers the canonical 17-shard plan, not every repository test
 surface. The manifest excludes architecture, performance, manual E2E,
 live-provider contracts, and memory selectors; those gates have separate
-workflows. The tracked test-module inventory contains 3,033 `test_*.py` files
-as of 2026-10-08. This summary remains a non-canonical backlog signal and does
+workflows. The tracked test-module inventory contains 3,037 `test_*.py` files
+as of 2026-10-13, measured with `git ls-files 'tests/**/test_*.py'`. This
+census is separate from the historical 2026-10-08 coverage capture. This summary
+remains a non-canonical backlog signal and does
 not claim lifecycle or release admission.
 
 ## Historical backlog signals
