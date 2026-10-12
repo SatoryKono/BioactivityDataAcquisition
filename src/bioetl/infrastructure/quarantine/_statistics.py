@@ -10,6 +10,7 @@ from bioetl.infrastructure.quarantine._pyarrow_helpers import equal_mask
 from bioetl.infrastructure.quarantine.filtered_reads import (
     _increment_counter,
     _load_filtered_rows,
+    _load_scoped_pyarrow_table,
     _single_filter_value,
 )
 from bioetl.infrastructure.quarantine.statistics_support import (
@@ -128,9 +129,10 @@ def get_statistics(
     filters: list[tuple[str, str, object]] = []
     if error_code:
         filters.append(("error_code", "=", error_code))
-    arrow_table = dt.to_pyarrow_table(
-        partitions=[("pipeline", "=", pipeline)],
-        filters=filters or None,
+    arrow_table = _load_scoped_pyarrow_table(
+        dt,
+        pipeline_single=pipeline,
+        filters=filters,
     )
     if len(arrow_table) == 0:
         return empty_stats

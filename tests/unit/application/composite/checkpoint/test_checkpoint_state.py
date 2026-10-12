@@ -454,6 +454,25 @@ class TestWithState:
         updated = initial.with_state(CompositePipelineState.FAILED, clock=_FIXED_CLOCK)
         assert updated.state == CompositePipelineState.FAILED
 
+    @pytest.mark.parametrize(
+        "target_state",
+        [CompositePipelineState.COMPLETED, CompositePipelineState.NOT_STARTED],
+        ids=["completed", "not_started"],
+    )
+    def test_with_state_replaces_failed_snapshot(
+        self, target_state: CompositePipelineState
+    ) -> None:
+        """with_state replaces the enum in a failed checkpoint snapshot."""
+        initial = CompositeCheckpointState(
+            composite_name="c", run_id="r", state=CompositePipelineState.FAILED
+        )
+
+        updated = initial.with_state(target_state, clock=_FIXED_CLOCK)
+
+        assert updated.state is target_state
+        assert initial.state is CompositePipelineState.FAILED
+        assert updated.updated_at == _FIXED_CLOCK.now()
+
 
 # ---------------------------------------------------------------------------
 # 6. is_resumable
@@ -814,6 +833,8 @@ class TestFromDict:
         assert state.last_event_occurred_at is None
         assert state.input_snapshot_fingerprint == ""
         assert state.contract_version == ""
+        assert state.merge_completed is False
+        assert state.merge_result is None
 
     def test_extra_fields_are_ignored(self) -> None:
         """from_dict ignores unknown fields in the dictionary (forward compat)."""
@@ -826,6 +847,8 @@ class TestFromDict:
         state = CompositeCheckpointState.from_dict(data)
         assert state.composite_name == "c"
         assert state.run_id == "r"
+        assert state.merge_completed is False
+        assert state.merge_result is None
 
     def test_null_values_for_optional_fields(self) -> None:
         """from_dict handles explicit None values for fields gracefully."""
@@ -836,12 +859,26 @@ class TestFromDict:
             "last_event_id": None,
             "last_event_occurred_at": None,
             "seed_result": None,
+            "merge_result": None,
         }
         state = CompositeCheckpointState.from_dict(data)
         assert state.effective_config_hash == ""
         assert state.last_event_id is None
         assert state.last_event_occurred_at is None
         assert state.seed_result is None
+        assert state.merge_result is None
+
+    def test_merge_fields_deserialized(self) -> None:
+        """from_dict correctly restores merge_completed and merge_result."""
+        data = {
+            "composite_name": "c",
+            "run_id": "r",
+            "merge_completed": True,
+            "merge_result": {"status": "success", "count": 42},
+        }
+        state = CompositeCheckpointState.from_dict(data)
+        assert state.merge_completed is True
+        assert state.merge_result == {"status": "success", "count": 42}
 
     def test_runtime_anchors_are_normalized_during_round_trip(self) -> None:
         """Checkpoint serialization/deserialization canonicalizes runtime anchors."""

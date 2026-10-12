@@ -47,7 +47,6 @@ import pytest
 from bioetl.domain.aggregates.pipeline_run import PipelineRun
 from bioetl.domain.aggregates.pipeline_run_stage_result import (
     StageResult,
-    _validate_stage_result,
 )
 from bioetl.domain.aggregates.pipeline_run_stage_result import (
     PipelineRunState,
@@ -607,43 +606,88 @@ class TestPipelineRunLifecycleMixin:
 
 
 class TestStageResultValidationFunctions:
-    """Tests for StageResult validation functions."""
+    """Tests for StageResult constructor validation invariants."""
 
     def test_validate_stage_name_rejects_empty(self):
         """Empty stage names are rejected by stage-result validation."""
         with pytest.raises(ValueError, match="Stage name cannot be empty"):
-            _validate_stage_result("", StageStatus.RUNNING, None, None, 0, _ts(0))
+            StageResult(
+                stage="",
+                status=StageStatus.RUNNING,
+                started_at=_ts(0),
+                completed_at=None,
+                error=None,
+                records_processed=0,
+            )
 
     def test_validate_stage_name_accepts_valid(self):
         """Valid stage names pass stage-result validation."""
-        _validate_stage_result("bronze", StageStatus.RUNNING, None, None, 0, _ts(0))
+        StageResult(
+            stage="bronze",
+            status=StageStatus.RUNNING,
+            started_at=_ts(0),
+            completed_at=None,
+            error=None,
+            records_processed=0,
+        )
 
     def test_validate_stage_completion_failed_requires_error(self):
         """FAILED status requires an error message."""
         with pytest.raises(ValueError, match="Failed stage must have an error"):
-            _validate_stage_result("stage", StageStatus.FAILED, None, _ts(0), 0, _ts(0))
+            StageResult(
+                stage="stage",
+                status=StageStatus.FAILED,
+                started_at=_ts(0),
+                completed_at=_ts(0),
+                error=None,
+                records_processed=0,
+            )
 
     def test_validate_stage_completion_success_requires_timestamp(self):
         """SUCCESS status requires completed_at."""
         with pytest.raises(ValueError, match="must have completed_at"):
-            _validate_stage_result("stage", StageStatus.SUCCESS, None, None, 0, _ts(0))
+            StageResult(
+                stage="stage",
+                status=StageStatus.SUCCESS,
+                started_at=_ts(0),
+                completed_at=None,
+                error=None,
+                records_processed=0,
+            )
 
     def test_validate_stage_completion_failed_requires_timestamp(self):
         """FAILED status requires completed_at."""
         with pytest.raises(ValueError, match="must have completed_at"):
-            _validate_stage_result(
-                "stage", StageStatus.FAILED, "error", None, 0, _ts(0)
+            StageResult(
+                stage="stage",
+                status=StageStatus.FAILED,
+                started_at=_ts(0),
+                completed_at=None,
+                error="error",
+                records_processed=0,
             )
 
     def test_validate_stage_completion_running_allows_none_timestamp(self):
         """RUNNING status allows a missing completed_at."""
-        _validate_stage_result("stage", StageStatus.RUNNING, None, None, 0, _ts(0))
+        StageResult(
+            stage="stage",
+            status=StageStatus.RUNNING,
+            started_at=_ts(0),
+            completed_at=None,
+            error=None,
+            records_processed=0,
+        )
 
     def test_validate_stage_result_rejects_negative_records(self):
-        """_validate_stage_result should reject negative records_processed."""
+        """StageResult should reject negative records_processed."""
         with pytest.raises(ValueError, match="cannot be negative"):
-            _validate_stage_result(
-                "test", StageStatus.SUCCESS, None, _ts(0), -1, _ts(0)
+            StageResult(
+                stage="test",
+                status=StageStatus.SUCCESS,
+                started_at=_ts(0),
+                completed_at=_ts(0),
+                error=None,
+                records_processed=-1,
             )
 
     def test_validate_in_progress_rejects_completed_at(self) -> None:
@@ -651,21 +695,36 @@ class TestStageResultValidationFunctions:
         with pytest.raises(
             ValueError, match="In-progress stage must not have completed_at"
         ):
-            _validate_stage_result(
-                "stage", StageStatus.RUNNING, None, _ts(1), 0, _ts(0)
+            StageResult(
+                stage="stage",
+                status=StageStatus.RUNNING,
+                started_at=_ts(0),
+                completed_at=_ts(1),
+                error=None,
+                records_processed=0,
             )
         with pytest.raises(
             ValueError, match="In-progress stage must not have completed_at"
         ):
-            _validate_stage_result(
-                "stage", StageStatus.PENDING, None, _ts(1), 0, _ts(0)
+            StageResult(
+                stage="stage",
+                status=StageStatus.PENDING,
+                started_at=_ts(0),
+                completed_at=_ts(1),
+                error=None,
+                records_processed=0,
             )
 
     def test_validate_completion_order_rejects_earlier_completed_at(self) -> None:
         """completed_at must not precede started_at."""
         with pytest.raises(ValueError, match="completed_at cannot be earlier"):
-            _validate_stage_result(
-                "stage", StageStatus.SUCCESS, None, _ts(0), 0, _ts(1)
+            StageResult(
+                stage="stage",
+                status=StageStatus.SUCCESS,
+                started_at=_ts(1),
+                completed_at=_ts(0),
+                error=None,
+                records_processed=0,
             )
 
 
