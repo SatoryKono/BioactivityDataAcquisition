@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-10-10'
+  Last verified: '2026-10-12'
 
 ______________________________________________________________________
 
@@ -28,11 +28,11 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `codex/integrate-telemetry-cancellation-20261009`
-- Source commit: `d28436d5f78c911d68f6fbbf91314578bdcb897c`
+- Source commit: `c6549b1772667ecbc1e98f9b429d0d71a49df976`
 - Source run id: `local-pr12164-main-sync-c6549b1-w2`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `b629f4d6c6e45f201724a3aa241b25a2928d27acc2d94c59768c533571ab00b4`
+- Source tree sha256: `4ff62f73f0f2e451e410a00c2743968ecbb7c7808ce8c97fa39dd3fb9c471333`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-10-10T00:12:30.304249+00:00`
 
@@ -41,6 +41,8 @@ trend evidence only.
 - Continuous identity is `source_tree_sha256` over `tests/**/*.py`,
   `pyproject.toml`, `configs/quality/test_matrix.yaml`, and
   `.github/workflows/tests.yml`.
+- `measurement_provenance.head` and `test_tree_sha256` retain the captured
+  run identity when the current audited test tree advances later.
 - Freshness uses live UTC (injectable via `BIOETL_TELEMETRY_REFERENCE_NOW`)
   and rejects future/stale `refreshed_at_utc` values.
 - `source_commit` must remain an ancestor of HEAD or have a reviewed squash

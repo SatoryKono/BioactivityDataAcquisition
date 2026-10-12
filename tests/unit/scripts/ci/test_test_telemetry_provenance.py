@@ -142,6 +142,27 @@ def test_accepts_equal_inputs_and_confirmed_squash_tree(bridge) -> None:
     assert validate_squash_bridge(payload, receipt, root, head)
 
 
+def test_local_capture_keeps_measured_identity_after_test_tree_changes(bridge) -> None:
+    root, head, payload, receipt, _ = bridge
+    payload["source_event"] = "local_coverage_verify"
+    payload["source_tree_sha256"] = "current-audited-tree"
+    payload["measurement_provenance"] = {
+        "head": payload["source_commit"],
+        "test_tree_sha256": "snapshot",
+        "manifest_sha256": "manifest",
+    }
+    receipt["manifest_sha256"] = "manifest"
+
+    assert validate_squash_bridge(payload, receipt, root, head)
+    for field in ("head", "test_tree_sha256", "manifest_sha256"):
+        changed = copy.deepcopy(payload)
+        changed["measurement_provenance"][field] = "forged"
+        assert not validate_squash_bridge(changed, receipt, root, head)
+    without_measurement = copy.deepcopy(payload)
+    del without_measurement["measurement_provenance"]
+    assert not validate_squash_bridge(without_measurement, receipt, root, head)
+
+
 @pytest.mark.parametrize(
     "field,value",
     [

@@ -509,6 +509,8 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
         "- Continuous identity is `source_tree_sha256` over `tests/**/*.py`,",
         "  `pyproject.toml`, `configs/quality/test_matrix.yaml`, and",
         "  `.github/workflows/tests.yml`.",
+        "- `measurement_provenance.head` and `test_tree_sha256` retain the captured",
+        "  run identity when the current audited test tree advances later.",
         "- Freshness uses live UTC (injectable via `BIOETL_TELEMETRY_REFERENCE_NOW`)",
         "  and rejects future/stale `refreshed_at_utc` values.",
         "- `source_commit` must remain an ancestor of HEAD or have a reviewed squash",

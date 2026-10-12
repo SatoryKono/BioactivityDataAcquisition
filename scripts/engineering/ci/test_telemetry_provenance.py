@@ -109,9 +109,22 @@ def _tree(root: Path, commit: str) -> str:
 
 
 def _receipt_matches_capture(receipt: dict[str, Any], payload: dict[str, Any]) -> bool:
-    return receipt.get("schema_version") == 1 and all(
-        receipt.get(key) == payload.get(key)
-        for key in ("source_commit", "source_run_id", "source_tree_sha256")
+    if receipt.get("schema_version") != 1:
+        return False
+    if any(
+        receipt.get(key) != payload.get(key)
+        for key in ("source_commit", "source_run_id")
+    ):
+        return False
+    measurement = payload.get("measurement_provenance")
+    if not isinstance(measurement, dict):
+        return payload.get("source_event") != "local_coverage_verify" and receipt.get(
+            "source_tree_sha256"
+        ) == payload.get("source_tree_sha256")
+    return (
+        measurement.get("head") == payload.get("source_commit")
+        and receipt.get("source_tree_sha256") == measurement.get("test_tree_sha256")
+        and receipt.get("manifest_sha256") == measurement.get("manifest_sha256")
     )
 
 

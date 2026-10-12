@@ -12,11 +12,15 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import re
+import subprocess
 
 import pytest
 import yaml
+
+from scripts.engineering.ci.test_telemetry_provenance import validate_squash_bridge
 
 pytestmark = pytest.mark.architecture
 
@@ -56,7 +60,18 @@ def test_test_telemetry_baseline_contract_is_present_and_scoped() -> None:
         assert provenance["trust_tier"] == "local_single_host"
         assert provenance["ci_status"] == "BLOCKED_EXTERNAL_PERMANENT"
         assert provenance["head"] == payload["source_commit"]
-        assert provenance["test_tree_sha256"] == payload["source_tree_sha256"]
+        if provenance["test_tree_sha256"] != payload["source_tree_sha256"]:
+            receipt = json.loads(
+                (ROOT / "reports/test-telemetry/squash-provenance.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            assert receipt["source_tree_sha256"] == provenance["test_tree_sha256"]
+            assert receipt["manifest_sha256"] == provenance["manifest_sha256"]
+            head = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+            ).strip()
+            assert validate_squash_bridge(payload, receipt, ROOT, head)
         assert provenance["required_shards"] == [shard.name for shard in SHARDS]
         assert [row["name"] for row in provenance["shards"]] == provenance[
             "required_shards"
