@@ -16,6 +16,7 @@ from bioetl.application.composite.aggregator import (
     _deduplicate_columns,
 )
 from bioetl.application.composite.checkpoint.persistence_service import (
+    CompositeCheckpointPersistenceParams,
     CompositeCheckpointPersistenceService,
 )
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
@@ -99,12 +100,14 @@ def test_aggregator_dedupe_sort_and_fallback_expr() -> None:
 def test_checkpoint_persistence_none_timestamp_and_save_errors() -> None:
     metrics = MagicMock()
     service = CompositeCheckpointPersistenceService(
-        composite_name="chembl_activity",
-        checkpoint_filename="cp.json",
-        glob_pattern="cp-*.json",
-        storage=MagicMock(),
-        logger=MagicMock(),
-        metrics=metrics,
+        CompositeCheckpointPersistenceParams(
+            composite_name="chembl_activity",
+            checkpoint_filename="cp.json",
+            glob_pattern="cp-*.json",
+            storage=MagicMock(),
+            logger=MagicMock(),
+            metrics=metrics,
+        )
     )
     empty = CompositeCheckpointState(composite_name="chembl_activity", run_id="run-1")
     service._emit_checkpoint_saved_at_from_state(empty)
