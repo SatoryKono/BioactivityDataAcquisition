@@ -154,6 +154,10 @@ def test_local_capture_keeps_measured_identity_after_test_tree_changes(bridge) -
     receipt["manifest_sha256"] = "manifest"
 
     assert validate_squash_bridge(payload, receipt, root, head)
+    for field in ("source_tree_sha256", "manifest_sha256"):
+        changed_receipt = copy.deepcopy(receipt)
+        changed_receipt[field] = "forged"
+        assert not validate_squash_bridge(payload, changed_receipt, root, head)
     for field in ("head", "test_tree_sha256", "manifest_sha256"):
         changed = copy.deepcopy(payload)
         changed["measurement_provenance"][field] = "forged"
