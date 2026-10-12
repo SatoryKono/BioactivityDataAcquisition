@@ -53,6 +53,9 @@ from bioetl.application.pipelines.openalex.transformer import (
 from bioetl.application.pipelines.pubchem.transformer import (
     PubChemCompoundTransformer as PubChemCompoundTransformer,
 )
+from bioetl.application.pipelines.pubmed.publication_term_enricher import (
+    PubMedPublicationTermEnrichmentService as PubMedPublicationTermEnrichmentService,
+)
 from bioetl.application.pipelines.pubmed.transformer import (
     PubMedPublicationTransformer as PubMedPublicationTransformer,
 )
