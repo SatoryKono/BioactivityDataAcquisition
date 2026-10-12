@@ -158,6 +158,7 @@ def build_gold_output(
         content_hash=content_hash,
         write_started_at=input_data.started_at,
         write_completed_at=input_data.completed_at,
+        write_duration_seconds=getattr(input_data, "duration_seconds", None),
         composite_run_id=composite_run_id,
     )
 

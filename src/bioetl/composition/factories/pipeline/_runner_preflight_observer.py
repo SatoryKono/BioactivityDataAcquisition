@@ -18,7 +18,6 @@ from bioetl.composition.factories.pipeline._preflight_health_monitor import (
 )
 from bioetl.domain.medallion import WriteModePolicy
 from bioetl.application.core.preflight.medallion_validator import PreflightLayerConfig
-from bioetl.composition.factories.storage.bundle import StorageBundle
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
@@ -41,10 +40,15 @@ def build_preflight_service(context: RunnerAssemblyContext) -> PreflightService:
         logger=context.logger_port,
         write_mode_policy=WriteModePolicy(),
     )
-    storage = cast(StorageBundle, pipeline.services.storage)
+    storage = pipeline.services.storage
     sink = context.yaml_config.sink if context.yaml_config is not None else {}
     silver = sink.get("silver")
     gold = sink.get("gold")
+
+    bronze_svc = getattr(storage, "bronze", None)
+    silver_svc = getattr(storage, "silver", None)
+    gold_svc = getattr(storage, "gold", None)
+
     return PreflightService(
         config=pipeline.config,
         context=pipeline.context,
@@ -53,9 +57,9 @@ def build_preflight_service(context: RunnerAssemblyContext) -> PreflightService:
         health_aggregator=health_aggregator,
         medallion_validator=medallion_validator,
         layer_config=PreflightLayerConfig(
-            bronze_path=str(storage.bronze.base_path),
-            silver_path=str(storage.silver.base_path),
-            gold_path=str(storage.gold.base_path),
+            bronze_path=str(bronze_svc.base_path) if bronze_svc else None,
+            silver_path=str(silver_svc.base_path) if silver_svc else None,
+            gold_path=str(gold_svc.base_path) if gold_svc else None,
             silver_format=silver.format if silver is not None else None,
             gold_format=gold.format if gold is not None else None,
         ),

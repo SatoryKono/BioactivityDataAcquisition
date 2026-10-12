@@ -3,8 +3,8 @@
     "snapshot_date": "2026-09-11",
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
-    "budget_warnings": 1,
-    "budget_review_notes": 2
+    "budget_warnings": 2,
+    "budget_review_notes": 1
   },
   "families": [
     {
@@ -18,8 +18,8 @@
       ],
       "duplication_clusters": 0,
       "files": 203,
-      "total_loc": 25275,
-      "files_ge_250_loc": 0,
+      "total_loc": 25288,
+      "files_ge_250_loc": 1,
       "helper_function_ratio": 0.378,
       "max_internal_fan_in": 5,
       "max_internal_fan_in_module": "bioetl.application.core.record_processor_config",
@@ -1582,7 +1582,9 @@
           "bioetl.application.core.record_processor_config"
         ]
       },
-      "budget_warnings": [],
+      "budget_warnings": [
+        "over_budget:files_ge_250_loc=1/0"
+      ],
       "budget_review_notes": [],
       "at_budget_modules": [],
       "at_budget_module_count": 0
@@ -1598,11 +1600,11 @@
       ],
       "duplication_clusters": 0,
       "files": 49,
-      "total_loc": 6416,
+      "total_loc": 6419,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.286,
-      "max_internal_fan_in": 3,
-      "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.observability_bundle",
+      "max_internal_fan_in": 2,
+      "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.tracing_bootstrap",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 3
@@ -1610,9 +1612,8 @@
       "internal_fan_in_census": {
         "distribution": {
           "0": 6,
-          "1": 28,
-          "2": 14,
-          "3": 1
+          "1": 27,
+          "2": 16
         },
         "modules": [
           {
@@ -1667,9 +1668,10 @@
           },
           {
             "module": "bioetl.composition.bootstrap.runtime._observability_bundle_support",
-            "fan_in": 1,
+            "fan_in": 2,
             "runtime_importers": [
-              "bioetl.composition.bootstrap.runtime.observability_bundle"
+              "bioetl.composition.bootstrap.runtime.observability_bundle",
+              "bioetl.composition.bootstrap.runtime.observability_validate_observability_preflight"
             ]
           },
           {
@@ -1861,10 +1863,9 @@
           },
           {
             "module": "bioetl.composition.bootstrap.runtime.observability_bundle",
-            "fan_in": 3,
+            "fan_in": 2,
             "runtime_importers": [
               "bioetl.composition.bootstrap.runtime.observability",
-              "bioetl.composition.bootstrap.runtime.observability_validate_observability_preflight",
               "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases"
             ]
           },
@@ -1963,27 +1964,30 @@
             ]
           }
         ],
-        "max_fan_in": 3,
+        "max_fan_in": 2,
         "max_modules": [
-          "bioetl.composition.bootstrap.runtime.observability_bundle"
+          "bioetl.composition.bootstrap.runtime._composite_control_plane_support",
+          "bioetl.composition.bootstrap.runtime._composite_plan_support",
+          "bioetl.composition.bootstrap.runtime._dependency_runner_support",
+          "bioetl.composition.bootstrap.runtime._observability_bundle_support",
+          "bioetl.composition.bootstrap.runtime._runner_assembly_support",
+          "bioetl.composition.bootstrap.runtime.assembly",
+          "bioetl.composition.bootstrap.runtime.composite_filter_extraction_service",
+          "bioetl.composition.bootstrap.runtime.dq_bootstrap",
+          "bioetl.composition.bootstrap.runtime.logger_bootstrap",
+          "bioetl.composition.bootstrap.runtime.metrics_bootstrap",
+          "bioetl.composition.bootstrap.runtime.observability",
+          "bioetl.composition.bootstrap.runtime.observability_assembly",
+          "bioetl.composition.bootstrap.runtime.observability_bundle",
+          "bioetl.composition.bootstrap.runtime.pipeline",
+          "bioetl.composition.bootstrap.runtime.run_status_capture",
+          "bioetl.composition.bootstrap.runtime.tracing_bootstrap"
         ]
       },
       "budget_warnings": [],
-      "budget_review_notes": [
-        "at_budget:max_internal_fan_in=3/3"
-      ],
-      "at_budget_modules": [
-        {
-          "module": "bioetl.composition.bootstrap.runtime.observability_bundle",
-          "fan_in": 3,
-          "runtime_importers": [
-            "bioetl.composition.bootstrap.runtime.observability",
-            "bioetl.composition.bootstrap.runtime.observability_validate_observability_preflight",
-            "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases"
-          ]
-        }
-      ],
-      "at_budget_module_count": 1
+      "budget_review_notes": [],
+      "at_budget_modules": [],
+      "at_budget_module_count": 0
     },
     {
       "name": "composition_factories_pipeline",
@@ -1996,7 +2000,7 @@
       ],
       "duplication_clusters": 0,
       "files": 32,
-      "total_loc": 3882,
+      "total_loc": 3886,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.358,
       "max_internal_fan_in": 2,
@@ -2269,7 +2273,7 @@
       ],
       "duplication_clusters": 0,
       "files": 131,
-      "total_loc": 15528,
+      "total_loc": 15527,
       "files_ge_250_loc": 1,
       "helper_function_ratio": 0.395,
       "max_internal_fan_in": 2,

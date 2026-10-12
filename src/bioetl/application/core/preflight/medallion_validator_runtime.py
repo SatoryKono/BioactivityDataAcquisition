@@ -75,7 +75,7 @@ def validate_layer_formats(
 
 def canonicalize_layer_path(path: str) -> str:
     """Normalize a medallion layer path so trailing-slash variants compare equal."""
-    return os.path.normpath(path.strip())
+    return os.path.realpath(path.strip())
 
 
 def _path_collision_error(

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
 
-from .observability_bundle import (
+from ._observability_bundle_support import (
     validate_observability_preflight_impl as _validate_observability_preflight_impl,
 )
 

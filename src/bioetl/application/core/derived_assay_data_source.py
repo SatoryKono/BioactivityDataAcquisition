@@ -46,9 +46,13 @@ class DerivedAssayDataSource(
         filter_ids: list[str] | None = None,
         *,
         filter_id_count: int | None = None,
+        offset: int | None = None,
     ) -> int:
+        base_limit = limit
+        if limit is not None and offset is not None:
+            base_limit = limit + offset
         return resolve_derived_upstream_limit(
-            limit,
+            base_limit,
             multiplier=self.ASSAY_LIMIT_MULTIPLIER,
             filter_ids=filter_ids,
             filter_id_count=filter_id_count,
@@ -64,7 +68,7 @@ class DerivedAssayDataSource(
     ) -> AsyncIterator[JsonDict]:
         if limit is not None and limit <= 0:
             return
-        scan_limit = self._upstream_limit(limit, filter_ids)
+        scan_limit = self._upstream_limit(limit, filter_ids, offset=offset)
         source = self._data_source.fetch(
             entity_type=self.SOURCE_ENTITY_TYPE,
             limit=scan_limit,
@@ -86,7 +90,7 @@ class DerivedAssayDataSource(
 
     async def _fetch_target_filtered_records(
         self,
-        filterable: Any,
+        filterable: Any,  # Any: delegated to multiple filterable source types
         filter_ids: list[str],
         filter_field: str,
         limit: int | None = None,
@@ -107,7 +111,7 @@ class DerivedAssayDataSource(
 
     async def _fetch_target_multi_filtered_records(
         self,
-        filterable: Any,
+        filterable: Any,  # Any: delegated to multiple filterable source types
         filters: dict[str, list[str]],
         limit: int | None = None,
     ) -> AsyncIterator[JsonDict]:

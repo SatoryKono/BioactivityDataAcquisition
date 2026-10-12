@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "20f951f3aa0d2f535a757dca96af0b213f675f0fd74873f80d8c3feded56293c",
-      "limit": "20f951f3aa0d2f535a757dca96af0b213f675f0fd74873f80d8c3feded56293c",
+      "current": "58bfec37061e697f4a8cfed40adc13f0d42f9fca9db69b3bc5eae231216281e2",
+      "limit": "58bfec37061e697f4a8cfed40adc13f0d42f9fca9db69b3bc5eae231216281e2",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -56,14 +56,14 @@
     },
     {
       "current": {
-        "source_module_count": 2557,
-        "source_tree_sha256": "20f951f3aa0d2f535a757dca96af0b213f675f0fd74873f80d8c3feded56293c",
+        "source_module_count": 2559,
+        "source_tree_sha256": "58bfec37061e697f4a8cfed40adc13f0d42f9fca9db69b3bc5eae231216281e2",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
-        "source_module_count": 2557,
-        "source_tree_sha256": "20f951f3aa0d2f535a757dca96af0b213f675f0fd74873f80d8c3feded56293c",
+        "source_module_count": 2559,
+        "source_tree_sha256": "58bfec37061e697f4a8cfed40adc13f0d42f9fca9db69b3bc5eae231216281e2",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -92,13 +92,13 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": 2,
       "limit": 0,
       "metric": "budget_warnings",
       "name": "hotspot_family_baseline_budget_warnings",
       "remediation": "Reduce hotspot-family metrics to stay at or below reviewed budgets.",
       "source_artifact": "reports/quality/hotspot-family-baseline.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": 0,
@@ -370,22 +370,22 @@
       "status": "pass"
     },
     {
-      "current": "passed",
+      "current": null,
       "limit": "passed",
       "metric": "status",
       "name": "observability_release_review_status",
       "remediation": "Run live observability cardinality review without degraded release evidence.",
       "source_artifact": "reports/observability/runtime_cardinality_review.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
-      "current": 0,
+      "current": "missing_or_invalid",
       "limit": 21,
       "metric": "generated_at_age_days",
       "name": "observability_release_review_freshness",
       "remediation": "Regenerate live runtime cardinality review evidence.",
       "source_artifact": "reports/observability/runtime_cardinality_review.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": 0,
@@ -415,13 +415,13 @@
       "status": "pass"
     },
     {
-      "current": "bd93d0cac99cfe256ea1c54b90e8b4f6fdff25a294ecc23678e3e0f9a5b0c2f6",
+      "current": "db481facc9c4e5393c41a1d2cc0585f8c207fe7238e4aa6701ffbba07aebc2c0",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
       "remediation": "Fetch origin/main and regenerate the remote-main architecture debt baseline.",
       "source_artifact": "reports/quality/architecture-debt-remote-main-baseline.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": {
@@ -467,18 +467,23 @@
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 0,
-    "pass": 46,
+    "fail": 4,
+    "pass": 42,
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 10.0,
+    "architecture_quality_scorecard_integral_score": 9.74,
     "architecture_quality_scorecard_interpretation": "excellent",
-    "fail_count": 0,
-    "failing_gates": [],
+    "fail_count": 4,
+    "failing_gates": [
+      "hotspot_family_baseline_budget_warnings",
+      "observability_release_review_status",
+      "observability_release_review_freshness",
+      "remote_main_architecture_debt_baseline"
+    ],
     "gate_count": 46,
-    "pass_count": 46,
-    "release_gate_status": "passing",
+    "pass_count": 42,
+    "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
   }

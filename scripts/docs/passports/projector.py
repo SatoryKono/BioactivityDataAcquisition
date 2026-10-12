@@ -132,7 +132,7 @@ def _source_revision() -> str:
     if override:
         return override
     result = subprocess.run(
-        ["git", "ls-tree", "-r", "--full-tree", "HEAD", "--", *canonical_paths],
+        ["git", "ls-files", "-s", "--", *canonical_paths],
         cwd=PROJECT_ROOT,
         check=True,
         capture_output=True,
