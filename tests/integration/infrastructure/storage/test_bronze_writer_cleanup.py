@@ -12,6 +12,7 @@
 
 from __future__ import annotations
 
+import os
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -22,6 +23,17 @@ from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
 pytestmark = pytest.mark.integration
+_APPLY_POSIX = pytest.mark.skipif(
+    os.name == "nt", reason="Windows destructive cleanup is fail-closed (NOT_VERIFIED)"
+)
+_ARTIFACT = "batch_2024-01-01_12345678-1234-5678-1234-567812345678.jsonl.zst"
+
+
+def _write_pair(date_dir: Path, data: bytes = b"test data") -> Path:
+    payload = date_dir / _ARTIFACT
+    payload.write_bytes(data)
+    (date_dir / f"{_ARTIFACT}.meta.json").write_bytes(b"{}")
+    return payload
 
 
 def _make_writer(base_path: Path) -> BronzeWriter:
@@ -68,19 +80,17 @@ def test_find_old_date_dirs_ignores_non_date_directories(tmp_path: Path) -> None
 
 
 @pytest.mark.asyncio
+@_APPLY_POSIX
 async def test_cleanup_old_files_removes_old_data(tmp_path: Path) -> None:
     writer = _make_writer(tmp_path)
     old_date = tmp_path / "chembl" / "activity" / "2024-01-01"
     old_date.mkdir(parents=True)
-    old_file = (
-        old_date / "batch_2024-01-01_12345678-1234-5678-1234-567812345678.jsonl.zst"
-    )
-    old_file.write_bytes(b"test data")
+    old_file = _write_pair(old_date)
 
     cutoff = datetime(2024, 6, 1, tzinfo=UTC)
     result = await writer.cleanup_old_files(cutoff)
 
-    assert result["files_removed"] == 1
+    assert result["files_removed"] == 2
     assert result["bytes_freed"] > 0
     assert result["directories_removed"] == 1
     assert not old_date.exists()
@@ -91,21 +101,21 @@ async def test_cleanup_old_files_dry_run(tmp_path: Path) -> None:
     writer = _make_writer(tmp_path)
     old_date = tmp_path / "chembl" / "activity" / "2024-01-01"
     old_date.mkdir(parents=True)
-    old_file = (
-        old_date / "batch_2024-01-01_12345678-1234-5678-1234-567812345678.jsonl.zst"
-    )
-    old_file.write_bytes(b"test data")
+    old_file = _write_pair(old_date)
 
     cutoff = datetime(2024, 6, 1, tzinfo=UTC)
     result = await writer.cleanup_old_files(cutoff, dry_run=True)
 
-    assert result["files_removed"] == 1
-    assert result["directories_removed"] == 1
+    assert result["files_planned"] == 2
+    assert result["directories_planned"] == 1
+    assert result["files_removed"] == 0
+    assert result["bytes_freed"] == 0
     assert old_file.exists()
     assert old_date.exists()
 
 
 @pytest.mark.asyncio
+@_APPLY_POSIX
 async def test_cleanup_old_files_preserves_recent_data(tmp_path: Path) -> None:
     writer = _make_writer(tmp_path)
     recent_date = tmp_path / "chembl" / "activity" / "2024-12-01"
@@ -124,6 +134,7 @@ async def test_cleanup_old_files_preserves_recent_data(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
+@_APPLY_POSIX
 async def test_cleanup_old_files_multiple_providers(tmp_path: Path) -> None:
     writer = _make_writer(tmp_path)
 
@@ -131,13 +142,10 @@ async def test_cleanup_old_files_multiple_providers(tmp_path: Path) -> None:
         for entity in ["activity", "compound"]:
             old_date = tmp_path / provider / entity / "2024-01-01"
             old_date.mkdir(parents=True)
-            (
-                old_date
-                / "batch_2024-01-01_12345678-1234-5678-1234-567812345678.jsonl.zst"
-            ).write_bytes(b"data")
+            _write_pair(old_date, b"data")
 
     cutoff = datetime(2024, 6, 1, tzinfo=UTC)
     result = await writer.cleanup_old_files(cutoff)
 
-    assert result["files_removed"] == 4
+    assert result["files_removed"] == 8
     assert result["directories_removed"] == 4

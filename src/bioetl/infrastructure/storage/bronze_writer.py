@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import time
 from collections.abc import Iterator
 from datetime import datetime
@@ -11,6 +12,7 @@ from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+from bioetl.infrastructure.storage.bronze.cleanup_support import bronze_tree_lock
 from bioetl.infrastructure.storage.bronze.facade_contracts import (
     BRONZE_WRITE_ERRORS,
 )
@@ -187,19 +189,25 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         source_metadata: SourceMetadata | None = None,
     ) -> BronzeWriteResult:
         """Write raw records to Bronze layer (JSONL + zstd)."""
-        return await self._write_bronze_with_tracing(
-            BronzeWriteRequest(
-                records=records,
-                provider=provider,
-                entity=entity,
-                date=date,
-                batch_id=batch_id,
-                run_id=run_id,
-                run_type=run_type,
-                ingestion_ts=ingestion_ts,
-                source_metadata=source_metadata,
-            )
+        request = BronzeWriteRequest(
+            records=records,
+            provider=provider,
+            entity=entity,
+            date=date,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+            source_metadata=source_metadata,
         )
+        self._validate_bronze_request_inputs(request)
+        self.base_path.mkdir(parents=True, exist_ok=True)
+        lock = bronze_tree_lock(self.base_path, exclusive=False)
+        await asyncio.to_thread(lock.__enter__)
+        try:
+            return await self._write_bronze_with_tracing(request)
+        finally:
+            await asyncio.to_thread(lock.__exit__, None, None, None)
 
     async def cleanup_bronze(
         self,

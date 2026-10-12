@@ -53,6 +53,15 @@ class _MockCleanupResult:
     files_removed: int
     bytes_freed: int
     directories_removed: int
+    files_planned: int = 10
+    bytes_planned: int = 1024 * 1024
+    directories_planned: int = 2
+    files_skipped: int = 0
+    files_conflicted: int = 0
+    files_failed: int = 0
+    directories_skipped: int = 0
+    directories_conflicted: int = 0
+    directories_failed: int = 0
 
 
 @pytest.fixture
@@ -145,6 +154,29 @@ class TestBronzeCleanupCommand:
         mock_bronze_cleanup_service.cleanup.assert_awaited_once_with(
             retention_days=90, dry_run=True
         )
+
+    def test_partial_cleanup_displays_retained_counts(
+        self, cli_runner: CliRunner, mock_bronze_cleanup_service: MagicMock
+    ) -> None:
+        """The operator sees partial success and the artifacts needing review."""
+        mock_bronze_cleanup_service.cleanup.return_value = _MockCleanupResult(
+            files_removed=2,
+            bytes_freed=20,
+            directories_removed=0,
+            files_skipped=1,
+            files_conflicted=1,
+            files_failed=1,
+            directories_failed=1,
+        )
+        with patch(
+            "bioetl.interfaces.cli.commands.cleanup.get_bronze_cleanup_service",
+            return_value=mock_bronze_cleanup_service,
+        ):
+            result = cli_runner.invoke(cli, ["maintenance", "bronze-cleanup"])
+        assert result.exit_code == 0
+        assert "Removed 2 files" in result.output
+        assert "files skipped=1, conflicted=1, failed=1" in result.output
+        assert "directories skipped=0, conflicted=0, failed=1" in result.output
 
     def test_domain_error_exits_nonzero(self, cli_runner: CliRunner) -> None:
         """Test that BioETLError causes non-zero exit code."""

@@ -194,6 +194,36 @@ class TestBronzeCleanupServiceCleanup:
         assert result.bytes_freed == 0
         assert result.directories_removed == 0
 
+    @pytest.mark.asyncio
+    async def test_partial_cleanup_reports_retained_artifacts(
+        self, bronze_cleanup_service, mock_storage
+    ):
+        """Late failures retain successful deletions and all diagnostic counts."""
+        mock_storage.cleanup_bronze.return_value = {
+            "files_planned": 4,
+            "bytes_planned": 40,
+            "directories_planned": 1,
+            "files_removed": 2,
+            "bytes_freed": 20,
+            "directories_removed": 0,
+            "files_skipped": 1,
+            "files_conflicted": 1,
+            "files_failed": 1,
+            "directories_skipped": 1,
+            "directories_conflicted": 0,
+            "directories_failed": 1,
+        }
+
+        result = await bronze_cleanup_service.cleanup()
+
+        assert (result.files_planned, result.files_removed, result.bytes_freed) == (
+            4, 2, 20
+        )
+        assert (result.files_skipped, result.files_conflicted, result.files_failed) == (
+            1, 1, 1
+        )
+        assert (result.directories_skipped, result.directories_failed) == (1, 1)
+
 
 @pytest.mark.unit
 class TestBronzeCleanupServiceFormatBytes:

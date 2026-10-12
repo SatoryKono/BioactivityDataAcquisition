@@ -10,15 +10,22 @@ Implements the FS-001 contract (#12102):
 
 from __future__ import annotations
 
-import fnmatch
+import errno
 import os
+import re
+import secrets
 import stat
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
+from uuid import UUID
 
 __all__ = [
+    "bronze_tree_lock",
+    "candidate_is_safe",
     "date_dir_name_is_older",
+    "destructive_cleanup_supported",
     "find_old_date_dirs",
     "is_fully_resolved",
     "is_owned_artifact",
@@ -37,10 +44,10 @@ __all__ = [
 # payload ``batch_<date>_<batch_id>.jsonl.zst``, its sidecar
 # ``batch_<date>_<batch_id>.jsonl.zst.meta.json`` and the optional
 # uncompressed copy ``batch_<date>_<batch_id>.jsonl``.
-_OWNED_ARTIFACT_PATTERNS = (
-    "batch_*.jsonl.zst",
-    "batch_*.jsonl.zst.meta.json",
-    "batch_*.jsonl",
+_BATCH_ARTIFACT = re.compile(
+    r"^batch_(\d{4}-\d{2}-\d{2})_([0-9a-f]{8}-[0-9a-f]{4}-"
+    r"[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"
+    r"(\.jsonl\.zst|\.jsonl\.zst\.meta\.json|\.jsonl)$"
 )
 
 _DATE_DIR_FORMAT = "%Y-%m-%d"
@@ -57,7 +64,60 @@ _ANCHORED_OPS = bool(
     and _O_NOFOLLOW
     and os.unlink in os.supports_dir_fd
     and os.stat in os.supports_dir_fd
+    and os.open in os.supports_dir_fd
+    and os.rename in os.supports_dir_fd
+    and os.rmdir in os.supports_dir_fd
+    and os.mkdir in os.supports_dir_fd
 )
+
+
+def destructive_cleanup_supported() -> bool:
+    """Only POSIX handle-relative operations with advisory locking qualify."""
+    if not _ANCHORED_OPS or os.name == "nt":
+        return False
+    try:
+        import fcntl
+    except ImportError:
+        return False
+    return hasattr(fcntl, "flock")
+
+
+@contextmanager
+def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[None]:
+    """Coordinate all application writers and cleaners for one Bronze root.
+
+    This is advisory. The operator must exclude uncooperative same-user writers.
+    """
+    if not destructive_cleanup_supported():
+        if exclusive:
+            raise NotImplementedError(
+                "Bronze destructive cleanup requires POSIX dir_fd/no-follow and flock"
+            )
+        yield
+        return
+    import fcntl
+
+    root_real = real_root(base_path)
+    root_fd = os.open(root_real, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW)
+    try:
+        lock_fd = os.open(
+            ".bronze-cleanup.lock",
+            os.O_CREAT | os.O_RDWR | _O_NOFOLLOW,
+            0o600,
+            dir_fd=root_fd,
+        )
+        try:
+            if not stat.S_ISREG(os.fstat(lock_fd).st_mode):
+                raise OSError("Bronze cleanup lock is not a regular file")
+            fcntl.flock(  # type: ignore[attr-defined]  # POSIX-only runtime gate
+                lock_fd,
+                (fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH),  # type: ignore[attr-defined]
+            )
+            yield
+        finally:
+            os.close(lock_fd)
+    finally:
+        os.close(root_fd)
 
 
 def real_root(base_path: Path) -> Path:
@@ -102,9 +162,35 @@ def _entry_is_link_or_reparse(entry: os.DirEntry[str]) -> bool:
         return True
 
 
-def is_owned_artifact(name: str) -> bool:
-    """True when a filename matches the Bronze write contract."""
-    return any(fnmatch.fnmatch(name, pattern) for pattern in _OWNED_ARTIFACT_PATTERNS)
+def is_owned_artifact(
+    name: str,
+    *,
+    date_name: str | None = None,
+    payload_names: set[str] | None = None,
+) -> bool:
+    """Match a canonical writer UUID/date and require sidecar/copy association."""
+    match = _BATCH_ARTIFACT.fullmatch(name)
+    if match is None:
+        return False
+    artifact_date, batch_id, _suffix = match.groups()
+    try:
+        valid_date = (
+            datetime.strptime(artifact_date, _DATE_DIR_FORMAT).strftime(
+                _DATE_DIR_FORMAT
+            )
+            == artifact_date
+        )
+    except ValueError:
+        return False
+    if not valid_date:
+        return False
+    if date_name is not None and artifact_date != date_name:
+        return False
+    if str(UUID(batch_id)) != batch_id:
+        return False
+    if payload_names is None:
+        return True
+    return f"batch_{artifact_date}_{batch_id}.jsonl.zst" in payload_names
 
 
 def date_dir_name_is_older(name: str, cutoff_str: str) -> bool:
@@ -146,6 +232,7 @@ def iter_safe_child_dirs(
     """List direct child directories without following links/reparse points."""
     entries = scan_dir_entries(parent)
     if entries is None:
+        _notify_skip(on_skip, parent, "scan_error")
         return []
     dirs: list[Path] = []
     for entry in entries:
@@ -180,7 +267,11 @@ def safe_named_child_dir(
     child = parent / name
     try:
         st = child.lstat()
+    except FileNotFoundError:
+        _notify_skip(on_skip, child, "missing_scope")
+        return None
     except OSError:
+        _notify_skip(on_skip, child, "stat_error")
         return None
     if not stat.S_ISDIR(st.st_mode) or stat_is_link_or_reparse(st):
         _notify_skip(on_skip, child, "link_or_reparse")
@@ -202,6 +293,8 @@ def find_old_date_dirs(
     on_flat_filter: Callable[[], None] | None = None,
 ) -> list[Path]:
     """Find canonical date dirs older than cutoff in flat or nested layout."""
+    validate_scope_filter(provider, "provider")
+    validate_scope_filter(entity, "entity")
     if not base_path.exists():
         return []
     if flat_structure:
@@ -268,71 +361,216 @@ def _scope_child_dirs(
     return [resolved] if resolved is not None else []
 
 
-def safe_unlink(file_path: Path, root_abs: Path, root_real: Path) -> bool:
-    """Unlink a file after re-verifying it is a real file inside the root."""
-    if _ANCHORED_OPS:
-        return _unlink_anchored(file_path, root_abs, root_real)
-    return _unlink_bounded_verify(file_path, root_abs, root_real)
+class _CleanupConflict(Exception):
+    """A candidate or directory component changed during destructive apply."""
 
 
-def _unlink_anchored(file_path: Path, root_abs: Path, root_real: Path) -> bool:
-    """POSIX path: verify parent chain, then unlink via an anchored dir_fd."""
-    if not is_fully_resolved(
-        file_path.parent, root_abs, root_real
-    ) or not is_within_root(file_path.parent, root_real):
-        return False
-    try:
-        parent_fd = os.open(file_path.parent, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW)
-    except OSError:
-        return False
-    try:
-        st = os.stat(file_path.name, dir_fd=parent_fd, follow_symlinks=False)
-        if stat_is_link_or_reparse(st) or not stat.S_ISREG(st.st_mode):
+def _same_identity(left: os.stat_result, right: os.stat_result) -> bool:
+    return (left.st_dev, left.st_ino) == (right.st_dev, right.st_ino)
+
+
+def candidate_is_safe(
+    path: Path,
+    root_abs: Path,
+    root_real: Path,
+    expected: os.stat_result,
+    *,
+    directory: bool = False,
+) -> bool:
+    """Nonmutating eligibility used by dry-run and apply planning."""
+    if destructive_cleanup_supported():
+        try:
+            with _anchored_parent(path, root_abs, root_real) as (
+                _root_fd,
+                parent_fd,
+                name,
+                _chain,
+            ):
+                actual = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+                return (
+                    _same_identity(actual, expected)
+                    and not stat_is_link_or_reparse(actual)
+                    and (
+                        stat.S_ISDIR(actual.st_mode)
+                        if directory
+                        else stat.S_ISREG(actual.st_mode)
+                    )
+                )
+        except (OSError, _CleanupConflict):
             return False
-        os.unlink(file_path.name, dir_fd=parent_fd)
-        return True
-    except OSError:
-        return False
-    finally:
-        os.close(parent_fd)
-
-
-def _unlink_bounded_verify(file_path: Path, root_abs: Path, root_real: Path) -> bool:
-    """Windows path: bounded re-verify immediately before unlink."""
-    try:
-        st = file_path.lstat()
-    except OSError:
-        return False
-    if stat_is_link_or_reparse(st) or not stat.S_ISREG(st.st_mode):
-        return False
-    if not is_fully_resolved(
-        file_path.parent, root_abs, root_real
-    ) or not is_within_root(file_path, root_real):
-        return False
-    try:
-        file_path.unlink()
-        return True
-    except OSError:
-        return False
-
-
-def safe_rmdir(dir_path: Path, root_abs: Path, root_real: Path) -> bool:
-    """Remove a directory only when it is real, empty, and inside the root."""
-    try:
-        st = dir_path.lstat()
-    except OSError:
-        return False
-    if stat_is_link_or_reparse(st) or not stat.S_ISDIR(st.st_mode):
-        return False
-    entries = scan_dir_entries(dir_path)
-    if entries is None or entries:
-        return False
-    if not is_fully_resolved(dir_path, root_abs, root_real) or not is_within_root(
-        dir_path, root_real
+    if not is_fully_resolved(path, root_abs, root_real) or not is_within_root(
+        path, root_real
     ):
         return False
     try:
-        dir_path.rmdir()
-        return True
+        actual = path.lstat()
     except OSError:
+        return False
+    return (
+        _same_identity(actual, expected)
+        and not stat_is_link_or_reparse(actual)
+        and (
+            stat.S_ISDIR(actual.st_mode) if directory else stat.S_ISREG(actual.st_mode)
+        )
+    )
+
+
+@contextmanager
+def _anchored_parent(
+    path: Path, root_abs: Path, root_real: Path
+) -> Iterator[tuple[int, int, str, list[tuple[int, int, str]]]]:
+    """Open every relative parent component without following a link."""
+    if not destructive_cleanup_supported():
+        raise NotImplementedError("Bronze destructive cleanup has no safe handle API")
+    try:
+        parts = Path(os.path.abspath(path)).relative_to(root_abs).parts  # noqa: PTH100
+    except ValueError as exc:
+        raise _CleanupConflict from exc
+    if not parts or any(part in ("", ".", "..") for part in parts):
+        raise _CleanupConflict
+    fds: list[int] = []
+    chain: list[tuple[int, int, str]] = []
+    try:
+        root_fd = os.open(root_real, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW)
+        fds.append(root_fd)
+        parent_fd = root_fd
+        for name in parts[:-1]:
+            child_fd = os.open(
+                name, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW, dir_fd=parent_fd
+            )
+            fds.append(child_fd)
+            chain.append((parent_fd, child_fd, name))
+            parent_fd = child_fd
+        if not _chain_is_stable(root_fd, root_abs, chain):
+            raise _CleanupConflict
+        yield root_fd, parent_fd, parts[-1], chain
+    finally:
+        for fd in reversed(fds):
+            os.close(fd)
+
+
+def _chain_is_stable(
+    root_fd: int, root_abs: Path, chain: list[tuple[int, int, str]]
+) -> bool:
+    try:
+        if not _same_identity(os.fstat(root_fd), root_abs.stat()):
+            return False
+        for parent_fd, child_fd, name in chain:
+            named = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+            if stat_is_link_or_reparse(named) or not _same_identity(
+                named, os.fstat(child_fd)
+            ):
+                return False
+    except OSError:
+        return False
+    return True
+
+
+@contextmanager
+def _private_stage(
+    root_fd: int,
+    on_stage_error: Callable[[str, OSError], None] | None = None,
+) -> Iterator[int]:
+    """Isolate a target name before checking its identity and deleting it."""
+    name = f".bronze-cleanup-stage-{secrets.token_hex(16)}"
+    os.mkdir(name, 0o700, dir_fd=root_fd)
+    stage_fd = os.open(name, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW, dir_fd=root_fd)
+    try:
+        yield stage_fd
+    finally:
+        os.close(stage_fd)
+        try:
+            os.rmdir(name, dir_fd=root_fd)
+        except OSError as exc:
+            # A conflicted artifact may remain in the stage; expose its name.
+            if on_stage_error is None:
+                raise
+            on_stage_error(name, exc)
+
+
+def _restore_staged(name: str, stage_fd: int, parent_fd: int) -> None:
+    """Restore a refused artifact only when its original name is still free."""
+    try:
+        os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+    except FileNotFoundError:
+        os.rename(name, name, src_dir_fd=stage_fd, dst_dir_fd=parent_fd)
+
+
+def safe_unlink(
+    file_path: Path,
+    root_abs: Path,
+    root_real: Path,
+    expected: os.stat_result | None = None,
+    *,
+    on_stage_error: Callable[[str, OSError], None] | None = None,
+) -> bool:
+    """Delete only the planned inode after atomic isolation under the root."""
+    try:
+        with _anchored_parent(file_path, root_abs, root_real) as (
+            root_fd,
+            parent_fd,
+            name,
+            chain,
+        ):
+            current = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+            if (
+                stat_is_link_or_reparse(current)
+                or not stat.S_ISREG(current.st_mode)
+                or (expected is not None and not _same_identity(expected, current))
+            ):
+                return False
+            with _private_stage(root_fd, on_stage_error) as stage_fd:
+                os.rename(name, name, src_dir_fd=parent_fd, dst_dir_fd=stage_fd)
+                staged = os.stat(name, dir_fd=stage_fd, follow_symlinks=False)
+                if not _same_identity(current, staged) or not _chain_is_stable(
+                    root_fd, root_abs, chain
+                ):
+                    _restore_staged(name, stage_fd, parent_fd)
+                    return False
+                os.unlink(name, dir_fd=stage_fd)
+                return True
+    except (FileNotFoundError, NotADirectoryError, _CleanupConflict):
+        return False
+
+
+def safe_rmdir(
+    dir_path: Path,
+    root_abs: Path,
+    root_real: Path,
+    expected: os.stat_result | None = None,
+    *,
+    on_stage_error: Callable[[str, OSError], None] | None = None,
+) -> bool:
+    """Remove only the planned empty directory after atomic isolation."""
+    try:
+        with _anchored_parent(dir_path, root_abs, root_real) as (
+            root_fd,
+            parent_fd,
+            name,
+            chain,
+        ):
+            current = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+            if (
+                stat_is_link_or_reparse(current)
+                or not stat.S_ISDIR(current.st_mode)
+                or (expected is not None and not _same_identity(expected, current))
+            ):
+                return False
+            with _private_stage(root_fd, on_stage_error) as stage_fd:
+                os.rename(name, name, src_dir_fd=parent_fd, dst_dir_fd=stage_fd)
+                staged = os.stat(name, dir_fd=stage_fd, follow_symlinks=False)
+                if not _same_identity(current, staged) or not _chain_is_stable(
+                    root_fd, root_abs, chain
+                ):
+                    _restore_staged(name, stage_fd, parent_fd)
+                    return False
+                try:
+                    os.rmdir(name, dir_fd=stage_fd)
+                except OSError as exc:
+                    _restore_staged(name, stage_fd, parent_fd)
+                    if exc.errno in (errno.ENOTEMPTY, errno.EEXIST):
+                        return False
+                    raise
+                return True
+    except (FileNotFoundError, NotADirectoryError, _CleanupConflict):
         return False
