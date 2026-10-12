@@ -29,14 +29,14 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import pytest
-
 import bioetl.infrastructure.control_plane._file_lineage_index as lineage_index_module
 import bioetl.infrastructure.control_plane.file_lineage_store as lineage_store_module
+import pytest
 from bioetl.domain.lineage import (
     DatasetRef,
     LineageEdge,
@@ -48,7 +48,6 @@ from bioetl.domain.lineage import (
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane import FileLineageStore
 from tests.helpers.deterministic_ids import deterministic_uuid_value
-
 
 pytestmark = pytest.mark.unit
 
@@ -279,10 +278,11 @@ def test_file_store_rolls_back_fragment_and_indexes_when_index_append_fails(
     )
     original_append = lineage_store_module._append_jsonl_payload
     call_count = {"value": 0}
+    fail_appends = {"enabled": True}
 
     def _fail_on_second_append(path, payload) -> int:
         call_count["value"] += 1
-        if call_count["value"] == 2:
+        if fail_appends["enabled"] and call_count["value"] == 2:
             raise OSError("simulated lineage index append failure")
         return original_append(path, payload)
 
@@ -302,9 +302,44 @@ def test_file_store_rolls_back_fragment_and_indexes_when_index_append_fails(
         / (f"{lineage_store_module._stable_key_filename(stored_fragment_id)}.json")
     )
     assert not fragment_path.exists()
+    semantic_index = store._semantic_fragment_index_path(fragment.fragment_id)
+    semantic_text = (
+        semantic_index.read_text(encoding="utf-8") if semantic_index.exists() else ""
+    )
+    assert semantic_text.strip() == ""
     assert store.list_by_run_id(run_id) == []
     assert store.list_by_manifest_id("manifest-rollback") == []
     assert store.list_by_node_id(dataset_node.node_id) == []
+
+    fail_appends["enabled"] = False
+    call_count["value"] = 0
+    store.save(fragment)
+    previous_size = semantic_index.stat().st_size
+    previous_payload = fragment_path.read_text(encoding="utf-8")
+    assert store.list_by_run_id(run_id)[0].created_at == fragment.created_at
+
+    fail_appends["enabled"] = True
+    call_count["value"] = 0
+    replacement = replace(
+        fragment,
+        created_at=datetime(2026, 1, 2, 12, 0, tzinfo=UTC),
+        edges=(),
+    )
+    with pytest.raises(OSError, match="simulated lineage index append failure"):
+        store.save(replacement)
+
+    assert semantic_index.stat().st_size == previous_size
+    assert fragment_path.read_text(encoding="utf-8") == previous_payload
+    restored = store.list_by_run_id(run_id)
+    assert len(restored) == 1
+    assert restored[0].created_at == fragment.created_at
+    assert len(restored[0].edges) == 1
+    assert store.list_by_manifest_id("manifest-rollback")[0].created_at == (
+        fragment.created_at
+    )
+    assert store.list_by_node_id(dataset_node.node_id)[0].created_at == (
+        fragment.created_at
+    )
 
 
 def test_file_store_get_fails_closed_on_truncated_semantic_index_tail(tmp_path) -> None:
