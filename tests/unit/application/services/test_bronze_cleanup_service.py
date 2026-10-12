@@ -220,13 +220,19 @@ class TestBronzeCleanupServiceCleanup:
         result = await bronze_cleanup_service.cleanup()
 
         assert (result.files_planned, result.files_removed, result.bytes_freed) == (
-            4, 2, 20
+            4,
+            2,
+            20,
         )
         assert (result.files_skipped, result.files_conflicted, result.files_failed) == (
-            1, 1, 1
+            1,
+            1,
+            1,
         )
         assert (result.bytes_skipped, result.bytes_conflicted, result.bytes_failed) == (
-            11, 12, 13
+            11,
+            12,
+            13,
         )
         assert (result.directories_skipped, result.directories_failed) == (1, 1)
 

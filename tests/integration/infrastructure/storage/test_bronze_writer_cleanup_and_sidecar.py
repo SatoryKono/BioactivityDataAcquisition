@@ -738,7 +738,9 @@ async def test_writer_produced_batch_preview_apply_and_second_noop(
     assert dry["files_planned"] == 3
     assert dry["directories_planned"] == 1
     assert dry["files_removed"] == dry["bytes_freed"] == 0
-    assert {path.name: (path.read_bytes(), path.stat().st_mtime_ns) for path in files} == before
+    assert {
+        path.name: (path.read_bytes(), path.stat().st_mtime_ns) for path in files
+    } == before
     assert planned_paths == [
         candidate.path.relative_to(tmp_path).as_posix()
         for candidate in writer._plan_old_dir_files(date_dir, tmp_path, tmp_path).files

@@ -182,8 +182,8 @@ async def test_bronze_read_list_cleanup_and_preview(tmp_path: Path) -> None:
     host._flat_structure = False
     host._logger = MagicMock()
     host._metrics = MagicMock()
-    host._resolve_bronze_path = BronzeWriterValidationMixin._resolve_bronze_path.__get__(
-        host
+    host._resolve_bronze_path = (
+        BronzeWriterValidationMixin._resolve_bronze_path.__get__(host)
     )
     rows = [
         row

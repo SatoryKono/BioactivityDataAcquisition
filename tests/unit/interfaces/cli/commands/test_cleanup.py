@@ -183,7 +183,10 @@ class TestBronzeCleanupCommand:
         assert "Removed 2 files" in result.output
         assert "files skipped=1, conflicted=1, failed=1" in result.output
         assert "directories skipped=0, conflicted=0, failed=1" in result.output
-        assert "Retained bytes: skipped=11 bytes, conflicted=12 bytes, failed=13 bytes" in result.output
+        assert (
+            "Retained bytes: skipped=11 bytes, conflicted=12 bytes, failed=13 bytes"
+            in result.output
+        )
 
     def test_domain_error_exits_nonzero(self, cli_runner: CliRunner) -> None:
         """Test that BioETLError causes non-zero exit code."""

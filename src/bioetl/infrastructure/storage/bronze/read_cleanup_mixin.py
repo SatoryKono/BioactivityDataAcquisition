@@ -258,7 +258,9 @@ class BronzeWriterReadCleanupMixin:
 
             def on_stage_error(name: str, _error: OSError) -> None:
                 stats["directories_failed"] += 1
-                self._log_cleanup_skip(str(self.base_path / name), "stage_cleanup_error")
+                self._log_cleanup_skip(
+                    str(self.base_path / name), "stage_cleanup_error"
+                )
 
             for candidate in plan.files:
                 try:
@@ -363,9 +365,7 @@ class BronzeWriterReadCleanupMixin:
                 )
             )
             file_path = date_dir / entry.name
-            if (
-                stat.S_ISDIR(candidate_identity.st_mode)
-            ):
+            if stat.S_ISDIR(candidate_identity.st_mode):
                 plan.directories_skipped += 1
                 self._log_cleanup_skip(entry.path, "unknown_directory")
                 continue
@@ -381,7 +381,9 @@ class BronzeWriterReadCleanupMixin:
                     plan.bytes_skipped += candidate_identity.st_size
                 self._log_cleanup_skip(entry.path, "unknown_artifact")
                 continue
-            if not candidate_is_safe(file_path, root_abs, root_real, candidate_identity):
+            if not candidate_is_safe(
+                file_path, root_abs, root_real, candidate_identity
+            ):
                 plan.files_conflicted += 1
                 plan.bytes_conflicted += candidate_identity.st_size
                 self._log_cleanup_skip(entry.path, "candidate_conflict")
@@ -488,7 +490,13 @@ class BronzeWriterReadCleanupMixin:
                         date_parents.append(child)
                 else:
                     date_parents.extend(iter_safe_child_dirs(provider_dir))
-            scope_exists = bool(date_parents) if entity else bool(providers) if provider else exists
+            scope_exists = (
+                bool(date_parents)
+                if entity
+                else bool(providers)
+                if provider
+                else exists
+            )
         for parent in date_parents:
             for date_dir in iter_safe_child_dirs(parent):
                 if not (
