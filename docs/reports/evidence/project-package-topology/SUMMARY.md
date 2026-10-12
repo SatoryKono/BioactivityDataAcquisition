@@ -1,3 +1,5 @@
+Source-only refresh (2026-10-12, composite checkpoint persistence parameter bundle merged with origin/main fe524f074da5): the canonical module inventory records `source_tree_sha256=95d43c1d9e9dd87d408891a38d3dfb6940e0c042d2cf762af79fbd520956ff20` and `source_module_count=2566`. This binds the merged source tree; coverage measurements remain those of the last authoritative run recorded below.
+
 Source-only refresh (2026-10-12, PR #12187 review and origin/main sync): the canonical module inventory records `source_tree_sha256=5ef35dfcf5f7339a22f3900043b0b6af49474fcd98ed019e1d89067735f5c2eb` and `source_module_count=2566`. This updates source identity while retaining the accepted coverage measurements and additive XML provenance.
 
 Source-only refresh (2026-10-12, CF-061 join-key normalization): the canonical module inventory records `source_tree_sha256=0dfece1cf53b8f33e7dbdfd357cfc12d6e16f51b9e2c1fb6d5fc7a10b0426f83` and `source_module_count=2566`. This binds the merged main tree; coverage measurements remain those of the last authoritative run recorded below.

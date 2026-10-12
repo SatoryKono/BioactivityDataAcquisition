@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `codex/pr12187-review-sync`
-- Source commit: `c52c681ed5586950f1d054585455690100d9875a`
-- Source run id: `local-pr12187-main-d124-20261012`
+- Source branch: `refactor/composite-checkpoint-persistence-params-1493320248371917823`
+- Source commit: `6ba0e2803723369c2e4d48e4fdb320dcabaea63b`
+- Source run id: `local-bioetl-local-coverage-uiltn594`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `c9788013b782aeb6b41ebf9e2e65445788ed6611efbf29df6b8b3deaab1c3f26`
+- Source tree sha256: `3ec41186310457076a0292557c510cbb73d24e0b1fc6e3e68d263193d73dd823`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-10-12T11:10:13.717706+00:00`
+- Refreshed at (UTC): `2026-10-12T15:25:39.623439+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -76,38 +76,38 @@ trend evidence only.
 
 ## Duration Telemetry
 
-- Total collected test cases: `33496`
+- Total collected test cases: `33500`
 - Freshness guard: `<=45 days` via `refreshed_at_utc`
 
 ### Top Slowest Tests
 
 | Rank | Duration (s) | Test | Source |
 |---:|---:|---|---|
-| 1 | `22.181` | `tests.smoke.test_control_plane_rollout_smoke::test_control_plane_rollout_smoke_emits_artifacts_and_aggregate_metrics` | `smoke.xml` |
-| 2 | `21.064` | `tests.security.test_security.TestVCRCassetteSanitization::test_no_authorization_headers_with_real_values[Authorization]` | `security.xml` |
-| 3 | `20.019` | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers::test_filter_options_deadline_does_not_send_late_success` | `unit-other.xml` |
-| 4 | `19.066` | `tests.unit.infrastructure.observability.test_tracing.TestTracingImportFallbackBranches::test_module_marks_otlp_unavailable_when_exporter_import_fails` | `unit-infrastructure.xml` |
-| 5 | `18.65` | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline::test_chembl_target_component_happy_path` | `integration.xml` |
-| 6 | `17.779` | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_happy_path` | `integration.xml` |
-| 7 | `17.245` | `tests.smoke.test_smoke.TestCoreImports::test_composition_imports` | `smoke.xml` |
-| 8 | `16.08` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `unit-scripts-tooling-debt-governance.xml` |
-| 9 | `12.764` | `tests.unit.infrastructure.quality.test_architecture_quality_scorecard::test_architecture_quality_scorecard_has_stable_weighted_shape` | `unit-infrastructure.xml` |
-| 10 | `12.457` | `tests.integration.test_dashboard_ux_report_freshness::test_dashboard_json_changes_require_fresh_ux_report_and_change_note_link` | `integration.xml` |
+| 1 | `82.672` | `tests.unit.composition.test_workflow_cohort_lineage::test_real_gold_expiry_descendant_and_partial_resume_keep_scoped_history[None]` | `unit-other.xml` |
+| 2 | `45.516` | `tests.unit.infrastructure.storage.test_workflow_foreign_key_reconciliation::test_gold_snapshot_pins_version_and_distinguishes_physical_rows` | `unit-infrastructure.xml` |
+| 3 | `24.477` | `tests.unit.infrastructure.quality.test_architecture_quality_scorecard::test_architecture_quality_scorecard_has_stable_weighted_shape` | `unit-infrastructure.xml` |
+| 4 | `22.47` | `tests.unit.infrastructure.export.test_export_adapters::test_write_pack_records_successful_xlsx_artifact` | `unit-infrastructure.xml` |
+| 5 | `20.221` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `unit-scripts-tooling-debt-governance.xml` |
+| 6 | `20.008` | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers::test_filter_options_deadline_does_not_send_late_success` | `unit-other.xml` |
+| 7 | `19.721` | `tests.unit.application.services.dq.test_checks_integrity_extended.TestCheckSCDIntegrityExtended::test_overlapping_validity_periods_warn` | `unit-application.xml` |
+| 8 | `16.902` | `tests.unit.infrastructure.adapters.test_csv_filter_reader.TestCsvFilterReaderLoadFilterIds::test_load_filter_ids_returns_filter_load_result` | `unit-infrastructure.xml` |
+| 9 | `15.17` | `tests.unit.application.test_main_module::test_main_block_executed_via_subprocess` | `unit-application.xml` |
+| 10 | `14.488` | `tests.unit.application.test_issue_10518_application_compwf_a::test_chained_key_filter_applied_and_failed` | `unit-application.xml` |
 
 ### Top Slow Zones
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 3 | 36.68 | 16.08 |
-| 2 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 28.617 | 17.779 |
-| 3 | `tests.integration.composite.test_assay_snapshot_merge_replay` | 3 | 26.452 | 10.36 |
-| 4 | `tests.smoke.test_control_plane_rollout_smoke` | 1 | 22.181 | 22.181 |
-| 5 | `tests.security.test_security.TestVCRCassetteSanitization` | 1 | 21.064 | 21.064 |
-| 6 | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers` | 1 | 20.019 | 20.019 |
-| 7 | `tests.unit.infrastructure.observability.test_tracing.TestTracingImportFallbackBranches` | 1 | 19.066 | 19.066 |
-| 8 | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline` | 1 | 18.65 | 18.65 |
-| 9 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 2 | 17.748 | 10.534 |
-| 10 | `tests.smoke.test_smoke.TestCoreImports` | 1 | 17.245 | 17.245 |
+| 1 | `tests.unit.composition.test_workflow_cohort_lineage` | 1 | 82.672 | 82.672 |
+| 2 | `tests.unit.infrastructure.storage.test_workflow_foreign_key_reconciliation` | 1 | 45.516 | 45.516 |
+| 3 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 3 | 39.51 | 20.221 |
+| 4 | `tests.unit.infrastructure.quality.test_architecture_quality_scorecard` | 1 | 24.477 | 24.477 |
+| 5 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 23.467 | 12.397 |
+| 6 | `tests.unit.infrastructure.export.test_export_adapters` | 1 | 22.47 | 22.47 |
+| 7 | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers` | 1 | 20.008 | 20.008 |
+| 8 | `tests.unit.application.services.dq.test_checks_integrity_extended.TestCheckSCDIntegrityExtended` | 1 | 19.721 | 19.721 |
+| 9 | `tests.unit.infrastructure.adapters.test_csv_filter_reader.TestCsvFilterReaderLoadFilterIds` | 1 | 16.902 | 16.902 |
+| 10 | `tests.unit.application.test_main_module` | 1 | 15.17 | 15.17 |
 
 ## Refresh Procedure
 
