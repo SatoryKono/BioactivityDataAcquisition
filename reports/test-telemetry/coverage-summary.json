@@ -4,7 +4,7 @@
   "source_run_id": "local-pr12164-main-sync-c6549b1-w2",
   "source_event": "local_coverage_verify",
   "source_run_url": null,
-  "source_tree_sha256": "b422c514cecc2750bed2957ec20895d6c063e7ed4aee1e6c9f4af109876c19fc",
+  "source_tree_sha256": "a0e55216c14bbeaecd045f36b857a69471e2210082e6f9269c1c678849c55d47",
   "refreshed_at_utc": "2026-10-10T00:12:30.304249+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.67,
@@ -21,7 +21,7 @@
     "manifest_sha256": "571d0ce15ae9e51b1faf48042568f030a99a4c3e765690649e01cdb92d28c152",
     "coverage_xml_sha256": "b6d1a70a67d657b314dd9660b7f172319015ffeb49b2e1e2ab1e7bf7e73f9e22",
     "source_tree_sha256": "633508ed5fc1a0024adf57c03d3e631af47461a53f525e03f36f145d95b8c8c7",
-    "test_tree_sha256": "b422c514cecc2750bed2957ec20895d6c063e7ed4aee1e6c9f4af109876c19fc",
+    "test_tree_sha256": "a0e55216c14bbeaecd045f36b857a69471e2210082e6f9269c1c678849c55d47",
     "head": "d28436d5f78c911d68f6fbbf91314578bdcb897c",
     "required_shards": [
       "smoke",
