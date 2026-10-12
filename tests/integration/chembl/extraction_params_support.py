@@ -12,7 +12,6 @@
 
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar
@@ -22,6 +21,7 @@ import pytest
 
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.domain.resilience import AdapterConfig
+from tests.helpers.vcr_config import build_base_vcr_config
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.chembl import ChemblAdapter
@@ -285,12 +285,10 @@ async def run_filtered_api_request_test(
 @pytest.fixture(scope="module")
 def vcr_config() -> dict[str, Any]:
     """Configure VCR for shared ChEMBL extraction params tests."""
-    return {
-        "cassette_library_dir": str(CASSETTE_DIR),
-        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
-        "match_on": ["method", "scheme", "host", "port", "path", "query"],
-        "decode_compressed_response": True,
-    }
+    return build_base_vcr_config(
+        cassette_library_dir=CASSETTE_DIR,
+        decode_compressed_response=True,
+    )
 
 
 @pytest.fixture

@@ -59,25 +59,7 @@ def validate_manifest_persistence_requirements(
     )
 
 
-def validate_required_persistence_profile(
-    *,
-    manifest_enabled: bool,
-    ledger_enabled: bool,
-    required_profile: object,
-    execution_label: str,
-    exact_replay_execution_context_supported: bool = True,
-    composite_resume_rich_replay_supported: bool = True,
-    missing_artifact_lineage_layers: tuple[str, ...] = (),
-) -> None:
-    _validate_required_persistence_profile(
-        manifest_enabled=manifest_enabled,
-        ledger_enabled=ledger_enabled,
-        required_profile=required_profile,
-        execution_label=execution_label,
-        exact_replay_execution_context_supported=exact_replay_execution_context_supported,
-        composite_resume_rich_replay_supported=composite_resume_rich_replay_supported,
-        missing_artifact_lineage_layers=missing_artifact_lineage_layers,
-    )
+validate_required_persistence_profile = _validate_required_persistence_profile
 
 
 def validate_strict_data_root_policy(

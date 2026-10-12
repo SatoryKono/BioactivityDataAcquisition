@@ -404,11 +404,11 @@ python scripts/ops/observability/start_read_only_audit_stack.py \
   --data-root=/path/to/data \
   --log-root=/path/to/logs \
   --timeout-seconds=90
-  
-# Deploys Loki, Promtail, Tempo (audit-only overlays)
+
+# Starts the base stack only: prometheus, pushgateway, grafana, renderer
+# Loki/Promtail/Tempo/Quarantine Explorer audit overlays were removed
+# Verifies backend readiness, data_root routing, and catalog access
 # Reads from external data/logs, does not modify
-# Sentinel logs verify write path
-# Produces live-panel-audit.json for CI/release gates
 ```
 
 ## Параметры ресурсов (cgroup limits)
