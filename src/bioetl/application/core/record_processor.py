@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from bioetl.domain.types import JsonDict
 
-__all__ = ["RecordProcessor", "RecordProcessorWriteDependencies"]
+__all__ = ["RecordProcessor"]
 
 from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
