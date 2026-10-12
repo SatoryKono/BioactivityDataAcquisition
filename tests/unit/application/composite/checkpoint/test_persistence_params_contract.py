@@ -9,6 +9,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from bioetl.application.composite.checkpoint.persistence_service import (
     CompositeCheckpointPersistenceParams,
     CompositeCheckpointPersistenceService,
