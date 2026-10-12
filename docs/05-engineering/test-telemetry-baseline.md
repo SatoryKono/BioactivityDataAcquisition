@@ -32,7 +32,7 @@ trend evidence only.
 - Source run id: `local-pr12164-main-sync-c6549b1-w2`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `4ff62f73f0f2e451e410a00c2743968ecbb7c7808ce8c97fa39dd3fb9c471333`
+- Source tree sha256: `38458b5b42789314d34e59d0cfddb3db83be492cd075048f47cc44f3ebd0e018`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-10-10T00:12:30.304249+00:00`
 
@@ -49,6 +49,8 @@ trend evidence only.
   bridge in `reports/test-telemetry/squash-provenance.json`. A bridge keeps
   the real captured source/run and requires equal PR/merge trees, source
   ancestry in the PR, merge ancestry in HEAD and unchanged runtime/test inputs.
+- Reviewed squash receipts retain hash-verified Git commit/tree objects
+  for offline validation when old PR commits are absent from a fresh clone.
 - New captures use `verification_mode: live_github`: resolve the recorded
   PR's actual merge with read-only GitHub GETs after squash. Never stamp a
   future merge SHA. API failure, unmerged PRs, changed inputs and incomplete

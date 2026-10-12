@@ -517,6 +517,8 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
         "  bridge in `reports/test-telemetry/squash-provenance.json`. A bridge keeps",
         "  the real captured source/run and requires equal PR/merge trees, source",
         "  ancestry in the PR, merge ancestry in HEAD and unchanged runtime/test inputs.",
+        "- Reviewed squash receipts retain hash-verified Git commit/tree objects",
+        "  for offline validation when old PR commits are absent from a fresh clone.",
         "- New captures use `verification_mode: live_github`: resolve the recorded",
         "  PR's actual merge with read-only GitHub GETs after squash. Never stamp a",
         "  future merge SHA. API failure, unmerged PRs, changed inputs and incomplete",

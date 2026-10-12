@@ -6,6 +6,9 @@ CI execution receipt. Git objects independently bind its commit/tree claims.
 
 from __future__ import annotations
 
+import base64
+import binascii
+import hashlib
 import json
 import os
 import subprocess
@@ -108,6 +111,113 @@ def _tree(root: Path, commit: str) -> str:
     return result.stdout.strip() if result.returncode == 0 else ""
 
 
+def _verified_object(encoded: str, kind: str, oid: str) -> bytes:
+    raw = base64.b64decode(encoded, validate=True)
+    header = f"{kind} {len(raw)}\0".encode("ascii")
+    if hashlib.sha1(header + raw).hexdigest() != oid:
+        raise ValueError("Git object proof has a wrong object ID")
+    return raw
+
+
+def _commit_tree(raw: bytes) -> str:
+    for line in raw.split(b"\n\n", 1)[0].splitlines():
+        if line.startswith(b"tree "):
+            return line[5:].decode("ascii")
+    raise ValueError("Git object proof has no commit tree")
+
+
+def _tree_entry(raw: bytes, name: bytes) -> tuple[bytes, str] | None:
+    offset = 0
+    while offset < len(raw):
+        separator = raw.index(b" ", offset)
+        end = raw.index(b"\0", separator + 1)
+        mode = raw[offset:separator]
+        entry_name = raw[separator + 1 : end]
+        object_id = raw[end + 1 : end + 21]
+        if len(object_id) != 20:
+            raise ValueError("Truncated Git tree object")
+        offset = end + 21
+        if entry_name == name:
+            return mode, object_id.hex()
+    return None
+
+
+def _proof_path(
+    trees: dict[str, str], root_oid: str, path: str
+) -> tuple[bytes, str] | None:
+    oid = root_oid
+    parts = path.encode("utf-8").split(b"/")
+    for index, part in enumerate(parts):
+        raw = _verified_object(trees[oid], "tree", oid)
+        entry = _tree_entry(raw, part)
+        if entry is None:
+            return None
+        mode, oid = entry
+        if index < len(parts) - 1 and mode not in {b"40000", b"040000"}:
+            return None
+    return mode, oid
+
+
+def _object_proof_relation(
+    receipt: dict[str, Any], source: str, pr_head: str
+) -> tuple[bool, str]:
+    """Verify retained Git objects when squash removed the PR commits from main."""
+    try:
+        proof = receipt["git_object_proof"]
+        commits = proof["commits"]
+        trees = proof["trees"]
+        source_raw = _verified_object(commits["source"], "commit", source)
+        head_raw = _verified_object(commits["pr_head"], "commit", pr_head)
+        source_tree = _commit_tree(source_raw)
+        head_tree = _commit_tree(head_raw)
+        parents = [
+            line[7:].decode("ascii")
+            for line in head_raw.split(b"\n\n", 1)[0].splitlines()
+            if line.startswith(b"parent ")
+        ]
+        if parents != [source]:
+            return False, ""
+        same_inputs = all(
+            (entry := _proof_path(trees, source_tree, path)) is not None
+            and entry == _proof_path(trees, head_tree, path)
+            for path in TEST_INPUTS
+        )
+        return same_inputs, head_tree
+    except (binascii.Error, KeyError, TypeError, ValueError, UnicodeError):
+        return False, ""
+
+
+def build_git_object_proof(root: Path, source: str, pr_head: str) -> dict[str, Any]:
+    """Retain the minimal Git objects needed to audit unchanged test inputs."""
+
+    def read(kind: str, oid: str) -> bytes:
+        return subprocess.check_output(["git", "cat-file", kind, oid], cwd=root)
+
+    commits = {
+        label: base64.b64encode(read("commit", oid)).decode("ascii")
+        for label, oid in (("source", source), ("pr_head", pr_head))
+    }
+    trees: dict[str, str] = {}
+    for commit in (source, pr_head):
+        root_oid = _tree(root, commit)
+        if not root_oid:
+            raise ValueError("Missing commit tree for Git object proof")
+        for path in TEST_INPUTS:
+            oid = root_oid
+            for part in path.encode("utf-8").split(b"/"):
+                raw = read("tree", oid)
+                trees[oid] = base64.b64encode(raw).decode("ascii")
+                entry = _tree_entry(raw, part)
+                if entry is None:
+                    raise ValueError(f"Missing test input in Git object proof: {path}")
+                _, oid = entry
+    proof: dict[str, Any] = {"commits": commits, "trees": trees}
+    verified, _ = _object_proof_relation({"git_object_proof": proof}, source, pr_head)
+    if not verified:
+        raise ValueError("Git object proof does not preserve test inputs")
+    return proof
+
+
 def _receipt_matches_capture(receipt: dict[str, Any], payload: dict[str, Any]) -> bool:
     if receipt.get("schema_version") != 1:
         return False
@@ -200,10 +310,14 @@ def validate_squash_bridge(
     pr_head, merge = mapping
     source = str(payload["source_commit"])
     live = receipt.get("verification_mode") == "live_github"
-    related, _ = _source_relation(root, source, pr_head, live=live)
+    local_objects = bool(_tree(root, source) and _tree(root, pr_head))
+    if not local_objects and not live and "git_object_proof" in receipt:
+        related, tree = _object_proof_relation(receipt, source, pr_head)
+    else:
+        related, _ = _source_relation(root, source, pr_head, live=live)
+        tree = _pr_tree(root, pr_head, live=live)
     if not related or not _ancestor(root, merge, head):
         return False
-    tree = _pr_tree(root, pr_head, live=live)
     if not tree or tree != _tree(root, merge):
         return False
     if not live and tree != receipt.get("merged_tree"):

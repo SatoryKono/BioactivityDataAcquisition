@@ -163,6 +163,35 @@ def test_local_capture_keeps_measured_identity_after_test_tree_changes(bridge) -
     assert not validate_squash_bridge(without_measurement, receipt, root, head)
 
 
+def test_squash_bridge_verifies_without_old_pr_objects(
+    bridge, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root, head, payload, receipt, _ = bridge
+    monkeypatch.setattr(provenance, "TEST_INPUTS", ("tests",))
+    source = payload["source_commit"]
+    pr_head = receipt["github_pull_request"]["head"]["sha"]
+    receipt["git_object_proof"] = provenance.build_git_object_proof(
+        root, source, pr_head
+    )
+    shallow = root.parent / f"{root.name}-shallow"
+    subprocess.run(
+        ["git", "clone", "-q", "--depth", "1", root.as_uri(), str(shallow)],
+        check=True,
+        capture_output=True,
+    )
+    assert not provenance._tree(shallow, source)
+    assert not provenance._tree(shallow, pr_head)
+    assert validate_squash_bridge(payload, receipt, shallow, head)
+
+    tampered = copy.deepcopy(receipt)
+    tampered["git_object_proof"]["commits"]["pr_head"] = "Zm9yZ2Vk"
+    assert not validate_squash_bridge(payload, tampered, shallow, head)
+    tampered = copy.deepcopy(receipt)
+    tree_oid = next(iter(tampered["git_object_proof"]["trees"]))
+    tampered["git_object_proof"]["trees"][tree_oid] = "Zm9yZ2Vk"
+    assert not validate_squash_bridge(payload, tampered, shallow, head)
+
+
 @pytest.mark.parametrize(
     "field,value",
     [
