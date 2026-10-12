@@ -1372,6 +1372,7 @@ class _CorruptedStoreManifestService:
         raise RunManifestInspectionCorruptionError(left, "checksum mismatch")
 
 
+@pytest.mark.unit
 class TestRunManifestErrorExitCodes:
     """#12019 (CF-015): run-manifest errors must exit non-zero."""
 

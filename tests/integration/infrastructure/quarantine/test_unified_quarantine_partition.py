@@ -30,7 +30,7 @@ from bioetl.infrastructure.quarantine.unified import (
     _normalize_quarantine_record,
 )
 
-pytestmark = pytest.mark.integration
+pytestmark = [pytest.mark.integration]
 
 INGESTION_TS = datetime(2026, 10, 7, 12, 0, 0, tzinfo=UTC)
 BATCH_ID = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
