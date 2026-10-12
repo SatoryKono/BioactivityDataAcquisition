@@ -213,6 +213,85 @@ def test_parse_rule_rejects_evasion_bypass(
     assert not eval_called, "literal_eval should not be called for evasion payload"
 
 
+@pytest.mark.parametrize(
+    ("raw_pattern", "expected"),
+    (
+        # Brackets inside string literals are content, not structural nesting.
+        ('["' + "[" * 11 + '"]', ["[" * 11]),
+        ("['" + "]" * 11 + "']", ["]" * 11]),
+        ('["' + "{(" * 6 + '"]', ["{(" * 6]),
+        # Escaped quotes and backslashes must not confuse the string tracker.
+        ('["\\"' + "[" * 11 + '"]', ['"' + "[" * 11]),
+        ('["\\\\' + "]" * 11 + '"]', ["\\" + "]" * 11]),
+        ("['\\'" + "[" * 11 + "']", ["'" + "[" * 11]),
+        # Triple-quoted strings keep bracket content inside the literal.
+        ('["""' + "[" * 11 + '"""]', ["[" * 11]),
+        # Mixed quoting: the opposite quote char is plain content.
+        ('["' + "'" + '", ' + "'" + "[" * 11 + "'" + "]", ["'", "[" * 11]),
+    ),
+)
+def test_parse_rule_ignores_brackets_inside_string_literals(
+    raw_pattern: str,
+    expected: list[str],
+) -> None:
+    line = f'prefix_rule(pattern={raw_pattern}, decision="allow")'
+    assert local_state_audit._parse_rule(line) == (expected, "allow")
+
+
+def test_parse_rule_string_closers_do_not_mask_real_depth(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import ast
+
+    eval_called = False
+
+    def mock_eval(node_or_string: str, **kwargs: object) -> list[str]:
+        nonlocal eval_called
+        eval_called = True
+        return ["mocked"]
+
+    monkeypatch.setattr(ast, "literal_eval", mock_eval)
+
+    # Closers inside the first string must not offset the real depth-11 nesting.
+    masked = '["' + "]" * 9 + '", ' + "[" * 10 + '"x"' + "]" * 10 + "]"
+    line_masked = f'prefix_rule(pattern={masked}, decision="allow")'
+    assert local_state_audit._parse_rule(line_masked) is None
+    assert not eval_called, "literal_eval should not be called for masked depth"
+
+
+def test_parse_rule_depth_boundary_ten_passes_eleven_rejects(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import ast
+
+    eval_called = False
+
+    def mock_eval(node_or_string: str, **kwargs: object) -> list[str]:
+        nonlocal eval_called
+        eval_called = True
+        return ["mocked"]
+
+    monkeypatch.setattr(ast, "literal_eval", mock_eval)
+
+    depth_ten = "[" * 10 + '"x"' + "]" * 10
+    line_ten = f'prefix_rule(pattern={depth_ten}, decision="allow")'
+    assert local_state_audit._parse_rule(line_ten) == (["mocked"], "allow")
+    assert eval_called, "literal_eval should run for structural depth 10"
+
+    eval_called = False
+    depth_eleven = "[" * 11 + '"x"' + "]" * 11
+    line_eleven = f'prefix_rule(pattern={depth_eleven}, decision="allow")'
+    assert local_state_audit._parse_rule(line_eleven) is None
+    assert not eval_called, "literal_eval should not run for structural depth 11"
+
+
+def test_parse_rule_allowed_depth_still_requires_string_items() -> None:
+    # Depth-10 nested list parses via real literal_eval but violates list[str].
+    nested = "[" * 10 + '"x"' + "]" * 10
+    line_nested = f'prefix_rule(pattern={nested}, decision="allow")'
+    assert local_state_audit._parse_rule(line_nested) is None
+
+
 def test_parse_rule_rejects_recursion_and_memory_errors(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

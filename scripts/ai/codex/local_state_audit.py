@@ -107,6 +107,46 @@ def audit_permissions(codex_home: Path) -> dict[str, Any]:
     }
 
 
+def _depth_limit_exceeded(raw_pattern: str, limit: int = 10) -> bool:
+    """Return True when structural bracket depth exceeds ``limit``.
+
+    Brackets inside string literals (single-, double-, and triple-quoted)
+    and characters consumed by escape sequences do not count toward depth.
+    """
+    depth = 0
+    quote: str | None = None
+    triple = False
+    escaped = False
+    index = 0
+    end = len(raw_pattern)
+    while index < end:
+        char = raw_pattern[index]
+        if quote is not None:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif triple and raw_pattern.startswith(quote * 3, index):
+                quote = None
+                triple = False
+                index += 2
+            elif not triple and char == quote:
+                quote = None
+        elif char in "'\"":
+            triple = raw_pattern.startswith(char * 3, index)
+            if triple:
+                index += 2
+            quote = char
+        elif char in "[{(":
+            depth += 1
+            if depth > limit:
+                return True
+        elif char in "]})":
+            depth = max(0, depth - 1)
+        index += 1
+    return False
+
+
 def _parse_rule(line: str) -> tuple[list[str], str] | None:
     match = RULE_PATTERN.match(line)
     if match is None:
@@ -115,15 +155,8 @@ def _parse_rule(line: str) -> tuple[list[str], str] | None:
         raw_pattern = match.group(1)
         if len(raw_pattern) > 4096:
             return None
-
-        depth = 0
-        for char in raw_pattern:
-            if char in "[{(":
-                depth += 1
-                if depth > 10:
-                    return None
-            elif char in "]})":
-                depth = max(0, depth - 1)
+        if _depth_limit_exceeded(raw_pattern):
+            return None
 
         pattern = ast.literal_eval(raw_pattern)
     except (SyntaxError, ValueError, RecursionError, MemoryError):
