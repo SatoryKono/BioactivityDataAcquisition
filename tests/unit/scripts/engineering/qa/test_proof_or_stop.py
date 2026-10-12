@@ -273,3 +273,107 @@ def test_pilot_covers_adversarial_matrix(proof_repo: Path, tmp_path: Path) -> No
     assert '"reason_code_coverage"' in payload
     assert '"deterministic_replay"' in payload
     assert output.with_suffix(".md").is_file()
+
+
+def _full_suite_argv() -> list[str]:
+    return [
+        "python",
+        "-m",
+        "scripts.engineering.dev",
+        "run-tests",
+        "all",
+        "--junitxml=reports/full.xml",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/full-suite",
+        "--vcr-record=none",
+    ]
+
+
+def test_canonical_full_suite_wrapper_is_qualified_in_ci(proof_repo: Path) -> None:
+    bundle = _bundle(proof_repo)
+    receipt = bundle["receipts"][0]
+    receipt["argv"] = _full_suite_argv()
+    receipt["command"] = " ".join(receipt["argv"])
+    _resign(bundle)
+    result = verify_bundle(
+        bundle=bundle, repo_root=proof_repo, policy=load_policy(), schema=load_schema()
+    )
+    assert result.outcome == "ADMIT"
+    assert result.claim_qualified is True
+
+
+@pytest.mark.parametrize(
+    "trailing",
+    [
+        ["-k", "one_test"],
+        ["-m", "unit"],
+        ["tests/unit/"],
+        ["--collect-only"],
+        ["--ignore=tests/integration"],
+        ["--vcr-record=all"],
+        [";", "true"],
+        ["--junitxml=other.xml"],
+        ["-p", "no:cacheprovider"],
+    ],
+)
+def test_full_suite_wrapper_rejects_selection_or_extra_arguments(
+    proof_repo: Path, trailing: list[str]
+) -> None:
+    bundle = _bundle(proof_repo)
+    receipt = bundle["receipts"][0]
+    receipt["argv"] = _full_suite_argv() + trailing
+    receipt["command"] = " ".join(receipt["argv"])
+    _resign(bundle)
+    result = verify_bundle(
+        bundle=bundle, repo_root=proof_repo, policy=load_policy(), schema=load_schema()
+    )
+    assert result.outcome == "STOP"
+    assert "command_not_authorized:tests" in result.errors
+
+
+@pytest.mark.parametrize(
+    "damage",
+    [
+        "missing_argv",
+        "different_argv",
+        "different_lane",
+        "prefix_suffix",
+        "missing_junit",
+        "missing_basetemp",
+        "missing_offline",
+        "missing_plugin",
+        "malformed_quotes",
+    ],
+)
+def test_full_suite_wrapper_is_fail_closed(proof_repo: Path, damage: str) -> None:
+    bundle = _bundle(proof_repo)
+    receipt = bundle["receipts"][0]
+    argv = _full_suite_argv()
+    if damage == "different_lane":
+        argv[4] = "unit"
+    elif damage == "prefix_suffix":
+        argv[4] = "all-untrusted"
+    elif damage == "missing_junit":
+        argv.remove("--junitxml=reports/full.xml")
+    elif damage == "missing_basetemp":
+        argv.remove("--basetemp=/tmp/full-suite")
+    elif damage == "missing_offline":
+        argv.remove("--vcr-record=none")
+    elif damage == "missing_plugin":
+        argv.remove("-p")
+        argv.remove("no:cacheprovider")
+    receipt["command"] = " ".join(argv)
+    receipt["argv"] = argv
+    if damage == "missing_argv":
+        receipt["argv"] = []
+    elif damage == "different_argv":
+        receipt["argv"] = [*argv, "--collect-only"]
+    elif damage == "malformed_quotes":
+        receipt["command"] += " '"
+    _resign(bundle)
+    result = verify_bundle(
+        bundle=bundle, repo_root=proof_repo, policy=load_policy(), schema=load_schema()
+    )
+    assert result.outcome == "STOP"
+    assert "command_not_authorized:tests" in result.errors
