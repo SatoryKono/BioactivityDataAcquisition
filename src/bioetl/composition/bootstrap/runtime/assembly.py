@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     )
 
 __all__ = [
+    "PreflightRuntimeSettings",
     "ResolvedVacuumSettings",
     "RuntimeBootstrapPhases",
     "assemble_cached_bronze_context",

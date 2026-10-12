@@ -237,7 +237,7 @@ class SilverWriterMetadataFacade:
         self,
         table_name: str,
         records: list[BronzeRecord],
-        mode: Literal["append", "merge", "overwrite"] | SilverOperationMode,
+        mode: Literal["append", "merge"] | WriteMode | SilverOperationMode,
         *,
         run_id: RunID | None,
         run_type: RunType | None,
@@ -247,8 +247,6 @@ class SilverWriterMetadataFacade:
         """Log Silver audit events through metadata operations."""
         if self._metadata is None:
             raise RuntimeError(self._SILVER_METADATA_OPERATIONS_REQUIRED)
-        if mode == "overwrite" and not isinstance(mode, WriteMode):
-            mode = WriteMode.OVERWRITE
         validated_mode = (
             mode
             if isinstance(mode, (SilverWriteMode, WriteMode))

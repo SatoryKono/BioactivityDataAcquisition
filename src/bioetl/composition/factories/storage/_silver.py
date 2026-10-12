@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from bioetl.domain.ports import ClockPort
 from bioetl.infrastructure.time import SystemClock
 
 
@@ -59,6 +60,7 @@ class CreateSilverWriterRequest:
     merge_resilience_policy: SilverMergeResiliencePolicy | None = None
     contract_rollout_policy: ContractRolloutPolicy | None = None
     pipeline_name: str | None = None
+    clock: ClockPort | None = None
 
 
 def create_silver_writer(request: CreateSilverWriterRequest) -> SilverWriter:
@@ -105,7 +107,7 @@ def create_silver_writer(request: CreateSilverWriterRequest) -> SilverWriter:
             "SilverWriter requires explicit tracing injection. "
             "Build NoOpTracing in composition when tracing is disabled."
         )
-    clock = SystemClock()
+    clock = request.clock if getattr(request, 'clock', None) is not None else SystemClock()
     runtime_request = SilverWriterRuntimeServicesRequest(
         clock=clock,
         csv_exporter=request.csv_exporter,

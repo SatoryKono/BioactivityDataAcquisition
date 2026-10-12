@@ -24,8 +24,8 @@ flowchart LR
     application -->|1634 OK| application
     application -->|1079 OK| domain
     composition -->|228 OK| application
-    composition -->|648 OK| composition
-    composition -->|310 OK| domain
+    composition -->|647 OK| composition
+    composition -->|311 OK| domain
     composition -->|296 OK| infrastructure
     domain -->|1298 OK| domain
     infrastructure -->|789 OK| domain
@@ -43,8 +43,8 @@ flowchart LR
 | `application`    | `application`    |    1634 | allowed |
 | `application`    | `domain`         |    1079 | allowed |
 | `composition`    | `application`    |     228 | allowed |
-| `composition`    | `composition`    |     648 | allowed |
-| `composition`    | `domain`         |     310 | allowed |
+| `composition`    | `composition`    |     647 | allowed |
+| `composition`    | `domain`         |     311 | allowed |
 | `composition`    | `infrastructure` |     296 | allowed |
 | `domain`         | `domain`         |    1298 | allowed |
 | `infrastructure` | `domain`         |     789 | allowed |
@@ -71,7 +71,7 @@ flowchart LR
 | `composition.factories`        | `application.core`                         |      49 |
 | `composition.bootstrap`        | `application.services`                     |      47 |
 | `infrastructure.storage`       | `domain.value_objects`                     |      43 |
-| `composition.factories`        | `domain.ports`                             |      35 |
+| `composition.factories`        | `domain.ports`                             |      36 |
 | `infrastructure.storage`       | `domain.models`                            |      35 |
 | `application.composite`        | `domain.exceptions`                        |      34 |
 | `composition.bootstrap`        | `domain.ports`                             |      34 |

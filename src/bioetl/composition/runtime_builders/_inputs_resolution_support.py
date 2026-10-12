@@ -84,7 +84,7 @@ def assemble_runtime_config_impl(
     vacuum_retention_days: int,
     health_check_mode: Literal["strict", "probe"],
     skip_gold: bool,
-    strict_validation: bool = True,
+    strict_validation: bool = False,
 ) -> RuntimeConfig:
     return RuntimeConfig(
         run_type=ctx.run_type,

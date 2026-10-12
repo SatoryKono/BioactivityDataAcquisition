@@ -545,7 +545,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "342",
+      "line": "344",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_lineage.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_silver_without_bronze_refs"
@@ -1735,7 +1735,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "342",
+        "line": "344",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_lineage.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_silver_without_bronze_refs"
@@ -2087,12 +2087,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3035,
-    "total_test_functions": 29673,
+    "total_test_functions": 29676,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "d22422a8f5549240627acfb4d2aedc778dd64fa248708e0aedf9dd171e165c7c",
+  "source_tree_sha256": "07b768b3972c75b9c0f4633d74f7df9fa4f5024ea52e0eaae6e4a2fc19b5c1d0",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2155,7 +2155,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3035,
-  "total_test_functions": 29673,
+  "total_test_functions": 29676,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

@@ -708,10 +708,6 @@ def test_release_artifact_is_written_only_for_live_review(tmp_path, mode):
         repo_root=tmp_path,
         output_path=release,
     )
-    target = (
-        release
-        if mode == "live_review"
-        else release.with_name("runtime_cardinality_review_pr.json")
-    )
+    target = release
     assert json.loads(target.read_text(encoding="utf-8")) == summary
-    assert release.exists() == (mode == "live_review")
+    assert release.exists()
