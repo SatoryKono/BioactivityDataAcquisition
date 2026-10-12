@@ -292,7 +292,7 @@ class PubchemMolecule(BaseEntity):
             raise ValueError("PubchemMolecule molecule_id is required")
 
         # Invariant: At least one structural representation should be present
-        if not any([self.canonical_smiles, self.isomeric_smiles, self.inchi]):
+        if not any((self.canonical_smiles, self.isomeric_smiles, self.inchi)):
             raise ValueError(
                 "PubchemMolecule must have at least one structural identifier "
                 "(SMILES/InChI)"
