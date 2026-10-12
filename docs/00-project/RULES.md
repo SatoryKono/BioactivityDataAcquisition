@@ -478,7 +478,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 | ChEMBL Molecule | `first-approval`, `black-box-warning`, `max-phase`, `chirality`, `usan-year` и др.     |
 | ChEMBL Assay    | `src-id`, `assay-taxonomy-id`, `confidence-score`, `dap-id`                            |
 | ChEMBL Target   | `taxonomy-id`                                                                          |
-| UniProt Protein | `organism-id`, `sequence-length`                                                       |
+| UniProt Protein | `taxonomy-id`, `sequence-length`                                                       |
 | Publications    | `year`, `publication-year`                                                             |
 
 **Слои типизации**:

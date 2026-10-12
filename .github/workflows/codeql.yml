@@ -5,15 +5,6 @@ permissions:
 
 on:
   workflow_call:
-  push:
-    branches: [main]
-    paths-ignore:
-      - "docs/**"
-      - "*.md"
-      - ".ai/**"
-      - "LICENSE"
-  schedule:
-    - cron: "17 4 * * 1"
 
 concurrency:
   group: codeql-${{ github.event.pull_request.number || github.sha }}

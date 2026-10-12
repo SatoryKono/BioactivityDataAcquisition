@@ -294,15 +294,16 @@ def test_tests_workflow_publishes_empirical_flaky_telemetry() -> None:
     assert "replay_tree_sha256" in block
 
 
-def test_test_matrix_wording_keeps_gate_always_required() -> None:
-    """#11058: test-matrix is not a leaf check, and gate tests is always_required."""
+def test_test_matrix_wording_keeps_gate_path_scoped() -> None:
+    """#11058: test-matrix is not a leaf check, and gate tests is path-scoped."""
     policy = Path("docs/00-project/governance/05-github-policy.md").read_text(
         encoding="utf-8"
     )
     workflow = _read_workflow(".github/workflows/tests.yml")
     for line in policy.splitlines():
-        if "test-matrix" in line:
+        if "test-matrix" in line or line.startswith("| `coverage-verify` |"):
             assert "not always-on" not in line, line
+            assert "always_required" not in line, line
     matrix_row = next(
         line for line in policy.splitlines() if "job `test-matrix`" in line
     )
@@ -311,9 +312,10 @@ def test_test_matrix_wording_keeps_gate_always_required() -> None:
     )
     for row in (matrix_row, coverage_row):
         assert "Not a leaf required check" in row
-        assert "always_required" in row
+        assert "path-scoped" in row
         assert "pr-gate-complete" in row
         assert "docs-only" in row
+        assert "nightly" in row
     comment_lines: list[str] = []
     for line in reversed(workflow.split("  test-matrix:", 1)[0].splitlines()):
         if line.startswith("  #"):
@@ -322,10 +324,12 @@ def test_test_matrix_wording_keeps_gate_always_required() -> None:
         if comment_lines:
             break
     comment = "\n".join(reversed(comment_lines))
-    assert "always_required" in comment
+    assert "always_required" not in comment
+    assert "path-scoped" in comment
+    assert "nightly" in comment
+    assert "docs-only" in comment
     assert "pr-gate-complete" in comment
     assert "not always-on" not in comment
-    assert "path-scoped" not in comment
 
 
 def test_neo4j_live_audit_uses_cached_image_and_compose_wait() -> None:

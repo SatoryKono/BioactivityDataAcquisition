@@ -8,16 +8,6 @@ concurrency:
 
 on:
   workflow_call:
-  push:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - '.github/workflows/**'
-      - 'LICENSE'
-    branches:
-      - main
-      - master
 jobs:
   duplication-complexity:
     runs-on: ubuntu-latest

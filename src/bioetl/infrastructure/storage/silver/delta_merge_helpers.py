@@ -161,12 +161,28 @@ def _execute_merge_inline_with_timeout(
     *,
     merge_callable: Callable[[], object],
     timeout_seconds: float,
+    logger: LoggerPort,
+    table_path: str,
+    primary_keys: list[str],
 ) -> None:
-    """Execute a local Delta merge without thread offload."""
+    """Execute a local Delta merge without thread offload.
+
+    Inline merges run in-process and cannot be cancelled mid-call (native
+    delta-rs). A completed merge is already durable, so elapsed time past the
+    budget is reported as ``silver_merge_slow`` telemetry instead of a false
+    timeout failure that would trigger a redundant committed-merge retry.
+    """
     started_at = time.perf_counter()
     merge_callable()
-    if time.perf_counter() - started_at > timeout_seconds:
-        raise _MergeExecutionTimeoutError(timeout_seconds)
+    elapsed = time.perf_counter() - started_at
+    if elapsed > timeout_seconds:
+        logger.warning(
+            "silver_merge_slow",
+            table_path=table_path,
+            timeout_seconds=timeout_seconds,
+            elapsed_seconds=elapsed,
+            primary_keys=primary_keys,
+        )
 
 
 async def _merge_records_with_timeout(
@@ -194,6 +210,9 @@ async def _merge_records_with_timeout(
         _execute_merge_inline_with_timeout(
             merge_callable=merge_callable,
             timeout_seconds=timeout_seconds,
+            logger=logger,
+            table_path=table_path,
+            primary_keys=primary_keys,
         )
         return
     try:

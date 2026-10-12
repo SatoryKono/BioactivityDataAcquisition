@@ -2,11 +2,6 @@ name: Lint and Architecture Gates
 
 on:
     workflow_call:
-    push:
-        branches:
-            - main
-            - master
-            - develop
     workflow_dispatch:
 
 permissions:

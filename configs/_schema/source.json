@@ -7,8 +7,8 @@
         "requests_per_second": {
           "default": 5.0,
           "description": "Maximum requests per second",
+          "exclusiveMinimum": 0.0,
           "maximum": 100.0,
-          "minimum": 0.1,
           "title": "Requests Per Second",
           "type": "number"
         },
@@ -42,8 +42,8 @@
         "requests_per_second": {
           "default": 5.0,
           "description": "Maximum requests per second",
+          "exclusiveMinimum": 0.0,
           "maximum": 100.0,
-          "minimum": 0.1,
           "title": "Requests Per Second",
           "type": "number"
         },

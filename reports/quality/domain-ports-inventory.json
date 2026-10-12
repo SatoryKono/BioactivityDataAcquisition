@@ -477,7 +477,7 @@
       "runtime_checkable": true
     },
     {
-      "line": 23,
+      "line": 24,
       "name": "JsonEncoderPort",
       "path": "src/bioetl/domain/ports/serialization.py",
       "runtime_checkable": true
