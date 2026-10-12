@@ -207,7 +207,7 @@ class _ClassificationViews:
     lookups: dict[str, dict[str, PublicationTypeEntry]]
 
 
-_VIEW_CACHE: dict[int, _ClassificationViews] = {}
+_VIEW_CACHE: dict[int, tuple[ClassificationData, _ClassificationViews]] = {}
 
 
 def _build_lookup(
@@ -230,8 +230,8 @@ def _views_for(data: ClassificationData) -> _ClassificationViews:
     indexes does not change a snapshot already built from that object.
     """
     cached = _VIEW_CACHE.get(id(data))
-    if cached is not None:
-        return cached
+    if cached is not None and cached[0] is data:
+        return cached[1]
     entries = tuple(
         PublicationTypeEntry(
             unified_type=unified_type,
@@ -260,7 +260,7 @@ def _views_for(data: ClassificationData) -> _ClassificationViews:
             "s2": semantic_scholar,
         },
     )
-    _VIEW_CACHE[id(data)] = views
+    _VIEW_CACHE[id(data)] = (data, views)
     return views
 
 

@@ -76,6 +76,19 @@ def test_child_binding_gap_codes() -> None:
         resolve_child_workflow_binding({}, {"run_id": "r"}, "step")
         == "identity_not_recorded"
     )
+    parent = {"workflow_name": "wf", "workflow_run_id": "wr"}
+    assert (
+        resolve_child_workflow_binding(parent, {"run_id": "r"}, "step")
+        == "child_identity_not_recorded"
+    )
+    assert (
+        resolve_child_workflow_binding(
+            parent,
+            {"run_id": "r", "pipeline_name": "pipe"},
+            None,
+        )
+        == "child_identity_not_recorded"
+    )
 
 
 def test_parent_binding_requires_exact_child_step() -> None:
