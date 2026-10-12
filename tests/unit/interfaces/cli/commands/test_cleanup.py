@@ -57,8 +57,11 @@ class _MockCleanupResult:
     bytes_planned: int = 1024 * 1024
     directories_planned: int = 2
     files_skipped: int = 0
+    bytes_skipped: int = 0
     files_conflicted: int = 0
+    bytes_conflicted: int = 0
     files_failed: int = 0
+    bytes_failed: int = 0
     directories_skipped: int = 0
     directories_conflicted: int = 0
     directories_failed: int = 0
@@ -164,8 +167,11 @@ class TestBronzeCleanupCommand:
             bytes_freed=20,
             directories_removed=0,
             files_skipped=1,
+            bytes_skipped=11,
             files_conflicted=1,
+            bytes_conflicted=12,
             files_failed=1,
+            bytes_failed=13,
             directories_failed=1,
         )
         with patch(
@@ -177,6 +183,7 @@ class TestBronzeCleanupCommand:
         assert "Removed 2 files" in result.output
         assert "files skipped=1, conflicted=1, failed=1" in result.output
         assert "directories skipped=0, conflicted=0, failed=1" in result.output
+        assert "Retained bytes: skipped=11 bytes, conflicted=12 bytes, failed=13 bytes" in result.output
 
     def test_domain_error_exits_nonzero(self, cli_runner: CliRunner) -> None:
         """Test that BioETLError causes non-zero exit code."""

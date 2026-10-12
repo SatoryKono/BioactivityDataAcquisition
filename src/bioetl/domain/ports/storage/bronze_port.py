@@ -71,7 +71,7 @@ class BronzeStoragePort(Protocol):
 
         Returns:
             Dict with planned, removed, skipped, conflicted, and failed file/
-            directory counts plus planned and freed bytes. Legacy removed keys
+            directory counts plus planned, freed, and retained bytes. Legacy removed keys
             remain present; dry-run leaves removed and freed counts at zero.
         """
         ...

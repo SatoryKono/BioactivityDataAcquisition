@@ -141,6 +141,12 @@ def bronze_cleanup_command(retention_days: int, dry_run: bool) -> None:
             f"failed={result.files_failed}; directories skipped={result.directories_skipped}, "
             f"conflicted={result.directories_conflicted}, failed={result.directories_failed}"
         )
+        echo_info(
+            "Retained bytes: "
+            f"skipped={format_bytes(result.bytes_skipped)}, "
+            f"conflicted={format_bytes(result.bytes_conflicted)}, "
+            f"failed={format_bytes(result.bytes_failed)}"
+        )
 
     run_async_with_cli_failure_policy(
         _run(),

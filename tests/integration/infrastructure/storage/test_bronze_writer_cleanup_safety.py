@@ -124,16 +124,22 @@ async def test_cleanup_preserves_unknown_artifacts(tmp_path: Path) -> None:
     (date_dir / orphan).write_bytes(b"orphan")
     sidecar_orphan = ARTIFACT.replace("12345678", "11223344", 1)
     (date_dir / f"{sidecar_orphan}.meta.json").write_bytes(b"orphan sidecar")
+    unknown_dir = date_dir / "manual"
+    unknown_dir.mkdir()
+    (unknown_dir / "keep.txt").write_bytes(b"nested sentinel")
+    retained_bytes = sum(path.stat().st_size for path in date_dir.iterdir() if path.is_file()) - 3
 
     result = await writer.cleanup_old_files(CUTOFF)
 
     assert result["files_removed"] == 2  # payload + sidecar
     assert result["files_skipped"] == 5
+    assert result["bytes_skipped"] == retained_bytes
     assert result["directories_removed"] == 0
-    assert result["directories_skipped"] == 1
+    assert result["directories_skipped"] == 2  # manual child and date parent
     assert (date_dir / "batch.jsonl.zst").exists()
     assert (date_dir / "README.txt").exists()
     assert (date_dir / "batch_manual_backup.jsonl.zst").read_bytes() == b"backup"
+    assert (unknown_dir / "keep.txt").read_bytes() == b"nested sentinel"
     assert not (date_dir / ARTIFACT).exists()
 
 
@@ -226,15 +232,24 @@ async def test_cleanup_refuses_link_inside_date_dir(tmp_path: Path) -> None:
     ],
 )
 async def test_cleanup_rejects_invalid_scope_filters(
-    tmp_path: Path, provider: str | None, entity: str | None
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    provider: str | None,
+    entity: str | None,
 ) -> None:
     """Scope filters with traversal/glob semantics are rejected."""
     writer = _make_writer(tmp_path)
+    discovery = Mock(side_effect=AssertionError("filesystem traversal started"))
+    preview_resolution = Mock(side_effect=AssertionError("preview traversal started"))
+    monkeypatch.setattr(writer, "_find_old_date_dirs", discovery)
+    monkeypatch.setattr(writer, "_resolve_bronze_preview_root", preview_resolution)
     with pytest.raises(ValueError, match=r"Invalid .* filter"):
         await writer.cleanup_old_files(CUTOFF, provider=provider, entity=entity)
 
     with pytest.raises(ValueError, match=r"Invalid .* filter"):
         writer.preview_cleanup(provider=provider, entity=entity)
+    discovery.assert_not_called()
+    preview_resolution.assert_not_called()
 
 
 @_APPLY_POSIX
@@ -413,6 +428,7 @@ async def test_cleanup_continues_after_entry_stat_error(
     assert result["bytes_freed"] == (0 if dry_run else 8)
     assert result["directories_removed"] == 0
     assert result["files_failed"] == 1
+    assert result["bytes_failed"] == 0  # stat did not yield a reliable size
     assert result["files_skipped"] == 1  # orphan payload of the failed pair
     failed.stat.assert_called_once_with(follow_symlinks=False)
     log_skip.assert_any_call(str(date_dir / other_sidecar), "stat_error")
@@ -455,6 +471,8 @@ async def test_late_unlink_failure_retains_partial_result(
 ) -> None:
     """A later I/O error cannot erase successful removals or retained files."""
     writer = _make_writer(tmp_path)
+    metrics = Mock()
+    writer._metrics = metrics
     date_dir = _date_dir(tmp_path, "chembl", "activity")
     second = ARTIFACT.replace("12345678", "87654321", 1)
     for name in (ARTIFACT, SIDECAR, second, f"{second}.meta.json"):
@@ -476,9 +494,16 @@ async def test_late_unlink_failure_retains_partial_result(
     assert result["files_removed"] == 3
     assert result["bytes_freed"] == 12
     assert result["files_failed"] == 1
+    assert result["bytes_failed"] == 4
     assert result["directories_skipped"] == 1
     assert result["directories_removed"] == 0
     assert sum(path.is_file() for path in date_dir.iterdir()) == 1
+    metrics.increment_counter.assert_any_call(
+        "bioetl_bronze_cleanup_files_failed_total", 1, {"operation": "cleanup"}
+    )
+    metrics.increment_counter.assert_any_call(
+        "bioetl_bronze_cleanup_bytes_failed_total", 4, {"operation": "cleanup"}
+    )
 
 
 @_APPLY_POSIX
@@ -509,6 +534,31 @@ async def test_stage_cleanup_failure_is_reported_after_file_removal(
     assert result["directories_failed"] == 1
     assert not date_dir.exists()
     assert any(path.name.startswith(".bronze-cleanup-stage-") for path in tmp_path.iterdir())
+
+
+@_APPLY_POSIX
+async def test_date_rmdir_failure_preserves_partial_file_counts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A failed directory removal follows successful files in the result."""
+    writer = _make_writer(tmp_path)
+    date_dir = _date_dir(tmp_path, "chembl", "activity")
+    _write_pair(date_dir)
+    original_rmdir = cleanup_support.os.rmdir
+
+    def deny_date_rmdir(name: object, **kwargs: object) -> None:
+        if name == OLD_DATE:
+            raise PermissionError("directory locked")
+        original_rmdir(name, **kwargs)
+
+    monkeypatch.setattr(cleanup_support.os, "rmdir", deny_date_rmdir)
+    result = await writer.cleanup_old_files(CUTOFF)
+
+    assert result["files_removed"] == 2
+    assert result["bytes_freed"] == 3
+    assert result["directories_failed"] == 1
+    assert result["directories_removed"] == 0
+    assert date_dir.is_dir() and not list(date_dir.iterdir())
 
 
 @pytest.mark.skipif(
@@ -690,6 +740,48 @@ def test_open_date_renamed_at_unlink_cannot_redirect_staged_file(
     assert sentinel.read_bytes() == b"outside"
 
 
+@_APPLY_POSIX
+@pytest.mark.parametrize("component", ["root", "provider"])
+def test_root_or_provider_replaced_at_unlink_keeps_outside_sentinel(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, component: str
+) -> None:
+    """After isolation, an ancestor swap cannot redirect the staged unlink."""
+    root = tmp_path / "bronze"
+    date_dir = _date_dir(root, "chembl", "activity")
+    target = date_dir / ARTIFACT
+    target.write_bytes(b"planned")
+    planned = target.stat()
+    outside = tmp_path / "outside"
+    outside_date = _date_dir(outside, "chembl", "activity")
+    outside_target = outside_date / ARTIFACT
+    outside_target.write_bytes(b"outside")
+    original_unlink = cleanup_support.os.unlink
+    source = root if component == "root" else root / "chembl"
+    destination = outside if component == "root" else outside / "chembl"
+    moved = source.with_name(f"{source.name}_moved")
+    replaced = False
+
+    def replace_at_unlink(name: object, **kwargs: object) -> None:
+        nonlocal replaced
+        if name == ARTIFACT and not replaced:
+            replaced = True
+            source.rename(moved)
+            os.symlink(destination, source, target_is_directory=True)
+        original_unlink(name, **kwargs)
+
+    monkeypatch.setattr(cleanup_support.os, "unlink", replace_at_unlink)
+    assert safe_unlink(target, root, root, planned)
+    assert replaced
+    assert outside_target.read_bytes() == b"outside"
+    remainder = (
+        Path("chembl") / "activity" / OLD_DATE
+        if component == "root"
+        else Path("activity") / OLD_DATE
+    )
+    moved_date = moved / remainder
+    assert moved_date.is_dir() and not (moved_date / ARTIFACT).exists()
+
+
 @pytest.mark.skipif(
     not destructive_cleanup_supported(), reason="POSIX handle capability required"
 )
@@ -746,6 +838,35 @@ def test_same_name_directory_replacement_at_rmdir_is_retained(
     assert outside_empty.is_dir()
 
 
+@_APPLY_POSIX
+def test_root_replaced_at_rmdir_keeps_outside_empty_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A late root swap cannot redirect rmdir to an unrelated directory."""
+    root = tmp_path / "bronze"
+    date_dir = _date_dir(root, "chembl", "activity")
+    planned = date_dir.stat()
+    outside = tmp_path / "outside"
+    outside_date = _date_dir(outside, "chembl", "activity")
+    original_rmdir = cleanup_support.os.rmdir
+    moved_root = tmp_path / "bronze_moved"
+    replaced = False
+
+    def replace_at_rmdir(name: object, **kwargs: object) -> None:
+        nonlocal replaced
+        if name == OLD_DATE and not replaced:
+            replaced = True
+            root.rename(moved_root)
+            os.symlink(outside, root, target_is_directory=True)
+        original_rmdir(name, **kwargs)
+
+    monkeypatch.setattr(cleanup_support.os, "rmdir", replace_at_rmdir)
+    assert safe_rmdir(date_dir, root, root, planned)
+    assert replaced
+    assert outside_date.is_dir() and not list(outside_date.iterdir())
+    assert not (moved_root / "chembl" / "activity" / OLD_DATE).exists()
+
+
 @pytest.mark.skipif(
     not destructive_cleanup_supported(), reason="POSIX flock capability required"
 )
@@ -793,3 +914,33 @@ async def test_windows_apply_refuses_before_discovery(
         await writer.cleanup_old_files(CUTOFF)
     assert (date_dir / ARTIFACT).read_bytes() == b"x"
     assert outside.read_bytes() == b"outside"
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows junction-specific case")
+async def test_windows_junction_preview_skips_and_apply_refuses(tmp_path: Path) -> None:
+    """A junction is distinct from a symlink and never enables apply."""
+    root = tmp_path / "bronze"
+    provider_dir = root / "chembl"
+    provider_dir.mkdir(parents=True)
+    outside = tmp_path / "outside"
+    outside_date = _date_dir(outside, date=OLD_DATE)
+    _write_pair(outside_date)
+    junction = provider_dir / "activity"
+    created = subprocess.run(
+        ["cmd", "/c", "mklink", "/J", str(junction), str(outside)],
+        capture_output=True,
+        check=False,
+    )
+    if created.returncode != 0:
+        pytest.skip("Windows junction capability unavailable (NOT_VERIFIED)")
+    writer = _make_writer(root)
+
+    dry = await writer.cleanup_old_files(CUTOFF, dry_run=True)
+    preview = writer.preview_cleanup(provider="chembl", entity="activity")
+    with pytest.raises(NotImplementedError, match="unsupported"):
+        await writer.cleanup_old_files(CUTOFF)
+
+    assert dry["files_planned"] == 0
+    assert preview["file_count"] == 0
+    assert preview["exists"] is False
+    assert (outside_date / ARTIFACT).read_bytes() == b"x"

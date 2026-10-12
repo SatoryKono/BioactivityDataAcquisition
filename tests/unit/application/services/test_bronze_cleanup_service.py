@@ -207,8 +207,11 @@ class TestBronzeCleanupServiceCleanup:
             "bytes_freed": 20,
             "directories_removed": 0,
             "files_skipped": 1,
+            "bytes_skipped": 11,
             "files_conflicted": 1,
+            "bytes_conflicted": 12,
             "files_failed": 1,
+            "bytes_failed": 13,
             "directories_skipped": 1,
             "directories_conflicted": 0,
             "directories_failed": 1,
@@ -221,6 +224,9 @@ class TestBronzeCleanupServiceCleanup:
         )
         assert (result.files_skipped, result.files_conflicted, result.files_failed) == (
             1, 1, 1
+        )
+        assert (result.bytes_skipped, result.bytes_conflicted, result.bytes_failed) == (
+            11, 12, 13
         )
         assert (result.directories_skipped, result.directories_failed) == (1, 1)
 

@@ -50,8 +50,12 @@ class _CleanupDatePlan:
     files: list[_CleanupCandidate]
     removable: bool
     files_skipped: int = 0
+    bytes_skipped: int = 0
     files_conflicted: int = 0
+    bytes_conflicted: int = 0
     files_failed: int = 0
+    bytes_failed: int = 0
+    directories_skipped: int = 0
     directories_conflicted: int = 0
     directories_failed: int = 0
 
@@ -205,10 +209,13 @@ class BronzeWriterReadCleanupMixin:
                 "bytes_freed",
                 "directories_removed",
                 "files_skipped",
+                "bytes_skipped",
                 "directories_skipped",
                 "files_conflicted",
+                "bytes_conflicted",
                 "directories_conflicted",
                 "files_failed",
+                "bytes_failed",
                 "directories_failed",
             ),
             0,
@@ -232,8 +239,12 @@ class BronzeWriterReadCleanupMixin:
             stats["files_planned"] += len(plan.files)
             stats["bytes_planned"] += sum(c.identity.st_size for c in plan.files)
             stats["files_skipped"] += plan.files_skipped
+            stats["bytes_skipped"] += plan.bytes_skipped
             stats["files_conflicted"] += plan.files_conflicted
+            stats["bytes_conflicted"] += plan.bytes_conflicted
             stats["files_failed"] += plan.files_failed
+            stats["bytes_failed"] += plan.bytes_failed
+            stats["directories_skipped"] += plan.directories_skipped
             stats["directories_conflicted"] += plan.directories_conflicted
             stats["directories_failed"] += plan.directories_failed
             if plan.removable:
@@ -260,6 +271,7 @@ class BronzeWriterReadCleanupMixin:
                     )
                 except OSError:
                     stats["files_failed"] += 1
+                    stats["bytes_failed"] += candidate.identity.st_size
                     self._log_cleanup_skip(str(candidate.path), "unlink_error")
                 else:
                     if removed:
@@ -267,6 +279,7 @@ class BronzeWriterReadCleanupMixin:
                         stats["bytes_freed"] += candidate.identity.st_size
                     else:
                         stats["files_conflicted"] += 1
+                        stats["bytes_conflicted"] += candidate.identity.st_size
                         self._log_cleanup_skip(str(candidate.path), "unlink_conflict")
             if not plan.removable:
                 continue
@@ -351,6 +364,12 @@ class BronzeWriterReadCleanupMixin:
             )
             file_path = date_dir / entry.name
             if (
+                stat.S_ISDIR(candidate_identity.st_mode)
+            ):
+                plan.directories_skipped += 1
+                self._log_cleanup_skip(entry.path, "unknown_directory")
+                continue
+            if (
                 not stat.S_ISREG(candidate_identity.st_mode)
                 or not is_owned_artifact(
                     entry.name, date_name=date_dir.name, payload_names=payload_names
@@ -358,10 +377,13 @@ class BronzeWriterReadCleanupMixin:
                 or expected_rel != rel_date / entry.name
             ):
                 plan.files_skipped += 1
+                if stat.S_ISREG(candidate_identity.st_mode):
+                    plan.bytes_skipped += candidate_identity.st_size
                 self._log_cleanup_skip(entry.path, "unknown_artifact")
                 continue
             if not candidate_is_safe(file_path, root_abs, root_real, candidate_identity):
                 plan.files_conflicted += 1
+                plan.bytes_conflicted += candidate_identity.st_size
                 self._log_cleanup_skip(entry.path, "candidate_conflict")
                 continue
             plan.files.append(_CleanupCandidate(file_path, candidate_identity))
@@ -411,8 +433,11 @@ class BronzeWriterReadCleanupMixin:
             )
         for key, metric in (
             ("files_skipped", "bioetl_bronze_cleanup_files_skipped_total"),
+            ("bytes_skipped", "bioetl_bronze_cleanup_bytes_skipped_total"),
             ("files_conflicted", "bioetl_bronze_cleanup_files_conflicted_total"),
+            ("bytes_conflicted", "bioetl_bronze_cleanup_bytes_conflicted_total"),
             ("files_failed", "bioetl_bronze_cleanup_files_failed_total"),
+            ("bytes_failed", "bioetl_bronze_cleanup_bytes_failed_total"),
             ("directories_skipped", "bioetl_bronze_cleanup_directories_skipped_total"),
             (
                 "directories_conflicted",

@@ -43,10 +43,13 @@ class BronzeCleanupResult:
     bytes_planned: int = 0
     directories_planned: int = 0
     files_skipped: int = 0
+    bytes_skipped: int = 0
     directories_skipped: int = 0
     files_conflicted: int = 0
+    bytes_conflicted: int = 0
     directories_conflicted: int = 0
     files_failed: int = 0
+    bytes_failed: int = 0
     directories_failed: int = 0
 
 
@@ -121,10 +124,13 @@ class BronzeCleanupService:
             bytes_planned=result.get("bytes_planned", 0),
             directories_planned=result.get("directories_planned", 0),
             files_skipped=result.get("files_skipped", 0),
+            bytes_skipped=result.get("bytes_skipped", 0),
             directories_skipped=result.get("directories_skipped", 0),
             files_conflicted=result.get("files_conflicted", 0),
+            bytes_conflicted=result.get("bytes_conflicted", 0),
             directories_conflicted=result.get("directories_conflicted", 0),
             files_failed=result.get("files_failed", 0),
+            bytes_failed=result.get("bytes_failed", 0),
             directories_failed=result.get("directories_failed", 0),
         )
 
@@ -147,10 +153,13 @@ class BronzeCleanupService:
             bytes_planned=result.bytes_planned,
             directories_planned=result.directories_planned,
             files_skipped=result.files_skipped,
+            bytes_skipped=result.bytes_skipped,
             directories_skipped=result.directories_skipped,
             files_conflicted=result.files_conflicted,
+            bytes_conflicted=result.bytes_conflicted,
             directories_conflicted=result.directories_conflicted,
             files_failed=result.files_failed,
+            bytes_failed=result.bytes_failed,
             directories_failed=result.directories_failed,
             cutoff_date=result.cutoff_date.isoformat(),
             dry_run=result.dry_run,
