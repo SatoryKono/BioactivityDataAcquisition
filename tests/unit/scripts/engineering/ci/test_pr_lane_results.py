@@ -137,6 +137,44 @@ def test_affected_targets_map_source_and_existing_tests(tmp_path: Path) -> None:
     ]
 
 
+def test_affected_targets_map_memory_source_without_test_diff() -> None:
+    """A chunking-only PR must select its real RAG regression suite."""
+    repo_root = Path(__file__).resolve().parents[5]
+    targets = affected_pytest_targets(
+        ["src/memory/rag/chunking.py", "src/memory/rag/chunking.py"],
+        repo_root=repo_root,
+    )
+
+    assert targets == ["tests/unit/memory/test_rag_indexing.py"]
+    assert all((repo_root / target).is_file() for target in targets)
+
+
+def test_affected_targets_fail_closed_without_memory_test(tmp_path: Path) -> None:
+    """A mapping never turns an absent test into a passing target."""
+    assert (
+        affected_pytest_targets(["src/memory/rag/chunking.py"], repo_root=tmp_path)
+        == []
+    )
+
+
+def test_affected_targets_preserve_bioetl_and_scripts_routes(tmp_path: Path) -> None:
+    """Memory routing keeps the existing source and script selection."""
+    (tmp_path / "tests/unit/domain").mkdir(parents=True)
+    script_test = tmp_path / "tests/unit/scripts/engineering/ci/test_tool.py"
+    script_test.parent.mkdir(parents=True)
+    script_test.write_text("def test_tool():\n    assert True\n", encoding="utf-8")
+
+    targets = affected_pytest_targets(
+        ["src/bioetl/domain/sample.py", "scripts/engineering/ci/tool.py"],
+        repo_root=tmp_path,
+    )
+
+    assert targets == [
+        "tests/unit/domain",
+        "tests/unit/scripts/engineering/ci/test_tool.py",
+    ]
+
+
 def test_build_rejects_unknown_decision() -> None:
     """Reject gate decisions outside the coordinator decision vocabulary."""
     with pytest.raises(ValueError, match="unknown decision"):
