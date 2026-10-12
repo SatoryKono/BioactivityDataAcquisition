@@ -593,6 +593,7 @@ async def test_filter_options_deadline_does_not_send_late_success(monkeypatch) -
         return {"items": []}
 
     monkeypatch.setattr(routing_support, "_filter_options_payload", slow_options)
+    monkeypatch.setattr(routing_support, "_FILTER_OPTIONS_TIMEOUT_SECONDS", 0.01)
     monkeypatch.setattr(
         routing_support,
         "run_bounded_forensic_operation",
