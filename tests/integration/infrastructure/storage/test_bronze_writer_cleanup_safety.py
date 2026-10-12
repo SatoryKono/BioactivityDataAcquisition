@@ -119,6 +119,27 @@ async def test_cleanup_skips_noncanonical_date_dirs(tmp_path: Path) -> None:
 
 
 @_APPLY_POSIX
+async def test_calendar_cutoff_keeps_boundary_and_fresh_dates(tmp_path: Path) -> None:
+    """A valid leap day is old; cutoff day and later dates are retained."""
+    writer = _make_writer(tmp_path)
+    entity_dir = tmp_path / "chembl" / "activity"
+    partitions: dict[str, Path] = {}
+    for date_name in ("2024-02-29", "2024-06-01", "2024-06-02"):
+        date_dir = _date_dir(entity_dir, date=date_name)
+        artifact = ARTIFACT.replace(OLD_DATE, date_name)
+        (date_dir / artifact).write_bytes(date_name.encode())
+        (date_dir / f"{artifact}.meta.json").write_bytes(b"{}")
+        partitions[date_name] = date_dir
+
+    result = await writer.cleanup_old_files(datetime(2024, 6, 1, tzinfo=UTC))
+
+    assert result["files_removed"] == 2
+    assert not partitions["2024-02-29"].exists()
+    assert partitions["2024-06-01"].is_dir()
+    assert partitions["2024-06-02"].is_dir()
+
+
+@_APPLY_POSIX
 async def test_cleanup_preserves_unknown_artifacts(tmp_path: Path) -> None:
     """Unknown files stop deletion and keep the date directory alive."""
     writer = _make_writer(tmp_path)
