@@ -507,3 +507,35 @@ def test_explicit_classification_data_objects_stay_isolated() -> None:
     assert cached.unified_type == "Journal Article"
     with pytest.raises(RuntimeError, match="passed explicitly"):
         classify("crossref", raw_type="journal-article")
+
+
+def test_classification_view_cache_checks_source_identity() -> None:
+    """An id-key collision must never return another taxonomy snapshot."""
+    from bioetl.domain.mapping import (
+        _publication_type_classification_support as support,
+    )
+    from bioetl.domain.mapping.classification_data import ClassificationData
+
+    journal = ClassificationData(
+        entry_cores=(("Journal Article", "Original Experimental Data", "EXP"),),
+        openalex_row_index={},
+        crossref_row_index={"journal-article": 1},
+        pubmed_row_index={},
+        s2_row_index={},
+    )
+    preprint = ClassificationData(
+        entry_cores=(("Preprint", "Original Experimental Data", "EXP"),),
+        openalex_row_index={},
+        crossref_row_index={"journal-article": 1},
+        pubmed_row_index={},
+        s2_row_index={},
+    )
+    wrong_views = support._views_for(preprint)
+    support._VIEW_CACHE[id(journal)] = (preprint, wrong_views)
+
+    views = support._views_for(journal)
+
+    assert views is not wrong_views
+    assert views.entries[0].unified_type == "Journal Article"
+    support._VIEW_CACHE.pop(id(journal), None)
+    support._VIEW_CACHE.pop(id(preprint), None)

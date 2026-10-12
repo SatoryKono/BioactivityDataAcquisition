@@ -281,11 +281,9 @@ def _is_injected_fallback(
     while current is not None and not isinstance(
         current, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)
     ):
-        if isinstance(current, ast.BoolOp):
-            if any(
-                isinstance(value, ast.Name) and value.id in injected
-                for value in current.values
-            ):
+        if isinstance(current, ast.BoolOp) and isinstance(current.op, ast.Or):
+            first = current.values[0]
+            if isinstance(first, ast.Name) and first.id in injected:
                 return True
         if isinstance(current, ast.IfExp):
             for branch in (current.body, current.orelse):
@@ -293,6 +291,20 @@ def _is_injected_fallback(
                     return True
         current = parents.get(current)
     return False
+
+
+def test_injected_fallback_requires_injected_first_operand_of_or() -> None:
+    """Only ``injected or Constructor()`` is an injected fallback."""
+
+    def classified(source: str) -> bool:
+        tree = ast.parse(source)
+        parents = _ast_parents(tree)
+        call = next(node for node in ast.walk(tree) if isinstance(node, ast.Call))
+        return _is_injected_fallback(call, parents, {"injected"})
+
+    assert classified("value = injected or Dependency()")
+    assert not classified("value = injected and Dependency()")
+    assert not classified("value = Dependency() or injected")
 
 
 class _NonAssignmentDependencyFinder(ast.NodeVisitor):
