@@ -283,6 +283,7 @@ reports/quality/coderabbit/**/auth.*
 !/reports/quality/domain-ports-inventory.md
 !/reports/quality/config-contract-registry-artifact-duplication.json
 !/reports/quality/config-surface-backlog.json
+!/reports/quality/governance-artifact-closeout-20261012.json
 !/reports/quality/pipeline-config-contract-ownership-map.json
 !/reports/quality/pipeline-config-contract-ownership-map.md
 !/reports/quality/contract-coverage-matrix.json

@@ -1,0 +1,293 @@
+{
+  "schema_version": 1,
+  "task_id": "78ffdcbf-6b3d-4b9c-9aa0-d212aad009d9",
+  "reviewed_revision": "f0df2cb284cc852e3a2f8618619110ed1eb11bba",
+  "scope": "Closeout of the generated artifacts changed by the reviewed revision; current working-tree verification on 2026-10-12 UTC.",
+  "finding_disposition": {
+    "missing_closeout_evidence": "valid: recorded matching generators, checks, source identity, JSON/Markdown parity and non-growth below",
+    "freshness_value_3": "already correct: no scalar correction required; JSON and Markdown both report 3 elapsed days",
+    "config_surface_check_flag": "not implemented by this reporter; used the architecture guard prescribed by the generated-artifact-drift runbook"
+  },
+  "environment": {
+    "python": "3.13.16",
+    "uv": "0.12.23",
+    "dependencies": "uv sync --frozen --extra dev --extra tests --extra tracing",
+    "BIOETL_AI_MEMORY_MODE": "off",
+    "trust_tier": "local_single_host",
+    "uv_lock_sha256": "552daa6c199f3669f8f5d8e22b1eb1ff44bc9fb39d0178bb47b25e8557674f56",
+    "pyproject_sha256": "2ccc58d80dc5e6de6232a63fb3e324e7eaa25f75c94ae13467028de214647f8a"
+  },
+  "constraints": {
+    "refresh_governance_artifacts_used": false,
+    "generated_payloads_edited_manually": false,
+    "env_files_changed": false,
+    "debt_budgets_increased": false,
+    "runtime_mirror_sync": "not applicable: runtime sources and mirrors unchanged",
+    "memory_pre_task": "not run: generated-artifact rebind task class"
+  },
+  "remote_main": {
+    "fetch": {
+      "command": "git fetch origin main",
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": "From https://github.com/SatoryKono/BioactivityDataAcquisition\n * branch                  main       -> FETCH_HEAD\n   5700f6a551..d12420e436  main       -> origin/main\n"
+    },
+    "remote_verification": {
+      "command": "git ls-remote origin refs/heads/main",
+      "exit_status": 0,
+      "stdout": "d12420e436a8b59078c838d2f96fd1b1f4f50be8\trefs/heads/main\n"
+    },
+    "previous_source_revision": "c2b5ed3a3bc9c5d7d2cc895212e6975b28bdb80c",
+    "source_revision": [
+      "d12420e436a8b59078c838d2f96fd1b1f4f50be8"
+    ],
+    "local_tracking_ref_sha": "d12420e436a8b59078c838d2f96fd1b1f4f50be8",
+    "remote_main_sha": "d12420e436a8b59078c838d2f96fd1b1f4f50be8",
+    "local_tracking_ref_matches_remote": true,
+    "provenance": "All six blob_sha256 values verified against git show <remote_main_sha>:<path>; no working-tree blobs substituted. Checkout was clean before regeneration; generated changes remain uncommitted.",
+    "baseline_artifact_fingerprint": "f871c593d9ad934c1eb3c19764bacba8b5ee5438be2f3abffad50fc884ec0f4d",
+    "remote_module_coverage_source_tree_sha256": "0dfece1cf53b8f33e7dbdfd357cfc12d6e16f51b9e2c1fb6d5fc7a10b0426f83"
+  },
+  "test_governance": {
+    "source_tree_sha256": "90452227f5c62d000ac3c6432788c694bf7ee9657712cf4fee1b45b9865e98e5",
+    "hash_verification": "Recomputed with _compute_test_governance_source_tree_sha256; matching generator and --check force a source rescan. This is not the telemetry or module-coverage hash.",
+    "budget_violations": []
+  },
+  "freshness_parity": {
+    "gate": "observability_release_review_freshness",
+    "json_current": 3,
+    "markdown_current": 3,
+    "limit": 21,
+    "status": "pass",
+    "source_generated_at": "2026-10-08T19:28:13Z",
+    "calculation": "floor((current UTC time - generated_at).total_seconds() / 86400), verified at the command timestamps below"
+  },
+  "artifacts": [
+    {
+      "path": "reports/quality/architecture-debt-remote-main-baseline.json",
+      "sha256_before": "aa545b1ca0f916c144e8c3744b69447b4e0807e6161be9c8fdb1f6a5f56f8e2b",
+      "sha256_after": "ce01c54a40cf2d081a79e2b1609bf8edd917b8a718d6ed543138ebefe46dafac",
+      "changed": true,
+      "reason": "Matching generator rebound the remote-main Git blob identity or its dependent fingerprint; debt metrics unchanged."
+    },
+    {
+      "path": "reports/quality/architecture-debt-remote-main-baseline.md",
+      "sha256_before": "a4162174ae81013865e661fdbac1b4ce7591fca296528af5d24700628b7fea95",
+      "sha256_after": "9a23ac908babc65ea80cce31e90bdf16460ace07d933859cefc5c5e2ba3bbcad",
+      "changed": true,
+      "reason": "Matching generator rebound the remote-main Git blob identity or its dependent fingerprint; debt metrics unchanged."
+    },
+    {
+      "path": "reports/quality/test-governance-current.json",
+      "sha256_before": "b2a7aa94eba5ebc837b54db07a3fd4a678fbe0bbb6d90de1551a2892f2e74d92",
+      "sha256_after": "b2a7aa94eba5ebc837b54db07a3fd4a678fbe0bbb6d90de1551a2892f2e74d92",
+      "changed": false,
+      "reason": "Matching generator reproduced the committed artifact byte for byte."
+    },
+    {
+      "path": "reports/quality/test-fixture-asset-duplication.json",
+      "sha256_before": "f059bf48f0f2af102b381e7f79af511f7c625c473c797ab496ee7df2c8434c4e",
+      "sha256_after": "f059bf48f0f2af102b381e7f79af511f7c625c473c797ab496ee7df2c8434c4e",
+      "changed": false,
+      "reason": "Matching generator reproduced the committed artifact byte for byte."
+    },
+    {
+      "path": "reports/quality/config-surface-backlog.json",
+      "sha256_before": "ecc7f93757a3d0e9343a54e211e995492eb1625b1ff4958b2b8aed1ab1d69a79",
+      "sha256_after": "ecc7f93757a3d0e9343a54e211e995492eb1625b1ff4958b2b8aed1ab1d69a79",
+      "changed": false,
+      "reason": "Matching generator reproduced the committed artifact byte for byte."
+    },
+    {
+      "path": "reports/quality/live-residual-snapshot.json",
+      "sha256_before": "d7c9e7c55178ebc371bba1776002d357577cbb55dfe02816c01682ff4b0ee66f",
+      "sha256_after": "d7c9e7c55178ebc371bba1776002d357577cbb55dfe02816c01682ff4b0ee66f",
+      "changed": false,
+      "reason": "Matching generator reproduced the committed artifact byte for byte."
+    },
+    {
+      "path": "reports/quality/debt-governance-gates.json",
+      "sha256_before": "1a70b7d2f99559ceb9eafeff15c834d1e0edef2826ae78833c55122e657c1b99",
+      "sha256_after": "79de28fee0d9ab4fe36f32f565be6bb6e22c608f969bb8051a70663c0404086e",
+      "changed": true,
+      "reason": "Matching generator rebound the remote-main Git blob identity or its dependent fingerprint; debt metrics unchanged."
+    },
+    {
+      "path": "reports/quality/debt-governance-gates.md",
+      "sha256_before": "cabe958ca973cad0321830133560f54f0f2a3c2ee19140f1c9481a3c6608a854",
+      "sha256_after": "80f6759341e91181ba6e9f44340ac2827bd2274477c458637add3c4aee98045d",
+      "changed": true,
+      "reason": "Matching generator rebound the remote-main Git blob identity or its dependent fingerprint; debt metrics unchanged."
+    }
+  ],
+  "families": {
+    "remote-main": {
+      "generator": {
+        "command": ".venv/bin/python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update",
+        "started_at": "2026-10-12T10:25:24.686439+00:00",
+        "finished_at": "2026-10-12T10:25:29.582697+00:00",
+        "exit_status": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "check": {
+        "command": ".venv/bin/python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check",
+        "started_at": "2026-10-12T10:26:22.641019+00:00",
+        "finished_at": "2026-10-12T10:26:28.910441+00:00",
+        "exit_status": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    },
+    "test-governance": {
+      "generator": {
+        "command": ".venv/bin/python -m scripts.engineering.qa.report_test_governance_audit --json-out reports/quality/test-governance-current.json --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json",
+        "started_at": "2026-10-12T10:25:07.913959+00:00",
+        "finished_at": "2026-10-12T10:25:24.676781+00:00",
+        "exit_status": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "check": {
+        "command": ".venv/bin/python -m scripts.engineering.qa.report_test_governance_audit --check",
+        "started_at": "2026-10-12T10:26:28.913421+00:00",
+        "finished_at": "2026-10-12T10:26:48.289886+00:00",
+        "exit_status": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    },
+    "config-surface": {
+      "generator": {
+        "command": ".venv/bin/python -m scripts.engineering.qa.report_config_surface_backlog",
+        "started_at": "2026-10-12T10:25:29.585677+00:00",
+        "finished_at": "2026-10-12T10:25:38.720088+00:00",
+        "exit_status": 0,
+        "stdout": "Backlog saved to reports/quality/config-surface-backlog.json\nentity_effective partial=0 actionable=0 composite=0\n",
+        "stderr": ""
+      },
+      "check": {
+        "command": ".venv/bin/python -m pytest tests/architecture/test_config_surface_entity_residual_plateau.py -q --no-cov",
+        "started_at": "2026-10-12T10:26:48.295151+00:00",
+        "finished_at": "2026-10-12T10:27:11.693983+00:00",
+        "exit_status": 0,
+        "stdout": ".....                                                                    [100%]\n",
+        "stderr": ""
+      }
+    },
+    "live-residual": {
+      "generator": {
+        "command": ".venv/bin/python -m scripts.engineering.qa.report_live_residual_snapshot",
+        "started_at": "2026-10-12T10:25:38.724321+00:00",
+        "finished_at": "2026-10-12T10:25:44.758716+00:00",
+        "exit_status": 0,
+        "stdout": "[updated] wrote live residual snapshot: /home/vercel-sandbox/workspace/repos/github.com/satorykono/bioactivitydataacquisition/reports/quality/live-residual-snapshot.json families=5 clusters=6\n",
+        "stderr": ""
+      },
+      "check": {
+        "command": ".venv/bin/python -m scripts.engineering.qa.report_live_residual_snapshot --check",
+        "started_at": "2026-10-12T10:27:11.697958+00:00",
+        "finished_at": "2026-10-12T10:27:18.727074+00:00",
+        "exit_status": 0,
+        "stdout": "[ok] live residual snapshot non-growth holds: /home/vercel-sandbox/workspace/repos/github.com/satorykono/bioactivitydataacquisition/reports/quality/live-residual-snapshot.json\n",
+        "stderr": ""
+      }
+    },
+    "debt-governance": {
+      "generator": {
+        "command": ".venv/bin/python -m scripts.engineering.qa.report_debt_governance_gates --update",
+        "started_at": "2026-10-12T10:25:44.762469+00:00",
+        "finished_at": "2026-10-12T10:26:03.494324+00:00",
+        "exit_status": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "check": {
+        "command": ".venv/bin/python -m scripts.engineering.qa.report_debt_governance_gates --check",
+        "started_at": "2026-10-12T10:27:18.731340+00:00",
+        "finished_at": "2026-10-12T10:27:39.376556+00:00",
+        "exit_status": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    }
+  },
+  "json_validation": {
+    "command": ".venv/bin/python -c 'import hashlib\nimport json\nimport subprocess\nfrom pathlib import Path\n\nfrom scripts.engineering.qa.report_test_governance_audit import _compute_test_governance_source_tree_sha256\n\nroot = Path.cwd()\nbase = Path('\"'\"'reports/quality'\"'\"')\nnames = ['\"'\"'architecture-debt-remote-main-baseline'\"'\"', '\"'\"'test-governance-current'\"'\"', '\"'\"'config-surface-backlog'\"'\"', '\"'\"'live-residual-snapshot'\"'\"', '\"'\"'debt-governance-gates'\"'\"']\ncurrent = {name: json.loads((base / (name + '\"'\"'.json'\"'\"')).read_text()) for name in names}\nprevious = {name: json.loads(subprocess.check_output(['\"'\"'git'\"'\"', '\"'\"'show'\"'\"', f'\"'\"'HEAD:{base}/{name}.json'\"'\"'])) for name in names}\nassert all(isinstance(value, dict) and value for value in current.values())\nprint('\"'\"'JSON validation: 5 nonempty objects parsed'\"'\"')\nremote = current[names[0]]\ntracking = subprocess.check_output(['\"'\"'git'\"'\"', '\"'\"'rev-parse'\"'\"', '\"'\"'origin/main'\"'\"'], text=True).strip()\nupstream = subprocess.check_output(['\"'\"'git'\"'\"', '\"'\"'ls-remote'\"'\"', '\"'\"'origin'\"'\"', '\"'\"'refs/heads/main'\"'\"'], text=True).split()[0]\nassert remote['\"'\"'local_tracking_ref_matches_remote'\"'\"'] is True\nassert remote['\"'\"'local_tracking_ref_sha'\"'\"'] == remote['\"'\"'remote_main_sha'\"'\"'] == tracking == upstream\nfor row in remote['\"'\"'artifacts'\"'\"']:\n    assert row['\"'\"'source_revision'\"'\"'] == upstream\n    blob = subprocess.check_output(['\"'\"'git'\"'\"', '\"'\"'show'\"'\"', f\"{upstream}:{row['\"'\"'path'\"'\"']}\"])\n    assert hashlib.sha256(blob).hexdigest() == row['\"'\"'blob_sha256'\"'\"']\nprint('\"'\"'Remote provenance: all 6 Git blobs and source_revision/local_tracking_ref_sha/remote_main_sha verified:'\"'\"', upstream)\ntest_hash = _compute_test_governance_source_tree_sha256(str(root))\nassert current[names[1]]['\"'\"'source_tree_sha256'\"'\"'] == test_hash\nprint('\"'\"'Test-governance source_tree_sha256:'\"'\"', test_hash)\ndebt = current[names[4]]\nmarkdown = (base / (names[4] + '\"'\"'.md'\"'\"')).read_text()\ngate = next(g for g in debt['\"'\"'gates'\"'\"'] if g['\"'\"'name'\"'\"'] == '\"'\"'observability_release_review_freshness'\"'\"')\nassert gate['\"'\"'current'\"'\"'] == 3 and gate['\"'\"'limit'\"'\"'] == 21 and gate['\"'\"'status'\"'\"'] == '\"'\"'pass'\"'\"'\nassert '\"'\"'| `observability_release_review_freshness` | `pass` | `generated_at_age_days` | `3` | `21` |'\"'\"' in markdown\nprint('\"'\"'JSON/Markdown freshness parity: 3 == 3; limit 21; pass'\"'\"')\nfor name in names[1:4]:\n    assert current[name] == previous[name], name\nfor before, after in zip(previous[names[0]]['\"'\"'artifacts'\"'\"'], remote['\"'\"'artifacts'\"'\"'], strict=True):\n    assert before['\"'\"'path'\"'\"'] == after['\"'\"'path'\"'\"']\n    stable = lambda row: {k: v for k, v in row['\"'\"'summary'\"'\"'].items() if k not in {'\"'\"'snapshot_date'\"'\"', '\"'\"'source_tree_sha256'\"'\"'}}\n    assert stable(before) == stable(after), after['\"'\"'path'\"'\"']\nfor before, after in zip(previous[names[4]]['\"'\"'gates'\"'\"'], debt['\"'\"'gates'\"'\"'], strict=True):\n    assert before['\"'\"'name'\"'\"'] == after['\"'\"'name'\"'\"']\n    if after['\"'\"'name'\"'\"'] == '\"'\"'remote_main_architecture_debt_baseline'\"'\"':\n        before = {k: v for k, v in before.items() if k != '\"'\"'current'\"'\"'}\n        after = {k: v for k, v in after.items() if k != '\"'\"'current'\"'\"'}\n    assert before == after\nassert debt['\"'\"'summary'\"'\"'] == previous[names[4]]['\"'\"'summary'\"'\"']\nassert debt['\"'\"'summary'\"'\"']['\"'\"'fail_count'\"'\"'] == debt['\"'\"'summary'\"'\"']['\"'\"'warn_count'\"'\"'] == 0\nsubprocess.run(['\"'\"'git'\"'\"', '\"'\"'diff'\"'\"', '\"'\"'--quiet'\"'\"', '\"'\"'HEAD'\"'\"', '\"'\"'--'\"'\"', '\"'\"'configs'\"'\"'], check=True)\nprint('\"'\"'Non-growth: all residuals/counts/limits unchanged; 46 pass, 0 warn, 0 fail; configs unchanged'\"'\"')\nprint('\"'\"'Debt outcome: decreased (remote_main_baseline stale artifact resolved); metric/budget outcome: flat. Technical debt and its budgets did not increase.'\"'\"')\n'",
+    "started_at": "2026-10-12T10:27:20.296360+00:00",
+    "finished_at": "2026-10-12T10:27:27.975281+00:00",
+    "exit_status": 0,
+    "stdout": "JSON validation: 5 nonempty objects parsed\nRemote provenance: all 6 Git blobs and source_revision/local_tracking_ref_sha/remote_main_sha verified: d12420e436a8b59078c838d2f96fd1b1f4f50be8\nTest-governance source_tree_sha256: 90452227f5c62d000ac3c6432788c694bf7ee9657712cf4fee1b45b9865e98e5\nJSON/Markdown freshness parity: 3 == 3; limit 21; pass\nNon-growth: all residuals/counts/limits unchanged; 46 pass, 0 warn, 0 fail; configs unchanged\nDebt outcome: decreased (remote_main_baseline stale artifact resolved); metric/budget outcome: flat. Technical debt and its budgets did not increase.\n",
+    "stderr": ""
+  },
+  "initial_failures": [
+    {
+      "command": ".venv/bin/python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check",
+      "exit_status": 1,
+      "stderr": "Remote-main debt baseline JSON artifact is stale: /home/vercel-sandbox/workspace/repos/github.com/satorykono/bioactivitydataacquisition/reports/quality/architecture-debt-remote-main-baseline.json\nRemote-main debt baseline Markdown artifact is stale: /home/vercel-sandbox/workspace/repos/github.com/satorykono/bioactivitydataacquisition/reports/quality/architecture-debt-remote-main-baseline.md\n"
+    },
+    {
+      "command": ".venv/bin/python -m scripts.engineering.qa.report_debt_governance_gates --check",
+      "exit_status": 1,
+      "stderr": "Debt governance gate JSON artifact is stale: /home/vercel-sandbox/workspace/repos/github.com/satorykono/bioactivitydataacquisition/reports/quality/debt-governance-gates.json\nDebt governance gate Markdown artifact is stale: /home/vercel-sandbox/workspace/repos/github.com/satorykono/bioactivitydataacquisition/reports/quality/debt-governance-gates.md\nDebt governance gates have 1 failing gate(s): generated_artifact_drift\n  - generated_artifact_drift: current={'count': 1, 'artifacts': ['remote_main_baseline']}; Regenerate stale quality artifacts with their canonical QA commands: remote_main_baseline\n"
+    }
+  ],
+  "additional_validation": {
+    "docs-links": {
+      "command": ".venv/bin/python -m scripts.docs check-links",
+      "started_at": "2026-10-12T10:25:34.994140+00:00",
+      "finished_at": "2026-10-12T10:25:42.896570+00:00",
+      "exit_status": 0,
+      "stdout": "Links: OK (no broken relative links found)\nNav docs: OK (all mkdocs nav files exist)\nNav link scope: OK (all nav docs are included in link checks)\nLocal skill nav classification: OK (all local skill pages are in nav or not_in_nav)\nSpecs: OK (all referenced spec files exist)\nConfigs: OK (all convention-based config files exist)\nGold contracts index: OK (docs list matches exported JSON files)\nWorkflow inventory: OK (published workflow doc matches .github/workflows)\nChEMBL provider overview: OK (README links match active entity-config inventory)\nProvider spec governance: OK\nRunbook governance: OK\nControl-plane contract governance: OK\nNot-in-nav growth: OK (current 228 <= baseline 228)\nDoc drift: OK (no guardrail violations in mkdocs nav docs)\n\nAll checks passed.\n",
+      "stderr": ""
+    },
+    "docs-drift": {
+      "command": ".venv/bin/python -m scripts.docs check-drift --runtime-mirrors --freshness",
+      "started_at": "2026-10-12T10:25:42.899661+00:00",
+      "finished_at": "2026-10-12T10:25:47.671460+00:00",
+      "exit_status": 0,
+      "stdout": "Documentation Drift Report\n============================================================\nNo drift detected. Documentation is in sync with code.\n\nSummary: 0 errors, 0 warnings\n",
+      "stderr": ""
+    },
+    "docs-inventory": {
+      "command": ".venv/bin/python -m scripts.docs generate-cleanup-inventory --check",
+      "started_at": "2026-10-12T10:25:47.674486+00:00",
+      "finished_at": "2026-10-12T10:25:53.727903+00:00",
+      "exit_status": 0,
+      "stdout": "[documentation-cleanup-inventory] inventory is synchronized\n",
+      "stderr": ""
+    },
+    "pretest": {
+      "command": "bash scripts/engineering/dev/pretest_guardrails.sh --mode check --scope light --skip-cleanup --skip-memory",
+      "started_at": "2026-10-12T10:27:00.481700+00:00",
+      "finished_at": "2026-10-12T10:27:42.052397+00:00",
+      "exit_status": 0,
+      "stdout": "[pretest-guardrails] mode=check scope=light strict_docs=0\n[pretest-guardrails] inventory-check: .venv/bin/python -m scripts.engineering.repo check-inventory --check --manifest configs/quality/scripts_inventory_manifest.json --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json \n[OK] Scripts inventory is in sync: /home/vercel-sandbox/workspace/repos/github.com/satorykono/bioactivitydataacquisition/configs/quality/scripts_inventory_manifest.json\n[OK] Lifecycle registry covers non-active scripts: /home/vercel-sandbox/workspace/repos/github.com/satorykono/bioactivitydataacquisition/configs/quality/scripts_lifecycle_registry.json\n[INFO] scripts=648 active=335 unknown=0 orphan=0 legacy=0\n[pretest-guardrails] catalog-check: .venv/bin/python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml \n[OK] Scripts catalog governance is valid: scripts/engineering/repo/catalog.yaml\n[pretest-guardrails] hotspot-family-baseline-check: .venv/bin/python -m scripts.engineering.qa report-family-baseline --check \n[ok] hotspot-family baseline artifacts are up to date\n[pretest-guardrails] repo-identity-check: .venv/bin/python -m scripts.docs sync-repo-identity --check \n[sync-repo-identity] repo identity is already synchronized\n[pretest-guardrails] integration-vcr-policy-check: .venv/bin/python -m scripts.engineering.qa sync-integration-vcr-policy --check \n[sync-integration-vcr-policy] inventory is already synchronized\n[pretest-guardrails] OK\n[pretest-guardrails] report: reports/quality/pretest_guardrails_20261012_102742.json\n",
+      "stderr": ""
+    }
+  },
+  "debt_outcome": {
+    "outcome": "decreased",
+    "stale_artifact_count_before": 1,
+    "stale_artifact_count_after": 0,
+    "resolved_artifact": "remote_main_baseline",
+    "metrics_and_budgets": "flat relative to reviewed_revision; config/test/live residual payloads unchanged, remote summary metrics unchanged, all debt gate statuses/counts/limits unchanged",
+    "summary": {
+      "architecture_quality_scorecard_integral_score": 10.0,
+      "architecture_quality_scorecard_interpretation": "excellent",
+      "fail_count": 0,
+      "failing_gates": [],
+      "gate_count": 46,
+      "pass_count": 46,
+      "release_gate_status": "passing",
+      "warn_count": 0,
+      "warning_gates": []
+    },
+    "confirmation": "Technical debt did not increase. No technical-debt budget was increased; all configs are unchanged relative to HEAD."
+  },
+  "validation_limits": [
+    "Source freshness is bound to the recorded UTC timestamps and Git revision; remote main can advance later.",
+    "No full application test suite or coverage run: no application code or tests changed in this closeout.",
+    "Local evidence is not a CI result or lifecycle ADMIT."
+  ]
+}
