@@ -1,53 +1,53 @@
 # Slowest Tests
 
-Source commit: `6ba0e2803723369c2e4d48e4fdb320dcabaea63b`
-Source run id: `local-bioetl-local-coverage-uiltn594`
+Source commit: `4eefc2be8d32cc968e4fc5d2696a02dbce703978`
+Source run id: `local-bioetl-local-coverage-pr12138`
 Source event: `local_coverage_verify`
 Source run URL: `pending`
 Refresh status: `captured`
-Collected test cases: `33500`
+Collected test cases: `33513`
 Freshness guard: `<=45 days`
 
 | Rank | Duration (s) | Test | Source |
 |---:|---:|---|---|
-| 1 | 82.672 | `tests.unit.composition.test_workflow_cohort_lineage::test_real_gold_expiry_descendant_and_partial_resume_keep_scoped_history[None]` | `unit-other.xml` |
-| 2 | 45.516 | `tests.unit.infrastructure.storage.test_workflow_foreign_key_reconciliation::test_gold_snapshot_pins_version_and_distinguishes_physical_rows` | `unit-infrastructure.xml` |
-| 3 | 24.477 | `tests.unit.infrastructure.quality.test_architecture_quality_scorecard::test_architecture_quality_scorecard_has_stable_weighted_shape` | `unit-infrastructure.xml` |
-| 4 | 22.47 | `tests.unit.infrastructure.export.test_export_adapters::test_write_pack_records_successful_xlsx_artifact` | `unit-infrastructure.xml` |
-| 5 | 20.221 | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `unit-scripts-tooling-debt-governance.xml` |
-| 6 | 20.008 | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers::test_filter_options_deadline_does_not_send_late_success` | `unit-other.xml` |
-| 7 | 19.721 | `tests.unit.application.services.dq.test_checks_integrity_extended.TestCheckSCDIntegrityExtended::test_overlapping_validity_periods_warn` | `unit-application.xml` |
-| 8 | 16.902 | `tests.unit.infrastructure.adapters.test_csv_filter_reader.TestCsvFilterReaderLoadFilterIds::test_load_filter_ids_returns_filter_load_result` | `unit-infrastructure.xml` |
-| 9 | 15.17 | `tests.unit.application.test_main_module::test_main_block_executed_via_subprocess` | `unit-application.xml` |
-| 10 | 14.488 | `tests.unit.application.test_issue_10518_application_compwf_a::test_chained_key_filter_applied_and_failed` | `unit-application.xml` |
-| 11 | 13.951 | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline::test_chembl_target_component_happy_path` | `integration.xml` |
-| 12 | 13.244 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path` | `integration.xml` |
-| 13 | 12.397 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_source_fields` | `integration.xml` |
-| 14 | 11.797 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation` | `repo-backed-unit-ops.xml` |
-| 15 | 11.557 | `tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline::test_chembl_compound_record_happy_path` | `integration.xml` |
-| 16 | 11.07 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_happy_path` | `integration.xml` |
-| 17 | 10.663 | `tests.integration.adapters.test_uniprot_idmapping.TestUniProtIDMappingIntegration::test_map_mixed_results` | `integration.xml` |
-| 18 | 10.301 | `tests.integration.composite.test_assay_snapshot_merge_replay::test_other_composite_families_replay_physical_outputs[relative-replay-target]` | `integration.xml` |
-| 19 | 10.05 | `tests.unit.application.composite.test_helper_module_coverage::test_cross_validator_helper_functions_cover_details_and_numeric_comparison` | `unit-application.xml` |
-| 20 | 10.021 | `tests.unit.application.test_issue_10469_one_line_residuals::test_composite_join_preserves_shared_right_key` | `unit-application.xml` |
-| 21 | 9.831 | `tests.smoke.test_control_plane_rollout_smoke::test_control_plane_rollout_smoke_emits_artifacts_and_aggregate_metrics` | `smoke.xml` |
-| 22 | 9.793 | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale` | `unit-scripts-tooling-debt-governance.xml` |
-| 23 | 9.496 | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact` | `unit-scripts-tooling-debt-governance.xml` |
-| 24 | 9.278 | `tests.unit.composition.bootstrap.runtime.test_composite_contract_evidence::test_composite_archive_bootstrap_imports_in_fresh_process` | `unit-other.xml` |
-| 25 | 9.127 | `tests.integration.test_runtime_metric_emission_consistency::test_critical_observability_metric_families_are_runtime_emitted` | `integration.xml` |
+| 1 | 44.119 | `tests.smoke.test_control_plane_rollout_smoke::test_control_plane_rollout_smoke_emits_artifacts_and_aggregate_metrics` | `smoke.xml` |
+| 2 | 31.48 | `tests.smoke.test_smoke.TestDevDependencies::test_dev_dependency_importable[hypothesis]` | `smoke.xml` |
+| 3 | 24.102 | `tests.unit.scripts.ci.test_test_telemetry_provenance::test_accepts_equal_inputs_and_confirmed_squash_tree` | `unit-scripts-tooling-other.xml` |
+| 4 | 21.944 | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `unit-scripts-tooling-debt-governance.xml` |
+| 5 | 20.018 | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers::test_filter_options_deadline_does_not_send_late_success` | `unit-other.xml` |
+| 6 | 17.706 | `tests.smoke.test_smoke.TestRuntimeDependencies::test_runtime_dependency_importable[structlog]` | `smoke.xml` |
+| 7 | 14.764 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path` | `integration.xml` |
+| 8 | 13.812 | `tests.smoke.test_smoke.TestCoreImports::test_composition_imports` | `smoke.xml` |
+| 9 | 13.059 | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline::test_chembl_target_component_happy_path` | `integration.xml` |
+| 10 | 12.127 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation` | `repo-backed-unit-ops.xml` |
+| 11 | 11.197 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_happy_path` | `integration.xml` |
+| 12 | 11.07 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_source_fields` | `integration.xml` |
+| 13 | 10.891 | `tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline::test_chembl_compound_record_happy_path` | `integration.xml` |
+| 14 | 10.155 | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact` | `unit-scripts-tooling-debt-governance.xml` |
+| 15 | 9.898 | `tests.smoke.test_smoke.TestDevDependencies::test_dev_only_dependency_importable[importlinter]` | `smoke.xml` |
+| 16 | 9.357 | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale` | `unit-scripts-tooling-debt-governance.xml` |
+| 17 | 9.139 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_bounded_restart_failure_uses_supported_stop_start_fallback` | `repo-backed-unit-ops.xml` |
+| 18 | 8.28 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_diagnostic_subprocess_timeout_is_bounded` | `repo-backed-unit-ops.xml` |
+| 19 | 8.026 | `tests.unit.repo_backed.scripts.ai.mcp.test_mcp_wrapper_contracts::test_bash_uv_resolver_prefers_uvx_on_path` | `repo-backed-unit-tooling.xml` |
+| 20 | 7.999 | `tests.smoke.test_smoke.TestRuntimeDependencies::test_runtime_dependency_importable[prometheus_client]` | `smoke.xml` |
+| 21 | 7.986 | `tests.integration.composite.test_assay_snapshot_merge_replay::test_assay_replay_compares_physical_production_outputs` | `integration.xml` |
+| 22 | 7.301 | `tests.unit.scripts.docs.passports.test_passport_projector::test_workflow_operations_are_classified` | `unit-scripts-tooling-passport.xml` |
+| 23 | 7.165 | `tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts` | `integration.xml` |
+| 24 | 7.027 | `tests.unit.composition.bootstrap.runtime.test_composite_contract_evidence::test_composite_archive_bootstrap_imports_in_fresh_process` | `unit-other.xml` |
+| 25 | 6.9 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_report_recursively_redacts_observations_and_classifications` | `repo-backed-unit-ops.xml` |
 
 ## Top Slow Zones
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.unit.composition.test_workflow_cohort_lineage` | 1 | 82.672 | 82.672 |
-| 2 | `tests.unit.infrastructure.storage.test_workflow_foreign_key_reconciliation` | 1 | 45.516 | 45.516 |
-| 3 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 3 | 39.51 | 20.221 |
-| 4 | `tests.unit.infrastructure.quality.test_architecture_quality_scorecard` | 1 | 24.477 | 24.477 |
-| 5 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 23.467 | 12.397 |
-| 6 | `tests.unit.infrastructure.export.test_export_adapters` | 1 | 22.47 | 22.47 |
-| 7 | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers` | 1 | 20.008 | 20.008 |
-| 8 | `tests.unit.application.services.dq.test_checks_integrity_extended.TestCheckSCDIntegrityExtended` | 1 | 19.721 | 19.721 |
-| 9 | `tests.unit.infrastructure.adapters.test_csv_filter_reader.TestCsvFilterReaderLoadFilterIds` | 1 | 16.902 | 16.902 |
-| 10 | `tests.unit.application.test_main_module` | 1 | 15.17 | 15.17 |
+| 1 | `tests.smoke.test_control_plane_rollout_smoke` | 1 | 44.119 | 44.119 |
+| 2 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 3 | 41.456 | 21.944 |
+| 3 | `tests.smoke.test_smoke.TestDevDependencies` | 2 | 41.378 | 31.48 |
+| 4 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 4 | 36.446 | 12.127 |
+| 5 | `tests.smoke.test_smoke.TestRuntimeDependencies` | 2 | 25.705 | 17.706 |
+| 6 | `tests.unit.scripts.ci.test_test_telemetry_provenance` | 1 | 24.102 | 24.102 |
+| 7 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 22.267 | 11.197 |
+| 8 | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers` | 1 | 20.018 | 20.018 |
+| 9 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline` | 1 | 14.764 | 14.764 |
+| 10 | `tests.smoke.test_smoke.TestCoreImports` | 1 | 13.812 | 13.812 |
 
