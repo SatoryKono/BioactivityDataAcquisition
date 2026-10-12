@@ -432,7 +432,7 @@ class TestCanonicalTestLanes:
         assert (
             '-m "repo_backed and not slow and not benchmark and not memory"' in workflow
         )
-        assert "-p no:xdist" in workflow
+        assert "-n auto --dist loadscope" in workflow
         assert lanes["unit-parallel-safe"]["runner_backend"] == "run_pytest_sharded"
         assert (
             lanes["unit-parallel-safe"]["marker_expression"]
@@ -574,8 +574,8 @@ class TestCanonicalTestLanes:
         unit_fast_idx = workflow.index("Run canonical unit-fast lane")
         repo_backed_idx = workflow.index("repo-backed-unit:", unit_fast_idx)
         unit_fast_block = workflow[unit_fast_idx:repo_backed_idx]
-        assert "-n auto" not in unit_fast_block
-        assert "-p no:xdist" in unit_fast_block
+        assert "-n auto" in unit_fast_block
+        assert "-p no:xdist" not in unit_fast_block
 
         integration_idx = workflow.index("- name: integration\n")
         security_idx = workflow.index("- name: security\n", integration_idx)

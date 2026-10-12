@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-10-10'
+  Last verified: '2026-10-12'
 
 ______________________________________________________________________
 
@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `codex/integrate-telemetry-cancellation-20261009`
-- Source commit: `d28436d5f78c911d68f6fbbf91314578bdcb897c`
-- Source run id: `local-pr12164-main-sync-c6549b1-w2`
-- Source event: `local_coverage_verify`
+- Source branch: `main`
+- Source commit: `c02d30366d720a4223ed8049749af6a3b57b483c`
+- Source run id: `local-run`
+- Source event: `push`
 - Source run URL: `pending`
-- Source tree sha256: `ec74973999343716c76d00aa0cd21ede054f1bdbb7b8f51b6741bf89e5f393bc`
+- Source tree sha256: `28c92aa99a5eb0d50032605576b1732d127ad47d2bea907cc72074c94fdb1bc2`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-10-10T00:12:30.304249+00:00`
+- Refreshed at (UTC): `2026-10-12T11:57:21.931118+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -71,8 +71,8 @@ trend evidence only.
 ## Coverage
 
 - Hard threshold: `85.0%`
-- Actual coverage: `99.67%`
-- Threshold satisfied: `True`
+- Actual coverage: `pending`
+- Threshold satisfied: `None`
 
 ## Duration Telemetry
 
