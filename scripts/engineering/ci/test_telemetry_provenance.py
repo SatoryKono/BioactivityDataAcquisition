@@ -126,6 +126,14 @@ def _commit_tree(raw: bytes) -> str:
     raise ValueError("Git object proof has no commit tree")
 
 
+def _commit_parents(raw: bytes) -> list[str]:
+    return [
+        line[7:].decode("ascii")
+        for line in raw.split(b"\n\n", 1)[0].splitlines()
+        if line.startswith(b"parent ")
+    ]
+
+
 def _tree_entry(raw: bytes, name: bytes) -> tuple[bytes, str] | None:
     offset = 0
     while offset < len(raw):
@@ -164,19 +172,22 @@ def _object_proof_relation(
     """Verify retained Git objects when squash removed the PR commits from main."""
     try:
         proof = receipt["git_object_proof"]
-        commits = proof["commits"]
+        chain = proof["commit_chain"]
         trees = proof["trees"]
-        source_raw = _verified_object(commits["source"], "commit", source)
-        head_raw = _verified_object(commits["pr_head"], "commit", pr_head)
-        source_tree = _commit_tree(source_raw)
-        head_tree = _commit_tree(head_raw)
-        parents = [
-            line[7:].decode("ascii")
-            for line in head_raw.split(b"\n\n", 1)[0].splitlines()
-            if line.startswith(b"parent ")
-        ]
-        if parents != [source]:
+        if not isinstance(chain, list) or not 2 <= len(chain) <= 128:
             return False, ""
+        if chain[0]["oid"] != source or chain[-1]["oid"] != pr_head:
+            return False, ""
+        commits = [
+            _verified_object(item["raw"], "commit", item["oid"]) for item in chain
+        ]
+        if any(
+            chain[index - 1]["oid"] not in _commit_parents(commits[index])
+            for index in range(1, len(chain))
+        ):
+            return False, ""
+        source_tree = _commit_tree(commits[0])
+        head_tree = _commit_tree(commits[-1])
         same_inputs = all(
             (entry := _proof_path(trees, source_tree, path)) is not None
             and entry == _proof_path(trees, head_tree, path)
@@ -193,10 +204,22 @@ def build_git_object_proof(root: Path, source: str, pr_head: str) -> dict[str, A
     def read(kind: str, oid: str) -> bytes:
         return subprocess.check_output(["git", "cat-file", kind, oid], cwd=root)
 
-    commits = {
-        label: base64.b64encode(read("commit", oid)).decode("ascii")
-        for label, oid in (("source", source), ("pr_head", pr_head))
-    }
+    reverse_chain = [pr_head]
+    while reverse_chain[-1] != source:
+        if len(reverse_chain) >= 128:
+            raise ValueError("Git object proof exceeds 128 commits")
+        parents = _commit_parents(read("commit", reverse_chain[-1]))
+        parent = next(
+            (oid for oid in parents if oid == source or _ancestor(root, source, oid)),
+            None,
+        )
+        if parent is None or parent in reverse_chain:
+            raise ValueError("Captured source is not an ancestor of PR head")
+        reverse_chain.append(parent)
+    commit_chain = [
+        {"oid": oid, "raw": base64.b64encode(read("commit", oid)).decode("ascii")}
+        for oid in reversed(reverse_chain)
+    ]
     trees: dict[str, str] = {}
     for commit in (source, pr_head):
         root_oid = _tree(root, commit)
@@ -211,7 +234,7 @@ def build_git_object_proof(root: Path, source: str, pr_head: str) -> dict[str, A
                 if entry is None:
                     raise ValueError(f"Missing test input in Git object proof: {path}")
                 _, oid = entry
-    proof: dict[str, Any] = {"commits": commits, "trees": trees}
+    proof: dict[str, Any] = {"commit_chain": commit_chain, "trees": trees}
     verified, _ = _object_proof_relation({"git_object_proof": proof}, source, pr_head)
     if not verified:
         raise ValueError("Git object proof does not preserve test inputs")

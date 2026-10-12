@@ -188,12 +188,52 @@ def test_squash_bridge_verifies_without_old_pr_objects(
     assert validate_squash_bridge(payload, receipt, shallow, head)
 
     tampered = copy.deepcopy(receipt)
-    tampered["git_object_proof"]["commits"]["pr_head"] = "Zm9yZ2Vk"
+    tampered["git_object_proof"]["commit_chain"][-1]["raw"] = "Zm9yZ2Vk"
     assert not validate_squash_bridge(payload, tampered, shallow, head)
     tampered = copy.deepcopy(receipt)
     tree_oid = next(iter(tampered["git_object_proof"]["trees"]))
     tampered["git_object_proof"]["trees"][tree_oid] = "Zm9yZ2Vk"
     assert not validate_squash_bridge(payload, tampered, shallow, head)
+
+
+def test_squash_bridge_verifies_intermediate_evidence_commits(
+    bridge, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root, _, payload, receipt, git = bridge
+    monkeypatch.setattr(provenance, "TEST_INPUTS", ("tests",))
+    source = payload["source_commit"]
+    base = git("rev-parse", f"{source}^")
+    branch = git("symbolic-ref", "--short", "HEAD")
+    git("checkout", "--detach", receipt["github_pull_request"]["head"]["sha"])
+    (root / "more-evidence.json").write_text("{}\n")
+    git("add", ".")
+    git("commit", "-qm", "more captured outputs")
+    pr_head = git("rev-parse", "HEAD")
+    tree = git("rev-parse", "HEAD^{tree}")
+    merge = git("commit-tree", tree, "-p", base, "-m", "capture (#42)")
+    git("checkout", branch)
+    git("reset", "--hard", merge)
+    receipt["github_pull_request"]["head"]["sha"] = pr_head
+    receipt["github_pull_request"]["merge_commit_sha"] = merge
+    receipt["merged_tree"] = tree
+    receipt["git_object_proof"] = provenance.build_git_object_proof(
+        root, source, pr_head
+    )
+    assert len(receipt["git_object_proof"]["commit_chain"]) == 3
+
+    shallow = root.parent / f"{root.name}-evidence-shallow"
+    subprocess.run(
+        ["git", "clone", "-q", "--depth", "1", root.as_uri(), str(shallow)],
+        check=True,
+        capture_output=True,
+    )
+    assert not provenance._tree(shallow, source)
+    assert not provenance._tree(shallow, pr_head)
+    assert validate_squash_bridge(payload, receipt, shallow, merge)
+
+    tampered = copy.deepcopy(receipt)
+    del tampered["git_object_proof"]["commit_chain"][1]
+    assert not validate_squash_bridge(payload, tampered, shallow, merge)
 
 
 @pytest.mark.parametrize(
