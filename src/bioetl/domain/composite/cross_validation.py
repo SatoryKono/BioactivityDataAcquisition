@@ -16,6 +16,7 @@ from enum import StrEnum
 
 __all__ = [
     "ComparisonMethod",
+    "CrossValidationContext",
     "CrossValidationStats",
     "CrossValidationVerdict",
     "EnricherCVStats",
@@ -41,6 +42,16 @@ class CrossValidationVerdict(StrEnum):
     PASS = "pass"  # nosec B105 - see suppression registry
     WARNING = "warning"
     ENRICHER_ERROR = "enricher_error"
+
+
+@dataclass(frozen=True, slots=True)
+class CrossValidationContext:
+    """Context holding pipeline provider and entity names for cross-validation."""
+
+    seed_provider: str
+    seed_entity: str
+    enricher_provider: str
+    enricher_entity: str
 
 
 @dataclass(frozen=True, slots=True)
