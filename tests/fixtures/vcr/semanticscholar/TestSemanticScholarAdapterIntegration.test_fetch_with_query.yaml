@@ -16,76 +16,48 @@ interactions:
     uri: https://api.semanticscholar.org/graph/v1/paper/search?query=CRISPR+gene+editing&fields=paperId,externalIds,title,abstract,year,publicationDate,venue,authors,authors.externalIds,authors.hIndex,authors.authorId,citationCount,referenceCount,isOpenAccess,openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal&offset=0&limit=3
   response:
     body:
-      string: '{"total": 108645, "offset": 0, "next": 3, "data": [{"paperId": "40e4e9a1f4431a952014fd8bdd4827e29718b217", "externalIds": {"PubMedCentral":
-        "12825352", "DOI": "10.1002/smtd.202401632", "CorpusId": 278933728, "PubMed": "40434188"}, "title": "Lipid Nanoparticles for Delivery
-        of CRISPR Gene Editing Components", "venue": "Small Methods", "year": 2025, "referenceCount": 204, "citationCount": 55, "isOpenAccess":
-        true, "openAccessPdf": {"url": "https://doi.org/10.1002/smtd.202401632", "status": "HYBRID", "license": "CCBYNCND", "disclaimer": "Notice:
-        Paper or abstract available at https://pmc.ncbi.nlm.nih.gov/articles/PMC12825352, which is subject to the license by the author or copyright
-        owner provided with this content. Please go to the source to verify the license and copyright information for your use."}, "fieldsOfStudy":
-        ["Medicine"], "tldr": {"model": "tldr@v2.0.0", "text": "In this review, the widely used CRISPR gene editing systems are first overviewed,
-        and each component of LNPs, as well as their effects on delivery, are systematically discussed."}, "publicationTypes": ["Review", "JournalArticle"],
-        "publicationDate": "2025-05-28", "journal": {"name": "Small Methods", "volume": "10"}, "authors": [{"authorId": "2363804544", "externalIds":
-        {}, "hIndex": 3}, {"authorId": "2363841368", "externalIds": {}, "hIndex": 3}, {"authorId": "2363974075", "externalIds": {}, "hIndex":
-        5}, {"authorId": "2023741281", "externalIds": {}, "hIndex": 17}, {"authorId": "2312280467", "externalIds": {}, "hIndex": 7}, {"authorId":
-        "2241736330", "externalIds": {}, "hIndex": 33}, {"authorId": "2256557416", "externalIds": {}, "hIndex": 21}], "abstract": "Gene editing
-        has emerged as a promising therapeutic option for treating genetic diseases. However, a central challenge in the field is the safe and
-        efficient delivery of these large editing tools, especially in vivo. Lipid nanoparticles (LNPs) are attractive nonviral vectors due to
-        their low immunogenicity and high delivery efficiency. To maximize editing efficiency, LNPs should efficiently protect gene editing components
-        against multiple biological barriers and release them into the cytoplasm of target cells. In this review, the widely used CRISPR gene
-        editing systems are first overviewed. Then, each component of LNPs, as well as their effects on delivery, are systematically discussed.
-        Following this, the current LNP engineering strategies to achieve non\u2010liver targeting are summarized. Finally, preclinical and clinical
-        applications of LNPs for in vivo genome editing are highlighted, and perspectives for the future development of LNPs are provided."},
-        {"paperId": "8236a26eed620c341dd9cb62cad5fed494f016e7", "externalIds": {"PubMedCentral": "12114816", "DOI": "10.3390/pharmaceutics17050555",
-        "CorpusId": 278069918, "PubMed": "40430848"}, "title": "Transforming Pharmacogenomics and CRISPR Gene Editing with the Power of Artificial
-        Intelligence for Precision Medicine", "venue": "Pharmaceutics", "year": 2025, "referenceCount": 49, "citationCount": 31, "isOpenAccess":
-        true, "openAccessPdf": {"url": "https://www.mdpi.com/1999-4923/17/5/555/pdf?version=1745478798", "status": "GOLD", "license": "CCBY",
-        "disclaimer": "Notice: Paper or abstract available at https://pmc.ncbi.nlm.nih.gov/articles/PMC12114816, which is subject to the license
-        by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for
-        your use."}, "fieldsOfStudy": ["Medicine"], "tldr": {"model": "tldr@v2.0.0", "text": "The synergy of artificial intelligence, pharmacogenomics,
-        and CRISPR alters precision medicine by letting customized therapeutic interventions and developing moral guidelines for applying these
-        tools in individualized medicine going forward are explored."}, "publicationTypes": ["Review", "JournalArticle"], "publicationDate": "2025-04-24",
-        "journal": {"name": "Pharmaceutics", "volume": "17"}, "authors": [{"authorId": "2356953771", "externalIds": {"DBLP": ["Amit Srivastav"]},
-        "hIndex": 3}, {"authorId": "2187096201", "externalIds": {}, "hIndex": 7}, {"authorId": "4348538", "externalIds": {}, "hIndex": 43}, {"authorId":
-        "2349063103", "externalIds": {}, "hIndex": 3}], "abstract": "Background: Advancements in pharmacogenomics, artificial intelligence (AI),
-        and CRISPR gene-editing technology are revolutionizing precision medicine by enabling highly individualized therapeutic strategies. Artificial
-        intelligence-driven computational techniques improve biomarker discovery and drug optimization while pharmacogenomics helps to identify
-        genetic polymorphisms affecting medicine metabolism, efficacy, and toxicity. Genetically editing based on CRISPR presents a precise method
-        for changing gene expression and repairing damaging mutations. This review explores the convergence of these three fields to enhance improved
-        precision medicine. Method: A methodical study of the current literature was performed on the effects of pharmacogenomics on drug response
-        variability, artificial intelligence, and CRISPR in predictive modeling and gene-editing applications. Results: Driven by artificial intelligence,
-        pharmacogenomics allows clinicians to classify patients and select the appropriate medications depending on their DNA profiles. This reduces
-        the side effect risk and increases the therapeutic efficacy. Precision genetic modifications made feasible by CRISPR technology improve
-        therapy outcomes in oncology, metabolic illnesses, neurological diseases, and other fields. The integration of artificial intelligence
-        streamlines genome-editing applications, lowers off-target effects, and increases CRISPR specificity. Notwithstanding these advances,
-        issues including computational biases, moral dilemmas, and legal constraints still arise. Conclusions: The synergy of artificial intelligence,
-        pharmacogenomics, and CRISPR alters precision medicine by letting customized therapeutic interventions. Clinically translating, however,
-        hinges on resolving data privacy concerns, assuring equitable access, and strengthening legal systems. Future research should focus on
-        refining CRISPR gene-editing technologies, enhancing AI-driven pharmacogenomics, and developing moral guidelines for applying these tools
-        in individualized medicine going forward."}, {"paperId": "0abbdc3050d16ddd79081ef3d007abf9825dc94d", "externalIds": {"PubMedCentral":
-        "11588664", "DOI": "10.1038/s41375-024-02444-y", "CorpusId": 273627905, "PubMed": "39455854"}, "title": "Leveraging CRISPR gene editing
-        technology to optimize the efficacy, safety and accessibility of CAR T-cell therapy", "venue": "Leukemia", "year": 2024, "referenceCount":
-        250, "citationCount": 114, "isOpenAccess": false, "openAccessPdf": {"url": "", "status": null, "license": null, "disclaimer": "Notice:
-        Paper or abstract available at https://pmc.ncbi.nlm.nih.gov/articles/PMC11588664, which is subject to the license by the author or copyright
-        owner provided with this content. Please go to the source to verify the license and copyright information for your use."}, "fieldsOfStudy":
-        ["Medicine"], "tldr": {"model": "tldr@v2.0.0", "text": "Potential uses of the CRISPR system to improve results of CAR T-cells therapy
-        including optimizing efficacy and safety and, developing universal CAR T-cells are summarized."}, "publicationTypes": ["Review", "JournalArticle"],
-        "publicationDate": "2024-10-25", "journal": {"name": "Leukemia", "pages": "2517 - 2543", "volume": "38"}, "authors": [{"authorId": "2216353120",
-        "externalIds": {}, "hIndex": 2}, {"authorId": "2308726086", "externalIds": {}, "hIndex": 2}, {"authorId": "2303909718", "externalIds":
-        {}, "hIndex": 3}, {"authorId": "2327823669", "externalIds": {}, "hIndex": 2}, {"authorId": "2327610008", "externalIds": {}, "hIndex":
-        3}, {"authorId": "2465810667", "externalIds": {}, "hIndex": 19}, {"authorId": "2308721793", "externalIds": {}, "hIndex": 4}, {"authorId":
-        "2308791004", "externalIds": {}, "hIndex": 3}, {"authorId": "2308809621", "externalIds": {}, "hIndex": 3}, {"authorId": "2441622482",
-        "externalIds": {}, "hIndex": 1}, {"authorId": "50180734", "externalIds": {"DBLP": ["Xinjie Xu"]}, "hIndex": 25}, {"authorId": "2289648649",
-        "externalIds": {}, "hIndex": 7}, {"authorId": "2350991089", "externalIds": {}, "hIndex": 4}], "abstract": "Chimeric Antigen Receptor (CAR)-T-cell
-        therapy has revolutionized cancer immune therapy. However, challenges remain including increasing efficacy, reducing adverse events and
-        increasing accessibility. Use of Clustered Regularly Interspaced Short Palindromic Repeats (CRISPR) technology can effectively perform
-        various functions such as precise integration, multi-gene editing, and genome-wide functional regulation. Additionally, CRISPR screening
-        using large-scale guide RNA (gRNA) genetic perturbation provides an unbiased approach to understanding mechanisms underlying anti-cancer
-        efficacy of CAR T-cells. Several emerging CRISPR tools with high specificity, controllability and efficiency are useful to modify CAR
-        T-cells and identify new targets. In this review we summarize potential uses of the CRISPR system to improve results of CAR T-cells therapy
-        including optimizing efficacy and safety and, developing universal CAR T-cells. We discuss challenges facing CRISPR gene editing and propose
-        solutions highlighting future research directions in CAR T-cell therapy."}]}
-
-        '
+      string: "{\n  \"total\": 50000,\n  \"offset\": 0,\n  \"next\": 3,\n  \"data\":
+        [\n    {\n      \"paperId\": \"1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b\",\n
+        \     \"externalIds\": {\n        \"DOI\": \"10.1126/science.aad5227\",\n
+        \       \"CorpusId\": 123456\n      },\n      \"title\": \"CRISPR-Cas9 structures
+        and mechanisms\",\n      \"abstract\": \"CRISPR-Cas9 has revolutionized genome
+        editing.\",\n      \"year\": 2016,\n      \"publicationDate\": \"2016-01-01\",\n
+        \     \"venue\": \"Science\",\n      \"authors\": [\n        {\"authorId\":
+        \"1111111\", \"name\": \"Jennifer Doudna\", \"externalIds\": {\"ORCID\": \"0000-0001-1111-2222\"},
+        \"hIndex\": 150}\n      ],\n      \"citationCount\": 5000,\n      \"referenceCount\":
+        80,\n      \"isOpenAccess\": true,\n      \"openAccessPdf\": {\n        \"url\":
+        \"https://example.com/paper.pdf\",\n        \"status\": \"GOLD\"\n      },\n
+        \     \"tldr\": {\n        \"model\": \"tldr@v2.0.0\",\n        \"text\":
+        \"CRISPR-Cas9 technology for genome editing.\"\n      },\n      \"fieldsOfStudy\":
+        [\"Biology\", \"Genetics\"],\n      \"publicationTypes\": [\"Review\"],\n
+        \     \"journal\": {\n        \"name\": \"Science\",\n        \"volume\":
+        \"351\"\n      }\n    },\n    {\n      \"paperId\": \"2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c\",\n
+        \     \"externalIds\": {\n        \"DOI\": \"10.1038/nature14136\",\n        \"PubMed\":
+        \"25587962\",\n        \"CorpusId\": 789012\n      },\n      \"title\": \"In
+        vivo genome editing using Staphylococcus aureus Cas9\",\n      \"abstract\":
+        \"A compact Cas9 ortholog for in vivo applications.\",\n      \"year\": 2015,\n
+        \     \"publicationDate\": \"2015-02-01\",\n      \"venue\": \"Nature\",\n
+        \     \"authors\": [\n        {\"authorId\": \"2222222\", \"name\": \"Feng
+        Zhang\", \"externalIds\": {\"ORCID\": \"0000-0002-3333-4444\"}, \"hIndex\":
+        180}\n      ],\n      \"citationCount\": 3000,\n      \"referenceCount\":
+        45,\n      \"isOpenAccess\": false,\n      \"openAccessPdf\": null,\n      \"tldr\":
+        null,\n      \"fieldsOfStudy\": [\"Biology\"],\n      \"publicationTypes\":
+        [\"JournalArticle\"],\n      \"journal\": {\n        \"name\": \"Nature\",\n
+        \       \"volume\": \"520\"\n      }\n    },\n    {\n      \"paperId\": \"3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d\",\n
+        \     \"externalIds\": {\n        \"DOI\": \"10.1016/j.cell.2014.09.040\",\n
+        \       \"CorpusId\": 345678\n      },\n      \"title\": \"Development and
+        applications of CRISPR-Cas9 for genome engineering\",\n      \"abstract\":
+        \"Comprehensive overview of CRISPR-Cas9 applications.\",\n      \"year\":
+        2014,\n      \"publicationDate\": \"2014-10-01\",\n      \"venue\": \"Cell\",\n
+        \     \"authors\": [\n        {\"authorId\": \"3333333\", \"name\": \"Patrick
+        Hsu\", \"externalIds\": null, \"hIndex\": 65}\n      ],\n      \"citationCount\":
+        8000,\n      \"referenceCount\": 120,\n      \"isOpenAccess\": true,\n      \"openAccessPdf\":
+        {\n        \"url\": \"https://example.com/crispr-review.pdf\",\n        \"status\":
+        \"GREEN\"\n      },\n      \"tldr\": {\n        \"model\": \"tldr@v2.0.0\",\n
+        \       \"text\": \"A comprehensive review of CRISPR-Cas9 genome engineering.\"\n
+        \     },\n      \"fieldsOfStudy\": [\"Biology\", \"Computer Science\"],\n
+        \     \"publicationTypes\": [\"Review\"],\n      \"journal\": {\n        \"name\":
+        \"Cell\",\n        \"volume\": \"157\"\n      }\n    }\n  ]\n}\n"
     headers:
       Content-Type:
       - application/json
@@ -167,7 +139,8 @@ interactions:
     uri: https://api.semanticscholar.org/graph/v1/paper/search?query=CRISPR+gene+editing&fields=paperId%2CexternalIds%2Ctitle%2Cabstract%2Cyear%2CpublicationDate%2Cvenue%2Cauthors%2Cauthors.externalIds%2Cauthors.hIndex%2Cauthors.authorId%2CcitationCount%2CreferenceCount%2CisOpenAccess%2CopenAccessPdf%2Ctldr%2CfieldsOfStudy%2CpublicationTypes%2Cjournal&offset=0&limit=1
   response:
     body:
-      string: '{"message": "Too Many Requests. Please wait and try again or apply for a key for higher rate limits. https://www.semanticscholar.org/product/api#api-key-form",
+      string: '{"message": "Too Many Requests. Please wait and try again or apply
+        for a key for higher rate limits. https://www.semanticscholar.org/product/api#api-key-form",
         "code": "429"}'
     headers:
       Connection:
@@ -214,7 +187,8 @@ interactions:
     uri: https://api.semanticscholar.org/graph/v1/paper/search?query=test&limit=1&fields=paperId
   response:
     body:
-      string: '{"message": "Too Many Requests. Please wait and try again or apply for a key for higher rate limits. https://www.semanticscholar.org/product/api#api-key-form",
+      string: '{"message": "Too Many Requests. Please wait and try again or apply
+        for a key for higher rate limits. https://www.semanticscholar.org/product/api#api-key-form",
         "code": "429"}'
     headers:
       Connection:
@@ -261,7 +235,8 @@ interactions:
     uri: https://api.semanticscholar.org/graph/v1/paper/search?query=CRISPR+gene+editing&fields=paperId%2CexternalIds%2Ctitle%2Cabstract%2Cyear%2CpublicationDate%2Cvenue%2Cauthors%2Cauthors.externalIds%2Cauthors.hIndex%2Cauthors.authorId%2CcitationCount%2CreferenceCount%2CisOpenAccess%2CopenAccessPdf%2Ctldr%2CfieldsOfStudy%2CpublicationTypes%2Cjournal&offset=0&limit=1
   response:
     body:
-      string: '{"message": "Too Many Requests. Please wait and try again or apply for a key for higher rate limits. https://www.semanticscholar.org/product/api#api-key-form",
+      string: '{"message": "Too Many Requests. Please wait and try again or apply
+        for a key for higher rate limits. https://www.semanticscholar.org/product/api#api-key-form",
         "code": "429"}'
     headers:
       Connection:
@@ -308,7 +283,8 @@ interactions:
     uri: https://api.semanticscholar.org/graph/v1/paper/search?query=test&limit=1&fields=paperId
   response:
     body:
-      string: '{"message": "Too Many Requests. Please wait and try again or apply for a key for higher rate limits. https://www.semanticscholar.org/product/api#api-key-form",
+      string: '{"message": "Too Many Requests. Please wait and try again or apply
+        for a key for higher rate limits. https://www.semanticscholar.org/product/api#api-key-form",
         "code": "429"}'
     headers:
       Connection:
@@ -355,7 +331,8 @@ interactions:
     uri: https://api.semanticscholar.org/graph/v1/paper/search?query=CRISPR+gene+editing&fields=paperId%2CexternalIds%2Ctitle%2Cabstract%2Cyear%2CpublicationDate%2Cvenue%2Cauthors%2Cauthors.externalIds%2Cauthors.hIndex%2Cauthors.authorId%2CcitationCount%2CreferenceCount%2CisOpenAccess%2CopenAccessPdf%2Ctldr%2CfieldsOfStudy%2CpublicationTypes%2Cjournal&offset=0&limit=1
   response:
     body:
-      string: '{"message": "Too Many Requests. Please wait and try again or apply for a key for higher rate limits. https://www.semanticscholar.org/product/api#api-key-form",
+      string: '{"message": "Too Many Requests. Please wait and try again or apply
+        for a key for higher rate limits. https://www.semanticscholar.org/product/api#api-key-form",
         "code": "429"}'
     headers:
       Connection:

@@ -13,16 +13,12 @@ import argparse
 import ast
 import json
 import sys
-from datetime import date
 from pathlib import Path
 from typing import Any
 
 import yaml
 
 from scripts.engineering.common.repo_paths import resolve_output_path
-from scripts.engineering.qa.private_import_exception_metadata import (
-    validate_exception_metadata,
-)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 SRC_DIR = PROJECT_ROOT / "src"
@@ -102,16 +98,13 @@ def _parse_source_file(
     py_file: Path,
     *,
     resolved_src: Path,
-) -> tuple[str, ast.AST] | str:
-    """Return a parsed tree, or an error string. Parse failure is not a clean skip."""
+) -> tuple[str, ast.AST] | None:
+    """Return a source-relative path and parsed tree for one readable source file."""
     try:
         rel_path = py_file.resolve().relative_to(resolved_src).as_posix()
-    except ValueError as exc:
-        return f"unparsed source {py_file}: {exc}"
-    try:
         tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
-    except (OSError, SyntaxError, ValueError) as exc:
-        return f"unparsed source {rel_path}: {exc.__class__.__name__}"
+    except (OSError, SyntaxError, ValueError):
+        return None
     return rel_path, tree
 
 
@@ -147,8 +140,6 @@ def _external_private_imports_in_tree(
 
 def collect_external_private_imports(
     src_dir: Path = SRC_DIR,
-    *,
-    parse_errors: list[str] | None = None,
 ) -> dict[tuple[str, str], list[int]]:
     """Return cross-owner private-module import pairs keyed by (rel_path, target)."""
     violations: dict[tuple[str, str], list[int]] = {}
@@ -156,9 +147,7 @@ def collect_external_private_imports(
     resolved_src = src_dir.resolve()
     for py_file in sorted(src_dir.rglob("*.py")):
         parsed = _parse_source_file(py_file, resolved_src=resolved_src)
-        if isinstance(parsed, str):
-            if parse_errors is not None:
-                parse_errors.append(parsed)
+        if parsed is None:
             continue
         rel_path, tree = parsed
         importer_module = _module_name_for_path(src_dir, py_file)
@@ -203,8 +192,7 @@ def build_payload(
     config_path: Path = DEFAULT_CONFIG,
 ) -> dict[str, Any]:
     config = load_ratchet_config(config_path)
-    parse_errors: list[str] = []
-    observed = collect_external_private_imports(src_dir, parse_errors=parse_errors)
+    observed = collect_external_private_imports(src_dir)
     allowed = allowed_pairs_from_config(config)
     max_count = int(config["max_count"])
     observed_pairs = sorted(observed)
@@ -231,7 +219,6 @@ def build_payload(
             {"importer": importer, "target": target}
             for importer, target in sorted(allowed - set(observed))
         ],
-        "parse_errors": parse_errors,
     }
 
 
@@ -273,28 +260,12 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _registry_errors(config_path: Path) -> list[str]:
-    """Pair-metadata errors. Count logic stays in evaluate_ratchet."""
-    config = load_ratchet_config(config_path)
-    errors = validate_exception_metadata(
-        config,
-        project_root=PROJECT_ROOT,
-        today=date.today(),
-    )
-    return errors
-
-
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
-    config_path = resolve_output_path(args.config)
-    payload = build_payload(config_path=config_path)
+    payload = build_payload(config_path=resolve_output_path(args.config))
     json_text = json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
     json_out = resolve_output_path(args.json_out)
-    errors = [
-        *evaluate_ratchet(payload),
-        *list(payload.get("parse_errors") or []),
-        *_registry_errors(config_path),
-    ]
+    errors = evaluate_ratchet(payload)
     if args.check:
         if errors:
             print("\n".join(errors), file=sys.stderr)

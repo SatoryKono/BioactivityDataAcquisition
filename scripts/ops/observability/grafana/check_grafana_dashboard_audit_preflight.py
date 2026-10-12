@@ -37,10 +37,8 @@ from bioetl.application.services.run_reports.source_identity import (
     RUNTIME_SOURCE_ID_ENV,
     RuntimeSourceIdentityResolutionResult,
     compare_runtime_source_identity,
-    resolve_runtime_source_identity,
-)
-from bioetl.composition.observability_runtime import (
     load_repository_source_environment,
+    resolve_runtime_source_identity,
 )
 
 DEFAULT_GRAFANA_BASE_URL = "http://localhost:3000"

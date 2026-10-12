@@ -2,9 +2,9 @@ publication_identifier_arrays:
   author_orcids:
     input: '["https://orcid.org/0000-0002-1825-0097","0000000218250097"]'
     expected: '["0000-0002-1825-0097"]'
-  author_orcids_preserves_unknown:
+  author_orcids_drops_invalid:
     input: '["not-an-orcid","0000-0002-1825-0097","0000000218250097"]'
-    expected: '["0000-0002-1825-0097","not-an-orcid"]'
+    expected: '["0000-0002-1825-0097"]'
   issn_list:
     input: '["2049-3630","ISSN:1234567X"]'
     expected: '["1234-567X","2049-3630"]'
@@ -25,9 +25,9 @@ uniprot_identifier_arrays:
   all_mappings:
     input: '["p00742","P00742","q9y6k9"]'
     expected: '["P00742","Q9Y6K9"]'
-  all_mappings_preserves_noise:
+  all_mappings_drops_noise:
     input: '["p00742","n/a","CHEMBL203","   "]'
-    expected: '["   ","CHEMBL203","P00742","n/a"]'
+    expected: '["CHEMBL203","P00742"]'
   chembl_ids:
     input: '["chembl25","CHEMBL1"]'
     expected: '["CHEMBL1","CHEMBL25"]'

@@ -1,8 +1,7 @@
-"""Report-root path helpers (no process env maps, no direct filesystem I/O).
+"""Pure report-root path helpers (no process env maps).
 
 Application code resolves an explicit ``root`` or the mutable
-:data:`DEFAULT_REPORT_ROOT` default. Marker bytes go through
-``RunReportStorePort``. Process environment bridging
+:data:`DEFAULT_REPORT_ROOT` default. Process environment bridging
 (``BIOETL_REPORT_ROOT``) lives in the interfaces layer so this module stays
 free of infrastructure/Settings imports.
 """
@@ -10,6 +9,8 @@ free of infrastructure/Settings imports.
 from __future__ import annotations
 
 import json
+import os
+import tempfile
 from pathlib import Path
 from typing import NamedTuple
 
@@ -80,19 +81,36 @@ def write_report_root_source_identity(
     *,
     report_root: Path,
     source_id: str,
-    store: RunReportStorePort,
 ) -> Path:
-    """Write a versioned machine-local report source attestation via ``store``."""
+    """Atomically write a versioned machine-local report source attestation."""
     valid_source_id = normalize_source_id(source_id)
     if valid_source_id is None:
         raise ValueError("source_id must be a 64-character lowercase hex digest")
     target = report_root_source_identity_path(report_root=report_root)
+    target.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "schema_version": REPORT_ROOT_SOURCE_IDENTITY_SCHEMA,
         "runtime_source_id": valid_source_id,
     }
     serialized = json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n"
-    store.write_synced_text(str(target), serialized)
+    temporary_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=target.parent,
+            prefix=f"{target.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            temporary_path = Path(handle.name)
+            handle.write(serialized)
+            handle.flush()
+            os.fsync(handle.fileno())
+        temporary_path.replace(target)
+    finally:
+        if temporary_path is not None and temporary_path.exists():
+            temporary_path.unlink()
     return target
 
 
@@ -116,18 +134,15 @@ def _source_identity_failure(
 
 def _read_source_identity_payload(
     marker: Path,
-    *,
-    store: RunReportStorePort,
 ) -> tuple[JsonDict | None, tuple[str, str] | None]:
-    marker_key = str(marker)
-    if not store.is_file(marker_key):
+    if not marker.is_file():
         return None, (
             "missing",
             "Report-root source attestation is missing; start or recover "
             "the main stack from the intended checkout.",
         )
     try:
-        raw = json.loads(store.read_text(marker_key))
+        raw = json.loads(marker.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, UnicodeDecodeError, OSError) as exc:
         return None, (
             "unreadable",
@@ -184,7 +199,6 @@ def inspect_report_root_source_identity(
     *,
     report_root: Path | None = None,
     expected_source_id: str | None,
-    store: RunReportStorePort,
 ) -> JsonDict:
     """Inspect source attestation and compare it with the managed runtime ID."""
     resolved = resolve_report_root(root=report_root)
@@ -205,7 +219,7 @@ def inspect_report_root_source_identity(
                 "start the stack through runtime_manager."
             ),
         )
-    raw, failure = _read_source_identity_payload(marker, store=store)
+    raw, failure = _read_source_identity_payload(marker)
     if failure is not None:
         return _source_identity_failure(
             payload,
@@ -227,7 +241,6 @@ def inspect_report_root_source_identity(
 def inspect_report_root_marker(
     *,
     report_root: Path | None = None,
-    store: RunReportStorePort,
 ) -> JsonDict:
     """Inspect the bind-identity marker without raising.
 
@@ -241,8 +254,7 @@ def inspect_report_root_marker(
         "marker_path": str(marker.as_posix()),
         "marker_token_expected": REPORT_ROOT_MARKER_VALUE,
     }
-    marker_key = str(marker)
-    if not store.is_file(marker_key):
+    if not marker.is_file():
         payload["status"] = "unhealthy"
         payload["marker"] = "missing"
         payload["layout_marker_state"] = "missing"
@@ -253,10 +265,8 @@ def inspect_report_root_marker(
         )
         return payload
     try:
-        marker_prefix = store.read_text_prefix(
-            marker_key,
-            limit=_REPORT_ROOT_MARKER_READ_LIMIT + 1,
-        )
+        with marker.open(encoding="utf-8") as stream:
+            marker_prefix = stream.read(_REPORT_ROOT_MARKER_READ_LIMIT + 1)
         oversized = len(marker_prefix) > _REPORT_ROOT_MARKER_READ_LIMIT
         token = marker_prefix[:_REPORT_ROOT_MARKER_READ_LIMIT].strip()
     except (OSError, UnicodeDecodeError) as exc:
@@ -282,15 +292,10 @@ def inspect_report_root_marker(
     return payload
 
 
-def report_root_marker_is_healthy(
-    *,
-    report_root: Path | None = None,
-    store: RunReportStorePort,
-) -> bool:
+def report_root_marker_is_healthy(*, report_root: Path | None = None) -> bool:
     """Return True when the bind-identity marker is present and valid."""
     return (
-        inspect_report_root_marker(report_root=report_root, store=store).get("status")
-        == "healthy"
+        inspect_report_root_marker(report_root=report_root).get("status") == "healthy"
     )
 
 

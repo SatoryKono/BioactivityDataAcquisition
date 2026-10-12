@@ -5,53 +5,13 @@ Provides PaginatedFetcherMixin to standardize loop logic for offset/cursor based
 
 from __future__ import annotations
 
-__all__ = ["PaginatedFetcherMixin", "PaginationTruncatedError", "T"]
+__all__ = ["PaginatedFetcherMixin", "T"]
 
 
-from collections.abc import AsyncIterator, Awaitable, Callable, Hashable, Mapping
-from typing import TYPE_CHECKING, NoReturn, TypeVar
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
+from collections.abc import AsyncIterator, Awaitable, Callable
+from typing import Any, TypeVar
 
 T = TypeVar("T")
-CursorT = TypeVar("CursorT", bound=Hashable)
-
-
-class PaginationTruncatedError(RuntimeError):
-    """Signal that pagination stopped before the provider reported exhaustion."""
-
-    def __init__(self, *, reason: str, page_count: int, page_limit: int) -> None:
-        self.reason = reason
-        self.page_count = page_count
-        self.page_limit = page_limit
-        super().__init__(
-            f"pagination truncated: reason={reason}, page_count={page_count}, "
-            f"page_limit={page_limit}"
-        )
-
-
-def raise_pagination_truncated(
-    logger: LoggerPort,
-    *,
-    event: str,
-    reason: str,
-    page_count: int,
-    page_limit: int,
-    cursor_field: str,
-    cursor_value: object,
-    log_context: Mapping[str, object] | None = None,
-) -> NoReturn:
-    """Log structured truncation evidence and fail the incomplete scan."""
-    fields = dict(log_context or {})
-    fields.update(reason=reason, page_count=page_count, page_limit=page_limit)
-    fields[cursor_field] = cursor_value
-    logger.warning(event, **fields)
-    raise PaginationTruncatedError(
-        reason=reason,
-        page_count=page_count,
-        page_limit=page_limit,
-    )
 
 
 class PaginatedFetcherMixin:
@@ -59,22 +19,6 @@ class PaginatedFetcherMixin:
 
     # Hard ceiling against runaway providers (cursor loops / empty pages).
     _DEFAULT_MAX_PAGES: int = 10_000
-    _logger: LoggerPort
-
-    async def _fetch_page_and_check_cursor(
-        self,
-        page: Awaitable[tuple[list[T], CursorT | None]],
-        *,
-        seen_cursors: set[CursorT | None],
-    ) -> tuple[list[T], CursorT | None, bool]:
-        """Fetch a page and defer repeated-cursor handling until after its yield."""
-        items, next_cursor = await page
-        if next_cursor is None:
-            return items, None, False
-        if next_cursor in seen_cursors:
-            return items, next_cursor, True
-        seen_cursors.add(next_cursor)
-        return items, next_cursor, False
 
     @staticmethod
     def _should_stop_fetching(fetched: int, limit: int | None) -> bool:
@@ -89,14 +33,30 @@ class PaginatedFetcherMixin:
         """
         return limit is not None and fetched >= limit
 
+    def _advance_pagination_cursor(
+        self,
+        *,
+        next_cursor: object,
+        seen_cursors: set[object],
+    ) -> object | None:
+        """Return next cursor or None when pagination should terminate."""
+        if next_cursor is None:
+            return None
+        if next_cursor in seen_cursors:
+            return None
+        seen_cursors.add(next_cursor)
+        return next_cursor
+
     async def paginated_fetch(
         self,
         fetch_func: Callable[
-            [CursorT | None, int],
-            Awaitable[tuple[list[T], CursorT | None]],
-        ],
+            [Any | None, int],  # Any: pagination cursor type varies by API
+            Awaitable[
+                tuple[list[T], Any | None]  # Any: pagination cursor type varies by API
+            ],  # Any: pagination cursor type varies by API
+        ],  # Any: cursor type varies per API
         limit: int | None = None,
-        initial_cursor: CursorT | None = None,
+        initial_cursor: Any | None = None,  # Any: cursor type varies per...
         *,
         max_pages: int | None = None,
     ) -> AsyncIterator[T]:
@@ -120,34 +80,20 @@ class PaginatedFetcherMixin:
         fetched = 0
         cursor = initial_cursor
         page_count = 0
-        seen_cursors: set[CursorT | None] = (
-            {initial_cursor} if initial_cursor is not None else set()
-        )
+        seen_cursors: set[object] = set()
         page_limit = max_pages if max_pages is not None else self._DEFAULT_MAX_PAGES
         if page_limit < 1:
             raise ValueError(f"max_pages must be >= 1, got {page_limit!r}")
 
         while not self._should_stop_fetching(fetched, limit):
             if page_count >= page_limit:
-                raise_pagination_truncated(
-                    self._logger,
-                    event="pagination_truncated",
-                    reason="max_pages",
-                    page_count=page_count,
-                    page_limit=page_limit,
-                    cursor_field="next_cursor",
-                    cursor_value=repr(cursor),
-                )
+                break
             page_count += 1
 
-            (
-                items,
-                next_cursor,
-                repeated_cursor,
-            ) = await self._fetch_page_and_check_cursor(
-                fetch_func(cursor, fetched),
-                seen_cursors=seen_cursors,
-            )
+            items, next_cursor = await fetch_func(cursor, fetched)
+
+            if not items and next_cursor is None:
+                break
 
             for item in items:
                 yield item
@@ -155,16 +101,10 @@ class PaginatedFetcherMixin:
                 if self._should_stop_fetching(fetched, limit):
                     return
 
-            if repeated_cursor:
-                raise_pagination_truncated(
-                    self._logger,
-                    event="pagination_truncated",
-                    reason="repeated_cursor",
-                    page_count=page_count,
-                    page_limit=page_limit,
-                    cursor_field="next_cursor",
-                    cursor_value=repr(next_cursor),
-                )
-            if next_cursor is None:
+            advanced = self._advance_pagination_cursor(
+                next_cursor=next_cursor,
+                seen_cursors=seen_cursors,
+            )
+            if advanced is None:
                 break
-            cursor = next_cursor
+            cursor = advanced

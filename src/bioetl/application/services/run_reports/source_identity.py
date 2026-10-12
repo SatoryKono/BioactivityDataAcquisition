@@ -11,17 +11,6 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
-from bioetl.application.services.run_reports._report_diff_support import (
-    _parse_repository_env_document,
-    _repository_env_paths,
-)
-from bioetl.application.services.run_reports._report_diff_support import (
-    _parse_repository_env_line as _parse_repository_env_line,
-)
-from bioetl.application.services.run_reports._report_diff_support import (
-    repository_env_candidate_paths as repository_env_candidate_paths,
-)
-
 RUNTIME_SOURCE_ID_ENV = "BIOETL_RUNTIME_SOURCE_ID"
 RUNTIME_SOURCE_ID_LABEL = "io.bioetl.dashboard-source-id"
 RUNTIME_SOURCE_ID_SCHEMA = "bioetl-dashboard-source-v1"
@@ -360,24 +349,63 @@ def load_repository_source_environment(
     *,
     names: Iterable[str],
     process_environment: Mapping[str, object] | None = None,
-    file_texts: Mapping[str, str | None],
 ) -> dict[str, str]:
-    """Whitelist-parse repository env documents already read by the config seam.
+    """Read only whitelisted source settings through repository-env semantics.
 
-    ``file_texts`` maps ``str(path)`` for each candidate from
-    :func:`_repository_env_paths` to UTF-8 contents. ``None`` or a missing key
-    means that file is absent. Later documents override earlier ones. This
-    function never reads the filesystem and never returns keys outside
-    ``names``. ``.env.local`` still overrides ``.env`` when both texts are
-    present. A custom ``BIOETL_ENV_FILE`` is honored only as path selection
-    through ``process_environment``.
+    The function never mutates process state and never returns unrelated or
+    secret-bearing values.  ``.env.local`` overrides ``.env`` exactly as the
+    canonical shell loader does.  A custom ``BIOETL_ENV_FILE`` is honored when
+    the caller supplies it through ``process_environment``.
     """
     root_path = Path(root)
     process = process_environment or {}
     allowed = {str(name) for name in names if str(name)}
     values: dict[str, str] = {}
     for path in _repository_env_paths(root_path, process):
-        values.update(
-            _parse_repository_env_document(file_texts.get(str(path)), allowed)
-        )
+        values.update(_read_repository_env_file(path, allowed))
     return values
+
+
+def _repository_env_paths(
+    root_path: Path, process: Mapping[str, object]
+) -> tuple[Path, ...]:
+    configured_env = str(process.get("BIOETL_ENV_FILE") or "").strip()
+    env_path = Path(configured_env) if configured_env else root_path / ".env"
+    if not env_path.is_absolute():
+        env_path = root_path / env_path
+    if str(process.get("BIOETL_SKIP_ENV_LOCAL") or "0").strip() == "1":
+        return (env_path,)
+    return env_path, root_path / ".env.local"
+
+
+def _read_repository_env_file(path: Path, allowed: set[str]) -> dict[str, str]:
+    if not path.is_file():
+        return {}
+    values: dict[str, str] = {}
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        parsed = _parse_repository_env_line(raw, allowed)
+        if parsed is not None:
+            key, value = parsed
+            values[key] = value
+    return values
+
+
+def _strip_repository_env_inline_comment(value: str) -> str:
+    """Strip a shell-style inline comment from an unquoted env value."""
+    for index, character in enumerate(value):
+        if character == "#" and index > 0 and value[index - 1].isspace():
+            return value[:index].rstrip()
+    return value.rstrip()
+
+
+def _parse_repository_env_line(raw: str, allowed: set[str]) -> tuple[str, str] | None:
+    stripped = raw.strip()
+    if not stripped or stripped.startswith("#") or "=" not in raw:
+        return None
+    key, value = raw.split("=", 1)
+    key, value = key.strip(), value.strip()
+    if key not in allowed:
+        return None
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        return key, value[1:-1]
+    return key, _strip_repository_env_inline_comment(value)

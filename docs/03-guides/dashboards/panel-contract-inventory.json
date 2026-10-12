@@ -4088,7 +4088,7 @@
       "formula": "",
       "kind": "http",
       "panel_id": 9482,
-      "panel_title": "Review Contract Exclusions",
+      "panel_title": "Review Data Quality",
       "query": "/ops/observability/selected-run-status?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&run_type=${run_type:csv}&workflow=${workflow:csv}",
       "query_tokens": [
         "/ops/observability/selected-run-status",

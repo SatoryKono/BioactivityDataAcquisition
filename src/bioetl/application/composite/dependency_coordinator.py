@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
-from dataclasses import dataclass
 
 import polars as pl
 
@@ -32,17 +31,7 @@ from bioetl.domain.ports import (
     LoggerPort,
 )
 
-__all__ = ["DependencyCoordinatorCollaborators", "DependencyCoordinatorService"]
-
-
-@dataclass(frozen=True, slots=True)
-class DependencyCoordinatorCollaborators:
-    """Bundle of dependency coordinator collaborators."""
-
-    seed_key_resolver: SeedKeyResolver
-    chained_key_resolver: ChainedKeyResolver
-    progress_service: DependencyProgressService
-    result_service: DependencyResultService
+__all__ = ["DependencyCoordinatorService"]
 
 
 class DependencyCoordinatorService:
@@ -67,7 +56,10 @@ class DependencyCoordinatorService:
     Example:
         >>> coordinator = DependencyCoordinatorService(
         ...     logger=logger,
-        ...     collaborators=collaborators,
+        ...     seed_key_resolver=seed_key_resolver,
+        ...     chained_key_resolver=chained_key_resolver,
+        ...     progress_service=progress_service,
+        ...     result_service=result_service,
         ...     delta_reader=reader,
         ... )
         >>> results = await coordinator.run_dependencies(
@@ -81,7 +73,10 @@ class DependencyCoordinatorService:
     def __init__(
         self,
         logger: LoggerPort,
-        collaborators: DependencyCoordinatorCollaborators,
+        seed_key_resolver: SeedKeyResolver,
+        chained_key_resolver: ChainedKeyResolver,
+        progress_service: DependencyProgressService,
+        result_service: DependencyResultService,
         delta_reader: DeltaReaderPort | None = None,
         clock: ClockPort | None = None,
     ) -> None:
@@ -89,15 +84,18 @@ class DependencyCoordinatorService:
 
         Args:
             logger: Structured logger.
-            collaborators: Bundle of resolvers and services.
+            seed_key_resolver: Resolver for seed-key dependencies.
+            chained_key_resolver: Resolver for chained dependencies.
+            progress_service: Service for dependency progress bookkeeping.
+            result_service: Service for dependency result/log assembly.
             delta_reader: Reader for Silver tables (required for chained dependencies).
         """
         self._logger = logger
         self._delta_reader = delta_reader
-        self._seed_key_resolver = collaborators.seed_key_resolver
-        self._chained_key_resolver = collaborators.chained_key_resolver
-        self._result_service = collaborators.result_service
-        self._progress_service = collaborators.progress_service
+        self._seed_key_resolver = seed_key_resolver
+        self._chained_key_resolver = chained_key_resolver
+        self._result_service = result_service
+        self._progress_service = progress_service
         self._clock = resolve_runtime_clock(clock)
 
     async def run_dependencies(

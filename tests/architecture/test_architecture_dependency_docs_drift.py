@@ -77,11 +77,9 @@ def test_nightly_workflow_regenerates_dependency_map() -> None:
     assert workflow_path.exists(), "Missing nightly architecture docs workflow"
 
     workflow = workflow_path.read_text(encoding="utf-8")
-    nightly = Path(".github/workflows/nightly.yml").read_text(encoding="utf-8")
-    assert "schedule:" not in workflow
-    assert "cron:" not in workflow
+    assert "schedule:" in workflow
+    assert 'cron: "15 2 * * *"' in workflow
     assert "workflow_dispatch:" in workflow
-    assert "architecture-docs-nightly.yml" not in nightly
     assert "Regenerate architecture dependency map" in workflow
     assert (
         "uv run --frozen --no-build python "

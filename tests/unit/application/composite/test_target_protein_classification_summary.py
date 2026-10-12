@@ -40,27 +40,31 @@ from bioetl.application.composite.target_protein_classification_summary import (
 from bioetl.domain.mapping.protein_class_target_type import (
     ProteinClassTargetTypeMappingData,
     ProteinClassTopLevelMappingEntry,
+    initialize_protein_class_target_type_mapping,
 )
 
 
-def _mapping() -> ProteinClassTargetTypeMappingData:
-    return ProteinClassTargetTypeMappingData(
-        mapping_version="protein_class_l1_map_v1",
-        entries=(
-            ProteinClassTopLevelMappingEntry("Enzyme", "enzyme", True),
-            ProteinClassTopLevelMappingEntry("Ion channel", "ion_channel", True),
-            ProteinClassTopLevelMappingEntry("Transporter", "transporter", True),
-            ProteinClassTopLevelMappingEntry(
-                "Unclassified protein",
-                "unclassified_protein",
-                False,
+@pytest.fixture(autouse=True)
+def _init_protein_class_mapping() -> None:
+    initialize_protein_class_target_type_mapping(
+        ProteinClassTargetTypeMappingData(
+            mapping_version="protein_class_l1_map_v1",
+            entries=(
+                ProteinClassTopLevelMappingEntry("Enzyme", "enzyme", True),
+                ProteinClassTopLevelMappingEntry("Ion channel", "ion_channel", True),
+                ProteinClassTopLevelMappingEntry("Transporter", "transporter", True),
+                ProteinClassTopLevelMappingEntry(
+                    "Unclassified protein",
+                    "unclassified_protein",
+                    False,
+                ),
+                ProteinClassTopLevelMappingEntry(
+                    "Membrane receptor",
+                    "membrane_receptor",
+                    True,
+                ),
             ),
-            ProteinClassTopLevelMappingEntry(
-                "Membrane receptor",
-                "membrane_receptor",
-                True,
-            ),
-        ),
+        )
     )
 
 
@@ -84,7 +88,7 @@ def test_summary_copies_single_resolved_hierarchy_levels() -> None:
         }
     )
 
-    result = summarize_target_protein_classification_dependency(df, _mapping())
+    result = summarize_target_protein_classification_dependency(df)
     row = result.to_dicts()[0]
 
     assert row["target_protein_class_id_L1"] == "1"
@@ -119,7 +123,7 @@ def test_summary_marks_multiple_informative_l1_values_as_multifunctional() -> No
         }
     )
 
-    result = summarize_target_protein_classification_dependency(df, _mapping())
+    result = summarize_target_protein_classification_dependency(df)
     row = result.to_dicts()[0]
 
     assert row["target_protein_class_id_L1"] is None
@@ -153,7 +157,7 @@ def test_summary_does_not_mark_duplicate_top_level_branches_multifunctional() ->
         }
     )
 
-    result = summarize_target_protein_classification_dependency(df, _mapping())
+    result = summarize_target_protein_classification_dependency(df)
     row = result.to_dicts()[0]
 
     assert row["target_protein_class_type"] == "enzyme"
@@ -176,7 +180,7 @@ def test_summary_ignores_unclassified_top_level_for_target_type() -> None:
         }
     )
 
-    result = summarize_target_protein_classification_dependency(df, _mapping())
+    result = summarize_target_protein_classification_dependency(df)
     row = result.to_dicts()[0]
 
     assert row["target_protein_class_type"] == "ion_channel"
@@ -195,7 +199,7 @@ def test_summary_ignores_missing_and_quarantined_classifications() -> None:
         }
     )
 
-    result = summarize_target_protein_classification_dependency(df, _mapping())
+    result = summarize_target_protein_classification_dependency(df)
     row = result.to_dicts()[0]
 
     assert row["protein_classifications"] is None
@@ -219,7 +223,7 @@ def test_summary_deduplicates_leaf_ids_deterministically() -> None:
         }
     )
 
-    result = summarize_target_protein_classification_dependency(df, _mapping())
+    result = summarize_target_protein_classification_dependency(df)
     row = result.to_dicts()[0]
 
     assert row["target_protein_class_id_L1"] == "1"

@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 from uuid import UUID
-from typing import Literal, cast
+from typing import cast
+
 
 from bioetl.application.ports.storage import CompositeMergeStorageProtocol
 from bioetl.application.services.run_reports.observations import (
@@ -137,15 +138,14 @@ async def replay_assay(
             )
             result = await merger.execute_request(request)
             output_reader = DeltaReader(destination / "output", logger)
-            layers: tuple[Literal["silver", "gold"], ...] = ("silver", "gold")
-            paths: dict[str, Path] = {
+            paths = {
                 layer: storage.get_table_path(
                     output_table_name(
                         getattr(config.merge, f"output_{layer}_path"), layer
                     ),
                     layer=layer,
                 )
-                for layer in layers
+                for layer in ("silver", "gold")
             }
             await verify_replay_outputs(root, output_reader, paths)
             receipt = verification_receipt(

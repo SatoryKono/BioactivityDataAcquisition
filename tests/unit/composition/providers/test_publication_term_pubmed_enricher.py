@@ -7,13 +7,11 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.pipelines.pubmed.publication_term_enricher import (
+from bioetl.composition.providers.publication_term_pubmed_enricher import (
     PubMedPublicationTermPayloadEnricher,
+    create_pubmed_publication_term_enricher,
     parse_pubmed_mesh_xml,
     pubmed_term_payload,
-)
-from bioetl.composition.providers.publication_term_pubmed_enricher import (
-    create_pubmed_publication_term_enricher,
 )
 
 pytestmark = pytest.mark.unit

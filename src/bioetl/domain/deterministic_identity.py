@@ -8,39 +8,25 @@ from enum import Enum
 from typing import cast
 from uuid import UUID, uuid5
 
-from bioetl.domain.normalization.json import (
-    CanonicalJsonProfile,
-    serialize_json_canonical,
-)
+from bioetl.domain.normalization.json import serialize_json_canonical
 
 _DOMAIN_ID_NAMESPACE = UUID("2e4195de-b899-4a13-a6bc-177126826f6d")
 
 
-def deterministic_uuid(
-    scope: str,
-    payload: Mapping[str, object],
-    *,
-    profile: CanonicalJsonProfile = CanonicalJsonProfile.DOMAIN_V1,
-) -> UUID:
+def deterministic_uuid(scope: str, payload: Mapping[str, object]) -> UUID:
     """Return a UUIDv5 derived from canonical domain identity inputs."""
     canonical_payload = serialize_json_canonical(
         {
             "payload": _canonical_identity_value(payload),
             "scope": scope,
-        },
-        profile=profile,
+        }
     )
     return uuid5(_DOMAIN_ID_NAMESPACE, canonical_payload)
 
 
-def deterministic_id(
-    scope: str,
-    payload: Mapping[str, object],
-    *,
-    profile: CanonicalJsonProfile = CanonicalJsonProfile.DOMAIN_V1,
-) -> str:
+def deterministic_id(scope: str, payload: Mapping[str, object]) -> str:
     """Return a stable string identifier for a domain identity payload."""
-    return str(deterministic_uuid(scope, payload, profile=profile))
+    return str(deterministic_uuid(scope, payload))
 
 
 def _canonical_datetime(value: object) -> str:

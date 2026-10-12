@@ -9,6 +9,9 @@ from pathlib import Path
 import pytest
 
 from bioetl.application.services.run_reports import paths as run_report_paths
+
+pytestmark = pytest.mark.unit
+
 from bioetl.application.services.run_reports.paths import (
     REPORT_ROOT_MARKER_NAME,
     REPORT_ROOT_MARKER_VALUE,
@@ -22,23 +25,6 @@ from bioetl.application.services.run_reports.paths import (
     resolve_report_root,
     write_report_root_source_identity,
 )
-from tests.helpers.run_report_store import MemoryReportStore
-
-pytestmark = pytest.mark.unit
-
-
-def _store() -> MemoryReportStore:
-    return MemoryReportStore()
-
-
-class _UnreadableMarkerStore(MemoryReportStore):
-    def read_text_prefix(self, path: str, *, limit: int) -> str:
-        raise UnicodeDecodeError("utf-8", b"\xff", 0, 1, "invalid start byte")
-
-
-class _FailingSyncStore(MemoryReportStore):
-    def write_synced_text(self, path: str, content: str) -> None:
-        raise OSError("fsync failed")
 
 
 def test_resolve_report_root_default() -> None:
@@ -71,30 +57,28 @@ def test_marker_path_for_isolated_test_root(tmp_path: Path) -> None:
 def test_inspect_marker_missing(tmp_path: Path) -> None:
     root = tmp_path / "run-reports"
     root.mkdir()
-    check = inspect_report_root_marker(report_root=root, store=_store())
+    check = inspect_report_root_marker(report_root=root)
     assert check["status"] == "unhealthy"
     assert check["marker"] == "missing"
-    assert not report_root_marker_is_healthy(report_root=root, store=_store())
+    assert not report_root_marker_is_healthy(report_root=root)
 
 
 def test_inspect_marker_ok(tmp_path: Path) -> None:
     root = tmp_path / "run-reports"
-    store = _store()
-    store.write_text(
-        str(report_root_marker_path(report_root=root)),
-        REPORT_ROOT_MARKER_VALUE + "\n",
-    )
-    check = inspect_report_root_marker(report_root=root, store=store)
+    root.mkdir()
+    marker = tmp_path / REPORT_ROOT_MARKER_NAME
+    marker.write_text(REPORT_ROOT_MARKER_VALUE + "\n", encoding="utf-8")
+    check = inspect_report_root_marker(report_root=root)
     assert check["status"] == "healthy"
     assert check["marker"] == "ok"
-    assert report_root_marker_is_healthy(report_root=root, store=store)
+    assert report_root_marker_is_healthy(report_root=root)
 
 
 def test_inspect_marker_token_mismatch(tmp_path: Path) -> None:
     root = tmp_path / "run-reports"
-    store = _store()
-    store.write_text(str(report_root_marker_path(report_root=root)), "wrong\n")
-    check = inspect_report_root_marker(report_root=root, store=store)
+    root.mkdir()
+    (tmp_path / REPORT_ROOT_MARKER_NAME).write_text("wrong\n", encoding="utf-8")
+    check = inspect_report_root_marker(report_root=root)
     assert check["status"] == "unhealthy"
     assert check["marker"] == "mismatch"
 
@@ -103,39 +87,37 @@ def test_inspect_marker_bounds_reads_and_handles_invalid_encoding(
     tmp_path: Path,
 ) -> None:
     root = tmp_path / "run-reports"
-    marker = str(report_root_marker_path(report_root=root))
-    unreadable = _UnreadableMarkerStore()
-    unreadable.write_text(marker, "present")
+    root.mkdir()
+    marker = tmp_path / REPORT_ROOT_MARKER_NAME
+    marker.write_bytes(b"\xff\xfe")
 
-    invalid = inspect_report_root_marker(report_root=root, store=unreadable)
+    invalid = inspect_report_root_marker(report_root=root)
 
     assert invalid["status"] == "unhealthy"
     assert invalid["marker"] == "unreadable"
 
-    oversized_store = _store()
-    oversized_store.write_text(marker, REPORT_ROOT_MARKER_VALUE + (" " * 5000))
-    oversized = inspect_report_root_marker(report_root=root, store=oversized_store)
+    marker.write_text(REPORT_ROOT_MARKER_VALUE + (" " * 5000), encoding="utf-8")
+    oversized = inspect_report_root_marker(report_root=root)
     assert oversized["status"] == "unhealthy"
     assert oversized["marker"] == "mismatch"
 
 
-def test_source_identity_write_propagates_store_failure(tmp_path: Path) -> None:
+def test_source_identity_temp_file_is_cleaned_when_fsync_fails(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
     root = tmp_path / "run-reports"
-    store = _FailingSyncStore()
+    root.mkdir()
+
+    def _fail_fsync(_file_descriptor: int) -> None:
+        raise OSError("fsync failed")
+
+    monkeypatch.setattr(run_report_paths.os, "fsync", _fail_fsync)
 
     with pytest.raises(OSError, match="fsync failed"):
-        write_report_root_source_identity(
-            report_root=root,
-            source_id="a" * 64,
-            store=store,
-        )
+        write_report_root_source_identity(report_root=root, source_id="a" * 64)
 
-    check = inspect_report_root_source_identity(
-        report_root=root,
-        expected_source_id="a" * 64,
-        store=store,
-    )
-    assert check["source_identity"] == "missing"
+    assert list(tmp_path.glob(f"{REPORT_ROOT_SOURCE_IDENTITY_NAME}.*.tmp")) == []
 
 
 def test_source_identity_path_follows_bind_root_layout(tmp_path: Path) -> None:
@@ -150,16 +132,13 @@ def test_source_identity_round_trip_exact_match(tmp_path: Path) -> None:
     root.mkdir()
     source_id = "a" * 64
 
-    store = _store()
     target = write_report_root_source_identity(
         report_root=root,
         source_id=source_id,
-        store=store,
     )
     check = inspect_report_root_source_identity(
         report_root=root,
         expected_source_id=source_id,
-        store=store,
     )
 
     assert target.name == REPORT_ROOT_SOURCE_IDENTITY_NAME
@@ -172,13 +151,12 @@ def test_source_identity_round_trip_exact_match(tmp_path: Path) -> None:
 
 def test_source_identity_fails_closed_for_foreign_checkout(tmp_path: Path) -> None:
     root = tmp_path / "run-reports"
-    store = _store()
-    write_report_root_source_identity(report_root=root, source_id="a" * 64, store=store)
+    root.mkdir()
+    write_report_root_source_identity(report_root=root, source_id="a" * 64)
 
     check = inspect_report_root_source_identity(
         report_root=root,
         expected_source_id="b" * 64,
-        store=store,
     )
 
     assert check["source_identity_status"] == "unhealthy"
@@ -208,17 +186,14 @@ def test_source_identity_invalid_states_fail_closed(
     reason: str,
 ) -> None:
     root = tmp_path / "run-reports"
-    store = _store()
+    root.mkdir()
+    marker = tmp_path / REPORT_ROOT_SOURCE_IDENTITY_NAME
     if payload is not None:
-        store.write_text(
-            str(report_root_source_identity_path(report_root=root)),
-            payload,
-        )
+        marker.write_text(payload, encoding="utf-8")
 
     check = inspect_report_root_source_identity(
         report_root=root,
         expected_source_id="a" * 64,
-        store=store,
     )
 
     assert check["source_identity_status"] == "unhealthy"

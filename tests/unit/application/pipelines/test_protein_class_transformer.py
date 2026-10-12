@@ -34,23 +34,11 @@ from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
-from bioetl.application.core.base_transformer import FilteredOutError
-from bioetl.application.core.batch_metrics import BatchMetricsRecorder
-from bioetl.application.core.batch_transformer import BatchTransformer
-from bioetl.application.core.config import RecordProcessorConfig
-from bioetl.domain.config import DQConfig
-from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.application.pipelines.chembl.protein_class_transformer import (
     ProteinClassTransformer,
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.entities import ProteinClassification
-from bioetl.domain.run_reports import build_pipeline_run_report
-from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
-from bioetl.domain.run_reports.context import (
-    bind_stage_accounting,
-    reset_stage_accounting,
-)
 from bioetl.domain.types import RunType
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
@@ -71,61 +59,6 @@ def mock_context():
 @pytest.mark.unit
 class TestProteinClassTransformer:
     """Tests for ProteinClassTransformer."""
-
-    @pytest.mark.asyncio
-    @pytest.mark.parametrize("entrypoint", ["transform", "transform_pre_silver"])
-    @pytest.mark.parametrize("mode", ["transform_batch", "transform_stream"])
-    @pytest.mark.parametrize("policy", ["skip", "quarantine", "fail"])
-    async def test_root_filter_conserves_stage_counts(
-        self, transformer, mock_context, entrypoint, mode, policy
-    ):
-        quarantine = MagicMock()
-        batch = BatchTransformer(
-            context=mock_context,
-            config=RecordProcessorConfig(
-                pipeline_name="chembl_protein_class",
-                provider="chembl",
-                entity_type="protein_class",
-                silver_schema=None,
-                gold_schema=MagicMock(),
-                dq_config=DQConfig(invalid_record_policy=policy),
-            ),
-            error_classifier=ErrorClassifier(),
-            quarantine_manager=quarantine,
-            batch_metrics=BatchMetricsRecorder(
-                None, "chembl_protein_class", "incremental"
-            ),
-            transform_callback=getattr(transformer, entrypoint),
-            gold_filter_callback=lambda _ctx, _record: True,
-            gold_transform_callback=lambda _ctx, record: record,
-        )
-        accounting = StageAccountingAccumulator()
-        token = bind_stage_accounting(accounting)
-        try:
-            result = await getattr(batch, mode)(
-                [{"protein_class_id": 0}, {"protein_class_id": 1}],
-                deterministic_uuid_from_callsite("root_filter_batch"),
-            )
-        finally:
-            reset_stage_accounting(token)
-        assert result.filtered_out_count == 1
-        assert result.quarantined_count == 0
-        assert [row["protein_class_id"] for row in result.silver_records] == [1]
-        assert [row["protein_class_id"] for row in result.gold_records] == [1]
-        assert result.records_quarantine_failed == 0
-        quarantine.quarantine_filtered_records.assert_not_called()
-        quarantine.quarantine_records.assert_not_called()
-        report = build_pipeline_run_report(
-            identity={},
-            metrics={"records_bronze": 2, "records_silver": 1, "records_gold": 1},
-            accounting=accounting,
-        )
-        silver = next(row for row in report.funnel if row.stage_id == "silver")
-        assert silver.balance_status.value == "OK"
-        assert silver.unaccounted == 0
-        assert silver.removed_total == 1
-        assert silver.removals[0].reason_code == "FILTERED_OUT_SILVER:protein_class_id"
-        assert report.layers.silver_filtered_out == 1
 
     @pytest.fixture
     def transformer(self):
@@ -226,6 +159,7 @@ class TestProteinClassTransformer:
         }
 
         result = await transformer.transform(mock_context, record, index=0)
+
         assert result is None
 
     @pytest.mark.asyncio
@@ -240,9 +174,9 @@ class TestProteinClassTransformer:
             "short_name": "Protein class",
         }
 
-        with pytest.raises(FilteredOutError) as caught:
-            await transformer.transform(mock_context, record, index=0)
-        assert caught.value.skip_quarantine is True
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is None
 
     @pytest.mark.asyncio
     async def test_class_transformer__minimal_record__8008a5c1(

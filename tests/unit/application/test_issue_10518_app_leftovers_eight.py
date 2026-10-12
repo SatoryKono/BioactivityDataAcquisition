@@ -193,20 +193,22 @@ def test_historical_certification_missing_and_ambiguous(
 @pytest.mark.asyncio
 async def test_protein_class_skip_and_assay_gold() -> None:
     host = ProteinClassTransformer.__new__(ProteinClassTransformer)
-    with pytest.raises(FilteredOutError) as root:
+    assert (
         await host.transform_pre_silver(
             object(),  # type: ignore[arg-type]
             {"protein_class_id": 0},
             0,
         )
-    assert root.value.skip_quarantine is True
-    with pytest.raises(FilteredOutError) as negative_root:
+        is None
+    )
+    assert (
         await host._transform_impl(
             object(),  # type: ignore[arg-type]
             {"protein_class_id": -1},
             0,
         )
-    assert negative_root.value.skip_quarantine is True
+        is None
+    )
     assay = AssayTransformer.__new__(AssayTransformer)
     gold = assay.transform_for_gold(
         object(),  # type: ignore[arg-type]

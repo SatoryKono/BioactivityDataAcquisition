@@ -16,7 +16,6 @@ from __future__ import annotations
 
 from typing import Any, Protocol, runtime_checkable
 
-from bioetl.domain.normalization.canonical_json_profile import CanonicalJsonProfile
 from bioetl.domain.types import JsonDict
 
 
@@ -60,8 +59,6 @@ class JsonEncoderPort(Protocol):
     def dumps_canonical(
         self,
         obj: JsonDict,  # Any: port contract allows heterogeneous record values
-        *,
-        profile: CanonicalJsonProfile = CanonicalJsonProfile.PORT_V1,
     ) -> str:  # Any: JSON values are heterogeneous
         """Serialize object to canonical JSON for hashing.
 
@@ -71,9 +68,6 @@ class JsonEncoderPort(Protocol):
         - ASCII-only output (ensure_ascii=True)
 
         This is used for content hash generation to ensure deterministic hashes.
-        Both adapters MUST produce identical bytes/errors for the same explicit
-        profile. The default preserves historical port-stdlib-v1 bytes; historical
-        replay selects a profile using recorded provenance, never backend guessing.
 
         Args:
             obj: Dictionary to serialize

@@ -51,9 +51,6 @@ from bioetl.application.core.record_normalization_processor import (
 from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
     initialize_publication_controlled_vocabulary,
 )
-from bioetl.composition.factories.transformer_dependencies import (
-    load_publication_controlled_vocabulary,
-)
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.entities.base import BaseEntity
@@ -150,12 +147,6 @@ def _shared_transformer_dependencies() -> Any:
     return build_test_transformer_dependencies()
 
 
-@cache
-def _shared_publication_vocabulary() -> object:
-    """Load the same configs vocabulary the module fixture installs."""
-    return load_publication_controlled_vocabulary(Path("configs"))
-
-
 def _create_stub_transformer(
     transformer_class: type[StubPublicationTransformer] = StubPublicationTransformer,
     *,
@@ -173,7 +164,6 @@ def _create_stub_transformer(
         provider=provider,
         entity_type=entity_type,
         dependencies=dependencies,
-        publication_vocabulary=_shared_publication_vocabulary(),
     )
 
 

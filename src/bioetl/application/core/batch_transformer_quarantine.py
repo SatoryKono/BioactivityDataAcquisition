@@ -126,5 +126,4 @@ async def route_single_transform_attempt(
         silver_record=None,
         gold_record=None,
         is_quarantined=False,
-        is_filtered_out=attempt.is_filtered_out,
     )

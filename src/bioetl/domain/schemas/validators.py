@@ -280,7 +280,7 @@ def _is_scalar_missing(value: object) -> bool:
     if isinstance(value, (list, tuple, dict, set)):
         return False
     try:
-        result = pd.Series([value], dtype=object).isna().iat[0]
+        result = pd.isna(value)
     except (ValueError, TypeError):
         return False
-    return bool(result)
+    return result is True

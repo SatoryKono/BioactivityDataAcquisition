@@ -3,8 +3,10 @@ name: Labeler
 # `.github/labeler.yml` and `docs/00-project/governance/github-label-taxonomy.md`.
 # `pull_request_target` remains a dangerous trigger.
 
-# History: pull_request_target was removed in #11234, so the workflow is
-# workflow_dispatch-only and the zizmor dangerous-triggers exception was dropped in #12071.
+# pull_request_target is required so fork PRs can receive labels.
+# This job does not checkout untrusted PR HEAD and does not expose
+# secrets beyond GITHUB_TOKEN with pull-requests: write.
+# Documented zizmor exception: .github/zizmor.yml (dangerous-triggers).
 on:
   # pull_request_target removed (#11234). Dangerous trigger must stay off.
   workflow_dispatch:

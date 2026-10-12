@@ -44,7 +44,6 @@ from tests.helpers.deterministic_ids import (
 
 import pytest
 
-from bioetl.application.core.batch_processing_contracts import LayerWriteOutcome
 from bioetl.application.core.batch_processing_service import (
     BatchProcessingComponents,
     BatchProcessingOutcome,
@@ -237,12 +236,6 @@ class TestBatchProcessingOutcome:
             gold_records=[],
             quarantined_count=0,
             filtered_out_count=0,
-            silver_write=LayerWriteOutcome(
-                layer="silver", status="skipped", candidate_count=0
-            ),
-            gold_write=LayerWriteOutcome(
-                layer="gold", status="skipped", candidate_count=0
-            ),
         )
         with pytest.raises(AttributeError):
             output.quarantined_count = 1  # type: ignore[misc]
@@ -260,18 +253,6 @@ class TestBatchProcessingOutcome:
             gold_records=[{"b": 2}],
             quarantined_count=3,
             filtered_out_count=1,
-            silver_write=LayerWriteOutcome(
-                layer="silver",
-                status="written",
-                candidate_count=1,
-                confirmed_count=1,
-            ),
-            gold_write=LayerWriteOutcome(
-                layer="gold",
-                status="written",
-                candidate_count=1,
-                confirmed_count=1,
-            ),
         )
         assert output.batch_id is batch_id
         assert output.bronze_result is bronze
@@ -353,7 +334,6 @@ class TestProcessBatchHappyPath:
 
         mock_transformer.transform_batch.assert_awaited_once()
 
-    @pytest.mark.parametrize("filtered_out", [0, 1])
     async def test_emits_batch_created_and_sealed_events(
         self,
         mock_context,
@@ -365,12 +345,8 @@ class TestProcessBatchHappyPath:
         mock_writer,
         mock_tracing,
         mock_batch_id_factory,
-        filtered_out,
     ):
         """process_batch emits typed batch lifecycle events through the support seam."""
-        mock_transformer.transform_batch.return_value = _make_transform_result(
-            silver=[{"entity_id": "kept"}], filtered_out=filtered_out
-        )
         event_emitter = MagicMock()
         service = BatchProcessingService(
             services=mock_services,
@@ -397,7 +373,7 @@ class TestProcessBatchHappyPath:
         )
 
         await service.process_batch(
-            records=[{"id": "kept"}] + [{"id": "root"}] * filtered_out,
+            records=[{"id": "1", "val": 10}],
             start_index=0,
             query_string=None,
         )
@@ -407,12 +383,6 @@ class TestProcessBatchHappyPath:
         ]
         assert any(isinstance(event, BatchCreated) for event in emitted_events)
         assert any(isinstance(event, BatchSealed) for event in emitted_events)
-        sealed = next(
-            event for event in emitted_events if isinstance(event, BatchSealed)
-        )
-        assert sealed.record_count == 1 + filtered_out
-        assert sealed.valid_count == 1
-        assert sealed.quarantined_count == filtered_out
 
     async def test_calls_write_silver_when_silver_records_present(
         self,

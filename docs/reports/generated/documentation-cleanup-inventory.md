@@ -7,18 +7,18 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3810 |
-| Tracked doc-like files | 3810 |
+| Doc-like files | 3806 |
+| Tracked doc-like files | 3806 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 7 |
 | Generated without route or exception | 0 |
-| Generated routes | 73 |
+| Generated routes | 72 |
 
 ## Tracking State
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3810 |
+| tracked | 3806 |
 
 ## Lifecycle Counts
 
@@ -29,11 +29,11 @@
 | active_quality_baseline | 61 |
 | closeout_evidence | 165 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 28 |
+| docs_reports_curated_or_historical_report | 27 |
 | docs_reports_generated_or_route_owned | 7 |
-| docs_reports_retention_sensitive_evidence | 22 |
+| docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_reference_mirror | 19 |
-| generated_test_run_evidence | 6 |
+| generated_test_run_evidence | 4 |
 | guide | 4 |
 | index | 4 |
 | issue_pack | 60 |
@@ -57,30 +57,30 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 750 |
+| Active | 749 |
 | Archived | 283 |
 | Canonical | 75 |
-| Generated | 1062 |
-| Working | 1640 |
+| Generated | 1060 |
+| Working | 1639 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 750 |
+| active | 749 |
 | archive | 283 |
 | canonical | 75 |
-| generated | 1062 |
-| working | 1640 |
+| generated | 1060 |
+| working | 1639 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 338 |
-| archive-after-migration | 1068 |
-| generate-automatically | 1062 |
-| keep | 1334 |
+| archive-after-migration | 1067 |
+| generate-automatically | 1060 |
+| keep | 1333 |
 | reconcile-with-github-state | 8 |
 
 ## Cleanup Candidates
@@ -118,7 +118,6 @@
 | `docs/reports/dashboard-ux-checks/2026-09-23.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-09-25.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-10-02.md` | Working | 0 | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-10-06.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-event-age.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-final-tests.txt` | Working | 0 | archive-after-migration |
@@ -167,6 +166,7 @@
 | `reports/dashboards/thirty-cycles/cycle-10/issue-10-1.md` | Working | 0 | archive-after-migration |
 | `reports/dashboards/thirty-cycles/cycle-10/issue-10-2.md` | Working | 0 | archive-after-migration |
 | `reports/dashboards/thirty-cycles/cycle-10/issue-10-3.md` | Working | 0 | archive-after-migration |
+| `reports/dashboards/thirty-cycles/cycle-10/issue-10-4.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -321,7 +321,6 @@
 | `docs/reports/dashboard-ux-checks/2026-09-23.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-09-25.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-10-02.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/dashboard-ux-checks/2026-10-06.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-event-age.json` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/accepted-final-tests.txt` | tracked | docs_reports_curated_or_historical_report | archive-after-migration |
@@ -342,6 +341,7 @@
 | `docs/reports/evidence/project-legacy-compatibility-remediation/config-schema-and-migration-compat/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-legacy-compatibility-remediation/domain-application-legacy-seams/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/project-legacy-compatibility-remediation/infrastructure-adapters-and-fallbacks/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/project-legacy-compatibility-remediation/interfaces-cli-and-public-entrypoint-compat/SUMMARY.md` | tracked | docs_reports_retention_sensitive_evidence | keep |
 
 ## Generated Route Registry
 
@@ -360,7 +360,6 @@
 | architecture-diagram-description-indexes | `scripts/diagrams/render/generate_description_indexes.py` | tracked_curated_generated_doc |
 | architecture-diagram-package-family-sources | `scripts/diagrams/render/generate_package_family_class_diagrams.py` | tracked_curated_generated_doc |
 | architecture-diagram-render-artifacts | `docs/02-architecture/diagrams/tooling/render.sh` | tracked_curated_generated_doc |
-| captured-test-telemetry-squash-provenance | `reviewed read-only GitHub PR capture` | tracked_quality_evidence |
 | chembl-field-matrix-generated-docs | `scripts/docs/matrix/generate_field_matrix.py` | ignored_local_output |
 | ci-quality-integral-gate-report | `scripts/engineering/ci/quality_integral_gate.py` | working_output |
 | committed-test-telemetry-baseline-summary-layer | `scripts/engineering/ci/update_test_telemetry_baseline.py` | tracked_quality_baseline |

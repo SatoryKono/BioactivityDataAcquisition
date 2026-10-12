@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING
 from bioetl.application.core.wiring.transformer import build_structural_policy
 from bioetl.composition.factories.transformer_dependencies import (
     build_transformer_dependencies,
-    publication_vocabulary_kwargs,
 )
 from bioetl.domain.behavior.identity_service import EntityIdentityGenerator
 from bioetl.infrastructure.config.contract_policy_loader import (
@@ -25,6 +24,8 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True, slots=True)
 class TransformerBuilder:
+    """Construct transformer instances with policy/config dependencies."""
+
     provider: str
     pipeline_name: str
     entity_type_extractor: Callable[[str], str | None]
@@ -79,7 +80,6 @@ class TransformerBuilder:
             silver_filters=domain_config.silver_filters,
             gold_filters=domain_config.gold_filters,
             dependencies=dependencies,
-            **publication_vocabulary_kwargs(transformer_class),
         )
 
     def _load_contract_policy(

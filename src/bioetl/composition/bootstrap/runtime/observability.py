@@ -32,7 +32,6 @@ from bioetl.composition.factories.storage.audit import (
     create_audit_port as create_audit_port_impl,
 )
 from bioetl.composition.bootstrap.runtime.observability_validate_observability_preflight import (
-    ObservabilityPreflightOptions,
     validate_observability_preflight as _validate_observability_preflight_delegated,
 )
 
@@ -57,13 +56,11 @@ def validate_observability_preflight(
         environment,
         logger,
         allow_noop_in_prod,
-        options=ObservabilityPreflightOptions(
-            audit=audit,
-            audit_required=audit_required,
-            control_plane=control_plane,
-            yaml_config=yaml_config,
-            skip_gold=skip_gold,
-        ),
+        audit=audit,
+        audit_required=audit_required,
+        control_plane=control_plane,
+        yaml_config=yaml_config,
+        skip_gold=skip_gold,
         impl=_validate_observability_preflight_impl,
     )
 

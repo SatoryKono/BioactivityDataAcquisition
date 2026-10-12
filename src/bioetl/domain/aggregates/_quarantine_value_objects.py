@@ -269,7 +269,7 @@ class QuarantineEntryTransitionsMixin:
                 current_state=self._status.value,
                 attempted_operation="add_metadata",
             )
-        self._metadata[key] = deepcopy(value)
+        self._metadata[key] = value
 
     def collect_events(self) -> list[DomainEvent]:
         events = self._events.copy()

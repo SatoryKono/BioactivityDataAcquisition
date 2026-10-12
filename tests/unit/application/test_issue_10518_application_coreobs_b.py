@@ -340,8 +340,7 @@ def test_build_dq_report_context_requires_started_at():
             source_batch_ids=[],
             last_bronze_path=None,
             records_fetched=0,
-            silver_quarantined_count=0,
-            gold_quarantined_count=0,
+            records_quarantined=0,
             build_dataframe=lambda records, stage: None,
         )
 

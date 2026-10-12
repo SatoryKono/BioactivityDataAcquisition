@@ -51,10 +51,6 @@ def test_committed_passport_completeness_is_exact() -> None:
 def test_passport_cli_is_wired_into_docs_governance() -> None:
     docs_router = (ROOT / "scripts/docs/__main__.py").read_text(encoding="utf-8")
     workflow = (ROOT / ".github/workflows/docs.yml").read_text(encoding="utf-8")
-    catalog = (ROOT / "configs/quality/github_required_checks.yaml").read_text(
-        encoding="utf-8"
-    )
-    docs_gate = catalog.rsplit("- id: docs-governance", maxsplit=1)[1]
     assert '"passports": "scripts.docs.passports.cli"' in docs_router
     assert "python -m scripts.docs passports check" in workflow
     assert "tests/architecture/test_passport_documentation_projections.py" in workflow
@@ -65,7 +61,7 @@ def test_passport_cli_is_wired_into_docs_governance() -> None:
         "configs/workflows/**",
         "configs/contracts/**",
     ):
-        assert docs_gate.count(source_path) == 1
+        assert workflow.count(source_path) == 1
 
 
 def test_passport_nightly_and_release_gates_are_blocking() -> None:

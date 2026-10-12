@@ -159,7 +159,7 @@ def normalize_protein_class_top_level(
     mapping_data: ProteinClassTargetTypeMappingData | None = None,
 ) -> NormalizedProteinClassTopLevel:
     """Normalize one raw L1 value to canonical top-level evidence."""
-    data = helpers.require_explicit_mapping(mapping_data)
+    data = mapping_data or current_protein_class_target_type_mapping()
     normalized = normalize_protein_class_label(raw_l1)
     if normalized is None:
         return helpers.missing_top_level(NormalizedProteinClassTopLevel)
@@ -257,7 +257,7 @@ def derive_protein_class_target_type(
     mapping_data: ProteinClassTargetTypeMappingData | None = None,
 ) -> ProteinClassTargetTypeResult:
     """Derive target protein-class type from relation or raw class rows."""
-    data = helpers.require_explicit_mapping(mapping_data)
+    data = mapping_data or current_protein_class_target_type_mapping()
     normalized = tuple(
         normalized_top_level_from_row(
             row,

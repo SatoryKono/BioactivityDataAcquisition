@@ -19,16 +19,8 @@ class RunReportStorePort(Protocol):
         """Atomically replace ``path`` with UTF-8 text."""
         ...
 
-    def write_synced_text(self, path: str, content: str) -> None:
-        """Atomically replace ``path`` with fsync and failed-temp cleanup."""
-        ...
-
     def read_text(self, path: str) -> str:
         """Read UTF-8 text from ``path``."""
-        ...
-
-    def read_text_prefix(self, path: str, *, limit: int) -> str:
-        """Read at most ``limit`` UTF-8 characters from ``path``."""
         ...
 
     def sha256(self, path: str) -> str:
