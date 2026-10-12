@@ -811,6 +811,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/engineering/ci/test_telemetry_provenance.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the imported squash-provenance validation library used by telemetry governance tests; it has no standalone CLI and must remain supporting code behind the owning checks.",
+      "owner": "@bioetl-quality",
+      "review_by": "2026-11-30"
+    },
     "scripts/engineering/common/cli_dispatch.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the shared CLI dispatch helper for canonical scripts.engineering and adjacent routers; promote it to active inventory once helper modules receive explicit catalog classification. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
