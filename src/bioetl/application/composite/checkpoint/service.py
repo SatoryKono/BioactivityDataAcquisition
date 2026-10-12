@@ -53,7 +53,8 @@ class CompositeCheckpointServiceContext:
         CompositeCheckpointLoadService
     )
     persistence_service_factory: Callable[
-        ..., CompositeCheckpointPersistenceService
+        [CompositeCheckpointPersistenceParams],
+        CompositeCheckpointPersistenceService,
     ] = CompositeCheckpointPersistenceService
 
 
