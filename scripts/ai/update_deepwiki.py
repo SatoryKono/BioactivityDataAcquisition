@@ -86,7 +86,7 @@ class DeepWikiUpdater:
     """Automated DeepWiki update utility."""
 
     def __init__(self, repo_path: Path):
-        """Locate the wiki sources and target modules in the repository."""
+        """Set wiki paths and module filenames for the given repository root."""
         self.repo_path = repo_path
         self.wiki_dir = repo_path / ".devin"
         self.monolith = self.wiki_dir / _WIKI
@@ -144,7 +144,7 @@ class DeepWikiUpdater:
     def _module_for(
         self, page: dict[str, Any], by_title: dict[str, dict[str, Any]]
     ) -> str:
-        """Route a page using its closest matching ancestor."""
+        """Choose the nearest subtree override, then the root section or reference."""
         chain = self._ancestors(page, by_title)
         for title in chain:  # nearest ancestor wins
             if title in SUBTREE_MODULE:
