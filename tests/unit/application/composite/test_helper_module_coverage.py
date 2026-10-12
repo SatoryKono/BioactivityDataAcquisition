@@ -65,6 +65,7 @@ from bioetl.domain.composite.aggregation import (
 from bioetl.domain.composite.config import EnricherConfig
 from bioetl.domain.composite.cross_validation import (
     ComparisonMethod,
+    CrossValidationContext,
     EnricherFieldPairing,
     FieldComparisonSpec,
 )
@@ -215,10 +216,12 @@ def test_cross_validator_helper_functions_cover_details_and_numeric_comparison()
         _count_mismatches_vectorized(
             df,
             pairing,
-            "chembl",
-            "publication",
-            "crossref",
-            "publication",
+            CrossValidationContext(
+                seed_provider="chembl",
+                seed_entity="publication",
+                enricher_provider="crossref",
+                enricher_entity="publication",
+            ),
             logger=logger,
         )
     )
