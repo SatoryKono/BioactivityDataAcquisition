@@ -1,6 +1,13 @@
 name: Memory freshness
 
 on:
+  pull_request:
+    paths:
+      - "src/memory/**"
+      - "docs/00-project/ai/memory/**"
+      - ".github/workflows/memory-freshness.yml"
+  schedule:
+    - cron: "17 5 * * 1"
   workflow_dispatch:
 
 permissions:

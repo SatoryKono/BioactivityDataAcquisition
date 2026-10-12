@@ -27,9 +27,6 @@ if TYPE_CHECKING:
         JoinKeyResolverProtocol,
     )
     from bioetl.domain.composite import DependencyConfig
-    from bioetl.domain.mapping.protein_class_target_type import (
-        ProteinClassTargetTypeMappingData,
-    )
     from bioetl.domain.ports import LoggerPort
 
 __all__ = ["DependencyJoinerService"]
@@ -59,14 +56,6 @@ class DependencyJoinerService:
         self._join_key_resolver = join_key_resolver
         self._join_executor = join_executor
         self._system_columns_to_drop = system_columns_to_drop
-        self._target_type_mapping_data: ProteinClassTargetTypeMappingData | None = None
-
-    def bind_target_type_mapping(
-        self,
-        target_type_mapping_data: ProteinClassTargetTypeMappingData | None,
-    ) -> None:
-        """Install the explicit protein-class mapping used by classification joins."""
-        self._target_type_mapping_data = target_type_mapping_data
 
     def apply_dependency_joins(
         self,
@@ -161,14 +150,7 @@ class DependencyJoinerService:
         if dep_df is None:
             return merged_df
         if dep.pipeline == TARGET_PROTEIN_CLASSIFICATION_PIPELINE:
-            if self._target_type_mapping_data is None:
-                raise RuntimeError(
-                    "target protein classification join requires an explicit mapping"
-                )
-            dep_df = summarize_target_protein_classification_dependency(
-                dep_df,
-                self._target_type_mapping_data,
-            )
+            dep_df = summarize_target_protein_classification_dependency(dep_df)
 
         return self._apply_resolved_dependency_join(
             merged_df=merged_df,

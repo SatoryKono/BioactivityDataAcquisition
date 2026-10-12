@@ -1,44 +1,14 @@
-Source-only refresh (2026-10-12, CF-061 join-key normalization): the canonical module inventory records `source_tree_sha256=0dfece1cf53b8f33e7dbdfd357cfc12d6e16f51b9e2c1fb6d5fc7a10b0426f83` and `source_module_count=2566`. This binds the current source tree; coverage measurements remain those of the last authoritative run recorded below.
+# Сводка evidence: project-package-topology
 
-Source-only refresh (2026-10-09, PR #11992 merge of origin/main): the canonical module inventory records `source_tree_sha256=eaae6dcaedff2fb4311166410adcf2d2e4455dff1f15e6f9c600450dd754a3af` and `source_module_count=2566`. This binds the merged PR tree; coverage measurements remain those of the last authoritative run recorded below.
+Source-only refresh (2026-10-07, PR #11972 filtered batch outcome): `source_tree_sha256=696182570b4993b98acd1fa0ced60a7d33520910642560737e6d6eb2346e1086` binds the classified synthetic-root exclusion and batch/streaming counters. This is not a new coverage measurement; prior measurements below remain historical.
 
-Coverage refresh (2026-10-10, PR #12164 latest-main integration): the canonical module inventory records `source_tree_sha256=633508ed5fc1a0024adf57c03d3e631af47461a53f525e03f36f145d95b8c8c7` and `source_module_count=2566`. The complete local 17-shard measurement on merge commit `c6549b1772667ecbc1e98f9b429d0d71a49df976` passed all shards and both coverage gates at 99.67% line / 94.25% branch. Remote CI acceptance for the final PR head remains separate.
+Source-only refresh (2026-10-07, PR #11972 merged with main 62c33a2f3491): the canonical source manifest binds Silver removal accounting and ChEMBL health negotiation to `source_tree_sha256=2816e16c865d5563146ca94243b1c465adf8830e53a5d7d849055955787f6f48`. This binding is not a new coverage measurement.
 
-Coverage refresh (2026-10-10, PR #12164 final review remediation): the canonical module inventory records `source_tree_sha256=633508ed5fc1a0024adf57c03d3e631af47461a53f525e03f36f145d95b8c8c7` and `source_module_count=2566`. The complete local 17-shard measurement on source commit `4e9fadfef59574ee54eadaae53ab1f55ded131bc` passed all shards and both coverage gates at 99.67% line / 94.25% branch. Remote CI acceptance for the final PR head remains separate.
+Historical PR #11972 source binding before that merge: `source_tree_sha256=49d512a9190e2e7a5f84764c42a52a54fe1feb0628ac616983211f0035749a13`. Silver removal accounting reuses the application accounting helper.
 
-Coverage refresh (2026-10-10, PR #12164 review remediation): the canonical module inventory records `source_tree_sha256=25bbb95d243a40f5a9ac2e8761a1c434a627afddb36301f132ce5179920277e1` and `source_module_count=2566`. The complete local 17-shard measurement on source commit `9d36a1c974c7bfd6e80f6ce150aa8eb19ad8a062` passed all shards and both coverage gates at 99.67% line / 94.25% branch. Remote CI acceptance for the final PR head remains separate.
+Source-only refresh (2026-10-07, ChEMBL health negotiation): current `source_tree_sha256=3d393f7423ab30ea129513e82aa2beaaa163d45c49e50d850d3450dc11d25237` is derived from the canonical source manifest. Historical measurements below remain unchanged; this binding is not a new coverage measurement.
 
-Coverage refresh (2026-10-09, PR #12164 conflict and CI remediation): the canonical module inventory records `source_tree_sha256=eeeb853b4721c2204da3905cd181caefc8437f640200e51153a50a111ac318c9` and `source_module_count=2566`. The complete local 17-shard measurement on source commit `0d9fcdb2e00725100eca9a52152c48c212c80fa6` passed all shards and both coverage gates at 99.67% line / 94.25% branch. Remote CI acceptance for the final PR head remains separate.
-
-Source-only refresh (2026-10-09, PR #11980 merge of origin/main #12153): the canonical module inventory records `source_tree_sha256=8c006b322614aa47c7727a0b2e1d47697cb28df9389c4ca9eba5d143525230e7` and `source_module_count=2566`. This binds the merged PR tree; coverage measurements remain those of the last authoritative 17-shard run recorded below.
-
-Source-only refresh (2026-10-09, PR #12153 architecture closeout): the canonical module inventory records `source_tree_sha256=605cd7a41e1111420ab749640eb09a8dff101365b4e8df8f6e1df497946bae6a` and `source_module_count=2566`. The complete local 17-shard measurement on source commit `aca391a3c262102a320e27e7e0a7a8c2fe9a2170` passed all shards and both gates at 99.67% line / 94.25% branch. This is the current source binding; the entries below are historical. Remote CI acceptance for the final PR head remains separate.
-
-Source-only refresh (2026-10-09, PR #12096 final architecture closeout): the canonical module inventory records `source_tree_sha256=6e2bf6d41d2fa7b5df095621c6727b5ef3c8be708137539b62cf7991b815f931` and `source_module_count=2566`. The complete local 17-shard measurement on source commit `912f483953c76ede75313f762e41a9848369c3bb` passed all shards and both gates at 99.67% line / 94.25% branch, including all six newly tracked modules. Remote CI acceptance remains separate.
-
-Coverage refresh (2026-10-09, PR #12096 Linux architecture closeout): the canonical module inventory records `source_tree_sha256=9fc57cb6d893268c2b5161e7a6e763a2a5d27d0171f3c948a5e417407d213fe9` and `source_module_count=2561`. The complete local 17-shard measurement on source commit `57363ebd46f4cde3340797375694cfc70f497eac` passed all 17 shards and both coverage gates at 99.67% line / 94.24% branch. This is the current source binding; the entries below are historical. Remote CI acceptance for the final PR head remains separate.
-
-Coverage refresh (2026-10-08, PR #12096 review closeout): the canonical module inventory records `source_tree_sha256=82b56b2edc0f57bbe88216b4218ec37d05e323d5b2dc7ef5c0c475afc88f1337` and `source_module_count=2561` after splitting workflow-binding and env-comment helpers to satisfy the unchanged complexity gates. The complete local 17-shard measurement on `a98125c53252afc237ee3bd409ef0cb4f867128b` passed every shard and both coverage gates at 99.67% line / 94.24% branch. This is local evidence, not CircleCI acceptance or lifecycle ADMIT for the final PR head.
-
-Coverage refresh (2026-10-08, PR #12096 architecture and workflow inventory fixes): current module inventory records `source_tree_sha256=bf341b35caff7e5959ae3b5b092c0f69437e6611ccbbaf91e2ad5f9dc08ef7aa` and `source_module_count=2561`. The complete local 17-shard measurement on source commit `93bab45bda53d25b14498cc601d366465e88eb2f` passed all shards and both gates at 99.67% line / 94.27% branch; nonregressing adoption adds absent module rows and retains accepted values where the raw measurement was lower. This is local evidence, not CircleCI acceptance or lifecycle ADMIT for the final PR head.
-
-Source-only integration (2026-10-07, PR #12096): merged main `5551e654990b43ddbc88bc10fdef8a0a2bd2771f`; current canonical source_tree_sha256 `c71e4fcf8d1650c14a65e33f85f37d971b8b92efd2b02d0638f6892af26ac7e3`, with 2558 eligible source modules and 2552 historical coverage rows. Six modules remain unmatched until complete 17-shard coverage is captured and adopted; final-SHA CI acceptance remains required.
-
-Previous source-only refresh (2026-10-07, P02 F1-F7): `source_tree_sha256=7e52b9a05c47ce9c79b095f9672fc1615fa4be68d70d36acb74c18012964d4c6`; `source_module_count=2552`. That binding is derived from the canonical module inventory and covers event/result snapshots, prepared transitions and explicit canonical byte profiles; it is not a new topology audit or a coverage measurement. The previous bindings and measurements below are historical and superseded for source freshness.
-
-Historical source-only stamps and measurements (superseded bindings):
-
-Source-only refresh (2026-10-07, architecture ownership LOC split): source_tree_sha256 `fb60ec89b76c2879ca58d49ede04cb894ae74ecd28355d27d83c1d2bccdec68a`. File-size and complexity splits stayed inside the existing domain and application limits. Publication vocabulary wiring and repository env loading sit outside the shrink-only hotspot prefixes. Publication classification view construction lives in the existing _publication_type_classification_support module so the public logic module stays under 250 lines. The module-coverage inventory still records `source_module_count=2553`. This source binding is not a new coverage measurement or a complete topology re-audit; historical evidence below is preserved.
-
-`source_tree_sha256=fb60ec89b76c2879ca58d49ede04cb894ae74ecd28355d27d83c1d2bccdec68a`
-
-`source_module_count=2553`
-
-Source-only refresh (2026-10-07, architecture ownership): source_tree_sha256 `ab36ec7abab20cb5fd4459c44d3bf42e5179adc2d0b4c41612d8249da302c9eb`. The module-coverage inventory now records `source_module_count=2553` after the repository env reader. This source binding is not a new coverage measurement or a complete topology re-audit; historical evidence below is preserved.
-
-`source_tree_sha256=ab36ec7abab20cb5fd4459c44d3bf42e5179adc2d0b4c41612d8249da302c9eb`
-
-`source_module_count=2553`
+Source-only refresh (2026-10-06, integration with main 480a54241e04): reviewed repairs and replay mapping are bound to `source_tree_sha256=63b3eb109cc22123be824a42b6b0c1fc2c9564406c5a702d914c3d74a2f10689`. Historical measurements below are unchanged; this stamp is not new coverage evidence.
 
 Coverage refresh (2026-10-05, RF-023 after main merge): complete 17-shard measurement on `54c7c9d5b5dad9077054081484275fc93a8be83e`, source `2f462961d6e80105c964f5d536a956def9a7b4c66af316bad70abfb0f6b226a1`. 32979 PASS / 187 SKIP; line 99.70%, branch 94.34%. Canonical nonregressing adoption retains 81 visible raw module regressions as historical values. Portable evidence: `reports/quality/proof-or-stop/rf023-54c7c9d5-complete-coverage`. This local measurement does not claim full-suite acceptance or CI ADMIT.
 
@@ -54,8 +24,9 @@ Source-only refresh (2026-10-05, scoped replay mapping): source_tree_sha256 `f8b
 
 Source-only refresh (2026-10-05, direct owner imports): source_tree_sha256 `0d662d51438a2eee9bad3b02099e5a4d94c2938948ff83093ca6c968d50c55f7`. The three mapping codec imports now address their module owner directly; root-facade importers remain zero. This is a source binding update, not a new coverage measurement.
 
-# Сводка evidence: project-package-topology
+Historical source-only snapshot (2026-10-06, before merging main 480a54241e04): the hash below identifies the earlier PubChem, metadata and Polars tree. It is not the current source binding; use the first entry in this document.
 
+`source_tree_sha256=6de85b6b390eb245580e3cb6a2b85955700250ff09e9623bf83f437a024b2648`
 Source-only refresh (2026-10-05, RF-023): sealed target mapping codecs now use the existing infrastructure config loader. Runtime cross-layer group edges are 330, within the unchanged 330 budget. This source binding is not a new coverage measurement or a complete topology re-audit; historical evidence below is preserved.
 
 `source_tree_sha256=d141e4aaac41d30aa6d90f53dff69fe99d2bf280335a394b41d4ec298485dd08`

@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 
 from bioetl.application.services.control_plane.ledger._input_snapshot_manifest import (
     persist_input_snapshots_on_manifest,
@@ -17,34 +18,47 @@ if TYPE_CHECKING:
     )
 
 
-def _record_published_snapshot(
-    service: RunLedgerService,
+class _SnapshotPublishKwargs(TypedDict):
+    """Publish kwargs for one validated input-snapshot payload."""
+
+    provider: str
+    entity: str
+    pipeline_name: str
+    snapshot_id: str
+    content_hash: str
+    immutable_uri: str
+    bronze_batch_ref: str
+    query_fingerprint: str | None
+    details: Mapping[str, object]
+
+
+def _published_snapshot_kwargs(
     snapshot: dict[str, object],
     *,
     details: dict[str, object],
     artifact_path: str,
     snapshot_id: str,
-) -> None:
-    """Publish one validated input-snapshot payload to the run ledger."""
-    service.record_input_snapshot_published(
-        provider=str(details.get("provider") or ""),
-        entity=str(details.get("entity") or ""),
-        pipeline_name=str(details.get("pipeline_name") or ""),
-        snapshot_id=snapshot_id,
-        content_hash=str(snapshot.get("content_hash") or ""),
-        immutable_uri=str(snapshot.get("immutable_uri")),
-        bronze_batch_ref=artifact_path,
-        query_fingerprint=(
+) -> _SnapshotPublishKwargs:
+    """Build publish kwargs for one validated snapshot payload."""
+    return {
+        "provider": str(details.get("provider") or ""),
+        "entity": str(details.get("entity") or ""),
+        "pipeline_name": str(details.get("pipeline_name") or ""),
+        "snapshot_id": snapshot_id,
+        "content_hash": str(snapshot.get("content_hash") or ""),
+        "immutable_uri": str(snapshot.get("immutable_uri")),
+        "bronze_batch_ref": artifact_path,
+        "query_fingerprint": (
             None
             if snapshot.get("query_fingerprint") is None
             else str(snapshot.get("query_fingerprint"))
         ),
-        details={
+        "details": {
             key: value
             for key, value in snapshot.items()
             if key not in {"snapshot_id", "content_hash", "immutable_uri"}
         },
-    )
+    }
 
 
 def _record_one_input_snapshot(
@@ -62,12 +76,13 @@ def _record_one_input_snapshot(
     snapshot_id = str(snapshot.get("snapshot_id") or "").strip()
     if not snapshot_id:
         raise ValueError("input snapshot is missing snapshot_id")
-    _record_published_snapshot(
-        service,
-        snapshot,
-        details=details,
-        artifact_path=artifact_path,
-        snapshot_id=snapshot_id,
+    service.record_input_snapshot_published(
+        **_published_snapshot_kwargs(
+            snapshot,
+            details=details,
+            artifact_path=artifact_path,
+            snapshot_id=snapshot_id,
+        )
     )
     return _snapshot_ref_from_payload(snapshot, snapshot_id=snapshot_id)
 

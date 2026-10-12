@@ -44,7 +44,6 @@ from tests.helpers.deterministic_ids import (
 
 import pytest
 
-from bioetl.application.core.batch_processing_contracts import LayerWriteOutcome
 from bioetl.application.core.batch_processing_service import (
     BatchProcessingComponents,
     BatchProcessingOutcome,
@@ -237,12 +236,6 @@ class TestBatchProcessingOutcome:
             gold_records=[],
             quarantined_count=0,
             filtered_out_count=0,
-            silver_write=LayerWriteOutcome(
-                layer="silver", status="skipped", candidate_count=0
-            ),
-            gold_write=LayerWriteOutcome(
-                layer="gold", status="skipped", candidate_count=0
-            ),
         )
         with pytest.raises(AttributeError):
             output.quarantined_count = 1  # type: ignore[misc]
@@ -260,18 +253,6 @@ class TestBatchProcessingOutcome:
             gold_records=[{"b": 2}],
             quarantined_count=3,
             filtered_out_count=1,
-            silver_write=LayerWriteOutcome(
-                layer="silver",
-                status="written",
-                candidate_count=1,
-                confirmed_count=1,
-            ),
-            gold_write=LayerWriteOutcome(
-                layer="gold",
-                status="written",
-                candidate_count=1,
-                confirmed_count=1,
-            ),
         )
         assert output.batch_id is batch_id
         assert output.bronze_result is bronze

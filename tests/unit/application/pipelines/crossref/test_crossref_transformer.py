@@ -49,13 +49,6 @@ from bioetl.domain.entities.crossref import CrossRefPublicationEntity
 from bioetl.domain.mapping.publication_type_classification import (
     classify_publication_type,
 )
-from tests.helpers.publication_type_classification import (
-    bind_installed_classification_data,
-)
-
-classify_publication_type = bind_installed_classification_data(
-    classify_publication_type
-)
 from bioetl.domain.normalization import extract_first_string, normalize_doi
 from bioetl.domain.types import RunType
 from tests.helpers.transformer_dependencies import instantiate_test_transformer

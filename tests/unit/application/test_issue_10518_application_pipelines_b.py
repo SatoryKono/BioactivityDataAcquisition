@@ -234,12 +234,7 @@ class TestPublicationRecords:
             "build_publication_type_classification_payload",
             lambda provider, **kwargs: {"publication_type": kwargs.get("raw_type")},
         )
-        out = classification_payload(
-            "crossref",
-            "journal-article",
-            None,
-            data=object(),
-        )
+        out = classification_payload("crossref", "journal-article", None)
         assert out == {"publication_type": "journal-article"}
 
     def test_resolve_entity_id(self) -> None:

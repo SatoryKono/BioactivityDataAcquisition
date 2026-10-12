@@ -1,7 +1,57 @@
 name: Semantic Pipeline Governance
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [main, develop]
+    paths:
+      - "configs/base/**"
+      - "configs/composites/**"
+      - "configs/entities/**"
+      - "configs/field_registry/**"
+      - "configs/quality/**"
+      - "docs/04-reference/contracts/**"
+      - "reports/semantic_pipeline_audit/**"
+      - "scripts/docs/matrix/generate_pipeline_normalization_matrix.py"
+      - "scripts/engineering/qa/check_generic_field_ownership.py"
+      - "scripts/engineering/qa/check_ontology_unit_semantics.py"
+      - "scripts/engineering/qa/check_semantic_anchor_parity.py"
+      - "scripts/engineering/qa/check_semantic_governance_policy.py"
+      - "scripts/engineering/qa/check_semantic_pair_matrix_budget.py"
+      - "scripts/engineering/qa/check_semantic_registry_drift.py"
+      - "scripts/engineering/qa/generate_semantic_pipeline_audit.py"
+      - "src/bioetl/domain/contracts/**"
+      - "src/bioetl/domain/mapping/**"
+      - "src/bioetl/domain/normalization/**"
+      - "src/bioetl/domain/registry/**"
+      - "src/bioetl/domain/schemas/**"
+      - "src/bioetl/domain/validation/**"
+      - "tests/integration/config/test_semantic_*.py"
+      - ".github/workflows/semantic-governance.yml"
+  pull_request:
+    paths:
+      - "configs/base/**"
+      - "configs/composites/**"
+      - "configs/entities/**"
+      - "configs/field_registry/**"
+      - "configs/quality/**"
+      - "docs/04-reference/contracts/**"
+      - "reports/semantic_pipeline_audit/**"
+      - "scripts/docs/matrix/generate_pipeline_normalization_matrix.py"
+      - "scripts/engineering/qa/check_generic_field_ownership.py"
+      - "scripts/engineering/qa/check_ontology_unit_semantics.py"
+      - "scripts/engineering/qa/check_semantic_anchor_parity.py"
+      - "scripts/engineering/qa/check_semantic_governance_policy.py"
+      - "scripts/engineering/qa/check_semantic_pair_matrix_budget.py"
+      - "scripts/engineering/qa/check_semantic_registry_drift.py"
+      - "scripts/engineering/qa/generate_semantic_pipeline_audit.py"
+      - "src/bioetl/domain/contracts/**"
+      - "src/bioetl/domain/mapping/**"
+      - "src/bioetl/domain/normalization/**"
+      - "src/bioetl/domain/registry/**"
+      - "src/bioetl/domain/schemas/**"
+      - "src/bioetl/domain/validation/**"
+      - "tests/integration/config/test_semantic_*.py"
+      - ".github/workflows/semantic-governance.yml"
 
 permissions:
   contents: read

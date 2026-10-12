@@ -35,12 +35,7 @@ def transformer_init_kwargs(init_locals: Mapping[str, object]) -> dict[str, obje
 
 def transformer_context_kwargs(context: object) -> dict[str, object]:
     """Extract BaseTransformer kwargs from a typed constructor context."""
-    payload = {key: getattr(context, key) for key in _BASE_TRANSFORMER_KWARGS}
-    payload["publication_vocabulary"] = getattr(context, "publication_vocabulary", None)
-    payload["publication_classification"] = getattr(
-        context, "publication_classification", None
-    )
-    return payload
+    return {key: getattr(context, key) for key in _BASE_TRANSFORMER_KWARGS}
 
 
 def initialize_base_transformer(
@@ -50,15 +45,8 @@ def initialize_base_transformer(
     kwargs: Mapping[str, object],
 ) -> None:
     """Initialize a ``BaseTransformer`` subclass through the shared contract."""
-    payload = dict(kwargs)
-    if "publication_vocabulary" in payload or "publication_classification" in payload:
-        host = as_mixin_host(transformer)
-        host._publication_vocabulary = payload.pop("publication_vocabulary", None)
-        host._publication_classification = payload.pop(
-            "publication_classification", None
-        )
     BaseTransformer.__init__(
-        transformer, provider, **cast(Any, payload)
+        transformer, provider, **cast(Any, dict(kwargs))
     )  # Any: TYPE-002 kwargs bridge
 
 
@@ -99,20 +87,13 @@ def build_runtime_transformer_init(
         identity_service: EntityIdentityGenerator | None = None,
         pii_hasher: PiiHasherPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
-        publication_vocabulary: object | None = None,
-        publication_classification: object | None = None,
     ) -> None:
         mro_owner = owner_type if owner_type is not None else type(self)
-        forwarded = transformer_init_kwargs(locals())
-        if publication_vocabulary is not None:
-            forwarded["publication_vocabulary"] = publication_vocabulary
-        if publication_classification is not None:
-            forwarded["publication_classification"] = publication_classification
         initialize_next_transformer_mro(
             self,
             mro_owner,
             provider=provider,
-            kwargs=forwarded,
+            kwargs=transformer_init_kwargs(locals()),
         )
 
     _runtime_init.__name__ = "__init__"

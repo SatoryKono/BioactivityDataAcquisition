@@ -15,7 +15,6 @@ from bioetl.application.services.run_reports.paths import (
     REPORT_ROOT_MARKER_VALUE,
     write_report_root_source_identity,
 )
-from bioetl.composition.observability_runtime import create_run_report_store
 from bioetl.interfaces.http import report_root_config as report_root_config_module
 from bioetl.interfaces.http.report_root_config import (
     ENFORCE_REPORT_ROOT_MARKER_ENV,
@@ -81,11 +80,7 @@ def test_readiness_check_with_marker(
         "load_repository_source_environment",
         lambda *_args, **_kwargs: {},
     )
-    write_report_root_source_identity(
-        report_root=root,
-        source_id="a" * 64,
-        store=create_run_report_store(),
-    )
+    write_report_root_source_identity(report_root=root, source_id="a" * 64)
     check = report_root_readiness_check()
     assert check["status"] == "healthy"
     assert check["layout_status"] == "healthy"
@@ -117,11 +112,7 @@ def test_readiness_valid_layout_foreign_source_fails_closed(
         REPORT_ROOT_MARKER_VALUE + "\n",
         encoding="utf-8",
     )
-    write_report_root_source_identity(
-        report_root=root,
-        source_id="a" * 64,
-        store=create_run_report_store(),
-    )
+    write_report_root_source_identity(report_root=root, source_id="a" * 64)
     monkeypatch.setenv(REPORT_ROOT_ENV, str(root))
     monkeypatch.setenv(ENFORCE_REPORT_ROOT_MARKER_ENV, "1")
     monkeypatch.setenv(RUNTIME_SOURCE_ID_ENV, "b" * 64)
@@ -166,11 +157,7 @@ def test_readiness_rejects_process_repository_identity_conflict(
         REPORT_ROOT_MARKER_VALUE + "\n",
         encoding="utf-8",
     )
-    write_report_root_source_identity(
-        report_root=root,
-        source_id="a" * 64,
-        store=create_run_report_store(),
-    )
+    write_report_root_source_identity(report_root=root, source_id="a" * 64)
     monkeypatch.setenv(REPORT_ROOT_ENV, str(root))
     monkeypatch.setenv(RUNTIME_SOURCE_ID_ENV, "a" * 64)
     monkeypatch.setattr(

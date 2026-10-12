@@ -143,8 +143,7 @@ def test_dq_helpers_import_none_and_started_at(monkeypatch: pytest.MonkeyPatch) 
             source_batch_ids=[],
             last_bronze_path=None,
             records_fetched=0,
-            silver_quarantined_count=0,
-            gold_quarantined_count=0,
+            records_quarantined=0,
             build_dataframe=lambda *_a: None,
         )
 

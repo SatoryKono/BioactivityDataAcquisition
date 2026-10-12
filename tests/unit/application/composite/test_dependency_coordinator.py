@@ -43,7 +43,6 @@ import pyarrow as pa
 import pytest
 
 from bioetl.application.composite.dependency_coordinator import (
-    DependencyCoordinatorCollaborators,
     DependencyCoordinatorService,
 )
 from bioetl.application.composite.dependency_key_resolvers import (
@@ -73,12 +72,10 @@ def _make_coordinator(
     """Build coordinator with explicit resolver injection for tests."""
     return DependencyCoordinatorService(
         logger=logger,
-        collaborators=DependencyCoordinatorCollaborators(
-            seed_key_resolver=create_seed_key_resolver(logger),
-            chained_key_resolver=create_chained_key_resolver(logger),
-            progress_service=DependencyProgressService(logger),
-            result_service=DependencyResultService(logger),
-        ),
+        seed_key_resolver=create_seed_key_resolver(logger),
+        chained_key_resolver=create_chained_key_resolver(logger),
+        progress_service=DependencyProgressService(logger),
+        result_service=DependencyResultService(logger),
         delta_reader=delta_reader,
         clock=FixedClock(datetime(2026, 4, 28, 12, 0, tzinfo=UTC)),
     )

@@ -831,8 +831,8 @@ def _assert_architecture_workflow_shape(content: str) -> None:
     assert "workflow_dispatch" in content, (
         "Architecture workflow must allow manual fast profile execution"
     )
-    assert "schedule:" not in content, (
-        "Heavy architecture stays manual; nightly does not call this workflow"
+    assert "schedule:" in content, (
+        "Architecture workflow must keep scheduled heavy profile execution"
     )
     assert "pull_request:" not in content and "push:" not in content, (
         "Fast architecture pytest must stay out of PR/push workflow triggers"
@@ -854,7 +854,7 @@ def _assert_makefile_architecture_target(content: str) -> None:
 
 
 def test_architecture_test_p95_duration_tracked() -> None:
-    """Architecture workflow must keep manual fast and manual heavy profiles."""
+    """Architecture workflow must keep manual fast + scheduled heavy split."""
     workflow = Path(".github/workflows/architecture.yml")
     if not workflow.exists():
         pytest.skip("Architecture workflow not found")

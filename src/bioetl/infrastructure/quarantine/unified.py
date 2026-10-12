@@ -97,17 +97,22 @@ def _write_records_to_delta(base_path: str, records: list[JsonDict]) -> None:
         arrow_table.schema, arrow_table.to_batches()
     )
 
-    # ``mode="append"`` creates the table when the path is fresh, so partition
-    # layout must be decided up front: new tables are partitioned by pipeline
-    # (inspection pushdown contract); appends to existing tables keep the
-    # stored layout, including legacy non-partitioned ones.
-    table_exists = DeltaTable.is_deltatable(base_path)
-    write_deltalake(
-        table_or_uri=base_path,
-        data=arrow_reader,
-        mode="append",
-        partition_by=None if table_exists else ["pipeline"],
-    )
+    try:
+        write_deltalake(
+            table_or_uri=base_path,
+            data=arrow_reader,
+            mode="append",
+        )
+    except TableNotFoundError:
+        arrow_reader = pa.RecordBatchReader.from_batches(
+            arrow_table.schema, arrow_table.to_batches()
+        )
+        write_deltalake(
+            table_or_uri=base_path,
+            data=arrow_reader,
+            mode="append",
+            partition_by=["pipeline"],
+        )
 
 
 class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):

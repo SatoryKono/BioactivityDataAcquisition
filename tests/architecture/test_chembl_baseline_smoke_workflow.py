@@ -31,8 +31,8 @@ def test_chembl_baseline_smoke_workflow_exists_and_supports_ci_entrypoints() -> 
     assert WORKFLOW_PATH.exists(), "ChemblBaseline smoke workflow must exist"
 
     workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
-    assert "pull_request:" not in workflow
-    assert "push:" not in workflow
+    assert "pull_request:" in workflow
+    assert "push:" in workflow
     assert "workflow_dispatch:" in workflow
 
 

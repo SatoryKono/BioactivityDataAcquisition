@@ -8,17 +8,28 @@ from datetime import datetime
 
 from bioetl.domain.control_plane import (
     RunInputSnapshotRef,
+    RunLedgerEntry,
     RunManifest,
     RunSourceRef,
 )
-from bioetl.domain.control_plane.composite_replay_evidence import (
-    attach_rich_composite_replay_support as _attach_rich_composite_replay_support,
+from bioetl.domain.control_plane.run_ledger import (
+    COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
+    COMPOSITE_ENRICHER_COMPLETED_EVENT,
+    COMPOSITE_MERGE_COMPLETED_EVENT,
 )
 
 __all__ = [
     "_attach_rich_composite_replay_support",
     "_build_effective_source_refs",
 ]
+
+_RICH_COMPOSITE_REPLAY_EVENTS = frozenset(
+    {
+        COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
+        COMPOSITE_ENRICHER_COMPLETED_EVENT,
+        COMPOSITE_MERGE_COMPLETED_EVENT,
+    }
+)
 
 
 def _build_effective_source_refs(
@@ -191,3 +202,20 @@ def _parse_optional_datetime(value: object) -> datetime | None:
 def _optional_text(value: object) -> str | None:
     """Return optional textual snapshot metadata without unsafe coercion."""
     return value if isinstance(value, str) else None
+
+
+def _attach_rich_composite_replay_support(
+    summary: dict[str, object],
+    ledger_entries: tuple[RunLedgerEntry, ...],
+) -> dict[str, object]:
+    """Mark composite rich replay support only when ledger evidence is present."""
+    observed_events = {
+        entry.event_type
+        for entry in ledger_entries
+        if entry.event_type in _RICH_COMPOSITE_REPLAY_EVENTS
+    }
+    if not _RICH_COMPOSITE_REPLAY_EVENTS.issubset(observed_events):
+        return summary
+    updated = dict(summary)
+    updated["composite_resume_rich_replay_supported"] = True
+    return updated

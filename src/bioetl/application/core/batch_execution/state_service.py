@@ -78,6 +78,4 @@ class BatchExecutionStateService:
             records_quarantined=state.records_quarantined,
             records_filtered_out=state.records_filtered_out,
             source_batch_ids=state.source_batch_ids,
-            records_quarantined_silver=state.records_quarantined_silver,
-            records_quarantined_gold=state.records_quarantined_gold,
         )

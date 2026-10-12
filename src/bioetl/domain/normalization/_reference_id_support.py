@@ -25,7 +25,6 @@ _S2_HEX_RE = re.compile(r"^[0-9a-f]{40}$", re.IGNORECASE)
 _NCBI_TAXONOMY_RE = re.compile(r"^\d{1,10}$")
 _PMCID_RE = re.compile(r"^(?:PMC)?(\d+)$", re.IGNORECASE)
 _MESH_RE = re.compile(r"^[A-Z]\d{6}$", re.IGNORECASE)
-_ROR_RE = re.compile(r"^0[a-z0-9]{6}\d{2}$", re.IGNORECASE)
 
 
 def _legacy_transport_alias(secure_prefix: str) -> str:

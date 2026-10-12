@@ -145,10 +145,6 @@ class TestChemblPublicationTermBranch:
 class TestChemblTargetProteinClassificationBranch:
     """Covers snapshot-backed target protein classification registration."""
 
-    @patch(
-        "bioetl.composition.providers.registration_bio."
-        "current_target_protein_classification_mapping"
-    )
     @patch("bioetl.composition.providers.registration_bio._wrap_with_filter")
     @patch(
         "bioetl.composition.providers.registration_bio."
@@ -160,7 +156,6 @@ class TestChemblTargetProteinClassificationBranch:
         mock_delta_reader_cls: MagicMock,
         mock_snapshot_source_cls: MagicMock,
         mock_wrap_with_filter: MagicMock,
-        mock_mapping: MagicMock,
     ) -> None:
         support = MagicMock()
         logger = MagicMock()
@@ -176,8 +171,6 @@ class TestChemblTargetProteinClassificationBranch:
         delta_reader = MagicMock(name="delta_reader")
         snapshot_source = MagicMock(name="snapshot_source")
         filtered_source = MagicMock(name="filtered_source")
-        mapping = object()
-        mock_mapping.return_value = mapping
         mock_delta_reader_cls.return_value = delta_reader
         mock_snapshot_source_cls.return_value = snapshot_source
         mock_wrap_with_filter.return_value = filtered_source
@@ -197,7 +190,6 @@ class TestChemblTargetProteinClassificationBranch:
         mock_snapshot_source_cls.assert_called_once_with(
             delta_reader=delta_reader,
             logger=logger,
-            target_type_mapping_data=mapping,
         )
         support.create_http_client.assert_not_called()
         support.create_adapter.assert_not_called()

@@ -211,12 +211,3 @@ def first_present_value(
         if value is not None:
             return value
     return None
-
-
-def require_explicit_mapping[MappingT](mapping_data: MappingT | None) -> MappingT:
-    """Reject an omitted mapping instead of reading process state."""
-    if mapping_data is None:
-        raise RuntimeError(
-            "Protein class target type mapping must be passed explicitly."
-        )
-    return mapping_data

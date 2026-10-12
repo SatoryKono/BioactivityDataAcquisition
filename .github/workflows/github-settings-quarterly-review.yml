@@ -1,8 +1,9 @@
 name: Quarterly GitHub Settings Review
 
 on:
+  schedule:
+    - cron: "23 6 1 1,4,7,10 *"
   workflow_dispatch:
-  workflow_call:
 
 permissions:
   actions: read

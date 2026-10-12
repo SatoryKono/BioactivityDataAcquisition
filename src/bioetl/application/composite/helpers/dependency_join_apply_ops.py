@@ -34,9 +34,6 @@ if TYPE_CHECKING:
     from bioetl.application.composite.conflict_resolver import ConflictResolverService
     from bioetl.application.composite.deduplication import EnricherDeduplicatorService
     from bioetl.domain.composite import DependencyConfig
-    from bioetl.domain.mapping.protein_class_target_type import (
-        ProteinClassTargetTypeMappingData,
-    )
     from bioetl.domain.ports import LoggerPort
 
 __all__ = [
@@ -210,21 +207,13 @@ def apply_loaded_dependency_join(
     dependency_dfs: dict[str, pl.DataFrame],
     dep: DependencyConfig,
     seed_pipeline: str | None,
-    target_type_mapping_data: ProteinClassTargetTypeMappingData | None = None,
 ) -> pl.DataFrame:
     """Join a dependency frame when it is present in the loaded frame map."""
     dep_df = dependency_dfs.get(dep.pipeline)
     if dep_df is None:
         return merged_df
     if dep.pipeline == TARGET_PROTEIN_CLASSIFICATION_PIPELINE:
-        if target_type_mapping_data is None:
-            raise RuntimeError(
-                "target protein classification join requires an explicit mapping"
-            )
-        dep_df = summarize_target_protein_classification_dependency(
-            dep_df,
-            target_type_mapping_data,
-        )
+        dep_df = summarize_target_protein_classification_dependency(dep_df)
 
     return apply_resolved_dependency_join(
         deduplicator=deduplicator,

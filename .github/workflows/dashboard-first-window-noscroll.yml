@@ -3,7 +3,10 @@
 name: Dashboard first-window no-scroll
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
 
 permissions:
   contents: read

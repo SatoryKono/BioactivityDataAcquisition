@@ -15,12 +15,7 @@ Unified Observability Pattern:
 
 from __future__ import annotations
 
-__all__ = [
-    "LifecyclePhase",
-    "PipelineEvent",
-    "PipelineObserver",
-    "PipelineObserverParams",
-]
+__all__ = ["LifecyclePhase", "PipelineObserver", "PipelineObserverParams"]
 
 import time
 from contextlib import AbstractContextManager

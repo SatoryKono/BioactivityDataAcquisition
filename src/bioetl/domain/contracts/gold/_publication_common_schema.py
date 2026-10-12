@@ -13,7 +13,6 @@ from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
     StrictGoldContractSchema,
 )
 from bioetl.domain.mapping.publication_type_classification import (
-    classification_install,
     publication_classification_values,
 )
 from bioetl.domain.schemas.common.publication_base import LOOKUP_METHODS
@@ -25,10 +24,7 @@ def _check_classification_values(
     *,
     field_name: str,
 ) -> Series[bool]:
-    data = classification_install.data
-    if data is None:
-        return cast(Series[bool], series.isna())
-    allowed = publication_classification_values(field_name, data)
+    allowed = publication_classification_values(field_name)
     if not allowed:
         # Fail closed: empty taxonomy must not accept non-null values.
         return cast(Series[bool], series.isna())

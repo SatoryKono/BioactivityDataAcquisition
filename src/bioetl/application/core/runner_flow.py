@@ -16,8 +16,8 @@ from bioetl.application.core.runner_flow_metrics import (
 from bioetl.application.core.runner_flow_metrics import (
     record_output_ready as _record_output_ready_impl,
 )
-from bioetl.application.observability.observer import PipelineEvent
 from bioetl.application.runtime_clock import current_utc_time
+from bioetl.domain.events import PipelineEvent
 from bioetl.domain.types import JsonDict
 
 _FLOW_ERRORS = cast("OperationErrorTypes", (*OPERATION_ERRORS, ArithmeticError))

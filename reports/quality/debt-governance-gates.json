@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "0dfece1cf53b8f33e7dbdfd357cfc12d6e16f51b9e2c1fb6d5fc7a10b0426f83",
-      "limit": "0dfece1cf53b8f33e7dbdfd357cfc12d6e16f51b9e2c1fb6d5fc7a10b0426f83",
+      "current": "030ac42438fbe787dd0a2b0ff30d12a4ef11f476f7cacfcdacb4095afafdd6a0",
+      "limit": "030ac42438fbe787dd0a2b0ff30d12a4ef11f476f7cacfcdacb4095afafdd6a0",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -56,14 +56,14 @@
     },
     {
       "current": {
-        "source_module_count": 2566,
-        "source_tree_sha256": "0dfece1cf53b8f33e7dbdfd357cfc12d6e16f51b9e2c1fb6d5fc7a10b0426f83",
+        "source_module_count": 2552,
+        "source_tree_sha256": "030ac42438fbe787dd0a2b0ff30d12a4ef11f476f7cacfcdacb4095afafdd6a0",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
-        "source_module_count": 2566,
-        "source_tree_sha256": "0dfece1cf53b8f33e7dbdfd357cfc12d6e16f51b9e2c1fb6d5fc7a10b0426f83",
+        "source_module_count": 2552,
+        "source_tree_sha256": "030ac42438fbe787dd0a2b0ff30d12a4ef11f476f7cacfcdacb4095afafdd6a0",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -379,13 +379,13 @@
       "status": "pass"
     },
     {
-      "current": 3,
+      "current": 25,
       "limit": 21,
       "metric": "generated_at_age_days",
       "name": "observability_release_review_freshness",
       "remediation": "Regenerate live runtime cardinality review evidence.",
       "source_artifact": "reports/observability/runtime_cardinality_review.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": 0,
@@ -415,7 +415,7 @@
       "status": "pass"
     },
     {
-      "current": "2e9bad747703d7fa32dd16c462506fa87adab5221e23e7a28e7dd125ddd16b87",
+      "current": "5d3f8a156db8ed72af1a20a9d4afc98714d57671b3b43dd0e298f8ef22b1742e",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -467,18 +467,20 @@
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 0,
-    "pass": 46,
+    "fail": 1,
+    "pass": 45,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 10.0,
     "architecture_quality_scorecard_interpretation": "excellent",
-    "fail_count": 0,
-    "failing_gates": [],
+    "fail_count": 1,
+    "failing_gates": [
+      "observability_release_review_freshness"
+    ],
     "gate_count": 46,
-    "pass_count": 46,
-    "release_gate_status": "passing",
+    "pass_count": 45,
+    "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
   }

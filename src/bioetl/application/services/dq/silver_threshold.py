@@ -28,9 +28,11 @@ def _key_null_counts(df: pl.DataFrame, rules: list[JsonDict]) -> dict[str, int]:
             if not rule.get("nullable", False) and str(rule.get("field", "")) in columns
         )
     )
-    # Bolt: Replaced python list comprehension of expressions with native select
-    # to avoid FFI overhead. This natively shifts operation to Rust.
-    return df.select(fields).null_count().row(0, named=True) if fields else {}
+    return (
+        df.select(pl.col(field).null_count() for field in fields).row(0, named=True)
+        if fields
+        else {}
+    )
 
 
 class SilverThresholdChecker:

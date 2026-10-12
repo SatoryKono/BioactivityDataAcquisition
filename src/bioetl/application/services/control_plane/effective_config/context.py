@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import copy
 from dataclasses import dataclass
-from operator import attrgetter
 
 from bioetl.application.services.control_plane.effective_config.provenance_support import (
     build_source_class_provenance,
@@ -98,13 +97,14 @@ def resolve_resolution_policy(
 def compute_source_fingerprint(source_refs: list[ConfigSourceRef]) -> str:
     if not source_refs:
         return "no_sources"
-    common_sort_fields = attrgetter("priority", "source_type", "source_path")
     ordered = sorted(
         source_refs,
-        key=lambda source_ref: (
-            *common_sort_fields(source_ref),
-            source_ref.source_hash or "",
-            source_ref.raw_source_hash or "",
+        key=lambda src: (
+            src.priority,
+            src.source_type,
+            src.source_path,
+            src.source_hash or "",
+            src.raw_source_hash or "",
         ),
     )
     return stable_json_hash(
