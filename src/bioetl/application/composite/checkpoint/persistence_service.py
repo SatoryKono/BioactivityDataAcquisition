@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
 from hashlib import sha256
 from typing import TYPE_CHECKING
 
@@ -17,28 +16,25 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort, MetricsPort
 
 
-@dataclass(frozen=True, slots=True)
-class CompositeCheckpointPersistenceParams:
-    """Collaborator bag for :class:`CompositeCheckpointPersistenceService`."""
-
-    composite_name: str
-    checkpoint_filename: str
-    glob_pattern: str
-    storage: CompositeCheckpointPort
-    logger: LoggerPort
-    metrics: MetricsPort | None = None
-
-
 class CompositeCheckpointPersistenceService:
     """Persist and clean up composite checkpoint files."""
 
-    def __init__(self, params: CompositeCheckpointPersistenceParams) -> None:
-        self._composite_name = params.composite_name
-        self._checkpoint_filename = params.checkpoint_filename
-        self._glob_pattern = params.glob_pattern
-        self._storage = params.storage
-        self._logger = params.logger
-        self._metrics = params.metrics
+    def __init__(
+        self,
+        *,
+        composite_name: str,
+        checkpoint_filename: str,
+        glob_pattern: str,
+        storage: CompositeCheckpointPort,
+        logger: LoggerPort,
+        metrics: MetricsPort | None = None,
+    ) -> None:
+        self._composite_name = composite_name
+        self._checkpoint_filename = checkpoint_filename
+        self._glob_pattern = glob_pattern
+        self._storage = storage
+        self._logger = logger
+        self._metrics = metrics
 
     def _emit_checkpoint_saved_at_from_state(
         self,

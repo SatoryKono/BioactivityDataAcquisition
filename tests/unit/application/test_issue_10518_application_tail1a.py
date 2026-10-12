@@ -189,21 +189,16 @@ def test_emit_batch_failed_without_run_id_is_noop() -> None:
 async def test_safe_write_layer_rejects_unknown_layer() -> None:
     from datetime import UTC, datetime
 
-    from bioetl.application.core._batch_write_support import (
-        LayerWriteContext,
-        safe_write_layer,
-    )
+    from bioetl.application.core._batch_write_support import safe_write_layer
 
     with pytest.raises(ValueError, match="supports only 'silver' or 'gold'"):
         await safe_write_layer(
-            context=LayerWriteContext(
-                execute_with_span=MagicMock(),
-                writer=MagicMock(),
-                quarantine_manager=MagicMock(),
-                logger=MagicMock(),
-                run_id=None,
-                domain_event_emitter=None,
-            ),
+            execute_with_span=MagicMock(),
+            writer=MagicMock(),
+            quarantine_manager=MagicMock(),
+            logger=MagicMock(),
+            run_id=None,
+            domain_event_emitter=None,
             layer="bronze",
             records=[],
             batch_id="b1",  # type: ignore[arg-type]
@@ -1188,7 +1183,6 @@ def test_build_aggregation_expr_unknown_function_passthrough() -> None:
 
 def test_emit_saved_at_without_timestamps_is_noop() -> None:
     from bioetl.application.composite.checkpoint.persistence_service import (
-        CompositeCheckpointPersistenceParams,
         CompositeCheckpointPersistenceService,
     )
     from bioetl.application.composite.checkpoint.state import (
@@ -1196,14 +1190,12 @@ def test_emit_saved_at_without_timestamps_is_noop() -> None:
     )
 
     service = CompositeCheckpointPersistenceService(
-        CompositeCheckpointPersistenceParams(
-            composite_name="c",
-            checkpoint_filename="ckpt.json",
-            glob_pattern="ckpt*",
-            storage=MagicMock(),
-            logger=MagicMock(),
-            metrics=MagicMock(),
-        )
+        composite_name="c",
+        checkpoint_filename="ckpt.json",
+        glob_pattern="ckpt*",
+        storage=MagicMock(),
+        logger=MagicMock(),
+        metrics=MagicMock(),
     )
     state = CompositeCheckpointState(
         composite_name="c", run_id="r", created_at=None, updated_at=None
@@ -1214,7 +1206,6 @@ def test_emit_saved_at_without_timestamps_is_noop() -> None:
 
 def test_save_unexpected_domain_error_reraises() -> None:
     from bioetl.application.composite.checkpoint.persistence_service import (
-        CompositeCheckpointPersistenceParams,
         CompositeCheckpointPersistenceService,
     )
     from bioetl.application.composite.checkpoint.state import (
@@ -1223,13 +1214,11 @@ def test_save_unexpected_domain_error_reraises() -> None:
     from bioetl.domain.exceptions import BioETLError
 
     service = CompositeCheckpointPersistenceService(
-        CompositeCheckpointPersistenceParams(
-            composite_name="c",
-            checkpoint_filename="ckpt.json",
-            glob_pattern="ckpt*",
-            storage=MagicMock(),
-            logger=MagicMock(),
-        )
+        composite_name="c",
+        checkpoint_filename="ckpt.json",
+        glob_pattern="ckpt*",
+        storage=MagicMock(),
+        logger=MagicMock(),
     )
     service._storage.write_atomic.side_effect = BioETLError("boom")
     state = CompositeCheckpointState(composite_name="c", run_id="r")

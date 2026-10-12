@@ -5,6 +5,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.application.core.batch_shared_operation_errors import (
+    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
+)
 from bioetl.application.core.lifecycle._checkpoint_types import (
     CheckpointCompatibilityService,
 )
@@ -20,9 +23,6 @@ from bioetl.application.core.lifecycle.checkpoint_runtime import (
 from bioetl.application.core.lifecycle.checkpoint_saved_at import (
     metadata_with_checkpoint_saved_at,
     set_checkpoint_saved_at,
-)
-from bioetl.application.services.batch_processing.operation_errors import (
-    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
 from bioetl.domain.medallion import LoadingStrategy
 from bioetl.domain.ports import CheckpointPort, ClockPort, LoggerPort, MetricsPort

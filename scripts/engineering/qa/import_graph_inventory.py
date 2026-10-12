@@ -1586,7 +1586,7 @@ def _rotate_cycle(path: tuple[str, ...]) -> tuple[str, ...]:
 
 
 class _Tarjan:
-    """Iterative Tarjan SCC finder safe for deep import graphs."""
+    """Iterative-free Tarjan SCC. Methods stay under the cognitive-complexity cap."""
 
     def __init__(self, outgoing: dict[str, set[str]]) -> None:
         self.outgoing = outgoing
@@ -1603,35 +1603,24 @@ class _Tarjan:
                 self._connect(node)
         return self.components
 
-    def _enter(self, node: str) -> None:
+    def _connect(self, node: str) -> None:
         self.indices[node] = self.index
         self.low_links[node] = self.index
         self.index += 1
         self.stack.append(node)
         self.on_stack.add(node)
+        self._visit_targets(node)
+        if self.low_links[node] != self.indices[node]:
+            return
+        self.components.append(frozenset(self._pop_component(node)))
 
-    def _connect(self, root: str) -> None:
-        self._enter(root)
-        frames = [(root, tuple(sorted(self.outgoing.get(root, ()))), 0)]
-        while frames:
-            node, targets, target_index = frames[-1]
-            if target_index >= len(targets):
-                frames.pop()
-                self._finish_node(node, frames[-1][0] if frames else None)
-                continue
-            target = targets[target_index]
-            frames[-1] = (node, targets, target_index + 1)
+    def _visit_targets(self, node: str) -> None:
+        for target in sorted(self.outgoing.get(node, ())):
             if target not in self.indices:
-                self._enter(target)
-                frames.append((target, tuple(sorted(self.outgoing.get(target, ()))), 0))
+                self._connect(target)
+                self.low_links[node] = min(self.low_links[node], self.low_links[target])
             elif target in self.on_stack:
                 self.low_links[node] = min(self.low_links[node], self.indices[target])
-
-    def _finish_node(self, node: str, parent: str | None) -> None:
-        if parent is not None:
-            self.low_links[parent] = min(self.low_links[parent], self.low_links[node])
-        if self.low_links[node] == self.indices[node]:
-            self.components.append(frozenset(self._pop_component(node)))
 
     def _pop_component(self, node: str) -> list[str]:
         component: list[str] = []
@@ -1659,24 +1648,16 @@ def _walk_cycle(
     visited.add(node)
     path.append(node)
     seen.add(node)
-    frames = [(node, neighbors.get(node, ()), 0)]
-    while frames:
-        current, targets, target_index = frames[-1]
-        if target_index >= len(targets):
-            frames.pop()
-            path.pop()
-            seen.remove(current)
-            continue
-        nxt = targets[target_index]
-        frames[-1] = (current, targets, target_index + 1)
+    for nxt in neighbors.get(node, ()):
         if nxt in seen:
             start = path.index(nxt)
             return tuple(path[start:])
         if nxt not in visited:
-            visited.add(nxt)
-            path.append(nxt)
-            seen.add(nxt)
-            frames.append((nxt, neighbors.get(nxt, ()), 0))
+            found = _walk_cycle(nxt, path, seen, neighbors=neighbors, visited=visited)
+            if found is not None:
+                return found
+    path.pop()
+    seen.remove(node)
     return None
 
 
@@ -1720,17 +1701,6 @@ def _trivial_component(
         return False
     node = next(iter(component))
     return node not in outgoing.get(node, ())
-
-
-def find_import_sccs(edges: Iterable[ImportEdge]) -> tuple[frozenset[str], ...]:
-    """Return deterministic non-trivial SCCs for resolved import edges."""
-    _, outgoing = _resolved_graph(edges)
-    components = (
-        component
-        for component in _strongly_connected(outgoing)
-        if not _trivial_component(component, outgoing)
-    )
-    return tuple(sorted(components, key=lambda component: tuple(sorted(component))))
 
 
 def _edges_along_path(

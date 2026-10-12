@@ -23,6 +23,7 @@ Rate Limits:
 from __future__ import annotations
 
 import asyncio
+import os
 from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import Any
@@ -44,7 +45,7 @@ from tests.integration.adapters.http_integration_support import (
     reset_http_client_state,
 )
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
-from tests.helpers.vcr_config import build_base_vcr_config, resolve_cassette_name
+from tests.helpers.vcr_config import resolve_cassette_name
 
 # VCR cassette directory
 CASSETTE_DIR = (
@@ -79,10 +80,12 @@ def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
 @pytest.fixture(scope="module")
 def vcr_config() -> dict[str, Any]:
     """Configure VCR for Semantic Scholar tests."""
-    return build_base_vcr_config(
-        cassette_library_dir=CASSETTE_DIR,
-        decode_compressed_response=True,
-    )
+    return {
+        "cassette_library_dir": str(CASSETTE_DIR),
+        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
+        "match_on": ["method", "scheme", "host", "port", "path", "query"],
+        "decode_compressed_response": True,
+    }
 
 
 @pytest.fixture

@@ -13,10 +13,6 @@ from bioetl.infrastructure.adapters.crossref._batch_support import (
     perform_timed_crossref_get,
 )
 from bioetl.infrastructure.adapters.crossref.exceptions import CrossRefApiError
-from bioetl.infrastructure.adapters.http.pagination import (
-    PaginationTruncatedError,
-    raise_pagination_truncated,
-)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -25,10 +21,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
-
-
-# Hard ceiling against runaway cursor loops from misbehaving providers (CF-034).
-_DEFAULT_MAX_PAGES: int = 10_000
 
 
 class SearchPaginator:
@@ -116,23 +108,9 @@ class SearchPaginator:
         """Search for publications using cursor-based pagination."""
         rows = min(limit, 100) if limit else 100
         fetched = 0
-        page_count = 0
-        seen_cursors: set[str] = {cursor}
 
         try:
             while True:
-                if page_count >= _DEFAULT_MAX_PAGES:
-                    raise_pagination_truncated(
-                        self._logger,
-                        event="crossref_search_truncated",
-                        reason="max_pages",
-                        page_count=page_count,
-                        page_limit=_DEFAULT_MAX_PAGES,
-                        cursor_field="next_cursor",
-                        cursor_value=cursor[:100],
-                        log_context={"query": query[:100]},
-                    )
-                page_count += 1
                 items, next_cursor = await self._fetch_page(query, rows, cursor)
 
                 for item in items:
@@ -141,47 +119,13 @@ class SearchPaginator:
                     if limit and fetched >= limit:
                         return
 
-                advanced = self._advance_search_cursor(
-                    items=items,
-                    next_cursor=next_cursor,
-                    current_cursor=cursor,
-                    seen_cursors=seen_cursors,
-                    query=query,
-                    page_count=page_count,
-                )
-                if advanced is None:
+                if not self._should_continue_pagination(items, next_cursor, cursor):
                     break
-                cursor = advanced
+                assert next_cursor is not None
+                cursor = next_cursor
 
-        except (CrossRefApiError, PaginationTruncatedError):
+        except CrossRefApiError:
             raise
         except CROSSREF_RUNTIME_ERRORS as error:
             self._logger.error("crossref_search_failed", query=query, error=str(error))
             raise CrossRefApiError(f"CrossRef search failed: {error}") from error
-
-    def _advance_search_cursor(
-        self,
-        *,
-        items: list[BronzeRecord],
-        next_cursor: str | None,
-        current_cursor: str,
-        seen_cursors: set[str],
-        query: str,
-        page_count: int,
-    ) -> str | None:
-        """Stop on exhaustion or a cursor cycle before refetching a page."""
-        if not items or not next_cursor:
-            return None
-        if next_cursor == current_cursor or next_cursor in seen_cursors:
-            raise_pagination_truncated(
-                self._logger,
-                event="crossref_search_truncated",
-                reason="repeated_cursor",
-                page_count=page_count,
-                page_limit=_DEFAULT_MAX_PAGES,
-                cursor_field="next_cursor",
-                cursor_value=next_cursor[:100],
-                log_context={"query": query[:100]},
-            )
-        seen_cursors.add(next_cursor)
-        return next_cursor
