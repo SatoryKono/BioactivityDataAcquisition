@@ -1,25 +1,13 @@
 {
-  "source_commit": "c6549b1772667ecbc1e98f9b429d0d71a49df976",
-  "source_run_id": "local-pr12164-main-sync-c6549b1-w2",
-  "source_tree_sha256": "39198b2ae91d02ae8c3a5ed8e7c8819a97fe7438832fa1628fabdec7ba77f311",
+  "source_commit": "c52c681ed5586950f1d054585455690100d9875a",
+  "source_run_id": "local-pr12187-main-d124-20261012",
+  "source_tree_sha256": "c9788013b782aeb6b41ebf9e2e65445788ed6611efbf29df6b8b3deaab1c3f26",
   "schema_version": 1,
   "trust_tier": "local_single_host",
-  "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/12164",
-  "retrieved_at_utc": "2026-10-10T10:00:59.708817+00:00",
+  "verification_mode": "live_github",
+  "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/12187",
+  "retrieved_at_utc": "2026-10-12T11:48:56+00:00",
   "github_pull_request": {
-    "base": {
-      "repo": {
-        "full_name": "SatoryKono/BioactivityDataAcquisition"
-      }
-    },
-    "head": {
-      "ref": "codex/integrate-telemetry-cancellation-20261009",
-      "sha": "636594f59c65837cfce0bd5b0c51d3b032e9c3ab"
-    },
-    "html_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/pull/12164",
-    "merge_commit_sha": "d28436d5f78c911d68f6fbbf91314578bdcb897c",
-    "merged": true,
-    "number": 12164
-  },
-  "merged_tree": "ff4830f0e82cbf70ae3014b26bab6a0f38d95455"
+    "number": 12187
+  }
 }
