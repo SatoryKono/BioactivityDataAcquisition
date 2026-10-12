@@ -120,7 +120,10 @@ class TestBronzeMixins:
             provider="chembl",
             entity="activity",
         )
-        assert cleaned["files_removed"] == 1
+        assert cleaned["files_removed"] == 0
+        assert cleaned["files_planned"] == 0
+        assert cleaned["files_skipped"] == 1
+        assert stale.read_bytes() == b"x"
 
     def test_metadata_mixin_coordinator_and_legacy(self) -> None:
         mixin = BronzeWriterMetadataMixin()
