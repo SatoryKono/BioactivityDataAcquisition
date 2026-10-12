@@ -22,7 +22,7 @@ from bioetl.domain.run_reports.reason_catalog_data import (
     default_reason_catalog as default_reason_catalog,
 )
 
-_FIELD_REASON_TOKEN = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
+_FIELD_REASON_TOKEN = re.compile(r"[A-Za-z_]\w*", re.ASCII)
 
 
 def _valid_field_suffix(field: str | None, stripped_base: str) -> str:
