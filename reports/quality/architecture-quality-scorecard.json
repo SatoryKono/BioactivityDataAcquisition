@@ -232,7 +232,7 @@
     },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
-      "snapshot_date": "2026-10-08"
+      "snapshot_date": "2026-10-04"
     },
     "contract_registry_diagnostics": {
       "path": "reports/quality/contract-registry-diagnostics.json",
@@ -250,7 +250,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "18cee21da889cbc24cee4223e007c02d85d24f1d11afc333cb3018962296ee1a"
+      "source_fingerprint": "767ff5fe23bfc8c60e74b97ae44190e28b92adb7478adac94c80f541577ecd61"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -269,7 +269,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "fe63b59925906b554d9587f99ea5862f42731c1c9be278ab600351e702de3a5a"
+      "source_tree_sha256": "f20a307e42ab4df9ccd59844dcee980aeda57412f34dec3f537b2841b615d4a8"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
