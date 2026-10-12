@@ -9,7 +9,9 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
+from memory.rag import chunking as rag_chunking
 from memory.rag.chunking import (
+    build_chunk_id,
     infer_domain,
     infer_source_type,
     split_config_sections,
@@ -22,6 +24,46 @@ from memory.rag.retrieval import filter_chunks, load_chunk_manifest
 
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize(
+    ("source_path", "title", "index", "expected"),
+    [
+        ("docs/example.md", "Overview", 0, "docs/example.md#overview-c06cadceef99"),
+        (
+            "docs/ümlaut.md",
+            "Crème brûlée",
+            2,
+            "docs/ümlaut.md#cr-me-br-l-e-411b77c83190",
+        ),
+        ("docs/empty.md", "", 1, "docs/empty.md#section-1a1bcbc4fe02"),
+    ],
+)
+def test_build_chunk_id_preserves_existing_values(
+    source_path: str, title: str, index: int, expected: str
+) -> None:
+    """Keep persisted IDs stable for ordinary, Unicode, and empty titles."""
+    assert build_chunk_id(source_path, title, index) == expected
+    assert build_chunk_id(source_path, title, index) == expected
+
+
+def test_build_chunk_id_marks_sha1_as_non_security(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Pass the flag explicitly without changing the digest input."""
+    original_sha1 = rag_chunking.hashlib.sha1
+    calls: list[tuple[bytes, bool]] = []
+
+    def spy_sha1(data: bytes, *, usedforsecurity: bool = True) -> Any:
+        calls.append((data, usedforsecurity))
+        return original_sha1(data, usedforsecurity=usedforsecurity)
+
+    monkeypatch.setattr(rag_chunking.hashlib, "sha1", spy_sha1)
+
+    assert build_chunk_id("docs/example.md", "Overview", 0) == (
+        "docs/example.md#overview-c06cadceef99"
+    )
+    assert calls == [(b"docs/example.md:0:Overview", False)]
 
 
 def test_split_markdown_sections_respects_headings() -> None:
