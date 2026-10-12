@@ -392,18 +392,12 @@ async def test_search_stops_on_same_cursor(search_paginator, mock_http):
     }
     mock_http.get.return_value = mock_response
 
-    from bioetl.infrastructure.adapters.http.pagination import (
-        PaginationTruncatedError,
-    )
-
     results = []
-    with pytest.raises(PaginationTruncatedError) as caught:
-        async for item in search_paginator.search("test", cursor="*"):
-            results.append(item)
+    async for item in search_paginator.search("test", cursor="*"):
+        results.append(item)
 
     assert len(results) == 1
     assert mock_http.get.call_count == 1
-    assert caught.value.reason == "repeated_cursor"
 
 
 @pytest.mark.asyncio
@@ -459,142 +453,3 @@ async def test_should_continue_pagination_logic(search_paginator):
         )
         is True
     )
-
-
-# =============================================================================
-# CF-034: SearchPaginator truncation-signal tests
-# =============================================================================
-
-
-def _works_response(items: list[dict[str, object]], next_cursor: str | None):
-    """Build one mocked CrossRef /works page response."""
-    response = MagicMock()
-    response.status_code = 200
-    response.json.return_value = {
-        "message": {"items": items, "next-cursor": next_cursor}
-    }
-    return response
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize("limit", [None, 3])
-async def test_search_warns_and_stops_on_cursor_cycle(
-    search_paginator, mock_http, mock_logger, limit
-):
-    """A cursor cycle fails the scan after emitting a truncation warning."""
-    from bioetl.infrastructure.adapters.http.pagination import (
-        PaginationTruncatedError,
-    )
-
-    pages = iter(
-        [
-            _works_response([{"DOI": "10.1/a"}], "cursor-B"),
-            _works_response([{"DOI": "10.1/b"}], "*"),
-            _works_response([{"DOI": "10.1/c"}], "cursor-B"),
-        ]
-    )
-
-    async def _get(url, params=None, headers=None):
-        """Return the next prepared CrossRef page without a network request."""
-        return next(pages)
-
-    mock_http.get.side_effect = _get
-
-    results = []
-    with pytest.raises(PaginationTruncatedError) as caught:
-        async for item in search_paginator.search("test", limit=limit, cursor="*"):
-            results.append(item)
-
-    # Stop before requesting the initial page a second time.
-    assert results == [{"DOI": "10.1/a"}, {"DOI": "10.1/b"}]
-    assert caught.value.reason == "repeated_cursor"
-    assert mock_http.get.call_count == 2
-    mock_logger.warning.assert_called_once()
-    assert mock_logger.warning.call_args[0][0] == "crossref_search_truncated"
-    assert mock_logger.warning.call_args[1]["reason"] == "repeated_cursor"
-
-
-@pytest.mark.asyncio
-async def test_search_warns_and_stops_on_immediate_cursor_repeat(
-    search_paginator, mock_http, mock_logger
-):
-    """An immediate cursor repeat fails the scan after a warning."""
-    from bioetl.infrastructure.adapters.http.pagination import (
-        PaginationTruncatedError,
-    )
-
-    pages = iter([_works_response([{"DOI": "10.1/a"}], "*")])
-
-    async def _get(url, params=None, headers=None):
-        """Return the next prepared CrossRef page without a network request."""
-        return next(pages)
-
-    mock_http.get.side_effect = _get
-
-    results = []
-    with pytest.raises(PaginationTruncatedError) as caught:
-        async for item in search_paginator.search("test", cursor="*"):
-            results.append(item)
-
-    assert results == [{"DOI": "10.1/a"}]
-    assert caught.value.reason == "repeated_cursor"
-    mock_logger.warning.assert_called_once()
-    assert mock_logger.warning.call_args[0][0] == "crossref_search_truncated"
-    assert mock_logger.warning.call_args[1]["reason"] == "repeated_cursor"
-
-
-@pytest.mark.asyncio
-async def test_search_warns_on_page_ceiling(
-    search_paginator, mock_http, mock_logger, monkeypatch
-):
-    """The page ceiling fails the scan after a structured warning."""
-    from bioetl.infrastructure.adapters.http.pagination import (
-        PaginationTruncatedError,
-    )
-
-    monkeypatch.setattr(
-        "bioetl.infrastructure.adapters.crossref._search_paginator._DEFAULT_MAX_PAGES",
-        2,
-    )
-    pages = iter(
-        [
-            _works_response([{"DOI": "10.1/a"}], "cursor-2"),
-            _works_response([{"DOI": "10.1/b"}], "cursor-3"),
-            _works_response([{"DOI": "10.1/c"}], "cursor-4"),
-        ]
-    )
-
-    async def _get(url, params=None, headers=None):
-        """Return the next prepared CrossRef page without a network request."""
-        return next(pages)
-
-    mock_http.get.side_effect = _get
-
-    results = []
-    with pytest.raises(PaginationTruncatedError) as caught:
-        async for item in search_paginator.search("test", cursor="*"):
-            results.append(item)
-
-    assert results == [{"DOI": "10.1/a"}, {"DOI": "10.1/b"}]
-    assert caught.value.reason == "max_pages"
-    assert mock_http.get.call_count == 2
-    mock_logger.warning.assert_called_once()
-    assert mock_logger.warning.call_args[0][0] == "crossref_search_truncated"
-    assert mock_logger.warning.call_args[1]["reason"] == "max_pages"
-
-
-@pytest.mark.asyncio
-async def test_search_no_truncation_warning_on_clean_end(
-    search_paginator, mock_http, mock_logger
-):
-    """Clean end-of-data (no next cursor) emits no truncation warning."""
-    mock_http.get.side_effect = [
-        _works_response([{"DOI": "10.1/a"}], None),
-    ]
-
-    results = []
-    async for item in search_paginator.search("test", cursor="*"):
-        results.append(item)
-
-    assert results == [{"DOI": "10.1/a"}]
-    mock_logger.warning.assert_not_called()

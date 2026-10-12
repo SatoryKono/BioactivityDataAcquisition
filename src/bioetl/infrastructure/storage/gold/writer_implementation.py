@@ -6,7 +6,6 @@ from time import perf_counter
 from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.exceptions import BioETLError
-from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
 from bioetl.infrastructure.observability.metrics import (
     GOLD_VALIDATION_FAILURES_TOTAL,
     GOLD_WRITE_ATTEMPTS_TOTAL,
@@ -38,6 +37,7 @@ from bioetl.infrastructure.storage.writer_common import (
     iterate_write_targets,
     validate_write_versions,
 )
+from bioetl.domain.types.gold_contracts import GoldWriteReceipt, GoldWriteCategory
 
 if TYPE_CHECKING:
     from pandera.polars import DataFrameSchema
@@ -188,10 +188,7 @@ async def _write_dual_targets_impl(
                 )
         except (BioETLError, OSError, RuntimeError, ValueError) as error:
             receipt = getattr(error, "gold_receipt", None)
-            if receipt is not None and receipt.category in (
-                GoldWriteCategory.COMPLETE,
-                GoldWriteCategory.COMMITTED_POSTWRITE_PENDING,
-            ):
+            if receipt and receipt.category in (GoldWriteCategory.COMPLETE, GoldWriteCategory.COMMITTED_POSTWRITE_PENDING):
                 committed_targets.append(
                     {
                         "contract_version": contract_version,

@@ -1,3 +1,7 @@
+import pytest
+
+pytestmark = pytest.mark.repo_backed
+
 # pyright: reportArgumentType=false
 # pyright: reportAttributeAccessIssue=false
 # pyright: reportCallIssue=false
@@ -40,8 +44,6 @@ from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 from click.testing import CliRunner
-
-pytestmark = pytest.mark.unit
 
 from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestDiffEntry,
@@ -1374,7 +1376,6 @@ class _CorruptedStoreManifestService:
         raise RunManifestInspectionCorruptionError(left, "checksum mismatch")
 
 
-@pytest.mark.unit
 class TestRunManifestErrorExitCodes:
     """#12019 (CF-015): run-manifest errors must exit non-zero."""
 
