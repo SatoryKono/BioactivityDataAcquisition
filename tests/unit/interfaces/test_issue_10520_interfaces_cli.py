@@ -7,8 +7,6 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 import pytest
-from click.testing import CliRunner
-
 from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionCorruptionError,
 )
@@ -26,17 +24,18 @@ from bioetl.interfaces.cli.commands.lineage import (
     _render_text_payload,
     _resolve_explain_identifier,
 )
+from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import (
     echo_export_preview,
     echo_export_result,
     echo_quarantine_record,
 )
-from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.main import cli
 from bioetl.interfaces.http._health_server_identity_routing_support import (
     _require_run_manifest_port,
     _timeout_identity_payload,
 )
+from click.testing import CliRunner
 
 pytestmark = pytest.mark.unit
 

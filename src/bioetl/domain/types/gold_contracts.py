@@ -9,6 +9,7 @@ from ._gold_contracts_support import (
     GoldBusinessRuleSemanticScope,
     GoldBusinessRuleSeverity,
 )
+from ._gold_write_receipt import GoldWriteCategory, GoldWriteReceipt
 from .gold_contracts_rejects import (
     GoldContractValidationError,
     GoldRejectReason,
@@ -20,7 +21,6 @@ from .gold_contracts_rejects import (
 )
 from .gold_contracts_rules import GoldBusinessRuleSpec
 from .gold_contracts_scd import ScdConfig
-from ._gold_write_receipt import GoldWriteCategory, GoldWriteReceipt
 
 __all__ = [
     "GOLD_CONTRACT_VERSION_UNKNOWN",

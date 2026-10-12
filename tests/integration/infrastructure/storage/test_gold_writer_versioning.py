@@ -39,6 +39,7 @@ from bioetl.infrastructure.storage.gold.runtime_helpers import (
 )
 from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     GoldWriteDispatchContext,
+    GoldWritePostwriteContext,
 )
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
