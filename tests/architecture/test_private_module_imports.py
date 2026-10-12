@@ -19,7 +19,7 @@ shrink-only baseline (``STRICT_PRIVATE_IMPORT_GUARD = False``). The YAML
 from __future__ import annotations
 
 import ast
-from datetime import date
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -226,7 +226,7 @@ def test_private_import_baseline_is_monotonically_non_increasing(
     metadata_errors = validate_exception_metadata(
         config,
         project_root=RATCHET_CONFIG_PATH.parents[2],
-        today=date(2026, 10, 7),
+        today=datetime.now(UTC).date(),
     )
     assert not metadata_errors, "\n".join(metadata_errors)
     stale_waves = {
