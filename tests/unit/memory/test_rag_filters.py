@@ -41,12 +41,13 @@ def test_candidate_source_paths_avoids_path_is_file(
     ]
 
 
-def test_candidate_source_paths_prefers_git_tracked_files(
+def test_candidate_source_paths_uses_git_tracked_and_untracked_files(
     monkeypatch, tmp_path: Path
 ) -> None:
     docs_root = tmp_path / "docs" / "00-project"
     docs_root.mkdir(parents=True)
     (docs_root / "alpha.md").write_text("# Alpha\n", encoding="utf-8")
+    (docs_root / "untracked.md").write_text("# New\n", encoding="utf-8")
     (tmp_path / ".git").mkdir()
 
     calls: list[tuple[str, ...]] = []
@@ -56,7 +57,11 @@ def test_candidate_source_paths_prefers_git_tracked_files(
         return CompletedProcess(
             args[0],
             0,
-            stdout="docs/00-project/alpha.md\ndocs/00-project/beta.txt\n",
+            stdout=(
+                "docs/00-project/alpha.md\n"
+                "docs/00-project/beta.txt\n"
+                "docs/00-project/untracked.md\n"
+            ),
             stderr="",
         )
 
@@ -72,8 +77,21 @@ def test_candidate_source_paths_prefers_git_tracked_files(
         base=Path("docs/00-project"),
     )
 
-    assert calls == [("git", "ls-files", "--", "docs/00-project")]
-    assert [path.as_posix() for path in candidates] == ["docs/00-project/alpha.md"]
+    assert calls == [
+        (
+            "git",
+            "ls-files",
+            "--cached",
+            "--others",
+            "--exclude-standard",
+            "--",
+            "docs/00-project",
+        )
+    ]
+    assert [path.as_posix() for path in candidates] == [
+        "docs/00-project/alpha.md",
+        "docs/00-project/untracked.md",
+    ]
 
 
 def test_candidate_source_paths_supports_single_file_sources(tmp_path: Path) -> None:

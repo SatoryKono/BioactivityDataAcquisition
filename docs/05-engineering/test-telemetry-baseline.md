@@ -32,7 +32,7 @@ trend evidence only.
 - Source run id: `local-bioetl-local-coverage-pr11990-final3`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `b80589852202c211c5dc19d71363d5ef01c5fb2238a36009e808a2759d2f23f4`
+- Source tree sha256: `7b8d1996bf89e979a4370ac3d669f262efc2069e4e368b932b7e886184df0439`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-10-13T06:16:30.069150+00:00`
 

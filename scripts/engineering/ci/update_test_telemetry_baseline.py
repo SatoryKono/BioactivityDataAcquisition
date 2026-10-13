@@ -771,56 +771,60 @@ def write_baseline_outputs(
     write_branch_telemetry_reports(payload=payload, output_dir=branch_reports_dir)
 
 
+def _rebind_current_tree(args: argparse.Namespace) -> int:
+    """Preserve only metrics bound to the reviewed capture while rehashing tests."""
+    import subprocess
+
+    from scripts.engineering.ci.test_telemetry_provenance import (
+        capture_metrics_are_bound,
+        source_commit_is_reachable,
+    )
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    if any(
+        (
+            args.local_manifest,
+            args.source_commit,
+            args.source_run_id,
+            args.source_run_url,
+            args.source_branch != "main",
+            args.source_event != "push",
+            args.coverage_percent is not None,
+            args.coverage_xml != CANONICAL_COVERAGE_XML,
+            args.coverage_log,
+            args.slowest_json != CANONICAL_SLOWEST_TESTS_JSON,
+            args.junit,
+            args.coverage_threshold is not None,
+        )
+    ):
+        raise ValueError("Rebind uses only the existing verified capture")
+    output_yaml_path = resolve_output_path(args.output_yaml)
+    output_md_path = resolve_output_path(args.output_md)
+    payload = yaml.safe_load(output_yaml_path.read_text(encoding="utf-8"))
+    head = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, text=True
+    ).strip()
+    if not source_commit_is_reachable(payload, REPO_ROOT, head):
+        raise ValueError("Captured run lacks proven ancestry or reviewed squash bridge")
+    if payload.get("source_event") == "local_coverage_verify" and not (
+        capture_metrics_are_bound(payload, REPO_ROOT)
+    ):
+        raise ValueError("Captured telemetry metrics lack a reviewed binding")
+    payload["source_tree_sha256"] = compute_test_telemetry_source_tree_sha256()
+    write_baseline_outputs(
+        payload=payload,
+        output_yaml_path=output_yaml_path,
+        output_md_path=output_md_path,
+    )
+    return 0
+
+
 def main() -> int:
     from scripts.engineering.common.repo_paths import resolve_output_path
 
     args = _parse_args()
     if args.rebind_current_tree:
-        import subprocess
-
-        from scripts.engineering.ci.test_telemetry_provenance import (
-            capture_metrics_are_bound,
-            source_commit_is_reachable,
-        )
-
-        if any(
-            (
-                args.local_manifest,
-                args.source_commit,
-                args.source_run_id,
-                args.source_run_url,
-                args.source_branch != "main",
-                args.source_event != "push",
-                args.coverage_percent is not None,
-                args.coverage_xml != CANONICAL_COVERAGE_XML,
-                args.coverage_log,
-                args.slowest_json != CANONICAL_SLOWEST_TESTS_JSON,
-                args.junit,
-                args.coverage_threshold is not None,
-            )
-        ):
-            raise ValueError("Rebind uses only the existing verified capture")
-        output_yaml_path = resolve_output_path(args.output_yaml)
-        output_md_path = resolve_output_path(args.output_md)
-        payload = yaml.safe_load(output_yaml_path.read_text(encoding="utf-8"))
-        head = subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, text=True
-        ).strip()
-        if not source_commit_is_reachable(payload, REPO_ROOT, head):
-            raise ValueError(
-                "Captured run lacks proven ancestry or reviewed squash bridge"
-            )
-        if payload.get("source_event") == "local_coverage_verify" and not (
-            capture_metrics_are_bound(payload, REPO_ROOT)
-        ):
-            raise ValueError("Captured telemetry metrics lack a reviewed binding")
-        payload["source_tree_sha256"] = compute_test_telemetry_source_tree_sha256()
-        write_baseline_outputs(
-            payload=payload,
-            output_yaml_path=output_yaml_path,
-            output_md_path=output_md_path,
-        )
-        return 0
+        return _rebind_current_tree(args)
     if args.source_event == "local_coverage_verify" and not args.local_manifest:
         raise ValueError("local_coverage_verify requires --local-manifest")
     coverage_xml_path = resolve_output_path(args.coverage_xml)
