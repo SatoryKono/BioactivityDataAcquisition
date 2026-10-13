@@ -39,7 +39,7 @@ class BronzeRootLease:
 
     @property
     def writer_path(self) -> Path:
-        """Address writes through the locked inode, even if its name is replaced."""
+        """Route writes through the locked inode, even if its name is replaced."""
         if self.fd is None:
             return self.path
         locked = os.fstat(self.fd)
