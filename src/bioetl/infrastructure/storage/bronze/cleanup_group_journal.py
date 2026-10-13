@@ -488,23 +488,15 @@ class GroupJournal:
             raise GroupJournalConflict("unassociated Bronze sidecar") from exc
 
     def _persist_intent(self, operation_id: str, body: dict[str, Any]) -> None:
-        raw_record = _record_bytes(body)
         journal_fd = self._private_dir(_JOURNAL_DIR, create=True)
         assert journal_fd is not None
         try:
             self._reject_pending_duplicate(journal_fd, body)
-            fd = os.open(
-                f"{operation_id}.json",
-                os.O_WRONLY | os.O_CREAT | os.O_EXCL | _NOFOLLOW,
-                0o600,
-                dir_fd=journal_fd,
-            )
-            try:
-                _write_all(fd, raw_record)
-                os.fsync(fd)
-            finally:
-                os.close(fd)
-            os.fsync(journal_fd)
+            if _exists(journal_fd, f"{operation_id}.json") or _exists(
+                journal_fd, f"{operation_id}.next"
+            ):
+                raise GroupJournalConflict("group operation ID already exists")
+            self._replace_record(journal_fd, operation_id, body)
         finally:
             os.close(journal_fd)
 
@@ -668,10 +660,17 @@ class GroupJournal:
         progress.phase = "completion"
         if hook:
             hook("before_completion")
-        if chain != self._current_chain(relative) or any(
-            _exists(date_fd, body["names"][key])
-            or (stage_fd is not None and _exists(stage_fd, key))
-            for key in body["members"]
+        if (
+            chain != self._current_chain(relative)
+            or (
+                "copy" not in body["members"]
+                and _exists(date_fd, body["names"]["copy"])
+            )
+            or any(
+                _exists(date_fd, body["names"][key])
+                or (stage_fd is not None and _exists(stage_fd, key))
+                for key in body["members"]
+            )
         ):
             raise GroupJournalConflict("group is not durably absent")
         if body["state"] == "prepared":
@@ -710,6 +709,8 @@ class GroupJournal:
         self, date_fd: int, stage_fd: int, body: dict[str, Any]
     ) -> None:
         """Reject ambiguous later members before deleting any earlier member."""
+        if "copy" not in body["members"] and _exists(date_fd, body["names"]["copy"]):
+            raise GroupJournalConflict("unattested group copy appeared")
         if set(os.listdir(stage_fd)) - set(body["members"]):
             raise GroupJournalConflict("unknown content in group stage")
         for key in body["members"]:
@@ -724,6 +725,8 @@ class GroupJournal:
         staged = _exists(stage_fd, key)
         if source and staged:
             raise GroupJournalConflict(f"ambiguous duplicate {key}")
+        if source and key in body["staged"]:
+            raise GroupJournalConflict(f"staged {key} reappeared at source")
         if not source and not staged and key not in body["staged"]:
             raise GroupJournalConflict(f"unexplained absence of {key}")
         if source and _fingerprint(date_fd, name) != body["members"][key]:

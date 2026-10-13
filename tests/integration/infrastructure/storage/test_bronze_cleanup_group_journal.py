@@ -173,6 +173,7 @@ def test_late_sidecar_failure_recovers_exact_group(
     root, spec, date_dir = _fixture(tmp_path, copy=copy)
     outsider = date_dir / "manual-backup.json"
     outsider.write_bytes(b"retain")
+    sidecar_bytes = (date_dir / spec.names()["sidecar"]).read_bytes()
     with journal.open_group_journal(root) as group:
         operation_id = group.begin(spec)
         with pytest.raises(journal.GroupJournalFailure) as failure:
@@ -187,6 +188,12 @@ def test_late_sidecar_failure_recovers_exact_group(
         assert failure.value.removed == first_removed
         assert failure.value.possibly_unlinked == 0
         assert (date_dir / spec.names()["sidecar"]).exists() is False
+        record_path = root / ".bronze-group-journals" / f"{operation_id}.json"
+        record = journal._decode_record(record_path.read_bytes(), operation_id)
+        assert record["staged"] == (["copy"] if copy else []) + ["payload", "sidecar"]
+        assert (
+            root / f".bronze-group-stage-{operation_id}" / "sidecar"
+        ).read_bytes() == sidecar_bytes
     with journal.open_group_journal(root) as group:
         assert group.recover(operation_id) == 1
         assert group.recover(operation_id) == 0
@@ -302,6 +309,46 @@ def test_process_crash_after_payload_unlink_then_retry(tmp_path: Path) -> None:
 
 
 @POSIX_ONLY
+def test_process_crash_between_unlink_and_directory_fsync_recovers(
+    tmp_path: Path,
+) -> None:
+    root, spec, date_dir = _fixture(tmp_path)
+    outsider = tmp_path / "outside"
+    outsider.write_bytes(b"sentinel")
+    with journal.open_group_journal(root) as group:
+        operation_id = group.begin(spec)
+    code = (
+        "import os,sys\nfrom pathlib import Path\n"
+        "import bioetl.infrastructure.storage.bronze.cleanup_group_journal as journal\n"
+        "original_unlink=os.unlink\n"
+        "def crash_after_unlink(name, *, dir_fd=None):\n"
+        " original_unlink(name,dir_fd=dir_fd)\n"
+        " if name=='payload': os._exit(77)\n"
+        "journal.os.unlink=crash_after_unlink\n"
+        "with journal.open_group_journal(Path(sys.argv[1])) as group:\n"
+        " group.recover(sys.argv[2])\n"
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", code, str(root), operation_id],
+        capture_output=True,
+        check=False,
+        env={**os.environ, "PYTHONPATH": str(Path(__file__).parents[4] / "src")},
+    )
+    assert result.returncode == 77, result.stderr.decode(errors="replace")
+    record_path = root / ".bronze-group-journals" / f"{operation_id}.json"
+    record = journal._decode_record(record_path.read_bytes(), operation_id)
+    assert record["staged"] == ["payload"]
+    assert not (root / f".bronze-group-stage-{operation_id}" / "payload").exists()
+    assert not (date_dir / spec.names()["payload"]).exists()
+    assert (date_dir / spec.names()["sidecar"]).exists()
+    with journal.open_group_journal(root) as group:
+        assert group.recover(operation_id) == 1
+        assert group.recover(operation_id) == 0
+    assert outsider.read_bytes() == b"sentinel"
+    assert not record_path.exists()
+
+
+@POSIX_ONLY
 def test_replaced_name_or_symlink_never_deleted(tmp_path: Path) -> None:
     root, spec, date_dir = _fixture(tmp_path)
     outsider = tmp_path / "outside"
@@ -322,6 +369,82 @@ def test_replaced_name_or_symlink_never_deleted(tmp_path: Path) -> None:
         with pytest.raises((journal.GroupJournalConflict, journal.GroupJournalFailure)):
             group.recover(operation_id)
     assert outsider.read_bytes() == b"sentinel"
+
+
+@POSIX_ONLY
+def test_durably_staged_member_reappearing_at_source_is_not_redeleted(
+    tmp_path: Path,
+) -> None:
+    root, spec, date_dir = _fixture(tmp_path)
+    payload = date_dir / spec.names()["payload"]
+    original = payload.stat()
+    original_bytes = payload.read_bytes()
+    with journal.open_group_journal(root) as group:
+        operation_id = group.begin(spec)
+        stage = root / f".bronze-group-stage-{operation_id}" / "payload"
+
+        def restore_same_inode(phase: str) -> None:
+            if phase == "after_payload_staged_record":
+                stage.rename(payload)
+                raise OSError("injected stop after source reappearance")
+
+        with pytest.raises(journal.GroupJournalFailure) as stopped:
+            group.recover(operation_id, restore_same_inode)
+        assert stopped.value.removed == 0
+        assert payload.stat().st_ino == original.st_ino
+        assert payload.read_bytes() == original_bytes
+        with pytest.raises(
+            journal.GroupJournalConflict, match="staged payload reappeared at source"
+        ) as conflict:
+            group.recover(operation_id)
+        assert conflict.value.removed == 0
+        assert payload.stat().st_ino == original.st_ino
+        assert payload.read_bytes() == original_bytes
+        assert (root / ".bronze-group-journals" / f"{operation_id}.json").exists()
+
+
+@POSIX_ONLY
+def test_copy_appearing_after_intent_does_not_delete_partial_group(
+    tmp_path: Path,
+) -> None:
+    root, spec, date_dir = _fixture(tmp_path)
+    copy = date_dir / spec.names()["copy"]
+    with journal.open_group_journal(root) as group:
+        operation_id = group.begin(spec)
+        copy.write_bytes(b"new copy")
+        with pytest.raises(
+            journal.GroupJournalConflict, match="unattested group copy appeared"
+        ) as conflict:
+            group.recover(operation_id)
+        assert conflict.value.removed == 0
+        assert copy.read_bytes() == b"new copy"
+        assert all(
+            (date_dir / spec.names()[key]).exists() for key in ("payload", "sidecar")
+        )
+        assert (root / ".bronze-group-journals" / f"{operation_id}.json").exists()
+
+
+@POSIX_ONLY
+def test_unattested_copy_at_completion_preserves_partial_result(tmp_path: Path) -> None:
+    root, spec, date_dir = _fixture(tmp_path)
+    copy = date_dir / spec.names()["copy"]
+    with journal.open_group_journal(root) as group:
+        operation_id = group.begin(spec)
+
+        def add_copy(phase: str) -> None:
+            if phase == "before_completion":
+                copy.write_bytes(b"late copy")
+
+        with pytest.raises(journal.GroupJournalConflict) as conflict:
+            group.recover(operation_id, add_copy)
+        assert conflict.value.removed == 2
+        assert conflict.value.possibly_unlinked == 0
+        assert copy.read_bytes() == b"late copy"
+        assert all(
+            not (date_dir / spec.names()[key]).exists()
+            for key in ("payload", "sidecar")
+        )
+        assert (root / ".bronze-group-journals" / f"{operation_id}.json").exists()
 
 
 @POSIX_ONLY
@@ -485,7 +608,7 @@ def test_missing_unstaged_member_is_ambiguous(tmp_path: Path) -> None:
 def test_write_fsync_and_finalization_errors_retain_intent(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    root, spec, _date_dir = _fixture(tmp_path)
+    root, spec, date_dir = _fixture(tmp_path)
     original_write = journal._write_all
     monkeypatch.setattr(
         journal, "_write_all", lambda *_: (_ for _ in ()).throw(OSError("write denied"))
@@ -496,7 +619,13 @@ def test_write_fsync_and_finalization_errors_retain_intent(
     ):
         group.begin(spec)
     monkeypatch.setattr(journal, "_write_all", original_write)
-    # A torn intent is never replayed. Use another isolated root for barrier faults.
+    journal_dir = root / ".bronze-group-journals"
+    assert list(journal_dir.glob("*.json")) == []
+    assert len(list(journal_dir.glob("*.next"))) == 1
+    assert all(
+        (date_dir / spec.names()[key]).exists() for key in ("payload", "sidecar")
+    )
+    # An unpublished temp is never replayed. Use another isolated root for faults.
     root, spec, _date_dir = _fixture(tmp_path / "fresh")
     original_fsync = journal.os.fsync
     calls = 0
