@@ -566,7 +566,7 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
         "",
         "## Duration Telemetry",
         "",
-        f"- Total collected test cases: `{total_cases_display}`",
+        f"- Total executed test cases: `{total_cases_display}`",
         f"- Freshness guard: `<={int(freshness_guard['max_age_days'])} days` via "
         f"`{freshness_guard['timestamp_field']}`",
         "",
@@ -629,7 +629,7 @@ def render_branch_telemetry_markdown(payload: TelemetryPayload) -> str:
         f"Source event: `{payload.get('source_event') or 'pending'}`",
         f"Source run URL: `{payload.get('source_run_url') or 'pending'}`",
         f"Refresh status: `{payload['refresh_status']}`",
-        f"Collected test cases: `{total_cases_display}`",
+        f"Executed test cases: `{total_cases_display}`",
         f"Freshness guard: `<={int(payload['freshness_guard']['max_age_days'])} days`",
         "",
     ]

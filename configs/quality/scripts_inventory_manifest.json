@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-13T12:07:01.753703+00:00",
+  "generated_at": "2026-10-13T12:45:57.403507+00:00",
   "summary": {
     "total_scripts": 648,
     "status_counts": {
@@ -10252,7 +10252,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 28,
+          "line": 33,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
