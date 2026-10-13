@@ -20,6 +20,7 @@ from pathlib import Path
 from uuid import UUID
 
 from .cleanup_core import (
+    _DONE_PREFIX,
     _O_DIRECTORY,
     _O_NOFOLLOW,
     _STAGE_PREFIX,
@@ -107,7 +108,7 @@ def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[BronzeRoot
             if exclusive:
                 _recover_stages(root_fd, root_real)
             elif any(
-                name.startswith(_STAGE_PREFIX)
+                name.startswith((_STAGE_PREFIX, _DONE_PREFIX))
                 for name in os.listdir(root_fd)  # noqa: PTH208 - pinned root fd
             ):
                 raise OSError("Bronze writer refused while cleanup recovery is pending")

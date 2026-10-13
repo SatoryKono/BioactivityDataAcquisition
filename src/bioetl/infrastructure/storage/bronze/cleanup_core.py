@@ -9,6 +9,7 @@ from pathlib import Path
 
 _REPARSE_POINT_ATTR = 0x400
 _STAGE_PREFIX = ".bronze-cleanup-stage-"
+_DONE_PREFIX = ".bronze-cleanup-done-"
 _STAGE_JOURNAL = "origin.json"
 _O_DIRECTORY = getattr(os, "O_DIRECTORY", 0)
 _O_NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)

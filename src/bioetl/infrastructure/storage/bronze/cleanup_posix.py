@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .cleanup_core import (
+    _DONE_PREFIX,
     _O_DIRECTORY,
     _O_NOFOLLOW,
     _O_NONBLOCK,
@@ -108,11 +109,11 @@ def _parse_stage_origin(raw: bytes, stage_name: str) -> _StageOrigin:
     return _StageOrigin(parts, dev, ino)
 
 
-def _load_stage_origin(stage_fd: int, stage_name: str) -> _StageOrigin:
-    """Read a bounded origin record; never claim an unjournaled stage."""
+def _load_origin_record(dir_fd: int, name: str, stage_name: str) -> _StageOrigin:
+    """Read a bounded no-follow origin record from a pinned directory."""
     try:
         journal_fd = os.open(
-            _STAGE_JOURNAL, os.O_RDONLY | _O_NONBLOCK | _O_NOFOLLOW, dir_fd=stage_fd
+            name, os.O_RDONLY | _O_NONBLOCK | _O_NOFOLLOW, dir_fd=dir_fd
         )
     except FileNotFoundError:
         raise OSError(f"Bronze stage {stage_name} has no origin journal") from None
@@ -125,6 +126,11 @@ def _load_stage_origin(stage_fd: int, stage_name: str) -> _StageOrigin:
     if len(raw) > 4096:
         raise OSError(f"Bronze stage {stage_name} has an oversized journal")
     return _parse_stage_origin(raw, stage_name)
+
+
+def _load_stage_origin(stage_fd: int, stage_name: str) -> _StageOrigin:
+    """Never claim an unjournaled stage."""
+    return _load_origin_record(stage_fd, _STAGE_JOURNAL, stage_name)
 
 
 def _restore_stage_entry(
@@ -174,6 +180,7 @@ def _restore_stage_entry(
 
 def _recover_stages(root_fd: int, root_real: Path) -> None:
     """Restore crash-interrupted isolates before any new destructive plan."""
+    _recover_completed_stages(root_fd)
     for stage_name in os.listdir(root_fd):
         if not stage_name.startswith(_STAGE_PREFIX):
             continue
@@ -188,6 +195,34 @@ def _recover_stages(root_fd: int, root_real: Path) -> None:
         finally:
             os.close(stage_fd)
         os.rmdir(stage_name, dir_fd=root_fd)
+        os.fsync(root_fd)
+
+
+def _recover_completed_stages(root_fd: int) -> None:
+    """Discard only stages with a durable moved completion journal."""
+    for marker in os.listdir(root_fd):
+        if not marker.startswith(_DONE_PREFIX):
+            continue
+        suffix = marker.removeprefix(_DONE_PREFIX)
+        if len(suffix) != 32 or any(c not in "0123456789abcdef" for c in suffix):
+            raise OSError(f"Invalid Bronze completion marker {marker}")
+        _load_origin_record(root_fd, marker, marker)
+        stage_name = f"{_STAGE_PREFIX}{suffix}"
+        try:
+            stage_fd = os.open(
+                stage_name, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW, dir_fd=root_fd
+            )
+        except FileNotFoundError:
+            pass
+        else:
+            try:
+                if os.listdir(stage_fd):  # noqa: PTH208 - pinned stage fd
+                    raise OSError(f"Bronze completed stage {stage_name} is not empty")
+            finally:
+                os.close(stage_fd)
+            os.rmdir(stage_name, dir_fd=root_fd)
+            os.fsync(root_fd)
+        os.unlink(marker, dir_fd=root_fd)
         os.fsync(root_fd)
 
 
@@ -264,11 +299,19 @@ def _finish_private_stage(
 ) -> None:
     """Report post-commit durability failures without losing removal counts."""
     stage_error: OSError | None = None
+    marker = name.replace(_STAGE_PREFIX, _DONE_PREFIX, 1)
+    marked_complete = False
     try:
         if relative.name not in os.listdir(stage_fd):
-            with suppress(FileNotFoundError):
-                os.unlink(_STAGE_JOURNAL, dir_fd=stage_fd)
+            os.rename(
+                _STAGE_JOURNAL,
+                marker,
+                src_dir_fd=stage_fd,
+                dst_dir_fd=root_fd,
+            )
+            marked_complete = True
             os.fsync(stage_fd)
+            os.fsync(root_fd)
     except OSError as exc:
         stage_error = exc
     finally:
@@ -279,6 +322,12 @@ def _finish_private_stage(
     except OSError as exc:
         # A conflicted artifact may remain in the stage; expose its name.
         stage_error = stage_error or exc
+    if marked_complete and stage_error is None:
+        try:
+            os.unlink(marker, dir_fd=root_fd)
+            os.fsync(root_fd)
+        except OSError as exc:
+            stage_error = exc
     if stage_error is not None:
         if on_stage_error is None:
             raise stage_error

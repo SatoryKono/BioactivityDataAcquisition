@@ -725,6 +725,15 @@ async def test_stage_cleanup_failure_is_reported_after_file_removal(
     assert any(
         path.name.startswith(".bronze-cleanup-stage-") for path in tmp_path.iterdir()
     )
+    assert any(
+        path.name.startswith(".bronze-cleanup-done-") for path in tmp_path.iterdir()
+    )
+    monkeypatch.setattr(cleanup_support.os, "rmdir", original_rmdir)
+    retry = await writer.cleanup_old_files(CUTOFF)
+    assert retry["files_removed"] == 0
+    assert retry["directories_removed"] == 0
+    assert not list(tmp_path.glob(".bronze-cleanup-stage-*"))
+    assert not list(tmp_path.glob(".bronze-cleanup-done-*"))
 
 
 @_APPLY_POSIX
@@ -1686,6 +1695,20 @@ def test_unjournaled_empty_stage_like_directory_is_preserved(tmp_path: Path) -> 
         with bronze_tree_lock(tmp_path, exclusive=True):
             pytest.fail("unknown directory must stop destructive recovery")
     assert stage.is_dir()
+
+
+@_APPLY_POSIX
+def test_invalid_completion_marker_preserves_unknown_empty_stage(tmp_path: Path) -> None:
+    suffix = "a" * 32
+    stage = tmp_path / f".bronze-cleanup-stage-{suffix}"
+    stage.mkdir()
+    marker = tmp_path / f".bronze-cleanup-done-{suffix}"
+    marker.write_bytes(b"not an origin record")
+    with pytest.raises(OSError, match="invalid origin"):
+        with bronze_tree_lock(tmp_path, exclusive=True):
+            pytest.fail("invalid marker must stop destructive recovery")
+    assert stage.is_dir()
+    assert marker.read_bytes() == b"not an origin record"
 
 
 @_APPLY_POSIX
