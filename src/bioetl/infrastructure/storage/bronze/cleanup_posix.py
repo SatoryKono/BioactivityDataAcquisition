@@ -90,6 +90,24 @@ class _StageOrigin:
     ino: int
 
 
+def _parse_stage_origin(raw: bytes, stage_name: str) -> _StageOrigin:
+    try:
+        record = json.loads(raw)
+        relative = record["relative"]
+        dev, ino = record["dev"], record["ino"]
+        parts = tuple(relative.split("/")) if isinstance(relative, str) else ()
+        if (
+            not parts
+            or any(part in ("", ".", "..") for part in parts)
+            or not isinstance(dev, int)
+            or not isinstance(ino, int)
+        ):
+            raise ValueError("invalid stage origin")
+    except (KeyError, TypeError, ValueError) as exc:
+        raise OSError(f"Bronze stage {stage_name} has invalid origin") from exc
+    return _StageOrigin(parts, dev, ino)
+
+
 def _load_stage_origin(stage_fd: int, stage_name: str) -> _StageOrigin:
     """Read a bounded origin record; never claim an unjournaled stage."""
     try:
@@ -106,21 +124,7 @@ def _load_stage_origin(stage_fd: int, stage_name: str) -> _StageOrigin:
         os.close(journal_fd)
     if len(raw) > 4096:
         raise OSError(f"Bronze stage {stage_name} has an oversized journal")
-    try:
-        record = json.loads(raw)
-        relative = record["relative"]
-        dev, ino = record["dev"], record["ino"]
-        parts = tuple(relative.split("/")) if isinstance(relative, str) else ()
-        if (
-            not parts
-            or any(part in ("", ".", "..") for part in parts)
-            or not isinstance(dev, int)
-            or not isinstance(ino, int)
-        ):
-            raise ValueError("invalid stage origin")
-    except (KeyError, TypeError, ValueError) as exc:
-        raise OSError(f"Bronze stage {stage_name} has invalid origin") from exc
-    return _StageOrigin(parts, dev, ino)
+    return _parse_stage_origin(raw, stage_name)
 
 
 def _restore_stage_entry(
@@ -335,6 +339,16 @@ def safe_unlink(
         return False
 
 
+def _rmdir_staged(name: str, stage_fd: int) -> bool:
+    try:
+        os.rmdir(name, dir_fd=stage_fd)
+    except OSError as exc:
+        if exc.errno in (errno.ENOTEMPTY, errno.EEXIST):
+            return False
+        raise
+    return True
+
+
 def safe_rmdir(
     dir_path: Path,
     root_abs: Path,
@@ -371,12 +385,9 @@ def safe_rmdir(
                     ):
                         _restore_staged(name, stage_fd, parent_fd)
                         return False
-                    os.rmdir(name, dir_fd=stage_fd)
-                except OSError as exc:
-                    _restore_staged(name, stage_fd, parent_fd)
-                    if exc.errno in (errno.ENOTEMPTY, errno.EEXIST):
+                    if not _rmdir_staged(name, stage_fd):
+                        _restore_staged(name, stage_fd, parent_fd)
                         return False
-                    raise
                 except BaseException:
                     _restore_staged(name, stage_fd, parent_fd)
                     raise

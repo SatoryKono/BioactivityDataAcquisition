@@ -84,6 +84,16 @@ class BronzeWriterReadMixin:
             if line.strip():
                 yield orjson.loads(line)
 
+    def _batch_search_path(
+        self, provider: str, entity: str, date: datetime | None
+    ) -> Path | None:
+        if self._flat_structure and not provider and not entity:
+            return self.base_path / date.strftime("%Y-%m-%d") if date else self.base_path
+        if not provider or not entity:
+            return None
+        path = self.base_path / provider / entity
+        return path / date.strftime("%Y-%m-%d") if date else path
+
     def _list_batches_sync(
         self,
         provider: str,
@@ -91,19 +101,8 @@ class BronzeWriterReadMixin:
         date: datetime | None = None,
     ) -> list[str]:
         """Sync body for list_batches with blocking Path I/O."""
-        if self._flat_structure and not provider and not entity:
-            search_path = (
-                self.base_path / date.strftime("%Y-%m-%d") if date else self.base_path
-            )
-        else:
-            if not provider or not entity:
-                return []
-            prefix = f"{provider}/{entity}/"
-            if date:
-                prefix = f"{prefix}{date.strftime('%Y-%m-%d')}/"
-            search_path = self.base_path / prefix
-
-        if not search_path.exists():
+        search_path = self._batch_search_path(provider, entity, date)
+        if search_path is None or not search_path.exists():
             return []
 
         pattern = "batch_*.jsonl.zst" if date else "**/*.jsonl.zst"

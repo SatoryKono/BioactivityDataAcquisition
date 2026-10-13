@@ -367,6 +367,16 @@ def _scope_child_dirs(
     return [resolved] if resolved is not None else []
 
 
+def _matches_planned_candidate(
+    actual: os.stat_result, expected: os.stat_result, directory: bool
+) -> bool:
+    return (
+        _same_identity(actual, expected)
+        and not stat_is_link_or_reparse(actual)
+        and (stat.S_ISDIR(actual.st_mode) if directory else stat.S_ISREG(actual.st_mode))
+    )
+
+
 def candidate_is_safe(
     path: Path,
     root_abs: Path,
@@ -386,15 +396,7 @@ def candidate_is_safe(
                 _chain,
             ):
                 actual = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
-                return (
-                    _same_identity(actual, expected)
-                    and not stat_is_link_or_reparse(actual)
-                    and (
-                        stat.S_ISDIR(actual.st_mode)
-                        if directory
-                        else stat.S_ISREG(actual.st_mode)
-                    )
-                )
+                return _matches_planned_candidate(actual, expected, directory)
         except (OSError, _CleanupConflict):
             return False
     if not is_fully_resolved(path, root_abs, root_real) or not is_within_root(
@@ -405,13 +407,7 @@ def candidate_is_safe(
         actual = path.lstat()
     except OSError:
         return False
-    return (
-        _same_identity(actual, expected)
-        and not stat_is_link_or_reparse(actual)
-        and (
-            stat.S_ISDIR(actual.st_mode) if directory else stat.S_ISREG(actual.st_mode)
-        )
-    )
+    return _matches_planned_candidate(actual, expected, directory)
 
 
 from .cleanup_posix import (  # noqa: E402 - destructive helpers depend on discovery primitives
