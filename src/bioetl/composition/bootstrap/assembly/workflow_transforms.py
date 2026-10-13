@@ -73,11 +73,14 @@ def build_workflow_transform_registry(
 ) -> WorkflowTransformRegistry:
     """Assemble workflow transform storage and builtin transform registry."""
     workflow_storage_logger = create_noop_logger()
+    clock = SystemClock()
     transform_storage = SilverWriter(
+        clock=clock,
         base_path=settings.silver_path,
         logger=workflow_storage_logger,
         runtime_services=build_silver_writer_runtime_services(
             SilverWriterRuntimeServicesRequest(
+                clock=clock,
                 csv_exporter=None,
                 tracing=NoOpTracing(),
                 write_policy=None,

@@ -401,7 +401,7 @@ class TestPreflightServicePublicationBoundary:
 @pytest.fixture
 def incremental_runtime():
     """Create an incremental runtime config."""
-    return RuntimeConfig(run_type=RunType.INCREMENTAL)
+    return RuntimeConfig(run_type=RunType.INCREMENTAL, strict_preflight=False)
 
 
 @pytest.fixture
@@ -419,7 +419,7 @@ def backfill_runtime():
 @pytest.fixture
 def strict_runtime():
     """Create a strict validation runtime config."""
-    return RuntimeConfig(run_type=RunType.INCREMENTAL, strict_validation=True)
+    return RuntimeConfig(run_type=RunType.INCREMENTAL, strict_preflight=True)
 
 
 @pytest.mark.unit
@@ -684,10 +684,10 @@ class TestValidateMedallionConfig:
         format_errors = [e for e in errors if "format" in e.field]
         assert len(format_errors) == 0
 
-    def test_strict_validation_flag_included_in_log(
+    def test_strict_preflight_flag_included_in_log(
         self, preflight_service, mock_logger, strict_runtime
     ):
-        """Test that strict_validation flag is included in log output."""
+        """Test that strict_preflight flag is included in log output."""
         preflight_service.validate_medallion_config(
             runtime=strict_runtime,
             bronze_path="/data/bronze",
@@ -752,30 +752,30 @@ class TestConfigValidationErrorDataclass:
 
 @pytest.mark.unit
 class TestRuntimeConfigStrictValidation:
-    """Tests for RuntimeConfig.strict_validation flag."""
+    """Tests for RuntimeConfig.strict_preflight flag."""
 
-    def test_strict_validation_default_false(self):
-        """Test strict_validation defaults to False."""
+    def test_strict_preflight_default_true(self):
+        """Test strict_preflight defaults to True."""
         runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
-        assert runtime.strict_validation is False
+        assert runtime.strict_preflight is True
 
-    def test_strict_validation_can_be_enabled(self):
-        """Test strict_validation can be set to True."""
+    def test_strict_preflight_can_be_enabled(self):
+        """Test strict_preflight can be set to True."""
         runtime = RuntimeConfig(
             run_type=RunType.INCREMENTAL,
-            strict_validation=True,
+            strict_preflight=True,
         )
-        assert runtime.strict_validation is True
+        assert runtime.strict_preflight is True
 
-    def test_strict_validation_with_other_flags(self):
-        """Test strict_validation works with other runtime flags."""
+    def test_strict_preflight_with_other_flags(self):
+        """Test strict_preflight works with other runtime flags."""
         runtime = RuntimeConfig(
             run_type=RunType.REBUILD,
-            strict_validation=True,
+            strict_preflight=True,
             dry_run=True,
             limit=100,
         )
-        assert runtime.strict_validation is True
+        assert runtime.strict_preflight is True
         assert runtime.dry_run is True
         assert runtime.limit == 100
 
@@ -812,7 +812,7 @@ class TestValidateWriteModes:
             **_build_preflight_dependencies(config, mock_logger, mock_metrics),
         )
         errors = service.validate_write_modes()
-        assert len([e for e in errors if e.field == "write_mode"]) == 0
+        assert errors == []
 
     def test_silver_append_mode_is_valid(self, mock_context, mock_logger, mock_metrics):
         """Test that Silver 'append' mode is valid."""
@@ -837,7 +837,7 @@ class TestValidateWriteModes:
             **_build_preflight_dependencies(config, mock_logger, mock_metrics),
         )
         errors = service.validate_write_modes()
-        assert len([e for e in errors if e.field == "write_mode"]) == 0
+        assert errors == []
 
     def test_silver_overwrite_mode_is_invalid(
         self, mock_context, mock_logger, mock_metrics
@@ -983,7 +983,7 @@ class TestValidateWriteModes:
     ):
         """Test that invalid write modes are logged as warnings.
 
-        SilverWriteMode.DELETE is valid enum but not allowed by policy.
+        A MERGE contract declared as overwrite_rebuild must remain invalid.
         """
         from bioetl.domain.medallion import SilverWriteMode
 
@@ -994,8 +994,8 @@ class TestValidateWriteModes:
             table=TableConfig(
                 primary_keys=["id"],
                 silver_table="silver",
-                silver_write_mode=SilverWriteMode.DELETE,
-                silver_idempotency_contract="merge_upsert",
+                silver_write_mode=SilverWriteMode.MERGE,
+                silver_idempotency_contract="overwrite_rebuild",
                 gold_write_mode="scd2",
                 gold_idempotency_contract="scd2",
             ),
@@ -1060,13 +1060,15 @@ class TestValidatePreflight:
         assert report.should_block_startup is True
 
     @pytest.mark.asyncio
+    @pytest.mark.parametrize("duplicate_paths", [False, True])
     async def test_validate_preflight_strict_mode_raises(
-        self, preflight_service, mock_services
+        self, preflight_service, mock_services, duplicate_paths
     ):
-        """Test validate_preflight raises in strict mode on errors."""
+        """Invalid explicit layers stop before any infrastructure checks."""
+        preflight_service.validate_infrastructure = AsyncMock()
         strict_runtime = RuntimeConfig(
             run_type=RunType.INCREMENTAL,
-            strict_validation=True,
+            strict_preflight=True,
         )
 
         with pytest.raises(ValueError, match="Preflight validation failed"):
@@ -1074,11 +1076,15 @@ class TestValidatePreflight:
                 services=mock_services,
                 runtime=strict_runtime,
                 bronze_path="/data/output/bronze",
-                silver_path="/data/output/silver",
+                silver_path="/data/output/bronze"
+                if duplicate_paths
+                else "/data/output/silver",
                 gold_path="/data/output/gold",
-                silver_format="parquet",  # Invalid!
+                silver_format="delta" if duplicate_paths else "parquet",
                 gold_format="delta",
             )
+
+        preflight_service.validate_infrastructure.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def test_validate_preflight_non_strict_mode_returns_report(
@@ -1131,7 +1137,7 @@ class TestValidatePreflight:
     ):
         """Test validate_preflight includes write mode validation errors.
 
-        SilverWriteMode.DELETE is valid enum but not allowed by policy.
+        A MERGE contract declared as overwrite_rebuild must remain invalid.
         """
         from bioetl.domain.medallion import SilverWriteMode
 
@@ -1142,8 +1148,8 @@ class TestValidatePreflight:
             table=TableConfig(
                 primary_keys=["id"],
                 silver_table="silver",
-                silver_write_mode=SilverWriteMode.DELETE,
-                silver_idempotency_contract="merge_upsert",
+                silver_write_mode=SilverWriteMode.MERGE,
+                silver_idempotency_contract="overwrite_rebuild",
                 gold_write_mode="scd2",
                 gold_idempotency_contract="scd2",
             ),
@@ -1167,7 +1173,11 @@ class TestValidatePreflight:
         )
 
         assert report.medallion_policy_valid is False
-        write_mode_errors = [e for e in report.config_errors if e.field == "write_mode"]
+        write_mode_errors = [
+            e
+            for e in report.config_errors
+            if e.field == "sink.silver.idempotency_contract"
+        ]
         assert len(write_mode_errors) == 1
 
 

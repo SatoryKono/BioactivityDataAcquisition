@@ -12,6 +12,8 @@
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 from pathlib import Path
 
 import pytest
@@ -41,7 +43,9 @@ def test_writer_filesystem__clear_specific_table__81bdf630(
     delta_log.mkdir(parents=True)
     (table_path / "part-00000.parquet").touch()
 
-    writer = SilverWriter(base_path=str(tmp_path), logger=noop_logger)
+    writer = SilverWriter(
+        clock=fixed_test_clock(), base_path=str(tmp_path), logger=noop_logger
+    )
     result = writer.clear(table_name="chembl.activity")
 
     assert result == 1
@@ -53,7 +57,9 @@ def test_clear_specific_table_dry_run(noop_logger, tmp_path: Path) -> None:
     table_path = tmp_path / "chembl" / "activity"
     (table_path / "_delta_log").mkdir(parents=True)
 
-    writer = SilverWriter(base_path=str(tmp_path), logger=noop_logger)
+    writer = SilverWriter(
+        clock=fixed_test_clock(), base_path=str(tmp_path), logger=noop_logger
+    )
     result = writer.clear(table_name="chembl.activity", dry_run=True)
 
     assert result == 1
@@ -67,7 +73,9 @@ def test_clear_all_tables__infrastructure_storage_test_silver_writer_filesystem_
     for name in ["table1", "table2", "table3"]:
         (tmp_path / name / "_delta_log").mkdir(parents=True)
 
-    writer = SilverWriter(base_path=str(tmp_path), logger=noop_logger)
+    writer = SilverWriter(
+        clock=fixed_test_clock(), base_path=str(tmp_path), logger=noop_logger
+    )
     result = writer.clear()
 
     assert result == 3
@@ -83,7 +91,9 @@ def test_clear_ignores_non_delta_directories(noop_logger, tmp_path: Path) -> Non
     non_delta.mkdir()
     (non_delta / "some_file.txt").touch()
 
-    writer = SilverWriter(base_path=str(tmp_path), logger=noop_logger)
+    writer = SilverWriter(
+        clock=fixed_test_clock(), base_path=str(tmp_path), logger=noop_logger
+    )
     result = writer.clear()
 
     assert result == 1

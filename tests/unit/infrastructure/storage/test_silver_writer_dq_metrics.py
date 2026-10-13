@@ -29,6 +29,8 @@
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 import asyncio
 from tests.helpers.synthetic_paths import synthetic_test_root
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -78,7 +80,11 @@ class TestSilverWriterDQMetrics:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+            writer = SilverWriter(
+                clock=fixed_test_clock(),
+                base_path=str(SILVER_BASE_PATH),
+                logger=noop_logger,
+            )
             result = await writer._compute_dq_metrics("test.table", valid_records)
 
             assert isinstance(result, BatchDQMetrics)
@@ -99,7 +105,11 @@ class TestSilverWriterDQMetrics:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+            writer = SilverWriter(
+                clock=fixed_test_clock(),
+                base_path=str(SILVER_BASE_PATH),
+                logger=noop_logger,
+            )
             result = await writer._compute_dq_metrics("test.table", valid_records)
 
             # Should have column stats for non-internal fields
@@ -139,7 +149,11 @@ class TestSilverWriterDQMetrics:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+            writer = SilverWriter(
+                clock=fixed_test_clock(),
+                base_path=str(SILVER_BASE_PATH),
+                logger=noop_logger,
+            )
             result = await writer._compute_dq_metrics("test.table", records)
 
             assert result.schema_drift is not None
@@ -160,7 +174,11 @@ class TestSilverWriterDQMetrics:
                 "new_field": ["first", "second"],
             }
         )
-        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+        writer = SilverWriter(
+            clock=fixed_test_clock(),
+            base_path=str(SILVER_BASE_PATH),
+            logger=noop_logger,
+        )
         writer._detect_schema_drift = AsyncMock(return_value=None)
 
         with patch.object(
@@ -187,7 +205,11 @@ class TestSilverWriterDQMetrics:
             {"entity_id": "CHEMBL123"},
             {"entity_id": "CHEMBL456", "late_field": "value"},
         ]
-        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+        writer = SilverWriter(
+            clock=fixed_test_clock(),
+            base_path=str(SILVER_BASE_PATH),
+            logger=noop_logger,
+        )
         writer._detect_schema_drift = AsyncMock(return_value=None)
 
         result = await writer._compute_dq_metrics("test.table", records)
@@ -205,7 +227,11 @@ class TestSilverWriterDQMetrics:
         """Empty list input must not invent a schema-drift record."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+        writer = SilverWriter(
+            clock=fixed_test_clock(),
+            base_path=str(SILVER_BASE_PATH),
+            logger=noop_logger,
+        )
         writer._detect_schema_drift = AsyncMock(return_value=None)
 
         result = await writer._compute_dq_metrics("test.table", [])
@@ -226,7 +252,11 @@ class TestSilverWriterDQMetrics:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+            writer = SilverWriter(
+                clock=fixed_test_clock(),
+                base_path=str(SILVER_BASE_PATH),
+                logger=noop_logger,
+            )
             result = await writer._compute_dq_metrics("test.table", valid_records)
 
             assert result.schema_drift is None
@@ -245,7 +275,11 @@ class TestSilverWriterDQMetrics:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+            writer = SilverWriter(
+                clock=fixed_test_clock(),
+                base_path=str(SILVER_BASE_PATH),
+                logger=noop_logger,
+            )
             result = await writer._compute_dq_metrics("test.table", records)
 
             assert result.total_records == 102
@@ -274,7 +308,11 @@ class TestSilverWriterDQMetrics:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+            writer = SilverWriter(
+                clock=fixed_test_clock(),
+                base_path=str(SILVER_BASE_PATH),
+                logger=noop_logger,
+            )
             result = await writer._detect_schema_drift("test.table", records)
 
             assert isinstance(result, SchemaDriftInfo)
@@ -310,7 +348,11 @@ class TestSilverWriterDQMetrics:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+            writer = SilverWriter(
+                clock=fixed_test_clock(),
+                base_path=str(SILVER_BASE_PATH),
+                logger=noop_logger,
+            )
             result = await writer._detect_schema_drift("test.table", records)
 
             assert result is not None
@@ -346,7 +388,11 @@ class TestSilverWriterDQMetrics:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+            writer = SilverWriter(
+                clock=fixed_test_clock(),
+                base_path=str(SILVER_BASE_PATH),
+                logger=noop_logger,
+            )
             result = await writer._detect_schema_drift("test.table", records)
 
             assert result is not None
@@ -402,9 +448,11 @@ class TestSilverWriterDQMetrics:
         )
 
         writer = SilverWriter(
+            clock=fixed_test_clock(),
             base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock(),
                 metadata_writer=mock_metadata_writer,
                 metadata_coordinator=mock_metadata_coordinator,
             ),
@@ -474,9 +522,11 @@ class TestSilverWriterDQMetrics:
         mock_metadata_writer.write_silver_metadata = capture_write
 
         writer = SilverWriter(
+            clock=fixed_test_clock(),
             base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock(),
                 metadata_writer=mock_metadata_writer,
                 metadata_coordinator=mock_metadata_coordinator,
             ),
@@ -555,9 +605,11 @@ class TestSilverWriterDQMetrics:
             patch("bioetl.infrastructure.storage.silver_writer.write_deltalake"),
         ):
             writer = SilverWriter(
+                clock=fixed_test_clock(),
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
                 runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock(),
                     metadata_writer=mock_metadata_writer,
                     metadata_coordinator=mock_metadata_coordinator,
                 ),
@@ -596,7 +648,11 @@ class TestSilverWriterDQMetrics:
         from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+        writer = SilverWriter(
+            clock=fixed_test_clock(),
+            base_path=str(SILVER_BASE_PATH),
+            logger=noop_logger,
+        )
         writer._compute_dq_metrics = AsyncMock(
             return_value=BatchDQMetrics(
                 total_records=2,
@@ -635,12 +691,16 @@ class TestSilverWriterDQMetrics:
         self, noop_logger, valid_records
     ):
         """Finalization helper should resolve DQ/version/timing as one context."""
-        from datetime import UTC, datetime, timedelta
+        from datetime import UTC, datetime
 
         from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+        writer = SilverWriter(
+            clock=fixed_test_clock(),
+            base_path=str(SILVER_BASE_PATH),
+            logger=noop_logger,
+        )
         dq_metrics = BatchDQMetrics(
             total_records=2,
             valid_records=2,
@@ -652,7 +712,7 @@ class TestSilverWriterDQMetrics:
         started_at = datetime(2026, 3, 11, 12, 0, tzinfo=UTC)
 
         with patch(
-            "bioetl.infrastructure.storage.silver.metadata_mixin.time.perf_counter",
+            "bioetl.infrastructure.storage.silver.writer_runtime_support.time.perf_counter",
             return_value=5.5,
         ):
             context = await writer._prepare_silver_write_finalization_context(
@@ -667,7 +727,7 @@ class TestSilverWriterDQMetrics:
 
         assert context.dq_metrics is dq_metrics
         assert context.version_after == 11
-        assert context.completed_at == started_at + timedelta(seconds=1.5)
+        assert context.completed_at == writer._clock.now()
 
     @pytest.mark.asyncio
     async def test_prepare_silver_write_finalization_context_forwards_validation_context(
@@ -679,7 +739,11 @@ class TestSilverWriterDQMetrics:
         from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+        writer = SilverWriter(
+            clock=fixed_test_clock(),
+            base_path=str(SILVER_BASE_PATH),
+            logger=noop_logger,
+        )
         dq_metrics = BatchDQMetrics(
             total_records=3,
             valid_records=2,

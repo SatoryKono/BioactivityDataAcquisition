@@ -76,7 +76,7 @@ class SilverMetadataInput:
     Attributes:
         table_path: Full path to the Delta table.
         primary_keys: Primary key columns.
-        mode: Write mode (merge, append, delete).
+        mode: Batch write mode (merge, append), or physical snapshot overwrite.
         records: List of records written (current batch).
         total_records: Optional total records for the entire run (aggregates).
         source_batch_ids: Optional list of all source batch IDs for the run.
@@ -122,6 +122,7 @@ class SilverMetadataInput:
     composite_run_id: str | None = None
     lineage_created_at: datetime | None = None
     total_bytes: int = 0  # ADR-029: Total size in bytes
+    duration_seconds: float | None = None
 
 
 @dataclass(frozen=True, slots=True)

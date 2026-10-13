@@ -8,6 +8,10 @@ import asyncio
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, TypeVar, cast
 
+from bioetl.infrastructure.storage.gold.commit_outcome import (
+    await_physical_commit,
+    receipt_for,
+)
 from bioetl.infrastructure.storage.gold.io_delta_runtime import (
     _build_simple_gold_write,
     _execute_prepared_scd2_gold_write,
@@ -186,20 +190,23 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
         if "content_hash" in new_data.schema.names:
             update_kwargs["predicate"] = self._build_content_changed_predicate()
 
-        await self._run_in_executor(
-            lambda: (
-                dt.merge(
-                    source=pa.RecordBatchReader.from_batches(
-                        new_data.schema, new_data.to_batches()
-                    ),
-                    predicate=merge_condition,
-                    source_alias="source",
-                    target_alias="target",
+        await await_physical_commit(
+            lambda: self._run_in_executor(
+                lambda: (
+                    dt.merge(
+                        source=pa.RecordBatchReader.from_batches(
+                            new_data.schema, new_data.to_batches()
+                        ),
+                        predicate=merge_condition,
+                        source_alias="source",
+                        target_alias="target",
+                    )
+                    .when_matched_update(**update_kwargs)
+                    .when_not_matched_insert_all()
+                    .execute()
                 )
-                .when_matched_update(**update_kwargs)
-                .when_not_matched_insert_all()
-                .execute()
-            )
+            ),
+            receipt_for(str(dt.table_uri)),
         )
 
 

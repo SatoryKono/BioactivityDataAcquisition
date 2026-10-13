@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
+from bioetl.application.core.preflight.medallion_validator import PreflightLayerConfig
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -271,4 +272,22 @@ def build_storage_creation_context(
         silver_csv_exporter=silver_csv_exporter,
         gold_csv_exporter=gold_csv_exporter,
         pipeline_name=pipeline_name,
+    )
+
+
+def build_preflight_layer_config(
+    storage: object, yaml_config: PipelineYamlConfig | None
+) -> PreflightLayerConfig:
+    """Bind preflight to actual writer destinations, including YAML defaulted paths."""
+    sink = yaml_config.sink if yaml_config is not None else {}
+    silver, gold = sink.get("silver"), sink.get("gold")
+    bronze_writer = getattr(storage, "bronze", None)
+    silver_writer = getattr(storage, "silver", None)
+    gold_writer = getattr(storage, "gold", None)
+    return PreflightLayerConfig(
+        bronze_path=str(bronze_writer.base_path) if bronze_writer is not None else None,
+        silver_path=str(silver_writer.base_path) if silver_writer is not None else None,
+        gold_path=str(gold_writer.base_path) if gold_writer is not None else None,
+        silver_format=silver.format if silver is not None else None,
+        gold_format=gold.format if gold is not None else None,
     )

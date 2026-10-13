@@ -12,6 +12,8 @@
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 import hashlib
 import json
 from pathlib import Path
@@ -74,7 +76,9 @@ def temp_delta_path(tmp_path: Path) -> str:
 
 @pytest.fixture
 def silver_writer(temp_delta_path: str, noop_logger: object) -> SilverWriter:
-    return SilverWriter(base_path=temp_delta_path, logger=noop_logger)
+    return SilverWriter(
+        clock=fixed_test_clock(), base_path=temp_delta_path, logger=noop_logger
+    )
 
 
 @pytest.mark.asyncio

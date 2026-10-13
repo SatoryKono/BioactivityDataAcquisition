@@ -88,6 +88,9 @@ class RuntimeConfig:
     # When False, violations are logged as warnings
     strict_validation: bool = False
 
+    # Startup policy is independent of postrun publication failure handling.
+    strict_preflight: bool = True
+
     # Gold layer schema validation (strict mode)
     # When True, pipelines fail if Gold schema is not provided
     # Default True to enforce strict Gold validation (override only in non-prod)
@@ -203,3 +206,11 @@ class RuntimeConfig:
         if self.lock_ttl is None:
             return self.heartbeat_interval * 3
         return self.lock_ttl
+
+
+@dataclass(frozen=True, slots=True)
+class PreflightRuntimeSettings:
+    """Resolved infrastructure health and Medallion escalation policy."""
+
+    health_check_mode: Literal["strict", "probe"] = "strict"
+    strict_preflight: bool = True

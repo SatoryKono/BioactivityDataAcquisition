@@ -30,6 +30,9 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from contextlib import contextmanager
+from bioetl.domain.exceptions.gold_write import GoldWriteFailure
+from bioetl.domain.types.gold_contracts import GoldWriteCategory
 from unittest.mock import MagicMock, patch
 
 import pandera.pandas as pa
@@ -67,7 +70,7 @@ def strict_schema():
 
 async def test_write_gold_no_records(gold_writer, strict_schema):
     """Test writing empty records raises ValueError."""
-    with pytest.raises(ValueError, match="No records to write"):
+    with precommit_error("No records to write"):
         await gold_writer.write_gold("test_table", [], schema=strict_schema)
 
 
@@ -75,7 +78,7 @@ async def test_write_gold_schema_not_strict(gold_writer, valid_records):
     """Test non-strict schema raises ValueError."""
     schema = DataFrameSchema({"id": pa.Column(int)})  # strict=False by default
 
-    with pytest.raises(ValueError, match="Gold layer requires strict=True"):
+    with precommit_error("Gold layer requires strict=True"):
         await gold_writer.write_gold("test_table", valid_records, schema=schema)
 
 
@@ -85,7 +88,7 @@ async def test_storage_gold_writer__validation_failure__eb6c952a(
     """Test schema validation failure raises ValueError."""
     invalid_records = [{"id": "not_int", "value": 10.5}]
 
-    with pytest.raises(ValueError, match="Schema validation failed"):
+    with precommit_error("Schema validation failed"):
         await gold_writer.write_gold(
             "test_table", invalid_records, schema=strict_schema
         )
@@ -93,7 +96,7 @@ async def test_storage_gold_writer__validation_failure__eb6c952a(
 
 async def test_write_gold_invalid_mode(gold_writer, valid_records, strict_schema):
     """Test invalid write mode raises ValueError."""
-    with pytest.raises(ValueError, match="Invalid Gold write mode"):
+    with precommit_error("Invalid Gold write mode"):
         await gold_writer.write_gold(
             "test_table", valid_records, schema=strict_schema, mode="invalid"
         )
@@ -138,7 +141,7 @@ async def test_write_simple_append(gold_writer, valid_records, strict_schema):
 
 async def test_write_scd2_missing_config(gold_writer, valid_records, strict_schema):
     """Test SCD2 mode without config raises ValueError."""
-    with pytest.raises(ValueError, match="scd_config required"):
+    with precommit_error("scd_config required"):
         await gold_writer.write_gold(
             "test_table", valid_records, schema=strict_schema, mode="scd2"
         )
@@ -386,3 +389,13 @@ async def test_write_gold_merged_strips_runtime_occurrence_fields(gold_writer):
         written_list = written_data.to_pylist()
 
         assert list(written_list[0].keys()) == ["id", "value"]
+
+
+@contextmanager
+def precommit_error(message):
+    """Preserve validation type/message assertions inside the receipt wrapper."""
+    with pytest.raises(GoldWriteFailure) as found:
+        yield
+    assert found.value.receipt.category == GoldWriteCategory.NOT_COMMITTED
+    assert isinstance(found.value.__cause__, ValueError)
+    assert message in str(found.value.__cause__)

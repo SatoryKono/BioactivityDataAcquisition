@@ -29,6 +29,8 @@
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 from dataclasses import dataclass, replace
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -62,12 +64,14 @@ class _ReplaceableValidation:
 @dataclass(frozen=True)
 class _ReplaceableMetadata:
     _host: object | None
+    _clock: object = None
 
 
 class _Writer:
     """Duck-typed writer for runtime support helpers."""
 
     def __init__(self) -> None:
+        self._clock = fixed_test_clock()
         self.logger = MagicMock()
         self._pipeline_name = "chembl_activity"
         self._tracing = None
@@ -112,6 +116,7 @@ def _services() -> SilverWriterRuntimeServices:
 
 def _request() -> SilverWriterRuntimeServicesRequest:
     return SilverWriterRuntimeServicesRequest(
+        clock=fixed_test_clock(),
         csv_exporter=MagicMock(),
         tracing=MagicMock(),
         write_policy=MagicMock(),
@@ -165,6 +170,7 @@ class TestSilverWriterRuntimeSupport:
 
         assert resolved is services
         build_request = build_services.call_args.args[0]
+        assert build_request.clock is writer._clock
         assert build_request.logger is writer.logger
         assert build_request.pipeline_name == "chembl_activity"
 
@@ -190,6 +196,7 @@ class TestSilverWriterRuntimeSupport:
             == writer._write_silver_merged_metadata
         )
         assert writer._validation._get_table_schema == writer._get_table_schema
+        assert writer._metadata._clock is writer._clock
         assert writer._metadata._host is writer
         assert writer._postwrite is not None
 
