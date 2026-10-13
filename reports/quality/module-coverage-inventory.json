@@ -1,6 +1,6 @@
 {
-  "additive_coverage_xml_path": "reports/quality/fs001-ci-38d/coverage-report/coverage/coverage.xml",
-  "additive_coverage_xml_sha256": "0495f563eea5ac2814308ba60696949eeb3aec32b11e930edc724b25a20adf61",
+  "additive_coverage_xml_path": "reports/quality/fs001-ci-84d/coverage-report/coverage/coverage.xml",
+  "additive_coverage_xml_sha256": "8ae650899233e04f649acec1d639f8a945b887ce53d65e4991947bf0d0250eb2",
   "additive_measured_module_count": 2463,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
@@ -22349,14 +22349,14 @@
       "source_lines": 443
     },
     {
-      "coverage_percent": 91.51,
+      "coverage_percent": 91.74,
       "coverage_status": "partially_covered",
-      "covered_lines": 97,
-      "executable_lines": 106,
+      "covered_lines": 100,
+      "executable_lines": 109,
       "missing_lines": 9,
       "module": "bioetl.infrastructure.storage.bronze.cleanup_preview_mixin",
       "path": "src/bioetl/infrastructure/storage/bronze/cleanup_preview_mixin.py",
-      "source_lines": 191
+      "source_lines": 195
     },
     {
       "coverage_percent": 87.08,
@@ -48071,14 +48071,14 @@
       "source_lines": 443
     },
     {
-      "coverage_percent": 91.51,
+      "coverage_percent": 91.74,
       "coverage_status": "partially_covered",
-      "covered_lines": 97,
-      "executable_lines": 106,
+      "covered_lines": 100,
+      "executable_lines": 109,
       "missing_lines": 9,
       "module": "bioetl.infrastructure.storage.bronze.cleanup_preview_mixin",
       "path": "src/bioetl/infrastructure/storage/bronze/cleanup_preview_mixin.py",
-      "source_lines": 191
+      "source_lines": 195
     },
     {
       "coverage_percent": 87.08,
@@ -51453,7 +51453,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "bf40f4f32acec5d7d57f851b0b6599509e4bae4f5313f6e00eb0cc8054c2b3ba",
+  "source_tree_sha256": "452c3d374f54252a9bb46e958184057db51dbdf0f9947d0baac2267e141acfb7",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

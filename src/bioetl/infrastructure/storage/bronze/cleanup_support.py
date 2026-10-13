@@ -22,6 +22,7 @@ from uuid import UUID
 from .cleanup_core import (
     _DONE_PREFIX,
     _O_NOFOLLOW,
+    _O_NONBLOCK,
     _STAGE_PREFIX,
     BronzeRootLease,
     _CleanupConflict,
@@ -84,7 +85,7 @@ def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[BronzeRoot
     try:
         lock_fd = os.open(
             ".bronze-cleanup.lock",
-            os.O_CREAT | os.O_RDWR | _O_NOFOLLOW,
+            os.O_CREAT | os.O_RDWR | _O_NOFOLLOW | _O_NONBLOCK,
             0o600,
             dir_fd=root_fd,
         )

@@ -14,7 +14,10 @@ from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage import bronze_writer as bronze_writer_module
-from bioetl.infrastructure.storage.bronze.cleanup_support import bronze_tree_lock
+from bioetl.infrastructure.storage.bronze.cleanup_support import (
+    bronze_tree_lock,
+    destructive_cleanup_supported,
+)
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
 pytestmark = pytest.mark.integration
@@ -22,6 +25,23 @@ _APPLY_POSIX = pytest.mark.skipif(
     os.name == "nt", reason="Windows destructive cleanup is fail-closed (NOT_VERIFIED)"
 )
 CUTOFF = datetime(2024, 6, 1, tzinfo=UTC)
+
+
+@pytest.mark.skipif(
+    not destructive_cleanup_supported(),
+    reason="POSIX anchored lock capability required",
+)
+def test_non_regular_lock_refuses_without_blocking(tmp_path: Path) -> None:
+    """A FIFO in place of the lock cannot stall or authorize cleanup."""
+    root = tmp_path / "bronze"
+    root.mkdir()
+    os.mkfifo(root / ".bronze-cleanup.lock")
+    sentinel = root / "sentinel"
+    sentinel.write_bytes(b"retain")
+    with pytest.raises(OSError, match="not a regular file"):
+        with bronze_tree_lock(root, exclusive=True):
+            pytest.fail("non-regular lock must not authorize cleanup")
+    assert sentinel.read_bytes() == b"retain"
 
 
 @_APPLY_POSIX
