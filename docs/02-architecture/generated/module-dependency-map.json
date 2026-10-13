@@ -1,12 +1,12 @@
 {
   "summary": {
-    "scanned_modules": 2567,
-    "total_internal_imports": 8260,
+    "scanned_modules": 2569,
+    "total_internal_imports": 8271,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "d90ab6a0eb9a168b52a77520ae131ea5e98f86a152cbc6d875fcc347d32771b7"
+    "source_fingerprint": "aaa06110661b801ee45defa9db1541c25b43dd37f7ba2737acbbb4eefe24c781"
   },
   "layer_edges": [
     {
@@ -24,7 +24,7 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 229,
+      "imports": 230,
       "allowed": true
     },
     {
@@ -36,31 +36,31 @@
     {
       "source": "composition",
       "target": "domain",
-      "imports": 314,
+      "imports": 316,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 294,
+      "imports": 296,
       "allowed": true
     },
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1305,
+      "imports": 1306,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 801,
+      "imports": 803,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 1268,
+      "imports": 1271,
       "allowed": true
     },
     {
@@ -117,7 +117,7 @@
     {
       "source": "infrastructure.storage",
       "target": "domain.types",
-      "imports": 81
+      "imports": 82
     },
     {
       "source": "infrastructure.storage",
@@ -142,7 +142,7 @@
     {
       "source": "composition.factories",
       "target": "application.core",
-      "imports": 49
+      "imports": 50
     },
     {
       "source": "composition.bootstrap",
@@ -157,7 +157,7 @@
     {
       "source": "composition.factories",
       "target": "domain.ports",
-      "imports": 36
+      "imports": 37
     },
     {
       "source": "infrastructure.storage",
@@ -305,6 +305,11 @@
       "imports": 20
     },
     {
+      "source": "infrastructure.storage",
+      "target": "domain.exceptions",
+      "imports": 18
+    },
+    {
       "source": "application.core",
       "target": "domain.exceptions",
       "imports": 17
@@ -332,11 +337,6 @@
     {
       "source": "infrastructure.schemas",
       "target": "domain.config",
-      "imports": 17
-    },
-    {
-      "source": "infrastructure.storage",
-      "target": "domain.exceptions",
       "imports": 17
     },
     {
