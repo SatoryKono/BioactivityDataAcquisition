@@ -155,6 +155,16 @@ def _depth_limit_exceeded(raw_pattern: str, limit: int = 10) -> bool:
     return False
 
 
+def _is_formatted_string_prefix(raw_pattern: str, index: int) -> bool:
+    """Recognize an f-string prefix at a string-token boundary."""
+    if index and (raw_pattern[index - 1].isalnum() or raw_pattern[index - 1] == "_"):
+        return False
+    prefix = raw_pattern[index : index + 2].lower()
+    return (
+        raw_pattern[index] in "fF" and raw_pattern[index + 1 : index + 2] in ("'", '"')
+    ) or (prefix in {"fr", "rf"} and raw_pattern[index + 2 : index + 3] in ("'", '"'))
+
+
 def _contains_formatted_string(raw_pattern: str) -> bool:
     """Find f-string tokens without parsing their potentially nested expressions."""
     quote: str | None = None
@@ -172,16 +182,8 @@ def _contains_formatted_string(raw_pattern: str) -> bool:
             if triple:
                 index += 2
             quote = char
-        elif char in "fFrR" and (
-            index == 0
-            or not (raw_pattern[index - 1].isalnum() or raw_pattern[index - 1] == "_")
-        ):
-            prefix = raw_pattern[index : index + 2].lower()
-            if (char in "fF" and raw_pattern[index + 1 : index + 2] in ("'", '"')) or (
-                prefix in {"fr", "rf"}
-                and raw_pattern[index + 2 : index + 3] in ("'", '"')
-            ):
-                return True
+        elif char in "fFrR" and _is_formatted_string_prefix(raw_pattern, index):
+            return True
         index += 1
     return False
 
