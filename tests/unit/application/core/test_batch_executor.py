@@ -33,6 +33,8 @@ the retired pipeline execution loop and RecordProcessor-era helpers.
 
 from __future__ import annotations
 
+from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
+
 import asyncio
 from dataclasses import FrozenInstanceError
 from typing import cast
@@ -128,7 +130,11 @@ def mock_storage():
     storage = AsyncMock()
     storage.write_bronze = AsyncMock()
     storage.write_silver = AsyncMock()
-    storage.write_gold = AsyncMock()
+    storage.write_gold = AsyncMock(
+        return_value=GoldWriteReceipt(
+            "synthetic", "0.0.0", GoldWriteCategory.COMPLETE, ("synthetic",)
+        )
+    )
     return storage
 
 

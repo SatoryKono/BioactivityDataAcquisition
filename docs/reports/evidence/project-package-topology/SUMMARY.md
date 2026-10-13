@@ -429,3 +429,21 @@ Refresh note (2026-09-22, isolated Grafana continuation): source inventory
 rebound to `source_tree_sha256=6c334dfe51b614f733e0a070d4eb84658e171e21fa6dd11b2ed9a5e024232b00`,
 `source_module_count=2497`. This stamp is derived from the module inventory;
 it is not a new coverage measurement or a complete topology re-audit.
+
+<!-- current-source-binding:start -->
+
+## Current source inventory binding
+
+- `source_tree_sha256=a12b1787b696aa01041800c8a9fa100147107c3a8f36f35158a11c6687e0d299`
+- `source_module_count=2571`
+- Source modules: `2571`
+- `2529` fully covered
+- `41` partially covered
+- Test inventory: `assertless_total_candidates=85`
+
+Derived by scripts/engineering/qa/report_topology_source_binding.py from
+the verified module inventory. This is a source-only projection, not a
+new coverage measurement or a complete topology re-audit. Historical raw
+evidence and capture identity above remain unchanged.
+
+<!-- current-source-binding:end -->

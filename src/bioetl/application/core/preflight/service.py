@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import inspect
 import time
 from typing import TYPE_CHECKING, Protocol
 
@@ -10,8 +9,14 @@ from bioetl.application.core.preflight._observability import (
     emit_preflight_health_results,
 )
 from bioetl.application.core.preflight.health_aggregator import HealthAggregator
+from bioetl.application.core.preflight.health_aggregator_runtime import (
+    _supports_raise_on_unhealthy,
+)
 from bioetl.application.core.preflight.medallion_validator import (
     MedallionConfigValidator,
+    PreflightLayerConfig,
+    build_runtime_validation_report,
+    raise_if_strict_blocking,
 )
 from bioetl.domain.control_plane.run_ledger import ORDINARY_RUN_LEDGER_STAGE_NAMES
 from bioetl.domain.types import (
@@ -49,21 +54,9 @@ class _PreflightExecutionHostProtocol(Protocol):
     def _observer(self) -> PipelineObserver: ...
 
 
-def _supports_raise_on_unhealthy(validate_fn: object) -> bool:
-    """Return True when ``validate_infrastructure`` accepts raise_on_unhealthy."""
-    try:
-        from typing import Any, cast
-
-        signature = inspect.signature(
-            cast(Any, validate_fn)
-        )  # Any: inspect accepts arbitrary callables
-    except (TypeError, ValueError):
-        return False
-    return "raise_on_unhealthy" in signature.parameters
-
-
 async def validate_infrastructure(host: _PreflightExecutionHostProtocol) -> None:
     """Validate infrastructure health before pipeline execution."""
+    host._preflight_service.validate_runtime_configuration(host._runtime)
     start_time = time.perf_counter()
     validate_fn = host._preflight_service.validate_infrastructure
     if _supports_raise_on_unhealthy(validate_fn):
@@ -103,6 +96,8 @@ class PreflightService:
         metrics: MetricsPort,
         health_aggregator: HealthAggregator,
         medallion_validator: MedallionConfigValidator,
+        *,
+        layer_config: PreflightLayerConfig | None = None,
     ) -> None:
         self._config = config
         self._context = context
@@ -110,6 +105,7 @@ class PreflightService:
         self._metrics = metrics
         self._health_aggregator = health_aggregator
         self._medallion_validator = medallion_validator
+        self._layer_config = layer_config or PreflightLayerConfig()
 
     async def validate_infrastructure(
         self,
@@ -117,13 +113,9 @@ class PreflightService:
         *,
         raise_on_unhealthy: bool = True,
     ) -> HealthReport:
-        """Validate storage and data source health.
-        Args:
-            services: Pipeline service container providing storage and data source ports.
-            raise_on_unhealthy: Whether to raise InfrastructureError when any
-                component in the resulting report is unhealthy.
-        Returns:
-            HealthReport with per-component status and overall health assessment.
+        """Probe storage/provider ports and return their executed health report.
+
+        Unhealthy components raise only when ``raise_on_unhealthy`` is true.
         """
         report = await self._health_aggregator.check_all(services)
         if raise_on_unhealthy:
@@ -137,23 +129,13 @@ class PreflightService:
     def validate_medallion_config(
         self,
         runtime: RuntimeConfig,
-        bronze_path: str,
-        silver_path: str,
-        gold_path: str,
+        bronze_path: str | None,
+        silver_path: str | None,
+        gold_path: str | None,
         silver_format: str | None = None,
         gold_format: str | None = None,
     ) -> list[ConfigValidationError]:
-        """Validate Medallion architecture invariants.
-        Args:
-            runtime: Runtime configuration specifying run type and write modes.
-            bronze_path: Absolute path to the Bronze layer directory.
-            silver_path: Absolute path to the Silver layer directory.
-            gold_path: Absolute path to the Gold layer directory.
-            silver_format: Optional storage format override for Silver (e.g. ``"delta"``).
-            gold_format: Optional storage format override for Gold.
-        Returns:
-            List of ConfigValidationError for any detected violations (empty if valid).
-        """
+        """Return violations for supplied paths/formats and the runtime policy."""
         return self._medallion_validator.validate_medallion_config(
             runtime=runtime,
             bronze_path=bronze_path,
@@ -164,39 +146,27 @@ class PreflightService:
         )
 
     def validate_write_modes(self) -> list[ConfigValidationError]:
-        """Validate that config write modes are allowed by Medallion policy.
-        Returns:
-            List of ConfigValidationError for any invalid write mode combinations.
-        """
+        """Return mode/idempotency violations without running health probes."""
         return self._medallion_validator.validate_write_modes()
 
     async def validate_preflight(
         self,
         services: PipelineHealthServicesProtocol,
         runtime: RuntimeConfig,
-        bronze_path: str,
-        silver_path: str,
-        gold_path: str,
+        bronze_path: str | None,
+        silver_path: str | None,
+        gold_path: str | None,
         silver_format: str | None = None,
         gold_format: str | None = None,
     ) -> PreflightReport:
-        """Execute all preflight checks and return aggregated report.
-        Args:
-            services: Pipeline service container for infrastructure health checks.
-            runtime: Runtime configuration used for Medallion invariant validation.
-            bronze_path: Absolute path to the Bronze layer directory.
-            silver_path: Absolute path to the Silver layer directory.
-            gold_path: Absolute path to the Gold layer directory.
-            silver_format: Optional storage format override for Silver.
-            gold_format: Optional storage format override for Gold.
-        Returns:
-            PreflightReport aggregating infrastructure health and config validation results.
+        """Validate supplied layer paths/formats before health and extraction.
+
+        Strict preflight raises for invalid configuration before health probes.
+        Advisory mode runs probes and includes configuration errors in the report.
+        Paths may be relative; validation compares their resolved destinations.
+        The report contains actual component health and Medallion validation results.
         """
-        health_report = await self.validate_infrastructure(
-            services,
-            raise_on_unhealthy=False,
-        )
-        self.assert_infrastructure_healthy(health_report)
+        self.validate_runtime_configuration(runtime)
         config_errors = self.validate_medallion_config(
             runtime=runtime,
             bronze_path=bronze_path,
@@ -208,6 +178,20 @@ class PreflightService:
         write_mode_errors = self.validate_write_modes()
         config_errors.extend(write_mode_errors)
         medallion_policy_valid = len(config_errors) == 0
+        if config_errors and runtime.strict_preflight:
+            report = PreflightReport(
+                health_report=HealthReport(results=[]),
+                medallion_policy_valid=False,
+                config_errors=config_errors,
+                checked_at=self._context.started_at,
+            )
+            self._raise_if_strict_blocking(report, runtime)
+            return report
+        health_report = await self.validate_infrastructure(
+            services,
+            raise_on_unhealthy=False,
+        )
+        self.assert_infrastructure_healthy(health_report)
         report = PreflightReport(
             health_report=health_report,
             medallion_policy_valid=medallion_policy_valid,
@@ -217,21 +201,24 @@ class PreflightService:
         self._raise_if_strict_blocking(report, runtime)
         return report
 
-    def _raise_if_strict_blocking(
-        self,
-        report: PreflightReport,
-        runtime: RuntimeConfig,
-    ) -> None:
-        """Raise strict-mode preflight error when startup should be blocked."""
-        if not (report.should_block_startup and runtime.strict_validation):
-            return
-        error_messages = [
-            f"{error.field}: {error.actual} (expected: {error.expected})"
-            for error in report.config_errors
-        ]
-        raise ValueError(
-            "Preflight validation failed (strict mode): " + ", ".join(error_messages)
+    def validate_runtime_configuration(
+        self, runtime: RuntimeConfig, health_report: HealthReport | None = None
+    ) -> PreflightReport:
+        """Enforce bound Medallion configuration before preparation or extraction."""
+        report = build_runtime_validation_report(
+            self._medallion_validator,
+            runtime,
+            self._layer_config,
+            health_report,
+            checked_at=self._context.started_at,
         )
+        self._raise_if_strict_blocking(report, runtime)
+        return report
+
+    def _raise_if_strict_blocking(
+        self, report: PreflightReport, runtime: RuntimeConfig
+    ) -> None:
+        raise_if_strict_blocking(report, runtime)
 
 
 __all__ = [

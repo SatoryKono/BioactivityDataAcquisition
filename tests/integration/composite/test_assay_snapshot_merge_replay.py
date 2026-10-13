@@ -6,6 +6,7 @@ from bioetl.composition.bootstrap.runtime.assay_replay_capture import (
     prepare_assay_replay,
 )
 
+from bioetl.domain.types.gold_contracts import GoldWriteReceipt, GoldWriteCategory
 from datetime import UTC, datetime
 from os.path import relpath
 from pathlib import Path
@@ -310,7 +311,11 @@ async def test_assay_merge_replays_nullable_foreign_keys_without_live_reads(tmp_
             clock=FixedClock(timestamp),
         )
 
+    table_name = config.merge.output_gold_path.replace("\\", "/").split("gold/", 1)[-1]
     original_output = AsyncMock()
+    original_output.write_gold_merged.return_value = GoldWriteReceipt(
+        table_name, "0.0.0", GoldWriteCategory.COMPLETE, (table_name,)
+    )
     original = await service(capture, original_output).execute_request(request)
     assert original.records_merged == 3
     digest = capture.seal(required_tables=frozenset(tables))
@@ -320,6 +325,9 @@ async def test_assay_merge_replays_nullable_foreign_keys_without_live_reads(tmp_
         tmp_path / "inputs", envelope_sha256=digest
     )
     replay_output = AsyncMock()
+    replay_output.write_gold_merged.return_value = (
+        original_output.write_gold_merged.return_value
+    )
     replay = await service(replay_reader, replay_output).execute_request(request)
     assert replay.records_merged == 3
     for layer in ("silver", "gold"):
@@ -327,6 +335,8 @@ async def test_assay_merge_replays_nullable_foreign_keys_without_live_reads(tmp_
         replay_write = getattr(replay_output, f"write_{layer}_merged")
         original_write.assert_awaited_once()
         replay_write.assert_awaited_once()
+        if layer == "gold":
+            assert original_write.call_args.args[0] == table_name
         assert replay_write.call_args == original_write.call_args
         records = replay_write.call_args.args[1]
         assert len(records) == 3

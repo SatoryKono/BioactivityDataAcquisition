@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import Mapping
 from dataclasses import asdict
 from enum import Enum
 from pathlib import Path
@@ -57,7 +58,7 @@ def _convert_for_json(obj: Any) -> Any:
         return obj.value  # Convert Enum to its value
     if isinstance(obj, frozenset):
         return sorted(obj)  # Convert to sorted list for stable comparisons
-    if isinstance(obj, dict):
+    if isinstance(obj, Mapping):
         return {k: _convert_for_json(v) for k, v in obj.items()}
     if isinstance(obj, (list, tuple)):
         return [_convert_for_json(item) for item in obj]
@@ -81,8 +82,8 @@ def load_snapshots() -> dict[str, Any]:
 def save_snapshots(snapshots: dict[str, Any]) -> None:
     """Save snapshots to JSON file."""
     SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
-    with open(SNAPSHOT_FILE, "w") as f:
-        json.dump(snapshots, f, indent=2, sort_keys=True)
+    payload = json.dumps(snapshots, indent=2, sort_keys=True)
+    SNAPSHOT_FILE.write_text(payload, encoding="utf-8")
 
 
 @pytest.fixture(scope="session")
@@ -186,3 +187,12 @@ def test_golden_master_pipeline_set_matches_declared_registry() -> None:
     registry = _golden_master_registry()
     expected = {pipeline for pipelines in registry.values() for pipeline in pipelines}
     assert set(PIPELINES) == expected
+
+
+def test_golden_master_serializes_immutable_mappings() -> None:
+    """Frozen config mappings must retain their values in snapshot JSON."""
+    from types import MappingProxyType
+
+    assert _convert_for_json(
+        MappingProxyType({"nested": MappingProxyType({"enabled": True})})
+    ) == {"nested": {"enabled": True}}

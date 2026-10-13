@@ -272,8 +272,12 @@ def augment_dq_summary_with_composite_cv(
 def build_runtime_duration(
     started_at: datetime | None,
     completed_at: datetime | None,
+    *,
+    duration_override: float | None = None,
 ) -> float:
     """Compute operation duration in seconds."""
+    if duration_override is not None:
+        return duration_override
     if started_at is None or completed_at is None:
         return 0.0
     return (completed_at - started_at).total_seconds()
