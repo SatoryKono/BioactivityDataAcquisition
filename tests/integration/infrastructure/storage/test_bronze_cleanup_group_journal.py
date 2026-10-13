@@ -48,13 +48,21 @@ def journal_execution_environment(tmp_path_factory, record_testsuite_property) -
         mounts = []
         for line in Path("/proc/self/mountinfo").read_text().splitlines():
             fields = line.split()
-            if temp.is_relative_to(Path(fields[4])):
+            mountpoint = fields[4]
+            for escaped, decoded in (
+                (r"\040", " "),
+                (r"\011", "\t"),
+                (r"\012", "\n"),
+                (r"\134", "\\"),
+            ):
+                mountpoint = mountpoint.replace(escaped, decoded)
+            if temp.is_relative_to(Path(mountpoint)):
                 separator = fields.index("-")
                 mounts.append(
                     (
-                        len(fields[4]),
+                        len(mountpoint),
                         {
-                            "target": fields[4],
+                            "target": mountpoint,
                             "options": fields[5],
                             "filesystem": fields[separator + 1],
                             "super_options": fields[separator + 3],
