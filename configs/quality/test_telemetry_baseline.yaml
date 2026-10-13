@@ -8,7 +8,7 @@ source_commit: 02080b2e76c8064e7f4fa57a6694c294e63a4c0d
 source_run_id: local-bioetl-local-coverage-pr12198-r2
 source_event: local_coverage_verify
 source_run_url: null
-source_tree_sha256: 3e030c96bf18fc12bf37e517fcca7eaab9f014dfc409cc4ee8d324dcb566b208
+source_tree_sha256: 7d69143531a1e831c9e05c5e852ef0f10832b09b80a40dc1077829284c361102
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
