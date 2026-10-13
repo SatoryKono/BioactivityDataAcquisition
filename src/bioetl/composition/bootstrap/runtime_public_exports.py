@@ -125,7 +125,10 @@ RUNTIME_PACKAGE_PUBLIC_EXPORTS: dict[str, str] = {
     "bootstrap_pipeline_runner_service": (
         "bioetl.composition.bootstrap.runtime.runner"
     ),
-    "validate_observability_preflight": RUNTIME_OBSERVABILITY_MODULE,
+    "validate_observability_preflight": (
+        "bioetl.composition.bootstrap.runtime."
+        "observability_validate_observability_preflight"
+    ),
 }
 
 BOOTSTRAP_ROOT_EXPORT_NAMES: tuple[str, ...] = (

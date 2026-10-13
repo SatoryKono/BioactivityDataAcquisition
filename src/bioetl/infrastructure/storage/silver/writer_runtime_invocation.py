@@ -135,6 +135,7 @@ def _coerce_silver_write_invocation(
         run_type=write_request.run_type,
         source_batch_id=write_request.source_batch_id,
         ingestion_ts=write_request.ingestion_ts,
+        started_at=write_request.started_at,
         quarantined_count=write_request.quarantined_count,
         validation_errors=write_request.validation_errors,
     )
