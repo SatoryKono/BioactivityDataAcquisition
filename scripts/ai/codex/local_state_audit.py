@@ -155,18 +155,22 @@ def _depth_limit_exceeded(raw_pattern: str, limit: int = 10) -> bool:
     return False
 
 
-def _is_formatted_string_prefix(raw_pattern: str, index: int) -> bool:
-    """Recognize an f-string prefix at a string-token boundary."""
+def _is_interpolated_string_prefix(raw_pattern: str, index: int) -> bool:
+    """Recognize an f- or t-string prefix at a string-token boundary."""
     if index and (raw_pattern[index - 1].isalnum() or raw_pattern[index - 1] == "_"):
         return False
     prefix = raw_pattern[index : index + 2].lower()
     return (
-        raw_pattern[index] in "fF" and raw_pattern[index + 1 : index + 2] in ("'", '"')
-    ) or (prefix in {"fr", "rf"} and raw_pattern[index + 2 : index + 3] in ("'", '"'))
+        raw_pattern[index] in "fFtT"
+        and raw_pattern[index + 1 : index + 2] in ("'", '"')
+    ) or (
+        prefix in {"fr", "rf", "tr", "rt"}
+        and raw_pattern[index + 2 : index + 3] in ("'", '"')
+    )
 
 
-def _contains_formatted_string(raw_pattern: str) -> bool:
-    """Find f-string tokens without parsing their potentially nested expressions."""
+def _contains_interpolated_string(raw_pattern: str) -> bool:
+    """Find f-/t-string tokens without parsing their nested expressions."""
     quote: str | None = None
     triple = False
     index = 0
@@ -182,7 +186,7 @@ def _contains_formatted_string(raw_pattern: str) -> bool:
             if triple:
                 index += 2
             quote = char
-        elif char in "fFrR" and _is_formatted_string_prefix(raw_pattern, index):
+        elif char in "fFrRtT" and _is_interpolated_string_prefix(raw_pattern, index):
             return True
         index += 1
     return False
@@ -196,7 +200,7 @@ def _parse_rule(line: str) -> tuple[list[str], str] | None:
         raw_pattern = match.group(1)
         if len(raw_pattern) > 4096:
             return None
-        if _contains_formatted_string(raw_pattern) or _depth_limit_exceeded(
+        if _contains_interpolated_string(raw_pattern) or _depth_limit_exceeded(
             raw_pattern
         ):
             return None

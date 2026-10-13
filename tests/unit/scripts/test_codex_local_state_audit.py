@@ -214,13 +214,35 @@ def test_parse_rule_rejects_evasion_bypass(
 
 
 @pytest.mark.parametrize(
-    "prefix", ("f", "F", "fr", "fR", "Fr", "FR", "rf", "rF", "Rf", "RF")
+    "prefix",
+    (
+        "f",
+        "F",
+        "fr",
+        "fR",
+        "Fr",
+        "FR",
+        "rf",
+        "rF",
+        "Rf",
+        "RF",
+        "t",
+        "T",
+        "tr",
+        "tR",
+        "Tr",
+        "TR",
+        "rt",
+        "rT",
+        "Rt",
+        "RT",
+    ),
 )
-def test_parse_rule_rejects_f_strings_before_literal_eval(
+def test_parse_rule_rejects_interpolated_strings_before_literal_eval(
     prefix: str, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     def fail_eval(*args: object, **kwargs: object) -> None:
-        pytest.fail("literal_eval must not see an f-string")
+        pytest.fail("literal_eval must not see an interpolated string")
 
     monkeypatch.setattr(local_state_audit.ast, "literal_eval", fail_eval)
     nested = "[" * 11 + "1" + "]" * 11
@@ -239,13 +261,16 @@ def test_parse_rule_rejects_f_strings_before_literal_eval(
         '[f"""{[1]}"""]',
         "[Fr'''{[1]}''']",
         r"""[f"escaped \" quote {[1]}"]""",
+        '[t"""{[1]}"""]',
+        "[Tr'''{[1]}''']",
+        r"""[t"escaped \" quote {[1]}"]""",
     ),
 )
-def test_parse_rule_rejects_triple_and_escaped_f_strings_before_literal_eval(
+def test_parse_rule_rejects_triple_and_escaped_interpolated_strings_before_literal_eval(
     raw_pattern: str, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     def fail_eval(*args: object, **kwargs: object) -> None:
-        pytest.fail("literal_eval must not see an f-string")
+        pytest.fail("literal_eval must not see an interpolated string")
 
     monkeypatch.setattr(local_state_audit.ast, "literal_eval", fail_eval)
     assert (
@@ -273,6 +298,8 @@ def test_parse_rule_rejects_triple_and_escaped_f_strings_before_literal_eval(
         ("[\"ordinary f'{[1]}'\"]", ["ordinary f'{[1]}'"]),
         ('["""ordinary rf\'{[1]}\'"""]', ["ordinary rf'{[1]}'"]),
         (r"""["ordinary f\"{[1]}\""]""", ['ordinary f"{[1]}"']),
+        ("[\"ordinary t'{[1]}'\"]", ["ordinary t'{[1]}'"]),
+        ('["""ordinary rt\'{[1]}\'"""]', ["ordinary rt'{[1]}'"]),
         # Mixed quoting: the opposite quote char is plain content.
         ('["' + "'" + '", ' + "'" + "[" * 11 + "'" + "]", ["'", "[" * 11]),
     ),
