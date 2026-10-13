@@ -630,6 +630,17 @@ def test_workflow_scope_git_search_finds_real_symbol_before_cap() -> None:
     assert selected == [Path("src/memory/rag/chunking.py")]
 
 
+def test_workflow_scope_prefers_symbol_definition_over_references() -> None:
+    root = Path(__file__).resolve().parents[3]
+    selected = iter_rag_sources(
+        root,
+        selected_ids=WORKFLOW_RAG_SOURCE_IDS,
+        workflow_focus_query="LoggerPort",
+        max_sources=160,
+    )
+    assert Path("src/bioetl/domain/ports/observability/logging.py") in selected
+
+
 def test_workflow_scope_git_search_includes_eligible_untracked_sources(
     tmp_path: Path,
 ) -> None:

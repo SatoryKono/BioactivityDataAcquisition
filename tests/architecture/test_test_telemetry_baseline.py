@@ -19,7 +19,10 @@ import subprocess
 import pytest
 import yaml
 
-from scripts.engineering.ci.test_telemetry_provenance import source_commit_is_reachable
+from scripts.engineering.ci.test_telemetry_provenance import (
+    capture_metrics_are_bound,
+    source_commit_is_reachable,
+)
 
 pytestmark = pytest.mark.architecture
 
@@ -60,6 +63,7 @@ def test_test_telemetry_baseline_contract_is_present_and_scoped() -> None:
         assert provenance["ci_status"] == "BLOCKED_EXTERNAL_PERMANENT"
         assert provenance["head"] == payload["source_commit"]
         if provenance["test_tree_sha256"] != payload["source_tree_sha256"]:
+            assert capture_metrics_are_bound(payload, ROOT)
             head = subprocess.check_output(
                 ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
             ).strip()

@@ -168,11 +168,18 @@ def _run_git(
         return None
 
 
-def capture_rag_git_identity(root: Path) -> dict[str, str | None]:
-    """Capture HEAD and tracked or untracked working-tree changes."""
+def capture_rag_git_identity(
+    root: Path, *, include_untracked: bool = True
+) -> dict[str, str | None]:
+    """Capture HEAD and working-tree changes for the requested source scope."""
     head_result = _run_git(root, ["rev-parse", "HEAD"])
     status_result = _run_git(
-        root, ["status", "--porcelain", "--untracked-files=normal"]
+        root,
+        [
+            "status",
+            "--porcelain",
+            "--untracked-files=normal" if include_untracked else "--untracked-files=no",
+        ],
     )
     git_head_sha = (
         head_result.stdout.strip()

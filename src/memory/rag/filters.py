@@ -264,6 +264,15 @@ def _workflow_focus_score(
     return (-(token_hits + direct_bonus + content_bonus), source_priority, rel_path)
 
 
+def _symbol_definition_bonus(
+    content: str, exact_query: str, focus_tokens: tuple[str, ...]
+) -> int:
+    if len(focus_tokens) != 1 or not exact_query.isidentifier():
+        return 0
+    definition = rf"(?m)^\s*(?:class|(?:async\s+)?def)\s+{re.escape(exact_query)}\b"
+    return 20 if re.search(definition, content) else 0
+
+
 def _content_focus_scores(
     root: Path,
     entries: list[tuple[str, Path]],
@@ -320,6 +329,9 @@ def _content_focus_scores(
         if matched_terms:
             scores[rel_path] = matched_terms + (
                 len(focus_tokens) + 1 if exact_query in content else 0
+            )
+            scores[rel_path] += _symbol_definition_bonus(
+                content, exact_query, focus_tokens
             )
     return scores
 

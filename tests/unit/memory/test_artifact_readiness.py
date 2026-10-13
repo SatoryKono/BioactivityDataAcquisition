@@ -114,6 +114,33 @@ def test_timeline_readiness_rejects_tampered_projection(tmp_path: Path) -> None:
     assert timeline_events_ready(events_dir) is False
 
 
+def test_timeline_readiness_ignores_untracked_files(tmp_path: Path) -> None:
+    source = _write_doc(tmp_path)
+    for args in (
+        ("init", "-q"),
+        ("add", source.relative_to(tmp_path).as_posix()),
+        (
+            "-c",
+            "user.name=Timeline test",
+            "-c",
+            "user.email=timeline@example.invalid",
+            "commit",
+            "-qm",
+            "initial source",
+        ),
+    ):
+        subprocess.run(["git", *args], cwd=tmp_path, check=True, capture_output=True)
+    events_dir = tmp_path / "out/events"
+    events_dir.mkdir(parents=True)
+    (tmp_path / ".git/info/exclude").write_text("out/\n", encoding="utf-8")
+    (events_dir / "ci.jsonl").write_text('{"id":"ci::one"}\n', encoding="utf-8")
+    (tmp_path / "scratch.txt").write_text("temporary\n", encoding="utf-8")
+    write_timeline_manifest(tmp_path, events_dir)
+
+    assert capture_rag_git_identity(tmp_path)["working_tree_state"] == "dirty"
+    assert timeline_events_ready(events_dir, repo_root=tmp_path)
+
+
 def test_timeline_readiness_requires_manifest_inside_repository(
     tmp_path: Path,
 ) -> None:

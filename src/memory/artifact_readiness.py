@@ -134,7 +134,7 @@ def _timeline_manifest_matches_repository(
     """Validate repository identity when timeline events are repo-bound."""
     if resolved_root is None:
         return True
-    current = capture_rag_git_identity(resolved_root)
+    current = capture_rag_git_identity(resolved_root, include_untracked=False)
     return (
         manifest.get("git_head_sha") == current["git_head_sha"]
         and manifest.get("working_tree_state") == "clean"

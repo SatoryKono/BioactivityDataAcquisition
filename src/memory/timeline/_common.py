@@ -69,7 +69,7 @@ def write_timeline_manifest(root: Path, events_dir: Path) -> Path:
     event_files = sorted(events_dir.glob("*.jsonl"), key=lambda path: path.name)
     payload = {
         "schema_version": 1,
-        **capture_rag_git_identity(root),
+        **capture_rag_git_identity(root, include_untracked=False),
         "files": [
             {
                 "path": path.name,
