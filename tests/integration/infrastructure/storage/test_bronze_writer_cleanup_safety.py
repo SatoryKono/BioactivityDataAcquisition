@@ -56,7 +56,8 @@ from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
 pytestmark = pytest.mark.integration
 _APPLY_POSIX = pytest.mark.skipif(
-    os.name == "nt", reason="Windows destructive cleanup is fail-closed (NOT_VERIFIED)"
+    not destructive_cleanup_supported(),
+    reason="POSIX anchored destructive capability required (Windows NOT_VERIFIED)",
 )
 
 ARTIFACT = "batch_2024-01-01_12345678-1234-5678-1234-567812345678.jsonl.zst"

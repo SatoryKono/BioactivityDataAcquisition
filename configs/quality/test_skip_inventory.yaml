@@ -338,7 +338,17 @@ entries:
     reviewed_skip_calls: 12
     vcr_related: false
     review_date: "2026-10-12"
-    rationale: POSIX apply and anchored-operation cases require handle APIs; Windows-only refusal tests and junction cases remain platform-conditional. Windows destructive safety is NOT_VERIFIED.
+    rationale: POSIX apply and anchored-operation cases require verified handle APIs; Windows-only refusal tests and junction cases remain platform-conditional. Windows destructive safety is NOT_VERIFIED.
+  - path: tests/integration/infrastructure/storage/test_bronze_writer_cleanup_writer_races.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-storage"
+    linked_issue: "#12102"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 2
+    vcr_related: false
+    review_date: "2026-10-13"
+    rationale: Pinned writer and lock race tests require verified POSIX anchored handle capability; unsupported platforms remain NOT_VERIFIED.
   - path: tests/integration/test_docker_compose_smoke.py
     suite: integration
     category: conditional_environment_guard

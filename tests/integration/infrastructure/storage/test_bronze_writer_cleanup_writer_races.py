@@ -22,7 +22,8 @@ from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
 pytestmark = pytest.mark.integration
 _APPLY_POSIX = pytest.mark.skipif(
-    os.name == "nt", reason="Windows destructive cleanup is fail-closed (NOT_VERIFIED)"
+    not destructive_cleanup_supported(),
+    reason="POSIX anchored destructive capability required (Windows NOT_VERIFIED)",
 )
 CUTOFF = datetime(2024, 6, 1, tzinfo=UTC)
 
