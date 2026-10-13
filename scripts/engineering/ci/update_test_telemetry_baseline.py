@@ -192,37 +192,33 @@ def _read_coverage_percent_from_log(path: Path | None) -> float | None:
         return None
 
 
-def _read_slowest_summary(path: Path) -> TelemetryPayload:
-    if not path.exists():
-        return {"total_cases": None, "top_slowest": [], "execution_context": {}}
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    total_cases = payload.get("total_cases")
-    top_slowest = payload.get("top_slowest")
-    if top_slowest is None:
-        top_slowest = payload.get("top_slowest_tests")
-    if not isinstance(top_slowest, list):
-        top_slowest = []
+def _normalized_execution_context(payload: TelemetryPayload) -> TelemetryPayload:
     execution_context = payload.get("execution_context", {})
-    if isinstance(execution_context, dict):
-        execution_context = dict(execution_context)
-        duration_sums = execution_context.get("junit_testcase_duration_sum_s")
-        if (
-            not execution_context.get("lane_wall_time_s")
-            and isinstance(duration_sums, dict)
-            and duration_sums
-        ):
-            execution_context["lane_wall_time_s"] = dict(duration_sums)
-            execution_context["lane_wall_time_source"] = (
-                "junit_testcase_duration_sum_fallback"
-            )
-    else:
-        execution_context = {}
+    if not isinstance(execution_context, dict):
+        return {}
+    execution_context = dict(execution_context)
+    duration_sums = execution_context.get("junit_testcase_duration_sum_s")
+    if (
+        not execution_context.get("lane_wall_time_s")
+        and isinstance(duration_sums, dict)
+        and duration_sums
+    ):
+        execution_context["lane_wall_time_s"] = dict(duration_sums)
+        execution_context["lane_wall_time_source"] = (
+            "junit_testcase_duration_sum_fallback"
+        )
+    return execution_context
+
+
+def _canonical_local_count(
+    payload: TelemetryPayload, execution_context: TelemetryPayload, total_cases: object
+) -> bool:
     # The canonical local 17-shard producer already counted non-skipped JUnit
     # records before CI gained this marker. Its provenance distinguishes it
     # from the old inline CI producer's positive-duration-row total.
     local_capture = payload.get("measurement_provenance", {})
     local_skipped_count = execution_context.get("skipped_count")
-    canonical_local_count = (
+    return (
         execution_context.get("count_semantics") is None
         and isinstance(total_cases, int)
         and not isinstance(total_cases, bool)
@@ -236,34 +232,53 @@ def _read_slowest_summary(path: Path) -> TelemetryPayload:
         and local_capture.get("complete") is True
         and execution_context.get("executed_count") == total_cases
     )
-    if execution_context.get("count_semantics") == "non_skipped_junit_records":
-        observed = execution_context.get("observed_count")
-        skipped = execution_context.get("skipped_count")
-        executed = execution_context.get("executed_count")
-        sources = execution_context.get("junit_source_count")
-        if not all(
-            isinstance(value, int) and not isinstance(value, bool) and value >= 0
-            for value in (observed, skipped, executed, sources)
-        ):
-            raise ValueError(f"Inconsistent non-skipped JUnit counts in {path}")
-        assert isinstance(observed, int) and isinstance(skipped, int)
-        assert isinstance(executed, int) and isinstance(sources, int)
-        if (
-            skipped > observed
-            or observed - skipped != executed
-            or (sources == 0 and (total_cases is not None or observed != 0))
-            or (
-                sources > 0
-                and (
-                    not isinstance(total_cases, int)
-                    or isinstance(total_cases, bool)
-                    or total_cases < 0
-                    or total_cases != executed
-                )
+
+
+def _validate_non_skipped_counts(
+    path: Path, total_cases: object, execution_context: TelemetryPayload
+) -> None:
+    observed = execution_context.get("observed_count")
+    skipped = execution_context.get("skipped_count")
+    executed = execution_context.get("executed_count")
+    sources = execution_context.get("junit_source_count")
+    if not all(
+        isinstance(value, int) and not isinstance(value, bool) and value >= 0
+        for value in (observed, skipped, executed, sources)
+    ):
+        raise ValueError(f"Inconsistent non-skipped JUnit counts in {path}")
+    assert isinstance(observed, int) and isinstance(skipped, int)
+    assert isinstance(executed, int) and isinstance(sources, int)
+    if (
+        skipped > observed
+        or observed - skipped != executed
+        or (sources == 0 and (total_cases is not None or observed != 0))
+        or (
+            sources > 0
+            and (
+                not isinstance(total_cases, int)
+                or isinstance(total_cases, bool)
+                or total_cases < 0
+                or total_cases != executed
             )
-        ):
-            raise ValueError(f"Inconsistent non-skipped JUnit counts in {path}")
-    elif canonical_local_count:
+        )
+    ):
+        raise ValueError(f"Inconsistent non-skipped JUnit counts in {path}")
+
+
+def _read_slowest_summary(path: Path) -> TelemetryPayload:
+    if not path.exists():
+        return {"total_cases": None, "top_slowest": [], "execution_context": {}}
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    total_cases = payload.get("total_cases")
+    top_slowest = payload.get("top_slowest")
+    if top_slowest is None:
+        top_slowest = payload.get("top_slowest_tests")
+    if not isinstance(top_slowest, list):
+        top_slowest = []
+    execution_context = _normalized_execution_context(payload)
+    if execution_context.get("count_semantics") == "non_skipped_junit_records":
+        _validate_non_skipped_counts(path, total_cases, execution_context)
+    elif _canonical_local_count(payload, execution_context, total_cases):
         execution_context["count_semantics"] = "non_skipped_junit_records"
     else:
         # Pre-parity CI JSON used total_cases for timed rows only.

@@ -42,6 +42,27 @@ def _validate_aggregate(node: ET.Element, field: str, actual: int, path: Path) -
         )
 
 
+def _aggregate_counts(node: ET.Element, cases: list[ET.Element]) -> dict[str, int]:
+    counts = {
+        "tests": len(cases),
+        "skipped": sum(case.find("skipped") is not None for case in cases),
+        "failures": sum(case.find("failure") is not None for case in cases)
+        + len(node.findall("failure")),
+        "errors": sum(case.find("error") is not None for case in cases)
+        + len(node.findall("error")),
+    }
+    # Suite-level diagnostics contribute to ancestor declarations too.
+    for child in node:
+        if child.tag in {"testsuite", "testsuites"}:
+            for field in ("failures", "errors"):
+                counts[field] += sum(
+                    len(descendant.findall(field[:-1]))
+                    for descendant in child.iter()
+                    if descendant.tag in {"testsuite", "testsuites"}
+                )
+    return counts
+
+
 def _validated_cases(path: Path) -> tuple[ET.Element, list[ET.Element]]:
     root = ET.parse(path).getroot()
     if root.tag not in {"testsuite", "testsuites"}:
@@ -52,28 +73,32 @@ def _validated_cases(path: Path) -> tuple[ET.Element, list[ET.Element]]:
         for child in node:
             if child.tag in {"testsuite", "testsuites"}:
                 cases.extend(check(child))
-        counts = {
-            "tests": len(cases),
-            "skipped": sum(case.find("skipped") is not None for case in cases),
-            "failures": sum(case.find("failure") is not None for case in cases)
-            + len(node.findall("failure")),
-            "errors": sum(case.find("error") is not None for case in cases)
-            + len(node.findall("error")),
-        }
-        # Suite-level diagnostics contribute to ancestor declarations too.
-        for child in node:
-            if child.tag in {"testsuite", "testsuites"}:
-                for field in ("failures", "errors"):
-                    counts[field] += sum(
-                        len(descendant.findall(field[:-1]))
-                        for descendant in child.iter()
-                        if descendant.tag in {"testsuite", "testsuites"}
-                    )
-        for field, actual in counts.items():
+        for field, actual in _aggregate_counts(node, cases).items():
             _validate_aggregate(node, field, actual, path)
         return cases
 
     return root, check(root)
+
+
+def _record_case(
+    case: ET.Element, path: Path, rows: list[Summary]
+) -> tuple[int, int, int, float]:
+    skipped = case.find("skipped") is not None
+    error = case.find("error") is not None
+    failure = case.find("failure") is not None
+    name = case.get("name", "")
+    class_name = case.get("classname", "")
+    full_name = f"{class_name}::{name}" if class_name else name
+    duration = _nonnegative_duration(case.get("time"), "testcase", path)
+    if not skipped and duration is not None and duration > 0:
+        rows.append(
+            {
+                "source": path.name,
+                "test": full_name or "<unknown>",
+                "duration_s": round(duration, 3),
+            }
+        )
+    return int(skipped), int(error), int(failure), duration or 0.0
 
 
 def derive_summary(junit_paths: list[Path]) -> Summary:
@@ -99,22 +124,13 @@ def derive_summary(junit_paths: list[Path]) -> Summary:
         duration_sum = 0.0
         for case in cases:
             observed += 1
-            skipped += case.find("skipped") is not None
-            errors += case.find("error") is not None
-            failures += case.find("failure") is not None
-            name = case.get("name", "")
-            class_name = case.get("classname", "")
-            full_name = f"{class_name}::{name}" if class_name else name
-            duration = _nonnegative_duration(case.get("time"), "testcase", path)
-            duration_sum += duration or 0
-            if case.find("skipped") is None and duration is not None and duration > 0:
-                rows.append(
-                    {
-                        "source": path.name,
-                        "test": full_name or "<unknown>",
-                        "duration_s": round(duration, 3),
-                    }
-                )
+            case_skipped, case_errors, case_failures, duration = _record_case(
+                case, path, rows
+            )
+            skipped += case_skipped
+            errors += case_errors
+            failures += case_failures
+            duration_sum += duration
         duration_sums[path.name] = round(duration_sum, 3)
     rows.sort(key=lambda row: float(row["duration_s"]), reverse=True)
     executed = observed - skipped
