@@ -22,6 +22,7 @@ from uuid import UUID
 from .cleanup_core import (
     _O_DIRECTORY,
     _O_NOFOLLOW,
+    BronzeRootLease,
     _CleanupConflict,
     destructive_cleanup_supported,
     stat_is_link_or_reparse,
@@ -60,7 +61,7 @@ _DATE_DIR_FORMAT = "%Y-%m-%d"
 
 
 @contextmanager
-def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[Path]:
+def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[BronzeRootLease]:
     """Coordinate all application writers and cleaners for one Bronze root.
 
     This is advisory. The operator must exclude uncooperative same-user writers.
@@ -70,7 +71,7 @@ def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[Path]:
             raise NotImplementedError(
                 "Bronze destructive cleanup requires POSIX dir_fd/no-follow and flock"
             )
-        yield base_path
+        yield BronzeRootLease(base_path, None)
         return
     import fcntl
 
@@ -93,7 +94,7 @@ def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[Path]:
             )
             if exclusive:
                 _recover_stages(root_fd, root_real)
-            yield root_real
+            yield BronzeRootLease(root_real, root_fd)
         finally:
             os.close(lock_fd)
     finally:
@@ -341,11 +342,12 @@ def candidate_is_safe(
     expected: os.stat_result,
     *,
     directory: bool = False,
+    root_fd: int | None = None,
 ) -> bool:
     """Nonmutating eligibility used by dry-run and apply planning."""
     if destructive_cleanup_supported():
         try:
-            with _anchored_parent(path, root_abs, root_real) as (
+            with _anchored_parent(path, root_abs, root_real, root_fd) as (
                 _root_fd,
                 parent_fd,
                 name,

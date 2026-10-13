@@ -30,7 +30,7 @@ def _same_identity(left: os.stat_result, right: os.stat_result) -> bool:
 
 @contextmanager
 def _anchored_parent(
-    path: Path, root_abs: Path, root_real: Path
+    path: Path, root_abs: Path, root_real: Path, root_fd: int | None = None
 ) -> Iterator[tuple[int, int, str, list[tuple[int, int, str]]]]:
     """Open every relative parent component without following a link."""
     if not destructive_cleanup_supported():
@@ -44,9 +44,13 @@ def _anchored_parent(
     fds: list[int] = []
     chain: list[tuple[int, int, str]] = []
     try:
-        root_fd = os.open(root_real, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW)
-        fds.append(root_fd)
-        parent_fd = root_fd
+        opened_root_fd = (
+            os.dup(root_fd)
+            if root_fd is not None
+            else os.open(root_real, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW)
+        )
+        fds.append(opened_root_fd)
+        parent_fd = opened_root_fd
         for name in parts[:-1]:
             child_fd = os.open(
                 name, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW, dir_fd=parent_fd
@@ -54,9 +58,9 @@ def _anchored_parent(
             fds.append(child_fd)
             chain.append((parent_fd, child_fd, name))
             parent_fd = child_fd
-        if not _chain_is_stable(root_fd, root_abs, chain):
+        if not _chain_is_stable(opened_root_fd, root_abs, chain):
             raise _CleanupConflict
-        yield root_fd, parent_fd, parts[-1], chain
+        yield opened_root_fd, parent_fd, parts[-1], chain
     finally:
         for fd in reversed(fds):
             os.close(fd)
@@ -132,7 +136,7 @@ def _restore_stage_entry(
     if (staged.st_dev, staged.st_ino) != (origin.dev, origin.ino):
         raise OSError(f"Bronze stage {stage_name} identity changed")
     target = root_real.joinpath(*origin.parts)
-    with _anchored_parent(target, root_real, root_real) as (
+    with _anchored_parent(target, root_real, root_real, root_fd) as (
         _opened_root,
         parent_fd,
         _name,
@@ -240,10 +244,11 @@ def safe_unlink(
     expected: os.stat_result | None = None,
     *,
     on_stage_error: Callable[[str, OSError], None] | None = None,
+    root_fd: int | None = None,
 ) -> bool:
     """Delete only the planned inode after atomic isolation under the root."""
     try:
-        with _anchored_parent(file_path, root_abs, root_real) as (
+        with _anchored_parent(file_path, root_abs, root_real, root_fd) as (
             root_fd,
             parent_fd,
             name,
@@ -284,10 +289,11 @@ def safe_rmdir(
     expected: os.stat_result | None = None,
     *,
     on_stage_error: Callable[[str, OSError], None] | None = None,
+    root_fd: int | None = None,
 ) -> bool:
     """Remove only the planned empty directory after atomic isolation."""
     try:
-        with _anchored_parent(dir_path, root_abs, root_real) as (
+        with _anchored_parent(dir_path, root_abs, root_real, root_fd) as (
             root_fd,
             parent_fd,
             name,

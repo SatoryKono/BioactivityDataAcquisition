@@ -14,6 +14,7 @@ import orjson
 import zstandard as zstd
 
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.storage.bronze.cleanup_core import BronzeRootLease
 from bioetl.infrastructure.storage.bronze.cleanup_metrics import (
     emit_cleanup_outcome_metrics,
 )
@@ -205,16 +206,16 @@ class BronzeWriterReadCleanupMixin(
         dry_run: bool,
         provider: str | None,
         entity: str | None,
-        locked_root: Path | None = None,
+        locked_root: BronzeRootLease | None = None,
     ) -> dict[str, int]:
         stats = self._empty_cleanup_stats()
         root_abs = (
-            locked_root
+            locked_root.path
             if locked_root is not None
             else Path(os.path.abspath(self.base_path))  # noqa: PTH100
         )
         root_real = (
-            locked_root if locked_root is not None else real_root(self.base_path)
+            locked_root.path if locked_root is not None else real_root(self.base_path)
         )
 
         def on_discovery_skip(path: str, reason: str) -> None:
@@ -231,12 +232,23 @@ class BronzeWriterReadCleanupMixin(
             provider,
             entity,
             on_skip=on_discovery_skip,
-            base_path=locked_root,
+            base_path=locked_root.path if locked_root is not None else None,
         ):
-            plan = self._plan_old_dir_files(date_dir, root_abs, root_real)
+            plan = self._plan_old_dir_files(
+                date_dir,
+                root_abs,
+                root_real,
+                root_fd=locked_root.fd if locked_root is not None else None,
+            )
             self._record_cleanup_plan(stats, plan)
             if not dry_run:
-                self._apply_cleanup_plan(stats, plan, root_abs, root_real)
+                self._apply_cleanup_plan(
+                    stats,
+                    plan,
+                    root_abs,
+                    root_real,
+                    locked_root.fd if locked_root is not None else None,
+                )
         return stats
 
     def _apply_cleanup_plan(
@@ -245,6 +257,7 @@ class BronzeWriterReadCleanupMixin(
         plan: _CleanupDatePlan,
         root_abs: Path,
         root_real: Path,
+        root_fd: int | None,
     ) -> None:
         """Apply the exact planned inodes and retain partial-result accounting."""
         failed_before = stats["files_failed"]
@@ -254,7 +267,9 @@ class BronzeWriterReadCleanupMixin(
             stats["directories_failed"] += 1
             self._log_cleanup_skip(str(self.base_path / name), "stage_cleanup_error")
 
-        self._apply_planned_files(stats, plan, root_abs, root_real, on_stage_error)
+        self._apply_planned_files(
+            stats, plan, root_abs, root_real, root_fd, on_stage_error
+        )
         if not plan.removable:
             return
         if (
@@ -263,7 +278,9 @@ class BronzeWriterReadCleanupMixin(
         ):
             stats["directories_skipped"] += 1
             return
-        self._apply_planned_directory(stats, plan, root_abs, root_real, on_stage_error)
+        self._apply_planned_directory(
+            stats, plan, root_abs, root_real, root_fd, on_stage_error
+        )
 
     def _apply_planned_files(
         self,
@@ -271,6 +288,7 @@ class BronzeWriterReadCleanupMixin(
         plan: _CleanupDatePlan,
         root_abs: Path,
         root_real: Path,
+        root_fd: int | None,
         on_stage_error: Callable[[str, OSError], None],
     ) -> None:
         for candidate in plan.files:
@@ -281,6 +299,7 @@ class BronzeWriterReadCleanupMixin(
                     root_real,
                     candidate.identity,
                     on_stage_error=on_stage_error,
+                    root_fd=root_fd,
                 )
             except OSError:
                 stats["files_failed"] += 1
@@ -301,6 +320,7 @@ class BronzeWriterReadCleanupMixin(
         plan: _CleanupDatePlan,
         root_abs: Path,
         root_real: Path,
+        root_fd: int | None,
         on_stage_error: Callable[[str, OSError], None],
     ) -> None:
         try:
@@ -310,6 +330,7 @@ class BronzeWriterReadCleanupMixin(
                 root_real,
                 plan.identity,
                 on_stage_error=on_stage_error,
+                root_fd=root_fd,
             )
         except OSError:
             stats["directories_failed"] += 1

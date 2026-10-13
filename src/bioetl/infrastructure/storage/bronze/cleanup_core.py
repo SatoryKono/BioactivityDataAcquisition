@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import os
 import stat
+from dataclasses import dataclass
+from pathlib import Path
 
 _REPARSE_POINT_ATTR = 0x400
 _STAGE_PREFIX = ".bronze-cleanup-stage-"
@@ -26,6 +28,14 @@ _ANCHORED_OPS = bool(
 
 class _CleanupConflict(Exception):
     """A candidate or directory component changed during destructive apply."""
+
+
+@dataclass(frozen=True, slots=True)
+class BronzeRootLease:
+    """The root inode held by one cooperative writer or cleaner lock."""
+
+    path: Path
+    fd: int | None
 
 
 def destructive_cleanup_supported() -> bool:

@@ -1280,6 +1280,63 @@ async def test_cleanup_uses_root_pinned_by_lock_after_alias_switch(
 
 
 @_APPLY_POSIX
+@pytest.mark.parametrize("replacement_barrier", ["after_lock", "before_unlink"])
+async def test_replaced_root_cannot_redirect_locked_cleanup(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    replacement_barrier: str,
+) -> None:
+    """The locked root FD rejects a different inode at either barrier."""
+    root = tmp_path / "bronze"
+    original_date = _date_dir(root, "chembl", "activity")
+    _write_pair(original_date)
+    replacement = tmp_path / "replacement"
+    replacement_date = _date_dir(replacement, "chembl", "activity")
+    _write_pair(replacement_date, b"outside")
+    moved = tmp_path / "moved_root"
+    outside_empty = tmp_path / "outside_empty"
+    outside_empty.mkdir()
+    writer = _make_writer(root)
+    switched = False
+
+    def switch() -> None:
+        nonlocal switched
+        if switched:
+            return
+        root.rename(moved)
+        replacement.rename(root)
+        switched = True
+
+    if replacement_barrier == "after_lock":
+        original_lock = bronze_tree_lock
+
+        @contextmanager
+        def switch_after_lock(base_path: Path, *, exclusive: bool):
+            with original_lock(base_path, exclusive=exclusive) as lease:
+                switch()
+                yield lease
+
+        monkeypatch.setattr(read_cleanup_mixin, "bronze_tree_lock", switch_after_lock)
+    else:
+        original_unlink = read_cleanup_mixin.safe_unlink
+
+        def switch_before_unlink(*args: object, **kwargs: object) -> bool:
+            switch()
+            return original_unlink(*args, **kwargs)
+
+        monkeypatch.setattr(read_cleanup_mixin, "safe_unlink", switch_before_unlink)
+
+    result = await writer.cleanup_old_files(CUTOFF)
+    assert switched and result["files_removed"] == 0
+    assert result["files_conflicted"] + result["directories_conflicted"] >= 1
+    assert (moved / "chembl" / "activity" / OLD_DATE / ARTIFACT).read_bytes() == b"x"
+    assert (
+        root / "chembl" / "activity" / OLD_DATE / ARTIFACT
+    ).read_bytes() == b"outside"
+    assert outside_empty.is_dir() and not list(outside_empty.iterdir())
+
+
+@_APPLY_POSIX
 async def test_cancelled_cleanup_waiter_finishes_without_late_deletion(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

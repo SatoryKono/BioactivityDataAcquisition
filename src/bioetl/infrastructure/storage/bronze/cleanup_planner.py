@@ -42,6 +42,7 @@ class _CleanupPlanScope:
     provider_name: str
     entity_name: str
     payload_names: set[str]
+    root_fd: int | None = None
 
 
 class BronzeCleanupPlannerMixin:
@@ -96,7 +97,11 @@ class BronzeCleanupPlannerMixin:
             stats["directories_skipped"] += 1
 
     def _plan_old_dir_files(
-        self, date_dir: Path, root_abs: Path, root_real: Path
+        self,
+        date_dir: Path,
+        root_abs: Path,
+        root_real: Path,
+        root_fd: int | None = None,
     ) -> _CleanupDatePlan:
         """Snapshot exact writer-owned paths without mutating the tree."""
         plan = _CleanupDatePlan(date_dir, None, [], False)
@@ -106,7 +111,7 @@ class BronzeCleanupPlannerMixin:
             plan.directories_failed = 1
             return plan
         if not candidate_is_safe(
-            date_dir, root_abs, root_real, identity, directory=True
+            date_dir, root_abs, root_real, identity, directory=True, root_fd=root_fd
         ):
             plan.directories_conflicted = 1
             return plan
@@ -122,7 +127,13 @@ class BronzeCleanupPlannerMixin:
             ("", "") if self._flat_structure else rel_date.parts[:2]
         )
         scope = _CleanupPlanScope(
-            root_abs, root_real, rel_date, provider_name, entity_name, payload_names
+            root_abs,
+            root_real,
+            rel_date,
+            provider_name,
+            entity_name,
+            payload_names,
+            root_fd,
         )
         for entry in sorted(entries, key=lambda item: item.name):
             candidate_identity = identities.get(entry.name)
@@ -200,7 +211,13 @@ class BronzeCleanupPlannerMixin:
                 plan.bytes_skipped += identity.st_size
             self._log_cleanup_skip(entry.path, "unknown_artifact")
             return
-        if not candidate_is_safe(file_path, scope.root_abs, scope.root_real, identity):
+        if not candidate_is_safe(
+            file_path,
+            scope.root_abs,
+            scope.root_real,
+            identity,
+            root_fd=scope.root_fd,
+        ):
             plan.files_conflicted += 1
             plan.bytes_conflicted += identity.st_size
             self._log_cleanup_skip(entry.path, "candidate_conflict")
