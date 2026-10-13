@@ -155,6 +155,37 @@ def _depth_limit_exceeded(raw_pattern: str, limit: int = 10) -> bool:
     return False
 
 
+def _contains_formatted_string(raw_pattern: str) -> bool:
+    """Find f-string tokens without parsing their potentially nested expressions."""
+    quote: str | None = None
+    triple = False
+    index = 0
+    end = len(raw_pattern)
+    while index < end:
+        char = raw_pattern[index]
+        if quote is not None:
+            quote, triple, index = _consume_quoted_char(
+                raw_pattern, index, quote, triple
+            )
+        elif char in "'\"":
+            triple = raw_pattern.startswith(char * 3, index)
+            if triple:
+                index += 2
+            quote = char
+        elif char in "fFrR" and (
+            index == 0
+            or not (raw_pattern[index - 1].isalnum() or raw_pattern[index - 1] == "_")
+        ):
+            prefix = raw_pattern[index : index + 2].lower()
+            if (char in "fF" and raw_pattern[index + 1 : index + 2] in ("'", '"')) or (
+                prefix in {"fr", "rf"}
+                and raw_pattern[index + 2 : index + 3] in ("'", '"')
+            ):
+                return True
+        index += 1
+    return False
+
+
 def _parse_rule(line: str) -> tuple[list[str], str] | None:
     match = RULE_PATTERN.match(line)
     if match is None:
@@ -163,7 +194,9 @@ def _parse_rule(line: str) -> tuple[list[str], str] | None:
         raw_pattern = match.group(1)
         if len(raw_pattern) > 4096:
             return None
-        if _depth_limit_exceeded(raw_pattern):
+        if _contains_formatted_string(raw_pattern) or _depth_limit_exceeded(
+            raw_pattern
+        ):
             return None
 
         pattern = ast.literal_eval(raw_pattern)
