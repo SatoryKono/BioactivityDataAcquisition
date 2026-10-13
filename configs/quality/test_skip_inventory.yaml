@@ -309,6 +309,16 @@ entries:
     vcr_related: false
     review_date: "2026-07-30"
     rationale: Windows lock-stress contracts are meaningful only on Windows and remain explicitly platform-conditional.
+  - path: tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-storage"
+    linked_issue: "#12102"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 6
+    vcr_related: false
+    review_date: "2026-10-14"
+    rationale: POSIX pinned handles, flock and symlink capability are required for synthetic journal destruction; Windows refusal is tested separately without skips.
   - path: tests/integration/infrastructure/storage/test_bronze_writer_cleanup.py
     suite: integration
     category: conditional_environment_guard

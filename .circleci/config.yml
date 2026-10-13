@@ -2221,6 +2221,10 @@ jobs:
               export COVERAGE_FILE=reports/quality/fs001-journal-coverage/.coverage
               JOURNAL_COVERAGE=(
                 --cov=bioetl.infrastructure.storage.bronze.cleanup_group_journal
+                --cov=bioetl.infrastructure.storage.bronze.cleanup_group_schema
+                --cov=bioetl.infrastructure.storage.bronze.cleanup_group_records
+                --cov=bioetl.infrastructure.storage.bronze.cleanup_group_members
+                --cov=bioetl.infrastructure.storage.bronze.cleanup_group_recovery
                 --cov-branch
                 --cov-report=term-missing
                 --cov-report=json:reports/quality/fs001-journal-coverage/coverage.json

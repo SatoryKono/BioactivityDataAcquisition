@@ -14,6 +14,7 @@ from pathlib import Path
 import pytest
 
 from bioetl.infrastructure.storage.bronze import cleanup_group_journal as journal
+from bioetl.infrastructure.storage.bronze import cleanup_group_records as records
 
 
 pytestmark = pytest.mark.integration
@@ -39,13 +40,32 @@ def journal_execution_environment(tmp_path_factory, record_testsuite_property) -
         "python": sys.version,
         "module": str(module),
         "journal_sha256": hashlib.sha256(module.read_bytes()).hexdigest(),
+        "journal_components_sha256": {
+            path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+            for path in sorted(module.parent.glob("cleanup_group_*.py"))
+        },
         "uid": os.geteuid() if hasattr(os, "geteuid") else None,
         "temp_device": temp.stat().st_dev,
         "destructive_supported": journal.destructive_cleanup_supported(),
         "mount": None,
         "capabilities": None,
+        "directory_xattr_fd": None,
     }
     if sys.platform.startswith("linux"):
+        probe_fd = os.open(temp, journal._DIR_FLAGS)
+        try:
+            probe_tag = "user.bioetl.fs001-probe"
+            os.setxattr(probe_fd, probe_tag, b"probe", flags=os.XATTR_CREATE)
+            os.fsync(probe_fd)
+            environment["directory_xattr_fd"] = (
+                os.getxattr(probe_fd, probe_tag) == b"probe"
+            )
+            os.removexattr(probe_fd, probe_tag)
+            os.fsync(probe_fd)
+        except OSError as exc:
+            environment["directory_xattr_fd"] = {"supported": False, "errno": exc.errno}
+        finally:
+            os.close(probe_fd)
         mounts = []
         for line in Path("/proc/self/mountinfo").read_text().splitlines():
             fields = line.split()
@@ -116,7 +136,7 @@ def _body() -> dict[str, object]:
     spec = journal.GroupSpec("chembl", "activity", DATE, BATCH, CUTOFF)
     identity = {"dev": 1, "ino": 2, "size": 3, "sha256": "a" * 64}
     return {
-        "schema": 2,
+        "schema": 3,
         "operation_id": "1" * 32,
         "state": "prepared",
         "scope": {
@@ -133,6 +153,7 @@ def _body() -> dict[str, object]:
         "names": spec.names(),
         "members": {"payload": identity, "sidecar": identity},
         "staged": [],
+        "stage": {"dev": 1, "ino": 6, "token": "1" * 32},
     }
 
 
@@ -185,14 +206,11 @@ def test_record_rejects_forged_checksum_and_unstaged_absence() -> None:
     envelope["body"]["schema"] = 99
     with pytest.raises(journal.GroupJournalConflict):
         journal._decode_record(json.dumps(envelope).encode(), "1" * 32)
-    body["schema"] = 1
-    with pytest.raises(journal.GroupJournalConflict):
-        journal._decode_record(journal._record_bytes(body), "1" * 32)
-    body["schema"] = 2
-    body["schema"] = 2.0
-    with pytest.raises(journal.GroupJournalConflict):
-        journal._decode_record(journal._record_bytes(body), "1" * 32)
-    body["schema"] = 2
+    for version in (1, 2, 3.0):
+        body["schema"] = version
+        with pytest.raises(journal.GroupJournalConflict):
+            journal._decode_record(journal._record_bytes(body), "1" * 32)
+    body["schema"] = 3
     body["staged"] = ["sidecar", "payload"]
     with pytest.raises(journal.GroupJournalConflict):
         journal._decode_record(journal._record_bytes(body), "1" * 32)
@@ -216,20 +234,203 @@ def test_completed_record_requires_durable_member_transitions() -> None:
 
 def test_anchored_conflict_uses_public_journal_error(tmp_path, monkeypatch) -> None:
     """The platform primitive's refusal cannot escape the group-result contract."""
-    monkeypatch.setattr(journal, "destructive_cleanup_supported", lambda: True)
-    group = journal.GroupJournal(journal.BronzeRootLease(tmp_path, -1))
-    conflict = journal._CleanupConflict()
+    monkeypatch.setattr(records, "destructive_cleanup_supported", lambda: True)
+    group = journal.GroupJournal(records.BronzeRootLease(tmp_path, -1))
+    conflict = records._CleanupConflict()
 
     def refuse(*args, **kwargs):
         raise conflict
 
-    monkeypatch.setattr(journal, "_anchored_parent", refuse)
+    monkeypatch.setattr(records, "_anchored_parent", refuse)
     with pytest.raises(journal.GroupJournalConflict) as failure:
         with group._date("chembl/activity/2024-01-01"):
             pytest.fail("refused traversal entered")
     assert failure.value.__cause__ is conflict
     assert failure.value.removed == 0
     assert failure.value.possibly_unlinked == 0
+
+
+@POSIX_ONLY
+@pytest.mark.parametrize("stop", ["before_completion", "after_completion_fsync"])
+def test_restart_rejects_replaced_empty_stage(tmp_path: Path, stop: str) -> None:
+    root, spec, date_dir = _fixture(tmp_path, copy=True)
+
+    def interrupt(phase: str) -> None:
+        if phase == stop:
+            raise OSError("stop before stage retirement")
+
+    with journal.open_group_journal(root) as group:
+        operation_id = group.begin(spec)
+        with pytest.raises(journal.GroupJournalFailure) as failure:
+            group.recover(operation_id, interrupt)
+        assert failure.value.removed == 3
+    stage = root / f".bronze-group-stage-{operation_id}"
+    stage.rename(tmp_path / "original-stage")
+    stage.mkdir(mode=0o700)
+    replacement = stage.stat()
+    record = root / ".bronze-group-journals" / f"{operation_id}.json"
+    original = record.read_bytes()
+    with journal.open_group_journal(root) as group:
+        with pytest.raises(journal.GroupJournalConflict) as failure:
+            group.recover(operation_id)
+        assert failure.value.removed == 0
+        assert failure.value.possibly_unlinked == 0
+    assert stage.stat().st_ino == replacement.st_ino
+    assert record.read_bytes() == original
+    assert (tmp_path / "original-stage").exists()
+    assert not any((date_dir / name).exists() for name in spec.names().values())
+
+
+@POSIX_ONLY
+def test_process_crash_before_stage_association_preserves_orphan(
+    tmp_path: Path,
+) -> None:
+    root, spec, date_dir = _fixture(tmp_path)
+    with journal.open_group_journal(root) as group:
+        operation_id = group.begin(spec)
+    code = (
+        "import os,sys\nfrom pathlib import Path\n"
+        "from bioetl.infrastructure.storage.bronze.cleanup_group_journal import open_group_journal\n"
+        "with open_group_journal(Path(sys.argv[1])) as group:\n"
+        " group.recover(sys.argv[2],lambda p: os._exit(78) if p=='after_stage_create' else None)"
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", code, str(root), operation_id],
+        capture_output=True,
+        check=False,
+        timeout=20,
+        env={**os.environ, "PYTHONPATH": str(Path(__file__).parents[4] / "src")},
+    )
+    assert result.returncode == 78, result.stderr.decode(errors="replace")
+    stage = root / f".bronze-group-stage-{operation_id}"
+    identity = stage.stat()
+    with journal.open_group_journal(root) as group:
+        with pytest.raises(journal.GroupJournalConflict, match="unassociated stage"):
+            group.recover(operation_id)
+    assert stage.stat().st_ino == identity.st_ino
+    assert (date_dir / spec.names()["payload"]).read_bytes() == b"payload\n"
+    assert (date_dir / spec.names()["sidecar"]).exists()
+
+
+@POSIX_ONLY
+@pytest.mark.parametrize("replacement", [b"{", b"unrelated evidence", b"valid-copy"])
+def test_restart_preserves_unassociated_next(
+    tmp_path: Path, replacement: bytes
+) -> None:
+    root, spec, date_dir = _fixture(tmp_path)
+    with journal.open_group_journal(root) as group:
+        operation_id = group.begin(spec)
+    record = root / ".bronze-group-journals" / f"{operation_id}.json"
+    original = record.read_bytes()
+    raw = original if replacement == b"valid-copy" else replacement
+    temp = record.with_suffix(".next")
+    fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    try:
+        os.write(fd, raw)
+    finally:
+        os.close(fd)
+    with journal.open_group_journal(root) as group:
+        with pytest.raises(journal.GroupJournalConflict, match="replacement retained"):
+            group.recover(operation_id)
+    assert temp.read_bytes() == raw
+    assert record.read_bytes() == original
+    assert (date_dir / spec.names()["payload"]).read_bytes() == b"payload\n"
+    assert (date_dir / spec.names()["sidecar"]).exists()
+
+
+@POSIX_ONLY
+def test_stage_token_replacement_refuses_before_member_removal(tmp_path: Path) -> None:
+    root, spec, date_dir = _fixture(tmp_path)
+
+    def interrupt(phase: str) -> None:
+        if phase == "after_stage_association_fsync":
+            raise OSError("stop after durable association")
+
+    with journal.open_group_journal(root) as group:
+        operation_id = group.begin(spec)
+        with pytest.raises(journal.GroupJournalFailure):
+            group.recover(operation_id, interrupt)
+    stage = root / f".bronze-group-stage-{operation_id}"
+    os.setxattr(stage, journal._STAGE_TAG, b"foreign")
+    with journal.open_group_journal(root) as group:
+        with pytest.raises(journal.GroupJournalConflict):
+            group.recover(operation_id)
+    assert os.getxattr(stage, journal._STAGE_TAG) == b"foreign"
+    assert (date_dir / spec.names()["payload"]).read_bytes() == b"payload\n"
+
+
+@POSIX_ONLY
+def test_late_journal_replacement_retains_partial_result(tmp_path: Path) -> None:
+    root, spec, date_dir = _fixture(tmp_path)
+    with journal.open_group_journal(root) as group:
+        operation_id = group.begin(spec)
+        record = root / ".bronze-group-journals" / f"{operation_id}.json"
+
+        def replace(phase: str) -> None:
+            if phase == "before_journal_unlink":
+                record.write_bytes(b"external evidence")
+
+        with pytest.raises(journal.GroupJournalConflict) as failure:
+            group.recover(operation_id, replace)
+        assert failure.value.removed == 2
+        assert failure.value.removed_bytes > 0
+    assert record.read_bytes() == b"external evidence"
+    assert not (date_dir / spec.names()["payload"]).exists()
+
+
+@POSIX_ONLY
+def test_stage_moved_outside_root_is_not_unlinked_through_old_handle(
+    tmp_path: Path,
+) -> None:
+    root, spec, date_dir = _fixture(tmp_path)
+    outside = tmp_path / "outside-stage"
+    with journal.open_group_journal(root) as group:
+        operation_id = group.begin(spec)
+        stage = root / f".bronze-group-stage-{operation_id}"
+
+        def move(phase: str) -> None:
+            if phase == "after_payload_stage":
+                stage.rename(outside)
+                stage.mkdir(mode=0o700)
+
+        with pytest.raises(journal.GroupJournalConflict) as failure:
+            group.recover(operation_id, move)
+        assert failure.value.removed == 0
+        assert failure.value.possibly_unlinked == 0
+    assert (outside / "payload").read_bytes() == b"payload\n"
+    assert stage.is_dir()
+    assert (date_dir / spec.names()["sidecar"]).exists()
+
+
+@POSIX_ONLY
+def test_unsupported_stage_tag_never_falls_back_to_unattested_removal(
+    tmp_path: Path, monkeypatch
+) -> None:
+    root, spec, date_dir = _fixture(tmp_path)
+    monkeypatch.delattr(journal.os, "setxattr")
+    with journal.open_group_journal(root) as group:
+        operation_id = group.begin(spec)
+        with pytest.raises(journal.GroupJournalFailure) as failure:
+            group.recover(operation_id)
+        assert failure.value.removed == 0
+        assert failure.value.possibly_unlinked == 0
+        assert failure.value.phase == "stage_association"
+    assert (date_dir / spec.names()["payload"]).read_bytes() == b"payload\n"
+    assert (date_dir / spec.names()["sidecar"]).exists()
+
+
+@POSIX_ONLY
+def test_begin_rejects_duplicate_pending_intent(tmp_path: Path) -> None:
+    root, spec, date_dir = _fixture(tmp_path)
+    with journal.open_group_journal(root) as group:
+        operation_id = group.begin(spec)
+        record = root / ".bronze-group-journals" / f"{operation_id}.json"
+        original = record.read_bytes()
+        with pytest.raises(journal.GroupJournalConflict, match="pending intent"):
+            group.begin(spec)
+        assert record.read_bytes() == original
+    assert len(list((root / ".bronze-group-journals").iterdir())) == 1
+    assert (date_dir / spec.names()["payload"]).read_bytes() == b"payload\n"
 
 
 def test_windows_apply_capability_fails_closed(tmp_path: Path) -> None:
@@ -729,19 +930,19 @@ def test_write_fsync_and_finalization_errors_retain_intent(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     root, spec, date_dir = _fixture(tmp_path)
-    original_write = journal._write_all
+    original_write = records._write_all
     monkeypatch.setattr(
-        journal, "_write_all", lambda *_: (_ for _ in ()).throw(OSError("write denied"))
+        records, "_write_all", lambda *_: (_ for _ in ()).throw(OSError("write denied"))
     )
     with (
         journal.open_group_journal(root) as group,
         pytest.raises(OSError, match="write denied"),
     ):
         group.begin(spec)
-    monkeypatch.setattr(journal, "_write_all", original_write)
+    monkeypatch.setattr(records, "_write_all", original_write)
     journal_dir = root / ".bronze-group-journals"
     assert list(journal_dir.glob("*.json")) == []
-    assert len(list(journal_dir.glob("*.next"))) == 1
+    assert list(journal_dir.glob("*.next")) == []
     assert all(
         (date_dir / spec.names()[key]).exists() for key in ("payload", "sidecar")
     )
@@ -819,3 +1020,83 @@ def test_unlink_then_fsync_failure_reports_uncertain_partial_result(
         not (date_dir / name).exists()
         for name in (spec.names()["payload"], spec.names()["sidecar"])
     )
+
+
+@POSIX_ONLY
+@pytest.mark.parametrize("phase", ["after_payload_stage", "before_completion"])
+def test_record_substitution_is_not_overwritten(tmp_path: Path, phase: str) -> None:
+    root, spec, _date_dir = _fixture(tmp_path)
+    with journal.open_group_journal(root) as group:
+        operation_id = group.begin(spec)
+        receipt = root / ".bronze-group-journals" / f"{operation_id}.json"
+
+        def replace_record(point: str) -> None:
+            if point == phase:
+                receipt.unlink()
+                fd = os.open(receipt, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+                try:
+                    os.write(fd, b"foreign receipt")
+                finally:
+                    os.close(fd)
+
+        with pytest.raises(
+            journal.GroupJournalConflict, match="journal replaced"
+        ) as error:
+            group.recover(operation_id, replace_record)
+        assert receipt.read_bytes() == b"foreign receipt"
+        assert error.value.removed == (2 if phase == "before_completion" else 0)
+        assert list(receipt.parent.glob("*.next")) == []
+
+
+@POSIX_ONLY
+def test_completed_missing_stage_is_fsynced_before_receipt_retirement(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root, spec, _date_dir = _fixture(tmp_path)
+    original_fsync = os.fsync
+    with journal.open_group_journal(root) as group:
+        operation_id = group.begin(spec)
+        stage = root / f".bronze-group-stage-{operation_id}"
+        receipt = root / ".bronze-group-journals" / f"{operation_id}.json"
+
+        def fail_root_confirmation(fd: int) -> None:
+            if fd == group._root_fd and not stage.exists():
+                raise OSError("root confirmation failed")
+            original_fsync(fd)
+
+        monkeypatch.setattr(journal.os, "fsync", fail_root_confirmation)
+        with pytest.raises(journal.GroupJournalFailure) as failure:
+            group.recover(operation_id)
+        assert failure.value.removed == 2
+        assert not stage.exists()
+        assert receipt.exists()
+        with pytest.raises(journal.GroupJournalFailure) as retry:
+            group.recover(operation_id)
+        assert retry.value.removed == 0
+        assert receipt.exists()
+        monkeypatch.setattr(journal.os, "fsync", original_fsync)
+        assert group.recover(operation_id) == 0
+        assert not receipt.exists()
+
+
+@POSIX_ONLY
+def test_synchronous_write_failure_retains_substituted_temp(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root, spec, date_dir = _fixture(tmp_path)
+    retained = tmp_path / "owned-temp"
+
+    def replace_temp_then_fail(_fd: int, _raw: bytes) -> None:
+        temp = next((root / ".bronze-group-journals").glob("*.next"))
+        temp.rename(retained)
+        temp.write_bytes(b"foreign temp")
+        raise OSError("write failed after substitution")
+
+    monkeypatch.setattr(records, "_write_all", replace_temp_then_fail)
+    with journal.open_group_journal(root) as group:
+        with pytest.raises(OSError, match="write failed after substitution"):
+            group.begin(spec)
+    temp = next((root / ".bronze-group-journals").glob("*.next"))
+    assert temp.read_bytes() == b"foreign temp"
+    assert retained.exists()
+    assert (date_dir / spec.names()["payload"]).exists()
