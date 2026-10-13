@@ -17,7 +17,7 @@ from bioetl.domain.exceptions.gold_write import (
 )
 from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
 from bioetl.infrastructure.storage.gold.cancellation import (
-    GoldWriteCancelled,
+    GoldWriteCancelled as GoldWriteCancelled,
     _PhysicalCancellationBoundary,
 )
 
