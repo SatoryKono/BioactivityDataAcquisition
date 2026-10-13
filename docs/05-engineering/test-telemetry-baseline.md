@@ -32,7 +32,7 @@ trend evidence only.
 - Source run id: `local-coverage`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `5a848a6ec068a6855017b0b9822991d1c241ae51c6098788491a9f9d865656c8`
+- Source tree sha256: `b579809e62c20b85e32aa931fd25a025da649b7fea9245a113b2ba9cc27905a6`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-10-13T11:39:16.320446+00:00`
 
@@ -92,7 +92,12 @@ trend evidence only.
 
 ## Duration Telemetry
 
-- Total collected test cases: `33668`
+- Total executed test cases: `33668`
+- Executed means observed non-skipped JUnit testcase records, not
+  collection count or distinct logical tests. Error records can describe
+  setup or collection failures rather than a test body run.
+- Only measured positive durations enter the slowest-test ranking.
+  Older CI timed-row totals are not directly comparable with this count.
 - Freshness guard: `<=45 days` via `refreshed_at_utc`
 
 ### Top Slowest Tests

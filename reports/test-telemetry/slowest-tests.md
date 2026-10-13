@@ -5,7 +5,10 @@ Source run id: `local-coverage`
 Source event: `local_coverage_verify`
 Source run URL: `pending`
 Refresh status: `captured`
-Collected test cases: `33668`
+Executed test cases: `33668`
+Executed counts non-skipped JUnit records, including zero or missing
+duration; duplicate identities remain separate records. This is not a
+collection count. Older CI timed-row totals are not directly comparable.
 Freshness guard: `<=45 days`
 
 | Rank | Duration (s) | Test | Source |
