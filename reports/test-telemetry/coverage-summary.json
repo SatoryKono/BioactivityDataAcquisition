@@ -4,7 +4,7 @@
   "source_run_id": "local-bioetl-local-coverage-pr11990-final3",
   "source_event": "local_coverage_verify",
   "source_run_url": null,
-  "source_tree_sha256": "0f00d47deece0643d6ed9012cfc63c336bd86cff1f85144efe042ac3f83b7cab",
+  "source_tree_sha256": "86f0cf75aa5c5faab52ea12171582ebbe4f1256a266984dfbdbbb7a39b6cfb1c",
   "refreshed_at_utc": "2026-10-13T06:16:30.069150+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.67,

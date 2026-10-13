@@ -155,6 +155,43 @@ def _depth_limit_exceeded(raw_pattern: str, limit: int = 10) -> bool:
     return False
 
 
+def _is_interpolated_string_prefix(raw_pattern: str, index: int) -> bool:
+    """Recognize an f- or t-string prefix at a string-token boundary."""
+    if index and (raw_pattern[index - 1].isalnum() or raw_pattern[index - 1] == "_"):
+        return False
+    prefix = raw_pattern[index : index + 2].lower()
+    return (
+        raw_pattern[index] in "fFtT"
+        and raw_pattern[index + 1 : index + 2] in ("'", '"')
+    ) or (
+        prefix in {"fr", "rf", "tr", "rt"}
+        and raw_pattern[index + 2 : index + 3] in ("'", '"')
+    )
+
+
+def _contains_interpolated_string(raw_pattern: str) -> bool:
+    """Find f-/t-string tokens without parsing their nested expressions."""
+    quote: str | None = None
+    triple = False
+    index = 0
+    end = len(raw_pattern)
+    while index < end:
+        char = raw_pattern[index]
+        if quote is not None:
+            quote, triple, index = _consume_quoted_char(
+                raw_pattern, index, quote, triple
+            )
+        elif char in "'\"":
+            triple = raw_pattern.startswith(char * 3, index)
+            if triple:
+                index += 2
+            quote = char
+        elif char in "fFrRtT" and _is_interpolated_string_prefix(raw_pattern, index):
+            return True
+        index += 1
+    return False
+
+
 def _parse_rule(line: str) -> tuple[list[str], str] | None:
     match = RULE_PATTERN.match(line)
     if match is None:
@@ -163,7 +200,9 @@ def _parse_rule(line: str) -> tuple[list[str], str] | None:
         raw_pattern = match.group(1)
         if len(raw_pattern) > 4096:
             return None
-        if _depth_limit_exceeded(raw_pattern):
+        if _contains_interpolated_string(raw_pattern) or _depth_limit_exceeded(
+            raw_pattern
+        ):
             return None
 
         pattern = ast.literal_eval(raw_pattern)
