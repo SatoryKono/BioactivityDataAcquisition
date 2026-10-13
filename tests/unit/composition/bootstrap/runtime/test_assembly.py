@@ -571,6 +571,7 @@ def test_runtime_config_preserves_typed_debug_export_keywords(debug_overrides):
     assert result.health_check_mode == "probe"
 
 
+@pytest.mark.unit
 def test_runtime_config_rejects_unknown_debug_keyword():
     with pytest.raises(TypeError, match="Unexpected debug-export options"):
         assemble_runtime_config(

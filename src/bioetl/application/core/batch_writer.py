@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.domain.types.gold_contracts import GoldWriteReceipt
-
 __all__ = ["BatchWriter"]
 
 from dataclasses import dataclass
@@ -38,6 +36,7 @@ if TYPE_CHECKING:
         RunType,
         ScdConfig,
     )
+    from bioetl.domain.types.gold_contracts import GoldWriteReceipt
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 

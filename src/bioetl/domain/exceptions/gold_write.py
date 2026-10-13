@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from asyncio import CancelledError
 from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions.base import BioETLError
@@ -23,8 +22,8 @@ class GoldWriteFailure(BioETLError):
         super().__init__(f"Gold write {receipt.physical_table}: {receipt.category}")
 
 
-class GoldWriteCancelled(CancelledError):
-    """Cancellation remains cancellation, even when a commit is already proven."""
+class GoldWriteCancelled(BaseException):
+    """Framework-neutral identity for cancellation carrying a Gold outcome."""
 
     def __init__(self, receipt: GoldWriteReceipt) -> None:
         self.receipt = receipt

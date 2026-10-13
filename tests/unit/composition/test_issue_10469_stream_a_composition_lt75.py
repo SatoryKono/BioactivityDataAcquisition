@@ -8,7 +8,9 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.composition.factories.pipeline import _runner_preflight_observer as subject
-from bioetl.composition.factories.services import _preflight as preflight_subject
+from bioetl.composition.factories.pipeline import (
+    _runner_preflight_observer as preflight_subject,
+)
 
 pytestmark = pytest.mark.unit
 

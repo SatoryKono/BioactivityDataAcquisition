@@ -3,9 +3,6 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal, TypedDict, Unpack
-from bioetl.composition.runtime_builders.inputs_runtime_models import (
-    ResolvedVacuumSettings,
-)
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.config.runtime import PreflightRuntimeSettings
 from bioetl.domain.types import RunType
@@ -18,14 +15,11 @@ from pathlib import Path
 
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.runtime_builders.inputs_runtime_assembly import (
+    ResolvedVacuumSettings,
     assemble_vacuum_settings as _assemble_vacuum_settings,
 )
 from bioetl.domain.context import CachedBronzeContext
-from bioetl.composition.runtime_builders.runner_builder_wiring import (
-    RunnerBuilderWiring,
-    RunnerFactoryWiring,
-    RunnerInputWiring,
-)
+from bioetl.composition.runtime_builders import runner_builder_wiring as wiring
 
 if TYPE_CHECKING:
     from bioetl.composition.registry_api import PipelineRegistry
@@ -57,22 +51,22 @@ class RuntimeBootstrapPhases:
 
     registry: PipelineRegistry
     configs_root: Path
-    factory_wiring: RunnerFactoryWiring
-    input_wiring: RunnerInputWiring
+    factory_wiring: wiring.RunnerFactoryWiring
+    input_wiring: wiring.RunnerInputWiring
 
     @property
-    def wiring(self) -> RunnerBuilderWiring:
+    def wiring(self) -> wiring.RunnerBuilderWiring:
         """Return the canonical aggregate runner wiring bundle."""
 
-        return RunnerBuilderWiring(self.factory_wiring, self.input_wiring)
+        return wiring.RunnerBuilderWiring(self.factory_wiring, self.input_wiring)
 
 
 def assemble_runtime_bootstrap_phases(
     *,
     registry: PipelineRegistry,
     configs_root: Path,
-    factory_wiring: RunnerFactoryWiring,
-    input_wiring: RunnerInputWiring,
+    factory_wiring: wiring.RunnerFactoryWiring,
+    input_wiring: wiring.RunnerInputWiring,
 ) -> RuntimeBootstrapPhases:
     """Build the typed payload shared by runtime pipeline bootstrap seams."""
     return RuntimeBootstrapPhases(
@@ -101,8 +95,6 @@ def assemble_filter_config(
     test_mode: bool,
 ) -> InputFilterConfig | None:
     """Assemble filter config from YAML plus run-context overrides."""
-    effective_test_mode = test_mode or ctx.ignore_yaml_filter
-
     return FilterConfigBuilder.build(
         yaml_filter=yaml_filter,
         cli_csv=ctx.input_filter.source_path if ctx.input_filter.enabled else None,
@@ -111,7 +103,7 @@ def assemble_filter_config(
         cli_fallback_column=(
             ctx.input_filter.fallback_column if ctx.input_filter.enabled else None
         ),
-        test_mode=effective_test_mode,
+        test_mode=test_mode or ctx.ignore_yaml_filter,
         direct_filter_ids=ctx.input_filter.filter_ids,
         direct_fallback_mapping=ctx.input_filter.fallback_mapping,
         direct_multi_filter_ids=ctx.input_filter.multi_filter_ids,
@@ -156,6 +148,7 @@ def assemble_runtime_config(
     unsupported = debug_export.keys() - _DebugExportOverrides.__annotations__.keys()
     if unsupported:
         raise TypeError(f"Unexpected debug-export options: {sorted(unsupported)}")
+    mode = health_check_mode
     return RuntimeConfig(
         run_type=run_type,
         resume=resume,
@@ -170,11 +163,7 @@ def assemble_runtime_config(
         debug_export_formats=debug_export.get("debug_export_formats", ()),
         debug_export_dir=debug_export.get("debug_export_dir"),
         workflow_id=workflow_id,
-        health_check_mode=(
-            health_check_mode
-            if health_check_mode is not None
-            else preflight.health_check_mode
-        ),
+        health_check_mode=mode if mode is not None else preflight.health_check_mode,
         strict_preflight=preflight.strict_preflight,
         silver_filter_compatibility_mode=resolve_silver_filter_compatibility_mode(),
     )

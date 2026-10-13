@@ -327,3 +327,20 @@ by storage technology. Current owner boundaries:
   `QuarantineEntry` transition wording drift. `PipelineStorageProtocol` remains
   valid only as an application-owned aggregate protocol and must not be listed as
   a domain storage port.
+
+<!-- current-source-binding:start -->
+
+## Current source inventory binding
+
+- `source_tree_sha256=f47b387c7e866d9a83fa4c8b77496eeba6ab80c85a526c15575d6eeef7f02686`
+- `source_module_count=2569`
+- Source modules: `2569`
+- `2527` fully covered
+- `41` partially covered
+
+Derived by scripts/engineering/qa/report_topology_source_binding.py from
+the verified module inventory. This is a source-only projection, not a
+new coverage measurement or a complete topology re-audit. Historical raw
+evidence and capture identity above remain unchanged.
+
+<!-- current-source-binding:end -->

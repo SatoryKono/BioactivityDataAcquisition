@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Literal, override
+from typing import Literal, TypedDict, Unpack, override
 
 from deltalake import DeltaTable, write_deltalake
 
@@ -46,6 +46,13 @@ __all__ = ["SilverWriteMode", "SilverWriter", "_SilverWriteExecutionContext"]
 _DELTA_LAKE_REQUIREMENTS = (DeltaTable, write_deltalake)
 
 
+class _SilverTransformMetadata(TypedDict, total=False):
+    """Typed compatibility keywords for transform metadata, not collaborators."""
+
+    transform_version: str | None
+    transform_steps: tuple[str, ...] | None
+
+
 class SilverWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
     SilverWriterRuntimeFacade,
     BaseDeltaWriter,
@@ -74,10 +81,16 @@ class SilverWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         runtime_request: SilverWriterRuntimeServicesRequest | None = None,
         *,
         clock: ClockPort,
-        transform_version: str | None = None,
-        transform_steps: tuple[str, ...] | None = None,
+        **transform_metadata: Unpack[_SilverTransformMetadata],
     ) -> None:
         """Initialize Silver writer."""
+        unsupported = (
+            transform_metadata.keys() - _SilverTransformMetadata.__annotations__.keys()
+        )
+        if unsupported:
+            raise TypeError(
+                f"Unexpected Silver transform metadata: {sorted(unsupported)}"
+            )
         if clock is None:
             raise TypeError("SilverWriter requires an explicit ClockPort")
         self._clock = clock
@@ -87,8 +100,8 @@ class SilverWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
             runtime_request = SilverWriterRuntimeServicesRequest(
                 logger=logger,
                 clock=clock,
-                transform_version=transform_version,
-                transform_steps=transform_steps,
+                transform_version=transform_metadata.get("transform_version"),
+                transform_steps=transform_metadata.get("transform_steps"),
             )
 
         super().__init__(base_path, logger, flat_structure=flat_structure)

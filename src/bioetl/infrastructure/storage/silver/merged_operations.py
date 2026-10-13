@@ -13,7 +13,7 @@ import pyarrow as pa
 from deltalake import write_deltalake
 
 from bioetl.domain.exceptions import SchemaViolationError
-from bioetl.domain.models._metadata_common import validate_utc_datetime
+from bioetl.domain.models.metadata import validate_utc_datetime
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol

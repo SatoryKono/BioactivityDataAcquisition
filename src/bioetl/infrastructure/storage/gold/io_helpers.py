@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Callable
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, Protocol
 
-from bioetl.domain.exceptions.gold_write import GoldWriteCancelled
 from bioetl.infrastructure.storage.gold.commit_outcome import (
+    GoldOutcomeBoundary,
     await_physical_commit,
     receipt_for,
 )
@@ -79,33 +78,30 @@ async def write_scd2_once(
     column_order: list[str] | None,
 ) -> None:
     """Execute one SCD2 write attempt with merge-or-create flow."""
-    try:
-        dt = await writer._run_in_executor(lambda: module.DeltaTable(table_path))
-        await writer._merge_scd2(
-            dt,
-            records,
-            business_key,
-            scd_config,
-            ingestion_ts,
-            column_order,
-        )
-    except asyncio.CancelledError as original:
-        if isinstance(original, GoldWriteCancelled):
-            raise
-        raise GoldWriteCancelled(receipt_for(table_path)) from original
-    except module.TableNotFoundError:
-        arrow_data = writer._to_arrow_table(records, column_order=column_order)
-        await await_physical_commit(
-            lambda: writer._run_in_executor(
-                lambda: module.write_deltalake(
-                    table_or_uri=table_path,
-                    data=arrow_data,
-                    mode="append",
-                    partition_by=partition_cols,
-                )
-            ),
-            receipt_for(table_path),
-        )
+    with GoldOutcomeBoundary(receipt_for(table_path), translate_failure=False):
+        try:
+            dt = await writer._run_in_executor(lambda: module.DeltaTable(table_path))
+            await writer._merge_scd2(
+                dt,
+                records,
+                business_key,
+                scd_config,
+                ingestion_ts,
+                column_order,
+            )
+        except module.TableNotFoundError:
+            arrow_data = writer._to_arrow_table(records, column_order=column_order)
+            await await_physical_commit(
+                lambda: writer._run_in_executor(
+                    lambda: module.write_deltalake(
+                        table_or_uri=table_path,
+                        data=arrow_data,
+                        mode="append",
+                        partition_by=partition_cols,
+                    )
+                ),
+                receipt_for(table_path),
+            )
 
 
 __all__ = [

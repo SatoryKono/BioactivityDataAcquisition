@@ -364,3 +364,50 @@ def test_receipt_guard_rejects_untyped_success():
 
     with pytest.raises(TypeError):
         require_complete_gold_receipt(None)
+
+
+@pytest.mark.parametrize("original", [KeyboardInterrupt(), SystemExit(1)])
+def test_gold_outcome_boundary_preserves_process_control(original):
+    from bioetl.infrastructure.storage.gold.commit_outcome import GoldOutcomeBoundary
+
+    with pytest.raises(type(original)) as found:
+        with GoldOutcomeBoundary(receipt_for("synthetic")):
+            raise original
+    assert found.value is original
+
+
+def test_gold_outcome_boundary_adapts_domain_cancellation():
+    from bioetl.infrastructure.storage.gold.commit_outcome import GoldOutcomeBoundary
+
+    receipt = receipt_for("synthetic", category=Category.COMMITTED_POSTWRITE_PENDING)
+    original = GoldWriteCancelled(receipt)
+    with pytest.raises(asyncio.CancelledError) as found:
+        with GoldOutcomeBoundary(receipt):
+            raise original
+    assert isinstance(found.value, GoldWriteCancelled)
+    assert found.value.receipt is receipt
+    assert found.value.__cause__ is original
+
+
+@pytest.mark.asyncio
+async def test_physical_commit_drains_many_cancellations_without_recursion():
+    started, release = asyncio.Event(), asyncio.Event()
+
+    async def physical():
+        started.set()
+        await release.wait()
+
+    pending = asyncio.create_task(
+        await_physical_commit(physical, receipt_for("synthetic"))
+    )
+    await started.wait()
+    for _ in range(1500):
+        pending.cancel()
+        await asyncio.sleep(0)
+    assert not pending.done()
+    release.set()
+    with pytest.raises(GoldWriteCancelled) as found:
+        await pending
+    assert isinstance(found.value, asyncio.CancelledError)
+    assert found.value.receipt.category == Category.COMMITTED_POSTWRITE_PENDING
+    assert found.value.receipt.committed_targets == ("synthetic",)

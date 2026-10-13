@@ -3,12 +3,10 @@
 
 from __future__ import annotations
 
-import asyncio
 from dataclasses import replace
 from time import perf_counter
 from typing import cast
 
-from bioetl.domain.exceptions.gold_write import GoldWriteCancelled, GoldWriteFailure
 from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
 from bioetl.infrastructure.observability.metrics import (
     GOLD_VALIDATION_FAILURES_TOTAL,
@@ -17,6 +15,7 @@ from bioetl.infrastructure.observability.metrics import (
     GOLD_WRITE_OUTCOMES_TOTAL,
 )
 from bioetl.infrastructure.storage.gold.commit_outcome import (
+    GoldOutcomeBoundary,
     await_physical_commit,
     receipt_for,
 )
@@ -103,13 +102,9 @@ async def _complete_gold_merged_write(
         category=GoldWriteCategory.COMMITTED_POSTWRITE_PENDING,
         committed_targets=(receipt.physical_table,),
     )
-    try:
+    with GoldOutcomeBoundary(receipt):
         await _export_gold_merged_csv(host, prepared)
         await _write_gold_merged_sidecar(host, prepared)
-    except asyncio.CancelledError as original:
-        raise GoldWriteCancelled(receipt) from original
-    except Exception as original:
-        raise GoldWriteFailure(receipt) from original
     return replace(receipt, category=GoldWriteCategory.COMPLETE)
 
 
@@ -118,44 +113,41 @@ async def _execute_gold_merged_write(
     request: _GoldMergedWriteRequest,
 ) -> GoldWriteReceipt:
     """Prepare, log, and execute one merged Gold write request."""
-    from bioetl.infrastructure.storage.gold.io_preparation import (
-        _log_prepared_gold_merged_write,
-        _prepare_gold_merged_write,
-    )
+    with GoldOutcomeBoundary(receipt_for(request.table_name), translate_failure=False):
+        from bioetl.infrastructure.storage.gold.io_preparation import (
+            _log_prepared_gold_merged_write,
+            _prepare_gold_merged_write,
+        )
 
-    started_at = perf_counter()
-    terminal_status = "failure"
-    prepared = None
-    GOLD_WRITE_ATTEMPTS_TOTAL.labels(
-        **_gold_merged_metric_labels(request.table_name)
-    ).inc()
-    try:
-        prepared = await _prepare_gold_merged_write(host, request)
-        _log_prepared_gold_merged_write(host, prepared)
-        receipt = await _complete_gold_merged_write(host, prepared)
-        terminal_status = "success"
-        return receipt
-    except asyncio.CancelledError as original:
-        if isinstance(original, GoldWriteCancelled):
-            raise
-        raise GoldWriteCancelled(receipt_for(request.table_name)) from original
-    except ValueError as error:
-        if prepared is None:
-            terminal_status = "validation_failure"
-            GOLD_VALIDATION_FAILURES_TOTAL.labels(
-                **_gold_merged_validation_metric_labels(request.table_name, error)
-            ).inc()
-        raise
-    finally:
-        GOLD_WRITE_OUTCOMES_TOTAL.labels(
-            **_gold_merged_metric_labels(
-                request.table_name,
-                status=terminal_status,
-            )
+        started_at = perf_counter()
+        terminal_status = "failure"
+        prepared = None
+        GOLD_WRITE_ATTEMPTS_TOTAL.labels(
+            **_gold_merged_metric_labels(request.table_name)
         ).inc()
-        GOLD_WRITE_DURATION_SECONDS.labels(
-            **_gold_merged_metric_labels(
-                request.table_name,
-                status=terminal_status,
-            )
-        ).observe(perf_counter() - started_at)
+        try:
+            prepared = await _prepare_gold_merged_write(host, request)
+            _log_prepared_gold_merged_write(host, prepared)
+            receipt = await _complete_gold_merged_write(host, prepared)
+            terminal_status = "success"
+            return receipt
+        except ValueError as error:
+            if prepared is None:
+                terminal_status = "validation_failure"
+                GOLD_VALIDATION_FAILURES_TOTAL.labels(
+                    **_gold_merged_validation_metric_labels(request.table_name, error)
+                ).inc()
+            raise
+        finally:
+            GOLD_WRITE_OUTCOMES_TOTAL.labels(
+                **_gold_merged_metric_labels(
+                    request.table_name,
+                    status=terminal_status,
+                )
+            ).inc()
+            GOLD_WRITE_DURATION_SECONDS.labels(
+                **_gold_merged_metric_labels(
+                    request.table_name,
+                    status=terminal_status,
+                )
+            ).observe(perf_counter() - started_at)
