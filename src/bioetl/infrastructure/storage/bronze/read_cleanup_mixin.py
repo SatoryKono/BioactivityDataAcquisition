@@ -60,6 +60,16 @@ class _CleanupDatePlan:
     directories_failed: int = 0
 
 
+@dataclass(frozen=True, slots=True)
+class _CleanupPlanScope:
+    root_abs: Path
+    root_real: Path
+    rel_date: Path
+    provider_name: str
+    entity_name: str
+    payload_names: set[str]
+
+
 class BronzeWriterReadCleanupMixin:
     """Filesystem read/list/cleanup helpers for Bronze storage."""
 
@@ -236,79 +246,111 @@ class BronzeWriterReadCleanupMixin:
             cutoff_str, provider, entity, on_skip=on_discovery_skip
         ):
             plan = self._plan_old_dir_files(date_dir, root_abs, root_real)
-            stats["files_planned"] += len(plan.files)
-            stats["bytes_planned"] += sum(c.identity.st_size for c in plan.files)
-            stats["files_skipped"] += plan.files_skipped
-            stats["bytes_skipped"] += plan.bytes_skipped
-            stats["files_conflicted"] += plan.files_conflicted
-            stats["bytes_conflicted"] += plan.bytes_conflicted
-            stats["files_failed"] += plan.files_failed
-            stats["bytes_failed"] += plan.bytes_failed
-            stats["directories_skipped"] += plan.directories_skipped
-            stats["directories_conflicted"] += plan.directories_conflicted
-            stats["directories_failed"] += plan.directories_failed
-            if plan.removable:
-                stats["directories_planned"] += 1
-            elif not plan.directories_failed and not plan.directories_conflicted:
-                stats["directories_skipped"] += 1
-            if dry_run:
-                continue
-            failed_before = stats["files_failed"]
-            conflicted_before = stats["files_conflicted"]
+            self._record_cleanup_plan(stats, plan)
+            if not dry_run:
+                self._apply_cleanup_plan(stats, plan, root_abs, root_real)
+        return stats
 
-            def on_stage_error(name: str, _error: OSError) -> None:
-                stats["directories_failed"] += 1
-                self._log_cleanup_skip(
-                    str(self.base_path / name), "stage_cleanup_error"
-                )
+    @staticmethod
+    def _record_cleanup_plan(stats: dict[str, int], plan: _CleanupDatePlan) -> None:
+        """Add one nonmutating plan to the public result counters."""
+        stats["files_planned"] += len(plan.files)
+        stats["bytes_planned"] += sum(c.identity.st_size for c in plan.files)
+        stats["files_skipped"] += plan.files_skipped
+        stats["bytes_skipped"] += plan.bytes_skipped
+        stats["files_conflicted"] += plan.files_conflicted
+        stats["bytes_conflicted"] += plan.bytes_conflicted
+        stats["files_failed"] += plan.files_failed
+        stats["bytes_failed"] += plan.bytes_failed
+        stats["directories_skipped"] += plan.directories_skipped
+        stats["directories_conflicted"] += plan.directories_conflicted
+        stats["directories_failed"] += plan.directories_failed
+        if plan.removable:
+            stats["directories_planned"] += 1
+        elif not plan.directories_failed and not plan.directories_conflicted:
+            stats["directories_skipped"] += 1
 
-            for candidate in plan.files:
-                try:
-                    removed = safe_unlink(
-                        candidate.path,
-                        root_abs,
-                        root_real,
-                        candidate.identity,
-                        on_stage_error=on_stage_error,
-                    )
-                except OSError:
-                    stats["files_failed"] += 1
-                    stats["bytes_failed"] += candidate.identity.st_size
-                    self._log_cleanup_skip(str(candidate.path), "unlink_error")
-                else:
-                    if removed:
-                        stats["files_removed"] += 1
-                        stats["bytes_freed"] += candidate.identity.st_size
-                    else:
-                        stats["files_conflicted"] += 1
-                        stats["bytes_conflicted"] += candidate.identity.st_size
-                        self._log_cleanup_skip(str(candidate.path), "unlink_conflict")
-            if not plan.removable:
-                continue
-            if (
-                stats["files_failed"] != failed_before
-                or stats["files_conflicted"] != conflicted_before
-            ):
-                stats["directories_skipped"] += 1
-                continue
+    def _apply_cleanup_plan(
+        self,
+        stats: dict[str, int],
+        plan: _CleanupDatePlan,
+        root_abs: Path,
+        root_real: Path,
+    ) -> None:
+        """Apply the exact planned inodes and retain partial-result accounting."""
+        failed_before = stats["files_failed"]
+        conflicted_before = stats["files_conflicted"]
+
+        def on_stage_error(name: str, _error: OSError) -> None:
+            stats["directories_failed"] += 1
+            self._log_cleanup_skip(str(self.base_path / name), "stage_cleanup_error")
+
+        self._apply_planned_files(stats, plan, root_abs, root_real, on_stage_error)
+        if not plan.removable:
+            return
+        if (
+            stats["files_failed"] != failed_before
+            or stats["files_conflicted"] != conflicted_before
+        ):
+            stats["directories_skipped"] += 1
+            return
+        self._apply_planned_directory(stats, plan, root_abs, root_real, on_stage_error)
+
+    def _apply_planned_files(
+        self,
+        stats: dict[str, int],
+        plan: _CleanupDatePlan,
+        root_abs: Path,
+        root_real: Path,
+        on_stage_error: Callable[[str, OSError], None],
+    ) -> None:
+        for candidate in plan.files:
             try:
-                removed_dir = safe_rmdir(
-                    date_dir,
+                removed = safe_unlink(
+                    candidate.path,
                     root_abs,
                     root_real,
-                    plan.identity,
+                    candidate.identity,
                     on_stage_error=on_stage_error,
                 )
             except OSError:
-                stats["directories_failed"] += 1
-                self._log_cleanup_skip(str(date_dir), "rmdir_error")
+                stats["files_failed"] += 1
+                stats["bytes_failed"] += candidate.identity.st_size
+                self._log_cleanup_skip(str(candidate.path), "unlink_error")
             else:
-                if removed_dir:
-                    stats["directories_removed"] += 1
+                if removed:
+                    stats["files_removed"] += 1
+                    stats["bytes_freed"] += candidate.identity.st_size
                 else:
-                    stats["directories_conflicted"] += 1
-                    self._log_cleanup_skip(str(date_dir), "rmdir_conflict")
-        return stats
+                    stats["files_conflicted"] += 1
+                    stats["bytes_conflicted"] += candidate.identity.st_size
+                    self._log_cleanup_skip(str(candidate.path), "unlink_conflict")
+
+    def _apply_planned_directory(
+        self,
+        stats: dict[str, int],
+        plan: _CleanupDatePlan,
+        root_abs: Path,
+        root_real: Path,
+        on_stage_error: Callable[[str, OSError], None],
+    ) -> None:
+        try:
+            removed_dir = safe_rmdir(
+                plan.path,
+                root_abs,
+                root_real,
+                plan.identity,
+                on_stage_error=on_stage_error,
+            )
+        except OSError:
+            stats["directories_failed"] += 1
+            self._log_cleanup_skip(str(plan.path), "rmdir_error")
+        else:
+            if removed_dir:
+                stats["directories_removed"] += 1
+            else:
+                stats["directories_conflicted"] += 1
+                self._log_cleanup_skip(str(plan.path), "rmdir_conflict")
 
     def _plan_old_dir_files(
         self, date_dir: Path, root_abs: Path, root_real: Path
@@ -330,6 +372,34 @@ class BronzeWriterReadCleanupMixin:
         if entries is None:
             plan.directories_failed = 1
             return plan
+        identities = self._snapshot_cleanup_identities(date_dir, entries, plan)
+        payload_names = self._associated_payload_names(identities, date_dir.name)
+        rel_date = Path(os.path.abspath(date_dir)).relative_to(root_abs)  # noqa: PTH100
+        provider_name, entity_name = (
+            ("", "") if self._flat_structure else rel_date.parts[:2]
+        )
+        scope = _CleanupPlanScope(
+            root_abs, root_real, rel_date, provider_name, entity_name, payload_names
+        )
+        for entry in sorted(entries, key=lambda item: item.name):
+            candidate_identity = identities.get(entry.name)
+            if candidate_identity is None:
+                continue
+            self._plan_cleanup_entry(plan, entry, candidate_identity, scope)
+        plan.removable = (
+            len(plan.files) == len(entries)
+            and not plan.files_failed
+            and not plan.files_conflicted
+        )
+        return plan
+
+    def _snapshot_cleanup_identities(
+        self,
+        date_dir: Path,
+        entries: list[os.DirEntry[str]],
+        plan: _CleanupDatePlan,
+    ) -> dict[str, os.stat_result]:
+        """Retain stat failures while obtaining portable entry identities."""
         identities: dict[str, os.stat_result] = {}
         for entry in entries:
             try:
@@ -339,62 +409,60 @@ class BronzeWriterReadCleanupMixin:
             except OSError:
                 plan.files_failed += 1
                 self._log_cleanup_skip(entry.path, "stat_error")
-        payload_names = {
+        return identities
+
+    @staticmethod
+    def _associated_payload_names(
+        identities: dict[str, os.stat_result], date_name: str
+    ) -> set[str]:
+        """Require an exact payload/sidecar pair before classifying copies."""
+        return {
             name
             for name, identity in identities.items()
             if name.endswith(".jsonl.zst")
             and stat.S_ISREG(identity.st_mode)
-            and is_owned_artifact(name, date_name=date_dir.name)
+            and is_owned_artifact(name, date_name=date_name)
             and (sidecar := identities.get(f"{name}.meta.json")) is not None
             and stat.S_ISREG(sidecar.st_mode)
         }
-        rel_date = Path(os.path.abspath(date_dir)).relative_to(root_abs)  # noqa: PTH100
-        provider_name, entity_name = (
-            ("", "") if self._flat_structure else rel_date.parts[:2]
-        )
-        for entry in sorted(entries, key=lambda item: item.name):
-            candidate_identity = identities.get(entry.name)
-            if candidate_identity is None:
-                continue
-            expected_rel = Path(
-                self._resolve_bronze_path(
-                    provider_name,
-                    entity_name,
-                    date_dir.name,
-                    entry.name,
-                )
+
+    def _plan_cleanup_entry(
+        self,
+        plan: _CleanupDatePlan,
+        entry: os.DirEntry[str],
+        identity: os.stat_result,
+        scope: _CleanupPlanScope,
+    ) -> None:
+        expected_rel = Path(
+            self._resolve_bronze_path(
+                scope.provider_name, scope.entity_name, plan.path.name, entry.name
             )
-            file_path = date_dir / entry.name
-            if stat.S_ISDIR(candidate_identity.st_mode):
-                plan.directories_skipped += 1
-                self._log_cleanup_skip(entry.path, "unknown_directory")
-                continue
-            if (
-                not stat.S_ISREG(candidate_identity.st_mode)
-                or not is_owned_artifact(
-                    entry.name, date_name=date_dir.name, payload_names=payload_names
-                )
-                or expected_rel != rel_date / entry.name
-            ):
-                plan.files_skipped += 1
-                if stat.S_ISREG(candidate_identity.st_mode):
-                    plan.bytes_skipped += candidate_identity.st_size
-                self._log_cleanup_skip(entry.path, "unknown_artifact")
-                continue
-            if not candidate_is_safe(
-                file_path, root_abs, root_real, candidate_identity
-            ):
-                plan.files_conflicted += 1
-                plan.bytes_conflicted += candidate_identity.st_size
-                self._log_cleanup_skip(entry.path, "candidate_conflict")
-                continue
-            plan.files.append(_CleanupCandidate(file_path, candidate_identity))
-        plan.removable = (
-            len(plan.files) == len(entries)
-            and not plan.files_failed
-            and not plan.files_conflicted
         )
-        return plan
+        file_path = plan.path / entry.name
+        if stat.S_ISDIR(identity.st_mode):
+            plan.directories_skipped += 1
+            self._log_cleanup_skip(entry.path, "unknown_directory")
+            return
+        if (
+            not stat.S_ISREG(identity.st_mode)
+            or not is_owned_artifact(
+                entry.name,
+                date_name=plan.path.name,
+                payload_names=scope.payload_names,
+            )
+            or expected_rel != scope.rel_date / entry.name
+        ):
+            plan.files_skipped += 1
+            if stat.S_ISREG(identity.st_mode):
+                plan.bytes_skipped += identity.st_size
+            self._log_cleanup_skip(entry.path, "unknown_artifact")
+            return
+        if not candidate_is_safe(file_path, scope.root_abs, scope.root_real, identity):
+            plan.files_conflicted += 1
+            plan.bytes_conflicted += identity.st_size
+            self._log_cleanup_skip(entry.path, "candidate_conflict")
+            return
+        plan.files.append(_CleanupCandidate(file_path, identity))
 
     async def cleanup_old_files(
         self,
@@ -471,32 +539,46 @@ class BronzeWriterReadCleanupMixin:
             }
         root_abs = Path(os.path.abspath(self.base_path))  # noqa: PTH100
         root_real = real_root(self.base_path)
-        file_count = 0
-        scope_exists: bool = bool(exists)
+        date_parents, scope_exists = self._preview_date_parents(
+            provider, entity, root_real
+        )
+        file_count = self._count_preview_files(date_parents, root_abs, root_real)
+        return {
+            "path": str(preview_root),
+            "file_count": file_count,
+            "exists": scope_exists,
+        }
+
+    def _preview_date_parents(
+        self, provider: str | None, entity: str | None, root_real: Path
+    ) -> tuple[list[Path], bool]:
+        """Resolve bounded preview scopes without following child links."""
         if self._flat_structure:
-            date_parents = [self.base_path]
+            return [self.base_path], True
+        if provider:
+            named = safe_named_child_dir(self.base_path, provider, root_real)
+            providers = [named] if named is not None else []
         else:
-            providers = (
-                [p]
-                if provider
-                and (p := safe_named_child_dir(self.base_path, provider, root_real))
-                else ([] if provider else iter_safe_child_dirs(self.base_path))
-            )
-            date_parents = []
-            for provider_dir in providers:
-                if entity:
-                    child = safe_named_child_dir(provider_dir, entity, root_real)
-                    if child is not None:
-                        date_parents.append(child)
-                else:
-                    date_parents.extend(iter_safe_child_dirs(provider_dir))
-            scope_exists = (
-                bool(date_parents)
-                if entity
-                else bool(providers)
-                if provider
-                else exists
-            )
+            providers = iter_safe_child_dirs(self.base_path)
+        date_parents: list[Path] = []
+        for provider_dir in providers:
+            if entity:
+                child = safe_named_child_dir(provider_dir, entity, root_real)
+                if child is not None:
+                    date_parents.append(child)
+            else:
+                date_parents.extend(iter_safe_child_dirs(provider_dir))
+        if entity:
+            return date_parents, bool(date_parents)
+        if provider:
+            return date_parents, bool(providers)
+        return date_parents, True
+
+    def _count_preview_files(
+        self, date_parents: list[Path], root_abs: Path, root_real: Path
+    ) -> int:
+        """Count only direct, safe date-partition files up to the public bound."""
+        file_count = 0
         for parent in date_parents:
             for date_dir in iter_safe_child_dirs(parent):
                 if not (
@@ -504,35 +586,40 @@ class BronzeWriterReadCleanupMixin:
                     or date_dir.name == "9999-12-31"
                 ):
                     continue
-                try:
-                    date_stat = date_dir.lstat()
-                except OSError:
-                    continue
-                if not candidate_is_safe(
-                    date_dir, root_abs, root_real, date_stat, directory=True
-                ):
-                    continue
-                entries = scan_dir_entries(date_dir)
-                if entries is None:
-                    continue
-                for entry in entries:
-                    try:
-                        entry.stat(follow_symlinks=False)
-                        identity = (date_dir / entry.name).lstat()
-                    except OSError:
-                        continue
-                    if stat.S_ISREG(identity.st_mode) and candidate_is_safe(
-                        date_dir / entry.name, root_abs, root_real, identity
-                    ):
-                        file_count += 1
-                        if file_count > 100_000:
-                            raise ValueError("Bronze preview exceeds 100000 files")
+                file_count += self._count_preview_date_files(
+                    date_dir, root_abs, root_real
+                )
+                if file_count > 100_000:
+                    raise ValueError("Bronze preview exceeds 100000 files")
+        return file_count
 
-        return {
-            "path": str(preview_root),
-            "file_count": file_count,
-            "exists": scope_exists,
-        }
+    @staticmethod
+    def _count_preview_date_files(
+        date_dir: Path, root_abs: Path, root_real: Path
+    ) -> int:
+        try:
+            date_stat = date_dir.lstat()
+        except OSError:
+            return 0
+        if not candidate_is_safe(
+            date_dir, root_abs, root_real, date_stat, directory=True
+        ):
+            return 0
+        entries = scan_dir_entries(date_dir)
+        if entries is None:
+            return 0
+        count = 0
+        for entry in entries:
+            try:
+                entry.stat(follow_symlinks=False)
+                identity = (date_dir / entry.name).lstat()
+            except OSError:
+                continue
+            if stat.S_ISREG(identity.st_mode) and candidate_is_safe(
+                date_dir / entry.name, root_abs, root_real, identity
+            ):
+                count += 1
+        return count
 
     def _resolve_bronze_preview_root(
         self,

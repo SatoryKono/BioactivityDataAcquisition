@@ -982,6 +982,53 @@ def test_root_replaced_at_rmdir_keeps_outside_empty_directory(
     assert not (moved_root / "chembl" / "activity" / OLD_DATE).exists()
 
 
+async def test_shielded_io_wait_propagates_repeated_cancellation_after_completion(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Repeated cancellation must not end the wait before in-flight I/O."""
+    release = asyncio.Event()
+    entered = asyncio.Event()
+    retry_once = asyncio.Event()
+    retry_twice = asyncio.Event()
+
+    async def blocked_io() -> None:
+        await release.wait()
+
+    io_task = asyncio.create_task(blocked_io())
+    original_shield = asyncio.shield
+    shield_calls = 0
+
+    def observed_shield(task: asyncio.Task[None]) -> asyncio.Future[None]:
+        nonlocal shield_calls
+        if task is io_task:
+            shield_calls += 1
+            if shield_calls == 1:
+                entered.set()
+            elif shield_calls == 2:
+                retry_once.set()
+            elif shield_calls == 3:
+                retry_twice.set()
+        return original_shield(task)
+
+    monkeypatch.setattr(bronze_writer_module.asyncio, "shield", observed_shield)
+    waiter = asyncio.create_task(
+        bronze_writer_module._wait_for_task_completion(io_task)
+    )
+    try:
+        await asyncio.wait_for(entered.wait(), 3)
+        waiter.cancel()
+        await asyncio.wait_for(retry_once.wait(), 3)
+        waiter.cancel()
+        await asyncio.wait_for(retry_twice.wait(), 3)
+        assert not io_task.done()
+        assert not waiter.done()
+    finally:
+        release.set()
+    with pytest.raises(asyncio.CancelledError):
+        await asyncio.wait_for(waiter, 3)
+    assert io_task.done()
+
+
 @pytest.mark.skipif(
     not destructive_cleanup_supported(), reason="POSIX flock capability required"
 )
@@ -1030,9 +1077,9 @@ async def test_cancelled_writer_keeps_lock_until_io_finishes(
     waiting_after_cancel = asyncio.Event()
     original_wait = bronze_writer_module._wait_for_task_completion
 
-    async def watched_wait(task: asyncio.Task[object]) -> bool:
+    async def watched_wait(task: asyncio.Task[object]) -> None:
         waiting_after_cancel.set()
-        return await original_wait(task)
+        await original_wait(task)
 
     async def blocked_write(_request: object) -> object:
         writing.set()
@@ -1056,6 +1103,7 @@ async def test_cancelled_writer_keeps_lock_until_io_finishes(
     await asyncio.wait_for(writing.wait(), 3)
     write_task.cancel()
     await asyncio.wait_for(waiting_after_cancel.wait(), 3)
+    write_task.cancel()
     probe = os.open(tmp_path / ".bronze-cleanup.lock", os.O_RDONLY)
     try:
         with pytest.raises(BlockingIOError):
