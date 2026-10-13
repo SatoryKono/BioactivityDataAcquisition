@@ -382,13 +382,14 @@ class TestGoldWriterValidation:
 
     async def test_write_gold_empty_records_raises(self, gold_writer, strict_schema):
         """Test write_gold raises ValueError for empty records."""
-        with precommit_error("No records to write"):
+        with precommit_error("No records to write") as found:
             await gold_writer.write_gold(
                 table_name="test.table",
                 records=[],
                 schema=strict_schema,
                 mode="overwrite",
             )
+        assert found.value.receipt.committed_targets == ()
 
     async def test_write_gold_non_strict_schema_raises(
         self, gold_writer, non_strict_schema, valid_records
@@ -407,13 +408,14 @@ class TestGoldWriterValidation:
         self, gold_writer, valid_records, strict_schema
     ):
         """Test write_gold raises ValueError for invalid mode."""
-        with precommit_error("Invalid Gold write mode"):
+        with precommit_error("Invalid Gold write mode") as found:
             await gold_writer.write_gold(
                 table_name="test.table",
                 records=valid_records,
                 schema=strict_schema,
                 mode="invalid",
             )
+        assert found.value.receipt.committed_targets == ()
 
     async def test_prepare_write_gold_returns_named_context(
         self, gold_writer, valid_records, strict_schema
@@ -481,20 +483,21 @@ class TestGoldWriterValidation:
         self, gold_writer, valid_records, strict_schema
     ):
         """Test write_gold raises ValueError for SCD2 mode without config."""
-        with precommit_error("scd_config required"):
+        with precommit_error("scd_config required") as found:
             await gold_writer.write_gold(
                 table_name="test.table",
                 records=valid_records,
                 schema=strict_schema,
                 mode="scd2",
             )
+        assert found.value.receipt.committed_targets == ()
 
     async def test_write_gold_scd2_without_ingestion_ts_raises(
         self, gold_writer, valid_records, strict_schema
     ):
         """Test write_gold raises ValueError for SCD2 mode without ingestion_ts."""
         scd_config = {"business_key": "entity_id"}
-        with precommit_error("ingestion_ts required"):
+        with precommit_error("ingestion_ts required") as found:
             await gold_writer.write_gold(
                 table_name="test.table",
                 records=valid_records,
@@ -502,6 +505,7 @@ class TestGoldWriterValidation:
                 mode="scd2",
                 scd_config=scd_config,
             )
+        assert found.value.receipt.committed_targets == ()
 
 
 @pytest.mark.unit

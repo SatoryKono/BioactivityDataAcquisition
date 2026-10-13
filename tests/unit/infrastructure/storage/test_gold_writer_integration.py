@@ -70,8 +70,9 @@ def strict_schema():
 
 async def test_write_gold_no_records(gold_writer, strict_schema):
     """Test writing empty records raises ValueError."""
-    with precommit_error("No records to write"):
+    with precommit_error("No records to write") as found:
         await gold_writer.write_gold("test_table", [], schema=strict_schema)
+    assert found.value.receipt.committed_targets == ()
 
 
 async def test_write_gold_schema_not_strict(gold_writer, valid_records):
