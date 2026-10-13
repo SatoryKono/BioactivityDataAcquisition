@@ -214,6 +214,24 @@ def test_completed_record_requires_durable_member_transitions() -> None:
         journal._decode_record(journal._record_bytes(body), "1" * 32)
 
 
+def test_anchored_conflict_uses_public_journal_error(tmp_path, monkeypatch) -> None:
+    """The platform primitive's refusal cannot escape the group-result contract."""
+    monkeypatch.setattr(journal, "destructive_cleanup_supported", lambda: True)
+    group = journal.GroupJournal(journal.BronzeRootLease(tmp_path, -1))
+    conflict = journal._CleanupConflict()
+
+    def refuse(*args, **kwargs):
+        raise conflict
+
+    monkeypatch.setattr(journal, "_anchored_parent", refuse)
+    with pytest.raises(journal.GroupJournalConflict) as failure:
+        with group._date("chembl/activity/2024-01-01"):
+            pytest.fail("refused traversal entered")
+    assert failure.value.__cause__ is conflict
+    assert failure.value.removed == 0
+    assert failure.value.possibly_unlinked == 0
+
+
 def test_windows_apply_capability_fails_closed(tmp_path: Path) -> None:
     if journal.destructive_cleanup_supported():
         pytest.skip("capability is present on this POSIX host")

@@ -20,6 +20,7 @@ from uuid import UUID, uuid4
 
 from .cleanup_core import (
     BronzeRootLease,
+    _CleanupConflict,
     destructive_cleanup_supported,
     valid_bronze_scope_name,
 )
@@ -418,21 +419,24 @@ class GroupJournal:
     @contextmanager
     def _date(self, relative: str) -> Iterator[tuple[int, list[list[int]]]]:
         target = self._root / relative / "_member"
-        with _anchored_parent(target, self._root, self._root, self._root_fd) as (
-            root_fd,
-            date_fd,
-            _name,
-            chain,
-        ):
-            if not _chain_is_stable(root_fd, self._root, chain):
-                raise GroupJournalConflict("date chain changed")
-            yield (
+        try:
+            with _anchored_parent(target, self._root, self._root, self._root_fd) as (
+                root_fd,
                 date_fd,
-                [
-                    _identity(root_fd),
-                    *(_identity(child) for _parent, child, _part in chain),
-                ],
-            )
+                _name,
+                chain,
+            ):
+                if not _chain_is_stable(root_fd, self._root, chain):
+                    raise GroupJournalConflict("date chain changed")
+                yield (
+                    date_fd,
+                    [
+                        _identity(root_fd),
+                        *(_identity(child) for _parent, child, _part in chain),
+                    ],
+                )
+        except _CleanupConflict as exc:
+            raise GroupJournalConflict("root or date chain changed") from exc
 
     def _private_dir(self, name: str, *, create: bool) -> int | None:
         if create:
