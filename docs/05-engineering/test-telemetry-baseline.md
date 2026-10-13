@@ -32,7 +32,7 @@ trend evidence only.
 - Source run id: `local-bioetl-local-coverage-pr11990-final3`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `7b8d1996bf89e979a4370ac3d669f262efc2069e4e368b932b7e886184df0439`
+- Source tree sha256: `8ba4bad4caecbbc0e5b85e9f65b02ef308b6182f41250ef22ded49164a722d92`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-10-13T06:16:30.069150+00:00`
 
@@ -51,6 +51,8 @@ trend evidence only.
   ancestry in the PR, merge ancestry in HEAD and unchanged runtime/test inputs.
 - Reviewed squash receipts retain hash-verified Git commit/tree objects
   for offline validation when old PR commits are absent from a fresh clone.
+  If a shallow checkout's HEAD is newer than the squash merge, unshallow
+  it first so merge ancestry and the merged tree can be verified locally.
 - To produce a receipt for an existing local capture, run
   `python -m scripts.engineering.ci.test_telemetry_provenance --measurement-repo-root
   <original-worktree> --local-manifest <manifest.json> --pull-request <merged-PR>`.

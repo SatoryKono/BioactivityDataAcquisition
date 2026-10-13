@@ -13,6 +13,7 @@ import hashlib
 import json
 import os
 import subprocess
+import tempfile
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -21,6 +22,12 @@ from typing import Any
 
 REPOSITORY = "SatoryKono/BioactivityDataAcquisition"
 RECEIPT = Path("reports/test-telemetry/squash-provenance.json")
+
+
+class ShallowMergeHistoryError(ValueError):
+    """The squash merge cannot be proven below a newer shallow tip."""
+
+
 TEST_INPUTS = (
     "src/bioetl",
     "scripts/engineering/ci",
@@ -359,13 +366,17 @@ def _pr_tree(root: Path, pr_head: str, *, live: bool) -> str:
 def validate_squash_bridge(
     payload: dict[str, Any], receipt: dict[str, Any], root: Path, head: str
 ) -> bool:
-    """Fail closed on a changed run, wrong PR, missing object, or different tree."""
+    """Require merge history when HEAD is newer than a shallow squash checkout."""
     if not _receipt_matches_capture(receipt, payload):
         return False
     mapping = _github_mapping(receipt)
     if mapping is None:
         return False
     pr_head, merge = mapping
+    if head != merge and _is_shallow(root):
+        raise ShallowMergeHistoryError(
+            "Unshallow the checkout before validating a squash merge below HEAD"
+        )
     source = str(payload["source_commit"])
     live = receipt.get("verification_mode") == "live_github"
     source_tree = _tree(root, source)
@@ -405,8 +416,35 @@ def source_commit_is_reachable(payload: dict[str, Any], root: Path, head: str) -
         if receipt.get("verification_mode") == "live_github":
             receipt = _refresh_live_mapping(receipt)
         return validate_squash_bridge(payload, receipt, root, head)
+    except ShallowMergeHistoryError:
+        raise
     except (OSError, ValueError, KeyError, TypeError, AttributeError):
         return False
+
+
+def _write_receipt_atomically(destination: Path, receipt: dict[str, Any]) -> None:
+    """Publish a complete receipt without truncating a prior valid one."""
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            newline="\n",
+            dir=destination.parent,
+            prefix=f".{destination.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as stream:
+            temporary = Path(stream.name)
+            json.dump(receipt, stream, indent=2, sort_keys=True)
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, destination)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
 
 
 def require_capture_metrics(payload: dict[str, Any], expected: dict[str, Any]) -> None:
@@ -513,10 +551,7 @@ def main() -> int:
         pull_request=args.pull_request,
     )
     destination = root / RECEIPT
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(
-        json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
+    _write_receipt_atomically(destination, receipt)
     return 0
 
 

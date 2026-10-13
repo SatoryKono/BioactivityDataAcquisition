@@ -203,6 +203,56 @@ def test_shallow_endpoints_without_intermediate_require_verified_proof(bridge) -
     assert not validate_squash_bridge(payload, without_proof, shallow, head)
 
 
+def test_newer_shallow_tip_requires_merge_history(bridge) -> None:
+    root, _, payload, receipt, git = bridge
+    receipt["git_object_proof"] = provenance.build_git_object_proof(
+        root, payload["source_commit"], receipt["github_pull_request"]["head"]["sha"]
+    )
+    git("commit", "--allow-empty", "-qm", "later main")
+    later_head = git("rev-parse", "HEAD")
+    shallow = root.parent / f"{root.name}-later-shallow"
+    subprocess.run(
+        ["git", "clone", "-q", "--depth", "1", root.as_uri(), str(shallow)],
+        check=True,
+        capture_output=True,
+    )
+    assert provenance._is_shallow(shallow)
+    with pytest.raises(provenance.ShallowMergeHistoryError, match="Unshallow"):
+        validate_squash_bridge(payload, receipt, shallow, later_head)
+    receipt_path = shallow / provenance.RECEIPT
+    receipt_path.parent.mkdir(parents=True)
+    receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+    with pytest.raises(provenance.ShallowMergeHistoryError, match="Unshallow"):
+        provenance.source_commit_is_reachable(payload, shallow, later_head)
+    subprocess.run(
+        ["git", "fetch", "-q", "--unshallow", "origin"],
+        cwd=shallow,
+        check=True,
+        capture_output=True,
+    )
+    assert validate_squash_bridge(payload, receipt, shallow, later_head)
+    assert provenance.source_commit_is_reachable(payload, shallow, later_head)
+
+
+def test_receipt_publication_preserves_prior_file_on_replace_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    destination = tmp_path / "squash-provenance.json"
+    destination.write_text("prior valid receipt\n", encoding="utf-8")
+
+    def fail_replace(_source: Path, _destination: Path) -> None:
+        raise OSError("replace failed")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(provenance.os, "replace", fail_replace)
+        with pytest.raises(OSError, match="replace failed"):
+            provenance._write_receipt_atomically(destination, {"schema_version": 1})
+    assert destination.read_text(encoding="utf-8") == "prior valid receipt\n"
+    assert list(tmp_path.glob(".squash-provenance.json.*.tmp")) == []
+    provenance._write_receipt_atomically(destination, {"schema_version": 1})
+    assert json.loads(destination.read_text(encoding="utf-8")) == {"schema_version": 1}
+
+
 def test_complete_history_rejects_unrelated_source_even_with_proof(
     bridge, monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -525,6 +525,8 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
         "  ancestry in the PR, merge ancestry in HEAD and unchanged runtime/test inputs.",
         "- Reviewed squash receipts retain hash-verified Git commit/tree objects",
         "  for offline validation when old PR commits are absent from a fresh clone.",
+        "  If a shallow checkout's HEAD is newer than the squash merge, unshallow",
+        "  it first so merge ancestry and the merged tree can be verified locally.",
         "- To produce a receipt for an existing local capture, run",
         "  `python -m scripts.engineering.ci.test_telemetry_provenance --measurement-repo-root",
         "  <original-worktree> --local-manifest <manifest.json> --pull-request <merged-PR>`.",
