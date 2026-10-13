@@ -222,6 +222,76 @@ def _read_slowest_summary(path: Path) -> TelemetryPayload:
     }
 
 
+def _validate_junit_aggregate(
+    root: ET.Element, field: str, actual: int, junit_path: Path
+) -> None:
+    declared = root.get(field)
+    if declared is None:
+        return
+    try:
+        declared_count = int(declared)
+    except ValueError as error:
+        raise ValueError(
+            f"Invalid JUnit {field} testcase count in {junit_path}"
+        ) from error
+    if declared_count < 0 or declared_count != actual:
+        raise ValueError(
+            f"JUnit {field} testcase count disagrees with records in "
+            f"{junit_path}: declared {declared_count}, observed {actual}"
+        )
+
+
+def _validated_junit_cases(junit_path: Path) -> list[ET.Element]:
+    root = ET.parse(junit_path).getroot()
+    if root.tag not in {"testsuite", "testsuites"}:
+        raise ValueError(f"Unsupported JUnit root in {junit_path}: {root.tag}")
+    cases = list(root.iter("testcase"))
+    skipped_count = sum(case.find("skipped") is not None for case in cases)
+    _validate_junit_aggregate(root, "tests", len(cases), junit_path)
+    _validate_junit_aggregate(root, "skipped", skipped_count, junit_path)
+    return cases
+
+
+def _junit_duration(
+    testcase: ET.Element, full_name: str, junit_path: Path
+) -> float | None:
+    raw_duration = testcase.get("time")
+    if raw_duration is None:
+        return None
+    try:
+        duration = float(raw_duration)
+    except ValueError as error:
+        raise ValueError(
+            f"Invalid JUnit testcase duration for {full_name} in {junit_path}"
+        ) from error
+    if not math.isfinite(duration) or duration < 0:
+        raise ValueError(
+            f"Invalid JUnit testcase duration for {full_name} in {junit_path}"
+        )
+    return duration
+
+
+def _junit_case_measurement(
+    testcase: ET.Element, junit_path: Path
+) -> tuple[bool, TelemetryPayload | None]:
+    case_name = testcase.attrib.get("name", "")
+    class_name = testcase.attrib.get("classname", "")
+    full_name = f"{class_name}::{case_name}" if class_name else case_name
+    skipped = testcase.find("skipped") is not None
+    if skipped and any(
+        testcase.find(status) is not None for status in ("failure", "error")
+    ):
+        raise ValueError(f"Conflicting JUnit testcase status: {full_name}")
+    duration = _junit_duration(testcase, full_name, junit_path)
+    if skipped or duration is None or duration == 0:
+        return not skipped, None
+    return True, {
+        "source": junit_path.name,
+        "test": full_name or UNKNOWN_LABEL,
+        "duration_s": round(duration, 3),
+    }
+
+
 def _derive_slowest_summary_from_junit_paths(
     junit_paths: list[Path],
 ) -> TelemetryPayload:
@@ -235,59 +305,11 @@ def _derive_slowest_summary_from_junit_paths(
     for junit_path in junit_paths:
         if not junit_path.exists():
             continue
-        root = ET.parse(junit_path).getroot()
-        if root.tag not in {"testsuite", "testsuites"}:
-            raise ValueError(f"Unsupported JUnit root in {junit_path}: {root.tag}")
-        cases = list(root.iter("testcase"))
-        skipped_count = sum(case.find("skipped") is not None for case in cases)
-        for field, actual in (("tests", len(cases)), ("skipped", skipped_count)):
-            declared = root.get(field)
-            if declared is None:
-                continue
-            try:
-                declared_count = int(declared)
-            except ValueError as error:
-                raise ValueError(
-                    f"Invalid JUnit {field} testcase count in {junit_path}"
-                ) from error
-            if declared_count < 0 or declared_count != actual:
-                raise ValueError(
-                    f"JUnit {field} testcase count disagrees with records in "
-                    f"{junit_path}: declared {declared_count}, observed {actual}"
-                )
-        for testcase in cases:
-            case_name = testcase.attrib.get("name", "")
-            class_name = testcase.attrib.get("classname", "")
-            full_name = f"{class_name}::{case_name}" if class_name else case_name
-            skipped = testcase.find("skipped") is not None
-            if skipped and any(
-                testcase.find(status) is not None for status in ("failure", "error")
-            ):
-                raise ValueError(f"Conflicting JUnit testcase status: {full_name}")
-            if not skipped:
-                executed_count += 1
-            raw_duration = testcase.get("time")
-            if raw_duration is None:
-                continue
-            try:
-                duration = float(raw_duration)
-            except ValueError as error:
-                raise ValueError(
-                    f"Invalid JUnit testcase duration for {full_name} in {junit_path}"
-                ) from error
-            if not math.isfinite(duration) or duration < 0:
-                raise ValueError(
-                    f"Invalid JUnit testcase duration for {full_name} in {junit_path}"
-                )
-            if skipped or duration == 0:
-                continue
-            rows.append(
-                {
-                    "source": junit_path.name,
-                    "test": full_name or UNKNOWN_LABEL,
-                    "duration_s": round(duration, 3),
-                }
-            )
+        for testcase in _validated_junit_cases(junit_path):
+            executed, row = _junit_case_measurement(testcase, junit_path)
+            executed_count += executed
+            if row is not None:
+                rows.append(row)
 
     rows.sort(key=lambda row: float(row["duration_s"]), reverse=True)
     return {
