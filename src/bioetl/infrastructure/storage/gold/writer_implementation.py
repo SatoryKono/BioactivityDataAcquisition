@@ -133,13 +133,6 @@ async def _write_single_target_impl(
         if isinstance(original, GoldWriteCancelled):
             raise
         raise GoldWriteCancelled(receipt) from original
-    except ValueError as error:
-        if prepared is None:
-            terminal_status = "validation_failure"
-            GOLD_VALIDATION_FAILURES_TOTAL.labels(
-                **_gold_validation_metric_labels(request, error)
-            ).inc()
-        raise
     finally:
         GOLD_WRITE_OUTCOMES_TOTAL.labels(
             **_gold_write_metric_labels(request, status=terminal_status)
@@ -198,23 +191,7 @@ async def _write_dual_targets_impl(
             )
             attempted = True
             receipt = await writer._write_single_target(request=target_request)
-            if not isinstance(receipt, GoldWriteReceipt):
-                raise TypeError("Gold target must return a GoldWriteReceipt")
-            if (
-                receipt.physical_table != physical_table
-                or receipt.contract_version != contract_version
-                or (
-                    receipt.committed_targets != (physical_table,)
-                    and receipt.category
-                    in (
-                        GoldWriteCategory.COMPLETE,
-                        GoldWriteCategory.COMMITTED_POSTWRITE_PENDING,
-                    )
-                )
-            ):
-                raise TypeError("Gold receipt identity does not match requested target")
-            if receipt.category != GoldWriteCategory.COMPLETE:
-                raise GoldWriteFailure(receipt)
+            _validate_target_receipt(receipt, physical_table, contract_version)
             committed_targets.append(
                 {
                     "contract_version": contract_version,
@@ -222,32 +199,8 @@ async def _write_dual_targets_impl(
                 }
             )
         except (Exception, asyncio.CancelledError) as original:
-            receipt = (
-                original.receipt
-                if isinstance(original, (GoldWriteFailure, GoldWriteCancelled))
-                else GoldWriteReceipt(
-                    physical_table,
-                    contract_version,
-                    GoldWriteCategory.UNKNOWN
-                    if attempted
-                    else GoldWriteCategory.NOT_COMMITTED,
-                )
-            )
-            if receipt.category in (
-                GoldWriteCategory.COMPLETE,
-                GoldWriteCategory.COMMITTED_POSTWRITE_PENDING,
-            ):
-                committed_targets.append(
-                    {
-                        "contract_version": contract_version,
-                        "physical_table": physical_table,
-                    }
-                )
-            receipt = replace(
-                receipt,
-                committed_targets=tuple(
-                    item["physical_table"] for item in committed_targets
-                ),
+            receipt = _retain_target_failure(
+                original, physical_table, contract_version, attempted, committed_targets
             )
             writer.logger.error(
                 "gold_dual_write_failed",
@@ -264,22 +217,68 @@ async def _write_dual_targets_impl(
                 active_contract_version=writer._contract_rollout_policy.active_version,
                 write_versions=writer._contract_rollout_policy.write_versions,
             )
-            if isinstance(original, asyncio.CancelledError):
-                raise GoldWriteCancelled(receipt) from (
-                    original.__cause__
-                    if isinstance(original, (GoldWriteFailure, GoldWriteCancelled))
-                    and original.__cause__ is not None
-                    else original
-                )
-            raise GoldWriteFailure(receipt) from (
-                original.__cause__
-                if isinstance(original, (GoldWriteFailure, GoldWriteCancelled))
+            cause: BaseException = original
+            if (
+                isinstance(original, (GoldWriteFailure, GoldWriteCancelled))
                 and original.__cause__ is not None
-                else original
-            )
+            ):
+                cause = original.__cause__
+            if isinstance(original, asyncio.CancelledError):
+                raise GoldWriteCancelled(receipt) from cause
+            raise GoldWriteFailure(receipt) from cause
     return GoldWriteReceipt(
         request.table_name,
         writer._contract_rollout_policy.active_version,
         GoldWriteCategory.COMPLETE,
         tuple(item["physical_table"] for item in committed_targets),
+    )
+
+
+def _validate_target_receipt(
+    receipt: object, physical_table: str, contract_version: str
+) -> None:
+    """Validate target identity and completeness without manufacturing commit proof."""
+    if not isinstance(receipt, GoldWriteReceipt):
+        raise TypeError("Gold target must return a GoldWriteReceipt")
+    proven = receipt.category in (
+        GoldWriteCategory.COMPLETE,
+        GoldWriteCategory.COMMITTED_POSTWRITE_PENDING,
+    )
+    if (
+        receipt.physical_table != physical_table
+        or receipt.contract_version != contract_version
+    ):
+        raise TypeError("Gold receipt identity does not match requested target")
+    if proven and receipt.committed_targets != (physical_table,):
+        raise TypeError("Gold receipt identity does not match requested target")
+    if receipt.category != GoldWriteCategory.COMPLETE:
+        raise GoldWriteFailure(receipt)
+
+
+def _retain_target_failure(
+    original: BaseException,
+    physical_table: str,
+    contract_version: str,
+    attempted: bool,
+    committed_targets: list[dict[str, str]],
+) -> GoldWriteReceipt:
+    """Retain only proven targets and preserve unknown physical attempts."""
+    category = (
+        GoldWriteCategory.UNKNOWN if attempted else GoldWriteCategory.NOT_COMMITTED
+    )
+    receipt = (
+        original.receipt
+        if isinstance(original, (GoldWriteFailure, GoldWriteCancelled))
+        else GoldWriteReceipt(physical_table, contract_version, category)
+    )
+    if receipt.category in (
+        GoldWriteCategory.COMPLETE,
+        GoldWriteCategory.COMMITTED_POSTWRITE_PENDING,
+    ):
+        committed_targets.append(
+            {"contract_version": contract_version, "physical_table": physical_table}
+        )
+    return replace(
+        receipt,
+        committed_targets=tuple(item["physical_table"] for item in committed_targets),
     )

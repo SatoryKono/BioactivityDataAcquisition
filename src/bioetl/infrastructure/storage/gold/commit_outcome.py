@@ -34,13 +34,7 @@ async def await_physical_commit(
     except asyncio.CancelledError as original:
         if not entered:
             task.cancel()
-        while not task.done():
-            try:
-                await asyncio.shield(task)
-            except asyncio.CancelledError:
-                continue
-            except Exception:
-                break
+        await _drain_physical_attempt(task)
         category = (
             GoldWriteCategory.NOT_COMMITTED
             if not entered
@@ -60,6 +54,17 @@ async def await_physical_commit(
         raise GoldWriteFailure(
             replace(receipt, category=GoldWriteCategory.UNKNOWN)
         ) from original
+
+
+async def _drain_physical_attempt(task: asyncio.Task[object]) -> None:
+    """Observe the started attempt despite repeated caller cancellation."""
+    while not task.done():
+        try:
+            await asyncio.shield(task)
+        except asyncio.CancelledError:
+            continue
+        except Exception:
+            break
 
 
 def receipt_for(

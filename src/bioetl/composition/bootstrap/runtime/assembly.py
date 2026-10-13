@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, TypedDict, Unpack
 from bioetl.composition.runtime_builders.inputs_runtime_models import (
     ResolvedVacuumSettings,
 )
@@ -126,6 +126,14 @@ def assemble_cached_bronze_context(
     return ctx.cached_bronze
 
 
+class _DebugExportOverrides(TypedDict, total=False):
+    """Typed compatibility bundle for the three existing debug-export keywords."""
+
+    debug_export_enabled: bool
+    debug_export_formats: tuple[str, ...]
+    debug_export_dir: str | None
+
+
 _DEFAULT_PREFLIGHT_SETTINGS = PreflightRuntimeSettings()
 
 
@@ -139,14 +147,15 @@ def assemble_runtime_config(
     heartbeat_interval: int,
     vacuum: ResolvedVacuumSettings,
     skip_gold: bool = False,
-    debug_export_enabled: bool = False,
-    debug_export_formats: tuple[str, ...] = (),
-    debug_export_dir: str | None = None,
     workflow_id: str = "standalone",
     preflight: PreflightRuntimeSettings = _DEFAULT_PREFLIGHT_SETTINGS,
     health_check_mode: Literal["strict", "probe"] | None = None,
+    **debug_export: Unpack[_DebugExportOverrides],
 ) -> RuntimeConfig:
-    """Build ``RuntimeConfig`` from already-resolved runtime inputs."""
+    """Build runtime settings, preserving the existing debug-export keywords."""
+    unsupported = debug_export.keys() - _DebugExportOverrides.__annotations__.keys()
+    if unsupported:
+        raise TypeError(f"Unexpected debug-export options: {sorted(unsupported)}")
     return RuntimeConfig(
         run_type=run_type,
         resume=resume,
@@ -157,9 +166,9 @@ def assemble_runtime_config(
         vacuum_after_run=vacuum.enabled,
         vacuum_retention_days=vacuum.retention_days,
         skip_gold=skip_gold,
-        debug_export_enabled=debug_export_enabled,
-        debug_export_formats=debug_export_formats,
-        debug_export_dir=debug_export_dir,
+        debug_export_enabled=debug_export.get("debug_export_enabled", False),
+        debug_export_formats=debug_export.get("debug_export_formats", ()),
+        debug_export_dir=debug_export.get("debug_export_dir"),
         workflow_id=workflow_id,
         health_check_mode=(
             health_check_mode

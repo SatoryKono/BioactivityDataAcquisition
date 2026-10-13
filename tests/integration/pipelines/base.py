@@ -20,6 +20,7 @@ from unittest.mock import patch
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
+from tests.helpers.clock import fixed_test_clock
 
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.composition.factories.pipeline import GenericPipelineFactory
@@ -211,6 +212,7 @@ class IntegrationPipelineTestCase:
         adapter = StorageBundle(
             bronze_writer=bronze_writer,
             silver_writer=SilverWriter(
+                clock=fixed_test_clock(),
                 base_path=self.silver_path,
                 logger=logger,
                 # Lock validation at Application layer

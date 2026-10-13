@@ -135,13 +135,11 @@ async def test_postrun_compact_service_keeps_success_when_optimize_is_allowliste
 
 
 @pytest.mark.asyncio
-async def test_postrun_compact_service_skips_delete_mode_without_storage_calls() -> (
-    None
-):
+async def test_postrun_compact_service_skips_merge_mode_without_storage_calls() -> None:
     storage = _RecordingStorage(deduplicate_result=99)
     logger = _RecordingLogger()
     service = PostrunCompactService(
-        config=_build_config(silver_write_mode=SilverWriteMode.DELETE),
+        config=_build_config(silver_write_mode=SilverWriteMode.MERGE),
         storage=storage,
         logger=logger,
         warning_allowlist=(RuntimeError,),
