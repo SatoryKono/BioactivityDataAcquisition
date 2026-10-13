@@ -149,6 +149,15 @@
         "bioetl_bronze_bytes_written_total",
         "bioetl_bronze_files_removed_total",
         "bioetl_bronze_bytes_freed_total",
+        "bioetl_bronze_cleanup_files_skipped_total",
+        "bioetl_bronze_cleanup_files_conflicted_total",
+        "bioetl_bronze_cleanup_files_failed_total",
+        "bioetl_bronze_cleanup_bytes_skipped_total",
+        "bioetl_bronze_cleanup_bytes_conflicted_total",
+        "bioetl_bronze_cleanup_bytes_failed_total",
+        "bioetl_bronze_cleanup_directories_skipped_total",
+        "bioetl_bronze_cleanup_directories_conflicted_total",
+        "bioetl_bronze_cleanup_directories_failed_total",
         "bioetl_policy_violations_total",
         "bioetl_silver_csv_export_start_total",
         "bioetl_silver_csv_export_success_total",
@@ -211,6 +220,6 @@
       ]
     }
   },
-  "total_counters": 112,
+  "total_counters": 121,
   "total_histograms": 25
 }

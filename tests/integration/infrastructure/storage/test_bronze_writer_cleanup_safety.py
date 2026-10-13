@@ -33,6 +33,7 @@ import pytest
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.storage import bronze_writer as bronze_writer_module
 from bioetl.infrastructure.storage.bronze import cleanup_support, read_cleanup_mixin
 from bioetl.infrastructure.storage.bronze.cleanup_support import (
@@ -1223,3 +1224,167 @@ async def test_windows_junction_preview_skips_and_apply_refuses(tmp_path: Path) 
     assert preview["file_count"] == 0
     assert preview["exists"] is False
     assert (outside_date / ARTIFACT).read_bytes() == b"x"
+
+
+@_APPLY_POSIX
+async def test_cleanup_missing_root_never_traverses_later_backfill(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """An absent root is a completed no-op, even if a writer creates it next."""
+    root = tmp_path / "bronze"
+    writer = _make_writer(root)
+
+    def unexpected_discovery(*_args: object, **_kwargs: object) -> list[Path]:
+        _write_pair(_date_dir(root, "chembl", "activity"))
+        raise AssertionError("absent-root cleanup must not discover")
+
+    monkeypatch.setattr(writer, "_find_old_date_dirs", unexpected_discovery)
+    result = await writer.cleanup_old_files(CUTOFF)
+    assert result["files_removed"] == 0
+    assert not root.exists()
+
+
+@_APPLY_POSIX
+async def test_cleanup_uses_root_pinned_by_lock_after_alias_switch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A switched alias cannot redirect cleanup to another unlocked root."""
+    old_root, new_root = tmp_path / "old", tmp_path / "new"
+    old_date = _date_dir(old_root, "chembl", "activity")
+    new_date = _date_dir(new_root, "chembl", "activity")
+    _write_pair(old_date)
+    _write_pair(new_date, b"outside")
+    alias = tmp_path / "alias"
+    _symlink_or_skip(alias, old_root)
+    writer = _make_writer(alias)
+    original_lock = bronze_tree_lock
+
+    @contextmanager
+    def switch_after_lock(base_path: Path, *, exclusive: bool):
+        with original_lock(base_path, exclusive=exclusive) as locked_root:
+            alias.unlink()
+            alias.symlink_to(new_root, target_is_directory=True)
+            yield locked_root
+
+    monkeypatch.setattr(read_cleanup_mixin, "bronze_tree_lock", switch_after_lock)
+    result = await writer.cleanup_old_files(CUTOFF)
+    assert result["files_removed"] == 2
+    assert not (old_date / ARTIFACT).exists()
+    assert (new_date / ARTIFACT).read_bytes() == b"outside"
+
+
+@_APPLY_POSIX
+async def test_cancelled_cleanup_waiter_finishes_without_late_deletion(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Cancellation while flock blocks prevents deletion after lock release."""
+    root = tmp_path / "bronze"
+    date_dir = _date_dir(root, "chembl", "activity")
+    _write_pair(date_dir)
+    writer = _make_writer(root)
+    attempted = threading.Event()
+    original_lock = bronze_tree_lock
+
+    async def real_to_thread(
+        func: Callable[..., object], /, *args: object, **kwargs: object
+    ) -> object:
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, partial(func, *args, **kwargs))
+
+    @contextmanager
+    def observed_lock(base_path: Path, *, exclusive: bool):
+        attempted.set()
+        with original_lock(base_path, exclusive=exclusive) as locked_root:
+            yield locked_root
+
+    monkeypatch.setattr(asyncio, "to_thread", real_to_thread)
+    monkeypatch.setattr(read_cleanup_mixin, "bronze_tree_lock", observed_lock)
+    with original_lock(root, exclusive=False):
+        task = asyncio.create_task(writer.cleanup_old_files(CUTOFF))
+        assert await asyncio.wait_for(asyncio.to_thread(attempted.wait), 3)
+        task.cancel()
+        await asyncio.sleep(0)
+        assert not task.done()
+        assert (date_dir / ARTIFACT).read_bytes() == b"x"
+    with pytest.raises(asyncio.CancelledError):
+        await asyncio.wait_for(task, 3)
+    assert (date_dir / ARTIFACT).read_bytes() == b"x"
+
+
+@_APPLY_POSIX
+def test_staged_unlink_error_restores_canonical_artifact(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    date_dir = _date_dir(tmp_path, "chembl", "activity")
+    _write_pair(date_dir)
+    target = date_dir / ARTIFACT
+    original_unlink = cleanup_support.os.unlink
+
+    def fail_unlink(path: str, *, dir_fd: int | None = None) -> None:
+        if path == ARTIFACT and dir_fd is not None:
+            raise PermissionError("injected unlink failure")
+        original_unlink(path, dir_fd=dir_fd)
+
+    monkeypatch.setattr(cleanup_support.os, "unlink", fail_unlink)
+    with pytest.raises(PermissionError, match="injected"):
+        safe_unlink(target, tmp_path, tmp_path, target.lstat())
+    assert target.read_bytes() == b"x"
+    assert not list(tmp_path.glob(".bronze-cleanup-stage-*"))
+
+
+@_APPLY_POSIX
+def test_interrupted_stage_is_restored_before_next_cleanup_plan(tmp_path: Path) -> None:
+    """A durable origin journal makes a staged inode recoverable on restart."""
+    date_dir = _date_dir(tmp_path, "chembl", "activity")
+    _write_pair(date_dir)
+    target = date_dir / ARTIFACT
+    root_fd = os.open(tmp_path, os.O_RDONLY | os.O_DIRECTORY)
+    parent_fd = os.open(date_dir, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        with cleanup_support._private_stage(
+            root_fd,
+            target.relative_to(tmp_path),
+            target.lstat(),
+            on_stage_error=lambda _name, _error: None,
+        ) as stage_fd:
+            os.rename(ARTIFACT, ARTIFACT, src_dir_fd=parent_fd, dst_dir_fd=stage_fd)
+            os.fsync(parent_fd)
+            os.fsync(stage_fd)
+    finally:
+        os.close(parent_fd)
+        os.close(root_fd)
+    assert not target.exists()
+    assert len(list(tmp_path.glob(".bronze-cleanup-stage-*"))) == 1
+
+    with bronze_tree_lock(tmp_path, exclusive=True):
+        assert target.read_bytes() == b"x"
+    assert not list(tmp_path.glob(".bronze-cleanup-stage-*"))
+
+
+@_APPLY_POSIX
+def test_unjournaled_nonempty_stage_refuses_destructive_cleanup(tmp_path: Path) -> None:
+    date_dir = _date_dir(tmp_path, "chembl", "activity")
+    _write_pair(date_dir)
+    stage = tmp_path / ".bronze-cleanup-stage-old-version"
+    stage.mkdir()
+    (stage / "unknown").write_bytes(b"retain")
+    with pytest.raises(OSError, match="no origin journal"):
+        with bronze_tree_lock(tmp_path, exclusive=True):
+            pytest.fail("lock must refuse before caller can delete")
+    assert (date_dir / ARTIFACT).read_bytes() == b"x"
+    assert (stage / "unknown").read_bytes() == b"retain"
+
+
+@_APPLY_POSIX
+async def test_retained_artifact_metrics_use_registered_prometheus_counters(
+    tmp_path: Path,
+) -> None:
+    date_dir = _date_dir(tmp_path, "chembl", "activity")
+    _write_pair(date_dir)
+    (date_dir / "README").write_bytes(b"keep")
+    writer = _make_writer(tmp_path)
+    writer._metrics = PrometheusMetrics()
+    result = await writer.cleanup_old_files(CUTOFF)
+    assert result["files_removed"] == 2
+    assert result["files_skipped"] == 1
+    assert (date_dir / "README").read_bytes() == b"keep"

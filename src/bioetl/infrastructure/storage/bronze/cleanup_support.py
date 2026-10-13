@@ -11,12 +11,13 @@ Implements the FS-001 contract (#12102):
 from __future__ import annotations
 
 import errno
+import json
 import os
 import re
 import secrets
 import stat
 from collections.abc import Callable, Iterator
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from datetime import datetime
 from pathlib import Path
 from uuid import UUID
@@ -55,6 +56,8 @@ _DATE_DIR_FORMAT = "%Y-%m-%d"
 # Windows FILE_ATTRIBUTE_REPARSE_POINT — covers junctions, mount points and
 # other reparse-point types, not just symlinks.
 _REPARSE_POINT_ATTR = 0x400
+_STAGE_PREFIX = ".bronze-cleanup-stage-"
+_STAGE_JOURNAL = "origin.json"
 
 # POSIX anchored operations: dir_fd support is unavailable on Windows.
 _O_DIRECTORY = getattr(os, "O_DIRECTORY", 0)
@@ -83,7 +86,7 @@ def destructive_cleanup_supported() -> bool:
 
 
 @contextmanager
-def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[None]:
+def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[Path]:
     """Coordinate all application writers and cleaners for one Bronze root.
 
     This is advisory. The operator must exclude uncooperative same-user writers.
@@ -93,7 +96,7 @@ def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[None]:
             raise NotImplementedError(
                 "Bronze destructive cleanup requires POSIX dir_fd/no-follow and flock"
             )
-        yield
+        yield base_path
         return
     import fcntl
 
@@ -114,7 +117,9 @@ def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[None]:
                 lock_fd,
                 fcntl.__dict__["LOCK_EX" if exclusive else "LOCK_SH"],
             )
-            yield
+            if exclusive:
+                _recover_stages(root_fd, root_real)
+            yield root_real
         finally:
             os.close(lock_fd)
     finally:
@@ -467,21 +472,134 @@ def _chain_is_stable(
     return True
 
 
+def _recover_stages(root_fd: int, root_real: Path) -> None:
+    """Restore crash-interrupted isolates before any new destructive plan."""
+    for stage_name in os.listdir(root_fd):
+        if not stage_name.startswith(_STAGE_PREFIX):
+            continue
+        stage_fd = os.open(
+            stage_name, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW, dir_fd=root_fd
+        )
+        try:
+            try:
+                journal_fd = os.open(
+                    _STAGE_JOURNAL, os.O_RDONLY | _O_NOFOLLOW, dir_fd=stage_fd
+                )
+            except FileNotFoundError:
+                if os.listdir(stage_fd):  # noqa: PTH208 - handle-relative scan
+                    raise OSError(
+                        f"Bronze stage {stage_name} has no origin journal"
+                    ) from None
+            else:
+                try:
+                    raw = os.read(journal_fd, 4097)
+                finally:
+                    os.close(journal_fd)
+                if len(raw) > 4096:
+                    raise OSError(f"Bronze stage {stage_name} has an oversized journal")
+                try:
+                    record = json.loads(raw)
+                    relative = record["relative"]
+                    dev, ino = record["dev"], record["ino"]
+                    parts = relative.split("/") if isinstance(relative, str) else []
+                    if (
+                        not isinstance(relative, str)
+                        or not parts
+                        or any(part in ("", ".", "..") for part in parts)
+                        or not isinstance(dev, int)
+                        or not isinstance(ino, int)
+                    ):
+                        raise ValueError("invalid stage origin")
+                except (KeyError, TypeError, ValueError) as exc:
+                    raise OSError(
+                        f"Bronze stage {stage_name} has invalid origin"
+                    ) from exc
+                name = parts[-1]
+                try:
+                    staged = os.stat(name, dir_fd=stage_fd, follow_symlinks=False)
+                except FileNotFoundError:
+                    pass  # Deletion completed before the process stopped.
+                else:
+                    if (staged.st_dev, staged.st_ino) != (dev, ino):
+                        raise OSError(f"Bronze stage {stage_name} identity changed")
+                    target = root_real.joinpath(*parts)
+                    with _anchored_parent(target, root_real, root_real) as (
+                        _opened_root,
+                        parent_fd,
+                        _name,
+                        chain,
+                    ):
+                        if not _chain_is_stable(root_fd, root_real, chain):
+                            raise OSError("Bronze stage parent changed")
+                        try:
+                            os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+                        except FileNotFoundError:
+                            os.rename(
+                                name,
+                                name,
+                                src_dir_fd=stage_fd,
+                                dst_dir_fd=parent_fd,
+                            )
+                            os.fsync(parent_fd)
+                        else:
+                            raise OSError(f"Bronze stage {stage_name} origin occupied")
+                os.unlink(_STAGE_JOURNAL, dir_fd=stage_fd)
+                os.fsync(stage_fd)
+        finally:
+            os.close(stage_fd)
+        os.rmdir(stage_name, dir_fd=root_fd)
+        os.fsync(root_fd)
+
+
 @contextmanager
 def _private_stage(
     root_fd: int,
+    relative: Path,
+    identity: os.stat_result,
     on_stage_error: Callable[[str, OSError], None] | None = None,
 ) -> Iterator[int]:
     """Isolate a target name before checking its identity and deleting it."""
-    name = f".bronze-cleanup-stage-{secrets.token_hex(16)}"
+    name = f"{_STAGE_PREFIX}{secrets.token_hex(16)}"
     os.mkdir(name, 0o700, dir_fd=root_fd)
     stage_fd = os.open(name, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW, dir_fd=root_fd)
     try:
+        journal_fd = os.open(
+            _STAGE_JOURNAL,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL | _O_NOFOLLOW,
+            0o600,
+            dir_fd=stage_fd,
+        )
+        try:
+            payload = json.dumps(
+                {
+                    "relative": relative.as_posix(),
+                    "dev": identity.st_dev,
+                    "ino": identity.st_ino,
+                }
+            ).encode()
+            if len(payload) > 4096:
+                raise OSError("Bronze stage origin exceeds journal limit")
+            written = 0
+            while written < len(payload):
+                count = os.write(journal_fd, payload[written:])
+                if count <= 0:
+                    raise OSError("Bronze stage journal write made no progress")
+                written += count
+            os.fsync(journal_fd)
+        finally:
+            os.close(journal_fd)
+        os.fsync(stage_fd)
+        os.fsync(root_fd)
         yield stage_fd
     finally:
+        if relative.name not in os.listdir(stage_fd):  # noqa: PTH208 - stage fd
+            with suppress(FileNotFoundError):
+                os.unlink(_STAGE_JOURNAL, dir_fd=stage_fd)
+            os.fsync(stage_fd)
         os.close(stage_fd)
         try:
             os.rmdir(name, dir_fd=root_fd)
+            os.fsync(root_fd)
         except OSError as exc:
             # A conflicted artifact may remain in the stage; expose its name.
             if on_stage_error is None:
@@ -520,16 +638,23 @@ def safe_unlink(
                 or (expected is not None and not _same_identity(expected, current))
             ):
                 return False
-            with _private_stage(root_fd, on_stage_error) as stage_fd:
+            relative = Path(os.path.abspath(file_path)).relative_to(root_abs)  # noqa: PTH100
+            with _private_stage(root_fd, relative, current, on_stage_error) as stage_fd:
                 os.rename(name, name, src_dir_fd=parent_fd, dst_dir_fd=stage_fd)
-                staged = os.stat(name, dir_fd=stage_fd, follow_symlinks=False)
-                if not _same_identity(current, staged) or not _chain_is_stable(
-                    root_fd, root_abs, chain
-                ):
+                os.fsync(parent_fd)
+                os.fsync(stage_fd)
+                try:
+                    staged = os.stat(name, dir_fd=stage_fd, follow_symlinks=False)
+                    if not _same_identity(current, staged) or not _chain_is_stable(
+                        root_fd, root_abs, chain
+                    ):
+                        _restore_staged(name, stage_fd, parent_fd)
+                        return False
+                    os.unlink(name, dir_fd=stage_fd)
+                    return True
+                except BaseException:
                     _restore_staged(name, stage_fd, parent_fd)
-                    return False
-                os.unlink(name, dir_fd=stage_fd)
-                return True
+                    raise
     except (FileNotFoundError, NotADirectoryError, _CleanupConflict):
         return False
 
@@ -557,20 +682,26 @@ def safe_rmdir(
                 or (expected is not None and not _same_identity(expected, current))
             ):
                 return False
-            with _private_stage(root_fd, on_stage_error) as stage_fd:
+            relative = Path(os.path.abspath(dir_path)).relative_to(root_abs)  # noqa: PTH100
+            with _private_stage(root_fd, relative, current, on_stage_error) as stage_fd:
                 os.rename(name, name, src_dir_fd=parent_fd, dst_dir_fd=stage_fd)
-                staged = os.stat(name, dir_fd=stage_fd, follow_symlinks=False)
-                if not _same_identity(current, staged) or not _chain_is_stable(
-                    root_fd, root_abs, chain
-                ):
-                    _restore_staged(name, stage_fd, parent_fd)
-                    return False
+                os.fsync(parent_fd)
+                os.fsync(stage_fd)
                 try:
+                    staged = os.stat(name, dir_fd=stage_fd, follow_symlinks=False)
+                    if not _same_identity(current, staged) or not _chain_is_stable(
+                        root_fd, root_abs, chain
+                    ):
+                        _restore_staged(name, stage_fd, parent_fd)
+                        return False
                     os.rmdir(name, dir_fd=stage_fd)
                 except OSError as exc:
                     _restore_staged(name, stage_fd, parent_fd)
                     if exc.errno in (errno.ENOTEMPTY, errno.EEXIST):
                         return False
+                    raise
+                except BaseException:
+                    _restore_staged(name, stage_fd, parent_fd)
                     raise
                 return True
     except (FileNotFoundError, NotADirectoryError, _CleanupConflict):

@@ -6,6 +6,7 @@ from __future__ import annotations
 import asyncio
 import os
 import stat
+import threading
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -77,7 +78,9 @@ class BronzeWriterReadCleanupMixin:
     _flat_structure: bool = cast(Any, None)  # Any: host attr default (PD3)
     _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
     _metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD3)
-    _resolve_bronze_path: Callable[[str, str, str, str], str] = cast(Any, None)
+    _resolve_bronze_path: Callable[[str, str, str, str], str] = cast(
+        Any, None
+    )  # Any: host method default (PD3)
 
     async def read_bronze(
         self, path: str
@@ -158,10 +161,11 @@ class BronzeWriterReadCleanupMixin:
         provider: str | None = None,
         entity: str | None = None,
         on_skip: Callable[[str, str], None] | None = None,
+        base_path: Path | None = None,
     ) -> list[Path]:
         """Find date directories older than cutoff without following links."""
         return find_old_date_dirs(
-            self.base_path,
+            base_path if base_path is not None else self.base_path,
             flat_structure=self._flat_structure,
             cutoff_str=cutoff_str,
             provider=provider,
@@ -184,6 +188,7 @@ class BronzeWriterReadCleanupMixin:
         dry_run: bool,
         provider: str | None,
         entity: str | None,
+        cancel_requested: threading.Event | None = None,
     ) -> dict[str, int]:
         """Plan once and apply the same candidates under the writer/cleaner lock."""
         if not dry_run and not destructive_cleanup_supported():
@@ -195,12 +200,12 @@ class BronzeWriterReadCleanupMixin:
                 cutoff_str, dry_run, provider, entity
             )
         if not self.base_path.exists():
+            return self._empty_cleanup_stats()
+        with bronze_tree_lock(self.base_path, exclusive=True) as locked_root:
+            if cancel_requested is not None and cancel_requested.is_set():
+                return self._empty_cleanup_stats()
             return self._cleanup_old_files_locked_sync(
-                cutoff_str, dry_run, provider, entity
-            )
-        with bronze_tree_lock(self.base_path, exclusive=True):
-            return self._cleanup_old_files_locked_sync(
-                cutoff_str, dry_run, provider, entity
+                cutoff_str, dry_run, provider, entity, locked_root
             )
 
     def _cleanup_old_files_locked_sync(
@@ -209,8 +214,43 @@ class BronzeWriterReadCleanupMixin:
         dry_run: bool,
         provider: str | None,
         entity: str | None,
+        locked_root: Path | None = None,
     ) -> dict[str, int]:
-        stats = dict.fromkeys(
+        stats = self._empty_cleanup_stats()
+        root_abs = (
+            locked_root
+            if locked_root is not None
+            else Path(os.path.abspath(self.base_path))  # noqa: PTH100
+        )
+        root_real = (
+            locked_root if locked_root is not None else real_root(self.base_path)
+        )
+
+        def on_discovery_skip(path: str, reason: str) -> None:
+            self._log_cleanup_skip(path, reason)
+            if reason in ("scan_error", "stat_error"):
+                stats["directories_failed"] += 1
+            elif reason == "missing_scope":
+                stats["directories_conflicted"] += 1
+            elif reason != "not_a_directory":
+                stats["directories_skipped"] += 1
+
+        for date_dir in self._find_old_date_dirs(
+            cutoff_str,
+            provider,
+            entity,
+            on_skip=on_discovery_skip,
+            base_path=locked_root,
+        ):
+            plan = self._plan_old_dir_files(date_dir, root_abs, root_real)
+            self._record_cleanup_plan(stats, plan)
+            if not dry_run:
+                self._apply_cleanup_plan(stats, plan, root_abs, root_real)
+        return stats
+
+    @staticmethod
+    def _empty_cleanup_stats() -> dict[str, int]:
+        return dict.fromkeys(
             (
                 "files_planned",
                 "bytes_planned",
@@ -230,26 +270,6 @@ class BronzeWriterReadCleanupMixin:
             ),
             0,
         )
-        root_abs = Path(os.path.abspath(self.base_path))  # noqa: PTH100
-        root_real = real_root(self.base_path)
-
-        def on_discovery_skip(path: str, reason: str) -> None:
-            self._log_cleanup_skip(path, reason)
-            if reason in ("scan_error", "stat_error"):
-                stats["directories_failed"] += 1
-            elif reason == "missing_scope":
-                stats["directories_conflicted"] += 1
-            elif reason != "not_a_directory":
-                stats["directories_skipped"] += 1
-
-        for date_dir in self._find_old_date_dirs(
-            cutoff_str, provider, entity, on_skip=on_discovery_skip
-        ):
-            plan = self._plan_old_dir_files(date_dir, root_abs, root_real)
-            self._record_cleanup_plan(stats, plan)
-            if not dry_run:
-                self._apply_cleanup_plan(stats, plan, root_abs, root_real)
-        return stats
 
     @staticmethod
     def _record_cleanup_plan(stats: dict[str, int], plan: _CleanupDatePlan) -> None:
@@ -475,13 +495,30 @@ class BronzeWriterReadCleanupMixin:
         validate_scope_filter(provider, "provider")
         validate_scope_filter(entity, "entity")
         cutoff_str = cutoff_date.strftime("%Y-%m-%d")
-        result = await asyncio.to_thread(
-            self._cleanup_old_files_sync,
-            cutoff_str,
-            dry_run,
-            provider,
-            entity,
+        cancel_requested = threading.Event()
+        worker = asyncio.create_task(
+            asyncio.to_thread(
+                self._cleanup_old_files_sync,
+                cutoff_str,
+                dry_run,
+                provider,
+                entity,
+                cancel_requested,
+            )
         )
+        try:
+            result = await asyncio.shield(worker)
+        except asyncio.CancelledError:
+            cancel_requested.set()
+            # A cancelled caller must not leave an unobserved destructive thread.
+            while not worker.done():
+                try:
+                    await asyncio.shield(worker)
+                except asyncio.CancelledError:
+                    current = asyncio.current_task()
+                    if current is not None:
+                        current.uncancel()
+            raise
 
         self._logger.info(
             "bronze_cleanup_complete",
@@ -501,25 +538,67 @@ class BronzeWriterReadCleanupMixin:
                 result["bytes_freed"],
                 cleanup_labels,
             )
-        for key, metric in (
-            ("files_skipped", "bioetl_bronze_cleanup_files_skipped_total"),
-            ("bytes_skipped", "bioetl_bronze_cleanup_bytes_skipped_total"),
-            ("files_conflicted", "bioetl_bronze_cleanup_files_conflicted_total"),
-            ("bytes_conflicted", "bioetl_bronze_cleanup_bytes_conflicted_total"),
-            ("files_failed", "bioetl_bronze_cleanup_files_failed_total"),
-            ("bytes_failed", "bioetl_bronze_cleanup_bytes_failed_total"),
-            ("directories_skipped", "bioetl_bronze_cleanup_directories_skipped_total"),
-            (
-                "directories_conflicted",
-                "bioetl_bronze_cleanup_directories_conflicted_total",
-            ),
-            ("directories_failed", "bioetl_bronze_cleanup_directories_failed_total"),
-        ):
-            if not dry_run and result[key]:
-                self._metrics.increment_counter(
-                    metric, result[key], {"operation": "cleanup"}
-                )
+        if not dry_run:
+            self._emit_cleanup_outcome_metrics(result)
         return result
+
+    def _emit_cleanup_outcome_metrics(self, result: dict[str, int]) -> None:
+        """Emit bounded outcome series through the registered metric names."""
+        labels = {"operation": "cleanup"}
+        if result["files_skipped"]:
+            self._metrics.increment_counter(
+                "bioetl_bronze_cleanup_files_skipped_total",
+                result["files_skipped"],
+                labels,
+            )
+        if result["bytes_skipped"]:
+            self._metrics.increment_counter(
+                "bioetl_bronze_cleanup_bytes_skipped_total",
+                result["bytes_skipped"],
+                labels,
+            )
+        if result["files_conflicted"]:
+            self._metrics.increment_counter(
+                "bioetl_bronze_cleanup_files_conflicted_total",
+                result["files_conflicted"],
+                labels,
+            )
+        if result["bytes_conflicted"]:
+            self._metrics.increment_counter(
+                "bioetl_bronze_cleanup_bytes_conflicted_total",
+                result["bytes_conflicted"],
+                labels,
+            )
+        if result["files_failed"]:
+            self._metrics.increment_counter(
+                "bioetl_bronze_cleanup_files_failed_total",
+                result["files_failed"],
+                labels,
+            )
+        if result["bytes_failed"]:
+            self._metrics.increment_counter(
+                "bioetl_bronze_cleanup_bytes_failed_total",
+                result["bytes_failed"],
+                labels,
+            )
+        if result["directories_skipped"]:
+            self._metrics.increment_counter(
+                "bioetl_bronze_cleanup_directories_skipped_total",
+                result["directories_skipped"],
+                labels,
+            )
+        if result["directories_conflicted"]:
+            self._metrics.increment_counter(
+                "bioetl_bronze_cleanup_directories_conflicted_total",
+                result["directories_conflicted"],
+                labels,
+            )
+        if result["directories_failed"]:
+            self._metrics.increment_counter(
+                "bioetl_bronze_cleanup_directories_failed_total",
+                result["directories_failed"],
+                labels,
+            )
 
     def preview_cleanup(
         self,

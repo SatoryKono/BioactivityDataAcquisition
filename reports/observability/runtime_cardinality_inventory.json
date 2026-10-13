@@ -175,6 +175,15 @@
     "bioetl_batch_size_records",
     "bioetl_bronze_bytes_freed_total",
     "bioetl_bronze_bytes_written_total",
+    "bioetl_bronze_cleanup_bytes_conflicted_total",
+    "bioetl_bronze_cleanup_bytes_failed_total",
+    "bioetl_bronze_cleanup_bytes_skipped_total",
+    "bioetl_bronze_cleanup_directories_conflicted_total",
+    "bioetl_bronze_cleanup_directories_failed_total",
+    "bioetl_bronze_cleanup_directories_skipped_total",
+    "bioetl_bronze_cleanup_files_conflicted_total",
+    "bioetl_bronze_cleanup_files_failed_total",
+    "bioetl_bronze_cleanup_files_skipped_total",
     "bioetl_bronze_files_removed_total",
     "bioetl_bronze_records_written_total",
     "bioetl_bronze_write_attempts_total",
@@ -447,6 +456,15 @@
     "bioetl_batch_lifecycle_records_total",
     "bioetl_bronze_bytes_freed_total",
     "bioetl_bronze_bytes_written_total",
+    "bioetl_bronze_cleanup_bytes_conflicted_total",
+    "bioetl_bronze_cleanup_bytes_failed_total",
+    "bioetl_bronze_cleanup_bytes_skipped_total",
+    "bioetl_bronze_cleanup_directories_conflicted_total",
+    "bioetl_bronze_cleanup_directories_failed_total",
+    "bioetl_bronze_cleanup_directories_skipped_total",
+    "bioetl_bronze_cleanup_files_conflicted_total",
+    "bioetl_bronze_cleanup_files_failed_total",
+    "bioetl_bronze_cleanup_files_skipped_total",
     "bioetl_bronze_files_removed_total",
     "bioetl_bronze_records_written_total",
     "bioetl_bronze_write_attempts_total",
@@ -528,6 +546,15 @@
     "bioetl_batch_size_records",
     "bioetl_bronze_bytes_freed_total",
     "bioetl_bronze_bytes_written_total",
+    "bioetl_bronze_cleanup_bytes_conflicted_total",
+    "bioetl_bronze_cleanup_bytes_failed_total",
+    "bioetl_bronze_cleanup_bytes_skipped_total",
+    "bioetl_bronze_cleanup_directories_conflicted_total",
+    "bioetl_bronze_cleanup_directories_failed_total",
+    "bioetl_bronze_cleanup_directories_skipped_total",
+    "bioetl_bronze_cleanup_files_conflicted_total",
+    "bioetl_bronze_cleanup_files_failed_total",
+    "bioetl_bronze_cleanup_files_skipped_total",
     "bioetl_bronze_files_removed_total",
     "bioetl_bronze_records_written_total",
     "bioetl_bronze_write_attempts_total",
@@ -943,6 +970,15 @@
     "bioetl_batch_size_records",
     "bioetl_bronze_bytes_freed_total",
     "bioetl_bronze_bytes_written_total",
+    "bioetl_bronze_cleanup_bytes_conflicted_total",
+    "bioetl_bronze_cleanup_bytes_failed_total",
+    "bioetl_bronze_cleanup_bytes_skipped_total",
+    "bioetl_bronze_cleanup_directories_conflicted_total",
+    "bioetl_bronze_cleanup_directories_failed_total",
+    "bioetl_bronze_cleanup_directories_skipped_total",
+    "bioetl_bronze_cleanup_files_conflicted_total",
+    "bioetl_bronze_cleanup_files_failed_total",
+    "bioetl_bronze_cleanup_files_skipped_total",
     "bioetl_bronze_files_removed_total",
     "bioetl_bronze_records_written_total",
     "bioetl_bronze_write_attempts_total",
@@ -1180,6 +1216,33 @@
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md"
+    ],
+    "bioetl_bronze_cleanup_bytes_conflicted_total": [
+      "docs/04-reference/observability/metrics-catalog.md"
+    ],
+    "bioetl_bronze_cleanup_bytes_failed_total": [
+      "docs/04-reference/observability/metrics-catalog.md"
+    ],
+    "bioetl_bronze_cleanup_bytes_skipped_total": [
+      "docs/04-reference/observability/metrics-catalog.md"
+    ],
+    "bioetl_bronze_cleanup_directories_conflicted_total": [
+      "docs/04-reference/observability/metrics-catalog.md"
+    ],
+    "bioetl_bronze_cleanup_directories_failed_total": [
+      "docs/04-reference/observability/metrics-catalog.md"
+    ],
+    "bioetl_bronze_cleanup_directories_skipped_total": [
+      "docs/04-reference/observability/metrics-catalog.md"
+    ],
+    "bioetl_bronze_cleanup_files_conflicted_total": [
+      "docs/04-reference/observability/metrics-catalog.md"
+    ],
+    "bioetl_bronze_cleanup_files_failed_total": [
+      "docs/04-reference/observability/metrics-catalog.md"
+    ],
+    "bioetl_bronze_cleanup_files_skipped_total": [
+      "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_bronze_files_removed_total": [
       "docs/04-reference/observability/metrics-catalog.md"
@@ -2470,6 +2533,15 @@
     "bioetl_batch_size_records",
     "bioetl_bronze_bytes_freed_total",
     "bioetl_bronze_bytes_written_total",
+    "bioetl_bronze_cleanup_bytes_conflicted_total",
+    "bioetl_bronze_cleanup_bytes_failed_total",
+    "bioetl_bronze_cleanup_bytes_skipped_total",
+    "bioetl_bronze_cleanup_directories_conflicted_total",
+    "bioetl_bronze_cleanup_directories_failed_total",
+    "bioetl_bronze_cleanup_directories_skipped_total",
+    "bioetl_bronze_cleanup_files_conflicted_total",
+    "bioetl_bronze_cleanup_files_failed_total",
+    "bioetl_bronze_cleanup_files_skipped_total",
     "bioetl_bronze_files_removed_total",
     "bioetl_bronze_records_written_total",
     "bioetl_bronze_write_attempts_total",
@@ -2769,6 +2841,15 @@
     "bioetl_batch_size_records",
     "bioetl_bronze_bytes_freed_total",
     "bioetl_bronze_bytes_written_total",
+    "bioetl_bronze_cleanup_bytes_conflicted_total",
+    "bioetl_bronze_cleanup_bytes_failed_total",
+    "bioetl_bronze_cleanup_bytes_skipped_total",
+    "bioetl_bronze_cleanup_directories_conflicted_total",
+    "bioetl_bronze_cleanup_directories_failed_total",
+    "bioetl_bronze_cleanup_directories_skipped_total",
+    "bioetl_bronze_cleanup_files_conflicted_total",
+    "bioetl_bronze_cleanup_files_failed_total",
+    "bioetl_bronze_cleanup_files_skipped_total",
     "bioetl_bronze_files_removed_total",
     "bioetl_bronze_records_written_total",
     "bioetl_bronze_write_attempts_total",
@@ -3028,6 +3109,15 @@
     "bioetl_batch_size_records",
     "bioetl_bronze_bytes_freed_total",
     "bioetl_bronze_bytes_written_total",
+    "bioetl_bronze_cleanup_bytes_conflicted_total",
+    "bioetl_bronze_cleanup_bytes_failed_total",
+    "bioetl_bronze_cleanup_bytes_skipped_total",
+    "bioetl_bronze_cleanup_directories_conflicted_total",
+    "bioetl_bronze_cleanup_directories_failed_total",
+    "bioetl_bronze_cleanup_directories_skipped_total",
+    "bioetl_bronze_cleanup_files_conflicted_total",
+    "bioetl_bronze_cleanup_files_failed_total",
+    "bioetl_bronze_cleanup_files_skipped_total",
     "bioetl_bronze_files_removed_total",
     "bioetl_bronze_records_written_total",
     "bioetl_bronze_write_attempts_total",
@@ -3889,6 +3979,33 @@
     "bioetl_bronze_bytes_written_total": [
       "observed_series_count=0"
     ],
+    "bioetl_bronze_cleanup_bytes_conflicted_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_bronze_cleanup_bytes_failed_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_bronze_cleanup_bytes_skipped_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_bronze_cleanup_directories_conflicted_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_bronze_cleanup_directories_failed_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_bronze_cleanup_directories_skipped_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_bronze_cleanup_files_conflicted_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_bronze_cleanup_files_failed_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_bronze_cleanup_files_skipped_total": [
+      "observed_series_count=0"
+    ],
     "bioetl_bronze_files_removed_total": [
       "observed_series_count=0"
     ],
@@ -4414,6 +4531,33 @@
     ],
     "bioetl_bronze_bytes_written_total": [
       "src/bioetl/infrastructure/storage/bronze/metrics_mixin.py"
+    ],
+    "bioetl_bronze_cleanup_bytes_conflicted_total": [
+      "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py"
+    ],
+    "bioetl_bronze_cleanup_bytes_failed_total": [
+      "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py"
+    ],
+    "bioetl_bronze_cleanup_bytes_skipped_total": [
+      "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py"
+    ],
+    "bioetl_bronze_cleanup_directories_conflicted_total": [
+      "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py"
+    ],
+    "bioetl_bronze_cleanup_directories_failed_total": [
+      "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py"
+    ],
+    "bioetl_bronze_cleanup_directories_skipped_total": [
+      "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py"
+    ],
+    "bioetl_bronze_cleanup_files_conflicted_total": [
+      "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py"
+    ],
+    "bioetl_bronze_cleanup_files_failed_total": [
+      "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py"
+    ],
+    "bioetl_bronze_cleanup_files_skipped_total": [
+      "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py"
     ],
     "bioetl_bronze_files_removed_total": [
       "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py"
