@@ -293,8 +293,10 @@ class TestBronzeWriterTracing:
             ingestion_ts=ingestion_ts,
         )
 
-        tracing.get_tracer.assert_called_once()
-        tracer.start_as_current_span.assert_called_once_with("write_bronze")
+        assert tracing.get_tracer.call_count == 2
+        assert tracer.start_as_current_span.call_count == 2
+        tracer.start_as_current_span.assert_any_call("write_bronze")
+        tracer.start_as_current_span.assert_any_call("write_bronze_data")
         span.set_attribute.assert_any_call("provider", "chembl")
         span.set_attribute.assert_any_call("entity", "activity")
 

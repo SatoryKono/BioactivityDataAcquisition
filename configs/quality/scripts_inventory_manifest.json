@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-13T04:59:30.093731+00:00",
+  "generated_at": "2026-10-13T08:08:18.554154+00:00",
   "summary": {
     "total_scripts": 648,
     "status_counts": {
@@ -10992,13 +10992,13 @@
         },
         {
           "path": "scripts/ai/codex/local_state_audit.py",
-          "line": 524,
+          "line": 575,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.repo_paths import ensure_path_within_root"
         },
         {
           "path": "scripts/ai/codex/local_state_audit.py",
-          "line": 664,
+          "line": 715,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.repo_paths import ensure_path_within_root"
         }

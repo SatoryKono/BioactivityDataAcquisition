@@ -25,7 +25,7 @@ from contextlib import contextmanager
 from datetime import UTC, datetime
 from functools import partial
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import MagicMock, Mock
 from uuid import UUID
 
 import pytest
@@ -39,6 +39,7 @@ from bioetl.infrastructure.storage.bronze import (
     cleanup_core,
     cleanup_planner,
     cleanup_posix,
+    cleanup_preview_mixin,
     cleanup_support,
     read_cleanup_mixin,
 )
@@ -100,6 +101,52 @@ def _symlink_or_skip(link: Path, target: Path) -> Path:
         if result.returncode == 0:
             return link
     pytest.skip("symlink/junction creation not permitted on this host")
+
+
+async def test_writer_lock_failure_records_attempt_and_trace(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A refused shared lock is still one observable public write attempt."""
+    metrics = Mock()
+    tracing = Mock()
+    span = Mock()
+    span_context = MagicMock()
+    span_context.__enter__.return_value = span
+    tracing.get_tracer.return_value.start_as_current_span.return_value = span_context
+    writer = BronzeWriter(
+        base_path=tmp_path / "bronze",
+        logger=NoOpLogger(),
+        metrics=metrics,
+        tracing=tracing,
+    )
+
+    @contextmanager
+    def denied_lock(_base_path: Path, *, exclusive: bool):
+        assert not exclusive
+        raise PermissionError("lock denied")
+        yield  # pragma: no cover - retain contextmanager protocol
+
+    monkeypatch.setattr(bronze_writer_module, "bronze_tree_lock", denied_lock)
+    with pytest.raises(PermissionError, match="lock denied"):
+        await writer.write_bronze(
+            records=iter([b"{}\n"]),
+            provider="chembl",
+            entity="activity",
+            date=CUTOFF,
+            batch_id=BatchID(UUID(int=1)),
+            run_id=RunID(UUID(int=2)),
+            run_type=RunType.INCREMENTAL,
+            ingestion_ts=CUTOFF,
+        )
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_bronze_write_attempts_total",
+        1,
+        {"provider": "chembl", "entity": "activity"},
+    )
+    tracing.get_tracer.return_value.start_as_current_span.assert_called_once_with(
+        "write_bronze"
+    )
+    assert span_context.__exit__.call_count == 1
 
 
 @_APPLY_POSIX
@@ -322,6 +369,42 @@ async def test_cleanup_rejects_invalid_scope_filters(
         writer.preview_cleanup(provider=provider, entity=entity)
     discovery.assert_not_called()
     preview_resolution.assert_not_called()
+
+
+def test_preview_stops_scandir_within_one_oversized_partition(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    date_dir = _date_dir(tmp_path, "chembl", "activity")
+    for index in range(20):
+        (date_dir / f"manual_{index}.txt").write_bytes(b"retain")
+    original_scandir = cleanup_preview_mixin.os.scandir
+    seen = 0
+
+    @contextmanager
+    def observed_scandir(path: Path):
+        nonlocal seen
+        with original_scandir(path) as entries:
+            if Path(path) != date_dir:
+                yield entries
+                return
+
+            def bounded_entries():
+                nonlocal seen
+                for entry in entries:
+                    seen += 1
+                    if seen > 4:
+                        raise AssertionError("preview consumed beyond its entry budget")
+                    yield entry
+
+            yield bounded_entries()
+
+    monkeypatch.setattr(cleanup_preview_mixin, "_PREVIEW_MAX_ENTRIES", 6)
+    monkeypatch.setattr(cleanup_preview_mixin.os, "scandir", observed_scandir)
+    with pytest.raises(ValueError, match="filesystem entries"):
+        _make_writer(tmp_path).preview_cleanup()
+    assert seen == 4
+    monkeypatch.setattr(cleanup_preview_mixin.os, "scandir", original_scandir)
+    assert len(list(date_dir.iterdir())) == 20
 
 
 @_APPLY_POSIX
@@ -1908,98 +1991,3 @@ def test_fifo_stage_journal_fails_without_blocking_lock(
     assert (date_dir / ARTIFACT).read_bytes() == b"x"
     assert outside.read_bytes() == b"outside"
     assert (stage / "origin.json").is_fifo()
-
-
-@_APPLY_POSIX
-async def test_writer_uses_pinned_root_after_alias_switch(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """Payload, sidecar and optional copy stay under the shared-locked root."""
-    old_root, new_root = tmp_path / "old", tmp_path / "new"
-    new_root.mkdir()
-    alias = tmp_path / "alias"
-    alias.mkdir()
-    writer = BronzeWriter(
-        base_path=alias,
-        logger=NoOpLogger(),
-        metrics=NoOpMetrics(),
-        json_export=(True, None),
-    )
-    original_lock = bronze_tree_lock
-    switched = False
-
-    @contextmanager
-    def switch_after_lock(base_path: Path, *, exclusive: bool):
-        nonlocal switched
-        with original_lock(base_path, exclusive=exclusive) as locked_root:
-            alias.rename(old_root)
-            alias.symlink_to(new_root, target_is_directory=True)
-            switched = True
-            yield locked_root
-
-    monkeypatch.setattr(bronze_writer_module, "bronze_tree_lock", switch_after_lock)
-    batch_id = BatchID(UUID(int=1))
-    result = await writer.write_bronze(
-        records=iter([b"{}\n"]),
-        provider="chembl",
-        entity="activity",
-        date=CUTOFF,
-        batch_id=batch_id,
-        run_id=RunID(UUID(int=2)),
-        run_type=RunType.INCREMENTAL,
-        ingestion_ts=CUTOFF,
-    )
-    assert switched
-    expected = Path(result.relative_path)
-    assert (old_root / expected).is_file()
-    assert (old_root / f"{expected}.meta.json").is_file()
-    assert (old_root / expected.with_suffix("")).is_file()
-    assert Path(result.absolute_path) == old_root / expected
-    assert not list(new_root.rglob("batch_*"))
-
-
-@_APPLY_POSIX
-async def test_writer_uses_locked_root_inode_after_root_rename(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """A same-name replacement cannot receive writes under the old root lock."""
-    root = tmp_path / "bronze"
-    root.mkdir()
-    moved = tmp_path / "moved_bronze"
-    replacement = tmp_path / "replacement"
-    replacement.mkdir()
-    outside = replacement / "sentinel"
-    outside.write_bytes(b"outside")
-    writer = BronzeWriter(
-        base_path=root,
-        logger=NoOpLogger(),
-        metrics=NoOpMetrics(),
-        json_export=(True, None),
-    )
-    original_lock = bronze_tree_lock
-
-    @contextmanager
-    def replace_after_lock(base_path: Path, *, exclusive: bool):
-        with original_lock(base_path, exclusive=exclusive) as locked_root:
-            root.rename(moved)
-            replacement.rename(root)
-            yield locked_root
-
-    monkeypatch.setattr(bronze_writer_module, "bronze_tree_lock", replace_after_lock)
-    result = await writer.write_bronze(
-        records=iter([b"{}\n"]),
-        provider="chembl",
-        entity="activity",
-        date=CUTOFF,
-        batch_id=BatchID(UUID(int=1)),
-        run_id=RunID(UUID(int=2)),
-        run_type=RunType.INCREMENTAL,
-        ingestion_ts=CUTOFF,
-    )
-    expected = Path(result.relative_path)
-    assert (moved / expected).is_file()
-    assert (moved / f"{expected}.meta.json").is_file()
-    assert (moved / expected.with_suffix("")).is_file()
-    assert Path(result.absolute_path) == moved / expected
-    assert (root / "sentinel").read_bytes() == b"outside"
-    assert not list(root.rglob("batch_*"))

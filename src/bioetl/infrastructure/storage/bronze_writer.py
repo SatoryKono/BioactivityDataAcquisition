@@ -229,6 +229,24 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
             source_metadata=source_metadata,
         )
         self._validate_bronze_request_inputs(request)
+        labels = {"provider": request.provider, "entity": request.entity}
+        self._metrics.increment_counter("bioetl_bronze_write_attempts_total", 1, labels)
+        span_context = (
+            self._tracing.get_tracer(__name__).start_as_current_span("write_bronze")
+            if self._tracing is not None
+            else _NoOpSpan()
+        )
+        with span_context as span:
+            span.set_attribute("provider", request.provider)
+            span.set_attribute("entity", request.entity)
+            span.set_attribute("batch_id", str(request.batch_id))
+            span.set_attribute("run_id", str(request.run_id))
+            return await self._write_bronze_under_lock(request)
+
+    async def _write_bronze_under_lock(
+        self, request: BronzeWriteRequest
+    ) -> BronzeWriteResult:
+        """Hold the cooperative root lock through all writer side effects."""
         await asyncio.to_thread(self.base_path.mkdir, parents=True, exist_ok=True)
         lock = bronze_tree_lock(self.base_path, exclusive=False)
         entering = asyncio.create_task(asyncio.to_thread(lock.__enter__))
@@ -283,7 +301,9 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         locked_root: Path | None = None,
     ) -> BronzeWriteResult:
         span_context = (
-            self._tracing.get_tracer(__name__).start_as_current_span("write_bronze")
+            self._tracing.get_tracer(__name__).start_as_current_span(
+                "write_bronze_data"
+            )
             if self._tracing is not None
             else _NoOpSpan()
         )
@@ -294,9 +314,6 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
             span.set_attribute("run_id", str(request.run_id))
 
             labels = {"provider": request.provider, "entity": request.entity}
-            self._metrics.increment_counter(
-                "bioetl_bronze_write_attempts_total", 1, labels
-            )
             start_time = time.perf_counter()
             prepared = self._prepare_bronze_write(request, locked_root=locked_root)
             write_artifacts = await self._write_bronze_data_and_sidecar(prepared)

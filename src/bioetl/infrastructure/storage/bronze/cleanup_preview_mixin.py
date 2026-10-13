@@ -4,21 +4,29 @@ from __future__ import annotations
 
 import os
 import stat
+from collections.abc import Iterator
 from pathlib import Path
 
 from bioetl.domain.types import JsonDict
 
+from .cleanup_core import valid_bronze_scope_name
 from .cleanup_support import (
     candidate_is_safe,
     date_dir_name_is_older,
-    iter_safe_child_dirs,
-    iter_writer_scope_dirs,
     real_root,
     root_components_safe,
     safe_named_child_dir,
-    scan_dir_entries,
+    stat_is_link_or_reparse,
     validate_scope_filter,
 )
+
+_PREVIEW_MAX_ENTRIES = 100_000
+
+
+def _consume_preview_entry(budget: list[int]) -> None:
+    budget[0] += 1
+    if budget[0] > _PREVIEW_MAX_ENTRIES:
+        raise ValueError("Bronze preview exceeds 100000 filesystem entries")
 
 
 class BronzeCleanupPreviewMixin:
@@ -47,10 +55,13 @@ class BronzeCleanupPreviewMixin:
             return {"path": str(preview_root), "file_count": 0, "exists": False}
         root_abs = Path(os.path.abspath(self.base_path))  # noqa: PTH100
         root_real = real_root(self.base_path)
+        budget = [0]
         date_parents, scope_exists = self._preview_date_parents(
-            provider, entity, root_real
+            provider, entity, root_real, budget
         )
-        file_count = self._count_preview_files(date_parents, root_abs, root_real)
+        file_count = self._count_preview_files(
+            date_parents, root_abs, root_real, budget
+        )
         return {
             "path": str(preview_root),
             "file_count": file_count,
@@ -58,7 +69,11 @@ class BronzeCleanupPreviewMixin:
         }
 
     def _preview_date_parents(
-        self, provider: str | None, entity: str | None, root_real: Path
+        self,
+        provider: str | None,
+        entity: str | None,
+        root_real: Path,
+        budget: list[int],
     ) -> tuple[list[Path], bool]:
         """Resolve bounded preview scopes without following child links."""
         if self._flat_structure:
@@ -66,16 +81,23 @@ class BronzeCleanupPreviewMixin:
         if provider:
             named = safe_named_child_dir(self.base_path, provider, root_real)
             providers = [named] if named is not None else []
+            if named is not None:
+                _consume_preview_entry(budget)
         else:
-            providers = iter_writer_scope_dirs(self.base_path)
+            providers = list(
+                self._iter_bounded_dirs(self.base_path, budget, scope=True)
+            )
         date_parents: list[Path] = []
         for provider_dir in providers:
             if entity:
                 child = safe_named_child_dir(provider_dir, entity, root_real)
                 if child is not None:
+                    _consume_preview_entry(budget)
                     date_parents.append(child)
             else:
-                date_parents.extend(iter_writer_scope_dirs(provider_dir))
+                date_parents.extend(
+                    self._iter_bounded_dirs(provider_dir, budget, scope=True)
+                )
         if entity:
             return date_parents, bool(date_parents)
         if provider:
@@ -83,27 +105,50 @@ class BronzeCleanupPreviewMixin:
         return date_parents, True
 
     def _count_preview_files(
-        self, date_parents: list[Path], root_abs: Path, root_real: Path
+        self,
+        date_parents: list[Path],
+        root_abs: Path,
+        root_real: Path,
+        budget: list[int],
     ) -> int:
         """Count only direct, safe date-partition files up to the public bound."""
         file_count = 0
         for parent in date_parents:
-            for date_dir in iter_safe_child_dirs(parent):
+            for date_dir in self._iter_bounded_dirs(parent, budget):
                 if not (
                     date_dir_name_is_older(date_dir.name, "9999-12-31")
                     or date_dir.name == "9999-12-31"
                 ):
                     continue
                 file_count += self._count_preview_date_files(
-                    date_dir, root_abs, root_real
+                    date_dir, root_abs, root_real, budget
                 )
-                if file_count > 100_000:
-                    raise ValueError("Bronze preview exceeds 100000 files")
         return file_count
 
     @staticmethod
+    def _iter_bounded_dirs(
+        parent: Path, budget: list[int], *, scope: bool = False
+    ) -> Iterator[Path]:
+        try:
+            with os.scandir(parent) as entries:
+                for entry in entries:
+                    _consume_preview_entry(budget)
+                    try:
+                        identity = entry.stat(follow_symlinks=False)
+                    except OSError:
+                        continue
+                    if (
+                        stat.S_ISDIR(identity.st_mode)
+                        and not stat_is_link_or_reparse(identity)
+                        and (not scope or valid_bronze_scope_name(entry.name))
+                    ):
+                        yield Path(entry.path)
+        except OSError:
+            return
+
+    @staticmethod
     def _count_preview_date_files(
-        date_dir: Path, root_abs: Path, root_real: Path
+        date_dir: Path, root_abs: Path, root_real: Path, budget: list[int]
     ) -> int:
         try:
             date_stat = date_dir.lstat()
@@ -113,20 +158,22 @@ class BronzeCleanupPreviewMixin:
             date_dir, root_abs, root_real, date_stat, directory=True
         ):
             return 0
-        entries = scan_dir_entries(date_dir)
-        if entries is None:
-            return 0
         count = 0
-        for entry in entries:
-            try:
-                entry.stat(follow_symlinks=False)
-                identity = (date_dir / entry.name).lstat()
-            except OSError:
-                continue
-            if stat.S_ISREG(identity.st_mode) and candidate_is_safe(
-                date_dir / entry.name, root_abs, root_real, identity
-            ):
-                count += 1
+        try:
+            with os.scandir(date_dir) as entries:
+                for entry in entries:
+                    _consume_preview_entry(budget)
+                    try:
+                        entry.stat(follow_symlinks=False)
+                        identity = (date_dir / entry.name).lstat()
+                    except OSError:
+                        continue
+                    if stat.S_ISREG(identity.st_mode) and candidate_is_safe(
+                        date_dir / entry.name, root_abs, root_real, identity
+                    ):
+                        count += 1
+        except OSError:
+            return 0
         return count
 
     def _resolve_bronze_preview_root(
