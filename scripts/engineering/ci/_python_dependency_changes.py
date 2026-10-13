@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+from collections.abc import Mapping
 import json
 from importlib.metadata import packages_distributions
 import re
@@ -93,25 +94,8 @@ def dependency_consumers(root: Path, changed: set[str]) -> list[str]:
     imports = _source_imports(root)
     module_owners = packages_distributions()
     for dependency in sorted(changed):
-        family = {_name(dependency)}
-        while True:
-            previous = set(family)
-            for package in packages:
-                if package.get("source", {}).get("editable") == ".":
-                    continue
-                if any(
-                    _name(edge["name"]) in family
-                    for edge in package.get("dependencies", [])
-                ):
-                    family.add(_name(package["name"]))
-            if family == previous:
-                break
-        modules = {
-            module
-            for module, owners in module_owners.items()
-            if any(_name(owner) in family for owner in owners)
-        }
-        selected = {path for path, imported in imports.items() if imported & modules}
+        family = _lock_family(packages, dependency)
+        selected = _import_consumers(imports, module_owners, family)
         if selected:
             consumers.update(selected)
         else:
@@ -121,6 +105,35 @@ def dependency_consumers(root: Path, changed: set[str]) -> list[str]:
             "Unconfirmed Python dependency consumer route: " + ", ".join(unresolved)
         )
     return sorted(consumers)
+
+
+def _lock_family(packages: list[dict[str, Any]], dependency: str) -> set[str]:
+    family = {_name(dependency)}
+    while True:
+        parents = {
+            _name(package["name"])
+            for package in packages
+            if package.get("source", {}).get("editable") != "."
+            and any(
+                _name(edge["name"]) in family
+                for edge in package.get("dependencies", [])
+            )
+        }
+        expanded = family | parents
+        if expanded == family:
+            return family
+        family = expanded
+
+
+def _import_consumers(
+    imports: dict[str, set[str]], owners: dict[str, list[str]], family: set[str]
+) -> set[str]:
+    modules = {
+        module
+        for module, distributions in owners.items()
+        if any(_name(owner) in family for owner in distributions)
+    }
+    return {path for path, imported in imports.items() if imported & modules}
 
 
 def _source_imports(root: Path) -> dict[str, set[str]]:

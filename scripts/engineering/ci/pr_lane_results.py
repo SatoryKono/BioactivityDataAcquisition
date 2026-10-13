@@ -28,6 +28,7 @@ FAILURE = "failure"
 SKIPPED = "skipped"
 REQUIRED = "required"
 NOT_APPLICABLE = "not_applicable"
+TESTS_PREFIX = "tests/"
 
 NPM_RUNTIME_TEST = "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py"
 
@@ -237,134 +238,119 @@ def affected_pytest_targets(
     repo_root: Path,
     changed_python_dependencies: set[str] | None = None,
 ) -> list[str]:
-    """Map a diff to tests; every declared mandatory target must exist."""
+    """Map a diff to tests; validate all declared targets before selection."""
+    paths = [path for raw in changed_files if (path := raw.strip().replace("\\", "/"))]
+    mapped = {path: _mapped_targets(path) for path in paths}
+    _require_targets(
+        [target for values in mapped.values() for target in values], repo_root
+    )
     targets: list[str] = []
-    missing: set[str] = set()
-    if {"pyproject.toml", "uv.lock"} & set(changed_files):
+    if {"pyproject.toml", "uv.lock"} & set(paths):
         if changed_python_dependencies is None:
             raise ValueError(
                 "Python dependency route requires verified dependency diff"
             )
         targets.extend(_dependency_targets(repo_root, changed_python_dependencies))
-    for raw_path in changed_files:
-        path = raw_path.strip().replace("\\", "/")
-        if not path:
-            continue
-        for candidate_path in AFFECTED_TESTS_BY_PATH.get(path, ()):
-            if (repo_root / candidate_path).is_file():
-                targets.append(candidate_path)
-            else:
-                missing.add(candidate_path)
-        for prefix, prefix_tests in AFFECTED_TESTS_BY_PREFIX.items():
-            if path.startswith(prefix):
-                for candidate_path in prefix_tests:
-                    if (repo_root / candidate_path).is_file():
-                        targets.append(candidate_path)
-                    else:
-                        missing.add(candidate_path)
-        if path.startswith("tests/") and path.endswith(".py"):
-            if (repo_root / path).is_file():
-                targets.append(path)
-            continue
-        if path.startswith("src/bioetl/") and path.endswith(".py"):
-            relative = path.removeprefix("src/bioetl/")
-            first = relative.split("/", 1)[0]
-            candidate = repo_root / "tests" / "unit" / first
-            if candidate.is_dir():
-                targets.append(candidate.relative_to(repo_root).as_posix())
-            continue
-        if path.startswith("scripts/") and path.endswith(".py"):
-            script_relative = Path(path.removeprefix("scripts/"))
-            scripts_test_roots = (
-                repo_root / "tests" / "unit" / "scripts",
-                repo_root / "tests" / "unit" / "repo_backed" / "scripts",
-            )
-            direct_test_name = f"test_{script_relative.name.lstrip('_')}"
-            direct_test_dirs = [
-                test_root / script_relative.parent for test_root in scripts_test_roots
-            ]
-            if script_relative.parts[0] == "engineering":
-                direct_test_dirs.append(
-                    scripts_test_roots[0] / Path(*script_relative.parts[1:-1])
-                )
-            direct_tests = sorted(
-                candidate
-                for test_dir in direct_test_dirs
-                if (candidate := test_dir / direct_test_name).is_file()
-            )
-            module_name = ".".join(("scripts", *script_relative.with_suffix("").parts))
-            importing_tests = sorted(
-                test_path
-                for test_root in scripts_test_roots
-                if test_root.is_dir()
-                for test_path in test_root.rglob("test_*.py")
-                if _imports_module(test_path, module_name)
-            )
-            selected_tests = sorted({*direct_tests, *importing_tests})
-            if selected_tests:
-                targets.extend(
-                    test_path.relative_to(repo_root).as_posix()
-                    for test_path in selected_tests
-                )
-            else:
-                targets.extend(
-                    test_root.relative_to(repo_root).as_posix()
-                    for test_root in scripts_test_roots
-                    if test_root.is_dir()
-                )
+    for path in paths:
+        targets.extend(mapped[path])
+        targets.extend(_path_targets(path, repo_root))
+    return list(dict.fromkeys(targets))
+
+
+def _mapped_targets(path: str) -> list[str]:
+    targets = list(AFFECTED_TESTS_BY_PATH.get(path, ()))
+    for prefix, values in AFFECTED_TESTS_BY_PREFIX.items():
+        if path.startswith(prefix):
+            targets.extend(values)
+    return targets
+
+
+def _require_targets(targets: list[str], root: Path) -> None:
+    missing = sorted({target for target in targets if not (root / target).is_file()})
     if missing:
-        raise ValueError(
-            "Missing mandatory mapped test targets: " + ", ".join(sorted(missing))
-        )
-    ordered: list[str] = []
-    seen: set[str] = set()
-    for target in targets:
-        if target not in seen:
-            seen.add(target)
-            ordered.append(target)
-    return ordered
+        raise ValueError("Missing mandatory mapped test targets: " + ", ".join(missing))
+
+
+def _path_targets(path: str, root: Path) -> list[str]:
+    if path.startswith(TESTS_PREFIX) and path.endswith(".py"):
+        return [path] if (root / path).is_file() else []
+    if path.startswith("src/bioetl/") and path.endswith(".py"):
+        first = path.removeprefix("src/bioetl/").split("/", 1)[0]
+        candidate = root / "tests" / "unit" / first
+        return [candidate.relative_to(root).as_posix()] if candidate.is_dir() else []
+    if path.startswith("scripts/") and path.endswith(".py"):
+        return _script_targets(path, root)
+    return []
+
+
+def _script_targets(path: str, root: Path) -> list[str]:
+    relative = Path(path.removeprefix("scripts/"))
+    test_roots = (root / "tests/unit/scripts", root / "tests/unit/repo_backed/scripts")
+    direct_dirs = [test_root / relative.parent for test_root in test_roots]
+    if relative.parts[0] == "engineering":
+        direct_dirs.append(test_roots[0] / Path(*relative.parts[1:-1]))
+    direct_name = f"test_{relative.name.lstrip('_')}"
+    direct = {
+        candidate
+        for directory in direct_dirs
+        if (candidate := directory / direct_name).is_file()
+    }
+    module = ".".join(("scripts", *relative.with_suffix("").parts))
+    selected = sorted(direct | _importing_script_tests(test_roots, module))
+    if selected:
+        return [test.relative_to(root).as_posix() for test in selected]
+    return [
+        test_root.relative_to(root).as_posix()
+        for test_root in test_roots
+        if test_root.is_dir()
+    ]
+
+
+def _importing_script_tests(roots: tuple[Path, Path], module: str) -> set[Path]:
+    return {
+        test
+        for root in roots
+        if root.is_dir()
+        for test in root.rglob("test_*.py")
+        if _imports_module(test, module)
+    }
 
 
 def _dependency_targets(repo_root: Path, dependencies: set[str]) -> list[str]:
-    """Reuse source routing and its canonical curated owners for dependency consumers."""
+    """Reuse source routing and canonical owners for actual dependency consumers."""
     inventory = repo_root / "configs/quality/source_test_owner_inventory.yaml"
-    owners = {}
+    owners: dict[str, list[str]] = {}
     if inventory.is_file():
         document = yaml.safe_load(inventory.read_text(encoding="utf-8"))
         owners = {row["source"]: row["owner_tests"] for row in document["modules"]}
     targets: list[str] = []
     for consumer in dependency_consumers(repo_root, dependencies):
-        if consumer in owners:
-            selected = owners[consumer]
-            missing = [
-                target for target in selected if not (repo_root / target).is_file()
-            ]
-            if missing:
-                raise ValueError(
-                    "Missing mandatory mapped test targets: " + ", ".join(missing)
-                )
-        elif consumer.startswith("tests/") and Path(consumer).name == "conftest.py":
-            selected = [Path(consumer).parent.as_posix()]
-        elif consumer.startswith("tests/") and not Path(consumer).name.startswith(
-            "test_"
-        ):
-            raise ValueError(
-                f"Unconfirmed Python dependency test-helper owner route: {consumer}"
-            )
-        elif consumer.startswith("src/memory/"):
-            selected = (
-                ["tests/unit/memory"]
-                if (repo_root / "tests/unit/memory").is_dir()
-                else []
-            )
-        else:
-            selected = affected_pytest_targets([consumer], repo_root=repo_root)
+        selected = _consumer_targets(consumer, repo_root, owners)
         if not selected:
             raise ValueError(
                 f"Unconfirmed Python dependency consumer route: {consumer}"
             )
         targets.extend(selected)
     return targets
+
+
+def _consumer_targets(
+    consumer: str, root: Path, owners: dict[str, list[str]]
+) -> list[str]:
+    if consumer in owners:
+        selected = owners[consumer]
+        _require_targets(selected, root)
+        return selected
+    if consumer.startswith(TESTS_PREFIX):
+        if Path(consumer).name == "conftest.py":
+            return [Path(consumer).parent.as_posix()]
+        if not Path(consumer).name.startswith("test_"):
+            raise ValueError(
+                f"Unconfirmed Python dependency test-helper owner route: {consumer}"
+            )
+    if consumer.startswith("src/memory/"):
+        return ["tests/unit/memory"] if (root / "tests/unit/memory").is_dir() else []
+    return affected_pytest_targets([consumer], repo_root=root)
 
 
 def _imports_module(test_path: Path, module_name: str) -> bool:

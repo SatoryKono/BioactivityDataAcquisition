@@ -25,12 +25,12 @@ function npmSemver() {
 
 function validateLock(manifest, lock, nodeVersion = process.versions.node) {
   const semver = npmSemver();
-  const root = lock.packages && lock.packages[''];
+  const root = lock.packages?.[''];
   if (!root) throw new Error('Root npm lock is missing packages[""]');
   for (const group of ['dependencies', 'devDependencies', 'optionalDependencies']) {
     const wanted = manifest[group] || {};
     const locked = root[group] || {};
-    if (JSON.stringify(Object.entries(wanted).sort()) !== JSON.stringify(Object.entries(locked).sort())) {
+    if (JSON.stringify(Object.entries(wanted).sort(([left], [right]) => left.localeCompare(right))) !== JSON.stringify(Object.entries(locked).sort(([left], [right]) => left.localeCompare(right)))) {
       throw new Error(`Root manifest/lock mismatch: ${group}`);
     }
     for (const [name, spec] of Object.entries(wanted)) {
@@ -39,7 +39,7 @@ function validateLock(manifest, lock, nodeVersion = process.versions.node) {
     }
   }
   for (const [name, entry] of Object.entries({ '<root>': manifest, ...lock.packages })) {
-    const range = entry.engines && entry.engines.node;
+    const range = entry.engines?.node;
     if (range && !semver.satisfies(nodeVersion, range)) {
       throw new Error(`Unsupported Node ${nodeVersion}: ${name || '<root>'} requires ${range}`);
     }
