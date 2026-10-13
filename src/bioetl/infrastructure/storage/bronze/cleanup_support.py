@@ -62,6 +62,7 @@ _O_NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
 _ANCHORED_OPS = bool(
     _O_DIRECTORY
     and _O_NOFOLLOW
+    and getattr(os, "O_NONBLOCK", 0)
     and os.unlink in os.supports_dir_fd
     and os.stat in os.supports_dir_fd
     and os.open in os.supports_dir_fd

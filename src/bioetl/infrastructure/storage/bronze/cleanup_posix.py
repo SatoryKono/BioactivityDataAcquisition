@@ -22,6 +22,8 @@ from .cleanup_support import (
     stat_is_link_or_reparse,
 )
 
+_O_NONBLOCK = getattr(os, "O_NONBLOCK", 0)
+
 
 def _same_identity(left: os.stat_result, right: os.stat_result) -> bool:
     return (left.st_dev, left.st_ino) == (right.st_dev, right.st_ino)
@@ -88,12 +90,16 @@ class _StageOrigin:
 def _load_stage_origin(stage_fd: int, stage_name: str) -> _StageOrigin | None:
     """Read a bounded origin record; an empty pre-journal stage is removable."""
     try:
-        journal_fd = os.open(_STAGE_JOURNAL, os.O_RDONLY | _O_NOFOLLOW, dir_fd=stage_fd)
+        journal_fd = os.open(
+            _STAGE_JOURNAL, os.O_RDONLY | _O_NONBLOCK | _O_NOFOLLOW, dir_fd=stage_fd
+        )
     except FileNotFoundError:
         if os.listdir(stage_fd):
             raise OSError(f"Bronze stage {stage_name} has no origin journal") from None
         return None
     try:
+        if not stat.S_ISREG(os.fstat(journal_fd).st_mode):
+            raise OSError(f"Bronze stage {stage_name} has a non-file journal")
         raw = os.read(journal_fd, 4097)
     finally:
         os.close(journal_fd)
@@ -253,10 +259,10 @@ def safe_unlink(
                 return False
             relative = Path(os.path.abspath(file_path)).relative_to(root_abs)  # noqa: PTH100
             with _private_stage(root_fd, relative, current, on_stage_error) as stage_fd:
-                os.rename(name, name, src_dir_fd=parent_fd, dst_dir_fd=stage_fd)
-                os.fsync(parent_fd)
-                os.fsync(stage_fd)
                 try:
+                    os.rename(name, name, src_dir_fd=parent_fd, dst_dir_fd=stage_fd)
+                    os.fsync(parent_fd)
+                    os.fsync(stage_fd)
                     staged = os.stat(name, dir_fd=stage_fd, follow_symlinks=False)
                     if not _same_identity(current, staged) or not _chain_is_stable(
                         root_fd, root_abs, chain
@@ -297,10 +303,10 @@ def safe_rmdir(
                 return False
             relative = Path(os.path.abspath(dir_path)).relative_to(root_abs)  # noqa: PTH100
             with _private_stage(root_fd, relative, current, on_stage_error) as stage_fd:
-                os.rename(name, name, src_dir_fd=parent_fd, dst_dir_fd=stage_fd)
-                os.fsync(parent_fd)
-                os.fsync(stage_fd)
                 try:
+                    os.rename(name, name, src_dir_fd=parent_fd, dst_dir_fd=stage_fd)
+                    os.fsync(parent_fd)
+                    os.fsync(stage_fd)
                     staged = os.stat(name, dir_fd=stage_fd, follow_symlinks=False)
                     if not _same_identity(current, staged) or not _chain_is_stable(
                         root_fd, root_abs, chain

@@ -98,6 +98,7 @@ class BronzeWriterSideEffectsMixin:
         ingestion_ts: datetime,
         duration: float,
         source_metadata: SourceMetadata | None,
+        locked_root: Path | None = None,
     ) -> None:
         """Create and persist Bronze metadata through the canonical coordinator path."""
         host = self
@@ -115,6 +116,7 @@ class BronzeWriterSideEffectsMixin:
                 ingestion_ts=ingestion_ts,
                 duration=duration,
                 source_metadata=source_metadata,
+                locked_root=locked_root,
             ),
         )
         await host._metadata_writer.write_bronze_metadata(

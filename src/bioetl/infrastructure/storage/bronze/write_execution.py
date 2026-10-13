@@ -42,6 +42,8 @@ class _BronzeWriteExecutionHostProtocol(Protocol):
         entity: str,
         date_str: str,
         batch_id: BatchID,
+        *,
+        locked_root: Path | None = None,
     ) -> None: ...
 
     def _emit_bronze_write_metrics(
@@ -88,6 +90,7 @@ class _BronzeWriteExecutionHostProtocol(Protocol):
         ingestion_ts: datetime,
         duration: float,
         source_metadata: SourceMetadata | None,
+        locked_root: Path | None = None,
     ) -> None: ...
 
 
@@ -118,6 +121,7 @@ async def run_bronze_post_write_actions(
             request.entity,
             prepared.date_str,
             request.batch_id,
+            locked_root=prepared.locked_root,
         )
     if host._audit:
         await host._log_bronze_audit(
@@ -145,6 +149,7 @@ async def run_bronze_post_write_actions(
             ingestion_ts=request.ingestion_ts,
             duration=context.duration,
             source_metadata=request.source_metadata,
+            locked_root=prepared.locked_root,
         )
 
 

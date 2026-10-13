@@ -6,6 +6,7 @@ from __future__ import annotations
 import asyncio
 import time
 from collections.abc import Iterator
+from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
@@ -250,7 +251,10 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
                     leaving.result()
             raise
         try:
-            writing = asyncio.create_task(self._write_bronze_with_tracing(request))
+            pinned_request = replace(request, locked_root=entering.result())
+            writing = asyncio.create_task(
+                self._write_bronze_with_tracing(pinned_request)
+            )
             try:
                 return await asyncio.shield(writing)
             except asyncio.CancelledError:

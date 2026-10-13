@@ -37,6 +37,7 @@ from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMet
 from bioetl.infrastructure.storage import bronze_writer as bronze_writer_module
 from bioetl.infrastructure.storage.bronze import (
     cleanup_planner,
+    cleanup_posix,
     cleanup_support,
     read_cleanup_mixin,
 )
@@ -1392,3 +1393,129 @@ async def test_retained_artifact_metrics_use_registered_prometheus_counters(
     assert result["files_removed"] == 2
     assert result["files_skipped"] == 1
     assert (date_dir / "README").read_bytes() == b"keep"
+
+
+@_APPLY_POSIX
+@pytest.mark.parametrize("directory", [False, True])
+def test_post_rename_fsync_failure_restores_canonical_name(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, directory: bool
+) -> None:
+    """The first durability failure after isolation restores the same inode."""
+    date_dir = _date_dir(tmp_path, "chembl", "activity")
+    if not directory:
+        _write_pair(date_dir)
+    target = date_dir if directory else date_dir / ARTIFACT
+    original = target.lstat()
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    original_rename = cleanup_posix.os.rename
+    original_fsync = cleanup_posix.os.fsync
+    isolated = False
+    injected = False
+
+    def observed_rename(src: str, dst: str, **kwargs: object) -> None:
+        nonlocal isolated
+        original_rename(src, dst, **kwargs)
+        if src == target.name and not isolated:
+            isolated = True
+
+    def fail_first_post_rename(fd: int) -> None:
+        nonlocal injected
+        if isolated and not injected:
+            injected = True
+            raise OSError("injected post-rename fsync")
+        original_fsync(fd)
+
+    monkeypatch.setattr(cleanup_posix.os, "rename", observed_rename)
+    monkeypatch.setattr(cleanup_posix.os, "fsync", fail_first_post_rename)
+    with pytest.raises(OSError, match="post-rename fsync"):
+        if directory:
+            safe_rmdir(target, tmp_path, tmp_path, original)
+        else:
+            safe_unlink(target, tmp_path, tmp_path, original)
+    assert isolated and injected
+    assert target.lstat().st_ino == original.st_ino
+    assert outside.is_dir() and not list(outside.iterdir())
+    assert not list(tmp_path.glob(".bronze-cleanup-stage-*"))
+
+
+@_APPLY_POSIX
+def test_fifo_stage_journal_fails_without_blocking_lock(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Recovery rejects a FIFO before read and leaves all artifacts untouched."""
+    date_dir = _date_dir(tmp_path, "chembl", "activity")
+    _write_pair(date_dir)
+    stage = tmp_path / ".bronze-cleanup-stage-untrusted"
+    stage.mkdir()
+    os.mkfifo(stage / "origin.json")
+    outside = tmp_path / "outside"
+    outside.write_bytes(b"outside")
+    original_open = cleanup_posix.os.open
+    checked = False
+
+    def require_nonblocking_journal(
+        path: object, flags: int, *args: object, **kwargs: object
+    ) -> int:
+        nonlocal checked
+        if path == "origin.json":
+            checked = True
+            assert flags & os.O_NONBLOCK
+        return original_open(path, flags, *args, **kwargs)
+
+    monkeypatch.setattr(cleanup_posix.os, "open", require_nonblocking_journal)
+    with pytest.raises(OSError, match="non-file journal"):
+        with bronze_tree_lock(tmp_path, exclusive=True):
+            pytest.fail("untrusted stage must refuse the lock")
+    assert checked
+    assert (date_dir / ARTIFACT).read_bytes() == b"x"
+    assert outside.read_bytes() == b"outside"
+    assert (stage / "origin.json").is_fifo()
+
+
+@_APPLY_POSIX
+async def test_writer_uses_pinned_root_after_alias_switch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Payload, sidecar and optional copy stay under the shared-locked root."""
+    old_root, new_root = tmp_path / "old", tmp_path / "new"
+    old_root.mkdir()
+    new_root.mkdir()
+    alias = tmp_path / "alias"
+    _symlink_or_skip(alias, old_root)
+    writer = BronzeWriter(
+        base_path=alias,
+        logger=NoOpLogger(),
+        metrics=NoOpMetrics(),
+        json_export=(True, None),
+    )
+    original_lock = bronze_tree_lock
+    switched = False
+
+    @contextmanager
+    def switch_after_lock(base_path: Path, *, exclusive: bool):
+        nonlocal switched
+        with original_lock(base_path, exclusive=exclusive) as locked_root:
+            alias.unlink()
+            alias.symlink_to(new_root, target_is_directory=True)
+            switched = True
+            yield locked_root
+
+    monkeypatch.setattr(bronze_writer_module, "bronze_tree_lock", switch_after_lock)
+    batch_id = BatchID(UUID(int=1))
+    result = await writer.write_bronze(
+        records=iter([b"{}\n"]),
+        provider="chembl",
+        entity="activity",
+        date=CUTOFF,
+        batch_id=batch_id,
+        run_id=RunID(UUID(int=2)),
+        run_type=RunType.INCREMENTAL,
+        ingestion_ts=CUTOFF,
+    )
+    assert switched
+    expected = Path(result.relative_path)
+    assert (old_root / expected).is_file()
+    assert (old_root / f"{expected}.meta.json").is_file()
+    assert (old_root / expected.with_suffix("")).is_file()
+    assert not list(new_root.rglob("batch_*"))
