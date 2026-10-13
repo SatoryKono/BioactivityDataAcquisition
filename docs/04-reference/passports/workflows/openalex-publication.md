@@ -5,7 +5,7 @@
 - Kind: `workflow`
 - Typed identity: `workflow:openalex_publication`
 - Schema: `1.0.0`
-- Source revision: `c6b67c93336fcdf36ee854ab3b26e9bc674257e8`
+- Source revision: `8b2775addef6188eb913879753029dc596b430ee`
 
 ## Evidence
 
@@ -75,7 +75,7 @@
   "provenance": {
     "projector_version": "1.0.0",
     "semantic_content_hash": "sha256:c6cfeea4142f76d56aa6aa6ccd74c68a8251dbef0f3f07443e2817a7eba3cc79",
-    "source_revision": "c6b67c93336fcdf36ee854ab3b26e9bc674257e8"
+    "source_revision": "8b2775addef6188eb913879753029dc596b430ee"
   },
   "source_references": [
     {

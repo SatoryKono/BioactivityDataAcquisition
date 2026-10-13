@@ -1,3 +1,5 @@
+Source-only refresh (2026-10-14, Polars 2 join-type migration): the canonical module inventory records `source_tree_sha256=87c69355c221c6b971f2998d80d69a94eb2a6ba43859078defe186c250e5d905` and `source_module_count=2566`. This binds the Polars delivery source tree; coverage measurements remain those of the last authoritative run recorded below.
+
 Source-only refresh (2026-10-12, composite checkpoint persistence parameter bundle merged with origin/main fe524f074da5): the canonical module inventory records `source_tree_sha256=0d318c17dfd76032544e2e179569af53912aed1d409c2bf8f2725ee9ab589805` and `source_module_count=2566`. This binds the merged source tree; coverage measurements remain those of the last authoritative run recorded below.
 
 Source-only refresh (2026-10-12, PR #12187 review and origin/main sync): the canonical module inventory records `source_tree_sha256=5ef35dfcf5f7339a22f3900043b0b6af49474fcd98ed019e1d89067735f5c2eb` and `source_module_count=2566`. This updates source identity while retaining the accepted coverage measurements and additive XML provenance.
