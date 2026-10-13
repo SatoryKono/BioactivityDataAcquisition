@@ -186,6 +186,35 @@ async def test_cleanup_preserves_unknown_artifacts(tmp_path: Path) -> None:
     assert not (date_dir / ARTIFACT).exists()
 
 
+async def test_noncanonical_scope_directories_are_never_owned(tmp_path: Path) -> None:
+    """Unfiltered cleanup and preview reject names the writer cannot create."""
+    writer = _make_writer(tmp_path)
+    foreign = [
+        _date_dir(tmp_path, "manual-backup", "activity"),
+        _date_dir(tmp_path, "chembl", "activity-copy"),
+    ]
+    for date_dir in foreign:
+        _write_pair(date_dir, b"foreign")
+    before = {
+        str(path): path.read_bytes()
+        for date_dir in foreign
+        for path in (date_dir / ARTIFACT, date_dir / SIDECAR)
+    }
+
+    dry = await writer.cleanup_old_files(CUTOFF, dry_run=True)
+    preview = writer.preview_cleanup()
+    assert dry["files_planned"] == 0
+    assert preview["file_count"] == 0
+    if destructive_cleanup_supported():
+        applied = await writer.cleanup_old_files(CUTOFF)
+        assert applied["files_removed"] == 0
+        assert applied["directories_skipped"] >= 2
+    else:
+        with pytest.raises(NotImplementedError):
+            await writer.cleanup_old_files(CUTOFF)
+    assert {path: Path(path).read_bytes() for path in before} == before
+
+
 @_APPLY_POSIX
 async def test_cleanup_removes_json_copy_artifact(tmp_path: Path) -> None:
     """Optional uncompressed copies are owned artifacts too."""
@@ -1666,6 +1695,7 @@ async def test_writer_uses_pinned_root_after_alias_switch(
     assert (old_root / expected).is_file()
     assert (old_root / f"{expected}.meta.json").is_file()
     assert (old_root / expected.with_suffix("")).is_file()
+    assert Path(result.absolute_path) == old_root / expected
     assert not list(new_root.rglob("batch_*"))
 
 
@@ -1711,5 +1741,6 @@ async def test_writer_uses_locked_root_inode_after_root_rename(
     assert (moved / expected).is_file()
     assert (moved / f"{expected}.meta.json").is_file()
     assert (moved / expected.with_suffix("")).is_file()
+    assert Path(result.absolute_path) == moved / expected
     assert (root / "sentinel").read_bytes() == b"outside"
     assert not list(root.rglob("batch_*"))

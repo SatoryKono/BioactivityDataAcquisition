@@ -26,6 +26,7 @@ from .cleanup_core import (
     _CleanupConflict,
     destructive_cleanup_supported,
     stat_is_link_or_reparse,
+    valid_bronze_scope_name,
 )
 
 __all__ = [
@@ -38,6 +39,7 @@ __all__ = [
     "is_owned_artifact",
     "is_within_root",
     "iter_safe_child_dirs",
+    "iter_writer_scope_dirs",
     "real_root",
     "safe_named_child_dir",
     "safe_rmdir",
@@ -182,7 +184,7 @@ def validate_scope_filter(value: str | None, label: str) -> None:
     """Reject scope filters that could broaden cleanup beyond a named dir."""
     if value is None:
         return
-    if not value or not value.replace("_", "").isalnum():
+    if not valid_bronze_scope_name(value):
         raise ValueError(
             f"Invalid {label} filter for Bronze cleanup: {value!r}. "
             "Use alphanumeric characters and underscores only."
@@ -221,6 +223,21 @@ def iter_safe_child_dirs(
         except OSError:
             _notify_skip(on_skip, entry.path, "stat_error")
     return dirs
+
+
+def iter_writer_scope_dirs(
+    parent: Path,
+    *,
+    on_skip: Callable[[str, str], None] | None = None,
+) -> list[Path]:
+    """Enumerate only provider/entity names accepted by the writer."""
+    children: list[Path] = []
+    for child in iter_safe_child_dirs(parent, on_skip=on_skip):
+        if valid_bronze_scope_name(child.name):
+            children.append(child)
+        else:
+            _notify_skip(on_skip, child, "invalid_scope_name")
+    return children
 
 
 def _notify_skip(
@@ -330,7 +347,7 @@ def _scope_child_dirs(
 ) -> list[Path]:
     """Resolve a named scope dir or enumerate all safe child dirs."""
     if name is None:
-        return iter_safe_child_dirs(parent, on_skip=on_skip)
+        return iter_writer_scope_dirs(parent, on_skip=on_skip)
     resolved = safe_named_child_dir(parent, name, root_real, on_skip=on_skip)
     return [resolved] if resolved is not None else []
 

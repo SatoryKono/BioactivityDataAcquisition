@@ -324,6 +324,7 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
                 uncompressed_size=write_artifacts.uncompressed_size,
                 compressed_size=write_artifacts.compressed_size,
                 span=span,
+                locked_root=locked_root,
             )
 
     def _validate_bronze_request_inputs(self, request: BronzeWriteRequest) -> None:

@@ -12,6 +12,7 @@ from .cleanup_support import (
     candidate_is_safe,
     date_dir_name_is_older,
     iter_safe_child_dirs,
+    iter_writer_scope_dirs,
     real_root,
     safe_named_child_dir,
     scan_dir_entries,
@@ -63,7 +64,7 @@ class BronzeCleanupPreviewMixin:
             named = safe_named_child_dir(self.base_path, provider, root_real)
             providers = [named] if named is not None else []
         else:
-            providers = iter_safe_child_dirs(self.base_path)
+            providers = iter_writer_scope_dirs(self.base_path)
         date_parents: list[Path] = []
         for provider_dir in providers:
             if entity:
@@ -71,7 +72,7 @@ class BronzeCleanupPreviewMixin:
                 if child is not None:
                     date_parents.append(child)
             else:
-                date_parents.extend(iter_safe_child_dirs(provider_dir))
+                date_parents.extend(iter_writer_scope_dirs(provider_dir))
         if entity:
             return date_parents, bool(date_parents)
         if provider:

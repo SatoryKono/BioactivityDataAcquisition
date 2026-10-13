@@ -54,6 +54,11 @@ class BronzeRootLease:
         raise NotImplementedError("Bronze writer requires a path to its locked root fd")
 
 
+def valid_bronze_scope_name(value: str) -> bool:
+    """The provider/entity naming contract shared by writes and cleanup."""
+    return bool(value) and value.replace("_", "").isalnum()
+
+
 def destructive_cleanup_supported() -> bool:
     """Only POSIX handle-relative operations with advisory locking qualify."""
     if not _ANCHORED_OPS or os.name == "nt":
