@@ -102,22 +102,23 @@ class BronzeWriterSideEffectsMixin:
     ) -> None:
         """Create and persist Bronze metadata through the canonical coordinator path."""
         host = self
-        prepared = prepare_bronze_metadata_write(
-            host,
-            BronzeMetadataWriteRequest(
-                run_id=run_id,
-                run_type=run_type,
-                provider=provider,
-                entity=entity,
-                batch_id=batch_id,
-                record_count=record_count,
-                compressed_size=compressed_size,
-                relative_path=relative_path,
-                ingestion_ts=ingestion_ts,
-                duration=duration,
-                source_metadata=source_metadata,
-            ),
-            locked_root=locked_root,
+        request = BronzeMetadataWriteRequest(
+            run_id=run_id,
+            run_type=run_type,
+            provider=provider,
+            entity=entity,
+            batch_id=batch_id,
+            record_count=record_count,
+            compressed_size=compressed_size,
+            relative_path=relative_path,
+            ingestion_ts=ingestion_ts,
+            duration=duration,
+            source_metadata=source_metadata,
+        )
+        prepared = (
+            prepare_bronze_metadata_write(host, request)
+            if locked_root is None
+            else prepare_bronze_metadata_write(host, request, locked_root=locked_root)
         )
         await host._metadata_writer.write_bronze_metadata(
             base_path=str(prepared.metadata_base_path),
