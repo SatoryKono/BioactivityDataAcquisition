@@ -300,3 +300,46 @@ def test_inventory_cannot_be_redirected_to_another_git_index(
     monkeypatch.setenv("GIT_INDEX_FILE", str(foreign / ".git/index"))
 
     assert checker._tracked_yaml_paths() == [target / "target.yaml"]
+
+
+@pytest.mark.parametrize("merge", ["*first", "[*first, *second]"])
+def test_yaml_merge_defaults_allow_explicit_overrides(
+    tmp_path: Path, merge: str
+) -> None:
+    content = (
+        "first: &first {method: POST, uri: 'https://example.test/items', headers: {}}\n"
+        "second: &second {method: PUT, uri: 'https://example.test/other', headers: {}}\n"
+        "interactions:\n- request:\n"
+        f"    <<: {merge}\n"
+        "    method: GET\n"
+        "  response: {status: {code: 200}, headers: {}, body: {string: protein}}\n"
+        "version: 1\n"
+    )
+    path = tmp_path / "cassette.yaml"
+    path.write_text(content, encoding="utf-8")
+    document, errors = checker._parse_document(path, content.encode())
+    assert not errors
+    assert document == yaml.safe_load(content)
+    assert checker._scan_file(path) == []
+
+
+@pytest.mark.parametrize(
+    "headers",
+    [
+        "{cookie: [REDACTED], cookie: [synthetic-session]}",
+        "{cookie: [synthetic-session]}",
+    ],
+)
+def test_yaml_merge_cannot_hide_duplicate_keys_or_effective_secrets(
+    tmp_path: Path, headers: str
+) -> None:
+    content = (
+        f"defaults: &defaults {{method: GET, uri: 'https://example.test/items', headers: {headers}}}\n"
+        "interactions:\n- request: {<<: *defaults}\n"
+        "  response: {status: {code: 200}, headers: {}, body: {string: protein}}\n"
+    )
+    path = tmp_path / "cassette.yaml"
+    path.write_text(content, encoding="utf-8")
+    findings = checker._scan_file(path)
+    assert findings
+    assert all("synthetic-session" not in finding for finding in findings)

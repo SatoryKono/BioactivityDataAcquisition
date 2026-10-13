@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 
 import json
+import subprocess
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
@@ -19,8 +20,9 @@ from memory.rag.chunking import (
     split_python_symbols,
 )
 from memory.rag import indexing as rag_indexing
+from memory.rag.filters import WORKFLOW_RAG_SOURCE_IDS, iter_rag_sources
 from memory.rag.indexing import build_rag_manifests, write_rag_manifests
-from memory.rag.retrieval import filter_chunks, load_chunk_manifest
+from memory.rag.retrieval import filter_chunks, load_chunk_manifest, rank_chunks
 
 
 pytestmark = pytest.mark.unit
@@ -592,6 +594,133 @@ def test_build_rag_manifests_workflow_scope_limits_to_focus_matches(
     assert all(
         "tests/unit/test_memory_flow.py" != chunk["source_path"] for chunk in chunks
     )
+
+
+def test_workflow_scope_finds_symbol_in_source_content_beyond_cap(
+    tmp_path: Path,
+) -> None:
+    docs = tmp_path / "docs/00-project"
+    docs.mkdir(parents=True)
+    for index in range(170):
+        (docs / f"doc-{index:03d}.md").write_text("# Ordinary\n", encoding="utf-8")
+    source = tmp_path / "src/memory/rag/chunking.py"
+    source.parent.mkdir(parents=True)
+    source.write_text("def build_chunk_id():\n    return 'stable'\n", encoding="utf-8")
+
+    catalog, chunks = build_rag_manifests(
+        tmp_path,
+        build_scope="workflow",
+        focus_query="build_chunk_id",
+        max_sources=1,
+    )
+
+    assert catalog["source_count"] == 1
+    assert catalog["sources"][0]["source_path"] == "src/memory/rag/chunking.py"
+    assert any(chunk["symbol"] == "build_chunk_id" for chunk in chunks)
+
+
+def test_workflow_scope_git_search_finds_real_symbol_before_cap() -> None:
+    root = Path(__file__).resolve().parents[3]
+    selected = iter_rag_sources(
+        root,
+        selected_ids=WORKFLOW_RAG_SOURCE_IDS,
+        workflow_focus_query="build_chunk_id",
+        max_sources=1,
+    )
+    assert selected == [Path("src/memory/rag/chunking.py")]
+
+
+def test_workflow_scope_prefers_symbol_definition_over_references() -> None:
+    root = Path(__file__).resolve().parents[3]
+    selected = iter_rag_sources(
+        root,
+        selected_ids=WORKFLOW_RAG_SOURCE_IDS,
+        workflow_focus_query="LoggerPort",
+        max_sources=160,
+    )
+    assert Path("src/bioetl/domain/ports/observability/logging.py") in selected
+
+
+def test_workflow_scope_multiword_query_returns_rag_chunks(tmp_path: Path) -> None:
+    source = tmp_path / "docs/00-project/telemetry.md"
+    source.parent.mkdir(parents=True)
+    source.write_text(
+        "# Telemetry\nThe capture records provenance.\n", encoding="utf-8"
+    )
+    catalog, chunks = build_rag_manifests(
+        tmp_path,
+        build_scope="workflow",
+        focus_query="telemetry provenance",
+        max_sources=1,
+    )
+
+    assert catalog["source_count"] == 1
+    assert rank_chunks(chunks, query="telemetry provenance")
+
+
+def test_workflow_scope_git_search_includes_eligible_untracked_sources(
+    tmp_path: Path,
+) -> None:
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    docs = tmp_path / "docs/00-project"
+    docs.mkdir(parents=True)
+    for index in range(10):
+        (docs / f"doc-{index:03d}.md").write_text("# Ordinary\n", encoding="utf-8")
+    (docs / "doc-009.md").write_text(
+        "# Contains quantum_whale_signal\n", encoding="utf-8"
+    )
+
+    selected = iter_rag_sources(
+        tmp_path,
+        selected_ids=WORKFLOW_RAG_SOURCE_IDS,
+        workflow_focus_query="quantum_whale_signal",
+        max_sources=1,
+    )
+    assert selected == [Path("docs/00-project/doc-009.md")]
+
+
+def test_workflow_scope_git_search_includes_untracked_beside_tracked(
+    tmp_path: Path,
+) -> None:
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    docs = tmp_path / "docs/00-project"
+    docs.mkdir(parents=True)
+    (docs / "doc-000.md").write_text("# Ordinary\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "add", "docs/00-project/doc-000.md"], cwd=tmp_path, check=True
+    )
+    (docs / "doc-009.md").write_text("# quantum_whale_signal\n", encoding="utf-8")
+
+    selected = iter_rag_sources(
+        tmp_path,
+        selected_ids=WORKFLOW_RAG_SOURCE_IDS,
+        workflow_focus_query="quantum_whale_signal",
+        max_sources=1,
+    )
+    assert selected == [Path("docs/00-project/doc-009.md")]
+
+
+def test_workflow_scope_ranks_all_query_terms_before_generic_matches(
+    tmp_path: Path,
+) -> None:
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    docs = tmp_path / "docs/00-project"
+    docs.mkdir(parents=True)
+    for index in range(170):
+        (docs / f"doc-{index:03d}.md").write_text("# telemetry\n", encoding="utf-8")
+    (docs / "doc-169.md").write_text(
+        "# telemetry quantum_whale_signal\n", encoding="utf-8"
+    )
+    subprocess.run(["git", "add", "docs/00-project"], cwd=tmp_path, check=True)
+
+    selected = iter_rag_sources(
+        tmp_path,
+        selected_ids=WORKFLOW_RAG_SOURCE_IDS,
+        workflow_focus_query="telemetry quantum_whale_signal",
+        max_sources=160,
+    )
+    assert len(selected) == 160
+    assert Path("docs/00-project/doc-169.md") in selected
 
 
 def test_write_rag_manifests_persists_build_scope_metadata(tmp_path: Path) -> None:

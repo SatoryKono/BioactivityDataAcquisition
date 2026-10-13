@@ -41,12 +41,28 @@ trend evidence only.
 - Continuous identity is `source_tree_sha256` over `tests/**/*.py`,
   `pyproject.toml`, `configs/quality/test_matrix.yaml`, and
   `.github/workflows/tests.yml`.
+- `measurement_provenance.head` and `test_tree_sha256` retain the captured
+  run identity when the current audited test tree advances later.
 - Freshness uses live UTC (injectable via `BIOETL_TELEMETRY_REFERENCE_NOW`)
   and rejects future/stale `refreshed_at_utc` values.
 - `source_commit` must remain an ancestor of HEAD or have a reviewed squash
   bridge in `reports/test-telemetry/squash-provenance.json`. A bridge keeps
   the real captured source/run and requires equal PR/merge trees, source
   ancestry in the PR, merge ancestry in HEAD and unchanged runtime/test inputs.
+- Reviewed squash receipts retain hash-verified Git commit/tree objects
+  for offline validation when old PR commits are absent from a fresh clone.
+  If a shallow checkout's HEAD is newer than the squash merge, unshallow
+  it first so merge ancestry and the merged tree can be verified locally.
+- To produce a receipt for an existing local capture, run
+  `python -m scripts.engineering.ci.test_telemetry_provenance --measurement-repo-root
+  <original-worktree> --local-manifest <manifest.json> --pull-request <merged-PR>`.
+  The generator validates the complete 17-shard capture and reads the merged
+  PR mapping before writing the bridge. Keep the original capture available.
+- For a reviewed local coverage capture, run
+  `python -m scripts.engineering.ci.update_test_telemetry_baseline
+  --rebind-current-tree`, then the coupled `refresh-ci-drift-families`
+  update/check for test-gov, flaky-fingerprint, telemetry and evidence.
+  Non-local captures require regeneration from their source artifacts.
 - New captures use `verification_mode: live_github`: resolve the recorded
   PR's actual merge with read-only GitHub GETs after squash. Never stamp a
   future merge SHA. API failure, unmerged PRs, changed inputs and incomplete

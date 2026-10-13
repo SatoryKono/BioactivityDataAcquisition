@@ -55,17 +55,27 @@ class _DuplicateKeyError(yaml.YAMLError):
 class _StrictCassetteLoader(yaml.SafeLoader):
     """Load safe YAML while rejecting duplicate mapping keys."""
 
-    def construct_mapping(
-        self, node: yaml.MappingNode, deep: bool = False
-    ) -> dict[Any, Any]:
-        self.flatten_mapping(node)
-        result: dict[Any, Any] = {}
-        for key_node, value_node in node.value:
-            key = self.construct_object(key_node, deep=deep)
-            if key in result:
-                raise _DuplicateKeyError
-            result[key] = self.construct_object(value_node, deep=deep)
-        return result
+    def __init__(self, stream: Any) -> None:
+        super().__init__(stream)
+        self._validated_nodes: set[yaml.MappingNode] = set()
+
+    def flatten_mapping(self, node: yaml.MappingNode) -> None:
+        # Check literal keys before PyYAML expands merge precedence. A node can
+        # be reused by several aliases after its merge entries were flattened.
+        if node not in self._validated_nodes:
+            self._validated_nodes.add(node)
+            keys: set[object] = set()
+            merge_key = object()
+            for key_node, _ in node.value:
+                key = (
+                    merge_key
+                    if key_node.tag == "tag:yaml.org,2002:merge"
+                    else self.construct_object(key_node)
+                )
+                if key in keys:
+                    raise _DuplicateKeyError
+                keys.add(key)
+        super().flatten_mapping(node)
 
 
 def _location(path: Path, interaction: int | str, field: str, issue: str) -> str:
