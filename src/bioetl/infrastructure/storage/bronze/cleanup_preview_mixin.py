@@ -78,15 +78,7 @@ class BronzeCleanupPreviewMixin:
         """Resolve bounded preview scopes without following child links."""
         if self._flat_structure:
             return [self.base_path], True
-        if provider:
-            named = safe_named_child_dir(self.base_path, provider, root_real)
-            providers = [named] if named is not None else []
-            if named is not None:
-                _consume_preview_entry(budget)
-        else:
-            providers = list(
-                self._iter_bounded_dirs(self.base_path, budget, scope=True)
-            )
+        providers = self._preview_providers(provider, root_real, budget)
         date_parents: list[Path] = []
         for provider_dir in providers:
             if entity:
@@ -103,6 +95,18 @@ class BronzeCleanupPreviewMixin:
         if provider:
             return date_parents, bool(providers)
         return date_parents, True
+
+    def _preview_providers(
+        self, provider: str | None, root_real: Path, budget: list[int]
+    ) -> list[Path]:
+        """Select a named provider or stream bounded canonical scopes."""
+        if provider:
+            named = safe_named_child_dir(self.base_path, provider, root_real)
+            if named is None:
+                return []
+            _consume_preview_entry(budget)
+            return [named]
+        return list(self._iter_bounded_dirs(self.base_path, budget, scope=True))
 
     def _count_preview_files(
         self,
