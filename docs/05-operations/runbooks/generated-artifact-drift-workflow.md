@@ -44,9 +44,10 @@ ______________________________________________________________________
 Do **not** copy `source_tree_sha256` between families. Telemetry hashing is
 `compute_test_telemetry_source_tree_sha256()` in
 `scripts/engineering/ci/update_test_telemetry_baseline.py`: LF-normalized
-`tests/**/*.py`, `pyproject.toml`, `configs/quality/test_matrix.yaml`, and
-`.github/workflows/tests.yml`. Test-governance uses a different inventory in
-`reports/quality/test-governance-current.json`.
+`tests/**/*.py`, `pyproject.toml`, `configs/quality/test_matrix.yaml`,
+`.github/workflows/tests.yml`, and
+`scripts/engineering/ci/junit_duration_summary.py`. Test-governance uses a
+different inventory in `reports/quality/test-governance-current.json`.
 
 `source_commit` must be an ancestor of HEAD (`git merge-base --is-ancestor`).
 GitHub telemetry from a non-`main` `source_branch` requires
@@ -109,6 +110,13 @@ python -m scripts.engineering.qa refresh-ci-drift-families --update \
 from `test-governance-current.json`. A complete local capture instead uses
 `--update --telemetry --local-manifest <path>`; CI identity and coverage
 overrides are not accepted by the local updater.
+
+For a legacy `slowest-tests.json` with `legacy_positive_duration_rows`,
+pass the complete original JUnit inventory with repeated `--junit <path>`
+to `refresh-ci-drift-families --update --telemetry`. The updater checks source
+names against the recorded inventory and rejects partial or ambiguous inputs.
+Names alone do not prove the XML bytes or run identity; verify the capture
+provenance before migrating it. Do not combine `--junit` with `--local-manifest`.
 
 Order: test-gov → flaky fingerprint → telemetry → evidence_surface →
 remote-main → dataflow.

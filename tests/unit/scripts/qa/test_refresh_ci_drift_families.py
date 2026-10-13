@@ -111,6 +111,45 @@ def test_telemetry_update_requires_tests_run_fields(
         refresh.run_ci_drift_families(["--update", "--telemetry"])
 
 
+def test_telemetry_update_forwards_complete_junit_inventory(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[list[str]] = []
+    monkeypatch.setattr(refresh, "_run", lambda command: commands.append(command) or 0)
+    monkeypatch.setattr(refresh, "_assert_commit_is_ancestor", lambda _commit: None)
+    assert (
+        refresh.run_ci_drift_families(
+            [
+                "--update",
+                "--telemetry",
+                "--coverage-percent",
+                "96.73",
+                "--source-commit",
+                "a" * 40,
+                "--source-run-id",
+                "run-1",
+                "--source-run-url",
+                "https://example.invalid/run/1",
+                "--junit",
+                "first.xml",
+                "--junit",
+                "second.xml",
+            ]
+        )
+        == 0
+    )
+    assert commands[0][-2:] == ["--junit=first.xml", "--junit=second.xml"]
+
+
+def test_junit_override_requires_telemetry_update(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    with pytest.raises(SystemExit) as exc_info:
+        refresh.run_ci_drift_families(["--check", "--telemetry", "--junit", "lane.xml"])
+    assert exc_info.value.code == 2
+    assert "--junit requires --update --telemetry" in capsys.readouterr().err
+
+
 def test_replace_current_evidence_hash_leaves_historical_records() -> None:
     registry = (
         "current_audit_id: current-id\n"

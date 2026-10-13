@@ -32,15 +32,16 @@ trend evidence only.
 - Source run id: `local-coverage`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `a4e5bb5cc21a80e5f7c3de1e370f162d6b94f7dc33d1d9986d2779941ca2e760`
+- Source tree sha256: `2c0cf5ae58f53e649ad607f6650613afe99dbf596293664e5cef87b059e3757f`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-10-13T11:39:16.320446+00:00`
 
 ## Branch-accurate provenance (#5729)
 
 - Continuous identity is `source_tree_sha256` over `tests/**/*.py`,
-  `pyproject.toml`, `configs/quality/test_matrix.yaml`, and
-  `.github/workflows/tests.yml`.
+  `pyproject.toml`, `configs/quality/test_matrix.yaml`,
+  `.github/workflows/tests.yml`, and the live JUnit producer
+  `scripts/engineering/ci/junit_duration_summary.py`.
 - `measurement_provenance.head` and `test_tree_sha256` retain the captured
   run identity when the current audited test tree advances later.
 - Freshness uses live UTC (injectable via `BIOETL_TELEMETRY_REFERENCE_NOW`)
@@ -135,4 +136,5 @@ trend evidence only.
 1. Preferred path: download `reports/coverage/coverage.xml` and `reports/test-telemetry/slowest-tests.json` from a main-branch CI run.
 2. Fallback path: use resilient CI diagnostics artifacts (`junit_parallel.xml`, `junit_serial.xml`, and the coverage `TOTAL` line from `parallel.log`) when the direct coverage artifact expired.
 3. Run `python -m scripts.engineering.ci.update_test_telemetry_baseline --source-commit <sha> --source-run-id <run-id> ...` with either direct artifacts or fallback diagnostics inputs.
-4. Commit the updated baseline and branch-consumable telemetry summary layer together.
+4. A legacy JSON timed-row count requires raw `--junit` inputs for the complete recorded source inventory; the updater rejects a partial or legacy-only refresh before writing outputs.
+5. Commit the updated baseline and branch-consumable telemetry summary layer together.

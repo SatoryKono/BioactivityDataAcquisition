@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-13T22:44:31.704429+00:00",
+  "generated_at": "2026-10-13T22:57:25.683284+00:00",
   "summary": {
     "total_scripts": 650,
     "status_counts": {
@@ -11,7 +11,7 @@
       "agents": 11,
       "build": 18,
       "ci": 71,
-      "docs": 280,
+      "docs": 281,
       "other": 50,
       "scripts": 543,
       "skills": 13,
@@ -10156,7 +10156,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 9,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -10165,10 +10165,34 @@
           "text": "python -m scripts.engineering.ci.junit_duration_summary"
         },
         {
+          "path": "docs/05-engineering/test-telemetry-baseline.md",
+          "line": 44,
+          "source_group": "docs",
+          "text": "`scripts/engineering/ci/junit_duration_summary.py`."
+        },
+        {
+          "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
+          "line": 49,
+          "source_group": "docs",
+          "text": "`scripts/engineering/ci/junit_duration_summary.py`. Test-governance uses a"
+        },
+        {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
           "line": 18,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.junit_duration_summary import ("
+        },
+        {
+          "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
+          "line": 54,
+          "source_group": "scripts",
+          "text": "\"scripts/engineering/ci/junit_duration_summary.py\","
+        },
+        {
+          "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
+          "line": 621,
+          "source_group": "scripts",
+          "text": "\"  `scripts/engineering/ci/junit_duration_summary.py`.\","
         },
         {
           "path": "tests/architecture/test_ci_test_strategy.py",
@@ -10199,7 +10223,7 @@
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 938,
+          "line": 973,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.local_test_telemetry import build_local_baseline"
         },
@@ -10650,19 +10674,19 @@
       "references": [
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 57,
+          "line": 58,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.ci.test_telemetry_provenance --measurement-repo-root"
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 603,
+          "line": 635,
           "source_group": "scripts",
           "text": "\"  `python -m scripts.engineering.ci.test_telemetry_provenance --measurement-repo-root\","
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 874,
+          "line": 909,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.test_telemetry_provenance import ("
         },
@@ -10729,19 +10753,19 @@
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 62,
+          "line": 63,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.ci.update_test_telemetry_baseline"
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 83,
+          "line": 84,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.ci.update_test_telemetry_baseline`"
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 137,
+          "line": 138,
           "source_group": "docs",
           "text": "3. Run `python -m scripts.engineering.ci.update_test_telemetry_baseline --source-commit <sha> --source-run-id <run-id> ...` with either direct artifacts or fallback diagnostics inputs."
         },
@@ -10753,7 +10777,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 78,
+          "line": 79,
           "source_group": "docs",
           "text": "| S7-d `test_committed_test_telemetry_baseline_is_populated` | telemetry | `pytest tests/architecture/test_test_telemetry_governance.py tests/architecture/test_test_telemetry_baseline.py` | `python -m"
         }
@@ -15695,7 +15719,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 144,
+          "line": 152,
           "source_group": "docs",
           "text": "| Architecture artifact duplication | `python -m scripts.engineering.qa.report_artifact_duplication_audit --check` | `python -m scripts.engineering.qa.report_artifact_duplication_audit --json-out repo"
         },
@@ -15927,7 +15951,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 132,
+          "line": 140,
           "source_group": "docs",
           "text": "| Config duplication/backlog audit | `pytest tests/architecture/test_config_surface_entity_residual_plateau.py` | `python -m scripts.engineering.qa.report_config_surface_backlog` |"
         },
@@ -16276,7 +16300,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 147,
+          "line": 155,
           "source_group": "docs",
           "text": "| Debt-governance rollup | `python -m scripts.engineering.qa.report_debt_governance_gates --check` | `python -m scripts.engineering.qa.report_debt_governance_gates --update` |"
         },
@@ -16446,7 +16470,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 145,
+          "line": 153,
           "source_group": "docs",
           "text": "| Flaky-test burndown review | `python -m scripts.engineering.qa.report_flaky_test_burndown_review --check` | `python -m scripts.engineering.qa.report_flaky_test_burndown_review` |"
         },
@@ -16649,7 +16673,7 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 146,
+          "line": 154,
           "source_group": "docs",
           "text": "| Live residual snapshot | `python -m scripts.engineering.qa.report_live_residual_snapshot --check` | `python -m scripts.engineering.qa.report_live_residual_snapshot` |"
         },
@@ -17046,13 +17070,13 @@
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 80,
+          "line": 81,
           "source_group": "docs",
           "text": "| test-governance `--check` | governance snapshot | `python -m scripts.engineering.qa.report_test_governance_audit --check` | `python -m scripts.engineering.qa.report_test_governance_audit --json-out "
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 138,
+          "line": 146,
           "source_group": "docs",
           "text": "| Test governance snapshots | `python -m scripts.engineering.qa.report_test_governance_audit --check` | `python -m scripts.engineering.qa.report_test_governance_audit --json-out reports/quality/test-g"
         },
@@ -17367,13 +17391,13 @@
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 62,
+          "line": 63,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.qa.run_local_coverage_verify --max-workers 1`."
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
-          "line": 136,
+          "line": 144,
           "source_group": "docs",
           "text": "| Module coverage measurements | `python -m scripts.engineering.qa.run_local_coverage_verify` completes all 17 local shards on one committed source tree; its manifest records every exit code and the c"
         },
@@ -17397,7 +17421,7 @@
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 231,
+          "line": 232,
           "source_group": "scripts",
           "text": "and local_capture.get(\"producer\") == \"run_local_coverage_verify.py\""
         },
