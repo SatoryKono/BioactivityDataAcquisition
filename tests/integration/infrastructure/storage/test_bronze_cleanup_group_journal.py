@@ -10,12 +10,13 @@ import select
 import subprocess
 import sys
 from pathlib import Path
-from uuid import uuid4
 
 import pytest
 
 from bioetl.infrastructure.storage.bronze import cleanup_group_journal as journal
 
+
+pytestmark = pytest.mark.integration
 
 DATE = "2024-01-01"
 CUTOFF = "2024-01-02"
@@ -240,7 +241,7 @@ def test_missing_intent_never_adopts_orphan(tmp_path: Path) -> None:
     root, spec, date_dir = _fixture(tmp_path)
     (date_dir / spec.names()["payload"]).unlink()
     with journal.open_group_journal(root) as group:
-        assert group.recover(uuid4().hex) == 0
+        assert group.recover("f" * 32) == 0
         with pytest.raises(FileNotFoundError):
             group.begin(spec)
     assert (date_dir / spec.names()["sidecar"]).exists()
@@ -249,7 +250,7 @@ def test_missing_intent_never_adopts_orphan(tmp_path: Path) -> None:
 @POSIX_ONLY
 def test_stage_without_intent_is_a_conflict(tmp_path: Path) -> None:
     root, spec, date_dir = _fixture(tmp_path)
-    operation_id = uuid4().hex
+    operation_id = "f" * 32
     (root / f".bronze-group-stage-{operation_id}").mkdir()
     with journal.open_group_journal(root) as group:
         with pytest.raises(journal.GroupJournalConflict, match="without group journal"):
@@ -684,7 +685,9 @@ def test_invalid_journal_does_not_delete(tmp_path: Path, mutation: str) -> None:
             elif mutation == "root":
                 body["root"] = [999, 999]
             else:
-                body["operation_id"] = uuid4().hex
+                body["operation_id"] = (
+                    "0" if operation_id[0] != "0" else "1"
+                ) + operation_id[1:]
             raw = journal._record_bytes(body)
         path.write_bytes(raw)
         with pytest.raises(journal.GroupJournalConflict):

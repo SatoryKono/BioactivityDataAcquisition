@@ -1001,20 +1001,7 @@
     }
   },
   "assertless_total_candidates": 85,
-  "budget_violations": [
-    {
-      "actual": 19,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    },
-    {
-      "actual": 3,
-      "budget": "uuid4_call_sites_max",
-      "expected_max": 0,
-      "metric": "uuid4_call_sites"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1188,28 +1175,8 @@
     ]
   },
   "intentional_no_exception_contract": 85,
-  "markerless_examples": [
-    "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:179",
-    "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:200",
-    "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:209",
-    "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:216",
-    "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:239",
-    "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:250",
-    "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:303",
-    "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:385",
-    "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:411",
-    "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:451",
-    "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:474",
-    "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:506",
-    "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:527",
-    "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:577",
-    "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:626",
-    "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:640",
-    "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:696",
-    "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:707",
-    "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:767"
-  ],
-  "markerless_test_functions": 19,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2058,28 +2025,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:179",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:200",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:209",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:216",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:239",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:250",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:303",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:385",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:411",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:451",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:474",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:506",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:527",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:577",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:626",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:640",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:696",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:707",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:767"
-    ],
-    "markerless_test_functions": 19,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2142,10 +2089,10 @@
     "total_test_files": 3041,
     "total_test_functions": 29906,
     "unreviewed_assertion_bypass_count": 0,
-    "uuid4_call_sites": 3
+    "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "e7cae0c884ab4fa39fd4e49e1027c27118a08305ae0d0fd8a793e1fd4cd3b9b9",
+  "source_tree_sha256": "e755d93692dc373e463a428d3fe373860473403527f7d0a3ea5d6f69fc4ff050",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2154,31 +2101,11 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 85,
-    "markerless_examples": [
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:179",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:200",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:209",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:216",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:239",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:250",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:303",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:385",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:411",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:451",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:474",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:506",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:527",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:577",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:626",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:640",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:696",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:707",
-      "tests/integration/infrastructure/storage/test_bronze_cleanup_group_journal.py:767"
-    ],
-    "markerless_test_functions": 19,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
-    "uuid4_call_sites": 3
+    "uuid4_call_sites": 0
   },
   "test_file_inventory": {
     "pytest_python_files": [
@@ -2230,5 +2157,5 @@
   "total_test_files": 3041,
   "total_test_functions": 29906,
   "unreviewed_assertion_bypass_count": 0,
-  "uuid4_call_sites": 3
+  "uuid4_call_sites": 0
 }

@@ -16,6 +16,8 @@ from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.bronze import cleanup_group_journal as journal
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
+pytestmark = pytest.mark.integration
+
 BATCH = "11111111-1111-4111-8111-111111111111"
 
 
