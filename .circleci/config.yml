@@ -3985,6 +3985,7 @@ workflows:
               - codex/pr-eight-integration
               - codex/ci-11931-main-acceptance-20261007
               - fix/p02-domain-12087-12093
+              - fix/cf007-vcr-session-headers-20261013
           requires:
           - proof-coverage-shards
       - proof-governance:
