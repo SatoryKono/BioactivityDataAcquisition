@@ -81,7 +81,10 @@ def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[BronzeRoot
         return
     import fcntl
 
-    root_real, root_fd = open_bronze_root_no_follow(base_path)
+    # A writer may be configured through an alias; pin its resolved target
+    # before locking. Destructive cleanup still rejects every linked component.
+    root_path = base_path if exclusive else Path(os.path.realpath(base_path))
+    root_real, root_fd = open_bronze_root_no_follow(root_path)
     try:
         lock_fd = os.open(
             ".bronze-cleanup.lock",

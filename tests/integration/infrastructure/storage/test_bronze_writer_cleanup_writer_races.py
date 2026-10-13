@@ -193,6 +193,38 @@ async def test_writer_uses_pinned_root_after_alias_switch(
 
 
 @_APPLY_POSIX
+async def test_symlink_configured_writer_pins_target_but_cleanup_refuses_alias(
+    tmp_path: Path,
+) -> None:
+    """An existing writer alias remains usable without authorizing apply through it."""
+    target_root = tmp_path / "target"
+    target_root.mkdir()
+    alias = tmp_path / "alias"
+    alias.symlink_to(target_root, target_is_directory=True)
+    sentinel = target_root / "sentinel"
+    sentinel.write_bytes(b"retain")
+    writer = BronzeWriter(base_path=alias, logger=NoOpLogger(), metrics=NoOpMetrics())
+
+    result = await writer.write_bronze(
+        records=iter([b"{}\n"]),
+        provider="chembl",
+        entity="activity",
+        date=CUTOFF,
+        batch_id=BatchID(UUID(int=1)),
+        run_id=RunID(UUID(int=2)),
+        run_type=RunType.INCREMENTAL,
+        ingestion_ts=CUTOFF,
+    )
+
+    assert (target_root / result.relative_path).is_file()
+    assert (target_root / f"{result.relative_path}.meta.json").is_file()
+    with pytest.raises(OSError):
+        await writer.cleanup_old_files(datetime(2025, 1, 1, tzinfo=UTC))
+    assert sentinel.read_bytes() == b"retain"
+    assert (target_root / result.relative_path).is_file()
+
+
+@_APPLY_POSIX
 async def test_writer_uses_locked_root_inode_after_root_rename(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
