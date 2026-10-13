@@ -6,6 +6,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
+import yaml
 
 from scripts.engineering.qa.vcr import check_vcr_secrets as checker
 
@@ -129,18 +130,24 @@ def test_missing_or_empty_root_fails_closed(
     assert checker.main() != 0
 
 
+@pytest.mark.parametrize("style", ["block", "quoted", "flow"])
 def test_tracked_cassette_outside_canonical_directory_is_scanned(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    style: str,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     vcr_root = tmp_path / "tests/fixtures/vcr"
     vcr_root.mkdir(parents=True)
     (vcr_root / "clean.yaml").write_text(_cassette(), encoding="utf-8")
     outside = tmp_path / "tests/fixtures/http/captured.yaml"
     outside.parent.mkdir(parents=True)
-    outside.write_text(
-        _cassette(response_headers="{set-cookie: [synthetic-session]}"),
-        encoding="utf-8",
-    )
+    content = _cassette(response_headers="{set-cookie: [synthetic-session]}")
+    if style == "quoted":
+        content = content.replace("interactions:", '"interactions":', 1)
+    elif style == "flow":
+        content = yaml.safe_dump(yaml.safe_load(content), default_flow_style=True)
+    outside.write_text(content, encoding="utf-8")
     subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True, capture_output=True)
     subprocess.run(
         [
@@ -157,6 +164,7 @@ def test_tracked_cassette_outside_canonical_directory_is_scanned(
     monkeypatch.setattr(checker, "VCR_ROOT", vcr_root)
 
     assert checker.main() != 0
+    assert "response.headers.set-cookie" in capsys.readouterr().err
 
 
 def test_missing_tracked_cassette_fails_closed(

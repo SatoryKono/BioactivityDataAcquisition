@@ -258,11 +258,19 @@ def _candidate(path: Path, raw: bytes) -> bool:
     if path.is_relative_to(VCR_ROOT):
         return True
     name = path.relative_to(ROOT).as_posix().casefold()
-    return (
-        bool(re.search(rb"(?m)^interactions\s*:", raw))
-        or "vcr" in name
-        or "cassette" in name
-    )
+    if "vcr" in name or "cassette" in name:
+        return True
+    try:
+        for document in yaml.compose_all(raw, Loader=yaml.SafeLoader):
+            if isinstance(document, yaml.MappingNode) and any(
+                isinstance(key, yaml.ScalarNode) and key.value == "interactions"
+                for key, _ in document.value
+            ):
+                return True
+    except (yaml.YAMLError, UnicodeError, ValueError, TypeError, RecursionError):
+        # Malformed cassette-like input must reach the strict parser and fail.
+        return bool(re.search(rb"""(?m)(?:^|[,{])\s*['"]?interactions['"]?\s*:""", raw))
+    return False
 
 
 def main() -> int:
