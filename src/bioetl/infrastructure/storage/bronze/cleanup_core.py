@@ -60,15 +60,35 @@ def valid_bronze_scope_name(value: str) -> bool:
     return bool(value) and value.replace("_", "").isalnum()
 
 
+def _fd_view_supported() -> bool:
+    """Require a verified pathname to an open directory for pinned writer I/O."""
+    try:
+        fd = os.open("/", os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW)
+    except OSError:
+        return False
+    try:
+        opened = os.fstat(fd)
+        for directory in ("/proc/self/fd", "/dev/fd"):
+            try:
+                viewed = (Path(directory) / str(fd)).stat()
+            except OSError:
+                continue
+            if (viewed.st_dev, viewed.st_ino) == (opened.st_dev, opened.st_ino):
+                return True
+        return False
+    finally:
+        os.close(fd)
+
+
 def destructive_cleanup_supported() -> bool:
-    """Only POSIX handle-relative operations with advisory locking qualify."""
+    """Require anchored operations, advisory locking, and pinned writer I/O."""
     if not _ANCHORED_OPS or os.name == "nt":
         return False
     try:
         import fcntl
     except ImportError:
         return False
-    return hasattr(fcntl, "flock")
+    return hasattr(fcntl, "flock") and _fd_view_supported()
 
 
 def stat_is_link_or_reparse(st: os.stat_result) -> bool:

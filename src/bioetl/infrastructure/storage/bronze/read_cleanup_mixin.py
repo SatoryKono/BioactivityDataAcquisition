@@ -88,7 +88,9 @@ class BronzeWriterReadMixin:
         self, provider: str, entity: str, date: datetime | None
     ) -> Path | None:
         if self._flat_structure and not provider and not entity:
-            return self.base_path / date.strftime("%Y-%m-%d") if date else self.base_path
+            return (
+                self.base_path / date.strftime("%Y-%m-%d") if date else self.base_path
+            )
         if not provider or not entity:
             return None
         path = self.base_path / provider / entity

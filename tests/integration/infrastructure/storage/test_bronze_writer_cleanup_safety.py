@@ -1597,9 +1597,7 @@ def test_uninitialized_stage_is_removed_after_journal_sync_failure(
     monkeypatch.setattr(cleanup_posix.os, "fsync", fail_first_sync)
     try:
         with pytest.raises(OSError, match="injected journal sync failure"):
-            with cleanup_posix._private_stage(
-                root_fd, Path(ARTIFACT), target.lstat()
-            ):
+            with cleanup_posix._private_stage(root_fd, Path(ARTIFACT), target.lstat()):
                 pytest.fail("uninitialized stage must not be yielded")
     finally:
         os.close(root_fd)
@@ -1610,25 +1608,49 @@ def test_uninitialized_stage_is_removed_after_journal_sync_failure(
 
 
 @_APPLY_POSIX
-def test_missing_fd_view_falls_back_for_writes_but_refuses_cleanup(
+def test_fd_view_probe_refuses_missing_pseudo_fd_mount(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original_stat = Path.stat
+
+    def missing_fd_view(path: Path, *args: object, **kwargs: object) -> os.stat_result:
+        if str(path).startswith(("/proc/self/fd/", "/dev/fd/")):
+            raise FileNotFoundError("injected missing pseudo-fd mount")
+        return original_stat(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "stat", missing_fd_view)
+    assert not cleanup_core._fd_view_supported()
+    assert not destructive_cleanup_supported()
+
+
+@_APPLY_POSIX
+def test_missing_fd_view_keeps_writes_available_but_refuses_cleanup(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    original_path = cleanup_core.BronzeRootLease.writer_path
+    monkeypatch.setattr(cleanup_core, "_fd_view_supported", lambda: False)
+    assert not destructive_cleanup_supported()
+    with bronze_tree_lock(tmp_path, exclusive=False) as lease:
+        assert lease.fd is None
+        assert lease.writer_path == tmp_path
+    with pytest.raises(NotImplementedError, match="dir_fd/no-follow"):
+        with bronze_tree_lock(tmp_path, exclusive=True):
+            pytest.fail("destructive apply must refuse missing fd-view capability")
 
-    def no_fd_view(lease: cleanup_core.BronzeRootLease) -> Path:
-        if lease.fd is not None:
-            raise NotImplementedError("injected missing procfs fd view")
-        return original_path.fget(lease)  # type: ignore[union-attr]
+
+@_APPLY_POSIX
+def test_fd_view_lost_after_probe_refuses_both_locks(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def no_fd_view(_lease: cleanup_core.BronzeRootLease) -> Path:
+        raise NotImplementedError("injected missing procfs fd view")
 
     monkeypatch.setattr(
         cleanup_core.BronzeRootLease, "writer_path", property(no_fd_view)
     )
-    with bronze_tree_lock(tmp_path, exclusive=False) as lease:
-        assert lease.fd is None
-        assert lease.writer_path == tmp_path
-    with pytest.raises(NotImplementedError, match="verified root fd path"):
-        with bronze_tree_lock(tmp_path, exclusive=True):
-            pytest.fail("destructive apply must refuse missing fd-view capability")
+    for exclusive in (False, True):
+        with pytest.raises(NotImplementedError, match="injected missing procfs"):
+            with bronze_tree_lock(tmp_path, exclusive=exclusive):
+                pytest.fail("root fd without a view must never yield a path")
 
 
 @_APPLY_POSIX
@@ -1698,7 +1720,9 @@ def test_unjournaled_empty_stage_like_directory_is_preserved(tmp_path: Path) -> 
 
 
 @_APPLY_POSIX
-def test_invalid_completion_marker_preserves_unknown_empty_stage(tmp_path: Path) -> None:
+def test_invalid_completion_marker_preserves_unknown_empty_stage(
+    tmp_path: Path,
+) -> None:
     suffix = "a" * 32
     stage = tmp_path / f".bronze-cleanup-stage-{suffix}"
     stage.mkdir()

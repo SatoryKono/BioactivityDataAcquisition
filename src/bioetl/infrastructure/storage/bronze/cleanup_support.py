@@ -73,7 +73,8 @@ def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[BronzeRoot
     if not destructive_cleanup_supported():
         if exclusive:
             raise NotImplementedError(
-                "Bronze destructive cleanup requires POSIX dir_fd/no-follow and flock"
+                "Bronze destructive cleanup requires POSIX dir_fd/no-follow, "
+                "flock, and a verified root fd view"
             )
         yield BronzeRootLease(base_path, None)
         return
@@ -97,14 +98,7 @@ def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[BronzeRoot
                 fcntl.__dict__["LOCK_EX" if exclusive else "LOCK_SH"],
             )
             lease = BronzeRootLease(root_real, root_fd)
-            try:
-                _ = lease.writer_path
-            except NotImplementedError:
-                if exclusive:
-                    raise NotImplementedError(
-                        "Bronze destructive cleanup requires a verified root fd path"
-                    ) from None
-                lease = BronzeRootLease(root_real, None)
+            _ = lease.writer_path
             if exclusive:
                 _recover_stages(root_fd, root_real)
             elif any(
@@ -374,7 +368,9 @@ def _matches_planned_candidate(
     return (
         _same_identity(actual, expected)
         and not stat_is_link_or_reparse(actual)
-        and (stat.S_ISDIR(actual.st_mode) if directory else stat.S_ISREG(actual.st_mode))
+        and (
+            stat.S_ISDIR(actual.st_mode) if directory else stat.S_ISREG(actual.st_mode)
+        )
     )
 
 

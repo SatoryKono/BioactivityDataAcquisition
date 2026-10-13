@@ -110,7 +110,6 @@ def _parse_stage_origin(raw: bytes, stage_name: str) -> _StageOrigin:
 
 
 def _load_origin_record(dir_fd: int, name: str, stage_name: str) -> _StageOrigin:
-    """Read a bounded no-follow origin record from a pinned directory."""
     try:
         journal_fd = os.open(
             name, os.O_RDONLY | _O_NONBLOCK | _O_NOFOLLOW, dir_fd=dir_fd
@@ -129,7 +128,6 @@ def _load_origin_record(dir_fd: int, name: str, stage_name: str) -> _StageOrigin
 
 
 def _load_stage_origin(stage_fd: int, stage_name: str) -> _StageOrigin:
-    """Never claim an unjournaled stage."""
     return _load_origin_record(stage_fd, _STAGE_JOURNAL, stage_name)
 
 
@@ -141,8 +139,7 @@ def _restore_stage_entry(
     try:
         staged = os.stat(name, dir_fd=stage_fd, follow_symlinks=False)
     except FileNotFoundError:
-        # A restored entry may still need a durable parent before its journal
-        # can be discarded. An absent canonical entry means deletion completed.
+        # An absent canonical entry means deletion completed.
         with _anchored_parent(target, root_real, root_real, root_fd) as (
             _opened_root,
             parent_fd,
@@ -237,7 +234,9 @@ def _private_stage(
     name = f"{_STAGE_PREFIX}{secrets.token_hex(16)}"
     os.mkdir(name, 0o700, dir_fd=root_fd)
     try:
-        stage_fd = os.open(name, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW, dir_fd=root_fd)
+        stage_fd = os.open(
+            name, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW, dir_fd=root_fd
+        )
     except BaseException:
         os.rmdir(name, dir_fd=root_fd)
         raise
@@ -320,7 +319,6 @@ def _finish_private_stage(
         os.rmdir(name, dir_fd=root_fd)
         os.fsync(root_fd)
     except OSError as exc:
-        # A conflicted artifact may remain in the stage; expose its name.
         stage_error = stage_error or exc
     if marked_complete and stage_error is None:
         try:
