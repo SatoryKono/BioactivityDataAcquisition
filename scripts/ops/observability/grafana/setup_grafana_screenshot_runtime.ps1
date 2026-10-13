@@ -168,6 +168,8 @@ function Resolve-PythonCommand {
 }
 
 $NodeToolchain = Resolve-NodeToolchain
+& $NodeToolchain.NodeExe (Join-Path $RepoRoot "scripts/ai/npm_runtime_contract.cjs") $RepoRoot
+if ($LASTEXITCODE -ne 0) { throw "Node/manifest/lock runtime contract failed." }
 $PythonCommand = Resolve-PythonCommand
 Write-Host "Using Node toolchain source: $($NodeToolchain.Source)"
 Write-Host "Using Python command: $PythonCommand"

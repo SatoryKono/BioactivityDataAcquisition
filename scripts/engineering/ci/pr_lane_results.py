@@ -16,37 +16,39 @@ import sys
 from pathlib import Path
 from typing import Any, cast
 
+import yaml
+
+from scripts.engineering.ci._python_dependency_changes import (
+    changed_dependencies,
+    dependency_consumers,
+)
+
 SUCCESS = "success"
 FAILURE = "failure"
 SKIPPED = "skipped"
 REQUIRED = "required"
 NOT_APPLICABLE = "not_applicable"
 
+NPM_RUNTIME_TEST = "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py"
+
 TELEMETRY_BASELINE_TESTS: tuple[str, ...] = (
     "tests/architecture/test_test_telemetry_baseline.py",
     "tests/architecture/test_test_telemetry_governance.py",
 )
 
-PYTHON_DEPENDENCY_TESTS: tuple[str, ...] = (
-    "tests/unit/infrastructure/storage/test_arrow_converter.py",
-    "tests/unit/application/composite/test_join_planner.py",
-    "tests/unit/infrastructure/validation/test_pandera_validator.py",
-    "tests/unit/application/core/test_batch_tracing.py",
-    "tests/unit/infrastructure/observability/test_metrics.py",
-    "tests/unit/tools/test_pytest_option_handling.py",
-    "tests/unit/repo_backed/application/pipelines/test_transformer_snapshots.py",
-    "tests/unit/repo_backed/scripts/ai/agent_tools/test_install_contracts.py",
-    "tests/unit/infrastructure/export/test_debug_export_adapter.py",
-    "tests/architecture/test_docs_build_site_router.py",
-)
-
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
-    "pyproject.toml": PYTHON_DEPENDENCY_TESTS,
-    "uv.lock": PYTHON_DEPENDENCY_TESTS,
-    "package.json": ("tests/architecture/test_observability_dashboard_tooling.py",),
+    "package.json": (
+        "tests/architecture/test_observability_dashboard_tooling.py",
+        NPM_RUNTIME_TEST,
+    ),
     "package-lock.json": (
         "tests/architecture/test_observability_dashboard_tooling.py",
+        NPM_RUNTIME_TEST,
     ),
+    "scripts/ai/npm_runtime_contract.cjs": (NPM_RUNTIME_TEST,),
+    "scripts/ai/mcp/mcp_filesystem_wrapper.sh": (NPM_RUNTIME_TEST,),
+    "scripts/ai/mcp/mcp_filesystem_wrapper.ps1": (NPM_RUNTIME_TEST,),
+    "scripts/ai/mcp/check.sh": (NPM_RUNTIME_TEST,),
     ".circleci/config.yml": ("tests/architecture/test_circleci_migration_contract.py",),
     "src/memory/rag/chunking.py": ("tests/unit/memory/test_rag_indexing.py",),
     "scripts/engineering/ci/publish_docker_image.sh": (
@@ -67,6 +69,12 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
 # governing tests; fail-closed semantics are unchanged for unmapped paths.
 AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
     "reports/test-telemetry/": TELEMETRY_BASELINE_TESTS,
+    "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.": (
+        NPM_RUNTIME_TEST,
+    ),
+    "scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh": (
+        NPM_RUNTIME_TEST,
+    ),
     "docs/02-architecture/diagrams/": (
         "tests/architecture/test_diagram_corpus_regression_guards.py",
         "tests/architecture/test_diagram_drift_and_embed_guards.py",
@@ -223,9 +231,21 @@ def assert_step_outcomes(
     return failures
 
 
-def affected_pytest_targets(changed_files: list[str], *, repo_root: Path) -> list[str]:
-    """Map a diff to existing unit tests. Empty means the caller must fail closed."""
+def affected_pytest_targets(
+    changed_files: list[str],
+    *,
+    repo_root: Path,
+    changed_python_dependencies: set[str] | None = None,
+) -> list[str]:
+    """Map a diff to tests; every declared mandatory target must exist."""
     targets: list[str] = []
+    missing: set[str] = set()
+    if {"pyproject.toml", "uv.lock"} & set(changed_files):
+        if changed_python_dependencies is None:
+            raise ValueError(
+                "Python dependency route requires verified dependency diff"
+            )
+        targets.extend(_dependency_targets(repo_root, changed_python_dependencies))
     for raw_path in changed_files:
         path = raw_path.strip().replace("\\", "/")
         if not path:
@@ -233,11 +253,15 @@ def affected_pytest_targets(changed_files: list[str], *, repo_root: Path) -> lis
         for candidate_path in AFFECTED_TESTS_BY_PATH.get(path, ()):
             if (repo_root / candidate_path).is_file():
                 targets.append(candidate_path)
+            else:
+                missing.add(candidate_path)
         for prefix, prefix_tests in AFFECTED_TESTS_BY_PREFIX.items():
             if path.startswith(prefix):
                 for candidate_path in prefix_tests:
                     if (repo_root / candidate_path).is_file():
                         targets.append(candidate_path)
+                    else:
+                        missing.add(candidate_path)
         if path.startswith("tests/") and path.endswith(".py"):
             if (repo_root / path).is_file():
                 targets.append(path)
@@ -250,25 +274,25 @@ def affected_pytest_targets(changed_files: list[str], *, repo_root: Path) -> lis
                 targets.append(candidate.relative_to(repo_root).as_posix())
             continue
         if path.startswith("scripts/") and path.endswith(".py"):
-            relative = Path(path.removeprefix("scripts/"))
+            script_relative = Path(path.removeprefix("scripts/"))
             scripts_test_roots = (
                 repo_root / "tests" / "unit" / "scripts",
                 repo_root / "tests" / "unit" / "repo_backed" / "scripts",
             )
-            direct_test_name = f"test_{relative.name.lstrip('_')}"
+            direct_test_name = f"test_{script_relative.name.lstrip('_')}"
             direct_test_dirs = [
-                test_root / relative.parent for test_root in scripts_test_roots
+                test_root / script_relative.parent for test_root in scripts_test_roots
             ]
-            if relative.parts[0] == "engineering":
+            if script_relative.parts[0] == "engineering":
                 direct_test_dirs.append(
-                    scripts_test_roots[0] / Path(*relative.parts[1:-1])
+                    scripts_test_roots[0] / Path(*script_relative.parts[1:-1])
                 )
             direct_tests = sorted(
                 candidate
                 for test_dir in direct_test_dirs
                 if (candidate := test_dir / direct_test_name).is_file()
             )
-            module_name = ".".join(("scripts", *relative.with_suffix("").parts))
+            module_name = ".".join(("scripts", *script_relative.with_suffix("").parts))
             importing_tests = sorted(
                 test_path
                 for test_root in scripts_test_roots
@@ -288,6 +312,10 @@ def affected_pytest_targets(changed_files: list[str], *, repo_root: Path) -> lis
                     for test_root in scripts_test_roots
                     if test_root.is_dir()
                 )
+    if missing:
+        raise ValueError(
+            "Missing mandatory mapped test targets: " + ", ".join(sorted(missing))
+        )
     ordered: list[str] = []
     seen: set[str] = set()
     for target in targets:
@@ -295,6 +323,40 @@ def affected_pytest_targets(changed_files: list[str], *, repo_root: Path) -> lis
             seen.add(target)
             ordered.append(target)
     return ordered
+
+
+def _dependency_targets(repo_root: Path, dependencies: set[str]) -> list[str]:
+    """Reuse source routing and its canonical curated owners for dependency consumers."""
+    inventory = repo_root / "configs/quality/source_test_owner_inventory.yaml"
+    owners = {}
+    if inventory.is_file():
+        document = yaml.safe_load(inventory.read_text(encoding="utf-8"))
+        owners = {row["source"]: row["owner_tests"] for row in document["modules"]}
+    targets: list[str] = []
+    for consumer in dependency_consumers(repo_root, dependencies):
+        if consumer in owners:
+            selected = owners[consumer]
+            missing = [
+                target for target in selected if not (repo_root / target).is_file()
+            ]
+            if missing:
+                raise ValueError(
+                    "Missing mandatory mapped test targets: " + ", ".join(missing)
+                )
+        elif consumer.startswith("src/memory/"):
+            selected = (
+                ["tests/unit/memory"]
+                if (repo_root / "tests/unit/memory").is_dir()
+                else []
+            )
+        else:
+            selected = affected_pytest_targets([consumer], repo_root=repo_root)
+        if not selected:
+            raise ValueError(
+                f"Unconfirmed Python dependency consumer route: {consumer}"
+            )
+        targets.extend(selected)
+    return targets
 
 
 def _imports_module(test_path: Path, module_name: str) -> bool:
@@ -413,7 +475,18 @@ def _affected_command(args: argparse.Namespace) -> int:
             cwd=args.repo_root,
         )
         changed = [line for line in completed.stdout.splitlines() if line.strip()]
-    targets = affected_pytest_targets(changed, repo_root=args.repo_root)
+    try:
+        dependencies = None
+        if {"pyproject.toml", "uv.lock"} & set(changed):
+            dependencies = changed_dependencies(
+                args.repo_root, args.base_sha, args.head_sha
+            )
+        targets = affected_pytest_targets(
+            changed, repo_root=args.repo_root, changed_python_dependencies=dependencies
+        )
+    except (ValueError, OSError) as error:
+        print(f"tests gate selection failed: {error}", file=sys.stderr)
+        return 1
     if not targets:
         print("tests gate has no affected pytest target", file=sys.stderr)
         return 1

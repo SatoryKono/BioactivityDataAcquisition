@@ -152,10 +152,8 @@ def test_affected_targets_map_memory_source_without_test_diff() -> None:
 
 def test_affected_targets_fail_closed_without_memory_test(tmp_path: Path) -> None:
     """A mapping never turns an absent test into a passing target."""
-    assert (
+    with pytest.raises(ValueError, match="Missing mandatory mapped test targets"):
         affected_pytest_targets(["src/memory/rag/chunking.py"], repo_root=tmp_path)
-        == []
-    )
 
 
 def test_affected_targets_map_root_npm_only_and_deduplicate() -> None:
@@ -163,23 +161,16 @@ def test_affected_targets_map_root_npm_only_and_deduplicate() -> None:
     repo_root = Path(__file__).resolve().parents[5]
     assert affected_pytest_targets(
         ["package.json", "package-lock.json", "package.json"], repo_root=repo_root
-    ) == ["tests/architecture/test_observability_dashboard_tooling.py"]
+    ) == [
+        "tests/architecture/test_observability_dashboard_tooling.py",
+        "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
+    ]
 
 
-def test_affected_targets_map_python_lock_only_and_deduplicate() -> None:
-    """Lock-only PRs exercise real consumers of supported dependency families."""
-    repo_root = Path(__file__).resolve().parents[5]
-    targets = affected_pytest_targets(
-        ["uv.lock", "pyproject.toml", "uv.lock"], repo_root=repo_root
-    )
-    assert len(targets) == len(set(targets))
-    assert {
-        "tests/unit/infrastructure/storage/test_arrow_converter.py",
-        "tests/unit/application/composite/test_join_planner.py",
-        "tests/unit/repo_backed/application/pipelines/test_transformer_snapshots.py",
-        "tests/architecture/test_docs_build_site_router.py",
-    }.issubset(targets)
-    assert all((repo_root / target).is_file() for target in targets)
+def test_python_dependency_diff_must_be_verified(tmp_path: Path) -> None:
+    """No fixed unrelated list can qualify a Python dependency gate."""
+    with pytest.raises(ValueError, match="verified dependency diff"):
+        affected_pytest_targets(["uv.lock"], repo_root=tmp_path)
 
 
 @pytest.mark.parametrize(
@@ -189,7 +180,8 @@ def test_root_npm_lane_fails_when_target_is_missing(
     tmp_path: Path, capsys: pytest.CaptureFixture[str], changed_file: str
 ) -> None:
     """An absent mapped contract cannot satisfy required affected-tests."""
-    assert affected_pytest_targets([changed_file], repo_root=tmp_path) == []
+    with pytest.raises(ValueError):
+        affected_pytest_targets([changed_file], repo_root=tmp_path)
     assert (
         lane_main(
             [
@@ -202,7 +194,7 @@ def test_root_npm_lane_fails_when_target_is_missing(
         )
         == 1
     )
-    assert "no affected pytest target" in capsys.readouterr().err
+    assert "tests gate selection failed" in capsys.readouterr().err
 
 
 def test_affected_targets_preserve_bioetl_and_scripts_routes(tmp_path: Path) -> None:
@@ -231,3 +223,39 @@ def test_build_rejects_unknown_decision() -> None:
             {},
             head_sha=HEAD,
         )
+
+
+@pytest.mark.parametrize("missing_count", [0, 1, 2])
+def test_partial_mapped_targets_fail_lane(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    missing_count: int,
+) -> None:
+    """Reject partial mappings before printing targets for the caller to run."""
+    from scripts.engineering.ci import pr_lane_results as lane
+
+    mapped = ("tests/unit/test_one.py", "tests/unit/test_two.py")
+    monkeypatch.setitem(lane.AFFECTED_TESTS_BY_PATH, "fixture/source.py", mapped)
+    for target in mapped[: 2 - missing_count]:
+        path = tmp_path / target
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("def test_contract(): pass\n", encoding="utf-8")
+    result = lane_main(
+        [
+            "affected-tests",
+            "--repo-root",
+            str(tmp_path),
+            "--changed-file",
+            "fixture/source.py",
+        ]
+    )
+    captured = capsys.readouterr()
+    if missing_count:
+        assert result == 1
+        assert not captured.out
+        for target in mapped[2 - missing_count :]:
+            assert target in captured.err
+    else:
+        assert result == 0
+        assert captured.out.splitlines() == list(mapped)
