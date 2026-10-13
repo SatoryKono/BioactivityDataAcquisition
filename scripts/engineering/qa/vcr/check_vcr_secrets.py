@@ -75,6 +75,7 @@ class _StrictCassetteLoader(yaml.SafeLoader):
         super().__init__(stream)
         self._validated_nodes: set[yaml.MappingNode] = set()
         self._merge_sizes: dict[yaml.MappingNode, int] = {}
+        self._expanded_merge_keys = 0
 
     def _merge_size(self, node: yaml.MappingNode, active: set[yaml.MappingNode]) -> int:
         if node in active or len(active) >= _MAX_MERGE_STACK_DEPTH:
@@ -100,8 +101,16 @@ class _StrictCassetteLoader(yaml.SafeLoader):
         finally:
             active.remove(node)
 
+    def _charge_merge_expansion(self, node: yaml.MappingNode, size: int) -> None:
+        if node not in self._validated_nodes and any(
+            key.tag == "tag:yaml.org,2002:merge" for key, _ in node.value
+        ):
+            self._expanded_merge_keys += size
+            if self._expanded_merge_keys > _MAX_MERGED_KEYS:
+                raise _AliasExpansionError
+
     def flatten_mapping(self, node: yaml.MappingNode) -> None:
-        self._merge_size(node, set())
+        self._charge_merge_expansion(node, self._merge_size(node, set()))
         # Check literal keys before PyYAML expands merge precedence. A node can
         # be reused by several aliases after its merge entries were flattened.
         if node not in self._validated_nodes:

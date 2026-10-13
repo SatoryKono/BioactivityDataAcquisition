@@ -367,3 +367,14 @@ def test_merge_alias_expansion_budget_fails_closed(
     path = tmp_path / "cassette.yaml"
     path.write_text(content + _cassette(), encoding="utf-8")
     assert bool(checker._scan_file(path)) is rejected
+
+
+def test_merge_alias_budget_is_shared_across_mappings(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(checker, "_MAX_MERGED_KEYS", 32)
+    content = "base: &base {a: 0, b: 0, c: 0, d: 0, e: 0, f: 0, g: 0, h: 0}\n"
+    content += "".join(f"copy{index}: {{<<: *base}}\n" for index in range(6))
+    path = tmp_path / "cassette.yaml"
+    path.write_text(content + _cassette(), encoding="utf-8")
+    assert checker._scan_file(path)
