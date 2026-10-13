@@ -648,12 +648,51 @@ async def test_late_unlink_failure_retains_partial_result(
     assert result["directories_skipped"] == 1
     assert result["directories_removed"] == 0
     assert sum(path.is_file() for path in date_dir.iterdir()) == 1
+    assert not (date_dir / ARTIFACT).exists()
+    assert (date_dir / SIDECAR).read_bytes() == b"data"
+    assert not (date_dir / second).exists()
+    assert not (date_dir / f"{second}.meta.json").exists()
     metrics.increment_counter.assert_any_call(
         "bioetl_bronze_cleanup_files_failed_total", 1, {"operation": "cleanup"}
     )
     metrics.increment_counter.assert_any_call(
         "bioetl_bronze_cleanup_bytes_failed_total", 4, {"operation": "cleanup"}
     )
+    monkeypatch.setattr(read_cleanup_mixin, "safe_unlink", original_unlink)
+    retry = await writer.cleanup_old_files(CUTOFF)
+    assert retry["files_removed"] == 0
+    assert retry["files_skipped"] == 1
+    assert (date_dir / SIDECAR).read_bytes() == b"data"
+
+
+@_APPLY_POSIX
+async def test_failed_copy_keeps_its_payload_and_sidecar_retryable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    writer = _make_writer(tmp_path)
+    date_dir = _date_dir(tmp_path, "chembl", "activity")
+    _write_pair(date_dir, b"payload")
+    (date_dir / JSON_COPY).write_bytes(b"copy")
+    original_unlink = read_cleanup_mixin.safe_unlink
+
+    def fail_copy(*args: object, **kwargs: object) -> bool:
+        if Path(args[0]).name == JSON_COPY:
+            raise PermissionError("injected copy failure")
+        return original_unlink(*args, **kwargs)
+
+    monkeypatch.setattr(read_cleanup_mixin, "safe_unlink", fail_copy)
+    first = await writer.cleanup_old_files(CUTOFF)
+    assert first["files_planned"] == 3
+    assert first["files_removed"] == 0
+    assert first["files_failed"] == 1
+    assert first["files_skipped"] == 2
+    assert (date_dir / ARTIFACT).read_bytes() == b"payload"
+    assert (date_dir / SIDECAR).read_bytes() == b"{}"
+
+    monkeypatch.setattr(read_cleanup_mixin, "safe_unlink", original_unlink)
+    second = await writer.cleanup_old_files(CUTOFF)
+    assert second["files_removed"] == 3
+    assert second["directories_removed"] == 1
 
 
 @_APPLY_POSIX
@@ -1527,6 +1566,101 @@ def test_interrupted_stage_is_restored_before_next_cleanup_plan(tmp_path: Path) 
     with bronze_tree_lock(tmp_path, exclusive=True):
         assert target.read_bytes() == b"x"
     assert not list(tmp_path.glob(".bronze-cleanup-stage-*"))
+
+
+@_APPLY_POSIX
+def test_uninitialized_stage_is_removed_after_journal_sync_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    target = tmp_path / ARTIFACT
+    target.write_bytes(b"retained")
+    root_fd = os.open(tmp_path, os.O_RDONLY | os.O_DIRECTORY)
+    original_fsync = cleanup_posix.os.fsync
+    failed = False
+
+    def fail_first_sync(fd: int) -> None:
+        nonlocal failed
+        if not failed:
+            failed = True
+            raise OSError("injected journal sync failure")
+        original_fsync(fd)
+
+    monkeypatch.setattr(cleanup_posix.os, "fsync", fail_first_sync)
+    try:
+        with pytest.raises(OSError, match="injected journal sync failure"):
+            with cleanup_posix._private_stage(
+                root_fd, Path(ARTIFACT), target.lstat()
+            ):
+                pytest.fail("uninitialized stage must not be yielded")
+    finally:
+        os.close(root_fd)
+    assert target.read_bytes() == b"retained"
+    assert not list(tmp_path.glob(".bronze-cleanup-stage-*"))
+    with bronze_tree_lock(tmp_path, exclusive=True):
+        assert target.read_bytes() == b"retained"
+
+
+@_APPLY_POSIX
+def test_missing_fd_view_falls_back_for_writes_but_refuses_cleanup(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    original_path = cleanup_core.BronzeRootLease.writer_path
+
+    def no_fd_view(lease: cleanup_core.BronzeRootLease) -> Path:
+        if lease.fd is not None:
+            raise NotImplementedError("injected missing procfs fd view")
+        return original_path.fget(lease)  # type: ignore[union-attr]
+
+    monkeypatch.setattr(
+        cleanup_core.BronzeRootLease, "writer_path", property(no_fd_view)
+    )
+    with bronze_tree_lock(tmp_path, exclusive=False) as lease:
+        assert lease.fd is None
+        assert lease.writer_path == tmp_path
+    with pytest.raises(NotImplementedError, match="verified root fd path"):
+        with bronze_tree_lock(tmp_path, exclusive=True):
+            pytest.fail("destructive apply must refuse missing fd-view capability")
+
+
+@_APPLY_POSIX
+async def test_writer_refuses_pending_stage_before_reusing_batch_name(
+    tmp_path: Path,
+) -> None:
+    date_dir = _date_dir(tmp_path, "chembl", "activity")
+    _write_pair(date_dir, b"original")
+    target = date_dir / ARTIFACT
+    root_fd = os.open(tmp_path, os.O_RDONLY | os.O_DIRECTORY)
+    parent_fd = os.open(date_dir, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        with cleanup_posix._private_stage(
+            root_fd,
+            target.relative_to(tmp_path),
+            target.lstat(),
+            on_stage_error=lambda _name, _error: None,
+        ) as stage_fd:
+            os.rename(ARTIFACT, ARTIFACT, src_dir_fd=parent_fd, dst_dir_fd=stage_fd)
+            os.fsync(parent_fd)
+            os.fsync(stage_fd)
+    finally:
+        os.close(parent_fd)
+        os.close(root_fd)
+    assert not target.exists()
+
+    writer = _make_writer(tmp_path)
+    with pytest.raises(OSError, match="recovery is pending"):
+        await writer.write_bronze(
+            records=iter([b"new\n"]),
+            provider="chembl",
+            entity="activity",
+            date=datetime(2024, 1, 1, tzinfo=UTC),
+            batch_id=BatchID(UUID("12345678-1234-5678-1234-567812345678")),
+            run_id=RunID(UUID(int=2)),
+            run_type=RunType.INCREMENTAL,
+            ingestion_ts=CUTOFF,
+        )
+    assert not target.exists()
+    with bronze_tree_lock(tmp_path, exclusive=True):
+        assert target.read_bytes() == b"original"
 
 
 @_APPLY_POSIX

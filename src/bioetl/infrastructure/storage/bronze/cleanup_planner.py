@@ -135,6 +135,8 @@ class BronzeCleanupPlannerMixin:
             payload_names,
             root_fd,
         )
+        # Writer names sort copy, payload, then lineage sidecar. A failed
+        # member therefore cannot leave a retained payload without its sidecar.
         for entry in sorted(entries, key=lambda item: item.name):
             candidate_identity = identities.get(entry.name)
             if candidate_identity is None:

@@ -22,6 +22,7 @@ from uuid import UUID
 from .cleanup_core import (
     _O_DIRECTORY,
     _O_NOFOLLOW,
+    _STAGE_PREFIX,
     BronzeRootLease,
     _CleanupConflict,
     destructive_cleanup_supported,
@@ -94,9 +95,23 @@ def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[BronzeRoot
                 lock_fd,
                 fcntl.__dict__["LOCK_EX" if exclusive else "LOCK_SH"],
             )
+            lease = BronzeRootLease(root_real, root_fd)
+            try:
+                _ = lease.writer_path
+            except NotImplementedError:
+                if exclusive:
+                    raise NotImplementedError(
+                        "Bronze destructive cleanup requires a verified root fd path"
+                    ) from None
+                lease = BronzeRootLease(root_real, None)
             if exclusive:
                 _recover_stages(root_fd, root_real)
-            yield BronzeRootLease(root_real, root_fd)
+            elif any(
+                name.startswith(_STAGE_PREFIX)
+                for name in os.listdir(root_fd)  # noqa: PTH208 - pinned root fd
+            ):
+                raise OSError("Bronze writer refused while cleanup recovery is pending")
+            yield lease
         finally:
             os.close(lock_fd)
     finally:

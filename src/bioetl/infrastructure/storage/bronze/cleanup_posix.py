@@ -197,7 +197,12 @@ def _private_stage(
     """Isolate a target name before checking its identity and deleting it."""
     name = f"{_STAGE_PREFIX}{secrets.token_hex(16)}"
     os.mkdir(name, 0o700, dir_fd=root_fd)
-    stage_fd = os.open(name, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW, dir_fd=root_fd)
+    try:
+        stage_fd = os.open(name, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW, dir_fd=root_fd)
+    except BaseException:
+        os.rmdir(name, dir_fd=root_fd)
+        raise
+    prepared = False
     completed = False
     try:
         journal_fd = os.open(
@@ -227,10 +232,20 @@ def _private_stage(
             os.close(journal_fd)
         os.fsync(stage_fd)
         os.fsync(root_fd)
+        prepared = True
         yield stage_fd
         completed = True
     finally:
-        if not completed:
+        if not prepared:
+            try:
+                with suppress(FileNotFoundError):
+                    os.unlink(_STAGE_JOURNAL, dir_fd=stage_fd)
+                os.fsync(stage_fd)
+            finally:
+                os.close(stage_fd)
+            os.rmdir(name, dir_fd=root_fd)
+            os.fsync(root_fd)
+        elif not completed:
             os.close(stage_fd)
         else:
             _finish_private_stage(root_fd, stage_fd, name, relative, on_stage_error)

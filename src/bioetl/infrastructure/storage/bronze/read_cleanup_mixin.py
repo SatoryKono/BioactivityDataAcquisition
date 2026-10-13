@@ -291,7 +291,14 @@ class BronzeWriterReadCleanupMixin(
         root_fd: int | None,
         on_stage_error: Callable[[str, OSError], None],
     ) -> None:
+        failed_groups: set[str] = set()
         for candidate in plan.files:
+            group = candidate.path.name.split(".jsonl", 1)[0]
+            if group in failed_groups:
+                stats["files_skipped"] += 1
+                stats["bytes_skipped"] += candidate.identity.st_size
+                self._log_cleanup_skip(str(candidate.path), "associated_member_failed")
+                continue
             try:
                 removed = safe_unlink(
                     candidate.path,
@@ -302,6 +309,7 @@ class BronzeWriterReadCleanupMixin(
                     root_fd=root_fd,
                 )
             except OSError:
+                failed_groups.add(group)
                 stats["files_failed"] += 1
                 stats["bytes_failed"] += candidate.identity.st_size
                 self._log_cleanup_skip(str(candidate.path), "unlink_error")
@@ -310,6 +318,7 @@ class BronzeWriterReadCleanupMixin(
                     stats["files_removed"] += 1
                     stats["bytes_freed"] += candidate.identity.st_size
                 else:
+                    failed_groups.add(group)
                     stats["files_conflicted"] += 1
                     stats["bytes_conflicted"] += candidate.identity.st_size
                     self._log_cleanup_skip(str(candidate.path), "unlink_conflict")
