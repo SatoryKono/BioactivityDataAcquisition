@@ -1,6 +1,7 @@
 """Offline synthetic npm/Node/Playwright runtime contracts."""
 
 import json
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -191,6 +192,39 @@ def test_powershell_filesystem_executes_locked_pin() -> None:
     )
     result = subprocess.run(
         [powershell, "-NoProfile", "-Command", code],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "@modelcontextprotocol/server-filesystem@2026.8.31" in result.stdout
+
+
+def test_shell_filesystem_executes_locked_pin(tmp_path: Path) -> None:
+    git = shutil.which("git")
+    assert git
+    bash = (
+        str(Path(git).parents[1] / "bin/bash.exe")
+        if os.name == "nt"
+        else shutil.which("bash")
+    )
+    assert bash
+    npx = tmp_path / "npx"
+    npx.write_text('#!/usr/bin/env bash\nprintf "%s\\n" "$@"\n', encoding="utf-8")
+    npx.chmod(0o755)
+    fake_bin = str(tmp_path)
+    if os.name == "nt":
+        fake_bin = "/" + tmp_path.drive[0].lower() + tmp_path.as_posix()[2:]
+    script = ROOT / "scripts/ai/mcp/mcp_filesystem_wrapper.sh"
+    result = subprocess.run(
+        [
+            bash,
+            "-c",
+            'export PATH="$1:$PATH"; exec bash "$2"',
+            "fixture",
+            fake_bin,
+            str(script),
+        ],
         text=True,
         capture_output=True,
         check=False,
