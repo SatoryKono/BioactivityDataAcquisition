@@ -593,6 +593,10 @@ def test_explicit_junit_override_uses_only_new_run_inputs(tmp_path: Path) -> Non
     assert "worker_mode" not in duration["execution_context"]
     assert "explicit_exclusions" not in duration["execution_context"]
 
+    prior.write_text("{bad", encoding="utf-8")
+    recomputed = build_baseline_payload(junit_paths=[current], **kwargs)
+    assert recomputed["duration_telemetry"]["total_cases"] == 2
+
 
 def test_legacy_only_refresh_rejects_before_overwriting_baseline(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch

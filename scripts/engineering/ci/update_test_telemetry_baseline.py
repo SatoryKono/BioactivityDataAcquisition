@@ -431,19 +431,20 @@ def build_baseline_payload(
     if resolved_coverage_percent is None:
         resolved_coverage_percent = _read_coverage_percent_from_log(coverage_log_path)
 
-    slowest_summary = _read_slowest_summary(slowest_json_path)
     if prefer_junit:
         if not junit_paths:
             raise ValueError("prefer_junit requires JUnit telemetry inputs")
         # An explicit new-run override must not inherit the prior JSON's
         # source inventory or execution metadata.
         slowest_summary = _derive_slowest_summary_from_junit_paths(junit_paths)
-    elif junit_paths and (
-        slowest_summary["total_cases"] is None
-        or slowest_summary["execution_context"].get("count_semantics")
-        == "legacy_positive_duration_rows"
-    ):
-        slowest_summary = _validated_junit_override(slowest_summary, junit_paths)
+    else:
+        slowest_summary = _read_slowest_summary(slowest_json_path)
+        if junit_paths and (
+            slowest_summary["total_cases"] is None
+            or slowest_summary["execution_context"].get("count_semantics")
+            == "legacy_positive_duration_rows"
+        ):
+            slowest_summary = _validated_junit_override(slowest_summary, junit_paths)
     top_slowest = slowest_summary["top_slowest"]
     status = (
         "captured"
