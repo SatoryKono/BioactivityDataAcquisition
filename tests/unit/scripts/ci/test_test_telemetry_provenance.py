@@ -225,14 +225,25 @@ def test_local_capture_keeps_measured_identity_after_test_tree_changes(bridge) -
     root, head, payload, receipt, _ = bridge
     payload["source_event"] = "local_coverage_verify"
     payload["source_tree_sha256"] = "current-audited-tree"
+    payload["coverage"] = {"actual_percent": 99.0}
+    payload["duration_telemetry"] = {"total_cases": 17}
     payload["measurement_provenance"] = {
         "head": payload["source_commit"],
         "test_tree_sha256": receipt["source_tree_sha256"],
         "manifest_sha256": "manifest",
     }
     receipt["manifest_sha256"] = "manifest"
+    receipt["metrics_sha256"] = provenance.telemetry_metrics_sha256(payload)
 
     assert validate_squash_bridge(payload, receipt, root, head)
+    receipt_path = root / provenance.RECEIPT
+    receipt_path.parent.mkdir(parents=True, exist_ok=True)
+    receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+    assert provenance.capture_metrics_are_bound(payload, root)
+    changed_metrics = copy.deepcopy(payload)
+    changed_metrics["coverage"]["actual_percent"] = 0.0
+    assert not provenance.capture_metrics_are_bound(changed_metrics, root)
+    assert not validate_squash_bridge(changed_metrics, receipt, root, head)
     for field in ("source_tree_sha256", "manifest_sha256"):
         changed_receipt = copy.deepcopy(receipt)
         changed_receipt[field] = "forged"
@@ -272,6 +283,16 @@ def test_squash_bridge_verifies_without_old_pr_objects(
     tree_oid = next(iter(tampered["git_object_proof"]["trees"]))
     tampered["git_object_proof"]["trees"][tree_oid] = "Zm9yZ2Vk"
     assert not validate_squash_bridge(payload, tampered, shallow, head)
+
+
+def test_single_commit_object_proof_for_capture_on_pr_head(bridge) -> None:
+    root, _, _, receipt, _ = bridge
+    pr_head = receipt["github_pull_request"]["head"]["sha"]
+    proof = provenance.build_git_object_proof(root, pr_head, pr_head)
+    assert [item["oid"] for item in proof["commit_chain"]] == [pr_head]
+    assert provenance._object_proof_relation(
+        {"git_object_proof": proof}, pr_head, pr_head
+    ) == (True, provenance._tree(root, pr_head))
 
 
 def test_receipt_builder_uses_original_checkout_after_squash(

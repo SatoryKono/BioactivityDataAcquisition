@@ -13,9 +13,15 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
+import yaml
+
+from scripts.engineering.ci import test_telemetry_provenance as provenance
+from scripts.engineering.ci import update_test_telemetry_baseline as updater
 
 from scripts.engineering.ci.update_test_telemetry_baseline import (
     build_branch_telemetry_reports,
@@ -491,3 +497,66 @@ def test_merge_existing_baseline_supplemental_fields_preserves_probe(
         "issue_ref": "#4663",
         "source": "local_direct_probe",
     }
+
+
+def test_rebind_rejects_tampered_metrics_even_with_normal_ancestry(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    payload = {
+        "source_event": "local_coverage_verify",
+        "source_commit": "a" * 40,
+        "source_run_id": "local-capture",
+        "measurement_provenance": {
+            "head": "a" * 40,
+            "test_tree_sha256": "measured-tree",
+            "manifest_sha256": "manifest-digest",
+        },
+        "coverage": {"actual_percent": 0.0},
+        "duration_telemetry": {"total_cases": 17},
+    }
+    original = {**payload, "coverage": {"actual_percent": 99.0}}
+    receipt = {
+        "schema_version": 1,
+        "source_commit": payload["source_commit"],
+        "source_run_id": payload["source_run_id"],
+        "source_tree_sha256": "measured-tree",
+        "manifest_sha256": "manifest-digest",
+        "metrics_sha256": provenance.telemetry_metrics_sha256(original),
+    }
+    receipt_path = tmp_path / provenance.RECEIPT
+    receipt_path.parent.mkdir(parents=True)
+    receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+    baseline_path = tmp_path / "baseline.yaml"
+    baseline_path.write_text(yaml.safe_dump(payload), encoding="utf-8")
+    output_md = tmp_path / "baseline.md"
+    monkeypatch.setattr(updater, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(
+        updater,
+        "_parse_args",
+        lambda: SimpleNamespace(
+            rebind_current_tree=True,
+            local_manifest=None,
+            source_commit=None,
+            source_run_id=None,
+            source_run_url=None,
+            source_branch="main",
+            source_event="push",
+            coverage_percent=None,
+            coverage_xml=updater.CANONICAL_COVERAGE_XML,
+            coverage_log=None,
+            slowest_json=updater.CANONICAL_SLOWEST_TESTS_JSON,
+            junit=[],
+            coverage_threshold=None,
+            output_yaml=baseline_path,
+            output_md=output_md,
+        ),
+    )
+    monkeypatch.setattr(
+        "scripts.engineering.common.repo_paths.resolve_output_path", Path
+    )
+    monkeypatch.setattr(provenance, "source_commit_is_reachable", lambda *_: True)
+    monkeypatch.setattr(subprocess, "check_output", lambda *_args, **_kwargs: "b" * 40)
+
+    with pytest.raises(ValueError, match="metrics lack a reviewed binding"):
+        updater.main()
+    assert not output_md.exists()

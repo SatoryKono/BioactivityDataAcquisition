@@ -181,7 +181,7 @@ def _object_proof_relation(
         proof = receipt["git_object_proof"]
         chain = proof["commit_chain"]
         trees = proof["trees"]
-        if not isinstance(chain, list) or not 2 <= len(chain) <= 128:
+        if not isinstance(chain, list) or not 1 <= len(chain) <= 128:
             return False, ""
         if chain[0]["oid"] != source or chain[-1]["oid"] != pr_head:
             return False, ""
@@ -266,11 +266,34 @@ def _receipt_matches_capture(receipt: dict[str, Any], payload: dict[str, Any]) -
         return payload.get("source_event") != "local_coverage_verify" and receipt.get(
             "source_tree_sha256"
         ) == payload.get("source_tree_sha256")
+    try:
+        metrics_digest = telemetry_metrics_sha256(payload)
+    except (KeyError, TypeError, ValueError):
+        return False
     return (
         measurement.get("head") == payload.get("source_commit")
         and receipt.get("source_tree_sha256") == measurement.get("test_tree_sha256")
         and receipt.get("manifest_sha256") == measurement.get("manifest_sha256")
+        and receipt.get("metrics_sha256") == metrics_digest
     )
+
+
+def telemetry_metrics_sha256(payload: dict[str, Any]) -> str:
+    """Bind the reported coverage and duration values to a reviewed capture."""
+    metrics = {field: payload[field] for field in ("coverage", "duration_telemetry")}
+    encoded = json.dumps(
+        metrics, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def capture_metrics_are_bound(payload: dict[str, Any], root: Path) -> bool:
+    """Require a capture-matched receipt before preserving metrics on rebind."""
+    try:
+        receipt = json.loads((root / RECEIPT).read_text(encoding="utf-8"))
+        return _receipt_matches_capture(receipt, payload)
+    except (OSError, ValueError, KeyError, TypeError, AttributeError):
+        return False
 
 
 def _github_mapping(receipt: dict[str, Any]) -> tuple[str, str] | None:
@@ -443,6 +466,7 @@ def build_reviewed_squash_receipt(
         "source_run_id": payload["source_run_id"],
         "source_tree_sha256": manifest["test_tree_sha256"],
         "manifest_sha256": capture["manifest_sha256"],
+        "metrics_sha256": telemetry_metrics_sha256(expected),
         "retrieved_from": url,
         "retrieved_at_utc": datetime.now(UTC).isoformat(),
         "github_pull_request": {

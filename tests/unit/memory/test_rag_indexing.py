@@ -651,6 +651,50 @@ def test_workflow_scope_git_search_includes_eligible_untracked_sources(
     assert selected == [Path("docs/00-project/doc-009.md")]
 
 
+def test_workflow_scope_git_search_includes_untracked_beside_tracked(
+    tmp_path: Path,
+) -> None:
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    docs = tmp_path / "docs/00-project"
+    docs.mkdir(parents=True)
+    (docs / "doc-000.md").write_text("# Ordinary\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "add", "docs/00-project/doc-000.md"], cwd=tmp_path, check=True
+    )
+    (docs / "doc-009.md").write_text("# quantum_whale_signal\n", encoding="utf-8")
+
+    selected = iter_rag_sources(
+        tmp_path,
+        selected_ids=WORKFLOW_RAG_SOURCE_IDS,
+        workflow_focus_query="quantum_whale_signal",
+        max_sources=1,
+    )
+    assert selected == [Path("docs/00-project/doc-009.md")]
+
+
+def test_workflow_scope_ranks_all_query_terms_before_generic_matches(
+    tmp_path: Path,
+) -> None:
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    docs = tmp_path / "docs/00-project"
+    docs.mkdir(parents=True)
+    for index in range(170):
+        (docs / f"doc-{index:03d}.md").write_text("# telemetry\n", encoding="utf-8")
+    (docs / "doc-169.md").write_text(
+        "# telemetry quantum_whale_signal\n", encoding="utf-8"
+    )
+    subprocess.run(["git", "add", "docs/00-project"], cwd=tmp_path, check=True)
+
+    selected = iter_rag_sources(
+        tmp_path,
+        selected_ids=WORKFLOW_RAG_SOURCE_IDS,
+        workflow_focus_query="telemetry quantum_whale_signal",
+        max_sources=160,
+    )
+    assert len(selected) == 160
+    assert Path("docs/00-project/doc-169.md") in selected
+
+
 def test_write_rag_manifests_persists_build_scope_metadata(tmp_path: Path) -> None:
     (tmp_path / "src/memory/tooling").mkdir(parents=True)
     (tmp_path / "src/memory/tooling/workflow.py").write_text(

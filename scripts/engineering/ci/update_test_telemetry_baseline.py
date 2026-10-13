@@ -779,6 +779,7 @@ def main() -> int:
         import subprocess
 
         from scripts.engineering.ci.test_telemetry_provenance import (
+            capture_metrics_are_bound,
             source_commit_is_reachable,
         )
 
@@ -809,6 +810,10 @@ def main() -> int:
             raise ValueError(
                 "Captured run lacks proven ancestry or reviewed squash bridge"
             )
+        if payload.get("source_event") == "local_coverage_verify" and not (
+            capture_metrics_are_bound(payload, REPO_ROOT)
+        ):
+            raise ValueError("Captured telemetry metrics lack a reviewed binding")
         payload["source_tree_sha256"] = compute_test_telemetry_source_tree_sha256()
         write_baseline_outputs(
             payload=payload,
