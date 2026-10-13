@@ -54,15 +54,15 @@ bioetl = "bioetl.interfaces.cli:main"
 [project.optional-dependencies]
 agentdebugx = [
     # Optional, subprocess-only diagnostic producer. Keep exact for reproducibility.
-    "agentdebugx==0.3.1",
+    "agentdebugx==0.5.2",
 ]
 proofagent = [
     # Optional, subprocess-only advisory evidence producer. Keep exact for reproducibility.
-    "proofagent-harness==0.12.1",
+    "proofagent-harness==0.13.0",
 ]
 agent-tools = [
-    "agentdebugx==0.3.1",
-    "proofagent-harness==0.12.1",
+    "agentdebugx==0.5.2",
+    "proofagent-harness==0.13.0",
 ]
 tracing = [
     "opentelemetry-api>=1.20",
@@ -129,7 +129,7 @@ dev = [
     "beautifulsoup4>=4.11.0",
     # mypy exact pin: keeps the type gate reproducible across Linux/Windows CI
     # (same checker version everywhere; avoids per-platform drift). Reviewed 2026-09-18; re-review by 2027-03-18.
-    "mypy==2.3.1",
+    "mypy==2.4.0",
     "types-openpyxl>=3.1",
     "ruff>=0.4",
     "basedpyright>=1.0",
@@ -168,7 +168,7 @@ dev = [
     "detect-secrets>=1.4",
     # Exact pins: reproducible sdist/wheel build + upload toolchain.
     # Reviewed 2026-09-19; re-review by 2027-03-19. (AUD-006)
-    "build==1.2.2.post1",
+    "build==1.6.1",
     "twine==6.1.0",
     # Dead code detection
     "vulture>=2.11",
