@@ -370,6 +370,36 @@ def _portable_artifact_path(
         return str(path)
 
 
+def _validated_junit_override(
+    slowest_summary: TelemetryPayload, junit_paths: list[Path]
+) -> TelemetryPayload:
+    derived_summary = _derive_slowest_summary_from_junit_paths(junit_paths)
+    if slowest_summary["total_cases"] is None:
+        return derived_summary
+
+    previous_sources = slowest_summary["execution_context"].get("junit_sources")
+    previous_source_count = slowest_summary["execution_context"].get(
+        "junit_source_count"
+    )
+    derived_sources = derived_summary["execution_context"]["junit_sources"]
+    if (
+        not isinstance(previous_sources, list)
+        or not all(isinstance(source, str) for source in previous_sources)
+        or len(set(previous_sources)) != len(previous_sources)
+        or len(set(derived_sources)) != len(derived_sources)
+        or (
+            previous_source_count is not None
+            and previous_source_count != len(previous_sources)
+        )
+        or sorted(previous_sources) != sorted(derived_sources)
+    ):
+        raise ValueError(
+            "JUnit inputs do not match the source inventory of the "
+            "existing slowest-tests.json; refusing a partial refresh"
+        )
+    return derived_summary
+
+
 def build_baseline_payload(
     *,
     coverage_xml_path: Path,
@@ -403,29 +433,7 @@ def build_baseline_payload(
             == "legacy_positive_duration_rows"
         )
     ):
-        derived_summary = _derive_slowest_summary_from_junit_paths(junit_paths)
-        if slowest_summary["total_cases"] is not None:
-            previous_sources = slowest_summary["execution_context"].get("junit_sources")
-            previous_source_count = slowest_summary["execution_context"].get(
-                "junit_source_count"
-            )
-            derived_sources = derived_summary["execution_context"]["junit_sources"]
-            if (
-                not isinstance(previous_sources, list)
-                or not all(isinstance(source, str) for source in previous_sources)
-                or len(set(previous_sources)) != len(previous_sources)
-                or len(set(derived_sources)) != len(derived_sources)
-                or (
-                    previous_source_count is not None
-                    and previous_source_count != len(previous_sources)
-                )
-                or sorted(previous_sources) != sorted(derived_sources)
-            ):
-                raise ValueError(
-                    "JUnit inputs do not match the source inventory of the "
-                    "existing slowest-tests.json; refusing a partial refresh"
-                )
-        slowest_summary = derived_summary
+        slowest_summary = _validated_junit_override(slowest_summary, junit_paths)
     top_slowest = slowest_summary["top_slowest"]
     status = (
         "captured"
