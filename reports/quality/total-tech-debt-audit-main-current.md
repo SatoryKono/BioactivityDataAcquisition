@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `8accbe095b5082f1ec2bbee5c6543a1aaf001a648eaea6e3b7e944109b883f4b`
+Evidence surface SHA-256: `7697fbf5c7958b7265d8c8a2f6948d8994915d7fac31e8ccc77289e530011054`
 
 ## Current evidence summary
 
@@ -35,13 +35,13 @@ reported separately in the issue closeout evidence.
 
 <!-- current-audit-headlines:start -->
 
-Debt-governance gates: **44 pass / 2 fail**
+Debt-governance gates: **46 pass / 0 fail**
 
 Architecture quality integral score: **10.0** (`excellent`)
 
-source_module_count: **2569**
+source_module_count: **2571**
 
-fully_covered: **2527**
+fully_covered: **2529**
 
 partially_covered: **41**
 
@@ -51,7 +51,7 @@ uncovered: **0**
 
 unmeasured: **0**
 
-= 2569 == source_module_count
+= 2571 == source_module_count
 
 Contract coverage matrix schema: **contract-coverage-matrix-v3**
 
@@ -69,22 +69,22 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "8accbe095b5082f1ec2bbee5c6543a1aaf001a648eaea6e3b7e944109b883f4b",
+  "evidence_surface_sha256": "7697fbf5c7958b7265d8c8a2f6948d8994915d7fac31e8ccc77289e530011054",
   "metrics": {
     "architecture_integral_score": 10.0,
     "architecture_interpretation": "excellent",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 46,
-    "debt_gate_fail_count": 2,
-    "debt_gate_pass_count": 44,
+    "debt_gate_fail_count": 0,
+    "debt_gate_pass_count": 46,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 2527,
+    "fully_covered_module_count": 2529,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 1,
     "partially_covered_module_count": 41,
-    "source_module_count": 2569,
+    "source_module_count": 2571,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,

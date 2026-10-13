@@ -1,7 +1,7 @@
 {
-  "additive_coverage_xml_path": "reports/coverage/step4-combined.xml",
-  "additive_coverage_xml_sha256": "ac619fa79773aee7535e50a0a3f414136bbc0cf94d0a4065a51cc8448c80a9b7",
-  "additive_measured_module_count": 17,
+  "additive_coverage_xml_path": "reports/quality/pr12215-new-modules-coverage.xml",
+  "additive_coverage_xml_sha256": "ee9127e13944a71a6951af6566723e060b864df41ac686c95fac5f5b8b87367a",
+  "additive_measured_module_count": 2,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
   "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
@@ -9777,6 +9777,16 @@
       "module": "bioetl.composition.factories.services.port_factories",
       "path": "src/bioetl/composition/factories/services/port_factories.py",
       "source_lines": 98
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 17,
+      "executable_lines": 17,
+      "missing_lines": 0,
+      "module": "bioetl.composition.factories.services.preflight",
+      "path": "src/bioetl/composition/factories/services/preflight.py",
+      "source_lines": 63
     },
     {
       "coverage_percent": 100.0,
@@ -22627,6 +22637,16 @@
       "module": "bioetl.infrastructure.storage.gold",
       "path": "src/bioetl/infrastructure/storage/gold/__init__.py",
       "source_lines": 9
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 47,
+      "executable_lines": 47,
+      "missing_lines": 0,
+      "module": "bioetl.infrastructure.storage.gold.cancellation",
+      "path": "src/bioetl/infrastructure/storage/gold/cancellation.py",
+      "source_lines": 100
     },
     {
       "coverage_percent": 100.0,
@@ -35473,6 +35493,16 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
+      "covered_lines": 17,
+      "executable_lines": 17,
+      "missing_lines": 0,
+      "module": "bioetl.composition.factories.services.preflight",
+      "path": "src/bioetl/composition/factories/services/preflight.py",
+      "source_lines": 63
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
       "covered_lines": 31,
       "executable_lines": 31,
       "missing_lines": 0,
@@ -48323,6 +48353,16 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
+      "covered_lines": 47,
+      "executable_lines": 47,
+      "missing_lines": 0,
+      "module": "bioetl.infrastructure.storage.gold.cancellation",
+      "path": "src/bioetl/infrastructure/storage/gold/cancellation.py",
+      "source_lines": 100
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
       "covered_lines": 36,
       "executable_lines": 36,
       "missing_lines": 0,
@@ -51393,7 +51433,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "c4c1d071ec4aed1ca268fc3a488909aaa8de5b3f08acc335e38b7a5513f1b199",
+  "source_tree_sha256": "538e68518ac5903eb53424c59d7c544034486bdcb4e91a919f64e1dd0496a2a9",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -51548,10 +51588,10 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2569,
+    "source_module_count": 2571,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 2527,
+      "fully_covered": 2529,
       "no_executable_lines": 1,
       "partially_covered": 41,
       "uncovered": 0,
