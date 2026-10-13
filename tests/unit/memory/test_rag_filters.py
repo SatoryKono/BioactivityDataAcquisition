@@ -7,7 +7,7 @@ import pytest
 from subprocess import CompletedProcess
 from pathlib import Path
 
-from memory.rag.filters import _candidate_source_paths
+from memory.rag.filters import _candidate_source_paths, _safe_source_path
 
 
 pytestmark = pytest.mark.unit
@@ -92,6 +92,83 @@ def test_candidate_source_paths_uses_git_tracked_and_untracked_files(
         "docs/00-project/alpha.md",
         "docs/00-project/untracked.md",
     ]
+
+
+def test_candidate_sources_exclude_untracked_symlink_outside_repo(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    docs_root = tmp_path / "docs/00-project"
+    docs_root.mkdir(parents=True)
+    (docs_root / "safe.md").write_text("# Safe\n", encoding="utf-8")
+    outside = tmp_path.parent / f"{tmp_path.name}-secret.md"
+    outside.write_text("outside repository\n", encoding="utf-8")
+    link = docs_root / "linked.md"
+    try:
+        link.symlink_to(outside)
+    except (OSError, NotImplementedError) as exc:
+        pytest.skip(f"symlink creation unavailable: {exc}")
+
+    git_dir = tmp_path / ".git"
+    git_dir.mkdir()
+    monkeypatch.setattr(
+        "memory.rag.filters.subprocess.run",
+        lambda args, **_kwargs: CompletedProcess(
+            args,
+            0,
+            stdout="docs/00-project/linked.md\ndocs/00-project/safe.md\n",
+            stderr="",
+        ),
+    )
+    expected = [Path("docs/00-project/safe.md")]
+    assert (
+        _candidate_source_paths(
+            root=tmp_path, source_id="active_docs", base=Path("docs/00-project")
+        )
+        == expected
+    )
+    git_dir.rmdir()
+    assert (
+        _candidate_source_paths(
+            root=tmp_path, source_id="active_docs", base=Path("docs/00-project")
+        )
+        == expected
+    )
+
+
+def test_candidate_source_boundary_rejects_outside_file(tmp_path: Path) -> None:
+    inside = tmp_path / "inside.md"
+    inside.write_text("inside\n", encoding="utf-8")
+    outside = tmp_path.parent / f"{tmp_path.name}-outside.md"
+    outside.write_text("outside\n", encoding="utf-8")
+
+    assert _safe_source_path(inside, tmp_path.resolve())
+    assert not _safe_source_path(outside, tmp_path.resolve())
+
+
+def test_git_empty_source_set_does_not_fall_back_to_ignored_files(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    docs_root = tmp_path / "docs/00-project"
+    docs_root.mkdir(parents=True)
+    (docs_root / "ignored.md").write_text("# Ignored\n", encoding="utf-8")
+    (tmp_path / ".git").mkdir()
+    monkeypatch.setattr(
+        "memory.rag.filters.subprocess.run",
+        lambda args, **_kwargs: CompletedProcess(args, 0, stdout="", stderr=""),
+    )
+    monkeypatch.setattr(
+        "memory.rag.filters.os.walk",
+        lambda *_args, **_kwargs: pytest.fail(
+            "Git empty set must not scan ignored files"
+        ),
+    )
+
+    assert (
+        _candidate_source_paths(
+            root=tmp_path, source_id="active_docs", base=Path("docs/00-project")
+        )
+        == []
+    )
 
 
 def test_candidate_source_paths_supports_single_file_sources(tmp_path: Path) -> None:

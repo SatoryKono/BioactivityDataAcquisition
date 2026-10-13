@@ -169,9 +169,11 @@ def _run_git(
 
 
 def capture_rag_git_identity(root: Path) -> dict[str, str | None]:
-    """Capture the repository HEAD and tracked working-tree state."""
+    """Capture HEAD and tracked or untracked working-tree changes."""
     head_result = _run_git(root, ["rev-parse", "HEAD"])
-    status_result = _run_git(root, ["status", "--porcelain", "--untracked-files=no"])
+    status_result = _run_git(
+        root, ["status", "--porcelain", "--untracked-files=normal"]
+    )
     git_head_sha = (
         head_result.stdout.strip()
         if head_result is not None and head_result.returncode == 0

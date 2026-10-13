@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 import pytest
 
 from memory.artifact_readiness import rag_chunks_ready, timeline_events_ready
 from memory.rag.indexing import write_rag_manifests
+from memory.rag.validation import capture_rag_git_identity
 from memory.timeline._common import write_timeline_manifest
 
 pytestmark = pytest.mark.unit
@@ -40,6 +42,38 @@ def test_rag_readiness_rejects_source_content_drift(tmp_path: Path) -> None:
     source.write_text("# Overview\nChanged\n", encoding="utf-8")
 
     assert rag_chunks_ready(chunks_path, repo_root=tmp_path) is False
+
+
+def test_untracked_source_invalidates_clean_rag_cache_identity(tmp_path: Path) -> None:
+    _write_doc(tmp_path)
+    for args in (
+        ("init", "-q"),
+        ("add", "docs/00-project/overview.md"),
+        (
+            "-c",
+            "user.name=RAG test",
+            "-c",
+            "user.email=rag@example.invalid",
+            "commit",
+            "-qm",
+            "initial source",
+        ),
+    ):
+        subprocess.run(["git", *args], cwd=tmp_path, check=True, capture_output=True)
+    (tmp_path / ".git/info/exclude").write_text("out/\n", encoding="utf-8")
+    output_dir = tmp_path / "out"
+    _, chunks_path = write_rag_manifests(tmp_path, output_dir)
+    assert capture_rag_git_identity(tmp_path)["working_tree_state"] == "clean"
+    assert rag_chunks_ready(chunks_path, repo_root=tmp_path)
+
+    untracked = tmp_path / "docs/00-project/new.md"
+    untracked.write_text("# New source\n", encoding="utf-8")
+    assert capture_rag_git_identity(tmp_path)["working_tree_state"] == "dirty"
+    assert not rag_chunks_ready(chunks_path, repo_root=tmp_path)
+    untracked.write_text("# Changed new source\n", encoding="utf-8")
+    assert not rag_chunks_ready(chunks_path, repo_root=tmp_path)
+    untracked.unlink()
+    assert rag_chunks_ready(chunks_path, repo_root=tmp_path)
 
 
 def test_rag_readiness_rejects_workflow_pair_when_full_is_required(

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-13T07:51:13.571475+00:00",
+  "generated_at": "2026-10-13T08:18:25.382806+00:00",
   "summary": {
     "total_scripts": 648,
     "status_counts": {
@@ -10115,7 +10115,7 @@
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 841,
+          "line": 845,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.local_test_telemetry import build_local_baseline"
         },
@@ -10566,7 +10566,7 @@
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 780,
+          "line": 781,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.test_telemetry_provenance import ("
         },
@@ -10639,13 +10639,13 @@
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 82,
+          "line": 83,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.ci.update_test_telemetry_baseline`"
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 131,
+          "line": 132,
           "source_group": "docs",
           "text": "3. Run `python -m scripts.engineering.ci.update_test_telemetry_baseline --source-commit <sha> --source-run-id <run-id> ...` with either direct artifacts or fallback diagnostics inputs."
         },

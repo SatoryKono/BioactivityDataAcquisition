@@ -499,11 +499,24 @@ def test_merge_existing_baseline_supplemental_fields_preserves_probe(
     }
 
 
-def test_rebind_rejects_tampered_metrics_even_with_normal_ancestry(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+@pytest.mark.parametrize(
+    ("source_event", "message"),
+    [
+        ("local_coverage_verify", "metrics lack a reviewed binding"),
+        ("push", "requires a reviewed local coverage capture"),
+        ("pull_request", "requires a reviewed local coverage capture"),
+        ("workflow_dispatch", "requires a reviewed local coverage capture"),
+        ("schedule", "requires a reviewed local coverage capture"),
+    ],
+)
+def test_rebind_rejects_tampered_or_unverified_metrics(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    source_event: str,
+    message: str,
 ) -> None:
     payload = {
-        "source_event": "local_coverage_verify",
+        "source_event": source_event,
         "source_commit": "a" * 40,
         "source_run_id": "local-capture",
         "measurement_provenance": {
@@ -557,6 +570,6 @@ def test_rebind_rejects_tampered_metrics_even_with_normal_ancestry(
     monkeypatch.setattr(provenance, "source_commit_is_reachable", lambda *_: True)
     monkeypatch.setattr(subprocess, "check_output", lambda *_args, **_kwargs: "b" * 40)
 
-    with pytest.raises(ValueError, match="metrics lack a reviewed binding"):
+    with pytest.raises(ValueError, match=message):
         updater.main()
     assert not output_md.exists()

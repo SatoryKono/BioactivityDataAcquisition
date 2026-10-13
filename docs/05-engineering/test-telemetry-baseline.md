@@ -32,7 +32,7 @@ trend evidence only.
 - Source run id: `local-bioetl-local-coverage-pr11990-final3`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `8ba4bad4caecbbc0e5b85e9f65b02ef308b6182f41250ef22ded49164a722d92`
+- Source tree sha256: `e68c11f0ae72c30925cc1271224ad87c0ef5ba355fe063c481bd5d3b769d611a`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-10-13T06:16:30.069150+00:00`
 
@@ -58,10 +58,11 @@ trend evidence only.
   <original-worktree> --local-manifest <manifest.json> --pull-request <merged-PR>`.
   The generator validates the complete 17-shard capture and reads the merged
   PR mapping before writing the bridge. Keep the original capture available.
-- After validating the bridge, run
+- For a reviewed local coverage capture, run
   `python -m scripts.engineering.ci.update_test_telemetry_baseline
   --rebind-current-tree`, then the coupled `refresh-ci-drift-families`
   update/check for test-gov, flaky-fingerprint, telemetry and evidence.
+  Non-local captures require regeneration from their source artifacts.
 - New captures use `verification_mode: live_github`: resolve the recorded
   PR's actual merge with read-only GitHub GETs after squash. Never stamp a
   future merge SHA. API failure, unmerged PRs, changed inputs and incomplete

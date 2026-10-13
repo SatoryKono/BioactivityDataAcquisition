@@ -532,10 +532,11 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
         "  <original-worktree> --local-manifest <manifest.json> --pull-request <merged-PR>`.",
         "  The generator validates the complete 17-shard capture and reads the merged",
         "  PR mapping before writing the bridge. Keep the original capture available.",
-        "- After validating the bridge, run",
+        "- For a reviewed local coverage capture, run",
         "  `python -m scripts.engineering.ci.update_test_telemetry_baseline",
         "  --rebind-current-tree`, then the coupled `refresh-ci-drift-families`",
         "  update/check for test-gov, flaky-fingerprint, telemetry and evidence.",
+        "  Non-local captures require regeneration from their source artifacts.",
         "- New captures use `verification_mode: live_github`: resolve the recorded",
         "  PR's actual merge with read-only GitHub GETs after squash. Never stamp a",
         "  future merge SHA. API failure, unmerged PRs, changed inputs and incomplete",
@@ -803,14 +804,17 @@ def _rebind_current_tree(args: argparse.Namespace) -> int:
     output_yaml_path = resolve_output_path(args.output_yaml)
     output_md_path = resolve_output_path(args.output_md)
     payload = yaml.safe_load(output_yaml_path.read_text(encoding="utf-8"))
+    if payload.get("source_event") != "local_coverage_verify":
+        raise ValueError(
+            "Rebind requires a reviewed local coverage capture; "
+            "rebuild non-local telemetry from its source artifacts"
+        )
     head = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, text=True
     ).strip()
     if not source_commit_is_reachable(payload, REPO_ROOT, head):
         raise ValueError("Captured run lacks proven ancestry or reviewed squash bridge")
-    if payload.get("source_event") == "local_coverage_verify" and not (
-        capture_metrics_are_bound(payload, REPO_ROOT)
-    ):
+    if not capture_metrics_are_bound(payload, REPO_ROOT):
         raise ValueError("Captured telemetry metrics lack a reviewed binding")
     payload["source_tree_sha256"] = compute_test_telemetry_source_tree_sha256()
     write_baseline_outputs(

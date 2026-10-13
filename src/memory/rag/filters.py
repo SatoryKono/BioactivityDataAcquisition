@@ -139,17 +139,22 @@ def _candidate_source_paths(
 ) -> list[Path]:
     suffixes = SOURCE_SUFFIXES.get(source_id, MARKDOWN_SUFFIXES)
     source_dir = root / base
+    resolved_root = root.resolve()
     git_paths = _git_source_paths(root=root, base=base)
-    if git_paths:
+    if git_paths is not None:
         return [
             rel_path
             for rel_path in git_paths
-            if Path(rel_path).suffix.lower() in suffixes and (root / rel_path).is_file()
+            if Path(rel_path).suffix.lower() in suffixes
+            and _safe_source_path(root / rel_path, resolved_root)
+            and (root / rel_path).is_file()
         ]
-    if not source_dir.exists():
+    if not source_dir.exists() or source_dir.is_symlink():
         return []
     if not source_dir.is_dir():
-        if source_dir.suffix.lower() in suffixes:
+        if source_dir.suffix.lower() in suffixes and _safe_source_path(
+            source_dir, resolved_root
+        ):
             return [base]
         return []
     candidates: list[Path] = []
@@ -160,14 +165,26 @@ def _candidate_source_paths(
         for filename in sorted(filenames):
             if Path(filename).suffix.lower() not in suffixes:
                 continue
-            candidates.append(base / rel_dir / filename)
+            candidate = base / rel_dir / filename
+            if _safe_source_path(root / candidate, resolved_root):
+                candidates.append(candidate)
     return candidates
 
 
-def _git_source_paths(*, root: Path, base: Path) -> list[Path]:
+def _safe_source_path(path: Path, resolved_root: Path) -> bool:
+    """Keep generated RAG sources inside the repository, without symlinks."""
+    try:
+        return not path.is_symlink() and path.resolve(strict=True).is_relative_to(
+            resolved_root
+        )
+    except (OSError, RuntimeError):
+        return False
+
+
+def _git_source_paths(*, root: Path, base: Path) -> list[Path] | None:
     git_dir = root / ".git"
     if not git_dir.exists():
-        return []
+        return None
     try:
         result = subprocess.run(
             [
@@ -187,7 +204,7 @@ def _git_source_paths(*, root: Path, base: Path) -> list[Path]:
             errors="replace",
         )
     except (OSError, subprocess.CalledProcessError):
-        return []
+        return None
     return [
         Path(line) for line in sorted(set(result.stdout.splitlines())) if line.strip()
     ]
