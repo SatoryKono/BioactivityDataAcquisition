@@ -28,6 +28,10 @@ TELEMETRY_BASELINE_TESTS: tuple[str, ...] = (
 )
 
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "package.json": ("tests/architecture/test_observability_dashboard_tooling.py",),
+    "package-lock.json": (
+        "tests/architecture/test_observability_dashboard_tooling.py",
+    ),
     ".circleci/config.yml": ("tests/architecture/test_circleci_migration_contract.py",),
     "src/memory/rag/chunking.py": ("tests/unit/memory/test_rag_indexing.py",),
     "scripts/engineering/ci/publish_docker_image.sh": (
