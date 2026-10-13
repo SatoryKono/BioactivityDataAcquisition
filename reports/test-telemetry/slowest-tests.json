@@ -4,7 +4,7 @@
   "source_run_id": "local-bioetl-local-coverage-pr11990-final3",
   "source_event": "local_coverage_verify",
   "source_run_url": null,
-  "source_tree_sha256": "4462bae1b7ed298714c0b5ca19f1c36b593168e5075b0694d78487581379ad13",
+  "source_tree_sha256": "0f00d47deece0643d6ed9012cfc63c336bd86cff1f85144efe042ac3f83b7cab",
   "refreshed_at_utc": "2026-10-13T06:16:30.069150+00:00",
   "refresh_status": "captured",
   "total_cases": 33571,
