@@ -92,6 +92,7 @@ async def test_failed_completion_marker_retains_date_for_stage_recovery(
     date_dir.mkdir(parents=True)
     artifact = "batch_2024-01-01_12345678-1234-5678-1234-567812345678.jsonl.zst"
     (date_dir / artifact).write_bytes(b"owned")
+    (date_dir / f"{artifact}.meta.json").write_bytes(b"{}")
     writer = BronzeWriter(base_path=root, logger=NoOpLogger(), metrics=NoOpMetrics())
     original_rename = cleanup_posix.os.rename
     failed = False
@@ -111,8 +112,8 @@ async def test_failed_completion_marker_retains_date_for_stage_recovery(
     first = await writer.cleanup_old_files(CUTOFF)
 
     assert failed
-    assert first["files_removed"] == 1
-    assert first["bytes_freed"] == 5
+    assert first["files_removed"] == 2
+    assert first["bytes_freed"] == 7
     assert first["directories_failed"] == 1
     assert first["directories_skipped"] == 1
     assert first["directories_removed"] == 0

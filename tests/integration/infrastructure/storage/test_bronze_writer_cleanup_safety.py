@@ -883,9 +883,10 @@ async def test_stage_cleanup_failure_is_reported_after_file_removal(
     assert failed
     assert result["files_removed"] == 2
     assert result["bytes_freed"] == 3
-    assert result["directories_removed"] == 1
+    assert result["directories_removed"] == 0
     assert result["directories_failed"] == 1
-    assert not date_dir.exists()
+    assert result["directories_skipped"] == 1
+    assert date_dir.is_dir() and not list(date_dir.iterdir())
     assert any(
         path.name.startswith(".bronze-cleanup-stage-") for path in tmp_path.iterdir()
     )
@@ -895,7 +896,8 @@ async def test_stage_cleanup_failure_is_reported_after_file_removal(
     monkeypatch.setattr(cleanup_support.os, "rmdir", original_rmdir)
     retry = await writer.cleanup_old_files(CUTOFF)
     assert retry["files_removed"] == 0
-    assert retry["directories_removed"] == 0
+    assert retry["directories_removed"] == 1
+    assert not date_dir.exists()
     assert not list(tmp_path.glob(".bronze-cleanup-stage-*"))
     assert not list(tmp_path.glob(".bronze-cleanup-done-*"))
 
