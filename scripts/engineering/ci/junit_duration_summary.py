@@ -46,9 +46,9 @@ def _aggregate_counts(node: ET.Element, cases: list[ET.Element]) -> dict[str, in
     counts = {
         "tests": len(cases),
         "skipped": sum(case.find("skipped") is not None for case in cases),
-        "failures": sum(case.find("failure") is not None for case in cases)
+        "failures": sum(len(case.findall("failure")) for case in cases)
         + len(node.findall("failure")),
-        "errors": sum(case.find("error") is not None for case in cases)
+        "errors": sum(len(case.findall("error")) for case in cases)
         + len(node.findall("error")),
     }
     # Suite-level diagnostics contribute to ancestor declarations too.

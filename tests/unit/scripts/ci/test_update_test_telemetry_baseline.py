@@ -239,6 +239,25 @@ def test_junit_suite_level_error_does_not_invent_testcase(tmp_path: Path) -> Non
     assert payload["top_slowest"] == []
 
 
+def test_junit_counts_each_diagnostic_element_in_suite_totals(tmp_path: Path) -> None:
+    path = tmp_path / "multiple-diagnostics.xml"
+    path.write_text(
+        '<testsuites tests="1" errors="2" failures="2">'
+        '<testsuite tests="1" errors="2" failures="2">'
+        '<testcase name="multiple_diagnostics" time="0">'
+        '<error message="setup" /><error message="teardown" />'
+        '<failure message="first" /><failure message="second" />'
+        '</testcase></testsuite></testsuites>',
+        encoding="utf-8",
+    )
+    summary = _derive_slowest_summary_from_junit_paths([path])
+    assert summary["total_cases"] == 1
+    assert summary["execution_context"]["observed_count"] == 1
+    # Suite totals count diagnostics; execution_context counts affected records.
+    assert summary["execution_context"]["error_record_count"] == 1
+    assert summary["execution_context"]["failure_record_count"] == 1
+
+
 def test_workflow_producer_and_fallback_share_record_contract(tmp_path: Path) -> None:
     raw = tmp_path / "reports/test-telemetry/raw"
     raw.mkdir(parents=True)
@@ -499,6 +518,54 @@ def test_legacy_json_count_is_timed_rows_or_recomputed_with_junit(
     assert (
         rebound["duration_telemetry"]["count_semantics"] == "non_skipped_junit_records"
     )
+
+
+def test_legacy_only_refresh_rejects_before_overwriting_baseline(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    legacy = tmp_path / "slowest.json"
+    legacy.write_text(json.dumps({"total_cases": 1}), encoding="utf-8")
+    baseline = tmp_path / "baseline.yaml"
+    baseline.write_text("existing baseline", encoding="utf-8")
+    rendered = tmp_path / "baseline.md"
+    monkeypatch.setattr(updater, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(
+        "scripts.engineering.common.repo_paths.resolve_output_path", Path
+    )
+    monkeypatch.setattr(
+        updater,
+        "_parse_args",
+        lambda: SimpleNamespace(
+            rebind_current_tree=False,
+            local_manifest=None,
+            source_commit="source",
+            source_run_id="run",
+            source_run_url="",
+            source_branch="main",
+            source_event="push",
+            coverage_percent=85.0,
+            coverage_xml=tmp_path / "missing.xml",
+            coverage_log="",
+            slowest_json=legacy,
+            junit=[],
+            coverage_threshold=None,
+            output_yaml=baseline,
+            output_md=rendered,
+        ),
+    )
+    with pytest.raises(ValueError, match="requires --junit inputs"):
+        updater.main()
+    assert baseline.read_text(encoding="utf-8") == "existing baseline"
+    assert not rendered.exists()
+
+
+def test_source_tree_hash_includes_live_junit_producer(tmp_path: Path) -> None:
+    producer = tmp_path / "scripts/engineering/ci/junit_duration_summary.py"
+    producer.parent.mkdir(parents=True)
+    producer.write_text("first\n", encoding="utf-8")
+    first = updater.compute_test_telemetry_source_tree_sha256(tmp_path)
+    producer.write_text("second\n", encoding="utf-8")
+    assert updater.compute_test_telemetry_source_tree_sha256(tmp_path) != first
 
 
 def test_markerless_canonical_local_json_preserves_non_skipped_semantics(

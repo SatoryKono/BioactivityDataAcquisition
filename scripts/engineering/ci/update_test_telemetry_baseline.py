@@ -51,6 +51,7 @@ def compute_test_telemetry_source_tree_sha256(repo_root: Path = REPO_ROOT) -> st
             "pyproject.toml",
             "configs/quality/test_matrix.yaml",
             ".github/workflows/tests.yml",
+            "scripts/engineering/ci/junit_duration_summary.py",
         )
     )
     digest = hashlib.sha256()
@@ -585,8 +586,9 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
         "## Branch-accurate provenance (#5729)",
         "",
         "- Continuous identity is `source_tree_sha256` over `tests/**/*.py`,",
-        "  `pyproject.toml`, `configs/quality/test_matrix.yaml`, and",
-        "  `.github/workflows/tests.yml`.",
+        "  `pyproject.toml`, `configs/quality/test_matrix.yaml`,",
+        "  `.github/workflows/tests.yml`, and the live JUnit producer",
+        "  `scripts/engineering/ci/junit_duration_summary.py`.",
         "- `measurement_provenance.head` and `test_tree_sha256` retain the captured",
         "  run identity when the current audited test tree advances later.",
         "- Freshness uses live UTC (injectable via `BIOETL_TELEMETRY_REFERENCE_NOW`)",
@@ -679,7 +681,9 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
             "3. Run `python -m scripts.engineering.ci.update_test_telemetry_baseline "
             "--source-commit <sha> --source-run-id <run-id> ...` with either direct "
             "artifacts or fallback diagnostics inputs.",
-            "4. Commit the updated baseline and branch-consumable telemetry "
+            "4. A legacy JSON timed-row count requires raw `--junit` inputs; "
+            "the updater rejects a legacy-only refresh before writing outputs.",
+            "5. Commit the updated baseline and branch-consumable telemetry "
             "summary layer together.",
             "",
         ]
@@ -972,6 +976,14 @@ def main() -> int:
             ),
             source_tree_sha256=compute_test_telemetry_source_tree_sha256(),
         )
+        if (
+            payload["duration_telemetry"]["count_semantics"]
+            == "legacy_positive_duration_rows"
+        ):
+            raise ValueError(
+                "Legacy slowest-tests.json requires --junit inputs before "
+                "refreshing a captured baseline"
+            )
     payload = merge_existing_baseline_supplemental_fields(
         payload,
         existing_yaml_path=output_yaml_path,
