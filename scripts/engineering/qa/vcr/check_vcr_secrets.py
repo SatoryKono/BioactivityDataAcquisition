@@ -46,6 +46,7 @@ HEADER_KEYS = {
 REDACTED_MARKERS = ("redacted", "<redacted>", "***", "example", "dummy", "test")
 _INVALID_MAPPING = "invalid mapping"
 _LFS_POINTER_PREFIX = b"version https://git-lfs.github.com/spec/v1"
+_YAML_MERGE_TAG = "tag:yaml.org,2002:merge"
 _MAX_MERGED_KEYS = 100_000
 _MAX_MERGE_STACK_DEPTH = 64
 
@@ -91,7 +92,7 @@ class _StrictCassetteLoader(yaml.SafeLoader):
                         self._merge_size(child, active)
                         for child in _merge_sources(value)
                     )
-                    if key.tag == "tag:yaml.org,2002:merge"
+                    if key.tag == _YAML_MERGE_TAG
                     else 1
                 )
                 if size > _MAX_MERGED_KEYS:
@@ -103,7 +104,7 @@ class _StrictCassetteLoader(yaml.SafeLoader):
 
     def _charge_merge_expansion(self, node: yaml.MappingNode, size: int) -> None:
         if node not in self._validated_nodes and any(
-            key.tag == "tag:yaml.org,2002:merge" for key, _ in node.value
+            key.tag == _YAML_MERGE_TAG for key, _ in node.value
         ):
             self._expanded_merge_keys += size
             if self._expanded_merge_keys > _MAX_MERGED_KEYS:
@@ -120,7 +121,7 @@ class _StrictCassetteLoader(yaml.SafeLoader):
             for key_node, _ in node.value:
                 key = (
                     merge_key
-                    if key_node.tag == "tag:yaml.org,2002:merge"
+                    if key_node.tag == _YAML_MERGE_TAG
                     else self.construct_object(key_node)
                 )
                 if key in keys:
@@ -336,7 +337,7 @@ def _has_interactions(node: yaml.Node, active: frozenset[int] = frozenset()) -> 
         if isinstance(key, yaml.ScalarNode):
             if key.value == "interactions":
                 return True
-            if key.tag == "tag:yaml.org,2002:merge" and _has_interactions(
+            if key.tag == _YAML_MERGE_TAG and _has_interactions(
                 value, active
             ):
                 return True
