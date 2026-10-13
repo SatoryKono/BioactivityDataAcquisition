@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import asyncio
 import os
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
@@ -14,7 +17,7 @@ from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage import bronze_writer as bronze_writer_module
-from bioetl.infrastructure.storage.bronze import cleanup_posix
+from bioetl.infrastructure.storage.bronze import cleanup_posix, read_cleanup_mixin
 from bioetl.infrastructure.storage.bronze.cleanup_support import (
     bronze_tree_lock,
     destructive_cleanup_supported,
@@ -27,6 +30,56 @@ _APPLY_POSIX = pytest.mark.skipif(
     reason="POSIX anchored destructive capability required (Windows NOT_VERIFIED)",
 )
 CUTOFF = datetime(2024, 6, 1, tzinfo=UTC)
+
+
+@_APPLY_POSIX
+def test_waiting_cleaners_leave_writer_io_executor_available(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Two exclusive waiters cannot consume the writer's two I/O workers."""
+    root = tmp_path / "bronze"
+    root.mkdir()
+    writer = BronzeWriter(base_path=root, logger=NoOpLogger(), metrics=NoOpMetrics())
+    original_lock = bronze_tree_lock
+    waiter_count = 0
+    waiter_guard = threading.Lock()
+
+    async def interleave() -> None:
+        nonlocal waiter_count
+        loop = asyncio.get_running_loop()
+        both_waiting = asyncio.Event()
+        completed_io = threading.Event()
+        loop.set_default_executor(ThreadPoolExecutor(max_workers=2))
+
+        @contextmanager
+        def count_exclusive_waiters(base_path: Path, *, exclusive: bool):
+            nonlocal waiter_count
+            if exclusive:
+                with waiter_guard:
+                    waiter_count += 1
+                    if waiter_count == 2:
+                        loop.call_soon_threadsafe(both_waiting.set)
+            with original_lock(base_path, exclusive=exclusive) as lease:
+                yield lease
+
+        monkeypatch.setattr(
+            read_cleanup_mixin, "bronze_tree_lock", count_exclusive_waiters
+        )
+        cleaners: list[asyncio.Task[dict[str, int]]] = []
+        try:
+            with original_lock(root, exclusive=False):
+                cleaners = [
+                    asyncio.create_task(writer.cleanup_old_files(CUTOFF))
+                    for _ in range(2)
+                ]
+                await asyncio.wait_for(both_waiting.wait(), timeout=5)
+                await asyncio.wait_for(asyncio.to_thread(completed_io.set), timeout=5)
+                assert completed_io.is_set()
+        finally:
+            await asyncio.gather(*cleaners)
+
+    asyncio.run(interleave())
+    assert waiter_count == 2
 
 
 @_APPLY_POSIX

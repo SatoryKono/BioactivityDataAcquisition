@@ -4,9 +4,12 @@
 from __future__ import annotations
 
 import asyncio
+import contextvars
 import os
 import threading
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
@@ -42,7 +45,12 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
 
 
-async def _drain_cleanup_worker(task: asyncio.Task[dict[str, int]]) -> None:
+_CLEANUP_EXECUTOR = ThreadPoolExecutor(
+    max_workers=2, thread_name_prefix="bronze-cleanup"
+)
+
+
+async def _drain_cleanup_worker(task: asyncio.Future[dict[str, int]]) -> None:
     """Wait through repeated cancellation before releasing the caller."""
     while not task.done():
         try:
@@ -374,15 +382,17 @@ class BronzeWriterReadCleanupMixin(
         validate_scope_filter(entity, "entity")
         cutoff_str = cutoff_date.strftime("%Y-%m-%d")
         cancel_requested = threading.Event()
-        worker = asyncio.create_task(
-            asyncio.to_thread(
+        worker = asyncio.get_running_loop().run_in_executor(
+            _CLEANUP_EXECUTOR,
+            partial(
+                contextvars.copy_context().run,
                 self._cleanup_old_files_sync,
                 cutoff_str,
                 dry_run,
                 provider,
                 entity,
                 cancel_requested,
-            )
+            ),
         )
         try:
             result = await asyncio.shield(worker)
