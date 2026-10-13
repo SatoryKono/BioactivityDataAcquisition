@@ -549,6 +549,51 @@ def test_legacy_json_count_is_timed_rows_or_recomputed_with_junit(
     ]
 
 
+def test_explicit_junit_override_uses_only_new_run_inputs(tmp_path: Path) -> None:
+    prior = tmp_path / "slowest.json"
+    prior.write_text(
+        json.dumps(
+            {
+                "total_cases": 1,
+                "top_slowest": [],
+                "execution_context": {
+                    "junit_sources": ["old.xml"],
+                    "junit_source_count": 1,
+                    "worker_mode": "old worker mode",
+                    "explicit_exclusions": [{"lane": "old lane"}],
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    current = tmp_path / "new.xml"
+    current.write_text(
+        '<testsuite tests="2"><testcase name="timed" time="1" />'
+        '<testcase name="zero" time="0" /></testsuite>',
+        encoding="utf-8",
+    )
+    kwargs = {
+        "coverage_xml_path": tmp_path / "missing.xml",
+        "coverage_percent": 90.0,
+        "coverage_log_path": None,
+        "slowest_json_path": prior,
+        "source_branch": "main",
+        "source_commit": "new-source",
+        "source_run_id": "new-run",
+        "coverage_threshold": 85.0,
+        "prefer_junit": True,
+    }
+    with pytest.raises(ValueError, match="requires JUnit telemetry inputs"):
+        build_baseline_payload(junit_paths=[], **kwargs)
+
+    payload = build_baseline_payload(junit_paths=[current], **kwargs)
+    duration = payload["duration_telemetry"]
+    assert duration["total_cases"] == 2
+    assert duration["execution_context"]["junit_sources"] == ["new.xml"]
+    assert "worker_mode" not in duration["execution_context"]
+    assert "explicit_exclusions" not in duration["execution_context"]
+
+
 def test_legacy_only_refresh_rejects_before_overwriting_baseline(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
