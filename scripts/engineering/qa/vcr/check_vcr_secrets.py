@@ -247,6 +247,11 @@ def _tracked_yaml_paths() -> list[Path]:
     result = subprocess.run(
         ["git", "ls-files", "--cached", "-z", "--", "*.yaml", "*.yml"],
         cwd=ROOT,
+        env={
+            key: value
+            for key, value in os.environ.items()
+            if not key.upper().startswith("GIT_")
+        },
         check=True,
         capture_output=True,
     )

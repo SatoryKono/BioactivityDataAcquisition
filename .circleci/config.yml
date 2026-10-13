@@ -3888,6 +3888,7 @@ workflows:
                 - "unit-domain|tests/unit/domain/"
                 - "unit-application|tests/unit/application/"
                 - "unit-infrastructure|tests/unit/infrastructure/"
+                - "unit-vcr-secrets|tests/unit/scripts/qa/test_check_vcr_secrets.py"
                 - "unit-other|tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/application/ --ignore=tests/unit/infrastructure/ --ignore=tests/unit/scripts/ --ignore=tests/unit/repo_backed/"
       - test-integration:
           requires: [classify]

@@ -9,6 +9,7 @@ import pytest
 import yaml
 
 from scripts.engineering.qa.vcr import check_vcr_secrets as checker
+from tests.helpers.isolated_git import isolated_git_env, run_isolated_git
 
 pytestmark = pytest.mark.unit
 
@@ -154,7 +155,13 @@ def test_tracked_cassette_outside_canonical_directory_is_scanned(
             + "<<: *cassette\n"
         )
     outside.write_text(content, encoding="utf-8")
-    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "init", "-q"],
+        cwd=tmp_path,
+        env=isolated_git_env(),
+        check=True,
+        capture_output=True,
+    )
     subprocess.run(
         [
             "git",
@@ -163,6 +170,7 @@ def test_tracked_cassette_outside_canonical_directory_is_scanned(
             "tests/fixtures/http/captured.yaml",
         ],
         cwd=tmp_path,
+        env=isolated_git_env(),
         check=True,
         capture_output=True,
     )
@@ -180,10 +188,17 @@ def test_missing_tracked_cassette_fails_closed(
     vcr_root.mkdir(parents=True)
     path = vcr_root / "missing.yaml"
     path.write_text(_cassette(), encoding="utf-8")
-    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "init", "-q"],
+        cwd=tmp_path,
+        env=isolated_git_env(),
+        check=True,
+        capture_output=True,
+    )
     subprocess.run(
         ["git", "add", "tests/fixtures/vcr/missing.yaml"],
         cwd=tmp_path,
+        env=isolated_git_env(),
         check=True,
         capture_output=True,
     )
@@ -220,9 +235,19 @@ def test_empty_canonical_root_fails_with_other_tracked_yaml_present(
     vcr_root.mkdir(parents=True)
     other = tmp_path / "config.yaml"
     other.write_text("name: unrelated\n", encoding="utf-8")
-    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True, capture_output=True)
     subprocess.run(
-        ["git", "add", "config.yaml"], cwd=tmp_path, check=True, capture_output=True
+        ["git", "init", "-q"],
+        cwd=tmp_path,
+        env=isolated_git_env(),
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "add", "config.yaml"],
+        cwd=tmp_path,
+        env=isolated_git_env(),
+        check=True,
+        capture_output=True,
     )
     monkeypatch.setattr(checker, "ROOT", tmp_path)
     monkeypatch.setattr(checker, "VCR_ROOT", vcr_root)
@@ -252,3 +277,22 @@ def test_malformed_off_catalog_yaml_is_not_silently_excluded(
     diagnostic = capsys.readouterr().err
     assert "unknown.yaml" in diagnostic
     assert "unavailable=1" in diagnostic
+
+
+def test_inventory_cannot_be_redirected_to_another_git_index(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    target = tmp_path / "target"
+    foreign = tmp_path / "foreign"
+    for root, name in ((target, "target.yaml"), (foreign, "foreign.yaml")):
+        root.mkdir()
+        (root / name).write_text("name: safe\n", encoding="utf-8")
+        run_isolated_git(root, "init", "-q")
+        run_isolated_git(root, "add", name)
+    monkeypatch.setattr(checker, "ROOT", target)
+    monkeypatch.setenv("GIT_DIR", str(foreign / ".git"))
+    monkeypatch.setenv("GIT_WORK_TREE", str(foreign))
+    monkeypatch.setenv("GIT_INDEX_FILE", str(foreign / ".git/index"))
+
+    assert checker._tracked_yaml_paths() == [target / "target.yaml"]
