@@ -27,7 +27,26 @@ TELEMETRY_BASELINE_TESTS: tuple[str, ...] = (
     "tests/architecture/test_test_telemetry_governance.py",
 )
 
+PYTHON_DEPENDENCY_TESTS: tuple[str, ...] = (
+    "tests/unit/infrastructure/storage/test_arrow_converter.py",
+    "tests/unit/application/composite/test_join_planner.py",
+    "tests/unit/infrastructure/validation/test_pandera_validator.py",
+    "tests/unit/application/core/test_batch_tracing.py",
+    "tests/unit/infrastructure/observability/test_metrics.py",
+    "tests/unit/tools/test_pytest_option_handling.py",
+    "tests/unit/repo_backed/application/pipelines/test_transformer_snapshots.py",
+    "tests/unit/repo_backed/scripts/ai/agent_tools/test_install_contracts.py",
+    "tests/unit/infrastructure/export/test_debug_export_adapter.py",
+    "tests/architecture/test_docs_build_site_router.py",
+)
+
 AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "pyproject.toml": PYTHON_DEPENDENCY_TESTS,
+    "uv.lock": PYTHON_DEPENDENCY_TESTS,
+    "package.json": ("tests/architecture/test_observability_dashboard_tooling.py",),
+    "package-lock.json": (
+        "tests/architecture/test_observability_dashboard_tooling.py",
+    ),
     ".circleci/config.yml": ("tests/architecture/test_circleci_migration_contract.py",),
     "src/memory/rag/chunking.py": ("tests/unit/memory/test_rag_indexing.py",),
     "scripts/engineering/ci/publish_docker_image.sh": (
