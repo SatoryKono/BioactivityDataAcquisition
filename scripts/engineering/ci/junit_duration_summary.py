@@ -190,14 +190,8 @@ def write_ci_summary(raw_dir: Path, output_dir: Path) -> Summary:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--raw-dir", type=Path, default=Path("reports/test-telemetry/raw")
-    )
-    parser.add_argument(
-        "--output-dir", type=Path, default=Path("reports/test-telemetry")
-    )
-    args = parser.parse_args()
-    write_ci_summary(args.raw_dir, args.output_dir)
+    parser.parse_args()
+    write_ci_summary(Path("reports/test-telemetry/raw"), Path("reports/test-telemetry"))
     return 0
 
 

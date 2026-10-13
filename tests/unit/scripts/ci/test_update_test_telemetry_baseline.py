@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
@@ -239,8 +240,8 @@ def test_junit_suite_level_error_does_not_invent_testcase(tmp_path: Path) -> Non
 
 
 def test_workflow_producer_and_fallback_share_record_contract(tmp_path: Path) -> None:
-    raw = tmp_path / "raw"
-    raw.mkdir()
+    raw = tmp_path / "reports/test-telemetry/raw"
+    raw.mkdir(parents=True)
     (raw / "lane.xml").write_text(
         """<testsuites tests="7" skipped="2" errors="1" failures="1">
   <testsuite tests="7" skipped="2" errors="1" failures="1" time="9">
@@ -255,25 +256,26 @@ def test_workflow_producer_and_fallback_share_record_contract(tmp_path: Path) ->
 </testsuites>""",
         encoding="utf-8",
     )
-    # This is the same module invocation used by tests.yml, with only fixture paths changed.
+    # This is the exact module invocation used by tests.yml, in a fixture cwd.
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(updater.REPO_ROOT)
     result = subprocess.run(
         [
             sys.executable,
             "-m",
             "scripts.engineering.ci.junit_duration_summary",
-            "--raw-dir",
-            str(raw),
-            "--output-dir",
-            str(tmp_path / "output"),
         ],
-        cwd=updater.REPO_ROOT,
+        cwd=tmp_path,
+        env=env,
         capture_output=True,
         text=True,
         check=False,
     )
     assert result.returncode == 0, result.stderr
     produced = json.loads(
-        (tmp_path / "output/slowest-tests.json").read_text(encoding="utf-8")
+        (tmp_path / "reports/test-telemetry/slowest-tests.json").read_text(
+            encoding="utf-8"
+        )
     )
     fallback = _derive_slowest_summary_from_junit_paths([raw / "lane.xml"])
     assert produced["total_cases"] == fallback["total_cases"] == 5
@@ -286,10 +288,39 @@ def test_workflow_producer_and_fallback_share_record_contract(tmp_path: Path) ->
     }
     assert produced["execution_context"]["lane_wall_time_s"] == {"lane.xml": 9.0}
     assert [row["test"] for row in produced["top_slowest"]].count("suite::retry") == 2
-    markdown = (tmp_path / "output/slowest-tests.md").read_text(encoding="utf-8")
+    markdown = (tmp_path / "reports/test-telemetry/slowest-tests.md").read_text(
+        encoding="utf-8"
+    )
     assert "Observed testcase records: `7`" in markdown
     assert "Non-skipped testcase records: `5`" in markdown
     assert "Collected test cases" not in markdown
+
+
+@pytest.mark.parametrize("flag", ["--raw-dir", "--output-dir"])
+def test_workflow_producer_rejects_path_arguments(tmp_path: Path, flag: str) -> None:
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    sentinel = outside / "keep.txt"
+    sentinel.write_text("untouched", encoding="utf-8")
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(updater.REPO_ROOT)
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.ci.junit_duration_summary",
+            flag,
+            str(outside),
+        ],
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 2
+    assert sentinel.read_text(encoding="utf-8") == "untouched"
+    assert not (tmp_path / "reports/test-telemetry").exists()
 
 
 @pytest.mark.parametrize(

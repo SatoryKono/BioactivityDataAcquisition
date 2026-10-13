@@ -166,11 +166,11 @@ def test_tests_workflow_publishes_duration_telemetry_artifact() -> None:
     assert "slowest-tests.md" in workflow and "slowest-tests.json" in workflow, (
         "duration telemetry output should include both markdown and JSON summaries"
     )
-    assert "python -m scripts.engineering.ci.junit_duration_summary " in workflow, (
+    assert "python -m scripts.engineering.ci.junit_duration_summary\n" in workflow, (
         "duration telemetry must call the shared JUnit accounting producer"
     )
-    assert "--raw-dir reports/test-telemetry/raw" in workflow
-    assert "--output-dir reports/test-telemetry" in workflow
+    assert "--raw-dir" not in workflow
+    assert "--output-dir" not in workflow
 
 
 def test_tests_workflow_publishes_test_health_telemetry_artifact() -> None:
