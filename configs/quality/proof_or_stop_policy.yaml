@@ -36,6 +36,7 @@ evidence_kinds:
     command_families:
       - python -m scripts.engineering.qa run-tests
       - python -m pytest
+      - python -m scripts.engineering.dev run-tests all
   review:
     authorized_producers:
       - independent_evaluator

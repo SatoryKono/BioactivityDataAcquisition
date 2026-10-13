@@ -33,7 +33,7 @@ import pytest
 
 from datetime import UTC, datetime
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, call, patch
 
 from bioetl.application.core import runner_flow
 
@@ -403,3 +403,54 @@ def test_pipeline_runner_shares_finalize_failure_exceptions() -> None:
     )
 
     assert runner_exceptions is finalize_exceptions
+
+
+@pytest.mark.parametrize(
+    ("execution_metrics", "backlogs"),
+    [
+        (
+            {
+                "records_fetched": 10,
+                "records_bronze": 7,
+                "records_silver": 4,
+                "records_gold": 1,
+                "records_gold_excluded_by_contract": 1,
+                "records_quarantined": 2,
+            },
+            (3, 2, 2),
+        ),
+        ({"records_fetched": 0, "records_bronze": 0, "records_silver": 0}, (0, 0, 0)),
+        (
+            {
+                "records_fetched": 1,
+                "records_bronze": 2,
+                "records_silver": 1,
+                "records_gold": 3,
+                "records_quarantined": 4,
+            },
+            (0, 4, 0),
+        ),
+    ],
+)
+def test_stage_metrics_keep_order_counts_and_backlog_conditioned_lag(
+    execution_metrics: dict[str, int], backlogs: tuple[int, int, int]
+) -> None:
+    from bioetl.application.core.runner_flow_metrics import record_flow_invariants
+
+    host = _Host(diagnostics={}, execution_metrics=execution_metrics)
+    with patch(
+        "bioetl.application.observability.pipeline_metrics.PipelineMetricsRecorder"
+    ) as recorder:
+        record_flow_invariants(
+            host, current_time_fn=lambda: datetime(2026, 4, 29, 12, 0, 10, tzinfo=UTC)
+        )
+    metrics = recorder.return_value
+    stages = ("ingestion", "validation", "output")
+    assert metrics.record_stage_backlog.call_args_list == [
+        call(run_type="incremental", stage=stage, count=count)
+        for stage, count in zip(stages, backlogs, strict=True)
+    ]
+    assert metrics.record_stage_lag_seconds.call_args_list == [
+        call(run_type="incremental", stage=stage, seconds=10.0 if count > 0 else 0.0)
+        for stage, count in zip(stages, backlogs, strict=True)
+    ]

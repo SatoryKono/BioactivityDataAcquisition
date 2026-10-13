@@ -146,7 +146,7 @@ async def verify_replay_outputs(
 ) -> None:
     """Compare both materialized logical layers against immutable captures."""
     for layer, path in output_paths.items():
-        table = await output_reader.read_table(str(path))
+        table = await output_reader.read_table(str(path.resolve()))
         if not isinstance(table, pa.Table):
             raise TypeError("composite_replay_output_must_be_arrow_table")
         actual = canonical_table(table)

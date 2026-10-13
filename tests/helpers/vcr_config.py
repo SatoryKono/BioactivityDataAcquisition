@@ -3,18 +3,28 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from contextlib import suppress
 from fnmatch import fnmatch
+import logging
 import os
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
-from urllib.parse import parse_qsl, urlparse
+from urllib.parse import parse_qsl, unquote_plus, urlparse
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
 
     import pytest
+
+_LOGGER = logging.getLogger(__name__)
+
+# Canonical secret filter sets installed unconditionally by build_base_vcr_config
+# (CF-030 / REQ-SECRET-003): callers may extend them but never remove them.
+CANONICAL_FILTER_HEADERS: tuple[str, ...] = ("authorization", "x-api-key", "cookie")
+CANONICAL_FILTER_QUERY_PARAMETERS: tuple[str, ...] = ("api_key", "key")
+CANONICAL_RESPONSE_FILTER_HEADERS: frozenset[str] = frozenset(
+    (*CANONICAL_FILTER_HEADERS, "set-cookie", "set-cookie2")
+)
 
 DEFAULT_VCR_MATCH_ON: tuple[str, ...] = (
     "method",
@@ -135,7 +145,12 @@ def build_base_vcr_config(
     ignore_localhost: bool = False,
     record_mode: str | None = None,
 ) -> dict[str, object]:
-    """Build one shared VCR config payload with deterministic defaults."""
+    """Build one shared VCR config payload with deterministic defaults.
+
+    The canonical secret filter sets (CANONICAL_FILTER_HEADERS and
+    CANONICAL_FILTER_QUERY_PARAMETERS) are always installed; caller-provided
+    filters extend them but can never remove them (CF-030 / REQ-SECRET-003).
+    """
     config: dict[str, object] = {
         "record_mode": record_mode or os.environ.get("VCR_RECORD_MODE", "none"),
         "match_on": list(match_on),
@@ -144,16 +159,51 @@ def build_base_vcr_config(
         config["cassette_library_dir"] = str(cassette_library_dir)
     if decode_compressed_response:
         config["decode_compressed_response"] = True
-    before_record_request = _build_before_record_request_sanitizer(
-        filter_headers=filter_headers,
-        filter_query_parameters=filter_query_parameters,
+    config["before_record_request"] = _build_before_record_request_sanitizer(
+        filter_headers=_merge_canonical_filters(
+            CANONICAL_FILTER_HEADERS, filter_headers
+        ),
+        filter_query_parameters=_merge_canonical_filters(
+            CANONICAL_FILTER_QUERY_PARAMETERS,
+            filter_query_parameters,
+        ),
     )
-    if before_record_request is not None:
-        config["before_record_request"] = before_record_request
     config["before_record_response"] = _build_before_record_response_filter()
     if ignore_localhost:
         config["ignore_localhost"] = True
     return config
+
+
+def _merge_canonical_filters(
+    canonical: Sequence[str],
+    extra: Sequence[str] | None,
+) -> tuple[str, ...]:
+    """Return the canonical filter set extended (never reduced) by caller extras."""
+    merged: dict[str, str] = {value.lower(): value for value in canonical}
+    for value in extra or ():
+        merged.setdefault(value.lower(), value)
+    return tuple(merged.values())
+
+
+_sanitizer_failures_logged: set[tuple[str, str]] = set()
+
+
+class VCRRequestSanitizationError(RuntimeError):
+    """Stop a VCR request when secret sanitization cannot be guaranteed."""
+
+
+def _log_sanitizer_failure_once(
+    reason: str, *, event: str = "vcr_request_sanitizer_failed_closed"
+) -> None:
+    """Log each distinct sanitizer failure once per process."""
+    failure_key = (event, reason)
+    if failure_key in _sanitizer_failures_logged:
+        return
+    _sanitizer_failures_logged.add(failure_key)
+    _LOGGER.warning(
+        event,
+        extra={"sanitizer_failure_reason": reason},
+    )
 
 
 def _normalize_vcr_replacements(
@@ -169,56 +219,104 @@ def _build_before_record_request_sanitizer(
     *,
     filter_headers: Sequence[str] | None,
     filter_query_parameters: Sequence[str] | None,
-) -> Callable[[Any], Any] | None:
-    """Build one defensive sanitizer for VCR request replay/record hooks.
+) -> Callable[[Any], Any]:
+    """Build one fail-closed sanitizer for VCR request record hooks.
 
     Some adapter transports expose request-like objects that do not fully satisfy
-    vcrpy's built-in filter expectations. In those cases, vcrpy's synthesized
-    before_record_request chain can raise TypeError during test setup. This
-    helper preserves header/query secret filtering for standard VCR Request
-    objects while degrading to a no-op for malformed or provider-specific
-    request surfaces.
+    vcrpy's built-in filter expectations. On any filter failure, returning None
+    would let vcrpy treat the request as a cassette miss and send it to the real
+    server, even in replay-only mode. This helper therefore logs once and raises
+    an exception so the request stops before either recording or network access
+    (CF-030 / REQ-SECRET-003).
     """
     header_replacements = _normalize_vcr_replacements(filter_headers)
     query_replacements = _normalize_vcr_replacements(filter_query_parameters)
-    if not header_replacements and not query_replacements:
-        return None
 
     def before_record_request(request: Any) -> Any:
+        """Sanitize credentials or raise before VCR can record or send the request."""
         if request is None:
             return None
 
         try:
             from vcr import filters
         except Exception:  # pragma: no cover - vcr import is environment-owned
-            return request
+            _log_sanitizer_failure_once("vcr_import_unavailable")
+            raise VCRRequestSanitizationError("vcr_import_unavailable") from None
 
-        sanitized = request
-        if header_replacements and hasattr(sanitized, "headers"):
-            with suppress(AttributeError, KeyError, TypeError, ValueError):
+        try:
+            sanitized = request
+            if not hasattr(sanitized, "headers") or not hasattr(sanitized, "uri"):
+                _log_sanitizer_failure_once("unsupported_request_surface")
+                raise VCRRequestSanitizationError(
+                    "unsupported_request_surface"
+                ) from None
+            if header_replacements:
                 sanitized = filters.replace_headers(
                     sanitized,
                     replacements=header_replacements,
                 )
 
-        if query_replacements and hasattr(sanitized, "uri"):
-            with suppress(AttributeError, KeyError, TypeError, ValueError):
-                sanitized = filters.replace_query_parameters(
+            if query_replacements:
+                sanitized = _remove_query_parameters_case_insensitive(
                     sanitized,
-                    replacements=query_replacements,
+                    {name for name, _ in query_replacements},
                 )
+        except Exception as error:
+            if isinstance(error, VCRRequestSanitizationError):
+                raise
+            _log_sanitizer_failure_once(type(error).__name__)
+            raise VCRRequestSanitizationError(type(error).__name__) from None
         return sanitized
 
     return before_record_request
 
 
+def _remove_query_parameters_case_insensitive(
+    request: Any, parameter_names: set[str]
+) -> Any:
+    """Remove matching raw query segments without normalizing unrelated values."""
+    parsed_uri = urlparse(request.uri)
+    sensitive_names = {name.casefold() for name in parameter_names}
+    retained_segments = [
+        segment
+        for segment in parsed_uri.query.split("&")
+        if unquote_plus(segment.partition("=")[0]).casefold() not in sensitive_names
+    ]
+    filtered_query = "&".join(retained_segments)
+    if filtered_query == parsed_uri.query:
+        return request
+    filtered_uri = parsed_uri._replace(query=filtered_query).geturl()
+    return type(request)(
+        request.method,
+        filtered_uri,
+        request.body,
+        request.headers,
+    )
+
+
 def _build_before_record_response_filter() -> Callable[[Any], Any]:
-    """Skip transient upstream HTML error pages during cassette recording."""
+    """Remove response secrets and skip transient upstream HTML errors."""
 
     def before_record_response(response: Any) -> Any:
+        """Return a response without secret headers, or drop an unsafe response."""
         if _is_transient_html_server_error(response):
             return None
-        return response
+        if not isinstance(response, Mapping) or not isinstance(
+            response.get("headers"), Mapping
+        ):
+            _log_sanitizer_failure_once(
+                "unsupported_response_surface",
+                event="vcr_response_sanitizer_dropped_response",
+            )
+            return None
+        return {
+            **response,
+            "headers": {
+                key: value
+                for key, value in response["headers"].items()
+                if str(key).lower() not in CANONICAL_RESPONSE_FILTER_HEADERS
+            },
+        }
 
     return before_record_response
 
