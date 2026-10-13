@@ -11,6 +11,9 @@ variables, see [README.md](../../README.md#installation) and `.env.example`.
 |----------|-------------|---------|----------|
 | `BIOETL_ENV` | Environment mode (`dev`, `staging`, `prod`). `test` is not a valid mode. | `dev` | No |
 | `BIOETL_DATA_DIR` | Directory for data storage | `./data` | No |
+| `BIOETL_JSON_ENCODER` | JSON encoder implementation (orjson or stdlib) | `""` | No |
+| `BIOETL_SILVER_DEDUP_TIMEOUT_SECONDS` | Timeout budget in seconds for Silver deduplication executor work | `60.0` | No |
+| `BIOETL_STRICT_MEDALLION` | When True, schema drift in Silver layer raises SchemaEvolutionError | `False` | No |
 
 The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-level`. Settings does not read a log-level environment variable.
 
@@ -45,6 +48,7 @@ The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-lev
 | `BIOETL_PROMETHEUS_URL` | Optional Prometheus base URL for local HTTP probes | unset (`http://localhost:9090` loopback default in health/processed-records) | No |
 | `BIOETL_OBSERVABILITY__TRACING_ENABLED` | Enable OpenTelemetry tracing | `false` | No |
 | `BIOETL_OBSERVABILITY__ALLOW_NOOP_OBSERVABILITY_IN_PROD` | Allow NoOp observability in prod | `false` | No |
+| `BIOETL_PUSHGATEWAY_URL` | Pushgateway address for terminal metrics publication | unset | No |
 
 ## Runtime Identity
 
@@ -57,6 +61,7 @@ The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-lev
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
 | `BIOETL_ENFORCE_REPORT_ROOT_MARKER` | Enforce report root marker for Grafana | `true` (in docker-compose.yml) | No |
+| `BIOETL_REPORT_ROOT` | Run-report root override | unset | No |
 
 ## Windows + WSL Mixed Checkout
 
@@ -66,6 +71,16 @@ The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-lev
 | `BIOETL_PYTEST_WINDOWS_XDIST_WORKERS` | Windows pytest worker count | `1` | No |
 
 ## Security Notes
+
+### PII Security
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `BIOETL_PII_SALT_CURRENT` | Current salt for PII hashing | unset | No |
+| `BIOETL_PII_SALT_NEXT` | Next salt for rotation | unset | No |
+| `BIOETL_PII_SALT_ROTATION_ACTIVE` | Whether salt rotation is active | `False` | No |
+
+### API Security
 
 - **Secrets**: Environment variables only (`BIOETL_{PROVIDER}_{KEY}`)
 - **Never commit secrets**: Store API keys in `.env` file (gitignored)
