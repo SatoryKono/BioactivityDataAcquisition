@@ -90,16 +90,14 @@ class _StageOrigin:
     ino: int
 
 
-def _load_stage_origin(stage_fd: int, stage_name: str) -> _StageOrigin | None:
-    """Read a bounded origin record; an empty pre-journal stage is removable."""
+def _load_stage_origin(stage_fd: int, stage_name: str) -> _StageOrigin:
+    """Read a bounded origin record; never claim an unjournaled stage."""
     try:
         journal_fd = os.open(
             _STAGE_JOURNAL, os.O_RDONLY | _O_NONBLOCK | _O_NOFOLLOW, dir_fd=stage_fd
         )
     except FileNotFoundError:
-        if os.listdir(stage_fd):
-            raise OSError(f"Bronze stage {stage_name} has no origin journal") from None
-        return None
+        raise OSError(f"Bronze stage {stage_name} has no origin journal") from None
     try:
         if not stat.S_ISREG(os.fstat(journal_fd).st_mode):
             raise OSError(f"Bronze stage {stage_name} has a non-file journal")
@@ -129,13 +127,30 @@ def _restore_stage_entry(
     root_fd: int, root_real: Path, stage_fd: int, stage_name: str, origin: _StageOrigin
 ) -> None:
     name = origin.parts[-1]
+    target = root_real.joinpath(*origin.parts)
     try:
         staged = os.stat(name, dir_fd=stage_fd, follow_symlinks=False)
     except FileNotFoundError:
-        return  # Deletion completed before the process stopped.
+        # A restored entry may still need a durable parent before its journal
+        # can be discarded. An absent canonical entry means deletion completed.
+        with _anchored_parent(target, root_real, root_real, root_fd) as (
+            _opened_root,
+            parent_fd,
+            _name,
+            chain,
+        ):
+            if not _chain_is_stable(root_fd, root_real, chain):
+                raise OSError("Bronze stage parent changed") from None
+            try:
+                current = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+            except FileNotFoundError:
+                return
+            if (current.st_dev, current.st_ino) != (origin.dev, origin.ino):
+                raise OSError(f"Bronze stage {stage_name} origin occupied") from None
+            os.fsync(parent_fd)
+        return
     if (staged.st_dev, staged.st_ino) != (origin.dev, origin.ino):
         raise OSError(f"Bronze stage {stage_name} identity changed")
-    target = root_real.joinpath(*origin.parts)
     with _anchored_parent(target, root_real, root_real, root_fd) as (
         _opened_root,
         parent_fd,
@@ -163,10 +178,9 @@ def _recover_stages(root_fd: int, root_real: Path) -> None:
         )
         try:
             origin = _load_stage_origin(stage_fd, stage_name)
-            if origin is not None:
-                _restore_stage_entry(root_fd, root_real, stage_fd, stage_name, origin)
-                os.unlink(_STAGE_JOURNAL, dir_fd=stage_fd)
-                os.fsync(stage_fd)
+            _restore_stage_entry(root_fd, root_real, stage_fd, stage_name, origin)
+            os.unlink(_STAGE_JOURNAL, dir_fd=stage_fd)
+            os.fsync(stage_fd)
         finally:
             os.close(stage_fd)
         os.rmdir(stage_name, dir_fd=root_fd)
@@ -184,6 +198,7 @@ def _private_stage(
     name = f"{_STAGE_PREFIX}{secrets.token_hex(16)}"
     os.mkdir(name, 0o700, dir_fd=root_fd)
     stage_fd = os.open(name, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW, dir_fd=root_fd)
+    completed = False
     try:
         journal_fd = os.open(
             _STAGE_JOURNAL,
@@ -213,20 +228,42 @@ def _private_stage(
         os.fsync(stage_fd)
         os.fsync(root_fd)
         yield stage_fd
+        completed = True
     finally:
-        if relative.name not in os.listdir(stage_fd):  # noqa: PTH208 - stage fd
+        if not completed:
+            os.close(stage_fd)
+        else:
+            _finish_private_stage(root_fd, stage_fd, name, relative, on_stage_error)
+
+
+def _finish_private_stage(
+    root_fd: int,
+    stage_fd: int,
+    name: str,
+    relative: Path,
+    on_stage_error: Callable[[str, OSError], None] | None,
+) -> None:
+    """Report post-commit durability failures without losing removal counts."""
+    stage_error: OSError | None = None
+    try:
+        if relative.name not in os.listdir(stage_fd):
             with suppress(FileNotFoundError):
                 os.unlink(_STAGE_JOURNAL, dir_fd=stage_fd)
             os.fsync(stage_fd)
+    except OSError as exc:
+        stage_error = exc
+    finally:
         os.close(stage_fd)
-        try:
-            os.rmdir(name, dir_fd=root_fd)
-            os.fsync(root_fd)
-        except OSError as exc:
-            # A conflicted artifact may remain in the stage; expose its name.
-            if on_stage_error is None:
-                raise
-            on_stage_error(name, exc)
+    try:
+        os.rmdir(name, dir_fd=root_fd)
+        os.fsync(root_fd)
+    except OSError as exc:
+        # A conflicted artifact may remain in the stage; expose its name.
+        stage_error = stage_error or exc
+    if stage_error is not None:
+        if on_stage_error is None:
+            raise stage_error
+        on_stage_error(name, stage_error)
 
 
 def _restore_staged(name: str, stage_fd: int, parent_fd: int) -> None:
@@ -235,6 +272,7 @@ def _restore_staged(name: str, stage_fd: int, parent_fd: int) -> None:
         os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
     except FileNotFoundError:
         os.rename(name, name, src_dir_fd=stage_fd, dst_dir_fd=parent_fd)
+        os.fsync(parent_fd)
 
 
 def safe_unlink(

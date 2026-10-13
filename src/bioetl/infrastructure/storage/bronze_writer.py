@@ -229,7 +229,7 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
             source_metadata=source_metadata,
         )
         self._validate_bronze_request_inputs(request)
-        self.base_path.mkdir(parents=True, exist_ok=True)
+        await asyncio.to_thread(self.base_path.mkdir, parents=True, exist_ok=True)
         lock = bronze_tree_lock(self.base_path, exclusive=False)
         entering = asyncio.create_task(asyncio.to_thread(lock.__enter__))
         try:

@@ -660,6 +660,50 @@ async def test_stage_cleanup_failure_is_reported_after_file_removal(
 
 
 @_APPLY_POSIX
+def test_final_stage_sync_failure_keeps_removed_count_and_closes_fd(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A post-unlink fsync error is a stage failure, not an undone deletion."""
+    date_dir = _date_dir(tmp_path, "chembl", "activity")
+    target = date_dir / ARTIFACT
+    target.write_bytes(b"owned")
+    original_unlink = cleanup_posix.os.unlink
+    original_fsync = cleanup_posix.os.fsync
+    removed = False
+    failed_fd: int | None = None
+    stage_errors: list[OSError] = []
+
+    def track_unlink(path: object, **kwargs: object) -> None:
+        nonlocal removed
+        original_unlink(path, **kwargs)
+        if path == ARTIFACT:
+            removed = True
+
+    def fail_final_sync(fd: int) -> None:
+        nonlocal failed_fd
+        if removed and failed_fd is None:
+            failed_fd = fd
+            raise OSError("injected final stage sync")
+        original_fsync(fd)
+
+    monkeypatch.setattr(cleanup_posix.os, "unlink", track_unlink)
+    monkeypatch.setattr(cleanup_posix.os, "fsync", fail_final_sync)
+    assert safe_unlink(
+        target,
+        tmp_path,
+        tmp_path,
+        target.stat(),
+        on_stage_error=lambda _name, error: stage_errors.append(error),
+    )
+    assert removed and not target.exists()
+    assert len(stage_errors) == 1
+    assert "final stage sync" in str(stage_errors[0])
+    assert failed_fd is not None
+    with pytest.raises(OSError):
+        os.fstat(failed_fd)
+
+
+@_APPLY_POSIX
 async def test_date_rmdir_failure_preserves_partial_file_counts(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -1392,7 +1436,39 @@ def test_staged_unlink_error_restores_canonical_artifact(
     with pytest.raises(PermissionError, match="injected"):
         safe_unlink(target, tmp_path, tmp_path, target.lstat())
     assert target.read_bytes() == b"x"
+    assert len(list(tmp_path.glob(".bronze-cleanup-stage-*"))) == 1
+    monkeypatch.setattr(cleanup_support.os, "unlink", original_unlink)
+    with bronze_tree_lock(tmp_path, exclusive=True):
+        pass
     assert not list(tmp_path.glob(".bronze-cleanup-stage-*"))
+
+
+@_APPLY_POSIX
+def test_restored_staged_entry_syncs_parent_before_journal_discard(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The destination directory is made durable after restoration."""
+    stage, parent = tmp_path / "stage", tmp_path / "parent"
+    stage.mkdir()
+    parent.mkdir()
+    (stage / "owned").write_bytes(b"retained")
+    stage_fd = os.open(stage, os.O_RDONLY | os.O_DIRECTORY)
+    parent_fd = os.open(parent, os.O_RDONLY | os.O_DIRECTORY)
+    original_fsync = cleanup_posix.os.fsync
+    synced: list[int] = []
+
+    def track_sync(fd: int) -> None:
+        synced.append(fd)
+        original_fsync(fd)
+
+    monkeypatch.setattr(cleanup_posix.os, "fsync", track_sync)
+    try:
+        cleanup_posix._restore_staged("owned", stage_fd, parent_fd)
+    finally:
+        os.close(parent_fd)
+        os.close(stage_fd)
+    assert parent_fd in synced
+    assert (parent / "owned").read_bytes() == b"retained"
 
 
 @_APPLY_POSIX
@@ -1436,6 +1512,17 @@ def test_unjournaled_nonempty_stage_refuses_destructive_cleanup(tmp_path: Path) 
             pytest.fail("lock must refuse before caller can delete")
     assert (date_dir / ARTIFACT).read_bytes() == b"x"
     assert (stage / "unknown").read_bytes() == b"retain"
+
+
+@_APPLY_POSIX
+def test_unjournaled_empty_stage_like_directory_is_preserved(tmp_path: Path) -> None:
+    """A name prefix alone does not establish cleanup ownership."""
+    stage = tmp_path / ".bronze-cleanup-stage-manual"
+    stage.mkdir()
+    with pytest.raises(OSError, match="no origin journal"):
+        with bronze_tree_lock(tmp_path, exclusive=True):
+            pytest.fail("unknown directory must stop destructive recovery")
+    assert stage.is_dir()
 
 
 @_APPLY_POSIX
@@ -1494,6 +1581,9 @@ def test_post_rename_fsync_failure_restores_canonical_name(
     assert isolated and injected
     assert target.lstat().st_ino == original.st_ino
     assert outside.is_dir() and not list(outside.iterdir())
+    assert len(list(tmp_path.glob(".bronze-cleanup-stage-*"))) == 1
+    with bronze_tree_lock(tmp_path, exclusive=True):
+        pass
     assert not list(tmp_path.glob(".bronze-cleanup-stage-*"))
 
 
@@ -1621,5 +1711,5 @@ async def test_writer_uses_locked_root_inode_after_root_rename(
     assert (moved / expected).is_file()
     assert (moved / f"{expected}.meta.json").is_file()
     assert (moved / expected.with_suffix("")).is_file()
-    assert outside.read_bytes() == b"outside"
+    assert (root / "sentinel").read_bytes() == b"outside"
     assert not list(root.rglob("batch_*"))
