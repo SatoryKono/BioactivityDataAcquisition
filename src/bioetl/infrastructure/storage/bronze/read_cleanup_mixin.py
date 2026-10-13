@@ -352,6 +352,14 @@ class BronzeWriterReadCleanupMixin(
                 stats["directories_conflicted"] += 1
                 self._log_cleanup_skip(str(plan.path), "rmdir_conflict")
 
+    async def cleanup_bronze(
+        self,
+        cutoff_date: datetime,
+        dry_run: bool = False,
+    ) -> dict[str, int]:
+        """Implement ``BronzeStoragePort`` cleanup through the shared helper."""
+        return await self.cleanup_old_files(cutoff_date, dry_run=dry_run)
+
     async def cleanup_old_files(
         self,
         cutoff_date: datetime,
