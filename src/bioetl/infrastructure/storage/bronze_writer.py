@@ -251,7 +251,7 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
             raise
         try:
             writing = asyncio.create_task(
-                self._write_bronze_with_tracing(request, entering.result().path)
+                self._write_bronze_with_tracing(request, entering.result().writer_path)
             )
             try:
                 return await asyncio.shield(writing)

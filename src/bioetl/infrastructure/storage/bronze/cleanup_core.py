@@ -37,6 +37,22 @@ class BronzeRootLease:
     path: Path
     fd: int | None
 
+    @property
+    def writer_path(self) -> Path:
+        """Address writes through the locked inode, even if its name is replaced."""
+        if self.fd is None:
+            return self.path
+        locked = os.fstat(self.fd)
+        for directory in ("/proc/self/fd", "/dev/fd"):
+            candidate = Path(directory) / str(self.fd)
+            try:
+                opened = candidate.stat()
+            except OSError:
+                continue
+            if (opened.st_dev, opened.st_ino) == (locked.st_dev, locked.st_ino):
+                return candidate
+        raise NotImplementedError("Bronze writer requires a path to its locked root fd")
+
 
 def destructive_cleanup_supported() -> bool:
     """Only POSIX handle-relative operations with advisory locking qualify."""
