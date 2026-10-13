@@ -139,16 +139,15 @@ interactions:
       date:
       - Tue, 06 Oct 2026 04:36:22 GMT
       ncbi-phid:
-      - 1D3311480BFF76F500005209D100A523.1.1.m_1
+      - REDACTED
       ncbi-sid:
-      - 2BCD4555A729A73F_E6BFSID
+      - REDACTED
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Finatra
       set-cookie:
-      - ncbi_sid=2BCD4555A729A73F_E6BFSID; domain=.nih.gov; path=/; expires=Wed, 06
-        Oct 2027 04:36:22 GMT
+      - REDACTED
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:

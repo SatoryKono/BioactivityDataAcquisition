@@ -374,3 +374,35 @@ def test_sanitizer_failure_latch_keeps_distinct_failures(
         "vcr_request_sanitizer_failed_closed",
         "vcr_response_sanitizer_dropped_response",
     ]
+
+
+@pytest.mark.parametrize("header", ["NCBI-SID", "ncbi-sid", "NcBi-PhId"])
+def test_ncbi_session_headers_are_filtered_on_both_sides(header: str) -> None:
+    config = build_base_vcr_config(filter_headers=["x-extra"])
+    request_hook = cast(Callable[[Any], Any], config["before_record_request"])
+    response_hook = cast(Callable[[Any], Any], config["before_record_response"])
+    request = Request(
+        "GET",
+        "https://example.org/search?term=protein",
+        b"",
+        {header: "synthetic-session", "x-extra": "synthetic-extra"},
+    )
+    response = {
+        "status": {"code": 200},
+        "headers": {
+            header: ["synthetic-session"],
+            "Content-Type": ["application/json"],
+        },
+        "body": {"string": b"{}"},
+    }
+
+    sanitized_request = request_hook(request)
+    sanitized_response = response_hook(response)
+
+    assert not any(
+        name.casefold() == header.casefold() for name in sanitized_request.headers
+    )
+    assert "x-extra" not in sanitized_request.headers
+    assert sanitized_response["headers"] == {"Content-Type": ["application/json"]}
+    assert sanitized_response["body"] == response["body"]
+    assert response["headers"][header] == ["synthetic-session"]
