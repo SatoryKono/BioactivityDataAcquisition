@@ -7,7 +7,8 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 import pytest
 from bioetl.domain.exceptions.base_exceptions import BioETLDomainError
-from bioetl.domain.exceptions.gold_write import GoldWriteCancelled, GoldWriteFailure
+from bioetl.domain.exceptions.gold_write import GoldWriteFailure
+from bioetl.infrastructure.storage.gold.commit_outcome import GoldWriteCancelled
 from bioetl.domain.types.gold_contracts import (
     GoldWriteCategory as Category,
     GoldWriteReceipt,
@@ -364,3 +365,186 @@ def test_receipt_guard_rejects_untyped_success():
 
     with pytest.raises(TypeError):
         require_complete_gold_receipt(None)
+
+
+@pytest.mark.parametrize("failure", [SystemExit(2), KeyboardInterrupt()])
+def test_phase_boundary_preserves_process_exit(failure):
+    from bioetl.infrastructure.storage.gold.commit_outcome import GoldOutcomeBoundary
+
+    with pytest.raises(type(failure)) as found:
+        with GoldOutcomeBoundary(receipt_for("synthetic")):
+            raise failure
+    assert found.value is failure
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("primary_type", [ValueError, asyncio.CancelledError])
+@pytest.mark.parametrize("diagnostic_type", [TypeError, asyncio.CancelledError])
+async def test_dual_failure_logging_cannot_discard_primary_outcome(
+    monkeypatch, primary_type, diagnostic_type
+):
+    host = writer()
+    host._contract_rollout_policy = SimpleNamespace(
+        write_versions=["1.0.0", "2.0.0"], active_version="2.0.0"
+    )
+    committed = []
+    attempts = []
+    primary = primary_type("synthetic second target")
+    diagnostic = diagnostic_type("synthetic diagnostic publication")
+
+    async def single(*, request):
+        attempts.append(request.table_name)
+        if committed:
+            raise primary
+        committed.append(request.table_name)
+        return GoldWriteReceipt(
+            request.table_name,
+            request.contract_version,
+            Category.COMPLETE,
+            (request.table_name,),
+        )
+
+    host._write_single_target = single
+    host.logger.error.side_effect = diagnostic
+    monkeypatch.setattr(
+        impl, "_project_records_for_gold_schema", lambda records, schema: records
+    )
+    wrapper = (
+        GoldWriteCancelled
+        if asyncio.CancelledError in (primary_type, diagnostic_type)
+        else GoldWriteFailure
+    )
+    with pytest.raises(wrapper) as found:
+        await impl._write_dual_targets_impl(
+            host,
+            request=request(),
+            schema_policy=SimpleNamespace(for_version=lambda _: MagicMock()),
+        )
+    assert len(attempts) == 2
+    assert found.value.receipt.committed_targets == tuple(committed)
+    assert found.value.__cause__ is primary
+    assert found.value.diagnostic_error is diagnostic
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("contract_error", [False, True])
+async def test_precommit_validation_preserves_error_classification(contract_error):
+    from bioetl.domain.error_classifier import ErrorClassifier
+    from bioetl.domain.types.gold_contracts import (
+        GoldContractValidationError,
+        GoldRejectReason,
+        GoldRejectReasonCode,
+    )
+
+    original = (
+        GoldContractValidationError(
+            GoldRejectReason(
+                reason_code=GoldRejectReasonCode.CONTRACT_SCHEMA_FAILURE,
+                message="synthetic validation",
+            )
+        )
+        if contract_error
+        else ValueError("synthetic validation")
+    )
+    host = writer()
+    host._prepare_write_gold.side_effect = original
+    with pytest.raises(GoldWriteFailure) as found:
+        await impl._write_single_target_impl(host, request=request())
+    assert ErrorClassifier().classify(found.value) == ErrorClassifier().classify(
+        original
+    )
+    assert found.value.get_reason_code() == "gold_write_validation_failed"
+    assert found.value.receipt.category == Category.NOT_COMMITTED
+    assert found.value.__cause__ is original
+    host._dispatch_write.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("postwrite", [None, ValueError, asyncio.CancelledError])
+async def test_merged_outcome_binds_schema_contract_version(monkeypatch, postwrite):
+    from bioetl.infrastructure.storage.gold import io_execution
+
+    schema = SimpleNamespace(metadata={"contract_version": "3.1.4"})
+    prepared = SimpleNamespace(
+        request=SimpleNamespace(table_name="synthetic", schema=schema)
+    )
+    monkeypatch.setattr(io_execution, "_write_gold_merged_delta", AsyncMock())
+    monkeypatch.setattr(
+        io_execution,
+        "_export_gold_merged_csv",
+        AsyncMock(
+            side_effect=postwrite("synthetic postwrite") if postwrite else None,
+        ),
+    )
+    monkeypatch.setattr(io_execution, "_write_gold_merged_sidecar", AsyncMock())
+    if postwrite:
+        wrapper = (
+            GoldWriteCancelled
+            if postwrite is asyncio.CancelledError
+            else GoldWriteFailure
+        )
+        with pytest.raises(wrapper) as found:
+            await io_execution._complete_gold_merged_write(writer(), prepared)
+        receipt = found.value.receipt
+        assert receipt.category == Category.COMMITTED_POSTWRITE_PENDING
+    else:
+        receipt = await io_execution._complete_gold_merged_write(writer(), prepared)
+        assert receipt.category == Category.COMPLETE
+    assert receipt.contract_version == "3.1.4"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("previous_commit", [False, True])
+@pytest.mark.parametrize("diagnostic_failure", [False, True])
+async def test_dual_validation_classification_depends_on_proven_commits(
+    monkeypatch,
+    previous_commit,
+    diagnostic_failure,
+):
+    from bioetl.domain.error_classifier import ErrorClassifier
+    from bioetl.domain.exceptions.gold_write import GoldWriteValidationFailure
+    from bioetl.domain.types import ErrorType
+
+    host = writer()
+    host._contract_rollout_policy = SimpleNamespace(
+        write_versions=["1.0.0", "2.0.0"],
+        active_version="2.0.0",
+    )
+    attempts = []
+    original = ValueError("synthetic validation")
+
+    async def single(*, request):
+        attempts.append(request.table_name)
+        if previous_commit and len(attempts) == 1:
+            return GoldWriteReceipt(
+                request.table_name,
+                request.contract_version,
+                Category.COMPLETE,
+                (request.table_name,),
+            )
+        raise GoldWriteValidationFailure(
+            GoldWriteReceipt(
+                request.table_name, request.contract_version, Category.NOT_COMMITTED
+            ),
+            original,
+        ) from original
+
+    host._write_single_target = single
+    if diagnostic_failure:
+        host.logger.error.side_effect = TypeError("synthetic diagnostics")
+    monkeypatch.setattr(
+        impl, "_project_records_for_gold_schema", lambda records, schema: records
+    )
+    with pytest.raises(GoldWriteFailure) as found:
+        await impl._write_dual_targets_impl(
+            host,
+            request=request(),
+            schema_policy=SimpleNamespace(for_version=lambda _: MagicMock()),
+        )
+    assert found.value.receipt.category == Category.NOT_COMMITTED
+    assert bool(found.value.receipt.committed_targets) is previous_commit
+    assert found.value.__cause__ is original
+    assert ErrorClassifier().classify(found.value) == (
+        ErrorType.DB_UNAVAILABLE if previous_commit else ErrorType.INVALID_DATA
+    )
+    assert len(attempts) == (2 if previous_commit else 1)

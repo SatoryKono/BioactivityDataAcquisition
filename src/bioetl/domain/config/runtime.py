@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date
-from typing import Literal
+from typing import Literal, TypedDict
 
 from bioetl.domain.types import RunType
 
@@ -214,3 +214,14 @@ class PreflightRuntimeSettings:
 
     health_check_mode: Literal["strict", "probe"] = "strict"
     strict_preflight: bool = True
+
+
+class DebugExportOverrides(TypedDict, total=False):
+    """Typed compatibility bundle for the three existing debug-export keywords."""
+
+    debug_export_enabled: bool
+    debug_export_formats: tuple[str, ...]
+    debug_export_dir: str | None
+
+
+DEFAULT_PREFLIGHT_SETTINGS = PreflightRuntimeSettings()

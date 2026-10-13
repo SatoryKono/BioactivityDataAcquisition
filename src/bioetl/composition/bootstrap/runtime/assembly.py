@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypedDict, Unpack
+from typing import TYPE_CHECKING, Literal, Unpack
 from bioetl.composition.runtime_builders.inputs_runtime_models import (
     ResolvedVacuumSettings,
 )
 from bioetl.domain.config import RuntimeConfig
-from bioetl.domain.config.runtime import PreflightRuntimeSettings
+from bioetl.domain.config import runtime as runtime_config
+from bioetl.domain.config.runtime import DebugExportOverrides, PreflightRuntimeSettings
 from bioetl.domain.types import RunType
 from bioetl.domain.filtering.silver_filter_identity import (
     resolve_silver_filter_compatibility_mode,
@@ -126,17 +127,6 @@ def assemble_cached_bronze_context(
     return ctx.cached_bronze
 
 
-class _DebugExportOverrides(TypedDict, total=False):
-    """Typed compatibility bundle for the three existing debug-export keywords."""
-
-    debug_export_enabled: bool
-    debug_export_formats: tuple[str, ...]
-    debug_export_dir: str | None
-
-
-_DEFAULT_PREFLIGHT_SETTINGS = PreflightRuntimeSettings()
-
-
 def assemble_runtime_config(
     *,
     run_type: RunType,
@@ -148,12 +138,12 @@ def assemble_runtime_config(
     vacuum: ResolvedVacuumSettings,
     skip_gold: bool = False,
     workflow_id: str = "standalone",
-    preflight: PreflightRuntimeSettings = _DEFAULT_PREFLIGHT_SETTINGS,
+    preflight: PreflightRuntimeSettings = runtime_config.DEFAULT_PREFLIGHT_SETTINGS,
     health_check_mode: Literal["strict", "probe"] | None = None,
-    **debug_export: Unpack[_DebugExportOverrides],
+    **debug_export: Unpack[DebugExportOverrides],
 ) -> RuntimeConfig:
     """Build runtime settings, preserving the existing debug-export keywords."""
-    unsupported = debug_export.keys() - _DebugExportOverrides.__annotations__.keys()
+    unsupported = debug_export.keys() - DebugExportOverrides.__annotations__.keys()
     if unsupported:
         raise TypeError(f"Unexpected debug-export options: {sorted(unsupported)}")
     return RuntimeConfig(

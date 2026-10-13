@@ -9,7 +9,8 @@ import pandera.pandas as pa
 import pytest
 from deltalake import DeltaTable
 from bioetl.domain.exceptions.base_exceptions import BioETLDomainError
-from bioetl.domain.exceptions.gold_write import GoldWriteFailure, GoldWriteCancelled
+from bioetl.domain.exceptions.gold_write import GoldWriteFailure
+from bioetl.infrastructure.storage.gold.commit_outcome import GoldWriteCancelled
 from bioetl.domain.types.gold_contracts import GoldWriteCategory as Category
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.gold.runtime_helpers import (

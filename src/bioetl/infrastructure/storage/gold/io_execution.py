@@ -8,8 +8,11 @@ from dataclasses import replace
 from time import perf_counter
 from typing import cast
 
-from bioetl.domain.exceptions.gold_write import GoldWriteCancelled, GoldWriteFailure
-from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
+from bioetl.domain.types.gold_contracts import (
+    GoldWriteCategory,
+    GoldWriteReceipt,
+    resolve_gold_contract_version,
+)
 from bioetl.infrastructure.observability.metrics import (
     GOLD_VALIDATION_FAILURES_TOTAL,
     GOLD_WRITE_ATTEMPTS_TOTAL,
@@ -17,6 +20,8 @@ from bioetl.infrastructure.observability.metrics import (
     GOLD_WRITE_OUTCOMES_TOTAL,
 )
 from bioetl.infrastructure.storage.gold.commit_outcome import (
+    GoldOutcomeBoundary,
+    GoldWriteCancelled,
     await_physical_commit,
     receipt_for,
 )
@@ -60,7 +65,10 @@ async def _write_gold_merged_delta(
                 schema_mode="overwrite",
             )
         ),
-        receipt_for(prepared.request.table_name),
+        receipt_for(
+            prepared.request.table_name,
+            resolve_gold_contract_version(prepared.request.schema),
+        ),
     )
 
 
@@ -96,20 +104,19 @@ async def _write_gold_merged_sidecar(
 async def _complete_gold_merged_write(
     host: _GoldMergedWriteHostProtocol, prepared: _PreparedGoldMergedWrite
 ) -> GoldWriteReceipt:
-    receipt = receipt_for(prepared.request.table_name)
+    receipt = receipt_for(
+        prepared.request.table_name,
+        resolve_gold_contract_version(prepared.request.schema),
+    )
     await _write_gold_merged_delta(host, prepared)
     receipt = replace(
         receipt,
         category=GoldWriteCategory.COMMITTED_POSTWRITE_PENDING,
         committed_targets=(receipt.physical_table,),
     )
-    try:
+    with GoldOutcomeBoundary(receipt):
         await _export_gold_merged_csv(host, prepared)
         await _write_gold_merged_sidecar(host, prepared)
-    except asyncio.CancelledError as original:
-        raise GoldWriteCancelled(receipt) from original
-    except Exception as original:
-        raise GoldWriteFailure(receipt) from original
     return replace(receipt, category=GoldWriteCategory.COMPLETE)
 
 
@@ -138,7 +145,11 @@ async def _execute_gold_merged_write(
     except asyncio.CancelledError as original:
         if isinstance(original, GoldWriteCancelled):
             raise
-        raise GoldWriteCancelled(receipt_for(request.table_name)) from original
+        raise GoldWriteCancelled(
+            receipt_for(
+                request.table_name, resolve_gold_contract_version(request.schema)
+            )
+        ) from original
     except ValueError as error:
         if prepared is None:
             terminal_status = "validation_failure"

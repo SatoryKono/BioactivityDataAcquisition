@@ -106,7 +106,7 @@ async def test_write_gold_merged_delta_and_csv_sidecar_use_fakes(
             table_name="chembl/activity",
             records=[{"id": 1}],
             primary_keys=["id"],
-            schema=MagicMock(),
+            schema=SimpleNamespace(metadata={"contract_version": "1.0.0"}),
             completed_at=None,
             run_id="r1",
             sources_used=None,
@@ -203,7 +203,7 @@ async def test_complete_gold_merged_write_runs_three_stages(
     monkeypatch.setattr(io_exec, "_write_gold_merged_sidecar", _sidecar)
     await io_exec._complete_gold_merged_write(
         SimpleNamespace(),
-        SimpleNamespace(request=SimpleNamespace(table_name="synthetic")),
+        SimpleNamespace(request=SimpleNamespace(table_name="synthetic", schema=None)),
     )  # type: ignore[arg-type]
     assert stages == ["delta", "csv", "sidecar"]
 

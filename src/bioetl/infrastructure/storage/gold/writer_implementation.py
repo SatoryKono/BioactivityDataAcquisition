@@ -7,13 +7,21 @@ from dataclasses import replace
 from time import perf_counter
 from typing import TYPE_CHECKING, cast
 
-from bioetl.domain.exceptions.gold_write import GoldWriteCancelled, GoldWriteFailure
+from bioetl.domain.exceptions.gold_write import (
+    GoldWriteFailure,
+    GoldWriteValidationFailure,
+)
 from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
 from bioetl.infrastructure.observability.metrics import (
     GOLD_VALIDATION_FAILURES_TOTAL,
     GOLD_WRITE_ATTEMPTS_TOTAL,
     GOLD_WRITE_DURATION_SECONDS,
     GOLD_WRITE_OUTCOMES_TOTAL,
+)
+from bioetl.infrastructure.storage.gold.commit_outcome import (
+    GoldDiagnosticsBoundary,
+    GoldOutcomeBoundary,
+    GoldWriteCancelled,
 )
 from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     GoldWriteDispatchContext as _GoldWriteDispatchContext,
@@ -68,50 +76,53 @@ async def _write_single_target_impl(
         GoldWriteCategory.NOT_COMMITTED,
     )
     try:
-        try:
-            prepared = await writer._prepare_write_gold(
-                table_name=request.table_name,
-                records=request.records,
-                mode=request.mode,
-                schema=request.schema,
-                scd_config=request.scd_config,
-                ingestion_ts=request.ingestion_ts,
-                contract_version=request.contract_version,
-            )
-        except Exception as original:
-            if isinstance(original, ValueError):
+        with GoldOutcomeBoundary(
+            receipt, preserve_outcome=True, propagate_cancellation=True
+        ):
+            try:
+                prepared = await writer._prepare_write_gold(
+                    table_name=request.table_name,
+                    records=request.records,
+                    mode=request.mode,
+                    schema=request.schema,
+                    scd_config=request.scd_config,
+                    ingestion_ts=request.ingestion_ts,
+                    contract_version=request.contract_version,
+                )
+            except ValueError as original:
                 terminal_status = "validation_failure"
                 GOLD_VALIDATION_FAILURES_TOTAL.labels(
                     **_gold_validation_metric_labels(request, original)
                 ).inc()
-            raise GoldWriteFailure(receipt) from original
+                raise GoldWriteValidationFailure(receipt, original) from original
         receipt = replace(receipt, category=GoldWriteCategory.UNKNOWN)
-        try:
-            await writer._dispatch_write(
-                _GoldWriteDispatchContext(prepared=prepared, request=request)
-            )
-        except (GoldWriteFailure, GoldWriteCancelled) as outcome:
-            bound = replace(
-                outcome.receipt,
-                physical_table=request.table_name,
-                contract_version=receipt.contract_version,
-                committed_targets=(request.table_name,)
-                if outcome.receipt.category
-                in (
-                    GoldWriteCategory.COMPLETE,
-                    GoldWriteCategory.COMMITTED_POSTWRITE_PENDING,
+        with GoldOutcomeBoundary(
+            receipt, preserve_outcome=True, propagate_cancellation=True
+        ):
+            try:
+                await writer._dispatch_write(
+                    _GoldWriteDispatchContext(prepared=prepared, request=request)
                 )
-                else (),
-            )
-            raise type(outcome)(bound) from (outcome.__cause__ or outcome)
-        except Exception as original:
-            raise GoldWriteFailure(receipt) from original
+            except (GoldWriteFailure, GoldWriteCancelled) as outcome:
+                bound = replace(
+                    outcome.receipt,
+                    physical_table=request.table_name,
+                    contract_version=receipt.contract_version,
+                    committed_targets=(request.table_name,)
+                    if outcome.receipt.category
+                    in (
+                        GoldWriteCategory.COMPLETE,
+                        GoldWriteCategory.COMMITTED_POSTWRITE_PENDING,
+                    )
+                    else (),
+                )
+                raise type(outcome)(bound) from (outcome.__cause__ or outcome)
         receipt = replace(
             receipt,
             category=GoldWriteCategory.COMMITTED_POSTWRITE_PENDING,
             committed_targets=(request.table_name,),
         )
-        try:
+        with GoldOutcomeBoundary(receipt):
             await writer._post_write_gold(
                 _GoldWritePostwriteContext(
                     prepared=prepared,
@@ -123,10 +134,6 @@ async def _write_single_target_impl(
                     schema=request.schema,
                 )
             )
-        except asyncio.CancelledError as original:
-            raise GoldWriteCancelled(receipt) from original
-        except Exception as original:
-            raise GoldWriteFailure(receipt) from original
         terminal_status = "success"
         return replace(receipt, category=GoldWriteCategory.COMPLETE)
     except asyncio.CancelledError as original:
@@ -165,67 +172,14 @@ async def _write_dual_targets_impl(
     for contract_version, physical_table in iterate_write_targets(
         write_versions, write_targets
     ):
-        attempted = False
-        try:
-            target_schema = schema_policy.for_version(contract_version)
-            if target_schema is None:
-                raise ValueError(
-                    f"No Gold schema configured for contract version {contract_version}"
-                )
-            target_request = _GoldWriteRequest(
-                table_name=physical_table,
-                records=_project_records_for_gold_schema(
-                    request.records,
-                    schema=target_schema,
-                ),
-                schema=cast("DataFrameSchema", target_schema),
-                primary_keys=request.primary_keys,
-                mode=request.mode,
-                partition_cols=request.partition_cols,
-                scd_config=request.scd_config,
-                column_order=request.column_order,
-                ingestion_ts=request.ingestion_ts,
-                run_id=request.run_id,
-                silver_refs=request.silver_refs,
-                contract_version=contract_version,
-            )
-            attempted = True
-            receipt = await writer._write_single_target(request=target_request)
-            _validate_target_receipt(receipt, physical_table, contract_version)
-            committed_targets.append(
-                {
-                    "contract_version": contract_version,
-                    "physical_table": physical_table,
-                }
-            )
-        except (Exception, asyncio.CancelledError) as original:
-            receipt = _retain_target_failure(
-                original, physical_table, contract_version, attempted, committed_targets
-            )
-            writer.logger.error(
-                "gold_dual_write_failed",
-                logical_table=request.table_name,
-                failed_contract_version=contract_version,
-                failed_target_table=physical_table,
-                committed_targets=list(committed_targets),
-                partial_dual_write=bool(committed_targets),
-                recovery_action=(
-                    "operator_compensate_committed_targets"
-                    if committed_targets
-                    else "none"
-                ),
-                active_contract_version=writer._contract_rollout_policy.active_version,
-                write_versions=writer._contract_rollout_policy.write_versions,
-            )
-            cause: BaseException = original
-            if (
-                isinstance(original, (GoldWriteFailure, GoldWriteCancelled))
-                and original.__cause__ is not None
-            ):
-                cause = original.__cause__
-            if isinstance(original, asyncio.CancelledError):
-                raise GoldWriteCancelled(receipt) from cause
-            raise GoldWriteFailure(receipt) from cause
+        await _write_dual_target(
+            writer,
+            request,
+            schema_policy,
+            contract_version,
+            physical_table,
+            committed_targets,
+        )
     return GoldWriteReceipt(
         request.table_name,
         writer._contract_rollout_policy.active_version,
@@ -282,3 +236,89 @@ def _retain_target_failure(
         receipt,
         committed_targets=tuple(item["physical_table"] for item in committed_targets),
     )
+
+
+def _record_target_failure(
+    writer: _GoldWriterHost,
+    request: _GoldWriteRequest,
+    original: BaseException,
+    physical_table: str,
+    contract_version: str,
+    attempted: bool,
+    committed_targets: list[dict[str, str]],
+) -> GoldWriteReceipt:
+    """Retain the classified target outcome before publishing failure diagnostics."""
+    assert writer._contract_rollout_policy is not None
+    receipt = _retain_target_failure(
+        original, physical_table, contract_version, attempted, committed_targets
+    )
+    with GoldDiagnosticsBoundary(original, receipt):
+        writer.logger.error(
+            "gold_dual_write_failed",
+            logical_table=request.table_name,
+            failed_contract_version=contract_version,
+            failed_target_table=physical_table,
+            committed_targets=list(committed_targets),
+            partial_dual_write=bool(committed_targets),
+            recovery_action=(
+                "operator_compensate_committed_targets" if committed_targets else "none"
+            ),
+            active_contract_version=writer._contract_rollout_policy.active_version,
+            write_versions=writer._contract_rollout_policy.write_versions,
+        )
+    return receipt
+
+
+async def _write_dual_target(
+    writer: _GoldWriterHost,
+    request: _GoldWriteRequest,
+    schema_policy: GoldSchemaPolicyByVersion,
+    contract_version: str,
+    physical_table: str,
+    committed_targets: list[dict[str, str]],
+) -> None:
+    """Keep one target's attempted state scoped to its own outcome boundary."""
+    attempted = False
+    with GoldOutcomeBoundary(
+        lambda original: _record_target_failure(
+            writer,
+            request,
+            original,
+            physical_table,
+            contract_version,
+            attempted,
+            committed_targets,
+        ),
+        flatten_cause=True,
+    ):
+        target_schema = schema_policy.for_version(contract_version)
+        if target_schema is None:
+            raise ValueError(
+                f"No Gold schema configured for contract version {contract_version}"
+            )
+        target_request = _GoldWriteRequest(
+            table_name=physical_table,
+            records=_project_records_for_gold_schema(
+                request.records,
+                schema=target_schema,
+            ),
+            schema=cast("DataFrameSchema", target_schema),
+            primary_keys=request.primary_keys,
+            mode=request.mode,
+            partition_cols=request.partition_cols,
+            scd_config=request.scd_config,
+            column_order=request.column_order,
+            ingestion_ts=request.ingestion_ts,
+            run_id=request.run_id,
+            silver_refs=request.silver_refs,
+            contract_version=contract_version,
+        )
+        attempted = True
+        receipt = await writer._write_single_target(request=target_request)
+        _validate_target_receipt(receipt, physical_table, contract_version)
+        committed_targets.append(
+            {
+                "contract_version": contract_version,
+                "physical_table": physical_table,
+            }
+        )

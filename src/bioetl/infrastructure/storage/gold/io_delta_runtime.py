@@ -9,9 +9,9 @@ from dataclasses import dataclass
 from types import ModuleType
 from typing import TYPE_CHECKING, TypeVar, cast
 
-from bioetl.domain.exceptions.gold_write import GoldWriteCancelled, GoldWriteFailure
 from bioetl.domain.types.gold_contracts import GoldWriteCategory
 from bioetl.infrastructure.storage.gold.commit_outcome import (
+    GoldOutcomeBoundary,
     await_physical_commit,
     receipt_for,
 )
@@ -131,7 +131,12 @@ async def _execute_prepared_simple_gold_write(
     if host.csv_exporter:
         from typing import Any, cast
 
-        try:
+        with GoldOutcomeBoundary(
+            receipt_for(
+                prepared.request.table_name,
+                category=GoldWriteCategory.COMMITTED_POSTWRITE_PENDING,
+            )
+        ):
             await host.csv_exporter.export(
                 prepared.request.table_name,
                 cast(
@@ -144,20 +149,6 @@ async def _execute_prepared_simple_gold_write(
                     else None
                 ),
             )
-        except asyncio.CancelledError as original:
-            raise GoldWriteCancelled(
-                receipt_for(
-                    prepared.request.table_name,
-                    category=GoldWriteCategory.COMMITTED_POSTWRITE_PENDING,
-                )
-            ) from original
-        except Exception as original:
-            raise GoldWriteFailure(
-                receipt_for(
-                    prepared.request.table_name,
-                    category=GoldWriteCategory.COMMITTED_POSTWRITE_PENDING,
-                )
-            ) from original
 
 
 def _prepare_scd2_gold_write(

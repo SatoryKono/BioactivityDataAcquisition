@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Literal, override
+from typing import Literal, Unpack, override
 
 from deltalake import DeltaTable, write_deltalake
 
@@ -29,6 +29,7 @@ from bioetl.infrastructure.storage.silver.pipeline_helpers import (
 from bioetl.infrastructure.storage.silver.runtime_helpers import (
     SilverWriterRuntimeServices,
     SilverWriterRuntimeServicesRequest,
+    SilverWriterTransformOptions,
 )
 from bioetl.infrastructure.storage.silver.writer_runtime_facade import (
     SilverWriterRuntimeFacade,
@@ -74,10 +75,16 @@ class SilverWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         runtime_request: SilverWriterRuntimeServicesRequest | None = None,
         *,
         clock: ClockPort,
-        transform_version: str | None = None,
-        transform_steps: tuple[str, ...] | None = None,
+        **transform: Unpack[SilverWriterTransformOptions],
     ) -> None:
         """Initialize Silver writer."""
+        unsupported = (
+            transform.keys() - SilverWriterTransformOptions.__annotations__.keys()
+        )
+        if unsupported:
+            raise TypeError(
+                f"Unexpected Silver transform options: {sorted(unsupported)}"
+            )
         if clock is None:
             raise TypeError("SilverWriter requires an explicit ClockPort")
         self._clock = clock
@@ -87,8 +94,8 @@ class SilverWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
             runtime_request = SilverWriterRuntimeServicesRequest(
                 logger=logger,
                 clock=clock,
-                transform_version=transform_version,
-                transform_steps=transform_steps,
+                transform_version=transform.get("transform_version"),
+                transform_steps=transform.get("transform_steps"),
             )
 
         super().__init__(base_path, logger, flat_structure=flat_structure)

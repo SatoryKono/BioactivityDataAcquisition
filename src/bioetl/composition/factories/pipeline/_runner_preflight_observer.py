@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from bioetl.composition.factories.services._preflight import (
+from bioetl.composition.factories.services.preflight import (
     build_preflight_service as _build_preflight_service,
+)
+from bioetl.composition.factories.pipeline._preflight_health_monitor import (
+    build_preflight_health_monitor,
 )
 
 from bioetl.application.observability.observer import (
@@ -21,8 +24,15 @@ if TYPE_CHECKING:
 
 
 def build_preflight_service(context: RunnerAssemblyContext) -> PreflightService:
-    """Delegate startup service construction to the service factory owner."""
-    return _build_preflight_service(context)
+    """Delegate startup construction through the public service seam."""
+    return _build_preflight_service(
+        pipeline=context.pipeline,
+        logger=context.logger_port,
+        yaml_config=context.yaml_config,
+        health_monitor=build_preflight_health_monitor(
+            context.pipeline.services.metrics
+        ),
+    )
 
 
 def build_observer(context: RunnerAssemblyContext) -> PipelineObserver:

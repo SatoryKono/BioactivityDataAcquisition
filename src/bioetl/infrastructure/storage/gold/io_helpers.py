@@ -7,8 +7,8 @@ from collections.abc import Callable
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, Protocol
 
-from bioetl.domain.exceptions.gold_write import GoldWriteCancelled
 from bioetl.infrastructure.storage.gold.commit_outcome import (
+    GoldWriteCancelled,
     await_physical_commit,
     receipt_for,
 )

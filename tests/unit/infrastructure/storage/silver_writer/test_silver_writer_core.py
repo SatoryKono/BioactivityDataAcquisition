@@ -962,3 +962,48 @@ class TestSilverWriterMergePredicate:
             "target.entity_id = source.entity_id"
         )
         assert predicate == expected
+
+
+@pytest.mark.require_silver_validator
+@pytest.mark.parametrize(
+    "version,steps", [(None, None), ("synthetic-v1", ("normalize",))]
+)
+def test_legacy_transform_keywords_remain_supported(
+    tmp_path, noop_logger, version, steps
+):
+    from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+    from bioetl.infrastructure.storage.silver.runtime_helpers import (
+        build_silver_writer_runtime_services,
+    )
+    from bioetl.infrastructure.validation.pandera_validator import NoOpValidator
+
+    clock = fixed_test_clock()
+    services = build_silver_writer_runtime_services(
+        SilverWriterRuntimeServicesRequest(
+            logger=noop_logger, clock=clock, silver_validator=NoOpValidator()
+        )
+    )
+    instance = SilverWriter(
+        base_path=tmp_path,
+        logger=noop_logger,
+        clock=clock,
+        runtime_services=services,
+        transform_version=version,
+        transform_steps=steps,
+    )
+    assert instance._transform_version == version
+    assert instance._transform_steps == (steps or ())
+
+
+@pytest.mark.require_silver_validator
+def test_unknown_transform_keyword_is_rejected(tmp_path, noop_logger):
+    from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+    with pytest.raises(TypeError, match="Unexpected Silver transform options"):
+        SilverWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            clock=fixed_test_clock(),
+            unexpected=True,
+        )
