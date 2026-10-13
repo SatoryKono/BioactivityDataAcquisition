@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-13T19:36:09.056101+00:00",
+  "generated_at": "2026-10-13T20:49:46.266921+00:00",
   "summary": {
-    "total_scripts": 648,
+    "total_scripts": 649,
     "status_counts": {
-      "active": 335,
+      "active": 336,
       "supporting": 313
     },
     "reference_group_coverage": {
       "agents": 11,
       "build": 18,
-      "ci": 70,
+      "ci": 71,
       "docs": 280,
       "other": 50,
-      "scripts": 539,
+      "scripts": 540,
       "skills": 13,
-      "tests": 458
+      "tests": 459
     }
   },
   "scripts": [
@@ -2708,7 +2708,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1970,
+          "line": 1851,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check >> \"$log\" 2>&1"
         },
@@ -6091,13 +6091,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2876,
+          "line": 2895,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3309,
+          "line": 3328,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check"
         },
@@ -6205,7 +6205,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2562,
+          "line": 2581,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
@@ -6411,7 +6411,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2565,
+          "line": 2584,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
@@ -7132,7 +7132,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2533,
+          "line": 2552,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/lint_diagrams.py \"${lint_targets[@]}\" --json > /tmp/diagram-lint.json"
         },
@@ -7189,7 +7189,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2536,
+          "line": 2555,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -7420,13 +7420,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2885,
+          "line": 2904,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3318,
+          "line": 3337,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check"
         },
@@ -7943,13 +7943,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2463,
+          "line": 2482,
           "source_group": "ci",
           "text": "# Export so validate_mermaid_syntax.sh resolve_chrome_headless_shell and"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2497,
+          "line": 2516,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -8095,13 +8095,13 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2877,
+          "line": 2896,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.docs passports check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3310,
+          "line": 3329,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.docs passports check"
         },
@@ -10101,6 +10101,39 @@
       ]
     },
     {
+      "path": "scripts/engineering/ci/junit_duration_summary.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": ".github/workflows/tests.yml",
+          "line": 1741,
+          "source_group": "ci",
+          "text": "python -m scripts.engineering.ci.junit_duration_summary"
+        },
+        {
+          "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.ci.junit_duration_summary import ("
+        },
+        {
+          "path": "tests/architecture/test_ci_test_strategy.py",
+          "line": 169,
+          "source_group": "tests",
+          "text": "assert \"python -m scripts.engineering.ci.junit_duration_summary\\n\" in workflow, ("
+        },
+        {
+          "path": "tests/unit/scripts/ci/test_update_test_telemetry_baseline.py",
+          "line": 29,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.junit_duration_summary import write_ci_summary"
+        }
+      ]
+    },
+    {
       "path": "scripts/engineering/ci/local_test_telemetry.py",
       "type": "py",
       "status": "supporting",
@@ -10115,7 +10148,7 @@
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 920,
+          "line": 938,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.local_test_telemetry import build_local_baseline"
         },
@@ -10302,7 +10335,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 2054,
+          "line": 1935,
           "source_group": "ci",
           "text": "\"python -m scripts.engineering.ci.quality_integral_gate\" \\"
         },
@@ -10560,13 +10593,13 @@
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 598,
+          "line": 603,
           "source_group": "scripts",
           "text": "\"  `python -m scripts.engineering.ci.test_telemetry_provenance --measurement-repo-root\","
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 856,
+          "line": 874,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.test_telemetry_provenance import ("
         },
@@ -10615,13 +10648,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 3135,
+          "line": 3154,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest reports/quality/proof-or-stop/shared/coverage/coverage/manifest.json"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3570,
+          "line": 3589,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest \"$ROOT/coverage/manifest.json\""
         },
@@ -10672,7 +10705,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2818,
+          "line": 2837,
           "source_group": "ci",
           "text": "check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_contract_identity.py"
         },
@@ -10699,7 +10732,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2819,
+          "line": 2838,
           "source_group": "ci",
           "text": "check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_contract_registry.py"
         },
@@ -10759,7 +10792,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2823,
+          "line": 2842,
           "source_group": "ci",
           "text": "check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_registry_dq_refs.py"
         },
@@ -10816,7 +10849,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2822,
+          "line": 2841,
           "source_group": "ci",
           "text": "check_contract uv run --frozen --no-build python -m scripts.engineering.ci.validate_schema_classifier_gate --base-sha \"$BASE\" --head-sha \"$CIRCLE_SHA1\""
         },
@@ -11333,19 +11366,19 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 3061,
+          "line": 3080,
           "source_group": "ci",
           "text": "(\"governance\", \"pretest_guardrails\", [\"bash\", \"scripts/engineering/dev/pretest_guardrails.sh\", \"--mode\", \"check\", \"--scope\", \"governance\"]),"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3516,
+          "line": 3535,
           "source_group": "ci",
           "text": "(\"governance\", \"pretest_guardrails\", [\"bash\", \"scripts/engineering/dev/pretest_guardrails.sh\","
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 2046,
+          "line": 1927,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -12484,7 +12517,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2262,
+          "line": 2281,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.diagnostics audit-structure --path ."
         },
@@ -12860,13 +12893,13 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2238,
+          "line": 2257,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa validate-dq-consistency"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2739,
+          "line": 2758,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-duplication-complexity-exemptions"
         }
@@ -17261,7 +17294,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 18,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
@@ -17300,16 +17333,16 @@
           "text": "payload.get(\"producer\") != \"run_local_coverage_verify.py\""
         },
         {
+          "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
+          "line": 231,
+          "source_group": "scripts",
+          "text": "and local_capture.get(\"producer\") == \"run_local_coverage_verify.py\""
+        },
+        {
           "path": "scripts/engineering/qa/README.md",
           "line": 249,
           "source_group": "scripts",
           "text": "coverage acceptance is based on `python -m scripts.engineering.qa.run_local_coverage_verify`"
-        },
-        {
-          "path": "tests/architecture/test_proof_closeout_workflow_contract.py",
-          "line": 11,
-          "source_group": "tests",
-          "text": "from scripts.engineering.qa.run_local_coverage_verify import SHARDS"
         }
       ]
     },
@@ -17893,31 +17926,31 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2258,
+          "line": 2277,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-cleanliness --strict-untracked --check-local-forbidden-outputs"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2259,
+          "line": 2278,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-cleanup-governance"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2260,
+          "line": 2279,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-root-governance-docs"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2261,
+          "line": 2280,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-root-review-registry"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2297,
+          "line": 2316,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-cleanliness"
         }
@@ -18173,7 +18206,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2364,
+          "line": 2383,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json"
         },
@@ -18230,19 +18263,19 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2263,
+          "line": 2282,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3292,
+          "line": 3311,
           "source_group": "ci",
           "text": "python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3404,
+          "line": 3423,
           "source_group": "ci",
           "text": "\\ scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD\\n\""
         },
@@ -19145,7 +19178,7 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3018,
+          "line": 3037,
           "source_group": "ci",
           "text": "python -m scripts.ops verify-router-managed-image \"$BUILT\""
         },
@@ -22078,7 +22111,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 3414,
+          "line": 3433,
           "source_group": "ci",
           "text": "bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh --attempt-system-install"
         },
@@ -23912,7 +23945,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2267,
+          "line": 2286,
           "source_group": "ci",
           "text": "mkdir -p reports/quality && uv run --frozen --no-build python scripts/ops/support/repo/cleanup_repository.py --dry-run --detail-limit 0 --report-json reports/quality/root-hygiene-cleanup-classificatio"
         },
@@ -24085,19 +24118,19 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2243,
+          "line": 2262,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.schema validate-configs"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2805,
+          "line": 2824,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.schema generate-artifacts --check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2806,
+          "line": 2825,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.schema verify-schema-parity --mode blocking"
         },
