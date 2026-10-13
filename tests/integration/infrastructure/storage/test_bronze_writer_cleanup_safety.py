@@ -478,14 +478,14 @@ def test_safe_unlink_refuses_outside_root(tmp_path: Path) -> None:
 @pytest.mark.parametrize("anchored", [True])
 @pytest.mark.parametrize("flat", [False, True])
 @pytest.mark.parametrize("root_link", [False, True])
-async def test_cleanup_accepts_links_at_or_above_trusted_root(
+async def test_cleanup_refuses_links_at_or_above_trusted_root(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     anchored: bool,
     flat: bool,
     root_link: bool,
 ) -> None:
-    """A trusted root alias must permit both file and directory removal."""
+    """Root or ancestor aliases cannot establish destructive ownership."""
     if anchored and not cleanup_core._ANCHORED_OPS:
         pytest.skip("anchored operations unavailable")
     monkeypatch.setattr(cleanup_core, "_ANCHORED_OPS", anchored)
@@ -500,12 +500,14 @@ async def test_cleanup_accepts_links_at_or_above_trusted_root(
     date_dir = _date_dir(root, *(() if flat else ("chembl", "activity")))
     _write_pair(date_dir, b"payload")
 
-    result = await writer.cleanup_old_files(CUTOFF)
-
-    assert result["files_removed"] == 2
-    assert result["bytes_freed"] == 9
-    assert result["directories_removed"] == 1
-    assert not date_dir.exists()
+    dry = await writer.cleanup_old_files(CUTOFF, dry_run=True)
+    preview = writer.preview_cleanup()
+    assert dry["files_planned"] == 0
+    assert preview["file_count"] == 0
+    with pytest.raises(OSError):
+        await writer.cleanup_old_files(CUTOFF)
+    assert (date_dir / ARTIFACT).read_bytes() == b"payload"
+    assert (date_dir / SIDECAR).read_bytes() == b"{}"
 
 
 @pytest.mark.parametrize("anchored", [True])
@@ -534,6 +536,84 @@ def test_cleanup_reverification_refuses_links_below_trusted_root(
     victim.unlink()
     assert not safe_rmdir(link / OLD_DATE, root, target)
     assert date_dir.is_dir()
+
+
+@pytest.mark.parametrize("linked_ancestor", [False, True])
+async def test_public_cleanup_rejects_linked_root_or_ancestor(
+    tmp_path: Path, linked_ancestor: bool
+) -> None:
+    outside_parent = tmp_path / "outside-parent"
+    outside_root = outside_parent / "bronze"
+    date_dir = _date_dir(outside_root, "chembl", "activity")
+    _write_pair(date_dir, b"outside sentinel")
+    empty_outside = date_dir / "empty"
+    empty_outside.mkdir()
+    if linked_ancestor:
+        root = _symlink_or_skip(tmp_path / "linked-parent", outside_parent) / "bronze"
+    else:
+        root = _symlink_or_skip(tmp_path / "bronze", outside_root)
+    writer = _make_writer(root)
+
+    dry = await writer.cleanup_old_files(CUTOFF, dry_run=True)
+    preview = writer.preview_cleanup()
+    assert dry["files_planned"] == 0
+    assert dry["directories_planned"] == 0
+    assert preview["file_count"] == 0
+    assert not preview["exists"]
+    with pytest.raises((OSError, NotImplementedError)):
+        await writer.cleanup_old_files(CUTOFF)
+    if destructive_cleanup_supported():
+        assert not safe_unlink(
+            root / "chembl" / "activity" / OLD_DATE / ARTIFACT,
+            root,
+            outside_root,
+            (date_dir / ARTIFACT).lstat(),
+        )
+        assert not safe_rmdir(
+            root / "chembl" / "activity" / OLD_DATE / "empty",
+            root,
+            outside_root,
+            empty_outside.lstat(),
+        )
+    assert (date_dir / ARTIFACT).read_bytes() == b"outside sentinel"
+    assert (date_dir / SIDECAR).read_bytes() == b"{}"
+    assert empty_outside.is_dir()
+    assert not (outside_root / ".bronze-cleanup.lock").exists()
+
+
+@_APPLY_POSIX
+async def test_root_replaced_by_link_at_handle_open_preserves_external_tree(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = tmp_path / "bronze"
+    _write_pair(_date_dir(root, "chembl", "activity"))
+    moved = tmp_path / "moved"
+    outside = tmp_path / "outside"
+    outside_date = _date_dir(outside, "chembl", "activity")
+    _write_pair(outside_date, b"outside sentinel")
+    empty_outside = outside_date / "empty"
+    empty_outside.mkdir()
+    original_open = cleanup_core.os.open
+    switched = False
+
+    def replace_before_open(
+        path: object, flags: int, *args: object, **kwargs: object
+    ) -> int:
+        nonlocal switched
+        if path == root.name and kwargs.get("dir_fd") is not None and not switched:
+            switched = True
+            root.rename(moved)
+            os.symlink(outside, root, target_is_directory=True)
+        return original_open(path, flags, *args, **kwargs)
+
+    monkeypatch.setattr(cleanup_core.os, "open", replace_before_open)
+    with pytest.raises(OSError):
+        await _make_writer(root).cleanup_old_files(CUTOFF)
+    assert switched
+    assert (outside_date / ARTIFACT).read_bytes() == b"outside sentinel"
+    assert (outside_date / SIDECAR).read_bytes() == b"{}"
+    assert empty_outside.is_dir()
+    assert (moved / "chembl" / "activity" / OLD_DATE / ARTIFACT).is_file()
 
 
 @_APPLY_POSIX
@@ -898,7 +978,7 @@ def test_component_swap_before_open_does_not_delete_outside(
 
     def swap_at_open(path: object, flags: int, *args: object, **kwargs: object) -> int:
         nonlocal swapped
-        barrier = str(root) if component == "root" else component
+        barrier = root.name if component == "root" else component
         if str(path) == barrier and not swapped:
             swapped = True
             source.rename(source.with_name(f"{source.name}_backup"))
@@ -1372,31 +1452,30 @@ async def test_cleanup_missing_root_never_traverses_later_backfill(
 
 
 @_APPLY_POSIX
-async def test_cleanup_uses_root_pinned_by_lock_after_alias_switch(
+async def test_cleanup_refuses_switched_alias_after_lock(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """A switched alias cannot redirect cleanup to another unlocked root."""
     old_root, new_root = tmp_path / "old", tmp_path / "new"
-    old_date = _date_dir(old_root, "chembl", "activity")
+    alias = tmp_path / "alias"
+    old_date = _date_dir(alias, "chembl", "activity")
     new_date = _date_dir(new_root, "chembl", "activity")
     _write_pair(old_date)
     _write_pair(new_date, b"outside")
-    alias = tmp_path / "alias"
-    _symlink_or_skip(alias, old_root)
     writer = _make_writer(alias)
     original_lock = bronze_tree_lock
 
     @contextmanager
     def switch_after_lock(base_path: Path, *, exclusive: bool):
         with original_lock(base_path, exclusive=exclusive) as locked_root:
-            alias.unlink()
+            alias.rename(old_root)
             alias.symlink_to(new_root, target_is_directory=True)
             yield locked_root
 
     monkeypatch.setattr(read_cleanup_mixin, "bronze_tree_lock", switch_after_lock)
     result = await writer.cleanup_old_files(CUTOFF)
-    assert result["files_removed"] == 2
-    assert not (old_date / ARTIFACT).exists()
+    assert result["files_removed"] == 0
+    assert (old_root / old_date.relative_to(alias) / ARTIFACT).is_file()
     assert (new_date / ARTIFACT).read_bytes() == b"outside"
 
 
@@ -1837,10 +1916,9 @@ async def test_writer_uses_pinned_root_after_alias_switch(
 ) -> None:
     """Payload, sidecar and optional copy stay under the shared-locked root."""
     old_root, new_root = tmp_path / "old", tmp_path / "new"
-    old_root.mkdir()
     new_root.mkdir()
     alias = tmp_path / "alias"
-    _symlink_or_skip(alias, old_root)
+    alias.mkdir()
     writer = BronzeWriter(
         base_path=alias,
         logger=NoOpLogger(),
@@ -1854,7 +1932,7 @@ async def test_writer_uses_pinned_root_after_alias_switch(
     def switch_after_lock(base_path: Path, *, exclusive: bool):
         nonlocal switched
         with original_lock(base_path, exclusive=exclusive) as locked_root:
-            alias.unlink()
+            alias.rename(old_root)
             alias.symlink_to(new_root, target_is_directory=True)
             switched = True
             yield locked_root

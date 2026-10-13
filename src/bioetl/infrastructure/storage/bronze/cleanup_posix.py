@@ -21,6 +21,7 @@ from .cleanup_core import (
     _STAGE_PREFIX,
     _CleanupConflict,
     destructive_cleanup_supported,
+    open_bronze_root_no_follow,
     stat_is_link_or_reparse,
 )
 
@@ -45,11 +46,10 @@ def _anchored_parent(
     fds: list[int] = []
     chain: list[tuple[int, int, str]] = []
     try:
-        opened_root_fd = (
-            os.dup(root_fd)
-            if root_fd is not None
-            else os.open(root_real, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW)
-        )
+        if root_fd is None:  # noqa: SIM108 - keep untrusted root open explicit
+            opened_root_fd = open_bronze_root_no_follow(root_abs)[1]
+        else:
+            opened_root_fd = os.dup(root_fd)
         fds.append(opened_root_fd)
         parent_fd = opened_root_fd
         for name in parts[:-1]:

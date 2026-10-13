@@ -14,6 +14,7 @@ from .cleanup_support import (
     iter_safe_child_dirs,
     iter_writer_scope_dirs,
     real_root,
+    root_components_safe,
     safe_named_child_dir,
     scan_dir_entries,
     validate_scope_filter,
@@ -42,6 +43,8 @@ class BronzeCleanupPreviewMixin:
                 "file_count": 0,
                 "exists": exists and not (provider or entity),
             }
+        if not root_components_safe(self.base_path):
+            return {"path": str(preview_root), "file_count": 0, "exists": False}
         root_abs = Path(os.path.abspath(self.base_path))  # noqa: PTH100
         root_real = real_root(self.base_path)
         date_parents, scope_exists = self._preview_date_parents(

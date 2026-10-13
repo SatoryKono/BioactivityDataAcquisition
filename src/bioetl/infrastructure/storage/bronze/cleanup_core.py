@@ -55,6 +55,29 @@ class BronzeRootLease:
         raise NotImplementedError("Bronze writer requires a path to its locked root fd")
 
 
+def open_bronze_root_no_follow(base_path: Path) -> tuple[Path, int]:
+    """Pin every component of the configured root without following links."""
+    root_abs = Path(os.path.abspath(base_path))  # noqa: PTH100 - preserve links
+    flags = os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW
+    fd = os.open(root_abs.anchor, flags)
+    try:
+        for name in root_abs.parts[1:]:
+            next_fd = os.open(name, flags, dir_fd=fd)
+            os.close(fd)
+            fd = next_fd
+        named = root_abs.lstat()
+        opened = os.fstat(fd)
+        if stat_is_link_or_reparse(named) or (
+            named.st_dev,
+            named.st_ino,
+        ) != (opened.st_dev, opened.st_ino):
+            raise OSError("Bronze root changed while opening its components")
+        return root_abs, fd
+    except BaseException:
+        os.close(fd)
+        raise
+
+
 def valid_bronze_scope_name(value: str) -> bool:
     """The provider/entity naming contract shared by writes and cleanup."""
     return bool(value) and value.replace("_", "").isalnum()

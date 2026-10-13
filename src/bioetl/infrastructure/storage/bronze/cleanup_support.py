@@ -21,12 +21,12 @@ from uuid import UUID
 
 from .cleanup_core import (
     _DONE_PREFIX,
-    _O_DIRECTORY,
     _O_NOFOLLOW,
     _STAGE_PREFIX,
     BronzeRootLease,
     _CleanupConflict,
     destructive_cleanup_supported,
+    open_bronze_root_no_follow,
     stat_is_link_or_reparse,
     valid_bronze_scope_name,
 )
@@ -80,8 +80,7 @@ def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[BronzeRoot
         return
     import fcntl
 
-    root_real = real_root(base_path)
-    root_fd = os.open(root_real, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW)
+    root_real, root_fd = open_bronze_root_no_follow(base_path)
     try:
         lock_fd = os.open(
             ".bronze-cleanup.lock",
@@ -116,6 +115,19 @@ def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[BronzeRoot
 def real_root(base_path: Path) -> Path:
     """Return the fully-resolved trusted root for containment checks."""
     return Path(os.path.realpath(base_path))
+
+
+def root_components_safe(base_path: Path) -> bool:
+    """Reject an observed symlink/reparse ancestor before read-only traversal."""
+    absolute = Path(os.path.abspath(base_path))  # noqa: PTH100 - preserve links
+    try:
+        return all(
+            stat.S_ISDIR(st.st_mode) and not stat_is_link_or_reparse(st)
+            for component in (absolute, *absolute.parents)
+            for st in (component.lstat(),)
+        )
+    except OSError:
+        return False
 
 
 def is_within_root(path: Path, root_real: Path) -> bool:
@@ -297,6 +309,9 @@ def find_old_date_dirs(
     validate_scope_filter(provider, "provider")
     validate_scope_filter(entity, "entity")
     if not base_path.exists():
+        return []
+    if not root_components_safe(base_path):
+        _notify_skip(on_skip, base_path, "link_or_reparse")
         return []
     if flat_structure:
         return _flat_old_date_dirs(
