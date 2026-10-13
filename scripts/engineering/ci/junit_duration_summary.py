@@ -138,8 +138,10 @@ def derive_summary(junit_paths: list[Path]) -> Summary:
     }
 
 
-def write_ci_summary(raw_dir: Path, output_dir: Path) -> Summary:
+def write_ci_summary() -> Summary:
     """Produce the workflow's JSON and Markdown from the same validated records."""
+    raw_dir = Path("reports/test-telemetry/raw")
+    output_dir = Path("reports/test-telemetry")
     summary = derive_summary(sorted(raw_dir.rglob("*.xml")))
     context = summary["execution_context"]
     context["worker_mode"] = (
@@ -191,7 +193,7 @@ def write_ci_summary(raw_dir: Path, output_dir: Path) -> Summary:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.parse_args()
-    write_ci_summary(Path("reports/test-telemetry/raw"), Path("reports/test-telemetry"))
+    write_ci_summary()
     return 0
 
 

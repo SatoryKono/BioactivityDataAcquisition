@@ -342,25 +342,29 @@ def test_nested_suite_aggregates_are_checked_without_double_count(
         _derive_slowest_summary_from_junit_paths([path])
 
 
-def test_zero_only_is_present_telemetry_in_both_reports(tmp_path: Path) -> None:
-    raw = tmp_path / "raw"
-    raw.mkdir()
+def test_zero_only_is_present_telemetry_in_both_reports(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("GITHUB_STEP_SUMMARY", raising=False)
+    raw = tmp_path / "reports/test-telemetry/raw"
+    raw.mkdir(parents=True)
     (raw / "zero.xml").write_text(
         '<testsuite tests="2"><testcase name="zero" time="0" />'
         '<testcase name="missing" /></testsuite>',
         encoding="utf-8",
     )
-    summary = write_ci_summary(raw, tmp_path / "output")
+    summary = write_ci_summary()
     assert summary["total_cases"] == 2
     assert summary["top_slowest"] == []
-    assert "records are present" in (tmp_path / "output/slowest-tests.md").read_text(
-        encoding="utf-8"
-    )
+    assert "records are present" in (
+        tmp_path / "reports/test-telemetry/slowest-tests.md"
+    ).read_text(encoding="utf-8")
     payload = build_baseline_payload(
         coverage_xml_path=tmp_path / "missing.xml",
         coverage_percent=None,
         coverage_log_path=None,
-        slowest_json_path=tmp_path / "output/slowest-tests.json",
+        slowest_json_path=tmp_path / "reports/test-telemetry/slowest-tests.json",
         junit_paths=[],
         source_branch="main",
         source_commit="source",
@@ -388,18 +392,21 @@ def test_zero_only_is_present_telemetry_in_both_reports(tmp_path: Path) -> None:
 )
 def test_empty_and_all_skipped_telemetry_are_distinct(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
     cases: str,
     observed: int,
     skipped: int,
     message: str,
 ) -> None:
-    raw = tmp_path / "raw"
-    raw.mkdir()
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("GITHUB_STEP_SUMMARY", raising=False)
+    raw = tmp_path / "reports/test-telemetry/raw"
+    raw.mkdir(parents=True)
     (raw / "lane.xml").write_text(
         f'<testsuite tests="{observed}" skipped="{skipped}">{cases}</testsuite>',
         encoding="utf-8",
     )
-    summary = write_ci_summary(raw, tmp_path / "output")
+    summary = write_ci_summary()
     assert summary["execution_context"]["observed_count"] == observed
     assert summary["execution_context"]["skipped_count"] == skipped
     assert summary["total_cases"] == 0
@@ -408,7 +415,7 @@ def test_empty_and_all_skipped_telemetry_are_distinct(
         coverage_xml_path=tmp_path / "missing.xml",
         coverage_percent=None,
         coverage_log_path=None,
-        slowest_json_path=tmp_path / "output/slowest-tests.json",
+        slowest_json_path=tmp_path / "reports/test-telemetry/slowest-tests.json",
         junit_paths=[],
         source_branch="main",
         source_commit="source",
@@ -419,15 +426,19 @@ def test_empty_and_all_skipped_telemetry_are_distinct(
     assert message in build_branch_telemetry_reports(payload)["slowest-tests.md"]
 
 
-def test_missing_junit_source_is_not_an_empty_measurement(tmp_path: Path) -> None:
-    summary = write_ci_summary(tmp_path / "missing-raw", tmp_path / "output")
+def test_missing_junit_source_is_not_an_empty_measurement(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("GITHUB_STEP_SUMMARY", raising=False)
+    summary = write_ci_summary()
     assert summary["total_cases"] is None
     assert summary["execution_context"]["junit_source_count"] == 0
     payload = build_baseline_payload(
         coverage_xml_path=tmp_path / "missing.xml",
         coverage_percent=None,
         coverage_log_path=None,
-        slowest_json_path=tmp_path / "output/slowest-tests.json",
+        slowest_json_path=tmp_path / "reports/test-telemetry/slowest-tests.json",
         junit_paths=[],
         source_branch="main",
         source_commit="source",
