@@ -126,7 +126,7 @@ def _lock_family(packages: list[dict[str, Any]], dependency: str) -> set[str]:
 
 
 def _import_consumers(
-    imports: dict[str, set[str]], owners: dict[str, list[str]], family: set[str]
+    imports: dict[str, set[str]], owners: Mapping[str, list[str]], family: set[str]
 ) -> set[str]:
     modules = {
         module
