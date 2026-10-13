@@ -109,9 +109,9 @@ def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[None]:
         try:
             if not stat.S_ISREG(os.fstat(lock_fd).st_mode):
                 raise OSError("Bronze cleanup lock is not a regular file")
-            fcntl.flock(  # type: ignore[attr-defined]  # POSIX-only runtime gate
+            getattr(fcntl, "flock")(
                 lock_fd,
-                (fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH),  # type: ignore[attr-defined]
+                getattr(fcntl, "LOCK_EX" if exclusive else "LOCK_SH"),
             )
             yield
         finally:

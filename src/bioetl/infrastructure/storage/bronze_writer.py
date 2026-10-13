@@ -62,22 +62,30 @@ __all__ = ["BRONZE_WRITE_ERRORS", "BronzeWriter"]
 BRONZE_ATOMIC_WRITE_CONTRACT = "atomic_write_bytes via bronze.write_execution"
 
 
-async def _wait_for_task_completion[T](task: asyncio.Task[T]) -> None:
-    """Finish shielded I/O, then propagate any cancellation to the caller."""
-    cancelled: asyncio.CancelledError | None = None
+async def _drain_shielded_task[T](task: asyncio.Task[T]) -> None:
+    """Wait through repeated cancellation while an I/O task still owns its lock."""
     while not task.done():
         try:
             await asyncio.shield(task)
-        except asyncio.CancelledError as exc:
-            cancelled = exc
-            current = asyncio.current_task()
-            if current is not None:
-                current.uncancel()
-        except Exception:
-            # The caller retrieves the completed task's result or exception.
-            pass
-    if cancelled is not None:
-        raise cancelled
+        except BaseException as exc:
+            if isinstance(exc, asyncio.CancelledError):
+                current = asyncio.current_task()
+                if current is not None:
+                    current.uncancel()
+            elif not task.done():
+                raise
+
+
+async def _wait_for_task_completion[T](task: asyncio.Task[T]) -> None:
+    """Finish shielded I/O, then propagate any cancellation to the caller."""
+    try:
+        await asyncio.shield(task)
+    except asyncio.CancelledError:
+        await _drain_shielded_task(task)
+        raise
+    except Exception:
+        # A shielded task raises only after completion; the caller owns its result.
+        return
 
 
 class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
