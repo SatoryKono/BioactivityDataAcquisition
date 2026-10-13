@@ -343,3 +343,27 @@ def test_yaml_merge_cannot_hide_duplicate_keys_or_effective_secrets(
     findings = checker._scan_file(path)
     assert findings
     assert all("synthetic-session" not in finding for finding in findings)
+
+
+@pytest.mark.parametrize(
+    ("width", "depth", "limit", "rejected"),
+    [(4, 3, 32, True), (8, 8, 100_000, True), (1, 65, 100_000, False)],
+)
+def test_merge_alias_expansion_budget_fails_closed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    width: int,
+    depth: int,
+    limit: int,
+    rejected: bool,
+) -> None:
+    monkeypatch.setattr(checker, "_MAX_MERGED_KEYS", limit)
+    content = "base: &base {method: GET}\n"
+    previous = "base"
+    for level in range(depth):
+        name = f"level{level}"
+        content += f"{name}: &{name} {{<<: [{', '.join(['*' + previous] * width)}]}}\n"
+        previous = name
+    path = tmp_path / "cassette.yaml"
+    path.write_text(content + _cassette(), encoding="utf-8")
+    assert bool(checker._scan_file(path)) is rejected

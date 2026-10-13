@@ -46,10 +46,26 @@ HEADER_KEYS = {
 REDACTED_MARKERS = ("redacted", "<redacted>", "***", "example", "dummy", "test")
 _INVALID_MAPPING = "invalid mapping"
 _LFS_POINTER_PREFIX = b"version https://git-lfs.github.com/spec/v1"
+_MAX_MERGED_KEYS = 100_000
+_MAX_MERGE_STACK_DEPTH = 64
 
 
 class _DuplicateKeyError(yaml.YAMLError):
     """A YAML mapping has more than one value for the same key."""
+
+
+class _AliasExpansionError(yaml.YAMLError):
+    """YAML merge expansion exceeds the bounded metadata parser budget."""
+
+
+def _merge_sources(node: yaml.Node) -> list[yaml.MappingNode]:
+    children = node.value if isinstance(node, yaml.SequenceNode) else [node]
+    sources: list[yaml.MappingNode] = []
+    for child in children:
+        if not isinstance(child, yaml.MappingNode):
+            raise ValueError("invalid merge source")
+        sources.append(child)
+    return sources
 
 
 class _StrictCassetteLoader(yaml.SafeLoader):
@@ -58,8 +74,34 @@ class _StrictCassetteLoader(yaml.SafeLoader):
     def __init__(self, stream: Any) -> None:
         super().__init__(stream)
         self._validated_nodes: set[yaml.MappingNode] = set()
+        self._merge_sizes: dict[yaml.MappingNode, int] = {}
+
+    def _merge_size(self, node: yaml.MappingNode, active: set[yaml.MappingNode]) -> int:
+        if node in active or len(active) >= _MAX_MERGE_STACK_DEPTH:
+            raise _AliasExpansionError
+        if node in self._merge_sizes:
+            return self._merge_sizes[node]
+        active.add(node)
+        try:
+            size = 0
+            for key, value in node.value:
+                size += (
+                    sum(
+                        self._merge_size(child, active)
+                        for child in _merge_sources(value)
+                    )
+                    if key.tag == "tag:yaml.org,2002:merge"
+                    else 1
+                )
+                if size > _MAX_MERGED_KEYS:
+                    raise _AliasExpansionError
+            self._merge_sizes[node] = size
+            return size
+        finally:
+            active.remove(node)
 
     def flatten_mapping(self, node: yaml.MappingNode) -> None:
+        self._merge_size(node, set())
         # Check literal keys before PyYAML expands merge precedence. A node can
         # be reused by several aliases after its merge entries were flattened.
         if node not in self._validated_nodes:
@@ -122,6 +164,10 @@ def _parse_document(path: Path, raw: bytes) -> tuple[object | None, list[str]]:
     try:
         document = yaml.load(raw, Loader=_StrictCassetteLoader)
         _reject_alias_cycles(document, set(), set())
+    except _AliasExpansionError:
+        return None, [
+            _location(path, "-", "yaml", "merge alias expansion limit exceeded")
+        ]
     except _DuplicateKeyError:
         return None, [_location(path, "-", "yaml", "duplicate mapping key")]
     except (yaml.YAMLError, UnicodeError, ValueError, TypeError, RecursionError):
