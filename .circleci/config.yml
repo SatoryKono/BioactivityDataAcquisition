@@ -2222,6 +2222,9 @@ jobs:
               --junitxml="reports/test-telemetry/junit.${NAME}.xml"
       - store_test_results:
           path: reports/test-telemetry
+      - store_artifacts:
+          path: reports/test-telemetry
+          destination: integration-junit
 
   # Mirrors tests.yml `dq-consistency-gate`.
   dq-consistency:
