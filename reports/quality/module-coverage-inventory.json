@@ -1,6 +1,6 @@
 {
   "additive_coverage_xml_path": "reports/quality/pr12215-new-modules-coverage.xml",
-  "additive_coverage_xml_sha256": "ee9127e13944a71a6951af6566723e060b864df41ac686c95fac5f5b8b87367a",
+  "additive_coverage_xml_sha256": "fdf8632a2b24e92e9dbabae7409c2c73522923df3a5010a74ff204e2d1cc95b0",
   "additive_measured_module_count": 2,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
@@ -22641,12 +22641,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 47,
-      "executable_lines": 47,
+      "covered_lines": 46,
+      "executable_lines": 46,
       "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.gold.cancellation",
       "path": "src/bioetl/infrastructure/storage/gold/cancellation.py",
-      "source_lines": 100
+      "source_lines": 99
     },
     {
       "coverage_percent": 100.0,
@@ -48353,12 +48353,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 47,
-      "executable_lines": 47,
+      "covered_lines": 46,
+      "executable_lines": 46,
       "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.gold.cancellation",
       "path": "src/bioetl/infrastructure/storage/gold/cancellation.py",
-      "source_lines": 100
+      "source_lines": 99
     },
     {
       "coverage_percent": 100.0,
