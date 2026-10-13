@@ -14,6 +14,7 @@ from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage import bronze_writer as bronze_writer_module
+from bioetl.infrastructure.storage.bronze import cleanup_posix
 from bioetl.infrastructure.storage.bronze.cleanup_support import (
     bronze_tree_lock,
     destructive_cleanup_supported,
@@ -26,6 +27,51 @@ _APPLY_POSIX = pytest.mark.skipif(
     reason="POSIX anchored destructive capability required (Windows NOT_VERIFIED)",
 )
 CUTOFF = datetime(2024, 6, 1, tzinfo=UTC)
+
+
+@_APPLY_POSIX
+async def test_failed_completion_marker_retains_date_for_stage_recovery(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """An uncommitted stage journal must retain its parent after unlink."""
+    root = tmp_path / "bronze"
+    date_dir = root / "chembl" / "activity" / "2024-01-01"
+    date_dir.mkdir(parents=True)
+    artifact = "batch_2024-01-01_12345678-1234-5678-1234-567812345678.jsonl.zst"
+    (date_dir / artifact).write_bytes(b"owned")
+    writer = BronzeWriter(base_path=root, logger=NoOpLogger(), metrics=NoOpMetrics())
+    original_rename = cleanup_posix.os.rename
+    failed = False
+
+    def fail_completion_marker(src: object, dst: object, **kwargs: object) -> None:
+        nonlocal failed
+        if (
+            src == "origin.json"
+            and str(dst).startswith(".bronze-cleanup-done-")
+            and not failed
+        ):
+            failed = True
+            raise PermissionError("completion marker denied")
+        original_rename(src, dst, **kwargs)
+
+    monkeypatch.setattr(cleanup_posix.os, "rename", fail_completion_marker)
+    first = await writer.cleanup_old_files(CUTOFF)
+
+    assert failed
+    assert first["files_removed"] == 1
+    assert first["bytes_freed"] == 5
+    assert first["directories_failed"] == 1
+    assert first["directories_skipped"] == 1
+    assert first["directories_removed"] == 0
+    assert date_dir.is_dir() and not list(date_dir.iterdir())
+    assert list(root.glob(".bronze-cleanup-stage-*"))
+
+    monkeypatch.setattr(cleanup_posix.os, "rename", original_rename)
+    second = await writer.cleanup_old_files(CUTOFF)
+    assert second["files_removed"] == 0
+    assert second["directories_removed"] == 1
+    assert not date_dir.exists()
+    assert not list(root.glob(".bronze-cleanup-stage-*"))
 
 
 @pytest.mark.skipif(

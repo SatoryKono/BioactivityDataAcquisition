@@ -263,6 +263,7 @@ class BronzeWriterReadCleanupMixin(
         """Apply the exact planned inodes and retain partial-result accounting."""
         failed_before = stats["files_failed"]
         conflicted_before = stats["files_conflicted"]
+        stage_failed_before = stats["directories_failed"]
 
         def on_stage_error(name: str, _error: OSError) -> None:
             stats["directories_failed"] += 1
@@ -276,6 +277,7 @@ class BronzeWriterReadCleanupMixin(
         if (
             stats["files_failed"] != failed_before
             or stats["files_conflicted"] != conflicted_before
+            or stats["directories_failed"] != stage_failed_before
         ):
             stats["directories_skipped"] += 1
             return
