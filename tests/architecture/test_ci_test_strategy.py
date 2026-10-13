@@ -166,19 +166,11 @@ def test_tests_workflow_publishes_duration_telemetry_artifact() -> None:
     assert "slowest-tests.md" in workflow and "slowest-tests.json" in workflow, (
         "duration telemetry output should include both markdown and JSON summaries"
     )
-    assert "junit_testcase_duration_sum_s" in workflow, (
-        "summed testcase durations must use an aggregate-duration label"
+    assert "python -m scripts.engineering.ci.junit_duration_summary " in workflow, (
+        "duration telemetry must call the shared JUnit accounting producer"
     )
-    assert "lane_wall_time_s" in workflow, (
-        "duration telemetry must publish per-lane JUnit suite wall times"
-    )
-    assert '"lane_wall_time_source": "junit_testsuite_time"' in workflow, (
-        "lane wall time must come from JUnit testsuite duration, not summed xdist cases"
-    )
-    assert 'suite.attrib.get("time", "0")' in workflow, (
-        "lane wall time must come from JUnit suite duration, not summed xdist "
-        "testcase durations"
-    )
+    assert "--raw-dir reports/test-telemetry/raw" in workflow
+    assert "--output-dir reports/test-telemetry" in workflow
 
 
 def test_tests_workflow_publishes_test_health_telemetry_artifact() -> None:

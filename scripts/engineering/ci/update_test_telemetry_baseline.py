@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import math
 import re
 import xml.etree.ElementTree as ET
 from datetime import UTC, datetime
@@ -16,6 +15,9 @@ from typing import Any
 import yaml
 
 from scripts.engineering.common.repo_paths import REPO_ROOT
+from scripts.engineering.ci.junit_duration_summary import (
+    derive_summary as _derive_slowest_summary_from_junit_paths,
+)
 
 BRANCH_TELEMETRY_DIR = Path("reports/test-telemetry")
 CANONICAL_COVERAGE_XML = "reports/coverage/coverage.xml"
@@ -215,114 +217,64 @@ def _read_slowest_summary(path: Path) -> TelemetryPayload:
             )
     else:
         execution_context = {}
+    # The canonical local 17-shard producer already counted non-skipped JUnit
+    # records before CI gained this marker. Its provenance distinguishes it
+    # from the old inline CI producer's positive-duration-row total.
+    local_capture = payload.get("measurement_provenance", {})
+    local_skipped_count = execution_context.get("skipped_count")
+    canonical_local_count = (
+        execution_context.get("count_semantics") is None
+        and isinstance(total_cases, int)
+        and not isinstance(total_cases, bool)
+        and total_cases >= 0
+        and isinstance(local_skipped_count, int)
+        and not isinstance(local_skipped_count, bool)
+        and local_skipped_count >= 0
+        and payload.get("source_event") == "local_coverage_verify"
+        and isinstance(local_capture, dict)
+        and local_capture.get("producer") == "run_local_coverage_verify.py"
+        and local_capture.get("complete") is True
+        and execution_context.get("executed_count") == total_cases
+    )
+    if execution_context.get("count_semantics") == "non_skipped_junit_records":
+        observed = execution_context.get("observed_count")
+        skipped = execution_context.get("skipped_count")
+        executed = execution_context.get("executed_count")
+        sources = execution_context.get("junit_source_count")
+        if not all(
+            isinstance(value, int) and not isinstance(value, bool) and value >= 0
+            for value in (observed, skipped, executed, sources)
+        ):
+            raise ValueError(f"Inconsistent non-skipped JUnit counts in {path}")
+        assert isinstance(observed, int) and isinstance(skipped, int)
+        assert isinstance(executed, int) and isinstance(sources, int)
+        if (
+            skipped > observed
+            or observed - skipped != executed
+            or (sources == 0 and (total_cases is not None or observed != 0))
+            or (
+                sources > 0
+                and (
+                    not isinstance(total_cases, int)
+                    or isinstance(total_cases, bool)
+                    or total_cases < 0
+                    or total_cases != executed
+                )
+            )
+        ):
+            raise ValueError(f"Inconsistent non-skipped JUnit counts in {path}")
+    elif canonical_local_count:
+        execution_context["count_semantics"] = "non_skipped_junit_records"
+    else:
+        # Pre-parity CI JSON used total_cases for timed rows only.
+        execution_context["count_semantics"] = "legacy_positive_duration_rows"
+        execution_context.pop("executed_count", None)
     return {
-        "total_cases": total_cases if isinstance(total_cases, int) else None,
+        "total_cases": total_cases
+        if isinstance(total_cases, int) and not isinstance(total_cases, bool)
+        else None,
         "top_slowest": top_slowest,
         "execution_context": execution_context,
-    }
-
-
-def _validate_junit_aggregate(
-    root: ET.Element, field: str, actual: int, junit_path: Path
-) -> None:
-    declared = root.get(field)
-    if declared is None:
-        return
-    try:
-        declared_count = int(declared)
-    except ValueError as error:
-        raise ValueError(
-            f"Invalid JUnit {field} testcase count in {junit_path}"
-        ) from error
-    if declared_count < 0 or declared_count != actual:
-        raise ValueError(
-            f"JUnit {field} testcase count disagrees with records in "
-            f"{junit_path}: declared {declared_count}, observed {actual}"
-        )
-
-
-def _validated_junit_cases(junit_path: Path) -> list[ET.Element]:
-    root = ET.parse(junit_path).getroot()
-    if root.tag not in {"testsuite", "testsuites"}:
-        raise ValueError(f"Unsupported JUnit root in {junit_path}: {root.tag}")
-    cases = list(root.iter("testcase"))
-    skipped_count = sum(case.find("skipped") is not None for case in cases)
-    _validate_junit_aggregate(root, "tests", len(cases), junit_path)
-    _validate_junit_aggregate(root, "skipped", skipped_count, junit_path)
-    return cases
-
-
-def _junit_duration(
-    testcase: ET.Element, full_name: str, junit_path: Path
-) -> float | None:
-    raw_duration = testcase.get("time")
-    if raw_duration is None:
-        return None
-    try:
-        duration = float(raw_duration)
-    except ValueError as error:
-        raise ValueError(
-            f"Invalid JUnit testcase duration for {full_name} in {junit_path}"
-        ) from error
-    if not math.isfinite(duration) or duration < 0:
-        raise ValueError(
-            f"Invalid JUnit testcase duration for {full_name} in {junit_path}"
-        )
-    return duration
-
-
-def _junit_case_measurement(
-    testcase: ET.Element, junit_path: Path
-) -> tuple[bool, TelemetryPayload | None]:
-    case_name = testcase.attrib.get("name", "")
-    class_name = testcase.attrib.get("classname", "")
-    full_name = f"{class_name}::{case_name}" if class_name else case_name
-    skipped = testcase.find("skipped") is not None
-    if skipped and any(
-        testcase.find(status) is not None for status in ("failure", "error")
-    ):
-        raise ValueError(f"Conflicting JUnit testcase status: {full_name}")
-    duration = _junit_duration(testcase, full_name, junit_path)
-    if skipped or duration is None or duration == 0:
-        return not skipped, None
-    return True, {
-        "source": junit_path.name,
-        "test": full_name or UNKNOWN_LABEL,
-        "duration_s": round(duration, 3),
-    }
-
-
-def _derive_slowest_summary_from_junit_paths(
-    junit_paths: list[Path],
-) -> TelemetryPayload:
-    """Count non-skipped JUnit records; rank only measured positive durations.
-
-    Each ``testcase`` element is one observed record, including rerun attempts
-    with the same name. JUnit does not prove that an error reached a test body.
-    """
-    rows: list[TelemetryPayload] = []
-    executed_count = 0
-    for junit_path in junit_paths:
-        if not junit_path.exists():
-            continue
-        for testcase in _validated_junit_cases(junit_path):
-            executed, row = _junit_case_measurement(testcase, junit_path)
-            executed_count += executed
-            if row is not None:
-                rows.append(row)
-
-    rows.sort(key=lambda row: float(row["duration_s"]), reverse=True)
-    return {
-        "total_cases": executed_count,
-        "top_slowest": rows[:25],
-        "execution_context": {
-            "junit_source_count": len([path for path in junit_paths if path.exists()]),
-            "junit_sources": [path.name for path in junit_paths if path.exists()],
-            "executed_count": executed_count,
-            "worker_mode": "caller-declared; see source run metadata",
-            "junit_testcase_duration_sum_s": {},
-            "explicit_exclusions": [],
-        },
     }
 
 
@@ -427,7 +379,14 @@ def build_baseline_payload(
         resolved_coverage_percent = _read_coverage_percent_from_log(coverage_log_path)
 
     slowest_summary = _read_slowest_summary(slowest_json_path)
-    if prefer_junit or (slowest_summary["total_cases"] is None and junit_paths):
+    if prefer_junit or (
+        junit_paths
+        and (
+            slowest_summary["total_cases"] is None
+            or slowest_summary["execution_context"].get("count_semantics")
+            == "legacy_positive_duration_rows"
+        )
+    ):
         slowest_summary = _derive_slowest_summary_from_junit_paths(junit_paths)
     top_slowest = slowest_summary["top_slowest"]
     status = (
@@ -473,6 +432,9 @@ def build_baseline_payload(
         },
         "duration_telemetry": {
             "total_cases": slowest_summary["total_cases"],
+            "count_semantics": slowest_summary.get("execution_context", {}).get(
+                "count_semantics", "unknown"
+            ),
             "top_slowest": top_slowest,
             "top_slowest_zones": _summarize_slowest_zones(top_slowest),
             "execution_context": slowest_summary.get("execution_context", {}),
@@ -523,6 +485,19 @@ def _format_slowest_zone_table_rows(rows: object, *, limit: int = 10) -> list[st
     return lines
 
 
+def _no_duration_message(duration: TelemetryPayload) -> str:
+    context = duration.get("execution_context", {})
+    if context.get("junit_source_count") == 0:
+        return "No JUnit telemetry sources are available."
+    if "observed_count" in context:
+        if context["observed_count"] > 0:
+            return "JUnit testcase records are present; none has a non-skipped positive duration."
+        return "JUnit sources contain no testcase records."
+    if duration.get("total_cases") is not None:
+        return "No non-skipped positive testcase durations were measured."
+    return "No committed slow-test telemetry is available yet."
+
+
 def render_baseline_markdown(payload: TelemetryPayload) -> str:
     coverage = payload["coverage"]
     duration = payload["duration_telemetry"]
@@ -536,6 +511,21 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
     )
     total_cases = duration["total_cases"]
     total_cases_display = "pending" if total_cases is None else str(total_cases)
+    legacy_count = duration.get("count_semantics") == "legacy_positive_duration_rows"
+    count_label = (
+        "Legacy positive-duration testcase rows"
+        if legacy_count
+        else "Total executed test cases"
+    )
+    count_explanation = (
+        ["- Legacy timed-row count cannot establish non-skipped testcase records."]
+        if legacy_count
+        else [
+            "- Executed means observed non-skipped JUnit testcase records, not",
+            "  collection count or distinct logical tests. Error records can describe",
+            "  setup or collection failures rather than a test body run.",
+        ]
+    )
     freshness_guard = payload["freshness_guard"]
 
     lines = [
@@ -633,10 +623,8 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
         "",
         "## Duration Telemetry",
         "",
-        f"- Total executed test cases: `{total_cases_display}`",
-        "- Executed means observed non-skipped JUnit testcase records, not",
-        "  collection count or distinct logical tests. Error records can describe",
-        "  setup or collection failures rather than a test body run.",
+        f"- {count_label}: `{total_cases_display}`",
+        *count_explanation,
         "- Only measured positive durations enter the slowest-test ranking.",
         "  Older CI timed-row totals are not directly comparable with this count.",
         f"- Freshness guard: `<={int(freshness_guard['max_age_days'])} days` via "
@@ -654,10 +642,7 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
     if top_slowest_lines:
         lines.extend(top_slowest_lines)
     else:
-        lines.append(
-            "No committed slow-test baseline is present yet. Refresh from a main-branch "
-            "CI run using `python -m scripts.engineering.ci.update_test_telemetry_baseline`."
-        )
+        lines.append(_no_duration_message(duration))
 
     lines.extend(["", "### Top Slow Zones", ""])
     zone_lines = _format_slowest_zone_table_rows(duration.get("top_slowest_zones"))
@@ -692,6 +677,21 @@ def render_branch_telemetry_markdown(payload: TelemetryPayload) -> str:
     duration = payload["duration_telemetry"]
     total_cases = duration["total_cases"]
     total_cases_display = "pending" if total_cases is None else str(total_cases)
+    legacy_count = duration.get("count_semantics") == "legacy_positive_duration_rows"
+    count_label = (
+        "Legacy positive-duration testcase rows"
+        if legacy_count
+        else "Executed test cases"
+    )
+    count_explanation = (
+        ["Legacy timed-row count cannot establish non-skipped testcase records."]
+        if legacy_count
+        else [
+            "Executed counts non-skipped JUnit records, including zero or missing",
+            "duration; duplicate identities remain separate records. This is not a",
+            "collection count. Older CI timed-row totals are not directly comparable.",
+        ]
+    )
 
     lines = [
         "# Slowest Tests",
@@ -701,10 +701,8 @@ def render_branch_telemetry_markdown(payload: TelemetryPayload) -> str:
         f"Source event: `{payload.get('source_event') or 'pending'}`",
         f"Source run URL: `{payload.get('source_run_url') or 'pending'}`",
         f"Refresh status: `{payload['refresh_status']}`",
-        f"Executed test cases: `{total_cases_display}`",
-        "Executed counts non-skipped JUnit records, including zero or missing",
-        "duration; duplicate identities remain separate records. This is not a",
-        "collection count. Older CI timed-row totals are not directly comparable.",
+        f"{count_label}: `{total_cases_display}`",
+        *count_explanation,
         f"Freshness guard: `<={int(payload['freshness_guard']['max_age_days'])} days`",
         "",
     ]
@@ -716,7 +714,7 @@ def render_branch_telemetry_markdown(payload: TelemetryPayload) -> str:
     if top_slowest_lines:
         lines.extend(top_slowest_lines)
     else:
-        lines.append("No committed slow-test telemetry is available yet.")
+        lines.append(_no_duration_message(duration))
     lines.extend(["", "## Top Slow Zones", ""])
     zone_lines = _format_slowest_zone_table_rows(duration.get("top_slowest_zones"))
     if zone_lines:
@@ -769,6 +767,11 @@ def build_branch_telemetry_reports(payload: TelemetryPayload) -> dict[str, str]:
                 "refreshed_at_utc": payload["refreshed_at_utc"],
                 "refresh_status": payload["refresh_status"],
                 "total_cases": duration["total_cases"],
+                **(
+                    {"count_semantics": duration["count_semantics"]}
+                    if "count_semantics" in duration
+                    else {}
+                ),
                 "top_slowest": top_slowest,
                 "top_slowest_tests": top_slowest,
                 "top_slowest_zones": duration["top_slowest_zones"],

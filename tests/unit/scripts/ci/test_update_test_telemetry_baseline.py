@@ -15,6 +15,8 @@ from __future__ import annotations
 import copy
 import json
 import subprocess
+import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -23,6 +25,7 @@ import yaml
 
 from scripts.engineering.ci import test_telemetry_provenance as provenance
 from scripts.engineering.ci import update_test_telemetry_baseline as updater
+from scripts.engineering.ci.junit_duration_summary import write_ci_summary
 
 from scripts.engineering.ci.update_test_telemetry_baseline import (
     build_branch_telemetry_reports,
@@ -233,6 +236,373 @@ def test_junit_suite_level_error_does_not_invent_testcase(tmp_path: Path) -> Non
     payload = _derive_slowest_summary_from_junit_paths([junit_path])
     assert payload["total_cases"] == 0
     assert payload["top_slowest"] == []
+
+
+def test_workflow_producer_and_fallback_share_record_contract(tmp_path: Path) -> None:
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    (raw / "lane.xml").write_text(
+        """<testsuites tests="7" skipped="2" errors="1" failures="1">
+  <testsuite tests="7" skipped="2" errors="1" failures="1" time="9">
+    <testcase classname="suite" name="positive" time="2" />
+    <testcase classname="suite" name="zero" time="0" />
+    <testcase classname="suite" name="missing" />
+    <testcase classname="suite" name="skip" time="5"><skipped /></testcase>
+    <testcase classname="suite" name="skip_error" time="4"><skipped /><error /></testcase>
+    <testcase classname="suite" name="retry" time="1"><failure /></testcase>
+    <testcase classname="suite" name="retry" time="1.5" />
+  </testsuite>
+</testsuites>""",
+        encoding="utf-8",
+    )
+    # This is the same module invocation used by tests.yml, with only fixture paths changed.
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.ci.junit_duration_summary",
+            "--raw-dir",
+            str(raw),
+            "--output-dir",
+            str(tmp_path / "output"),
+        ],
+        cwd=updater.REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    produced = json.loads(
+        (tmp_path / "output/slowest-tests.json").read_text(encoding="utf-8")
+    )
+    fallback = _derive_slowest_summary_from_junit_paths([raw / "lane.xml"])
+    assert produced["total_cases"] == fallback["total_cases"] == 5
+    assert produced["top_slowest"] == fallback["top_slowest"]
+    assert produced["execution_context"]["observed_count"] == 7
+    assert produced["execution_context"]["skipped_count"] == 2
+    assert produced["execution_context"]["error_record_count"] == 1
+    assert produced["execution_context"]["junit_testcase_duration_sum_s"] == {
+        "lane.xml": 13.5
+    }
+    assert produced["execution_context"]["lane_wall_time_s"] == {"lane.xml": 9.0}
+    assert [row["test"] for row in produced["top_slowest"]].count("suite::retry") == 2
+    markdown = (tmp_path / "output/slowest-tests.md").read_text(encoding="utf-8")
+    assert "Observed testcase records: `7`" in markdown
+    assert "Non-skipped testcase records: `5`" in markdown
+    assert "Collected test cases" not in markdown
+
+
+@pytest.mark.parametrize(
+    "xml",
+    [
+        '<testsuites><testsuite tests="2"><testcase name="one" /></testsuite></testsuites>',
+        '<testsuites><testsuite skipped="1"><testcase name="one" /></testsuite></testsuites>',
+        '<testsuites tests="1"><testsuite tests="1" errors="1"><testcase name="one" /></testsuite></testsuites>',
+        '<testsuites tests="2"><testsuite tests="1"><testcase name="one" /></testsuite></testsuites>',
+    ],
+)
+def test_nested_suite_aggregates_are_checked_without_double_count(
+    tmp_path: Path,
+    xml: str,
+) -> None:
+    path = tmp_path / "bad.xml"
+    path.write_text(xml, encoding="utf-8")
+    with pytest.raises(ValueError, match="testcase count"):
+        _derive_slowest_summary_from_junit_paths([path])
+
+
+def test_zero_only_is_present_telemetry_in_both_reports(tmp_path: Path) -> None:
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    (raw / "zero.xml").write_text(
+        '<testsuite tests="2"><testcase name="zero" time="0" />'
+        '<testcase name="missing" /></testsuite>',
+        encoding="utf-8",
+    )
+    summary = write_ci_summary(raw, tmp_path / "output")
+    assert summary["total_cases"] == 2
+    assert summary["top_slowest"] == []
+    assert "records are present" in (tmp_path / "output/slowest-tests.md").read_text(
+        encoding="utf-8"
+    )
+    payload = build_baseline_payload(
+        coverage_xml_path=tmp_path / "missing.xml",
+        coverage_percent=None,
+        coverage_log_path=None,
+        slowest_json_path=tmp_path / "output/slowest-tests.json",
+        junit_paths=[],
+        source_branch="main",
+        source_commit="source",
+        source_run_id="run",
+        coverage_threshold=85.0,
+    )
+    assert "records are present" in render_baseline_markdown(payload)
+    assert (
+        "records are present"
+        in build_branch_telemetry_reports(payload)["slowest-tests.md"]
+    )
+
+
+@pytest.mark.parametrize(
+    ("cases", "observed", "skipped", "message"),
+    [
+        ("", 0, 0, "no testcase records"),
+        (
+            '<testcase name="skip" time="2"><skipped /></testcase>',
+            1,
+            1,
+            "records are present",
+        ),
+    ],
+)
+def test_empty_and_all_skipped_telemetry_are_distinct(
+    tmp_path: Path,
+    cases: str,
+    observed: int,
+    skipped: int,
+    message: str,
+) -> None:
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    (raw / "lane.xml").write_text(
+        f'<testsuite tests="{observed}" skipped="{skipped}">{cases}</testsuite>',
+        encoding="utf-8",
+    )
+    summary = write_ci_summary(raw, tmp_path / "output")
+    assert summary["execution_context"]["observed_count"] == observed
+    assert summary["execution_context"]["skipped_count"] == skipped
+    assert summary["total_cases"] == 0
+    assert summary["top_slowest"] == []
+    payload = build_baseline_payload(
+        coverage_xml_path=tmp_path / "missing.xml",
+        coverage_percent=None,
+        coverage_log_path=None,
+        slowest_json_path=tmp_path / "output/slowest-tests.json",
+        junit_paths=[],
+        source_branch="main",
+        source_commit="source",
+        source_run_id="run",
+        coverage_threshold=85.0,
+    )
+    assert message in render_baseline_markdown(payload)
+    assert message in build_branch_telemetry_reports(payload)["slowest-tests.md"]
+
+
+def test_missing_junit_source_is_not_an_empty_measurement(tmp_path: Path) -> None:
+    summary = write_ci_summary(tmp_path / "missing-raw", tmp_path / "output")
+    assert summary["total_cases"] is None
+    assert summary["execution_context"]["junit_source_count"] == 0
+    payload = build_baseline_payload(
+        coverage_xml_path=tmp_path / "missing.xml",
+        coverage_percent=None,
+        coverage_log_path=None,
+        slowest_json_path=tmp_path / "output/slowest-tests.json",
+        junit_paths=[],
+        source_branch="main",
+        source_commit="source",
+        source_run_id="run",
+        coverage_threshold=85.0,
+    )
+    assert payload["refresh_status"] == "pending_initial_refresh"
+    assert "No JUnit telemetry sources are available" in render_baseline_markdown(
+        payload
+    )
+
+
+def test_legacy_json_count_is_timed_rows_or_recomputed_with_junit(
+    tmp_path: Path,
+) -> None:
+    legacy = tmp_path / "slowest.json"
+    legacy.write_text(
+        json.dumps(
+            {
+                "total_cases": 1,
+                "top_slowest": [],
+                "execution_context": {"executed_count": 1},
+            }
+        ),
+        encoding="utf-8",
+    )
+    raw = tmp_path / "junit.xml"
+    raw.write_text(
+        '<testsuite tests="2"><testcase name="timed" time="1" />'
+        '<testcase name="zero" time="0" /></testsuite>',
+        encoding="utf-8",
+    )
+    kwargs = {
+        "coverage_xml_path": tmp_path / "missing.xml",
+        "coverage_percent": None,
+        "coverage_log_path": None,
+        "slowest_json_path": legacy,
+        "source_branch": "main",
+        "source_commit": "source",
+        "source_run_id": "run",
+        "coverage_threshold": 85.0,
+    }
+    old = build_baseline_payload(junit_paths=[], **kwargs)
+    assert old["duration_telemetry"]["total_cases"] == 1
+    assert (
+        old["duration_telemetry"]["count_semantics"] == "legacy_positive_duration_rows"
+    )
+    assert "executed_count" not in old["duration_telemetry"]["execution_context"]
+    assert "Legacy positive-duration testcase rows: `1`" in render_baseline_markdown(
+        old
+    )
+    assert (
+        "Legacy positive-duration testcase rows: `1`"
+        in build_branch_telemetry_reports(old)["slowest-tests.md"]
+    )
+    rebound = build_baseline_payload(junit_paths=[raw], **kwargs)
+    assert rebound["duration_telemetry"]["total_cases"] == 2
+    assert (
+        rebound["duration_telemetry"]["count_semantics"] == "non_skipped_junit_records"
+    )
+
+
+def test_markerless_canonical_local_json_preserves_non_skipped_semantics(
+    tmp_path: Path,
+) -> None:
+    local = tmp_path / "local.json"
+    local.write_text(
+        json.dumps(
+            {
+                "source_event": "local_coverage_verify",
+                "source_run_id": "local-measurement",
+                "measurement_provenance": {
+                    "producer": "run_local_coverage_verify.py",
+                    "complete": True,
+                },
+                "total_cases": 2,
+                "top_slowest": [],
+                "execution_context": {"executed_count": 2, "skipped_count": 1},
+            }
+        ),
+        encoding="utf-8",
+    )
+    summary = _read_slowest_summary(local)
+    assert summary["total_cases"] == 2
+    assert summary["execution_context"]["executed_count"] == 2
+    assert (
+        summary["execution_context"]["count_semantics"] == "non_skipped_junit_records"
+    )
+
+
+@pytest.mark.parametrize(
+    ("bad_total", "observed", "skipped", "executed"),
+    [(2, 3, 2, 2), (True, 1, 0, 1), (1.0, 1, 0, 1)],
+)
+def test_marked_json_rejects_inconsistent_record_counts(
+    tmp_path: Path,
+    bad_total: object,
+    observed: int,
+    skipped: int,
+    executed: int,
+) -> None:
+    summary = tmp_path / "marked.json"
+    summary.write_text(
+        json.dumps(
+            {
+                "total_cases": bad_total,
+                "execution_context": {
+                    "count_semantics": "non_skipped_junit_records",
+                    "observed_count": observed,
+                    "skipped_count": skipped,
+                    "executed_count": executed,
+                    "junit_source_count": 1,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="Inconsistent non-skipped JUnit counts"):
+        _read_slowest_summary(summary)
+
+
+def test_marked_local_capture_also_validates_record_counts(tmp_path: Path) -> None:
+    summary = tmp_path / "local-marked.json"
+    summary.write_text(
+        json.dumps(
+            {
+                "source_event": "local_coverage_verify",
+                "measurement_provenance": {
+                    "producer": "run_local_coverage_verify.py",
+                    "complete": True,
+                },
+                "total_cases": 1,
+                "execution_context": {
+                    "count_semantics": "non_skipped_junit_records",
+                    "observed_count": 4,
+                    "skipped_count": 0,
+                    "executed_count": 1,
+                    "junit_source_count": 1,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="Inconsistent non-skipped JUnit counts"):
+        _read_slowest_summary(summary)
+
+
+def test_incomplete_junit_inputs_cannot_recompute_legacy_count(tmp_path: Path) -> None:
+    legacy = tmp_path / "legacy.json"
+    legacy.write_text(
+        json.dumps({"total_cases": 1, "top_slowest": []}), encoding="utf-8"
+    )
+    present = tmp_path / "present.xml"
+    present.write_text(
+        '<testsuite tests="1"><testcase name="zero" time="0" /></testsuite>',
+        encoding="utf-8",
+    )
+    with pytest.raises(FileNotFoundError, match="Missing JUnit telemetry input"):
+        build_baseline_payload(
+            coverage_xml_path=tmp_path / "missing.xml",
+            coverage_percent=None,
+            coverage_log_path=None,
+            slowest_json_path=legacy,
+            junit_paths=[present, tmp_path / "missing.xml"],
+            source_branch="main",
+            source_commit="source",
+            source_run_id="run",
+            coverage_threshold=85.0,
+        )
+
+
+def test_pytest_skip_with_teardown_error_is_not_executed(tmp_path: Path) -> None:
+    test_file = tmp_path / "test_skip_teardown.py"
+    test_file.write_text(
+        "import pytest\n"
+        "@pytest.fixture\n"
+        "def failing_teardown():\n"
+        "    yield\n"
+        "    raise RuntimeError('teardown failed')\n"
+        "def test_skip(failing_teardown):\n"
+        "    pytest.skip('skip after fixture setup')\n",
+        encoding="utf-8",
+    )
+    junit = tmp_path / "actual-pytest.xml"
+    result = subprocess.run(
+        [sys.executable, "-m", "pytest", str(test_file), "-q", f"--junitxml={junit}"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode != 0
+    root = ET.parse(junit).getroot()
+    case = next(root.iter("testcase"))
+    assert case.find("skipped") is not None
+    assert case.find("error") is not None
+    suite = root.find("testsuite")
+    assert suite is not None
+    assert suite.get("tests") == "1"
+    assert suite.get("skipped") == "1"
+    assert suite.get("errors") == "1"
+    summary = _derive_slowest_summary_from_junit_paths([junit])
+    assert summary["execution_context"]["observed_count"] == 1
+    assert summary["execution_context"]["skipped_count"] == 1
+    assert summary["execution_context"]["error_record_count"] == 1
+    assert summary["total_cases"] == 0
 
 
 def test_summarize_slowest_zones_groups_cases_by_module() -> None:
