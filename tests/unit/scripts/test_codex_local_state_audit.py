@@ -214,6 +214,74 @@ def test_parse_rule_rejects_evasion_bypass(
 
 
 @pytest.mark.parametrize(
+    "prefix",
+    (
+        "f",
+        "F",
+        "fr",
+        "fR",
+        "Fr",
+        "FR",
+        "rf",
+        "rF",
+        "Rf",
+        "RF",
+        "t",
+        "T",
+        "tr",
+        "tR",
+        "Tr",
+        "TR",
+        "rt",
+        "rT",
+        "Rt",
+        "RT",
+    ),
+)
+def test_parse_rule_rejects_interpolated_strings_before_literal_eval(
+    prefix: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fail_eval(*args: object, **kwargs: object) -> None:
+        pytest.fail("literal_eval must not see an interpolated string")
+
+    monkeypatch.setattr(local_state_audit.ast, "literal_eval", fail_eval)
+    nested = "[" * 11 + "1" + "]" * 11
+    raw_pattern = f'["safe", {prefix}"{{{nested}}}"]'
+    assert (
+        local_state_audit._parse_rule(
+            f'prefix_rule(pattern={raw_pattern}, decision="allow")'
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    "raw_pattern",
+    (
+        '[f"""{[1]}"""]',
+        "[Fr'''{[1]}''']",
+        r"""[f"escaped \" quote {[1]}"]""",
+        '[t"""{[1]}"""]',
+        "[Tr'''{[1]}''']",
+        r"""[t"escaped \" quote {[1]}"]""",
+    ),
+)
+def test_parse_rule_rejects_triple_and_escaped_interpolated_strings_before_literal_eval(
+    raw_pattern: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fail_eval(*args: object, **kwargs: object) -> None:
+        pytest.fail("literal_eval must not see an interpolated string")
+
+    monkeypatch.setattr(local_state_audit.ast, "literal_eval", fail_eval)
+    assert (
+        local_state_audit._parse_rule(
+            f'prefix_rule(pattern={raw_pattern}, decision="allow")'
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize(
     ("raw_pattern", "expected"),
     (
         # Brackets inside string literals are content, not structural nesting.
@@ -226,6 +294,12 @@ def test_parse_rule_rejects_evasion_bypass(
         ("['\\'" + "[" * 11 + "']", ["'" + "[" * 11]),
         # Triple-quoted strings keep bracket content inside the literal.
         ('["""' + "[" * 11 + '"""]', ["[" * 11]),
+        # Prefix-like text inside an ordinary literal remains valid content.
+        ("[\"ordinary f'{[1]}'\"]", ["ordinary f'{[1]}'"]),
+        ('["""ordinary rf\'{[1]}\'"""]', ["ordinary rf'{[1]}'"]),
+        (r"""["ordinary f\"{[1]}\""]""", ['ordinary f"{[1]}"']),
+        ("[\"ordinary t'{[1]}'\"]", ["ordinary t'{[1]}'"]),
+        ('["""ordinary rt\'{[1]}\'"""]', ["ordinary rt'{[1]}'"]),
         # Mixed quoting: the opposite quote char is plain content.
         ('["' + "'" + '", ' + "'" + "[" * 11 + "'" + "]", ["'", "[" * 11]),
     ),
