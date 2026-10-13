@@ -71,6 +71,20 @@ class _CleanupPlanScope:
     payload_names: set[str]
 
 
+async def _drain_cleanup_worker(task: asyncio.Task[dict[str, int]]) -> None:
+    """Wait through repeated cancellation before releasing the caller."""
+    while not task.done():
+        try:
+            await asyncio.shield(task)
+        except BaseException as exc:
+            if isinstance(exc, asyncio.CancelledError):
+                current = asyncio.current_task()
+                if current is not None:
+                    current.uncancel()
+            elif not task.done():
+                raise
+
+
 class BronzeWriterReadCleanupMixin:
     """Filesystem read/list/cleanup helpers for Bronze storage."""
 
@@ -511,13 +525,7 @@ class BronzeWriterReadCleanupMixin:
         except asyncio.CancelledError:
             cancel_requested.set()
             # A cancelled caller must not leave an unobserved destructive thread.
-            while not worker.done():
-                try:
-                    await asyncio.shield(worker)
-                except asyncio.CancelledError:
-                    current = asyncio.current_task()
-                    if current is not None:
-                        current.uncancel()
+            await _drain_cleanup_worker(worker)
             raise
 
         self._logger.info(

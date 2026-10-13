@@ -18,6 +18,7 @@ import secrets
 import stat
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager, suppress
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from uuid import UUID
@@ -472,6 +473,72 @@ def _chain_is_stable(
     return True
 
 
+@dataclass(frozen=True, slots=True)
+class _StageOrigin:
+    parts: tuple[str, ...]
+    dev: int
+    ino: int
+
+
+def _load_stage_origin(stage_fd: int, stage_name: str) -> _StageOrigin | None:
+    """Read a bounded origin record; an empty pre-journal stage is removable."""
+    try:
+        journal_fd = os.open(_STAGE_JOURNAL, os.O_RDONLY | _O_NOFOLLOW, dir_fd=stage_fd)
+    except FileNotFoundError:
+        if os.listdir(stage_fd):
+            raise OSError(f"Bronze stage {stage_name} has no origin journal") from None
+        return None
+    try:
+        raw = os.read(journal_fd, 4097)
+    finally:
+        os.close(journal_fd)
+    if len(raw) > 4096:
+        raise OSError(f"Bronze stage {stage_name} has an oversized journal")
+    try:
+        record = json.loads(raw)
+        relative = record["relative"]
+        dev, ino = record["dev"], record["ino"]
+        parts = tuple(relative.split("/")) if isinstance(relative, str) else ()
+        if (
+            not parts
+            or any(part in ("", ".", "..") for part in parts)
+            or not isinstance(dev, int)
+            or not isinstance(ino, int)
+        ):
+            raise ValueError("invalid stage origin")
+    except (KeyError, TypeError, ValueError) as exc:
+        raise OSError(f"Bronze stage {stage_name} has invalid origin") from exc
+    return _StageOrigin(parts, dev, ino)
+
+
+def _restore_stage_entry(
+    root_fd: int, root_real: Path, stage_fd: int, stage_name: str, origin: _StageOrigin
+) -> None:
+    name = origin.parts[-1]
+    try:
+        staged = os.stat(name, dir_fd=stage_fd, follow_symlinks=False)
+    except FileNotFoundError:
+        return  # Deletion completed before the process stopped.
+    if (staged.st_dev, staged.st_ino) != (origin.dev, origin.ino):
+        raise OSError(f"Bronze stage {stage_name} identity changed")
+    target = root_real.joinpath(*origin.parts)
+    with _anchored_parent(target, root_real, root_real) as (
+        _opened_root,
+        parent_fd,
+        _name,
+        chain,
+    ):
+        if not _chain_is_stable(root_fd, root_real, chain):
+            raise OSError("Bronze stage parent changed")
+        try:
+            os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+        except FileNotFoundError:
+            os.rename(name, name, src_dir_fd=stage_fd, dst_dir_fd=parent_fd)
+            os.fsync(parent_fd)
+        else:
+            raise OSError(f"Bronze stage {stage_name} origin occupied")
+
+
 def _recover_stages(root_fd: int, root_real: Path) -> None:
     """Restore crash-interrupted isolates before any new destructive plan."""
     for stage_name in os.listdir(root_fd):
@@ -481,68 +548,9 @@ def _recover_stages(root_fd: int, root_real: Path) -> None:
             stage_name, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW, dir_fd=root_fd
         )
         try:
-            try:
-                journal_fd = os.open(
-                    _STAGE_JOURNAL, os.O_RDONLY | _O_NOFOLLOW, dir_fd=stage_fd
-                )
-            except FileNotFoundError:
-                if os.listdir(stage_fd):  # noqa: PTH208 - handle-relative scan
-                    raise OSError(
-                        f"Bronze stage {stage_name} has no origin journal"
-                    ) from None
-            else:
-                try:
-                    raw = os.read(journal_fd, 4097)
-                finally:
-                    os.close(journal_fd)
-                if len(raw) > 4096:
-                    raise OSError(f"Bronze stage {stage_name} has an oversized journal")
-                try:
-                    record = json.loads(raw)
-                    relative = record["relative"]
-                    dev, ino = record["dev"], record["ino"]
-                    parts = relative.split("/") if isinstance(relative, str) else []
-                    if (
-                        not isinstance(relative, str)
-                        or not parts
-                        or any(part in ("", ".", "..") for part in parts)
-                        or not isinstance(dev, int)
-                        or not isinstance(ino, int)
-                    ):
-                        raise ValueError("invalid stage origin")
-                except (KeyError, TypeError, ValueError) as exc:
-                    raise OSError(
-                        f"Bronze stage {stage_name} has invalid origin"
-                    ) from exc
-                name = parts[-1]
-                try:
-                    staged = os.stat(name, dir_fd=stage_fd, follow_symlinks=False)
-                except FileNotFoundError:
-                    pass  # Deletion completed before the process stopped.
-                else:
-                    if (staged.st_dev, staged.st_ino) != (dev, ino):
-                        raise OSError(f"Bronze stage {stage_name} identity changed")
-                    target = root_real.joinpath(*parts)
-                    with _anchored_parent(target, root_real, root_real) as (
-                        _opened_root,
-                        parent_fd,
-                        _name,
-                        chain,
-                    ):
-                        if not _chain_is_stable(root_fd, root_real, chain):
-                            raise OSError("Bronze stage parent changed")
-                        try:
-                            os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
-                        except FileNotFoundError:
-                            os.rename(
-                                name,
-                                name,
-                                src_dir_fd=stage_fd,
-                                dst_dir_fd=parent_fd,
-                            )
-                            os.fsync(parent_fd)
-                        else:
-                            raise OSError(f"Bronze stage {stage_name} origin occupied")
+            origin = _load_stage_origin(stage_fd, stage_name)
+            if origin is not None:
+                _restore_stage_entry(root_fd, root_real, stage_fd, stage_name, origin)
                 os.unlink(_STAGE_JOURNAL, dir_fd=stage_fd)
                 os.fsync(stage_fd)
         finally:
