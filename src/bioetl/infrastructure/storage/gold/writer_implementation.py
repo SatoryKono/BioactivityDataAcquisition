@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from time import perf_counter
+import asyncio
 from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.exceptions import BioETLError
@@ -72,30 +73,47 @@ async def _write_single_target_impl(
             ingestion_ts=request.ingestion_ts,
             contract_version=request.contract_version,
         )
-        await writer._dispatch_write(
-            _GoldWriteDispatchContext(
-                prepared=prepared,
-                request=request,
-            )
-        )
-        category = GoldWriteCategory.COMMITTED_POSTWRITE_PENDING
-        post_write_error: Exception | None = None
+        post_write_error: BaseException | None = None
         try:
-            await writer._post_write_gold(
-                _GoldWritePostwriteContext(
+            await writer._dispatch_write(
+                _GoldWriteDispatchContext(
                     prepared=prepared,
-                    records=request.records,
-                    ingestion_ts=request.ingestion_ts,
-                    run_id=request.run_id,
-                    scd_config=request.scd_config,
-                    silver_refs=request.silver_refs,
-                    schema=request.schema,
+                    request=request,
                 )
             )
-            terminal_status = "success"
-            category = GoldWriteCategory.COMPLETE
-        except Exception as error:
-            post_write_error = error
+        except BaseException as dispatch_error:
+            if getattr(dispatch_error, "gold_write_committed", False):
+                category = GoldWriteCategory.COMMITTED_POSTWRITE_PENDING
+                post_write_error = dispatch_error
+            elif isinstance(dispatch_error, asyncio.CancelledError):
+                category = GoldWriteCategory.UNKNOWN
+                dispatch_error.gold_receipt = GoldWriteReceipt(  # type: ignore[attr-defined]
+                    physical_table=request.table_name,
+                    contract_version=contract_version,
+                    category=category,
+                )
+                raise
+            else:
+                raise
+
+        if post_write_error is None:
+            category = GoldWriteCategory.COMMITTED_POSTWRITE_PENDING
+            try:
+                await writer._post_write_gold(
+                    _GoldWritePostwriteContext(
+                        prepared=prepared,
+                        records=request.records,
+                        ingestion_ts=request.ingestion_ts,
+                        run_id=request.run_id,
+                        scd_config=request.scd_config,
+                        silver_refs=request.silver_refs,
+                        schema=request.schema,
+                    )
+                )
+                terminal_status = "success"
+                category = GoldWriteCategory.COMPLETE
+            except BaseException as error:
+                post_write_error = error
     except ValueError as error:
         if prepared is None:
             terminal_status = "validation_failure"
@@ -186,7 +204,7 @@ async def _write_dual_targets_impl(
                         "physical_table": physical_table,
                     }
                 )
-        except (BioETLError, OSError, RuntimeError, ValueError) as error:
+        except (BioETLError, OSError, RuntimeError, TypeError, ValueError) as error:
             receipt = getattr(error, "gold_receipt", None)
             if receipt and receipt.category in (GoldWriteCategory.COMPLETE, GoldWriteCategory.COMMITTED_POSTWRITE_PENDING):
                 committed_targets.append(

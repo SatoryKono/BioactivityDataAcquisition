@@ -22,6 +22,7 @@ from bioetl.infrastructure.storage.gold.io_preparation import (
     _PreparedGoldMergedWrite,
 )
 from bioetl.infrastructure.storage.gold.metadata_mixin import GoldWriterMetadataMixin
+from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
 from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     GoldWriteDispatchContext,
     GoldWritePostwriteContext,
@@ -334,9 +335,10 @@ async def test_single_target_validation_failure_and_dual_write(
         async def _post_write_gold(self, *_a: object, **_k: object) -> None:
             return None
 
-        async def _write_single_target(self, *, request: GoldWriteRequest) -> None:
+        async def _write_single_target(self, *, request: GoldWriteRequest) -> GoldWriteReceipt:
             if "1_1_0" in request.table_name:
                 raise ValueError("second target failed")
+            return GoldWriteReceipt("table", "1.0.0", GoldWriteCategory.COMPLETE)
 
     with pytest.raises(ValueError, match="invalid schema"):
         await impl._write_single_target_impl(_Writer(), request=_request())  # type: ignore[arg-type]

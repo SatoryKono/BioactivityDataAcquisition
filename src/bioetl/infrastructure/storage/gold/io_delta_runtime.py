@@ -125,16 +125,20 @@ async def _execute_prepared_simple_gold_write(
     if host.csv_exporter:
         from typing import Any, cast
 
-        await host.csv_exporter.export(
-            prepared.request.table_name,
-            cast(Any, prepared.arrow_data),  # Any: CSV exporter Arrow table duck-type
-            append=prepared.request.mode != "overwrite",
-            primary_keys=(
-                prepared.request.primary_keys
-                if prepared.request.mode != "overwrite"
-                else None
-            ),
-        )
+        try:
+            await host.csv_exporter.export(
+                prepared.request.table_name,
+                cast(Any, prepared.arrow_data),  # Any: CSV exporter Arrow table duck-type
+                append=prepared.request.mode != "overwrite",
+                primary_keys=(
+                    prepared.request.primary_keys
+                    if prepared.request.mode != "overwrite"
+                    else None
+                ),
+            )
+        except BaseException as error:
+            error.gold_write_committed = True  # type: ignore[attr-defined]
+            raise
 
 
 def _prepare_scd2_gold_write(
