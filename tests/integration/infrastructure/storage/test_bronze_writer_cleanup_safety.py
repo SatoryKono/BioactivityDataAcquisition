@@ -35,7 +35,11 @@ from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.storage import bronze_writer as bronze_writer_module
-from bioetl.infrastructure.storage.bronze import cleanup_support, read_cleanup_mixin
+from bioetl.infrastructure.storage.bronze import (
+    cleanup_planner,
+    cleanup_support,
+    read_cleanup_mixin,
+)
 from bioetl.infrastructure.storage.bronze.cleanup_support import (
     bronze_tree_lock,
     destructive_cleanup_supported,
@@ -524,7 +528,7 @@ async def test_cleanup_continues_after_entry_stat_error(
     failed.path = str(date_dir / other_sidecar)
     failed.stat.side_effect = error("entry inaccessible")
     monkeypatch.setattr(
-        read_cleanup_mixin,
+        cleanup_planner,
         "scan_dir_entries",
         lambda _: [
             by_name[ARTIFACT],

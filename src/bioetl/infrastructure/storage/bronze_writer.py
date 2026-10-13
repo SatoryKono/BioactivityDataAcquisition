@@ -83,8 +83,10 @@ async def _wait_for_task_completion[T](task: asyncio.Task[T]) -> None:
     except asyncio.CancelledError:
         await _drain_shielded_task(task)
         raise
-    except Exception:
-        # A shielded task raises only after completion; the caller owns its result.
+    except BaseException as exc:
+        if isinstance(exc, asyncio.CancelledError) or not task.done():
+            raise
+        # A completed task's result or exception belongs to the caller.
         return
 
 
