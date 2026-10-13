@@ -78,7 +78,9 @@ async def write_scd2_once(
     column_order: list[str] | None,
 ) -> None:
     """Execute one SCD2 write attempt with merge-or-create flow."""
-    with GoldOutcomeBoundary(receipt_for(table_path), translate_failure=False):
+    with GoldOutcomeBoundary(
+        receipt_for(table_path), preserve_outcome=True, translate_failure=False
+    ):
         try:
             dt = await writer._run_in_executor(lambda: module.DeltaTable(table_path))
             await writer._merge_scd2(

@@ -7,7 +7,7 @@
 # pyright: reportOptionalMemberAccess=false
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
-# PD5 test mock/fixture surface â€” product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture test: write mode types enforcement.
 
 Tests that write modes use domain enums (SilverWriteMode, GoldWriteMode)
@@ -204,7 +204,7 @@ def test_overwrite_for_silver_raises_error() -> None:
     """silver_write_mode='overwrite' MUST raise ValueError.
 
     The deprecated 'overwrite' alias for Silver layer has been removed.
-    Destructive Silver rebuild modes are rejected before writes.
+    Use the separate clear/rebuild lifecycle for destructive operations.
     """
     from bioetl.domain.config import TableConfig
 
@@ -235,3 +235,11 @@ def test_no_silent_degradation_in_batch_writer() -> None:
         "BatchWriter silver mode must use explicit append/merge set "
         "without overwrite alias."
     )
+
+
+@pytest.mark.parametrize("mode", ["delete", "overwrite"])
+def test_destructive_silver_config_is_rejected(mode: str) -> None:
+    from bioetl.domain.config import TableConfig
+
+    with pytest.raises(ValueError, match="Invalid Silver write mode"):
+        TableConfig(silver_write_mode=mode)

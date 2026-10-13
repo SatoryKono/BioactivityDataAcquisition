@@ -24,7 +24,11 @@ END = "<!-- current-source-binding:end -->"
 
 
 def render_binding(
-    text: str, digest: str, count: int, statuses: dict[str, int] | None = None
+    text: str,
+    digest: str,
+    count: int,
+    statuses: dict[str, int] | None = None,
+    assertless: int | None = None,
 ) -> str:
     """Keep historical bytes intact and replace only this producer's projection."""
     if not re.fullmatch(r"[0-9a-f]{64}", digest) or count < 0:

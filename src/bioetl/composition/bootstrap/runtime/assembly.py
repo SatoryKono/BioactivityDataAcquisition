@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypedDict, Unpack
+from typing import TYPE_CHECKING, Literal, Unpack
+from bioetl.composition.runtime_builders.inputs_runtime_models import (
+    ResolvedVacuumSettings,
+)
 from bioetl.domain.config import RuntimeConfig
-from bioetl.domain.config.runtime import PreflightRuntimeSettings
+from bioetl.domain.config import runtime as runtime_config
+from bioetl.domain.config.runtime import DebugExportOverrides, PreflightRuntimeSettings
 from bioetl.domain.types import RunType
 from bioetl.domain.filtering.silver_filter_identity import (
     resolve_silver_filter_compatibility_mode,
@@ -15,11 +19,14 @@ from pathlib import Path
 
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.runtime_builders.inputs_runtime_assembly import (
-    ResolvedVacuumSettings,
     assemble_vacuum_settings as _assemble_vacuum_settings,
 )
 from bioetl.domain.context import CachedBronzeContext
-from bioetl.composition.runtime_builders import runner_builder_wiring as wiring
+from bioetl.composition.runtime_builders.runner_builder_wiring import (
+    RunnerBuilderWiring,
+    RunnerFactoryWiring,
+    RunnerInputWiring,
+)
 
 if TYPE_CHECKING:
     from bioetl.composition.registry_api import PipelineRegistry
@@ -51,22 +58,22 @@ class RuntimeBootstrapPhases:
 
     registry: PipelineRegistry
     configs_root: Path
-    factory_wiring: wiring.RunnerFactoryWiring
-    input_wiring: wiring.RunnerInputWiring
+    factory_wiring: RunnerFactoryWiring
+    input_wiring: RunnerInputWiring
 
     @property
-    def wiring(self) -> wiring.RunnerBuilderWiring:
+    def wiring(self) -> RunnerBuilderWiring:
         """Return the canonical aggregate runner wiring bundle."""
 
-        return wiring.RunnerBuilderWiring(self.factory_wiring, self.input_wiring)
+        return RunnerBuilderWiring(self.factory_wiring, self.input_wiring)
 
 
 def assemble_runtime_bootstrap_phases(
     *,
     registry: PipelineRegistry,
     configs_root: Path,
-    factory_wiring: wiring.RunnerFactoryWiring,
-    input_wiring: wiring.RunnerInputWiring,
+    factory_wiring: RunnerFactoryWiring,
+    input_wiring: RunnerInputWiring,
 ) -> RuntimeBootstrapPhases:
     """Build the typed payload shared by runtime pipeline bootstrap seams."""
     return RuntimeBootstrapPhases(
@@ -95,6 +102,8 @@ def assemble_filter_config(
     test_mode: bool,
 ) -> InputFilterConfig | None:
     """Assemble filter config from YAML plus run-context overrides."""
+    effective_test_mode = test_mode or ctx.ignore_yaml_filter
+
     return FilterConfigBuilder.build(
         yaml_filter=yaml_filter,
         cli_csv=ctx.input_filter.source_path if ctx.input_filter.enabled else None,
@@ -103,7 +112,7 @@ def assemble_filter_config(
         cli_fallback_column=(
             ctx.input_filter.fallback_column if ctx.input_filter.enabled else None
         ),
-        test_mode=test_mode or ctx.ignore_yaml_filter,
+        test_mode=effective_test_mode,
         direct_filter_ids=ctx.input_filter.filter_ids,
         direct_fallback_mapping=ctx.input_filter.fallback_mapping,
         direct_multi_filter_ids=ctx.input_filter.multi_filter_ids,
@@ -118,17 +127,6 @@ def assemble_cached_bronze_context(
     return ctx.cached_bronze
 
 
-class _DebugExportOverrides(TypedDict, total=False):
-    """Typed compatibility bundle for the three existing debug-export keywords."""
-
-    debug_export_enabled: bool
-    debug_export_formats: tuple[str, ...]
-    debug_export_dir: str | None
-
-
-_DEFAULT_PREFLIGHT_SETTINGS = PreflightRuntimeSettings()
-
-
 def assemble_runtime_config(
     *,
     run_type: RunType,
@@ -140,15 +138,14 @@ def assemble_runtime_config(
     vacuum: ResolvedVacuumSettings,
     skip_gold: bool = False,
     workflow_id: str = "standalone",
-    preflight: PreflightRuntimeSettings = _DEFAULT_PREFLIGHT_SETTINGS,
+    preflight: PreflightRuntimeSettings = runtime_config.DEFAULT_PREFLIGHT_SETTINGS,
     health_check_mode: Literal["strict", "probe"] | None = None,
-    **debug_export: Unpack[_DebugExportOverrides],
+    **debug_export: Unpack[DebugExportOverrides],
 ) -> RuntimeConfig:
     """Build runtime settings, preserving the existing debug-export keywords."""
-    unsupported = debug_export.keys() - _DebugExportOverrides.__annotations__.keys()
+    unsupported = debug_export.keys() - DebugExportOverrides.__annotations__.keys()
     if unsupported:
         raise TypeError(f"Unexpected debug-export options: {sorted(unsupported)}")
-    mode = health_check_mode
     return RuntimeConfig(
         run_type=run_type,
         resume=resume,
@@ -163,7 +160,11 @@ def assemble_runtime_config(
         debug_export_formats=debug_export.get("debug_export_formats", ()),
         debug_export_dir=debug_export.get("debug_export_dir"),
         workflow_id=workflow_id,
-        health_check_mode=mode if mode is not None else preflight.health_check_mode,
+        health_check_mode=(
+            health_check_mode
+            if health_check_mode is not None
+            else preflight.health_check_mode
+        ),
         strict_preflight=preflight.strict_preflight,
         silver_filter_compatibility_mode=resolve_silver_filter_compatibility_mode(),
     )

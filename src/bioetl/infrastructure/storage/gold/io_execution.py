@@ -7,7 +7,11 @@ from dataclasses import replace
 from time import perf_counter
 from typing import cast
 
-from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
+from bioetl.domain.types.gold_contracts import (
+    GoldWriteCategory,
+    GoldWriteReceipt,
+    resolve_gold_contract_version,
+)
 from bioetl.infrastructure.observability.metrics import (
     GOLD_VALIDATION_FAILURES_TOTAL,
     GOLD_WRITE_ATTEMPTS_TOTAL,
@@ -59,7 +63,10 @@ async def _write_gold_merged_delta(
                 schema_mode="overwrite",
             )
         ),
-        receipt_for(prepared.request.table_name),
+        receipt_for(
+            prepared.request.table_name,
+            resolve_gold_contract_version(prepared.request.schema),
+        ),
     )
 
 
@@ -95,7 +102,10 @@ async def _write_gold_merged_sidecar(
 async def _complete_gold_merged_write(
     host: _GoldMergedWriteHostProtocol, prepared: _PreparedGoldMergedWrite
 ) -> GoldWriteReceipt:
-    receipt = receipt_for(prepared.request.table_name)
+    receipt = receipt_for(
+        prepared.request.table_name,
+        resolve_gold_contract_version(prepared.request.schema),
+    )
     await _write_gold_merged_delta(host, prepared)
     receipt = replace(
         receipt,
@@ -113,18 +123,27 @@ async def _execute_gold_merged_write(
     request: _GoldMergedWriteRequest,
 ) -> GoldWriteReceipt:
     """Prepare, log, and execute one merged Gold write request."""
-    with GoldOutcomeBoundary(receipt_for(request.table_name), translate_failure=False):
-        from bioetl.infrastructure.storage.gold.io_preparation import (
-            _log_prepared_gold_merged_write,
-            _prepare_gold_merged_write,
-        )
+    from bioetl.infrastructure.storage.gold.io_preparation import (
+        _log_prepared_gold_merged_write,
+        _prepare_gold_merged_write,
+    )
 
-        started_at = perf_counter()
-        terminal_status = "failure"
-        prepared = None
-        GOLD_WRITE_ATTEMPTS_TOTAL.labels(
-            **_gold_merged_metric_labels(request.table_name)
-        ).inc()
+    started_at = perf_counter()
+    terminal_status = "failure"
+    prepared = None
+    GOLD_WRITE_ATTEMPTS_TOTAL.labels(
+        **_gold_merged_metric_labels(request.table_name)
+    ).inc()
+    with GoldOutcomeBoundary(
+        lambda _: receipt_for(
+            request.table_name,
+            resolve_gold_contract_version(request.schema)
+            if prepared is not None
+            else "0.0.0",
+        ),
+        preserve_outcome=True,
+        translate_failure=False,
+    ):
         try:
             prepared = await _prepare_gold_merged_write(host, request)
             _log_prepared_gold_merged_write(host, prepared)
