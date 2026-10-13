@@ -138,17 +138,29 @@ def _candidate_source_paths(
     base: Path,
 ) -> list[Path]:
     suffixes = SOURCE_SUFFIXES.get(source_id, MARKDOWN_SUFFIXES)
-    source_dir = root / base
     resolved_root = root.resolve()
     git_paths = _git_source_paths(root=root, base=base)
     if git_paths is not None:
-        return [
-            rel_path
-            for rel_path in git_paths
-            if Path(rel_path).suffix.lower() in suffixes
-            and _safe_source_path(root / rel_path, resolved_root)
-            and (root / rel_path).is_file()
-        ]
+        return _filter_git_source_paths(root, resolved_root, git_paths, suffixes)
+    return _fallback_source_paths(root, resolved_root, base, suffixes)
+
+
+def _filter_git_source_paths(
+    root: Path, resolved_root: Path, paths: list[Path], suffixes: set[str]
+) -> list[Path]:
+    return [
+        rel_path
+        for rel_path in paths
+        if rel_path.suffix.lower() in suffixes
+        and _safe_source_path(root / rel_path, resolved_root)
+        and (root / rel_path).is_file()
+    ]
+
+
+def _fallback_source_paths(
+    root: Path, resolved_root: Path, base: Path, suffixes: set[str]
+) -> list[Path]:
+    source_dir = root / base
     if not source_dir.exists() or source_dir.is_symlink():
         return []
     if not source_dir.is_dir():
