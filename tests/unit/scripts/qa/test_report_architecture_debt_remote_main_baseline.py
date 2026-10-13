@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -102,6 +103,24 @@ def test_json_blob_summary_returns_available_only_for_invalid_json() -> None:
     assert summary == {"available": True}
 
 
+def test_markdown_semantically_equivalent_masks_volatile_local_tracking_ref() -> None:
+    """_markdown_semantically_equivalent should ignore changes to local_tracking_ref_matches_remote."""
+    base_md = """# Title
+- evidence_source: `tree`
+- local_tracking_ref_matches_remote: `{status}`
+| col |
+| --- |
+"""
+    actual_md = base_md.format(status="True")
+    expected_md = base_md.format(status="False")
+
+    assert baseline._markdown_semantically_equivalent(actual_md, expected_md) is True
+
+    # Real content drift should still be detected
+    different_md = base_md.format(status="True") + "| row |\n"
+    assert baseline._markdown_semantically_equivalent(actual_md, different_md) is False
+
+
 def test_json_blob_summary_returns_available_only_for_non_dict_json() -> None:
     """_json_blob_summary should return only availability for blobs whose JSON content is not a dict."""
     blob = json.dumps(["valid", "json", "list"]).encode("utf-8")
@@ -109,3 +128,156 @@ def test_json_blob_summary_returns_available_only_for_non_dict_json() -> None:
     summary = baseline._json_blob_summary(blob)
 
     assert summary == {"available": True}
+
+
+def _sample_baseline_markdown(
+    *,
+    status: str = "True",
+    evidence_source: str = "remote_main_git_tree",
+    fingerprint: str = "abc123",
+    table_row: str = (
+        "| `reports/quality/example.json` | `hash` | `True` | `True` | `False` |"
+    ),
+) -> str:
+    return "\n".join(
+        [
+            "# Architecture Debt Remote-Main Baseline",
+            "",
+            f"- evidence_source: `{evidence_source}`",
+            f"- baseline_artifact_fingerprint: `{fingerprint}`",
+            f"- local_tracking_ref_matches_remote: `{status}`",
+            "",
+            "| artifact | blob_sha256 | available | required_on_remote | introduced_after_remote_main |",
+            "| --- | --- | --- | --- | --- |",
+            table_row,
+            "",
+        ]
+    )
+
+
+@pytest.mark.parametrize(
+    ("actual_status", "expected_status"),
+    [("True", "False"), ("False", "True")],
+)
+def test_markdown_equivalent_accepts_either_exact_tracking_boolean(
+    actual_status: str,
+    expected_status: str,
+) -> None:
+    """Only the exact tracking-status boolean may differ."""
+    actual = _sample_baseline_markdown(status=actual_status)
+    expected = _sample_baseline_markdown(status=expected_status)
+
+    assert baseline._markdown_semantically_equivalent(actual, expected) is True
+
+
+def test_markdown_equivalent_accepts_unchanged_document() -> None:
+    """Identical Markdown remains equivalent without using the mask."""
+    document = _sample_baseline_markdown(status="False")
+
+    assert baseline._markdown_semantically_equivalent(document, document) is True
+
+
+@pytest.mark.parametrize(
+    "expected",
+    [
+        _sample_baseline_markdown(fingerprint="def456"),
+        _sample_baseline_markdown(evidence_source="working_tree"),
+        _sample_baseline_markdown(
+            table_row=(
+                "| `reports/quality/example.json` | `other` | `True` | `True` | `False` |"
+            )
+        ),
+        _sample_baseline_markdown().replace(
+            "- local_tracking_ref_matches_remote: `True`\n",
+            "",
+        ),
+        _sample_baseline_markdown().replace(
+            "- local_tracking_ref_matches_remote: `True`",
+            "- local_tracking_ref_matches_remote: True",
+        ),
+        _sample_baseline_markdown().replace(
+            "- local_tracking_ref_matches_remote: `True`",
+            "- local_tracking_ref_matches_remote: `yes`",
+        ),
+        _sample_baseline_markdown().replace(
+            "- local_tracking_ref_matches_remote: `True`",
+            "  - local_tracking_ref_matches_remote: `False`",
+        ),
+        _sample_baseline_markdown(
+            table_row=(
+                "| `local_tracking_ref_matches_remote` | `False` | `True` | `True` | `False` |"
+            )
+        ),
+    ],
+)
+def test_markdown_equivalent_rejects_non_tracking_or_malformed_drift(
+    expected: str,
+) -> None:
+    """Fingerprint, evidence, tables, and inexact status lines stay significant."""
+    actual = _sample_baseline_markdown(status="True")
+
+    assert baseline._markdown_semantically_equivalent(actual, expected) is False
+
+
+def _tracking_check_payload(*, matches_remote: bool) -> dict[str, object]:
+    return {
+        "evidence_source": "remote_main_git_tree",
+        "remote_main_ref": "refs/heads/main",
+        "baseline_artifact_fingerprint": "abc123",
+        "local_tracking_ref_matches_remote": matches_remote,
+        "artifacts": [
+            {
+                "path": "reports/quality/example.json",
+                "blob_sha256": "hash",
+                "required_on_remote": False,
+                "summary": {"available": True},
+            }
+        ],
+    }
+
+
+def test_check_artifacts_rejects_live_tracking_ref_mismatch(tmp_path: Path) -> None:
+    """Markdown masking must not accept a live local-ref mismatch."""
+    payload = _tracking_check_payload(matches_remote=False)
+    json_out = tmp_path / "baseline.json"
+    md_out = tmp_path / "baseline.md"
+    json_out.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    masked_markdown = baseline.render_markdown(
+        _tracking_check_payload(matches_remote=True)
+    )
+    expected_markdown = baseline.render_markdown(payload)
+    assert baseline._markdown_semantically_equivalent(
+        masked_markdown, expected_markdown
+    )
+    md_out.write_text(masked_markdown, encoding="utf-8")
+
+    errors = baseline._check_artifacts(
+        payload,
+        json_out=json_out,
+        md_out=md_out,
+        root=tmp_path,
+    )
+
+    assert (
+        "Local tracking ref does not match remote main; fetch before closeout" in errors
+    )
+    assert not any("Markdown artifact is stale" in error for error in errors)
+
+    matching_payload = _tracking_check_payload(matches_remote=True)
+    json_out.write_text(
+        json.dumps(matching_payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    md_out.write_text(baseline.render_markdown(matching_payload), encoding="utf-8")
+    assert (
+        baseline._check_artifacts(
+            matching_payload,
+            json_out=json_out,
+            md_out=md_out,
+            root=tmp_path,
+        )
+        == []
+    )
