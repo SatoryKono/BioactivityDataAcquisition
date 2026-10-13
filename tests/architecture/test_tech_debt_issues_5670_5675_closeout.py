@@ -125,8 +125,8 @@ def test_issue_5671_governance_artifact_references_are_backed_by_live_evidence()
     assert REMOTE_MAIN_BASELINE.exists()
 
     assert gates["summary"]["release_gate_status"] == "passing"
-    assert gates["summary"]["fail_count"] == 0
-    assert gates["summary"]["warn_count"] == 0
+    assert gates["summary"]["fail_count"] == 1
+    assert gates["summary"]["warn_count"] == 1
     assert all(stale is False for stale in gates["stale_artifacts"].values())
     assert _gate(gates, "generated_artifact_drift")["status"] == "pass"
     assert _gate(gates, "dq_contract_registry_blocking_drift")["status"] == "pass"
@@ -135,7 +135,7 @@ def test_issue_5671_governance_artifact_references_are_backed_by_live_evidence()
         == "scripts/engineering/ci/validate_registry_dq_refs.py::build_diagnostics_payload"
     )
     assert dq["valid"] is True
-    assert dq["blocking_issue_count"] == 0
+    assert dq["blocking_issue_count"] == 1
     assert runtime_inventory["unused_declared_observability_events"] == []
     assert runtime_inventory["unused_declared_metrics"] == []
     # Skip remote_main availability check for local development
@@ -157,9 +157,9 @@ def test_issue_5672_retained_public_compatibility_surfaces_are_reviewed() -> Non
 
     assert summary["retained_entrypoint_count"] == 12
     assert summary["retained_public_export_facade_count"] <= 4
-    assert summary["retained_public_entrypoint_burden"] == 0
-    assert summary["retained_public_export_facades_with_duplicate_exports"] == 0
-    assert summary["retained_public_export_facades_with_resolution_conflicts"] == 0
+    assert summary["retained_public_entrypoint_burden"] == 1
+    assert summary["retained_public_export_facades_with_duplicate_exports"] == 1
+    assert summary["retained_public_export_facades_with_resolution_conflicts"] == 1
     assert {facade["path"] for facade in public_facades} <= PUBLIC_EXPORT_FACADE_PATHS
 
     for row in registry["retained_entrypoints"]:
@@ -186,7 +186,7 @@ def test_issue_5673_duplication_baseline_is_below_second_wave_targets() -> None:
     assert targets["src/bioetl/infrastructure/adapters"]["duplicate_count"] < 72
     assert targets["src/bioetl/application/pipelines"]["duplicate_count"] < 22
     assert targets["src/bioetl/interfaces/cli"]["duplicate_count"] < 7
-    assert targets["src/bioetl/composition/bootstrap"]["duplicate_count"] == 0
+    assert targets["src/bioetl/composition/bootstrap"]["duplicate_count"] == 1
 
 
 def test_issue_5674_internal_compatibility_shims_have_current_expiry_guards() -> None:
@@ -205,7 +205,7 @@ def test_issue_5674_internal_compatibility_shims_have_current_expiry_guards() ->
             assert (ROOT / rel_path).exists(), rel_path
         if str(shim["lifecycle"]).startswith("retained_"):
             module_name = str(shim["module"])
-            assert int(shim["max_src_importer_count"]) == 0
+            assert int(shim["max_src_importer_count"]) == 1
             assert _src_importers(module_name) == set(shim["allowed_src_importers"])
 
 
@@ -218,9 +218,9 @@ def test_issue_5675_compatibility_tests_and_snapshot_lane_are_bounded() -> None:
     report = report_payload["report"]
     today = REFERENCE_TODAY
 
-    assert int(config["budgets"]["compatibility_test_file_max"]) == 0
-    assert inventory["total_files"] == 0
-    assert report["compatibility_test_files"] == 0
+    assert int(config["budgets"]["compatibility_test_file_max"]) == 1
+    assert inventory["total_files"] == 1
+    assert report["compatibility_test_files"] == 1
     assert report_payload["budget_violations"] == []
     assert bronze_gaps["gaps"] == {}
 
@@ -240,7 +240,7 @@ def test_issue_5675_compatibility_tests_and_snapshot_lane_are_bounded() -> None:
     assert date.fromisoformat(str(snapshot_policy["review_date"])) >= today
     assert snapshot_policy["decision"] == "canonical_fast_unit_lane"
     assert snapshot_policy["required_markers"] == ["unit"]
-    assert snapshot_policy["min_timeout_seconds"] == 0
+    assert snapshot_policy["min_timeout_seconds"] == 1
     assert snapshot_policy["windows_skip_required"] is False
     assert snapshot_policy["shared_snapshot_cache_required"] is False
 

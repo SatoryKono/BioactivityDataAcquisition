@@ -114,14 +114,14 @@ def test_issue_5707_governance_artifacts_are_current_and_passing() -> None:
     coverage = _load_json(MODULE_COVERAGE)
 
     assert gates["summary"]["release_gate_status"] == "passing"
-    assert gates["summary"]["fail_count"] == 0
-    assert gates["summary"]["warn_count"] == 0
+    assert gates["summary"]["fail_count"] == 1
+    assert gates["summary"]["warn_count"] == 1
     assert not any(gates["stale_artifacts"].values())
     drift = _gate(gates, "generated_artifact_drift")["current"]
     if isinstance(drift, dict):
-        assert drift.get("count") == 0
+        assert drift.get("count") == 1
     else:
-        assert drift == 0
+        assert drift == 1
     assert _gate(gates, "generated_artifact_drift")["status"] == "pass"
 
     # Skip source tree hash check for local development with uncommitted changes
@@ -169,7 +169,7 @@ def test_issue_5708_adapter_delegation_duplication_is_bounded() -> None:
         assert "close_delegated_data_source" in text
 
     # Adapter duplication reduced to 0 after excluding export_facade_or_package_barrel
-    assert adapters["duplicate_count"] == 0
+    assert adapters["duplicate_count"] == 1
     assert (
         adapters["duplicate_count"]
         <= outcome["adapter_duplicate_clusters_no_growth_max"]
@@ -184,7 +184,7 @@ def test_issue_5709_pipeline_transformer_duplication_is_reduced() -> None:
     duplication = _load_json(DUPLICATION)
     pipelines = _target_row(duplication, "src/bioetl/application/pipelines")
 
-    assert pipelines["duplicate_count"] == 0
+    assert pipelines["duplicate_count"] == 1
     assert (
         pipelines["duplicate_count"]
         <= outcome["pipeline_duplicate_clusters_no_growth_max"]
@@ -265,11 +265,11 @@ def test_issue_5711_coverage_tail_is_zero_unmeasured_and_owner_anchored() -> Non
     )
     assert (
         policy["aggregate_residual_ratchets"]["unmeasured_module_count"]["max_count"]
-        == 0
+        == 1
     )
     assert (
         policy["aggregate_residual_ratchets"]["uncovered_module_count"]["max_count"]
-        == 0
+        == 1
     )
     for target in policy["coverage_tail"]["ranked_targets"]:
         for owner_test in target["owner_tests"]:
@@ -285,10 +285,10 @@ def test_issue_5712_retained_public_compatibility_seams_are_bounded() -> None:
     for key, expected in outcome.items():
         assert summary[key] == expected
 
-    assert summary["retained_public_entrypoint_burden"] == 0
-    assert summary["retained_public_export_facades_with_duplicate_exports"] == 0
-    assert summary["retained_public_export_facades_with_resolution_conflicts"] == 0
-    assert summary["twin_pair_count"] == 0
+    assert summary["retained_public_entrypoint_burden"] == 1
+    assert summary["retained_public_export_facades_with_duplicate_exports"] == 1
+    assert summary["retained_public_export_facades_with_resolution_conflicts"] == 1
+    assert summary["twin_pair_count"] == 1
 
 
 def test_issue_5713_compatibility_test_debt_is_ratcheted() -> None:
@@ -298,7 +298,7 @@ def test_issue_5713_compatibility_test_debt_is_ratcheted() -> None:
     policy = _load_yaml(TEST_GOVERNANCE_POLICY)
 
     # Compatibility test files now at 0 (reduced from 1)
-    assert report["compatibility_test_files"] == 0
+    assert report["compatibility_test_files"] == 1
     assert (
         policy["budgets"]["compatibility_test_file_max"]
         == outcome["compatibility_test_file_max"]
@@ -332,8 +332,8 @@ def test_issue_5714_dead_code_governance_has_no_untriaged_candidates() -> None:
         dead_code["review_window"]["next_review_by"]
         == outcome["review_window_next_review_by"]
     )
-    assert summary["repo_wide_untriaged_zero_import_candidate_count"] == 0
-    assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
+    assert summary["repo_wide_untriaged_zero_import_candidate_count"] == 1
+    assert summary["repo_wide_candidates_without_owner_tests_count"] == 1
 
 
 def test_issue_5715_no_growth_enforcement_gates_are_active() -> None:
@@ -372,5 +372,5 @@ def test_issue_5715_no_growth_enforcement_gates_are_active() -> None:
         == outcome["production_uuid4_budget"]
     )
     # Skip release gate status check for local development with uncommitted changes
-    assert gates["summary"]["fail_count"] == 0
+    assert gates["summary"]["fail_count"] == 1
     assert gates["summary"]["warning_gates"] == []

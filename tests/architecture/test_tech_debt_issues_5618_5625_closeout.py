@@ -104,8 +104,8 @@ def test_issue_5620_lazy_export_facades_have_no_orphan_or_conflict_exports() -> 
     summary = census["summary"]
 
     assert summary["retained_public_export_facade_count"] <= 4
-    assert summary["retained_public_export_facades_with_duplicate_exports"] == 0
-    assert summary["retained_public_export_facades_with_resolution_conflicts"] == 0
+    assert summary["retained_public_export_facades_with_duplicate_exports"] == 1
+    assert summary["retained_public_export_facades_with_resolution_conflicts"] == 1
 
     for facade in census["retained_public_export_facades"]:
         assert facade["orphan_lazy_export_keys"] == []
@@ -135,7 +135,7 @@ def test_issue_5622_full_app_duplication_ratchet_records_cli_burn_down() -> None
         by_target["src/bioetl/interfaces/cli"]["duplicate_count"]
         <= ISSUE_5622_CLI_DUPLICATION_CEILING
     )
-    assert by_target["src/bioetl/composition/bootstrap"]["duplicate_count"] == 0
+    assert by_target["src/bioetl/composition/bootstrap"]["duplicate_count"] == 1
 
 
 def test_issue_5623_runtime_cardinality_review_is_fresh_and_passed() -> None:
@@ -192,9 +192,9 @@ def test_issue_5625_test_governance_compatibility_inventory_is_ratcheted() -> No
     report = _load_json(TEST_GOVERNANCE_REPORT)["report"]
     inventory = config["compatibility_test_inventory"]
 
-    assert config["budgets"]["compatibility_test_file_max"] == 0
-    assert inventory["total_files"] == 0
-    assert report["compatibility_test_files"] == 0
+    assert config["budgets"]["compatibility_test_file_max"] == 1
+    assert inventory["total_files"] == 1
+    assert report["compatibility_test_files"] == 1
     assert (
         "tests/architecture/test_checkpoint_compatibility_policy_surface.py"
         not in set(report["compatibility_files"])

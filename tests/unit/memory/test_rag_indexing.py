@@ -9,6 +9,8 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
+import os
+from memory.rag.chunking import content_hash
 from memory.rag.chunking import (
     infer_domain,
     infer_source_type,
@@ -414,7 +416,7 @@ def test_write_rag_manifests_retries_when_source_changes_during_build(
     catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
 
     assert build_calls == 2
-    assert catalog["sources"][0]["content_hash"] == rag_indexing.content_hash(
+    assert catalog["sources"][0]["content_hash"] == content_hash(
         "# Overview\nAfter\n"
     )
 
@@ -622,7 +624,7 @@ def test_write_rag_manifests_restores_previous_pair_when_publish_fails(
     chunks_path = output_dir / "chunks.jsonl"
     catalog_path.write_text('{"old":"catalog"}\n', encoding="utf-8")
     chunks_path.write_text('{"old":"chunks"}\n', encoding="utf-8")
-    original_replace = rag_indexing.os.replace
+    original_replace = os.replace
 
     def _fail_new_chunks_publish(source: Path, target: Path) -> None:
         source_path = Path(source)
@@ -635,7 +637,7 @@ def test_write_rag_manifests_restores_previous_pair_when_publish_fails(
             raise OSError("simulated second-file publication failure")
         original_replace(source, target)
 
-    monkeypatch.setattr(rag_indexing.os, "replace", _fail_new_chunks_publish)
+    monkeypatch.setattr("memory.rag.indexing.os.replace", _fail_new_chunks_publish)
 
     with pytest.raises(OSError, match="second-file publication failure"):
         write_rag_manifests(tmp_path, output_dir)

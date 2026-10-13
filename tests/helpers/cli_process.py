@@ -40,7 +40,7 @@ def _windows_creation_flags() -> int:
     """Return flags that avoid console popups for Windows subprocesses."""
     if sys.platform != "win32":
         return 0
-    return int(getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    return int(getattr(subprocess, "CREATE_NO_WINDOW", 0)) # type: ignore
 
 
 def run_repo_command(
