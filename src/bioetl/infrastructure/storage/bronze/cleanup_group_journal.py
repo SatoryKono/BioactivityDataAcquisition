@@ -31,6 +31,7 @@ _JOURNAL_DIR = ".bronze-group-journals"
 _STAGE_PREFIX = ".bronze-group-stage-"
 _MAX_RECORD = 16_384
 _MAX_SIDECAR = 1_048_576
+_SCHEMA_VERSION = 2  # Version 1 did not require writer content association.
 _ORDER = ("copy", "payload", "sidecar")
 _NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
 _DIR_FLAGS = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
@@ -44,6 +45,8 @@ class GroupJournalConflict(OSError):
     operation_id: str | None = None
     removed: int = 0
     possibly_unlinked: int = 0
+    removed_bytes: int = 0
+    possibly_unlinked_bytes: int = 0
     phase: str = "read"
 
 
@@ -51,7 +54,13 @@ class GroupJournalFailure(OSError):
     """An I/O barrier failed after a known number of successful unlinks."""
 
     def __init__(
-        self, operation_id: str, removed: int, phase: str, possibly_unlinked: int
+        self,
+        operation_id: str,
+        removed: int,
+        phase: str,
+        possibly_unlinked: int,
+        removed_bytes: int = 0,
+        possibly_unlinked_bytes: int = 0,
     ):
         super().__init__(
             f"group {operation_id} failed at {phase}; durably_removed={removed}; possibly_unlinked={possibly_unlinked}"
@@ -60,12 +69,18 @@ class GroupJournalFailure(OSError):
         self.removed = removed
         self.phase = phase
         self.possibly_unlinked = possibly_unlinked
+        self.removed_bytes = removed_bytes
+        self.possibly_unlinked_bytes = possibly_unlinked_bytes
 
 
 @dataclass(slots=True)
-class _RecoveryProgress:
+class GroupRecoveryResult:
+    """Per-call durable removals and unconfirmed unlinks; never cumulative."""
+
     removed: int = 0
     possibly_unlinked: int = 0
+    removed_bytes: int = 0
+    possibly_unlinked_bytes: int = 0
     phase: str = "read"
 
 
@@ -235,7 +250,8 @@ def _validate_record_body(body: dict[str, Any], operation_id: str) -> None:
     }:
         raise ValueError("body keys")
     if (
-        body["schema"] != 1
+        type(body["schema"]) is not int
+        or body["schema"] != _SCHEMA_VERSION
         or body["operation_id"] != operation_id
         or body["state"] not in ("prepared", "completed")
     ):
@@ -339,6 +355,46 @@ def _write_all(fd: int, raw: bytes) -> None:
         offset += wrote
 
 
+def _validate_association(
+    metadata: dict[str, Any], spec: GroupSpec, members: dict[str, dict[str, Any]]
+) -> None:
+    """Require writer-produced content association before adopting a group.
+
+    Legacy lineage labels or matching filenames alone do not attest ownership.
+    Fingerprints in the durable intent subsequently pin these exact objects.
+    """
+    association = metadata.get("cleanup_association")
+    if (
+        any(
+            metadata.get(key) != value
+            for key, value in (
+                ("provider", spec.provider),
+                ("entity", spec.entity),
+                ("batch_id", spec.batch_id),
+            )
+        )
+        or not isinstance(association, dict)
+        or set(association) != {"schema", "payload_sha256", "copy_sha256"}
+        or type(association["schema"]) is not int
+        or association["schema"] != 1
+        or not _optional_copy_digest_valid(association["copy_sha256"])
+        or association["payload_sha256"] != members["payload"]["sha256"]
+        or (
+            "copy" in members
+            and association["copy_sha256"] != members["copy"]["sha256"]
+        )
+    ):
+        raise GroupJournalConflict("unassociated Bronze group content")
+
+
+def _optional_copy_digest_valid(value: Any) -> bool:
+    return value is None or (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(char in "0123456789abcdef" for char in value)
+    )
+
+
 @contextmanager
 def open_group_journal(root: Path) -> Iterator[GroupJournal]:
     """Hold the production cooperative exclusive lock for explicit operations."""
@@ -423,7 +479,7 @@ class GroupJournal:
         members, chain = self._snapshot_group(spec, names, relative)
         operation_id = uuid4().hex
         body = {
-            "schema": 1,
+            "schema": _SCHEMA_VERSION,
             "operation_id": operation_id,
             "state": "prepared",
             "scope": {
@@ -457,13 +513,25 @@ class GroupJournal:
             }
             if _exists(date_fd, names["copy"]):
                 members["copy"] = _fingerprint(date_fd, names["copy"])
-            self._validate_sidecar(date_fd, names["sidecar"], spec)
+            self._validate_sidecar(date_fd, names["sidecar"], spec, members)
+            if any(
+                _fingerprint(date_fd, names[key]) != identity
+                for key, identity in members.items()
+            ):
+                raise GroupJournalConflict(
+                    "group changed during association validation"
+                )
             if chain != self._current_chain(relative):
                 raise GroupJournalConflict("date chain changed before intent")
         return members, chain
 
     @staticmethod
-    def _validate_sidecar(date_fd: int, name: str, spec: GroupSpec) -> None:
+    def _validate_sidecar(
+        date_fd: int,
+        name: str,
+        spec: GroupSpec,
+        members: dict[str, dict[str, Any]],
+    ) -> None:
         sidecar_fd = os.open(name, _FILE_FLAGS, dir_fd=date_fd)
         try:
             raw = os.read(sidecar_fd, _MAX_SIDECAR + 1)
@@ -471,19 +539,9 @@ class GroupJournal:
             os.close(sidecar_fd)
         try:
             meta = json.loads(raw, object_pairs_hook=_unique_pairs)
-            if (
-                len(raw) > _MAX_SIDECAR
-                or not isinstance(meta, dict)
-                or any(
-                    meta.get(k) != v
-                    for k, v in (
-                        ("provider", spec.provider),
-                        ("entity", spec.entity),
-                        ("batch_id", spec.batch_id),
-                    )
-                )
-            ):
+            if len(raw) > _MAX_SIDECAR or not isinstance(meta, dict):
                 raise ValueError("sidecar does not identify this writer group")
+            _validate_association(meta, spec, members)
         except (ValueError, TypeError) as exc:
             raise GroupJournalConflict("unassociated Bronze sidecar") from exc
 
@@ -518,24 +576,32 @@ class GroupJournal:
 
     def recover(self, operation_id: str, hook: Barrier | None = None) -> int:
         """Resume only a previously attested operation, never infer an orphan."""
+        return self.recover_with_result(operation_id, hook).removed
+
+    def recover_with_result(
+        self, operation_id: str, hook: Barrier | None = None
+    ) -> GroupRecoveryResult:
+        """Return exact bytes for this call, including a retry's remaining members."""
         _require_operation_id(operation_id)
+        progress = GroupRecoveryResult()
         journal_fd = self._journal_dir_for_recovery(operation_id)
         if journal_fd is None:
-            return 0
-        progress = _RecoveryProgress()
+            return progress
         try:
             body = self._read_intent(journal_fd, operation_id)
             if body is None:
-                return 0
+                return progress
             if body["root"] != _identity(self._root_fd):
                 raise GroupJournalConflict("journal belongs to another root")
             self._discard_temp(journal_fd, operation_id)
             self._recover_body(journal_fd, operation_id, body, hook, progress)
-            return progress.removed
+            return progress
         except GroupJournalConflict as exc:
             exc.operation_id = operation_id
             exc.removed = progress.removed
             exc.possibly_unlinked = progress.possibly_unlinked
+            exc.removed_bytes = progress.removed_bytes
+            exc.possibly_unlinked_bytes = progress.possibly_unlinked_bytes
             exc.phase = progress.phase
             raise
         except OSError as exc:
@@ -544,6 +610,8 @@ class GroupJournal:
                 progress.removed,
                 progress.phase,
                 progress.possibly_unlinked,
+                progress.removed_bytes,
+                progress.possibly_unlinked_bytes,
             ) from exc
         finally:
             os.close(journal_fd)
@@ -576,7 +644,7 @@ class GroupJournal:
         operation_id: str,
         body: dict[str, Any],
         hook: Barrier | None,
-        progress: _RecoveryProgress,
+        progress: GroupRecoveryResult,
     ) -> None:
         relative = body["relative_date"]
         with self._date(relative) as (date_fd, chain):
@@ -627,7 +695,7 @@ class GroupJournal:
         relative: str,
         chain: list[list[int]],
         hook: Barrier | None,
-        progress: _RecoveryProgress,
+        progress: GroupRecoveryResult,
     ) -> None:
         self._preflight_group(date_fd, stage_fd, body)
         for key in _ORDER:
@@ -655,7 +723,7 @@ class GroupJournal:
         relative: str,
         chain: list[list[int]],
         hook: Barrier | None,
-        progress: _RecoveryProgress,
+        progress: GroupRecoveryResult,
     ) -> None:
         progress.phase = "completion"
         if hook:
@@ -685,7 +753,7 @@ class GroupJournal:
         stage_name: str,
         stage_identity: list[int] | None,
         hook: Barrier | None,
-        progress: _RecoveryProgress,
+        progress: GroupRecoveryResult,
     ) -> None:
         progress.phase = "finalize"
         if _exists(self._root_fd, stage_name):
@@ -745,7 +813,7 @@ class GroupJournal:
         relative: str,
         chain: list[list[int]],
         hook: Barrier | None,
-        progress: _RecoveryProgress,
+        progress: GroupRecoveryResult,
     ) -> None:
         progress.phase = f"{key}_identity"
         self._verify_member_state(date_fd, stage_fd, body, key)
@@ -800,7 +868,7 @@ class GroupJournal:
         relative: str,
         chain: list[list[int]],
         hook: Barrier | None,
-        progress: _RecoveryProgress,
+        progress: GroupRecoveryResult,
     ) -> None:
         if _fingerprint(stage_fd, key) != body["members"][key]:
             raise GroupJournalConflict(f"replaced staged {key}")
@@ -821,9 +889,12 @@ class GroupJournal:
             raise GroupJournalConflict(f"replaced staged {key} before unlink")
         os.unlink(key, dir_fd=stage_fd)
         progress.possibly_unlinked += 1
+        progress.possibly_unlinked_bytes += body["members"][key]["size"]
         os.fsync(stage_fd)
         progress.possibly_unlinked -= 1
+        progress.possibly_unlinked_bytes -= body["members"][key]["size"]
         progress.removed += 1
+        progress.removed_bytes += body["members"][key]["size"]
         if hook:
             hook(f"after_{key}_unlink")
 

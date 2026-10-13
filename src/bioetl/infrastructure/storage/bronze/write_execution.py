@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 from collections.abc import Iterator
 from datetime import datetime
 from pathlib import Path
@@ -166,7 +167,7 @@ async def write_bronze_data_and_sidecar(
             prepared.records_iter,
             prepared.full_path,
         )
-        meta_bytes = orjson.dumps(prepared.metadata, option=orjson.OPT_SORT_KEYS)
+        meta_bytes = _bronze_sidecar_bytes(prepared, save_json=host.save_json)
         write_bytes_if_absent_or_same(
             prepared.meta_path,
             meta_bytes,
@@ -183,6 +184,66 @@ async def write_bronze_data_and_sidecar(
         record_count=record_count,
         uncompressed_size=uncompressed_size,
     )
+
+
+def _bronze_sidecar_bytes(prepared: BronzeWritePrepared, *, save_json: bool) -> bytes:
+    """Attest new content, preserving an existing batch's ownership on retry."""
+    with prepared.full_path.open("rb") as payload:
+        payload_digest = hashlib.file_digest(payload, "sha256").hexdigest()
+    copy_digest = hashlib.sha256()
+    for record in prepared.record_list:
+        copy_digest.update(record)
+    metadata = {
+        **prepared.metadata,
+        "cleanup_association": {
+            "schema": 1,
+            "payload_sha256": payload_digest,
+            "copy_sha256": copy_digest.hexdigest() if save_json else None,
+        },
+    }
+    new_bytes: bytes = orjson.dumps(metadata, option=orjson.OPT_SORT_KEYS)
+    try:
+        with prepared.meta_path.open("rb") as existing:
+            raw: bytes = existing.read(1_048_577)
+    except FileNotFoundError:
+        return new_bytes
+    legacy_bytes = orjson.dumps(prepared.metadata, option=orjson.OPT_SORT_KEYS)
+    if raw == legacy_bytes:
+        return raw  # Legacy sidecars never acquire cleanup ownership on retry.
+    return (
+        raw if _same_existing_association(raw, prepared, payload_digest) else new_bytes
+    )
+
+
+def _same_existing_association(
+    raw: bytes, prepared: BronzeWritePrepared, payload_digest: str
+) -> bool:
+    try:
+        existing = orjson.loads(raw)
+    except orjson.JSONDecodeError:
+        return False
+    if not isinstance(existing, dict):
+        return False
+    association = existing.get("cleanup_association")
+    if not isinstance(association, dict):
+        return False
+    copy_digest = association.get("copy_sha256")
+    if copy_digest is not None and not (
+        isinstance(copy_digest, str)
+        and len(copy_digest) == 64
+        and all(char in "0123456789abcdef" for char in copy_digest)
+    ):
+        return False
+    expected = {
+        **prepared.metadata,
+        "cleanup_association": {
+            "schema": 1,
+            "payload_sha256": payload_digest,
+            "copy_sha256": copy_digest,
+        },
+    }
+    # Exact canonical bytes reject ambiguous/foreign lineage, keys and schema.
+    return raw == orjson.dumps(expected, option=orjson.OPT_SORT_KEYS)
 
 
 __all__ = [

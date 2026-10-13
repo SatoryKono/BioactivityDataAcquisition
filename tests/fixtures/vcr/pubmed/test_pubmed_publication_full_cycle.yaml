@@ -139,16 +139,15 @@ interactions:
       date:
       - Tue, 06 Oct 2026 03:57:02 GMT
       ncbi-phid:
-      - 1D340139CC456915000024EE90F43A08.1.1.m_1
+      - REDACTED
       ncbi-sid:
-      - DD823FC2C468CDC4_B8A0SID
+      - REDACTED
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Finatra
       set-cookie:
-      - ncbi_sid=DD823FC2C468CDC4_B8A0SID; domain=.nih.gov; path=/; expires=Wed, 06
-        Oct 2027 03:57:03 GMT
+      - REDACTED
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:
@@ -176,7 +175,7 @@ interactions:
       connection:
       - keep-alive
       cookie:
-      - ncbi_sid=DD823FC2C468CDC4_B8A0SID
+      - REDACTED
       host:
       - eutils.ncbi.nlm.nih.gov
       user-agent:
@@ -206,16 +205,15 @@ interactions:
       date:
       - Tue, 06 Oct 2026 03:57:02 GMT
       ncbi-phid:
-      - 1D340139CC456915000046EE917F2AB9.1.1.m_1
+      - REDACTED
       ncbi-sid:
-      - DD823FC2C468CDC4_B8A0SID
+      - REDACTED
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Finatra
       set-cookie:
-      - ncbi_sid=DD823FC2C468CDC4_B8A0SID; domain=.nih.gov; path=/; expires=Wed, 06
-        Oct 2027 03:57:03 GMT
+      - REDACTED
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:
@@ -243,7 +241,7 @@ interactions:
       connection:
       - keep-alive
       cookie:
-      - ncbi_sid=DD823FC2C468CDC4_B8A0SID
+      - REDACTED
       host:
       - eutils.ncbi.nlm.nih.gov
       user-agent:
@@ -1555,16 +1553,15 @@ interactions:
       date:
       - Tue, 06 Oct 2026 03:57:03 GMT
       ncbi-phid:
-      - 1D340139CC456915000045EE92188AF8.1.1.m_6
+      - REDACTED
       ncbi-sid:
-      - DD823FC2C468CDC4_B8A0SID
+      - REDACTED
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Finatra
       set-cookie:
-      - ncbi_sid=DD823FC2C468CDC4_B8A0SID; domain=.nih.gov; path=/; expires=Wed, 06
-        Oct 2027 03:57:03 GMT
+      - REDACTED
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:
@@ -1592,7 +1589,7 @@ interactions:
       connection:
       - keep-alive
       cookie:
-      - ncbi_sid=DD823FC2C468CDC4_B8A0SID
+      - REDACTED
       host:
       - eutils.ncbi.nlm.nih.gov
       user-agent:
@@ -1622,16 +1619,15 @@ interactions:
       date:
       - Tue, 06 Oct 2026 07:27:23 GMT
       ncbi-phid:
-      - 1D328C8C3EF3BD85000048305195D35C.1.1.m_1
+      - REDACTED
       ncbi-sid:
-      - DD823FC2C468CDC4_B8A0SID
+      - REDACTED
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Finatra
       set-cookie:
-      - ncbi_sid=DD823FC2C468CDC4_B8A0SID; domain=.nih.gov; path=/; expires=Wed, 06
-        Oct 2027 07:27:24 GMT
+      - REDACTED
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:
@@ -1659,7 +1655,7 @@ interactions:
       connection:
       - keep-alive
       cookie:
-      - ncbi_sid=DD823FC2C468CDC4_B8A0SID
+      - REDACTED
       host:
       - eutils.ncbi.nlm.nih.gov
       user-agent:
@@ -1812,16 +1808,15 @@ interactions:
       date:
       - Tue, 06 Oct 2026 07:27:24 GMT
       ncbi-phid:
-      - 1D328C8C3EF3BD85000053305211D826.1.1.m_6
+      - REDACTED
       ncbi-sid:
-      - DD823FC2C468CDC4_B8A0SID
+      - REDACTED
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Finatra
       set-cookie:
-      - ncbi_sid=DD823FC2C468CDC4_B8A0SID; domain=.nih.gov; path=/; expires=Wed, 06
-        Oct 2027 07:27:24 GMT
+      - REDACTED
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:

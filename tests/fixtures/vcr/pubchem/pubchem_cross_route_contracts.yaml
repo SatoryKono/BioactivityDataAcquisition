@@ -163,16 +163,15 @@ interactions:
       Expires:
       - Tue, 06 Oct 2026 05:17:44 GMT
       Ncbi-Phid:
-      - 90C68151AC4766810000000000000001.m_1
+      - REDACTED
       Ncbi-Sid:
-      - 90C68151AC476681_0000SID
+      - REDACTED
       Referrer-Policy:
       - origin-when-cross-origin
       Server:
       - Apache
       Set-Cookie:
-      - ncbi_sid=90C68151AC476681_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
-        Oct 2027 04:17:44 GMT
+      - REDACTED
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
       Transfer-Encoding:
@@ -355,16 +354,15 @@ interactions:
       Expires:
       - Tue, 06 Oct 2026 05:17:45 GMT
       Ncbi-Phid:
-      - 95B7B8FFAC4766910000000000000001.m_2
+      - REDACTED
       Ncbi-Sid:
-      - 95B7B8FFAC476691_0000SID
+      - REDACTED
       Referrer-Policy:
       - origin-when-cross-origin
       Server:
       - Apache
       Set-Cookie:
-      - ncbi_sid=95B7B8FFAC476691_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
-        Oct 2027 04:17:45 GMT
+      - REDACTED
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
       Transfer-Encoding:
@@ -587,16 +585,15 @@ interactions:
       Expires:
       - Tue, 06 Oct 2026 05:17:47 GMT
       Ncbi-Phid:
-      - 95B7BFD9AC4766B10000000000000001.m_1
+      - REDACTED
       Ncbi-Sid:
-      - 95B7BFD9AC4766B1_0000SID
+      - REDACTED
       Referrer-Policy:
       - origin-when-cross-origin
       Server:
       - Apache
       Set-Cookie:
-      - ncbi_sid=95B7BFD9AC4766B1_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
-        Oct 2027 04:17:47 GMT
+      - REDACTED
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
       Transfer-Encoding:
@@ -829,16 +826,15 @@ interactions:
       Expires:
       - Tue, 06 Oct 2026 05:17:49 GMT
       Ncbi-Phid:
-      - 95B7C58FAC4766C10000000000000001.m_1
+      - REDACTED
       Ncbi-Sid:
-      - 95B7C58FAC4766C1_0000SID
+      - REDACTED
       Referrer-Policy:
       - origin-when-cross-origin
       Server:
       - Apache
       Set-Cookie:
-      - ncbi_sid=95B7C58FAC4766C1_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
-        Oct 2027 04:17:48 GMT
+      - REDACTED
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
       Transfer-Encoding:
@@ -1031,16 +1027,15 @@ interactions:
       Expires:
       - Tue, 06 Oct 2026 05:17:50 GMT
       Ncbi-Phid:
-      - 95B7D46AAC4766E10000000000000001.m_1
+      - REDACTED
       Ncbi-Sid:
-      - 95B7D46AAC4766E1_0000SID
+      - REDACTED
       Referrer-Policy:
       - origin-when-cross-origin
       Server:
       - Apache
       Set-Cookie:
-      - ncbi_sid=95B7D46AAC4766E1_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
-        Oct 2027 04:17:50 GMT
+      - REDACTED
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
       Transfer-Encoding:

@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
+import platform
 import select
 import subprocess
 import sys
@@ -24,6 +26,52 @@ POSIX_ONLY = pytest.mark.skipif(
 )
 
 
+@pytest.fixture(scope="module", autouse=True)
+def journal_execution_environment(tmp_path_factory, record_testsuite_property) -> None:
+    """Record the actual checkout and temp mount; never infer POSIX from a job label."""
+    repo = Path(__file__).resolve().parents[4]
+    module = Path(journal.__file__).resolve()
+    assert module.is_relative_to(repo / "src"), "journal imported from another checkout"
+    temp = tmp_path_factory.mktemp("fs001-journal-environment").resolve()
+    environment = {
+        "os": platform.platform(),
+        "python": sys.version,
+        "module": str(module),
+        "journal_sha256": hashlib.sha256(module.read_bytes()).hexdigest(),
+        "uid": os.geteuid() if hasattr(os, "geteuid") else None,
+        "temp_device": temp.stat().st_dev,
+        "destructive_supported": journal.destructive_cleanup_supported(),
+        "mount": None,
+        "capabilities": None,
+    }
+    if sys.platform.startswith("linux"):
+        mounts = []
+        for line in Path("/proc/self/mountinfo").read_text().splitlines():
+            fields = line.split()
+            if temp.is_relative_to(Path(fields[4])):
+                separator = fields.index("-")
+                mounts.append(
+                    (
+                        len(fields[4]),
+                        {
+                            "target": fields[4],
+                            "options": fields[5],
+                            "filesystem": fields[separator + 1],
+                            "super_options": fields[separator + 3],
+                        },
+                    )
+                )
+        environment["mount"] = max(mounts, key=lambda item: item[0])[1]
+        environment["capabilities"] = [
+            line
+            for line in Path("/proc/self/status").read_text().splitlines()
+            if line.startswith(("CapEff:", "CapBnd:"))
+        ]
+    record_testsuite_property(
+        "FS001_ENVIRONMENT", json.dumps(environment, sort_keys=True)
+    )
+
+
 def _fixture(
     tmp_path: Path, *, copy: bool = False
 ) -> tuple[Path, journal.GroupSpec, Path]:
@@ -34,7 +82,20 @@ def _fixture(
     names = spec.names()
     (date_dir / names["payload"]).write_bytes(b"payload\n")
     (date_dir / names["sidecar"]).write_text(
-        json.dumps({"provider": "chembl", "entity": "activity", "batch_id": BATCH}),
+        json.dumps(
+            {
+                "provider": "chembl",
+                "entity": "activity",
+                "batch_id": BATCH,
+                "cleanup_association": {
+                    "schema": 1,
+                    "payload_sha256": hashlib.sha256(b"payload\n").hexdigest(),
+                    "copy_sha256": hashlib.sha256(b"copy\n").hexdigest()
+                    if copy
+                    else None,
+                },
+            }
+        ),
         encoding="utf-8",
     )
     if copy:
@@ -46,7 +107,7 @@ def _body() -> dict[str, object]:
     spec = journal.GroupSpec("chembl", "activity", DATE, BATCH, CUTOFF)
     identity = {"dev": 1, "ino": 2, "size": 3, "sha256": "a" * 64}
     return {
-        "schema": 1,
+        "schema": 2,
         "operation_id": "1" * 32,
         "state": "prepared",
         "scope": {
@@ -82,6 +143,25 @@ def test_spec_rejects_invalid_or_ineligible_group(
         journal.GroupSpec("chembl", "activity", date, batch, cutoff).names()
 
 
+@POSIX_ONLY
+@pytest.mark.parametrize("mutation", ["legacy", "payload", "copy"])
+def test_begin_does_not_adopt_unattested_group(tmp_path: Path, mutation: str) -> None:
+    root, spec, date_dir = _fixture(tmp_path, copy=True)
+    if mutation == "legacy":
+        sidecar = date_dir / spec.names()["sidecar"]
+        metadata = json.loads(sidecar.read_bytes())
+        del metadata["cleanup_association"]
+        sidecar.write_text(json.dumps(metadata), encoding="utf-8")
+    else:
+        (date_dir / spec.names()[mutation]).write_bytes(b"foreign replacement")
+    original = {name: (date_dir / name).read_bytes() for name in spec.names().values()}
+    with journal.open_group_journal(root) as group:
+        with pytest.raises(journal.GroupJournalConflict, match="unassociated"):
+            group.begin(spec)
+    assert {name: (date_dir / name).read_bytes() for name in original} == original
+    assert not (root / ".bronze-group-journals").exists()
+
+
 @pytest.mark.parametrize("raw", [b"", b"{", b"[]", b'{"body":1,"body":2}'])
 def test_record_rejects_truncated_or_ambiguous_bytes(raw: bytes) -> None:
     with pytest.raises(journal.GroupJournalConflict):
@@ -93,13 +173,17 @@ def test_record_rejects_forged_checksum_and_unstaged_absence() -> None:
     raw = journal._record_bytes(body)
     assert journal._decode_record(raw, "1" * 32) == body
     envelope = json.loads(raw)
-    envelope["body"]["schema"] = 2
+    envelope["body"]["schema"] = 99
     with pytest.raises(journal.GroupJournalConflict):
         journal._decode_record(json.dumps(envelope).encode(), "1" * 32)
-    body["schema"] = 2
+    body["schema"] = 1
     with pytest.raises(journal.GroupJournalConflict):
         journal._decode_record(journal._record_bytes(body), "1" * 32)
-    body["schema"] = 1
+    body["schema"] = 2
+    body["schema"] = 2.0
+    with pytest.raises(journal.GroupJournalConflict):
+        journal._decode_record(journal._record_bytes(body), "1" * 32)
+    body["schema"] = 2
     body["staged"] = ["sidecar", "payload"]
     with pytest.raises(journal.GroupJournalConflict):
         journal._decode_record(journal._record_bytes(body), "1" * 32)
@@ -186,7 +270,11 @@ def test_late_sidecar_failure_recovers_exact_group(
                 ),
             )
         assert failure.value.removed == first_removed
+        assert failure.value.removed_bytes == len(b"payload\n") + (
+            len(b"copy\n") if copy else 0
+        )
         assert failure.value.possibly_unlinked == 0
+        assert failure.value.possibly_unlinked_bytes == 0
         assert (date_dir / spec.names()["sidecar"]).exists() is False
         record_path = root / ".bronze-group-journals" / f"{operation_id}.json"
         record = journal._decode_record(record_path.read_bytes(), operation_id)
@@ -195,7 +283,9 @@ def test_late_sidecar_failure_recovers_exact_group(
             root / f".bronze-group-stage-{operation_id}" / "sidecar"
         ).read_bytes() == sidecar_bytes
     with journal.open_group_journal(root) as group:
-        assert group.recover(operation_id) == 1
+        result = group.recover_with_result(operation_id)
+        assert result.removed == 1
+        assert result.removed_bytes == len(sidecar_bytes)
         assert group.recover(operation_id) == 0
     assert outsider.read_bytes() == b"retain"
     assert all(not (date_dir / name).exists() for name in spec.names().values())
@@ -218,6 +308,7 @@ def test_late_foreign_replacement_preserves_partial_result(tmp_path: Path) -> No
             group.recover(operation_id, replace_after_payload)
         assert conflict.value.operation_id == operation_id
         assert conflict.value.removed == 1
+        assert conflict.value.removed_bytes == len(b"payload\n")
         assert conflict.value.possibly_unlinked == 0
         assert conflict.value.phase == "sidecar_identity"
         assert not payload.exists()
@@ -692,6 +783,8 @@ def test_unlink_then_fsync_failure_reports_uncertain_partial_result(
         monkeypatch.setattr(journal.os, "fsync", original_fsync)
         assert failure.value.removed == 0
         assert failure.value.possibly_unlinked == 1
+        assert failure.value.removed_bytes == 0
+        assert failure.value.possibly_unlinked_bytes == len(b"payload\n")
         assert group.recover(operation_id) == 1
     assert all(
         not (date_dir / name).exists()
