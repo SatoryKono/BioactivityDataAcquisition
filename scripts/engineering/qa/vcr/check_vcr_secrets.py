@@ -325,21 +325,28 @@ def _tracked_yaml_paths() -> list[Path]:
     return [path for path in paths if path.suffix.casefold() in {".yaml", ".yml"}]
 
 
-def _has_interactions(node: yaml.Node, active: frozenset[int] = frozenset()) -> bool:
+def _has_interactions(
+    node: yaml.Node,
+    active: frozenset[int] = frozenset(),
+    visited: set[int] | None = None,
+) -> bool:
     if id(node) in active:
         return True  # Route cyclic merges to the strict parser.
+    if visited is None:
+        visited = set()
+    if id(node) in visited:
+        return False
+    visited.add(id(node))
     active = active | {id(node)}
     if isinstance(node, yaml.SequenceNode):
-        return any(_has_interactions(item, active) for item in node.value)
+        return any(_has_interactions(item, active, visited) for item in node.value)
     if not isinstance(node, yaml.MappingNode):
         return False
     for key, value in node.value:
         if isinstance(key, yaml.ScalarNode):
             if key.value == "interactions":
                 return True
-            if key.tag == _YAML_MERGE_TAG and _has_interactions(
-                value, active
-            ):
+            if key.tag == _YAML_MERGE_TAG and _has_interactions(value, active, visited):
                 return True
     return False
 

@@ -378,3 +378,36 @@ def test_merge_alias_budget_is_shared_across_mappings(
     path = tmp_path / "cassette.yaml"
     path.write_text(content + _cassette(), encoding="utf-8")
     assert checker._scan_file(path)
+
+
+def test_candidate_alias_dag_visits_shared_nodes_once() -> None:
+    class BoundedPairs(list[tuple[yaml.Node, yaml.Node]]):
+        visits = 0
+
+        def __iter__(self):
+            self.visits += 1
+            assert self.visits <= 2, "candidate traversal revisited shared alias"
+            return super().__iter__()
+
+    leaf = yaml.MappingNode("tag:yaml.org,2002:map", [])
+    pairs = BoundedPairs()
+    leaf.value = pairs
+    node = leaf
+    for _ in range(8):
+        node = yaml.MappingNode(
+            "tag:yaml.org,2002:map",
+            [
+                (
+                    yaml.ScalarNode("tag:yaml.org,2002:merge", "<<"),
+                    yaml.SequenceNode("tag:yaml.org,2002:seq", [node] * 8),
+                )
+            ],
+        )
+    assert checker._has_interactions(node) is False
+    assert pairs.visits == 1
+
+
+def test_candidate_cyclic_merge_routes_to_strict_parser() -> None:
+    node = yaml.MappingNode("tag:yaml.org,2002:map", [])
+    node.value.append((yaml.ScalarNode("tag:yaml.org,2002:merge", "<<"), node))
+    assert checker._has_interactions(node) is True
