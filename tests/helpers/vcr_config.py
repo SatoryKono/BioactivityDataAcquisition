@@ -23,7 +23,12 @@ _LOGGER = logging.getLogger(__name__)
 CANONICAL_FILTER_HEADERS: tuple[str, ...] = (
     "authorization",
     "x-api-key",
+    "api-key",
+    "x-auth-token",
+    "proxy-authorization",
     "cookie",
+    "set-cookie",
+    "set-cookie2",
     "ncbi-sid",
     "ncbi-phid",
 )

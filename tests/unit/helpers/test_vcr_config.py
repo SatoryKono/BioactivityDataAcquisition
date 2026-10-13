@@ -376,8 +376,20 @@ def test_sanitizer_failure_latch_keeps_distinct_failures(
     ]
 
 
-@pytest.mark.parametrize("header", ["NCBI-SID", "ncbi-sid", "NcBi-PhId"])
-def test_ncbi_session_headers_are_filtered_on_both_sides(header: str) -> None:
+@pytest.mark.parametrize(
+    "header",
+    [
+        "NCBI-SID",
+        "ncbi-sid",
+        "NcBi-PhId",
+        "API-Key",
+        "X-Auth-Token",
+        "Proxy-Authorization",
+        "Set-Cookie",
+        "Set-Cookie2",
+    ],
+)
+def test_sensitive_headers_are_filtered_on_both_sides(header: str) -> None:
     config = build_base_vcr_config(filter_headers=["x-extra"])
     request_hook = cast(Callable[[Any], Any], config["before_record_request"])
     response_hook = cast(Callable[[Any], Any], config["before_record_response"])
