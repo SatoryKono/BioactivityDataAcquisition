@@ -291,6 +291,8 @@ def test_pre_task_read_only_refreshes_only_into_temporary_root(
         title="Read-only refresh",
         query="bounded temporary refresh",
         source_refs=[],
+        chunks_path=tmp_path / "missing-rag" / "chunks.jsonl",
+        events_dir=tmp_path / "missing-timeline",
         refresh_output_root=requested_root,
         limit=5,
     )
