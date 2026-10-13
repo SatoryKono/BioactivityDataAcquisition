@@ -97,6 +97,8 @@ class _BronzeWriteExecutionHostProtocol(Protocol):
 async def run_bronze_post_write_actions(
     host: _BronzeWriteExecutionHostProtocol,
     context: BronzeWritePostwriteContext,
+    *,
+    locked_root: Path | None = None,
 ) -> None:
     """Emit metrics, optional JSON copy, audit log, and metadata sidecar."""
     request = context.request
@@ -121,7 +123,7 @@ async def run_bronze_post_write_actions(
             request.entity,
             prepared.date_str,
             request.batch_id,
-            locked_root=prepared.locked_root,
+            locked_root=locked_root,
         )
     if host._audit:
         await host._log_bronze_audit(
@@ -149,7 +151,7 @@ async def run_bronze_post_write_actions(
             ingestion_ts=request.ingestion_ts,
             duration=context.duration,
             source_metadata=request.source_metadata,
-            locked_root=prepared.locked_root,
+            locked_root=locked_root,
         )
 
 

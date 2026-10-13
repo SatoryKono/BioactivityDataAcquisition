@@ -55,18 +55,12 @@ async def _drain_cleanup_worker(task: asyncio.Task[dict[str, int]]) -> None:
                 raise
 
 
-class BronzeWriterReadCleanupMixin(
-    BronzeCleanupPlannerMixin, BronzeCleanupPreviewMixin
-):
-    """Filesystem read/list/cleanup helpers for Bronze storage."""
+class BronzeWriterReadMixin:
+    """Filesystem read and batch listing helpers for Bronze storage."""
 
     base_path: Path = cast(Any, None)  # Any: host attr default (PD3)
     _flat_structure: bool = cast(Any, None)  # Any: host attr default (PD3)
     _logger: LoggerPort = cast(Any, None)  # Any: host attr default (PD3)
-    _metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD3)
-    _resolve_bronze_path: Callable[[str, str, str, str], str] = cast(
-        Any, None
-    )  # Any: host method default (PD3)
 
     async def read_bronze(
         self, path: str
@@ -132,6 +126,17 @@ class BronzeWriterReadCleanupMixin(
             batch_count=len(result),
         )
         return result
+
+
+class BronzeWriterReadCleanupMixin(
+    BronzeWriterReadMixin, BronzeCleanupPlannerMixin, BronzeCleanupPreviewMixin
+):
+    """Apply and report nonmutating Bronze cleanup plans."""
+
+    _metrics: MetricsPort = cast(Any, None)  # Any: host attr default (PD3)
+    _resolve_bronze_path: Callable[[str, str, str, str], str] = cast(
+        Any, None
+    )  # Any: host method default (PD3)
 
     def _log_cleanup_skip(self, path: str, reason: str) -> None:
         """Emit a diagnostic for a skipped cleanup candidate."""

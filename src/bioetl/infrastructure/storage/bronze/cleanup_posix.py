@@ -12,17 +12,16 @@ from contextlib import contextmanager, suppress
 from dataclasses import dataclass
 from pathlib import Path
 
-from .cleanup_support import (
+from .cleanup_core import (
     _O_DIRECTORY,
     _O_NOFOLLOW,
+    _O_NONBLOCK,
     _STAGE_JOURNAL,
     _STAGE_PREFIX,
     _CleanupConflict,
     destructive_cleanup_supported,
     stat_is_link_or_reparse,
 )
-
-_O_NONBLOCK = getattr(os, "O_NONBLOCK", 0)
 
 
 def _same_identity(left: os.stat_result, right: os.stat_result) -> bool:

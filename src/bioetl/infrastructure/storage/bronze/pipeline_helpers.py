@@ -34,7 +34,6 @@ class BronzeWriteRequest:
     run_type: RunType
     ingestion_ts: datetime
     source_metadata: SourceMetadata | None = None
-    locked_root: Path | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,7 +47,6 @@ class BronzeWritePrepared:
     metadata: JsonDict
     full_path: Path
     meta_path: Path
-    locked_root: Path | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -103,6 +101,8 @@ class _BronzeWritePreparationHostProtocol(Protocol):
 def prepare_bronze_write(
     host: _BronzeWritePreparationHostProtocol,
     request: BronzeWriteRequest,
+    *,
+    locked_root: Path | None = None,
 ) -> BronzeWritePrepared:
     """Validate inputs and build the prepared Bronze write context."""
     host._validate_bronze_request_inputs(request)
@@ -134,7 +134,7 @@ def prepare_bronze_write(
         record_list = cast(list[bytes], [])
         records_iter = validated_records
 
-    write_root = request.locked_root or host.base_path
+    write_root = locked_root or host.base_path
     full_path = write_root / relative_path
     return BronzeWritePrepared(
         records_iter=records_iter,
@@ -144,7 +144,6 @@ def prepare_bronze_write(
         metadata=metadata,
         full_path=full_path,
         meta_path=full_path.with_suffix(".zst.meta.json"),
-        locked_root=request.locked_root,
     )
 
 

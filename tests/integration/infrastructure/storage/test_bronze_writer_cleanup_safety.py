@@ -36,6 +36,7 @@ from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.storage import bronze_writer as bronze_writer_module
 from bioetl.infrastructure.storage.bronze import (
+    cleanup_core,
     cleanup_planner,
     cleanup_posix,
     cleanup_support,
@@ -357,7 +358,7 @@ def test_absent_handle_capability_refuses_exclusive_lock(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """An unsupported platform cannot silently enter destructive cleanup."""
-    monkeypatch.setattr(cleanup_support, "_ANCHORED_OPS", False)
+    monkeypatch.setattr(cleanup_core, "_ANCHORED_OPS", False)
     assert not destructive_cleanup_supported()
     with pytest.raises(NotImplementedError, match="dir_fd/no-follow"):
         with bronze_tree_lock(tmp_path, exclusive=True):
@@ -456,9 +457,9 @@ async def test_cleanup_accepts_links_at_or_above_trusted_root(
     root_link: bool,
 ) -> None:
     """A trusted root alias must permit both file and directory removal."""
-    if anchored and not cleanup_support._ANCHORED_OPS:
+    if anchored and not cleanup_core._ANCHORED_OPS:
         pytest.skip("anchored operations unavailable")
-    monkeypatch.setattr(cleanup_support, "_ANCHORED_OPS", anchored)
+    monkeypatch.setattr(cleanup_core, "_ANCHORED_OPS", anchored)
     target = tmp_path / "target"
     target.mkdir()
     alias = _symlink_or_skip(tmp_path / "alias", target)
@@ -487,9 +488,9 @@ def test_cleanup_reverification_refuses_links_below_trusted_root(
     inside: bool,
 ) -> None:
     """Even an internal link below a trusted root alias must be rejected."""
-    if anchored and not cleanup_support._ANCHORED_OPS:
+    if anchored and not cleanup_core._ANCHORED_OPS:
         pytest.skip("anchored operations unavailable")
-    monkeypatch.setattr(cleanup_support, "_ANCHORED_OPS", anchored)
+    monkeypatch.setattr(cleanup_core, "_ANCHORED_OPS", anchored)
     target = tmp_path / "target"
     target.mkdir()
     root = _symlink_or_skip(tmp_path / "alias", target)
@@ -1087,7 +1088,7 @@ async def test_cancelled_writer_keeps_lock_until_io_finishes(
         waiting_after_cancel.set()
         await original_wait(task)
 
-    async def blocked_write(_request: object) -> object:
+    async def blocked_write(_request: object, _locked_root: Path) -> object:
         writing.set()
         await release_write.wait()
         return Mock()

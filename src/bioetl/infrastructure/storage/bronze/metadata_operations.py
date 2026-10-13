@@ -54,7 +54,6 @@ class BronzeMetadataWriteRequest:
     ingestion_ts: datetime
     duration: float
     source_metadata: SourceMetadata | None
-    locked_root: Path | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -88,9 +87,11 @@ class _BronzeMetadataBundleBuilder(Protocol):
 def prepare_bronze_metadata_write(
     host: _BronzeMetadataWriteHostProtocol,
     request: BronzeMetadataWriteRequest,
+    *,
+    locked_root: Path | None = None,
 ) -> PreparedBronzeMetadataWrite:
     """Resolve metadata payload and target path for one Bronze write."""
-    write_root = request.locked_root or host.base_path
+    write_root = locked_root or host.base_path
     live_snapshot = _build_live_input_snapshot_ref_if_available(
         base_path=write_root,
         relative_path=request.relative_path,

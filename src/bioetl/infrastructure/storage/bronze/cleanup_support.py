@@ -19,6 +19,14 @@ from datetime import datetime
 from pathlib import Path
 from uuid import UUID
 
+from .cleanup_core import (
+    _O_DIRECTORY,
+    _O_NOFOLLOW,
+    _CleanupConflict,
+    destructive_cleanup_supported,
+    stat_is_link_or_reparse,
+)
+
 __all__ = [
     "bronze_tree_lock",
     "candidate_is_safe",
@@ -49,38 +57,6 @@ _BATCH_ARTIFACT = re.compile(
 )
 
 _DATE_DIR_FORMAT = "%Y-%m-%d"
-
-# Windows FILE_ATTRIBUTE_REPARSE_POINT — covers junctions, mount points and
-# other reparse-point types, not just symlinks.
-_REPARSE_POINT_ATTR = 0x400
-_STAGE_PREFIX = ".bronze-cleanup-stage-"
-_STAGE_JOURNAL = "origin.json"
-
-# POSIX anchored operations: dir_fd support is unavailable on Windows.
-_O_DIRECTORY = getattr(os, "O_DIRECTORY", 0)
-_O_NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
-_ANCHORED_OPS = bool(
-    _O_DIRECTORY
-    and _O_NOFOLLOW
-    and getattr(os, "O_NONBLOCK", 0)
-    and os.unlink in os.supports_dir_fd
-    and os.stat in os.supports_dir_fd
-    and os.open in os.supports_dir_fd
-    and os.rename in os.supports_dir_fd
-    and os.rmdir in os.supports_dir_fd
-    and os.mkdir in os.supports_dir_fd
-)
-
-
-def destructive_cleanup_supported() -> bool:
-    """Only POSIX handle-relative operations with advisory locking qualify."""
-    if not _ANCHORED_OPS or os.name == "nt":
-        return False
-    try:
-        import fcntl
-    except ImportError:
-        return False
-    return hasattr(fcntl, "flock")
 
 
 @contextmanager
@@ -148,13 +124,6 @@ def is_fully_resolved(path: Path, root_abs: Path, root_real: Path) -> bool:
         )
     except (OSError, ValueError):
         return False
-
-
-def stat_is_link_or_reparse(st: os.stat_result) -> bool:
-    """True for symlinks and Windows reparse points (junctions, mounts)."""
-    if stat.S_ISLNK(st.st_mode):
-        return True
-    return bool(getattr(st, "st_file_attributes", 0) & _REPARSE_POINT_ATTR)
 
 
 def _entry_is_link_or_reparse(entry: os.DirEntry[str]) -> bool:
@@ -363,10 +332,6 @@ def _scope_child_dirs(
         return iter_safe_child_dirs(parent, on_skip=on_skip)
     resolved = safe_named_child_dir(parent, name, root_real, on_skip=on_skip)
     return [resolved] if resolved is not None else []
-
-
-class _CleanupConflict(Exception):
-    """A candidate or directory component changed during destructive apply."""
 
 
 def candidate_is_safe(

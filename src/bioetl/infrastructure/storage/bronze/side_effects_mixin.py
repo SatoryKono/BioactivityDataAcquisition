@@ -116,8 +116,8 @@ class BronzeWriterSideEffectsMixin:
                 ingestion_ts=ingestion_ts,
                 duration=duration,
                 source_metadata=source_metadata,
-                locked_root=locked_root,
             ),
+            locked_root=locked_root,
         )
         await host._metadata_writer.write_bronze_metadata(
             base_path=str(prepared.metadata_base_path),

@@ -6,7 +6,6 @@ from __future__ import annotations
 import asyncio
 import time
 from collections.abc import Iterator
-from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
@@ -251,9 +250,8 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
                     leaving.result()
             raise
         try:
-            pinned_request = replace(request, locked_root=entering.result())
             writing = asyncio.create_task(
-                self._write_bronze_with_tracing(pinned_request)
+                self._write_bronze_with_tracing(request, entering.result())
             )
             try:
                 return await asyncio.shield(writing)
@@ -282,6 +280,7 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
     async def _write_bronze_with_tracing(
         self,
         request: BronzeWriteRequest,
+        locked_root: Path | None = None,
     ) -> BronzeWriteResult:
         span_context = (
             self._tracing.get_tracer(__name__).start_as_current_span("write_bronze")
@@ -299,7 +298,7 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
                 "bioetl_bronze_write_attempts_total", 1, labels
             )
             start_time = time.perf_counter()
-            prepared = self._prepare_bronze_write(request)
+            prepared = self._prepare_bronze_write(request, locked_root=locked_root)
             write_artifacts = await self._write_bronze_data_and_sidecar(prepared)
             duration = time.perf_counter() - start_time
             await self._run_bronze_post_write_actions(
@@ -308,7 +307,8 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
                     prepared=prepared,
                     write_artifacts=write_artifacts,
                     duration=duration,
-                )
+                ),
+                locked_root=locked_root,
             )
             total_duration = time.perf_counter() - start_time
             self._metrics.observe_histogram(
@@ -356,16 +356,20 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
     def _prepare_bronze_write(
         self,
         request: BronzeWriteRequest,
+        *,
+        locked_root: Path | None = None,
     ) -> BronzeWritePrepared:
         """Validate inputs and build the prepared write context."""
-        return prepare_bronze_write(self, request)
+        return prepare_bronze_write(self, request, locked_root=locked_root)
 
     async def _run_bronze_post_write_actions(
         self,
         context: BronzeWritePostwriteContext,
+        *,
+        locked_root: Path | None = None,
     ) -> None:
         """Emit metrics, optional JSON copy, audit log, and metadata sidecar."""
-        await run_bronze_post_write_actions(self, context)  # pyright: ignore[reportArgumentType]
+        await run_bronze_post_write_actions(self, context, locked_root=locked_root)  # pyright: ignore[reportArgumentType]
 
     async def _write_bronze_data_and_sidecar(
         self,
