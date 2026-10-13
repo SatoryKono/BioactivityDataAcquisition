@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import json
+from importlib.metadata import packages_distributions
 import re
 import subprocess
 import tomllib
@@ -90,11 +91,7 @@ def dependency_consumers(root: Path, changed: set[str]) -> list[str]:
     consumers: set[str] = set()
     unresolved: list[str] = []
     imports = _source_imports(root)
-    aliases = {
-        "pyyaml": "yaml",
-        "typing-extensions": "typing_extensions",
-        "pymdown-extensions": "pymdownx",
-    }
+    module_owners = packages_distributions()
     for dependency in sorted(changed):
         family = {_name(dependency)}
         while True:
@@ -109,7 +106,11 @@ def dependency_consumers(root: Path, changed: set[str]) -> list[str]:
                     family.add(_name(package["name"]))
             if family == previous:
                 break
-        modules = {aliases.get(name, name.replace("-", "_")) for name in family}
+        modules = {
+            module
+            for module, owners in module_owners.items()
+            if any(_name(owner) in family for owner in owners)
+        }
         selected = {path for path, imported in imports.items() if imported & modules}
         if selected:
             consumers.update(selected)
@@ -124,7 +125,7 @@ def dependency_consumers(root: Path, changed: set[str]) -> list[str]:
 
 def _source_imports(root: Path) -> dict[str, set[str]]:
     result: dict[str, set[str]] = {}
-    for prefix in ("src/bioetl", "src/memory", "scripts"):
+    for prefix in ("src/bioetl", "src/memory", "scripts", "tests"):
         for path in sorted((root / prefix).rglob("*.py")):
             tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
             modules: set[str] = set()

@@ -343,6 +343,14 @@ def _dependency_targets(repo_root: Path, dependencies: set[str]) -> list[str]:
                 raise ValueError(
                     "Missing mandatory mapped test targets: " + ", ".join(missing)
                 )
+        elif consumer.startswith("tests/") and Path(consumer).name == "conftest.py":
+            selected = [Path(consumer).parent.as_posix()]
+        elif consumer.startswith("tests/") and not Path(consumer).name.startswith(
+            "test_"
+        ):
+            raise ValueError(
+                f"Unconfirmed Python dependency test-helper owner route: {consumer}"
+            )
         elif consumer.startswith("src/memory/"):
             selected = (
                 ["tests/unit/memory"]

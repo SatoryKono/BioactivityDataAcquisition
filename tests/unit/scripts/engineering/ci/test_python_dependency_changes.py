@@ -10,6 +10,21 @@ from scripts.engineering.ci import pr_lane_results as lane
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(autouse=True)
+def _distribution_owners(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Use deterministic package ownership metadata, never name guessing."""
+    monkeypatch.setattr(
+        dependencies,
+        "packages_distributions",
+        lambda: {
+            "httpx": ["httpx"],
+            "polars": ["polars"],
+            "pyarrow": ["pyarrow"],
+            "syrupy": ["syrupy"],
+        },
+    )
+
+
 def _consumer(root: Path, source: str, imported: str) -> None:
     path = root / source
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -102,3 +117,24 @@ def test_configuration_only_change_is_not_a_dependency_success(
     monkeypatch.setattr(dependencies, "_read_revision", lambda *args: {})
     with pytest.raises(ValueError, match="own classified route"):
         dependencies.changed_dependencies(tmp_path, "base", "head")
+
+
+def test_test_only_dependency_selects_its_consumers(tmp_path: Path) -> None:
+    _consumer(tmp_path, "tests/unit/test_snapshot.py", "syrupy")
+    (tmp_path / "uv.lock").write_text("version = 1\n", encoding="utf-8")
+    assert lane.affected_pytest_targets(
+        ["uv.lock"], repo_root=tmp_path, changed_python_dependencies={"syrupy"}
+    ) == ["tests/unit/test_snapshot.py"]
+
+
+def test_import_name_is_not_assumed_to_equal_distribution(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _consumer(tmp_path, "src/bioetl/infrastructure/consumer.py", "unknown_package")
+    (tmp_path / "uv.lock").write_text("version = 1\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="Unconfirmed.*unknown-package"):
+        lane.affected_pytest_targets(
+            ["uv.lock"],
+            repo_root=tmp_path,
+            changed_python_dependencies={"unknown-package"},
+        )
