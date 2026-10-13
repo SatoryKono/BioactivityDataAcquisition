@@ -490,6 +490,7 @@ class TestIntegrationVcrPolicy:
         assert "configs/quality/test_matrix.yaml" in historical_report
 
 
+@pytest.mark.architecture
 def test_secret_inventory_runs_in_blocking_ci_lanes() -> None:
     command = "python -m scripts.engineering.qa.vcr check-secrets"
     github = yaml.safe_load(
