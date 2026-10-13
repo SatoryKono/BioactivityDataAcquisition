@@ -107,6 +107,22 @@ def audit_permissions(codex_home: Path) -> dict[str, Any]:
     }
 
 
+def _consume_quoted_char(
+    raw_pattern: str, index: int, quote: str, triple: bool
+) -> tuple[str | None, bool, int]:
+    """Advance one character inside a quoted string literal."""
+    char = raw_pattern[index]
+    if char == "\\":
+        index += 1
+    elif triple and raw_pattern.startswith(quote * 3, index):
+        quote = None
+        triple = False
+        index += 2
+    elif not triple and char == quote:
+        quote = None
+    return quote, triple, index
+
+
 def _depth_limit_exceeded(raw_pattern: str, limit: int = 10) -> bool:
     """Return True when structural bracket depth exceeds ``limit``.
 
@@ -116,22 +132,14 @@ def _depth_limit_exceeded(raw_pattern: str, limit: int = 10) -> bool:
     depth = 0
     quote: str | None = None
     triple = False
-    escaped = False
     index = 0
     end = len(raw_pattern)
     while index < end:
         char = raw_pattern[index]
         if quote is not None:
-            if escaped:
-                escaped = False
-            elif char == "\\":
-                escaped = True
-            elif triple and raw_pattern.startswith(quote * 3, index):
-                quote = None
-                triple = False
-                index += 2
-            elif not triple and char == quote:
-                quote = None
+            quote, triple, index = _consume_quoted_char(
+                raw_pattern, index, quote, triple
+            )
         elif char in "'\"":
             triple = raw_pattern.startswith(char * 3, index)
             if triple:
