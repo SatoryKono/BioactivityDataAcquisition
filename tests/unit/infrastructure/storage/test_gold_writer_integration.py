@@ -90,18 +90,20 @@ async def test_storage_gold_writer__validation_failure__eb6c952a(
     """Test schema validation failure raises ValueError."""
     invalid_records = [{"id": "not_int", "value": 10.5}]
 
-    with precommit_error("Schema validation failed"):
+    with precommit_error("Schema validation failed") as found:
         await gold_writer.write_gold(
             "test_table", invalid_records, schema=strict_schema
         )
+    assert found.value.receipt.committed_targets == ()
 
 
 async def test_write_gold_invalid_mode(gold_writer, valid_records, strict_schema):
     """Test invalid write mode raises ValueError."""
-    with precommit_error("Invalid Gold write mode"):
+    with precommit_error("Invalid Gold write mode") as found:
         await gold_writer.write_gold(
             "test_table", valid_records, schema=strict_schema, mode="invalid"
         )
+    assert found.value.receipt.committed_targets == ()
 
 
 async def test_write_simple_overwrite(gold_writer, valid_records, strict_schema):

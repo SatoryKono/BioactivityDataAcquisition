@@ -426,21 +426,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "87",
-      "path": "tests/unit/infrastructure/storage/test_gold_writer_integration.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_storage_gold_writer__validation_failure__eb6c952a"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "99",
-      "path": "tests/unit/infrastructure/storage/test_gold_writer_integration.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_write_gold_invalid_mode"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "295",
+      "line": "297",
       "path": "tests/unit/infrastructure/storage/test_gold_writer_integration.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_gold_merged_no_records"
@@ -646,7 +632,7 @@
     "architecture_helper_guard": 0,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
-    "intentional_no_exception_contract": 87,
+    "intentional_no_exception_contract": 85,
     "weak_no_value": 0
   },
   "assertless_examples": [
@@ -918,9 +904,9 @@
       }
     },
     "tests/unit/infrastructure/storage/test_gold_writer_integration.py": {
-      "assertless_tests": 3,
+      "assertless_tests": 1,
       "categories": {
-        "intentional_no_exception_contract": 3
+        "intentional_no_exception_contract": 1
       }
     },
     "tests/unit/infrastructure/storage/test_gold_writer_validation_mixin.py": {
@@ -1014,7 +1000,7 @@
       }
     }
   },
-  "assertless_total_candidates": 87,
+  "assertless_total_candidates": 85,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -1188,7 +1174,7 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 87,
+  "intentional_no_exception_contract": 85,
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
@@ -1630,21 +1616,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "87",
-        "path": "tests/unit/infrastructure/storage/test_gold_writer_integration.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_storage_gold_writer__validation_failure__eb6c952a"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "99",
-        "path": "tests/unit/infrastructure/storage/test_gold_writer_integration.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_write_gold_invalid_mode"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "295",
+        "line": "297",
         "path": "tests/unit/infrastructure/storage/test_gold_writer_integration.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_gold_merged_no_records"
@@ -1850,7 +1822,7 @@
       "architecture_helper_guard": 0,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
-      "intentional_no_exception_contract": 87,
+      "intentional_no_exception_contract": 85,
       "weak_no_value": 0
     },
     "assertless_examples": [
@@ -1880,7 +1852,7 @@
       "tests/unit/composition/factories/storage/test_health_mixin.py:103",
       "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:623"
     ],
-    "assertless_total_candidates": 87,
+    "assertless_total_candidates": 85,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -2120,15 +2092,15 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "011ad65ce05f09831b158ae739e7a29658e1b24daee9af0085d28e3c38af83fa",
+  "source_tree_sha256": "dcd2cbe4411f8cca11d31741ad82f510d375afde0eda7b09374e174669f06d53",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 87,
+    "assertless_total_candidates": 85,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 87,
+    "intentional_no_exception_contract": 85,
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,

@@ -337,7 +337,7 @@ by storage technology. Current owner boundaries:
 - Source modules: `2571`
 - `2529` fully covered
 - `41` partially covered
-- Test inventory: `assertless_total_candidates=87`
+- Test inventory: `assertless_total_candidates=85`
 
 Derived by scripts/engineering/qa/report_topology_source_binding.py from
 the verified module inventory. This is a source-only projection, not a
