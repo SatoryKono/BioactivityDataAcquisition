@@ -7,13 +7,10 @@ from collections.abc import Callable
 from dataclasses import replace
 from typing import Literal
 
-from bioetl.domain.exceptions.gold_write import (
-    GoldWriteCancelled as DomainGoldWriteCancelled,
-)
 from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
 
 
-class GoldWriteCancelled(asyncio.CancelledError, DomainGoldWriteCancelled):
+class GoldWriteCancelled(asyncio.CancelledError):
     """Preserve asyncio cancellation and an independently classified receipt."""
 
     def __init__(
@@ -24,7 +21,9 @@ class GoldWriteCancelled(asyncio.CancelledError, DomainGoldWriteCancelled):
     ) -> None:
         self.receipt = receipt
         self.diagnostic_error = diagnostic_error
-        DomainGoldWriteCancelled.__init__(self, receipt)
+        super().__init__(
+            f"Gold write cancelled: {receipt.physical_table}: {receipt.category}"
+        )
 
 
 class _DeferredCancellation:

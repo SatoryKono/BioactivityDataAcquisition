@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `2569`
-- Internal import edges (raw): `8271`
+- Internal import edges (raw): `8270`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `330`
@@ -28,7 +28,7 @@ flowchart LR
     composition -->|316 OK| domain
     composition -->|296 OK| infrastructure
     domain -->|1306 OK| domain
-    infrastructure -->|803 OK| domain
+    infrastructure -->|802 OK| domain
     infrastructure -->|1271 OK| infrastructure
     interfaces -->|72 OK| application
     interfaces -->|61 OK| composition
@@ -47,7 +47,7 @@ flowchart LR
 | `composition`    | `domain`         |     316 | allowed |
 | `composition`    | `infrastructure` |     296 | allowed |
 | `domain`         | `domain`         |    1306 | allowed |
-| `infrastructure` | `domain`         |     803 | allowed |
+| `infrastructure` | `domain`         |     802 | allowed |
 | `infrastructure` | `infrastructure` |    1271 | allowed |
 | `interfaces`     | `application`    |      72 | allowed |
 | `interfaces`     | `composition`    |      61 | allowed |
@@ -101,13 +101,13 @@ flowchart LR
 | `composition.bootstrap`        | `infrastructure.config`                    |      20 |
 | `composition.factories`        | `infrastructure.storage`                   |      20 |
 | `composition.runtime_builders` | `infrastructure.config`                    |      20 |
-| `infrastructure.storage`       | `domain.exceptions`                        |      18 |
 | `application.core`             | `domain.exceptions`                        |      17 |
 | `application.observability`    | `domain.control_plane`                     |      17 |
 | `application.pipelines`        | `domain.value_objects`                     |      17 |
 | `application.services`         | `domain.lineage`                           |      17 |
 | `application.services`         | `domain.run_reports`                       |      17 |
 | `infrastructure.schemas`       | `domain.config`                            |      17 |
+| `infrastructure.storage`       | `domain.exceptions`                        |      17 |
 | `interfaces.http`              | `domain.ports`                             |      16 |
 | `composition.bootstrap`        | `infrastructure.observability`             |      15 |
 | `composition.bootstrap`        | `infrastructure.time`                      |      15 |

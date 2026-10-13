@@ -574,6 +574,7 @@ def test_gold_outcome_boundary_adapts_domain_cancellation():
             raise original
     assert isinstance(found.value, GoldWriteCancelled)
     assert found.value.receipt is receipt
+    assert not isinstance(found.value, Exception)
     assert found.value.__cause__ is original
 
 

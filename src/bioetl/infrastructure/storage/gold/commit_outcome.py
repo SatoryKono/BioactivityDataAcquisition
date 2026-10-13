@@ -104,15 +104,7 @@ class GoldOutcomeBoundary:
             original, (Exception, asyncio.CancelledError)
         ):
             return False
-        if self._propagate_cancellation and isinstance(
-            original, asyncio.CancelledError
-        ):
-            return False
-        if not self._translate_failure and isinstance(original, Exception):
-            return False
-        if self._preserve_outcome and isinstance(
-            original, (GoldWriteFailure, GoldWriteCancelled)
-        ):
+        if self._should_propagate(original):
             return False
         receipt = self._receipt(original) if callable(self._receipt) else self._receipt
         cause: BaseException = original
@@ -123,6 +115,20 @@ class GoldOutcomeBoundary:
         if isinstance(original, asyncio.CancelledError):
             raise GoldWriteCancelled(receipt) from cause
         raise _failure_for(receipt, cause) from cause
+
+    def _should_propagate(self, original: BaseException) -> bool:
+        """Keep cancellation, ordinary validation and classified outcomes intact."""
+        return (
+            (
+                self._propagate_cancellation
+                and isinstance(original, asyncio.CancelledError)
+            )
+            or (not self._translate_failure and isinstance(original, Exception))
+            or (
+                self._preserve_outcome
+                and isinstance(original, (GoldWriteFailure, GoldWriteCancelled))
+            )
+        )
 
 
 class GoldDiagnosticsBoundary:

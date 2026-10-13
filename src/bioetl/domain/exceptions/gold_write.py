@@ -48,11 +48,11 @@ class GoldWriteValidationFailure(GoldWriteFailure, ValueError):
         self.args = (str(original),)
 
 
-class GoldWriteCancelled(BaseException):
-    """Framework-neutral cancellation identity retained for domain consumers."""
+class GoldWriteCancelled(Exception):
+    """Framework-neutral cancellation intent translated by the async adapter."""
 
     def __init__(self, receipt: GoldWriteReceipt) -> None:
         self.receipt = receipt
-        BaseException.__init__(
+        Exception.__init__(
             self, f"Gold write cancelled: {receipt.physical_table}: {receipt.category}"
         )

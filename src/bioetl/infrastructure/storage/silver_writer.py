@@ -75,13 +75,11 @@ class SilverWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         runtime_request: SilverWriterRuntimeServicesRequest | None = None,
     ) -> None:
         """Initialize with the required composition-owned clock in grouped runtime."""
-        clock = (
-            runtime_request.clock
-            if runtime_request is not None
-            else runtime_services.clock
-            if runtime_services is not None
-            else None
-        )
+        clock = None
+        if runtime_request is not None:
+            clock = runtime_request.clock
+        elif runtime_services is not None:
+            clock = runtime_services.clock
         if clock is None:
             raise TypeError(
                 "SilverWriter requires an explicit clock (ClockPort) in grouped runtime"
