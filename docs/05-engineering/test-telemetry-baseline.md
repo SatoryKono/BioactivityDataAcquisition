@@ -32,7 +32,7 @@ trend evidence only.
 - Source run id: `local-coverage`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `53517f3edd0d3ab17c44c6fe6c20a5a7112d7dcb4d8f7ddd7d34de3e324a5b1a`
+- Source tree sha256: `d731682390c414cb59067db5e94158f2c36ff6b2a1e450a5eb48b39dfdbb09c9`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-10-13T11:39:16.320446+00:00`
 

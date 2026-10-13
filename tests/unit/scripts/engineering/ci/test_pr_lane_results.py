@@ -9,6 +9,7 @@ from scripts.engineering.ci.pr_lane_results import (
     affected_pytest_targets,
     assert_step_outcomes,
     build_results,
+    main as lane_main,
 )
 
 pytestmark = pytest.mark.unit
@@ -155,6 +156,53 @@ def test_affected_targets_fail_closed_without_memory_test(tmp_path: Path) -> Non
         affected_pytest_targets(["src/memory/rag/chunking.py"], repo_root=tmp_path)
         == []
     )
+
+
+def test_affected_targets_map_root_npm_only_and_deduplicate() -> None:
+    """Manifest-only tooling updates execute their existing runtime contract."""
+    repo_root = Path(__file__).resolve().parents[5]
+    assert affected_pytest_targets(
+        ["package.json", "package-lock.json", "package.json"], repo_root=repo_root
+    ) == ["tests/architecture/test_observability_dashboard_tooling.py"]
+
+
+def test_affected_targets_map_python_lock_only_and_deduplicate() -> None:
+    """Lock-only PRs exercise real consumers of supported dependency families."""
+    repo_root = Path(__file__).resolve().parents[5]
+    targets = affected_pytest_targets(
+        ["uv.lock", "pyproject.toml", "uv.lock"], repo_root=repo_root
+    )
+    assert len(targets) == len(set(targets))
+    assert {
+        "tests/unit/infrastructure/storage/test_arrow_converter.py",
+        "tests/unit/application/composite/test_join_planner.py",
+        "tests/unit/repo_backed/application/pipelines/test_transformer_snapshots.py",
+        "tests/architecture/test_docs_build_site_router.py",
+    }.issubset(targets)
+    assert all((repo_root / target).is_file() for target in targets)
+
+
+@pytest.mark.parametrize(
+    "changed_file", ["package.json", "package-lock.json", "pyproject.toml", "uv.lock"]
+)
+def test_root_npm_lane_fails_when_target_is_missing(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], changed_file: str
+) -> None:
+    """An absent mapped contract cannot satisfy required affected-tests."""
+    assert affected_pytest_targets([changed_file], repo_root=tmp_path) == []
+    assert (
+        lane_main(
+            [
+                "affected-tests",
+                "--repo-root",
+                str(tmp_path),
+                "--changed-file",
+                changed_file,
+            ]
+        )
+        == 1
+    )
+    assert "no affected pytest target" in capsys.readouterr().err
 
 
 def test_affected_targets_preserve_bioetl_and_scripts_routes(tmp_path: Path) -> None:
