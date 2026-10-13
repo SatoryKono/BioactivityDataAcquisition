@@ -27,39 +27,26 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `fix/debt-baseline-markdown`
-- Source commit: `02080b2e76c8064e7f4fa57a6694c294e63a4c0d`
-- Source run id: `local-bioetl-local-coverage-pr12198-r2`
+- Source branch: `fix/codex-audit-literal-eval-dos-6596739025540769976`
+- Source commit: `179eacffd4dd9bd57add25a2ed90071b096d2588`
+- Source run id: `local-bioetl-local-coverage-pr11990-final3`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `16680316be6756321d01501772a85beb464caf6adf2f9824c8d8596099306736`
+- Source tree sha256: `4462bae1b7ed298714c0b5ca19f1c36b593168e5075b0694d78487581379ad13`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-10-12T20:21:41.507653+00:00`
+- Refreshed at (UTC): `2026-10-13T06:16:30.069150+00:00`
 
 ## Branch-accurate provenance (#5729)
 
 - Continuous identity is `source_tree_sha256` over `tests/**/*.py`,
   `pyproject.toml`, `configs/quality/test_matrix.yaml`, and
   `.github/workflows/tests.yml`.
-- `measurement_provenance.head` and `test_tree_sha256` retain the captured
-  run identity when the current audited test tree advances later.
 - Freshness uses live UTC (injectable via `BIOETL_TELEMETRY_REFERENCE_NOW`)
   and rejects future/stale `refreshed_at_utc` values.
 - `source_commit` must remain an ancestor of HEAD or have a reviewed squash
   bridge in `reports/test-telemetry/squash-provenance.json`. A bridge keeps
   the real captured source/run and requires equal PR/merge trees, source
   ancestry in the PR, merge ancestry in HEAD and unchanged runtime/test inputs.
-- Reviewed squash receipts retain hash-verified Git commit/tree objects
-  for offline validation when old PR commits are absent from a fresh clone.
-- To produce a receipt for an existing local capture, run
-  `python -m scripts.engineering.ci.test_telemetry_provenance --measurement-repo-root
-  <original-worktree> --local-manifest <manifest.json> --pull-request <merged-PR>`.
-  The generator validates the complete 17-shard capture and reads the merged
-  PR mapping before writing the bridge. Keep the original capture available.
-- After validating the bridge, run
-  `python -m scripts.engineering.ci.update_test_telemetry_baseline
-  --rebind-current-tree`, then the coupled `refresh-ci-drift-families`
-  update/check for test-gov, flaky-fingerprint, telemetry and evidence.
 - New captures use `verification_mode: live_github`: resolve the recorded
   PR's actual merge with read-only GitHub GETs after squash. Never stamp a
   future merge SHA. API failure, unmerged PRs, changed inputs and incomplete
@@ -89,38 +76,38 @@ trend evidence only.
 
 ## Duration Telemetry
 
-- Total collected test cases: `33520`
+- Total collected test cases: `33571`
 - Freshness guard: `<=45 days` via `refreshed_at_utc`
 
 ### Top Slowest Tests
 
 | Rank | Duration (s) | Test | Source |
 |---:|---:|---|---|
-| 1 | `20.017` | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers::test_filter_options_deadline_does_not_send_late_success` | `unit-other.xml` |
-| 2 | `17.069` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `unit-scripts-tooling-debt-governance.xml` |
-| 3 | `16.006` | `tests.unit.scripts.ai.mcp.test_export_mcp_env_from_dotenv.TestExportMcpEnvFromDotenv::test_user_scope_flag_accepted` | `unit-scripts-tooling-other.xml` |
-| 4 | `15.042` | `tests.unit.infrastructure.quality.test_architecture_quality_scorecard::test_architecture_quality_scorecard_has_stable_weighted_shape` | `unit-infrastructure.xml` |
-| 5 | `12.374` | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_diagnostic_subprocess_timeout_is_bounded` | `repo-backed-unit-ops.xml` |
-| 6 | `11.955` | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation` | `repo-backed-unit-ops.xml` |
-| 7 | `11.553` | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_status_failure_is_classified_but_supported_recovery_succeeds` | `repo-backed-unit-ops.xml` |
-| 8 | `11.38` | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path` | `integration.xml` |
-| 9 | `11.078` | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline::test_chembl_target_component_happy_path` | `integration.xml` |
-| 10 | `10.861` | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_source_fields` | `integration.xml` |
+| 1 | `143.035` | `tests.unit.interfaces.cli.test_workflow_cli::test_multi_pipeline_push_failure_preserves_success_and_report` | `unit-other.xml` |
+| 2 | `20.012` | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers::test_filter_options_deadline_does_not_send_late_success` | `unit-other.xml` |
+| 3 | `19.283` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `unit-scripts-tooling-debt-governance.xml` |
+| 4 | `14.793` | `tests.unit.interfaces.cli.commands.test_health.TestHealthServerCommand::test_start_health_observability_starts_metrics_server_when_enabled` | `unit-other.xml` |
+| 5 | `14.338` | `tests.security.test_security.TestVCRCassetteSanitization::test_no_authorization_headers_with_real_values[Authorization]` | `security.xml` |
+| 6 | `12.581` | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation` | `repo-backed-unit-ops.xml` |
+| 7 | `12.176` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact` | `unit-scripts-tooling-debt-governance.xml` |
+| 8 | `11.611` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale` | `unit-scripts-tooling-debt-governance.xml` |
+| 9 | `11.516` | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path` | `integration.xml` |
+| 10 | `11.456` | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline::test_chembl_target_component_happy_path` | `integration.xml` |
 
 ### Top Slow Zones
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 6 | 67.103 | 12.374 |
-| 2 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 3 | 37.513 | 17.069 |
-| 3 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 21.685 | 10.861 |
-| 4 | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers` | 1 | 20.017 | 20.017 |
-| 5 | `tests.unit.scripts.ai.mcp.test_export_mcp_env_from_dotenv.TestExportMcpEnvFromDotenv` | 1 | 16.006 | 16.006 |
-| 6 | `tests.unit.infrastructure.quality.test_architecture_quality_scorecard` | 1 | 15.042 | 15.042 |
-| 7 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline` | 1 | 11.38 | 11.38 |
-| 8 | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline` | 1 | 11.078 | 11.078 |
-| 9 | `tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline` | 1 | 10.673 | 10.673 |
-| 10 | `tests.unit.repo_backed.scripts.ai.mcp.test_repo_env_loaders` | 1 | 9.854 | 9.854 |
+| 1 | `tests.unit.interfaces.cli.test_workflow_cli` | 1 | 143.035 | 143.035 |
+| 2 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 6 | 60.083 | 12.581 |
+| 3 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 3 | 43.07 | 19.283 |
+| 4 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 22.376 | 11.434 |
+| 5 | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers` | 1 | 20.012 | 20.012 |
+| 6 | `tests.unit.interfaces.cli.commands.test_health.TestHealthServerCommand` | 1 | 14.793 | 14.793 |
+| 7 | `tests.security.test_security.TestVCRCassetteSanitization` | 1 | 14.338 | 14.338 |
+| 8 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline` | 1 | 11.516 | 11.516 |
+| 9 | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline` | 1 | 11.456 | 11.456 |
+| 10 | `tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline` | 1 | 11.242 | 11.242 |
 
 ## Refresh Procedure
 
