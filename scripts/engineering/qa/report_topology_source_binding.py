@@ -37,6 +37,10 @@ def render_binding(
             f"- `{statuses['fully_covered']}` fully covered\n"
             f"- `{statuses['partially_covered']}` partially covered\n"
         )
+    if assertless is not None:
+        classifications += (
+            f"- Test inventory: `assertless_total_candidates={assertless}`\n"
+        )
     block = (
         f"{START}\n\n## Current source inventory binding\n\n"
         f"- `source_tree_sha256={digest}`\n"
@@ -71,12 +75,21 @@ def main(argv: list[str] | None = None) -> int:
         or payload["summary"]["source_module_count"] != count
     ):
         raise ValueError("Module inventory is stale; regenerate it before binding")
+    governance = json.loads(
+        (root / "reports/quality/test-governance-current.json").read_text(
+            encoding="utf-8"
+        )
+    )
     current = True
     for target in (SUMMARY, Path("docs/02-architecture/current-state-inventory.md")):
         path = root / target
         existing = path.read_text(encoding="utf-8")
         expected = render_binding(
-            existing, digest, count, payload["summary"]["status_counts"]
+            existing,
+            digest,
+            count,
+            payload["summary"]["status_counts"],
+            governance["report"]["assertless_total_candidates"],
         )
         current = current and existing == expected
         if args.update:

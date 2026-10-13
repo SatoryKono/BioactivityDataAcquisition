@@ -425,36 +425,29 @@
       "test_name": "test_write_gold_empty_records_raises"
     },
     {
-      "category": "weak_no_value",
-      "line": "393",
-      "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
-      "rationale": "candidate tests that need later assertion strengthening or removal review",
-      "test_name": "test_write_gold_non_strict_schema_raises"
-    },
-    {
       "category": "intentional_no_exception_contract",
-      "line": "405",
+      "line": "406",
       "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_gold_invalid_mode_raises"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "479",
+      "line": "480",
       "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_gold_scd2_without_config_raises"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "491",
+      "line": "492",
       "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_gold_scd2_without_ingestion_ts_raises"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1579",
+      "line": "1580",
       "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_gold_merged_empty_records_returns"
@@ -467,36 +460,22 @@
       "test_name": "test_write_gold_no_records"
     },
     {
-      "category": "weak_no_value",
-      "line": "77",
-      "path": "tests/unit/infrastructure/storage/test_gold_writer_integration.py",
-      "rationale": "candidate tests that need later assertion strengthening or removal review",
-      "test_name": "test_write_gold_schema_not_strict"
-    },
-    {
       "category": "intentional_no_exception_contract",
-      "line": "85",
+      "line": "86",
       "path": "tests/unit/infrastructure/storage/test_gold_writer_integration.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_storage_gold_writer__validation_failure__eb6c952a"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "97",
+      "line": "98",
       "path": "tests/unit/infrastructure/storage/test_gold_writer_integration.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_gold_invalid_mode"
     },
     {
-      "category": "weak_no_value",
-      "line": "142",
-      "path": "tests/unit/infrastructure/storage/test_gold_writer_integration.py",
-      "rationale": "candidate tests that need later assertion strengthening or removal review",
-      "test_name": "test_write_scd2_missing_config"
-    },
-    {
       "category": "intentional_no_exception_contract",
-      "line": "292",
+      "line": "294",
       "path": "tests/unit/infrastructure/storage/test_gold_writer_integration.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_gold_merged_no_records"
@@ -703,7 +682,7 @@
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
     "intentional_no_exception_contract": 92,
-    "weak_no_value": 3
+    "weak_no_value": 0
   },
   "assertless_examples": [
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
@@ -968,17 +947,15 @@
       }
     },
     "tests/unit/infrastructure/storage/test_gold_writer.py": {
-      "assertless_tests": 6,
+      "assertless_tests": 5,
       "categories": {
-        "intentional_no_exception_contract": 5,
-        "weak_no_value": 1
+        "intentional_no_exception_contract": 5
       }
     },
     "tests/unit/infrastructure/storage/test_gold_writer_integration.py": {
-      "assertless_tests": 6,
+      "assertless_tests": 4,
       "categories": {
-        "intentional_no_exception_contract": 4,
-        "weak_no_value": 2
+        "intentional_no_exception_contract": 4
       }
     },
     "tests/unit/infrastructure/storage/test_gold_writer_validation_mixin.py": {
@@ -1072,15 +1049,8 @@
       }
     }
   },
-  "assertless_total_candidates": 95,
-  "budget_violations": [
-    {
-      "actual": 3,
-      "budget": "refined_assertless_max",
-      "expected_max": 0,
-      "metric": "refined_assertless_tests"
-    }
-  ],
+  "assertless_total_candidates": 92,
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1257,7 +1227,7 @@
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
-  "refined_assertless_tests": 3,
+  "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
@@ -1694,36 +1664,29 @@
         "test_name": "test_write_gold_empty_records_raises"
       },
       {
-        "category": "weak_no_value",
-        "line": "393",
-        "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_write_gold_non_strict_schema_raises"
-      },
-      {
         "category": "intentional_no_exception_contract",
-        "line": "405",
+        "line": "406",
         "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_gold_invalid_mode_raises"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "479",
+        "line": "480",
         "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_gold_scd2_without_config_raises"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "491",
+        "line": "492",
         "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_gold_scd2_without_ingestion_ts_raises"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1579",
+        "line": "1580",
         "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_gold_merged_empty_records_returns"
@@ -1736,36 +1699,22 @@
         "test_name": "test_write_gold_no_records"
       },
       {
-        "category": "weak_no_value",
-        "line": "77",
-        "path": "tests/unit/infrastructure/storage/test_gold_writer_integration.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_write_gold_schema_not_strict"
-      },
-      {
         "category": "intentional_no_exception_contract",
-        "line": "85",
+        "line": "86",
         "path": "tests/unit/infrastructure/storage/test_gold_writer_integration.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_storage_gold_writer__validation_failure__eb6c952a"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "97",
+        "line": "98",
         "path": "tests/unit/infrastructure/storage/test_gold_writer_integration.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_gold_invalid_mode"
       },
       {
-        "category": "weak_no_value",
-        "line": "142",
-        "path": "tests/unit/infrastructure/storage/test_gold_writer_integration.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_write_scd2_missing_config"
-      },
-      {
         "category": "intentional_no_exception_contract",
-        "line": "292",
+        "line": "294",
         "path": "tests/unit/infrastructure/storage/test_gold_writer_integration.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_gold_merged_no_records"
@@ -1972,7 +1921,7 @@
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
       "intentional_no_exception_contract": 92,
-      "weak_no_value": 3
+      "weak_no_value": 0
     },
     "assertless_examples": [
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
@@ -2001,7 +1950,7 @@
       "tests/unit/composition/factories/storage/test_health_mixin.py:103",
       "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:623"
     ],
-    "assertless_total_candidates": 95,
+    "assertless_total_candidates": 92,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -2177,7 +2126,7 @@
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "parse_errors": [],
-    "refined_assertless_tests": 3,
+    "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
@@ -2236,15 +2185,15 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3045,
-    "total_test_functions": 29860,
+    "total_test_functions": 29872,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "8e578b435aabe2233326a4a702082476203d69b3eb35c160833e0bf728459350",
+  "source_tree_sha256": "ae663845c95867a25f55a5eff17d64755db1da6e7fb493bfcf92100f2af95b42",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 95,
+    "assertless_total_candidates": 92,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
@@ -2252,7 +2201,7 @@
     "intentional_no_exception_contract": 92,
     "markerless_examples": [],
     "markerless_test_functions": 0,
-    "refined_assertless_tests": 3,
+    "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
@@ -2304,7 +2253,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3045,
-  "total_test_functions": 29860,
+  "total_test_functions": 29872,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

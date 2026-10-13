@@ -78,8 +78,9 @@ async def test_write_gold_schema_not_strict(gold_writer, valid_records):
     """Test non-strict schema raises ValueError."""
     schema = DataFrameSchema({"id": pa.Column(int)})  # strict=False by default
 
-    with precommit_error("Gold layer requires strict=True"):
+    with precommit_error("Gold layer requires strict=True") as found:
         await gold_writer.write_gold("test_table", valid_records, schema=schema)
+    assert found.value.receipt.committed_targets == ()
 
 
 async def test_storage_gold_writer__validation_failure__eb6c952a(
@@ -141,10 +142,11 @@ async def test_write_simple_append(gold_writer, valid_records, strict_schema):
 
 async def test_write_scd2_missing_config(gold_writer, valid_records, strict_schema):
     """Test SCD2 mode without config raises ValueError."""
-    with precommit_error("scd_config required"):
+    with precommit_error("scd_config required") as found:
         await gold_writer.write_gold(
             "test_table", valid_records, schema=strict_schema, mode="scd2"
         )
+    assert found.value.receipt.committed_targets == ()
 
 
 async def test_write_scd2_new_table(gold_writer, valid_records, strict_schema):
@@ -395,7 +397,7 @@ async def test_write_gold_merged_strips_runtime_occurrence_fields(gold_writer):
 def precommit_error(message):
     """Preserve validation type/message assertions inside the receipt wrapper."""
     with pytest.raises(GoldWriteFailure) as found:
-        yield
+        yield found
     assert found.value.receipt.category == GoldWriteCategory.NOT_COMMITTED
     assert isinstance(found.value.__cause__, ValueError)
     assert message in str(found.value.__cause__)

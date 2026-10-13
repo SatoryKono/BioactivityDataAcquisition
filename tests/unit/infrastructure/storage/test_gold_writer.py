@@ -394,13 +394,14 @@ class TestGoldWriterValidation:
         self, gold_writer, non_strict_schema, valid_records
     ):
         """Test write_gold raises ValueError for non-strict schema."""
-        with precommit_error("strict=True"):
+        with precommit_error("strict=True") as found:
             await gold_writer.write_gold(
                 table_name="test.table",
                 records=valid_records,
                 schema=non_strict_schema,
                 mode="overwrite",
             )
+        assert found.value.receipt.committed_targets == ()
 
     async def test_write_gold_invalid_mode_raises(
         self, gold_writer, valid_records, strict_schema
@@ -1679,7 +1680,7 @@ class TestGoldWriterMergedValidation:
 def precommit_error(message):
     """Assert the new receipt without weakening original validation checks."""
     with pytest.raises(GoldWriteFailure) as found:
-        yield
+        yield found
     assert found.value.receipt.category == GoldWriteCategory.NOT_COMMITTED
     assert isinstance(found.value.__cause__, ValueError)
     assert message in str(found.value.__cause__)
