@@ -274,6 +274,89 @@ def test_squash_bridge_verifies_without_old_pr_objects(
     assert not validate_squash_bridge(payload, tampered, shallow, head)
 
 
+def test_receipt_builder_uses_original_checkout_after_squash(
+    bridge, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    measurement_root, head, payload, prior_receipt, _ = bridge
+    shallow = measurement_root.parent / f"{measurement_root.name}-receipt-shallow"
+    subprocess.run(
+        ["git", "clone", "-q", "--depth", "1", measurement_root.as_uri(), str(shallow)],
+        check=True,
+        capture_output=True,
+    )
+    assert not provenance._tree(shallow, payload["source_commit"])
+    manifest_path = measurement_root / "capture" / "manifest.json"
+    manifest = {
+        "head": payload["source_commit"],
+        "test_tree_sha256": payload["source_tree_sha256"],
+        "source_tree_sha256": "source-tree",
+        "finished_at_utc": "2026-10-01T01:00:00+00:00",
+    }
+    payload.update(
+        {
+            "source_event": "local_coverage_verify",
+            "source_run_id": "local-capture",
+            "refreshed_at_utc": manifest["finished_at_utc"],
+            "measurement_provenance": {
+                "head": manifest["head"],
+                "test_tree_sha256": manifest["test_tree_sha256"],
+                "source_tree_sha256": manifest["source_tree_sha256"],
+                "manifest_sha256": "manifest-digest",
+            },
+            "coverage": {"actual_percent": 99.0},
+            "duration_telemetry": {"total_cases": 17},
+        }
+    )
+    monkeypatch.setattr(
+        "scripts.engineering.ci.local_test_telemetry.validate_local_measurement",
+        lambda *_args, **_kwargs: {
+            "manifest": manifest,
+            "manifest_sha256": "manifest-digest",
+        },
+    )
+    monkeypatch.setattr(
+        "scripts.engineering.ci.local_test_telemetry.build_local_baseline",
+        lambda *_args, **_kwargs: payload,
+    )
+    monkeypatch.setattr(
+        "scripts.engineering.ci.update_test_telemetry_baseline.compute_test_telemetry_source_tree_sha256",
+        lambda _root: manifest["test_tree_sha256"],
+    )
+    monkeypatch.setattr(
+        "scripts.engineering.qa.report_module_coverage_inventory.compute_source_tree_sha256",
+        lambda **_kwargs: manifest["source_tree_sha256"],
+    )
+    monkeypatch.setattr(
+        provenance,
+        "_read_github_json",
+        lambda _path: prior_receipt["github_pull_request"],
+    )
+
+    receipt = provenance.build_reviewed_squash_receipt(
+        payload,
+        root=shallow,
+        measurement_root=measurement_root,
+        manifest_path=manifest_path,
+        pull_request=42,
+    )
+    assert receipt["merged_tree"] == provenance._tree(shallow, head)
+    assert validate_squash_bridge(payload, receipt, shallow, head)
+    for field, key, value in (
+        ("coverage", "actual_percent", 0.0),
+        ("duration_telemetry", "total_cases", 999),
+    ):
+        changed = copy.deepcopy(payload)
+        changed[field][key] = value
+        with pytest.raises(ValueError, match=f"Committed {field}"):
+            provenance.build_reviewed_squash_receipt(
+                changed,
+                root=shallow,
+                measurement_root=measurement_root,
+                manifest_path=manifest_path,
+                pull_request=42,
+            )
+
+
 def test_squash_bridge_verifies_intermediate_evidence_commits(
     bridge, monkeypatch: pytest.MonkeyPatch
 ) -> None:

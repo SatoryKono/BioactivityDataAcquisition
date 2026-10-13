@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 
 import json
+import subprocess
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
@@ -627,6 +628,27 @@ def test_workflow_scope_git_search_finds_real_symbol_before_cap() -> None:
         max_sources=1,
     )
     assert selected == [Path("src/memory/rag/chunking.py")]
+
+
+def test_workflow_scope_git_search_includes_eligible_untracked_sources(
+    tmp_path: Path,
+) -> None:
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    docs = tmp_path / "docs/00-project"
+    docs.mkdir(parents=True)
+    for index in range(10):
+        (docs / f"doc-{index:03d}.md").write_text("# Ordinary\n", encoding="utf-8")
+    (docs / "doc-009.md").write_text(
+        "# Contains quantum_whale_signal\n", encoding="utf-8"
+    )
+
+    selected = iter_rag_sources(
+        tmp_path,
+        selected_ids=WORKFLOW_RAG_SOURCE_IDS,
+        workflow_focus_query="quantum_whale_signal",
+        max_sources=1,
+    )
+    assert selected == [Path("docs/00-project/doc-009.md")]
 
 
 def test_write_rag_manifests_persists_build_scope_metadata(tmp_path: Path) -> None:

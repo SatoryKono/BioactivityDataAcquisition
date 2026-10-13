@@ -386,6 +386,13 @@ def source_commit_is_reachable(payload: dict[str, Any], root: Path, head: str) -
         return False
 
 
+def require_capture_metrics(payload: dict[str, Any], expected: dict[str, Any]) -> None:
+    """Reject telemetry values that were not derived from the validated capture."""
+    for field in ("coverage", "duration_telemetry"):
+        if payload.get(field) != expected[field]:
+            raise ValueError(f"Committed {field} does not match local measurement")
+
+
 def build_reviewed_squash_receipt(
     payload: dict[str, Any],
     *,
@@ -395,7 +402,10 @@ def build_reviewed_squash_receipt(
     pull_request: int,
 ) -> dict[str, Any]:
     """Build a local reviewed bridge from a validated capture and merged PR."""
-    from scripts.engineering.ci.local_test_telemetry import validate_local_measurement
+    from scripts.engineering.ci.local_test_telemetry import (
+        build_local_baseline,
+        validate_local_measurement,
+    )
     from scripts.engineering.ci.update_test_telemetry_baseline import (
         compute_test_telemetry_source_tree_sha256,
     )
@@ -421,6 +431,8 @@ def build_reviewed_squash_receipt(
         or manifest["finished_at_utc"] != payload.get("refreshed_at_utc")
     ):
         raise ValueError("Measurement does not match committed telemetry capture")
+    expected = build_local_baseline(manifest_path, repo_root=measurement_root)
+    require_capture_metrics(payload, expected)
     pr = _read_github_json(f"pulls/{pull_request}")
     url = f"https://api.github.com/repos/{REPOSITORY}/pulls/{pull_request}"
     source = str(payload["source_commit"])
@@ -445,7 +457,7 @@ def build_reviewed_squash_receipt(
             "merge_commit_sha": pr.get("merge_commit_sha"),
         },
         "merged_tree": _tree(root, str(pr.get("merge_commit_sha", ""))),
-        "git_object_proof": build_git_object_proof(root, source, pr_head),
+        "git_object_proof": build_git_object_proof(measurement_root, source, pr_head),
     }
     head = _git(root, "rev-parse", "HEAD").stdout.strip()
     if not validate_squash_bridge(payload, receipt, root, head):

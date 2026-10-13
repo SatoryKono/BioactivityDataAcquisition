@@ -247,6 +247,7 @@ def _content_focus_paths(
                 [
                     "git",
                     "grep",
+                    "--untracked",
                     "-i",
                     "-l",
                     "-F",
