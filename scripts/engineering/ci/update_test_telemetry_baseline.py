@@ -370,6 +370,17 @@ def _portable_artifact_path(
         return str(path)
 
 
+def _retain_recorded_execution_context(
+    previous_summary: TelemetryPayload, derived_summary: TelemetryPayload
+) -> None:
+    """Keep capture context that cannot be derived from matching JUnit inputs."""
+    previous_context = previous_summary["execution_context"]
+    derived_context = derived_summary["execution_context"]
+    for key in ("worker_mode", "explicit_exclusions"):
+        if key in previous_context:
+            derived_context[key] = previous_context[key]
+
+
 def _validated_junit_override(
     slowest_summary: TelemetryPayload, junit_paths: list[Path]
 ) -> TelemetryPayload:
@@ -399,11 +410,7 @@ def _validated_junit_override(
         )
     # JUnit determines counts and durations, but it cannot reconstruct the
     # capture's worker configuration or its declared out-of-scope lanes.
-    previous_context = slowest_summary["execution_context"]
-    derived_context = derived_summary["execution_context"]
-    for key in ("worker_mode", "explicit_exclusions"):
-        if key in previous_context:
-            derived_context[key] = previous_context[key]
+    _retain_recorded_execution_context(slowest_summary, derived_summary)
     return derived_summary
 
 
