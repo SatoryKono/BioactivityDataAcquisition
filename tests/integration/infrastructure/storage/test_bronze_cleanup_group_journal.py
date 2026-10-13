@@ -1100,3 +1100,49 @@ def test_synchronous_write_failure_retains_substituted_temp(
     assert temp.read_bytes() == b"foreign temp"
     assert retained.exists()
     assert (date_dir / spec.names()["payload"]).exists()
+
+
+@POSIX_ONLY
+def test_retry_confirms_uncertain_absence_before_completed_receipt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root, spec, _date_dir = _fixture(tmp_path)
+    original_fsync = os.fsync
+    armed = False
+
+    def fail_once(fd: int) -> None:
+        nonlocal armed
+        if armed:
+            armed = False
+            raise OSError("confirmation failed")
+        original_fsync(fd)
+
+    def arm_unlink(phase: str) -> None:
+        nonlocal armed
+        if phase == "before_sidecar_unlink":
+            armed = True
+
+    def arm_completion(phase: str) -> None:
+        nonlocal armed
+        if phase == "before_completion":
+            armed = True
+
+    with journal.open_group_journal(root) as group:
+        operation_id = group.begin(spec)
+        receipt = root / ".bronze-group-journals" / f"{operation_id}.json"
+        monkeypatch.setattr(journal.os, "fsync", fail_once)
+        with pytest.raises(journal.GroupJournalFailure) as initial:
+            group.recover(operation_id, arm_unlink)
+        assert initial.value.removed == 1
+        assert initial.value.possibly_unlinked == 1
+        with pytest.raises(journal.GroupJournalFailure) as retry:
+            group.recover(operation_id, arm_completion)
+        assert retry.value.removed == 0
+        assert retry.value.possibly_unlinked == 0
+        assert (
+            journal._decode_record(receipt.read_bytes(), operation_id)["state"]
+            == "prepared"
+        )
+        monkeypatch.setattr(journal.os, "fsync", original_fsync)
+        assert group.recover(operation_id) == 0
+        assert not receipt.exists()

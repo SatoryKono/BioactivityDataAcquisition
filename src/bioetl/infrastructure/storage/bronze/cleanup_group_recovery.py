@@ -184,19 +184,30 @@ class GroupRecoveryCoordinator(GroupMemberRecovery):
             hook("before_completion")
         if stage_fd is not None:
             self._assert_stage_named(stage_fd, body)
-        if (
-            chain != self._current_chain(relative)
-            or (
-                "copy" not in body["members"]
-                and _exists(date_fd, body["names"]["copy"])
+
+        def absent() -> bool:
+            return (
+                chain == self._current_chain(relative)
+                and not (
+                    "copy" not in body["members"]
+                    and _exists(date_fd, body["names"]["copy"])
+                )
+                and not any(
+                    _exists(date_fd, body["names"][key])
+                    or (stage_fd is not None and _exists(stage_fd, key))
+                    for key in body["members"]
+                )
             )
-            or any(
-                _exists(date_fd, body["names"][key])
-                or (stage_fd is not None and _exists(stage_fd, key))
-                for key in body["members"]
-            )
-        ):
+
+        if not absent():
             raise GroupJournalConflict("group is not durably absent")
+        # Visible absence after an earlier failed fsync is not durable evidence.
+        os.fsync(date_fd)
+        if stage_fd is not None:
+            os.fsync(stage_fd)
+            self._assert_stage_named(stage_fd, body)
+        if not absent():
+            raise GroupJournalConflict("group changed during absence confirmation")
         if body["state"] == "prepared":
             self._complete_record(journal_fd, operation_id, body)
         if hook:

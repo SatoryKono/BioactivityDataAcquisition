@@ -120,6 +120,11 @@ class GroupMemberRecovery(GroupRecordStore):
             self._stage_member(date_fd, stage_fd, body, key, relative, chain, hook)
         if not _exists(stage_fd, key):
             return
+        # A previous call may have renamed this member but failed to fsync.
+        # Do not attest that visible move as durable without acknowledging it.
+        progress.phase = f"{key}_stage_confirmation"
+        os.fsync(date_fd)
+        os.fsync(stage_fd)
         self._unlink_staged(
             stage_fd,
             journal_fd,
