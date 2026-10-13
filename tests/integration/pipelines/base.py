@@ -12,6 +12,10 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
+
 from datetime import UTC, datetime
 from pathlib import Path
 import os
@@ -212,7 +216,9 @@ class IntegrationPipelineTestCase:
         adapter = StorageBundle(
             bronze_writer=bronze_writer,
             silver_writer=SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path=self.silver_path,
                 logger=logger,
                 # Lock validation at Application layer

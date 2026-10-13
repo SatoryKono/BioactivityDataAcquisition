@@ -143,7 +143,6 @@ async def test_contract_rollout_affects_hash_false_dual_write_keeps_same_hash(
     logical_table = "chembl.activity"
     clock = SystemClock()
     writer = SilverWriter(
-        clock=clock,
         base_path=e2e_data_dir / "silver",
         logger=NoOpLogger(),
         runtime_services=_build_rollout_runtime_services(
@@ -185,7 +184,6 @@ async def test_contract_rollout_affects_hash_true_dual_write_projects_version_ha
     logical_table = "chembl.activity"
     clock = SystemClock()
     writer = SilverWriter(
-        clock=clock,
         base_path=e2e_data_dir / "silver",
         logger=NoOpLogger(),
         runtime_services=_build_rollout_runtime_services(

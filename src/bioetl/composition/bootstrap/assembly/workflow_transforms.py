@@ -75,7 +75,6 @@ def build_workflow_transform_registry(
     workflow_storage_logger = create_noop_logger()
     clock = SystemClock()
     transform_storage = SilverWriter(
-        clock=clock,
         base_path=settings.silver_path,
         logger=workflow_storage_logger,
         runtime_services=build_silver_writer_runtime_services(

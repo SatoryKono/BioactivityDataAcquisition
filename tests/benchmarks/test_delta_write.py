@@ -146,7 +146,6 @@ def _create_silver_writer(base_path: Path) -> SilverWriter:
     """Create an isolated Silver writer rooted at one benchmark round path."""
     clock = SystemClock()
     return SilverWriter(
-        clock=clock,
         base_path=base_path,
         logger=FakeLogger(),
         runtime_request=SilverWriterRuntimeServicesRequest(

@@ -7,7 +7,7 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING
 
 from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.medallion import WriteModePolicy
@@ -68,6 +68,7 @@ if TYPE_CHECKING:
 class SilverWriterRuntimeServices:
     """Grouped runtime collaborators for ``SilverWriter``."""
 
+    clock: ClockPort
     csv_exporter: CsvExporterProtocol | None
     tracing: TracingPort | None
     write_policy: WriteModePolicy
@@ -328,6 +329,7 @@ def build_silver_writer_runtime_services(
     merged_ops = _build_merged_operations(request)
 
     return SilverWriterRuntimeServices(
+        clock=request.clock,
         csv_exporter=request.csv_exporter,
         tracing=resolved_tracing,
         write_policy=resolved_write_policy,
@@ -348,10 +350,3 @@ def build_silver_writer_runtime_services(
         merged_operations=merged_ops,
         postwrite_operations=None,
     )
-
-
-class SilverWriterTransformOptions(TypedDict, total=False):
-    """Typed legacy transform keywords carried by the runtime request."""
-
-    transform_version: str | None
-    transform_steps: tuple[str, ...] | None

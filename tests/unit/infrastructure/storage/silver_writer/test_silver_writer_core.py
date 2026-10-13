@@ -61,7 +61,11 @@ class TestSilverWriterInit:
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path="s3://bucket/path/", logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path="s3://bucket/path/",
+            logger=noop_logger,
         )
         assert writer.base_path == "s3://bucket/path"
 
@@ -73,7 +77,6 @@ class TestSilverWriterInit:
 
         mock_exporter = MagicMock()
         writer = SilverWriter(
-            clock=fixed_test_clock(),
             base_path=SILVER_ROOT,
             logger=noop_logger,
             runtime_request=SilverWriterRuntimeServicesRequest(
@@ -88,7 +91,11 @@ class TestSilverWriterInit:
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path=SILVER_ROOT, logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path=SILVER_ROOT,
+            logger=noop_logger,
         )
         assert writer.csv_exporter is None
 
@@ -165,7 +172,11 @@ class TestSilverWriterValidation:
         )
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path=SILVER_ROOT, logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path=SILVER_ROOT,
+            logger=noop_logger,
         )
         schema = pa.schema(
             [
@@ -564,7 +575,11 @@ class TestSilverWriterValidation:
         )
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path=SILVER_ROOT, logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path=SILVER_ROOT,
+            logger=noop_logger,
         )
         payload_records = [
             {
@@ -667,7 +682,11 @@ class TestSilverWriterValidation:
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path="s3://bucket", logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path="s3://bucket",
+            logger=noop_logger,
         )
         schema = pa.schema(
             [
@@ -697,7 +716,11 @@ class TestSilverWriterValidation:
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path="s3://bucket", logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path="s3://bucket",
+            logger=noop_logger,
         )
 
         dummy_schema = pa.schema([pa.field("entity_id", pa.string())])
@@ -720,7 +743,11 @@ class TestSilverWriterValidation:
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path="s3://bucket", logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path="s3://bucket",
+            logger=noop_logger,
         )
         records = [{"entity_id": "CHEMBL123", "value": 5.5}]
 
@@ -750,7 +777,11 @@ class TestSilverWriterValidation:
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path="s3://bucket", logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path="s3://bucket",
+            logger=noop_logger,
         )
         records = [{"entity_id": "CHEMBL123"}]
 
@@ -792,7 +823,11 @@ class TestSilverWriterValidation:
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path="s3://bucket", logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path="s3://bucket",
+            logger=noop_logger,
         )
         records = [
             {
@@ -881,7 +916,11 @@ class TestSilverWriterWriteModeEnum:
         )
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path=SILVER_ROOT, logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path=SILVER_ROOT,
+            logger=noop_logger,
         )
 
         assert writer._validate_write_mode("merge") == SilverWriteMode.MERGE
@@ -905,7 +944,11 @@ class TestSilverWriterTablePath:
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path="s3://bucket/silver", logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path="s3://bucket/silver",
+            logger=noop_logger,
         )
 
         # Access internal path construction
@@ -920,7 +963,11 @@ class TestSilverWriterTablePath:
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path="s3://bucket/silver", logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path="s3://bucket/silver",
+            logger=noop_logger,
         )
 
         table_name = "provider.schema.table"
@@ -987,7 +1034,6 @@ def test_legacy_transform_keywords_remain_supported(
     instance = SilverWriter(
         base_path=tmp_path,
         logger=noop_logger,
-        clock=clock,
         runtime_services=services,
         transform_version=version,
         transform_steps=steps,
@@ -1000,10 +1046,12 @@ def test_legacy_transform_keywords_remain_supported(
 def test_unknown_transform_keyword_is_rejected(tmp_path, noop_logger):
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-    with pytest.raises(TypeError, match="Unexpected Silver transform options"):
+    with pytest.raises(TypeError, match="unexpected keyword argument"):
         SilverWriter(
             base_path=tmp_path,
             logger=noop_logger,
-            clock=fixed_test_clock(),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
             unexpected=True,
         )

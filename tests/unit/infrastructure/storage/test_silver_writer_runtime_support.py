@@ -92,6 +92,7 @@ class _Invocation:
 
 def _services() -> SilverWriterRuntimeServices:
     return SilverWriterRuntimeServices(
+        clock=fixed_test_clock(),
         csv_exporter=MagicMock(),
         tracing=MagicMock(),
         write_policy=MagicMock(),

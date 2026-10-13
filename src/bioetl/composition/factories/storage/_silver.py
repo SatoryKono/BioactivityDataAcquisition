@@ -130,7 +130,6 @@ def create_silver_writer(request: CreateSilverWriterRequest) -> SilverWriter:
     )
     runtime_services = build_silver_writer_runtime_services(runtime_request)
     return request.writer_cls(
-        clock=clock,
         base_path=request.base_path,
         logger=request.logger,
         runtime_services=runtime_services,

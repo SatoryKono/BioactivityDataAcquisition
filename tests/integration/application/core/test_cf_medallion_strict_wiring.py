@@ -277,6 +277,7 @@ def test_public_health_check_mode_keyword_remains_supported():
     assert "health_check_mode" in inspect.signature(assemble_runtime_config).parameters
 
 
+@pytest.mark.require_silver_validator
 def test_workflow_transform_assembly_injects_clock(tmp_path):
     from bioetl.composition.bootstrap.assembly.workflow_transforms import (
         build_workflow_transform_registry,
