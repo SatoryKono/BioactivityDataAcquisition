@@ -7,6 +7,7 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
+from memory.rag.filters import _tokenize_focus_query
 from memory.resources import POLICY_DIR, load_yaml_resource
 
 SOURCE_BUCKET_BY_TYPE = {
@@ -173,7 +174,13 @@ def _chunk_matches_filters(
         return False
     if lowered_query is None:
         return True
-    return lowered_query in _chunk_search_haystack(chunk)
+    haystack = _chunk_search_haystack(chunk)
+    tokens = _tokenize_focus_query(lowered_query)
+    return (
+        any(token in haystack for token in tokens)
+        if tokens
+        else lowered_query in haystack
+    )
 
 
 def _chunk_search_haystack(chunk: dict[str, Any]) -> str:

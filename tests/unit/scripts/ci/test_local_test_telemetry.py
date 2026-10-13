@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 from pathlib import Path
@@ -14,6 +15,7 @@ from scripts.engineering.ci.local_test_telemetry import (
     junit_telemetry_sha256,
     validate_local_measurement,
 )
+from scripts.engineering.ci import test_telemetry_provenance as provenance
 from scripts.engineering.qa.run_local_coverage_verify import SHARDS
 
 pytestmark = pytest.mark.unit
@@ -122,6 +124,64 @@ def test_local_baseline_never_reuses_cached_ci_identity_or_summary(
         baseline["measurement_provenance"]["ci_status"] == "BLOCKED_EXTERNAL_PERMANENT"
     )
     assert baseline["measurement_provenance"]["trust_tier"] == "local_single_host"
+
+
+def test_reviewed_receipt_rejects_metrics_drift_and_reads_proof_from_capture(
+    measurement: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        "scripts.engineering.ci.update_test_telemetry_baseline.compute_test_telemetry_source_tree_sha256",
+        lambda root: "tests",
+    )
+    monkeypatch.setattr(
+        "scripts.engineering.qa.report_module_coverage_inventory.compute_source_tree_sha256",
+        lambda **kwargs: "source",
+    )
+    baseline = build_local_baseline(measurement, repo_root=measurement.parent)
+    for field, key, value in (
+        ("coverage", "actual_percent", 0.0),
+        ("duration_telemetry", "total_cases", 999),
+        ("duration_telemetry", "top_slowest", []),
+    ):
+        changed = copy.deepcopy(baseline)
+        changed[field][key] = value
+        with pytest.raises(ValueError, match=f"Committed {field}"):
+            provenance.require_capture_metrics(changed, baseline)
+
+    root = measurement.parent / "fresh-main"
+    root.mkdir()
+    proof_roots = []
+    monkeypatch.setattr(
+        provenance,
+        "_read_github_json",
+        lambda _path: {
+            "number": 42,
+            "merged": True,
+            "base": {"repo": {"full_name": provenance.REPOSITORY}},
+            "head": {"sha": "c" * 40},
+            "merge_commit_sha": "d" * 40,
+        },
+    )
+    monkeypatch.setattr(
+        provenance,
+        "build_git_object_proof",
+        lambda proof_root, _source, _head: proof_roots.append(proof_root) or {},
+    )
+    monkeypatch.setattr(provenance, "_tree", lambda *_: "e" * 40)
+    monkeypatch.setattr(
+        provenance,
+        "_git",
+        lambda *_: CompletedProcess([], 0, stdout="d" * 40),
+    )
+    monkeypatch.setattr(provenance, "validate_squash_bridge", lambda *_: True)
+    provenance.build_reviewed_squash_receipt(
+        baseline,
+        root=root,
+        measurement_root=measurement.parent,
+        manifest_path=measurement,
+        pull_request=42,
+    )
+    assert proof_roots == [measurement.parent]
 
 
 @pytest.mark.parametrize(

@@ -813,7 +813,7 @@
     },
     "scripts/engineering/ci/test_telemetry_provenance.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the imported squash-provenance validation library used by telemetry governance tests; it has no standalone CLI and must remain supporting code behind the owning checks.",
+      "next_step": "Retain as the imported squash-provenance validation library used by telemetry governance tests; its standalone CLI builds a reviewed receipt from a validated local capture and merged PR. Keep it as supporting code behind the owning checks.",
       "owner": "@bioetl-quality",
       "review_by": "2026-11-30"
     },
