@@ -2172,9 +2172,13 @@ jobs:
       - run:
           name: pytest fast lane (<< parameters.test-group >>)
           command: |
+            set -euo pipefail
             export PATH="$HOME/.local/bin:$PATH"
             GROUP="<< parameters.test-group >>"
             NAME="${GROUP%%|*}"; PATHS="${GROUP#*|}"
+            if [[ "$NAME" == unit-vcr-secrets ]]; then
+              uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-secrets
+            fi
             mkdir -p reports/test-telemetry
             HYPOTHESIS_PROFILE=fast \
             uv run --frozen --no-build pytest $PATHS \

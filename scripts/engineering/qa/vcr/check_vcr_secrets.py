@@ -245,7 +245,7 @@ def _scan_file(path: Path, *, raw: bytes | None = None) -> list[str]:
 
 def _tracked_yaml_paths() -> list[Path]:
     result = subprocess.run(
-        ["git", "ls-files", "--cached", "-z", "--", "*.yaml", "*.yml"],
+        ["git", "ls-files", "--cached", "-z"],
         cwd=ROOT,
         env={
             key: value
@@ -255,7 +255,8 @@ def _tracked_yaml_paths() -> list[Path]:
         check=True,
         capture_output=True,
     )
-    return [ROOT / os.fsdecode(item) for item in result.stdout.split(b"\0") if item]
+    paths = [ROOT / os.fsdecode(item) for item in result.stdout.split(b"\0") if item]
+    return [path for path in paths if path.suffix.casefold() in {".yaml", ".yml"}]
 
 
 def _has_interactions(node: yaml.Node, active: frozenset[int] = frozenset()) -> bool:

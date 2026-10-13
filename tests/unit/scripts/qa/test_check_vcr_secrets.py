@@ -131,7 +131,9 @@ def test_missing_or_empty_root_fails_closed(
     assert checker.main() != 0
 
 
-@pytest.mark.parametrize("style", ["block", "quoted", "flow", "merge"])
+@pytest.mark.parametrize(
+    "style", ["block", "quoted", "flow", "merge", "upper_extension"]
+)
 def test_tracked_cassette_outside_canonical_directory_is_scanned(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -142,6 +144,8 @@ def test_tracked_cassette_outside_canonical_directory_is_scanned(
     vcr_root.mkdir(parents=True)
     (vcr_root / "clean.yaml").write_text(_cassette(), encoding="utf-8")
     outside = tmp_path / "tests/fixtures/http/captured.yaml"
+    if style == "upper_extension":
+        outside = outside.with_suffix(".YaMl")
     outside.parent.mkdir(parents=True)
     content = _cassette(response_headers="{set-cookie: [synthetic-session]}")
     if style == "quoted":
@@ -167,7 +171,7 @@ def test_tracked_cassette_outside_canonical_directory_is_scanned(
             "git",
             "add",
             "tests/fixtures/vcr/clean.yaml",
-            "tests/fixtures/http/captured.yaml",
+            outside.relative_to(tmp_path).as_posix(),
         ],
         cwd=tmp_path,
         env=isolated_git_env(),

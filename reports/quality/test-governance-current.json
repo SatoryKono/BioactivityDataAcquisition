@@ -1001,7 +1001,14 @@
     }
   },
   "assertless_total_candidates": 85,
-  "budget_violations": [],
+  "budget_violations": [
+    {
+      "actual": 1,
+      "budget": "markerless_test_functions_max",
+      "expected_max": 0,
+      "metric": "markerless_test_functions"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1175,8 +1182,10 @@
     ]
   },
   "intentional_no_exception_contract": 85,
-  "markerless_examples": [],
-  "markerless_test_functions": 0,
+  "markerless_examples": [
+    "tests/architecture/test_integration_vcr_policy.py:493"
+  ],
+  "markerless_test_functions": 1,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2025,8 +2034,10 @@
         ".yml"
       ]
     },
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/architecture/test_integration_vcr_policy.py:493"
+    ],
+    "markerless_test_functions": 1,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2087,12 +2098,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3037,
-    "total_test_functions": 29756,
+    "total_test_functions": 29757,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "5a36db8b59727f2461db6f97b7a9be8364e8d411aaa29a96245fcd57f2b177f1",
+  "source_tree_sha256": "59b36f445b3ce49ed166253b9c7d373335cef75c8a2d430320ea94481d818eb1",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2101,8 +2112,10 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 85,
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/architecture/test_integration_vcr_policy.py:493"
+    ],
+    "markerless_test_functions": 1,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
@@ -2155,7 +2168,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3037,
-  "total_test_functions": 29756,
+  "total_test_functions": 29757,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
