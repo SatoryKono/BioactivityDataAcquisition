@@ -403,7 +403,29 @@ def build_baseline_payload(
             == "legacy_positive_duration_rows"
         )
     ):
-        slowest_summary = _derive_slowest_summary_from_junit_paths(junit_paths)
+        derived_summary = _derive_slowest_summary_from_junit_paths(junit_paths)
+        if slowest_summary["total_cases"] is not None:
+            previous_sources = slowest_summary["execution_context"].get("junit_sources")
+            previous_source_count = slowest_summary["execution_context"].get(
+                "junit_source_count"
+            )
+            derived_sources = derived_summary["execution_context"]["junit_sources"]
+            if (
+                not isinstance(previous_sources, list)
+                or not all(isinstance(source, str) for source in previous_sources)
+                or len(set(previous_sources)) != len(previous_sources)
+                or len(set(derived_sources)) != len(derived_sources)
+                or (
+                    previous_source_count is not None
+                    and previous_source_count != len(previous_sources)
+                )
+                or sorted(previous_sources) != sorted(derived_sources)
+            ):
+                raise ValueError(
+                    "JUnit inputs do not match the source inventory of the "
+                    "existing slowest-tests.json; refusing a partial refresh"
+                )
+        slowest_summary = derived_summary
     top_slowest = slowest_summary["top_slowest"]
     status = (
         "captured"
@@ -681,8 +703,9 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
             "3. Run `python -m scripts.engineering.ci.update_test_telemetry_baseline "
             "--source-commit <sha> --source-run-id <run-id> ...` with either direct "
             "artifacts or fallback diagnostics inputs.",
-            "4. A legacy JSON timed-row count requires raw `--junit` inputs; "
-            "the updater rejects a legacy-only refresh before writing outputs.",
+            "4. A legacy JSON timed-row count requires raw `--junit` inputs for "
+            "the complete recorded source inventory; the updater rejects a "
+            "partial or legacy-only refresh before writing outputs.",
             "5. Commit the updated baseline and branch-consumable telemetry "
             "summary layer together.",
             "",

@@ -247,7 +247,7 @@ def test_junit_counts_each_diagnostic_element_in_suite_totals(tmp_path: Path) ->
         '<testcase name="multiple_diagnostics" time="0">'
         '<error message="setup" /><error message="teardown" />'
         '<failure message="first" /><failure message="second" />'
-        '</testcase></testsuite></testsuites>',
+        "</testcase></testsuite></testsuites>",
         encoding="utf-8",
     )
     summary = _derive_slowest_summary_from_junit_paths([path])
@@ -479,7 +479,11 @@ def test_legacy_json_count_is_timed_rows_or_recomputed_with_junit(
             {
                 "total_cases": 1,
                 "top_slowest": [],
-                "execution_context": {"executed_count": 1},
+                "execution_context": {
+                    "executed_count": 1,
+                    "junit_source_count": 1,
+                    "junit_sources": ["junit.xml"],
+                },
             }
         ),
         encoding="utf-8",
@@ -670,6 +674,106 @@ def test_incomplete_junit_inputs_cannot_recompute_legacy_count(tmp_path: Path) -
             coverage_log_path=None,
             slowest_json_path=legacy,
             junit_paths=[present, tmp_path / "missing.xml"],
+            source_branch="main",
+            source_commit="source",
+            source_run_id="run",
+            coverage_threshold=85.0,
+        )
+
+
+def test_partial_existing_junit_inventory_cannot_replace_full_summary(
+    tmp_path: Path,
+) -> None:
+    legacy = tmp_path / "legacy.json"
+    legacy.write_text(
+        json.dumps(
+            {
+                "total_cases": 1,
+                "top_slowest": [],
+                "execution_context": {
+                    "junit_source_count": 2,
+                    "junit_sources": ["first.xml", "second.xml"],
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    first = tmp_path / "first.xml"
+    second = tmp_path / "second.xml"
+    first.write_text('<testsuite tests="1"><testcase name="first" /></testsuite>')
+    second.write_text('<testsuite tests="1"><testcase name="second" /></testsuite>')
+    kwargs = {
+        "coverage_xml_path": tmp_path / "missing.xml",
+        "coverage_percent": None,
+        "coverage_log_path": None,
+        "slowest_json_path": legacy,
+        "source_branch": "main",
+        "source_commit": "source",
+        "source_run_id": "run",
+        "coverage_threshold": 85.0,
+    }
+    with pytest.raises(ValueError, match="refusing a partial refresh"):
+        build_baseline_payload(**kwargs, junit_paths=[first])
+    payload = build_baseline_payload(**kwargs, junit_paths=[first, second])
+    assert payload["duration_telemetry"]["total_cases"] == 2
+    assert payload["duration_telemetry"]["execution_context"]["junit_sources"] == [
+        "first.xml",
+        "second.xml",
+    ]
+
+
+def test_nested_testsuites_wrapper_preserves_non_overlapping_wall_time(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "nested.xml"
+    path.write_text(
+        '<testsuites><testsuites><testsuite tests="1" time="3">'
+        '<testcase name="one" /></testsuite></testsuites>'
+        '<testsuite tests="2" time="4"><testcase name="two" />'
+        '<testsuite tests="1" time="2"><testcase name="three" />'
+        "</testsuite></testsuite></testsuites>",
+        encoding="utf-8",
+    )
+    summary = _derive_slowest_summary_from_junit_paths([path])
+    assert summary["total_cases"] == 3
+    assert summary["execution_context"]["lane_wall_time_s"] == {"nested.xml": 7.0}
+
+
+def test_duplicate_junit_paths_and_ambiguous_source_names_fail_closed(
+    tmp_path: Path,
+) -> None:
+    first = tmp_path / "first" / "junit.xml"
+    second = tmp_path / "second" / "junit.xml"
+    for path in (first, second):
+        path.parent.mkdir()
+        path.write_text(
+            '<testsuite tests="1"><testcase name="one" /></testsuite>',
+            encoding="utf-8",
+        )
+    with pytest.raises(ValueError, match="Duplicate JUnit telemetry input path"):
+        _derive_slowest_summary_from_junit_paths([first, first])
+
+    legacy = tmp_path / "legacy.json"
+    legacy.write_text(
+        json.dumps(
+            {
+                "total_cases": 1,
+                "top_slowest": [],
+                "execution_context": {
+                    "junit_source_count": 2,
+                    "junit_sources": ["junit.xml", "junit.xml"],
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="Ambiguous JUnit telemetry source name"):
+        build_baseline_payload(
+            coverage_xml_path=tmp_path / "missing.xml",
+            coverage_percent=None,
+            coverage_log_path=None,
+            slowest_json_path=legacy,
+            junit_paths=[first, second],
             source_branch="main",
             source_commit="source",
             source_run_id="run",

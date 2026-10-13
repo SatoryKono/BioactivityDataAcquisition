@@ -101,6 +101,17 @@ def _record_case(
     return int(skipped), int(error), int(failure), duration or 0.0
 
 
+def _outermost_suites(node: ET.Element) -> list[ET.Element]:
+    """Select non-overlapping suite clocks beneath optional wrapper elements."""
+    if node.tag == "testsuite":
+        return [node]
+    suites: list[ET.Element] = []
+    for child in node:
+        if child.tag in {"testsuite", "testsuites"}:
+            suites.extend(_outermost_suites(child))
+    return suites
+
+
 def derive_summary(junit_paths: list[Path]) -> Summary:
     """Count each testcase record once; positive duration is a separate measure."""
     rows: list[Summary] = []
@@ -110,10 +121,14 @@ def derive_summary(junit_paths: list[Path]) -> Summary:
     missing = [path for path in junit_paths if not path.is_file()]
     if missing:
         raise FileNotFoundError(f"Missing JUnit telemetry input: {missing[0]}")
+    if len({path.resolve() for path in junit_paths}) != len(junit_paths):
+        raise ValueError("Duplicate JUnit telemetry input path")
+    if len({path.name for path in junit_paths}) != len(junit_paths):
+        raise ValueError("Ambiguous JUnit telemetry source name")
     existing = junit_paths
     for path in existing:
         root, cases = _validated_cases(path)
-        suites = [root] if root.tag == "testsuite" else root.findall("testsuite")
+        suites = _outermost_suites(root)
         lane_wall[path.name] = round(
             sum(
                 _nonnegative_duration(suite.get("time"), "testsuite", path) or 0

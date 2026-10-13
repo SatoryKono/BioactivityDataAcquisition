@@ -32,7 +32,7 @@ trend evidence only.
 - Source run id: `local-coverage`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `0f91cb4ff8ddccfb580c17c705d7091a929f04455bc9ddb6c711b3963c6c64d5`
+- Source tree sha256: `53517f3edd0d3ab17c44c6fe6c20a5a7112d7dcb4d8f7ddd7d34de3e324a5b1a`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-10-13T11:39:16.320446+00:00`
 
@@ -136,5 +136,5 @@ trend evidence only.
 1. Preferred path: download `reports/coverage/coverage.xml` and `reports/test-telemetry/slowest-tests.json` from a main-branch CI run.
 2. Fallback path: use resilient CI diagnostics artifacts (`junit_parallel.xml`, `junit_serial.xml`, and the coverage `TOTAL` line from `parallel.log`) when the direct coverage artifact expired.
 3. Run `python -m scripts.engineering.ci.update_test_telemetry_baseline --source-commit <sha> --source-run-id <run-id> ...` with either direct artifacts or fallback diagnostics inputs.
-4. A legacy JSON timed-row count requires raw `--junit` inputs; the updater rejects a legacy-only refresh before writing outputs.
+4. A legacy JSON timed-row count requires raw `--junit` inputs for the complete recorded source inventory; the updater rejects a partial or legacy-only refresh before writing outputs.
 5. Commit the updated baseline and branch-consumable telemetry summary layer together.
