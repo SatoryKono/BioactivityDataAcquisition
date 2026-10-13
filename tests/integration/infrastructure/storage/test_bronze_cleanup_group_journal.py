@@ -185,12 +185,41 @@ def test_late_sidecar_failure_recovers_exact_group(
                 ),
             )
         assert failure.value.removed == first_removed
+        assert failure.value.possibly_unlinked == 0
         assert (date_dir / spec.names()["sidecar"]).exists() is False
     with journal.open_group_journal(root) as group:
         assert group.recover(operation_id) == 1
         assert group.recover(operation_id) == 0
     assert outsider.read_bytes() == b"retain"
     assert all(not (date_dir / name).exists() for name in spec.names().values())
+
+
+@POSIX_ONLY
+def test_late_foreign_replacement_preserves_partial_result(tmp_path: Path) -> None:
+    root, spec, date_dir = _fixture(tmp_path)
+    sidecar = date_dir / spec.names()["sidecar"]
+    payload = date_dir / spec.names()["payload"]
+
+    def replace_after_payload(phase: str) -> None:
+        if phase == "after_payload_unlink":
+            sidecar.unlink()
+            sidecar.write_bytes(b"foreign")
+
+    with journal.open_group_journal(root) as group:
+        operation_id = group.begin(spec)
+        with pytest.raises(journal.GroupJournalConflict) as conflict:
+            group.recover(operation_id, replace_after_payload)
+        assert conflict.value.operation_id == operation_id
+        assert conflict.value.removed == 1
+        assert conflict.value.possibly_unlinked == 0
+        assert conflict.value.phase == "sidecar_identity"
+        assert not payload.exists()
+        assert sidecar.read_bytes() == b"foreign"
+        with pytest.raises(journal.GroupJournalConflict) as retry_conflict:
+            group.recover(operation_id)
+        assert retry_conflict.value.removed == 0
+    assert sidecar.read_bytes() == b"foreign"
+    assert (root / ".bronze-group-journals" / f"{operation_id}.json").exists()
 
 
 @POSIX_ONLY
@@ -338,8 +367,10 @@ def test_empty_foreign_directory_is_not_rmdir_target(tmp_path: Path) -> None:
 
         with pytest.raises(
             journal.GroupJournalConflict, match="stage directory replaced"
-        ):
+        ) as conflict:
             group.recover(operation_id, replace_stage)
+        assert conflict.value.removed == 2
+        assert conflict.value.possibly_unlinked == 0
         assert stage.is_dir()
         assert (root / ".bronze-group-journals" / f"{operation_id}.json").exists()
 

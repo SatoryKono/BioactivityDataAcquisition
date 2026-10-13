@@ -41,6 +41,11 @@ Barrier = Callable[[str], None]
 class GroupJournalConflict(OSError):
     """The journal or a group member cannot be proven to be the original."""
 
+    operation_id: str | None = None
+    removed: int = 0
+    possibly_unlinked: int = 0
+    phase: str = "read"
+
 
 class GroupJournalFailure(OSError):
     """An I/O barrier failed after a known number of successful unlinks."""
@@ -535,7 +540,11 @@ class GroupJournal:
             self._discard_temp(journal_fd, operation_id)
             self._recover_body(journal_fd, operation_id, body, hook, progress)
             return progress.removed
-        except GroupJournalConflict:
+        except GroupJournalConflict as exc:
+            exc.operation_id = operation_id
+            exc.removed = progress.removed
+            exc.possibly_unlinked = progress.possibly_unlinked
+            exc.phase = progress.phase
             raise
         except OSError as exc:
             raise GroupJournalFailure(
@@ -810,6 +819,7 @@ class GroupJournal:
         os.unlink(key, dir_fd=stage_fd)
         progress.possibly_unlinked += 1
         os.fsync(stage_fd)
+        progress.possibly_unlinked -= 1
         progress.removed += 1
         if hook:
             hook(f"after_{key}_unlink")
