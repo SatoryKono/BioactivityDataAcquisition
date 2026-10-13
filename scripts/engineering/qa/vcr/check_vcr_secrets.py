@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import os
-import re
 import subprocess
 import sys
 from dataclasses import dataclass, field
@@ -268,8 +267,9 @@ def _candidate(path: Path, raw: bytes) -> bool:
             ):
                 return True
     except (yaml.YAMLError, UnicodeError, ValueError, TypeError, RecursionError):
-        # Malformed cassette-like input must reach the strict parser and fail.
-        return bool(re.search(rb"""(?m)(?:^|[,{])\s*['"]?interactions['"]?\s*:""", raw))
+        # An unreadable YAML structure cannot prove that the file is unrelated.
+        # Route it to the strict parser instead of silently excluding it.
+        return True
     return False
 
 

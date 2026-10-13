@@ -223,3 +223,26 @@ def test_empty_canonical_root_fails_with_other_tracked_yaml_present(
 
     assert checker.main() == 1
     assert "empty cassette traversal" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("content", ["[unterminated", "invalid: \xff"])
+def test_malformed_off_catalog_yaml_is_not_silently_excluded(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    content: str,
+) -> None:
+    vcr_root = tmp_path / "tests/fixtures/vcr"
+    vcr_root.mkdir(parents=True)
+    clean = vcr_root / "clean.yaml"
+    clean.write_text(_cassette(), encoding="utf-8")
+    ambiguous = tmp_path / "unknown.yaml"
+    ambiguous.write_bytes(content.encode("latin-1"))
+    monkeypatch.setattr(checker, "ROOT", tmp_path)
+    monkeypatch.setattr(checker, "VCR_ROOT", vcr_root)
+    monkeypatch.setattr(checker, "_tracked_yaml_paths", lambda: [clean, ambiguous])
+
+    assert checker.main() == 1
+    diagnostic = capsys.readouterr().err
+    assert "unknown.yaml" in diagnostic
+    assert "unavailable=1" in diagnostic
