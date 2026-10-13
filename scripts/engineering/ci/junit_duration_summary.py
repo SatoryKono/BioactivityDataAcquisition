@@ -27,7 +27,9 @@ def _nonnegative_duration(raw: str | None, label: str, path: Path) -> float | No
     return value
 
 
-def _validate_aggregate(node: ET.Element, field: str, actual: int, path: Path) -> None:
+def _validate_aggregate(
+    node: ET.Element, field: str, allowed: set[int], path: Path
+) -> None:
     declared = node.get(field)
     if declared is None:
         return
@@ -35,31 +37,31 @@ def _validate_aggregate(node: ET.Element, field: str, actual: int, path: Path) -
         count = int(declared)
     except ValueError as error:
         raise ValueError(f"Invalid JUnit {field} testcase count in {path}") from error
-    if count < 0 or count != actual:
+    if count < 0 or count not in allowed:
         raise ValueError(
             f"JUnit {field} testcase count disagrees with records in {path}: "
-            f"declared {count}, observed {actual}"
+            f"declared {count}, allowed {sorted(allowed)}"
         )
 
 
-def _aggregate_counts(node: ET.Element, cases: list[ET.Element]) -> dict[str, int]:
+def _aggregate_counts(node: ET.Element, cases: list[ET.Element]) -> dict[str, set[int]]:
     counts = {
-        "tests": len(cases),
-        "skipped": sum(case.find("skipped") is not None for case in cases),
-        "failures": sum(bool(case.findall("failure")) for case in cases)
-        + len(node.findall("failure")),
-        "errors": sum(bool(case.findall("error")) for case in cases)
-        + len(node.findall("error")),
+        "tests": {len(cases)},
+        "skipped": {sum(case.find("skipped") is not None for case in cases)},
     }
-    # Suite-level diagnostics contribute to ancestor declarations too.
-    for child in node:
-        if child.tag in {"testsuite", "testsuites"}:
-            for field in ("failures", "errors"):
-                counts[field] += sum(
-                    len(descendant.findall(field[:-1]))
-                    for descendant in child.iter()
-                    if descendant.tag in {"testsuite", "testsuites"}
-                )
+    for field in ("failures", "errors"):
+        tag = field[:-1]
+        suite_diagnostics = sum(
+            len(suite.findall(tag))
+            for suite in node.iter()
+            if suite.tag in {"testsuite", "testsuites"}
+        )
+        # JUnit emitters differ: pytest counts diagnostic elements, while
+        # other producers count affected testcase records.
+        counts[field] = {
+            sum(case.find(tag) is not None for case in cases) + suite_diagnostics,
+            sum(len(case.findall(tag)) for case in cases) + suite_diagnostics,
+        }
     return counts
 
 

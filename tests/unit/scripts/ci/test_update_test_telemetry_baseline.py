@@ -239,11 +239,14 @@ def test_junit_suite_level_error_does_not_invent_testcase(tmp_path: Path) -> Non
     assert payload["top_slowest"] == []
 
 
-def test_junit_suite_totals_count_affected_records_once(tmp_path: Path) -> None:
+@pytest.mark.parametrize("declared", [1, 2])
+def test_junit_suite_totals_accept_record_or_diagnostic_counts(
+    tmp_path: Path, declared: int
+) -> None:
     path = tmp_path / "multiple-diagnostics.xml"
     path.write_text(
-        '<testsuites tests="1" errors="1" failures="1">'
-        '<testsuite tests="1" errors="1" failures="1">'
+        f'<testsuites tests="1" errors="{declared}" failures="{declared}">'
+        f'<testsuite tests="1" errors="{declared}" failures="{declared}">'
         '<testcase name="multiple_diagnostics" time="0">'
         '<error message="setup" /><error message="teardown" />'
         '<failure message="first" /><failure message="second" />'
@@ -253,9 +256,22 @@ def test_junit_suite_totals_count_affected_records_once(tmp_path: Path) -> None:
     summary = _derive_slowest_summary_from_junit_paths([path])
     assert summary["total_cases"] == 1
     assert summary["execution_context"]["observed_count"] == 1
-    # Both suite totals and execution context count the affected testcase once.
+    # The context always counts affected records, regardless of suite convention.
     assert summary["execution_context"]["error_record_count"] == 1
     assert summary["execution_context"]["failure_record_count"] == 1
+
+
+def test_junit_rejects_aggregate_outside_both_count_conventions(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "contradictory.xml"
+    path.write_text(
+        '<testsuite tests="1" errors="3"><testcase name="double_error">'
+        "<error /><error /></testcase></testsuite>",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="JUnit errors testcase count disagrees"):
+        _derive_slowest_summary_from_junit_paths([path])
 
 
 def test_workflow_producer_and_fallback_share_record_contract(tmp_path: Path) -> None:
@@ -816,6 +832,53 @@ def test_pytest_skip_with_teardown_error_is_not_executed(tmp_path: Path) -> None
     assert summary["execution_context"]["skipped_count"] == 1
     assert summary["execution_context"]["error_record_count"] == 1
     assert summary["total_cases"] == 0
+
+
+def test_pytest_double_error_aggregate_keeps_one_record(tmp_path: Path) -> None:
+    test_file = tmp_path / "test_double_error.py"
+    test_file.write_text(
+        "import pytest\n"
+        "@pytest.fixture\n"
+        "def bad(request):\n"
+        "    request.addfinalizer(lambda: 1 / 0)\n"
+        "    raise RuntimeError('setup failure')\n"
+        "def test_one(bad):\n"
+        "    pass\n",
+        encoding="utf-8",
+    )
+    junit = tmp_path / "actual-double-error.xml"
+    env = os.environ.copy()
+    env["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            str(test_file),
+            f"--junitxml={junit}",
+        ],
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode != 0
+    root = ET.parse(junit).getroot()
+    suite = root.find("testsuite")
+    assert suite is not None
+    assert suite.get("tests") == "1"
+    assert suite.get("errors") == "2"
+    case = next(root.iter("testcase"))
+    assert len(case.findall("error")) == 2
+    summary = _derive_slowest_summary_from_junit_paths([junit])
+    assert summary["execution_context"]["observed_count"] == 1
+    assert summary["execution_context"]["error_record_count"] == 1
+    assert summary["total_cases"] == 1
 
 
 def test_summarize_slowest_zones_groups_cases_by_module() -> None:
