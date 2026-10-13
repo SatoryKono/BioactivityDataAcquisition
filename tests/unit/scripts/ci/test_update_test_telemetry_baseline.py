@@ -239,11 +239,11 @@ def test_junit_suite_level_error_does_not_invent_testcase(tmp_path: Path) -> Non
     assert payload["top_slowest"] == []
 
 
-def test_junit_counts_each_diagnostic_element_in_suite_totals(tmp_path: Path) -> None:
+def test_junit_suite_totals_count_affected_records_once(tmp_path: Path) -> None:
     path = tmp_path / "multiple-diagnostics.xml"
     path.write_text(
-        '<testsuites tests="1" errors="2" failures="2">'
-        '<testsuite tests="1" errors="2" failures="2">'
+        '<testsuites tests="1" errors="1" failures="1">'
+        '<testsuite tests="1" errors="1" failures="1">'
         '<testcase name="multiple_diagnostics" time="0">'
         '<error message="setup" /><error message="teardown" />'
         '<failure message="first" /><failure message="second" />'
@@ -253,7 +253,7 @@ def test_junit_counts_each_diagnostic_element_in_suite_totals(tmp_path: Path) ->
     summary = _derive_slowest_summary_from_junit_paths([path])
     assert summary["total_cases"] == 1
     assert summary["execution_context"]["observed_count"] == 1
-    # Suite totals count diagnostics; execution_context counts affected records.
+    # Both suite totals and execution context count the affected testcase once.
     assert summary["execution_context"]["error_record_count"] == 1
     assert summary["execution_context"]["failure_record_count"] == 1
 
