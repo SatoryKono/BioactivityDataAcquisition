@@ -397,6 +397,13 @@ def _validated_junit_override(
             "JUnit inputs do not match the source inventory of the "
             "existing slowest-tests.json; refusing a partial refresh"
         )
+    # JUnit determines counts and durations, but it cannot reconstruct the
+    # capture's worker configuration or its declared out-of-scope lanes.
+    previous_context = slowest_summary["execution_context"]
+    derived_context = derived_summary["execution_context"]
+    for key in ("worker_mode", "explicit_exclusions"):
+        if key in previous_context:
+            derived_context[key] = previous_context[key]
     return derived_summary
 
 

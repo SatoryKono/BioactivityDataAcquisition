@@ -499,6 +499,10 @@ def test_legacy_json_count_is_timed_rows_or_recomputed_with_junit(
                     "executed_count": 1,
                     "junit_source_count": 1,
                     "junit_sources": ["junit.xml"],
+                    "worker_mode": "recorded worker configuration",
+                    "explicit_exclusions": [
+                        {"lane": "manual-e2e", "reason": "operator-triggered"}
+                    ],
                 },
             }
         ),
@@ -538,6 +542,11 @@ def test_legacy_json_count_is_timed_rows_or_recomputed_with_junit(
     assert (
         rebound["duration_telemetry"]["count_semantics"] == "non_skipped_junit_records"
     )
+    context = rebound["duration_telemetry"]["execution_context"]
+    assert context["worker_mode"] == "recorded worker configuration"
+    assert context["explicit_exclusions"] == [
+        {"lane": "manual-e2e", "reason": "operator-triggered"}
+    ]
 
 
 def test_legacy_only_refresh_rejects_before_overwriting_baseline(
