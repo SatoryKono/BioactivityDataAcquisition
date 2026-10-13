@@ -7,6 +7,7 @@ import os
 import re
 import subprocess
 import sys
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qsl, urlsplit
@@ -44,6 +45,7 @@ HEADER_KEYS = {
     "ncbi-phid",
 }
 REDACTED_MARKERS = ("redacted", "<redacted>", "***", "example", "dummy", "test")
+_INVALID_MAPPING = "invalid mapping"
 _LFS_POINTER_PREFIX = b"version https://git-lfs.github.com/spec/v1"
 
 
@@ -147,7 +149,7 @@ def _scan_headers(
     path: Path, interaction: int, side: str, headers: object
 ) -> list[str]:
     if not isinstance(headers, dict):
-        return [_location(path, interaction, f"{side}.headers", "invalid mapping")]
+        return [_location(path, interaction, f"{side}.headers", _INVALID_MAPPING)]
     findings: list[str] = []
     for raw_name, raw_values in headers.items():
         if not isinstance(raw_name, str):
@@ -164,22 +166,50 @@ def _scan_headers(
         else:
             findings.append(_location(path, interaction, field, "invalid values"))
             continue
-        for value_index, value in enumerate(values, start=1):
-            if not isinstance(value, str):
-                findings.append(
-                    _location(
-                        path, interaction, field, f"invalid value at {value_index}"
-                    )
+        findings.extend(_scan_header_values(path, interaction, field, name, values))
+    return findings
+
+
+def _scan_header_values(
+    path: Path, interaction: int, field: str, name: str, values: list[object]
+) -> list[str]:
+    findings: list[str] = []
+    for value_index, value in enumerate(values, start=1):
+        if not isinstance(value, str):
+            findings.append(
+                _location(path, interaction, field, f"invalid value at {value_index}")
+            )
+        elif name in HEADER_KEYS and not _looks_redacted(value):
+            findings.append(
+                _location(
+                    path, interaction, field, f"unredacted value at {value_index}"
                 )
-            elif name in HEADER_KEYS and not _looks_redacted(value):
-                findings.append(
-                    _location(
-                        path,
-                        interaction,
-                        field,
-                        f"unredacted value at {value_index}",
-                    )
-                )
+            )
+    return findings
+
+
+def _scan_request(path: Path, interaction: int, request: dict[Any, Any]) -> list[str]:
+    findings: list[str] = []
+    if not isinstance(request.get("method"), str):
+        findings.append(_location(path, interaction, "request.method", "invalid value"))
+    uri = request.get("uri")
+    if isinstance(uri, str):
+        findings.extend(_scan_uri(path, interaction, uri))
+    else:
+        findings.append(_location(path, interaction, "request.uri", "invalid value"))
+    return findings
+
+
+def _scan_part(path: Path, interaction: int, side: str, part: object) -> list[str]:
+    if not isinstance(part, dict):
+        return [_location(path, interaction, side, "missing or invalid mapping")]
+    findings = _scan_headers(path, interaction, side, part.get("headers"))
+    if side == "request":
+        findings.extend(_scan_request(path, interaction, part))
+    elif not isinstance(part.get("status"), dict):
+        findings.append(
+            _location(path, interaction, "response.status", _INVALID_MAPPING)
+        )
     return findings
 
 
@@ -193,42 +223,12 @@ def _scan_interactions(path: Path, document: object) -> list[str]:
     for interaction_index, interaction in enumerate(interactions, start=1):
         if not isinstance(interaction, dict):
             findings.append(
-                _location(path, interaction_index, "interaction", "invalid mapping")
+                _location(path, interaction_index, "interaction", _INVALID_MAPPING)
             )
             continue
         for side in ("request", "response"):
-            part = interaction.get(side)
-            if not isinstance(part, dict):
-                findings.append(
-                    _location(
-                        path, interaction_index, side, "missing or invalid mapping"
-                    )
-                )
-                continue
-            if side == "request":
-                if not isinstance(part.get("method"), str):
-                    findings.append(
-                        _location(
-                            path, interaction_index, "request.method", "invalid value"
-                        )
-                    )
-                uri = part.get("uri")
-                if isinstance(uri, str):
-                    findings.extend(_scan_uri(path, interaction_index, uri))
-                else:
-                    findings.append(
-                        _location(
-                            path, interaction_index, "request.uri", "invalid value"
-                        )
-                    )
-            elif not isinstance(part.get("status"), dict):
-                findings.append(
-                    _location(
-                        path, interaction_index, "response.status", "invalid mapping"
-                    )
-                )
             findings.extend(
-                _scan_headers(path, interaction_index, side, part.get("headers"))
+                _scan_part(path, interaction_index, side, interaction.get(side))
             )
     return findings
 
@@ -273,6 +273,88 @@ def _candidate(path: Path, raw: bytes) -> bool:
     return False
 
 
+@dataclass
+class _Inventory:
+    findings: list[str] = field(default_factory=list)
+    read: int = 0
+    excluded: int = 0
+    cassettes: int = 0
+    canonical_cassettes: int = 0
+    unavailable: int = 0
+
+    def reject(self, path: Path, field_name: str, reason: str) -> None:
+        self.findings.append(_location(path, "-", field_name, reason))
+        self.unavailable += 1
+
+
+def _inspect_document(path: Path, raw: bytes, inventory: _Inventory) -> None:
+    if not _candidate(path, raw):
+        inventory.excluded += 1
+        return
+    document, parse_errors = _parse_document(path, raw)
+    if parse_errors:
+        inventory.findings.extend(parse_errors)
+        inventory.unavailable += 1
+        return
+    if not isinstance(document, dict) or "interactions" not in document:
+        if path.is_relative_to(VCR_ROOT) and not path.stem.endswith("_meta"):
+            inventory.findings.append(
+                _location(path, "-", "interactions", "missing from cassette")
+            )
+        else:
+            inventory.excluded += 1
+        return
+    inventory.cassettes += 1
+    if path.is_relative_to(VCR_ROOT):
+        inventory.canonical_cassettes += 1
+    inventory.findings.extend(_scan_interactions(path, document))
+
+
+def _inspect_path(path: Path, inventory: _Inventory) -> None:
+    if not path.resolve().is_relative_to(ROOT.resolve()):
+        inventory.reject(path, "inventory", "path escapes repository")
+        return
+    try:
+        raw = path.read_bytes()
+    except OSError:
+        inventory.reject(path, "yaml", "unreadable file")
+        return
+    inventory.read += 1
+    if raw.startswith(_LFS_POINTER_PREFIX):
+        inventory.reject(path, "yaml", "LFS pointer is unavailable")
+        return
+    _inspect_document(path, raw, inventory)
+
+
+def _untracked_findings(tracked_paths: list[Path]) -> list[str]:
+    tracked_names = {path.resolve() for path in tracked_paths}
+    return [
+        _location(path, "-", "inventory", "untracked VCR YAML")
+        for path in VCR_ROOT.rglob("*")
+        if path.suffix.casefold() in {".yaml", ".yml"}
+        and path.resolve() not in tracked_names
+    ]
+
+
+def _report_inventory(tracked_count: int, inventory: _Inventory) -> int:
+    if not inventory.cassettes or not inventory.canonical_cassettes:
+        inventory.findings.append(
+            _location(VCR_ROOT, "-", "inventory", "empty cassette traversal")
+        )
+    summary = (
+        f"tracked_yaml={tracked_count} read={inventory.read} "
+        f"excluded={inventory.excluded} unavailable={inventory.unavailable} "
+        f"cassettes={inventory.cassettes} canonical_cassettes={inventory.canonical_cassettes}"
+    )
+    if inventory.findings:
+        sys.stderr.write(f"ERROR: VCR secret-safety check failed ({summary}).\n")
+        for finding in inventory.findings:
+            sys.stderr.write(f" - {finding}\n")
+        return 1
+    sys.stdout.write(f"OK: VCR HTTP metadata is sanitized ({summary}).\n")
+    return 0
+
+
 def main() -> int:
     if not VCR_ROOT.is_dir():
         sys.stderr.write(
@@ -291,75 +373,10 @@ def main() -> int:
             _location(ROOT, "-", "inventory", "empty tracked YAML traversal") + "\n"
         )
         return 1
-
-    findings: list[str] = []
-    tracked_names = {path.resolve() for path in tracked_paths}
-    for path in VCR_ROOT.rglob("*"):
-        if (
-            path.suffix.casefold() in {".yaml", ".yml"}
-            and path.resolve() not in tracked_names
-        ):
-            findings.append(_location(path, "-", "inventory", "untracked VCR YAML"))
-    read_count = 0
-    excluded_count = 0
-    cassette_count = 0
-    canonical_cassette_count = 0
-    unavailable_count = 0
+    inventory = _Inventory(findings=_untracked_findings(tracked_paths))
     for path in tracked_paths:
-        if not path.resolve().is_relative_to(ROOT.resolve()):
-            findings.append(
-                _location(path, "-", "inventory", "path escapes repository")
-            )
-            unavailable_count += 1
-            continue
-        try:
-            raw = path.read_bytes()
-        except OSError:
-            findings.append(_location(path, "-", "yaml", "unreadable file"))
-            unavailable_count += 1
-            continue
-        read_count += 1
-        if raw.startswith(_LFS_POINTER_PREFIX):
-            findings.append(_location(path, "-", "yaml", "LFS pointer is unavailable"))
-            unavailable_count += 1
-            continue
-        if not _candidate(path, raw):
-            excluded_count += 1
-            continue
-        document, parse_errors = _parse_document(path, raw)
-        if parse_errors:
-            findings.extend(parse_errors)
-            unavailable_count += 1
-            continue
-        if not isinstance(document, dict) or "interactions" not in document:
-            if path.is_relative_to(VCR_ROOT) and not path.stem.endswith("_meta"):
-                findings.append(
-                    _location(path, "-", "interactions", "missing from cassette")
-                )
-            else:
-                excluded_count += 1
-            continue
-        cassette_count += 1
-        if path.is_relative_to(VCR_ROOT):
-            canonical_cassette_count += 1
-        findings.extend(_scan_interactions(path, document))
-    if not cassette_count or not canonical_cassette_count:
-        findings.append(
-            _location(VCR_ROOT, "-", "inventory", "empty cassette traversal")
-        )
-
-    summary = (
-        f"tracked_yaml={len(tracked_paths)} read={read_count} "
-        f"excluded={excluded_count} unavailable={unavailable_count} "
-        f"cassettes={cassette_count} canonical_cassettes={canonical_cassette_count}"
-    )
-    if findings:
-        sys.stderr.write(f"ERROR: VCR secret-safety check failed ({summary}).\n")
-        for finding in findings:
-            sys.stderr.write(f" - {finding}\n")
-        return 1
-    sys.stdout.write(f"OK: VCR HTTP metadata is sanitized ({summary}).\n")
-    return 0
+        _inspect_path(path, inventory)
+    return _report_inventory(len(tracked_paths), inventory)
 
 
 if __name__ == "__main__":
