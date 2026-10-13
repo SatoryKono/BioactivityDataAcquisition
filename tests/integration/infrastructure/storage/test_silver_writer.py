@@ -83,7 +83,6 @@ def _create_dual_write_writer(
 ) -> SilverWriter:
     """Build a SilverWriter wired for contract dual-write tests."""
     return SilverWriter(
-        clock=fixed_test_clock(),
         base_path=temp_delta_path,
         logger=noop_logger,
         runtime_services=build_silver_writer_runtime_services(
@@ -170,7 +169,9 @@ def temp_delta_path(tmp_path):
 @pytest.fixture
 def silver_writer(temp_delta_path, noop_logger):
     return SilverWriter(
-        clock=fixed_test_clock(), base_path=temp_delta_path, logger=noop_logger
+        runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
+        base_path=temp_delta_path,
+        logger=noop_logger,
     )
 
 
@@ -697,7 +698,9 @@ async def test_write_silver_merged_empty_records(temp_delta_path: str):
     """Test write_silver_merged handles empty records gracefully."""
     logger = RecordingLogger()
     silver_writer = SilverWriter(
-        clock=fixed_test_clock(), base_path=temp_delta_path, logger=logger
+        runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
+        base_path=temp_delta_path,
+        logger=logger,
     )
 
     # Should not raise, just log warning

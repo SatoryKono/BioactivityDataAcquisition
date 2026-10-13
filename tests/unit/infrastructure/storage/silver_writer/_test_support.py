@@ -97,9 +97,6 @@ def make_silver_writer(
         )
 
     return SilverWriter(
-        clock=runtime_request.clock
-        if runtime_request is not None
-        else fixed_test_clock(),
         base_path=str(SILVER_BASE_PATH if base_path is None else base_path),
         logger=logger,
         runtime_services=runtime_services,

@@ -81,7 +81,9 @@ class TestSilverWriterDQMetrics:
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
             )
@@ -106,7 +108,9 @@ class TestSilverWriterDQMetrics:
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
             )
@@ -150,7 +154,9 @@ class TestSilverWriterDQMetrics:
             return_value=mock_table,
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
             )
@@ -175,7 +181,9 @@ class TestSilverWriterDQMetrics:
             }
         )
         writer = SilverWriter(
-            clock=fixed_test_clock(),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
             base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
         )
@@ -206,7 +214,9 @@ class TestSilverWriterDQMetrics:
             {"entity_id": "CHEMBL456", "late_field": "value"},
         ]
         writer = SilverWriter(
-            clock=fixed_test_clock(),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
             base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
         )
@@ -228,7 +238,9 @@ class TestSilverWriterDQMetrics:
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(
-            clock=fixed_test_clock(),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
             base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
         )
@@ -253,7 +265,9 @@ class TestSilverWriterDQMetrics:
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
             )
@@ -276,7 +290,9 @@ class TestSilverWriterDQMetrics:
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
             )
@@ -309,7 +325,9 @@ class TestSilverWriterDQMetrics:
             return_value=mock_table,
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
             )
@@ -349,7 +367,9 @@ class TestSilverWriterDQMetrics:
             return_value=mock_table,
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
             )
@@ -389,7 +409,9 @@ class TestSilverWriterDQMetrics:
             return_value=mock_table,
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
             )
@@ -448,7 +470,6 @@ class TestSilverWriterDQMetrics:
         )
 
         writer = SilverWriter(
-            clock=fixed_test_clock(),
             base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             runtime_request=SilverWriterRuntimeServicesRequest(
@@ -522,7 +543,6 @@ class TestSilverWriterDQMetrics:
         mock_metadata_writer.write_silver_metadata = capture_write
 
         writer = SilverWriter(
-            clock=fixed_test_clock(),
             base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             runtime_request=SilverWriterRuntimeServicesRequest(
@@ -605,7 +625,6 @@ class TestSilverWriterDQMetrics:
             patch("bioetl.infrastructure.storage.silver_writer.write_deltalake"),
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
                 runtime_request=SilverWriterRuntimeServicesRequest(
@@ -649,7 +668,9 @@ class TestSilverWriterDQMetrics:
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(
-            clock=fixed_test_clock(),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
             base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
         )
@@ -697,7 +718,9 @@ class TestSilverWriterDQMetrics:
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(
-            clock=fixed_test_clock(),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
             base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
         )
@@ -740,7 +763,9 @@ class TestSilverWriterDQMetrics:
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(
-            clock=fixed_test_clock(),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
             base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
         )

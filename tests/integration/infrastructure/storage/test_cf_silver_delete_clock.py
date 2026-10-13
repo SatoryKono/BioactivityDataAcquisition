@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
+
 from datetime import UTC, datetime, timedelta, timezone
 from unittest.mock import Mock
 
@@ -47,7 +51,11 @@ def _make_metadata_coordinator(start):
 
 @pytest.mark.asyncio
 async def test_unsupported_delete_and_overwrite_preserve_all_prior_batches(tmp_path):
-    writer = SilverWriter(tmp_path, Mock(), clock=fixed_test_clock())
+    writer = SilverWriter(
+        tmp_path,
+        Mock(),
+        runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
+    )
     schema = pa.schema([("id", pa.string()), ("content_hash", pa.string())])
     first = [{"id": "old", "content_hash": "a" * 64}]
     second = [{"id": "new", "content_hash": "b" * 64}]
@@ -82,7 +90,11 @@ async def test_injected_clock_controls_start_and_completion_without_wallclock_pa
 ):
     start = datetime(2026, 10, 7, tzinfo=UTC)
     writer = SilverWriter(
-        tmp_path, Mock(), clock=StepClock(start, timedelta(seconds=2))
+        tmp_path,
+        Mock(),
+        runtime_request=SilverWriterRuntimeServicesRequest(
+            clock=StepClock(start, timedelta(seconds=2))
+        ),
     )
     seen = []
 
@@ -145,9 +157,8 @@ async def test_real_delta_metadata_records_injected_clock_provenance(
     writer = SilverWriter(
         tmp_path,
         Mock(),
-        clock=clock,
         runtime_request=SilverWriterRuntimeServicesRequest(
-            clock=fixed_test_clock(),
+            clock=clock,
             metadata_writer=metadata_writer,
             metadata_coordinator=coordinator,
         ),
@@ -203,7 +214,6 @@ async def test_invalid_explicit_timestamp_is_rejected_before_delta_commit(
     writer = SilverWriter(
         tmp_path,
         Mock(),
-        clock=fixed_test_clock(),
         runtime_request=SilverWriterRuntimeServicesRequest(
             clock=fixed_test_clock(),
             metadata_writer=metadata_writer,
@@ -250,7 +260,11 @@ async def test_invalid_explicit_timestamp_is_rejected_before_delta_commit(
 @pytest.mark.asyncio
 @pytest.mark.parametrize("mode", ["append", "merge"])
 async def test_physical_partition_change_requires_explicit_migration(tmp_path, mode):
-    writer = SilverWriter(tmp_path, Mock(), clock=fixed_test_clock())
+    writer = SilverWriter(
+        tmp_path,
+        Mock(),
+        runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
+    )
     schema = pa.schema(
         [("id", pa.string()), ("content_hash", pa.string()), ("group", pa.string())]
     )
@@ -282,7 +296,11 @@ async def test_physical_partition_change_requires_explicit_migration(tmp_path, m
 
 @pytest.mark.asyncio
 async def test_invalid_merged_completion_never_commits(tmp_path):
-    writer = SilverWriter(tmp_path, Mock(), clock=fixed_test_clock())
+    writer = SilverWriter(
+        tmp_path,
+        Mock(),
+        runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
+    )
     with pytest.raises(ValueError, match="UTC"):
         await writer.write_silver_merged(
             "test_merged", [{"id": "one"}], completed_at=datetime(2026, 10, 13)

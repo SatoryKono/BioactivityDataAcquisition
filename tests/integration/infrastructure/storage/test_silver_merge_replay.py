@@ -12,6 +12,10 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
+
 from tests.helpers.clock import fixed_test_clock
 
 import hashlib
@@ -77,7 +81,9 @@ def temp_delta_path(tmp_path: Path) -> str:
 @pytest.fixture
 def silver_writer(temp_delta_path: str, noop_logger: object) -> SilverWriter:
     return SilverWriter(
-        clock=fixed_test_clock(), base_path=temp_delta_path, logger=noop_logger
+        runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
+        base_path=temp_delta_path,
+        logger=noop_logger,
     )
 
 
