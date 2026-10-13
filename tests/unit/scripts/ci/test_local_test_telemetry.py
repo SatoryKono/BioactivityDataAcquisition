@@ -141,7 +141,7 @@ def test_reviewed_receipt_rejects_metrics_drift_and_reads_proof_from_capture(
     for field, key, value in (
         ("coverage", "actual_percent", 0.0),
         ("duration_telemetry", "total_cases", 999),
-        ("duration_telemetry", "top_slowest", []),
+        ("duration_telemetry", "top_slowest", [{"test": "tampered", "duration_s": 1}]),
     ):
         changed = copy.deepcopy(baseline)
         changed[field][key] = value

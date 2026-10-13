@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import re
 import xml.etree.ElementTree as ET
 from datetime import UTC, datetime
@@ -224,18 +225,62 @@ def _read_slowest_summary(path: Path) -> TelemetryPayload:
 def _derive_slowest_summary_from_junit_paths(
     junit_paths: list[Path],
 ) -> TelemetryPayload:
+    """Count non-skipped JUnit records; rank only measured positive durations.
+
+    Each ``testcase`` element is one observed record, including rerun attempts
+    with the same name. JUnit does not prove that an error reached a test body.
+    """
     rows: list[TelemetryPayload] = []
+    executed_count = 0
     for junit_path in junit_paths:
         if not junit_path.exists():
             continue
         root = ET.parse(junit_path).getroot()
-        for testcase in root.iter("testcase"):
-            duration = float(testcase.attrib.get("time", "0") or 0.0)
-            if duration <= 0:
+        if root.tag not in {"testsuite", "testsuites"}:
+            raise ValueError(f"Unsupported JUnit root in {junit_path}: {root.tag}")
+        cases = list(root.iter("testcase"))
+        skipped_count = sum(case.find("skipped") is not None for case in cases)
+        for field, actual in (("tests", len(cases)), ("skipped", skipped_count)):
+            declared = root.get(field)
+            if declared is None:
                 continue
+            try:
+                declared_count = int(declared)
+            except ValueError as error:
+                raise ValueError(
+                    f"Invalid JUnit {field} testcase count in {junit_path}"
+                ) from error
+            if declared_count < 0 or declared_count != actual:
+                raise ValueError(
+                    f"JUnit {field} testcase count disagrees with records in "
+                    f"{junit_path}: declared {declared_count}, observed {actual}"
+                )
+        for testcase in cases:
             case_name = testcase.attrib.get("name", "")
             class_name = testcase.attrib.get("classname", "")
             full_name = f"{class_name}::{case_name}" if class_name else case_name
+            skipped = testcase.find("skipped") is not None
+            if skipped and any(
+                testcase.find(status) is not None for status in ("failure", "error")
+            ):
+                raise ValueError(f"Conflicting JUnit testcase status: {full_name}")
+            if not skipped:
+                executed_count += 1
+            raw_duration = testcase.get("time")
+            if raw_duration is None:
+                continue
+            try:
+                duration = float(raw_duration)
+            except ValueError as error:
+                raise ValueError(
+                    f"Invalid JUnit testcase duration for {full_name} in {junit_path}"
+                ) from error
+            if not math.isfinite(duration) or duration < 0:
+                raise ValueError(
+                    f"Invalid JUnit testcase duration for {full_name} in {junit_path}"
+                )
+            if skipped or duration == 0:
+                continue
             rows.append(
                 {
                     "source": junit_path.name,
@@ -246,12 +291,12 @@ def _derive_slowest_summary_from_junit_paths(
 
     rows.sort(key=lambda row: float(row["duration_s"]), reverse=True)
     return {
-        "total_cases": len(rows),
+        "total_cases": executed_count,
         "top_slowest": rows[:25],
         "execution_context": {
             "junit_source_count": len([path for path in junit_paths if path.exists()]),
             "junit_sources": [path.name for path in junit_paths if path.exists()],
-            "executed_count": len(rows),
+            "executed_count": executed_count,
             "worker_mode": "caller-declared; see source run metadata",
             "junit_testcase_duration_sum_s": {},
             "explicit_exclusions": [],
@@ -567,6 +612,11 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
         "## Duration Telemetry",
         "",
         f"- Total executed test cases: `{total_cases_display}`",
+        "- Executed means observed non-skipped JUnit testcase records, not",
+        "  collection count or distinct logical tests. Error records can describe",
+        "  setup or collection failures rather than a test body run.",
+        "- Only measured positive durations enter the slowest-test ranking.",
+        "  Older CI timed-row totals are not directly comparable with this count.",
         f"- Freshness guard: `<={int(freshness_guard['max_age_days'])} days` via "
         f"`{freshness_guard['timestamp_field']}`",
         "",
@@ -630,6 +680,9 @@ def render_branch_telemetry_markdown(payload: TelemetryPayload) -> str:
         f"Source run URL: `{payload.get('source_run_url') or 'pending'}`",
         f"Refresh status: `{payload['refresh_status']}`",
         f"Executed test cases: `{total_cases_display}`",
+        "Executed counts non-skipped JUnit records, including zero or missing",
+        "duration; duplicate identities remain separate records. This is not a",
+        "collection count. Older CI timed-row totals are not directly comparable.",
         f"Freshness guard: `<={int(payload['freshness_guard']['max_age_days'])} days`",
         "",
     ]

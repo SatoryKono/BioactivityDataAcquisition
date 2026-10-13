@@ -12,6 +12,7 @@
 
 from __future__ import annotations
 
+import copy
 import json
 import subprocess
 from pathlib import Path
@@ -143,6 +144,95 @@ def test_derive_slowest_summary_from_junit_paths(tmp_path: Path) -> None:
     assert payload["total_cases"] == 2
     assert payload["top_slowest"][0]["test"] == "tests.example::test_slow"
     assert payload["top_slowest"][0]["duration_s"] == pytest.approx(5.5)
+
+
+def test_junit_counts_observed_non_skipped_records_independent_of_time(
+    tmp_path: Path,
+) -> None:
+    junit_path = tmp_path / "nested.xml"
+    junit_path.write_text(
+        """<testsuites tests="8" skipped="1">
+  <testsuite name="outer">
+    <testcase classname="suite" name="passed" time="1.5" />
+    <testcase classname="suite" name="zero" time="0" />
+    <testcase classname="suite" name="missing" />
+    <testcase classname="suite" name="skipped" time="4"><skipped /></testcase>
+    <testsuite name="inner">
+      <testcase classname="suite" name="failed" time="0"><failure /></testcase>
+      <testcase classname="suite" name="errored"><error /></testcase>
+      <testcase classname="suite" name="retry" time="0.2" />
+      <testcase classname="suite" name="retry" time="0.3" />
+    </testsuite>
+  </testsuite>
+</testsuites>""",
+        encoding="utf-8",
+    )
+
+    payload = _derive_slowest_summary_from_junit_paths([junit_path])
+
+    assert payload["total_cases"] == 7
+    assert payload["execution_context"]["executed_count"] == 7
+    assert [row["duration_s"] for row in payload["top_slowest"]] == [
+        1.5,
+        0.3,
+        0.2,
+    ]
+    assert [row["test"] for row in payload["top_slowest"]].count("suite::retry") == 2
+
+
+@pytest.mark.parametrize(
+    ("testcases", "expected"),
+    [
+        ("", 0),
+        ('<testcase name="skip" time="5"><skipped /></testcase>', 0),
+    ],
+)
+def test_junit_empty_or_only_skipped_has_no_executed_cases(
+    tmp_path: Path, testcases: str, expected: int
+) -> None:
+    junit_path = tmp_path / "junit.xml"
+    junit_path.write_text(
+        f'<testsuite tests="{int(bool(testcases))}" skipped="{int(bool(testcases))}">'
+        f"{testcases}</testsuite>",
+        encoding="utf-8",
+    )
+    payload = _derive_slowest_summary_from_junit_paths([junit_path])
+    assert payload["total_cases"] == expected
+    assert payload["top_slowest"] == []
+
+
+@pytest.mark.parametrize("bad_time", ["bogus", "NaN", "inf", "-1", ""])
+def test_junit_rejects_invalid_duration_without_losing_case(
+    tmp_path: Path, bad_time: str
+) -> None:
+    junit_path = tmp_path / "invalid.xml"
+    junit_path.write_text(
+        f'<testsuite><testcase name="case" time="{bad_time}" /></testsuite>',
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="duration"):
+        _derive_slowest_summary_from_junit_paths([junit_path])
+
+
+def test_junit_rejects_aggregate_test_count_disagreement(tmp_path: Path) -> None:
+    junit_path = tmp_path / "mismatch.xml"
+    junit_path.write_text(
+        '<testsuite tests="2"><testcase name="only" time="1" /></testsuite>',
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="testcase count"):
+        _derive_slowest_summary_from_junit_paths([junit_path])
+
+
+def test_junit_suite_level_error_does_not_invent_testcase(tmp_path: Path) -> None:
+    junit_path = tmp_path / "suite-error.xml"
+    junit_path.write_text(
+        '<testsuite tests="0" errors="1"><error message="collection" /></testsuite>',
+        encoding="utf-8",
+    )
+    payload = _derive_slowest_summary_from_junit_paths([junit_path])
+    assert payload["total_cases"] == 0
+    assert payload["top_slowest"] == []
 
 
 def test_summarize_slowest_zones_groups_cases_by_module() -> None:
@@ -322,6 +412,7 @@ def test_render_and_write_baseline_outputs(tmp_path: Path) -> None:
     assert "`coverage-verify`" in markdown
     assert "historical `test-health` rollups remain non-blocking" in markdown
     assert "Source event: `push`" in markdown
+    assert "Total executed test cases: `321`" in markdown
 
     output_yaml = tmp_path / "baseline.yaml"
     output_md = tmp_path / "baseline.md"
@@ -351,6 +442,8 @@ def test_render_and_write_baseline_outputs(tmp_path: Path) -> None:
     slowest_markdown = slowest_md.read_text(encoding="utf-8")
     assert "Slowest Tests" in slowest_markdown
     assert "Top Slow Zones" in slowest_markdown
+    assert "Executed test cases: `321`" in slowest_markdown
+    assert "Collected test cases" not in slowest_markdown
 
 
 def test_build_baseline_payload_marks_duration_only_refresh_as_captured(
@@ -470,6 +563,7 @@ def test_build_branch_telemetry_reports_preserves_baseline_snapshot() -> None:
     assert slowest_summary["top_slowest_zones"][0]["zone"] == "tests.example"
     assert "Slowest Tests" in reports["slowest-tests.md"]
     assert "Top Slow Zones" in reports["slowest-tests.md"]
+    assert "Executed test cases: `321`" in reports["slowest-tests.md"]
 
 
 def test_merge_existing_baseline_supplemental_fields_preserves_probe(
@@ -573,3 +667,82 @@ def test_rebind_rejects_tampered_or_unverified_metrics(
     with pytest.raises(ValueError, match=message):
         updater.main()
     assert not output_md.exists()
+
+
+def test_rebind_preserves_measured_identity_and_metrics(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    payload = {
+        "source_event": "local_coverage_verify",
+        "source_commit": "a" * 40,
+        "source_run_id": "local-capture",
+        "source_tree_sha256": "previous-audited-tree",
+        "measurement_provenance": {
+            "head": "a" * 40,
+            "test_tree_sha256": "captured-tree",
+            "manifest_sha256": "captured-manifest",
+        },
+        "coverage": {"actual_percent": 99.0},
+        "duration_telemetry": {"total_cases": 17},
+    }
+    receipt = {
+        "schema_version": 1,
+        "source_commit": payload["source_commit"],
+        "source_run_id": payload["source_run_id"],
+        "source_tree_sha256": "captured-tree",
+        "manifest_sha256": "captured-manifest",
+        "metrics_sha256": provenance.telemetry_metrics_sha256(payload),
+    }
+    receipt_path = tmp_path / provenance.RECEIPT
+    receipt_path.parent.mkdir(parents=True)
+    receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+    baseline_path = tmp_path / "baseline.yaml"
+    baseline_path.write_text(yaml.safe_dump(payload), encoding="utf-8")
+    captured = {}
+    monkeypatch.setattr(updater, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(
+        updater,
+        "_parse_args",
+        lambda: SimpleNamespace(
+            rebind_current_tree=True,
+            local_manifest=None,
+            source_commit=None,
+            source_run_id=None,
+            source_run_url=None,
+            source_branch="main",
+            source_event="push",
+            coverage_percent=None,
+            coverage_xml=updater.CANONICAL_COVERAGE_XML,
+            coverage_log=None,
+            slowest_json=updater.CANONICAL_SLOWEST_TESTS_JSON,
+            junit=[],
+            coverage_threshold=None,
+            output_yaml=baseline_path,
+            output_md=tmp_path / "baseline.md",
+        ),
+    )
+    monkeypatch.setattr(
+        "scripts.engineering.common.repo_paths.resolve_output_path", Path
+    )
+    monkeypatch.setattr(provenance, "source_commit_is_reachable", lambda *_: True)
+    monkeypatch.setattr(subprocess, "check_output", lambda *_args, **_kwargs: "b" * 40)
+    monkeypatch.setattr(
+        updater, "compute_test_telemetry_source_tree_sha256", lambda: "current-tree"
+    )
+    monkeypatch.setattr(
+        updater,
+        "write_baseline_outputs",
+        lambda **kwargs: captured.update(copy.deepcopy(kwargs["payload"])),
+    )
+
+    assert updater.main() == 0
+    assert captured["source_tree_sha256"] == "current-tree"
+    for field in (
+        "source_commit",
+        "source_run_id",
+        "measurement_provenance",
+        "coverage",
+        "duration_telemetry",
+    ):
+        assert captured[field] == payload[field]
+    assert json.loads(receipt_path.read_text(encoding="utf-8")) == receipt
