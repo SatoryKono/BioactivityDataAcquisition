@@ -19,6 +19,7 @@ from scripts.engineering.common.repo_paths import REPO_ROOT
 BRANCH_TELEMETRY_DIR = Path("reports/test-telemetry")
 CANONICAL_COVERAGE_XML = "reports/coverage/coverage.xml"
 CANONICAL_SLOWEST_TESTS_JSON = "reports/test-telemetry/slowest-tests.json"
+DEFAULT_COVERAGE_THRESHOLD = 85.0
 TELEMETRY_FRESHNESS_MAX_AGE_DAYS = 45
 UNKNOWN_LABEL = "<unknown>"
 SUPPORTED_SOURCE_EVENTS = (
@@ -155,7 +156,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--coverage-threshold",
         type=float,
-        default=85.0,
+        default=None,
         help="Canonical hard coverage threshold enforced in CI.",
     )
     return parser.parse_args()
@@ -794,7 +795,7 @@ def main() -> int:
                 args.coverage_log,
                 args.slowest_json != CANONICAL_SLOWEST_TESTS_JSON,
                 args.junit,
-                args.coverage_threshold != 85.0,
+                args.coverage_threshold is not None,
             )
         ):
             raise ValueError("Rebind uses only the existing verified capture")
@@ -856,7 +857,11 @@ def main() -> int:
             source_run_id=args.source_run_id,
             source_event=args.source_event,
             source_run_url=args.source_run_url,
-            coverage_threshold=args.coverage_threshold,
+            coverage_threshold=(
+                args.coverage_threshold
+                if args.coverage_threshold is not None
+                else DEFAULT_COVERAGE_THRESHOLD
+            ),
             source_tree_sha256=compute_test_telemetry_source_tree_sha256(),
         )
     payload = merge_existing_baseline_supplemental_fields(
