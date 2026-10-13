@@ -12,7 +12,7 @@
   "current_metrics": {
     "repo_uncovered_module_count": 0,
     "repo_unmeasured_module_count": 0,
-    "application_core_covered_line_percent": 99.79,
+    "application_core_covered_line_percent": 99.86,
     "application_core_uncovered_module_count": 0,
     "application_core_unmeasured_module_count": 0
   },
@@ -36,6 +36,17 @@
   },
   "notes": "Current metrics are rebound to the accepted module inventory. Historical measurements, baseline, and earlier closeout notes are preserved in previous_current_bindings. This does not claim fresh global measured nonregression.",
   "previous_current_bindings": [
+    {
+      "snapshot_date": "2026-10-13",
+      "current_metrics": {
+        "repo_uncovered_module_count": 0,
+        "repo_unmeasured_module_count": 0,
+        "application_core_covered_line_percent": 99.79,
+        "application_core_uncovered_module_count": 0,
+        "application_core_unmeasured_module_count": 0
+      },
+      "notes": "Previous accepted inventory binding before the measured FS-001 additive coverage adoption."
+    },
     {
       "snapshot_date": "2026-08-17",
       "current_metrics": {
