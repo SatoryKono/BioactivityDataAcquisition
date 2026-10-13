@@ -27,7 +27,21 @@ CANONICAL_FILTER_HEADERS: tuple[str, ...] = (
     "ncbi-sid",
     "ncbi-phid",
 )
-CANONICAL_FILTER_QUERY_PARAMETERS: tuple[str, ...] = ("api_key", "key")
+CANONICAL_FILTER_QUERY_PARAMETERS: tuple[str, ...] = (
+    "api_key",
+    "key",
+    "apikey",
+    "token",
+    "access_token",
+    "refresh_token",
+    "ncbi_sid",
+    "ncbi_phid",
+    "ncbi-sid",
+    "ncbi-phid",
+    "session_id",
+    "sessionid",
+    "session_token",
+)
 CANONICAL_RESPONSE_FILTER_HEADERS: frozenset[str] = frozenset(
     (*CANONICAL_FILTER_HEADERS, "set-cookie", "set-cookie2")
 )

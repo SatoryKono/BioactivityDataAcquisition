@@ -130,7 +130,7 @@ def test_missing_or_empty_root_fails_closed(
     assert checker.main() != 0
 
 
-@pytest.mark.parametrize("style", ["block", "quoted", "flow"])
+@pytest.mark.parametrize("style", ["block", "quoted", "flow", "merge"])
 def test_tracked_cassette_outside_canonical_directory_is_scanned(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -147,6 +147,12 @@ def test_tracked_cassette_outside_canonical_directory_is_scanned(
         content = content.replace("interactions:", '"interactions":', 1)
     elif style == "flow":
         content = yaml.safe_dump(yaml.safe_load(content), default_flow_style=True)
+    elif style == "merge":
+        content = (
+            "defaults: &cassette\n"
+            + "".join("  " + line + "\n" for line in content.splitlines())
+            + "<<: *cassette\n"
+        )
     outside.write_text(content, encoding="utf-8")
     subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True, capture_output=True)
     subprocess.run(

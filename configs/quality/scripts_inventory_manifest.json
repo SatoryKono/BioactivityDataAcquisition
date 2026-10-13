@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-10T11:28:53.180482+00:00",
+  "generated_at": "2026-10-13T07:35:25.549687+00:00",
   "summary": {
     "total_scripts": 648,
     "status_counts": {
@@ -10246,7 +10246,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 26,
+          "line": 28,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -15482,7 +15482,7 @@
         },
         {
           "path": "tests/unit/scripts/qa/test_report_architecture_debt_remote_main_baseline.py",
-          "line": 19,
+          "line": 20,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import ("
         }
@@ -17808,7 +17808,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/engineering/qa/vcr/__main__.py",
@@ -17821,6 +17821,12 @@
           "line": 12,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.vcr.check_vcr_secrets import _looks_redacted"
+        },
+        {
+          "path": "tests/unit/scripts/qa/test_check_vcr_secrets.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.vcr import check_vcr_secrets as checker"
         }
       ]
     },
@@ -22930,7 +22936,7 @@
         },
         {
           "path": "docs/04-reference/environment-variables.md",
-          "line": 53,
+          "line": 57,
           "source_group": "docs",
           "text": "| `BIOETL_RUNTIME_SOURCE_ID` | Managed runtime source identity (injected by runtime_manager.py) | No |"
         },

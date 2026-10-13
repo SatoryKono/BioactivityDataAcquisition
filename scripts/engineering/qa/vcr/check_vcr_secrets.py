@@ -253,6 +253,25 @@ def _tracked_yaml_paths() -> list[Path]:
     return [ROOT / os.fsdecode(item) for item in result.stdout.split(b"\0") if item]
 
 
+def _has_interactions(node: yaml.Node, active: frozenset[int] = frozenset()) -> bool:
+    if id(node) in active:
+        return True  # Route cyclic merges to the strict parser.
+    active = active | {id(node)}
+    if isinstance(node, yaml.SequenceNode):
+        return any(_has_interactions(item, active) for item in node.value)
+    if not isinstance(node, yaml.MappingNode):
+        return False
+    for key, value in node.value:
+        if isinstance(key, yaml.ScalarNode):
+            if key.value == "interactions":
+                return True
+            if key.tag == "tag:yaml.org,2002:merge" and _has_interactions(
+                value, active
+            ):
+                return True
+    return False
+
+
 def _candidate(path: Path, raw: bytes) -> bool:
     if path.is_relative_to(VCR_ROOT):
         return True
@@ -261,10 +280,7 @@ def _candidate(path: Path, raw: bytes) -> bool:
         return True
     try:
         for document in yaml.compose_all(raw, Loader=yaml.SafeLoader):
-            if isinstance(document, yaml.MappingNode) and any(
-                isinstance(key, yaml.ScalarNode) and key.value == "interactions"
-                for key, _ in document.value
-            ):
+            if isinstance(document, yaml.MappingNode) and _has_interactions(document):
                 return True
     except (yaml.YAMLError, UnicodeError, ValueError, TypeError, RecursionError):
         # An unreadable YAML structure cannot prove that the file is unrelated.

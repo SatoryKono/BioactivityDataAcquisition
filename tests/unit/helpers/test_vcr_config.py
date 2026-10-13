@@ -406,3 +406,34 @@ def test_ncbi_session_headers_are_filtered_on_both_sides(header: str) -> None:
     assert sanitized_response["headers"] == {"Content-Type": ["application/json"]}
     assert sanitized_response["body"] == response["body"]
     assert response["headers"][header] == ["synthetic-session"]
+
+
+@pytest.mark.parametrize(
+    "key",
+    [
+        "apikey",
+        "token",
+        "access_token",
+        "refresh_token",
+        "ncbi_sid",
+        "ncbi_phid",
+        "ncbi-sid",
+        "ncbi-phid",
+        "session_id",
+        "sessionid",
+        "session_token",
+    ],
+)
+def test_sensitive_query_fields_are_unconditionally_removed(key: str) -> None:
+    from urllib.parse import parse_qsl, urlsplit
+
+    config = build_base_vcr_config(filter_query_parameters=["extra"])
+    request_hook = cast(Callable[[Any], Any], config["before_record_request"])
+    request = Request(
+        "GET",
+        f"https://example.org/search?{key.upper()}=synthetic-session&{key}=second-secret&extra=hidden&term=protein",
+        b"",
+        {},
+    )
+    sanitized = request_hook(request)
+    assert parse_qsl(urlsplit(sanitized.uri).query) == [("term", "protein")]
