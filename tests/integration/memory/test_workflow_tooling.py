@@ -147,6 +147,47 @@ def test_pre_task_workflow_creates_session_note_and_uses_local_surfaces(
     assert note.metadata["query"] == "chembl_activity"
 
 
+def test_pre_task_returns_multiword_rag_match_across_title_and_content(
+    tmp_path: Path,
+) -> None:
+    chunks_path = tmp_path / "chunks.jsonl"
+    write_test_rag_manifest(
+        chunks_path,
+        [
+            {
+                "id": "chunk-telemetry",
+                "title": "Telemetry",
+                "content": "The capture records provenance.",
+                "source_path": "docs/05-engineering/telemetry.md",
+                "source_type": "doc",
+                "domain": "project",
+                "repo_zone": "canonical_project_docs",
+                "symbol_kind": "markdown_section",
+            }
+        ],
+    )
+    events_dir = tmp_path / "events"
+    events_dir.mkdir()
+    (events_dir / "runs.jsonl").write_text(
+        '{"id":"run-1","event_type":"run.manifest_registered"}\n',
+        encoding="utf-8",
+    )
+
+    payload = workflow.pre_task_workflow(
+        task_id="multiword-rag",
+        title="Telemetry provenance",
+        query="telemetry provenance",
+        source_refs=[],
+        create_session_note=False,
+        chunks_path=chunks_path,
+        events_dir=events_dir,
+        run_refresh_if_missing=False,
+    )
+
+    assert payload["ok"] is True
+    assert payload["retrieval"]["results"]["rag"][0]["id"] == "chunk-telemetry"
+
+
 def test_emit_returns_nonzero_for_failed_payload(capsys) -> None:
     exit_code = workflow._emit({"kind": "diagnostic", "ok": False}, as_json=True)
 

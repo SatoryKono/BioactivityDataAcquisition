@@ -9,7 +9,10 @@ from memory.rag.validation import (
     capture_rag_git_identity,
     validate_rag_manifest_files,
 )
-from memory.timeline._common import TIMELINE_MANIFEST_NAME
+from memory.timeline._common import (
+    TIMELINE_MANIFEST_NAME,
+    timeline_source_surface_sha256,
+)
 
 
 def _discover_repo_root(path: Path) -> Path | None:
@@ -95,7 +98,7 @@ def timeline_events_ready(events_dir: Path, *, repo_root: Path | None = None) ->
             _valid_timeline_jsonl(path) for path in event_files
         )
     entries = manifest.get("files")
-    if manifest.get("schema_version") != 1 or not isinstance(entries, list):
+    if manifest.get("schema_version") != 2 or not isinstance(entries, list):
         return False
     if not _timeline_manifest_files_valid(events_dir, event_files, entries):
         return False
@@ -139,6 +142,8 @@ def _timeline_manifest_matches_repository(
         manifest.get("git_head_sha") == current["git_head_sha"]
         and manifest.get("working_tree_state") == "clean"
         and current["working_tree_state"] == "clean"
+        and manifest.get("source_surface_sha256")
+        == timeline_source_surface_sha256(resolved_root)
     )
 
 

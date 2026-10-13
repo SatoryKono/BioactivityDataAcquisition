@@ -22,7 +22,7 @@ from memory.rag.chunking import (
 from memory.rag import indexing as rag_indexing
 from memory.rag.filters import WORKFLOW_RAG_SOURCE_IDS, iter_rag_sources
 from memory.rag.indexing import build_rag_manifests, write_rag_manifests
-from memory.rag.retrieval import filter_chunks, load_chunk_manifest
+from memory.rag.retrieval import filter_chunks, load_chunk_manifest, rank_chunks
 
 
 pytestmark = pytest.mark.unit
@@ -639,6 +639,23 @@ def test_workflow_scope_prefers_symbol_definition_over_references() -> None:
         max_sources=160,
     )
     assert Path("src/bioetl/domain/ports/observability/logging.py") in selected
+
+
+def test_workflow_scope_multiword_query_returns_rag_chunks(tmp_path: Path) -> None:
+    source = tmp_path / "docs/00-project/telemetry.md"
+    source.parent.mkdir(parents=True)
+    source.write_text(
+        "# Telemetry\nThe capture records provenance.\n", encoding="utf-8"
+    )
+    catalog, chunks = build_rag_manifests(
+        tmp_path,
+        build_scope="workflow",
+        focus_query="telemetry provenance",
+        max_sources=1,
+    )
+
+    assert catalog["source_count"] == 1
+    assert rank_chunks(chunks, query="telemetry provenance")
 
 
 def test_workflow_scope_git_search_includes_eligible_untracked_sources(
