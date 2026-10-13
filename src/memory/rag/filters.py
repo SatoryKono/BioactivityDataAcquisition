@@ -212,6 +212,7 @@ def _workflow_focus_score(
     source_id: str,
     rel_path: str,
     focus_tokens: tuple[str, ...],
+    content_matches: set[str],
     priority_index: dict[str, int],
 ) -> tuple[int, int, str]:
     lowered_path = rel_path.lower()
@@ -220,7 +221,59 @@ def _workflow_focus_score(
         1 if any(f"/{token}" in lowered_path for token in focus_tokens) else 0
     )
     source_priority = priority_index.get(source_id, len(priority_index))
-    return (-(token_hits + direct_bonus), source_priority, rel_path)
+    content_bonus = 3 if rel_path in content_matches else 0
+    return (-(token_hits + direct_bonus + content_bonus), source_priority, rel_path)
+
+
+def _content_focus_paths(
+    root: Path,
+    entries: list[tuple[str, Path]],
+    focus_tokens: tuple[str, ...],
+    selected_ids: tuple[str, ...],
+) -> set[str]:
+    """Find eligible sources mentioning the query before applying the source cap."""
+    eligible = {path.as_posix() for _, path in entries}
+    if not focus_tokens:
+        return set()
+    if (root / ".git").exists():
+        specs = tuple(
+            dict.fromkeys(
+                base.as_posix()
+                for _, base in _load_source_specs(selected_ids=selected_ids)
+            )
+        )
+        try:
+            result = subprocess.run(
+                [
+                    "git",
+                    "grep",
+                    "-i",
+                    "-l",
+                    "-F",
+                    *(arg for token in focus_tokens for arg in ("-e", token)),
+                    "--",
+                    *specs,
+                ],
+                cwd=root,
+                check=False,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+            )
+            if result.returncode in {0, 1}:
+                return set(result.stdout.splitlines()) & eligible
+        except OSError:
+            pass
+    matches = set()
+    for rel_path in eligible:
+        try:
+            content = (root / rel_path).read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        if any(token in content.lower() for token in focus_tokens):
+            matches.add(rel_path)
+    return matches
 
 
 def iter_rag_sources(
@@ -258,12 +311,16 @@ def iter_rag_sources(
         source_id: index for index, source_id in enumerate(priority_order)
     }
     if focus_tokens:
+        content_matches = _content_focus_paths(
+            root, entries, focus_tokens, selected_ids
+        )
         ranked_entries = sorted(
             entries,
             key=lambda item: _workflow_focus_score(
                 source_id=item[0],
                 rel_path=item[1].as_posix(),
                 focus_tokens=focus_tokens,
+                content_matches=content_matches,
                 priority_index=priority_index,
             ),
         )

@@ -76,6 +76,11 @@ def _parse_args() -> argparse.Namespace:
         help="Complete canonical 17-shard manifest; derives local identity and all inputs.",
     )
     parser.add_argument(
+        "--rebind-current-tree",
+        action="store_true",
+        help="Rehash current audited test inputs while preserving a verified captured run.",
+    )
+    parser.add_argument(
         "--coverage-xml",
         default="reports/coverage/coverage.xml",
         help="Path to coverage XML produced by coverage-verify.",
@@ -509,12 +514,25 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
         "- Continuous identity is `source_tree_sha256` over `tests/**/*.py`,",
         "  `pyproject.toml`, `configs/quality/test_matrix.yaml`, and",
         "  `.github/workflows/tests.yml`.",
+        "- `measurement_provenance.head` and `test_tree_sha256` retain the captured",
+        "  run identity when the current audited test tree advances later.",
         "- Freshness uses live UTC (injectable via `BIOETL_TELEMETRY_REFERENCE_NOW`)",
         "  and rejects future/stale `refreshed_at_utc` values.",
         "- `source_commit` must remain an ancestor of HEAD or have a reviewed squash",
         "  bridge in `reports/test-telemetry/squash-provenance.json`. A bridge keeps",
         "  the real captured source/run and requires equal PR/merge trees, source",
         "  ancestry in the PR, merge ancestry in HEAD and unchanged runtime/test inputs.",
+        "- Reviewed squash receipts retain hash-verified Git commit/tree objects",
+        "  for offline validation when old PR commits are absent from a fresh clone.",
+        "- To produce a receipt for an existing local capture, run",
+        "  `python -m scripts.engineering.ci.test_telemetry_provenance --measurement-repo-root",
+        "  <original-worktree> --local-manifest <manifest.json> --pull-request <merged-PR>`.",
+        "  The generator validates the complete 17-shard capture and reads the merged",
+        "  PR mapping before writing the bridge. Keep the original capture available.",
+        "- After validating the bridge, run",
+        "  `python -m scripts.engineering.ci.update_test_telemetry_baseline",
+        "  --rebind-current-tree`, then the coupled `refresh-ci-drift-families`",
+        "  update/check for test-gov, flaky-fingerprint, telemetry and evidence.",
         "- New captures use `verification_mode: live_github`: resolve the recorded",
         "  PR's actual merge with read-only GitHub GETs after squash. Never stamp a",
         "  future merge SHA. API failure, unmerged PRs, changed inputs and incomplete",
@@ -756,6 +774,47 @@ def main() -> int:
     from scripts.engineering.common.repo_paths import resolve_output_path
 
     args = _parse_args()
+    if args.rebind_current_tree:
+        import subprocess
+
+        from scripts.engineering.ci.test_telemetry_provenance import (
+            source_commit_is_reachable,
+        )
+
+        if any(
+            (
+                args.local_manifest,
+                args.source_commit,
+                args.source_run_id,
+                args.source_run_url,
+                args.source_branch != "main",
+                args.source_event != "push",
+                args.coverage_percent is not None,
+                args.coverage_xml != CANONICAL_COVERAGE_XML,
+                args.coverage_log,
+                args.slowest_json != CANONICAL_SLOWEST_TESTS_JSON,
+                args.junit,
+                args.coverage_threshold != 85.0,
+            )
+        ):
+            raise ValueError("Rebind uses only the existing verified capture")
+        output_yaml_path = resolve_output_path(args.output_yaml)
+        output_md_path = resolve_output_path(args.output_md)
+        payload = yaml.safe_load(output_yaml_path.read_text(encoding="utf-8"))
+        head = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, text=True
+        ).strip()
+        if not source_commit_is_reachable(payload, REPO_ROOT, head):
+            raise ValueError(
+                "Captured run lacks proven ancestry or reviewed squash bridge"
+            )
+        payload["source_tree_sha256"] = compute_test_telemetry_source_tree_sha256()
+        write_baseline_outputs(
+            payload=payload,
+            output_yaml_path=output_yaml_path,
+            output_md_path=output_md_path,
+        )
+        return 0
     if args.source_event == "local_coverage_verify" and not args.local_manifest:
         raise ValueError("local_coverage_verify requires --local-manifest")
     coverage_xml_path = resolve_output_path(args.coverage_xml)
