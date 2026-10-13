@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-13T01:22:29.659840+00:00",
+  "generated_at": "2026-10-13T04:59:30.093731+00:00",
   "summary": {
     "total_scripts": 648,
     "status_counts": {
@@ -15482,7 +15482,7 @@
         },
         {
           "path": "tests/unit/scripts/qa/test_report_architecture_debt_remote_main_baseline.py",
-          "line": 19,
+          "line": 20,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import ("
         }
@@ -22930,7 +22930,7 @@
         },
         {
           "path": "docs/04-reference/environment-variables.md",
-          "line": 53,
+          "line": 57,
           "source_group": "docs",
           "text": "| `BIOETL_RUNTIME_SOURCE_ID` | Managed runtime source identity (injected by runtime_manager.py) | No |"
         },
