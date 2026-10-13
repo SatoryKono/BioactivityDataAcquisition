@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.composition.factories.pipeline import _runner_preflight_observer as subject
-from bioetl.composition.factories.services import _preflight as preflight_subject
+from bioetl.composition.factories.services import preflight as preflight_subject
 
 pytestmark = pytest.mark.unit
 
@@ -53,7 +53,7 @@ def test_build_preflight_service_wires_health_and_medallion(
         lambda **kwargs: captured.setdefault("health", SimpleNamespace(**kwargs)),
     )
     monkeypatch.setattr(
-        preflight_subject,
+        subject,
         "build_preflight_health_monitor",
         lambda metrics: captured.setdefault("monitor", metrics),
     )
@@ -71,7 +71,7 @@ def test_build_preflight_service_wires_health_and_medallion(
     monkeypatch.setattr(preflight_subject, "SystemClock", lambda: "clock")
 
     context = _context()
-    result = preflight_subject.build_preflight_service(context)
+    result = subject.build_preflight_service(context)
     assert result is captured["service"]
     assert captured["monitor"] is context.pipeline.services.metrics
     assert captured["health"].clock == "clock"
