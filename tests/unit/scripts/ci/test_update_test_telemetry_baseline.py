@@ -755,6 +755,26 @@ def test_nested_testsuites_wrapper_preserves_non_overlapping_wall_time(
     assert summary["execution_context"]["lane_wall_time_s"] == {"nested.xml": 7.0}
 
 
+@pytest.mark.parametrize("duration", ["NaN", "inf", "-1", "not-a-number"])
+@pytest.mark.parametrize("wrapper", [False, True])
+def test_nested_suite_and_wrapper_reject_invalid_time(
+    tmp_path: Path, duration: str, wrapper: bool
+) -> None:
+    path = tmp_path / "invalid-nested-time.xml"
+    inner = '<testsuite tests="1" time="2"><testcase name="one" /></testsuite>'
+    if wrapper:
+        xml = f'<testsuites time="{duration}">{inner}</testsuites>'
+    else:
+        xml = (
+            '<testsuite tests="1" time="2">'
+            f'<testsuite tests="1" time="{duration}"><testcase name="one" />'
+            "</testsuite></testsuite>"
+        )
+    path.write_text(xml, encoding="utf-8")
+    with pytest.raises(ValueError, match="Invalid JUnit"):
+        _derive_slowest_summary_from_junit_paths([path])
+
+
 def test_duplicate_junit_paths_and_ambiguous_source_names_fail_closed(
     tmp_path: Path,
 ) -> None:

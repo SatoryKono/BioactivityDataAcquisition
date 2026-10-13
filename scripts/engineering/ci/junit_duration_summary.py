@@ -71,6 +71,7 @@ def _validated_cases(path: Path) -> tuple[ET.Element, list[ET.Element]]:
         raise ValueError(f"Unsupported JUnit root in {path}: {root.tag}")
 
     def check(node: ET.Element) -> list[ET.Element]:
+        _nonnegative_duration(node.get("time"), node.tag, path)
         cases = list(node.findall("testcase"))
         for child in node:
             if child.tag in {"testsuite", "testsuites"}:
