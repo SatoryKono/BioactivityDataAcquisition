@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-10-13'
+  Last verified: '2026-10-14'
 
 ______________________________________________________________________
 
@@ -32,7 +32,7 @@ trend evidence only.
 - Source run id: `local-coverage`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `df7eeef45abe70bca812b86cd1bb652d7d1b8afecbf9cbc2d3d20e2a5e6aca22`
+- Source tree sha256: `859fd69202228f3e73c633eeae2c2756867a6d36d2f0f4d76f4f6b277120ea21`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-10-13T11:39:16.320446+00:00`
 
