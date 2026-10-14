@@ -1,8 +1,8 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: Postrun Retention Deduplication And Vacuum Warning Path
-%% @version 1.1.0
-%% @date    2026-10-09
-%% Reviewed against main 9a7339dc: storage/support/retention.py, retention_dedup.py; core/postrun/compact_orchestrator.py
+%% @version 1.1.1
+%% @date    2026-10-14
+%% Reviewed against eb89071531: storage/support/retention.py, retention_dedup.py; core/postrun/compact_orchestrator.py
 %% @type    sequenceDiagram
 %% @level   System / Interaction
 %% @nodes   7
@@ -36,7 +36,7 @@ sequenceDiagram
         Retention-->>Service: duplicates removed
         Service->>Retention: storage.optimize(table)
     else TimeoutError
-        Delta-->>Retention: timeout
+        Retention-->>Service: raise TimeoutError after deduplication exceeds timeout
         Service->>Warn: check allowlist
         Warn-->>Service: log warning and return CompactionResult failed
     end
