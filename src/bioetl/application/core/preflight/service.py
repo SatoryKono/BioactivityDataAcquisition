@@ -200,7 +200,7 @@ class PreflightService:
         write_mode_errors = self.validate_write_modes()
         config_errors.extend(write_mode_errors)
         medallion_policy_valid = len(config_errors) == 0
-        if config_errors:
+        if config_errors and runtime.strict_validation:
             report = PreflightReport(
                 health_report=HealthReport(results=[]),
                 medallion_policy_valid=False,
