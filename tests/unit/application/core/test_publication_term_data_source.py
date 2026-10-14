@@ -41,7 +41,13 @@ from bioetl.application.core.publication_term_enrichment import _attach_pubmed_p
 from bioetl.application.core.publication_term_runtime import (
     extract_terms_from_publication,
 )
-from bioetl.domain.exceptions import BioETLError
+from bioetl.domain.exceptions import (
+    BioETLError,
+    CriticalError,
+    InvalidStateError,
+    PolicyViolationError,
+    RecoverableError,
+)
 from bioetl.domain.types import HealthStatus
 
 
@@ -990,7 +996,7 @@ class TestPublicationTermPubmedEnricherHook:
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
-        "error_type", [BioETLError, OSError, RuntimeError, ValueError]
+        "error_type", [RecoverableError, OSError, RuntimeError, ValueError]
     )
     async def test_expected_enrichment_failure_preserves_original_records(
         self, error_type
@@ -1049,10 +1055,14 @@ class TestPublicationTermPubmedEnricherHook:
         assert enricher.enrich_many.await_args_list[1].args == ([later_record],)
 
     @pytest.mark.asyncio
-    async def test_enrichment_programming_error_propagates(self):
-        """Programming errors escape the optional enrichment fallback."""
+    @pytest.mark.parametrize(
+        "error_type",
+        [TypeError, BioETLError, CriticalError, InvalidStateError, PolicyViolationError],
+    )
+    async def test_enrichment_programming_error_propagates(self, error_type):
+        """Programming and invariant errors escape optional enrichment fallback."""
         enricher = AsyncMock()
-        enricher.enrich_many.side_effect = TypeError("invalid provider contract")
+        enricher.enrich_many.side_effect = error_type("invalid provider contract")
         wrapper = PublicationTermDataSource(
             data_source=MockDataSource(
                 documents=[{"publication_id": "CHEMBL1", "pubmed_id": "1"}]
@@ -1060,7 +1070,7 @@ class TestPublicationTermPubmedEnricherHook:
             term_payload_enricher=enricher,
         )
 
-        with pytest.raises(TypeError, match="invalid provider contract"):
+        with pytest.raises(error_type, match="invalid provider contract"):
             await _collect_async(wrapper.fetch("publication_term"))
 
     @pytest.mark.asyncio
