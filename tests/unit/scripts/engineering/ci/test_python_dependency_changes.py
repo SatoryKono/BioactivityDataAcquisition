@@ -1,5 +1,7 @@
 """Source-only dependency selection without collecting or running the suite."""
 
+from __future__ import annotations
+
 from pathlib import Path
 from types import SimpleNamespace
 
