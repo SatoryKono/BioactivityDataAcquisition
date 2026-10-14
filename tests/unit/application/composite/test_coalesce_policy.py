@@ -24,7 +24,7 @@
 # pyright: reportFunctionMemberAccess=false
 # pyright: reportConstantRedefinition=false
 # pyright: reportInvalidTypeForm=false
-# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+# PD5 test mock/fixture surface â€” product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Unit tests for CoalescePolicyService."""
 
 from __future__ import annotations
@@ -121,7 +121,7 @@ def test_can_coalesce_handles_same_null_and_list_types() -> None:
 
 
 @pytest.mark.unit
-def test_coalesce_prefer_seed_coalesces_only_large_field_groups(
+def test_coalesce_prefer_seed_coalesces_each_duplicate_field_group(
     policy: CoalescePolicyService,
 ) -> None:
     df = pl.DataFrame(
@@ -143,7 +143,26 @@ def test_coalesce_prefer_seed_coalesces_only_large_field_groups(
     assert "chembl.publication.title" in result.columns
     assert "crossref.publication.title" not in result.columns
     assert result["chembl.publication.title"][0] == "crossref"
-    assert "crossref.publication.year" in result.columns
+    assert "crossref.publication.year" not in result.columns
+    assert result["chembl.publication.year"].to_list() == [2020]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("source_count", [2, 3, 4])
+def test_coalesce_first_non_null_merges_small_groups(
+    policy: CoalescePolicyService, source_count: int
+) -> None:
+    providers = ("chembl", "crossref", "openalex", "pubmed")[:source_count]
+    data = {
+        f"{provider}.publication.title": [None, provider, None]
+        for provider in providers
+    }
+    data["crossref.publication.title"][0] = "fallback"
+    result = policy.coalesce_first_non_null(
+        pl.DataFrame(data), enrichers=(), seed_pipeline="chembl_publication"
+    )
+    assert result.columns == ["chembl.publication.title"]
+    assert result["chembl.publication.title"].to_list() == ["fallback", "chembl", None]
 
 
 @pytest.mark.unit

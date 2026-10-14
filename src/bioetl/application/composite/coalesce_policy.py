@@ -97,7 +97,7 @@ class CoalescePolicyService:
         field_groups = build_field_groups(result)
 
         for columns in field_groups.values():
-            if len(columns) <= 4:
+            if len(columns) <= 1:
                 continue
 
             sorted_cols = sort_columns(
