@@ -15,8 +15,6 @@ pytestmark = pytest.mark.unit
 
 HEAD = "a" * 40
 
-pytestmark = pytest.mark.repo_backed
-
 
 def test_not_applicable_gate_does_not_inherit_job_success() -> None:
     """Keep a nonapplicable gate skipped even when its owner job succeeds."""
