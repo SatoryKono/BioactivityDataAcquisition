@@ -292,7 +292,7 @@ class PubchemMolecule(BaseEntity):
             raise ValueError("PubchemMolecule molecule_id is required")
 
         # Invariant: At least one structural representation should be present
-        # ⚡ Bolt: tuple over list avoids memory allocation overhead (~38% faster), avoiding OR chain to respect CC limits
+        # ⚡ Bolt: tuple over list avoids memory allocation overhead (~38% faster)
         if not any((self.canonical_smiles, self.isomeric_smiles, self.inchi)):
             raise ValueError(
                 "PubchemMolecule must have at least one structural identifier "
