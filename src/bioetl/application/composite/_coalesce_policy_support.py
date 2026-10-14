@@ -52,7 +52,7 @@ class _ColumnPriorityProvider(Protocol):
 
 def extract_field_from_qualified(column: str) -> str:
     """Extract field name from qualified column (x.y.z -> z)."""
-    parts = column.split(".")
+    parts = column.split(".", 2)
     if len(parts) == 3:
         return parts[2]
     return column
@@ -95,7 +95,7 @@ def build_field_groups(
         if col.startswith("_"):
             continue
         field = extract_field_from_qualified(col)
-        if entity_scoped and len(col.split(".")) == 3:
+        if entity_scoped and len(col.split(".", 2)) == 3:
             field = col.split(".", 1)[1]
         field_groups.setdefault(field, []).append(col)
     if entity_scoped:
@@ -121,8 +121,8 @@ def sort_columns(
     """Sort columns with either seed-first or enricher-first strategy."""
 
     def sort_key(col: str) -> tuple[int, str]:
-        is_seed = (
-            col.startswith(seed_prefix_value) if seed_prefix_value else "." not in col
+        is_seed = "." not in col or bool(
+            seed_prefix_value and col.startswith(seed_prefix_value)
         )
         priority = int(is_seed != prefer_seed)
         return (priority, col)
@@ -134,7 +134,9 @@ def compatible_columns(
     df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
     ordered_cols: list[str],
 ) -> list[str]:
-    """Keep the leading column and mutually type-compatible candidates."""
+    """Keep candidates only when the complete group has a valid supertype."""
+    import polars as pl
+
     if not ordered_cols:
         return []
 
@@ -142,6 +144,10 @@ def compatible_columns(
     result = [base_col]
     for col in ordered_cols[1:]:
         if all(can_coalesce(df, selected, col) for selected in result):
+            try:
+                df.lazy().select(pl.coalesce(*result, col)).collect_schema()
+            except (pl.exceptions.SchemaError, pl.exceptions.InvalidOperationError):
+                continue
             result.append(col)
     return result
 

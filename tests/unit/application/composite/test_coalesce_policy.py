@@ -643,3 +643,77 @@ def test_small_group_preserves_incompatible_scalar_dtypes(
     )
     result = policy.coalesce_prefer_seed(df, (), "chembl_publication")
     assert result.equals(df)
+
+
+@pytest.mark.unit
+def test_coalesce_checks_supertype_of_entire_group(
+    policy: CoalescePolicyService,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original_coalesce = pl.coalesce
+
+    def reject_three_way_supertype(*columns):
+        # Polars versions differ in whether this trio promotes to Float64 or
+        # rejects Int128 + Date. Exercise the rejecting planner deterministically.
+        if len(columns) == 3:
+            raise pl.exceptions.SchemaError(
+                "failed to determine supertype of i128 and date"
+            )
+        return original_coalesce(*columns)
+
+    monkeypatch.setattr(pl, "coalesce", reject_three_way_supertype)
+    df = pl.DataFrame(
+        {
+            "chembl.publication.value": pl.Series([None, 1], dtype=pl.Int64),
+            "crossref.publication.value": pl.Series([2, None], dtype=pl.UInt64),
+            "openalex.publication.value": pl.Series([None, None], dtype=pl.Date),
+        }
+    )
+    result = policy.coalesce_prefer_seed(df, (), "chembl_publication")
+    assert result["chembl.publication.value"].to_list() == [2, 1]
+    assert result["openalex.publication.value"].equals(df["openalex.publication.value"])
+    assert "crossref.publication.value" not in result.columns
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("field", ["title", "doi"])
+def test_coalesce_preserves_unqualified_seed_with_pipeline(
+    policy: CoalescePolicyService, field: str
+) -> None:
+    df = pl.DataFrame(
+        {
+            field: ["seed", None],
+            f"crossref.publication.{field}": ["enricher", "fallback"],
+        }
+    )
+    result = policy.coalesce_prefer_seed(df, (), "chembl_publication")
+    assert result.columns == [field]
+    assert result[field].to_list() == ["seed", "fallback"]
+    preferred = policy.coalesce_prefer_enricher(df, (), "chembl_publication")
+    assert preferred[f"crossref.publication.{field}"].to_list() == [
+        "enricher",
+        "fallback",
+    ]
+
+
+@pytest.mark.unit
+def test_coalesce_preserves_dotted_field_and_entity_identity(
+    policy: CoalescePolicyService,
+) -> None:
+    df = pl.DataFrame(
+        {
+            "chembl.publication.field.with.dots": [None, "seed"],
+            "crossref.publication.field.with.dots": ["fallback", "enricher"],
+            "chembl.activity.field.with.dots": ["activity", "activity"],
+        }
+    )
+    result = policy.coalesce_first_non_null(df, (), "chembl_publication")
+    assert result["chembl.publication.field.with.dots"].to_list() == [
+        "fallback",
+        "seed",
+    ]
+    assert result["chembl.activity.field.with.dots"].to_list() == [
+        "activity",
+        "activity",
+    ]
+    assert "crossref.publication.field.with.dots" not in result.columns
