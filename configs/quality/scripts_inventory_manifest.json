@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-14T05:38:09.590533+00:00",
+  "generated_at": "2026-10-14T18:43:47.927267+00:00",
   "summary": {
     "total_scripts": 651,
     "status_counts": {
@@ -11463,7 +11463,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 23,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -12954,7 +12954,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 402,
+      "reference_count": 403,
       "references": [
         {
           "path": ".circleci/config.yml",

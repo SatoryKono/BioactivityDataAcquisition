@@ -353,7 +353,9 @@ async def test_gold_writer_dual_write_postwrite_failure_preserves_committed_targ
             mode="append",
         )
 
-    assert caught.value.receipt.category == GoldWriteCategory.COMMITTED_POSTWRITE_PENDING
+    assert (
+        caught.value.receipt.category == GoldWriteCategory.COMMITTED_POSTWRITE_PENDING
+    )
     assert caught.value.receipt.committed_targets == ("chembl.activity__v1_0_0",)
     assert isinstance(caught.value.__cause__, RuntimeError)
     assert str(caught.value.__cause__) == "postwrite boom"
