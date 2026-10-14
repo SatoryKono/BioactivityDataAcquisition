@@ -995,6 +995,7 @@ class TestPublicationTermPubmedEnricherHook:
     async def test_expected_enrichment_failure_preserves_original_records(
         self, error_type
     ):
+        """Expected enrichment failures preserve the original publication records."""
         records = [
             {"publication_id": "CHEMBL1", "pubmed_id": "1"},
             SAMPLE_DOCUMENT_WITH_TERMS,
@@ -1013,6 +1014,7 @@ class TestPublicationTermPubmedEnricherHook:
     async def test_enrichment_failure_preserves_terms_and_continues_next_batch(
         self, monkeypatch
     ):
+        """A failed enrichment batch preserves terms and permits later batches."""
         monkeypatch.setattr(
             "bioetl.application.core.publication_term_enrichment."
             "PUBLICATION_TERM_PUBMED_ENRICH_BATCH_SIZE",
@@ -1048,6 +1050,7 @@ class TestPublicationTermPubmedEnricherHook:
 
     @pytest.mark.asyncio
     async def test_enrichment_programming_error_propagates(self):
+        """Programming errors escape the optional enrichment fallback."""
         enricher = AsyncMock()
         enricher.enrich_many.side_effect = TypeError("invalid provider contract")
         wrapper = PublicationTermDataSource(

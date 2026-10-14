@@ -43,6 +43,7 @@ async def _attach_pubmed_payloads(
     extract_terms: _ExtractTerms,
     enricher: PublicationTermEnrichmentPort,
 ) -> list[BronzeRecord]:
+    """Attach optional PubMed payloads, preserving originals on expected failures."""
     need = [
         record for record in records if _needs_pubmed_enrichment(record, extract_terms)
     ]

@@ -152,6 +152,8 @@ async def test_enrich_many_enters_pubmed_source_context() -> None:
 
 @pytest.mark.asyncio
 async def test_enrich_many_reraises_when_pubmed_fetch_fails() -> None:
+    """Provider fetch errors propagate to the caller fallback boundary."""
+
     class _FailingPubmed:
         async def fetch_filtered(self, **kwargs: object):
             raise RuntimeError("ncbi down")
