@@ -24,7 +24,7 @@
 # pyright: reportFunctionMemberAccess=false
 # pyright: reportConstantRedefinition=false
 # pyright: reportInvalidTypeForm=false
-# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+# PD5 test mock/fixture surface â€” product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Unit tests for the storage exception hierarchy."""
 
 from __future__ import annotations
@@ -68,32 +68,36 @@ def valid_record():
     }
 
 
+@pytest.fixture
+def storage_schema():
+    """Schema shared by storage exception paths, including required metadata."""
+    import pyarrow as pa
+
+    return pa.schema(
+        [
+            pa.field("id", pa.int64()),
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
+            pa.field("_ingestion_ts", pa.string()),
+        ]
+    )
+
+
 class TestSilverWriterExceptions:
     """Tests for exception handling in SilverWriter."""
 
     @pytest.mark.asyncio
     async def test_write_silver_raises_schema_violation_error_on_merge(
-        self, valid_record, noop_logger
+        self, valid_record, silver_writer, storage_schema
     ):
         """Test that SchemaViolationError is raised on merge."""
-        import pyarrow as pa
-
         # First call (schema check) raises TableNotFoundError, second call raises
         # SchemaMismatchError
         mock_delta_table = MagicMock(
             side_effect=[
                 TableNotFoundError("Not found"),  # Schema check (base_delta_writer)
                 SchemaMismatchError("Invalid schema"),  # Write attempt (silver_writer)
-            ]
-        )
-
-        schema = pa.schema(
-            [
-                pa.field("id", pa.int64()),
-                pa.field("_run_id", pa.string()),
-                pa.field("_run_type", pa.string()),
-                pa.field("_source_batch_id", pa.string()),
-                pa.field("_ingestion_ts", pa.string()),
             ]
         )
 
@@ -108,25 +112,17 @@ class TestSilverWriterExceptions:
                 mock_delta_table,
             ),
         ):
-            writer = SilverWriter(
-                runtime_request=SilverWriterRuntimeServicesRequest(
-                    clock=fixed_test_clock()
-                ),
-                base_path="/fake/path",
-                logger=noop_logger,
-            )
+            writer = silver_writer
             with pytest.raises(SchemaViolationError):
                 await writer.write_silver(
-                    "test.table", [valid_record], ["id"], schema=schema
+                    "test.table", [valid_record], ["id"], schema=storage_schema
                 )
 
     @pytest.mark.asyncio
     async def test_write_silver_raises_merge_conflict_error(
-        self, valid_record, noop_logger
+        self, valid_record, silver_writer, storage_schema
     ):
         """Test that MergeConflictError is raised."""
-        import pyarrow as pa
-
         mock_table_instance = MagicMock()
         mock_merge = MagicMock()
         mock_table_instance.merge.return_value = mock_merge
@@ -145,16 +141,6 @@ class TestSilverWriterExceptions:
             ]
         )
 
-        schema = pa.schema(
-            [
-                pa.field("id", pa.int64()),
-                pa.field("_run_id", pa.string()),
-                pa.field("_run_type", pa.string()),
-                pa.field("_source_batch_id", pa.string()),
-                pa.field("_ingestion_ts", pa.string()),
-            ]
-        )
-
         # Use same mock for both modules so side_effect list is shared
         with (
             patch(
@@ -166,34 +152,17 @@ class TestSilverWriterExceptions:
                 mock_delta_table,
             ),
         ):
-            writer = SilverWriter(
-                runtime_request=SilverWriterRuntimeServicesRequest(
-                    clock=fixed_test_clock()
-                ),
-                base_path="/fake/path",
-                logger=noop_logger,
-            )
+            writer = silver_writer
             with pytest.raises(MergeConflictError):
                 await writer.write_silver(
-                    "test.table", [valid_record], ["id"], schema=schema
+                    "test.table", [valid_record], ["id"], schema=storage_schema
                 )
 
     @pytest.mark.asyncio
     async def test_write_silver_raises_schema_error_on_create(
-        self, valid_record, noop_logger, tmp_path
+        self, valid_record, noop_logger, tmp_path, storage_schema
     ):
         """Test SchemaViolationError on table creation."""
-        import pyarrow as pa
-
-        schema = pa.schema(
-            [
-                pa.field("id", pa.int64()),
-                pa.field("_run_id", pa.string()),
-                pa.field("_run_type", pa.string()),
-                pa.field("_source_batch_id", pa.string()),
-                pa.field("_ingestion_ts", pa.string()),
-            ]
-        )
 
         # Both DeltaTable patches raise TableNotFoundError so it falls back to write_deltalake
         with (
@@ -219,7 +188,7 @@ class TestSilverWriterExceptions:
             )
             with pytest.raises(SchemaViolationError):
                 await writer.write_silver(
-                    "test.table", [valid_record], ["id"], schema=schema
+                    "test.table", [valid_record], ["id"], schema=storage_schema
                 )
 
     @pytest.mark.asyncio
