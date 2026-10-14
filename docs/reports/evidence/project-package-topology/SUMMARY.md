@@ -1,5 +1,3 @@
-Source-only refresh (2026-10-13, PR #12136 with main `51f53843d17c3d69d8d95200adaec725a61d9900`): the canonical `report-module-coverage` inventory records `source_tree_sha256=0050796610c7f0ab19f489de03828e012e7dc678aaf0e6d62f3476a12b6de2a2` and `source_module_count=2572`. This binds the current source tree; it does not replace the historical topology analysis or claim a new coverage measurement.
-
 Source-only refresh (2026-10-12, composite checkpoint persistence parameter bundle merged with origin/main fe524f074da5): the canonical module inventory records `source_tree_sha256=0d318c17dfd76032544e2e179569af53912aed1d409c2bf8f2725ee9ab589805` and `source_module_count=2566`. This binds the merged source tree; coverage measurements remain those of the last authoritative run recorded below.
 
 Source-only refresh (2026-10-12, PR #12187 review and origin/main sync): the canonical module inventory records `source_tree_sha256=5ef35dfcf5f7339a22f3900043b0b6af49474fcd98ed019e1d89067735f5c2eb` and `source_module_count=2566`. This updates source identity while retaining the accepted coverage measurements and additive XML provenance.
@@ -436,7 +434,7 @@ it is not a new coverage measurement or a complete topology re-audit.
 
 ## Current source inventory binding
 
-- `source_tree_sha256=a8849fae6bcbb8de30d33937524b7d432b4413fc04e352d507dae7016b24a3be`
+- `source_tree_sha256=325e64c6f7d88913ae89de98d25116f836fc62a4904d7a68730bef115dd5473f`
 - `source_module_count=2571`
 - Source modules: `2571`
 - `2529` fully covered

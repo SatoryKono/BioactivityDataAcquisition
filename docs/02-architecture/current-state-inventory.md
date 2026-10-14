@@ -36,20 +36,20 @@ The current table includes the OpenAlex query paginator extracted in PR #12096. 
 
 The earlier LoggerPort alias-removal source rebind did not constitute a new coverage measurement. Its accepted inventory followed a complete 17-group local measurement on `c4071c0eeecd6b06f18bc781a0435ee128e0e994`; that historical raw comparison recorded 80 remaining module regressions. Accepted inventory values are not a claim of fresh global nonregression. `config_root` was freshly measured at 40/40 lines and 18/18 branches. Final architecture acceptance and publication remain separate checks.
 
-The current source tree contains 2572 eligible modules, all represented in the
-accepted inventory. Six Bronze cleanup modules were added through canonical
-nonregressing adoption from the complete 17-shard measurement on
-`4dc329904752efab5da815db96214bdc971164c8` (99.60% line, 94.15% branch).
-The raw candidate has 107 module regressions against retained historical values,
-so the coverage verification gate and final PR acceptance remain open.
+The current source tree contains 2566 eligible modules, all represented in the
+accepted inventory. A complete local 17-shard measurement on source commit
+`912f483953c76ede75313f762e41a9848369c3bb` produced 99.67% line and 94.25%
+branch coverage; nonregressing adoption retains prior accepted values where
+the fresh raw measurement is lower. This is local measurement evidence, not
+CircleCI acceptance or lifecycle ADMIT for the final PR head.
 
 | Artifact | Current value | Source |
 | --- | ---: | --- |
 | Architecture quality score | `10.00` (`excellent`) | `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2572` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2566` | `reports/quality/module-coverage-inventory.json` |
 | Unmatched live modules / uncovered measured modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, complete source-module snapshot |
-| Coverage inventory status counts | `2525` fully covered, `46` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
+| Coverage inventory status counts | `2524` fully covered, `41` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Families at fan-in budget | `0` | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
 | Module-boundaries coupling | `10.0` (`control-plane` fan-in `1/2`, `runtime_builders` fan-in `2/3`) | `reports/quality/architecture-quality-scorecard.json`, `tests/architecture/test_issue_10468_module_boundaries_coupling_closeout.py` |
@@ -332,7 +332,7 @@ by storage technology. Current owner boundaries:
 
 ## Current source inventory binding
 
-- `source_tree_sha256=a8849fae6bcbb8de30d33937524b7d432b4413fc04e352d507dae7016b24a3be`
+- `source_tree_sha256=325e64c6f7d88913ae89de98d25116f836fc62a4904d7a68730bef115dd5473f`
 - `source_module_count=2571`
 - Source modules: `2571`
 - `2529` fully covered
