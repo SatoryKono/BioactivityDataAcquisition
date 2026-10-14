@@ -119,6 +119,27 @@ class BasePanderaValidator:
         df = pd.DataFrame(records)
         return self._validate_with_schema(df)
 
+    def _seed_missing_nullable_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Insert nullable fields relative to supplied schema fields, retaining extras."""
+        if self._schema is None or not hasattr(self._schema, "columns"):
+            return df
+        seeded = df.copy()
+        columns = list(self._schema.columns)
+        for index, name in enumerate(columns):
+            if name in seeded.columns or not self._schema.columns[name].nullable:
+                continue
+            following = next(
+                (field for field in columns[index + 1 :] if field in seeded.columns),
+                None,
+            )
+            position = (
+                len(seeded.columns)
+                if following is None
+                else seeded.columns.get_loc(following)
+            )
+            seeded.insert(position, name, None)
+        return seeded
+
     def _reorder_to_schema(self, df: pd.DataFrame) -> pd.DataFrame:
         """Reorder DataFrame columns to match schema definition order.
 
@@ -130,6 +151,9 @@ class BasePanderaValidator:
         """
         assert self._schema is not None
         if not hasattr(self._schema, "columns"):
+            return df
+        df = self._seed_missing_nullable_columns(df)
+        if self._schema.ordered:
             return df
         schema_cols = list(self._schema.columns.keys())
         df_cols = df.columns.tolist()
@@ -230,17 +254,7 @@ class BasePanderaValidator:
         from pandera.errors import SchemaError, SchemaErrors
 
         try:
-            df_to_validate = df
-            if hasattr(self._schema, "columns"):
-                missing = [
-                    name for name in self._schema.columns if name not in df.columns
-                ]
-                if missing:
-                    df_to_validate = df.copy()
-                    for name in missing:
-                        column = self._schema.columns[name]
-                        if getattr(column, "nullable", False):
-                            df_to_validate[name] = None
+            df_to_validate = self._seed_missing_nullable_columns(df)
             df_to_validate = self._normalize_nullable_integer_columns(df_to_validate)
             df_to_validate = self._normalize_nullable_boolean_columns(df_to_validate)
             df_to_validate = self._reorder_to_schema(df_to_validate)
@@ -278,7 +292,15 @@ class PanderaSilverValidator(BasePanderaValidator):
     def _reindex_non_strict(self, df: pd.DataFrame) -> pd.DataFrame:
         assert self._schema is not None
         schema_columns = list(self._schema.columns.keys())
-        df_to_validate = df.reindex(columns=schema_columns)
+        supplied = [name for name in df.columns if name in self._schema.columns]
+        missing = [name for name in schema_columns if name not in df.columns]
+        df_to_validate = self._seed_missing_nullable_columns(df[supplied])
+        if not self._schema.ordered:
+            df_to_validate = df_to_validate.reindex(columns=schema_columns)
+        else:
+            for name in missing:
+                if name not in df_to_validate.columns:
+                    df_to_validate[name] = None
         dq_defaults = {"_dq_warn": False, "_dq_error": False, "_index": 0}
         for name, default in dq_defaults.items():
             if name not in df_to_validate.columns:
@@ -286,19 +308,6 @@ class PanderaSilverValidator(BasePanderaValidator):
             if df_to_validate[name].isna().all():
                 df_to_validate[name] = default
         return df_to_validate
-
-    def _seed_missing_nullable_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        if self._schema is None or not hasattr(self._schema, "columns"):
-            return df
-        missing = [name for name in self._schema.columns if name not in df.columns]
-        if not missing:
-            return df
-        seeded = df.copy()
-        for name in missing:
-            column = self._schema.columns[name]
-            if getattr(column, "nullable", False):
-                seeded[name] = None
-        return seeded
 
     def _validate_with_schema(self, df: pd.DataFrame) -> ValidationResult:
         """Validate Silver frames; non-strict mode ignores extra columns.
@@ -383,14 +392,15 @@ class PanderaGoldValidator(BasePanderaValidator):
 
                 # Filter DF to only schema columns
                 # Handle case where schema column is NOT in df (missing column) - Pandera handles that.
-                cols_to_keep = list(schema_columns.intersection(df.columns))
+                cols_to_keep = [name for name in df.columns if name in schema_columns]
                 df_to_validate = self._reorder_to_schema(df[cols_to_keep])  # pyright: ignore[reportArgumentType]
 
-                self._schema.validate(df_to_validate, lazy=True)
             else:
                 df_to_validate = self._reorder_to_schema(df)
-                self._schema.validate(df_to_validate, lazy=True)
 
+            df_to_validate = self._normalize_nullable_integer_columns(df_to_validate)
+            df_to_validate = self._normalize_nullable_boolean_columns(df_to_validate)
+            self._schema.validate(df_to_validate, lazy=True)
             return ValidationResult(valid=True)
         except (SchemaError, SchemaErrors, KeyError, TypeError, ValueError) as e:
             return ValidationResult(valid=False, errors=[str(e)])

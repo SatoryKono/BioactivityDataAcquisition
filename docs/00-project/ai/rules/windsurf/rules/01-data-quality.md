@@ -13,7 +13,7 @@ globs:
 | Layer  | Format | Path / Validation | Retention | Write semantics |
 |--------|--------|-------------------|-----------|-----------------|
 | Bronze | JSONL+zstd | `bronze/{provider}/{entity}/{date}/` (ingestion date) | 90 days hot → archive | Append-only, immutable payload |
-| Silver | Delta Lake (delta-rs) | ACID via `_delta_log/` | Permanent | MERGE / APPEND / DELETE |
+| Silver | Delta Lake (delta-rs) | ACID via `_delta_log/` | Permanent | MERGE / APPEND |
 | Gold   | Delta Lake | strict Pandera (`strict=True`) | Permanent | OVERWRITE / APPEND / SCD2 |
 
 ## Bronze (MUST)

@@ -29,6 +29,8 @@
 
 from __future__ import annotations
 
+from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
+
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
@@ -130,7 +132,11 @@ class TestBatchExecutorRecoveryInvariants:
         services.data_source = data_source
         services.storage.write_bronze = AsyncMock()
         services.storage.write_silver = AsyncMock()
-        services.storage.write_gold = AsyncMock()
+        services.storage.write_gold = AsyncMock(
+            return_value=GoldWriteReceipt(
+                "synthetic", "0.0.0", GoldWriteCategory.COMPLETE, ("synthetic",)
+            )
+        )
         mock_logger = MagicMock()
         mock_logger.bind = MagicMock(return_value=mock_logger)
         context = PipelineContext(

@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Protocol
 
-from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.medallion import SilverOperationMode
 from bioetl.domain.ports import AuditPort
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.infrastructure.storage.silver.operations.metadata_write_support import (
@@ -26,7 +26,7 @@ async def log_silver_audit_via_support_request(
     *,
     table_name: str,
     records: list[BronzeRecord],
-    validated_mode: SilverWriteMode,
+    validated_mode: SilverOperationMode,
     run_id: RunID | None = None,
     run_type: RunType | None = None,
     source_batch_id: BatchID | None = None,
@@ -56,7 +56,7 @@ async def log_silver_audit_operation(
     table_name: str,
     records: list[BronzeRecord],
     mode: str,
-    validated_mode: SilverWriteMode,
+    validated_mode: SilverOperationMode,
     run_id: RunID | None = None,
     run_type: RunType | None = None,
     source_batch_id: BatchID | None = None,
