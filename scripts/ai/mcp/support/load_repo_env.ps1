@@ -187,7 +187,8 @@ function Import-BioetlRepoEnv {
         Join-Path $RepoRoot ".env.local"
     }
 
-    if (-not (Test-Path $envFile) -and -not (Test-Path $envLocalFile)) {
+    if (-not (Test-Path -LiteralPath $envFile) -and
+        (-not $envLocalFile -or -not (Test-Path -LiteralPath $envLocalFile))) {
         $env:BIOETL_REPO_ENV_LOADED = "1"
         Normalize-BioetlRepoEnvAliases
         return
