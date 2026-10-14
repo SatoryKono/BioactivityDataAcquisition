@@ -79,7 +79,7 @@ bioetl workflow status <NAME> [OPTIONS]
 | `--only-steps a,b` | Выполнить только указанные шаги и их обязательные зависимости |
 | `--run-type` | Override для `incremental`, `backfill`, `rebuild` |
 | `--start-offset` | Override для `start_offset` у pipeline steps |
-| `--reconciliation-mode` | Override reconciliation mode у pipeline steps: `complete-reference` (default) или `selected-snapshot` |
+| `--reconciliation-mode` | Override reconciliation mode у pipeline steps: `complete-reference` (default) или `selected-snapshot`. `complete-reference` подтверждает полноту reference-данных по evidence. Полное соответствие внешних ключей дополнительно требует `require_closed_cohort`: несовпавшие source-строки блокируют мутацию. Без закрытой когорты доказанно полный reference выполняет guarded deletion или Gold expiry несопоставленных строк, а reference со статусом `unproven` блокирует мутацию и сохраняет просмотренные строки. Независимо заданный limit/offset без явной закрытой reference-когорты отклоняется до destructive execution. `selected-snapshot` сверяет текущие строки выбранных producer run ID с закреплённой Delta-версией reference producer. Пропущенный ключ означает отсутствие в этом bounded snapshot. Режим выполняет scoped deletion или Gold expiry non-null FK строк выбранного source scope, в том числе всех таких строк при пустом закреплённом снимке; строки с NULL или blank FK, а также unrelated и history строки, сохраняются, и `reference_completeness` остаётся `unproven`. Пример: `--reconciliation-mode selected-snapshot` |
 | `--limit` | Override для `limit` у pipeline steps |
 | `--input-csv` | Override для CSV filter input у pipeline steps |
 | `--filter-column` | Override для CSV filter column у pipeline steps |
@@ -1602,7 +1602,7 @@ ______________________________________________________________________
 | ------------------------ | ------------------------------ | ------------ |
 | `BIOETL_ENV`                            | Окружение (`dev`, `staging`, `prod`) | `dev`   |
 | `BIOETL_DATA_DIR`                       | Директория данных                    | `./data` |
-| `BIOETL_OBSERVABILITY__METRICS_ENABLED` | Включить Prometheus метрики          | `true`  |
+| `BIOETL_METRICS_ENABLED`                | Включить Prometheus метрики          | `true`  |
 | `BIOETL_METRICS_PORT`                   | Порт для Prometheus                  | `8000`  |
 | `BIOETL_OBSERVABILITY__TRACING_ENABLED` | Включить OpenTelemetry tracing       | `false` |
 
@@ -1612,7 +1612,6 @@ ______________________________________________________________________
 
 - `BIOETL_UNIPROT_API_KEY` — optional higher-throughput UniProt profile
 - `BIOETL_OPENALEX_API_KEY` — required for production-like OpenAlex runs
-- `BIOETL_OPENALEX_EMAIL` — optional OpenAlex contact attribution
 - `BIOETL_SEMANTICSCHOLAR_API_KEY`
 
 ______________________________________________________________________

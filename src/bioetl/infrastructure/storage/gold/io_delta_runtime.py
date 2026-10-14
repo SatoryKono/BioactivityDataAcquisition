@@ -9,6 +9,12 @@ from dataclasses import dataclass
 from types import ModuleType
 from typing import TYPE_CHECKING, TypeVar, cast
 
+from bioetl.domain.types.gold_contracts import GoldWriteCategory
+from bioetl.infrastructure.storage.gold.commit_outcome import (
+    GoldOutcomeBoundary,
+    await_physical_commit,
+    receipt_for,
+)
 from bioetl.infrastructure.storage.gold.io_delta_protocols import (
     GoldWriteAsyncioProtocol as _GoldWriteAsyncioProtocol,
 )
@@ -114,27 +120,35 @@ async def _execute_prepared_simple_gold_write(
     prepared: _PreparedSimpleGoldWrite,
 ) -> None:
     """Run retry-wrapped simple Delta write and optional CSV export."""
-    await _run_gold_write_with_retry(
-        module,
+    await await_physical_commit(
         lambda: host._run_in_executor(
             _write_prepared_simple_delta,
             module,
             prepared,
         ),
+        receipt_for(prepared.request.table_name),
     )
     if host.csv_exporter:
         from typing import Any, cast
 
-        await host.csv_exporter.export(
-            prepared.request.table_name,
-            cast(Any, prepared.arrow_data),  # Any: CSV exporter Arrow table duck-type
-            append=prepared.request.mode != "overwrite",
-            primary_keys=(
-                prepared.request.primary_keys
-                if prepared.request.mode != "overwrite"
-                else None
-            ),
-        )
+        with GoldOutcomeBoundary(
+            receipt_for(
+                prepared.request.table_name,
+                category=GoldWriteCategory.COMMITTED_POSTWRITE_PENDING,
+            )
+        ):
+            await host.csv_exporter.export(
+                prepared.request.table_name,
+                cast(
+                    Any, prepared.arrow_data
+                ),  # Any: CSV exporter Arrow table duck-type
+                append=prepared.request.mode != "overwrite",
+                primary_keys=(
+                    prepared.request.primary_keys
+                    if prepared.request.mode != "overwrite"
+                    else None
+                ),
+            )
 
 
 def _prepare_scd2_gold_write(

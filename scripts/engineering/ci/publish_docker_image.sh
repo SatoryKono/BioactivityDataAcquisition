@@ -87,6 +87,11 @@ assert len(producer) == 1 and producer[0]['status'] == 'success'
 assert str(producer[0]['job_number']) == str(metadata['run_id'])
 Path('approval.json').write_text(json.dumps({'workflow_id': os.environ['CIRCLE_WORKFLOW_ID'], 'approval_job_id': approval[0]['id'], 'approved_by': approval[0]['approved_by'], 'producer_job_number': producer[0]['job_number']}, sort_keys=True) + '\n', encoding='utf-8')
 APPROVAL
+# Use the job-injected Environment CLI, not the separately installed local CLI.
+# Obtain the signing credential before any registry write; never print it.
+SIGSTORE_ID_TOKEN="$(circleci run oidc get --claims '{"aud":"sigstore"}')"
+[[ -n "$SIGSTORE_ID_TOKEN" ]]
+export SIGSTORE_ID_TOKEN
 zstd --decompress --stdout bioetl-scanned-image.tar.zst | docker load
 image_ref="bioetl:${CIRCLE_SHA1}"
 expected_id="$(cat bioetl-image-id.txt)"
@@ -128,11 +133,7 @@ from pathlib import Path
 manifest = json.loads(Path('published-manifest.json').read_text(encoding='utf-8'))
 assert manifest['config']['digest'] == Path('bioetl-image-id.txt').read_text(encoding='utf-8').strip()
 IMAGE
-# The pinned cosign and CircleCI CLI installation belongs to the job setup.
-# Read no token from files or browser state; request a short-lived Sigstore audience.
-SIGSTORE_ID_TOKEN="$(circleci run oidc get --claims '{"aud":"sigstore"}')"
-[[ -n "$SIGSTORE_ID_TOKEN" ]]
-export SIGSTORE_ID_TOKEN
+# Cosign is checksum-pinned in job setup; the Environment CLI is supplied by CircleCI.
 export CIRCLE_ORGANIZATION_ID="${CIRCLE_ORGANIZATION_ID:?Missing OIDC issuer identity}"
 export CIRCLE_PROJECT_ID="${CIRCLE_PROJECT_ID:?Missing OIDC project identity}"
 export PIPELINE_DEFINITION_ID="${PIPELINE_DEFINITION_ID:?Missing OIDC pipeline identity}"

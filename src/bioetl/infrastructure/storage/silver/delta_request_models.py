@@ -10,7 +10,7 @@ import pyarrow as pa
 from deltalake.exceptions import DeltaError, SchemaMismatchError
 
 from bioetl.domain.exceptions import MergeConflictError, SchemaViolationError
-from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.medallion import SilverOperationMode, SilverWriteMode, WriteMode
 
 __all__ = [
     "_DeltaWriteDispatchPolicy",
@@ -28,7 +28,7 @@ __all__ = [
 class _DeltaWriteRequest:
     """Normalized request object for a single Silver Delta write dispatch."""
 
-    validated_mode: SilverWriteMode
+    validated_mode: SilverOperationMode
     table_path: str
     arrow_data: pa.Table
     primary_keys: list[str]
@@ -80,11 +80,11 @@ def _build_dispatch_policy(
 
 def _select_dispatch_handler(
     *,
-    validated_mode: SilverWriteMode,
+    validated_mode: SilverOperationMode,
     policy: _DeltaWriteDispatchPolicy,
 ) -> _DeltaWriteHandler:
     """Select the mode-specific write handler from the dispatch policy."""
-    if validated_mode == SilverWriteMode.DELETE:
+    if validated_mode == WriteMode.OVERWRITE:
         return policy.write_delete
     if validated_mode == SilverWriteMode.APPEND:
         return policy.write_append

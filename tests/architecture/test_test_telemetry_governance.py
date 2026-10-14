@@ -24,6 +24,7 @@ import yaml
 from scripts.engineering.ci.update_test_telemetry_baseline import (
     compute_test_telemetry_source_tree_sha256,
 )
+from scripts.engineering.ci.test_telemetry_provenance import source_commit_is_reachable
 
 pytestmark = pytest.mark.architecture
 
@@ -134,7 +135,7 @@ def test_committed_test_telemetry_branch_accurate_source_identity() -> None:
     except subprocess.CalledProcessError:
         head = source_commit
     assert len(source_commit) == 40, "source_commit must be a full 40-char SHA"
-    assert _is_ancestor(source_commit, head) or source_commit == head, (
+    assert source_commit_is_reachable(payload, Path.cwd(), head), (
         f"source_commit {source_commit} is not reachable from HEAD {head}. "
         f"{REFRESH_HINT}"
     )

@@ -29,6 +29,8 @@
 
 from __future__ import annotations
 
+from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
+
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -51,7 +53,11 @@ def _make_mixin() -> StorageBundleMergedMixin:
     )  # type: ignore[assignment]
     mixin.gold = SimpleNamespace(
         get_table_path=MagicMock(return_value=Path("/gold/table")),
-        write_gold_merged=AsyncMock(),
+        write_gold_merged=AsyncMock(
+            side_effect=lambda table_name, *args, **kwargs: GoldWriteReceipt(
+                table_name, "0.0.0", GoldWriteCategory.COMPLETE, (table_name,)
+            )
+        ),
     )  # type: ignore[assignment]
     mixin._COMPOSITE_GOLD_SCHEMAS = {"test.table": MagicMock()}  # type: ignore[assignment]
     return mixin

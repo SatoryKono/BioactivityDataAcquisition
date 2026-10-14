@@ -8,6 +8,7 @@ inherits a sibling job result.
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import os
 import subprocess
@@ -20,6 +21,62 @@ FAILURE = "failure"
 SKIPPED = "skipped"
 REQUIRED = "required"
 NOT_APPLICABLE = "not_applicable"
+
+TELEMETRY_BASELINE_TESTS: tuple[str, ...] = (
+    "tests/architecture/test_test_telemetry_baseline.py",
+    "tests/architecture/test_test_telemetry_governance.py",
+)
+
+PYTHON_DEPENDENCY_TESTS: tuple[str, ...] = (
+    "tests/unit/infrastructure/storage/test_arrow_converter.py",
+    "tests/unit/application/composite/test_join_planner.py",
+    "tests/unit/infrastructure/validation/test_pandera_validator.py",
+    "tests/unit/application/core/test_batch_tracing.py",
+    "tests/unit/infrastructure/observability/test_metrics.py",
+    "tests/unit/tools/test_pytest_option_handling.py",
+    "tests/unit/repo_backed/application/pipelines/test_transformer_snapshots.py",
+    "tests/unit/repo_backed/scripts/ai/agent_tools/test_install_contracts.py",
+    "tests/unit/infrastructure/export/test_debug_export_adapter.py",
+    "tests/architecture/test_docs_build_site_router.py",
+)
+
+AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "pyproject.toml": PYTHON_DEPENDENCY_TESTS,
+    "uv.lock": PYTHON_DEPENDENCY_TESTS,
+    "package.json": ("tests/architecture/test_observability_dashboard_tooling.py",),
+    "package-lock.json": (
+        "tests/architecture/test_observability_dashboard_tooling.py",
+    ),
+    ".circleci/config.yml": ("tests/architecture/test_circleci_migration_contract.py",),
+    "src/memory/rag/chunking.py": ("tests/unit/memory/test_rag_indexing.py",),
+    "scripts/engineering/ci/publish_docker_image.sh": (
+        "tests/unit/scripts/ci/test_docker_publication_guards.py",
+    ),
+    "scripts/engineering/ci/pr_lane_results.py": (
+        "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
+    ),
+    "configs/quality/test_telemetry_baseline.yaml": TELEMETRY_BASELINE_TESTS,
+    "configs/quality/scripts_inventory_manifest.json": (
+        "tests/architecture/test_scripts_inventory_manifest.py",
+    ),
+    "docs/05-engineering/test-telemetry-baseline.md": TELEMETRY_BASELINE_TESTS,
+}
+
+# Directory-level edges for generated artifacts and diagrams where an exact
+# file mapping would need hundreds of entries. Each prefix still maps to real
+# governing tests; fail-closed semantics are unchanged for unmapped paths.
+AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "reports/test-telemetry/": TELEMETRY_BASELINE_TESTS,
+    "docs/02-architecture/diagrams/": (
+        "tests/architecture/test_diagram_corpus_regression_guards.py",
+        "tests/architecture/test_diagram_drift_and_embed_guards.py",
+        "tests/architecture/test_diagram_lint_policy_rules.py",
+    ),
+    "src/memory/episodic/": (
+        "tests/architecture/test_ai_session_memory_placement.py",
+        "tests/architecture/test_pretest_guardrails_memory_phase.py",
+    ),
+}
 
 FAST_GOVERNANCE = "fast-governance"
 CLASS_LANE = "class-lane"
@@ -173,6 +230,14 @@ def affected_pytest_targets(changed_files: list[str], *, repo_root: Path) -> lis
         path = raw_path.strip().replace("\\", "/")
         if not path:
             continue
+        for candidate_path in AFFECTED_TESTS_BY_PATH.get(path, ()):
+            if (repo_root / candidate_path).is_file():
+                targets.append(candidate_path)
+        for prefix, prefix_tests in AFFECTED_TESTS_BY_PREFIX.items():
+            if path.startswith(prefix):
+                for candidate_path in prefix_tests:
+                    if (repo_root / candidate_path).is_file():
+                        targets.append(candidate_path)
         if path.startswith("tests/") and path.endswith(".py"):
             if (repo_root / path).is_file():
                 targets.append(path)
@@ -183,6 +248,46 @@ def affected_pytest_targets(changed_files: list[str], *, repo_root: Path) -> lis
             candidate = repo_root / "tests" / "unit" / first
             if candidate.is_dir():
                 targets.append(candidate.relative_to(repo_root).as_posix())
+            continue
+        if path.startswith("scripts/") and path.endswith(".py"):
+            relative = Path(path.removeprefix("scripts/"))
+            scripts_test_roots = (
+                repo_root / "tests" / "unit" / "scripts",
+                repo_root / "tests" / "unit" / "repo_backed" / "scripts",
+            )
+            direct_test_name = f"test_{relative.name.lstrip('_')}"
+            direct_test_dirs = [
+                test_root / relative.parent for test_root in scripts_test_roots
+            ]
+            if relative.parts[0] == "engineering":
+                direct_test_dirs.append(
+                    scripts_test_roots[0] / Path(*relative.parts[1:-1])
+                )
+            direct_tests = sorted(
+                candidate
+                for test_dir in direct_test_dirs
+                if (candidate := test_dir / direct_test_name).is_file()
+            )
+            module_name = ".".join(("scripts", *relative.with_suffix("").parts))
+            importing_tests = sorted(
+                test_path
+                for test_root in scripts_test_roots
+                if test_root.is_dir()
+                for test_path in test_root.rglob("test_*.py")
+                if _imports_module(test_path, module_name)
+            )
+            selected_tests = sorted({*direct_tests, *importing_tests})
+            if selected_tests:
+                targets.extend(
+                    test_path.relative_to(repo_root).as_posix()
+                    for test_path in selected_tests
+                )
+            else:
+                targets.extend(
+                    test_root.relative_to(repo_root).as_posix()
+                    for test_root in scripts_test_roots
+                    if test_root.is_dir()
+                )
     ordered: list[str] = []
     seen: set[str] = set()
     for target in targets:
@@ -190,6 +295,43 @@ def affected_pytest_targets(changed_files: list[str], *, repo_root: Path) -> lis
             seen.add(target)
             ordered.append(target)
     return ordered
+
+
+def _imports_module(test_path: Path, module_name: str) -> bool:
+    """Return whether a test statically imports the selected script module."""
+    tree = ast.parse(test_path.read_text(encoding="utf-8"), filename=str(test_path))
+    parent_module, _, leaf_name = module_name.rpartition(".")
+    return any(
+        _matches_module_import(
+            node,
+            module_name=module_name,
+            parent_module=parent_module,
+            leaf_name=leaf_name,
+        )
+        for node in ast.walk(tree)
+    )
+
+
+def _matches_module_import(
+    node: ast.AST,
+    *,
+    module_name: str,
+    parent_module: str,
+    leaf_name: str,
+) -> bool:
+    """Return whether one AST node imports the selected module."""
+    if isinstance(node, ast.Import):
+        return any(
+            alias.name == module_name or alias.name.startswith(f"{module_name}.")
+            for alias in node.names
+        )
+    return isinstance(node, ast.ImportFrom) and (
+        node.module == module_name
+        or (
+            node.module == parent_module
+            and any(alias.name == leaf_name for alias in node.names)
+        )
+    )
 
 
 def _load_json_object(raw: str, *, label: str) -> dict[str, Any]:

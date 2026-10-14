@@ -266,27 +266,27 @@ protocols:
   target_tier: application
 - name: CompositeRuntimeStorageProtocol
   path: src/bioetl/application/ports/storage.py
-  line: 29
+  line: 30
   target_tier: application
 - name: CompositeMergeStorageProtocol
   path: src/bioetl/application/ports/storage.py
-  line: 34
+  line: 35
   target_tier: application
 - name: SilverMergedWriteProtocol
   path: src/bioetl/application/ports/storage.py
-  line: 39
+  line: 40
   target_tier: application
 - name: GoldMergedWriteProtocol
   path: src/bioetl/application/ports/storage.py
-  line: 59
+  line: 60
   target_tier: application
 - name: StorageContextProtocol
   path: src/bioetl/application/ports/storage.py
-  line: 79
+  line: 80
   target_tier: application
 - name: StorageFactoryProtocol
   path: src/bioetl/application/ports/storage.py
-  line: 89
+  line: 90
   target_tier: application
 - name: EntityTypeExtractor
   path: src/bioetl/domain/ports/entity_type.py

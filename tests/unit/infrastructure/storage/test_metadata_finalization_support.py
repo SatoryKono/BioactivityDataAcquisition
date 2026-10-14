@@ -102,6 +102,7 @@ def test_build_silver_write_result_helpers_cover_none_and_success_cases() -> Non
 async def test_prepare_metadata_result_context_uses_request_and_perf_counter() -> None:
     started_at = datetime(2026, 1, 1, tzinfo=UTC)
     host = SimpleNamespace(
+        _clock=SimpleNamespace(now=lambda: started_at - timedelta(seconds=1)),
         _compute_dq_metrics=AsyncMock(return_value=BatchDQMetrics(total_records=2)),
         _get_delta_version=AsyncMock(return_value=11),
     )
@@ -129,7 +130,8 @@ async def test_prepare_metadata_result_context_uses_request_and_perf_counter() -
     )
     host._get_delta_version.assert_awaited_once_with("/tmp/silver/chembl/activity")
     assert context.version_after == 11
-    assert context.completed_at == started_at + timedelta(seconds=4.5)
+    assert context.completed_at == started_at - timedelta(seconds=1)
+    assert context.duration_seconds == 4.5
 
 
 @pytest.mark.unit
@@ -154,6 +156,7 @@ async def test_prepare_silver_write_finalization_context_collects_dq_version_and
     None
 ):
     metadata_ops = SimpleNamespace(
+        _clock=SimpleNamespace(now=lambda: started_at + timedelta(days=1)),
         _resolve_finalization_dq_metrics=AsyncMock(
             return_value=BatchDQMetrics(total_records=3)
         ),
@@ -190,7 +193,8 @@ async def test_prepare_silver_write_finalization_context_collects_dq_version_and
     assert context == _PreparedSilverWriteFinalizationContext(
         dq_metrics=BatchDQMetrics(total_records=3),
         version_after=5,
-        completed_at=started_at + timedelta(seconds=2.25),
+        completed_at=started_at + timedelta(days=1),
+        duration_seconds=2.25,
     )
 
 

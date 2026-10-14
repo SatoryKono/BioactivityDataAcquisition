@@ -32,6 +32,8 @@ Targets uncovered lines: 77-78, 212-219.
 
 from __future__ import annotations
 
+from bioetl.domain.medallion import WriteMode
+
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
@@ -82,7 +84,7 @@ class TestMaybeExportCsvEdgeCases:
         )
 
     @pytest.mark.asyncio
-    async def test_csv_exporter_delete_mode_sets_append_false(
+    async def test_csv_exporter_snapshot_overwrite_sets_append_false(
         self, tmp_path: Path
     ) -> None:
         """Line 55: delete mode → csv_append=False."""
@@ -94,8 +96,8 @@ class TestMaybeExportCsvEdgeCases:
         await mixin._maybe_export_csv(
             table_name="t",
             arrow_data=data,
-            mode="delete",
-            validated_mode=SilverWriteMode.DELETE,
+            mode="overwrite",
+            validated_mode=WriteMode.OVERWRITE,
             primary_keys=["id"],
         )
 

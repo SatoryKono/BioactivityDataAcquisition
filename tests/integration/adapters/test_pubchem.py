@@ -25,7 +25,6 @@ Rate Limits:
 from __future__ import annotations
 
 from collections.abc import Generator
-import os
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
@@ -41,6 +40,7 @@ from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+from tests.helpers.vcr_config import build_base_vcr_config
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
 from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
@@ -55,12 +55,11 @@ CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "pubch
 @pytest.fixture(scope="module")
 def vcr_config() -> dict[str, Any]:
     """Configure VCR for PubChem adapter tests."""
-    return {
-        "cassette_library_dir": str(CASSETTE_DIR),
-        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
-        "match_on": ["method", "scheme", "host", "port", "path", "body"],
-        "decode_compressed_response": True,
-    }
+    return build_base_vcr_config(
+        cassette_library_dir=CASSETTE_DIR,
+        match_on=["method", "scheme", "host", "port", "path", "body"],
+        decode_compressed_response=True,
+    )
 
 
 @pytest.fixture

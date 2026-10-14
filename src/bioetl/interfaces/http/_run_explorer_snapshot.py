@@ -150,10 +150,25 @@ async def stop_run_explorer_snapshot(task: asyncio.Task[None] | None) -> None:
     if task is None:
         return
     _ = task.cancel()
+
+    async def _join_snapshot() -> None:
+        await asyncio.gather(task, return_exceptions=True)
+        if not task.cancelled():
+            task.result()
+
+    joined = asyncio.create_task(_join_snapshot())
     try:
-        await task
+        # Shield the join so a cancellation of this caller cannot cancel the
+        # child again while that child is still inside its own cleanup.
+        await asyncio.shield(joined)
     except asyncio.CancelledError:
-        return
+        while not joined.done():
+            try:
+                await asyncio.shield(joined)
+            except asyncio.CancelledError:  # NOSONAR python:S7497 - re-raised below
+                continue
+        joined.result()
+        raise
 
 
 def _without_timing(payload: dict[str, object]) -> dict[str, object]:
