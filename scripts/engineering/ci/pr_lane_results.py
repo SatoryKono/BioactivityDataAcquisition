@@ -33,6 +33,7 @@ SKIPPED = "skipped"
 REQUIRED = "required"
 NOT_APPLICABLE = "not_applicable"
 TESTS_PREFIX = "tests/"
+TEST_FILE_GLOB = "test_*.py"
 
 from scripts.engineering.dev.run_tests import TESTS_ROOT as PYTEST_ALL_ROOT
 
@@ -346,7 +347,7 @@ def _importing_script_tests(roots: tuple[Path, Path], module: str) -> set[Path]:
         test
         for root in roots
         if root.is_dir()
-        for test in root.rglob("test_*.py")
+        for test in root.rglob(TEST_FILE_GLOB)
         if _imports_module(test, module)
     }
 
@@ -390,10 +391,10 @@ def _helper_suite(consumer: str, root: Path) -> list[str]:
     """Shared helpers require their complete owning suite, never a helper file alone."""
     suite = Path(consumer).parent
     while suite.as_posix().startswith(TESTS_PREFIX) and not any(
-        (root / suite).rglob("test_*.py")
+        (root / suite).rglob(TEST_FILE_GLOB)
     ):
         suite = suite.parent
-    if not (root / suite).is_dir() or not any((root / suite).rglob("test_*.py")):
+    if not (root / suite).is_dir() or not any((root / suite).rglob(TEST_FILE_GLOB)):
         raise ValueError(
             f"Unconfirmed Python dependency test-helper owner route: {consumer}"
         )
