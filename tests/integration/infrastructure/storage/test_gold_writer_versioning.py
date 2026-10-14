@@ -360,10 +360,9 @@ async def test_gold_writer_dual_write_postwrite_failure_preserves_committed_targ
     assert isinstance(caught.value.__cause__, RuntimeError)
     assert str(caught.value.__cause__) == "postwrite boom"
     assert calls == ["chembl.activity__v1_0_0"]
-    assert _versioned_table_path(
-        tmp_path / "gold",
-        "chembl.activity__v1_0_0",
-    ).exists()
+    assert _load_gold_rows(tmp_path / "gold", "chembl.activity__v1_0_0") == [
+        {"entity_id": "CHEMBL123", "legacy_value": "old-shape"}
+    ]
     assert not _versioned_table_path(
         tmp_path / "gold",
         "chembl.activity__v2_0_0",
