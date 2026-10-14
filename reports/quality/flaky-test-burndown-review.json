@@ -41,7 +41,7 @@
   ],
   "source_fingerprints": {
     "curated_inventory_sha256": "0d698b73cd22ee00bb4afbb96cb166c3f7c7a6da809fe5e05931b3f3dc3dad04",
-    "test_governance_source_tree_sha256": "c88b7735160a4faaa3cd8b0f864fa6b8d79c6341d26bcaac258986cf8880791a"
+    "test_governance_source_tree_sha256": "ed539c1dcce5b7abda99e2ac3b70aa06e60403e97532c3a65ea0e78dd9ca0fdd"
   },
   "summary": {
     "by_alert_level": {
@@ -75,9 +75,9 @@
       "quarantined": 0
     },
     "test_governance_budget_violation_count": 0,
-    "test_governance_source_tree_sha256": "c88b7735160a4faaa3cd8b0f864fa6b8d79c6341d26bcaac258986cf8880791a",
+    "test_governance_source_tree_sha256": "ed539c1dcce5b7abda99e2ac3b70aa06e60403e97532c3a65ea0e78dd9ca0fdd",
     "total_flaky": 0,
     "total_test_files": 3047,
-    "total_tests_analyzed": 29946
+    "total_tests_analyzed": 29947
   }
 }
