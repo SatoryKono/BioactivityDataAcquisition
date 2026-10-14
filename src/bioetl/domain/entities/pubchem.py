@@ -288,11 +288,11 @@ class PubchemMolecule(BaseEntity):
     feature_count_3d: int | None = None
 
     def _validate_invariants(self) -> None:
+        """Require a molecule ID and at least one structural identifier."""
         if not self.molecule_id:
             raise ValueError("PubchemMolecule molecule_id is required")
 
-        # Invariant: At least one structural representation should be present
-        if not any([self.canonical_smiles, self.isomeric_smiles, self.inchi]):
+        if not any((self.canonical_smiles, self.isomeric_smiles, self.inchi)):
             raise ValueError(
                 "PubchemMolecule must have at least one structural identifier "
                 "(SMILES/InChI)"
