@@ -175,8 +175,22 @@ def test_coalesce_first_non_null_forwards_to_prefer_seed(
     df = pl.DataFrame(
         {
             "chembl.publication.title": [None, "seed", None, None, "seed2", None],
-            "crossref.publication.title": ["crossref", None, "enricher", None, "crossref2", None],
-            "openalex.publication.title": [None, "openalex", None, "openalex2", None, None],
+            "crossref.publication.title": [
+                "crossref",
+                None,
+                "enricher",
+                None,
+                "crossref2",
+                None,
+            ],
+            "openalex.publication.title": [
+                None,
+                "openalex",
+                None,
+                "openalex2",
+                None,
+                None,
+            ],
             "pubmed.publication.title": [None, "pubmed", None, "pubmed2", None, None],
             "semanticscholar.publication.title": [None, "ss", None, "ss2", None, None],
         }
