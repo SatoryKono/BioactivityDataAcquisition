@@ -24,6 +24,7 @@ from scripts.engineering.ci._python_dependency_changes import (
     pytest_configuration_changed,
     pytest_framework_affected,
     removed_dependencies,
+    repository_cli_affected,
 )
 
 SUCCESS = "success"
@@ -54,7 +55,10 @@ AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
     "scripts/ai/npm_runtime_contract.cjs": (NPM_RUNTIME_TEST,),
     "scripts/ai/mcp/mcp_filesystem_wrapper.sh": (NPM_RUNTIME_TEST,),
     "scripts/ai/mcp/mcp_filesystem_wrapper.ps1": (NPM_RUNTIME_TEST,),
-    "scripts/ai/mcp/check.sh": (NPM_RUNTIME_TEST,),
+    "scripts/ai/mcp/check.sh": (
+        NPM_RUNTIME_TEST,
+        "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+    ),
     ".circleci/config.yml": ("tests/architecture/test_circleci_migration_contract.py",),
     "src/memory/rag/chunking.py": ("tests/unit/memory/test_rag_indexing.py",),
     "scripts/engineering/ci/publish_docker_image.sh": (
@@ -256,7 +260,7 @@ def affected_pytest_targets(
             raise ValueError(
                 "Python dependency route requires verified dependency diff"
             )
-        if require_all_python_tests or pytest_framework_affected(
+        if require_all_python_tests or _global_dependency_lane(
             repo_root, changed_python_dependencies
         ):
             if not (repo_root / PYTEST_ALL_ROOT).is_dir():
@@ -270,6 +274,12 @@ def affected_pytest_targets(
         targets.extend(mapped[path])
         targets.extend(_path_targets(path, repo_root))
     return list(dict.fromkeys(targets))
+
+
+def _global_dependency_lane(root: Path, dependencies: set[str]) -> bool:
+    return pytest_framework_affected(root, dependencies) or repository_cli_affected(
+        root, dependencies
+    )
 
 
 def _mapped_targets(path: str) -> list[str]:
@@ -360,12 +370,24 @@ def _consumer_targets(
         if Path(consumer).name == "conftest.py":
             return [Path(consumer).parent.as_posix()]
         if not Path(consumer).name.startswith("test_"):
-            raise ValueError(
-                f"Unconfirmed Python dependency test-helper owner route: {consumer}"
-            )
+            return _helper_suite(consumer, root)
     if consumer.startswith("src/memory/"):
         return ["tests/unit/memory"] if (root / "tests/unit/memory").is_dir() else []
     return affected_pytest_targets([consumer], repo_root=root)
+
+
+def _helper_suite(consumer: str, root: Path) -> list[str]:
+    """Shared helpers require their complete owning suite, never a helper file alone."""
+    suite = Path(consumer).parent
+    while suite.as_posix().startswith(TESTS_PREFIX) and not any(
+        (root / suite).rglob("test_*.py")
+    ):
+        suite = suite.parent
+    if not (root / suite).is_dir() or not any((root / suite).rglob("test_*.py")):
+        raise ValueError(
+            f"Unconfirmed Python dependency test-helper owner route: {consumer}"
+        )
+    return [suite.as_posix()]
 
 
 def _imports_module(test_path: Path, module_name: str) -> bool:

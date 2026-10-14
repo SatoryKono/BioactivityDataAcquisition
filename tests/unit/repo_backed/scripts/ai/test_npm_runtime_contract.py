@@ -324,3 +324,58 @@ def test_docker_capture_preflight_does_not_require_host_node(
     assert ("capture" in recorded) == preflight_success
     assert recorded.count("call") == (2 if preflight_success else 1)
     assert "Host Node must not run" not in result.stderr
+
+
+@pytest.mark.parametrize(
+    "mode,expected",
+    [
+        ("compatible-path", "path"),
+        ("old-path", "portable-nodejs"),
+        ("incompatible-portable", None),
+    ],
+)
+def test_powershell_resolves_only_engine_compatible_toolchain(
+    tmp_path: Path, mode: str, expected: str | None
+) -> None:
+    powershell = (
+        shutil.which("pwsh")
+        or shutil.which("pwsh.exe")
+        or shutil.which("powershell.exe")
+    )
+    if not powershell and os.name != "nt":
+        pytest.skip("Optional PowerShell is unavailable on this Linux host")
+    assert powershell, "PowerShell is required for the Windows resolver contract"
+    setup = (
+        ROOT / "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1"
+    )
+    script = r"""
+$ErrorActionPreference = 'Stop'
+$tokens = $null; $errors = $null
+$ast = [System.Management.Automation.Language.Parser]::ParseFile($env:FIXTURE_SETUP, [ref]$tokens, [ref]$errors)
+if ($errors.Count) { throw 'Setup script syntax failed' }
+$ast.FindAll({param($node) $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -in @('Test-NodeToolchain','Resolve-NodeToolchain')}, $true) | ForEach-Object { Invoke-Expression $_.Extent.Text }
+$RepoRoot = $env:FIXTURE_ROOT
+function Get-Command { [CmdletBinding()] param([string]$Name) [pscustomobject]@{Source='fixture-old-node'} }
+function fixture-old-node { $global:LASTEXITCODE = if ($env:FIXTURE_MODE -eq 'compatible-path') { 0 } else { 1 } }
+function fixture-portable-node { $global:LASTEXITCODE = if ($env:FIXTURE_MODE -eq 'incompatible-portable') { 1 } else { 0 } }
+function Resolve-PortableNodeToolchain { return @{NodeExe='fixture-portable-node';NpmCmd='fixture-npm';Source='portable-nodejs';InstallDir=$env:FIXTURE_ROOT} }
+try { $selected = Resolve-NodeToolchain; Write-Output ('SELECTED=' + $selected.Source) } catch { Write-Output $_.Exception.Message; exit 1 }
+"""
+    result = subprocess.run(
+        [powershell, "-NoProfile", "-NonInteractive", "-Command", script],
+        env={
+            **os.environ,
+            "FIXTURE_SETUP": str(setup),
+            "FIXTURE_ROOT": str(tmp_path),
+            "FIXTURE_MODE": mode,
+        },
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if expected is None:
+        assert result.returncode != 0
+        assert "Portable Node/manifest/lock runtime contract failed" in result.stdout
+    else:
+        assert result.returncode == 0, result.stderr
+        assert f"SELECTED={expected}" in result.stdout

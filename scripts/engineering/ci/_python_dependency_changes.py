@@ -147,12 +147,58 @@ def pytest_framework_affected(root: Path, dependencies: set[str]) -> bool:
     )
 
 
-def _is_pytest_plugin(package: str) -> bool:
+def repository_cli_affected(root: Path, dependencies: set[str]) -> bool:
+    """CLI ownership comes from installed entrypoints and existing workflow commands."""
+    workflows = [
+        *(root / ".github/workflows").glob("*.yml"),
+        root / ".circleci/config.yml",
+    ]
+    commands = {
+        token
+        for workflow in workflows
+        if workflow.is_file()
+        for command in _workflow_commands(workflow)
+        for line in command.splitlines()
+        if not line.lstrip().startswith("#")
+        for token in re.findall(r"(?<![\w./-])[\w-]+(?=\s|[;&|]|$)", line)
+    }
+    return any(
+        entry.group == "console_scripts" and entry.name in commands
+        for dependency in dependencies
+        for entry in _entry_points(dependency)
+    )
+
+
+def _workflow_commands(path: Path) -> list[str]:
+    import yaml
+
+    def runs(value: Any) -> list[str]:
+        if isinstance(value, dict):
+            result = []
+            for key, nested in value.items():
+                if key == "run" and isinstance(nested, str):
+                    result.append(nested)
+                elif key == "run" and isinstance(nested, dict):
+                    result.append(nested.get("command", ""))
+                else:
+                    result.extend(runs(nested))
+            return result
+        if isinstance(value, list):
+            return [command for nested in value for command in runs(nested)]
+        return []
+
+    return runs(yaml.safe_load(path.read_text(encoding="utf-8")))
+
+
+def _entry_points(package: str) -> tuple[Any, ...]:
     try:
-        installed = distribution(package)
+        return tuple(distribution(package).entry_points)
     except PackageNotFoundError:
-        return False
-    return any(entry.group == "pytest11" for entry in installed.entry_points)
+        return ()
+
+
+def _is_pytest_plugin(package: str) -> bool:
+    return any(entry.group == "pytest11" for entry in _entry_points(package))
 
 
 def removed_dependencies(root: Path, base: str, head: str) -> bool:

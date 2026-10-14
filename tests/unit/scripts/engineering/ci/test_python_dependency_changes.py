@@ -281,3 +281,75 @@ def test_import_name_is_not_assumed_to_equal_distribution(
             repo_root=tmp_path,
             changed_python_dependencies={"unknown-package"},
         )
+
+
+@pytest.mark.parametrize("command", ["ruff", "mypy", "twine", "pip-audit", "bandit"])
+def test_repository_console_tool_uses_canonical_lane(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, command: str
+) -> None:
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "uv.lock").write_text("version = 1\n", encoding="utf-8")
+    workflow = tmp_path / ".github/workflows/owner.yml"
+    workflow.parent.mkdir(parents=True)
+    workflow.write_text(
+        f"jobs:\n  owner:\n    steps:\n      - run: uv run --frozen {command} --version\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        dependencies,
+        "distribution",
+        lambda name: SimpleNamespace(
+            entry_points=[SimpleNamespace(group="console_scripts", name=command)]
+        ),
+    )
+    assert lane.affected_pytest_targets(
+        ["uv.lock"], repo_root=tmp_path, changed_python_dependencies={command}
+    ) == ["tests"]
+
+
+def test_console_entrypoint_without_workflow_owner_fails_closed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / "uv.lock").write_text("version = 1\n", encoding="utf-8")
+    monkeypatch.setattr(
+        dependencies,
+        "distribution",
+        lambda name: SimpleNamespace(
+            entry_points=[
+                SimpleNamespace(group="console_scripts", name="unowned-command")
+            ]
+        ),
+    )
+    with pytest.raises(
+        ValueError, match="Unconfirmed Python dependency consumer route: unowned"
+    ):
+        lane.affected_pytest_targets(
+            ["uv.lock"], repo_root=tmp_path, changed_python_dependencies={"unowned"}
+        )
+
+
+@pytest.mark.parametrize(
+    "helper,suite",
+    [
+        ("tests/helpers/control_plane_replay.py", "tests"),
+        ("tests/contract/_provider_contract_replay.py", "tests/contract"),
+    ],
+)
+def test_shared_dependency_helper_uses_complete_owner_suite(
+    tmp_path: Path, helper: str, suite: str
+) -> None:
+    _consumer(tmp_path, helper, "yaml")
+    test = tmp_path / (
+        "tests/unit/test_consumer.py"
+        if suite == "tests"
+        else "tests/contract/test_consumer.py"
+    )
+    test.parent.mkdir(parents=True, exist_ok=True)
+    test.write_text("def test_consumer(): pass\n", encoding="utf-8")
+    assert lane._consumer_targets(helper, tmp_path, {}) == [suite]
+
+
+def test_shared_helper_without_any_tests_fails_closed(tmp_path: Path) -> None:
+    _consumer(tmp_path, "tests/helpers/control_plane_replay.py", "yaml")
+    with pytest.raises(ValueError, match="test-helper owner route"):
+        lane._consumer_targets("tests/helpers/control_plane_replay.py", tmp_path, {})

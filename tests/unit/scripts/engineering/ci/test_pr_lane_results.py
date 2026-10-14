@@ -259,3 +259,23 @@ def test_partial_mapped_targets_fail_lane(
     else:
         assert result == 0
         assert captured.out.splitlines() == list(mapped)
+
+
+def test_mcp_check_source_routes_both_mandatory_contract_suites(tmp_path: Path) -> None:
+    from scripts.engineering.ci.pr_lane_results import (
+        affected_pytest_targets,
+        NPM_RUNTIME_TEST,
+    )
+
+    mcp_target = "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py"
+    for name in (NPM_RUNTIME_TEST, mcp_target):
+        path = tmp_path / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.touch()
+    assert affected_pytest_targets(["scripts/ai/mcp/check.sh"], repo_root=tmp_path) == [
+        NPM_RUNTIME_TEST,
+        mcp_target,
+    ]
+    (tmp_path / mcp_target).unlink()
+    with pytest.raises(ValueError, match="Missing mandatory mapped test targets"):
+        affected_pytest_targets(["scripts/ai/mcp/check.sh"], repo_root=tmp_path)
