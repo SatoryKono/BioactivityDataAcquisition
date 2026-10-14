@@ -2172,9 +2172,13 @@ jobs:
       - run:
           name: pytest fast lane (<< parameters.test-group >>)
           command: |
+            set -euo pipefail
             export PATH="$HOME/.local/bin:$PATH"
             GROUP="<< parameters.test-group >>"
             NAME="${GROUP%%|*}"; PATHS="${GROUP#*|}"
+            if [[ "$NAME" == unit-vcr-secrets ]]; then
+              uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-secrets
+            fi
             mkdir -p reports/test-telemetry
             HYPOTHESIS_PROFILE=fast \
             uv run --frozen --no-build pytest $PATHS \
@@ -3888,6 +3892,7 @@ workflows:
                 - "unit-domain|tests/unit/domain/"
                 - "unit-application|tests/unit/application/"
                 - "unit-infrastructure|tests/unit/infrastructure/"
+                - "unit-vcr-secrets|tests/unit/scripts/qa/test_check_vcr_secrets.py"
                 - "unit-other|tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/application/ --ignore=tests/unit/infrastructure/ --ignore=tests/unit/scripts/ --ignore=tests/unit/repo_backed/"
       - test-integration:
           requires: [classify]
@@ -3985,6 +3990,7 @@ workflows:
               - codex/pr-eight-integration
               - codex/ci-11931-main-acceptance-20261007
               - fix/p02-domain-12087-12093
+              - fix/cf007-vcr-session-headers-20261013
           requires:
           - proof-coverage-shards
       - proof-governance:

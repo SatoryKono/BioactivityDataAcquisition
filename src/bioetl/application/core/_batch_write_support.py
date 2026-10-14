@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
 from bioetl.application.core._batch_write_events import (
     BatchWriteEventContext,
@@ -16,49 +15,25 @@ from bioetl.application.core._batch_write_events import (
 from bioetl.application.core._batch_write_schema_quarantine import (
     quarantine_schema_violation,
 )
-from bioetl.application.core.quarantine_manager import (
-    QuarantineRuntimeService,
+from bioetl.application.services.batch_processing.write_collaborators import (
+    LayerWriteContext,
+    LayerWriteOutcome,
+    WriteLayerStatus,
 )
 from bioetl.domain.exceptions import SchemaViolationError
-from bioetl.domain.types import BatchID, RunID
-
-WriteLayerStatus = Literal["written", "quarantined", "blocked", "skipped"]
-
-
-@dataclass(frozen=True, slots=True)
-class LayerWriteOutcome:
-    """Typed result of one storage-layer write attempt."""
-
-    layer: str
-    status: WriteLayerStatus
-    candidate_count: int
-    confirmed_count: int = 0
-    quarantined_count: int = 0
-    write_result: object | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class LayerWriteContext:
-    """Collaborators shared by Silver and Gold write attempts."""
-
-    execute_with_span: Callable[..., Awaitable[object]]
-    writer: BatchWriter
-    quarantine_manager: QuarantineRuntimeService
-    logger: LoggerPort
-    run_id: RunID | None
-    domain_event_emitter: DomainEventEmitterProtocol | None
-
+from bioetl.domain.exceptions.gold_write import GoldWriteFailure
+from bioetl.domain.types import BatchID
+from bioetl.domain.types.gold_contracts import require_complete_gold_receipt
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_writer import BatchWriter
-    from bioetl.application.observability.domain_event_emitter import (
-        DomainEventEmitterProtocol,
-    )
-    from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 __all__ = [
+    "LayerWriteContext",
+    "LayerWriteOutcome",
+    "WriteLayerStatus",
     "emit_batch_failed",
     "emit_batch_written",
     "emit_domain_event",
@@ -77,6 +52,7 @@ async def _execute_layer_write(
     bronze_refs: list[BronzeWriteResult] | None,
     silver_refs: list[SilverWriteResult] | None,
 ) -> object:
+    operation: Awaitable[object]
     if layer == "silver":
         operation = writer.write_silver(
             records,
@@ -112,12 +88,10 @@ async def safe_write_layer(
     silver_refs: list[SilverWriteResult] | None = None,
     operation_errors: tuple[type[BaseException], ...],
 ) -> LayerWriteOutcome:
-    """Execute one layer write and quarantine schema-invalid outputs.
+    """Write one layer; Gold requires COMPLETE, Silver may return no result.
 
-    Returns a typed outcome: ``written`` when the writer port call completed
-    (even when the port itself returns ``None``, as Gold does), or
-    ``quarantined`` after the records were persisted to quarantine. Operational
-    errors and quarantine-write failures propagate to the caller.
+    Schema violations are quarantined. Operational/quarantine failures propagate;
+    incomplete Gold outcomes retain their receipt and never confirm record counts.
     """
     if layer not in {"silver", "gold"}:
         raise ValueError(
@@ -142,6 +116,8 @@ async def safe_write_layer(
             bronze_refs=bronze_refs,
             silver_refs=silver_refs,
         )
+        if layer == "gold":
+            write_result = require_complete_gold_receipt(write_result)
         context.writer.track_batch_written(stage=layer, count=len(records))
         event_context.emit_written(len(records))
         return LayerWriteOutcome(
@@ -165,6 +141,9 @@ async def safe_write_layer(
             candidate_count=len(records),
             quarantined_count=len(records),
         )
+    except GoldWriteFailure as error:
+        event_context.emit_failed(error)
+        raise
     except operation_errors as error:
         if isinstance(error, Exception):
             event_context.emit_failed(error)

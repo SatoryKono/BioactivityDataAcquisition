@@ -555,6 +555,7 @@ def test_pr_gate_credit_cut_keeps_required_job_names():
         "unit-domain",
         "unit-application",
         "unit-infrastructure",
+        "unit-vcr-secrets",
         "unit-other",
     ]
     event_names = [

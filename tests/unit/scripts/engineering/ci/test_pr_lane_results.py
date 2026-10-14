@@ -9,6 +9,7 @@ from scripts.engineering.ci.pr_lane_results import (
     affected_pytest_targets,
     assert_step_outcomes,
     build_results,
+    main as lane_main,
 )
 
 pytestmark = pytest.mark.unit
@@ -131,9 +132,84 @@ def test_affected_targets_map_source_and_existing_tests(tmp_path: Path) -> None:
         repo_root=tmp_path,
     )
 
+    # The selected parent suite already executes test_sample.py exactly once.
+    assert targets == ["tests/unit/domain"]
+
+
+def test_affected_targets_map_memory_source_without_test_diff() -> None:
+    """A chunking-only PR must select its real RAG regression suite."""
+    repo_root = Path(__file__).resolve().parents[5]
+    targets = affected_pytest_targets(
+        ["src/memory/rag/chunking.py", "src/memory/rag/chunking.py"],
+        repo_root=repo_root,
+    )
+
+    assert targets == ["tests/unit/memory/test_rag_indexing.py"]
+    assert all((repo_root / target).is_file() for target in targets)
+
+
+def test_affected_targets_fail_closed_without_memory_test(tmp_path: Path) -> None:
+    """A mapping never turns an absent test into a passing target."""
+    with pytest.raises(ValueError, match="Missing mandatory mapped test targets"):
+        affected_pytest_targets(["src/memory/rag/chunking.py"], repo_root=tmp_path)
+
+
+def test_affected_targets_map_root_npm_only_and_deduplicate() -> None:
+    """Manifest-only tooling updates execute their existing runtime contract."""
+    repo_root = Path(__file__).resolve().parents[5]
+    assert affected_pytest_targets(
+        ["package.json", "package-lock.json", "package.json"], repo_root=repo_root
+    ) == [
+        "tests/architecture/test_observability_dashboard_tooling.py",
+        "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
+    ]
+
+
+def test_python_dependency_diff_must_be_verified(tmp_path: Path) -> None:
+    """No fixed unrelated list can qualify a Python dependency gate."""
+    with pytest.raises(ValueError, match="verified dependency diff"):
+        affected_pytest_targets(["uv.lock"], repo_root=tmp_path)
+
+
+@pytest.mark.parametrize(
+    "changed_file", ["package.json", "package-lock.json", "pyproject.toml", "uv.lock"]
+)
+def test_root_npm_lane_fails_when_target_is_missing(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], changed_file: str
+) -> None:
+    """An absent mapped contract cannot satisfy required affected-tests."""
+    with pytest.raises(ValueError):
+        affected_pytest_targets([changed_file], repo_root=tmp_path)
+    assert (
+        lane_main(
+            [
+                "affected-tests",
+                "--repo-root",
+                str(tmp_path),
+                "--changed-file",
+                changed_file,
+            ]
+        )
+        == 1
+    )
+    assert "tests gate selection failed" in capsys.readouterr().err
+
+
+def test_affected_targets_preserve_bioetl_and_scripts_routes(tmp_path: Path) -> None:
+    """Memory routing keeps the existing source and script selection."""
+    (tmp_path / "tests/unit/domain").mkdir(parents=True)
+    script_test = tmp_path / "tests/unit/scripts/engineering/ci/test_tool.py"
+    script_test.parent.mkdir(parents=True)
+    script_test.write_text("def test_tool():\n    assert True\n", encoding="utf-8")
+
+    targets = affected_pytest_targets(
+        ["src/bioetl/domain/sample.py", "scripts/engineering/ci/tool.py"],
+        repo_root=tmp_path,
+    )
+
     assert targets == [
         "tests/unit/domain",
-        "tests/unit/domain/test_sample.py",
+        "tests/unit/scripts/engineering/ci/test_tool.py",
     ]
 
 
@@ -144,4 +220,81 @@ def test_build_rejects_unknown_decision() -> None:
             {"tests": {"decision": "maybe"}},
             {},
             head_sha=HEAD,
+        )
+
+
+@pytest.mark.parametrize("missing_count", [0, 1, 2])
+def test_partial_mapped_targets_fail_lane(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    missing_count: int,
+) -> None:
+    """Reject partial mappings before printing targets for the caller to run."""
+    from scripts.engineering.ci import pr_lane_results as lane
+
+    mapped = ("tests/unit/test_one.py", "tests/unit/test_two.py")
+    monkeypatch.setitem(lane.AFFECTED_TESTS_BY_PATH, "fixture/source.py", mapped)
+    for target in mapped[: 2 - missing_count]:
+        path = tmp_path / target
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("def test_contract(): pass\n", encoding="utf-8")
+    result = lane_main(
+        [
+            "affected-tests",
+            "--repo-root",
+            str(tmp_path),
+            "--changed-file",
+            "fixture/source.py",
+        ]
+    )
+    captured = capsys.readouterr()
+    if missing_count:
+        assert result == 1
+        assert not captured.out
+        for target in mapped[2 - missing_count :]:
+            assert target in captured.err
+    else:
+        assert result == 0
+        assert captured.out.splitlines() == list(mapped)
+
+
+def test_mcp_check_source_routes_both_mandatory_contract_suites(tmp_path: Path) -> None:
+    from scripts.engineering.ci.pr_lane_results import (
+        affected_pytest_targets,
+        NPM_RUNTIME_TEST,
+    )
+
+    mcp_target = "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py"
+    for name in (NPM_RUNTIME_TEST, mcp_target):
+        path = tmp_path / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.touch()
+    assert affected_pytest_targets(["scripts/ai/mcp/check.sh"], repo_root=tmp_path) == [
+        NPM_RUNTIME_TEST,
+        mcp_target,
+    ]
+    (tmp_path / mcp_target).unlink()
+    with pytest.raises(ValueError, match="Missing mandatory mapped test targets"):
+        affected_pytest_targets(["scripts/ai/mcp/check.sh"], repo_root=tmp_path)
+
+
+def test_complete_suite_removes_nested_duplicates_after_required_validation(
+    tmp_path: Path,
+) -> None:
+    from scripts.engineering.ci.pr_lane_results import affected_pytest_targets
+
+    rag = "tests/unit/memory/test_rag_indexing.py"
+    path = tmp_path / rag
+    path.parent.mkdir(parents=True)
+    path.touch()
+    (tmp_path / "uv.lock").write_text("version = 1\n", encoding="utf-8")
+    changed = ["uv.lock", "src/memory/rag/chunking.py", rag]
+    assert affected_pytest_targets(
+        changed, repo_root=tmp_path, changed_python_dependencies={"pytest"}
+    ) == ["tests"]
+    path.unlink()
+    with pytest.raises(ValueError, match="Missing mandatory mapped test targets"):
+        affected_pytest_targets(
+            changed, repo_root=tmp_path, changed_python_dependencies={"pytest"}
         )
