@@ -670,8 +670,10 @@ dependencies:
 | Параметр               | Описание                            | Значения                                                           |
 | ---------------------- | ----------------------------------- | ------------------------------------------------------------------ |
 | `strategy`             | Стратегия объединения               | `left_outer`, `inner`, `union`                                     |
-| `conflict_resolution`  | Разрешение конфликтов полей         | `seed_priority`, `enricher_priority`, `coalesce`, `explicit_rules` |
+| `conflict_resolution`  | Разрешение конфликтов полей         | `seed_priority`, `enricher_priority` (`enricher`), `latest_timestamp` (`latest`), `coalesce`, `explicit_rules` (`explicit`) |
 | `preserve_all_sources` | Сохранение всех колонок провайдеров | `true` / `false` (default)                                         |
+
+Aliases в скобках эквивалентны соответствующим основным значениям. Для `explicit_rules` и `explicit` обязателен непустой `field_priorities`; проверка выполняется при загрузке схемы.
 
 #### 2.9.3. preserve_all_sources Feature
 
