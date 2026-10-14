@@ -29,6 +29,43 @@ from scripts.engineering.qa.observability_metric_inventory_shared import (
 
 
 _FACADE_MODULE = "scripts.engineering.qa.report_observability_metric_inventory"
+_PROVENANCE_SWITCHES: tuple[tuple[str, str], ...] = (
+    ("json", "--json"),
+    ("typed_observability_views", "--typed-observability-views"),
+    ("update_panel_contracts", "--update-panel-contracts"),
+    ("check", "--check"),
+    ("fail_on_degraded_live_review", "--fail-on-degraded-live-review"),
+    ("allow_local_cardinality_fallback", "--allow-local-cardinality-fallback"),
+)
+_PROVENANCE_PATHS: tuple[tuple[str, str], ...] = (
+    ("write_evidence", "--write-evidence"),
+    ("review_json_out", "--review-json-out"),
+    ("summary_out", "--summary-out"),
+)
+
+
+def _append_declared_switches(parts: list[str], args: argparse.Namespace) -> None:
+    parts.extend(flag for attr, flag in _PROVENANCE_SWITCHES if getattr(args, attr))
+
+
+def _append_declared_paths(parts: list[str], args: argparse.Namespace) -> None:
+    if Path(args.allowlist) != Path(_DEFAULT_DRIFT_ALLOWLIST):
+        parts.extend(["--allowlist", str(args.allowlist)])
+    parts.extend(["--repo-root", str(args.repo_root)])
+    for attr, flag in _PROVENANCE_PATHS:
+        value = getattr(args, attr)
+        if value is not None:
+            parts.extend([flag, str(value)])
+    if args.prometheus_base_url:
+        parts.extend(["--prometheus-base-url", str(args.prometheus_base_url)])
+
+
+def _recorded_source_command(args: argparse.Namespace) -> str:
+    """Rebuild provenance from declared options, not the raw argv vector."""
+    parts = ["python", "-m", _FACADE_MODULE]
+    _append_declared_switches(parts, args)
+    _append_declared_paths(parts, args)
+    return shlex.join(parts)
 
 
 def collect_metric_inventory(repo_root: Path) -> MetricInventoryReport:
@@ -465,7 +502,7 @@ def _typed_inventory_violations(
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Collect metric evidence and retain the invoked CLI command as provenance."""
+    """Collect metric evidence and record declared CLI options as provenance."""
     parser = _build_parser()
     args = parser.parse_args(argv)
     violations: dict[str, list[str]]
@@ -490,14 +527,7 @@ def main(argv: list[str] | None = None) -> int:
         prometheus_base_url=args.prometheus_base_url,
         allow_local_cardinality_fallback=args.allow_local_cardinality_fallback,
     )
-    review_summary["source_command"] = shlex.join(
-        [
-            "python",
-            "-m",
-            _FACADE_MODULE,
-            *(sys.argv[1:] if argv is None else argv),
-        ]
-    )
+    review_summary["source_command"] = _recorded_source_command(args)
     _write_evidence_report(
         report,
         repo_root=args.repo_root,

@@ -740,6 +740,38 @@ def test_pr_fallback_records_actual_cli_command(tmp_path, monkeypatch):
         "--allow-local-cardinality-fallback",
     ]
     assert cli.main(argv) == 0
-    command = json.loads(output.read_text())["source_command"]
-    assert shlex.split(command)[3:] == argv
-    assert "--fail-on-degraded-live-review" not in command
+    command = json.loads(output.read_text(encoding="utf-8"))["source_command"]
+    recorded = shlex.split(command)
+    assert recorded[:3] == [
+        "python",
+        "-m",
+        "scripts.engineering.qa.report_observability_metric_inventory",
+    ]
+    assert recorded[3:] == [
+        "--allow-local-cardinality-fallback",
+        "--repo-root",
+        str(tmp_path),
+        "--review-json-out",
+        str(output),
+    ]
+    assert "--fail-on-degraded-live-review" not in recorded
+
+
+def test_unknown_option_is_rejected_before_provenance(tmp_path: Path) -> None:
+    """Extra argv tokens must not be copied into a replayable command."""
+    from scripts.engineering.qa import observability_metric_inventory_cli as cli
+
+    output = tmp_path / "review.json"
+    with pytest.raises(SystemExit) as caught:
+        cli.main(
+            [
+                "--repo-root",
+                str(tmp_path),
+                "--review-json-out",
+                str(output),
+                "--allow-local-cardinality-fallback",
+                ";rm",
+            ]
+        )
+    assert caught.value.code == 2
+    assert not output.exists()
