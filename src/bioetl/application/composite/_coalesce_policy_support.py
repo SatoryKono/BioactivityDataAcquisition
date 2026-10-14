@@ -99,13 +99,17 @@ def build_field_groups(
             field = col.split(".", 1)[1]
         field_groups.setdefault(field, []).append(col)
     if entity_scoped:
-        for field in list(field_groups):
-            if "." in field:
-                continue
-            matches = [key for key in field_groups if key.endswith("." + field)]
-            if len(matches) == 1:
-                field_groups[matches[0]][:0] = field_groups.pop(field)
+        _merge_unqualified_fields(field_groups)
     return field_groups
+
+
+def _merge_unqualified_fields(field_groups: dict[str, list[str]]) -> None:
+    """Move an unqualified seed into its unique entity group, preserving priority."""
+    unqualified = [field for field in field_groups if "." not in field]
+    for field in unqualified:
+        matches = [key for key in field_groups if key.endswith("." + field)]
+        if len(matches) == 1:
+            field_groups[matches[0]][:0] = field_groups.pop(field)
 
 
 def sort_columns(
