@@ -263,10 +263,11 @@ uv run python -m pytest tests/architecture/test_regression_metrics.py -q
 
 - **MERGE**: Upsert по первичным ключам. Стратегия по умолчанию для incremental updates.
 - **APPEND**: Вставка новых записей без проверки дубликатов.
+- Batch Silver поддерживает только **MERGE** и **APPEND**. **DELETE** и **OVERWRITE** отклоняются до записи. Полная замена выполняется отдельным rebuild/clear lifecycle либо `write_silver_merged`.
 
 **Валидация**:
 
-- `delete` и `overwrite` недопустимы в batch-контракте Silver и отклоняются до записи. Полная замена объединённого snapshot выполняется отдельным `write_silver_merged`, а не режимом batch writer.
+- Batch-режимы `DELETE` и `OVERWRITE` вызывают ошибку без изменения таблицы; destructive lifecycle не является batch write mode.
 - Нарушение инвариантов Medallion (например, Append для данных требующих идемпотентности) логируется как `PolicyViolation`.
 
 #### 2.1.2. Gold Write Modes (Режимы Записи)
@@ -334,18 +335,6 @@ sink:
 - **Protocol**: Writer Version 2 (поддержка Column Mapping), Reader Version 1.
 - **Maintenance**: Обязательный запуск `VACUUM` с `retention-period=7 days` еженедельно для очистки старых файлов и уменьшения стоимости хранения. **VACUUM MUST** запускаться еженедельно.
 - **Forensic Retention**: По умолчанию 7 дней. Для таблиц класса critical (Core Data) допустимо увеличение до 30 дней через конфиг (`forensic-retention: true`), если позволяет бюджет.
-
-#### 2.1.4. Medallion preflight escalation (CF-020)
-
-Canonical runtime assembly wires `pipeline.strict_validation` into
-`RuntimeConfig.strict_validation`. The default is `true`: invalid layer formats,
-paths, write modes, idempotency contracts and key-nullability scope block startup
-before extraction or storage mutation. An explicit
-`BIOETL_PIPELINE__STRICT_VALIDATION=false` selects advisory mode for diagnostics;
-it does not weaken runtime write-policy or Gold strict-validation enforcement.
-This setting is independent of DQ `strict_validation`, `strict_gold_validation`
-and schema-drift `strict_medallion`, and is materialized in effective-config
-identity for replay.
 
 ### 2.2. Политика Дрейфа Схемы (Schema Drift)
 

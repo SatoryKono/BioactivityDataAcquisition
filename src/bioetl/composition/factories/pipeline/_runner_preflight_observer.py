@@ -2,66 +2,35 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
-
-from bioetl.application.core.preflight import (
-    HealthAggregator,
-    MedallionConfigValidator,
-    PreflightService,
-)
-from bioetl.application.observability.observer import (
-    PipelineObserver,
-    PipelineObserverParams,
+from typing import TYPE_CHECKING
+from bioetl.composition.factories.services.preflight import (
+    build_preflight_service as _build_preflight_service,
 )
 from bioetl.composition.factories.pipeline._preflight_health_monitor import (
     build_preflight_health_monitor,
 )
-from bioetl.domain.medallion import WriteModePolicy
-from bioetl.application.core.preflight.medallion_validator import PreflightLayerConfig
+
+from bioetl.application.observability.observer import (
+    PipelineObserver,
+    PipelineObserverParams,
+)
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
+    from bioetl.application.core.preflight import PreflightService
     from bioetl.composition.factories.pipeline._runner_assembly_support import (
         RunnerAssemblyContext,
     )
 
 
 def build_preflight_service(context: RunnerAssemblyContext) -> PreflightService:
-    """Build the preflight service for a pipeline runner."""
-    pipeline = context.pipeline
-    health_aggregator = HealthAggregator(
+    """Delegate startup construction through the public service seam."""
+    return _build_preflight_service(
+        pipeline=context.pipeline,
         logger=context.logger_port,
-        health_monitor=build_preflight_health_monitor(pipeline.services.metrics),
-        health_check_mode=pipeline.runtime.health_check_mode,
-        clock=SystemClock(),
-    )
-    medallion_validator = MedallionConfigValidator(
-        config=pipeline.config,
-        logger=context.logger_port,
-        write_mode_policy=WriteModePolicy(),
-    )
-    storage = pipeline.services.storage
-    sink = context.yaml_config.sink if context.yaml_config is not None else {}
-    silver = sink.get("silver")
-    gold = sink.get("gold")
-
-    bronze_svc = getattr(storage, "bronze", None)
-    silver_svc = getattr(storage, "silver", None)
-    gold_svc = getattr(storage, "gold", None)
-
-    return PreflightService(
-        config=pipeline.config,
-        context=pipeline.context,
-        logger=context.logger_port,
-        metrics=pipeline.services.metrics,
-        health_aggregator=health_aggregator,
-        medallion_validator=medallion_validator,
-        layer_config=PreflightLayerConfig(
-            bronze_path=str(bronze_svc.base_path) if bronze_svc else None,
-            silver_path=str(silver_svc.base_path) if silver_svc else None,
-            gold_path=str(gold_svc.base_path) if gold_svc else None,
-            silver_format=silver.format if silver is not None else None,
-            gold_format=gold.format if gold is not None else None,
+        yaml_config=context.yaml_config,
+        health_monitor=build_preflight_health_monitor(
+            context.pipeline.services.metrics
         ),
     )
 

@@ -289,6 +289,13 @@ async def test_capture_reads_injected_writer_paths_as_absolute(
     table = pa.table({"entity_id": ["publication-1"]})
     physical_root = tmp_path / "injected-writer-location"
     if relative:
+        physical_root = (
+            Path.cwd()
+            / "reports"
+            / "test-scratch"
+            / tmp_path.name
+            / "injected-writer-location"
+        )
         physical_root = Path(relpath(physical_root))
     paths = {layer: physical_root / layer for layer in ("silver", "gold")}
     storage = MagicMock()
@@ -348,6 +355,13 @@ async def test_replay_verification_reads_supplied_physical_paths_as_absolute(
     root = tmp_path / "capture"
     physical_root = tmp_path / "injected-writer-location"
     if relative:
+        physical_root = (
+            Path.cwd()
+            / "reports"
+            / "test-scratch"
+            / tmp_path.name
+            / "injected-writer-location"
+        )
         physical_root = Path(relpath(physical_root))
     paths = {layer: physical_root / layer for layer in ("silver", "gold")}
     for layer in paths:

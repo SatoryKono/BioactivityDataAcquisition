@@ -775,7 +775,7 @@ sink:
 
 | Mode        | Bronze        | Silver            | Gold              |
 | ----------- | ------------- | ----------------- | ----------------- |
-| `append`    | Только append | —                 | —                 |
+| `append`    | Только append | С явным idempotency contract | Append |
 | `merge`     | —             | Upsert по PK      | —                 |
 | `overwrite` | —             | —                 | Полная перезапись |
 | `scd2`      | —             | —                 | Историзация Type 2 |

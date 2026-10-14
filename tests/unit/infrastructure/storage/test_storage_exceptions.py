@@ -29,6 +29,10 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
+
 from tests.helpers.clock import fixed_test_clock
 
 from unittest.mock import MagicMock, patch
@@ -46,7 +50,9 @@ from bioetl.infrastructure.storage.silver_writer import SilverWriter
 def silver_writer(noop_logger):
     """Fixture for a SilverWriter."""
     return SilverWriter(
-        clock=fixed_test_clock(), base_path="/fake/path", logger=noop_logger
+        runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
+        base_path="/fake/path",
+        logger=noop_logger,
     )
 
 
@@ -103,7 +109,11 @@ class TestSilverWriterExceptions:
             ),
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(), base_path="/fake/path", logger=noop_logger
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
+                base_path="/fake/path",
+                logger=noop_logger,
             )
             with pytest.raises(SchemaViolationError):
                 await writer.write_silver(
@@ -124,11 +134,14 @@ class TestSilverWriterExceptions:
         mock_merge.when_not_matched_insert_all.return_value = mock_merge
         mock_merge.execute.side_effect = DeltaError("Merge-conflict")
 
-        # First call (schema check) raises TableNotFoundError, second call returns mock
+        mock_table_instance.metadata.return_value.partition_columns = []
+
+        # Schema and physical-partition checks precede the actual merge attempt.
         mock_delta_table = MagicMock(
             side_effect=[
                 TableNotFoundError("Not found"),  # Schema check
-                mock_table_instance,  # Write attempt
+                mock_table_instance,  # Physical partition compatibility
+                mock_table_instance,  # Merge attempt
             ]
         )
 
@@ -154,7 +167,11 @@ class TestSilverWriterExceptions:
             ),
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(), base_path="/fake/path", logger=noop_logger
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
+                base_path="/fake/path",
+                logger=noop_logger,
             )
             with pytest.raises(MergeConflictError):
                 await writer.write_silver(
@@ -194,7 +211,11 @@ class TestSilverWriterExceptions:
             ),
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(), base_path=str(tmp_path), logger=noop_logger
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
+                base_path=str(tmp_path),
+                logger=noop_logger,
             )
             with pytest.raises(SchemaViolationError):
                 await writer.write_silver(
@@ -209,7 +230,11 @@ class TestSilverWriterExceptions:
             side_effect=TableNotFoundError,
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(), base_path="/fake/path", logger=noop_logger
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
+                base_path="/fake/path",
+                logger=noop_logger,
             )
 
             with pytest.raises(CustomTableNotFoundError):

@@ -14,6 +14,10 @@ standard test runs. Run explicitly with: make bench or pytest -m benchmark
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
+
 from tests.helpers.clock import fixed_test_clock
 
 import asyncio
@@ -94,7 +98,9 @@ def bronze_writer(tmp_path: Path, logger: NoOpLogger) -> BronzeWriter:
 def silver_writer(tmp_path: Path, logger: NoOpLogger) -> SilverWriter:
     """Create SilverWriter for performance tests."""
     return SilverWriter(
-        clock=fixed_test_clock(), base_path=tmp_path / "silver", logger=logger
+        runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
+        base_path=tmp_path / "silver",
+        logger=logger,
     )
 
 

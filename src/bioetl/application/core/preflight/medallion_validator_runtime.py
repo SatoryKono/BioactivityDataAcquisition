@@ -75,25 +75,7 @@ def validate_layer_formats(
 
 def canonicalize_layer_path(path: str) -> str:
     """Normalize a medallion layer path so trailing-slash variants compare equal."""
-    return os.path.realpath(path.strip())
-
-
-def _path_collision_error(
-    *,
-    first_layer: str,
-    first_path: str | None,
-    first_canonical: str | None,
-    second_layer: str,
-    second_canonical: str | None,
-) -> ConfigValidationError | None:
-    if first_canonical is None or first_canonical != second_canonical:
-        return None
-    return ConfigValidationError(
-        field=_LAYER_PATHS_FIELD,
-        expected=_UNIQUE_LAYER_PATHS_EXPECTED,
-        actual=f"{first_layer}_path == {second_layer}_path ({first_path})",
-        rule=_DISTINCT_LAYER_PATHS_RULE,
-    )
+    return os.path.normcase(os.path.realpath(path.strip()))
 
 
 def validate_path_uniqueness(
@@ -102,32 +84,25 @@ def validate_path_uniqueness(
     silver_path: str | None,
     gold_path: str | None,
 ) -> list[ConfigValidationError]:
-    """Validate that bronze/silver/gold use distinct paths."""
-    canon_bronze = (
-        canonicalize_layer_path(bronze_path) if bronze_path is not None else None
-    )
-    canon_silver = (
-        canonicalize_layer_path(silver_path) if silver_path is not None else None
-    )
-    canon_gold = canonicalize_layer_path(gold_path) if gold_path is not None else None
-    pairs = (
-        ("bronze", bronze_path, canon_bronze, "silver", canon_silver),
-        ("silver", silver_path, canon_silver, "gold", canon_gold),
-        ("bronze", bronze_path, canon_bronze, "gold", canon_gold),
-    )
+    """Compare resolved destinations, keeping the canonical collision error order."""
+    paths = {"bronze": bronze_path, "silver": silver_path, "gold": gold_path}
+    canonical = {
+        name: canonicalize_layer_path(path) if path is not None else None
+        for name, path in paths.items()
+    }
     return [
-        error
-        for first_layer, first_path, first_canonical, second_layer, second_canonical in pairs
-        if (
-            error := _path_collision_error(
-                first_layer=first_layer,
-                first_path=first_path,
-                first_canonical=first_canonical,
-                second_layer=second_layer,
-                second_canonical=second_canonical,
-            )
+        ConfigValidationError(
+            field=_LAYER_PATHS_FIELD,
+            expected=_UNIQUE_LAYER_PATHS_EXPECTED,
+            actual=f"{first}_path == {second}_path ({paths[first]})",
+            rule=_DISTINCT_LAYER_PATHS_RULE,
         )
-        is not None
+        for first, second in (
+            ("bronze", "silver"),
+            ("silver", "gold"),
+            ("bronze", "gold"),
+        )
+        if canonical[first] is not None and canonical[first] == canonical[second]
     ]
 
 

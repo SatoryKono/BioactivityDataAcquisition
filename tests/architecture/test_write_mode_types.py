@@ -110,7 +110,7 @@ def test_write_mode_enums_exist_in_domain() -> None:
     # Verify enum values
     assert SilverWriteMode.MERGE.value == "merge"
     assert SilverWriteMode.APPEND.value == "append"
-    assert {m.value for m in SilverWriteMode} == {"merge", "append"}
+    assert {mode.value for mode in SilverWriteMode} == {"merge", "append"}
 
     assert GoldWriteMode.APPEND.value == "append"
     assert GoldWriteMode.SCD2.value == "scd2"
@@ -124,7 +124,7 @@ def test_write_mode_enums_have_from_string() -> None:
     # Test SilverWriteMode.from_string
     assert SilverWriteMode.from_string("merge") == SilverWriteMode.MERGE
     assert SilverWriteMode.from_string("APPEND") == SilverWriteMode.APPEND
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Invalid Silver write mode"):
         SilverWriteMode.from_string("Delete")
 
     # Test GoldWriteMode.from_string
@@ -168,11 +168,11 @@ def test_table_config_accepts_enums_directly() -> None:
     from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 
     config = TableConfig(
-        silver_write_mode=SilverWriteMode.MERGE,
+        silver_write_mode=SilverWriteMode.APPEND,
         gold_write_mode=GoldWriteMode.SCD2,
     )
 
-    assert config.silver_write_mode == SilverWriteMode.MERGE
+    assert config.silver_write_mode == SilverWriteMode.APPEND
     assert config.gold_write_mode == GoldWriteMode.SCD2
 
 
@@ -204,7 +204,7 @@ def test_overwrite_for_silver_raises_error() -> None:
     """silver_write_mode='overwrite' MUST raise ValueError.
 
     The deprecated 'overwrite' alias for Silver layer has been removed.
-    Full snapshot overwrite belongs to write_silver_merged, not batch modes.
+    Use the separate clear/rebuild lifecycle for destructive operations.
     """
     from bioetl.domain.config import TableConfig
 
@@ -235,3 +235,11 @@ def test_no_silent_degradation_in_batch_writer() -> None:
         "BatchWriter silver mode must use explicit append/merge set "
         "without overwrite alias."
     )
+
+
+@pytest.mark.parametrize("mode", ["delete", "overwrite"])
+def test_destructive_silver_config_is_rejected(mode: str) -> None:
+    from bioetl.domain.config import TableConfig
+
+    with pytest.raises(ValueError, match="Invalid Silver write mode"):
+        TableConfig(silver_write_mode=mode)

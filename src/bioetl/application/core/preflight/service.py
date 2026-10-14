@@ -113,13 +113,9 @@ class PreflightService:
         *,
         raise_on_unhealthy: bool = True,
     ) -> HealthReport:
-        """Validate storage and data source health.
-        Args:
-            services: Pipeline service container providing storage and data source ports.
-            raise_on_unhealthy: Whether to raise InfrastructureError when any
-                component in the resulting report is unhealthy.
-        Returns:
-            HealthReport with per-component status and overall health assessment.
+        """Probe storage/provider ports and return their executed health report.
+
+        Unhealthy components raise only when ``raise_on_unhealthy`` is true.
         """
         report = await self._health_aggregator.check_all(services)
         if raise_on_unhealthy:
@@ -139,17 +135,7 @@ class PreflightService:
         silver_format: str | None = None,
         gold_format: str | None = None,
     ) -> list[ConfigValidationError]:
-        """Validate Medallion architecture invariants.
-        Args:
-            runtime: Runtime configuration specifying run type and write modes.
-            bronze_path: Absolute path to the Bronze layer directory.
-            silver_path: Absolute path to the Silver layer directory.
-            gold_path: Absolute path to the Gold layer directory.
-            silver_format: Optional storage format override for Silver (e.g. ``"delta"``).
-            gold_format: Optional storage format override for Gold.
-        Returns:
-            List of ConfigValidationError for any detected violations (empty if valid).
-        """
+        """Return violations for supplied paths/formats and the runtime policy."""
         return self._medallion_validator.validate_medallion_config(
             runtime=runtime,
             bronze_path=bronze_path,
@@ -160,10 +146,7 @@ class PreflightService:
         )
 
     def validate_write_modes(self) -> list[ConfigValidationError]:
-        """Validate that config write modes are allowed by Medallion policy.
-        Returns:
-            List of ConfigValidationError for any invalid write mode combinations.
-        """
+        """Return mode/idempotency violations without running health probes."""
         return self._medallion_validator.validate_write_modes()
 
     async def validate_preflight(
@@ -176,17 +159,12 @@ class PreflightService:
         silver_format: str | None = None,
         gold_format: str | None = None,
     ) -> PreflightReport:
-        """Execute all preflight checks and return aggregated report.
-        Args:
-            services: Pipeline service container for infrastructure health checks.
-            runtime: Runtime configuration used for Medallion invariant validation.
-            bronze_path: Absolute path to the Bronze layer directory.
-            silver_path: Absolute path to the Silver layer directory.
-            gold_path: Absolute path to the Gold layer directory.
-            silver_format: Optional storage format override for Silver.
-            gold_format: Optional storage format override for Gold.
-        Returns:
-            PreflightReport aggregating infrastructure health and config validation results.
+        """Validate supplied layer paths/formats before health and extraction.
+
+        Strict preflight raises for invalid configuration before health probes.
+        Advisory mode runs probes and includes configuration errors in the report.
+        Paths may be relative; validation compares their resolved destinations.
+        The report contains actual component health and Medallion validation results.
         """
         self.validate_runtime_configuration(runtime)
         config_errors = self.validate_medallion_config(
@@ -200,7 +178,7 @@ class PreflightService:
         write_mode_errors = self.validate_write_modes()
         config_errors.extend(write_mode_errors)
         medallion_policy_valid = len(config_errors) == 0
-        if config_errors:
+        if config_errors and runtime.strict_preflight:
             report = PreflightReport(
                 health_report=HealthReport(results=[]),
                 medallion_policy_valid=False,

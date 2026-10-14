@@ -36,6 +36,7 @@ if TYPE_CHECKING:
         RunType,
         ScdConfig,
     )
+    from bioetl.domain.types.gold_contracts import GoldWriteReceipt
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
@@ -78,7 +79,7 @@ class BatchWriteStorageProtocol(Protocol):
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
         silver_refs: list[SilverWriteResult] | None = None,
-    ) -> None:
+    ) -> GoldWriteReceipt:
         """Persist validated records into Gold storage."""
         ...
 

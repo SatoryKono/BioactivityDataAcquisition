@@ -73,14 +73,13 @@ def build_workflow_transform_registry(
 ) -> WorkflowTransformRegistry:
     """Assemble workflow transform storage and builtin transform registry."""
     workflow_storage_logger = create_noop_logger()
-    silver_clock = SystemClock()
+    clock = SystemClock()
     transform_storage = SilverWriter(
-        clock=silver_clock,
         base_path=settings.silver_path,
         logger=workflow_storage_logger,
         runtime_services=build_silver_writer_runtime_services(
             SilverWriterRuntimeServicesRequest(
-                clock=silver_clock,
+                clock=clock,
                 csv_exporter=None,
                 tracing=NoOpTracing(),
                 write_policy=None,
@@ -123,7 +122,7 @@ def build_workflow_transform_registry(
         foreign_key_reconciliation_port=SilverForeignKeyReconciliationAdapter(
             silver_writer=transform_storage,
             logger=foreign_key_reconciliation_logger,
-            clock=silver_clock,
+            clock=SystemClock(),
             metrics=metrics,
             quarantine=reconciliation_quarantine,
             quarantine_pipeline_name="workflow_transforms",

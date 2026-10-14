@@ -1074,10 +1074,10 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         encoding="utf-8"
     )
     assert "uv=0.11.26-r0" in dockerfile
-    assert dockerfile.count("glibc-2.44=2.44-r6") == 2
-    assert dockerfile.count("glibc-2.44-locale-posix=2.44-r6") == 2
-    assert dockerfile.count("ld-linux-2.44=2.44-r6") == 2
-    assert dockerfile.count("libcrypt1-2.44=2.44-r6") == 2
+    assert dockerfile.count("glibc-2.44=2.44-r8") == 2
+    assert dockerfile.count("glibc-2.44-locale-posix=2.44-r8") == 2
+    assert dockerfile.count("ld-linux-2.44=2.44-r8") == 2
+    assert dockerfile.count("libcrypt1-2.44=2.44-r8") == 2
     assert (
         dockerfile.count(
             "chainguard/wolfi-base@sha256:"
@@ -1515,7 +1515,7 @@ def test_docker_workflow_probes_shellless_runtime_and_default_health() -> None:
     )
     probe = str(provenance["run"])
     for required in (
-        "sys.version_info[:3] == (3, 13, 15)",
+        "sys.version_info[:3] == (3, 13, 16)",
         "(os.getuid(), os.getgid()) == (999, 999)",
         'pwd.getpwuid(999).pw_name == "bioetl"',
         'pwd.getpwuid(999).pw_shell == "/sbin/nologin"',
@@ -1648,7 +1648,12 @@ def test_docker_security_gate_covers_dependency_build_inputs() -> None:
     assert isinstance(trigger, dict)
     assert "workflow_call" in trigger
     assert "pull_request" not in trigger
-    paths = set(trigger["push"]["paths"])
+    # Dependency/build inputs trigger the docker gate through the shared
+    # required-checks catalog (CircleCI pr-gate, catalog version 3); main
+    # pushes additionally reach docker.yml via main-integrity.yml.
+    catalog = _load_yaml(ROOT / "configs/quality/github_required_checks.yaml")
+    docker_gate = next(gate for gate in catalog["gates"] if gate.get("id") == "docker")
+    paths = set(docker_gate["paths"]["include"])
     assert {
         "Dockerfile.bioetl",
         "pyproject.toml",

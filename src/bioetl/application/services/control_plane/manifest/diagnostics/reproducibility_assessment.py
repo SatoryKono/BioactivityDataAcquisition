@@ -5,13 +5,15 @@ from __future__ import annotations
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants import (
     required_persistence_profile as _required_persistence_profile_module,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context import (
-    build_replay_family_context,
-)
 from bioetl.domain.control_plane import RunManifest
+from bioetl.domain.control_plane.execution_context import is_composite_execution_context
 from bioetl.domain.control_plane.reproducibility_policy import (
     ReproducibilityPolicyAssessment,
     assess_reproducibility_policy,
+)
+from bioetl.domain.control_plane.reproducibility_profiles import (
+    ReproducibilityExecutionContext,
+    resolve_reproducibility_family_profile,
 )
 
 
@@ -22,17 +24,21 @@ def _assess_manifest_reproducibility_policy(
     resume_requested: bool,
 ) -> ReproducibilityPolicyAssessment:
     """Return the central reproducibility policy verdict for one manifest."""
-    replay_family_contract = build_replay_family_context(
-        manifest
-    ).replay_family_contract
+    execution_context: ReproducibilityExecutionContext = (
+        "composite" if is_composite_execution_context(manifest) else "source"
+    )
+    replay_family_profile = resolve_reproducibility_family_profile(
+        provider=manifest.provider,
+        entity=manifest.entity,
+        contract_ref=manifest.code_provenance.contract_ref,
+        execution_context=execution_context,
+    )
     return assess_reproducibility_policy(
         source_refs=manifest.source_refs,
         required_persistence_profile=_required_persistence_profile_module._resolve_required_persistence_profile(
             manifest
         ),
-        strict_exact_replay_supported=bool(
-            replay_family_contract.get("strict_exact_replay_supported", False)
-        ),
+        strict_exact_replay_supported=replay_family_profile.strict_exact_replay_supported,
         exact_replay_requested=requested_exact_replay,
         resume_requested=resume_requested,
         require_full_snapshot_envelope=False,

@@ -157,7 +157,6 @@ def bootstrap_storage_adapter(
             lineage_store=lineage_store,
         ),
         silver_writer=SilverWriter(
-            clock=silver_clock,
             base_path=output_dir / "silver",  # data/output/silver
             logger=logger,
             runtime_services=build_silver_writer_runtime_services(

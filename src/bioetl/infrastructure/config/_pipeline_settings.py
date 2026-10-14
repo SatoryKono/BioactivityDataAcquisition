@@ -98,7 +98,7 @@ class PipelineSettings(BaseSettings):
     checkpoint_interval: int = Field(default=DEFAULT_CHECKPOINT_INTERVAL, ge=100)
     """Save checkpoint every N records."""
 
-    strict_validation: bool = Field(default=True)
+    strict_preflight: bool = Field(default=True)
     """Block startup on Medallion preflight violations; explicit False is advisory."""
 
     relaxed_dq: bool = Field(default=False)

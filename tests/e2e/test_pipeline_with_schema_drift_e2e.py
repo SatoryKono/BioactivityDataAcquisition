@@ -38,6 +38,10 @@ Per domain/config.py TableConfig:
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
+
 from tests.helpers.clock import fixed_test_clock
 
 from pathlib import Path
@@ -164,7 +168,9 @@ class TestSchemaEvolutionErrorMode:
         table_path = e2e_data_dir / "silver" / table_name
 
         writer = SilverWriter(
-            clock=fixed_test_clock(),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
         )
@@ -205,7 +211,9 @@ class TestSchemaEvolutionErrorMode:
         table_name = "test_schema_removed"
 
         writer = SilverWriter(
-            clock=fixed_test_clock(),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
         )
@@ -262,7 +270,9 @@ class TestSchemaEvolutionEvolveMode:
         table_path = e2e_data_dir / "silver" / table_name
 
         writer = SilverWriter(
-            clock=fixed_test_clock(),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
         )
@@ -314,7 +324,9 @@ class TestSchemaEvolutionEvolveMode:
         table_name = "test_schema_evolve_log"
 
         writer = SilverWriter(
-            clock=fixed_test_clock(),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
             base_path=str(e2e_data_dir / "silver"),
             logger=mock_logger,
         )
@@ -387,7 +399,9 @@ class TestSchemaEvolutionIgnoreMode:
         table_path = e2e_data_dir / "silver" / table_name
 
         writer = SilverWriter(
-            clock=fixed_test_clock(),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
         )
@@ -439,7 +453,9 @@ class TestSchemaEvolutionEdgeCases:
         table_path = e2e_data_dir / "silver" / table_name
 
         writer = SilverWriter(
-            clock=fixed_test_clock(),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
         )
@@ -474,7 +490,9 @@ class TestSchemaEvolutionEdgeCases:
         table_name = "test_no_drift"
 
         writer = SilverWriter(
-            clock=fixed_test_clock(),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
             base_path=str(e2e_data_dir / "silver"),
             logger=mock_logger,
         )
@@ -536,7 +554,9 @@ class TestSchemaEvolutionEdgeCases:
         table_path = e2e_data_dir / "silver" / table_name
 
         writer = SilverWriter(
-            clock=fixed_test_clock(),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
         )

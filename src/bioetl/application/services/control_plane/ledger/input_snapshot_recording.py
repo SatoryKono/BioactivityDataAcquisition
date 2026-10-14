@@ -2,15 +2,10 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.input_snapshot_identity import (
-    InputSnapshotIdentity,
-)
 from bioetl.application.services.control_plane.ledger._input_snapshot_manifest import (
     persist_input_snapshots_on_manifest,
 )
@@ -22,37 +17,16 @@ if TYPE_CHECKING:
     )
 
 
-@dataclass(frozen=True, slots=True)
-class _SnapshotPublishRequest(InputSnapshotIdentity):
-    """Validated input-snapshot publication request."""
-
-    query_fingerprint: str | None
-    details: Mapping[str, object]
-
-    def publish(self, service: RunLedgerService) -> None:
-        """Append this snapshot through the ledger service port."""
-        service.record_input_snapshot_published(
-            provider=self.provider,
-            entity=self.entity,
-            pipeline_name=self.pipeline_name,
-            snapshot_id=self.snapshot_id,
-            content_hash=self.content_hash,
-            immutable_uri=self.immutable_uri,
-            bronze_batch_ref=self.bronze_batch_ref,
-            query_fingerprint=self.query_fingerprint,
-            details=self.details,
-        )
-
-
-def _published_snapshot_request(
+def _record_published_snapshot(
+    service: RunLedgerService,
     snapshot: dict[str, object],
     *,
     details: dict[str, object],
     artifact_path: str,
     snapshot_id: str,
-) -> _SnapshotPublishRequest:
-    """Build a publication request for one validated snapshot payload."""
-    return _SnapshotPublishRequest(
+) -> None:
+    """Publish one validated input-snapshot payload to the run ledger."""
+    service.record_input_snapshot_published(
         provider=str(details.get("provider") or ""),
         entity=str(details.get("entity") or ""),
         pipeline_name=str(details.get("pipeline_name") or ""),
@@ -88,13 +62,13 @@ def _record_one_input_snapshot(
     snapshot_id = str(snapshot.get("snapshot_id") or "").strip()
     if not snapshot_id:
         raise ValueError("input snapshot is missing snapshot_id")
-    request = _published_snapshot_request(
+    _record_published_snapshot(
+        service,
         snapshot,
         details=details,
         artifact_path=artifact_path,
         snapshot_id=snapshot_id,
     )
-    request.publish(service)
     return _snapshot_ref_from_payload(snapshot, snapshot_id=snapshot_id)
 
 

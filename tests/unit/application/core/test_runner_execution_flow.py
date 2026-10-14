@@ -79,9 +79,11 @@ class _ExecutionHost:
             delete_checkpoint=self._delete_checkpoint,
         )
         self._preflight_service = SimpleNamespace(
+            validate_runtime_configuration=lambda runtime: self.order.append(
+                "validate_runtime_configuration"
+            ),
             validate_infrastructure=self._validate_infrastructure,
             assert_infrastructure_healthy=self._assert_infrastructure_healthy,
-            validate_runtime_configuration=lambda runtime: None,
         )
         self._postrun_service = SimpleNamespace(
             OPERATION_ERRORS=PostrunService.OPERATION_ERRORS,
@@ -258,6 +260,7 @@ async def test_run_managed_pipeline_preserves_canonical_stage_order() -> None:
     assert host.order == [
         "start:preflight",
         "observer:start:preflight",
+        "validate_runtime_configuration",
         "validate_infrastructure",
         "observer:health:storage",
         "observer:health:data_source",

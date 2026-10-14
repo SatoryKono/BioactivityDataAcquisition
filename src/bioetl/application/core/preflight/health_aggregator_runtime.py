@@ -107,12 +107,9 @@ __all__ = [
 
 def _supports_raise_on_unhealthy(validate_fn: object) -> bool:
     """Return True when ``validate_infrastructure`` accepts raise_on_unhealthy."""
+    if not callable(validate_fn):
+        return False
     try:
-        from typing import Any, cast
-
-        signature = inspect.signature(
-            cast(Any, validate_fn)
-        )  # Any: inspect accepts arbitrary callables
+        return "raise_on_unhealthy" in inspect.signature(validate_fn).parameters
     except (TypeError, ValueError):
         return False
-    return "raise_on_unhealthy" in signature.parameters

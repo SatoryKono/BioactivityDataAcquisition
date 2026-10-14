@@ -29,6 +29,10 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
+
 from tests.helpers.clock import fixed_test_clock
 
 from unittest.mock import AsyncMock
@@ -51,7 +55,11 @@ class TestSilverWriterKeyNullability:
     async def test_non_nullable_merge_key_rejects_null(self) -> None:
         """Non-null merge key policy must reject records with null merge key."""
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path=TEST_SILVER_ROOT, logger=NoOpLogger()
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path=TEST_SILVER_ROOT,
+            logger=NoOpLogger(),
         )
         writer._dispatch_write_with_domain_errors = AsyncMock()  # type: ignore[method-assign]
 
@@ -94,7 +102,11 @@ class TestSilverWriterKeyNullability:
     async def test_nullable_partition_key_allows_null(self) -> None:
         """Nullable partition key policy should allow null partition values."""
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path=TEST_SILVER_ROOT, logger=NoOpLogger()
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path=TEST_SILVER_ROOT,
+            logger=NoOpLogger(),
         )
 
         writer._dispatch_write_with_domain_errors = AsyncMock(return_value=None)  # type: ignore[method-assign]

@@ -10,17 +10,17 @@ from bioetl.domain.composite.cross_validation import ComparisonMethod
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.domain.composite.cross_validation import EnricherFieldPairing
+    from bioetl.domain.composite.cross_validation import (
+        CrossValidationContext,
+        EnricherFieldPairing,
+    )
     from bioetl.domain.ports import LoggerPort
 
 
 def _count_mismatches_vectorized(
     df: pl.DataFrame,
     pairing: EnricherFieldPairing,
-    seed_provider: str,
-    seed_entity: str,
-    enricher_provider: str,
-    enricher_entity: str,
+    context: CrossValidationContext,
     *,
     logger: LoggerPort,
 ) -> tuple[pl.Series, pl.Series, dict[str, int], dict[str, pl.Series]]:
@@ -37,8 +37,10 @@ def _count_mismatches_vectorized(
         if spec.method == ComparisonMethod.SKIP:
             continue
 
-        seed_col = f"{seed_provider}.{seed_entity}.{spec.field_name}"
-        enricher_col = f"{enricher_provider}.{enricher_entity}.{spec.field_name}"
+        seed_col = f"{context.seed_provider}.{context.seed_entity}.{spec.field_name}"
+        enricher_col = (
+            f"{context.enricher_provider}.{context.enricher_entity}.{spec.field_name}"
+        )
 
         if seed_col not in df.columns or enricher_col not in df.columns:
             logger.debug(

@@ -12,6 +12,10 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
+
 from tests.helpers.clock import fixed_test_clock
 
 import json
@@ -188,7 +192,9 @@ async def test_reconcile_foreign_keys_is_idempotent(
 ) -> None:
     logger = _RecordingLogger()
     silver_writer = SilverWriter(
-        clock=fixed_test_clock(), base_path=tmp_path / "silver", logger=logger
+        runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
+        base_path=tmp_path / "silver",
+        logger=logger,
     )
     reference_schema = pa.schema(
         [
@@ -292,7 +298,9 @@ async def test_reconcile_foreign_keys_sends_orphans_to_quarantine(
 ) -> None:
     logger = _RecordingLogger()
     silver_writer = SilverWriter(
-        clock=fixed_test_clock(), base_path=tmp_path / "silver", logger=logger
+        runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
+        base_path=tmp_path / "silver",
+        logger=logger,
     )
     quarantine = _RecordingQuarantine()
     reference_schema = pa.schema(
@@ -387,7 +395,9 @@ async def test_reconcile_foreign_keys_supports_composite_keys_and_null_policy(
 ) -> None:
     logger = _RecordingLogger()
     silver_writer = SilverWriter(
-        clock=fixed_test_clock(), base_path=tmp_path / "silver", logger=logger
+        runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
+        base_path=tmp_path / "silver",
+        logger=logger,
     )
     reference_schema = pa.schema(
         [
@@ -515,7 +525,9 @@ async def test_reconcile_foreign_keys_dry_run_previews_without_mutation(
 ) -> None:
     logger = _RecordingLogger()
     silver_writer = SilverWriter(
-        clock=fixed_test_clock(), base_path=tmp_path / "silver", logger=logger
+        runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
+        base_path=tmp_path / "silver",
+        logger=logger,
     )
     reference_schema = pa.schema(
         [
@@ -613,7 +625,9 @@ async def test_reconcile_foreign_keys_expires_gold_orphans_without_dropping_hist
     logger = _RecordingLogger()
     metrics = _RecordingMetrics()
     silver_writer = SilverWriter(
-        clock=fixed_test_clock(), base_path=tmp_path / "silver", logger=logger
+        runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
+        base_path=tmp_path / "silver",
+        logger=logger,
     )
     gold_writer = _gold_writer(tmp_path, logger, metrics)
     quarantine = _RecordingQuarantine()
@@ -711,7 +725,9 @@ async def test_reconcile_foreign_keys_persists_result_and_debug_artifacts(
     logger = _RecordingLogger()
     metrics = _RecordingMetrics()
     silver_writer = SilverWriter(
-        clock=fixed_test_clock(), base_path=tmp_path / "silver", logger=logger
+        runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
+        base_path=tmp_path / "silver",
+        logger=logger,
     )
     gold_writer = _gold_writer(tmp_path, logger, metrics)
     quarantine = _RecordingQuarantine()
@@ -891,7 +907,9 @@ async def test_inverse_reconcile_foreign_keys_expires_unused_gold_dimensions(
     logger = _RecordingLogger()
     metrics = _RecordingMetrics()
     silver_writer = SilverWriter(
-        clock=fixed_test_clock(), base_path=tmp_path / "silver", logger=logger
+        runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
+        base_path=tmp_path / "silver",
+        logger=logger,
     )
     gold_writer = _gold_writer(tmp_path, logger, metrics)
     quarantine = _RecordingQuarantine()

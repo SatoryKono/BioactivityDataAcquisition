@@ -1288,19 +1288,29 @@ def _bioetl_test_silver_validator(
         if "SilverWriter" not in module_text and "silver_writer" not in module_text:
             return
 
+    from tests.helpers.clock import fixed_test_clock
+
     original_init = SilverWriter.__init__
 
     def _init(
         self: object,
         base_path: object,
         logger: object,
+        transform_version: object = None,
+        transform_steps: object = None,
         runtime_services: object = None,
         flat_structure: bool = False,
         pipeline_name: object = None,
         runtime_request: object = None,
-        *,
-        clock: object,
+        clock: object = None,
     ) -> None:
+        clock = (
+            clock
+            if clock is not None
+            else getattr(runtime_request, "clock", None)
+            or getattr(runtime_services, "clock", None)
+            or fixed_test_clock()
+        )
         if runtime_services is None:
             request_obj = runtime_request
             if (
@@ -1311,6 +1321,8 @@ def _bioetl_test_silver_validator(
                     runtime_request = SilverWriterRuntimeServicesRequest(
                         clock=clock,
                         logger=logger,  # type: ignore[arg-type]
+                        transform_version=transform_version,  # type: ignore[arg-type]
+                        transform_steps=transform_steps,  # type: ignore[arg-type]
                         silver_validator=NoOpValidator(),
                     )
                 else:
@@ -1339,11 +1351,12 @@ def _bioetl_test_silver_validator(
             self,
             base_path,
             logger,
+            transform_version=transform_version,
+            transform_steps=transform_steps,
             runtime_services=runtime_services,
             flat_structure=flat_structure,
             pipeline_name=pipeline_name,
             runtime_request=runtime_request,
-            clock=clock,
         )
 
     monkeypatch.setattr(SilverWriter, "__init__", _init)

@@ -260,6 +260,7 @@ class BaseOutputMetadata(BaseModel):
     )
     write_duration_seconds: float | None = Field(
         default=None,
+        exclude=True,
         ge=0,
         description="Measured elapsed write duration, independent of wall-clock timestamps",
     )

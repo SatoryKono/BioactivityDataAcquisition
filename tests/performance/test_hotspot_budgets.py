@@ -15,6 +15,10 @@ latency is inherently noisier on shared CI runners.
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
+
 from tests.helpers.clock import fixed_test_clock
 
 import asyncio
@@ -376,7 +380,7 @@ def test_silver_prepare_arrow_data_budget(
     budget = budgets["silver_prepare_arrow_2000"]
 
     writer = SilverWriter(
-        clock=fixed_test_clock(),
+        runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
         base_path=tmp_path / "silver_prepare",
         logger=NoOpLogger(),
     )
@@ -416,7 +420,7 @@ def test_silver_write_append_budget(
     budget = budgets["silver_write_append_600"]
 
     writer = SilverWriter(
-        clock=fixed_test_clock(),
+        runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
         base_path=tmp_path / "silver_append",
         logger=NoOpLogger(),
     )
@@ -476,7 +480,7 @@ def test_silver_write_merge_budget(
     budget = budgets["silver_write_merge_600"]
 
     writer = SilverWriter(
-        clock=fixed_test_clock(),
+        runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
         base_path=tmp_path / "silver_merge",
         logger=NoOpLogger(),
     )

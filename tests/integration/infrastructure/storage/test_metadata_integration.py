@@ -366,7 +366,6 @@ class TestSilverWriterMetadataIntegration:
         silver_schema: pa.Schema,
     ) -> None:
         writer = SilverWriter(
-            clock=fixed_test_clock(),
             base_path=tmp_path,
             logger=mock_logger,
             runtime_request=SilverWriterRuntimeServicesRequest(
@@ -403,7 +402,9 @@ class TestSilverWriterMetadataIntegration:
         silver_schema: pa.Schema,
     ) -> None:
         writer = SilverWriter(
-            clock=fixed_test_clock(),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
             base_path=tmp_path,
             logger=mock_logger,
         )

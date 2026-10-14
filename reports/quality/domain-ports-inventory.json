@@ -495,7 +495,7 @@
       "runtime_checkable": true
     },
     {
-      "line": 14,
+      "line": 15,
       "name": "GoldStoragePort",
       "path": "src/bioetl/domain/ports/storage/gold_port.py",
       "runtime_checkable": true
@@ -507,7 +507,7 @@
       "runtime_checkable": true
     },
     {
-      "line": 14,
+      "line": 15,
       "name": "MergedStoragePort",
       "path": "src/bioetl/domain/ports/storage/merged_port.py",
       "runtime_checkable": true

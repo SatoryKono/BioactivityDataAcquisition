@@ -5,27 +5,64 @@ from __future__ import annotations
 from collections.abc import AsyncIterator
 from typing import ClassVar
 
-from bioetl.application.core.derived_assay_data_source import (
-    DerivedAssayDataSource,
+from bioetl.application.core.data_sources._derived_assay_source import (
+    _DerivedAssayDataSourceBase,
 )
 from bioetl.domain.deterministic_identity import deterministic_uuid
 from bioetl.domain.types import JsonDict
 
 
-class AssayParametersDataSource(DerivedAssayDataSource):
-    """Expose the API's nested parameters, never entire assays as parameters.
-
-    The public API has no parameter surrogate key. Its v1 local identity is a
-    positive signed-64-bit UUID-derived content key over assay ID and parameter
-    payload. An identical repeated observation is the same record; changing a
-    parameter value creates a new observation. It is not a ChEMBL database PK.
-    """
+class AssayParametersDataSource(_DerivedAssayDataSourceBase):
+    """Expand nested assay parameters into UUID-keyed content observations."""
 
     TARGET_ENTITY_TYPE = "assay_parameters"
     # Nested parameters are sparse; scale upstream assays for limited runs.
     ASSAY_LIMIT_MULTIPLIER: ClassVar[int] = 20
 
-    async def _expand_derived_records(
+    async def _fetch_target_records(
+        self,
+        limit: int | None = None,
+        query: str | None = None,
+        filter_ids: list[str] | None = None,
+        filter_field: str | None = None,
+        offset: int | None = None,
+    ) -> AsyncIterator[JsonDict]:
+        if limit is not None and limit <= 0:
+            return
+        source = self._iter_assays(
+            limit=limit,
+            query=query,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+        )
+        async for parameter in self._expand_parameters(
+            source,
+            limit=limit,
+            offset=offset,
+        ):
+            yield parameter
+
+    def _iter_derived_records(
+        self,
+        assays: AsyncIterator[JsonDict],
+        *,
+        limit: int | None,
+    ) -> AsyncIterator[JsonDict]:
+        return self._expand_parameters(assays, limit=limit)
+
+    def _yield_target_records_from_fallback_source_records(
+        self,
+        source_records: AsyncIterator[
+            object
+        ],  # object: fallback source stream forwards raw upstream records.
+        limit: int | None,
+    ) -> AsyncIterator[JsonDict]:
+        return self._expand_parameters(
+            self._coerce_assay_records(source_records),
+            limit=limit,
+        )
+
+    async def _expand_parameters(
         self,
         assays: AsyncIterator[JsonDict],
         *,

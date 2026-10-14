@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.artifact_payloads import (
-    ARTIFACT_TRACE_ORDERED_KEYS,
-)
 from bioetl.domain.control_plane import RunManifest
-
-_ARTIFACT_TRACE_ORDERED_KEYS = ARTIFACT_TRACE_ORDERED_KEYS
+from bioetl.domain.control_plane.artifact_trace_fields import (
+    ARTIFACT_TRACE_ORDERED_KEYS as _ARTIFACT_TRACE_ORDERED_KEYS,
+)
 
 
 def sorted_text_items(value: object) -> list[str]:

@@ -480,7 +480,7 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
     )
     assert (
         local_fallback_evidence["artifact"]
-        == "reports/observability/runtime_cardinality_review.json"
+        == "reports/observability/runtime_cardinality_review_pr.json"
     )
     assert local_fallback_evidence["release_gate_allowed"] is False
     assert "--allow-local-cardinality-fallback" in local_fallback_evidence["command"]

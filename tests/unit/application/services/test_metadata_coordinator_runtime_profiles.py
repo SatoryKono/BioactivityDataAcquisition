@@ -284,15 +284,15 @@ class TestSilverMetadata:
             coordinator.create_silver_metadata(input_append).delta.operation == "append"
         )
 
-        # Test DELETE mode (maps to overwrite)
-        input_delete = SilverMetadataInput(
+        # Explicit merged/lifecycle overwrite metadata remains supported
+        input_overwrite = SilverMetadataInput(
             table_path="/data/silver/t",
             records=records,
             primary_keys=["id"],
             mode=WriteMode.OVERWRITE,
         )
         assert (
-            coordinator.create_silver_metadata(input_delete).delta.operation
+            coordinator.create_silver_metadata(input_overwrite).delta.operation
             == "overwrite"
         )
 

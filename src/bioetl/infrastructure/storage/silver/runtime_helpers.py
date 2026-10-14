@@ -68,6 +68,7 @@ if TYPE_CHECKING:
 class SilverWriterRuntimeServices:
     """Grouped runtime collaborators for ``SilverWriter``."""
 
+    clock: ClockPort
     csv_exporter: CsvExporterProtocol | None
     tracing: TracingPort | None
     write_policy: WriteModePolicy
@@ -328,6 +329,7 @@ def build_silver_writer_runtime_services(
     merged_ops = _build_merged_operations(request)
 
     return SilverWriterRuntimeServices(
+        clock=request.clock,
         csv_exporter=request.csv_exporter,
         tracing=resolved_tracing,
         write_policy=resolved_write_policy,

@@ -179,8 +179,8 @@ def yaml_config_to_domain(
 
     table = TableConfig(
         primary_keys=tuple(yaml_config.business_primary_keys or ()),
-        # TODO(P2): Add migration/rebuild logic for pre-existing unpartitioned Delta tables.
-        # merge operations will fail if partition_by is added to an existing unpartitioned table.
+        # Existing Delta partitioning must match this configuration before any write.
+        # A mismatch requires an explicit rebuild/migration lifecycle, never a batch rewrite.
         partition_cols=tuple(silver_sink.partition_by if silver_sink else ()),
         silver_table=yaml_config.silver_table,
         gold_table=yaml_config.gold_table,

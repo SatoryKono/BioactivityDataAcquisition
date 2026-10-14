@@ -117,6 +117,11 @@ Domain business paths не должны создавать текущее вре
 - `bioetl.infrastructure.time.SystemClock` is the concrete system-time adapter;
 - composition/bootstrap modules wire `SystemClock` into application services, while `domain`, `application`, and `interfaces` must not instantiate infrastructure clocks directly.
 
+Silver writer получает обязательный `ClockPort` из composition. Явные
+`started_at` и `completed_at` проверяются по UTC-контракту до commit.
+Elapsed duration измеряется монотонным таймером независимо от исторического
+`started_at` и обратного перевода wall-clock.
+
 ### 4. Deterministic Domain Identities
 
 Replay-sensitive domain aggregates and domain events MUST NOT create hidden UUID4
@@ -317,8 +322,8 @@ byte fixtures cover profile differences and historical golden identity values.
 
 ### Silver provenance clock (CF-012)
 
-SilverWriter requires an explicit keyword-only ClockPort. Composition creates the
-production SystemClock; tests and replay may inject a deterministic clock. The
+SilverWriter requires an explicit ClockPort through `runtime_request` or the
+grouped `runtime_services`. Composition creates the production SystemClock; tests and replay may inject a deterministic clock. The
 public write entrypoint captures started_at once, preserving an explicit request
 value and sharing it across versioned targets. Calendar completed_at also comes
 from ClockPort; perf_counter measures duration and never synthesizes provenance

@@ -34,6 +34,10 @@ Replay-backed tests use materialized VCR cassettes and per-test data roots so
 the non-live suite remains deterministic and isolated from global ``data/output``.
 """
 
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
+
 from tests.helpers.clock import fixed_test_clock
 
 from pathlib import Path
@@ -76,7 +80,9 @@ def _create_test_storage_context(storage_paths: dict[str, object]) -> StorageCon
             json_export=(True, str(bronze_path / "json")),
         ),
         silver_writer=SilverWriter(
-            clock=fixed_test_clock(),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
             base_path=str(silver_path),
             logger=logger,
         ),

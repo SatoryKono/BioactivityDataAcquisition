@@ -1,9 +1,9 @@
-"""Shared fetch choreography for assay-derived data-source wrappers."""
+"""Shared mechanics for data sources derived from ChEMBL assay records."""
 
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
-from typing import TYPE_CHECKING, Any, ClassVar, cast
+from typing import ClassVar, cast
 
 from bioetl.application.core.data_source_mixins import (
     _SourceMetadataDelegationMixin,
@@ -18,21 +18,17 @@ from bioetl.application.core.target_data_source_mixins import (
     _FilterableTargetDelegationMixin,
     _TargetEntityFetchDelegationMixin,
 )
+from bioetl.domain.ports import DataSourcePort, FilterableDataSourcePort
 from bioetl.domain.types import JsonDict
 
-if TYPE_CHECKING:
-    from bioetl.domain.ports import DataSourcePort
 
-
-class DerivedAssayDataSource(
+class _DerivedAssayDataSourceBase(
     _FallbackFilterableTargetFetchMixin,
     _FilterableTargetDelegationMixin,
     _TargetEntityFetchDelegationMixin,
     _WrappedDataSourceDelegationMixin,
     _SourceMetadataDelegationMixin,
 ):
-    """Own the common bounded-scan contract for assay-derived entities."""
-
     SOURCE_ENTITY_TYPE = "assay"
     TARGET_ENTITY_TYPE: str
     ASSAY_LIMIT_MULTIPLIER: ClassVar[int]
@@ -46,29 +42,23 @@ class DerivedAssayDataSource(
         filter_ids: list[str] | None = None,
         *,
         filter_id_count: int | None = None,
-        offset: int | None = None,
     ) -> int:
-        base_limit = limit
-        if limit is not None and offset is not None:
-            base_limit = limit + offset
         return resolve_derived_upstream_limit(
-            base_limit,
+            limit,
             multiplier=self.ASSAY_LIMIT_MULTIPLIER,
             filter_ids=filter_ids,
             filter_id_count=filter_id_count,
         )
 
-    async def _fetch_target_records(
+    def _iter_assays(
         self,
-        limit: int | None = None,
-        query: str | None = None,
-        filter_ids: list[str] | None = None,
-        filter_field: str | None = None,
-        offset: int | None = None,
+        *,
+        limit: int | None,
+        query: str | None,
+        filter_ids: list[str] | None,
+        filter_field: str | None,
     ) -> AsyncIterator[JsonDict]:
-        if limit is not None and limit <= 0:
-            return
-        scan_limit = self._upstream_limit(limit, filter_ids, offset=offset)
+        scan_limit = self._upstream_limit(limit, filter_ids)
         source = self._data_source.fetch(
             entity_type=self.SOURCE_ENTITY_TYPE,
             limit=scan_limit,
@@ -76,24 +66,15 @@ class DerivedAssayDataSource(
             filter_ids=filter_ids,
             filter_field=filter_field,
         )
-        bounded = iter_derived_source(
-            source,
-            output_limit=limit,
-            scan_limit=scan_limit,
-        )
-        async for record in self._expand_derived_records(
-            bounded,
-            limit=limit,
-            offset=offset,
-        ):
-            yield record
+        return iter_derived_source(source, output_limit=limit, scan_limit=scan_limit)
 
-    async def _fetch_target_filtered_records(
+    def _iter_filtered_assays(
         self,
-        filterable: Any,  # Any: delegated to multiple filterable source types
+        filterable: FilterableDataSourcePort,
+        *,
         filter_ids: list[str],
         filter_field: str,
-        limit: int | None = None,
+        limit: int | None,
     ) -> AsyncIterator[JsonDict]:
         scan_limit = self._upstream_limit(limit, filter_ids)
         source = filterable.fetch_filtered(
@@ -102,51 +83,63 @@ class DerivedAssayDataSource(
             filter_field=filter_field,
             limit=scan_limit,
         )
-        async for record in self._expand_bounded_source(
-            source,
-            limit=limit,
-            scan_limit=scan_limit,
-        ):
-            yield record
+        return iter_derived_source(source, output_limit=limit, scan_limit=scan_limit)
 
-    async def _fetch_target_multi_filtered_records(
+    def _iter_multi_filtered_assays(
         self,
-        filterable: Any,  # Any: delegated to multiple filterable source types
+        filterable: FilterableDataSourcePort,
+        *,
         filters: dict[str, list[str]],
-        limit: int | None = None,
+        limit: int | None,
     ) -> AsyncIterator[JsonDict]:
+        filter_id_count = sum(len(values) for values in filters.values())
         scan_limit = self._upstream_limit(
             limit,
-            filter_id_count=sum(len(values) for values in filters.values()),
+            filter_id_count=filter_id_count,
         )
         source = filterable.fetch_multi_filtered(
             entity_type=self.SOURCE_ENTITY_TYPE,
             filters=filters,
             limit=scan_limit,
         )
-        async for record in self._expand_bounded_source(
-            source,
-            limit=limit,
-            scan_limit=scan_limit,
-        ):
-            yield record
+        return iter_derived_source(source, output_limit=limit, scan_limit=scan_limit)
 
-    async def _expand_bounded_source(
+    def _iter_derived_records(
         self,
-        source: AsyncIterator[object],
+        assays: AsyncIterator[JsonDict],
         *,
         limit: int | None,
-        scan_limit: int,
     ) -> AsyncIterator[JsonDict]:
-        bounded = iter_derived_source(
-            source,
-            output_limit=limit,
-            scan_limit=scan_limit,
-        )
-        async for record in self._expand_derived_records(
-            self._coerce_assay_records(bounded),
+        raise NotImplementedError
+
+    async def _fetch_target_filtered_records(
+        self,
+        filterable: FilterableDataSourcePort,
+        filter_ids: list[str],
+        filter_field: str,
+        limit: int | None = None,
+    ) -> AsyncIterator[JsonDict]:
+        assays = self._iter_filtered_assays(
+            filterable,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
             limit=limit,
-        ):
+        )
+        async for record in self._iter_derived_records(assays, limit=limit):
+            yield record
+
+    async def _fetch_target_multi_filtered_records(
+        self,
+        filterable: FilterableDataSourcePort,
+        filters: dict[str, list[str]],
+        limit: int | None = None,
+    ) -> AsyncIterator[JsonDict]:
+        assays = self._iter_multi_filtered_assays(
+            filterable,
+            filters=filters,
+            limit=limit,
+        )
+        async for record in self._iter_derived_records(assays, limit=limit):
             yield record
 
     def _resolve_target_fallback_upstream_limit(
@@ -155,16 +148,6 @@ class DerivedAssayDataSource(
     ) -> int | None:
         return self._upstream_limit(limit)
 
-    def _yield_target_records_from_fallback_source_records(
-        self,
-        source_records: AsyncIterator[object],
-        limit: int | None,
-    ) -> AsyncIterator[JsonDict]:
-        return self._expand_derived_records(
-            self._coerce_assay_records(source_records),
-            limit=limit,
-        )
-
     async def _coerce_assay_records(
         self,
         assays: AsyncIterator[object],
@@ -172,12 +155,3 @@ class DerivedAssayDataSource(
         async for assay in assays:
             if isinstance(assay, dict):
                 yield cast("JsonDict", assay)
-
-    def _expand_derived_records(
-        self,
-        assays: AsyncIterator[JsonDict],
-        *,
-        limit: int | None,
-        offset: int | None = None,
-    ) -> AsyncIterator[JsonDict]:
-        raise NotImplementedError

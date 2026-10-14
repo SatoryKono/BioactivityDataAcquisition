@@ -9,7 +9,7 @@ from typing import Protocol
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 
-CERTIFICATION_SHARED_EXPORTS = (
+CERTIFICATION_SUPPORT_PUBLIC_NAMES = (
     "DiagnosticsSummaryBuilder",
     "HistoricalReplayCertificationProtocol",
     "HistoricalReplayCertificationResult",
@@ -17,7 +17,7 @@ CERTIFICATION_SHARED_EXPORTS = (
 )
 
 __all__ = [
-    *CERTIFICATION_SHARED_EXPORTS,
+    *CERTIFICATION_SUPPORT_PUBLIC_NAMES,
     "_source_key",
     "load_upstream_manifest",
     "validate_upstream_certification_state",

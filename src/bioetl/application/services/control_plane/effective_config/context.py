@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 from dataclasses import dataclass
+from operator import attrgetter
 
 from bioetl.application.services.control_plane.effective_config.provenance_support import (
     build_source_class_provenance,
@@ -14,9 +15,6 @@ from bioetl.application.services.control_plane.effective_config.runtime_override
     build_runtime_override_snapshot,
     normalize_runtime_overrides_for_semantic_identity,
     validate_runtime_environment_provenance,
-)
-from bioetl.application.services.control_plane.effective_config.serialization import (
-    canonical_source_refs,
 )
 from bioetl.domain.behavior.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.config.dq import DQConfig
@@ -100,7 +98,15 @@ def resolve_resolution_policy(
 def compute_source_fingerprint(source_refs: list[ConfigSourceRef]) -> str:
     if not source_refs:
         return "no_sources"
-    ordered = canonical_source_refs(source_refs)
+    common_sort_fields = attrgetter("priority", "source_type", "source_path")
+    ordered = sorted(
+        source_refs,
+        key=lambda source_ref: (
+            *common_sort_fields(source_ref),
+            source_ref.source_hash or "",
+            source_ref.raw_source_hash or "",
+        ),
+    )
     return stable_json_hash(
         [
             {

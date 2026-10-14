@@ -59,55 +59,32 @@ class MedallionConfigValidator:
         silver_format: str | None = None,
         gold_format: str | None = None,
     ) -> list[ConfigValidationError]:
-        """Validate layer formats, path uniqueness and policy consistency.
-        Args:
-            runtime: Runtime configuration supplying run type and strict validation flag.
-            bronze_path: Filesystem path configured for the Bronze layer.
-            silver_path: Filesystem path configured for the Silver layer.
-            gold_path: Filesystem path configured for the Gold layer.
-            silver_format: Storage format for Silver (must be ``'delta'`` when provided).
-            gold_format: Storage format for Gold (must be ``'delta'`` when provided).
-        Returns:
-            List of ConfigValidationError instances describing each violation found.
-            An empty list indicates the configuration is valid.
+        """Validate resolved paths/formats, run-type policy and key nullability.
+
+        Returns all violations; strict escalation belongs to the caller.
         """
-        errors: list[ConfigValidationError] = []
-        errors.extend(
-            validate_layer_formats(
-                silver_format=silver_format,
-                gold_format=gold_format,
-            )
-        )
-        errors.extend(
-            validate_path_uniqueness(
-                bronze_path=bronze_path,
-                silver_path=silver_path,
-                gold_path=gold_path,
-            )
-        )
-        policy = MedallionPolicy.for_run_type(runtime.run_type)
-        errors.extend(
-            validate_medallion_policy_consistency(
+        errors = [
+            *validate_layer_formats(
+                silver_format=silver_format, gold_format=gold_format
+            ),
+            *validate_path_uniqueness(
+                bronze_path=bronze_path, silver_path=silver_path, gold_path=gold_path
+            ),
+            *validate_medallion_policy_consistency(
                 run_type=runtime.run_type,
-                policy=policy,
-            )
-        )
-        errors.extend(
-            validate_key_nullability_policies(
+                policy=MedallionPolicy.for_run_type(runtime.run_type),
+            ),
+            *validate_key_nullability_policies(
                 primary_keys=list(self._config.table.primary_keys),
                 partition_cols=list(self._config.table.partition_cols),
                 key_nullability_rules=list(self._config.dq.key_nullability_rules),
-            )
-        )
+            ),
+        ]
         self._log_medallion_validation_result(errors, runtime)
         return errors
 
     def validate_write_modes(self) -> list[ConfigValidationError]:
-        """Validate that configured write modes are allowed by policy.
-        Returns:
-            List of ConfigValidationError instances for each disallowed write mode.
-            An empty list indicates both Silver and Gold modes are policy-compliant.
-        """
+        """Return disallowed modes and invalid idempotency contracts."""
         silver_mode = self._config.table.silver_write_mode
         silver_mode_value = str(silver_mode)
         gold_mode = self._config.table.gold_write_mode
@@ -174,7 +151,7 @@ class MedallionConfigValidator:
                 "Medallion config validation found issues",
                 error_count=len(errors),
                 errors=[{"field": err.field, "rule": err.rule} for err in errors],
-                strict_mode=runtime.strict_validation,
+                strict_mode=runtime.strict_preflight,
             )
         else:
             self._logger.debug(
@@ -219,7 +196,7 @@ def build_runtime_validation_report(
 
 def raise_if_strict_blocking(report: PreflightReport, runtime: RuntimeConfig) -> None:
     """Escalate invalid configuration according to the resolved runtime policy."""
-    if not (report.should_block_startup and runtime.strict_validation):
+    if not (report.should_block_startup and runtime.strict_preflight):
         return
     errors = [
         f"{error.field}: {error.actual} (expected: {error.expected})"

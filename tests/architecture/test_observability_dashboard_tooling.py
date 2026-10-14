@@ -274,7 +274,7 @@ def test_ci_dashboard_semantic_gate_covers_declared_release_contracts() -> None:
     assert isinstance(upload_paths, str)
     assert {path.strip() for path in upload_paths.splitlines() if path.strip()} == {
         "reports/observability/ci/dashboard-semantic-policy.xml",
-        "reports/observability/runtime_cardinality_review.json",
+        "reports/observability/runtime_cardinality_review_pr.json",
     }
 
 

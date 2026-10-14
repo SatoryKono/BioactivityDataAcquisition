@@ -15,42 +15,50 @@ verification_scope: tracked_test_module_inventory
 
 ## Current status
 
-The tracked inventory contains 3034 test modules, counted from tracked
-`tests/**/test_*.py` files on 2026-10-08. A complete local
-`run_local_coverage_verify` campaign on source commit
-`3e734a6b872fff524c663cf183ade40aafdaea12` completed all 17 required shards:
-33,599 tests, 0 failures, 0 errors, and 203 skips. Combined coverage was
-99.68% line and 94.26% branch; both 85% gates passed. The manifest records
-`source_tree_sha256=20f951f3aa0d2f535a757dca96af0b213f675f0fd74873f80d8c3feded56293c`.
-This is local single-host evidence, not CI PASS, release acceptance, or proof
-that the separate architecture campaign is complete.
+On 2026-10-08, CircleCI run [17286](https://circleci.com/gh/SatoryKono/BioactivityDataAcquisition/17286)
+completed the canonical 17-shard coverage plan for source commit
+`ceedc671b613ec3c2b25bbbae86b8b950719ddb6` on
+`fix/cf-wave1-pagination-vcr-security`. Its complete manifest binds source
+tree `3cabab41baf177eb6f34163e59cbdb352e4cbbb8d570d3af7551bf66790c7714` and
+test tree `ad43e49af046f215efd16b0b4d629bc452fa1729da73c47e6ec00e48cee800b4`.
+All 17 JUnit inputs report 33,424 passed, 175 skipped, and 0 failed; combined
+coverage is 99.68% line and 94.29% branch. The portable manifest records the
+public CircleCI artifact index, raw manifest path and SHA-256, and SHA-256 for
+every JUnit and coverage input; those bindings were re-verified from run 17286
+on 2026-10-10. The committed telemetry baseline separately retains GitHub PR
+workflow [37743490942](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/37743490942)
+for the same source commit as a `historical_unverified_ci_binding`; that entry
+is not used as provenance for this CircleCI capture.
 
-Historical incomplete campaigns: the GR-DB-CORR broad attempt executed 29,758
-tests with 10 failures and 91 skips; a subsequent integration and
-affected-runner attempt executed 2885 tests with three failures and 12 skips.
-The 108-test recheck of affected integration files passed. Those results are
-retained as historical context and are superseded by the 2026-10-08 local
-coverage measurement where their selections overlap.
+This evidence covers the canonical 17-shard plan, not every repository test
+surface. The manifest excludes architecture, performance, manual E2E,
+live-provider contracts, and memory selectors; those gates have separate
+workflows. The tracked test-module inventory contains 3,033 `test_*.py` files
+as of 2026-10-08. This summary remains a non-canonical backlog signal and does
+not claim lifecycle or release admission.
 
-## Required evidence refresh
+## Historical backlog signals
 
-- Run `tests/architecture/` and record its result without weakening guards.
-- Check VCR freshness as a separate acceptance surface.
-- Re-run the complete local 17-shard measurement after any later source-tree change.
+The earlier GR-DB-CORR broad attempt executed 29,758 tests with 10 failures
+and 91 skips; a subsequent integration and affected-runner attempt executed
+2,885 tests with three failures and 12 skips. The 108-test recheck of the
+affected integration files passed. The architectural campaign then encountered
+drift and a timeout. These historical attempts were not PASS results.
 
-## Open action items
+Older action items remain backlog signals and have not been re-audited by this
+coverage refresh:
 
-1. Close the separate architecture campaign on the exact candidate SHA.
-2. Record VCR freshness independently of the local coverage result.
+1. Complete remaining lifecycle, contract, and UTC metadata tests.
+2. Add security regression coverage for HTML output and recursive redaction.
 
 ## Freshness note
 
-Re-verified on 2026-10-08 against source commit
-`3e734a6b872fff524c663cf183ade40aafdaea12`: all canonical source paths exist,
-the tracked test-module inventory is 3034, and the complete 17-shard local
-manifest is bound to the source hash above. Interpretation remains backlog
-signal only. The local run does not establish CI admission, release acceptance,
-or architecture/VCR closeout.
+Re-verified on 2026-10-08 against source HEAD
+`ceedc671b613ec3c2b25bbbae86b8b950719ddb6`. The manifest is complete, all 17
+required shard selections are present, and its test-tree hash matches the
+working tree. Local evidence at
+`reports/local/nav-tests-20260914/final-tests.xml` (1,199 passed, 11 skipped)
+remains historical. Recurrence of #7419 remains a backlog signal.
 
 This is a non-canonical repo-only evidence layer. The canonical sources of truth are:
 - `configs/quality/test_matrix.yaml`

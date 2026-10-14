@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.core._batch_write_events import BatchFailureEventContext
+from bioetl.application.core._batch_write_events import BatchWriteEventContext
 from bioetl.application.core.quarantine_manager import (
     DQQuarantineEntry,
     QuarantineRuntimeService,
@@ -14,22 +14,22 @@ from bioetl.domain.types import ErrorType
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_writer import BatchWriter
-    from bioetl.domain.ports import LoggerPort
 
 
 async def quarantine_schema_violation(
     *,
     writer: BatchWriter,
     quarantine_manager: QuarantineRuntimeService,
-    logger: LoggerPort,
-    failure_context: BatchFailureEventContext,
+    event_context: BatchWriteEventContext,
     records: list[dict[str, object]],
     error: SchemaViolationError,
 ) -> None:
-    layer = failure_context.layer
+    layer = event_context.layer
     writer.track_batch_failed(stage=layer, count=len(records))
-    failure_context.emit(error)
-    logger.warning("schema_violation_quarantined", layer=layer, errors=error.errors)
+    event_context.emit_failed(error)
+    event_context.logger.warning(
+        "schema_violation_quarantined", layer=layer, errors=error.errors
+    )
     reason_code = (
         "gold_contract_schema_failure"
         if layer == "gold"
@@ -45,7 +45,7 @@ async def quarantine_schema_violation(
             )
             for record in records
         ],
-        failure_context.batch_id,
-        ingestion_ts=failure_context.occurred_at,
+        event_context.batch_id,
+        ingestion_ts=event_context.occurred_at,
         stage=layer,
     )

@@ -16,6 +16,10 @@ and documented in ADR-025.
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
+
 from tests.helpers.clock import fixed_test_clock
 
 import pytest
@@ -81,7 +85,9 @@ def test_bronze_path_contract() -> None:
 def test_silver_path_contract() -> None:
     """Silver Delta tables MUST expose stable provider/entity contract paths."""
     writer = SilverWriter(
-        clock=fixed_test_clock(), base_path="data/output/silver", logger=Mock()
+        runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
+        base_path="data/output/silver",
+        logger=Mock(),
     )
     path = writer._resolve_table_path("chembl.activity")
     normalized = path.replace("\\", "/")

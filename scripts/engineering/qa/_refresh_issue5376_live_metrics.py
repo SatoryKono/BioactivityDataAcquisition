@@ -39,6 +39,7 @@ record["current_live_metrics"].update(
     tracked_module_status=tracked["coverage_status"],
 )
 record["closeout"].update(
+    residual_tail_remains=bool(below),
     residual_below_85_module_count=len(below),
     rationale=(
         f"Retained live inventory has {len(below)} measured modules below the default floor; "
@@ -49,7 +50,9 @@ record["closeout"].update(
     ),
 )
 record["current_live_metrics_provenance"] = {
-    "source_inventory_sha256": hashlib.sha256(inventory_path.read_bytes()).hexdigest(),
+    "source_inventory_sha256": hashlib.sha256(
+        inventory_path.read_text(encoding="utf-8").encode("utf-8")
+    ).hexdigest(),
     "source_tree_sha256": inventory["source_tree_sha256"],
     "derived_by": "scripts/engineering/qa/_refresh_issue5376_live_metrics.py",
     "semantics": "Live retained-inventory binding; raw W44 regression ledger is separate.",

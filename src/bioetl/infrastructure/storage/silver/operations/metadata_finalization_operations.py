@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Protocol
 
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
@@ -41,12 +42,37 @@ class _SilverMetadataFinalizationOps(
     ) -> None: ...
 
 
+async def prepare_silver_write_finalization_context_with_default_perf_counter(
+    metadata_ops: _SilverMetadataFinalizationOps,
+    request: _SilverWriteFinalizationPreparationRequest,
+    *,
+    perf_counter: Callable[[], float] | None = None,
+) -> _PreparedSilverWriteFinalizationContext:
+    """Prepare finalization context using the canonical perf-counter fallback."""
+    resolved_perf_counter = perf_counter
+    if resolved_perf_counter is None:
+        from bioetl.infrastructure.storage.silver import metadata_mixin
+
+        resolved_perf_counter = metadata_mixin.time.perf_counter
+    return await _prepare_silver_write_finalization_context(
+        metadata_ops,
+        request,
+        perf_counter=resolved_perf_counter,
+    )
+
+
 async def prepare_silver_write_finalization_context_operation(
     metadata_ops: _SilverMetadataFinalizationOps,
     request: _SilverWriteFinalizationPreparationRequest,
+    *,
+    perf_counter: Callable[[], float] | None = None,
 ) -> _PreparedSilverWriteFinalizationContext:
-    """Prepare DQ/version/provenance context using the injected clock."""
-    return await _prepare_silver_write_finalization_context(metadata_ops, request)
+    """Prepare DQ/version/timing context before Silver metadata persistence."""
+    return await prepare_silver_write_finalization_context_with_default_perf_counter(
+        metadata_ops,
+        request,
+        perf_counter=perf_counter,
+    )
 
 
 async def finalize_silver_write_result_from_request(

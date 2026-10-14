@@ -62,7 +62,11 @@ class TestSilverWriterVacuum:
         ]
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path="s3://bucket/silver", logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path="s3://bucket/silver",
+            logger=noop_logger,
         )
         result = await writer.vacuum("test.table", retention_hours=168)
 
@@ -84,7 +88,11 @@ class TestSilverWriterVacuum:
         mock_table_instance.vacuum.return_value = ["file1.parquet"]
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path="s3://bucket/silver", logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path="s3://bucket/silver",
+            logger=noop_logger,
         )
         await writer.vacuum("test.table", retention_hours=24, dry_run=True)
 
@@ -105,7 +113,9 @@ class TestSilverWriterVacuum:
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path="s3://bucket/silver",
                 logger=noop_logger,
             )
@@ -134,7 +144,11 @@ class TestSilverWriterOptimize:
         }
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path="s3://bucket/silver", logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path="s3://bucket/silver",
+            logger=noop_logger,
         )
         result = await writer.optimize("test.table")
 
@@ -154,7 +168,11 @@ class TestSilverWriterOptimize:
         mock_optimize.compact.return_value = {}
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path="s3://bucket/silver", logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path="s3://bucket/silver",
+            logger=noop_logger,
         )
         await writer.optimize("test.table", partition_filters=[("year", "=", 2025)])
 
@@ -175,7 +193,9 @@ class TestSilverWriterOptimize:
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path="s3://bucket/silver",
                 logger=noop_logger,
             )
@@ -323,7 +343,11 @@ class TestSilverWriterGetTableInfo:
         mock_table_instance.metadata.return_value = {"id": "test-table"}
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path="s3://bucket/silver", logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path="s3://bucket/silver",
+            logger=noop_logger,
         )
         result = await writer.get_table_info("test.table")
 
@@ -343,7 +367,9 @@ class TestSilverWriterGetTableInfo:
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path="s3://bucket/silver",
                 logger=noop_logger,
             )
@@ -366,7 +392,11 @@ class TestSilverWriterTimeTravel:
         mock_delta_table.return_value = mock_table_instance
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path="s3://bucket/silver", logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path="s3://bucket/silver",
+            logger=noop_logger,
         )
         result = await writer.time_travel("test.table", version=5)
 
@@ -385,7 +415,11 @@ class TestSilverWriterTimeTravel:
         mock_delta_table.return_value = mock_table_instance
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path="s3://bucket/silver", logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path="s3://bucket/silver",
+            logger=noop_logger,
         )
         ts = datetime(2025, 1, 1, 12, 0, 0)
         result = await writer.time_travel("test.table", timestamp=ts)
@@ -400,7 +434,11 @@ class TestSilverWriterTimeTravel:
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path="s3://bucket/silver", logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path="s3://bucket/silver",
+            logger=noop_logger,
         )
 
         with pytest.raises(ValueError, match="Specify either version or timestamp"):
@@ -414,7 +452,11 @@ class TestSilverWriterTimeTravel:
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path="s3://bucket/silver", logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path="s3://bucket/silver",
+            logger=noop_logger,
         )
 
         with pytest.raises(
@@ -435,7 +477,9 @@ class TestSilverWriterTimeTravel:
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path="s3://bucket/silver",
                 logger=noop_logger,
             )
@@ -491,7 +535,9 @@ class TestSilverWriterErrorHandling:
             ),
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path="s3://bucket/silver",
                 logger=noop_logger,
             )
@@ -537,7 +583,8 @@ class TestSilverWriterErrorHandling:
         # Second call (write merge) returns mock_table
         delta_table_mock = MagicMock(
             side_effect=[
-                DeltaTableNotFoundError("Not found"),  # Schema check
+                DeltaTableNotFoundError("Not found"),
+                mock_table,  # Physical partition compatibility probe  # Schema check
                 mock_table,  # Write attempt
             ]
         )
@@ -553,7 +600,9 @@ class TestSilverWriterErrorHandling:
             ),
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path="s3://bucket/silver",
                 logger=noop_logger,
             )
@@ -600,6 +649,7 @@ class TestSilverWriterErrorHandling:
         delta_table_mock = MagicMock(
             side_effect=[
                 DeltaTableNotFoundError("Not found"),
+                mock_table,  # Physical partition compatibility probe
                 mock_table,
                 mock_table,
             ]
@@ -623,7 +673,9 @@ class TestSilverWriterErrorHandling:
             ),
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path="s3://bucket/silver",
                 logger=noop_logger,
             )
@@ -670,6 +722,7 @@ class TestSilverWriterErrorHandling:
         delta_table_mock = MagicMock(
             side_effect=[
                 DeltaTableNotFoundError("Not found"),
+                mock_table,  # Physical partition compatibility probe
                 mock_table,
             ]
         )
@@ -707,7 +760,6 @@ class TestSilverWriterErrorHandling:
             ),
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
                 base_path="s3://bucket/silver",
                 logger=logger,
                 runtime_request=SilverWriterRuntimeServicesRequest(
@@ -741,7 +793,11 @@ class TestSilverWriterClear:
 
         nonexistent = tmp_path / "nonexistent"
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path=str(nonexistent), logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path=str(nonexistent),
+            logger=noop_logger,
         )
 
         result = writer.clear()
@@ -754,7 +810,11 @@ class TestSilverWriterClear:
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(
-            clock=fixed_test_clock(), base_path=str(tmp_path), logger=noop_logger
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path=str(tmp_path),
+            logger=noop_logger,
         )
         result = writer.get_table_path("chembl.activity")
 

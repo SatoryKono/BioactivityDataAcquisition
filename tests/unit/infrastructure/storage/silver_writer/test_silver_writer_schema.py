@@ -29,6 +29,10 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
+
 from tests.helpers.clock import fixed_test_clock
 
 from tests.helpers.synthetic_paths import synthetic_test_root
@@ -58,7 +62,9 @@ class TestSilverWriterSchemaDrift:
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
             )
@@ -87,7 +93,9 @@ class TestSilverWriterSchemaDrift:
             return_value=mock_table,
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
             )
@@ -117,7 +125,9 @@ class TestSilverWriterSchemaDrift:
             return_value=mock_table,
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
             )
@@ -168,7 +178,9 @@ class TestSilverWriterSchemaDrift:
             return_value=mock_table,
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
             )
@@ -200,7 +212,9 @@ class TestSilverWriterSchemaDrift:
             return_value=mock_table,
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
             )
@@ -229,7 +243,9 @@ class TestSilverWriterSchemaDrift:
             return_value=mock_table,
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
             )
@@ -264,7 +280,9 @@ class TestSilverWriterSchemaDrift:
             return_value=mock_table,
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
             )
@@ -284,7 +302,9 @@ class TestSilverWriterSchemaDrift:
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
             )
@@ -311,7 +331,9 @@ class TestSilverWriterSchemaDrift:
             return_value=mock_table,
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
             )
@@ -365,7 +387,9 @@ class TestSilverWriterSchemaDrift:
             return_value=mock_table,
         ):
             writer = SilverWriter(
-                clock=fixed_test_clock(),
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
             )

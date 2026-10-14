@@ -69,7 +69,7 @@ async def test_effective_setting_reaches_runtime_and_preflight(strict):
     projection = inputs_runtime_helpers.resolve_runtime_projection(
         ctx=SimpleNamespace(skip_gold=False),
         settings=SimpleNamespace(
-            test_mode=False, pipeline=PipelineSettings(strict_validation=strict)
+            test_mode=False, pipeline=PipelineSettings(strict_preflight=strict)
         ),
         yaml_config=SimpleNamespace(sink={}),
         observability=SimpleNamespace(logger=Mock()),
@@ -88,7 +88,7 @@ async def test_effective_setting_reaches_runtime_and_preflight(strict):
         vacuum=SimpleNamespace(enabled=False, retention_days=7),
         runtime_projection=projection,
     )
-    assert runtime.strict_validation is strict
+    assert runtime.strict_preflight is strict
     validator = MedallionConfigValidator(_config(), Mock(), WriteModePolicy())
     health = Mock()
     health.assert_healthy = Mock()
@@ -112,7 +112,7 @@ async def test_effective_setting_reaches_runtime_and_preflight(strict):
 
 
 def test_shipped_settings_and_bootstrap_are_strict_by_default():
-    assert PipelineSettings().strict_validation is True
+    assert PipelineSettings().strict_preflight is True
     runtime = assemble_runtime_config(
         run_type=RunType.INCREMENTAL,
         resume=False,
@@ -122,7 +122,7 @@ def test_shipped_settings_and_bootstrap_are_strict_by_default():
         heartbeat_interval=30,
         vacuum=SimpleNamespace(enabled=False, retention_days=7),
     )
-    assert runtime.strict_validation is True
+    assert runtime.strict_preflight is True
 
 
 @pytest.mark.asyncio
@@ -140,7 +140,7 @@ async def test_runner_startup_reaches_gate_before_preparation_and_extraction(str
         dry_run=False,
         heartbeat_interval=30,
         vacuum=SimpleNamespace(enabled=False, retention_days=7),
-        preflight=PreflightRuntimeSettings(strict_validation=strict),
+        preflight=PreflightRuntimeSettings(strict_preflight=strict),
     )
     health = Mock()
     health.assert_healthy = Mock()
@@ -182,11 +182,11 @@ def test_env_setting_and_effective_snapshot_record_gate_policy(monkeypatch, stri
         build_execution_settings_snapshot,
     )
 
-    monkeypatch.setenv("BIOETL_PIPELINE__STRICT_VALIDATION", str(strict).lower())
+    monkeypatch.setenv("BIOETL_PIPELINE__STRICT_PREFLIGHT", str(strict).lower())
     settings = Settings(_env_file=None)
-    assert settings.pipeline.strict_validation is strict
+    assert settings.pipeline.strict_preflight is strict
     snapshot = build_execution_settings_snapshot(settings)
-    assert snapshot["pipeline"]["strict_validation"] is strict
+    assert snapshot["pipeline"]["strict_preflight"] is strict
 
 
 def test_all_shipped_pipeline_configs_preserve_partitions_and_pass_preflight():
@@ -211,7 +211,7 @@ def test_all_shipped_pipeline_configs_preserve_partitions_and_pass_preflight():
             silver.partition_by if silver else ()
         ), name
         validator = MedallionConfigValidator(config, Mock(), WriteModePolicy())
-        runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, strict_validation=True)
+        runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, strict_preflight=True)
         assert (
             validator.validate_medallion_config(
                 runtime, "bronze", "silver", "gold", "delta", "delta"
@@ -232,7 +232,7 @@ def test_preflight_binds_resolved_storage_paths_instead_of_nullable_yaml_paths(
     pipeline = SimpleNamespace(
         config=_config(),
         context=Mock(),
-        runtime=RuntimeConfig(run_type=RunType.INCREMENTAL, strict_validation=True),
+        runtime=RuntimeConfig(run_type=RunType.INCREMENTAL, strict_preflight=True),
         services=SimpleNamespace(
             metrics=Mock(),
             storage=SimpleNamespace(
@@ -256,3 +256,48 @@ def test_preflight_binds_resolved_storage_paths_instead_of_nullable_yaml_paths(
     service = build_preflight_service(context)
     with pytest.raises(ValueError, match="strict mode"):
         service.validate_runtime_configuration(pipeline.runtime)
+
+
+def test_strict_preflight_does_not_enable_postrun_strict_validation():
+    from bioetl.domain.config import RuntimeConfig
+
+    runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, strict_preflight=True)
+    assert runtime.strict_preflight is True
+    assert runtime.strict_validation is False
+    advisory = RuntimeConfig(
+        run_type=RunType.INCREMENTAL, strict_preflight=False, strict_validation=True
+    )
+    assert advisory.strict_preflight is False
+    assert advisory.strict_validation is True
+
+
+def test_public_health_check_mode_keyword_remains_supported():
+    import inspect
+
+    assert "health_check_mode" in inspect.signature(assemble_runtime_config).parameters
+
+
+@pytest.mark.require_silver_validator
+def test_workflow_transform_assembly_injects_clock(tmp_path):
+    from bioetl.composition.bootstrap.assembly.workflow_transforms import (
+        build_workflow_transform_registry,
+    )
+    from bioetl.domain.ports.noop import NoOpMetrics
+
+    settings = SimpleNamespace(
+        silver_path=tmp_path / "silver",
+        gold_path=tmp_path / "gold",
+        quarantine_path=tmp_path / "quarantine",
+    )
+    assert build_workflow_transform_registry(settings, NoOpMetrics()) is not None
+
+
+def test_platform_path_case_collision_semantics(tmp_path):
+    import os
+    from bioetl.application.core.preflight.medallion_validator_runtime import (
+        canonicalize_layer_path,
+    )
+
+    upper = canonicalize_layer_path(str(tmp_path / "Silver"))
+    lower = canonicalize_layer_path(str(tmp_path / "silver"))
+    assert (upper == lower) is (os.name == "nt")

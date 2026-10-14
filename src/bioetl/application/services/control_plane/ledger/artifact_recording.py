@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 
-from bioetl.application.services.control_plane.ledger import core_events as _core_events
 from bioetl.application.services.control_plane.ledger.input_snapshot_recording import (
     record_input_snapshots_from_artifact,
 )
@@ -21,9 +20,23 @@ __all__ = [
 ]
 
 
+class _ArtifactPublishedArguments(TypedDict):
+    layer: str
+    artifact_path: str
+    artifact_content_hash: str
+    dataset_ref: str | None
+    lineage_fragment_id: str | None
+    details: dict[str, object] | None
+
+
 def canonical_lineage_fragment_id(raw: object) -> str | None:
     """Reject layer aliases such as ``bronze`` as fragment identifiers."""
-    return _core_events.canonical_lineage_fragment_id(raw)
+    if raw is None:
+        return None
+    value = str(raw).strip()
+    if not value or value.lower() in {"bronze", "silver", "gold"}:
+        return None
+    return value
 
 
 def record_published_artifact(
@@ -34,12 +47,27 @@ def record_published_artifact(
     details: dict[str, object] | None,
 ) -> object:
     """Record one published artifact and any Bronze input snapshots."""
-    request = _core_events.ArtifactPublicationRequest.from_artifact_details(
-        layer=layer,
-        artifact_path=artifact_path,
-        details=details,
-    )
-    entry = request.record(service)
+    dataset_ref = None
+    lineage_fragment_id = None
+    if details is not None:
+        raw_dataset_ref = details.get("dataset_ref")
+        raw_lineage_fragment_id = details.get("lineage_fragment_id")
+        dataset_ref = None if raw_dataset_ref is None else str(raw_dataset_ref)
+        lineage_fragment_id = canonical_lineage_fragment_id(raw_lineage_fragment_id)
+        artifact_content_hash = str(
+            details.get("artifact_content_hash") or details.get("content_hash") or ""
+        )
+    else:
+        artifact_content_hash = ""
+    recording_arguments: _ArtifactPublishedArguments = {
+        "layer": layer,
+        "artifact_path": artifact_path,
+        "artifact_content_hash": artifact_content_hash,
+        "dataset_ref": dataset_ref,
+        "lineage_fragment_id": lineage_fragment_id,
+        "details": details,
+    }
+    entry = service.record_artifact_published(**recording_arguments)
     record_input_snapshots_from_artifact(
         service,
         layer=layer,

@@ -107,7 +107,7 @@ def create_silver_writer(request: CreateSilverWriterRequest) -> SilverWriter:
             "SilverWriter requires explicit tracing injection. "
             "Build NoOpTracing in composition when tracing is disabled."
         )
-    clock = request.clock if getattr(request, 'clock', None) is not None else SystemClock()
+    clock = request.clock if request.clock is not None else SystemClock()
     runtime_request = SilverWriterRuntimeServicesRequest(
         clock=clock,
         csv_exporter=request.csv_exporter,
@@ -130,7 +130,6 @@ def create_silver_writer(request: CreateSilverWriterRequest) -> SilverWriter:
     )
     runtime_services = build_silver_writer_runtime_services(runtime_request)
     return request.writer_cls(
-        clock=clock,
         base_path=request.base_path,
         logger=request.logger,
         runtime_services=runtime_services,

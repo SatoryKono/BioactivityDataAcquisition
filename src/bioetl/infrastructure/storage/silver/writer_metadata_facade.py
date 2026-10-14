@@ -247,11 +247,13 @@ class SilverWriterMetadataFacade:
         """Log Silver audit events through metadata operations."""
         if self._metadata is None:
             raise RuntimeError(self._SILVER_METADATA_OPERATIONS_REQUIRED)
-        validated_mode = (
-            mode
-            if isinstance(mode, (SilverWriteMode, WriteMode))
-            else SilverWriteMode(mode)
-        )
+        validated_mode: SilverOperationMode
+        if mode == WriteMode.OVERWRITE:
+            validated_mode = WriteMode.OVERWRITE
+        elif isinstance(mode, SilverWriteMode):
+            validated_mode = mode
+        else:
+            validated_mode = SilverWriteMode(mode)
         await self._metadata._log_silver_audit(
             _SilverMetadataAuditSupportRequest(
                 table_name=table_name,

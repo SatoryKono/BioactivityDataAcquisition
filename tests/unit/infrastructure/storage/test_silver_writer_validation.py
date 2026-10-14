@@ -183,7 +183,11 @@ class TestSilverWriterSilverValidatorInit:
 
         with pytest.raises(ValueError, match="SilverValidatorPort is required"):
             SilverWriter(
-                clock=fixed_test_clock(), base_path="/tmp/silver", logger=noop_logger
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    clock=fixed_test_clock()
+                ),
+                base_path="/tmp/silver",
+                logger=noop_logger,
             )
 
     def test_init_with_custom_validator(self, noop_logger):

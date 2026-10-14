@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import TYPE_CHECKING, Literal, Unpack
 from bioetl.composition.runtime_builders.inputs_runtime_models import (
     ResolvedVacuumSettings,
 )
 from bioetl.domain.config import RuntimeConfig
+from bioetl.domain.config import runtime as runtime_config
+from bioetl.domain.config.runtime import DebugExportOverrides, PreflightRuntimeSettings
 from bioetl.domain.types import RunType
 from bioetl.domain.filtering.silver_filter_identity import (
     resolve_silver_filter_compatibility_mode,
@@ -14,21 +16,20 @@ from bioetl.domain.filtering.silver_filter_identity import (
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 from bioetl.composition.builders import FilterConfigBuilder
+from bioetl.composition.runtime_builders.inputs_runtime_assembly import (
+    assemble_vacuum_settings as _assemble_vacuum_settings,
+)
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.composition.runtime_builders.runner_builder_wiring import (
     RunnerBuilderWiring,
+    RunnerFactoryWiring,
+    RunnerInputWiring,
 )
 
 if TYPE_CHECKING:
     from bioetl.composition.registry_api import PipelineRegistry
-    from bioetl.composition.runtime_builders.runner_builder_wiring import (
-        RunnerBuilderWiring,
-        RunnerFactoryWiring,
-        RunnerInputWiring,
-    )
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.context import VacuumSettings as CliVacuumSettings
     from bioetl.domain.filtering import InputFilterConfig
@@ -64,10 +65,7 @@ class RuntimeBootstrapPhases:
     def wiring(self) -> RunnerBuilderWiring:
         """Return the canonical aggregate runner wiring bundle."""
 
-        return RunnerBuilderWiring(
-            factory=self.factory_wiring,
-            inputs=self.input_wiring,
-        )
+        return RunnerBuilderWiring(self.factory_wiring, self.input_wiring)
 
 
 def assemble_runtime_bootstrap_phases(
@@ -92,15 +90,8 @@ def assemble_vacuum_settings(
     yaml_maintenance: MaintenanceConfig,
 ) -> ResolvedVacuumSettings:
     """Merge CLI vacuum overrides with YAML defaults."""
-    if cli_vacuum.enabled is not None:
-        return ResolvedVacuumSettings(
-            enabled=cli_vacuum.enabled,
-            retention_days=cli_vacuum.retention_days,
-        )
-
-    return ResolvedVacuumSettings(
-        enabled=yaml_maintenance.auto_vacuum,
-        retention_days=yaml_maintenance.vacuum_retention_days,
+    return _assemble_vacuum_settings(
+        cli_vacuum=cli_vacuum, yaml_maintenance=yaml_maintenance
     )
 
 
@@ -136,17 +127,6 @@ def assemble_cached_bronze_context(
     return ctx.cached_bronze
 
 
-@dataclass(frozen=True, slots=True)
-class PreflightRuntimeSettings:
-    """Resolved infrastructure health and Medallion escalation policy."""
-
-    health_check_mode: Literal["strict", "probe"] = "strict"
-    strict_validation: bool = True
-
-
-_DEFAULT_PREFLIGHT_SETTINGS = PreflightRuntimeSettings()
-
-
 def assemble_runtime_config(
     *,
     run_type: RunType,
@@ -157,13 +137,15 @@ def assemble_runtime_config(
     heartbeat_interval: int,
     vacuum: ResolvedVacuumSettings,
     skip_gold: bool = False,
-    debug_export_enabled: bool = False,
-    debug_export_formats: tuple[str, ...] = (),
-    debug_export_dir: str | None = None,
     workflow_id: str = "standalone",
-    preflight: PreflightRuntimeSettings = _DEFAULT_PREFLIGHT_SETTINGS,
+    preflight: PreflightRuntimeSettings = runtime_config.DEFAULT_PREFLIGHT_SETTINGS,
+    health_check_mode: Literal["strict", "probe"] | None = None,
+    **debug_export: Unpack[DebugExportOverrides],
 ) -> RuntimeConfig:
-    """Build ``RuntimeConfig`` from already-resolved runtime inputs."""
+    """Build runtime settings, preserving the existing debug-export keywords."""
+    unsupported = debug_export.keys() - DebugExportOverrides.__annotations__.keys()
+    if unsupported:
+        raise TypeError(f"Unexpected debug-export options: {sorted(unsupported)}")
     return RuntimeConfig(
         run_type=run_type,
         resume=resume,
@@ -174,11 +156,15 @@ def assemble_runtime_config(
         vacuum_after_run=vacuum.enabled,
         vacuum_retention_days=vacuum.retention_days,
         skip_gold=skip_gold,
-        debug_export_enabled=debug_export_enabled,
-        debug_export_formats=debug_export_formats,
-        debug_export_dir=debug_export_dir,
+        debug_export_enabled=debug_export.get("debug_export_enabled", False),
+        debug_export_formats=debug_export.get("debug_export_formats", ()),
+        debug_export_dir=debug_export.get("debug_export_dir"),
         workflow_id=workflow_id,
-        health_check_mode=preflight.health_check_mode,
-        strict_validation=preflight.strict_validation,
+        health_check_mode=(
+            health_check_mode
+            if health_check_mode is not None
+            else preflight.health_check_mode
+        ),
+        strict_preflight=preflight.strict_preflight,
         silver_filter_compatibility_mode=resolve_silver_filter_compatibility_mode(),
     )

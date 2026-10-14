@@ -1,6 +1,7 @@
 """Canonical grouping for batch-transformer runtime helpers."""
 
 from __future__ import annotations
+
 # ruff: noqa: I001
 
 from bioetl.application.core.transformer_runtime.attempts import (
@@ -32,21 +33,15 @@ from bioetl.application.core.transformer_runtime.quarantine import (
     route_single_transform_attempt as route_single_transform_attempt,
 )
 from bioetl.application.core.transformer_runtime import state as _state
-from bioetl.application.core.transformer_runtime.state import (
-    RecordTransformOutcome as RecordTransformOutcome,
-    TransformAggregationState as TransformAggregationState,
-    TransformResult as TransformResult,
-    TransformedRecord as TransformedRecord,
-    accumulate_stream_transform_result as accumulate_stream_transform_result,
-    accumulate_transform_outcome as accumulate_transform_outcome,
-    apply_stream_transform_result_to_state as apply_stream_transform_result_to_state,
-    apply_transform_outcome_to_state as apply_transform_outcome_to_state,
-    build_transform_result as build_transform_result,
-    create_transform_aggregation_state as create_transform_aggregation_state,
-)
 from bioetl.application.core.transformer_runtime.streaming import (
     StreamingBatchProcessor as StreamingBatchProcessor,
 )
+from bioetl.application.core.wiring.lazy_export_hooks import (
+    install_lazy_export_facade,
+)
+
+_STATE_EXPORTS = {name: (_state.__name__, name) for name in _state.__all__}
+install_lazy_export_facade(globals(), __name__, _STATE_EXPORTS)
 
 __all__ = [
     "QUARANTINE_WRITE_WARN_ONLY_ERRORS",
@@ -56,7 +51,6 @@ __all__ = [
     "StreamingBatchProcessor",
     "ThresholdBreach",
     "ThresholdBreachReason",
-    *_state.__all__,
     "bind_record_context",
     "check_dq_thresholds",
     "classify_dq_threshold_breach",
@@ -71,4 +65,5 @@ __all__ = [
     "route_single_transform_attempt",
     "transform_record_attempt",
     "yield_control_if_needed",
+    *_state.__all__,
 ]

@@ -4,11 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.services.control_plane.input_snapshot_identity import (
-    InputSnapshotIdentity,
-)
-from bioetl.application.services.control_plane.replay.historical_identity_models import (
+from bioetl.domain.control_plane.historical_replay_identity import (
     HistoricalReplayRunIdentityRecord,
+    build_historical_certified_identity_payload_from_record,
 )
 
 CORPUS_MODEL_PUBLIC_NAMES: tuple[str, ...] = (
@@ -22,9 +20,16 @@ CORPUS_MODEL_PUBLIC_NAMES: tuple[str, ...] = (
 
 
 @dataclass(frozen=True, slots=True)
-class HistoricalReplaySnapshotCertification(InputSnapshotIdentity):
+class HistoricalReplaySnapshotCertification:
     """Immutable snapshot evidence used for historical replay certification."""
 
+    provider: str
+    entity: str
+    pipeline_name: str
+    snapshot_id: str
+    content_hash: str
+    immutable_uri: str
+    bronze_batch_ref: str
     query: str | None = None
     query_fingerprint: str | None = None
     certification_artifact_ref: str | None = None
@@ -47,28 +52,20 @@ class HistoricalReplayCertifiabilityRecord(HistoricalReplayRunIdentityRecord):
     blocking_reasons: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, object]:
-        return {
-            "manifest_id": self.manifest_id,
-            "run_id": self.run_id,
-            "pipeline_name": self.pipeline_name,
-            "provider": self.provider,
-            "entity": self.entity,
-            "execution_context": self.execution_context,
-            "certification_status": self.certification_status,
-            "replay_occurrence_kind": self.replay_occurrence_kind,
-            "blocking_reasons": list(self.blocking_reasons),
-            "family": self.family,
-            "certification_scope": self.certification_scope,
-            "broader_historical_exact_replay_policy": (
+        return build_historical_certified_identity_payload_from_record(
+            self,
+            family=self.family,
+            certification_scope=self.certification_scope,
+            broader_historical_exact_replay_policy=(
                 self.broader_historical_exact_replay_policy
             ),
-            "broader_historical_exact_replay_boundary": (
+            broader_historical_exact_replay_boundary=(
                 self.broader_historical_exact_replay_boundary
             ),
-            "broader_historical_exact_replay_state": (
+            broader_historical_exact_replay_state=(
                 self.broader_historical_exact_replay_state
             ),
-        }
+        )
 
 
 @dataclass(frozen=True, slots=True)
