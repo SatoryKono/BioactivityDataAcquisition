@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-14T04:53:11.957021+00:00",
+  "generated_at": "2026-10-14T05:04:24.411915+00:00",
   "summary": {
     "total_scripts": 651,
     "status_counts": {
@@ -3684,13 +3684,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 106,
+          "line": 108,
           "source_group": "tests",
           "text": "for name in (\"mcp_filesystem_wrapper.sh\", \"mcp_filesystem_wrapper.ps1\", \"check.sh\"):"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 191,
+          "line": 193,
           "source_group": "tests",
           "text": "script = ROOT / \"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\""
         }
@@ -3739,13 +3739,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 106,
+          "line": 108,
           "source_group": "tests",
           "text": "for name in (\"mcp_filesystem_wrapper.sh\", \"mcp_filesystem_wrapper.ps1\", \"check.sh\"):"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 222,
+          "line": 224,
           "source_group": "tests",
           "text": "script = ROOT / \"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
         },
@@ -9924,7 +9924,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_python_dependency_changes.py",
-          "line": 8,
+          "line": 10,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import _python_dependency_changes as dependencies"
         }
@@ -10359,7 +10359,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_python_dependency_changes.py",
-          "line": 9,
+          "line": 11,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pr_lane_results as lane"
         }
@@ -21390,13 +21390,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 120,
+          "line": 122,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\""
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 303,
+          "line": 305,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\""
         }
