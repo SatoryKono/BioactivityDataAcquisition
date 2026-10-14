@@ -9,6 +9,11 @@ from ._gold_contracts_support import (
     GoldBusinessRuleSemanticScope,
     GoldBusinessRuleSeverity,
 )
+from ._gold_write_receipt import (
+    GoldWriteCategory,
+    GoldWriteReceipt,
+    require_complete_gold_receipt,
+)
 from .gold_contracts_rejects import (
     GoldContractValidationError,
     GoldRejectReason,
@@ -31,9 +36,12 @@ __all__ = [
     "GoldContractValidationError",
     "GoldRejectReason",
     "GoldRejectReasonCode",
+    "GoldWriteCategory",
+    "GoldWriteReceipt",
     "ScdConfig",
     "build_gold_contract_reject_reason",
     "build_gold_semantic_reject_reason",
     "classify_gold_schema_error_reason",
+    "require_complete_gold_receipt",
     "resolve_gold_contract_version",
 ]

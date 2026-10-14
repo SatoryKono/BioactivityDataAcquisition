@@ -14,6 +14,7 @@ from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.medallion import GoldWriteMode
+from bioetl.domain.types.gold_contracts import GoldWriteReceipt
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -68,14 +69,16 @@ class _GoldWriterMergedDispatchMixin(_GoldWriterExecutorArrowMixin):
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
-    ) -> None:
+    ) -> GoldWriteReceipt:
         """Write merged records to Gold layer with mandatory strict validation."""
         if not records:
             self.logger.warning(
                 "No records to write for merged Gold",
                 table_name=table_name,
             )
-            return
+            from bioetl.infrastructure.storage.gold.commit_outcome import receipt_for
+
+            return receipt_for(table_name)
         if schema is None:
             raise ValueError(
                 "Merged Gold writes require a registered strict schema: "
@@ -99,7 +102,7 @@ class _GoldWriterMergedDispatchMixin(_GoldWriterExecutorArrowMixin):
             sources_used=sources_used,
             preserve_column_order=preserve_column_order,
         )
-        await _execute_gold_merged_write(self, request)
+        return await _execute_gold_merged_write(self, request)
 
     async def _dispatch_write(
         self,

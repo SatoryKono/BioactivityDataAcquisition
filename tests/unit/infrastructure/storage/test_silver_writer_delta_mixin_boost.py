@@ -32,6 +32,8 @@ Targets uncovered lines: 69-70, 130, 142-158, 195, 275, 297, 333.
 
 from __future__ import annotations
 
+from bioetl.domain.medallion import WriteMode
+
 import asyncio
 import tempfile
 from pathlib import Path
@@ -129,7 +131,7 @@ class TestWriteDeleteLines:
         mixin = _ConcreteDeltaMixin()
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
-            validated_mode=SilverWriteMode.DELETE,
+            validated_mode=WriteMode.OVERWRITE,
             table_path=_TABLE_PATH,
             arrow_data=data,
             primary_keys=[],
@@ -176,7 +178,7 @@ def test_build_merge_update_predicate_ignores_run_type_precedence() -> None:
         mixin = _ConcreteDeltaMixin()
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
-            validated_mode=SilverWriteMode.DELETE,
+            validated_mode=WriteMode.OVERWRITE,
             table_path=_TABLE_PATH,
             arrow_data=data,
             primary_keys=[],
@@ -510,7 +512,7 @@ class TestDispatchWriteMode:
         mixin = _ConcreteDeltaMixin()
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
-            validated_mode=SilverWriteMode.DELETE,
+            validated_mode=WriteMode.OVERWRITE,
             table_path=_TABLE_PATH,
             arrow_data=data,
             primary_keys=[],
@@ -600,7 +602,7 @@ class TestDispatchRequestByMode:
         )
 
         handler = _select_dispatch_handler(
-            validated_mode=SilverWriteMode.DELETE,
+            validated_mode=WriteMode.OVERWRITE,
             policy=policy,
         )
 

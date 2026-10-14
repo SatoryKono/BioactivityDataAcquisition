@@ -27,7 +27,9 @@ def _nonnegative_duration(raw: str | None, label: str, path: Path) -> float | No
     return value
 
 
-def _validate_aggregate(node: ET.Element, field: str, actual: int, path: Path) -> None:
+def _validate_aggregate(
+    node: ET.Element, field: str, allowed: set[int], path: Path
+) -> None:
     declared = node.get(field)
     if declared is None:
         return
@@ -35,31 +37,31 @@ def _validate_aggregate(node: ET.Element, field: str, actual: int, path: Path) -
         count = int(declared)
     except ValueError as error:
         raise ValueError(f"Invalid JUnit {field} testcase count in {path}") from error
-    if count < 0 or count != actual:
+    if count < 0 or count not in allowed:
         raise ValueError(
             f"JUnit {field} testcase count disagrees with records in {path}: "
-            f"declared {count}, observed {actual}"
+            f"declared {count}, allowed {sorted(allowed)}"
         )
 
 
-def _aggregate_counts(node: ET.Element, cases: list[ET.Element]) -> dict[str, int]:
+def _aggregate_counts(node: ET.Element, cases: list[ET.Element]) -> dict[str, set[int]]:
     counts = {
-        "tests": len(cases),
-        "skipped": sum(case.find("skipped") is not None for case in cases),
-        "failures": sum(case.find("failure") is not None for case in cases)
-        + len(node.findall("failure")),
-        "errors": sum(case.find("error") is not None for case in cases)
-        + len(node.findall("error")),
+        "tests": {len(cases)},
+        "skipped": {sum(case.find("skipped") is not None for case in cases)},
     }
-    # Suite-level diagnostics contribute to ancestor declarations too.
-    for child in node:
-        if child.tag in {"testsuite", "testsuites"}:
-            for field in ("failures", "errors"):
-                counts[field] += sum(
-                    len(descendant.findall(field[:-1]))
-                    for descendant in child.iter()
-                    if descendant.tag in {"testsuite", "testsuites"}
-                )
+    for field in ("failures", "errors"):
+        tag = field[:-1]
+        suite_diagnostics = sum(
+            len(suite.findall(tag))
+            for suite in node.iter()
+            if suite.tag in {"testsuite", "testsuites"}
+        )
+        # JUnit emitters differ: pytest counts diagnostic elements, while
+        # other producers count affected testcase records.
+        counts[field] = {
+            sum(case.find(tag) is not None for case in cases) + suite_diagnostics,
+            sum(len(case.findall(tag)) for case in cases) + suite_diagnostics,
+        }
     return counts
 
 
@@ -69,6 +71,7 @@ def _validated_cases(path: Path) -> tuple[ET.Element, list[ET.Element]]:
         raise ValueError(f"Unsupported JUnit root in {path}: {root.tag}")
 
     def check(node: ET.Element) -> list[ET.Element]:
+        _nonnegative_duration(node.get("time"), node.tag, path)
         cases = list(node.findall("testcase"))
         for child in node:
             if child.tag in {"testsuite", "testsuites"}:
@@ -101,6 +104,17 @@ def _record_case(
     return int(skipped), int(error), int(failure), duration or 0.0
 
 
+def _outermost_suites(node: ET.Element) -> list[ET.Element]:
+    """Select non-overlapping suite clocks beneath optional wrapper elements."""
+    if node.tag == "testsuite":
+        return [node]
+    suites: list[ET.Element] = []
+    for child in node:
+        if child.tag in {"testsuite", "testsuites"}:
+            suites.extend(_outermost_suites(child))
+    return suites
+
+
 def derive_summary(junit_paths: list[Path]) -> Summary:
     """Count each testcase record once; positive duration is a separate measure."""
     rows: list[Summary] = []
@@ -110,10 +124,14 @@ def derive_summary(junit_paths: list[Path]) -> Summary:
     missing = [path for path in junit_paths if not path.is_file()]
     if missing:
         raise FileNotFoundError(f"Missing JUnit telemetry input: {missing[0]}")
+    if len({path.resolve() for path in junit_paths}) != len(junit_paths):
+        raise ValueError("Duplicate JUnit telemetry input path")
+    if len({path.name for path in junit_paths}) != len(junit_paths):
+        raise ValueError("Ambiguous JUnit telemetry source name")
     existing = junit_paths
     for path in existing:
         root, cases = _validated_cases(path)
-        suites = [root] if root.tag == "testsuite" else root.findall("testsuite")
+        suites = _outermost_suites(root)
         lane_wall[path.name] = round(
             sum(
                 _nonnegative_duration(suite.get("time"), "testsuite", path) or 0
