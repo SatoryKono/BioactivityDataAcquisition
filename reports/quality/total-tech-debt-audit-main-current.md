@@ -14,7 +14,7 @@ Evidence surface SHA-256: `f528eb355a58dcab1419bf727ded446607bd01792b12e6edcfe2e
 
 ## Current evidence summary
 
-Evidence metadata refresh: 2026-10-01 (RF-001, #11846).
+Evidence metadata refresh (previous event): 2026-10-01 (RF-001, #11846).
 The single machine-readable summary below is generated from the canonical
 coverage inventory, architecture scorecard and debt-governance gates. Its
 `evidence_surface_sha256` binds those artifacts; the inventory's
