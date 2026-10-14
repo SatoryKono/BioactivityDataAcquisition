@@ -766,3 +766,29 @@ def test_coalesce_preserves_dotted_field_and_entity_identity(
         "activity",
     ]
     assert "crossref.publication.field.with.dots" not in result.columns
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "seed,enricher",
+    [
+        (
+            pl.Series([None, "seed"], dtype=pl.String),
+            pl.Series([1, 2], dtype=pl.Duration("us")),
+        ),
+        (pl.Series([None, 1], dtype=pl.Int64), pl.Series([{"x": 1}, {"x": 2}])),
+    ],
+    ids=["string-duration", "scalar-struct"],
+)
+def test_coalesce_preserves_columns_when_planned_cast_cannot_execute(
+    policy: CoalescePolicyService, seed: pl.Series, enricher: pl.Series
+) -> None:
+    frame = pl.DataFrame(
+        {"chembl.publication.value": seed, "crossref.publication.value": enricher}
+    )
+    # The schema planner accepts these pairs, but execution cannot cast values.
+    frame.lazy().select(pl.coalesce(frame.columns)).collect_schema()
+    with pytest.raises(pl.exceptions.InvalidOperationError):
+        frame.select(pl.coalesce(frame.columns))
+    result = policy.coalesce_first_non_null(frame, (), "chembl_publication")
+    assert result.equals(frame)

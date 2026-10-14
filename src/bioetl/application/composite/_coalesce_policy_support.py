@@ -75,20 +75,18 @@ def can_coalesce(
         return True
     if isinstance(type1, pl.List) != isinstance(type2, pl.List):
         return False
-    return _has_coalesce_supertype(df, [col1, col2])
+    return _can_execute_coalesce(df, [col1, col2])
 
 
-def _has_coalesce_supertype(
+def _can_execute_coalesce(
     df: Any,  # Any: DataFrame follows the same schema surface as can_coalesce.
     columns: list[str],
 ) -> bool:
-    """Check the complete expression's type without reading or coercing rows."""
+    """Check the complete expression, including value-dependent casts."""
     import polars as pl
 
     try:
-        pl.DataFrame(schema={col: df[col].dtype for col in columns}).lazy().select(
-            pl.coalesce(columns)
-        ).collect_schema()
+        df.select(pl.coalesce(columns))
     except (pl.exceptions.SchemaError, pl.exceptions.InvalidOperationError):
         return False
     return True
@@ -154,7 +152,7 @@ def compatible_columns(
     result = [base_col]
     for col in ordered_cols[1:]:
         if all(can_coalesce(df, selected, col) for selected in result) and (
-            _has_coalesce_supertype(df, [*result, col])
+            _can_execute_coalesce(df, [*result, col])
         ):
             result.append(col)
     return result
