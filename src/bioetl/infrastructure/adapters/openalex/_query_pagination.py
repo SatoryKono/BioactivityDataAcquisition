@@ -65,6 +65,18 @@ async def iter_query_results(
         payload = await query_executor.request_works_payload(params)
         results = response_mapper.extract_results(payload)
         if not results:
+            next_cursor = response_mapper.extract_next_cursor(payload)
+            if next_cursor is not None:
+                raise_pagination_truncated(
+                    logger,
+                    event="openalex_query_results_truncated",
+                    reason="empty_page_with_cursor",
+                    page_count=page_count,
+                    page_limit=max_pages,
+                    cursor_field="next_cursor",
+                    cursor_value=next_cursor[:100],
+                    log_context={"query": query[:100]},
+                )
             return
         for work in results:
             yield work
