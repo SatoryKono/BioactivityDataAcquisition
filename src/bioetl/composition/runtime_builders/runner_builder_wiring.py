@@ -96,17 +96,13 @@ def resolve_runner_factory_wiring(
 ) -> RunnerFactoryWiring:
     """Return factory wiring with legacy keyword overrides applied."""
     resolved = wiring or RunnerFactoryWiring()
-    overrides = {
-        "create_registry": create_registry_fn,
-        "ensure_providers_loaded": ensure_providers_loaded_fn,
-        "register_all_pipelines": register_all_pipelines_fn,
-    }
-
-    active_overrides = {k: v for k, v in overrides.items() if v is not None}
-    if not active_overrides:
-        return resolved
-
-    return replace(resolved, **active_overrides)
+    if create_registry_fn is not None:
+        resolved = replace(resolved, create_registry=create_registry_fn)
+    if ensure_providers_loaded_fn is not None:
+        resolved = replace(resolved, ensure_providers_loaded=ensure_providers_loaded_fn)
+    if register_all_pipelines_fn is not None:
+        resolved = replace(resolved, register_all_pipelines=register_all_pipelines_fn)
+    return resolved
 
 
 def resolve_runner_builder_wiring(
@@ -158,22 +154,32 @@ def resolve_runner_input_wiring(
 ) -> RunnerInputWiring:
     """Return input wiring with legacy keyword overrides applied."""
     resolved = wiring or RunnerInputWiring()
-    overrides = {
-        "get_settings": get_settings_fn,
-        "load_pipeline_config": load_pipeline_config_fn,
-        "load_source_config": load_source_config_fn,
-        "build_observability_bundle": build_observability_bundle_fn,
-        "assemble_vacuum_settings": assemble_vacuum_settings_fn,
-        "assemble_runtime_config": assemble_runtime_config_fn,
-        "assemble_filter_config": assemble_filter_config_fn,
-        "assemble_cached_bronze_context": assemble_cached_bronze_context_fn,
-    }
-
-    active_overrides = {k: v for k, v in overrides.items() if v is not None}
-    if not active_overrides:
-        return resolved
-
-    return replace(resolved, **active_overrides)
+    if get_settings_fn is not None:
+        resolved = replace(resolved, get_settings=get_settings_fn)
+    if load_pipeline_config_fn is not None:
+        resolved = replace(resolved, load_pipeline_config=load_pipeline_config_fn)
+    if load_source_config_fn is not None:
+        resolved = replace(resolved, load_source_config=load_source_config_fn)
+    if build_observability_bundle_fn is not None:
+        resolved = replace(
+            resolved,
+            build_observability_bundle=build_observability_bundle_fn,
+        )
+    if assemble_vacuum_settings_fn is not None:
+        resolved = replace(
+            resolved,
+            assemble_vacuum_settings=assemble_vacuum_settings_fn,
+        )
+    if assemble_runtime_config_fn is not None:
+        resolved = replace(resolved, assemble_runtime_config=assemble_runtime_config_fn)
+    if assemble_filter_config_fn is not None:
+        resolved = replace(resolved, assemble_filter_config=assemble_filter_config_fn)
+    if assemble_cached_bronze_context_fn is not None:
+        resolved = replace(
+            resolved,
+            assemble_cached_bronze_context=assemble_cached_bronze_context_fn,
+        )
+    return resolved
 
 
 __all__ = [
