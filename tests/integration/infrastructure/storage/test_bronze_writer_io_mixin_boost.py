@@ -22,6 +22,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from tests.helpers.bronze_cleanup import sidecar_bytes
+
 from bioetl.infrastructure.storage.bronze.io_mixin import BronzeWriterIOMixin
 from bioetl.infrastructure.storage.bronze import io_mixin
 
@@ -296,7 +298,9 @@ class TestCleanupOldFiles:
         old_dir.mkdir(parents=True)
         artifact = "batch_2024-12-01_12345678-1234-5678-1234-567812345678.jsonl.zst"
         (old_dir / artifact).write_bytes(b"data")
-        (old_dir / f"{artifact}.meta.json").write_bytes(b"{}")
+        (old_dir / f"{artifact}.meta.json").write_bytes(
+            sidecar_bytes(b"data", artifact)
+        )
 
         cutoff = datetime(2025, 1, 1, tzinfo=UTC)
         result = await mixin.cleanup_old_files(cutoff, dry_run=True)
@@ -319,7 +323,9 @@ class TestCleanupOldFiles:
         ]
         for artifact in artifacts:
             (old_dir / artifact).write_bytes(b"data")
-            (old_dir / f"{artifact}.meta.json").write_bytes(b"{}")
+            (old_dir / f"{artifact}.meta.json").write_bytes(
+                sidecar_bytes(b"data", artifact)
+            )
 
         cutoff = datetime(2025, 1, 1, tzinfo=UTC)
         if os.name == "nt":
@@ -343,7 +349,9 @@ class TestCleanupOldFiles:
         old_dir.mkdir(parents=True)
         artifact = "batch_2024-12-01_12345678-1234-5678-1234-567812345678.jsonl.zst"
         (old_dir / artifact).write_bytes(b"data")
-        (old_dir / f"{artifact}.meta.json").write_bytes(b"{}")
+        (old_dir / f"{artifact}.meta.json").write_bytes(
+            sidecar_bytes(b"data", artifact)
+        )
 
         cutoff = datetime(2025, 1, 1, tzinfo=UTC)
         if os.name == "nt":

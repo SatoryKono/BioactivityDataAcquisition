@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator, Awaitable, Callable
+from collections.abc import AsyncIterator, Awaitable, Callable, Iterator
 
 from bioetl.application.core.derived_scan_budget import batched_source_records
 from bioetl.application.core.publication_term_runtime import publication_pubmed_id
@@ -48,6 +48,14 @@ async def _attach_pubmed_payloads(
     return [replacements.get(id(record), record) for record in records]
 
 
+def _terms_from_batch(
+    records: list[BronzeRecord], extract_terms: _ExtractTerms
+) -> Iterator[BronzeRecord]:
+    for record in records:
+        if (publication_id := _publication_id(record)) is not None:
+            yield from extract_terms(record, publication_id)
+
+
 async def yield_terms_from_publications(
     publications: AsyncIterator[BronzeRecord],
     *,
@@ -73,12 +81,7 @@ async def yield_terms_from_publications(
                 batch = await _attach_pubmed_payloads(
                     batch, extract_terms=extract_terms, enricher=enricher
                 )
-            for term in (
-                term
-                for record in batch
-                if (publication_id := _publication_id(record)) is not None
-                for term in extract_terms(record, publication_id)
-            ):
+            for term in _terms_from_batch(batch, extract_terms):
                 term_count += 1
                 yield term
                 if limit is not None and term_count >= limit:

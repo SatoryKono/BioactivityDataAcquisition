@@ -1,4 +1,4 @@
-"""Opt-in POSIX journal for an already validated Bronze cleanup group.
+"""POSIX journal schema for an attested Bronze cleanup group.
 
 Validated record schema and bounded member fingerprinting for Bronze journals.
 """

@@ -418,11 +418,7 @@ def _refresh_targeted_coverage_closeout() -> None:
 
     path = ROOT / "reports/quality/low-coverage-targeted-tests-6045.json"
     payload = json.loads(path.read_text(encoding="utf-8"))
-    inventory = json.loads(
-        (ROOT / _MODULE_COVERAGE_JSON).read_text(
-            encoding="utf-8"
-        )
-    )
+    inventory = json.loads((ROOT / _MODULE_COVERAGE_JSON).read_text(encoding="utf-8"))
     digest = inventory["source_tree_sha256"]
     if payload["module_coverage_inventory_source_tree_sha256"] == digest:
         return
@@ -461,11 +457,7 @@ def _refresh_application_core_closeout(*, check_only: bool) -> None:
     """Bind the live closeout view to inventory without inventing measurements."""
     path = ROOT / "reports/quality/issue-5272-application-core-coverage-closeout.json"
     payload = json.loads(path.read_text(encoding="utf-8"))
-    inventory = json.loads(
-        (ROOT / _MODULE_COVERAGE_JSON).read_text(
-            encoding="utf-8"
-        )
-    )
+    inventory = json.loads((ROOT / _MODULE_COVERAGE_JSON).read_text(encoding="utf-8"))
     summary = inventory["summary"]
     core = summary["hotspot_family_coverage"]["application_core"]
     metrics = {
@@ -484,6 +476,8 @@ def _refresh_application_core_closeout(*, check_only: bool) -> None:
         payload["current_metrics"] == metrics
         and payload["parent_epic_status"]["remaining_below_85_module_count"]
         == below_floor
+        and payload.get("current_binding_refresh", {}).get("source_tree_sha256")
+        == inventory["source_tree_sha256"]
     ):
         return
     if check_only:

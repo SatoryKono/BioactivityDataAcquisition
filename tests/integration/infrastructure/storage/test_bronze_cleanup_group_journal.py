@@ -157,6 +157,151 @@ def _body() -> dict[str, object]:
     }
 
 
+def _public_writer(root: Path):
+    from bioetl.domain.ports.noop import NoOpMetrics
+    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+    from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+
+    return BronzeWriter(base_path=root, logger=NoOpLogger(), metrics=NoOpMetrics())
+
+
+@POSIX_ONLY
+@pytest.mark.asyncio
+@pytest.mark.parametrize("mutation", ["legacy", "payload", "copy"])
+async def test_public_cleanup_preserves_unattested_group(tmp_path: Path, mutation: str):
+    from datetime import datetime
+
+    root, spec, date = _fixture(tmp_path, copy=True)
+    names = spec.names()
+    if mutation == "legacy":
+        (date / names["sidecar"]).write_text("{}")
+    else:
+        (date / names[mutation]).write_bytes(b"foreign")
+    original = {p.name: p.read_bytes() for p in date.iterdir()}
+    result = await _public_writer(root).cleanup_old_files(
+        datetime.fromisoformat(CUTOFF)
+    )
+    assert result["files_removed"] == 0
+    assert result["files_conflicted"] == 3
+    assert {p.name: p.read_bytes() for p in date.iterdir()} == original
+
+
+@POSIX_ONLY
+@pytest.mark.asyncio
+async def test_public_cleanup_retries_late_failure_without_widening_scope(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    from datetime import datetime
+
+    root, spec, date = _fixture(tmp_path)
+    original_unlink = os.unlink
+    injected = False
+
+    def fail_once(name, *args, **kwargs):
+        nonlocal injected
+        if name == "sidecar" and not injected:
+            injected = True
+            raise OSError("transient sidecar unlink")
+        return original_unlink(name, *args, **kwargs)
+
+    monkeypatch.setattr(os, "unlink", fail_once)
+    writer = _public_writer(root)
+    cutoff = datetime.fromisoformat(CUTOFF)
+    first = await writer.cleanup_old_files(cutoff)
+    assert first["files_removed"] == 1
+    assert first["bytes_freed"] == len(b"payload\n")
+    assert first["files_failed"] == 1
+    assert date.exists()
+    refused = await writer.cleanup_old_files(cutoff, provider="openalex")
+    assert refused["files_removed"] == 0
+    assert refused["directories_skipped"] == 1
+    second = await writer.cleanup_old_files(
+        cutoff, provider=spec.provider, entity=spec.entity
+    )
+    assert second["files_planned"] == second["files_removed"] == 1
+    assert second["files_failed"] == 0
+    assert not date.exists()
+
+
+@POSIX_ONLY
+def test_begin_rejects_new_attested_inode_after_plan(tmp_path: Path):
+    root, spec, date = _fixture(tmp_path)
+    expected = {p.name: p.stat() for p in date.iterdir()}
+    date_identity = date.stat()
+    payload = date / spec.names()["payload"]
+    payload.unlink()
+    payload.write_bytes(b"payload\n")
+    with journal.open_group_journal(root) as operation:
+        with pytest.raises(
+            journal.GroupJournalConflict, match="planned group member changed"
+        ):
+            operation.begin(
+                spec, expected_members=expected, expected_date=date_identity
+            )
+    assert payload.exists()
+
+
+@POSIX_ONLY
+@pytest.mark.parametrize("barrier", ["root_fsync", "stage_fsync", "setxattr"])
+def test_stage_setup_failure_is_retryable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, barrier: str
+) -> None:
+    root, spec, date = _fixture(tmp_path)
+    original_fsync, original_setxattr = os.fsync, os.setxattr
+    with journal.open_group_journal(root) as group:
+        operation = group.begin(spec)
+        stage = root / f".bronze-group-stage-{operation}"
+        failed = False
+
+        def fsync(fd: int) -> None:
+            nonlocal failed
+            if (
+                stage.exists()
+                and not failed
+                and (
+                    (barrier == "root_fsync" and fd == group._root_fd)
+                    or (barrier == "stage_fsync" and fd != group._root_fd)
+                )
+            ):
+                failed = True
+                raise OSError("transient stage setup")
+            original_fsync(fd)
+
+        def setxattr(*args, **kwargs) -> None:
+            nonlocal failed
+            if barrier == "setxattr" and not failed:
+                failed = True
+                raise OSError("transient xattr")
+            original_setxattr(*args, **kwargs)
+
+        monkeypatch.setattr(os, "fsync", fsync)
+        monkeypatch.setattr(os, "setxattr", setxattr)
+        with pytest.raises(journal.GroupJournalFailure):
+            group.recover(operation)
+        assert failed and not stage.exists()
+        assert (date / spec.names()["payload"]).read_bytes() == b"payload\n"
+        assert group.recover(operation) == 2
+
+
+@POSIX_ONLY
+def test_stage_setup_failure_preserves_substituted_directory(tmp_path: Path) -> None:
+    root, spec, _date = _fixture(tmp_path)
+    with journal.open_group_journal(root) as group:
+        operation = group.begin(spec)
+        stage = root / f".bronze-group-stage-{operation}"
+
+        def substitute(phase: str) -> None:
+            if phase == "after_stage_create":
+                stage.rename(tmp_path / "held-original-stage")
+                stage.mkdir(mode=0o700)
+                (stage / "foreign").write_bytes(b"preserve")
+                raise OSError("setup interrupted")
+
+        with pytest.raises(journal.GroupJournalConflict, match="substituted"):
+            group.recover(operation, substitute)
+        assert (stage / "foreign").read_bytes() == b"preserve"
+
+
 @pytest.mark.parametrize(
     "date,batch,cutoff",
     [

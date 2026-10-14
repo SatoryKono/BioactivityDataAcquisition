@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import stat
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -119,3 +120,77 @@ def stat_is_link_or_reparse(st: os.stat_result) -> bool:
     if stat.S_ISLNK(st.st_mode):
         return True
     return bool(getattr(st, "st_file_attributes", 0) & _REPARSE_POINT_ATTR)
+
+
+def _pending_group_operation(root_fd: int) -> bool:
+    """Recognize durable group work without following an untrusted directory."""
+    names = os.listdir(root_fd)
+    if any(name.startswith(".bronze-group-stage-") for name in names):
+        return True
+    if ".bronze-group-journals" not in names:
+        return False
+    fd = os.open(
+        ".bronze-group-journals",
+        os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | _O_NOFOLLOW,
+        dir_fd=root_fd,
+    )
+    try:
+        return bool(os.listdir(fd))  # noqa: PTH208 - pinned directory fd
+    finally:
+        os.close(fd)
+
+
+def _finish_private_stage(
+    root_fd: int,
+    stage_fd: int,
+    name: str,
+    relative: Path,
+    on_stage_error: Callable[[str, OSError], None] | None,
+) -> None:
+    """Report post-commit durability failures without losing removal counts."""
+    stage_error: OSError | None = None
+    marker = name.replace(_STAGE_PREFIX, _DONE_PREFIX, 1)
+    marked_complete = False
+    try:
+        if relative.name not in os.listdir(stage_fd):
+            os.rename(
+                _STAGE_JOURNAL,
+                marker,
+                src_dir_fd=stage_fd,
+                dst_dir_fd=root_fd,
+            )
+            marked_complete = True
+            os.fsync(stage_fd)
+            os.fsync(root_fd)
+    except OSError as exc:
+        stage_error = exc
+    try:
+        owned = os.fstat(stage_fd)
+        named = os.stat(name, dir_fd=root_fd, follow_symlinks=False)
+        if (owned.st_dev, owned.st_ino) != (named.st_dev, named.st_ino):
+            raise OSError("Bronze cleanup stage replaced before retirement")
+        os.rmdir(name, dir_fd=root_fd)
+        os.fsync(root_fd)
+    except OSError as exc:
+        stage_error = stage_error or exc
+    finally:
+        os.close(stage_fd)
+    if marked_complete and stage_error is None:
+        try:
+            os.unlink(marker, dir_fd=root_fd)
+            os.fsync(root_fd)
+        except OSError as exc:
+            stage_error = exc
+    if stage_error is not None:
+        if on_stage_error is None:
+            raise stage_error
+        on_stage_error(name, stage_error)
+
+
+def _entry_is_link_or_reparse(entry: os.DirEntry[str]) -> bool:
+    if entry.is_symlink():
+        return True
+    try:
+        return stat_is_link_or_reparse(entry.stat(follow_symlinks=False))
+    except OSError:
+        return True

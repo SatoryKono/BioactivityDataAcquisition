@@ -69,7 +69,6 @@ class GroupRecordStore:
         if create:
             try:
                 os.mkdir(name, 0o700, dir_fd=self._root_fd)
-                os.fsync(self._root_fd)
             except FileExistsError:
                 if exclusive:
                     raise GroupJournalConflict(
@@ -87,7 +86,28 @@ class GroupRecordStore:
         ):
             os.close(fd)
             raise GroupJournalConflict("untrusted group journal/stage directory")
+        if create:
+            try:
+                os.fsync(self._root_fd)
+            except BaseException:
+                try:
+                    if exclusive:
+                        self._discard_created_empty_dir(name, fd)
+                finally:
+                    os.close(fd)
+                raise
         return fd
+
+    def _discard_created_empty_dir(self, name: str, fd: int) -> None:
+        """Retire only this attempt's held, still-named empty directory."""
+        named = os.stat(name, dir_fd=self._root_fd, follow_symlinks=False)
+        if [named.st_dev, named.st_ino] != _identity(fd):
+            raise GroupJournalConflict("new directory was substituted")
+        with os.scandir(fd) as entries:
+            if next(entries, None) is not None:
+                raise GroupJournalConflict("new directory is not empty")
+        os.rmdir(name, dir_fd=self._root_fd)
+        os.fsync(self._root_fd)
 
     @staticmethod
     def _checked_file(parent_fd: int, name: str) -> bytes:

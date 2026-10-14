@@ -20,6 +20,7 @@ from .cleanup_core import (
     _STAGE_JOURNAL,
     _STAGE_PREFIX,
     _CleanupConflict,
+    _finish_private_stage,
     destructive_cleanup_supported,
     open_bronze_root_no_follow,
     stat_is_link_or_reparse,
@@ -287,53 +288,6 @@ def _private_stage(
             os.close(stage_fd)
         else:
             _finish_private_stage(root_fd, stage_fd, name, relative, on_stage_error)
-
-
-def _finish_private_stage(
-    root_fd: int,
-    stage_fd: int,
-    name: str,
-    relative: Path,
-    on_stage_error: Callable[[str, OSError], None] | None,
-) -> None:
-    """Report post-commit durability failures without losing removal counts."""
-    stage_error: OSError | None = None
-    marker = name.replace(_STAGE_PREFIX, _DONE_PREFIX, 1)
-    marked_complete = False
-    try:
-        if relative.name not in os.listdir(stage_fd):
-            os.rename(
-                _STAGE_JOURNAL,
-                marker,
-                src_dir_fd=stage_fd,
-                dst_dir_fd=root_fd,
-            )
-            marked_complete = True
-            os.fsync(stage_fd)
-            os.fsync(root_fd)
-    except OSError as exc:
-        stage_error = exc
-    try:
-        owned = os.fstat(stage_fd)
-        named = os.stat(name, dir_fd=root_fd, follow_symlinks=False)
-        if (owned.st_dev, owned.st_ino) != (named.st_dev, named.st_ino):
-            raise OSError("Bronze cleanup stage replaced before retirement")
-        os.rmdir(name, dir_fd=root_fd)
-        os.fsync(root_fd)
-    except OSError as exc:
-        stage_error = stage_error or exc
-    finally:
-        os.close(stage_fd)
-    if marked_complete and stage_error is None:
-        try:
-            os.unlink(marker, dir_fd=root_fd)
-            os.fsync(root_fd)
-        except OSError as exc:
-            stage_error = exc
-    if stage_error is not None:
-        if on_stage_error is None:
-            raise stage_error
-        on_stage_error(name, stage_error)
 
 
 def _restore_staged(name: str, stage_fd: int, parent_fd: int) -> None:

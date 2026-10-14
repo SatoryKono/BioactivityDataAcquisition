@@ -18,6 +18,7 @@ import zstandard as zstd
 
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.storage.bronze.cleanup_core import BronzeRootLease
+from bioetl.infrastructure.storage.bronze.cleanup_group_apply import BronzeGroupCleanup
 from bioetl.infrastructure.storage.bronze.cleanup_metrics import (
     emit_cleanup_outcome_metrics,
 )
@@ -35,7 +36,6 @@ from bioetl.infrastructure.storage.bronze.cleanup_support import (
     find_old_date_dirs,
     real_root,
     safe_rmdir,
-    safe_unlink,
     validate_scope_filter,
 )
 
@@ -202,7 +202,9 @@ class BronzeWriterReadCleanupMixin(
             )
         if not self.base_path.exists():
             return self._empty_cleanup_stats()
-        with bronze_tree_lock(self.base_path, exclusive=True) as locked_root:
+        with bronze_tree_lock(
+            self.base_path, exclusive=True, allow_group_recovery=True
+        ) as locked_root:
             if cancel_requested is not None and cancel_requested.is_set():
                 return self._empty_cleanup_stats()
             return self._cleanup_old_files_locked_sync(
@@ -218,6 +220,17 @@ class BronzeWriterReadCleanupMixin(
         locked_root: BronzeRootLease | None = None,
     ) -> dict[str, int]:
         stats = self._empty_cleanup_stats()
+        group_cleanup = (
+            BronzeGroupCleanup(
+                locked_root, cutoff_str, self._flat_structure, self._log_cleanup_skip
+            )
+            if locked_root is not None
+            else None
+        )
+        if group_cleanup is not None and not group_cleanup.resume(
+            stats, provider, entity
+        ):
+            return stats
         root_abs = (
             locked_root.path
             if locked_root is not None
@@ -257,6 +270,7 @@ class BronzeWriterReadCleanupMixin(
                     root_abs,
                     root_real,
                     locked_root.fd if locked_root is not None else None,
+                    group_cleanup,
                 )
         return stats
 
@@ -267,72 +281,36 @@ class BronzeWriterReadCleanupMixin(
         root_abs: Path,
         root_real: Path,
         root_fd: int | None,
+        group_cleanup: BronzeGroupCleanup | None,
     ) -> None:
         """Apply the exact planned inodes and retain partial-result accounting."""
         failed_before = stats["files_failed"]
         conflicted_before = stats["files_conflicted"]
         stage_failed_before = stats["directories_failed"]
+        stage_conflicted_before = stats["directories_conflicted"]
 
         def on_stage_error(name: str, _error: OSError) -> None:
             stats["directories_failed"] += 1
             self._log_cleanup_skip(str(self.base_path / name), "stage_cleanup_error")
 
-        self._apply_planned_files(
-            stats, plan, root_abs, root_real, root_fd, on_stage_error
-        )
+        if group_cleanup is None:
+            raise NotImplementedError(
+                "destructive cleanup requires a pinned group journal"
+            )
+        group_cleanup.apply(plan, stats)
         if not plan.removable:
             return
         if (
             stats["files_failed"] != failed_before
             or stats["files_conflicted"] != conflicted_before
             or stats["directories_failed"] != stage_failed_before
+            or stats["directories_conflicted"] != stage_conflicted_before
         ):
             stats["directories_skipped"] += 1
             return
         self._apply_planned_directory(
             stats, plan, root_abs, root_real, root_fd, on_stage_error
         )
-
-    def _apply_planned_files(
-        self,
-        stats: dict[str, int],
-        plan: _CleanupDatePlan,
-        root_abs: Path,
-        root_real: Path,
-        root_fd: int | None,
-        on_stage_error: Callable[[str, OSError], None],
-    ) -> None:
-        failed_groups: set[str] = set()
-        for candidate in plan.files:
-            group = candidate.path.name.split(".jsonl", 1)[0]
-            if group in failed_groups:
-                stats["files_skipped"] += 1
-                stats["bytes_skipped"] += candidate.identity.st_size
-                self._log_cleanup_skip(str(candidate.path), "associated_member_failed")
-                continue
-            try:
-                removed = safe_unlink(
-                    candidate.path,
-                    root_abs,
-                    root_real,
-                    candidate.identity,
-                    on_stage_error=on_stage_error,
-                    root_fd=root_fd,
-                )
-            except OSError:
-                failed_groups.add(group)
-                stats["files_failed"] += 1
-                stats["bytes_failed"] += candidate.identity.st_size
-                self._log_cleanup_skip(str(candidate.path), "unlink_error")
-            else:
-                if removed:
-                    stats["files_removed"] += 1
-                    stats["bytes_freed"] += candidate.identity.st_size
-                else:
-                    failed_groups.add(group)
-                    stats["files_conflicted"] += 1
-                    stats["bytes_conflicted"] += candidate.identity.st_size
-                    self._log_cleanup_skip(str(candidate.path), "unlink_conflict")
 
     def _apply_planned_directory(
         self,

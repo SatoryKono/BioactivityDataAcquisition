@@ -26,6 +26,8 @@ from .cleanup_core import (
     _STAGE_PREFIX,
     BronzeRootLease,
     _CleanupConflict,
+    _entry_is_link_or_reparse,
+    _pending_group_operation,
     destructive_cleanup_supported,
     open_bronze_root_no_follow,
     stat_is_link_or_reparse,
@@ -124,24 +126,6 @@ def bronze_tree_lock(
         os.close(root_fd)
 
 
-def _pending_group_operation(root_fd: int) -> bool:
-    """Recognize durable group work without following an untrusted directory."""
-    names = os.listdir(root_fd)
-    if any(name.startswith(".bronze-group-stage-") for name in names):
-        return True
-    if ".bronze-group-journals" not in names:
-        return False
-    fd = os.open(
-        ".bronze-group-journals",
-        os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | _O_NOFOLLOW,
-        dir_fd=root_fd,
-    )
-    try:
-        return bool(os.listdir(fd))  # noqa: PTH208 - pinned directory fd
-    finally:
-        os.close(fd)
-
-
 def real_root(base_path: Path) -> Path:
     """Return the fully-resolved trusted root for containment checks."""
     return Path(os.path.realpath(base_path))
@@ -179,15 +163,6 @@ def is_fully_resolved(path: Path, root_abs: Path, root_real: Path) -> bool:
         )
     except (OSError, ValueError):
         return False
-
-
-def _entry_is_link_or_reparse(entry: os.DirEntry[str]) -> bool:
-    if entry.is_symlink():
-        return True
-    try:
-        return stat_is_link_or_reparse(entry.stat(follow_symlinks=False))
-    except OSError:
-        return True
 
 
 def is_owned_artifact(

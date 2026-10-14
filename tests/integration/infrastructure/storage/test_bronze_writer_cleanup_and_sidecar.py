@@ -26,6 +26,7 @@ from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+from tests.helpers.bronze_cleanup import sidecar_bytes
 from tests.testing_support.bronze_writer import (
     batch_id,
     ingestion_ts,
@@ -677,12 +678,16 @@ class TestBronzeWriterCleanupFiltered:
         p1_e1 = tmp_path / "p1" / "e1" / "2024-01-01"
         p1_e1.mkdir(parents=True)
         (p1_e1 / artifact).touch()
-        (p1_e1 / f"{artifact}.meta.json").write_bytes(b"{}")
+        (p1_e1 / f"{artifact}.meta.json").write_bytes(
+            sidecar_bytes(b"", artifact, provider="p1", entity="e1")
+        )
 
         p2_e1 = tmp_path / "p2" / "e1" / "2024-01-01"
         p2_e1.mkdir(parents=True)
         (p2_e1 / artifact).touch()
-        (p2_e1 / f"{artifact}.meta.json").write_bytes(b"{}")
+        (p2_e1 / f"{artifact}.meta.json").write_bytes(
+            sidecar_bytes(b"", artifact, provider="p2", entity="e1")
+        )
 
         cutoff = datetime(2024, 6, 1, tzinfo=UTC)
 

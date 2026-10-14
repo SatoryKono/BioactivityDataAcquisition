@@ -13,11 +13,13 @@ from uuid import UUID
 
 import pytest
 
+from tests.helpers.bronze_cleanup import sidecar_bytes
+
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage import bronze_writer as bronze_writer_module
-from bioetl.infrastructure.storage.bronze import cleanup_posix, read_cleanup_mixin
+from bioetl.infrastructure.storage.bronze import read_cleanup_mixin
 from bioetl.infrastructure.storage.bronze.cleanup_support import (
     bronze_tree_lock,
     destructive_cleanup_supported,
@@ -92,40 +94,38 @@ async def test_failed_completion_marker_retains_date_for_stage_recovery(
     date_dir.mkdir(parents=True)
     artifact = "batch_2024-01-01_12345678-1234-5678-1234-567812345678.jsonl.zst"
     (date_dir / artifact).write_bytes(b"owned")
-    (date_dir / f"{artifact}.meta.json").write_bytes(b"{}")
+    (date_dir / f"{artifact}.meta.json").write_bytes(sidecar_bytes(b"owned", artifact))
     writer = BronzeWriter(base_path=root, logger=NoOpLogger(), metrics=NoOpMetrics())
-    original_rename = cleanup_posix.os.rename
+    from bioetl.infrastructure.storage.bronze.cleanup_group_journal import GroupJournal
+
+    original_replace = GroupJournal._replace_record
     failed = False
 
-    def fail_completion_marker(src: object, dst: object, **kwargs: object) -> None:
+    def fail_completion_marker(operation, fd, operation_id, body):
         nonlocal failed
-        if (
-            src == "origin.json"
-            and str(dst).startswith(".bronze-cleanup-done-")
-            and not failed
-        ):
+        if body["state"] == "completed" and not failed:
             failed = True
-            raise PermissionError("completion marker denied")
-        original_rename(src, dst, **kwargs)
+            raise PermissionError("completion record denied")
+        return original_replace(operation, fd, operation_id, body)
 
-    monkeypatch.setattr(cleanup_posix.os, "rename", fail_completion_marker)
+    monkeypatch.setattr(GroupJournal, "_replace_record", fail_completion_marker)
     first = await writer.cleanup_old_files(CUTOFF)
 
     assert failed
     assert first["files_removed"] == 2
-    assert first["bytes_freed"] == 7
+    assert first["bytes_freed"] == 5 + len(sidecar_bytes(b"owned", artifact))
     assert first["directories_failed"] == 1
     assert first["directories_skipped"] == 1
     assert first["directories_removed"] == 0
     assert date_dir.is_dir() and not list(date_dir.iterdir())
-    assert list(root.glob(".bronze-cleanup-stage-*"))
+    assert list(root.glob(".bronze-group-stage-*"))
 
-    monkeypatch.setattr(cleanup_posix.os, "rename", original_rename)
+    monkeypatch.setattr(GroupJournal, "_replace_record", original_replace)
     second = await writer.cleanup_old_files(CUTOFF)
     assert second["files_removed"] == 0
     assert second["directories_removed"] == 1
     assert not date_dir.exists()
-    assert not list(root.glob(".bronze-cleanup-stage-*"))
+    assert not list(root.glob(".bronze-group-stage-*"))
 
 
 @pytest.mark.skipif(

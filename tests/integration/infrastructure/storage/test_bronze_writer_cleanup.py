@@ -18,6 +18,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.helpers.bronze_cleanup import sidecar_bytes
+
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
@@ -32,7 +34,14 @@ _ARTIFACT = "batch_2024-01-01_12345678-1234-5678-1234-567812345678.jsonl.zst"
 def _write_pair(date_dir: Path, data: bytes = b"test data") -> Path:
     payload = date_dir / _ARTIFACT
     payload.write_bytes(data)
-    (date_dir / f"{_ARTIFACT}.meta.json").write_bytes(b"{}")
+    (date_dir / f"{_ARTIFACT}.meta.json").write_bytes(
+        sidecar_bytes(
+            data,
+            _ARTIFACT,
+            provider=date_dir.parent.parent.name,
+            entity=date_dir.parent.name,
+        )
+    )
     return payload
 
 

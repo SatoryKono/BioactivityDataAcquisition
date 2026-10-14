@@ -102,6 +102,7 @@ class GroupRecoveryCoordinator(GroupMemberRecovery):
         if body["stage"] is None:
             fd = self._private_dir(name, create=True, exclusive=True)
             assert fd is not None
+            association_started = False
             try:
                 if hook:
                     hook("after_stage_create")
@@ -115,13 +116,18 @@ class GroupRecoveryCoordinator(GroupMemberRecovery):
                 os.fsync(fd)
                 os.fsync(self._root_fd)
                 dev, ino = _identity(fd)
+                association_started = True
                 body["stage"] = {"dev": dev, "ino": ino, "token": token}
                 self._replace_record(journal_fd, operation_id, body)
                 if hook:
                     hook("after_stage_association_fsync")
                 return fd
             except BaseException:
-                os.close(fd)
+                try:
+                    if not association_started:
+                        self._discard_created_empty_dir(name, fd)
+                finally:
+                    os.close(fd)
                 raise
         fd = self._private_dir(name, create=False)
         if fd is None:

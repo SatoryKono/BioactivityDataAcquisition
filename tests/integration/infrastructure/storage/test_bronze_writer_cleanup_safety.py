@@ -30,6 +30,8 @@ from uuid import UUID
 
 import pytest
 
+from tests.helpers.bronze_cleanup import sidecar_bytes
+
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
@@ -82,9 +84,22 @@ def _date_dir(root: Path, *parents: str, date: str = OLD_DATE) -> Path:
     return date_dir
 
 
-def _write_pair(date_dir: Path, data: bytes = b"x") -> None:
-    (date_dir / ARTIFACT).write_bytes(data)
-    (date_dir / SIDECAR).write_bytes(b"{}")
+def _sidecar(data: bytes, artifact: str = ARTIFACT, copy: bytes | None = None) -> bytes:
+    return sidecar_bytes(data, artifact, copy)
+
+
+def _write_pair(
+    date_dir: Path,
+    data: bytes = b"x",
+    *,
+    artifact: str | None = None,
+    copy: bytes | None = None,
+) -> None:
+    artifact = artifact or ARTIFACT.replace(OLD_DATE, date_dir.name)
+    (date_dir / artifact).write_bytes(data)
+    (date_dir / f"{artifact}.meta.json").write_bytes(_sidecar(data, artifact, copy))
+    if copy is not None:
+        (date_dir / artifact.removesuffix(".zst")).write_bytes(copy)
 
 
 def _symlink_or_skip(link: Path, target: Path) -> Path:
@@ -122,7 +137,7 @@ async def test_writer_lock_failure_records_attempt_and_trace(
     )
 
     @contextmanager
-    def denied_lock(_base_path: Path, *, exclusive: bool):
+    def denied_lock(_base_path: Path, *, exclusive: bool, **options):
         assert not exclusive
         raise PermissionError("lock denied")
         yield  # pragma: no cover - retain contextmanager protocol
@@ -188,8 +203,7 @@ async def test_calendar_cutoff_keeps_boundary_and_fresh_dates(tmp_path: Path) ->
     for date_name in ("2024-02-29", "2024-06-01", "2024-06-02"):
         date_dir = _date_dir(entity_dir, date=date_name)
         artifact = ARTIFACT.replace(OLD_DATE, date_name)
-        (date_dir / artifact).write_bytes(date_name.encode())
-        (date_dir / f"{artifact}.meta.json").write_bytes(b"{}")
+        _write_pair(date_dir, date_name.encode(), artifact=artifact)
         partitions[date_name] = date_dir
 
     result = await writer.cleanup_old_files(datetime(2024, 6, 1, tzinfo=UTC))
@@ -268,8 +282,7 @@ async def test_cleanup_removes_json_copy_artifact(tmp_path: Path) -> None:
     """Optional uncompressed copies are owned artifacts too."""
     writer = _make_writer(tmp_path)
     date_dir = _date_dir(tmp_path, "chembl", "activity")
-    _write_pair(date_dir)
-    (date_dir / JSON_COPY).write_bytes(b"{}")
+    _write_pair(date_dir, copy=b"{}")
 
     result = await writer.cleanup_old_files(CUTOFF)
 
@@ -591,7 +604,7 @@ async def test_cleanup_refuses_links_at_or_above_trusted_root(
     with pytest.raises(OSError):
         await writer.cleanup_old_files(CUTOFF)
     assert (date_dir / ARTIFACT).read_bytes() == b"payload"
-    assert (date_dir / SIDECAR).read_bytes() == b"{}"
+    assert (date_dir / SIDECAR).read_bytes() == _sidecar(b"payload")
 
 
 @pytest.mark.parametrize("anchored", [True])
@@ -660,7 +673,7 @@ async def test_public_cleanup_rejects_linked_root_or_ancestor(
             empty_outside.lstat(),
         )
     assert (date_dir / ARTIFACT).read_bytes() == b"outside sentinel"
-    assert (date_dir / SIDECAR).read_bytes() == b"{}"
+    assert (date_dir / SIDECAR).read_bytes() == _sidecar(b"outside sentinel")
     assert empty_outside.is_dir()
     assert not (outside_root / ".bronze-cleanup.lock").exists()
 
@@ -695,7 +708,7 @@ async def test_root_replaced_by_link_at_handle_open_preserves_external_tree(
         await _make_writer(root).cleanup_old_files(CUTOFF)
     assert switched
     assert (outside_date / ARTIFACT).read_bytes() == b"outside sentinel"
-    assert (outside_date / SIDECAR).read_bytes() == b"{}"
+    assert (outside_date / SIDECAR).read_bytes() == _sidecar(b"outside sentinel")
     assert empty_outside.is_dir()
     assert (moved / "chembl" / "activity" / OLD_DATE / ARTIFACT).is_file()
 
@@ -714,8 +727,8 @@ async def test_cleanup_continues_after_entry_stat_error(
     date_dir = _date_dir(tmp_path, "chembl", "activity")
     other_artifact = ARTIFACT.replace("12345678", "87654321", 1)
     other_sidecar = f"{other_artifact}.meta.json"
-    for name in (ARTIFACT, SIDECAR, other_artifact, other_sidecar):
-        (date_dir / name).write_bytes(b"data")
+    _write_pair(date_dir, b"data")
+    _write_pair(date_dir, b"data", artifact=other_artifact)
     with os.scandir(date_dir) as entries:
         by_name = {entry.name: entry for entry in entries}
     failed = Mock(wraps=by_name[other_sidecar])
@@ -739,7 +752,7 @@ async def test_cleanup_continues_after_entry_stat_error(
 
     assert result["files_planned"] == 2
     assert result["files_removed"] == (0 if dry_run else 2)
-    assert result["bytes_freed"] == (0 if dry_run else 8)
+    assert result["bytes_freed"] == (0 if dry_run else 4 + len(_sidecar(b"data")))
     assert result["directories_removed"] == 0
     assert result["files_failed"] == 1
     assert result["bytes_failed"] == 0  # stat did not yield a reliable size
@@ -783,50 +796,51 @@ async def test_discovery_scan_failure_is_reported(
 async def test_late_unlink_failure_retains_partial_result(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """A later I/O error cannot erase successful removals or retained files."""
+    """A later group error retains exact counts and converges on retry."""
     writer = _make_writer(tmp_path)
     metrics = Mock()
     writer._metrics = metrics
     date_dir = _date_dir(tmp_path, "chembl", "activity")
     second = ARTIFACT.replace("12345678", "87654321", 1)
-    for name in (ARTIFACT, SIDECAR, second, f"{second}.meta.json"):
-        (date_dir / name).write_bytes(b"data")
-    original_unlink = read_cleanup_mixin.safe_unlink
-    calls = 0
+    _write_pair(date_dir, b"data")
+    _write_pair(date_dir, b"data", artifact=second)
+    original_unlink = os.unlink
+    failed = False
 
-    def fail_late(*args: object, **kwargs: object) -> bool:
-        nonlocal calls
-        calls += 1
-        if calls == 2:
+    def fail_late(name, *args, **kwargs):
+        nonlocal failed
+        if name == "sidecar" and not failed:
+            failed = True
             raise PermissionError("locked by another process")
-        return original_unlink(*args, **kwargs)
+        return original_unlink(name, *args, **kwargs)
 
-    monkeypatch.setattr(read_cleanup_mixin, "safe_unlink", fail_late)
+    monkeypatch.setattr(os, "unlink", fail_late)
     result = await writer.cleanup_old_files(CUTOFF)
-
     assert result["files_planned"] == 4
     assert result["files_removed"] == 3
-    assert result["bytes_freed"] == 12
+    assert result["bytes_freed"] == 8 + len(_sidecar(b"data", second))
     assert result["files_failed"] == 1
-    assert result["bytes_failed"] == 4
+    assert result["bytes_failed"] == len(_sidecar(b"data"))
     assert result["directories_skipped"] == 1
     assert result["directories_removed"] == 0
-    assert sum(path.is_file() for path in date_dir.iterdir()) == 1
-    assert not (date_dir / ARTIFACT).exists()
-    assert (date_dir / SIDECAR).read_bytes() == b"data"
-    assert not (date_dir / second).exists()
-    assert not (date_dir / f"{second}.meta.json").exists()
+    assert date_dir.exists() and not list(date_dir.iterdir())
+    staged = list(tmp_path.glob(".bronze-group-stage-*/sidecar"))
+    assert len(staged) == 1 and staged[0].read_bytes() == _sidecar(b"data")
     metrics.increment_counter.assert_any_call(
         "bioetl_bronze_cleanup_files_failed_total", 1, {"operation": "cleanup"}
     )
     metrics.increment_counter.assert_any_call(
-        "bioetl_bronze_cleanup_bytes_failed_total", 4, {"operation": "cleanup"}
+        "bioetl_bronze_cleanup_bytes_failed_total",
+        len(_sidecar(b"data")),
+        {"operation": "cleanup"},
     )
-    monkeypatch.setattr(read_cleanup_mixin, "safe_unlink", original_unlink)
+    monkeypatch.setattr(os, "unlink", original_unlink)
     retry = await writer.cleanup_old_files(CUTOFF)
-    assert retry["files_removed"] == 0
-    assert retry["files_skipped"] == 1
-    assert (date_dir / SIDECAR).read_bytes() == b"data"
+    assert retry["files_removed"] == 1
+    assert retry["bytes_freed"] == len(_sidecar(b"data"))
+    assert retry["directories_removed"] == 1
+    assert not date_dir.exists()
+    assert not list(tmp_path.glob(".bronze-group-stage-*"))
 
 
 @_APPLY_POSIX
@@ -835,25 +849,24 @@ async def test_failed_copy_keeps_its_payload_and_sidecar_retryable(
 ) -> None:
     writer = _make_writer(tmp_path)
     date_dir = _date_dir(tmp_path, "chembl", "activity")
-    _write_pair(date_dir, b"payload")
-    (date_dir / JSON_COPY).write_bytes(b"copy")
-    original_unlink = read_cleanup_mixin.safe_unlink
+    _write_pair(date_dir, b"payload", copy=b"copy")
+    original_unlink = os.unlink
 
-    def fail_copy(*args: object, **kwargs: object) -> bool:
-        if Path(args[0]).name == JSON_COPY:
+    def fail_copy(name, *args, **kwargs):
+        if name == "copy":
             raise PermissionError("injected copy failure")
-        return original_unlink(*args, **kwargs)
+        return original_unlink(name, *args, **kwargs)
 
-    monkeypatch.setattr(read_cleanup_mixin, "safe_unlink", fail_copy)
+    monkeypatch.setattr(os, "unlink", fail_copy)
     first = await writer.cleanup_old_files(CUTOFF)
     assert first["files_planned"] == 3
     assert first["files_removed"] == 0
-    assert first["files_failed"] == 1
-    assert first["files_skipped"] == 2
+    assert first["files_failed"] == 3
     assert (date_dir / ARTIFACT).read_bytes() == b"payload"
-    assert (date_dir / SIDECAR).read_bytes() == b"{}"
-
-    monkeypatch.setattr(read_cleanup_mixin, "safe_unlink", original_unlink)
+    assert (date_dir / SIDECAR).read_bytes() == _sidecar(b"payload", copy=b"copy")
+    staged = list(tmp_path.glob(".bronze-group-stage-*/copy"))
+    assert len(staged) == 1 and staged[0].read_bytes() == b"copy"
+    monkeypatch.setattr(os, "unlink", original_unlink)
     second = await writer.cleanup_old_files(CUTOFF)
     assert second["files_removed"] == 3
     assert second["directories_removed"] == 1
@@ -872,7 +885,7 @@ async def test_stage_cleanup_failure_is_reported_after_file_removal(
 
     def fail_first_stage(name: object, **kwargs: object) -> None:
         nonlocal failed
-        if str(name).startswith(".bronze-cleanup-stage-") and not failed:
+        if str(name).startswith(".bronze-group-stage-") and not failed:
             failed = True
             raise PermissionError("stage directory locked")
         original_rmdir(name, **kwargs)
@@ -882,24 +895,22 @@ async def test_stage_cleanup_failure_is_reported_after_file_removal(
 
     assert failed
     assert result["files_removed"] == 2
-    assert result["bytes_freed"] == 3
+    assert result["bytes_freed"] == 1 + len(_sidecar(b"x"))
     assert result["directories_removed"] == 0
     assert result["directories_failed"] == 1
     assert result["directories_skipped"] == 1
     assert date_dir.is_dir() and not list(date_dir.iterdir())
     assert any(
-        path.name.startswith(".bronze-cleanup-stage-") for path in tmp_path.iterdir()
+        path.name.startswith(".bronze-group-stage-") for path in tmp_path.iterdir()
     )
-    assert any(
-        path.name.startswith(".bronze-cleanup-done-") for path in tmp_path.iterdir()
-    )
+    assert list((tmp_path / ".bronze-group-journals").glob("*.json"))
     monkeypatch.setattr(cleanup_support.os, "rmdir", original_rmdir)
     retry = await writer.cleanup_old_files(CUTOFF)
     assert retry["files_removed"] == 0
     assert retry["directories_removed"] == 1
     assert not date_dir.exists()
-    assert not list(tmp_path.glob(".bronze-cleanup-stage-*"))
-    assert not list(tmp_path.glob(".bronze-cleanup-done-*"))
+    assert not list(tmp_path.glob(".bronze-group-stage-*"))
+    assert not list((tmp_path / ".bronze-group-journals").glob("*.json"))
 
 
 @_APPLY_POSIX
@@ -965,7 +976,7 @@ async def test_date_rmdir_failure_preserves_partial_file_counts(
     result = await writer.cleanup_old_files(CUTOFF)
 
     assert result["files_removed"] == 2
-    assert result["bytes_freed"] == 3
+    assert result["bytes_freed"] == 1 + len(_sidecar(b"x"))
     assert result["directories_failed"] == 1
     assert result["directories_removed"] == 0
     assert date_dir.is_dir() and not list(date_dir.iterdir())
@@ -1439,7 +1450,7 @@ async def test_cancelled_writer_waiting_for_lock_does_not_leak_it(
     monkeypatch.setattr(asyncio, "to_thread", real_to_thread)
 
     @contextmanager
-    def observed_lock(base_path: Path, *, exclusive: bool):
+    def observed_lock(base_path: Path, *, exclusive: bool, **options):
         attempted.set()
         with original_lock(base_path, exclusive=exclusive):
             acquired.set()
@@ -1552,8 +1563,8 @@ async def test_cleanup_refuses_switched_alias_after_lock(
     original_lock = bronze_tree_lock
 
     @contextmanager
-    def switch_after_lock(base_path: Path, *, exclusive: bool):
-        with original_lock(base_path, exclusive=exclusive) as locked_root:
+    def switch_after_lock(base_path: Path, *, exclusive: bool, **options):
+        with original_lock(base_path, exclusive=exclusive, **options) as locked_root:
             alias.rename(old_root)
             alias.symlink_to(new_root, target_is_directory=True)
             yield locked_root
@@ -1597,20 +1608,24 @@ async def test_replaced_root_cannot_redirect_locked_cleanup(
         original_lock = bronze_tree_lock
 
         @contextmanager
-        def switch_after_lock(base_path: Path, *, exclusive: bool):
-            with original_lock(base_path, exclusive=exclusive) as lease:
+        def switch_after_lock(base_path: Path, *, exclusive: bool, **options):
+            with original_lock(base_path, exclusive=exclusive, **options) as lease:
                 switch()
                 yield lease
 
         monkeypatch.setattr(read_cleanup_mixin, "bronze_tree_lock", switch_after_lock)
     else:
-        original_unlink = read_cleanup_mixin.safe_unlink
+        from bioetl.infrastructure.storage.bronze.cleanup_group_journal import (
+            GroupJournal,
+        )
 
-        def switch_before_unlink(*args: object, **kwargs: object) -> bool:
+        original_recover = GroupJournal.recover_with_result
+
+        def switch_before_unlink(journal, *args, **kwargs):
             switch()
-            return original_unlink(*args, **kwargs)
+            return original_recover(journal, *args, **kwargs)
 
-        monkeypatch.setattr(read_cleanup_mixin, "safe_unlink", switch_before_unlink)
+        monkeypatch.setattr(GroupJournal, "recover_with_result", switch_before_unlink)
 
     result = await writer.cleanup_old_files(CUTOFF)
     assert switched and result["files_removed"] == 0
@@ -1682,9 +1697,9 @@ async def test_cancelled_cleanup_waiter_finishes_without_late_deletion(
         return await loop.run_in_executor(None, partial(func, *args, **kwargs))
 
     @contextmanager
-    def observed_lock(base_path: Path, *, exclusive: bool):
+    def observed_lock(base_path: Path, *, exclusive: bool, **options):
         attempted.set()
-        with original_lock(base_path, exclusive=exclusive) as locked_root:
+        with original_lock(base_path, exclusive=exclusive, **options) as locked_root:
             yield locked_root
 
     monkeypatch.setattr(asyncio, "to_thread", real_to_thread)
@@ -1784,82 +1799,6 @@ def test_interrupted_stage_is_restored_before_next_cleanup_plan(tmp_path: Path) 
 
 
 @_APPLY_POSIX
-def test_uninitialized_stage_is_removed_after_journal_sync_failure(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    target = tmp_path / ARTIFACT
-    target.write_bytes(b"retained")
-    root_fd = os.open(tmp_path, os.O_RDONLY | os.O_DIRECTORY)
-    original_fsync = cleanup_posix.os.fsync
-    failed = False
-
-    def fail_first_sync(fd: int) -> None:
-        nonlocal failed
-        if not failed:
-            failed = True
-            raise OSError("injected journal sync failure")
-        original_fsync(fd)
-
-    monkeypatch.setattr(cleanup_posix.os, "fsync", fail_first_sync)
-    try:
-        with pytest.raises(OSError, match="injected journal sync failure"):
-            with cleanup_posix._private_stage(root_fd, Path(ARTIFACT), target.lstat()):
-                pytest.fail("uninitialized stage must not be yielded")
-    finally:
-        os.close(root_fd)
-    assert target.read_bytes() == b"retained"
-    assert not list(tmp_path.glob(".bronze-cleanup-stage-*"))
-    with bronze_tree_lock(tmp_path, exclusive=True):
-        assert target.read_bytes() == b"retained"
-
-
-@_APPLY_POSIX
-def test_fd_view_probe_refuses_missing_pseudo_fd_mount(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    original_stat = Path.stat
-
-    def missing_fd_view(path: Path, *args: object, **kwargs: object) -> os.stat_result:
-        if str(path).startswith(("/proc/self/fd/", "/dev/fd/")):
-            raise FileNotFoundError("injected missing pseudo-fd mount")
-        return original_stat(path, *args, **kwargs)
-
-    monkeypatch.setattr(Path, "stat", missing_fd_view)
-    assert not cleanup_core._fd_view_supported()
-    assert not destructive_cleanup_supported()
-
-
-@_APPLY_POSIX
-def test_missing_fd_view_keeps_writes_available_but_refuses_cleanup(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setattr(cleanup_core, "_fd_view_supported", lambda: False)
-    assert not destructive_cleanup_supported()
-    with bronze_tree_lock(tmp_path, exclusive=False) as lease:
-        assert lease.fd is None
-        assert lease.writer_path == tmp_path
-    with pytest.raises(NotImplementedError, match="dir_fd/no-follow"):
-        with bronze_tree_lock(tmp_path, exclusive=True):
-            pytest.fail("destructive apply must refuse missing fd-view capability")
-
-
-@_APPLY_POSIX
-def test_fd_view_lost_after_probe_refuses_both_locks(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    def no_fd_view(_lease: cleanup_core.BronzeRootLease) -> Path:
-        raise NotImplementedError("injected missing procfs fd view")
-
-    monkeypatch.setattr(
-        cleanup_core.BronzeRootLease, "writer_path", property(no_fd_view)
-    )
-    for exclusive in (False, True):
-        with pytest.raises(NotImplementedError, match="injected missing procfs"):
-            with bronze_tree_lock(tmp_path, exclusive=exclusive):
-                pytest.fail("root fd without a view must never yield a path")
-
-
-@_APPLY_POSIX
 async def test_writer_refuses_pending_stage_before_reusing_batch_name(
     tmp_path: Path,
 ) -> None:
@@ -1898,33 +1837,6 @@ async def test_writer_refuses_pending_stage_before_reusing_batch_name(
     assert not target.exists()
     with bronze_tree_lock(tmp_path, exclusive=True):
         assert target.read_bytes() == b"original"
-
-
-def test_stage_retirement_preserves_substituted_directory(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Identity mismatch must prevent rmdir while retaining the completed marker."""
-    stage_fd, root_fd = 101, 102
-    owned = Mock(st_dev=1, st_ino=2)
-    replacement = Mock(st_dev=1, st_ino=3)
-    closed, removed, unlinked = Mock(), Mock(), Mock()
-    monkeypatch.setattr(cleanup_posix.os, "listdir", lambda _fd: [])
-    monkeypatch.setattr(cleanup_posix.os, "rename", Mock())
-    monkeypatch.setattr(cleanup_posix.os, "fsync", Mock())
-    monkeypatch.setattr(cleanup_posix.os, "fstat", lambda _fd: owned)
-    monkeypatch.setattr(cleanup_posix.os, "stat", lambda *_args, **_kwargs: replacement)
-    monkeypatch.setattr(cleanup_posix.os, "rmdir", removed)
-    monkeypatch.setattr(cleanup_posix.os, "unlink", unlinked)
-    monkeypatch.setattr(cleanup_posix.os, "close", closed)
-    errors = Mock()
-    cleanup_posix._finish_private_stage(
-        root_fd, stage_fd, ".bronze-cleanup-stage-test", Path("date/member"), errors
-    )
-    removed.assert_not_called()
-    unlinked.assert_not_called()
-    closed.assert_called_once_with(stage_fd)
-    errors.assert_called_once()
-    assert "replaced before retirement" in str(errors.call_args.args[1])
 
 
 @_APPLY_POSIX

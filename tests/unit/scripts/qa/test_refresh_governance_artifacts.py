@@ -303,6 +303,27 @@ def test_application_core_closeout_preserves_measurement_history(
     refresh._refresh_application_core_closeout(check_only=True)
     assert path.read_bytes() == original_bytes
 
+    # Identical measurements do not make a different source binding current.
+    inventory["source_tree_sha256"] = "new-source-with-same-metrics"
+    (quality / "module-coverage-inventory.json").write_text(
+        json.dumps(inventory), encoding="utf-8"
+    )
+    with pytest.raises(SystemExit, match="differs from accepted inventory"):
+        refresh._refresh_application_core_closeout(check_only=True)
+    assert path.read_bytes() == original_bytes
+    refresh._refresh_application_core_closeout(check_only=False)
+    rebound = json.loads(path.read_text())
+    assert rebound["current_metrics"] == updated["current_metrics"]
+    assert (
+        rebound["current_binding_refresh"]["source_tree_sha256"]
+        == inventory["source_tree_sha256"]
+    )
+    assert (
+        rebound["previous_current_bindings"][-1]["current_binding_refresh"]
+        == (updated["current_binding_refresh"])
+    )
+    refresh._refresh_application_core_closeout(check_only=True)
+
 
 @pytest.mark.parametrize("outcome", ["pass", "fail", "skip"])
 def test_coverage_closeout_rebinds_only_after_executed_tests(
