@@ -715,9 +715,9 @@ def test_release_artifact_is_written_only_for_live_review(tmp_path, mode):
     assert release.exists()
 
 
-def test_pr_fallback_records_actual_cli_command(tmp_path, monkeypatch):
-    """Keep PR output and fallback flags in reproducible CLI provenance."""
-    import shlex
+@pytest.fixture
+def local_cardinality_cli(monkeypatch):
+    """Isolate CLI provenance tests from inventory scanning and evidence writes."""
     from scripts.engineering.qa import observability_metric_inventory_cli as cli
 
     monkeypatch.setattr(cli, "collect_metric_inventory", lambda _: {})
@@ -731,6 +731,15 @@ def test_pr_fallback_records_actual_cli_command(tmp_path, monkeypatch):
     monkeypatch.setattr(
         cli, "_append_runtime_cardinality_review_summary", lambda *a, **kw: None
     )
+    return cli
+
+
+def test_pr_fallback_records_actual_cli_command(tmp_path, local_cardinality_cli):
+    """Keep PR output and fallback flags in reproducible CLI provenance."""
+    import shlex
+
+    cli = local_cardinality_cli
+
     output = tmp_path / "runtime_cardinality_review_pr.json"
     argv = [
         "--repo-root",
@@ -757,23 +766,14 @@ def test_pr_fallback_records_actual_cli_command(tmp_path, monkeypatch):
     assert "--fail-on-degraded-live-review" not in recorded
 
 
-def test_cwd_repo_root_is_omitted_from_source_command(tmp_path, monkeypatch):
+def test_cwd_repo_root_is_omitted_from_source_command(
+    tmp_path, monkeypatch, local_cardinality_cli
+):
     """A cwd repo root must not be stored as an absolute --repo-root."""
     import shlex
 
-    from scripts.engineering.qa import observability_metric_inventory_cli as cli
+    cli = local_cardinality_cli
 
-    monkeypatch.setattr(cli, "collect_metric_inventory", lambda _: {})
-    monkeypatch.setattr(cli, "_metric_inventory_violations", lambda *a, **kw: {})
-    monkeypatch.setattr(
-        cli,
-        "_build_runtime_cardinality_review_summary",
-        lambda *a, **kw: {"status": "passed", "mode": "local_cardinality_fallback"},
-    )
-    monkeypatch.setattr(cli, "_write_evidence_report", lambda *a, **kw: None)
-    monkeypatch.setattr(
-        cli, "_append_runtime_cardinality_review_summary", lambda *a, **kw: None
-    )
     monkeypatch.chdir(tmp_path)
     output = tmp_path / "review.json"
     assert (
