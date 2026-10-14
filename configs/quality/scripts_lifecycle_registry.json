@@ -757,6 +757,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/engineering/ci/_python_dependency_changes.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the private diff/ownership analysis backend of pr_lane_results.py; it has no standalone runner or public CLI. All test execution stays with the governed existing affected-tests lane.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-10-31"
+    },
     "scripts/engineering/ci/apply-ci-optimizations-fixed.ps1": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain only as a bounded manual Windows CI-optimization variant while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow.",
@@ -768,6 +774,12 @@
       "next_step": "Retain only as a bounded manual Windows CI-optimization helper while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/engineering/ci/junit_duration_summary.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the shared JUnit record-accounting backend imported by update_test_telemetry_baseline and invoked internally by the tests workflow. Its CLI has no operator inputs and only adapts CI environment/artifact paths; the owning tests workflow remains the public execution surface.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-10-31"
     },
     "scripts/engineering/ci/local_test_telemetry.py": {
       "decision": "shared_helper_module",
@@ -1254,6 +1266,12 @@
       "next_step": "Retain as a bounded manual test-governance report utility while testing guidance still references the direct script path; promote it into the canonical scripts.engineering.qa surface or retire it after the broader test-governance workflow is consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
+    },
+    "scripts/engineering/qa/report_topology_source_binding.py": {
+      "decision": "legacy_manual_utility",
+      "next_step": "Retain as the bounded manual source-projection producer introduced by #12215; its direct script invocation only rebinds two delimited documentation blocks and does not produce measurements or expose a runtime entrypoint. Route through the canonical QA command surface before promoting it to an active operator command.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-10-31"
     },
     "scripts/engineering/qa/report_vcr_cassette_census.py": {
       "decision": "legacy_manual_utility",
