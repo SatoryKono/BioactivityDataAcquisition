@@ -346,3 +346,20 @@ def test_merge_schema_invalid_conflict_resolution() -> None:
                 "sort_by": {"silver": ["entity_id"], "gold": ["entity_id"]},
             }
         )
+
+
+@pytest.mark.parametrize("strategy", ["explicit_rules", "explicit"])
+@pytest.mark.parametrize("priorities", [None, {}])
+def test_merge_schema_explicit_alias_requires_priorities(
+    strategy: str, priorities: dict[str, list[str]] | None
+) -> None:
+    """Reject both explicit spellings before domain conversion without priorities."""
+    payload = {
+        "conflict_resolution": strategy,
+        "output": {"silver": "silver/path", "gold": "gold/path"},
+        "sort_by": {"silver": ["entity_id"], "gold": ["entity_id"]},
+    }
+    if priorities is not None:
+        payload["field_priorities"] = priorities
+    with pytest.raises(ValidationError, match="field_priorities required"):
+        MergeSchema.model_validate(payload)

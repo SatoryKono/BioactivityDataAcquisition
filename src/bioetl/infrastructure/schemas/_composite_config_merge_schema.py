@@ -174,7 +174,10 @@ class MergeSchema(BaseModel):
     @model_validator(mode="after")
     def validate_explicit_rules_requires_priorities(self) -> MergeSchema:
         """Ensure field_priorities is provided when using explicit_rules."""
-        if self.conflict_resolution == "explicit_rules" and not self.field_priorities:
+        if (
+            self.conflict_resolution in {"explicit_rules", "explicit"}
+            and not self.field_priorities
+        ):
             raise ValueError(
                 "field_priorities required when using explicit_rules conflict resolution"
             )
