@@ -456,13 +456,82 @@ def _refresh_targeted_coverage_closeout() -> None:
     _write_text_atomically(path, json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
 
+def _refresh_application_core_closeout(*, check_only: bool) -> None:
+    """Bind the live closeout view to inventory without inventing measurements."""
+    path = ROOT / "reports/quality/issue-5272-application-core-coverage-closeout.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    inventory = json.loads(
+        (ROOT / "reports/quality/module-coverage-inventory.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    summary = inventory["summary"]
+    core = summary["hotspot_family_coverage"]["application_core"]
+    metrics = {
+        "repo_uncovered_module_count": summary["status_counts"]["uncovered"],
+        "repo_unmeasured_module_count": summary["unmeasured_module_count"],
+        "application_core_covered_line_percent": core["covered_line_percent"],
+        "application_core_uncovered_module_count": core["status_counts"]["uncovered"],
+        "application_core_unmeasured_module_count": core["unmeasured_module_count"],
+    }
+    below_floor = sum(
+        isinstance(row.get("coverage_percent"), (int, float))
+        and row["coverage_percent"] < 85
+        for row in inventory["modules"]
+    )
+    if (
+        payload["current_metrics"] == metrics
+        and payload["parent_epic_status"]["remaining_below_85_module_count"]
+        == below_floor
+    ):
+        return
+    if check_only:
+        raise SystemExit("Application-core closeout differs from accepted inventory")
+    previous = {
+        key: payload[key]
+        for key in (
+            "snapshot_date",
+            "current_metrics",
+            "parent_epic_status",
+            "current_binding_refresh",
+            "notes",
+        )
+        if key in payload
+    }
+    payload.setdefault("previous_current_bindings", []).append(previous)
+    payload["current_metrics"] = metrics
+    payload["parent_epic_status"] = {
+        **payload["parent_epic_status"],
+        "remaining_below_85_module_count": below_floor,
+        "reason": "Live accepted-inventory floor count; this binding does not close the parent epic.",
+    }
+    regressed = any(
+        value for key, value in metrics.items() if key.endswith("count")
+    ) or (
+        core["covered_line_percent"]
+        <= payload["baseline_metrics"]["application_core_covered_line_percent"]
+    )
+    payload["status"] = (
+        "current_inventory_regressed" if regressed else "validated_local_closeable"
+    )
+    payload["debt_outcome"] = "current_inventory_regressed" if regressed else "improved"
+    payload["current_binding_refresh"] = {
+        "source_tree_sha256": inventory["source_tree_sha256"],
+        "evidence": "reports/quality/module-coverage-inventory.json",
+        "semantics": "Accepted inventory binding only; no new measurement or CI acceptance claimed.",
+    }
+    _write_text_atomically(path, json.dumps(payload, indent=2) + "\n")
+
+
 def refresh(*, check_only: bool) -> None:
     """Refresh or verify governance artifacts in deterministic order."""
     if check_only:
         _run_check_only()
+        _refresh_application_core_closeout(check_only=True)
         return
     _run_refresh()
     _refresh_targeted_coverage_closeout()
+    _refresh_application_core_closeout(check_only=False)
 
 
 _CI_DRIFT_FAMILY_ORDER = (

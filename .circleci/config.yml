@@ -3758,6 +3758,27 @@ workflows:
             - '2'
             - '3'
 
+  # PR #12136 needs real POSIX execution and all canonical coverage shards.
+  # Measurement only: this does not select publication or closeout jobs.
+  bronze-cleanup-coverage:
+    when:
+      and:
+        - or:
+            - equal: [coverage-closeout, << pipeline.parameters.ci-lane >>]
+            - equal: [pr-gate, << pipeline.parameters.ci-lane >>]
+        - equal: [fix/bronze-cleanup-fs001, << pipeline.git.branch >>]
+        - not:
+            equal: [scheduled_pipeline, << pipeline.trigger_source >>]
+    jobs:
+      - proof-coverage-shard:
+          matrix:
+            alias: bronze-coverage-shards
+            parameters:
+              group: ['0', '1', '2', '3']
+      - proof-coverage:
+          requires:
+            - bronze-coverage-shards
+
   main-coverage-closeout:
     when:
       and:

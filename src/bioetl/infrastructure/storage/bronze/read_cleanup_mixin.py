@@ -400,8 +400,17 @@ class BronzeWriterReadCleanupMixin(
             cancel_requested.set()
             # A cancelled caller must not leave an unobserved destructive thread.
             await _drain_cleanup_worker(worker)
+            if not worker.cancelled() and worker.exception() is None:
+                self._emit_cleanup_result(cutoff_str, dry_run, worker.result())
             raise
 
+        self._emit_cleanup_result(cutoff_str, dry_run, result)
+        return result
+
+    def _emit_cleanup_result(
+        self, cutoff_str: str, dry_run: bool, result: dict[str, int]
+    ) -> None:
+        """Account for completed work even when its caller was cancelled."""
         self._logger.info(
             "bronze_cleanup_complete",
             cutoff=cutoff_str,
@@ -422,4 +431,3 @@ class BronzeWriterReadCleanupMixin(
             )
         if not dry_run:
             emit_cleanup_outcome_metrics(self._metrics, result)
-        return result

@@ -420,17 +420,89 @@ def test_unsupported_stage_tag_never_falls_back_to_unattested_removal(
 
 
 @POSIX_ONLY
-def test_begin_rejects_duplicate_pending_intent(tmp_path: Path) -> None:
+def test_begin_reuses_identical_pending_intent(tmp_path: Path) -> None:
     root, spec, date_dir = _fixture(tmp_path)
     with journal.open_group_journal(root) as group:
         operation_id = group.begin(spec)
         record = root / ".bronze-group-journals" / f"{operation_id}.json"
         original = record.read_bytes()
-        with pytest.raises(journal.GroupJournalConflict, match="pending intent"):
-            group.begin(spec)
+        assert group.begin(spec) == operation_id
         assert record.read_bytes() == original
     assert len(list((root / ".bronze-group-journals").iterdir())) == 1
     assert (date_dir / spec.names()["payload"]).read_bytes() == b"payload\n"
+
+
+@POSIX_ONLY
+def test_begin_retry_confirms_published_intent(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root, spec, _ = _fixture(tmp_path)
+    original_fsync = os.fsync
+    with journal.open_group_journal(root) as group:
+
+        def fail_published(fd: int) -> None:
+            if list((root / ".bronze-group-journals").glob("*.json")):
+                raise OSError("published intent confirmation failed")
+            original_fsync(fd)
+
+        monkeypatch.setattr(os, "fsync", fail_published)
+        with pytest.raises(OSError, match="confirmation failed"):
+            group.begin(spec)
+        receipt = next((root / ".bronze-group-journals").glob("*.json"))
+        original = receipt.read_bytes()
+        with pytest.raises(OSError, match="confirmation failed"):
+            group.begin(spec)
+        monkeypatch.setattr(os, "fsync", original_fsync)
+        assert group.begin(spec) == receipt.stem
+        assert receipt.read_bytes() == original
+        assert group.recover(receipt.stem) == 2
+
+
+@POSIX_ONLY
+def test_retired_receipt_retry_confirms_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root, spec, _ = _fixture(tmp_path)
+    original_fsync = os.fsync
+    with journal.open_group_journal(root) as group:
+        operation_id = group.begin(spec)
+        receipt = root / ".bronze-group-journals" / f"{operation_id}.json"
+        journal_identity = receipt.parent.stat()
+
+        def fail_retirement(fd: int) -> None:
+            identity = os.fstat(fd)
+            if not receipt.exists() and (identity.st_dev, identity.st_ino) == (
+                journal_identity.st_dev,
+                journal_identity.st_ino,
+            ):
+                raise OSError("retirement confirmation failed")
+            original_fsync(fd)
+
+        monkeypatch.setattr(os, "fsync", fail_retirement)
+        with pytest.raises(journal.GroupJournalFailure):
+            group.recover(operation_id)
+        assert not receipt.exists()
+        with pytest.raises(journal.GroupJournalFailure):
+            group.recover(operation_id)
+        monkeypatch.setattr(os, "fsync", original_fsync)
+        assert group.recover(operation_id) == 0
+
+
+@POSIX_ONLY
+@pytest.mark.parametrize("exclusive", [False, True])
+def test_pending_group_blocks_regular_root_operations(
+    tmp_path: Path, exclusive: bool
+) -> None:
+    root, spec, _ = _fixture(tmp_path)
+    with journal.open_group_journal(root) as group:
+        operation_id = group.begin(spec)
+    with pytest.raises(OSError, match="group recovery is pending"):
+        with journal.bronze_tree_lock(root, exclusive=exclusive):
+            pytest.fail("pending group admitted regular operation")
+    with journal.open_group_journal(root) as group:
+        assert group.recover(operation_id) == 2
+    with journal.bronze_tree_lock(root, exclusive=exclusive):
+        pass
 
 
 def test_windows_apply_capability_fails_closed(tmp_path: Path) -> None:

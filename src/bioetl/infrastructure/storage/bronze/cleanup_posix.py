@@ -313,13 +313,17 @@ def _finish_private_stage(
             os.fsync(root_fd)
     except OSError as exc:
         stage_error = exc
-    finally:
-        os.close(stage_fd)
     try:
+        owned = os.fstat(stage_fd)
+        named = os.stat(name, dir_fd=root_fd, follow_symlinks=False)
+        if (owned.st_dev, owned.st_ino) != (named.st_dev, named.st_ino):
+            raise OSError("Bronze cleanup stage replaced before retirement")
         os.rmdir(name, dir_fd=root_fd)
         os.fsync(root_fd)
     except OSError as exc:
         stage_error = stage_error or exc
+    finally:
+        os.close(stage_fd)
     if marked_complete and stage_error is None:
         try:
             os.unlink(marker, dir_fd=root_fd)

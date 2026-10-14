@@ -249,6 +249,61 @@ def test_atomic_writer_uses_utf8_lf_and_replaces_target(tmp_path: Path) -> None:
     assert list(tmp_path.iterdir()) == [target]
 
 
+@pytest.mark.parametrize("unmeasured", [0, 1])
+def test_application_core_closeout_preserves_measurement_history(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, unmeasured: int
+) -> None:
+    import json
+
+    quality = tmp_path / "reports/quality"
+    quality.mkdir(parents=True)
+    path = quality / "issue-5272-application-core-coverage-closeout.json"
+    initial = {
+        "snapshot_date": "2026-08-17",
+        "current_metrics": {"application_core_covered_line_percent": 99.86},
+        "baseline_metrics": {"application_core_covered_line_percent": 49.09},
+        "parent_epic_status": {"remaining_below_85_module_count": 0, "status": "open"},
+        "current_binding_refresh": {"measured_head": "historical-head"},
+    }
+    path.write_text(json.dumps(initial), encoding="utf-8")
+    inventory = {
+        "source_tree_sha256": "current-source",
+        "summary": {
+            "status_counts": {"uncovered": 0},
+            "unmeasured_module_count": unmeasured,
+            "hotspot_family_coverage": {
+                "application_core": {
+                    "covered_line_percent": 99.79,
+                    "status_counts": {"uncovered": 0},
+                    "unmeasured_module_count": 0,
+                }
+            },
+        },
+        "modules": [{"coverage_percent": 95}, {"coverage_percent": None}],
+    }
+    (quality / "module-coverage-inventory.json").write_text(
+        json.dumps(inventory), encoding="utf-8"
+    )
+    monkeypatch.setattr(refresh, "ROOT", tmp_path)
+    with pytest.raises(SystemExit, match="differs from accepted inventory"):
+        refresh._refresh_application_core_closeout(check_only=True)
+    assert json.loads(path.read_text()) == initial
+    refresh._refresh_application_core_closeout(check_only=False)
+    updated = json.loads(path.read_text())
+    assert updated["current_metrics"]["application_core_covered_line_percent"] == 99.79
+    assert updated["previous_current_bindings"][0]["current_binding_refresh"] == {
+        "measured_head": "historical-head"
+    }
+    assert "measured_head" not in updated["current_binding_refresh"]
+    assert updated["status"] == (
+        "current_inventory_regressed" if unmeasured else "validated_local_closeable"
+    )
+    original_bytes = path.read_bytes()
+    refresh._refresh_application_core_closeout(check_only=False)
+    refresh._refresh_application_core_closeout(check_only=True)
+    assert path.read_bytes() == original_bytes
+
+
 @pytest.mark.parametrize("outcome", ["pass", "fail", "skip"])
 def test_coverage_closeout_rebinds_only_after_executed_tests(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path, outcome: str

@@ -66,7 +66,9 @@ _DATE_DIR_FORMAT = "%Y-%m-%d"
 
 
 @contextmanager
-def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[BronzeRootLease]:
+def bronze_tree_lock(
+    base_path: Path, *, exclusive: bool, allow_group_recovery: bool = False
+) -> Iterator[BronzeRootLease]:
     """Coordinate all application writers and cleaners for one Bronze root.
 
     This is advisory. The operator must exclude uncooperative same-user writers.
@@ -102,6 +104,12 @@ def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[BronzeRoot
             )
             lease = BronzeRootLease(root_real, root_fd)
             _ = lease.writer_path
+            if _pending_group_operation(root_fd) and not (
+                exclusive and allow_group_recovery
+            ):
+                raise OSError(
+                    "Bronze operation refused while group recovery is pending"
+                )
             if exclusive:
                 _recover_stages(root_fd, root_real)
             elif any(
@@ -114,6 +122,24 @@ def bronze_tree_lock(base_path: Path, *, exclusive: bool) -> Iterator[BronzeRoot
             os.close(lock_fd)
     finally:
         os.close(root_fd)
+
+
+def _pending_group_operation(root_fd: int) -> bool:
+    """Recognize durable group work without following an untrusted directory."""
+    names = os.listdir(root_fd)
+    if any(name.startswith(".bronze-group-stage-") for name in names):
+        return True
+    if ".bronze-group-journals" not in names:
+        return False
+    fd = os.open(
+        ".bronze-group-journals",
+        os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | _O_NOFOLLOW,
+        dir_fd=root_fd,
+    )
+    try:
+        return bool(os.listdir(fd))  # noqa: PTH208 - pinned directory fd
+    finally:
+        os.close(fd)
 
 
 def real_root(base_path: Path) -> Path:

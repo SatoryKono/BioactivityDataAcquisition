@@ -12,14 +12,14 @@
   "current_metrics": {
     "repo_uncovered_module_count": 0,
     "repo_unmeasured_module_count": 0,
-    "application_core_covered_line_percent": 99.86,
+    "application_core_covered_line_percent": 99.79,
     "application_core_uncovered_module_count": 0,
     "application_core_unmeasured_module_count": 0
   },
   "parent_epic_status": {
     "status": "not_closeable_under_current_definition_of_done",
     "remaining_below_85_module_count": 0,
-    "reason": "Issue #5244 requires zero below-tier production modules; the live inventory now reports zero modules below the default floor, while this closeout remains the #5272 application-core evidence pack."
+    "reason": "Live accepted-inventory floor count; this binding does not close the parent epic."
   },
   "evidence": [
     "reports/quality/module-coverage-inventory.json",
@@ -174,12 +174,33 @@
         "reason": "Issue #5244 requires zero below-tier production modules; the live inventory now reports zero modules below the default floor, while this closeout remains the #5272 application-core evidence pack."
       },
       "notes": "Current metrics are rebound to the accepted module inventory. Historical measurements, baseline, and earlier closeout notes are preserved in previous_current_bindings. This does not claim fresh global measured nonregression."
+    },
+    {
+      "snapshot_date": "2026-08-17",
+      "current_metrics": {
+        "repo_uncovered_module_count": 0,
+        "repo_unmeasured_module_count": 0,
+        "application_core_covered_line_percent": 99.86,
+        "application_core_uncovered_module_count": 0,
+        "application_core_unmeasured_module_count": 0
+      },
+      "parent_epic_status": {
+        "status": "not_closeable_under_current_definition_of_done",
+        "remaining_below_85_module_count": 0,
+        "reason": "Issue #5244 requires zero below-tier production modules; the live inventory now reports zero modules below the default floor, while this closeout remains the #5272 application-core evidence pack."
+      },
+      "current_binding_refresh": {
+        "measured_head": "912f483953c76ede75313f762e41a9848369c3bb",
+        "source_tree_sha256": "6e2bf6d41d2fa7b5df095621c6727b5ef3c8be708137539b62cf7991b815f931",
+        "evidence": "reports/coverage/local-verify-pr12096-20261009-final16/manifest.json",
+        "semantics": "Current accepted inventory may retain historical nonregressing rows; raw measured candidate remains separate."
+      },
+      "notes": "Current metrics are rebound to the accepted module inventory. Historical measurements, baseline, and earlier closeout notes are preserved in previous_current_bindings. This does not claim fresh global measured nonregression."
     }
   ],
   "current_binding_refresh": {
-    "measured_head": "912f483953c76ede75313f762e41a9848369c3bb",
-    "source_tree_sha256": "6e2bf6d41d2fa7b5df095621c6727b5ef3c8be708137539b62cf7991b815f931",
-    "evidence": "reports/coverage/local-verify-pr12096-20261009-final16/manifest.json",
-    "semantics": "Current accepted inventory may retain historical nonregressing rows; raw measured candidate remains separate."
+    "source_tree_sha256": "3b65538211b9eb7aff1026eaf424ff0222d7ea2059a94c62f6a40a46c4c29584",
+    "evidence": "reports/quality/module-coverage-inventory.json",
+    "semantics": "Accepted inventory binding only; no new measurement or CI acceptance claimed."
   }
 }

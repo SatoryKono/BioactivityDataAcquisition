@@ -60,7 +60,7 @@ def open_group_journal(root: Path) -> Iterator[GroupJournal]:
         raise NotImplementedError(
             "durable Bronze group apply requires POSIX pinned handles"
         )
-    with bronze_tree_lock(root, exclusive=True) as lease:
+    with bronze_tree_lock(root, exclusive=True, allow_group_recovery=True) as lease:
         yield GroupJournal(lease)
 
 
@@ -161,6 +161,8 @@ class GroupJournal(GroupRecoveryCoordinator):
         try:
             body = self._read_intent(journal_fd, operation_id)
             if body is None:
+                # A previous unlink can be visible even though its fsync failed.
+                os.fsync(journal_fd)
                 return progress
             if body["root"] != _identity(self._root_fd):
                 raise GroupJournalConflict("journal belongs to another root")

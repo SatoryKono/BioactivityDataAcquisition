@@ -124,6 +124,12 @@ class GroupRecordStore:
         journal_fd = self._private_dir(_JOURNAL_DIR, create=True)
         assert journal_fd is not None
         try:
+            existing = self._read_intent(journal_fd, operation_id)
+            if existing == body:
+                # replace may have succeeded before the directory fsync failed.
+                # Retry the durability barrier before returning the same intent.
+                os.fsync(journal_fd)
+                return
             self._reject_pending_duplicate(journal_fd, body)
             if _exists(journal_fd, f"{operation_id}.json") or _exists(
                 journal_fd, f"{operation_id}.next"

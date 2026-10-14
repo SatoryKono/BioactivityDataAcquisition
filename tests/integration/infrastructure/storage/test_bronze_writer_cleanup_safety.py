@@ -1622,6 +1622,47 @@ async def test_replaced_root_cannot_redirect_locked_cleanup(
     assert outside_empty.is_dir() and not list(outside_empty.iterdir())
 
 
+async def test_cancelled_completed_cleanup_emits_exact_result(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    writer = _make_writer(tmp_path)
+    writer._logger = Mock()
+    writer._metrics = Mock()
+    started, finish = threading.Event(), threading.Event()
+    result = writer._empty_cleanup_stats()
+    result.update(files_removed=2, bytes_freed=17, files_failed=1, bytes_failed=3)
+
+    def controlled_worker(*_args: object) -> dict[str, int]:
+        started.set()
+        assert finish.wait(5)
+        return result
+
+    monkeypatch.setattr(writer, "_cleanup_old_files_sync", controlled_worker)
+    task = asyncio.create_task(writer.cleanup_old_files(CUTOFF))
+    try:
+        for _ in range(300):
+            if started.is_set():
+                break
+            await asyncio.sleep(0.01)
+        assert started.is_set()
+        task.cancel()
+        await asyncio.sleep(0)
+        assert not task.done()
+    finally:
+        finish.set()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+    writer._logger.info.assert_called_once_with(
+        "bronze_cleanup_complete", cutoff="2024-06-01", dry_run=False, **result
+    )
+    writer._metrics.increment_counter.assert_any_call(
+        "bioetl_bronze_files_removed_total", 2, {"operation": "cleanup"}
+    )
+    writer._metrics.increment_counter.assert_any_call(
+        "bioetl_bronze_bytes_freed_total", 17, {"operation": "cleanup"}
+    )
+
+
 @_APPLY_POSIX
 async def test_cancelled_cleanup_waiter_finishes_without_late_deletion(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
@@ -1857,6 +1898,33 @@ async def test_writer_refuses_pending_stage_before_reusing_batch_name(
     assert not target.exists()
     with bronze_tree_lock(tmp_path, exclusive=True):
         assert target.read_bytes() == b"original"
+
+
+def test_stage_retirement_preserves_substituted_directory(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Identity mismatch must prevent rmdir while retaining the completed marker."""
+    stage_fd, root_fd = 101, 102
+    owned = Mock(st_dev=1, st_ino=2)
+    replacement = Mock(st_dev=1, st_ino=3)
+    closed, removed, unlinked = Mock(), Mock(), Mock()
+    monkeypatch.setattr(cleanup_posix.os, "listdir", lambda _fd: [])
+    monkeypatch.setattr(cleanup_posix.os, "rename", Mock())
+    monkeypatch.setattr(cleanup_posix.os, "fsync", Mock())
+    monkeypatch.setattr(cleanup_posix.os, "fstat", lambda _fd: owned)
+    monkeypatch.setattr(cleanup_posix.os, "stat", lambda *_args, **_kwargs: replacement)
+    monkeypatch.setattr(cleanup_posix.os, "rmdir", removed)
+    monkeypatch.setattr(cleanup_posix.os, "unlink", unlinked)
+    monkeypatch.setattr(cleanup_posix.os, "close", closed)
+    errors = Mock()
+    cleanup_posix._finish_private_stage(
+        root_fd, stage_fd, ".bronze-cleanup-stage-test", Path("date/member"), errors
+    )
+    removed.assert_not_called()
+    unlinked.assert_not_called()
+    closed.assert_called_once_with(stage_fd)
+    errors.assert_called_once()
+    assert "replaced before retirement" in str(errors.call_args.args[1])
 
 
 @_APPLY_POSIX
