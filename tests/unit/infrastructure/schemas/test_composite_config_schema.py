@@ -302,3 +302,41 @@ def test_composite_config_schema_unique_name_validations() -> None:
     ]
     with pytest.raises(ValidationError, match="Duplicate dependency pipelines"):
         CompositeConfigSchema.model_validate(payload_dep)
+
+def test_merge_schema_conflict_resolution_alias_mapping() -> None:
+    # Test valid literal configurations mapping cleanly to expected domain Enums
+    mappings = {
+        "seed_priority": "seed_priority",
+        "enricher_priority": "enricher",
+        "latest_timestamp": "latest",
+        "explicit_rules": "explicit",
+        "coalesce": "coalesce",
+        # Test aliases mapping identically
+        "enricher": "enricher",
+        "latest": "latest",
+        "explicit": "explicit",
+    }
+
+    for literal_val, expected_domain_val in mappings.items():
+        merge = MergeSchema.model_validate(
+            {
+                "strategy": "left_outer",
+                "conflict_resolution": literal_val,
+                "output": {"silver": "silver/path", "gold": "gold/path"},
+                "sort_by": {"silver": ["entity_id"], "gold": ["entity_id"]},
+                **({"field_priorities": {"f": ["x"]}} if literal_val in ("explicit_rules", "explicit") else {})
+            }
+        )
+        assert merge.to_domain().conflict_resolution.value == expected_domain_val
+
+def test_merge_schema_invalid_conflict_resolution() -> None:
+    # Prove unknown literal fails validation explicitly before hitting Domain
+    with pytest.raises(ValidationError, match="Input should be"):
+        MergeSchema.model_validate(
+            {
+                "strategy": "left_outer",
+                "conflict_resolution": "unknown_value",
+                "output": {"silver": "silver/path", "gold": "gold/path"},
+                "sort_by": {"silver": ["entity_id"], "gold": ["entity_id"]},
+            }
+        )

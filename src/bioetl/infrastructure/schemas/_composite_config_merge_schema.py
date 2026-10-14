@@ -131,6 +131,10 @@ class MergeSchema(BaseModel):
         "latest_timestamp",
         "explicit_rules",
         "coalesce",
+        # Aliases for compatibility
+        "enricher",
+        "latest",
+        "explicit",
     ] = Field(default="seed_priority", description="Strategy for field conflicts")
     field_priorities: dict[str, list[str]] = Field(
         default_factory=dict, description="Mapping of field to source priority list"
@@ -195,10 +199,21 @@ class MergeSchema(BaseModel):
             )
             for group in self.column_groups
         )
+
+        # Safely map schema literals to domain enums for backwards compatibility
+        conflict_resolution_map = {
+            "enricher_priority": "enricher",
+            "latest_timestamp": "latest",
+            "explicit_rules": "explicit",
+        }
+        domain_conflict_resolution = conflict_resolution_map.get(
+            self.conflict_resolution, self.conflict_resolution
+        )
+
         return MergeConfig(
             strategy=MergeStrategy.from_string(self.strategy),
             conflict_resolution=ConflictResolution.from_string(
-                self.conflict_resolution
+                domain_conflict_resolution
             ),
             output_silver_path=self.output.silver,
             output_gold_path=self.output.gold,
