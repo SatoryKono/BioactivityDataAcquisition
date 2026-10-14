@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-14T05:04:24.411915+00:00",
+  "generated_at": "2026-10-14T05:15:57.903280+00:00",
   "summary": {
     "total_scripts": 651,
     "status_counts": {
@@ -2850,7 +2850,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 16,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
@@ -2896,9 +2896,9 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 57,
+          "line": 58,
           "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/check.sh\": (NPM_RUNTIME_TEST,),"
+          "text": "\"scripts/ai/mcp/check.sh\": ("
         }
       ],
       "owner": "@bioetl-platform",
@@ -3678,7 +3678,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 56,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\": (NPM_RUNTIME_TEST,),"
         },
@@ -3733,7 +3733,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 55,
+          "line": 56,
           "source_group": "scripts",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\": (NPM_RUNTIME_TEST,),"
         },
@@ -10319,7 +10319,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
@@ -10358,6 +10358,12 @@
           "text": "from scripts.engineering.ci import pr_lane_results as lane"
         },
         {
+          "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
+          "line": 265,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.pr_lane_results import ("
+        },
+        {
           "path": "tests/unit/scripts/engineering/ci/test_python_dependency_changes.py",
           "line": 11,
           "source_group": "tests",
@@ -10380,7 +10386,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 60,
+          "line": 64,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/publish_docker_image.sh\": ("
         },
@@ -12007,7 +12013,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 36,
+          "line": 37,
           "source_group": "scripts",
           "text": "from scripts.engineering.dev.run_tests import TESTS_ROOT as PYTEST_ALL_ROOT"
         },
@@ -21384,7 +21390,7 @@
         },
         {
           "path": "scripts/engineering/ci/pr_lane_results.py",
-          "line": 81,
+          "line": 85,
           "source_group": "scripts",
           "text": "\"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\": ("
         },
@@ -22220,7 +22226,7 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "grafana/README.md",
@@ -22233,6 +22239,12 @@
           "line": 31,
           "source_group": "scripts",
           "text": "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
+          "line": 349,
+          "source_group": "tests",
+          "text": "ROOT / \"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1\""
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
