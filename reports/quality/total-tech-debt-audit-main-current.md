@@ -12,6 +12,22 @@ Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
 Evidence surface SHA-256: `8d109ecd2050bc9ee7990bddce565922515359a32c6f412dde72ef83b0923d0a`
 
+## Generated evidence validation
+
+Validated on checkout `b81e7528816ea16c217f11e0e6a4f5f8d4e48fab` with the
+reviewed docstring-only working patch on 2026-10-14. The evidence fingerprint
+above is unchanged. Command:
+
+```text
+python -m scripts.engineering.qa validate-technical-debt-audit --json
+```
+
+Result (exit status 0):
+
+```json
+{"issues": [], "ok": true}
+```
+
 ## Current evidence summary
 
 Evidence metadata refresh: 2026-10-01 (RF-001, #11846).

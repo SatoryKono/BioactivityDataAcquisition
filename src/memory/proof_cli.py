@@ -226,28 +226,33 @@ def _mutate_source(bundle: dict[str, Any], field: str) -> None:
 
 
 def _mutate_stale_head(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
+    """Invalidate the captured source revision and re-sign the bundle."""
     bundle["source"]["head_sha"] = "0" * 40
     bundle["receipts"][0]["source"]["head_sha"] = "0" * 40
     _resign(bundle)
 
 
 def _mutate_missing(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
+    """Remove all receipts and re-sign the incomplete bundle."""
     bundle["receipts"] = []
     _resign(bundle)
 
 
 def _mutate_failed_as_pass(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
+    """Give a nominally passing receipt a failing exit code."""
     bundle["receipts"][0]["exit_code"] = 1
     _resign(bundle)
 
 
 def _mutate_invalid_skip(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
+    """Replace the required receipt with an unsupported skip result."""
     receipt = bundle["receipts"][0]
     receipt.update(status="skip", exit_code=None, skip_reason=None, follow_up=None)
     _resign(bundle)
 
 
 def _mutate_unavailable(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
+    """Mark the receipt unavailable to exercise fail-closed admission."""
     receipt = bundle["receipts"][0]
     receipt.update(
         status="unavailable",
@@ -259,16 +264,19 @@ def _mutate_unavailable(bundle: dict[str, Any], _policy: dict[str, Any]) -> None
 
 
 def _mutate_tampered(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
+    """Change receipt contents while preserving the stale receipt digest."""
     bundle["receipts"][0]["duration_ms"] = 999
     _resign(bundle, receipts=False)
 
 
 def _mutate_vendor_override(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
+    """Replace the receipt producer with an optional vendor evaluator."""
     bundle["receipts"][0]["producer"] = "optional_vendor_evaluator"
     _resign(bundle)
 
 
 def _mutate_cross_scope(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
+    """Qualify a receipt for a different run scope."""
     bundle["receipts"][0]["task_id"] = "another-task"
     bundle["receipts"][0]["repository"]["repo_id"] = "another-repository"
     bundle["receipts"][0]["repository"]["worktree_id"] = "another-worktree"
@@ -277,6 +285,7 @@ def _mutate_cross_scope(bundle: dict[str, Any], _policy: dict[str, Any]) -> None
 
 
 def _mutate_dirty_full(bundle: dict[str, Any], policy: dict[str, Any]) -> None:
+    """Mark a full-suite receipt as captured from a dirty source tree."""
     source = bundle["source"]
     source["dirty"] = True
     source["untracked_paths"] = ["untracked.py"]
@@ -294,17 +303,20 @@ def _mutate_dirty_full(bundle: dict[str, Any], policy: dict[str, Any]) -> None:
 
 
 def _mutate_sharded_ci(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
+    """Move the receipt to a different shard worktree identity."""
     bundle["receipts"][0]["repository"]["worktree_id"] = "another-shard"
     _resign(bundle)
 
 
 def _mutate_degraded_full(bundle: dict[str, Any], policy: dict[str, Any]) -> None:
+    """Downgrade the full-suite receipt trust before admission checks."""
     _mutate_unavailable(bundle, policy)
     bundle["acceptance"]["require_full_trust"] = True
     _resign(bundle)
 
 
 def _mutate_partial(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
+    """Mark the receipt failed to exercise partial-evidence rejection."""
     bundle["receipts"][0]["status"] = "fail"
     bundle["receipts"][0]["exit_code"] = 1
     _resign(bundle)
@@ -313,6 +325,7 @@ def _mutate_partial(bundle: dict[str, Any], _policy: dict[str, Any]) -> None:
 def _scenario_cases() -> list[
     tuple[str, str, bool, Callable[[dict[str, Any], dict[str, Any]], None]]
 ]:
+    """Map each adversarial scenario to its mutation and expected verdict."""
     return [
         ("stale_source", "STOP", True, _mutate_stale_head),
         ("stale_diff", "STOP", True, lambda b, _p: _mutate_source(b, "task_diff_hash")),

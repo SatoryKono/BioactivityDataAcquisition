@@ -270,6 +270,7 @@ def test_existing_producer_emits_only_when_capture_is_enabled(
 
 
 def test_pilot_covers_adversarial_matrix(proof_repo: Path, tmp_path: Path) -> None:
+    """Verify pilot covers adversarial matrix."""
     output = tmp_path / "pilot.json"
     result = main(
         [
@@ -400,6 +401,7 @@ def test_full_suite_wrapper_is_fail_closed(proof_repo: Path, damage: str) -> Non
 
 
 def _mock_bundle() -> dict[str, Any]:
+    """Construct a signed baseline bundle for isolated mutation tests."""
     bundle: dict[str, Any] = {
         "source": {"head_sha": "original_head"},
         "receipts": [
@@ -427,6 +429,7 @@ def _mock_bundle() -> dict[str, Any]:
 
 
 def _mock_policy() -> dict[str, Any]:
+    """Define evidence kinds used by command-set hashing in mutation tests."""
     return {
         "claims": {"ready_to_merge": {"required_evidence": ["evidence1", "evidence2"]}},
         "evidence_kinds": {
@@ -445,6 +448,7 @@ def _mock_policy() -> dict[str, Any]:
 
 
 def _assert_digests(bundle: dict[str, Any]) -> None:
+    """Assert receipt and bundle digests match their current contents."""
     for receipt in bundle["receipts"]:
         assert receipt["receipt_digest"] == canonical_digest(
             {key: value for key, value in receipt.items() if key != "receipt_digest"}
@@ -475,6 +479,7 @@ _SCENARIO_ROUTING_SPEC: tuple[tuple[str, str, bool, str], ...] = (
 
 
 def _scenario_mutators() -> dict[str, Callable[[dict[str, Any], dict[str, Any]], None]]:
+    """Index scenario mutators by their public pilot scenario names."""
     return {
         "cross_scope": _mutate_cross_scope,
         "degraded_full": _mutate_degraded_full,
@@ -497,6 +502,7 @@ def _assert_one_scenario(
     check_source: bool,
     mutator_key: str,
 ) -> None:
+    """Check one scenario mutation, verdict, and source-check setting."""
     cases = {
         case_name: (outcome, source_check, mutator)
         for case_name, outcome, source_check, mutator in _scenario_cases()
@@ -515,6 +521,7 @@ def _assert_one_scenario(
 
 
 def _assert_scenario_routing() -> None:
+    """Compare every pilot scenario against its expected routing contract."""
     cases = _scenario_cases()
     spec_names = [
         name for name, _expected, _check_source, _key in _SCENARIO_ROUTING_SPEC
@@ -537,10 +544,12 @@ def test_scenario_cases_routing(
     check_source: bool,
     mutator_key: str,
 ) -> None:
+    """Verify scenario cases routing."""
     _assert_one_scenario(name, expected, check_source, mutator_key)
 
 
 def test_mutate_stale_head() -> None:
+    """Verify mutate stale head."""
     b = _mock_bundle()
     _mutate_stale_head(b, {})
     assert b["source"]["head_sha"] == "0" * 40
@@ -549,6 +558,7 @@ def test_mutate_stale_head() -> None:
 
 
 def test_mutate_missing() -> None:
+    """Verify mutate missing."""
     b = _mock_bundle()
     _mutate_missing(b, {})
     assert b["receipts"] == []
@@ -556,6 +566,7 @@ def test_mutate_missing() -> None:
 
 
 def test_mutate_failed_as_pass() -> None:
+    """Verify mutate failed as pass."""
     b = _mock_bundle()
     _mutate_failed_as_pass(b, {})
     assert b["receipts"][0]["exit_code"] == 1
@@ -563,6 +574,7 @@ def test_mutate_failed_as_pass() -> None:
 
 
 def test_mutate_invalid_skip() -> None:
+    """Verify mutate invalid skip."""
     b = _mock_bundle()
     _mutate_invalid_skip(b, {})
     r = b["receipts"][0]
@@ -574,6 +586,7 @@ def test_mutate_invalid_skip() -> None:
 
 
 def test_mutate_unavailable() -> None:
+    """Verify mutate unavailable."""
     b = _mock_bundle()
     _mutate_unavailable(b, {})
     r = b["receipts"][0]
@@ -585,6 +598,7 @@ def test_mutate_unavailable() -> None:
 
 
 def test_mutate_tampered() -> None:
+    """Verify mutate tampered."""
     b = _mock_bundle()
     original_receipt_digest = b["receipts"][0]["receipt_digest"]
     _mutate_tampered(b, {})
@@ -600,6 +614,7 @@ def test_mutate_tampered() -> None:
 
 
 def test_mutate_vendor_override() -> None:
+    """Verify mutate vendor override."""
     b = _mock_bundle()
     _mutate_vendor_override(b, {})
     assert b["receipts"][0]["producer"] == "optional_vendor_evaluator"
@@ -607,6 +622,7 @@ def test_mutate_vendor_override() -> None:
 
 
 def test_mutate_cross_scope() -> None:
+    """Verify mutate cross scope."""
     b = _mock_bundle()
     _mutate_cross_scope(b, {})
     r = b["receipts"][0]
@@ -618,6 +634,7 @@ def test_mutate_cross_scope() -> None:
 
 
 def test_mutate_dirty_full() -> None:
+    """Verify mutate dirty full."""
     b = _mock_bundle()
     p = _mock_policy()
     _mutate_dirty_full(b, p)
@@ -639,6 +656,7 @@ def test_mutate_dirty_full() -> None:
 
 
 def test_mutate_sharded_ci() -> None:
+    """Verify mutate sharded ci."""
     b = _mock_bundle()
     _mutate_sharded_ci(b, {})
     assert b["receipts"][0]["repository"]["worktree_id"] == "another-shard"
@@ -646,6 +664,7 @@ def test_mutate_sharded_ci() -> None:
 
 
 def test_mutate_degraded_full() -> None:
+    """Verify mutate degraded full."""
     b = _mock_bundle()
     _mutate_degraded_full(b, {})
     assert b["receipts"][0]["status"] == "unavailable"
@@ -654,6 +673,7 @@ def test_mutate_degraded_full() -> None:
 
 
 def test_mutate_partial() -> None:
+    """Verify mutate partial."""
     b = _mock_bundle()
     _mutate_partial(b, {})
     assert b["receipts"][0]["status"] == "fail"
