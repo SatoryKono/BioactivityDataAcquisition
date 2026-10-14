@@ -8,7 +8,7 @@ source_commit: 3bb4a9fca5636f2bda77a4730090d10ffe07650a
 source_run_id: local-pr12204-combined-3bb4a9fc
 source_event: local_coverage_verify
 source_run_url: null
-source_tree_sha256: 04352f805a866765755ac75a6a1d29e0ee1858ce9dae28475045c071b4895b11
+source_tree_sha256: ba9f52c120dc61c37ad1b926b92de58360e5d37eccd230f22a189f5fe0ca82bd
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
@@ -250,7 +250,7 @@ measurement_provenance:
   manifest_sha256: 36214cc50ef586a2c1f93f91543f585b1dc7dc9436526e151147b2970f5048cf
   coverage_xml_sha256: 126d052bdaff22c1f71f537d874f9259d60d980253c49e33b11eb7c999e3f15d
   source_tree_sha256: b9c15ceed524dd83b5b2a7b56d815392eac481166f786466d857f709f75a8ced
-  test_tree_sha256: 04352f805a866765755ac75a6a1d29e0ee1858ce9dae28475045c071b4895b11
+  test_tree_sha256: ba9f52c120dc61c37ad1b926b92de58360e5d37eccd230f22a189f5fe0ca82bd
   head: 3bb4a9fca5636f2bda77a4730090d10ffe07650a
   required_shards:
   - smoke
