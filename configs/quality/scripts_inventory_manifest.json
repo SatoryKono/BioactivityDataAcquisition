@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-14T05:33:13.615548+00:00",
+  "generated_at": "2026-10-14T05:38:09.590533+00:00",
   "summary": {
     "total_scripts": 651,
     "status_counts": {
@@ -10194,7 +10194,7 @@
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 621,
+          "line": 647,
           "source_group": "scripts",
           "text": "\"  `scripts/engineering/ci/junit_duration_summary.py`.\","
         },
@@ -10231,7 +10231,7 @@
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 973,
+          "line": 999,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.local_test_telemetry import build_local_baseline"
         },
@@ -10694,13 +10694,13 @@
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 635,
+          "line": 661,
           "source_group": "scripts",
           "text": "\"  `python -m scripts.engineering.ci.test_telemetry_provenance --measurement-repo-root\","
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 909,
+          "line": 935,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.test_telemetry_provenance import ("
         },
