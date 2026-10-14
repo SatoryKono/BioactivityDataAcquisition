@@ -54,7 +54,7 @@ The only reviewed boundary is canonical form plus collection semantics.
 | `pdb` | uppercase 4-char code | set-like JSON array | `pdb_xrefs` |
 | `chembl` | `CHEMBL123` | scalar or set-like string array | `target_id`, `chembl_ids` |
 | `drugbank` | `DB00001` | set-like string array | `drugbank_ids` |
-| `pubchem_cid` | digits-only canonical CID text | scalar or set-like string array | `pubchem_cid` |
+| `pubchem_cid` | digits-only canonical CID text | scalar or set-like string array | `pubchem_compound.molecule_id` |
 
 ## Why This Is Not Enum Governance
 
