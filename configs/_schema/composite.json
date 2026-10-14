@@ -1016,7 +1016,10 @@
             "enricher_priority",
             "latest_timestamp",
             "explicit_rules",
-            "coalesce"
+            "coalesce",
+            "enricher",
+            "latest",
+            "explicit"
           ],
           "title": "Conflict Resolution",
           "type": "string"
