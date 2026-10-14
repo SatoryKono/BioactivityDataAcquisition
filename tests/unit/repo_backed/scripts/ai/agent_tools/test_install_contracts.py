@@ -7,6 +7,8 @@ from pathlib import Path
 
 import pytest
 
+from scripts.ai.agent_tools.__main__ import TOOLS
+
 
 pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
@@ -19,11 +21,14 @@ def test_optional_vendor_extras_are_exact_and_absent_from_core_dependencies() ->
     ]
     extras = project["optional-dependencies"]
     expected = {
-        "agentdebugx": ["agentdebugx==0.3.1"],
-        "proofagent": ["proofagent-harness==0.12.1"],
-        "agent-tools": ["agentdebugx==0.3.1", "proofagent-harness==0.12.1"],
+        "agentdebugx": ["agentdebugx==0.5.2"],
+        "proofagent": ["proofagent-harness==0.13.0"],
+        "agent-tools": ["agentdebugx==0.5.2", "proofagent-harness==0.13.0"],
     }
     assert {name: extras[name] for name in expected} == expected
+    for name in ("agentdebugx", "proofagent"):
+        spec = TOOLS[name]
+        assert extras[name] == [f"{spec.distribution}=={spec.expected_version}"]
     core = "\n".join(project["dependencies"]).lower()
     assert "agentdebugx" not in core
     assert "proofagent" not in core
@@ -31,14 +36,14 @@ def test_optional_vendor_extras_are_exact_and_absent_from_core_dependencies() ->
 
 def test_lock_contains_approved_wheel_hashes() -> None:
     lock = (ROOT / "uv.lock").read_text(encoding="utf-8")
-    assert "agentdebugx-0.3.1-py3-none-any.whl" in lock
+    assert "agentdebugx-0.5.2-py3-none-any.whl" in lock
     assert (
-        "sha256:4199bd0be46e7b904da782eea02e330a00e6dd4a66fc66458259ec73bdb9b85b"
+        "sha256:4fdb90ae19167deb49cbaacce3fbc925220041408aee31c48e59c03bbf7ec82b"
         in lock
     )
-    assert "proofagent_harness-0.12.1-py3-none-any.whl" in lock
+    assert "proofagent_harness-0.13.0-py3-none-any.whl" in lock
     assert (
-        "sha256:6dc59be01ce4ce77b0b6baa8c341498d420fdd77eae22bc11930089be64382aa"
+        "sha256:a4013765f2e31b68514f66ac5c7e21709c2036d891ce88b08d7a3e01f8c13527"
         in lock
     )
 

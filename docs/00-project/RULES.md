@@ -263,11 +263,11 @@ uv run python -m pytest tests/architecture/test_regression_metrics.py -q
 
 - **MERGE**: Upsert по первичным ключам. Стратегия по умолчанию для incremental updates.
 - **APPEND**: Вставка новых записей без проверки дубликатов.
-- **DELETE**: Полная перезапись таблицы (удаление и вставка).
+- Batch Silver поддерживает только **MERGE** и **APPEND**. **DELETE** и **OVERWRITE** отклоняются до записи. Полная замена выполняется отдельным rebuild/clear lifecycle либо `write_silver_merged`.
 
 **Валидация**:
 
-- Попытка использовать режим `OVERWRITE` (не `DELETE`) вызовет ошибку.
+- Batch-режимы `DELETE` и `OVERWRITE` вызывают ошибку без изменения таблицы; destructive lifecycle не является batch write mode.
 - Нарушение инвариантов Medallion (например, Append для данных требующих идемпотентности) логируется как `PolicyViolation`.
 
 #### 2.1.2. Gold Write Modes (Режимы Записи)

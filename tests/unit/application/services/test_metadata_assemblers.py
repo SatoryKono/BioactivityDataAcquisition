@@ -172,7 +172,10 @@ class TestSilverMetadataService:
         with pytest.raises(ValueError, match="Cannot create Silver metadata"):
             service.assemble(input_data)
 
-    def test_assemble_builds_complete_metadata(self) -> None:
+    @pytest.mark.parametrize(
+        "wall_seconds,measured", [(15, None), (172800, 1.25), (-5, 0.0)]
+    )
+    def test_assemble_builds_complete_metadata(self, wall_seconds, measured) -> None:
         run_context = _make_run_context()
         runtime_builder, calls = _make_runtime_builder(run_context)
         service = SilverMetadataService(
@@ -182,7 +185,7 @@ class TestSilverMetadataService:
             environment_metadata=_make_environment(),
         )
         started_at = datetime(2026, 3, 19, 10, 5, tzinfo=UTC)
-        completed_at = started_at + timedelta(seconds=15)
+        completed_at = started_at + timedelta(seconds=wall_seconds)
         input_data = SilverMetadataInput(
             table_path=SILVER_TABLE_PATH,
             primary_keys=["activity_id"],
@@ -205,12 +208,17 @@ class TestSilverMetadataService:
             partition_by=["activity_id"],
             started_at=started_at,
             completed_at=completed_at,
+            duration_seconds=measured,
             total_bytes=256,
         )
 
         result = service.assemble(input_data)
 
-        assert result.runtime.duration_seconds == pytest.approx(15.0)
+        expected_duration = wall_seconds if measured is None else measured
+        assert result.runtime.duration_seconds == pytest.approx(expected_duration)
+        assert result.output.write_duration_ms == int(expected_duration * 1000)
+        assert result.output.write_started_at == started_at
+        assert result.output.write_completed_at == completed_at
         assert calls[0]["started_at"] == started_at
         assert result.pipeline.name == "chembl_activity"
         assert set(result.lineage.source_batch_ids) == {"batch-a", "batch-b"}

@@ -101,7 +101,7 @@ new spend/safety decision.
 | `security.yml` | `Security Scans` | `workflow_call` | `active` | `active` | Secrets, pip-audit, Bandit, Gitleaks, OSV-Scanner |
 | `zizmor.yml` | `zizmor` | `workflow_call`, `workflow_dispatch` | `active` | `active` | High-confidence GitHub Actions YAML audit |
 | `semantic-governance.yml` | `Semantic Pipeline Governance` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Semantic pipeline contract/policy governance |
-| `skills-consistency.yml` | `Skills Consistency` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Local skill mirrors plus Codex–Junie runtime parity |
+| `skills-consistency.yml` | `Skills Consistency` | `push`, `pull_request`, `workflow_dispatch` | `active` | `active` | Path-filtered local skill mirrors plus Codex–Junie runtime parity |
 | `tests.yml` | `Tests` | `workflow_call` | `active` | `active` | Main test matrix, DQ gates, coverage, telemetry, control-plane E2E |
 | `type-checking.yml` | `Type Checking (Strict)` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Strict mypy lane |
 | `validate-vendored-mermaid-assets.yml` | `Validate vendored Mermaid assets` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Vendored Mermaid asset presence check |
@@ -116,7 +116,7 @@ new spend/safety decision.
 | `contract-tests.yml` | `Monthly Contract Tests` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Live API lane stays local; schedule removed (#11190) |
 | `diagram-nightly.yml` | `Diagram Nightly Regression` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Nightly canary and phase2 stay off; PR lint is docs.yml (#11196) |
 | `docs-kpi-weekly.yml` | `Docs KPI Weekly` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Weekly docs KPI plus calendar runtime-mirror/freshness drift |
-| `github-settings-quarterly-review.yml` | `Quarterly GitHub Settings Review` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Read-only quarterly GitHub settings review |
+| `github-settings-quarterly-review.yml` | `Quarterly GitHub Settings Review` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Read-only quarterly GitHub settings review delegated by `nightly.yml` |
 | `memory-freshness.yml` | `Memory freshness` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Repository memory freshness and contract checks |
 | `memory-retention.yml` | `Memory Retention Policy` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Weekly and change-triggered non-destructive episodic-memory retention policy check |
 | `mutation-testing.yml` | `Mutation Testing` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Sole Sunday mutation owner (#10263 exception); push and pull_request stay off |
@@ -134,7 +134,7 @@ new spend/safety decision.
 | File | Workflow name | Triggers | GitHub live state | Decision | Primary purpose |
 | --- | --- | --- | --- | --- | --- |
 | `dashboard-render-host.yml` | `Dashboard render release evidence (host-only)` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Dashboard rendering and release evidence generation on self-hosted runner |
-| `docker.yml` | `Docker Build & Compose Validation` | `workflow_call`, `workflow_dispatch` | `active` | `active` | Optional helper-image and compose validation |
+| `docker.yml` | `Docker Build & Compose Validation` | `push`, `workflow_call`, `workflow_dispatch` | `active` | `active` | Path-filtered non-main push validation; `main-integrity.yml` owns the `main` invocation |
 | `labeler.yml` | `Labeler` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Applies repository labels to PRs |
 | `release.yml` | `Release` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Publish stays outside Actions (#11182) |
 
@@ -174,7 +174,6 @@ enable heavy nightlies without Actions spend evidence. Do not reopen #9975 or
 | `reusable-mermaid-setup.yml` | Deprecated; use `.github/actions/setup-mermaid` |
 | `reusable-setup.yml` | Deprecated; use `.github/actions/setup-python-uv` |
 | `semantic-governance.yml` | Overlaps schema/docs governance; not a `pr-required.yml` owner |
-| `skills-consistency.yml` | Optional AI-runtime parity lane; not a `pr-required.yml` owner |
 | `stale.yml` | YAML 14/7 PR stale/close contradicts `.github/PULL_REQUEST_HYGIENE.md` (21 days, draft + report-noise only). Do not enable until days/exemptions match that policy. Do not weaken stale to close non-draft engineering PRs. |
 | `vacuum.yml` | Optional Delta VACUUM. Schedule removed; run locally (#11189) |
 | `validate-vendored-mermaid-assets.yml` | Covered by `docs.yml` Mermaid jobs when that owner is active |

@@ -29,6 +29,8 @@
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 import asyncio
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -93,6 +95,7 @@ async def test_write_silver_metadata_uses_record_ingestion_anchor_when_explicit_
     metadata_writer = MagicMock()
     metadata_writer.write_silver_metadata = capture_write
     ops = SilverMetadataOperations(
+        _clock=fixed_test_clock(),
         _logger=MagicMock(),
         _metadata_writer=metadata_writer,
         _metadata_coordinator=_metadata_coordinator(started_at=expected),
@@ -132,6 +135,7 @@ async def test_write_silver_metadata_emits_canonical_success_metric() -> None:
     metadata_writer.write_silver_metadata = capture_write
     metrics = MagicMock()
     ops = SilverMetadataOperations(
+        _clock=fixed_test_clock(),
         _logger=MagicMock(),
         _metadata_writer=metadata_writer,
         _metadata_coordinator=_metadata_coordinator(),
@@ -181,6 +185,7 @@ async def test_write_silver_metadata_uses_coordinator_control_plane_anchors() ->
     metadata_writer = MagicMock()
     metadata_writer.write_silver_metadata = capture_write
     ops = SilverMetadataOperations(
+        _clock=fixed_test_clock(),
         _logger=MagicMock(),
         _metadata_writer=metadata_writer,
         _metadata_coordinator=_metadata_coordinator(),
@@ -236,6 +241,7 @@ async def test_resolve_finalization_dq_metrics_normalizes_mixed_struct_and_strin
         warning_records=0,
     )
     ops = SilverMetadataOperations(
+        _clock=fixed_test_clock(),
         _logger=MagicMock(),
         _dq_calculator=dq_calculator,
     )
@@ -280,6 +286,7 @@ async def test_compute_dq_metrics_passes_explicit_validation_context() -> None:
         warning_records=0,
     )
     ops = SilverMetadataOperations(
+        _clock=fixed_test_clock(),
         _logger=MagicMock(),
         _dq_calculator=dq_calculator,
     )
@@ -313,7 +320,7 @@ async def test_prepare_finalization_context_passes_explicit_validation_context(
         error_records=1,
         warning_records=0,
     )
-    ops = SilverMetadataOperations(_logger=MagicMock())
+    ops = SilverMetadataOperations(_clock=fixed_test_clock(), _logger=MagicMock())
     resolve_finalization_dq_metrics = AsyncMock(return_value=dq_metrics)
     resolve_version_after = AsyncMock(return_value=7)
 
@@ -363,6 +370,7 @@ async def test_internal_write_silver_metadata_uses_canonical_execution_path(
     metadata_coordinator = MagicMock()
     metadata_writer = MagicMock()
     ops = SilverMetadataOperations(
+        _clock=fixed_test_clock(),
         _logger=MagicMock(),
         _metadata_writer=metadata_writer,
         _metadata_coordinator=metadata_coordinator,

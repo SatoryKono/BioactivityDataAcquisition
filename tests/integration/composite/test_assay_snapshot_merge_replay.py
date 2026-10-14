@@ -6,9 +6,11 @@ from bioetl.composition.bootstrap.runtime.assay_replay_capture import (
     prepare_assay_replay,
 )
 
+from bioetl.domain.types.gold_contracts import GoldWriteReceipt, GoldWriteCategory
 from datetime import UTC, datetime
 from os.path import relpath
 from pathlib import Path
+from shutil import rmtree
 from unittest.mock import AsyncMock, MagicMock
 
 import pyarrow as pa
@@ -63,7 +65,7 @@ def _successful_publication_enricher_inputs(config, tables, record):
     ids=["absolute", "relative-capture", "relative-replay", "relative-both"],
 )
 async def test_other_composite_families_replay_physical_outputs(
-    tmp_path, family, monkeypatch, relative_capture, relative_replay
+    tmp_path, family, monkeypatch, request, relative_capture, relative_replay
 ):
     """Exercise each real family config and production writer without network I/O."""
     from uuid import UUID
@@ -95,8 +97,12 @@ async def test_other_composite_families_replay_physical_outputs(
     run_id = "22222222-2222-4222-8222-222222222222"
     logger = NoOpLogger()
     registry = _load_field_group_registry(config.name, logger)
-    capture_root = Path(relpath(tmp_path)) if relative_capture else tmp_path
-    replay_root = Path(relpath(tmp_path)) if relative_replay else tmp_path
+    physical_root = tmp_path
+    if relative_capture or relative_replay:
+        physical_root = Path.cwd() / "reports" / "test-scratch" / tmp_path.name
+        request.addfinalizer(lambda: rmtree(physical_root, ignore_errors=True))
+    capture_root = Path(relpath(physical_root)) if relative_capture else physical_root
+    replay_root = Path(relpath(physical_root)) if relative_replay else physical_root
     settings = Settings.model_validate(
         {"data_dir": capture_root / "live", "report_root": capture_root / "reports"}
     )
@@ -305,7 +311,11 @@ async def test_assay_merge_replays_nullable_foreign_keys_without_live_reads(tmp_
             clock=FixedClock(timestamp),
         )
 
+    table_name = config.merge.output_gold_path.replace("\\", "/").split("gold/", 1)[-1]
     original_output = AsyncMock()
+    original_output.write_gold_merged.return_value = GoldWriteReceipt(
+        table_name, "0.0.0", GoldWriteCategory.COMPLETE, (table_name,)
+    )
     original = await service(capture, original_output).execute_request(request)
     assert original.records_merged == 3
     digest = capture.seal(required_tables=frozenset(tables))
@@ -315,6 +325,9 @@ async def test_assay_merge_replays_nullable_foreign_keys_without_live_reads(tmp_
         tmp_path / "inputs", envelope_sha256=digest
     )
     replay_output = AsyncMock()
+    replay_output.write_gold_merged.return_value = (
+        original_output.write_gold_merged.return_value
+    )
     replay = await service(replay_reader, replay_output).execute_request(request)
     assert replay.records_merged == 3
     for layer in ("silver", "gold"):
@@ -322,6 +335,8 @@ async def test_assay_merge_replays_nullable_foreign_keys_without_live_reads(tmp_
         replay_write = getattr(replay_output, f"write_{layer}_merged")
         original_write.assert_awaited_once()
         replay_write.assert_awaited_once()
+        if layer == "gold":
+            assert original_write.call_args.args[0] == table_name
         assert replay_write.call_args == original_write.call_args
         records = replay_write.call_args.args[1]
         assert len(records) == 3

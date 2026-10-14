@@ -9,7 +9,7 @@ interactions:
       connection:
       - keep-alive
       cookie:
-      - ncbi_sid=90C6ABF3AC474F51_0000SID
+      - REDACTED
       host:
       - eutils.ncbi.nlm.nih.gov
       user-agent:
@@ -63,16 +63,15 @@ interactions:
       date:
       - Tue, 06 Oct 2026 04:11:53 GMT
       ncbi-phid:
-      - 1D32099356568F3500004BEB6BB017CB.1.1.m_1
+      - REDACTED
       ncbi-sid:
-      - 90C6ABF3AC474F51_0000SID
+      - REDACTED
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Finatra
       set-cookie:
-      - ncbi_sid=90C6ABF3AC474F51_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
-        Oct 2027 04:11:54 GMT
+      - REDACTED
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:
