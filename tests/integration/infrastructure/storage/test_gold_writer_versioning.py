@@ -11,6 +11,7 @@
 """Integration tests for version-aware Gold dual-write behavior."""
 
 from __future__ import annotations
+from bioetl.domain.exceptions.gold_write import GoldWriteFailure
 
 from datetime import datetime
 from pathlib import Path
@@ -24,7 +25,6 @@ from pandera.pandas import Column, DataFrameSchema
 
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import (
-    GoldContractValidationError,
     GoldSchemaPolicyByVersion,
     GoldSchemaVersionPolicy,
 )
@@ -170,7 +170,7 @@ async def test_gold_writer_dual_write_fails_fast_when_shadow_target_errors(
 
     writer._dispatch_write = _dispatch_with_failure  # type: ignore[method-assign]
 
-    with pytest.raises(RuntimeError, match="boom"):
+    with pytest.raises(GoldWriteFailure) as outcome:
         await writer.write_gold(
             table_name="chembl.activity",
             records=[
@@ -231,7 +231,7 @@ async def test_gold_writer_dual_write_validation_failure_carries_contract_versio
         runtime_services=_build_runtime_services(),
     )
 
-    with pytest.raises(GoldContractValidationError) as exc_info:
+    with pytest.raises(GoldWriteFailure) as exc_info:
         await writer.write_gold(
             table_name="chembl.activity",
             records=[
@@ -251,9 +251,12 @@ async def test_gold_writer_dual_write_validation_failure_carries_contract_versio
             mode="append",
         )
 
-    assert exc_info.value.reject_reason.reason_code == "gold_contract_schema_failure"
-    assert exc_info.value.reject_reason.contract_version == "2.0.0"
-    assert exc_info.value.reject_reason.rule_id == "gold.contract.schema"
+    assert (
+        exc_info.value.__cause__.reject_reason.reason_code
+        == "gold_contract_schema_failure"
+    )
+    assert exc_info.value.__cause__.reject_reason.contract_version == "2.0.0"
+    assert exc_info.value.__cause__.reject_reason.rule_id == "gold.contract.schema"
 
 
 @pytest.mark.integration

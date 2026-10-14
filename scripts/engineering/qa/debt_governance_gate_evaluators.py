@@ -50,7 +50,7 @@ DEFAULT_JSON_OUTPUT = (
     PROJECT_ROOT / "reports" / "quality" / "debt-governance-gates.json"
 )
 DEFAULT_MD_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "debt-governance-gates.md"
-RELEASE_REVIEW_MAX_AGE_DAYS = 26
+RELEASE_REVIEW_MAX_AGE_DAYS = 21
 DEBT_SCORECARD_PATH = "configs/quality/debt_scorecard.yaml"
 FLAKY_TEST_REVIEW_PATH = "reports/quality/flaky-test-burndown-review.json"
 HOTSPOT_FAMILY_BASELINE_JSON = "reports/quality/hotspot-family-baseline.json"

@@ -304,32 +304,35 @@ class HealthServer(
             self._selector_prewarm_task.cancel()
             await asyncio.gather(self._selector_prewarm_task, return_exceptions=True)
             self._selector_prewarm_task = None
-        await stop_run_explorer_snapshot(self._run_explorer_refresh_task)
-        self._run_explorer_refresh_task = None
-        await stop_control_plane_metrics_refresh(
-            self._control_plane_integrity_refresh_task
-        )
-        self._control_plane_integrity_refresh_task = None
-        if not self._server:
-            return
-        self._server.close()
         try:
-            await asyncio.wait_for(
-                self._server.wait_closed(),
-                timeout=self._server_close_timeout_seconds,
-            )
-        except TimeoutError as exc:
-            if self._logger:
-                self._logger.warning(
-                    "health_server_shutdown_timeout",
-                    host=self.host,
-                    port=self.port,
-                    error=str(exc),
-                    reason_code="HEALTH_SERVER_SHUTDOWN_TIMEOUT",
+            await stop_run_explorer_snapshot(self._run_explorer_refresh_task)
+        finally:
+            self._run_explorer_refresh_task = None
+            try:
+                await stop_control_plane_metrics_refresh(
+                    self._control_plane_integrity_refresh_task
                 )
-        self._server = None
-        if self._logger:
-            self._logger.info("health_server_stopped")
+            finally:
+                self._control_plane_integrity_refresh_task = None
+                if self._server:
+                    self._server.close()
+                    try:
+                        await asyncio.wait_for(
+                            self._server.wait_closed(),
+                            timeout=self._server_close_timeout_seconds,
+                        )
+                    except TimeoutError as exc:
+                        if self._logger:
+                            self._logger.warning(
+                                "health_server_shutdown_timeout",
+                                host=self.host,
+                                port=self.port,
+                                error=str(exc),
+                                reason_code="HEALTH_SERVER_SHUTDOWN_TIMEOUT",
+                            )
+                    self._server = None
+                    if self._logger:
+                        self._logger.info("health_server_stopped")
 
     @property
     def is_running(self) -> bool:

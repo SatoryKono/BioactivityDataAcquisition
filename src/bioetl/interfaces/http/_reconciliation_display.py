@@ -13,6 +13,7 @@ from bioetl.interfaces.http.run_report_ops import load_workflow_run_report_paylo
 _BINDING_CAPTIONS = {
     "binding_not_recorded": "Parent workflow binding not recorded",
     "identity_not_recorded": "Parent workflow identity not recorded",
+    "child_identity_not_recorded": "Child workflow identity not recorded",
     "identity_mismatch": "Parent workflow identity mismatch",
     "child_binding_mismatch": "Parent workflow child binding mismatch",
 }

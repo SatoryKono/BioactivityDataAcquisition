@@ -96,6 +96,9 @@ def test_error_type_quarantine_codes_stay_mapped() -> None:
     assert compose_field_reason_code("INVALID_DATA", "units") == "INVALID_DATA:units"
     assert compose_field_reason_code("INVALID_DATA", None) == "INVALID_DATA"
     assert compose_field_reason_code("INVALID_DATA", "bad-field!") == "INVALID_DATA"
+    for field in ("naïve", "field²", "field١"):
+        assert compose_field_reason_code("INVALID_DATA", field) == "INVALID_DATA"
+        assert normalize_reason_code(f"INVALID_DATA:{field}") == UNKNOWN_REASON
     assert (
         compose_field_reason_code("INVALID_DATA:max_phase", "units")
         == "INVALID_DATA:max_phase"

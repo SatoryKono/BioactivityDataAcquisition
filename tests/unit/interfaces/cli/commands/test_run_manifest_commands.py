@@ -41,7 +41,7 @@ from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 import pytest
 from click.testing import CliRunner
 
-pytestmark = pytest.mark.repo_backed
+pytestmark = pytest.mark.unit
 
 from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestDiffEntry,
@@ -808,6 +808,7 @@ def _patch_historical_replay_universe_service(
     )
 
 
+@pytest.mark.unit
 class TestRunManifestCommands:
     def test_run_manifest_help_shows_subcommands(self, cli_runner: CliRunner) -> None:
         result = cli_runner.invoke(cli, ["run-manifest", "--help"])
@@ -1373,6 +1374,7 @@ class _CorruptedStoreManifestService:
         raise RunManifestInspectionCorruptionError(left, "checksum mismatch")
 
 
+@pytest.mark.unit
 class TestRunManifestErrorExitCodes:
     """#12019 (CF-015): run-manifest errors must exit non-zero."""
 

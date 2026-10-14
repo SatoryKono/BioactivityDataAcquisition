@@ -34,6 +34,8 @@ error propagation through spans, and batch ID factory delegation.
 
 from __future__ import annotations
 
+from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
+
 import asyncio
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
@@ -150,7 +152,11 @@ def mock_writer():
     w = MagicMock()
     w.write_bronze = AsyncMock(return_value=MagicMock(name="bronze_result"))
     w.write_silver = AsyncMock(return_value=MagicMock(name="silver_result"))
-    w.write_gold = AsyncMock(return_value=None)
+    w.write_gold = AsyncMock(
+        return_value=GoldWriteReceipt(
+            "synthetic", "0.0.0", GoldWriteCategory.COMPLETE, ("synthetic",)
+        )
+    )
     w.log_and_track_write_error = MagicMock()
     return w
 

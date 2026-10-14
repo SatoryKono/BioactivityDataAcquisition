@@ -15,10 +15,14 @@ from typing import Any
 import yaml
 
 from scripts.engineering.common.repo_paths import REPO_ROOT
+from scripts.engineering.ci.junit_duration_summary import (
+    derive_summary as _derive_slowest_summary_from_junit_paths,
+)
 
 BRANCH_TELEMETRY_DIR = Path("reports/test-telemetry")
 CANONICAL_COVERAGE_XML = "reports/coverage/coverage.xml"
 CANONICAL_SLOWEST_TESTS_JSON = "reports/test-telemetry/slowest-tests.json"
+DEFAULT_COVERAGE_THRESHOLD = 85.0
 TELEMETRY_FRESHNESS_MAX_AGE_DAYS = 45
 UNKNOWN_LABEL = "<unknown>"
 SUPPORTED_SOURCE_EVENTS = (
@@ -47,6 +51,7 @@ def compute_test_telemetry_source_tree_sha256(repo_root: Path = REPO_ROOT) -> st
             "pyproject.toml",
             "configs/quality/test_matrix.yaml",
             ".github/workflows/tests.yml",
+            "scripts/engineering/ci/junit_duration_summary.py",
         )
     )
     digest = hashlib.sha256()
@@ -74,6 +79,11 @@ def _parse_args() -> argparse.Namespace:
         "--local-manifest",
         type=Path,
         help="Complete canonical 17-shard manifest; derives local identity and all inputs.",
+    )
+    parser.add_argument(
+        "--rebind-current-tree",
+        action="store_true",
+        help="Rehash current audited test inputs while preserving a verified captured run.",
     )
     parser.add_argument(
         "--coverage-xml",
@@ -150,7 +160,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--coverage-threshold",
         type=float,
-        default=85.0,
+        default=None,
         help="Canonical hard coverage threshold enforced in CI.",
     )
     return parser.parse_args()
@@ -183,6 +193,79 @@ def _read_coverage_percent_from_log(path: Path | None) -> float | None:
         return None
 
 
+def _normalized_execution_context(payload: TelemetryPayload) -> TelemetryPayload:
+    execution_context = payload.get("execution_context", {})
+    if not isinstance(execution_context, dict):
+        return {}
+    execution_context = dict(execution_context)
+    duration_sums = execution_context.get("junit_testcase_duration_sum_s")
+    if (
+        not execution_context.get("lane_wall_time_s")
+        and isinstance(duration_sums, dict)
+        and duration_sums
+    ):
+        execution_context["lane_wall_time_s"] = dict(duration_sums)
+        execution_context["lane_wall_time_source"] = (
+            "junit_testcase_duration_sum_fallback"
+        )
+    return execution_context
+
+
+def _canonical_local_count(
+    payload: TelemetryPayload, execution_context: TelemetryPayload, total_cases: object
+) -> bool:
+    # The canonical local 17-shard producer already counted non-skipped JUnit
+    # records before CI gained this marker. Its provenance distinguishes it
+    # from the old inline CI producer's positive-duration-row total.
+    local_capture = payload.get("measurement_provenance", {})
+    local_skipped_count = execution_context.get("skipped_count")
+    return (
+        execution_context.get("count_semantics") is None
+        and isinstance(total_cases, int)
+        and not isinstance(total_cases, bool)
+        and total_cases >= 0
+        and isinstance(local_skipped_count, int)
+        and not isinstance(local_skipped_count, bool)
+        and local_skipped_count >= 0
+        and payload.get("source_event") == "local_coverage_verify"
+        and isinstance(local_capture, dict)
+        and local_capture.get("producer") == "run_local_coverage_verify.py"
+        and local_capture.get("complete") is True
+        and execution_context.get("executed_count") == total_cases
+    )
+
+
+def _validate_non_skipped_counts(
+    path: Path, total_cases: object, execution_context: TelemetryPayload
+) -> None:
+    observed = execution_context.get("observed_count")
+    skipped = execution_context.get("skipped_count")
+    executed = execution_context.get("executed_count")
+    sources = execution_context.get("junit_source_count")
+    if not all(
+        isinstance(value, int) and not isinstance(value, bool) and value >= 0
+        for value in (observed, skipped, executed, sources)
+    ):
+        raise ValueError(f"Inconsistent non-skipped JUnit counts in {path}")
+    assert isinstance(observed, int) and isinstance(skipped, int)
+    assert isinstance(executed, int) and isinstance(sources, int)
+    if (
+        skipped > observed
+        or observed - skipped != executed
+        or (sources == 0 and (total_cases is not None or observed != 0))
+        or (
+            sources > 0
+            and (
+                not isinstance(total_cases, int)
+                or isinstance(total_cases, bool)
+                or total_cases < 0
+                or total_cases != executed
+            )
+        )
+    ):
+        raise ValueError(f"Inconsistent non-skipped JUnit counts in {path}")
+
+
 def _read_slowest_summary(path: Path) -> TelemetryPayload:
     if not path.exists():
         return {"total_cases": None, "top_slowest": [], "execution_context": {}}
@@ -193,63 +276,21 @@ def _read_slowest_summary(path: Path) -> TelemetryPayload:
         top_slowest = payload.get("top_slowest_tests")
     if not isinstance(top_slowest, list):
         top_slowest = []
-    execution_context = payload.get("execution_context", {})
-    if isinstance(execution_context, dict):
-        execution_context = dict(execution_context)
-        duration_sums = execution_context.get("junit_testcase_duration_sum_s")
-        if (
-            not execution_context.get("lane_wall_time_s")
-            and isinstance(duration_sums, dict)
-            and duration_sums
-        ):
-            execution_context["lane_wall_time_s"] = dict(duration_sums)
-            execution_context["lane_wall_time_source"] = (
-                "junit_testcase_duration_sum_fallback"
-            )
+    execution_context = _normalized_execution_context(payload)
+    if execution_context.get("count_semantics") == "non_skipped_junit_records":
+        _validate_non_skipped_counts(path, total_cases, execution_context)
+    elif _canonical_local_count(payload, execution_context, total_cases):
+        execution_context["count_semantics"] = "non_skipped_junit_records"
     else:
-        execution_context = {}
+        # Pre-parity CI JSON used total_cases for timed rows only.
+        execution_context["count_semantics"] = "legacy_positive_duration_rows"
+        execution_context.pop("executed_count", None)
     return {
-        "total_cases": total_cases if isinstance(total_cases, int) else None,
+        "total_cases": total_cases
+        if isinstance(total_cases, int) and not isinstance(total_cases, bool)
+        else None,
         "top_slowest": top_slowest,
         "execution_context": execution_context,
-    }
-
-
-def _derive_slowest_summary_from_junit_paths(
-    junit_paths: list[Path],
-) -> TelemetryPayload:
-    rows: list[TelemetryPayload] = []
-    for junit_path in junit_paths:
-        if not junit_path.exists():
-            continue
-        root = ET.parse(junit_path).getroot()
-        for testcase in root.iter("testcase"):
-            duration = float(testcase.attrib.get("time", "0") or 0.0)
-            if duration <= 0:
-                continue
-            case_name = testcase.attrib.get("name", "")
-            class_name = testcase.attrib.get("classname", "")
-            full_name = f"{class_name}::{case_name}" if class_name else case_name
-            rows.append(
-                {
-                    "source": junit_path.name,
-                    "test": full_name or UNKNOWN_LABEL,
-                    "duration_s": round(duration, 3),
-                }
-            )
-
-    rows.sort(key=lambda row: float(row["duration_s"]), reverse=True)
-    return {
-        "total_cases": len(rows),
-        "top_slowest": rows[:25],
-        "execution_context": {
-            "junit_source_count": len([path for path in junit_paths if path.exists()]),
-            "junit_sources": [path.name for path in junit_paths if path.exists()],
-            "executed_count": len(rows),
-            "worker_mode": "caller-declared; see source run metadata",
-            "junit_testcase_duration_sum_s": {},
-            "explicit_exclusions": [],
-        },
     }
 
 
@@ -329,6 +370,36 @@ def _portable_artifact_path(
         return str(path)
 
 
+def _validated_junit_override(
+    slowest_summary: TelemetryPayload, junit_paths: list[Path]
+) -> TelemetryPayload:
+    derived_summary = _derive_slowest_summary_from_junit_paths(junit_paths)
+    if slowest_summary["total_cases"] is None:
+        return derived_summary
+
+    previous_sources = slowest_summary["execution_context"].get("junit_sources")
+    previous_source_count = slowest_summary["execution_context"].get(
+        "junit_source_count"
+    )
+    derived_sources = derived_summary["execution_context"]["junit_sources"]
+    if (
+        not isinstance(previous_sources, list)
+        or not all(isinstance(source, str) for source in previous_sources)
+        or len(set(previous_sources)) != len(previous_sources)
+        or len(set(derived_sources)) != len(derived_sources)
+        or (
+            previous_source_count is not None
+            and previous_source_count != len(previous_sources)
+        )
+        or sorted(previous_sources) != sorted(derived_sources)
+    ):
+        raise ValueError(
+            "JUnit inputs do not match the source inventory of the "
+            "existing slowest-tests.json; refusing a partial refresh"
+        )
+    return derived_summary
+
+
 def build_baseline_payload(
     *,
     coverage_xml_path: Path,
@@ -354,8 +425,15 @@ def build_baseline_payload(
         resolved_coverage_percent = _read_coverage_percent_from_log(coverage_log_path)
 
     slowest_summary = _read_slowest_summary(slowest_json_path)
-    if prefer_junit or (slowest_summary["total_cases"] is None and junit_paths):
-        slowest_summary = _derive_slowest_summary_from_junit_paths(junit_paths)
+    if prefer_junit or (
+        junit_paths
+        and (
+            slowest_summary["total_cases"] is None
+            or slowest_summary["execution_context"].get("count_semantics")
+            == "legacy_positive_duration_rows"
+        )
+    ):
+        slowest_summary = _validated_junit_override(slowest_summary, junit_paths)
     top_slowest = slowest_summary["top_slowest"]
     status = (
         "captured"
@@ -400,6 +478,9 @@ def build_baseline_payload(
         },
         "duration_telemetry": {
             "total_cases": slowest_summary["total_cases"],
+            "count_semantics": slowest_summary.get("execution_context", {}).get(
+                "count_semantics", "unknown"
+            ),
             "top_slowest": top_slowest,
             "top_slowest_zones": _summarize_slowest_zones(top_slowest),
             "execution_context": slowest_summary.get("execution_context", {}),
@@ -450,6 +531,19 @@ def _format_slowest_zone_table_rows(rows: object, *, limit: int = 10) -> list[st
     return lines
 
 
+def _no_duration_message(duration: TelemetryPayload) -> str:
+    context = duration.get("execution_context", {})
+    if context.get("junit_source_count") == 0:
+        return "No JUnit telemetry sources are available."
+    if "observed_count" in context:
+        if context["observed_count"] > 0:
+            return "JUnit testcase records are present; none has a non-skipped positive duration."
+        return "JUnit sources contain no testcase records."
+    if duration.get("total_cases") is not None:
+        return "No non-skipped positive testcase durations were measured."
+    return "No committed slow-test telemetry is available yet."
+
+
 def render_baseline_markdown(payload: TelemetryPayload) -> str:
     coverage = payload["coverage"]
     duration = payload["duration_telemetry"]
@@ -463,6 +557,21 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
     )
     total_cases = duration["total_cases"]
     total_cases_display = "pending" if total_cases is None else str(total_cases)
+    legacy_count = duration.get("count_semantics") == "legacy_positive_duration_rows"
+    count_label = (
+        "Legacy positive-duration testcase rows"
+        if legacy_count
+        else "Total executed test cases"
+    )
+    count_explanation = (
+        ["- Legacy timed-row count cannot establish non-skipped testcase records."]
+        if legacy_count
+        else [
+            "- Executed means observed non-skipped JUnit testcase records, not",
+            "  collection count or distinct logical tests. Error records can describe",
+            "  setup or collection failures rather than a test body run.",
+        ]
+    )
     freshness_guard = payload["freshness_guard"]
 
     lines = [
@@ -507,12 +616,38 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
         "## Branch-accurate provenance (#5729)",
         "",
         "- Continuous identity is `source_tree_sha256` over `tests/**/*.py`,",
-        "  `pyproject.toml`, `configs/quality/test_matrix.yaml`, and",
-        "  `.github/workflows/tests.yml`.",
+        "  `pyproject.toml`, `configs/quality/test_matrix.yaml`,",
+        "  `.github/workflows/tests.yml`, and the live JUnit producer",
+        "  `scripts/engineering/ci/junit_duration_summary.py`.",
+        "- `measurement_provenance.head` and `test_tree_sha256` retain the captured",
+        "  run identity when the current audited test tree advances later.",
         "- Freshness uses live UTC (injectable via `BIOETL_TELEMETRY_REFERENCE_NOW`)",
         "  and rejects future/stale `refreshed_at_utc` values.",
-        "- `source_commit` must remain an ancestor of HEAD; exact `source_commit == HEAD`",
-        "  is opt-in via `BIOETL_REQUIRE_TELEMETRY_SOURCE_COMMIT_EQUALS_HEAD=1`.",
+        "- `source_commit` must remain an ancestor of HEAD or have a reviewed squash",
+        "  bridge in `reports/test-telemetry/squash-provenance.json`. A bridge keeps",
+        "  the real captured source/run and requires equal PR/merge trees, source",
+        "  ancestry in the PR, merge ancestry in HEAD and unchanged runtime/test inputs.",
+        "- Reviewed squash receipts retain hash-verified Git commit/tree objects",
+        "  for offline validation when old PR commits are absent from a fresh clone.",
+        "  If a shallow checkout's HEAD is newer than the squash merge, unshallow",
+        "  it first so merge ancestry and the merged tree can be verified locally.",
+        "- To produce a receipt for an existing local capture, run",
+        "  `python -m scripts.engineering.ci.test_telemetry_provenance --measurement-repo-root",
+        "  <original-worktree> --local-manifest <manifest.json> --pull-request <merged-PR>`.",
+        "  The generator validates the complete 17-shard capture and reads the merged",
+        "  PR mapping before writing the bridge. Keep the original capture available.",
+        "- For a reviewed local coverage capture, run",
+        "  `python -m scripts.engineering.ci.update_test_telemetry_baseline",
+        "  --rebind-current-tree`, then the coupled `refresh-ci-drift-families`",
+        "  update/check for test-gov, flaky-fingerprint, telemetry and evidence.",
+        "  Non-local captures require regeneration from their source artifacts.",
+        "- New captures use `verification_mode: live_github`: resolve the recorded",
+        "  PR's actual merge with read-only GitHub GETs after squash. Never stamp a",
+        "  future merge SHA. API failure, unmerged PRs, changed inputs and incomplete",
+        "  compare responses fail closed; the live fingerprint/freshness guards remain.",
+        "- Reviewed snapshots retain `local_single_host` trust; they are not signed",
+        "  vendor attestations or CI execution receipts. Exact `source_commit == HEAD`",
+        "  remains opt-in via `BIOETL_REQUIRE_TELEMETRY_SOURCE_COMMIT_EQUALS_HEAD=1`.",
         "- GitHub evidence from a non-main branch requires `pull_request`;",
         "  its run URL and id remain independently auditable.",
         "- `--local-manifest <path>` accepts only a complete canonical 17-shard run",
@@ -535,7 +670,10 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
         "",
         "## Duration Telemetry",
         "",
-        f"- Total collected test cases: `{total_cases_display}`",
+        f"- {count_label}: `{total_cases_display}`",
+        *count_explanation,
+        "- Only measured positive durations enter the slowest-test ranking.",
+        "  Older CI timed-row totals are not directly comparable with this count.",
         f"- Freshness guard: `<={int(freshness_guard['max_age_days'])} days` via "
         f"`{freshness_guard['timestamp_field']}`",
         "",
@@ -551,10 +689,7 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
     if top_slowest_lines:
         lines.extend(top_slowest_lines)
     else:
-        lines.append(
-            "No committed slow-test baseline is present yet. Refresh from a main-branch "
-            "CI run using `python -m scripts.engineering.ci.update_test_telemetry_baseline`."
-        )
+        lines.append(_no_duration_message(duration))
 
     lines.extend(["", "### Top Slow Zones", ""])
     zone_lines = _format_slowest_zone_table_rows(duration.get("top_slowest_zones"))
@@ -576,7 +711,10 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
             "3. Run `python -m scripts.engineering.ci.update_test_telemetry_baseline "
             "--source-commit <sha> --source-run-id <run-id> ...` with either direct "
             "artifacts or fallback diagnostics inputs.",
-            "4. Commit the updated baseline and branch-consumable telemetry "
+            "4. A legacy JSON timed-row count requires raw `--junit` inputs for "
+            "the complete recorded source inventory; the updater rejects a "
+            "partial or legacy-only refresh before writing outputs.",
+            "5. Commit the updated baseline and branch-consumable telemetry "
             "summary layer together.",
             "",
         ]
@@ -589,6 +727,21 @@ def render_branch_telemetry_markdown(payload: TelemetryPayload) -> str:
     duration = payload["duration_telemetry"]
     total_cases = duration["total_cases"]
     total_cases_display = "pending" if total_cases is None else str(total_cases)
+    legacy_count = duration.get("count_semantics") == "legacy_positive_duration_rows"
+    count_label = (
+        "Legacy positive-duration testcase rows"
+        if legacy_count
+        else "Executed test cases"
+    )
+    count_explanation = (
+        ["Legacy timed-row count cannot establish non-skipped testcase records."]
+        if legacy_count
+        else [
+            "Executed counts non-skipped JUnit records, including zero or missing",
+            "duration; duplicate identities remain separate records. This is not a",
+            "collection count. Older CI timed-row totals are not directly comparable.",
+        ]
+    )
 
     lines = [
         "# Slowest Tests",
@@ -598,7 +751,8 @@ def render_branch_telemetry_markdown(payload: TelemetryPayload) -> str:
         f"Source event: `{payload.get('source_event') or 'pending'}`",
         f"Source run URL: `{payload.get('source_run_url') or 'pending'}`",
         f"Refresh status: `{payload['refresh_status']}`",
-        f"Collected test cases: `{total_cases_display}`",
+        f"{count_label}: `{total_cases_display}`",
+        *count_explanation,
         f"Freshness guard: `<={int(payload['freshness_guard']['max_age_days'])} days`",
         "",
     ]
@@ -610,7 +764,7 @@ def render_branch_telemetry_markdown(payload: TelemetryPayload) -> str:
     if top_slowest_lines:
         lines.extend(top_slowest_lines)
     else:
-        lines.append("No committed slow-test telemetry is available yet.")
+        lines.append(_no_duration_message(duration))
     lines.extend(["", "## Top Slow Zones", ""])
     zone_lines = _format_slowest_zone_table_rows(duration.get("top_slowest_zones"))
     if zone_lines:
@@ -663,6 +817,11 @@ def build_branch_telemetry_reports(payload: TelemetryPayload) -> dict[str, str]:
                 "refreshed_at_utc": payload["refreshed_at_utc"],
                 "refresh_status": payload["refresh_status"],
                 "total_cases": duration["total_cases"],
+                **(
+                    {"count_semantics": duration["count_semantics"]}
+                    if "count_semantics" in duration
+                    else {}
+                ),
                 "top_slowest": top_slowest,
                 "top_slowest_tests": top_slowest,
                 "top_slowest_zones": duration["top_slowest_zones"],
@@ -743,10 +902,63 @@ def write_baseline_outputs(
     write_branch_telemetry_reports(payload=payload, output_dir=branch_reports_dir)
 
 
+def _rebind_current_tree(args: argparse.Namespace) -> int:
+    """Preserve only metrics bound to the reviewed capture while rehashing tests."""
+    import subprocess
+
+    from scripts.engineering.ci.test_telemetry_provenance import (
+        capture_metrics_are_bound,
+        source_commit_is_reachable,
+    )
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    if any(
+        (
+            args.local_manifest,
+            args.source_commit,
+            args.source_run_id,
+            args.source_run_url,
+            args.source_branch != "main",
+            args.source_event != "push",
+            args.coverage_percent is not None,
+            args.coverage_xml != CANONICAL_COVERAGE_XML,
+            args.coverage_log,
+            args.slowest_json != CANONICAL_SLOWEST_TESTS_JSON,
+            args.junit,
+            args.coverage_threshold is not None,
+        )
+    ):
+        raise ValueError("Rebind uses only the existing verified capture")
+    output_yaml_path = resolve_output_path(args.output_yaml)
+    output_md_path = resolve_output_path(args.output_md)
+    payload = yaml.safe_load(output_yaml_path.read_text(encoding="utf-8"))
+    if payload.get("source_event") != "local_coverage_verify":
+        raise ValueError(
+            "Rebind requires a reviewed local coverage capture; "
+            "rebuild non-local telemetry from its source artifacts"
+        )
+    head = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, text=True
+    ).strip()
+    if not source_commit_is_reachable(payload, REPO_ROOT, head):
+        raise ValueError("Captured run lacks proven ancestry or reviewed squash bridge")
+    if not capture_metrics_are_bound(payload, REPO_ROOT):
+        raise ValueError("Captured telemetry metrics lack a reviewed binding")
+    payload["source_tree_sha256"] = compute_test_telemetry_source_tree_sha256()
+    write_baseline_outputs(
+        payload=payload,
+        output_yaml_path=output_yaml_path,
+        output_md_path=output_md_path,
+    )
+    return 0
+
+
 def main() -> int:
     from scripts.engineering.common.repo_paths import resolve_output_path
 
     args = _parse_args()
+    if args.rebind_current_tree:
+        return _rebind_current_tree(args)
     if args.source_event == "local_coverage_verify" and not args.local_manifest:
         raise ValueError("local_coverage_verify requires --local-manifest")
     coverage_xml_path = resolve_output_path(args.coverage_xml)
@@ -788,9 +1000,21 @@ def main() -> int:
             source_run_id=args.source_run_id,
             source_event=args.source_event,
             source_run_url=args.source_run_url,
-            coverage_threshold=args.coverage_threshold,
+            coverage_threshold=(
+                args.coverage_threshold
+                if args.coverage_threshold is not None
+                else DEFAULT_COVERAGE_THRESHOLD
+            ),
             source_tree_sha256=compute_test_telemetry_source_tree_sha256(),
         )
+        if (
+            payload["duration_telemetry"]["count_semantics"]
+            == "legacy_positive_duration_rows"
+        ):
+            raise ValueError(
+                "Legacy slowest-tests.json requires --junit inputs before "
+                "refreshing a captured baseline"
+            )
     payload = merge_existing_baseline_supplemental_fields(
         payload,
         existing_yaml_path=output_yaml_path,

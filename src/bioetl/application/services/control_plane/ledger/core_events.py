@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Protocol
+from typing import TYPE_CHECKING
 
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import (
@@ -15,51 +15,18 @@ from bioetl.domain.normalization import (
     normalize_contract_version,
     normalize_control_plane_opaque_hash_ref,
 )
-from bioetl.domain.types import RunID
 from bioetl.domain.types.dq_contracts import DQDisposition
+
+if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.ledger.service import (
+        RunLedgerService,
+    )
 
 __all__ = [
     "record_artifact_published",
     "record_dq_policy_applied",
     "record_manifest_created",
 ]
-
-
-class _RunLedgerCorrelationFields(Protocol):
-    pipeline_name: str | None
-    provider: str | None
-    entity: str | None
-    run_type: str | None
-    resolved_config_hash: str | None
-    effective_config_hash: str | None
-    contract_ref: str | None
-    contract_version: str | None
-    dq_policy_ref: str | None
-    rule_bundle_version: str | None
-    dq_contract_compatibility_hash: str | None
-    effective_config_artifact_id: str | None
-
-
-class _RunLedgerCoreEventAppender(_RunLedgerCorrelationFields, Protocol):
-    @property
-    def manifest_id(self) -> str: ...
-
-    @property
-    def run_id(self) -> RunID: ...
-
-    def _append(
-        self,
-        *,
-        event_type: str,
-        status: str | None,
-        stage: str | None = None,
-        message: str | None = None,
-        error_type: str | None = None,
-        dataset_ref: str | None = None,
-        lineage_fragment_id: str | None = None,
-        metrics_snapshot: dict[str, int] | None = None,
-        details: dict[str, object] | None = None,
-    ) -> RunLedgerEntry: ...
 
 
 def _required_text(value: str, field_name: str) -> str:
@@ -77,7 +44,7 @@ def _coalesce_missing(current: str | None, default: str | None) -> str | None:
 
 
 def sync_manifest_runtime_defaults(
-    host: _RunLedgerCoreEventAppender,
+    host: RunLedgerService,
     manifest: RunManifest,
 ) -> None:
     """Hydrate runtime correlation defaults from the immutable manifest."""
@@ -97,7 +64,7 @@ def sync_manifest_runtime_defaults(
 
 
 def sync_manifest_contract_defaults(
-    host: _RunLedgerCoreEventAppender,
+    host: RunLedgerService,
     manifest: RunManifest,
 ) -> None:
     """Hydrate contract/DQ correlation defaults from the immutable manifest."""
@@ -129,7 +96,7 @@ def sync_manifest_contract_defaults(
 
 
 def record_manifest_created(
-    appender: _RunLedgerCoreEventAppender,
+    appender: RunLedgerService,
     manifest: RunManifest,
 ) -> RunLedgerEntry:
     """Record manifest creation as the first control-plane event."""
@@ -161,7 +128,7 @@ def record_manifest_created(
 
 
 def record_artifact_published(
-    appender: _RunLedgerCoreEventAppender,
+    appender: RunLedgerService,
     *,
     layer: str,
     artifact_path: str,
@@ -194,7 +161,7 @@ def record_artifact_published(
 
 
 def record_dq_policy_applied(
-    appender: _RunLedgerCoreEventAppender,
+    appender: RunLedgerService,
     *,
     stage: str,
     status: str = "failed",

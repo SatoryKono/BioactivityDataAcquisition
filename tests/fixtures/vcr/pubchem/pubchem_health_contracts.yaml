@@ -163,16 +163,15 @@ interactions:
       Expires:
       - Tue, 06 Oct 2026 04:57:33 GMT
       Ncbi-Phid:
-      - 90C64488AC471AD10000000000000001.m_1
+      - REDACTED
       Ncbi-Sid:
-      - 90C64488AC471AD1_0000SID
+      - REDACTED
       Referrer-Policy:
       - origin-when-cross-origin
       Server:
       - Apache
       Set-Cookie:
-      - ncbi_sid=90C64488AC471AD1_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
-        Oct 2027 03:57:33 GMT
+      - REDACTED
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
       Transfer-Encoding:
