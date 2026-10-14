@@ -273,7 +273,17 @@ def affected_pytest_targets(
     for path in paths:
         targets.extend(mapped[path])
         targets.extend(_path_targets(path, repo_root))
-    return list(dict.fromkeys(targets))
+    return _deduplicate_targets(targets, repo_root)
+
+
+def _deduplicate_targets(targets: list[str], root: Path) -> list[str]:
+    unique = list(dict.fromkeys(targets))
+    suites = {target.rstrip("/") for target in unique if (root / target).is_dir()}
+    return [
+        target
+        for target in unique
+        if not any(parent.as_posix() in suites for parent in Path(target).parents)
+    ]
 
 
 def _global_dependency_lane(root: Path, dependencies: set[str]) -> bool:

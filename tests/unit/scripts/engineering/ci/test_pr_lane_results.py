@@ -132,10 +132,8 @@ def test_affected_targets_map_source_and_existing_tests(tmp_path: Path) -> None:
         repo_root=tmp_path,
     )
 
-    assert targets == [
-        "tests/unit/domain",
-        "tests/unit/domain/test_sample.py",
-    ]
+    # The selected parent suite already executes test_sample.py exactly once.
+    assert targets == ["tests/unit/domain"]
 
 
 def test_affected_targets_map_memory_source_without_test_diff() -> None:
@@ -279,3 +277,24 @@ def test_mcp_check_source_routes_both_mandatory_contract_suites(tmp_path: Path) 
     (tmp_path / mcp_target).unlink()
     with pytest.raises(ValueError, match="Missing mandatory mapped test targets"):
         affected_pytest_targets(["scripts/ai/mcp/check.sh"], repo_root=tmp_path)
+
+
+def test_complete_suite_removes_nested_duplicates_after_required_validation(
+    tmp_path: Path,
+) -> None:
+    from scripts.engineering.ci.pr_lane_results import affected_pytest_targets
+
+    rag = "tests/unit/memory/test_rag_indexing.py"
+    path = tmp_path / rag
+    path.parent.mkdir(parents=True)
+    path.touch()
+    (tmp_path / "uv.lock").write_text("version = 1\n", encoding="utf-8")
+    changed = ["uv.lock", "src/memory/rag/chunking.py", rag]
+    assert affected_pytest_targets(
+        changed, repo_root=tmp_path, changed_python_dependencies={"pytest"}
+    ) == ["tests"]
+    path.unlink()
+    with pytest.raises(ValueError, match="Missing mandatory mapped test targets"):
+        affected_pytest_targets(
+            changed, repo_root=tmp_path, changed_python_dependencies={"pytest"}
+        )
