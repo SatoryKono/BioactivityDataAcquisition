@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import pyarrow as pa
 from deltalake import DeltaTable as DeltaTableType
+from deltalake.exceptions import TableNotFoundError
 
 from bioetl.infrastructure.storage.delta.resilience import (
     DEFAULT_SILVER_MERGE_POLICY,
@@ -17,6 +18,7 @@ from bioetl.infrastructure.storage.silver.delta_helpers import (
     _DeltaWriteRequest,
     _dispatch_request_by_mode,
     _dispatch_request_with_domain_errors,
+    _load_delta_table,
     _merge_records_with_timeout,
     _write_plain_delta_request,
 )
@@ -128,7 +130,21 @@ async def _dispatch_write_impl(
     host: _SilverDeltaHostProtocol,
     request: _DeltaWriteRequest,
 ) -> None:
-    """Dispatch write call by mode."""
+    """Dispatch write call by mode after checking physical partition compatibility."""
+    try:
+        table = await _load_delta_table(
+            load_module=host._load_silver_writer_module, table_path=request.table_path
+        )
+    except TableNotFoundError:
+        table = None
+    if table is not None:
+        physical = tuple(table.metadata().partition_columns)
+        configured = tuple(request.partition_cols or ())
+        if physical != configured:
+            raise ValueError(
+                f"Silver partition mismatch: configured={configured}, physical={physical}; "
+                "explicit rebuild/migration required"
+            )
     await _dispatch_request_by_mode(
         request=request,
         policy=_build_dispatch_policy(

@@ -244,9 +244,8 @@ def test_write_mode_docs_match_domain_enums() -> None:
     assert "`MERGE`, `OVERWRITE`, `SCD2`" not in glossary_text
 
     expected_pipeline_tokens = (
-        "merge | append | delete",
+        "merge | append",
         "append | overwrite | scd2",
-        "| `delete`    | —             | Полная перезапись | —                 |",
         "| `scd2`      | —             | —                 | Историзация Type 2 |",
     )
     missing = [
@@ -255,6 +254,8 @@ def test_write_mode_docs_match_domain_enums() -> None:
         if fragment not in pipeline_text
     ]
     assert not missing, f"Pipeline write-mode guide drifted: {missing}"
+    assert "merge | append | delete" not in pipeline_text
+    assert "| `delete`" not in pipeline_text
 
 
 def test_adr_044_keeps_owner_doc_boundary_for_mutable_control_plane_facts() -> None:

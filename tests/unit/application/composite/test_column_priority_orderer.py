@@ -36,6 +36,7 @@ import pytest
 
 from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.application.composite.column_priority_orderer import (
+    collect_priority_field_columns,
     get_enricher_prefix,
     resolve_priority_column,
 )
@@ -228,3 +229,81 @@ def test_resolve_priority_column_returns_none_for_seed_without_seed_context() ->
         seed_entity=None,
     )
     assert resolved is None
+
+
+def test_collect_priority_field_columns_includes_seed_and_enrichers() -> None:
+    enrichers = [
+        EnricherConfig(pipeline="crossref_publication", join_keys=("doi",)),
+        EnricherConfig(pipeline="pubmed_publication", join_keys=("pmid",)),
+    ]
+    available = {
+        "chembl.publication.title",
+        "crossref.publication.title",
+        "pubmed.publication.abstract",
+    }
+
+    columns, fallback = collect_priority_field_columns(
+        field="title",
+        enrichers=enrichers,
+        available_columns=available,
+        seed_pipeline="chembl_publication",
+    )
+
+    assert columns == ["chembl.publication.title", "crossref.publication.title"]
+    assert fallback is False
+
+
+def test_collect_priority_field_columns_invalid_seed_sets_fallback() -> None:
+    enrichers = [
+        EnricherConfig(pipeline="crossref_publication", join_keys=("doi",)),
+    ]
+    available = {
+        "crossref.publication.title",
+    }
+
+    columns, fallback = collect_priority_field_columns(
+        field="title",
+        enrichers=enrichers,
+        available_columns=available,
+        seed_pipeline="invalidseed",
+    )
+
+    assert columns == ["crossref.publication.title"]
+    assert fallback is True
+
+
+def test_collect_priority_field_columns_invalid_enricher_uses_legacy() -> None:
+    enrichers = [
+        EnricherConfig(pipeline="legacycrossref", join_keys=("doi",)),
+    ]
+    available = {"legacycrossref_title"}
+
+    columns, fallback = collect_priority_field_columns(
+        field="title",
+        enrichers=enrichers,
+        available_columns=available,
+        seed_pipeline=None,
+    )
+
+    assert columns == ["legacycrossref_title"]
+    assert fallback is False
+
+
+def test_collect_priority_field_columns_deduplicates_columns() -> None:
+    enrichers = [
+        EnricherConfig(pipeline="crossref_publication", join_keys=("doi",)),
+        EnricherConfig(pipeline="crossref_publication", join_keys=("doi",)),
+    ]
+    available = {
+        "crossref.publication.title",
+    }
+
+    columns, fallback = collect_priority_field_columns(
+        field="title",
+        enrichers=enrichers,
+        available_columns=available,
+        seed_pipeline=None,
+    )
+
+    assert columns == ["crossref.publication.title"]
+    assert fallback is False

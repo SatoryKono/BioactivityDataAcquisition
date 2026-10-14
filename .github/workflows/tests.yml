@@ -157,6 +157,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Reject secrets in tracked VCR HTTP metadata
+        run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-secrets
+
       - name: Validate VCR cassette placement
         run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-placement
 
@@ -1735,126 +1738,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p reports/test-telemetry
-          python - <<'PY'
-          from __future__ import annotations
-
-          import json
-          import os
-          import xml.etree.ElementTree as ET
-          from pathlib import Path
-
-          raw_dir = Path("reports/test-telemetry/raw")
-          rows: list[dict[str, object]] = []
-          junit_paths = sorted(raw_dir.rglob("*.xml"))
-          junit_testcase_duration_sum_s: dict[str, float] = {}
-          lane_wall_time_s: dict[str, float] = {}
-          for junit_path in junit_paths:
-              root = ET.parse(junit_path).getroot()
-              suites = [root] if root.tag == "testsuite" else list(root.findall("testsuite"))
-              lane_wall_time_s[junit_path.name] = round(
-                  sum(float(suite.attrib.get("time", "0") or 0.0) for suite in suites),
-                  3,
-              )
-              junit_testcase_duration_sum_s[junit_path.name] = round(
-                  sum(
-                      float(case.attrib.get("time", "0") or 0.0)
-                      for case in root.iter("testcase")
-                  ),
-                  3,
-              )
-              for testcase in root.iter("testcase"):
-                  case_name = testcase.attrib.get("name", "")
-                  class_name = testcase.attrib.get("classname", "")
-                  duration = float(testcase.attrib.get("time", "0") or 0.0)
-                  if duration <= 0:
-                      continue
-                  full_name = (
-                      f"{class_name}::{case_name}" if class_name else case_name
-                  )
-                  rows.append(
-                      {
-                          "source": junit_path.name,
-                          "test": full_name,
-                          "duration_s": round(duration, 3),
-                      }
-                  )
-
-          rows.sort(key=lambda row: row["duration_s"], reverse=True)
-          top_rows = rows[:25]
-
-          md_path = Path("reports/test-telemetry/slowest-tests.md")
-          json_path = Path("reports/test-telemetry/slowest-tests.json")
-
-          lines = [
-              "# Slowest Tests",
-              "",
-              f"Collected test cases: `{len(rows)}`",
-              "",
-          ]
-          if top_rows:
-              lines.extend(
-                  [
-                      "| Rank | Duration (s) | Test | Source |",
-                      "|---:|---:|---|---|",
-                  ]
-              )
-              for idx, row in enumerate(top_rows, start=1):
-                  lines.append(
-                      f"| {idx} | {row['duration_s']:.3f} | `{row['test']}` | `{row['source']}` |"
-                  )
-          else:
-              lines.append("No JUnit test-case durations were collected.")
-
-          markdown = "\n".join(lines) + "\n"
-          md_path.write_text(markdown, encoding="utf-8")
-          payload = {
-              "source_commit": os.environ.get("GITHUB_SHA"),
-              "source_run_id": (
-                  f"github-{os.environ.get('GITHUB_RUN_ID', 'unknown')}-"
-                  f"{os.environ.get('GITHUB_RUN_ATTEMPT', '1')}"
-              ),
-              "total_cases": len(rows),
-              "top_slowest": top_rows,
-              "execution_context": {
-                  "junit_source_count": len(junit_paths),
-                  "junit_sources": [path.name for path in junit_paths],
-                  "executed_count": len(rows),
-                  "worker_mode": (
-                      "mixed: xdist unit/integration; serial "
-                      "contracts/repo-backed/memory"
-                  ),
-                  "junit_testcase_duration_sum_s": (
-                      junit_testcase_duration_sum_s
-                  ),
-                  "lane_wall_time_s": lane_wall_time_s,
-                  "lane_wall_time_source": "junit_testsuite_time",
-                  "explicit_exclusions": [
-                      {
-                          "lane": "live-provider-contracts",
-                          "reason": "scheduled network-owned workflow",
-                      },
-                      {
-                          "lane": "performance",
-                          "reason": "benchmark-owned non-blocking workflow",
-                      },
-                      {
-                          "lane": "manual-e2e",
-                          "reason": "operator-triggered external-runtime lane",
-                      },
-                  ],
-              },
-          }
-          json_path.write_text(
-              json.dumps(payload, indent=2, sort_keys=True)
-              + "\n",
-              encoding="utf-8",
-          )
-
-          summary_path = os.getenv("GITHUB_STEP_SUMMARY")
-          if summary_path:
-              with Path(summary_path).open("a", encoding="utf-8") as handle:
-                  handle.write(markdown)
-          PY
+          python -m scripts.engineering.ci.junit_duration_summary
 
       - name: Publish CI confidence accounting summary
         if: always()

@@ -29,6 +29,8 @@ _REASON_CATALOG_RESOLVE = (
 )
 _REASON_CATALOG_PATH = "src/bioetl/domain/run_reports/reason_catalog.py"
 _MODULE_SCOPE = "<module>"
+_REASON_FILESYSTEM_MODULE = "filesystem module load bypassing the import graph"
+_SELF_RESOLVE = "self.resolve"
 
 FORBIDDEN_IMPORT_PREFIXES = {
     "aiohttp": _REASON_NETWORK_CLIENT,
@@ -48,18 +50,18 @@ FORBIDDEN_CALL_NAMES = {
 }
 FORBIDDEN_ATTRIBUTE_CALLS = {
     "connect": "database/network connection",
-    "exec_module": "filesystem module load bypassing the import graph",
+    "exec_module": _REASON_FILESYSTEM_MODULE,
     "exists": "filesystem existence probe",
     "glob": _REASON_FILESYSTEM_DISCOVERY,
     "iterdir": _REASON_FILESYSTEM_DISCOVERY,
     "mkdir": "filesystem mutation",
-    "module_from_spec": "filesystem module load bypassing the import graph",
+    "module_from_spec": _REASON_FILESYSTEM_MODULE,
     "open": "filesystem read/write",
     "read_bytes": "filesystem read",
     "read_text": "filesystem read",
     "resolve": "filesystem resolution",
     "rglob": _REASON_FILESYSTEM_DISCOVERY,
-    "spec_from_file_location": "filesystem module load bypassing the import graph",
+    "spec_from_file_location": _REASON_FILESYSTEM_MODULE,
     "stat": "filesystem metadata read",
     "unlink": "filesystem mutation",
     "write_bytes": "filesystem write",
@@ -68,12 +70,8 @@ FORBIDDEN_ATTRIBUTE_CALLS = {
 FORBIDDEN_QUALIFIED_CALLS = {
     "datetime.now": _REASON_WALL_CLOCK,
     "datetime.utcnow": _REASON_WALL_CLOCK,
-    "importlib.util.module_from_spec": (
-        "filesystem module load bypassing the import graph"
-    ),
-    "importlib.util.spec_from_file_location": (
-        "filesystem module load bypassing the import graph"
-    ),
+    "importlib.util.module_from_spec": _REASON_FILESYSTEM_MODULE,
+    "importlib.util.spec_from_file_location": _REASON_FILESYSTEM_MODULE,
     "os.getenv": "process environment read",
     "random.random": "randomness",
     "subprocess.run": "process execution",
@@ -91,12 +89,12 @@ ALLOWED_CALL_EXCEPTIONS = {
     (
         _REASON_CATALOG_PATH,
         "ReasonCatalog.family_for",
-        "self.resolve",
+        _SELF_RESOLVE,
     ): _REASON_CATALOG_RESOLVE,
     (
         _REASON_CATALOG_PATH,
         "ReasonCatalog.default_outcome_for",
-        "self.resolve",
+        _SELF_RESOLVE,
     ): _REASON_CATALOG_RESOLVE,
     (
         _REASON_CATALOG_PATH,
@@ -116,12 +114,12 @@ ALLOWED_CALL_EXCEPTIONS = {
     (
         "src/bioetl/domain/run_reports/reason_catalog_data.py",
         "ReasonCatalog.family_for",
-        "self.resolve",
+        _SELF_RESOLVE,
     ): _REASON_CATALOG_RESOLVE,
     (
         "src/bioetl/domain/run_reports/reason_catalog_data.py",
         "ReasonCatalog.default_outcome_for",
-        "self.resolve",
+        _SELF_RESOLVE,
     ): _REASON_CATALOG_RESOLVE,
 }
 

@@ -1602,7 +1602,7 @@ ______________________________________________________________________
 | ------------------------ | ------------------------------ | ------------ |
 | `BIOETL_ENV`                            | Окружение (`dev`, `staging`, `prod`) | `dev`   |
 | `BIOETL_DATA_DIR`                       | Директория данных                    | `./data` |
-| `BIOETL_OBSERVABILITY__METRICS_ENABLED` | Включить Prometheus метрики          | `true`  |
+| `BIOETL_METRICS_ENABLED`                | Включить Prometheus метрики          | `true`  |
 | `BIOETL_METRICS_PORT`                   | Порт для Prometheus                  | `8000`  |
 | `BIOETL_OBSERVABILITY__TRACING_ENABLED` | Включить OpenTelemetry tracing       | `false` |
 

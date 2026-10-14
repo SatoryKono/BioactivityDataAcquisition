@@ -13,7 +13,7 @@ interactions:
       content-type:
       - application/x-www-form-urlencoded
       cookie:
-      - ncbi_sid=90C6ABF3AC474F51_0000SID
+      - REDACTED
       host:
       - pubchem.ncbi.nlm.nih.gov
       user-agent:
@@ -209,16 +209,15 @@ interactions:
       expires:
       - Tue, 06 Oct 2026 05:11:37 GMT
       ncbi-phid:
-      - 90C6C224AC474F910000000000000001.m_1
+      - REDACTED
       ncbi-sid:
-      - 90C6ABF3AC474F51_0000SID
+      - REDACTED
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Apache
       set-cookie:
-      - ncbi_sid=90C6ABF3AC474F51_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
-        Oct 2027 04:11:37 GMT
+      - REDACTED
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:
@@ -251,7 +250,7 @@ interactions:
       content-type:
       - application/x-www-form-urlencoded
       cookie:
-      - ncbi_sid=90C6ABF3AC474F51_0000SID
+      - REDACTED
       host:
       - pubchem.ncbi.nlm.nih.gov
       user-agent:
@@ -273,7 +272,7 @@ interactions:
       content-type:
       - application/x-www-form-urlencoded
       cookie:
-      - ncbi_sid=90C6ABF3AC474F51_0000SID
+      - REDACTED
       host:
       - pubchem.ncbi.nlm.nih.gov
       user-agent:
@@ -479,16 +478,15 @@ interactions:
       expires:
       - Tue, 06 Oct 2026 05:11:39 GMT
       ncbi-phid:
-      - 95B718B6AC474FA10000000000000001.m_1
+      - REDACTED
       ncbi-sid:
-      - 90C6ABF3AC474F51_0000SID
+      - REDACTED
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Apache
       set-cookie:
-      - ncbi_sid=90C6ABF3AC474F51_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
-        Oct 2027 04:11:38 GMT
+      - REDACTED
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:
