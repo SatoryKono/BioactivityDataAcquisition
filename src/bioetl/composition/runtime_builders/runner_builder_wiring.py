@@ -153,33 +153,27 @@ def resolve_runner_input_wiring(
     | None = None,
 ) -> RunnerInputWiring:
     """Return input wiring with legacy keyword overrides applied."""
-    resolved = wiring or RunnerInputWiring()
+    value = wiring or RunnerInputWiring()
     if get_settings_fn is not None:
-        resolved = replace(resolved, get_settings=get_settings_fn)
+        value = replace(value, get_settings=get_settings_fn)
     if load_pipeline_config_fn is not None:
-        resolved = replace(resolved, load_pipeline_config=load_pipeline_config_fn)
+        value = replace(value, load_pipeline_config=load_pipeline_config_fn)
     if load_source_config_fn is not None:
-        resolved = replace(resolved, load_source_config=load_source_config_fn)
+        value = replace(value, load_source_config=load_source_config_fn)
     if build_observability_bundle_fn is not None:
-        resolved = replace(
-            resolved,
-            build_observability_bundle=build_observability_bundle_fn,
-        )
+        value = replace(value, build_observability_bundle=build_observability_bundle_fn)
     if assemble_vacuum_settings_fn is not None:
-        resolved = replace(
-            resolved,
-            assemble_vacuum_settings=assemble_vacuum_settings_fn,
-        )
+        value = replace(value, assemble_vacuum_settings=assemble_vacuum_settings_fn)
     if assemble_runtime_config_fn is not None:
-        resolved = replace(resolved, assemble_runtime_config=assemble_runtime_config_fn)
+        value = replace(value, assemble_runtime_config=assemble_runtime_config_fn)
     if assemble_filter_config_fn is not None:
-        resolved = replace(resolved, assemble_filter_config=assemble_filter_config_fn)
+        value = replace(value, assemble_filter_config=assemble_filter_config_fn)
     if assemble_cached_bronze_context_fn is not None:
-        resolved = replace(
-            resolved,
+        value = replace(
+            value,
             assemble_cached_bronze_context=assemble_cached_bronze_context_fn,
         )
-    return resolved
+    return value
 
 
 __all__ = [
