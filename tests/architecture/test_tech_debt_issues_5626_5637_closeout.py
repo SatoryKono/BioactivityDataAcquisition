@@ -204,7 +204,7 @@ def test_issue_5629_cli_command_shell_duplication_is_below_opening_baseline() ->
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] == 1
+    assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] == 0
     assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] < 6
 
 
@@ -237,14 +237,14 @@ def test_issue_5632_hotspot_warning_count_and_budget_are_ratcheted_down() -> Non
     baseline_family = baseline_families["composition_bootstrap_runtime"]
     scorecard_family = scorecard_families["composition_bootstrap_runtime"]
 
-    assert baseline["summary"]["budget_warnings"] == 1
+    assert baseline["summary"]["budget_warnings"] == 0
     assert baseline["summary"]["budget_review_notes"] == sum(
         len(family["budget_review_notes"]) for family in baseline["families"]
     )
     assert baseline["summary"]["budget_review_notes"] <= 6
-    assert baseline_family["files_ge_250_loc"] == 1
-    assert baseline_family["bounded_growth_budgets"]["files_ge_250_loc"] == 1
-    assert scorecard_family["bounded_growth_budgets"]["files_ge_250_loc"] == 1
+    assert baseline_family["files_ge_250_loc"] == 0
+    assert baseline_family["bounded_growth_budgets"]["files_ge_250_loc"] == 0
+    assert scorecard_family["bounded_growth_budgets"]["files_ge_250_loc"] == 0
 
 
 def test_issue_5633_contract_and_dq_diagnostics_are_blocker_free() -> None:
@@ -254,13 +254,13 @@ def test_issue_5633_contract_and_dq_diagnostics_are_blocker_free() -> None:
     gates = _load_json(DEBT_GATES)
 
     assert contract["valid"] is True
-    assert contract["blocking_issue_count"] == 1
+    assert contract["blocking_issue_count"] == 0
     assert dq["valid"] is True
     assert dq["checked_entries_count"] == contract["entries_count"]
-    assert dq["blocking_issue_count"] == 1
+    assert dq["blocking_issue_count"] == 0
     assert dq["issue_count"] <= 3
-    assert scorecard["metrics"]["contract_blocking_issue_count"] == 1
-    assert scorecard["metrics"]["dq_blocking_issue_count"] == 1
+    assert scorecard["metrics"]["contract_blocking_issue_count"] == 0
+    assert scorecard["metrics"]["dq_blocking_issue_count"] == 0
     assert _gate(gates, "contract_registry_blocking_drift")["status"] == "pass"
     assert _gate(gates, "dq_contract_registry_blocking_drift")["status"] == "pass"
 
@@ -271,9 +271,9 @@ def test_issue_5634_retained_compatibility_test_inventory_is_reviewed() -> None:
     report = report_payload["report"]
     inventory = config["compatibility_test_inventory"]
 
-    assert config["budgets"]["compatibility_test_file_max"] == 1
-    assert inventory["total_files"] == 1
-    assert report["compatibility_test_files"] == 1
+    assert config["budgets"]["compatibility_test_file_max"] == 0
+    assert inventory["total_files"] == 0
+    assert report["compatibility_test_files"] == 0
     assert report["compatibility_files"] == []
     assert report_payload["budget_violations"] == []
     assert inventory["review_cadence"] == "quarterly"
@@ -289,10 +289,10 @@ def test_issue_5635_dead_code_inventory_review_window_is_current() -> None:
     review_window = inventory["review_window"]
 
     assert review_window["mode"] == "fail-fast-zero-untriaged"
-    assert review_window["max_untriaged_zero_import_candidates"] == 1
+    assert review_window["max_untriaged_zero_import_candidates"] == 0
     assert date.fromisoformat(review_window["next_review_by"]) >= date(2026, 9, 14)
-    assert summary["repo_wide_untriaged_zero_import_candidate_count"] == 1
-    assert summary["repo_wide_candidates_without_owner_tests_count"] == 1
+    assert summary["repo_wide_untriaged_zero_import_candidate_count"] == 0
+    assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
     for row in inventory["repo_wide_zero_import_candidates"]:
         assert row["classification_status"] == "classified"
         assert row["owner_test_count"] == row["owner_test_paths_exist_count"]
@@ -306,8 +306,8 @@ def test_issue_5636_public_lazy_export_facades_are_bounded_and_drift_free() -> N
     public_facades = census["retained_public_export_facades"]
 
     assert summary["retained_public_export_facade_count"] <= 4
-    assert summary["retained_public_export_facades_with_duplicate_exports"] == 1
-    assert summary["retained_public_export_facades_with_resolution_conflicts"] == 1
+    assert summary["retained_public_export_facades_with_duplicate_exports"] == 0
+    assert summary["retained_public_export_facades_with_resolution_conflicts"] == 0
     assert {facade["path"] for facade in public_facades} <= PUBLIC_EXPORT_FACADES
 
     registry_by_path = {
@@ -332,7 +332,7 @@ def test_issue_5637_silver_filter_identity_adapter_budget_is_ratcheted() -> None
     )
     actual = _src_importers("bioetl.infrastructure.config.silver_filter_migration")
 
-    assert row["max_src_importer_count"] == 1
+    assert row["max_src_importer_count"] == 0
     assert set(row["allowed_src_importers"]) == SILVER_FILTER_IDENTITY_IMPORTERS
     assert actual == SILVER_FILTER_IDENTITY_IMPORTERS
     assert len(actual) <= row["max_src_importer_count"]

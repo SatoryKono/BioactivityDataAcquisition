@@ -416,9 +416,7 @@ def test_write_rag_manifests_retries_when_source_changes_during_build(
     catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
 
     assert build_calls == 2
-    assert catalog["sources"][0]["content_hash"] == content_hash(
-        "# Overview\nAfter\n"
-    )
+    assert catalog["sources"][0]["content_hash"] == content_hash("# Overview\nAfter\n")
 
 
 def test_source_reconciliation_rebuilds_only_changed_paths(

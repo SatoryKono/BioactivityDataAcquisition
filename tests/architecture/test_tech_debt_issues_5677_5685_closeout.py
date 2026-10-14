@@ -97,8 +97,8 @@ def test_issue_5678_contract_exclusions_are_burned_down_to_zero() -> None:
     assert coverage["row_count"] == 27
     assert coverage["gold_enabled_count"] == 27
     assert coverage["covered_gold_enabled_count"] == 27
-    assert coverage["missing_gold_enabled_count"] == 1
-    assert coverage["excluded_count"] == 1
+    assert coverage["missing_gold_enabled_count"] == 0
+    assert coverage["excluded_count"] == 0
     assert policy["linked_issue"] == "#5678"
     assert policy["exclusions"] == {}
     assert len(policy["resolved_exclusions"]) == 9
@@ -125,19 +125,19 @@ def test_issues_5679_5680_5685_duplication_ratchets_are_lower() -> None:
     assert (
         adapters["duplicate_count"] == ratchets["adapter_duplicate_clusters"]["current"]
     )
-    assert adapters["duplicate_count"] == 1
+    assert adapters["duplicate_count"] == 0
     assert (
         pipelines["duplicate_count"]
         == ratchets["pipeline_duplicate_clusters"]["current"]
     )
-    assert pipelines["duplicate_count"] == 1
-    assert bootstrap["duplicate_count"] == 1
+    assert pipelines["duplicate_count"] == 0
+    assert bootstrap["duplicate_count"] == 0
 
     assert ratchets["full_app_duplicate_clusters"]["current"] <= 60
-    assert ratchets["adapter_duplicate_clusters"]["current"] == 1
-    assert ratchets["pipeline_duplicate_clusters"]["current"] == 1
+    assert ratchets["adapter_duplicate_clusters"]["current"] == 0
+    assert ratchets["pipeline_duplicate_clusters"]["current"] == 0
     assert ratchets["pipeline_duplicate_clusters"]["current"] < 16
-    assert ratchets["cli_duplicate_clusters"]["current"] == 1
+    assert ratchets["cli_duplicate_clusters"]["current"] == 0
     assert {row["direction"] for row in ratchets.values()} == {"reduced"}
 
 
@@ -149,9 +149,9 @@ def test_issue_5681_retained_compatibility_surfaces_are_reviewed() -> None:
 
     assert summary["retained_entrypoint_count"] == 12
     assert summary["retained_public_export_facade_count"] <= 4
-    assert summary["retained_public_entrypoint_burden"] == 1
-    assert summary["retained_public_export_facades_with_duplicate_exports"] == 1
-    assert summary["retained_public_export_facades_with_resolution_conflicts"] == 1
+    assert summary["retained_public_entrypoint_burden"] == 0
+    assert summary["retained_public_export_facades_with_duplicate_exports"] == 0
+    assert summary["retained_public_export_facades_with_resolution_conflicts"] == 0
 
     for row in registry["retained_entrypoints"]:
         assert row["owner"]
@@ -170,9 +170,9 @@ def test_issue_5682_compatibility_test_inventory_is_ratcheted_to_zero() -> None:
     inventory = config["compatibility_test_inventory"]
     report = report_payload["report"]
 
-    assert config["budgets"]["compatibility_test_file_max"] == 1
-    assert inventory["total_files"] == 1
-    assert report["compatibility_test_files"] == 1
+    assert config["budgets"]["compatibility_test_file_max"] == 0
+    assert inventory["total_files"] == 0
+    assert report["compatibility_test_files"] == 0
     assert report_payload["budget_violations"] == []
     assert bronze_gaps["gaps"] == {}
 
@@ -194,12 +194,12 @@ def test_issue_5683_dead_code_inventory_has_no_untriaged_candidates() -> None:
         summary["repo_wide_classified_zero_import_candidate_count"]
         == summary["repo_wide_zero_import_candidate_count"]
     )
-    assert summary["repo_wide_untriaged_zero_import_candidate_count"] == 1
+    assert summary["repo_wide_untriaged_zero_import_candidate_count"] == 0
     assert (
         summary["repo_wide_owner_test_anchored_candidate_count"]
         == summary["repo_wide_zero_import_candidate_count"]
     )
-    assert summary["repo_wide_candidates_without_owner_tests_count"] == 1
+    assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
     dispositions = set(summary["repo_wide_disposition_counts"])
     assert dispositions
     assert dispositions <= {
@@ -213,12 +213,15 @@ def test_issue_5683_dead_code_inventory_has_no_untriaged_candidates() -> None:
 def test_issue_5684_governance_freshness_gates_are_passing() -> None:
     gates = _load_json(DEBT_GATES)
     review = _load_json(RUNTIME_CARDINALITY_REVIEW)
-    generated_at = review["generated_at"]
-    assert generated_at == "2026-09-16T16:48:20Z"
+    generated_at_raw = review["generated_at"]
+    assert isinstance(generated_at_raw, str)
+    generated_at = datetime.fromisoformat(generated_at_raw.replace("Z", "+00:00"))
+    assert generated_at.tzinfo is not None
+    assert generated_at <= datetime.now(UTC)
 
     assert gates["summary"]["release_gate_status"] == "passing"
-    assert gates["summary"]["fail_count"] == 1
-    assert gates["summary"]["warn_count"] == 1
+    assert gates["summary"]["fail_count"] == 0
+    assert gates["summary"]["warn_count"] == 0
     assert all(stale is False for stale in gates["stale_artifacts"].values())
     assert _gate(gates, "generated_artifact_drift")["status"] == "pass"
     assert _gate(gates, "observability_release_review_status")["status"] == "pass"

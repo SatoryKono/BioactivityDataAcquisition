@@ -608,6 +608,44 @@ def test_pr_gate_credit_cut_keeps_required_job_names():
     )
     assert "tests/e2e" in e2e_halt["pathspecs"]
     assert "tests/contract" in provider_halt["pathspecs"]
+
+    def halt_params(job_name: str) -> dict[str, str]:
+        steps = config["jobs"][job_name]["steps"]
+        return next(
+            step["halt-unless-pr-gate-paths"]
+            for step in steps
+            if isinstance(step, dict) and "halt-unless-pr-gate-paths" in step
+        )
+
+    for job_name in ("arch-tests", "duplication", "security-scans"):
+        job_keys = keys(config["jobs"][job_name]["steps"])
+        assert job_keys.index("halt-unless-pr-gate-paths") < job_keys.index(
+            "setup-python-uv"
+        )
+    docker_keys = keys(config["jobs"]["docker-build"]["steps"])
+    assert docker_keys.index("halt-unless-pr-gate-paths") < docker_keys.index(
+        "check-gate"
+    )
+    assert docker_keys.index("halt-unless-pr-gate-paths") < docker_keys.index(
+        "setup_remote_docker"
+    )
+    arch_paths = halt_params("arch-tests")["pathspecs"]
+    assert "src/bioetl" in arch_paths
+    assert "tests/architecture" in arch_paths
+    assert "configs/**/*.yaml" in arch_paths
+    assert ".circleci/config.yml" not in arch_paths
+    duplication_paths = halt_params("duplication")["pathspecs"]
+    assert ".jscpd.json" in duplication_paths
+    assert "duplication_complexity_exemptions.yaml" in duplication_paths
+    security_paths = halt_params("security-scans")["pathspecs"]
+    assert "pyproject.toml" in security_paths
+    assert ".gitleaks.toml" in security_paths
+    assert ".secrets.baseline" in security_paths
+    docker_paths = halt_params("docker-build")["pathspecs"]
+    assert "Dockerfile.bioetl" in docker_paths
+    assert "docker.yml" in docker_paths
+    for name in ("arch-tests", "duplication", "security-scans", "docker-build"):
+        assert name in complete
     docs_steps = config["jobs"]["docs-diagrams"]["steps"]
     classify_at = next(
         index
@@ -617,6 +655,12 @@ def test_pr_gate_credit_cut_keeps_required_job_names():
     )
     assert keys(docs_steps).index("setup-python-uv") > classify_at
     assert "uv run" not in docs_steps[classify_at]["run"]["command"]
-    halt = config["commands"]["halt-unless-pr-gate-paths"]["steps"][0]["run"]["command"]
+    halt_run = config["commands"]["halt-unless-pr-gate-paths"]["steps"][0]["run"]
+    halt = halt_run["command"]
     assert '!= "pr-gate"' in halt
     assert "circleci-agent step halt" in halt
+    assert (
+        halt_run["environment"]["BIOETL_HALT_PATHSPECS"] == "<< parameters.pathspecs >>"
+    )
+    assert "<< parameters.pathspecs >>" not in halt
+    assert '"${pathspec_args[@]}"' in halt

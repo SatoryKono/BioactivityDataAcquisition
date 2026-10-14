@@ -39,9 +39,9 @@ from typing import Any
 from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
-pytestmark = pytest.mark.unit
-
 from click.testing import CliRunner
+
+pytestmark = pytest.mark.unit
 
 from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestDiffEntry,
@@ -768,7 +768,8 @@ class _FakeHistoricalReplayUniverseService:
 @pytest.fixture
 def cli_runner() -> CliRunner:
     if "mix_stderr" in inspect.signature(CliRunner).parameters:
-        return CliRunner(mix_stderr=False) # type: ignore
+        options: dict[str, Any] = {"mix_stderr": False}
+        return CliRunner(**options)
     return CliRunner()
 
 
@@ -1374,6 +1375,7 @@ class _CorruptedStoreManifestService:
         raise RunManifestInspectionCorruptionError(left, "checksum mismatch")
 
 
+@pytest.mark.unit
 class TestRunManifestErrorExitCodes:
     """#12019 (CF-015): run-manifest errors must exit non-zero."""
 

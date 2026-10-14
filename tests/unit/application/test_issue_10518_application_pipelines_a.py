@@ -850,7 +850,7 @@ class TestVocabTokenHelpers:
     def test_normalized_string_tokens_filters(self) -> None:
         assert _normalized_string_tokens([" a ", None, "  ", 3]) == ("a",)
 
-    def test_allowed_vocab_requires_explicit_registry(self) -> None:
+    def test_allowed_vocab_uses_registry_and_skips_when_absent(self) -> None:
         from bioetl.domain.mapping.publication_controlled_vocabulary import (
             PublicationControlledVocabularyRegistry,
         )
@@ -861,8 +861,10 @@ class TestVocabTokenHelpers:
         assert _allowed_publication_vocab(
             "crossref", "publication_type", registry
         ) == frozenset({"journal-article"})
-        with pytest.raises(RuntimeError, match="passed explicitly"):
+        assert (
             _allowed_publication_vocab("crossref", "publication_type", None)
+            == frozenset()
+        )
 
 
 # ---------------------------------------------------------------------------

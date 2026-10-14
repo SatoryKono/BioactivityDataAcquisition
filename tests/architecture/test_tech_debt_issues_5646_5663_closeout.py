@@ -76,8 +76,8 @@ def test_issue_5656_debt_governance_gates_are_fail_fast_and_current() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
 
     assert summary["release_gate_status"] == "passing"
-    assert summary["fail_count"] == 1
-    assert summary["warn_count"] == 1
+    assert summary["fail_count"] == 0
+    assert summary["warn_count"] == 0
     assert summary["failing_gates"] == []
     assert summary["warning_gates"] == []
     assert all(stale is False for stale in gates["stale_artifacts"].values())
@@ -91,17 +91,17 @@ def test_issue_5660_hotspot_family_warnings_are_zero_without_budget_growth() -> 
     gates = _load_json(DEBT_GATES)
     scorecard = _load_json(ARCHITECTURE_SCORECARD)
 
-    assert hotspot["summary"]["budget_warnings"] == 1
+    assert hotspot["summary"]["budget_warnings"] == 0
     assert hotspot["summary"]["budget_review_notes"] == sum(
         len(family["budget_review_notes"]) for family in hotspot["families"]
     )
     assert hotspot["summary"]["budget_review_notes"] <= 6
-    assert scorecard["metrics"]["hotspot_budget_warning_count"] == 1
+    assert scorecard["metrics"]["hotspot_budget_warning_count"] == 0
     assert (
-        scorecard["source_artifacts"]["hotspot_family_baseline"]["budget_warnings"] == 1
+        scorecard["source_artifacts"]["hotspot_family_baseline"]["budget_warnings"] == 0
     )
     assert _gate(gates, "hotspot_family_baseline_budget_warnings")["status"] == "pass"
-    assert _gate(gates, "hotspot_family_baseline_budget_warnings")["current"] == 1
+    assert _gate(gates, "hotspot_family_baseline_budget_warnings")["current"] == 0
 
     for family in hotspot["families"]:
         assert family["budget_warnings"] == []
@@ -127,11 +127,11 @@ def test_issue_5662_config_contract_dq_and_observability_evidence_is_release_gra
     gates = _load_json(DEBT_GATES)
 
     assert contract["valid"] is True
-    assert contract["blocking_issue_count"] == 1
+    assert contract["blocking_issue_count"] == 0
     assert dq["valid"] is True
-    assert dq["blocking_issue_count"] == 1
-    assert config["metrics"]["inconsistent_parameter_count"] == 1
-    assert config["metrics"]["raw_inconsistent_parameter_count"] == 1
+    assert dq["blocking_issue_count"] == 0
+    assert config["metrics"]["inconsistent_parameter_count"] == 0
+    assert config["metrics"]["raw_inconsistent_parameter_count"] == 0
     assert runtime["dashboarded_without_emission"] == []
     assert runtime["runtime_cardinality_review_required"] == []
     assert runtime["runtime_cardinality_threshold_violations"] == []
@@ -168,9 +168,9 @@ def test_issue_5663_test_inventory_and_snapshot_policy_are_bounded() -> None:
     report = report_payload["report"]
     snapshot_policy = config["platform_sensitive_snapshot_tests"]
 
-    assert config["budgets"]["compatibility_test_file_max"] == 1
-    assert inventory["total_files"] == 1
-    assert report["compatibility_test_files"] == 1
+    assert config["budgets"]["compatibility_test_file_max"] == 0
+    assert inventory["total_files"] == 0
+    assert report["compatibility_test_files"] == 0
     assert report_payload["budget_violations"] == []
     assert bronze_gaps["gaps"] == {}
 
@@ -190,7 +190,7 @@ def test_issue_5663_test_inventory_and_snapshot_policy_are_bounded() -> None:
     assert snapshot_policy["issue_ref"] == "#8406"
     assert snapshot_policy["decision"] == "canonical_fast_unit_lane"
     assert snapshot_policy["required_markers"] == ["unit"]
-    assert snapshot_policy["min_timeout_seconds"] == 1
+    assert snapshot_policy["min_timeout_seconds"] == 0
     assert snapshot_policy["windows_skip_required"] is False
     assert snapshot_policy["shared_snapshot_cache_required"] is False
 
