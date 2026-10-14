@@ -83,6 +83,14 @@ bash scripts/engineering/dev/run_pytest_sharded.sh --stream
 bash scripts/engineering/dev/run_pytest_sharded.sh --tail
 ```
 
+JUnit output uses `scripts/engineering/dev/pytest_junit_subtests.py`, loaded
+through `pytest_plugins` in `tests/conftest.py`. The pinned pytest reporter
+counts successful subtests without preserving separate testcase nodes; this
+adapter gives only the XML writer distinct child identities while preserving
+pytest failure propagation. The telemetry consumer still rejects mismatched
+counts. Remove the adapter only when the pinned upstream reporter passes the
+existing serial and xdist pass/fail/skip regressions without it.
+
 For fast, reproducible narrow slices during refactoring, use the explicit
 `--narrow` mode:
 

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-14T16:54:33.057964+00:00",
+  "generated_at": "2026-10-14T16:58:57.014134+00:00",
   "summary": {
     "total_scripts": 652,
     "status_counts": {
@@ -13,7 +13,7 @@
       "ci": 71,
       "docs": 282,
       "other": 50,
-      "scripts": 543,
+      "scripts": 544,
       "skills": 13,
       "tests": 463
     }
@@ -11187,7 +11187,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 260,
+          "line": 268,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/.wsl-vpn-fix.ps1`                   | Recover Windows-side VPN proxy settings for WSL interoperability                          |"
         }
@@ -11398,7 +11398,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 218,
+          "line": 226,
           "source_group": "scripts",
           "text": "| `install-deps`       | `scripts/engineering/dev/install_deps.py`                    | Auxiliary helper script, not a full project bootstrap            |"
         },
@@ -11423,7 +11423,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 223,
+          "line": 231,
           "source_group": "scripts",
           "text": "| `mock-metrics`       | `scripts/engineering/dev/metrics_mock_server.py`             | Start mock metrics server                                        |"
         },
@@ -11509,7 +11509,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 130,
+          "line": 138,
           "source_group": "scripts",
           "text": "invoke `bash scripts/engineering/dev/pretest_guardrails.sh --scope full`"
         }
@@ -11520,8 +11520,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/dev/README.md",
+          "line": 86,
+          "source_group": "scripts",
+          "text": "JUnit output uses `scripts/engineering/dev/pytest_junit_subtests.py`, loaded"
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2027-01-12",
@@ -11551,13 +11558,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 219,
+          "line": 227,
           "source_group": "scripts",
           "text": "| `probe-quality`      | `scripts/engineering/dev/quality_gate_probe.py`              | Measure narrow pytest/mypy startup latency and timeout behavior  |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 256,
+          "line": 264,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/quality_gate_probe.py`              | Diagnose narrow pytest/mypy startup latency and timeout behavior                          |"
         },
@@ -11578,13 +11585,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 224,
+          "line": 232,
           "source_group": "scripts",
           "text": "| `mock-quarantine`    | `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock quarantine explorer API server                        |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 257,
+          "line": 265,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock `/ops/quarantine/*` endpoints for Silver Reject Explorer smoke checks          |"
         },
@@ -11962,7 +11969,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 249,
+          "line": 257,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/run_tests.ps1`                      | Run tests (PowerShell variant)                                                            |"
         },
@@ -12031,13 +12038,13 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 221,
+          "line": 229,
           "source_group": "scripts",
           "text": "| `run-tests`          | `scripts/engineering/dev/run_tests.py`                       | Run tests                                                        |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 225,
+          "line": 233,
           "source_group": "scripts",
           "text": "| `test-changed`       | `scripts/engineering/dev/run_tests.py changed`               | Run tests for changed files only                                 |"
         }
@@ -12064,7 +12071,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 248,
+          "line": 256,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/run_tests.sh`                       | Run tests (shell variant)                                                                 |"
         },
@@ -12097,7 +12104,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 265,
+          "line": 273,
           "source_group": "scripts",
           "text": "Canonical entrypoint: `scripts/engineering/dev/setup_bioetl_wsl.ps1`."
         }
@@ -20255,7 +20262,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 122,
+          "line": 130,
           "source_group": "scripts",
           "text": "- `bash scripts/engineering/dev/run_pytest.sh` runs `bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only`"
         },
