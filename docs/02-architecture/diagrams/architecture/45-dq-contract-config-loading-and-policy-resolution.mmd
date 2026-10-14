@@ -1,8 +1,8 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: DQ Contract Config Loading And Policy Resolution
 %% @version 1.1.0
-%% @date    2026-10-09
-%% Reviewed against main 9a7339dc: config/dq_config_resolution.py; behavior/dq_policy_resolver.py, dq_rule_evaluator.py; effective_config/context.py
+%% @date    2026-10-14
+%% Reviewed against PR head 23eee03e97: config/dq_config_resolution.py; behavior/dq_policy_resolver.py, dq_rule_evaluator.py; effective_config/context.py
 %% @type    flowchart
 %% @level   Configuration / Component
 %% @nodes   10
@@ -28,7 +28,8 @@ flowchart LR
     evaluator -->|resolve violation disposition| service
     config --> artifact
     service -->|policy ref| artifact
-    artifact -->|build_dq_components| snapshot
+    config -->|build_dq_components| snapshot
+    artifact -->|contains| snapshot
     evaluator -->|DQRuleOutcome through application orchestration| report
 
     class yaml ext;
