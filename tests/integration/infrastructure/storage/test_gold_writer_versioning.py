@@ -23,6 +23,7 @@ import pytest
 
 from pandera.pandas import Column, DataFrameSchema
 
+from bioetl.domain.types.gold_contracts import GoldWriteCategory
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import (
     GoldSchemaPolicyByVersion,
@@ -39,6 +40,7 @@ from bioetl.infrastructure.storage.gold.runtime_helpers import (
 )
 from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     GoldWriteDispatchContext,
+    GoldWritePostwriteContext,
 )
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
@@ -302,3 +304,82 @@ async def test_gold_writer_overwrite_is_idempotent_for_identical_records(
         {"entity_id": "CHEMBL456", "value": 7.0},
     ]
     assert second_rows == first_rows
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_gold_writer_dual_write_postwrite_failure_preserves_committed_target(
+    tmp_path: Path,
+    strict_schema: DataFrameSchema,
+    legacy_schema: DataFrameSchema,
+) -> None:
+    logger = MagicMock()
+    logger.bind.return_value = logger
+    writer = GoldWriter(
+        base_path=tmp_path / "gold",
+        logger=logger,
+        runtime_services=_build_runtime_services(),
+    )
+    original_post_write = writer._post_write_gold
+    calls: list[str] = []
+
+    async def _post_write_with_failure(
+        context: GoldWritePostwriteContext,
+    ) -> None:
+        calls.append(context.prepared.table_name)
+        if context.prepared.table_name.endswith("__v1_0_0"):
+            raise RuntimeError("postwrite boom")
+        await original_post_write(context)
+
+    writer._post_write_gold = _post_write_with_failure  # type: ignore[method-assign]
+
+    with pytest.raises(GoldWriteFailure) as caught:
+        await writer.write_gold(
+            table_name="chembl.activity",
+            records=[
+                {
+                    "entity_id": "CHEMBL123",
+                    "legacy_value": "old-shape",
+                    "value": 5.5,
+                }
+            ],
+            schema=GoldSchemaPolicyByVersion(
+                active_version="2.0.0",
+                policies=(
+                    GoldSchemaVersionPolicy(version="1.0.0", schema=legacy_schema),
+                    GoldSchemaVersionPolicy(version="2.0.0", schema=strict_schema),
+                ),
+            ),
+            mode="append",
+        )
+
+    assert (
+        caught.value.receipt.category == GoldWriteCategory.COMMITTED_POSTWRITE_PENDING
+    )
+    assert caught.value.receipt.committed_targets == ("chembl.activity__v1_0_0",)
+    assert isinstance(caught.value.__cause__, RuntimeError)
+    assert str(caught.value.__cause__) == "postwrite boom"
+    assert calls == ["chembl.activity__v1_0_0"]
+    assert _load_gold_rows(tmp_path / "gold", "chembl.activity__v1_0_0") == [
+        {"entity_id": "CHEMBL123", "legacy_value": "old-shape"}
+    ]
+    assert not _versioned_table_path(
+        tmp_path / "gold",
+        "chembl.activity__v2_0_0",
+    ).exists()
+    logger.error.assert_called_once_with(
+        "gold_dual_write_failed",
+        logical_table="chembl.activity",
+        failed_contract_version="1.0.0",
+        failed_target_table="chembl.activity__v1_0_0",
+        committed_targets=[
+            {
+                "contract_version": "1.0.0",
+                "physical_table": "chembl.activity__v1_0_0",
+            }
+        ],
+        partial_dual_write=True,
+        recovery_action="operator_compensate_committed_targets",
+        active_contract_version="2.0.0",
+        write_versions=("1.0.0", "2.0.0"),
+    )
