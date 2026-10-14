@@ -136,6 +136,35 @@ def test_affected_targets_map_source_and_existing_tests(tmp_path: Path) -> None:
     assert targets == ["tests/unit/domain"]
 
 
+def test_affected_targets_map_telemetry_baseline(tmp_path: Path) -> None:
+    """Telemetry edits select both baseline guards and leave other configs unmapped."""
+    governance = tmp_path / "tests/architecture/test_test_telemetry_governance.py"
+    governance.parent.mkdir(parents=True)
+    governance.write_text(
+        "def test_identity() -> None:\n    assert True\n", encoding="utf-8"
+    )
+    (governance.parent / "test_test_telemetry_baseline.py").write_text(
+        "def test_baseline() -> None:\n    assert True\n", encoding="utf-8"
+    )
+    targets = affected_pytest_targets(
+        [
+            "configs/quality/test_telemetry_baseline.yaml",
+            "docs/readme.md",
+        ],
+        repo_root=tmp_path,
+    )
+    untouched = affected_pytest_targets(
+        ["configs/quality/github_required_checks.yaml"],
+        repo_root=tmp_path,
+    )
+
+    assert targets == [
+        "tests/architecture/test_test_telemetry_baseline.py",
+        "tests/architecture/test_test_telemetry_governance.py",
+    ]
+    assert untouched == []
+
+
 def test_affected_targets_map_memory_source_without_test_diff() -> None:
     """A chunking-only PR must select its real RAG regression suite."""
     repo_root = Path(__file__).resolve().parents[5]
