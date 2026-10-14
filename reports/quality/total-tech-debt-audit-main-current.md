@@ -10,23 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `6f143e14965a6400c29c648502cf32c1e44f3803cbff756a37e0946cf90294ac`
-
-## Generated evidence validation
-
-Validated on checkout `b81e7528816ea16c217f11e0e6a4f5f8d4e48fab` with the
-reviewed docstring-only working patch on 2026-10-14. The evidence fingerprint
-above is unchanged. Command:
-
-```text
-python -m scripts.engineering.qa validate-technical-debt-audit --json
-```
-
-Result (exit status 0):
-
-```json
-{"issues": [], "ok": true}
-```
+Evidence surface SHA-256: `49d40b8bd11163e246a7a85ff3c3c8545d2d6b632479ce8f5200c56357b604cb`
 
 ## Current evidence summary
 
@@ -85,7 +69,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "6f143e14965a6400c29c648502cf32c1e44f3803cbff756a37e0946cf90294ac",
+  "evidence_surface_sha256": "49d40b8bd11163e246a7a85ff3c3c8545d2d6b632479ce8f5200c56357b604cb",
   "metrics": {
     "architecture_integral_score": 10.0,
     "architecture_interpretation": "excellent",
