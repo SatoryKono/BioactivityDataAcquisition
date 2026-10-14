@@ -163,10 +163,29 @@ def repository_cli_affected(root: Path, dependencies: set[str]) -> bool:
         for token in re.findall(r"(?<![\w./-])[\w-]+(?=\s|[;&|]|$)", line)
     }
     return any(
-        entry.group == "console_scripts" and entry.name in commands
+        command in commands
         for dependency in dependencies
-        for entry in _entry_points(dependency)
+        for command in _console_commands(dependency)
     )
+
+
+def _console_commands(package: str) -> set[str]:
+    try:
+        installed = distribution(package)
+    except PackageNotFoundError:
+        return set()
+    commands = {
+        entry.name
+        for entry in installed.entry_points
+        if entry.group == "console_scripts"
+    }
+    # Native wheels (e.g. Ruff) own scripts through RECORD, not console_scripts.
+    commands.update(
+        Path(str(record)).stem
+        for record in (getattr(installed, "files", None) or ())
+        if {"bin", "Scripts", "scripts"} & set(Path(str(record)).parts[:-1])
+    )
+    return commands
 
 
 def _workflow_commands(path: Path) -> list[str]:

@@ -353,3 +353,22 @@ def test_shared_helper_without_any_tests_fails_closed(tmp_path: Path) -> None:
     _consumer(tmp_path, "tests/helpers/control_plane_replay.py", "yaml")
     with pytest.raises(ValueError, match="test-helper owner route"):
         lane._consumer_targets("tests/helpers/control_plane_replay.py", tmp_path, {})
+
+
+def test_native_cli_record_uses_workflow_owner(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    workflow = tmp_path / ".github/workflows/owner.yml"
+    workflow.parent.mkdir(parents=True)
+    workflow.write_text(
+        "jobs:\n  owner:\n    steps:\n      - run: uv run --frozen ruff check src\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        dependencies,
+        "distribution",
+        lambda name: SimpleNamespace(
+            entry_points=[], files=[Path("../../../bin/ruff")]
+        ),
+    )
+    assert dependencies.repository_cli_affected(tmp_path, {"ruff"})
