@@ -4,10 +4,13 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable, Sequence
-from typing import TYPE_CHECKING, Protocol
+from typing import Protocol
 
 import polars as pl
 
+from bioetl.application.composite.dependency_progress_tracker import (
+    DependencyProgressService,
+)
 from bioetl.application.composite.dependency_result_mapper import (
     DependencyResultService,
 )
@@ -18,11 +21,6 @@ from bioetl.application.runtime_timestamps import (
 from bioetl.domain.composite import DependencyConfig
 from bioetl.domain.composite.result import DependencyResult
 from bioetl.domain.ports import ClockPort, ExecutionMetricsRunnerPort, LoggerPort
-
-if TYPE_CHECKING:
-    from bioetl.application.composite.dependency_progress_tracker import (
-        DependencyProgressService,
-    )
 
 __all__ = [
     "execute_dependency_runner",
