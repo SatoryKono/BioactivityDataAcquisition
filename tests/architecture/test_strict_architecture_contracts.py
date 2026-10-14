@@ -352,6 +352,7 @@ def _schema_entity_pairs():
 
 
 def _schema_field_aliases() -> dict[str, str]:
+    """Map schema aliases to their canonical entity field names."""
     return {
         "_run_id": "run_id",
         "_run_type": "run_type",

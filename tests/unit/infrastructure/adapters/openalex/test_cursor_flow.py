@@ -355,6 +355,7 @@ async def test_iter_query_results_rejects_empty_page_with_next_cursor() -> None:
 
 @pytest.mark.asyncio
 async def test_iter_query_results_empty_page_without_cursor_completes() -> None:
+    """Verify iter query results empty page without cursor completes."""
     flow = _build_flow()
     flow.query_executor.request_works_payload.return_value = {"results": []}
     flow.response_mapper.extract_results.return_value = []
