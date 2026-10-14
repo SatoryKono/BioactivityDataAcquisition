@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-14T19:46:38.037158+00:00",
+  "generated_at": "2026-10-14T22:35:40.130195+00:00",
   "summary": {
     "total_scripts": 652,
     "status_counts": {
@@ -9324,7 +9324,7 @@
         },
         {
           "path": "tests/architecture/test_strict_architecture_contracts.py",
-          "line": 880,
+          "line": 892,
           "source_group": "tests",
           "text": "\"cli.py\","
         }
