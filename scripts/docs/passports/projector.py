@@ -34,6 +34,21 @@ SCHEMA_VERSION = "1.0.0"
 PROJECTOR_VERSION = "1.0.0"
 PIPELINE_PROJECTOR_VERSION = "1.1.0"
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
+CANONICAL_SOURCE_PATHS = (
+    "configs/entities",
+    "configs/providers",
+    "configs/composites",
+    "configs/workflows",
+    "configs/contracts",
+    "src/bioetl/composition/factories/pipeline",
+    "src/bioetl/application/composite",
+    "src/bioetl/application/services/workflow",
+    "src/bioetl/application/services/control_plane/workflow",
+    "src/bioetl/application/workflow/transforms",
+    "src/bioetl/infrastructure/config",
+    "src/bioetl/domain/contracts",
+    "src/bioetl/domain/workflow",
+)
 DEFAULT_CONFIGS_ROOT = PROJECT_ROOT / "configs"
 DEFAULT_OUTPUT_ROOT = PROJECT_ROOT / "docs/04-reference/passports"
 JsonObject = dict[str, Any]
@@ -87,58 +102,59 @@ def _sha(value: object) -> str:
 
 
 def _source_revision() -> str:
-    """Fingerprint canonical source blobs independently of commit ancestry.
-
-    Squash/merge commits preserve source content but replace commit identities.
-    Reject uncommitted canonical changes before hashing Git tree entries.
-    Generated-only commits and history rewrites keep the revision stable,
-    while any source blob change invalidates it.
-    Explicit revision overrides remain available for SHA-bound CI artifacts.
-    """
-    canonical_paths = [
-        "configs/entities",
-        "configs/providers",
-        "configs/composites",
-        "configs/workflows",
-        "configs/contracts",
-        "src/bioetl/composition/factories/pipeline",
-        "src/bioetl/application/composite",
-        "src/bioetl/application/services/workflow",
-        "src/bioetl/application/services/control_plane/workflow",
-        "src/bioetl/application/workflow/transforms",
-        "src/bioetl/infrastructure/config",
-        "src/bioetl/domain/contracts",
-        "src/bioetl/domain/workflow",
-    ]
-    dirty = subprocess.run(
-        [
-            "git",
-            "status",
-            "--porcelain",
-            "--untracked-files=all",
-            "--",
-            *canonical_paths,
-        ],
-        cwd=PROJECT_ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    if dirty.stdout:
-        raise ValueError(
-            "Cannot generate passports with uncommitted canonical source changes"
-        )
+    """Hash current canonical files while preserving clean Git-index identities."""
     override = os.environ.get("BIOETL_PASSPORT_SOURCE_REVISION")
     if override:
         return override
-    result = subprocess.run(
-        ["git", "ls-files", "-s", "--", *canonical_paths],
-        cwd=PROJECT_ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
+
+    def git(*args: str, input_text: str | None = None) -> str:
+        """Read metadata or filter-aware hashes without writing Git objects."""
+        return subprocess.run(
+            ["git", *args],
+            cwd=PROJECT_ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+            input=input_text,
+        ).stdout
+
+    index = {}
+    for entry in git("ls-files", "-s", "-z", "--", *CANONICAL_SOURCE_PATHS).split("\0"):
+        if not entry:
+            continue
+        metadata, path = entry.split("\t", 1)
+        mode, _, stage = metadata.split()
+        if stage != "0":
+            raise ValueError("Cannot fingerprint unmerged canonical sources")
+        index[path] = mode
+    paths = sorted(
+        {
+            path
+            for path in git(
+                "ls-files",
+                "--cached",
+                "--others",
+                "--exclude-standard",
+                "-z",
+                "--",
+                *CANONICAL_SOURCE_PATHS,
+            ).split("\0")
+            if path and (PROJECT_ROOT / path).is_file()
+        }
     )
-    return f"sha256:{hashlib.sha256(result.stdout.encode('utf-8')).hexdigest()}"
+    # Path input applies Git attributes and line-ending filters.
+    hashes = (
+        git(
+            "hash-object", "--stdin-paths", input_text="\n".join(paths) + "\n"
+        ).splitlines()
+        if paths
+        else []
+    )
+    records = "".join(
+        f"{index.get(path, '100644')} {blob} 0\t{path}\n"
+        for path, blob in zip(paths, hashes, strict=True)
+    )
+    return f"sha256:{hashlib.sha256(records.encode('utf-8')).hexdigest()}"
 
 
 def _contract_path(provider: str, entity: str) -> Path:

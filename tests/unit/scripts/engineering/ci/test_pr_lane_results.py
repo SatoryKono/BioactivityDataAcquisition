@@ -301,6 +301,7 @@ def test_complete_suite_removes_nested_duplicates_after_required_validation(
 
 
 def test_router_executes_lane_results_as_importable_module(capsys):
+    """Verify router executes lane results as importable module."""
     from scripts.engineering.ci.__main__ import main
 
     assert main(["pr-lane-results", "--help"]) == 0
@@ -308,6 +309,7 @@ def test_router_executes_lane_results_as_importable_module(capsys):
 
 
 def test_base_checkout_aggregation_uses_existing_module_entrypoint():
+    """Verify base checkout aggregation uses existing module entrypoint."""
     import yaml
 
     root = Path(__file__).resolve().parents[5]

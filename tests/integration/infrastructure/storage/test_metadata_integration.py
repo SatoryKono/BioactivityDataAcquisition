@@ -401,6 +401,7 @@ class TestSilverWriterMetadataIntegration:
         sample_records: list[dict[str, Any]],
         silver_schema: pa.Schema,
     ) -> None:
+        """Verify silver writer uses noop when no metadata writer."""
         writer = SilverWriter(
             runtime_request=SilverWriterRuntimeServicesRequest(
                 clock=fixed_test_clock()

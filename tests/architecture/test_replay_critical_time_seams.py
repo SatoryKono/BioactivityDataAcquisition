@@ -110,6 +110,7 @@ def _current_utc_time_refs(py_file: Path) -> list[str]:
 
 
 def _system_clock_constructor_refs(py_file: Path) -> list[str]:
+    """Find direct and aliased SystemClock construction in the parsed module."""
     relative = _relative_path(py_file)
     if not (
         relative
@@ -155,6 +156,7 @@ def test_replay_critical_time_seams_do_not_read_wall_clock_directly() -> None:
 
 
 def test_silver_infrastructure_does_not_construct_system_clock() -> None:
+    """Verify silver infrastructure does not construct system clock."""
     files = _iter_python_files(Path("src/bioetl/infrastructure/storage/silver"))
     files += _iter_python_files(
         Path("src/bioetl/infrastructure/storage/silver_writer.py")
@@ -170,6 +172,7 @@ def test_silver_infrastructure_does_not_construct_system_clock() -> None:
     ],
 )
 def test_silver_clock_guard_detects_aliased_construction(tmp_path, monkeypatch, source):
+    """Verify silver clock guard detects aliased construction."""
     monkeypatch.setitem(
         _system_clock_constructor_refs.__globals__, "REPO_ROOT", tmp_path
     )

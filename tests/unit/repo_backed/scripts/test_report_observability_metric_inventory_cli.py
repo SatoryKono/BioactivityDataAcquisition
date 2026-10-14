@@ -183,6 +183,7 @@ def test_build_runtime_cardinality_review_summary_uses_local_fallback_for_pr_gat
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Verify build runtime cardinality review summary uses local fallback for pr gate."""
     monkeypatch.delenv(inventory._PROMETHEUS_BASE_URL_ENV_VAR, raising=False)
     monkeypatch.setattr(
         inventory,
@@ -695,6 +696,7 @@ def test_direct_module_entrypoint_json_bootstraps_without_circular_import() -> N
     "mode", ["local_cardinality_fallback", "live_review_unavailable", "live_review"]
 )
 def test_release_artifact_is_written_only_for_live_review(tmp_path, mode):
+    """Verify release artifact is written only for live review."""
     from scripts.engineering.qa import observability_metric_inventory_cli as cli
 
     release = tmp_path / "runtime_cardinality_review.json"
@@ -711,3 +713,33 @@ def test_release_artifact_is_written_only_for_live_review(tmp_path, mode):
     target = release
     assert json.loads(target.read_text(encoding="utf-8")) == summary
     assert release.exists()
+
+
+def test_pr_fallback_records_actual_cli_command(tmp_path, monkeypatch):
+    """Keep PR output and fallback flags in reproducible CLI provenance."""
+    import shlex
+    from scripts.engineering.qa import observability_metric_inventory_cli as cli
+
+    monkeypatch.setattr(cli, "collect_metric_inventory", lambda _: {})
+    monkeypatch.setattr(cli, "_metric_inventory_violations", lambda *a, **kw: {})
+    monkeypatch.setattr(
+        cli,
+        "_build_runtime_cardinality_review_summary",
+        lambda *a, **kw: {"status": "passed", "mode": "local_cardinality_fallback"},
+    )
+    monkeypatch.setattr(cli, "_write_evidence_report", lambda *a, **kw: None)
+    monkeypatch.setattr(
+        cli, "_append_runtime_cardinality_review_summary", lambda *a, **kw: None
+    )
+    output = tmp_path / "runtime_cardinality_review_pr.json"
+    argv = [
+        "--repo-root",
+        str(tmp_path),
+        "--review-json-out",
+        str(output),
+        "--allow-local-cardinality-fallback",
+    ]
+    assert cli.main(argv) == 0
+    command = json.loads(output.read_text())["source_command"]
+    assert shlex.split(command)[3:] == argv
+    assert "--fail-on-degraded-live-review" not in command

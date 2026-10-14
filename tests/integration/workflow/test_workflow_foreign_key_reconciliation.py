@@ -190,6 +190,7 @@ def _scd_config(primary_key: str) -> dict[str, object]:
 async def test_reconcile_foreign_keys_is_idempotent(
     tmp_path,
 ) -> None:
+    """Verify reconcile foreign keys is idempotent."""
     logger = _RecordingLogger()
     silver_writer = SilverWriter(
         runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
@@ -296,6 +297,7 @@ async def test_reconcile_foreign_keys_is_idempotent(
 async def test_reconcile_foreign_keys_sends_orphans_to_quarantine(
     tmp_path,
 ) -> None:
+    """Verify reconcile foreign keys sends orphans to quarantine."""
     logger = _RecordingLogger()
     silver_writer = SilverWriter(
         runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
@@ -393,6 +395,7 @@ async def test_reconcile_foreign_keys_sends_orphans_to_quarantine(
 async def test_reconcile_foreign_keys_supports_composite_keys_and_null_policy(
     tmp_path,
 ) -> None:
+    """Verify reconcile foreign keys supports composite keys and null policy."""
     logger = _RecordingLogger()
     silver_writer = SilverWriter(
         runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
@@ -523,6 +526,7 @@ async def test_reconcile_foreign_keys_supports_composite_keys_and_null_policy(
 async def test_reconcile_foreign_keys_dry_run_previews_without_mutation(
     tmp_path,
 ) -> None:
+    """Verify reconcile foreign keys dry run previews without mutation."""
     logger = _RecordingLogger()
     silver_writer = SilverWriter(
         runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
@@ -622,6 +626,7 @@ async def test_reconcile_foreign_keys_dry_run_previews_without_mutation(
 async def test_reconcile_foreign_keys_expires_gold_orphans_without_dropping_history(
     tmp_path,
 ) -> None:
+    """Verify reconcile foreign keys expires gold orphans without dropping history."""
     logger = _RecordingLogger()
     metrics = _RecordingMetrics()
     silver_writer = SilverWriter(
@@ -722,6 +727,7 @@ async def test_reconcile_foreign_keys_expires_gold_orphans_without_dropping_hist
 async def test_reconcile_foreign_keys_persists_result_and_debug_artifacts(
     tmp_path,
 ) -> None:
+    """Verify reconcile foreign keys persists result and debug artifacts."""
     logger = _RecordingLogger()
     metrics = _RecordingMetrics()
     silver_writer = SilverWriter(
@@ -904,6 +910,7 @@ async def test_inverse_reconcile_foreign_keys_expires_unused_gold_dimensions(
     expected_current_key: str,
     expected_expired_key: str,
 ) -> None:
+    """Verify inverse reconcile foreign keys expires unused gold dimensions."""
     logger = _RecordingLogger()
     metrics = _RecordingMetrics()
     silver_writer = SilverWriter(

@@ -470,6 +470,7 @@ def _release_review_freshness_gate(
     *,
     now: datetime | None = None,
 ) -> Gate:
+    """Require release evidence to be live, dated, and within its freshness window."""
     generated_at = _parse_generated_at(runtime_review.get("generated_at"))
     if generated_at is None:
         return Gate(

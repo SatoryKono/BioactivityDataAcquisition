@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shlex
 import sys
 from collections.abc import Callable
 from datetime import date
@@ -465,6 +466,7 @@ def _typed_inventory_violations(
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Collect metric evidence and retain the invoked CLI command as provenance."""
     parser = _build_parser()
     args = parser.parse_args(argv)
     violations: dict[str, list[str]]
@@ -488,6 +490,14 @@ def main(argv: list[str] | None = None) -> int:
         repo_root=args.repo_root,
         prometheus_base_url=args.prometheus_base_url,
         allow_local_cardinality_fallback=args.allow_local_cardinality_fallback,
+    )
+    review_summary["source_command"] = shlex.join(
+        [
+            "python",
+            "-m",
+            "scripts.engineering.qa.report_observability_metric_inventory",
+            *(sys.argv[1:] if argv is None else argv),
+        ]
     )
     _write_evidence_report(
         report,

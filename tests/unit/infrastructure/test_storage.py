@@ -509,6 +509,7 @@ class TestSilverWriter:
     @pytest.mark.usefixtures("mock_silver_writer")
     @pytest.mark.asyncio
     async def test_write_silver_empty_records_raises_error(self, noop_logger):
+        """Verify write silver empty records raises error."""
         writer = SilverWriter(
             runtime_request=SilverWriterRuntimeServicesRequest(
                 clock=fixed_test_clock()

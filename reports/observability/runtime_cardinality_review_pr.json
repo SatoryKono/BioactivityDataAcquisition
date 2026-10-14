@@ -6,9 +6,9 @@
     "bioetl_pipeline_runs_total": 500
   },
   "degraded_reasons": [
-    "Live Prometheus review unavailable; local fallback is not release evidence."
+    "live Prometheus review unavailable; using local cardinality evidence"
   ],
-  "generated_at": "2026-10-07T21:28:01Z",
+  "generated_at": "2026-10-14T11:49:29Z",
   "label_keys": {
     "bioetl_checkpoint_load_events_total": [
       "pipeline",
@@ -50,8 +50,8 @@
     "bioetl_health_check_latency_seconds",
     "bioetl_pipeline_runs_total"
   ],
-  "source_command": "python -m scripts.engineering.qa.report_observability_metric_inventory --check --write-evidence reports/observability/runtime_cardinality_inventory.json --review-json-out reports/observability/runtime_cardinality_review.json --summary-out \"$GITHUB_STEP_SUMMARY\" --fail-on-degraded-live-review",
-  "source_revision": "e99c057c5faa51c5c72d2715e0ca0056502a8717",
+  "source_command": "python -m scripts.engineering.qa.report_observability_metric_inventory --check --write-evidence reports/observability/runtime_cardinality_inventory.json --review-json-out reports/observability/runtime_cardinality_review_pr.json --allow-local-cardinality-fallback",
+  "source_revision": "ccea7591c9f22d6774a7191d124e81a005ee96f9",
   "source_worktree_dirty": true,
   "static_threshold_violations": [],
   "status": "degraded"

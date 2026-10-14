@@ -254,6 +254,7 @@ def test_infrastructure_adapter_signatures_conform_to_ports(
 
 
 def _storage_adapter_instances(tmp_path: Path) -> tuple[object, ...]:
+    """Build storage adapter instances for structural protocol checks."""
     logger = NoOpLogger()
     metrics = NoOpMetrics(warn_on_use=False)
     return (

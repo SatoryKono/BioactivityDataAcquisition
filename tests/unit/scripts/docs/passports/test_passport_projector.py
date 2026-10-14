@@ -128,9 +128,11 @@ def test_generation_is_byte_deterministic(tmp_path: Path) -> None:
 def test_source_revision_survives_squash_and_generated_only_commits(
     tmp_path, monkeypatch
 ):
+    """Verify source revision survives squash and generated only commits."""
     from scripts.docs.passports import projector
 
     def git(*args):
+        """Run Git in the isolated repository and return its captured output."""
         return subprocess.run(
             ["git", *args], cwd=tmp_path, check=True, capture_output=True, text=True
         ).stdout.strip()
@@ -155,18 +157,28 @@ def test_source_revision_survives_squash_and_generated_only_commits(
     git("checkout", "--detach", squashed)
     assert _source_revision() == before
     source.write_text("version: 2\n", encoding="utf-8")
-    with pytest.raises(ValueError, match="uncommitted canonical source"):
-        _source_revision()
+    from scripts.docs.passports import cli
+
+    monkeypatch.setattr(cli, "PROJECT_ROOT", tmp_path)
+    assert cli._SOURCE_PATHS is projector.CANONICAL_SOURCE_PATHS
+    assert cli.main(["generate", "--require-clean-source"]) == 1
+    dirty_revision = _source_revision()
+    assert dirty_revision != before
     git("add", ".")
-    with pytest.raises(ValueError, match="uncommitted canonical source"):
-        _source_revision()
+    assert _source_revision() == dirty_revision
     git("commit", "-m", "changed canonical source")
     assert _source_revision() != before
     extra = source.with_name("untracked.yaml")
     extra.write_text("version: 3\n", encoding="utf-8")
-    with pytest.raises(ValueError, match="uncommitted canonical source"):
-        _source_revision()
+    git("config", "status.showUntrackedFiles", "no")
+    assert cli.main(["generate", "--require-clean-source"]) == 1
+    assert _source_revision() != dirty_revision
     extra.unlink()
+    assert _source_revision() == dirty_revision
+    source.unlink()
+    assert _source_revision() != dirty_revision
+    source.write_text("version: 2\n", encoding="utf-8")
+    assert _source_revision() == dirty_revision
     monkeypatch.setenv("BIOETL_PASSPORT_SOURCE_REVISION", REVISION)
     assert _source_revision() == REVISION
 

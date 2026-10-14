@@ -52,6 +52,7 @@ GOLD_ROOT = str(TEST_ROOT / "gold")
 
 
 def _make_pipeline() -> BasePipeline:
+    """Build a pipeline fixture with explicit record processor dependencies."""
     pipeline = MagicMock()
     pipeline.services = MagicMock(name="services")
     pipeline.context = MagicMock(name="context")
@@ -100,6 +101,7 @@ def _make_callbacks() -> PipelineCallbacksContext:
 
 
 def test_create_record_processor_from_pipeline_projects_pipeline_fields() -> None:
+    """Verify create record processor from pipeline projects pipeline fields."""
     pipeline = _make_pipeline()
     active_schema = MagicMock(name="active_gold_schema")
     shadow_schema = MagicMock(name="shadow_gold_schema")

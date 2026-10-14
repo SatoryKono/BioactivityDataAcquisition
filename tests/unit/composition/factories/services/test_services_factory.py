@@ -383,6 +383,7 @@ def test_create_record_processor_builds_dependencies(
     mock_gold_validator: MagicMock,
     mock_record_processor: MagicMock,
 ) -> None:
+    """Verify create record processor builds dependencies."""
     services = MagicMock()
     context = MagicMock()
 

@@ -257,6 +257,7 @@ class TestAssembleRuntimeConfig:
 
     @pytest.mark.parametrize("health_check_mode", ["strict", "probe"])
     def test_preserves_health_check_mode_keyword(self, health_check_mode):
+        """Verify preserves health check mode keyword."""
         result = assemble_runtime_config(
             run_type=RunType.INCREMENTAL,
             resume=False,

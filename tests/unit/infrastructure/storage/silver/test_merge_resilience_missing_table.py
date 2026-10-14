@@ -45,19 +45,26 @@ async def test_pre_evolution_skips_a_table_that_does_not_exist(
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("merge_schema", [False, True])
+@pytest.mark.parametrize(
+    "configured, existing", [(["target_type"], []), ([], ["target_type"])]
+)
 async def test_partition_mismatch_fails_before_schema_or_data_mutation(
-    monkeypatch: pytest.MonkeyPatch, merge_schema: bool
+    monkeypatch: pytest.MonkeyPatch,
+    merge_schema: bool,
+    configured: list[str],
+    existing: list[str],
 ) -> None:
+    """Verify partition mismatch fails before schema or data mutation."""
     request = _DeltaWriteRequest(
         validated_mode=SilverWriteMode.MERGE,
         table_path="/synthetic/silver/target",
         arrow_data=pa.table({"target_id": ["T1"], "target_type": ["protein"]}),
         primary_keys=["target_id"],
-        partition_cols=["target_type"],
+        partition_cols=configured,
         merge_schema=merge_schema,
     )
     table = MagicMock()
-    table.metadata.return_value.partition_columns = []
+    table.metadata.return_value.partition_columns = existing
     monkeypatch.setattr(resilience, "_load_delta_table", AsyncMock(return_value=table))
     evolve = AsyncMock()
     monkeypatch.setattr(resilience, "_evolve_delta_schema_with_empty_append", evolve)

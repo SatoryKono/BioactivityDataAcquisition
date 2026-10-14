@@ -48,7 +48,7 @@ async def _pre_evolve_existing_table_schema(
     load_module: LoadModule,
 ) -> tuple[_DeltaWriteRequest, bool]:
     """Pre-evolve schema only when merge-schema targets an existing table."""
-    if not request.merge_schema and not request.partition_cols:
+    if not request.merge_schema and request.partition_cols is None:
         return request, False
     try:
         table = await _load_delta_table(
@@ -57,9 +57,9 @@ async def _pre_evolve_existing_table_schema(
         )
     except DeltaTableNotFoundError:
         return request, False
-    if request.partition_cols and tuple(table.metadata().partition_columns) != tuple(
-        request.partition_cols
-    ):
+    if request.partition_cols is not None and tuple(
+        table.metadata().partition_columns
+    ) != tuple(request.partition_cols):
         raise ValueError(
             "Silver partition layout differs from configured partition_cols; "
             "perform an explicit migration/rebuild before merging"
