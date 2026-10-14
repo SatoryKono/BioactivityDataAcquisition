@@ -1047,7 +1047,7 @@ async def test_publication_enricher_rejects_cardinality_mismatch():
 
     enricher = AsyncMock()
     enricher.enrich_many.return_value = []
-    with pytest.raises(ValueError, match="preserve record cardinality"):
+    with pytest.raises(ValueError, match="zip"):
         await _attach_pubmed_payloads(
             [{"publication_id": "P1", "pubmed_id": 123}],
             extract_terms=lambda record, publication_id: [],

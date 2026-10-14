@@ -92,6 +92,7 @@ class GroupSpec:
     flat_structure: bool = False
 
     def names(self) -> dict[str, str]:
+        """Return owned artifact names; raise ValueError for invalid group scope."""
         if not all(valid_bronze_scope_name(x) for x in (self.provider, self.entity)):
             raise ValueError("invalid Bronze provider/entity")
         for value in (self.date, self.cutoff):
@@ -117,6 +118,7 @@ class GroupSpec:
         }
 
     def relative_date(self) -> Path:
+        """Return the relative date directory; reject invalid layout or scope."""
         if type(self.flat_structure) is not bool:
             raise ValueError("invalid Bronze layout flag")
         payload = self.names()["payload"]

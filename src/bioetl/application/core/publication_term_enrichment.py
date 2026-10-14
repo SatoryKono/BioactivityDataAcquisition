@@ -41,8 +41,6 @@ async def _attach_pubmed_payloads(
     if not need:
         return records
     enriched = list(await enricher.enrich_many(need))
-    if len(enriched) != len(need):
-        raise ValueError("Publication enrichment must preserve record cardinality")
     replacements = {
         id(original): replacement
         for original, replacement in zip(need, enriched, strict=True)
