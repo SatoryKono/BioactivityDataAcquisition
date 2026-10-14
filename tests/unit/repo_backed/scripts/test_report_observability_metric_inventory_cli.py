@@ -741,12 +741,15 @@ def test_pr_fallback_records_actual_cli_command(tmp_path, local_cardinality_cli)
     cli = local_cardinality_cli
 
     output = tmp_path / "runtime_cardinality_review_pr.json"
+    summary = tmp_path / "runner-specific" / "summary.md"
     argv = [
         "--repo-root",
         str(tmp_path),
         "--review-json-out",
         str(output),
         "--allow-local-cardinality-fallback",
+        "--summary-out",
+        str(summary),
     ]
     assert cli.main(argv) == 0
     command = json.loads(output.read_text(encoding="utf-8"))["source_command"]
@@ -764,6 +767,8 @@ def test_pr_fallback_records_actual_cli_command(tmp_path, local_cardinality_cli)
         str(output),
     ]
     assert "--fail-on-degraded-live-review" not in recorded
+    assert "--summary-out" not in recorded
+    assert str(summary) not in recorded
 
 
 def test_cwd_repo_root_is_omitted_from_source_command(

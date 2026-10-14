@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-14T19:04:57.579752+00:00",
+  "generated_at": "2026-10-14T19:54:09.021308+00:00",
   "summary": {
     "total_scripts": 651,
     "status_counts": {
@@ -15228,7 +15228,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_report_observability_metric_inventory_cli.py",
-          "line": 816,
+          "line": 821,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import observability_metric_inventory_cli as cli"
         }

@@ -40,7 +40,6 @@ _PROVENANCE_SWITCHES: tuple[tuple[str, str], ...] = (
 _PROVENANCE_PATHS: tuple[tuple[str, str], ...] = (
     ("write_evidence", "--write-evidence"),
     ("review_json_out", "--review-json-out"),
-    ("summary_out", "--summary-out"),
 )
 
 
