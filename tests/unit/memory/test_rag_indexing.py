@@ -10,9 +10,11 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
+import os
 from memory.rag import chunking as rag_chunking
 from memory.rag.chunking import (
     build_chunk_id,
+    content_hash,
     infer_domain,
     infer_source_type,
     split_config_sections,
@@ -103,6 +105,38 @@ def test_infer_source_metadata_from_repo_paths() -> None:
     assert infer_source_type(Path(".github/workflows/tests.yml")) == "workflow"
     assert infer_source_type(Path("grafana/dashboards/main.json")) == "dashboard"
     assert infer_source_type(Path("scripts/engineering/dev/run.sh")) == "script"
+
+
+def test_infer_source_type_exact_match() -> None:
+    assert infer_source_type(Path(".devin/wiki.json")) == "devin_wiki"
+    assert infer_source_type(Path(".devin/wiki.json.bak")) == "doc"
+
+
+def test_infer_source_type_prefix_only() -> None:
+    assert infer_source_type(Path("docs/plans/2026/migration.md")) == "plan"
+    # Path("docs/plans/").as_posix() yields "docs/plans" which doesn't start with "docs/plans/"
+    assert infer_source_type(Path("docs/plans/index.md")) == "plan"
+
+
+def test_infer_source_type_prefix_and_suffix() -> None:
+    assert infer_source_type(Path("src/bioetl/test.py")) == "code"
+    assert infer_source_type(Path("tests/test_foo.py")) == "test"
+
+
+def test_infer_source_type_prefix_wrong_suffix() -> None:
+    assert infer_source_type(Path("src/bioetl/data.json")) == "doc"
+    assert infer_source_type(Path("tests/fixture.json")) == "doc"
+
+
+def test_infer_source_type_fallback() -> None:
+    assert infer_source_type(Path("docs/00-project/overview.md")) == "doc"
+    assert infer_source_type(Path("src/unknown/file.txt")) == "doc"
+    assert infer_source_type(Path("README.md")) == "doc"
+
+
+def test_infer_source_type_priority() -> None:
+    # memory rule is before code rule. src/memory/*.py is "memory" not "code"
+    assert infer_source_type(Path("src/memory/app.py")) == "memory"
     assert (
         infer_domain(Path("docs/02-architecture/decisions/ADR-043-example.md"))
         == "architecture"
@@ -426,9 +460,7 @@ def test_write_rag_manifests_retries_when_source_changes_during_build(
     catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
 
     assert build_calls == 2
-    assert catalog["sources"][0]["content_hash"] == rag_indexing.content_hash(
-        "# Overview\nAfter\n"
-    )
+    assert catalog["sources"][0]["content_hash"] == content_hash("# Overview\nAfter\n")
 
 
 def test_source_reconciliation_rebuilds_only_changed_paths(
@@ -761,7 +793,7 @@ def test_write_rag_manifests_restores_previous_pair_when_publish_fails(
     chunks_path = output_dir / "chunks.jsonl"
     catalog_path.write_text('{"old":"catalog"}\n', encoding="utf-8")
     chunks_path.write_text('{"old":"chunks"}\n', encoding="utf-8")
-    original_replace = rag_indexing.os.replace
+    original_replace = os.replace
 
     def _fail_new_chunks_publish(source: Path, target: Path) -> None:
         source_path = Path(source)
@@ -774,7 +806,7 @@ def test_write_rag_manifests_restores_previous_pair_when_publish_fails(
             raise OSError("simulated second-file publication failure")
         original_replace(source, target)
 
-    monkeypatch.setattr(rag_indexing.os, "replace", _fail_new_chunks_publish)
+    monkeypatch.setattr("memory.rag.indexing.os.replace", _fail_new_chunks_publish)
 
     with pytest.raises(OSError, match="second-file publication failure"):
         write_rag_manifests(tmp_path, output_dir)
