@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date
-from typing import Literal
+from typing import Literal, TypedDict
 
 from bioetl.domain.types import RunType
 
@@ -87,6 +87,9 @@ class RuntimeConfig:
     # When True, Medallion config violations fail the pipeline
     # When False, violations are logged as warnings
     strict_validation: bool = False
+
+    # Startup policy is independent of postrun publication failure handling.
+    strict_preflight: bool = True
 
     # Gold layer schema validation (strict mode)
     # When True, pipelines fail if Gold schema is not provided
@@ -203,3 +206,22 @@ class RuntimeConfig:
         if self.lock_ttl is None:
             return self.heartbeat_interval * 3
         return self.lock_ttl
+
+
+@dataclass(frozen=True, slots=True)
+class PreflightRuntimeSettings:
+    """Resolved infrastructure health and Medallion escalation policy."""
+
+    health_check_mode: Literal["strict", "probe"] = "strict"
+    strict_preflight: bool = True
+
+
+class DebugExportOverrides(TypedDict, total=False):
+    """Typed compatibility bundle for the three existing debug-export keywords."""
+
+    debug_export_enabled: bool
+    debug_export_formats: tuple[str, ...]
+    debug_export_dir: str | None
+
+
+DEFAULT_PREFLIGHT_SETTINGS = PreflightRuntimeSettings()

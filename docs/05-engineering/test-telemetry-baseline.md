@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-10-12'
+  Last verified: '2026-10-13'
 
 ______________________________________________________________________
 
@@ -27,26 +27,43 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `refactor/composite-checkpoint-persistence-params-1493320248371917823`
-- Source commit: `6ba0e2803723369c2e4d48e4fdb320dcabaea63b`
-- Source run id: `local-bioetl-local-coverage-uiltn594`
+- Source branch: `fix/cf007-vcr-session-headers-20261013`
+- Source commit: `7db3bfe0867ef1057e87b1772ca83271caafe167`
+- Source run id: `local-coverage`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `3ec41186310457076a0292557c510cbb73d24e0b1fc6e3e68d263193d73dd823`
+- Source tree sha256: `df7eeef45abe70bca812b86cd1bb652d7d1b8afecbf9cbc2d3d20e2a5e6aca22`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-10-12T15:25:39.623439+00:00`
+- Refreshed at (UTC): `2026-10-13T11:39:16.320446+00:00`
 
 ## Branch-accurate provenance (#5729)
 
 - Continuous identity is `source_tree_sha256` over `tests/**/*.py`,
-  `pyproject.toml`, `configs/quality/test_matrix.yaml`, and
-  `.github/workflows/tests.yml`.
+  `pyproject.toml`, `configs/quality/test_matrix.yaml`,
+  `.github/workflows/tests.yml`, and the live JUnit producer
+  `scripts/engineering/ci/junit_duration_summary.py`.
+- `measurement_provenance.head` and `test_tree_sha256` retain the captured
+  run identity when the current audited test tree advances later.
 - Freshness uses live UTC (injectable via `BIOETL_TELEMETRY_REFERENCE_NOW`)
   and rejects future/stale `refreshed_at_utc` values.
 - `source_commit` must remain an ancestor of HEAD or have a reviewed squash
   bridge in `reports/test-telemetry/squash-provenance.json`. A bridge keeps
   the real captured source/run and requires equal PR/merge trees, source
   ancestry in the PR, merge ancestry in HEAD and unchanged runtime/test inputs.
+- Reviewed squash receipts retain hash-verified Git commit/tree objects
+  for offline validation when old PR commits are absent from a fresh clone.
+  If a shallow checkout's HEAD is newer than the squash merge, unshallow
+  it first so merge ancestry and the merged tree can be verified locally.
+- To produce a receipt for an existing local capture, run
+  `python -m scripts.engineering.ci.test_telemetry_provenance --measurement-repo-root
+  <original-worktree> --local-manifest <manifest.json> --pull-request <merged-PR>`.
+  The generator validates the complete 17-shard capture and reads the merged
+  PR mapping before writing the bridge. Keep the original capture available.
+- For a reviewed local coverage capture, run
+  `python -m scripts.engineering.ci.update_test_telemetry_baseline
+  --rebind-current-tree`, then the coupled `refresh-ci-drift-families`
+  update/check for test-gov, flaky-fingerprint, telemetry and evidence.
+  Non-local captures require regeneration from their source artifacts.
 - New captures use `verification_mode: live_github`: resolve the recorded
   PR's actual merge with read-only GitHub GETs after squash. Never stamp a
   future merge SHA. API failure, unmerged PRs, changed inputs and incomplete
@@ -76,42 +93,48 @@ trend evidence only.
 
 ## Duration Telemetry
 
-- Total collected test cases: `33500`
+- Total executed test cases: `33668`
+- Executed means observed non-skipped JUnit testcase records, not
+  collection count or distinct logical tests. Error records can describe
+  setup or collection failures rather than a test body run.
+- Only measured positive durations enter the slowest-test ranking.
+  Older CI timed-row totals are not directly comparable with this count.
 - Freshness guard: `<=45 days` via `refreshed_at_utc`
 
 ### Top Slowest Tests
 
 | Rank | Duration (s) | Test | Source |
 |---:|---:|---|---|
-| 1 | `82.672` | `tests.unit.composition.test_workflow_cohort_lineage::test_real_gold_expiry_descendant_and_partial_resume_keep_scoped_history[None]` | `unit-other.xml` |
-| 2 | `45.516` | `tests.unit.infrastructure.storage.test_workflow_foreign_key_reconciliation::test_gold_snapshot_pins_version_and_distinguishes_physical_rows` | `unit-infrastructure.xml` |
-| 3 | `24.477` | `tests.unit.infrastructure.quality.test_architecture_quality_scorecard::test_architecture_quality_scorecard_has_stable_weighted_shape` | `unit-infrastructure.xml` |
-| 4 | `22.47` | `tests.unit.infrastructure.export.test_export_adapters::test_write_pack_records_successful_xlsx_artifact` | `unit-infrastructure.xml` |
-| 5 | `20.221` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `unit-scripts-tooling-debt-governance.xml` |
-| 6 | `20.008` | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers::test_filter_options_deadline_does_not_send_late_success` | `unit-other.xml` |
-| 7 | `19.721` | `tests.unit.application.services.dq.test_checks_integrity_extended.TestCheckSCDIntegrityExtended::test_overlapping_validity_periods_warn` | `unit-application.xml` |
-| 8 | `16.902` | `tests.unit.infrastructure.adapters.test_csv_filter_reader.TestCsvFilterReaderLoadFilterIds::test_load_filter_ids_returns_filter_load_result` | `unit-infrastructure.xml` |
-| 9 | `15.17` | `tests.unit.application.test_main_module::test_main_block_executed_via_subprocess` | `unit-application.xml` |
-| 10 | `14.488` | `tests.unit.application.test_issue_10518_application_compwf_a::test_chained_key_filter_applied_and_failed` | `unit-application.xml` |
+| 1 | `20.012` | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers::test_filter_options_deadline_does_not_send_late_success` | `unit-other.xml` |
+| 2 | `19.0` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `unit-scripts-tooling-debt-governance.xml` |
+| 3 | `13.947` | `tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts` | `integration.xml` |
+| 4 | `11.035` | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path` | `integration.xml` |
+| 5 | `11.013` | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline::test_chembl_target_component_happy_path` | `integration.xml` |
+| 6 | `10.648` | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_source_fields` | `integration.xml` |
+| 7 | `10.587` | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline::test_chembl_cell_line_happy_path` | `integration.xml` |
+| 8 | `10.477` | `tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline::test_chembl_compound_record_happy_path` | `integration.xml` |
+| 9 | `10.222` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact` | `unit-scripts-tooling-debt-governance.xml` |
+| 10 | `10.01` | `tests.integration.composite.test_assay_snapshot_merge_replay::test_assay_replay_compares_physical_production_outputs` | `integration.xml` |
 
 ### Top Slow Zones
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.unit.composition.test_workflow_cohort_lineage` | 1 | 82.672 | 82.672 |
-| 2 | `tests.unit.infrastructure.storage.test_workflow_foreign_key_reconciliation` | 1 | 45.516 | 45.516 |
-| 3 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 3 | 39.51 | 20.221 |
-| 4 | `tests.unit.infrastructure.quality.test_architecture_quality_scorecard` | 1 | 24.477 | 24.477 |
-| 5 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 23.467 | 12.397 |
-| 6 | `tests.unit.infrastructure.export.test_export_adapters` | 1 | 22.47 | 22.47 |
-| 7 | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers` | 1 | 20.008 | 20.008 |
-| 8 | `tests.unit.application.services.dq.test_checks_integrity_extended.TestCheckSCDIntegrityExtended` | 1 | 19.721 | 19.721 |
-| 9 | `tests.unit.infrastructure.adapters.test_csv_filter_reader.TestCsvFilterReaderLoadFilterIds` | 1 | 16.902 | 16.902 |
-| 10 | `tests.unit.application.test_main_module` | 1 | 15.17 | 15.17 |
+| 1 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 3 | 39.086 | 19.0 |
+| 2 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 21.235 | 10.648 |
+| 3 | `tests.unit.interfaces.http.test_health_server_routing_pure_helpers` | 1 | 20.012 | 20.012 |
+| 4 | `tests.contract.test_normalization_cross_layer_contracts` | 3 | 17.284 | 5.908 |
+| 5 | `tests.integration.ci.test_track_d_fixture_control_plane_linkage` | 1 | 13.947 | 13.947 |
+| 6 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline` | 1 | 11.035 | 11.035 |
+| 7 | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline` | 1 | 11.013 | 11.013 |
+| 8 | `tests.integration.pipelines.test_chembl_compound_record.TestChemblCompoundRecordPipeline` | 1 | 10.477 | 10.477 |
+| 9 | `tests.integration.composite.test_assay_snapshot_merge_replay` | 1 | 10.01 | 10.01 |
+| 10 | `tests.unit.scripts.docs.passports.test_passport_projector` | 1 | 9.385 | 9.385 |
 
 ## Refresh Procedure
 
 1. Preferred path: download `reports/coverage/coverage.xml` and `reports/test-telemetry/slowest-tests.json` from a main-branch CI run.
 2. Fallback path: use resilient CI diagnostics artifacts (`junit_parallel.xml`, `junit_serial.xml`, and the coverage `TOTAL` line from `parallel.log`) when the direct coverage artifact expired.
 3. Run `python -m scripts.engineering.ci.update_test_telemetry_baseline --source-commit <sha> --source-run-id <run-id> ...` with either direct artifacts or fallback diagnostics inputs.
-4. Commit the updated baseline and branch-consumable telemetry summary layer together.
+4. A legacy JSON timed-row count requires raw `--junit` inputs for the complete recorded source inventory; the updater rejects a partial or legacy-only refresh before writing outputs.
+5. Commit the updated baseline and branch-consumable telemetry summary layer together.

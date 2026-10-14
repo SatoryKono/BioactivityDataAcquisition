@@ -29,6 +29,10 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
+from bioetl.domain.exceptions.gold_write import GoldWriteFailure
+from bioetl.domain.types.gold_contracts import GoldWriteCategory
+
 from tests.helpers.synthetic_paths import synthetic_test_root
 from datetime import UTC, datetime
 from functools import cache
@@ -343,7 +347,7 @@ class TestGoldWriterPipelineHelpers:
                 "bioetl.infrastructure.storage.gold.writer_implementation.GOLD_WRITE_DURATION_SECONDS"
             ) as duration,
         ):
-            with pytest.raises(ValueError, match="schema validation failed"):
+            with precommit_error("schema validation failed"):
                 await writer.write_gold(
                     table_name="chembl.activity",
                     records=valid_records,
@@ -378,37 +382,40 @@ class TestGoldWriterValidation:
 
     async def test_write_gold_empty_records_raises(self, gold_writer, strict_schema):
         """Test write_gold raises ValueError for empty records."""
-        with pytest.raises(ValueError, match="No records to write"):
+        with precommit_error("No records to write") as found:
             await gold_writer.write_gold(
                 table_name="test.table",
                 records=[],
                 schema=strict_schema,
                 mode="overwrite",
             )
+        assert found.value.receipt.committed_targets == ()
 
     async def test_write_gold_non_strict_schema_raises(
         self, gold_writer, non_strict_schema, valid_records
     ):
         """Test write_gold raises ValueError for non-strict schema."""
-        with pytest.raises(ValueError, match="strict=True"):
+        with precommit_error("strict=True") as found:
             await gold_writer.write_gold(
                 table_name="test.table",
                 records=valid_records,
                 schema=non_strict_schema,
                 mode="overwrite",
             )
+        assert found.value.receipt.committed_targets == ()
 
     async def test_write_gold_invalid_mode_raises(
         self, gold_writer, valid_records, strict_schema
     ):
         """Test write_gold raises ValueError for invalid mode."""
-        with pytest.raises(ValueError, match="Invalid Gold write mode"):
+        with precommit_error("Invalid Gold write mode") as found:
             await gold_writer.write_gold(
                 table_name="test.table",
                 records=valid_records,
                 schema=strict_schema,
                 mode="invalid",
             )
+        assert found.value.receipt.committed_targets == ()
 
     async def test_prepare_write_gold_returns_named_context(
         self, gold_writer, valid_records, strict_schema
@@ -476,20 +483,21 @@ class TestGoldWriterValidation:
         self, gold_writer, valid_records, strict_schema
     ):
         """Test write_gold raises ValueError for SCD2 mode without config."""
-        with pytest.raises(ValueError, match="scd_config required"):
+        with precommit_error("scd_config required") as found:
             await gold_writer.write_gold(
                 table_name="test.table",
                 records=valid_records,
                 schema=strict_schema,
                 mode="scd2",
             )
+        assert found.value.receipt.committed_targets == ()
 
     async def test_write_gold_scd2_without_ingestion_ts_raises(
         self, gold_writer, valid_records, strict_schema
     ):
         """Test write_gold raises ValueError for SCD2 mode without ingestion_ts."""
         scd_config = {"business_key": "entity_id"}
-        with pytest.raises(ValueError, match="ingestion_ts required"):
+        with precommit_error("ingestion_ts required") as found:
             await gold_writer.write_gold(
                 table_name="test.table",
                 records=valid_records,
@@ -497,6 +505,7 @@ class TestGoldWriterValidation:
                 mode="scd2",
                 scd_config=scd_config,
             )
+        assert found.value.receipt.committed_targets == ()
 
 
 @pytest.mark.unit
@@ -617,7 +626,7 @@ class TestGoldWriterDualWrite:
         )
         writer._post_write_gold = AsyncMock()  # type: ignore[method-assign]
 
-        with pytest.raises(RuntimeError, match="boom"):
+        with pytest.raises(GoldWriteFailure) as outcome:
             await writer.write_gold(
                 table_name="test.table",
                 records=[
@@ -898,20 +907,19 @@ class TestGoldWriterSchemaValidation:
             {"entity_id": "CHEMBL123"},  # Missing 'value'
         ]
 
-        with pytest.raises(
-            GoldContractValidationError,
-            match="Schema validation failed",
-        ) as exc_info:
+        with pytest.raises(GoldWriteFailure) as exc_info:
             await gold_writer.write_gold(
                 table_name="test.table",
                 records=invalid_records,
                 schema=strict_schema,
                 mode="overwrite",
             )
-        assert (
-            exc_info.value.reject_reason.reason_code == "gold_contract_required_failure"
-        )
-        assert exc_info.value.reject_reason.rule_id == "gold.contract.required_fields"
+        original = exc_info.value.__cause__
+        assert isinstance(original, GoldContractValidationError)
+        assert "Schema validation failed" in str(original)
+        assert exc_info.value.receipt.category == GoldWriteCategory.NOT_COMMITTED
+        assert original.reject_reason.reason_code == "gold_contract_required_failure"
+        assert original.reject_reason.rule_id == "gold.contract.required_fields"
 
 
 @pytest.mark.unit
@@ -1186,21 +1194,22 @@ class TestGoldWriterDeterministicBackoff:
             None,  # Success on third attempt
         ]
 
-        await gold_writer.write_gold(
-            table_name="test.table",
-            records=valid_records,
-            schema=strict_schema,
-            mode="overwrite",
-        )
+        with pytest.raises(GoldWriteFailure) as outcome:
+            await gold_writer.write_gold(
+                table_name="test.table",
+                records=valid_records,
+                schema=strict_schema,
+                mode="overwrite",
+            )
 
         # Verify deterministic backoff delays were used
-        assert mock_sleep.call_count == 2
-        sleep_calls = [call[0][0] for call in mock_sleep.call_args_list]
+        assert mock_sleep.call_count == 0
+        assert outcome.value.receipt.category == GoldWriteCategory.UNKNOWN
+        assert mock_write_deltalake.call_count == 1
+        assert mock_sleep.call_args_list == []
 
         # Attempt 0: 0.5 * (2**0) + 0.05 = 0.55
-        assert sleep_calls[0] == pytest.approx(0.55)
         # Attempt 1: 0.5 * (2**1) + 0.05 = 1.05
-        assert sleep_calls[1] == pytest.approx(1.05)
 
     @patch("bioetl.infrastructure.storage.gold.io_delta_runtime.asyncio.sleep")
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
@@ -1236,20 +1245,21 @@ class TestGoldWriterDeterministicBackoff:
             "current_flag_col": "is_current",
         }
 
-        await gold_writer.write_gold(
-            table_name="test.table",
-            records=valid_records,
-            schema=strict_schema,
-            mode="scd2",
-            scd_config=scd_config,
-            ingestion_ts=fixed_ingestion_ts,
-        )
+        with pytest.raises(GoldWriteFailure) as outcome:
+            await gold_writer.write_gold(
+                table_name="test.table",
+                records=valid_records,
+                schema=strict_schema,
+                mode="scd2",
+                scd_config=scd_config,
+                ingestion_ts=fixed_ingestion_ts,
+            )
 
         # Verify deterministic backoff delays
-        assert mock_sleep.call_count == 2
-        sleep_calls = [call[0][0] for call in mock_sleep.call_args_list]
-        assert sleep_calls[0] == pytest.approx(0.55)
-        assert sleep_calls[1] == pytest.approx(1.05)
+        assert mock_sleep.call_count == 0
+        assert outcome.value.receipt.category == GoldWriteCategory.UNKNOWN
+        assert mock_write_deltalake.call_count == 1
+        assert mock_sleep.call_args_list == []
 
 
 @pytest.mark.unit
@@ -1668,3 +1678,13 @@ class TestGoldWriterMergedValidation:
         outcomes_metric.labels.return_value.inc.assert_called_once()
         duration_metric.labels.assert_called_once_with(**terminal_labels)
         duration_metric.labels.return_value.observe.assert_called_once()
+
+
+@contextmanager
+def precommit_error(message):
+    """Assert the new receipt without weakening original validation checks."""
+    with pytest.raises(GoldWriteFailure) as found:
+        yield found
+    assert found.value.receipt.category == GoldWriteCategory.NOT_COMMITTED
+    assert isinstance(found.value.__cause__, ValueError)
+    assert message in str(found.value.__cause__)

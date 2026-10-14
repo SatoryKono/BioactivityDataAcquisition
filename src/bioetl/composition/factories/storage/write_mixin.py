@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from bioetl.domain.types.gold_contracts import GoldWriteReceipt
+
 from typing import TYPE_CHECKING, Literal, Any, cast
 
 from bioetl.domain.ports import SilverWriteRequest, coerce_silver_write_request
@@ -91,7 +93,7 @@ class StorageBundleWriteMixin:
             records: A list of dictionaries, where each dictionary is a transformed record.
             primary_keys: A list of column names that form the primary key.
             schema: The PyArrow schema definition for the records (ArrowSchema alias).
-            mode: The write mode (e.g., 'merge', 'append', 'delete').
+            mode: The write mode (e.g., 'merge', 'append').
             partition_cols: Optional list of columns to partition by.
             on_schema_mismatch: How to handle schema drift.
             column_order: Optional explicit column order to apply.
@@ -133,7 +135,7 @@ class StorageBundleWriteMixin:
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
         silver_refs: list[SilverWriteResult] | None = None,
-    ) -> None:
+    ) -> GoldWriteReceipt:
         """Write aggregated records to Gold layer.
 
         Args:
@@ -154,7 +156,7 @@ class StorageBundleWriteMixin:
             Lock validation is performed at Application layer (BatchWriter)
             per RULES.md §4.6 Safety Guard.
         """
-        await self.gold.write_gold(
+        return await self.gold.write_gold(
             table_name=table_name,
             records=records,
             schema=schema,
