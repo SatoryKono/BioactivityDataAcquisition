@@ -34,6 +34,7 @@ See ADR-026 for architectural context.
 from __future__ import annotations
 
 import asyncio
+import warnings
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
@@ -41,7 +42,6 @@ from unittest.mock import AsyncMock, MagicMock
 import polars as pl
 import pyarrow as pa
 import pytest
-
 from bioetl.application.composite.dependency_coordinator import (
     DependencyCoordinatorCollaborators,
     DependencyCoordinatorService,
@@ -127,7 +127,7 @@ class TestDependencyCoordinatorInitialization:
         progress_service = DependencyProgressService(mock_logger)
         result_service = DependencyResultService(mock_logger)
 
-        with pytest.warns(DeprecationWarning, match="deprecated"):
+        with pytest.warns(DeprecationWarning, match="deprecated") as recorded:
             coordinator = DependencyCoordinatorService(
                 logger=mock_logger,
                 seed_key_resolver=seed_key_resolver,
@@ -137,10 +137,35 @@ class TestDependencyCoordinatorInitialization:
                 clock=FixedClock(datetime(2026, 4, 28, 12, 0, tzinfo=UTC)),
             )
 
+        warning_path = recorded[0].filename.replace("\\", "/")
+        assert warning_path.endswith(
+            "tests/unit/application/composite/test_dependency_coordinator.py"
+        )
         assert coordinator._seed_key_resolver is seed_key_resolver
         assert coordinator._chained_key_resolver is chained_key_resolver
         assert coordinator._progress_service is progress_service
         assert coordinator._result_service is result_service
+
+    def test_collaborators_bundle_does_not_warn(self, mock_logger: LoggerPort) -> None:
+        """The current collaborators argument must not emit the legacy warning."""
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", DeprecationWarning)
+            coordinator = _make_coordinator(mock_logger)
+
+        assert isinstance(coordinator._progress_service, DependencyProgressService)
+
+    def test_coordinator_requires_collaborators_or_complete_legacy_arguments(
+        self,
+        mock_logger: LoggerPort,
+    ) -> None:
+        """Missing collaborator inputs fail before any dependency is executed."""
+        with pytest.raises(TypeError, match="must be provided"):
+            DependencyCoordinatorService(logger=mock_logger)
+        with pytest.raises(TypeError, match="must be provided"):
+            DependencyCoordinatorService(
+                logger=mock_logger,
+                seed_key_resolver=create_seed_key_resolver(mock_logger),
+            )
 
 
 @pytest.mark.parametrize(
