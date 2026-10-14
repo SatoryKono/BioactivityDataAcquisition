@@ -63,7 +63,10 @@ async def iter_query_results(
             per_page=per_page,
         )
         payload = await query_executor.request_works_payload(params)
-        for work in response_mapper.extract_results(payload):
+        results = response_mapper.extract_results(payload)
+        if not results:
+            return
+        for work in results:
             yield work
             fetched += 1
             if limit is not None and fetched >= limit:

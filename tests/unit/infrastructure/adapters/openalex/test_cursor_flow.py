@@ -336,3 +336,16 @@ async def test_iter_query_results_nonpositive_limit_does_not_request_page(limit)
     assert rows == []
     flow.query_executor.request_works_payload.assert_not_awaited()
     flow.logger.warning.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_iter_query_results_stops_on_empty_page_with_next_cursor() -> None:
+    """An empty provider page is terminal even when metadata has a cursor."""
+    flow = _build_flow()
+    flow.query_executor.request_works_payload.return_value = {"results": []}
+    flow.response_mapper.extract_results.return_value = []
+    flow.response_mapper.extract_next_cursor.return_value = "cursor-2"
+    rows = await collect_async_iterator(flow.iter_query_results(query="q", limit=None))
+    assert rows == []
+    flow.query_executor.request_works_payload.assert_awaited_once()
+    flow.response_mapper.extract_next_cursor.assert_not_called()
