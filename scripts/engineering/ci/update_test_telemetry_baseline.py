@@ -370,6 +370,17 @@ def _portable_artifact_path(
         return str(path)
 
 
+def _retain_recorded_execution_context(
+    previous_summary: TelemetryPayload, derived_summary: TelemetryPayload
+) -> None:
+    """Keep capture context that cannot be derived from matching JUnit inputs."""
+    previous_context = previous_summary["execution_context"]
+    derived_context = derived_summary["execution_context"]
+    for key in ("worker_mode", "explicit_exclusions"):
+        if key in previous_context:
+            derived_context[key] = previous_context[key]
+
+
 def _validated_junit_override(
     slowest_summary: TelemetryPayload, junit_paths: list[Path]
 ) -> TelemetryPayload:
@@ -397,7 +408,29 @@ def _validated_junit_override(
             "JUnit inputs do not match the source inventory of the "
             "existing slowest-tests.json; refusing a partial refresh"
         )
+    # JUnit determines counts and durations, but it cannot reconstruct the
+    # capture's worker configuration or its declared out-of-scope lanes.
+    _retain_recorded_execution_context(slowest_summary, derived_summary)
     return derived_summary
+
+
+def _resolve_slowest_summary(
+    slowest_json_path: Path, junit_paths: list[Path], *, prefer_junit: bool
+) -> TelemetryPayload:
+    if prefer_junit:
+        if not junit_paths:
+            raise ValueError("prefer_junit requires JUnit telemetry inputs")
+        # A new-run override must not inherit the prior JSON's inventory or context.
+        return _derive_slowest_summary_from_junit_paths(junit_paths)
+
+    slowest_summary = _read_slowest_summary(slowest_json_path)
+    if junit_paths and (
+        slowest_summary["total_cases"] is None
+        or slowest_summary["execution_context"].get("count_semantics")
+        == "legacy_positive_duration_rows"
+    ):
+        return _validated_junit_override(slowest_summary, junit_paths)
+    return slowest_summary
 
 
 def build_baseline_payload(
@@ -424,16 +457,9 @@ def build_baseline_payload(
     if resolved_coverage_percent is None:
         resolved_coverage_percent = _read_coverage_percent_from_log(coverage_log_path)
 
-    slowest_summary = _read_slowest_summary(slowest_json_path)
-    if prefer_junit or (
-        junit_paths
-        and (
-            slowest_summary["total_cases"] is None
-            or slowest_summary["execution_context"].get("count_semantics")
-            == "legacy_positive_duration_rows"
-        )
-    ):
-        slowest_summary = _validated_junit_override(slowest_summary, junit_paths)
+    slowest_summary = _resolve_slowest_summary(
+        slowest_json_path, junit_paths, prefer_junit=prefer_junit
+    )
     top_slowest = slowest_summary["top_slowest"]
     status = (
         "captured"
