@@ -17,7 +17,6 @@ their VCR cassettes under tests/fixtures/vcr/chembl/.
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
@@ -25,6 +24,8 @@ from unittest.mock import MagicMock
 
 import pytest
 import httpx
+
+from tests.helpers.vcr_config import build_base_vcr_config
 
 # VCR cassette directory for ChEMBL adapter tests
 CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "chembl"
@@ -106,12 +107,10 @@ class _ReplayChemblHTTPClient:
 @pytest.fixture(scope="module")
 def vcr_config() -> dict[str, Any]:
     """Configure VCR for ChEMBL adapter tests."""
-    return {
-        "cassette_library_dir": str(CASSETTE_DIR),
-        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
-        "match_on": ["method", "scheme", "host", "port", "path", "query"],
-        "decode_compressed_response": True,
-    }
+    return build_base_vcr_config(
+        cassette_library_dir=CASSETTE_DIR,
+        decode_compressed_response=True,
+    )
 
 
 @pytest.mark.integration

@@ -138,18 +138,35 @@ def _candidate_source_paths(
     base: Path,
 ) -> list[Path]:
     suffixes = SOURCE_SUFFIXES.get(source_id, MARKDOWN_SUFFIXES)
+    resolved_root = root.resolve()
+    git_paths = _git_source_paths(root=root, base=base)
+    if git_paths is not None:
+        return _filter_git_source_paths(root, resolved_root, git_paths, suffixes)
+    return _fallback_source_paths(root, resolved_root, base, suffixes)
+
+
+def _filter_git_source_paths(
+    root: Path, resolved_root: Path, paths: list[Path], suffixes: set[str]
+) -> list[Path]:
+    return [
+        rel_path
+        for rel_path in paths
+        if rel_path.suffix.lower() in suffixes
+        and _safe_source_path(root / rel_path, resolved_root)
+        and (root / rel_path).is_file()
+    ]
+
+
+def _fallback_source_paths(
+    root: Path, resolved_root: Path, base: Path, suffixes: set[str]
+) -> list[Path]:
     source_dir = root / base
-    tracked_paths = _git_tracked_source_paths(root=root, base=base)
-    if tracked_paths:
-        return [
-            rel_path
-            for rel_path in tracked_paths
-            if Path(rel_path).suffix.lower() in suffixes and (root / rel_path).is_file()
-        ]
-    if not source_dir.exists():
+    if not source_dir.exists() or source_dir.is_symlink():
         return []
     if not source_dir.is_dir():
-        if source_dir.suffix.lower() in suffixes:
+        if source_dir.suffix.lower() in suffixes and _safe_source_path(
+            source_dir, resolved_root
+        ):
             return [base]
         return []
     candidates: list[Path] = []
@@ -160,17 +177,37 @@ def _candidate_source_paths(
         for filename in sorted(filenames):
             if Path(filename).suffix.lower() not in suffixes:
                 continue
-            candidates.append(base / rel_dir / filename)
+            candidate = base / rel_dir / filename
+            if _safe_source_path(root / candidate, resolved_root):
+                candidates.append(candidate)
     return candidates
 
 
-def _git_tracked_source_paths(*, root: Path, base: Path) -> list[Path]:
+def _safe_source_path(path: Path, resolved_root: Path) -> bool:
+    """Keep generated RAG sources inside the repository, without symlinks."""
+    try:
+        return not path.is_symlink() and path.resolve(strict=True).is_relative_to(
+            resolved_root
+        )
+    except (OSError, RuntimeError):
+        return False
+
+
+def _git_source_paths(*, root: Path, base: Path) -> list[Path] | None:
     git_dir = root / ".git"
     if not git_dir.exists():
-        return []
+        return None
     try:
         result = subprocess.run(
-            ["git", "ls-files", "--", base.as_posix()],
+            [
+                "git",
+                "ls-files",
+                "--cached",
+                "--others",
+                "--exclude-standard",
+                "--",
+                base.as_posix(),
+            ],
             cwd=root,
             check=True,
             capture_output=True,
@@ -179,8 +216,10 @@ def _git_tracked_source_paths(*, root: Path, base: Path) -> list[Path]:
             errors="replace",
         )
     except (OSError, subprocess.CalledProcessError):
-        return []
-    return [Path(line) for line in result.stdout.splitlines() if line.strip()]
+        return None
+    return [
+        Path(line) for line in sorted(set(result.stdout.splitlines())) if line.strip()
+    ]
 
 
 def _should_include_source(
@@ -212,6 +251,7 @@ def _workflow_focus_score(
     source_id: str,
     rel_path: str,
     focus_tokens: tuple[str, ...],
+    content_scores: dict[str, int],
     priority_index: dict[str, int],
 ) -> tuple[int, int, str]:
     lowered_path = rel_path.lower()
@@ -220,7 +260,80 @@ def _workflow_focus_score(
         1 if any(f"/{token}" in lowered_path for token in focus_tokens) else 0
     )
     source_priority = priority_index.get(source_id, len(priority_index))
-    return (-(token_hits + direct_bonus), source_priority, rel_path)
+    content_bonus = 3 * content_scores.get(rel_path, 0)
+    return (-(token_hits + direct_bonus + content_bonus), source_priority, rel_path)
+
+
+def _symbol_definition_bonus(
+    content: str, exact_query: str, focus_tokens: tuple[str, ...]
+) -> int:
+    if len(focus_tokens) != 1 or not exact_query.isidentifier():
+        return 0
+    definition = rf"(?m)^\s*(?:class|(?:async\s+)?def)\s+{re.escape(exact_query)}\b"
+    return 20 if re.search(definition, content) else 0
+
+
+def _content_focus_scores(
+    root: Path,
+    entries: list[tuple[str, Path]],
+    focus_tokens: tuple[str, ...],
+    selected_ids: tuple[str, ...],
+    focus_query: str | None,
+) -> dict[str, int]:
+    """Score eligible content by matched query terms before the source cap."""
+    eligible = {path.as_posix() for _, path in entries}
+    if not focus_tokens:
+        return {}
+    candidates = eligible
+    if (root / ".git").exists():
+        specs = tuple(
+            dict.fromkeys(
+                base.as_posix()
+                for _, base in _load_source_specs(selected_ids=selected_ids)
+            )
+        )
+        try:
+            result = subprocess.run(
+                [
+                    "git",
+                    "grep",
+                    "--untracked",
+                    "-i",
+                    "-l",
+                    "-F",
+                    *(arg for token in focus_tokens for arg in ("-e", token)),
+                    "--",
+                    *specs,
+                ],
+                cwd=root,
+                check=False,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+            )
+            if result.returncode in {0, 1}:
+                candidates = set(result.stdout.splitlines()) & eligible
+        except OSError:
+            pass
+    scores: dict[str, int] = {}
+    exact_query = (focus_query or "").strip().lower()
+    for rel_path in candidates:
+        try:
+            content = (
+                (root / rel_path).read_text(encoding="utf-8", errors="replace").lower()
+            )
+        except OSError:
+            continue
+        matched_terms = sum(token in content for token in focus_tokens)
+        if matched_terms:
+            scores[rel_path] = matched_terms + (
+                len(focus_tokens) + 1 if exact_query in content else 0
+            )
+            scores[rel_path] += _symbol_definition_bonus(
+                content, exact_query, focus_tokens
+            )
+    return scores
 
 
 def iter_rag_sources(
@@ -258,12 +371,16 @@ def iter_rag_sources(
         source_id: index for index, source_id in enumerate(priority_order)
     }
     if focus_tokens:
+        content_scores = _content_focus_scores(
+            root, entries, focus_tokens, selected_ids, workflow_focus_query
+        )
         ranked_entries = sorted(
             entries,
             key=lambda item: _workflow_focus_score(
                 source_id=item[0],
                 rel_path=item[1].as_posix(),
                 focus_tokens=focus_tokens,
+                content_scores=content_scores,
                 priority_index=priority_index,
             ),
         )

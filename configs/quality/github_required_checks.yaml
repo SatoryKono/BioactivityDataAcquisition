@@ -7,24 +7,24 @@ version: 3
 aggregator: pr-gate-complete
 coordinator_workflow: .github/workflows/pr-required.yml
 deployment:
-  provider: circleci
-  config_path: .circleci/config.yml
-  workflow: pr-gate
-  github_status_transport: commit_status
-  github_app_binding: unavailable
-  required_context: 'ci/circleci: pr-gate-complete'
-  root_hygiene_context: 'ci/circleci: root-hygiene'
+  provider: github_actions
+  config_path: .github/workflows/pr-required.yml
+  workflow: PR Gate Complete
+  github_status_transport: check_run
+  github_app_binding: github_actions
+  required_context: pr-gate-complete
+  root_hygiene_context: Fast governance
   legacy_owner_retirement_issue: 11930
 policy:
   allow_skipped_as_success: false
   allow_cancelled_as_success: false
   require_sha_binding: true
   not_applicable_requires_reason: true
-  github_ruleset_13643213_enforcement: active
-  github_ruleset_15730586_enforcement: active
+  github_ruleset_13643213_enforcement: disabled
+  github_ruleset_15730586_enforcement: disabled
   catalog_check_status: enforced
-  enforcement_provider: circleci
-  enforcement_verified_date: "2026-10-05"
+  enforcement_provider: github_actions
+  enforcement_verified_date: "2026-10-09"
 canonical_checks:
   - id: ruff
     owner_workflow: .github/workflows/import-linter.yml

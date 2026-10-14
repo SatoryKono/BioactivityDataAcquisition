@@ -139,16 +139,15 @@ interactions:
       date:
       - Tue, 06 Oct 2026 04:16:07 GMT
       ncbi-phid:
-      - 1D32099356568F35000047ED0D2AF5D5.1.1.m_1
+      - REDACTED
       ncbi-sid:
-      - BAC6A8A6E15A53A4_BA6DSID
+      - REDACTED
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Finatra
       set-cookie:
-      - ncbi_sid=BAC6A8A6E15A53A4_BA6DSID; domain=.nih.gov; path=/; expires=Wed, 06
-        Oct 2027 04:16:08 GMT
+      - REDACTED
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:
@@ -176,7 +175,7 @@ interactions:
       connection:
       - keep-alive
       cookie:
-      - ncbi_sid=BAC6A8A6E15A53A4_BA6DSID
+      - REDACTED
       host:
       - eutils.ncbi.nlm.nih.gov
       user-agent:
@@ -206,16 +205,15 @@ interactions:
       date:
       - Tue, 06 Oct 2026 04:16:08 GMT
       ncbi-phid:
-      - 1D32099356568F35000053ED0DE4411F.1.1.m_1
+      - REDACTED
       ncbi-sid:
-      - BAC6A8A6E15A53A4_BA6DSID
+      - REDACTED
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Finatra
       set-cookie:
-      - ncbi_sid=BAC6A8A6E15A53A4_BA6DSID; domain=.nih.gov; path=/; expires=Wed, 06
-        Oct 2027 04:16:08 GMT
+      - REDACTED
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:
@@ -243,7 +241,7 @@ interactions:
       connection:
       - keep-alive
       cookie:
-      - ncbi_sid=BAC6A8A6E15A53A4_BA6DSID
+      - REDACTED
       host:
       - eutils.ncbi.nlm.nih.gov
       user-agent:
@@ -1555,16 +1553,15 @@ interactions:
       date:
       - Tue, 06 Oct 2026 04:16:08 GMT
       ncbi-phid:
-      - 1D34B17B56A0D05500005604A7677497.1.1.m_6
+      - REDACTED
       ncbi-sid:
-      - BAC6A8A6E15A53A4_BA6DSID
+      - REDACTED
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Finatra
       set-cookie:
-      - ncbi_sid=BAC6A8A6E15A53A4_BA6DSID; domain=.nih.gov; path=/; expires=Wed, 06
-        Oct 2027 04:16:09 GMT
+      - REDACTED
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:

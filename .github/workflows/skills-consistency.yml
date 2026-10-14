@@ -7,6 +7,30 @@ permissions:
   contents: read
 
 on:
+  push:
+    paths:
+      - ".codex/config.toml"
+      - ".codex/agents/**"
+      - ".codex/skills/**"
+      - "scripts/ai/codex/doctor.py"
+      - "scripts/ai/codex/setup_mcp.py"
+      - ".junie/agents/**"
+      - ".junie/skills/**"
+      - "scripts/ai/junie/check_junie_mirror.sh"
+      - "scripts/ai/junie/check_junie_mirror.py"
+      - "scripts/ai/junie/junie-mirror-contract.json"
+  pull_request:
+    paths:
+      - ".codex/config.toml"
+      - ".codex/agents/**"
+      - ".codex/skills/**"
+      - "scripts/ai/codex/doctor.py"
+      - "scripts/ai/codex/setup_mcp.py"
+      - ".junie/agents/**"
+      - ".junie/skills/**"
+      - "scripts/ai/junie/check_junie_mirror.sh"
+      - "scripts/ai/junie/check_junie_mirror.py"
+      - "scripts/ai/junie/junie-mirror-contract.json"
   workflow_dispatch:
     inputs:
       approve_runtime_sync:
