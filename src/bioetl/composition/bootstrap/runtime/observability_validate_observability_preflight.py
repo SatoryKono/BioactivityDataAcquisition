@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Observability preflight validation bootstrap."""
+
+from __future__ import annotations
 
 from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
 

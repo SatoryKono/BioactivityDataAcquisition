@@ -1,3 +1,5 @@
+# Сводка evidence: project-package-topology
+
 Source-only refresh (2026-10-08, CF closeout): `source_tree_sha256=20f951f3aa0d2f535a757dca96af0b213f675f0fd74873f80d8c3feded56293c`; `source_module_count=2557`. This stamp is derived from the canonical module inventory and confirms source freshness only; it is not a new topology audit or coverage measurement.
 
 Source-only refresh (2026-10-07, P02 F1-F7): `source_tree_sha256=7e52b9a05c47ce9c79b095f9672fc1615fa4be68d70d36acb74c18012964d4c6`; `source_module_count=2552`. This current binding is derived from the canonical module inventory. It covers event/result snapshots, prepared transitions and explicit canonical byte profiles; it is not a new topology audit or a coverage measurement. The previous bindings and measurements below are historical and superseded for source freshness.
@@ -30,7 +32,6 @@ Source-only refresh (2026-10-05, scoped replay mapping): source_tree_sha256 `f8b
 
 Source-only refresh (2026-10-05, direct owner imports): source_tree_sha256 `0d662d51438a2eee9bad3b02099e5a4d94c2938948ff83093ca6c968d50c55f7`. The three mapping codec imports now address their module owner directly; root-facade importers remain zero. This is a source binding update, not a new coverage measurement.
 
-# Сводка evidence: project-package-topology
 
 Source-only refresh (2026-10-05, RF-023): sealed target mapping codecs now use the existing infrastructure config loader. Runtime cross-layer group edges are 330, within the unchanged 330 budget. This source binding is not a new coverage measurement or a complete topology re-audit; historical evidence below is preserved.
 
