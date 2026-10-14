@@ -77,6 +77,7 @@ def _make_pipeline() -> BasePipeline:
     pipeline.config.dq = None
     pipeline.config.table = MagicMock()
     pipeline.config.table.primary_keys = ["pk"]
+    pipeline.config.table.partition_cols = ("target_type",)
     pipeline.config.effective_silver_table = "silver_table"
     pipeline.config.effective_gold_table = "gold_table"
     pipeline.config.table.silver_write_mode = "merge"
@@ -126,6 +127,7 @@ def test_create_record_processor_from_pipeline_projects_pipeline_fields() -> Non
     assert request.pipeline_name == "chembl_activity"
     assert request.provider == "chembl"
     assert request.entity_type == "activity"
+    assert request.partition_cols == ("target_type",)
     assert request.column_groups == ("system", "business")
     assert request.scd_config == {"type": 2}
     assert request.content_hash_policy_authoritative is True

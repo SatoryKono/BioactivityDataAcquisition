@@ -1101,8 +1101,12 @@ class TestValidatePreflight:
             gold_format="delta",
         )
 
-        # Should not raise, should return report
+        # Advisory configuration errors must not suppress real health probes.
         assert report.medallion_policy_valid is False
+        assert report.config_errors
+        assert report.health_report.results
+        mock_services.storage.health_check.assert_awaited_once()
+        mock_services.data_source.health_check.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def test_validate_preflight_does_not_publish_service_local_metrics(
