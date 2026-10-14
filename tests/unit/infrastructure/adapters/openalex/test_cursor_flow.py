@@ -336,3 +336,33 @@ async def test_iter_query_results_nonpositive_limit_does_not_request_page(limit)
     assert rows == []
     flow.query_executor.request_works_payload.assert_not_awaited()
     flow.logger.warning.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_iter_query_results_rejects_empty_page_with_next_cursor() -> None:
+    """A continuation after an empty page must not silently truncate the scan."""
+    from bioetl.infrastructure.adapters.http.pagination import PaginationTruncatedError
+
+    flow = _build_flow()
+    flow.query_executor.request_works_payload.return_value = {"results": []}
+    flow.response_mapper.extract_results.return_value = []
+    flow.response_mapper.extract_next_cursor.return_value = "cursor-2"
+    with pytest.raises(PaginationTruncatedError) as caught:
+        await collect_async_iterator(flow.iter_query_results(query="q", limit=None))
+    assert caught.value.reason == "empty_page_with_cursor"
+    flow.query_executor.request_works_payload.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_iter_query_results_empty_page_without_cursor_completes() -> None:
+    """Verify iter query results empty page without cursor completes."""
+    flow = _build_flow()
+    flow.query_executor.request_works_payload.return_value = {"results": []}
+    flow.response_mapper.extract_results.return_value = []
+    flow.response_mapper.extract_next_cursor.return_value = None
+    assert (
+        await collect_async_iterator(flow.iter_query_results(query="q", limit=None))
+        == []
+    )
+    flow.query_executor.request_works_payload.assert_awaited_once()
+    flow.logger.warning.assert_not_called()
