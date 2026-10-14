@@ -581,6 +581,7 @@ async def test_missing_evidence_service_keeps_unknown_table_contract() -> None:
 
 @pytest.mark.asyncio
 async def test_filter_options_deadline_does_not_send_late_success(monkeypatch) -> None:
+    """Return a timeout instead of publishing a response after its deadline."""
     from functools import partial
 
     host = _RoutingHost()
@@ -588,6 +589,7 @@ async def test_filter_options_deadline_does_not_send_late_success(monkeypatch) -
     completed = asyncio.Event()
 
     async def slow_options(_host, _query):
+        """Delay the filter payload beyond the patched response deadline."""
         await release.wait()
         completed.set()
         return {"items": []}
