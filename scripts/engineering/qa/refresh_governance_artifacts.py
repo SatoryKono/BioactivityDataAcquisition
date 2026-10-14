@@ -38,6 +38,7 @@ ROOT = Path(__file__).resolve().parents[3]
 
 _TEST_GOVERNANCE_JSON = "reports/quality/test-governance-current.json"
 _FIXTURE_DUPLICATION_JSON = "reports/quality/test-fixture-asset-duplication.json"
+_MODULE_COVERAGE_JSON = "reports/quality/module-coverage-inventory.json"
 _QA_MODULE = "scripts.engineering.qa"
 _TEST_GOVERNANCE_MODULE = f"{_QA_MODULE}.report_test_governance_audit"
 
@@ -418,7 +419,7 @@ def _refresh_targeted_coverage_closeout() -> None:
     path = ROOT / "reports/quality/low-coverage-targeted-tests-6045.json"
     payload = json.loads(path.read_text(encoding="utf-8"))
     inventory = json.loads(
-        (ROOT / "reports/quality/module-coverage-inventory.json").read_text(
+        (ROOT / _MODULE_COVERAGE_JSON).read_text(
             encoding="utf-8"
         )
     )
@@ -461,7 +462,7 @@ def _refresh_application_core_closeout(*, check_only: bool) -> None:
     path = ROOT / "reports/quality/issue-5272-application-core-coverage-closeout.json"
     payload = json.loads(path.read_text(encoding="utf-8"))
     inventory = json.loads(
-        (ROOT / "reports/quality/module-coverage-inventory.json").read_text(
+        (ROOT / _MODULE_COVERAGE_JSON).read_text(
             encoding="utf-8"
         )
     )
@@ -517,7 +518,7 @@ def _refresh_application_core_closeout(*, check_only: bool) -> None:
     payload["debt_outcome"] = "current_inventory_regressed" if regressed else "improved"
     payload["current_binding_refresh"] = {
         "source_tree_sha256": inventory["source_tree_sha256"],
-        "evidence": "reports/quality/module-coverage-inventory.json",
+        "evidence": _MODULE_COVERAGE_JSON,
         "semantics": "Accepted inventory binding only; no new measurement or CI acceptance claimed.",
     }
     _write_text_atomically(path, json.dumps(payload, indent=2) + "\n")

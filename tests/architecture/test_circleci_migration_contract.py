@@ -48,7 +48,12 @@ def test_circleci_config_rejects_duplicate_nested_keys():
 
 
 def test_bronze_coverage_is_branch_scoped_and_uses_complete_canonical_groups():
-    workflow = _config()["workflows"]["bronze-cleanup-coverage"]
+    config = _config()
+    # The canonical tooling group runs subprocess-based Node contracts.
+    assert config["jobs"]["proof-coverage-shard"]["docker"] == [
+        {"image": "cimg/python:3.12-node"}
+    ]
+    workflow = config["workflows"]["bronze-cleanup-coverage"]
     conditions = workflow["when"]["and"]
     assert {
         "equal": ["fix/bronze-cleanup-fs001", "<< pipeline.git.branch >>"]
