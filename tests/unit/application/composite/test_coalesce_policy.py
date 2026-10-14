@@ -559,3 +559,42 @@ def test_coalesce_by_latest_timestamp_returns_unchanged_for_single_column() -> N
     df = pl.DataFrame({"seed.title": ["seed"]})
 
     assert coalesce_by_latest_timestamp(df, ordered_cols=["seed.title"]).equals(df)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("source_count", [3, 4])
+def test_small_group_null_seed_preserves_incompatible_enricher(
+    policy: CoalescePolicyService, source_count: int
+) -> None:
+    data = {
+        "chembl.publication.title": [None],
+        "crossref.publication.title": ["fallback"],
+        "openalex.publication.title": [[1]],
+    }
+    if source_count == 4:
+        data["pubmed.publication.title"] = [None]
+    result = policy.coalesce_first_non_null(
+        pl.DataFrame(data), enrichers=(), seed_pipeline="chembl_publication"
+    )
+    assert result["chembl.publication.title"].to_list() == ["fallback"]
+    assert result["openalex.publication.title"].to_list() == [[1]]
+    assert "crossref.publication.title" not in result.columns
+
+
+@pytest.mark.unit
+def test_prefer_seed_preserves_entity_specific_fields_for_mapping(
+    policy: CoalescePolicyService,
+) -> None:
+    df = pl.DataFrame(
+        {
+            "chembl.cell_line.efo_id": ["cell-efo"],
+            "chembl.tissue.efo_id": ["tissue-efo"],
+            "chembl.publication.title": [None],
+            "crossref.publication.title": ["paper"],
+        }
+    )
+    result = policy.coalesce_prefer_seed(df, (), seed_pipeline="chembl_assay")
+    assert result["chembl.cell_line.efo_id"].to_list() == ["cell-efo"]
+    assert result["chembl.tissue.efo_id"].to_list() == ["tissue-efo"]
+    assert result["chembl.publication.title"].to_list() == ["paper"]
+    assert "crossref.publication.title" not in result.columns

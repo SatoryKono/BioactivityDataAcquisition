@@ -78,13 +78,17 @@ def can_coalesce(
 
 def build_field_groups(
     df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
+    *,
+    entity_scoped: bool = False,
 ) -> dict[str, list[str]]:
-    """Group non-system columns by field name."""
+    """Group non-system columns, optionally retaining qualified entity identity."""
     field_groups: dict[str, list[str]] = {}
     for col in df.columns:
         if col.startswith("_"):
             continue
         field = extract_field_from_qualified(col)
+        if entity_scoped and len(col.split(".")) == 3:
+            field = col.split(".", 1)[1]
         field_groups.setdefault(field, []).append(col)
     return field_groups
 
@@ -109,14 +113,14 @@ def compatible_columns(
     df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
     ordered_cols: list[str],
 ) -> list[str]:
-    """Keep the leading column and all columns type-compatible with it."""
+    """Keep the leading column and mutually type-compatible candidates."""
     if not ordered_cols:
         return []
 
     base_col = ordered_cols[0]
     result = [base_col]
     for col in ordered_cols[1:]:
-        if can_coalesce(df, base_col, col):
+        if all(can_coalesce(df, selected, col) for selected in result):
             result.append(col)
     return result
 
