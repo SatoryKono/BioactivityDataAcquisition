@@ -143,6 +143,26 @@ class TestDependencyCoordinatorInitialization:
         assert coordinator._result_service is result_service
 
 
+@pytest.mark.parametrize(
+    "legacy_argument",
+    ["seed_key_resolver", "chained_key_resolver", "progress_service", "result_service"],
+)
+def test_coordinator_rejects_mixed_collaborator_arguments(mock_logger, legacy_argument):
+    """A supplied legacy dependency must never be silently ignored by the bundle."""
+    collaborators = DependencyCoordinatorCollaborators(
+        seed_key_resolver=create_seed_key_resolver(mock_logger),
+        chained_key_resolver=create_chained_key_resolver(mock_logger),
+        progress_service=DependencyProgressService(mock_logger),
+        result_service=DependencyResultService(mock_logger),
+    )
+    with pytest.raises(TypeError, match="Cannot combine"):
+        DependencyCoordinatorService(
+            logger=mock_logger,
+            collaborators=collaborators,
+            **{legacy_argument: MagicMock()},
+        )
+
+
 class TestGetEffectiveKeys:
     """Tests for _get_effective_keys method."""
 

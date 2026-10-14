@@ -106,6 +106,18 @@ class DependencyCoordinatorService:
         """
         self._logger = logger
         self._delta_reader = delta_reader
+        if collaborators is not None and any(
+            item is not None
+            for item in (
+                seed_key_resolver,
+                chained_key_resolver,
+                progress_service,
+                result_service,
+            )
+        ):
+            raise TypeError(
+                "Cannot combine 'collaborators' with legacy dependency arguments."
+            )
         if collaborators is None:
             if (
                 seed_key_resolver is None
