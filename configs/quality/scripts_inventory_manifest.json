@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-14T15:40:24.839109+00:00",
+  "generated_at": "2026-10-14T17:35:30.773035+00:00",
   "summary": {
     "total_scripts": 651,
     "status_counts": {
@@ -15194,7 +15194,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
@@ -15228,7 +15228,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_report_observability_metric_inventory_cli.py",
-          "line": 762,
+          "line": 764,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import observability_metric_inventory_cli as cli"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/test_report_observability_metric_inventory_cli.py",
+          "line": 816,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import observability_metric_inventory_cli as cli"
         }
