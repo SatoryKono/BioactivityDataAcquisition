@@ -51,7 +51,8 @@ def _append_declared_switches(parts: list[str], args: argparse.Namespace) -> Non
 def _append_declared_paths(parts: list[str], args: argparse.Namespace) -> None:
     if Path(args.allowlist) != Path(_DEFAULT_DRIFT_ALLOWLIST):
         parts.extend(["--allowlist", str(args.allowlist)])
-    parts.extend(["--repo-root", str(args.repo_root)])
+    if Path(args.repo_root) != Path.cwd():
+        parts.extend(["--repo-root", str(args.repo_root)])
     for attr, flag in _PROVENANCE_PATHS:
         value = getattr(args, attr)
         if value is not None:

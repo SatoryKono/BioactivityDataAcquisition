@@ -757,6 +757,60 @@ def test_pr_fallback_records_actual_cli_command(tmp_path, monkeypatch):
     assert "--fail-on-degraded-live-review" not in recorded
 
 
+def test_cwd_repo_root_is_omitted_from_source_command(tmp_path, monkeypatch):
+    """A cwd repo root must not be stored as an absolute --repo-root."""
+    import shlex
+
+    from scripts.engineering.qa import observability_metric_inventory_cli as cli
+
+    monkeypatch.setattr(cli, "collect_metric_inventory", lambda _: {})
+    monkeypatch.setattr(cli, "_metric_inventory_violations", lambda *a, **kw: {})
+    monkeypatch.setattr(
+        cli,
+        "_build_runtime_cardinality_review_summary",
+        lambda *a, **kw: {"status": "passed", "mode": "local_cardinality_fallback"},
+    )
+    monkeypatch.setattr(cli, "_write_evidence_report", lambda *a, **kw: None)
+    monkeypatch.setattr(
+        cli, "_append_runtime_cardinality_review_summary", lambda *a, **kw: None
+    )
+    monkeypatch.chdir(tmp_path)
+    output = tmp_path / "review.json"
+    assert (
+        cli.main(
+            [
+                "--review-json-out",
+                str(output),
+                "--allow-local-cardinality-fallback",
+            ]
+        )
+        == 0
+    )
+    recorded = shlex.split(
+        json.loads(output.read_text(encoding="utf-8"))["source_command"]
+    )
+    assert "--repo-root" not in recorded
+    assert str(tmp_path) not in recorded
+    explicit = tmp_path / "explicit.json"
+    assert (
+        cli.main(
+            [
+                "--repo-root",
+                str(tmp_path),
+                "--review-json-out",
+                str(explicit),
+                "--allow-local-cardinality-fallback",
+            ]
+        )
+        == 0
+    )
+    recorded_explicit = shlex.split(
+        json.loads(explicit.read_text(encoding="utf-8"))["source_command"]
+    )
+    assert "--repo-root" not in recorded_explicit
+    assert "--allow-local-cardinality-fallback" in recorded_explicit
+
+
 def test_unknown_option_is_rejected_before_provenance(tmp_path: Path) -> None:
     """Extra argv tokens must not be copied into a replayable command."""
     from scripts.engineering.qa import observability_metric_inventory_cli as cli
