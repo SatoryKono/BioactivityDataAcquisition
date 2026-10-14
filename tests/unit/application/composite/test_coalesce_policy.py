@@ -598,3 +598,48 @@ def test_prefer_seed_preserves_entity_specific_fields_for_mapping(
     assert result["chembl.tissue.efo_id"].to_list() == ["tissue-efo"]
     assert result["chembl.publication.title"].to_list() == ["paper"]
     assert "crossref.publication.title" not in result.columns
+
+
+@pytest.mark.unit
+def test_prefer_seed_without_pipeline_coalesces_unqualified_seed(
+    policy: CoalescePolicyService,
+) -> None:
+    df = pl.DataFrame(
+        {
+            "title": [None, "seed"],
+            "crossref.publication.title": ["fallback", "enricher"],
+        }
+    )
+    result = policy.coalesce_prefer_seed(df, ())
+    assert result.columns == ["title"]
+    assert result["title"].to_list() == ["fallback", "seed"]
+
+
+@pytest.mark.unit
+def test_unqualified_field_does_not_bridge_distinct_entities(
+    policy: CoalescePolicyService,
+) -> None:
+    df = pl.DataFrame(
+        {
+            "efo_id": [None],
+            "chembl.cell_line.efo_id": ["cell"],
+            "chembl.tissue.efo_id": ["tissue"],
+        }
+    )
+    result = policy.coalesce_prefer_seed(df, ())
+    assert result.equals(df)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("dtypes", [(pl.Boolean, pl.Date), (pl.Int64, pl.Binary)])
+def test_small_group_preserves_incompatible_scalar_dtypes(
+    policy: CoalescePolicyService, dtypes: tuple[pl.DataType, pl.DataType]
+) -> None:
+    df = pl.DataFrame(
+        {
+            "chembl.publication.value": pl.Series([None], dtype=dtypes[0]),
+            "crossref.publication.value": pl.Series([None], dtype=dtypes[1]),
+        }
+    )
+    result = policy.coalesce_prefer_seed(df, (), "chembl_publication")
+    assert result.equals(df)

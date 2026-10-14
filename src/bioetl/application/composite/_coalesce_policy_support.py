@@ -73,7 +73,15 @@ def can_coalesce(
         return True
     if type1 == pl.Null or type2 == pl.Null:
         return True
-    return isinstance(type1, pl.List) == isinstance(type2, pl.List)
+    if isinstance(type1, pl.List) != isinstance(type2, pl.List):
+        return False
+    try:
+        pl.DataFrame(schema={"left": type1, "right": type2}).lazy().select(
+            pl.coalesce("left", "right")
+        ).collect_schema()
+    except (pl.exceptions.SchemaError, pl.exceptions.InvalidOperationError):
+        return False
+    return True
 
 
 def build_field_groups(
@@ -90,6 +98,13 @@ def build_field_groups(
         if entity_scoped and len(col.split(".")) == 3:
             field = col.split(".", 1)[1]
         field_groups.setdefault(field, []).append(col)
+    if entity_scoped:
+        for field in list(field_groups):
+            if "." in field:
+                continue
+            matches = [key for key in field_groups if key.endswith("." + field)]
+            if len(matches) == 1:
+                field_groups[matches[0]][:0] = field_groups.pop(field)
     return field_groups
 
 
@@ -102,7 +117,9 @@ def sort_columns(
     """Sort columns with either seed-first or enricher-first strategy."""
 
     def sort_key(col: str) -> tuple[int, str]:
-        is_seed = bool(seed_prefix_value and col.startswith(seed_prefix_value))
+        is_seed = (
+            col.startswith(seed_prefix_value) if seed_prefix_value else "." not in col
+        )
         priority = int(is_seed != prefer_seed)
         return (priority, col)
 
