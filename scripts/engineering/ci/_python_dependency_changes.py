@@ -19,6 +19,9 @@ from typing import Any
 
 from packaging.requirements import Requirement
 
+PYTHON_MANIFEST = "pyproject.toml"
+PYTHON_LOCK = "uv.lock"
+
 
 def _name(value: str) -> str:
     return re.sub(r"[-_.]+", "-", value).lower()
@@ -70,10 +73,10 @@ def changed_dependencies(
 ) -> set[str]:
     """Compare both manifests; include transitive/wheel/hash changes in the lock."""
     changed: set[str] = set()
-    for name in ("pyproject.toml", "uv.lock"):
+    for name in (PYTHON_MANIFEST, PYTHON_LOCK):
         old = _read_revision(root, base, name)
         new = _read_revision(root, head, name)
-        if name == "pyproject.toml":
+        if name == PYTHON_MANIFEST:
             before, after = _requirements(old), _requirements(new)
         else:
             before, after = _locked_packages(old), _locked_packages(new)
@@ -91,8 +94,8 @@ def changed_dependencies(
 
 def pytest_configuration_changed(root: Path, base: str, head: str) -> bool:
     """Mixed config/dependency changes must retain their configuration lane."""
-    before = _configuration(_read_revision(root, base, "pyproject.toml"))
-    after = _configuration(_read_revision(root, head, "pyproject.toml"))
+    before = _configuration(_read_revision(root, base, PYTHON_MANIFEST))
+    after = _configuration(_read_revision(root, head, PYTHON_MANIFEST))
     paths = _changed_paths(before, after)
     unknown = [path for path in paths if not path.startswith("tool.pytest.ini_options")]
     if unknown:
@@ -135,7 +138,7 @@ def _changed_paths(before: Any, after: Any, prefix: str = "") -> list[str]:
 
 def pytest_framework_affected(root: Path, dependencies: set[str]) -> bool:
     """The global test framework owns the canonical all-tests lane, including helpers."""
-    packages = tomllib.loads((root / "uv.lock").read_text(encoding="utf-8")).get(
+    packages = tomllib.loads((root / PYTHON_LOCK).read_text(encoding="utf-8")).get(
         "package", []
     )
     return any(
@@ -154,8 +157,8 @@ def _is_pytest_plugin(package: str) -> bool:
 
 def removed_dependencies(root: Path, base: str, head: str) -> bool:
     """Exact sync removes ownership metadata; retain a conservative canonical lane."""
-    before = _locked_packages(_read_revision(root, base, "uv.lock"))
-    after = _locked_packages(_read_revision(root, head, "uv.lock"))
+    before = _locked_packages(_read_revision(root, base, PYTHON_LOCK))
+    after = _locked_packages(_read_revision(root, head, PYTHON_LOCK))
     return bool(before.keys() - after.keys())
 
 
@@ -172,7 +175,7 @@ def _locked_packages(document: dict[str, Any]) -> dict[str, list[str]]:
 
 def dependency_consumers(root: Path, changed: set[str]) -> list[str]:
     """Find real imports, including consumers of reverse lock dependencies."""
-    lock = tomllib.loads((root / "uv.lock").read_text(encoding="utf-8"))
+    lock = tomllib.loads((root / PYTHON_LOCK).read_text(encoding="utf-8"))
     packages = lock.get("package", [])
     consumers: set[str] = set()
     unresolved: list[str] = []
