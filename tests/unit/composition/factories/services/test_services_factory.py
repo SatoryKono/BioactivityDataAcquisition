@@ -401,6 +401,7 @@ def test_create_record_processor_builds_dependencies(
             dq_config=MagicMock(),
             data_schema=None,
             primary_keys=("activity_id",),
+            partition_cols=("target_type",),
             silver_table="activity",
             gold_table="activity_gold",
             silver_write_mode="merge",
@@ -427,6 +428,7 @@ def test_create_record_processor_builds_dependencies(
         ),
     )
 
+    assert mock_table_config.call_args.kwargs["partition_cols"] == ("target_type",)
     assert result is mock_record_processor.return_value
     mock_table_config.assert_called_once()
     mock_processor_config.assert_called_once()
@@ -451,6 +453,7 @@ def test_create_record_processor_from_pipeline_delegates() -> None:
             data_schema=None,
             table=SimpleNamespace(
                 primary_keys=("activity_id",),
+            partition_cols=("target_type",),
                 silver_write_mode="merge",
                 gold_write_mode="overwrite",
                 on_schema_mismatch="error",

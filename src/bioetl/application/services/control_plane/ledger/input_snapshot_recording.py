@@ -8,9 +8,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.input_snapshot_identity import (
-    InputSnapshotIdentity,
-)
 from bioetl.application.services.control_plane.ledger._input_snapshot_manifest import (
     persist_input_snapshots_on_manifest,
 )
@@ -23,8 +20,16 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True, slots=True)
-class _SnapshotPublishRequest(InputSnapshotIdentity):
+class _SnapshotPublishRequest:
     """Validated input-snapshot publication request."""
+
+    provider: str
+    entity: str
+    pipeline_name: str
+    snapshot_id: str
+    content_hash: str
+    immutable_uri: str
+    bronze_batch_ref: str
 
     query_fingerprint: str | None
     details: Mapping[str, object]

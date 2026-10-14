@@ -80,6 +80,7 @@ class _RecordProcessorBuildRequest:
     table_config_cls: type[TableConfig]
     gold_validator_factory: Callable[..., GoldValidatorPort]
     record_processor_cls: type[RecordProcessor]
+    partition_cols: tuple[str, ...] = ()
     debug_export_config: DebugExportConfig | None = None
 
 
@@ -104,6 +105,7 @@ def create_record_processor_impl(
         data_schema=request.data_schema,
         table_config=request.table_config_cls(
             primary_keys=tuple(request.primary_keys),
+            partition_cols=request.partition_cols,
             silver_table=request.silver_table,
             gold_table=request.gold_table,
             silver_write_mode=request.silver_write_mode,
