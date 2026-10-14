@@ -1,4 +1,4 @@
-Source-only refresh (2026-10-12, composite checkpoint persistence parameter bundle merged with origin/main fe524f074da5): the canonical module inventory records `source_tree_sha256=95d43c1d9e9dd87d408891a38d3dfb6940e0c042d2cf762af79fbd520956ff20` and `source_module_count=2566`. This binds the merged source tree; coverage measurements remain those of the last authoritative run recorded below.
+Source-only refresh (2026-10-12, composite checkpoint persistence parameter bundle merged with origin/main fe524f074da5): the canonical module inventory records `source_tree_sha256=0d318c17dfd76032544e2e179569af53912aed1d409c2bf8f2725ee9ab589805` and `source_module_count=2566`. This binds the merged source tree; coverage measurements remain those of the last authoritative run recorded below.
 
 Source-only refresh (2026-10-12, PR #12187 review and origin/main sync): the canonical module inventory records `source_tree_sha256=5ef35dfcf5f7339a22f3900043b0b6af49474fcd98ed019e1d89067735f5c2eb` and `source_module_count=2566`. This updates source identity while retaining the accepted coverage measurements and additive XML provenance.
 
@@ -429,3 +429,21 @@ Refresh note (2026-09-22, isolated Grafana continuation): source inventory
 rebound to `source_tree_sha256=6c334dfe51b614f733e0a070d4eb84658e171e21fa6dd11b2ed9a5e024232b00`,
 `source_module_count=2497`. This stamp is derived from the module inventory;
 it is not a new coverage measurement or a complete topology re-audit.
+
+<!-- current-source-binding:start -->
+
+## Current source inventory binding
+
+- `source_tree_sha256=a12b1787b696aa01041800c8a9fa100147107c3a8f36f35158a11c6687e0d299`
+- `source_module_count=2571`
+- Source modules: `2571`
+- `2529` fully covered
+- `41` partially covered
+- Test inventory: `assertless_total_candidates=85`
+
+Derived by scripts/engineering/qa/report_topology_source_binding.py from
+the verified module inventory. This is a source-only projection, not a
+new coverage measurement or a complete topology re-audit. Historical raw
+evidence and capture identity above remain unchanged.
+
+<!-- current-source-binding:end -->

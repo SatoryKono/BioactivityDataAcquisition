@@ -374,3 +374,78 @@ def test_sanitizer_failure_latch_keeps_distinct_failures(
         "vcr_request_sanitizer_failed_closed",
         "vcr_response_sanitizer_dropped_response",
     ]
+
+
+@pytest.mark.parametrize(
+    "header",
+    [
+        "NCBI-SID",
+        "ncbi-sid",
+        "NcBi-PhId",
+        "API-Key",
+        "X-Auth-Token",
+        "Proxy-Authorization",
+        "Set-Cookie",
+        "Set-Cookie2",
+    ],
+)
+def test_sensitive_headers_are_filtered_on_both_sides(header: str) -> None:
+    config = build_base_vcr_config(filter_headers=["x-extra"])
+    request_hook = cast(Callable[[Any], Any], config["before_record_request"])
+    response_hook = cast(Callable[[Any], Any], config["before_record_response"])
+    request = Request(
+        "GET",
+        "https://example.org/search?term=protein",
+        b"",
+        {header: "synthetic-session", "x-extra": "synthetic-extra"},
+    )
+    response = {
+        "status": {"code": 200},
+        "headers": {
+            header: ["synthetic-session"],
+            "Content-Type": ["application/json"],
+        },
+        "body": {"string": b"{}"},
+    }
+
+    sanitized_request = request_hook(request)
+    sanitized_response = response_hook(response)
+
+    assert not any(
+        name.casefold() == header.casefold() for name in sanitized_request.headers
+    )
+    assert "x-extra" not in sanitized_request.headers
+    assert sanitized_response["headers"] == {"Content-Type": ["application/json"]}
+    assert sanitized_response["body"] == response["body"]
+    assert response["headers"][header] == ["synthetic-session"]
+
+
+@pytest.mark.parametrize(
+    "key",
+    [
+        "apikey",
+        "token",
+        "access_token",
+        "refresh_token",
+        "ncbi_sid",
+        "ncbi_phid",
+        "ncbi-sid",
+        "ncbi-phid",
+        "session_id",
+        "sessionid",
+        "session_token",
+    ],
+)
+def test_sensitive_query_fields_are_unconditionally_removed(key: str) -> None:
+    from urllib.parse import parse_qsl, urlsplit
+
+    config = build_base_vcr_config(filter_query_parameters=["extra"])
+    request_hook = cast(Callable[[Any], Any], config["before_record_request"])
+    request = Request(
+        "GET",
+        f"https://example.org/search?{key.upper()}=synthetic-session&{key}=second-secret&extra=hidden&term=protein",
+        b"",
+        {},
+    )
+    sanitized = request_hook(request)
+    assert parse_qsl(urlsplit(sanitized.uri).query) == [("term", "protein")]

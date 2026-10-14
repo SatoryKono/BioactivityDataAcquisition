@@ -199,7 +199,7 @@
   "provenance": {
     "projector_version": "1.1.0",
     "semantic_content_hash": "sha256:f33a2979107693d1ad96bad19e6cb5a18090a5e7e7c780903504cbe5b93d3e23",
-    "source_revision": "26d7bc60d0e04eb5b495a26abbac2f07ddef4d8b"
+    "source_revision": "2458f8a1f2c2650128acce982b5e0dcd97f81452"
   },
   "silver": {
     "column_projection": {

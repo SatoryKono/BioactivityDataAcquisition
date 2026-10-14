@@ -267,6 +267,9 @@ Use it to keep curated memory small and durable:
 ### Code change
 
 - Use `pre-task` with a domain or symbol-oriented query.
+- Workflow RAG searches eligible source contents for query terms before applying
+  its 160-source cap. A symbol query can therefore retrieve a source whose path
+  does not contain the symbol; inspect returned `source_path` values.
 - Read code and tests directly after retrieval.
 - Use `post-task` to summarize the change and promote only if the lesson will
   matter again.

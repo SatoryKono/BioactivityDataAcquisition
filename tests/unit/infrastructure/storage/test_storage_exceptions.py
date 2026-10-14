@@ -118,11 +118,14 @@ class TestSilverWriterExceptions:
         mock_merge.when_not_matched_insert_all.return_value = mock_merge
         mock_merge.execute.side_effect = DeltaError("Merge-conflict")
 
-        # First call (schema check) raises TableNotFoundError, second call returns mock
+        mock_table_instance.metadata.return_value.partition_columns = []
+
+        # Schema and physical-partition checks precede the actual merge attempt.
         mock_delta_table = MagicMock(
             side_effect=[
                 TableNotFoundError("Not found"),  # Schema check
-                mock_table_instance,  # Write attempt
+                mock_table_instance,  # Physical partition compatibility
+                mock_table_instance,  # Merge attempt
             ]
         )
 

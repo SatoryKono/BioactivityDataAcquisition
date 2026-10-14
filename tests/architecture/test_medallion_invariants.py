@@ -18,6 +18,12 @@ See docs/02-architecture/decisions/ADR-014-deterministic-writes.md
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
+
+from tests.helpers.clock import fixed_test_clock
+
 import re
 from pathlib import Path
 
@@ -229,7 +235,13 @@ class TestSilverLayerInvariants:
 
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path="data/output/silver", logger=Mock())
+        writer = SilverWriter(
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path="data/output/silver",
+            logger=Mock(),
+        )
         path = writer._resolve_table_path("chembl.activity")
         normalized = path.replace("\\", "/")
         assert normalized == "data/output/silver/chembl/activity"
