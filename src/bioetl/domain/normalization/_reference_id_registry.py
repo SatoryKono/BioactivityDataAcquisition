@@ -135,6 +135,13 @@ _REFERENCE_IDENTIFIER_FAMILY_SPECS: tuple[tuple[str, str, str, str, str], ...] =
         "chembl",
         "ChEMBL identifiers used by ChEMBL entities and non-ChEMBL provider references.",
     ),
+    (
+        "pubchem_cid",
+        "string",
+        "scalar_or_set_like",
+        "pubchem_cid",
+        "PubChem Compound Identifiers (CID).",
+    ),
     ("doi", "string", "scalar", "doi", "Digital Object Identifiers."),
     ("pmid", "numeric_string", "scalar", "pmid", "PubMed identifiers."),
     ("pmcid", "string", "scalar", "pmcid", "PubMed Central identifiers."),
