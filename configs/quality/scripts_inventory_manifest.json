@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-14T20:18:21.798197+00:00",
+  "generated_at": "2026-10-14T05:38:09.590533+00:00",
   "summary": {
     "total_scripts": 651,
     "status_counts": {
@@ -6121,13 +6121,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2885,
+          "line": 2876,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3318,
+          "line": 3309,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check"
         },
@@ -7450,13 +7450,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2894,
+          "line": 2885,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3327,
+          "line": 3318,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/diagrams/render/generate_description_indexes.py --check"
         },
@@ -8125,13 +8125,13 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2886,
+          "line": 2877,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.docs passports check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3319,
+          "line": 3310,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.docs passports check"
         },
@@ -9324,7 +9324,7 @@
         },
         {
           "path": "tests/architecture/test_strict_architecture_contracts.py",
-          "line": 892,
+          "line": 880,
           "source_group": "tests",
           "text": "\"cli.py\","
         }
@@ -10353,19 +10353,19 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 263,
+          "line": 234,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pr_lane_results as lane"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 292,
+          "line": 263,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pr_lane_results import ("
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
-          "line": 314,
+          "line": 285,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pr_lane_results import affected_pytest_targets"
         }
@@ -10749,13 +10749,13 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 3144,
+          "line": 3135,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest reports/quality/proof-or-stop/shared/coverage/coverage/manifest.json"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3579,
+          "line": 3570,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.update_test_telemetry_baseline --local-manifest \"$ROOT/coverage/manifest.json\""
         },
@@ -10806,7 +10806,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2827,
+          "line": 2818,
           "source_group": "ci",
           "text": "check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_contract_identity.py"
         },
@@ -10833,7 +10833,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2828,
+          "line": 2819,
           "source_group": "ci",
           "text": "check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_contract_registry.py"
         },
@@ -10893,7 +10893,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2832,
+          "line": 2823,
           "source_group": "ci",
           "text": "check_contract uv run --frozen --no-build python scripts/engineering/ci/validate_registry_dq_refs.py"
         },
@@ -10950,7 +10950,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 2831,
+          "line": 2822,
           "source_group": "ci",
           "text": "check_contract uv run --frozen --no-build python -m scripts.engineering.ci.validate_schema_classifier_gate --base-sha \"$BASE\" --head-sha \"$CIRCLE_SHA1\""
         },
@@ -11463,17 +11463,17 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 22,
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 3070,
+          "line": 3061,
           "source_group": "ci",
           "text": "(\"governance\", \"pretest_guardrails\", [\"bash\", \"scripts/engineering/dev/pretest_guardrails.sh\", \"--mode\", \"check\", \"--scope\", \"governance\"]),"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3525,
+          "line": 3516,
           "source_group": "ci",
           "text": "(\"governance\", \"pretest_guardrails\", [\"bash\", \"scripts/engineering/dev/pretest_guardrails.sh\","
         },
@@ -12954,7 +12954,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 403,
+      "reference_count": 402,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -13000,7 +13000,7 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2748,
+          "line": 2739,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.qa check-duplication-complexity-exemptions"
         }
@@ -14286,7 +14286,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 82,
+      "reference_count": 81,
       "references": [
         {
           "path": "docs/00-project/RULES.md",
@@ -18401,13 +18401,13 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3301,
+          "line": 3292,
           "source_group": "ci",
           "text": "python scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3413,
+          "line": 3404,
           "source_group": "ci",
           "text": "\\ scripts/engineering/repo/check_no_partial_tree.py --base origin/main --tip HEAD\\n\""
         },
@@ -19310,7 +19310,7 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 3027,
+          "line": 3018,
           "source_group": "ci",
           "text": "python -m scripts.ops verify-router-managed-image \"$BUILT\""
         },
@@ -22267,7 +22267,7 @@
       "references": [
         {
           "path": ".circleci/config.yml",
-          "line": 3423,
+          "line": 3414,
           "source_group": "ci",
           "text": "bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh --attempt-system-install"
         },
@@ -24280,13 +24280,13 @@
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2814,
+          "line": 2805,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.schema generate-artifacts --check"
         },
         {
           "path": ".circleci/config.yml",
-          "line": 2815,
+          "line": 2806,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.schema verify-schema-parity --mode blocking"
         },

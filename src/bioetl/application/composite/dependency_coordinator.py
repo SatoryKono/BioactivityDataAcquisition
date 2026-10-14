@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
+from dataclasses import dataclass
 
 import polars as pl
 
 from bioetl.application.composite.dependency_key_resolvers import (
     ChainedKeyResolver,
-    DependencyCoordinatorCollaborators,
     SeedKeyResolver,
-    resolve_dependency_coordinator_collaborators,
 )
 from bioetl.application.composite.dependency_progress_tracker import (
     DependencyProgressService,
@@ -20,7 +19,7 @@ from bioetl.application.composite.dependency_result_mapper import (
 )
 from bioetl.application.composite.helpers.dependency_coordinator_execution import (
     execute_dependency_runner,
-    run_dependency_batch,
+    log_dependencies_batch_start,
     run_single_dependency,
 )
 from bioetl.application.runtime_clock import resolve_runtime_clock
@@ -34,6 +33,16 @@ from bioetl.domain.ports import (
 )
 
 __all__ = ["DependencyCoordinatorCollaborators", "DependencyCoordinatorService"]
+
+
+@dataclass(frozen=True, slots=True)
+class DependencyCoordinatorCollaborators:
+    """Bundle of dependency coordinator collaborators."""
+
+    seed_key_resolver: SeedKeyResolver
+    chained_key_resolver: ChainedKeyResolver
+    progress_service: DependencyProgressService
+    result_service: DependencyResultService
 
 
 class DependencyCoordinatorService:
@@ -55,12 +64,6 @@ class DependencyCoordinatorService:
         result_service: Service for mapping execution outcomes.
         delta_reader: Reader for Silver tables (for chained dependencies).
 
-    .. deprecated:: 1.x
-       The arguments `seed_key_resolver`, `chained_key_resolver`, `progress_service`,
-       and `result_service` are deprecated in favor of passing a single `collaborators`
-       bundle of type `DependencyCoordinatorCollaborators`. They will be removed in a
-       future release.
-
     Example:
         >>> coordinator = DependencyCoordinatorService(
         ...     logger=logger,
@@ -78,14 +81,9 @@ class DependencyCoordinatorService:
     def __init__(
         self,
         logger: LoggerPort,
-        collaborators: DependencyCoordinatorCollaborators | None = None,
+        collaborators: DependencyCoordinatorCollaborators,
         delta_reader: DeltaReaderPort | None = None,
         clock: ClockPort | None = None,
-        *,
-        seed_key_resolver: SeedKeyResolver | None = None,
-        chained_key_resolver: ChainedKeyResolver | None = None,
-        progress_service: DependencyProgressService | None = None,
-        result_service: DependencyResultService | None = None,
     ) -> None:
         """Initialize dependency coordinator.
 
@@ -96,14 +94,6 @@ class DependencyCoordinatorService:
         """
         self._logger = logger
         self._delta_reader = delta_reader
-        collaborators = resolve_dependency_coordinator_collaborators(
-            collaborators,
-            seed_key_resolver=seed_key_resolver,
-            chained_key_resolver=chained_key_resolver,
-            progress_service=progress_service,
-            result_service=result_service,
-        )
-
         self._seed_key_resolver = collaborators.seed_key_resolver
         self._chained_key_resolver = collaborators.chained_key_resolver
         self._result_service = collaborators.result_service
@@ -133,13 +123,56 @@ class DependencyCoordinatorService:
         Returns:
             Mapping from dependency pipeline name to its DependencyResult.
         """
-        return await run_dependency_batch(
-            self,
-            keys=keys,
-            dependencies=dependencies,
-            completed=completed,
-            runner_factory=runner_factory,
-        )
+        results: dict[str, DependencyResult] = {}
+        dep_config_lookup = {
+            dependency.pipeline: dependency for dependency in dependencies
+        }
+
+        if not dependencies:
+            self._logger.debug(
+                "No dependencies to run",
+            )
+            return results
+
+        log_dependencies_batch_start(logger=self._logger, dependencies=dependencies)
+
+        for dependency in dependencies:
+            if self._progress_service.maybe_store_completed_skip(
+                dependency=dependency,
+                completed=completed,
+                results=results,
+            ):
+                continue
+
+            if self._progress_service.maybe_store_blocked_chain(
+                dependency=dependency, results=results
+            ):
+                if self._progress_service.should_stop_after_result(
+                    dependency=dependency, result=results[dependency.pipeline]
+                ):
+                    break
+                continue
+
+            effective_keys = await self._get_effective_keys(
+                dependency=dependency,
+                seed_keys=keys,
+                dep_config_lookup=dep_config_lookup,
+            )
+
+            result = await self._run_single_dependency(
+                dependency=dependency,
+                keys=effective_keys,
+                runner_factory=runner_factory,
+            )
+            results[dependency.pipeline] = result
+
+            if self._progress_service.should_stop_after_result(
+                dependency=dependency,
+                result=result,
+            ):
+                break
+
+        return results
 
     async def _get_effective_keys(
         self,
