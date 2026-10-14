@@ -3,9 +3,14 @@
 from __future__ import annotations
 
 import ast
+import copy
 from collections.abc import Mapping
 import json
-from importlib.metadata import packages_distributions
+from importlib.metadata import (
+    PackageNotFoundError,
+    distribution,
+    packages_distributions,
+)
 import re
 import subprocess
 import tomllib
@@ -38,21 +43,31 @@ def _read_revision(root: Path, revision: str, name: str) -> dict[str, Any]:
 def _requirements(document: dict[str, Any]) -> dict[str, list[str]]:
     project = document.get("project", {})
     groups = [
-        project.get("dependencies", []),
-        document.get("build-system", {}).get("requires", []),
+        ("project", project.get("dependencies", [])),
+        ("build-system", document.get("build-system", {}).get("requires", [])),
+        *[
+            (f"optional:{name}", values)
+            for name, values in project.get("optional-dependencies", {}).items()
+        ],
+        *[
+            (f"group:{name}", values)
+            for name, values in document.get("dependency-groups", {}).items()
+        ],
     ]
-    groups.extend(project.get("optional-dependencies", {}).values())
-    groups.extend(document.get("dependency-groups", {}).values())
     result: dict[str, list[str]] = {}
-    for group in groups:
+    for label, group in groups:
         for raw in group:
             if isinstance(raw, str):
                 requirement = Requirement(raw)
-                result.setdefault(_name(requirement.name), []).append(str(requirement))
+                result.setdefault(_name(requirement.name), []).append(
+                    f"{label}:{requirement}"
+                )
     return {key: sorted(values) for key, values in result.items()}
 
 
-def changed_dependencies(root: Path, base: str, head: str) -> set[str]:
+def changed_dependencies(
+    root: Path, base: str, head: str, *, allow_configuration: bool = False
+) -> set[str]:
     """Compare both manifests; include transitive/wheel/hash changes in the lock."""
     changed: set[str] = set()
     for name in ("pyproject.toml", "uv.lock"):
@@ -67,11 +82,81 @@ def changed_dependencies(root: Path, base: str, head: str) -> set[str]:
             for key in before.keys() | after.keys()
             if before.get(key) != after.get(key)
         )
-    if not changed:
+    if not changed and not allow_configuration:
         raise ValueError(
             "No Python dependency change proven; manifest/tool configuration needs its own classified route"
         )
     return changed
+
+
+def pytest_configuration_changed(root: Path, base: str, head: str) -> bool:
+    """Mixed config/dependency changes must retain their configuration lane."""
+    before = _configuration(_read_revision(root, base, "pyproject.toml"))
+    after = _configuration(_read_revision(root, head, "pyproject.toml"))
+    paths = _changed_paths(before, after)
+    unknown = [path for path in paths if not path.startswith("tool.pytest.ini_options")]
+    if unknown:
+        raise ValueError(
+            "Unconfirmed Python manifest configuration route: " + ", ".join(unknown)
+        )
+    return bool(paths)
+
+
+def _configuration(document: dict[str, Any]) -> dict[str, Any]:
+    remaining = copy.deepcopy(document)
+    for section, keys in (
+        ("project", ("dependencies", "optional-dependencies")),
+        ("build-system", ("requires",)),
+    ):
+        for key in keys:
+            remaining.get(section, {}).pop(key, None)
+        if section in remaining and not remaining[section]:
+            remaining.pop(section)
+    group_config = {
+        name: [item for item in values if not isinstance(item, str)]
+        for name, values in remaining.pop("dependency-groups", {}).items()
+    }
+    if any(group_config.values()):
+        remaining["dependency-groups"] = group_config
+    return remaining
+
+
+def _changed_paths(before: Any, after: Any, prefix: str = "") -> list[str]:
+    if isinstance(before, dict) and isinstance(after, dict):
+        return [
+            path
+            for key in sorted(before.keys() | after.keys())
+            for path in _changed_paths(
+                before.get(key, {}), after.get(key, {}), f"{prefix}.{key}".lstrip(".")
+            )
+        ]
+    return [prefix] if before != after else []
+
+
+def pytest_framework_affected(root: Path, dependencies: set[str]) -> bool:
+    """The global test framework owns the canonical all-tests lane, including helpers."""
+    packages = tomllib.loads((root / "uv.lock").read_text(encoding="utf-8")).get(
+        "package", []
+    )
+    return any(
+        "pytest" in _lock_family(packages, dependency) or _is_pytest_plugin(dependency)
+        for dependency in dependencies
+    )
+
+
+def _is_pytest_plugin(package: str) -> bool:
+    try:
+        installed = distribution(package)
+    except PackageNotFoundError:
+        return False
+    return any(entry.group == "pytest11" for entry in installed.entry_points)
+
+
+def removed_dependencies(root: Path, base: str, head: str) -> bool:
+    """Exact sync removes ownership metadata; retain a conservative canonical lane."""
+    before = _locked_packages(_read_revision(root, base, "uv.lock"))
+    after = _locked_packages(_read_revision(root, head, "uv.lock"))
+    return bool(before.keys() - after.keys())
 
 
 def _locked_packages(document: dict[str, Any]) -> dict[str, list[str]]:

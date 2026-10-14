@@ -183,6 +183,10 @@ def test_powershell_filesystem_executes_locked_pin() -> None:
         or shutil.which("pwsh.exe")
         or shutil.which("powershell.exe")
     )
+    if not powershell and os.name != "nt":
+        pytest.skip(
+            "PowerShell is optional on non-Windows; actual Windows launch has separate evidence"
+        )
     assert powershell, "PowerShell is required for the actual Windows launch contract"
     script = ROOT / "scripts/ai/mcp/mcp_filesystem_wrapper.ps1"
     code = (
@@ -231,3 +235,90 @@ def test_shell_filesystem_executes_locked_pin(tmp_path: Path) -> None:
     )
     assert result.returncode == 0, result.stderr
     assert "@modelcontextprotocol/server-filesystem@2026.8.31" in result.stdout
+
+
+def test_root_npm_lock_graph_clean_install_parity(tmp_path: Path) -> None:
+    """Use npm's resolver as well as direct dependency/engine assertions."""
+    npm = shutil.which("npm.cmd") if os.name == "nt" else shutil.which("npm")
+    assert npm, "npm is required for the root dependency contract"
+    for name in ("package.json", "package-lock.json"):
+        shutil.copyfile(ROOT / name, tmp_path / name)
+    result = subprocess.run(
+        [npm, "ci", "--ignore-scripts", "--dry-run", "--no-audit", "--no-fund"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=120,
+    )
+    assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.parametrize("preflight_success", [True, False])
+def test_docker_capture_preflight_does_not_require_host_node(
+    tmp_path: Path, preflight_success: bool
+) -> None:
+    """Docker-only hosts validate in the image; failures never reach capture."""
+    git = shutil.which("git")
+    assert git
+    bash = (
+        str(Path(git).parents[1] / "bin/bash.exe")
+        if os.name == "nt"
+        else shutil.which("bash")
+    )
+    assert bash
+    docker = tmp_path / "docker"
+    docker.write_text(
+        '#!/usr/bin/env bash\nprintf "call\\n" >> "$FIXTURE_DOCKER_LOG"\n'
+        'if [[ "$*" == *"--playwright-version"* ]]; then\n'
+        + (
+            'printf "1.64.0\\n"\n'
+            if preflight_success
+            else 'echo "Unsupported Node in image" >&2\nexit 42\n'
+        )
+        + 'else\nprintf "capture\\n" >> "$FIXTURE_DOCKER_LOG"\nfi\n',
+        encoding="utf-8",
+    )
+    docker.chmod(0o755)
+    node = tmp_path / "node"
+    node.write_text(
+        '#!/usr/bin/env bash\necho "Host Node must not run" >&2\nexit 99\n',
+        encoding="utf-8",
+    )
+    node.chmod(0o755)
+    fake_bin = str(tmp_path)
+    if os.name == "nt":
+        fake_bin = "/" + tmp_path.drive[0].lower() + tmp_path.as_posix()[2:]
+    log = tmp_path / "docker.log"
+    log_path = str(log)
+    if os.name == "nt":
+        log_path = "/" + log.drive[0].lower() + log.as_posix()[2:]
+    env = {
+        **os.environ,
+        "GRAFANA_PASSWORD": "fixture-only",
+        "GRAFANA_SERVICE_ACCOUNT_TOKEN": "",
+        "FIXTURE_DOCKER_LOG": log_path,
+    }
+    script = (
+        ROOT / "scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh"
+    )
+    result = subprocess.run(
+        [
+            bash,
+            "-c",
+            'export PATH="$1:$PATH"; exec bash "$2" "$3"',
+            "fixture",
+            fake_bin,
+            str(script),
+            str(tmp_path / "screenshots"),
+        ],
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert (result.returncode == 0) == preflight_success, result.stderr
+    recorded = log.read_text(encoding="utf-8")
+    assert ("capture" in recorded) == preflight_success
+    assert recorded.count("call") == (2 if preflight_success else 1)
+    assert "Host Node must not run" not in result.stderr

@@ -1,6 +1,7 @@
 """Source-only dependency selection without collecting or running the suite."""
 
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -23,6 +24,146 @@ def _distribution_owners(monkeypatch: pytest.MonkeyPatch) -> None:
             "syrupy": ["syrupy"],
         },
     )
+    monkeypatch.setattr(
+        dependencies, "distribution", lambda name: SimpleNamespace(entry_points=[])
+    )
+
+
+def test_pytest_helper_uses_canonical_all_tests_lane(tmp_path: Path) -> None:
+    _consumer(tmp_path, "tests/helpers/publication_fixtures.py", "pytest")
+    (tmp_path / "uv.lock").write_text("version = 1\n", encoding="utf-8")
+    assert lane.affected_pytest_targets(
+        ["uv.lock"], repo_root=tmp_path, changed_python_dependencies={"pytest"}
+    ) == ["tests"]
+
+
+@pytest.mark.parametrize(
+    "plugin", ["pytest-cov", "pytest-xdist", "pytest-timeout", "pytest-recording"]
+)
+def test_entrypoint_plugin_uses_canonical_lane(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, plugin: str
+) -> None:
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "uv.lock").write_text("version = 1\n", encoding="utf-8")
+    monkeypatch.setattr(
+        dependencies,
+        "distribution",
+        lambda name: SimpleNamespace(entry_points=[SimpleNamespace(group="pytest11")]),
+    )
+    assert lane.affected_pytest_targets(
+        ["uv.lock"], repo_root=tmp_path, changed_python_dependencies={plugin}
+    ) == ["tests"]
+
+
+@pytest.mark.parametrize("dependency_changed", [False, True])
+def test_pytest_config_change_retains_required_lane(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    dependency_changed: bool,
+) -> None:
+    (tmp_path / "tests").mkdir()
+
+    def revision(root: Path, sha: str, name: str) -> dict:
+        if name == "uv.lock":
+            return {}
+        spec = "httpx>=0.29" if dependency_changed and sha == "head" else "httpx>=0.28"
+        return {
+            "project": {"dependencies": [spec]},
+            "tool": {
+                "pytest": {
+                    "ini_options": {"addopts": "-q" if sha == "base" else "-q -ra"}
+                }
+            },
+        }
+
+    monkeypatch.setattr(dependencies, "_read_revision", revision)
+    assert (
+        lane.main(
+            [
+                "affected-tests",
+                "--repo-root",
+                str(tmp_path),
+                "--changed-file",
+                "pyproject.toml",
+                "--base-sha",
+                "base",
+                "--head-sha",
+                "head",
+            ]
+        )
+        == 0
+    )
+    assert capsys.readouterr().out.splitlines() == ["tests"]
+
+
+def test_unknown_mixed_configuration_does_not_pass(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    def revision(root: Path, sha: str, name: str) -> dict:
+        if name == "uv.lock":
+            return {}
+        return {
+            "project": {
+                "dependencies": ["httpx>=0.28" if sha == "base" else "httpx>=0.29"]
+            },
+            "tool": {"ruff": {"line-length": 88 if sha == "base" else 100}},
+        }
+
+    monkeypatch.setattr(dependencies, "_read_revision", revision)
+    assert (
+        lane.main(
+            [
+                "affected-tests",
+                "--repo-root",
+                str(tmp_path),
+                "--changed-file",
+                "pyproject.toml",
+                "--base-sha",
+                "base",
+                "--head-sha",
+                "head",
+            ]
+        )
+        == 1
+    )
+    captured = capsys.readouterr()
+    assert "tool.ruff.line-length" in captured.err
+    assert not captured.out
+
+
+def test_removed_package_without_head_metadata_gets_broad_lane(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    (tmp_path / "tests").mkdir()
+
+    def revision(root: Path, sha: str, name: str) -> dict:
+        if name == "pyproject.toml":
+            return {}
+        return (
+            {"package": [{"name": "removed-distribution", "version": "1"}]}
+            if sha == "base"
+            else {}
+        )
+
+    monkeypatch.setattr(dependencies, "_read_revision", revision)
+    assert (
+        lane.main(
+            [
+                "affected-tests",
+                "--repo-root",
+                str(tmp_path),
+                "--changed-file",
+                "uv.lock",
+                "--base-sha",
+                "base",
+                "--head-sha",
+                "head",
+            ]
+        )
+        == 0
+    )
+    assert capsys.readouterr().out.splitlines() == ["tests"]
 
 
 def _consumer(root: Path, source: str, imported: str) -> None:

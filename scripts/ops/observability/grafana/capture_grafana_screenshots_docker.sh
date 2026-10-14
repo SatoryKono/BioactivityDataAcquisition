@@ -28,12 +28,17 @@ if [[ ! -f "${CAPTURE_JS}" ]]; then
   exit 1
 fi
 
-PLAYWRIGHT_VERSION="$(node "${ROOT}/scripts/ai/npm_runtime_contract.cjs" "${ROOT}" --playwright-version)"
+# Resolve and validate using the image's actual Node runtime; host Node is optional.
+PLAYWRIGHT_VERSION="$(docker run --rm --entrypoint node \
+  -v "${ROOT}/package.json:/work/package.json:ro" \
+  -v "${ROOT}/package-lock.json:/work/package-lock.json:ro" \
+  -v "${ROOT}/scripts/ai/npm_runtime_contract.cjs:/work/npm_runtime_contract.cjs:ro" \
+  "${IMAGE}" /work/npm_runtime_contract.cjs /work --playwright-version)"
 IMAGE_DIGEST="${IMAGE##*@sha256:}"
 BROWSER_CACHE="bioetl-playwright-${PLAYWRIGHT_VERSION}-${IMAGE_DIGEST:0:16}"
 mkdir -p "${OUT_DIR}"
 
-# Single container run: install playwright once under /tmp, then capture all UIDs.
+# Capture container: install the locked runtime under /tmp, then capture all UIDs.
 # Use --entrypoint bash because mcp/playwright images may wrap node as MCP server.
 docker run --rm \
   --ipc=host \

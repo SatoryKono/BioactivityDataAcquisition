@@ -21,6 +21,9 @@ import yaml
 from scripts.engineering.ci._python_dependency_changes import (
     changed_dependencies,
     dependency_consumers,
+    pytest_configuration_changed,
+    pytest_framework_affected,
+    removed_dependencies,
 )
 
 SUCCESS = "success"
@@ -29,6 +32,8 @@ SKIPPED = "skipped"
 REQUIRED = "required"
 NOT_APPLICABLE = "not_applicable"
 TESTS_PREFIX = "tests/"
+
+from scripts.engineering.dev.run_tests import TESTS_ROOT as PYTEST_ALL_ROOT
 
 NPM_RUNTIME_TEST = "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py"
 
@@ -237,6 +242,7 @@ def affected_pytest_targets(
     *,
     repo_root: Path,
     changed_python_dependencies: set[str] | None = None,
+    require_all_python_tests: bool = False,
 ) -> list[str]:
     """Map a diff to tests; validate all declared targets before selection."""
     paths = [path for raw in changed_files if (path := raw.strip().replace("\\", "/"))]
@@ -250,7 +256,16 @@ def affected_pytest_targets(
             raise ValueError(
                 "Python dependency route requires verified dependency diff"
             )
-        targets.extend(_dependency_targets(repo_root, changed_python_dependencies))
+        if require_all_python_tests or pytest_framework_affected(
+            repo_root, changed_python_dependencies
+        ):
+            if not (repo_root / PYTEST_ALL_ROOT).is_dir():
+                raise ValueError(
+                    "Missing mandatory mapped test targets: " + PYTEST_ALL_ROOT
+                )
+            targets.append(PYTEST_ALL_ROOT.rstrip("/"))
+        else:
+            targets.extend(_dependency_targets(repo_root, changed_python_dependencies))
     for path in paths:
         targets.extend(mapped[path])
         targets.extend(_path_targets(path, repo_root))
@@ -471,12 +486,25 @@ def _affected_command(args: argparse.Namespace) -> int:
         changed = [line for line in completed.stdout.splitlines() if line.strip()]
     try:
         dependencies = None
+        all_tests = False
         if {"pyproject.toml", "uv.lock"} & set(changed):
+            all_tests = pytest_configuration_changed(
+                args.repo_root, args.base_sha, args.head_sha
+            )
             dependencies = changed_dependencies(
+                args.repo_root,
+                args.base_sha,
+                args.head_sha,
+                allow_configuration=all_tests,
+            )
+            all_tests = all_tests or removed_dependencies(
                 args.repo_root, args.base_sha, args.head_sha
             )
         targets = affected_pytest_targets(
-            changed, repo_root=args.repo_root, changed_python_dependencies=dependencies
+            changed,
+            repo_root=args.repo_root,
+            changed_python_dependencies=dependencies,
+            require_all_python_tests=all_tests,
         )
     except (ValueError, OSError) as error:
         print(f"tests gate selection failed: {error}", file=sys.stderr)
