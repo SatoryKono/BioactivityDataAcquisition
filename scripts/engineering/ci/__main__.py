@@ -41,7 +41,6 @@ COMMANDS = {
     "quality-gate": "quality_integral_gate.py",
     "architecture-junit-skips": "quality_integral_gate.py",
     "pr-gate": "pr_gate.py",
-    "pr-lane-results": "pr_lane_results.py",
     "e2e-skip-rate": "check_e2e_matrix_skip_rate.py",
     "e2e-rerun": "check_e2e_rerun_stability.py",
     "neo4j-memory": "check_neo4j_memory_ontology.py",
@@ -54,6 +53,7 @@ COMMANDS = {
 COMMAND_SPECS = {name: python_command(script) for name, script in COMMANDS.items()}
 COMMAND_SPECS.update(
     {
+        "pr-lane-results": module_command("scripts.engineering.ci.pr_lane_results"),
         "publish-scorecard": module_command(
             "scripts.engineering.ci.publish_scorecard_sarif"
         ),

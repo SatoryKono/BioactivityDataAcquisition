@@ -726,7 +726,7 @@ jobs:
           set -euo pipefail
           test "${{ needs['classify-changes'].result }}" = "success"
           mkdir -p reports/quality
-          uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results build \
+          uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \
             --decision-matrix DECISION_MATRIX \
             --decision-matrix-env \
             --head-sha "${EXPECTED_HEAD_SHA}" \
