@@ -30,6 +30,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
 from unittest.mock import AsyncMock, MagicMock
 
 import polars as pl
@@ -47,6 +48,13 @@ def _make_mixin(**overrides: object) -> MergeOutputWriterMixin:
     mixin._config.output_silver_path = "silver/composite/pub"
     mixin._config.output_gold_path = "gold/pub_enriched"
     mixin._storage = AsyncMock()
+
+    async def gold_receipt(table_name, *args, **kwargs):
+        return GoldWriteReceipt(
+            table_name, "0.0.0", GoldWriteCategory.COMPLETE, (table_name,)
+        )
+
+    mixin._storage.write_gold_merged.side_effect = gold_receipt
     mixin._field_group_registry = None
     mixin._gold_schema = None
     for key, value in overrides.items():
@@ -204,3 +212,11 @@ async def test_composite_gold_validation_evidence_does_not_mask_io_failure(fail_
             assert run_observations()["Data Validation"]["facts"]["records"] == 1
     finally:
         reset_run_observations(token)
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_empty_merged_gold_is_a_skip_without_claiming_commit():
+    mixin = _make_mixin(_gold_schema=MagicMock())
+    await mixin._write_merged_gold(pl.DataFrame({"doi": []}, schema={"doi": pl.String}))
+    mixin._storage.write_gold_merged.assert_not_awaited()

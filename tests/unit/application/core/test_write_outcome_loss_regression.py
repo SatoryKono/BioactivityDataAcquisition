@@ -13,6 +13,7 @@ candidates, transform quarantine = 0.
 """
 
 from __future__ import annotations
+from bioetl.domain.types.gold_contracts import GoldWriteReceipt, GoldWriteCategory
 
 import asyncio
 from datetime import UTC, datetime
@@ -86,7 +87,12 @@ def _make_writer(
     writer.write_silver = AsyncMock(
         side_effect=silver_error, return_value=silver_result
     )
-    writer.write_gold = AsyncMock(side_effect=gold_error, return_value=None)
+    writer.write_gold = AsyncMock(
+        side_effect=gold_error,
+        return_value=GoldWriteReceipt(
+            "synthetic", "1.0.0", GoldWriteCategory.COMPLETE, ("synthetic",)
+        ),
+    )
     return writer
 
 

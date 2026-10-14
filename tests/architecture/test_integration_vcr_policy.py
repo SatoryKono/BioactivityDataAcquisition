@@ -488,3 +488,33 @@ class TestIntegrationVcrPolicy:
         assert "configs/quality/integration_vcr_policy.yaml" in historical_report
         assert "docs/03-guides/testing.md" in historical_report
         assert "configs/quality/test_matrix.yaml" in historical_report
+
+
+@pytest.mark.architecture
+def test_secret_inventory_runs_in_blocking_ci_lanes() -> None:
+    command = "python -m scripts.engineering.qa.vcr check-secrets"
+    github = yaml.safe_load(
+        (ROOT / ".github/workflows/tests.yml").read_text(encoding="utf-8")
+    )
+    preflight = github["jobs"]["vcr-preflight"]
+    assert any(
+        command in step.get("run", "") and not step.get("continue-on-error", False)
+        for step in preflight["steps"]
+    )
+    circle = yaml.safe_load((ROOT / ".circleci/config.yml").read_text(encoding="utf-8"))
+    runs = [
+        step["run"]["command"]
+        for step in circle["jobs"]["test-fast"]["steps"]
+        if isinstance(step, dict) and "run" in step
+    ]
+    assert any(
+        command in run and "unit-vcr-secrets" in run and "set -euo pipefail" in run
+        for run in runs
+    )
+    jobs = circle["workflows"]["pr-gate"]["jobs"]
+    aggregate = next(
+        job["pr-gate-complete"]
+        for job in jobs
+        if isinstance(job, dict) and "pr-gate-complete" in job
+    )
+    assert "test-fast" in aggregate["requires"]

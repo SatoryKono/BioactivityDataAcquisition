@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
-from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.medallion import SilverOperationMode, SilverWriteMode, WriteMode
 from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation, LoggerPort
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.infrastructure.storage.audit_normalization import (
@@ -16,10 +16,10 @@ from bioetl.infrastructure.storage.audit_normalization import (
 
 __all__ = ["_SilverAuditWriteRequest", "_build_silver_audit_entry"]
 
-_SILVER_AUDIT_OPERATION_MAP: dict[SilverWriteMode, AuditOperation] = {
+_SILVER_AUDIT_OPERATION_MAP: dict[SilverOperationMode, AuditOperation] = {
     SilverWriteMode.MERGE: AuditOperation.MERGE,
     SilverWriteMode.APPEND: AuditOperation.APPEND,
-    SilverWriteMode.DELETE: AuditOperation.DELETE,
+    WriteMode.OVERWRITE: AuditOperation.DELETE,
 }
 
 
@@ -29,7 +29,7 @@ class _SilverAuditWriteRequest:
 
     table_name: str
     records: list[BronzeRecord]
-    mode: SilverWriteMode
+    mode: SilverOperationMode
     run_id: RunID | None = None
     run_type: RunType | None = None
     source_batch_id: BatchID | None = None

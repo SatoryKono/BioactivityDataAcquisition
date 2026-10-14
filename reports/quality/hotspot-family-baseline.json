@@ -18,9 +18,9 @@
       ],
       "duplication_clusters": 0,
       "files": 203,
-      "total_loc": 25115,
+      "total_loc": 25113,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.38,
+      "helper_function_ratio": 0.379,
       "max_internal_fan_in": 5,
       "max_internal_fan_in_module": "bioetl.application.core.record_processor_config",
       "bounded_growth_budgets": {
@@ -30,10 +30,10 @@
       "internal_fan_in_census": {
         "distribution": {
           "0": 19,
-          "1": 106,
-          "2": 41,
-          "3": 16,
-          "4": 12,
+          "1": 105,
+          "2": 42,
+          "3": 17,
+          "4": 11,
           "5": 9
         },
         "modules": [
@@ -1287,9 +1287,10 @@
           },
           {
             "module": "bioetl.application.core.preflight.health_aggregator_runtime",
-            "fan_in": 1,
+            "fan_in": 2,
             "runtime_importers": [
-              "bioetl.application.core.preflight.health_aggregator"
+              "bioetl.application.core.preflight.health_aggregator",
+              "bioetl.application.core.preflight.service"
             ]
           },
           {
@@ -1365,10 +1366,9 @@
           },
           {
             "module": "bioetl.application.core.quarantine_manager",
-            "fan_in": 4,
+            "fan_in": 3,
             "runtime_importers": [
               "bioetl.application.core._batch_write_schema_quarantine",
-              "bioetl.application.core._batch_write_support",
               "bioetl.application.core.batch_transformer_quarantine",
               "bioetl.application.core.wiring.runtime"
             ]
@@ -1595,7 +1595,7 @@
       ],
       "duplication_clusters": 0,
       "files": 49,
-      "total_loc": 6451,
+      "total_loc": 6450,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.284,
       "max_internal_fan_in": 2,
@@ -1993,7 +1993,7 @@
       ],
       "duplication_clusters": 0,
       "files": 32,
-      "total_loc": 3869,
+      "total_loc": 3855,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.358,
       "max_internal_fan_in": 2,

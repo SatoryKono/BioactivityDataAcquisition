@@ -7,7 +7,9 @@ from contextvars import ContextVar, Token
 from copy import deepcopy
 from datetime import datetime
 
+from bioetl.domain.exceptions.gold_write import GoldWriteFailure
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus
+from bioetl.domain.types.gold_contracts import require_complete_gold_receipt
 from bioetl.domain.types.gold_contracts_rejects import GoldContractValidationError
 from bioetl.domain.value_objects.dq_result import DQResult
 
@@ -183,12 +185,20 @@ def record_gold_observation(valid: bool, count: int) -> None:
     )
 
 
-async def observe_gold_write(operation: Awaitable[object], count: int) -> None:
+async def observe_gold_write[Result](
+    operation: Awaitable[Result], count: int
+) -> Result:
     """Capture storage-delegated schema outcomes without misclassifying IO failures."""
     try:
-        await operation
+        result = await operation
+        require_complete_gold_receipt(result)
+    except GoldWriteFailure as outcome:
+        if isinstance(outcome.__cause__, GoldContractValidationError):
+            record_gold_observation(False, count)
+        raise
     except GoldContractValidationError:
         record_gold_observation(False, count)
         raise
     else:
         record_gold_observation(True, count)
+        return result

@@ -4,6 +4,8 @@
 
 from __future__ import annotations
 
+from bioetl.domain.medallion import SilverOperationMode
+
 __all__ = ["SilverWriterMetadataMixin", "time"]
 
 import asyncio
@@ -13,7 +15,6 @@ from datetime import datetime
 
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
-from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
@@ -77,7 +78,7 @@ class SilverWriterMetadataMixin:
         self: _SilverWriterMetadataRuntimeProtocol,
         table_name: str,
         records: list[BronzeRecord],
-        mode: SilverWriteMode,
+        mode: SilverOperationMode,
         *,
         run_id: RunID | None,
         run_type: RunType | None,
@@ -200,7 +201,7 @@ class SilverWriterMetadataMixin:
         *,
         table_name: str,
         records: list[BronzeRecord],
-        mode: SilverWriteMode,
+        mode: SilverOperationMode,
         run_id: RunID | None,
         run_type: RunType | None,
         source_batch_id: BatchID | None,

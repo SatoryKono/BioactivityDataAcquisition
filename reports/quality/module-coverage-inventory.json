@@ -1,7 +1,7 @@
 {
-  "additive_coverage_xml_path": "reports/coverage/local-verify-pr12096-20261009-final16/coverage.xml",
-  "additive_coverage_xml_sha256": "0928d5524f15d0b97ac418d6a56de6d031a98b479a6f424be8bcb34bd3179d27",
-  "additive_measured_module_count": 2461,
+  "additive_coverage_xml_path": "reports/quality/pr12215-new-modules-coverage.xml",
+  "additive_coverage_xml_sha256": "fdf8632a2b24e92e9dbabae7409c2c73522923df3a5010a74ff204e2d1cc95b0",
+  "additive_measured_module_count": 2,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
   "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
@@ -9611,8 +9611,8 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 19,
-      "executable_lines": 19,
+      "covered_lines": 2,
+      "executable_lines": 2,
       "missing_lines": 0,
       "module": "bioetl.composition.factories.services",
       "path": "src/bioetl/composition/factories/services/__init__.py",
@@ -9621,12 +9621,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 52,
-      "executable_lines": 52,
+      "covered_lines": 53,
+      "executable_lines": 53,
       "missing_lines": 0,
       "module": "bioetl.composition.factories.services._builder_record_processor_support",
       "path": "src/bioetl/composition/factories/services/_builder_record_processor_support.py",
-      "source_lines": 157
+      "source_lines": 159
     },
     {
       "coverage_percent": 100.0,
@@ -9777,6 +9777,16 @@
       "module": "bioetl.composition.factories.services.port_factories",
       "path": "src/bioetl/composition/factories/services/port_factories.py",
       "source_lines": 98
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 17,
+      "executable_lines": 17,
+      "missing_lines": 0,
+      "module": "bioetl.composition.factories.services.preflight",
+      "path": "src/bioetl/composition/factories/services/preflight.py",
+      "source_lines": 63
     },
     {
       "coverage_percent": 100.0,
@@ -13239,6 +13249,16 @@
       "source_lines": 58
     },
     {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 15,
+      "executable_lines": 15,
+      "missing_lines": 0,
+      "module": "bioetl.domain.exceptions.gold_write",
+      "path": "src/bioetl/domain/exceptions/gold_write.py",
+      "source_lines": 33
+    },
+    {
       "coverage_percent": null,
       "coverage_status": "no_executable_lines",
       "covered_lines": 0,
@@ -16481,6 +16501,16 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
+      "covered_lines": 26,
+      "executable_lines": 26,
+      "missing_lines": 0,
+      "module": "bioetl.domain.types._gold_write_receipt",
+      "path": "src/bioetl/domain/types/_gold_write_receipt.py",
+      "source_lines": 45
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
       "covered_lines": 19,
       "executable_lines": 19,
       "missing_lines": 0,
@@ -16571,12 +16601,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 6,
-      "executable_lines": 6,
+      "covered_lines": 7,
+      "executable_lines": 7,
       "missing_lines": 0,
       "module": "bioetl.domain.types.gold_contracts",
       "path": "src/bioetl/domain/types/gold_contracts.py",
-      "source_lines": 39
+      "source_lines": 47
     },
     {
       "coverage_percent": 100.0,
@@ -22611,6 +22641,26 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
+      "covered_lines": 46,
+      "executable_lines": 46,
+      "missing_lines": 0,
+      "module": "bioetl.infrastructure.storage.gold.cancellation",
+      "path": "src/bioetl/infrastructure/storage/gold/cancellation.py",
+      "source_lines": 99
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 36,
+      "executable_lines": 36,
+      "missing_lines": 0,
+      "module": "bioetl.infrastructure.storage.gold.commit_outcome",
+      "path": "src/bioetl/infrastructure/storage/gold/commit_outcome.py",
+      "source_lines": 78
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
       "covered_lines": 48,
       "executable_lines": 48,
       "missing_lines": 0,
@@ -22811,12 +22861,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 35,
-      "executable_lines": 35,
+      "covered_lines": 36,
+      "executable_lines": 36,
       "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.gold.writer_protocols",
       "path": "src/bioetl/infrastructure/storage/gold/writer_protocols.py",
-      "source_lines": 106
+      "source_lines": 109
     },
     {
       "coverage_percent": 100.0,
@@ -35273,8 +35323,8 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 19,
-      "executable_lines": 19,
+      "covered_lines": 2,
+      "executable_lines": 2,
       "missing_lines": 0,
       "module": "bioetl.composition.factories.services",
       "path": "src/bioetl/composition/factories/services/__init__.py",
@@ -35283,12 +35333,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 52,
-      "executable_lines": 52,
+      "covered_lines": 53,
+      "executable_lines": 53,
       "missing_lines": 0,
       "module": "bioetl.composition.factories.services._builder_record_processor_support",
       "path": "src/bioetl/composition/factories/services/_builder_record_processor_support.py",
-      "source_lines": 157
+      "source_lines": 159
     },
     {
       "coverage_percent": 100.0,
@@ -35439,6 +35489,16 @@
       "module": "bioetl.composition.factories.services.port_factories",
       "path": "src/bioetl/composition/factories/services/port_factories.py",
       "source_lines": 98
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 17,
+      "executable_lines": 17,
+      "missing_lines": 0,
+      "module": "bioetl.composition.factories.services.preflight",
+      "path": "src/bioetl/composition/factories/services/preflight.py",
+      "source_lines": 63
     },
     {
       "coverage_percent": 100.0,
@@ -38901,6 +38961,16 @@
       "source_lines": 58
     },
     {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 15,
+      "executable_lines": 15,
+      "missing_lines": 0,
+      "module": "bioetl.domain.exceptions.gold_write",
+      "path": "src/bioetl/domain/exceptions/gold_write.py",
+      "source_lines": 33
+    },
+    {
       "coverage_percent": null,
       "coverage_status": "no_executable_lines",
       "covered_lines": 0,
@@ -42143,6 +42213,16 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
+      "covered_lines": 26,
+      "executable_lines": 26,
+      "missing_lines": 0,
+      "module": "bioetl.domain.types._gold_write_receipt",
+      "path": "src/bioetl/domain/types/_gold_write_receipt.py",
+      "source_lines": 45
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
       "covered_lines": 19,
       "executable_lines": 19,
       "missing_lines": 0,
@@ -42233,12 +42313,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 6,
-      "executable_lines": 6,
+      "covered_lines": 7,
+      "executable_lines": 7,
       "missing_lines": 0,
       "module": "bioetl.domain.types.gold_contracts",
       "path": "src/bioetl/domain/types/gold_contracts.py",
-      "source_lines": 39
+      "source_lines": 47
     },
     {
       "coverage_percent": 100.0,
@@ -48273,6 +48353,26 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
+      "covered_lines": 46,
+      "executable_lines": 46,
+      "missing_lines": 0,
+      "module": "bioetl.infrastructure.storage.gold.cancellation",
+      "path": "src/bioetl/infrastructure/storage/gold/cancellation.py",
+      "source_lines": 99
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 36,
+      "executable_lines": 36,
+      "missing_lines": 0,
+      "module": "bioetl.infrastructure.storage.gold.commit_outcome",
+      "path": "src/bioetl/infrastructure/storage/gold/commit_outcome.py",
+      "source_lines": 78
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
       "covered_lines": 48,
       "executable_lines": 48,
       "missing_lines": 0,
@@ -48473,12 +48573,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 35,
-      "executable_lines": 35,
+      "covered_lines": 36,
+      "executable_lines": 36,
       "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.gold.writer_protocols",
       "path": "src/bioetl/infrastructure/storage/gold/writer_protocols.py",
-      "source_lines": 106
+      "source_lines": 109
     },
     {
       "coverage_percent": 100.0,
@@ -51333,7 +51433,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "f94951f03a7a697fef51bca6fc053a0623a0e559bc13ef1baeaf94799f3d15b5",
+  "source_tree_sha256": "b0a466d76bab7c43dbcea7fc7b570adbe834fe6996062c9c34464c04079c4953",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -51488,10 +51588,10 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2566,
+    "source_module_count": 2571,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 2524,
+      "fully_covered": 2529,
       "no_executable_lines": 1,
       "partially_covered": 41,
       "uncovered": 0,

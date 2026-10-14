@@ -20,8 +20,8 @@ bash scripts/engineering/dev/setup_env_wsl.sh --agent-tools all
 .\scripts\engineering\dev\setup_env_windows.ps1 -AgentTools all
 ```
 
-The lock-backed extras pin `agentdebugx==0.3.1` and
-`proofagent-harness==0.11.0`. When `all` is selected, each optional tool is
+The lock-backed extras pin `agentdebugx==0.5.2` and
+`proofagent-harness==0.13.0`. When `all` is selected, each optional tool is
 attempted separately so one installation failure does not prevent the other.
 
 ## Use

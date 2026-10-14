@@ -12,14 +12,13 @@ from memory.graph.refs import (
 )
 from memory.timeline._common import (
     DEFAULT_EVENTS_DIR,
+    DEFAULT_RUN_LEDGER_DIR,
+    DEFAULT_RUN_MANIFEST_DIR,
     dedupe_preserve_order,
     read_json,
     read_jsonl,
     write_jsonl,
 )
-
-DEFAULT_RUN_MANIFEST_DIR = Path("data/output/control/run_manifest")
-DEFAULT_RUN_LEDGER_DIR = Path("data/output/control/run_ledger")
 
 
 def _manifest_event(manifest_path: Path, payload: dict[str, Any]) -> dict[str, Any]:
