@@ -1057,7 +1057,13 @@ class TestPublicationTermPubmedEnricherHook:
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
         "error_type",
-        [TypeError, BioETLError, CriticalError, InvalidStateError, PolicyViolationError],
+        [
+            TypeError,
+            BioETLError,
+            CriticalError,
+            InvalidStateError,
+            PolicyViolationError,
+        ],
     )
     async def test_enrichment_programming_error_propagates(self, error_type):
         """Programming and invariant errors escape optional enrichment fallback."""
