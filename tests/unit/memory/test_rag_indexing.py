@@ -114,8 +114,9 @@ def test_infer_source_type_exact_match() -> None:
 
 def test_infer_source_type_prefix_only() -> None:
     assert infer_source_type(Path("docs/plans/2026/migration.md")) == "plan"
-    # Path("docs/plans/").as_posix() yields "docs/plans" which doesn't start with "docs/plans/"
     assert infer_source_type(Path("docs/plans/index.md")) == "plan"
+    # A bare directory does not match the prefix including its trailing slash.
+    assert infer_source_type(Path("docs/plans")) == "doc"
 
 
 def test_infer_source_type_prefix_and_suffix() -> None:
@@ -137,6 +138,9 @@ def test_infer_source_type_fallback() -> None:
 def test_infer_source_type_priority() -> None:
     # memory rule is before code rule. src/memory/*.py is "memory" not "code"
     assert infer_source_type(Path("src/memory/app.py")) == "memory"
+
+
+def test_infer_domain_from_repo_paths() -> None:
     assert (
         infer_domain(Path("docs/02-architecture/decisions/ADR-043-example.md"))
         == "architecture"

@@ -79,7 +79,7 @@ export = [
 ]
 tests = [
     # Testing frameworks
-    "pytest>=9.0.3",
+    "pytest>=9.0.3,<9.2",
     "pytest-cov>=4.0",
     "pytest-asyncio>=1.4",
     "pytest-xdist>=3.5",
@@ -115,7 +115,7 @@ tests_full = [
     "vulture>=2.11",
 ]
 dev = [
-    "pytest>=9.0.3",
+    "pytest>=9.0.3,<9.2",
     "pytest-cov>=4.0",
     "pytest-asyncio>=1.4",
     "pytest-xdist>=3.5",

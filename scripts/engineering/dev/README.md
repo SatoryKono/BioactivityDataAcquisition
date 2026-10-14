@@ -89,7 +89,9 @@ counts successful subtests without preserving separate testcase nodes; this
 adapter gives only the XML writer distinct child identities while preserving
 pytest failure propagation. The telemetry consumer still rejects mismatched
 counts. Remove the adapter only when the pinned upstream reporter passes the
-existing serial and xdist pass/fail/skip regressions without it.
+existing serial and xdist pass/fail/skip regressions without it. The pytest
+dependency stays below 9.2 while this adapter uses private reporter APIs; expand
+that bound only after running those regressions with the new version.
 
 For fast, reproducible narrow slices during refactoring, use the explicit
 `--narrow` mode:
