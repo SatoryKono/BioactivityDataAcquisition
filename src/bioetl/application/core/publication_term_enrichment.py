@@ -42,7 +42,7 @@ async def _attach_pubmed_payloads(
         return records
     enriched = list(await enricher.enrich_many(need))
     if len(enriched) != len(need):
-        return records
+        raise ValueError("Publication enrichment must preserve record cardinality")
     replacements = {
         id(original): replacement
         for original, replacement in zip(need, enriched, strict=True)
@@ -62,6 +62,8 @@ async def yield_terms_from_publications(
     """Expand publications into term records, enriching empty PubMed-linked docs."""
     term_count = 0
     try:
+        if limit is not None and limit <= 0:
+            return
         async for batch in batched_source_records(
             publications,
             batch_size=PUBLICATION_TERM_PUBMED_ENRICH_BATCH_SIZE,
