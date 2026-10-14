@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-14T22:59:51.164022+00:00",
+  "generated_at": "2026-10-14T23:06:57.351274+00:00",
   "summary": {
     "total_scripts": 652,
     "status_counts": {
@@ -8381,7 +8381,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1445,
+          "line": 1447,
           "source_group": "docs",
           "text": "автоматические docs-проверки (`python -m scripts.docs check-links` и"
         }
@@ -11202,7 +11202,7 @@
       "references": [
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1808,
+          "line": 1810,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.dev run-tests cov"
         },
@@ -14309,13 +14309,13 @@
       "references": [
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1543,
+          "line": 1545,
           "source_group": "docs",
           "text": "| **Файл:строки**      | Точная ссылка на код (`runner.py:116-123`)    |"
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1555,
+          "line": 1557,
           "source_group": "docs",
           "text": "- **Файл**: `runner.py:116-123` (175 строк, 9 методов)"
         },
@@ -14714,7 +14714,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1666,
+          "line": 1668,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },
