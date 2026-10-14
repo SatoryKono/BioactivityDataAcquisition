@@ -52,7 +52,7 @@ class _ColumnPriorityProvider(Protocol):
 
 def extract_field_from_qualified(column: str) -> str:
     """Extract field name from qualified column (x.y.z -> z)."""
-    parts = column.split(".")
+    parts = column.split(".", 2)
     if len(parts) == 3:
         return parts[2]
     return column
@@ -105,7 +105,7 @@ def build_field_groups(
         if col.startswith("_"):
             continue
         field = extract_field_from_qualified(col)
-        if entity_scoped and len(col.split(".")) == 3:
+        if entity_scoped and len(col.split(".", 2)) == 3:
             field = col.split(".", 1)[1]
         field_groups.setdefault(field, []).append(col)
     if entity_scoped:
