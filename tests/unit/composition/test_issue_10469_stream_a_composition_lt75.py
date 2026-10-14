@@ -8,13 +8,16 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.composition.factories.pipeline import _runner_preflight_observer as subject
+from bioetl.composition.factories.services import preflight as preflight_subject
 
 pytestmark = pytest.mark.unit
 
 
 def _context() -> SimpleNamespace:
     pipeline = SimpleNamespace(
-        services=SimpleNamespace(metrics=MagicMock(name="metrics")),
+        services=SimpleNamespace(
+            metrics=MagicMock(name="metrics"), storage=SimpleNamespace()
+        ),
         runtime=SimpleNamespace(health_check_mode="off", run_type="backfill"),
         config=SimpleNamespace(
             pipeline_name="chembl_activity",
@@ -33,6 +36,7 @@ def _context() -> SimpleNamespace:
     )
     return SimpleNamespace(
         pipeline=pipeline,
+        yaml_config=None,
         logger_port=MagicMock(name="logger"),
         observability=SimpleNamespace(tracer=MagicMock(name="tracer")),
     )
@@ -44,7 +48,7 @@ def test_build_preflight_service_wires_health_and_medallion(
     captured: dict[str, object] = {}
 
     monkeypatch.setattr(
-        subject,
+        preflight_subject,
         "HealthAggregator",
         lambda **kwargs: captured.setdefault("health", SimpleNamespace(**kwargs)),
     )
@@ -54,21 +58,22 @@ def test_build_preflight_service_wires_health_and_medallion(
         lambda metrics: captured.setdefault("monitor", metrics),
     )
     monkeypatch.setattr(
-        subject,
+        preflight_subject,
         "MedallionConfigValidator",
         lambda **kwargs: captured.setdefault("validator", SimpleNamespace(**kwargs)),
     )
     monkeypatch.setattr(
-        subject,
+        preflight_subject,
         "PreflightService",
         lambda **kwargs: captured.setdefault("service", SimpleNamespace(**kwargs)),
     )
-    monkeypatch.setattr(subject, "WriteModePolicy", lambda: "policy")
-    monkeypatch.setattr(subject, "SystemClock", lambda: "clock")
+    monkeypatch.setattr(preflight_subject, "WriteModePolicy", lambda: "policy")
+    monkeypatch.setattr(preflight_subject, "SystemClock", lambda: "clock")
 
-    result = subject.build_preflight_service(_context())
+    context = _context()
+    result = subject.build_preflight_service(context)
     assert result is captured["service"]
-    assert captured["monitor"] is _context().pipeline.services.metrics or True
+    assert captured["monitor"] is context.pipeline.services.metrics
     assert captured["health"].clock == "clock"
     assert captured["validator"].write_mode_policy == "policy"
 

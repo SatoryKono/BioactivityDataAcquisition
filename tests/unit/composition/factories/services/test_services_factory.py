@@ -451,6 +451,7 @@ def test_create_record_processor_from_pipeline_delegates() -> None:
             data_schema=None,
             table=SimpleNamespace(
                 primary_keys=("activity_id",),
+                partition_cols=("year",),
                 silver_write_mode="merge",
                 gold_write_mode="overwrite",
                 on_schema_mismatch="error",

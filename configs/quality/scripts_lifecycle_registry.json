@@ -1267,6 +1267,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
     },
+    "scripts/engineering/qa/report_topology_source_binding.py": {
+      "decision": "legacy_manual_utility",
+      "next_step": "Retain as the bounded manual source-projection producer introduced by #12215; its direct script invocation only rebinds two delimited documentation blocks and does not produce measurements or expose a runtime entrypoint. Route through the canonical QA command surface before promoting it to an active operator command.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-10-31"
+    },
     "scripts/engineering/qa/report_vcr_cassette_census.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain as a bounded VCR census utility pending consolidation into the canonical QA command surface; do not count it as a new active entrypoint.",

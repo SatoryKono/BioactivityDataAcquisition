@@ -18,6 +18,7 @@ from bioetl.application.core._batch_write_support import (
 from bioetl.application.services.batch_processing.operation_errors import (
     OPERATION_ERRORS as _OPERATION_ERRORS,
 )
+from bioetl.domain.types.gold_contracts import require_complete_gold_receipt
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -120,15 +121,17 @@ async def write_gold_layer(
     silver_result = cast("SilverWriteResult | None", silver_outcome.write_result)
     silver_refs = [silver_result] if silver_result is not None else None
     if quarantine_manager is None:
-        await span_executor.execute_with_span(
+        receipt = await span_executor.execute_with_span(
             "write_gold",
             writer.write_gold(result.gold_records, silver_refs=silver_refs),
             batch_id,
             len(result.gold_records),
             on_error=lambda e: writer.log_and_track_write_error("gold", e, batch_id),
         )
+        receipt = require_complete_gold_receipt(receipt)
         return LayerWriteOutcome(
             layer="gold",
+            write_result=receipt,
             status="written",
             candidate_count=len(result.gold_records),
             confirmed_count=len(result.gold_records),

@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-14T04:49:48.484687+00:00",
+  "generated_at": "2026-10-14T04:53:11.957021+00:00",
   "summary": {
-    "total_scripts": 650,
+    "total_scripts": 651,
     "status_counts": {
       "active": 335,
-      "supporting": 315
+      "supporting": 316
     },
     "reference_group_coverage": {
       "agents": 11,
       "build": 18,
       "ci": 71,
-      "docs": 281,
+      "docs": 282,
       "other": 50,
       "scripts": 543,
       "skills": 13,
-      "tests": 462
+      "tests": 463
     }
   },
   "scripts": [
@@ -15922,7 +15922,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
@@ -15939,6 +15939,12 @@
         {
           "path": "tests/architecture/test_composition_protocol_inventory.py",
           "line": 10,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.report_composition_protocol_inventory import ("
+        },
+        {
+          "path": "tests/unit/scripts/qa/test_composition_protocol_locations.py",
+          "line": 7,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_composition_protocol_inventory import ("
         },
@@ -16708,7 +16714,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 19,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
@@ -17099,6 +17105,31 @@
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-11-17",
       "next_step": "Retain as a bounded manual test-governance report utility while testing guidance still references the direct script path; promote it into the canonical scripts.engineering.qa surface or retire it after the broader test-governance workflow is consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17."
+    },
+    {
+      "path": "scripts/engineering/qa/report_topology_source_binding.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "docs/02-architecture/current-state-inventory.md",
+          "line": 342,
+          "source_group": "docs",
+          "text": "Derived by scripts/engineering/qa/report_topology_source_binding.py from"
+        },
+        {
+          "path": "tests/unit/scripts/qa/test_topology_source_binding.py",
+          "line": 5,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.report_topology_source_binding import ("
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-10-31",
+      "next_step": "Retain as the bounded manual source-projection producer introduced by #12215; its direct script invocation only rebinds two delimited documentation blocks and does not produce measurements or expose a runtime entrypoint. Route through the canonical QA command surface before promoting it to an active operator command."
     },
     {
       "path": "scripts/engineering/qa/report_vcr_cassette_census.py",
