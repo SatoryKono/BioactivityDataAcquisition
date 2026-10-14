@@ -28,13 +28,14 @@ from scripts.engineering.qa.observability_metric_inventory_shared import (
 )
 
 
+_FACADE_MODULE = "scripts.engineering.qa.report_observability_metric_inventory"
+
+
 def collect_metric_inventory(repo_root: Path) -> MetricInventoryReport:
     """Bind the facade collector without a static import cycle."""
     from importlib import import_module
 
-    module = import_module(
-        "scripts.engineering.qa.report_observability_metric_inventory"
-    )
+    module = import_module(_FACADE_MODULE)
     collector = cast(
         Callable[[Path], MetricInventoryReport],
         module.collect_metric_inventory,
@@ -52,9 +53,7 @@ def _build_runtime_cardinality_review_summary(
     """Bind the facade review summary without a static import cycle."""
     from importlib import import_module
 
-    module = import_module(
-        "scripts.engineering.qa.report_observability_metric_inventory"
-    )
+    module = import_module(_FACADE_MODULE)
     builder = cast(
         Callable[..., RuntimeCardinalityReviewSummary],
         module._build_runtime_cardinality_review_summary,
@@ -495,7 +494,7 @@ def main(argv: list[str] | None = None) -> int:
         [
             "python",
             "-m",
-            "scripts.engineering.qa.report_observability_metric_inventory",
+            _FACADE_MODULE,
             *(sys.argv[1:] if argv is None else argv),
         ]
     )
