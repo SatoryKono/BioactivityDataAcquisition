@@ -601,18 +601,26 @@ def test_prefer_seed_preserves_entity_specific_fields_for_mapping(
 
 
 @pytest.mark.unit
-def test_prefer_seed_without_pipeline_coalesces_unqualified_seed(
+@pytest.mark.parametrize("seed_pipeline", [None, "chembl_publication"])
+@pytest.mark.parametrize(
+    "field,qualified",
+    [("title", "chembl.publication.title"), ("doi", "crossref.publication.doi")],
+)
+def test_prefer_seed_coalesces_unqualified_seed(
     policy: CoalescePolicyService,
+    seed_pipeline: str | None,
+    field: str,
+    qualified: str,
 ) -> None:
     df = pl.DataFrame(
         {
-            "title": [None, "seed"],
-            "crossref.publication.title": ["fallback", "enricher"],
+            field: [None, "seed"],
+            qualified: ["fallback", "enricher"],
         }
     )
-    result = policy.coalesce_prefer_seed(df, ())
-    assert result.columns == ["title"]
-    assert result["title"].to_list() == ["fallback", "seed"]
+    result = policy.coalesce_prefer_seed(df, (), seed_pipeline=seed_pipeline)
+    assert result.columns == [field]
+    assert result[field].to_list() == ["fallback", "seed"]
 
 
 @pytest.mark.unit
@@ -643,3 +651,24 @@ def test_small_group_preserves_incompatible_scalar_dtypes(
     )
     result = policy.coalesce_prefer_seed(df, (), "chembl_publication")
     assert result.equals(df)
+
+
+@pytest.mark.unit
+def test_coalesce_preserves_column_without_whole_group_supertype(
+    policy: CoalescePolicyService,
+) -> None:
+    frame = pl.DataFrame(
+        {
+            "chembl.publication.value": pl.Series([None, 1], dtype=pl.Int64),
+            "crossref.publication.value": pl.Series([2, 3], dtype=pl.UInt64),
+            "openalex.publication.value": pl.Series(
+                [date(2020, 1, 1)] * 2, dtype=pl.Date
+            ),
+        }
+    )
+    result = policy.coalesce_first_non_null(frame, (), "chembl_publication")
+    assert result["chembl.publication.value"].to_list() == [2, 1]
+    assert "crossref.publication.value" not in result.columns
+    assert result["openalex.publication.value"].equals(
+        frame["openalex.publication.value"]
+    )

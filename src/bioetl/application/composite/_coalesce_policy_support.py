@@ -75,9 +75,19 @@ def can_coalesce(
         return True
     if isinstance(type1, pl.List) != isinstance(type2, pl.List):
         return False
+    return _has_coalesce_supertype(df, [col1, col2])
+
+
+def _has_coalesce_supertype(
+    df: Any,  # Any: DataFrame follows the same schema surface as can_coalesce.
+    columns: list[str],
+) -> bool:
+    """Check the complete expression's type without reading or coercing rows."""
+    import polars as pl
+
     try:
-        pl.DataFrame(schema={"left": type1, "right": type2}).lazy().select(
-            pl.coalesce("left", "right")
+        pl.DataFrame(schema={col: df[col].dtype for col in columns}).lazy().select(
+            pl.coalesce(columns)
         ).collect_schema()
     except (pl.exceptions.SchemaError, pl.exceptions.InvalidOperationError):
         return False
@@ -121,11 +131,13 @@ def sort_columns(
     """Sort columns with either seed-first or enricher-first strategy."""
 
     def sort_key(col: str) -> tuple[int, str]:
-        is_seed = (
-            col.startswith(seed_prefix_value) if seed_prefix_value else "." not in col
-        )
-        priority = int(is_seed != prefer_seed)
-        return (priority, col)
+        if "." not in col:
+            seed_rank = 0
+        elif seed_prefix_value and col.startswith(seed_prefix_value):
+            seed_rank = 1
+        else:
+            seed_rank = 2
+        return (seed_rank if prefer_seed else 2 - seed_rank, col)
 
     return sorted(columns, key=sort_key)
 
@@ -141,7 +153,9 @@ def compatible_columns(
     base_col = ordered_cols[0]
     result = [base_col]
     for col in ordered_cols[1:]:
-        if all(can_coalesce(df, selected, col) for selected in result):
+        if all(can_coalesce(df, selected, col) for selected in result) and (
+            _has_coalesce_supertype(df, [*result, col])
+        ):
             result.append(col)
     return result
 
