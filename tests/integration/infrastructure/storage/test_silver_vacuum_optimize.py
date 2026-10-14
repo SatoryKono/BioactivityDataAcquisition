@@ -12,6 +12,12 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
+
+from tests.helpers.clock import fixed_test_clock
+
 from pathlib import Path
 
 import pyarrow as pa
@@ -58,7 +64,11 @@ def temp_delta_path(tmp_path: Path) -> str:
 
 @pytest.fixture
 def silver_writer(temp_delta_path: str, noop_logger: object) -> SilverWriter:
-    return SilverWriter(base_path=temp_delta_path, logger=noop_logger)
+    return SilverWriter(
+        runtime_request=SilverWriterRuntimeServicesRequest(clock=fixed_test_clock()),
+        base_path=temp_delta_path,
+        logger=noop_logger,
+    )
 
 
 @pytest.mark.asyncio

@@ -25,29 +25,32 @@ import sys
 from pathlib import Path
 from typing import Any
 
+_WIKI = "wiki.json"
+_WIKI_CORE = "wiki-core.json"
+_WIKI_REFERENCE = "wiki-reference.json"
 
 MODULES = [
-    "wiki-core.json",
+    _WIKI_CORE,
     "wiki-architecture.json",
     "wiki-pipelines.json",
     "wiki-schemas.json",
     "wiki-providers.json",
     "wiki-observability.json",
-    "wiki-reference.json",
+    _WIKI_REFERENCE,
 ]
 
 # Top-level DeepWiki section -> module file. The wiki.json monolith is
 # DFS-ordered, so each section's pages stay contiguous after filtering.
 SECTION_MODULE = {
-    "BioETL Overview": "wiki-core.json",
-    "AI Agent Subsystem and Memory": "wiki-core.json",
+    "BioETL Overview": _WIKI_CORE,
+    "AI Agent Subsystem and Memory": _WIKI_CORE,
     "Architecture": "wiki-architecture.json",
     "Data Pipelines": "wiki-pipelines.json",
     "Run Control Plane and Observability": "wiki-observability.json",
-    "Quality Governance and CI/CD": "wiki-reference.json",
-    "Diagram and Documentation Generation": "wiki-reference.json",
-    "Operations and Deployment": "wiki-reference.json",
-    "Glossary": "wiki-reference.json",
+    "Quality Governance and CI/CD": _WIKI_REFERENCE,
+    "Diagram and Documentation Generation": _WIKI_REFERENCE,
+    "Operations and Deployment": _WIKI_REFERENCE,
+    "Glossary": _WIKI_REFERENCE,
 }
 
 # Subtree overrides win over the top-level section mapping.
@@ -83,9 +86,10 @@ class DeepWikiUpdater:
     """Automated DeepWiki update utility."""
 
     def __init__(self, repo_path: Path):
+        """Set wiki paths and module filenames for the given repository root."""
         self.repo_path = repo_path
         self.wiki_dir = repo_path / ".devin"
-        self.monolith = self.wiki_dir / "wiki.json"
+        self.monolith = self.wiki_dir / _WIKI
         self.modules = list(MODULES)
 
     def backup_wiki_files(self) -> bool:
@@ -140,11 +144,12 @@ class DeepWikiUpdater:
     def _module_for(
         self, page: dict[str, Any], by_title: dict[str, dict[str, Any]]
     ) -> str:
+        """Choose the nearest subtree override, then the root section or reference."""
         chain = self._ancestors(page, by_title)
         for title in chain:  # nearest ancestor wins
             if title in SUBTREE_MODULE:
                 return SUBTREE_MODULE[title]
-        return SECTION_MODULE.get(chain[-1], "wiki-reference.json")
+        return SECTION_MODULE.get(chain[-1], _WIKI_REFERENCE)
 
     def emit_modules(self, only: str | None = None) -> bool:
         """Regenerate wiki-*.json module files from the wiki.json monolith."""
@@ -167,7 +172,7 @@ class DeepWikiUpdater:
             module_pages = buckets[name]
             payload = {
                 "version": wiki.get("version", "2.1"),
-                "generated_from": "wiki.json",
+                "generated_from": _WIKI,
                 "repo_notes": wiki.get("repo_notes", []),
                 "pages": module_pages,
             }
@@ -184,7 +189,7 @@ class DeepWikiUpdater:
         """Validate JSON structure of monolith and module files."""
         print("Validating JSON structure...")
         all_valid = True
-        for name in ["wiki.json", *self.modules]:
+        for name in [_WIKI, *self.modules]:
             path = self.wiki_dir / name
             if not path.exists():
                 print(f"FAIL {name} does not exist")

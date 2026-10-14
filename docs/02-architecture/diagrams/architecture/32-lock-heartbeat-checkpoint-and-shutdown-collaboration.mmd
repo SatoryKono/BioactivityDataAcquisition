@@ -1,7 +1,7 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: Lock Heartbeat Checkpoint And Shutdown Collaboration
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.0.1
+%% @date    2026-10-13
 %% @type    sequenceDiagram
 %% @level   System / Interaction
 %% @nodes   6
@@ -11,7 +11,7 @@ sequenceDiagram
     participant Runner as PipelineRunner
     participant Lock as MemoryLock
     participant Heartbeat as heartbeat service
-    participant Checkpoint as LocalCheckpointPort
+    participant Checkpoint as CheckpointPort
     participant Shutdown as ShutdownPort
     participant Ledger as attached run ledger service
 

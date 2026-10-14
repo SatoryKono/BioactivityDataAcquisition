@@ -20,8 +20,33 @@ _LOGGER = logging.getLogger(__name__)
 
 # Canonical secret filter sets installed unconditionally by build_base_vcr_config
 # (CF-030 / REQ-SECRET-003): callers may extend them but never remove them.
-CANONICAL_FILTER_HEADERS: tuple[str, ...] = ("authorization", "x-api-key", "cookie")
-CANONICAL_FILTER_QUERY_PARAMETERS: tuple[str, ...] = ("api_key", "key")
+CANONICAL_FILTER_HEADERS: tuple[str, ...] = (
+    "authorization",
+    "x-api-key",
+    "api-key",
+    "x-auth-token",
+    "proxy-authorization",
+    "cookie",
+    "set-cookie",
+    "set-cookie2",
+    "ncbi-sid",
+    "ncbi-phid",
+)
+CANONICAL_FILTER_QUERY_PARAMETERS: tuple[str, ...] = (
+    "api_key",
+    "key",
+    "apikey",
+    "token",
+    "access_token",
+    "refresh_token",
+    "ncbi_sid",
+    "ncbi_phid",
+    "ncbi-sid",
+    "ncbi-phid",
+    "session_id",
+    "sessionid",
+    "session_token",
+)
 CANONICAL_RESPONSE_FILTER_HEADERS: frozenset[str] = frozenset(
     (*CANONICAL_FILTER_HEADERS, "set-cookie", "set-cookie2")
 )

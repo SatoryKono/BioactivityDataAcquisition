@@ -1,7 +1,7 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: UniProt IDMapping To Protein Fetch Enrichment
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.0.1
+%% @date    2026-10-13
 %% @type    flowchart
 %% @level   Provider / Component
 %% @nodes   10
@@ -9,7 +9,7 @@
 flowchart TB
     seed[seed ids or accessions]
     adapter[UniProtAdapter]
-    idmap[UniProtIdMappingClient]
+    idmap[UniProtIDMappingClient]
     job[start idmapping job]
     poll[poll job status]
     mapped[mapped accession set]

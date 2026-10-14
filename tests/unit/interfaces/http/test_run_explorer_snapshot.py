@@ -201,6 +201,7 @@ async def test_stop_propagates_caller_cancellation_during_child_cleanup() -> Non
     started = asyncio.Event()
     cleaning = asyncio.Event()
     release = asyncio.Event()
+    cleanup_finished = asyncio.Event()
 
     async def child() -> None:
         started.set()
@@ -209,16 +210,20 @@ async def test_stop_propagates_caller_cancellation_during_child_cleanup() -> Non
         finally:
             cleaning.set()
             await release.wait()
+            cleanup_finished.set()
 
     task = asyncio.create_task(child())
     await started.wait()
     caller = asyncio.create_task(stop_run_explorer_snapshot(task))
     await cleaning.wait()
     caller.cancel()
+    release.set()
     with pytest.raises(asyncio.CancelledError):
         await caller
     assert caller.cancelled()
     assert task.done()
+    assert task.cancelled()
+    assert cleanup_finished.is_set()
 
 
 @pytest.mark.asyncio
