@@ -29,6 +29,12 @@ HistoricalReplayClaimScopeMode = Literal[
     "all_retained_historical_runs",
     "retained_certifiable_historical_runs",
 ]
+HISTORICAL_CLOSURE_MODEL_PUBLIC_NAMES = (
+    "RESIDUAL_BLOCKED_STATUSES",
+    "HistoricalReplayClaimScopeMode",
+    "HistoricalReplayClosureReportRecord",
+    "HistoricalReplayResidualDispositionRecord",
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -96,9 +102,4 @@ class HistoricalReplayClosureReportRecord:
         }
 
 
-__all__ = [
-    "RESIDUAL_BLOCKED_STATUSES",
-    "HistoricalReplayClaimScopeMode",
-    "HistoricalReplayClosureReportRecord",
-    "HistoricalReplayResidualDispositionRecord",
-]
+__all__ = list(HISTORICAL_CLOSURE_MODEL_PUBLIC_NAMES)

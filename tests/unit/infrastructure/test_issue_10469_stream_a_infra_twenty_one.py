@@ -14,6 +14,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pandas as pd
 import pyarrow as pa
 import pytest
+from tests.helpers.clock import fixed_test_clock
 
 from bioetl.domain.medallion import SilverWriteMode, WriteModePolicy
 from bioetl.domain.workflow import (
@@ -399,7 +400,9 @@ async def test_validation_facade_wrappers_and_schema_wrapper(
         _schema,
     )
     built = _build_validation_operations(
-        SilverWriterRuntimeServicesRequest(base_path=tmp_path, logger=NoOpLogger()),
+        SilverWriterRuntimeServicesRequest(
+            base_path=tmp_path, logger=NoOpLogger(), clock=fixed_test_clock()
+        ),
         write_policy=WriteModePolicy(),
         silver_validator=MagicMock(),
     )
@@ -427,6 +430,7 @@ def test_pandera_non_object_and_index_schema() -> None:
     assert validator._normalize_nullable_integer_columns(frame) is not None
     assert validator._normalize_nullable_boolean_columns(frame) is not None
     indexed_schema = SimpleNamespace(
+        ordered=False,
         columns={"n": object(), "idx": object()},
         index=SimpleNamespace(names=["idx"]),
         validate=lambda *_a, **_k: None,

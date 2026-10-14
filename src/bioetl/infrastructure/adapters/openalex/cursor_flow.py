@@ -13,9 +13,7 @@ from bioetl.infrastructure.adapters.openalex._cursor_lookup import (
     fetch_works_by_dois,
     search_works_by_title,
 )
-from bioetl.infrastructure.adapters.openalex.query_builder import (
-    build_openalex_search_params,
-)
+from bioetl.infrastructure.adapters.openalex._query_pagination import iter_query_results
 from bioetl.infrastructure.adapters.openalex.query_execution import (
     OpenAlexQueryExecutor,
 )
@@ -25,6 +23,9 @@ from bioetl.infrastructure.adapters.openalex.response_mapping import (
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
+
+# Hard ceiling against runaway cursor loops from misbehaving providers (CF-014).
+_DEFAULT_MAX_PAGES: int = 10_000
 
 
 @dataclass(slots=True)
@@ -61,25 +62,18 @@ class OpenAlexCursorFlow:
         Yields:
             BronzeRecord works from the OpenAlex search results.
         """
-        fetched = 0
-        cursor: str | None = "*"
-        per_page = min(self.batch_size, 200)
-
-        while cursor:
-            params = build_openalex_search_params(
-                mailto=self.mailto,
-                api_key=self.api_key,
-                query=query,
-                cursor=cursor,
-                per_page=per_page,
-            )
-            payload = await self.query_executor.request_works_payload(params)
-            for work in self.response_mapper.extract_results(payload):
-                if limit is not None and fetched >= limit:
-                    return
-                yield work
-                fetched += 1
-            cursor = self.response_mapper.extract_next_cursor(payload)
+        async for work in iter_query_results(
+            query=query,
+            limit=limit,
+            max_pages=_DEFAULT_MAX_PAGES,
+            batch_size=self.batch_size,
+            mailto=self.mailto,
+            api_key=self.api_key,
+            query_executor=self.query_executor,
+            response_mapper=self.response_mapper,
+            logger=self.logger,
+        ):
+            yield work
 
     async def iter_filtered_by_doi(
         self,

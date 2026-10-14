@@ -2,22 +2,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, cast
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from bioetl.application.core import subcellular_fraction_support as support
-from bioetl.application.core.data_source_mixins import (
-    _SourceMetadataDelegationMixin,
-    _WrappedDataSourceDelegationMixin,
+from bioetl.application.core.data_sources._derived_assay_source import (
+    _DerivedAssayDataSourceBase,
 )
-from bioetl.application.core.derived_scan_budget import (
-    iter_derived_source,
-    resolve_derived_upstream_limit,
-)
-from bioetl.application.core.target_data_source_mixins import (
-    _FallbackFilterableTargetFetchMixin,
-    _FilterableTargetDelegationMixin,
-    _TargetEntityFetchDelegationMixin,
-)
+from bioetl.application.core.derived_scan_budget import iter_derived_source
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
@@ -28,37 +19,19 @@ if TYPE_CHECKING:
 __all__ = ["SubcellularFractionDataSource"]
 
 
-class SubcellularFractionDataSource(
-    _FallbackFilterableTargetFetchMixin,
-    _FilterableTargetDelegationMixin,
-    _TargetEntityFetchDelegationMixin,
-    _WrappedDataSourceDelegationMixin,
-    _SourceMetadataDelegationMixin,
-):
+class SubcellularFractionDataSource(_DerivedAssayDataSourceBase):
     """Wraps a DataSourcePort to extract subcellular fraction records."""
 
-    SOURCE_ENTITY_TYPE = "assay"
     TARGET_ENTITY_TYPE = "subcellular_fraction"
     # assay_subcellular_fraction is sparse; scale upstream assays for --limit runs.
     ASSAY_LIMIT_MULTIPLIER: ClassVar[int] = 200
 
     def __init__(self, data_source: DataSourcePort) -> None:
-        self._data_source = data_source
+        super().__init__(data_source)
         self._seen_fractions: set[str] = set()
 
     def _after_wrapped_data_source_enter(self) -> None:
         self._seen_fractions = set()
-
-    def _upstream_limit(
-        self,
-        limit: int | None,
-        filter_ids: list[str] | None = None,
-    ) -> int:
-        return resolve_derived_upstream_limit(
-            limit,
-            multiplier=self.ASSAY_LIMIT_MULTIPLIER,
-            filter_ids=filter_ids,
-        )
 
     async def _fetch_target_records(
         self,
@@ -90,16 +63,14 @@ class SubcellularFractionDataSource(
         filter_ids: list[str] | None,
         filter_field: str | None,
     ) -> AsyncIterator[JsonDict]:
-        scan_limit = self._upstream_limit(limit, filter_ids)
-        assays = self._data_source.fetch(
-            entity_type=self.SOURCE_ENTITY_TYPE,
-            limit=scan_limit,
+        assays = self._iter_assays(
+            limit=limit,
             query=query,
             filter_ids=filter_ids,
             filter_field=filter_field,
         )
         async for record in self._extract_unique_fractions(
-            iter_derived_source(assays, output_limit=limit, scan_limit=scan_limit),
+            assays,
             limit,
         ):
             yield record
@@ -121,60 +92,13 @@ class SubcellularFractionDataSource(
     ) -> JsonDict:
         return support.create_fraction_record(assay, fraction)
 
-    async def _fetch_target_filtered_records(
+    def _iter_derived_records(
         self,
-        filterable: Any,  # Any: mixin provides a duck-typed filtered fetch surface rather than one concrete protocol.
-        filter_ids: list[str],
-        filter_field: str,
-        limit: int | None = None,
+        assays: AsyncIterator[JsonDict],
+        *,
+        limit: int | None,
     ) -> AsyncIterator[JsonDict]:
-        scan_limit = self._upstream_limit(limit, filter_ids)
-        async for record in self._fetch_filtered_fractions(
-            iter_derived_source(
-                filterable.fetch_filtered(
-                    entity_type=self.SOURCE_ENTITY_TYPE,
-                    filter_ids=filter_ids,
-                    filter_field=filter_field,
-                    limit=scan_limit,
-                ),
-                output_limit=limit,
-                scan_limit=scan_limit,
-            ),
-            limit,
-        ):
-            yield record
-
-    async def _fetch_target_multi_filtered_records(
-        self,
-        filterable: Any,  # Any: mixin accepts multiple runtime filterable adapters with the same fetch contract.
-        filters: dict[str, list[str]],
-        limit: int | None = None,
-    ) -> AsyncIterator[JsonDict]:
-        id_count = sum(len(values) for values in filters.values())
-        scan_limit = resolve_derived_upstream_limit(
-            limit,
-            multiplier=self.ASSAY_LIMIT_MULTIPLIER,
-            filter_id_count=id_count,
-        )
-        async for record in self._fetch_filtered_fractions(
-            iter_derived_source(
-                filterable.fetch_multi_filtered(
-                    entity_type=self.SOURCE_ENTITY_TYPE,
-                    filters=filters,
-                    limit=scan_limit,
-                ),
-                output_limit=limit,
-                scan_limit=scan_limit,
-            ),
-            limit,
-        ):
-            yield record
-
-    def _resolve_target_fallback_upstream_limit(
-        self,
-        limit: int | None = None,
-    ) -> int | None:
-        return self._upstream_limit(limit)
+        return self._fetch_filtered_fractions(assays, limit)
 
     def _yield_target_records_from_fallback_source_records(
         self,
@@ -202,15 +126,6 @@ class SubcellularFractionDataSource(
             self._coerce_assay_records(assays), limit
         ):
             yield record
-
-    async def _coerce_assay_records(
-        self,
-        assays: AsyncIterator[object],
-    ) -> AsyncIterator[JsonDict]:
-        """Yield only mapping-shaped assay records expected by extraction helpers."""
-        async for assay in assays:
-            if isinstance(assay, dict):
-                yield cast("JsonDict", assay)
 
     async def _extract_unique_fractions(
         self,

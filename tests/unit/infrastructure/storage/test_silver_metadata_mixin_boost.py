@@ -29,9 +29,10 @@
 
 from __future__ import annotations
 
+import time
 from datetime import UTC, datetime
 from types import SimpleNamespace
-from unittest.mock import ANY, AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
@@ -330,7 +331,7 @@ class TestSilverWriterMetadataMixinBoost:
         prepare_op.assert_awaited_once_with(
             host,
             prepare_request,
-            perf_counter=ANY,
+            perf_counter=time.perf_counter,
         )
 
     def test_build_silver_write_result_returns_result_only_with_version(self) -> None:

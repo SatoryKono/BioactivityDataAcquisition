@@ -45,6 +45,7 @@ from bioetl.infrastructure.storage.silver.runtime_helpers import (
     build_silver_writer_runtime_services,
 )
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
+from bioetl.infrastructure.time import SystemClock
 from bioetl.infrastructure.storage.versioned_table_resolver import (
     resolve_versioned_table_name,
 )
@@ -102,9 +103,11 @@ def _build_rollout_runtime_services(
     *,
     affects_hash: bool,
     base_path: Path,
+    clock: SystemClock,
 ) -> SilverWriterRuntimeServices:
     return build_silver_writer_runtime_services(
         SilverWriterRuntimeServicesRequest(
+            clock=clock,
             csv_exporter=None,
             tracing=None,
             write_policy=None,
@@ -138,11 +141,13 @@ async def test_contract_rollout_affects_hash_false_dual_write_keeps_same_hash(
     silver_rollout_schema: pa.Schema,
 ) -> None:
     logical_table = "chembl.activity"
+    clock = SystemClock()
     writer = SilverWriter(
         base_path=e2e_data_dir / "silver",
         logger=NoOpLogger(),
         runtime_services=_build_rollout_runtime_services(
             affects_hash=False,
+            clock=clock,
             base_path=e2e_data_dir / "silver",
         ),
     )
@@ -177,11 +182,13 @@ async def test_contract_rollout_affects_hash_true_dual_write_projects_version_ha
     silver_rollout_schema: pa.Schema,
 ) -> None:
     logical_table = "chembl.activity"
+    clock = SystemClock()
     writer = SilverWriter(
         base_path=e2e_data_dir / "silver",
         logger=NoOpLogger(),
         runtime_services=_build_rollout_runtime_services(
             affects_hash=True,
+            clock=clock,
             base_path=e2e_data_dir / "silver",
         ),
     )

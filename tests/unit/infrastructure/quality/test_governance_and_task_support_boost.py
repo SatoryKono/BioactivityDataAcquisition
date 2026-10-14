@@ -74,6 +74,9 @@ from bioetl.infrastructure.quality.architecture_debt_task_support import (
     measure_task,
     parse_limit_value,
     safe_text,
+    parse_symbol_key,
+    filter_symbol_candidates,
+    select_best_candidate,
     select_symbol_location,
     task_status,
 )
@@ -414,6 +417,118 @@ def test_architecture_debt_reduction_helpers_cover_default_paths_and_loading(
     assert output_path.name == "architecture_debt_execution_plan_2026-04-04-09-30.json"
     with pytest.raises(ValueError, match="generated_at must be provided"):
         _require_generated_at(None)
+
+
+def test_parse_symbol_key() -> None:
+    assert parse_symbol_key("src/bioetl/some/path.py::MySymbol") == (
+        "src/bioetl/some/path.py",
+        "MySymbol",
+    )
+    assert parse_symbol_key("JustASymbol") == (None, "JustASymbol")
+
+
+def test_filter_symbol_candidates(tmp_path: Path) -> None:
+    loc1 = SymbolMetricLocation(
+        name="sym",
+        path=tmp_path / "path1.py",
+        kind="function",
+        lineno=1,
+        end_lineno=1,
+        size=1,
+    )
+    loc2 = SymbolMetricLocation(
+        name="sym",
+        path=tmp_path / "path2.py",
+        kind="function",
+        lineno=1,
+        end_lineno=1,
+        size=1,
+    )
+    loc3 = SymbolMetricLocation(
+        name="sym",
+        path=tmp_path / "path3.py",
+        kind="class",
+        lineno=1,
+        end_lineno=1,
+        size=1,
+    )
+
+    index = {"sym": [loc1, loc2, loc3]}
+
+    # Filter by raw path
+    candidates = filter_symbol_candidates(
+        symbol_name="sym",
+        raw_path="path1.py",
+        registry_name="function_complexity",
+        project_root=tmp_path,
+        symbol_index=index,
+    )
+    assert candidates == [loc1]
+
+    # Filter by class
+    candidates = filter_symbol_candidates(
+        symbol_name="sym",
+        raw_path=None,
+        registry_name="class_size",
+        project_root=tmp_path,
+        symbol_index=index,
+    )
+    assert candidates == [loc3]
+
+    # Filter by function
+    candidates = filter_symbol_candidates(
+        symbol_name="sym",
+        raw_path=None,
+        registry_name="function_complexity",
+        project_root=tmp_path,
+        symbol_index=index,
+    )
+    assert candidates == [loc1, loc2]
+
+    # Domain complexity applies to both functions and classes.
+    candidates = filter_symbol_candidates(
+        symbol_name="sym",
+        raw_path=None,
+        registry_name="domain_complexity",
+        project_root=tmp_path,
+        symbol_index=index,
+    )
+    assert candidates == [loc1, loc2, loc3]
+
+
+def test_select_best_candidate(tmp_path: Path) -> None:
+    loc1 = SymbolMetricLocation(
+        name="sym",
+        path=tmp_path / "path1.py",
+        kind="function",
+        lineno=1,
+        end_lineno=1,
+        size=10,
+    )
+    loc2 = SymbolMetricLocation(
+        name="sym",
+        path=tmp_path / "path2.py",
+        kind="function",
+        lineno=1,
+        end_lineno=1,
+        size=20,
+    )
+
+    # Select max size without notes
+    selected, notes = select_best_candidate(
+        [loc1, loc2], project_root=tmp_path, include_notes=False
+    )
+    assert selected == loc2
+    assert notes is None
+
+    # Select max size with notes
+    selected, notes = select_best_candidate(
+        [loc1, loc2], project_root=tmp_path, include_notes=True
+    )
+    assert selected == loc2
+    assert notes is not None
+    assert "path1.py" in notes
+    assert "Multiple symbol matches" in notes
 
 
 def test_select_symbol_location_reports_ambiguous_candidates(tmp_path: Path) -> None:

@@ -3,14 +3,25 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from time import perf_counter
 from typing import cast
 
+from bioetl.domain.types.gold_contracts import (
+    GoldWriteCategory,
+    GoldWriteReceipt,
+    resolve_gold_contract_version,
+)
 from bioetl.infrastructure.observability.metrics import (
     GOLD_VALIDATION_FAILURES_TOTAL,
     GOLD_WRITE_ATTEMPTS_TOTAL,
     GOLD_WRITE_DURATION_SECONDS,
     GOLD_WRITE_OUTCOMES_TOTAL,
+)
+from bioetl.infrastructure.storage.gold.commit_outcome import (
+    GoldOutcomeBoundary,
+    await_physical_commit,
+    receipt_for,
 )
 from bioetl.infrastructure.storage.gold.io_helpers import (
     load_gold_writer_module as _load_gold_writer_module,
@@ -43,13 +54,19 @@ async def _write_gold_merged_delta(
 ) -> None:
     """Persist merged Gold table to Delta."""
     module = _load_gold_writer_module()
-    await host._run_in_executor(
-        lambda: module.write_deltalake(
-            prepared.table_path,
-            prepared.arrow_table,
-            mode="overwrite",
-            schema_mode="overwrite",
-        )
+    await await_physical_commit(
+        lambda: host._run_in_executor(
+            lambda: module.write_deltalake(
+                prepared.table_path,
+                prepared.arrow_table,
+                mode="overwrite",
+                schema_mode="overwrite",
+            )
+        ),
+        receipt_for(
+            prepared.request.table_name,
+            resolve_gold_contract_version(prepared.request.schema),
+        ),
     )
 
 
@@ -83,19 +100,28 @@ async def _write_gold_merged_sidecar(
 
 
 async def _complete_gold_merged_write(
-    host: _GoldMergedWriteHostProtocol,
-    prepared: _PreparedGoldMergedWrite,
-) -> None:
-    """Run Delta write plus post-write side effects for merged Gold."""
+    host: _GoldMergedWriteHostProtocol, prepared: _PreparedGoldMergedWrite
+) -> GoldWriteReceipt:
+    receipt = receipt_for(
+        prepared.request.table_name,
+        resolve_gold_contract_version(prepared.request.schema),
+    )
     await _write_gold_merged_delta(host, prepared)
-    await _export_gold_merged_csv(host, prepared)
-    await _write_gold_merged_sidecar(host, prepared)
+    receipt = replace(
+        receipt,
+        category=GoldWriteCategory.COMMITTED_POSTWRITE_PENDING,
+        committed_targets=(receipt.physical_table,),
+    )
+    with GoldOutcomeBoundary(receipt):
+        await _export_gold_merged_csv(host, prepared)
+        await _write_gold_merged_sidecar(host, prepared)
+    return replace(receipt, category=GoldWriteCategory.COMPLETE)
 
 
 async def _execute_gold_merged_write(
     host: _GoldMergedWriteHostProtocol,
     request: _GoldMergedWriteRequest,
-) -> None:
+) -> GoldWriteReceipt:
     """Prepare, log, and execute one merged Gold write request."""
     from bioetl.infrastructure.storage.gold.io_preparation import (
         _log_prepared_gold_merged_write,
@@ -104,30 +130,43 @@ async def _execute_gold_merged_write(
 
     started_at = perf_counter()
     terminal_status = "failure"
+    prepared = None
     GOLD_WRITE_ATTEMPTS_TOTAL.labels(
         **_gold_merged_metric_labels(request.table_name)
     ).inc()
-    try:
-        prepared = await _prepare_gold_merged_write(host, request)
-        _log_prepared_gold_merged_write(host, prepared)
-        await _complete_gold_merged_write(host, prepared)
-        terminal_status = "success"
-    except ValueError as error:
-        terminal_status = "validation_failure"
-        GOLD_VALIDATION_FAILURES_TOTAL.labels(
-            **_gold_merged_validation_metric_labels(request.table_name, error)
-        ).inc()
-        raise
-    finally:
-        GOLD_WRITE_OUTCOMES_TOTAL.labels(
-            **_gold_merged_metric_labels(
-                request.table_name,
-                status=terminal_status,
-            )
-        ).inc()
-        GOLD_WRITE_DURATION_SECONDS.labels(
-            **_gold_merged_metric_labels(
-                request.table_name,
-                status=terminal_status,
-            )
-        ).observe(perf_counter() - started_at)
+    with GoldOutcomeBoundary(
+        lambda _: receipt_for(
+            request.table_name,
+            resolve_gold_contract_version(request.schema)
+            if prepared is not None
+            else "0.0.0",
+        ),
+        preserve_outcome=True,
+        translate_failure=False,
+    ):
+        try:
+            prepared = await _prepare_gold_merged_write(host, request)
+            _log_prepared_gold_merged_write(host, prepared)
+            receipt = await _complete_gold_merged_write(host, prepared)
+            terminal_status = "success"
+            return receipt
+        except ValueError as error:
+            if prepared is None:
+                terminal_status = "validation_failure"
+                GOLD_VALIDATION_FAILURES_TOTAL.labels(
+                    **_gold_merged_validation_metric_labels(request.table_name, error)
+                ).inc()
+            raise
+        finally:
+            GOLD_WRITE_OUTCOMES_TOTAL.labels(
+                **_gold_merged_metric_labels(
+                    request.table_name,
+                    status=terminal_status,
+                )
+            ).inc()
+            GOLD_WRITE_DURATION_SECONDS.labels(
+                **_gold_merged_metric_labels(
+                    request.table_name,
+                    status=terminal_status,
+                )
+            ).observe(perf_counter() - started_at)

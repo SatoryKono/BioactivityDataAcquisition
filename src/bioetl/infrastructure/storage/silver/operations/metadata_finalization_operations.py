@@ -34,8 +34,6 @@ class _SilverMetadataFinalizationOps(
     async def _prepare_silver_write_finalization_context(
         self,
         request: _SilverWriteFinalizationPreparationRequest,
-        *,
-        perf_counter: Callable[[], float] | None = None,
     ) -> _PreparedSilverWriteFinalizationContext: ...
 
     async def _write_silver_metadata(
@@ -111,6 +109,7 @@ async def finalize_silver_write_result_from_request(
             ),
             started_at=request.started_at,
             completed_at=context.completed_at,
+            duration_seconds=context.duration_seconds,
             version_after=context.version_after,
         )
     )

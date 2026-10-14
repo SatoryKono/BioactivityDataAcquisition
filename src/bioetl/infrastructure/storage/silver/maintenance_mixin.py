@@ -51,13 +51,13 @@ class SilverWriterMaintenanceMixin:
         Args:
             table_name: Logical table name for the export target.
             arrow_data: PyArrow table containing the records to export.
-            mode: Write mode string (e.g., "delete", "merge", "append").
+            mode: Write mode string (e.g., "merge", "append").
             validated_mode: Silver write mode enum for determining CSV append behavior.
             primary_keys: List of primary key columns for deduplication in merge exports.
         """
         if not self.csv_exporter:
             return
-        csv_append = mode != "delete"
+        csv_append = mode != "overwrite"
         csv_primary_keys = (
             primary_keys if validated_mode == SilverWriteMode.MERGE else None
         )

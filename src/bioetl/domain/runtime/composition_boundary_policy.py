@@ -44,8 +44,10 @@ def resolve_health_check_mode(
     """Resolve health-check mode from settings with an explicit default."""
     if test_mode:
         return "probe"
-    if configured_mode in ("strict", "probe"):
-        return configured_mode
+    if configured_mode == "strict":
+        return "strict"
+    if configured_mode == "probe":
+        return "probe"
     return default_health_check_mode
 
 

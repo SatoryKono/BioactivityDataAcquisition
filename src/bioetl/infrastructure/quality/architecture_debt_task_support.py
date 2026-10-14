@@ -4,8 +4,16 @@ from __future__ import annotations
 
 import ast
 from ast import AsyncFunctionDef, ClassDef, FunctionDef
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
+from importlib import import_module
 from pathlib import Path
+from typing import Protocol, cast
+
+
+class _RadonComplexityResult(Protocol):
+    name: str
+    complexity: int
 
 
 @dataclass(frozen=True)
@@ -87,7 +95,10 @@ def fallback_complexity(function_node: FunctionDef | AsyncFunctionDef) -> int:
 def function_complexities(source: str) -> dict[str, int]:
     """Build a function-name to complexity map for one source module."""
     try:
-        from radon.complexity import cc_visit  # type: ignore[import-untyped]
+        radon_complexity = import_module("radon.complexity")
+        cc_visit = cast(
+            Callable[[str], Iterable[_RadonComplexityResult]], radon_complexity.cc_visit
+        )
     except ImportError:
         tree = ast.parse(source)
         return {
@@ -147,45 +158,58 @@ def build_symbol_index(project_root: Path) -> dict[str, list[SymbolMetricLocatio
     return symbol_index
 
 
-def select_symbol_location(
+def parse_symbol_key(key: str) -> tuple[str | None, str]:
+    """Parse a registry key into an optional path and a symbol name."""
+    if "::" in key:
+        raw_path, symbol_name = key.split("::", 1)
+        return raw_path, symbol_name
+    return None, key
+
+
+def filter_symbol_candidates(
     *,
-    key: str,
+    symbol_name: str,
+    raw_path: str | None,
     registry_name: str,
     project_root: Path,
     symbol_index: dict[str, list[SymbolMetricLocation]],
-) -> tuple[SymbolMetricLocation | None, str | None, str | None, str | None]:
-    """Resolve one registry key to the best symbol location candidate."""
-    notes: list[str] = []
-    if "::" in key:
-        raw_path, symbol_name = key.split("::", 1)
+) -> list[SymbolMetricLocation]:
+    """Filter symbol locations by path or expected kind."""
+    if raw_path is not None:
         target_path = project_root / raw_path
-        candidates = [
+        return [
             location
             for location in symbol_index.get(symbol_name, [])
             if location.path == target_path
         ]
-        if not candidates:
-            return None, raw_path, symbol_name, None
-        selected = max(candidates, key=lambda item: item.size)
-        return selected, raw_path, symbol_name, None
 
-    if key.endswith(".py"):
-        return None, key, None, None
-
-    expected_kind = (
-        "class"
-        if registry_name in {"class_size", "class_method_count", "god_object"}
-        else "function"
-    )
-    candidates = [
+    if registry_name == "domain_complexity":
+        expected_kinds = {"class", "function"}
+    else:
+        expected_kinds = {
+            "class"
+            if registry_name in {"class_size", "class_method_count", "god_object"}
+            else "function"
+        }
+    return [
         location
-        for location in symbol_index.get(key, [])
-        if location.kind == expected_kind
+        for location in symbol_index.get(symbol_name, [])
+        if location.kind in expected_kinds
     ]
-    if not candidates:
-        return None, None, key, None
 
+
+def select_best_candidate(
+    candidates: list[SymbolMetricLocation],
+    project_root: Path,
+    include_notes: bool = True,
+) -> tuple[SymbolMetricLocation, str | None]:
+    """Select the largest candidate and optionally format ambiguity notes."""
     selected = max(candidates, key=lambda item: item.size)
+
+    if not include_notes:
+        return selected, None
+
+    notes: list[str] = []
     if len(candidates) > 1:
         alt_paths = ", ".join(
             sorted(
@@ -199,11 +223,48 @@ def select_symbol_location(
                 "Multiple symbol matches; selected largest definition. "
                 f"Other candidates: {alt_paths}."
             )
+
     note_text = " ".join(notes) if notes else None
+    return selected, note_text
+
+
+def select_symbol_location(
+    *,
+    key: str,
+    registry_name: str,
+    project_root: Path,
+    symbol_index: dict[str, list[SymbolMetricLocation]],
+) -> tuple[SymbolMetricLocation | None, str | None, str | None, str | None]:
+    """Resolve one registry key to the best symbol location candidate."""
+    raw_path, symbol_name = parse_symbol_key(key)
+
+    if raw_path is None and key.endswith(".py"):
+        return None, key, None, None
+
+    candidates = filter_symbol_candidates(
+        symbol_name=symbol_name,
+        raw_path=raw_path,
+        registry_name=registry_name,
+        project_root=project_root,
+        symbol_index=symbol_index,
+    )
+
+    if not candidates:
+        if raw_path is not None:
+            return None, raw_path, symbol_name, None
+        return None, None, symbol_name, None
+
+    selected, note_text = select_best_candidate(
+        candidates, project_root=project_root, include_notes=(raw_path is None)
+    )
+
+    if raw_path is not None:
+        return selected, raw_path, symbol_name, None
+
     return (
         selected,
         relative_target(selected.path, project_root=project_root),
-        key,
+        symbol_name,
         note_text,
     )
 
