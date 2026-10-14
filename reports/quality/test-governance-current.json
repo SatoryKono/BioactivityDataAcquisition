@@ -1001,7 +1001,14 @@
     }
   },
   "assertless_total_candidates": 85,
-  "budget_violations": [],
+  "budget_violations": [
+    {
+      "actual": 1,
+      "budget": "compatibility_test_file_max",
+      "expected_max": 0,
+      "metric": "compatibility_test_files"
+    }
+  ],
   "compatibility_examples": [
     "tests/integration/infrastructure/quarantine/test_unified_quarantine_partition_compat.py"
   ],
@@ -2100,7 +2107,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "820e06c35568cb829f4184d5e29952655e11a81f62aed4eafdca5cbb24316569",
+  "source_tree_sha256": "f906dad07737d70bc388c34fa34c1ab02fe55d7ed63ca77c635d5fd55ecfb6b9",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,

@@ -69,7 +69,7 @@ budgets:
   refined_assertless_max: 0
   duplicate_test_names_max: 0
   duplicate_test_name_occurrences_max: 0
-  compatibility_test_file_max: 1
+  compatibility_test_file_max: 0
   markerless_test_functions_max: 0
   uuid4_call_sites_max: 0
   date_today_call_sites_max: 0
@@ -481,7 +481,7 @@ test_audit_closeout_2026_06_19:
     - tests/architecture/test_test_telemetry_baseline.py
     - tests/architecture/test_test_telemetry_governance.py
   invariants:
-    compatibility_test_file_max: 1
+    compatibility_test_file_max: 0
     compatibility_test_files_less_than: 1
     repo_backed_unit_lane: repo-backed-unit
     repo_backed_unit_subtree: tests/unit/repo_backed/
