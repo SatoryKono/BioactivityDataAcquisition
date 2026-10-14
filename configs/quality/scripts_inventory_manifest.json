@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-14T05:38:09.590533+00:00",
+  "generated_at": "2026-10-14T16:54:33.057964+00:00",
   "summary": {
-    "total_scripts": 651,
+    "total_scripts": 652,
     "status_counts": {
       "active": 335,
-      "supporting": 316
+      "supporting": 317
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -10160,7 +10160,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 10,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -11463,7 +11463,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 23,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -11514,6 +11514,18 @@
           "text": "invoke `bash scripts/engineering/dev/pretest_guardrails.sh --scope full`"
         }
       ]
+    },
+    {
+      "path": "scripts/engineering/dev/pytest_junit_subtests.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-01-12",
+      "next_step": "Retain as the pytest JUnit plugin loaded by tests/conftest.py to preserve subtest records for strict telemetry accounting. Remove after the pinned upstream reporter provides equivalent records and the pass/fail/skip regressions pass without this adapter."
     },
     {
       "path": "scripts/engineering/dev/python/migrate_deprecated_names.py",
@@ -12954,7 +12966,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 402,
+      "reference_count": 403,
       "references": [
         {
           "path": ".circleci/config.yml",

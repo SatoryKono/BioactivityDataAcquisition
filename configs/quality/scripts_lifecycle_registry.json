@@ -871,6 +871,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
+    "scripts/engineering/dev/pytest_junit_subtests.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the pytest JUnit plugin loaded by tests/conftest.py to preserve subtest records for strict telemetry accounting. Remove after the pinned upstream reporter provides equivalent records and the pass/fail/skip regressions pass without this adapter.",
+      "owner": "@bioetl-platform",
+      "review_by": "2027-01-12"
+    },
     "scripts/engineering/dev/quarantine_explorer_mock_server.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the quarantine explorer mock API helper dispatched via the dev router mock-quarantine command; keep it supporting unless mock quarantine APIs become a governed CI surface.",
