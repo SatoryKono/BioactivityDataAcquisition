@@ -130,7 +130,6 @@ areas:
       - src/bioetl/application/composite/dependency_result_mapper.py
       - src/bioetl/application/composite/helpers/dependency_chained_key_resolver.py
       - src/bioetl/application/composite/helpers/dependency_coordinator_execution.py
-      - src/bioetl/application/composite/helpers/dependency_coordinator_legacy.py
       - src/bioetl/application/composite/helpers/dependency_join_apply_ops.py
       - src/bioetl/application/composite/helpers/dependency_join_service_ops.py
   - name: join

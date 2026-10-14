@@ -8,7 +8,9 @@ import polars as pl
 
 from bioetl.application.composite.dependency_key_resolvers import (
     ChainedKeyResolver,
+    DependencyCoordinatorCollaborators,
     SeedKeyResolver,
+    resolve_dependency_coordinator_collaborators,
 )
 from bioetl.application.composite.dependency_progress_tracker import (
     DependencyProgressService,
@@ -20,10 +22,6 @@ from bioetl.application.composite.helpers.dependency_coordinator_execution impor
     execute_dependency_runner,
     run_dependency_batch,
     run_single_dependency,
-)
-from bioetl.application.composite.helpers.dependency_coordinator_legacy import (
-    DependencyCoordinatorCollaborators,
-    resolve_dependency_coordinator_collaborators,
 )
 from bioetl.application.runtime_clock import resolve_runtime_clock
 from bioetl.domain.composite import DependencyConfig
