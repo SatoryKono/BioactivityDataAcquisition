@@ -239,6 +239,41 @@ def test_junit_suite_level_error_does_not_invent_testcase(tmp_path: Path) -> Non
     assert payload["top_slowest"] == []
 
 
+@pytest.mark.parametrize("declared", [1, 2])
+def test_junit_suite_totals_accept_record_or_diagnostic_counts(
+    tmp_path: Path, declared: int
+) -> None:
+    path = tmp_path / "multiple-diagnostics.xml"
+    path.write_text(
+        f'<testsuites tests="1" errors="{declared}" failures="{declared}">'
+        f'<testsuite tests="1" errors="{declared}" failures="{declared}">'
+        '<testcase name="multiple_diagnostics" time="0">'
+        '<error message="setup" /><error message="teardown" />'
+        '<failure message="first" /><failure message="second" />'
+        "</testcase></testsuite></testsuites>",
+        encoding="utf-8",
+    )
+    summary = _derive_slowest_summary_from_junit_paths([path])
+    assert summary["total_cases"] == 1
+    assert summary["execution_context"]["observed_count"] == 1
+    # The context always counts affected records, regardless of suite convention.
+    assert summary["execution_context"]["error_record_count"] == 1
+    assert summary["execution_context"]["failure_record_count"] == 1
+
+
+def test_junit_rejects_aggregate_outside_both_count_conventions(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "contradictory.xml"
+    path.write_text(
+        '<testsuite tests="1" errors="3"><testcase name="double_error">'
+        "<error /><error /></testcase></testsuite>",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="JUnit errors testcase count disagrees"):
+        _derive_slowest_summary_from_junit_paths([path])
+
+
 def test_workflow_producer_and_fallback_share_record_contract(tmp_path: Path) -> None:
     raw = tmp_path / "reports/test-telemetry/raw"
     raw.mkdir(parents=True)
@@ -460,7 +495,11 @@ def test_legacy_json_count_is_timed_rows_or_recomputed_with_junit(
             {
                 "total_cases": 1,
                 "top_slowest": [],
-                "execution_context": {"executed_count": 1},
+                "execution_context": {
+                    "executed_count": 1,
+                    "junit_source_count": 1,
+                    "junit_sources": ["junit.xml"],
+                },
             }
         ),
         encoding="utf-8",
@@ -499,6 +538,54 @@ def test_legacy_json_count_is_timed_rows_or_recomputed_with_junit(
     assert (
         rebound["duration_telemetry"]["count_semantics"] == "non_skipped_junit_records"
     )
+
+
+def test_legacy_only_refresh_rejects_before_overwriting_baseline(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    legacy = tmp_path / "slowest.json"
+    legacy.write_text(json.dumps({"total_cases": 1}), encoding="utf-8")
+    baseline = tmp_path / "baseline.yaml"
+    baseline.write_text("existing baseline", encoding="utf-8")
+    rendered = tmp_path / "baseline.md"
+    monkeypatch.setattr(updater, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(
+        "scripts.engineering.common.repo_paths.resolve_output_path", Path
+    )
+    monkeypatch.setattr(
+        updater,
+        "_parse_args",
+        lambda: SimpleNamespace(
+            rebind_current_tree=False,
+            local_manifest=None,
+            source_commit="source",
+            source_run_id="run",
+            source_run_url="",
+            source_branch="main",
+            source_event="push",
+            coverage_percent=85.0,
+            coverage_xml=tmp_path / "missing.xml",
+            coverage_log="",
+            slowest_json=legacy,
+            junit=[],
+            coverage_threshold=None,
+            output_yaml=baseline,
+            output_md=rendered,
+        ),
+    )
+    with pytest.raises(ValueError, match="requires --junit inputs"):
+        updater.main()
+    assert baseline.read_text(encoding="utf-8") == "existing baseline"
+    assert not rendered.exists()
+
+
+def test_source_tree_hash_includes_live_junit_producer(tmp_path: Path) -> None:
+    producer = tmp_path / "scripts/engineering/ci/junit_duration_summary.py"
+    producer.parent.mkdir(parents=True)
+    producer.write_text("first\n", encoding="utf-8")
+    first = updater.compute_test_telemetry_source_tree_sha256(tmp_path)
+    producer.write_text("second\n", encoding="utf-8")
+    assert updater.compute_test_telemetry_source_tree_sha256(tmp_path) != first
 
 
 def test_markerless_canonical_local_json_preserves_non_skipped_semantics(
@@ -610,6 +697,126 @@ def test_incomplete_junit_inputs_cannot_recompute_legacy_count(tmp_path: Path) -
         )
 
 
+def test_partial_existing_junit_inventory_cannot_replace_full_summary(
+    tmp_path: Path,
+) -> None:
+    legacy = tmp_path / "legacy.json"
+    legacy.write_text(
+        json.dumps(
+            {
+                "total_cases": 1,
+                "top_slowest": [],
+                "execution_context": {
+                    "junit_source_count": 2,
+                    "junit_sources": ["first.xml", "second.xml"],
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    first = tmp_path / "first.xml"
+    second = tmp_path / "second.xml"
+    first.write_text('<testsuite tests="1"><testcase name="first" /></testsuite>')
+    second.write_text('<testsuite tests="1"><testcase name="second" /></testsuite>')
+    kwargs = {
+        "coverage_xml_path": tmp_path / "missing.xml",
+        "coverage_percent": None,
+        "coverage_log_path": None,
+        "slowest_json_path": legacy,
+        "source_branch": "main",
+        "source_commit": "source",
+        "source_run_id": "run",
+        "coverage_threshold": 85.0,
+    }
+    with pytest.raises(ValueError, match="refusing a partial refresh"):
+        build_baseline_payload(**kwargs, junit_paths=[first])
+    payload = build_baseline_payload(**kwargs, junit_paths=[first, second])
+    assert payload["duration_telemetry"]["total_cases"] == 2
+    assert payload["duration_telemetry"]["execution_context"]["junit_sources"] == [
+        "first.xml",
+        "second.xml",
+    ]
+
+
+def test_nested_testsuites_wrapper_preserves_non_overlapping_wall_time(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "nested.xml"
+    path.write_text(
+        '<testsuites><testsuites><testsuite tests="1" time="3">'
+        '<testcase name="one" /></testsuite></testsuites>'
+        '<testsuite tests="2" time="4"><testcase name="two" />'
+        '<testsuite tests="1" time="2"><testcase name="three" />'
+        "</testsuite></testsuite></testsuites>",
+        encoding="utf-8",
+    )
+    summary = _derive_slowest_summary_from_junit_paths([path])
+    assert summary["total_cases"] == 3
+    assert summary["execution_context"]["lane_wall_time_s"] == {"nested.xml": 7.0}
+
+
+@pytest.mark.parametrize("duration", ["NaN", "inf", "-1", "not-a-number"])
+@pytest.mark.parametrize("wrapper", [False, True])
+def test_nested_suite_and_wrapper_reject_invalid_time(
+    tmp_path: Path, duration: str, wrapper: bool
+) -> None:
+    path = tmp_path / "invalid-nested-time.xml"
+    inner = '<testsuite tests="1" time="2"><testcase name="one" /></testsuite>'
+    if wrapper:
+        xml = f'<testsuites time="{duration}">{inner}</testsuites>'
+    else:
+        xml = (
+            '<testsuite tests="1" time="2">'
+            f'<testsuite tests="1" time="{duration}"><testcase name="one" />'
+            "</testsuite></testsuite>"
+        )
+    path.write_text(xml, encoding="utf-8")
+    with pytest.raises(ValueError, match="Invalid JUnit"):
+        _derive_slowest_summary_from_junit_paths([path])
+
+
+def test_duplicate_junit_paths_and_ambiguous_source_names_fail_closed(
+    tmp_path: Path,
+) -> None:
+    first = tmp_path / "first" / "junit.xml"
+    second = tmp_path / "second" / "junit.xml"
+    for path in (first, second):
+        path.parent.mkdir()
+        path.write_text(
+            '<testsuite tests="1"><testcase name="one" /></testsuite>',
+            encoding="utf-8",
+        )
+    with pytest.raises(ValueError, match="Duplicate JUnit telemetry input path"):
+        _derive_slowest_summary_from_junit_paths([first, first])
+
+    legacy = tmp_path / "legacy.json"
+    legacy.write_text(
+        json.dumps(
+            {
+                "total_cases": 1,
+                "top_slowest": [],
+                "execution_context": {
+                    "junit_source_count": 2,
+                    "junit_sources": ["junit.xml", "junit.xml"],
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="Ambiguous JUnit telemetry source name"):
+        build_baseline_payload(
+            coverage_xml_path=tmp_path / "missing.xml",
+            coverage_percent=None,
+            coverage_log_path=None,
+            slowest_json_path=legacy,
+            junit_paths=[first, second],
+            source_branch="main",
+            source_commit="source",
+            source_run_id="run",
+            coverage_threshold=85.0,
+        )
+
+
 def test_pytest_skip_with_teardown_error_is_not_executed(tmp_path: Path) -> None:
     test_file = tmp_path / "test_skip_teardown.py"
     test_file.write_text(
@@ -645,6 +852,53 @@ def test_pytest_skip_with_teardown_error_is_not_executed(tmp_path: Path) -> None
     assert summary["execution_context"]["skipped_count"] == 1
     assert summary["execution_context"]["error_record_count"] == 1
     assert summary["total_cases"] == 0
+
+
+def test_pytest_double_error_aggregate_keeps_one_record(tmp_path: Path) -> None:
+    test_file = tmp_path / "test_double_error.py"
+    test_file.write_text(
+        "import pytest\n"
+        "@pytest.fixture\n"
+        "def bad(request):\n"
+        "    request.addfinalizer(lambda: 1 / 0)\n"
+        "    raise RuntimeError('setup failure')\n"
+        "def test_one(bad):\n"
+        "    pass\n",
+        encoding="utf-8",
+    )
+    junit = tmp_path / "actual-double-error.xml"
+    env = os.environ.copy()
+    env["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            str(test_file),
+            f"--junitxml={junit}",
+        ],
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode != 0
+    root = ET.parse(junit).getroot()
+    suite = root.find("testsuite")
+    assert suite is not None
+    assert suite.get("tests") == "1"
+    assert suite.get("errors") == "2"
+    case = next(root.iter("testcase"))
+    assert len(case.findall("error")) == 2
+    summary = _derive_slowest_summary_from_junit_paths([junit])
+    assert summary["execution_context"]["observed_count"] == 1
+    assert summary["execution_context"]["error_record_count"] == 1
+    assert summary["total_cases"] == 1
 
 
 def test_summarize_slowest_zones_groups_cases_by_module() -> None:

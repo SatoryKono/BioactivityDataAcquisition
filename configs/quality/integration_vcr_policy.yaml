@@ -128,6 +128,7 @@ tracked_suite_inventory:
       pubchem_compound: tests/integration/test_pubchem_pipeline.py
       uniprot_protein: tests/integration/test_uniprot_pipeline.py
     normalization_and_pipeline_support:
+    - tests/integration/application/core/test_cf_medallion_strict_wiring.py
     - tests/integration/application/core/test_postrun_compact_service.py
     - tests/integration/application/core/test_record_processor.py
     - tests/integration/application/core/test_write_outcome_loss_integration.py
@@ -334,9 +335,16 @@ tracked_suite_inventory:
     - tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py
     - tests/integration/infrastructure/storage/test_composite_checkpoint_writer.py
     - tests/integration/infrastructure/storage/test_control_plane_file_stores.py
+    - tests/integration/application/core/test_cf_medallion_strict_wiring.py
+    - tests/integration/infrastructure/storage/test_cf_silver_delete_clock.py
+    - tests/integration/infrastructure/storage/test_step4_gold_commit.py
+    - tests/integration/infrastructure/storage/test_step4_ordered_merged.py
     - tests/integration/infrastructure/storage/test_delta_reader.py
     - tests/integration/infrastructure/storage/test_deterministic_write.py
     - tests/integration/infrastructure/storage/test_export_reader_version_fallback.py
+    - tests/integration/infrastructure/storage/test_cf_silver_delete_clock.py
+    - tests/integration/infrastructure/storage/test_step4_gold_commit.py
+    - tests/integration/infrastructure/storage/test_step4_ordered_merged.py
     - tests/integration/infrastructure/storage/test_gold_writer_read_cleanup.py
     - tests/integration/infrastructure/storage/test_gold_writer_versioning.py
     - tests/integration/infrastructure/storage/test_metadata_integration.py

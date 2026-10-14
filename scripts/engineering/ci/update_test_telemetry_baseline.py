@@ -51,6 +51,7 @@ def compute_test_telemetry_source_tree_sha256(repo_root: Path = REPO_ROOT) -> st
             "pyproject.toml",
             "configs/quality/test_matrix.yaml",
             ".github/workflows/tests.yml",
+            "scripts/engineering/ci/junit_duration_summary.py",
         )
     )
     digest = hashlib.sha256()
@@ -369,6 +370,36 @@ def _portable_artifact_path(
         return str(path)
 
 
+def _validated_junit_override(
+    slowest_summary: TelemetryPayload, junit_paths: list[Path]
+) -> TelemetryPayload:
+    derived_summary = _derive_slowest_summary_from_junit_paths(junit_paths)
+    if slowest_summary["total_cases"] is None:
+        return derived_summary
+
+    previous_sources = slowest_summary["execution_context"].get("junit_sources")
+    previous_source_count = slowest_summary["execution_context"].get(
+        "junit_source_count"
+    )
+    derived_sources = derived_summary["execution_context"]["junit_sources"]
+    if (
+        not isinstance(previous_sources, list)
+        or not all(isinstance(source, str) for source in previous_sources)
+        or len(set(previous_sources)) != len(previous_sources)
+        or len(set(derived_sources)) != len(derived_sources)
+        or (
+            previous_source_count is not None
+            and previous_source_count != len(previous_sources)
+        )
+        or sorted(previous_sources) != sorted(derived_sources)
+    ):
+        raise ValueError(
+            "JUnit inputs do not match the source inventory of the "
+            "existing slowest-tests.json; refusing a partial refresh"
+        )
+    return derived_summary
+
+
 def build_baseline_payload(
     *,
     coverage_xml_path: Path,
@@ -402,7 +433,7 @@ def build_baseline_payload(
             == "legacy_positive_duration_rows"
         )
     ):
-        slowest_summary = _derive_slowest_summary_from_junit_paths(junit_paths)
+        slowest_summary = _validated_junit_override(slowest_summary, junit_paths)
     top_slowest = slowest_summary["top_slowest"]
     status = (
         "captured"
@@ -585,8 +616,9 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
         "## Branch-accurate provenance (#5729)",
         "",
         "- Continuous identity is `source_tree_sha256` over `tests/**/*.py`,",
-        "  `pyproject.toml`, `configs/quality/test_matrix.yaml`, and",
-        "  `.github/workflows/tests.yml`.",
+        "  `pyproject.toml`, `configs/quality/test_matrix.yaml`,",
+        "  `.github/workflows/tests.yml`, and the live JUnit producer",
+        "  `scripts/engineering/ci/junit_duration_summary.py`.",
         "- `measurement_provenance.head` and `test_tree_sha256` retain the captured",
         "  run identity when the current audited test tree advances later.",
         "- Freshness uses live UTC (injectable via `BIOETL_TELEMETRY_REFERENCE_NOW`)",
@@ -679,7 +711,10 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
             "3. Run `python -m scripts.engineering.ci.update_test_telemetry_baseline "
             "--source-commit <sha> --source-run-id <run-id> ...` with either direct "
             "artifacts or fallback diagnostics inputs.",
-            "4. Commit the updated baseline and branch-consumable telemetry "
+            "4. A legacy JSON timed-row count requires raw `--junit` inputs for "
+            "the complete recorded source inventory; the updater rejects a "
+            "partial or legacy-only refresh before writing outputs.",
+            "5. Commit the updated baseline and branch-consumable telemetry "
             "summary layer together.",
             "",
         ]
@@ -972,6 +1007,14 @@ def main() -> int:
             ),
             source_tree_sha256=compute_test_telemetry_source_tree_sha256(),
         )
+        if (
+            payload["duration_telemetry"]["count_semantics"]
+            == "legacy_positive_duration_rows"
+        ):
+            raise ValueError(
+                "Legacy slowest-tests.json requires --junit inputs before "
+                "refreshing a captured baseline"
+            )
     payload = merge_existing_baseline_supplemental_fields(
         payload,
         existing_yaml_path=output_yaml_path,

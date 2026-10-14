@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Protocol, cast
 
-from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.medallion import SilverOperationMode, SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports import (
     AuditPort,
@@ -82,7 +82,7 @@ class _SilverMetadataWriteSupportRequest:
     records: list[BronzeRecord]
     bronze_refs: list[BronzeWriteResult] | None = None
     mode: str = "merge"
-    validated_mode: SilverWriteMode = SilverWriteMode.MERGE
+    validated_mode: SilverOperationMode = SilverWriteMode.MERGE
     run_id: RunID | None = None
     run_type: RunType | None = None
     source_batch_id: BatchID | None = None
@@ -97,7 +97,7 @@ class _SilverMetadataAuditSupportRequest:
 
     table_name: str
     records: list[BronzeRecord]
-    mode: SilverWriteMode
+    mode: SilverOperationMode
     run_id: RunID | None = None
     run_type: RunType | None = None
     source_batch_id: BatchID | None = None

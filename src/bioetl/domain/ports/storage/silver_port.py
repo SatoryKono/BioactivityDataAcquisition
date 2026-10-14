@@ -31,7 +31,7 @@ class SilverWriteRequest:
     records: list[BronzeRecord]
     primary_keys: list[str]
     schema: ArrowSchema
-    mode: Literal["merge", "append", "delete"] = "merge"
+    mode: Literal["merge", "append"] = "merge"
     partition_cols: list[str] | None = None
     on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"
     column_order: list[str] | None = None
@@ -43,6 +43,7 @@ class SilverWriteRequest:
     ingestion_ts: datetime | None = None
     quarantined_count: int | None = None
     validation_errors: tuple[str, ...] | None = None
+    started_at: datetime | None = None
 
 
 _SILVER_WRITE_POSITIONAL_FIELDS = (
@@ -74,6 +75,7 @@ _SILVER_WRITE_DEFAULTS: dict[str, object] = {
     "run_type": None,
     "source_batch_id": None,
     "ingestion_ts": None,
+    "started_at": None,
     "quarantined_count": None,
     "validation_errors": None,
 }
@@ -105,7 +107,7 @@ def coerce_silver_write_request(
         records=cast(list[BronzeRecord], resolved_kwargs["records"]),
         primary_keys=cast(list[str], resolved_kwargs["primary_keys"]),
         schema=cast(ArrowSchema, resolved_kwargs["schema"]),
-        mode=cast(Literal["merge", "append", "delete"], resolved_kwargs["mode"]),
+        mode=cast(Literal["merge", "append"], resolved_kwargs["mode"]),
         partition_cols=cast(list[str] | None, resolved_kwargs["partition_cols"]),
         on_schema_mismatch=cast(
             Literal["error", "evolve", "ignore"],
@@ -124,6 +126,7 @@ def coerce_silver_write_request(
         run_type=cast("RunType | None", resolved_kwargs["run_type"]),
         source_batch_id=cast("BatchID | None", resolved_kwargs["source_batch_id"]),
         ingestion_ts=cast("datetime | None", resolved_kwargs["ingestion_ts"]),
+        started_at=cast("datetime | None", resolved_kwargs["started_at"]),
         quarantined_count=cast(
             int | None,
             resolved_kwargs["quarantined_count"],
