@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-JoinHow = Literal["inner", "left", "right", "full", "semi", "anti", "cross", "outer"]
+JoinHow = Literal["inner", "left", "right", "full", "semi", "anti", "cross"]
 
 
 class JoinExecutorService:
