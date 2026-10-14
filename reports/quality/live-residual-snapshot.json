@@ -14,9 +14,9 @@
     "application_core": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 5,
-      "helper_function_ratio": 0.38,
+      "helper_function_ratio": 0.379,
       "files": 203,
-      "total_loc": 25115,
+      "total_loc": 25113,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 7
     },
@@ -25,7 +25,7 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.284,
       "files": 49,
-      "total_loc": 6451,
+      "total_loc": 6450,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
@@ -34,7 +34,7 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.358,
       "files": 32,
-      "total_loc": 3869,
+      "total_loc": 3855,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
