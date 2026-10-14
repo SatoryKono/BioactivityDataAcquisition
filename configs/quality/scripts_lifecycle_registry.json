@@ -871,6 +871,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
+    "scripts/engineering/dev/pytest_junit_subtests.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the import-only pytest JUnit hook shared by serial and xdist test runs, not a standalone CLI. Remove when upstream pytest emits balanced successful subtest XML and the regression tests pass without this adapter.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-14"
+    },
     "scripts/engineering/dev/quarantine_explorer_mock_server.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the quarantine explorer mock API helper dispatched via the dev router mock-quarantine command; keep it supporting unless mock quarantine APIs become a governed CI surface.",

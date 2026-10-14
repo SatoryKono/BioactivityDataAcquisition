@@ -100,35 +100,7 @@ class GroupRecoveryCoordinator(GroupMemberRecovery):
         name = f"{_STAGE_PREFIX}{operation_id}"
         progress.phase = "stage_association"
         if body["stage"] is None:
-            fd = self._private_dir(name, create=True, exclusive=True)
-            assert fd is not None
-            association_started = False
-            try:
-                if hook:
-                    hook("after_stage_create")
-                setter = os.__dict__.get("setxattr")
-                if setter is None:
-                    raise OSError(errno.ENOTSUP, "directory xattrs unavailable")
-                token = token_hex(16)
-                setter(
-                    fd, _STAGE_TAG, token.encode(), flags=getattr(os, "XATTR_CREATE", 1)
-                )
-                os.fsync(fd)
-                os.fsync(self._root_fd)
-                dev, ino = _identity(fd)
-                association_started = True
-                body["stage"] = {"dev": dev, "ino": ino, "token": token}
-                self._replace_record(journal_fd, operation_id, body)
-                if hook:
-                    hook("after_stage_association_fsync")
-                return fd
-            except BaseException:
-                try:
-                    if not association_started:
-                        self._discard_created_empty_dir(name, fd)
-                finally:
-                    os.close(fd)
-                raise
+            return self._create_operation_stage(journal_fd, operation_id, body, hook)
         fd = self._private_dir(name, create=False)
         if fd is None:
             if body["state"] != "completed":
@@ -143,6 +115,43 @@ class GroupRecoveryCoordinator(GroupMemberRecovery):
             return fd
         except BaseException:
             os.close(fd)
+            raise
+
+    def _create_operation_stage(
+        self,
+        journal_fd: int,
+        operation_id: str,
+        body: dict[str, Any],  # Any: validated JSON.
+        hook: Barrier | None,
+    ) -> int:
+        """Create and bind a stage, retiring only our unassociated empty inode."""
+        name = f"{_STAGE_PREFIX}{operation_id}"
+        fd = self._private_dir(name, create=True, exclusive=True)
+        assert fd is not None
+        association_started = False
+        try:
+            if hook:
+                hook("after_stage_create")
+            setter = os.__dict__.get("setxattr")
+            if setter is None:
+                raise OSError(errno.ENOTSUP, "directory xattrs unavailable")
+            token = token_hex(16)
+            setter(fd, _STAGE_TAG, token.encode(), flags=getattr(os, "XATTR_CREATE", 1))
+            os.fsync(fd)
+            os.fsync(self._root_fd)
+            dev, ino = _identity(fd)
+            association_started = True
+            body["stage"] = {"dev": dev, "ino": ino, "token": token}
+            self._replace_record(journal_fd, operation_id, body)
+            if hook:
+                hook("after_stage_association_fsync")
+            return fd
+        except BaseException:
+            try:
+                if not association_started:
+                    self._discard_created_empty_dir(name, fd)
+            finally:
+                os.close(fd)
             raise
 
     def _apply_group(

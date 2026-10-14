@@ -319,6 +319,16 @@ entries:
     vcr_related: false
     review_date: "2026-10-14"
     rationale: POSIX pinned handles, flock and symlink capability are required for synthetic journal destruction; Windows refusal is tested separately without skips.
+  - path: tests/integration/infrastructure/storage/test_bronze_cleanup_platform_and_stages.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-storage"
+    linked_issue: "#12102"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-10-14"
+    rationale: Existing POSIX pinned-handle and stage-retirement cases moved from cleanup_safety retain the same capability guard; no test is newly suppressed. Windows destructive safety remains NOT_VERIFIED.
   - path: tests/integration/infrastructure/storage/test_bronze_writer_cleanup.py
     suite: integration
     category: conditional_environment_guard

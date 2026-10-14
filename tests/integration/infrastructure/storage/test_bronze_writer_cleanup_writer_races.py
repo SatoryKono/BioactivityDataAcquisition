@@ -54,14 +54,20 @@ def test_waiting_cleaners_leave_writer_io_executor_available(
         loop.set_default_executor(ThreadPoolExecutor(max_workers=2))
 
         @contextmanager
-        def count_exclusive_waiters(base_path: Path, *, exclusive: bool):
+        def count_exclusive_waiters(
+            base_path: Path, *, exclusive: bool, allow_group_recovery: bool = False
+        ):
             nonlocal waiter_count
             if exclusive:
                 with waiter_guard:
                     waiter_count += 1
                     if waiter_count == 2:
                         loop.call_soon_threadsafe(both_waiting.set)
-            with original_lock(base_path, exclusive=exclusive) as lease:
+            with original_lock(
+                base_path,
+                exclusive=exclusive,
+                allow_group_recovery=allow_group_recovery,
+            ) as lease:
                 yield lease
 
         monkeypatch.setattr(

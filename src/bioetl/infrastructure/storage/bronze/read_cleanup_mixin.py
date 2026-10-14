@@ -240,20 +240,11 @@ class BronzeWriterReadCleanupMixin(
             locked_root.path if locked_root is not None else real_root(self.base_path)
         )
 
-        def on_discovery_skip(path: str, reason: str) -> None:
-            self._log_cleanup_skip(path, reason)
-            if reason in ("scan_error", "stat_error"):
-                stats["directories_failed"] += 1
-            elif reason == "missing_scope":
-                stats["directories_conflicted"] += 1
-            elif reason != "not_a_directory":
-                stats["directories_skipped"] += 1
-
         for date_dir in self._find_old_date_dirs(
             cutoff_str,
             provider,
             entity,
-            on_skip=on_discovery_skip,
+            on_skip=partial(self._record_cleanup_discovery_skip, stats),
             base_path=locked_root.path if locked_root is not None else None,
         ):
             plan = self._plan_old_dir_files(
@@ -273,6 +264,17 @@ class BronzeWriterReadCleanupMixin(
                     group_cleanup,
                 )
         return stats
+
+    def _record_cleanup_discovery_skip(
+        self, stats: dict[str, int], path: str, reason: str
+    ) -> None:
+        self._log_cleanup_skip(path, reason)
+        if reason in ("scan_error", "stat_error"):
+            stats["directories_failed"] += 1
+        elif reason == "missing_scope":
+            stats["directories_conflicted"] += 1
+        elif reason != "not_a_directory":
+            stats["directories_skipped"] += 1
 
     def _apply_cleanup_plan(
         self,

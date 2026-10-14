@@ -231,7 +231,9 @@ async def test_cleanup_preserves_unknown_artifacts(tmp_path: Path) -> None:
     unknown_dir.mkdir()
     (unknown_dir / "keep.txt").write_bytes(b"nested sentinel")
     retained_bytes = (
-        sum(path.stat().st_size for path in date_dir.iterdir() if path.is_file()) - 3
+        sum(path.stat().st_size for path in date_dir.iterdir() if path.is_file())
+        - (date_dir / ARTIFACT).stat().st_size
+        - (date_dir / SIDECAR).stat().st_size
     )
 
     result = await writer.cleanup_old_files(CUTOFF)
@@ -331,7 +333,7 @@ async def test_cleanup_skips_symlinked_date_dir(tmp_path: Path) -> None:
 
 @_APPLY_POSIX
 async def test_cleanup_refuses_link_inside_date_dir(tmp_path: Path) -> None:
-    """A symlinked file inside a date dir is not unlinked."""
+    """An unattested symlink copy prevents removal of its entire group."""
     writer = _make_writer(tmp_path)
     date_dir = _date_dir(tmp_path, "chembl", "activity")
     owned = date_dir / ARTIFACT
@@ -345,9 +347,13 @@ async def test_cleanup_refuses_link_inside_date_dir(tmp_path: Path) -> None:
 
     result = await writer.cleanup_old_files(CUTOFF)
 
-    assert result["files_removed"] == 2
+    assert result["files_removed"] == 0
+    assert result["files_conflicted"] == 2
     assert result["files_skipped"] == 1
-    assert outside_file.exists()
+    assert owned.read_bytes() == b"x"
+    assert (date_dir / SIDECAR).read_bytes() == _sidecar(b"x")
+    assert (date_dir / JSON_COPY).is_symlink()
+    assert outside_file.read_bytes() == b"victim"
 
 
 @pytest.mark.parametrize(

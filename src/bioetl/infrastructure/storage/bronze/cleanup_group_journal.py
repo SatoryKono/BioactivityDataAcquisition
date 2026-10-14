@@ -119,7 +119,7 @@ class GroupJournal(GroupRecoveryCoordinator):
         self,
         relative: str,
         names: dict[str, str],
-        members: dict[str, dict[str, Any]],
+        members: dict[str, dict[str, Any]],  # Any: validated journal member JSON.
         expected: dict[str, os.stat_result],
         expected_date: os.stat_result | None,
     ) -> None:
@@ -180,7 +180,10 @@ class GroupJournal(GroupRecoveryCoordinator):
         with os.scandir(fd) as entries:
             return sorted(entry.name for entry in entries)
 
-    def _pending_size(self, body: dict[str, Any]) -> tuple[int, int]:
+    def _pending_size(
+        self,
+        body: dict[str, Any],  # Any: validated journal record JSON.
+    ) -> tuple[int, int]:
         """Exclude previously removed members from this call's plan counters."""
         stage = self._private_dir(
             f"{_STAGE_PREFIX}{body['operation_id']}", create=False
