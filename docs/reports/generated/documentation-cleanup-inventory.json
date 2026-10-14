@@ -93615,6 +93615,34 @@
       "duplicate_group": null,
       "duplicate_resolution": null,
       "extension": ".json",
+      "freshness": "retention-sensitive",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "closeout_evidence",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/quality/governance-artifact-closeout-20261012.json",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".json",
       "freshness": "review-required",
       "generated_route": null,
       "generated_route_exception": null,
@@ -107527,7 +107555,7 @@
       "active_backlog": 1,
       "active_draft": 278,
       "active_quality_baseline": 61,
-      "closeout_evidence": 165,
+      "closeout_evidence": 166,
       "docs_reports_curated_entrypoint": 2,
       "docs_reports_curated_or_historical_report": 28,
       "docs_reports_generated_or_route_owned": 7,
@@ -107547,7 +107575,7 @@
       "archive-after-github-state-check": 338,
       "archive-after-migration": 1069,
       "generate-automatically": 1062,
-      "keep": 1334,
+      "keep": 1335,
       "reconcile-with-github-state": 8
     },
     "by_section": {
@@ -107572,7 +107600,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 1328,
+      "reports": 1329,
       "security": 2
     },
     "by_status": {
@@ -107580,17 +107608,17 @@
       "Archived": 283,
       "Canonical": 75,
       "Generated": 1062,
-      "Working": 1641
+      "Working": 1642
     },
     "by_surface_family": {
       "active": 750,
       "archive": 283,
       "canonical": 75,
       "generated": 1062,
-      "working": 1641
+      "working": 1642
     },
     "by_tracking_state": {
-      "tracked": 3811
+      "tracked": 3812
     },
     "docs_reports_local_count": 59,
     "duplicate_group_count": 7,
@@ -107606,8 +107634,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3811,
+    "total_doc_like": 3812,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3811
+    "total_doc_like_tracked": 3812
   }
 }
