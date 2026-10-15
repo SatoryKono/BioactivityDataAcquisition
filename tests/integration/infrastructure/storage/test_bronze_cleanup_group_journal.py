@@ -555,7 +555,7 @@ def test_unsupported_stage_tag_never_falls_back_to_unattested_removal(
     root, spec, date_dir = _fixture(tmp_path)
     real_setxattr = journal.os.setxattr
 
-    def refuse_stage_tag(path, attribute, value, *args, **kwargs):  # noqa: ANN001
+    def refuse_stage_tag(path, attribute, value, *args, **kwargs):
         name = attribute.decode() if isinstance(attribute, bytes) else attribute
         if name == "user.bioetl.fs001-stage":
             raise OSError(errno.ENOTSUP, "directory xattrs unavailable")
