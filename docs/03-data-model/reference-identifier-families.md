@@ -51,4 +51,4 @@ DQ alignment:
 | `pmcid` | string | scalar | `PMC1234567` | `pubmed_publication.pmcid` |
 | `mesh` | string | scalar | `D000001` | `pubmed_publication.mesh_primary`, `pubmed_publication.mesh_terms` |
 | `drugbank` | string | set-like | `DB00001` | `uniprot_protein.drugbank_ids` |
-| `pubchem_cid` | string | scalar or set-like | digits-only canonical CID text | `pubchem_cid` |
+| `pubchem_cid` | string | scalar | digits-only canonical CID text | `pubchem_compound.molecule_id` |
