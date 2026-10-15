@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-15'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -71,9 +71,11 @@ separate aggregate roots.
 | `dq_report_results_core.py` | DQ/reporting | Core result model helpers. |
 | `dq_report_results_quality.py` | DQ/reporting | Quality-specific result model helpers. |
 | `dq_result.py` | DQ/reporting | Generic DQ result value object. |
+| `export_identity.py` | Runtime context | Deterministic bundle IDs and fingerprint projection helpers (domain-side, clock-free). |
 | `identifiers.py` | Publication identifiers | General identifier primitives. |
 | `inchi.py` | Chemistry identifiers | InChI/InChIKey value objects and validation helpers. |
 | `molecular_descriptors.py` | Chemistry semantics | Molecular descriptor value objects. |
+| `orcid.py` | Publication identifiers | ORCID researcher identifier value object. |
 | `pchembl_value.py` | Activity semantics | pChEMBL value validation and normalization. |
 | `protein_class_hierarchy.py` | Classification | Protein-class hierarchy value object. |
 | `publication_field_group_types.py` | Publication output structure | Publication field-group type definitions. |

@@ -14,13 +14,13 @@ live application service facades.
 This page is intentionally compact. Use source modules for exact signatures and
 the layer page for curated public-surface guidance.
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________

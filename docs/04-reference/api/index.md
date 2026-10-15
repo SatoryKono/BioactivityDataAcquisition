@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -65,4 +65,4 @@ expected to reason about directly.
   - `docs/02-architecture/generated/module-dependency-map.json`
 - The JSON summary section contains two coupling metrics:
   - `cross_layer_group_edges` — top-60 slice used in the markdown table.
-- `cross_layer_group_edges_total` — full graph count before slicing; enforced by `test_cross_layer_group_edges_total_budget` with the current reviewed ratchet baseline and budget set to `334`.
+- `cross_layer_group_edges_total` — full graph count before slicing; enforced by `test_cross_layer_group_edges_total_budget` with the current reviewed ratchet baseline and budget set to `330`.

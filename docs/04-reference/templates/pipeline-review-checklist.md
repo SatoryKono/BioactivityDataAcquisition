@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -34,7 +34,7 @@ ______________________________________________________________________
 - [ ] Unified config includes required sections: `pipeline`, `schema`, `quality`, `filters`, `contracts`
 - [ ] Provider config exists at `configs/providers/{provider}.yaml` (source, rate-limit, circuit-breaker)
 - [ ] `loading_strategy` specified (`full_scan_only` | `null`)
-- [ ] `forensic-retention` flag set for Critical tables if needed
+- [ ] `forensic_grade` run option set for Critical tables if needed (see `domain/workflow/_run_options_support.py`)
 
 ## 3. Data Flow - Medallion Architecture (RULES.md §2.1)
 
@@ -138,7 +138,7 @@ ______________________________________________________________________
 ## 11. Delta Maintenance (RULES.md §2.1.1)
 
 - [ ] Weekly `VACUUM` scheduled with `retention-period=7 days`
-- [ ] Forensic retention policy set appropriately (7d default; 30d for Critical tables via `forensic-retention: true`)
+- [ ] Retention policy set appropriately (`vacuum_retention_days` in `configs/base/pipeline.yaml`, 7d default; forensic-grade runs use `forensic_grade` run option)
 
 ## 12. Security (RULES.md §5.2, §5.4)
 

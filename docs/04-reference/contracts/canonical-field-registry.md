@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.1.0
+Version: 1.2.0
 Status: published
 Class: reference
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-15'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -141,7 +141,7 @@ with explicit migration semantics.
 ## Semantic Pair-Matrix Budget Gate
 
 `configs/field_registry/semantic_pair_matrix_budget.yaml` records the reviewed
-semantic pair-matrix drift budget from the exhaustive 2026-05-15 audit. The
+semantic pair-matrix drift budget from the exhaustive 2026-07-01 audit. The
 budget currently ratchets `CRITICAL`, `HIGH`, and `MEDIUM` rows at 0, blocks
 unreviewed `Normalization=DIFFERENT`, `Typing=CONFLICTING`, and
 `Validation=STRICTNESS_MISMATCH` rows, and freezes growth in the reviewed
@@ -176,14 +176,14 @@ that:
   rationale, review id, and expiry metadata.
 
 The generated audit also publishes
-`reports/semantic_pipeline_audit/base_config_semantic_coverage_2026-05-15.json`
+`reports/semantic_pipeline_audit/base_config_semantic_coverage_2026-07-01.json`
 so `configs/base/**` remains visible alongside entity and composite pipeline
 surfaces. That artifact tracks base DQ defaults, contract registry identity
 metadata, Medallion sort/default settings, and fixture/gap governance.
 
 The generated audit additionally publishes
-`reports/semantic_pipeline_audit/semantic_residual_backlog_2026-05-15.json` and
-`reports/semantic_pipeline_audit/semantic_residual_backlog_2026-05-15.md`.
+`reports/semantic_pipeline_audit/semantic_residual_backlog_2026-07-01.json` and
+`reports/semantic_pipeline_audit/semantic_residual_backlog_2026-07-01.md`.
 Those artifacts are the canonical residual-task register for the audit. They
 currently report zero blocking tasks and list the reviewed partial-identity,
 weak-inventory, generic-collision, compatible-normalization,

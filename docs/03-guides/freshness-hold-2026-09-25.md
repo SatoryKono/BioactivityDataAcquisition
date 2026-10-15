@@ -15,7 +15,7 @@ Their `Last verified` dates stay unchanged because a concrete claim does not mat
 Documents in the same age slice whose claims matched were stamped `2026-09-25` only after that check.
 `.mmd` files are outside this slice: they have no `Last verified` header.
 
-> **Resolution wave 2026-10-15:** 69 entries were fixed against the current tree
+> **Resolution wave 2026-10-15:** 87 entries were fixed against the current tree
 > and removed from the table below (canonical renames ChemblAdapter /
 > PipelineService / *Service suffixes, storage port family names,
 > StoragePort -> Bronze/Silver/Gold/Merged ports in description cards,
@@ -81,21 +81,3 @@ Documents in the same age slice whose claims matched were stamped `2026-09-25` o
 | `docs/02-architecture/diagrams/governance/diagram-views-plan.md` | Родительские пути названы .mermaid, канон лежит как .mmd. |
 | `docs/02-architecture/history/compatibility-facade-review-history.md` | publication_field_groups.py всё ещё помечен retained, модуля нет. |
 | `docs/02-architecture/module-consolidation-migration-requirements.md` | Стартовый путь domain/value-objects неверен, пакет называется value_objects. |
-| `docs/04-reference/api/application.md` | Package exports сервисов сняты, перечисленные классы отсутствуют. |
-| `docs/04-reference/api/application/services.md` | services/__init__.py оставил пустой __all__. |
-| `docs/04-reference/api/composition.md` | Названы отсутствующие runtime-модули и классы CrossrefAdapterFactory/PipelineContractValidator. |
-| `docs/04-reference/api/index.md` | Бюджет cross_layer_group_edges_total 334 не совпадает с 330 в коде. |
-| `docs/04-reference/components/config-runtime-artifacts.md` | get_config_drift и ConfigDriftReport в src отсутствуют. |
-| `docs/04-reference/contracts/canonical-field-registry.md` | Артефакты аудита 2026-05-15 указаны как текущие, их нет в reports/. |
-| `docs/04-reference/domain/control-plane.md` | Названы отсутствующие RunManifestArtifact и классы RunLedger/WorkflowLedger. |
-| `docs/04-reference/domain/ports.md` | Каталог утверждает 74 файла, в domain/ports их 81. |
-| `docs/04-reference/domain/symbol-invariant-traceability.md` | События BatchCompleted и QuarantineResolved отсутствуют. |
-| `docs/04-reference/domain/value-objects.md` | Каталог неполон: нет orcid.py и export_identity.py. |
-| `docs/04-reference/hash-policy.md` | Путь tests/unit/domain/hash-policy/ неверен, ключи YAML другие. |
-| `docs/04-reference/pipelines/chembl/08-assay-parameters-spec.md` | Текущим Gold назван v1.0, registry держит 2.0.0. |
-| `docs/04-reference/pipelines/chembl/12-publication-similarity-spec.md` | Текущим экспортом назван v1.0, опубликован только 2.0.0. |
-| `docs/04-reference/pipelines/contract-facet-matrix.md` | Счётчики required/nullable не совпадают с contract-coverage-matrix.json. |
-| `docs/04-reference/publication-fields-reference.md` | Утверждение, что _run_id не пишется в Silver, не совпадает с publication.yaml. |
-| `docs/04-reference/publication-validation-index.md` | Номера ADR перепутаны с текущим реестром. |
-| `docs/04-reference/templates/pipeline-review-checklist.md` | Флаг forensic-retention снят со sink-схемы. |
-| `docs/04-reference/workflow-catalog.md` | Ссылка на services/workflow_runner_service.py, файл лежит в services/workflow/. |
