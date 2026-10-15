@@ -1,1 +1,494 @@
-<svg xmlns="http://www.w3.org/2000/svg" id="my-svg" width="100%" aria-roledescription="classDiagram" style="max-width:953.5px;background-color:white" viewBox="0 0 953.5 742"><style>#my-svg{font-family:&quot;trebuchet ms&quot;,verdana,arial,sans-serif;font-size:16px;fill:#333;}#my-svg .error-icon{fill:hsl(220.5882352941, 100%, 98.3333333333%);}#my-svg .error-text{fill:rgb(8.5000000002, 5.7500000001, 0);stroke:rgb(8.5000000002, 5.7500000001, 0);}#my-svg .edge-thickness-normal{stroke-width:2px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#0b0b0b;stroke:#0b0b0b;}#my-svg .marker.cross{stroke:#0b0b0b;}#my-svg svg{font-family:&quot;trebuchet ms&quot;,verdana,arial,sans-serif;font-size:16px;}#my-svg g.classGroup text{fill:hsl(40.5882352941, 60%, 83.3333333333%);stroke:none;font-family:&quot;trebuchet ms&quot;,verdana,arial,sans-serif;font-size:10px;}#my-svg g.classGroup text .title{font-weight:bolder;}#my-svg .nodeLabel,#my-svg .edgeLabel{color:#333;}#my-svg .edgeLabel .label rect{fill:#fff4dd;}#my-svg .label text{fill:#333;}#my-svg .edgeLabel .label span{background:#fff4dd;}#my-svg .classTitle{font-weight:bolder;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#fff4dd;stroke:hsl(40.5882352941, 60%, 83.3333333333%);stroke-width:1px;}#my-svg .divider{stroke:hsl(40.5882352941, 60%, 83.3333333333%);stroke-width:1;}#my-svg g.clickable{cursor:pointer;}#my-svg g.classGroup rect{fill:#fff4dd;stroke:hsl(40.5882352941, 60%, 83.3333333333%);}#my-svg g.classGroup line{stroke:hsl(40.5882352941, 60%, 83.3333333333%);stroke-width:1;}#my-svg .classLabel .box{stroke:none;stroke-width:0;fill:#fff4dd;opacity:0.5;}#my-svg .classLabel .label{fill:hsl(40.5882352941, 60%, 83.3333333333%);font-size:10px;}#my-svg .relation{stroke:#0b0b0b;stroke-width:1;fill:none;}#my-svg .dashed-line{stroke-dasharray:3;}#my-svg .dotted-line{stroke-dasharray:1 2;}#my-svg #compositionStart,#my-svg .composition{fill:#0b0b0b!important;stroke:#0b0b0b!important;stroke-width:1;}#my-svg #compositionEnd,#my-svg .composition{fill:#0b0b0b!important;stroke:#0b0b0b!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#0b0b0b!important;stroke:#0b0b0b!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#0b0b0b!important;stroke:#0b0b0b!important;stroke-width:1;}#my-svg #extensionStart,#my-svg .extension{fill:transparent!important;stroke:#0b0b0b!important;stroke-width:1;}#my-svg #extensionEnd,#my-svg .extension{fill:transparent!important;stroke:#0b0b0b!important;stroke-width:1;}#my-svg #aggregationStart,#my-svg .aggregation{fill:transparent!important;stroke:#0b0b0b!important;stroke-width:1;}#my-svg #aggregationEnd,#my-svg .aggregation{fill:transparent!important;stroke:#0b0b0b!important;stroke-width:1;}#my-svg #lollipopStart,#my-svg .lollipop{fill:#fff4dd!important;stroke:#0b0b0b!important;stroke-width:1;}#my-svg #lollipopEnd,#my-svg .lollipop{fill:#fff4dd!important;stroke:#0b0b0b!important;stroke-width:1;}#my-svg .edgeTerminals{font-size:11px;}#my-svg .classTitleText{text-anchor:middle;font-size:18px;fill:#333;}#my-svg :root{--mermaid-font-family:&quot;trebuchet ms&quot;,verdana,arial,sans-serif;}</style><defs><marker id="my-svg_classDiagram-aggregationStart" class="marker aggregation classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-aggregationEnd" class="marker aggregation classDiagram" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-extensionStart" class="marker extension classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m1 7 17 6V1Z"/></marker></defs><defs><marker id="my-svg_classDiagram-extensionEnd" class="marker extension classDiagram" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="M1 1v12l17-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-compositionStart" class="marker composition classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-compositionEnd" class="marker composition classDiagram" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-dependencyStart" class="marker dependency classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="6" refY="7"><path d="m5 7 4 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-dependencyEnd" class="marker dependency classDiagram" markerHeight="28" markerWidth="20" orient="auto" refX="13" refY="7"><path d="m18 7-9 6 5-6-5-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-lollipopStart" class="marker lollipop classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="13" refY="7"><circle cx="7" cy="7" r="6" fill="transparent" stroke="#000"/></marker></defs><defs><marker id="my-svg_classDiagram-lollipopEnd" class="marker lollipop classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="1" refY="7"><circle cx="7" cy="7" r="6" fill="transparent" stroke="#000"/></marker></defs><g class="root"><g class="edgePaths"><path id="id1" marker-end="url(#my-svg_classDiagram-dependencyEnd)" d="m582.202 446 7.396 5.75c7.396 5.75 22.188 17.25 38.855 30.06 16.667 12.812 35.208 26.933 44.479 33.994l9.27 7.06" class="edge-pattern-solid relation" style="fill:none"/><path id="id2" marker-end="url(#my-svg_classDiagram-dependencyEnd)" d="m452.702 446 1.777 5.75c1.776 5.75 5.328 17.25 7.104 33.5s1.776 37.25 1.776 47.75v10.5" class="edge-pattern-solid relation" style="fill:none"/><path id="id3" marker-end="url(#my-svg_classDiagram-dependencyEnd)" d="M507.73 112v5.75c0 5.75 0 17.25-2.805 27.883s-8.417 20.399-11.223 25.282l-2.806 4.883" class="edge-pattern-solid relation" style="fill:none"/><path id="id4" marker-end="url(#my-svg_classDiagram-dependencyEnd)" d="m218.249 446-8.398 5.75c-8.399 5.75-25.195 17.25-33.593 27.75s-8.399 20-8.399 24.75V509" class="edge-pattern-solid relation" style="fill:none"/><path id="edgeNote5" d="M123.488 105.5v6.833c0 6.834 0 20.5 9.926 33.084C143.34 158 163.192 169.5 173.118 175.25l9.926 5.75" class="edge-pattern-dotted relation" style="fill:none"/><path id="edgeNote6" d="M815.648 368.5v158" class="edge-pattern-dotted relation" style="fill:none"/></g><g class="edgeLabels"><g class="edgeLabel"><foreignObject width="30.422" height="19" class="label" transform="translate(611.367 471)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="edgeLabel"><span class="edgeLabel">uses</span></span></div></foreignObject></g><g class="edgeLabel"><foreignObject width="51.469" height="19" class="label" transform="translate(437.625 471)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="edgeLabel"><span class="edgeLabel">returns</span></span></div></foreignObject></g><g class="edgeLabel"><foreignObject width="88.828" height="19" class="label" transform="translate(463.316 137)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="edgeLabel"><span class="edgeLabel">delegates to</span></span></div></foreignObject></g><g class="edgeLabel"><foreignObject width="83.781" height="19" class="label" transform="translate(125.969 471)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="edgeLabel"><span class="edgeLabel">implements</span></span></div></foreignObject></g><g class="edgeLabel"><foreignObject width="0" height="0" class="label"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="edgeLabel"/></div></foreignObject></g><g class="edgeLabel"><foreignObject width="0" height="0" class="label"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="edgeLabel"/></div></foreignObject></g></g><g class="nodes"><g id="classId-ContentHashPolicyGroup-0" class="node default"><path d="M151.554 181h520.438v265H151.554z" class="outer title-state"/><path d="M151.554 235h520.438M151.554 274h520.438" class="divider"/><g class="label" transform="translate(411.773 313.5)"><foreignObject width="61.578" height="19" transform="translate(-30.79 -125)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">«Utility»</span></div></foreignObject><foreignObject width="184.781" height="19" class="classTitle" transform="translate(-92.39 -102)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">ContentHashPolicyGroup</span></div></foreignObject><foreignObject width="147.516" height="19" transform="translate(-252.719 -67)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">+PRECISION: int = 10</span></div></foreignObject><foreignObject width="253.094" height="19" transform="translate(-252.719 -32)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">+EXCLUDED_PREFIXES: tuple =(&quot;_&quot;,)</span></div></foreignObject><foreignObject width="357.953" height="19" transform="translate(-252.719 -9)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">+compute(provider: str, data: dict) : ContentHash</span></div></foreignObject><foreignObject width="505.438" height="19" transform="translate(-252.719 14)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">+compute_batch(provider: str, records: list&lt;dict&gt;) : list&lt;ContentHash&gt;</span></div></foreignObject><foreignObject width="247.797" height="19" transform="translate(-252.719 37)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">-_filter_hashable(data: dict) : dict</span></div></foreignObject><foreignObject width="210.625" height="19" transform="translate(-252.719 60)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">-_normalize(data: dict) : dict</span></div></foreignObject><foreignObject width="258.688" height="19" transform="translate(-252.719 83)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">-_normalize_value(value: Any) : Any</span></div></foreignObject><foreignObject width="237.156" height="19" transform="translate(-252.719 106)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">-_canonical_json(data: dict) : str</span></div></foreignObject></g></g><g id="classId-NormalizationRules-1" class="node default"><path d="M685.796 526.5H945.5v196H685.796z" class="outer title-state"/><path d="M685.796 580.5H945.5M685.796 711.5H945.5" class="divider"/><g class="label" transform="translate(815.648 624.5)"><foreignObject width="108.891" height="19" transform="translate(-54.445 -90.5)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">«Value Object»</span></div></foreignObject><foreignObject width="144.969" height="19" class="classTitle" transform="translate(-72.484 -67.5)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">NormalizationRules</span></div></foreignObject><foreignObject width="180.359" height="19" transform="translate(-122.352 -32.5)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">+nan_replacement: None</span></div></foreignObject><foreignObject width="173.688" height="19" transform="translate(-122.352 -9.5)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">+inf_replacement: None</span></div></foreignObject><foreignObject width="180.625" height="19" transform="translate(-122.352 13.5)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">+float_precision: int = 10</span></div></foreignObject><foreignObject width="244.703" height="19" transform="translate(-122.352 36.5)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">+date_format: str = &quot;YYYY-MM-DD&quot;</span></div></foreignObject><foreignObject width="218.016" height="19" transform="translate(-122.352 59.5)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">+string_transform: str = &quot;strip&quot;</span></div></foreignObject></g></g><g id="classId-ContentHash-2" class="node default"><path d="M377.718 549.5H549v150H377.72z" class="outer title-state"/><path d="M377.718 603.5H549M377.718 642.5H549" class="divider"/><g class="label" transform="translate(463.36 624.5)"><foreignObject width="80.609" height="19" transform="translate(-40.305 -67.5)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">«NewType»</span></div></foreignObject><foreignObject width="95.453" height="19" class="classTitle" transform="translate(-47.727 -44.5)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">ContentHash</span></div></foreignObject><foreignObject width="76.563" height="19" transform="translate(-78.14 -9.5)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">+value: str</span></div></foreignObject><foreignObject width="111.063" height="19" transform="translate(-78.14 25.5)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">+__len__() : int</span></div></foreignObject><foreignObject width="156.281" height="19" transform="translate(-78.14 48.5)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">+__eq__(other) : bool</span></div></foreignObject></g></g><g id="classId-BaseTransformer-3" class="node default"><path d="M268.972 8h477.516v104H268.972z" class="outer title-state"/><path d="M268.972 39h477.516M268.972 55h477.516" class="divider"/><g class="label" transform="translate(507.73 60)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel"/></div></foreignObject><foreignObject width="125.063" height="19" class="classTitle" transform="translate(-62.531 -44.5)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">BaseTransformer</span></div></foreignObject><foreignObject width="462.516" height="19" transform="translate(-231.258 2.5)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">#compute_content_hash(provider: str, data: dict) : ContentHash</span></div></foreignObject><foreignObject width="227.063" height="19" transform="translate(-231.258 25.5)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">#serialize_json(value: Any) : str</span></div></foreignObject></g></g><g id="classId-HashFlow-4" class="node default"><path d="M8 515h319.72v219H8z" class="outer title-state"/><path d="M8 569h319.718M8 723h319.718" class="divider"/><g class="label" transform="translate(167.86 624.5)"><foreignObject width="85.547" height="19" transform="translate(-42.773 -102)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">«flowchart»</span></div></foreignObject><foreignObject width="71.484" height="19" class="classTitle" transform="translate(-35.742 -79)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">HashFlow</span></div></foreignObject><foreignObject width="209.672" height="19" transform="translate(-152.36 -44)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">1_Input: provider + raw_data</span></div></foreignObject><foreignObject width="304.719" height="19" transform="translate(-152.36 -21)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">2_Filter: remove underscore prefixed keys</span></div></foreignObject><foreignObject width="221.578" height="19" transform="translate(-152.36 2)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">3_Normalize: apply value rules</span></div></foreignObject><foreignObject width="197.828" height="19" transform="translate(-152.36 25)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">4_Serialize: canonical JSON</span></div></foreignObject><foreignObject width="114.344" height="19" transform="translate(-152.36 48)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">5_Hash: SHA256</span></div></foreignObject><foreignObject width="262.984" height="19" transform="translate(-152.36 71)"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">6_Output: ContentHash 64 hex chars</span></div></foreignObject></g></g><g id="note0" class="node undefined" transform="translate(123.488 60)"><rect width="190.969" height="91" x="-95.484" y="-45.5" rx="0" ry="0"/><g class="label" transform="translate(-87.984 -38)"><rect/><foreignObject width="175.969" height="76"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">Content hash pipeline<br/>filter internal fields<br/>normalize values<br/>canonical JSON + sha256</span></div></foreignObject></g></g><g id="note1" class="node undefined" transform="translate(815.648 313.5)"><rect width="187.313" height="110" x="-93.656" y="-55" rx="0" ry="0"/><g class="label" transform="translate(-86.156 -47.5)"><rect/><foreignObject width="172.313" height="95"><div xmlns="http://www.w3.org/1999/xhtml" style="display:inline-block;white-space:nowrap"><span class="nodeLabel">Normalization examples<br/>float round(10)<br/>NaN -&gt; null<br/>trim strings<br/>datetime -&gt; ISO date</span></div></foreignObject></g></g></g></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" id="my-svg" width="100%" aria-roledescription="classDiagram" style="max-width:980.199px;background-color:white" viewBox="-8 -8 980.199 821"><style>#my-svg{font-family:Inter,-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;fill:#212121;}#my-svg .error-icon{fill:#f0fdf4;}#my-svg .error-text{fill:#212121;stroke:#212121;}#my-svg .edge-thickness-normal{stroke-width:2px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#475569;stroke:#475569;}#my-svg .marker.cross{stroke:#475569;}#my-svg svg{font-family:Inter,-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;}#my-svg g.classGroup text{fill:#2563eb;stroke:none;font-family:Inter,-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,Roboto,Oxygen,Ubuntu,sans-serif;font-size:10px;}#my-svg g.classGroup text .title{font-weight:bolder;}#my-svg .nodeLabel,#my-svg .edgeLabel{color:#212121;}#my-svg .edgeLabel .label rect{fill:#eff6ff;}#my-svg .label text{fill:#212121;}#my-svg .edgeLabel .label span{background:#eff6ff;}#my-svg .classTitle{font-weight:bolder;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#eff6ff;stroke:#2563eb;stroke-width:1px;}#my-svg .divider{stroke:#2563eb;stroke-width:1;}#my-svg g.clickable{cursor:pointer;}#my-svg g.classGroup rect{fill:#eff6ff;stroke:#2563eb;}#my-svg g.classGroup line{stroke:#2563eb;stroke-width:1;}#my-svg .classLabel .box{stroke:none;stroke-width:0;fill:#eff6ff;opacity:0.5;}#my-svg .classLabel .label{fill:#2563eb;font-size:10px;}#my-svg .relation{stroke:#475569;stroke-width:1;fill:none;}#my-svg .dashed-line{stroke-dasharray:3;}#my-svg .dotted-line{stroke-dasharray:1 2;}#my-svg #compositionStart,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #compositionEnd,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionStart,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionEnd,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationStart,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationEnd,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopStart,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopEnd,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg .edgeTerminals{font-size:11px;}#my-svg .classTitleText{text-anchor:middle;font-size:18px;fill:#212121;}#my-svg :root{--mermaid-font-family:&quot;trebuchet ms&quot;,verdana,arial,sans-serif;}/*
+ * Пользовательские стили диаграмм BioETL (структурированная копия)
+ * Источник: custom.css
+ * Цель: сгруппировать правила по типам элементов и документировать назначение каждого CSS-параметра.
+ */
+
+/* =========================================================
+ * 1) Глобальная типографика и базовое поведение текста
+ * ========================================================= */
+svg {
+    /* Задаёт основной стек шрифтов для всего текста в SVG. */
+    font-family: Inter, -apple-system, BlinkMacSystemFont, &apos;Segoe UI&apos;, Roboto,
+    Oxygen, Ubuntu, sans-serif;
+}
+
+
+
+/* =========================================================
+ * 2) Общая геометрия узлов (для нескольких типов диаграмм)
+ * ========================================================= */
+.node rect,
+.node circle,
+.node ellipse,
+.node polygon,
+.node path {
+    /* Единая толщина контура для фигур узлов. */
+    stroke-width: 1.5px !important;
+    /* Скругляет углы по горизонтали для более мягкого вида. */
+    rx: 8;
+    /* Скругляет углы по вертикали в паре с rx. */
+    ry: 8;
+    /* Добавляет лёгкую тень и отделяет узлы от фона. */
+    filter:  none; /*  drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));*/
+}
+
+/* =========================================================
+ * 3) Контейнеры subgraph / cluster
+ * ========================================================= */
+.cluster rect,
+.cluster path {
+    /* Увеличивает радиус углов у контейнеров-групп. */
+    rx: 10;
+    /* Поддерживает симметрию скругления по вертикали. */
+    ry: 10;
+    /* Нейтральная заливка контейнера для снижения визуального шума. */
+    fill: #f8fafc;
+    /* Приглушённая обводка, чтобы границы были заметны, но не доминировали. */
+    stroke: #94a3b8;
+    /* Толщина границы контейнера в тон большинству узлов. */
+    stroke-width: 1.5px;
+    /* Убирает пунктир у рамок контейнеров. */
+    stroke-dasharray: none;
+    /* Делает фон контейнера полностью непрозрачным. */
+    fill-opacity: 1;
+    /* Отключает тень контейнера, чтобы акцент оставался на узлах. */
+    filter: none;
+}
+
+.cluster text {
+    /* Нормальный вес шрифта для заголовков групп. */
+    font-weight: 400;
+    /* Увеличенный размер заголовка относительно текста узлов. */
+    font-size: 16px;
+}
+
+/* =========================================================
+ * 4) Стили линий связей (edges/links)
+ * ========================================================= */
+.edgePath .path {
+    /* Делает основные ребра более заметными в плотных графах. */
+    stroke-width: 2.5px;
+    /* Скругляет соединения сегментов линий. */
+    stroke-linejoin: round;
+    /* Скругляет окончания линий. */
+    stroke-linecap: round;
+}
+
+.edgePath path,
+.flowchart-link,
+.relation,
+.messageLine0,
+.messageLine1,
+.transition path {
+    /* Унифицированные скруглённые соединения для всех типов линий. */
+    stroke-linejoin: round;
+    /* Унифицированные скруглённые окончания для всех типов линий. */
+    stroke-linecap: round;
+}
+
+.transition path {
+    /* Выравнивает толщину переходов state diagram с основными ребрами. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 5) Подписи ребер и fallback-текст
+ * ========================================================= */
+.edgeLabel {
+    /* Компактный размер шрифта для подписей на связях. */
+    font-size: 12px;
+    /* Плотная межстрочность для экономии места. */
+    line-height: 1.1;
+    /* Базовый непрозрачный фон под подписью. */
+    background-color: #ffffff;
+    /* Небольшие внутренние отступы вокруг текста. */
+    padding: 1px 3px;
+    /* Мягкое скругление фона подписи. */
+    border-radius: 2px;
+}
+
+.edgeLabel span,
+.edgeLabel p,
+text.fo-fallback {
+    /* Принудительный тёмный fill для контраста в SVG-рендерах. */
+    fill: #111827 !important;
+    /* Принудительный тёмный цвет для HTML-подписей. */
+    color: #111827 !important;
+    /* Полная непрозрачность текста. */
+    opacity: 1 !important;
+    /* Компактная межстрочность для многострочных подписей. */
+    line-height: 1.1;
+    /* Убирает стандартные внешние отступы HTML-параграфов. */
+    margin: 0;
+    /* Убирает стандартные внутренние отступы HTML-параграфов. */
+    padding: 0;
+}
+
+.edgeLabel .labelBkg,
+.labelBkg {
+    /* Жёстко задаёт белый фон под текстом подписей. */
+    background-color: #ffffff !important;
+    /* Делает фон полностью непрозрачным во всех просмотрщиках. */
+    opacity: 1 !important;
+}
+
+.edgeLabel rect {
+    /* Переопределяет полупрозрачный фон по умолчанию у Mermaid. */
+    opacity: 1 !important;
+    /* Жёстко фиксирует белую заливку прямоугольника под подписью. */
+    fill: #ffffff !important;
+}
+
+/* =========================================================
+ * 6) Элементы sequence diagram
+ * ========================================================= */
+.actor {
+    /* Толщина границы actor-блоков. */
+    stroke-width: 1.5px;
+    /* Скругление углов actor-блоков по горизонтали. */
+    rx: 4;
+    /* Скругление углов actor-блоков по вертикали. */
+    ry: 4;
+}
+
+.messageLine0,
+.messageLine1 {
+    /* Толщина линий сообщений в sequence diagram. */
+    stroke-width: 1.6px;
+}
+
+.messageText {
+    /* Базовый размер текста сообщений. */
+    font-size: 13px;
+}
+
+.activation0 {
+    /* Более тонкая линия activation bar, чтобы не перегружать схему. */
+    stroke-width: 1px;
+}
+
+.note {
+    /* Скругление углов заметки по горизонтали. */
+    rx: 4;
+    /* Скругление углов заметки по вертикали. */
+    ry: 4;
+    /* Тонкая граница для вторичных блоков. */
+    stroke-width: 1px;
+    /* Лёгкая тень для визуального отделения заметок. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+/* =========================================================
+ * 7) Базовые элементы class diagram
+ * ========================================================= */
+g.classGroup rect {
+    /* Скругление углов class box по горизонтали. */
+    rx: 10;
+    /* Скругление углов class box по вертикали. */
+    ry: 10;
+    /* Толщина границы class box. */
+    stroke-width: 1.5px;
+    /* Мягкая тень у class box без агрессивного контраста. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+g.classGroup text {
+    /* Базовый размер текста внутри class diagram. */
+    font-size: 14px;
+    padding: 10px 10px;
+}
+
+g.classGroup line {
+    /* Толщина внутренних разделителей класса. */
+    stroke-width: 1px;
+}
+
+.relation {
+    /* Толщина связей между классами на уровне основных ребер. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 8) Типографика HTML-лейблов class diagram
+ * ========================================================= */
+g.label-group .nodeLabel {
+    /* Увеличенный размер названия класса для иерархии. */
+    font-size: 16px !important;
+    /* Полужирный акцент на имени класса. */
+    font-weight: 200 !important;
+    /* Лёгкое межбуквенное расстояние для читаемости заголовка. */
+    letter-spacing: 0.01em;
+}
+
+g.annotation-group .nodeLabel {
+    /* Уменьшенный размер для стереотипов/аннотаций. */
+    font-size: 11px !important;
+    /* Курсив для визуального отделения аннотаций. */
+    font-style: italic !important;
+    /* Небольшое ослабление контраста вторичного текста. */
+    opacity: 0.8;
+}
+
+g.members-group .nodeLabel,
+g.methods-group .nodeLabel {
+    /* Компактный размер для атрибутов и методов. */
+    font-size: 12px !important;
+    /* Нормальный вес шрифта для плотного структурного текста. */
+    font-weight: 400 !important;
+}
+
+/* =========================================================
+ * 9) Помощники размеров foreignObject (class/flowchart)
+ * ========================================================= */
+g.members-group foreignObject,
+g.methods-group foreignObject {
+    /* Минимальная высота областей members/methods. */
+    min-height: 40px;
+}
+
+.node foreignObject &gt; div,
+g.classGroup foreignObject &gt; div {
+    /* Стабилизирует вычисление размеров с учётом отступов/границ. */
+    box-sizing: border-box;
+}
+
+.node.size-sm foreignObject &gt; div {
+    /* Минимальная высота для малого размерного уровня узла. */
+    min-height: 80px;
+    /* Минимальная ширина для малого размерного уровня узла. */
+    min-width: 180px;
+}
+
+.node.size-md foreignObject &gt; div {
+    /* Минимальная высота для среднего размерного уровня узла. */
+    min-height: 140px;
+    /* Минимальная ширина для среднего размерного уровня узла. */
+    min-width: 260px;
+}
+
+.node.size-lg foreignObject &gt; div {
+    /* Минимальная высота для большого размерного уровня узла. */
+    min-height: 200px;
+    /* Минимальная ширина для большого размерного уровня узла. */
+    min-width: 340px;
+}
+
+/* =========================================================
+ * 10) Элементы state diagram
+ * ========================================================= */
+g.stateGroup rect {
+    /* Скругление углов контейнеров состояний по горизонтали. */
+    rx: 8;
+    /* Скругление углов контейнеров состояний по вертикали. */
+    ry: 8;
+}
+
+.statediagram-state rect {
+    /* Скругление углов узлов состояния по горизонтали. */
+    rx: 8;
+    /* Скругление углов узлов состояния по вертикали. */
+    ry: 8;
+    /* Толщина границы узла состояния. */
+    stroke-width: 1.5px;
+    /* Лёгкая тень для визуального отделения state box. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 11) Элементы ER diagram
+ * ========================================================= */
+.er.entityBox {
+    /* Толщина границы сущности ER-диаграммы. */
+    stroke-width: 1.5px;
+    /* Скругление углов сущности по горизонтали. */
+    rx: 4;
+    /* Скругление углов сущности по вертикали. */
+    ry: 4;
+    /* Лёгкая тень для отделения блоков сущностей. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 12) Узлы mindmap
+ * ========================================================= */
+.mindmap-node rect,
+.mindmap-node circle {
+    /* Толщина контура узлов mindmap. */
+    stroke-width: 1.5px;
+    /* Чуть более выраженная тень для плотных радиальных веток. */
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* =========================================================
+ * 13) Маркеры стрелок
+ * ========================================================= */
+marker path {
+    /* Единый нейтральный цвет наконечников стрелок. */
+    fill: #475569;
+}
+
+/* =========================================================
+ * 14) Цветовая карта архитектурных слоёв (fallback-селекторы)
+ * ========================================================= */
+[id*=&quot;Domain&quot;] &gt; rect,
+[id*=&quot;Domain&quot;] &gt; path {
+    /* Цвет фона для доменного слоя. */
+    fill: #f5f3ff !important;
+    /* Цвет границы для доменного слоя. */
+    stroke: #7c3aed !important;
+}
+
+.cluster[id*=&quot;Domain&quot;] &gt; rect,
+.cluster[id*=&quot;Domain&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Application&quot;] &gt; rect,
+[id*=&quot;Application&quot;] &gt; path {
+    /* Цвет фона для application-слоя. */
+    fill: #f0fdf4 !important;
+    /* Цвет границы для application-слоя. */
+    stroke: #16a34a !important;
+}
+
+.cluster[id*=&quot;Application&quot;] &gt; rect,
+.cluster[id*=&quot;Application&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Infrastructure&quot;] &gt; rect,
+[id*=&quot;Infrastructure&quot;] &gt; path {
+    /* Цвет фона для infrastructure-слоя. */
+    fill: #fff1f2 !important;
+    /* Цвет границы для infrastructure-слоя. */
+    stroke: #dc2626 !important;
+}
+
+.cluster[id*=&quot;Infrastructure&quot;] &gt; rect,
+.cluster[id*=&quot;Infrastructure&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Composition&quot;] &gt; rect,
+[id*=&quot;Composition&quot;] &gt; path {
+    /* Цвет фона для composition-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы для composition-слоя. */
+    stroke: #f59e0b !important;
+}
+
+.cluster[id*=&quot;Composition&quot;] &gt; rect,
+.cluster[id*=&quot;Composition&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Interfaces&quot;] &gt; rect,
+[id*=&quot;Interfaces&quot;] &gt; path {
+    /* Цвет фона для слоя интерфейсов. */
+    fill: #eff6ff !important;
+    /* Цвет границы для слоя интерфейсов. */
+    stroke: #2563eb !important;
+}
+
+.cluster[id*=&quot;Interfaces&quot;] &gt; rect,
+.cluster[id*=&quot;Interfaces&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;External&quot;] &gt; rect,
+[id*=&quot;External&quot;] &gt; path {
+    /* Цвет фона для внешних систем. */
+    fill: #f1f5f9 !important;
+    /* Цвет границы для внешних систем. */
+    stroke: #64748b !important;
+}
+
+.cluster[id*=&quot;External&quot;] &gt; rect,
+.cluster[id*=&quot;External&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+/* Белая подложка под подписи всех архитектурных/medallion слоёв */
+g.cluster[id*=&quot;Domain&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Application&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Infrastructure&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Composition&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Interfaces&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;External&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Bronze&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Silver&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Gold&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Quarantine&quot;] .cluster-label foreignObject &gt; div {
+    background: #ffffff !important;
+    padding: 0 6px !important;
+    border-radius: 4px;
+}
+
+/* Fallback для рендеров без foreignObject: не рисуем толстую обводку */
+g.cluster[id*=&quot;Domain&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Application&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Infrastructure&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Composition&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Interfaces&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;External&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Bronze&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Silver&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Gold&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Quarantine&quot;] .cluster-label text.fo-fallback {
+    fill: #111827 !important;
+    stroke: none !important;
+}
+
+/* =========================================================
+ * 15) Цветовая карта слоёв Medallion
+ * ========================================================= */
+[id*=&quot;Bronze&quot;] &gt; rect,
+[id*=&quot;Bronze&quot;] &gt; path {
+    /* Цвет фона Bronze-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы Bronze-слоя. */
+    stroke: #f59e0b !important;
+}
+
+[id*=&quot;Silver&quot;] &gt; rect,
+[id*=&quot;Silver&quot;] &gt; path {
+    /* Цвет фона Silver-слоя. */
+    fill: #f8fafc !important;
+    /* Цвет границы Silver-слоя. */
+    stroke: #475569 !important;
+}
+
+[id*=&quot;Gold&quot;] &gt; rect,
+[id*=&quot;Gold&quot;] &gt; path {
+    /* Цвет фона Gold-слоя. */
+    fill: #fefce8 !important;
+    /* Цвет границы Gold-слоя. */
+    stroke: #ca8a04 !important;
+}
+
+[id*=&quot;Quarantine&quot;] &gt; rect,
+[id*=&quot;Quarantine&quot;] &gt; path {
+    /* Цвет фона для карантинных/проблемных потоков данных. */
+    fill: #ffe4e6 !important;
+    /* Цвет границы для карантинных/проблемных потоков данных. */
+    stroke: #e11d48 !important;
+}
+/* Нормализует вес текста в узлах и заголовках слоёв (без полужирного акцента). */
+.node .label text,
+.node .label tspan,
+.node .label .nodeLabel,
+text.fo-fallback {
+    stroke: none !important;
+    stroke-width: 0 !important;
+    fill: #111827 !important;
+    font-weight: 400 !important;
+}
+/* Single text layer (fallback-only) */
+text.fo-fallback {
+    display: inline !important;
+}
+
+foreignObject {
+    display: none !important;
+}/* bioetl-inject */#my-svg .edgeLabel rect{opacity:1!important;fill:#ffffff!important}#my-svg .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel{font-size:12px;line-height:1.1;padding:1px 3px}#my-svg .edgeLabel span{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg .edgeLabel p{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg text.fo-fallback{color:#111827!important;fill:#111827!important;opacity:1!important}</style><defs><marker id="my-svg_classDiagram-aggregationStart" class="marker aggregation classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-aggregationEnd" class="marker aggregation classDiagram" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-extensionStart" class="marker extension classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m1 7 17 6V1Z"/></marker></defs><defs><marker id="my-svg_classDiagram-extensionEnd" class="marker extension classDiagram" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="M1 1v12l17-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-compositionStart" class="marker composition classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-compositionEnd" class="marker composition classDiagram" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-dependencyStart" class="marker dependency classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="6" refY="7"><path d="m5 7 4 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-dependencyEnd" class="marker dependency classDiagram" markerHeight="28" markerWidth="20" orient="auto" refX="13" refY="7"><path d="m18 7-9 6 5-6-5-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-lollipopStart" class="marker lollipop classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="13" refY="7"><circle cx="7" cy="7" r="6" fill="transparent" stroke="#000"/></marker></defs><defs><marker id="my-svg_classDiagram-lollipopEnd" class="marker lollipop classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="1" refY="7"><circle cx="7" cy="7" r="6" fill="transparent" stroke="#000"/></marker></defs><g class="root"><g class="edgePaths"><path id="id1" marker-end="url(#my-svg_classDiagram-dependencyEnd)" d="m586.65 487 6.603 5.5c6.603 5.5 19.81 16.5 34.99 28.954 15.182 12.453 32.338 26.36 40.915 33.314l8.578 6.954" class="edge-pattern-solid relation" style="fill:none"/><path id="id2" marker-end="url(#my-svg_classDiagram-dependencyEnd)" d="m450.008 487 1.49 5.5c1.492 5.5 4.473 16.5 5.964 32.75s1.491 37.75 1.491 48.5v10.75" class="edge-pattern-solid relation" style="fill:none"/><path id="id3" marker-end="url(#my-svg_classDiagram-dependencyEnd)" d="M505.04 127v5.5c0 5.5 0 16.5-2.434 26.615-2.433 10.116-7.298 19.346-9.73 23.962l-2.434 4.615" class="edge-pattern-solid relation" style="fill:none"/><path id="id4" marker-end="url(#my-svg_classDiagram-dependencyEnd)" d="m210.54 487-7.47 5.5c-7.468 5.5-22.406 16.5-29.875 26.5-7.468 10-7.468 19-7.468 23.5v4.5" class="edge-pattern-solid relation" style="fill:none"/><path id="edgeNote5" d="M119.64 121.5v6.417c0 6.416 0 19.25 8.878 31.166S155.148 182 164.026 187.5l8.877 5.5" class="edge-pattern-dotted relation" style="fill:none"/><path id="edgeNote6" d="M817.473 404.5v161" class="edge-pattern-dotted relation" style="fill:none"/></g><g class="edgeLabels"><g class="edgeLabel"><g class="label"><text xml:space="preserve" x="15.5" y="10.5" class="fo-fallback" text-anchor="middle" transform="translate(610.77 509.5)"><tspan x="15.5">uses</tspan></text></g></g><g class="edgeLabel"><g class="label"><text xml:space="preserve" x="24.906" y="10.5" class="fo-fallback" text-anchor="middle" transform="translate(434.047 509.5)"><tspan x="24.906">returns</tspan></text></g></g><g class="edgeLabel"><g class="label"><text xml:space="preserve" x="43.68" y="10.5" class="fo-fallback" text-anchor="middle" transform="translate(461.36 149.5)"><tspan x="43.68">delegates to</tspan></text></g></g><g class="edgeLabel"><g class="label"><text xml:space="preserve" x="41.359" y="10.5" class="fo-fallback" text-anchor="middle" transform="translate(124.367 509.5)"><tspan x="41.359">implements</tspan></text></g></g></g><g class="nodes"><g id="classId-ContentHashPolicyGroup-0" class="node default"><path d="M149.918 193h520.484v294H149.918z" class="outer title-state"/><path d="M149.918 251h520.484M149.918 292h520.484" class="divider"/><g class="label"><text xml:space="preserve" x="28.695" y="10.5" class="fo-fallback" text-anchor="middle" transform="translate(381.465 205)"><tspan x="28.695">«Utility»</tspan></text><text xml:space="preserve" x="94.648" y="2.1" class="classTitle fo-fallback" text-anchor="middle" transform="translate(315.512 230)"><tspan x="94.648">ContentHashPolicyGrou</tspan><tspan x="94.648" dy="16.8">p</tspan></text><text xml:space="preserve" x="75.844" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(161.918 267)"><tspan x="75.844">+PRECISION: int =</tspan><tspan x="75.844" dy="16.8">10</tspan></text><text xml:space="preserve" x="124.969" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(161.918 304)"><tspan x="124.969">+EXCLUDED_PREFIXES: tuple =</tspan><tspan x="124.969" dy="16.8">(&quot;_&quot;,)</tspan></text><text xml:space="preserve" x="172.688" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(161.918 329)"><tspan x="172.688">+compute(provider: str, data: dict) :</tspan><tspan x="172.688" dy="16.8">ContentHash</tspan></text><text xml:space="preserve" x="248.242" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(161.918 354)"><tspan x="248.242">+compute_batch(provider: str, records: list&lt;dict&gt;) :</tspan><tspan x="248.242" dy="16.8">list&lt;ContentHash&gt;</tspan></text><text xml:space="preserve" x="113.852" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(161.918 379)"><tspan x="113.852">-_filter_hashable(data:</tspan><tspan x="113.852" dy="16.8">dict) : dict</tspan></text><text xml:space="preserve" x="97.695" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(161.918 404)"><tspan x="97.695">-_normalize(data:</tspan><tspan x="97.695" dy="16.8">dict) : dict</tspan></text><text xml:space="preserve" x="123.562" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(161.918 429)"><tspan x="123.562">-_normalize_value(value:</tspan><tspan x="123.562" dy="16.8">Any) : Any</tspan></text><text xml:space="preserve" x="109.914" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(161.918 454)"><tspan x="109.914">-_canonical_json(data:</tspan><tspan x="109.914" dy="16.8">dict) : str</tspan></text></g></g><g id="classId-NormalizationRules-1" class="node default"><path d="M678.746 565.5h277.453v219H678.746z" class="outer title-state"/><path d="M678.746 623.5H956.2M678.746 764.5H956.2" class="divider"/><g class="label"><text xml:space="preserve" x="52.648" y="10.5" class="fo-fallback" text-anchor="middle" transform="translate(764.824 577.5)"><tspan x="52.648">«Value Object»</tspan></text><text xml:space="preserve" x="74.039" y="10.5" class="classTitle fo-fallback" text-anchor="middle" transform="translate(743.434 602.5)"><tspan x="74.039">NormalizationRules</tspan></text><text xml:space="preserve" x="89.094" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(690.746 639.5)"><tspan x="89.094">+nan_replacement:</tspan><tspan x="89.094" dy="16.8">None</tspan></text><text xml:space="preserve" x="84.938" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(690.746 664.5)"><tspan x="84.938">+inf_replacement:</tspan><tspan x="84.938" dy="16.8">None</tspan></text><text xml:space="preserve" x="88.133" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(690.746 689.5)"><tspan x="88.133">+float_precision:</tspan><tspan x="88.133" dy="16.8">int = 10</tspan></text><text xml:space="preserve" x="126.727" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(690.746 714.5)"><tspan x="126.727">+date_format: str =</tspan><tspan x="126.727" dy="16.8">&quot;YYYY-MM-DD&quot;</tspan></text><text xml:space="preserve" x="107.672" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(690.746 739.5)"><tspan x="107.672">+string_transform: str =</tspan><tspan x="107.672" dy="16.8">&quot;strip&quot;</tspan></text></g></g><g id="classId-ContentHash-2" class="node default"><path d="M373.453 590.5h171v169h-171z" class="outer title-state"/><path d="M373.453 648.5h171M373.453 689.5h171" class="divider"/><g class="label"><text xml:space="preserve" x="40.555" y="10.5" class="fo-fallback" text-anchor="middle" transform="translate(418.398 602.5)"><tspan x="40.555">«NewType»</tspan></text><text xml:space="preserve" x="48.859" y="10.5" class="classTitle fo-fallback" text-anchor="middle" transform="translate(410.094 627.5)"><tspan x="48.859">ContentHash</tspan></text><text xml:space="preserve" x="36.836" y="10.5" class="fo-fallback" text-anchor="middle" transform="translate(385.453 664.5)"><tspan x="36.836">+value: str</tspan></text><text xml:space="preserve" x="49.523" y="10.5" class="fo-fallback" text-anchor="middle" transform="translate(385.453 701.5)"><tspan x="49.523">+__len__() : int</tspan></text><text xml:space="preserve" x="73.5" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(385.453 726.5)"><tspan x="73.5">+__eq__(other) :</tspan><tspan x="73.5" dy="16.8">bool</tspan></text></g></g><g id="classId-BaseTransformer-3" class="node default"><path d="M270.891 8h468.297v119H270.891z" class="outer title-state"/><path d="M270.891 41h468.296M270.891 57h468.296" class="divider"/><g class="label"><text xml:space="preserve" x="63.219" y="10.5" class="classTitle fo-fallback" text-anchor="middle" transform="translate(441.82 20)"><tspan x="63.219">BaseTransformer</tspan></text><text xml:space="preserve" x="222.148" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(282.89 69)"><tspan x="222.148">#compute_content_hash(provider: str, data: dict)</tspan><tspan x="222.148" dy="16.8">: ContentHash</tspan></text><text xml:space="preserve" x="106.508" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(282.89 94)"><tspan x="106.508">#serialize_json(value:</tspan><tspan x="106.508" dy="16.8">Any) : str</tspan></text></g></g><g id="classId-HashFlow-4" class="node default"><path d="M8 553h315.453v244H8z" class="outer title-state"/><path d="M8 611h315.454M8 777h315.454" class="divider"/><g class="label"><text xml:space="preserve" x="40.789" y="10.5" class="fo-fallback" text-anchor="middle" transform="translate(124.938 565)"><tspan x="40.789">«flowchart»</tspan></text><text xml:space="preserve" x="36.477" y="10.5" class="classTitle fo-fallback" text-anchor="middle" transform="translate(129.25 590)"><tspan x="36.477">HashFlow</tspan></text><text xml:space="preserve" x="101.148" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(20 627)"><tspan x="101.148">1_Input: provider +</tspan><tspan x="101.148" dy="16.8">raw_data</tspan></text><text xml:space="preserve" x="145.727" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(20 652)"><tspan x="145.727">2_Filter: remove underscore</tspan><tspan x="145.727" dy="16.8">prefixed keys</tspan></text><text xml:space="preserve" x="106.695" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(20 677)"><tspan x="106.695">3_Normalize: apply</tspan><tspan x="106.695" dy="16.8">value rules</tspan></text><text xml:space="preserve" x="94.922" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(20 702)"><tspan x="94.922">4_Serialize:</tspan><tspan x="94.922" dy="16.8">canonical JSON</tspan></text><text xml:space="preserve" x="57.258" y="10.5" class="fo-fallback" text-anchor="middle" transform="translate(20 727)"><tspan x="57.258">5_Hash: SHA256</tspan></text><text xml:space="preserve" x="128.797" y="2.1" class="fo-fallback" text-anchor="middle" transform="translate(20 752)"><tspan x="128.797">6_Output: ContentHash 64 hex</tspan><tspan x="128.797" dy="16.8">chars</tspan></text></g></g><g id="note0" class="node undefined" transform="translate(119.64 67.5)"><rect width="202.5" height="108" x="-101.25" y="-54" rx="0" ry="0"/><g class="label" transform="translate(-89.25 -42)"><rect/><text xml:space="preserve" x="89.25" y="-8.4" class="fo-fallback" text-anchor="middle"><tspan x="89.25">Content hash</tspan><tspan x="89.25" dy="16.8">pipeline</tspan><tspan x="89.25" dy="16.8">filter internal</tspan><tspan x="89.25" dy="16.8">fields</tspan><tspan x="89.25" dy="16.8">normalize values</tspan><tspan x="89.25" dy="16.8">canonical JSON +</tspan><tspan x="89.25" dy="16.8">sha256</tspan></text></g></g><g id="note1" class="node undefined" transform="translate(817.473 340)"><rect width="194.141" height="129" x="-97.07" y="-64.5" rx="0" ry="0"/><g class="label" transform="translate(-85.07 -52.5)"><rect/><text xml:space="preserve" x="85.07" y="2.1" class="fo-fallback" text-anchor="middle"><tspan x="85.07">Normalization</tspan><tspan x="85.07" dy="16.8">examples</tspan><tspan x="85.07" dy="16.8">float round (10)</tspan><tspan x="85.07" dy="16.8">NaN -&gt; null</tspan><tspan x="85.07" dy="16.8">trim strings</tspan><tspan x="85.07" dy="16.8">datetime -&gt; ISO</tspan><tspan x="85.07" dy="16.8">date</tspan></text></g></g></g></g></svg>
