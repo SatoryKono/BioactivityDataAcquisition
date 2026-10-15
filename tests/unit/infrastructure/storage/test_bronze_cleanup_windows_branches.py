@@ -386,7 +386,9 @@ def _arm(monkeypatch: pytest.MonkeyPatch, *modules: types.ModuleType) -> DirFdBr
     for module in chosen:
         monkeypatch.setattr(module, "os", bridge)
     for module in (cleanup_posix, cleanup_core, support):
-        monkeypatch.setattr(module, "destructive_cleanup_supported", lambda: True)
+        monkeypatch.setattr(
+            module, "destructive_cleanup_supported", lambda *_a, **_k: True
+        )
     # bronze_tree_lock binds platform + volume xattr through cleanup_core names.
     monkeypatch.setattr(cleanup_core, "_platform_cleanup_supported", lambda: True)
     monkeypatch.setattr(
@@ -858,7 +860,9 @@ def test_missing_journal_and_bad_origin_records(tmp_path: Path, monkeypatch) -> 
 def test_anchored_parent_requires_destructive_support(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr(cleanup_posix, "destructive_cleanup_supported", lambda: False)
+    monkeypatch.setattr(
+        cleanup_posix, "destructive_cleanup_supported", lambda *_a, **_k: False
+    )
     root = _abs(tmp_path)
     leaf = _touch(root / "leaf")
     with pytest.raises(NotImplementedError):
