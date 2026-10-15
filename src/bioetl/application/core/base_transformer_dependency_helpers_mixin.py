@@ -7,21 +7,8 @@ import dataclasses
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from bioetl.domain.behavior import EntityIdentityGenerator
-from bioetl.domain.ports import ContractPolicyProtocol
+from bioetl.domain.ports import ContractPolicyProtocol, project_etl_order
 from bioetl.domain.types import ContentHash, EntityID, GoldRecord
-
-# ETLRecordSchema declares these parent columns first and sets ordered=True.
-_ETL_RECORD_PREFIX: tuple[str, ...] = (
-    "entity_id",
-    "content_hash",
-    "_run_id",
-    "_run_type",
-    "_source_batch_id",
-    "_ingestion_ts",
-    "_index",
-    "_dq_warn",
-    "_dq_error",
-)
 
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer.types import ValueObjectWithFromRaw
@@ -43,13 +30,6 @@ class _TransformerDependencyOwner(Protocol):
     def _normalize_lineage_value(field_name: str, value: object) -> object:
         """Normalize lineage/meta field values after rename."""
         ...
-
-
-def _project_etl_record_order(record: dict[str, Any]) -> dict[str, Any]:
-    """Keep ETL parent columns ahead of pipeline fields."""
-    ordered = {key: record[key] for key in _ETL_RECORD_PREFIX if key in record}
-    ordered.update((key, value) for key, value in record.items() if key not in ordered)
-    return ordered
 
 
 class _BaseTransformerDependencyHelpersMixin:
@@ -159,7 +139,7 @@ class _BaseTransformerDependencyHelpersMixin:
                     value,
                 )
 
-        return _project_etl_record_order(silver_record)
+        return project_etl_order(silver_record)
 
     @staticmethod
     def _apply_hash_policy(

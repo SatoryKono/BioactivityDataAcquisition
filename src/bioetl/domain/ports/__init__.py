@@ -127,6 +127,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "SilverDQConfigPort",
         "SilverValidatorPort",
         "coerce_silver_dq_analyze_request",
+        "project_etl_order",
     ),
     "bioetl.domain.ports.resilience": (
         "CircuitBreakerPort",
