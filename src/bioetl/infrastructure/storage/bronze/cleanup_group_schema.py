@@ -5,6 +5,7 @@ Validated record schema and bounded member fingerprinting for Bronze journals.
 
 from __future__ import annotations
 
+import errno
 import hashlib
 import json
 import os
@@ -17,6 +18,7 @@ from typing import Any
 from uuid import UUID
 
 from .cleanup_core import (
+    stat_is_link_or_reparse,
     valid_bronze_scope_name,
 )
 from .cleanup_support import date_dir_name_is_older, is_owned_artifact
@@ -330,8 +332,23 @@ def _require_operation_id(operation_id: str) -> None:
         raise GroupJournalConflict("invalid operation ID") from exc
 
 
+def _open_regular_member(parent_fd: int, name: str) -> int:
+    """Reject a link before open so ELOOP is a conflict, not a failed read."""
+    named = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+    if stat_is_link_or_reparse(named) or not stat.S_ISREG(named.st_mode):
+        raise GroupJournalConflict("group member is not a regular file")
+    try:
+        return os.open(name, _FILE_FLAGS, dir_fd=parent_fd)
+    except OSError as exc:
+        if exc.errno == errno.ELOOP:
+            raise GroupJournalConflict(
+                "group member is not a regular file"
+            ) from exc
+        raise
+
+
 def _fingerprint(parent_fd: int, name: str) -> dict[str, Any]:  # Any: validated JSON.
-    fd = os.open(name, _FILE_FLAGS, dir_fd=parent_fd)
+    fd = _open_regular_member(parent_fd, name)
     try:
         before = os.fstat(fd)
         if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1:
