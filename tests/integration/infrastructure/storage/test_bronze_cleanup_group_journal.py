@@ -137,7 +137,7 @@ def _body() -> dict[str, object]:
     spec = journal.GroupSpec("chembl", "activity", DATE, BATCH, CUTOFF)
     identity = {"dev": 1, "ino": 2, "size": 3, "sha256": "a" * 64}
     return {
-        "schema": 3,
+        "schema": 4,
         "operation_id": "1" * 32,
         "state": "prepared",
         "scope": {
@@ -154,6 +154,7 @@ def _body() -> dict[str, object]:
         "names": spec.names(),
         "members": {"payload": identity, "sidecar": identity},
         "staged": [],
+        "removed": [],
         "stage": {"dev": 1, "ino": 6, "token": "1" * 32},
     }
 
@@ -356,7 +357,7 @@ def test_record_rejects_forged_checksum_and_unstaged_absence() -> None:
         body["schema"] = version
         with pytest.raises(journal.GroupJournalConflict):
             journal._decode_record(journal._record_bytes(body), "1" * 32)
-    body["schema"] = 3
+    body["schema"] = 4
     body["staged"] = ["sidecar", "payload"]
     with pytest.raises(journal.GroupJournalConflict):
         journal._decode_record(journal._record_bytes(body), "1" * 32)
