@@ -1,37 +1,24 @@
 {
   "summary": {
-<<<<<<< HEAD
     "scanned_modules": 2569,
-    "total_internal_imports": 8273,
-=======
-    "scanned_modules": 2554,
-    "total_internal_imports": 8189,
->>>>>>> 7487dd5be (chore: refactor http client retry context)
+    "total_internal_imports": 8274,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-<<<<<<< HEAD
-    "source_fingerprint": "37b07b045d5319388bff161df69fc0ac376ead96358de95cd9077d798fea9404"
-=======
-    "source_fingerprint": "044976dbef2de96564328575e8974428ae80d6d24786011236794a6389ae5101"
->>>>>>> 7487dd5be (chore: refactor http client retry context)
+    "source_fingerprint": "07c2232c5715f2813a5dec4f728868f6e57c45d67f9758360a4194bc535a2663"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-<<<<<<< HEAD
       "imports": 1629,
-=======
-      "imports": 1614,
->>>>>>> 7487dd5be (chore: refactor http client retry context)
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1102,
+      "imports": 1103,
       "allowed": true
     },
     {
@@ -61,21 +48,13 @@
     {
       "source": "domain",
       "target": "domain",
-<<<<<<< HEAD
       "imports": 1306,
-=======
-      "imports": 1298,
->>>>>>> 7487dd5be (chore: refactor http client retry context)
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-<<<<<<< HEAD
       "imports": 802,
-=======
-      "imports": 787,
->>>>>>> 7487dd5be (chore: refactor http client retry context)
       "allowed": true
     },
     {
@@ -291,7 +270,6 @@
       "imports": 21
     },
     {
-<<<<<<< HEAD
       "source": "composition.factories",
       "target": "application.services",
       "imports": 21
@@ -299,10 +277,6 @@
     {
       "source": "composition.factories",
       "target": "domain.types",
-=======
-      "source": "composition.runtime_builders",
-      "target": "infrastructure.config",
->>>>>>> 7487dd5be (chore: refactor http client retry context)
       "imports": 21
     },
     {
@@ -316,14 +290,6 @@
       "imports": 20
     },
     {
-<<<<<<< HEAD
-=======
-      "source": "application.services",
-      "target": "domain.exceptions",
-      "imports": 20
-    },
-    {
->>>>>>> 7487dd5be (chore: refactor http client retry context)
       "source": "composition.bootstrap",
       "target": "infrastructure.config",
       "imports": 20
@@ -341,7 +307,7 @@
     {
       "source": "application.core",
       "target": "domain.exceptions",
-      "imports": 17
+      "imports": 18
     },
     {
       "source": "application.observability",
