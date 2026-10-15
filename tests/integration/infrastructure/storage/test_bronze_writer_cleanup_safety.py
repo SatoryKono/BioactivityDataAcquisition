@@ -492,6 +492,7 @@ def test_fd_view_lost_after_probe_refuses_both_locks(
             with bronze_tree_lock(tmp_path, exclusive=exclusive):
                 pytest.fail("root fd without a view must never yield a path")
 
+
 @pytest.mark.parametrize(
     ("provider", "entity"),
     [

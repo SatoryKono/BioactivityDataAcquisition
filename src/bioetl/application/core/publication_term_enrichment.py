@@ -10,10 +10,7 @@ from bioetl.domain.exceptions import RecoverableError
 from bioetl.domain.ports import PublicationTermEnrichmentPort
 from bioetl.domain.types import BronzeRecord
 
-__all__ = [
-    "PUBLICATION_TERM_PUBMED_ENRICH_BATCH_SIZE",
-    "yield_terms_from_publications",
-]
+__all__ = ["PUBLICATION_TERM_PUBMED_ENRICH_BATCH_SIZE", "yield_terms_from_publications"]
 
 PUBLICATION_TERM_PUBMED_ENRICH_BATCH_SIZE = 200
 

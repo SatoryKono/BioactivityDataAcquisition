@@ -341,9 +341,7 @@ def _open_regular_member(parent_fd: int, name: str) -> int:
         return os.open(name, _FILE_FLAGS, dir_fd=parent_fd)
     except OSError as exc:
         if exc.errno == errno.ELOOP:
-            raise GroupJournalConflict(
-                "group member is not a regular file"
-            ) from exc
+            raise GroupJournalConflict("group member is not a regular file") from exc
         raise
 
 
