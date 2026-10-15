@@ -8,24 +8,21 @@ import json
 import subprocess
 from pathlib import Path
 
-from .projector import build_all_outputs, check_outputs, write_outputs
+from .projector import (
+    CANONICAL_SOURCE_PATHS,
+    build_all_outputs,
+    check_outputs,
+    write_outputs,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
-_SOURCE_PATHS = (
-    "configs/entities",
-    "configs/providers",
-    "configs/composites",
-    "configs/workflows",
-    "configs/contracts",
-    "src/bioetl/composition/factories/pipeline",
-    "src/bioetl/domain/workflow",
-    "src/bioetl/infrastructure/config",
-)
+_SOURCE_PATHS = CANONICAL_SOURCE_PATHS
 
 
 def _source_tree_is_clean() -> bool:
+    """Include every canonical untracked file in the explicit clean-source gate."""
     result = subprocess.run(
-        ["git", "status", "--porcelain", "--", *_SOURCE_PATHS],
+        ["git", "status", "--porcelain", "--untracked-files=all", "--", *_SOURCE_PATHS],
         cwd=PROJECT_ROOT,
         check=True,
         capture_output=True,

@@ -255,6 +255,22 @@ class TestAssembleRuntimeConfig:
         assert result.vacuum_retention_days == 7
         assert result.silver_filter_compatibility_mode == "structural_only_compat"
 
+    @pytest.mark.parametrize("health_check_mode", ["strict", "probe"])
+    def test_preserves_health_check_mode_keyword(self, health_check_mode):
+        """Verify preserves health check mode keyword."""
+        result = assemble_runtime_config(
+            run_type=RunType.INCREMENTAL,
+            resume=False,
+            limit=None,
+            query=None,
+            dry_run=False,
+            heartbeat_interval=30,
+            vacuum=VacuumSettings(enabled=False, retention_days=7),
+            health_check_mode=health_check_mode,
+        )
+        assert result.health_check_mode == health_check_mode
+        assert result.strict_preflight is True
+
     def test_assembles_config_with_limit(self):
         """Test that assemble_runtime_config handles limit parameter."""
         vacuum = VacuumSettings(enabled=False, retention_days=7)

@@ -10,6 +10,7 @@ Commands:
     quality-gate    Integral quality gate for CI
     architecture-junit-skips  Fail closed on empty/skipped architecture JUnit
     pr-gate         Classify and aggregate required PR checks
+    pr-lane-results Map coordinator job results onto required PR gates
     e2e-skip-rate   Check E2E matrix skip rate against threshold
     e2e-rerun       Check E2E rerun stability
     gitleaks-boundaries  Verify Gitleaks false-positive exception boundaries
@@ -52,6 +53,7 @@ COMMANDS = {
 COMMAND_SPECS = {name: python_command(script) for name, script in COMMANDS.items()}
 COMMAND_SPECS.update(
     {
+        "pr-lane-results": module_command("scripts.engineering.ci.pr_lane_results"),
         "publish-scorecard": module_command(
             "scripts.engineering.ci.publish_scorecard_sarif"
         ),

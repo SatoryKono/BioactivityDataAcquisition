@@ -29,6 +29,12 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
+
+from tests.helpers.clock import fixed_test_clock
+
 import io
 import json
 from datetime import UTC, datetime
@@ -371,7 +377,13 @@ class TestSilverWriter:
 
     def test_silver_writer_initialization(self, noop_logger):
         """Test SilverWriter can be initialized."""
-        writer = SilverWriter(base_path=SILVER_DELTA_ROOT, logger=noop_logger)
+        writer = SilverWriter(
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path=SILVER_DELTA_ROOT,
+            logger=noop_logger,
+        )
         # Normalize paths for cross-platform comparison (Windows uses backslashes)
         import os.path
 
@@ -387,7 +399,13 @@ class TestSilverWriter:
         mock_delta_table, mock_write_deltalake = mock_silver_writer
         mock_delta_table.side_effect = TableNotFoundError("Not found")
 
-        writer = SilverWriter(base_path=SILVER_DELTA_ROOT, logger=noop_logger)
+        writer = SilverWriter(
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path=SILVER_DELTA_ROOT,
+            logger=noop_logger,
+        )
 
         # Mock the _get_table_schema method to return None (no existing table)
         writer._get_table_schema = AsyncMock(return_value=None)
@@ -456,7 +474,13 @@ class TestSilverWriter:
         # Mock version() to return an integer for SilverWriteResult
         mock_table_instance.version.return_value = 1
 
-        writer = SilverWriter(base_path=str(tmp_path), logger=noop_logger)
+        writer = SilverWriter(
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path=str(tmp_path),
+            logger=noop_logger,
+        )
         table_path = tmp_path / "test_table"
         table_path.mkdir(parents=True, exist_ok=True)
         (table_path / "part-00000.parquet").write_bytes(b"parquet-marker")
@@ -485,7 +509,14 @@ class TestSilverWriter:
     @pytest.mark.usefixtures("mock_silver_writer")
     @pytest.mark.asyncio
     async def test_write_silver_empty_records_raises_error(self, noop_logger):
-        writer = SilverWriter(base_path=SILVER_DELTA_ROOT, logger=noop_logger)
+        """Verify write silver empty records raises error."""
+        writer = SilverWriter(
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+            base_path=SILVER_DELTA_ROOT,
+            logger=noop_logger,
+        )
 
         with pytest.raises(ValueError, match="No records to write"):
             await writer.write_silver(

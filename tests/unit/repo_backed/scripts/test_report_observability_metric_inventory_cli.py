@@ -183,6 +183,7 @@ def test_build_runtime_cardinality_review_summary_uses_local_fallback_for_pr_gat
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Verify build runtime cardinality review summary uses local fallback for pr gate."""
     monkeypatch.delenv(inventory._PROMETHEUS_BASE_URL_ENV_VAR, raising=False)
     monkeypatch.setattr(
         inventory,
@@ -202,7 +203,8 @@ def test_build_runtime_cardinality_review_summary_uses_local_fallback_for_pr_gat
         allow_local_cardinality_fallback=True,
     )
 
-    assert summary["status"] == "passed"
+    assert summary["status"] == "degraded"
+    assert summary["degraded_reasons"]
     assert summary["mode"] == "local_cardinality_fallback"
     assert summary["local_observed_series"] == {"bioetl_hotspot_total": 12}
     assert summary["local_threshold_violations"] == []
@@ -688,3 +690,147 @@ def test_direct_module_entrypoint_json_bootstraps_without_circular_import() -> N
     assert completed.returncode == 0, completed.stderr[-2000:]
     payload = json.loads(completed.stdout)
     assert isinstance(payload, dict)
+
+
+@pytest.mark.parametrize(
+    "mode", ["local_cardinality_fallback", "live_review_unavailable", "live_review"]
+)
+def test_release_artifact_is_written_only_for_live_review(tmp_path, mode):
+    """Verify release artifact is written only for live review."""
+    from scripts.engineering.qa import observability_metric_inventory_cli as cli
+
+    release = tmp_path / "runtime_cardinality_review.json"
+    release.write_text('{"status": "passed"}', encoding="utf-8")
+    summary = {
+        "mode": mode,
+        "status": "passed" if mode == "live_review" else "degraded",
+    }
+    cli._write_runtime_cardinality_review_summary(
+        summary,
+        repo_root=tmp_path,
+        output_path=release,
+    )
+    target = release
+    assert json.loads(target.read_text(encoding="utf-8")) == summary
+    assert release.exists()
+
+
+@pytest.fixture
+def local_cardinality_cli(monkeypatch):
+    """Isolate CLI provenance tests from inventory scanning and evidence writes."""
+    from scripts.engineering.qa import observability_metric_inventory_cli as cli
+
+    monkeypatch.setattr(cli, "collect_metric_inventory", lambda _: {})
+    monkeypatch.setattr(cli, "_metric_inventory_violations", lambda *a, **kw: {})
+    monkeypatch.setattr(
+        cli,
+        "_build_runtime_cardinality_review_summary",
+        lambda *a, **kw: {"status": "passed", "mode": "local_cardinality_fallback"},
+    )
+    monkeypatch.setattr(cli, "_write_evidence_report", lambda *a, **kw: None)
+    monkeypatch.setattr(
+        cli, "_append_runtime_cardinality_review_summary", lambda *a, **kw: None
+    )
+    return cli
+
+
+def test_pr_fallback_records_actual_cli_command(tmp_path, local_cardinality_cli):
+    """Keep PR output and fallback flags in reproducible CLI provenance."""
+    import shlex
+
+    cli = local_cardinality_cli
+
+    output = tmp_path / "runtime_cardinality_review_pr.json"
+    summary = tmp_path / "runner-specific" / "summary.md"
+    argv = [
+        "--repo-root",
+        str(tmp_path),
+        "--review-json-out",
+        str(output),
+        "--allow-local-cardinality-fallback",
+        "--summary-out",
+        str(summary),
+    ]
+    assert cli.main(argv) == 0
+    command = json.loads(output.read_text(encoding="utf-8"))["source_command"]
+    recorded = shlex.split(command)
+    assert recorded[:3] == [
+        "python",
+        "-m",
+        "scripts.engineering.qa.report_observability_metric_inventory",
+    ]
+    assert recorded[3:] == [
+        "--allow-local-cardinality-fallback",
+        "--repo-root",
+        str(tmp_path),
+        "--review-json-out",
+        str(output),
+    ]
+    assert "--fail-on-degraded-live-review" not in recorded
+    assert "--summary-out" not in recorded
+    assert str(summary) not in recorded
+
+
+def test_cwd_repo_root_is_omitted_from_source_command(
+    tmp_path, monkeypatch, local_cardinality_cli
+):
+    """A cwd repo root must not be stored as an absolute --repo-root."""
+    import shlex
+
+    cli = local_cardinality_cli
+
+    monkeypatch.chdir(tmp_path)
+    output = tmp_path / "review.json"
+    assert (
+        cli.main(
+            [
+                "--review-json-out",
+                str(output),
+                "--allow-local-cardinality-fallback",
+            ]
+        )
+        == 0
+    )
+    recorded = shlex.split(
+        json.loads(output.read_text(encoding="utf-8"))["source_command"]
+    )
+    assert "--repo-root" not in recorded
+    assert str(tmp_path) not in recorded
+    explicit = tmp_path / "explicit.json"
+    assert (
+        cli.main(
+            [
+                "--repo-root",
+                str(tmp_path),
+                "--review-json-out",
+                str(explicit),
+                "--allow-local-cardinality-fallback",
+            ]
+        )
+        == 0
+    )
+    recorded_explicit = shlex.split(
+        json.loads(explicit.read_text(encoding="utf-8"))["source_command"]
+    )
+    assert "--repo-root" not in recorded_explicit
+    assert "--allow-local-cardinality-fallback" in recorded_explicit
+
+
+def test_unknown_option_is_rejected_before_provenance(tmp_path: Path) -> None:
+    """Extra argv tokens must not be copied into a replayable command."""
+    from scripts.engineering.qa import observability_metric_inventory_cli as cli
+
+    output = tmp_path / "review.json"
+    with pytest.raises(SystemExit) as caught:
+        cli.main(
+            [
+                "--repo-root",
+                str(tmp_path),
+                "--review-json-out",
+                str(output),
+                "--allow-local-cardinality-fallback",
+                ";rm",
+            ]
+        )
+    assert caught.value.code == 2
+    assert not output.exists()

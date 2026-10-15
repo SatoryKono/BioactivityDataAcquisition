@@ -313,6 +313,15 @@ byte fixtures cover profile differences and historical golden identity values.
 - [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
 - [ ] Related docs, contracts, and operational guidance are aligned with this ADR.
 
+### Silver provenance clock (CF-012)
+
+SilverWriter requires an explicit ClockPort through `runtime_request` or the
+grouped `runtime_services`. Composition creates the production SystemClock; tests and replay may inject a deterministic clock. The
+public write entrypoint captures started_at once, preserving an explicit request
+value and sharing it across versioned targets. Calendar completed_at also comes
+from ClockPort; perf_counter measures duration and never synthesizes provenance
+timestamps. The storage adapter does not construct a concrete clock.
+
 ## References
 
 - [ADR-044: RunManifest/RunLedger Control Plane](ADR-044-run-manifest-ledger-control-plane.md)
