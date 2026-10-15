@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 119 |
+| working_report | 122 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -52,28 +52,28 @@
 | Status | Count |
 | --- | --- |
 | Active | 748 |
-| Archived | 1549 |
+| Archived | 1546 |
 | Canonical | 75 |
 | Generated | 1062 |
-| Working | 378 |
+| Working | 381 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
 | active | 748 |
-| archive | 1549 |
+| archive | 1546 |
 | canonical | 75 |
 | generated | 1062 |
-| working | 378 |
+| working | 381 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 152 |
+| archive-after-migration | 155 |
 | generate-automatically | 1062 |
-| keep | 2598 |
+| keep | 2595 |
 
 ## Cleanup Candidates
 
