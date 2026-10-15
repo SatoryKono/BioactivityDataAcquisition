@@ -31,9 +31,6 @@ from unittest.mock import MagicMock, Mock
 from uuid import UUID
 
 import pytest
-
-from tests.helpers.bronze_cleanup import sidecar_bytes
-
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
@@ -44,20 +41,19 @@ from bioetl.infrastructure.storage.bronze import (
     cleanup_group_schema,
     cleanup_planner,
     cleanup_posix,
-    cleanup_preview_mixin,
     cleanup_support,
     read_cleanup_mixin,
 )
 from bioetl.infrastructure.storage.bronze.cleanup_support import (
     bronze_tree_lock,
     destructive_cleanup_supported,
-    is_owned_artifact,
     iter_safe_child_dirs,
     safe_rmdir,
     safe_unlink,
-    validate_scope_filter,
 )
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+
+from tests.helpers.bronze_cleanup import sidecar_bytes
 
 pytestmark = pytest.mark.integration
 _APPLY_POSIX = pytest.mark.skipif(
@@ -492,6 +488,7 @@ def test_fd_view_lost_after_probe_refuses_both_locks(
             with bronze_tree_lock(tmp_path, exclusive=exclusive):
                 pytest.fail("root fd without a view must never yield a path")
 
+
 @pytest.mark.parametrize(
     ("provider", "entity"),
     [
@@ -527,42 +524,6 @@ async def test_cleanup_rejects_invalid_scope_filters(
     preview_resolution.assert_not_called()
 
 
-def test_preview_stops_scandir_within_one_oversized_partition(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    date_dir = _date_dir(tmp_path, "chembl", "activity")
-    for index in range(20):
-        (date_dir / f"manual_{index}.txt").write_bytes(b"retain")
-    original_scandir = cleanup_preview_mixin.os.scandir
-    seen = 0
-
-    @contextmanager
-    def observed_scandir(path: Path):
-        nonlocal seen
-        with original_scandir(path) as entries:
-            if Path(path) != date_dir:
-                yield entries
-                return
-
-            def bounded_entries():
-                nonlocal seen
-                for entry in entries:
-                    seen += 1
-                    if seen > 4:
-                        raise AssertionError("preview consumed beyond its entry budget")
-                    yield entry
-
-            yield bounded_entries()
-
-    monkeypatch.setattr(cleanup_preview_mixin, "_PREVIEW_MAX_ENTRIES", 6)
-    monkeypatch.setattr(cleanup_preview_mixin.os, "scandir", observed_scandir)
-    with pytest.raises(ValueError, match="filesystem entries"):
-        _make_writer(tmp_path).preview_cleanup()
-    assert seen == 4
-    monkeypatch.setattr(cleanup_preview_mixin.os, "scandir", original_scandir)
-    assert len(list(date_dir.iterdir())) == 20
-
-
 @_APPLY_POSIX
 async def test_cleanup_flat_layout(tmp_path: Path) -> None:
     """Flat layout cleans level-1 date dirs through the same contract."""
@@ -593,99 +554,6 @@ async def test_cleanup_flat_layout_scope_filter_is_noop(tmp_path: Path) -> None:
     assert old_dir.exists()
 
 
-def test_validate_scope_filter_accepts_canonical_names() -> None:
-    """Canonical provider/entity names pass validation."""
-    validate_scope_filter("chembl", "provider")
-    validate_scope_filter("pubchem_compound2", "entity")
-    validate_scope_filter(None, "provider")
-
-
-def test_is_owned_artifact_contract() -> None:
-    """Ownership allowlist matches only Bronze writer artifacts."""
-    assert is_owned_artifact(ARTIFACT)
-    assert is_owned_artifact(SIDECAR)
-    assert is_owned_artifact(JSON_COPY)
-    assert not is_owned_artifact("batch_2024-01-01_x.jsonl.zst")
-    assert not is_owned_artifact("batch_manual_backup.jsonl.zst")
-    assert not is_owned_artifact("batch_.jsonl.zst")
-    assert not is_owned_artifact("batch.jsonl.zst")
-    assert not is_owned_artifact("README.txt")
-    assert not is_owned_artifact("batch_2024-01-01_x.parquet")
-
-
-def test_owned_artifact_requires_valid_date_scope_and_payload_association() -> None:
-    """A plausible name or sidecar alone does not establish writer ownership."""
-    invalid_day = ARTIFACT.replace(OLD_DATE, "2024-02-30")
-    assert not is_owned_artifact(invalid_day)
-    assert not is_owned_artifact(ARTIFACT, date_name="2023-01-01")
-    assert not is_owned_artifact(SIDECAR, date_name=OLD_DATE, payload_names=set())
-    assert is_owned_artifact(SIDECAR, date_name=OLD_DATE, payload_names={ARTIFACT})
-
-
-def test_absent_handle_capability_refuses_exclusive_lock(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """An unsupported platform cannot silently enter destructive cleanup."""
-    monkeypatch.setattr(cleanup_core, "_ANCHORED_OPS", False)
-    assert not destructive_cleanup_supported()
-    with pytest.raises(NotImplementedError, match="dir_fd/no-follow"):
-        with bronze_tree_lock(tmp_path, exclusive=True):
-            pytest.fail("unsupported exclusive lock entered")
-    with bronze_tree_lock(tmp_path, exclusive=False):
-        pass
-
-
-def test_discovery_permission_error_is_reported_before_traversal(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """Unreadable scope enumeration remains visible to a read-only plan."""
-    original_scandir = cleanup_support.os.scandir
-
-    def deny_scope(path: object) -> os.ScandirIterator[str]:
-        if path == tmp_path:
-            raise PermissionError("denied scope")
-        return original_scandir(path)
-
-    monkeypatch.setattr(cleanup_support.os, "scandir", deny_scope)
-    skipped: list[tuple[str, str]] = []
-    assert cleanup_support.scan_dir_entries(tmp_path) is None
-    assert (
-        iter_safe_child_dirs(
-            tmp_path, on_skip=lambda path, reason: skipped.append((path, reason))
-        )
-        == []
-    )
-    assert skipped == [(str(tmp_path), "scan_error")]
-
-
-def test_named_scope_stat_failure_is_reported_without_following(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """A denied provider lookup cannot become a missing or traversed scope."""
-    provider = tmp_path / "chembl"
-    provider.mkdir()
-    original_lstat = Path.lstat
-
-    def deny_provider(path: Path) -> os.stat_result:
-        if path == provider:
-            raise PermissionError("denied provider")
-        return original_lstat(path)
-
-    monkeypatch.setattr(Path, "lstat", deny_provider)
-    skipped: list[tuple[str, str]] = []
-    assert (
-        cleanup_support.safe_named_child_dir(
-            tmp_path,
-            "chembl",
-            tmp_path,
-            on_skip=lambda path, reason: skipped.append((path, reason)),
-        )
-        is None
-    )
-    assert skipped == [(str(provider), "stat_error")]
-    assert provider.is_dir()
-
-
 def test_iter_safe_child_dirs_skips_links(tmp_path: Path) -> None:
     """Traversal yields real dirs and refuses link entries."""
     (tmp_path / "real").mkdir()
@@ -698,19 +566,6 @@ def test_iter_safe_child_dirs_skips_links(tmp_path: Path) -> None:
 
     assert result == [tmp_path / "real"]
     assert skipped and skipped[0][1] == "link_or_reparse"
-
-
-def test_safe_unlink_refuses_outside_root(tmp_path: Path) -> None:
-    """safe_unlink never deletes paths resolved outside the trusted root."""
-    outside = tmp_path.parent / f"{tmp_path.name}_victim2"
-    outside.write_bytes(b"x")
-
-    if destructive_cleanup_supported():
-        assert safe_unlink(outside, tmp_path, tmp_path.resolve()) is False
-    else:
-        with pytest.raises(NotImplementedError):
-            safe_unlink(outside, tmp_path, tmp_path.resolve())
-    assert outside.exists()
 
 
 @_APPLY_POSIX

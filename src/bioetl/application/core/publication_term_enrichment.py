@@ -10,10 +10,7 @@ from bioetl.domain.exceptions import RecoverableError
 from bioetl.domain.ports import PublicationTermEnrichmentPort
 from bioetl.domain.types import BronzeRecord
 
-__all__ = [
-    "PUBLICATION_TERM_PUBMED_ENRICH_BATCH_SIZE",
-    "yield_terms_from_publications",
-]
+__all__ = ["PUBLICATION_TERM_PUBMED_ENRICH_BATCH_SIZE", "yield_terms_from_publications"]
 
 PUBLICATION_TERM_PUBMED_ENRICH_BATCH_SIZE = 200
 
@@ -32,7 +29,6 @@ async def _attach_pubmed_payloads(
     extract_terms: _ExtractTerms,
     enricher: PublicationTermEnrichmentPort,
 ) -> list[BronzeRecord]:
-    """Attach optional PubMed payloads, preserving originals on expected failures."""
     need = [
         record
         for record in records
@@ -80,8 +76,6 @@ async def yield_terms_from_publications(
             batch_size=PUBLICATION_TERM_PUBMED_ENRICH_BATCH_SIZE,
             max_records=scan_limit,
         ):
-            # Term yield is zero-or-many per record, so the term limit cannot
-            # bound records fetched here without discarding usable terms.
             if enricher is not None:
                 batch = await _attach_pubmed_payloads(
                     batch, extract_terms=extract_terms, enricher=enricher

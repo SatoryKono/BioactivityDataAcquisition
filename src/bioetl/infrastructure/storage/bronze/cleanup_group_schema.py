@@ -34,6 +34,7 @@ _ORDER = ("copy", "payload", "sidecar")
 _NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
 _DIR_FLAGS = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
 _FILE_FLAGS = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+_MEMBER_NOT_REGULAR = "group member is not a regular file"
 Barrier = Callable[[str], None]
 
 
@@ -336,14 +337,12 @@ def _open_regular_member(parent_fd: int, name: str) -> int:
     """Reject a link before open so ELOOP is a conflict, not a failed read."""
     named = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
     if stat_is_link_or_reparse(named) or not stat.S_ISREG(named.st_mode):
-        raise GroupJournalConflict("group member is not a regular file")
+        raise GroupJournalConflict(_MEMBER_NOT_REGULAR)
     try:
         return os.open(name, _FILE_FLAGS, dir_fd=parent_fd)
     except OSError as exc:
         if exc.errno == errno.ELOOP:
-            raise GroupJournalConflict(
-                "group member is not a regular file"
-            ) from exc
+            raise GroupJournalConflict(_MEMBER_NOT_REGULAR) from exc
         raise
 
 
@@ -352,7 +351,7 @@ def _fingerprint(parent_fd: int, name: str) -> dict[str, Any]:  # Any: validated
     try:
         before = os.fstat(fd)
         if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1:
-            raise GroupJournalConflict("group member is not a regular file")
+            raise GroupJournalConflict(_MEMBER_NOT_REGULAR)
         digest = hashlib.sha256()
         size = 0
         while chunk := os.read(fd, 1_048_576):

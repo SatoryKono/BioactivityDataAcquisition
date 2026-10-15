@@ -734,9 +734,11 @@ def test_recover_completed_marker_shapes(tmp_path: Path, monkeypatch) -> None:
     bridge = _arm(monkeypatch)
     root = _abs(tmp_path)
     root_fd = bridge.bind_dir(root)
-    (root / ".bronze-cleanup-done-zz").write_text("x", encoding="utf-8")
+    rejected = root / ".bronze-cleanup-done-zz"
+    rejected.write_text("x", encoding="utf-8")
     with pytest.raises(OSError, match="Invalid"):
         cleanup_posix._recover_completed_stages(root_fd)
+    rejected.unlink()
     suffix = "ab" * 16
     marker = _marker(root, suffix, b"not-json")
     with pytest.raises(OSError, match="invalid origin"):
@@ -846,7 +848,10 @@ def test_missing_journal_and_bad_origin_records(tmp_path: Path, monkeypatch) -> 
         )
 
 
-def test_anchored_parent_requires_destructive_support(tmp_path: Path) -> None:
+def test_anchored_parent_requires_destructive_support(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(cleanup_posix, "destructive_cleanup_supported", lambda: False)
     root = _abs(tmp_path)
     leaf = _touch(root / "leaf")
     with pytest.raises(NotImplementedError):
@@ -1023,7 +1028,10 @@ def test_bronze_tree_lock_success_pending_and_directory_lock(
             pass
 
 
-def test_bronze_tree_lock_nondestructive_paths(tmp_path: Path) -> None:
+def test_bronze_tree_lock_nondestructive_paths(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(support, "destructive_cleanup_supported", lambda: False)
     with pytest.raises(NotImplementedError):
         with support.bronze_tree_lock(tmp_path, exclusive=True):
             pass
@@ -1298,10 +1306,13 @@ def test_schema_member_stage_and_chain_rejections() -> None:
         schema._decode_record(b"{}", operation)
 
 
-def test_operation_id_uid_digest_and_association() -> None:
+def test_operation_id_uid_digest_and_association(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     with pytest.raises(GroupJournalConflict, match="operation"):
         schema._require_operation_id("AA" * 16)
     schema._require_operation_id(_operation())
+    monkeypatch.delattr(schema.os, "geteuid", raising=False)
     with pytest.raises(NotImplementedError):
         schema._effective_uid()
     assert schema._optional_copy_digest_valid(None) is True
