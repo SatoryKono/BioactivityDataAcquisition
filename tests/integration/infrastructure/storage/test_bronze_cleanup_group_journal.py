@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import errno
 import json
 import hashlib
 import os
@@ -552,7 +553,15 @@ def test_unsupported_stage_tag_never_falls_back_to_unattested_removal(
     tmp_path: Path, monkeypatch
 ) -> None:
     root, spec, date_dir = _fixture(tmp_path)
-    monkeypatch.delattr(journal.os, "setxattr")
+    real_setxattr = journal.os.setxattr
+
+    def refuse_stage_tag(path, attribute, value, *args, **kwargs):  # noqa: ANN001
+        name = attribute.decode() if isinstance(attribute, bytes) else attribute
+        if name == "user.bioetl.fs001-stage":
+            raise OSError(errno.ENOTSUP, "directory xattrs unavailable")
+        return real_setxattr(path, attribute, value, *args, **kwargs)
+
+    monkeypatch.setattr(journal.os, "setxattr", refuse_stage_tag)
     with journal.open_group_journal(root) as group:
         operation_id = group.begin(spec)
         with pytest.raises(journal.GroupJournalFailure) as failure:

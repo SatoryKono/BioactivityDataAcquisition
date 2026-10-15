@@ -18,7 +18,12 @@ import zstandard as zstd
 
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.storage.bronze.cleanup_core import BronzeRootLease
-from bioetl.infrastructure.storage.bronze.cleanup_group_apply import BronzeGroupCleanup
+from bioetl.infrastructure.storage.bronze.cleanup_group_apply import (
+    BronzeGroupCleanup,
+    cleanup_roots,
+    execute_cleanup_plan,
+    group_cleanup_for_lock,
+)
 from bioetl.infrastructure.storage.bronze.cleanup_metrics import (
     emit_cleanup_outcome_metrics,
 )
@@ -34,7 +39,7 @@ from bioetl.infrastructure.storage.bronze.cleanup_support import (
     date_dir_name_is_older,
     destructive_cleanup_supported,
     find_old_date_dirs,
-    real_root,
+    root_components_safe,
     safe_rmdir,
     validate_scope_filter,
 )
@@ -199,6 +204,9 @@ class BronzeWriterReadCleanupMixin(
         if not self.base_path.exists():
             return self._empty_cleanup_stats()
         if dry_run:
+            # Shared lock may resolve writer aliases; linked cleanup roots refuse.
+            if not root_components_safe(self.base_path):
+                return self._empty_cleanup_stats()
             # Shared lock when available; attestation still runs read-only.
             with bronze_tree_lock(self.base_path, exclusive=False) as locked_root:
                 return self._cleanup_old_files_locked_sync(
@@ -222,12 +230,8 @@ class BronzeWriterReadCleanupMixin(
         locked_root: BronzeRootLease | None = None,
     ) -> dict[str, int]:
         stats = self._empty_cleanup_stats()
-        group_cleanup = (
-            BronzeGroupCleanup(
-                locked_root, cutoff_str, self._flat_structure, self._log_cleanup_skip
-            )
-            if locked_root is not None and locked_root.fd is not None
-            else None
+        group_cleanup = group_cleanup_for_lock(
+            locked_root, cutoff_str, self._flat_structure, self._log_cleanup_skip
         )
         if (
             group_cleanup is not None
@@ -235,15 +239,8 @@ class BronzeWriterReadCleanupMixin(
             and not group_cleanup.resume(stats, provider, entity)
         ):
             return stats
-        root_abs = (
-            locked_root.path
-            if locked_root is not None
-            else Path(os.path.abspath(self.base_path))  # noqa: PTH100
-        )
-        root_real = (
-            locked_root.path if locked_root is not None else real_root(self.base_path)
-        )
-
+        root_abs, root_real = cleanup_roots(locked_root, self.base_path)
+        root_fd = locked_root.fd if locked_root is not None else None
         for date_dir in self._find_old_date_dirs(
             cutoff_str,
             provider,
@@ -252,24 +249,12 @@ class BronzeWriterReadCleanupMixin(
             base_path=locked_root.path if locked_root is not None else None,
         ):
             plan = self._plan_old_dir_files(
-                date_dir,
-                root_abs,
-                root_real,
-                root_fd=locked_root.fd if locked_root is not None else None,
+                date_dir, root_abs, root_real, root_fd=root_fd
             )
             self._record_cleanup_plan(stats, plan)
-            if dry_run:
-                if group_cleanup is not None:
-                    group_cleanup.attest_plan(plan, stats)
-            else:
-                self._apply_cleanup_plan(
-                    stats,
-                    plan,
-                    root_abs,
-                    root_real,
-                    locked_root.fd if locked_root is not None else None,
-                    group_cleanup,
-                )
+            execute_cleanup_plan(
+                self, dry_run, stats, plan, root_abs, root_real, root_fd, group_cleanup
+            )
         return stats
 
     def _record_cleanup_discovery_skip(

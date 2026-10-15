@@ -29,6 +29,7 @@ from .cleanup_core import (
     _entry_is_link_or_reparse,
     _pending_group_operation,
     destructive_cleanup_supported,
+    is_reserved_bronze_maintenance_name,
     open_bronze_root_no_follow,
     stat_is_link_or_reparse,
     valid_bronze_scope_name,
@@ -252,17 +253,6 @@ def iter_safe_child_dirs(
     return dirs
 
 
-def _is_reserved_bronze_maintenance_name(name: str) -> bool:
-    """Owned journal/stage directories are not cleanup discovery targets."""
-    return (
-        name == ".bronze-group-journals"
-        or name.startswith(".bronze-group-stage-")
-        or name.startswith(".bronze-cleanup-stage-")
-        or name.startswith(".bronze-cleanup-done-")
-        or name == ".bronze-cleanup.lock"
-    )
-
-
 def iter_writer_scope_dirs(
     parent: Path,
     *,
@@ -271,7 +261,7 @@ def iter_writer_scope_dirs(
     """Enumerate only provider/entity names accepted by the writer."""
     children: list[Path] = []
     for child in iter_safe_child_dirs(parent, on_skip=on_skip):
-        if _is_reserved_bronze_maintenance_name(child.name):
+        if is_reserved_bronze_maintenance_name(child.name):
             _notify_skip(on_skip, child, "reserved_maintenance")
             continue
         if valid_bronze_scope_name(child.name):

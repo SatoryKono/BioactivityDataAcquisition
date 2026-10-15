@@ -11,6 +11,9 @@ from pathlib import Path
 _REPARSE_POINT_ATTR = 0x400
 _STAGE_PREFIX = ".bronze-cleanup-stage-"
 _DONE_PREFIX = ".bronze-cleanup-done-"
+_GROUP_STAGE_PREFIX = ".bronze-group-stage-"
+_GROUP_JOURNAL_DIR = ".bronze-group-journals"
+_CLEANUP_LOCK_NAME = ".bronze-cleanup.lock"
 _STAGE_JOURNAL = "origin.json"
 _O_DIRECTORY = getattr(os, "O_DIRECTORY", 0)
 _O_NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
@@ -160,15 +163,22 @@ def stat_is_link_or_reparse(st: os.stat_result) -> bool:
     return bool(getattr(st, "st_file_attributes", 0) & _REPARSE_POINT_ATTR)
 
 
+def is_reserved_bronze_maintenance_name(name: str) -> bool:
+    """Owned journal/stage/lock names are not cleanup discovery targets."""
+    return name in {_GROUP_JOURNAL_DIR, _CLEANUP_LOCK_NAME} or name.startswith(
+        (_GROUP_STAGE_PREFIX, _STAGE_PREFIX, _DONE_PREFIX)
+    )
+
+
 def _pending_group_operation(root_fd: int) -> bool:
     """Recognize durable group work without following an untrusted directory."""
     names = os.listdir(root_fd)
-    if any(name.startswith(".bronze-group-stage-") for name in names):
+    if any(name.startswith(_GROUP_STAGE_PREFIX) for name in names):
         return True
-    if ".bronze-group-journals" not in names:
+    if _GROUP_JOURNAL_DIR not in names:
         return False
     fd = os.open(
-        ".bronze-group-journals",
+        _GROUP_JOURNAL_DIR,
         os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | _O_NOFOLLOW,
         dir_fd=root_fd,
     )

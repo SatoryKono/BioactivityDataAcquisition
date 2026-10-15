@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 import os
 from collections.abc import Callable
+from pathlib import Path
+from typing import Any
 
 from .cleanup_core import BronzeRootLease
 from .cleanup_group_journal import GroupJournal
@@ -186,3 +188,47 @@ class BronzeGroupCleanup:
         return GroupSpec(
             provider, entity, plan.path.name, batch, self.cutoff, self.flat
         )
+
+
+def group_cleanup_for_lock(
+    locked_root: BronzeRootLease | None,
+    cutoff_str: str,
+    flat: bool,
+    on_skip: Callable[[str, str], None],
+) -> BronzeGroupCleanup | None:
+    """Build a journal-backed group cleaner only when the root fd is pinned."""
+    if locked_root is None or locked_root.fd is None:
+        return None
+    return BronzeGroupCleanup(locked_root, cutoff_str, flat, on_skip)
+
+
+def cleanup_roots(
+    locked_root: BronzeRootLease | None, base_path: Path
+) -> tuple[Path, Path]:
+    """Return absolute and real roots for planning under an optional lease."""
+    if locked_root is not None:
+        return locked_root.path, locked_root.path
+    return (
+        Path(os.path.abspath(base_path)),  # noqa: PTH100
+        Path(os.path.realpath(base_path)),
+    )
+
+
+def execute_cleanup_plan(
+    host: Any,
+    dry_run: bool,
+    stats: dict[str, int],
+    plan: _CleanupDatePlan,
+    root_abs: Path,
+    root_real: Path,
+    root_fd: int | None,
+    group_cleanup: BronzeGroupCleanup | None,
+) -> None:
+    """Attest dry-run plans or apply destructive cleanup through the host."""
+    if dry_run:
+        if group_cleanup is not None:
+            group_cleanup.attest_plan(plan, stats)
+        return
+    host._apply_cleanup_plan(
+        stats, plan, root_abs, root_real, root_fd, group_cleanup
+    )
