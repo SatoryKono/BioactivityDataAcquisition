@@ -23,9 +23,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-# Import domain value objects
-from bioetl.domain.mixin_host import as_mixin_host
-
 # Re-export MemoryStats from domain for backward compatibility.
 # Sunset date: 2026-12-31 (#10535) — remove this re-export once external
 # consumers migrate. Codemod: import MemoryStats from bioetl.domain.ports.
@@ -104,9 +101,7 @@ class MemoryMonitor:
         vm = psutil.virtual_memory()
         if self._cached_process is None:
             object.__setattr__(self, "_cached_process", psutil.Process())
-        process_memory = as_mixin_host(
-            self
-        )._cached_process.memory_info()  # Any: mixin host
+        process_memory = self._cached_process.memory_info()
 
         return MemoryStats(
             used_mb=vm.used / (1024 * 1024),

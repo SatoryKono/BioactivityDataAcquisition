@@ -323,7 +323,11 @@ def build_payload(
         repo_root,
         "configs/quality/observability_metric_governance.yaml",
     )
-    runtime_review = _load_json(repo_root, RUNTIME_CARDINALITY_REVIEW_JSON)
+    runtime_review, _ = _load_json_input_with_preflight(
+        repo_root,
+        RUNTIME_CARDINALITY_REVIEW_JSON,
+        gate_name="observability_release_review_input",
+    )
     runtime_uuid = _load_yaml(repo_root, RUNTIME_UUID_SEAMS_YAML)
     adr_matrix = _load_json(repo_root, ADR_ENFORCEMENT_MATRIX_JSON)
     remote_baseline = _load_json(

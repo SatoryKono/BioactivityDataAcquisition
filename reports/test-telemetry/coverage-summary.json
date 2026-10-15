@@ -4,7 +4,13 @@
   "source_run_id": "local-coverage",
   "source_event": "local_coverage_verify",
   "source_run_url": null,
+<<<<<<< HEAD
   "source_tree_sha256": "763487c4b519f961ac5672010f298426c386eadd99d9ed4ca5273817c0e2fbc2",
+||||||| eb68cb742b5de
+  "source_tree_sha256": "d06583aea3078ff770a8465e5a9f732b118056b7364a60750672e3e2a96b8986",
+=======
+  "source_tree_sha256": "ba7dcaa93b448a8eb4e7c9bb4d2e84ecfdfe5a4140abe8bdad7086119af5921a",
+>>>>>>> origin/main
   "refreshed_at_utc": "2026-10-13T11:39:16.320446+00:00",
   "refresh_status": "captured",
   "coverage_percent": 99.67,

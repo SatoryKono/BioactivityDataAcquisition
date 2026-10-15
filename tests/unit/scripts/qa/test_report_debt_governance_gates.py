@@ -38,8 +38,13 @@ def _patch_both(monkeypatch: pytest.MonkeyPatch, name: str, value: object) -> No
 
 
 def test_release_review_freshness_gate_passes_for_recent_live_review() -> None:
+    """Verify release review freshness gate passes for recent live review."""
     gate = gates._release_review_freshness_gate(
-        {"generated_at": "2026-06-04T15:01:29Z"},
+        {
+            "mode": "live_review",
+            "status": "passed",
+            "generated_at": "2026-06-04T15:01:29Z",
+        },
         now=datetime(2026, 6, 17, 15, 1, 29, tzinfo=UTC),
     )
 
@@ -50,8 +55,13 @@ def test_release_review_freshness_gate_passes_for_recent_live_review() -> None:
 
 
 def test_release_review_freshness_gate_fails_for_stale_live_review() -> None:
+    """Verify release review freshness gate fails for stale live review."""
     gate = gates._release_review_freshness_gate(
-        {"generated_at": "2026-06-04T15:01:29Z"},
+        {
+            "mode": "live_review",
+            "status": "passed",
+            "generated_at": "2026-06-04T15:01:29Z",
+        },
         now=datetime(2026, 7, 6, 15, 1, 29, tzinfo=UTC),
     )
 
@@ -60,8 +70,9 @@ def test_release_review_freshness_gate_fails_for_stale_live_review() -> None:
 
 
 def test_release_review_freshness_gate_fails_for_invalid_generated_at() -> None:
+    """Verify release review freshness gate fails for invalid generated at."""
     gate = gates._release_review_freshness_gate(
-        {"generated_at": "not-a-timestamp"},
+        {"mode": "live_review", "status": "passed", "generated_at": "not-a-timestamp"},
         now=datetime(2026, 6, 17, tzinfo=UTC),
     )
 
@@ -70,8 +81,13 @@ def test_release_review_freshness_gate_fails_for_invalid_generated_at() -> None:
 
 
 def test_release_review_freshness_gate_fails_for_future_generated_at() -> None:
+    """Verify release review freshness gate fails for future generated at."""
     gate = gates._release_review_freshness_gate(
-        {"generated_at": "2026-06-18T00:00:00Z"},
+        {
+            "mode": "live_review",
+            "status": "passed",
+            "generated_at": "2026-06-18T00:00:00Z",
+        },
         now=datetime(2026, 6, 17, 0, 0, 0, tzinfo=UTC),
     )
 
@@ -794,8 +810,12 @@ def test_check_artifacts_can_skip_artifact_comparison_for_changed_path_gate(
 def test_observability_touched_metric_review_gate_passes_without_metric_changes() -> (
     None
 ):
+    """Verify observability touched metric review gate passes without metric changes."""
     gate = gates._observability_touched_metric_review_gate(
-        {"generated_at": "2026-06-04T15:01:29Z", "status": "passed"},
+        {
+            "generated_at": "2026-06-04T15:01:29Z",
+            "status": "passed",
+        },
         changed_paths={"src/bioetl/interfaces/cli/main.py"},
         trigger_paths={"src/bioetl/infrastructure/observability/server.py"},
         now=datetime(2026, 6, 17, 15, 1, 29, tzinfo=UTC),
@@ -853,8 +873,12 @@ def test_collect_metric_change_trigger_paths_includes_dashboard_and_alert_surfac
 
 
 def test_observability_touched_metric_review_gate_matches_static_prefixes() -> None:
+    """Verify observability touched metric review gate matches static prefixes."""
     gate = gates._observability_touched_metric_review_gate(
-        {"generated_at": "2026-06-04T15:01:29Z", "status": "passed"},
+        {
+            "generated_at": "2026-06-04T15:01:29Z",
+            "status": "passed",
+        },
         changed_paths={"grafana/dashboards/new-metric.json"},
         trigger_paths={"grafana/dashboards/"},
         now=datetime(2026, 7, 6, 15, 1, 29, tzinfo=UTC),
@@ -894,8 +918,12 @@ def test_observability_touched_metric_inventory_gate_fails_for_stale_artifact() 
 
 
 def test_observability_touched_metric_review_gate_fails_for_stale_review() -> None:
+    """Verify observability touched metric review gate fails for stale review."""
     gate = gates._observability_touched_metric_review_gate(
-        {"generated_at": "2026-06-04T15:01:29Z", "status": "passed"},
+        {
+            "generated_at": "2026-06-04T15:01:29Z",
+            "status": "passed",
+        },
         changed_paths={"src/bioetl/infrastructure/observability/server.py"},
         trigger_paths={"src/bioetl/infrastructure/observability/server.py"},
         now=datetime(2026, 7, 6, 15, 1, 29, tzinfo=UTC),
@@ -906,8 +934,12 @@ def test_observability_touched_metric_review_gate_fails_for_stale_review() -> No
 
 
 def test_observability_touched_metric_review_gate_fails_for_degraded_review() -> None:
+    """Verify observability touched metric review gate fails for degraded review."""
     gate = gates._observability_touched_metric_review_gate(
-        {"generated_at": "2026-06-04T15:01:29Z", "status": "degraded"},
+        {
+            "generated_at": "2026-06-04T15:01:29Z",
+            "status": "degraded",
+        },
         changed_paths={"configs/quality/observability_metric_declarations.yaml"},
         trigger_paths={"configs/quality/observability_metric_declarations.yaml"},
         now=datetime(2026, 6, 17, 15, 1, 29, tzinfo=UTC),
@@ -961,3 +993,24 @@ def test_stored_public_surface_max_count_is_independent_of_live_census() -> None
         )
         == 12
     )
+
+
+@pytest.mark.parametrize(
+    "mode,status",
+    [
+        ("local_cardinality_fallback", "passed"),
+        ("local_cardinality_fallback", "degraded"),
+        ("live_review_unavailable", "degraded"),
+        ("live_review", "failed"),
+        ("live_review", "degraded"),
+        (None, "passed"),
+        ("live_review", None),
+    ],
+)
+def test_release_review_freshness_rejects_non_release_evidence(mode, status):
+    """Verify release review freshness rejects non release evidence."""
+    gate = gates._release_review_freshness_gate(
+        {"mode": mode, "status": status, "generated_at": "2026-06-17T00:00:00Z"},
+        now=datetime(2026, 6, 17, tzinfo=UTC),
+    )
+    assert gate.status == "fail"

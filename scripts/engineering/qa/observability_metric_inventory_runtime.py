@@ -648,6 +648,10 @@ def _apply_local_cardinality_fallback(
         ]
         if not missing_local_observations:
             summary["mode"] = "local_cardinality_fallback"
+            summary["status"] = "degraded"
+            degraded_reasons.append(
+                "live Prometheus review unavailable; using local cardinality evidence"
+            )
             local_threshold_violations.extend(
                 _threshold_violation_rows(
                     metric_names=reviewed_metrics,
