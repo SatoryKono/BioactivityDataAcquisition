@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -403,15 +403,13 @@ sink:
     primary_key: ["activity-id"]
     partition_by: []
     sort_by:
-      columns: ["activity-id"]
-      ascending: true
+      - "activity-id" 
     csv_export:
       path: "data/output/csv/silver/chembl/activity"
   gold:
     path: "data/output/gold/chembl/activity"
     sort_by:
-      columns: ["activity-id"]
-      ascending: true
+      - "activity-id" 
     csv_export:
       path: "data/output/csv/gold/chembl/activity"
 ```
@@ -525,11 +523,10 @@ ______________________________________________________________________
 ### 6.2. Проверка соответствия
 
 ```bash
-# Проверить все конфиги
-make validate-configs
-
-# Или вручную через pre-commit
+# Проверить все конфиги (pre-commit hook)
 pre-commit run validate-pipeline-configs --all-files
+# Эквивалент прямого вызова:
+python scripts/engineering/dev/run_project_python.py -m scripts.schema validate-configs
 ```
 
 ______________________________________________________________________

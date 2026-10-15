@@ -1,10 +1,10 @@
 ______________________________________________________________________
 
-Version: 1.1.1
+Version: 1.2.1
 Status: internal-published
 Class: internal
 Owner: BioETL Team
-Last verified: '2026-07-16'
+Last verified: '2026-10-15'
 Aligned with: consolidated AI rules digest 2.0.0 (RULES v6.1.5, REQUIREMENTS v1.12, 168 requirements, ADR-050); Qodo extract 66 rules (2026-07-16)
 
 ______________________________________________________________________
@@ -52,7 +52,7 @@ ______________________________________________________________________
 | §5.5 | Disaster recovery | REQ-DR-* | `08-operations.mdc` | covered |
 | §5.6 | Environment isolation | REQ-OPS-* | `08-operations.mdc` | covered |
 | §6 | Documentation automation | REQ-DOC-* | `06-docs-standards.mdc` | partial |
-| §7.1 | Schema evolution / deprecation | REQ-SCHEMA-* | `11-schema-evolution.mdc` | covered |
+| §7.1 | Dual verification (двойная верификация, REQ-ARCH-040) | REQ-ARCH-* | `07-qodo-enforcement.mdc` | covered |
 | §8.1 | Data contracts | REQ-SCHEMA-* | `11-schema-evolution.mdc` | covered |
 | §8.2 | Rollback strategy | REQ-OPS-* | `11-schema-evolution.mdc` | partial |
 | §9 | Developer experience / CI gates | REQ-DX-*, REQ-DEP-* | `02-code-style.mdc`, `03-testing.mdc` | covered |

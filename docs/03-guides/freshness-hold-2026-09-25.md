@@ -15,7 +15,7 @@ Their `Last verified` dates stay unchanged because a concrete claim does not mat
 Documents in the same age slice whose claims matched were stamped `2026-09-25` only after that check.
 `.mmd` files are outside this slice: they have no `Last verified` header.
 
-> **Resolution wave 2026-10-15:** 87 entries were fixed against the current tree
+> **Resolution wave 2026-10-15:** 95 entries were fixed against the current tree
 > and removed from the table below (canonical renames ChemblAdapter /
 > PipelineService / *Service suffixes, storage port family names,
 > StoragePort -> Bronze/Silver/Gold/Merged ports in description cards,
@@ -25,14 +25,6 @@ Documents in the same age slice whose claims matched were stamped `2026-09-25` o
 
 | Path | Reason |
 | --- | --- |
-| `docs/00-project/ai/agents/policy/agent-orchestration-rules.md` | Slash-команды /architecture-guardian, /new-composite, /config-validate, /schema-parity, /provider-health и /migration в runtime-деревьях отсутствуют. |
-| `docs/00-project/ai/memory/neo4j-project-memory-seed.md` | Источники истины ссылаются на отсутствующие knowledge-graph JSON и SYN-project-package-topology.md. |
-| `docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md` | §7.1 матрицы не совпадает с RULES.md v6.1.11 (там двойная верификация, не schema evolution). |
-| `docs/00-project/ai/skills/README.md` | Указаны отсутствующие .codex/skills/documentation-cascade-audit и docs/00-project/ai/skills/global/. |
-| `docs/00-project/ai/skills/SKILLS-PRACTICAL-INDEX.md` | Таблицы всё ещё вызывают снятые grafana-dashboard-extension и prometheus-metric-discovery. |
-| `docs/00-project/glossary.md` | LoadingStrategy не содержит WATERMARK-BASED; модуля pandera_compat нет. |
-| `docs/00-project/governance/03-file-policy.md` | Документ требует отсутствующий make validate-configs и старую форму sort_by.columns. |
-| `docs/00-project/governance/07-doc-nav-policy.md` | Политика требует docs/05-engineering в primary nav, а mkdocs.yml исключает этот префикс. |
 | `docs/02-architecture/07-compatibility-facade-inventory.md` | Разрешённый test path tests/unit/composition/test_services_entrypoints.py отсутствует. |
 | `docs/02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md` | Решение требует Pydantic для всех моделей, PipelineConfig остаётся dataclass. |
 | `docs/02-architecture/decisions/ADR-017-observability-architecture.md` | Путь composition/observability_api.py устарел. |
