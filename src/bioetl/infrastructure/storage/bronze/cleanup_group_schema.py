@@ -128,11 +128,13 @@ def _validate_members(
 def _validate_member_key_list(
     value: object, members: dict[str, Any], *, label: str
 ) -> None:  # Any: validated JSON.
+    if not isinstance(value, list):
+        raise ValueError(label)
+    keys = list(value)
     ok = (
-        isinstance(value, list)
-        and len(value) == len(set(value))
-        and all(key in members for key in value)  # Any: validated JSON.
-        and value == [key for key in _ORDER if key in value]
+        len(keys) == len(set(keys))
+        and all(key in members for key in keys)  # Any: validated JSON.
+        and keys == [key for key in _ORDER if key in keys]
     )
     if not ok:
         raise ValueError(label)
@@ -194,11 +196,9 @@ def _validate_record_body(
         or body.get("state") not in ("prepared", "completed")
     ):
         raise ValueError("schema, operation or state")
-    if schema == _SCHEMA_VERSION and keys == _BODY_KEYS:
-        pass
-    elif schema == _LEGACY_SCHEMA_VERSION and keys == _LEGACY_BODY_KEYS:
+    if schema == _LEGACY_SCHEMA_VERSION and keys == _LEGACY_BODY_KEYS:
         body["removed"] = []
-    else:
+    elif not (schema == _SCHEMA_VERSION and keys == _BODY_KEYS):
         raise ValueError("body keys")
     if UUID(hex=operation_id).hex != operation_id:
         raise ValueError("operation ID")

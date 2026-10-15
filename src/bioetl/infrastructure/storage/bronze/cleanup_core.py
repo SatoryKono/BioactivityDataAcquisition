@@ -393,17 +393,12 @@ def _locked_bronze_root(
         if not stat.S_ISREG(os.fstat(lock_fd).st_mode):
             raise OSError("Bronze cleanup lock is not a regular file")
         flock(lock_fd, lock_ex if exclusive else lock_sh)
-        lease = _shared_lease_after_pending_check(
+        yield _shared_lease_after_pending_check(
             root_real,
             root_fd,
             exclusive=exclusive,
             allow_group_recovery=allow_group_recovery,
         )
-        if exclusive:
-            from .cleanup_posix import _recover_stages
-
-            _recover_stages(root_fd, root_real)
-        yield lease
     finally:
         os.close(lock_fd)
 

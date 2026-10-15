@@ -13,12 +13,14 @@ from __future__ import annotations
 import os
 import re
 import stat
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 from uuid import UUID
 
 from .cleanup_core import (
+    BronzeRootLease,
     _CleanupConflict,
     _entry_is_link_or_reparse,
     destructive_cleanup_supported,
@@ -26,7 +28,9 @@ from .cleanup_core import (
     stat_is_link_or_reparse,
     valid_bronze_scope_name,
 )
-from .cleanup_core import bronze_tree_lock as bronze_tree_lock
+from .cleanup_core import (
+    bronze_tree_lock as _bronze_tree_lock_impl,
+)
 
 __all__ = [
     "bronze_tree_lock",
@@ -47,6 +51,29 @@ __all__ = [
     "stat_is_link_or_reparse",
     "validate_scope_filter",
 ]
+
+
+@contextmanager
+def bronze_tree_lock(
+    base_path: Path,
+    *,
+    exclusive: bool,
+    allow_group_recovery: bool = False,
+    create_lock: bool = True,
+) -> Iterator[BronzeRootLease]:
+    """Advisory lock; exclusive holders also recover legacy cleanup stages."""
+    with _bronze_tree_lock_impl(
+        base_path,
+        exclusive=exclusive,
+        allow_group_recovery=allow_group_recovery,
+        create_lock=create_lock,
+    ) as lease:
+        if exclusive and lease.fd is not None:
+            from .cleanup_posix import _recover_stages
+
+            _recover_stages(lease.fd, lease.path)
+        yield lease
+
 
 # Artifacts produced by BronzeWriter under a date directory:
 # payload ``batch_<date>_<batch_id>.jsonl.zst``, its sidecar

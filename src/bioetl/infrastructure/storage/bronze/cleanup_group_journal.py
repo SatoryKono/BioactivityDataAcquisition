@@ -13,6 +13,7 @@ from typing import Any
 from .cleanup_core import (
     _directory_xattr_supported,
     _platform_cleanup_supported,
+    destructive_cleanup_supported,
 )
 from .cleanup_group_recovery import GroupRecoveryCoordinator
 from .cleanup_group_schema import (
@@ -50,6 +51,7 @@ __all__ = [
     "GroupSpec",
     "_decode_record",
     "_record_bytes",
+    "destructive_cleanup_supported",
     "open_group_journal",
 ]
 
