@@ -244,6 +244,4 @@ def execute_cleanup_plan(
         if group_cleanup is not None:
             group_cleanup.attest_plan(plan, stats)
         return
-    host._apply_cleanup_plan(
-        stats, plan, root_abs, root_real, root_fd, group_cleanup
-    )
+    host._apply_cleanup_plan(stats, plan, root_abs, root_real, root_fd, group_cleanup)

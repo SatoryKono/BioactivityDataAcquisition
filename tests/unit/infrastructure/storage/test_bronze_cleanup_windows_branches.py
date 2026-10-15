@@ -388,7 +388,9 @@ def _arm(monkeypatch: pytest.MonkeyPatch, *modules: types.ModuleType) -> DirFdBr
     for module in (cleanup_posix, cleanup_core, support):
         monkeypatch.setattr(module, "destructive_cleanup_supported", lambda: True)
     # bronze_tree_lock also binds directory xattr to the Bronze volume itself.
-    monkeypatch.setattr(cleanup_core, "_directory_xattr_supported", lambda *_a, **_k: True)
+    monkeypatch.setattr(
+        cleanup_core, "_directory_xattr_supported", lambda *_a, **_k: True
+    )
     monkeypatch.setattr(support, "_directory_xattr_supported", lambda *_a, **_k: True)
     _patch_fd_view(monkeypatch, bridge)
     return bridge
