@@ -6,6 +6,7 @@ from collections.abc import AsyncIterator, Awaitable, Callable, Iterator
 
 from bioetl.application.core.derived_scan_budget import batched_source_records
 from bioetl.application.core.publication_term_runtime import publication_pubmed_id
+from bioetl.domain.exceptions import RecoverableError
 from bioetl.domain.ports import PublicationTermEnrichmentPort
 from bioetl.domain.types import BronzeRecord
 
@@ -31,6 +32,7 @@ async def _attach_pubmed_payloads(
     extract_terms: _ExtractTerms,
     enricher: PublicationTermEnrichmentPort,
 ) -> list[BronzeRecord]:
+    """Attach optional PubMed payloads, preserving originals on expected failures."""
     need = [
         record
         for record in records
@@ -40,7 +42,10 @@ async def _attach_pubmed_payloads(
     ]
     if not need:
         return records
-    enriched = list(await enricher.enrich_many(need))
+    try:
+        enriched = list(await enricher.enrich_many(need))
+    except (RecoverableError, OSError, RuntimeError, ValueError):
+        return records
     replacements = {
         id(original): replacement
         for original, replacement in zip(need, enriched, strict=True)
