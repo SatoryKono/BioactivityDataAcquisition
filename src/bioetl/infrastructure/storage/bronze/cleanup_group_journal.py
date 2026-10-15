@@ -12,7 +12,7 @@ from typing import Any
 
 from .cleanup_core import (
     _directory_xattr_supported,
-    destructive_cleanup_supported,
+    _platform_cleanup_supported,
 )
 from .cleanup_group_recovery import GroupRecoveryCoordinator
 from .cleanup_group_schema import (
@@ -57,7 +57,7 @@ __all__ = [
 @contextmanager
 def open_group_journal(root: Path) -> Iterator[GroupJournal]:
     """Hold the production cooperative exclusive lock for explicit operations."""
-    if not destructive_cleanup_supported() or not _directory_xattr_supported(root):
+    if not _platform_cleanup_supported() or not _directory_xattr_supported(root):
         raise NotImplementedError(
             "durable Bronze group apply requires POSIX pinned handles"
         )
@@ -123,6 +123,7 @@ class GroupJournal(GroupRecoveryCoordinator):
             "names": names,
             "members": members,
             "staged": [],
+            "removed": [],
             "stage": None,
         }
         if hook:

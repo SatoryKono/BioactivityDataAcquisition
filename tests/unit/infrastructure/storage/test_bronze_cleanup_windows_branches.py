@@ -387,11 +387,11 @@ def _arm(monkeypatch: pytest.MonkeyPatch, *modules: types.ModuleType) -> DirFdBr
         monkeypatch.setattr(module, "os", bridge)
     for module in (cleanup_posix, cleanup_core, support):
         monkeypatch.setattr(module, "destructive_cleanup_supported", lambda: True)
-    # bronze_tree_lock also binds directory xattr to the Bronze volume itself.
+    # bronze_tree_lock binds platform + volume xattr through cleanup_core names.
+    monkeypatch.setattr(cleanup_core, "_platform_cleanup_supported", lambda: True)
     monkeypatch.setattr(
         cleanup_core, "_directory_xattr_supported", lambda *_a, **_k: True
     )
-    monkeypatch.setattr(support, "_directory_xattr_supported", lambda *_a, **_k: True)
     _patch_fd_view(monkeypatch, bridge)
     return bridge
 
@@ -466,6 +466,7 @@ def _body(operation: str, **overrides) -> dict[str, object]:
         "names": spec.names(),
         "members": {"payload": _member(), "sidecar": _member()},
         "staged": [],
+        "removed": [],
         "stage": None,
     }
     body.update(overrides)
@@ -1070,7 +1071,10 @@ def test_bronze_tree_lock_success_pending_and_directory_lock(
 def test_bronze_tree_lock_nondestructive_paths(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr(support, "destructive_cleanup_supported", lambda: False)
+    monkeypatch.setattr(cleanup_core, "_platform_cleanup_supported", lambda: False)
+    monkeypatch.setattr(
+        cleanup_core, "_directory_xattr_supported", lambda *_a, **_k: False
+    )
     with pytest.raises(NotImplementedError):
         with support.bronze_tree_lock(tmp_path, exclusive=True):
             pass
@@ -1083,6 +1087,77 @@ def test_bronze_tree_lock_nondestructive_paths(
     with pytest.raises(OSError, match="group recovery"):
         with support.bronze_tree_lock(pending, exclusive=False):
             pass
+    legacy = tmp_path / "legacy-stage"
+    legacy.mkdir()
+    (legacy / ".bronze-cleanup-stage-1").mkdir()
+    with pytest.raises(OSError, match="group recovery"):
+        with support.bronze_tree_lock(legacy, exclusive=False):
+            pass
+
+
+def test_find_old_date_dirs_notifies_invalid_date(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Non-calendar partitions are retained and reported as invalid_date skips."""
+    monkeypatch.setattr(support, "root_components_safe", lambda _path: True)
+    entity = tmp_path / "prov" / "ent"
+    entity.mkdir(parents=True)
+    (entity / "2024-99-99").mkdir()
+    (entity / "2020-01-01").mkdir()
+    (entity / "2022-06-01").mkdir()
+    skips: list[tuple[str, str]] = []
+    found = support.find_old_date_dirs(
+        tmp_path,
+        flat_structure=False,
+        cutoff_str="2021-01-01",
+        on_skip=lambda path, reason: skips.append((path, reason)),
+    )
+    assert [path.name for path in found] == ["2020-01-01"]
+    assert (entity / "2024-99-99").is_dir()
+    assert (entity / "2022-06-01").is_dir()
+    assert any(
+        path.endswith("2024-99-99") and reason == "invalid_date"
+        for path, reason in skips
+    )
+
+
+def test_dry_run_lock_does_not_create_marker(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Read-only preview must not create ``.bronze-cleanup.lock``."""
+    _arm(monkeypatch)
+    _install_fcntl(monkeypatch)
+    root = _abs(tmp_path)
+    lock = root / ".bronze-cleanup.lock"
+    assert not lock.exists()
+    with support.bronze_tree_lock(root, exclusive=False, create_lock=False) as lease:
+        assert lease.fd is not None
+    assert not lock.exists()
+
+
+def test_directory_xattr_cache_skips_repeat_probe(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Argumentless capability checks reuse a warmed device cache."""
+    cleanup_core._DIR_XATTR_BY_DEV.clear()
+    probes: list[object] = []
+
+    def fake_probe(probe_dir: str | None, cache_key: int) -> bool:
+        probes.append((probe_dir, cache_key))
+        cleanup_core._DIR_XATTR_BY_DEV[cache_key] = True
+        return True
+
+    monkeypatch.setattr(
+        cleanup_core,
+        "_xattr_apis",
+        lambda: (lambda *_a, **_k: None, lambda *_a, **_k: b"1", None),
+    )
+    monkeypatch.setattr(cleanup_core, "_run_directory_xattr_probe", fake_probe)
+    monkeypatch.setattr(cleanup_core, "_default_temp_device", lambda: 42)
+    assert cleanup_core._directory_xattr_supported() is True
+    assert cleanup_core._directory_xattr_supported() is True
+    assert probes == [(None, 42)]
+    cleanup_core._DIR_XATTR_BY_DEV.clear()
 
 
 def test_candidate_is_safe_uses_anchored_parent(tmp_path: Path, monkeypatch) -> None:
@@ -1287,13 +1362,30 @@ def test_schema_record_validation_success_and_rejections() -> None:
     schema._validate_record_body(body, operation)
     decoded = schema._decode_record(schema._record_bytes(body), operation)
     assert decoded["operation_id"] == operation
+    assert decoded["removed"] == []
     assert schema._unique_pairs([("a", 1)]) == {"a": 1}
     with pytest.raises(ValueError, match="duplicate"):
         schema._unique_pairs([("a", 1), ("a", 2)])
     with pytest.raises(GroupJournalConflict, match="size"):
         schema._record_bytes({"k": "x" * 20000})
-    with pytest.raises(ValueError, match="body keys"):
+    with pytest.raises(ValueError, match="schema"):
         schema._validate_record_body({"schema": 3}, operation)
+    legacy = _body(operation, schema=3)
+    legacy.pop("removed")
+    schema._validate_record_body(legacy, operation)
+    assert legacy["removed"] == []
+    accounted = _body(
+        operation,
+        staged=["payload", "sidecar"],
+        removed=["payload"],
+        stage={"dev": 1, "ino": 2, "token": operation},
+    )
+    schema._validate_record_body(accounted, operation)
+    with pytest.raises(ValueError, match="removed before staged"):
+        schema._validate_staged(
+            _body(operation, staged=["payload"], removed=["sidecar"]),
+            {"payload": _member(), "sidecar": _member()},
+        )
     uppercase = "AA" * 16
     bad_op = _body(uppercase)
     with pytest.raises(ValueError, match="operation ID"):

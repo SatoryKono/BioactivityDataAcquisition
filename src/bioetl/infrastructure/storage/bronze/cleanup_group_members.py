@@ -10,6 +10,7 @@ from typing import Any
 from .cleanup_group_records import GroupRecordStore
 from .cleanup_group_schema import (
     _ORDER,
+    _SCHEMA_VERSION,
     _STAGE_PREFIX,
     _STAGE_TAG,
     Barrier,
@@ -119,11 +120,9 @@ class GroupMemberRecovery(GroupRecordStore):
             progress.phase = f"{key}_stage"
             self._stage_member(date_fd, stage_fd, body, key, relative, chain, hook)
         if not _exists(stage_fd, key):
-            # Prior unlink may have survived while the following fsync failed.
-            # Count once before completion confirms durable absence.
-            if key in body["staged"] and not _exists(date_fd, body["names"][key]):
-                progress.removed += 1
-                progress.removed_bytes += body["members"][key]["size"]
+            self._account_absent_staged(
+                date_fd, journal_fd, operation_id, body, key, progress
+            )
             return
         # A previous call may have renamed this member but failed to fsync.
         # Do not attest that visible move as durable without acknowledging it.
@@ -141,6 +140,27 @@ class GroupMemberRecovery(GroupRecordStore):
             hook,
             progress,
         )
+
+    def _account_absent_staged(
+        self,
+        date_fd: int,
+        journal_fd: int,
+        operation_id: str,
+        body: dict[str, Any],  # Any: validated JSON.
+        key: str,
+        progress: GroupRecoveryResult,
+    ) -> None:
+        """Count uncertain prior unlinks once; never re-count journaled removals."""
+        removed = body.setdefault("removed", [])
+        if key in removed:
+            return
+        if key not in body["staged"] or _exists(date_fd, body["names"][key]):
+            return
+        progress.removed += 1
+        progress.removed_bytes += body["members"][key]["size"]
+        body["schema"] = _SCHEMA_VERSION
+        body["removed"] = [member for member in _ORDER if member in (*removed, key)]
+        self._replace_record(journal_fd, operation_id, body)
 
     def _stage_member(
         self,
@@ -206,5 +226,9 @@ class GroupMemberRecovery(GroupRecordStore):
         progress.possibly_unlinked_bytes -= body["members"][key]["size"]
         progress.removed += 1
         progress.removed_bytes += body["members"][key]["size"]
+        removed = body.setdefault("removed", [])
+        body["schema"] = _SCHEMA_VERSION
+        body["removed"] = [member for member in _ORDER if member in (*removed, key)]
+        self._replace_record(journal_fd, operation_id, body)
         if hook:
             hook(f"after_{key}_unlink")

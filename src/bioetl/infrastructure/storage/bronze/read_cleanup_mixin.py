@@ -16,7 +16,10 @@ import orjson
 import zstandard as zstd
 
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.storage.bronze.cleanup_core import BronzeRootLease
+from bioetl.infrastructure.storage.bronze.cleanup_core import (
+    BronzeRootLease,
+    _platform_cleanup_supported,
+)
 from bioetl.infrastructure.storage.bronze.cleanup_group_apply import (
     BronzeGroupCleanup,
     cleanup_roots,
@@ -36,7 +39,6 @@ from bioetl.infrastructure.storage.bronze.cleanup_preview_mixin import (
 from bioetl.infrastructure.storage.bronze.cleanup_support import (
     bronze_tree_lock,
     date_dir_name_is_older,
-    destructive_cleanup_supported,
     find_old_date_dirs,
     root_components_safe,
     safe_rmdir,
@@ -196,7 +198,7 @@ class BronzeWriterReadCleanupMixin(
         cancel_requested: threading.Event | None = None,
     ) -> dict[str, int]:
         """Plan once and apply the same candidates under the writer/cleaner lock."""
-        if not dry_run and not destructive_cleanup_supported():
+        if not dry_run and not _platform_cleanup_supported():
             raise NotImplementedError(
                 "Bronze destructive cleanup is unsupported on this platform/FS"
             )
@@ -206,8 +208,10 @@ class BronzeWriterReadCleanupMixin(
             # Shared lock may resolve writer aliases; linked cleanup roots refuse.
             if not root_components_safe(self.base_path):
                 return self._empty_cleanup_stats()
-            # Shared lock when available; attestation still runs read-only.
-            with bronze_tree_lock(self.base_path, exclusive=False) as locked_root:
+            # Read-only preview must not create .bronze-cleanup.lock in the root.
+            with bronze_tree_lock(
+                self.base_path, exclusive=False, create_lock=False
+            ) as locked_root:
                 return self._cleanup_old_files_locked_sync(
                     cutoff_str, dry_run, provider, entity, locked_root
                 )

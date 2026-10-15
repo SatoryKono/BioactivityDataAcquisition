@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import os
 import stat
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 _REPARSE_POINT_ATTR = 0x400
 _STAGE_PREFIX = ".bronze-cleanup-stage-"
@@ -108,58 +110,90 @@ def _fd_view_supported() -> bool:
 
 
 _DIR_XATTR_BY_DEV: dict[int, bool] = {}
+_XATTR_PROBE_TAG = b"user.bioetl.fs001-capability-probe"
 
 
-def _directory_xattr_supported(base_path: Path | None = None) -> bool:
-    """Require directory user-xattr on the target volume before durable intent."""
+def _xattr_apis() -> tuple[Any, Any, Any | None] | None:  # Any: os xattr callables.
     setter = os.__dict__.get("setxattr")
     getter = os.__dict__.get("getxattr")
-    remover = os.__dict__.get("removexattr")
     if setter is None or getter is None:
-        return False
+        return None
+    return setter, getter, os.__dict__.get("removexattr")
+
+
+def _xattr_probe_anchor(base_path: Path) -> tuple[int, str] | None:
+    """Return ``(st_dev, probe_parent)`` for the Bronze volume, if reachable."""
+    try:
+        anchor = Path(os.path.abspath(base_path))  # noqa: PTH100
+        while not anchor.exists() and anchor.parent != anchor:
+            anchor = anchor.parent
+        if not anchor.exists():
+            return None
+        cache_key = int(anchor.stat().st_dev)
+        parent = str(anchor if anchor.is_dir() else anchor.parent)
+        return cache_key, parent
+    except OSError:
+        return None
+
+
+def _default_temp_device() -> int | None:
+    """Device id for the default temp volume without creating a probe directory."""
     import tempfile
 
-    probe_dir: str | None = None
-    cache_key: int | None = None
-    if base_path is not None:
-        try:
-            anchor = Path(os.path.abspath(base_path))  # noqa: PTH100
-            while not anchor.exists() and anchor.parent != anchor:
-                anchor = anchor.parent
-            if not anchor.exists():
-                return False
-            cache_key = int(anchor.stat().st_dev)
-            cached = _DIR_XATTR_BY_DEV.get(cache_key)
-            if cached is not None:
-                return cached
-            probe_dir = str(anchor if anchor.is_dir() else anchor.parent)
-        except OSError:
-            return False
-    probe_tag = b"user.bioetl.fs001-capability-probe"
+    try:
+        return int(Path(tempfile.gettempdir()).stat().st_dev)
+    except OSError:
+        return None
+
+
+def _run_directory_xattr_probe(probe_dir: str | None, cache_key: int) -> bool:
+    """Create one probe directory on ``probe_dir`` and cache the result by device."""
+    import tempfile
+
+    apis = _xattr_apis()
+    if apis is None:
+        return False
+    setter, getter, remover = apis
     try:
         with tempfile.TemporaryDirectory(
             prefix="bioetl-xattr-probe-", dir=probe_dir
         ) as tmp:
-            if cache_key is None:
-                cache_key = int(Path(tmp).stat().st_dev)
-                cached = _DIR_XATTR_BY_DEV.get(cache_key)
-                if cached is not None:
-                    return cached
             fd = os.open(tmp, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW)
             try:
                 create_flag = getattr(os, "XATTR_CREATE", 1)
-                setter(fd, probe_tag, b"1", flags=create_flag)
-                supported = bool(getter(fd, probe_tag) == b"1")
+                setter(fd, _XATTR_PROBE_TAG, b"1", flags=create_flag)
+                supported = bool(getter(fd, _XATTR_PROBE_TAG) == b"1")
                 if remover is not None:
-                    remover(fd, probe_tag)
+                    remover(fd, _XATTR_PROBE_TAG)
                 _DIR_XATTR_BY_DEV[cache_key] = supported
                 return supported
             finally:
                 os.close(fd)
     except OSError:
-        if cache_key is not None:
-            _DIR_XATTR_BY_DEV[cache_key] = False
+        _DIR_XATTR_BY_DEV[cache_key] = False
         return False
+
+
+def _directory_xattr_supported(base_path: Path | None = None) -> bool:
+    """Require directory user-xattr on the target volume before durable intent."""
+    if _xattr_apis() is None:
+        return False
+    if base_path is not None:
+        resolved = _xattr_probe_anchor(base_path)
+        if resolved is None:
+            return False
+        cache_key, probe_dir = resolved
+        cached = _DIR_XATTR_BY_DEV.get(cache_key)
+        if cached is not None:
+            return cached
+        return _run_directory_xattr_probe(probe_dir, cache_key)
+    default_key = _default_temp_device()
+    if default_key is None:
+        return False
+    cached = _DIR_XATTR_BY_DEV.get(default_key)
+    if cached is not None:
+        return cached
+    return _run_directory_xattr_probe(None, default_key)
 
 
 def _visible_pending_group_markers(base_path: Path) -> bool:
@@ -168,7 +202,10 @@ def _visible_pending_group_markers(base_path: Path) -> bool:
         names = [entry.name for entry in base_path.iterdir()]
     except OSError:
         return False
-    if any(name.startswith(_GROUP_STAGE_PREFIX) for name in names):
+    if any(
+        name.startswith((_GROUP_STAGE_PREFIX, _STAGE_PREFIX, _DONE_PREFIX))
+        for name in names
+    ):
         return True
     if _GROUP_JOURNAL_DIR not in names:
         return False
@@ -185,19 +222,20 @@ def shared_lease_without_caps(base_path: Path) -> BronzeRootLease:
     return BronzeRootLease(base_path, None)
 
 
-def destructive_cleanup_supported() -> bool:
-    """Require anchored ops, flock, pinned writer I/O, and directory xattr."""
+def _platform_cleanup_supported() -> bool:
+    """POSIX dir_fd/no-follow, flock, and pinned fd view — without volume xattr."""
     if not _ANCHORED_OPS or os.name == "nt":
         return False
     try:
         import fcntl
     except ImportError:
         return False
-    return (
-        hasattr(fcntl, "flock")
-        and _fd_view_supported()
-        and _directory_xattr_supported()
-    )
+    return hasattr(fcntl, "flock") and _fd_view_supported()
+
+
+def destructive_cleanup_supported() -> bool:
+    """Platform gates plus default-temp xattr; prefer per-volume checks at lock."""
+    return _platform_cleanup_supported() and _directory_xattr_supported()
 
 
 def stat_is_link_or_reparse(st: os.stat_result) -> bool:
@@ -290,3 +328,99 @@ def _entry_is_link_or_reparse(entry: os.DirEntry[str]) -> bool:
         return stat_is_link_or_reparse(entry.stat(follow_symlinks=False))
     except OSError:
         return True
+
+
+@contextmanager
+def bronze_tree_lock(
+    base_path: Path,
+    *,
+    exclusive: bool,
+    allow_group_recovery: bool = False,
+    create_lock: bool = True,
+) -> Iterator[BronzeRootLease]:
+    """Advisory writer/cleaner lock; ``create_lock=False`` is non-mutating dry-run."""
+    caps = _platform_cleanup_supported() and _directory_xattr_supported(base_path)
+    if not caps:
+        if exclusive:
+            raise NotImplementedError(
+                "Bronze destructive cleanup requires POSIX dir_fd/no-follow, "
+                "flock, and a verified root fd view"
+            )
+        yield shared_lease_without_caps(base_path)
+        return
+    import fcntl
+
+    root_path = base_path if exclusive else Path(os.path.realpath(base_path))
+    root_real, root_fd = open_bronze_root_no_follow(root_path)
+    try:
+        flock_fn: Callable[[int, int], None] = fcntl.__dict__["flock"]
+        yield from _locked_bronze_root(
+            root_real,
+            root_fd,
+            exclusive=exclusive,
+            allow_group_recovery=allow_group_recovery,
+            create_lock=create_lock,
+            flock=flock_fn,
+            lock_ex=int(fcntl.__dict__["LOCK_EX"]),
+            lock_sh=int(fcntl.__dict__["LOCK_SH"]),
+        )
+    finally:
+        os.close(root_fd)
+
+
+def _locked_bronze_root(
+    root_real: Path,
+    root_fd: int,
+    *,
+    exclusive: bool,
+    allow_group_recovery: bool,
+    create_lock: bool,
+    flock: Callable[[int, int], None],
+    lock_ex: int,
+    lock_sh: int,
+) -> Iterator[BronzeRootLease]:
+    flags = os.O_RDWR | _O_NOFOLLOW | _O_NONBLOCK
+    if create_lock:
+        flags |= os.O_CREAT
+    try:
+        lock_fd = os.open(".bronze-cleanup.lock", flags, 0o600, dir_fd=root_fd)
+    except FileNotFoundError:
+        if exclusive or create_lock:
+            raise
+        yield _shared_lease_after_pending_check(root_real, root_fd)
+        return
+    try:
+        if not stat.S_ISREG(os.fstat(lock_fd).st_mode):
+            raise OSError("Bronze cleanup lock is not a regular file")
+        flock(lock_fd, lock_ex if exclusive else lock_sh)
+        lease = _shared_lease_after_pending_check(
+            root_real,
+            root_fd,
+            exclusive=exclusive,
+            allow_group_recovery=allow_group_recovery,
+        )
+        if exclusive:
+            from .cleanup_posix import _recover_stages
+
+            _recover_stages(root_fd, root_real)
+        yield lease
+    finally:
+        os.close(lock_fd)
+
+
+def _shared_lease_after_pending_check(
+    root_real: Path,
+    root_fd: int,
+    *,
+    exclusive: bool = False,
+    allow_group_recovery: bool = False,
+) -> BronzeRootLease:
+    lease = BronzeRootLease(root_real, root_fd)
+    _ = lease.writer_path
+    if _pending_group_operation(root_fd) and not (exclusive and allow_group_recovery):
+        raise OSError("Bronze operation refused while group recovery is pending")
+    if not exclusive and any(
+        name.startswith((_STAGE_PREFIX, _DONE_PREFIX)) for name in os.listdir(root_fd)
+    ):
+        raise OSError("Bronze writer refused while cleanup recovery is pending")
+    return lease

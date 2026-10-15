@@ -53,8 +53,13 @@ def test_preview_stops_scandir_within_one_oversized_partition(
     seen = 0
 
     @contextmanager
-    def observed_scandir(path: Path):
+    def observed_scandir(path: Path | int | str):
         nonlocal seen
+        # Capability probes may pass a directory fd; leave those untouched.
+        if isinstance(path, int):
+            with original_scandir(path) as entries:
+                yield entries
+            return
         with original_scandir(path) as entries:
             if Path(path) != date_dir:
                 yield entries

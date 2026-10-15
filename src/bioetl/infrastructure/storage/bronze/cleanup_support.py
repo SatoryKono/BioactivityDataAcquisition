@@ -13,29 +13,20 @@ from __future__ import annotations
 import os
 import re
 import stat
-from collections.abc import Callable, Iterator
-from contextlib import contextmanager
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 from uuid import UUID
 
 from .cleanup_core import (
-    _DONE_PREFIX,
-    _O_NOFOLLOW,
-    _O_NONBLOCK,
-    _STAGE_PREFIX,
-    BronzeRootLease,
     _CleanupConflict,
-    _directory_xattr_supported,
     _entry_is_link_or_reparse,
-    _pending_group_operation,
     destructive_cleanup_supported,
     is_reserved_bronze_maintenance_name,
-    open_bronze_root_no_follow,
-    shared_lease_without_caps,
     stat_is_link_or_reparse,
     valid_bronze_scope_name,
 )
+from .cleanup_core import bronze_tree_lock as bronze_tree_lock
 
 __all__ = [
     "bronze_tree_lock",
@@ -68,65 +59,6 @@ _BATCH_ARTIFACT = re.compile(
 )
 
 _DATE_DIR_FORMAT = "%Y-%m-%d"
-
-
-@contextmanager
-def bronze_tree_lock(
-    base_path: Path, *, exclusive: bool, allow_group_recovery: bool = False
-) -> Iterator[BronzeRootLease]:
-    """Coordinate all application writers and cleaners for one Bronze root.
-
-    This is advisory. The operator must exclude uncooperative same-user writers.
-    """
-    if not (destructive_cleanup_supported() and _directory_xattr_supported(base_path)):
-        if exclusive:
-            raise NotImplementedError(
-                "Bronze destructive cleanup requires POSIX dir_fd/no-follow, "
-                "flock, and a verified root fd view"
-            )
-        yield shared_lease_without_caps(base_path)
-        return
-    import fcntl
-
-    # A writer may be configured through an alias; pin its resolved target
-    # before locking. Destructive cleanup still rejects every linked component.
-    root_path = base_path if exclusive else Path(os.path.realpath(base_path))
-    root_real, root_fd = open_bronze_root_no_follow(root_path)
-    try:
-        lock_fd = os.open(
-            ".bronze-cleanup.lock",
-            os.O_CREAT | os.O_RDWR | _O_NOFOLLOW | _O_NONBLOCK,
-            0o600,
-            dir_fd=root_fd,
-        )
-        try:
-            if not stat.S_ISREG(os.fstat(lock_fd).st_mode):
-                raise OSError("Bronze cleanup lock is not a regular file")
-            # Windows typeshed lacks POSIX-only members even behind this gate.
-            fcntl.__dict__["flock"](
-                lock_fd,
-                fcntl.__dict__["LOCK_EX" if exclusive else "LOCK_SH"],
-            )
-            lease = BronzeRootLease(root_real, root_fd)
-            _ = lease.writer_path
-            if _pending_group_operation(root_fd) and not (
-                exclusive and allow_group_recovery
-            ):
-                raise OSError(
-                    "Bronze operation refused while group recovery is pending"
-                )
-            if exclusive:
-                _recover_stages(root_fd, root_real)
-            elif any(
-                name.startswith((_STAGE_PREFIX, _DONE_PREFIX))
-                for name in os.listdir(root_fd)  # noqa: PTH208 - pinned root fd
-            ):
-                raise OSError("Bronze writer refused while cleanup recovery is pending")
-            yield lease
-        finally:
-            os.close(lock_fd)
-    finally:
-        os.close(root_fd)
 
 
 def real_root(base_path: Path) -> Path:
@@ -199,15 +131,18 @@ def is_owned_artifact(
     return f"batch_{artifact_date}_{batch_id}.jsonl.zst" in payload_names
 
 
-def date_dir_name_is_older(name: str, cutoff_str: str) -> bool:
-    """True for canonical ``YYYY-MM-DD`` names strictly older than cutoff."""
+def date_dir_name_is_canonical(name: str) -> bool:
+    """True for a strict calendar ``YYYY-MM-DD`` directory name."""
     try:
         parsed = datetime.strptime(name, _DATE_DIR_FORMAT).date()
     except ValueError:
         return False
-    if parsed.strftime(_DATE_DIR_FORMAT) != name:
-        return False
-    return name < cutoff_str
+    return parsed.strftime(_DATE_DIR_FORMAT) == name
+
+
+def date_dir_name_is_older(name: str, cutoff_str: str) -> bool:
+    """True for canonical ``YYYY-MM-DD`` names strictly older than cutoff."""
+    return date_dir_name_is_canonical(name) and name < cutoff_str
 
 
 def validate_scope_filter(value: str | None, label: str) -> None:
@@ -368,11 +303,13 @@ def _old_date_children(
     cutoff_str: str,
     on_skip: Callable[[str, str], None] | None,
 ) -> list[Path]:
-    return [
-        date_dir
-        for date_dir in iter_safe_child_dirs(parent, on_skip=on_skip)
-        if date_dir_name_is_older(date_dir.name, cutoff_str)
-    ]
+    old: list[Path] = []
+    for date_dir in iter_safe_child_dirs(parent, on_skip=on_skip):
+        if date_dir_name_is_older(date_dir.name, cutoff_str):
+            old.append(date_dir)
+        elif not date_dir_name_is_canonical(date_dir.name):
+            _notify_skip(on_skip, date_dir, "invalid_date")
+    return old
 
 
 def _scope_child_dirs(
@@ -435,7 +372,6 @@ def candidate_is_safe(
 
 from .cleanup_posix import (  # noqa: E402 - destructive helpers depend on discovery primitives
     _anchored_parent,
-    _recover_stages,
     _same_identity,
     safe_rmdir,
     safe_unlink,

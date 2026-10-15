@@ -11,24 +11,23 @@ import json
 import os
 import stat
 from collections.abc import Callable
-from dataclasses import dataclass
-from datetime import datetime
-from pathlib import Path
 from typing import Any
 from uuid import UUID
 
-from .cleanup_core import (
-    stat_is_link_or_reparse,
-    valid_bronze_scope_name,
+from .cleanup_core import stat_is_link_or_reparse
+from .cleanup_metrics import (
+    GroupJournalConflict,
+    GroupJournalFailure,
+    GroupRecoveryResult,
+    GroupSpec,
 )
-from .cleanup_support import date_dir_name_is_older, is_owned_artifact
-from .validation_mixin import BronzeWriterValidationMixin
 
 _JOURNAL_DIR = ".bronze-group-journals"
 _STAGE_PREFIX = ".bronze-group-stage-"
 _MAX_RECORD = 16_384
 _MAX_SIDECAR = 1_048_576
-_SCHEMA_VERSION = 3  # Bind the stage object as well as writer member contents.
+_SCHEMA_VERSION = 4  # Persist accounted unlinks separately from staged presence.
+_LEGACY_SCHEMA_VERSION = 3
 _STAGE_TAG = "user.bioetl.fs001-stage"
 _ORDER = ("copy", "payload", "sidecar")
 _NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
@@ -37,101 +36,13 @@ _FILE_FLAGS = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLO
 _MEMBER_NOT_REGULAR = "group member is not a regular file"
 Barrier = Callable[[str], None]
 
-
-class GroupJournalConflict(OSError):
-    """The journal or a group member cannot be proven to be the original."""
-
-    operation_id: str | None = None
-    removed: int = 0
-    possibly_unlinked: int = 0
-    removed_bytes: int = 0
-    possibly_unlinked_bytes: int = 0
-    phase: str = "read"
-
-
-class GroupJournalFailure(OSError):
-    """An I/O barrier failed after a known number of successful unlinks."""
-
-    def __init__(
-        self,
-        operation_id: str,
-        removed: int,
-        phase: str,
-        possibly_unlinked: int,
-        removed_bytes: int = 0,
-        possibly_unlinked_bytes: int = 0,
-    ):
-        super().__init__(
-            f"group {operation_id} failed at {phase}; durably_removed={removed}; possibly_unlinked={possibly_unlinked}"
-        )
-        self.operation_id = operation_id
-        self.removed = removed
-        self.phase = phase
-        self.possibly_unlinked = possibly_unlinked
-        self.removed_bytes = removed_bytes
-        self.possibly_unlinked_bytes = possibly_unlinked_bytes
-
-
-@dataclass(slots=True)
-class GroupRecoveryResult:
-    """Per-call durable removals and unconfirmed unlinks; never cumulative."""
-
-    removed: int = 0
-    possibly_unlinked: int = 0
-    removed_bytes: int = 0
-    possibly_unlinked_bytes: int = 0
-    phase: str = "read"
-
-
-@dataclass(frozen=True, slots=True)
-class GroupSpec:
-    """Exact writer scope and calendar eligibility for one complete group."""
-
-    provider: str
-    entity: str
-    date: str
-    batch_id: str
-    cutoff: str
-    flat_structure: bool = False
-
-    def names(self) -> dict[str, str]:
-        """Return owned artifact names; raise ValueError for invalid group scope."""
-        if not all(valid_bronze_scope_name(x) for x in (self.provider, self.entity)):
-            raise ValueError("invalid Bronze provider/entity")
-        for value in (self.date, self.cutoff):
-            try:
-                if datetime.strptime(value, "%Y-%m-%d").strftime("%Y-%m-%d") != value:
-                    raise ValueError("non-canonical date")
-            except ValueError as exc:
-                raise ValueError("invalid Bronze date/cutoff") from exc
-        if not date_dir_name_is_older(self.date, self.cutoff):
-            raise ValueError("group is not older than cutoff")
-        try:
-            if str(UUID(self.batch_id)) != self.batch_id:
-                raise ValueError("non-canonical batch ID")
-        except ValueError as exc:
-            raise ValueError("invalid batch ID") from exc
-        payload = f"batch_{self.date}_{self.batch_id}.jsonl.zst"
-        if not is_owned_artifact(payload, date_name=self.date):
-            raise ValueError("group does not match writer naming")
-        return {
-            "copy": payload.removesuffix(".zst"),
-            "payload": payload,
-            "sidecar": f"{payload}.meta.json",
-        }
-
-    def relative_date(self) -> Path:
-        """Return the relative date directory; reject invalid layout or scope."""
-        if type(self.flat_structure) is not bool:
-            raise ValueError("invalid Bronze layout flag")
-        payload = self.names()["payload"]
-        resolver = BronzeWriterValidationMixin()
-        resolver._flat_structure = self.flat_structure
-        return Path(
-            resolver._resolve_bronze_path(
-                self.provider, self.entity, self.date, payload
-            )
-        ).parent
+__all__ = [
+    "Barrier",
+    "GroupJournalConflict",
+    "GroupJournalFailure",
+    "GroupRecoveryResult",
+    "GroupSpec",
+]
 
 
 def _canonical(value: dict[str, Any]) -> bytes:  # Any: validated JSON.
@@ -214,18 +125,28 @@ def _validate_members(
         _validate_member_identity(identity)
 
 
+def _validate_member_key_list(
+    value: object, members: dict[str, Any], *, label: str
+) -> None:  # Any: validated JSON.
+    ok = (
+        isinstance(value, list)
+        and len(value) == len(set(value))
+        and all(key in members for key in value)  # Any: validated JSON.
+        and value == [key for key in _ORDER if key in value]
+    )
+    if not ok:
+        raise ValueError(label)
+
+
 def _validate_staged(
     body: dict[str, Any], members: dict[str, Any]
 ) -> None:  # Any: validated JSON.
-    staged = body["staged"]
-    if (
-        not isinstance(staged, list)
-        or len(staged) != len(set(staged))
-        or any(key not in members for key in staged)  # Any: validated JSON.
-        or staged != [key for key in _ORDER if key in staged]
-    ):
-        raise ValueError("staged members")
-    if body["state"] == "completed" and set(staged) != set(members):
+    _validate_member_key_list(body["staged"], members, label="staged members")
+    removed = body.get("removed", [])
+    _validate_member_key_list(removed, members, label="removed members")
+    if any(key not in body["staged"] for key in removed):  # Any: validated JSON.
+        raise ValueError("removed before staged")
+    if body["state"] == "completed" and set(body["staged"]) != set(members):
         raise ValueError("incomplete completion")
 
 
@@ -242,10 +163,8 @@ def _validate_chain(body: dict[str, Any]) -> None:  # Any: validated JSON.
             raise ValueError("directory identity")
 
 
-def _validate_record_body(
-    body: dict[str, Any], operation_id: str
-) -> None:  # Any: validated JSON.
-    if set(body) != {
+_BODY_KEYS = frozenset(
+    [
         "schema",
         "operation_id",
         "state",
@@ -257,15 +176,30 @@ def _validate_record_body(
         "members",
         "staged",
         "stage",
-    }:
-        raise ValueError("body keys")
+        "removed",
+    ]
+)
+_LEGACY_BODY_KEYS = _BODY_KEYS - {"removed"}
+
+
+def _validate_record_body(
+    body: dict[str, Any], operation_id: str
+) -> None:  # Any: validated JSON.
+    keys = set(body)
+    schema = body.get("schema")
     if (
-        type(body["schema"]) is not int
-        or body["schema"] != _SCHEMA_VERSION
-        or body["operation_id"] != operation_id
-        or body["state"] not in ("prepared", "completed")
+        type(schema) is not int
+        or schema not in (_SCHEMA_VERSION, _LEGACY_SCHEMA_VERSION)
+        or body.get("operation_id") != operation_id
+        or body.get("state") not in ("prepared", "completed")
     ):
         raise ValueError("schema, operation or state")
+    if schema == _SCHEMA_VERSION and keys == _BODY_KEYS:
+        pass
+    elif schema == _LEGACY_SCHEMA_VERSION and keys == _LEGACY_BODY_KEYS:
+        body["removed"] = []
+    else:
+        raise ValueError("body keys")
     if UUID(hex=operation_id).hex != operation_id:
         raise ValueError("operation ID")
     _validate_members(body, _validated_scope(body))
