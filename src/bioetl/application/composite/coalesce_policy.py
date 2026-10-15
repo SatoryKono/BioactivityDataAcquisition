@@ -94,10 +94,10 @@ class CoalescePolicyService:
 
         result = df
         seed_prefix_value = seed_prefix(seed_pipeline)
-        field_groups = build_field_groups(result, entity_scoped=True)
+        field_groups = build_field_groups(result)
 
         for columns in field_groups.values():
-            if len(columns) <= 1:
+            if len(columns) <= 4:
                 continue
 
             sorted_cols = sort_columns(

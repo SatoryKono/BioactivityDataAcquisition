@@ -138,7 +138,7 @@ _REFERENCE_IDENTIFIER_FAMILY_SPECS: tuple[tuple[str, str, str, str, str], ...] =
     (
         "pubchem_cid",
         "string",
-        "scalar",
+        "scalar_or_set_like",
         "pubchem_cid",
         "PubChem Compound Identifiers (CID).",
     ),

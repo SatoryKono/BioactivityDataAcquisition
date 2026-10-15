@@ -10,11 +10,11 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `9d6d3e68a0414c43928f1d74290e1ee3eb59592cf69dc2c07ff676280f83fbf1`
+Evidence surface SHA-256: `9e52d58ddb27995ef985473e3b8f1bc245c74479389dbeb89eb01b1d0fd5df4d`
 
 ## Current evidence summary
 
-Evidence metadata refresh (previous event): 2026-10-01 (RF-001, #11846).
+Evidence metadata refresh: 2026-10-01 (RF-001, #11846).
 The single machine-readable summary below is generated from the canonical
 coverage inventory, architecture scorecard and debt-governance gates. Its
 `evidence_surface_sha256` binds those artifacts; the inventory's
@@ -69,7 +69,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "9d6d3e68a0414c43928f1d74290e1ee3eb59592cf69dc2c07ff676280f83fbf1",
+  "evidence_surface_sha256": "9e52d58ddb27995ef985473e3b8f1bc245c74479389dbeb89eb01b1d0fd5df4d",
   "metrics": {
     "architecture_integral_score": 10.0,
     "architecture_interpretation": "excellent",
