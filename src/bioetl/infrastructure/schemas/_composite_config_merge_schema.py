@@ -131,10 +131,6 @@ class MergeSchema(BaseModel):
         "latest_timestamp",
         "explicit_rules",
         "coalesce",
-        # Aliases for compatibility
-        "enricher",
-        "latest",
-        "explicit",
     ] = Field(default="seed_priority", description="Strategy for field conflicts")
     field_priorities: dict[str, list[str]] = Field(
         default_factory=dict, description="Mapping of field to source priority list"
@@ -174,10 +170,7 @@ class MergeSchema(BaseModel):
     @model_validator(mode="after")
     def validate_explicit_rules_requires_priorities(self) -> MergeSchema:
         """Ensure field_priorities is provided when using explicit_rules."""
-        if (
-            self.conflict_resolution in {"explicit_rules", "explicit"}
-            and not self.field_priorities
-        ):
+        if self.conflict_resolution == "explicit_rules" and not self.field_priorities:
             raise ValueError(
                 "field_priorities required when using explicit_rules conflict resolution"
             )
@@ -202,21 +195,10 @@ class MergeSchema(BaseModel):
             )
             for group in self.column_groups
         )
-
-        # Safely map schema literals to domain enums for backwards compatibility
-        conflict_resolution_map = {
-            "enricher_priority": "enricher",
-            "latest_timestamp": "latest",
-            "explicit_rules": "explicit",
-        }
-        domain_conflict_resolution = conflict_resolution_map.get(
-            self.conflict_resolution, self.conflict_resolution
-        )
-
         return MergeConfig(
             strategy=MergeStrategy.from_string(self.strategy),
             conflict_resolution=ConflictResolution.from_string(
-                domain_conflict_resolution
+                self.conflict_resolution
             ),
             output_silver_path=self.output.silver,
             output_gold_path=self.output.gold,

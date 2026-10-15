@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Protocol
 
 import httpx
@@ -69,19 +68,6 @@ class _StatusCodeResolver(Protocol):
     """Callable extracting status codes from retryable errors."""
 
     def __call__(self, exc: Exception) -> int: ...
-
-
-@dataclass(frozen=True, slots=True)
-class RetryPolicyContext:
-    """Grouped retry policy hooks and configuration to keep signatures small."""
-
-    retry_config: RetryConfig
-    is_retryable_error: _RetryableErrorCheck
-    can_retry: _CanRetryCheck
-    handle_retry_delay: _RetryDelayHandler
-    log_retry: _RetryLogger
-    record_retry_budget_exhausted: _RetryBudgetRecorder
-    status_code_from_error: _StatusCodeResolver
 
 
 def should_retry_response(
@@ -174,16 +160,22 @@ async def handle_request_exception(
     attempt: int,
     retries_used: int,
     span: SpanLike,
-    context: RetryPolicyContext,
+    retry_config: RetryConfig,
+    is_retryable_error: _RetryableErrorCheck,
+    can_retry: _CanRetryCheck,
+    handle_retry_delay: _RetryDelayHandler,
+    log_retry: _RetryLogger,
+    record_retry_budget_exhausted: _RetryBudgetRecorder,
+    status_code_from_error: _StatusCodeResolver,
 ) -> _RequestAttemptOutcome | None:
     """Process retryable vs terminal exception paths for one request attempt."""
-    if not context.is_retryable_error(exc):
+    if not is_retryable_error(exc):
         mark_span_error(span, type(exc).__name__, exc)
         return None
 
-    if context.can_retry(attempt, retries_used):
-        wait_seconds = await context.handle_retry_delay(attempt, url)
-        context.log_retry(
+    if can_retry(attempt, retries_used):
+        wait_seconds = await handle_retry_delay(attempt, url)
+        log_retry(
             url,
             method,
             attempt,
@@ -192,17 +184,17 @@ async def handle_request_exception(
         )
         return _RequestAttemptOutcome(
             True,
-            context.status_code_from_error(exc),
+            status_code_from_error(exc),
             1,
             exc,
         )
 
-    if should_record_retry_budget_exhaustion(context.retry_config, attempt=attempt):
-        context.record_retry_budget_exhausted(method, url)
+    if should_record_retry_budget_exhaustion(retry_config, attempt=attempt):
+        record_retry_budget_exhausted(method, url)
 
     return _RequestAttemptOutcome(
         False,
-        context.status_code_from_error(exc),
+        status_code_from_error(exc),
         0,
         exc,
     )
