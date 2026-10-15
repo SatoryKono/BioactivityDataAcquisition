@@ -126,7 +126,7 @@ def _directory_xattr_supported() -> bool:
             try:
                 create_flag = getattr(os, "XATTR_CREATE", 1)
                 setter(fd, probe_tag, b"1", flags=create_flag)
-                supported = getter(fd, probe_tag) == b"1"
+                supported = bool(getter(fd, probe_tag) == b"1")
                 if remover is not None:
                     remover(fd, probe_tag)
                 _DIR_XATTR_FS = supported
