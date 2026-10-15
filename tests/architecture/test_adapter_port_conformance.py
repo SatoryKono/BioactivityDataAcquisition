@@ -12,6 +12,12 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
+
+from tests.helpers.clock import fixed_test_clock
+
 import inspect
 from dataclasses import dataclass
 from pathlib import Path
@@ -248,11 +254,18 @@ def test_infrastructure_adapter_signatures_conform_to_ports(
 
 
 def _storage_adapter_instances(tmp_path: Path) -> tuple[object, ...]:
+    """Build storage adapter instances for structural protocol checks."""
     logger = NoOpLogger()
     metrics = NoOpMetrics(warn_on_use=False)
     return (
         BronzeWriter(tmp_path / "bronze", logger, metrics),
-        SilverWriter(tmp_path / "silver", logger),
+        SilverWriter(
+            tmp_path / "silver",
+            logger,
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
+        ),
         GoldWriter(tmp_path / "gold", logger),
     )
 

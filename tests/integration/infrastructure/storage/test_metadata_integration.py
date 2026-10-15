@@ -11,6 +11,8 @@
 """Integration tests for metadata writing with Silver and Gold writers."""
 
 from __future__ import annotations
+
+from tests.helpers.clock import fixed_test_clock
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -22,7 +24,6 @@ from tests.helpers.deterministic_ids import (
 
 import pyarrow as pa
 import pytest
-from tests.helpers.clock import fixed_test_clock
 
 from bioetl.application.services.lineage import MetadataLineageBundleResult
 from bioetl.domain.models.metadata import (
@@ -400,7 +401,11 @@ class TestSilverWriterMetadataIntegration:
         sample_records: list[dict[str, Any]],
         silver_schema: pa.Schema,
     ) -> None:
+        """Verify silver writer uses noop when no metadata writer."""
         writer = SilverWriter(
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
             base_path=tmp_path,
             logger=mock_logger,
         )

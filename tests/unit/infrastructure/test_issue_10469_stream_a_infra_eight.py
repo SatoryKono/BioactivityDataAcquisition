@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from tests.helpers.clock import fixed_test_clock
+
 import subprocess
 from pathlib import Path
 from types import SimpleNamespace
@@ -9,7 +11,6 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pyarrow as pa
 import pytest
-from tests.helpers.clock import fixed_test_clock
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.medallion import SilverWriteMode

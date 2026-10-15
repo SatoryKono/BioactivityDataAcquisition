@@ -243,6 +243,9 @@ def test_write_mode_docs_match_domain_enums() -> None:
     assert "`MERGE`, `OVERWRITE`" not in glossary_text
     assert "`MERGE`, `OVERWRITE`, `SCD2`" not in glossary_text
 
+    assert "merge | append | delete" not in pipeline_text
+    assert "`MERGE`, `APPEND`, `DELETE`" not in glossary_text
+
     expected_pipeline_tokens = (
         "merge | append",
         "append | overwrite | scd2",
