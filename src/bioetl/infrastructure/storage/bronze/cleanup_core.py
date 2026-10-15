@@ -233,9 +233,11 @@ def _platform_cleanup_supported() -> bool:
     return hasattr(fcntl, "flock") and _fd_view_supported()
 
 
-def destructive_cleanup_supported() -> bool:
-    """Platform gates plus default-temp xattr; prefer per-volume checks at lock."""
-    return _platform_cleanup_supported() and _directory_xattr_supported()
+def destructive_cleanup_supported(base_path: Path | None = None) -> bool:
+    """Platform gates plus volume xattr; pass Bronze root for per-volume checks."""
+    if base_path is None:
+        return _platform_cleanup_supported() and _directory_xattr_supported()
+    return _platform_cleanup_supported() and _directory_xattr_supported(base_path)
 
 
 def stat_is_link_or_reparse(st: os.stat_result) -> bool:

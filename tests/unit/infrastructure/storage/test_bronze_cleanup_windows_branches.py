@@ -1374,6 +1374,10 @@ def test_schema_record_validation_success_and_rejections() -> None:
     legacy.pop("removed")
     schema._validate_record_body(legacy, operation)
     assert legacy["removed"] == []
+    assert legacy["schema"] == 4
+    rewritten = schema._decode_record(schema._record_bytes(legacy), operation)
+    assert rewritten["schema"] == 4
+    assert rewritten["removed"] == []
     accounted = _body(
         operation,
         staged=["payload", "sidecar"],

@@ -36,7 +36,7 @@ def _anchored_parent(
     path: Path, root_abs: Path, root_real: Path, root_fd: int | None = None
 ) -> Iterator[tuple[int, int, str, list[tuple[int, int, str]]]]:
     """Open every relative parent component without following a link."""
-    if not destructive_cleanup_supported():
+    if not destructive_cleanup_supported(root_abs):
         raise NotImplementedError("Bronze destructive cleanup has no safe handle API")
     try:
         parts = Path(os.path.abspath(path)).relative_to(root_abs).parts  # noqa: PTH100

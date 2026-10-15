@@ -197,7 +197,9 @@ def _validate_record_body(
     ):
         raise ValueError("schema, operation or state")
     if schema == _LEGACY_SCHEMA_VERSION and keys == _LEGACY_BODY_KEYS:
+        # Upgrade in place before any rewrite so schema-3 + removed[] never persists.
         body["removed"] = []
+        body["schema"] = _SCHEMA_VERSION
     elif not (schema == _SCHEMA_VERSION and keys == _BODY_KEYS):
         raise ValueError("body keys")
     if UUID(hex=operation_id).hex != operation_id:

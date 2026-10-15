@@ -35,7 +35,7 @@ class GroupRecordStore:
     """cleanup group records responsibilities."""
 
     def __init__(self, lease: BronzeRootLease):
-        if lease.fd is None or not destructive_cleanup_supported():
+        if lease.fd is None or not destructive_cleanup_supported(lease.path):
             raise NotImplementedError("missing pinned POSIX Bronze root")
         self._root = lease.path
         self._root_fd = lease.fd

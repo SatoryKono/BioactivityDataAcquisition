@@ -374,7 +374,7 @@ def candidate_is_safe(
     root_fd: int | None = None,
 ) -> bool:
     """Nonmutating eligibility used by dry-run and apply planning."""
-    if destructive_cleanup_supported():
+    if destructive_cleanup_supported(root_abs):
         try:
             with _anchored_parent(path, root_abs, root_real, root_fd) as (
                 _root_fd,
