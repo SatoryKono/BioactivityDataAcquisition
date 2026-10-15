@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from bioetl.domain.ports.quality.contract_policy import ContractPolicyProtocol
+from bioetl.domain.ports.quality.contract_policy import (
+    ContractPolicyProtocol,
+    project_etl_order,
+)
 from bioetl.domain.ports.quality.dq_config import (
     BronzeDQConfigPort,
     GoldDQConfigPort,
@@ -46,4 +49,5 @@ __all__ = [
     "SilverDQConfigPort",
     "SilverValidatorPort",
     "coerce_silver_dq_analyze_request",
+    "project_etl_order",
 ]

@@ -7,7 +7,7 @@ import dataclasses
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from bioetl.domain.behavior import EntityIdentityGenerator
-from bioetl.domain.ports import ContractPolicyProtocol
+from bioetl.domain.ports import ContractPolicyProtocol, project_etl_order
 from bioetl.domain.types import ContentHash, EntityID, GoldRecord
 
 if TYPE_CHECKING:
@@ -139,7 +139,7 @@ class _BaseTransformerDependencyHelpersMixin:
                     value,
                 )
 
-        return silver_record
+        return project_etl_order(silver_record)
 
     @staticmethod
     def _apply_hash_policy(

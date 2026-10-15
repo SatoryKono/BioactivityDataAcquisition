@@ -873,9 +873,9 @@
     },
     "scripts/engineering/dev/pytest_junit_subtests.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the import-only pytest JUnit hook shared by serial and xdist test runs, not a standalone CLI. Remove when upstream pytest emits balanced successful subtest XML and the regression tests pass without this adapter.",
+      "next_step": "Retain as the pytest JUnit plugin loaded by tests/conftest.py to preserve subtest records for strict telemetry accounting. Remove after the pinned upstream reporter provides equivalent records and the pass/fail/skip regressions pass without this adapter.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-11-14"
+      "review_by": "2027-01-12"
     },
     "scripts/engineering/dev/quarantine_explorer_mock_server.py": {
       "decision": "shared_helper_module",
