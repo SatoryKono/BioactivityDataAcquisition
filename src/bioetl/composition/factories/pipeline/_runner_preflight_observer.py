@@ -3,49 +3,35 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-
-from bioetl.application.core.preflight import (
-    HealthAggregator,
-    MedallionConfigValidator,
-    PreflightService,
-)
-from bioetl.application.observability.observer import (
-    PipelineObserver,
-    PipelineObserverParams,
+from bioetl.composition.factories.services.preflight import (
+    build_preflight_service as _build_preflight_service,
 )
 from bioetl.composition.factories.pipeline._preflight_health_monitor import (
     build_preflight_health_monitor,
 )
-from bioetl.domain.medallion import WriteModePolicy
+
+from bioetl.application.observability.observer import (
+    PipelineObserver,
+    PipelineObserverParams,
+)
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
+    from bioetl.application.core.preflight import PreflightService
     from bioetl.composition.factories.pipeline._runner_assembly_support import (
         RunnerAssemblyContext,
     )
 
 
 def build_preflight_service(context: RunnerAssemblyContext) -> PreflightService:
-    """Build the preflight service for a pipeline runner."""
-    pipeline = context.pipeline
-    health_aggregator = HealthAggregator(
+    """Delegate startup construction through the public service seam."""
+    return _build_preflight_service(
+        pipeline=context.pipeline,
         logger=context.logger_port,
-        health_monitor=build_preflight_health_monitor(pipeline.services.metrics),
-        health_check_mode=pipeline.runtime.health_check_mode,
-        clock=SystemClock(),
-    )
-    medallion_validator = MedallionConfigValidator(
-        config=pipeline.config,
-        logger=context.logger_port,
-        write_mode_policy=WriteModePolicy(),
-    )
-    return PreflightService(
-        config=pipeline.config,
-        context=pipeline.context,
-        logger=context.logger_port,
-        metrics=pipeline.services.metrics,
-        health_aggregator=health_aggregator,
-        medallion_validator=medallion_validator,
+        yaml_config=context.yaml_config,
+        health_monitor=build_preflight_health_monitor(
+            context.pipeline.services.metrics
+        ),
     )
 
 

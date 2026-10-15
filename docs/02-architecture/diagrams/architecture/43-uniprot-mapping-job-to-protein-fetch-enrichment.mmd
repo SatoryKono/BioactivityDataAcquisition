@@ -1,35 +1,41 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: UniProt IDMapping To Protein Fetch Enrichment
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.1.0
+%% @date    2026-10-09
+%% Reviewed against main 9a7339dc: uniprot/idmapping_client.py, client.py, protein_fetch_adapter_mixin.py and feature_sequence_adapter_mixin.py
 %% @type    flowchart
 %% @level   Provider / Component
-%% @nodes   10
+%% @nodes   11
 %% RULES: RULES.md §2.1, ADR-009, ADR-031
 flowchart TB
     seed[seed ids or accessions]
     adapter[UniProtAdapter]
-    idmap[UniProtIdMappingClient]
+    idmap[UniProtIDMappingClient]
     job[start idmapping job]
     poll[poll job status]
     mapped[mapped accession set]
     protein[protein fetch adapter mixin]
     features[feature sequence adapter mixin]
-    models[UniProt models]
+    models[BronzeRecord dictionaries]
+    bronze[Bronze artifact publication]
     silver[silver protein output]
 
-    seed --> adapter
-    adapter --> idmap
+    seed --> idmap
+    seed -->|direct accessions| adapter
     idmap --> job
     job --> poll
     poll ==> mapped
-    mapped ==> protein
-    protein --> features
+    mapped -.->|caller may use mapped accessions| adapter
+    adapter -->|protein entity| protein
+    adapter -->|feature or sequence entity| features
+    protein ==> models
     features ==> models
-    models ==> silver
+    models ==> bronze
+    bronze ==> silver
 
     class seed ext;
-    class adapter app;
+    class adapter infra;
     class idmap,job,poll,protein,features infra;
-    class mapped,models domain;
+    class mapped,models infra;
+    class bronze bronze;
     class silver silver;

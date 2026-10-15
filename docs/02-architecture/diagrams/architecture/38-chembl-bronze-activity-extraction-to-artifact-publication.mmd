@@ -1,7 +1,8 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: ChEMBL Activity Extraction To Bronze Artifact Publication
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.1.0
+%% @date    2026-10-09
+%% Reviewed against main 9a7339dc: chembl/fetch_paging_mixin.py, http/request_timing.py, core/batch_writer_io_mixin.py and storage/bronze metadata publication
 %% @type    sequenceDiagram
 %% @level   Provider / Interaction
 %% @nodes   7
@@ -18,15 +19,15 @@ sequenceDiagram
 
     Runner->>Exec: execute batch loop
     Exec->>Adapter: fetch activity records
-    Adapter->>Rate: try_acquire()
-    Rate-->>Adapter: token granted
     Adapter->>HTTP: GET /activity + filters
+    HTTP->>Rate: acquire() before request
+    Rate-->>HTTP: token granted
     HTTP-->>Adapter: ChEMBL payload
     Adapter-->>Exec: mapped raw records
     Exec->>Bronze: write raw batch artifact
+    Bronze->>Meta: persist coordinator-built bronze metadata bundle
+    Meta-->>Bronze: metadata sidecar path
     Bronze-->>Exec: BronzeWriteResult
-    Exec->>Meta: persist bronze metadata
-    Meta-->>Exec: metadata path + dataset_ref
     Exec-->>Runner: batch written with batch_id
 
     Note over Adapter,Bronze: The focused slice ends at bronze publication, before silver normalization or gold validation.

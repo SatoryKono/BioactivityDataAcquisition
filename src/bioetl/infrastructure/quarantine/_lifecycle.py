@@ -10,6 +10,9 @@ from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.serialization import deserialize_from_json
 from bioetl.domain.types import JsonDict, QuarantineRecordStatus
+from bioetl.infrastructure.quarantine.filtered_reads import (
+    _load_scoped_pyarrow_table,
+)
 from bioetl.infrastructure.quarantine.record_encoding import quote_literal
 from bioetl.infrastructure.quarantine.status_events import apply_latest_statuses
 
@@ -47,11 +50,10 @@ def replay_records(
         return
 
     cutoff_date = (now - timedelta(days=max_age_days)).isoformat()
-    arrow_table = dt.to_pyarrow_table(
-        partitions=[("pipeline", "=", pipeline)],
-        filters=[
-            ("ingestion_ts", ">=", cutoff_date),
-        ],
+    arrow_table = _load_scoped_pyarrow_table(
+        dt,
+        pipeline_single=pipeline,
+        filters=[("ingestion_ts", ">=", cutoff_date)],
     )
 
     records = apply_latest_statuses(
@@ -106,8 +108,9 @@ def purge_records(
         f"ingestion_ts < {quote_literal(cutoff_date)}"
     )
 
-    arrow_table = dt.to_pyarrow_table(
-        partitions=[("pipeline", "=", pipeline)],
+    arrow_table = _load_scoped_pyarrow_table(
+        dt,
+        pipeline_single=pipeline,
         filters=[("ingestion_ts", "<", cutoff_date)],
     )
     count_before = len(arrow_table)

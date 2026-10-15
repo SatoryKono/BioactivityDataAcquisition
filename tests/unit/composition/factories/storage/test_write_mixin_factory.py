@@ -29,6 +29,8 @@
 
 from __future__ import annotations
 
+from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
+
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -101,16 +103,22 @@ async def test_write_silver_delegates() -> None:
 async def test_write_gold_delegates() -> None:
     """write_gold delegates to gold.write_gold."""
     gold = MagicMock()
-    gold.write_gold = AsyncMock(return_value=None)
+    gold.write_gold = AsyncMock(
+        side_effect=lambda *, table_name, **kwargs: GoldWriteReceipt(
+            table_name, "0.0.0", GoldWriteCategory.COMPLETE, (table_name,)
+        )
+    )
     mixin = _make_mixin(gold=gold)
 
-    await mixin.write_gold(
+    result = await mixin.write_gold(
         table_name="chembl.activity",
         records=[{"pk": 1}],
         schema=MagicMock(),
     )
 
     gold.write_gold.assert_awaited_once()
+    assert isinstance(result, GoldWriteReceipt)
+    assert result.physical_table == "chembl.activity"
 
 
 @pytest.mark.unit
@@ -164,7 +172,11 @@ async def test_write_silver_passes_key_nullability_rules() -> None:
 async def test_write_gold_passes_scd_config() -> None:
     """scd_config is forwarded to gold.write_gold."""
     gold = MagicMock()
-    gold.write_gold = AsyncMock(return_value=None)
+    gold.write_gold = AsyncMock(
+        side_effect=lambda *, table_name, **kwargs: GoldWriteReceipt(
+            table_name, "0.0.0", GoldWriteCategory.COMPLETE, (table_name,)
+        )
+    )
     mixin = _make_mixin(gold=gold)
     scd = MagicMock()
 

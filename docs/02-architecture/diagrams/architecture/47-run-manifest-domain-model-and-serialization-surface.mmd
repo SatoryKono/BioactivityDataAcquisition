@@ -1,7 +1,8 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: Run Manifest Domain Model And Serialization Surface
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.1.0
+%% @date    2026-10-09
+%% Reviewed against main 9a7339dc: domain/control_plane/run_manifest.py; input snapshots belong to RunSourceRef
 %% @type    classDiagram
 %% @level   Domain / Model
 %% @nodes   6
@@ -18,7 +19,7 @@ classDiagram
     class RunCodeProvenance
 
     RunManifest --> ReplayCapability
-    RunManifest --> RunInputSnapshotRef
+    RunSourceRef --> RunInputSnapshotRef
     RunManifest --> RunSourceRef
     RunManifest --> RunArtifactRef
     RunManifest --> RunCodeProvenance

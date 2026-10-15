@@ -17,7 +17,8 @@ packages:
     target_helper_ratio: 0.40
   - path: src/bioetl/composition
     # Shrink-only after shim collapse (#10551 / AUD-001 → #10595 / AUD-002, #11080):
-    # live 280, composition_util = 280/295 ≈ 0.9492. Cap held at 295 (ARCH-011, #11859).
+    # live 278 (rglob *.py, 2026-10-07), composition_util = 278/295 ≈ 0.9424.
+    # Cap held at 295 (ARCH-011, #11859).
     max_modules: 295
     max_package_loc: 40000
     linked_issue: "10595"

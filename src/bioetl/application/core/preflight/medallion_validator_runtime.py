@@ -75,51 +75,35 @@ def validate_layer_formats(
 
 def canonicalize_layer_path(path: str) -> str:
     """Normalize a medallion layer path so trailing-slash variants compare equal."""
-    return os.path.normpath(path.strip())
+    return os.path.normcase(os.path.realpath(path.strip()))
 
 
 def validate_path_uniqueness(
     *,
-    bronze_path: str,
-    silver_path: str,
-    gold_path: str,
+    bronze_path: str | None,
+    silver_path: str | None,
+    gold_path: str | None,
 ) -> list[ConfigValidationError]:
-    """Validate that bronze/silver/gold use distinct paths."""
-    errors: list[ConfigValidationError] = []
-    canon_bronze = canonicalize_layer_path(bronze_path)
-    canon_silver = canonicalize_layer_path(silver_path)
-    canon_gold = canonicalize_layer_path(gold_path)
-    paths = {canon_bronze, canon_silver, canon_gold}
-    if len(paths) >= 3:
-        return errors
-    if canon_bronze == canon_silver:
-        errors.append(
-            ConfigValidationError(
-                field=_LAYER_PATHS_FIELD,
-                expected=_UNIQUE_LAYER_PATHS_EXPECTED,
-                actual=f"bronze_path == silver_path ({bronze_path})",
-                rule=_DISTINCT_LAYER_PATHS_RULE,
-            )
+    """Compare resolved destinations, keeping the canonical collision error order."""
+    paths = {"bronze": bronze_path, "silver": silver_path, "gold": gold_path}
+    canonical = {
+        name: canonicalize_layer_path(path) if path is not None else None
+        for name, path in paths.items()
+    }
+    return [
+        ConfigValidationError(
+            field=_LAYER_PATHS_FIELD,
+            expected=_UNIQUE_LAYER_PATHS_EXPECTED,
+            actual=f"{first}_path == {second}_path ({paths[first]})",
+            rule=_DISTINCT_LAYER_PATHS_RULE,
         )
-    if canon_silver == canon_gold:
-        errors.append(
-            ConfigValidationError(
-                field=_LAYER_PATHS_FIELD,
-                expected=_UNIQUE_LAYER_PATHS_EXPECTED,
-                actual=f"silver_path == gold_path ({silver_path})",
-                rule=_DISTINCT_LAYER_PATHS_RULE,
-            )
+        for first, second in (
+            ("bronze", "silver"),
+            ("silver", "gold"),
+            ("bronze", "gold"),
         )
-    if canon_bronze == canon_gold:
-        errors.append(
-            ConfigValidationError(
-                field=_LAYER_PATHS_FIELD,
-                expected=_UNIQUE_LAYER_PATHS_EXPECTED,
-                actual=f"bronze_path == gold_path ({bronze_path})",
-                rule=_DISTINCT_LAYER_PATHS_RULE,
-            )
-        )
-    return errors
+        if canonical[first] is not None and canonical[first] == canonical[second]
+    ]
 
 
 def validate_medallion_policy_consistency(

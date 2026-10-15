@@ -11,8 +11,7 @@ updates:
       pip-minor-patch:
         patterns: ["*"]
         update-types:
-          - "minor"
-          - "patch"
+          ["minor", "patch"]
 
   - package-ecosystem: "uv"
     directory: "/"
@@ -25,8 +24,7 @@ updates:
       uv-minor-patch:
         patterns: ["*"]
         update-types:
-          - "minor"
-          - "patch"
+          ["minor", "patch"]
 
   - package-ecosystem: "github-actions"
     directory: "/"

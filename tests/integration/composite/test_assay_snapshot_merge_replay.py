@@ -6,7 +6,11 @@ from bioetl.composition.bootstrap.runtime.assay_replay_capture import (
     prepare_assay_replay,
 )
 
+from bioetl.domain.types.gold_contracts import GoldWriteReceipt, GoldWriteCategory
 from datetime import UTC, datetime
+from os.path import relpath
+from pathlib import Path
+from shutil import rmtree
 from unittest.mock import AsyncMock, MagicMock
 
 import pyarrow as pa
@@ -21,6 +25,7 @@ from bioetl.application.composite.merger_orchestration import (
 )
 from bioetl.application.composite.runtime_wiring_api import (
     JOIN_KEY_NORMALIZATION_POLICIES,
+    EnrichmentCrossValidator,
 )
 from bioetl.composition.bootstrap.runtime.composite_merge_service_builder import (
     build_composite_merge_service,
@@ -42,9 +47,25 @@ from tests.helpers.clock import FixedClock
 pytestmark = [pytest.mark.integration, pytest.mark.asyncio]
 
 
+def _successful_publication_enricher_inputs(config, tables, record):
+    """Capture every configured publication enricher, including Semantic Scholar."""
+    results = {}
+    for item in config.enrichers:
+        tables[item.silver_table or f"silver/{item.pipeline}"] = pa.Table.from_pylist(
+            [record]
+        )
+        results[item.pipeline] = EnrichmentResult.success(item.pipeline, 1, 1)
+    return results
+
+
 @pytest.mark.parametrize("family", ["activity", "molecule", "publication", "target"])
+@pytest.mark.parametrize(
+    "relative_capture,relative_replay",
+    [(False, False), (True, False), (False, True), (True, True)],
+    ids=["absolute", "relative-capture", "relative-replay", "relative-both"],
+)
 async def test_other_composite_families_replay_physical_outputs(
-    tmp_path, family, monkeypatch
+    tmp_path, family, monkeypatch, request, relative_capture, relative_replay
 ):
     """Exercise each real family config and production writer without network I/O."""
     from uuid import UUID
@@ -76,8 +97,14 @@ async def test_other_composite_families_replay_physical_outputs(
     run_id = "22222222-2222-4222-8222-222222222222"
     logger = NoOpLogger()
     registry = _load_field_group_registry(config.name, logger)
+    physical_root = tmp_path
+    if relative_capture or relative_replay:
+        physical_root = Path.cwd() / "reports" / "test-scratch" / tmp_path.name
+        request.addfinalizer(lambda: rmtree(physical_root, ignore_errors=True))
+    capture_root = Path(relpath(physical_root)) if relative_capture else physical_root
+    replay_root = Path(relpath(physical_root)) if relative_replay else physical_root
     settings = Settings.model_validate(
-        {"data_dir": tmp_path / "live", "report_root": tmp_path / "reports"}
+        {"data_dir": capture_root / "live", "report_root": capture_root / "reports"}
     )
     storage = bootstrap_storage_adapter(
         run_context=RunContext(
@@ -104,6 +131,7 @@ async def test_other_composite_families_replay_physical_outputs(
         "pref_name": "Example",
         "title": "Example publication",
         "doi": "10.1234/example",
+        "pmid": "12345678",
         "publication_year": 2024,
         "target_type": "SINGLE PROTEIN",
         "organism": "Homo sapiens",
@@ -112,6 +140,14 @@ async def test_other_composite_families_replay_physical_outputs(
         "canonical_smiles": "CC(=O)O",
     }
     tables = {config.seed.silver_table: pa.Table.from_pylist([record])}
+    enrichment_results = {
+        item.pipeline: EnrichmentResult(item.pipeline, EnrichmentStatus.NOT_RUN)
+        for item in config.enrichers
+    }
+    if family == "publication":
+        enrichment_results = _successful_publication_enricher_inputs(
+            config, tables, record
+        )
     dependency_results = {}
     # Activity's dual-key dependency must be part of the sealed replay inputs.
     dependencies = config.dependencies if family == "activity" else ()
@@ -167,7 +203,11 @@ async def test_other_composite_families_replay_physical_outputs(
         resolve_gold_schema=resolve_composite_gold_schema,
         delta_reader=reader,
         field_group_registry=registry,
-        cross_validator=None,
+        cross_validator=EnrichmentCrossValidator(
+            config=config.cross_validation, logger=logger
+        )
+        if config.cross_validation.enabled
+        else None,
         logger=logger,
         system_columns_to_drop=CompositeSupportServicesFactory._SYSTEM_COLUMNS_TO_DROP,
         normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
@@ -178,10 +218,7 @@ async def test_other_composite_families_replay_physical_outputs(
         seed_table=config.seed.silver_table,
         seed_pipeline=config.seed.pipeline,
         enrichers=config.enrichers,
-        enrichment_results={
-            item.pipeline: EnrichmentResult(item.pipeline, EnrichmentStatus.NOT_RUN)
-            for item in config.enrichers
-        },
+        enrichment_results=enrichment_results,
         dependencies=dependencies,
         dependency_results=dependency_results,
         run_id=run_id,
@@ -194,6 +231,7 @@ async def test_other_composite_families_replay_physical_outputs(
         await storage.aclose()
     root = settings.report_root / "pipeline" / config.name / run_id / "replay"
     digest = digest_bytes((root / "parent.json").read_bytes())
+    assert {call.args[0] for call in live.read_table.await_args_list} == set(tables)
     tables.clear()
     live.read_table.side_effect = AssertionError("Live input during replay")
     if family == "target":
@@ -206,7 +244,7 @@ async def test_other_composite_families_replay_physical_outputs(
             ),
         )
         monkeypatch.setattr(mapping, "_mapping_data", default_mapping)
-    receipt = await replay_assay(root, digest, tmp_path / "offline")
+    receipt = await replay_assay(root, digest, replay_root / "offline")
     assert receipt["silver_equal"] is True and receipt["gold_equal"] is True
     assert receipt["records"] == 1
     if family == "target":
@@ -273,7 +311,11 @@ async def test_assay_merge_replays_nullable_foreign_keys_without_live_reads(tmp_
             clock=FixedClock(timestamp),
         )
 
+    table_name = config.merge.output_gold_path.replace("\\", "/").split("gold/", 1)[-1]
     original_output = AsyncMock()
+    original_output.write_gold_merged.return_value = GoldWriteReceipt(
+        table_name, "0.0.0", GoldWriteCategory.COMPLETE, (table_name,)
+    )
     original = await service(capture, original_output).execute_request(request)
     assert original.records_merged == 3
     digest = capture.seal(required_tables=frozenset(tables))
@@ -283,6 +325,9 @@ async def test_assay_merge_replays_nullable_foreign_keys_without_live_reads(tmp_
         tmp_path / "inputs", envelope_sha256=digest
     )
     replay_output = AsyncMock()
+    replay_output.write_gold_merged.return_value = (
+        original_output.write_gold_merged.return_value
+    )
     replay = await service(replay_reader, replay_output).execute_request(request)
     assert replay.records_merged == 3
     for layer in ("silver", "gold"):
@@ -290,6 +335,8 @@ async def test_assay_merge_replays_nullable_foreign_keys_without_live_reads(tmp_
         replay_write = getattr(replay_output, f"write_{layer}_merged")
         original_write.assert_awaited_once()
         replay_write.assert_awaited_once()
+        if layer == "gold":
+            assert original_write.call_args.args[0] == table_name
         assert replay_write.call_args == original_write.call_args
         records = replay_write.call_args.args[1]
         assert len(records) == 3

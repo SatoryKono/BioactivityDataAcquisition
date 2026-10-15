@@ -117,6 +117,11 @@ Domain business paths не должны создавать текущее вре
 - `bioetl.infrastructure.time.SystemClock` is the concrete system-time adapter;
 - composition/bootstrap modules wire `SystemClock` into application services, while `domain`, `application`, and `interfaces` must not instantiate infrastructure clocks directly.
 
+Silver writer получает обязательный `ClockPort` из composition. Явные
+`started_at` и `completed_at` проверяются по UTC-контракту до commit.
+Elapsed duration измеряется монотонным таймером независимо от исторического
+`started_at` и обратного перевода wall-clock.
+
 ### 4. Deterministic Domain Identities
 
 Replay-sensitive domain aggregates and domain events MUST NOT create hidden UUID4

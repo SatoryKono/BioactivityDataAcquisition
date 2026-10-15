@@ -7,6 +7,9 @@ from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.serialization import deserialize_from_json
 from bioetl.domain.types import JsonDict, QuarantineRecordStatus
+from bioetl.infrastructure.quarantine.filtered_reads import (
+    _load_scoped_pyarrow_table,
+)
 from bioetl.infrastructure.quarantine.status_events import apply_latest_statuses
 
 
@@ -39,7 +42,7 @@ def inspect_records(
     except TableNotFoundError:
         return []
 
-    arrow_table = dt.to_pyarrow_table(partitions=[("pipeline", "=", pipeline)])
+    arrow_table = _load_scoped_pyarrow_table(dt, pipeline_single=pipeline)
     status_filter = dq_status or QuarantineRecordStatus.NEW
 
     records = apply_latest_statuses(

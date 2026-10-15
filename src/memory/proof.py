@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shlex
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -555,6 +556,34 @@ def _receipt_scope_errors(receipt: dict[str, Any], bundle: dict[str, Any]) -> li
     return errors
 
 
+def _canonical_full_suite_command(command: str, argv: object) -> bool:
+    """Admit only the complete offline dev wrapper with its receipt outputs."""
+    try:
+        tokens = shlex.split(command)
+    except ValueError:
+        return False
+    prefix = ["python", "-m", "scripts.engineering.dev", "run-tests", "all"]
+    if tokens[:5] != prefix or tokens != argv:
+        return False
+    seen: set[str] = set()
+    arguments = iter(tokens[5:])
+    for argument in arguments:
+        if argument == "-p":
+            if argument in seen or next(arguments, None) != "no:cacheprovider":
+                return False
+            seen.add(argument)
+            continue
+        name, separator, value = argument.partition("=")
+        if name not in {"--junitxml", "--basetemp", "--vcr-record"}:
+            return False
+        if name in seen or not separator or not value or value.startswith("-"):
+            return False
+        if name == "--vcr-record" and value != "none":
+            return False
+        seen.add(name)
+    return seen == {"--junitxml", "--basetemp", "--vcr-record", "-p"}
+
+
 def _verify_receipt(
     receipt: dict[str, Any], bundle: dict[str, Any], policy: dict[str, Any]
 ) -> tuple[list[str], list[str]]:
@@ -576,7 +605,12 @@ def _verify_receipt(
         errors.append(f"unauthorized_producer:{kind}:{producer}")
     command = str(receipt.get("command", ""))
     families = [str(item) for item in kind_policy.get("command_families", [])]
-    if not any(command.startswith(family) for family in families):
+    command_authorized = any(command.startswith(family) for family in families)
+    if command.startswith("python -m scripts.engineering.dev"):
+        command_authorized = command_authorized and _canonical_full_suite_command(
+            command, receipt.get("argv")
+        )
+    if not command_authorized:
         errors.append(f"command_not_authorized:{kind}")
 
     status = receipt.get("status")

@@ -25,19 +25,33 @@ def _workflow() -> dict[Any, Any]:
 
 
 def test_skills_consistency_watches_runtime_parity_surfaces() -> None:
-    workflow = _workflow()
-    triggers = workflow[True]
-    required = {
-        ".codex/agents/**",
-        ".codex/skills/**",
-        ".junie/agents/**",
-        ".junie/skills/**",
-        "scripts/ai/junie/check_junie_mirror.sh",
-        "scripts/ai/junie/check_junie_mirror.py",
-        "scripts/ai/junie/junie-mirror-contract.json",
-    }
-    for event in ("push", "pull_request"):
-        assert required <= set(triggers[event]["paths"])
+    """Runtime parity surfaces stay guarded after the coordinator cutover.
+
+    Leaf Actions workflows no longer carry push/pull_request path filters;
+    the CircleCI ``skills-consistency`` job runs the canonical mirror checks
+    inside ``pr-gate`` on every gated run.
+    """
+    config = yaml.safe_load(
+        (ROOT / ".circleci" / "config.yml").read_text(encoding="utf-8")
+    )
+    job = config["jobs"]["skills-consistency"]
+    commands = " ".join(
+        step["run"]["command"]
+        for step in job["steps"]
+        if isinstance(step, dict) and isinstance(step.get("run"), dict)
+    )
+    for check in (
+        "bash scripts/ai/junie/check_junie_mirror.sh --check",
+        "bash scripts/ops/support/skills/check_skills_mirror.sh --check",
+        "bash scripts/ops/support/skills/check_ai_skills_layout.sh",
+        "python -m scripts.ai.sync.runtime_skills",
+    ):
+        assert check in commands
+    pr_gate_jobs = config["workflows"]["pr-gate"]["jobs"]
+    assert any(
+        isinstance(entry, dict) and "skills-consistency" in entry
+        for entry in pr_gate_jobs
+    )
 
 
 def test_skills_consistency_executes_canonical_junie_checker() -> None:

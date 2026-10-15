@@ -180,6 +180,7 @@ class HTTPClientRetryRequestFlow(_RetryRequestBase):
         retries_used: int,
         span: SpanLike,
     ) -> _RequestAttemptOutcome | None:
+        """Bind retry callbacks to the shared exception policy context."""
         return await handle_request_exception(
             exc,
             method=method,

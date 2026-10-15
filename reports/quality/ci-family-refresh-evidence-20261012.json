@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "verified_on": "2026-10-12",
+  "reviewed_commit": "b531f9f50157b872a58c73cfcff523e44c07fec1",
+  "comparison_base": "93a0565bdae8039f99c27bf668b06945693d07b4",
+  "scope": "Fingerprint-only CI-family rebind in the reviewed commit; all eight changed artifacts reconciled byte-for-byte after the three recorded fingerprint substitutions.",
+  "outcome": "flat",
+  "check": {
+    "command": "BIOETL_AI_MEMORY_MODE=off .venv/bin/python -m scripts.engineering.qa refresh-ci-drift-families --check --test-gov --flaky-fingerprint --telemetry --evidence",
+    "exit_code": 0,
+    "result": "CI drift families complete (no budget ratchet)",
+    "family_results": {
+      "test-gov": "passed",
+      "flaky-fingerprint": "artifact is current",
+      "telemetry": "12 architecture tests passed",
+      "evidence": "current audit registry and evidence surface validated"
+    },
+    "output_sha256": "707ad7e7066435a74e9401ead6fc80b4011c4649204bca72b0b1740e03fac373",
+    "python_version": "3.13.16",
+    "pytest_version": "9.1.1",
+    "uv_lock_sha256": "552daa6c199f3669f8f5d8e22b1eb1ff44bc9fb39d0178bb47b25e8557674f56"
+  },
+  "fingerprint_changes": {
+    "test_governance": {
+      "before": "e49c83a7e14cda65b15146435c9241f985fc364d81c2afb9e20439534b7a16d9",
+      "after": "8b9bdc0e184d8aaa02de02e5769ef6f7f72bc854f5430fe03bd5934ee28ca956"
+    },
+    "telemetry": {
+      "before": "b629f4d6c6e45f201724a3aa241b25a2928d27acc2d94c59768c533571ab00b4",
+      "after": "a8da2aeae61a4320fcc9ed07824be4618b26802005825505b0e1fe5eb4067ce2"
+    },
+    "evidence_surface": {
+      "before": "fcc38ddd75b6b0ebe0a78a396d501bf1769825329325cb21f1b57bac25245dad",
+      "after": "0b6f214e1fc10767da03f8f7fb45b638be359a0a8cd9f29a11cdae53b047ba27"
+    }
+  },
+  "artifacts": [
+    {
+      "path": "configs/quality/technical_debt_audit_registry.yaml",
+      "before_sha256": "31d8dbee76d6080c6351e8ca89826112ca7ee600a4002e3007b8fc5a057b0979",
+      "after_sha256": "af4f2dbf60f4942d1298e497b58ca1349f830b55f6484ade5d3c77d72104843d",
+      "fingerprint_replacements": 1
+    },
+    {
+      "path": "configs/quality/test_telemetry_baseline.yaml",
+      "before_sha256": "30cc6140099475e3512345b5da20af63a1bb04416a16bfc1a1040c1262b04ce7",
+      "after_sha256": "3152972b0c8ebc83d81dad100c1c6e9aa453691e1ccbc40ae3a26ee17223401f",
+      "fingerprint_replacements": 2
+    },
+    {
+      "path": "docs/05-engineering/test-telemetry-baseline.md",
+      "before_sha256": "81ecc70992f6f21f2c81bcb55a4b4b642f086e75a888be6dc887c8a5395c25c9",
+      "after_sha256": "d66548affa2a8706cc3686318dca2be3f18e98959761d5586e37e83bf98e5581",
+      "fingerprint_replacements": 1
+    },
+    {
+      "path": "reports/quality/flaky-test-burndown-review.json",
+      "before_sha256": "405c3b2079b37bc8c079e88b22ff45793b2fac9da44f8555ea4c2eab786be314",
+      "after_sha256": "6288247aaf968efaf1d91204bae97718b04b7943125101ab751c2bac187d339f",
+      "fingerprint_replacements": 2
+    },
+    {
+      "path": "reports/quality/test-governance-current.json",
+      "before_sha256": "812cf1022804c3edcde19bf75a4b63bfa9ce72ee617f82b625ca22c209c4ee23",
+      "after_sha256": "72fd9fe35df4defe86eddaab2ca01f18b05a6847fc7639786ef14faa485f68db",
+      "fingerprint_replacements": 1
+    },
+    {
+      "path": "reports/quality/total-tech-debt-audit-main-current.md",
+      "before_sha256": "1ef889a5516260d2ff5cfef88caa42f9ee8bf5924dc1f09a2f3b1a3583a04401",
+      "after_sha256": "42ef6c571c8419f2c76a82d95b220155075e5fa272d45741d9a752fdb0ef6955",
+      "fingerprint_replacements": 2
+    },
+    {
+      "path": "reports/test-telemetry/coverage-summary.json",
+      "before_sha256": "6a3c1c1989932bb0ed870d934e6cfdb0d6b1bdc1bd3a9cee7a540593510fb874",
+      "after_sha256": "f64e88cf7ce55f154b3b97aea1deaa2736109d3fc82a95d2626ea4c79a6523a9",
+      "fingerprint_replacements": 2
+    },
+    {
+      "path": "reports/test-telemetry/slowest-tests.json",
+      "before_sha256": "8ca595c6fc677034a09be38c9db443f62ae85c0d27efde25e436baf59725d0ad",
+      "after_sha256": "d4a2262cd9acb88dddb2fc572ad136ffaf2ef1e4a1532d465d3b7cddd397115e",
+      "fingerprint_replacements": 2
+    }
+  ],
+  "metrics_before_and_after": {
+    "test_governance_budget_violations": 0,
+    "flaky_total": 0,
+    "flaky_warning": 0,
+    "flaky_critical": 0
+  },
+  "budget_verification": {
+    "technical_debt_budget_increased": false,
+    "statement": "No technical-debt budget was increased. All counts, warnings, residual inventories, thresholds and exemptions in the eight artifacts are unchanged; their only changes are the recorded fingerprint substitutions.",
+    "unchanged_config_count": 270,
+    "method": "Compared every tracked configs/** file with comparison_base. All 270 files other than technical_debt_audit_registry.yaml and test_telemetry_baseline.yaml are byte-identical. Those two files differ only by the recorded fingerprint substitutions.",
+    "debt_scorecard_sha256": "4d950d49b5bcb015cf628907e757b77a83341d3b9f3cb08f546b2f33dffa462a",
+    "test_governance_policy_sha256": "ccaf71387db882fd47e3dd592da9992cfb5cb90282ce4c80397477ef39e48e23",
+    "budget_ratcheting_refresh_used": false
+  },
+  "unchanged_families": {
+    "remote-main": "No artifact changed in the reviewed commit or this evidence follow-up; not selected for refresh/check.",
+    "dataflow": "No artifact changed in the reviewed commit or this evidence follow-up; not selected for refresh/check."
+  },
+  "notes": [
+    "The current artifacts already pass the canonical check. No --update or full refresh_governance_artifacts invocation was needed in this follow-up.",
+    "Telemetry checks validate the committed contract and current fingerprints. This follow-up does not rerun the historical 17-shard coverage producer or establish a new coverage measurement.",
+    "This follow-up adds this evidence file and its exact .gitignore exception; generated payload schemas and runtime mirrors are unchanged."
+  ]
+}

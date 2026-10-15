@@ -6,6 +6,7 @@ from collections.abc import AsyncIterator, Awaitable, Callable
 
 from bioetl.application.core.derived_scan_budget import bounded_source_records
 from bioetl.application.core.publication_term_runtime import publication_pubmed_id
+from bioetl.domain.exceptions import RecoverableError
 from bioetl.domain.ports import PublicationTermEnrichmentPort
 from bioetl.domain.types import BronzeRecord
 
@@ -42,12 +43,16 @@ async def _attach_pubmed_payloads(
     extract_terms: _ExtractTerms,
     enricher: PublicationTermEnrichmentPort,
 ) -> list[BronzeRecord]:
+    """Attach optional PubMed payloads, preserving originals on expected failures."""
     need = [
         record for record in records if _needs_pubmed_enrichment(record, extract_terms)
     ]
     if not need:
         return records
-    enriched = list(await enricher.enrich_many(need))
+    try:
+        enriched = list(await enricher.enrich_many(need))
+    except (RecoverableError, OSError, RuntimeError, ValueError):
+        return records
     if len(enriched) != len(need):
         return records
     replacements = {
@@ -57,7 +62,33 @@ async def _attach_pubmed_payloads(
     return [replacements.get(id(record), record) for record in records]
 
 
-async def yield_terms_from_publications(    publications: AsyncIterator[BronzeRecord],
+async def _emit_publication_terms(
+    batch: list[BronzeRecord],
+    *,
+    extract_terms: _ExtractTerms,
+    enricher: PublicationTermEnrichmentPort | None,
+    term_count: int,
+    limit: int | None,
+) -> AsyncIterator[tuple[BronzeRecord, int]]:
+    prepared = batch
+    if enricher is not None:
+        prepared = await _attach_pubmed_payloads(
+            batch, extract_terms=extract_terms, enricher=enricher
+        )
+    count = term_count
+    for record in prepared:
+        publication_id = _publication_id(record)
+        if publication_id is None:
+            continue
+        for term in extract_terms(record, publication_id):
+            count += 1
+            yield term, count
+            if limit is not None and count >= limit:
+                return
+
+
+async def yield_terms_from_publications(
+    publications: AsyncIterator[BronzeRecord],
     *,
     limit: int | None,
     scan_limit: int,
@@ -66,40 +97,35 @@ async def yield_terms_from_publications(    publications: AsyncIterator[BronzeRe
     close_publications: _ClosePublications,
 ) -> AsyncIterator[BronzeRecord]:
     """Expand publications into term records, enriching empty PubMed-linked docs."""
-    term_count = 0
-    buffer: list[BronzeRecord] = []
-
-    async def emit(batch: list[BronzeRecord]) -> AsyncIterator[BronzeRecord]:
-        nonlocal term_count
-        prepared = batch
-        if enricher is not None:
-            prepared = await _attach_pubmed_payloads(
-                batch, extract_terms=extract_terms, enricher=enricher
-            )
-        for record in prepared:
-            publication_id = _publication_id(record)
-            if publication_id is None:
-                continue
-            for term in extract_terms(record, publication_id):
-                yield term
-                term_count += 1
-                if limit is not None and term_count >= limit:
-                    return
-
     try:
+        term_count = 0
+        buffer: list[BronzeRecord] = []
         async for publication in bounded_source_records(
             publications, max_records=scan_limit
         ):
             buffer.append(publication)
             if len(buffer) < PUBLICATION_TERM_PUBMED_ENRICH_BATCH_SIZE:
                 continue
-            async for term in emit(buffer):
+            async for term, count in _emit_publication_terms(
+                buffer,
+                extract_terms=extract_terms,
+                enricher=enricher,
+                term_count=term_count,
+                limit=limit,
+            ):
+                term_count = count
                 yield term
-                if limit is not None and term_count >= limit:
-                    return
+            if limit is not None and term_count >= limit:
+                return
             buffer = []
         if buffer:
-            async for term in emit(buffer):
+            async for term, _count in _emit_publication_terms(
+                buffer,
+                extract_terms=extract_terms,
+                enricher=enricher,
+                term_count=term_count,
+                limit=limit,
+            ):
                 yield term
     finally:
         await close_publications(publications)

@@ -1,7 +1,8 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: SemanticScholar Search Fallback And Batch Request Flow
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.1.0
+%% @date    2026-10-09
+%% Reviewed against main 9a7339dc: semanticscholar/fetch_adapter_mixin.py, _search_fetch_flow.py and batch_request_mixin.py
 %% @type    sequenceDiagram
 %% @level   Provider / Interaction
 %% @nodes   6
@@ -16,20 +17,26 @@ sequenceDiagram
     participant HTTP as UnifiedHTTPClient
 
     Runner->>Adapter: publication lookup
-    Adapter->>Search: build search request
-    Search->>HTTP: execute search request
-    alt search response accepted
-        HTTP-->>Search: candidate ids / payload
-    else weak or empty response
-        Search->>Fallback: resolve fallback
-        Fallback-->>Search: alternate terms or route
-        Search->>HTTP: retry fallback request
-        HTTP-->>Search: recovered payload
+    alt free-text fetch without filter IDs
+        Adapter->>Search: _paginate_search(query, limit)
+        loop unique offsets and below 10000 pages
+            Search->>HTTP: GET /paper/search
+            HTTP-->>Search: raw records and next offset
+            Search-->>Adapter: BronzeRecord stream
+        end
+    else DOI filter fetch
+        Adapter->>Batch: _fetch_batch_with_nulls(DOIs)
+        Batch->>HTTP: execute batch request
+        HTTP-->>Batch: detailed records and unresolved IDs
+        Batch-->>Adapter: list[BronzeRecord | None] (None for unresolved DOIs)
+        Adapter->>Adapter: process batch results and yield non-null BronzeRecord stream
+        opt fetch_filtered_with_fallback and mapping supplied
+            Adapter->>Fallback: recover unresolved DOI records by title
+            Fallback-->>Adapter: fallback BronzeRecord stream
+        end
     end
-    Search->>Batch: request batch details
-    Batch->>HTTP: execute batch request
-    HTTP-->>Batch: detailed records
-    Batch-->>Runner: mapped publication entities
+    Adapter-->>Runner: raw provider publication dictionaries
+    Note over Search,HTTP: Repeated offset / page ceiling raises pagination-truncated error (CF-034). Absent offset or record limit ends normally.
 %% padding line for readability and stable render budget
 %% padding line for readability and stable render budget
 %% padding line for readability and stable render budget
