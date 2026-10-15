@@ -135,9 +135,16 @@ def test_infer_source_type_fallback() -> None:
     assert infer_source_type(Path("README.md")) == "doc"
 
 
-def test_infer_source_type_priority() -> None:
-    # memory rule is before code rule. src/memory/*.py is "memory" not "code"
-    assert infer_source_type(Path("src/memory/app.py")) == "memory"
+def test_infer_source_type_priority(monkeypatch: pytest.MonkeyPatch) -> None:
+    path = Path("src/memory/app.py")
+    broader = rag_chunking._SourceTypeRule("code", prefix="src/", suffix=".py")
+    narrower = rag_chunking._SourceTypeRule(
+        "memory", prefix="src/memory/", suffix=".py"
+    )
+    monkeypatch.setattr(rag_chunking, "_SOURCE_TYPE_RULES", (narrower, broader))
+    assert infer_source_type(path) == "memory"
+    monkeypatch.setattr(rag_chunking, "_SOURCE_TYPE_RULES", (broader, narrower))
+    assert infer_source_type(path) == "code"
 
 
 def test_infer_domain_from_repo_paths() -> None:
