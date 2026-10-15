@@ -30,9 +30,9 @@ from .cleanup_core import (
     _entry_is_link_or_reparse,
     _pending_group_operation,
     destructive_cleanup_supported,
-    shared_lease_without_caps,
     is_reserved_bronze_maintenance_name,
     open_bronze_root_no_follow,
+    shared_lease_without_caps,
     stat_is_link_or_reparse,
     valid_bronze_scope_name,
 )
@@ -435,9 +435,9 @@ def candidate_is_safe(
 
 from .cleanup_posix import (  # noqa: E402 - destructive helpers depend on discovery primitives
     _anchored_parent,
-    _private_stage as _private_stage,
     _recover_stages,
     _same_identity,
     safe_rmdir,
     safe_unlink,
 )
+from .cleanup_posix import _private_stage as _private_stage  # noqa: E402

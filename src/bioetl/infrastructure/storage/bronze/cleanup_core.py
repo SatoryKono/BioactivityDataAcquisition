@@ -119,7 +119,7 @@ def _directory_xattr_supported(base_path: Path | None = None) -> bool:
         return False
     import tempfile
 
-    probe_kwargs: dict[str, str] = {"prefix": "bioetl-xattr-probe-"}
+    probe_dir: str | None = None
     cache_key: int | None = None
     if base_path is not None:
         try:
@@ -132,14 +132,16 @@ def _directory_xattr_supported(base_path: Path | None = None) -> bool:
             cached = _DIR_XATTR_BY_DEV.get(cache_key)
             if cached is not None:
                 return cached
-            probe_kwargs["dir"] = str(anchor if anchor.is_dir() else anchor.parent)
+            probe_dir = str(anchor if anchor.is_dir() else anchor.parent)
         except OSError:
             return False
     probe_tag = b"user.bioetl.fs001-capability-probe"
     try:
-        with tempfile.TemporaryDirectory(**probe_kwargs) as tmp:
+        with tempfile.TemporaryDirectory(
+            prefix="bioetl-xattr-probe-", dir=probe_dir
+        ) as tmp:
             if cache_key is None:
-                cache_key = int(os.stat(tmp).st_dev)
+                cache_key = int(Path(tmp).stat().st_dev)
                 cached = _DIR_XATTR_BY_DEV.get(cache_key)
                 if cached is not None:
                     return cached
@@ -163,7 +165,7 @@ def _directory_xattr_supported(base_path: Path | None = None) -> bool:
 def _visible_pending_group_markers(base_path: Path) -> bool:
     """Fail-closed reserved journal/stage visibility without a pinned root fd."""
     try:
-        names = os.listdir(base_path)
+        names = [entry.name for entry in base_path.iterdir()]
     except OSError:
         return False
     if any(name.startswith(_GROUP_STAGE_PREFIX) for name in names):
@@ -171,7 +173,7 @@ def _visible_pending_group_markers(base_path: Path) -> bool:
     if _GROUP_JOURNAL_DIR not in names:
         return False
     try:
-        return bool(os.listdir(base_path / _GROUP_JOURNAL_DIR))
+        return any((base_path / _GROUP_JOURNAL_DIR).iterdir())
     except OSError:
         return True
 
