@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-15T15:18:46.915243+00:00",
+  "generated_at": "2026-10-15T15:35:52.965764+00:00",
   "summary": {
     "total_scripts": 652,
     "status_counts": {
-      "active": 335,
-      "supporting": 317
+      "active": 334,
+      "supporting": 318
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -13,9 +13,9 @@
       "ci": 71,
       "docs": 283,
       "other": 50,
-      "scripts": 544,
+      "scripts": 545,
       "skills": 13,
-      "tests": 464
+      "tests": 465
     }
   },
   "scripts": [
@@ -9278,7 +9278,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-005-composition-layer-separation.md",
@@ -9448,7 +9448,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/docs/passports/__init__.py",
@@ -9466,13 +9466,19 @@
           "path": "scripts/docs/passports/cli.py",
           "line": 11,
           "source_group": "scripts",
-          "text": "from .projector import build_all_outputs, check_outputs, write_outputs"
+          "text": "from .projector import ("
         },
         {
           "path": "tests/unit/scripts/docs/passports/test_passport_projector.py",
           "line": 26,
           "source_group": "tests",
           "text": "from scripts.docs.passports.projector import ("
+        },
+        {
+          "path": "tests/unit/scripts/docs/passports/test_passport_projector.py",
+          "line": 132,
+          "source_group": "tests",
+          "text": "from scripts.docs.passports import projector"
         }
       ],
       "owner": "@bioetl-platform",
@@ -9747,7 +9753,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 27,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -9787,15 +9793,15 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 727,
+          "line": 271,
           "source_group": "ci",
-          "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-gate aggregate \\"
+          "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-lane-results assert-steps \\"
         },
         {
-          "path": ".github/workflows/tests.yml",
-          "line": 432,
+          "path": ".github/workflows/pr-required.yml",
+          "line": 355,
           "source_group": "ci",
-          "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory"
+          "text": "uv run --quiet --frozen --no-build python -m scripts.engineering.ci pr-lane-results affected-tests \\"
         }
       ]
     },
@@ -9808,7 +9814,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 59,
+          "line": 60,
           "source_group": "scripts",
           "text": "| `scripts/engineering/ci/_compatibility_registry.py`       | Shared compatibility registry loader used by telemetry/reporting helpers      |"
         },
@@ -9857,7 +9863,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 60,
+          "line": 61,
           "source_group": "scripts",
           "text": "| `scripts/engineering/ci/_compatibility_telemetry.py`      | Compatibility inventory telemetry helper used by architecture reporting flows |"
         },
@@ -9943,7 +9949,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 58,
+          "line": 59,
           "source_group": "scripts",
           "text": "| `scripts/engineering/ci/apply-ci-optimizations-fixed.ps1` | Fixed variant of CI optimization                                              |"
         },
@@ -9968,7 +9974,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 57,
+          "line": 58,
           "source_group": "scripts",
           "text": "| `scripts/engineering/ci/apply-ci-optimizations.ps1`       | PowerShell CI optimization script                                             |"
         },
@@ -9993,13 +9999,13 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 31,
+          "line": 32,
           "source_group": "scripts",
           "text": "| `apply-ci-fixes` | `scripts/engineering/ci/apply_ci_fixes.py`             | One-off GitHub-hosted workflow repair helper requiring explicit token input |"
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 50,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"apply-ci-fixes\": \"apply_ci_fixes.py\","
         },
@@ -10050,13 +10056,13 @@
         },
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 26,
+          "line": 27,
           "source_group": "scripts",
           "text": "| `e2e-skip-rate`  | `scripts/engineering/ci/check_e2e_matrix_skip_rate.py` | Check E2E matrix skip rate against threshold                                |"
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 43,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"e2e-skip-rate\": \"check_e2e_matrix_skip_rate.py\","
         },
@@ -10095,13 +10101,13 @@
         },
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 27,
+          "line": 28,
           "source_group": "scripts",
           "text": "| `e2e-rerun`      | `scripts/engineering/ci/check_e2e_rerun_stability.py`  | Check E2E rerun stability                                                   |"
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 44,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"e2e-rerun\": \"check_e2e_rerun_stability.py\","
         },
@@ -10134,7 +10140,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 46,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"neo4j-memory-live\": \"check_neo4j_memory_live_audit.py\","
         }
@@ -10149,7 +10155,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 45,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"neo4j-memory\": \"check_neo4j_memory_ontology.py\","
         }
@@ -10286,7 +10292,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 42,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"pr-gate\": \"pr_gate.py\","
         },
@@ -10317,33 +10323,27 @@
     {
       "path": "scripts/engineering/ci/pr_lane_results.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 9,
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 271,
-          "source_group": "ci",
-          "text": "uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results assert-steps \\"
-        },
-        {
-          "path": ".github/workflows/pr-required.yml",
-          "line": 355,
-          "source_group": "ci",
-          "text": "uv run --quiet --frozen --no-build python -m scripts.engineering.ci.pr_lane_results affected-tests \\"
-        },
-        {
-          "path": ".github/workflows/pr-required.yml",
-          "line": 674,
-          "source_group": "ci",
-          "text": "uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results assert-steps \\"
-        },
-        {
-          "path": ".github/workflows/pr-required.yml",
-          "line": 718,
+          "line": 729,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci.pr_lane_results build \\"
+        },
+        {
+          "path": "scripts/engineering/ci/README.md",
+          "line": 26,
+          "source_group": "scripts",
+          "text": "| `pr-lane-results` | `scripts/engineering/ci/pr_lane_results.py`            | Internal lane result mapping behind the CI router                            |"
+        },
+        {
+          "path": "scripts/engineering/ci/__main__.py",
+          "line": 56,
+          "source_group": "scripts",
+          "text": "\"pr-lane-results\": module_command(\"scripts.engineering.ci.pr_lane_results\"),"
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
@@ -10368,8 +10368,18 @@
           "line": 314,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pr_lane_results import affected_pytest_targets"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
+          "line": 352,
+          "source_group": "tests",
+          "text": "assert \"python -m scripts.engineering.ci.pr_lane_results build\" in build"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-31",
+      "next_step": "Keep as the internal result-mapping implementation behind the canonical scripts.engineering.ci pr-lane-results command; do not expose a second workflow CLI surface."
     },
     {
       "path": "scripts/engineering/ci/publish_docker_image.sh",
@@ -10380,7 +10390,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 58,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"publish-docker\": shell_command(\"publish_docker_image.sh\"),"
         },
@@ -10411,7 +10421,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 56,
+          "line": 58,
           "source_group": "scripts",
           "text": "\"scripts.engineering.ci.publish_scorecard_sarif\""
         },
@@ -10448,13 +10458,13 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 40,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"quality-gate\": \"quality_integral_gate.py\","
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 41,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"architecture-junit-skips\": \"quality_integral_gate.py\","
         },
@@ -10524,13 +10534,13 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 28,
+          "line": 29,
           "source_group": "scripts",
           "text": "| `docker-timing`  | `scripts/engineering/ci/report_docker_actions_timing.py` | Collect read-only Docker Actions timing and runner-capacity evidence      |"
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 47,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"docker-timing\": \"report_docker_actions_timing.py\","
         },
@@ -10567,13 +10577,13 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 29,
+          "line": 30,
           "source_group": "scripts",
           "text": "| `pr-gate-timing` | `scripts/engineering/ci/report_pr_gate_timing.py`        | Collect read-only PR Gate Complete wall-clock, queue, and owner-path evidence |"
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 48,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"pr-gate-timing\": \"report_pr_gate_timing.py\","
         },
@@ -10604,13 +10614,13 @@
         },
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 30,
+          "line": 31,
           "source_group": "scripts",
           "text": "| `debt-report`    | `scripts/engineering/ci/report_quality_debt_weekly.py` | Generate weekly quality debt report                                         |"
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 49,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"debt-report\": \"report_quality_debt_weekly.py\","
         },
@@ -10655,7 +10665,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 39,
+          "line": 40,
           "source_group": "scripts",
           "text": "\"run-tests\": \"run_pytest_resilient.py\","
         },
@@ -10905,7 +10915,7 @@
         },
         {
           "path": "scripts/engineering/qa/debt_governance_gate_evaluators.py",
-          "line": 1093,
+          "line": 1100,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py::\""
         },
@@ -11019,7 +11029,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 31,
+          "line": 32,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.cli_dispatch import ("
         },
@@ -14123,7 +14133,7 @@
         },
         {
           "path": "scripts/engineering/qa/report_debt_governance_gates.py",
-          "line": 481,
+          "line": 485,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.debt_governance_gate_report import main as _gate_main"
         }
@@ -15227,7 +15237,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
@@ -15243,7 +15253,25 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_report_observability_metric_inventory_cli.py",
-          "line": 590,
+          "line": 592,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import observability_metric_inventory_cli as cli"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/test_report_observability_metric_inventory_cli.py",
+          "line": 700,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import observability_metric_inventory_cli as cli"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/test_report_observability_metric_inventory_cli.py",
+          "line": 721,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import observability_metric_inventory_cli as cli"
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/test_report_observability_metric_inventory_cli.py",
+          "line": 821,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import observability_metric_inventory_cli as cli"
         }
@@ -15262,7 +15290,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_cli.py",
-          "line": 13,
+          "line": 14,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_report import ("
         },
@@ -15293,7 +15321,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_cli.py",
-          "line": 18,
+          "line": 19,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_runtime import ("
         },
@@ -15373,7 +15401,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_cli.py",
-          "line": 21,
+          "line": 22,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_shared import ("
         },
