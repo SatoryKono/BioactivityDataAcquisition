@@ -292,7 +292,9 @@ class PubchemMolecule(BaseEntity):
         if not self.molecule_id:
             raise ValueError("PubchemMolecule molecule_id is required")
 
-        if not (self.canonical_smiles or self.isomeric_smiles or self.inchi):  # (~70% faster)
+        if not (
+            self.canonical_smiles or self.isomeric_smiles or self.inchi
+        ):  # (~70% faster)
             raise ValueError(
                 "PubchemMolecule must have at least one structural identifier "
                 "(SMILES/InChI)"
