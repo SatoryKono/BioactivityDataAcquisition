@@ -6,7 +6,6 @@ from datetime import datetime
 from typing import Protocol, runtime_checkable
 
 from bioetl.domain.types import BronzeRecord, GoldRecord
-from bioetl.domain.types.gold_contracts import GoldWriteReceipt
 
 __all__ = ["MergedStoragePort"]
 
@@ -63,7 +62,7 @@ class MergedStoragePort(Protocol):
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
-    ) -> GoldWriteReceipt:
+    ) -> None:
         """Write merged records to Gold layer with mandatory strict schema.
 
         Used by composite pipelines only when a registered composite Gold

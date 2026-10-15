@@ -5,7 +5,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
 OUT_DIR="${1:-${ROOT}/reports/observability/grafana/screenshots}"
-# Verified base image digest. Its preinstalled 1.60 browsers are never reused.
+# Playwright 1.60.0 image, pinned to the verified multi-platform digest.
 IMAGE="${PLAYWRIGHT_DOCKER_IMAGE:-mcr.microsoft.com/playwright@sha256:9bd26ad900bb5e0f4dee75839e957a89ae89c2b7ab1e76050e559790e946b948}"
 GRAFANA_BASE_URL="${GRAFANA_BASE_URL:-http://host.docker.internal:3000}"
 GRAFANA_USERNAME="${GRAFANA_USERNAME:-admin}"
@@ -28,17 +28,9 @@ if [[ ! -f "${CAPTURE_JS}" ]]; then
   exit 1
 fi
 
-# Resolve and validate using the image's actual Node runtime; host Node is optional.
-PLAYWRIGHT_VERSION="$(docker run --rm --entrypoint node \
-  -v "${ROOT}/package.json:/work/package.json:ro" \
-  -v "${ROOT}/package-lock.json:/work/package-lock.json:ro" \
-  -v "${ROOT}/scripts/ai/npm_runtime_contract.cjs:/work/npm_runtime_contract.cjs:ro" \
-  "${IMAGE}" /work/npm_runtime_contract.cjs /work --playwright-version)"
-IMAGE_DIGEST="${IMAGE##*@sha256:}"
-BROWSER_CACHE="bioetl-playwright-${PLAYWRIGHT_VERSION}-${IMAGE_DIGEST:0:16}"
 mkdir -p "${OUT_DIR}"
 
-# Capture container: install the locked runtime under /tmp, then capture all UIDs.
+# Single container run: install playwright once under /tmp, then capture all UIDs.
 # Use --entrypoint bash because mcp/playwright images may wrap node as MCP server.
 docker run --rm \
   --ipc=host \
@@ -53,11 +45,9 @@ docker run --rm \
   -e OUT_DIR=/out \
   -e SETTLE_MS="${SETTLE_MS:-12000}" \
   -e NAV_TIMEOUT_MS="${NAV_TIMEOUT_MS:-180000}" \
-  -e PLAYWRIGHT_BROWSERS_PATH=/bioetl-browsers \
+  -e PLAYWRIGHT_BROWSERS_PATH="${PLAYWRIGHT_BROWSERS_PATH_IN_CONTAINER:-/ms-playwright}" \
   -e PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
   -e NODE_PATH=/tmp/node_modules \
-  -v "${BROWSER_CACHE}:/bioetl-browsers" \
-  -v "${ROOT}/scripts/ai/npm_runtime_contract.cjs:/work/npm_runtime_contract.cjs:ro" \
   -v "${OUT_DIR}:/out" \
   -v "${CAPTURE_JS}:/work/capture.js:ro" \
   -v "${ROOT}/package.json:/work/package.json:ro" \
@@ -66,11 +56,12 @@ docker run --rm \
   -lc 'set -euo pipefail
 cd /tmp
 cp /work/package.json /work/package-lock.json ./
-node /work/npm_runtime_contract.cjs /work
 npm ci --ignore-scripts --no-fund --no-audit
-# The locked CLI installs its exact browser revision into the version/digest cache.
-./node_modules/.bin/playwright install chromium
-node /work/npm_runtime_contract.cjs /work --browser /tmp/node_modules
+# Prefer image browsers when present; otherwise let Playwright use defaults.
+if [[ ! -d "${PLAYWRIGHT_BROWSERS_PATH:-/ms-playwright}" ]]; then
+  unset PLAYWRIGHT_BROWSERS_PATH PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
+  ./node_modules/.bin/playwright install chromium
+fi
 node /work/capture.js
 '
 

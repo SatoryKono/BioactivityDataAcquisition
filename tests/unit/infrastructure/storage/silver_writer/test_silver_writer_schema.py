@@ -29,12 +29,6 @@
 
 from __future__ import annotations
 
-from bioetl.infrastructure.storage.silver.runtime_helpers import (
-    SilverWriterRuntimeServicesRequest,
-)
-
-from tests.helpers.clock import fixed_test_clock
-
 from tests.helpers.synthetic_paths import synthetic_test_root
 from unittest.mock import MagicMock, patch
 
@@ -61,13 +55,7 @@ class TestSilverWriterSchemaDrift:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = SilverWriter(
-                runtime_request=SilverWriterRuntimeServicesRequest(
-                    clock=fixed_test_clock()
-                ),
-                base_path=str(SILVER_BASE_PATH),
-                logger=noop_logger,
-            )
+            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
             result = await writer._get_table_schema("test.table")
             assert result is None
 
@@ -92,13 +80,7 @@ class TestSilverWriterSchemaDrift:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(
-                runtime_request=SilverWriterRuntimeServicesRequest(
-                    clock=fixed_test_clock()
-                ),
-                base_path=str(SILVER_BASE_PATH),
-                logger=noop_logger,
-            )
+            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
             result = await writer._get_table_schema("test.table")
             assert result == expected_schema
 
@@ -124,13 +106,7 @@ class TestSilverWriterSchemaDrift:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(
-                runtime_request=SilverWriterRuntimeServicesRequest(
-                    clock=fixed_test_clock()
-                ),
-                base_path=str(SILVER_BASE_PATH),
-                logger=noop_logger,
-            )
+            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
 
             with pytest.raises(SchemaEvolutionError) as exc_info:
                 await writer._check_schema_drift("test.table", valid_records, "error")
@@ -177,13 +153,7 @@ class TestSilverWriterSchemaDrift:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(
-                runtime_request=SilverWriterRuntimeServicesRequest(
-                    clock=fixed_test_clock()
-                ),
-                base_path=str(SILVER_BASE_PATH),
-                logger=noop_logger,
-            )
+            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
 
             with pytest.raises(SchemaEvolutionError) as exc_info:
                 await writer._check_schema_drift("test.table", records, "error")
@@ -211,13 +181,7 @@ class TestSilverWriterSchemaDrift:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(
-                runtime_request=SilverWriterRuntimeServicesRequest(
-                    clock=fixed_test_clock()
-                ),
-                base_path=str(SILVER_BASE_PATH),
-                logger=noop_logger,
-            )
+            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
 
             # Should not raise
             await writer._check_schema_drift("test.table", valid_records, "evolve")
@@ -242,13 +206,7 @@ class TestSilverWriterSchemaDrift:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(
-                runtime_request=SilverWriterRuntimeServicesRequest(
-                    clock=fixed_test_clock()
-                ),
-                base_path=str(SILVER_BASE_PATH),
-                logger=noop_logger,
-            )
+            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
 
             # Should not raise
             await writer._check_schema_drift("test.table", valid_records, "ignore")
@@ -279,13 +237,7 @@ class TestSilverWriterSchemaDrift:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(
-                runtime_request=SilverWriterRuntimeServicesRequest(
-                    clock=fixed_test_clock()
-                ),
-                base_path=str(SILVER_BASE_PATH),
-                logger=noop_logger,
-            )
+            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
 
             # Should not raise even in error mode
             await writer._check_schema_drift("test.table", valid_records, "error")
@@ -301,13 +253,7 @@ class TestSilverWriterSchemaDrift:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = SilverWriter(
-                runtime_request=SilverWriterRuntimeServicesRequest(
-                    clock=fixed_test_clock()
-                ),
-                base_path=str(SILVER_BASE_PATH),
-                logger=noop_logger,
-            )
+            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
 
             # Should not raise for new table
             await writer._check_schema_drift("test.table", valid_records, "error")
@@ -330,13 +276,7 @@ class TestSilverWriterSchemaDrift:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(
-                runtime_request=SilverWriterRuntimeServicesRequest(
-                    clock=fixed_test_clock()
-                ),
-                base_path=str(SILVER_BASE_PATH),
-                logger=noop_logger,
-            )
+            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
 
             # Should not raise for empty records
             await writer._check_schema_drift("test.table", [], "error")
@@ -386,13 +326,7 @@ class TestSilverWriterSchemaDrift:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(
-                runtime_request=SilverWriterRuntimeServicesRequest(
-                    clock=fixed_test_clock()
-                ),
-                base_path=str(SILVER_BASE_PATH),
-                logger=noop_logger,
-            )
+            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
 
             # write_silver with on_schema_mismatch="error" should raise
             with pytest.raises(SchemaEvolutionError) as exc_info:

@@ -16,10 +16,11 @@ from memory.graph.refs import (
 )
 from memory.timeline._common import (
     DEFAULT_EVENTS_DIR,
-    DEFAULT_WORKFLOWS_DIR,
     dedupe_preserve_order,
     write_jsonl,
 )
+
+DEFAULT_WORKFLOWS_DIR = Path(".github/workflows")
 
 
 def build_ci_events(root: Path) -> list[dict[str, Any]]:

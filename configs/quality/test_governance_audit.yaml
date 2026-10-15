@@ -852,12 +852,6 @@ oversized_test_module_inventory:
       extracted_surface_lines: 96
       owner: composition-runtime
     - issue_ref: "#4506"
-      source: tests/unit/composition/runtime_builders/test_runner_builder_wiring_contracts.py
-      source_lines_after_split: 81
-      extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_wiring_overrides.py
-      extracted_surface_lines: 72
-      owner: composition-runtime
-    - issue_ref: "#4506"
       source: tests/unit/application/services/test_run_manifest_inspection_service.py
       source_lines_after_split: 1459
       extracted_surface: tests/unit/application/services/test_run_manifest_inspection_dq_traceability.py
@@ -1169,9 +1163,6 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/scripts/ai/mcp/test_protocol_smoke.py
       target_lane: repo-backed-unit
       protected_surface: scripts/ai/mcp/protocol_smoke.py
-    - path: tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py
-      target_lane: repo-backed-unit
-      protected_surface: Root npm manifest/lock, MCP filesystem launchers, and Grafana npm/Playwright preflight contracts; synthetic browser/Docker inputs, no live provider data
     - path: tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py
       target_lane: repo-backed-unit
       protected_surface: scripts/ai/mcp/{mcp_*_wrapper.sh,mcp_*_wrapper.ps1,support/**,check.sh}

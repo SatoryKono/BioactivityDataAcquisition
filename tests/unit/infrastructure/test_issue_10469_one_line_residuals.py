@@ -11,8 +11,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from bioetl.domain.exceptions.gold_write import GoldWriteFailure
-from bioetl.domain.types.gold_contracts import GoldWriteCategory
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.adapters.chembl._fetch_paging_filtered import (
     _ChemblFetchPagingFilteredMixin,
@@ -483,11 +481,10 @@ def test_owner_decomposition_skips_invalid_allocations_after_valid_quarter() -> 
 @pytest.mark.asyncio
 async def test_dual_gold_write_rejects_missing_version_schema() -> None:
     writer = SimpleNamespace(
-        logger=MagicMock(),
         _contract_rollout_policy=SimpleNamespace(
             write_versions=("1.0.0",),
             active_version="1.0.0",
-        ),
+        )
     )
     request = SimpleNamespace(table_name="activity")
     schema_policy = SimpleNamespace(for_version=lambda _version: None)
@@ -507,13 +504,9 @@ async def test_dual_gold_write_rejects_missing_version_schema() -> None:
             return_value=(("1.0.0", "activity_v1"),),
         ),
     ):
-        with pytest.raises(GoldWriteFailure) as error:
+        with pytest.raises(ValueError, match="No Gold schema"):
             await _write_dual_targets_impl(
                 writer,
                 request=request,
                 schema_policy=schema_policy,
             )
-        assert isinstance(error.value.__cause__, ValueError)
-        assert "No Gold schema" in str(error.value.__cause__)
-        assert error.value.receipt.category == GoldWriteCategory.NOT_COMMITTED
-        assert error.value.receipt.committed_targets == ()

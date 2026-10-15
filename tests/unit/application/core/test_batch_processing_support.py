@@ -29,8 +29,6 @@
 
 from __future__ import annotations
 
-from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
-
 from unittest.mock import AsyncMock, MagicMock
 from tests.helpers.deterministic_ids import (
     deterministic_batch_uuid_from_callsite,
@@ -152,9 +150,6 @@ async def test_write_silver_gold_concurrent_orders_layers_and_lineage(
         _ = records
         call_order.append("gold")
         assert silver_refs == [silver_result]
-        return GoldWriteReceipt(
-            "synthetic", "0.0.0", GoldWriteCategory.COMPLETE, ("synthetic",)
-        )
 
     writer = MagicMock()
     writer.write_silver = AsyncMock(side_effect=write_silver)
@@ -207,11 +202,7 @@ async def test_write_silver_gold_concurrent_stops_on_silver_failure(
 
     writer = MagicMock()
     writer.write_silver = AsyncMock(side_effect=RuntimeError("silver failed"))
-    writer.write_gold = AsyncMock(
-        return_value=GoldWriteReceipt(
-            "synthetic", "0.0.0", GoldWriteCategory.COMPLETE, ("synthetic",)
-        )
-    )
+    writer.write_gold = AsyncMock()
     writer.track_batch_written = MagicMock()
 
     async def execute_with_span(_name, coro, *_args, **_kwargs):  # type: ignore[no-untyped-def]
@@ -258,11 +249,7 @@ async def test_write_silver_gold_skips_gold_when_silver_quarantined(
     writer.write_silver = AsyncMock(
         side_effect=SchemaViolationError("silver", ["bad column"])
     )
-    writer.write_gold = AsyncMock(
-        return_value=GoldWriteReceipt(
-            "synthetic", "0.0.0", GoldWriteCategory.COMPLETE, ("synthetic",)
-        )
-    )
+    writer.write_gold = AsyncMock()
     writer.track_batch_written = MagicMock()
     writer.track_batch_failed = MagicMock()
 

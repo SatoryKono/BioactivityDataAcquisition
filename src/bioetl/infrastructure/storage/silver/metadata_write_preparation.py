@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from bioetl.domain.lineage import LineageGraphFragment
-from bioetl.domain.medallion import WriteMode
+from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports import MetadataCoordinatorPort, SilverMetadataInput
 from bioetl.infrastructure.storage.lineage_persistence import (
@@ -124,7 +124,6 @@ async def _prepare_silver_metadata_write(
         source_batch_ids=request.source_batch_ids,
         started_at=request.started_at,
         completed_at=request.completed_at,
-        duration_seconds=request.duration_seconds,
     )
     metadata, lineage_fragment = _resolve_silver_metadata_bundle(
         coordinator=host._metadata_coordinator,
@@ -159,7 +158,7 @@ async def _prepare_silver_merged_metadata_write(
         table_path=request.table_path,
         records=request.records,
         primary_keys=request.primary_keys,
-        mode=WriteMode.OVERWRITE,
+        mode=SilverWriteMode.DELETE,
         started_at=merged_completed_at,
         completed_at=merged_completed_at,
         composite_run_id=request.run_id,

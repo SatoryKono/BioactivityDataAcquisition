@@ -259,7 +259,26 @@ export_local_lib_path() {
 }
 
 playwright_version_spec() {
-  node "${REPO_ROOT}/scripts/ai/npm_runtime_contract.cjs" "${REPO_ROOT}" --playwright-version
+  local python_bin
+  python_bin="$(command -v python3 || command -v python || true)"
+  if [[ -z "${python_bin}" ]]; then
+    printf '%s' 'latest'
+    return 0
+  fi
+  "${python_bin}" - "${REPO_ROOT}/package.json" <<'PY'
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+package = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+deps = package.get("devDependencies", {}) or {}
+value = deps.get("playwright")
+if not value:
+    value = (package.get("dependencies", {}) or {}).get("playwright", "latest")
+print(value)
+PY
 }
 
 run_npm_install() {
@@ -324,7 +343,7 @@ install_node_dependencies() {
     PLAYWRIGHT_INSTALL_ROOT="${REPO_ROOT}"
     return 0
   fi
-  return 1
+  install_playwright_tool_runtime
 }
 
 install_playwright_browser() {
@@ -373,7 +392,6 @@ run_repo_smoke() {
 
 main() {
   parse_args "$@"
-  node "${REPO_ROOT}/scripts/ai/npm_runtime_contract.cjs" "${REPO_ROOT}"
   ensure_dirs
 
   local missing_libs_text=""

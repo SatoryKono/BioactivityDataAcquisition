@@ -9,7 +9,6 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pyarrow as pa
 import pytest
-from tests.helpers.clock import fixed_test_clock
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.medallion import SilverWriteMode
@@ -230,7 +229,7 @@ async def test_runtime_helpers_and_invocation_compat() -> None:
     logger = NoOpLogger()
     assert _resolve_operation_logger(logger) is logger
     assert isinstance(_resolve_operation_logger(None), NoOpLogger)
-    request = SilverWriterRuntimeServicesRequest(clock=fixed_test_clock())
+    request = SilverWriterRuntimeServicesRequest()
     assert _build_merged_operations(request) is None
     assert (
         _build_validation_operations(
@@ -242,7 +241,6 @@ async def test_runtime_helpers_and_invocation_compat() -> None:
     )
 
     with_path = SilverWriterRuntimeServicesRequest(
-        clock=fixed_test_clock(),
         base_path=".",
         logger=NoOpLogger(),
     )

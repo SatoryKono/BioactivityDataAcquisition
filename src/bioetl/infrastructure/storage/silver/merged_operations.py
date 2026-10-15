@@ -13,7 +13,6 @@ import pyarrow as pa
 from deltalake import write_deltalake
 
 from bioetl.domain.exceptions import SchemaViolationError
-from bioetl.domain.models.metadata import validate_utc_datetime
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
@@ -139,8 +138,6 @@ def _prepare_merged_silver_write(
     request: _MergedSilverWriteRequest,
 ) -> _PreparedMergedSilverWrite:
     """Prepare normalized Arrow payload and resolved table path for merged writes."""
-    if request.completed_at is not None:
-        validate_utc_datetime(request.completed_at)
     if request.schema is not None:
         schema = request.schema
         # SchemaModel / class-style contracts expose ``to_schema()``.

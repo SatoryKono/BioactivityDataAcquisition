@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.domain.medallion import WriteMode
-
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
@@ -17,7 +15,7 @@ from bioetl.domain.exceptions import (
     PolicyViolationError,
     SchemaEvolutionError,
 )
-from bioetl.domain.medallion import SilverWriteMode, WriteModePolicy
+from bioetl.domain.medallion import SilverWriteMode, WriteMode, WriteModePolicy
 from bioetl.infrastructure.storage.delta.resilience import (
     AdaptiveRetryPolicy,
     SilverMergeResiliencePolicy,
@@ -108,20 +106,15 @@ class TestSilverValidationOperations:
         assert _validate_write_mode_impl("merge") is SilverWriteMode.MERGE
         with pytest.raises(ValueError, match="Invalid Silver write mode"):
             _validate_write_mode_impl("upsert")
-        assert _to_policy_write_mode_impl(SilverWriteMode.APPEND) is WriteMode.APPEND
+        assert _to_policy_write_mode_impl(SilverWriteMode.DELETE) is WriteMode.OVERWRITE
         host = SimpleNamespace(
             logger=MagicMock(),
             _write_policy=WriteModePolicy(),
             _metrics=MagicMock(),
             _to_policy_write_mode=_to_policy_write_mode_impl,
         )
-        _enforce_write_policy(host, SilverWriteMode.APPEND, "chembl.activity")
-        host._write_policy = MagicMock()
-        host._write_policy.validate.side_effect = PolicyViolationError(
-            "custom rejection"
-        )
-        with pytest.raises(PolicyViolationError, match="custom rejection"):
-            _enforce_write_policy(host, SilverWriteMode.APPEND, "chembl.activity")
+        with pytest.raises(PolicyViolationError, match="does not allow overwrite"):
+            _enforce_write_policy(host, SilverWriteMode.DELETE, "chembl.activity")
         host._metrics.increment_counter.assert_called()
         schema_request = _SilverSchemaPolicyRequest(
             table_name="chembl.activity",

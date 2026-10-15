@@ -2,10 +2,6 @@
 
 from __future__ import annotations
 
-from contextlib import contextmanager
-from bioetl.domain.exceptions.gold_write import GoldWriteFailure
-from bioetl.domain.types.gold_contracts import GoldWriteReceipt, GoldWriteCategory
-
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
@@ -106,7 +102,7 @@ async def test_write_gold_merged_delta_and_csv_sidecar_use_fakes(
             table_name="chembl/activity",
             records=[{"id": 1}],
             primary_keys=["id"],
-            schema=SimpleNamespace(metadata={"contract_version": "1.0.0"}),
+            schema=MagicMock(),
             completed_at=None,
             run_id="r1",
             sources_used=None,
@@ -201,10 +197,7 @@ async def test_complete_gold_merged_write_runs_three_stages(
     monkeypatch.setattr(io_exec, "_write_gold_merged_delta", _delta)
     monkeypatch.setattr(io_exec, "_export_gold_merged_csv", _csv)
     monkeypatch.setattr(io_exec, "_write_gold_merged_sidecar", _sidecar)
-    await io_exec._complete_gold_merged_write(
-        SimpleNamespace(),
-        SimpleNamespace(request=SimpleNamespace(table_name="synthetic", schema=None)),
-    )  # type: ignore[arg-type]
+    await io_exec._complete_gold_merged_write(SimpleNamespace(), SimpleNamespace())  # type: ignore[arg-type]
     assert stages == ["delta", "csv", "sidecar"]
 
 
@@ -282,7 +275,7 @@ async def test_scd2_write_and_merge_use_mocked_delta(
     merge = MagicMock()
     merge.when_matched_update.return_value = merge
     merge.when_not_matched_insert_all.return_value = merge
-    dt = SimpleNamespace(table_uri="synthetic", merge=MagicMock(return_value=merge))
+    dt = SimpleNamespace(merge=MagicMock(return_value=merge))
     await host._merge_scd2(
         dt,
         [{"id": 1}],
@@ -341,26 +334,18 @@ async def test_single_target_validation_failure_and_dual_write(
         async def _post_write_gold(self, *_a: object, **_k: object) -> None:
             return None
 
-        async def _write_single_target(
-            self, *, request: GoldWriteRequest
-        ) -> GoldWriteReceipt:
+        async def _write_single_target(self, *, request: GoldWriteRequest) -> None:
             if "1_1_0" in request.table_name:
                 raise ValueError("second target failed")
-            return GoldWriteReceipt(
-                request.table_name,
-                request.contract_version or "0.0.0",
-                GoldWriteCategory.COMPLETE,
-                (request.table_name,),
-            )
 
-    with precommit_error("invalid schema"):
+    with pytest.raises(ValueError, match="invalid schema"):
         await impl._write_single_target_impl(_Writer(), request=_request())  # type: ignore[arg-type]
 
     monkeypatch.setattr(
         impl, "_project_records_for_gold_schema", lambda records, schema: records
     )
     policy = SimpleNamespace(for_version=lambda _v: MagicMock(strict=True))
-    with pytest.raises(GoldWriteFailure):
+    with pytest.raises(ValueError, match="second target failed"):
         await impl._write_dual_targets_impl(
             _Writer(),  # type: ignore[arg-type]
             request=_request(),
@@ -368,7 +353,7 @@ async def test_single_target_validation_failure_and_dual_write(
         )
     _Writer.logger.error.assert_called()
     missing = SimpleNamespace(for_version=lambda _v: None)
-    with pytest.raises(GoldWriteFailure):
+    with pytest.raises(ValueError, match="No Gold schema"):
         await impl._write_dual_targets_impl(
             _Writer(),  # type: ignore[arg-type]
             request=_request(),
@@ -512,13 +497,3 @@ def test_delta_table_constructs_via_lazy_import(
     table = gw.delta_table("/gold/activity", version=1, without_files=True)
     assert isinstance(table, _DeltaTable)
     assert constructed
-
-
-@contextmanager
-def precommit_error(message):
-    """Assert the new receipt without weakening original validation checks."""
-    with pytest.raises(GoldWriteFailure) as found:
-        yield
-    assert found.value.receipt.category == GoldWriteCategory.NOT_COMMITTED
-    assert isinstance(found.value.__cause__, ValueError)
-    assert message in str(found.value.__cause__)

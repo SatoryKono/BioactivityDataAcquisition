@@ -1060,7 +1060,7 @@ fixture_governance:
       multi_provider: 1
       openalex: 25
       pubchem: 12
-      pubmed: 22
+      pubmed: 23
       semanticscholar: 22
       uniprot: 16
   rollout:

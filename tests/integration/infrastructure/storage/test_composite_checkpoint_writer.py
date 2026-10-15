@@ -29,7 +29,6 @@ pytestmark = pytest.mark.integration
 
 def test_manifest_history_survives_successful_composite_cleanup(tmp_path: Path) -> None:
     from bioetl.application.composite.checkpoint.persistence_service import (
-        CompositeCheckpointPersistenceParams,
         CompositeCheckpointPersistenceService,
     )
     from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
@@ -41,13 +40,11 @@ def test_manifest_history_survives_successful_composite_cleanup(tmp_path: Path) 
     root = tmp_path / "checkpoints" / "composite"
     writer = FileCompositeCheckpointWriter(root)
     service = CompositeCheckpointPersistenceService(
-        CompositeCheckpointPersistenceParams(
-            composite_name="composite_publication",
-            checkpoint_filename="resume.json",
-            glob_pattern="*.json",
-            storage=writer,
-            logger=MagicMock(),
-        )
+        composite_name="composite_publication",
+        checkpoint_filename="resume.json",
+        glob_pattern="*.json",
+        storage=writer,
+        logger=MagicMock(),
     )
     state = CompositeCheckpointState(
         composite_name="composite_publication", run_id="run-1", manifest_id="manifest-1"
@@ -83,7 +80,6 @@ def test_manifest_history_survives_successful_composite_cleanup(tmp_path: Path) 
 
 def test_history_failure_does_not_publish_resume_checkpoint(tmp_path: Path) -> None:
     from bioetl.application.composite.checkpoint.persistence_service import (
-        CompositeCheckpointPersistenceParams,
         CompositeCheckpointPersistenceService,
     )
     from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
@@ -92,13 +88,11 @@ def test_history_failure_does_not_publish_resume_checkpoint(tmp_path: Path) -> N
     storage = MagicMock()
     storage.write_atomic.side_effect = OSError("history disk full")
     service = CompositeCheckpointPersistenceService(
-        CompositeCheckpointPersistenceParams(
-            composite_name="composite_publication",
-            checkpoint_filename="resume.json",
-            glob_pattern="*.json",
-            storage=storage,
-            logger=MagicMock(),
-        )
+        composite_name="composite_publication",
+        checkpoint_filename="resume.json",
+        glob_pattern="*.json",
+        storage=storage,
+        logger=MagicMock(),
     )
     with pytest.raises(CheckpointConflictError, match="history disk full"):
         service.save(

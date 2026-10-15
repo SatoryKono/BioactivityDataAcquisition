@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import TYPE_CHECKING, ClassVar, Literal
+from typing import TYPE_CHECKING, ClassVar
 
 from bioetl.domain.exceptions import PolicyViolationError
 
@@ -33,13 +33,14 @@ class SilverWriteMode(StrEnum):
 
     MERGE = "merge"
     APPEND = "append"
+    DELETE = "delete"
 
     @classmethod
     def from_string(cls, value: str) -> SilverWriteMode:
         """Convert string to SilverWriteMode with validation.
 
         Args:
-            value: String value to convert (e.g., 'merge', 'append').
+            value: String value to convert (e.g., 'merge', 'append', 'delete').
 
         Returns:
             Matching SilverWriteMode enum member.
@@ -51,10 +52,6 @@ class SilverWriteMode(StrEnum):
             raise ValueError(
                 f"Invalid Silver write mode: '{value}'. Valid modes: {valid}"
             ) from None
-
-
-# Physical snapshot overwrite belongs to merged-write orchestration, not batch modes.
-type SilverOperationMode = SilverWriteMode | Literal[WriteMode.OVERWRITE]
 
 
 class GoldWriteMode(StrEnum):

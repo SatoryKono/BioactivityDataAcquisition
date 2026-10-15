@@ -33,9 +33,6 @@ without requiring I/O or DI.
 """
 
 from __future__ import annotations
-from bioetl.composition.runtime_builders.inputs_runtime_models import (
-    ResolvedVacuumSettings,
-)
 
 
 import pytest
@@ -536,51 +533,3 @@ class TestAssemblyIntegration:
         )
         assert filter_cfg is not None
         assert filter_cfg.source_path == "/cli/filter.csv"
-
-
-@pytest.mark.parametrize(
-    "debug_overrides",
-    [
-        {},
-        {
-            "debug_export_enabled": True,
-            "debug_export_formats": ("csv",),
-            "debug_export_dir": "synthetic-debug",
-        },
-    ],
-)
-def test_runtime_config_preserves_typed_debug_export_keywords(debug_overrides):
-    result = assemble_runtime_config(
-        run_type=RunType.INCREMENTAL,
-        resume=False,
-        limit=10,
-        query=None,
-        dry_run=True,
-        heartbeat_interval=60,
-        vacuum=ResolvedVacuumSettings(enabled=False, retention_days=7),
-        health_check_mode="probe",
-        **debug_overrides,
-    )
-    assert result.debug_export_enabled == debug_overrides.get(
-        "debug_export_enabled", False
-    )
-    assert result.debug_export_formats == debug_overrides.get(
-        "debug_export_formats", ()
-    )
-    assert result.debug_export_dir == debug_overrides.get("debug_export_dir")
-    assert result.health_check_mode == "probe"
-
-
-@pytest.mark.unit
-def test_runtime_config_rejects_unknown_debug_keyword():
-    with pytest.raises(TypeError, match="Unexpected debug-export options"):
-        assemble_runtime_config(
-            run_type=RunType.INCREMENTAL,
-            resume=False,
-            limit=10,
-            query=None,
-            dry_run=True,
-            heartbeat_interval=60,
-            vacuum=ResolvedVacuumSettings(enabled=False, retention_days=7),
-            unexpected_debug_option=True,
-        )

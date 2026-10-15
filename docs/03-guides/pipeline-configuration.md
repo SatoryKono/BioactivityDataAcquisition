@@ -742,7 +742,7 @@ sink:
     enabled: true
     format: delta
     path: data/output/silver/chembl/activity
-    mode: merge                    # merge | append
+    mode: merge                    # merge | append | delete
     primary_key: ["activity_id"]
     deterministic: true
     sort_by:
@@ -775,8 +775,9 @@ sink:
 
 | Mode        | Bronze        | Silver            | Gold              |
 | ----------- | ------------- | ----------------- | ----------------- |
-| `append`    | Только append | С явным idempotency contract | Append |
+| `append`    | Только append | —                 | —                 |
 | `merge`     | —             | Upsert по PK      | —                 |
+| `delete`    | —             | Полная перезапись | —                 |
 | `overwrite` | —             | —                 | Полная перезапись |
 | `scd2`      | —             | —                 | Историзация Type 2 |
 

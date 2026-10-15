@@ -12,6 +12,7 @@
 
 from __future__ import annotations
 
+import os
 import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -24,10 +25,6 @@ from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
-from tests.helpers.vcr_config import (
-    QUERY_IGNORE_EMAIL_MATCH_ON,
-    build_base_vcr_config,
-)
 
 REBALANCE_CASES = tuple(f"case_{index:02d}" for index in range(1, 16))
 _FIXTURES_DIR = Path(__file__).resolve().parents[2] / "fixtures" / "vcr"
@@ -35,11 +32,12 @@ _FIXTURES_DIR = Path(__file__).resolve().parents[2] / "fixtures" / "vcr"
 
 def build_vcr_config(provider: str) -> dict[str, Any]:
     """Build the canonical provider VCR config for rebalance suites."""
-    return build_base_vcr_config(
-        cassette_library_dir=_FIXTURES_DIR / provider,
-        match_on=QUERY_IGNORE_EMAIL_MATCH_ON,
-        decode_compressed_response=True,
-    )
+    return {
+        "cassette_library_dir": str(_FIXTURES_DIR / provider),
+        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
+        "match_on": ["method", "scheme", "host", "port", "path", "query_ignore_email"],
+        "decode_compressed_response": True,
+    }
 
 
 def build_rebalance_cassette_name(

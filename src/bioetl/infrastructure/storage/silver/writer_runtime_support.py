@@ -71,7 +71,6 @@ def _resolve_runtime_services_for_writer(
     if runtime_services is not None:
         return runtime_services
     resolved_request = SilverWriterRuntimeServicesRequest(
-        clock=writer._clock,
         csv_exporter=runtime_request.csv_exporter,
         tracing=runtime_request.tracing,
         write_policy=runtime_request.write_policy,
@@ -87,8 +86,6 @@ def _resolve_runtime_services_for_writer(
         contract_rollout_policy=runtime_request.contract_rollout_policy,
         base_path=base_path,
         pipeline_name=writer._pipeline_name,
-        transform_version=runtime_request.transform_version,
-        transform_steps=runtime_request.transform_steps,
         delta_module_loader=runtime_request.delta_module_loader,
     )
     return build_silver_writer_runtime_services(resolved_request)
@@ -138,7 +135,7 @@ def _rewire_runtime_services(
     if writer._postwrite is None:
         writer._postwrite = SilverPostwriteOperations(writer)
     if writer._metadata is not None:
-        writer._metadata = replace(writer._metadata, _host=writer, _clock=writer._clock)
+        writer._metadata = replace(writer._metadata, _host=writer)
 
 
 def _project_records_for_contract_version(
@@ -168,11 +165,7 @@ async def _write_single_target_impl(
     module_name: str,
 ) -> SilverWriteResult | None:
     """Execute one physical Silver write target with tracing."""
-    started_at = (
-        invocation.started_at
-        if invocation.started_at is not None
-        else writer._clock.now()
-    )
+    started_at = getattr(invocation, "started_at", None) or writer._clock.now()
     start_perf = time.perf_counter()
     return await execute_with_tracing(
         tracing=writer._tracing,

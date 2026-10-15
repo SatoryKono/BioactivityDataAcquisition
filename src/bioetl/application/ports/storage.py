@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from bioetl.domain.ports import MergedStoragePort, SilverStoragePort
-from bioetl.domain.types.gold_contracts import GoldWriteReceipt
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
@@ -71,7 +70,7 @@ class GoldMergedWriteProtocol(Protocol):
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
-    ) -> GoldWriteReceipt:
+    ) -> None:
         """Write merged Gold layer records with schema and completion metadata."""
         ...
 

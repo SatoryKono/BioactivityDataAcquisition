@@ -44,11 +44,7 @@ def vcr_config() -> dict[str, Any]:
 @pytest.fixture
 def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
     """Use deterministic cassette names for RF-013 rebalance cases."""
-    name = build_rebalance_cassette_name(request, provider="pubmed")
-    # Cases 12 and 14 differ only in redacted transport session metadata.
-    if name == "rf013_pubmed_health_case_14":
-        return "rf013_pubmed_health_case_12"
-    return name
+    return build_rebalance_cassette_name(request, provider="pubmed")
 
 
 @pytest_asyncio.fixture(scope="module", loop_scope="module")

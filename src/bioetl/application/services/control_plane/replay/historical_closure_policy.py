@@ -7,11 +7,6 @@ import json
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.replay.closure_claims import (
-    HISTORICAL_CLOSURE_MODEL_PUBLIC_NAMES,
-    build_narrowed_scope_global_claim,
-    build_universal_scope_global_claim,
-)
-from bioetl.application.services.control_plane.replay.closure_claims import (
     RESIDUAL_BLOCKED_STATUSES as RESIDUAL_BLOCKED_STATUSES,
 )
 from bioetl.application.services.control_plane.replay.closure_claims import (
@@ -23,6 +18,10 @@ from bioetl.application.services.control_plane.replay.closure_claims import (
 from bioetl.application.services.control_plane.replay.closure_claims import (
     HistoricalReplayResidualDispositionRecord as HistoricalReplayResidualDispositionRecord,
 )
+from bioetl.application.services.control_plane.replay.closure_claims import (
+    build_narrowed_scope_global_claim,
+    build_universal_scope_global_claim,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.services.control_plane.replay.historical_corpus_models import (
@@ -33,7 +32,10 @@ if TYPE_CHECKING:
     )
 
 __all__ = [
-    *HISTORICAL_CLOSURE_MODEL_PUBLIC_NAMES,
+    "RESIDUAL_BLOCKED_STATUSES",
+    "HistoricalReplayClaimScopeMode",
+    "HistoricalReplayClosureReportRecord",
+    "HistoricalReplayResidualDispositionRecord",
     "build_closure_report_id",
     "build_global_claim_gate",
     "build_retained_corpus_claim",

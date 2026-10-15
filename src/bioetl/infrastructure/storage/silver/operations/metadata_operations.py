@@ -9,7 +9,6 @@ from dataclasses import dataclass
 from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.ports import (
     AuditPort,
-    ClockPort,
     LineageStorePort,
     LoggerPort,
     MetadataCoordinatorPort,
@@ -33,7 +32,6 @@ class SilverMetadataOperations(
     """Silver-layer metadata operations via composition."""
 
     _logger: LoggerPort
-    _clock: ClockPort
     _metrics: MetricsPort | None = None
     _audit: AuditPort | None = None
     _metadata_writer: MetadataWriterPort | None = None  # pyright: ignore[reportIncompatibleVariableOverride]

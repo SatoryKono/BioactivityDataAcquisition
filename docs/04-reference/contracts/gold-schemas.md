@@ -299,21 +299,21 @@ ______________________________________________________________________
 | `pref_name`                    | str   | Yes      | Предпочтительное название        |
 | `molecule_type`                | str   | Yes      | Тип молекулы                     |
 | `max_phase`                    | float | Yes      | Фаза клинических испытаний (0-4) |
-| `canonical_smiles`             | str   | Yes      | Каноническая SMILES              |
-| `standard_inchi`               | str   | Yes      | InChI                            |
-| `inchi_key`                    | str   | Yes      | InChIKey                         |
+| `structure_canonical_smiles`   | str   | Yes      | Каноническая SMILES              |
+| `structure_standard_inchi`     | str   | Yes      | InChI                            |
+| `structure_standard_inchi_key` | str   | Yes      | InChIKey                         |
 
 ##### Физико-химические свойства
 
 | Поле                      | Описание                   |
 | ------------------------- | -------------------------- |
-| `logp`                  | Расчётный logP             |
-| `mw_freebase`           | Молекулярная масса         |
-| `hba_count`             | Hydrogen Bond Acceptors    |
-| `hbd_count`             | Hydrogen Bond Donors       |
-| `polar_surface_area`    | Polar Surface Area         |
-| `rotatable_bond_count`  | Rotatable Bonds            |
-| `ro5_violation_count`   | Нарушения правила Lipinski |
+| `property_alogp`          | Расчётный logP             |
+| `property_mw_freebase`    | Молекулярная масса         |
+| `property_hba`            | Hydrogen Bond Acceptors    |
+| `property_hbd`            | Hydrogen Bond Donors       |
+| `property_psa`            | Polar Surface Area         |
+| `property_rtb`            | Rotatable Bonds            |
+| `property_ro5_violations` | Нарушения правила Lipinski |
 
 ______________________________________________________________________
 
@@ -492,28 +492,28 @@ ______________________________________________________________________
 
 #### pubchem_compound
 
-**Primary Key**: `molecule_id`
+**Primary Key**: `cid`
 **Назначение**: Химические соединения PubChem
 
 ##### Gold-фильтры
 
-| Фильтр   | Значения                         | Обоснование        |
-| -------- | -------------------------------- | ------------------ |
-| required | `molecule_id, molecular_formula` | Минимальные данные |
+| Фильтр   | Значения                 | Обоснование        |
+| -------- | ------------------------ | ------------------ |
+| required | `cid, molecular_formula` | Минимальные данные |
 
 ##### Ключевые поля
 
-| Поле                | Тип   | Nullable | Описание             |
-| ------------------- | ----- | -------- | -------------------- |
-| `entity_id`         | str   | No       | Уникальный ID        |
-| `molecule_id`       | str   | No       | PubChem Compound ID  |
-| `molecular_formula` | str   | Yes      | Молекулярная формула |
-| `molecular_weight`  | float | Yes      | Молекулярная масса   |
-| `canonical_smiles`  | str   | Yes      | Каноническая SMILES  |
-| `isomeric_smiles`   | str   | Yes      | Изомерная SMILES     |
-| `inchi`             | str   | Yes      | InChI                |
-| `inchi_key`         | str   | Yes      | InChIKey             |
-| `iupac_name`        | str   | Yes      | IUPAC название       |
+| Поле                | Тип | Nullable | Описание             |
+| ------------------- | --- | -------- | -------------------- |
+| `entity_id`         | str | No       | Уникальный ID        |
+| `cid`               | str | No       | PubChem Compound ID  |
+| `molecular_formula` | str | Yes      | Молекулярная формула |
+| `molecular_weight`  | str | Yes      | Молекулярная масса   |
+| `canonical_smiles`  | str | Yes      | Каноническая SMILES  |
+| `isomeric_smiles`   | str | Yes      | Изомерная SMILES     |
+| `inchi`             | str | Yes      | InChI                |
+| `inchikey`          | str | Yes      | InChIKey             |
+| `iupac_name`        | str | Yes      | IUPAC название       |
 
 ______________________________________________________________________
 
@@ -529,7 +529,7 @@ ______________________________________________________________________
 | Фильтр     | Значения                          | Обоснование                  |
 | ---------- | --------------------------------- | ---------------------------- |
 | `reviewed` | `["true"]`                        | Только Swiss-Prot (reviewed) |
-| required   | `accession, entry_name, organism_scientific` | Полнота данных               |
+| required   | `accession, entry_name, organism` | Полнота данных               |
 
 ##### Ключевые поля
 
@@ -539,9 +539,8 @@ ______________________________________________________________________
 | `accession`       | str       | No       | UniProt Accession        |
 | `entry_name`      | str       | Yes      | Entry name               |
 | `protein_name`    | str       | Yes      | Название белка           |
-| `gene_primary`    | str       | Yes      | Основное название гена   |
-| `gene_synonyms`   | str       | Yes      | Синонимы названия гена   |
-| `taxonomy_id`     | float     | Yes      | NCBI Taxonomy ID         |
+| `gene_names`      | list[str] | Yes      | Названия генов           |
+| `organism_id`     | float     | Yes      | NCBI Taxonomy ID         |
 | `sequence_length` | float     | Yes      | Длина последовательности |
 
 ______________________________________________________________________
@@ -902,9 +901,9 @@ SELECT
     a.molecule_id,
     a.target_id,
     a.standard_value AS ic50_nm,
-    m.logp,
-    m.mw_freebase AS mw,
-    m.canonical_smiles
+    m.property_alogp,
+    m.property_mw_freebase AS mw,
+    m.structure_canonical_smiles
 FROM delta_scan('data/output/gold/chembl_activity') a
 JOIN delta_scan('data/output/gold/chembl_molecule') m
   ON a.molecule_id = m.molecule_id
@@ -1058,6 +1057,6 @@ ______________________________________________________________________
 | ChEMBL   | publication      | `publication_id` | required + enum/range validation | ~17    |
 | ChEMBL   | compound_record  | `record_id`      | required only                    | ~8     |
 | ChEMBL   | cell_line        | `cell_id`        | required only                    | ~12    |
-| PubChem  | compound         | `molecule_id`    | required only                    | ~10    |
+| PubChem  | compound         | `cid`            | required only                    | ~10    |
 | UniProt  | protein          | `accession`      | 1 column                         | ~8     |
 | PubMed   | publication      | `pmid`           | required only                    | ~24    |

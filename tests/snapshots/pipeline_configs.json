@@ -782,9 +782,7 @@
       "gold_table": "chembl.molecule",
       "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
-      "partition_cols": [
-        "molecule_type"
-      ],
+      "partition_cols": [],
       "primary_keys": [
         "molecule_id"
       ],
@@ -1017,9 +1015,7 @@
       "gold_table": "chembl.publication_term",
       "gold_write_mode": "overwrite",
       "on_schema_mismatch": "evolve",
-      "partition_cols": [
-        "term_type"
-      ],
+      "partition_cols": [],
       "primary_keys": [
         "publication_id",
         "term_type",
@@ -4809,9 +4805,7 @@
       "gold_table": "uniprot.protein",
       "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
-      "partition_cols": [
-        "organism_scientific"
-      ],
+      "partition_cols": [],
       "primary_keys": [
         "accession"
       ],

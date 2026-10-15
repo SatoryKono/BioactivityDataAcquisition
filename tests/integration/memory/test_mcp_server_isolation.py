@@ -36,11 +36,7 @@ def _call(
 
 
 def _server(path: Path) -> subprocess.Popen[str]:
-    source_path = Path(__file__).resolve().parents[3] / "src"
-    pythonpath = os.pathsep.join(
-        part for part in (str(source_path), os.environ.get("PYTHONPATH")) if part
-    )
-    env = dict(os.environ, MEMORY_FILE_PATH=str(path), PYTHONPATH=pythonpath)
+    env = dict(os.environ, MEMORY_FILE_PATH=str(path))
     return subprocess.Popen(
         [sys.executable, "-m", "memory.mcp_server"],
         stdin=subprocess.PIPE,

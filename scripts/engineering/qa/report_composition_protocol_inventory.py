@@ -11,7 +11,6 @@ from __future__ import annotations
 import argparse
 import ast
 import sys
-from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -102,71 +101,33 @@ def evaluate(config: dict[str, Any], live: list[dict[str, Any]]) -> list[str]:
             f"yaml protocols={len(configured)} expected_total={expected_total}"
         )
     if isinstance(configured, list):
-        errors.extend(_location_errors(configured, live))
+        live_lines = {
+            (str(row["name"]), str(row["path"])): int(row["line"]) for row in live
+        }
+        for row in configured:
+            if not isinstance(row, dict):
+                continue
+            key = (str(row.get("name")), str(row.get("path")))
+            expected_line = live_lines.get(key)
+            if expected_line is None:
+                errors.append(f"yaml protocol {key[0]} at {key[1]} is not in the live set")
+                continue
+            if int(row.get("line", -1)) != expected_line:
+                errors.append(
+                    f"{key[0]} yaml line {row.get('line')} != class line {expected_line}"
+                )
     return errors
-
-
-def _location_errors(
-    configured: list[dict[str, Any]], live: list[dict[str, Any]]
-) -> list[str]:
-    """Check identity and location separately from shrink-only aggregate gates."""
-    errors: list[str] = []
-    live_lines = {
-        (str(row["name"]), str(row["path"])): int(row["line"]) for row in live
-    }
-    for row in configured:
-        if not isinstance(row, dict):
-            continue
-        key = (str(row.get("name")), str(row.get("path")))
-        expected_line = live_lines.get(key)
-        if expected_line is None:
-            errors.append(f"yaml protocol {key[0]} at {key[1]} is not in the live set")
-            continue
-        if int(row.get("line", -1)) != expected_line:
-            errors.append(
-                f"{key[0]} yaml line {row.get('line')} != class line {expected_line}"
-            )
-    return errors
-
-
-def refresh_protocol_lines(
-    config: dict[str, Any], live: list[dict[str, Any]]
-) -> dict[str, Any]:
-    """Refresh locations only; additions, removals and gate violations fail closed."""
-    updated = deepcopy(config)
-    locations = {(row["name"], row["path"]): row["line"] for row in live}
-    rows = updated.get("protocols", [])
-    configured = {(row["name"], row["path"]) for row in rows}
-    if configured != set(locations) or len(rows) != len(locations):
-        raise ValueError("Protocol identities changed; inventory needs explicit review")
-    for row in rows:
-        row["line"] = locations[(row["name"], row["path"])]
-    errors = evaluate(updated, live)
-    if errors:
-        raise ValueError("\n".join(errors))
-    return updated
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
-    mode = parser.add_mutually_exclusive_group()
-    mode.add_argument("--check", action="store_true")
-    mode.add_argument(
-        "--update",
-        action="store_true",
-        help="Refresh AST locations without changing inventory identities or caps",
-    )
+    parser.add_argument("--check", action="store_true")
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     args = parser.parse_args(argv)
     config = yaml.safe_load(
         resolve_output_path(args.config).read_text(encoding="utf-8")
     )
     live = collect_scoped_protocols()
-    if args.update:
-        config = refresh_protocol_lines(config, live)
-        resolve_output_path(args.config).write_text(
-            yaml.safe_dump(config, sort_keys=False), encoding="utf-8"
-        )
     errors = evaluate(config, live)
     if errors:
         print("\n".join(errors), file=sys.stderr)

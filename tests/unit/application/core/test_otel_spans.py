@@ -42,8 +42,6 @@ Tests verify:
 
 from __future__ import annotations
 
-from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
-
 import asyncio
 from types import SimpleNamespace
 from typing import Any, cast
@@ -640,11 +638,7 @@ class TestRecordProcessorSpanRegression:
         writer = MagicMock()
         writer.write_bronze = AsyncMock(return_value=None)
         writer.write_silver = AsyncMock(return_value=None)
-        writer.write_gold = AsyncMock(
-            return_value=GoldWriteReceipt(
-                "synthetic", "0.0.0", GoldWriteCategory.COMPLETE, ("synthetic",)
-            )
-        )
+        writer.write_gold = AsyncMock(return_value=None)
         writer.log_and_track_write_error = MagicMock()
 
         config = MagicMock(spec=RecordProcessorConfig)

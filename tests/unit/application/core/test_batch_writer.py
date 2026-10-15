@@ -29,8 +29,6 @@
 
 from __future__ import annotations
 
-from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
-
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 from tests.helpers.deterministic_ids import (
@@ -58,13 +56,7 @@ def mock_storage():
     storage = AsyncMock()
     storage.write_bronze = AsyncMock()
     storage.write_silver = AsyncMock()
-
-    async def write_gold_receipt(*, table_name, **kwargs):
-        return GoldWriteReceipt(
-            table_name, "0.0.0", GoldWriteCategory.COMPLETE, (table_name,)
-        )
-
-    storage.write_gold = AsyncMock(side_effect=write_gold_receipt)
+    storage.write_gold = AsyncMock()
     return storage
 
 

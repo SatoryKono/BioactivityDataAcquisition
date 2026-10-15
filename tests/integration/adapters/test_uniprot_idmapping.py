@@ -18,13 +18,12 @@ Cassettes location: tests/fixtures/vcr/uniprot/
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
-from tests.helpers.vcr_config import build_base_vcr_config
 
 # VCR cassette directory for UniProt adapter tests (shared with test_uniprot.py)
 CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "uniprot"
@@ -33,10 +32,12 @@ CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "unipr
 @pytest.fixture(scope="module")
 def vcr_config() -> dict[str, Any]:
     """Configure VCR for UniProt ID Mapping adapter tests."""
-    return build_base_vcr_config(
-        cassette_library_dir=CASSETTE_DIR,
-        decode_compressed_response=True,
-    )
+    return {
+        "cassette_library_dir": str(CASSETTE_DIR),
+        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
+        "match_on": ["method", "scheme", "host", "port", "path", "query"],
+        "decode_compressed_response": True,
+    }
 
 
 @pytest.mark.integration

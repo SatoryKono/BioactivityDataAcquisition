@@ -107,7 +107,6 @@ class TestSilverWriterRuntimeFacade:
             run_type="incremental",
             source_batch_id="batch-1",
             ingestion_ts=datetime(2026, 1, 1, tzinfo=UTC),
-            started_at=datetime(2026, 1, 1, tzinfo=UTC),
         )
 
         with patch(

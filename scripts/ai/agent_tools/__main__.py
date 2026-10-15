@@ -76,14 +76,14 @@ TOOLS: Final[dict[str, ToolSpec]] = {
     "agentdebugx": ToolSpec(
         name="AgentDebugX",
         distribution="agentdebugx",
-        expected_version="0.5.2",
+        expected_version="0.3.1",
         executable="agentdebug",
         report_subdir="agentdebugx",
     ),
     "proofagent": ToolSpec(
         name="ProofAgent Harness",
         distribution="proofagent-harness",
-        expected_version="0.13.0",
+        expected_version="0.11.0",
         executable="proof",
         report_subdir="proofagent",
     ),

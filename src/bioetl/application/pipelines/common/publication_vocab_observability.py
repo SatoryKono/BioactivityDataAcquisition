@@ -98,5 +98,7 @@ def _allowed_publication_vocab(
     registry: PublicationControlledVocabularyRegistry | None,
 ) -> frozenset[str]:
     if registry is None:
-        return frozenset()
+        raise RuntimeError(
+            "publication controlled vocabulary must be passed explicitly"
+        )
     return registry.allowed_values(provider, field_name)

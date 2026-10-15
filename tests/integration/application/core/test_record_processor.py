@@ -40,7 +40,6 @@ from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.domain.config import TableConfig
 from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
 from bioetl.domain.ports import MetricsPort, SilverWriteRequest
-from bioetl.domain.types.gold_contracts import GoldWriteReceipt, GoldWriteCategory
 from bioetl.domain.types import ValidationResult
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.config._base import get_pipeline_config
@@ -62,11 +61,7 @@ def mock_storage():
     storage = MagicMock()
     storage.write_bronze = AsyncMock()
     storage.write_silver = AsyncMock()
-    storage.write_gold = AsyncMock(
-        return_value=GoldWriteReceipt(
-            "synthetic", "0.0.0", GoldWriteCategory.COMPLETE, ("synthetic",)
-        )
-    )
+    storage.write_gold = AsyncMock()
     return storage
 
 

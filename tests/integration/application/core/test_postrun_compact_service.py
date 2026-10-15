@@ -73,7 +73,7 @@ def _build_config(
         provider="chembl",
         entity_type="activity",
         table=TableConfig(
-            primary_keys=primary_keys if primary_keys is not None else ["activity_id"],
+            primary_keys=primary_keys or ["activity_id"],
             silver_table=silver_table,
             silver_write_mode=silver_write_mode,
             gold_write_mode="scd2",
@@ -82,14 +82,13 @@ def _build_config(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("write_mode", [SilverWriteMode.APPEND, SilverWriteMode.MERGE])
-async def test_postrun_compact_service_runs_dedup_and_optimize_for_supported_mode(
-    write_mode: SilverWriteMode,
-) -> None:
+async def test_postrun_compact_service_runs_dedup_and_optimize_for_append_mode() -> (
+    None
+):
     storage = _RecordingStorage(deduplicate_result=7)
     logger = _RecordingLogger()
     service = PostrunCompactService(
-        config=_build_config(silver_write_mode=write_mode),
+        config=_build_config(),
         storage=storage,
         logger=logger,
         warning_allowlist=(RuntimeError,),
@@ -135,18 +134,22 @@ async def test_postrun_compact_service_keeps_success_when_optimize_is_allowliste
     ]
 
 
-def test_postrun_compact_rejects_missing_keys_before_storage_calls() -> None:
+@pytest.mark.asyncio
+async def test_postrun_compact_service_skips_delete_mode_without_storage_calls() -> (
+    None
+):
     storage = _RecordingStorage(deduplicate_result=99)
     logger = _RecordingLogger()
-    with pytest.raises(ValueError, match="primary_keys cannot be empty"):
-        PostrunCompactService(
-            config=_build_config(
-                silver_write_mode=SilverWriteMode.MERGE, primary_keys=[]
-            ),
-            storage=storage,
-            logger=logger,
-            warning_allowlist=(RuntimeError,),
-        )
+    service = PostrunCompactService(
+        config=_build_config(silver_write_mode=SilverWriteMode.DELETE),
+        storage=storage,
+        logger=logger,
+        warning_allowlist=(RuntimeError,),
+    )
+
+    result = await service.run_if_needed()
+
+    assert result == CompactionResult(status="skipped")
     assert storage.deduplicate_calls == []
     assert storage.optimize_calls == []
     assert logger.info_events == []
