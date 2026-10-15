@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-15T17:30:46.699003+00:00",
+  "generated_at": "2026-10-15T15:35:52.965764+00:00",
   "summary": {
-    "total_scripts": 646,
+    "total_scripts": 652,
     "status_counts": {
       "active": 334,
-      "supporting": 312
+      "supporting": 318
     },
     "reference_group_coverage": {
       "agents": 11,
       "build": 18,
       "ci": 71,
-      "docs": 281,
-      "other": 16,
-      "scripts": 543,
+      "docs": 283,
+      "other": 50,
+      "scripts": 545,
       "skills": 13,
-      "tests": 464
+      "tests": 465
     }
   },
   "scripts": [
@@ -161,7 +161,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 11,
       "references": [
         {
           "path": ".codex/skills/SKILLS-CATALOG.md",
@@ -174,6 +174,24 @@
           "line": 19,
           "source_group": "skills",
           "text": "bash scripts/ai/codex/check_skills_mirror.sh --sync"
+        },
+        {
+          "path": ".github/ISSUES/AI-RUNTIME-AUDIT-001-Make-AI-Skill-Mirror-CI-Truthful-And-Enforce-Devin-Parity.md",
+          "line": 18,
+          "source_group": "other",
+          "text": "- `scripts/ai/codex/check_skills_mirror.sh --check` only verifies that"
+        },
+        {
+          "path": ".github/ISSUES/AI-RUNTIME-AUDIT-001-Make-AI-Skill-Mirror-CI-Truthful-And-Enforce-Devin-Parity.md",
+          "line": 50,
+          "source_group": "other",
+          "text": "`scripts/ai/codex/check_skills_mirror.sh` with truthful `--check` and `--sync`"
+        },
+        {
+          "path": ".github/ISSUES/AI-RUNTIME-AUDIT-001-Make-AI-Skill-Mirror-CI-Truthful-And-Enforce-Devin-Parity.md",
+          "line": 90,
+          "source_group": "other",
+          "text": "bash scripts/ai/codex/check_skills_mirror.sh --check"
         },
         {
           "path": "docs/00-project/ai/skills/README.md",
@@ -192,24 +210,6 @@
           "line": 18,
           "source_group": "docs",
           "text": "bash scripts/ai/codex/check_skills_mirror.sh --check"
-        },
-        {
-          "path": "docs/00-project/ai/skills/local/SKILLS-CATALOG.md",
-          "line": 19,
-          "source_group": "docs",
-          "text": "bash scripts/ai/codex/check_skills_mirror.sh --sync"
-        },
-        {
-          "path": "docs/05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md",
-          "line": 159,
-          "source_group": "docs",
-          "text": "| HGN-007 / #6177 | `configs/quality/generated_artifact_routing.yaml` owns `ai-skill-reference-mirror` and `ai-skill-license-mirrors` through `scripts/ai/codex/check_skills_mirror.sh`. | Closed. Skill"
-        },
-        {
-          "path": "scripts/ops/support/skills/check_skills_mirror.sh",
-          "line": 8,
-          "source_group": "scripts",
-          "text": "exec bash \"$REPO_ROOT/scripts/ai/codex/check_skills_mirror.sh\" \"$@\""
         }
       ]
     },
@@ -1612,8 +1612,32 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 68,
+      "reference_count": 72,
       "references": [
+        {
+          "path": ".github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md",
+          "line": 12,
+          "source_group": "other",
+          "text": "| F-02: one MCP setup flow is documented | `scripts/ai/codex/setup_mcp.py` generates the tracked and local projections described by `README.md` | Confirmed design fact; no issue by itself |"
+        },
+        {
+          "path": ".github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md",
+          "line": 16,
+          "source_group": "other",
+          "text": "| F-06: Cursor/Copilot runtime files are not auditable | `.cursor/mcp.json` and `.vscode/mcp.json` remain intentionally local/generated, but their shape is owned by `setup_mcp.py` and covered by setup"
+        },
+        {
+          "path": ".github/ISSUES/AI-RUNTIME-AUDIT-002-Eliminate-Tracked-Devin-MCP-Workstation-Paths.md",
+          "line": 19,
+          "source_group": "other",
+          "text": "- `scripts/ai/codex/setup_mcp.py` intentionally generates `.devin/config.json`"
+        },
+        {
+          "path": ".github/ISSUES/AI-RUNTIME-AUDIT-002-Eliminate-Tracked-Devin-MCP-Workstation-Paths.md",
+          "line": 60,
+          "source_group": "other",
+          "text": "- Update `scripts/ai/codex/setup_mcp.py` so Devin generation follows the chosen"
+        },
         {
           "path": ".github/workflows/skills-consistency.yml",
           "line": 16,
@@ -1637,30 +1661,6 @@
           "line": 85,
           "source_group": "docs",
           "text": "`scripts/ai/codex/setup_mcp.py`; stdio-обёртки `scripts/ai/mcp/*_wrapper.sh`)."
-        },
-        {
-          "path": "docs/00-project/ai/agents/guides/KIMI.md",
-          "line": 144,
-          "source_group": "docs",
-          "text": "python scripts/ai/codex/setup_mcp.py --check"
-        },
-        {
-          "path": "docs/00-project/ai/agents/guides/KIMI.md",
-          "line": 145,
-          "source_group": "docs",
-          "text": "python scripts/ai/codex/setup_mcp.py --check-local"
-        },
-        {
-          "path": "docs/00-project/ai/agents/guides/MUSE.md",
-          "line": 59,
-          "source_group": "docs",
-          "text": "`scripts/ai/codex/setup_mcp.py`; wrappers in `scripts/ai/mcp/*_wrapper.sh`)."
-        },
-        {
-          "path": "docs/00-project/ai/agents/guides/MUSE.md",
-          "line": 83,
-          "source_group": "docs",
-          "text": "`scripts/ai/codex/setup_mcp.py`: every entry carries `\"mode\": \"optional\"`"
         }
       ]
     },
@@ -5238,7 +5238,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 43,
+      "reference_count": 44,
       "references": [
         {
           "path": "docs/00-project/ai/memory/MEMORY_ARCHITECTURE.md",
@@ -5278,7 +5278,7 @@
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 112,
+          "line": 115,
           "source_group": "docs",
           "text": "| Pipeline factory registry | `src/bioetl/composition/factories/pipeline/registry.py` | Registers provider/composite factories for composition-time lookup. | Composition registry API and pipeline fact"
         },
@@ -7560,8 +7560,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
+        {
+          "path": "docs/00-project/governance/documentation-update-plan.md",
+          "line": 34,
+          "source_group": "docs",
+          "text": "- Генератор: `scripts/diagrams/render/generate_pipeline_dataflows.py`"
+        },
         {
           "path": "scripts/diagrams/README.md",
           "line": 71,
@@ -8085,7 +8091,7 @@
         "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 219,
+      "reference_count": 225,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -8266,8 +8272,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
+        {
+          "path": ".github/ISSUES/AI-RUNTIME-AUDIT-001-Make-AI-Skill-Mirror-CI-Truthful-And-Enforce-Devin-Parity.md",
+          "line": 25,
+          "source_group": "other",
+          "text": "- `scripts/docs/checks/check_drift.py` scans both runtime roots for selected"
+        },
         {
           "path": "scripts/docs/README.md",
           "line": 49,
@@ -8323,13 +8335,31 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 38,
+      "reference_count": 40,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
           "line": 43,
           "source_group": "skills",
           "text": "Use targeted docs checks such as `python -m scripts.docs check-links` and"
+        },
+        {
+          "path": ".github/ISSUES/DOC-AUDIT-2026-06-19-ISSUE-PACK.md",
+          "line": 79,
+          "source_group": "other",
+          "text": "python3 -m scripts.docs check-links --links --specs --configs"
+        },
+        {
+          "path": ".github/ISSUES/PLAN-001-Sync-Tech-Debt-Zero-Epic-Mirror-With-GitHub-State.md",
+          "line": 69,
+          "source_group": "other",
+          "text": "python3 -m scripts.docs check-links --links --specs --configs"
+        },
+        {
+          "path": ".github/ISSUES/PLAN-002-Archive-Closed-Streams-D-E-In-Local-Tech-Debt-Planning-Surfaces.md",
+          "line": 77,
+          "source_group": "other",
+          "text": "python3 -m scripts.docs check-links --links --specs --configs"
         },
         {
           "path": ".github/workflows/docs.yml",
@@ -8354,24 +8384,6 @@
           "line": 1447,
           "source_group": "docs",
           "text": "автоматические docs-проверки (`python -m scripts.docs check-links` и"
-        },
-        {
-          "path": "docs/00-project/TOOLS.md",
-          "line": 64,
-          "source_group": "docs",
-          "text": "uv run python -m scripts.docs check-links"
-        },
-        {
-          "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
-          "line": 69,
-          "source_group": "docs",
-          "text": "- run `python -m scripts.docs check-links` (full suite; the `--links --specs --configs` subset is insufficient — DOCS-PIPE-006, #11858)"
-        },
-        {
-          "path": "docs/00-project/ai/prompts/fragments/project-requirements-audit.md",
-          "line": 42,
-          "source_group": "docs",
-          "text": "| `cycle.docs` | documentation / DOC-GOV-09 | `python -m scripts.docs verify` / `check-drift` / `check-links` |"
         }
       ]
     },
@@ -8402,7 +8414,7 @@
         },
         {
           "path": "tests/architecture/test_documentation_cleanup_inventory.py",
-          "line": 322,
+          "line": 323,
           "source_group": "tests",
           "text": "route[\"generator\"] == \"scripts/docs/checks/documentation_cleanup_inventory.py\""
         },
@@ -9016,8 +9028,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 26,
       "references": [
+        {
+          "path": ".github/ISSUES/CHEMBL-016-Close-Remaining-Chembl-Normalization-Governance-Gaps.md",
+          "line": 160,
+          "source_group": "other",
+          "text": "- `scripts/docs/matrix/generate_pipeline_normalization_matrix.py`"
+        },
         {
           "path": "docs/filters/inventory-baseline.csv",
           "line": 173,
@@ -9056,12 +9074,6 @@
         },
         {
           "path": "scripts/docs/matrix/normalization_matrix_builder.py",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "from scripts.docs.matrix.generate_pipeline_normalization_matrix import ("
-        },
-        {
-          "path": "scripts/docs/matrix/normalization_matrix_report.py",
           "line": 5,
           "source_group": "scripts",
           "text": "from scripts.docs.matrix.generate_pipeline_normalization_matrix import ("
@@ -9535,7 +9547,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/02-architecture/03-infrastructure-layer.md",
@@ -9545,7 +9557,7 @@
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 283,
+          "line": 286,
           "source_group": "docs",
           "text": "| Manifest service orchestration | `src/bioetl/application/services/control_plane/manifest/service.py`, `models.py`, `validation.py` | Create/inspect immutable run manifests and enforce application-le"
         },
@@ -9554,12 +9566,6 @@
           "line": 394,
           "source_group": "docs",
           "text": "| `GoldValidatorPort` протокол           | ✅ Реализован | `domain/ports/validation.py:41-61`                       |"
-        },
-        {
-          "path": "docs/02-architecture/decisions/ADR-020-basepipeline-decomposition.md",
-          "line": 62,
-          "source_group": "docs",
-          "text": "- `src/bioetl/domain/config/` (package: `pipeline.py`, `runtime.py`, `dq.py`, `validation.py`) - **NEW**"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md",
@@ -9584,6 +9590,12 @@
           "line": 42,
           "source_group": "docs",
           "text": "| Quality | `quality/validation.py`, `quality/quarantine.py`, `quality/dq_report.py`, `quality/contract_policy.py`, `quality/fallback_policy.py` | Validation, quarantine, contract-policy, and DQ repor"
+        },
+        {
+          "path": "docs/04-reference/domain/ports.md",
+          "line": 112,
+          "source_group": "docs",
+          "text": "| `quality/validation.py` | Quality | Schema and record validation contracts. |"
         }
       ],
       "owner": "@bioetl-platform",
@@ -9662,8 +9674,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": ".github/ISSUES/CODERABBIT-FULL-2026-08-ISSUE-PACK.md",
+          "line": 93,
+          "source_group": "other",
+          "text": "`scripts/engineering/apply_s1_c2_fixes.py` remains for closeout auditability"
+        },
         {
           "path": "tests/security/test_snr_rf002_script_sinks.py",
           "line": 9,
@@ -10148,7 +10166,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 10,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -10160,7 +10178,7 @@
           "path": "docs/05-engineering/test-telemetry-baseline.md",
           "line": 44,
           "source_group": "docs",
-          "text": "`scripts/engineering/ci/junit_duration_summary.py`."
+          "text": "`scripts/engineering/ci/junit_duration_summary.py` and"
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
@@ -10182,9 +10200,9 @@
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 647,
+          "line": 648,
           "source_group": "scripts",
-          "text": "\"  `scripts/engineering/ci/junit_duration_summary.py`.\","
+          "text": "\"  `scripts/engineering/ci/junit_duration_summary.py` and\","
         },
         {
           "path": "tests/architecture/test_ci_test_strategy.py",
@@ -10213,13 +10231,13 @@
       "references": [
         {
           "path": "scripts/engineering/ci/test_telemetry_provenance.py",
-          "line": 466,
+          "line": 467,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.local_test_telemetry import ("
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 999,
+          "line": 1001,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.local_test_telemetry import build_local_baseline"
         },
@@ -10680,19 +10698,19 @@
       "references": [
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 58,
+          "line": 59,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.ci.test_telemetry_provenance --measurement-repo-root"
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 661,
+          "line": 663,
           "source_group": "scripts",
           "text": "\"  `python -m scripts.engineering.ci.test_telemetry_provenance --measurement-repo-root\","
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 935,
+          "line": 937,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.test_telemetry_provenance import ("
         },
@@ -10759,19 +10777,19 @@
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 63,
+          "line": 64,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.ci.update_test_telemetry_baseline"
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 84,
+          "line": 85,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.ci.update_test_telemetry_baseline`"
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 138,
+          "line": 139,
           "source_group": "docs",
           "text": "3. Run `python -m scripts.engineering.ci.update_test_telemetry_baseline --source-commit <sha> --source-run-id <run-id> ...` with either direct artifacts or fallback diagnostics inputs."
         },
@@ -11114,7 +11132,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 269,
+      "reference_count": 270,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -11179,7 +11197,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 260,
+          "line": 270,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/.wsl-vpn-fix.ps1`                   | Recover Windows-side VPN proxy settings for WSL interoperability                          |"
         }
@@ -11390,7 +11408,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 218,
+          "line": 228,
           "source_group": "scripts",
           "text": "| `install-deps`       | `scripts/engineering/dev/install_deps.py`                    | Auxiliary helper script, not a full project bootstrap            |"
         },
@@ -11415,7 +11433,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 223,
+          "line": 233,
           "source_group": "scripts",
           "text": "| `mock-metrics`       | `scripts/engineering/dev/metrics_mock_server.py`             | Start mock metrics server                                        |"
         },
@@ -11501,11 +11519,54 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 130,
+          "line": 140,
           "source_group": "scripts",
           "text": "invoke `bash scripts/engineering/dev/pretest_guardrails.sh --scope full`"
         }
       ]
+    },
+    {
+      "path": "scripts/engineering/dev/pytest_junit_subtests.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": "docs/05-engineering/test-telemetry-baseline.md",
+          "line": 45,
+          "source_group": "docs",
+          "text": "`scripts/engineering/dev/pytest_junit_subtests.py`."
+        },
+        {
+          "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
+          "line": 55,
+          "source_group": "scripts",
+          "text": "\"scripts/engineering/dev/pytest_junit_subtests.py\","
+        },
+        {
+          "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
+          "line": 649,
+          "source_group": "scripts",
+          "text": "\"  `scripts/engineering/dev/pytest_junit_subtests.py`.\","
+        },
+        {
+          "path": "scripts/engineering/dev/README.md",
+          "line": 86,
+          "source_group": "scripts",
+          "text": "JUnit output uses `scripts/engineering/dev/pytest_junit_subtests.py`, loaded"
+        },
+        {
+          "path": "tests/unit/scripts/ci/test_update_test_telemetry_baseline.py",
+          "line": 650,
+          "source_group": "tests",
+          "text": "producer = tmp_path / \"scripts/engineering/dev/pytest_junit_subtests.py\""
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-01-12",
+      "next_step": "Retain as the pytest JUnit plugin loaded by tests/conftest.py to preserve subtest records for strict telemetry accounting. Remove after the pinned upstream reporter provides equivalent records and the pass/fail/skip regressions pass without this adapter."
     },
     {
       "path": "scripts/engineering/dev/python/migrate_deprecated_names.py",
@@ -11531,13 +11592,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 219,
+          "line": 229,
           "source_group": "scripts",
           "text": "| `probe-quality`      | `scripts/engineering/dev/quality_gate_probe.py`              | Measure narrow pytest/mypy startup latency and timeout behavior  |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 256,
+          "line": 266,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/quality_gate_probe.py`              | Diagnose narrow pytest/mypy startup latency and timeout behavior                          |"
         },
@@ -11558,13 +11619,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 224,
+          "line": 234,
           "source_group": "scripts",
           "text": "| `mock-quarantine`    | `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock quarantine explorer API server                        |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 257,
+          "line": 267,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock `/ops/quarantine/*` endpoints for Silver Reject Explorer smoke checks          |"
         },
@@ -11701,7 +11762,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 37,
+      "reference_count": 36,
       "references": [
         {
           "path": ".pre-commit-config.yaml",
@@ -11758,8 +11819,32 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 41,
+      "reference_count": 45,
       "references": [
+        {
+          "path": ".github/ISSUES/DOC-AUDIT-003-Align-Windows-Pytest-Docs-With-Xdist-Policy.md",
+          "line": 18,
+          "source_group": "other",
+          "text": ".\\scripts\\engineering\\dev\\run_pytest.ps1 tests\\ --timeout=120 -n 4 --lf"
+        },
+        {
+          "path": ".github/ISSUES/DOC-AUDIT-003-Align-Windows-Pytest-Docs-With-Xdist-Policy.md",
+          "line": 24,
+          "source_group": "other",
+          "text": "- `run_pytest.ps1` sets `PYTEST_XDIST_AUTO_NUM_WORKERS` to `1` unless overridden;"
+        },
+        {
+          "path": ".github/ISSUES/DOC-AUDIT-003-Align-Windows-Pytest-Docs-With-Xdist-Policy.md",
+          "line": 38,
+          "source_group": "other",
+          "text": "- `scripts/engineering/dev/run_pytest.ps1:355-361`"
+        },
+        {
+          "path": ".github/ISSUES/DOC-AUDIT-003-Align-Windows-Pytest-Docs-With-Xdist-Policy.md",
+          "line": 66,
+          "source_group": "other",
+          "text": "scripts/engineering/dev/run_tests.py scripts/engineering/dev/run_pytest.ps1 tests/conftest.py"
+        },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
           "line": 185,
@@ -11783,30 +11868,6 @@
           "line": 201,
           "source_group": "docs",
           "text": "- PowerShell: `.\\scripts\\engineering\\dev\\run_pytest.ps1 tests\\architecture\\ -v`, `.\\scripts\\engineering\\dev\\run_mypy.ps1`"
-        },
-        {
-          "path": "docs/00-project/ai/memory/gh-issues-documentation-update.md",
-          "line": 40,
-          "source_group": "docs",
-          "text": "- Windows PowerShell: `setup_env_windows.ps1`, `run_pytest.ps1`, `run_mypy.ps1`"
-        },
-        {
-          "path": "docs/00-project/ai/prompts/library/test/cycle.md",
-          "line": 39,
-          "source_group": "docs",
-          "text": "- scripts/engineering/dev/run_pytest.ps1"
-        },
-        {
-          "path": "docs/00-project/ai/prompts/library/test/cycle.md",
-          "line": 139,
-          "source_group": "docs",
-          "text": "или `.\\scripts\\engineering\\dev\\run_pytest.ps1 <scope> …`"
-        },
-        {
-          "path": "docs/00-project/ai/prompts/library/test/fix-retest.md",
-          "line": 22,
-          "source_group": "docs",
-          "text": "- scripts/engineering/dev/run_pytest.ps1"
         }
       ]
     },
@@ -11942,7 +12003,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 249,
+          "line": 259,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/run_tests.ps1`                      | Run tests (PowerShell variant)                                                            |"
         },
@@ -11971,8 +12032,20 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 24,
+      "reference_count": 26,
       "references": [
+        {
+          "path": ".github/ISSUES/DOC-AUDIT-003-Align-Windows-Pytest-Docs-With-Xdist-Policy.md",
+          "line": 37,
+          "source_group": "other",
+          "text": "- `scripts/engineering/dev/run_tests.py:106-112`"
+        },
+        {
+          "path": ".github/ISSUES/DOC-AUDIT-003-Align-Windows-Pytest-Docs-With-Xdist-Policy.md",
+          "line": 66,
+          "source_group": "other",
+          "text": "scripts/engineering/dev/run_tests.py scripts/engineering/dev/run_pytest.ps1 tests/conftest.py"
+        },
         {
           "path": "docs/00-project/governance/script-naming-conventions.md",
           "line": 37,
@@ -11999,27 +12072,15 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 221,
+          "line": 231,
           "source_group": "scripts",
           "text": "| `run-tests`          | `scripts/engineering/dev/run_tests.py`                       | Run tests                                                        |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 225,
+          "line": 235,
           "source_group": "scripts",
           "text": "| `test-changed`       | `scripts/engineering/dev/run_tests.py changed`               | Run tests for changed files only                                 |"
-        },
-        {
-          "path": "scripts/engineering/dev/__main__.py",
-          "line": 43,
-          "source_group": "scripts",
-          "text": "\"run-tests\": \"run_tests.py\","
-        },
-        {
-          "path": "scripts/engineering/dev/__main__.py",
-          "line": 106,
-          "source_group": "scripts",
-          "text": "commands={\"test-changed\": python_command(\"run_tests.py\", \"changed\")},"
         }
       ]
     },
@@ -12044,7 +12105,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 248,
+          "line": 258,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/run_tests.sh`                       | Run tests (shell variant)                                                                 |"
         },
@@ -12077,7 +12138,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 265,
+          "line": 275,
           "source_group": "scripts",
           "text": "Canonical entrypoint: `scripts/engineering/dev/setup_bioetl_wsl.ps1`."
         }
@@ -12684,11 +12745,29 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 11,
       "references": [
         {
+          "path": ".github/ISSUES/RH-017-Resolve-Noncanonical-Concepts-Root-Documentation-Surface.md",
+          "line": 33,
+          "source_group": "other",
+          "text": "- `python3 scripts/engineering/diagnostics/audit_structure.py --path .`"
+        },
+        {
+          "path": ".github/ISSUES/RH-017-Resolve-Noncanonical-Concepts-Root-Documentation-Surface.md",
+          "line": 88,
+          "source_group": "other",
+          "text": "- `python3 scripts/engineering/diagnostics/audit_structure.py --path .`"
+        },
+        {
+          "path": ".github/ISSUES/RH-017-Resolve-Noncanonical-Concepts-Root-Documentation-Surface.md",
+          "line": 95,
+          "source_group": "other",
+          "text": "python3 scripts/engineering/diagnostics/audit_structure.py --path ."
+        },
+        {
           "path": ".github/ISSUES/ROOT-HYGIENE-ISSUES-INDEX.md",
-          "line": 38,
+          "line": 31,
           "source_group": "other",
           "text": "- `python3 scripts/engineering/diagnostics/audit_structure.py --path .`"
         },
@@ -12712,27 +12791,9 @@
         },
         {
           "path": "docs/03-guides/cleanup-policy.md",
-          "line": 246,
+          "line": 245,
           "source_group": "docs",
           "text": "python3 scripts/engineering/diagnostics/audit_structure.py --path ."
-        },
-        {
-          "path": "scripts/engineering/diagnostics/README.md",
-          "line": 18,
-          "source_group": "scripts",
-          "text": "| `audit-structure` | `scripts/engineering/diagnostics/audit_structure.py`      | Validate project structure against file policy |"
-        },
-        {
-          "path": "scripts/engineering/diagnostics/__main__.py",
-          "line": 26,
-          "source_group": "scripts",
-          "text": "\"audit-structure\": \"audit_structure.py\","
-        },
-        {
-          "path": "tests/unit/scripts/repo/test_audit_structure.py",
-          "line": 21,
-          "source_group": "tests",
-          "text": "from scripts.engineering.diagnostics import audit_structure as module"
         }
       ]
     },
@@ -12946,7 +13007,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 392,
+      "reference_count": 403,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -14012,6 +14073,25 @@
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Consolidate this manual source-line counter with the canonical module-coverage inventory reporting path, then remove the duplicate utility after its output contract is covered."
+    },
+    {
+      "path": "scripts/engineering/qa/create_github_issues.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": ".github/ISSUES/TDX-AUDIT-007-Govern-Zero-Reference-Supporting-Scripts.md",
+          "line": 18,
+          "source_group": "other",
+          "text": "- `scripts/engineering/qa/create_github_issues.py`"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-11-17",
+      "next_step": "Retain only as a bounded historical GitHub issue seeding helper tied to a legacy markdown source and local .env token flow; either replace it with a governed issue-creation workflow or retire it once no reviewed maintenance lane needs it. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17."
     },
     {
       "path": "scripts/engineering/qa/debt_governance_gate_evaluators.py",
@@ -15436,8 +15516,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 22,
       "references": [
+        {
+          "path": ".github/ISSUES/_arch_vg_20260825/ARCH-VG-01.md",
+          "line": 26,
+          "source_group": "other",
+          "text": "python -m scripts.engineering.qa.refresh_governance_artifacts"
+        },
         {
           "path": "AGENTS.md",
           "line": 46,
@@ -15479,12 +15565,6 @@
           "line": 111,
           "source_group": "docs",
           "text": "7. Ban `python -m scripts.engineering.qa.refresh_governance_artifacts` for this MODE."
-        },
-        {
-          "path": "docs/00-project/governance/08-debt-ownership-playbook.md",
-          "line": 78,
-          "source_group": "docs",
-          "text": "python -m scripts.engineering.qa.refresh_governance_artifacts"
         }
       ]
     },
@@ -15658,8 +15738,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
+        {
+          "path": ".github/ISSUES/_arch_vg_20260825/ARCH-VG-01.md",
+          "line": 24,
+          "source_group": "other",
+          "text": "python scripts/engineering/qa/report_architecture_quality_scorecard.py"
+        },
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 66,
@@ -15763,8 +15849,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".github/ISSUES/PD3-2026-07-28-PROJECT-DIAGNOSTICS-STRUCTURAL-DEBT-ISSUE-PACK.md",
+          "line": 6,
+          "source_group": "other",
+          "text": "- `scripts/engineering/qa/report_basedpyright_suppression_inventory.py`"
+        },
         {
           "path": "docs/00-project/ai/agents/guides/BASEDPRIGHT_PROJECT_DIAGNOSTICS.md",
           "line": 51,
@@ -15850,8 +15942,20 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 8,
       "references": [
+        {
+          "path": ".github/ISSUES/TWIN-IMPORT-RATCHET-4744-Implement-Sanctioned-Twin-Module-Ratchet-Reduction.md",
+          "line": 21,
+          "source_group": "other",
+          "text": "- `scripts/engineering/qa/report_compatibility_importer_census.py`"
+        },
+        {
+          "path": ".github/ISSUES/TWIN-IMPORT-RATCHET-4744-Implement-Sanctioned-Twin-Module-Ratchet-Reduction.md",
+          "line": 31,
+          "source_group": "other",
+          "text": "- `scripts/engineering/qa/report_compatibility_importer_census.py`"
+        },
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 34,
@@ -16049,8 +16153,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
+        {
+          "path": ".github/ISSUES/_dash_cycle_bodies/DASH-CYCLE-003.md",
+          "line": 15,
+          "source_group": "other",
+          "text": "| `EXPECTED_PANEL_COUNT` in `scripts/engineering/qa/report_dashboard_panel_audit_matrix.py` | **226** |"
+        },
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 46,
@@ -16265,11 +16375,17 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 10,
       "references": [
         {
+          "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
+          "line": 49,
+          "source_group": "other",
+          "text": "- `scripts/engineering/qa/report_debt_governance_gates.py`: emit gate for"
+        },
+        {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 307,
+          "line": 310,
           "source_group": "docs",
           "text": "| Generated artifact drift gate did not include module coverage source-tree hash freshness | `report-module-coverage --check` could fail stale source-tree evidence while `report-debt-governance-gates "
         },
@@ -16308,12 +16424,6 @@
           "line": 22,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_debt_governance_gates import ("
-        },
-        {
-          "path": "tests/architecture/test_tech_debt_roadmap_7461_7465.py",
-          "line": 50,
-          "source_group": "tests",
-          "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"report_debt_governance_gates.py\""
         }
       ]
     },
@@ -16390,8 +16500,20 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 19,
+      "reference_count": 21,
       "references": [
+        {
+          "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
+          "line": 25,
+          "source_group": "other",
+          "text": "- `scripts/engineering/qa/report_duplication_baseline.py`"
+        },
+        {
+          "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
+          "line": 64,
+          "source_group": "other",
+          "text": "`report_duplication_baseline.py`; do not invent a parallel scanner."
+        },
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 74,
@@ -16427,18 +16549,6 @@
           "line": 19,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_duplication_baseline import DuplicateModuleRef"
-        },
-        {
-          "path": "tests/architecture/test_duplication_report_governance.py",
-          "line": 20,
-          "source_group": "tests",
-          "text": "from scripts.engineering.qa.report_duplication_baseline import TargetDuplicationReport"
-        },
-        {
-          "path": "tests/architecture/test_duplication_report_governance.py",
-          "line": 21,
-          "source_group": "tests",
-          "text": "from scripts.engineering.qa.report_duplication_baseline import _render_markdown"
         }
       ]
     },
@@ -16709,7 +16819,7 @@
         },
         {
           "path": "scripts/engineering/ci/test_telemetry_provenance.py",
-          "line": 473,
+          "line": 474,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.report_module_coverage_inventory import ("
         },
@@ -16796,8 +16906,32 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 18,
       "references": [
+        {
+          "path": ".github/ISSUES/P5-metrics-cardinality-audit.md",
+          "line": 13,
+          "source_group": "other",
+          "text": "- **Metric inventory script**: `report_observability_metric_inventory.py` exists"
+        },
+        {
+          "path": ".github/ISSUES/P5-metrics-cardinality-audit.md",
+          "line": 33,
+          "source_group": "other",
+          "text": "1. Run `report_observability_metric_inventory.py`"
+        },
+        {
+          "path": ".github/ISSUES/P5-metrics-cardinality-audit.md",
+          "line": 45,
+          "source_group": "other",
+          "text": "1. Integrate `report_observability_metric_inventory.py` into CI pipeline"
+        },
+        {
+          "path": ".github/ISSUES/P5-metrics-cardinality-audit.md",
+          "line": 68,
+          "source_group": "other",
+          "text": "- `report_observability_metric_inventory.py` (script location to be verified)"
+        },
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 38,
@@ -16821,30 +16955,6 @@
           "line": 21,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa import ("
-        },
-        {
-          "path": "scripts/engineering/qa/observability_metric_inventory_runtime.py",
-          "line": 588,
-          "source_group": "scripts",
-          "text": "\"python -m scripts.engineering.qa.report_observability_metric_inventory \""
-        },
-        {
-          "path": "scripts/engineering/qa/report_debt_governance_gates.py",
-          "line": 36,
-          "source_group": "scripts",
-          "text": "from scripts.engineering.qa import ("
-        },
-        {
-          "path": "tests/architecture/test_observability_metric_governance.py",
-          "line": 24,
-          "source_group": "tests",
-          "text": "from scripts.engineering.qa import report_observability_metric_inventory as inventory"
-        },
-        {
-          "path": "tests/architecture/test_observability_metric_governance.py",
-          "line": 60,
-          "source_group": "tests",
-          "text": "\"python -m scripts.engineering.qa.report_observability_metric_inventory \""
         }
       ]
     },
@@ -17017,8 +17127,20 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 19,
       "references": [
+        {
+          "path": ".github/ISSUES/TEST-SYS-13-Refresh-Test-Governance-Source-Hash.md",
+          "line": 20,
+          "source_group": "other",
+          "text": "`scripts/engineering/qa/report_test_governance_audit.py --check` reports drift."
+        },
+        {
+          "path": ".github/ISSUES/TEST-SYS-13-Refresh-Test-Governance-Source-Hash.md",
+          "line": 66,
+          "source_group": "other",
+          "text": "- `python scripts/engineering/qa/report_test_governance_audit.py --check`"
+        },
         {
           "path": ".github/workflows/tests.yml",
           "line": 420,
@@ -17054,18 +17176,6 @@
           "line": 19,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.report_test_governance_audit import ("
-        },
-        {
-          "path": "scripts/engineering/qa/refresh_test_governance_baseline.py",
-          "line": 24,
-          "source_group": "scripts",
-          "text": "from scripts.engineering.qa.report_test_governance_audit import ("
-        },
-        {
-          "path": "tests/architecture/conftest.py",
-          "line": 39,
-          "source_group": "tests",
-          "text": "from scripts.engineering.qa.report_test_governance_audit import ("
         }
       ],
       "owner": "@bioetl-platform",
@@ -17082,7 +17192,7 @@
       "references": [
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 342,
+          "line": 345,
           "source_group": "docs",
           "text": "Derived by scripts/engineering/qa/report_topology_source_binding.py from"
         },
@@ -17427,7 +17537,7 @@
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 232,
+          "line": 233,
           "source_group": "scripts",
           "text": "and local_capture.get(\"producer\") == \"run_local_coverage_verify.py\""
         },
@@ -17529,7 +17639,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -17558,6 +17668,12 @@
         {
           "path": "scripts/engineering/qa/refresh_governance_artifacts.py",
           "line": 585,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa.technical_debt_audit_registry import ("
+        },
+        {
+          "path": "scripts/engineering/repo/publish_tdx_audit_issues.py",
+          "line": 33,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.technical_debt_audit_registry import ("
         },
@@ -17991,7 +18107,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 95,
+      "reference_count": 98,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -18073,8 +18189,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
+        {
+          "path": ".github/ISSUES/RH-2026-07-28-ROOT-HYGIENE-MINIMIZATION-ISSUE-PACK.md",
+          "line": 14,
+          "source_group": "other",
+          "text": "- `scripts/engineering/repo/_root_governance.py`"
+        },
         {
           "path": "scripts/engineering/diagnostics/audit_structure.py",
           "line": 32,
@@ -18126,7 +18248,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 89,
+          "line": 91,
           "source_group": "scripts",
           "text": "| `apply_branch_cleanup_phases_0_2.sh` | Orchestrate phases 0-2 (inventory + apply reports) |"
         },
@@ -18162,55 +18284,55 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 28,
+      "reference_count": 44,
       "references": [
         {
-          "path": ".github/ISSUES/ROOT-HYGIENE-ISSUES-INDEX.md",
-          "line": 36,
+          "path": ".github/ISSUES/RH-014-Rehome-Observability-Cardinality-Evidence-Out-Of-Forbidden-Root-Artifacts.md",
+          "line": 21,
+          "source_group": "other",
+          "text": "- `scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked`"
+        },
+        {
+          "path": ".github/ISSUES/RH-014-Rehome-Observability-Cardinality-Evidence-Out-Of-Forbidden-Root-Artifacts.md",
+          "line": 35,
+          "source_group": "other",
+          "text": "- `scripts/engineering/repo/audit_root_cleanliness.py`"
+        },
+        {
+          "path": ".github/ISSUES/RH-014-Rehome-Observability-Cardinality-Evidence-Out-Of-Forbidden-Root-Artifacts.md",
+          "line": 75,
           "source_group": "other",
           "text": "- `./.venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked`"
         },
         {
-          "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 42,
-          "source_group": "docs",
-          "text": "| Human-facing root docs | `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `LICENSE`, `AGENTS.md`, and reviewed vendor guidance such as `best_practices.md`. Root `GEMINI.md` is not a project file. | c"
+          "path": ".github/ISSUES/RH-014-Rehome-Observability-Cardinality-Evidence-Out-Of-Forbidden-Root-Artifacts.md",
+          "line": 82,
+          "source_group": "other",
+          "text": "./.venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked"
         },
         {
-          "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 185,
-          "source_group": "docs",
-          "text": "python3 scripts/engineering/repo/audit_root_cleanliness.py"
+          "path": ".github/ISSUES/RH-015-Remove-Tracked-Root-Transient-Helpers-And-Restore-Root-Allowlist-Compliance.md",
+          "line": 33,
+          "source_group": "other",
+          "text": "- `scripts/engineering/repo/audit_root_cleanliness.py`"
         },
         {
-          "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 214,
-          "source_group": "docs",
-          "text": "`scripts/engineering/repo/audit_root_cleanliness.py` MUST использовать этот"
+          "path": ".github/ISSUES/RH-015-Remove-Tracked-Root-Transient-Helpers-And-Restore-Root-Allowlist-Compliance.md",
+          "line": 88,
+          "source_group": "other",
+          "text": "./.venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked"
         },
         {
-          "path": "docs/03-guides/cleanup-policy.md",
-          "line": 237,
-          "source_group": "docs",
-          "text": "| Structure policy green | `python3 scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked` |"
+          "path": ".github/ISSUES/RH-016-Expand-Root-Hygiene-Review-Lanes-For-Observed-Transient-Root-Families.md",
+          "line": 24,
+          "source_group": "other",
+          "text": "This means the repo has a good red-line failure (`audit_root_cleanliness.py`),"
         },
         {
-          "path": "docs/03-guides/cleanup-policy.md",
-          "line": 245,
-          "source_group": "docs",
-          "text": "python3 scripts/engineering/repo/audit_root_cleanliness.py"
-        },
-        {
-          "path": "docs/03-guides/cleanup-policy.md",
-          "line": 316,
-          "source_group": "docs",
-          "text": "- CI **MUST** run `scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked`;"
-        },
-        {
-          "path": "docs/03-guides/cleanup-policy.md",
-          "line": 346,
-          "source_group": "docs",
-          "text": "python3 scripts/engineering/repo/audit_root_cleanliness.py"
+          "path": ".github/ISSUES/RH-016-Expand-Root-Hygiene-Review-Lanes-For-Observed-Transient-Root-Families.md",
+          "line": 36,
+          "source_group": "other",
+          "text": "- `scripts/engineering/repo/audit_root_cleanliness.py`"
         }
       ]
     },
@@ -18223,13 +18345,13 @@
       "references": [
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 88,
+          "line": 90,
           "source_group": "scripts",
           "text": "| `branch_cleanup.py` | Generate inventory and apply branch cleanup phases 1-2 |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 91,
+          "line": 93,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.branch_cleanup import main as branch_cleanup_main"
         }
@@ -18248,7 +18370,7 @@
       "references": [
         {
           "path": ".github/ISSUES/ROOT-HYGIENE-ISSUES-INDEX.md",
-          "line": 54,
+          "line": 47,
           "source_group": "other",
           "text": "`scripts/engineering/repo/check_cleanup_governance.py`"
         },
@@ -18260,13 +18382,13 @@
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 85,
+          "line": 87,
           "source_group": "scripts",
           "text": "| `check_cleanup_governance.py`  | Guard active docs/scripts against broad cleanup guidance  |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 55,
+          "line": 56,
           "source_group": "scripts",
           "text": "\"check-cleanup-governance\": \"check_cleanup_governance.py\","
         },
@@ -18323,7 +18445,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 53,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"check-actions-runtime-policy\": \"check_github_actions_runtime_policy.py\","
         },
@@ -18395,7 +18517,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 56,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"check-reports-quality-ttl\": \"check_reports_quality_ttl.py\","
         },
@@ -18428,7 +18550,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 57,
+          "line": 58,
           "source_group": "scripts",
           "text": "\"check-root-governance-docs\": \"check_root_governance_docs.py\","
         },
@@ -18455,7 +18577,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 58,
+          "line": 59,
           "source_group": "scripts",
           "text": "\"check-root-review-registry\": \"check_root_hygiene_review_registry.py\","
         },
@@ -18518,7 +18640,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 51,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"check-catalog\": \"check_scripts_catalog.py\","
         }
@@ -18596,7 +18718,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 52,
+          "line": 53,
           "source_group": "scripts",
           "text": "\"check-versions\": \"check_version_consistency.py\","
         },
@@ -18617,37 +18739,37 @@
       "references": [
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 40,
+          "line": 41,
           "source_group": "scripts",
           "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 41,
+          "line": 42,
           "source_group": "scripts",
           "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh --apply"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 42,
+          "line": 43,
           "source_group": "scripts",
           "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh --apply --with-remote"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 55,
+          "line": 56,
           "source_group": "scripts",
           "text": "`cleanup_branch_candidates.sh` when you want the same workflow through a"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 87,
+          "line": 89,
           "source_group": "scripts",
           "text": "| `cleanup_branch_candidates.sh` | Dry-run/apply cleanup for curated branch deletion set |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 63,
+          "line": 65,
           "source_group": "scripts",
           "text": "\"cleanup-branch-candidates\": \"cleanup_branch_candidates.sh\","
         },
@@ -18710,7 +18832,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 59,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"cleanup-root-local-clutter\": \"cleanup_root_local_clutter.py\","
         },
@@ -18741,7 +18863,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 50,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"sync-wrapper-caller-matrix\": \"generate_scripts_wrapper_caller_matrix.py\","
         },
@@ -18786,7 +18908,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 48,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"github-settings-review\": \"github_settings_review.py\","
         },
@@ -18835,13 +18957,13 @@
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 86,
+          "line": 88,
           "source_group": "scripts",
           "text": "| `preflight_cleanup.sh`         | Bounded release-preflight cleanup helper                  |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 60,
+          "line": 61,
           "source_group": "scripts",
           "text": "\"preflight-cleanup\": \"preflight_cleanup.sh\","
         },
@@ -18852,6 +18974,50 @@
           "text": "SCRIPT = ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"preflight_cleanup.sh\""
         }
       ]
+    },
+    {
+      "path": "scripts/engineering/repo/publish_tdx_audit_issues.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/README.md",
+          "line": 30,
+          "source_group": "scripts",
+          "text": "| `publish-tdx-audit-issues` | `publish_tdx_audit_issues.py` | Publish or reopen TDX-AUDIT GitHub issues from local issue templates |"
+        },
+        {
+          "path": "scripts/engineering/repo/__main__.py",
+          "line": 64,
+          "source_group": "scripts",
+          "text": "\"publish-tdx-audit-issues\": \"publish_tdx_audit_issues.py\","
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual TDX-AUDIT issue publishing helper for local issue-template campaigns; keep it non-active unless it becomes a governed repo-operations workflow with a durable active-surface budget."
+    },
+    {
+      "path": "scripts/engineering/repo/publish_test_sys_issues.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": ".github/ISSUES/TEST-SYS-2026-07-29-ISSUE-PACK.md",
+          "line": 80,
+          "source_group": "other",
+          "text": "python scripts/engineering/repo/publish_test_sys_issues.py --apply --update-pack"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual TEST-SYS issue publishing helper for local issue-template campaigns; keep it non-active unless it becomes a governed repo-operations workflow with a durable active-surface budget."
     },
     {
       "path": "scripts/engineering/repo/split_testing_roadmap_issue.py",
@@ -18868,7 +19034,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 61,
+          "line": 62,
           "source_group": "scripts",
           "text": "\"split-testing-roadmap\": \"split_testing_roadmap_issue.py\","
         },
@@ -18895,7 +19061,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 62,
+          "line": 63,
           "source_group": "scripts",
           "text": "\"sync-docs-issues\": \"sync_docs_issues.py\","
         }
@@ -18906,8 +19072,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 22,
       "references": [
+        {
+          "path": ".github/ISSUES/DOC-AUDIT-001-Fix-Invalid-CLI-Examples-In-Deployment-And-Bootstrap-Docs.md",
+          "line": 29,
+          "source_group": "other",
+          "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
+        },
         {
           "path": "docs/02-architecture/04-interfaces-layer.md",
           "line": 42,
@@ -18949,12 +19121,6 @@
           "line": 43,
           "source_group": "docs",
           "text": "[04-interfaces-layer.md](../04-interfaces-layer.md) §2.3 (`run.py`, `run_all.py`,"
-        },
-        {
-          "path": "docs/02-architecture/diagrams/foundation/33-cli-run-interaction.mmd",
-          "line": 17,
-          "source_group": "docs",
-          "text": "participant CLI as run.py<br/>CLI command"
         }
       ]
     },
@@ -19205,7 +19371,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 66,
+      "reference_count": 74,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -19220,40 +19386,40 @@
           "text": "python -m scripts.ops verify-router-managed-image \"$BUILT\""
         },
         {
-          "path": ".github/workflows/dashboard-render-host.yml",
-          "line": 77,
-          "source_group": "ci",
-          "text": "uv run --frozen --no-build python -m scripts.ops run-grafana-audit-cycle \\"
+          "path": ".github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md",
+          "line": 119,
+          "source_group": "other",
+          "text": "- Run `python -m scripts.ops audit-live-grafana` with the required local"
         },
         {
-          "path": ".github/workflows/dashboard-render-host.yml",
-          "line": 86,
-          "source_group": "ci",
-          "text": "uv run --frozen --no-build python -m scripts.ops run-grafana-audit-cycle \\"
+          "path": ".github/ISSUES/_grafana_provenance_readability_bodies/GRA-PROV-00.md",
+          "line": 54,
+          "source_group": "other",
+          "text": "python -m scripts.ops render-grafana-matrix \\"
         },
         {
-          "path": "Makefile",
-          "line": 106,
-          "source_group": "build",
-          "text": "$(RUN) python -m scripts.ops setup-plugins"
+          "path": ".github/ISSUES/_grafana_runtime_render_bodies/GRA-RT-01.md",
+          "line": 58,
+          "source_group": "other",
+          "text": ".venv/bin/python -m scripts.ops rerender-grafana"
         },
         {
-          "path": "docs/00-project/RULES.md",
-          "line": 1154,
-          "source_group": "docs",
-          "text": "uv run python -m scripts.ops setup-plugins"
+          "path": ".github/ISSUES/_grafana_runtime_render_bodies/GRA-RT-02.md",
+          "line": 54,
+          "source_group": "other",
+          "text": ".venv/bin/python -m scripts.ops check-grafana-audit-preflight"
         },
         {
-          "path": "docs/00-project/RULES.md",
-          "line": 1809,
-          "source_group": "docs",
-          "text": "uv run python -m scripts.ops setup-plugins"
+          "path": ".github/ISSUES/_grafana_runtime_render_bodies/GRA-RT-02.md",
+          "line": 55,
+          "source_group": "other",
+          "text": ".venv/bin/python -m scripts.ops rerender-grafana"
         },
         {
-          "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 167,
-          "source_group": "docs",
-          "text": "plugins backend: [`scripts/ops/__main__.py`](../../../../../scripts/ops/__main__.py)"
+          "path": ".github/ISSUES/_grafana_runtime_render_bodies/GRA-RT-02.md",
+          "line": 56,
+          "source_group": "other",
+          "text": ".venv/bin/python -m scripts.ops audit-live-grafana"
         }
       ]
     },
@@ -19436,7 +19602,7 @@
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 448,
+          "line": 450,
           "source_group": "docs",
           "text": "uv run python -m scripts.ops.data check-data-dir"
         },
@@ -19540,8 +19706,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 9,
       "references": [
+        {
+          "path": ".github/ISSUES/SECURITY-4747-Env-Prefix-Policy-Exception.md",
+          "line": 43,
+          "source_group": "other",
+          "text": "- Non-`BIOETL_` env usage in `src/tools/neo4j_audit.py` remains outside the"
+        },
         {
           "path": "docs/05-operations/deployment/neo4j-audit-instance-guide.md",
           "line": 70,
@@ -19553,12 +19725,6 @@
           "line": 102,
           "source_group": "docs",
           "text": "### scripts/ops/data/neo4j_audit.py"
-        },
-        {
-          "path": "docs/05-operations/deployment/neo4j-audit-instance-guide.md",
-          "line": 131,
-          "source_group": "docs",
-          "text": "from scripts/ops/data/neo4j_audit.py import get_neo4j_uri, get_neo4j_auth"
         },
         {
           "path": "docs/05-operations/deployment/neo4j-audit-instance-implementation.md",
@@ -20148,7 +20314,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 122,
+          "line": 132,
           "source_group": "scripts",
           "text": "- `bash scripts/engineering/dev/run_pytest.sh` runs `bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only`"
         },
@@ -20267,6 +20433,25 @@
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain only as a bounded manual GitHub branch-protection utility for stripping a stale required status-check context after an external app is disconnected; do not promote it to an active ops command or evaluate_active."
+    },
+    {
+      "path": "scripts/ops/maintenance/github/update_github_issue.sh",
+      "type": "sh",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": ".github/ISSUES/TDX-AUDIT-007-Govern-Zero-Reference-Supporting-Scripts.md",
+          "line": 19,
+          "source_group": "other",
+          "text": "- `scripts/ops/maintenance/github/update_github_issue.sh`"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-11-17",
+      "next_step": "Retain only as a bounded manual GitHub issue update utility after removing the scripts.ops router command; prefer the governed issue lifecycle workflow or GitHub API client paths before re-exposing it as an active ops command. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17."
     },
     {
       "path": "scripts/ops/maintenance/security/salt_rotate.py",
@@ -21123,8 +21308,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": ".github/ISSUES/DS2-2026-07-28-DASHBOARD-SYSTEM-2-REFACTOR-ISSUE-PACK.md",
+          "line": 130,
+          "source_group": "other",
+          "text": "- Residual scripts: `scripts/ops/observability/grafana/apply_dux2_residual.py`, `render_nav_bus.py`"
+        },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
           "line": 57,
@@ -21142,8 +21333,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 17,
       "references": [
+        {
+          "path": ".github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md",
+          "line": 17,
+          "source_group": "other",
+          "text": "- `scripts/ops/observability/grafana/audit_live_grafana_panels.py`"
+        },
         {
           "path": "docs/03-guides/dashboards/10170-contrast-reflow-pin.md",
           "line": 49,
@@ -21185,12 +21382,6 @@
           "line": 22,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana import audit_live_grafana_panels as live_audit"
-        },
-        {
-          "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 321,
-          "source_group": "tests",
-          "text": "Path(\"scripts/ops/observability/grafana/audit_live_grafana_panels.py\"),"
         }
       ]
     },
@@ -21788,8 +21979,26 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 20,
       "references": [
+        {
+          "path": ".github/ISSUES/DS2-2026-07-28-DASHBOARD-SYSTEM-2-REFACTOR-ISSUE-PACK.md",
+          "line": 130,
+          "source_group": "other",
+          "text": "- Residual scripts: `scripts/ops/observability/grafana/apply_dux2_residual.py`, `render_nav_bus.py`"
+        },
+        {
+          "path": ".github/ISSUES/DUX5-2026-07-29-DASHBOARD-TYPOGRAPHY-READING-ORDER-ISSUE-PACK.md",
+          "line": 175,
+          "source_group": "other",
+          "text": "- Nav bus generator: `scripts/ops/observability/grafana/render_nav_bus.py`"
+        },
+        {
+          "path": ".github/ISSUES/_dux3_bodies/DUX3-34.md",
+          "line": 30,
+          "source_group": "other",
+          "text": "- `scripts/ops/observability/grafana/render_nav_bus.py`"
+        },
         {
           "path": "docs/03-guides/dashboards/README.md",
           "line": 222,
@@ -21819,24 +22028,6 @@
           "line": 28,
           "source_group": "docs",
           "text": "Nav HTML is generated by `scripts/ops/observability/grafana/render_nav_bus.py`."
-        },
-        {
-          "path": "docs/03-guides/dashboards/operator-ux-v2.md",
-          "line": 31,
-          "source_group": "docs",
-          "text": "| **Nav bus** | Full portfolio switcher `0–6` (Run Explorer…Incident Workspace) | Shared link-only `h=3` on all seven dashboards (DASH-FIT-004 / `layout-budgets.yaml`; shipped nav id=1000); wrap at 10"
-        },
-        {
-          "path": "docs/05-operations/monitoring-architecture.md",
-          "line": 358,
-          "source_group": "docs",
-          "text": "│       ├── render_nav_bus.py           ← Generate navigation panel"
-        },
-        {
-          "path": "grafana/README.md",
-          "line": 80,
-          "source_group": "other",
-          "text": "python scripts/ops/observability/grafana/render_nav_bus.py"
         }
       ],
       "owner": "@bioetl-platform",
@@ -22353,12 +22544,43 @@
       "next_step": "Retain as the fixture-materialization implementation imported by the bounded Trust validation generator; keep it supporting and route operator execution through generate_trust_validation_fixtures.py."
     },
     {
+      "path": "scripts/ops/observability/validate_emitter_contracts.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": ".github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md",
+          "line": 16,
+          "source_group": "other",
+          "text": "- `scripts/ops/observability/validate_emitter_contracts.py`"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded manual observability contract-audit utility while audit evidence references the direct script; promote it to an active governed command only after CI ownership and deterministic regression coverage are established."
+    },
+    {
       "path": "scripts/ops/observability/validate_live_observability.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
+        {
+          "path": ".github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md",
+          "line": 115,
+          "source_group": "other",
+          "text": "- Run `python scripts/ops/observability/validate_live_observability.py` against"
+        },
+        {
+          "path": ".github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md",
+          "line": 14,
+          "source_group": "other",
+          "text": "- `scripts/ops/observability/validate_live_observability.py`"
+        },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
           "line": 189,
@@ -22382,8 +22604,20 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
+        {
+          "path": ".github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md",
+          "line": 117,
+          "source_group": "other",
+          "text": "- Run `python scripts/ops/observability/validate_metric_to_panel_mapping.py`"
+        },
+        {
+          "path": ".github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md",
+          "line": 15,
+          "source_group": "other",
+          "text": "- `scripts/ops/observability/validate_metric_to_panel_mapping.py`"
+        },
         {
           "path": "tests/unit/scripts/ops/observability/test_validate_metric_to_panel_mapping.py",
           "line": 17,
@@ -22416,8 +22650,14 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
+        {
+          "path": ".github/ISSUES/CODERABBIT-FULL-2026-08-ISSUE-PACK.md",
+          "line": 9,
+          "source_group": "other",
+          "text": "**Launcher:** `scripts/ops/run-coderabbit-reviews.sh`"
+        },
         {
           "path": "docs/03-guides/development/coderabbit-local-reviews.md",
           "line": 3,
@@ -23096,8 +23336,20 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
+        {
+          "path": ".github/ISSUES/RH4-2026-07-28-ROOT-HYGIENE-POST-RH3-RESIDUAL-ISSUE-PACK.md",
+          "line": 35,
+          "source_group": "other",
+          "text": "| `logs/docker-watchdog/` | **Writer found:** `scripts/ops/runtime/docker/watchdog-docker-stable.ps1` default `$StateDir = Join-Path $Root 'logs\\docker-watchdog'` |"
+        },
+        {
+          "path": ".github/ISSUES/RH4-2026-07-28-ROOT-HYGIENE-POST-RH3-RESIDUAL-ISSUE-PACK.md",
+          "line": 71,
+          "source_group": "other",
+          "text": "- `scripts/ops/runtime/docker/watchdog-docker-stable.ps1`"
+        },
         {
           "path": "docs/00-project/governance/root-local-clutter-cleanup.md",
           "line": 91,
@@ -23631,8 +23883,26 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 28,
       "references": [
+        {
+          "path": "docs/03-guides/freshness-hold-2026-09-25.md",
+          "line": 152,
+          "source_group": "docs",
+          "text": "| `docs/05-operations/deployment/neo4j-audit-instance-guide.md` | Запуск идёт через отсутствующий scripts/ops/start-neo4j-audit.ps1. |"
+        },
+        {
+          "path": "docs/03-guides/freshness-hold-2026-09-25.md",
+          "line": 153,
+          "source_group": "docs",
+          "text": "| `docs/05-operations/deployment/neo4j-audit-instance-implementation.md` | Тот же отсутствующий start-neo4j-audit.ps1 и NEO4J_AUDIT_INSTANCE_GUIDE.md. |"
+        },
+        {
+          "path": "docs/03-guides/freshness-hold-2026-09-25.md",
+          "line": 154,
+          "source_group": "docs",
+          "text": "| `docs/05-operations/deployment/neo4j-audit-instance-quick-start.md` | Вызов scripts/ops/start-neo4j-audit.ps1 и src.tools.neo4j_audit не совпадает с деревом. |"
+        },
         {
           "path": "docs/05-operations/deployment/neo4j-audit-instance-guide.md",
           "line": 21,
@@ -23662,24 +23932,6 @@
           "line": 162,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\start-neo4j-audit.ps1 -Stop"
-        },
-        {
-          "path": "docs/05-operations/deployment/neo4j-audit-instance-guide.md",
-          "line": 226,
-          "source_group": "docs",
-          "text": ".\\scripts\\ops\\start-neo4j-audit.ps1 -Logs"
-        },
-        {
-          "path": "docs/05-operations/deployment/neo4j-audit-instance-guide.md",
-          "line": 276,
-          "source_group": "docs",
-          "text": "| Run live validation        | bioetl-neo4j-audit | `.\\scripts\\ops\\start-neo4j-audit.ps1`              |"
-        },
-        {
-          "path": "docs/05-operations/deployment/neo4j-audit-instance-guide.md",
-          "line": 281,
-          "source_group": "docs",
-          "text": "**Status**: Audit instance ready. Use `start-neo4j-audit.ps1` before running live validation. Expected: No OOMKilled errors."
         }
       ],
       "owner": "@bioetl-platform",
@@ -23747,7 +23999,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 19,
+      "reference_count": 20,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",
@@ -23766,6 +24018,12 @@
           "line": 84,
           "source_group": "docs",
           "text": "scripts\\ops\\runtime\\wsl\\start-wsl-proxy.bat 172.30.32.1 172.30.32.0/20"
+        },
+        {
+          "path": "docs/03-guides/freshness-hold-2026-09-25.md",
+          "line": 112,
+          "source_group": "docs",
+          "text": "| `docs/03-guides/development/codex-wsl2-setup.md` | wsl_proxy.py и start-wsl-proxy.bat указаны в scripts/ops/, файлы лежат в scripts/ops/runtime/wsl/. |"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
@@ -23790,12 +24048,6 @@
           "line": 221,
           "source_group": "docs",
           "text": "| `start-wsl-proxy.bat`              | Proxy launcher               | Windows PowerShell |"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
-          "line": 293,
-          "source_group": "docs",
-          "text": "# PowerShell: .\\scripts\\ops\\start-wsl-proxy.bat"
         }
       ]
     },
@@ -23804,7 +24056,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 18,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",
@@ -23843,16 +24095,16 @@
           "text": "**Layer 2: Proxy** (`scripts/ops/runtime/wsl/wsl_proxy.py`)"
         },
         {
+          "path": "docs/03-guides/freshness-hold-2026-09-25.md",
+          "line": 112,
+          "source_group": "docs",
+          "text": "| `docs/03-guides/development/codex-wsl2-setup.md` | wsl_proxy.py и start-wsl-proxy.bat указаны в scripts/ops/, файлы лежат в scripts/ops/runtime/wsl/. |"
+        },
+        {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 13,
           "source_group": "docs",
           "text": "├── wsl_proxy.py        ← HTTP proxy bridge"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
-          "line": 125,
-          "source_group": "docs",
-          "text": "python .\\scripts\\ops\\wsl_proxy.py"
         }
       ]
     },
@@ -23916,13 +24168,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 14,
       "references": [
         {
           "path": ".circleci/config.yml",
           "line": 2267,
           "source_group": "ci",
           "text": "mkdir -p reports/quality && uv run --frozen --no-build python scripts/ops/support/repo/cleanup_repository.py --dry-run --detail-limit 0 --report-json reports/quality/root-hygiene-cleanup-classificatio"
+        },
+        {
+          "path": ".github/ISSUES/RH-016-Expand-Root-Hygiene-Review-Lanes-For-Observed-Transient-Root-Families.md",
+          "line": 35,
+          "source_group": "other",
+          "text": "- `scripts/ops/support/repo/cleanup_repository.py`"
         },
         {
           "path": ".github/workflows/root-hygiene.yml",
@@ -23938,13 +24196,13 @@
         },
         {
           "path": "docs/03-guides/cleanup-policy.md",
-          "line": 188,
+          "line": 187,
           "source_group": "docs",
           "text": "`scripts/ops/support/repo/cleanup_repository.py` больше не является broad"
         },
         {
           "path": "docs/03-guides/cleanup-policy.md",
-          "line": 261,
+          "line": 260,
           "source_group": "docs",
           "text": "python -m scripts.ops.support.repo.cleanup_repository --dry-run"
         },
@@ -23959,12 +24217,6 @@
           "line": 13,
           "source_group": "scripts",
           "text": "from scripts.ops.support.repo.cleanup_repository import ("
-        },
-        {
-          "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 198,
-          "source_group": "scripts",
-          "text": "\"scripts/ops/support/repo/cleanup_repository.py\","
         }
       ]
     },
@@ -23973,12 +24225,18 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": ".circleci/config.yml",
           "line": 1675,
           "source_group": "ci",
+          "text": "bash scripts/ops/support/skills/check_ai_skills_layout.sh"
+        },
+        {
+          "path": ".github/ISSUES/AI-RUNTIME-AUDIT-001-Make-AI-Skill-Mirror-CI-Truthful-And-Enforce-Devin-Parity.md",
+          "line": 91,
+          "source_group": "other",
           "text": "bash scripts/ops/support/skills/check_ai_skills_layout.sh"
         },
         {
@@ -24083,7 +24341,7 @@
         "new-pipeline",
         "py-config-bot"
       ],
-      "reference_count": 82,
+      "reference_count": 81,
       "references": [
         {
           "path": ".circleci/config.yml",
@@ -24362,7 +24620,7 @@
           "path": "docs/02-architecture/decisions/ADR-037-canonical-schema-generation.md",
           "line": 45,
           "source_group": "docs",
-          "text": "(`scripts/schema/generation/generate_contracts.py`),"
+          "text": "(`src/tools/scripts/schema/generation/generate_contracts.py`),"
         },
         {
           "path": "docs/04-reference/contracts/gold-schemas.md",

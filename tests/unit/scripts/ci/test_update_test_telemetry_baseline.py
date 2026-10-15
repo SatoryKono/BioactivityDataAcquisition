@@ -646,6 +646,15 @@ def test_source_tree_hash_includes_live_junit_producer(tmp_path: Path) -> None:
     assert updater.compute_test_telemetry_source_tree_sha256(tmp_path) != first
 
 
+def test_source_tree_hash_includes_junit_subtests_producer(tmp_path: Path) -> None:
+    producer = tmp_path / "scripts/engineering/dev/pytest_junit_subtests.py"
+    producer.parent.mkdir(parents=True)
+    producer.write_text("first\n", encoding="utf-8")
+    first = updater.compute_test_telemetry_source_tree_sha256(tmp_path)
+    producer.write_text("second\n", encoding="utf-8")
+    assert updater.compute_test_telemetry_source_tree_sha256(tmp_path) != first
+
+
 def test_markerless_canonical_local_json_preserves_non_skipped_semantics(
     tmp_path: Path,
 ) -> None:
