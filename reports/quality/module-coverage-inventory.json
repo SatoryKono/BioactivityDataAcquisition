@@ -22339,6 +22339,126 @@
       "source_lines": 9
     },
     {
+      "coverage_percent": 93.75,
+      "coverage_status": "partially_covered",
+      "covered_lines": 120,
+      "executable_lines": 128,
+      "missing_lines": 8,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_core",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
+      "source_lines": 196
+    },
+    {
+      "coverage_percent": 94.05,
+      "coverage_status": "partially_covered",
+      "covered_lines": 79,
+      "executable_lines": 84,
+      "missing_lines": 5,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_group_apply",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_apply.py",
+      "source_lines": 146
+    },
+    {
+      "coverage_percent": 90.97,
+      "coverage_status": "partially_covered",
+      "covered_lines": 131,
+      "executable_lines": 144,
+      "missing_lines": 13,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_group_journal",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_journal.py",
+      "source_lines": 301
+    },
+    {
+      "coverage_percent": 90.0,
+      "coverage_status": "partially_covered",
+      "covered_lines": 99,
+      "executable_lines": 110,
+      "missing_lines": 11,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_group_members",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_members.py",
+      "source_lines": 205
+    },
+    {
+      "coverage_percent": 91.45,
+      "coverage_status": "partially_covered",
+      "covered_lines": 139,
+      "executable_lines": 152,
+      "missing_lines": 13,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_group_records",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_records.py",
+      "source_lines": 268
+    },
+    {
+      "coverage_percent": 97.32,
+      "coverage_status": "partially_covered",
+      "covered_lines": 109,
+      "executable_lines": 112,
+      "missing_lines": 3,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_group_recovery",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_recovery.py",
+      "source_lines": 262
+    },
+    {
+      "coverage_percent": 99.12,
+      "coverage_status": "partially_covered",
+      "covered_lines": 224,
+      "executable_lines": 226,
+      "missing_lines": 2,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_group_schema",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_schema.py",
+      "source_lines": 442
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 22,
+      "executable_lines": 22,
+      "missing_lines": 0,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_metrics",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_metrics.py",
+      "source_lines": 64
+    },
+    {
+      "coverage_percent": 99.15,
+      "coverage_status": "partially_covered",
+      "covered_lines": 117,
+      "executable_lines": 118,
+      "missing_lines": 1,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_planner",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_planner.py",
+      "source_lines": 227
+    },
+    {
+      "coverage_percent": 95.55,
+      "coverage_status": "partially_covered",
+      "covered_lines": 236,
+      "executable_lines": 247,
+      "missing_lines": 11,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_posix",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_posix.py",
+      "source_lines": 401
+    },
+    {
+      "coverage_percent": 96.33,
+      "coverage_status": "partially_covered",
+      "covered_lines": 105,
+      "executable_lines": 109,
+      "missing_lines": 4,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_preview_mixin",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_preview_mixin.py",
+      "source_lines": 195
+    },
+    {
+      "coverage_percent": 93.09,
+      "coverage_status": "partially_covered",
+      "covered_lines": 175,
+      "executable_lines": 188,
+      "missing_lines": 13,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_support",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+      "source_lines": 439
+    },
+    {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 15,
@@ -48051,6 +48171,126 @@
       "source_lines": 9
     },
     {
+      "coverage_percent": 93.75,
+      "coverage_status": "partially_covered",
+      "covered_lines": 120,
+      "executable_lines": 128,
+      "missing_lines": 8,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_core",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_core.py",
+      "source_lines": 196
+    },
+    {
+      "coverage_percent": 94.05,
+      "coverage_status": "partially_covered",
+      "covered_lines": 79,
+      "executable_lines": 84,
+      "missing_lines": 5,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_group_apply",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_apply.py",
+      "source_lines": 146
+    },
+    {
+      "coverage_percent": 90.97,
+      "coverage_status": "partially_covered",
+      "covered_lines": 131,
+      "executable_lines": 144,
+      "missing_lines": 13,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_group_journal",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_journal.py",
+      "source_lines": 301
+    },
+    {
+      "coverage_percent": 90.0,
+      "coverage_status": "partially_covered",
+      "covered_lines": 99,
+      "executable_lines": 110,
+      "missing_lines": 11,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_group_members",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_members.py",
+      "source_lines": 205
+    },
+    {
+      "coverage_percent": 91.45,
+      "coverage_status": "partially_covered",
+      "covered_lines": 139,
+      "executable_lines": 152,
+      "missing_lines": 13,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_group_records",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_records.py",
+      "source_lines": 268
+    },
+    {
+      "coverage_percent": 97.32,
+      "coverage_status": "partially_covered",
+      "covered_lines": 109,
+      "executable_lines": 112,
+      "missing_lines": 3,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_group_recovery",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_recovery.py",
+      "source_lines": 262
+    },
+    {
+      "coverage_percent": 99.12,
+      "coverage_status": "partially_covered",
+      "covered_lines": 224,
+      "executable_lines": 226,
+      "missing_lines": 2,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_group_schema",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_group_schema.py",
+      "source_lines": 442
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 22,
+      "executable_lines": 22,
+      "missing_lines": 0,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_metrics",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_metrics.py",
+      "source_lines": 64
+    },
+    {
+      "coverage_percent": 99.15,
+      "coverage_status": "partially_covered",
+      "covered_lines": 117,
+      "executable_lines": 118,
+      "missing_lines": 1,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_planner",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_planner.py",
+      "source_lines": 227
+    },
+    {
+      "coverage_percent": 95.55,
+      "coverage_status": "partially_covered",
+      "covered_lines": 236,
+      "executable_lines": 247,
+      "missing_lines": 11,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_posix",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_posix.py",
+      "source_lines": 401
+    },
+    {
+      "coverage_percent": 96.33,
+      "coverage_status": "partially_covered",
+      "covered_lines": 105,
+      "executable_lines": 109,
+      "missing_lines": 4,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_preview_mixin",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_preview_mixin.py",
+      "source_lines": 195
+    },
+    {
+      "coverage_percent": 93.09,
+      "coverage_status": "partially_covered",
+      "covered_lines": 175,
+      "executable_lines": 188,
+      "missing_lines": 13,
+      "module": "bioetl.infrastructure.storage.bronze.cleanup_support",
+      "path": "src/bioetl/infrastructure/storage/bronze/cleanup_support.py",
+      "source_lines": 439
+    },
+    {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 15,
@@ -51433,7 +51673,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-18",
-  "source_tree_sha256": "543117ed4b924457b894fc891c2202a16d19561e7b57d490d749aa43e10f4161",
+  "source_tree_sha256": "f4ddd1bae9969839f1d20c182546f750206908f09b8c1f673171519832975398",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -51588,12 +51828,12 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2571,
+    "source_module_count": 2583,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 2529,
+      "fully_covered": 2530,
       "no_executable_lines": 1,
-      "partially_covered": 41,
+      "partially_covered": 52,
       "uncovered": 0,
       "unmeasured": 0
     },
