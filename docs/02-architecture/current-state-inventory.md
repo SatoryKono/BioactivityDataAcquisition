@@ -36,18 +36,21 @@ The current table includes the OpenAlex query paginator extracted in PR #12096. 
 
 The earlier LoggerPort alias-removal source rebind did not constitute a new coverage measurement. Its accepted inventory followed a complete 17-group local measurement on `c4071c0eeecd6b06f18bc781a0435ee128e0e994`; that historical raw comparison recorded 80 remaining module regressions. Accepted inventory values are not a claim of fresh global nonregression. `config_root` was freshly measured at 40/40 lines and 18/18 branches. Final architecture acceptance and publication remain separate checks.
 
-The current source tree contains 2566 eligible modules, all represented in the
-accepted inventory. A complete local 17-shard measurement on source commit
-`912f483953c76ede75313f762e41a9848369c3bb` produced 99.67% line and 94.25%
-branch coverage; nonregressing adoption retains prior accepted values where
-the fresh raw measurement is lower. This is local measurement evidence, not
-CircleCI acceptance or lifecycle ADMIT for the final PR head.
+Historical coverage measurement on source commit
+`912f483953c76ede75313f762e41a9848369c3bb` recorded 2566 eligible modules in the
+accepted inventory and produced 99.67% line and 94.25% branch coverage;
+nonregressing adoption retains prior accepted values where the fresh raw
+measurement is lower. Those 2566-module figures and the summary table below are
+historical measurement evidence for that commit, not the live source-module
+count. The current source inventory binding at the end of this document reports
+the live projection (`source_module_count=2571`). This is local measurement
+evidence, not CircleCI acceptance or lifecycle ADMIT for the final PR head.
 
-| Artifact | Current value | Source |
+| Artifact | Historical measurement (`912f4839`) | Source |
 | --- | ---: | --- |
 | Architecture quality score | `10.00` (`excellent`) | `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2566` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2566` | `reports/quality/module-coverage-inventory.json` (historical measurement) |
 | Unmatched live modules / uncovered measured modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, complete source-module snapshot |
 | Coverage inventory status counts | `2524` fully covered, `41` partially covered, `1` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
@@ -332,7 +335,7 @@ by storage technology. Current owner boundaries:
 
 ## Current source inventory binding
 
-- `source_tree_sha256=041dbf4a5b51ae93c92da655108b03bd22ec6e54f02f3833820b3fa21888bf53`
+- `source_tree_sha256=c5fb580587723981d1b8668fddda3f186d9d9e0748d5bb065bdc40579b386a8c`
 - `source_module_count=2571`
 - Source modules: `2571`
 - `2529` fully covered

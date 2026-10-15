@@ -32,7 +32,7 @@ trend evidence only.
 - Source run id: `local-pr12204-combined-3bb4a9fc`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `cdd7b258d6bd935351710afdfd29cfd95f502ac7879a193c9d14d60f52ddf062`
+- Source tree sha256: `514e59a6edd3a7ec3eb4f577cc8a7ada15eb5fe65b0d6440ee0b6640dfb3b840`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-10-14T16:46:51.736643+00:00`
 
@@ -40,8 +40,9 @@ trend evidence only.
 
 - Continuous identity is `source_tree_sha256` over `tests/**/*.py`,
   `pyproject.toml`, `configs/quality/test_matrix.yaml`,
-  `.github/workflows/tests.yml`, and the live JUnit producer
-  `scripts/engineering/ci/junit_duration_summary.py`.
+  `.github/workflows/tests.yml`, and the live JUnit producers
+  `scripts/engineering/ci/junit_duration_summary.py` and
+  `scripts/engineering/dev/pytest_junit_subtests.py`.
 - `measurement_provenance.head` and `test_tree_sha256` retain the captured
   run identity when the current audited test tree advances later.
 - Freshness uses live UTC (injectable via `BIOETL_TELEMETRY_REFERENCE_NOW`)
