@@ -73,6 +73,7 @@ def test_reference_identifier_registry_covers_non_chembl_provider_families() -> 
         "semantic_scholar_corpus",
         "semantic_scholar_paper",
         "uniprot_accession",
+        "pubchem_cid",
     } <= registry.keys()
 
     openalex_author = registry["openalex_author"]
@@ -90,6 +91,10 @@ def test_reference_identifier_registry_covers_non_chembl_provider_families() -> 
     assert mixed.normalizer(" p12345 ") == "P12345"
     assert mixed.normalizer("chembl0203") == "CHEMBL203"
     assert mixed.normalizer("db00001") == "DB00001"
+
+    pubchem_cid = registry["pubchem_cid"]
+    assert pubchem_cid.normalizer is not None
+    assert pubchem_cid.normalizer(" CID:12345 ") == "12345"
 
 
 def test_reference_identifier_registry_normalizes_legacy_transport_aliases() -> None:
