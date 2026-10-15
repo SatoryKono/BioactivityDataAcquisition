@@ -119,6 +119,11 @@ class GroupMemberRecovery(GroupRecordStore):
             progress.phase = f"{key}_stage"
             self._stage_member(date_fd, stage_fd, body, key, relative, chain, hook)
         if not _exists(stage_fd, key):
+            # Prior unlink may have survived while the following fsync failed.
+            # Count once before completion confirms durable absence.
+            if key in body["staged"] and not _exists(date_fd, body["names"][key]):
+                progress.removed += 1
+                progress.removed_bytes += body["members"][key]["size"]
             return
         # A previous call may have renamed this member but failed to fsync.
         # Do not attest that visible move as durable without acknowledging it.

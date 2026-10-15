@@ -107,24 +107,42 @@ def _fd_view_supported() -> bool:
         os.close(fd)
 
 
-_DIR_XATTR_FS: bool | None = None
+_DIR_XATTR_BY_DEV: dict[int, bool] = {}
 
 
-def _directory_xattr_supported() -> bool:
-    """Require directory user-xattr before publishing a durable group intent."""
-    global _DIR_XATTR_FS
+def _directory_xattr_supported(base_path: Path | None = None) -> bool:
+    """Require directory user-xattr on the target volume before durable intent."""
     setter = os.__dict__.get("setxattr")
     getter = os.__dict__.get("getxattr")
     remover = os.__dict__.get("removexattr")
     if setter is None or getter is None:
         return False
-    if _DIR_XATTR_FS is not None:
-        return _DIR_XATTR_FS
     import tempfile
 
+    probe_kwargs: dict[str, str] = {"prefix": "bioetl-xattr-probe-"}
+    cache_key: int | None = None
+    if base_path is not None:
+        try:
+            anchor = Path(os.path.abspath(base_path))  # noqa: PTH100
+            while not anchor.exists() and anchor.parent != anchor:
+                anchor = anchor.parent
+            if not anchor.exists():
+                return False
+            cache_key = int(anchor.stat().st_dev)
+            cached = _DIR_XATTR_BY_DEV.get(cache_key)
+            if cached is not None:
+                return cached
+            probe_kwargs["dir"] = str(anchor if anchor.is_dir() else anchor.parent)
+        except OSError:
+            return False
     probe_tag = b"user.bioetl.fs001-capability-probe"
     try:
-        with tempfile.TemporaryDirectory(prefix="bioetl-xattr-probe-") as tmp:
+        with tempfile.TemporaryDirectory(**probe_kwargs) as tmp:
+            if cache_key is None:
+                cache_key = int(os.stat(tmp).st_dev)
+                cached = _DIR_XATTR_BY_DEV.get(cache_key)
+                if cached is not None:
+                    return cached
             fd = os.open(tmp, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW)
             try:
                 create_flag = getattr(os, "XATTR_CREATE", 1)
@@ -132,13 +150,37 @@ def _directory_xattr_supported() -> bool:
                 supported = bool(getter(fd, probe_tag) == b"1")
                 if remover is not None:
                     remover(fd, probe_tag)
-                _DIR_XATTR_FS = supported
+                _DIR_XATTR_BY_DEV[cache_key] = supported
                 return supported
             finally:
                 os.close(fd)
     except OSError:
-        _DIR_XATTR_FS = False
+        if cache_key is not None:
+            _DIR_XATTR_BY_DEV[cache_key] = False
         return False
+
+
+def _visible_pending_group_markers(base_path: Path) -> bool:
+    """Fail-closed reserved journal/stage visibility without a pinned root fd."""
+    try:
+        names = os.listdir(base_path)
+    except OSError:
+        return False
+    if any(name.startswith(_GROUP_STAGE_PREFIX) for name in names):
+        return True
+    if _GROUP_JOURNAL_DIR not in names:
+        return False
+    try:
+        return bool(os.listdir(base_path / _GROUP_JOURNAL_DIR))
+    except OSError:
+        return True
+
+
+def shared_lease_without_caps(base_path: Path) -> BronzeRootLease:
+    """Shared lease when caps are absent; refuse visible pending group work."""
+    if _visible_pending_group_markers(base_path):
+        raise OSError("Bronze operation refused while group recovery is pending")
+    return BronzeRootLease(base_path, None)
 
 
 def destructive_cleanup_supported() -> bool:

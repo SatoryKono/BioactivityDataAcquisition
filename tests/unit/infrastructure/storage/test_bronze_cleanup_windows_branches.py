@@ -387,6 +387,9 @@ def _arm(monkeypatch: pytest.MonkeyPatch, *modules: types.ModuleType) -> DirFdBr
         monkeypatch.setattr(module, "os", bridge)
     for module in (cleanup_posix, cleanup_core, support):
         monkeypatch.setattr(module, "destructive_cleanup_supported", lambda: True)
+    # bronze_tree_lock also binds directory xattr to the Bronze volume itself.
+    monkeypatch.setattr(cleanup_core, "_directory_xattr_supported", lambda *_a, **_k: True)
+    monkeypatch.setattr(support, "_directory_xattr_supported", lambda *_a, **_k: True)
     _patch_fd_view(monkeypatch, bridge)
     return bridge
 
@@ -1072,6 +1075,12 @@ def test_bronze_tree_lock_nondestructive_paths(
     with support.bronze_tree_lock(tmp_path, exclusive=False) as lease:
         assert lease.fd is None
         assert lease.writer_path == tmp_path
+    pending = tmp_path / "pending-markers"
+    pending.mkdir()
+    (pending / ".bronze-group-stage-1").mkdir()
+    with pytest.raises(OSError, match="group recovery"):
+        with support.bronze_tree_lock(pending, exclusive=False):
+            pass
 
 
 def test_candidate_is_safe_uses_anchored_parent(tmp_path: Path, monkeypatch) -> None:

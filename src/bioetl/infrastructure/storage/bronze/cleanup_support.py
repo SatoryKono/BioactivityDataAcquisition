@@ -26,9 +26,11 @@ from .cleanup_core import (
     _STAGE_PREFIX,
     BronzeRootLease,
     _CleanupConflict,
+    _directory_xattr_supported,
     _entry_is_link_or_reparse,
     _pending_group_operation,
     destructive_cleanup_supported,
+    shared_lease_without_caps,
     is_reserved_bronze_maintenance_name,
     open_bronze_root_no_follow,
     stat_is_link_or_reparse,
@@ -76,13 +78,13 @@ def bronze_tree_lock(
 
     This is advisory. The operator must exclude uncooperative same-user writers.
     """
-    if not destructive_cleanup_supported():
+    if not (destructive_cleanup_supported() and _directory_xattr_supported(base_path)):
         if exclusive:
             raise NotImplementedError(
                 "Bronze destructive cleanup requires POSIX dir_fd/no-follow, "
                 "flock, and a verified root fd view"
             )
-        yield BronzeRootLease(base_path, None)
+        yield shared_lease_without_caps(base_path)
         return
     import fcntl
 
@@ -433,11 +435,9 @@ def candidate_is_safe(
 
 from .cleanup_posix import (  # noqa: E402 - destructive helpers depend on discovery primitives
     _anchored_parent,
+    _private_stage as _private_stage,
     _recover_stages,
     _same_identity,
     safe_rmdir,
     safe_unlink,
-)
-from .cleanup_posix import (  # noqa: E402 - compatibility import after primitives
-    _private_stage as _private_stage,
 )

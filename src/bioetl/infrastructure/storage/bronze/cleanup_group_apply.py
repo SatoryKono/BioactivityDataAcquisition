@@ -6,7 +6,7 @@ import json
 import os
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any
+from typing import Protocol
 
 from .cleanup_core import BronzeRootLease
 from .cleanup_group_journal import GroupJournal
@@ -19,6 +19,20 @@ from .cleanup_group_schema import (
     _unique_pairs,
 )
 from .cleanup_planner import _CleanupCandidate, _CleanupDatePlan
+
+
+class _CleanupPlanHost(Protocol):
+    """Minimal host surface used by execute_cleanup_plan apply dispatch."""
+
+    def _apply_cleanup_plan(
+        self,
+        stats: dict[str, int],
+        plan: _CleanupDatePlan,
+        root_abs: Path,
+        root_real: Path,
+        root_fd: int | None,
+        group_cleanup: BronzeGroupCleanup | None,
+    ) -> None: ...
 
 
 class BronzeGroupCleanup:
@@ -122,6 +136,7 @@ class BronzeGroupCleanup:
             if plan.removable and stats["directories_planned"] > 0:
                 stats["directories_planned"] -= 1
                 plan.removable = False
+                stats["directories_skipped"] += 1
         stats[f"files_{kind}"] += len(candidates)
         stats[f"bytes_{kind}"] += size
         self.on_skip(str(plan.path / group), f"group_attestation_{kind}")
@@ -215,7 +230,7 @@ def cleanup_roots(
 
 
 def execute_cleanup_plan(
-    host: Any,
+    host: _CleanupPlanHost,
     dry_run: bool,
     stats: dict[str, int],
     plan: _CleanupDatePlan,
