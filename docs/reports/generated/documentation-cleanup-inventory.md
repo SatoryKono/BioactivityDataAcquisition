@@ -10,7 +10,7 @@
 | Doc-like files | 3812 |
 | Tracked doc-like files | 3812 |
 | Ignored local docs/reports files | 0 |
-| Duplicate groups | 7 |
+| Duplicate groups | 78 |
 | Generated without route or exception | 0 |
 | Generated routes | 73 |
 
@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 1037 |
+| working_report | 101 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -52,28 +52,28 @@
 | Status | Count |
 | --- | --- |
 | Active | 748 |
-| Archived | 631 |
+| Archived | 1567 |
 | Canonical | 75 |
 | Generated | 1062 |
-| Working | 1296 |
+| Working | 360 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
 | active | 748 |
-| archive | 631 |
+| archive | 1567 |
 | canonical | 75 |
 | generated | 1062 |
-| working | 1296 |
+| working | 360 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 1070 |
+| archive-after-migration | 134 |
 | generate-automatically | 1062 |
-| keep | 1680 |
+| keep | 2616 |
 
 ## Cleanup Candidates
 
@@ -120,45 +120,45 @@
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/runtime-receipt.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/screenshots.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-01/issue-01-1.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-01/issue-01-2.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-01/issue-01-3.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-01/issue-01-4.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-02/issue-02-1.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-02/issue-02-2.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-02/issue-02-3.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-02/issue-02-4.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-03/issue-03-1.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-03/issue-03-2.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-03/issue-03-3.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-03/issue-03-4.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-04/issue-04-1.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-04/issue-04-2.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-04/issue-04-3.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-04/issue-04-4.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-05/issue-05-1.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-05/issue-05-2.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-05/issue-05-3.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-05/issue-05-4.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-06/issue-06-1.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-06/issue-06-2.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-06/issue-06-3.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-06/issue-06-4.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-07/issue-07-1.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-07/issue-07-2.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-07/issue-07-3.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-07/issue-07-4.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-08/issue-08-1.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-08/issue-08-2.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-08/issue-08-3.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-08/issue-08-4.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-09/issue-09-1.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-09/issue-09-2.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-09/issue-09-3.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-09/issue-09-4.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-10/issue-10-1.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-10/issue-10-2.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-10/issue-10-3.md` | Working | 0 | archive-after-migration |
+| `reports/docs-evidence/README.md` | Working | 2 | archive-after-migration |
+| `reports/observability/grafana/security-ui-final-20261003/bioetl-scenes-app-gates.json` | Working | 0 | archive-after-migration |
+| `reports/observability/grafana/security-ui-final-20261003/bioetl-selectorshell-panel-gates.json` | Working | 0 | archive-after-migration |
+| `reports/observability/grafana/selector-audit-2026-07-20/selector-evidence.json` | Working | 0 | archive-after-migration |
+| `reports/observability/remediation/20260817/trust_manifest_validation.json` | Working | 0 | archive-after-migration |
+| `reports/observability/remediation/20260916/grafana-visual-10496-10504.md` | Working | 0 | archive-after-migration |
+| `reports/observability/remediation/20260916/selected-run-status-acceptance.md` | Working | 0 | archive-after-migration |
+| `reports/observability/runtime_cardinality_review.json` | Working | 0 | archive-after-migration |
+| `reports/observability/runtime_cardinality_review_pr.json` | Working | 0 | archive-after-migration |
+| `reports/quality/adr-enforcement-matrix.json` | Working | 0 | archive-after-migration |
+| `reports/quality/adr-enforcement-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture-quality-scorecard.json` | Working | 0 | archive-after-migration |
+| `reports/quality/branch-coverage-gate-evidence.json` | Working | 0 | archive-after-migration |
+| `reports/quality/cast-any-typing-census.json` | Working | 0 | archive-after-migration |
+| `reports/quality/cast-any-typing-census.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260805/01-scope-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/01-scope-matrix.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/01-scope-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260811/01-scope-matrix.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260811/01-scope-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260811/_S01-domain-aggregates.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260811/_S01-domain-registry.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260813/01-scope-matrix.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260813/01-scope-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260813/_S01-domain-aggregates.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260813/_S01-domain-registry.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260816/01-scope-matrix.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260816/01-scope-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260816/_S01-domain-aggregates.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260816/_S01-domain-registry.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260925_085141/scope_matrix.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/_domain_aggregates_open.json` | Working | 0 | archive-after-migration |
+| `reports/quality/codex-local-state-audit.json` | Working | 0 | archive-after-migration |
+| `reports/quality/codex-profile-benchmark.json` | Working | 0 | archive-after-migration |
+| `reports/quality/compatibility-importer-census.json` | Working | 0 | archive-after-migration |
+| `reports/quality/config-compatibility-legacy-taxonomy-review.json` | Working | 0 | archive-after-migration |
+| `reports/quality/config-surface-backlog.json` | Working | 0 | archive-after-migration |
+| `reports/quality/contract-coverage-matrix.json` | Working | 0 | archive-after-migration |
+| `reports/quality/contract-coverage-matrix.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
