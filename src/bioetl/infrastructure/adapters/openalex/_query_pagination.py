@@ -63,7 +63,17 @@ async def iter_query_results(
             per_page=per_page,
         )
         payload = await query_executor.request_works_payload(params)
-        for work in response_mapper.extract_results(payload):
+        results = response_mapper.extract_results(payload)
+        if not results:
+            _validate_page_cursor(
+                next_cursor=response_mapper.extract_next_cursor(payload),
+                logger=logger,
+                query=query,
+                page_count=page_count,
+                max_pages=max_pages,
+            )
+            return
+        for work in results:
             yield work
             fetched += 1
             if limit is not None and fetched >= limit:
@@ -71,16 +81,40 @@ async def iter_query_results(
         next_cursor = response_mapper.extract_next_cursor(payload)
         if next_cursor is None:
             break
-        if next_cursor in seen_cursors:
-            raise_pagination_truncated(
-                logger,
-                event="openalex_query_results_truncated",
-                reason="repeated_cursor",
-                page_count=page_count,
-                page_limit=max_pages,
-                cursor_field="next_cursor",
-                cursor_value=next_cursor[:100],
-                log_context={"query": query[:100]},
-            )
+        _validate_page_cursor(
+            next_cursor=next_cursor,
+            seen_cursors=seen_cursors,
+            logger=logger,
+            query=query,
+            page_count=page_count,
+            max_pages=max_pages,
+        )
         seen_cursors.add(next_cursor)
         cursor = next_cursor
+
+
+def _validate_page_cursor(
+    *,
+    next_cursor: str | None,
+    logger: LoggerPort,
+    query: str,
+    page_count: int,
+    max_pages: int,
+    seen_cursors: set[str] | None = None,
+) -> None:
+    """Reject empty-page continuation (no seen set) or a repeated cursor."""
+    if next_cursor is not None and (
+        seen_cursors is None or next_cursor in seen_cursors
+    ):
+        raise_pagination_truncated(
+            logger,
+            event="openalex_query_results_truncated",
+            reason="empty_page_with_cursor"
+            if seen_cursors is None
+            else "repeated_cursor",
+            page_count=page_count,
+            page_limit=max_pages,
+            cursor_field="next_cursor",
+            cursor_value=next_cursor[:100],
+            log_context={"query": query[:100]},
+        )

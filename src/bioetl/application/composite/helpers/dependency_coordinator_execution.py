@@ -8,6 +8,9 @@ from typing import Protocol
 
 import polars as pl
 
+from bioetl.application.composite.dependency_progress_tracker import (
+    DependencyProgressService,
+)
 from bioetl.application.composite.dependency_result_mapper import (
     DependencyResultService,
 )
@@ -23,6 +26,7 @@ __all__ = [
     "execute_dependency_runner",
     "log_dependencies_batch_start",
     "log_dependency_start",
+    "run_dependency_batch",
     "run_single_dependency",
 ]
 
@@ -127,3 +131,82 @@ async def run_single_dependency(
         completed_at=completed_at,
         duration_seconds=duration,
     )
+
+
+class _DependencyBatchHost(Protocol):
+    """Host surface for sequential dependency batch execution."""
+
+    _logger: LoggerPort
+    _progress_service: DependencyProgressService
+
+    async def _get_effective_keys(
+        self,
+        dependency: DependencyConfig,
+        seed_keys: pl.DataFrame,
+        dep_config_lookup: dict[str, DependencyConfig],
+    ) -> pl.DataFrame: ...
+
+    async def _run_single_dependency(
+        self,
+        dependency: DependencyConfig,
+        keys: pl.DataFrame,
+        runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
+    ) -> DependencyResult: ...
+
+
+async def run_dependency_batch(
+    host: _DependencyBatchHost,
+    *,
+    keys: pl.DataFrame,
+    dependencies: Sequence[DependencyConfig],
+    completed: frozenset[str],
+    runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
+) -> dict[str, DependencyResult]:
+    """Run dependencies sequentially and return per-pipeline results."""
+    results: dict[str, DependencyResult] = {}
+    dep_config_lookup = {dependency.pipeline: dependency for dependency in dependencies}
+
+    if not dependencies:
+        host._logger.debug("No dependencies to run")
+        return results
+
+    log_dependencies_batch_start(logger=host._logger, dependencies=dependencies)
+
+    for dependency in dependencies:
+        if host._progress_service.maybe_store_completed_skip(
+            dependency=dependency,
+            completed=completed,
+            results=results,
+        ):
+            continue
+
+        if host._progress_service.maybe_store_blocked_chain(
+            dependency=dependency,
+            results=results,
+        ):
+            if host._progress_service.should_stop_after_result(
+                dependency=dependency,
+                result=results[dependency.pipeline],
+            ):
+                break
+            continue
+
+        effective_keys = await host._get_effective_keys(
+            dependency=dependency,
+            seed_keys=keys,
+            dep_config_lookup=dep_config_lookup,
+        )
+        result = await host._run_single_dependency(
+            dependency=dependency,
+            keys=effective_keys,
+            runner_factory=runner_factory,
+        )
+        results[dependency.pipeline] = result
+
+        if host._progress_service.should_stop_after_result(
+            dependency=dependency,
+            result=result,
+        ):
+            break
+
+    return results
