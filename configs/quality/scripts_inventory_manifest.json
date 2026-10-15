@@ -3684,13 +3684,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 108,
+          "line": 110,
           "source_group": "tests",
           "text": "for name in (\"mcp_filesystem_wrapper.sh\", \"mcp_filesystem_wrapper.ps1\", \"check.sh\"):"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 193,
+          "line": 195,
           "source_group": "tests",
           "text": "script = ROOT / \"scripts/ai/mcp/mcp_filesystem_wrapper.ps1\""
         }
@@ -3739,13 +3739,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 108,
+          "line": 110,
           "source_group": "tests",
           "text": "for name in (\"mcp_filesystem_wrapper.sh\", \"mcp_filesystem_wrapper.ps1\", \"check.sh\"):"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 224,
+          "line": 220,
           "source_group": "tests",
           "text": "script = ROOT / \"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
         },
@@ -17454,7 +17454,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 19,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
@@ -21424,13 +21424,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 122,
+          "line": 124,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\""
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 305,
+          "line": 295,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh\""
         }
@@ -22270,7 +22270,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py",
-          "line": 349,
+          "line": 339,
           "source_group": "tests",
           "text": "ROOT / \"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1\""
         },
