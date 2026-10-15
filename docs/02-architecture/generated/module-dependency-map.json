@@ -1,12 +1,12 @@
 {
   "summary": {
     "scanned_modules": 2569,
-    "total_internal_imports": 8273,
+    "total_internal_imports": 8274,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "229ea25db35e3aa55d6d7eaae02b8203bf5d0a5a0cc34c8a9f222ea07d871a44"
+    "source_fingerprint": "05ade8931b2cb71b9de02576a60a2e9e6b2c0a76e84759100aa08bc32ac7f121"
   },
   "layer_edges": [
     {
@@ -18,7 +18,7 @@
     {
       "source": "application",
       "target": "domain",
-      "imports": 1102,
+      "imports": 1103,
       "allowed": true
     },
     {
@@ -307,7 +307,7 @@
     {
       "source": "application.core",
       "target": "domain.exceptions",
-      "imports": 17
+      "imports": 18
     },
     {
       "source": "application.observability",
