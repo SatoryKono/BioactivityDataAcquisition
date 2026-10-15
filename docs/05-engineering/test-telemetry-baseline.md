@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `main`
-- Source commit: `4aa5fa270e3a5646b73dacb0d57474a4cc3eac1b5a3f893d953962d638fa61de`
-- Source run id: `38650134453`
-- Source event: `push`
+- Source branch: `fix/cf007-vcr-session-headers-20261013`
+- Source commit: `7db3bfe0867ef1057e87b1772ca83271caafe167`
+- Source run id: `local-coverage`
+- Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `132785e1028bf25c7cee7aeda1c67300c482b41fcf4b7fec99025af7e3561e8d`
+- Source tree sha256: `4b21a114d7c08cced652751e2e9fd571b4b41e0be0e287060c2d2b7fe8bdb83f`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-10-15T06:58:38.705106+00:00`
+- Refreshed at (UTC): `2026-10-13T11:39:16.320446+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -88,8 +88,8 @@ trend evidence only.
 ## Coverage
 
 - Hard threshold: `85.0%`
-- Actual coverage: `pending`
-- Threshold satisfied: `None`
+- Actual coverage: `99.67%`
+- Threshold satisfied: `True`
 
 ## Duration Telemetry
 

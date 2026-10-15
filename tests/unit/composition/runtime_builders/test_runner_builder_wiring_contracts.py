@@ -71,3 +71,11 @@ def test_runtime_builder_public_exports_stay_narrow() -> None:
         "build_pipeline_runner",
         "ensure_providers_loaded",
     }
+
+
+def test_runner_wiring_preserves_identity_without_overrides() -> None:
+    factory = runner_builder_wiring.RunnerFactoryWiring()
+    inputs = runner_builder_wiring.RunnerInputWiring()
+
+    assert runner_builder_wiring.resolve_runner_factory_wiring(factory) is factory
+    assert runner_builder_wiring.resolve_runner_input_wiring(inputs) is inputs
