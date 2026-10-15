@@ -30,10 +30,8 @@
 from __future__ import annotations
 
 from unittest.mock import MagicMock
-from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
-
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
@@ -42,7 +40,9 @@ from bioetl.application.pipelines.uniprot.idmapping_transformer import (
     IDMappingTransformer,
 )
 from bioetl.domain.context import PipelineContext
+from bioetl.domain.schemas.uniprot.idmapping import IDMappingSchema
 from bioetl.domain.types import RunType
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 
@@ -306,6 +306,9 @@ class TestIDMappingTransformer:
         assert result["_source_batch_id"] is None
         assert "_ingestion_ts" in result
         assert "_index" in result
+        schema_columns = list(IDMappingSchema.to_schema().columns)
+        assert list(result) == [column for column in schema_columns if column in result]
+        assert [key for key in result if key not in schema_columns] == []
 
     @pytest.mark.asyncio
     async def test_transform_index_preserved(self, transformer, mock_context):

@@ -768,7 +768,10 @@ class _FakeHistoricalReplayUniverseService:
 @pytest.fixture
 def cli_runner() -> CliRunner:
     if "mix_stderr" in inspect.signature(CliRunner).parameters:
-        return CliRunner(mix_stderr=False)
+        # Click versions expose different constructor keywords; the signature
+        # guard bounds this dynamic compatibility call to supported versions.
+        options: dict[str, Any] = {"mix_stderr": False}
+        return CliRunner(**options)
     return CliRunner()
 
 

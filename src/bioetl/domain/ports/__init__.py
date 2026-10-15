@@ -127,6 +127,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "SilverDQConfigPort",
         "SilverValidatorPort",
         "coerce_silver_dq_analyze_request",
+        "project_etl_order",
     ),
     "bioetl.domain.ports.resilience": (
         "CircuitBreakerPort",
@@ -199,7 +200,6 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
 }
 
 _EXPORT_MODULES = build_export_modules(_EXPORT_GROUPS)
-
 __all__ = [*_EXPORT_MODULES]
 
 

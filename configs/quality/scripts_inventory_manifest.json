@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-14T23:16:54.932289+00:00",
+  "generated_at": "2026-10-15T15:35:52.965764+00:00",
   "summary": {
-    "total_scripts": 651,
+    "total_scripts": 652,
     "status_counts": {
       "active": 334,
-      "supporting": 317
+      "supporting": 318
     },
     "reference_group_coverage": {
       "agents": 11,
       "build": 18,
       "ci": 71,
-      "docs": 282,
+      "docs": 283,
       "other": 50,
-      "scripts": 544,
+      "scripts": 545,
       "skills": 13,
-      "tests": 464
+      "tests": 465
     }
   },
   "scripts": [
@@ -5278,7 +5278,7 @@
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 112,
+          "line": 115,
           "source_group": "docs",
           "text": "| Pipeline factory registry | `src/bioetl/composition/factories/pipeline/registry.py` | Registers provider/composite factories for composition-time lookup. | Composition registry API and pipeline fact"
         },
@@ -9557,7 +9557,7 @@
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 283,
+          "line": 286,
           "source_group": "docs",
           "text": "| Manifest service orchestration | `src/bioetl/application/services/control_plane/manifest/service.py`, `models.py`, `validation.py` | Create/inspect immutable run manifests and enforce application-le"
         },
@@ -10166,7 +10166,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 10,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -10178,7 +10178,7 @@
           "path": "docs/05-engineering/test-telemetry-baseline.md",
           "line": 44,
           "source_group": "docs",
-          "text": "`scripts/engineering/ci/junit_duration_summary.py`."
+          "text": "`scripts/engineering/ci/junit_duration_summary.py` and"
         },
         {
           "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
@@ -10200,9 +10200,9 @@
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 647,
+          "line": 648,
           "source_group": "scripts",
-          "text": "\"  `scripts/engineering/ci/junit_duration_summary.py`.\","
+          "text": "\"  `scripts/engineering/ci/junit_duration_summary.py` and\","
         },
         {
           "path": "tests/architecture/test_ci_test_strategy.py",
@@ -10231,13 +10231,13 @@
       "references": [
         {
           "path": "scripts/engineering/ci/test_telemetry_provenance.py",
-          "line": 466,
+          "line": 467,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.local_test_telemetry import ("
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 999,
+          "line": 1001,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.local_test_telemetry import build_local_baseline"
         },
@@ -10698,19 +10698,19 @@
       "references": [
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 58,
+          "line": 59,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.ci.test_telemetry_provenance --measurement-repo-root"
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 661,
+          "line": 663,
           "source_group": "scripts",
           "text": "\"  `python -m scripts.engineering.ci.test_telemetry_provenance --measurement-repo-root\","
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 935,
+          "line": 937,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.test_telemetry_provenance import ("
         },
@@ -10777,19 +10777,19 @@
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 63,
+          "line": 64,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.ci.update_test_telemetry_baseline"
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 84,
+          "line": 85,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.ci.update_test_telemetry_baseline`"
         },
         {
           "path": "docs/05-engineering/test-telemetry-baseline.md",
-          "line": 138,
+          "line": 139,
           "source_group": "docs",
           "text": "3. Run `python -m scripts.engineering.ci.update_test_telemetry_baseline --source-commit <sha> --source-run-id <run-id> ...` with either direct artifacts or fallback diagnostics inputs."
         },
@@ -11197,7 +11197,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 260,
+          "line": 270,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/.wsl-vpn-fix.ps1`                   | Recover Windows-side VPN proxy settings for WSL interoperability                          |"
         }
@@ -11408,7 +11408,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 218,
+          "line": 228,
           "source_group": "scripts",
           "text": "| `install-deps`       | `scripts/engineering/dev/install_deps.py`                    | Auxiliary helper script, not a full project bootstrap            |"
         },
@@ -11433,7 +11433,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 223,
+          "line": 233,
           "source_group": "scripts",
           "text": "| `mock-metrics`       | `scripts/engineering/dev/metrics_mock_server.py`             | Start mock metrics server                                        |"
         },
@@ -11519,11 +11519,54 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 130,
+          "line": 140,
           "source_group": "scripts",
           "text": "invoke `bash scripts/engineering/dev/pretest_guardrails.sh --scope full`"
         }
       ]
+    },
+    {
+      "path": "scripts/engineering/dev/pytest_junit_subtests.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": "docs/05-engineering/test-telemetry-baseline.md",
+          "line": 45,
+          "source_group": "docs",
+          "text": "`scripts/engineering/dev/pytest_junit_subtests.py`."
+        },
+        {
+          "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
+          "line": 55,
+          "source_group": "scripts",
+          "text": "\"scripts/engineering/dev/pytest_junit_subtests.py\","
+        },
+        {
+          "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
+          "line": 649,
+          "source_group": "scripts",
+          "text": "\"  `scripts/engineering/dev/pytest_junit_subtests.py`.\","
+        },
+        {
+          "path": "scripts/engineering/dev/README.md",
+          "line": 86,
+          "source_group": "scripts",
+          "text": "JUnit output uses `scripts/engineering/dev/pytest_junit_subtests.py`, loaded"
+        },
+        {
+          "path": "tests/unit/scripts/ci/test_update_test_telemetry_baseline.py",
+          "line": 650,
+          "source_group": "tests",
+          "text": "producer = tmp_path / \"scripts/engineering/dev/pytest_junit_subtests.py\""
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2027-01-12",
+      "next_step": "Retain as the pytest JUnit plugin loaded by tests/conftest.py to preserve subtest records for strict telemetry accounting. Remove after the pinned upstream reporter provides equivalent records and the pass/fail/skip regressions pass without this adapter."
     },
     {
       "path": "scripts/engineering/dev/python/migrate_deprecated_names.py",
@@ -11549,13 +11592,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 219,
+          "line": 229,
           "source_group": "scripts",
           "text": "| `probe-quality`      | `scripts/engineering/dev/quality_gate_probe.py`              | Measure narrow pytest/mypy startup latency and timeout behavior  |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 256,
+          "line": 266,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/quality_gate_probe.py`              | Diagnose narrow pytest/mypy startup latency and timeout behavior                          |"
         },
@@ -11576,13 +11619,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 224,
+          "line": 234,
           "source_group": "scripts",
           "text": "| `mock-quarantine`    | `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock quarantine explorer API server                        |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 257,
+          "line": 267,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock `/ops/quarantine/*` endpoints for Silver Reject Explorer smoke checks          |"
         },
@@ -11960,7 +12003,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 249,
+          "line": 259,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/run_tests.ps1`                      | Run tests (PowerShell variant)                                                            |"
         },
@@ -12029,13 +12072,13 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 221,
+          "line": 231,
           "source_group": "scripts",
           "text": "| `run-tests`          | `scripts/engineering/dev/run_tests.py`                       | Run tests                                                        |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 225,
+          "line": 235,
           "source_group": "scripts",
           "text": "| `test-changed`       | `scripts/engineering/dev/run_tests.py changed`               | Run tests for changed files only                                 |"
         }
@@ -12062,7 +12105,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 248,
+          "line": 258,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/run_tests.sh`                       | Run tests (shell variant)                                                                 |"
         },
@@ -12095,7 +12138,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 265,
+          "line": 275,
           "source_group": "scripts",
           "text": "Canonical entrypoint: `scripts/engineering/dev/setup_bioetl_wsl.ps1`."
         }
@@ -16342,7 +16385,7 @@
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 307,
+          "line": 310,
           "source_group": "docs",
           "text": "| Generated artifact drift gate did not include module coverage source-tree hash freshness | `report-module-coverage --check` could fail stale source-tree evidence while `report-debt-governance-gates "
         },
@@ -16776,7 +16819,7 @@
         },
         {
           "path": "scripts/engineering/ci/test_telemetry_provenance.py",
-          "line": 473,
+          "line": 474,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.report_module_coverage_inventory import ("
         },
@@ -17149,7 +17192,7 @@
       "references": [
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 342,
+          "line": 345,
           "source_group": "docs",
           "text": "Derived by scripts/engineering/qa/report_topology_source_binding.py from"
         },
@@ -17494,7 +17537,7 @@
         },
         {
           "path": "scripts/engineering/ci/update_test_telemetry_baseline.py",
-          "line": 232,
+          "line": 233,
           "source_group": "scripts",
           "text": "and local_capture.get(\"producer\") == \"run_local_coverage_verify.py\""
         },
@@ -20271,7 +20314,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 122,
+          "line": 132,
           "source_group": "scripts",
           "text": "- `bash scripts/engineering/dev/run_pytest.sh` runs `bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only`"
         },

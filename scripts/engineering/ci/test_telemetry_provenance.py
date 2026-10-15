@@ -31,6 +31,7 @@ class ShallowMergeHistoryError(ValueError):
 TEST_INPUTS = (
     "src/bioetl",
     "scripts/engineering/ci",
+    "scripts/engineering/dev",
     "scripts/engineering/qa",
     "tests",
     "pyproject.toml",

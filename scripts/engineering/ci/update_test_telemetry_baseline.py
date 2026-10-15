@@ -52,6 +52,7 @@ def compute_test_telemetry_source_tree_sha256(repo_root: Path = REPO_ROOT) -> st
             "configs/quality/test_matrix.yaml",
             ".github/workflows/tests.yml",
             "scripts/engineering/ci/junit_duration_summary.py",
+            "scripts/engineering/dev/pytest_junit_subtests.py",
         )
     )
     digest = hashlib.sha256()
@@ -643,8 +644,9 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
         "",
         "- Continuous identity is `source_tree_sha256` over `tests/**/*.py`,",
         "  `pyproject.toml`, `configs/quality/test_matrix.yaml`,",
-        "  `.github/workflows/tests.yml`, and the live JUnit producer",
-        "  `scripts/engineering/ci/junit_duration_summary.py`.",
+        "  `.github/workflows/tests.yml`, and the live JUnit producers",
+        "  `scripts/engineering/ci/junit_duration_summary.py` and",
+        "  `scripts/engineering/dev/pytest_junit_subtests.py`.",
         "- `measurement_provenance.head` and `test_tree_sha256` retain the captured",
         "  run identity when the current audited test tree advances later.",
         "- Freshness uses live UTC (injectable via `BIOETL_TELEMETRY_REFERENCE_NOW`)",
