@@ -52,7 +52,7 @@ class _ColumnPriorityProvider(Protocol):
 
 def extract_field_from_qualified(column: str) -> str:
     """Extract field name from qualified column (x.y.z -> z)."""
-    parts = column.split(".")
+    parts = column.split(".", 2)
     if len(parts) == 3:
         return parts[2]
     return column
@@ -73,20 +73,51 @@ def can_coalesce(
         return True
     if type1 == pl.Null or type2 == pl.Null:
         return True
-    return isinstance(type1, pl.List) == isinstance(type2, pl.List)
+    if isinstance(type1, pl.List) != isinstance(type2, pl.List):
+        return False
+    return _can_execute_coalesce(df, [col1, col2])
+
+
+def _can_execute_coalesce(
+    df: Any,  # Any: DataFrame follows the same schema surface as can_coalesce.
+    columns: list[str],
+) -> bool:
+    """Check the complete expression, including value-dependent casts."""
+    import polars as pl
+
+    try:
+        df.select(pl.coalesce(columns))
+    except (pl.exceptions.SchemaError, pl.exceptions.InvalidOperationError):
+        return False
+    return True
 
 
 def build_field_groups(
     df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
+    *,
+    entity_scoped: bool = False,
 ) -> dict[str, list[str]]:
-    """Group non-system columns by field name."""
+    """Group non-system columns, optionally retaining qualified entity identity."""
     field_groups: dict[str, list[str]] = {}
     for col in df.columns:
         if col.startswith("_"):
             continue
         field = extract_field_from_qualified(col)
+        if entity_scoped and len(col.split(".", 2)) == 3:
+            field = col.split(".", 1)[1]
         field_groups.setdefault(field, []).append(col)
+    if entity_scoped:
+        _merge_unqualified_fields(field_groups)
     return field_groups
+
+
+def _merge_unqualified_fields(field_groups: dict[str, list[str]]) -> None:
+    """Move an unqualified seed into its unique entity group, preserving priority."""
+    unqualified = [field for field in field_groups if "." not in field]
+    for field in unqualified:
+        matches = [key for key in field_groups if key.endswith("." + field)]
+        if len(matches) == 1:
+            field_groups[matches[0]][:0] = field_groups.pop(field)
 
 
 def sort_columns(
@@ -98,9 +129,13 @@ def sort_columns(
     """Sort columns with either seed-first or enricher-first strategy."""
 
     def sort_key(col: str) -> tuple[int, str]:
-        is_seed = bool(seed_prefix_value and col.startswith(seed_prefix_value))
-        priority = int(is_seed != prefer_seed)
-        return (priority, col)
+        if "." not in col:
+            seed_rank = 0
+        elif seed_prefix_value and col.startswith(seed_prefix_value):
+            seed_rank = 1
+        else:
+            seed_rank = 2
+        return (seed_rank if prefer_seed else 2 - seed_rank, col)
 
     return sorted(columns, key=sort_key)
 
@@ -109,14 +144,16 @@ def compatible_columns(
     df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
     ordered_cols: list[str],
 ) -> list[str]:
-    """Keep the leading column and all columns type-compatible with it."""
+    """Keep the leading column and mutually type-compatible candidates."""
     if not ordered_cols:
         return []
 
     base_col = ordered_cols[0]
     result = [base_col]
     for col in ordered_cols[1:]:
-        if can_coalesce(df, base_col, col):
+        if all(can_coalesce(df, selected, col) for selected in result) and (
+            _can_execute_coalesce(df, [*result, col])
+        ):
             result.append(col)
     return result
 
