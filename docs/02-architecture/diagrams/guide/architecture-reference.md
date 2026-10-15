@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -97,7 +97,7 @@ Ports & Adapters паттерн - ключевой архитектурный п
 
 - 7 Provider Adapters (ChEMBL, PubChem, UniProt, CrossRef, OpenAlex, PubMed, SemanticScholar)
 - Storage Adapters (BronzeWriter, SilverWriter, GoldWriter)
-- Observability Adapters (StructlogLogger, PrometheusMetrics, OTELTracer)
+- Observability Adapters (StructlogLogger, PrometheusMetrics, OpenTelemetryTracer)
 - Coordination Adapters (MemoryLock, LocalCheckpointAdapter, UnifiedQuarantineAdapter)
 
 **Domain Core:**

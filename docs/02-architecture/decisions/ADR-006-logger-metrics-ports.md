@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -20,7 +20,7 @@ ______________________________________________________________________
 
 ## Context
 
-Logger and metrics dependencies were not consistently formalized as ports. The logger was typed as a concrete `structlog.BoundLogger` in `PipelineServices`, while metrics already had a proper `MetricsPort`. This inconsistency violated the Ports & Adapters architecture principle.
+Logger and metrics dependencies were not consistently formalized as ports. The logger was typed as a concrete `structlog.BoundLogger` in `PipelineService`, while metrics already had a proper `MetricsPort`. This inconsistency violated the Ports & Adapters architecture principle.
 
 Note: `domain/ports.py` was reorganized into a package `domain/ports/` with a facade. Import: `from bioetl.domain.ports import LoggerPort`.
 
@@ -30,7 +30,7 @@ We have chosen to:
 
 1. **Create `LoggerPort`** in `domain/ports/` package as a formal Protocol for logging
 1. **Keep `MetricsPort`** as-is (already properly defined)
-1. **Use ports consistently** in `PipelineServices` for both logger and metrics
+1. **Use ports consistently** in `PipelineService` for both logger and metrics
 1. **Maintain backward compatibility** via `BoundLogger` alias in `domain/context.py`
 
 ## Justification
@@ -122,11 +122,11 @@ class LoggerPort(Protocol):
 The `BoundLogger` alias (previously in `domain/context.py`) has been fully removed.
 All code now uses `LoggerPort` directly from `bioetl.domain.ports`.
 
-### PipelineServices Update
+### PipelineService Update
 
 ```python
 @dataclass(frozen=True)
-class PipelineServices:
+class PipelineService:
     data - source: DataSourcePort
     storage: BronzeStoragePort | SilverStoragePort | GoldStoragePort | MergedStoragePort
     lock: LockPort

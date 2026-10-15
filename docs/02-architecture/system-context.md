@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -129,7 +129,7 @@ BioETL использует **Ports & Adapters** (Hexagonal Architecture):
 
 - **Ports**: Protocol interfaces в Domain layer (`DataSourcePort`, `BronzeStoragePort`, `SilverStoragePort`, `GoldStoragePort`, `MergedStoragePort`, `LockPort`)
 - **Adapters**: Infrastructure implementations
-  - **Local-Only runtime**: `ChemblClient`, `SilverWriter`, `BronzeWriter`, `GoldWriter`, `MemoryLock`
+  - **Local-Only runtime**: `ChemblAdapter`, `SilverWriter`, `BronzeWriter`, `GoldWriter`, `MemoryLock`
 
 Это обеспечивает:
 

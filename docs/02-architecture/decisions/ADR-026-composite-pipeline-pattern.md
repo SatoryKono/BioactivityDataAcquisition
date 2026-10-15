@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-24'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -297,7 +297,7 @@ src/bioetl/
 │   │   ├── __init__.py
 │   │   ├── runner_pkg/         # Decomposed runner package (refactored)
 │   │   │   └── runner.py       # CompositePipelineRunner
-│   │   ├── coordinator.py      # EnrichmentCoordinator (fan-out logic)
+│   │   ├── coordinator.py      # EnrichmentCoordinatorService (fan-out logic)
 │   │   ├── merger.py           # MergeService (join + conflict resolution)
 │   │   ├── key_extractor.py    # KeyExtractorService
 │   │   └── checkpoint/         # CompositeCheckpointService (package)
@@ -380,7 +380,7 @@ This ensures predictable execution flow and prevents invalid operations.
 | `can-transition()`, `validate-transition()` | **domain**      | Pure functions for transition logic          |
 | `CompositeCheckpointState.state` field      | **application** | Persists FSM state for resume                |
 | `CompositePipelineRunner`                   | **application** | Executes transitions, manages lifecycle      |
-| `EnrichmentCoordinator`                     | **application** | No FSM knowledge (delegated service)         |
+| `EnrichmentCoordinatorService`                     | **application** | No FSM knowledge (delegated service)         |
 | `MergeService`                              | **application** | No FSM knowledge (delegated service)         |
 
 **Key Principle:** Domain layer defines *what transitions are valid*, Application layer
@@ -785,7 +785,7 @@ class CompositePipelineRunner:
         seed-runner-factory: Callable[[], PipelineRunner],  # skip-gold=True
         enricher-runner-factory: Callable[[str], PipelineRunner],  # skip-gold=True
         key-extractor: KeyExtractorService,
-        coordinator: EnrichmentCoordinator,
+        coordinator: EnrichmentCoordinatorService,
         merger: MergeService,
         checkpoint-service: CompositeCheckpointService,
         logger: LoggerPort,
@@ -834,10 +834,10 @@ class CompositePipelineRunner:
             )
 ```
 
-### EnrichmentCoordinator
+### EnrichmentCoordinatorService
 
 ```python
-class EnrichmentCoordinator:
+class EnrichmentCoordinatorService:
     """Coordinates parallel enrichment pipeline execution.
 
     Implements fan-out pattern with async gather.
@@ -1149,7 +1149,7 @@ class TestMergeService:
 # tests/unit/application/composite/test_coordinator.py
 
 class TestEnrichmentCoordinator:
-    """Test cases for EnrichmentCoordinator."""
+    """Test cases for EnrichmentCoordinatorService."""
 
     async def test-parallel-execution-respects-timeout(self):
         """Enrichers should timeout independently."""
@@ -1157,7 +1157,7 @@ class TestEnrichmentCoordinator:
 
     async def test-required-enricher-failure-propagates(self):
         """Required enricher failure should raise exception."""
-        coordinator = EnrichmentCoordinator(...)
+        coordinator = EnrichmentCoordinatorService(...)
         enricher = EnricherConfig(pipeline="crossref", required=True)
 
         with pytest.raises(CriticalError):
@@ -1339,7 +1339,7 @@ def run_composite_command(composite: str, enrich_only: str | None, required_only
 
 - [ ] Domain models (CompositeConfig, EnrichmentResult, MergeStrategy)
 - [ ] CompositePipelineRunner basic implementation
-- [ ] EnrichmentCoordinator with sequential execution
+- [ ] EnrichmentCoordinatorService with sequential execution
 - [ ] MergeService with LEFT OUTER join only
 - [ ] CLI extensions for composite pipelines
 

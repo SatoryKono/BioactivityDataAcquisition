@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -26,15 +26,15 @@ diagrams, но сам `class-summary.md` по-прежнему остаётся 
 
 ## 01-domain-ports — Domain Port Protocols
 
-Диаграмма «Domain Port Protocols» описывает модуль `01-domain-ports` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: all protocol interfaces defined in `domain/ports`, включая narrow storage ports и backward-compatible aggregate `StoragePort`. Схема используется как representative family-level overview, а не как исчерпывающий инвентарь текущей кодовой поверхности. Для быстрого чтения и ревью полезно начать с элементов: DataSourcePort, FilterableDataSourcePort, StoragePort, LockPort, CheckpointPort, QuarantinePort.
+Диаграмма «Domain Port Protocols» описывает модуль `01-domain-ports` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: all protocol interfaces defined in `domain/ports`, включая narrow storage ports и backward-compatible aggregate `BronzeStoragePort / SilverStoragePort / GoldStoragePort / MergedStoragePort`. Схема используется как representative family-level overview, а не как исчерпывающий инвентарь текущей кодовой поверхности. Для быстрого чтения и ревью полезно начать с элементов: DataSourcePort, FilterableDataSourcePort, BronzeStoragePort / SilverStoragePort / GoldStoragePort / MergedStoragePort, LockPort, CheckpointPort, QuarantinePort.
 
 ## 01a-domain-ports-method-catalog — Domain Port Method Catalog (L2)
 
-Диаграмма «Domain Port Method Catalog (L2)» описывает модуль `01a-domain-ports-method-catalog` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: Detailed method surface extracted from 01-domain-ports L1 overview. Схема используется как representative family-level overview, а не как исчерпывающий инвентарь текущей кодовой поверхности. Для быстрого чтения и ревью полезно начать с элементов: DataSourcePort, FilterableDataSourcePort, StoragePort, LockPort, CheckpointPort, QuarantinePort.
+Диаграмма «Domain Port Method Catalog (L2)» описывает модуль `01a-domain-ports-method-catalog` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: Detailed method surface extracted from 01-domain-ports L1 overview. Схема используется как representative family-level overview, а не как исчерпывающий инвентарь текущей кодовой поверхности. Для быстрого чтения и ревью полезно начать с элементов: DataSourcePort, FilterableDataSourcePort, BronzeStoragePort / SilverStoragePort / GoldStoragePort / MergedStoragePort, LockPort, CheckpointPort, QuarantinePort.
 
 ## 02-entities-aggregates — Entities & Aggregates
 
-Диаграмма «Entities & Aggregates» описывает модуль `02-entities-aggregates` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: Domain entities, aggregate roots, and their relationships. Схема используется как representative family-level overview, а не как исчерпывающий инвентарь текущей кодовой поверхности. Для быстрого чтения и ревью полезно начать с элементов: BaseEntity, Bioactivity, BioactivityState, PublicationBase, Batch, BatchRecord.
+Диаграмма «Entities & Aggregates» описывает модуль `02-entities-aggregates` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: Domain entities, aggregate roots, and their relationships. Схема используется как representative family-level overview, а не как исчерпывающий инвентарь текущей кодовой поверхности. Для быстрого чтения и ревью полезно начать с элементов: BaseEntity, Bioactivity, BioactivityState, PublicationBaseSchema, Batch, BatchRecord.
 
 ## 03-value-objects — Value Objects
 
@@ -78,7 +78,7 @@ diagrams, но сам `class-summary.md` по-прежнему остаётся 
 
 ## 12-composite-pipeline — Composite Pipeline Components
 
-Диаграмма «Composite Pipeline Components» описывает модуль `12-composite-pipeline` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: Runner, coordinators, merge service, and FSM. Схема используется как representative family-level overview, а не как исчерпывающий инвентарь текущей кодовой поверхности. Для быстрого чтения и ревью полезно начать с элементов: CompositePipelineRunner, CompositeRuntimeConfig, EnrichmentCoordinator, DependencyCoordinator, MergeService, EnricherAggregator.
+Диаграмма «Composite Pipeline Components» описывает модуль `12-composite-pipeline` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: Runner, coordinators, merge service, and FSM. Схема используется как representative family-level overview, а не как исчерпывающий инвентарь текущей кодовой поверхности. Для быстрого чтения и ревью полезно начать с элементов: CompositePipelineRunner, CompositeRuntimeConfig, EnrichmentCoordinatorService, DependencyCoordinator, MergeService, EnricherAggregator.
 
 ## 13-domain-services — Domain Services
 

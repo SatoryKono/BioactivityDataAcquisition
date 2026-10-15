@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -560,7 +560,7 @@ Infrastructure -> Adapters (7 external APIs + ID mapping provider seam), Storage
 
 | Provider        | Entity Types                                                                                                                                                                                          | Adapter                  |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| ChEMBL          | activity, molecule, target, assay, compound-record, cell-line, protein-class, tissue, publication, publication-term, publication-similarity, subcellular-fraction, assay-parameters, target-component | `ChemblClient`           |
+| ChEMBL          | activity, molecule, target, assay, compound-record, cell-line, protein-class, tissue, publication, publication-term, publication-similarity, subcellular-fraction, assay-parameters, target-component | `ChemblAdapter`           |
 | PubChem         | compound                                                                                                                                                                                              | `PubChemClient`          |
 | UniProt         | protein, idmapping                                                                                                                                                                                    | `UniProtClient`          |
 | CrossRef        | publication                                                                                                                                                                                           | `CrossRefClient`         |
