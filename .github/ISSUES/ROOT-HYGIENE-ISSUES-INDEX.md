@@ -1,4 +1,11 @@
 # Root Hygiene Issue Drafts Index
+> **Relocation note (2026-10-15):** the issue drafts and body collections listed
+> below were archived to `docs/99-archive/github-issues-20261015/` after
+> reconciliation with live GitHub issue state (all referenced issues are
+> closed/merged; unfiled drafts were stale). This index is retained as a
+> navigation stub — adjust listed paths accordingly.
+
+
 
 These files are publish-ready GitHub issue drafts created from the
 2026-05-19 file-structure cleanup audit plus local repository verification in

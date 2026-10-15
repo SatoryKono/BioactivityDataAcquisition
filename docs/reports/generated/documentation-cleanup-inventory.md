@@ -25,7 +25,6 @@
 | Lifecycle | Count |
 | --- | --- |
 | active_backlog | 1 |
-| active_draft | 278 |
 | active_quality_baseline | 61 |
 | closeout_evidence | 165 |
 | docs_reports_curated_entrypoint | 2 |
@@ -34,10 +33,8 @@
 | docs_reports_retention_sensitive_evidence | 22 |
 | generated_skill_reference_mirror | 19 |
 | generated_test_run_evidence | 6 |
-| guide | 4 |
+| guide | 2 |
 | index | 4 |
-| issue_pack | 60 |
-| live_issue_mirror | 8 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
@@ -47,41 +44,36 @@
 
 | Lifecycle | Count |
 | --- | --- |
-| active_draft | 278 |
-| guide | 4 |
+| guide | 2 |
 | index | 4 |
-| issue_pack | 60 |
-| live_issue_mirror | 8 |
 
 ## Status Counts
 
 | Status | Count |
 | --- | --- |
-| Active | 750 |
-| Archived | 283 |
+| Active | 748 |
+| Archived | 631 |
 | Canonical | 75 |
 | Generated | 1062 |
-| Working | 1642 |
+| Working | 1296 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 750 |
-| archive | 283 |
+| active | 748 |
+| archive | 631 |
 | canonical | 75 |
 | generated | 1062 |
-| working | 1642 |
+| working | 1296 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-github-state-check | 338 |
 | archive-after-migration | 1070 |
 | generate-automatically | 1062 |
-| keep | 1334 |
-| reconcile-with-github-state | 8 |
+| keep | 1680 |
 
 ## Cleanup Candidates
 
@@ -257,46 +249,12 @@
 
 | Path | Lifecycle | Issue | Action |
 | --- | --- | --- | --- |
-| `.github/ISSUES/ADR-HYGIENE-4746-Archive-ADR-003-ADR-008.md` | live_issue_mirror | 4746 | reconcile-with-github-state |
-| `.github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/AI-RUNTIME-AUDIT-001-Make-AI-Skill-Mirror-CI-Truthful-And-Enforce-Devin-Parity.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/AI-RUNTIME-AUDIT-002-Eliminate-Tracked-Devin-MCP-Workstation-Paths.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/ARCH-CONT-2026-07-28-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/ARCH-CR-2026-07-28-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/ARCH-CR2-2026-07-29-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/ARCH-QA-2026-07-27-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/ARCH-REF-2026-07-28-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/ARCH-RES-2026-07-27-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/ARCH-VG-2026-08-25-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/ARCHITECTURE-FACADE-4745-Enforce-No-Growth-Bioetl-Infrastructure-Config-Seam.md` | live_issue_mirror | 4745 | reconcile-with-github-state |
-| `.github/ISSUES/ARCHITECTURE_AUDIT_2025-01-30_aggregate_invariants.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/ARCHITECTURE_AUDIT_2025-01-30_batch_fsm_tests.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/ARCHITECTURE_AUDIT_2025-01-30_scripts_governance.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/AUD-RF-2026-08-16-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-001-Align-Publication-Term-Derived-Contract.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-002-Rename-ChEMBL-Taxonomy-DQ-Fields-To-Taxonomy-Id.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-003-Align-Tissue-Ontology-DQ-Patterns-With-Canonical-Ids.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-004-Add-Profile-Owned-Assay-Parameters-Controlled-Field-Normalization.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-005-Normalize-Molecule-Type-Through-ChEMBL-Profile.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-006-Enforce-One-Canonical-ChEMBL-Activity-Unit-Spelling.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-007-Align-Activity-Standard-Type-With-ChEMBL-Enum-SSOT.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-008-Align-Target-Type-Across-Target-Schema-DQ-And-Enum-SSOT.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-009-Canonicalize-Subcellular-Fraction-Before-Identity-And-Hashing.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-010-Add-Profile-Owned-Component-Type-Normalization.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-011-Make-Target-Component-Json-Canonicalization-Profile-Complete.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-012-Move-Publication-Type-Normalization-Into-Domain-Profile-Policy.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-013-Add-SSOT-Subset-Checks-For-ChEMBL-Enum-Drift.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-014-Promote-Bronze-Fixtures-For-Missing-Chembl-Pipelines.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-015-Register-Missing-ChEMBL-Gold-Contracts.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-016-Close-Remaining-Chembl-Normalization-Governance-Gaps.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-017-Govern-ChEMBL-Molecule-Provider-Code-Surfaces-Availability-Type-And-Chirality.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-018-Add-Optional-Unit-Ontology-Companion-Bundle-For-ChEMBL-Assay-Parameters.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-019-Enforce-Nested-ChEMBL-Xref-Source-Vocabulary-In-Target-Structured-Fields.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-020-Expand-Observed-Value-Inventory-For-Weakly-Covered-ChEMBL-Reference-Pipelines.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-021-Sync-ChEMBL-Provider-Docs-With-Active-Normalization-Surfaces.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/CHEMBL-ISSUES-INDEX.md` | index |  | keep |
+| `.github/ISSUES/CREATION_GUIDE.md` | guide |  | keep |
+| `.github/ISSUES/NONCHEMBL-ISSUES-INDEX.md` | index |  | keep |
+| `.github/ISSUES/PLAN-GOVERNANCE-2026-05-31-ISSUES-INDEX.md` | index |  | keep |
+| `.github/ISSUES/README.md` | guide |  | keep |
+| `.github/ISSUES/ROOT-HYGIENE-ISSUES-INDEX.md` | index |  | keep |
 
 ## Docs Reports Evidence Examples
 
