@@ -3,6 +3,6 @@ provider: pubchem
 cassette_rel_path: tests/fixtures/vcr/pubchem/provider_contract_smiles_search.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: fab128f64f2da0ae38893d99b17db70e2f5ede2ac8675430a68cedf79f56a25a
+cassette_sha256: 3e4d575b68002755ae09c3944d4f37a8ade2aa58d37a5967cc8b1929aeb53852
 recorded_at: '2026-10-06'
 staleness_ready: true

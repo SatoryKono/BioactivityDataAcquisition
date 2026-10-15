@@ -1,10 +1,11 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: Pipeline Service Bundle And Runner Dependencies
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.1.0
+%% @date    2026-10-09
+%% Reviewed against main 9a7339dc: core/pipeline_services.py, _runner_dependency_support.py, runner.py
 %% @type    classDiagram
 %% @level   Application / Component
-%% @nodes   8
+%% @nodes   17
 %% RULES: RULES.md §2.2, §2.7, ADR-015
 classDiagram
     class PipelineRunner {
@@ -20,21 +21,37 @@ classDiagram
     class PipelineService
     class PipelineStorageProtocol
     class BatchExecutor
-    class RecordProcessor
-    class BatchWriter
-    class BatchMetrics
-    class QuarantineManager
+    class PipelineRunnerDependencies
+    class CheckpointRuntimeService
+    class LockRuntimeService
+    class PreflightService
+    class PostrunService
+    class MedallionLifecycleService
+    class PipelineObserver
+    class ShutdownSignal
+    class DataSourcePort
+    class CheckpointPort
+    class LockPort
+    class QuarantinePort
     class PipelineRunnerSupportMixin
 
     PipelineRunner --|> PipelineRunnerSupportMixin
     PipelineRunner --> PipelineService : uses
     PipelineService --> PipelineStorageProtocol : depends on
-    PipelineService --> BatchExecutor : orchestrates
-    PipelineService --> RecordProcessor : normalizes
-    PipelineService --> BatchWriter : publishes
-    PipelineService --> BatchMetrics : records
-    PipelineService --> QuarantineManager : routes invalid rows
-    BatchExecutor --> RecordProcessor : delegates
-    BatchExecutor --> BatchWriter : delegates
+    PipelineService --> DataSourcePort : data_source
+    PipelineService --> CheckpointPort : checkpoint
+    PipelineService --> LockPort : lock
+    PipelineService --> QuarantinePort : quarantine
+    PipelineRunner --> PipelineRunnerDependencies : injected separately
+    PipelineRunnerDependencies --> BatchExecutor : executor
+    PipelineRunnerDependencies --> CheckpointRuntimeService
+    PipelineRunnerDependencies --> LockRuntimeService
+    PipelineRunnerDependencies --> PreflightService
+    PipelineRunnerDependencies --> PostrunService
+    PipelineRunnerDependencies --> MedallionLifecycleService
+    PipelineRunnerDependencies --> PipelineObserver
+    PipelineRunnerDependencies --> ShutdownSignal
+
+    note for PipelineService "Frozen I/O port bundle; also owns logger,<br/>metrics and tracing ports plus optional DQ<br/>and metadata collaborators."
 
     note for PipelineStorageProtocol "Protocol combines BronzeStoragePort,<br/>SilverStoragePort, GoldStoragePort,<br/>MergedStoragePort, StorageMaintenancePort,<br/>and StorageLifecyclePort."

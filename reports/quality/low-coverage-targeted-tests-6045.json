@@ -10,7 +10,7 @@
   },
   "debt_budget_policy": "flat_or_decreasing_only",
   "issue": 6045,
-  "module_coverage_inventory_source_tree_sha256": "6b1612b79ab395fad0499b5bd456fe876c7626266094819dc95edc5b47fd83cd",
+  "module_coverage_inventory_source_tree_sha256": "2aea3e36e42ab6ad62bf877e9e05a7214485d92de32410c390ee2593cd6fc6fc",
   "reviewed_on": "2026-07-20",
   "schema_version": "low-coverage-targeted-tests-6045-v1",
   "source_binding_refresh": {
@@ -18,9 +18,9 @@
     "historical_reviewed_on": "2026-07-20",
     "historical_validation_preserved": true,
     "measured_head": "c4071c0eeecd6b06f18bc781a0435ee128e0e994",
-    "previous_source_tree_sha256": "78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db",
+    "previous_source_tree_sha256": "eaae6dcaedff2fb4311166410adcf2d2e4455dff1f15e6f9c600450dd754a3af",
     "semantics": "Current accepted inventory may retain historical nonregressing rows; raw measured candidate remains separate.",
-    "source_tree_sha256": "78d89eb5bb90c2f763f66b4ee296dcc478abc170013b94d7bf22c5d5c4c1f0db"
+    "source_tree_sha256": "eaae6dcaedff2fb4311166410adcf2d2e4455dff1f15e6f9c600450dd754a3af"
   },
   "targeted_modules": [
     {

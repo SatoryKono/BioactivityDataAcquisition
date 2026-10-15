@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
-from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.medallion import SilverOperationMode
 from bioetl.domain.types import BronzeRecord
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
@@ -21,7 +21,7 @@ class _SilverMetadataWriteRequest:
     table_name: str
     records: list[BronzeRecord]
     primary_keys: list[str]
-    mode: SilverWriteMode
+    mode: SilverOperationMode
     bronze_refs: list[BronzeWriteResult] | None = None
     dq_metrics: BatchDQMetrics | None = None
     dq_report_path: str | None = None
@@ -30,3 +30,4 @@ class _SilverMetadataWriteRequest:
     started_at: datetime | None = None
     completed_at: datetime | None = None
     version_after: int | None = None
+    duration_seconds: float | None = None

@@ -1,10 +1,11 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: Filter Config Resolution And Column Filter Evaluation
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.1.0
+%% @date    2026-10-09
+%% Reviewed against main 9a7339dc: config/filter_config_loader.py; filtering/silver_config.py, gold_config.py and _base_filter_config.py
 %% @type    flowchart
 %% @level   Configuration / Component
-%% @nodes   9
+%% @nodes   10
 %% RULES: RULES.md §2.6, ADR-028
 flowchart LR
     yaml[filter YAML]
@@ -14,22 +15,26 @@ flowchart LR
     gold[gold_config.py]
     column[column_filter.py]
     range[range_filter.py]
+    structural[required_fields / exclude_if_present]
     decision[filter decision]
     result[accepted / rejected rows]
 
     yaml ==> loader
     loader --> input
-    input --> silver
-    input --> gold
-    silver -.-> column
-    silver -.-> range
+    loader --> silver
+    loader --> gold
+    silver --> structural
+    gold --> structural
     gold -.-> column
     gold -.-> range
     column --> decision
     range --> decision
+    structural --> decision
     decision --> result
 
     class yaml ext;
     class loader infra;
-    class input,silver,gold,column,range,decision domain;
+    class input,silver,gold,column,range,structural,decision domain;
     class result app;
+    %% Silver rejects semantic column/range/list policy payloads; Gold owns business eligibility.
+    %% Loader returns independent InputFilterConfig, SilverFilterConfig, GoldFilterConfig and ExtractionParams.

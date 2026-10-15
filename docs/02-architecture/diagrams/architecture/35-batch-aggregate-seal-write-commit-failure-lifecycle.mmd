@@ -1,7 +1,8 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: Batch Aggregate Seal Write Commit Failure Lifecycle
-%% @version 1.0.0
-%% @date    2026-05-12
+%% @version 1.1.0
+%% @date    2026-10-09
+%% Reviewed against main 9a7339dc: domain/aggregates/_batch_aggregate.py and batch.py
 %% @type    stateDiagram
 %% @level   Domain / Aggregate
 %% @nodes   5
@@ -9,15 +10,17 @@
 stateDiagram-v2
     [*] --> OPEN
     OPEN --> OPEN: add_record()
-    OPEN --> SEALED: seal()
+    OPEN --> SEALED: seal / seal_with_counts
     SEALED --> WRITING: mark_writing()
-    WRITING --> COMMITTED: commit()
-    WRITING --> FAILED: mark_failed()
+    WRITING --> COMMITTED: mark_committed(layer, committed_at)
+    WRITING --> FAILED: mark_failed(layer, error, failed_at)
     COMMITTED --> [*]
     FAILED --> [*]
 
     note right of OPEN
       Batch intake remains mutable until the aggregate is sealed.
+      Seal counts must be non-negative and satisfy
+      valid_count + quarantined_count = record_count.
     end note
 
     note right of WRITING

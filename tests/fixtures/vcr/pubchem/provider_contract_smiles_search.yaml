@@ -9,7 +9,7 @@ interactions:
       connection:
       - keep-alive
       cookie:
-      - ncbi_sid=90C6ABF3AC474F51_0000SID
+      - REDACTED
       host:
       - pubchem.ncbi.nlm.nih.gov
       user-agent:
@@ -37,16 +37,15 @@ interactions:
       expires:
       - Tue, 06 Oct 2026 05:11:34 GMT
       ncbi-phid:
-      - 95B7FD62AC474F510000000000000001.m_2
+      - REDACTED
       ncbi-sid:
-      - 90C6ABF3AC474F51_0000SID
+      - REDACTED
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Apache
       set-cookie:
-      - ncbi_sid=90C6ABF3AC474F51_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
-        Oct 2027 04:11:33 GMT
+      - REDACTED
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:

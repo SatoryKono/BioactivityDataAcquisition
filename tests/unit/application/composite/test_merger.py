@@ -30,6 +30,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
 from functools import cache
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
@@ -94,7 +95,13 @@ def mock_storage():
     storage = AsyncMock()
     storage.read_silver = AsyncMock(return_value=[])
     storage.write_silver_merged = AsyncMock()
-    storage.write_gold_merged = AsyncMock()
+
+    async def gold_receipt(table_name, *args, **kwargs):
+        return GoldWriteReceipt(
+            table_name, "0.0.0", GoldWriteCategory.COMPLETE, (table_name,)
+        )
+
+    storage.write_gold_merged = AsyncMock(side_effect=gold_receipt)
     return storage
 
 

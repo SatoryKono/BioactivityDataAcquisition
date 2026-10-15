@@ -38,7 +38,10 @@ __all__ = [
 
 def _delta_partition_columns(dt: DeltaTable) -> frozenset[str]:
     """Return partition columns for historical Delta tables when available."""
-    metadata = dt.metadata()
+    try:
+        metadata = dt.metadata()
+    except (AttributeError, RuntimeError, TypeError, ValueError):
+        return frozenset()
     partition_columns = getattr(metadata, "partition_columns", ())
     if not isinstance(partition_columns, (list, tuple, set, frozenset)):
         return frozenset()
@@ -49,19 +52,19 @@ def _load_scoped_pyarrow_table(
     dt: DeltaTable,
     *,
     pipeline_single: str,
-    filters: list[tuple[str, str, object]],
+    filters: list[tuple[str, str, object]] | None = None,
     columns: list[str] | None = None,
 ) -> pa.Table:
     """Read rows scoped by pipeline for partitioned and legacy non-partitioned tables."""
     if "pipeline" in _delta_partition_columns(dt):
         return dt.to_pyarrow_table(
             partitions=[("pipeline", "=", pipeline_single)],
-            filters=filters,
+            filters=filters or None,
             columns=columns,
         )
     return dt.to_pyarrow_table(
         partitions=None,
-        filters=[*filters, ("pipeline", "=", pipeline_single)],
+        filters=[*(filters or []), ("pipeline", "=", pipeline_single)],
         columns=columns,
     )
 

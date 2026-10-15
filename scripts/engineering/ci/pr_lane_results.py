@@ -8,6 +8,7 @@ inherits a sibling job result.
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import os
 import subprocess
@@ -15,11 +16,86 @@ import sys
 from pathlib import Path
 from typing import Any, cast
 
+import yaml
+
+from scripts.engineering.ci._python_dependency_changes import (
+    changed_dependencies,
+    dependency_consumers,
+    pytest_configuration_changed,
+    pytest_framework_affected,
+    removed_dependencies,
+    repository_cli_affected,
+)
+
 SUCCESS = "success"
 FAILURE = "failure"
 SKIPPED = "skipped"
 REQUIRED = "required"
 NOT_APPLICABLE = "not_applicable"
+TESTS_PREFIX = "tests/"
+TEST_FILE_GLOB = "test_*.py"
+
+from scripts.engineering.dev.run_tests import TESTS_ROOT as PYTEST_ALL_ROOT
+
+NPM_RUNTIME_TEST = "tests/unit/repo_backed/scripts/ai/test_npm_runtime_contract.py"
+
+TELEMETRY_BASELINE_TESTS: tuple[str, ...] = (
+    "tests/architecture/test_test_telemetry_baseline.py",
+    "tests/architecture/test_test_telemetry_governance.py",
+)
+
+AFFECTED_TESTS_BY_PATH: dict[str, tuple[str, ...]] = {
+    "package.json": (
+        "tests/architecture/test_observability_dashboard_tooling.py",
+        NPM_RUNTIME_TEST,
+    ),
+    "package-lock.json": (
+        "tests/architecture/test_observability_dashboard_tooling.py",
+        NPM_RUNTIME_TEST,
+    ),
+    "scripts/ai/npm_runtime_contract.cjs": (NPM_RUNTIME_TEST,),
+    "scripts/ai/mcp/mcp_filesystem_wrapper.sh": (NPM_RUNTIME_TEST,),
+    "scripts/ai/mcp/mcp_filesystem_wrapper.ps1": (NPM_RUNTIME_TEST,),
+    "scripts/ai/mcp/check.sh": (
+        NPM_RUNTIME_TEST,
+        "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
+    ),
+    ".circleci/config.yml": ("tests/architecture/test_circleci_migration_contract.py",),
+    "src/memory/rag/chunking.py": ("tests/unit/memory/test_rag_indexing.py",),
+    "scripts/engineering/ci/publish_docker_image.sh": (
+        "tests/unit/scripts/ci/test_docker_publication_guards.py",
+    ),
+    "scripts/engineering/ci/pr_lane_results.py": (
+        "tests/unit/scripts/engineering/ci/test_pr_lane_results.py",
+    ),
+    "configs/quality/test_telemetry_baseline.yaml": TELEMETRY_BASELINE_TESTS,
+    "configs/quality/scripts_inventory_manifest.json": (
+        "tests/architecture/test_scripts_inventory_manifest.py",
+    ),
+    "docs/05-engineering/test-telemetry-baseline.md": TELEMETRY_BASELINE_TESTS,
+}
+
+# Directory-level edges for generated artifacts and diagrams where an exact
+# file mapping would need hundreds of entries. Each prefix still maps to real
+# governing tests; fail-closed semantics are unchanged for unmapped paths.
+AFFECTED_TESTS_BY_PREFIX: dict[str, tuple[str, ...]] = {
+    "reports/test-telemetry/": TELEMETRY_BASELINE_TESTS,
+    "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.": (
+        NPM_RUNTIME_TEST,
+    ),
+    "scripts/ops/observability/grafana/capture_grafana_screenshots_docker.sh": (
+        NPM_RUNTIME_TEST,
+    ),
+    "docs/02-architecture/diagrams/": (
+        "tests/architecture/test_diagram_corpus_regression_guards.py",
+        "tests/architecture/test_diagram_drift_and_embed_guards.py",
+        "tests/architecture/test_diagram_lint_policy_rules.py",
+    ),
+    "src/memory/episodic/": (
+        "tests/architecture/test_ai_session_memory_placement.py",
+        "tests/architecture/test_pretest_guardrails_memory_phase.py",
+    ),
+}
 
 FAST_GOVERNANCE = "fast-governance"
 CLASS_LANE = "class-lane"
@@ -166,30 +242,200 @@ def assert_step_outcomes(
     return failures
 
 
-def affected_pytest_targets(changed_files: list[str], *, repo_root: Path) -> list[str]:
-    """Map a diff to existing unit tests. Empty means the caller must fail closed."""
+def affected_pytest_targets(
+    changed_files: list[str],
+    *,
+    repo_root: Path,
+    changed_python_dependencies: set[str] | None = None,
+    require_all_python_tests: bool = False,
+) -> list[str]:
+    """Map a diff to tests; validate all declared targets before selection."""
+    paths = [path for raw in changed_files if (path := raw.strip().replace("\\", "/"))]
+    mapped = {path: _mapped_targets(path) for path in paths}
+    _require_targets(
+        [target for values in mapped.values() for target in values], repo_root
+    )
     targets: list[str] = []
-    for raw_path in changed_files:
-        path = raw_path.strip().replace("\\", "/")
-        if not path:
-            continue
-        if path.startswith("tests/") and path.endswith(".py"):
-            if (repo_root / path).is_file():
-                targets.append(path)
-            continue
-        if path.startswith("src/bioetl/") and path.endswith(".py"):
-            relative = path.removeprefix("src/bioetl/")
-            first = relative.split("/", 1)[0]
-            candidate = repo_root / "tests" / "unit" / first
-            if candidate.is_dir():
-                targets.append(candidate.relative_to(repo_root).as_posix())
-    ordered: list[str] = []
-    seen: set[str] = set()
-    for target in targets:
-        if target not in seen:
-            seen.add(target)
-            ordered.append(target)
-    return ordered
+    if {"pyproject.toml", "uv.lock"} & set(paths):
+        if changed_python_dependencies is None:
+            raise ValueError(
+                "Python dependency route requires verified dependency diff"
+            )
+        if require_all_python_tests or _global_dependency_lane(
+            repo_root, changed_python_dependencies
+        ):
+            if not (repo_root / PYTEST_ALL_ROOT).is_dir():
+                raise ValueError(
+                    "Missing mandatory mapped test targets: " + PYTEST_ALL_ROOT
+                )
+            targets.append(PYTEST_ALL_ROOT.rstrip("/"))
+        else:
+            targets.extend(_dependency_targets(repo_root, changed_python_dependencies))
+    for path in paths:
+        targets.extend(mapped[path])
+        targets.extend(_path_targets(path, repo_root))
+    return _deduplicate_targets(targets, repo_root)
+
+
+def _deduplicate_targets(targets: list[str], root: Path) -> list[str]:
+    unique = list(dict.fromkeys(targets))
+    suites = {target.rstrip("/") for target in unique if (root / target).is_dir()}
+    return [
+        target
+        for target in unique
+        if not any(parent.as_posix() in suites for parent in Path(target).parents)
+    ]
+
+
+def _global_dependency_lane(root: Path, dependencies: set[str]) -> bool:
+    return pytest_framework_affected(root, dependencies) or repository_cli_affected(
+        root, dependencies
+    )
+
+
+def _mapped_targets(path: str) -> list[str]:
+    targets = list(AFFECTED_TESTS_BY_PATH.get(path, ()))
+    for prefix, values in AFFECTED_TESTS_BY_PREFIX.items():
+        if path.startswith(prefix):
+            targets.extend(values)
+    return targets
+
+
+def _require_targets(targets: list[str], root: Path) -> None:
+    missing = sorted({target for target in targets if not (root / target).is_file()})
+    if missing:
+        raise ValueError("Missing mandatory mapped test targets: " + ", ".join(missing))
+
+
+def _path_targets(path: str, root: Path) -> list[str]:
+    if path.startswith(TESTS_PREFIX) and path.endswith(".py"):
+        return [path] if (root / path).is_file() else []
+    if path.startswith("src/bioetl/") and path.endswith(".py"):
+        first = path.removeprefix("src/bioetl/").split("/", 1)[0]
+        candidate = root / "tests" / "unit" / first
+        return [candidate.relative_to(root).as_posix()] if candidate.is_dir() else []
+    if path.startswith("scripts/") and path.endswith(".py"):
+        return _script_targets(path, root)
+    return []
+
+
+def _script_targets(path: str, root: Path) -> list[str]:
+    relative = Path(path.removeprefix("scripts/"))
+    test_roots = (root / "tests/unit/scripts", root / "tests/unit/repo_backed/scripts")
+    direct_dirs = [test_root / relative.parent for test_root in test_roots]
+    if relative.parts[0] == "engineering":
+        direct_dirs.append(test_roots[0] / Path(*relative.parts[1:-1]))
+    direct_name = f"test_{relative.name.lstrip('_')}"
+    direct = {
+        candidate
+        for directory in direct_dirs
+        if (candidate := directory / direct_name).is_file()
+    }
+    module = ".".join(("scripts", *relative.with_suffix("").parts))
+    selected = sorted(direct | _importing_script_tests(test_roots, module))
+    if selected:
+        return [test.relative_to(root).as_posix() for test in selected]
+    return [
+        test_root.relative_to(root).as_posix()
+        for test_root in test_roots
+        if test_root.is_dir()
+    ]
+
+
+def _importing_script_tests(roots: tuple[Path, Path], module: str) -> set[Path]:
+    return {
+        test
+        for root in roots
+        if root.is_dir()
+        for test in root.rglob(TEST_FILE_GLOB)
+        if _imports_module(test, module)
+    }
+
+
+def _dependency_targets(repo_root: Path, dependencies: set[str]) -> list[str]:
+    """Reuse source routing and canonical owners for actual dependency consumers."""
+    inventory = repo_root / "configs/quality/source_test_owner_inventory.yaml"
+    owners: dict[str, list[str]] = {}
+    if inventory.is_file():
+        document = yaml.safe_load(inventory.read_text(encoding="utf-8"))
+        owners = {row["source"]: row["owner_tests"] for row in document["modules"]}
+    targets: list[str] = []
+    for consumer in dependency_consumers(repo_root, dependencies):
+        selected = _consumer_targets(consumer, repo_root, owners)
+        if not selected:
+            raise ValueError(
+                f"Unconfirmed Python dependency consumer route: {consumer}"
+            )
+        targets.extend(selected)
+    return targets
+
+
+def _consumer_targets(
+    consumer: str, root: Path, owners: dict[str, list[str]]
+) -> list[str]:
+    if consumer in owners:
+        selected = owners[consumer]
+        _require_targets(selected, root)
+        return selected
+    if consumer.startswith(TESTS_PREFIX):
+        if Path(consumer).name == "conftest.py":
+            return [Path(consumer).parent.as_posix()]
+        if not Path(consumer).name.startswith("test_"):
+            return _helper_suite(consumer, root)
+    if consumer.startswith("src/memory/"):
+        return ["tests/unit/memory"] if (root / "tests/unit/memory").is_dir() else []
+    return affected_pytest_targets([consumer], repo_root=root)
+
+
+def _helper_suite(consumer: str, root: Path) -> list[str]:
+    """Shared helpers require their complete owning suite, never a helper file alone."""
+    suite = Path(consumer).parent
+    while suite.as_posix().startswith(TESTS_PREFIX) and not any(
+        (root / suite).rglob(TEST_FILE_GLOB)
+    ):
+        suite = suite.parent
+    if not (root / suite).is_dir() or not any((root / suite).rglob(TEST_FILE_GLOB)):
+        raise ValueError(
+            f"Unconfirmed Python dependency test-helper owner route: {consumer}"
+        )
+    return [suite.as_posix()]
+
+
+def _imports_module(test_path: Path, module_name: str) -> bool:
+    """Return whether a test statically imports the selected script module."""
+    tree = ast.parse(test_path.read_text(encoding="utf-8"), filename=str(test_path))
+    parent_module, _, leaf_name = module_name.rpartition(".")
+    return any(
+        _matches_module_import(
+            node,
+            module_name=module_name,
+            parent_module=parent_module,
+            leaf_name=leaf_name,
+        )
+        for node in ast.walk(tree)
+    )
+
+
+def _matches_module_import(
+    node: ast.AST,
+    *,
+    module_name: str,
+    parent_module: str,
+    leaf_name: str,
+) -> bool:
+    """Return whether one AST node imports the selected module."""
+    if isinstance(node, ast.Import):
+        return any(
+            alias.name == module_name or alias.name.startswith(f"{module_name}.")
+            for alias in node.names
+        )
+    return isinstance(node, ast.ImportFrom) and (
+        node.module == module_name
+        or (
+            node.module == parent_module
+            and any(alias.name == leaf_name for alias in node.names)
+        )
+    )
 
 
 def _load_json_object(raw: str, *, label: str) -> dict[str, Any]:
@@ -206,9 +452,17 @@ def _decision_map(matrix: dict[str, Any]) -> dict[str, Any]:
     return cast(dict[str, Any], decisions)
 
 
+def _env_or_text(value: str, *, from_env: bool) -> str:
+    if from_env:
+        if value not in os.environ:
+            raise ValueError(f"environment variable {value} is missing")
+        return os.environ[value]
+    return value
+
+
 def _build_command(args: argparse.Namespace) -> int:
     matrix = _load_json_object(
-        os.environ[args.decision_matrix_env],
+        _env_or_text(args.decision_matrix, from_env=args.decision_matrix_env),
         label="decision matrix",
     )
     job_results = dict(args.job_result or [])
@@ -226,11 +480,11 @@ def _build_command(args: argparse.Namespace) -> int:
 
 def _assert_command(args: argparse.Namespace) -> int:
     matrix = _load_json_object(
-        os.environ[args.decision_matrix_env],
+        _env_or_text(args.decision_matrix, from_env=args.decision_matrix_env),
         label="decision matrix",
     )
     outcomes = _load_json_object(
-        os.environ[args.outcomes_env],
+        _env_or_text(args.outcomes, from_env=args.outcomes_env),
         label="step outcomes",
     )
     failures = assert_step_outcomes(
@@ -263,7 +517,31 @@ def _affected_command(args: argparse.Namespace) -> int:
             cwd=args.repo_root,
         )
         changed = [line for line in completed.stdout.splitlines() if line.strip()]
-    targets = affected_pytest_targets(changed, repo_root=args.repo_root)
+    try:
+        dependencies = None
+        all_tests = False
+        if {"pyproject.toml", "uv.lock"} & set(changed):
+            all_tests = pytest_configuration_changed(
+                args.repo_root, args.base_sha, args.head_sha
+            )
+            dependencies = changed_dependencies(
+                args.repo_root,
+                args.base_sha,
+                args.head_sha,
+                allow_configuration=all_tests,
+            )
+            all_tests = all_tests or removed_dependencies(
+                args.repo_root, args.base_sha, args.head_sha
+            )
+        targets = affected_pytest_targets(
+            changed,
+            repo_root=args.repo_root,
+            changed_python_dependencies=dependencies,
+            require_all_python_tests=all_tests,
+        )
+    except (ValueError, OSError) as error:
+        print(f"tests gate selection failed: {error}", file=sys.stderr)
+        return 1
     if not targets:
         print("tests gate has no affected pytest target", file=sys.stderr)
         return 1
@@ -276,8 +554,8 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     build = subparsers.add_parser("build")
-    build.add_argument("--decision-matrix-env", required=True)
-
+    build.add_argument("--decision-matrix", required=True)
+    build.add_argument("--decision-matrix-env", action="store_true")
     build.add_argument("--head-sha", required=True)
     build.add_argument(
         "--job-result",
@@ -289,10 +567,10 @@ def build_parser() -> argparse.ArgumentParser:
     build.set_defaults(handler=_build_command)
 
     assert_steps = subparsers.add_parser("assert-steps")
-    assert_steps.add_argument("--decision-matrix-env", required=True)
-
-    assert_steps.add_argument("--outcomes-env", required=True)
-
+    assert_steps.add_argument("--decision-matrix", required=True)
+    assert_steps.add_argument("--decision-matrix-env", action="store_true")
+    assert_steps.add_argument("--outcomes", required=True)
+    assert_steps.add_argument("--outcomes-env", action="store_true")
     assert_steps.add_argument("--owner", required=True, choices=sorted(OWNER_STEPS))
     assert_steps.set_defaults(handler=_assert_command)
 

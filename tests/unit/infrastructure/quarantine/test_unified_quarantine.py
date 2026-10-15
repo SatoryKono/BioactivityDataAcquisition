@@ -258,17 +258,10 @@ class TestUnifiedQuarantineWrite:
         assert record["payload_truncated"] is False
 
     @pytest.mark.asyncio
-    async def test_write_creates_table_on_not_found(
+    async def test_write_creates_partitioned_table_on_fresh_path(
         self, quarantine, batch_id, mock_write_deltalake
     ):
-        """Test that table is created when it doesn't exist."""
-        from deltalake.exceptions import TableNotFoundError
-
-        mock_write_deltalake.side_effect = [
-            TableNotFoundError("Table not found"),
-            None,
-        ]
-
+        """Fresh paths are created partitioned by pipeline (#12119)."""
         await quarantine.write(
             pipeline="test",
             error_code="ERROR",
@@ -277,9 +270,26 @@ class TestUnifiedQuarantineWrite:
             ingestion_ts=TEST_INGESTION_TS,
         )
 
-        assert mock_write_deltalake.call_count == 2
-        second_call_kwargs = mock_write_deltalake.call_args_list[1].kwargs
-        assert "partition_by" in second_call_kwargs
+        mock_write_deltalake.assert_called_once()
+        assert mock_write_deltalake.call_args.kwargs["partition_by"] == ["pipeline"]
+
+    @pytest.mark.asyncio
+    async def test_write_keeps_layout_when_appending_to_existing_table(
+        self, quarantine, batch_id, mock_write_deltalake
+    ):
+        """Appends to existing tables must not override stored partitioning."""
+        with patch("bioetl.infrastructure.quarantine.unified.DeltaTable") as dt_mock:
+            dt_mock.is_deltatable.return_value = True
+            await quarantine.write(
+                pipeline="test",
+                error_code="ERROR",
+                payload={"id": 1},
+                bronze_batch_id=batch_id,
+                ingestion_ts=TEST_INGESTION_TS,
+            )
+
+        mock_write_deltalake.assert_called_once()
+        assert mock_write_deltalake.call_args.kwargs["partition_by"] is None
 
     @pytest.mark.asyncio
     async def test_write_sets_dq_status_new(

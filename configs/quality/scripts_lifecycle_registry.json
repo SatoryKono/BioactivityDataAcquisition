@@ -757,6 +757,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/engineering/ci/_python_dependency_changes.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the private diff/ownership analysis backend of pr_lane_results.py; it has no standalone runner or public CLI. All test execution stays with the governed existing affected-tests lane.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-10-31"
+    },
     "scripts/engineering/ci/apply-ci-optimizations-fixed.ps1": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain only as a bounded manual Windows CI-optimization variant while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow.",
@@ -768,6 +774,12 @@
       "next_step": "Retain only as a bounded manual Windows CI-optimization helper while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/engineering/ci/junit_duration_summary.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the shared JUnit record-accounting backend imported by update_test_telemetry_baseline and invoked internally by the tests workflow. Its CLI has no operator inputs and only adapts CI environment/artifact paths; the owning tests workflow remains the public execution surface.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-10-31"
     },
     "scripts/engineering/ci/local_test_telemetry.py": {
       "decision": "shared_helper_module",
@@ -810,6 +822,12 @@
       "next_step": "Retain as the implementation behind python -m scripts.engineering.ci pr-gate-timing; keep contributor execution routed through the unified CI dispatcher and do not count it as a separate active script.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/engineering/ci/test_telemetry_provenance.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the imported squash-provenance validation library used by telemetry governance tests; its standalone CLI builds a reviewed receipt from a validated local capture and merged PR. Keep it as supporting code behind the owning checks.",
+      "owner": "@bioetl-quality",
+      "review_by": "2026-11-30"
     },
     "scripts/engineering/common/cli_dispatch.py": {
       "decision": "shared_helper_module",
@@ -1069,12 +1087,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
     },
-    "scripts/engineering/qa/private_import_exception_metadata.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the metadata checker behind the private-import architecture ratchet; keep the architecture test as the entrypoint and do not promote this module to a standalone command.",
-      "owner": "@bioetl-architecture",
-      "review_by": "2026-11-17"
-    },
     "scripts/engineering/qa/observability_closure_campaign_cli.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the CLI orchestration implementation imported by run_observability_closure_campaign.py; keep the routed campaign command as the active surface.",
@@ -1116,6 +1128,12 @@
       "next_step": "Retain as the shared typed report/allowlist helpers behind report_observability_metric_inventory.py; keep it supporting and do not expose it as a standalone command.",
       "owner": "@bioetl-observability",
       "review_by": "2026-10-31"
+    },
+    "scripts/engineering/qa/private_import_exception_metadata.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the metadata checker behind the private-import architecture ratchet; keep the architecture test as the entrypoint and do not promote this module to a standalone command.",
+      "owner": "@bioetl-architecture",
+      "review_by": "2026-11-17"
     },
     "scripts/engineering/qa/refresh_test_governance_baseline.py": {
       "decision": "legacy_manual_utility",
@@ -1231,6 +1249,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
     },
+    "scripts/engineering/qa/report_pipeline_config_contract_ownership.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Keep the implementation as an internal backend for the canonical scripts.engineering.qa report-pipeline-config-contract-ownership-map command; route standalone use through the unified QA entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-10-31"
+    },
     "scripts/engineering/qa/report_port_adapter_factory_coverage.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as a bounded architecture-audit evidence helper consumed by the read-only architecture audit lane; keep it non-active unless it becomes a separately documented public QA command surface.",
@@ -1242,6 +1266,12 @@
       "next_step": "Retain as a bounded manual test-governance report utility while testing guidance still references the direct script path; promote it into the canonical scripts.engineering.qa surface or retire it after the broader test-governance workflow is consolidated. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
+    },
+    "scripts/engineering/qa/report_topology_source_binding.py": {
+      "decision": "legacy_manual_utility",
+      "next_step": "Retain as the bounded manual source-projection producer introduced by #12215; its direct script invocation only rebinds two delimited documentation blocks and does not produce measurements or expose a runtime entrypoint. Route through the canonical QA command surface before promoting it to an active operator command.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-10-31"
     },
     "scripts/engineering/qa/report_vcr_cassette_census.py": {
       "decision": "legacy_manual_utility",
