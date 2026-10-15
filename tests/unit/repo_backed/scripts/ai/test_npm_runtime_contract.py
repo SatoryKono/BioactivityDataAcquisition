@@ -10,6 +10,8 @@ from pathlib import Path
 
 import pytest
 
+from scripts.engineering.qa.run_local_coverage_verify import _windows_bash
+
 pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 ROOT = Path(__file__).resolve().parents[5]
 CONTRACT = ROOT / "scripts/ai/npm_runtime_contract.cjs"
@@ -207,13 +209,7 @@ def test_powershell_filesystem_executes_locked_pin() -> None:
 
 
 def test_shell_filesystem_executes_locked_pin(tmp_path: Path) -> None:
-    git = shutil.which("git")
-    assert git
-    bash = (
-        str(Path(git).parents[1] / "bin/bash.exe")
-        if os.name == "nt"
-        else shutil.which("bash")
-    )
+    bash = _windows_bash() if os.name == "nt" else shutil.which("bash")
     assert bash
     npx = tmp_path / "npx"
     npx.write_text('#!/usr/bin/env bash\nprintf "%s\\n" "$@"\n', encoding="utf-8")
@@ -261,13 +257,7 @@ def test_docker_capture_preflight_does_not_require_host_node(
     tmp_path: Path, preflight_success: bool
 ) -> None:
     """Docker-only hosts validate in the image; failures never reach capture."""
-    git = shutil.which("git")
-    assert git
-    bash = (
-        str(Path(git).parents[1] / "bin/bash.exe")
-        if os.name == "nt"
-        else shutil.which("bash")
-    )
+    bash = _windows_bash() if os.name == "nt" else shutil.which("bash")
     assert bash
     docker = tmp_path / "docker"
     docker.write_text(
