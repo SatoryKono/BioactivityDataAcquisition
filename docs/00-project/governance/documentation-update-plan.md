@@ -1,250 +1,137 @@
 # План обновления документации проекта BioETL
 
-**Дата:** 2026-08-05  
-**Версия:** 1.0  
-**Статус:** Draft
+**Дата:** 2026-10-15
+**Версия:** 2.0
+**Статус:** active
+**Заменяет:** v1.0 от 2026-08-05 (закрыт, см. §1)
 
 ## Executive Summary
 
-На основе анализа текущей документации проекта BioETL выявлено, что основная документация в репозитории `docs/` является актуальной и отражает последние изменения кода. Однако есть несколько областей, которые требуют обновления для улучшения полноты и доступности документации для разных аудиторий.
+Аудит 2026-10-15 показывает, что механическая целостность документации здорова:
+`scripts.docs check-drift` — PASS (0 issues), `check-links` — OK, навигация
+mkdocs цела, cleanup-inventory генерируется без unrouted-файлов, DeepWiki
+актуален (регенерация 2026-10-04, покрывает ADR-062). Основной объём работ —
+не поломки, а накопленный lifecycle-долг: миграция старых рабочих отчётов,
+реконсиляция issue-зеркал с GitHub и содержательная ре-верификация самых
+старых `Last verified` штампов.
 
-## Текущее состояние документации
+## 1. Закрытие плана v1.0 (2026-08-05)
 
-### ✅ Хорошо организованные разделы
-- **Architecture (docs/02-architecture/)**: 55 ADR, включая последние ADR-046–055
-- **Monitoring (docs/05-operations/)**: Обновлён после surface reduction 2026-07-23
-- **Control Plane (docs/03-guides/workflows.md)**: Включает ADR-047 и новые CLI команды
-- **API Reference (docs/04-reference/api/)**: Содержит новые порты (StorageMaintenancePort, CompositeCheckpointPort)
-- **Normalization (docs/04-reference/normalization/)**: Обновлена с новыми полями публикаций
+| Пункт v1.0 | Итог | Доказательство |
+| --- | --- | --- |
+| 1.1 Dataflow guide | DONE | `docs/03-guides/pipeline-dataflow-documentation.md` существует; ссылка добавлена в `docs/00-project/00-map.md` (Quick Links) |
+| 1.2 Pipeline configuration + dataflow | DONE | `docs/03-guides/pipeline-configuration.md` §953+ описывает генерацию dataflow, passports, CI drift detection |
+| 2.1 Layer docs port patterns | DONE | `CompositeCheckpointService` задокументирован в `docs/02-architecture/02-application-layer.md` |
+| 2.2 Fail-fast semantics | OPEN → перенесено в v2 фазу 3 | `docs/02-architecture/domain-composite.md` не содержит fail-fast описания EnrichmentCoordinatorService |
+| 3.1 Locking terminology | DONE | `running-pipelines.md`, `runbooks/scaling.md` используют Local-Only / MemoryLock (ADR-010) |
+| 3.2 CLI observability defaults | DONE | `docs/04-reference/cli.md` документирует `--ensure-observability-backend` (default off) |
+| 4.1 Passport guide + ADR-054 | DONE | `pipeline-passport-guide.md` — «deterministic documentation projections» |
+| 4.2 Normalization cheatsheet | UNVERIFIED → v2 фаза 3 | canonical fields в `cheatsheets/pipeline-config.md` не подтверждены |
+| Процессные рекомендации (PR template, CI checks, KPI) | частично: `report_docs_kpi`, `check-drift`, cleanup-inventory внедрены; PR template и freshness-gate — нет | → v2 фаза 6 |
 
-### ✅ Генерируемые артефакты
-- **Pipeline dataflow documentation**: `docs/02-architecture/generated/pipeline-dataflows/`
-- **Pipeline passports**: `docs/04-reference/passports/`
-- **Normalization field matrix**: `docs/reports/generated/pipeline_normalization_field_matrix/`
+## 2. Текущее верифицированное состояние (2026-10-15)
 
-## Выявленные пробелы и приоритеты
+Механические гейты:
 
-### Приоритет 1: Критические обновления для пользователей
+| Проверка | Результат |
+| --- | --- |
+| `python -m scripts.docs check-drift` | PASS, 0 issues (порты/классы/модули в docs совпадают с кодом) |
+| `check-links` | OK — битых относительных ссылок нет, nav цел |
+| `generate-cleanup-inventory` | 3811 файл, 0 unrouted, 73 generated routes |
+| DeepWiki | актуален: регенерация 2026-10-04, покрывает ADR-062 |
 
-#### 1.1 Документация pipeline dataflow для пользователей
-**Проблема:** Новая функциональность генерации pipeline dataflow документации упоминается в CHANGELOG, но не имеет пользовательского руководства.
+Реальные пробелы (данные `documentation-cleanup-inventory.json`):
 
-**Текущее состояние:**
-- Техническая документация существует: `docs/02-architecture/generated/pipeline-dataflows/chembl_activity/pipeline-passport.md`
-- Генератор: `scripts/diagrams/render/generate_pipeline_dataflows.py`
-- Ссылки на диаграммы и IR JSON присутствуют
+| Пласт | Объём | Маркер действия |
+| --- | --- | --- |
+| Stale `working_report` в `reports/` | 1028 файлов | `archive-after-migration` |
+| `.github/ISSUES` drafts/packs/mirrors | 346 | `archive-after-github-state-check` (338) + `reconcile-with-github-state` (8) |
+| Published docs `Last verified` < 2026-08 | ~170 (из них ~98 — 2026-03) | содержательная ре-верификация |
+| Retention-sensitive evidence | 165 | retention-политика `03-file-policy` |
+| Duplicate groups | 7 пар | по `duplicate_resolution` |
 
-**Требуемые действия:**
-- [x] Создать пользовательский guide: `docs/03-guides/pipeline-dataflow-documentation.md` (filled 2026-08-12 docs-cycle)
-- [ ] Объяснить назначение pipeline dataflow documentation
-- [ ] Описать как читать и интерпретировать pipeline passports
-- [ ] Добавить примеры использования для разных пайплайнов
-- [ ] Обновить `docs/00-project/00-map.md` с ссылкой на новый guide
+Известный семантический дрейф (check-drift его не ловит — имена целы):
+`docs/02-architecture/data-layers.md` (Last verified 2026-07-28) описывает
+модель Silver до изменений #12122 (удаление Silver DELETE, injected clocks,
+strict preflight) — требуется содержательное обновление, а не рестампинг.
 
-**Затронутые файлы:**
-- `docs/03-guides/pipeline-dataflow-documentation.md` (новый)
-- `docs/00-project/00-map.md` (обновление)
+## 3. План обновления v2.0
 
-#### 1.2 Обновление pipeline configuration guide
-**Проблема:** Существующий `docs/03-guides/pipeline-configuration.md` может не отражать новые возможности генерации dataflow документации.
+### Фаза 1 — Issue-mirror реконсиляция (~1 день, механично)
 
-**Требуемые действия:**
-- [ ] Добавить секцию о pipeline dataflow generation
-- [ ] Описать интеграцию с CI (drift detection)
-- [ ] Объяснить связь между config changes и documentation updates
+- Вытянуть live-состояние через `gh issue list --state all --json number,state,closedAt` и сопоставить с `github_issue_number` в cleanup-inventory.
+- Файлы с закрытыми issue и маркером `archive-after-github-state-check` → перенос в `docs/99-archive/` по `03-file-policy`.
+- 8 файлов `reconcile-with-github-state` — ручная проверка расхождений.
+- После переноса: `python -m scripts.docs generate-cleanup-inventory --update`, затем `--check`.
 
-**Затронутые файлы:**
-- `docs/03-guides/pipeline-configuration.md` (обновление)
+### Фаза 2 — Reports-миграция (1–2 дня, механично)
 
-### Приоритет 2: Архитектурные обновления
+- 1028 `working_report` + остальные `archive-after-migration` → переместить по retention-лейну `03-file-policy` (архивация, не удаление).
+- 165 `retention-sensitive` evidence — отдельным списком, по политике хранения.
+- Регенерация cleanup-inventory и link-проверка после миграции.
 
-#### 2.1 Документация архитектурных рефакторингов
-**Проблема:** Последние архитектурные рефакторинги (RF-002, RF-007.3, RF-008.2) отражены в CHANGELOG и технической документации, но могут потребоваться обновления в architecture guides.
+### Фаза 3 — Ре-верификация published docs (основная работа, ~1–2 недели)
 
-**Текущее состояние:**
-- CHANGELOG описывает: PostrunMetadataVersionResolver, CompositeCheckpointService, narrow ports migration
-- Технические детали в API reference и diagrams
-- ADR-054 (Passport Documentation Projections) принят
+Волнами по возрасту `Last verified`, содержательно (не штамп):
 
-**Требуемые действия:**
-- [ ] Обновить `docs/02-architecture/02-application-layer.md` с новыми паттернами
-- [ ] Добавить секцию о port migration strategy
-- [ ] Обновить `docs/02-architecture/03-infrastructure-layer.md` с новыми адаптерами
-- [ ] Рассмотреть создание отдельного guide: `docs/02-architecture/port-evolution.md`
+1. **2026-03 (~98 файлов):** `docs/00-project/glossary.md`, `03-file-policy.md`, `02-architecture/07-compatibility-facade-inventory.md`, diagram descriptions (`descriptions/architecture/*`).
+2. **2026-07/08 (~72 файла):** `data-layers.md`, `docs-verification.md`, `NORMATIVE_SOURCES.md`, ADR-053-era, diagram READMEs.
+3. Закрыть перенесённые из v1: fail-fast semantics в `domain-composite.md` (2.2), canonical fields в `cheatsheets/pipeline-config.md` (4.2).
 
-**Затронутые файлы:**
-- `docs/02-architecture/02-application-layer.md` (обновление)
-- `docs/02-architecture/03-infrastructure-layer.md` (обновление)
-- `docs/02-architecture/port-evolution.md` (новый, опционально)
+Каждый файл: сверка семантики с кодом (особенно storage/control-plane/composite
+после недавних PR), фикс контента или bump `Last verified` (+Version) если
+чисто. Приоритет: `02-architecture` > `03-guides` > `05-operations`.
 
-#### 2.2 Fail-fast semantics documentation
-**Проблема:** Изменения в EnrichmentCoordinatorService (fail-fast semantics) описаны в CHANGELOG, но не имеют пользовательской документации.
+### Фаза 4 — Дубликаты и навигация (0.5 дня)
 
-**Требуемые действия:**
-- [ ] Обновить `docs/02-architecture/domain-composite.md` с fail-fast паттернами
-- [ ] Добавить описание поведения при ошибках enrichers
-- [ ] Обновить composite pipeline documentation
+- 7 пар `duplicate_group` — применить `duplicate_resolution`/`canonical_successor` из cleanup-inventory.
+- `check-links --legacy-paths` на ссылки в архивные пути после фаз 1–2.
 
-**Затронутые файлы:**
-- `docs/02-architecture/domain-composite.md` (обновление)
-- `docs/04-reference/pipelines/composite/` (обновление спецификаций)
+### Фаза 5 — Генерируемые поверхности (0.5 дня)
 
-### Приоритет 3: Operational и runbook обновления
+- `generate-cleanup-inventory --update`, `report_docs_kpi`, adr-registry, pipeline dataflows — перегенерировать и прогнать `--check`.
 
-#### 3.1 Runtime locking terminology
-**Проблема:** Locking terminology уже обновлена в коде и некоторых документах, но может потребоваться полная синхронизация.
+### Фаза 6 — Процесс (0.5 дня)
 
-**Текущее состояние:**
-- CHANGELOG описывает locking terminology aligned with Local-Only runtime semantics
-- Некоторые docs обновлены, но возможны остаточные упоминания старой терминологии
+- Проверить wiring `check-drift --freshness` в CI; при отсутствии — тикет на freshness age-gate (warn при `Last verified` > 90 дней).
+- PR template: checklist-пункт «docs touched? → обнови Last verified / inventory».
+- DeepWiki: действий не требуется (авто-реиндексация, свежая). Issue #8035 (regen request) — проверить статус и закрыть, если покрыто.
 
-**Требуемые действия:**
-- [ ] Проверить все docs на предмет старой терминологии locking
-- [ ] Обновить `docs/05-operations/runbooks/scaling.md` (уже обновлено по CHANGELOG)
-- [ ] Проверить `docs/03-guides/running-pipelines.md` на предмет locking terminology
+## 4. Границы
 
-**Затронутые файлы:**
-- `docs/03-guides/running-pipelines.md` (проверка/обновление)
-- Другие operational docs (проверка)
-
-#### 3.2 CLI observability backend defaults
-**Проблема:** Изменения в CLI observability backend defaults (--ensure-observability-backend) описаны в CHANGELOG, но могут потребоваться обновления в user guides.
-
-**Требуемые действия:**
-- [ ] Обновить `docs/03-guides/metrics-monitoring.md` с новыми defaults
-- [ ] Обновить `docs/04-reference/cli.md` с описанием новых опций
-- [ ] Проверить `docs/05-operations/01-monitoring-guide.md` на соответствие
-
-**Затронутые файлы:**
-- `docs/03-guides/metrics-monitoring.md` (обновление)
-- `docs/04-reference/cli.md` (обновление)
-
-### Приоритет 4: Reference documentation улучшения
-
-#### 4.1 Passport documentation guide
-**Проблема:** Существует `docs/04-reference/passports/pipeline-passport-guide.md`, но может потребоваться обновление с учётом ADR-054.
-
-**Требуемые действия:**
-- [ ] Обновить guide с учётом ADR-054 (Passport Documentation Projections)
-- [ ] Добавить примеры использования pipeline passports
-- [ ] Описать связь между pipeline dataflow и passports
-
-**Затронутые файлы:**
-- `docs/04-reference/passports/pipeline-passport-guide.md` (обновление)
-
-#### 4.2 Normalization documentation completeness
-**Проблема:** Normalization governance closure для ChEMBL и publication types отражена в CHANGELOG, но может потребоваться обновление user guides.
-
-**Требуемые действия:**
-- [ ] Обновить `docs/03-guides/cheatsheets/pipeline-config.md` с новыми полями
-- [ ] Проверить completeness всех normalization guides
-- [ ] Добавить примеры использования новых canonical fields
-
-**Затронутые файлы:**
-- `docs/03-guides/cheatsheets/pipeline-config.md` (обновление)
-- `docs/04-reference/normalization/` (проверка)
-
-## Рекомендации по процессу документирования
-
-### 1. Интеграция с процессом разработки
-
-**Текущая практика:**
-- Документация обновляется вместе с кодом (хорошо)
-- CHANGELOG ведётся систематически
-- ADR процесс формализован
-
-**Рекомендации:**
-- [ ] Добавить documentation check в PR template
-- [ ] Создать checklist для documentation updates в RULES.md
-- [ ] Интегрировать documentation review в code review process
-
-### 2. Автоматизация генерации документации
-
-**Текущее состояние:**
-- Pipeline dataflow documentation генерируется автоматически
-- ADR registry генерируется автоматически
-- Normalization field matrix генерируется автоматически
-
-**Рекомендации:**
-- [ ] Добавить CI check для сгенерированной документации
-- [ ] Создать script для проверки актуальности user guides
-- [ ] Рассмотреть автоматическую генерацию API reference из docstrings
-
-### 3. Структура и навигация
-
-**Текущее состояние:**
-- Хорошая структура: 00-project, 01-requirements, 02-architecture, 03-guides, 04-reference, 05-operations
-- Project Navigator (00-map.md) хорошо организован
-
-**Рекомендации:**
-- [ ] Добавить "What's New" section в 00-map.md для последних изменений
-- [ ] Создать changelog для документации (отдельный от CHANGELOG.md)
-- [ ] Улучшить cross-references между разделами
-
-### 4. Метрики качества документации
-
-**Рекомендации:**
-- [ ] Определить KPI для документации (полнота, актуальность, доступность)
-- [ ] Создать script для проверки dead links
-- [ ] Внедрить periodic documentation audit (ежеквартально)
-
-## План выполнения
-
-### Фаза 1: Критические обновления (1-2 недели)
-1. Создать pipeline dataflow documentation guide
-2. Обновить pipeline configuration guide
-3. Обновить CLI reference с новыми опциями
-
-### Фаза 2: Архитектурные обновления (2-3 недели)
-1. Обновить architecture layer docs с новыми паттернами
-2. Документировать fail-fast semantics
-3. Обновить composite pipeline documentation
-
-### Фаза 3: Operational обновления (1-2 недели)
-1. Проверить и обновить locking terminology
-2. Обновить metrics monitoring guide
-3. Проверить все operational docs на актуальность
-
-### Фаза 4: Reference улучшения (1-2 недели)
-1. Обновить passport documentation guide
-2. Проверить normalization documentation completeness
-3. Улучшить cross-references
-
-### Фаза 5: Процесс улучшения (1 неделя)
-1. Внедрить documentation check в PR template
-2. Создать documentation audit process
-3. Настроить автоматические проверки для документации
+- `docs/99-archive/**`, `docs/reports/generated/**`, retention-sensitive evidence — без отдельного решения не трогаем.
+- Рестампинг `Last verified` без сверки содержимого запрещён — это скрывает семантический дрейф.
 
 ## Критерии успеха
 
-- [ ] Все критические (Priority 1) обновления завершены
-- [ ] User guides отражают последние изменения кода
-- [ ] Architecture docs синхронизированы с рефакторингами
-- [ ] Operational docs актуальны
-- [ ] Documentation process интегрирован в разработку
-- [ ] Автоматические проверки для документации настроены
+- [ ] `archive-after-github-state-check` и `archive-after-migration` в инвентаре → 0
+- [ ] `Last verified` старше 90 дней → 0 в published surface (`docs/0[0-5]`)
+- [ ] `data-layers.md` синхронизирован с post-#12122 storage semantics
+- [ ] `check-drift`, `check-links`, cleanup-inventory `--check` — зелёные после каждой фазы
+- [ ] Все 7 duplicate groups разрешены
 
 ## Риски и митигация
 
-| Риск | Вероятность | Влияние | Митигация |
-|------|-------------|---------|------------|
-| Недостаток времени для всех обновлений | Средняя | Средняя | Приоритизация по критичности, фазовый подход |
-| Устаревание документации во время выполнения | Средняя | Низкая | Регулярная синхронизация с CHANGELOG |
-| Сложность в создании user guides для технических изменений | Низкая | Средняя | Использование существующих паттернов, консультации с разработчиками |
-| Отсутствие автоматических проверок | Средняя | Низкая | Постепенное внедрение, начиная с manual checks |
+| Риск | Влияние | Митигация |
+| --- | --- | --- |
+| Семантический дрейф вне зоны check-drift | Среднее | Фаза 3 — содержательная ре-верификация, не рестампинг |
+| Объём reports-миграции | Низкое | Механично, по lifecycle-полю инвентаря; батчи по разделам |
+| Устаревание во время работы | Среднее | Фаза 6 — freshness-gate в CI, чтобы долг не возвращался |
 
 ## Следующие шаги
 
-1. **Утверждение плана** - Получить feedback от команды по приоритетам и объёму
-2. **Начало с Priority 1** - Создать pipeline dataflow documentation guide
-3. **Регулярный прогресс** - Еженедельные обновления статуса
-4. **Интеграция с процессом** - Начать внедрение documentation checks
+1. Фаза 1–2 — механическая гигиена (issue-mirrors, reports) — снимает ~60% инвентарного шума.
+2. Фаза 3 — содержательная волна ре-верификации.
+3. Фазы 4–6 — замыкание + защита от регресса.
 
 ---
 
-**Создано:** 2026-08-05  
-**Автор:** Devin AI Assistant  
+**Создано:** 2026-10-15 (v2.0)
+**Автор:** Devin AI Assistant
+**История:** v1.0 (2026-08-05) — закрыт в §1
 **Связанные артефакты:**
-- GitHub Issue #8035 (DeepWiki regeneration request)
-- CHANGELOG.md (последние изменения кода)
-- docs/00-project/00-map.md (текущая структура документации)
+
+- `docs/reports/generated/documentation-cleanup-inventory.{json,md}` — источник lifecycle-данных
+- `docs/00-project/governance/03-file-policy.md` — retention/archive правила
+- `docs/03-guides/docs-verification.md` — published docs boundaries
+- GitHub Issue #8035 (DeepWiki regeneration request) — проверить и закрыть
