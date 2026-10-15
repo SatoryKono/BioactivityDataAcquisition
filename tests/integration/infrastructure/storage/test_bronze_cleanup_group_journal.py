@@ -381,7 +381,9 @@ def test_completed_record_requires_durable_member_transitions() -> None:
 
 def test_anchored_conflict_uses_public_journal_error(tmp_path, monkeypatch) -> None:
     """The platform primitive's refusal cannot escape the group-result contract."""
-    monkeypatch.setattr(records, "destructive_cleanup_supported", lambda *_a, **_k: True)
+    monkeypatch.setattr(
+        records, "destructive_cleanup_supported", lambda *_a, **_k: True
+    )
     group = journal.GroupJournal(records.BronzeRootLease(tmp_path, -1))
     conflict = records._CleanupConflict()
 
