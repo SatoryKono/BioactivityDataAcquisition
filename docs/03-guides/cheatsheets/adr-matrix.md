@@ -1,10 +1,10 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
-Last verified: '2026-07-28'
+Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -35,6 +35,7 @@ Quick index of accepted architecture decisions and their operational impact.
 | Control plane / replay | ADR-044 Run manifest & ledger, ADR-046 Checkpoint vs ledger resume, ADR-051 Quarantine aggregate |
 | Quality & governance | ADR-040 Diagram governance, ADR-042 Testing matrix, ADR-043 Docs knowledge, ADR-049 LOC policy |
 | Domain / composition | ADR-005 Composition separation, ADR-021 DDD aggregates, ADR-052 Infrastructure config public API |
+| Recent ADRs (053–062) | ADR-053 Grafana Scenes app-shell, ADR-054 Passport doc projections, ADR-055 Workflow reconciliation data-step, ADR-056 Proof-or-stop lifecycle, ADR-057 Deterministic runtime-config authority, ADR-058 Layered port registries, ADR-059 Package cohesion budgets, ADR-060 Prompt-kernel/overlay architecture, ADR-061 Persisted selected-run assessment, ADR-062 Assay parent exact replay |
 
 ## Quick reference table
 

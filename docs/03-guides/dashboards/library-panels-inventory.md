@@ -4,7 +4,7 @@ Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
-Last verified: '2026-07-28'
+Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -20,8 +20,8 @@ patterns by stable panel id ranges and titles across boards.
 | `status_strip` | 9401 (Overview: 214) | stat | Canonical current-status recording rule |
 | `first_action` / `next_best_actions` | board-specific | text/table | ≤4 CTAs; preserve time+vars |
 | `confidence_badge` | trust cards / telemetry gap | stat | Missing evidence / scrape trust |
-| `entity_status_matrix` | Provider 9101, Overview Inputs 9002 | table | Population-first severity |
-| `suspect_table` | Provider causes / Runtime blockers | table | Ranked suspects |
+| `entity_status_matrix` | Incident 9101 (merged provider surface), Overview Inputs 9002 | table | Population-first severity |
+| `suspect_table` | Overview 9480 provider causes / Incident 8808 runtime blockers | table | Ranked suspects |
 | `event_timeline` | Incident workspace | table/timeseries | Alert/event range |
 | `run_identity` | 9402 (primary boards) | table HTTP | Ops HTTP identity — not Prom labels |
 | `processed_records` | 9403 (primary boards) / Run Explorer `3023` | table HTTP | Bronze/Silver/Gold accounting |

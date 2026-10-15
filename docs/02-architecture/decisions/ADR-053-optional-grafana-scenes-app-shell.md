@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-28'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -50,14 +50,12 @@ Risks without an ADR:
    remain the only evidence sources. No invented series. No `run_id` Prometheus
    labels.
 
-3. **Seven UIDs remain provisioned fallbacks** until an explicit cutover gate:
-   - `bioetl-control-plane-v1`
-   - `bioetl-overview-v2`
-   - `bioetl-runtime`
-   - `bioetl-provider-health-v2`
-   - `bioetl-dq-v2`
-   - `bioetl-incident-v1`
-   - `bioetl-run-explorer-v1`
+3. **UID provisioned-fallback list** (plan-time): `bioetl-control-plane-v1`,
+   `bioetl-overview-v2`, `bioetl-runtime`, `bioetl-provider-health-v2`,
+   `bioetl-dq-v2`, `bioetl-incident-v1`, `bioetl-run-explorer-v1`. **Current
+   shipped set (2026-10): 5 UIDs** — `bioetl-runtime` and
+   `bioetl-provider-health-v2` are retired (runtime diagnostics merged into
+   Incident row 8808, provider routes into Overview panel 9480).
 
 4. **Six app routes map to those UIDs** (Trust + DQ merge only at IA/tabs):
 
@@ -65,8 +63,8 @@ Risks without an ADR:
    | --- | --- |
    | Operations Home | `bioetl-overview-v2` |
    | Incident Console | `bioetl-incident-v1` |
-   | Pipeline Flow | `bioetl-runtime` |
-   | Dependency Health | `bioetl-provider-health-v2` |
+   | Pipeline Flow | `bioetl-runtime` (retired — merged into Incident row 8808) |
+   | Dependency Health | `bioetl-provider-health-v2` (retired — merged into Overview panel 9480) |
    | Data Trust & Recovery | `bioetl-control-plane-v1` + `bioetl-dq-v2` (tabs) |
    | Run Explorer | `bioetl-run-explorer-v1` |
 

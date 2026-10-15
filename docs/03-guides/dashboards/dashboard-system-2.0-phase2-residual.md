@@ -1,10 +1,10 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
-Last verified: '2026-07-28'
+Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -32,8 +32,8 @@ Use Unified Plan only as **benchmark inspiration**, not as delivery scope.
 | ---: | --- | --- |
 | 0 | `bioetl-control-plane-v1` | Trust / resume safety |
 | 1 | `bioetl-overview-v2` | Fleet / Global Ops **alias** (not a new board) |
-| 2 | `bioetl-runtime` | Pipeline explorer |
-| 3 | `bioetl-provider-health-v2` | Provider fleet |
+| 2 | `bioetl-runtime` | Pipeline explorer (**retired** — runtime diagnostics merged into Incident row 8808) |
+| 3 | `bioetl-provider-health-v2` | Provider fleet (**retired** — provider routes merged into Overview panel 9480) |
 | 4 | `bioetl-dq-v2` | Data trust (Now/Run/Range) |
 | 5 | `bioetl-incident-v1` | Incident workspace |
 | 6 | `bioetl-run-explorer-v1` | Run identity explorer |
