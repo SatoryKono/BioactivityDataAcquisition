@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-13'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -210,7 +210,7 @@ Overview routes first to:
 - `0. Control Plane` for replay/resume, manifest, ledger, or telemetry trust;
 - `4. Data Quality` for quality posture and Silver reject fallout;
 - `3. Provider Health` for provider degradation;
-- `5. Incident Workspace` (retired board name was Workflow) for workflow evidence, with reset-scope semantics;
+- `6. Incident Workspace` (retired board name was Workflow) for workflow evidence, with reset-scope semantics;
 - `CLI `bioetl quarantine inspect` (Silver Reject Explorer retired)` only for bounded forensic reject investigation.
 
 Navigation must follow `contracts/navigation-links.yaml`.

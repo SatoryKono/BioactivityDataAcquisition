@@ -15,7 +15,7 @@ Their `Last verified` dates stay unchanged because a concrete claim does not mat
 Documents in the same age slice whose claims matched were stamped `2026-09-25` only after that check.
 `.mmd` files are outside this slice: they have no `Last verified` header.
 
-> **Resolution wave 2026-10-15:** 39 entries were fixed against the current tree
+> **Resolution wave 2026-10-15:** 57 entries were fixed against the current tree
 > and removed from the table below (canonical renames ChemblAdapter /
 > PipelineService / *Service suffixes, storage port family names,
 > StoragePort -> Bronze/Silver/Gold/Merged ports in description cards,
@@ -81,24 +81,6 @@ Documents in the same age slice whose claims matched were stamped `2026-09-25` o
 | `docs/02-architecture/diagrams/governance/diagram-views-plan.md` | Родительские пути названы .mermaid, канон лежит как .mmd. |
 | `docs/02-architecture/history/compatibility-facade-review-history.md` | publication_field_groups.py всё ещё помечен retained, модуля нет. |
 | `docs/02-architecture/module-consolidation-migration-requirements.md` | Стартовый путь domain/value-objects неверен, пакет называется value_objects. |
-| `docs/03-guides/add-new-source.md` | Регистрация описана через custom_creator, в ProviderConfig поле называется adapter_creator. |
-| `docs/03-guides/add-pipeline-existing-source.md` | Процедура пишет в register_all_transformers и PIPELINE_CONFIGS, сейчас это manifest-модули. |
-| `docs/03-guides/cleanup-policy.md` | .junie описан как полностью untracked, agents и skills отслеживаются. |
-| `docs/03-guides/dashboards/dashboard-extension-llm.md` | Текст говорит о восьми shipped-страницах, в grafana/dashboards семь JSON. |
-| `docs/03-guides/dashboards/dashboard-v2-usage.md` | Описан отсутствующий дашборд bioetl-workflow-overview. |
-| `docs/03-guides/dashboards/v3.0/1-overview.md` | Handoff-номера не совпадают с navigation-links.yaml. |
-| `docs/03-guides/dashboards/v3.0/template/README.md` | Ссылки на dashboard-requirements-comprehensive.md и dashboard-audit-checklist.md не резолвятся в guides. |
-| `docs/03-guides/dashboards/v3.0/template/panel-contract.md` | Контракт всё ещё требует Explore-ссылки from/to после удаления Explore. |
-| `docs/03-guides/dashboards/v3.0/template/run-centric-dashboard-template.md` | Шина 0..5 не совпадает с текущим bus 0..6. |
-| `docs/03-guides/dashboards/v3.0/template/selector-resolution-contract.md` | Запрет видимого run_id противоречит bioetl-overview-v2.json. |
-| `docs/03-guides/date-handling.md` | Цитируется отсутствующий src/bioetl/domain/normalization.py. |
-| `docs/03-guides/development/codex-wsl2-setup.md` | wsl_proxy.py и start-wsl-proxy.bat указаны в scripts/ops/, файлы лежат в scripts/ops/runtime/wsl/. |
-| `docs/03-guides/development/config-schema-guidelines.md` | Импорт DQConfig и InputFilterConfig из pipeline_config не существует. |
-| `docs/03-guides/development/mistral-vibe-wsl2-setup.md` | Репозиторий не поставляет .vibe/config.toml. |
-| `docs/03-guides/pipeline-lifecycle.md` | Утверждение про 15 модулей в application/composite/ не совпадает с деревом. |
-| `docs/03-guides/publication-validation-guide.md` | Цитируется xlsx-схема, в дереве есть только csv. |
-| `docs/03-guides/replay-guide.md` | Команда run-historical-replay-closure-campaign не зарегистрирована. |
-| `docs/03-guides/workflows.md` | Путь workflow_runner_service.py устарел; класс лежит в application/services/workflow/. |
 | `docs/04-reference/api/application.md` | Package exports сервисов сняты, перечисленные классы отсутствуют. |
 | `docs/04-reference/api/application/services.md` | services/__init__.py оставил пустой __all__. |
 | `docs/04-reference/api/composition.md` | Названы отсутствующие runtime-модули и классы CrossrefAdapterFactory/PipelineContractValidator. |

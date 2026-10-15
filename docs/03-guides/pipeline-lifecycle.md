@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -109,7 +109,7 @@ Composite pipelines используют отдельный оркестрато
 ### Ключевые отличия
 
 1. **Без трансформеров**: Composite не использует `*Transformer` классы
-1. **Оркестрация**: `application/composite/` содержит 15 модулей сервисов
+1. **Оркестрация**: `application/composite/` содержит 60+ модулей сервисов
 1. **Merge**: `MergeService` выполняет JOIN по `join_keys` из composite-конфига
 1. **Fan-out**: Enrichers могут выполняться параллельно (если `optional: true`)
 

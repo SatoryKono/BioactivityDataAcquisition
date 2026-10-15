@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -49,12 +49,12 @@ ______________________________________________________________________
 
 ### `format-date-parts()` (CrossRef)
 
-Location: `src/bioetl/domain/normalization.py:56-73`
+Location: `src/bioetl/domain/behavior/data_normalization_service.py:56-73`
 
 Converts CrossRef API date-parts format to ISO string:
 
 ```python
-from bioetl.domain.normalization import format-date-parts
+from bioetl.domain.behavior.data_normalization_service import format-date-parts
 
 # Full date
 format-date-parts([[2024, 3, 15]])  # → "2024-03-15"
@@ -72,12 +72,12 @@ format-date-parts([])               # → None
 
 ### `parse-date-field()`
 
-Location: `src/bioetl/domain/normalization.py:88-97`
+Location: `src/bioetl/domain/behavior/data_normalization_service.py:88-97`
 
 Parses date string to Python `date` object:
 
 ```python
-from bioetl.domain.normalization import parse-date-field
+from bioetl.domain.behavior.data_normalization_service import parse-date-field
 
 parse-date-field("2024-03-15")           # → date(2024, 3, 15)
 parse-date-field("2024-03-15", "%Y-%m-%d")  # → date(2024, 3, 15)
@@ -92,7 +92,7 @@ Location: `src/bioetl/domain/behavior/data_normalization_service.py:186-240`
 Service-based partial date normalization:
 
 ```python
-from bioetl.domain.behavior.data-normalization-service import (
+from bioetl.domain.behavior.data_normalization_service import (
     DefaultDataNormalizer,
 )
 
@@ -194,7 +194,7 @@ When creating a new publication pipeline:
 ### 1. Use Centralized Functions When Possible
 
 ```python
-from bioetl.domain.normalization import format-date-parts, parse-date-field
+from bioetl.domain.behavior.data_normalization_service import format-date-parts, parse-date-field
 ```
 
 ### 2. Implement `-normalize-partial-date()` Method
@@ -296,6 +296,6 @@ ______________________________________________________________________
 ## Related Documentation
 
 - **Audit Report**: `docs/audits/date-handling-audit-2026-01-19.md`
-- **Normalization Functions**: `src/bioetl/domain/normalization.py`
+- **Normalization Functions**: `src/bioetl/domain/behavior/data_normalization_service.py`
 - **Data Normalization Service**: `src/bioetl/domain/behavior/data_normalization_service.py`
 - **RULES.md**: §2.4 Content Hash normalization
