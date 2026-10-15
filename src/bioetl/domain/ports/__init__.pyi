@@ -242,9 +242,7 @@ from bioetl.domain.ports.quality import (
 from bioetl.domain.ports.quality import (
     coerce_silver_dq_analyze_request as coerce_silver_dq_analyze_request,
 )
-from bioetl.domain.ports.quality import (
-    project_etl_order as project_etl_order,
-)
+from bioetl.domain.ports.quality import project_etl_order as project_etl_order
 from bioetl.domain.ports.resilience import (
     CircuitBreakerPort as CircuitBreakerPort,
 )
