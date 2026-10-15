@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.1.2
+Version: 1.2.2
 Status: active
 Class: published
 Owner: BioETL Team
@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P2
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-04-12'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -282,7 +282,7 @@ Targeted regression commands for lifecycle/control-plane observability changes:
 
 ```bash
 uv run pytest -q tests/unit/application/services/test_checkpoint_service.py
-uv run pytest -q tests/unit/application/services/test_checkpoint_compatibility_service.py
+uv run pytest -q tests/unit/application/composite/checkpoint/test_checkpoint_service.py
 uv run pytest -q tests/unit/infrastructure/control_plane/test_file_artifact_lifecycle_store.py
 uv run pytest -q tests/integration/test_runner_lifecycle.py
 ```

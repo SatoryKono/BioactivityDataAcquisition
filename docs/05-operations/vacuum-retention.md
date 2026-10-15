@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -53,7 +53,7 @@ PipelineRunner.run()
 **Реализация:**
 
 - `PostrunService` (`application/core/postrun/service.py`)
-- `MedallionLifecycleService.finalize_run()` (`application/services/medallion_lifecycle.py`)
+- `MedallionLifecycleService.finalize_run()` (`application/services/medallion/medallion_lifecycle.py`)
 - YAML defaults: `configs/base/pipeline.yaml` (`maintenance.auto_vacuum: false`)
 
 ### Конфигурация
@@ -244,5 +244,5 @@ ______________________________________________________________________
 - [ADR-001: Delta Lake vs Parquet](../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)
 - [ADR-002: Medallion Architecture](../02-architecture/decisions/ADR-002-medallion-architecture.md)
 - [RULES.md §3.1: Medallion Architecture](../00-project/RULES.md)
-- [VacuumService](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/src/bioetl/application/services/vacuum_service.py)
+- [VacuumService](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/src/bioetl/application/services/ops/vacuum_service.py)
 - [RetentionPolicy](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/src/bioetl/infrastructure/storage/support/retention.py)

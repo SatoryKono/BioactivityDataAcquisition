@@ -15,7 +15,7 @@ Their `Last verified` dates stay unchanged because a concrete claim does not mat
 Documents in the same age slice whose claims matched were stamped `2026-09-25` only after that check.
 `.mmd` files are outside this slice: they have no `Last verified` header.
 
-> **Resolution wave 2026-10-15:** 57 entries were fixed against the current tree
+> **Resolution wave 2026-10-15:** 69 entries were fixed against the current tree
 > and removed from the table below (canonical renames ChemblAdapter /
 > PipelineService / *Service suffixes, storage port family names,
 > StoragePort -> Bronze/Silver/Gold/Merged ports in description cards,
@@ -99,15 +99,3 @@ Documents in the same age slice whose claims matched were stamped `2026-09-25` o
 | `docs/04-reference/publication-validation-index.md` | Номера ADR перепутаны с текущим реестром. |
 | `docs/04-reference/templates/pipeline-review-checklist.md` | Флаг forensic-retention снят со sink-схемы. |
 | `docs/04-reference/workflow-catalog.md` | Ссылка на services/workflow_runner_service.py, файл лежит в services/workflow/. |
-| `docs/05-operations/archive-index.md` | release-checklist.md назван историческим v5.9, файл сейчас активный шаблон v6.x. |
-| `docs/05-operations/deployment/neo4j-audit-instance-guide.md` | Запуск идёт через отсутствующий scripts/ops/start-neo4j-audit.ps1. |
-| `docs/05-operations/deployment/neo4j-audit-instance-implementation.md` | Тот же отсутствующий start-neo4j-audit.ps1 и NEO4J_AUDIT_INSTANCE_GUIDE.md. |
-| `docs/05-operations/deployment/neo4j-audit-instance-quick-start.md` | Вызов scripts/ops/start-neo4j-audit.ps1 и src.tools.neo4j_audit не совпадает с деревом. |
-| `docs/05-operations/deployment/neo4j-memory-setup.md` | Цитируется отсутствующий docs/99-archive/operations/neo4j-root-status-2026-04/. |
-| `docs/05-operations/release-checklist.md` | Чеклист утверждает hard_fail 25%, в configs/base/quality.yaml стоит 0.50. |
-| `docs/05-operations/runbooks/incident-response.md` | Метрика errors-total{type=recoverable} не совпадает с bioetl_errors_total. |
-| `docs/05-operations/runbooks/merge-campaign.md` | Обязательный pytest tests/snapshots не собирает тесты: нет test_*.py. |
-| `docs/05-operations/runbooks/observability-checklist.md` | Регрессия указывает на отсутствующий test_checkpoint_compatibility_service.py. |
-| `docs/05-operations/runbooks/scaling.md` | Процедура требует SQL OPTIMIZE/ZORDER, такой поверхности в CLI нет. |
-| `docs/05-operations/sli-slo-baseline.md` | Алерт BioETLQuarantineExplorerUnavailable отсутствует в prometheus rules. |
-| `docs/05-operations/vacuum-retention.md` | Пути medallion_lifecycle.py и vacuum_service.py в указанных местах отсутствуют. |

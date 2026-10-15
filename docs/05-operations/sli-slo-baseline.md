@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -8,7 +8,7 @@ Reviewers:
 
 - BioETL Team
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-04-10'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -183,8 +183,9 @@ run freshness timestamp rather than to an infrastructure-local monitor clock.
   relabel it as source-publication freshness without an additional metric.
 - For local-only stacks, temporary tracing disablement or maintenance windows
   should be annotated in the incident log rather than silently ignored.
-- `BioETLQuarantineExplorerUnavailable` means HTTP-backed identity/forensic
-  panels are not trustworthy even when Prometheus panels remain healthy.
+- `BioETLQuarantineExplorerUnavailable` is a retired alert (Quarantine
+  Explorer UI was removed); identity/forensic panels now surface through the
+  run-explorer dashboard and control-plane endpoints.
 - `BioETLGrafanaRendererUnavailable` blocks screenshot/render acceptance but
   does not by itself prove Prometheus collection or interactive Grafana is down.
 

@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-12'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -128,7 +128,7 @@ driver = neo4j.driver("bolt://localhost:7687", auth=...)
 ### After (context-aware)
 
 ```python
-from src.tools.neo4j_audit import get_neo4j_uri, get_neo4j_auth
+from scripts/ops/data/neo4j_audit.py import get_neo4j_uri, get_neo4j_auth
 
 driver = neo4j.driver(get_neo4j_uri(), neo4j.auth.basic(*get_neo4j_auth()))
 ```

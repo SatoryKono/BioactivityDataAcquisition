@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: draft
 Class: operational
 Owner: BioETL Team
@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P2
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-05-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -63,7 +63,7 @@ uv run pytest tests/architecture/test_metadata_output_contract.py -q
 uv run pytest tests/architecture/test_provider_regression_matrix.py -q
 
 uv run pytest tests/integration/determinism tests/integration/idempotency tests/integration/composite_resume -q
-uv run pytest tests/snapshots -q
+uv run pytest tests/unit/infrastructure/schemas/test_composite_config_invariants_source_of_truth.py -q
 ```
 
 ### 3) Rebase and evidence logging
