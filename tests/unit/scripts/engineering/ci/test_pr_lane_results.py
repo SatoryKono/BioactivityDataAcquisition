@@ -327,3 +327,26 @@ def test_complete_suite_removes_nested_duplicates_after_required_validation(
         affected_pytest_targets(
             changed, repo_root=tmp_path, changed_python_dependencies={"pytest"}
         )
+
+
+def test_router_executes_lane_results_as_importable_module(capsys):
+    """Verify router executes lane results as importable module."""
+    from scripts.engineering.ci.__main__ import main
+
+    assert main(["pr-lane-results", "--help"]) == 0
+    assert "affected-tests" in capsys.readouterr().out
+
+
+def test_base_checkout_aggregation_uses_existing_module_entrypoint():
+    """Verify base checkout aggregation uses existing module entrypoint."""
+    import yaml
+
+    root = Path(__file__).resolve().parents[5]
+    workflow = yaml.safe_load(
+        (root / ".github/workflows/pr-required.yml").read_text(encoding="utf-8")
+    )
+    steps = workflow["jobs"]["pr-gate-complete"]["steps"]
+    build = next(
+        step["run"] for step in steps if "pr_lane_results build" in step.get("run", "")
+    )
+    assert "python -m scripts.engineering.ci.pr_lane_results build" in build

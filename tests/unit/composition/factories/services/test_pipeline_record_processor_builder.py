@@ -52,6 +52,7 @@ GOLD_ROOT = str(TEST_ROOT / "gold")
 
 
 def _make_pipeline() -> BasePipeline:
+    """Build a pipeline fixture with explicit record processor dependencies."""
     pipeline = MagicMock()
     pipeline.services = MagicMock(name="services")
     pipeline.context = MagicMock(name="context")
@@ -77,6 +78,7 @@ def _make_pipeline() -> BasePipeline:
     pipeline.config.dq = None
     pipeline.config.table = MagicMock()
     pipeline.config.table.primary_keys = ["pk"]
+    pipeline.config.table.partition_cols = ("target_type",)
     pipeline.config.effective_silver_table = "silver_table"
     pipeline.config.effective_gold_table = "gold_table"
     pipeline.config.table.silver_write_mode = "merge"
@@ -99,6 +101,7 @@ def _make_callbacks() -> PipelineCallbacksContext:
 
 
 def test_create_record_processor_from_pipeline_projects_pipeline_fields() -> None:
+    """Verify create record processor from pipeline projects pipeline fields."""
     pipeline = _make_pipeline()
     active_schema = MagicMock(name="active_gold_schema")
     shadow_schema = MagicMock(name="shadow_gold_schema")
@@ -126,6 +129,7 @@ def test_create_record_processor_from_pipeline_projects_pipeline_fields() -> Non
     assert request.pipeline_name == "chembl_activity"
     assert request.provider == "chembl"
     assert request.entity_type == "activity"
+    assert request.partition_cols == ("target_type",)
     assert request.column_groups == ("system", "business")
     assert request.scd_config == {"type": 2}
     assert request.content_hash_policy_authoritative is True

@@ -34,6 +34,21 @@ SCHEMA_VERSION = "1.0.0"
 PROJECTOR_VERSION = "1.0.0"
 PIPELINE_PROJECTOR_VERSION = "1.1.0"
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
+CANONICAL_SOURCE_PATHS = (
+    "configs/entities",
+    "configs/providers",
+    "configs/composites",
+    "configs/workflows",
+    "configs/contracts",
+    "src/bioetl/composition/factories/pipeline",
+    "src/bioetl/application/composite",
+    "src/bioetl/application/services/workflow",
+    "src/bioetl/application/services/control_plane/workflow",
+    "src/bioetl/application/workflow/transforms",
+    "src/bioetl/infrastructure/config",
+    "src/bioetl/domain/contracts",
+    "src/bioetl/domain/workflow",
+)
 DEFAULT_CONFIGS_ROOT = PROJECT_ROOT / "configs"
 DEFAULT_OUTPUT_ROOT = PROJECT_ROOT / "docs/04-reference/passports"
 JsonObject = dict[str, Any]
@@ -87,48 +102,59 @@ def _sha(value: object) -> str:
 
 
 def _source_revision() -> str:
-    """Resolve the latest revision touching canonical runtime/config inputs.
-
-    Using the containing commit would make tracked generated output
-    self-referential: committing the output changes HEAD again. Restricting the
-    revision to canonical fact owners keeps `--check` reproducible while still
-    identifying the source snapshot.
-    """
+    """Hash current canonical files while preserving clean Git-index identities."""
     override = os.environ.get("BIOETL_PASSPORT_SOURCE_REVISION")
     if override:
         return override
-    start_ref = (
-        "HEAD^2" if os.environ.get("GITHUB_EVENT_NAME") == "pull_request" else "HEAD"
+
+    def git(*args: str, input_text: str | None = None) -> str:
+        """Read metadata or filter-aware hashes without writing Git objects."""
+        return subprocess.run(
+            ["git", *args],
+            cwd=PROJECT_ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+            input=input_text,
+        ).stdout
+
+    index = {}
+    for entry in git("ls-files", "-s", "-z", "--", *CANONICAL_SOURCE_PATHS).split("\0"):
+        if not entry:
+            continue
+        metadata, path = entry.split("\t", 1)
+        mode, _, stage = metadata.split()
+        if stage != "0":
+            raise ValueError("Cannot fingerprint unmerged canonical sources")
+        index[path] = mode
+    paths = sorted(
+        {
+            path
+            for path in git(
+                "ls-files",
+                "--cached",
+                "--others",
+                "--exclude-standard",
+                "-z",
+                "--",
+                *CANONICAL_SOURCE_PATHS,
+            ).split("\0")
+            if path and (PROJECT_ROOT / path).is_file()
+        }
     )
-    result = subprocess.run(
-        [
-            "git",
-            "log",
-            "--no-merges",
-            "-1",
-            "--format=%H",
-            start_ref,
-            "--",
-            "configs/entities",
-            "configs/providers",
-            "configs/composites",
-            "configs/workflows",
-            "configs/contracts",
-            "src/bioetl/composition/factories/pipeline",
-            "src/bioetl/application/composite",
-            "src/bioetl/application/services/workflow",
-            "src/bioetl/application/services/control_plane/workflow",
-            "src/bioetl/application/workflow/transforms",
-            "src/bioetl/infrastructure/config",
-            "src/bioetl/domain/contracts",
-            "src/bioetl/domain/workflow",
-        ],
-        cwd=PROJECT_ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
+    # Path input applies Git attributes and line-ending filters.
+    hashes = (
+        git(
+            "hash-object", "--stdin-paths", input_text="\n".join(paths) + "\n"
+        ).splitlines()
+        if paths
+        else []
     )
-    return result.stdout.strip()
+    records = "".join(
+        f"{index.get(path, '100644')} {blob} 0\t{path}\n"
+        for path, blob in zip(paths, hashes, strict=True)
+    )
+    return f"sha256:{hashlib.sha256(records.encode('utf-8')).hexdigest()}"
 
 
 def _contract_path(provider: str, entity: str) -> Path:

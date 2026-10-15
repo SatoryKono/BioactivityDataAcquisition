@@ -15,6 +15,12 @@ Provides common fixtures for testing CLI commands with in-memory fakes.
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
+
+from tests.helpers.clock import fixed_test_clock
+
 import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -202,6 +208,9 @@ def create_local_storage_context(
             # Lock validation at Application layer
         ),
         silver_writer=SilverWriter(
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                clock=fixed_test_clock()
+            ),
             base_path=str(storage_paths["silver"]),
             logger=logger,
             # Lock validation at Application layer

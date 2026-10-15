@@ -28,7 +28,6 @@ globs:
 | ---- | --------- |
 | `MERGE` | Upsert by declared primary/business keys + deterministic content identity |
 | `APPEND` | **Only** with explicit machine-readable `idempotency_contract` — append without it is invalid config |
-| `DELETE` | Full rewrite semantics |
 
 **MUST NOT:** raw Parquet without `_delta_log/`; `OVERWRITE` as Silver enum.
 
