@@ -2641,10 +2641,6 @@ jobs:
               fi
 
               echo "Re-rendering changed sources and comparing sibling SVG bytes..."
-              render_artifacts=/tmp/diagram-ci/rendered
-              mkdir -p "$render_artifacts"
-              git rev-parse HEAD > "$render_artifacts/source-sha.txt"
-              drift=0
               while IFS= read -r source_path; do
                 [ -z "$source_path" ] && continue
                 source_dir="${source_path%/*}"
@@ -2656,16 +2652,11 @@ jobs:
                   --puppeteer /tmp/puppeteer-config.json \
                   --dir "${source_dir}" \
                   --filter "${stem}"
-                cp --parents "$source_path" "$expected_svg" "$render_artifacts/"
-                sha256sum "$source_path" "$expected_svg" >> "$render_artifacts/SHA256SUMS"
                 if ! git diff --exit-code -- "${expected_svg}"; then
                   echo "::error::Rendered SVG bytes do not match the committed sibling ${expected_svg}."
-                  drift=1
+                  exit 1
                 fi
               done <\<< "$changed_diagrams"
-              if [ "$drift" -ne 0 ]; then
-                exit 1
-              fi
               echo "Rendered SVG bytes match the committed siblings."
 
               DIAGRAM_CI
