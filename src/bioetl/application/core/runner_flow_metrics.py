@@ -30,8 +30,7 @@ def record_output_ready(host: _PipelineRunnerFlowHostProtocol) -> None:
     if output_count <= 0:
         return
     PipelineMetricsRecorder(
-        host._services.metrics,
-        host._config.pipeline_name,
+        host._services.metrics, host._config.pipeline_name
     ).record_stage_records(
         run_type=host._runtime.run_type.value,
         stage="output",
@@ -51,8 +50,7 @@ def record_flow_invariants(
     )
 
     pipeline_metrics = PipelineMetricsRecorder(
-        host._services.metrics,
-        host._config.pipeline_name,
+        host._services.metrics, host._config.pipeline_name
     )
     run_type = host._runtime.run_type.value
     metrics = host.execution_metrics

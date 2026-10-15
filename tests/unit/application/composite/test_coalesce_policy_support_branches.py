@@ -93,11 +93,15 @@ def test_can_coalesce_and_compatible_columns_cover_type_branches() -> None:
 
 
 def test_sort_columns_seed_and_enricher_strategies() -> None:
-    cols = ["chembl.activity.title", "pubchem.compound.title", "other"]
-    seed_first = sort_columns(cols, "chembl.activity.", prefer_seed=True)
-    assert seed_first[0].startswith("chembl.activity.")
-    enricher_first = sort_columns(cols, "chembl.activity.", prefer_seed=False)
-    assert enricher_first[0] != "chembl.activity.title" or len(enricher_first) == 1
+    cols = ["chembl.publication.title", "crossref.publication.title", "title"]
+    seed_first = sort_columns(cols, "chembl.publication.", prefer_seed=True)
+    assert seed_first == [
+        "title",
+        "chembl.publication.title",
+        "crossref.publication.title",
+    ]
+    enricher_first = sort_columns(cols, "chembl.publication.", prefer_seed=False)
+    assert enricher_first == list(reversed(seed_first))
 
 
 def test_coalesce_and_drop_and_drop_helpers() -> None:
