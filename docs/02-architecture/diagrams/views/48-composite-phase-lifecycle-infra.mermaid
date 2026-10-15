@@ -24,7 +24,7 @@ flowchart LR
     subgraph Application["Application Layer"]
         direction TB
         RUNNER["CompositePipelineRunner"]
-        DISPATCHER["PhaseDispatcher"]
+        DISPATCHER["CompositeRunnerStageDispatchMixin"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]

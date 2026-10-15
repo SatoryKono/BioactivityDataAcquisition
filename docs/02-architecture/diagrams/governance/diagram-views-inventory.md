@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -15,13 +15,13 @@ ______________________________________________________________________
 
 Measured inventory for `docs/02-architecture/diagrams/views/*.mermaid`.
 
-Current baseline reviewed on `2026-03-19`:
+Current baseline reviewed on `2026-10-15`:
 
-- `34` parent view families
+- `38` parent view families
 - `31` foundation families with the full five-view set
-- `3` architecture-derived families with reduced `full + overview` slices
+- `6` architecture-derived families with reduced slices
 - `1` service legend file (`00-legend.mermaid`)
-- `162` tracked `.mermaid` files total
+- `165` tracked `.mermaid` files total
 
 Parent-source truth stays in the canonical `.mmd` files under
 `docs/02-architecture/diagrams/foundation/` and
@@ -48,6 +48,9 @@ Parent-source truth stays in the canonical `.mmd` files under
 | `15-dq-check-workflow`                  | `docs/02-architecture/diagrams/foundation/15-dq-check-workflow.mmd`                  | `dataflow, domain, full, infra, overview` |     5 |
 | `16-transformer-hierarchy`              | `docs/02-architecture/diagrams/architecture/16-transformer-hierarchy.mmd`            | `full, overview`                          |     2 |
 | `21-activity-entity-data-flow`          | `docs/02-architecture/diagrams/foundation/21-activity-entity-data-flow.mmd`          | `dataflow, domain, full, infra, overview` |     5 |
+| `21-idempotent-processing-guards`       | `docs/02-architecture/diagrams/architecture/21-idempotent-processing-guards.mmd`     | `overview`                                |     1 |
+| `23-reproducible-run-contract`          | `docs/02-architecture/diagrams/architecture/23-reproducible-run-contract.mmd`        | `overview`                                |     1 |
+| `24-data-runtime-quality-map`           | `(view only, no parent .mmd)`           | `overview`                                |     1 |
 | `26-hexagonal-ports-adapters`           | `docs/02-architecture/diagrams/foundation/26-hexagonal-ports-adapters.mmd`           | `dataflow, domain, full, infra, overview` |     5 |
 | `28-composition-root-di-graph`          | `docs/02-architecture/diagrams/foundation/28-composition-root-di-graph.mmd`          | `dataflow, domain, full, infra, overview` |     5 |
 | `29-composite-pipeline-workflow`        | `docs/02-architecture/diagrams/foundation/29-composite-pipeline-workflow.mmd`        | `dataflow, domain, full, infra, overview` |     5 |

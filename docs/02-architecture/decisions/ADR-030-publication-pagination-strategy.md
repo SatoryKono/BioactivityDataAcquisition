@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -184,8 +184,8 @@ Records with identical `content-hash` are deduplicated during merge.
 
 **Composition:**
 
-- `src/bioetl/composition/factories/services_factory.py` — Pass `force-full-scan` to `CheckpointManager`
-- `src/bioetl/composition/factories/pipeline_factory.py` — Use `config.force-full-scan`
+- `src/bioetl/composition/factories/datasource/data_source_factory.py` — Pass `force-full-scan` to `CheckpointManager`
+- `src/bioetl/composition/factories/pipeline/run_context_factory.py` — Use `config.force-full-scan`
 
 **Configs:**
 

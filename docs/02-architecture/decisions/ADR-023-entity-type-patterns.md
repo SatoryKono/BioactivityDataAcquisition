@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -284,7 +284,7 @@ If more readable names needed, a mapping dictionary can be added later without b
 
 ## References
 
-- **Audit Report**: `docs/audits/entity_type-audit.md` — detailed analysis of all 19 transformers
+- **Audit Report**: `docs/audits/entity_type-audit.md (removed; archived audits live under docs/99-archive/reports/)` — detailed analysis of all 19 transformers
 
 ## Compliance
 

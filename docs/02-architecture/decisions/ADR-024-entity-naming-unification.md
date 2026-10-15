@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -174,8 +174,8 @@ is provided but deprecated.
 
 **Documentation:**
 
-- `docs/glossary.md` — Migration notes добавлены
-- `configs/naming-exceptions.yaml` — Canonical + deprecated names
+- `docs/00-project/glossary.md` — Migration notes добавлены
+- `configs/naming_exceptions.yaml` — Canonical + deprecated names
 
 **Tests:**
 

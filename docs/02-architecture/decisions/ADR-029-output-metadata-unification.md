@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -152,7 +152,7 @@ class OutputMetadata(BaseModel):
 
 **DTOs:**
 
-- `src/bioetl/domain/ports/metadata_coordinator.py` — Добавлены `version_before`, `total_bytes`, `partition_count`
+- `src/bioetl/domain/ports/metadata/coordinator.py` — Добавлены `version_before`, `total_bytes`, `partition_count`
 
 **Services:**
 
@@ -161,7 +161,7 @@ class OutputMetadata(BaseModel):
 **Infrastructure:**
 
 - `src/bioetl/infrastructure/storage/bronze_writer.py` — \_build_full_bronze_metadata
-- `src/bioetl/infrastructure/storage/metadata_builder.py` — Silver/Gold builders
+- `src/bioetl/infrastructure/storage/metadata_writer.py` — Silver/Gold builders
 
 ### JSON Output Format
 

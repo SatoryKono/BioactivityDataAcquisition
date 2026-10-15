@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Draft (обязательные критерии для RFC/ADR и implementation plan).
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -66,7 +66,7 @@ ______________________________________________________________________
 
 ### Required leaf-модули (Wave 0)
 
-1. `src/bioetl/domain/value-objects/**`
+1. `src/bioetl/domain/value_objects/**`
 1. `src/bioetl/domain/exceptions/**`
 1. `src/bioetl/domain/contracts/gold/**`
 1. `src/bioetl/domain/schemas/common/**`

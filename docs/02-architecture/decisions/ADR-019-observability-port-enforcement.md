@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -23,7 +23,7 @@ ______________________________________________________________________
 Following the adoption of `LoggerPort` abstraction (ADR-006), there was still direct usage of `structlog` in the `interfaces` layer:
 
 1. `src/bioetl/interfaces/cli/main.py` (historically `interfaces/cli.py`) imported `structlog.BoundLogger` for type hints
-1. `src/bioetl/interfaces/orchestration/signals.py` imported and used `structlog` directly
+1. `src/bioetl/interfaces/orchestration/signals.py (removed; signal handling now in control-plane diagnostics)` imported and used `structlog` directly
 
 This violated the principle that all layers should use ports, not concrete implementations.
 

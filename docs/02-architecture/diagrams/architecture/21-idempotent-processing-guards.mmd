@@ -15,10 +15,10 @@ sequenceDiagram
     participant LP as LockPort
     participant HB as HeartbeatTask
     participant CCS as CompositeCheckpointService
-    participant CLS as CheckpointLoadService
+    participant CLS as CompositeCheckpointLoadService
     participant CPS as CheckpointPersistenceService
     participant COMP as CheckpointCompatibilityService
-    participant RUN as PipelineRunner / CompositeRunner
+    participant RUN as PipelineRunner / CompositePipelineRunner
     participant PUB as Writers / artifact publication
 
     Caller->>LC: acquire(run_id, pipeline)
