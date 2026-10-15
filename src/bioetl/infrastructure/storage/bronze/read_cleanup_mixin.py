@@ -196,12 +196,14 @@ class BronzeWriterReadCleanupMixin(
             raise NotImplementedError(
                 "Bronze destructive cleanup is unsupported on this platform/FS"
             )
-        if dry_run:
-            return self._cleanup_old_files_locked_sync(
-                cutoff_str, dry_run, provider, entity
-            )
         if not self.base_path.exists():
             return self._empty_cleanup_stats()
+        if dry_run:
+            # Shared lock when available; attestation still runs read-only.
+            with bronze_tree_lock(self.base_path, exclusive=False) as locked_root:
+                return self._cleanup_old_files_locked_sync(
+                    cutoff_str, dry_run, provider, entity, locked_root
+                )
         with bronze_tree_lock(
             self.base_path, exclusive=True, allow_group_recovery=True
         ) as locked_root:
@@ -224,11 +226,13 @@ class BronzeWriterReadCleanupMixin(
             BronzeGroupCleanup(
                 locked_root, cutoff_str, self._flat_structure, self._log_cleanup_skip
             )
-            if locked_root is not None
+            if locked_root is not None and locked_root.fd is not None
             else None
         )
-        if group_cleanup is not None and not group_cleanup.resume(
-            stats, provider, entity
+        if (
+            group_cleanup is not None
+            and not dry_run
+            and not group_cleanup.resume(stats, provider, entity)
         ):
             return stats
         root_abs = (
@@ -254,7 +258,10 @@ class BronzeWriterReadCleanupMixin(
                 root_fd=locked_root.fd if locked_root is not None else None,
             )
             self._record_cleanup_plan(stats, plan)
-            if not dry_run:
+            if dry_run:
+                if group_cleanup is not None:
+                    group_cleanup.attest_plan(plan, stats)
+            else:
                 self._apply_cleanup_plan(
                     stats,
                     plan,
@@ -273,7 +280,7 @@ class BronzeWriterReadCleanupMixin(
             stats["directories_failed"] += 1
         elif reason == "missing_scope":
             stats["directories_conflicted"] += 1
-        elif reason != "not_a_directory":
+        elif reason not in ("not_a_directory", "reserved_maintenance"):
             stats["directories_skipped"] += 1
 
     def _apply_cleanup_plan(

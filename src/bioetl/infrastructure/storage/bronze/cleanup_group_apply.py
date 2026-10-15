@@ -88,13 +88,60 @@ class BronzeGroupCleanup:
         self._record_progress(stats, result)
         return True
 
-    def apply(self, plan: _CleanupDatePlan, stats: dict[str, int]) -> None:
+    def _grouped_candidates(
+        self, plan: _CleanupDatePlan
+    ) -> dict[str, list[_CleanupCandidate]]:
         groups: dict[str, list[_CleanupCandidate]] = {}
         for candidate in plan.files:
             groups.setdefault(candidate.path.name.split(".jsonl", 1)[0], []).append(
                 candidate
             )
-        for group, candidates in groups.items():
+        return groups
+
+    def _reject_group(
+        self,
+        stats: dict[str, int],
+        plan: _CleanupDatePlan,
+        group: str,
+        candidates: list[_CleanupCandidate],
+        size: int,
+        exc: BaseException,
+        *,
+        dry_run: bool,
+    ) -> None:
+        kind = (
+            "conflicted"
+            if isinstance(exc, (GroupJournalConflict, ValueError, TypeError))
+            else "failed"
+        )
+        if dry_run:
+            stats["files_planned"] = max(0, stats["files_planned"] - len(candidates))
+            stats["bytes_planned"] = max(0, stats["bytes_planned"] - size)
+            if plan.removable and stats["directories_planned"] > 0:
+                stats["directories_planned"] -= 1
+                plan.removable = False
+        stats[f"files_{kind}"] += len(candidates)
+        stats[f"bytes_{kind}"] += size
+        self.on_skip(str(plan.path / group), f"group_attestation_{kind}")
+
+    def attest_plan(self, plan: _CleanupDatePlan, stats: dict[str, int]) -> None:
+        """Apply the same ownership attestation used by destructive cleanup."""
+        for group, candidates in self._grouped_candidates(plan).items():
+            size = sum(candidate.identity.st_size for candidate in candidates)
+            try:
+                spec = self._spec(plan, group)
+                self.journal.validate_group_for_plan(
+                    spec,
+                    expected_members={c.path.name: c.identity for c in candidates},
+                    expected_date=plan.identity,
+                )
+            except (OSError, ValueError, TypeError) as exc:
+                self._reject_group(
+                    stats, plan, group, candidates, size, exc, dry_run=True
+                )
+
+    def apply(self, plan: _CleanupDatePlan, stats: dict[str, int]) -> None:
+        for group, candidates in self._grouped_candidates(plan).items():
             size = sum(candidate.identity.st_size for candidate in candidates)
             try:
                 spec = self._spec(plan, group)
@@ -104,14 +151,9 @@ class BronzeGroupCleanup:
                     expected_date=plan.identity,
                 )
             except (OSError, ValueError, TypeError) as exc:
-                kind = (
-                    "conflicted"
-                    if isinstance(exc, (GroupJournalConflict, ValueError, TypeError))
-                    else "failed"
+                self._reject_group(
+                    stats, plan, group, candidates, size, exc, dry_run=False
                 )
-                stats[f"files_{kind}"] += len(candidates)
-                stats[f"bytes_{kind}"] += size
-                self.on_skip(str(plan.path / group), f"group_attestation_{kind}")
                 continue
             self._recover(
                 stats, operation, len(candidates), size, str(plan.path / group)

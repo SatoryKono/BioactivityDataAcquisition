@@ -27,6 +27,7 @@ from bioetl.infrastructure.storage.bronze import cleanup_group_schema as schema
 from bioetl.infrastructure.storage.bronze import cleanup_planner as planner
 from bioetl.infrastructure.storage.bronze import cleanup_preview_mixin as preview_mod
 from bioetl.infrastructure.storage.bronze import cleanup_support as support
+from bioetl.infrastructure.storage.bronze import read_cleanup_mixin as read_cleanup
 from bioetl.infrastructure.storage.bronze.cleanup_core import BronzeRootLease
 from bioetl.infrastructure.storage.bronze.cleanup_group_apply import BronzeGroupCleanup
 from bioetl.infrastructure.storage.bronze.cleanup_group_schema import (
@@ -886,6 +887,7 @@ def test_destructive_gate_flock_and_fd_view(tmp_path: Path, monkeypatch) -> None
     bridge.name = "posix"
     monkeypatch.setattr(cleanup_core, "os", bridge)
     monkeypatch.setattr(cleanup_core, "_ANCHORED_OPS", True)
+    monkeypatch.setattr(cleanup_core, "_directory_xattr_supported", lambda: True)
     bare = types.ModuleType("fcntl")
     monkeypatch.setitem(sys.modules, "fcntl", bare)
     assert cleanup_core.destructive_cleanup_supported() is False
@@ -893,6 +895,8 @@ def test_destructive_gate_flock_and_fd_view(tmp_path: Path, monkeypatch) -> None
     assert cleanup_core.destructive_cleanup_supported() is False
     _patch_fd_view(monkeypatch, bridge)
     assert cleanup_core.destructive_cleanup_supported() is True
+    monkeypatch.setattr(cleanup_core, "_directory_xattr_supported", lambda: False)
+    assert cleanup_core.destructive_cleanup_supported() is False
 
 
 def test_pending_group_operation_and_entry_classification(
@@ -934,6 +938,36 @@ def test_pending_group_operation_and_entry_classification(
     assert cleanup_core.stat_is_link_or_reparse(link_stat) is True
     reparse = SimpleNamespace(st_mode=0o100644, st_file_attributes=0x400)
     assert cleanup_core.stat_is_link_or_reparse(reparse) is True
+
+
+def test_writer_scope_skips_reserved_journal_without_retained_counter(
+    tmp_path: Path,
+) -> None:
+    root = _abs(tmp_path)
+    (root / ".bronze-group-journals").mkdir()
+    (root / "chembl").mkdir()
+    skips: list[tuple[str, str]] = []
+
+    def on_skip(path: str, reason: str) -> None:
+        skips.append((path, reason))
+
+    children = support.iter_writer_scope_dirs(root, on_skip=on_skip)
+    assert [child.name for child in children] == ["chembl"]
+    assert any(reason == "reserved_maintenance" for _path, reason in skips)
+    stats = planner.BronzeCleanupPlannerMixin._empty_cleanup_stats()
+    mixin = type(
+        "_SkipMixin",
+        (),
+        {
+            "_log_cleanup_skip": staticmethod(lambda *_a, **_k: None),
+            "_record_cleanup_discovery_skip": (
+                read_cleanup.BronzeWriterReadCleanupMixin._record_cleanup_discovery_skip
+            ),
+        },
+    )()
+    for _path, reason in skips:
+        mixin._record_cleanup_discovery_skip(stats, _path, reason)
+    assert stats["directories_skipped"] == 0
 
 
 def test_support_names_dates_and_nondestructive_candidates(tmp_path: Path) -> None:

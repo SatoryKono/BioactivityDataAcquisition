@@ -67,6 +67,22 @@ def open_group_journal(root: Path) -> Iterator[GroupJournal]:
 class GroupJournal(GroupRecoveryCoordinator):
     """cleanup group journal responsibilities."""
 
+    def validate_group_for_plan(
+        self,
+        spec: GroupSpec,
+        *,
+        expected_members: dict[str, os.stat_result] | None = None,
+        expected_date: os.stat_result | None = None,
+    ) -> None:
+        """Read-only ownership attestation matching begin(), without durable intent."""
+        names = spec.names()
+        relative = spec.relative_date().as_posix()
+        members, _chain = self._snapshot_group(spec, names, relative)
+        if expected_members is not None:
+            self._check_planned_group(
+                relative, names, members, expected_members, expected_date
+            )
+
     def begin(
         self,
         spec: GroupSpec,

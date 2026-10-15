@@ -104,15 +104,53 @@ def _fd_view_supported() -> bool:
         os.close(fd)
 
 
+_DIR_XATTR_FS: bool | None = None
+
+
+def _directory_xattr_supported() -> bool:
+    """Require directory user-xattr before publishing a durable group intent."""
+    global _DIR_XATTR_FS
+    setter = os.__dict__.get("setxattr")
+    getter = os.__dict__.get("getxattr")
+    remover = os.__dict__.get("removexattr")
+    if setter is None or getter is None:
+        return False
+    if _DIR_XATTR_FS is not None:
+        return _DIR_XATTR_FS
+    import tempfile
+
+    probe_tag = b"user.bioetl.fs001-capability-probe"
+    try:
+        with tempfile.TemporaryDirectory(prefix="bioetl-xattr-probe-") as tmp:
+            fd = os.open(tmp, os.O_RDONLY | _O_DIRECTORY | _O_NOFOLLOW)
+            try:
+                create_flag = getattr(os, "XATTR_CREATE", 1)
+                setter(fd, probe_tag, b"1", flags=create_flag)
+                supported = getter(fd, probe_tag) == b"1"
+                if remover is not None:
+                    remover(fd, probe_tag)
+                _DIR_XATTR_FS = supported
+                return supported
+            finally:
+                os.close(fd)
+    except OSError:
+        _DIR_XATTR_FS = False
+        return False
+
+
 def destructive_cleanup_supported() -> bool:
-    """Require anchored operations, advisory locking, and pinned writer I/O."""
+    """Require anchored ops, flock, pinned writer I/O, and directory xattr."""
     if not _ANCHORED_OPS or os.name == "nt":
         return False
     try:
         import fcntl
     except ImportError:
         return False
-    return hasattr(fcntl, "flock") and _fd_view_supported()
+    return (
+        hasattr(fcntl, "flock")
+        and _fd_view_supported()
+        and _directory_xattr_supported()
+    )
 
 
 def stat_is_link_or_reparse(st: os.stat_result) -> bool:
@@ -135,6 +173,10 @@ def _pending_group_operation(root_fd: int) -> bool:
         dir_fd=root_fd,
     )
     try:
+        # Visible emptiness after unlink is not durable until the directory fsyncs.
+        if os.listdir(fd):  # noqa: PTH208 - pinned directory fd
+            return True
+        os.fsync(fd)
         return bool(os.listdir(fd))  # noqa: PTH208 - pinned directory fd
     finally:
         os.close(fd)
