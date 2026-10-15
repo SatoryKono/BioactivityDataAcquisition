@@ -2,10 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.domain.ports import ClockPort
-from bioetl.infrastructure.time import SystemClock
-
-
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -60,7 +56,6 @@ class CreateSilverWriterRequest:
     merge_resilience_policy: SilverMergeResiliencePolicy | None = None
     contract_rollout_policy: ContractRolloutPolicy | None = None
     pipeline_name: str | None = None
-    clock: ClockPort | None = None
 
 
 def create_silver_writer(request: CreateSilverWriterRequest) -> SilverWriter:
@@ -107,33 +102,31 @@ def create_silver_writer(request: CreateSilverWriterRequest) -> SilverWriter:
             "SilverWriter requires explicit tracing injection. "
             "Build NoOpTracing in composition when tracing is disabled."
         )
-    clock = request.clock if request.clock is not None else SystemClock()
-    runtime_request = SilverWriterRuntimeServicesRequest(
-        clock=clock,
-        csv_exporter=request.csv_exporter,
-        tracing=request.tracing,
-        write_policy=None,
-        metrics=request.metrics,
-        audit=request.audit,
-        logger=request.logger,
-        silver_validator=request.silver_validator,
-        metadata_writer=metadata_writer,
-        metadata_coordinator=request.metadata_coordinator,
-        lineage_store=lineage_store,
-        dq_calculator=None,
-        merge_resilience_policy=request.merge_resilience_policy,
-        contract_rollout_policy=request.contract_rollout_policy,
-        base_path=request.base_path,
-        pipeline_name=request.pipeline_name,
-        transform_version=request.transform_version,
-        transform_steps=request.transform_steps,
+    runtime_services = build_silver_writer_runtime_services(
+        SilverWriterRuntimeServicesRequest(
+            csv_exporter=request.csv_exporter,
+            tracing=request.tracing,
+            write_policy=None,
+            metrics=request.metrics,
+            audit=request.audit,
+            logger=request.logger,
+            silver_validator=request.silver_validator,
+            metadata_writer=metadata_writer,
+            metadata_coordinator=request.metadata_coordinator,
+            lineage_store=lineage_store,
+            dq_calculator=None,
+            merge_resilience_policy=request.merge_resilience_policy,
+            contract_rollout_policy=request.contract_rollout_policy,
+            base_path=request.base_path,
+            pipeline_name=request.pipeline_name,
+        )
     )
-    runtime_services = build_silver_writer_runtime_services(runtime_request)
     return request.writer_cls(
         base_path=request.base_path,
         logger=request.logger,
+        transform_version=request.transform_version,
+        transform_steps=request.transform_steps,
         runtime_services=runtime_services,
-        runtime_request=runtime_request,
         pipeline_name=request.pipeline_name,
         flat_structure=request.flat_structure,
     )

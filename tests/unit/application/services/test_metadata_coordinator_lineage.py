@@ -29,8 +29,6 @@
 
 from __future__ import annotations
 
-from bioetl.domain.medallion import WriteMode
-
 import pytest
 
 from bioetl.domain.lineage._shared import mapping_to_plain
@@ -348,7 +346,7 @@ class TestLineageFragments:
                 },
             ],
             primary_keys=["id"],
-            mode=WriteMode.OVERWRITE,
+            mode=SilverWriteMode.DELETE,
             version_after=11,
             composite_run_id="comp-run-456",
         )

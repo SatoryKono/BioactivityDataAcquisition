@@ -33,7 +33,6 @@ lock validation, and failure propagation.
 """
 
 from __future__ import annotations
-from bioetl.domain.types.gold_contracts import GoldWriteReceipt, GoldWriteCategory
 
 import asyncio
 from datetime import UTC, datetime
@@ -78,11 +77,7 @@ def mock_storage():
     storage = AsyncMock()
     storage.write_bronze = AsyncMock(return_value=MagicMock())
     storage.write_silver = AsyncMock(return_value=MagicMock())
-    storage.write_gold = AsyncMock(
-        return_value=GoldWriteReceipt(
-            "synthetic", "1.0.0", GoldWriteCategory.COMPLETE, ("synthetic",)
-        )
-    )
+    storage.write_gold = AsyncMock(return_value=None)
     return storage
 
 

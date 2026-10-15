@@ -22,7 +22,6 @@ from tests.helpers.deterministic_ids import (
 
 import pyarrow as pa
 import pytest
-from tests.helpers.clock import fixed_test_clock
 
 from bioetl.application.services.lineage import MetadataLineageBundleResult
 from bioetl.domain.models.metadata import (
@@ -368,7 +367,6 @@ class TestSilverWriterMetadataIntegration:
             base_path=tmp_path,
             logger=mock_logger,
             runtime_request=SilverWriterRuntimeServicesRequest(
-                clock=fixed_test_clock(),
                 metadata_writer=mock_metadata_writer,
                 metadata_coordinator=mock_metadata_coordinator_with_records,
             ),

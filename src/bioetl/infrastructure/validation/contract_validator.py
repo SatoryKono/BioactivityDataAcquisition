@@ -157,16 +157,16 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
         if schema is None:
             return self._reorder_to_schema(df_to_validate)
 
-        if not self._strict and hasattr(schema, "columns"):
-            known = set(schema.columns)
-            if schema.index:
-                known.update(schema.index.names)
-            df_to_validate = df_to_validate[
-                [name for name in df_to_validate.columns if name in known]
-            ]
-        df_to_validate = self._reorder_to_schema(df_to_validate)
-        df_to_validate = self._normalize_nullable_integer_columns(df_to_validate)
-        return self._normalize_nullable_boolean_columns(df_to_validate)
+        # Handle missing nullable columns
+        if hasattr(schema, "columns"):
+            missing = [name for name in schema.columns if name not in df.columns]
+            for name in missing:
+                column = schema.columns[name]
+                if getattr(column, "nullable", False):
+                    df_to_validate[name] = None
+
+        # Reorder to match schema
+        return self._reorder_to_schema(df_to_validate)
 
     def _convert_schema_errors_to_outcomes(
         self, error: Exception

@@ -35,8 +35,6 @@ Verifies that run_id is consistently propagated:
 
 from __future__ import annotations
 
-from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
-
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
 from tests.helpers.deterministic_ids import (
@@ -113,11 +111,7 @@ def mock_storage():
     storage = MagicMock()
     storage.write_bronze = AsyncMock()
     storage.write_silver = AsyncMock()
-    storage.write_gold = AsyncMock(
-        return_value=GoldWriteReceipt(
-            "synthetic", "0.0.0", GoldWriteCategory.COMPLETE, ("synthetic",)
-        )
-    )
+    storage.write_gold = AsyncMock()
     return storage
 
 

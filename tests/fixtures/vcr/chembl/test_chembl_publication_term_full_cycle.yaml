@@ -4910,15 +4910,16 @@ interactions:
       date:
       - Tue, 06 Oct 2026 06:36:15 GMT
       ncbi-phid:
-      - REDACTED
+      - 1D328C8C3EF3BD8500004C1FC6694E5E.1.1.m_6
       ncbi-sid:
-      - REDACTED
+      - 06F5065DB87EA186_33D1SID
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Finatra
       set-cookie:
-      - REDACTED
+      - ncbi_sid=06F5065DB87EA186_33D1SID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 06:36:16 GMT
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:
@@ -6516,15 +6517,16 @@ interactions:
       date:
       - Tue, 06 Oct 2026 07:28:02 GMT
       ncbi-phid:
-      - REDACTED
+      - 1D34B17B56A0D0550000524053699075.1.1.m_6
       ncbi-sid:
-      - REDACTED
+      - 9F9D67617D9A5455_871CSID
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Finatra
       set-cookie:
-      - REDACTED
+      - ncbi_sid=9F9D67617D9A5455_871CSID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 07:28:03 GMT
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:

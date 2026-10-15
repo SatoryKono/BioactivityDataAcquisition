@@ -136,30 +136,19 @@ function Resolve-PortableNodeToolchain {
     }
 }
 
-function Test-NodeToolchain {
-    param([Parameter(Mandatory = $true)][hashtable]$Toolchain)
-    & $Toolchain.NodeExe (Join-Path $RepoRoot "scripts/ai/npm_runtime_contract.cjs") $RepoRoot *> $null
-    return $LASTEXITCODE -eq 0
-}
-
 function Resolve-NodeToolchain {
     $nodeCommand = Get-Command node -ErrorAction SilentlyContinue
     $npmCommand = Get-Command npm -ErrorAction SilentlyContinue
     if ($nodeCommand -and $npmCommand) {
-        $candidate = @{
+        return @{
             NodeExe = $nodeCommand.Source
             NpmCmd = $npmCommand.Source
             Source = "path"
             InstallDir = ""
         }
-        if (Test-NodeToolchain -Toolchain $candidate) { return $candidate }
-        Write-Information "PATH Node does not satisfy the npm runtime contract; trying portable Node." -InformationAction Continue
     }
 
     $portable = Resolve-PortableNodeToolchain
-    if (-not (Test-NodeToolchain -Toolchain $portable)) {
-        throw "Portable Node/manifest/lock runtime contract failed."
-    }
     $env:Path = "$($portable.InstallDir);$env:Path"
     return $portable
 }

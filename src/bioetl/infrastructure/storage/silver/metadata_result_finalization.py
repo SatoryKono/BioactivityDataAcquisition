@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable
+from datetime import timedelta
 
 from deltalake import DeltaTable
 
@@ -57,11 +58,11 @@ async def _prepare_silver_write_finalization_context(
         validation_errors=request.validation_errors,
     )
     version_after = await host._get_delta_version(request.table_path)
-    # Calendar provenance comes from ClockPort; monotonic time measures duration only.
-    completed_at = host._clock.now()
+    completed_at = request.started_at + timedelta(
+        seconds=perf_counter() - request.start_perf
+    )
     return _PreparedSilverWriteFinalizationContext(
         dq_metrics=dq_metrics,
         version_after=version_after,
         completed_at=completed_at,
-        duration_seconds=perf_counter() - request.start_perf,
     )

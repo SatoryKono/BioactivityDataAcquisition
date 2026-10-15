@@ -30,7 +30,6 @@
 from __future__ import annotations
 
 import asyncio
-from bioetl.domain.types.gold_contracts import GoldWriteReceipt, GoldWriteCategory
 from typing import cast
 from unittest.mock import AsyncMock, MagicMock
 from tests.helpers.deterministic_ids import (
@@ -96,9 +95,6 @@ def mock_services():
     """Create mock pipeline services."""
     services = MagicMock(spec=PipelineService)
     services.storage = AsyncMock()
-    services.storage.write_gold.return_value = GoldWriteReceipt(
-        "synthetic", "0.0.0", GoldWriteCategory.COMPLETE, ("synthetic",)
-    )
     services.metrics = MagicMock(spec=MetricsPort)
     services.quarantine = AsyncMock()
     services.data_source = AsyncMock()

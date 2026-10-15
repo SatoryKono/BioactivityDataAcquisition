@@ -3,6 +3,6 @@ provider: pubmed
 cassette_rel_path: tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_12.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: d6ea89f8ee4118a9c167f336646d883f47217bd13b1c0d308a1b6e70ba815e21
+cassette_sha256: ff9609ebbf5540f989217c7bfdc2b56a8fab1e21f4da9146b887a92cc9909daf
 recorded_at: '2026-10-06'
 staleness_ready: true

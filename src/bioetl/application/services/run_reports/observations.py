@@ -7,13 +7,9 @@ from contextvars import ContextVar, Token
 from copy import deepcopy
 from datetime import datetime
 
-from bioetl.domain.exceptions.gold_write import GoldWriteFailure
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus
-from bioetl.domain.types.gold_contracts import require_complete_gold_receipt
 from bioetl.domain.types.gold_contracts_rejects import GoldContractValidationError
 from bioetl.domain.value_objects.dq_result import DQResult
-
-_DATA_VALIDATION = "Data Validation"
 
 _observations: ContextVar[dict[str, dict[str, object]] | None] = ContextVar(
     "run_observations", default=None
@@ -78,7 +74,7 @@ def ensure_terminal_data_validation_observation(
 ) -> None:
     """Fill Data Validation when gold write never recorded a domain check."""
     target = _observations.get()
-    if target is None or _DATA_VALIDATION in target:
+    if target is None or "Data Validation" in target:
         return
     facts: dict[str, object] = {
         "gold_candidates": records_gold,
@@ -87,7 +83,7 @@ def ensure_terminal_data_validation_observation(
     }
     if status in {"success", "dry_run"} and records_gold == 0:
         record_run_observation(
-            _DATA_VALIDATION,
+            "Data Validation",
             verdict="N/A",
             reason="no_gold_candidates",
             facts=facts,
@@ -96,7 +92,7 @@ def ensure_terminal_data_validation_observation(
     if status in {"failed", "shutdown"}:
         facts["status"] = status
         record_run_observation(
-            _DATA_VALIDATION,
+            "Data Validation",
             verdict="INCOMPLETE",
             reason="gold_not_attempted",
             facts=facts,
@@ -178,27 +174,19 @@ def observed_health_report(
 def record_gold_observation(valid: bool, count: int) -> None:
     """Record the outcome of executed Gold schema validation."""
     record_run_observation(
-        _DATA_VALIDATION,
+        "Data Validation",
         verdict="OK" if valid else "ERROR",
         reason="run_gold_schema_validation",
         facts={"valid": valid, "records": count},
     )
 
 
-async def observe_gold_write[Result](
-    operation: Awaitable[Result], count: int
-) -> Result:
+async def observe_gold_write(operation: Awaitable[object], count: int) -> None:
     """Capture storage-delegated schema outcomes without misclassifying IO failures."""
     try:
-        result = await operation
-        require_complete_gold_receipt(result)
-    except GoldWriteFailure as outcome:
-        if isinstance(outcome.__cause__, GoldContractValidationError):
-            record_gold_observation(False, count)
-        raise
+        await operation
     except GoldContractValidationError:
         record_gold_observation(False, count)
         raise
     else:
         record_gold_observation(True, count)
-        return result

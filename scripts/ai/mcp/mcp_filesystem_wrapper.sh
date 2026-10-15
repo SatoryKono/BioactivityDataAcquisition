@@ -14,4 +14,4 @@ source "${SCRIPT_DIR}/support/token_validation.sh"
 mcp_exit_if_validate_only "filesystem"
 
 # Optional extra allowed roots after the repo root (advanced clients).
-exec npx -y "@modelcontextprotocol/server-filesystem@2026.8.31" "${REPO_ROOT}" "$@"
+exec npx -y "@modelcontextprotocol/server-filesystem@2026.1.14" "${REPO_ROOT}" "$@"

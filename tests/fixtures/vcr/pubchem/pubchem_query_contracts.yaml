@@ -13,7 +13,7 @@ interactions:
       content-type:
       - application/x-www-form-urlencoded
       cookie:
-      - REDACTED
+      - ncbi_sid=90C6ABF3AC474F51_0000SID
       host:
       - pubchem.ncbi.nlm.nih.gov
       user-agent:
@@ -209,15 +209,16 @@ interactions:
       expires:
       - Tue, 06 Oct 2026 05:11:40 GMT
       ncbi-phid:
-      - REDACTED
+      - 95B72127AC474FC10000000000000001.m_1
       ncbi-sid:
-      - REDACTED
+      - 90C6ABF3AC474F51_0000SID
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Apache
       set-cookie:
-      - REDACTED
+      - ncbi_sid=90C6ABF3AC474F51_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 04:11:40 GMT
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:
@@ -250,7 +251,7 @@ interactions:
       content-type:
       - application/x-www-form-urlencoded
       cookie:
-      - REDACTED
+      - ncbi_sid=90C6ABF3AC474F51_0000SID
       host:
       - pubchem.ncbi.nlm.nih.gov
       user-agent:
@@ -456,15 +457,16 @@ interactions:
       expires:
       - Tue, 06 Oct 2026 05:11:42 GMT
       ncbi-phid:
-      - REDACTED
+      - 90C6D511AC474FD10000000000000001.m_1
       ncbi-sid:
-      - REDACTED
+      - 90C6ABF3AC474F51_0000SID
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Apache
       set-cookie:
-      - REDACTED
+      - ncbi_sid=90C6ABF3AC474F51_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 04:11:41 GMT
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:
@@ -497,7 +499,7 @@ interactions:
       content-type:
       - application/x-www-form-urlencoded
       cookie:
-      - REDACTED
+      - ncbi_sid=90C6ABF3AC474F51_0000SID
       host:
       - pubchem.ncbi.nlm.nih.gov
       user-agent:
@@ -653,15 +655,16 @@ interactions:
       expires:
       - Tue, 06 Oct 2026 05:11:42 GMT
       ncbi-phid:
-      - REDACTED
+      - 90C6DC77AC474FE10000000000000001.m_1
       ncbi-sid:
-      - REDACTED
+      - 90C6ABF3AC474F51_0000SID
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Apache
       set-cookie:
-      - REDACTED
+      - ncbi_sid=90C6ABF3AC474F51_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 04:11:42 GMT
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:
@@ -694,7 +697,7 @@ interactions:
       content-type:
       - application/x-www-form-urlencoded
       cookie:
-      - REDACTED
+      - ncbi_sid=90C6ABF3AC474F51_0000SID
       host:
       - pubchem.ncbi.nlm.nih.gov
       user-agent:
@@ -724,15 +727,16 @@ interactions:
       expires:
       - Tue, 06 Oct 2026 05:11:43 GMT
       ncbi-phid:
-      - REDACTED
+      - 95B7341AAC474FF10000000000000001.m_1
       ncbi-sid:
-      - REDACTED
+      - 90C6ABF3AC474F51_0000SID
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Apache
       set-cookie:
-      - REDACTED
+      - ncbi_sid=90C6ABF3AC474F51_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 04:11:43 GMT
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:
@@ -765,7 +769,7 @@ interactions:
       content-type:
       - application/x-www-form-urlencoded
       cookie:
-      - REDACTED
+      - ncbi_sid=90C6ABF3AC474F51_0000SID
       host:
       - pubchem.ncbi.nlm.nih.gov
       user-agent:
@@ -982,15 +986,16 @@ interactions:
       expires:
       - Tue, 06 Oct 2026 05:11:44 GMT
       ncbi-phid:
-      - REDACTED
+      - 90C6EA25AC4750010000000000000001.m_1
       ncbi-sid:
-      - REDACTED
+      - 90C6ABF3AC474F51_0000SID
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Apache
       set-cookie:
-      - REDACTED
+      - ncbi_sid=90C6ABF3AC474F51_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 04:11:44 GMT
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:

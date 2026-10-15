@@ -67,7 +67,6 @@ class _SilverWriteInvocation(_SilverWritePreparationRequest):
     run_type: RunType | None
     source_batch_id: BatchID | None
     ingestion_ts: datetime | None
-    started_at: datetime | None = None
     quarantined_count: int | None = None
     validation_errors: Sequence[str] | None = None
 

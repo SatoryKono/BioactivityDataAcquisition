@@ -36,7 +36,6 @@ from bioetl.domain.models._metadata_common import (
     QualityExpectations,
     RuntimeMetadata,
     RunTypeEnum,
-    validate_utc_datetime,
 )
 from bioetl.domain.models._metadata_gold import (
     CompositeOutputExt,
@@ -91,5 +90,4 @@ __all__ = [
     "SilverMetadata",
     "SilverOutputExt",
     "SourceMetadata",
-    "validate_utc_datetime",
 ]

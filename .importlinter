@@ -70,7 +70,7 @@ forbidden_modules =
     bioetl.infrastructure.adapters.pubmed
     bioetl.infrastructure.locking.memory_lock
     bioetl.infrastructure.checkpoint.local_checkpoint
-    bioetl.infrastructure.quarantine.unified
+    bioetl.infrastructure.quarantine.unified_quarantine
 
 # Note: interfaces -> composition -> infrastructure is allowed through
 # composition-owned entrypoints, while direct interfaces -> infrastructure

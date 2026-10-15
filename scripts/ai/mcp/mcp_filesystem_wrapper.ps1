@@ -20,5 +20,5 @@ New-Item -ItemType Directory -Force -Path $env:NPM_CONFIG_CACHE | Out-Null
 Exit-McpValidateOnly -ServerName "filesystem"
 
 # Optional extra allowed roots after the repo root (advanced clients).
-& npx -y "@modelcontextprotocol/server-filesystem@2026.8.31" $repoRoot @args
+& npx -y "@modelcontextprotocol/server-filesystem@2026.1.14" $repoRoot @args
 exit $LASTEXITCODE

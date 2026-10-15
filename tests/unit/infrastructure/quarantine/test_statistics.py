@@ -68,27 +68,17 @@ class _FakeArrowTable:
         return self._rows
 
 
-class _FakeDeltaTableMetadata:
-    """Minimal stand-in for DeltaTable metadata exposing partition layout."""
-
-    partition_columns: list[str] = ["pipeline"]
-
-
 class _FakeDeltaTable:
     def __init__(self, table: _FakeArrowTable) -> None:
         self.table = table
         self.partitions: list[tuple[str, str, object]] | None = None
         self.filters: list[tuple[str, str, object]] | None = None
 
-    def metadata(self) -> _FakeDeltaTableMetadata:
-        return _FakeDeltaTableMetadata()
-
     def to_pyarrow_table(
         self,
         *,
-        partitions: list[tuple[str, str, object]] | None = None,
-        filters: list[tuple[str, str, object]] | None = None,
-        columns: list[str] | None = None,
+        partitions: list[tuple[str, str, object]],
+        filters: list[tuple[str, str, object]] | None,
     ) -> _FakeArrowTable:
         self.partitions = partitions
         self.filters = filters

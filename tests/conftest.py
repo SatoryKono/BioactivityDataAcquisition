@@ -1288,8 +1288,6 @@ def _bioetl_test_silver_validator(
         if "SilverWriter" not in module_text and "silver_writer" not in module_text:
             return
 
-    from tests.helpers.clock import fixed_test_clock
-
     original_init = SilverWriter.__init__
 
     def _init(
@@ -1302,15 +1300,7 @@ def _bioetl_test_silver_validator(
         flat_structure: bool = False,
         pipeline_name: object = None,
         runtime_request: object = None,
-        clock: object = None,
     ) -> None:
-        clock = (
-            clock
-            if clock is not None
-            else getattr(runtime_request, "clock", None)
-            or getattr(runtime_services, "clock", None)
-            or fixed_test_clock()
-        )
         if runtime_services is None:
             request_obj = runtime_request
             if (
@@ -1319,15 +1309,11 @@ def _bioetl_test_silver_validator(
             ):
                 if request_obj is None:
                     runtime_request = SilverWriterRuntimeServicesRequest(
-                        clock=clock,
                         logger=logger,  # type: ignore[arg-type]
-                        transform_version=transform_version,  # type: ignore[arg-type]
-                        transform_steps=transform_steps,  # type: ignore[arg-type]
                         silver_validator=NoOpValidator(),
                     )
                 else:
                     runtime_request = SilverWriterRuntimeServicesRequest(
-                        clock=clock,
                         csv_exporter=request_obj.csv_exporter,
                         tracing=request_obj.tracing,
                         write_policy=request_obj.write_policy,
@@ -1343,8 +1329,6 @@ def _bioetl_test_silver_validator(
                         contract_rollout_policy=request_obj.contract_rollout_policy,
                         base_path=request_obj.base_path,
                         pipeline_name=request_obj.pipeline_name,
-                        transform_version=request_obj.transform_version,
-                        transform_steps=request_obj.transform_steps,
                         delta_module_loader=request_obj.delta_module_loader,
                     )
         original_init(

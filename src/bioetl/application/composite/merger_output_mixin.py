@@ -7,8 +7,6 @@ from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.services.run_reports.observations import observe_gold_write
 from bioetl.domain.exceptions import DataQualityError
-from bioetl.domain.exceptions.gold_write import GoldWriteFailure
-from bioetl.domain.types.gold_contracts import GoldWriteCategory, GoldWriteReceipt
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -122,9 +120,7 @@ class MergeOutputWriterMixin:
                 f"table_name={table_name}"
             )
         records = df.to_dicts()
-        if not records:
-            return
-        receipt = await observe_gold_write(
+        await observe_gold_write(
             host._storage.write_gold_merged(
                 table_name,
                 records,
@@ -136,12 +132,6 @@ class MergeOutputWriterMixin:
             ),
             len(records),
         )
-        if not isinstance(receipt, GoldWriteReceipt):
-            raise TypeError("MergedStoragePort must return a GoldWriteReceipt")
-        if receipt.category != GoldWriteCategory.COMPLETE:
-            raise GoldWriteFailure(receipt)
-        if receipt.physical_table != table_name:
-            raise TypeError("Merged Gold receipt does not match requested table")
 
 
 __all__ = ["MergeOutputWriterMixin"]

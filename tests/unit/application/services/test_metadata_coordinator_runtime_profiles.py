@@ -29,8 +29,6 @@
 
 from __future__ import annotations
 
-from bioetl.domain.medallion import WriteMode
-
 import pytest
 
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
@@ -218,7 +216,7 @@ class TestSilverMetadata:
                 {"id": 2, "_cv_error": True, "_cv_quarantine": True},
             ],
             primary_keys=["id"],
-            mode=WriteMode.OVERWRITE,
+            mode=SilverWriteMode.DELETE,
             dq_report_path="reports/dq/composite-publication.json",
         )
 
@@ -284,15 +282,15 @@ class TestSilverMetadata:
             coordinator.create_silver_metadata(input_append).delta.operation == "append"
         )
 
-        # Explicit merged/lifecycle overwrite metadata remains supported
-        input_overwrite = SilverMetadataInput(
+        # Test DELETE mode (maps to overwrite)
+        input_delete = SilverMetadataInput(
             table_path="/data/silver/t",
             records=records,
             primary_keys=["id"],
-            mode=WriteMode.OVERWRITE,
+            mode=SilverWriteMode.DELETE,
         )
         assert (
-            coordinator.create_silver_metadata(input_overwrite).delta.operation
+            coordinator.create_silver_metadata(input_delete).delta.operation
             == "overwrite"
         )
 

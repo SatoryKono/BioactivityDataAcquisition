@@ -3,8 +3,6 @@
 
 from __future__ import annotations
 
-from bioetl.domain.types.gold_contracts import GoldWriteReceipt
-
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar, Literal, cast
@@ -145,7 +143,7 @@ class StorageBundleMergedMixin:
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
         schema: DataFrameSchema | None = None,
-    ) -> GoldWriteReceipt:
+    ) -> None:
         """Write merged records to Gold layer with a required composite schema.
 
         Used by composite pipelines where the schema is resolved from the
@@ -169,7 +167,7 @@ class StorageBundleMergedMixin:
                 f"table_name={table_name}"
             )
 
-        return await cast(
+        await cast(
             _GoldMergedWriteProtocol,
             self.gold,
         ).write_gold_merged(

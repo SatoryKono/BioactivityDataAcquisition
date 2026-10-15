@@ -37,6 +37,7 @@ from bioetl.infrastructure.storage.silver.writer_runtime_support import (
     _resolve_runtime_services_for_writer,
     _rewire_runtime_services,
 )
+from bioetl.infrastructure.time import SystemClock
 
 __all__ = ["SilverWriteMode", "SilverWriter", "_SilverWriteExecutionContext"]
 
@@ -74,25 +75,12 @@ class SilverWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         pipeline_name: str | None = None,
         runtime_request: SilverWriterRuntimeServicesRequest | None = None,
     ) -> None:
-        """Initialize with the required composition-owned clock in grouped runtime."""
-        clock = None
-        if runtime_request is not None:
-            clock = runtime_request.clock
-        elif runtime_services is not None:
-            clock = runtime_services.clock
-        if clock is None:
-            raise TypeError(
-                "SilverWriter requires an explicit clock (ClockPort) in grouped runtime"
-            )
-        self._clock = clock
+        """Initialize Silver writer."""
         self._pipeline_name = pipeline_name
 
         if runtime_request is None:
             runtime_request = SilverWriterRuntimeServicesRequest(
                 logger=logger,
-                clock=clock,
-                transform_version=transform_version,
-                transform_steps=transform_steps,
             )
 
         super().__init__(base_path, logger, flat_structure=flat_structure)
@@ -104,8 +92,9 @@ class SilverWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         )
         _assign_runtime_services(self, services)
         _rewire_runtime_services(self)
-        self._transform_version = runtime_request.transform_version
-        self._transform_steps = runtime_request.transform_steps or ()
+        self._clock = SystemClock()
+        self._transform_version = transform_version
+        self._transform_steps = transform_steps or ()
         self._host = self
 
     @override

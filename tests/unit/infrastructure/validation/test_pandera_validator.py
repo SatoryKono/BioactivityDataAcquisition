@@ -184,7 +184,7 @@ class TestPanderaSilverValidator:
         result = validator.validate(records)
         assert result.valid is True
 
-    def test_validate_with_ordered_schema_rejects_reordered_columns(self):
+    def test_validate_with_ordered_schema_reorders_columns(self):
         """Columns in wrong order pass validation after reorder."""
         import pandera as pa
 
@@ -201,7 +201,7 @@ class TestPanderaSilverValidator:
         # Records with columns in WRONG order (c, a, b instead of a, b, c)
         records = [{"c": 1.0, "a": "x", "b": 1}]
         result = validator.validate(records)
-        assert result.valid is False
+        assert result.valid is True
 
     def test_validate_chembl_target_batch_without_removed_legacy_fields(self):
         """chembl.target accepts batches after legacy field removal."""

@@ -263,11 +263,11 @@ uv run python -m pytest tests/architecture/test_regression_metrics.py -q
 
 - **MERGE**: Upsert по первичным ключам. Стратегия по умолчанию для incremental updates.
 - **APPEND**: Вставка новых записей без проверки дубликатов.
-- Batch Silver поддерживает только **MERGE** и **APPEND**. **DELETE** и **OVERWRITE** отклоняются до записи. Полная замена выполняется отдельным rebuild/clear lifecycle либо `write_silver_merged`.
+- **DELETE**: Полная перезапись таблицы (удаление и вставка).
 
 **Валидация**:
 
-- Batch-режимы `DELETE` и `OVERWRITE` вызывают ошибку без изменения таблицы; destructive lifecycle не является batch write mode.
+- Попытка использовать режим `OVERWRITE` (не `DELETE`) вызовет ошибку.
 - Нарушение инвариантов Medallion (например, Append для данных требующих идемпотентности) логируется как `PolicyViolation`.
 
 #### 2.1.2. Gold Write Modes (Режимы Записи)
@@ -478,7 +478,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 | ChEMBL Molecule | `first-approval`, `black-box-warning`, `max-phase`, `chirality`, `usan-year` и др.     |
 | ChEMBL Assay    | `src-id`, `assay-taxonomy-id`, `confidence-score`, `dap-id`                            |
 | ChEMBL Target   | `taxonomy-id`                                                                          |
-| UniProt Protein | `taxonomy-id`, `sequence-length`                                                       |
+| UniProt Protein | `organism-id`, `sequence-length`                                                       |
 | Publications    | `year`, `publication-year`                                                             |
 
 **Слои типизации**:
@@ -670,10 +670,8 @@ dependencies:
 | Параметр               | Описание                            | Значения                                                           |
 | ---------------------- | ----------------------------------- | ------------------------------------------------------------------ |
 | `strategy`             | Стратегия объединения               | `left_outer`, `inner`, `union`                                     |
-| `conflict_resolution`  | Разрешение конфликтов полей         | `seed_priority`, `enricher_priority` (`enricher`), `latest_timestamp` (`latest`), `coalesce`, `explicit_rules` (`explicit`) |
+| `conflict_resolution`  | Разрешение конфликтов полей         | `seed_priority`, `enricher_priority`, `coalesce`, `explicit_rules` |
 | `preserve_all_sources` | Сохранение всех колонок провайдеров | `true` / `false` (default)                                         |
-
-Aliases в скобках эквивалентны соответствующим основным значениям. Для `explicit_rules` и `explicit` обязателен непустой `field_priorities`; проверка выполняется при загрузке схемы.
 
 #### 2.9.3. preserve_all_sources Feature
 

@@ -683,7 +683,6 @@ def _cmd_dataflow(*, check_only: bool, pipeline: str, **_: object) -> list[str]:
 
 
 def _run_telemetry(*, check_only: bool, telemetry: argparse.Namespace) -> int:
-    junit_paths = [str(path) for path in getattr(telemetry, "junit", [])]
     if check_only:
         return _run(
             [
@@ -698,7 +697,7 @@ def _run_telemetry(*, check_only: bool, telemetry: argparse.Namespace) -> int:
         )
     local_manifest = getattr(telemetry, "local_manifest", None)
     if local_manifest:
-        if junit_paths or any(
+        if any(
             getattr(telemetry, key, None) not in (None, "")
             for key in (
                 "coverage_percent",
@@ -737,25 +736,25 @@ def _run_telemetry(*, check_only: bool, telemetry: argparse.Namespace) -> int:
         )
     source_commit = _require_git_object_id(str(telemetry.source_commit))
     _assert_commit_is_ancestor(source_commit)
-    command = [
-        sys.executable,
-        "-m",
-        "scripts.engineering.ci.update_test_telemetry_baseline",
-        "--coverage-percent",
-        str(telemetry.coverage_percent),
-        "--source-branch",
-        str(telemetry.source_branch),
-        "--source-commit",
-        source_commit,
-        "--source-run-id",
-        str(telemetry.source_run_id),
-        "--source-event",
-        str(telemetry.source_event),
-        "--source-run-url",
-        str(telemetry.source_run_url),
-    ]
-    command.extend(f"--junit={path}" for path in junit_paths)
-    return _run(command)
+    return _run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.ci.update_test_telemetry_baseline",
+            "--coverage-percent",
+            str(telemetry.coverage_percent),
+            "--source-branch",
+            str(telemetry.source_branch),
+            "--source-commit",
+            source_commit,
+            "--source-run-id",
+            str(telemetry.source_run_id),
+            "--source-event",
+            str(telemetry.source_event),
+            "--source-run-url",
+            str(telemetry.source_run_url),
+        ]
+    )
 
 
 _FAMILY_COMMANDS = {
@@ -819,12 +818,6 @@ def run_ci_drift_families(argv: list[str]) -> int:
         help="Pipeline name for --dataflow (default: chembl_activity).",
     )
     parser.add_argument("--coverage-percent", type=float, default=None)
-    parser.add_argument(
-        "--junit",
-        action="append",
-        default=[],
-        help="Complete raw JUnit source inventory for a legacy telemetry refresh; repeat per file.",
-    )
     parser.add_argument("--local-manifest", type=Path, default=None)
     parser.add_argument("--source-branch", default="main")
     parser.add_argument("--source-commit", default="")
@@ -845,8 +838,6 @@ def run_ci_drift_families(argv: list[str]) -> int:
             "--telemetry --evidence --remote-main --dataflow"
         )
     check_only = not args.update
-    if args.junit and (check_only or not args.telemetry):
-        parser.error("--junit requires --update --telemetry")
     print(
         "CI drift families "
         + ("check" if check_only else "update")

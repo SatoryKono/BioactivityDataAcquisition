@@ -18,7 +18,6 @@ from bioetl.application.core.batch_processing_runtime import (
 )
 from bioetl.application.services.run_reports.observations import observe_gold_write
 from bioetl.domain.ports import SilverWriteRequest
-from bioetl.domain.types.gold_contracts import GoldWriteReceipt
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_writer import BatchWriteStorageProtocol
@@ -54,7 +53,7 @@ class BatchWriterIOMixin:
     _gold_schema_policy_by_version: GoldSchemaPolicyByVersion | None
     _gold_validator: GoldValidatorPort
     _table_config: TableConfig
-    _silver_mode: Literal["merge", "append"]
+    _silver_mode: Literal["merge", "append", "delete"]
     _gold_mode: Literal["overwrite", "append", "scd2"]
     _validate_lock: Callable[[str], Awaitable[None]]
     _start_span: Callable[..., object | None]
@@ -184,7 +183,7 @@ class BatchWriterIOMixin:
         self,
         records: list[GoldRecord],
         silver_refs: list[SilverWriteResult] | None = None,
-    ) -> GoldWriteReceipt:
+    ) -> None:
         """Validate and write schema-projected records to Gold."""
         await self._validate_lock("write_gold")
         span = self._start_span("write_gold", "gold", len(records))
@@ -199,7 +198,7 @@ class BatchWriterIOMixin:
             records, column_order, schema_payload = self._apply_layer_renames(
                 records, column_order, schema_payload, rename_map
             )
-            receipt = await observe_gold_write(
+            await observe_gold_write(
                 self._storage.write_gold(
                     table_name=self._gold_table_name,
                     records=records,
@@ -215,7 +214,6 @@ class BatchWriterIOMixin:
                 len(records),
             )
             self._end_span(span)
-            return receipt
         except _WRITE_SPAN_ERRORS as error:
             self._end_span(span, error)
             raise

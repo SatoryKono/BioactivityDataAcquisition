@@ -151,7 +151,6 @@ def create_record_processor_from_pipeline(
             dq_config=pipeline.config.dq,
             data_schema=pipeline.config.data_schema,
             primary_keys=pipeline.config.table.primary_keys,
-            partition_cols=tuple(pipeline.config.table.partition_cols),
             silver_table=pipeline.config.effective_silver_table,
             gold_table=pipeline.config.effective_gold_table,
             silver_write_mode=pipeline.config.table.silver_write_mode,

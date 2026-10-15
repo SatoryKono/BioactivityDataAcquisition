@@ -213,7 +213,7 @@
       "runtime_checkable": true
     },
     {
-      "line": 213,
+      "line": 212,
       "name": "MetadataCoordinatorPort",
       "path": "src/bioetl/domain/ports/metadata/coordinator.py",
       "runtime_checkable": true
@@ -495,7 +495,7 @@
       "runtime_checkable": true
     },
     {
-      "line": 15,
+      "line": 14,
       "name": "GoldStoragePort",
       "path": "src/bioetl/domain/ports/storage/gold_port.py",
       "runtime_checkable": true
@@ -507,7 +507,7 @@
       "runtime_checkable": true
     },
     {
-      "line": 15,
+      "line": 14,
       "name": "MergedStoragePort",
       "path": "src/bioetl/domain/ports/storage/merged_port.py",
       "runtime_checkable": true
@@ -519,7 +519,7 @@
       "runtime_checkable": true
     },
     {
-      "line": 195,
+      "line": 192,
       "name": "SilverStoragePort",
       "path": "src/bioetl/domain/ports/storage/silver_port.py",
       "runtime_checkable": true

@@ -63,9 +63,17 @@ def assemble_vacuum_settings_impl(
     cli_vacuum: CliVacuumSettings,
     yaml_maintenance: MaintenanceConfig,
 ) -> tuple[bool, int]:
-    if cli_vacuum.enabled is None:
-        return yaml_maintenance.auto_vacuum, yaml_maintenance.vacuum_retention_days
-    return cli_vacuum.enabled, cli_vacuum.retention_days
+    enabled = (
+        cli_vacuum.enabled
+        if cli_vacuum.enabled is not None
+        else yaml_maintenance.auto_vacuum
+    )
+    retention = (
+        cli_vacuum.retention_days
+        if cli_vacuum.enabled is not None
+        else yaml_maintenance.vacuum_retention_days
+    )
+    return enabled, retention
 
 
 def assemble_runtime_config_impl(
@@ -76,7 +84,6 @@ def assemble_runtime_config_impl(
     vacuum_retention_days: int,
     health_check_mode: Literal["strict", "probe"],
     skip_gold: bool,
-    strict_preflight: bool = True,
 ) -> RuntimeConfig:
     return RuntimeConfig(
         run_type=ctx.run_type,
@@ -96,7 +103,6 @@ def assemble_runtime_config_impl(
         vacuum_after_run=vacuum_enabled,
         vacuum_retention_days=vacuum_retention_days,
         skip_gold=skip_gold,
-        strict_preflight=strict_preflight,
         debug_export_enabled=bool(getattr(ctx, "debug_export_enabled", False)),
         debug_export_formats=tuple(getattr(ctx, "debug_export_formats", ())),
         debug_export_dir=getattr(ctx, "debug_export_dir", None),

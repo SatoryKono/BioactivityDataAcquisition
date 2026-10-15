@@ -32,8 +32,6 @@ Tests for the integration of PanderaSilverValidator with SilverWriter.
 
 from __future__ import annotations
 
-from tests.helpers.clock import fixed_test_clock
-
 import asyncio
 import sys
 import warnings
@@ -96,7 +94,6 @@ def _build_validation_writer(
     return make_silver_writer(
         logger=logger,
         runtime_request=SilverWriterRuntimeServicesRequest(
-            clock=fixed_test_clock(),
             silver_validator=validator,
             metrics=metrics,
         ),
@@ -182,13 +179,7 @@ class TestSilverWriterSilverValidatorInit:
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         with pytest.raises(ValueError, match="SilverValidatorPort is required"):
-            SilverWriter(
-                runtime_request=SilverWriterRuntimeServicesRequest(
-                    clock=fixed_test_clock()
-                ),
-                base_path="/tmp/silver",
-                logger=noop_logger,
-            )
+            SilverWriter(base_path="/tmp/silver", logger=noop_logger)
 
     def test_init_with_custom_validator(self, noop_logger):
         """Test SilverWriter accepts custom SilverValidatorPort."""
@@ -628,7 +619,6 @@ class TestSilverWriterPreparePayloadExecutor:
         writer = make_silver_writer(
             logger=noop_logger,
             runtime_request=SilverWriterRuntimeServicesRequest(
-                clock=fixed_test_clock(),
                 metadata_coordinator=MetadataCoordinator(context),
             ),
         )

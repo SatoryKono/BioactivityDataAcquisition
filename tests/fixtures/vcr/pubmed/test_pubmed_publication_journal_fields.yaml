@@ -139,15 +139,16 @@ interactions:
       date:
       - Tue, 06 Oct 2026 04:17:11 GMT
       ncbi-phid:
-      - REDACTED
+      - 1D32099356568F35000058ED67585015.1.1.m_1
       ncbi-sid:
-      - REDACTED
+      - 3B72ECBC7C3FB7D0_7C71SID
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Finatra
       set-cookie:
-      - REDACTED
+      - ncbi_sid=3B72ECBC7C3FB7D0_7C71SID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 04:17:11 GMT
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:
@@ -175,7 +176,7 @@ interactions:
       connection:
       - keep-alive
       cookie:
-      - REDACTED
+      - ncbi_sid=3B72ECBC7C3FB7D0_7C71SID
       host:
       - eutils.ncbi.nlm.nih.gov
       user-agent:
@@ -205,15 +206,16 @@ interactions:
       date:
       - Tue, 06 Oct 2026 04:17:10 GMT
       ncbi-phid:
-      - REDACTED
+      - 1D3311480BFF76F500007F03F33E106C.1.1.m_1
       ncbi-sid:
-      - REDACTED
+      - 3B72ECBC7C3FB7D0_7C71SID
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Finatra
       set-cookie:
-      - REDACTED
+      - ncbi_sid=3B72ECBC7C3FB7D0_7C71SID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 04:17:11 GMT
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:
@@ -241,7 +243,7 @@ interactions:
       connection:
       - keep-alive
       cookie:
-      - REDACTED
+      - ncbi_sid=3B72ECBC7C3FB7D0_7C71SID
       host:
       - eutils.ncbi.nlm.nih.gov
       user-agent:
@@ -1553,15 +1555,16 @@ interactions:
       date:
       - Tue, 06 Oct 2026 04:17:11 GMT
       ncbi-phid:
-      - REDACTED
+      - 1D32099356568F35000063ED6857460B.1.1.m_6
       ncbi-sid:
-      - REDACTED
+      - 3B72ECBC7C3FB7D0_7C71SID
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Finatra
       set-cookie:
-      - REDACTED
+      - ncbi_sid=3B72ECBC7C3FB7D0_7C71SID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 04:17:11 GMT
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:

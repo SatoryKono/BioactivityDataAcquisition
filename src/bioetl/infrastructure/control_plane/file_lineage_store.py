@@ -101,7 +101,7 @@ class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
                 fragment_path,
                 json.dumps(persisted_fragment.to_dict(), indent=2, sort_keys=True),
             )
-            self._fragment_indexes(fragment, stored_fragment_id, index_rollbacks)
+            index_rollbacks.extend(self._fragment_indexes(fragment, stored_fragment_id))
         except (OSError, TypeError, ValueError):
             self._rollback_save(
                 fragment_path=fragment_path,
@@ -114,16 +114,15 @@ class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
         self,
         fragment: LineageGraphFragment,
         stored_fragment_id: str,
-        index_rollbacks: list[tuple[Path, int]],
-    ) -> None:
-        """Append lookup indexes, recording each checkpoint before the next write."""
-        index_rollbacks.append(
+    ) -> list[tuple[Path, int]]:
+        """Append all lookup indexes for one persisted fragment."""
+        index_rollbacks = [
             self._append_index(
                 self._semantic_fragment_index_path(fragment.fragment_id),
                 key=fragment.fragment_id,
                 fragment_id=stored_fragment_id,
             )
-        )
+        ]
         if fragment.run_id is not None:
             index_rollbacks.append(
                 self._append_index(
@@ -148,6 +147,7 @@ class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
                     fragment_id=stored_fragment_id,
                 )
             )
+        return index_rollbacks
 
     def _rollback_save(
         self,

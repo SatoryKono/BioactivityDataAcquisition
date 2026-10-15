@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from tests.helpers.clock import fixed_test_clock
-
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
@@ -150,9 +148,7 @@ async def test_context_facade_manifest_and_version(
 
 
 def test_build_validation_operations_without_base_path() -> None:
-    request = SilverWriterRuntimeServicesRequest(
-        clock=fixed_test_clock(), base_path=None
-    )
+    request = SilverWriterRuntimeServicesRequest(base_path=None)
     assert (
         _build_validation_operations(
             request,

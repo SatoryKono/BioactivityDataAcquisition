@@ -14,7 +14,6 @@ from unittest.mock import AsyncMock, MagicMock
 import pandas as pd
 import pyarrow as pa
 import pytest
-from tests.helpers.clock import fixed_test_clock
 
 from bioetl.domain.medallion import SilverWriteMode, WriteModePolicy
 from bioetl.domain.workflow import (
@@ -42,6 +41,7 @@ from bioetl.infrastructure.storage.delta.resilience import (
     SilverMergeResiliencePolicy,
 )
 from bioetl.infrastructure.storage.silver.delta_merge_helpers import (
+    _MergeExecutionTimeoutError,
     _delta_table_has_parquet_data,
     _execute_merge_inline_with_timeout,
     _should_execute_merge_inline,
@@ -208,24 +208,10 @@ def test_delta_merge_log_skip_inline_timeout(
         return 0.0 if clock["n"] == 1 else 10.0
 
     monkeypatch.setattr(time, "perf_counter", _now)
-    logger = MagicMock()
-    # A completed inline merge is already durable: elapsed>budget must emit
-    # silver_merge_slow telemetry instead of raising a false timeout that
-    # would trigger a redundant committed-merge retry (#12041).
-    _execute_merge_inline_with_timeout(
-        merge_callable=lambda: None,
-        timeout_seconds=0.1,
-        logger=logger,
-        table_path=str(table),
-        primary_keys=["entity_id"],
-    )
-    logger.warning.assert_called_once_with(
-        "silver_merge_slow",
-        table_path=str(table),
-        timeout_seconds=0.1,
-        elapsed_seconds=10.0,
-        primary_keys=["entity_id"],
-    )
+    with pytest.raises(_MergeExecutionTimeoutError):
+        _execute_merge_inline_with_timeout(
+            merge_callable=lambda: None, timeout_seconds=0.1
+        )
 
 
 def test_bronze_chunk_flush_and_eexist_link(
@@ -400,9 +386,7 @@ async def test_validation_facade_wrappers_and_schema_wrapper(
         _schema,
     )
     built = _build_validation_operations(
-        SilverWriterRuntimeServicesRequest(
-            base_path=tmp_path, logger=NoOpLogger(), clock=fixed_test_clock()
-        ),
+        SilverWriterRuntimeServicesRequest(base_path=tmp_path, logger=NoOpLogger()),
         write_policy=WriteModePolicy(),
         silver_validator=MagicMock(),
     )
@@ -430,7 +414,6 @@ def test_pandera_non_object_and_index_schema() -> None:
     assert validator._normalize_nullable_integer_columns(frame) is not None
     assert validator._normalize_nullable_boolean_columns(frame) is not None
     indexed_schema = SimpleNamespace(
-        ordered=False,
         columns={"n": object(), "idx": object()},
         index=SimpleNamespace(names=["idx"]),
         validate=lambda *_a, **_k: None,

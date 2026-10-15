@@ -29,9 +29,6 @@
 
 from __future__ import annotations
 
-
-from tests.helpers.clock import fixed_test_clock
-
 import asyncio
 from tests.helpers.synthetic_paths import synthetic_test_root
 from unittest.mock import AsyncMock, MagicMock
@@ -60,13 +57,7 @@ class TestSilverWriterInit:
         """Test that trailing slash is stripped from base_path."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            runtime_request=SilverWriterRuntimeServicesRequest(
-                clock=fixed_test_clock()
-            ),
-            base_path="s3://bucket/path/",
-            logger=noop_logger,
-        )
+        writer = SilverWriter(base_path="s3://bucket/path/", logger=noop_logger)
         assert writer.base_path == "s3://bucket/path"
 
     def test_silver_writer_init__with_csv_exporter__9233c03f(self, noop_logger):
@@ -80,7 +71,6 @@ class TestSilverWriterInit:
             base_path=SILVER_ROOT,
             logger=noop_logger,
             runtime_request=SilverWriterRuntimeServicesRequest(
-                clock=fixed_test_clock(),
                 csv_exporter=mock_exporter,
             ),
         )
@@ -90,13 +80,7 @@ class TestSilverWriterInit:
         """Test initialization without CSV exporter."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            runtime_request=SilverWriterRuntimeServicesRequest(
-                clock=fixed_test_clock()
-            ),
-            base_path=SILVER_ROOT,
-            logger=noop_logger,
-        )
+        writer = SilverWriter(base_path=SILVER_ROOT, logger=noop_logger)
         assert writer.csv_exporter is None
 
     @pytest.mark.require_silver_validator
@@ -171,13 +155,7 @@ class TestSilverWriterValidation:
             _SilverWritePreparationRequest,
         )
 
-        writer = SilverWriter(
-            runtime_request=SilverWriterRuntimeServicesRequest(
-                clock=fixed_test_clock()
-            ),
-            base_path=SILVER_ROOT,
-            logger=noop_logger,
-        )
+        writer = SilverWriter(base_path=SILVER_ROOT, logger=noop_logger)
         schema = pa.schema(
             [
                 pa.field("entity_id", pa.string()),
@@ -574,13 +552,7 @@ class TestSilverWriterValidation:
             _PreparedSilverWritePayload,
         )
 
-        writer = SilverWriter(
-            runtime_request=SilverWriterRuntimeServicesRequest(
-                clock=fixed_test_clock()
-            ),
-            base_path=SILVER_ROOT,
-            logger=noop_logger,
-        )
+        writer = SilverWriter(base_path=SILVER_ROOT, logger=noop_logger)
         payload_records = [
             {
                 "entity_id": "CHEMBL123",
@@ -681,13 +653,7 @@ class TestSilverWriterValidation:
 
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            runtime_request=SilverWriterRuntimeServicesRequest(
-                clock=fixed_test_clock()
-            ),
-            base_path="s3://bucket",
-            logger=noop_logger,
-        )
+        writer = SilverWriter(base_path="s3://bucket", logger=noop_logger)
         schema = pa.schema(
             [
                 pa.field("entity_id", pa.string()),
@@ -715,13 +681,7 @@ class TestSilverWriterValidation:
 
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            runtime_request=SilverWriterRuntimeServicesRequest(
-                clock=fixed_test_clock()
-            ),
-            base_path="s3://bucket",
-            logger=noop_logger,
-        )
+        writer = SilverWriter(base_path="s3://bucket", logger=noop_logger)
 
         dummy_schema = pa.schema([pa.field("entity_id", pa.string())])
 
@@ -742,13 +702,7 @@ class TestSilverWriterValidation:
 
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            runtime_request=SilverWriterRuntimeServicesRequest(
-                clock=fixed_test_clock()
-            ),
-            base_path="s3://bucket",
-            logger=noop_logger,
-        )
+        writer = SilverWriter(base_path="s3://bucket", logger=noop_logger)
         records = [{"entity_id": "CHEMBL123", "value": 5.5}]
 
         import pyarrow as pa
@@ -776,13 +730,7 @@ class TestSilverWriterValidation:
         from bioetl.domain.types import BatchID, RunID, RunType
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            runtime_request=SilverWriterRuntimeServicesRequest(
-                clock=fixed_test_clock()
-            ),
-            base_path="s3://bucket",
-            logger=noop_logger,
-        )
+        writer = SilverWriter(base_path="s3://bucket", logger=noop_logger)
         records = [{"entity_id": "CHEMBL123"}]
 
         import pyarrow as pa
@@ -822,13 +770,7 @@ class TestSilverWriterValidation:
 
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            runtime_request=SilverWriterRuntimeServicesRequest(
-                clock=fixed_test_clock()
-            ),
-            base_path="s3://bucket",
-            logger=noop_logger,
-        )
+        writer = SilverWriter(base_path="s3://bucket", logger=noop_logger)
         records = [
             {
                 "entity_id": "CHEMBL123",
@@ -887,7 +829,7 @@ class TestSilverWriterWriteModeEnum:
 
         assert SilverWriteMode.MERGE.value == "merge"
         assert SilverWriteMode.APPEND.value == "append"
-        assert {m.value for m in SilverWriteMode} == {"merge", "append"}
+        assert SilverWriteMode.DELETE.value == "delete"
 
     def test_writer_write_mode_enum__mode_from_string__a1a1b7ae(self):
         """Test creating SilverWriteMode from string."""
@@ -895,8 +837,7 @@ class TestSilverWriterWriteModeEnum:
 
         assert SilverWriteMode("merge") == SilverWriteMode.MERGE
         assert SilverWriteMode("append") == SilverWriteMode.APPEND
-        with pytest.raises(ValueError):
-            SilverWriteMode("delete")
+        assert SilverWriteMode("delete") == SilverWriteMode.DELETE
 
     def test_silver_write_mode_invalid_raises(self):
         """Test invalid mode string raises ValueError."""
@@ -915,18 +856,11 @@ class TestSilverWriterWriteModeEnum:
             SilverWriter,
         )
 
-        writer = SilverWriter(
-            runtime_request=SilverWriterRuntimeServicesRequest(
-                clock=fixed_test_clock()
-            ),
-            base_path=SILVER_ROOT,
-            logger=noop_logger,
-        )
+        writer = SilverWriter(base_path=SILVER_ROOT, logger=noop_logger)
 
         assert writer._validate_write_mode("merge") == SilverWriteMode.MERGE
         assert writer._validate_write_mode("append") == SilverWriteMode.APPEND
-        with pytest.raises(ValueError):
-            writer._validate_write_mode("delete")
+        assert writer._validate_write_mode("delete") == SilverWriteMode.DELETE
 
         with pytest.raises(ValueError, match="Invalid Silver write mode 'invalid'"):
             writer._validate_write_mode("invalid")
@@ -943,13 +877,7 @@ class TestSilverWriterTablePath:
         """Test table path is constructed correctly."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            runtime_request=SilverWriterRuntimeServicesRequest(
-                clock=fixed_test_clock()
-            ),
-            base_path="s3://bucket/silver",
-            logger=noop_logger,
-        )
+        writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
         # Access internal path construction
         table_name = "chembl.activity"
@@ -962,13 +890,7 @@ class TestSilverWriterTablePath:
         """Test table path with nested table name."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            runtime_request=SilverWriterRuntimeServicesRequest(
-                clock=fixed_test_clock()
-            ),
-            base_path="s3://bucket/silver",
-            logger=noop_logger,
-        )
+        writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
         table_name = "provider.schema.table"
         expected_path = "s3://bucket/silver/provider/schema/table"
@@ -1009,49 +931,3 @@ class TestSilverWriterMergePredicate:
             "target.entity_id = source.entity_id"
         )
         assert predicate == expected
-
-
-@pytest.mark.require_silver_validator
-@pytest.mark.parametrize(
-    "version,steps", [(None, None), ("synthetic-v1", ("normalize",))]
-)
-def test_legacy_transform_keywords_remain_supported(
-    tmp_path, noop_logger, version, steps
-):
-    from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
-    from bioetl.infrastructure.storage.silver.runtime_helpers import (
-        build_silver_writer_runtime_services,
-    )
-    from bioetl.infrastructure.validation.pandera_validator import NoOpValidator
-
-    clock = fixed_test_clock()
-    services = build_silver_writer_runtime_services(
-        SilverWriterRuntimeServicesRequest(
-            logger=noop_logger, clock=clock, silver_validator=NoOpValidator()
-        )
-    )
-    instance = SilverWriter(
-        base_path=tmp_path,
-        logger=noop_logger,
-        runtime_services=services,
-        transform_version=version,
-        transform_steps=steps,
-    )
-    assert instance._transform_version == version
-    assert instance._transform_steps == (steps or ())
-
-
-@pytest.mark.require_silver_validator
-def test_unknown_transform_keyword_is_rejected(tmp_path, noop_logger):
-    from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
-    with pytest.raises(TypeError, match="unexpected keyword argument"):
-        SilverWriter(
-            base_path=tmp_path,
-            logger=noop_logger,
-            runtime_request=SilverWriterRuntimeServicesRequest(
-                clock=fixed_test_clock()
-            ),
-            unexpected=True,
-        )

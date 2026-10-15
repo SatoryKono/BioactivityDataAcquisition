@@ -4,11 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.domain.control_plane.historical_replay_identity import (
-    HistoricalReplayRunIdentityRecord,
-    build_historical_certified_identity_payload_from_record,
-)
-
 CORPUS_MODEL_PUBLIC_NAMES: tuple[str, ...] = (
     "HistoricalReplayBulkCertificationRecord",
     "HistoricalReplayBulkCertificationResult",
@@ -39,9 +34,15 @@ class HistoricalReplaySnapshotCertification:
 
 
 @dataclass(frozen=True, slots=True)
-class HistoricalReplayCertifiabilityRecord(HistoricalReplayRunIdentityRecord):
+class HistoricalReplayCertifiabilityRecord:
     """One deterministic certifiability record for a retained manifest."""
 
+    manifest_id: str
+    run_id: str
+    pipeline_name: str
+    provider: str
+    entity: str
+    execution_context: str
     family: str | None
     certification_scope: str | None
     certification_status: str
@@ -52,20 +53,28 @@ class HistoricalReplayCertifiabilityRecord(HistoricalReplayRunIdentityRecord):
     blocking_reasons: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, object]:
-        return build_historical_certified_identity_payload_from_record(
-            self,
-            family=self.family,
-            certification_scope=self.certification_scope,
-            broader_historical_exact_replay_policy=(
+        return {
+            "manifest_id": self.manifest_id,
+            "run_id": self.run_id,
+            "pipeline_name": self.pipeline_name,
+            "provider": self.provider,
+            "entity": self.entity,
+            "execution_context": self.execution_context,
+            "certification_status": self.certification_status,
+            "replay_occurrence_kind": self.replay_occurrence_kind,
+            "blocking_reasons": list(self.blocking_reasons),
+            "family": self.family,
+            "certification_scope": self.certification_scope,
+            "broader_historical_exact_replay_policy": (
                 self.broader_historical_exact_replay_policy
             ),
-            broader_historical_exact_replay_boundary=(
+            "broader_historical_exact_replay_boundary": (
                 self.broader_historical_exact_replay_boundary
             ),
-            broader_historical_exact_replay_state=(
+            "broader_historical_exact_replay_state": (
                 self.broader_historical_exact_replay_state
             ),
-        )
+        }
 
 
 @dataclass(frozen=True, slots=True)

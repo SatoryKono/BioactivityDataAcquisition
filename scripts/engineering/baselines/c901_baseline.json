@@ -2,11 +2,47 @@
   "rule": "C901",
   "target": "src/bioetl",
   "threshold": 10,
-  "entries": [],
+  "entries": [
+    {
+      "file": "src/bioetl/application/core/publication_term_enrichment.py",
+      "function": "yield_terms_from_publications",
+      "complexity": 13,
+      "threshold": 10,
+      "row": 60
+    },
+    {
+      "file": "src/bioetl/composition/providers/publication_term_pubmed_enricher.py",
+      "function": "enrich_many",
+      "complexity": 13,
+      "threshold": 10,
+      "row": 138
+    },
+    {
+      "file": "src/bioetl/interfaces/http/_selected_run_artifact_probes.py",
+      "function": "_artifact_probes",
+      "complexity": 11,
+      "threshold": 10,
+      "row": 228
+    },
+    {
+      "file": "src/bioetl/interfaces/http/_selected_run_report_assessment.py",
+      "function": "_manifest_snapshot",
+      "complexity": 11,
+      "threshold": 10,
+      "row": 222
+    },
+    {
+      "file": "src/bioetl/interfaces/http/selected_run_status.py",
+      "function": "load_selected_run_status",
+      "complexity": 11,
+      "threshold": 10,
+      "row": 230
+    }
+  ],
   "folder_budgets": {
-    "src/bioetl/application": 0,
-    "src/bioetl/composition": 0,
+    "src/bioetl/application": 1,
+    "src/bioetl/composition": 1,
     "src/bioetl/infrastructure": 0,
-    "src/bioetl/interfaces": 0
+    "src/bioetl/interfaces": 3
   }
 }

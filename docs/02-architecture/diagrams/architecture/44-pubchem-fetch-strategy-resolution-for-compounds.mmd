@@ -1,8 +1,7 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: PubChem Compound Fetch Strategy Resolution
-%% @version 1.1.0
-%% @date    2026-10-09
-%% Reviewed against main 9a7339dc: pubchem/fetch_strategies.py, fetch_flow.py and response_mapper.py
+%% @version 1.0.0
+%% @date    2026-05-12
 %% @type    flowchart
 %% @level   Provider / Component
 %% @nodes   9
@@ -14,7 +13,7 @@ flowchart TB
     query[query_builder.py]
     fetch[fetch_flow.py]
     map[response_mapper.py]
-    entity[BronzeRecord compound dictionary]
+    entity[PubChem compound entity]
     bronze[bronze artifact]
     silver[silver normalization]
 
@@ -25,12 +24,12 @@ flowchart TB
     fetch ==> map
     map ==> entity
     entity ==> bronze
-    bronze ==> silver
+    entity ==> silver
 
     class request ext;
-    class adapter infra;
+    class adapter app;
     class strategy,query,fetch,map infra;
-    class entity infra;
+    class entity domain;
     class bronze bronze;
     class silver silver;
 %% padding line for readability and stable render budget

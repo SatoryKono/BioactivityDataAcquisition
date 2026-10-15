@@ -13,7 +13,7 @@ interactions:
       content-type:
       - application/x-www-form-urlencoded
       cookie:
-      - REDACTED
+      - ncbi_sid=90C6ABF3AC474F51_0000SID
       host:
       - pubchem.ncbi.nlm.nih.gov
       user-agent:
@@ -515,15 +515,16 @@ interactions:
       expires:
       - Tue, 06 Oct 2026 05:11:35 GMT
       ncbi-phid:
-      - REDACTED
+      - 90C6B3BEAC474F710000000000000001.m_1
       ncbi-sid:
-      - REDACTED
+      - 90C6ABF3AC474F51_0000SID
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Apache
       set-cookie:
-      - REDACTED
+      - ncbi_sid=90C6ABF3AC474F51_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 04:11:35 GMT
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:
@@ -556,7 +557,7 @@ interactions:
       content-type:
       - application/x-www-form-urlencoded
       cookie:
-      - REDACTED
+      - ncbi_sid=90C6ABF3AC474F51_0000SID
       host:
       - pubchem.ncbi.nlm.nih.gov
       user-agent:
@@ -752,15 +753,16 @@ interactions:
       expires:
       - Tue, 06 Oct 2026 05:11:35 GMT
       ncbi-phid:
-      - REDACTED
+      - 90C6B7A0AC474F710000000000000001.m_1
       ncbi-sid:
-      - REDACTED
+      - 90C6ABF3AC474F51_0000SID
       referrer-policy:
       - origin-when-cross-origin
       server:
       - Apache
       set-cookie:
-      - REDACTED
+      - ncbi_sid=90C6ABF3AC474F51_0000SID; domain=.nih.gov; path=/; expires=Wed, 06
+        Oct 2027 04:11:35 GMT
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       transfer-encoding:
@@ -793,7 +795,7 @@ interactions:
       content-type:
       - application/x-www-form-urlencoded
       cookie:
-      - REDACTED
+      - ncbi_sid=90C6ABF3AC474F51_0000SID
       host:
       - pubchem.ncbi.nlm.nih.gov
       user-agent:
@@ -815,7 +817,7 @@ interactions:
       content-type:
       - application/x-www-form-urlencoded
       cookie:
-      - REDACTED
+      - ncbi_sid=90C6ABF3AC474F51_0000SID
       host:
       - pubchem.ncbi.nlm.nih.gov
       user-agent:

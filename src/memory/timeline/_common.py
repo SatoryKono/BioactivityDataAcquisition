@@ -13,11 +13,6 @@ from memory.storage import atomic_write_json
 
 DEFAULT_EVENTS_DIR = MEMORY_ROOT / "timeline" / "events"
 TIMELINE_MANIFEST_NAME = "timeline_manifest.json"
-DEFAULT_WORKFLOWS_DIR = Path(".github/workflows")
-DEFAULT_RUNBOOKS_DIR = Path("docs/05-operations/runbooks")
-DEFAULT_RUN_MANIFEST_DIR = Path("data/output/control/run_manifest")
-DEFAULT_RUN_LEDGER_DIR = Path("data/output/control/run_ledger")
-INCIDENT_KEYWORDS = ("incident", "failure")
 
 
 def dedupe_preserve_order(values: list[str]) -> list[str]:
@@ -69,32 +64,12 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def timeline_source_surface_sha256(root: Path) -> str:
-    """Bind the exact file set and bytes read by timeline projections."""
-    sources = [
-        *(root / DEFAULT_WORKFLOWS_DIR).glob("*.y*ml"),
-        *(
-            path
-            for path in (root / DEFAULT_RUNBOOKS_DIR).glob("*.md")
-            if any(keyword in path.stem for keyword in INCIDENT_KEYWORDS)
-        ),
-        *(root / DEFAULT_RUN_MANIFEST_DIR).glob("*.json"),
-        *(root / DEFAULT_RUN_LEDGER_DIR).glob("*.jsonl"),
-    ]
-    inventory = [
-        (path.relative_to(root).as_posix(), _sha256(path)) for path in sorted(sources)
-    ]
-    encoded = json.dumps(inventory, separators=(",", ":"), ensure_ascii=True)
-    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
-
-
 def write_timeline_manifest(root: Path, events_dir: Path) -> Path:
     """Bind generated event projections to their repository version and bytes."""
     event_files = sorted(events_dir.glob("*.jsonl"), key=lambda path: path.name)
     payload = {
-        "schema_version": 2,
-        **capture_rag_git_identity(root, include_untracked=False),
-        "source_surface_sha256": timeline_source_surface_sha256(root),
+        "schema_version": 1,
+        **capture_rag_git_identity(root),
         "files": [
             {
                 "path": path.name,

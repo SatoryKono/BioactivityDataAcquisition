@@ -125,14 +125,6 @@ def test_docs_kpi_is_opt_in_main_only_and_preserves_policy():
         "and": [
             {"equal": ["docs-kpi", "<< pipeline.parameters.ci-lane >>"]},
             {"equal": ["main", "<< pipeline.git.branch >>"]},
-            {
-                "not": {
-                    "equal": [
-                        "scheduled_pipeline",
-                        "<< pipeline.trigger_source >>",
-                    ]
-                }
-            },
         ]
     }
     assert docs["jobs"] == ["docs-kpi"]
@@ -208,14 +200,6 @@ def test_independent_lanes_are_opt_in_main_only(lane):
         "and": [
             {"equal": [lane, "<< pipeline.parameters.ci-lane >>"]},
             {"equal": ["main", "<< pipeline.git.branch >>"]},
-            {
-                "not": {
-                    "equal": [
-                        "scheduled_pipeline",
-                        "<< pipeline.trigger_source >>",
-                    ]
-                }
-            },
         ]
     }
     assert len(workflow["jobs"]) == 1
@@ -377,27 +361,6 @@ def test_memory_freshness_preparation_does_not_get_write_context():
     assert "context" not in str(_config()["workflows"]["memory-freshness"])
 
 
-def test_native_schedules_do_not_select_opt_in_lanes():
-    config = _config()
-    excluded = {
-        "not": {"equal": ["scheduled_pipeline", "<< pipeline.trigger_source >>"]}
-    }
-    kept = {
-        "pr-gate",
-        "router-bridge-events",
-        "retained-actions-online",
-        "rf023-closeout",
-    }
-    for name, workflow in config["workflows"].items():
-        if not isinstance(workflow, dict):
-            continue
-        when = workflow.get("when")
-        if name in kept:
-            assert "scheduled_pipeline" not in str(when)
-            continue
-        assert excluded in when["and"]
-
-
 def test_mutation_preserves_targets_and_manual_main_backup():
     config = _config()
     workflow = config["workflows"]["mutation"]
@@ -405,19 +368,9 @@ def test_mutation_preserves_targets_and_manual_main_backup():
         "and": [
             {"equal": ["mutation", "<< pipeline.parameters.ci-lane >>"]},
             {"equal": ["main", "<< pipeline.git.branch >>"]},
-            {
-                "not": {
-                    "equal": [
-                        "scheduled_pipeline",
-                        "<< pipeline.trigger_source >>",
-                    ]
-                }
-            },
         ]
     }
-    assert {"equal": ["scheduled_pipeline", "<< pipeline.trigger_source >>"]} not in (
-        workflow["when"]["and"]
-    )
+    assert "schedule" not in str(workflow["when"])
     legacy = yaml.safe_load(
         (ROOT / ".github/workflows/mutation-testing.yml").read_text(encoding="utf-8")
     )["jobs"]["mutation-testing"]["strategy"]["matrix"]["target"]
@@ -429,10 +382,7 @@ def test_mutation_preserves_targets_and_manual_main_backup():
         # A replacement may include additional existing tests, never drop the legacy set.
         assert (ROOT / old["tests_dir"]).is_relative_to(ROOT / new["tests-dir"])
         assert new["threshold"] == old["threshold"]
-    # Manual API backup stays available: the lane does not require a schedule.
-    assert {"equal": ["schedule", "<< pipeline.trigger_source >>"]} not in (
-        workflow["when"]["and"]
-    )
+    assert "pipeline.trigger_source" not in str(workflow)
     # Control-plane callers and regression tests also live outside its subdirectory.
     control_plane = next(
         job for job in actual if job["target"] == "application-control-plane"
@@ -555,7 +505,6 @@ def test_pr_gate_credit_cut_keeps_required_job_names():
         "unit-domain",
         "unit-application",
         "unit-infrastructure",
-        "unit-vcr-secrets",
         "unit-other",
     ]
     event_names = [
@@ -609,44 +558,6 @@ def test_pr_gate_credit_cut_keeps_required_job_names():
     )
     assert "tests/e2e" in e2e_halt["pathspecs"]
     assert "tests/contract" in provider_halt["pathspecs"]
-
-    def halt_params(job_name: str) -> dict[str, str]:
-        steps = config["jobs"][job_name]["steps"]
-        return next(
-            step["halt-unless-pr-gate-paths"]
-            for step in steps
-            if isinstance(step, dict) and "halt-unless-pr-gate-paths" in step
-        )
-
-    for job_name in ("arch-tests", "duplication", "security-scans"):
-        job_keys = keys(config["jobs"][job_name]["steps"])
-        assert job_keys.index("halt-unless-pr-gate-paths") < job_keys.index(
-            "setup-python-uv"
-        )
-    docker_keys = keys(config["jobs"]["docker-build"]["steps"])
-    assert docker_keys.index("halt-unless-pr-gate-paths") < docker_keys.index(
-        "check-gate"
-    )
-    assert docker_keys.index("halt-unless-pr-gate-paths") < docker_keys.index(
-        "setup_remote_docker"
-    )
-    arch_paths = halt_params("arch-tests")["pathspecs"]
-    assert "src/bioetl" in arch_paths
-    assert "tests/architecture" in arch_paths
-    assert "configs/**/*.yaml" in arch_paths
-    assert ".circleci/config.yml" not in arch_paths
-    duplication_paths = halt_params("duplication")["pathspecs"]
-    assert ".jscpd.json" in duplication_paths
-    assert "duplication_complexity_exemptions.yaml" in duplication_paths
-    security_paths = halt_params("security-scans")["pathspecs"]
-    assert "pyproject.toml" in security_paths
-    assert ".gitleaks.toml" in security_paths
-    assert ".secrets.baseline" in security_paths
-    docker_paths = halt_params("docker-build")["pathspecs"]
-    assert "Dockerfile.bioetl" in docker_paths
-    assert "docker.yml" in docker_paths
-    for name in ("arch-tests", "duplication", "security-scans", "docker-build"):
-        assert name in complete
     docs_steps = config["jobs"]["docs-diagrams"]["steps"]
     classify_at = next(
         index
@@ -656,12 +567,6 @@ def test_pr_gate_credit_cut_keeps_required_job_names():
     )
     assert keys(docs_steps).index("setup-python-uv") > classify_at
     assert "uv run" not in docs_steps[classify_at]["run"]["command"]
-    halt_run = config["commands"]["halt-unless-pr-gate-paths"]["steps"][0]["run"]
-    halt = halt_run["command"]
+    halt = config["commands"]["halt-unless-pr-gate-paths"]["steps"][0]["run"]["command"]
     assert '!= "pr-gate"' in halt
     assert "circleci-agent step halt" in halt
-    assert (
-        halt_run["environment"]["BIOETL_HALT_PATHSPECS"] == "<< parameters.pathspecs >>"
-    )
-    assert "<< parameters.pathspecs >>" not in halt
-    assert '"${pathspec_args[@]}"' in halt

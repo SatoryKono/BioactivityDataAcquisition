@@ -1,8 +1,7 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% Title: Control Plane Artifact Publication Pipeline
-%% @version 1.1.0
-%% @date    2026-10-09
-%% Reviewed against main 9a7339dc: runtime_builders/run_manifest_builder.py, effective_config_artifact_builder.py; workflow/manifest_service.py; storage/bronze metadata publication
+%% @version 1.0.0
+%% @date    2026-05-12
 %% @type    flowchart
 %% @level   System / Control Plane
 %% @nodes   16
@@ -12,11 +11,11 @@ flowchart TB
     bootstrap[composition.bootstrap.runtime.assembly]
     runner[PipelineRunner]
     bundle[build_postrun_service]
-    write_artifacts[run manifest / effective config builders]
+    write_artifacts[control plane writers]
     manifest[RunManifest]
     ledger[RunLedgerEntry]
     effcfg[EffectiveConfigArtifact]
-    wfmanifest[WorkflowManifestService / WorkflowManifest]
+    wfmanifest[WorkflowManifest]
     metadata[MetadataWriter]
     bronze[Bronze metadata]
     silver[Silver metadata]
@@ -27,21 +26,20 @@ flowchart TB
 
     cli --> bootstrap
     bootstrap --> runner
-    bootstrap --> write_artifacts
-    bootstrap --> bundle
-    bundle -->|injected postrun collaborator| runner
+    runner --> bundle
+    bundle --> write_artifacts
     write_artifacts --> manifest
     write_artifacts --> ledger
     write_artifacts --> effcfg
-    cli -->|workflow launch contract| wfmanifest
-    runner -.->|storage publication / postrun layer metadata| metadata
+    write_artifacts --> wfmanifest
+    runner -.-> metadata
     metadata ==> bronze
     metadata ==> silver
     metadata ==> gold
     metadata --> lineage
-    manifest ==>|via retained corpus / diagnostics services| replay
-    ledger ==>|via retained corpus evidence| replay
-    effcfg -.->|referenced provenance| manifest
+    manifest ==> replay
+    ledger ==> replay
+    effcfg ==> replay
     replay --> inspect
     inspect --> cli
 
@@ -54,4 +52,3 @@ flowchart TB
     class silver silver;
     class gold gold;
     class replay app;
-    %% This is an ownership overview, not one postrun call chain: launch contracts persist before runtime, workflow publication is separate.

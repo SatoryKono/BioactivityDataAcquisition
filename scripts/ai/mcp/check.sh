@@ -192,7 +192,7 @@ deepwiki_out="$(codex mcp get deepwiki 2>&1 || true)"
 ref_out="$(codex mcp get ref 2>&1 || true)"
 
 filesystem_wrapper_source="$(<"$EXPECTED_FILESYSTEM_WRAPPER_PATH")"
-require_contains "$filesystem_wrapper_source" '@modelcontextprotocol/server-filesystem@2026.8.31' "filesystem wrapper pins @2026.8.31" || status=1
+require_contains "$filesystem_wrapper_source" '@modelcontextprotocol/server-filesystem@2026.1.14' "filesystem wrapper pins @2026.1.14" || status=1
 require_contains "$filesystem_wrapper_source" 'REPO_ROOT' "filesystem wrapper scopes to resolved REPO_ROOT" || status=1
 fetch_wrapper_source="$(<"$EXPECTED_FETCH_WRAPPER_PATH")"
 require_contains "$fetch_wrapper_source" 'mcp-server-fetch==2025.4.7' "fetch wrapper pins mcp-server-fetch==2025.4.7" || status=1
