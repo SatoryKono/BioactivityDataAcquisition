@@ -38,7 +38,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 101 |
+| working_report | 119 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -52,28 +52,28 @@
 | Status | Count |
 | --- | --- |
 | Active | 748 |
-| Archived | 1567 |
+| Archived | 1549 |
 | Canonical | 75 |
 | Generated | 1062 |
-| Working | 360 |
+| Working | 378 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
 | active | 748 |
-| archive | 1567 |
+| archive | 1549 |
 | canonical | 75 |
 | generated | 1062 |
-| working | 360 |
+| working | 378 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-migration | 134 |
+| archive-after-migration | 152 |
 | generate-automatically | 1062 |
-| keep | 2616 |
+| keep | 2598 |
 
 ## Cleanup Candidates
 
@@ -127,12 +127,18 @@
 | `reports/observability/remediation/20260817/trust_manifest_validation.json` | Working | 0 | archive-after-migration |
 | `reports/observability/remediation/20260916/grafana-visual-10496-10504.md` | Working | 0 | archive-after-migration |
 | `reports/observability/remediation/20260916/selected-run-status-acceptance.md` | Working | 0 | archive-after-migration |
+| `reports/observability/runtime_cardinality_allowlist_review_5574.json` | Working | 0 | archive-after-migration |
 | `reports/observability/runtime_cardinality_review.json` | Working | 0 | archive-after-migration |
 | `reports/observability/runtime_cardinality_review_pr.json` | Working | 0 | archive-after-migration |
 | `reports/quality/adr-enforcement-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/quality/adr-enforcement-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-quality-scorecard.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-26-15-51.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-07-12-12-34.json` | Working | 0 | archive-after-migration |
+| `reports/quality/branch-coverage-gap-report.json` | Working | 0 | archive-after-migration |
+| `reports/quality/branch-coverage-gap-report.md` | Working | 0 | archive-after-migration |
 | `reports/quality/branch-coverage-gate-evidence.json` | Working | 0 | archive-after-migration |
+| `reports/quality/branch-coverage-tail-owner-map.json` | Working | 0 | archive-after-migration |
 | `reports/quality/cast-any-typing-census.json` | Working | 0 | archive-after-migration |
 | `reports/quality/cast-any-typing-census.md` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/20260805/01-scope-matrix.md` | Working | 0 | archive-after-migration |
@@ -153,12 +159,6 @@
 | `reports/quality/coderabbit/20260925_085141/scope_matrix.json` | Working | 0 | archive-after-migration |
 | `reports/quality/coderabbit/_domain_aggregates_open.json` | Working | 0 | archive-after-migration |
 | `reports/quality/codex-local-state-audit.json` | Working | 0 | archive-after-migration |
-| `reports/quality/codex-profile-benchmark.json` | Working | 0 | archive-after-migration |
-| `reports/quality/compatibility-importer-census.json` | Working | 0 | archive-after-migration |
-| `reports/quality/config-compatibility-legacy-taxonomy-review.json` | Working | 0 | archive-after-migration |
-| `reports/quality/config-surface-backlog.json` | Working | 0 | archive-after-migration |
-| `reports/quality/contract-coverage-matrix.json` | Working | 0 | archive-after-migration |
-| `reports/quality/contract-coverage-matrix.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 

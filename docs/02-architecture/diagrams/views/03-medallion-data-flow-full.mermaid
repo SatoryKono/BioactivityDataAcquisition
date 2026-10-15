@@ -26,8 +26,8 @@ graph LR
 
     subgraph Ingestion["Data Ingestion"]
         DS["DataSourcePort<br/>fetch() / fetch_filtered()"]:::size-sm
-        RL["RateLimiter<br/>(TokenBucket)"]:::size-sm
-        CB["CircuitBreaker<br/>"]:::size-sm
+        RL["RateLimiter<br/>(TokenBucketRateLimiter)"]:::size-sm
+        CB["CircuitBreakerGuard<br/>"]:::size-sm
         RETRY["Retry Logic<br/>"]:::size-sm
     end
 
