@@ -5,8 +5,13 @@
 
 ## Summary
 
+<<<<<<< HEAD
 - Scanned modules: `2569`
-- Internal import edges (raw): `8274`
+- Internal import edges (raw): `8273`
+=======
+- Scanned modules: `2554`
+- Internal import edges (raw): `8189`
+>>>>>>> 7487dd5be (chore: refactor http client retry context)
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `330`
@@ -21,8 +26,9 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
+<<<<<<< HEAD
     application -->|1629 OK| application
-    application -->|1103 OK| domain
+    application -->|1102 OK| domain
     composition -->|230 OK| application
     composition -->|649 OK| composition
     composition -->|316 OK| domain
@@ -30,6 +36,17 @@ flowchart LR
     domain -->|1306 OK| domain
     infrastructure -->|802 OK| domain
     infrastructure -->|1271 OK| infrastructure
+=======
+    application -->|1614 OK| application
+    application -->|1083 OK| domain
+    composition -->|228 OK| application
+    composition -->|647 OK| composition
+    composition -->|310 OK| domain
+    composition -->|293 OK| infrastructure
+    domain -->|1298 OK| domain
+    infrastructure -->|787 OK| domain
+    infrastructure -->|1258 OK| infrastructure
+>>>>>>> 7487dd5be (chore: refactor http client retry context)
     interfaces -->|72 OK| application
     interfaces -->|61 OK| composition
     interfaces -->|85 OK| domain
@@ -40,8 +57,9 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
+<<<<<<< HEAD
 | `application`    | `application`    |    1629 | allowed |
-| `application`    | `domain`         |    1103 | allowed |
+| `application`    | `domain`         |    1102 | allowed |
 | `composition`    | `application`    |     230 | allowed |
 | `composition`    | `composition`    |     649 | allowed |
 | `composition`    | `domain`         |     316 | allowed |
@@ -49,6 +67,17 @@ flowchart LR
 | `domain`         | `domain`         |    1306 | allowed |
 | `infrastructure` | `domain`         |     802 | allowed |
 | `infrastructure` | `infrastructure` |    1271 | allowed |
+=======
+| `application`    | `application`    |    1614 | allowed |
+| `application`    | `domain`         |    1083 | allowed |
+| `composition`    | `application`    |     228 | allowed |
+| `composition`    | `composition`    |     647 | allowed |
+| `composition`    | `domain`         |     310 | allowed |
+| `composition`    | `infrastructure` |     293 | allowed |
+| `domain`         | `domain`         |    1298 | allowed |
+| `infrastructure` | `domain`         |     787 | allowed |
+| `infrastructure` | `infrastructure` |    1258 | allowed |
+>>>>>>> 7487dd5be (chore: refactor http client retry context)
 | `interfaces`     | `application`    |      72 | allowed |
 | `interfaces`     | `composition`    |      61 | allowed |
 | `interfaces`     | `domain`         |      85 | allowed |
@@ -94,14 +123,21 @@ flowchart LR
 | `composition.factories`        | `domain.schemas`                           |      22 |
 | `interfaces.http`              | `domain.control_plane`                     |      22 |
 | `application.services`         | `domain.normalization`                     |      21 |
+<<<<<<< HEAD
 | `composition.factories`        | `application.services`                     |      21 |
 | `composition.factories`        | `domain.types`                             |      21 |
 | `interfaces.cli`               | `composition.control_plane_service_access` |      21 |
 | `application.core`             | `domain.normalization`                     |      20 |
+=======
+| `composition.runtime_builders` | `infrastructure.config`                    |      21 |
+| `interfaces.cli`               | `composition.control_plane_service_access` |      21 |
+| `application.core`             | `domain.normalization`                     |      20 |
+| `application.services`         | `domain.exceptions`                        |      20 |
+>>>>>>> 7487dd5be (chore: refactor http client retry context)
 | `composition.bootstrap`        | `infrastructure.config`                    |      20 |
 | `composition.factories`        | `infrastructure.storage`                   |      20 |
 | `composition.runtime_builders` | `infrastructure.config`                    |      20 |
-| `application.core`             | `domain.exceptions`                        |      18 |
+| `application.core`             | `domain.exceptions`                        |      17 |
 | `application.observability`    | `domain.control_plane`                     |      17 |
 | `application.pipelines`        | `domain.value_objects`                     |      17 |
 | `application.services`         | `domain.lineage`                           |      17 |

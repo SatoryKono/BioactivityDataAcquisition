@@ -196,7 +196,6 @@ class PubMedPublicationTermEnrichmentService:
     async def enrich_many(
         self, records: Sequence[BronzeRecord]
     ) -> Sequence[BronzeRecord]:
-        """Enrich publication records with PubMed payloads, propagating fetch failures."""
         pmids = _unique_pmids(records)
         if not pmids:
             return list(records)
@@ -213,7 +212,7 @@ class PubMedPublicationTermEnrichmentService:
                 ),
                 pmid_count=len(pmids),
             )
-            raise
+            return list(records)
         return _attach_pubmed_terms(records, pubmed_by_pmid)
 
 

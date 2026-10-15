@@ -250,7 +250,11 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "07c2232c5715f2813a5dec4f728868f6e57c45d67f9758360a4194bc535a2663"
+<<<<<<< HEAD
+      "source_fingerprint": "37b07b045d5319388bff161df69fc0ac376ead96358de95cd9077d798fea9404"
+=======
+      "source_fingerprint": "044976dbef2de96564328575e8974428ae80d6d24786011236794a6389ae5101"
+>>>>>>> 7487dd5be (chore: refactor http client retry context)
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -269,7 +273,11 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "14cfa5e0bb6e296b38f6ebe64d3cdadd814517c68f1de32f5da8b2dbba710c5c",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "2aea3e36e42ab6ad62bf877e9e05a7214485d92de32410c390ee2593cd6fc6fc"
+<<<<<<< HEAD
+      "source_tree_sha256": "f1fb4bffcda6b60cfde329607733bbb2c01346ca03e89c5d43d704ea10159a51"
+=======
+      "source_tree_sha256": "6b1612b79ab395fad0499b5bd456fe876c7626266094819dc95edc5b47fd83cd"
+>>>>>>> 7487dd5be (chore: refactor http client retry context)
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

@@ -463,9 +463,15 @@ hotspot_family_ratchets:
       files: 203
       total_loc: 25113
       files_ge_250_loc: 0
+<<<<<<< HEAD
       helper_function_ratio: 0.379
       max_internal_fan_in: 5
       max_internal_fan_in_module: bioetl.application.core.record_processor_config
+=======
+      helper_function_ratio: 0.381
+      max_internal_fan_in: 6
+      max_internal_fan_in_module: bioetl.application.core.batch_processing_contracts
+>>>>>>> 7487dd5be (chore: refactor http client retry context)
     trend:
       status: reduced_2026-08-27_debt_cycle_fanin_ratchet
       next_action: '2026-08-27 audit-cycle-tech-debt: ratchet application_core max_internal_fan_in budget
@@ -489,7 +495,11 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 49
+<<<<<<< HEAD
       total_loc: 6450
+=======
+      total_loc: 6440
+>>>>>>> 7487dd5be (chore: refactor http client retry context)
       files_ge_250_loc: 0
       helper_function_ratio: 0.284
       max_internal_fan_in: 2
