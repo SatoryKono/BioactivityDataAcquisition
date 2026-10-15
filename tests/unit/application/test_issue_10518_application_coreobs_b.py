@@ -10,9 +10,9 @@ record_processor_config, control_plane_integrity_metrics, replay_write_risk.
 from __future__ import annotations
 
 import sys
-from uuid import UUID
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
+from uuid import UUID
 
 import pytest
 
@@ -250,6 +250,46 @@ def test_entity_to_silver_record_applies_rename_map():
     owner._normalize_lineage_value = staticmethod(lambda f, v: v)
     record = owner.entity_to_silver_record(_Entity())
     assert record == {"new_name": "v"}
+
+
+def test_entity_to_silver_record_keeps_etl_prefix_order():
+    @dataclasses.dataclass
+    class _Entity:
+        entity_id: str = "e"
+        content_hash: str = "h"
+        run_id: str = "r"
+        run_type: str = "incremental"
+        ingestion_ts: str = "2024-01-15T10:30:00+00:00"
+        _index: int = 0
+        source_batch_id: str | None = None
+        _dq_warn: bool = False
+        _dq_error: bool = False
+        target_id: str = "CHEMBL1"
+
+    owner = _owner(
+        _contract_policy=SimpleNamespace(
+            rename_map={
+                "run_id": "_run_id",
+                "run_type": "_run_type",
+                "source_batch_id": "_source_batch_id",
+                "ingestion_ts": "_ingestion_ts",
+            }
+        ),
+    )
+    owner._normalize_lineage_value = staticmethod(lambda _field, value: value)
+    record = owner.entity_to_silver_record(_Entity())
+    assert list(record) == [
+        "entity_id",
+        "content_hash",
+        "_run_id",
+        "_run_type",
+        "_source_batch_id",
+        "_ingestion_ts",
+        "_index",
+        "_dq_warn",
+        "_dq_error",
+        "target_id",
+    ]
 
 
 def test_apply_hash_policy_explicit_identity_returns_copy():
