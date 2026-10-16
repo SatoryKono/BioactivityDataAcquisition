@@ -120,9 +120,7 @@ class GroupMemberRecovery(GroupRecordStore):
             progress.phase = f"{key}_stage"
             self._stage_member(date_fd, stage_fd, body, key, relative, chain, hook)
         if not _exists(stage_fd, key):
-            self._account_absent_staged(
-                date_fd, journal_fd, operation_id, body, key, progress
-            )
+            self._account_absent_staged(date_fd, journal_fd, operation_id, body, key)
             return
         # A previous call may have renamed this member but failed to fsync.
         # Do not attest that visible move as durable without acknowledging it.
@@ -148,16 +146,18 @@ class GroupMemberRecovery(GroupRecordStore):
         operation_id: str,
         body: dict[str, Any],  # Any: validated JSON.
         key: str,
-        progress: GroupRecoveryResult,
     ) -> None:
-        """Count uncertain prior unlinks once; never re-count journaled removals."""
+        """Journal an already-absent staged member without charging this call.
+
+        A prior unlink whose stage fsync did not finish is not a durable
+        removal of this call. Completion still confirms the directory before
+        the receipt is retired. Members already listed in removed[] stay put.
+        """
         removed = body.setdefault("removed", [])
         if key in removed:
             return
         if key not in body["staged"] or _exists(date_fd, body["names"][key]):
             return
-        progress.removed += 1
-        progress.removed_bytes += body["members"][key]["size"]
         body["schema"] = _SCHEMA_VERSION
         body["removed"] = [member for member in _ORDER if member in (*removed, key)]
         self._replace_record(journal_fd, operation_id, body)
