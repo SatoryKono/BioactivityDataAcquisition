@@ -1,10 +1,10 @@
 ______________________________________________________________________
 
-Version: 1.0.1
+Version: 1.0.2
 Status: active
 Class: published
 Owner: BioETL Team
-Last verified: '2026-10-06'
+Last verified: '2026-10-16'
 
 ______________________________________________________________________
 
@@ -22,11 +22,40 @@ Pull-request coordination runs in GitHub Actions (`deployment.provider=github_ac
 <!-- policy-anchor:ruleset-enforcement-mode -->
 Rulesets `13643213` and `15730586`, the ones that include `refs/heads/main`, are `enforcement: disabled` on the 2026-10-16 read-only GET. <!-- policy-anchor:stored-ruleset-contexts --> They still store `ci/circleci: pr-gate-complete` (the companion also stores `ci/circleci: root-hygiene`). A stored context is not active CircleCI protection and is not configured GitHub Actions enforcement. <!-- policy-anchor:target-gha-context --> The target job name `pr-gate-complete` is not the context stored on those rulesets. <!-- policy-anchor:enforcement-verified-date --> Catalog `enforcement_verified_date` `2026-10-09` is not proof of active merge protection. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge, because classic branch protection is absent and those rulesets are disabled. An offline catalog match does not confirm live server rulesets. CodeQL is excluded from required checks by the owner decision in #11929.
 
-## Major lanes
+## Current pull-request coordinator
 
-| Lane | CircleCI jobs or typed ci-lane | Purpose |
+`.github/workflows/pr-required.yml` is the runnable pull-request coordinator.
+These four jobs are GitHub Actions jobs. They are not CircleCI jobs and not
+typed `ci-lane` names.
+
+| Job id | Job name | Role in the current coordinator |
 | --- | --- | --- |
-| Required PR gate | `classify`, `test-fast`, `test-integration`, `pr-gate-complete` | Catalog-driven checks and aggregate result |
+| `classify-changes` | Classify changes (decision matrix) | Marks each catalog gate `required` or `not_applicable` |
+| `fast-governance` | Fast governance | Root hygiene, commit lint, documentation checks, required-check prose consistency, zizmor, dependency review |
+| `class-lane` | Class lane | Selected steps for `lint-arch`, `tests`, `type-checking`, `security`, `docker`, `generated-artifacts`, and `duplication` |
+| `pr-gate-complete` | pr-gate-complete | Fail-closed aggregate of `classify-changes`, `fast-governance`, and `class-lane` |
+
+`class-lane` is created only when at least one of `lint-arch`, `tests`,
+`type-checking`, `security`, `docker`, `generated-artifacts`, or `duplication`
+is `required`. `fast-governance` and `pr-gate-complete` still run. A skipped
+`class-lane` is not a CircleCI `test-fast` or `test-integration` job.
+
+## Acceptance
+
+Record the pull-request head SHA and the GitHub Actions run of workflow
+`PR Gate Complete`. Jobs on `pull_request` check out the synthetic merge ref
+`refs/pull/<number>/merge`; that checkout SHA is not the API head SHA. Accept
+the run only from the conclusions of the four jobs above. A successful
+`pr-gate-complete` does not by itself block merge. The README CI badge links
+to a pipeline list and is not this gate.
+
+## Historical CircleCI lane names
+
+The names below are retained CircleCI jobs and typed `ci-lane` values from
+`.circleci/config.yml`. They are not the current coordinator jobs.
+
+| Lane | Historical CircleCI job or typed ci-lane | Purpose |
+| --- | --- | --- |
 | Architecture | `lint-arch`, `arch-tests`, `architecture-docs` | Layering, debt and generated documentation |
 | Docs | `docs-governance`, `docs-kpi`, `skills-consistency` | Documentation and runtime mirror validation |
 | Contracts | `dq-consistency`, `schema-governance`, `semantic-governance`, `port-contracts`, `provider-contract-drift` | Data and adapter contracts |
@@ -34,10 +63,11 @@ Rulesets `13643213` and `15730586`, the ones that include `refs/heads/main`, are
 | Docker | `docker-baseline`, `docker-publish` | Build and full baseline before separate publication approval |
 | Release preparation | `release-validation` | Prepared wheel/sdist, install, tests, security and SPDX; remote acceptance and protected promotion pending |
 
-Scheduled and manual lanes use typed pipeline parameters on main. The workflow
-map records actual run IDs, schedule registration, input acceptance, disabled
-surfaces and unresolved parity. Do not treat a configured lane as accepted until
-its required artifacts and terminal result have been verified.
+Scheduled and manual lanes in that config use typed pipeline parameters on
+main. The workflow map records actual run IDs, schedule registration, input
+acceptance, disabled surfaces and unresolved parity. Do not treat a configured
+historical lane as accepted until its required artifacts and terminal result
+have been verified.
 
 ## Quality gates contributors hit most
 
@@ -58,11 +88,12 @@ python -m scripts.docs check-links
 
 ## Badges and source identity
 
-The README CI badge links to the main pipeline list; it identifies the provider,
-not the result of a specific gate. The coverage badge states the 85% policy.
-Use the exact source SHA, required GitHub statuses and linked CircleCI run for
-acceptance. A project-wide badge can reflect a maintenance workflow and must not
-be used as proof that the required PR gate passed.
+The README CI badge links to the main pipeline list; it identifies a provider
+view, not the result of `.github/workflows/pr-required.yml`. The coverage badge
+states the 85% policy. Use the head SHA and the four coordinator job
+conclusions recorded under Acceptance. A project-wide badge can reflect a
+maintenance workflow and must not be used as proof that the required PR gate
+passed.
 
 ## Artifacts
 
@@ -72,14 +103,20 @@ be used as proof that the required PR gate passed.
 
 ## Secrets
 
-- Use restricted CircleCI contexts; never commit tokens.
+- The current coordinator grants `contents: read`. Fast governance also grants
+  `security-events: write`. Never commit tokens.
+- `.env` files are machine-local and require explicit approval to edit.
+
+### Historical CircleCI contexts
+
+- Restricted CircleCI contexts belong to the retained `.circleci/config.yml`,
+  not to `.github/workflows/pr-required.yml`.
 - `bioetl-github-read-only` is restricted to the project and trusted main jobs.
 - `bioetl-ghcr-publish` and `bioetl-security-events-write` separate registry and
   SARIF permissions. Their credential population and successful publication
   acceptance remain pending in #11931.
 - Publication follows successful same-source gates and a separate approval.
   Failed, canceled, missing or stale evidence must block publication.
-- `.env` files are machine-local and require explicit approval to edit
 
 ## Related
 
