@@ -8,7 +8,6 @@ import yaml
 sys.path.insert(0, str(Path("scripts/engineering/ci").resolve()))
 from check_reusable_workflow_pins import check_pins
 
-
 pytestmark = pytest.mark.unit
 
 
