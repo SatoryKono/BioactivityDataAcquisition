@@ -47,7 +47,7 @@
     "reports/quality/*ownership*.json": 2,
     "reports/quality/*ownership*.md": 1,
     "reports/quality/*registry*.json": 3,
-    "tests/fixtures/contracts/**/*.json": 7,
+    "tests/fixtures/contracts/**/*.json": 8,
     "tests/fixtures/contracts/**/*.yaml": 1,
     "tests/fixtures/golden/**/*.json": 30
   },
@@ -56,12 +56,12 @@
   "schema_version": 1,
   "scope_file_counts": {
     "config": 203,
-    "contract": 50,
+    "contract": 51,
     "golden": 27,
     "quality_report": 8,
     "registry": 26
   },
-  "total_files": 314,
+  "total_files": 315,
   "tracked_extensions": [
     ".csv",
     ".json",
