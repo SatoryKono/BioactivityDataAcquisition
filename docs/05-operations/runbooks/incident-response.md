@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P1
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-03-30'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -66,7 +66,7 @@ ______________________________________________________________________
 
 ### 2. Rate Limit Exhausted (`429 Too Many Requests`)
 
-- **Symptom**: Spike in `errors-total{type="recoverable"}` metric. Pipeline slows down effectively to a halt.
+- **Symptom**: Spike in `bioetl_errors_total{error_code="recoverable"}` metric. Pipeline slows down effectively to a halt.
 - **Severity**: P2.
 - **Diagnosis**: The configured `requests-per-second` exceeds the provider's current allowance.
 - **Action**:

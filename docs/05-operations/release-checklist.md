@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 2.0.1
+Version: 2.1.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-10-06'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -41,7 +41,7 @@ publish checkpoint. See the [migration workflow map](ci-workflow-map.md).
 |---|---|---|---|---|
 | Architecture boundaries and import policy | Architecture Owner | PR diff + architecture test output | CircleCI `arch-tests`, `lint-arch`; RULES §1.4/§4.4 | **PASS** if architecture + import-linter jobs green and no new boundary violations. **FAIL** otherwise. |
 | Runtime compatibility (Codex/Junie mirrors and runtime guardrails) | Runtime Owner | Runtime-surface diff (`.codex/**`, `.junie/**`, `.devin/**`, `docs/00-project/ai/**`) | `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` | **PASS** if runtime-source updates are synced to mirrors when required and mirror drift is documented. **FAIL** if unsynced runtime behavior exists. |
-| Data quality policy readiness (DQ thresholds/hash/medallion) | Data Quality Owner | DQ configs/tests + policy evidence | CircleCI `dq-consistency`, `schema-governance`, `semantic-governance`; RULES §2.4/§2.8 | **PASS** if DQ checks green and the release scope validates the active threshold surface explicitly (`configs/base/quality.yaml` currently hard-fail 25%; contract/runtime fallbacks currently hard-fail 20%). **FAIL** on any blocking DQ gate. |
+| Data quality policy readiness (DQ thresholds/hash/medallion) | Data Quality Owner | DQ configs/tests + policy evidence | CircleCI `dq-consistency`, `schema-governance`, `semantic-governance`; RULES §2.4/§2.8 | **PASS** if DQ checks green and the release scope validates the active threshold surface explicitly (`configs/base/quality.yaml` currently hard-fail 0.50; contract/runtime fallbacks currently hard-fail 20%). **FAIL** on any blocking DQ gate. |
 | Documentation governance readiness | Docs Owner | Updated docs set + links matrix | CircleCI `docs-governance`, `skills-consistency`; RULES §6 | **PASS** if docs governance jobs green and changed contracts/behavior are documented. **FAIL** if docs gate fails or contract docs missing. |
 | Type/lint/test baseline | QA Owner | CI run for branch head | CircleCI `test-fast`, `test-integration`, `mypy`, `lint-ruff` | **PASS** if required CI checks are green on release candidate SHA. **FAIL** otherwise. |
 | Security & secret hygiene | Security Owner | Security scan outputs + VCR sanitization report | CircleCI `security-scans`, `compiled-artifacts` | **PASS** if no blocking HIGH/CRITICAL findings for release policy and no secret leaks. **FAIL** otherwise. |

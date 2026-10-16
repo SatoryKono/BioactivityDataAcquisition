@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-07'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -129,6 +129,6 @@ Minimum revalidation:
    `src/bioetl/infrastructure/schemas/workflow_config.py`;
 2. confirm step semantics still align with
    `src/bioetl/domain/workflow/dag.py` and
-   `src/bioetl/application/services/workflow_runner_service.py`;
+   `src/bioetl/application/services/workflow/workflow_runner_service.py`;
 3. confirm lifecycle wording remains aligned with
    [Workflow State Machine](domain/workflow-state-machine.md).

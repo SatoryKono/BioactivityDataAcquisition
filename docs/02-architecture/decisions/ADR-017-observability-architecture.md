@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.1.0
+Version: 1.2.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-12'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -291,7 +291,7 @@ src/bioetl/composition/bootstrap/runtime/
     metrics_bootstrap.py
     tracing_bootstrap.py
     observability_bundle.py
-src/bioetl/composition/observability_api.py
+src/bioetl/composition/factories/observability_api.py
 ```
 
 ### Dependency Injection

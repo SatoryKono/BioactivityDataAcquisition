@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-19'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -62,9 +62,9 @@ runbooks.
 
 | Symbol family | Representative symbols | Source |
 | --- | --- | --- |
-| Run manifest | `RunManifest`, `RunManifestArtifact`, `RunManifestSourceSnapshot` | `src/bioetl/domain/control_plane/run_manifest.py` |
-| Run ledger | `RunLedger`, `RunLedgerEntry`, `RunLedgerReplayPolicy`, `StageCompletionUpdate` | `src/bioetl/domain/control_plane/run_ledger.py`, `_run_ledger_runtime.py`, `_run_ledger_replay_policy.py` |
-| Workflow control plane | `WorkflowManifest`, `WorkflowLedger`, `WorkflowExecutionState`, `WorkflowStepState` | `src/bioetl/domain/control_plane/workflow_manifest.py`, `workflow_ledger.py`, `workflow_execution_state.py` |
+| Run manifest | `RunManifest`, `RunArtifactRef`, `RunInputSnapshotRef` | `src/bioetl/domain/control_plane/run_manifest.py` |
+| Run ledger | `RunLedgerEntry`, `StageCompletionUpdate`, `STAGE_COMPLETION_UPDATES` (module `run_ledger.py` re-exports the runtime facade) | `src/bioetl/domain/control_plane/run_ledger.py`, `_run_ledger_runtime.py`, `_run_ledger_replay_policy.py` |
+| Workflow control plane | `WorkflowManifest`, `WorkflowLedgerEntry`, `WorkflowExecutionState`, `WorkflowStepState` | `src/bioetl/domain/control_plane/workflow_manifest.py`, `workflow_ledger.py`, `workflow_execution_state.py` |
 | Effective config | `EffectiveConfigArtifact`, `ConfigSourceRef`, `ConfigSourceHashes`, `SourceClassProvenance` | `src/bioetl/domain/control_plane/effective_config_artifact.py`, `config_source_hashing.py` |
 | Contract registry | `ContractRegistry`, `ContractRegistryEntry`, `RegistryValidationResult`, `RegistryValidationIssue` | `src/bioetl/domain/control_plane/contract_registry*.py` |
 | Reproducibility | `ReproducibilityPolicy`, `ReproducibilityFamilyProfile`, `ReplayReadinessVerdict` | `src/bioetl/domain/control_plane/reproducibility*.py`, `_reproducibility_*.py` |
@@ -74,11 +74,11 @@ runbooks.
 
 - `RunManifest` is immutable provenance and must not be reused as mutable run
   status.
-- `RunLedger` is append-only history and inspection evidence; it is not the
-  mutable resume owner.
+- The run ledger (`RunLedgerEntry` items in `run_ledger.py`) is append-only
+  history and inspection evidence; it is not the mutable resume owner.
 - `WorkflowManifest` is immutable workflow intent.
-- `WorkflowLedger` is append-only workflow history and operator-intent
-  evidence.
+- The workflow ledger (`WorkflowLedgerEntry` items in `workflow_ledger.py`)
+  is append-only workflow history and operator-intent evidence.
 - `WorkflowExecutionState` is the mutable owner for workflow status, repair
   state, and ambiguity.
 - Contract-registry and reproducibility surfaces are domain-owned semantic

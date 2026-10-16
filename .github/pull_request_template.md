@@ -60,6 +60,9 @@ Keep twin / transition / expired compatibility metrics at zero:
 - [ ] No hardcoded secrets (AP-005)
 - [ ] Type annotations on all public functions (TYPE-001)
 - [ ] Tests added/updated for new code (TEST-002)
+- [ ] If docs changed: `Last verified` updated where claims were re-verified,
+      and generated surfaces regenerated (`generate-cleanup-inventory --update`
+      plus family regen commands) with `--check` clean
 - [ ] If `checks-complete` fails, I first triage `lint` → `c901-governance` →
       `arch-tests` and do not debug `checks-complete` separately
 

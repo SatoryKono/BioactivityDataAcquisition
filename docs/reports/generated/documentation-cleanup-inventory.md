@@ -10,7 +10,7 @@
 | Doc-like files | 3812 |
 | Tracked doc-like files | 3812 |
 | Ignored local docs/reports files | 0 |
-| Duplicate groups | 7 |
+| Duplicate groups | 78 |
 | Generated without route or exception | 0 |
 | Generated routes | 73 |
 
@@ -25,7 +25,6 @@
 | Lifecycle | Count |
 | --- | --- |
 | active_backlog | 1 |
-| active_draft | 278 |
 | active_quality_baseline | 61 |
 | closeout_evidence | 165 |
 | docs_reports_curated_entrypoint | 2 |
@@ -34,54 +33,47 @@
 | docs_reports_retention_sensitive_evidence | 22 |
 | generated_skill_reference_mirror | 19 |
 | generated_test_run_evidence | 6 |
-| guide | 4 |
+| guide | 2 |
 | index | 4 |
-| issue_pack | 60 |
-| live_issue_mirror | 8 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 26 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 1037 |
+| working_report | 122 |
 
 ## GitHub Issue Drafts And Packs
 
 | Lifecycle | Count |
 | --- | --- |
-| active_draft | 278 |
-| guide | 4 |
+| guide | 2 |
 | index | 4 |
-| issue_pack | 60 |
-| live_issue_mirror | 8 |
 
 ## Status Counts
 
 | Status | Count |
 | --- | --- |
-| Active | 750 |
-| Archived | 283 |
+| Active | 748 |
+| Archived | 1546 |
 | Canonical | 75 |
 | Generated | 1062 |
-| Working | 1642 |
+| Working | 381 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 750 |
-| archive | 283 |
+| active | 748 |
+| archive | 1546 |
 | canonical | 75 |
 | generated | 1062 |
-| working | 1642 |
+| working | 381 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-github-state-check | 338 |
-| archive-after-migration | 1070 |
+| archive-after-migration | 155 |
 | generate-automatically | 1062 |
-| keep | 1334 |
-| reconcile-with-github-state | 8 |
+| keep | 2595 |
 
 ## Cleanup Candidates
 
@@ -128,45 +120,45 @@
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/runtime-receipt.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis-acceptance/screenshots.json` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/assets/2026-09-23-vis/screenshots.json` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-01/issue-01-1.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-01/issue-01-2.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-01/issue-01-3.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-01/issue-01-4.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-02/issue-02-1.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-02/issue-02-2.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-02/issue-02-3.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-02/issue-02-4.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-03/issue-03-1.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-03/issue-03-2.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-03/issue-03-3.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-03/issue-03-4.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-04/issue-04-1.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-04/issue-04-2.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-04/issue-04-3.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-04/issue-04-4.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-05/issue-05-1.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-05/issue-05-2.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-05/issue-05-3.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-05/issue-05-4.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-06/issue-06-1.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-06/issue-06-2.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-06/issue-06-3.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-06/issue-06-4.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-07/issue-07-1.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-07/issue-07-2.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-07/issue-07-3.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-07/issue-07-4.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-08/issue-08-1.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-08/issue-08-2.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-08/issue-08-3.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-08/issue-08-4.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-09/issue-09-1.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-09/issue-09-2.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-09/issue-09-3.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-09/issue-09-4.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-10/issue-10-1.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-10/issue-10-2.md` | Working | 0 | archive-after-migration |
-| `reports/dashboards/thirty-cycles/cycle-10/issue-10-3.md` | Working | 0 | archive-after-migration |
+| `reports/docs-evidence/README.md` | Working | 2 | archive-after-migration |
+| `reports/observability/grafana/security-ui-final-20261003/bioetl-scenes-app-gates.json` | Working | 0 | archive-after-migration |
+| `reports/observability/grafana/security-ui-final-20261003/bioetl-selectorshell-panel-gates.json` | Working | 0 | archive-after-migration |
+| `reports/observability/grafana/selector-audit-2026-07-20/selector-evidence.json` | Working | 0 | archive-after-migration |
+| `reports/observability/remediation/20260817/trust_manifest_validation.json` | Working | 0 | archive-after-migration |
+| `reports/observability/remediation/20260916/grafana-visual-10496-10504.md` | Working | 0 | archive-after-migration |
+| `reports/observability/remediation/20260916/selected-run-status-acceptance.md` | Working | 0 | archive-after-migration |
+| `reports/observability/runtime_cardinality_allowlist_review_5574.json` | Working | 0 | archive-after-migration |
+| `reports/observability/runtime_cardinality_review.json` | Working | 0 | archive-after-migration |
+| `reports/observability/runtime_cardinality_review_pr.json` | Working | 0 | archive-after-migration |
+| `reports/quality/adr-enforcement-matrix.json` | Working | 0 | archive-after-migration |
+| `reports/quality/adr-enforcement-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture-quality-scorecard.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-06-26-15-51.json` | Working | 0 | archive-after-migration |
+| `reports/quality/architecture_debt_execution_plan_2026-07-12-12-34.json` | Working | 0 | archive-after-migration |
+| `reports/quality/branch-coverage-gap-report.json` | Working | 0 | archive-after-migration |
+| `reports/quality/branch-coverage-gap-report.md` | Working | 0 | archive-after-migration |
+| `reports/quality/branch-coverage-gate-evidence.json` | Working | 0 | archive-after-migration |
+| `reports/quality/branch-coverage-tail-owner-map.json` | Working | 0 | archive-after-migration |
+| `reports/quality/cast-any-typing-census.json` | Working | 0 | archive-after-migration |
+| `reports/quality/cast-any-typing-census.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260805/01-scope-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/01-scope-matrix.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260806-full/01-scope-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260811/01-scope-matrix.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260811/01-scope-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260811/_S01-domain-aggregates.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260811/_S01-domain-registry.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260813/01-scope-matrix.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260813/01-scope-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260813/_S01-domain-aggregates.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260813/_S01-domain-registry.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260816/01-scope-matrix.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260816/01-scope-matrix.md` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260816/_S01-domain-aggregates.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260816/_S01-domain-registry.txt` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/20260925_085141/scope_matrix.json` | Working | 0 | archive-after-migration |
+| `reports/quality/coderabbit/_domain_aggregates_open.json` | Working | 0 | archive-after-migration |
+| `reports/quality/codex-local-state-audit.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -257,46 +249,12 @@
 
 | Path | Lifecycle | Issue | Action |
 | --- | --- | --- | --- |
-| `.github/ISSUES/ADR-HYGIENE-4746-Archive-ADR-003-ADR-008.md` | live_issue_mirror | 4746 | reconcile-with-github-state |
-| `.github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/AI-RUNTIME-AUDIT-001-Make-AI-Skill-Mirror-CI-Truthful-And-Enforce-Devin-Parity.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/AI-RUNTIME-AUDIT-002-Eliminate-Tracked-Devin-MCP-Workstation-Paths.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/ARCH-CONT-2026-07-28-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/ARCH-CR-2026-07-28-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/ARCH-CR2-2026-07-29-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/ARCH-QA-2026-07-27-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/ARCH-REF-2026-07-28-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/ARCH-RES-2026-07-27-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/ARCH-VG-2026-08-25-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/ARCHITECTURE-FACADE-4745-Enforce-No-Growth-Bioetl-Infrastructure-Config-Seam.md` | live_issue_mirror | 4745 | reconcile-with-github-state |
-| `.github/ISSUES/ARCHITECTURE_AUDIT_2025-01-30_aggregate_invariants.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/ARCHITECTURE_AUDIT_2025-01-30_batch_fsm_tests.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/ARCHITECTURE_AUDIT_2025-01-30_scripts_governance.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/AUD-RF-2026-08-16-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-001-Align-Publication-Term-Derived-Contract.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-002-Rename-ChEMBL-Taxonomy-DQ-Fields-To-Taxonomy-Id.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-003-Align-Tissue-Ontology-DQ-Patterns-With-Canonical-Ids.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-004-Add-Profile-Owned-Assay-Parameters-Controlled-Field-Normalization.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-005-Normalize-Molecule-Type-Through-ChEMBL-Profile.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-006-Enforce-One-Canonical-ChEMBL-Activity-Unit-Spelling.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-007-Align-Activity-Standard-Type-With-ChEMBL-Enum-SSOT.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-008-Align-Target-Type-Across-Target-Schema-DQ-And-Enum-SSOT.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-009-Canonicalize-Subcellular-Fraction-Before-Identity-And-Hashing.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-010-Add-Profile-Owned-Component-Type-Normalization.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-011-Make-Target-Component-Json-Canonicalization-Profile-Complete.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-012-Move-Publication-Type-Normalization-Into-Domain-Profile-Policy.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-013-Add-SSOT-Subset-Checks-For-ChEMBL-Enum-Drift.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-014-Promote-Bronze-Fixtures-For-Missing-Chembl-Pipelines.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-015-Register-Missing-ChEMBL-Gold-Contracts.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-016-Close-Remaining-Chembl-Normalization-Governance-Gaps.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-017-Govern-ChEMBL-Molecule-Provider-Code-Surfaces-Availability-Type-And-Chirality.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-018-Add-Optional-Unit-Ontology-Companion-Bundle-For-ChEMBL-Assay-Parameters.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-019-Enforce-Nested-ChEMBL-Xref-Source-Vocabulary-In-Target-Structured-Fields.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-020-Expand-Observed-Value-Inventory-For-Weakly-Covered-ChEMBL-Reference-Pipelines.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/CHEMBL-021-Sync-ChEMBL-Provider-Docs-With-Active-Normalization-Surfaces.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/CHEMBL-ISSUES-INDEX.md` | index |  | keep |
+| `.github/ISSUES/CREATION_GUIDE.md` | guide |  | keep |
+| `.github/ISSUES/NONCHEMBL-ISSUES-INDEX.md` | index |  | keep |
+| `.github/ISSUES/PLAN-GOVERNANCE-2026-05-31-ISSUES-INDEX.md` | index |  | keep |
+| `.github/ISSUES/README.md` | guide |  | keep |
+| `.github/ISSUES/ROOT-HYGIENE-ISSUES-INDEX.md` | index |  | keep |
 
 ## Docs Reports Evidence Examples
 

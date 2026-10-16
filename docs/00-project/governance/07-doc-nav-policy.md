@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.9.2
+Version: 1.10.2
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-04'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -33,7 +33,8 @@ ______________________________________________________________________
 
 | Path Prefix                                                                                                                                                                | Status                                                    | Nav Rule                                                                                                                                                                     | Required Entrypoint                                                                               |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `docs/00-project/**`, `docs/01-requirements/**`, `docs/02-architecture/**`, `docs/03-guides/**`, `docs/04-reference/**`, `docs/05-engineering/**`, `docs/05-operations/**` | `published`                                               | MUST be represented in primary nav (except explicit internal/archived subsections); published specialist families MAY be nested under a broader reference branch instead of owning a separate top-level tab | Section index page in nav                                                                         |
+| `docs/00-project/**`, `docs/01-requirements/**`, `docs/02-architecture/**`, `docs/03-guides/**`, `docs/04-reference/**`, `docs/05-operations/**` | `published`                                               | MUST be represented in primary nav (except explicit internal/archived subsections); published specialist families MAY be nested under a broader reference branch instead of owning a separate top-level tab | Section index page in nav                                                                         |
+| `docs/05-engineering/**`                                                                                                                                                 | `stub+archive`                                            | Excluded from primary nav (`exclude_docs`, DOC-GOV-08); engineering content lives in stub/archive lane, not a published section                                                                 | n/a                                                                                         |
 | `docs/00-project/ai/agents/**`                                                                                                                                             | `internal-published` + `internal`                         | Curated entrypoints MAY be shown only under `Internal / Extended -> Agents`; bulk profiles/aliases MAY remain non-nav                                                        | [docs/00-project/ai/agents/README.md](../ai/agents/README.md)                                     |
 | `docs/00-project/ai/memory/**`                                                                                                                                             | `internal-published` + `internal` + `repo-only`           | Shared entrypoints MAY be shown under `Internal / Extended`; excluded README pages and specialized memory docs MAY remain repo-only/non-nav                                  | [docs/00-project/ai/memory/agent-memory.md](../ai/memory/agent-memory.md)                         |
 | `docs/00-project/ai/prompts/**`                                                                                                                                            | `internal-published` + `internal-generated` + `repo-only` | Curated prompt indexes MAY be shown under `Internal / Extended`; collected/raw prompt copies and excluded overview pages MAY remain repo-only/non-nav                        | [docs/00-project/ai/prompts/README.md](../ai/prompts/README.md) |

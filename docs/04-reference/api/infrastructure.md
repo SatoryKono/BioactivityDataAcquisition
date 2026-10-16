@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -109,8 +109,8 @@ and lifecycle governance in
 | Class                   | Description                                                     |
 | ----------------------- | --------------------------------------------------------------- |
 | `UnifiedHTTPClient`     | Central HTTP client with retry, rate limiting, circuit breaking |
-| `CircuitBreaker`        | Circuit breaker pattern implementation                          |
-| `TokenBucket`           | Token bucket rate limiter                                       |
+| `CircuitBreakerGuard`   | Circuit breaker pattern implementation                          |
+| `TokenBucketRateLimiter`| Token bucket rate limiter                                       |
 | `ProviderHealthMonitor` | Provider health state tracking and adaptive configuration       |
 | `ProviderHealthTracker` | Health state persistence                                        |
 | `PaginatedFetcherMixin` | Generic paginated fetch logic                                   |
@@ -262,7 +262,7 @@ ______________________________________________________________________
 
 | Class             | Implements       | Description                       |
 | ----------------- | ---------------- | --------------------------------- |
-| `LocalCheckpoint` | `CheckpointPort` | File-based checkpoint persistence |
+| `LocalCheckpointAdapter` | `CheckpointPort` | File-based checkpoint persistence |
 
 ______________________________________________________________________
 

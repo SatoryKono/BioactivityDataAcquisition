@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -166,13 +166,13 @@ When external APIs fail:
 
 ```python
 from bioetl.domain.exceptions import (
-    CriticalPipelineError,   # Stops pipeline
+    CriticalError,   # Stops pipeline
     RecoverableError,         # Retry with backoff
     DataQualityError,         # Log and skip
 )
 
 def handle-error(error: Exception) -> None:
-    if isinstance(error, CriticalPipelineError):
+    if isinstance(error, CriticalError):
         raise  # Pipeline fails
     elif isinstance(error, RecoverableError):
         # Retry logic handles this

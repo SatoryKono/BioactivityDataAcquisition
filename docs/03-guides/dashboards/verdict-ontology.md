@@ -1,10 +1,10 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
-Last verified: '2026-07-28'
+Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -41,8 +41,8 @@ Every operator-facing **verdict** is a 4-tuple:
 | --- | --- | --- | --- |
 | Trust / Control Plane | `bioetl-control-plane-v1` | Evidence-aware Status; replay safety cards | **INCOMPLETE** when required checkpoint/scrape evidence missing |
 | Overview / Fleet | `bioetl-overview-v2` | `bioetl_l0_status` | UNKNOWN when scope universe missing |
-| Pipeline Diagnostics | `bioetl-runtime` | `bioetl_runtime_current_status_trusted` | INCOMPLETE via telemetry gap / scrape trust |
-| Provider Health | `bioetl-provider-health-v2` | `bioetl_provider_current_status` (GLOBAL matrix) | Selected provider may disagree with fleet — must be labeled |
+| Pipeline Diagnostics (retired board, surface merged into Incident row 8808) | `bioetl-runtime` | `bioetl_runtime_current_status_trusted` | INCOMPLETE via telemetry gap / scrape trust |
+| Provider Health (retired board, surface merged into Overview panel 9480) | `bioetl-provider-health-v2` | `bioetl_provider_current_status` (GLOBAL matrix) | Selected provider may disagree with fleet — must be labeled |
 | Data Quality | `bioetl-dq-v2` | `bioetl_dq_current_status` | Now / Run / Range are **not** peer badges |
 | Incident Workspace | `bioetl-incident-v1` | `bioetl_l0_status` worst-of for scope | `0/1/2` + **labelled** `3/null=UNKNOWN` (never bare numeric); confidence from missing-telemetry / VALID_EMPTY suspects |
 | Run Explorer | `bioetl-run-explorer-v1` | HTTP identity + processed records | N/A when no run_id selected |

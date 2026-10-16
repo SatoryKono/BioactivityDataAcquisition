@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -29,7 +29,8 @@ from bioetl.infrastructure.schemas.base_schemas import (
 )
 
 # Импортируй из pipeline_config для расширенных классов
-from bioetl.infrastructure.schemas.pipeline_config import DQConfig, InputFilterConfig
+from bioetl.domain.config import DQConfig
+from bioetl.domain.filtering import InputFilterConfig
 ```
 
 ______________________________________________________________________
@@ -41,7 +42,7 @@ ______________________________________________________________________
 ```
 src/bioetl/infrastructure/schemas/
 ├── base_schemas.py      # Базовые классы (Single Source of Truth)
-├── pipeline_config.py   # Расширенные классы для pipeline YAML
+├── domain/config/dq.py + domain/filtering/input_config.py  # Расширенные классы для pipeline YAML
 ├── source_config.py     # Классы для configs/providers/*.yaml
 ├── filter_config.py     # Классы для секций filters в configs/base|providers|entities
 ├── dq_config.py         # Классы для секций quality в configs/base|providers|entities

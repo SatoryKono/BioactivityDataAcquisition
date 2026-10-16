@@ -979,12 +979,6 @@
       "owner": "@bioetl-architecture",
       "review_by": "2026-09-30"
     },
-    "scripts/engineering/qa/create_github_issues.py": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain only as a bounded historical GitHub issue seeding helper tied to a legacy markdown source and local .env token flow; either replace it with a governed issue-creation workflow or retire it once no reviewed maintenance lane needs it. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
-    },
     "scripts/engineering/qa/debt_governance_gate_evaluators.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the policy-evaluator module behind report_debt_governance_gates.py; keep the routed report-debt-governance-gates command as the active entrypoint.",
@@ -1363,18 +1357,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
-    "scripts/engineering/repo/publish_tdx_audit_issues.py": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain only as a bounded manual TDX-AUDIT issue publishing helper for local issue-template campaigns; keep it non-active unless it becomes a governed repo-operations workflow with a durable active-surface budget.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
-    "scripts/engineering/repo/publish_test_sys_issues.py": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain only as a bounded manual TEST-SYS issue publishing helper for local issue-template campaigns; keep it non-active unless it becomes a governed repo-operations workflow with a durable active-surface budget.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
     "scripts/generate_test_github_issues.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain only as a bounded manual historical test-issue generator; prefer current GitHub issue creation workflows and keep token-bearing direct script invocation out of active script inventory.",
@@ -1422,12 +1404,6 @@
       "next_step": "Retain only as a bounded manual GitHub branch-protection utility for stripping a stale required status-check context after an external app is disconnected; do not promote it to an active ops command or evaluate_active.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
-    },
-    "scripts/ops/maintenance/github/update_github_issue.sh": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain only as a bounded manual GitHub issue update utility after removing the scripts.ops router command; prefer the governed issue lifecycle workflow or GitHub API client paths before re-exposing it as an active ops command. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
     },
     "scripts/ops/migrations/active/migrate_gold_parquet_to_delta.py": {
       "decision": "legacy_manual_utility",
@@ -1709,12 +1685,6 @@
       "decision": "shared_helper_module",
       "next_step": "Retain as the fixture-materialization implementation imported by the bounded Trust validation generator; keep it supporting and route operator execution through generate_trust_validation_fixtures.py.",
       "owner": "@bioetl-observability",
-      "review_by": "2026-09-30"
-    },
-    "scripts/ops/observability/validate_emitter_contracts.py": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain as a bounded manual observability contract-audit utility while audit evidence references the direct script; promote it to an active governed command only after CI ownership and deterministic regression coverage are established.",
-      "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
     "scripts/ops/observability/validate_live_observability.py": {

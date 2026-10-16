@@ -78,7 +78,7 @@ See `reports/quality/pd7-schema-generator-implementation.md`.
 ## Related
 
 - Plan (~15.9k): `reports/quality/PROJECT_DIAGNOSTICS_15890_AUDIT_AND_PLAN_2026-07-29.md`
-- PD7 pack: `.github/ISSUES/PD7-2026-07-29-PROJECT-DIAGNOSTICS-WARNINGS-RESIDUAL-ISSUE-PACK.md`
+- PD7 pack: `docs/99-archive/github-issues-20261015/PD7-2026-07-29-PROJECT-DIAGNOSTICS-WARNINGS-RESIDUAL-ISSUE-PACK.md`
 - PD7 closeout: `reports/quality/pd7-campaign-closeout-2026-07-29.md`
 - PD6 closeout: `reports/quality/pd6-campaign-closeout-2026-07-29.md`
 - `docs/00-project/governance/05-github-policy.md` — `gate.types` = mypy

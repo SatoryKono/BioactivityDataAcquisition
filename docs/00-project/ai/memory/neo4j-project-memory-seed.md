@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.1.0
+Version: 1.2.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-08'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -32,9 +32,9 @@ ______________________________________________________________________
 - `docs/02-architecture/00-overview.md`
 - `docs/02-architecture/02-application-layer.md`
 - `docs/02-architecture/05-composition-layer.md`
-- `docs/reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md`
-- `docs/reports/knowledge-graphs/bioetl-architecture-graph.json`
-- `docs/reports/knowledge-graphs/bioetl-runtime-detail-graph.json`
+- `docs/reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md` (removed in baseline refresh — see git history)
+- `docs/reports/knowledge-graphs/bioetl-architecture-graph.json` (removed in baseline refresh)
+- `docs/reports/knowledge-graphs/bioetl-runtime-detail-graph.json` (removed in baseline refresh)
 - `src/bioetl/domain/README.md`
 - `src/bioetl/domain/__init__.py`
 - `configs/providers/*.yaml`
@@ -200,8 +200,8 @@ Prompt 12:
 ```text
 @neo4j-memory сохрани practical usage facts:
 - docs/00-project/ai/memory/agent-memory.md is the human project memory entry point
-- docs/reports/knowledge-graphs/bioetl-architecture-graph.json captures architecture-level graph context
-- docs/reports/knowledge-graphs/bioetl-runtime-detail-graph.json captures runtime/bootstrap detail
+- docs/reports/knowledge-graphs/bioetl-architecture-graph.json (removed in baseline refresh) previously captured architecture-level graph context
+- docs/reports/knowledge-graphs/bioetl-runtime-detail-graph.json (removed in baseline refresh) previously captured runtime/bootstrap detail
 
 Свяжи их с BioETL as memory source artifacts.
 ```

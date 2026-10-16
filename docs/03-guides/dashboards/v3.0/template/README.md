@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-13'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -30,8 +30,8 @@ Reference mirrors:
 - `docs/03-guides/dashboards/selector-architecture.md`
 - `docs/03-guides/dashboards/variable-reference.md`
 - `docs/03-guides/dashboards/navigation-contract.md`
-- `docs/03-guides/dashboards/dashboard-requirements-comprehensive.md`
-- `docs/03-guides/dashboards/dashboard-audit-checklist.md`
+- `docs/99-archive/guides/dashboards/dashboard-requirements-comprehensive.md`
+- `docs/99-archive/guides/dashboards/dashboard-audit-checklist.md`
 
 ## Template Files
 

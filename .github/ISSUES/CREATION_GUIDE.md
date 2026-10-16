@@ -1,4 +1,11 @@
 # GitHub Issues Creation Guide
+> **Relocation note (2026-10-15):** the issue drafts and body collections listed
+> below were archived to `docs/99-archive/github-issues-20261015/` after
+> reconciliation with live GitHub issue state (all referenced issues are
+> closed/merged; unfiled drafts were stale). This index is retained as a
+> navigation stub — adjust listed paths accordingly.
+
+
 
 ## Overview
 Based on the architecture audit (2025-01-30), three issues have been prepared for creation. Since GitHub CLI is not available in this environment, you can create these issues manually or use another method.

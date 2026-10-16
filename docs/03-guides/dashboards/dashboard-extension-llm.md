@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.2.0
+Version: 1.3.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-13'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -40,7 +40,7 @@ Grafana dashboards в BioETL.
 
 - `1. Trust`, `2. Overview`, `3. Pipeline Diagnostics`, `4. Provider Health`, `5. Data Quality`, `6. Incident Workspace`, `Run Explorer` — единая top-level
   шина.
-- На каждой из восьми shipped страниц navigation panel `id=1000` визуально
+- На каждой из пяти shipped страниц navigation panel `id=1000` визуально
   показывает полный bus `0..6`; текущий dashboard рендерится как disabled
   theme-safe item, а machine-readable `panel.links` сохраняют omit-self
   contract. Навигация MUST оставаться читаемой в dark/light themes и

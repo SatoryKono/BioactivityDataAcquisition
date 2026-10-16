@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -25,10 +25,10 @@ Hash policy фиксирует детерминированные правила
 - `provider`, `entity`
 - `contract.version` (SemVer)
 - `contract.migration-note`
-- `hash-policy.include-fields` (явный allow-list)
-- `hash-policy.exclude-fields` (явный deny-list)
-- `hash-policy.exclude-patterns`
-- `hash-policy.normalization` c правилами:
+- `hash_policy.include_fields` (явный allow-list)
+- `hash_policy.exclude_fields` (явный deny-list)
+- `hash_policy.exclude_patterns`
+- `hash_policy.normalization` c правилами:
   - `trim-strings`
   - `round-floats` (`precision`)
   - `dates` (`YYYY-MM-DD`)
@@ -44,7 +44,7 @@ Hash policy фиксирует детерминированные правила
 
 ## Проверка в тестах
 
-Контракт покрывается тестами в `tests/unit/domain/hash-policy/`:
+Контракт покрывается тестами в `tests/unit/domain/hash_policy/`:
 
 - Snapshot стабильности hash на фиксированных fixtures.
 - Проверка, что policy-изменение требует version bump + migration note.

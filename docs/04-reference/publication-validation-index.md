@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.1
+Version: 1.1.1
 Status: Production Ready ✅
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -41,9 +41,9 @@ ______________________________________________________________________
 
 **Связанные ADR:**
 
-- [ADR-002](../02-architecture/decisions/ADR-002-medallion-architecture.md) — Hexagonal Architecture (validation services в application layer)
-- [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md) — Medallion Architecture (Bronze → Silver → Gold)
-- [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md) — Silver Layer DQ Framework (`-dq-warn`, `-dq-error`)
+- [ADR-002](../02-architecture/decisions/ADR-002-medallion-architecture.md) — Medallion Architecture (validation layering over Bronze/Silver/Gold)
+- [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md) — Deterministic Writes and Retries
+- [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md) — DQ Rules Externalization
 
 ______________________________________________________________________
 

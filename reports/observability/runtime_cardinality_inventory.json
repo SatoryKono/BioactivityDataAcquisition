@@ -1561,11 +1561,11 @@
       "docs/02-architecture/decisions/ADR-017-observability-architecture.md",
       "docs/03-guides/dashboards/operator-scenarios-s1-s6.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/freshness-hold-2026-09-25.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/03-guides/running-pipelines.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
+      "docs/05-operations/runbooks/incident-response.md",
       "docs/05-operations/vacuum-retention.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-incident-v1.json"

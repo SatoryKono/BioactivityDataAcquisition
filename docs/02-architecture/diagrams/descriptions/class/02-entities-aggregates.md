@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -17,7 +17,7 @@ ______________________________________________________________________
 
 ## Описание
 
-Диаграмма Entities & Aggregates показывает архитектурную модель модуля `02-entities-aggregates` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: Domain entities, aggregate roots, and their relationships. На схеме отражено примерно 13 классов и 9 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: BaseEntity, Bioactivity, BioactivityState, PublicationBase, Batch, BatchRecord.
+Диаграмма Entities & Aggregates показывает архитектурную модель модуля `02-entities-aggregates` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: Domain entities, aggregate roots, and their relationships. На схеме отражено примерно 13 классов и 9 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: BaseEntity, Bioactivity, BioactivityState, PublicationBaseSchema, Batch, BatchRecord.
 
 ## Метаданные
 

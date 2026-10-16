@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -158,7 +158,7 @@ if not target_registry.is_registered("myprovider"):
     )
 ```
 
-If provider needs custom lifecycle/constructor wiring, use `custom_creator=` as in existing providers.
+If provider needs custom lifecycle/constructor wiring, use `adapter_creator=` as in existing providers.
 
 Runtime/bootstrap code should continue to use `ensure_providers_loaded()` as the
 shared lifecycle seam rather than calling registration directly.

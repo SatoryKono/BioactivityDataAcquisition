@@ -167,17 +167,16 @@ def test_documentation_cleanup_inventory_covers_github_issue_drafts() -> None:
 
     issue_rows = [path for path in rows if path.startswith(".github/ISSUES/")]
     assert len(issue_rows) == len(tracked_issue_files)
-    assert len(issue_rows) >= 131
+    # After the 2026-10-15 archive migration (docs/99-archive/github-issues-20261015/),
+    # only the indexes, README and creation guide remain live under .github/ISSUES/.
+    assert len(issue_rows) >= 6
     assert rows[".github/ISSUES/README.md"]["lifecycle"] == "guide"
     assert rows[".github/ISSUES/CHEMBL-ISSUES-INDEX.md"]["lifecycle"] == "index"
-    assert (
-        rows[".github/ISSUES/DOC-AUDIT-2026-06-19-ISSUE-PACK.md"]["lifecycle"]
-        == "issue_pack"
-    )
-    live_issue = rows[".github/ISSUES/ADR-HYGIENE-4746-Archive-ADR-003-ADR-008.md"]
-    assert live_issue["lifecycle"] == "live_issue_mirror"
-    assert live_issue["github_issue_number"] == 4746
-    assert live_issue["recommended_action"] == "reconcile-with-github-state"
+    assert rows[".github/ISSUES/CREATION_GUIDE.md"]["lifecycle"] == "guide"
+    migrated = rows[
+        "docs/99-archive/github-issues-20261015/ADR-HYGIENE-4746-Archive-ADR-003-ADR-008.md"
+    ]
+    assert migrated["recommended_action"] == "keep"
 
 
 def test_documentation_cleanup_inventory_covers_root_entrypoints() -> None:

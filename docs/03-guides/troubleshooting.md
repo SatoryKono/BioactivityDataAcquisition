@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-28'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -84,7 +84,7 @@ ______________________________________________________________________
 - **Решение**:
   1. Проверьте summary в Grafana:
      - `bioetl-overview-v2`
-     - `bioetl-runtime`
+     - `bioetl-incident-v1` (runtime diagnostics merged into row 8808)
      - `bioetl-dq-v2`
   1. Получите агрегаты по причинам:
      ```bash

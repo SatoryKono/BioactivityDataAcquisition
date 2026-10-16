@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -355,7 +355,7 @@ includes:
 
 | Файл                                                                            | Изменение                                                                                                          |
 | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `src/bioetl/infrastructure/config_loader.py`                                    | Сохраняет read/validate/map orchestration и compatibility wrappers для test-facing private helpers                 |
+| `src/bioetl/infrastructure/config/config_root.py`                                    | Сохраняет read/validate/map orchestration и compatibility wrappers для test-facing private helpers                 |
 | `src/bioetl/infrastructure/config/pipeline_payload_normalization.py`            | Новый normalization boundary: convention defaults, filter/source merge, schema bridge, legacy/new payload coercion |
 | `tests/architecture/test_pipeline_external_schema_non_empty.py`                 | Добавлена `find_pipeline_config()`, поддержка unified формата                                                      |
 | `tests/unit/infrastructure/config/test_pipeline_config_legacy_normalization.py` | Закрепляет явный `read -> normalize -> validate -> map` pipeline и compatibility surface                           |

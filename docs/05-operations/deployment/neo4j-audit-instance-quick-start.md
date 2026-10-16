@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-12'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -32,7 +32,7 @@ All files are ready to use. No additional setup needed.
 
 ### Documentation
 
-- **NEO4J_AUDIT_INSTANCE_GUIDE.md** — Full user guide
+- **docs/05-operations/deployment/neo4j-audit-instance-guide.md** — Full user guide
 - **AUDIT_INSTANCE_IMPLEMENTATION.md** — Implementation checklist
 
 ______________________________________________________________________
@@ -107,7 +107,7 @@ bioetl-neo4j          bioetl-neo4j-audit
 ### Automatic Routing (Python)
 
 ```python
-from src.tools.neo4j_audit import get_neo4j_uri, get_neo4j_auth
+from scripts/ops/data/neo4j_audit.py import get_neo4j_uri, get_neo4j_auth
 
 # If LIVE_AUDIT_MODE=1:
 get_neo4j_uri()  # → bolt://localhost:7688 (audit)
@@ -227,5 +227,5 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-**For detailed setup**: See NEO4J_AUDIT_INSTANCE_GUIDE.md
+**For detailed setup**: See docs/05-operations/deployment/neo4j-audit-instance-guide.md
 **For implementation checklist**: See AUDIT_INSTANCE_IMPLEMENTATION.md

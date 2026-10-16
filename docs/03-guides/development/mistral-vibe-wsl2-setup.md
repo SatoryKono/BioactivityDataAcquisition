@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-07'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -121,7 +121,9 @@ ______________________________________________________________________
 
 ## Repository Defaults
 
-The repository ships `.vibe/config.toml` with conservative defaults:
+Create a project-local `.vibe/config.toml` (it is not shipped by the
+repository; Vibe discovers it automatically before `~/.vibe/config.toml`).
+Conservative defaults:
 
 ```toml
 active_model = "devstral-2"

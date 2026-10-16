@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-12'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -46,7 +46,7 @@ ______________________________________________________________________
      - `is_audit_mode()` - Check if in audit mode
      - `get_heap_info()` - Get memory info
 
-1. ✅ **NEO4J_AUDIT_INSTANCE_GUIDE.md**
+1. ✅ **docs/05-operations/deployment/neo4j-audit-instance-guide.md**
 
    - Complete user guide for audit instance
    - Step-by-step instructions
@@ -270,7 +270,7 @@ live --report-fast
 
 ### Update #2795 Comment
 
-"Python sync code is optimized. Live validation now reaches snapshot building (98s) and analysis operations (1.8-15s). Previous OOMKilled failures were due to container memory limits. Solution: Use separate neo4j-audit instance with 1024m heap for heavy workload. See NEO4J_AUDIT_INSTANCE_GUIDE.md for setup."
+"Python sync code is optimized. Live validation now reaches snapshot building (98s) and analysis operations (1.8-15s). Previous OOMKilled failures were due to container memory limits. Solution: Use separate neo4j-audit instance with 1024m heap for heavy workload. See docs/05-operations/deployment/neo4j-audit-instance-guide.md for setup."
 
 ______________________________________________________________________
 
@@ -293,7 +293,7 @@ ______________________________________________________________________
 | scripts/ops/runtime/neo4j/start-neo4j-audit.ps1 | Start/stop script (PowerShell) | ✅ Ready |
 | scripts/ops/runtime/neo4j/start-neo4j-audit.sh  | Start/stop script (Bash)       | ✅ Ready |
 | scripts/ops/data/neo4j_audit.py                 | Connection helper              | ✅ Ready |
-| NEO4J_AUDIT_INSTANCE_GUIDE.md                   | User guide                     | ✅ Ready |
+| docs/05-operations/deployment/neo4j-audit-instance-guide.md                   | User guide                     | ✅ Ready |
 | This file                                       | Implementation guide           | ✅ Ready |
 
 All files created and ready for use. No further development needed.

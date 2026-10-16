@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -23,7 +23,7 @@ ______________________________________________________________________
 
 **Ключевые контейнеры/подграфы:**
 
-- **Domain Ports**: Интерфейсы (protocols) для инверсии зависимостей — CircuitBreakerPort, RateLimiterPort, HealthCheckPort
+- **Domain Ports**: Интерфейсы (protocols) для инверсии зависимостей — CircuitBreakerGuardPort, RateLimiterPort, HealthCheckPort
 - **Circuit Breaker Pattern**: Трёхсостояние finite state machine (CLOSED → OPEN → HALF_OPEN) для защиты от каскадных сбоев
 - **State Machine**: Визуализирует переходы состояний (failure threshold → OPEN, recovery timeout → HALF_OPEN, success → CLOSED)
 - **Rate Limiter (Token Bucket)**: Контроль нагрузки на внешние сервисы через квоты (ChEMBL: 5 req/s, UniProt: 100 req/s и т.д.)
@@ -31,12 +31,12 @@ ______________________________________________________________________
 
 **Data Source Decorators** (в нижней части диаграммы):
 
-- **CircuitBreakerDataSourceDecorator**: Оборачивает DataSourcePort, добавляя защиту от cascading failures
+- **CircuitBreakerGuardDataSourceDecorator**: Оборачивает DataSourcePort, добавляя защиту от cascading failures
 - **RetryingDataSourceDecorator**: Оборачивает DataSourcePort, добавляя retry logic с exponential backoff. Использует delegation pattern с private aliases (\_data_source, \_retry_config, \_logger, \_metrics) для compliance с архитектурными правилами NAME-004
 
 Оба декоратора — composable и применяются к любой реализации DataSourcePort (ChEMBL, PubMed, UniProt и т.д.).
 
-**Примеры узлов**, отражающих доменную модель и инфраструктуру: Domain Ports, CircuitBreakerPort (Protocol) -------- + get_state() + call(fn), RateLimiterPort (Protocol) -------- + acquire(tokens) + try_acquire(), HealthCheckPort (Protocol) -------- + check_health(), Circuit Breaker Pattern, CircuitBreaker -------- provider failure_threshold recovery_timeout.
+**Примеры узлов**, отражающих доменную модель и инфраструктуру: Domain Ports, CircuitBreakerGuardPort (Protocol) -------- + get_state() + call(fn), RateLimiterPort (Protocol) -------- + acquire(tokens) + try_acquire(), HealthCheckPort (Protocol) -------- + check_health(), Circuit Breaker Pattern, CircuitBreakerGuard -------- provider failure_threshold recovery_timeout.
 
 По этим сущностям можно проверить согласованность терминов, портов и адаптеров между диаграммой и реализацией. В метаданных указана оценка плотности (@nodes=15), что полезно для контроля читаемости, декомпозиции view-слоев и стабильного рендеринга в CI-пайплайне.
 

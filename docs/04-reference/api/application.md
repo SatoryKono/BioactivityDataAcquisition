@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -91,8 +91,8 @@ ______________________________________________________________________
 | Class                         | Description                                    |
 | ----------------------------- | ---------------------------------------------- |
 | `PreflightService`            | Pre-run validation (health, medallion, config) |
-| `PreflightHealthAggregator`   | Health check aggregation for preflight         |
-| `PreflightMedallionValidator` | Medallion layer state validation               |
+| `HealthAggregator`   | Health check aggregation for preflight         |
+| `MedallionConfigValidator` | Medallion layer state validation               |
 | `PostrunService`              | Post-run cleanup and reporting                 |
 | `CleanupService`              | Resource cleanup after pipeline runs           |
 
@@ -152,7 +152,7 @@ Import the symbols below from their defining submodules rather than from
 | `MedallionLifecycleService`   | Medallion layer lifecycle management     |
 | `LockService`                 | Lock management service                  |
 | `MetadataCoordinator`         | Metadata sidecar coordination            |
-| `MetadataAssemblers`          | Metadata assembly helpers                |
+| `MetadataCoordinator`          | Metadata assembly helpers                |
 | `ShutdownService`             | Graceful shutdown coordination           |
 | `StartResult`                 | Metrics-server start result model        |
 
@@ -191,7 +191,7 @@ The symbols below live in nested composite modules and are not exported by the
 
 | Symbol                             | Description                                |
 | ---------------------------------- | ------------------------------------------ |
-| `EnricherAggregatorService`        | Aggregates enrichment results              |
+| `EnricherAggregator`        | Aggregates enrichment results              |
 | `EnricherDeduplicatorService`      | Deduplicates enrichment records            |
 | `ConflictResolverService`          | Resolves field conflicts between providers |
 | `CoalescePolicyService`            | Coalescing policy for merged fields        |

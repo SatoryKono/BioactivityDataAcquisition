@@ -48,6 +48,10 @@ paths = [
     # Audit documentation (contains commit hashes, not secrets)
     '''docs/archived/audits/''',
 
+    # Frozen archive evidence relocated from governed reports/ (same files,
+    # previously covered by rule-level allowlists at their reports/ paths)
+    '''docs/99-archive/''',
+
     # Data fixtures may contain biological sequences that look like tokens
     '''data/input/''',
 ]

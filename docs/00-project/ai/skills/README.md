@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-31'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -24,7 +24,7 @@ This directory stores published documentation for BioETL AI skills across suppor
   authored in runtime trees such as `.codex/skills/`.
 - **Published mirror**: `docs/00-project/ai/skills/local/` and related indexes
   exist for discoverability and documentation stability.
-- **Snapshot**: `global/` may still hold curated copies of selected non-local skills (not the prompts library).
+- **Snapshot**: `global/` currently holds only its README — no curated non-local skill copies are committed (see Global Snapshot).
 - **Reference mirror**: `_references/` stores read-only mirrored reference
   bundles used by skills consistency tooling.
 
@@ -66,23 +66,22 @@ gate. Use `--sync` to regenerate only `local/`; it does not rewrite
 ## Layout
 
 - `local/` — published mirror for repository-local skills
-- `global/` — snapshot of selected global skills
+- `global/` — entrypoint README only; no skill snapshots currently committed
 - `_references/` — reference bundles overlaid into local mirror
 - `SKILLS-CATALOG.md` — consolidated skill registry
 - `SKILLS-PRACTICAL-INDEX.md` — operational index with practical usage guidance and a recommended top-15 for BioETL
 
 ## Current Runtime Status (2026-07-10)
 
-- `documentation-cascade-audit` is now a project-local Codex skill under
-  `.codex/skills/documentation-cascade-audit/`; matching user-global copies
-  are not authoritative.
+- The active project-local Codex skills under `.codex/skills/` are
+  `agent-debugging`, `coderabbit-audit`, `new-pipeline`,
+  `observability-dashboard`, `observability-prometheus`, `py-audit-bot`,
+  `py-config-bot`, `py-debug-bot`, `py-doc-bot`, `py-plan-bot`, `py-test-bot`,
+  `research-workflow`, `technical-designer-mermaid`, `vcr-record`, and
+  `verify-architecture` (historical `documentation-cascade-audit`,
+  `nci-analysis`, and `py-code-bot` names were removed).
 - Evidence/decision helper skills are active when present in `.codex/skills/`
   and share common reference contracts instead of redefining the same workflow.
-- `nci-analysis` is an active concise project skill with reference material
-  loaded by progressive disclosure.
-- `py-code-bot` is retained only as a deprecated compatibility marker; active
-  production changes are made by the orchestrator or the more specific `py-*`
-  profile skill.
 - Every active project skill is expected to provide `agents/openai.yaml`
   metadata and pass the Codex skill architecture gate.
 

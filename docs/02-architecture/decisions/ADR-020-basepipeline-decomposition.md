@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-03'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -59,12 +59,12 @@ def __init__(
 ### Затронутые файлы
 
 - `src/bioetl/application/core/base.py` - основной класс
-- `src/bioetl/domain/config.py` - **NEW**
+- `src/bioetl/domain/config/` (package: `pipeline.py`, `runtime.py`, `dq.py`, `validation.py`) - **NEW**
 - `src/bioetl/application/core/pipeline_services.py` - **NEW**
 - `src/bioetl/application/pipelines/chembl/activity.py` - наследник
 - `src/bioetl/application/core/runner.py` - зависит от BasePipeline
 - `src/bioetl/application/core/batch_executor.py` - зависит от BasePipeline
-- `src/bioetl/application/core/lifecycle/lock_manager.py` - зависит от BasePipeline
+- `src/bioetl/application/core/lifecycle/lock_runtime.py` + `lock_runtime_service.py` - зависит от BasePipeline
 - `src/bioetl/application/core/quarantine_manager.py` - зависит от BasePipeline
 - `tests/unit/application/test_base_pipeline.py` - тесты
 - `tests/unit/application/core/test_batch_executor.py` - тесты
@@ -323,8 +323,8 @@ finally:
 ## References
 
 - [ADR-005](ADR-005-composition-layer-separation.md): Composition Layer — assembles decomposed components
-- [ADR-006](ADR-006-logger-metrics-ports.md): Logger and Metrics Ports — LoggerPort in PipelineServices
-- [ADR-015](ADR-015-pipeline-services-lifecycle.md): Pipeline Services Lifecycle — PipelineServices design
+- [ADR-006](ADR-006-logger-metrics-ports.md): Logger and Metrics Ports — LoggerPort in PipelineService
+- [ADR-015](ADR-015-pipeline-services-lifecycle.md): Pipeline Services Lifecycle — PipelineService design
 - [ADR-021](ADR-021-ddd-aggregates-adoption.md): DDD Aggregates — further domain layer improvements
 
 ## References

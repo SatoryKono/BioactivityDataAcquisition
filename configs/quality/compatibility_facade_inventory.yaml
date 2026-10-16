@@ -207,7 +207,7 @@ retained_entrypoints:
       "`src`: only explicit execution-focused public symbols from `__all__` may be imported from `bioetl.composition.entrypoints`;
       removed service/resource compatibility symbols must stay absent from first-party source. `tests`: public entrypoint imports
       may appear in interface/composition boundary coverage, but direct internal-module patch targets stay confined to `tests/unit/composition/test_entrypoints.py`,
-      `tests/unit/composition/test_resource_management.py`, and `tests/unit/composition/test_services_entrypoints.py`"
+      `tests/unit/composition/test_resource_management.py`, and `tests/unit/composition/bootstrap/test_bootstrap_entrypoints.py`"
     migration_path:
       Use `bioetl.composition.entrypoints` as the sanctioned public seam; do not import `bioetl.composition._pipeline_execution`,
       `bioetl.composition._resource_management`, or `bioetl.composition._services` directly outside dedicated entrypoint-boundary

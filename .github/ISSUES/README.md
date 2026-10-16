@@ -1,4 +1,11 @@
 # GitHub Issues for Technical Debt Reduction
+> **Relocation note (2026-10-15):** the issue drafts and body collections listed
+> below were archived to `docs/99-archive/github-issues-20261015/` after
+> reconciliation with live GitHub issue state (all referenced issues are
+> closed/merged; unfiled drafts were stale). This index is retained as a
+> navigation stub — adjust listed paths accordingly.
+
+
 
 Этот каталог содержит готовые markdown-файлы для создания GitHub issues на основе технического аудита BioETL.
 

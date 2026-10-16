@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-13'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -54,7 +54,6 @@ Rules:
 - set `includeVars=false`;
 - pass only explicit target-scoped `var-*` parameters;
 - include `${__url_time_range}` for dashboard links;
-- include `from=${__from}` and `to=${__to}` for Explore links;
 - do not propagate forensic identifiers to non-target dashboards.
 
 ## Scope Panel

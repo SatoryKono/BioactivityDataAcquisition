@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 2.1.0
+Version: 2.2.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-31'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -75,21 +75,15 @@ Skills now inlined into commands — invoke directly via `/command-name`:
 | Command                        | Когда                                                         |
 | ------------------------------ | ------------------------------------------------------------- |
 | `/verify-architecture`         | Pre-commit проверка архитектурного тестового набора           |
-| `/architecture-guardian`       | Аудит arch boundaries                                         |
 | `/new-pipeline`                | Scaffolding нового ETL pipeline                               |
-| `/new-composite`               | Создание composite pipeline                                   |
 | `/vcr-record`                  | Управление VCR cassettes                                      |
 | `/py-doc-bot`         | Аудит документации                                            |
 | `/py-doc-bot` | Каскадный аудит документации с текущим docs-audit skill stack |
 | `/test-swarm`                  | Иерархическое тестирование (uses py-test-bot)               |
 | `/review-orchestrator`         | Code review (uses py-audit-bot)                     |
 | `/mermaid-design`              | Mermaid-диаграммы с ADR-040                                   |
-| `/config-validate`             | Валидация YAML vs JSON-schemas                                |
-| `/schema-parity`               | Silver↔Gold schema parity                                     |
-| `/provider-health`             | Статус провайдеров                                            |
 | `/release-checklist`           | Pre-release audit                                             |
 | `/ci-diagnose`                 | Диагностика CI workflows                                      |
-| `/migration`                   | Миграции Delta Lake                                           |
 | `/dependency-audit`            | CVE, лицензии                                                 |
 
 ## Полный контекст

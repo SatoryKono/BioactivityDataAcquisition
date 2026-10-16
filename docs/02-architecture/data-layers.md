@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-28'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -116,7 +116,7 @@ Silver слой использует стратегию **Merge/Upsert** для 
   - Если запись с PK существует: Обновление (UPDATE) только при изменении содержимого (`content_hash`).
   - Если запись не существует: Вставка (INSERT).
 - **Conflict Resolution / Replay Safety**:
-  Runtime provenance (`run_id`, `run_type`, `source_batch_id`, `ingestion_ts`) может участвовать в orchestration, audit и sidecar metadata, но не считается частью persisted Silver/Gold row contract. Exact replay и идемпотентность должны определяться бизнес-ключами, `content_hash` и control-plane anchors, а не occurrence-scoped полями в строках Delta.
+  Runtime provenance (`_run_id`, `_run_type`, `_source_batch_id`, `_ingestion_ts`, `_index`) **persisted в Silver** как `system` column_group prefix-поля (write-time SSOT в `configs/entities/*/*.yaml`, e.g. `chembl/activity.yaml`); эти поля также проецируются в sidecar/control-plane artifacts. Exact replay и идемпотентность определяются бизнес-ключами, `content_hash` и control-plane anchors (run_manifest, effective-config artifact, ledger), а не occurrence-scoped полями в строках Delta.
 
 ### 2.5. PII и Безопасность
 
