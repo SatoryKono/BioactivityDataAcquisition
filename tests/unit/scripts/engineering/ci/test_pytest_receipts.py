@@ -265,6 +265,13 @@ def test_sha_mismatch_fails(receipts: Path, tmp_path: Path) -> None:
     completed = _pytest(test_file, receipts, "--receipt-expected-sha=fake_sha123")
     assert completed.returncode != 0
     assert "Checkout SHA mismatch! Expected fake_sha123" in completed.stderr
+    payload = _load(receipts, worker="runner")
+    assert payload["role"] == "runner"
+    assert payload["terminal_kind"] == "sha_mismatch"
+    assert payload["completeness"] == "unknown"
+    assert payload["collection"] == {"status": "unknown"}
+    assert payload["results"] is None
+    assert "fake_sha123" in str(payload["observed_error"])
 
 
 def test_xdist_workers_do_not_double_count(receipts: Path, tmp_path: Path) -> None:

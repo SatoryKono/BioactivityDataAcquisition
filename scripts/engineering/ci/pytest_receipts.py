@@ -281,9 +281,18 @@ class ReceiptPlugin:
         self.source = source_snapshot(self.repo_root, self.receipt_dir)
         head = str(self.source["head"])
         if self.expected_sha and head != self.expected_sha:
-            raise RuntimeError(
-                f"Checkout SHA mismatch! Expected {self.expected_sha}, got {head}"
+            message = f"Checkout SHA mismatch! Expected {self.expected_sha}, got {head}"
+            write_runner_terminal_receipt(
+                receipt_dir=self.receipt_dir,
+                run_id=self.run_id,
+                attempt=self.attempt,
+                pass_name=self.pass_name,
+                repo_root=self.repo_root,
+                exit_code=3,
+                terminal_kind="sha_mismatch",
+                observed_error=message,
             )
+            raise RuntimeError(message)
 
     def pytest_configure(self, config: Any) -> None:
         self.write_receipt = not _is_xdist_controller(config)
@@ -395,7 +404,10 @@ def write_runner_terminal_receipt(
     terminal_kind: str,
     observed_error: str,
 ) -> Path:
-    """Record a timeout, crash, or aborted pass without inventing collection."""
+    """Record a timeout, crash, SHA mismatch, or aborted pass.
+
+    Collection and node outcomes stay unknown. The observed error is redacted.
+    """
     directory = _resolve_dir(str(receipt_dir))
     payload = {
         "schema_version": _SCHEMA_VERSION,
