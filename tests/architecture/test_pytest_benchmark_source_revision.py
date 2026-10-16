@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -176,6 +178,30 @@ def test_validator_rejects_bool_counts_and_unspecified_caller(tmp_path: Path) ->
     with pytest.raises(BenchmarkMeasurementContractError) as caller_error:
         validate_benchmark_measurement_json(output, search_from=root)
     assert caller_error.value.code == "blocked_provenance"
+
+
+def test_symlink_loop_is_blocked_without_vcs_probe(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    loop = tmp_path / "loop"
+    try:
+        os.symlink(loop, loop, target_is_directory=True)
+    except OSError as exc:
+        pytest.skip(f"symlink loop is not available: {exc}")
+    calls: list[object] = []
+
+    def _record(*args: object, **kwargs: object) -> None:
+        calls.append((args, kwargs))
+        raise AssertionError("VCS subprocess is not a fallback")
+
+    monkeypatch.setattr(subprocess, "run", _record)
+    monkeypatch.setattr(subprocess, "check_output", _record)
+    monkeypatch.setattr(subprocess, "check_call", _record)
+    monkeypatch.setattr(subprocess, "call", _record)
+    source = read_source_revision(loop, allow_parent_search=False)
+    assert source.revision == "unknown"
+    assert source.revision_method == "blocked"
+    assert calls == []
 
 
 def test_corrupt_loose_ref_does_not_fall_back_to_packed_refs(tmp_path: Path) -> None:

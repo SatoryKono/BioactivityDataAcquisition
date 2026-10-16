@@ -98,8 +98,23 @@ def _refuse_vcs_probe(command: object) -> None:
         raise _BlockedBenchmarkVcsProbe(command)
 
 
+def _safe_resolve(path: Path) -> Path | None:
+    """Resolve *path* or return None when the walk cannot finish.
+
+    Python 3.12 ``Path.resolve()`` raises ``RuntimeError`` for a symlink loop.
+    That is a blocked gitdir read, not a signal to shell out to Git.
+    """
+
+    try:
+        return path.resolve()
+    except (OSError, RuntimeError):
+        return None
+
+
 def _resolve_gitdir(start: Path, *, allow_parent_search: bool) -> Path | None:
-    current = start.resolve()
+    current = _safe_resolve(start)
+    if current is None:
+        return None
     candidates = (current,) if not allow_parent_search else (current, *current.parents)
     for candidate in candidates:
         git_entry = candidate / ".git"
@@ -114,7 +129,10 @@ def _resolve_gitdir(start: Path, *, allow_parent_search: bool) -> Path | None:
         raw = line.split(":", 1)[1].strip()
         gitdir = Path(raw)
         if not gitdir.is_absolute():
-            gitdir = (git_entry.parent / gitdir).resolve()
+            resolved = _safe_resolve(git_entry.parent / gitdir)
+            if resolved is None:
+                return None
+            gitdir = resolved
         return gitdir
     return None
 
@@ -163,7 +181,10 @@ def _common_gitdir(gitdir: Path) -> Path | None:
     raw = common_file.read_text(encoding="utf-8").strip()
     common = Path(raw)
     if not common.is_absolute():
-        common = (gitdir / common).resolve()
+        resolved = _safe_resolve(gitdir / common)
+        if resolved is None:
+            return None
+        common = resolved
     return common
 
 
@@ -198,7 +219,7 @@ def read_source_revision(
         sha = head_text.lower()
         if _SHA_RE.fullmatch(sha):
             return SourceRevision(sha, "gitdir_head_file", "(detached head)")
-    except (OSError, UnicodeError, _CorruptLooseRef):
+    except (OSError, RuntimeError, UnicodeError, _CorruptLooseRef):
         return SourceRevision("unknown", "blocked", "(unknown)")
     return SourceRevision("unknown", "blocked", "(unknown)")
 

@@ -28,11 +28,12 @@ $FilteredArgs = @()
 
 function Test-BenchmarkPluginNeeded {
     param(
-        [string[]]$Args
+        [Alias("Args")]
+        [string[]]$CandidateArgs
     )
 
     $PreviousArg = $null
-    foreach ($Arg in $Args) {
+    foreach ($Arg in $CandidateArgs) {
         if ($Arg -like "tests/benchmarks*" -or $Arg -like "*\tests\benchmarks*") {
             return $true
         }
@@ -79,12 +80,13 @@ function Test-CoveragePluginNeeded {
 
 function Remove-CoverageArgs {
     param(
-        [string[]]$Args
+        [Alias("Args")]
+        [string[]]$CandidateArgs
     )
 
     $Filtered = @()
     $SkipNext = $false
-    foreach ($Arg in $Args) {
+    foreach ($Arg in $CandidateArgs) {
         if ($SkipNext) {
             $SkipNext = $false
             continue
@@ -111,11 +113,12 @@ function Remove-CoverageArgs {
 
 function Test-XdistPluginNeeded {
     param(
-        [string[]]$Args
+        [Alias("Args")]
+        [string[]]$CandidateArgs
     )
 
     $PreviousArg = $null
-    foreach ($Arg in $Args) {
+    foreach ($Arg in $CandidateArgs) {
         if (
             $Arg -eq "-n" -or
             $Arg -eq "--numprocesses" -or
@@ -137,11 +140,12 @@ function Test-XdistPluginNeeded {
 
 function Test-XdistAutoRequested {
     param(
-        [string[]]$Args
+        [Alias("Args")]
+        [string[]]$CandidateArgs
     )
 
     $PreviousArg = $null
-    foreach ($Arg in $Args) {
+    foreach ($Arg in $CandidateArgs) {
         if (($PreviousArg -eq "-n" -or $PreviousArg -eq "--numprocesses") -and $Arg -eq "auto") {
             return $true
         }
@@ -160,13 +164,14 @@ function Test-PytestCacheDirValue {
 
 function Test-PytestCacheDirSpecified {
     param(
-        [string[]]$Args
+        [Alias("Args")]
+        [string[]]$CandidateArgs
     )
 
-    for ($i = 0; $i -lt $Args.Count; $i++) {
-        $Arg = $Args[$i]
+    for ($i = 0; $i -lt $CandidateArgs.Count; $i++) {
+        $Arg = $CandidateArgs[$i]
         if ($Arg -eq "-o" -or $Arg -eq "--override-ini") {
-            if (($i + 1 -lt $Args.Count) -and (Test-PytestCacheDirValue -Value $Args[$i + 1])) {
+            if (($i + 1 -lt $CandidateArgs.Count) -and (Test-PytestCacheDirValue -Value $CandidateArgs[$i + 1])) {
                 return $true
             }
             continue
@@ -183,11 +188,12 @@ function Test-PytestCacheDirSpecified {
 
 function Test-PreflightScope {
     param(
-        [string[]]$Args
+        [Alias("Args")]
+        [string[]]$CandidateArgs
     )
 
     $SelectedPaths = @()
-    foreach ($Arg in $Args) {
+    foreach ($Arg in $CandidateArgs) {
         if ($Arg.StartsWith("-")) {
             continue
         }

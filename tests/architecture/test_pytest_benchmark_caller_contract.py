@@ -314,6 +314,10 @@ def test_pytest_wrappers_load_guard_before_benchmark_plugin() -> None:
         assert guard_at < plugin_at
         assert "BIOETL_BENCHMARK_CALLER" in text
         assert text.count("pytest_benchmark.plugin") == 1
+        if path.suffix == ".ps1":
+            assert "[string[]]$Args" not in text
+            assert '[Alias("Args")]' in text
+            assert "[string[]]$CandidateArgs" in text
 
 
 def test_guard_import_does_not_sample_the_clock() -> None:
