@@ -966,8 +966,17 @@ def test_verdict_write_error_preserves_the_pytest_exit_code(
     from scripts.engineering.ci import pytest_event_journal as journal
     from scripts.engineering.ci import run_pytest_resilient
 
+    seen: list[dict[str, Any]] = []
+
     def _deny(path: Path, payload: dict[str, Any]) -> None:
-        _ = (path, payload)
+        _ = path
+        seen.append(
+            {
+                "status": payload["status"],
+                "tests_passed": payload["tests_passed"],
+                "reasons": list(payload["reasons"]),
+            }
+        )
         raise PermissionError(13, "denied")
 
     monkeypatch.setattr(journal, "atomic_write_json", _deny)
@@ -988,6 +997,8 @@ def test_verdict_write_error_preserves_the_pytest_exit_code(
         executed_passes=["parallel"],
         test_rc=1,
     )
+    failed_verdict = seen[-1]
+    seen.clear()
     passed = run_pytest_resilient._finish_run(
         reports_dir=reports,
         summary_lines=[],
@@ -995,6 +1006,8 @@ def test_verdict_write_error_preserves_the_pytest_exit_code(
         executed_passes=["parallel"],
         test_rc=0,
     )
+    passed_verdict = seen[-1]
+    seen.clear()
     incomplete = run_pytest_resilient._finish_run(
         reports_dir=reports,
         summary_lines=[],
@@ -1002,9 +1015,47 @@ def test_verdict_write_error_preserves_the_pytest_exit_code(
         executed_passes=["parallel"],
         test_rc=0,
     )
+    empty_verdict = seen[-1]
     assert failed == 1
     assert passed == 4
     assert incomplete == 4
+    assert failed_verdict["status"] == "incomplete"
+    assert failed_verdict["tests_passed"] is None
+    assert "verdict_write_failed" in failed_verdict["reasons"]
+    assert passed_verdict["status"] == "incomplete"
+    assert passed_verdict["tests_passed"] is None
+    assert empty_verdict["status"] == "unknown"
+    assert "verdict_write_failed" in empty_verdict["reasons"]
+
+
+def test_verdict_directory_parent_file_stays_a_controlled_exit(tmp_path: Path) -> None:
+    from scripts.engineering.ci import run_pytest_resilient
+
+    blocker = tmp_path / "blocker"
+    blocker.write_text("x", encoding="utf-8")
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    journal_dir = blocker / "journal"
+    assert (
+        run_pytest_resilient._finish_run(
+            reports_dir=reports,
+            summary_lines=[],
+            journal_dir=journal_dir,
+            executed_passes=["parallel"],
+            test_rc=0,
+        )
+        == 4
+    )
+    assert (
+        run_pytest_resilient._finish_run(
+            reports_dir=reports,
+            summary_lines=[],
+            journal_dir=journal_dir,
+            executed_passes=["parallel"],
+            test_rc=1,
+        )
+        == 1
+    )
 
 
 def test_call_without_teardown_is_not_complete(tmp_path: Path) -> None:

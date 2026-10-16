@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-16T19:20:14.659026+00:00",
+  "generated_at": "2026-10-16T19:30:01.030014+00:00",
   "summary": {
     "total_scripts": 648,
     "status_counts": {
@@ -10446,7 +10446,7 @@
         },
         {
           "path": "scripts/engineering/ci/run_pytest_resilient.py",
-          "line": 243,
+          "line": 255,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.pytest_event_journal import ("
         },
@@ -10686,7 +10686,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 13,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -10731,10 +10731,10 @@
           "text": "from scripts.engineering.ci import run_pytest_resilient"
         },
         {
-          "path": "tests/architecture/test_ci_heavy_lane_rebalance.py",
-          "line": 141,
+          "path": "tests/architecture/ci/test_event_journal.py",
+          "line": 1032,
           "source_group": "tests",
-          "text": "assert \"run_pytest_resilient.py\" not in verify_block"
+          "text": "from scripts.engineering.ci import run_pytest_resilient"
         }
       ]
     },

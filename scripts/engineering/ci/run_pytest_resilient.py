@@ -226,6 +226,18 @@ def _persist_journal_verdict(
     return persisted
 
 
+def _note_verdict_write_failure(verdict: dict[str, Any]) -> None:
+    """Record a persistence failure without hiding a stronger journal status."""
+    reasons = list(verdict["reasons"])
+    if "verdict_write_failed" not in reasons:
+        reasons.append("verdict_write_failed")
+    verdict["reasons"] = reasons
+    if verdict["status"] != "complete":
+        return
+    verdict["status"] = "incomplete"
+    verdict["tests_passed"] = None
+
+
 def _finish_run(
     *,
     reports_dir: Path,
@@ -252,12 +264,7 @@ def _finish_run(
             journal_dir / "journal-verdict.json",
         )
         if not _persist_journal_verdict(verdict, destinations):
-            reasons = list(verdict["reasons"])
-            if "verdict_write_failed" not in reasons:
-                reasons.append("verdict_write_failed")
-            verdict["reasons"] = reasons
-            verdict["status"] = "incomplete"
-            verdict["tests_passed"] = None
+            _note_verdict_write_failure(verdict)
             _persist_journal_verdict(verdict, destinations)
         summary_lines.append(
             f"journal_status={verdict['status']} "
