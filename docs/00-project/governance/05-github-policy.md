@@ -29,7 +29,7 @@ ______________________________________________________________________
 
 | Branch           | Purpose                         | Protection                                             |
 | ---------------- | ------------------------------- | ------------------------------------------------------ |
-| `main`           | Production-ready code           | Rulesets 13643213 and 15730586 are **active** as of 2026-10-05 (#11928), requiring `ci/circleci: pr-gate-complete` and companion `ci/circleci: root-hygiene`, with strict freshness and no bypass actors. See §3. |
+| `main`           | Production-ready code           | Read-only GET 2026-10-16: rulesets that include `refs/heads/main` (13643213, 15730586) are `enforcement: disabled` and still store `ci/circleci:*` contexts. That is not active CircleCI protection and not GitHub Actions ruleset enforcement. Classic branch protection: HTTP 404. See §3. |
 | `develop`        | Integration branch (optional)   | Commit lint enforced                                   |
 | Feature branches | `feat/*`, `fix/*`, `refactor/*` | None                                                   |
 
@@ -211,7 +211,7 @@ weaken gates, raise tech-debt budgets, or force Grafana npm majors
 | `secret_scanning_non_provider_patterns` | disabled | Intentionally off (noisy). Do not enable without a dated issue. |
 | Unused environments | absent | `staging` MUST NOT exist. `copilot` is an **agent-runtime** environment (`GH-ENV-003`, #10371), not unused. Live GET `2026-09-11`: `copilot` present with required reviewers + custom branch policy `copilot/**`; `staging` absent. Publish environments stay `ghcr-publish`, `observability-render-host`, `pypi`, `testpypi`. `GH-ENV-002.known_issue: null`. |
 | Agent-runtime environment | protected, non-publish | `copilot`: reviewer `@SatoryKono`, custom refs `copilot/**` only, zero environment secrets, no tracked workflow `environment: copilot`. Must not overlap `protected_environments`. `#10311` DELETE is superseded. |
-| `allow_auto_merge` | `true` | Subject to the active CircleCI contexts and strict rulesets in §3; auto-merge cannot bypass them. |
+| `allow_auto_merge` | `true` | Auto-merge cannot bypass a ruleset while its enforcement is `active`. The 2026-10-16 read found main ruleset enforcement `disabled`, so this row does not claim a currently enforced CircleCI or GitHub Actions required check. See §3. |
 
 Controls live in [`github_governance_policy.json`](../../../configs/quality/github_governance_policy.json): `GH-SECRET-002`, `GH-SECRET-003`, `GH-ACTIONS-002`, `GH-ACTIONS-003`, `GH-ENV-002`, `GH-ENV-003`.
 
@@ -268,44 +268,41 @@ ______________________________________________________________________
 
 ## 3. Status Checks and Ruleset Contract
 
-### Current CircleCI protection — #11928
+### Current ruleset readback — 2026-10-16 (#12009)
 
-As of 2026-10-05, the active provider is `.circleci/config.yml`, workflow
-`pr-gate`. Ruleset `main` (13643213) requires
-`ci/circleci: pr-gate-complete`; active companion
-`root-hygiene-required-check` (15730586) additionally requires
-`ci/circleci: root-hygiene`. Both target only `refs/heads/main`, retain strict
-freshness and have no bypass actors. Deletion, non-fast-forward and PR
-protections are preserved. Missing, failed, canceled or stale evidence must
-block merge. Main pipelines 218–220 passed all 81 jobs on
-`a34558b918b56984a185c0e4956d735b43483780`; isolated negative PR #11954
-confirmed merge rejection. The [live GET receipt](../../../reports/governance/ruleset-11928-closeout-get-2026-10-05.json)
-records both rulesets and the applied branch rules.
+This subsection is the current repo-side description. It is a read-only GET,
+not a server change. Four facts stay separate:
 
-The canonical catalog's `deployment` block identifies CircleCI. Legacy
-`coordinator_workflow` and `owner_workflow` fields retain source definitions
-until #11930. They do not declare runnable Actions: Actions are disabled and
-billing restoration is out of scope. CircleCI emits commit statuses without a
-GitHub App identity, so no integration_id binding is claimed. The following
-Actions-era contract and historical receipts remain migration references;
-where execution/enforcement differs, this current contract takes precedence.
+1. **Enforcement.** `GET /repos/SatoryKono/BioactivityDataAcquisition/rulesets?per_page=100&includes_parents=true` returned one page (`Link` absent, HTTP 200, `Date: Fri, 16 Oct 2026 07:38:05 GMT`). The page listed three repository rulesets, all `enforcement: disabled`: `13643213` (`main`), `15730586` (`root-hygiene-required-check`), and `24517966` (`ci-11928-isolated-negative-acceptance`). Only `13643213` and `15730586` include `refs/heads/main`. `24517966` includes `refs/heads/codex/ci-11928-negative-base-20261005` and excludes `refs/heads/main`, so it does not apply to `main`. `GET /repos/SatoryKono/BioactivityDataAcquisition/rules/branches/main` returned HTTP 200 and an empty rule list.
+2. **Stored contexts, including while disabled.** `13643213` stores `ci/circleci: pr-gate-complete`. `15730586` stores `ci/circleci: pr-gate-complete` and `ci/circleci: root-hygiene`. A stored context on a disabled ruleset is not active CircleCI protection.
+3. **Target GitHub Actions context.** Catalog `deployment.required_context` is `pr-gate-complete`, the job name in `.github/workflows/pr-required.yml`. That name is not the context stored on these rulesets. The 2026-10-16 read did not show configured GitHub Actions ruleset enforcement.
+4. **What the date covers.** Catalog `enforcement_verified_date` stays `2026-10-09`. No in-repo consumer defines that field, and the schema has no separate slot for stored contexts or for the scope of a read. The 2026-10-16 read verified enforcement mode and stored contexts only, so the date was not moved to 2026-10-16.
+
+Classic branch protection `GET /repos/SatoryKono/BioactivityDataAcquisition/branches/main/protection` returned HTTP 404 `Branch not protected` (`Date: Fri, 16 Oct 2026 07:38:08 GMT`). That is an answered read, not an unknown access failure. Org-parent rulesets beyond `includes_parents=true` on this list were not returned.
+
+`deployment.provider` and `policy.enforcement_provider` remain `github_actions` because they name the runnable coordinator in this catalog. They do not mean the ruleset stores or enforces that provider. `policy.github_ruleset_13643213_enforcement` and `policy.github_ruleset_15730586_enforcement` stay `disabled`, matching the enforcement field from this read. `24517966` is outside those two catalog keys; its enforcement was also `disabled`, and it does not target `main`.
+
+### Historical CircleCI activation — #11928
+
+As of 2026-10-05, a previous read recorded ruleset `main` (13643213) with stored context `ci/circleci: pr-gate-complete` and companion `root-hygiene-required-check` (15730586) with `ci/circleci: root-hygiene`, both then treated as active. The [GET receipt](../../../reports/governance/ruleset-11928-closeout-get-2026-10-05.json) is that historical record. It does not describe the 2026-10-16 enforcement mode. Main pipelines 218–220 and negative PR #11954 belong to that historical activation.
 
 ### Historical Actions protection — #10267
 
-Updates to `main` **are blocked** by repository ruleset `main` (13643213)
-with `enforcement: active` as of `2026-09-10T02:53:01+03:00` (#10267 owner-approved
-PUT). Live `GET .../rules/branches/main` applies `deletion`, `non_fast_forward`,
+Historical as of `2026-09-10T02:53:01+03:00`, not the 2026-10-16 readback.
+Updates to `main` were blocked by repository ruleset `main` (13643213)
+with `enforcement: active` (#10267 owner-approved PUT). That GET of
+`.../rules/branches/main` applied `deletion`, `non_fast_forward`,
 `pull_request` (`required_approving_review_count: 0`), and required status check
 `pr-gate-complete` (`strict_required_status_checks_policy: true`). Companion
-ruleset `root-hygiene-required-check` (15730586) remains `enforcement: disabled`
-(updated `2026-09-02T09:41:27+03:00`) and still stores legacy
-`checks-complete` and `root-hygiene`; those leaf names are **not** GitHub-required.
+ruleset `root-hygiene-required-check` (15730586) remained `enforcement: disabled`
+(updated `2026-09-02T09:41:27+03:00`) and still stored legacy
+`checks-complete` and `root-hygiene`; those leaf names were **not** GitHub-required.
 There are no bypass actors (`current_user_can_bypass: never`). The former shadow
-coordinator `pr-gate-complete` is the live required context.
+coordinator `pr-gate-complete` was the live required context.
 
 ### Final always-on required-check set
 
-The GitHub-required context for repository ruleset `main` (13643213) is exactly:
+The target GitHub Actions context for the coordinator is exactly the job name below. The 2026-10-16 ruleset read did not store this name; the stored contexts are the `ci/circleci:*` values in the current readback above.
 
 | Check Name | Workflow | Why it is safe to require globally |
 | --- | --- | --- |
@@ -456,15 +453,15 @@ To remove drift between workflow-specific job names and governance language, Bio
 
 ### Branch Protection Verification
 
-The current protection is the CircleCI #11928 contract above. The dated
+The current readback is the 2026-10-16 subsection above. The dated
 verification history below preserves prior states and must not be interpreted
 as the current required-check set.
 
-PR merges and direct pushes to `main` **are** blocked by repository ruleset
-`main` (13643213) while its enforcement is `active`. Repo-side evidence is the
-live GET plus the workflow that materializes `pr-gate-complete`. Leaf jobs still
-emit `checks-complete` and `root-hygiene` on coordinator-owned PRs; those names
-are not GitHub-required.
+PR merges and direct pushes to `main` are blocked by repository ruleset
+`main` (13643213) only while its enforcement is `active`. On 2026-10-16 that
+enforcement was `disabled` and `GET .../rules/branches/main` returned no
+applied rules. Leaf jobs still emit `checks-complete` and `root-hygiene` on
+coordinator-owned PRs; those names are not GitHub-required.
 
 Activated and re-verified on `2026-08-28` with repository admin credentials via the GitHub REST API (closeout for #9782). Re-verified disabled on `2026-08-30` via the GitHub REST API (maintainer request during 72h branch consolidation). Re-activated on `2026-08-31` via the GitHub REST API (closeout for #9800; owner-approved required-check set). On `2026-09-01`, strict up-to-date enforcement was enabled and the companion `main` ruleset was activated for deletion and non-fast-forward protection. On `2026-09-10`, owner-approved PUT activated `13643213` with required context `pr-gate-complete` (#10267).
 
@@ -498,12 +495,14 @@ Live GitHub enforcement state (as of `2026-09-10T02:53:01+03:00`, GET-verified):
 
 The companion repository ruleset `main`
 (`https://github.com/SatoryKono/BioactivityDataAcquisition/rules/13643213`)
-targets `refs/heads/main` and is currently **active**. Applied rules are
-`deletion`, `non_fast_forward`, `pull_request` (`required_approving_review_count: 0`,
-dismiss stale reviews, required thread resolution), and `required_status_checks`
-(`pr-gate-complete`). Required signatures remain omitted. Scorecard CodeReview
-alert `#1295` therefore remains open: an independent-approval rule would deadlock
-a one-collaborator repository.
+targets `refs/heads/main`. As of the 2026-09-10 GET it was **active**, with
+stored rules `deletion`, `non_fast_forward`, `pull_request`
+(`required_approving_review_count: 0`, dismiss stale reviews, required thread
+resolution), and `required_status_checks` (`pr-gate-complete`). The 2026-10-16
+read found the same ruleset `enforcement: disabled` and a CircleCI stored
+context, which is not the context stored in that 2026-09-10 snapshot. Required
+signatures remain omitted. Scorecard CodeReview alert `#1295` therefore remains
+open: an independent-approval rule would deadlock a one-collaborator repository.
 
 For a stale classic branch-protection context left after disconnecting an
 external GitHub App, preview the bounded maintenance helper with
@@ -850,7 +849,7 @@ Historical GET `2026-09-10T02:53:01+03:00`:
 
 The historical rollback payload was
 `reports/governance/ruleset-10267-rollback-13643213.json`; it is not a rollback
-plan for the current CircleCI protection. Historical tracking: #10267,
+plan for the 2026-10-16 ruleset state. Historical tracking: #10267,
 Scorecard #1272 (BranchProtection), #1295 (CodeReview), #1296 (CIIBestPractices).
 
 ### Quarterly Read-Only Review Runbook (read-only, no mutations)
@@ -858,7 +857,7 @@ Scorecard #1272 (BranchProtection), #1295 (CodeReview), #1296 (CIIBestPractices)
 Owner: @SatoryKono · Cadence: quarterly · Last: 2026-08-28 → Next: 2026-11-28 · Due: +5 days after quarter (Q4 due `2026-12-05`; `nightly.yml` calls the reusable workflow on the first day of Jan/Apr/Jul/Oct) · Evidence: `reports/governance/quarterly-review-YYYY-QN.md` + `reports/quality/github-settings-review*.json` (30d retention, `automation_mutated_github:false`).
 
 Checklist (read-only `GET`, `--paginate` where paginated, no `PUT/PATCH/POST/DELETE`):
-`GET /repos/{owner}/{repo}/rulesets` → `GET /rulesets/{id}` (expect both 13643213 and 15730586 **`enforcement: active`**, strict freshness and no bypass; required contexts `ci/circleci: pr-gate-complete` and companion `ci/circleci: root-hygiene`) → `GET /rules/branches/main` (expect both CircleCI contexts) → `GET /code-scanning/alerts?per_page=100` → `GET /labels?per_page=100 --paginate` (record the current label count) → `GET /repos/{repo} --jq '{has_wiki,default_branch}'`.
+`GET /repos/{owner}/{repo}/rulesets?per_page=100&includes_parents=true` (follow `Link` until absent; do not assume the two historical ids are the full list) → `GET /rulesets/{id}` for every returned id → record enforcement and stored contexts separately, including ids that do not target `main` → `GET /rules/branches/main` → `GET /branches/main/protection` (HTTP 404 `Branch not protected` is an answered empty classic protection, not an unknown failure) → `GET /code-scanning/alerts?per_page=100` → `GET /labels?per_page=100 --paginate` (record the current label count) → `GET /repos/{repo} --jq '{has_wiki,default_branch}'`. A stored `ci/circleci:*` context on a disabled ruleset is not active CircleCI protection and is not GitHub Actions enforcement. Compare the result with §3; do not expect `enforcement: active` unless that GET shows it.
 Escalation: drift → open/update governance issue (high-risk → Security lane/Release engineering day of review); do not expand token scopes.
 Verification (no token, dry-run): `pytest tests/architecture/test_github_governance_review.py` (`READ_ONLY_GH_COMMANDS` + `workflow_dispatch` + the quarterly `nightly.yml` delegation guard).
 

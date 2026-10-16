@@ -1,7 +1,13 @@
-# Canonical applicability catalog shared by the CircleCI and retained Actions coordinators.
-# deployment records the live execution provider; owner_workflow and
-# coordinator_workflow retain legacy definitions until their retirement in #11930.
-# They are compatibility references, not runnable GitHub Actions declarations.
+# Canonical applicability catalog for the pull-request coordinator (#12009).
+# deployment.provider records the runnable workflow provider in this repo.
+# It is not a ruleset enforcement mode and not a stored status-check context.
+# owner_workflow and coordinator_workflow retain legacy definitions until #11930.
+# They are compatibility references, not extra GitHub Actions declarations.
+# policy.github_ruleset_*_enforcement records only the ruleset enforcement field.
+# This schema has no field for stored ruleset contexts. See
+# docs/00-project/governance/05-github-policy.md section 3.
+# enforcement_verified_date has no in-repo consumer. A read that only confirms
+# enforcement=disabled does not replace that date.
 schema_version: 1
 version: 3
 aggregator: pr-gate-complete
@@ -12,6 +18,7 @@ deployment:
   workflow: PR Gate Complete
   github_status_transport: check_run
   github_app_binding: github_actions
+  # Target coordinator job name. Not the context string stored on a ruleset.
   required_context: pr-gate-complete
   root_hygiene_context: Fast governance
   legacy_owner_retirement_issue: 11930
@@ -20,10 +27,14 @@ policy:
   allow_cancelled_as_success: false
   require_sha_binding: true
   not_applicable_requires_reason: true
+  # Ruleset enforcement field only. Does not record stored status contexts.
   github_ruleset_13643213_enforcement: disabled
   github_ruleset_15730586_enforcement: disabled
   catalog_check_status: enforced
+  # Runnable catalog provider, not the context stored on a disabled ruleset.
   enforcement_provider: github_actions
+  # Prior unstructured catalog claim. Not moved on the 2026-10-16 read:
+  # that read verified enforcement=disabled and stored ci/circleci contexts.
   enforcement_verified_date: "2026-10-09"
 canonical_checks:
   - id: ruff

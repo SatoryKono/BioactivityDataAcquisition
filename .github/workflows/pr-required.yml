@@ -1,9 +1,15 @@
 name: PR Gate Complete
-# Repo-side #9975 coordinator. Ruleset 13643213 names this job
-# (`name: pr-gate-complete`) as the Actions required context.
-# Enforcement stays disabled (#11180): do not flip it to active in this change.
+# Repo-side #9975 / #12009 coordinator. These comments are not a live ruleset receipt
+# and do not prove server enforcement (#11180: do not change rulesets here).
+# Target GitHub Actions context is job name pr-gate-complete
+# (catalog deployment.required_context). That name is not the context stored
+# on repository rulesets.
+# Read-only GET 2026-10-16 (one ruleset page, includes_parents=true): rulesets
+# that include refs/heads/main were enforcement=disabled and still stored
+# ci/circleci contexts. A stored context on a disabled ruleset is not active CircleCI protection
+# and is not configured GitHub Actions enforcement.
 # Actions billing is restored and this workflow runs on pull_request.
-# Next review 2026-12-30 or when enforcement is enabled, whichever is earlier.
+# Next review 2026-12-30 or when a newer ruleset read changes this note.
 # Each pull request has one owner invocation per gate and one fail-closed result.
 # Classify and aggregate check out the base ref. The PR head SHA is only a
 # diff argument (#11181). Leaf reusable workflows are pinned to a full commit
