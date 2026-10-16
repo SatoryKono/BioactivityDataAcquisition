@@ -36,6 +36,7 @@ jobs:
             --junitxml=reports/performance/hotspot-budgets.xml
 
       - name: Run pytest-benchmark cases
+        if: ${{ always() && !cancelled() }}
         run: |
           mkdir -p reports/performance
           # addopts still injects -p no:benchmark. Load the guard first, then
@@ -51,6 +52,7 @@ jobs:
             --benchmark-json=reports/performance/benchmark-measurements.json
 
       - name: Require pytest-benchmark measurement JSON
+        if: ${{ always() && !cancelled() }}
         run: |
           uv run --frozen --no-build python -m tests.benchmarks.benchmark_vcs_guard \
             --validate-measurement-json reports/performance/benchmark-measurements.json

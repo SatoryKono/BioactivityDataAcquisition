@@ -88,6 +88,7 @@ Measurement settings when the plugin is on:
 
 ```bash
 # Explicit local caller. Guard first, then -p benchmark.
+mkdir -p reports/performance
 BIOETL_BENCHMARK_CALLER=local \
 pytest tests/benchmarks/ \
   -m benchmark \
@@ -133,8 +134,9 @@ inside a budget.
 `python -m tests.benchmarks.benchmark_vcs_guard --validate-measurement-json`
 exits 0. That check requires all of the following:
 
-- `benchmarks` is a non-empty list and every `stats.rounds` is an integer >= 1
-- `bioetl_source.schema_version` is 1
+- `benchmarks` is a non-empty list and every `stats.rounds` is an integer >= 1;
+  a JSON boolean is not an integer
+- `bioetl_source.schema_version` is the integer 1
 - `bioetl_source.revision` is the 40-hex gitdir HEAD of the tree being
   validated, with `revision_method` `gitdir_head_file`
 - `bioetl_source.dirty_state` is `unknown`; a missing dirty probe is not a
@@ -142,7 +144,7 @@ exits 0. That check requires all of the following:
 - `commit_info.id` equals that revision and `commit_info.dirty` is null
 - `bioetl_run.id` is a UUID and is not the source revision
 - `bioetl_run.kind` is `pytest-benchmark` and `bioetl_run.caller` names the
-  run rather than a commit
+  run rather than a commit; `unspecified` is rejected
 - `bioetl_vcs_guard.installed_before_plugin` is true and
   `blocked_probe_attempts` is 0
 

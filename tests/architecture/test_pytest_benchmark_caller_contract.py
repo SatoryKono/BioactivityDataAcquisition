@@ -34,6 +34,8 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
+import urllib.error
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -168,18 +170,32 @@ def _locked_pytest_benchmark_spec() -> tuple[str, str, str]:
     return version_match.group(1), wheel_match.group("url"), wheel_match.group("digest")
 
 
-def _locked_wheel_file() -> tuple[str, Path, str]:
+def _wheel_cache_dir() -> Path:
+    return Path(tempfile.gettempdir()) / "bioetl-locked-pytest-benchmark"
+
+
+def _matching_cached_wheel() -> tuple[str, Path, str] | None:
+    version, _url, digest = _locked_pytest_benchmark_spec()
+    wheel_path = _wheel_cache_dir() / f"pytest_benchmark-{version}-py3-none-any.whl"
+    if not wheel_path.is_file():
+        return None
+    if hashlib.sha256(wheel_path.read_bytes()).hexdigest() != digest:
+        return None
+    return version, wheel_path, digest
+
+
+def _download_locked_wheel() -> tuple[str, Path, str]:
     version, url, digest = _locked_pytest_benchmark_spec()
-    cache = Path(os.environ.get("TEMP", "")) / "bioetl-locked-pytest-benchmark"
+    cache = _wheel_cache_dir()
     cache.mkdir(parents=True, exist_ok=True)
     wheel_path = cache / f"pytest_benchmark-{version}-py3-none-any.whl"
-    if (
-        wheel_path.is_file()
-        and hashlib.sha256(wheel_path.read_bytes()).hexdigest() == digest
-    ):
-        return version, wheel_path, digest
     partial = wheel_path.with_suffix(".whl.partial")
-    urllib.request.urlretrieve(url, partial)
+    try:
+        with urllib.request.urlopen(url, timeout=30) as response:
+            partial.write_bytes(response.read())
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        partial.unlink(missing_ok=True)
+        pytest.skip(f"locked pytest-benchmark wheel is unreachable: {exc}")
     actual = hashlib.sha256(partial.read_bytes()).hexdigest()
     if actual != digest:
         partial.unlink(missing_ok=True)
@@ -188,8 +204,7 @@ def _locked_wheel_file() -> tuple[str, Path, str]:
     return version, wheel_path, digest
 
 
-def _locked_pytest_benchmark_src() -> tuple[str, Path]:
-    version, wheel_path, digest = _locked_wheel_file()
+def _extracted_locked_src(wheel_path: Path, version: str, digest: str) -> Path:
     extracted = wheel_path.parent / version
     stamp = extracted / ".sha256"
     if not stamp.is_file() or stamp.read_text(encoding="utf-8").strip() != digest:
@@ -197,7 +212,29 @@ def _locked_pytest_benchmark_src() -> tuple[str, Path]:
         with zipfile.ZipFile(wheel_path) as archive:
             archive.extractall(extracted)
         stamp.write_text(digest + "\n", encoding="utf-8")
-    return version, extracted
+    return extracted
+
+
+def _lock_resolved_benchmark_src() -> Path | None:
+    """Return an extracted lockfile wheel, or None to use the installed package."""
+
+    cached = _matching_cached_wheel()
+    if cached is None and os.environ.get("BIOETL_PYTEST_BENCHMARK_FETCH_LOCK") == "1":
+        cached = _download_locked_wheel()
+    if cached is not None:
+        version, wheel_path, digest = cached
+        return _extracted_locked_src(wheel_path, version, digest)
+    version, _url, _digest = _locked_pytest_benchmark_spec()
+    import importlib.metadata as metadata
+
+    installed = metadata.version("pytest-benchmark")
+    if installed != version:
+        pytest.skip(
+            "installed pytest-benchmark "
+            f"{installed} != uv.lock {version}; set "
+            "BIOETL_PYTEST_BENCHMARK_FETCH_LOCK=1 to fetch the pinned wheel"
+        )
+    return None
 
 
 def _benchmark_under_test() -> str:
@@ -221,8 +258,9 @@ def _probe_env(tmp_path: Path) -> tuple[dict[str, str], Path]:
     log_path.write_text("", encoding="utf-8")
     pythonpath = [str(probe_dir)]
     if _benchmark_under_test() != "installed":
-        _version, source = _locked_pytest_benchmark_src()
-        pythonpath.append(str(source))
+        source = _lock_resolved_benchmark_src()
+        if source is not None:
+            pythonpath.append(str(source))
     env = os.environ.copy()
     env.pop("PYTEST_ADDOPTS", None)
     env["PYTHONPATH"] = os.pathsep.join(pythonpath)
@@ -237,6 +275,12 @@ def _probe_lines(log_path: Path) -> list[str]:
         for line in log_path.read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
+
+
+def test_locked_wheel_cache_stays_outside_the_repository() -> None:
+    cache = _wheel_cache_dir()
+    assert cache.is_absolute()
+    assert not cache.is_relative_to(ROOT)
 
 
 def test_source_revision_matches_git_rev_parse() -> None:
@@ -358,6 +402,12 @@ def test_workflow_enables_guard_before_benchmark_and_keeps_hotspot_fail_open() -
     gate = _step_run("Require pytest-benchmark measurement JSON")
     assert f"python -m {GUARD_PLUGIN}" in gate
     assert "--validate-measurement-json" in gate
+    for name in (
+        "Run pytest-benchmark cases",
+        "Require pytest-benchmark measurement JSON",
+    ):
+        step = next(item for item in _workflow_steps() if item.get("name") == name)
+        assert step.get("if") == "${{ always() && !cancelled() }}"
 
 
 @pytest.mark.timeout(180)
@@ -503,18 +553,20 @@ def _assert_loaded_benchmark(env: dict[str, str]) -> None:
     version, loaded = completed.stdout.splitlines()
     assert version == _expected_benchmark_version()
     loaded_path = Path(loaded).resolve()
-    if _benchmark_under_test() == "installed":
-        import importlib.metadata as metadata
-
-        installed = Path(
-            metadata.distribution("pytest-benchmark").locate_file(
-                "pytest_benchmark/utils.py"
-            )
-        ).resolve()
-        assert loaded_path == installed
+    cached = _matching_cached_wheel()
+    if _benchmark_under_test() != "installed" and cached is not None:
+        version, wheel_path, digest = cached
+        source = _extracted_locked_src(wheel_path, version, digest)
+        assert loaded_path.is_relative_to(source.resolve())
         return
-    _pinned, source = _locked_pytest_benchmark_src()
-    assert loaded_path.is_relative_to(source.resolve())
+    import importlib.metadata as metadata
+
+    installed = Path(
+        metadata.distribution("pytest-benchmark").locate_file(
+            "pytest_benchmark/utils.py"
+        )
+    ).resolve()
+    assert loaded_path == installed
 
 
 @pytest.mark.timeout(120)

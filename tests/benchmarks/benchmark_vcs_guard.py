@@ -362,7 +362,7 @@ def validate_benchmark_measurement_json(
             )
         stats = bench.get("stats")
         rounds = stats.get("rounds") if isinstance(stats, dict) else None
-        if not isinstance(rounds, int) or rounds < 1:
+        if type(rounds) is not int or rounds < 1:
             raise BenchmarkMeasurementContractError(
                 "no_measurements",
                 f"benchmarks[{index}].stats.rounds must be an integer >= 1",
@@ -379,7 +379,8 @@ def validate_benchmark_measurement_json(
         "blocked_provenance",
         "bioetl_vcs_guard",
     )
-    if source.get("schema_version") != _SCHEMA_VERSION:
+    schema_version = source.get("schema_version")
+    if type(schema_version) is not int or schema_version != _SCHEMA_VERSION:
         raise BenchmarkMeasurementContractError(
             "blocked_provenance",
             "bioetl_source.schema_version is not 1",
@@ -429,17 +430,24 @@ def validate_benchmark_measurement_json(
             "blocked_provenance", "bioetl_run.kind is wrong"
         )
     caller = run.get("caller")
-    if not isinstance(caller, str) or not caller.strip() or _SHA_RE.fullmatch(caller):
+    if (
+        not isinstance(caller, str)
+        or caller.strip() in {"", "unspecified"}
+        or _SHA_RE.fullmatch(caller)
+    ):
         raise BenchmarkMeasurementContractError(
             "blocked_provenance",
-            "bioetl_run.caller must name the run, not a commit",
+            "bioetl_run.caller must name the run, not a commit or unspecified",
         )
     if guard.get("installed_before_plugin") is not True:
         raise BenchmarkMeasurementContractError(
             "late_guard",
             "VCS guard was installed after pytest-benchmark import",
         )
-    if guard.get("blocked_probe_attempts") != 0:
+    if (
+        type(guard.get("blocked_probe_attempts")) is not int
+        or guard.get("blocked_probe_attempts") != 0
+    ):
         raise BenchmarkMeasurementContractError(
             "vcs_probe",
             "pytest-benchmark reached a VCS probe seam",

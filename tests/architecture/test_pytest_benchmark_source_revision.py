@@ -140,3 +140,37 @@ def test_unresolvable_symbolic_head_is_blocked(tmp_path: Path) -> None:
     with pytest.raises(BenchmarkMeasurementContractError) as error:
         validate_benchmark_measurement_json(output, search_from=root)
     assert error.value.code == "provenance_mismatch"
+
+
+def test_validator_rejects_bool_counts_and_unspecified_caller(tmp_path: Path) -> None:
+    root = tmp_path / "checkout"
+    _write(root / ".git" / "HEAD", COMMIT + "\n")
+    output = root / "measurement.json"
+    _measurement(output, COMMIT)
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    payload["benchmarks"][0]["stats"]["rounds"] = True
+    output.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(BenchmarkMeasurementContractError) as rounds_error:
+        validate_benchmark_measurement_json(output, search_from=root)
+    assert rounds_error.value.code == "no_measurements"
+
+    payload["benchmarks"][0]["stats"]["rounds"] = 1
+    payload["bioetl_source"]["schema_version"] = True
+    output.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(BenchmarkMeasurementContractError) as schema_error:
+        validate_benchmark_measurement_json(output, search_from=root)
+    assert schema_error.value.code == "blocked_provenance"
+
+    payload["bioetl_source"]["schema_version"] = 1
+    payload["bioetl_vcs_guard"]["blocked_probe_attempts"] = True
+    output.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(BenchmarkMeasurementContractError) as probes_error:
+        validate_benchmark_measurement_json(output, search_from=root)
+    assert probes_error.value.code == "vcs_probe"
+
+    payload["bioetl_vcs_guard"]["blocked_probe_attempts"] = 0
+    payload["bioetl_run"]["caller"] = "unspecified"
+    output.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(BenchmarkMeasurementContractError) as caller_error:
+        validate_benchmark_measurement_json(output, search_from=root)
+    assert caller_error.value.code == "blocked_provenance"
