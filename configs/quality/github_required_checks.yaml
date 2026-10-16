@@ -84,7 +84,16 @@ policy:
     - "MUST be `enforcement: active`"
     - "Active main rulesets"
     - "CI runs through `.circleci/config.yml`"
-    - "GitHub Actions are disabled"
+  # "GitHub Actions are disabled" is a current-configuration claim only.
+  # The same words stay valid on a historical heading, or on a line that
+  # disables one workflow (keep-disabled, disabled_manually, individual workflow).
+  prose_scoped_forbidden_phrases:
+    - phrase: "GitHub Actions are disabled"
+      line_allow_if_contains_any:
+        - "historical"
+        - "keep-disabled"
+        - "disabled_manually"
+        - "individual workflow"
 canonical_checks:
   - id: ruff
     owner_workflow: .github/workflows/import-linter.yml

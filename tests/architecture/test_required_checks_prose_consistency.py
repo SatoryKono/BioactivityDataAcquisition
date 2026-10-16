@@ -6,6 +6,7 @@ does not prove that GitHub is blocking merge.
 
 from __future__ import annotations
 
+import copy
 import re
 from pathlib import Path
 from typing import Any
@@ -67,6 +68,13 @@ def check_required_checks_prose(
         for phrase in forbidden:
             if str(phrase) in text:
                 errors.append(f"{doc_path} contains forbidden phrase: {phrase}")
+        errors.extend(
+            _scoped_forbidden_errors(
+                str(doc_path),
+                text,
+                policy.get("prose_scoped_forbidden_phrases"),
+            )
+        )
         found_ids = set(_ANCHOR.findall(text))
         for claim_id in sorted(found_ids - declared_ids):
             errors.append(f"{doc_path} has undeclared policy-anchor:{claim_id}")
@@ -81,6 +89,45 @@ def check_required_checks_prose(
             for substring in claim.get("required_substrings") or []:
                 if str(substring) not in text:
                     errors.append(f"{doc_path} claim {claim_id} missing {substring!r}")
+    return errors
+
+
+def _scoped_forbidden_errors(
+    doc_path: str,
+    text: str,
+    rules: object,
+) -> list[str]:
+    """Flag a current-configuration claim without rejecting a marked exception."""
+
+    if rules is None:
+        return []
+    if not isinstance(rules, list):
+        return ["prose_scoped_forbidden_phrases must be a list"]
+    errors: list[str] = []
+    lines = text.splitlines()
+    for rule in rules:
+        if not isinstance(rule, dict):
+            errors.append("scoped forbidden phrase must be a mapping")
+            continue
+        phrase = str(rule.get("phrase") or "")
+        allow = [str(token) for token in rule.get("line_allow_if_contains_any") or []]
+        if not phrase:
+            errors.append("scoped forbidden phrase is empty")
+            continue
+        for index, line in enumerate(lines):
+            if phrase not in line:
+                continue
+            context = line
+            for previous in range(index - 1, -1, -1):
+                if lines[previous].lstrip().startswith("#"):
+                    context = lines[previous] + "\n" + line
+                    break
+            folded = context.casefold()
+            if any(token.casefold() in folded for token in allow):
+                continue
+            errors.append(
+                f"{doc_path} current-configuration claim {phrase!r} at line {index + 1}"
+            )
     return errors
 
 
@@ -136,3 +183,87 @@ def test_forbidden_active_circleci_phrase_fails() -> None:
     documents[target] += "\nActive main rulesets\n"
     errors = check_required_checks_prose(catalog, documents)
     assert any("Active main rulesets" in error for error in errors)
+
+
+def test_current_actions_disabled_claim_fails() -> None:
+    catalog = _load_yaml(CATALOG)
+    policy = catalog["policy"]
+    documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
+    target = str(policy["prose_claim_doc_paths"][0])
+    documents[target] = "GitHub Actions are disabled.\n" + documents[target]
+    errors = check_required_checks_prose(catalog, documents)
+    assert any("GitHub Actions are disabled" in error and target in error for error in errors)
+
+
+def test_historical_actions_disabled_sentence_is_allowed() -> None:
+    catalog = _load_yaml(CATALOG)
+    policy = catalog["policy"]
+    documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
+    target = str(policy["prose_claim_doc_paths"][0])
+    documents[target] = (
+        "### Historical record\nGitHub Actions are disabled.\n" + documents[target]
+    )
+    errors = check_required_checks_prose(catalog, documents)
+    assert errors == []
+
+
+def test_individual_workflow_disable_instruction_is_allowed() -> None:
+    catalog = _load_yaml(CATALOG)
+    policy = catalog["policy"]
+    allow = policy["prose_scoped_forbidden_phrases"][0]["line_allow_if_contains_any"]
+    assert allow == [
+        "historical",
+        "keep-disabled",
+        "disabled_manually",
+        "individual workflow",
+    ]
+    documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
+    target = str(policy["prose_claim_doc_paths"][0])
+    documents[target] = (
+        "Disable an individual workflow: GitHub Actions are disabled for stale.yml only.\n"
+        "coderabbit.yml is keep-disabled because GitHub Actions are disabled for that file.\n"
+        "labeler.yml is disabled_manually: GitHub Actions are disabled for that workflow.\n"
+        + documents[target]
+    )
+    errors = check_required_checks_prose(catalog, documents)
+    assert errors == []
+
+
+def test_historical_heading_does_not_allow_other_forbidden_phrases() -> None:
+    catalog = _load_yaml(CATALOG)
+    policy = catalog["policy"]
+    documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
+    target = str(policy["prose_claim_doc_paths"][0])
+    documents[target] = "### Historical record\nActive main rulesets\n" + documents[target]
+    errors = check_required_checks_prose(catalog, documents)
+    assert any("Active main rulesets" in error for error in errors)
+
+
+def test_each_declared_document_is_checked() -> None:
+    catalog = _load_yaml(CATALOG)
+    policy = catalog["policy"]
+    doc_paths = [str(path) for path in policy["prose_claim_doc_paths"]]
+    assert doc_paths
+    documents = _repo_documents(ROOT, doc_paths)
+    for doc_path in doc_paths:
+        assert (ROOT / doc_path).is_file()
+        mutated = dict(documents)
+        mutated[doc_path] = mutated[doc_path].replace(
+            "policy-anchor:merge-block",
+            "policy-anchor:merge-bloc",
+        )
+        errors = check_required_checks_prose(catalog, mutated)
+        assert any(doc_path in error and "merge-block" in error for error in errors), doc_path
+
+
+def test_live_protection_boolean_true_is_rejected() -> None:
+    from scripts.engineering.ci.pr_gate import load_catalog
+
+    loaded = load_catalog(CATALOG)
+    assert loaded["schema_version"] == 1
+    assert loaded["policy"]["enforcement_verified_date_is_live_protection_evidence"] is False
+    catalog = copy.deepcopy(_load_yaml(CATALOG))
+    catalog["policy"]["enforcement_verified_date_is_live_protection_evidence"] = True
+    documents = _repo_documents(ROOT, list(catalog["policy"]["prose_claim_doc_paths"]))
+    errors = check_required_checks_prose(catalog, documents)
+    assert any("must be false" in error for error in errors)
