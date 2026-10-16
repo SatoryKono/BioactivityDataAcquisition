@@ -39,16 +39,12 @@ jobs:
         if: ${{ always() && !cancelled() }}
         run: |
           mkdir -p reports/performance
-          if [ -f reports/performance/hotspot-observations.jsonl ]; then
-            uv run --frozen --no-build python -m scripts.engineering.qa report-hotspots \
-              --observations reports/performance/hotspot-observations.jsonl \
-              --budgets tests/performance/hotspot_budgets.json \
-              --window-size 5 \
-              --json-out reports/performance/hotspot-degradation.json \
-              --markdown-out reports/performance/hotspot-degradation.md
-          else
-            echo "No hotspot observations found; skipping report."
-          fi
+          uv run --frozen --no-build python -m scripts.engineering.qa report-hotspots \
+            --observations reports/performance/hotspot-observations.jsonl \
+            --budgets tests/performance/hotspot_budgets.json \
+            --window-size 5 \
+            --json-out reports/performance/hotspot-degradation.json \
+            --markdown-out reports/performance/hotspot-degradation.md
 
       - name: Publish degradation summary
         if: always()
@@ -58,29 +54,21 @@ jobs:
           fi
 
       - name: Gate on degradation report
-        if: always()
+        if: ${{ always() && !cancelled() }}
         run: |
-          if [ -f reports/performance/hotspot-degradation.json ]; then
-            python - <<'PY'
-          import json, sys
-          data = json.load(open('reports/performance/hotspot-degradation.json'))
-          failed = data.get('summary', {}).get('failed', 0)
-          print(f'Benchmarks over budget: {failed}')
-          sys.exit(1 if failed > 0 else 0)
-          PY
-          fi
+          uv run --frozen --no-build python -m scripts.engineering.qa gate-hotspot-report \
+            --report reports/performance/hotspot-degradation.json
 
       - name: Reduce benchmark evidence
         if: ${{ always() && !cancelled() }}
         run: |
           mkdir -p reports/performance
-
-          # Since PR 12235 is not merged into main, benchmark-measurements.json does not exist.
-          # The reducer will explicitly fail and log the integration blocker.
-          uv run --frozen --no-build python -m scripts.engineering.qa.reduce_benchmark_evidence \
+          uv run --frozen --no-build python -m scripts.engineering.qa reduce-benchmark-evidence \
             --raw-json reports/performance/benchmark-measurements.json \
             --manifest-out reports/performance/benchmark-manifest.json \
             --gate-out reports/performance/benchmark-gate.json \
+            --baseline reports/performance/benchmark-summary.json \
+            --evidence-dir reports/performance/evidence \
             --checkout-sha "${{ github.sha }}"
 
       - name: Upload performance artifacts
@@ -93,7 +81,9 @@ jobs:
             reports/performance/hotspot-observations.jsonl
             reports/performance/hotspot-degradation.json
             reports/performance/hotspot-degradation.md
+            reports/performance/benchmark-measurements.json
             reports/performance/benchmark-manifest.json
             reports/performance/benchmark-gate.json
+            reports/performance/evidence/
           if-no-files-found: error
           retention-days: 30

@@ -13,8 +13,15 @@ Produces:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import math
+import os
+import re
+import sys
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from statistics import median
 from typing import Any
@@ -81,32 +88,58 @@ def _load_budgets(path: Path, *, root: Path | None = None) -> dict[str, HotspotB
     }
 
 
+class HotspotLoadError(Exception):
+    """Observations are missing or are not a usable measurement."""
+
+    def __init__(self, reason: str) -> None:
+        super().__init__(reason)
+        self.reason = reason
+
+
+def _finite_float(value: object) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError("unusable number")
+    number = float(value)
+    if not math.isfinite(number):
+        raise ValueError("non-finite number")
+    return number
+
+
 def _load_observations(
     path: Path, *, root: Path | None = None
 ) -> dict[str, list[HotspotObservation]]:
     from scripts.engineering.common.repo_paths import read_text_confined_or_none
 
     content = read_text_confined_or_none(path, root=root, allow_external_absolute=True)
-    if content is None:
-        return {}
+    if content is None or not content.strip():
+        raise HotspotLoadError("missing_observations")
 
     grouped: dict[str, list[HotspotObservation]] = {}
     for line in content.splitlines():
         payload = line.strip()
         if not payload:
             continue
-        record = json.loads(payload)
-        key = str(record.get("benchmark_key", ""))
-        if not key:
-            continue
-        grouped.setdefault(key, []).append(
-            HotspotObservation(
-                latency_ms=float(record["latency_ms"]),
-                p95_latency_ms=float(record.get("p95_latency_ms", 0.0)),
-                throughput_rps=float(record["throughput_rps"]),
-                timestamp_unix=float(record.get("timestamp_unix", 0.0)),
+        try:
+            record = json.loads(payload)
+        except json.JSONDecodeError as exc:
+            raise HotspotLoadError("malformed_observations") from exc
+        if not isinstance(record, dict):
+            raise HotspotLoadError("malformed_observations")
+        key = record.get("benchmark_key")
+        if not isinstance(key, str) or not key:
+            raise HotspotLoadError("malformed_observations")
+        try:
+            observation = HotspotObservation(
+                latency_ms=_finite_float(record.get("latency_ms")),
+                p95_latency_ms=_finite_float(record.get("p95_latency_ms", 0.0)),
+                throughput_rps=_finite_float(record.get("throughput_rps")),
+                timestamp_unix=_finite_float(record.get("timestamp_unix", 0.0)),
             )
-        )
+        except (TypeError, ValueError) as exc:
+            raise HotspotLoadError("malformed_observations") from exc
+        grouped.setdefault(key, []).append(observation)
+    if not grouped:
+        raise HotspotLoadError("missing_observations")
     return grouped
 
 
@@ -297,9 +330,11 @@ def _write_json_report(
     from scripts.engineering.common.repo_paths import write_text_confined
 
     payload = {
-        "window_size": window_size,
-        "summary": summary,
         "benchmarks": [asdict(item) for item in report],
+        "reason": "over_budget" if summary["failed"] > 0 else "within_budget",
+        "summary": summary,
+        "verdict": "measured",
+        "window_size": window_size,
     }
     write_text_confined(
         path,
@@ -318,7 +353,37 @@ def _write_markdown_report(
     write_text_confined(path, markdown, root=root, allow_external_absolute=True)
 
 
-def main(argv: list[str] | None = None) -> int:
+def _write_hotspot_failure(
+    json_out: Path,
+    markdown_out: Path,
+    reason: str,
+    *,
+    root: Path,
+) -> None:
+    from scripts.engineering.common.repo_paths import write_text_confined
+
+    payload = {
+        "benchmarks": [],
+        "reason": reason,
+        "summary": None,
+        "verdict": "failed",
+        "window_size": None,
+    }
+    write_text_confined(
+        json_out,
+        json.dumps(payload, ensure_ascii=True, indent=2, sort_keys=True) + "\n",
+        root=root,
+        allow_external_absolute=True,
+    )
+    write_text_confined(
+        markdown_out,
+        f"# Hotspot Degradation Report\n\n- verdict: failed\n- reason: {reason}\n",
+        root=root,
+        allow_external_absolute=True,
+    )
+
+
+def hotspot_report_main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--observations",
@@ -354,8 +419,35 @@ def main(argv: list[str] | None = None) -> int:
     from scripts.engineering.common.repo_paths import REPO_ROOT
 
     root = REPO_ROOT
-    budgets = _load_budgets(args.budgets, root=root)
-    observations = _load_observations(args.observations, root=root)
+    try:
+        observations = _load_observations(args.observations, root=root)
+        budgets = _load_budgets(args.budgets, root=root)
+    except HotspotLoadError as exc:
+        _write_hotspot_failure(args.json_out, args.markdown_out, exc.reason, root=root)
+        return 1
+    except (
+        OSError,
+        UnicodeError,
+        json.JSONDecodeError,
+        ValueError,
+        KeyError,
+        TypeError,
+    ):
+        _write_hotspot_failure(
+            args.json_out,
+            args.markdown_out,
+            "malformed_observations",
+            root=root,
+        )
+        return 1
+    missing = [key for key in budgets if not observations.get(key)]
+    unknown = [key for key in observations if key not in budgets]
+    if not observations or missing or unknown:
+        reason = (
+            "missing_observations" if not observations else "incomplete_observations"
+        )
+        _write_hotspot_failure(args.json_out, args.markdown_out, reason, root=root)
+        return 1
     report = _compute_degradation(
         budgets,
         observations,
@@ -363,8 +455,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     summary = _build_summary(report)
     normalized_window_size = max(1, args.window_size)
+    if type(summary.get("failed")) is not int or summary["total"] < 1:
+        _write_hotspot_failure(
+            args.json_out, args.markdown_out, "missing_summary", root=root
+        )
+        return 1
     markdown = _render_markdown(report, summary, window_size=normalized_window_size)
-
     _write_json_report(
         args.json_out,
         report,
@@ -379,6 +475,615 @@ def main(argv: list[str] | None = None) -> int:
         f"over_budget={summary['failed']}",
     )
     return 0
+
+
+def judge_hotspot_report(payload: object) -> tuple[str, str]:
+    """Return status and reason. Missing summary.failed is not a pass."""
+    if not isinstance(payload, dict):
+        return "failed", "malformed_report"
+    if payload.get("verdict") != "measured":
+        reason = payload.get("reason")
+        if isinstance(reason, str) and reason:
+            return "failed", reason
+        return "failed", "missing_verdict"
+    summary = payload.get("summary")
+    if not isinstance(summary, dict) or type(summary.get("failed")) is not int:
+        return "failed", "missing_summary"
+    total = summary.get("total")
+    if type(total) is not int or total < 1:
+        return "failed", "zero_observations"
+    if summary["failed"] > 0:
+        return "failed", "over_budget"
+    return "passed", "within_budget"
+
+
+def gate_hotspot_report_main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Fail closed on a hotspot report.")
+    parser.add_argument("--report", type=Path, required=True)
+    parser.add_argument("--output-root", type=Path, default=None)
+    args = parser.parse_args(argv)
+    from scripts.engineering.common.repo_paths import REPO_ROOT, read_text_confined
+
+    root = args.output_root or REPO_ROOT
+    try:
+        text = read_text_confined(args.report, root=root)
+    except ValueError:
+        print("rejected_output_path", file=sys.stderr)
+        return 2
+    except OSError:
+        print("missing_report", file=sys.stderr)
+        return 1
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError:
+        print("malformed_report", file=sys.stderr)
+        return 1
+    status, reason = judge_hotspot_report(payload)
+    print(json.dumps({"reason": reason, "status": status}, sort_keys=True))
+    return 0 if status == "passed" else 1
+
+
+_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+_RUN_ID_RE = re.compile(r"^[1-9][0-9]*$")
+_REPO_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+_REGRESSION_THRESHOLD = Decimal("0.1")
+_SCOPE_PREFIXES = ("tests/benchmarks/", "tests/performance/")
+_Measurement = tuple[str, str, str, str, Decimal]
+
+
+def _dump(payload: Mapping[str, object]) -> str:
+    return json.dumps(payload, ensure_ascii=True, indent=2, sort_keys=True) + "\n"
+
+
+def _resolve_gitdir(repo: Path) -> Path | None:
+    git_entry = repo / ".git"
+    if git_entry.is_dir():
+        return git_entry
+    if not git_entry.is_file():
+        return None
+    try:
+        text = git_entry.read_text(encoding="utf-8").strip()
+    except (OSError, UnicodeError):
+        return None
+    if not text.startswith("gitdir: "):
+        return None
+    raw = Path(text[8:].strip())
+    gitdir = raw if raw.is_absolute() else (git_entry.parent / raw)
+    gitdir = gitdir.resolve(strict=False)
+    return gitdir if gitdir.is_dir() else None
+
+
+def _sha_from_ref(gitdir: Path, ref: str) -> str | None:
+    ref_path = gitdir / ref
+    if ref_path.is_file():
+        try:
+            value = ref_path.read_text(encoding="utf-8").strip()
+        except (OSError, UnicodeError):
+            return None
+        return value if _SHA_RE.fullmatch(value) else None
+    packed = gitdir / "packed-refs"
+    if not packed.is_file():
+        return None
+    try:
+        lines = packed.read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeError):
+        return None
+    for line in lines:
+        if not line or line.startswith("#") or line.startswith("^"):
+            continue
+        sha, _, name = line.partition(" ")
+        if name == ref and _SHA_RE.fullmatch(sha):
+            return sha
+    return None
+
+
+def _common_gitdir(gitdir: Path) -> Path:
+    pointer = gitdir / "commondir"
+    if not pointer.is_file():
+        return gitdir
+    try:
+        raw = Path(pointer.read_text(encoding="utf-8").strip())
+    except (OSError, UnicodeError):
+        return gitdir
+    resolved = raw if raw.is_absolute() else gitdir / raw
+    resolved = resolved.resolve(strict=False)
+    return resolved if resolved.is_dir() else gitdir
+
+
+def read_checkout_sha(repo: Path) -> str | None:
+    """Read the checked-out commit from the gitdir, without ancestry."""
+    gitdir = _resolve_gitdir(repo)
+    if gitdir is None:
+        return None
+    try:
+        head = (gitdir / "HEAD").read_text(encoding="utf-8").strip()
+    except (OSError, UnicodeError):
+        return None
+    if _SHA_RE.fullmatch(head):
+        return head
+    if not head.startswith("ref: "):
+        return None
+    ref = head[5:].strip()
+    return _sha_from_ref(gitdir, ref) or _sha_from_ref(_common_gitdir(gitdir), ref)
+
+
+def _decimal_mean(value: object) -> Decimal | None:
+    if isinstance(value, bool) or not isinstance(value, (int, float, str)):
+        return None
+    if isinstance(value, str):
+        return None
+    if isinstance(value, float) and not math.isfinite(value):
+        return None
+    try:
+        number = Decimal(str(value))
+    except InvalidOperation:
+        return None
+    return number if number.is_finite() else None
+
+
+def _scope_of(identity: str) -> str | None:
+    normalized = identity.replace("\\", "/")
+    for prefix in _SCOPE_PREFIXES:
+        if normalized.startswith(prefix):
+            return prefix
+    return None
+
+
+def _github_identity(env: Mapping[str, str]) -> tuple[dict[str, str] | None, str]:
+    if env.get("GITHUB_ACTIONS") != "true":
+        return None, "unproven_environment"
+    run_id = env.get("GITHUB_RUN_ID", "")
+    attempt = env.get("GITHUB_RUN_ATTEMPT", "")
+    server = env.get("GITHUB_SERVER_URL", "")
+    repository = env.get("GITHUB_REPOSITORY", "")
+    if (
+        _RUN_ID_RE.fullmatch(run_id) is None
+        or _RUN_ID_RE.fullmatch(attempt) is None
+        or _REPO_RE.fullmatch(repository) is None
+        or server != "https://github.com"
+    ):
+        return None, "unproven_run"
+    return {
+        "environment": "github-actions",
+        "event_name": env.get("GITHUB_EVENT_NAME", ""),
+        "repository": repository,
+        "run_attempt": attempt,
+        "run_id": run_id,
+        "run_url": f"{server}/{repository}/actions/runs/{run_id}",
+        "synthetic_merge": "true"
+        if env.get("GITHUB_EVENT_NAME") == "pull_request"
+        else "false",
+    }, ""
+
+
+def _assess_entries(benchmarks: object) -> str | list[_Measurement]:
+    if not isinstance(benchmarks, list):
+        return "malformed_entries"
+    if not benchmarks:
+        return "zero_execution"
+    measurements: list[_Measurement] = []
+    skipped = 0
+    saw_error = False
+    saw_unusable = False
+    saw_incomplete = False
+    for entry in benchmarks:
+        if not isinstance(entry, dict):
+            return "malformed_entries"
+        has_error = entry.get("has_error", False)
+        if not isinstance(has_error, bool):
+            return "malformed_entries"
+        if has_error:
+            saw_error = True
+            continue
+        stats = entry.get("stats", None)
+        if stats is None or stats == {}:
+            skipped += 1
+            continue
+        if not isinstance(stats, dict):
+            return "malformed_entries"
+        if "mean" not in stats:
+            saw_incomplete = True
+            continue
+        mean = _decimal_mean(stats.get("mean"))
+        rounds = stats.get("rounds")
+        if mean is None or type(rounds) is not int or rounds < 1:
+            if mean is None:
+                saw_unusable = True
+            else:
+                saw_incomplete = True
+            continue
+        identity = entry.get("fullname")
+        if not isinstance(identity, str) or not identity.strip():
+            identity = entry.get("name")
+        if not isinstance(identity, str) or not identity.strip():
+            saw_incomplete = True
+            continue
+        scope = _scope_of(identity)
+        if scope is None:
+            saw_incomplete = True
+            continue
+        measurements.append((identity, scope, "", "", mean))
+    if saw_error:
+        return "execution_error"
+    if saw_unusable:
+        return "unusable_measurement"
+    if saw_incomplete or (measurements and skipped):
+        return "incomplete_evidence"
+    if not measurements:
+        return "all_skipped"
+    return measurements
+
+
+def _measurement_context(
+    payload: Mapping[str, object],
+    measurements: list[_Measurement],
+) -> tuple[str, str, list[_Measurement]] | str:
+    context = payload.get("bioetl_measurement")
+    if not isinstance(context, dict):
+        return "incomplete_evidence"
+    dataset = context.get("dataset")
+    environment = context.get("environment")
+    if not isinstance(dataset, str) or not dataset.strip():
+        return "incomplete_evidence"
+    if dataset == "synthetic":
+        return "synthetic_measurement"
+    if environment != "github-actions":
+        return "unproven_environment"
+    bound = [
+        (test_id, scope, dataset, "github-actions", mean)
+        for test_id, scope, _dataset, _environment, mean in measurements
+    ]
+    return dataset, "github-actions", bound
+
+
+def _load_baseline(payload: object) -> tuple[str, list[_Measurement]] | str:
+    if not isinstance(payload, dict):
+        return "invalid_baseline"
+    if payload.get("adoption") != "measured":
+        return "insufficient_baseline"
+    if payload.get("schema_version") != 1:
+        return "invalid_baseline"
+    try:
+        threshold = Decimal(str(payload.get("threshold")))
+    except InvalidOperation:
+        return "invalid_baseline"
+    if threshold != _REGRESSION_THRESHOLD:
+        return "invalid_baseline"
+    baseline_sha = payload.get("baseline_sha")
+    if not isinstance(baseline_sha, str) or _SHA_RE.fullmatch(baseline_sha) is None:
+        return "invalid_baseline"
+    rows = payload.get("tests")
+    if not isinstance(rows, list) or not rows:
+        return "insufficient_baseline"
+    parsed: list[_Measurement] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            return "invalid_baseline"
+        test_id = row.get("test_id")
+        scope = row.get("scope")
+        dataset = row.get("dataset")
+        environment = row.get("environment")
+        mean = _decimal_mean(row.get("mean"))
+        if (
+            not isinstance(test_id, str)
+            or scope not in _SCOPE_PREFIXES
+            or not isinstance(dataset, str)
+            or environment != "github-actions"
+            or mean is None
+        ):
+            return "invalid_baseline"
+        parsed.append((test_id, scope, dataset, environment, mean))
+    return baseline_sha, parsed
+
+
+def _compare_measurements(
+    current: list[_Measurement],
+    baseline: list[_Measurement],
+) -> tuple[str, list[dict[str, object]]]:
+    current_keys = {(item[0], item[1], item[2], item[3]) for item in current}
+    baseline_by_key = {
+        (item[0], item[1], item[2], item[3]): item[4] for item in baseline
+    }
+    contexts = {(item[1], item[2], item[3]) for item in current}
+    baseline_contexts = {(row[1], row[2], row[3]) for row in baseline}
+    if not contexts or not contexts.issubset(baseline_contexts):
+        return "insufficient_baseline", []
+    rows: list[dict[str, object]] = []
+    missing = False
+    regression = False
+    improved = True
+    for key, base_mean in sorted(baseline_by_key.items()):
+        if (key[1], key[2], key[3]) not in contexts:
+            continue
+        if key not in current_keys:
+            missing = True
+            rows.append(
+                {
+                    "baseline_mean": str(base_mean),
+                    "current_mean": None,
+                    "dataset": key[2],
+                    "delta_ratio": None,
+                    "environment": key[3],
+                    "scope": key[1],
+                    "test_id": key[0],
+                    "threshold": str(_REGRESSION_THRESHOLD),
+                    "verdict": "missing_baseline_test",
+                }
+            )
+    for item in sorted(current, key=lambda row: row[0]):
+        key = (item[0], item[1], item[2], item[3])
+        base_mean = baseline_by_key.get(key)
+        if base_mean is None:
+            improved = False
+            rows.append(
+                {
+                    "baseline_mean": None,
+                    "current_mean": str(item[4]),
+                    "dataset": item[2],
+                    "delta_ratio": None,
+                    "environment": item[3],
+                    "scope": item[1],
+                    "test_id": item[0],
+                    "threshold": str(_REGRESSION_THRESHOLD),
+                    "verdict": "new_test",
+                }
+            )
+            continue
+        delta = (item[4] - base_mean) / base_mean
+        limit = base_mean * (Decimal(1) + _REGRESSION_THRESHOLD)
+        if item[4] > limit:
+            regression = True
+            improved = False
+            verdict = "measured_regression"
+        elif delta < 0:
+            verdict = "improvement"
+        else:
+            improved = False
+            verdict = "within_threshold"
+        rows.append(
+            {
+                "baseline_mean": str(base_mean),
+                "current_mean": str(item[4]),
+                "dataset": item[2],
+                "delta_ratio": format(delta, "f"),
+                "environment": item[3],
+                "scope": item[1],
+                "test_id": item[0],
+                "threshold": str(_REGRESSION_THRESHOLD),
+                "verdict": verdict,
+            }
+        )
+    rows.sort(key=lambda row: str(row["test_id"]))
+    if missing:
+        return "missing_baseline_test", rows
+    if regression:
+        return "measured_regression", rows
+    if improved and any(row["verdict"] == "improvement" for row in rows):
+        return "improvement", rows
+    return "within_threshold", rows
+
+
+def _provenance(
+    payload: Mapping[str, object],
+    *,
+    checkout_sha: str,
+    repo: Path,
+    env: Mapping[str, str],
+) -> tuple[str, dict[str, str]] | str:
+    source = payload.get("bioetl_source")
+    if not isinstance(source, dict):
+        return "malformed_entries"
+    revision = source.get("revision")
+    if not isinstance(revision, str) or _SHA_RE.fullmatch(revision) is None:
+        return "wrong_sha"
+    if source.get("revision_method") not in {None, "gitdir_head_file"}:
+        return "unproven_checkout"
+    if source.get("revision_method") != "gitdir_head_file":
+        return "unproven_checkout"
+    head = read_checkout_sha(repo)
+    if head is None:
+        return "unproven_checkout"
+    github_sha = env.get("GITHUB_SHA", "")
+    if github_sha and github_sha != head:
+        return "checkout_sha_mismatch"
+    if checkout_sha and checkout_sha != head:
+        return "checkout_sha_mismatch"
+    if revision != head:
+        return "wrong_sha"
+    commit_info = payload.get("commit_info")
+    if not isinstance(commit_info, dict) or commit_info.get("id") != revision:
+        return "incomplete_evidence"
+    if commit_info.get("dirty") is not None:
+        return "incomplete_evidence"
+    identity, identity_reason = _github_identity(env)
+    if identity is None:
+        return identity_reason
+    return revision, identity
+
+
+def reduce_benchmark_evidence_main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Reduce benchmark measurements into a fail-closed gate."
+    )
+    parser.add_argument("--raw-json", type=Path, required=True)
+    parser.add_argument("--manifest-out", type=Path, required=True)
+    parser.add_argument("--gate-out", type=Path, required=True)
+    parser.add_argument("--baseline", type=Path, required=True)
+    parser.add_argument("--evidence-dir", type=Path, required=True)
+    parser.add_argument("--output-root", type=Path, default=None)
+    parser.add_argument("--checkout-sha", default="")
+    parser.add_argument("--repo", type=Path, default=None)
+    args = parser.parse_args(argv)
+    from scripts.engineering.common.repo_paths import (
+        REPO_ROOT,
+        read_bytes_confined,
+        read_text_confined,
+        write_bytes_confined,
+        write_text_confined,
+    )
+
+    root = args.output_root or REPO_ROOT
+    repo = args.repo or REPO_ROOT
+
+    def emit(status: str, reason: str, extra: dict[str, object] | None = None) -> int:
+        body: dict[str, object] = {"reason": reason, "status": status}
+        if extra:
+            body.update(extra)
+        text = _dump(body)
+        for path in (args.gate_out, args.manifest_out):
+            write_text_confined(path, text, root=root)
+        return 0 if status == "passed" else 1
+
+    try:
+        for path in (
+            args.raw_json,
+            args.manifest_out,
+            args.gate_out,
+            args.baseline,
+            args.evidence_dir,
+        ):
+            confined = path if path.is_absolute() else root / path
+            confined.resolve(strict=False).relative_to(root.resolve(strict=False))
+        if args.gate_out.resolve(strict=False) == args.raw_json.resolve(strict=False):
+            raise ValueError("gate overwrites raw json")
+        write_text_confined(
+            args.gate_out,
+            _dump({"reason": "in_progress", "status": "failed"}),
+            root=root,
+        )
+    except (ValueError, OSError):
+        print("rejected_output_path", file=sys.stderr)
+        return 2
+    try:
+        raw_bytes = read_bytes_confined(args.raw_json, root=root)
+    except FileNotFoundError:
+        return emit("failed", "missing_observations")
+    except ValueError:
+        print("rejected_output_path", file=sys.stderr)
+        return 2
+    except OSError:
+        return emit("failed", "missing_observations")
+    if not raw_bytes:
+        return emit("failed", "empty_input")
+    try:
+        raw_text = raw_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        return emit("failed", "invalid_encoding")
+    try:
+        payload = json.loads(raw_text, parse_constant=_reject_non_finite)
+    except (json.JSONDecodeError, ValueError):
+        return emit("failed", "malformed_json")
+    if not isinstance(payload, dict):
+        return emit("failed", "malformed_json")
+    raw_sha = hashlib.sha256(raw_bytes).hexdigest()
+    assessed = _assess_entries(payload.get("benchmarks"))
+    if isinstance(assessed, str):
+        return emit("failed", assessed, {"raw_sha256": raw_sha})
+    context = _measurement_context(payload, assessed)
+    if isinstance(context, str):
+        return emit("failed", context, {"raw_sha256": raw_sha})
+    _dataset, _environment, measurements = context
+    provenance = _provenance(
+        payload,
+        checkout_sha=args.checkout_sha,
+        repo=repo,
+        env=os.environ,
+    )
+    if isinstance(provenance, str):
+        return emit("failed", provenance, {"raw_sha256": raw_sha})
+    measured_sha, identity = provenance
+    try:
+        baseline_text = read_text_confined(args.baseline, root=root)
+        baseline_payload = json.loads(baseline_text)
+    except FileNotFoundError:
+        return emit(
+            "failed",
+            "insufficient_baseline",
+            {"measured_sha": measured_sha, "raw_sha256": raw_sha},
+        )
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError):
+        return emit("failed", "invalid_baseline", {"raw_sha256": raw_sha})
+    loaded = _load_baseline(baseline_payload)
+    if isinstance(loaded, str):
+        return emit(
+            "failed",
+            loaded,
+            {"measured_sha": measured_sha, "raw_sha256": raw_sha},
+        )
+    baseline_sha, baseline_rows = loaded
+    reason, comparisons = _compare_measurements(measurements, baseline_rows)
+    status = "passed" if reason in {"within_threshold", "improvement"} else "failed"
+    scopes = sorted({item[1] for item in measurements})
+    evidence_name = f"{measured_sha}/{raw_sha}/benchmark-measurements.json"
+    try:
+        write_bytes_confined(
+            args.evidence_dir / evidence_name,
+            raw_bytes,
+            root=root,
+        )
+    except (OSError, ValueError):
+        return emit("failed", "rejected_output_path", {"raw_sha256": raw_sha})
+    extra: dict[str, object] = {
+        "baseline_sha": baseline_sha,
+        "comparisons": comparisons,
+        "dataset": measurements[0][2],
+        "environment": identity["environment"],
+        "event_name": identity["event_name"],
+        "measured_sha": measured_sha,
+        "raw_sha256": raw_sha,
+        "run_attempt": identity["run_attempt"],
+        "run_id": identity["run_id"],
+        "run_url": identity["run_url"],
+        "scopes": scopes,
+        "synthetic_merge": identity["synthetic_merge"] == "true",
+        "threshold": str(_REGRESSION_THRESHOLD),
+    }
+    if status == "passed":
+        candidate = {
+            "adoption": "proposed",
+            "baseline_sha": measured_sha,
+            "dataset": measurements[0][2],
+            "environment": identity["environment"],
+            "raw_sha256": raw_sha,
+            "run_attempt": identity["run_attempt"],
+            "run_id": identity["run_id"],
+            "run_url": identity["run_url"],
+            "schema_version": 1,
+            "scopes": scopes,
+            "tests": [
+                {
+                    "dataset": item[2],
+                    "environment": item[3],
+                    "mean": str(item[4]),
+                    "scope": item[1],
+                    "test_id": item[0],
+                }
+                for item in measurements
+            ],
+            "threshold": str(_REGRESSION_THRESHOLD),
+        }
+        write_text_confined(
+            args.evidence_dir
+            / measured_sha
+            / raw_sha
+            / "benchmark-summary-candidate.json",
+            _dump(candidate),
+            root=root,
+        )
+    return emit(status, reason, extra)
+
+
+def _reject_non_finite(value: str) -> None:
+    raise ValueError(value)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = list(argv) if argv is not None else sys.argv[1:]
+    if args and args[0] == "reduce-benchmark-evidence":
+        return reduce_benchmark_evidence_main(args[1:])
+    if args and args[0] == "gate-hotspot-report":
+        return gate_hotspot_report_main(args[1:])
+    return hotspot_report_main(args)
 
 
 if __name__ == "__main__":
