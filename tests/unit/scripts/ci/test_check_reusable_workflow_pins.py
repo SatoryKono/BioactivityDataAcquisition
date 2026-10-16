@@ -6,6 +6,7 @@ repo-side consistency only: these tests keep that limit explicit.
 
 from __future__ import annotations
 
+import ast
 import subprocess
 import sys
 from pathlib import Path
@@ -249,7 +250,36 @@ def test_current_coordinator_has_no_job_level_calls_and_matches_registry() -> No
     for name, job in jobs.items():
         assert "uses" not in job, name
         assert isinstance(job.get("steps"), list)
-    assert pins.check_pins(REGISTRY, [COORDINATOR], repo_root=ROOT)
+    assert pins.check_pins(
+        REGISTRY,
+        [COORDINATOR],
+        repo_root=ROOT,
+        enforce_allowed_uses=True,
+    )
+
+
+def test_registry_sha_outside_allowed_uses_fails(tmp_path: Path) -> None:
+    registry = tmp_path / "registry.yaml"
+    workflow = tmp_path / "workflow.yaml"
+    _registry(registry, sha=OTHER)
+    _step_workflow(workflow, f"actions/checkout@{OTHER}")
+    assert pins.check_pins(registry, [workflow], repo_root=tmp_path)
+    assert not pins.check_pins(
+        registry,
+        [workflow],
+        repo_root=tmp_path,
+        enforce_allowed_uses=True,
+    )
+
+
+def test_osv_entry_point_does_not_import_yaml_at_module_scope() -> None:
+    tree = ast.parse(CHECKER.read_text(encoding="utf-8"))
+    for node in tree.body:
+        if isinstance(node, ast.Import):
+            names = [alias.name for alias in node.names]
+            assert "yaml" not in names
+        elif isinstance(node, ast.ImportFrom):
+            assert node.module != "yaml"
 
 
 def test_fast_governance_hosts_the_checker_after_setup() -> None:

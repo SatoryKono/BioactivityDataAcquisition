@@ -13,8 +13,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
-import yaml
-
+_DOCKER_SCHEME = "docker://"
 ROOT = Path(__file__).resolve().parents[3]
 WORKFLOWS_DIR = ROOT / ".github/workflows"
 COMPOSITE_ACTIONS_DIR = ROOT / ".github/actions"
@@ -231,7 +230,7 @@ def _validate_allowed_uses_ref(uses_ref: str, action: str) -> str | None:
     if "@" not in uses_ref:
         return f"external action {uses_ref} must include an immutable ref"
     _, _, ref = uses_ref.partition("@")
-    if action.startswith("docker://"):
+    if action.startswith(_DOCKER_SCHEME):
         if not FULL_SHA256_DIGEST_PATTERN.fullmatch(ref):
             return f"Docker image {uses_ref} must be pinned by full sha256 digest"
         allowed_refs = ALLOWED_DOCKER_IMAGES.get(action)
@@ -660,6 +659,8 @@ def _read_pin_yaml(path: Path, errors: list[str]) -> object | None:
     if not text.strip():
         errors.append(f"empty YAML: {path}")
         return None
+    import yaml
+
     try:
         return yaml.safe_load(text)
     except yaml.YAMLError as exc:
@@ -796,7 +797,7 @@ def _check_step_uses(
     if not isinstance(uses, str) or not uses or uses != uses.strip():
         errors.append(f"{where} uses is not a non-empty string")
         return
-    if uses.startswith("docker://"):
+    if uses.startswith(_DOCKER_SCHEME):
         _check_docker_pin(uses, errors)
         return
     if uses.startswith(("./", "../")):
@@ -842,7 +843,7 @@ def _check_reusable_uses(
     if not isinstance(uses, str) or not uses or uses != uses.strip():
         errors.append(f"job {job_name} uses is not a non-empty string")
         return
-    if uses.startswith("docker://"):
+    if uses.startswith(_DOCKER_SCHEME):
         _check_docker_pin(uses, errors)
         return
     if uses.startswith(("./", "../")):
@@ -900,11 +901,25 @@ def _check_pin_workflow(
         _check_pin_job(str(job_name), job, registry, repo_root, errors)
 
 
+def allowlist_pin_disagreements(registry: dict[str, str]) -> list[str]:
+    """Fail when a pr-required registry pin is outside ALLOWED_USES."""
+    errors: list[str] = []
+    for path, sha in sorted(registry.items()):
+        allowed = ALLOWED_USES.get(path)
+        if allowed is None:
+            errors.append(f"registry path {path} is absent from ALLOWED_USES")
+            continue
+        if sha not in allowed:
+            errors.append(f"registry {path} SHA {sha} is not an ALLOWED_USES pin")
+    return errors
+
+
 def check_pins(
     registry_path: str | Path,
     workflow_paths: Sequence[str | Path],
     *,
     repo_root: Path | None = None,
+    enforce_allowed_uses: bool = False,
 ) -> bool:
     """Return whether every inspected uses reference matches the pin contract.
 
@@ -920,6 +935,8 @@ def check_pins(
         errors.append("no workflow paths to check")
     registry = _load_pin_registry(Path(registry_path), errors)
     if registry is not None:
+        if enforce_allowed_uses:
+            errors.extend(allowlist_pin_disagreements(registry))
         for workflow_path in workflow_paths:
             _check_pin_workflow(Path(workflow_path), registry, root, errors)
     _emit_pin_errors(errors)
@@ -941,7 +958,11 @@ def pr_required_pin_main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     mode = "--check" if args.check else "default"
-    if not check_pins(PIN_REGISTRY_PATH, PIN_WORKFLOW_PATHS):
+    if not check_pins(
+        PIN_REGISTRY_PATH,
+        PIN_WORKFLOW_PATHS,
+        enforce_allowed_uses=True,
+    ):
         return 1
     print(f"Pin check passed ({mode}).")
     return 0
