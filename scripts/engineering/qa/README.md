@@ -71,8 +71,6 @@ python -m scripts.engineering.qa <command> [args...]
 | `refresh-ci-drift-families` | `refresh_governance_artifacts.py` (`ci-drift-families`) | Coupled `--check`/`--update` for telemetry, test-gov, flaky, evidence, remote-main, dataflow. Does **not** call `_ratchet_family_budgets`. |
 | `run-architecture-audit-read-only` | `run_architecture_audit_read_only.py`                | Run check-only architecture evidence diagnostics without pretest sync or artifact writes          |
 | `report-hotspots`                | `generate_hotspot_degradation_report.py`              | Generate performance hotspot degradation report                                                   |
-| `gate-hotspot-report`            | `generate_hotspot_degradation_report.py`              | Fail closed unless the hotspot report is a measured verdict                                      |
-| `reduce-benchmark-evidence`      | `generate_hotspot_degradation_report.py`              | Compare benchmark means with a measured baseline and write a fail-closed gate                    |
 | `report-duplication-baseline`    | `report_duplication_baseline.py`                      | Generate report-only duplication baseline for `composition`/`application`                         |
 | `report-artifact-duplication-audit` | `report_artifact_duplication_audit.py`              | Generate/check exact-byte duplication audit for JSCPD-excluded config, contract, and registry artifacts |
 | `analyze-duplicate-functions`    | `analyze_duplicate_functions.py`                      | Compatibility wrapper for the legacy AST duplicate-function analyzer                              |
