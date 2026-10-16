@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.5
+Version: 1.0.6
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-09-17'
+  Last verified: '2026-10-16'
 
 ______________________________________________________________________
 
@@ -90,7 +90,7 @@ new spend/safety decision.
 | `no-partial-tree-commits.yml` | `No partial-tree commits` | `workflow_dispatch` | `active` | `active` | Rejects partial-tree commits that would collapse history for downstream PRs (#11709) |
 | `opencode-pr-review.yml` | `opencode-pr-review` | `workflow_dispatch` | `active` | `active` | Dispatch-only stub (#11012); remote OpenCode installer removed until a digest pin exists |
 | `opencode-triage.yml` | `opencode-triage` | `workflow_dispatch` | `active` | `active` | Dispatch-only stub (#11012); remote OpenCode installer removed until a digest pin exists |
-| `pr-required.yml` | `PR Gate Complete` | `pull_request`, `workflow_dispatch` | `active` | `active` | Always-materialized fail-closed coordinator; GitHub required context is job `pr-gate-complete` (ruleset 13643213) |
+| `pr-required.yml` | `PR Gate Complete` | `pull_request`, `workflow_dispatch` | `active` | `active` | Always-materialized fail-closed coordinator; job `pr-gate-complete` is the target name while ruleset 13643213 is `enforcement: disabled` |
 | `port-contracts.yml` | `Port Contract Tests` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Port-protocol and hypothesis contract tests |
 | `provider-contract-drift.yml` | `Provider Contract Drift` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Provider contract replay/drift gate |
 | `router-v7-bridge.yml` | `Router 7 bridge candidate` | `workflow_dispatch` | `active` | `active` | Path-filtered migration candidate tests, browser build, and dependency audit; host acceptance remains separate |

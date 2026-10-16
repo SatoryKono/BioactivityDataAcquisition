@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.2.17
+Version: 1.2.18
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-09-11'
+  Last verified: '2026-10-16'
 
 ______________________________________________________________________
 
@@ -364,8 +364,8 @@ The following leaf checks remain required by policy whenever the canonical
 catalog classifies their changed paths as `required`. The always-materialized
 coordinator emits an explicit, SHA-bound `not_applicable` decision otherwise;
 raw leaf contexts MUST NOT be configured as unconditional repository required
-statuses because ruleset `13643213` requires only the final
-`pr-gate-complete` context.
+statuses. Ruleset `13643213` is `enforcement: disabled` and does not currently
+require `pr-gate-complete`.
 
 | Check Name                 | Workflow              | Purpose                                                       |
 | -------------------------- | --------------------- | ------------------------------------------------------------- |

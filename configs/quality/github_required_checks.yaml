@@ -91,6 +91,8 @@ policy:
     # enforcement makes both phrases false for the live main rulesets.
     - "GitHub-required merge wall"
     - "enforces exactly one required status context"
+    - "GitHub required context is job"
+    - "requires only the final"
   # "GitHub Actions are disabled" is a current-configuration claim.
   # "historical" allows that phrase on the same line, or in the first paragraph
   # under a heading that contains the word. One blank line after the heading is
