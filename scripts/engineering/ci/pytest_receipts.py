@@ -12,6 +12,7 @@ import os
 import re
 import stat
 import subprocess
+import tempfile
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
@@ -27,7 +28,7 @@ ALLOWED_ENV_VARS = frozenset(
 )
 _ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$")
 _SECRET_KEY_RE = re.compile(
-    r"(SECRET|TOKEN|PASSWORD|PASSWD|PWD|CREDENTIAL|PRIVATE|PAT|_KEY)",
+    r"(SECRET|TOKEN|PASSWORD|PASSWD|PWD|CREDENTIAL|PRIVATE|PAT|_KEY|AUTH|URL|DSN|URI)",
     re.IGNORECASE,
 )
 _OUTPUT_PREFIXES = (
@@ -67,7 +68,7 @@ def git_head(repo_root: Path) -> str:
     return output.strip() or "unknown"
 
 
-def _porcelain_paths(repo_root: Path) -> list[str]:
+def _porcelain_entries(repo_root: Path) -> list[tuple[str, str]]:
     output = _git_output(
         repo_root,
         "status",
@@ -78,49 +79,67 @@ def _porcelain_paths(repo_root: Path) -> list[str]:
     if output is None:
         return []
     parts = output.split("\0")
-    paths: list[str] = []
+    entries: list[tuple[str, str]] = []
     index = 0
     while index < len(parts):
         entry = parts[index]
         index += 1
         if len(entry) < 4:
             continue
-        path = entry[3:]
-        paths.append(path)
-        if "R" in entry[:2] or "C" in entry[:2]:
+        status = entry[:2]
+        entries.append((status, entry[3:]))
+        if "R" in status or "C" in status:
             if index < len(parts) and parts[index]:
-                paths.append(parts[index])
+                entries.append((status, parts[index]))
                 index += 1
-    return paths
+    return entries
 
 
-def _is_run_output(path: str, receipt_dir: Path | None, repo_root: Path) -> bool:
-    normalized = path.replace("\\", "/").lstrip("./")
+def _normalize_repo_path(path: str) -> str:
+    """Drop a single ``./`` prefix without stripping a hidden-directory dot."""
+    normalized = path.replace("\\", "/")
+    if normalized.startswith("./"):
+        normalized = normalized[2:]
+    return normalized
+
+
+def _is_run_output(
+    path: str,
+    status: str,
+    receipt_dir: Path | None,
+    repo_root: Path,
+) -> bool:
+    """Ignore this run's untracked outputs, not edits to tracked inputs."""
+    normalized = _normalize_repo_path(path)
+    if receipt_dir is not None:
+        try:
+            relative = receipt_dir.resolve().relative_to(repo_root.resolve())
+        except ValueError:
+            relative = None
+        if relative is not None:
+            prefix = _normalize_repo_path(relative.as_posix())
+            if normalized == prefix or normalized.startswith(prefix + "/"):
+                return True
+    if status != "??":
+        return False
     if normalized == ".coverage" or normalized.startswith(".coverage."):
         return True
-    if normalized.startswith(_OUTPUT_PREFIXES):
-        return True
-    if receipt_dir is None:
-        return False
-    try:
-        relative = receipt_dir.resolve().relative_to(repo_root.resolve())
-    except ValueError:
-        return False
-    prefix = relative.as_posix()
-    return normalized == prefix or normalized.startswith(prefix + "/")
+    return normalized.startswith(_OUTPUT_PREFIXES)
 
 
 def source_snapshot(repo_root: Path, receipt_dir: Path | None = None) -> dict[str, Any]:
     """Bind a receipt to HEAD plus measured dirty paths.
 
-    Run outputs (reports, coverage, the receipt directory) are not treated as
-    changes to the measured sources. A dirty measured tree is not described as
-    a clean HEAD.
+    Untracked run outputs (reports, coverage, the receipt directory) are not
+    measured-source changes. A modified tracked file, including one under
+    ``reports/``, stays dirty. A dirty measured tree is not a clean HEAD.
     """
     dirty = sorted(
-        path
-        for path in _porcelain_paths(repo_root)
-        if path and not _is_run_output(path, receipt_dir, repo_root)
+        {
+            path
+            for status, path in _porcelain_entries(repo_root)
+            if path and not _is_run_output(path, status, receipt_dir, repo_root)
+        }
     )
     return {
         "head": git_head(repo_root),
@@ -184,10 +203,26 @@ def write_receipt_file(directory: Path, payload: Mapping[str, Any]) -> Path:
     final = directory / "receipt.json"
     if final.exists():
         return final
-    temporary = directory / ".receipt.json.tmp"
     encoded = json.dumps(payload, indent=2, sort_keys=True) + "\n"
-    temporary.write_text(encoded, encoding="utf-8")
-    os.replace(temporary, final)
+    fd, tmp_name = tempfile.mkstemp(
+        dir=directory,
+        prefix=".receipt.",
+        suffix=".tmp",
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
+            handle.write(encoded)
+            handle.flush()
+            os.fsync(handle.fileno())
+        try:
+            os.link(tmp_name, final)
+        except FileExistsError:
+            return final
+    finally:
+        try:
+            os.unlink(tmp_name)
+        except FileNotFoundError:
+            pass
     if not final.exists():
         raise OSError(f"receipt was not created: {final}")
     final.chmod(stat.S_IREAD | stat.S_IRGRP | stat.S_IROTH)
@@ -228,22 +263,41 @@ def terminal_outcome(phases: Mapping[str, str | None]) -> str:
     if call == "skipped" or setup == "skipped":
         return "skipped"
     if call == "passed":
+        if teardown is None:
+            return "error"
         return "passed"
     return "error"
 
 
+def _phases_finished(phases: Mapping[str, str | None]) -> bool:
+    """A node is finished only after its terminal phase.
+
+    A setup error or a setup-time skip/xfail ends the node. Any call still
+    needs its teardown report; a missing teardown is an interrupted run.
+    """
+    setup = phases.get("setup")
+    call = phases.get("call")
+    teardown = phases.get("teardown")
+    if setup == "error":
+        return True
+    if call is None:
+        return setup in {"skipped", "xfailed", "xpassed"}
+    return teardown is not None
+
+
 def _is_xdist_controller(config: Any) -> bool:
+    """True only when this process distributes work and does not execute it."""
     if getattr(config, "workerinput", None) is not None:
         return False
     if os.environ.get("PYTEST_XDIST_WORKER"):
         return False
     if not config.pluginmanager.hasplugin("xdist"):
         return False
-    dist = getattr(config.option, "dist", "no")
     workers = getattr(config.option, "numprocesses", None)
-    if dist in (None, "no") and workers in (None, 0, "0"):
-        return False
-    return True
+    if workers not in (None, 0, "0", "no"):
+        return True
+    transports = getattr(config.option, "tx", None) or []
+    return bool(transports)
 
 
 def _blank_phases() -> dict[str, str | None]:
@@ -327,15 +381,40 @@ class ReceiptPlugin:
         failed = getattr(session, "testsfailed", 0) or 0
         return bool(maxfail) and failed >= maxfail
 
+    def _assigned_nodeids(self, session: Any) -> list[str] | None:
+        """Shard assigned to this xdist worker, including tests still queued."""
+        config = session.config
+        if getattr(config, "workerinput", None) is None and not os.environ.get(
+            "PYTEST_XDIST_WORKER"
+        ):
+            return None
+        interactor = next(
+            (
+                plugin
+                for plugin in config.pluginmanager.get_plugins()
+                if type(plugin).__name__ == "WorkerInteractor"
+            ),
+            None,
+        )
+        pending: list[str] = []
+        items = list(getattr(session, "items", []))
+        torun = getattr(interactor, "torun", None)
+        if torun is not None and hasattr(torun, "lock"):
+            with torun.lock() as queued:
+                for item in queued:
+                    if isinstance(item, int) and 0 <= item < len(items):
+                        pending.append(str(items[item].nodeid))
+        return sorted(set(self.results) | set(pending))
+
     def _completeness(self, early_stop: bool) -> str:
         if self.collection_errors or not self.collection_observed:
             return "unknown"
         missing = [
-            nodeid for nodeid in self.selected_nodeids if nodeid not in self.results
+            nodeid
+            for nodeid in self.selected_nodeids
+            if not _phases_finished(self.results.get(nodeid, _blank_phases()))
         ]
-        if early_stop and missing:
-            return "incomplete"
-        if missing:
+        if early_stop or missing:
             return "incomplete"
         return "complete"
 
@@ -367,6 +446,9 @@ class ReceiptPlugin:
     def pytest_sessionfinish(self, session: Any, exitstatus: Any) -> None:
         if not self.write_receipt:
             return
+        assigned = self._assigned_nodeids(session)
+        if assigned is not None:
+            self.selected_nodeids = assigned
         early_stop = self._early_stop(session)
         payload: dict[str, Any] = {
             "schema_version": _SCHEMA_VERSION,

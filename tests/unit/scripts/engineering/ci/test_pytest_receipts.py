@@ -12,7 +12,12 @@ from pathlib import Path
 import pytest
 
 from scripts.engineering.ci.pytest_receipts import (
+    ReceiptPlugin,
+    _is_run_output,
+    _normalize_repo_path,
+    _phases_finished,
     dedupe_receipts,
+    redact_secrets,
     terminal_outcome,
     write_receipt_file,
 )
@@ -291,8 +296,26 @@ def test_xdist_workers_do_not_double_count(receipts: Path, tmp_path: Path) -> No
         payloads.append(json.loads(path.read_text(encoding="utf-8")))
     assert all(item["role"] == "worker" for item in payloads)
     assert all(item["worker"] != "master" for item in payloads)
+    assert all(item["completeness"] == "complete" for item in payloads)
     nodeids = [nodeid for item in payloads for nodeid in item["results"]]
     assert len(nodeids) == len(set(nodeids)) == 2
+    for item in payloads:
+        collection = item["collection"]
+        assert isinstance(collection, dict)
+        assert collection["selected"] == len(item["results"])
+
+
+def test_dist_without_workers_still_writes_receipt(
+    receipts: Path, tmp_path: Path
+) -> None:
+    pytest.importorskip("xdist")
+    test_file = tmp_path / "test_dist_flag.py"
+    _write(test_file, "def test_one():\n    assert True\n")
+    completed = _pytest(test_file, receipts, "--dist", "load")
+    assert completed.returncode == 0, completed.stderr
+    payload = _load(receipts)
+    assert payload["worker"] == "master"
+    assert payload["completeness"] == "complete"
 
 
 def test_timeout_writes_runner_record_without_fake_collection(
@@ -427,13 +450,54 @@ def test_receipt_write_is_immutable(tmp_path: Path) -> None:
 
 
 def test_terminal_outcome_matrix() -> None:
-    assert terminal_outcome({"setup": "passed", "call": "passed"}) == "passed"
+    assert (
+        terminal_outcome({"setup": "passed", "call": "passed", "teardown": "passed"})
+        == "passed"
+    )
+    assert terminal_outcome({"setup": "passed", "call": "passed"}) == "error"
     assert (
         terminal_outcome({"setup": "passed", "call": "passed", "teardown": "error"})
         == "teardown_error"
     )
     assert terminal_outcome({"setup": "error"}) == "setup_error"
     assert terminal_outcome({"call": "xfailed"}) == "xfailed"
+
+
+def test_partial_phases_are_incomplete() -> None:
+    plugin = object.__new__(ReceiptPlugin)
+    plugin.collection_observed = True
+    plugin.collection_errors = []
+    plugin.selected_nodeids = ["t"]
+    plugin.results = {"t": {"setup": "passed", "call": "passed", "teardown": None}}
+    assert plugin._completeness(False) == "incomplete"
+    plugin.results = {"t": {"setup": "passed", "call": "passed", "teardown": "passed"}}
+    assert plugin._completeness(False) == "complete"
+    plugin.results = {"t": {"setup": "skipped", "call": None, "teardown": None}}
+    assert _phases_finished(plugin.results["t"])
+    assert plugin._completeness(False) == "complete"
+
+
+def test_redact_secrets_covers_auth_and_urls() -> None:
+    text = redact_secrets(
+        "neo4j-secret postgres://user:pw@localhost/db",
+        {
+            "NEO4J_AUTH": "neo4j-secret",
+            "DATABASE_URL": "postgres://user:pw@localhost/db",
+        },
+    )
+    assert "neo4j-secret" not in text
+    assert "postgres://user:pw@localhost/db" not in text
+    assert "[REDACTED]" in text
+
+
+def test_hidden_receipt_dir_and_tracked_reports_stay_distinct(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    receipt_dir = repo / ".receipts"
+    receipt_dir.mkdir(parents=True)
+    assert _normalize_repo_path("./.receipts/receipt.json") == ".receipts/receipt.json"
+    assert _is_run_output(".receipts/run/receipt.json", "??", receipt_dir, repo)
+    assert not _is_run_output("reports/quality/input.json", " M", receipt_dir, repo)
+    assert _is_run_output("reports/noise.txt", "??", receipt_dir, repo)
 
 
 def test_dirty_sources_are_not_a_clean_head(receipts: Path, tmp_path: Path) -> None:
@@ -443,6 +507,9 @@ def test_dirty_sources_are_not_a_clean_head(receipts: Path, tmp_path: Path) -> N
     source = repo / "src"
     source.mkdir()
     _write(source / "example.py", "VALUE = 1\n")
+    tracked_report = repo / "reports" / "quality"
+    tracked_report.mkdir(parents=True)
+    _write(tracked_report / "input.json", "{}\n")
     _write(repo / "test_ok.py", "def test_ok():\n    assert True\n")
     subprocess.run(["git", "add", "."], cwd=repo, check=True)
     subprocess.run(
@@ -460,7 +527,7 @@ def test_dirty_sources_are_not_a_clean_head(receipts: Path, tmp_path: Path) -> N
         check=True,
     )
     _write(source / "example.py", "VALUE = 2\n")
-    (repo / "reports").mkdir()
+    _write(tracked_report / "input.json", '{"changed": true}\n')
     _write(repo / "reports" / "noise.txt", "output\n")
     completed = _pytest(
         repo / "test_ok.py",
@@ -475,5 +542,6 @@ def test_dirty_sources_are_not_a_clean_head(receipts: Path, tmp_path: Path) -> N
     dirty = source_state["measured_dirty_paths"]
     assert isinstance(dirty, list)
     assert any(str(path).endswith("src/example.py") for path in dirty)
-    assert not any(str(path).startswith("reports/") for path in dirty)
+    assert any(str(path).endswith("reports/quality/input.json") for path in dirty)
+    assert not any(str(path).endswith("reports/noise.txt") for path in dirty)
     assert source_state["head"] != "unknown"
