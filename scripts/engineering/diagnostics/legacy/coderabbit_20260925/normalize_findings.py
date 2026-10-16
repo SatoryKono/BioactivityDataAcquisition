@@ -1,7 +1,5 @@
 """Normalize CodeRabbit NDJSON leaf logs into a single findings table."""
 
-from __future__ import annotations
-
 import json
 import os
 import re

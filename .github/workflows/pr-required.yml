@@ -6,13 +6,10 @@ name: PR Gate Complete
 # Next review 2026-12-30 or when enforcement is enabled, whichever is earlier.
 # Each pull request has one owner invocation per gate and one fail-closed result.
 # Classify and aggregate check out the base ref. The PR head SHA is only a
-# diff argument (#11181). This coordinator has no job-level reusable-workflow
-# calls. fast-governance checks out the PR head and, after setup, runs the
-# repo-side pin checker. That checker is not an independent trust boundary:
-# a hostile PR can rewrite the coordinator, the checker, and the registry
-# together, and local action.yml existence does not prove content trust.
-# Residual risk remains until an org ruleset requires workflows from the
-# default branch. This does not close #12046.
+# diff argument (#11181). Leaf reusable workflows are pinned to a full commit
+# SHA of trusted main (#11232). Coordinator YAML may still come from the PR, so
+# a hostile PR can rewrite these uses: lines; residual risk until org ruleset
+# requires workflows from the default branch.
 
 on:
   pull_request:
@@ -142,10 +139,9 @@ jobs:
           python-version: "3.12"
           uv-extras: "dev docs"
 
-      # PR-head checkout. Not classify, and not the base-ref aggregate checkout.
       - name: Check reusable workflow pins
         id: check-pins
-        run: uv run --frozen --no-build python scripts/engineering/repo/check_github_actions_runtime_policy.py --pr-required-pins --check
+        run: uv run --frozen --no-build python scripts/engineering/ci/check_reusable_workflow_pins.py --check
 
       - name: Validate repository root allowlist
         id: cleanliness
