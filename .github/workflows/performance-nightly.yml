@@ -25,15 +25,35 @@ jobs:
         with:
           uv-extras: "dev tracing performance"
 
-      - name: Run all performance benchmarks
+      - name: Run hotspot performance tests
         run: |
           mkdir -p reports/performance
-          uv run --frozen --no-build pytest tests/performance/ tests/benchmarks/ \
+          uv run --frozen --no-build pytest tests/performance/ \
             -m "benchmark or performance" \
             -p no:xdist \
             -v --tb=short \
             --perf-obs-out reports/performance/hotspot-observations.jsonl \
             --junitxml=reports/performance/hotspot-budgets.xml
+
+      - name: Run pytest-benchmark cases
+        run: |
+          mkdir -p reports/performance
+          # addopts still injects -p no:benchmark. Load the guard first, then
+          # -p benchmark unblocks the plugin. The env label is run provenance,
+          # not the plugin switch.
+          BIOETL_BENCHMARK_CALLER=performance-nightly \
+          uv run --frozen --no-build pytest tests/benchmarks/ \
+            -m benchmark \
+            -p tests.benchmarks.benchmark_vcs_guard \
+            -p benchmark \
+            -p no:xdist \
+            -v --tb=short \
+            --benchmark-json=reports/performance/benchmark-measurements.json
+
+      - name: Require pytest-benchmark measurement JSON
+        run: |
+          uv run --frozen --no-build python -m tests.benchmarks.benchmark_vcs_guard \
+            --validate-measurement-json reports/performance/benchmark-measurements.json
 
       - name: Build hotspot degradation report
         if: ${{ always() && !cancelled() }}
@@ -80,5 +100,6 @@ jobs:
             reports/performance/hotspot-observations.jsonl
             reports/performance/hotspot-degradation.json
             reports/performance/hotspot-degradation.md
+            reports/performance/benchmark-measurements.json
           if-no-files-found: warn
           retention-days: 30
