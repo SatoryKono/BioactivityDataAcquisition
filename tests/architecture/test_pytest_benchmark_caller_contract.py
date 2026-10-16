@@ -173,7 +173,10 @@ def _locked_wheel_file() -> tuple[str, Path, str]:
     cache = Path(os.environ.get("TEMP", "")) / "bioetl-locked-pytest-benchmark"
     cache.mkdir(parents=True, exist_ok=True)
     wheel_path = cache / f"pytest_benchmark-{version}-py3-none-any.whl"
-    if wheel_path.is_file() and hashlib.sha256(wheel_path.read_bytes()).hexdigest() == digest:
+    if (
+        wheel_path.is_file()
+        and hashlib.sha256(wheel_path.read_bytes()).hexdigest() == digest
+    ):
         return version, wheel_path, digest
     partial = wheel_path.with_suffix(".whl.partial")
     urllib.request.urlretrieve(url, partial)
@@ -504,7 +507,9 @@ def _assert_loaded_benchmark(env: dict[str, str]) -> None:
         import importlib.metadata as metadata
 
         installed = Path(
-            metadata.distribution("pytest-benchmark").locate_file("pytest_benchmark/utils.py")
+            metadata.distribution("pytest-benchmark").locate_file(
+                "pytest_benchmark/utils.py"
+            )
         ).resolve()
         assert loaded_path == installed
         return
