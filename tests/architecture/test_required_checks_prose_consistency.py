@@ -23,6 +23,7 @@ CATALOG = ROOT / "configs/quality/github_required_checks.yaml"
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
+    """Load one YAML file and require a mapping."""
     data = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
         raise AssertionError(f"{path} must be a mapping")
@@ -179,6 +180,7 @@ def _anchor_regions(text: str) -> dict[str, list[str]]:
 
 
 def _repo_documents(root: Path, doc_paths: list[str]) -> dict[str, str]:
+    """Read each declared prose document as UTF-8 text."""
     return {
         doc_path: (root / doc_path).read_text(encoding="utf-8")
         for doc_path in doc_paths
@@ -186,6 +188,7 @@ def _repo_documents(root: Path, doc_paths: list[str]) -> dict[str, str]:
 
 
 def test_catalog_prose_matches_declared_documents() -> None:
+    """Declared documents satisfy every catalog prose claim."""
     catalog = _load_yaml(CATALOG)
     policy = catalog["policy"]
     assert policy["enforcement_verified_date"] == "2026-10-09"
@@ -200,6 +203,7 @@ def test_catalog_prose_matches_declared_documents() -> None:
 
 
 def test_one_character_prose_drift_fails() -> None:
+    """One edited character in a required phrase fails the checker."""
     catalog = _load_yaml(CATALOG)
     policy = catalog["policy"]
     documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
@@ -214,6 +218,7 @@ def test_one_character_prose_drift_fails() -> None:
 
 
 def test_undeclared_policy_anchor_fails() -> None:
+    """An anchor id that is not a declared claim fails the checker."""
     catalog = _load_yaml(CATALOG)
     policy = catalog["policy"]
     documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
@@ -224,6 +229,7 @@ def test_undeclared_policy_anchor_fails() -> None:
 
 
 def test_forbidden_active_circleci_phrase_fails() -> None:
+    """A current active-CircleCI phrase fails even inside a historical heading."""
     catalog = _load_yaml(CATALOG)
     policy = catalog["policy"]
     documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
@@ -234,6 +240,7 @@ def test_forbidden_active_circleci_phrase_fails() -> None:
 
 
 def test_current_actions_disabled_claim_fails() -> None:
+    """A bare current claim that GitHub Actions are disabled fails."""
     catalog = _load_yaml(CATALOG)
     policy = catalog["policy"]
     documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
@@ -246,6 +253,7 @@ def test_current_actions_disabled_claim_fails() -> None:
 
 
 def test_historical_actions_disabled_sentence_is_allowed() -> None:
+    """The same sentence is allowed on the first paragraph under a historical heading."""
     catalog = _load_yaml(CATALOG)
     policy = catalog["policy"]
     documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
@@ -258,6 +266,7 @@ def test_historical_actions_disabled_sentence_is_allowed() -> None:
 
 
 def test_blank_line_after_historical_heading_allows_first_paragraph() -> None:
+    """One blank line after a historical heading still belongs to the first paragraph."""
     catalog = _load_yaml(CATALOG)
     policy = catalog["policy"]
     documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
@@ -270,6 +279,7 @@ def test_blank_line_after_historical_heading_allows_first_paragraph() -> None:
 
 
 def test_second_paragraph_after_heading_blank_stays_forbidden() -> None:
+    """The paragraph after that first paragraph stays forbidden."""
     catalog = _load_yaml(CATALOG)
     policy = catalog["policy"]
     documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
@@ -289,6 +299,7 @@ def test_second_paragraph_after_heading_blank_stays_forbidden() -> None:
 
 
 def test_anchor_region_does_not_reuse_wording_elsewhere() -> None:
+    """A current anchor cannot borrow a required phrase from another region."""
     catalog = _load_yaml(CATALOG)
     policy = catalog["policy"]
     documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
@@ -313,12 +324,23 @@ def test_anchor_region_does_not_reuse_wording_elsewhere() -> None:
     )
 
 
+def _coordinator_step(workflow: str, step_id: str) -> str:
+    """Return one Fast governance step, from its name through the next step."""
+
+    marker = f"id: {step_id}\n"
+    start = workflow.index(marker)
+    head = workflow.rfind("\n      - name:", 0, start)
+    nxt = workflow.find("\n      - name:", start)
+    if nxt < 0:
+        nxt = len(workflow)
+    return workflow[head:nxt]
+
+
 def test_every_prose_doc_selects_docs_governance() -> None:
+    """Every declared prose path selects docs-governance."""
     from scripts.engineering.ci.pr_gate import classify_changes, load_catalog
 
     catalog = load_catalog(CATALOG)
-    docs_yml = (ROOT / ".github/workflows/docs.yml").read_text(encoding="utf-8")
-    assert "tests/architecture/test_required_checks_prose_consistency.py" in docs_yml
     for doc_path in catalog["policy"]["prose_claim_doc_paths"]:
         matrix = classify_changes(catalog, [str(doc_path)], head_sha="a" * 40)
         assert matrix["decisions"]["docs-governance"]["decision"] == "required", (
@@ -326,7 +348,43 @@ def test_every_prose_doc_selects_docs_governance() -> None:
         )
 
 
+def test_prose_only_change_runs_pytest_without_lint_arch() -> None:
+    """Prose-only paths skip lint-arch and still execute the coordinator pytest."""
+    from scripts.engineering.ci.pr_gate import (
+        NOT_APPLICABLE,
+        classify_changes,
+        load_catalog,
+    )
+    from scripts.engineering.ci.pr_lane_results import FAST_GOVERNANCE, OWNER_STEPS
+
+    catalog = load_catalog(CATALOG)
+    workflow = (ROOT / ".github/workflows/pr-required.yml").read_text(encoding="utf-8")
+    step = _coordinator_step(workflow, "prose-consistency")
+    assert "docs-governance'] == 'required'" in step
+    assert "lint-arch" not in step
+    assert "pytest tests/architecture/test_required_checks_prose_consistency.py" in step
+    assert "--junitxml=reports/quality/prose-consistency-junit.xml" in step
+    assert "prose-consistency" in OWNER_STEPS[FAST_GOVERNANCE]["docs-governance"]
+
+    prose_only: list[str] = []
+    for doc_path in catalog["policy"]["prose_claim_doc_paths"]:
+        matrix = classify_changes(catalog, [str(doc_path)], head_sha="b" * 40)
+        assert matrix["decisions"]["docs-governance"]["decision"] == "required"
+        if matrix["decisions"]["lint-arch"]["decision"] == NOT_APPLICABLE:
+            prose_only.append(str(doc_path))
+    assert prose_only == [
+        ".github/SECURITY.md",
+        "docs/00-project/governance/05-github-policy.md",
+        "docs/04-reference/github-actions-workflows.md",
+        "docs/05-operations/ci-cd-integration.md",
+        "docs/05-operations/ci-workflow-map.md",
+        "docs/05-operations/release-checklist.md",
+        "docs/05-operations/runbooks/github-settings-quarterly-review.md",
+    ]
+
+
 def test_individual_workflow_disable_instruction_is_allowed() -> None:
+    """Workflow disable markers allow the phrase only on the same line."""
     catalog = _load_yaml(CATALOG)
     policy = catalog["policy"]
     allow = policy["prose_scoped_forbidden_phrases"][0]["line_allow_if_contains_any"]
@@ -349,6 +407,7 @@ def test_individual_workflow_disable_instruction_is_allowed() -> None:
 
 
 def test_historical_heading_does_not_allow_other_forbidden_phrases() -> None:
+    """A historical heading does not allow other whole-file forbidden phrases."""
     catalog = _load_yaml(CATALOG)
     policy = catalog["policy"]
     documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
@@ -361,6 +420,7 @@ def test_historical_heading_does_not_allow_other_forbidden_phrases() -> None:
 
 
 def test_historical_section_does_not_allow_current_claim_later_in_file() -> None:
+    """A later section does not inherit a historical heading."""
     catalog = _load_yaml(CATALOG)
     policy = catalog["policy"]
     documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
@@ -380,6 +440,7 @@ def test_historical_section_does_not_allow_current_claim_later_in_file() -> None
 
 
 def test_later_paragraph_in_historical_section_stays_forbidden() -> None:
+    """A later paragraph in the same historical section stays forbidden."""
     catalog = _load_yaml(CATALOG)
     policy = catalog["policy"]
     documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
@@ -398,6 +459,7 @@ def test_later_paragraph_in_historical_section_stays_forbidden() -> None:
 
 
 def test_workflow_marker_does_not_allow_the_next_paragraph() -> None:
+    """A workflow marker does not allow the phrase in the next paragraph."""
     catalog = _load_yaml(CATALOG)
     policy = catalog["policy"]
     documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
@@ -422,6 +484,7 @@ def test_workflow_marker_does_not_allow_the_next_paragraph() -> None:
 
 
 def test_workflow_marker_in_heading_does_not_allow_the_body() -> None:
+    """A workflow marker in a heading does not allow the body."""
     catalog = _load_yaml(CATALOG)
     policy = catalog["policy"]
     documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
@@ -437,6 +500,7 @@ def test_workflow_marker_in_heading_does_not_allow_the_body() -> None:
 
 
 def test_each_declared_document_is_checked() -> None:
+    """Removing the merge-block anchor from any declared document fails."""
     catalog = _load_yaml(CATALOG)
     policy = catalog["policy"]
     doc_paths = [str(path) for path in policy["prose_claim_doc_paths"]]
@@ -456,6 +520,7 @@ def test_each_declared_document_is_checked() -> None:
 
 
 def test_live_protection_boolean_true_is_rejected() -> None:
+    """The live-protection boolean must stay false."""
     from scripts.engineering.ci.pr_gate import load_catalog
 
     loaded = load_catalog(CATALOG)

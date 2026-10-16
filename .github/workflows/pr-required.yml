@@ -232,6 +232,13 @@ jobs:
         if: needs['classify-changes'].outputs['docs-governance'] == 'required'
         run: uv run --frozen --no-build pytest tests/architecture/test_documentation_sync.py::test_mkdocs_nav_references_existing_markdown_files -q --tb=line
 
+      - name: Check required-check prose consistency
+        id: prose-consistency
+        if: needs['classify-changes'].outputs['docs-governance'] == 'required'
+        run: |
+          mkdir -p reports/quality
+          uv run --frozen --no-build pytest tests/architecture/test_required_checks_prose_consistency.py -q --tb=line --junitxml=reports/quality/prose-consistency-junit.xml
+
       - name: Run zizmor
         id: zizmor
         uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
