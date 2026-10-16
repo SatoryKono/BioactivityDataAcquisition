@@ -74,6 +74,7 @@ def check_required_checks_prose(
             )
         )
         found_ids = set(_ANCHOR.findall(text))
+        regions = _anchor_regions(text)
         for claim_id in sorted(found_ids - declared_ids):
             errors.append(f"{doc_path} has undeclared policy-anchor:{claim_id}")
         present = {f"policy-anchor:{item}" for item in found_ids}
@@ -84,9 +85,13 @@ def check_required_checks_prose(
                 errors.append("prose claim must be a mapping")
                 continue
             claim_id = str(claim.get("id"))
+            claim_regions = regions.get(claim_id) or [""]
             for substring in claim.get("required_substrings") or []:
-                if str(substring) not in text:
-                    errors.append(f"{doc_path} claim {claim_id} missing {substring!r}")
+                needle = str(substring)
+                if needle == f"policy-anchor:{claim_id}":
+                    continue
+                if not all(needle in region for region in claim_regions):
+                    errors.append(f"{doc_path} claim {claim_id} missing {needle!r}")
     return errors
 
 
@@ -98,8 +103,10 @@ def _scoped_forbidden_errors(
     """Flag a current-configuration claim outside its marked context.
 
     ``historical`` applies on the same line, or in the first paragraph under a
-    heading that contains that word. A later paragraph or a later section does
-    not inherit it. Workflow markers apply only on the same line.
+    heading that contains that word. One blank line after that heading is the
+    Markdown separator, not a new paragraph. A later paragraph or a later
+    section does not inherit the heading. Workflow markers apply only on the
+    same line.
     """
 
     if rules is None:
@@ -146,12 +153,29 @@ def _phrase_context_is_allowed(
         return True
     if "historical" not in allow:
         return False
+    seen_blank = False
     for previous in range(index - 1, -1, -1):
         if not lines[previous].strip():
-            return False
+            if seen_blank:
+                return False
+            seen_blank = True
+            continue
         if lines[previous].lstrip().startswith("#"):
             return "historical" in lines[previous].casefold()
+        if seen_blank:
+            return False
     return False
+
+
+def _anchor_regions(text: str) -> dict[str, list[str]]:
+    """Return the text of every anchor, ending at the next anchor."""
+
+    matches = list(_ANCHOR.finditer(text))
+    regions: dict[str, list[str]] = {}
+    for index, match in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        regions.setdefault(match.group(1), []).append(text[match.start() : end])
+    return regions
 
 
 def _repo_documents(root: Path, doc_paths: list[str]) -> dict[str, str]:
@@ -231,6 +255,75 @@ def test_historical_actions_disabled_sentence_is_allowed() -> None:
     )
     errors = check_required_checks_prose(catalog, documents)
     assert errors == []
+
+
+def test_blank_line_after_historical_heading_allows_first_paragraph() -> None:
+    catalog = _load_yaml(CATALOG)
+    policy = catalog["policy"]
+    documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
+    target = str(policy["prose_claim_doc_paths"][0])
+    documents[target] = (
+        "### Historical record\n\nGitHub Actions are disabled.\n" + documents[target]
+    )
+    errors = check_required_checks_prose(catalog, documents)
+    assert errors == []
+
+
+def test_second_paragraph_after_heading_blank_stays_forbidden() -> None:
+    catalog = _load_yaml(CATALOG)
+    policy = catalog["policy"]
+    documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
+    target = str(policy["prose_claim_doc_paths"][0])
+    documents[target] = (
+        "### Historical record\n"
+        "\n"
+        "GitHub Actions are disabled.\n"
+        "\n"
+        "GitHub Actions are disabled.\n" + documents[target]
+    )
+    errors = check_required_checks_prose(catalog, documents)
+    claim_errors = [error for error in errors if "GitHub Actions are disabled" in error]
+    assert claim_errors == [
+        f"{target} current-configuration claim 'GitHub Actions are disabled' at line 5"
+    ]
+
+
+def test_anchor_region_does_not_reuse_wording_elsewhere() -> None:
+    catalog = _load_yaml(CATALOG)
+    policy = catalog["policy"]
+    documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
+    target = "docs/00-project/governance/05-github-policy.md"
+    old = (
+        "<!-- policy-anchor:ruleset-enforcement-mode --> Rulesets `13643213` "
+        "and `15730586` are `enforcement: disabled`."
+    )
+    assert old in documents[target]
+    documents[target] = documents[target].replace(
+        old,
+        old.replace("`enforcement: disabled`", "`enforcement: active`"),
+        1,
+    )
+    assert "enforcement: disabled" in documents[target]
+    errors = check_required_checks_prose(catalog, documents)
+    assert any(
+        target in error
+        and "ruleset-enforcement-mode" in error
+        and "enforcement: disabled" in error
+        for error in errors
+    )
+
+
+def test_every_prose_doc_selects_docs_governance() -> None:
+    from scripts.engineering.ci.pr_gate import classify_changes, load_catalog
+
+    catalog = load_catalog(CATALOG)
+    docs_yml = (ROOT / ".github/workflows/docs.yml").read_text(encoding="utf-8")
+    assert "tests/architecture/test_required_checks_prose_consistency.py" in docs_yml
+    for doc_path in catalog["policy"]["prose_claim_doc_paths"]:
+        matrix = classify_changes(catalog, [str(doc_path)], head_sha="a" * 40)
+        assert matrix["decisions"]["docs-governance"]["decision"] == "required", (
+            doc_path
+        )
 
 
 def test_individual_workflow_disable_instruction_is_allowed() -> None:
