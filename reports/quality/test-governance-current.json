@@ -2051,7 +2051,6 @@
         "tests/benchmarks/",
         "tests/contract/",
         "tests/e2e/",
-        "tests/engineering/",
         "tests/fakes/",
         "tests/fixtures/",
         "tests/golden/",
@@ -2070,7 +2069,6 @@
         "tests/benchmarks/",
         "tests/contract/",
         "tests/e2e/",
-        "tests/engineering/",
         "tests/fakes/",
         "tests/fixtures/",
         "tests/golden/",
@@ -2084,17 +2082,17 @@
         "tests/testing_support/",
         "tests/unit/"
       ],
-      "top_level_directory_count": 17,
-      "top_level_directory_count_including_pycache": 17
+      "top_level_directory_count": 16,
+      "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3050,
-    "total_test_functions": 29997,
+    "total_test_functions": 30009,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "1e96f665b0112d5bb6a74acc58558b3576580c012b8b308c950301da5ddef46a",
+  "source_tree_sha256": "0cc54a0e37cbd200f56afcf6959523341f1d8d8e209d281b4ed3223b099d16f0",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2121,7 +2119,6 @@
       "tests/benchmarks/",
       "tests/contract/",
       "tests/e2e/",
-      "tests/engineering/",
       "tests/fakes/",
       "tests/fixtures/",
       "tests/golden/",
@@ -2140,7 +2137,6 @@
       "tests/benchmarks/",
       "tests/contract/",
       "tests/e2e/",
-      "tests/engineering/",
       "tests/fakes/",
       "tests/fixtures/",
       "tests/golden/",
@@ -2154,12 +2150,12 @@
       "tests/testing_support/",
       "tests/unit/"
     ],
-    "top_level_directory_count": 17,
-    "top_level_directory_count_including_pycache": 17
+    "top_level_directory_count": 16,
+    "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3050,
-  "total_test_functions": 29997,
+  "total_test_functions": 30009,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

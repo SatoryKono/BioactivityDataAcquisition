@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `847aff50db0cdcca66144203f7712f10825a3be8b8490086d3034687a49d1878`
+Evidence surface SHA-256: `7988fc55000f4679f06ee4a05ce432ed24cd43b88c840d5c09a3dc3d508d5b71`
 
 ## Current evidence summary
 
@@ -35,7 +35,7 @@ reported separately in the issue closeout evidence.
 
 <!-- current-audit-headlines:start -->
 
-Debt-governance gates: **46 pass / 0 fail**
+Debt-governance gates: **45 pass / 1 fail**
 
 Architecture quality integral score: **10.0** (`excellent`)
 
@@ -69,15 +69,15 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "847aff50db0cdcca66144203f7712f10825a3be8b8490086d3034687a49d1878",
+  "evidence_surface_sha256": "7988fc55000f4679f06ee4a05ce432ed24cd43b88c840d5c09a3dc3d508d5b71",
   "metrics": {
     "architecture_integral_score": 10.0,
     "architecture_interpretation": "excellent",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 46,
-    "debt_gate_fail_count": 0,
-    "debt_gate_pass_count": 46,
+    "debt_gate_fail_count": 1,
+    "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
     "fully_covered_module_count": 2529,
