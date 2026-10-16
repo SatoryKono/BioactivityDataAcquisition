@@ -24,10 +24,33 @@ SCHEMA = ROOT / "tests/fixtures/contracts/coderabbit-schema.v2.json"
 TARGET = "tests/architecture/test_coderabbit_config.py"
 
 
+class _UniqueKeyLoader(yaml.SafeLoader):
+    """Reject duplicate keys before schema validation can lose configuration."""
+
+    def construct_mapping(
+        self, node: yaml.MappingNode, deep: bool = False
+    ) -> dict[object, object]:
+        seen = set()
+        for key_node, _ in node.value:
+            key = self.construct_object(key_node, deep=deep)
+            if key in seen:
+                raise yaml.constructor.ConstructorError(
+                    "while constructing a mapping",
+                    node.start_mark,
+                    f"duplicate key: {key!r}",
+                    key_node.start_mark,
+                )
+            seen.add(key)
+        return super().construct_mapping(node, deep=deep)
+
+
 def test_coderabbit_configuration_matches_official_schema() -> None:
     """Use a pinned official schema offline, independent of vendor availability."""
     schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
-    config = yaml.safe_load((ROOT / ".coderabbit.yaml").read_text(encoding="utf-8"))
+    config = yaml.load(
+        (ROOT / ".coderabbit.yaml").read_text(encoding="utf-8"),
+        Loader=_UniqueKeyLoader,
+    )
     jsonschema.validate(config, schema)
     assert config["language"] == "ru-RU"
     assert config["reviews"]["path_filters"] == ["**"]
@@ -40,6 +63,20 @@ def test_coderabbit_configuration_matches_official_schema() -> None:
         "github-checks",
     ):
         assert config["reviews"]["tools"][tool]["enabled"] is True
+
+
+@pytest.mark.parametrize(
+    "document",
+    [
+        "reviews: {}\nreviews: {}\n",
+        "reviews:\n  auto_review: {}\n  auto_review: {}\n",
+        "reviews:\n  path_instructions:\n    - path: '**'\n      path: 'src/**'\n",
+    ],
+)
+def test_config_loader_rejects_duplicate_keys(document: str) -> None:
+    """Reject duplicates at the root, in nested mappings, and inside sequences."""
+    with pytest.raises(yaml.constructor.ConstructorError, match="duplicate key"):
+        yaml.load(document, Loader=_UniqueKeyLoader)
 
 
 def test_schema_rejects_invalid_review_controls() -> None:
