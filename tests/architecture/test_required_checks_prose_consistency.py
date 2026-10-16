@@ -168,13 +168,31 @@ def _phrase_context_is_allowed(
     return False
 
 
+def _final_anchor_end(text: str, start: int) -> int:
+    """Stop the last anchor at the next blank line or heading, not at EOF."""
+
+    consumed = 0
+    for index, line in enumerate(text[start:].splitlines(keepends=True)):
+        if index > 0 and (not line.strip() or line.lstrip().startswith("#")):
+            return start + consumed
+        consumed += len(line)
+    return len(text)
+
+
 def _anchor_regions(text: str) -> dict[str, list[str]]:
-    """Return the text of every anchor, ending at the next anchor."""
+    """Return the text of every anchor, ending at the next anchor.
+
+    The last anchor in a document ends at the following blank line or heading.
+    A later paragraph must not satisfy that anchor.
+    """
 
     matches = list(_ANCHOR.finditer(text))
     regions: dict[str, list[str]] = {}
     for index, match in enumerate(matches):
-        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        if index + 1 < len(matches):
+            end = matches[index + 1].start()
+        else:
+            end = _final_anchor_end(text, match.end())
         regions.setdefault(match.group(1), []).append(text[match.start() : end])
     return regions
 
@@ -358,6 +376,63 @@ def test_active_merge_wall_phrase_fails() -> None:
     assert any(
         target in error and "GitHub-required merge wall" in error for error in errors
     )
+
+
+def test_last_anchor_does_not_read_the_next_paragraph() -> None:
+    """A later paragraph cannot satisfy the document's final policy anchor."""
+    catalog = _load_yaml(CATALOG)
+    policy = catalog["policy"]
+    documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
+    target = "docs/05-operations/ci-cd-integration.md"
+    original = (
+        "A successful `pr-gate-complete` does not by itself block merge, "
+        "because classic branch protection is absent"
+    )
+    replacement = (
+        "A successful `pr-gate-complete` is enough by itself to block merge, "
+        "because classic branch protection is absent"
+    )
+    assert original in documents[target]
+    documents[target] = documents[target].replace(original, replacement, 1)
+    errors = check_required_checks_prose(catalog, documents)
+    assert any(target in error and "merge-block" in error for error in errors)
+
+
+def test_github_required_context_phrase_fails() -> None:
+    """Restoring the required-context table sentence fails."""
+    catalog = _load_yaml(CATALOG)
+    policy = catalog["policy"]
+    documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
+    target = "docs/04-reference/github-actions-workflows.md"
+    documents[target] += "\nGitHub required context is job `pr-gate-complete`\n"
+    errors = check_required_checks_prose(catalog, documents)
+    assert any(
+        target in error and "GitHub required context is job" in error
+        for error in errors
+    )
+
+
+def test_requires_only_final_context_phrase_fails() -> None:
+    """Restoring the ruleset-requires-final-context sentence fails."""
+    catalog = _load_yaml(CATALOG)
+    policy = catalog["policy"]
+    documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
+    target = "docs/00-project/governance/05-github-policy.md"
+    documents[target] += (
+        "\nruleset `13643213` requires only the final `pr-gate-complete` context\n"
+    )
+    errors = check_required_checks_prose(catalog, documents)
+    assert any(
+        target in error and "requires only the final" in error for error in errors
+    )
+
+
+def test_coordinator_workflow_stays_in_prose_claim_documents() -> None:
+    """The coordinator file itself is a required prose document."""
+    catalog = _load_yaml(CATALOG)
+    paths = [str(item) for item in catalog["policy"]["prose_claim_doc_paths"]]
+    assert catalog["coordinator_workflow"] in paths
+    assert catalog["deployment"]["config_path"] in paths
 
 
 def test_enforces_required_context_phrase_fails() -> None:
