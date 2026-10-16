@@ -3,8 +3,6 @@
 
 from __future__ import annotations
 
-import os
-import tempfile
 from pathlib import Path
 from typing import IO
 
@@ -186,45 +184,6 @@ def write_text_confined(
     )
     resolved.parent.mkdir(parents=True, exist_ok=True)  # NOSONAR - confined path
     resolved.write_text(data, encoding=encoding)  # NOSONAR - confined path
-    return resolved
-
-
-def read_bytes_confined(
-    path: str | Path,
-    *,
-    root: Path | None = None,
-    allow_external_absolute: bool = False,
-) -> bytes:
-    """Read raw bytes after confining *path* under *root*."""
-    resolved = confined_io_path(
-        path, root=root, allow_external_absolute=allow_external_absolute
-    )
-    return resolved.read_bytes()  # NOSONAR - confined path
-
-
-def write_bytes_confined(
-    path: str | Path,
-    data: bytes,
-    *,
-    root: Path | None = None,
-    allow_external_absolute: bool = False,
-) -> Path:
-    """Write raw bytes after confining *path* under *root*."""
-    resolved = confined_io_path(
-        path, root=root, allow_external_absolute=allow_external_absolute
-    )
-    resolved.parent.mkdir(parents=True, exist_ok=True)  # NOSONAR - confined path
-    descriptor, temporary_name = tempfile.mkstemp(
-        prefix=".bioetl-", suffix=".tmp", dir=resolved.parent
-    )
-    temporary = Path(temporary_name)
-    try:
-        with os.fdopen(descriptor, "wb") as handle:
-            handle.write(data)  # NOSONAR - confined parent of rebuilt path
-        os.replace(temporary, resolved)  # NOSONAR - confined parent of rebuilt path
-    except BaseException:
-        temporary.unlink(missing_ok=True)
-        raise
     return resolved
 
 
