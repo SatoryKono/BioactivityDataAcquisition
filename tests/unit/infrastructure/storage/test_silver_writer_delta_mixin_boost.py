@@ -270,6 +270,7 @@ class TestWriteMergeRetrySuccess:
     @pytest.mark.asyncio
     async def test_merge_records_builds_predicate_and_executes_merge_chain(
         self,
+        tmp_path: Path,
     ) -> None:
         """Merge path should build the expected predicate and execute full chain."""
         mixin = _ConcreteDeltaMixin()
@@ -279,12 +280,13 @@ class TestWriteMergeRetrySuccess:
         dt.merge.return_value = merge_builder
         merge_builder.when_matched_update_all.return_value = merge_builder
         merge_builder.when_not_matched_insert_all.return_value = merge_builder
+        table_path = str(tmp_path / "absent-table")
 
         await mixin._merge_records(
             dt,
             data,
             ["id", "value"],
-            _TABLE_PATH,
+            table_path,
             timeout_seconds=5.0,
         )
 
@@ -302,7 +304,10 @@ class TestWriteMergeRetrySuccess:
         merge_builder.execute.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_merge_records_enables_merge_schema_when_requested(self) -> None:
+    async def test_merge_records_enables_merge_schema_when_requested(
+        self,
+        tmp_path: Path,
+    ) -> None:
         """Merge path should opt into Delta schema evolution when payload requests it."""
         mixin = _ConcreteDeltaMixin()
         data = _make_arrow_table()
@@ -311,12 +316,13 @@ class TestWriteMergeRetrySuccess:
         dt.merge.return_value = merge_builder
         merge_builder.when_matched_update_all.return_value = merge_builder
         merge_builder.when_not_matched_insert_all.return_value = merge_builder
+        table_path = str(tmp_path / "absent-table")
 
         await mixin._merge_records(
             dt,
             data,
             ["id"],
-            _TABLE_PATH,
+            table_path,
             timeout_seconds=5.0,
             merge_schema=True,
         )
@@ -330,7 +336,10 @@ class TestWriteMergeRetrySuccess:
         )
 
     @pytest.mark.asyncio
-    async def test_write_merge_logs_recovery_after_retry(self) -> None:
+    async def test_write_merge_logs_recovery_after_retry(
+        self,
+        tmp_path: Path,
+    ) -> None:
         """Line 130: logs info when commit_retry_count > 0 on success."""
         from deltalake.exceptions import CommitFailedError
 
@@ -339,7 +348,7 @@ class TestWriteMergeRetrySuccess:
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
             validated_mode=SilverWriteMode.MERGE,
-            table_path=_TABLE_PATH,
+            table_path=str(tmp_path / "absent-table"),
             arrow_data=data,
             primary_keys=["id"],
             partition_cols=None,
@@ -422,7 +431,10 @@ class TestWriteMergeRetrySuccess:
         assert write_calls[0]["schema_mode"] == "overwrite"
 
     @pytest.mark.asyncio
-    async def test_write_merge_commit_retries_exhausted_raises(self) -> None:
+    async def test_write_merge_commit_retries_exhausted_raises(
+        self,
+        tmp_path: Path,
+    ) -> None:
         """Lines 144-147: CommitFailedError after max retries re-raises."""
         from deltalake.exceptions import CommitFailedError
 
@@ -432,7 +444,7 @@ class TestWriteMergeRetrySuccess:
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
             validated_mode=SilverWriteMode.MERGE,
-            table_path=_TABLE_PATH,
+            table_path=str(tmp_path / "absent-table"),
             arrow_data=data,
             primary_keys=["id"],
             partition_cols=None,
