@@ -56,9 +56,7 @@ def check_required_checks_prose(
         errors.append("prose_forbidden_substrings must be a list")
         return errors
 
-    declared_ids = {
-        str(claim.get("id")) for claim in claims if isinstance(claim, dict)
-    }
+    declared_ids = {str(claim.get("id")) for claim in claims if isinstance(claim, dict)}
     declared_anchors = {f"policy-anchor:{claim_id}" for claim_id in declared_ids}
     for doc_path in doc_paths:
         text = documents.get(str(doc_path))
@@ -115,7 +113,10 @@ def _scoped_forbidden_errors(
             errors.append("scoped forbidden phrase must be a mapping")
             continue
         phrase = str(rule.get("phrase") or "")
-        allow = [str(token).casefold() for token in rule.get("line_allow_if_contains_any") or []]
+        allow = [
+            str(token).casefold()
+            for token in rule.get("line_allow_if_contains_any") or []
+        ]
         if not phrase:
             errors.append("scoped forbidden phrase is empty")
             continue
@@ -155,7 +156,8 @@ def _phrase_context_is_allowed(
 
 def _repo_documents(root: Path, doc_paths: list[str]) -> dict[str, str]:
     return {
-        doc_path: (root / doc_path).read_text(encoding="utf-8") for doc_path in doc_paths
+        doc_path: (root / doc_path).read_text(encoding="utf-8")
+        for doc_path in doc_paths
     }
 
 
@@ -214,7 +216,9 @@ def test_current_actions_disabled_claim_fails() -> None:
     target = str(policy["prose_claim_doc_paths"][0])
     documents[target] = "GitHub Actions are disabled.\n" + documents[target]
     errors = check_required_checks_prose(catalog, documents)
-    assert any("GitHub Actions are disabled" in error and target in error for error in errors)
+    assert any(
+        "GitHub Actions are disabled" in error and target in error for error in errors
+    )
 
 
 def test_historical_actions_disabled_sentence_is_allowed() -> None:
@@ -256,7 +260,9 @@ def test_historical_heading_does_not_allow_other_forbidden_phrases() -> None:
     policy = catalog["policy"]
     documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
     target = str(policy["prose_claim_doc_paths"][0])
-    documents[target] = "### Historical record\nActive main rulesets\n" + documents[target]
+    documents[target] = (
+        "### Historical record\nActive main rulesets\n" + documents[target]
+    )
     errors = check_required_checks_prose(catalog, documents)
     assert any("Active main rulesets" in error for error in errors)
 
@@ -271,8 +277,7 @@ def test_historical_section_does_not_allow_current_claim_later_in_file() -> None
         "GitHub Actions are disabled.\n"
         "\n"
         "### Current configuration\n"
-        "GitHub Actions are disabled.\n"
-        + documents[target]
+        "GitHub Actions are disabled.\n" + documents[target]
     )
     errors = check_required_checks_prose(catalog, documents)
     claim_errors = [error for error in errors if "GitHub Actions are disabled" in error]
@@ -290,8 +295,7 @@ def test_later_paragraph_in_historical_section_stays_forbidden() -> None:
         "### Historical record\n"
         "GitHub Actions are disabled.\n"
         "\n"
-        "GitHub Actions are disabled.\n"
-        + documents[target]
+        "GitHub Actions are disabled.\n" + documents[target]
     )
     errors = check_required_checks_prose(catalog, documents)
     claim_errors = [error for error in errors if "GitHub Actions are disabled" in error]
@@ -312,9 +316,13 @@ def test_workflow_marker_does_not_allow_the_next_paragraph() -> None:
     )
     for marked in marked_lines:
         sample = dict(documents)
-        sample[target] = f"{marked}\n\nGitHub Actions are disabled.\n" + documents[target]
+        sample[target] = (
+            f"{marked}\n\nGitHub Actions are disabled.\n" + documents[target]
+        )
         errors = check_required_checks_prose(catalog, sample)
-        claim_errors = [error for error in errors if "GitHub Actions are disabled" in error]
+        claim_errors = [
+            error for error in errors if "GitHub Actions are disabled" in error
+        ]
         assert claim_errors == [
             f"{target} current-configuration claim 'GitHub Actions are disabled' at line 3"
         ], marked
@@ -349,7 +357,9 @@ def test_each_declared_document_is_checked() -> None:
             "policy-anchor:merge-bloc",
         )
         errors = check_required_checks_prose(catalog, mutated)
-        assert any(doc_path in error and "merge-block" in error for error in errors), doc_path
+        assert any(doc_path in error and "merge-block" in error for error in errors), (
+            doc_path
+        )
 
 
 def test_live_protection_boolean_true_is_rejected() -> None:
@@ -357,7 +367,10 @@ def test_live_protection_boolean_true_is_rejected() -> None:
 
     loaded = load_catalog(CATALOG)
     assert loaded["schema_version"] == 1
-    assert loaded["policy"]["enforcement_verified_date_is_live_protection_evidence"] is False
+    assert (
+        loaded["policy"]["enforcement_verified_date_is_live_protection_evidence"]
+        is False
+    )
     catalog = copy.deepcopy(_load_yaml(CATALOG))
     catalog["policy"]["enforcement_verified_date_is_live_protection_evidence"] = True
     documents = _repo_documents(ROOT, list(catalog["policy"]["prose_claim_doc_paths"]))
