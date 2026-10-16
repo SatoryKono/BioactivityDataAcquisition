@@ -1386,13 +1386,11 @@ jobs:
         run: |
           set +e
           mkdir -p reports/coverage reports/pytest/serial-coverage reports/test-telemetry
-          # 840s keeps dump, cleanup, and artifact upload inside the 15-minute job.
           uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \
             --target tests/ \
             --reports-dir reports/pytest/serial-coverage \
             --parallel-marker "serial and not e2e and not benchmark and not memory" \
             --parallel-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report=" \
-            --parallel-timeout-seconds 840 \
             --skip-serial-pass
           TEST_EXIT=$?
           if [ ! -s "$COVERAGE_FILE" ]; then
@@ -1406,15 +1404,6 @@ jobs:
           cp reports/pytest/serial-coverage/junit_parallel.xml \
             reports/test-telemetry/junit-serial-coverage.xml
           exit "$TEST_EXIT"
-
-      - name: Upload serial coverage abort diagnostics
-        if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: serial-coverage-abort-diagnostics
-          path: reports/pytest/serial-coverage/diagnostics/
-          if-no-files-found: warn
-          retention-days: 3
 
       - name: Upload serial coverage telemetry
         if: ${{ always() && !cancelled() }}
