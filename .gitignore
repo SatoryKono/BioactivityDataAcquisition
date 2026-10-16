@@ -149,6 +149,7 @@ log_test.txt
 !/reports/performance/evidence/*/*/benchmark-measurements.json
 !/reports/performance/evidence/*/*/benchmark-manifest.json
 !/reports/performance/evidence/*/*/benchmark-gate.json
+!/reports/performance/evidence/*/*/benchmark-summary-candidate.json
 # Orientation entry for working reports tree (linked from README / docs/reports).
 !/reports/README.md
 # Bind-identity marker: proves Docker mounts the real checkout reports tree.

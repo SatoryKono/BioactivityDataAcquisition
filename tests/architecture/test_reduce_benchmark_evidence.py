@@ -490,3 +490,145 @@ def test_hotspot_gate_rejects_missing_summary_and_missing_report(
     )
     assert escaped.returncode == 2, escaped.stderr
     assert "rejected_output_path" in escaped.stderr
+
+
+def test_non_positive_means_do_not_pass(tmp_path: Path) -> None:
+    zero_current = tmp_path / "zero-current"
+    zero_current.mkdir()
+    current, current_gate, _manifest = _invoke(
+        zero_current, json.dumps(_measurement(0)).encode(), baseline=_baseline(100)
+    )
+    assert current.returncode == 1, current.stderr
+    assert _gate(current_gate)["reason"] == "unusable_measurement"
+
+    negative_current = tmp_path / "negative-current"
+    negative_current.mkdir()
+    negative, negative_gate, _manifest = _invoke(
+        negative_current,
+        json.dumps(_measurement(-1)).encode(),
+        baseline=_baseline(100),
+    )
+    assert negative.returncode == 1, negative.stderr
+    assert _gate(negative_gate)["reason"] == "unusable_measurement"
+
+    zero_base = tmp_path / "zero-base"
+    zero_base.mkdir()
+    raw = zero_base / "benchmark-measurements.json"
+    raw.write_bytes(json.dumps(_measurement(90)).encode())
+    based, based_gate, _manifest = _invoke(
+        zero_base, raw.read_bytes(), baseline=_baseline(0)
+    )
+    assert based.returncode == 1, based.stderr
+    assert _gate(based_gate)["reason"] == "invalid_baseline"
+    assert raw.read_bytes() == json.dumps(_measurement(90)).encode()
+    assert _gate(based_gate)["status"] == "failed"
+
+
+def test_clean_checkout_accepts_boolean_dirty_false(tmp_path: Path) -> None:
+    payload = _measurement(90)
+    payload["commit_info"] = {"dirty": False, "id": _HEAD}
+    clean_dir = tmp_path / "clean"
+    clean_dir.mkdir()
+    clean, clean_gate, _manifest = _invoke(
+        clean_dir, json.dumps(payload).encode(), baseline=_baseline(100)
+    )
+    assert clean.returncode == 0, clean.stderr
+    assert _gate(clean_gate)["reason"] == "improvement"
+
+    dirty_payload = _measurement(90)
+    dirty_payload["commit_info"] = {"dirty": True, "id": _HEAD}
+    dirty_dir = tmp_path / "dirty"
+    dirty_dir.mkdir()
+    dirty, dirty_gate, _manifest = _invoke(
+        dirty_dir, json.dumps(dirty_payload).encode(), baseline=_baseline(100)
+    )
+    assert dirty.returncode == 1, dirty.stderr
+    assert _gate(dirty_gate)["reason"] == "incomplete_evidence"
+
+
+def test_distinct_outputs_and_string_baseline_mean(tmp_path: Path) -> None:
+    raw = tmp_path / "benchmark-measurements.json"
+    raw.write_bytes(json.dumps(_measurement(90)).encode())
+    original = raw.read_bytes()
+    collided = _run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa",
+            "reduce-benchmark-evidence",
+            "--raw-json",
+            str(raw),
+            "--manifest-out",
+            str(raw),
+            "--gate-out",
+            str(tmp_path / "gate.json"),
+            "--baseline",
+            str(tmp_path / "benchmark-summary.json"),
+            "--evidence-dir",
+            str(tmp_path / "evidence"),
+            "--output-root",
+            str(tmp_path),
+            "--checkout-sha",
+            _HEAD,
+        ],
+        env=_github_env(),
+    )
+    assert collided.returncode == 2, collided.stderr
+    assert "rejected_output_path" in collided.stderr
+    assert raw.read_bytes() == original
+
+    string_dir = tmp_path / "strings"
+    string_dir.mkdir()
+    string_mean = _baseline(100)
+    string_mean["tests"][0]["mean"] = "100"
+    adopted, adopted_gate, _manifest = _invoke(
+        string_dir,
+        json.dumps(_measurement(90)).encode(),
+        baseline=string_mean,
+    )
+    assert adopted.returncode == 0, adopted.stderr
+    assert _gate(adopted_gate)["reason"] == "improvement"
+
+
+def test_hotspot_rejects_negative_failures_and_non_positive_latency(
+    tmp_path: Path,
+) -> None:
+    from scripts.engineering.qa.generate_hotspot_degradation_report import (
+        HotspotLoadError,
+        _load_observations,
+        judge_hotspot_report,
+    )
+
+    status, reason = judge_hotspot_report(
+        {"summary": {"failed": -1, "total": 1}, "verdict": "measured"}
+    )
+    assert status == "failed"
+    assert reason == "invalid_summary"
+
+    observations = tmp_path / "observations.jsonl"
+    observations.write_text(
+        json.dumps(
+            {
+                "benchmark_key": "alpha",
+                "latency_ms": 0,
+                "p95_latency_ms": 1,
+                "throughput_rps": 1,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(HotspotLoadError) as captured:
+        _load_observations(observations, root=tmp_path)
+    assert captured.value.reason == "malformed_observations"
+
+
+def test_confined_byte_write_ignores_predictable_tmp_sibling(tmp_path: Path) -> None:
+    from scripts.engineering.common.repo_paths import write_bytes_confined
+
+    target = tmp_path / "benchmark-measurements.json"
+    decoy = tmp_path / "benchmark-measurements.json.tmp"
+    decoy.write_bytes(b"keep")
+    write_bytes_confined(target, b"payload", root=tmp_path)
+    assert target.read_bytes() == b"payload"
+    assert decoy.read_bytes() == b"keep"

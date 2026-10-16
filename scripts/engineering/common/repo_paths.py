@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import os
+import tempfile
 from pathlib import Path
 from typing import IO
 
@@ -212,9 +214,17 @@ def write_bytes_confined(
         path, root=root, allow_external_absolute=allow_external_absolute
     )
     resolved.parent.mkdir(parents=True, exist_ok=True)  # NOSONAR - confined path
-    temporary = resolved.with_name(resolved.name + ".tmp")
-    temporary.write_bytes(data)  # NOSONAR - confined sibling of rebuilt path
-    temporary.replace(resolved)
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=".bioetl-", suffix=".tmp", dir=resolved.parent
+    )
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "wb") as handle:
+            handle.write(data)  # NOSONAR - confined parent of rebuilt path
+        os.replace(temporary, resolved)  # NOSONAR - confined parent of rebuilt path
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
     return resolved
 
 

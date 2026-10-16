@@ -105,6 +105,24 @@ def _finite_float(value: object) -> float:
     return number
 
 
+def _observation_from_record(record: Mapping[str, Any]) -> HotspotObservation:
+    latency_ms = _finite_float(record.get("latency_ms"))
+    if latency_ms <= 0:
+        raise ValueError("non-positive latency")
+    if "p95_latency_ms" in record:
+        p95_latency_ms = _finite_float(record.get("p95_latency_ms"))
+        if p95_latency_ms <= 0:
+            raise ValueError("non-positive p95")
+    else:
+        p95_latency_ms = 0.0
+    return HotspotObservation(
+        latency_ms=latency_ms,
+        p95_latency_ms=p95_latency_ms,
+        throughput_rps=_finite_float(record.get("throughput_rps")),
+        timestamp_unix=_finite_float(record.get("timestamp_unix", 0.0)),
+    )
+
+
 def _load_observations(
     path: Path, *, root: Path | None = None
 ) -> dict[str, list[HotspotObservation]]:
@@ -129,12 +147,7 @@ def _load_observations(
         if not isinstance(key, str) or not key:
             raise HotspotLoadError("malformed_observations")
         try:
-            observation = HotspotObservation(
-                latency_ms=_finite_float(record.get("latency_ms")),
-                p95_latency_ms=_finite_float(record.get("p95_latency_ms", 0.0)),
-                throughput_rps=_finite_float(record.get("throughput_rps")),
-                timestamp_unix=_finite_float(record.get("timestamp_unix", 0.0)),
-            )
+            observation = _observation_from_record(record)
         except (TypeError, ValueError) as exc:
             raise HotspotLoadError("malformed_observations") from exc
         grouped.setdefault(key, []).append(observation)
@@ -489,10 +502,13 @@ def judge_hotspot_report(payload: object) -> tuple[str, str]:
     summary = payload.get("summary")
     if not isinstance(summary, dict) or type(summary.get("failed")) is not int:
         return "failed", "missing_summary"
+    failed = summary["failed"]
     total = summary.get("total")
     if type(total) is not int or total < 1:
         return "failed", "zero_observations"
-    if summary["failed"] > 0:
+    if failed < 0 or failed > total:
+        return "failed", "invalid_summary"
+    if failed > 0:
         return "failed", "over_budget"
     return "passed", "within_budget"
 
@@ -610,15 +626,17 @@ def read_checkout_sha(repo: Path) -> str | None:
 def _decimal_mean(value: object) -> Decimal | None:
     if isinstance(value, bool) or not isinstance(value, (int, float, str)):
         return None
-    if isinstance(value, str):
-        return None
     if isinstance(value, float) and not math.isfinite(value):
         return None
     try:
-        number = Decimal(str(value))
+        number = Decimal(value if isinstance(value, str) else str(value))
     except InvalidOperation:
         return None
-    return number if number.is_finite() else None
+    if not number.is_finite():
+        return None
+    if isinstance(value, str) and value not in {str(number), format(number, "f")}:
+        return None
+    return number
 
 
 def _scope_of(identity: str) -> str | None:
@@ -665,7 +683,7 @@ def _entry_mean(stats: object) -> Decimal | str:
         return "incomplete_evidence"
     mean = _decimal_mean(stats.get("mean"))
     rounds = stats.get("rounds")
-    if mean is None:
+    if mean is None or mean <= 0:
         return "unusable_measurement"
     if type(rounds) is not int or rounds < 1:
         return "incomplete_evidence"
@@ -765,6 +783,7 @@ def _baseline_measurement(row: object) -> _Measurement | None:
         or not isinstance(dataset, str)
         or environment != "github-actions"
         or mean is None
+        or mean <= 0
     ):
         return None
     return (test_id, scope, dataset, environment, mean)
@@ -969,7 +988,7 @@ def _provenance(
     commit_info = payload.get("commit_info")
     if not isinstance(commit_info, dict) or commit_info.get("id") != revision:
         return "incomplete_evidence"
-    if commit_info.get("dirty") is not None:
+    if "dirty" not in commit_info or commit_info.get("dirty") not in {None, False}:
         return "incomplete_evidence"
     identity, identity_reason = _github_identity(env)
     if identity is None:
@@ -995,21 +1014,29 @@ def _emit_reducer(
     return 0 if status == "passed" else 1
 
 
+def _resolved_under_root(path: Path, root: Path) -> Path:
+    confined = path if path.is_absolute() else root / path
+    resolved = confined.resolve(strict=False)
+    resolved.relative_to(root.resolve(strict=False))
+    return resolved
+
+
 def _confine_reducer_outputs(args: argparse.Namespace, root: Path) -> bool:
     from scripts.engineering.common.repo_paths import write_text_confined
 
     try:
-        for path in (
-            args.raw_json,
-            args.manifest_out,
-            args.gate_out,
-            args.baseline,
-            args.evidence_dir,
-        ):
-            confined = path if path.is_absolute() else root / path
-            confined.resolve(strict=False).relative_to(root.resolve(strict=False))
-        if args.gate_out.resolve(strict=False) == args.raw_json.resolve(strict=False):
-            raise ValueError("gate overwrites raw json")
+        resolved = [
+            _resolved_under_root(path, root)
+            for path in (
+                args.raw_json,
+                args.manifest_out,
+                args.gate_out,
+                args.baseline,
+                args.evidence_dir,
+            )
+        ]
+        if len(set(resolved)) != len(resolved):
+            raise ValueError("reducer outputs must be distinct files")
         write_text_confined(
             args.gate_out,
             _dump({"reason": "in_progress", "status": "failed"}),
