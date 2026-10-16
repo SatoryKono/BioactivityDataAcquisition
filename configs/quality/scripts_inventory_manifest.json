@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-16T16:51:01.235093+00:00",
+  "generated_at": "2026-10-16T17:53:40.611027+00:00",
   "summary": {
     "total_scripts": 648,
     "status_counts": {
-      "active": 335,
-      "supporting": 313
+      "active": 334,
+      "supporting": 314
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -15,7 +15,7 @@
       "other": 16,
       "scripts": 545,
       "skills": 13,
-      "tests": 465
+      "tests": 466
     }
   },
   "scripts": [
@@ -2708,7 +2708,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1856,
+          "line": 1869,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check >> \"$log\" 2>&1"
         },
@@ -10152,7 +10152,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1746,
+          "line": 1759,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.junit_duration_summary"
         },
@@ -10428,17 +10428,27 @@
     {
       "path": "scripts/engineering/ci/pytest_receipts.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/ci/run_pytest_resilient.py",
-          "line": 405,
+          "line": 24,
           "source_group": "scripts",
-          "text": "plugin_path = Path(\"scripts/engineering/ci/pytest_receipts.py\").resolve()"
+          "text": "from scripts.engineering.ci.pytest_receipts import ("
+        },
+        {
+          "path": "tests/unit/scripts/engineering/ci/test_pytest_receipts.py",
+          "line": 14,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.pytest_receipts import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-01",
+      "next_step": "Retain as the pytest receipt plugin imported by run_pytest_resilient.py. It is not a CLI entrypoint; keep it supporting and route receipt capture through that runner."
     },
     {
       "path": "scripts/engineering/ci/quality_integral_gate.py",
@@ -10449,7 +10459,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1940,
+          "line": 1953,
           "source_group": "ci",
           "text": "\"python -m scripts.engineering.ci.quality_integral_gate\" \\"
         },
@@ -10640,11 +10650,11 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1390,
+          "line": 1394,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -11492,7 +11502,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1932,
+          "line": 1945,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
