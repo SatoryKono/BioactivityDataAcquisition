@@ -51,8 +51,6 @@ Commands:
     sync-integration-vcr-policy Sync tracked integration/e2e inventory in integration VCR policy
     report-family-baseline Generate/check RF-06 hotspot-family baseline artifacts
     report-hotspots      Generate hotspot degradation report
-    gate-hotspot-report  Fail closed when the hotspot report is missing or unmeasured
-    reduce-benchmark-evidence  Fail closed on benchmark evidence and regression
     report-duplication-baseline  Generate report-only duplication baseline
     report-artifact-duplication-audit  Generate/check JSCPD-excluded governance artifact duplication audit
     report-function-length-inventory Generate report-only near-threshold function length inventory
@@ -236,14 +234,6 @@ COMMAND_SPECS.update(
         "refresh-ci-drift-families": module_command(
             "scripts.engineering.qa.refresh_governance_artifacts",
             "ci-drift-families",
-        ),
-        "gate-hotspot-report": module_command(
-            "scripts.engineering.qa.generate_hotspot_degradation_report",
-            "gate-hotspot-report",
-        ),
-        "reduce-benchmark-evidence": module_command(
-            "scripts.engineering.qa.generate_hotspot_degradation_report",
-            "reduce-benchmark-evidence",
         ),
     }
 )
