@@ -1,7 +1,7 @@
-%% Title: ContentHashService Class Diagram
+%% Title: ContentHashPolicyGroup Class Diagram
 %% Covers: RULES.md §2.4 (Deduplication via content_hash)
 %% Updated: 2026-07-31
-%% Components: ContentHashService, SHA256, canonical JSON, normalization rules
+%% Components: ContentHashPolicyGroup, SHA256, canonical JSON, normalization rules
 
 %% @version 1.0.0
 %% @date    2026-02-24
@@ -13,7 +13,7 @@
 classDiagram
     direction TB
 
-    class ContentHashService {
+    class ContentHashPolicyGroup {
         <<Utility>>
         +PRECISION: int = 10
         +EXCLUDED_PREFIXES: tuple = ("_",)
@@ -62,11 +62,11 @@ classDiagram
     }
 
     %% Relationships
-    ContentHashService --> NormalizationRules : uses
-    ContentHashService --> ContentHash : returns
-    BaseTransformer --> ContentHashService : delegates to
+    ContentHashPolicyGroup --> NormalizationRules : uses
+    ContentHashPolicyGroup --> ContentHash : returns
+    BaseTransformer --> ContentHashPolicyGroup : delegates to
 
-    note for ContentHashService "Content hash pipeline<br/>filter internal fields<br/>normalize values<br/>canonical JSON + sha256"
+    note for ContentHashPolicyGroup "Content hash pipeline<br/>filter internal fields<br/>normalize values<br/>canonical JSON + sha256"
 
     note for NormalizationRules "Normalization examples<br/>float round(10)<br/>NaN -> null<br/>trim strings<br/>datetime -> ISO date"
 
@@ -83,4 +83,4 @@ classDiagram
 
     }
 
-    ContentHashService --> HashFlow : implements
+    ContentHashPolicyGroup --> HashFlow : implements

@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-03'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -25,7 +25,7 @@ ______________________________________________________________________
 | Pipeline ID           | `chembl_subcellular_fraction` |
 | Provider              | `chembl`                      |
 | Entity                | `subcellular_fraction`        |
-| Business Primary Keys | `["entity_id"]`               |
+| Business Primary Keys | `["subcellular_fraction"]`               |
 | Loading Strategy      | `full_scan_only`              |
 | Silver Format         | `delta`                       |
 | Gold Format           | `delta`                       |

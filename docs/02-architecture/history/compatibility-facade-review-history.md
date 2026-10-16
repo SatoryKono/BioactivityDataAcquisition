@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -163,7 +163,7 @@ Review outcome for the remaining curated inventory rows:
 - `src/bioetl/domain/value_objects/activity_values.py`: `removed`
   on 2026-06-16 after importer census showed no first-party source importers; activity
   value-object symbols remain available through `bioetl.domain.value_objects`.
-- `src/bioetl/domain/value_objects/publication_field_groups.py`: `retain`
+- `src/bioetl/domain/value_objects/_publication_field_group_config.py`, `_publication_field_groups_data.py`, `publication_field_group_types.py`: `retain`
   because public field-group types are consumed through the root entrypoint while
   private `_publication_field_group_*` modules remain internal.
 - `src/bioetl/infrastructure/adapters/pubmed/client.py`: `retain`

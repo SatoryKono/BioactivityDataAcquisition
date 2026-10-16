@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P3
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-03-30'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -61,15 +61,8 @@ ______________________________________________________________________
 - **Symptom**: Slow `merge` operations on large Delta tables.
 - **Tuning**: Delta Lake performance depends heavily on file sizes and table maintenance.
 - **Actions**:
-  - **`OPTIMIZE`**: Periodically run `OPTIMIZE` to compact small files into larger ones. This significantly speeds up read performance.
-    ```sql
-    OPTIMIZE schema.table-name;
-    ```
-  - **`Z-ORDER`**: For frequently filtered columns, use `Z-ORDER` to co-locate related data.
-    ```sql
-    OPTIMIZE schema.table-name ZORDER BY (filter-column);
-    ```
-  - **`VACUUM`**: Regularly run `VACUUM` to remove old, unreferenced data files and reduce storage costs. This is a mandatory weekly operation as per `RULES.md`.
+  - **`OPTIMIZE`**: Storage-maintenance `optimize()` (Silver `maintenance_mixin` / `storage_maintenance` port) compacts small files; it is not exposed as a standalone CLI command — run it through the maintenance service.
+  - **`VACUUM`**: Regularly run `bioetl vacuum <table> --retention-days <N>` or `bioetl vacuum-all` (CLI: `src/bioetl/interfaces/cli/commands/vacuum.py`) to remove old, unreferenced data files and reduce storage costs. This is a mandatory weekly operation as per `RULES.md`.
 
 ### 3. Partitioning Strategy
 

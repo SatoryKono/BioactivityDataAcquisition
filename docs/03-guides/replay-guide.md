@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-03'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -69,7 +69,7 @@ flowchart TB
 ```bash
 python -m pytest tests/unit/application/services/control_plane -q
 python -m pytest tests/architecture -q
-python -m scripts.engineering.qa run-historical-replay-closure-campaign
+python -m scripts.engineering.qa run-observability-closure-campaign
 ```
 
 Use the last command only when the local environment has the required historical

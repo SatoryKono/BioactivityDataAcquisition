@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -23,7 +23,7 @@ The project requires a robust way to define and validate data schemas, especiall
 
 ## Decision
 
-We have chosen to use **Pydantic** for defining all data models and schemas throughout the application. Standard `dataclasses` should only be used for simple, internal data structures that do not require runtime validation.
+We have chosen to use **Pydantic** for defining all data models and schemas throughout the application. Standard `dataclasses` are restricted to simple, internal data structures that do not require runtime validation; a documented exception is `PipelineConfig` (`src/bioetl/domain/config/pipeline.py`), which remains `@dataclass(frozen=True, slots=True)` as an internal config container without runtime-validation needs.
 
 This decision is codified by the inclusion of `pydantic` in `pyproject.toml` and its implicit use in data validation rules.
 

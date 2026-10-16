@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -85,7 +85,7 @@ filter-config-file: ../../entities/chembl/activity.yaml
    - Thread-safe caching for performance
    - Deep merge with list deduplication for required-fields/exclude-if-present
 
-1. **Pipeline config integration**: `src/bioetl/infrastructure/config_loader.py`
+1. **Pipeline config integration**: `src/bioetl/infrastructure/config/config_root.py`
 
    - `_apply_hierarchical_filter_config()`: Single entry point for filter merge during pipeline loading
    - Delegates to `FilterConfigLoader.load-as-dict()` for the full hierarchy
@@ -308,7 +308,7 @@ Define filters in Python code. Rejected because:
 - Domain models: `src/bioetl/domain/filtering/`
 - Schema: `src/bioetl/infrastructure/schemas/filter_config.py`
 - Loader: `src/bioetl/infrastructure/config/filter_config_loader.py`
-- Pipeline integration: `src/bioetl/infrastructure/config_loader.py` (`_apply_hierarchical_filter_config`)
+- Pipeline integration: `src/bioetl/infrastructure/config/config_root.py` (`_apply_hierarchical_filter_config`)
 - Config files: `configs/base/pipeline.yaml#filter_defaults`, `configs/providers/*#filters`, `configs/entities/*/*#filters`
 - Tests: `tests/unit/infrastructure/config/test_filter_config_loader.py`
 

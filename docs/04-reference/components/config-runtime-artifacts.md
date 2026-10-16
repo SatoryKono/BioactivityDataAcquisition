@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -236,28 +236,15 @@ if not compatible:
     pass
 ```
 
-#### get_config_drift(saved_artifact: EffectiveConfigArtifact, current_artifact: EffectiveConfigArtifact) -> ConfigDriftReport
+#### Config-drift analysis (current surface)
 
-Analyzes differences between two configuration artifacts.
-
-**Parameters:**
-
-- `saved_artifact`: Previous configuration artifact
-- `current_artifact`: Current configuration artifact
-
-**Returns:**
-
-- `ConfigDriftReport`: Detailed report of changes
-
-**Example:**
-
-```python
-report = service.get_config_drift(old_artifact, new_artifact)
-if report.has_changes():
-    print(f"Configuration changed: {report.change_summary()}")
-    for change in report.changes:
-        print(f"  - {change.field}: {change.old_value} -> {change.new_value}")
-```
+A dedicated `get_config_drift()` / `ConfigDriftReport` API is not shipped.
+Configuration drift between two manifests/artifacts is surfaced through the
+manifest-inspection diagnostics in
+`application/services/control_plane/manifest/` (diff `classification` values
+`semantic_drift` and `effective_config_semantic_drift`), which compare
+manifest-embedded config snapshots and flag semantic vs effective-config drift
+kinds.
 
 ### EffectiveConfigArtifact Methods
 

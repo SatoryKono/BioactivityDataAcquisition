@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-23'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -190,7 +190,7 @@ mention `6. Alerts & SLO` / Explore Logs / Explore Traces as removed surfaces.
   selector values; optional local plugin
   `grafana/plugins/bioetl-selectorshell-panel` applies last-run defaults and
   exact-run sibling sync when enabled.
-- `bioetl-workflow-overview` uses additional hidden
+- `bioetl-workflow-overview` (**retired**) used additional hidden
   `$workflow_context/$pipeline_context_exact/$run_type_context_exact/$provider_context_exact`
   variables backed by `/ops/control-plane/filter-options?exact_run_only=1` so
   dashboard-to-dashboard links preserve exact run identity when `$run_id` is
@@ -410,7 +410,7 @@ Explorer health probe and monitoring setup docs for that reason.
    `Range Evidence`; они служат selected-range/L1 evidence и не определяют
    `Status` или Domains-вердикт. `Diagnostics & Docs` содержит routing по
    logs/traces/raw metrics.
-1. `bioetl-workflow-overview`, panels `id=2`, `id=3`, `id=6`, `id=7`, `id=4`,
+1. `bioetl-workflow-overview` (**retired board**), panels `id=2`, `id=3`, `id=6`, `id=7`, `id=4`,
    `id=5`, `id=8`:
    selected-range declarative workflow evidence for failed runs, failed/skipped
    step events, run-outcome mix, step outcomes, и step latency. Используйте его,
@@ -569,7 +569,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
 ## Default dashboard windows (L0/L1 baseline + L2 forensic exception)
 
 - Единый baseline для operator-facing L0/L1 dashboards:
-  - `overview`, `runtime`, `dq`, `control-plane`, `workflow-overview` -> `time.from=now-12h`, `refresh=60s`.
+  - `overview`, `dq`, `control-plane` -> `time.from=now-12h`, `refresh=60s`.
 - Forensic L2 exception:
   - `silver-reject-explorer` -> `time.from=now-24h`, `refresh=1m`.
   - Justification: forensic-поиск по reject payload обычно начинается с более широкого окна и не требует 30s polling; более медленный refresh снижает ненужные перезапросы при row-level drilldown.
@@ -665,7 +665,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   honest empty-state semantics (no synthetic `no_events` / `none` buckets).
 - `Inspect: Quarantine by Error Type` ships as horizontal `bargauge`, not
   `piechart` (category comparison over slice composition).
-- `bioetl-workflow-overview`: dashboard links `1. Trust`,
+- `bioetl-workflow-overview` (**retired**): dashboard links `1. Trust`,
   `2. Overview`, `3. Pipeline Diagnostics`, `4. Provider Health`, `5. Data Quality`;
   cross-dashboard handoffs preserve primary `$run_id` but do not leak
   `$status/$step_status/$step_kind` into non-workflow targets.

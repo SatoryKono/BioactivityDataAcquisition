@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -28,15 +28,15 @@ BioETL pipelines use multiple infrastructure components (data sources, storage, 
 
 ## Decision
 
-Introduce a centralized lifecycle management pattern through `PipelineServices`:
+Introduce a centralized lifecycle management pattern through `PipelineService`:
 
 ### 1. Async Context Manager Protocol
 
-`PipelineServices` implements async context manager for unified resource management:
+`PipelineService` implements async context manager for unified resource management:
 
 ```python
 @dataclass(frozen=True)
-class PipelineServices:
+class PipelineService:
     data-source: DataSourcePort
     storage: BronzeStoragePort | SilverStoragePort | GoldStoragePort | MergedStoragePort
     lock: LockPort
@@ -155,8 +155,8 @@ class TestObservabilityPortLifecycle:
 - [ADR-006](ADR-006-logger-metrics-ports.md): Logger and Metrics Ports — defines observability ports
 - [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown Strategy — shutdown coordination
 - [ADR-013](ADR-013-async-storage-cleanup.md): Async Storage Cleanup — async cleanup methods
-- [ADR-020](ADR-020-basepipeline-decomposition.md): BasePipeline Decomposition — PipelineServices design
-- [ADR-021](ADR-021-ddd-aggregates-adoption.md): DDD Aggregates — uses PipelineServices lifecycle
+- [ADR-020](ADR-020-basepipeline-decomposition.md): BasePipeline Decomposition — PipelineService design
+- [ADR-021](ADR-021-ddd-aggregates-adoption.md): DDD Aggregates — uses PipelineService lifecycle
 
 ## Compliance
 

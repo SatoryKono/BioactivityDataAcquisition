@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -17,9 +17,9 @@ ______________________________________________________________________
 
 ## Описание
 
-Эта views-диаграмма Application Layer Class Diagram Infra представляет срез типа infra для родительской схемы `06-application-layer-class-diagram-full.mermaid` и использует нотацию `flowchart`. Она показывает runner-side orchestration и его support collaborators: `PipelineRunner`, `RunnerDependencies`, `PipelineService`, `LockRuntimeService`, `CheckpointRuntimeService`, `PreflightService`, `PostrunService`, `MedallionLifecycleService`, `PipelineObserver`, `BatchExecutor`, `BatchTracingManagerService`, `BatchMetricsRecorderService`.
+Эта views-диаграмма Application Layer Class Diagram Infra представляет срез типа infra для родительской схемы `06-application-layer-class-diagram-full.mermaid` и использует нотацию `flowchart`. Она показывает runner-side orchestration и его support collaborators: `PipelineRunner`, `PipelineRunnerDependencies`, `PipelineService`, `LockRuntimeService`, `CheckpointRuntimeService`, `PreflightService`, `PostrunService`, `MedallionLifecycleService`, `PipelineObserver`, `BatchExecutor`, `BatchTracingManagerService`, `BatchMetricsRecorderService`.
 
-По этой схеме удобно проверять, как application runtime стыкуется с lifecycle и observability seams, не смешивая это с transform logic. Важно и то, что view уже не опирается на старые `RecordProcessor` / `PipelineExecutor`, а отражает текущую dependency shape вокруг `PipelineRunner` и `RunnerDependencies`.
+По этой схеме удобно проверять, как application runtime стыкуется с lifecycle и observability seams, не смешивая это с transform logic. Важно и то, что view уже не опирается на старые `RecordProcessor` / `PipelineExecutor`, а отражает текущую dependency shape вокруг `PipelineRunner` и `PipelineRunnerDependencies`.
 
 ## Метаданные
 

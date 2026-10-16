@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -37,9 +37,10 @@ ______________________________________________________________________
   config-level `field_aliases` where supported; they are not the canonical
   published contract.
 - DQ fields use underscore-prefixed names such as `_dq_warn` and `_dq_error`.
-- Occurrence-scoped lineage anchors such as `_run_id`, `_run_type`,
-  `_source_batch_id`, and `_ingestion_ts` are published via sidecar/control-plane
-  artifacts rather than persisted Silver/Gold rows.
+- Occurrence-scoped lineage anchors `_run_id`, `_run_type`, `_source_batch_id`,
+  and `_ingestion_ts` ARE persisted in Silver system column_groups
+  (`configs/entities/*/publication.yaml`, `schema.column_groups.system`) and
+  also surfaced through sidecar/control-plane artifacts.
 - Config- and normalization-matrix artifacts may still mention those anchors in
   hash-policy or normalization contexts; such inventories are not themselves
   the persisted-row contract.

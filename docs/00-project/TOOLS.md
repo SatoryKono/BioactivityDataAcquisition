@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-20'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -188,5 +188,5 @@ ______________________________________________________________________
 - Config: `.coderabbit.yaml` (assertive profile)
 - Residual audit report example:
   `reports/grok/review_coderabbit_architecture_audit_20260728_1520_FINAL.md`
-- Issue pack example: `.github/ISSUES/ARCH-CR2-2026-07-29-ISSUE-PACK.md`
+- Issue pack example: `docs/99-archive/github-issues-20261015/ARCH-CR2-2026-07-29-ISSUE-PACK.md`
  

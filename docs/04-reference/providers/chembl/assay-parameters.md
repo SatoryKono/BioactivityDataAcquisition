@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.2.0
+Version: 1.3.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -16,7 +16,7 @@ ______________________________________________________________________
 **Имя пайплайна:** `chembl_assay_parameters`
 **Провайдер:** `chembl`
 **Сущность:** `assay_parameters`
-**Версия схемы:** 1.2.0
+**Версия схемы:** 2.0.0
 
 ______________________________________________________________________
 
@@ -161,7 +161,7 @@ ______________________________________________________________________
 
 | Артефакт             | Ссылка                                                                                      |
 | -------------------- | ------------------------------------------------------------------------------------------- |
-| Gold contract export | [chembl_assay_parameters_v1.0.json](../../contracts/gold/chembl_assay_parameters_v1.0.json) |
+| Gold contract export | [chembl_assay_parameters_v2.0.json](../../contracts/gold/chembl_assay_parameters_v2.0.json) |
 | Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                          |
 | Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md)    |
 
@@ -171,7 +171,7 @@ ______________________________________________________________________
 | ----------------- | ------ | -------------------------------------------------------------------------------------------------------------- |
 | Metadata          | Pass   | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified`                       |
 | Runtime alignment | Pass   | Активный config/runtime surface задокументирован в разделах `Конфигурация`, `Трансформация`, `Связанные файлы` |
-| Contract linkage  | Pass   | [chembl_assay_parameters_v1.0.json](../../contracts/gold/chembl_assay_parameters_v1.0.json)                    |
+| Contract linkage  | Pass   | [chembl_assay_parameters_v2.0.json](../../contracts/gold/chembl_assay_parameters_v2.0.json)                    |
 | API governance    | Pass   | См. [API Compliance](#api-compliance)                                                                          |
 
 ## API Compliance

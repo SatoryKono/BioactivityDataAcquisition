@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -61,8 +61,8 @@ ______________________________________________________________________
 
 | File                   | Location                   | Purpose                                  |
 | ---------------------- | -------------------------- | ---------------------------------------- |
-| `wsl_proxy.py`         | `scripts/ops/`             | HTTP CONNECT proxy (Python stdlib)       |
-| `start-wsl-proxy.bat`  | `scripts/ops/`             | Start proxy in background                |
+| `wsl_proxy.py`         | `scripts/ops/runtime/wsl/`             | HTTP CONNECT proxy (Python stdlib)       |
+| `start-wsl-proxy.bat`  | `scripts/ops/runtime/wsl/`             | Start proxy in background                |
 | `codex.bat`            | `scripts/ops/`             | Launch interactive Codex from Windows    |
 | `codex-exec.bat`       | `scripts/ops/`             | Launch full-auto Codex from Windows      |
 | `setup-wsl.sh` | `scripts/ai/codex/helper/` | Codex WSL bootstrap (deps + env); dual-OS venv: `setup_env_wsl.sh` |

@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -42,7 +42,7 @@ ______________________________________________________________________
 1. генерирует Pandera-canonical registry
    (`src/bioetl/domain/schemas/generated/registry.py`),
 1. генерирует Gold JSON contracts через существующий exporter
-   (`src/tools/scripts/schema/generation/generate_contracts.py`),
+   (`scripts/schema/generation/generate_contracts.py`),
 1. поддерживает режим `--check` для CI gate по stale generated artifacts.
 
 ## Consequences

@@ -1,10 +1,10 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
-Last verified: '2026-07-28'
+Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -73,7 +73,7 @@ requiring a precise provider selection.
 - **Run Explorer hub**: only `bioetl-run-explorer-v1` ships full first-screen ID/Processed Records; other boards keep collapsed thin shell.
 - **Telemetry confidence** (Runtime `#9102`) is not pipeline health.
 - **Incident** remains read-only; alerts now + history form one evidence timeline.
-- Portfolio remains **7 UIDs**; logical 6-workspace IA via nav/docs/Scenes (ADR-053).
+- Portfolio is **5 UIDs** (control-plane, overview, dq, incident, run-explorer); `bioetl-runtime`/`bioetl-provider-health-v2` retired; logical 6-workspace IA via nav/docs/Scenes (ADR-053).
 
 ## Context-preserving link standard
 

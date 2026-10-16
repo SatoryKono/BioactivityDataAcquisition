@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -17,7 +17,7 @@ ______________________________________________________________________
 
 ## Описание
 
-Диаграмма BatchExecutor Internal Architecture показывает актуальный architecture-срез `BatchExecutor` после decomposition wave в `application/core`. Она использует нотацию flowchart и фиксирует не старый helper-bundle view, а текущий runtime path: `prepare_execution_context()` и `BatchExecutionContext`, `BatchExecutionRunService`, `BatchExecutionLifecycleService`, `BatchExtractionLoopService`, `PipelineProcessingPort`, `BatchStateCommitPort` и внутренний `BatchProcessingService` choreography. Это делает схему полезной для ревью изменений вокруг `batch_execution`, extraction loop, state commit и failure/finalization policy. Ключевые подграфы теперь: `BatchExecutor Shell`, `Run Orchestration`, `Processing And State Contracts`, `BatchProcessingService Internals`. По этим блокам удобно валидировать, что `BatchExecutor` больше работает как orchestration shell поверх injected contracts и grouped dependencies, а трансформация/запись/метрики/трейсинг остаются в downstream services. В метаданных зафиксирована текущая плотность (`@nodes=16`), что помогает контролировать читаемость и дальнейшую декомпозицию без потери архитектурного смысла.
+Диаграмма BatchExecutor Internal Architecture показывает актуальный architecture-срез `BatchExecutor` после decomposition wave в `application/core`. Она использует нотацию flowchart и фиксирует не старый helper-bundle view, а текущий runtime path: `prepare_execution_context()` и `BatchExecutionContext`, `BatchExecutionRunService`, `BatchExecutionLifecycleService`, `BatchExtractionLoopService`, `PipelineProcessingProtocol`, `BatchStateCommitProtocol` и внутренний `BatchProcessingService` choreography. Это делает схему полезной для ревью изменений вокруг `batch_execution`, extraction loop, state commit и failure/finalization policy. Ключевые подграфы теперь: `BatchExecutor Shell`, `Run Orchestration`, `Processing And State Contracts`, `BatchProcessingService Internals`. По этим блокам удобно валидировать, что `BatchExecutor` больше работает как orchestration shell поверх injected contracts и grouped dependencies, а трансформация/запись/метрики/трейсинг остаются в downstream services. В метаданных зафиксирована текущая плотность (`@nodes=16`), что помогает контролировать читаемость и дальнейшую декомпозицию без потери архитектурного смысла.
 
 ## Метаданные
 

@@ -197,6 +197,20 @@ src/bioetl/domain/composite/
 WARN и ошибки дочерних запусков сохраняются в отчёте. Предупреждение родителя
 не понижает дочерние `ERROR`, `INCOMPLETE` или `UNKNOWN` до WARN.
 
+#### Fail-fast semantics (RF-007.1)
+
+Semantics реализованы в `src/bioetl/application/composite/coordinator.py`:
+
+- **`required: true` enricher** — failure или timeout пробрасывает исключение
+  немедленно через `asyncio.gather` (без `return_exceptions`), отменяя все
+  оставшиеся sibling-task'и. Composite run завершается ошибкой — fail-fast.
+- **`required: false` enricher** — ошибки перехватываются внутри и возвращаются
+  как `FAILED`-результаты этапа; composite завершает merge как
+  `completed_with_warnings` (CLI exit `0`, отчёт сохраняет дочерние статусы).
+
+`required`-флаг задаётся per-dependency в `configs/composites/*.yaml`
+(`dependencies[].required`, default `false`; см. `configs/composites/publication.yaml`).
+
 ### 9. State Machine
 
 **Файл:** `state.py`

@@ -213,5 +213,5 @@ tracked root was 37 then. Live allowlist is **37**.
 - Epic RH4: #6812
 - Epic RH (2026-07-28): #6874
 - RH7 issues: #8292–#8295, #8299–#8300, #8306–#8307, #8310
-- Pack: `.github/ISSUES/RH-2026-07-28-ROOT-HYGIENE-MINIMIZATION-ISSUE-PACK.md`
-- Pack RH4: `.github/ISSUES/RH4-2026-07-28-ROOT-HYGIENE-POST-RH3-RESIDUAL-ISSUE-PACK.md`
+- Pack: `docs/99-archive/github-issues-20261015/RH-2026-07-28-ROOT-HYGIENE-MINIMIZATION-ISSUE-PACK.md`
+- Pack RH4: `docs/99-archive/github-issues-20261015/RH4-2026-07-28-ROOT-HYGIENE-POST-RH3-RESIDUAL-ISSUE-PACK.md`

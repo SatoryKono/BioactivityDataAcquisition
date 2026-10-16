@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Accepted (Implemented 2025-12-29)
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-07'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -168,7 +168,7 @@ NEW → UNDER_REVIEW → IGNORED
   ↘→ EXPIRED      ↘→ EXPIRED
 ```
 
-Source: `src/bioetl/domain/aggregates/_quarantine_entry_transitions_mixin.py`
+Source: `src/bioetl/domain/aggregates/quarantine_entry.py`
 
 ### 2. Добавлены Value Objects
 

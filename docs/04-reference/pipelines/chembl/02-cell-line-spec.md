@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-03'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -24,7 +24,7 @@ ______________________________________________________________________
 | --------------------- | ------------------------------- |
 | Pipeline ID           | `chembl_cell_line`              |
 | Provider              | `chembl`                        |
-| Entity                | `cell-line`                     |
+| Entity                | `cell_line`                     |
 | Business Primary Keys | `["cell_id"]`                   |
 | Loading Strategy      | `incremental` with input filter |
 | Silver Format         | `delta`                         |

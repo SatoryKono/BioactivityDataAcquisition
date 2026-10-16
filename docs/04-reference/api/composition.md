@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -79,13 +79,13 @@ Import the symbols below from their defining submodules rather than from the
 | `TransformerBuilder`        | Builds transformer instances with dependencies                     |
 | `HttpClientFactory`         | Creates configured HTTP clients with retry/rate limiting           |
 | `ResolvedHttpConfig`        | Resolved HTTP client configuration                                 |
-| `CrossrefAdapterFactory`    | CrossRef-specific adapter factory                                  |
+| `create_crossref_adapter()` | CrossRef adapter creation function (`composition/factories/datasource/crossref.py`) |
 | `AdapterHelpersFactory`     | Creates adapter helper services                                    |
 | `RunnerFactory`             | Creates `PipelineRunner` instances with all dependencies           |
 | `MetricsExtractor`          | Extracts metrics from completed runs                               |
 | `ServiceBundleDependencies` | Dependencies required for service bundle creation                  |
 | `UuidBatchIdGenerator`      | UUID-based batch ID generation (implements `BatchIdGeneratorPort`) |
-| `PipelineContractValidator` | Validates pipeline contracts at assembly time                      |
+| `ContractAwareGoldValidator` / `ContractAwareSilverValidator` | Contract-aware validators (`infrastructure/validation/contract_validator.py`); preflight helpers in `pipeline_support/contract_validation_helpers.py` |
 
 ______________________________________________________________________
 

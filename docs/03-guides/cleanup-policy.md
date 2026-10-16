@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -117,11 +117,12 @@ Root env-like files are security-review surfaces, not cleanup targets:
 
 Root AI/editor/runtime tooling decisions live in
 `configs/quality/root_hygiene_review_registry.yaml`. Canonical runtime roots
-such as `.codex/**` and `.gemini/**` are retained unless a separate runtime
-migration decision changes the source of truth. Local cache/editor/vendor roots
-such as `.agents`, `.ai`, `.cache`, `.npm-cache`, `caddy`, `.junie`,
-`.sonarlint`, and `.windsurf` must remain untracked or be reclassified through
-the registry before any rehome/delete action.
+such as `.codex/**`, `.devin/**`, `.junie/**`, and `.gemini/**` are retained
+(tracked by design) unless a separate runtime migration decision changes the
+source of truth. Local cache/editor/vendor roots such as `.agents`, `.ai`,
+`.cache`, `.npm-cache`, `caddy`, `.sonarlint`, and `.windsurf` must remain
+untracked or be reclassified through the registry before any rehome/delete
+action.
 
 ## 3. Data Retention (Medallion Architecture)
 

@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-13'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -59,8 +59,8 @@ Row 0: Policy Header
 Row 1: Navigation
 
 - navigation panel `id=1000`;
-- top-level bus `0. Control Plane`, `1. Overview`, `2. Runtime`,
-  `3. Provider Health`, `4. Data Quality`, `5. Incident Workspace` (retired board name was Workflow);
+- top-level bus `Run Explorer`, `Replay Readiness`, `Run Overview`,
+  `6. Incident Workspace` (per navigation-links.yaml canonical surface);
 - current dashboard visible as disabled item;
 - adjunct links when required by the navigation contract.
 

@@ -1,10 +1,10 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
-Last verified: '2026-07-28'
+Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -324,8 +324,8 @@ leakage in provision, missing parity tests for shared panels.
 ## Related history
 
 - Architecture CR FINAL: `reports/grok/review_coderabbit_architecture_audit_20260728_1203_FINAL.md`  
-- Issue pack: `.github/ISSUES/ARCH-CR-2026-07-28-ISSUE-PACK.md`  
-- Re-audit pack: `.github/ISSUES/CODERABBIT-REAUDIT-2026-07-27-ISSUE-PACK.md`  
+- Issue pack: `docs/99-archive/github-issues-20261015/ARCH-CR-2026-07-28-ISSUE-PACK.md`  
+- Re-audit pack: `docs/99-archive/github-issues-20261015/CODERABBIT-REAUDIT-2026-07-27-ISSUE-PACK.md`  
 - Workflow: `.github/workflows/coderabbit.yml`  
 - Dashboard skills: `.codex/skills/grafana-dashboard-render/`, `grafana-dashboard-extension/`  
 - Docs verification: [docs-verification.md](docs-verification.md)  

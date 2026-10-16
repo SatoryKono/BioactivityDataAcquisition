@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -180,7 +180,7 @@ Store DQ rules in a database. Rejected because:
 ## References
 
 - RULES.md §3.1.2: DQ Thresholds
-- Domain config: `src/bioetl/domain/config.py`
+- Domain config: `src/bioetl/domain/config/`
 - Schema: `src/bioetl/infrastructure/schemas/dq_config.py`
 - Loader: `src/bioetl/infrastructure/config/dq_config_loader.py`
 - Config files: `configs/base/quality.yaml`, `configs/providers/*.yaml#quality`, `configs/entities/*/*#quality`

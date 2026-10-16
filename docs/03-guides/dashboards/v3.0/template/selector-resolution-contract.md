@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-13'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -24,7 +24,9 @@ Pipeline-summary dashboards:
 
 - visible selectors: `pipeline`, `run_type`;
 - optional visible selector: `stage` on Runtime and Data Quality;
-- exact execution identifiers are not visible selectors.
+- exact execution identifiers are not Prometheus-label selectors; the
+  control-plane-backed `run_id` selector on Run Overview is HTTP-scoped
+  (bioetl-overview-v2.json), not a metric label.
 
 Provider-first dashboard:
 

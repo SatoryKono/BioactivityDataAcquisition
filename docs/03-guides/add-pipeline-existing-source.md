@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -100,17 +100,17 @@ ______________________________________________________________________
 
 ### 4.1 Transformer registry
 
-Update `src/bioetl/composition/factories/transformer_factory.py`:
+Update `src/bioetl/composition/factories/_transformer_spec_rows.py`:
 
-- import transformer class
-- add `register_transformer("{provider}", "{entity}", {TransformerClass})`
+- append a `TransformerSpecRow` to `BUILTIN_TRANSFORMER_SPEC_ROWS`:
+  `("{provider}", "{entity}", "bioetl.application.pipelines.{provider}.{entity}_transformer", "{TransformerClass}")`
 
 ### 4.2 Pipeline factory registry
 
-Update `src/bioetl/composition/factories/pipeline/registry.py`:
+Update the provider manifest module (`src/bioetl/composition/factories/pipeline/_registry_manifest_chembl.py` or `_registry_manifest_non_chembl.py`):
 
-- add imports for transformer/schemas/contracts
-- add new `PipelineFactoryConfig(...)` entry into `PIPELINE_CONFIGS`
+- add imports for schemas/contracts
+- add new `PipelineFactoryConfig(...)` entry into the provider `*_PIPELINE_CONFIGS` tuple
 
 Start from template:
 

@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-12'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -24,9 +24,9 @@ ______________________________________________________________________
 - [Neo4j Memory Windows Verification](../verification/neo4j-memory-windows-verification.md)
 - [Neo4j Memory QA Examples](../verification/neo4j-memory-qa-examples.md)
 
-Root-level Neo4j recovery/status notes from the 2026-04 cleanup wave were moved
-out of the repository root and archived under
-`docs/99-archive/operations/neo4j-root-status-2026-04/`.
+Root-level Neo4j recovery/status notes from the 2026-04 cleanup wave were
+archived under `docs/99-archive/operations/neo4j-root-status-2026-04/` and
+subsequently removed from the repository (commit `ba3387319`).
 
 ## Quick Start
 

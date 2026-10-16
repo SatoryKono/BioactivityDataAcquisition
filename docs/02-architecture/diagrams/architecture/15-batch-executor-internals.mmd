@@ -36,7 +36,7 @@ graph TB
     end
 
     subgraph Contracts["Processing And State Contracts"]
-        PROC["PipelineProcessingPort<br/>--------<br/>process_batch(records, start_index, query)<br/>canonical impl: BatchProcessingService"]:::size-md
+        PROC["PipelineProcessingProtocol<br/>--------<br/>process_batch(records, start_index, query)<br/>canonical impl: BatchProcessingService"]:::size-md
         STATE["BatchStateCommitProtocol<br/>--------<br/>commit_successful_batch()<br/>build_batch_result()<br/>build_run_statistics()"]:::size-md
     end
 

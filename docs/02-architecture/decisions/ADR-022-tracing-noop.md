@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.1
+Version: 1.1.1
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-13'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -75,7 +75,7 @@ context (`run_id`), not via Prometheus labels.
 
 ```python
 # Default: NoOpTracing (zero overhead, mirrors OTel API) — lives in src/bioetl/domain/ports/noop/
-from bioetl.domain.ports import NoOpTracing
+from bioetl.domain.ports.noop import NoOpTracing
 tracing = NoOpTracing()
 
 # Extension point: real OTel adapter (when distributed deployment needed)

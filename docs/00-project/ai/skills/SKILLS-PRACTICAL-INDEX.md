@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-31'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -89,8 +89,8 @@ ______________________________________________________________________
 | `suggest-users`                       | Подбирает reviewers и assignees по ownership, file expertise и активности. Делает review loop быстрее и точнее.                                                                                    | При создании PR, issue и re-request review.                                         | `create-pr`, `repo-config`                                         |
 | `vcr-record`                          | Управляет VCR-кассетами: запись, валидация, обновление, очистка. Держит HTTP tests воспроизводимыми и безопасными.                                                                                 | При работе с integration tests против внешних API.                                  | `py-test-bot`, `verify-unit-tests`                                 |
 | `new-pipeline`                        | Помогает добавить новый pipeline так, чтобы он сразу жил по правилам BioETL: configs, wiring, baseline verification.                                                                               | При добавлении нового provider/entity pipeline.                                     | `py-config-bot`, `data-engineer`, `verify-architecture`            |
-| `grafana-dashboard-extension`         | Специализированно ведёт правки shipped Grafana dashboards: панели, drilldowns, navigation, datasource semantics и docs cascade.                                                                    | Когда меняются `grafana/dashboards/*.json`, monitoring UX или поведение drilldowns. | `documentation-audit`, `py-doc-bot`                                |
-| `prometheus-metric-discovery`         | Быстро находит реальные metrics, label names и label values до того, как кто-то начнёт гадать про PromQL по памяти. Снижает риск ложных query fixes.                                               | Когда работа начинается с вопроса “как вообще называется нужная метрика?”.          | `prometheus-query-debugger`, `grafana-dashboard-extension`         |
+| `observability-dashboard`             | Правки shipped Grafana dashboards: панели, drilldowns, navigation, datasource semantics. (`grafana-dashboard-extension` — историческое имя, см. примечание ниже.)                                  | Когда меняются `grafana/dashboards/*.json`, monitoring UX или поведение drilldowns. | `py-doc-bot`                                                       |
+| `observability-prometheus`            | Реальные metrics/labels/alert rules до PromQL-догадок. (`prometheus-metric-discovery`, `prometheus-query-debugger`, `prometheus-alert-rule-editor` — исторические split-имена, см. примечание ниже.) | Когда работа начинается с вопроса «как называется нужная метрика/правило?».         | `observability-dashboard`                                          |
 | `prometheus-query-debugger`           | Разбирает PromQL по смыслу: aggregation, `rate/increase`, empty-state, histogram и label matching. Помогает объяснить проблему, а не только переписать выражение.                                  | Когда Prometheus-backed panel или alert expression ведут себя странно.              | `prometheus-metric-discovery`, `prometheus-alert-rule-editor`      |
 | `prometheus-alert-rule-editor`        | Держит alert rules в инженерной форме: intent, threshold, `for`, severity, labels, annotations и distinction между repo-backed и Grafana-managed rules.                                            | Когда создаются или меняются Prometheus-backed alerts.                              | `prometheus-query-debugger`, `prometheus-rule-testing`             |
 | `prometheus-rule-testing`             | Даёт детерминированную проверку repo-backed Prometheus rules через `promtool`, чтобы поведение алертов не оставалось на уровне интуиции.                                                           | После изменений в rule files и перед merge/release.                                 | `prometheus-alert-rule-editor`, `py-test-bot`                      |

@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -17,7 +17,7 @@ ______________________________________________________________________
 
 ## Описание
 
-Диаграмма Domain Port Protocols показывает архитектурную модель модуля `01-domain-ports` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: All Protocol interfaces defined in domain/ports/. На схеме отражено примерно 19 классов и 1 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: DataSourcePort, FilterableDataSourcePort, StoragePort, LockPort, CheckpointPort, QuarantinePort.
+Диаграмма Domain Port Protocols показывает архитектурную модель модуля `01-domain-ports` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: All Protocol interfaces defined in domain/ports/. На схеме отражено примерно 19 классов и 1 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: DataSourcePort, FilterableDataSourcePort, BronzeStoragePort / SilverStoragePort / GoldStoragePort / MergedStoragePort, LockPort, CheckpointPort, QuarantinePort.
 
 ## Метаданные
 

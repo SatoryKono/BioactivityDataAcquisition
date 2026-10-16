@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.1
+Version: 1.1.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-16'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -275,7 +275,7 @@ implementation.
 
 The currently shipped runtime projection is
 `WorkflowRunExecutionResult` from
-`src/bioetl/application/services/workflow_runner_service.py`.
+`src/bioetl/application/services/workflow/workflow_runner_service.py`.
 
 Current runtime result fields:
 
@@ -696,7 +696,7 @@ The most accurate short definition today is:
 - `WorkflowConfig` domain model in `src/bioetl/domain/workflow/config.py`
 - Workflow DAG validation in `src/bioetl/domain/workflow/dag.py`
 - `WorkflowTransformSpec` fingerprinting in `src/bioetl/domain/workflow/transform_spec.py`
-- Workflow runner MVP in `src/bioetl/application/services/workflow_runner_service.py`
+- Workflow runner MVP in `src/bioetl/application/services/workflow/workflow_runner_service.py`
 - [ADR-047: Workflow Control Plane for Declarative Workflows](../02-architecture/decisions/ADR-047-workflow-control-plane.md)
 - [Workflow Control-Plane Recovery](../05-operations/runbooks/workflow-control-plane.md)
 

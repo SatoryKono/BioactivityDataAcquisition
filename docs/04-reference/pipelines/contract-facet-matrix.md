@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-23'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -30,8 +30,8 @@ nullable` is the published Gold contract field count.
 | `chembl_compound_record` | `entity_id, record_id` | `merge` | `9 / 3` | `configs/contracts/chembl/compound_record.yaml` |
 | `chembl_molecule` | `entity_id, molecule_id` | `merge` | `6 / 51` | `configs/contracts/chembl/molecule.yaml` |
 | `chembl_protein_class` | `entity_id, protein_class_id` | `merge` | `6 / 9` | `configs/contracts/chembl/protein_class.yaml` |
-| `chembl_publication` | `entity_id, publication_id` | `merge` | `7 / 23` | `configs/contracts/chembl/publication.yaml` |
-| `chembl_publication_similarity` | `entity_id, sim_id` | `merge` | `8 / 6` | `configs/contracts/chembl/publication_similarity.yaml` |
+| `chembl_publication` | `entity_id, publication_id` | `merge` | `8 / 22` | `configs/contracts/chembl/publication.yaml` |
+| `chembl_publication_similarity` | `entity_id, sim_id` | `merge` | `6 / 10` | `configs/contracts/chembl/publication_similarity.yaml` |
 | `chembl_publication_term` | `entity_id, publication_id, term, term_type` | `merge` | `8 / 2` | `configs/contracts/chembl/publication_term.yaml` |
 | `chembl_subcellular_fraction` | `entity_id, subcellular_fraction` | `merge` | `6 / 2` | `configs/contracts/chembl/subcellular_fraction.yaml` |
 | `chembl_target` | `entity_id, target_id` | `merge` | `6 / 26` | `configs/contracts/chembl/target.yaml` |

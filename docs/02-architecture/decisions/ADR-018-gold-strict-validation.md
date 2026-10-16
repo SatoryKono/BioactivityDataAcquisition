@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -274,16 +274,16 @@ src/bioetl/
 │       └── base_pipeline.py   # + validate_gold_schema()
 └── infrastructure/
     └── validation/
-        └── gold_validator.py  # Pandera schema validation
+        └── pandera_validator.py  # Pandera schema validation
 ```
 
 ### Интеграция с Pandera
 
 ```python
-# infrastructure/validation/gold_validator.py
+# infrastructure/validation/pandera_validator.py
 import pandera as pa
 
-class GoldValidator:
+class PanderaGoldValidator:
     """Валидатор Gold-схем на основе Pandera."""
 
     def __init__(self, schema: GoldSchema):

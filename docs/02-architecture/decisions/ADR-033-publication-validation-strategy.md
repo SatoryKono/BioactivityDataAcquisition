@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -294,7 +294,7 @@ configs/validation/
 **Пример конфигурации:**
 
 ```yaml
-# configs/validation/pubmed/publication.yaml
+# configs/entities/pubmed/publication.yaml
 validation:
   base:
     enabled: true

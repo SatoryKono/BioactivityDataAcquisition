@@ -19,7 +19,9 @@ from pathlib import Path
 
 pytestmark = pytest.mark.architecture
 
-MIRROR_PATHS = (Path(".github/ISSUES/TECH-DEBT-ZERO-BURNDOWN-EPIC.md"),)
+MIRROR_PATHS = (
+    Path("docs/99-archive/github-issues-20261015/TECH-DEBT-ZERO-BURNDOWN-EPIC.md"),
+)
 
 
 def test_local_tech_debt_planning_mirrors_are_explicitly_non_authoritative() -> None:
@@ -40,7 +42,9 @@ def test_local_tech_debt_planning_mirrors_are_explicitly_non_authoritative() -> 
 
 
 def test_local_tech_debt_planning_mirrors_do_not_present_stale_active_status() -> None:
-    epic = Path(".github/ISSUES/TECH-DEBT-ZERO-BURNDOWN-EPIC.md")
+    epic = Path(
+        "docs/99-archive/github-issues-20261015/TECH-DEBT-ZERO-BURNDOWN-EPIC.md"
+    )
 
     assert "**Status**: in_progress" not in epic.read_text(encoding="utf-8")
 

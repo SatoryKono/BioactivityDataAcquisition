@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-23'
+  Last verified: '2026-10-15'
 
 ______________________________________________________________________
 
@@ -30,14 +30,14 @@ The authoritative aggregate invariant and test anchors are also published in
 
 | Symbol | Classification | Invariant / lifecycle owner | Event and test evidence |
 | --- | --- | --- | --- |
-| `Batch` | aggregate root | immutable `batch_id`; controlled add/process/complete/fail transitions | `BatchCompleted`; `tests/unit/domain/aggregates/test_batch.py` |
+| `Batch` | aggregate root | immutable `batch_id`; controlled add/process/complete/fail transitions | `PipelineCompleted`; `tests/unit/domain/aggregates/test_batch.py` |
 | `BatchRecord` | aggregate child | belongs to one batch and follows record status transitions | emitted through `Batch`; `tests/unit/domain/aggregates/test_batch.py` |
 | `BatchStatus` | state enum | legal batch lifecycle vocabulary | `tests/unit/domain/aggregates/test_batch.py` |
 | `PipelineRun` | aggregate root | legal run/stage transitions and terminal-state consistency | `PipelineRunStarted`, `PipelineRunCompleted`, `PipelineRunFailed`; `tests/unit/domain/aggregates/test_pipeline_run.py` |
 | `PipelineRunState` | state enum | legal run lifecycle vocabulary | `tests/unit/domain/aggregates/test_pipeline_run.py` |
 | `StageResult` | aggregate child/value | immutable stage outcome attached to its run | emitted through `PipelineRun`; `tests/unit/domain/aggregates/test_pipeline_run.py` |
 | `StageStatus` | state enum | legal stage lifecycle vocabulary | `tests/unit/domain/aggregates/test_pipeline_run.py` |
-| `QuarantineEntry` | aggregate root | immutable payload identity; legal review/resolve/ignore transitions | `RecordQuarantined`, `QuarantineResolved`; `tests/unit/domain/aggregates/test_quarantine_entry.py` |
+| `QuarantineEntry` | aggregate root | immutable payload identity; legal review/resolve/ignore transitions | `RecordQuarantined`, `QuarantineEntryResolved`; `tests/unit/domain/aggregates/test_quarantine_entry.py` |
 | `QuarantineStatus` | state enum | legal quarantine lifecycle vocabulary | `tests/unit/domain/aggregates/test_quarantine_entry.py` |
 
 ## Value-object facade
