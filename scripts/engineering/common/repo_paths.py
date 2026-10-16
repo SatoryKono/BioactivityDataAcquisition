@@ -187,6 +187,37 @@ def write_text_confined(
     return resolved
 
 
+def read_bytes_confined(
+    path: str | Path,
+    *,
+    root: Path | None = None,
+    allow_external_absolute: bool = False,
+) -> bytes:
+    """Read raw bytes after confining *path* under *root*."""
+    resolved = confined_io_path(
+        path, root=root, allow_external_absolute=allow_external_absolute
+    )
+    return resolved.read_bytes()  # NOSONAR - confined path
+
+
+def write_bytes_confined(
+    path: str | Path,
+    data: bytes,
+    *,
+    root: Path | None = None,
+    allow_external_absolute: bool = False,
+) -> Path:
+    """Write raw bytes after confining *path* under *root*."""
+    resolved = confined_io_path(
+        path, root=root, allow_external_absolute=allow_external_absolute
+    )
+    resolved.parent.mkdir(parents=True, exist_ok=True)  # NOSONAR - confined path
+    temporary = resolved.with_name(resolved.name + ".tmp")
+    temporary.write_bytes(data)  # NOSONAR - confined sibling of rebuilt path
+    temporary.replace(resolved)
+    return resolved
+
+
 def open_confined(
     path: str | Path,
     mode: str = "r",
