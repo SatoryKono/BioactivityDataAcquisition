@@ -224,7 +224,7 @@ gates:
     legacy_context: coverage-verify
     decision: path_scoped
     paths:
-      include: [src/**, tests/**, scripts/**, pyproject.toml, uv.lock, configs/**, .github/workflows/tests.yml, .github/workflows/pr-required.yml]
+      include: [src/**, tests/**, scripts/**, pyproject.toml, uv.lock, configs/**, .coderabbit.yaml, .github/workflows/tests.yml, .github/workflows/pr-required.yml]
     allowed_results: [success, not_applicable]
     not_applicable_allowed: true
     not_applicable_reason_required: true
