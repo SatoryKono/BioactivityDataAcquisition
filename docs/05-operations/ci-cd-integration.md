@@ -16,15 +16,11 @@ ______________________________________________________________________
 
 ## Overview
 
-CI runs through `.circleci/config.yml`. GitHub Actions are disabled; the retained
-`.github/workflows/` files describe legacy behavior until the verified migration
-cutover in #11930. Local-Only product runtime does not require cloud deployment.
+<!-- policy-anchor:deployment-provider -->
+Pull-request coordination runs in GitHub Actions (`deployment.provider=github_actions`, `.github/workflows/pr-required.yml`). `.circleci/config.yml` remains in the tree and is not current merge protection. Local-Only product runtime does not require cloud deployment.
 
-For pull requests, select `ci-lane=pr-gate` (the default). Active main rulesets
-require `ci/circleci: pr-gate-complete` and `ci/circleci: root-hygiene` on the
-current source SHA, with strict freshness and no bypass. A successful maintenance
-lane or an approval does not substitute for those checks. CodeQL is excluded
-from required checks by the owner decision in #11929.
+<!-- policy-anchor:ruleset-enforcement-mode -->
+Rulesets `13643213` and `15730586`, the ones that include `refs/heads/main`, are `enforcement: disabled` on the 2026-10-16 read-only GET. <!-- policy-anchor:stored-ruleset-contexts --> They still store `ci/circleci: pr-gate-complete` (the companion also stores `ci/circleci: root-hygiene`). A stored context is not active CircleCI protection and is not configured GitHub Actions enforcement. <!-- policy-anchor:target-gha-context --> The target job name `pr-gate-complete` is not the context stored on those rulesets. <!-- policy-anchor:enforcement-verified-date --> Catalog `enforcement_verified_date` `2026-10-09` is not proof of active merge protection. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge, because classic branch protection is absent and those rulesets are disabled. An offline catalog match does not confirm live server rulesets. CodeQL is excluded from required checks by the owner decision in #11929.
 
 ## Major lanes
 

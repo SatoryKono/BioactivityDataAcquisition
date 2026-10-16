@@ -6,8 +6,10 @@
 # policy.github_ruleset_*_enforcement records only the ruleset enforcement field.
 # This schema has no field for stored ruleset contexts. See
 # docs/00-project/governance/05-github-policy.md section 3.
-# enforcement_verified_date has no in-repo consumer. A read that only confirms
-# enforcement=disabled does not replace that date.
+# enforcement_verified_date is a catalog stamp. The boolean beside it is false
+# so that stamp is not evidence of live merge protection. prose_claims bind
+# that contract to governance prose (#12047). This schema does not store a
+# ruleset-context snapshot.
 schema_version: 1
 version: 3
 aggregator: pr-gate-complete
@@ -33,9 +35,52 @@ policy:
   catalog_check_status: enforced
   # Runnable catalog provider, not the context stored on a disabled ruleset.
   enforcement_provider: github_actions
-  # Prior unstructured catalog claim. Not moved on the 2026-10-16 read:
-  # that read verified enforcement=disabled and stored ci/circleci contexts.
+  # Catalog stamp from 2026-10-09. Not evidence that merge is blocked.
   enforcement_verified_date: "2026-10-09"
+  enforcement_verified_date_is_live_protection_evidence: false
+  prose_claim_doc_paths:
+    - .github/workflows/pr-required.yml
+    - docs/00-project/governance/05-github-policy.md
+    - docs/05-operations/ci-cd-integration.md
+    - docs/05-operations/ci-workflow-map.md
+    - docs/05-operations/runbooks/github-settings-quarterly-review.md
+  prose_claims:
+    - id: deployment-provider
+      required_substrings: ["policy-anchor:deployment-provider", "github_actions"]
+    - id: ruleset-enforcement-mode
+      required_substrings:
+        ["policy-anchor:ruleset-enforcement-mode", "13643213", "15730586", "enforcement: disabled"]
+    - id: stored-ruleset-contexts
+      required_substrings:
+        [
+          "policy-anchor:stored-ruleset-contexts",
+          "ci/circleci: pr-gate-complete",
+          "not active CircleCI protection",
+        ]
+    - id: target-gha-context
+      required_substrings:
+        ["policy-anchor:target-gha-context", "pr-gate-complete", "not the context stored"]
+    - id: enforcement-verified-date
+      required_substrings:
+        [
+          "policy-anchor:enforcement-verified-date",
+          "2026-10-09",
+          "not proof of active merge protection",
+        ]
+    - id: merge-block
+      required_substrings:
+        [
+          "policy-anchor:merge-block",
+          "pr-gate-complete",
+          "does not by itself block merge",
+          "does not confirm live server rulesets",
+        ]
+  prose_forbidden_substrings:
+    - "are **active** as of 2026-10-05"
+    - "the active provider is `.circleci/config.yml`"
+    - "MUST be `enforcement: active`"
+    - "Active main rulesets"
+    - "CI runs through `.circleci/config.yml`"
 canonical_checks:
   - id: ruff
     owner_workflow: .github/workflows/import-linter.yml
