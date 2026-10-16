@@ -8,12 +8,33 @@ from pathlib import Path
 
 
 def _sanitize_path(path: Path) -> Path:
-    # Resolve the path to an absolute path, throwing away any relative components.
+    # Safely resolve the path.
+    if ".." in str(path):
+        raise ValueError(f"Path traversal detected: {path}")
+
+    resolved = path.resolve()
+
+    # We must ensure the resolved path does not traverse outside the repository root
+    # or the system temp directory (which is where tests run).
     import os
-    resolved = Path(os.path.abspath(path))
-    # We do not restrict to cwd because the user might legitimately provide absolute paths,
-    # and testing framework (pytest) uses /tmp.
+    import tempfile
+
+    allowed_dirs = [
+        os.path.abspath(os.getcwd()),
+        os.path.abspath(tempfile.gettempdir()),
+    ]
+
+    resolved_str = str(resolved)
+    is_safe = any(
+        os.path.commonpath([allowed, resolved_str]) == allowed
+        for allowed in allowed_dirs
+    )
+
+    if not is_safe:
+        raise ValueError(f"Path traversal detected: {path}")
+
     return resolved
+
 
 def write_gate(path: Path, status: str, reason: str) -> None:
     if path:
@@ -60,7 +81,7 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
 
-    if not args.raw_json.is_file():
+    if not _sanitize_path(args.raw_json).is_file():
         sys.stderr.write(
             "Integration blocker: caller contract unavailable. Raw JSON missing.\n"
         )
@@ -68,7 +89,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     try:
-        raw_data = json.loads(args.raw_json.read_text(encoding="utf-8"))
+        raw_data = json.loads(_sanitize_path(args.raw_json).read_text(encoding="utf-8"))
     except json.JSONDecodeError as e:
         sys.stderr.write(f"Malformed JSON: {e}\n")
         write_gate(args.gate_out, "failed", "malformed_json")
