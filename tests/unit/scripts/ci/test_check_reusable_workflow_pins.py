@@ -13,14 +13,17 @@ from pathlib import Path
 import pytest
 import yaml
 
-from scripts.engineering.ci import check_reusable_workflow_pins as pins
+from scripts.engineering.repo import check_github_actions_runtime_policy as pins
 
 pytestmark = pytest.mark.unit
 
 ROOT = Path(__file__).resolve().parents[4]
 COORDINATOR = ROOT / ".github" / "workflows" / "pr-required.yml"
 REGISTRY = ROOT / "configs" / "quality" / "reusable_action_pins.yaml"
-CHECKER = ROOT / "scripts" / "engineering" / "ci" / "check_reusable_workflow_pins.py"
+CHECKER = (
+    ROOT / "scripts" / "engineering" / "repo" / "check_github_actions_runtime_policy.py"
+)
+PIN_ARGS = ["--pr-required-pins"]
 SHA = "3d3c42e5aac5ba805825da76410c181273ba90b1"
 OTHER = "0000000000000000000000000000000000000001"
 BUMP = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -268,7 +271,10 @@ def test_fast_governance_hosts_the_checker_after_setup() -> None:
         "Check reusable workflow pins"
     )
     pin_step = fast[names.index("Check reusable workflow pins")]
-    assert "check_reusable_workflow_pins.py --check" in pin_step["run"]
+    assert (
+        "check_github_actions_runtime_policy.py --pr-required-pins --check"
+        in pin_step["run"]
+    )
     assert "if" not in pin_step
     assert all(step.get("name") != "Check reusable workflow pins" for step in classify)
 
@@ -289,7 +295,7 @@ def test_disabled_pin_step_is_outside_the_checker(tmp_path: Path) -> None:
     runs = [
         str(step.get("run", "")) for step in loaded["jobs"]["fast-governance"]["steps"]
     ]
-    assert all("check_reusable_workflow_pins.py" not in run for run in runs)
+    assert all("check_github_actions_runtime_policy.py" not in run for run in runs)
     assert not pins.check_pins(registry, [workflow], repo_root=tmp_path)
 
 
@@ -300,7 +306,7 @@ def test_same_named_and_simultaneous_substitution_are_not_enforcement(
     hostile_sha = "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
     registry = tmp_path / "registry.yaml"
     workflow = tmp_path / "workflow.yaml"
-    substitute = tmp_path / "check_reusable_workflow_pins.py"
+    substitute = tmp_path / "check_github_actions_runtime_policy.py"
     _dump(registry, {"pins": [{"path": "hostile/action", "sha": hostile_sha}]})
     _dump(
         workflow,
@@ -308,7 +314,12 @@ def test_same_named_and_simultaneous_substitution_are_not_enforcement(
             "jobs": {
                 "fast-governance": {
                     "steps": [
-                        {"run": "python check_reusable_workflow_pins.py --check"},
+                        {
+                            "run": (
+                                "python check_github_actions_runtime_policy.py "
+                                "--pr-required-pins --check"
+                            )
+                        },
                         {"uses": f"hostile/action@{hostile_sha}"},
                     ]
                 }
@@ -330,22 +341,22 @@ def test_same_named_and_simultaneous_substitution_are_not_enforcement(
 @pytest.mark.subprocess_backed
 def test_cli_exit_codes(tmp_path: Path) -> None:
     success = subprocess.run(
-        [sys.executable, str(CHECKER), "--check"],
+        [sys.executable, str(CHECKER), *PIN_ARGS, "--check"],
         check=False,
         cwd=ROOT,
     )
     failure = subprocess.run(
-        [sys.executable, str(CHECKER), "--check"],
+        [sys.executable, str(CHECKER), *PIN_ARGS, "--check"],
         check=False,
         cwd=tmp_path,
     )
     default_still_checks = subprocess.run(
-        [sys.executable, str(CHECKER)],
+        [sys.executable, str(CHECKER), *PIN_ARGS],
         check=False,
         cwd=tmp_path,
     )
     usage = subprocess.run(
-        [sys.executable, str(CHECKER), "--nope"],
+        [sys.executable, str(CHECKER), *PIN_ARGS, "--nope"],
         check=False,
         cwd=ROOT,
     )
