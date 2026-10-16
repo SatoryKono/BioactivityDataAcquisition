@@ -38,19 +38,22 @@ class PytestAbortDiagnosticAdapter:
         out_dir_str = os.path.abspath(str(output_dir))
 
         # Strictly require output_dir to be under the current working directory,
-        # or under /tmp for test executions.
-        if not (out_dir_str.startswith(cwd_str) or out_dir_str.startswith("/tmp/")):
+        # or under tempdir for test executions.
+        import tempfile
+
+        tmp_str = os.path.abspath(tempfile.gettempdir())
+        if not (out_dir_str.startswith(cwd_str) or out_dir_str.startswith(tmp_str)):
             raise ValueError(
-                "output_dir must be within current working directory or /tmp/"
+                "output_dir must be within current working directory or tmp"
             )
 
         if ".." in out_dir_str:
             raise ValueError("Invalid output path")
 
         safe_path = os.path.realpath(out_dir_str)
-        if not (safe_path.startswith(cwd_str) or safe_path.startswith("/tmp/")):
+        if not (safe_path.startswith(cwd_str) or safe_path.startswith(tmp_str)):
             raise ValueError(
-                "output_dir must be within current working directory or /tmp/"
+                "output_dir must be within current working directory or tmp"
             )
 
         output_dir = Path(safe_path)
