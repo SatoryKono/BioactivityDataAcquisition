@@ -84,9 +84,11 @@ policy:
     - "MUST be `enforcement: active`"
     - "Active main rulesets"
     - "CI runs through `.circleci/config.yml`"
-  # "GitHub Actions are disabled" is a current-configuration claim only.
-  # The same words stay valid on a historical heading, or on a line that
-  # disables one workflow (keep-disabled, disabled_manually, individual workflow).
+  # "GitHub Actions are disabled" is a current-configuration claim.
+  # "historical" allows that phrase on the same line, or in the first paragraph
+  # under a heading that contains the word. A later paragraph or section does not
+  # inherit the heading. keep-disabled, disabled_manually, and individual workflow
+  # allow the phrase only on the same line.
   prose_scoped_forbidden_phrases:
     - phrase: "GitHub Actions are disabled"
       line_allow_if_contains_any:

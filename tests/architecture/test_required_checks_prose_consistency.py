@@ -97,7 +97,12 @@ def _scoped_forbidden_errors(
     text: str,
     rules: object,
 ) -> list[str]:
-    """Flag a current-configuration claim without rejecting a marked exception."""
+    """Flag a current-configuration claim outside its marked context.
+
+    ``historical`` applies on the same line, or in the first paragraph under a
+    heading that contains that word. A later paragraph or a later section does
+    not inherit it. Workflow markers apply only on the same line.
+    """
 
     if rules is None:
         return []
@@ -110,25 +115,42 @@ def _scoped_forbidden_errors(
             errors.append("scoped forbidden phrase must be a mapping")
             continue
         phrase = str(rule.get("phrase") or "")
-        allow = [str(token) for token in rule.get("line_allow_if_contains_any") or []]
+        allow = [str(token).casefold() for token in rule.get("line_allow_if_contains_any") or []]
         if not phrase:
             errors.append("scoped forbidden phrase is empty")
             continue
+        workflow_tokens = [token for token in allow if token != "historical"]
         for index, line in enumerate(lines):
             if phrase not in line:
                 continue
-            context = line
-            for previous in range(index - 1, -1, -1):
-                if lines[previous].lstrip().startswith("#"):
-                    context = lines[previous] + "\n" + line
-                    break
-            folded = context.casefold()
-            if any(token.casefold() in folded for token in allow):
+            if _phrase_context_is_allowed(lines, index, line, allow, workflow_tokens):
                 continue
             errors.append(
                 f"{doc_path} current-configuration claim {phrase!r} at line {index + 1}"
             )
     return errors
+
+
+def _phrase_context_is_allowed(
+    lines: list[str],
+    index: int,
+    line: str,
+    allow: list[str],
+    workflow_tokens: list[str],
+) -> bool:
+    folded_line = line.casefold()
+    if any(token in folded_line for token in workflow_tokens):
+        return True
+    if "historical" in allow and "historical" in folded_line:
+        return True
+    if "historical" not in allow:
+        return False
+    for previous in range(index - 1, -1, -1):
+        if not lines[previous].strip():
+            return False
+        if lines[previous].lstrip().startswith("#"):
+            return "historical" in lines[previous].casefold()
+    return False
 
 
 def _repo_documents(root: Path, doc_paths: list[str]) -> dict[str, str]:
@@ -237,6 +259,80 @@ def test_historical_heading_does_not_allow_other_forbidden_phrases() -> None:
     documents[target] = "### Historical record\nActive main rulesets\n" + documents[target]
     errors = check_required_checks_prose(catalog, documents)
     assert any("Active main rulesets" in error for error in errors)
+
+
+def test_historical_section_does_not_allow_current_claim_later_in_file() -> None:
+    catalog = _load_yaml(CATALOG)
+    policy = catalog["policy"]
+    documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
+    target = str(policy["prose_claim_doc_paths"][0])
+    documents[target] = (
+        "### Historical record\n"
+        "GitHub Actions are disabled.\n"
+        "\n"
+        "### Current configuration\n"
+        "GitHub Actions are disabled.\n"
+        + documents[target]
+    )
+    errors = check_required_checks_prose(catalog, documents)
+    claim_errors = [error for error in errors if "GitHub Actions are disabled" in error]
+    assert claim_errors == [
+        f"{target} current-configuration claim 'GitHub Actions are disabled' at line 5"
+    ]
+
+
+def test_later_paragraph_in_historical_section_stays_forbidden() -> None:
+    catalog = _load_yaml(CATALOG)
+    policy = catalog["policy"]
+    documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
+    target = str(policy["prose_claim_doc_paths"][0])
+    documents[target] = (
+        "### Historical record\n"
+        "GitHub Actions are disabled.\n"
+        "\n"
+        "GitHub Actions are disabled.\n"
+        + documents[target]
+    )
+    errors = check_required_checks_prose(catalog, documents)
+    claim_errors = [error for error in errors if "GitHub Actions are disabled" in error]
+    assert claim_errors == [
+        f"{target} current-configuration claim 'GitHub Actions are disabled' at line 4"
+    ]
+
+
+def test_workflow_marker_does_not_allow_the_next_paragraph() -> None:
+    catalog = _load_yaml(CATALOG)
+    policy = catalog["policy"]
+    documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
+    target = str(policy["prose_claim_doc_paths"][0])
+    marked_lines = (
+        "coderabbit.yml is keep-disabled because GitHub Actions are disabled for that file.",
+        "labeler.yml is disabled_manually: GitHub Actions are disabled for that workflow.",
+        "Disable an individual workflow: GitHub Actions are disabled for stale.yml only.",
+    )
+    for marked in marked_lines:
+        sample = dict(documents)
+        sample[target] = f"{marked}\n\nGitHub Actions are disabled.\n" + documents[target]
+        errors = check_required_checks_prose(catalog, sample)
+        claim_errors = [error for error in errors if "GitHub Actions are disabled" in error]
+        assert claim_errors == [
+            f"{target} current-configuration claim 'GitHub Actions are disabled' at line 3"
+        ], marked
+
+
+def test_workflow_marker_in_heading_does_not_allow_the_body() -> None:
+    catalog = _load_yaml(CATALOG)
+    policy = catalog["policy"]
+    documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
+    target = str(policy["prose_claim_doc_paths"][0])
+    documents[target] = (
+        "## keep-disabled\nGitHub Actions are disabled.\n" + documents[target]
+    )
+    errors = check_required_checks_prose(catalog, documents)
+    claim_errors = [error for error in errors if "GitHub Actions are disabled" in error]
+    assert claim_errors == [
+        f"{target} current-configuration claim 'GitHub Actions are disabled' at line 2"
+    ]
 
 
 def test_each_declared_document_is_checked() -> None:
