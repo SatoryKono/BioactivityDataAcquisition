@@ -39,10 +39,13 @@ policy:
   enforcement_verified_date: "2026-10-09"
   enforcement_verified_date_is_live_protection_evidence: false
   prose_claim_doc_paths:
+    - .github/SECURITY.md
     - .github/workflows/pr-required.yml
     - docs/00-project/governance/05-github-policy.md
+    - docs/04-reference/github-actions-workflows.md
     - docs/05-operations/ci-cd-integration.md
     - docs/05-operations/ci-workflow-map.md
+    - docs/05-operations/release-checklist.md
     - docs/05-operations/runbooks/github-settings-quarterly-review.md
   prose_claims:
     - id: deployment-provider
@@ -81,6 +84,7 @@ policy:
     - "MUST be `enforcement: active`"
     - "Active main rulesets"
     - "CI runs through `.circleci/config.yml`"
+    - "GitHub Actions are disabled"
 canonical_checks:
   - id: ruff
     owner_workflow: .github/workflows/import-linter.yml

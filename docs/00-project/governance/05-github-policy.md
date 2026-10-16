@@ -140,8 +140,8 @@ from checks that run only for matching paths.
 
 CodeQL is excluded from required checks by owner decision (#11929). Its legacy
 **advanced CodeQL setup** is retained in `.github/workflows/codeql.yml` until
-workflow retirement (#11930). GitHub Actions are disabled; this retained YAML
-does not prove active scanning. Optional external analysis is a separate decision.
+workflow retirement (#11930). The retained workflow file does not prove active
+CodeQL scanning. Optional external analysis is a separate decision.
 GitHub code-scanning **default setup MUST remain `not-configured`**. Do not
 enable default setup in parallel: that would duplicate Python scans and split
 alert ownership.

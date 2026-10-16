@@ -15,8 +15,8 @@ ______________________________________________________________________
 
 ## Current migration status
 
-GitHub Actions are disabled. The tables below retain the historical inventory and
-API-state snapshot; `active` in a historical row does not mean jobs currently run.
+The pull-request coordinator runs in GitHub Actions (`.github/workflows/pr-required.yml`). On the 2026-10-16 read-only GET, rulesets `13643213` and `15730586` are `enforcement: disabled`, so a successful `pr-gate-complete` does not by itself block merge. The tables below retain the historical inventory and API-state snapshot; `active` in a historical row does not mean that workflow currently runs.
+<!-- policy-anchor:deployment-provider --> `deployment.provider=github_actions`. <!-- policy-anchor:ruleset-enforcement-mode --> Rulesets `13643213` and `15730586` are `enforcement: disabled`. <!-- policy-anchor:stored-ruleset-contexts --> Stored `ci/circleci: pr-gate-complete` is not active CircleCI protection. <!-- policy-anchor:target-gha-context --> `pr-gate-complete` is not the context stored on the rulesets. <!-- policy-anchor:enforcement-verified-date --> `2026-10-09` is not proof of active merge protection. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge and does not confirm live server rulesets.
 CodeQL is excluded from required checks (#11929). Its workflow definition remains
 until retirement (#11930); optional analysis is a separate decision. Trivy and
 Scorecard SARIF upload functions must survive migration even though the old upload
