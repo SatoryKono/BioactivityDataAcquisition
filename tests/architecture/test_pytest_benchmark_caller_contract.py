@@ -29,6 +29,7 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import os
 import re
@@ -204,26 +205,47 @@ def _download_locked_wheel() -> tuple[str, Path, str]:
     return version, wheel_path, digest
 
 
-def _extracted_locked_src(wheel_path: Path, version: str, digest: str) -> Path:
-    extracted = wheel_path.parent / version
-    stamp = extracted / ".sha256"
-    if not stamp.is_file() or stamp.read_text(encoding="utf-8").strip() != digest:
-        extracted.mkdir(parents=True, exist_ok=True)
-        with zipfile.ZipFile(wheel_path) as archive:
-            archive.extractall(extracted)
-        stamp.write_text(digest + "\n", encoding="utf-8")
-    return extracted
+def _verified_wheel_payload(wheel_path: Path, digest: str) -> bytes:
+    if wheel_path.is_symlink():
+        raise AssertionError("locked wheel cache entry must be a regular file")
+    payload = wheel_path.read_bytes()
+    actual = hashlib.sha256(payload).hexdigest()
+    if actual != digest:
+        raise AssertionError(f"cached wheel hash mismatch: {actual} != {digest}")
+    return payload
 
 
-def _lock_resolved_benchmark_src() -> Path | None:
-    """Return an extracted lockfile wheel, or None to use the installed package."""
+def _reject_escaping_wheel_member(name: str) -> None:
+    path = Path(name)
+    if name.startswith(("/", "\\")) or path.is_absolute() or ".." in path.parts:
+        raise AssertionError(f"wheel member escapes the extract directory: {name}")
+
+
+def _extract_verified_wheel(payload: bytes, destination: Path) -> Path:
+    """Extract verified wheel bytes into a directory created for this call."""
+
+    with zipfile.ZipFile(io.BytesIO(payload)) as archive:
+        for info in archive.infolist():
+            _reject_escaping_wheel_member(info.filename)
+        destination.mkdir(parents=True, exist_ok=False)
+        archive.extractall(destination)
+    return destination
+
+
+def _lock_resolved_benchmark_src(destination: Path | None = None) -> Path | None:
+    """Return a private extract of the lockfile wheel, or None for the installed package."""
 
     cached = _matching_cached_wheel()
     if cached is None and os.environ.get("BIOETL_PYTEST_BENCHMARK_FETCH_LOCK") == "1":
         cached = _download_locked_wheel()
     if cached is not None:
-        version, wheel_path, digest = cached
-        return _extracted_locked_src(wheel_path, version, digest)
+        if destination is None:
+            raise AssertionError("locked wheel extraction requires a private directory")
+        wheel_path, digest = cached[1], cached[2]
+        return _extract_verified_wheel(
+            _verified_wheel_payload(wheel_path, digest),
+            destination,
+        )
     version, _url, _digest = _locked_pytest_benchmark_spec()
     import importlib.metadata as metadata
 
@@ -256,23 +278,24 @@ def _expected_benchmark_version() -> str:
     return version
 
 
-def _probe_env(tmp_path: Path) -> tuple[dict[str, str], Path]:
+def _probe_env(tmp_path: Path) -> tuple[dict[str, str], Path, Path | None]:
     probe_dir = tmp_path / "probe"
     probe_dir.mkdir()
     (probe_dir / "sitecustomize.py").write_text(_SITECUSTOMIZE, encoding="utf-8")
     log_path = tmp_path / "vcs-probes.jsonl"
     log_path.write_text("", encoding="utf-8")
     pythonpath = [str(probe_dir)]
+    locked_src: Path | None = None
     if _benchmark_under_test() != "installed":
-        source = _lock_resolved_benchmark_src()
-        if source is not None:
-            pythonpath.append(str(source))
+        locked_src = _lock_resolved_benchmark_src(tmp_path / "locked-pytest-benchmark")
+        if locked_src is not None:
+            pythonpath.append(str(locked_src))
     env = os.environ.copy()
     env.pop("PYTEST_ADDOPTS", None)
     env["PYTHONPATH"] = os.pathsep.join(pythonpath)
     env["BIOETL_VCS_PROBE_LOG"] = str(log_path)
     env["BIOETL_BENCHMARK_CALLER"] = "synthetic-proof"
-    return env, log_path
+    return env, log_path, locked_src
 
 
 def _probe_lines(log_path: Path) -> list[str]:
@@ -362,6 +385,63 @@ def test_locked_wheel_cache_stays_outside_the_repository() -> None:
     cache = _wheel_cache_dir()
     assert cache.is_absolute()
     assert not cache.is_relative_to(ROOT)
+
+
+def test_verified_extract_rejects_parent_segments(tmp_path: Path) -> None:
+    payload = io.BytesIO()
+    with zipfile.ZipFile(payload, "w") as archive:
+        archive.writestr("pkg/mod.py", "VALUE = 1\n")
+        archive.writestr("../outside.py", "VALUE = 2\n")
+    destination = tmp_path / "extract"
+    with pytest.raises(AssertionError, match="escapes"):
+        _extract_verified_wheel(payload.getvalue(), destination)
+    assert not destination.exists()
+
+
+def test_verified_extract_does_not_reuse_an_existing_directory(tmp_path: Path) -> None:
+    payload = io.BytesIO()
+    with zipfile.ZipFile(payload, "w") as archive:
+        archive.writestr("pkg/mod.py", "VALUE = 1\n")
+    destination = tmp_path / "extract"
+    _extract_verified_wheel(payload.getvalue(), destination)
+    assert (destination / "pkg" / "mod.py").read_text(encoding="utf-8") == "VALUE = 1\n"
+    (destination / "pkg" / "mod.py").write_text("VALUE = poisoned\n", encoding="utf-8")
+    with pytest.raises(FileExistsError):
+        _extract_verified_wheel(payload.getvalue(), destination)
+    assert (destination / "pkg" / "mod.py").read_text(
+        encoding="utf-8"
+    ) == "VALUE = poisoned\n"
+
+
+def test_lock_resolution_ignores_a_stamped_shared_extract(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload = io.BytesIO()
+    with zipfile.ZipFile(payload, "w") as archive:
+        archive.writestr("pytest_benchmark/utils.py", "VALUE = 1\n")
+    raw = payload.getvalue()
+    wheel_path = tmp_path / "pytest_benchmark-5.3.0-py3-none-any.whl"
+    wheel_path.write_bytes(raw)
+    digest = hashlib.sha256(raw).hexdigest()
+    shared = tmp_path / "shared-extract"
+    (shared / "pytest_benchmark").mkdir(parents=True)
+    (shared / ".sha256").write_text(digest + "\n", encoding="utf-8")
+    (shared / "pytest_benchmark" / "utils.py").write_text(
+        "raise SystemExit('poisoned')\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        "tests.architecture.test_pytest_benchmark_caller_contract._matching_cached_wheel",
+        lambda: ("5.3.0", wheel_path, digest),
+    )
+    source = _lock_resolved_benchmark_src(tmp_path / "private-extract")
+    assert source is not None
+    assert source.resolve() != shared.resolve()
+    assert (
+        source.joinpath("pytest_benchmark", "utils.py").read_text(encoding="utf-8")
+        == "VALUE = 1\n"
+    )
 
 
 def test_source_revision_matches_git_rev_parse() -> None:
@@ -493,7 +573,7 @@ def test_workflow_enables_guard_before_benchmark_and_keeps_hotspot_fail_open() -
 
 @pytest.mark.timeout(180)
 def test_default_pytest_skips_benchmark_and_does_not_probe(tmp_path: Path) -> None:
-    env, log_path = _probe_env(tmp_path)
+    env, log_path, _locked_src = _probe_env(tmp_path)
     completed = subprocess.run(
         [
             sys.executable,
@@ -522,8 +602,8 @@ def test_explicit_caller_measures_case_without_vcs_probe(tmp_path: Path) -> None
     test_path = tmp_path / "test_synthetic_benchmark.py"
     test_path.write_text(_SYNTHETIC_TEST, encoding="utf-8")
     output_path = tmp_path / "benchmark-measurements.json"
-    env, log_path = _probe_env(tmp_path)
-    _assert_loaded_benchmark(env)
+    env, log_path, locked_src = _probe_env(tmp_path)
+    _assert_loaded_benchmark(env, locked_src)
     completed = subprocess.run(
         [
             sys.executable,
@@ -573,7 +653,7 @@ def test_guard_after_benchmark_records_probe_and_rejects_provenance(
     test_path = tmp_path / "test_synthetic_benchmark.py"
     test_path.write_text(_SYNTHETIC_TEST, encoding="utf-8")
     output_path = tmp_path / "late-guard.json"
-    env, log_path = _probe_env(tmp_path)
+    env, log_path, _locked_src = _probe_env(tmp_path)
     completed = subprocess.run(
         [
             sys.executable,
@@ -613,7 +693,7 @@ def test_guard_after_benchmark_records_probe_and_rejects_provenance(
     del completed
 
 
-def _assert_loaded_benchmark(env: dict[str, str]) -> None:
+def _assert_loaded_benchmark(env: dict[str, str], locked_src: Path | None) -> None:
     script = (
         "import importlib.metadata as metadata\n"
         "import pytest_benchmark.utils as utils\n"
@@ -634,11 +714,8 @@ def _assert_loaded_benchmark(env: dict[str, str]) -> None:
     version, loaded = completed.stdout.splitlines()
     assert version == _expected_benchmark_version()
     loaded_path = Path(loaded).resolve()
-    cached = _matching_cached_wheel()
-    if _benchmark_under_test() != "installed" and cached is not None:
-        version, wheel_path, digest = cached
-        source = _extracted_locked_src(wheel_path, version, digest)
-        assert loaded_path.is_relative_to(source.resolve())
+    if _benchmark_under_test() != "installed" and locked_src is not None:
+        assert loaded_path.is_relative_to(locked_src.resolve())
         return
     import importlib.metadata as metadata
 
@@ -654,8 +731,8 @@ def _assert_loaded_benchmark(env: dict[str, str]) -> None:
 def test_collect_only_does_not_probe_before_execution(tmp_path: Path) -> None:
     test_path = tmp_path / "test_synthetic_benchmark.py"
     test_path.write_text(_SYNTHETIC_TEST, encoding="utf-8")
-    env, log_path = _probe_env(tmp_path)
-    _assert_loaded_benchmark(env)
+    env, log_path, locked_src = _probe_env(tmp_path)
+    _assert_loaded_benchmark(env, locked_src)
     completed = subprocess.run(
         [
             sys.executable,
