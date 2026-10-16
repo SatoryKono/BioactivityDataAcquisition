@@ -111,6 +111,7 @@ def _run_pass(
     marker_expr: str,
     addopts: list[str],
     reports_dir: Path,
+    journal_dir: Path | None = None,
     timeout_seconds: float | None = None,
 ) -> PassResult:
     """Run pytest pass and persist logs/artifacts."""
@@ -130,6 +131,14 @@ def _run_pass(
         str(junit_path),
         *addopts,
     ]
+    if journal_dir:
+        command.extend(
+            [
+                "-p",
+                "scripts.engineering.ci.pytest_event_journal",
+                f"--event-journal-dir={journal_dir}",
+            ]
+        )
 
     sys.stdout.write(f"\n=== Running pytest pass: {name} ===\n")
     sys.stdout.write(f"Command: {' '.join(command)}\n")
@@ -227,6 +236,7 @@ def _run_named_pass(
     marker_expr: str,
     addopts: str,
     reports_dir: Path,
+    journal_dir: Path | None,
     timeout_seconds: float | None,
 ) -> PassResult:
     """Run a named pass using shell-split addopts."""
@@ -237,6 +247,7 @@ def _run_named_pass(
         marker_expr=marker_expr,
         addopts=_split_args(addopts),
         reports_dir=reports_dir,
+        journal_dir=journal_dir,
         timeout_seconds=timeout_seconds,
     )
 
@@ -246,6 +257,7 @@ def _run_serial_pass(
     base_command: list[str],
     args: argparse.Namespace,
     reports_dir: Path,
+    journal_dir: Path | None,
     serial_timeout: float | None,
     summary_lines: list[str],
 ) -> int:
@@ -257,6 +269,7 @@ def _run_serial_pass(
         marker_expr=args.serial_marker,
         addopts=args.serial_addopts,
         reports_dir=reports_dir,
+        journal_dir=journal_dir,
         timeout_seconds=serial_timeout,
     )
     serial_rc = _effective_exit_code(serial_result, allow_no_tests=True)
@@ -291,6 +304,11 @@ def _create_parser() -> argparse.ArgumentParser:
         "--reports-dir",
         default="reports/pytest",
         help="Directory for pass logs and junit xml files.",
+    )
+    parser.add_argument(
+        "--journal-dir",
+        default=None,
+        help="Directory to store event journal receipts",
     )
     parser.add_argument(
         "--parallel-marker",
@@ -369,6 +387,7 @@ def main() -> int:
     args = parser.parse_args()
 
     reports_dir = Path(args.reports_dir)
+    journal_dir = Path(args.journal_dir) if args.journal_dir else None
     summary_lines: list[str] = []
     base_command = [sys.executable, "-m", "pytest"]
     parallel_timeout = args.parallel_timeout_seconds or None
@@ -382,6 +401,7 @@ def main() -> int:
         marker_expr=args.parallel_marker,
         addopts=_split_args(args.parallel_addopts),
         reports_dir=reports_dir,
+        journal_dir=journal_dir,
         timeout_seconds=parallel_timeout,
     )
 
@@ -403,6 +423,7 @@ def main() -> int:
             base_command=base_command,
             args=args,
             reports_dir=reports_dir,
+            journal_dir=journal_dir,
             serial_timeout=serial_timeout,
             summary_lines=summary_lines,
         )
@@ -429,6 +450,7 @@ def main() -> int:
         marker_expr=args.parallel_marker,
         addopts=args.fallback_addopts,
         reports_dir=reports_dir,
+        journal_dir=journal_dir,
         timeout_seconds=fallback_timeout,
     )
     fallback_rc = _effective_exit_code(fallback_result)
@@ -447,6 +469,7 @@ def main() -> int:
             base_command=base_command,
             args=args,
             reports_dir=reports_dir,
+            journal_dir=journal_dir,
             serial_timeout=serial_timeout,
             summary_lines=summary_lines,
         )
