@@ -126,10 +126,12 @@ subprocess.call = _call
 
 
 def _workflow_text() -> str:
+    """Return the Performance Nightly workflow source."""
     return WORKFLOW.read_text(encoding="utf-8")
 
 
 def _workflow_steps() -> list[dict[str, object]]:
+    """Return the steps of the performance-regression-gate job."""
     document = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))
     job = document["jobs"]["performance-regression-gate"]
     steps = job["steps"]
@@ -138,6 +140,7 @@ def _workflow_steps() -> list[dict[str, object]]:
 
 
 def _command_text(script: str) -> str:
+    """Drop blank lines and comments from a workflow script."""
     kept: list[str] = []
     for line in script.splitlines():
         stripped = line.strip()
@@ -148,6 +151,7 @@ def _command_text(script: str) -> str:
 
 
 def _step_run(name: str) -> str:
+    """Return the shell script of the named workflow step."""
     for step in _workflow_steps():
         if step.get("name") == name:
             run = step.get("run")
@@ -157,6 +161,7 @@ def _step_run(name: str) -> str:
 
 
 def _locked_pytest_benchmark_spec() -> tuple[str, str, str]:
+    """Return the pinned pytest-benchmark version, wheel URL, and sha256."""
     text = (ROOT / "uv.lock").read_text(encoding="utf-8")
     needle = '[[package]]\nname = "pytest-benchmark"\n'
     start = text.index(needle)
@@ -172,10 +177,12 @@ def _locked_pytest_benchmark_spec() -> tuple[str, str, str]:
 
 
 def _wheel_cache_dir() -> Path:
+    """Return the temporary directory that may hold the pinned wheel file."""
     return Path(tempfile.gettempdir()) / "bioetl-locked-pytest-benchmark"
 
 
 def _matching_cached_wheel() -> tuple[str, Path, str] | None:
+    """Return the cached wheel when its bytes match the lockfile digest."""
     version, _url, digest = _locked_pytest_benchmark_spec()
     wheel_path = _wheel_cache_dir() / f"pytest_benchmark-{version}-py3-none-any.whl"
     if not wheel_path.is_file():
@@ -186,6 +193,7 @@ def _matching_cached_wheel() -> tuple[str, Path, str] | None:
 
 
 def _download_locked_wheel() -> tuple[str, Path, str]:
+    """Download the pinned wheel when fetch is opted in, or skip if it is unreachable."""
     version, url, digest = _locked_pytest_benchmark_spec()
     cache = _wheel_cache_dir()
     cache.mkdir(parents=True, exist_ok=True)
@@ -206,6 +214,7 @@ def _download_locked_wheel() -> tuple[str, Path, str]:
 
 
 def _verified_wheel_payload(wheel_path: Path, digest: str) -> bytes:
+    """Read the wheel once and reject a symlink or a digest mismatch."""
     if wheel_path.is_symlink():
         raise AssertionError("locked wheel cache entry must be a regular file")
     payload = wheel_path.read_bytes()
@@ -216,6 +225,7 @@ def _verified_wheel_payload(wheel_path: Path, digest: str) -> bytes:
 
 
 def _reject_escaping_wheel_member(name: str) -> None:
+    """Reject a wheel member whose path leaves the extract directory."""
     path = Path(name)
     if name.startswith(("/", "\\")) or path.is_absolute() or ".." in path.parts:
         raise AssertionError(f"wheel member escapes the extract directory: {name}")
@@ -266,10 +276,12 @@ def _lock_resolved_benchmark_src(destination: Path | None = None) -> Path | None
 
 
 def _benchmark_under_test() -> str:
+    """Return whether the probe uses the lockfile wheel or the installed package."""
     return os.environ.get("BIOETL_PYTEST_BENCHMARK_UNDER_TEST", "locked")
 
 
 def _expected_benchmark_version() -> str:
+    """Return the pytest-benchmark version the probe must load."""
     if _benchmark_under_test() == "installed":
         import importlib.metadata as metadata
 
@@ -279,6 +291,7 @@ def _expected_benchmark_version() -> str:
 
 
 def _probe_env(tmp_path: Path) -> tuple[dict[str, str], Path, Path | None]:
+    """Build a child environment that records VCS probes and may prepend a private extract."""
     probe_dir = tmp_path / "probe"
     probe_dir.mkdir()
     (probe_dir / "sitecustomize.py").write_text(_SITECUSTOMIZE, encoding="utf-8")
@@ -299,6 +312,7 @@ def _probe_env(tmp_path: Path) -> tuple[dict[str, str], Path, Path | None]:
 
 
 def _probe_lines(log_path: Path) -> list[str]:
+    """Return non-empty lines from the VCS probe log."""
     return [
         line
         for line in log_path.read_text(encoding="utf-8").splitlines()
@@ -309,6 +323,7 @@ def _probe_lines(log_path: Path) -> list[str]:
 def test_missing_pytest_benchmark_package_skips(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Skip when pytest-benchmark is neither installed nor cached."""
     import importlib.metadata as metadata
 
     monkeypatch.delenv("BIOETL_PYTEST_BENCHMARK_FETCH_LOCK", raising=False)
@@ -318,6 +333,7 @@ def test_missing_pytest_benchmark_package_skips(
     )
 
     def _missing(_name: str) -> str:
+        """Raise PackageNotFoundError for the monkeypatched version lookup."""
         raise metadata.PackageNotFoundError
 
     monkeypatch.setattr(metadata, "version", _missing)
@@ -326,6 +342,7 @@ def test_missing_pytest_benchmark_package_skips(
 
 
 def test_pytest_wrappers_load_guard_before_benchmark_plugin() -> None:
+    """Require both wrappers to load the guard before the benchmark plugin."""
     wrappers = (
         ROOT / "scripts" / "engineering" / "dev" / "run_pytest.sh",
         ROOT / "scripts" / "engineering" / "dev" / "run_pytest.ps1",
@@ -344,6 +361,7 @@ def test_pytest_wrappers_load_guard_before_benchmark_plugin() -> None:
 
 
 def test_guard_import_does_not_sample_the_clock() -> None:
+    """Importing the guard must not sample the measurement clock."""
     env = os.environ.copy()
     pythonpath = [str(ROOT), str(ROOT / "src")]
     if env.get("PYTHONPATH"):
@@ -369,6 +387,7 @@ def test_guard_import_does_not_sample_the_clock() -> None:
 
 
 def test_measurement_start_uses_the_bound_clock() -> None:
+    """A bound clock supplies the frozen measurement timestamp."""
     from tests.benchmarks import benchmark_vcs_guard as guard
     from tests.helpers.clock import FIXED_TEST_TIME, FixedClock
 
@@ -382,12 +401,14 @@ def test_measurement_start_uses_the_bound_clock() -> None:
 
 
 def test_locked_wheel_cache_stays_outside_the_repository() -> None:
+    """The wheel cache path stays outside the repository root."""
     cache = _wheel_cache_dir()
     assert cache.is_absolute()
     assert not cache.is_relative_to(ROOT)
 
 
 def test_verified_extract_rejects_parent_segments(tmp_path: Path) -> None:
+    """A wheel member with a parent segment is not extracted."""
     payload = io.BytesIO()
     with zipfile.ZipFile(payload, "w") as archive:
         archive.writestr("pkg/mod.py", "VALUE = 1\n")
@@ -399,6 +420,7 @@ def test_verified_extract_rejects_parent_segments(tmp_path: Path) -> None:
 
 
 def test_verified_extract_does_not_reuse_an_existing_directory(tmp_path: Path) -> None:
+    """Extraction refuses a directory that already exists."""
     payload = io.BytesIO()
     with zipfile.ZipFile(payload, "w") as archive:
         archive.writestr("pkg/mod.py", "VALUE = 1\n")
@@ -417,6 +439,7 @@ def test_lock_resolution_ignores_a_stamped_shared_extract(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """A stamped shared extract is not the code placed on the import path."""
     payload = io.BytesIO()
     with zipfile.ZipFile(payload, "w") as archive:
         archive.writestr("pytest_benchmark/utils.py", "VALUE = 1\n")
@@ -445,6 +468,7 @@ def test_lock_resolution_ignores_a_stamped_shared_extract(
 
 
 def test_source_revision_matches_git_rev_parse() -> None:
+    """The gitdir reader matches git rev-parse HEAD for this checkout."""
     source = read_source_revision(ROOT)
     completed = subprocess.run(
         ["git", "rev-parse", "HEAD"],
@@ -461,6 +485,7 @@ def test_source_revision_matches_git_rev_parse() -> None:
 
 
 def test_source_revision_without_gitdir_is_blocked(tmp_path: Path) -> None:
+    """A directory without git metadata is blocked provenance."""
     source = read_source_revision(tmp_path, allow_parent_search=False)
     assert source.revision == "unknown"
     assert source.revision_method == "blocked"
@@ -468,6 +493,7 @@ def test_source_revision_without_gitdir_is_blocked(tmp_path: Path) -> None:
 
 
 def test_validator_rejects_missing_empty_and_false_provenance(tmp_path: Path) -> None:
+    """Missing output, empty rounds, a synthetic revision, and a false clean flag fail validation."""
     missing = tmp_path / "missing.json"
     with pytest.raises(BenchmarkMeasurementContractError) as missing_error:
         validate_benchmark_measurement_json(missing, search_from=ROOT)
@@ -531,11 +557,13 @@ def test_validator_rejects_missing_empty_and_false_provenance(tmp_path: Path) ->
 
 
 def test_pyproject_keeps_default_benchmark_disable() -> None:
+    """Default pytest addopts keep the benchmark plugin disabled."""
     text = PYPROJECT.read_text(encoding="utf-8")
     assert '"-p", "no:benchmark"' in text
 
 
 def test_workflow_enables_guard_before_benchmark_and_keeps_hotspot_fail_open() -> None:
+    """The nightly command loads the guard before benchmark and still runs after a hotspot failure."""
     benchmark_run = _command_text(_step_run("Run pytest-benchmark cases"))
     guard_at = benchmark_run.index(f"-p {GUARD_PLUGIN}")
     benchmark_at = benchmark_run.index("-p benchmark")
@@ -573,6 +601,7 @@ def test_workflow_enables_guard_before_benchmark_and_keeps_hotspot_fail_open() -
 
 @pytest.mark.timeout(180)
 def test_default_pytest_skips_benchmark_and_does_not_probe(tmp_path: Path) -> None:
+    """Default pytest skips the benchmark case and records no VCS probe."""
     env, log_path, _locked_src = _probe_env(tmp_path)
     completed = subprocess.run(
         [
@@ -599,6 +628,7 @@ def test_default_pytest_skips_benchmark_and_does_not_probe(tmp_path: Path) -> No
 
 @pytest.mark.timeout(180)
 def test_explicit_caller_measures_case_without_vcs_probe(tmp_path: Path) -> None:
+    """An explicit caller records one round without a VCS probe."""
     test_path = tmp_path / "test_synthetic_benchmark.py"
     test_path.write_text(_SYNTHETIC_TEST, encoding="utf-8")
     output_path = tmp_path / "benchmark-measurements.json"
@@ -650,6 +680,7 @@ def test_explicit_caller_measures_case_without_vcs_probe(tmp_path: Path) -> None
 def test_guard_after_benchmark_records_probe_and_rejects_provenance(
     tmp_path: Path,
 ) -> None:
+    """Loading the guard after the plugin records a probe and fails validation."""
     test_path = tmp_path / "test_synthetic_benchmark.py"
     test_path.write_text(_SYNTHETIC_TEST, encoding="utf-8")
     output_path = tmp_path / "late-guard.json"
@@ -694,6 +725,7 @@ def test_guard_after_benchmark_records_probe_and_rejects_provenance(
 
 
 def _assert_loaded_benchmark(env: dict[str, str], locked_src: Path | None) -> None:
+    """The child process imports the expected pytest-benchmark version and file."""
     script = (
         "import importlib.metadata as metadata\n"
         "import pytest_benchmark.utils as utils\n"
@@ -729,6 +761,7 @@ def _assert_loaded_benchmark(env: dict[str, str], locked_src: Path | None) -> No
 
 @pytest.mark.timeout(120)
 def test_collect_only_does_not_probe_before_execution(tmp_path: Path) -> None:
+    """Collection alone does not emit a VCS probe."""
     test_path = tmp_path / "test_synthetic_benchmark.py"
     test_path.write_text(_SYNTHETIC_TEST, encoding="utf-8")
     env, log_path, locked_src = _probe_env(tmp_path)
@@ -764,6 +797,7 @@ def test_collect_only_does_not_probe_before_execution(tmp_path: Path) -> None:
 
 
 def test_guard_leaves_project_subprocess_calls_intact() -> None:
+    """Project subprocess.Popen stays intact while pytest-benchmark git probes are refused."""
     import pytest_benchmark.utils as utils
 
     assert isinstance(subprocess.Popen, type)

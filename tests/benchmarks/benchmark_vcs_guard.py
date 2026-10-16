@@ -47,6 +47,7 @@ class BenchmarkMeasurementContractError(Exception):
     """Measurement JSON failed the caller contract."""
 
     def __init__(self, code: str, message: str) -> None:
+        """Store the contract code and message."""
         super().__init__(message)
         self.code = code
 
@@ -66,10 +67,12 @@ class SourceRevision:
 
     @property
     def blocked(self) -> bool:
+        """Return whether the revision was not read from a gitdir HEAD file."""
         return self.revision_method != "gitdir_head_file"
 
 
 def _command_tokens(command: object) -> list[str]:
+    """Split a subprocess command into string tokens."""
     if isinstance(command, str):
         return command.split()
     if isinstance(command, (list, tuple)):
@@ -78,6 +81,7 @@ def _command_tokens(command: object) -> list[str]:
 
 
 def _is_unwanted_vcs_probe(command: object) -> bool:
+    """Return whether the command starts with git or hg."""
     tokens = _command_tokens(command)
     if not tokens:
         return False
@@ -86,6 +90,7 @@ def _is_unwanted_vcs_probe(command: object) -> bool:
 
 
 def _note_blocked_probe(command: object) -> None:
+    """Remember a short label for a refused VCS probe."""
     tokens = _command_tokens(command)
     label = " ".join(tokens[:4])
     if len(_BLOCKED_PROBES) < 8:
@@ -93,6 +98,7 @@ def _note_blocked_probe(command: object) -> None:
 
 
 def _refuse_vcs_probe(command: object) -> None:
+    """Raise when pytest-benchmark tries to run git or hg."""
     if _is_unwanted_vcs_probe(command):
         _note_blocked_probe(command)
         raise _BlockedBenchmarkVcsProbe(command)
@@ -112,6 +118,7 @@ def _safe_resolve(path: Path) -> Path | None:
 
 
 def _resolve_gitdir(start: Path, *, allow_parent_search: bool) -> Path | None:
+    """Find the git directory from a checkout or a linked worktree file."""
     current = _safe_resolve(start)
     if current is None:
         return None
@@ -138,6 +145,7 @@ def _resolve_gitdir(start: Path, *, allow_parent_search: bool) -> Path | None:
 
 
 def _packed_ref(gitdir: Path, ref: str) -> str | None:
+    """Return the SHA recorded for a ref in packed-refs."""
     packed = gitdir / "packed-refs"
     if not packed.is_file():
         return None
@@ -157,6 +165,7 @@ class _CorruptLooseRef(Exception):
 
 
 def _sha_at(gitdir: Path, ref: str, *, depth: int = 0) -> str | None:
+    """Read a loose ref, using packed-refs only when that loose ref is absent."""
     if depth > 2 or not ref or ref.startswith(("/", "\\")) or ".." in Path(ref).parts:
         return None
     ref_path = gitdir / ref
@@ -175,6 +184,7 @@ def _sha_at(gitdir: Path, ref: str, *, depth: int = 0) -> str | None:
 
 
 def _common_gitdir(gitdir: Path) -> Path | None:
+    """Resolve the commondir file of a linked worktree git directory."""
     common_file = gitdir / "commondir"
     if not common_file.is_file():
         return None
@@ -225,6 +235,7 @@ def read_source_revision(
 
 
 def _safe_commit_info(project_name: str | None = None) -> dict[str, Any]:
+    """Build commit info from the gitdir reader without a VCS subprocess."""
     source = read_source_revision(Path.cwd())
     project = project_name or Path.cwd().name
     payload: dict[str, Any] = {
@@ -244,16 +255,21 @@ def _safe_commit_info(project_name: str | None = None) -> dict[str, Any]:
 
 
 def _safe_project_name(*_args: object, **_kwargs: object) -> str:
+    """Return the current directory name as the project label."""
     return Path.cwd().name
 
 
 def _safe_tag(project_name: str | None = None) -> str:
+    """Return a tag that pairs the source revision with this process run id."""
     info = _safe_commit_info(project_name)
     return f"{info['id']}_{_RUN_ID}"
 
 
 def _wrap_output(original: Any) -> Any:
+    """Wrap a subprocess helper so git and hg probes are refused first."""
+
     def _wrapped(command: object, *args: object, **kwargs: object) -> Any:
+        """Refuse a VCS probe, otherwise call the original subprocess helper."""
         _refuse_vcs_probe(command)
         return original(command, *args, **kwargs)
 
@@ -287,6 +303,7 @@ def install_benchmark_vcs_guard() -> None:
 
 
 def guard_status() -> dict[str, Any]:
+    """Return whether the guard loaded before the plugin and which probes were refused."""
     return {
         "schema_version": _SCHEMA_VERSION,
         "installed_before_plugin": _INSTALLED_BEFORE_PLUGIN,
@@ -296,6 +313,7 @@ def guard_status() -> dict[str, Any]:
 
 
 def _provenance_block() -> dict[str, Any]:
+    """Return the source-revision object stored in measurement JSON."""
     source = read_source_revision(Path.cwd())
     return {
         "schema_version": _SCHEMA_VERSION,
@@ -315,6 +333,7 @@ def bind_measurement_clock(now: _ClockNow | None) -> None:
 
 
 def _system_utc_now() -> datetime:
+    """Return the current UTC time from the project clock."""
     from bioetl.infrastructure.time.system_clock import current_utc_time
 
     return current_utc_time()
@@ -336,6 +355,7 @@ def measurement_started_at() -> str:
 
 
 def _run_block() -> dict[str, Any]:
+    """Return the UUID, start time, kind, and caller of this measurement."""
     caller = os.environ.get(_CALLER_ENV, "").strip() or "unspecified"
     return {
         "schema_version": _SCHEMA_VERSION,
@@ -384,6 +404,7 @@ def pytest_benchmark_update_json(
 
 
 def _require_mapping(value: object, code: str, label: str) -> dict[str, Any]:
+    """Return a JSON object or fail the named contract code."""
     if not isinstance(value, dict):
         raise BenchmarkMeasurementContractError(code, f"{label} is missing")
     return value
@@ -535,6 +556,7 @@ def validate_benchmark_measurement_json(
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Validate a measurement JSON path and return a process status."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--validate-measurement-json", type=Path, required=True)
     parser.add_argument("--search-from", type=Path, default=None)
