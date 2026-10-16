@@ -17,6 +17,7 @@ import sys
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(_REPO_ROOT) not in sys.path:
@@ -207,6 +208,24 @@ def _summary_path(reports_dir: Path) -> Path:
     return reports_dir / SUMMARY_FILENAME
 
 
+def _persist_journal_verdict(
+    verdict: dict[str, Any], destinations: tuple[Path, ...]
+) -> bool:
+    """Write each verdict copy. An OSError stays on stderr and does not raise."""
+    from scripts.engineering.ci.pytest_event_journal import atomic_write_json
+
+    persisted = True
+    for destination in destinations:
+        try:
+            atomic_write_json(destination, verdict)
+        except OSError as exc:
+            persisted = False
+            sys.stderr.write(
+                f"EventJournal verdict write failed: {type(exc).__name__}:{exc.errno}\n"
+            )
+    return persisted
+
+
 def _finish_run(
     *,
     reports_dir: Path,
@@ -223,14 +242,23 @@ def _finish_run(
     if journal_dir is not None:
         from scripts.engineering.ci.pytest_event_journal import (
             JOURNAL_COMPLETENESS_EXIT,
-            atomic_write_json,
             reconcile_directory,
         )
 
         verdict = reconcile_directory(journal_dir, executed_passes=executed_passes)
         verdict["test_exit_code"] = test_rc
-        atomic_write_json(reports_dir / "journal-verdict.json", verdict)
-        atomic_write_json(journal_dir / "journal-verdict.json", verdict)
+        destinations = (
+            reports_dir / "journal-verdict.json",
+            journal_dir / "journal-verdict.json",
+        )
+        if not _persist_journal_verdict(verdict, destinations):
+            reasons = list(verdict["reasons"])
+            if "verdict_write_failed" not in reasons:
+                reasons.append("verdict_write_failed")
+            verdict["reasons"] = reasons
+            verdict["status"] = "incomplete"
+            verdict["tests_passed"] = None
+            _persist_journal_verdict(verdict, destinations)
         summary_lines.append(
             f"journal_status={verdict['status']} "
             f"tests_passed={verdict['tests_passed']} test_exit_code={test_rc}"
@@ -410,6 +438,14 @@ def _create_parser() -> argparse.ArgumentParser:
         help="Skip dedicated serial-marker pass.",
     )
     parser.add_argument(
+        "--no-fallback",
+        action="store_true",
+        help=(
+            "Do not start a second pytest pass after a worker crash or timeout. "
+            "The parallel pass status is returned as-is."
+        ),
+    )
+    parser.add_argument(
         "--parallel-timeout-seconds",
         type=float,
         default=900.0,
@@ -504,8 +540,15 @@ def main() -> int:
             test_rc=serial_rc,
         )
 
-    if _parallel_failure_is_stable(parallel_result):
-        summary_lines.append("parallel_failed_without_worker_crash=true")
+    if _parallel_failure_is_stable(parallel_result) or args.no_fallback:
+        if _parallel_failure_is_stable(parallel_result):
+            summary_lines.append("parallel_failed_without_worker_crash=true")
+        else:
+            _append_parallel_instability_markers(
+                summary_lines,
+                parallel_result=parallel_result,
+            )
+            summary_lines.append("fallback_skipped=true")
         return _finish_run(
             reports_dir=reports_dir,
             summary_lines=summary_lines,

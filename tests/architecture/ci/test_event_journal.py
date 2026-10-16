@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-
 from scripts.engineering.ci.pytest_event_journal import (
     authoritative_pass_names,
     reconcile_directory,
@@ -413,8 +412,10 @@ def test_setup_teardown_skip_and_xfail_classifications(tmp_path: Path) -> None:
         _outcome(identity, nodeids[3], "setup", "skipped"),
         _outcome(identity, nodeids[4], "setup", "passed"),
         _outcome(identity, nodeids[4], "call", "xfail"),
+        _outcome(identity, nodeids[4], "teardown", "passed"),
         _outcome(identity, nodeids[5], "setup", "passed"),
         _outcome(identity, nodeids[5], "call", "xpass"),
+        _outcome(identity, nodeids[5], "teardown", "passed"),
         {"event": "session_finish", "identity": identity, "exitstatus": 1},
     ]
     _write_receipt(tmp_path, _finalized(events))
@@ -664,6 +665,7 @@ def test_disk_error_does_not_replace_the_test_result(tmp_path: Path) -> None:
         capture_output=True,
         text=True,
         check=False,
+        timeout=90,
     )
     assert result.returncode != 0
     assert "AssertionError" in result.stdout or "assert False" in result.stdout
@@ -757,6 +759,7 @@ def test_runner_keeps_test_failure_distinct_from_journal_status(tmp_path: Path) 
         capture_output=True,
         text=True,
         check=False,
+        timeout=90,
     )
     assert result.returncode == 1, result.stdout + result.stderr
     verdict = json.loads((journal / "journal-verdict.json").read_text(encoding="utf-8"))
@@ -764,3 +767,275 @@ def test_runner_keeps_test_failure_distinct_from_journal_status(tmp_path: Path) 
     assert verdict["tests_passed"] is False
     assert verdict["test_exit_code"] == 1
     assert "parallel" in verdict["executed_passes"]
+
+
+def test_deselected_tests_are_not_required_to_finish(tmp_path: Path) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    kept = "test_sample.py::test_serial"
+    dropped = "test_sample.py::test_other"
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [kept, dropped]),
+            {"event": "deselected", "identity": identity, "nodeids": [dropped]},
+            *_phases(identity, kept, "passed"),
+            {"event": "session_finish", "identity": identity, "exitstatus": 0},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "complete"
+    assert verdict["selected_count"] == 1
+    assert verdict["deselected_count"] == 1
+    assert verdict["unexplained"] == []
+
+
+def test_live_marker_expression_records_the_selected_test(tmp_path: Path) -> None:
+    result = _run_journal(
+        tmp_path,
+        "import pytest\n\n"
+        "@pytest.mark.serial\n"
+        "def test_serial():\n"
+        "    pass\n\n"
+        "def test_other():\n"
+        "    pass\n",
+        ["-m", "serial"],
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    verdict = _live_verdict(tmp_path)
+    assert verdict["status"] == "complete", verdict["reasons"]
+    assert verdict["passes"]["parallel"]["selected_count"] == 1
+    assert verdict["passes"]["parallel"]["deselected_count"] == 1
+
+
+def test_token_in_a_function_name_stays_a_distinct_nodeid(tmp_path: Path) -> None:
+    result = _run_journal(
+        tmp_path,
+        "def test_token_alpha():\n    pass\n\ndef test_token_beta():\n    pass\n",
+        [],
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    verdict = _live_verdict(tmp_path)
+    assert verdict["status"] == "complete", verdict["reasons"]
+    assert verdict["passes"]["parallel"]["selected_count"] == 2
+    blob = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in (tmp_path / "journal").glob("receipt_*.jsonl")
+    )
+    assert "test_token_alpha" in blob
+    assert "test_token_beta" in blob
+    assert blob.count("[redacted:") == 0
+
+
+def test_assignment_redacts_only_the_secret_value() -> None:
+    from scripts.engineering.ci.pytest_event_journal import _redact_text
+
+    raw = "tests/test_mcp_token_configuration.py::test_reads[token=super-secret-value]"
+    redacted = _redact_text(raw, ())
+    assert "test_mcp_token_configuration.py::test_reads" in redacted
+    assert "token=" in redacted
+    assert "super-secret-value" not in redacted
+    assert redacted.endswith("]")
+
+
+def test_credential_prefixes_stay_out_of_the_journal(tmp_path: Path) -> None:
+    from scripts.engineering.ci.pytest_event_journal import _redaction_token
+
+    first = "AKIAIOSFODNN7EXAMPLE"
+    second = "AKIABBBBBBBBBBBBBBBB"
+    result = _run_journal(
+        tmp_path,
+        "import pytest\n\n"
+        "@pytest.mark.parametrize(\n"
+        '    "credential",\n'
+        f'    ["{first}", "{second}"],\n'
+        ")\n"
+        "def test_reads(credential: str) -> None:\n"
+        "    assert credential\n",
+        [],
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    verdict = _live_verdict(tmp_path)
+    parallel = verdict["passes"]["parallel"]
+    assert verdict["status"] == "complete", verdict["reasons"]
+    assert parallel["selected_count"] == 2
+    assert len(parallel["terminals"]) == 2
+    blob = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in (tmp_path / "journal").glob("receipt_*.jsonl")
+    )
+    assert first not in blob
+    assert second not in blob
+    assert _redaction_token(first) in blob
+    assert _redaction_token(second) in blob
+    assert _redaction_token(first) != _redaction_token(second)
+
+
+def test_access_key_env_value_is_removed_from_nodeids(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from scripts.engineering.ci.pytest_event_journal import _redact_text, _secret_values
+
+    secret = "access-key-value-not-stored"
+    monkeypatch.setenv("AWS_ACCESS_KEY_ID", secret)
+    redacted = _redact_text(
+        f"tests/test_sample.py::test_reads[{secret}]", _secret_values()
+    )
+    assert secret not in redacted
+    assert "tests/test_sample.py::test_reads" in redacted
+
+
+def test_latest_invocation_does_not_conflict_with_an_older_pass(
+    tmp_path: Path,
+) -> None:
+    old = _controller_pass(
+        ["test_sample.py::test_a"],
+        {"test_sample.py::test_a": "failed"},
+        invocation_id="inv-old",
+    )
+    new = _controller_pass(
+        ["test_sample.py::test_a"],
+        {"test_sample.py::test_a": "passed"},
+        invocation_id="inv-new",
+    )
+    old[0]["timestamp"] = "2026-10-16T00:00:00+00:00"
+    new[0]["timestamp"] = "2026-10-16T01:00:00+00:00"
+    _write_receipt(tmp_path, old, name="receipt_old.jsonl")
+    _write_receipt(tmp_path, new, name="receipt_new.jsonl")
+    verdict = reconcile_directory(tmp_path, executed_passes=["parallel"])
+    parallel = verdict["passes"]["parallel"]
+    assert verdict["status"] == "complete", verdict["reasons"]
+    assert "conflicting_outcome" not in parallel["reasons"]
+    assert verdict["tests_passed"] is True
+    assert parallel["invocation_id"] == "inv-new"
+
+
+class _CloseDenied:
+    def __init__(self, wrapped: Any) -> None:
+        self._wrapped = wrapped
+
+    def write(self, data: str) -> int:
+        return self._wrapped.write(data)
+
+    def flush(self) -> None:
+        self._wrapped.flush()
+
+    def fileno(self) -> int:
+        return self._wrapped.fileno()
+
+    def close(self) -> None:
+        raise OSError(13, "denied")
+
+
+def test_close_error_marker_blocks_a_finalized_receipt(tmp_path: Path) -> None:
+    from scripts.engineering.ci.pytest_event_journal import (
+        EventJournalPlugin,
+        _load_receipt,
+    )
+
+    path = tmp_path / "receipt_close.jsonl"
+    plugin = EventJournalPlugin(
+        None,
+        path,
+        _identity(role="controller", worker_id="controller"),
+    )
+    real = plugin._file
+    assert real is not None
+    plugin._file = _CloseDenied(real)
+    try:
+        plugin.record("session_start", {"selection": {}})
+        plugin.finalize()
+    finally:
+        real.close()
+    marker = path.with_name(path.name + ".close_error")
+    assert marker.read_text(encoding="utf-8").strip() == "close_failed:13"
+    loaded = _load_receipt(path)
+    finalized = [
+        event for event in loaded["events"] if event.get("event") == "journal_finalized"
+    ]
+    assert finalized[-1]["io_error"] is None
+    assert loaded["io_error"] == "close_failed:13"
+    verdict = reconcile_pass([loaded], pass_name="parallel")
+    assert "journal_io_error" in verdict["reasons"]
+    assert verdict["status"] != "complete"
+
+
+def test_verdict_write_error_preserves_the_pytest_exit_code(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from scripts.engineering.ci import pytest_event_journal as journal
+    from scripts.engineering.ci import run_pytest_resilient
+
+    def _deny(path: Path, payload: dict[str, Any]) -> None:
+        _ = (path, payload)
+        raise PermissionError(13, "denied")
+
+    monkeypatch.setattr(journal, "atomic_write_json", _deny)
+    journal_dir = tmp_path / "journal"
+    _write_receipt(
+        journal_dir,
+        _controller_pass(
+            ["test_sample.py::test_a"],
+            {"test_sample.py::test_a": "passed"},
+        ),
+    )
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    failed = run_pytest_resilient._finish_run(
+        reports_dir=reports,
+        summary_lines=[],
+        journal_dir=journal_dir,
+        executed_passes=["parallel"],
+        test_rc=1,
+    )
+    passed = run_pytest_resilient._finish_run(
+        reports_dir=reports,
+        summary_lines=[],
+        journal_dir=journal_dir,
+        executed_passes=["parallel"],
+        test_rc=0,
+    )
+    incomplete = run_pytest_resilient._finish_run(
+        reports_dir=reports,
+        summary_lines=[],
+        journal_dir=tmp_path / "empty-journal",
+        executed_passes=["parallel"],
+        test_rc=0,
+    )
+    assert failed == 1
+    assert passed == 4
+    assert incomplete == 4
+
+
+def test_call_without_teardown_is_not_complete(tmp_path: Path) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_call"
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid]),
+            _outcome(identity, nodeid, "setup", "passed"),
+            _outcome(identity, nodeid, "call", "passed"),
+            {"event": "session_finish", "identity": identity, "exitstatus": 0},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "incomplete"
+    assert "missing_teardown" in verdict["reasons"]
+    assert "unexplained_selected_tests" in verdict["reasons"]
+    assert verdict["tests_passed"] is None
+
+
+def test_serial_coverage_journal_fits_the_job_timeout() -> None:
+    workflow = (_ROOT / ".github" / "workflows" / "tests.yml").read_text(
+        encoding="utf-8"
+    )
+    serial = workflow.split("  serial-coverage:\n", 1)[1].split(
+        "\n  coverage-verify:", 1
+    )[0]
+    assert "timeout-minutes: 20" in serial
+    assert "--parallel-timeout-seconds 840" in serial
+    assert "--no-fallback" in serial
+    assert "pytest-event-journal-serial-coverage" in serial
+    assert "if: ${{ always() && !cancelled() }}" in serial

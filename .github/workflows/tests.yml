@@ -1362,7 +1362,10 @@ jobs:
 
   serial-coverage:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Longer than --parallel-timeout-seconds below so a hung producer exits
+    # inside the job. The journal upload then still runs; repository policy
+    # keeps `always() && !cancelled()` on that upload.
+    timeout-minutes: 20
     needs: dependency-preflight
     permissions:
       contents: read
@@ -1392,10 +1395,14 @@ jobs:
         run: |
           set +e
           mkdir -p reports/coverage reports/pytest/serial-coverage reports/test-telemetry reports/pytest/journal
+          # 840s stops a hang before the 20-minute job cancellation.
+          # --no-fallback keeps a timeout from starting a second pytest.
           uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \
             --journal-dir "reports/pytest/journal" \
             --target tests/ \
             --reports-dir reports/pytest/serial-coverage \
+            --parallel-timeout-seconds 840 \
+            --no-fallback \
             --parallel-marker "serial and not e2e and not benchmark and not memory" \
             --parallel-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report=" \
             --skip-serial-pass

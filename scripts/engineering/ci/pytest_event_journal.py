@@ -13,17 +13,22 @@ Write contract (not an atomic snapshot of the whole file):
 Journal I/O errors are written to stderr and recorded when the file is
 still writable. They do not propagate out of pytest hooks, and they do
 not change the pytest process exit code. Completeness stays not-complete.
+A close-error marker beside the receipt overrides ``io_error`` on the
+finalized line.
 
 Completeness is not the number of JSONL rows and not pytest's exit code.
 ``complete`` requires an intact controller collection, intact receipts,
-and an explained terminal state for every selected test. A complete run
-may still contain failures. ``GITHUB_RUN_ATTEMPT`` is the workflow
-attempt, not a retry inside this runner.
+and an explained terminal state for every selected test. Deselected
+nodeids are removed before that match. A complete run may still contain
+failures. ``GITHUB_RUN_ATTEMPT`` is the workflow attempt, not a retry
+inside this runner. Reconciliation keeps the latest invocation of each
+pass and the workers that share it.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -39,12 +44,19 @@ SCHEMA_VERSION = 1
 JOURNAL_COMPLETENESS_EXIT = 4
 GIT_SHA_TIMEOUT_SECONDS = 10.0
 _SECRET_KEY = re.compile(
-    r"(?i)(secret|token|password|passwd|api_key|apikey|credential|authorization)"
+    r"(?i)(secret|token|password|passwd|api[_-]?key|access[_-]?key|"
+    r"credential|authorization)"
 )
 _SECRET_ASSIGNMENT = re.compile(
-    r"(?i)(token|secret|password|passwd|api[_-]?key|authorization|credential)"
+    r"(?i)(?:^|[^A-Za-z0-9])"
+    r"(token|secret|password|passwd|api[_-]?key|access[_-]?key|"
+    r"authorization|credential)"
+    r"\s*[:=]\s*([^\s,;\]\"']+)"
 )
-_SECRET_PREFIX = re.compile(r"(?i)^(ghp_|github_pat_|sk-|xox[baprs]-|AKIA)")
+_SECRET_PREFIX = re.compile(
+    r"(?:ghp_[A-Za-z0-9]+|github_pat_[A-Za-z0-9_]+|sk-[A-Za-z0-9]+|"
+    r"xox[baprs]-[A-Za-z0-9-]+|AKIA[A-Z0-9]{16})"
+)
 _SAFE_ENV_KEYS = frozenset(
     {
         "GITHUB_RUN_ID",
@@ -74,23 +86,37 @@ def pytest_addoption(parser: Any) -> None:
     )
 
 
+def _redaction_token(secret: str) -> str:
+    digest = hashlib.sha256(secret.encode("utf-8")).hexdigest()[:12]
+    return f"[redacted:{digest}]"
+
+
+def _replace_assignment(match: re.Match[str]) -> str:
+    value = match.group(2)
+    prefix = match.group(0)[: match.start(2) - match.start(0)]
+    return prefix + _redaction_token(value)
+
+
+def _replace_prefix(match: re.Match[str]) -> str:
+    return _redaction_token(match.group(0))
+
+
 def _secret_values() -> tuple[str, ...]:
-    values: list[str] = []
-    for key, value in os.environ.items():
-        if len(value) < 8 or _SECRET_KEY.search(key) is None:
-            continue
-        values.append(value)
-    return tuple(values)
+    values = {
+        value
+        for key, value in os.environ.items()
+        if len(value) >= 8 and _SECRET_KEY.search(key) is not None
+    }
+    return tuple(sorted(values, key=len, reverse=True))
 
 
 def _redact_text(text: str, secrets: tuple[str, ...]) -> str:
     redacted = text
     for secret in secrets:
-        if secret in redacted:
-            redacted = redacted.replace(secret, "[redacted]")
-    if _SECRET_ASSIGNMENT.search(redacted) or _SECRET_PREFIX.search(redacted):
-        return "[redacted]"
-    return redacted
+        if secret and secret in redacted:
+            redacted = redacted.replace(secret, _redaction_token(secret))
+    redacted = _SECRET_ASSIGNMENT.sub(_replace_assignment, redacted)
+    return _SECRET_PREFIX.sub(_replace_prefix, redacted)
 
 
 def _redact_args(args: list[str], secrets: tuple[str, ...]) -> list[str]:
@@ -231,23 +257,35 @@ class EventJournalPlugin:
     def finalize(self) -> None:
         if self._closed:
             return
+        if not _arm_close_marker(self.path):
+            self._mark_io_error("close_marker_failed")
+            return
         self.record(
             "journal_finalized",
             {"prior_line_count": self._line_count, "io_error": self._io_error},
         )
-        if self._file is not None and not self._closed:
-            try:
-                self._file.close()
-            except OSError as exc:
-                self._mark_io_error(f"close_failed:{exc.errno}")
-                return
-        self._closed = True
+        if self._closed or self._io_error:
+            return
+        if not self._close_receipt():
+            return
+        _disarm_close_marker(self.path)
 
-    def pytest_collection_modifyitems(
-        self, session: Any, config: Any, items: list[Any]
-    ) -> None:
-        _ = session
-        _ = config
+    def _close_receipt(self) -> bool:
+        if self._file is None or self._closed:
+            self._closed = True
+            return True
+        try:
+            self._file.close()
+        except OSError as exc:
+            self._closed = True
+            self._io_error = f"close_failed:{exc.errno}"
+            sys.stderr.write(f"EventJournal: close_failed:{exc.errno}\n")
+            _record_close_error(self.path, exc.errno)
+            return False
+        self._closed = True
+        return True
+
+    def record_selected(self, items: list[Any]) -> None:
         nodeids = sorted(_redact_text(str(item.nodeid), self.secrets) for item in items)
         self.record("collection_finished", {"nodeids": nodeids})
 
@@ -304,6 +342,32 @@ def _classify_report(report: Any, wasxfail: Any) -> str:
     return str(getattr(report, "outcome", "unknown"))
 
 
+def _register_collection_hook(config: Any, plugin: EventJournalPlugin) -> None:
+    """Record the collection after marker deselection has changed ``items``."""
+    import pytest
+
+    class _CollectionHook:
+        def __init__(self, owner: EventJournalPlugin) -> None:
+            self._owner = owner
+
+        @pytest.hookimpl(hookwrapper=True)
+        def pytest_collection_modifyitems(
+            self,
+            session: Any,
+            config: Any,
+            items: list[Any],
+        ) -> Any:
+            _ = (session, config)
+            outcome = yield
+            outcome.get_result()
+            self._owner.record_selected(items)
+
+    config.pluginmanager.register(
+        _CollectionHook(plugin),
+        "event_journal_collection_hook",
+    )
+
+
 def pytest_configure(config: Any) -> None:
     journal_dir = config.getoption("--event-journal-dir")
     if not journal_dir:
@@ -320,6 +384,7 @@ def pytest_configure(config: Any) -> None:
     if plugin._file is None:
         return
     config.pluginmanager.register(plugin, "event_journal_plugin")
+    _register_collection_hook(config, plugin)
     plugin.record(
         "session_start",
         {
@@ -353,6 +418,67 @@ def pytest_configure(config: Any) -> None:
         )
 
 
+def _marker_path(path: Path) -> Path:
+    return path.with_name(path.name + ".close_error")
+
+
+def _arm_close_marker(path: Path) -> bool:
+    try:
+        _marker_path(path).write_text("pending\n", encoding="utf-8", newline="\n")
+    except OSError:
+        return False
+    return True
+
+
+def _record_close_error(path: Path, errno: int | None) -> None:
+    try:
+        _marker_path(path).write_text(
+            f"close_failed:{errno}\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+    except OSError:
+        return
+
+
+def _disarm_close_marker(path: Path) -> None:
+    try:
+        _marker_path(path).unlink(missing_ok=True)
+    except OSError as exc:
+        _record_close_error(path, exc.errno)
+
+
+def _marker_io_error(path: Path) -> str | None:
+    marker = _marker_path(path)
+    if not marker.is_file():
+        return None
+    try:
+        text = marker.read_text(encoding="utf-8").strip()
+    except OSError:
+        return "close_marker_unreadable"
+    if text:
+        return text
+    return "close_marker_present"
+
+
+def _recorded_io_error(events: list[dict[str, Any]]) -> str | None:
+    for event in events:
+        if event.get("event") != "journal_finalized":
+            continue
+        value = event.get("io_error")
+        if isinstance(value, str) and value:
+            return value
+        return None
+    return None
+
+
+def _receipt_io_error(path: Path, events: list[dict[str, Any]]) -> str | None:
+    marker_error = _marker_io_error(path)
+    if marker_error is not None:
+        return marker_error
+    return _recorded_io_error(events)
+
+
 def _load_receipt(path: Path) -> dict[str, Any]:
     raw = path.read_bytes()
     truncated = bool(raw) and not raw.endswith(b"\n")
@@ -381,14 +507,7 @@ def _load_receipt(path: Path) -> dict[str, Any]:
         "events": events,
         "truncated": truncated or parse_error,
         "finalized": finalized and prior_ok and not truncated and not parse_error,
-        "io_error": next(
-            (
-                event.get("io_error")
-                for event in events
-                if event.get("event") == "journal_finalized"
-            ),
-            None,
-        ),
+        "io_error": _receipt_io_error(path, events),
     }
 
 
@@ -410,13 +529,48 @@ def _pass_of(receipt: dict[str, Any]) -> str:
     return "unspecified"
 
 
+def _note_controller_event(
+    event: dict[str, Any],
+    collections: list[list[str]],
+    deselected: list[str],
+    errors: list[str],
+) -> None:
+    kind = event.get("event")
+    nodeids = event.get("nodeids")
+    if kind == "collection_finished" and isinstance(nodeids, list):
+        collections.append(sorted(str(nodeid) for nodeid in nodeids))
+        return
+    if kind == "deselected" and isinstance(nodeids, list):
+        deselected.extend(str(nodeid) for nodeid in nodeids)
+        return
+    if kind == "collection_error":
+        errors.append(str(event.get("nodeid") or ""))
+
+
+def _unique_collection(
+    collections: list[list[str]],
+) -> tuple[list[str] | None, bool]:
+    if not collections:
+        return None, False
+    unique = {tuple(nodeids) for nodeids in collections}
+    if len(unique) != 1:
+        return None, True
+    return list(unique.pop()), False
+
+
+def _drop_deselected(nodeids: list[str], deselected: list[str]) -> list[str]:
+    blocked = set(deselected)
+    return [nodeid for nodeid in nodeids if nodeid not in blocked]
+
+
 def _controller_collection(
     events: list[dict[str, Any]],
 ) -> tuple[list[str] | None, list[str], list[str], bool]:
     """Return controller nodeids, deselected nodeids, errors, and conflict.
 
     Worker collection lists are ignored so per-worker collection cannot be
-    summed into extra tests.
+    summed into extra tests. The selected list still includes ids that a
+    later deselected event removes.
     """
     collections: list[list[str]] = []
     deselected: list[str] = []
@@ -425,22 +579,20 @@ def _controller_collection(
         identity = event.get("identity") or {}
         if identity.get("role") != "controller":
             continue
-        if event.get("event") == "collection_finished":
-            nodeids = event.get("nodeids")
-            if isinstance(nodeids, list):
-                collections.append(sorted(str(nodeid) for nodeid in nodeids))
-        elif event.get("event") == "deselected":
-            nodeids = event.get("nodeids")
-            if isinstance(nodeids, list):
-                deselected.extend(str(nodeid) for nodeid in nodeids)
-        elif event.get("event") == "collection_error":
-            errors.append(str(event.get("nodeid") or ""))
-    if not collections:
-        return None, sorted(set(deselected)), sorted(set(errors)), False
-    unique = {tuple(nodeids) for nodeids in collections}
-    if len(unique) != 1:
-        return None, sorted(set(deselected)), sorted(set(errors)), True
-    return list(unique.pop()), sorted(set(deselected)), sorted(set(errors)), False
+        _note_controller_event(event, collections, deselected, errors)
+    selected, conflict = _unique_collection(collections)
+    return selected, sorted(set(deselected)), sorted(set(errors)), conflict
+
+
+def _selected_nodeids(
+    events: list[dict[str, Any]],
+) -> tuple[list[str] | None, list[str], list[str], bool]:
+    selected, deselected, errors, conflict = _controller_collection(events)
+    if selected is None:
+        selected = _repeated_worker_collection(events)
+    if selected is not None:
+        selected = _drop_deselected(selected, deselected)
+    return selected, deselected, errors, conflict
 
 
 def _repeated_worker_collection(events: list[dict[str, Any]]) -> list[str] | None:
@@ -511,7 +663,7 @@ def _dedup_outcomes(
 def _terminal_states(
     selected: list[str],
     outcomes: dict[tuple[str, str, int], dict[str, Any]],
-) -> tuple[list[dict[str, Any]], list[str]]:
+) -> tuple[list[dict[str, Any]], list[str], list[str]]:
     by_node: dict[str, dict[int, dict[str, str]]] = defaultdict(dict)
     workers: dict[tuple[str, int], str] = {}
     for (nodeid, when, retry_index), row in outcomes.items():
@@ -523,6 +675,7 @@ def _terminal_states(
             workers.setdefault((nodeid, retry_index), str(row["worker_id"]))
     terminals: list[dict[str, Any]] = []
     missing: list[str] = []
+    gap_reasons: list[str] = []
     for nodeid in selected:
         attempts = by_node.get(nodeid) or {}
         if not attempts:
@@ -533,6 +686,8 @@ def _terminal_states(
         explained, classification = _explain_phases(phases)
         if not explained:
             missing.append(nodeid)
+            if classification == "missing_teardown":
+                gap_reasons.append("missing_teardown")
             continue
         terminals.append(
             {
@@ -545,7 +700,7 @@ def _terminal_states(
             }
         )
     terminals.sort(key=lambda item: str(item["nodeid"]))
-    return terminals, missing
+    return terminals, missing, sorted(set(gap_reasons))
 
 
 def _explain_phases(phases: dict[str, str]) -> tuple[bool, str]:
@@ -553,6 +708,8 @@ def _explain_phases(phases: dict[str, str]) -> tuple[bool, str]:
     setup = phases.get("setup")
     teardown = phases.get("teardown")
     if call in _CALL_CLASSIFICATIONS:
+        if teardown is None:
+            return False, "missing_teardown"
         if teardown == "teardown_error":
             return True, "teardown_error"
         return True, call
@@ -561,45 +718,190 @@ def _explain_phases(phases: dict[str, str]) -> tuple[bool, str]:
     return False, "unexplained"
 
 
-def _session_flags(events: list[dict[str, Any]]) -> dict[str, Any]:
-    selection: dict[str, Any] = {}
-    exitstatus: int | None = None
-    sha_error: str | None = None
-    mismatch = False
-    actual: str | None = None
-    expected: str | None = None
-    for event in events:
-        identity = event.get("identity") or {}
-        if event.get("event") == "checkout_mismatch":
-            mismatch = True
-            actual = event.get("actual") or actual
-            expected = event.get("expected") or expected
-        if identity.get("role") != "controller":
-            continue
-        if event.get("event") == "session_start":
-            raw_selection = event.get("selection")
-            if isinstance(raw_selection, dict):
-                selection = raw_selection
-            sha_error = event.get("sha_error")
-            actual = identity.get("actual_checkout_sha")
-            expected = identity.get("expected_checkout_sha")
-        elif event.get("event") == "session_finish":
-            status = event.get("exitstatus")
-            if isinstance(status, int):
-                exitstatus = status
+def _empty_session_state() -> dict[str, Any]:
     return {
-        "selection": selection,
-        "exitstatus": exitstatus,
-        "sha_error": sha_error,
-        "mismatch": mismatch,
-        "actual_checkout_sha": actual,
-        "expected_checkout_sha": expected,
+        "selection": {},
+        "exitstatus": None,
+        "sha_error": None,
+        "mismatch": False,
+        "actual": None,
+        "expected": None,
     }
+
+
+def _remember_mismatch(event: dict[str, Any], state: dict[str, Any]) -> None:
+    state["mismatch"] = True
+    actual = event.get("actual")
+    expected = event.get("expected")
+    if actual:
+        state["actual"] = actual
+    if expected:
+        state["expected"] = expected
+
+
+def _remember_start(
+    event: dict[str, Any],
+    identity: dict[str, Any],
+    state: dict[str, Any],
+) -> None:
+    raw_selection = event.get("selection")
+    if isinstance(raw_selection, dict):
+        state["selection"] = raw_selection
+    state["sha_error"] = event.get("sha_error")
+    state["actual"] = identity.get("actual_checkout_sha")
+    state["expected"] = identity.get("expected_checkout_sha")
+
+
+def _apply_session_event(event: dict[str, Any], state: dict[str, Any]) -> None:
+    identity = event.get("identity") or {}
+    kind = event.get("event")
+    if kind == "checkout_mismatch":
+        _remember_mismatch(event, state)
+    if identity.get("role") != "controller":
+        return
+    if kind == "session_start":
+        _remember_start(event, identity, state)
+        return
+    if kind != "session_finish":
+        return
+    status = event.get("exitstatus")
+    if isinstance(status, int):
+        state["exitstatus"] = status
+
+
+def _session_flags(events: list[dict[str, Any]]) -> dict[str, Any]:
+    state = _empty_session_state()
+    for event in events:
+        _apply_session_event(event, state)
+    return {
+        "selection": state["selection"],
+        "exitstatus": state["exitstatus"],
+        "sha_error": state["sha_error"],
+        "mismatch": state["mismatch"],
+        "actual_checkout_sha": state["actual"],
+        "expected_checkout_sha": state["expected"],
+    }
+
+
+_DAMAGE_REASONS = frozenset(
+    {
+        "truncated_jsonl",
+        "missing_terminal_event",
+        "journal_io_error",
+        "checkout_sha_unmeasured",
+    }
+)
+
+
+def _receipt_damage_reasons(receipts: list[dict[str, Any]]) -> list[str]:
+    reasons: list[str] = []
+    if any(item["truncated"] for item in receipts):
+        reasons.append("truncated_jsonl")
+    if any(not item["finalized"] for item in receipts):
+        reasons.append("missing_terminal_event")
+    if any(item.get("io_error") for item in receipts):
+        reasons.append("journal_io_error")
+    return reasons
+
+
+def _sha_mismatch(flags: dict[str, Any]) -> bool:
+    if flags["mismatch"]:
+        return True
+    expected = flags["expected_checkout_sha"]
+    actual = flags["actual_checkout_sha"]
+    return bool(expected and actual and expected != actual)
+
+
+def _checkout_reasons(flags: dict[str, Any]) -> list[str]:
+    reasons: list[str] = []
+    if _sha_mismatch(flags):
+        reasons.append("checkout_sha_mismatch")
+    expected = flags["expected_checkout_sha"]
+    if expected and not flags["actual_checkout_sha"]:
+        reasons.append("checkout_sha_unmeasured")
+    return reasons
+
+
+def _is_damaged(reasons: list[str]) -> bool:
+    return any(reason in _DAMAGE_REASONS for reason in reasons)
+
+
+def _early_stop(selection: dict[str, Any]) -> bool:
+    if selection.get("exitfirst"):
+        return True
+    maxfail = selection.get("maxfail")
+    return isinstance(maxfail, int) and maxfail > 0
+
+
+def _missing_controller(
+    selected: list[str] | None,
+    reasons: list[str],
+    damaged: bool,
+    collection_errors: list[str],
+) -> bool:
+    if selected is not None:
+        return False
+    if "checkout_sha_mismatch" in reasons or damaged or collection_errors:
+        return False
+    return True
+
+
+def _selection_gap_reasons(
+    *,
+    selected: list[str] | None,
+    missing: list[str],
+    selection: dict[str, Any],
+    collection_errors: list[str],
+    collection_conflict: bool,
+    damaged: bool,
+    reasons: list[str],
+) -> list[str]:
+    extra: list[str] = []
+    collect_only = bool(selection.get("collect_only"))
+    if collect_only:
+        extra.append("collect_only")
+    if collection_errors:
+        extra.append("collection_error")
+    if collection_conflict:
+        extra.append("conflicting_collection")
+    if missing and not collect_only:
+        extra.append("unexplained_selected_tests")
+        if _early_stop(selection):
+            extra.append("early_stop")
+    if _missing_controller(selected, reasons, damaged, collection_errors):
+        extra.append("missing_controller_collection")
+    return extra
+
+
+def _verdict_status(reasons: list[str]) -> str:
+    if (
+        _is_damaged(reasons)
+        or "conflicting_outcome" in reasons
+        or "conflicting_collection" in reasons
+        or "missing_controller_collection" in reasons
+    ):
+        return "unknown"
+    if (
+        "checkout_sha_mismatch" in reasons
+        or "collect_only" in reasons
+        or "collection_error" in reasons
+        or "unexplained_selected_tests" in reasons
+        or "missing_teardown" in reasons
+    ):
+        return "incomplete"
+    return "complete"
+
+
+def _tests_passed(status: str, terminals: list[dict[str, Any]]) -> bool | None:
+    if status != "complete":
+        return None
+    return all(
+        item["classification"] not in _FAILURE_CLASSIFICATIONS for item in terminals
+    )
 
 
 def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[str, Any]:
     """Reconcile one runner pass. See module docstring for the status rules."""
-    reasons: list[str] = []
     if not receipts:
         return _pass_verdict(
             pass_name=pass_name,
@@ -607,94 +909,37 @@ def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[st
             reasons=["missing_receipt"],
             tests_passed=None,
         )
-    if any(item["truncated"] for item in receipts):
-        reasons.append("truncated_jsonl")
-    if any(not item["finalized"] for item in receipts):
-        reasons.append("missing_terminal_event")
-    if any(item.get("io_error") for item in receipts):
-        reasons.append("journal_io_error")
+    reasons = _receipt_damage_reasons(receipts)
     events = [event for item in receipts for event in item["events"]]
     flags = _session_flags(events)
-    if flags["mismatch"] or (
-        flags["expected_checkout_sha"]
-        and flags["actual_checkout_sha"]
-        and flags["expected_checkout_sha"] != flags["actual_checkout_sha"]
-    ):
-        reasons.append("checkout_sha_mismatch")
-    if flags["expected_checkout_sha"] and not flags["actual_checkout_sha"]:
-        reasons.append("checkout_sha_unmeasured")
-    damaged = [
-        reason
-        for reason in reasons
-        if reason
-        in {
-            "truncated_jsonl",
-            "missing_terminal_event",
-            "journal_io_error",
-            "checkout_sha_unmeasured",
-        }
-    ]
-    selected, deselected, collection_errors, collection_conflict = (
-        _controller_collection(events)
+    reasons.extend(_checkout_reasons(flags))
+    selected, deselected, collection_errors, collection_conflict = _selected_nodeids(
+        events
     )
-    if selected is None:
-        selected = _repeated_worker_collection(events)
     outcomes, outcome_reasons = _dedup_outcomes(events)
     reasons.extend(outcome_reasons)
     terminals: list[dict[str, Any]] = []
     missing: list[str] = []
     if selected is not None:
-        terminals, missing = _terminal_states(selected, outcomes)
-    selection = flags["selection"]
-    collect_only = bool(selection.get("collect_only"))
-    early_stop = bool(selection.get("exitfirst")) or (
-        isinstance(selection.get("maxfail"), int) and int(selection["maxfail"]) > 0
-    )
-    if collect_only:
-        reasons.append("collect_only")
-    if collection_errors:
-        reasons.append("collection_error")
-    if collection_conflict:
-        reasons.append("conflicting_collection")
-    if missing and not collect_only:
-        reasons.append("unexplained_selected_tests")
-        if early_stop:
-            reasons.append("early_stop")
-    if (
-        selected is None
-        and "checkout_sha_mismatch" not in reasons
-        and not damaged
-        and not collection_errors
-    ):
-        reasons.append("missing_controller_collection")
-    status = "complete"
-    if (
-        damaged
-        or "conflicting_outcome" in reasons
-        or "conflicting_collection" in reasons
-    ):
-        status = "unknown"
-    elif "missing_controller_collection" in reasons:
-        status = "unknown"
-    elif (
-        "checkout_sha_mismatch" in reasons
-        or "collect_only" in reasons
-        or "collection_error" in reasons
-        or "unexplained_selected_tests" in reasons
-    ):
-        status = "incomplete"
-    tests_passed: bool | None
-    if status != "complete":
-        tests_passed = None
-    else:
-        tests_passed = all(
-            item["classification"] not in _FAILURE_CLASSIFICATIONS for item in terminals
+        terminals, missing, gap_reasons = _terminal_states(selected, outcomes)
+        reasons.extend(gap_reasons)
+    reasons.extend(
+        _selection_gap_reasons(
+            selected=selected,
+            missing=missing,
+            selection=flags["selection"],
+            collection_errors=collection_errors,
+            collection_conflict=collection_conflict,
+            damaged=_is_damaged(reasons),
+            reasons=reasons,
         )
+    )
+    status = _verdict_status(reasons)
     return _pass_verdict(
         pass_name=pass_name,
         status=status,
         reasons=sorted(set(reasons)),
-        tests_passed=tests_passed,
+        tests_passed=_tests_passed(status, terminals),
         selected_count=0 if selected is None else len(selected),
         deselected_count=len(deselected),
         terminals=terminals,
@@ -755,10 +1000,61 @@ def authoritative_pass_names(executed_passes: list[str]) -> tuple[list[str], lis
     return authoritative, superseded
 
 
+def _invocation_of(receipt: dict[str, Any]) -> str:
+    for event in receipt["events"]:
+        identity = event.get("identity") or {}
+        value = identity.get("invocation_id")
+        if isinstance(value, str) and value:
+            return value
+    return ""
+
+
+def _session_started_at(receipt: dict[str, Any]) -> str:
+    for event in receipt["events"]:
+        if event.get("event") != "session_start":
+            continue
+        stamp = event.get("timestamp")
+        if isinstance(stamp, str):
+            return stamp
+        return ""
+    return ""
+
+
+def _invocation_rank(
+    group: list[dict[str, Any]], invocation_id: str
+) -> tuple[str, str]:
+    stamp = max((_session_started_at(item) for item in group), default="")
+    return stamp, invocation_id
+
+
+def _latest_invocation_receipts(
+    receipts: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Keep every worker of the newest invocation for each pass."""
+    grouped: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
+    for receipt in receipts:
+        grouped[(_pass_of(receipt), _invocation_of(receipt))].append(receipt)
+    chosen: dict[str, tuple[str, str]] = {}
+    for (pass_name, invocation_id), group in grouped.items():
+        rank = _invocation_rank(group, invocation_id)
+        current = chosen.get(pass_name)
+        if current is None or rank > current:
+            chosen[pass_name] = rank
+    selected = {
+        pass_name: invocation_id
+        for pass_name, (_stamp, invocation_id) in chosen.items()
+    }
+    return [
+        receipt
+        for receipt in receipts
+        if _invocation_of(receipt) == selected[_pass_of(receipt)]
+    ]
+
+
 def reconcile_directory(
     journal_dir: Path, *, executed_passes: list[str]
 ) -> dict[str, Any]:
-    receipts = _group_receipts(journal_dir)
+    receipts = _latest_invocation_receipts(_group_receipts(journal_dir))
     by_pass: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for receipt in receipts:
         by_pass[_pass_of(receipt)].append(receipt)
