@@ -1001,14 +1001,7 @@
     }
   },
   "assertless_total_candidates": 85,
-  "budget_violations": [
-    {
-      "actual": 3,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1182,12 +1175,8 @@
     ]
   },
   "intentional_no_exception_contract": 85,
-  "markerless_examples": [
-    "tests/architecture/ci/test_event_journal.py:7",
-    "tests/architecture/ci/test_event_journal.py:32",
-    "tests/architecture/ci/test_event_journal.py:50"
-  ],
-  "markerless_test_functions": 3,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2036,12 +2025,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/architecture/ci/test_event_journal.py:7",
-      "tests/architecture/ci/test_event_journal.py:32",
-      "tests/architecture/ci/test_event_journal.py:50"
-    ],
-    "markerless_test_functions": 3,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2102,12 +2087,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 3050,
-    "total_test_functions": 29994,
+    "total_test_functions": 30009,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "04e43dd3c92690d5d7ff7ebab2de43eee3a2d74dfaff6d2a4d4b0640514c1d95",
+  "source_tree_sha256": "c8bdc7737508b251435b76fe4b73e200753720dc57c500b5750406da96cb86f4",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2116,12 +2101,8 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 85,
-    "markerless_examples": [
-      "tests/architecture/ci/test_event_journal.py:7",
-      "tests/architecture/ci/test_event_journal.py:32",
-      "tests/architecture/ci/test_event_journal.py:50"
-    ],
-    "markerless_test_functions": 3,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
@@ -2174,7 +2155,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 3050,
-  "total_test_functions": 29994,
+  "total_test_functions": 30009,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

@@ -1383,9 +1383,15 @@ jobs:
       - name: Run serial-only coverage producer
         env:
           COVERAGE_FILE: reports/coverage/.coverage.serial
+          # github.sha matches the checkout, including the pull_request
+          # synthetic merge commit. The journal records git rev-parse HEAD
+          # and refuses complete when the two differ.
+          EXPECTED_CHECKOUT_SHA: ${{ github.sha }}
+          BIOETL_JOURNAL_JOB: serial-coverage
+          BIOETL_JOURNAL_MATRIX: "{}"
         run: |
           set +e
-          mkdir -p reports/coverage reports/pytest/serial-coverage reports/test-telemetry
+          mkdir -p reports/coverage reports/pytest/serial-coverage reports/test-telemetry reports/pytest/journal
           uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \
             --journal-dir "reports/pytest/journal" \
             --target tests/ \
@@ -1404,7 +1410,29 @@ jobs:
           fi
           cp reports/pytest/serial-coverage/junit_parallel.xml \
             reports/test-telemetry/junit-serial-coverage.xml
-          exit "$TEST_EXIT"
+          # This receipt covers resilient-runner passes of serial-coverage
+          # only. Other pytest jobs in this workflow are separate producers.
+          uv run --frozen --no-build python -m scripts.engineering.ci.pytest_event_journal \
+            --verify reports/pytest/journal
+          JOURNAL_EXIT=$?
+          if [ "$JOURNAL_EXIT" -ne 0 ]; then
+            echo "::error::pytest event journal is not complete (exit ${JOURNAL_EXIT})."
+          fi
+          if [ "$TEST_EXIT" -ne 0 ]; then
+            exit "$TEST_EXIT"
+          fi
+          exit "$JOURNAL_EXIT"
+
+      - name: Upload pytest event journal
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: pytest-event-journal-serial-coverage
+          path: |
+            reports/pytest/journal
+            reports/pytest/serial-coverage/journal-verdict.json
+          if-no-files-found: warn
+          retention-days: 3
 
       - name: Upload serial coverage telemetry
         if: ${{ always() && !cancelled() }}

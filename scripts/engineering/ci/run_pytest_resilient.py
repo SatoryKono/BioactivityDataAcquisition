@@ -9,10 +9,12 @@ are always executed as a dedicated serial pass.
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import shlex
 import subprocess
 import sys
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -113,6 +115,7 @@ def _run_pass(
     reports_dir: Path,
     journal_dir: Path | None = None,
     timeout_seconds: float | None = None,
+    executed_passes: list[str] | None = None,
 ) -> PassResult:
     """Run pytest pass and persist logs/artifacts."""
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
@@ -131,7 +134,13 @@ def _run_pass(
         str(junit_path),
         *addopts,
     ]
-    if journal_dir:
+    child_env: dict[str, str] | None = None
+    if journal_dir is not None:
+        if executed_passes is not None:
+            executed_passes.append(name)
+        child_env = os.environ.copy()
+        child_env["BIOETL_JOURNAL_INVOCATION_ID"] = uuid.uuid4().hex
+        child_env["BIOETL_JOURNAL_PASS"] = name
         command.extend(
             [
                 "-p",
@@ -153,6 +162,7 @@ def _run_pass(
                 text=True,
                 check=False,
                 timeout=timeout_seconds,
+                env=child_env,
             )
         )
         return_code = completed.returncode
@@ -197,6 +207,47 @@ def _summary_path(reports_dir: Path) -> Path:
     return reports_dir / SUMMARY_FILENAME
 
 
+def _finish_run(
+    *,
+    reports_dir: Path,
+    summary_lines: list[str],
+    journal_dir: Path | None,
+    executed_passes: list[str],
+    test_rc: int,
+) -> int:
+    """Persist the summary and, when enabled, a separate journal verdict.
+
+    A non-zero pytest result is preserved. Journal incompleteness replaces
+    only a zero test result so a test failure cannot be reported as success.
+    """
+    if journal_dir is not None:
+        from scripts.engineering.ci.pytest_event_journal import (
+            JOURNAL_COMPLETENESS_EXIT,
+            atomic_write_json,
+            reconcile_directory,
+        )
+
+        verdict = reconcile_directory(journal_dir, executed_passes=executed_passes)
+        verdict["test_exit_code"] = test_rc
+        atomic_write_json(reports_dir / "journal-verdict.json", verdict)
+        atomic_write_json(journal_dir / "journal-verdict.json", verdict)
+        summary_lines.append(
+            f"journal_status={verdict['status']} "
+            f"tests_passed={verdict['tests_passed']} test_exit_code={test_rc}"
+        )
+        if verdict["reasons"]:
+            summary_lines.append("journal_reasons=" + ",".join(verdict["reasons"]))
+        if verdict["status"] != "complete":
+            sys.stderr.write(
+                "EventJournal completeness "
+                f"{verdict['status']}: {', '.join(verdict['reasons']) or 'unspecified'}\n"
+            )
+            if test_rc == 0:
+                test_rc = JOURNAL_COMPLETENESS_EXIT
+    _write_summary(_summary_path(reports_dir), summary_lines)
+    return test_rc
+
+
 def _append_pass_summary(
     summary_lines: list[str],
     *,
@@ -238,6 +289,7 @@ def _run_named_pass(
     reports_dir: Path,
     journal_dir: Path | None,
     timeout_seconds: float | None,
+    executed_passes: list[str],
 ) -> PassResult:
     """Run a named pass using shell-split addopts."""
     return _run_pass(
@@ -249,6 +301,7 @@ def _run_named_pass(
         reports_dir=reports_dir,
         journal_dir=journal_dir,
         timeout_seconds=timeout_seconds,
+        executed_passes=executed_passes,
     )
 
 
@@ -260,6 +313,7 @@ def _run_serial_pass(
     journal_dir: Path | None,
     serial_timeout: float | None,
     summary_lines: list[str],
+    executed_passes: list[str],
 ) -> int:
     """Run dedicated serial marker pass and record the summary."""
     serial_result = _run_named_pass(
@@ -271,6 +325,7 @@ def _run_serial_pass(
         reports_dir=reports_dir,
         journal_dir=journal_dir,
         timeout_seconds=serial_timeout,
+        executed_passes=executed_passes,
     )
     serial_rc = _effective_exit_code(serial_result, allow_no_tests=True)
     _append_pass_summary(summary_lines, result=serial_result, effective_rc=serial_rc)
@@ -386,9 +441,16 @@ def main() -> int:
     parser = _create_parser()
     args = parser.parse_args()
 
-    reports_dir = Path(args.reports_dir)
-    journal_dir = Path(args.journal_dir) if args.journal_dir else None
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    reports_dir = resolve_output_path(Path(args.reports_dir), root=REPO_ROOT)
+    journal_dir = (
+        resolve_output_path(Path(args.journal_dir), root=REPO_ROOT)
+        if args.journal_dir
+        else None
+    )
     summary_lines: list[str] = []
+    executed_passes: list[str] = []
     base_command = [sys.executable, "-m", "pytest"]
     parallel_timeout = args.parallel_timeout_seconds or None
     fallback_timeout = args.fallback_timeout_seconds or None
@@ -403,6 +465,7 @@ def main() -> int:
         reports_dir=reports_dir,
         journal_dir=journal_dir,
         timeout_seconds=parallel_timeout,
+        executed_passes=executed_passes,
     )
 
     parallel_rc = _effective_exit_code(parallel_result)
@@ -416,8 +479,13 @@ def main() -> int:
 
     if parallel_rc == 0:
         if not run_serial_pass:
-            _write_summary(_summary_path(reports_dir), summary_lines)
-            return 0
+            return _finish_run(
+                reports_dir=reports_dir,
+                summary_lines=summary_lines,
+                journal_dir=journal_dir,
+                executed_passes=executed_passes,
+                test_rc=0,
+            )
 
         serial_rc = _run_serial_pass(
             base_command=base_command,
@@ -426,14 +494,25 @@ def main() -> int:
             journal_dir=journal_dir,
             serial_timeout=serial_timeout,
             summary_lines=summary_lines,
+            executed_passes=executed_passes,
         )
-        _write_summary(_summary_path(reports_dir), summary_lines)
-        return serial_rc
+        return _finish_run(
+            reports_dir=reports_dir,
+            summary_lines=summary_lines,
+            journal_dir=journal_dir,
+            executed_passes=executed_passes,
+            test_rc=serial_rc,
+        )
 
     if _parallel_failure_is_stable(parallel_result):
         summary_lines.append("parallel_failed_without_worker_crash=true")
-        _write_summary(_summary_path(reports_dir), summary_lines)
-        return parallel_rc
+        return _finish_run(
+            reports_dir=reports_dir,
+            summary_lines=summary_lines,
+            journal_dir=journal_dir,
+            executed_passes=executed_passes,
+            test_rc=parallel_rc,
+        )
 
     _append_parallel_instability_markers(
         summary_lines,
@@ -452,6 +531,7 @@ def main() -> int:
         reports_dir=reports_dir,
         journal_dir=journal_dir,
         timeout_seconds=fallback_timeout,
+        executed_passes=executed_passes,
     )
     fallback_rc = _effective_exit_code(fallback_result)
     _append_pass_summary(
@@ -461,8 +541,13 @@ def main() -> int:
     )
 
     if fallback_rc != 0:
-        _write_summary(_summary_path(reports_dir), summary_lines)
-        return fallback_rc
+        return _finish_run(
+            reports_dir=reports_dir,
+            summary_lines=summary_lines,
+            journal_dir=journal_dir,
+            executed_passes=executed_passes,
+            test_rc=fallback_rc,
+        )
 
     if run_serial_pass:
         serial_rc = _run_serial_pass(
@@ -472,12 +557,23 @@ def main() -> int:
             journal_dir=journal_dir,
             serial_timeout=serial_timeout,
             summary_lines=summary_lines,
+            executed_passes=executed_passes,
         )
-        _write_summary(_summary_path(reports_dir), summary_lines)
-        return serial_rc
+        return _finish_run(
+            reports_dir=reports_dir,
+            summary_lines=summary_lines,
+            journal_dir=journal_dir,
+            executed_passes=executed_passes,
+            test_rc=serial_rc,
+        )
 
-    _write_summary(_summary_path(reports_dir), summary_lines)
-    return 0
+    return _finish_run(
+        reports_dir=reports_dir,
+        summary_lines=summary_lines,
+        journal_dir=journal_dir,
+        executed_passes=executed_passes,
+        test_rc=0,
+    )
 
 
 if __name__ == "__main__":
