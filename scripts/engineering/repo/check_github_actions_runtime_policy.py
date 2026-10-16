@@ -276,9 +276,7 @@ def _allowlist_sha_version_comments() -> dict[str, set[str]]:
     return comments
 
 
-def collect_version_comment_mismatches() -> list[str]:
-    """Fail when a workflow version comment disagrees with ALLOWED_USES."""
-    allowlist = _allowlist_sha_version_comments()
+def _conflicting_allowlist_comments(allowlist: dict[str, set[str]]) -> list[str]:
     violations: list[str] = []
     for sha, comments in sorted(allowlist.items()):
         if len(comments) > 1:
@@ -286,28 +284,51 @@ def collect_version_comment_mismatches() -> list[str]:
                 f"ALLOWED_USES SHA {sha} has conflicting version comments "
                 f"{sorted(comments)}"
             )
+    return violations
+
+
+def _workflow_version_comment_violation(
+    rel_path: Path,
+    line_no: int,
+    line: str,
+    allowlist: dict[str, set[str]],
+) -> str | None:
+    match = _USES_VERSION_COMMENT.search(line)
+    if match is None:
+        return None
+    sha = match.group("sha")
+    comment = match.group("comment")
+    expected = allowlist.get(sha)
+    if expected is None:
+        return (
+            f"{rel_path}:{line_no}: SHA {sha} comment {comment} has no "
+            "ALLOWED_USES version comment"
+        )
+    if comment not in expected or len(expected) != 1:
+        return (
+            f"{rel_path}:{line_no}: SHA {sha} comment {comment} != "
+            f"ALLOWED_USES {sorted(expected)}"
+        )
+    return None
+
+
+def collect_version_comment_mismatches() -> list[str]:
+    """Fail when a workflow version comment disagrees with ALLOWED_USES."""
+    allowlist = _allowlist_sha_version_comments()
+    violations = _conflicting_allowlist_comments(allowlist)
     for file_path in iter_yaml_files():
         rel_path = file_path.relative_to(ROOT)
         for line_no, line in enumerate(
             file_path.read_text(encoding="utf-8").splitlines(), 1
         ):
-            match = _USES_VERSION_COMMENT.search(line)
-            if match is None:
-                continue
-            sha = match.group("sha")
-            comment = match.group("comment")
-            expected = allowlist.get(sha)
-            if expected is None:
-                violations.append(
-                    f"{rel_path}:{line_no}: SHA {sha} comment {comment} has no "
-                    "ALLOWED_USES version comment"
-                )
-                continue
-            if comment not in expected or len(expected) != 1:
-                violations.append(
-                    f"{rel_path}:{line_no}: SHA {sha} comment {comment} != "
-                    f"ALLOWED_USES {sorted(expected)}"
-                )
+            violation = _workflow_version_comment_violation(
+                rel_path,
+                line_no,
+                line,
+                allowlist,
+            )
+            if violation is not None:
+                violations.append(violation)
     return violations
 
 
