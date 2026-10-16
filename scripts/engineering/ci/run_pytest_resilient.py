@@ -13,6 +13,8 @@ import re
 import shlex
 import subprocess
 import sys
+import uuid
+import json
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -112,6 +114,7 @@ def _run_pass(
     addopts: list[str],
     reports_dir: Path,
     timeout_seconds: float | None = None,
+    receipt_args: list[str] | None = None,
 ) -> PassResult:
     """Run pytest pass and persist logs/artifacts."""
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
@@ -130,6 +133,8 @@ def _run_pass(
         str(junit_path),
         *addopts,
     ]
+    if receipt_args:
+        command.extend(receipt_args)
 
     sys.stdout.write(f"\n=== Running pytest pass: {name} ===\n")
     sys.stdout.write(f"Command: {' '.join(command)}\n")
@@ -228,6 +233,7 @@ def _run_named_pass(
     addopts: str,
     reports_dir: Path,
     timeout_seconds: float | None,
+    receipt_args: list[str] | None = None,
 ) -> PassResult:
     """Run a named pass using shell-split addopts."""
     return _run_pass(
@@ -238,6 +244,7 @@ def _run_named_pass(
         addopts=_split_args(addopts),
         reports_dir=reports_dir,
         timeout_seconds=timeout_seconds,
+        receipt_args=receipt_args,
     )
 
 
@@ -248,6 +255,7 @@ def _run_serial_pass(
     reports_dir: Path,
     serial_timeout: float | None,
     summary_lines: list[str],
+    receipt_args: list[str] | None = None,
 ) -> int:
     """Run dedicated serial marker pass and record the summary."""
     serial_result = _run_named_pass(
@@ -258,6 +266,7 @@ def _run_serial_pass(
         addopts=args.serial_addopts,
         reports_dir=reports_dir,
         timeout_seconds=serial_timeout,
+        receipt_args=receipt_args,
     )
     serial_rc = _effective_exit_code(serial_result, allow_no_tests=True)
     _append_pass_summary(summary_lines, result=serial_result, effective_rc=serial_rc)
@@ -360,6 +369,27 @@ def _create_parser() -> argparse.ArgumentParser:
             "Timeout for serial pass in seconds (0 disables timeout). Default: 1200."
         ),
     )
+    # Receipt args
+    parser.add_argument(
+        "--receipt-dir",
+        default=None,
+        help="Directory to store per-worker receipts",
+    )
+    parser.add_argument(
+        "--receipt-run-id",
+        default="local",
+        help="Receipt run identifier",
+    )
+    parser.add_argument(
+        "--receipt-attempt",
+        default="1",
+        help="Receipt attempt identifier",
+    )
+    parser.add_argument(
+        "--receipt-expected-sha",
+        default=None,
+        help="Expected git SHA to enforce",
+    )
     return parser
 
 
@@ -370,7 +400,23 @@ def main() -> int:
 
     reports_dir = Path(args.reports_dir)
     summary_lines: list[str] = []
+
+    # We load our new plugin instead of rewriting pytest run loop
+    plugin_path = Path("scripts/engineering/ci/pytest_receipts.py").resolve()
     base_command = [sys.executable, "-m", "pytest"]
+
+    receipt_args = []
+    if args.receipt_dir:
+        # Load the module specifically via pythonpath and -p
+        base_command.extend(["-p", "scripts.engineering.ci.pytest_receipts"])
+        receipt_args = [
+            f"--receipt-dir={args.receipt_dir}",
+            f"--receipt-run-id={args.receipt_run_id}",
+            f"--receipt-attempt={args.receipt_attempt}",
+        ]
+        if args.receipt_expected_sha:
+            receipt_args.append(f"--receipt-expected-sha={args.receipt_expected_sha}")
+
     parallel_timeout = args.parallel_timeout_seconds or None
     fallback_timeout = args.fallback_timeout_seconds or None
     serial_timeout = args.serial_timeout_seconds or None
@@ -383,6 +429,7 @@ def main() -> int:
         addopts=_split_args(args.parallel_addopts),
         reports_dir=reports_dir,
         timeout_seconds=parallel_timeout,
+        receipt_args=receipt_args,
     )
 
     parallel_rc = _effective_exit_code(parallel_result)
@@ -405,6 +452,7 @@ def main() -> int:
             reports_dir=reports_dir,
             serial_timeout=serial_timeout,
             summary_lines=summary_lines,
+            receipt_args=receipt_args,
         )
         _write_summary(_summary_path(reports_dir), summary_lines)
         return serial_rc
@@ -430,6 +478,7 @@ def main() -> int:
         addopts=args.fallback_addopts,
         reports_dir=reports_dir,
         timeout_seconds=fallback_timeout,
+        receipt_args=receipt_args,
     )
     fallback_rc = _effective_exit_code(fallback_result)
     _append_pass_summary(
@@ -449,6 +498,7 @@ def main() -> int:
             reports_dir=reports_dir,
             serial_timeout=serial_timeout,
             summary_lines=summary_lines,
+            receipt_args=receipt_args,
         )
         _write_summary(_summary_path(reports_dir), summary_lines)
         return serial_rc

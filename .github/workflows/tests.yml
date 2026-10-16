@@ -1386,7 +1386,12 @@ jobs:
         run: |
           set +e
           mkdir -p reports/coverage reports/pytest/serial-coverage reports/test-telemetry
+          export PYTHONPATH="$GITHUB_WORKSPACE"
           uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \
+            --receipt-dir reports/pytest/receipts \
+            --receipt-run-id "${{ github.run_id }}" \
+            --receipt-attempt "${{ github.run_attempt }}" \
+            --receipt-expected-sha "${{ github.sha }}" \
             --target tests/ \
             --reports-dir reports/pytest/serial-coverage \
             --parallel-marker "serial and not e2e and not benchmark and not memory" \
