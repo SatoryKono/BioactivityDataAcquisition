@@ -368,6 +368,14 @@ def _create_parser() -> argparse.ArgumentParser:
         help="Skip dedicated serial-marker pass.",
     )
     parser.add_argument(
+        "--no-fallback",
+        action="store_true",
+        help=(
+            "Do not start a second pytest pass after a worker crash or watchdog "
+            "timeout. The parallel pass status is returned as-is."
+        ),
+    )
+    parser.add_argument(
         "--parallel-timeout-seconds",
         type=float,
         default=900.0,
@@ -440,8 +448,15 @@ def main(argv: list[str] | None = None) -> int:
         _write_summary(_summary_path(reports_dir), summary_lines)
         return serial_rc
 
-    if _parallel_failure_is_stable(parallel_result):
-        summary_lines.append("parallel_failed_without_worker_crash=true")
+    if _parallel_failure_is_stable(parallel_result) or args.no_fallback:
+        if _parallel_failure_is_stable(parallel_result):
+            summary_lines.append("parallel_failed_without_worker_crash=true")
+        else:
+            _append_parallel_instability_markers(
+                summary_lines,
+                parallel_result=parallel_result,
+            )
+            summary_lines.append("fallback_skipped=true")
         _write_summary(_summary_path(reports_dir), summary_lines)
         return parallel_rc
 

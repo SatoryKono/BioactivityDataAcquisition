@@ -15,6 +15,8 @@ from scripts.engineering.ci.pytest_abort_diagnostic_adapter import (
     DIAGNOSTIC_DUMP_MARGIN_SECONDS,
     PYTEST_PER_TEST_TIMEOUT_SECONDS,
     SERIAL_COVERAGE_JOB_TIMEOUT_SECONDS,
+    SERIAL_COVERAGE_SETUP_RESERVE_SECONDS,
+    SERIAL_COVERAGE_UPLOAD_RESERVE_SECONDS,
     PytestAbortDiagnosticAdapter,
     _pid_alive,
     _terminate_pid,
@@ -510,6 +512,11 @@ def test_secret_arguments_are_not_published(tmp_path: Path) -> None:
         *_junit_writer(tmp_path, evidence),
         "--token",
         secret,
+        "--access-token",
+        secret,
+        "--github-token",
+        secret,
+        f"--client-secret={secret}",
     ]
     _, manifest = _run(tmp_path, command, evidence)
     assert manifest.wrapper_exit_code == 0
@@ -590,9 +597,21 @@ def test_runner_rejects_budget_that_cannot_cover_dump_margin(tmp_path: Path) -> 
 
 def test_serial_coverage_budget_fits_job_and_pytest_timeout() -> None:
     budget = serial_coverage_pass_budget_seconds()
-    assert budget == 840
+    assert budget == (
+        SERIAL_COVERAGE_JOB_TIMEOUT_SECONDS
+        - SERIAL_COVERAGE_SETUP_RESERVE_SECONDS
+        - SERIAL_COVERAGE_UPLOAD_RESERVE_SECONDS
+    )
+    assert budget == 660
+    watchdog = budget - DIAGNOSTIC_DUMP_MARGIN_SECONDS
+    assert (
+        SERIAL_COVERAGE_SETUP_RESERVE_SECONDS
+        + watchdog
+        + DIAGNOSTIC_DUMP_MARGIN_SECONDS
+        + SERIAL_COVERAGE_UPLOAD_RESERVE_SECONDS
+        == SERIAL_COVERAGE_JOB_TIMEOUT_SECONDS
+    )
     assert budget > PYTEST_PER_TEST_TIMEOUT_SECONDS + DIAGNOSTIC_DUMP_MARGIN_SECONDS
-    assert budget < SERIAL_COVERAGE_JOB_TIMEOUT_SECONDS
     workflow = (_repo_root() / ".github/workflows/tests.yml").read_text(
         encoding="utf-8"
     )
@@ -600,7 +619,8 @@ def test_serial_coverage_budget_fits_job_and_pytest_timeout() -> None:
         "\n  coverage-verify:", 1
     )[0]
     assert "timeout-minutes: 15" in serial
-    assert "--parallel-timeout-seconds 840" in serial
+    assert "--parallel-timeout-seconds 660" in serial
+    assert "--no-fallback" in serial
     assert "junit_parallel.xml" in serial
     assert "serial-coverage-abort-diagnostics" in serial
     assert "diagnostic_manifest.json" not in serial.split("junit_parallel.xml", 1)[0]
@@ -614,6 +634,86 @@ def test_source_only_adapter_change_selects_this_test() -> None:
     assert any(
         target.endswith("test_pytest_abort_diagnostic_adapter.py") for target in targets
     )
+
+
+def test_evidence_symlink_is_rejected_before_spawn(tmp_path: Path) -> None:
+    base = tmp_path / "base"
+    base.mkdir()
+    target = base / "unrelated.txt"
+    target.write_text("keep-me", encoding="utf-8")
+    link = base / "junit.xml"
+    try:
+        link.symlink_to(target)
+    except OSError:
+        pytest.skip("this environment cannot create a file symlink")
+    marker = base / "spawned.txt"
+    manifest = _adapter(base).run(
+        _python_script(
+            base,
+            "would-spawn.py",
+            "import pathlib, sys\npathlib.Path(sys.argv[1]).write_text('spawned', encoding='utf-8')\n",
+            str(marker),
+        ),
+        link,
+        base / "out",
+        base=base,
+    )
+    assert manifest.status == "INVALID_INVOCATION"
+    assert manifest.wrapper_exit_code == 2
+    assert target.read_text(encoding="utf-8") == "keep-me"
+    assert not marker.exists()
+
+
+def test_unreadable_evidence_does_not_spawn(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    evidence = tmp_path / "junit.xml"
+    _write_junit(evidence)
+    real_open = Path.open
+
+    def locked(self: Path, *args: object, **kwargs: object) -> object:
+        if self.name == "junit.xml":
+            raise OSError("locked")
+        return real_open(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "open", locked)
+    marker = tmp_path / "spawned.txt"
+    _, manifest = _run(
+        tmp_path,
+        _python_script(
+            tmp_path,
+            "would-spawn.py",
+            "import pathlib, sys\npathlib.Path(sys.argv[1]).write_text('spawned', encoding='utf-8')\n",
+            str(marker),
+        ),
+        evidence,
+    )
+    assert manifest.evidence_reason == "unreadable"
+    assert manifest.evidence_valid is False
+    assert manifest.wrapper_exit_code != 0
+    assert _disk_manifest(tmp_path)["evidence_reason"] == "unreadable"
+    assert not marker.exists()
+
+
+def test_no_fallback_skips_second_pass_after_timeout(tmp_path: Path) -> None:
+    sleeping = tmp_path / "test_sleep.py"
+    sleeping.write_text(
+        "import time\n\ndef test_sleep() -> None:\n    time.sleep(30)\n",
+        encoding="utf-8",
+    )
+    reports = tmp_path / "reports"
+    code = resilient_main(
+        [
+            *_resilient_args(sleeping, reports),
+            "--no-fallback",
+            "--parallel-timeout-seconds",
+            "20",
+        ]
+    )
+    assert code == 124
+    assert not (reports / "junit_fallback.xml").exists()
+    summary = (reports / "summary.txt").read_text(encoding="utf-8")
+    assert "fallback_skipped=true" in summary
 
 
 def test_symlink_output_escape_is_rejected(tmp_path: Path) -> None:

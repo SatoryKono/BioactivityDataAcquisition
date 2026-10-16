@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import itertools
 import json
 import math
 import os
@@ -50,7 +51,9 @@ from scripts.engineering.common.repo_paths import (
 PYTEST_PER_TEST_TIMEOUT_SECONDS = 60
 DIAGNOSTIC_DUMP_MARGIN_SECONDS = 15
 SERIAL_COVERAGE_JOB_TIMEOUT_SECONDS = 15 * 60
+SERIAL_COVERAGE_SETUP_RESERVE_SECONDS = 180
 SERIAL_COVERAGE_UPLOAD_RESERVE_SECONDS = 60
+_LAUNCHER_REAP_SECONDS = 1.0
 _MAX_EVIDENCE_BYTES = 64 * 1024 * 1024
 _SECRET_PREFIXES = (
     "--token",
@@ -73,8 +76,17 @@ _JUNIT_TAGS = frozenset({"testsuite", "testsuites"})
 
 
 def serial_coverage_pass_budget_seconds() -> int:
-    """Pass budget that finishes before the serial-coverage job timeout."""
-    return SERIAL_COVERAGE_JOB_TIMEOUT_SECONDS - SERIAL_COVERAGE_UPLOAD_RESERVE_SECONDS
+    """Pass budget that finishes before the serial-coverage job timeout.
+
+    Checkout and interpreter setup run before the watchdog starts, and the
+    artifact upload runs after it. Both are reserved so a timeout can still
+    deliver the diagnostic signal and persist the manifest inside the job.
+    """
+    return (
+        SERIAL_COVERAGE_JOB_TIMEOUT_SECONDS
+        - SERIAL_COVERAGE_SETUP_RESERVE_SECONDS
+        - SERIAL_COVERAGE_UPLOAD_RESERVE_SECONDS
+    )
 
 
 def child_watchdog_seconds(
@@ -220,10 +232,22 @@ class PytestAbortDiagnosticAdapter:
         manifest.stderr_file = _relative(run_dir / "stderr.log", root)
         manifest.manifest_file = _relative(run_dir / "diagnostic_manifest.json", root)
         before = _snapshot_evidence(evidence)
+        if before is not None and before.get("kind") == "unreadable":
+            manifest.status = "EVIDENCE_UNAVAILABLE"
+            manifest.evidence_reason = "unreadable"
+            manifest.evidence_valid = False
+            _finalize(manifest, root)
+            return manifest
         try:
             return self._execute(cmd, evidence, before, root, run_dir, manifest)
         except KeyboardInterrupt:
-            _terminate_recorded(getattr(self, "_launcher_pid", None), set())
+            launcher = getattr(self, "_launcher_pid", None)
+            recorded = (
+                _descendant_pids(launcher) if isinstance(launcher, int) else set()
+            )
+            _terminate_recorded(
+                launcher if isinstance(launcher, int) else None, recorded
+            )
             manifest.status = "INTERRUPTED"
             _finalize(manifest, root)
             raise
@@ -358,6 +382,7 @@ def _invocation_is_valid(
 def _run_directory(output_dir: Path, run_id: str, root: Path) -> Path:
     if not run_id.isalnum():
         raise ValueError("run id must be alphanumeric")
+    _refuse_symlink_components(output_dir, root)
     confined = confined_io_path(output_dir, root=root, allow_external_absolute=False)
     confined.mkdir(parents=True, exist_ok=True)
     run_dir = confined_io_path(
@@ -370,7 +395,34 @@ def _run_directory(output_dir: Path, run_id: str, root: Path) -> Path:
 def _optional_evidence_path(path: Path | None, root: Path) -> Path | None:
     if path is None:
         return None
+    _refuse_symlink_components(path, root)
     return confined_io_path(path, root=root, allow_external_absolute=False)
+
+
+def _refuse_symlink_components(path: Path, root: Path) -> None:
+    """Reject a path before ``resolve`` follows a symlink to another file."""
+    raw = path.expanduser()
+    base = root.expanduser()
+    candidate = raw if raw.is_absolute() else base / raw
+    try:
+        parts = candidate.relative_to(base).parts
+    except ValueError:
+        return
+    current = base
+    for part in parts:
+        if part in {"", "."}:
+            continue
+        current = current / part
+        try:
+            linked = current.is_symlink() or (
+                hasattr(current, "is_junction") and current.is_junction()
+            )
+        except OSError as exc:
+            raise ValueError(f"refusing unreadable path: {current.as_posix()}") from exc
+        if linked:
+            raise ValueError(f"refusing symlink component: {current.as_posix()}")
+        if not current.exists():
+            return
 
 
 def _relative(path: Path, root: Path) -> str:
@@ -427,17 +479,28 @@ def _atomic_json(path: Path, text: str, root: Path) -> None:
 
 
 def _snapshot_evidence(path: Path | None) -> dict[str, object] | None:
-    if path is None or not path.exists():
+    if path is None:
         return None
-    stat_result = path.lstat()
+    try:
+        if not path.exists():
+            return None
+        stat_result = path.lstat()
+    except FileNotFoundError:
+        return None
+    except OSError:
+        return {"kind": "unreadable"}
     if not stat.S_ISREG(stat_result.st_mode):
         return {"kind": "non_regular"}
     if path.is_symlink() or stat_result.st_size > _MAX_EVIDENCE_BYTES:
         return {"kind": "file", "sha256": None, "size": stat_result.st_size}
+    try:
+        digest = _sha256(path)
+    except OSError:
+        return {"kind": "unreadable"}
     return {
         "kind": "file",
         "size": stat_result.st_size,
-        "sha256": _sha256(path),
+        "sha256": digest,
     }
 
 
@@ -511,7 +574,15 @@ def _secret_flag(token: str) -> bool:
     if lowered in _SECRET_PREFIXES:
         return True
     compact = lowered.lstrip("-").replace("-", "_")
-    return compact in _SECRET_KEY_PARTS
+    if compact in _SECRET_KEY_PARTS:
+        return True
+    parts = [part for part in compact.split("_") if part]
+    if any(part in _SECRET_KEY_PARTS for part in parts):
+        return True
+    return any(
+        f"{left}_{right}" in _SECRET_KEY_PARTS
+        for left, right in itertools.pairwise(parts)
+    )
 
 
 def _spawn(
@@ -568,11 +639,14 @@ def _terminate_recorded(launcher_pid: int | None, descendants: set[int]) -> str:
         for pid in descendants
         if pid > 0 and pid != os.getpid() and pid != launcher_pid
     ]
-    victims.append(launcher_pid)
     for pid in victims:
-        if pid == os.getpid() or pid <= 0:
-            continue
         error = _terminate_pid(pid)
+        if error:
+            errors.append(error)
+    if _pid_alive(launcher_pid):
+        _wait_pids_dead({launcher_pid}, timeout=_LAUNCHER_REAP_SECONDS)
+    if _pid_alive(launcher_pid):
+        error = _terminate_pid(launcher_pid)
         if error:
             errors.append(error)
     if os.name == "posix":
@@ -580,14 +654,14 @@ def _terminate_recorded(launcher_pid: int | None, descendants: set[int]) -> str:
             os.killpg(launcher_pid, signal.SIGKILL)
         except (ProcessLookupError, PermissionError, OSError) as exc:
             errors.append(f"killpg:{exc.__class__.__name__}")
-    survivors = _wait_pids_dead(set(victims))
+    survivors = _wait_pids_dead(set(victims) | {launcher_pid})
     if survivors:
         errors.append("cleanup_incomplete:" + ",".join(str(pid) for pid in survivors))
     return "; ".join(errors)
 
 
-def _wait_pids_dead(pids: set[int]) -> list[int]:
-    deadline = time.monotonic() + 2.0
+def _wait_pids_dead(pids: set[int], *, timeout: float = 2.0) -> list[int]:
+    deadline = time.monotonic() + timeout
     alive = {pid for pid in pids if pid > 0}
     while alive and time.monotonic() < deadline:
         alive = {pid for pid in alive if _pid_alive(pid)}

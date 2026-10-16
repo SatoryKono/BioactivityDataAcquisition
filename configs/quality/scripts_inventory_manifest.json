@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-16T17:45:44.671391+00:00",
+  "generated_at": "2026-10-16T18:02:03.290366+00:00",
   "summary": {
     "total_scripts": 648,
     "status_counts": {
@@ -2708,7 +2708,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1862,
+          "line": 1864,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check >> \"$log\" 2>&1"
         },
@@ -10152,7 +10152,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1752,
+          "line": 1754,
           "source_group": "ci",
           "text": "python -m scripts.engineering.ci.junit_duration_summary"
         },
@@ -10452,7 +10452,7 @@
         },
         {
           "path": "tests/unit/scripts/engineering/ci/test_pytest_abort_diagnostic_adapter.py",
-          "line": 611,
+          "line": 631,
           "source_group": "tests",
           "text": "[\"scripts/engineering/ci/pytest_abort_diagnostic_adapter.py\"],"
         }
@@ -10471,7 +10471,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1946,
+          "line": 1948,
           "source_group": "ci",
           "text": "\"python -m scripts.engineering.ci.quality_integral_gate\" \\"
         },
@@ -10666,7 +10666,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1390,
+          "line": 1391,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -11514,7 +11514,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1938,
+          "line": 1940,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
