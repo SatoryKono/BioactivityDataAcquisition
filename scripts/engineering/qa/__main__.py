@@ -97,6 +97,7 @@ from __future__ import annotations
 
 from scripts.engineering.common.cli_dispatch import dispatch_cli, module_command
 
+_HOTSPOT_REPORT_MODULE = "scripts.engineering.qa.generate_hotspot_degradation_report"
 COMMAND_MODULES: dict[str, str] = {
     "check-naming": "scripts.engineering.qa.naming_audit",
     "check-architecture": "scripts.engineering.qa.check_architecture",
@@ -152,7 +153,7 @@ COMMAND_MODULES: dict[str, str] = {
     "report-publication-nested-vocab": "scripts.engineering.qa.extract_publication_nested_vocab",
     "sync-integration-vcr-policy": "scripts.engineering.qa.sync_integration_vcr_policy",
     "report-family-baseline": "scripts.engineering.qa.report_hotspot_family_baseline",
-    "report-hotspots": "scripts.engineering.qa.generate_hotspot_degradation_report",
+    "report-hotspots": _HOTSPOT_REPORT_MODULE,
     "report-duplication-baseline": "scripts.engineering.qa.report_duplication_baseline",
     "report-artifact-duplication-audit": (
         "scripts.engineering.qa.report_artifact_duplication_audit"
@@ -238,11 +239,11 @@ COMMAND_SPECS.update(
             "ci-drift-families",
         ),
         "gate-hotspot-report": module_command(
-            "scripts.engineering.qa.generate_hotspot_degradation_report",
+            _HOTSPOT_REPORT_MODULE,
             "gate-hotspot-report",
         ),
         "reduce-benchmark-evidence": module_command(
-            "scripts.engineering.qa.generate_hotspot_degradation_report",
+            _HOTSPOT_REPORT_MODULE,
             "reduce-benchmark-evidence",
         ),
     }

@@ -524,7 +524,7 @@ def gate_hotspot_report_main(argv: list[str] | None = None) -> int:
 
 
 _SHA_RE = re.compile(r"^[0-9a-f]{40}$")
-_RUN_ID_RE = re.compile(r"^[1-9][0-9]*$")
+_RUN_ID_RE = re.compile(r"^[1-9]\d*$")
 _REPO_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 _REGRESSION_THRESHOLD = Decimal("0.1")
 _SCOPE_PREFIXES = ("tests/benchmarks/", "tests/performance/")
@@ -656,62 +656,77 @@ def _github_identity(env: Mapping[str, str]) -> tuple[dict[str, str] | None, str
     }, ""
 
 
+def _entry_mean(stats: object) -> Decimal | str:
+    if stats is None or stats == {}:
+        return "skipped"
+    if not isinstance(stats, dict):
+        return "malformed_entries"
+    if "mean" not in stats:
+        return "incomplete_evidence"
+    mean = _decimal_mean(stats.get("mean"))
+    rounds = stats.get("rounds")
+    if mean is None:
+        return "unusable_measurement"
+    if type(rounds) is not int or rounds < 1:
+        return "incomplete_evidence"
+    return mean
+
+
+def _entry_identity(entry: Mapping[str, object]) -> tuple[str, str] | None:
+    identity = entry.get("fullname")
+    if not isinstance(identity, str) or not identity.strip():
+        identity = entry.get("name")
+    if not isinstance(identity, str) or not identity.strip():
+        return None
+    scope = _scope_of(identity)
+    if scope is None:
+        return None
+    return identity, scope
+
+
+def _classify_benchmark_entry(entry: object) -> _Measurement | str:
+    if not isinstance(entry, dict):
+        return "malformed_entries"
+    has_error = entry.get("has_error", False)
+    if not isinstance(has_error, bool):
+        return "malformed_entries"
+    if has_error:
+        return "execution_error"
+    mean = _entry_mean(entry.get("stats", None))
+    if not isinstance(mean, Decimal):
+        return mean
+    identity = _entry_identity(entry)
+    if identity is None:
+        return "incomplete_evidence"
+    return (identity[0], identity[1], "", "", mean)
+
+
+def _fold_entry_outcomes(
+    outcomes: list[_Measurement | str],
+) -> str | list[_Measurement]:
+    if "malformed_entries" in outcomes:
+        return "malformed_entries"
+    if "execution_error" in outcomes:
+        return "execution_error"
+    if "unusable_measurement" in outcomes:
+        return "unusable_measurement"
+    measurements = [item for item in outcomes if isinstance(item, tuple)]
+    skipped = outcomes.count("skipped")
+    if "incomplete_evidence" in outcomes or (measurements and skipped):
+        return "incomplete_evidence"
+    if not measurements:
+        return "all_skipped"
+    return measurements
+
+
 def _assess_entries(benchmarks: object) -> str | list[_Measurement]:
     if not isinstance(benchmarks, list):
         return "malformed_entries"
     if not benchmarks:
         return "zero_execution"
-    measurements: list[_Measurement] = []
-    skipped = 0
-    saw_error = False
-    saw_unusable = False
-    saw_incomplete = False
-    for entry in benchmarks:
-        if not isinstance(entry, dict):
-            return "malformed_entries"
-        has_error = entry.get("has_error", False)
-        if not isinstance(has_error, bool):
-            return "malformed_entries"
-        if has_error:
-            saw_error = True
-            continue
-        stats = entry.get("stats", None)
-        if stats is None or stats == {}:
-            skipped += 1
-            continue
-        if not isinstance(stats, dict):
-            return "malformed_entries"
-        if "mean" not in stats:
-            saw_incomplete = True
-            continue
-        mean = _decimal_mean(stats.get("mean"))
-        rounds = stats.get("rounds")
-        if mean is None or type(rounds) is not int or rounds < 1:
-            if mean is None:
-                saw_unusable = True
-            else:
-                saw_incomplete = True
-            continue
-        identity = entry.get("fullname")
-        if not isinstance(identity, str) or not identity.strip():
-            identity = entry.get("name")
-        if not isinstance(identity, str) or not identity.strip():
-            saw_incomplete = True
-            continue
-        scope = _scope_of(identity)
-        if scope is None:
-            saw_incomplete = True
-            continue
-        measurements.append((identity, scope, "", "", mean))
-    if saw_error:
-        return "execution_error"
-    if saw_unusable:
-        return "unusable_measurement"
-    if saw_incomplete or (measurements and skipped):
-        return "incomplete_evidence"
-    if not measurements:
-        return "all_skipped"
-    return measurements
+    return _fold_entry_outcomes(
+        [_classify_benchmark_entry(entry) for entry in benchmarks]
+    )
 
 
 def _measurement_context(
@@ -736,6 +751,25 @@ def _measurement_context(
     return dataset, "github-actions", bound
 
 
+def _baseline_measurement(row: object) -> _Measurement | None:
+    if not isinstance(row, dict):
+        return None
+    test_id = row.get("test_id")
+    scope = row.get("scope")
+    dataset = row.get("dataset")
+    environment = row.get("environment")
+    mean = _decimal_mean(row.get("mean"))
+    if (
+        not isinstance(test_id, str)
+        or scope not in _SCOPE_PREFIXES
+        or not isinstance(dataset, str)
+        or environment != "github-actions"
+        or mean is None
+    ):
+        return None
+    return (test_id, scope, dataset, environment, mean)
+
+
 def _load_baseline(payload: object) -> tuple[str, list[_Measurement]] | str:
     if not isinstance(payload, dict):
         return "invalid_baseline"
@@ -757,23 +791,85 @@ def _load_baseline(payload: object) -> tuple[str, list[_Measurement]] | str:
         return "insufficient_baseline"
     parsed: list[_Measurement] = []
     for row in rows:
-        if not isinstance(row, dict):
+        measurement = _baseline_measurement(row)
+        if measurement is None:
             return "invalid_baseline"
-        test_id = row.get("test_id")
-        scope = row.get("scope")
-        dataset = row.get("dataset")
-        environment = row.get("environment")
-        mean = _decimal_mean(row.get("mean"))
-        if (
-            not isinstance(test_id, str)
-            or scope not in _SCOPE_PREFIXES
-            or not isinstance(dataset, str)
-            or environment != "github-actions"
-            or mean is None
-        ):
-            return "invalid_baseline"
-        parsed.append((test_id, scope, dataset, environment, mean))
+        parsed.append(measurement)
     return baseline_sha, parsed
+
+
+def _comparison_row(
+    *,
+    test_id: str,
+    scope: str,
+    dataset: str,
+    environment: str,
+    baseline_mean: str | None,
+    current_mean: str | None,
+    delta_ratio: str | None,
+    verdict: str,
+) -> dict[str, object]:
+    return {
+        "baseline_mean": baseline_mean,
+        "current_mean": current_mean,
+        "dataset": dataset,
+        "delta_ratio": delta_ratio,
+        "environment": environment,
+        "scope": scope,
+        "test_id": test_id,
+        "threshold": str(_REGRESSION_THRESHOLD),
+        "verdict": verdict,
+    }
+
+
+def _paired_comparison(
+    item: _Measurement,
+    base_mean: Decimal,
+) -> tuple[dict[str, object], bool, bool]:
+    delta = (item[4] - base_mean) / base_mean
+    limit = base_mean * (Decimal(1) + _REGRESSION_THRESHOLD)
+    if item[4] > limit:
+        verdict = "measured_regression"
+        regressed = True
+        still_improved = False
+    elif delta < 0:
+        verdict = "improvement"
+        regressed = False
+        still_improved = True
+    else:
+        verdict = "within_threshold"
+        regressed = False
+        still_improved = False
+    return (
+        _comparison_row(
+            test_id=item[0],
+            scope=item[1],
+            dataset=item[2],
+            environment=item[3],
+            baseline_mean=str(base_mean),
+            current_mean=str(item[4]),
+            delta_ratio=format(delta, "f"),
+            verdict=verdict,
+        ),
+        regressed,
+        still_improved,
+    )
+
+
+def _comparison_reason(
+    *,
+    missing: bool,
+    regression: bool,
+    improved: bool,
+    rows: list[dict[str, object]],
+) -> str:
+    if missing:
+        return "missing_baseline_test"
+    if regression:
+        return "measured_regression"
+    if improved and any(row["verdict"] == "improvement" for row in rows):
+        return "improvement"
+    return "within_threshold"
 
 
 def _compare_measurements(
@@ -798,17 +894,16 @@ def _compare_measurements(
         if key not in current_keys:
             missing = True
             rows.append(
-                {
-                    "baseline_mean": str(base_mean),
-                    "current_mean": None,
-                    "dataset": key[2],
-                    "delta_ratio": None,
-                    "environment": key[3],
-                    "scope": key[1],
-                    "test_id": key[0],
-                    "threshold": str(_REGRESSION_THRESHOLD),
-                    "verdict": "missing_baseline_test",
-                }
+                _comparison_row(
+                    test_id=key[0],
+                    scope=key[1],
+                    dataset=key[2],
+                    environment=key[3],
+                    baseline_mean=str(base_mean),
+                    current_mean=None,
+                    delta_ratio=None,
+                    verdict="missing_baseline_test",
+                )
             )
     for item in sorted(current, key=lambda row: row[0]):
         key = (item[0], item[1], item[2], item[3])
@@ -816,51 +911,32 @@ def _compare_measurements(
         if base_mean is None:
             improved = False
             rows.append(
-                {
-                    "baseline_mean": None,
-                    "current_mean": str(item[4]),
-                    "dataset": item[2],
-                    "delta_ratio": None,
-                    "environment": item[3],
-                    "scope": item[1],
-                    "test_id": item[0],
-                    "threshold": str(_REGRESSION_THRESHOLD),
-                    "verdict": "new_test",
-                }
+                _comparison_row(
+                    test_id=item[0],
+                    scope=item[1],
+                    dataset=item[2],
+                    environment=item[3],
+                    baseline_mean=None,
+                    current_mean=str(item[4]),
+                    delta_ratio=None,
+                    verdict="new_test",
+                )
             )
             continue
-        delta = (item[4] - base_mean) / base_mean
-        limit = base_mean * (Decimal(1) + _REGRESSION_THRESHOLD)
-        if item[4] > limit:
-            regression = True
-            improved = False
-            verdict = "measured_regression"
-        elif delta < 0:
-            verdict = "improvement"
-        else:
-            improved = False
-            verdict = "within_threshold"
-        rows.append(
-            {
-                "baseline_mean": str(base_mean),
-                "current_mean": str(item[4]),
-                "dataset": item[2],
-                "delta_ratio": format(delta, "f"),
-                "environment": item[3],
-                "scope": item[1],
-                "test_id": item[0],
-                "threshold": str(_REGRESSION_THRESHOLD),
-                "verdict": verdict,
-            }
-        )
+        row, regressed, still_improved = _paired_comparison(item, base_mean)
+        regression = regression or regressed
+        improved = improved and still_improved
+        rows.append(row)
     rows.sort(key=lambda row: str(row["test_id"]))
-    if missing:
-        return "missing_baseline_test", rows
-    if regression:
-        return "measured_regression", rows
-    if improved and any(row["verdict"] == "improvement" for row in rows):
-        return "improvement", rows
-    return "within_threshold", rows
+    return (
+        _comparison_reason(
+            missing=missing,
+            regression=regression,
+            improved=improved,
+            rows=rows,
+        ),
+        rows,
+    )
 
 
 def _provenance(
@@ -901,38 +977,26 @@ def _provenance(
     return revision, identity
 
 
-def reduce_benchmark_evidence_main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Reduce benchmark measurements into a fail-closed gate."
-    )
-    parser.add_argument("--raw-json", type=Path, required=True)
-    parser.add_argument("--manifest-out", type=Path, required=True)
-    parser.add_argument("--gate-out", type=Path, required=True)
-    parser.add_argument("--baseline", type=Path, required=True)
-    parser.add_argument("--evidence-dir", type=Path, required=True)
-    parser.add_argument("--output-root", type=Path, default=None)
-    parser.add_argument("--checkout-sha", default="")
-    parser.add_argument("--repo", type=Path, default=None)
-    args = parser.parse_args(argv)
-    from scripts.engineering.common.repo_paths import (
-        REPO_ROOT,
-        read_bytes_confined,
-        read_text_confined,
-        write_bytes_confined,
-        write_text_confined,
-    )
+def _emit_reducer(
+    args: argparse.Namespace,
+    root: Path,
+    status: str,
+    reason: str,
+    extra: dict[str, object] | None = None,
+) -> int:
+    from scripts.engineering.common.repo_paths import write_text_confined
 
-    root = args.output_root or REPO_ROOT
-    repo = args.repo or REPO_ROOT
+    body: dict[str, object] = {"reason": reason, "status": status}
+    if extra:
+        body.update(extra)
+    text = _dump(body)
+    for path in (args.gate_out, args.manifest_out):
+        write_text_confined(path, text, root=root)
+    return 0 if status == "passed" else 1
 
-    def emit(status: str, reason: str, extra: dict[str, object] | None = None) -> int:
-        body: dict[str, object] = {"reason": reason, "status": status}
-        if extra:
-            body.update(extra)
-        text = _dump(body)
-        for path in (args.gate_out, args.manifest_out):
-            write_text_confined(path, text, root=root)
-        return 0 if status == "passed" else 1
+
+def _confine_reducer_outputs(args: argparse.Namespace, root: Path) -> bool:
+    from scripts.engineering.common.repo_paths import write_text_confined
 
     try:
         for path in (
@@ -952,60 +1016,133 @@ def reduce_benchmark_evidence_main(argv: list[str] | None = None) -> int:
             root=root,
         )
     except (ValueError, OSError):
-        print("rejected_output_path", file=sys.stderr)
-        return 2
+        return False
+    return True
+
+
+def _read_reducer_bytes(path: Path, root: Path) -> bytes | str:
+    from scripts.engineering.common.repo_paths import read_bytes_confined
+
     try:
-        raw_bytes = read_bytes_confined(args.raw_json, root=root)
+        return read_bytes_confined(path, root=root)
     except FileNotFoundError:
-        return emit("failed", "missing_observations")
+        return "missing_observations"
     except ValueError:
-        print("rejected_output_path", file=sys.stderr)
-        return 2
+        return "rejected_output_path"
     except OSError:
-        return emit("failed", "missing_observations")
+        return "missing_observations"
+
+
+def _decode_measurement_payload(raw_bytes: bytes) -> dict[str, Any] | str:
     if not raw_bytes:
-        return emit("failed", "empty_input")
+        return "empty_input"
     try:
         raw_text = raw_bytes.decode("utf-8")
     except UnicodeDecodeError:
-        return emit("failed", "invalid_encoding")
+        return "invalid_encoding"
     try:
         payload = json.loads(raw_text, parse_constant=_reject_non_finite)
     except (json.JSONDecodeError, ValueError):
-        return emit("failed", "malformed_json")
+        return "malformed_json"
     if not isinstance(payload, dict):
-        return emit("failed", "malformed_json")
-    raw_sha = hashlib.sha256(raw_bytes).hexdigest()
-    assessed = _assess_entries(payload.get("benchmarks"))
-    if isinstance(assessed, str):
-        return emit("failed", assessed, {"raw_sha256": raw_sha})
-    context = _measurement_context(payload, assessed)
-    if isinstance(context, str):
-        return emit("failed", context, {"raw_sha256": raw_sha})
-    _dataset, _environment, measurements = context
-    provenance = _provenance(
-        payload,
-        checkout_sha=args.checkout_sha,
-        repo=repo,
-        env=os.environ,
-    )
-    if isinstance(provenance, str):
-        return emit("failed", provenance, {"raw_sha256": raw_sha})
-    measured_sha, identity = provenance
+        return "malformed_json"
+    return payload
+
+
+def _read_baseline_document(path: Path, root: Path) -> object | str:
+    from scripts.engineering.common.repo_paths import read_text_confined
+
     try:
-        baseline_text = read_text_confined(args.baseline, root=root)
-        baseline_payload = json.loads(baseline_text)
+        return json.loads(read_text_confined(path, root=root))
     except FileNotFoundError:
-        return emit(
+        return "insufficient_baseline"
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError):
+        return "invalid_baseline"
+
+
+def _store_raw_evidence(
+    args: argparse.Namespace,
+    root: Path,
+    measured_sha: str,
+    raw_sha: str,
+    raw_bytes: bytes,
+) -> str | None:
+    from scripts.engineering.common.repo_paths import write_bytes_confined
+
+    try:
+        write_bytes_confined(
+            args.evidence_dir / f"{measured_sha}/{raw_sha}/benchmark-measurements.json",
+            raw_bytes,
+            root=root,
+        )
+    except (OSError, ValueError):
+        return "rejected_output_path"
+    return None
+
+
+def _candidate_summary(
+    measurements: list[_Measurement],
+    identity: Mapping[str, str],
+    *,
+    measured_sha: str,
+    raw_sha: str,
+    scopes: list[str],
+) -> dict[str, object]:
+    return {
+        "adoption": "proposed",
+        "baseline_sha": measured_sha,
+        "dataset": measurements[0][2],
+        "environment": identity["environment"],
+        "raw_sha256": raw_sha,
+        "run_attempt": identity["run_attempt"],
+        "run_id": identity["run_id"],
+        "run_url": identity["run_url"],
+        "schema_version": 1,
+        "scopes": scopes,
+        "tests": [
+            {
+                "dataset": item[2],
+                "environment": item[3],
+                "mean": str(item[4]),
+                "scope": item[1],
+                "test_id": item[0],
+            }
+            for item in measurements
+        ],
+        "threshold": str(_REGRESSION_THRESHOLD),
+    }
+
+
+def _finish_reduction(
+    args: argparse.Namespace,
+    root: Path,
+    measurements: list[_Measurement],
+    identity: Mapping[str, str],
+    *,
+    measured_sha: str,
+    raw_bytes: bytes,
+    raw_sha: str,
+) -> int:
+    from scripts.engineering.common.repo_paths import write_text_confined
+
+    baseline_document = _read_baseline_document(args.baseline, root)
+    if baseline_document == "insufficient_baseline":
+        return _emit_reducer(
+            args,
+            root,
             "failed",
-            "insufficient_baseline",
+            baseline_document,
             {"measured_sha": measured_sha, "raw_sha256": raw_sha},
         )
-    except (OSError, UnicodeError, json.JSONDecodeError, ValueError):
-        return emit("failed", "invalid_baseline", {"raw_sha256": raw_sha})
-    loaded = _load_baseline(baseline_payload)
+    if isinstance(baseline_document, str):
+        return _emit_reducer(
+            args, root, "failed", baseline_document, {"raw_sha256": raw_sha}
+        )
+    loaded = _load_baseline(baseline_document)
     if isinstance(loaded, str):
-        return emit(
+        return _emit_reducer(
+            args,
+            root,
             "failed",
             loaded,
             {"measured_sha": measured_sha, "raw_sha256": raw_sha},
@@ -1014,63 +1151,104 @@ def reduce_benchmark_evidence_main(argv: list[str] | None = None) -> int:
     reason, comparisons = _compare_measurements(measurements, baseline_rows)
     status = "passed" if reason in {"within_threshold", "improvement"} else "failed"
     scopes = sorted({item[1] for item in measurements})
-    evidence_name = f"{measured_sha}/{raw_sha}/benchmark-measurements.json"
-    try:
-        write_bytes_confined(
-            args.evidence_dir / evidence_name,
-            raw_bytes,
-            root=root,
-        )
-    except (OSError, ValueError):
-        return emit("failed", "rejected_output_path", {"raw_sha256": raw_sha})
-    extra: dict[str, object] = {
-        "baseline_sha": baseline_sha,
-        "comparisons": comparisons,
-        "dataset": measurements[0][2],
-        "environment": identity["environment"],
-        "event_name": identity["event_name"],
-        "measured_sha": measured_sha,
-        "raw_sha256": raw_sha,
-        "run_attempt": identity["run_attempt"],
-        "run_id": identity["run_id"],
-        "run_url": identity["run_url"],
-        "scopes": scopes,
-        "synthetic_merge": identity["synthetic_merge"] == "true",
-        "threshold": str(_REGRESSION_THRESHOLD),
-    }
+    stored = _store_raw_evidence(args, root, measured_sha, raw_sha, raw_bytes)
+    if stored is not None:
+        return _emit_reducer(args, root, "failed", stored, {"raw_sha256": raw_sha})
     if status == "passed":
-        candidate = {
-            "adoption": "proposed",
-            "baseline_sha": measured_sha,
-            "dataset": measurements[0][2],
-            "environment": identity["environment"],
-            "raw_sha256": raw_sha,
-            "run_attempt": identity["run_attempt"],
-            "run_id": identity["run_id"],
-            "run_url": identity["run_url"],
-            "schema_version": 1,
-            "scopes": scopes,
-            "tests": [
-                {
-                    "dataset": item[2],
-                    "environment": item[3],
-                    "mean": str(item[4]),
-                    "scope": item[1],
-                    "test_id": item[0],
-                }
-                for item in measurements
-            ],
-            "threshold": str(_REGRESSION_THRESHOLD),
-        }
         write_text_confined(
             args.evidence_dir
             / measured_sha
             / raw_sha
             / "benchmark-summary-candidate.json",
-            _dump(candidate),
+            _dump(
+                _candidate_summary(
+                    measurements,
+                    identity,
+                    measured_sha=measured_sha,
+                    raw_sha=raw_sha,
+                    scopes=scopes,
+                )
+            ),
             root=root,
         )
-    return emit(status, reason, extra)
+    return _emit_reducer(
+        args,
+        root,
+        status,
+        reason,
+        {
+            "baseline_sha": baseline_sha,
+            "comparisons": comparisons,
+            "dataset": measurements[0][2],
+            "environment": identity["environment"],
+            "event_name": identity["event_name"],
+            "measured_sha": measured_sha,
+            "raw_sha256": raw_sha,
+            "run_attempt": identity["run_attempt"],
+            "run_id": identity["run_id"],
+            "run_url": identity["run_url"],
+            "scopes": scopes,
+            "synthetic_merge": identity["synthetic_merge"] == "true",
+            "threshold": str(_REGRESSION_THRESHOLD),
+        },
+    )
+
+
+def reduce_benchmark_evidence_main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Reduce benchmark measurements into a fail-closed gate."
+    )
+    parser.add_argument("--raw-json", type=Path, required=True)
+    parser.add_argument("--manifest-out", type=Path, required=True)
+    parser.add_argument("--gate-out", type=Path, required=True)
+    parser.add_argument("--baseline", type=Path, required=True)
+    parser.add_argument("--evidence-dir", type=Path, required=True)
+    parser.add_argument("--output-root", type=Path, default=None)
+    parser.add_argument("--checkout-sha", default="")
+    parser.add_argument("--repo", type=Path, default=None)
+    args = parser.parse_args(argv)
+    from scripts.engineering.common.repo_paths import REPO_ROOT
+
+    root = args.output_root or REPO_ROOT
+    repo = args.repo or REPO_ROOT
+    if not _confine_reducer_outputs(args, root):
+        print("rejected_output_path", file=sys.stderr)
+        return 2
+    raw_bytes = _read_reducer_bytes(args.raw_json, root)
+    if raw_bytes == "rejected_output_path":
+        print("rejected_output_path", file=sys.stderr)
+        return 2
+    if isinstance(raw_bytes, str):
+        return _emit_reducer(args, root, "failed", raw_bytes)
+    decoded = _decode_measurement_payload(raw_bytes)
+    if isinstance(decoded, str):
+        return _emit_reducer(args, root, "failed", decoded)
+    raw_sha = hashlib.sha256(raw_bytes).hexdigest()
+    assessed = _assess_entries(decoded.get("benchmarks"))
+    if isinstance(assessed, str):
+        return _emit_reducer(args, root, "failed", assessed, {"raw_sha256": raw_sha})
+    context = _measurement_context(decoded, assessed)
+    if isinstance(context, str):
+        return _emit_reducer(args, root, "failed", context, {"raw_sha256": raw_sha})
+    _dataset, _environment, measurements = context
+    provenance = _provenance(
+        decoded,
+        checkout_sha=args.checkout_sha,
+        repo=repo,
+        env=os.environ,
+    )
+    if isinstance(provenance, str):
+        return _emit_reducer(args, root, "failed", provenance, {"raw_sha256": raw_sha})
+    measured_sha, identity = provenance
+    return _finish_reduction(
+        args,
+        root,
+        measurements,
+        identity,
+        measured_sha=measured_sha,
+        raw_bytes=raw_bytes,
+        raw_sha=raw_sha,
+    )
 
 
 def _reject_non_finite(value: str) -> None:
