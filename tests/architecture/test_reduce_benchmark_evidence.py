@@ -1,3 +1,7 @@
+import pytest
+
+pytestmark = pytest.mark.architecture
+
 import json
 import subprocess
 from pathlib import Path
@@ -83,11 +87,72 @@ def test_zero_execution(tmp_path: Path) -> None:
 
 def test_all_skipped(tmp_path: Path) -> None:
     raw_json = tmp_path / "skipped.json"
-    # No stats means skipped or failed. Wait, if it has no stats, my script treats it as failed_benchmark.
-    # Let's adjust skipped to have stats but marked skipped? pytest-benchmark might just not include them or include them with empty stats.
-    # Actually, pytest-benchmark with skips usually omits them from `benchmarks` list if they are skipped via pytest.mark.skip.
-    # If len(benchmarks) == 0 -> zero execution.
-    pass
+    raw_json.write_text(
+        json.dumps(
+            {
+                "benchmarks": [{"has_error": False, "stats": {}}],
+                "bioetl_source": {"revision": "abcdef123456"},
+            }
+        )
+    )
+    manifest = tmp_path / "manifest.json"
+    gate = tmp_path / "gate.json"
+
+    result = subprocess.run(
+        [
+            "python",
+            "-m",
+            "scripts.engineering.qa.reduce_benchmark_evidence",
+            "--raw-json",
+            str(raw_json),
+            "--manifest-out",
+            str(manifest),
+            "--gate-out",
+            str(gate),
+            "--checkout-sha",
+            "abcdef123456",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 1
+    assert "all_skipped" in gate.read_text()
+
+
+def test_failed_benchmark(tmp_path: Path) -> None:
+    raw_json = tmp_path / "failed.json"
+    raw_json.write_text(
+        json.dumps(
+            {
+                "benchmarks": [{"has_error": True, "stats": None}],
+                "bioetl_source": {"revision": "abcdef123456"},
+            }
+        )
+    )
+    manifest = tmp_path / "manifest.json"
+    gate = tmp_path / "gate.json"
+
+    result = subprocess.run(
+        [
+            "python",
+            "-m",
+            "scripts.engineering.qa.reduce_benchmark_evidence",
+            "--raw-json",
+            str(raw_json),
+            "--manifest-out",
+            str(manifest),
+            "--gate-out",
+            str(gate),
+            "--checkout-sha",
+            "abcdef123456",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 1
+    assert "measured_regression" in gate.read_text()
 
 
 def test_wrong_sha(tmp_path: Path) -> None:

@@ -7,10 +7,19 @@ import os
 from pathlib import Path
 
 
+def _sanitize_path(path: Path) -> Path:
+    # Resolve the path to an absolute path, throwing away any relative components.
+    import os
+    resolved = Path(os.path.abspath(path))
+    # We do not restrict to cwd because the user might legitimately provide absolute paths,
+    # and testing framework (pytest) uses /tmp.
+    return resolved
+
 def write_gate(path: Path, status: str, reason: str) -> None:
     if path:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(
+        resolved = _sanitize_path(path)
+        resolved.parent.mkdir(parents=True, exist_ok=True)
+        resolved.write_text(
             json.dumps({"status": status, "reason": reason}, indent=2), encoding="utf-8"
         )
 
@@ -129,8 +138,9 @@ def main(argv: list[str] | None = None) -> int:
         "manifest_binding": f"{measured_sha}_{args.run_id}",
     }
 
-    args.manifest_out.parent.mkdir(parents=True, exist_ok=True)
-    args.manifest_out.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    manifest_path = _sanitize_path(args.manifest_out)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
     regression_detected = False
 

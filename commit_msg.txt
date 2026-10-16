@@ -1,6 +1,0 @@
-feat(benchmarks): add manifest-first benchmark evidence reducer
-
-Issue: #12044 Attempt C
-The commit adds reduce_benchmark_evidence.py to produce a manifest and a machine-readable gate verdict from benchmark JSON, rejecting malformed, zero-execution, incomplete provenance, or falsely identified checkouts. It modifies .github/workflows/performance-nightly.yml to run the reducer and upload benchmark-manifest.json and benchmark-gate.json, failing with if-no-files-found: error.
-
-As PR #12235 is not merged into main, the missing benchmark-measurements.json correctly surfaces as an integration blocker, explicitly handled by the script returning a failed gate with reason missing_observations.
