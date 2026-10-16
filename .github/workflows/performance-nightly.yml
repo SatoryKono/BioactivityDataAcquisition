@@ -70,6 +70,19 @@ jobs:
           PY
           fi
 
+      - name: Reduce benchmark evidence
+        if: ${{ always() && !cancelled() }}
+        run: |
+          mkdir -p reports/performance
+
+          # Since PR 12235 is not merged into main, benchmark-measurements.json does not exist.
+          # The reducer will explicitly fail and log the integration blocker.
+          uv run --frozen --no-build python -m scripts.engineering.qa.reduce_benchmark_evidence \
+            --raw-json reports/performance/benchmark-measurements.json \
+            --manifest-out reports/performance/benchmark-manifest.json \
+            --gate-out reports/performance/benchmark-gate.json \
+            --checkout-sha "${{ github.sha }}"
+
       - name: Upload performance artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ always() && !cancelled() }}
@@ -80,5 +93,7 @@ jobs:
             reports/performance/hotspot-observations.jsonl
             reports/performance/hotspot-degradation.json
             reports/performance/hotspot-degradation.md
-          if-no-files-found: warn
+            reports/performance/benchmark-manifest.json
+            reports/performance/benchmark-gate.json
+          if-no-files-found: error
           retention-days: 30
