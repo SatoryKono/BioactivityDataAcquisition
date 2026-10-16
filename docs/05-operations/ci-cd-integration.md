@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.0.2
+Version: 1.0.3
 Status: active
 Class: published
 Owner: BioETL Team
@@ -43,9 +43,21 @@ is `required`. `fast-governance` and `pr-gate-complete` still run. A skipped
 ## Acceptance
 
 Record the pull-request head SHA and the GitHub Actions run of workflow
-`PR Gate Complete`. Jobs on `pull_request` check out the synthetic merge ref
-`refs/pull/<number>/merge`; that checkout SHA is not the API head SHA. Accept
-the run only from the conclusions of the four jobs above. A successful
+`PR Gate Complete`. Checkout is chosen separately for each job.
+
+| Job | Checkout on `pull_request` |
+| --- | --- |
+| `classify-changes` | `github.event.pull_request.base.sha`, or `github.sha` when that event field is absent. This is the base SHA. |
+| `pr-gate-complete` | The same base ref as `classify-changes`. |
+| `fast-governance` | `actions/checkout` with no `ref`. GitHub uses `refs/pull/<number>/merge`. |
+| `class-lane` | The same default checkout as `fast-governance`. |
+
+On run `38909556660` for head `3ccabb127f84c0e3a9d683dbc6bb594682f49386`,
+`classify-changes` and `pr-gate-complete` checked out base
+`40fa210b9279c5a10568783815230a8955cc1d02`. `fast-governance` and `class-lane`
+checked out synthetic merge `4e39da041f29f57e6ba0d5ad75ccccae305c89a2`
+(`refs/pull/12234/merge`). That merge SHA is not the API head SHA. Accept the
+run only from the conclusions of the four jobs above. A successful
 `pr-gate-complete` does not by itself block merge. The README CI badge links
 to a pipeline list and is not this gate.
 

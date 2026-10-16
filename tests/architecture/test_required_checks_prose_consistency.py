@@ -324,6 +324,82 @@ def test_anchor_region_does_not_reuse_wording_elsewhere() -> None:
     )
 
 
+def test_acceptance_checkout_is_recorded_per_job() -> None:
+    """Acceptance names the base checkout and the observed synthetic merge."""
+    text = (ROOT / "docs/05-operations/ci-cd-integration.md").read_text(
+        encoding="utf-8"
+    )
+    start = text.index("## Acceptance")
+    end = text.index("## Historical CircleCI lane names")
+    acceptance = text[start:end]
+    for needle in (
+        "classify-changes",
+        "pr-gate-complete",
+        "fast-governance",
+        "class-lane",
+        "github.event.pull_request.base.sha",
+        "40fa210b9279c5a10568783815230a8955cc1d02",
+        "4e39da041f29f57e6ba0d5ad75ccccae305c89a2",
+        "refs/pull/<number>/merge",
+        "refs/pull/12234/merge",
+    ):
+        assert needle in acceptance, needle
+    assert "Jobs on `pull_request` check out the synthetic merge ref" not in text
+
+
+def test_active_merge_wall_phrase_fails() -> None:
+    """Restoring the merge-wall sentence in a contributor guide fails."""
+    catalog = _load_yaml(CATALOG)
+    policy = catalog["policy"]
+    documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
+    target = "docs/03-guides/github-local-workflow.md"
+    documents[target] += "\nGitHub-required merge wall is exactly `pr-gate-complete`\n"
+    errors = check_required_checks_prose(catalog, documents)
+    assert any(
+        target in error and "GitHub-required merge wall" in error for error in errors
+    )
+
+
+def test_enforces_required_context_phrase_fails() -> None:
+    """Restoring the enforcing-ruleset sentence in CONTRIBUTING fails."""
+    catalog = _load_yaml(CATALOG)
+    policy = catalog["policy"]
+    documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
+    target = ".github/CONTRIBUTING.md"
+    documents[target] += "\nenforces exactly one required status context\n"
+    errors = check_required_checks_prose(catalog, documents)
+    assert any(
+        target in error and "enforces exactly one required status context" in error
+        for error in errors
+    )
+
+
+def test_contributing_ruleset_region_cannot_borrow_disabled_wording() -> None:
+    """A contradictory ruleset sentence in CONTRIBUTING cannot reuse another document."""
+    catalog = _load_yaml(CATALOG)
+    policy = catalog["policy"]
+    documents = _repo_documents(ROOT, list(policy["prose_claim_doc_paths"]))
+    target = ".github/CONTRIBUTING.md"
+    old = (
+        "<!-- policy-anchor:ruleset-enforcement-mode --> Rulesets `13643213` "
+        "and `15730586` are `enforcement: disabled`."
+    )
+    assert old in documents[target]
+    documents[target] = documents[target].replace(
+        old,
+        old.replace("`enforcement: disabled`", "`enforcement: active`"),
+        1,
+    )
+    assert "enforcement: disabled" in documents[target]
+    errors = check_required_checks_prose(catalog, documents)
+    assert any(
+        target in error
+        and "ruleset-enforcement-mode" in error
+        and "enforcement: disabled" in error
+        for error in errors
+    )
+
+
 def _coordinator_step(workflow: str, step_id: str) -> str:
     """Return one Fast governance step, from its name through the next step."""
 
@@ -373,8 +449,11 @@ def test_prose_only_change_runs_pytest_without_lint_arch() -> None:
         if matrix["decisions"]["lint-arch"]["decision"] == NOT_APPLICABLE:
             prose_only.append(str(doc_path))
     assert prose_only == [
+        ".github/CONTRIBUTING.md",
         ".github/SECURITY.md",
         "docs/00-project/governance/05-github-policy.md",
+        "docs/03-guides/github-local-workflow.md",
+        "docs/03-guides/github-quick-reference.md",
         "docs/04-reference/github-actions-workflows.md",
         "docs/05-operations/ci-cd-integration.md",
         "docs/05-operations/ci-workflow-map.md",

@@ -39,9 +39,12 @@ policy:
   enforcement_verified_date: "2026-10-09"
   enforcement_verified_date_is_live_protection_evidence: false
   prose_claim_doc_paths:
+    - .github/CONTRIBUTING.md
     - .github/SECURITY.md
     - .github/workflows/pr-required.yml
     - docs/00-project/governance/05-github-policy.md
+    - docs/03-guides/github-local-workflow.md
+    - docs/03-guides/github-quick-reference.md
     - docs/04-reference/github-actions-workflows.md
     - docs/05-operations/ci-cd-integration.md
     - docs/05-operations/ci-workflow-map.md
@@ -84,6 +87,10 @@ policy:
     - "MUST be `enforcement: active`"
     - "Active main rulesets"
     - "CI runs through `.circleci/config.yml`"
+    # Current claims that a ruleset already requires this job. Disabled
+    # enforcement makes both phrases false for the live main rulesets.
+    - "GitHub-required merge wall"
+    - "enforces exactly one required status context"
   # "GitHub Actions are disabled" is a current-configuration claim.
   # "historical" allows that phrase on the same line, or in the first paragraph
   # under a heading that contains the word. One blank line after the heading is
@@ -333,7 +340,7 @@ gates:
     legacy_context: docs-governance
     decision: path_scoped
     paths:
-      include: [AGENTS.md, README.md, LICENSE, .ai/**, .cursor/**, .windsurf/**, .codex/**, .junie/**, .devin/**, .github/copilot-instructions.md, .github/instructions/**, .github/workflows/**, .github/SECURITY.md, .github/actions/setup-python-uv/**, grafana/**, reports/**, tests/**, grafana/README.md, docs/**, scripts/docs/**, scripts/diagrams/**, scripts/schema/**, scripts/engineering/ci/pr_gate.py, scripts/engineering/qa/check_xwalk_missing_backlog.py, configs/base/**, configs/entities/**, configs/providers/**, configs/composites/**, configs/workflows/**, configs/contracts/**, configs/quality/github_required_checks.yaml, configs/quality/xwalk_missing_backlog.yaml, src/bioetl/application/pipelines/chembl/activity_transformer.py, src/bioetl/composition/factories/pipeline/_registry_manifest_chembl.py, src/bioetl/domain/schemas/**, src/bioetl/infrastructure/schemas/**, src/bioetl/domain/contracts/gold/**, tests/architecture/test_ai_runtime_governance_links.py, tests/architecture/test_check_doc_links_guardrails.py, tests/unit/scripts/qa/test_check_xwalk_missing_backlog.py, tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py, mkdocs.yml, pyproject.toml, uv.lock]
+      include: [AGENTS.md, README.md, LICENSE, .ai/**, .cursor/**, .windsurf/**, .codex/**, .junie/**, .devin/**, .github/copilot-instructions.md, .github/instructions/**, .github/workflows/**, .github/CONTRIBUTING.md, .github/SECURITY.md, .github/actions/setup-python-uv/**, grafana/**, reports/**, tests/**, grafana/README.md, docs/**, scripts/docs/**, scripts/diagrams/**, scripts/schema/**, scripts/engineering/ci/pr_gate.py, scripts/engineering/qa/check_xwalk_missing_backlog.py, configs/base/**, configs/entities/**, configs/providers/**, configs/composites/**, configs/workflows/**, configs/contracts/**, configs/quality/github_required_checks.yaml, configs/quality/xwalk_missing_backlog.yaml, src/bioetl/application/pipelines/chembl/activity_transformer.py, src/bioetl/composition/factories/pipeline/_registry_manifest_chembl.py, src/bioetl/domain/schemas/**, src/bioetl/infrastructure/schemas/**, src/bioetl/domain/contracts/gold/**, tests/architecture/test_ai_runtime_governance_links.py, tests/architecture/test_check_doc_links_guardrails.py, tests/unit/scripts/qa/test_check_xwalk_missing_backlog.py, tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py, mkdocs.yml, pyproject.toml, uv.lock]
     allowed_results: [success, not_applicable]
     not_applicable_allowed: true
     not_applicable_reason_required: true
