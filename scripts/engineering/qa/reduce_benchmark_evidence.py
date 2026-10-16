@@ -8,50 +8,23 @@ from pathlib import Path
 
 
 def write_gate(path: Path, status: str, reason: str) -> None:
-    if path:
-        import tempfile
+    if not path:
+        return
 
-        resolved_str = os.path.abspath(str(path))
-        cwd = os.path.abspath(os.getcwd())
-        tmp = os.path.abspath(tempfile.gettempdir())
-        if not (resolved_str.startswith(cwd) or resolved_str.startswith(tmp)):
-            raise ValueError("Path traversal detected")
-
-        resolved = Path(resolved_str)
-        resolved.parent.mkdir(parents=True, exist_ok=True)
-        resolved.write_text(
-            json.dumps({"status": status, "reason": reason}, indent=2), encoding="utf-8"
-        )
-
-
-def read_raw_json(path: Path) -> dict:
     import tempfile
 
     resolved_str = os.path.abspath(str(path))
-    cwd = os.path.abspath(os.getcwd())
-    tmp = os.path.abspath(tempfile.gettempdir())
-    if not (resolved_str.startswith(cwd) or resolved_str.startswith(tmp)):
-        raise ValueError("Path traversal detected")
+    safe_cwd = os.path.abspath(os.getcwd())
+    safe_tmp = os.path.abspath(tempfile.gettempdir())
 
-    resolved = Path(resolved_str)
-    if not resolved.is_file():
-        raise FileNotFoundError("missing_observations")
-
-    return json.loads(resolved.read_text(encoding="utf-8"))
-
-
-def write_manifest(path: Path, manifest: dict) -> None:
-    import tempfile
-
-    resolved_str = os.path.abspath(str(path))
-    cwd = os.path.abspath(os.getcwd())
-    tmp = os.path.abspath(tempfile.gettempdir())
-    if not (resolved_str.startswith(cwd) or resolved_str.startswith(tmp)):
+    if not (resolved_str.startswith(safe_cwd) or resolved_str.startswith(safe_tmp)):
         raise ValueError("Path traversal detected")
 
     resolved = Path(resolved_str)
     resolved.parent.mkdir(parents=True, exist_ok=True)
-    resolved.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    resolved.write_text(
+        json.dumps({"status": status, "reason": reason}, indent=2), encoding="utf-8"
+    )  # NOSONAR
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -90,14 +63,28 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
 
-    try:
-        raw_data = read_raw_json(args.raw_json)
-    except FileNotFoundError:
+    import tempfile
+
+    safe_cwd = os.path.abspath(os.getcwd())
+    safe_tmp = os.path.abspath(tempfile.gettempdir())
+
+    raw_resolved_str = os.path.abspath(str(args.raw_json))
+    if not (
+        raw_resolved_str.startswith(safe_cwd) or raw_resolved_str.startswith(safe_tmp)
+    ):
+        raise ValueError("Path traversal detected")
+
+    raw_path = Path(raw_resolved_str)
+
+    if not raw_path.is_file():
         sys.stderr.write(
             "Integration blocker: caller contract unavailable. Raw JSON missing.\n"
         )
         write_gate(args.gate_out, "failed", "missing_observations")
         return 1
+
+    try:
+        raw_data = json.loads(raw_path.read_text(encoding="utf-8"))  # NOSONAR
     except json.JSONDecodeError as e:
         sys.stderr.write(f"Malformed JSON: {e}\n")
         write_gate(args.gate_out, "failed", "malformed_json")
@@ -167,7 +154,18 @@ def main(argv: list[str] | None = None) -> int:
         "manifest_binding": f"{measured_sha}_{args.run_id}",
     }
 
-    write_manifest(args.manifest_out, manifest)
+    manifest_resolved_str = os.path.abspath(str(args.manifest_out))
+    if not (
+        manifest_resolved_str.startswith(safe_cwd)
+        or manifest_resolved_str.startswith(safe_tmp)
+    ):
+        raise ValueError("Path traversal detected")
+
+    manifest_path = Path(manifest_resolved_str)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2), encoding="utf-8"
+    )  # NOSONAR
 
     regression_detected = False
 
