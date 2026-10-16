@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 from dataclasses import dataclass, asdict
 
+
 @dataclass
 class DiagnosticManifest:
     status: str
@@ -23,16 +24,34 @@ class DiagnosticManifest:
     stderr_file: str
     missing_evidence: bool
 
+
 class PytestAbortDiagnosticAdapter:
     def __init__(self, timeout: int = 60, dump_margin: int = 5):
         self.timeout = timeout
         self.dump_margin = dump_margin
 
-    def run(self, cmd: list[str], expected_evidence: Path | None, output_dir: Path) -> DiagnosticManifest:
+    def run(
+        self, cmd: list[str], expected_evidence: Path | None, output_dir: Path
+    ) -> DiagnosticManifest:
+        out_dir_str = os.path.abspath(str(output_dir))
+        if ".." in out_dir_str:
+            raise ValueError("Invalid output path")
+        output_dir = Path(out_dir_str)
         output_dir.mkdir(parents=True, exist_ok=True)
-        stdout_path = output_dir / "stdout.log"
-        stderr_path = output_dir / "stderr.log"
-        manifest_path = output_dir / "diagnostic_manifest.json"
+
+        stdout_path = Path(os.path.abspath(str(output_dir / "stdout.log")))
+        stderr_path = Path(os.path.abspath(str(output_dir / "stderr.log")))
+        manifest_path = Path(
+            os.path.abspath(str(output_dir / "diagnostic_manifest.json"))
+        )
+
+        # Security: verify files are strictly within output_dir
+        if (
+            not str(stdout_path).startswith(str(output_dir))
+            or not str(stderr_path).startswith(str(output_dir))
+            or not str(manifest_path).startswith(str(output_dir))
+        ):
+            raise ValueError("Invalid output path traversal")
 
         env = os.environ.copy()
         env["PYTHONFAULTHANDLER"] = "1"
@@ -84,7 +103,7 @@ class PytestAbortDiagnosticAdapter:
                 signal=sig,
                 stdout_file=str(stdout_path),
                 stderr_file=str(stderr_path),
-                missing_evidence=missing_evidence
+                missing_evidence=missing_evidence,
             )
 
             with open(manifest_path, "w") as f:
@@ -92,8 +111,10 @@ class PytestAbortDiagnosticAdapter:
 
             return manifest
 
+
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--timeout", type=int, default=60)
     parser.add_argument("--dump-margin", type=int, default=5)
@@ -102,11 +123,29 @@ if __name__ == "__main__":
     parser.add_argument("cmd", nargs=argparse.REMAINDER)
     args = parser.parse_args()
 
-    adapter = PytestAbortDiagnosticAdapter(timeout=args.timeout, dump_margin=args.dump_margin)
-    evidence_path = Path(args.expected_evidence) if args.expected_evidence else None
+    adapter = PytestAbortDiagnosticAdapter(
+        timeout=args.timeout, dump_margin=args.dump_margin
+    )
+    evidence_path = None
+    if args.expected_evidence:
+        ev_str = args.expected_evidence
+        if ".." in ev_str:
+            raise ValueError("Invalid evidence path traversal")
+        evidence_path = Path(os.path.abspath(ev_str))
 
-    manifest = adapter.run(args.cmd, evidence_path, Path(args.output_dir))
-    print(f"Diagnostic Manifest: {manifest.status} (exit_code={manifest.exit_code}, signal={manifest.signal})")
+    out_dir_str = args.output_dir
+    if ".." in out_dir_str:
+        raise ValueError("Invalid output path traversal")
+    out_path = Path(os.path.abspath(out_dir_str))
+
+    manifest = adapter.run(args.cmd, evidence_path, out_path)
+    print(
+        f"Diagnostic Manifest: {manifest.status} (exit_code={manifest.exit_code}, signal={manifest.signal})"
+    )
     if manifest.missing_evidence:
         print("Warning: Missing expected evidence!")
-    sys.exit(manifest.exit_code if manifest.exit_code is not None and manifest.exit_code > 0 else 0)
+    sys.exit(
+        manifest.exit_code
+        if manifest.exit_code is not None and manifest.exit_code > 0
+        else 0
+    )

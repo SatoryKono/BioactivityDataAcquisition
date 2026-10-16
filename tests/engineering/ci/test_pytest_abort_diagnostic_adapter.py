@@ -16,6 +16,7 @@ def test_normal_exit(tmp_path: Path):
     assert manifest.exit_code == 0
     assert manifest.signal is None
 
+
 @pytest.mark.unit
 def test_nonzero_exit(tmp_path: Path):
     adapter = PytestAbortDiagnosticAdapter(timeout=5)
@@ -24,6 +25,7 @@ def test_nonzero_exit(tmp_path: Path):
     assert manifest.status == "NONZERO_EXIT"
     assert manifest.exit_code == 42
     assert manifest.signal is None
+
 
 @pytest.mark.unit
 def test_memory_error(tmp_path: Path):
@@ -35,6 +37,7 @@ def test_memory_error(tmp_path: Path):
     assert manifest.exit_code == 1
     assert manifest.signal is None
 
+
 @pytest.mark.unit
 def test_timeout(tmp_path: Path):
     adapter = PytestAbortDiagnosticAdapter(timeout=1, dump_margin=1)
@@ -44,15 +47,21 @@ def test_timeout(tmp_path: Path):
     assert manifest.exit_code is not None
     # signal might be SIGABRT or SIGKILL depending on OS
 
+
 @pytest.mark.unit
 def test_abort_signal(tmp_path: Path):
     adapter = PytestAbortDiagnosticAdapter(timeout=5)
-    cmd = [sys.executable, "-c", "import os, signal; os.kill(os.getpid(), signal.SIGABRT)"]
+    cmd = [
+        sys.executable,
+        "-c",
+        "import os, signal; os.kill(os.getpid(), signal.SIGABRT)",
+    ]
     manifest = adapter.run(cmd, None, tmp_path)
     assert manifest.status == "SIGNAL_ABORT"
     assert manifest.exit_code is not None
     assert manifest.exit_code < 0
     assert manifest.signal is not None
+
 
 @pytest.mark.unit
 def test_missing_evidence(tmp_path: Path):
