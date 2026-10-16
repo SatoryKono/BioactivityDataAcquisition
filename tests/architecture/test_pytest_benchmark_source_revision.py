@@ -14,6 +14,8 @@ from tests.benchmarks.benchmark_vcs_guard import (
     validate_benchmark_measurement_json,
 )
 
+pytestmark = pytest.mark.architecture
+
 COMMIT = "40fa210b9279c5a10568783815230a8955cc1d02"
 PACKED = "0123456789abcdef0123456789abcdef01234567"
 RUN_ID = "11111111-1111-4111-8111-111111111111"
@@ -174,3 +176,19 @@ def test_validator_rejects_bool_counts_and_unspecified_caller(tmp_path: Path) ->
     with pytest.raises(BenchmarkMeasurementContractError) as caller_error:
         validate_benchmark_measurement_json(output, search_from=root)
     assert caller_error.value.code == "blocked_provenance"
+
+
+def test_corrupt_loose_ref_does_not_fall_back_to_packed_refs(tmp_path: Path) -> None:
+    root = tmp_path / "checkout"
+    _write(root / ".git" / "HEAD", "ref: refs/heads/topic\n")
+    _write(root / ".git" / "refs" / "heads" / "topic", "corrupt\n")
+    _write(root / ".git" / "packed-refs", f"{PACKED} refs/heads/topic\n")
+    source = read_source_revision(root, allow_parent_search=False)
+    assert source.revision == "unknown"
+    assert source.revision != PACKED
+    assert source.revision_method == "blocked"
+    output = root / "measurement.json"
+    _measurement(output, PACKED)
+    with pytest.raises(BenchmarkMeasurementContractError) as error:
+        validate_benchmark_measurement_json(output, search_from=root)
+    assert error.value.code == "provenance_mismatch"

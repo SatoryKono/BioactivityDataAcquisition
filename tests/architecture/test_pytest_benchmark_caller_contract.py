@@ -227,7 +227,13 @@ def _lock_resolved_benchmark_src() -> Path | None:
     version, _url, _digest = _locked_pytest_benchmark_spec()
     import importlib.metadata as metadata
 
-    installed = metadata.version("pytest-benchmark")
+    try:
+        installed = metadata.version("pytest-benchmark")
+    except metadata.PackageNotFoundError:
+        pytest.skip(
+            "pytest-benchmark is not installed and no lockfile wheel is cached; "
+            "set BIOETL_PYTEST_BENCHMARK_FETCH_LOCK=1 to fetch the pinned wheel"
+        )
     if installed != version:
         pytest.skip(
             "installed pytest-benchmark "
@@ -275,6 +281,77 @@ def _probe_lines(log_path: Path) -> list[str]:
         for line in log_path.read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
+
+
+def test_missing_pytest_benchmark_package_skips(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import importlib.metadata as metadata
+
+    monkeypatch.delenv("BIOETL_PYTEST_BENCHMARK_FETCH_LOCK", raising=False)
+    monkeypatch.setattr(
+        "tests.architecture.test_pytest_benchmark_caller_contract._matching_cached_wheel",
+        lambda: None,
+    )
+
+    def _missing(_name: str) -> str:
+        raise metadata.PackageNotFoundError
+
+    monkeypatch.setattr(metadata, "version", _missing)
+    with pytest.raises(pytest.skip.Exception):
+        _lock_resolved_benchmark_src()
+
+
+def test_pytest_wrappers_load_guard_before_benchmark_plugin() -> None:
+    wrappers = (
+        ROOT / "scripts" / "engineering" / "dev" / "run_pytest.sh",
+        ROOT / "scripts" / "engineering" / "dev" / "run_pytest.ps1",
+    )
+    for path in wrappers:
+        text = path.read_text(encoding="utf-8")
+        guard_at = text.index("tests.benchmarks.benchmark_vcs_guard")
+        plugin_at = text.index("pytest_benchmark.plugin")
+        assert guard_at < plugin_at
+        assert "BIOETL_BENCHMARK_CALLER" in text
+        assert text.count("pytest_benchmark.plugin") == 1
+
+
+def test_guard_import_does_not_sample_the_clock() -> None:
+    env = os.environ.copy()
+    pythonpath = [str(ROOT), str(ROOT / "src")]
+    if env.get("PYTHONPATH"):
+        pythonpath.append(env["PYTHONPATH"])
+    env["PYTHONPATH"] = os.pathsep.join(pythonpath)
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            (
+                "import tests.benchmarks.benchmark_vcs_guard as guard\n"
+                "assert guard._started_at is None\n"
+            ),
+        ],
+        cwd=ROOT,
+        env=env,
+        timeout=30,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, completed.stderr
+
+
+def test_measurement_start_uses_the_bound_clock() -> None:
+    from tests.benchmarks import benchmark_vcs_guard as guard
+    from tests.helpers.clock import FIXED_TEST_TIME, FixedClock
+
+    guard.bind_measurement_clock(FixedClock(FIXED_TEST_TIME).now)
+    try:
+        guard.pytest_configure(object())  # type: ignore[arg-type]
+        assert guard.measurement_started_at() == "2026-04-28T12:00:00Z"
+        assert guard._run_block()["started_at"] == "2026-04-28T12:00:00Z"
+    finally:
+        guard.bind_measurement_clock(None)
 
 
 def test_locked_wheel_cache_stays_outside_the_repository() -> None:

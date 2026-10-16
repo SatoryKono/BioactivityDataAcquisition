@@ -47,6 +47,16 @@ function Test-BenchmarkPluginNeeded {
     return $false
 }
 
+function Enable-BenchmarkPlugin {
+    if (-not $env:BIOETL_BENCHMARK_CALLER) {
+        $env:BIOETL_BENCHMARK_CALLER = "run_pytest"
+    }
+    $script:PytestPluginArgs += @(
+        "-p", "tests.benchmarks.benchmark_vcs_guard",
+        "-p", "pytest_benchmark.plugin"
+    )
+}
+
 function Test-CoveragePluginNeeded {
     param(
         [string[]]$CandidateArgs
@@ -318,7 +328,7 @@ if ($PytestNarrow) {
         $PytestPluginArgs += @("-p", $Plugin)
     }
     if (Test-BenchmarkPluginNeeded -Args $PytestArgs) {
-        $PytestPluginArgs += @("-p", "pytest_benchmark.plugin")
+        Enable-BenchmarkPlugin
     }
 } elseif ($env:BIOETL_PYTEST_AUTOLOAD -ne "1") {
     $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = "1"
@@ -339,7 +349,7 @@ if ($PytestNarrow) {
         $PytestPluginArgs += @("-p", $Plugin)
     }
     if (Test-BenchmarkPluginNeeded -Args $PytestArgs) {
-        $PytestPluginArgs += @("-p", "pytest_benchmark.plugin")
+        Enable-BenchmarkPlugin
     }
 }
 

@@ -20,6 +20,7 @@ import os
 import re
 import sys
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -37,7 +38,9 @@ _INSTALLED = False
 _INSTALLED_BEFORE_PLUGIN = False
 _BLOCKED_PROBES: list[str] = []
 _RUN_ID = str(uuid.uuid4())
-_STARTED_AT = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+_ClockNow = Callable[[], datetime]
+_clock_now: _ClockNow | None = None
+_started_at: str | None = None
 
 
 class BenchmarkMeasurementContractError(Exception):
@@ -131,6 +134,10 @@ def _packed_ref(gitdir: Path, ref: str) -> str | None:
     return None
 
 
+class _CorruptLooseRef(Exception):
+    """An existing loose ref is present but is not a SHA or symbolic ref."""
+
+
 def _sha_at(gitdir: Path, ref: str, *, depth: int = 0) -> str | None:
     if depth > 2 or not ref or ref.startswith(("/", "\\")) or ".." in Path(ref).parts:
         return None
@@ -140,11 +147,12 @@ def _sha_at(gitdir: Path, ref: str, *, depth: int = 0) -> str | None:
         if value.lower().startswith("ref:"):
             target = value.split(":", 1)[1].strip()
             if not target or target == ref:
-                return None
+                raise _CorruptLooseRef
             return _sha_at(gitdir, target, depth=depth + 1)
         lowered = value.lower()
         if _SHA_RE.fullmatch(lowered):
             return lowered
+        raise _CorruptLooseRef
     return _packed_ref(gitdir, ref)
 
 
@@ -190,7 +198,7 @@ def read_source_revision(
         sha = head_text.lower()
         if _SHA_RE.fullmatch(sha):
             return SourceRevision(sha, "gitdir_head_file", "(detached head)")
-    except (OSError, UnicodeError):
+    except (OSError, UnicodeError, _CorruptLooseRef):
         return SourceRevision("unknown", "blocked", "(unknown)")
     return SourceRevision("unknown", "blocked", "(unknown)")
 
@@ -277,15 +285,51 @@ def _provenance_block() -> dict[str, Any]:
     }
 
 
+def bind_measurement_clock(now: _ClockNow | None) -> None:
+    """Select the run clock and clear any stamp captured earlier."""
+
+    global _clock_now, _started_at
+    _clock_now = now
+    _started_at = None
+
+
+def _system_utc_now() -> datetime:
+    from bioetl.infrastructure.time.system_clock import current_utc_time
+
+    return current_utc_time()
+
+
+def measurement_started_at() -> str:
+    """Freeze the measurement timestamp on the first call of this run."""
+
+    global _started_at
+    if _started_at is None:
+        moment = (_clock_now or _system_utc_now)()
+        if moment.tzinfo is None:
+            raise BenchmarkMeasurementContractError(
+                "blocked_provenance",
+                "measurement clock returned a naive datetime",
+            )
+        _started_at = moment.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return _started_at
+
+
 def _run_block() -> dict[str, Any]:
     caller = os.environ.get(_CALLER_ENV, "").strip() or "unspecified"
     return {
         "schema_version": _SCHEMA_VERSION,
         "id": _RUN_ID,
-        "started_at": _STARTED_AT,
+        "started_at": measurement_started_at(),
         "kind": "pytest-benchmark",
         "caller": caller,
     }
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    """Capture the run timestamp when this guard is actually loaded."""
+
+    del config
+    measurement_started_at()
 
 
 @pytest.hookimpl(tryfirst=True)

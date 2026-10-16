@@ -142,6 +142,14 @@ if [[ "${BIOETL_PYTEST_LIVE_OUTPUT:-0}" == "1" && "$QUIET_REQUESTED" != "1" ]]; 
     DEFAULT_FLAGS+=(-o console_output_style=progress)
 fi
 
+_enable_benchmark_plugin() {
+    if [[ -z "${BIOETL_BENCHMARK_CALLER:-}" ]]; then
+        export BIOETL_BENCHMARK_CALLER="run_pytest"
+    fi
+    PYTEST_PLUGIN_ARGS+=(-p tests.benchmarks.benchmark_vcs_guard)
+    PYTEST_PLUGIN_ARGS+=(-p pytest_benchmark.plugin)
+}
+
 _should_enable_benchmark_plugin() {
     local previous=""
     local arg
@@ -528,7 +536,7 @@ if [[ "$PYTEST_NARROW" == "1" ]]; then
         PYTEST_PLUGIN_ARGS+=(-p xdist.plugin)
     fi
     if _should_enable_benchmark_plugin "${PYTEST_ARGS[@]}"; then
-        PYTEST_PLUGIN_ARGS+=(-p pytest_benchmark.plugin)
+        _enable_benchmark_plugin
     fi
 elif [[ "${BIOETL_PYTEST_AUTOLOAD:-0}" != "1" ]]; then
     # The mixed Windows+WSL checkout can make third-party pytest entrypoint
@@ -558,7 +566,7 @@ elif [[ "${BIOETL_PYTEST_AUTOLOAD:-0}" != "1" ]]; then
         PYTEST_PLUGIN_ARGS+=(-p "$plugin")
     done
     if _should_enable_benchmark_plugin "${PYTEST_ARGS[@]}"; then
-        PYTEST_PLUGIN_ARGS+=(-p pytest_benchmark.plugin)
+        _enable_benchmark_plugin
     fi
 fi
 
