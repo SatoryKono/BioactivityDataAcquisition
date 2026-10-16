@@ -147,10 +147,34 @@ _enable_benchmark_plugin() {
         export BIOETL_BENCHMARK_CALLER="run_pytest"
     fi
     PYTEST_PLUGIN_ARGS+=(-p tests.benchmarks.benchmark_vcs_guard)
-    PYTEST_PLUGIN_ARGS+=(-p pytest_benchmark.plugin)
+    PYTEST_PLUGIN_ARGS+=(-p benchmark)
+}
+
+_requests_explicit_benchmark_plugin() {
+    local previous=""
+    local arg
+    for arg in "$@"; do
+        case "$arg" in
+            -pbenchmark|-p=benchmark|-ppytest_benchmark|-p=pytest_benchmark|-ppytest_benchmark.plugin|-p=pytest_benchmark.plugin|-ppytest-benchmark|-p=pytest-benchmark|--plugins=benchmark|--plugins=pytest_benchmark|--plugins=pytest_benchmark.plugin|--plugins=pytest-benchmark)
+                return 0
+                ;;
+        esac
+        if [[ "$previous" == "-p" || "$previous" == "--plugins" ]]; then
+            case "$arg" in
+                benchmark|pytest_benchmark|pytest_benchmark.plugin|pytest-benchmark)
+                    return 0
+                    ;;
+            esac
+        fi
+        previous="$arg"
+    done
+    return 1
 }
 
 _should_enable_benchmark_plugin() {
+    if _requests_explicit_benchmark_plugin "$@"; then
+        return 0
+    fi
     local previous=""
     local arg
     for arg in "$@"; do
@@ -568,6 +592,10 @@ elif [[ "${BIOETL_PYTEST_AUTOLOAD:-0}" != "1" ]]; then
     if _should_enable_benchmark_plugin "${PYTEST_ARGS[@]}"; then
         _enable_benchmark_plugin
     fi
+fi
+
+if [[ "$PYTEST_NARROW" != "1" && "${BIOETL_PYTEST_AUTOLOAD:-0}" == "1" ]] && _should_enable_benchmark_plugin "${PYTEST_ARGS[@]}"; then
+    _enable_benchmark_plugin
 fi
 
 if [[ "${BIOETL_SKIP_PREFLIGHT:-0}" != "1" && "${BIOETL_SKIP_SETUP_PLUGINS:-0}" != "1" && -f "scripts/ops/launchers/codex/setup_plugins.sh" ]]; then

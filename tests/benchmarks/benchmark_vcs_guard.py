@@ -165,22 +165,31 @@ class _CorruptLooseRef(Exception):
 
 
 def _sha_at(gitdir: Path, ref: str, *, depth: int = 0) -> str | None:
-    """Read a loose ref, using packed-refs only when that loose ref is absent."""
+    """Read a loose ref.
+
+    packed-refs is used only when no loose entry exists. An existing entry that
+    cannot be read, including a broken or looping symlink, is corrupt.
+    """
     if depth > 2 or not ref or ref.startswith(("/", "\\")) or ".." in Path(ref).parts:
         return None
     ref_path = gitdir / ref
-    if ref_path.is_file():
+    try:
+        ref_path.lstat()
+    except OSError:
+        return _packed_ref(gitdir, ref)
+    try:
         value = ref_path.read_text(encoding="utf-8").strip()
-        if value.lower().startswith("ref:"):
-            target = value.split(":", 1)[1].strip()
-            if not target or target == ref:
-                raise _CorruptLooseRef
-            return _sha_at(gitdir, target, depth=depth + 1)
-        lowered = value.lower()
-        if _SHA_RE.fullmatch(lowered):
-            return lowered
-        raise _CorruptLooseRef
-    return _packed_ref(gitdir, ref)
+    except (OSError, RuntimeError, UnicodeError) as exc:
+        raise _CorruptLooseRef from exc
+    if value.lower().startswith("ref:"):
+        target = value.split(":", 1)[1].strip()
+        if not target or target == ref:
+            raise _CorruptLooseRef
+        return _sha_at(gitdir, target, depth=depth + 1)
+    lowered = value.lower()
+    if _SHA_RE.fullmatch(lowered):
+        return lowered
+    raise _CorruptLooseRef
 
 
 def _common_gitdir(gitdir: Path) -> Path | None:

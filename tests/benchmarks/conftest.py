@@ -57,7 +57,12 @@ def _benchmark_plugin_active(config: pytest.Config) -> bool:
     pluginmanager = config.pluginmanager
     return any(
         pluginmanager.hasplugin(name)
-        for name in ("benchmark", "pytest_benchmark", "pytest-benchmark")
+        for name in (
+            "benchmark",
+            "pytest_benchmark",
+            "pytest_benchmark.plugin",
+            "pytest-benchmark",
+        )
     )
 
 

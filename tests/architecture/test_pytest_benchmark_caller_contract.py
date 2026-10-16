@@ -350,10 +350,17 @@ def test_pytest_wrappers_load_guard_before_benchmark_plugin() -> None:
     for path in wrappers:
         text = path.read_text(encoding="utf-8")
         guard_at = text.index("tests.benchmarks.benchmark_vcs_guard")
-        plugin_at = text.index("pytest_benchmark.plugin")
+        if path.suffix == ".sh":
+            plugin_at = text.index("PYTEST_PLUGIN_ARGS+=(-p benchmark)")
+            assert text.count("PYTEST_PLUGIN_ARGS+=(-p benchmark)") == 1
+            assert "(-p pytest_benchmark.plugin)" not in text
+        else:
+            plugin_at = text.index('"-p", "benchmark"')
+            assert text.count('"-p", "benchmark"') == 1
+            assert '"-p", "pytest_benchmark.plugin"' not in text
         assert guard_at < plugin_at
         assert "BIOETL_BENCHMARK_CALLER" in text
-        assert text.count("pytest_benchmark.plugin") == 1
+        assert "BIOETL_PYTEST_AUTOLOAD" in text
         if path.suffix == ".ps1":
             assert "[string[]]$Args" not in text
             assert '[Alias("Args")]' in text

@@ -40,6 +40,32 @@ function Test-BenchmarkPluginNeeded {
         if ($Arg -in @("--benchmark-only", "--benchmark-compare")) {
             return $true
         }
+        if (
+            $Arg -in @(
+                "-pbenchmark",
+                "-p=benchmark",
+                "-ppytest_benchmark",
+                "-p=pytest_benchmark",
+                "-ppytest_benchmark.plugin",
+                "-p=pytest_benchmark.plugin",
+                "-ppytest-benchmark",
+                "-p=pytest-benchmark"
+            ) -or
+            $Arg -like "--plugins=benchmark" -or
+            $Arg -like "--plugins=pytest_benchmark" -or
+            $Arg -like "--plugins=pytest_benchmark.plugin" -or
+            $Arg -like "--plugins=pytest-benchmark"
+        ) {
+            return $true
+        }
+        if ($PreviousArg -in @("-p", "--plugins") -and $Arg -in @(
+            "benchmark",
+            "pytest_benchmark",
+            "pytest_benchmark.plugin",
+            "pytest-benchmark"
+        )) {
+            return $true
+        }
         if ($PreviousArg -eq "-m" -and $Arg -like "*benchmark*") {
             return $true
         }
@@ -54,7 +80,7 @@ function Enable-BenchmarkPlugin {
     }
     $script:PytestPluginArgs += @(
         "-p", "tests.benchmarks.benchmark_vcs_guard",
-        "-p", "pytest_benchmark.plugin"
+        "-p", "benchmark"
     )
 }
 
@@ -357,6 +383,10 @@ if ($PytestNarrow) {
     if (Test-BenchmarkPluginNeeded -Args $PytestArgs) {
         Enable-BenchmarkPlugin
     }
+}
+
+if (-not $PytestNarrow -and $env:BIOETL_PYTEST_AUTOLOAD -eq "1" -and (Test-BenchmarkPluginNeeded -Args $PytestArgs)) {
+    Enable-BenchmarkPlugin
 }
 
 if ($env:OS -eq "Windows_NT" -and -not (Test-PytestCacheDirSpecified -Args $PytestArgs)) {
