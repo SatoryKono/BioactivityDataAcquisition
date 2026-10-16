@@ -758,8 +758,6 @@ def _measurement_context(
     environment = context.get("environment")
     if not isinstance(dataset, str) or not dataset.strip():
         return "incomplete_evidence"
-    if dataset == "synthetic":
-        return "synthetic_measurement"
     if environment != "github-actions":
         return "unproven_environment"
     bound = [
@@ -958,6 +956,13 @@ def _compare_measurements(
     )
 
 
+def _commit_is_clean(commit_info: object, revision: str) -> bool:
+    if not isinstance(commit_info, dict) or commit_info.get("id") != revision:
+        return False
+    dirty = commit_info.get("dirty", "missing")
+    return dirty in {None, False}
+
+
 def _provenance(
     payload: Mapping[str, object],
     *,
@@ -985,10 +990,7 @@ def _provenance(
         return "checkout_sha_mismatch"
     if revision != head:
         return "wrong_sha"
-    commit_info = payload.get("commit_info")
-    if not isinstance(commit_info, dict) or commit_info.get("id") != revision:
-        return "incomplete_evidence"
-    if "dirty" not in commit_info or commit_info.get("dirty") not in {None, False}:
+    if not _commit_is_clean(payload.get("commit_info"), revision):
         return "incomplete_evidence"
     identity, identity_reason = _github_identity(env)
     if identity is None:
@@ -1140,6 +1142,44 @@ def _candidate_summary(
     }
 
 
+def _propose_initial_candidate(
+    args: argparse.Namespace,
+    root: Path,
+    measurements: list[_Measurement],
+    identity: Mapping[str, str],
+    *,
+    measured_sha: str,
+    raw_bytes: bytes,
+    raw_sha: str,
+) -> int:
+    from scripts.engineering.common.repo_paths import write_text_confined
+
+    stored = _store_raw_evidence(args, root, measured_sha, raw_sha, raw_bytes)
+    if stored is not None:
+        return _emit_reducer(args, root, "failed", stored, {"raw_sha256": raw_sha})
+    scopes = sorted({item[1] for item in measurements})
+    write_text_confined(
+        args.evidence_dir / measured_sha / raw_sha / "benchmark-summary-candidate.json",
+        _dump(
+            _candidate_summary(
+                measurements,
+                identity,
+                measured_sha=measured_sha,
+                raw_sha=raw_sha,
+                scopes=scopes,
+            )
+        ),
+        root=root,
+    )
+    return _emit_reducer(
+        args,
+        root,
+        "failed",
+        "insufficient_baseline",
+        {"measured_sha": measured_sha, "raw_sha256": raw_sha},
+    )
+
+
 def _finish_reduction(
     args: argparse.Namespace,
     root: Path,
@@ -1154,18 +1194,30 @@ def _finish_reduction(
 
     baseline_document = _read_baseline_document(args.baseline, root)
     if baseline_document == "insufficient_baseline":
-        return _emit_reducer(
+        return _propose_initial_candidate(
             args,
             root,
-            "failed",
-            baseline_document,
-            {"measured_sha": measured_sha, "raw_sha256": raw_sha},
+            measurements,
+            identity,
+            measured_sha=measured_sha,
+            raw_bytes=raw_bytes,
+            raw_sha=raw_sha,
         )
     if isinstance(baseline_document, str):
         return _emit_reducer(
             args, root, "failed", baseline_document, {"raw_sha256": raw_sha}
         )
     loaded = _load_baseline(baseline_document)
+    if loaded == "insufficient_baseline":
+        return _propose_initial_candidate(
+            args,
+            root,
+            measurements,
+            identity,
+            measured_sha=measured_sha,
+            raw_bytes=raw_bytes,
+            raw_sha=raw_sha,
+        )
     if isinstance(loaded, str):
         return _emit_reducer(
             args,

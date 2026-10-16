@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-16T18:07:53.658564+00:00",
+  "generated_at": "2026-10-16T18:27:56.016856+00:00",
   "summary": {
     "total_scripts": 647,
     "status_counts": {
@@ -11120,7 +11120,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 279,
+      "reference_count": 280,
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/local/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -14874,7 +14874,7 @@
         },
         {
           "path": "tests/architecture/test_reduce_benchmark_evidence.py",
-          "line": 596,
+          "line": 626,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.generate_hotspot_degradation_report import ("
         }

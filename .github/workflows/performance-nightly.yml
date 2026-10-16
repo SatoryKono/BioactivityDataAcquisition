@@ -26,8 +26,8 @@ jobs:
           uv-extras: "dev tracing performance"
 
       # Suites under tests/benchmarks and tests/performance are deterministic
-      # fixtures. The reducer rejects dataset "synthetic" and does not relabel
-      # them. The accepted fixture dataset id is locked-nightly.
+      # fixtures. Their dataset id is synthetic. The reducer compares it and
+      # may write a proposed candidate; CI does not adopt the baseline.
       - name: Run all performance benchmarks
         run: |
           mkdir -p reports/performance

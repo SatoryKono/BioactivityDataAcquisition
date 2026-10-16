@@ -408,16 +408,46 @@ def test_unknown_run_and_ancestry_do_not_pass(tmp_path: Path) -> None:
     assert _gate(ancestor_gate)["reason"] == "wrong_sha"
 
 
-def test_synthetic_dataset_cannot_pass(tmp_path: Path) -> None:
-    result, gate, _manifest = _invoke(
-        tmp_path,
+def test_synthetic_fixture_can_pass_after_adoption(tmp_path: Path) -> None:
+    baseline = _baseline(100)
+    baseline["dataset"] = "synthetic"
+    baseline["tests"][0]["dataset"] = "synthetic"
+    adopted_dir = tmp_path / "adopted"
+    adopted_dir.mkdir()
+    adopted, adopted_gate, _manifest = _invoke(
+        adopted_dir,
         json.dumps(_measurement(90, dataset="synthetic")).encode(),
+        baseline=baseline,
     )
-    assert result.returncode == 1, result.stderr
-    assert _gate(gate)["reason"] == "synthetic_measurement"
-    assert not (tmp_path / "evidence").exists() or not list(
-        (tmp_path / "evidence").rglob("benchmark-summary-candidate.json")
+    assert adopted.returncode == 0, adopted.stderr
+    assert _gate(adopted_gate)["reason"] == "improvement"
+    assert _gate(adopted_gate)["dataset"] == "synthetic"
+
+    absent = {
+        "adoption": "absent",
+        "reason": "no_accepted_measurement",
+        "schema_version": 1,
+        "tests": [],
+        "threshold": "0.1",
+    }
+    initial_dir = tmp_path / "initial"
+    initial_dir.mkdir()
+    raw = json.dumps(_measurement(90, dataset="synthetic")).encode()
+    initial, initial_gate, _manifest = _invoke(initial_dir, raw, baseline=absent)
+    assert initial.returncode == 1, initial.stderr
+    assert _gate(initial_gate)["reason"] == "insufficient_baseline"
+    stored = list((initial_dir / "evidence").rglob("benchmark-summary-candidate.json"))
+    assert len(stored) == 1
+    candidate = json.loads(stored[0].read_text(encoding="utf-8"))
+    assert candidate["adoption"] == "proposed"
+    assert candidate["dataset"] == "synthetic"
+    assert candidate["tests"][0]["mean"] == "90"
+    measurements = list((initial_dir / "evidence").rglob("benchmark-measurements.json"))
+    assert measurements[0].read_bytes() == raw
+    committed = json.loads(
+        (initial_dir / "benchmark-summary.json").read_text(encoding="utf-8")
     )
+    assert committed["adoption"] == "absent"
 
 
 def test_hotspot_gate_rejects_missing_summary_and_missing_report(
