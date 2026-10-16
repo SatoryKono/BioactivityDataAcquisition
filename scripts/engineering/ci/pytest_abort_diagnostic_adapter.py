@@ -750,6 +750,23 @@ def _windows_pid_alive(pid: int) -> bool:
     return code.value == 259
 
 
+class _CliUsageError(Exception):
+    """Argparse rejected the invocation without stopping the interpreter."""
+
+    def __init__(self, code: int) -> None:
+        super().__init__(str(code))
+        self.code = code
+
+
+class _CliParser(argparse.ArgumentParser):
+    """Report usage failures as ``_CliUsageError`` instead of ``SystemExit``."""
+
+    def exit(self, status: int = 0, message: str | None = None) -> None:
+        if message:
+            self._print_message(message, sys.stderr)
+        raise _CliUsageError(int(status))
+
+
 def _parse_cli(argv: list[str]) -> tuple[argparse.Namespace, list[str]] | int:
     if "--" not in argv:
         sys.stderr.write("missing -- separator before the command\n")
@@ -759,7 +776,7 @@ def _parse_cli(argv: list[str]) -> tuple[argparse.Namespace, list[str]] | int:
     if not command or any(not token.strip() for token in command):
         sys.stderr.write("empty command\n")
         return 2
-    parser = argparse.ArgumentParser(prog="pytest_abort_diagnostic_adapter")
+    parser = _CliParser(prog="pytest_abort_diagnostic_adapter")
     parser.add_argument("--timeout", required=True)
     parser.add_argument("--dump-margin", required=True)
     parser.add_argument("--expected-evidence", required=True)
@@ -767,9 +784,8 @@ def _parse_cli(argv: list[str]) -> tuple[argparse.Namespace, list[str]] | int:
     parser.add_argument("--base", default="")
     try:
         args = parser.parse_args(argv[:split])
-    except SystemExit as exc:
-        code = exc.code
-        return code if isinstance(code, int) else 2
+    except _CliUsageError as exc:
+        return exc.code
     return args, command
 
 

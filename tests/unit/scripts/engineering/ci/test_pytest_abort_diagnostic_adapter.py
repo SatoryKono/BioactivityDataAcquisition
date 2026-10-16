@@ -84,9 +84,15 @@ def _disk_manifest(base: Path) -> dict[str, object]:
 
 
 def _cli(base: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
+    """Run the module from a non-repo cwd, as CI does not export PYTHONPATH."""
+    env = os.environ.copy()
+    root = str(_repo_root())
+    existing = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = root if not existing else os.pathsep.join((root, existing))
     return subprocess.run(
         [sys.executable, "-m", _ADAPTER, *args],
         cwd=base,
+        env=env,
         capture_output=True,
         text=True,
         check=False,
