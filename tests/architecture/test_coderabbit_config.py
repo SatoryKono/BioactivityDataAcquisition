@@ -17,11 +17,11 @@ import yaml
 from scripts.engineering.ci.pr_gate import classify_changes, load_catalog
 from scripts.engineering.ci.pr_lane_results import affected_pytest_targets
 
-pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
+pytestmark = pytest.mark.architecture
 
-ROOT = Path(__file__).resolve().parents[6]
+ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = ROOT / "tests/fixtures/contracts/coderabbit-schema.v2.json"
-TARGET = "tests/unit/repo_backed/scripts/engineering/ci/test_coderabbit_config.py"
+TARGET = "tests/architecture/test_coderabbit_config.py"
 
 
 def test_coderabbit_configuration_matches_official_schema() -> None:
