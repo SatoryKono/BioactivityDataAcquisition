@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-16T17:05:52.199705+00:00",
+  "generated_at": "2026-10-16T17:31:55.653118+00:00",
   "summary": {
     "total_scripts": 648,
     "status_counts": {
-      "active": 335,
-      "supporting": 313
+      "active": 334,
+      "supporting": 314
     },
     "reference_group_coverage": {
       "agents": 11,
@@ -10428,7 +10428,7 @@
     {
       "path": "scripts/engineering/ci/pytest_event_journal.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 4,
       "references": [
@@ -10456,7 +10456,11 @@
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_event_journal import _group_receipts"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the pytest receipt helper imported by run_pytest_resilient.py and verified from the serial-coverage job. The resilient runner stays the public entrypoint; do not promote this module to active or raise active_script_count_max."
     },
     {
       "path": "scripts/engineering/ci/quality_integral_gate.py",
