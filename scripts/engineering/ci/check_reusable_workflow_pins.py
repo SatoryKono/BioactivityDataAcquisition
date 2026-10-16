@@ -7,6 +7,7 @@ import re
 REGISTRY_PATH = "configs/quality/reusable_action_pins.yaml"
 WORKFLOW_PATHS = [".github/workflows/pr-required.yml"]
 
+
 def check_pins(registry_path, workflow_paths):
     if not os.path.exists(registry_path):
         print(f"Error: Registry file not found at {registry_path}")
@@ -55,18 +56,25 @@ def check_pins(registry_path, workflow_paths):
                     action_sha = parts[1]
 
                     if not sha_pattern.match(action_sha):
-                        print(f"Error: External action {uses} is not pinned to a full 40-hex SHA")
+                        print(
+                            f"Error: External action {uses} is not pinned to a full 40-hex SHA"
+                        )
                         all_valid = False
                         continue
 
                     if action_path not in allowed_pins:
-                        print(f"Error: Action {action_path} is not in the allowed pins registry")
+                        print(
+                            f"Error: Action {action_path} is not in the allowed pins registry"
+                        )
                         all_valid = False
                     elif allowed_pins[action_path] != action_sha:
-                        print(f"Error: Action {action_path} is pinned to {action_sha}, but registry requires {allowed_pins[action_path]}")
+                        print(
+                            f"Error: Action {action_path} is pinned to {action_sha}, but registry requires {allowed_pins[action_path]}"
+                        )
                         all_valid = False
 
     return all_valid
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -77,6 +85,7 @@ def main():
         if not check_pins(REGISTRY_PATH, WORKFLOW_PATHS):
             sys.exit(1)
         print("Pin check passed.")
+
 
 if __name__ == "__main__":
     main()

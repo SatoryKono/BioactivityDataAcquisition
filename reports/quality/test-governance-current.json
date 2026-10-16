@@ -1001,14 +1001,7 @@
     }
   },
   "assertless_total_candidates": 85,
-  "budget_violations": [
-    {
-      "actual": 4,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1182,13 +1175,8 @@
     ]
   },
   "intentional_no_exception_contract": 85,
-  "markerless_examples": [
-    "tests/engineering/ci/test_check_reusable_workflow_pins.py:20",
-    "tests/engineering/ci/test_check_reusable_workflow_pins.py:42",
-    "tests/engineering/ci/test_check_reusable_workflow_pins.py:64",
-    "tests/engineering/ci/test_check_reusable_workflow_pins.py:86"
-  ],
-  "markerless_test_functions": 4,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2037,13 +2025,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/engineering/ci/test_check_reusable_workflow_pins.py:20",
-      "tests/engineering/ci/test_check_reusable_workflow_pins.py:42",
-      "tests/engineering/ci/test_check_reusable_workflow_pins.py:64",
-      "tests/engineering/ci/test_check_reusable_workflow_pins.py:86"
-    ],
-    "markerless_test_functions": 4,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2111,7 +2094,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "ac9952cb56dd0a2ec9a7677c7a07aac38fb59ab3ec1ce77d3ff85277753a2ae1",
+  "source_tree_sha256": "ad2ec684eeec5c4c3e2693c8573052873d6398a5b2c9a3ac43163de1809764d6",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2120,13 +2103,8 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 85,
-    "markerless_examples": [
-      "tests/engineering/ci/test_check_reusable_workflow_pins.py:20",
-      "tests/engineering/ci/test_check_reusable_workflow_pins.py:42",
-      "tests/engineering/ci/test_check_reusable_workflow_pins.py:64",
-      "tests/engineering/ci/test_check_reusable_workflow_pins.py:86"
-    ],
-    "markerless_test_functions": 4,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0

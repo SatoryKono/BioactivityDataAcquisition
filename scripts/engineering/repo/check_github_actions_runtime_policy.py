@@ -210,9 +210,7 @@ def _parsed_uses_reference(line: str) -> tuple[str, str] | None:
     return uses_ref, uses_ref.partition("@")[0]
 
 
-_OWN_REPO_WORKFLOW_PREFIX = (
-    "SatoryKono/BioactivityDataAcquisition/.github/workflows/"
-)
+_OWN_REPO_WORKFLOW_PREFIX = "SatoryKono/BioactivityDataAcquisition/.github/workflows/"
 
 
 def _is_own_repo_reusable_workflow(action: str) -> bool:
