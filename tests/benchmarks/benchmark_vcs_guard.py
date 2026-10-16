@@ -190,7 +190,7 @@ def read_source_revision(
         sha = head_text.lower()
         if _SHA_RE.fullmatch(sha):
             return SourceRevision(sha, "gitdir_head_file", "(detached head)")
-    except OSError:
+    except (OSError, UnicodeError):
         return SourceRevision("unknown", "blocked", "(unknown)")
     return SourceRevision("unknown", "blocked", "(unknown)")
 
