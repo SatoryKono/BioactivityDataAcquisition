@@ -214,16 +214,15 @@ def _bronze_sidecar_bytes(prepared: BronzeWritePrepared, *, save_json: bool) -> 
     legacy_bytes = orjson.dumps(prepared.metadata, option=orjson.OPT_SORT_KEYS)
     if raw == legacy_bytes:
         return raw  # Legacy sidecars never acquire cleanup ownership on retry.
-    return (
-        raw
-        if _same_existing_association(
-            raw,
-            prepared,
-            payload_digest,
-            copy_digest.hexdigest() if save_json else None,
-        )
-        else new_bytes
-    )
+    requested_copy_digest = copy_digest.hexdigest() if save_json else None
+    if _same_existing_association(
+        raw,
+        prepared,
+        payload_digest,
+        requested_copy_digest,
+    ):
+        return raw
+    return new_bytes
 
 
 def _same_existing_association(

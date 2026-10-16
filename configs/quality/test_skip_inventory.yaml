@@ -319,6 +319,16 @@ entries:
     vcr_related: false
     review_date: "2026-10-14"
     rationale: POSIX pinned handles, flock and symlink capability are required for synthetic journal destruction; Windows refusal is tested separately without skips.
+  - path: tests/integration/infrastructure/storage/test_bronze_group_association.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-storage"
+    linked_issue: "#12102"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 2
+    vcr_related: false
+    review_date: "2026-10-16"
+    rationale: POSIX pinned directory and flock capability are required for the dry-run mutation guard and the readonly journal refusal; Windows lock cases run without these skips.
   - path: tests/integration/infrastructure/storage/test_bronze_writer_cleanup.py
     suite: integration
     category: conditional_environment_guard
