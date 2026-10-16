@@ -33,10 +33,27 @@ class PytestAbortDiagnosticAdapter:
     def run(
         self, cmd: list[str], expected_evidence: Path | None, output_dir: Path
     ) -> DiagnosticManifest:
+        # SonarCloud Path Traversal prevention
+        cwd_str = os.path.abspath(str(Path.cwd()))
         out_dir_str = os.path.abspath(str(output_dir))
+
+        # Strictly require output_dir to be under the current working directory,
+        # or under /tmp for test executions.
+        if not (out_dir_str.startswith(cwd_str) or out_dir_str.startswith("/tmp/")):
+            raise ValueError(
+                "output_dir must be within current working directory or /tmp/"
+            )
+
         if ".." in out_dir_str:
             raise ValueError("Invalid output path")
-        output_dir = Path(out_dir_str)
+
+        safe_path = os.path.realpath(out_dir_str)
+        if not (safe_path.startswith(cwd_str) or safe_path.startswith("/tmp/")):
+            raise ValueError(
+                "output_dir must be within current working directory or /tmp/"
+            )
+
+        output_dir = Path(safe_path)
         output_dir.mkdir(parents=True, exist_ok=True)
 
         stdout_path = Path(os.path.abspath(str(output_dir / "stdout.log")))
