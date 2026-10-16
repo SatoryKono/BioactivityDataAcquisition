@@ -1170,11 +1170,11 @@
     "max_group_size": 0,
     "scan_root": "tests/fixtures",
     "scope_file_counts": {
-      "fixture": 84,
+      "fixture": 85,
       "golden": 30,
       "vcr": 344
     },
-    "total_files": 458,
+    "total_files": 459,
     "tracked_extensions": [
       ".json",
       ".yaml",
@@ -1183,9 +1183,9 @@
   },
   "intentional_no_exception_contract": 85,
   "markerless_examples": [
-    "tests/architecture/ci/test_event_journal.py:7",
-    "tests/architecture/ci/test_event_journal.py:32",
-    "tests/architecture/ci/test_event_journal.py:50"
+    "tests/architecture/ci/test_event_journal.py:6",
+    "tests/architecture/ci/test_event_journal.py:42",
+    "tests/architecture/ci/test_event_journal.py:74"
   ],
   "markerless_test_functions": 3,
   "parse_errors": [],
@@ -2025,11 +2025,11 @@
       "max_group_size": 0,
       "scan_root": "tests/fixtures",
       "scope_file_counts": {
-        "fixture": 84,
+        "fixture": 85,
         "golden": 30,
         "vcr": 344
       },
-      "total_files": 458,
+      "total_files": 459,
       "tracked_extensions": [
         ".json",
         ".yaml",
@@ -2037,9 +2037,9 @@
       ]
     },
     "markerless_examples": [
-      "tests/architecture/ci/test_event_journal.py:7",
-      "tests/architecture/ci/test_event_journal.py:32",
-      "tests/architecture/ci/test_event_journal.py:50"
+      "tests/architecture/ci/test_event_journal.py:6",
+      "tests/architecture/ci/test_event_journal.py:42",
+      "tests/architecture/ci/test_event_journal.py:74"
     ],
     "markerless_test_functions": 3,
     "parse_errors": [],
@@ -2059,8 +2059,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3050,
-      "test_python_file_count": 3286,
+      "test_glob_file_count": 3051,
+      "test_python_file_count": 3287,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2101,13 +2101,13 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 3050,
-    "total_test_functions": 29994,
+    "total_test_files": 3051,
+    "total_test_functions": 30000,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "04e43dd3c92690d5d7ff7ebab2de43eee3a2d74dfaff6d2a4d4b0640514c1d95",
+  "source_tree_sha256": "3e445c99e42fc607b7a2acd2eb18c9027c2690f61c8586679e32b349a52e8c65",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2117,9 +2117,9 @@
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 85,
     "markerless_examples": [
-      "tests/architecture/ci/test_event_journal.py:7",
-      "tests/architecture/ci/test_event_journal.py:32",
-      "tests/architecture/ci/test_event_journal.py:50"
+      "tests/architecture/ci/test_event_journal.py:6",
+      "tests/architecture/ci/test_event_journal.py:42",
+      "tests/architecture/ci/test_event_journal.py:74"
     ],
     "markerless_test_functions": 3,
     "refined_assertless_tests": 0,
@@ -2131,8 +2131,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3050,
-    "test_python_file_count": 3286,
+    "test_glob_file_count": 3051,
+    "test_python_file_count": 3287,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2173,8 +2173,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 3050,
-  "total_test_functions": 29994,
+  "total_test_files": 3051,
+  "total_test_functions": 30000,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
