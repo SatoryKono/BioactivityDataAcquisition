@@ -117,7 +117,7 @@ async def run_bronze_post_write_actions(
         run_id=request.run_id,
         run_type=request.run_type,
     )
-    if host.save_json:
+    if host.save_json and write_artifacts.json_copy_allowed:
         await host._write_json_copy(
             prepared.record_list,
             request.provider,
@@ -162,7 +162,7 @@ async def write_bronze_data_and_sidecar(
 ) -> BronzeWriteArtifacts:
     """Write compressed JSONL data and metadata sidecar to disk."""
 
-    def _write_task() -> tuple[int, int]:
+    def _write_task() -> tuple[int, int, bool]:
         count, size = host._write_atomic_stream(
             prepared.records_iter,
             prepared.full_path,
@@ -176,13 +176,17 @@ async def write_bronze_data_and_sidecar(
                 f"{prepared.meta_path}"
             ),
         )
-        return count, size
+        association = orjson.loads(meta_bytes).get("cleanup_association")
+        # Keep the original attestation: retries cannot add an unattested copy.
+        copy_allowed = association is None or association["copy_sha256"] is not None
+        return count, size, copy_allowed
 
-    record_count, uncompressed_size = await asyncio.to_thread(_write_task)
+    record_count, uncompressed_size, copy_allowed = await asyncio.to_thread(_write_task)
     return build_bronze_write_artifacts(
         full_path=prepared.full_path,
         record_count=record_count,
         uncompressed_size=uncompressed_size,
+        json_copy_allowed=copy_allowed,
     )
 
 
@@ -211,12 +215,22 @@ def _bronze_sidecar_bytes(prepared: BronzeWritePrepared, *, save_json: bool) -> 
     if raw == legacy_bytes:
         return raw  # Legacy sidecars never acquire cleanup ownership on retry.
     return (
-        raw if _same_existing_association(raw, prepared, payload_digest) else new_bytes
+        raw
+        if _same_existing_association(
+            raw,
+            prepared,
+            payload_digest,
+            copy_digest.hexdigest() if save_json else None,
+        )
+        else new_bytes
     )
 
 
 def _same_existing_association(
-    raw: bytes, prepared: BronzeWritePrepared, payload_digest: str
+    raw: bytes,
+    prepared: BronzeWritePrepared,
+    payload_digest: str,
+    requested_copy_digest: str | None,
 ) -> bool:
     try:
         existing = orjson.loads(raw)
@@ -232,6 +246,12 @@ def _same_existing_association(
         isinstance(copy_digest, str)
         and len(copy_digest) == 64
         and all(char in "0123456789abcdef" for char in copy_digest)
+    ):
+        return False
+    if (
+        requested_copy_digest is not None
+        and copy_digest is not None
+        and copy_digest != requested_copy_digest
     ):
         return False
     expected = {

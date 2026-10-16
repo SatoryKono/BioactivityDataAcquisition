@@ -453,6 +453,30 @@ def _refresh_targeted_coverage_closeout() -> None:
     _write_text_atomically(path, json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
 
+def _application_core_debt_outcome(
+    metrics: dict[str, float], previous: dict[str, float], baseline: dict[str, float]
+) -> str:
+    """Compare each debt metric monotonically, with regression taking priority.
+
+    Historical snapshots can omit metrics. Use their recorded baseline where
+    available, otherwise the count contract's zero floor; coverage requires a
+    recorded reference. Missing evidence must not invent a coverage improvement.
+    """
+    improved = False
+    for key, value in metrics.items():
+        reference = previous.get(key, baseline.get(key))
+        if reference is None:
+            if not key.endswith("count"):
+                raise SystemExit(f"Missing prior coverage reference: {key}")
+            reference = 0
+        delta = value - reference
+        debt_delta = delta if key.endswith("count") else -delta
+        if debt_delta > 0:
+            return "current_inventory_regressed"
+        improved |= debt_delta < 0
+    return "improved" if improved else "unchanged"
+
+
 def _refresh_application_core_closeout(*, check_only: bool) -> None:
     """Bind the live closeout view to inventory without inventing measurements."""
     path = ROOT / "reports/quality/issue-5272-application-core-coverage-closeout.json"
@@ -473,7 +497,7 @@ def _refresh_application_core_closeout(*, check_only: bool) -> None:
         for row in inventory["modules"]
     )
     if (
-        payload["current_metrics"] == metrics
+        payload.get("current_metrics") == metrics
         and payload["parent_epic_status"]["remaining_below_85_module_count"]
         == below_floor
         and payload.get("current_binding_refresh", {}).get("source_tree_sha256")
@@ -482,6 +506,9 @@ def _refresh_application_core_closeout(*, check_only: bool) -> None:
         return
     if check_only:
         raise SystemExit("Application-core closeout differs from accepted inventory")
+    outcome = _application_core_debt_outcome(
+        metrics, payload.get("current_metrics", {}), payload["baseline_metrics"]
+    )
     previous = {
         key: payload[key]
         for key in (
@@ -500,16 +527,16 @@ def _refresh_application_core_closeout(*, check_only: bool) -> None:
         "remaining_below_85_module_count": below_floor,
         "reason": "Live accepted-inventory floor count; this binding does not close the parent epic.",
     }
-    regressed = any(
-        value for key, value in metrics.items() if key.endswith("count")
-    ) or (
-        core["covered_line_percent"]
-        <= payload["baseline_metrics"]["application_core_covered_line_percent"]
+    closeable = (
+        outcome != "current_inventory_regressed"
+        and not any(value for key, value in metrics.items() if key.endswith("count"))
+        and core["covered_line_percent"]
+        > payload["baseline_metrics"]["application_core_covered_line_percent"]
     )
     payload["status"] = (
-        "current_inventory_regressed" if regressed else "validated_local_closeable"
+        "validated_local_closeable" if closeable else "current_inventory_regressed"
     )
-    payload["debt_outcome"] = "current_inventory_regressed" if regressed else "improved"
+    payload["debt_outcome"] = outcome
     payload["current_binding_refresh"] = {
         "source_tree_sha256": inventory["source_tree_sha256"],
         "evidence": _MODULE_COVERAGE_JSON,

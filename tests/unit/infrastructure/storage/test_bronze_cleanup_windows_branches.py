@@ -1691,3 +1691,34 @@ def test_resume_scope_filters_and_recovery(tmp_path: Path) -> None:
     assert actor.resume(pending, None, None) is False
     assert pending["directories_conflicted"] == 1
     assert actor.skips[-1][1] == "invalid_pending_group"
+
+
+@pytest.mark.parametrize(
+    "exclusive,create_lock",
+    [(False, False), (True, False), (True, True), (False, True)],
+)
+def test_lock_probes_target_volume_only_for_mutating_operations(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, exclusive: bool, create_lock: bool
+) -> None:
+    _arm(monkeypatch)
+    _install_fcntl(monkeypatch)
+    calls = []
+
+    def unsupported(root):
+        calls.append(root)
+        return False
+
+    monkeypatch.setattr(cleanup_core, "_directory_xattr_supported", unsupported)
+    if exclusive:
+        with pytest.raises(NotImplementedError):
+            with support.bronze_tree_lock(
+                tmp_path, exclusive=True, create_lock=create_lock
+            ):
+                pytest.fail("Unsupported destructive operation acquired a lease")
+    else:
+        with support.bronze_tree_lock(
+            tmp_path, exclusive=False, create_lock=create_lock
+        ):
+            pass
+    assert calls == ([tmp_path] if exclusive or create_lock else [])
+    assert list(tmp_path.iterdir()) == []

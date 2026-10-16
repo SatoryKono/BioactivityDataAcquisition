@@ -95,6 +95,8 @@ class GroupJournal(GroupRecoveryCoordinator):
         expected_date: os.stat_result | None = None,
     ) -> str:
         """Durably attest a complete writer group before any member removal."""
+        if not destructive_cleanup_supported(self._root):
+            raise NotImplementedError("missing target-volume cleanup capability")
         names = spec.names()  # validate before date traversal
         relative = spec.relative_date().as_posix()
         members, chain = self._snapshot_group(spec, names, relative)
@@ -277,6 +279,8 @@ class GroupJournal(GroupRecoveryCoordinator):
     ) -> GroupRecoveryResult:
         """Return exact bytes for this call, including a retry's remaining members."""
         _require_operation_id(operation_id)
+        if not destructive_cleanup_supported(self._root):
+            raise NotImplementedError("missing target-volume cleanup capability")
         progress = GroupRecoveryResult()
         journal_fd = self._journal_dir_for_recovery(operation_id)
         if journal_fd is None:

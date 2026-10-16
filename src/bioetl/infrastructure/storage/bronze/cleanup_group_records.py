@@ -11,7 +11,7 @@ from typing import Any
 from .cleanup_core import (
     BronzeRootLease,
     _CleanupConflict,
-    destructive_cleanup_supported,
+    _platform_cleanup_supported,
 )
 from .cleanup_group_schema import (
     _DIR_FLAGS,
@@ -35,7 +35,8 @@ class GroupRecordStore:
     """cleanup group records responsibilities."""
 
     def __init__(self, lease: BronzeRootLease):
-        if lease.fd is None or not destructive_cleanup_supported(lease.path):
+        # Construction also serves read-only planning; volume probes belong to apply.
+        if lease.fd is None or not _platform_cleanup_supported():
             raise NotImplementedError("missing pinned POSIX Bronze root")
         self._root = lease.path
         self._root_fd = lease.fd

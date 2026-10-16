@@ -56,6 +56,7 @@ class BronzeWriteArtifacts:
     record_count: int
     uncompressed_size: int
     compressed_size: int
+    json_copy_allowed: bool = True
 
 
 @dataclass(frozen=True, slots=True)
@@ -152,10 +153,12 @@ def build_bronze_write_artifacts(
     full_path: Path,
     record_count: int,
     uncompressed_size: int,
+    json_copy_allowed: bool = True,
 ) -> BronzeWriteArtifacts:
     """Build the measured Bronze write artifact payload."""
     return BronzeWriteArtifacts(
         record_count=record_count,
         uncompressed_size=uncompressed_size,
         compressed_size=full_path.stat().st_size,
+        json_copy_allowed=json_copy_allowed,
     )

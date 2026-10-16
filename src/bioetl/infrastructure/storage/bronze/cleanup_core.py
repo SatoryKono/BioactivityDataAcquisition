@@ -341,7 +341,10 @@ def bronze_tree_lock(
     create_lock: bool = True,
 ) -> Iterator[BronzeRootLease]:
     """Advisory writer/cleaner lock; ``create_lock=False`` is non-mutating dry-run."""
-    caps = _platform_cleanup_supported() and _directory_xattr_supported(base_path)
+    # Preview needs a pinned shared lease, but must never probe by creating files.
+    caps = _platform_cleanup_supported() and (
+        not (exclusive or create_lock) or _directory_xattr_supported(base_path)
+    )
     if not caps:
         if exclusive:
             raise NotImplementedError(
