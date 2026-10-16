@@ -359,6 +359,71 @@ class TestWriteMergeRetrySuccess:
             data,
             mode="append",
         )
+        assert list(empty_table.iterdir()) == []
+
+    @pytest.mark.asyncio
+    async def test_merge_chain_ignores_preexisting_shared_table(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Per-test path stays on merge when a shared table directory already exists."""
+        shared = tmp_path / "preexisting-shared-table"
+        shared.mkdir()
+        sentinel = shared / "sentinel.txt"
+        sentinel.write_text("keep", encoding="utf-8")
+        live_shared = _TABLE_PATH
+        monkeypatch.setattr(
+            "tests.unit.infrastructure.storage.test_silver_writer_delta_mixin_boost._TABLE_PATH",
+            str(shared),
+        )
+        mixin = _ConcreteDeltaMixin()
+        data = _make_arrow_table()
+        dt = MagicMock()
+        merge_builder = MagicMock()
+        dt.merge.return_value = merge_builder
+        merge_builder.when_matched_update_all.return_value = merge_builder
+        merge_builder.when_not_matched_insert_all.return_value = merge_builder
+        table_path = str(tmp_path / "absent-table")
+        assert table_path != live_shared
+        assert table_path != _TABLE_PATH
+
+        with patch("deltalake.write_deltalake") as write_deltalake:
+            await mixin._merge_records(
+                dt,
+                data,
+                ["id", "value"],
+                table_path,
+                timeout_seconds=5.0,
+            )
+
+        dt.merge.assert_called_once_with(
+            source=data,
+            predicate="target.id = source.id AND target.value = source.value",
+            source_alias="source",
+            target_alias="target",
+            merge_schema=False,
+        )
+        write_deltalake.assert_not_called()
+        assert not (tmp_path / "absent-table").exists()
+        assert sentinel.read_text(encoding="utf-8") == "keep"
+        assert list(shared.iterdir()) == [sentinel]
+        assert not any(shared.rglob("*.parquet"))
+        assert not (shared / "_delta_log").exists()
+
+    def test_repaired_merge_cases_do_not_reference_shared_table(self) -> None:
+        """Repaired merge cases must pass a per-test path, not the shared table."""
+        import inspect
+
+        repaired = (
+            "test_merge_records_builds_predicate_and_executes_merge_chain",
+            "test_merge_records_enables_merge_schema_when_requested",
+            "test_write_merge_logs_recovery_after_retry",
+            "test_write_merge_commit_retries_exhausted_raises",
+        )
+        for name in repaired:
+            source = inspect.getsource(getattr(TestWriteMergeRetrySuccess, name))
+            assert "_TABLE_PATH" not in source
 
     @pytest.mark.asyncio
     async def test_write_merge_logs_recovery_after_retry(
