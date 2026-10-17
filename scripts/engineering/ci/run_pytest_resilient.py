@@ -150,6 +150,15 @@ def _child_env() -> dict[str, str]:
     return env
 
 
+def _result_records_failure(item: object) -> bool:
+    """True when a node outcome, or one duplicate occurrence, is not success."""
+    if isinstance(item, list):
+        return any(_result_records_failure(entry) for entry in item)
+    if not isinstance(item, dict):
+        return False
+    return item.get("terminal") not in {"passed", "skipped", "xfailed"}
+
+
 def _payload_explains_failure(payload: object) -> bool:
     """True when one worker receipt already records why the pass failed."""
     if not isinstance(payload, dict):
@@ -161,11 +170,7 @@ def _payload_explains_failure(payload: object) -> bool:
     results = payload.get("results")
     if not isinstance(results, dict):
         return False
-    return any(
-        isinstance(item, dict)
-        and item.get("terminal") not in {"passed", "skipped", "xfailed"}
-        for item in results.values()
-    )
+    return any(_result_records_failure(item) for item in results.values())
 
 
 def _worker_failure_is_explained(receipt: ReceiptInvocation, pass_name: str) -> bool:
@@ -569,7 +574,7 @@ def _create_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--receipt-expected-sha",
         default=None,
-        help="Expected git SHA to enforce",
+        help="Expected git SHA to enforce. Requires --receipt-dir.",
     )
     return parser
 
@@ -578,6 +583,11 @@ def main(argv: list[str] | None = None) -> int:
     """CLI entrypoint."""
     parser = _create_parser()
     args = parser.parse_args(argv)
+    if args.receipt_expected_sha and not args.receipt_dir:
+        sys.stderr.write(
+            "[run_pytest_resilient] --receipt-expected-sha requires --receipt-dir\n"
+        )
+        return 2
 
     reports_dir = Path(args.reports_dir)
     summary_lines: list[str] = []

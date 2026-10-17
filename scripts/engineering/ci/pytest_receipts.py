@@ -294,7 +294,13 @@ def _merge_phase(existing: str | None, new: str) -> str:
 
 
 def _source_diverged(before: Mapping[str, Any], after: Mapping[str, Any]) -> bool:
-    """True when measured dirt appears or a dirty path is restored."""
+    """True when HEAD moves or measured dirt appears or is restored.
+
+    Two clean snapshots with empty dirty lists still diverge when a test
+    commits or switches checkout. Collection ran on the starting HEAD.
+    """
+    if before.get("head") != after.get("head"):
+        return True
     before_paths = before.get("measured_dirty_paths")
     after_paths = after.get("measured_dirty_paths")
     if isinstance(before_paths, list) and isinstance(after_paths, list):
@@ -320,10 +326,19 @@ def _source_for_receipt(
         merged["measured_dirty_paths"] = paths
         if paths:
             merged["clean"] = False
-        return merged
+        return _keep_starting_head(before, merged)
     if before.get("clean") is False and after.get("clean") is not False:
         return dict(before)
-    return dict(after)
+    return _keep_starting_head(before, dict(after))
+
+
+def _keep_starting_head(
+    before: Mapping[str, Any], snapshot: dict[str, Any]
+) -> dict[str, Any]:
+    """Report the HEAD that collection and the tests actually ran on."""
+    if before.get("head") != snapshot.get("head"):
+        snapshot["head"] = before.get("head")
+    return snapshot
 
 
 def _final_exit_code(session: Any, exitstatus: Any) -> int:
@@ -345,6 +360,43 @@ def _phases_finished(phases: Mapping[str, str | None]) -> bool:
     if call is None:
         return setup in {"skipped", "xfailed", "xpassed"}
     return teardown is not None
+
+
+def _occurrence_values(value: object) -> list[dict[str, str | None]]:
+    """One phase map, or one map per duplicate nodeid."""
+    if isinstance(value, list):
+        return value
+    if isinstance(value, dict):
+        return [value]
+    return []
+
+
+def _finished_occurrences(value: object) -> int:
+    return sum(1 for phases in _occurrence_values(value) if _phases_finished(phases))
+
+
+def _open_occurrence(
+    bucket: list[dict[str, str | None]], when: str
+) -> dict[str, str | None]:
+    """Start a new occurrence when a second setup arrives for the same nodeid.
+
+    ``--keep-duplicates`` reuses the nodeid. A later ``call`` report for one
+    occurrence, including a unittest subtest, stays on the open occurrence.
+    """
+    if when == "setup" and bucket and bucket[-1].get("setup") is not None:
+        bucket.append(_blank_phases())
+    if not bucket:
+        bucket.append(_blank_phases())
+    return bucket[-1]
+
+
+def _render_phases(phases: Mapping[str, str | None]) -> dict[str, Any]:
+    return {
+        "setup": phases.get("setup"),
+        "call": phases.get("call"),
+        "teardown": phases.get("teardown"),
+        "terminal": terminal_outcome(phases),
+    }
 
 
 def _is_xdist_controller(config: Any) -> bool:
@@ -432,8 +484,13 @@ class ReceiptPlugin:
     def pytest_runtest_logreport(self, report: Any) -> None:
         if not self.write_receipt:
             return
-        phases = self.results.setdefault(str(report.nodeid), _blank_phases())
+        nodeid = str(report.nodeid)
         when = str(report.when)
+        current = self.results.get(nodeid)
+        if not isinstance(current, list):
+            current = _occurrence_values(current)
+            self.results[nodeid] = current
+        phases = _open_occurrence(current, when)
         phases[when] = _merge_phase(phases.get(when), _phase_outcome(report))
 
     def _early_stop(self, session: Any) -> bool:
@@ -461,7 +518,7 @@ class ReceiptPlugin:
             None,
         )
         if interactor is None:
-            return sorted(self.results)
+            return self._recorded_nodeids()
         pending: list[str] = []
         items = list(getattr(session, "items", []))
         torun = getattr(interactor, "torun", None)
@@ -470,18 +527,36 @@ class ReceiptPlugin:
                 for item in queued:
                     if isinstance(item, int) and 0 <= item < len(items):
                         pending.append(str(items[item].nodeid))
+        assigned = [*self._recorded_nodeids(), *pending]
         next_index = getattr(interactor, "nextitem_index", None)
         if isinstance(next_index, int) and 0 <= next_index < len(items):
-            pending.append(str(items[next_index].nodeid))
-        return sorted(set(self.results) | set(pending))
+            next_nodeid = str(items[next_index].nodeid)
+            if not self._current_occurrence_open(next_nodeid):
+                assigned.append(next_nodeid)
+        return sorted(assigned)
+
+    def _recorded_nodeids(self) -> list[str]:
+        recorded: list[str] = []
+        for nodeid in sorted(self.results):
+            recorded.extend([nodeid] * len(_occurrence_values(self.results[nodeid])))
+        return recorded
+
+    def _current_occurrence_open(self, nodeid: str) -> bool:
+        occurrences = _occurrence_values(self.results.get(nodeid))
+        if not occurrences:
+            return False
+        return not _phases_finished(occurrences[-1])
 
     def _completeness(self, early_stop: bool) -> str:
         if self.collection_errors or not self.collection_observed:
             return "unknown"
+        needed: dict[str, int] = {}
+        for nodeid in self.selected_nodeids:
+            needed[nodeid] = needed.get(nodeid, 0) + 1
         missing = [
             nodeid
-            for nodeid in self.selected_nodeids
-            if not _phases_finished(self.results.get(nodeid, _blank_phases()))
+            for nodeid, count in needed.items()
+            if _finished_occurrences(self.results.get(nodeid)) < count
         ]
         if early_stop or missing or getattr(self, "source_diverged", False):
             return "incomplete"
@@ -503,17 +578,20 @@ class ReceiptPlugin:
     def _result_payload(self) -> dict[str, Any]:
         rendered: dict[str, Any] = {}
         for nodeid in sorted(self.results):
-            phases = self.results[nodeid]
-            rendered[nodeid] = {
-                "setup": phases.get("setup"),
-                "call": phases.get("call"),
-                "teardown": phases.get("teardown"),
-                "terminal": terminal_outcome(phases),
-            }
+            items = [
+                _render_phases(phases)
+                for phases in _occurrence_values(self.results[nodeid])
+            ]
+            rendered[nodeid] = items[0] if len(items) == 1 else items
         return rendered
 
-    @pytest.hookimpl(hookwrapper=True)
+    @pytest.hookimpl(hookwrapper=True, tryfirst=True)
     def pytest_sessionfinish(self, session: Any, exitstatus: Any) -> Iterator[None]:
+        """Write the receipt after every other sessionfinish wrapper.
+
+        ``tryfirst`` runs this post-yield last, so the receipt stores the
+        exit status left by wrappers that also use ``tryfirst``.
+        """
         yield
         if not self.write_receipt:
             return

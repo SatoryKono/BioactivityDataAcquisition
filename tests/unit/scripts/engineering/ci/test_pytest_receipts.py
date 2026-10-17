@@ -15,8 +15,11 @@ from scripts.engineering.ci.pytest_receipts import (
     ReceiptPlugin,
     _blank_phases,
     _is_run_output,
+    _keep_starting_head,
     _normalize_repo_path,
     _phases_finished,
+    _source_diverged,
+    _source_for_receipt,
     dedupe_receipts,
     redact_secrets,
     source_snapshot,
@@ -511,8 +514,8 @@ def test_failed_subtest_report_is_not_cleared_by_a_later_pass() -> None:
     passed = type("Report", (), {"nodeid": "t", "when": "call", "outcome": "passed"})()
     plugin.pytest_runtest_logreport(failed)
     plugin.pytest_runtest_logreport(passed)
-    assert plugin.results["t"]["call"] == "failed"
-    assert terminal_outcome(plugin.results["t"]) == "failed"
+    assert plugin.results["t"][0]["call"] == "failed"
+    assert terminal_outcome(plugin.results["t"][0]) == "failed"
 
 
 def test_sessionfinish_records_rewritten_exit_status(
@@ -721,6 +724,184 @@ def test_assigned_shard_includes_popped_next_index() -> None:
         "pkg/test_dist.py::test_next",
         "pkg/test_dist.py::test_queued",
     ]
+
+
+def test_head_move_stays_on_the_starting_commit_and_is_incomplete() -> None:
+    before = {"head": "aaa", "clean": True, "measured_dirty_paths": []}
+    after = {"head": "bbb", "clean": True, "measured_dirty_paths": []}
+    assert _source_diverged(before, after)
+    merged = _source_for_receipt(before, after)
+    assert merged["head"] == "aaa"
+    assert merged["clean"] is True
+    unchanged = {"head": "aaa", "clean": True, "measured_dirty_paths": []}
+    assert not _source_diverged(before, unchanged)
+    assert _keep_starting_head(before, dict(unchanged))["head"] == "aaa"
+
+
+def test_checkout_commit_during_pytest_is_incomplete(
+    receipts: Path, tmp_path: Path
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    subprocess.run(["git", "init", "-b", "main"], cwd=repo, check=True)
+    _write(
+        repo / "test_move_head.py",
+        "import subprocess\n"
+        "from pathlib import Path\n\n"
+        "def test_move_head():\n"
+        "    Path('extra.txt').write_text('x\\n', encoding='utf-8')\n"
+        "    subprocess.run(['git', 'add', '-A'], check=True)\n"
+        "    subprocess.run([\n"
+        "        'git', '-c', 'user.email=receipt@example.com',\n"
+        "        '-c', 'user.name=receipt', 'commit', '-m', 'during',\n"
+        "    ], check=True)\n",
+    )
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    subprocess.run(
+        [
+            "git",
+            "-c",
+            "user.email=receipt@example.com",
+            "-c",
+            "user.name=receipt",
+            "commit",
+            "-m",
+            "init",
+        ],
+        cwd=repo,
+        check=True,
+    )
+    before = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=repo,
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    completed = _pytest(repo / "test_move_head.py", receipts, repo_root=repo)
+    assert completed.returncode == 0, completed.stderr
+    after = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=repo,
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    assert after != before
+    payload = _load(receipts)
+    source_state = payload["source"]
+    assert isinstance(source_state, dict)
+    assert source_state["head"] == before
+    assert payload["completeness"] == "incomplete"
+
+
+def test_keep_duplicates_records_each_outcome(receipts: Path, tmp_path: Path) -> None:
+    test_file = tmp_path / "test_dup.py"
+    _write(
+        test_file,
+        "from pathlib import Path\n\n"
+        "def test_one():\n"
+        "    path = Path('hits.txt')\n"
+        "    count = int(path.read_text(encoding='utf-8')) if path.exists() else 0\n"
+        "    path.write_text(str(count + 1), encoding='utf-8')\n"
+        "    assert count == 0\n",
+    )
+    completed = _pytest(
+        test_file,
+        receipts,
+        str(test_file),
+        "--keep-duplicates",
+    )
+    assert completed.returncode == 1, completed.stdout + completed.stderr
+    payload = _load(receipts)
+    collection = payload["collection"]
+    assert isinstance(collection, dict)
+    assert collection["selected"] == 2
+    results = payload["results"]
+    assert isinstance(results, dict)
+    occurrences = next(iter(results.values()))
+    assert isinstance(occurrences, list)
+    assert [item["terminal"] for item in occurrences] == ["passed", "failed"]
+    assert payload["completeness"] == "complete"
+
+
+def test_later_sessionfinish_wrapper_sets_the_recorded_exit_code(
+    receipts: Path, tmp_path: Path
+) -> None:
+    _write(
+        tmp_path / "late_exit.py",
+        "import pytest\n\n"
+        "@pytest.hookimpl(hookwrapper=True, tryfirst=True)\n"
+        "def pytest_sessionfinish(session, exitstatus):\n"
+        "    yield\n"
+        "    session.exitstatus = 0\n",
+    )
+    test_file = tmp_path / "test_fail_exit.py"
+    _write(test_file, "def test_fail():\n    assert False\n")
+    env = os.environ.copy()
+    inherited = [part for part in env.get("PYTHONPATH", "").split(os.pathsep) if part]
+    env["PYTHONPATH"] = os.pathsep.join([str(tmp_path), str(REPO), *inherited])
+    command = [
+        sys.executable,
+        "-m",
+        "pytest",
+        str(test_file),
+        "-o",
+        "addopts=",
+        "--noconftest",
+        "-p",
+        "late_exit",
+        "-p",
+        PLUGIN,
+        "-p",
+        "no:cacheprovider",
+        "-q",
+        "--tb=short",
+        f"--receipt-dir={receipts}",
+        "--receipt-run-id=run1",
+        "--receipt-attempt=1",
+        "--receipt-pass=direct",
+        f"--receipt-repo-root={REPO}",
+    ]
+    completed = subprocess.run(
+        command,
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
+    payload = _load(receipts)
+    assert payload["exit_code"] == 0
+    assert set(_terminals(payload).values()) == {"failed"}
+
+
+def test_expected_sha_without_receipt_dir_is_rejected(tmp_path: Path) -> None:
+    test_file = tmp_path / "test_ok.py"
+    _write(test_file, "def test_ok():\n    assert True\n")
+    reports = tmp_path / "reports"
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(RUNNER),
+            "--target",
+            str(test_file),
+            "--reports-dir",
+            str(reports),
+            "--receipt-expected-sha",
+            "deadbeef",
+            "--no-fallback",
+            "--skip-serial-pass",
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 2, completed.stderr
+    assert "--receipt-dir" in completed.stderr
+    assert not (reports / "junit_parallel.xml").exists()
 
 
 def test_maxfail_interrupt_is_not_a_worker_crash() -> None:
