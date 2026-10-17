@@ -90,9 +90,15 @@ _SAFE_ENV_KEYS = frozenset(
 )
 _CALL_CLASSIFICATIONS = frozenset({"passed", "failed", "skipped", "xfail", "xpass"})
 _SETUP_TERMINAL = frozenset({"setup_error", "skipped", "xfail"})
-_FAILURE_CLASSIFICATIONS = frozenset(
-    {"failed", "setup_error", "teardown_error", "xpass"}
-)
+_FAILURE_CLASSIFICATIONS = frozenset({"failed", "setup_error", "teardown_error"})
+_WHEN_CLASSIFICATIONS = {
+    "setup": frozenset({"passed", "skipped", "setup_error", "xfail"}),
+    "call": frozenset({"passed", "failed", "skipped", "xfail", "xpass"}),
+    "teardown": frozenset({"passed", "skipped", "teardown_error"}),
+}
+_TEARDOWN_SUCCESS = frozenset({"passed", "skipped"})
+_HEX_32 = re.compile(r"^[0-9a-f]{32}$")
+_PATH_TOKEN = re.compile(r"^[A-Za-z0-9_.-]{1,64}$")
 _AUTHORITATIVE_PASS_NAMES = frozenset({"parallel", "serial", "fallback"})
 _RECEIPT_FILENAME = re.compile(
     r"^receipt_(?P<pass_name>parallel|serial|fallback|unspecified)_"
@@ -441,6 +447,7 @@ class EventJournalPlugin:
             "classification": classification,
             "retry_index": int(retry_index),
             "wasxfail": wasxfail is not None,
+            "subtest": type(report).__name__ == "SubtestReport",
         }
         origin = _origin_worker(report)
         if origin is not None:
@@ -488,7 +495,7 @@ def _register_collection_hook(config: Any, plugin: EventJournalPlugin) -> None:
         def __init__(self, owner: EventJournalPlugin) -> None:
             self._owner = owner
 
-        @pytest.hookimpl(hookwrapper=True)
+        @pytest.hookimpl(hookwrapper=True, tryfirst=True)
         def pytest_collection_modifyitems(
             self,
             session: Any,
@@ -500,10 +507,26 @@ def _register_collection_hook(config: Any, plugin: EventJournalPlugin) -> None:
             outcome.get_result()
             self._owner.record_selected(items)
 
-    config.pluginmanager.register(
-        _CollectionHook(plugin),
-        "event_journal_collection_hook",
-    )
+    hook_plugin = _CollectionHook(plugin)
+    config.pluginmanager.register(hook_plugin, "event_journal_collection_hook")
+    _promote_collection_hook(config, hook_plugin)
+
+
+def _promote_collection_hook(config: Any, hook_plugin: Any) -> None:
+    """Re-register the recorder so its post-yield runs after other wrappers."""
+    import pytest
+
+    class _Promote:
+        @pytest.hookimpl(hookwrapper=True, tryfirst=True)
+        def pytest_collection(self, session: Any) -> Any:
+            _ = session
+            manager = config.pluginmanager
+            if manager.is_registered(hook_plugin):
+                manager.unregister(name="event_journal_collection_hook")
+                manager.register(hook_plugin, "event_journal_collection_hook")
+            yield
+
+    config.pluginmanager.register(_Promote(), "event_journal_collection_promote")
 
 
 def _session_finish_payload(
@@ -552,6 +575,42 @@ def _register_session_finish_hook(config: Any, plugin: EventJournalPlugin) -> No
     )
 
 
+def _path_token(value: str, *, pattern: re.Pattern[str], fallback: str) -> str:
+    if value in {".", ".."} or "/" in value or "\\" in value:
+        return fallback
+    if pattern.fullmatch(value):
+        return value
+    return fallback
+
+
+def _receipt_path(directory: Path, identity: dict[str, Any]) -> Path:
+    """Build a receipt path that cannot leave ``directory``."""
+    role = identity.get("role")
+    if role not in {"controller", "worker"}:
+        role = "controller"
+    pass_name = _path_token(
+        str(identity.get("pass_name") or ""),
+        pattern=re.compile(r"^(?:parallel|serial|fallback|unspecified)$"),
+        fallback="unspecified",
+    )
+    invocation = _path_token(
+        str(identity.get("invocation_id") or ""),
+        pattern=_HEX_32,
+        fallback=hashlib.sha256(
+            str(identity.get("invocation_id") or "").encode("utf-8")
+        ).hexdigest()[:32],
+    )
+    worker = _path_token(
+        str(identity.get("worker_id") or ""),
+        pattern=_PATH_TOKEN,
+        fallback="worker" if role == "worker" else "controller",
+    )
+    filename = (
+        f"receipt_{pass_name}_{invocation}_{role}_{worker}_{uuid.uuid4().hex}.jsonl"
+    )
+    return directory / filename
+
+
 @pytest.hookimpl(optionalhook=True)
 def pytest_configure_node(node: Any) -> None:
     """Pass one redaction key to each xdist worker before it starts."""
@@ -571,11 +630,7 @@ def pytest_configure(config: Any) -> None:
     actual_sha, sha_error = measure_checkout_sha()
     identity = _identity_from_env(actual_sha=actual_sha, secrets=secrets)
     directory = Path(str(journal_dir))
-    filename = (
-        f"receipt_{identity['pass_name']}_{identity['invocation_id']}_"
-        f"{identity['role']}_{identity['worker_id']}_{uuid.uuid4().hex}.jsonl"
-    )
-    plugin = EventJournalPlugin(config, directory / filename, identity)
+    plugin = EventJournalPlugin(config, _receipt_path(directory, identity), identity)
     if plugin._file is None:
         return
     config.pluginmanager.register(plugin, "event_journal_plugin")
@@ -684,6 +739,22 @@ def _optional_str(event: dict[str, Any], field: str) -> bool:
     return value is None or isinstance(value, str)
 
 
+def _optional_bool(event: dict[str, Any], field: str) -> bool:
+    value = event.get(field)
+    return value is None or type(value) is bool
+
+
+def _classification_allowed(event: dict[str, Any]) -> bool:
+    classification = event.get("classification")
+    when = event.get("when")
+    if classification is None and when is None:
+        return True
+    if not isinstance(classification, str) or not isinstance(when, str):
+        return False
+    allowed = _WHEN_CLASSIFICATIONS.get(when)
+    return allowed is not None and classification in allowed
+
+
 def _optional_count(event: dict[str, Any], field: str) -> bool:
     value = event.get(field)
     return value is None or _is_non_negative_int(value)
@@ -708,6 +779,8 @@ def _outcome_fields_well_formed(event: dict[str, Any]) -> bool:
         _optional_str(event, "nodeid")
         and _optional_str(event, "when")
         and _optional_str(event, "classification")
+        and _classification_allowed(event)
+        and _optional_bool(event, "subtest")
         and _optional_str(event, "origin_worker")
         and _optional_count(event, "retry_index")
         and _optional_count(event, "instance_ordinal")
@@ -830,16 +903,12 @@ def _pass_of(receipt: dict[str, Any]) -> str:
 def _note_controller_event(
     event: dict[str, Any],
     collections: list[list[str]],
-    deselected: list[str],
     errors: list[str],
 ) -> None:
     kind = event.get("event")
     nodeids = event.get("nodeids")
     if kind == "collection_finished" and isinstance(nodeids, list):
         collections.append(sorted(str(nodeid) for nodeid in nodeids))
-        return
-    if kind == "deselected" and isinstance(nodeids, list):
-        deselected.extend(str(nodeid) for nodeid in nodeids)
         return
     if kind == "collection_error":
         errors.append(str(event.get("nodeid") or ""))
@@ -856,9 +925,32 @@ def _unique_collection(
     return list(unique.pop()), False
 
 
-def _drop_deselected(nodeids: list[str], deselected: list[str]) -> list[str]:
-    blocked = set(deselected)
-    return [nodeid for nodeid in nodeids if nodeid not in blocked]
+def _deselected_nodeids(events: list[dict[str, Any]]) -> list[str]:
+    """Count deselection once per nodeid across controller and workers.
+
+    ``collection_finished`` is already the final list, so these ids are not
+    removed again. Worker copies of the same deselection do not multiply.
+    """
+    controller: Counter[str] = Counter()
+    workers: dict[str, Counter[str]] = {}
+    for event in events:
+        if event.get("event") != "deselected":
+            continue
+        nodeids = event.get("nodeids")
+        if not isinstance(nodeids, list):
+            continue
+        counts = Counter(str(nodeid) for nodeid in nodeids)
+        identity = _event_identity(event)
+        if identity.get("role") == "worker":
+            worker_id = str(identity.get("worker_id") or "")
+            workers.setdefault(worker_id, Counter()).update(counts)
+            continue
+        controller.update(counts)
+    merged = Counter(controller)
+    for counts in workers.values():
+        for nodeid, count in counts.items():
+            merged[nodeid] = max(merged[nodeid], count)
+    return sorted(merged.elements())
 
 
 def _controller_collection(
@@ -867,19 +959,18 @@ def _controller_collection(
     """Return controller nodeids, deselected nodeids, errors, and conflict.
 
     Worker collection lists are ignored so per-worker collection cannot be
-    summed into extra tests. The selected list still includes ids that a
-    later deselected event removes.
+    summed into extra tests. Deselection is counted, not subtracted: the
+    recorded collection is the list that remains after the collection hooks.
     """
     collections: list[list[str]] = []
-    deselected: list[str] = []
     errors: list[str] = []
     for event in events:
         identity = _event_identity(event)
         if identity.get("role") != "controller":
             continue
-        _note_controller_event(event, collections, deselected, errors)
+        _note_controller_event(event, collections, errors)
     selected, conflict = _unique_collection(collections)
-    return selected, sorted(set(deselected)), sorted(set(errors)), conflict
+    return selected, _deselected_nodeids(events), sorted(set(errors)), conflict
 
 
 def _selected_nodeids(
@@ -890,8 +981,6 @@ def _selected_nodeids(
     selected, deselected, errors, conflict = _controller_collection(events)
     if selected is None and allow_worker_collection and not conflict:
         selected = _repeated_worker_collection(events)
-    if selected is not None:
-        selected = _drop_deselected(selected, deselected)
     return selected, deselected, errors, conflict
 
 
@@ -945,9 +1034,39 @@ def _group_outcome_rows(
                 "role": identity.get("role"),
                 "worker_id": identity.get("worker_id"),
                 "classification": event.get("classification"),
+                "subtest": event.get("subtest") is True,
             }
         )
     return grouped, reasons
+
+
+def _collapse_outcome_pool(
+    pool: list[dict[str, Any]],
+) -> dict[str, Any] | None:
+    """Merge subtest reports. Other mixed classifications stay a conflict."""
+    if any(row.get("subtest") for row in pool):
+        parents = [row for row in pool if not row.get("subtest")]
+        if len({row["classification"] for row in parents}) > 1:
+            return None
+        ranked = parents + [row for row in pool if row.get("subtest")]
+        worst = max(
+            ranked,
+            key=lambda row: (
+                row["classification"] in _FAILURE_CLASSIFICATIONS,
+                str(row["classification"]),
+            ),
+        )
+        base = parents[0] if parents else pool[0]
+        return {
+            **base,
+            "subtest": False,
+            "classification": worst["classification"],
+            "count": 1,
+        }
+    classifications = {row["classification"] for row in pool}
+    if len(classifications) > 1:
+        return None
+    return {**pool[0], "count": len(pool)}
 
 
 def _dedup_outcomes(
@@ -965,11 +1084,11 @@ def _dedup_outcomes(
         workers = [row for row in rows if row["role"] == "worker"]
         controllers = [row for row in rows if row["role"] == "controller"]
         pool = workers or controllers
-        classifications = {row["classification"] for row in pool}
-        if len(classifications) > 1:
+        collapsed = _collapse_outcome_pool(pool)
+        if collapsed is None:
             reasons.append("conflicting_outcome")
             continue
-        chosen[key] = {**pool[0], "count": len(pool)}
+        chosen[key] = collapsed
     return chosen, sorted(set(reasons))
 
 
@@ -1059,12 +1178,16 @@ def _explain_phases(phases: dict[str, str]) -> tuple[bool, str]:
             return False, "missing_teardown"
         if teardown == "teardown_error":
             return True, "teardown_error"
+        if teardown not in _TEARDOWN_SUCCESS:
+            return False, "unexplained"
         return True, call
     if setup in _SETUP_TERMINAL and call is None:
         if teardown is None:
             return False, "missing_teardown"
         if teardown == "teardown_error":
             return True, "teardown_error"
+        if teardown not in _TEARDOWN_SUCCESS:
+            return False, "unexplained"
         return True, setup
     return False, "unexplained"
 
@@ -1124,6 +1247,13 @@ def _session_finish_reasons(events: list[dict[str, Any]]) -> list[str]:
     for event in events:
         if event.get("event") == "session_finish" and event.get("hook_error") is True:
             return ["session_finish_error"]
+    return []
+
+
+def _pytest_exit_reasons(flags: dict[str, Any]) -> list[str]:
+    status = flags.get("exitstatus")
+    if type(status) is int and status not in (0, 1):
+        return ["pytest_abnormal_exit"]
     return []
 
 
@@ -1248,6 +1378,7 @@ def _verdict_status(reasons: list[str]) -> str:
         or "unexplained_selected_tests" in reasons
         or "missing_teardown" in reasons
         or "session_finish_error" in reasons
+        or "pytest_abnormal_exit" in reasons
     ):
         return "incomplete"
     return "complete"
@@ -1335,6 +1466,7 @@ def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[st
     flags = _session_flags(events)
     reasons.extend(_checkout_reasons(flags))
     reasons.extend(_session_finish_reasons(events))
+    reasons.extend(_pytest_exit_reasons(flags))
     selected, deselected, collection_errors, collection_conflict = _selected_nodeids(
         events,
         allow_worker_collection=_intact_controller_receipt(receipts),

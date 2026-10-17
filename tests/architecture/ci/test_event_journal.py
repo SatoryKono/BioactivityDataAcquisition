@@ -790,7 +790,7 @@ def test_deselected_tests_are_not_required_to_finish(tmp_path: Path) -> None:
     events = _finalized(
         [
             _start(identity),
-            _collected(identity, [kept, dropped]),
+            _collected(identity, [kept]),
             {"event": "deselected", "identity": identity, "nodeids": [dropped]},
             *_phases(identity, kept, "passed"),
             {"event": "session_finish", "identity": identity, "exitstatus": 0},
@@ -2147,3 +2147,170 @@ def test_xdist_workers_share_the_controller_redaction_key(tmp_path: Path) -> Non
     )
     assert "swordfish" not in blob
     assert "BIOETL_JOURNAL_REDACTION_KEY" not in blob
+
+
+def test_non_strict_xpass_is_not_a_failure(tmp_path: Path) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_xpass"
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid]),
+            *_phases(identity, nodeid, "xpass"),
+            {"event": "session_finish", "identity": identity, "exitstatus": 0},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "complete"
+    assert verdict["tests_passed"] is True
+
+
+def test_remaining_duplicate_is_kept_when_one_copy_is_deselected(
+    tmp_path: Path,
+) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_a"
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid]),
+            {"event": "deselected", "identity": identity, "nodeids": [nodeid]},
+            *_phases(identity, nodeid, "failed"),
+            {"event": "session_finish", "identity": identity, "exitstatus": 1},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["selected_count"] == 1
+    assert verdict["deselected_count"] == 1
+    assert verdict["status"] == "complete"
+    assert verdict["tests_passed"] is False
+
+
+def test_worker_deselection_is_counted_once(tmp_path: Path) -> None:
+    controller = _identity(role="controller", worker_id="controller")
+    worker_a = _identity(role="worker", worker_id="gw0")
+    worker_b = _identity(role="worker", worker_id="gw1")
+    kept = "test_sample.py::test_kept"
+    dropped = "test_sample.py::test_other"
+    events = _finalized(
+        [
+            _start(controller),
+            _collected(controller, [kept]),
+            {"event": "deselected", "identity": worker_a, "nodeids": [dropped]},
+            {"event": "deselected", "identity": worker_b, "nodeids": [dropped]},
+            *_phases(controller, kept, "passed"),
+            {"event": "session_finish", "identity": controller, "exitstatus": 0},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["selected_count"] == 1
+    assert verdict["deselected_count"] == 1
+    assert verdict["status"] == "complete"
+
+
+def test_unknown_classification_is_not_complete(tmp_path: Path) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_a"
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid]),
+            _outcome(identity, nodeid, "setup", "passed"),
+            _outcome(identity, nodeid, "call", "passed"),
+            _outcome(identity, nodeid, "teardown", "CORRUPTED"),
+            {"event": "session_finish", "identity": identity, "exitstatus": 0},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "unknown"
+    assert verdict["tests_passed"] is not True
+
+
+def test_internal_pytest_exit_is_incomplete(tmp_path: Path) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_a"
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid]),
+            *_phases(identity, nodeid, "passed"),
+            {"event": "session_finish", "identity": identity, "exitstatus": 3},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "incomplete"
+    assert "pytest_abnormal_exit" in verdict["reasons"]
+    assert verdict["tests_passed"] is None
+
+
+def test_subtest_failure_is_not_a_conflicting_outcome(tmp_path: Path) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::TestCase::test_parent"
+    failed = _outcome(identity, nodeid, "call", "failed")
+    failed["subtest"] = True
+    passed = _outcome(identity, nodeid, "call", "passed")
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid]),
+            _outcome(identity, nodeid, "setup", "passed"),
+            passed,
+            failed,
+            _outcome(identity, nodeid, "teardown", "passed"),
+            {"event": "session_finish", "identity": identity, "exitstatus": 1},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert "conflicting_outcome" not in verdict["reasons"]
+    assert verdict["status"] == "complete"
+    assert verdict["tests_passed"] is False
+
+
+def test_journal_filename_cannot_escape_the_directory(tmp_path: Path) -> None:
+    result = _run_journal(
+        tmp_path,
+        "def test_ok():\n    pass\n",
+        [],
+        {
+            "BIOETL_JOURNAL_PASS": "../../../escape",
+            "BIOETL_JOURNAL_INVOCATION_ID": "../not-hex",
+            "PYTEST_XDIST_WORKER": "..\\gw",
+        },
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    journal = tmp_path / "journal"
+    receipts = list(journal.glob("*.jsonl"))
+    assert receipts
+    assert all(path.parent == journal for path in receipts)
+    assert not (tmp_path.parent / "escape").exists()
+
+
+def test_restored_collection_item_stays_in_the_verdict(tmp_path: Path) -> None:
+    plugin = tmp_path / "restore_item.py"
+    plugin.write_text(
+        "import pytest\n\n"
+        "@pytest.hookimpl(hookwrapper=True, tryfirst=True)\n"
+        "def pytest_collection_modifyitems(session, config, items):\n"
+        "    saved = list(items)\n"
+        "    items.clear()\n"
+        "    yield\n"
+        "    items[:] = saved\n",
+        encoding="utf-8",
+    )
+    result = _run_journal(
+        tmp_path / "run",
+        "def test_fails():\n    assert False\n",
+        ["-p", "restore_item"],
+        {"PYTHONPATH": os.pathsep.join((str(tmp_path), str(_ROOT)))},
+    )
+    assert result.returncode != 0
+    verdict = _live_verdict(tmp_path / "run")
+    assert verdict["passes"]["parallel"]["selected_count"] == 1
+    assert verdict["status"] == "complete"
+    assert verdict["tests_passed"] is False
