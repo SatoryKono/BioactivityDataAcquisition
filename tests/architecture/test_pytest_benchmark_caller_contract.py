@@ -562,8 +562,10 @@ def test_pyproject_keeps_default_benchmark_disable() -> None:
     assert '"-p", "no:benchmark"' in text
 
 
-def test_workflow_enables_guard_before_benchmark_and_keeps_hotspot_fail_open() -> None:
-    """The nightly command loads the guard before benchmark and still runs after a hotspot failure."""
+def test_workflow_enables_guard_before_benchmark_and_requires_hotspot_evidence() -> (
+    None
+):
+    """The caller runs after hotspot failure, but evidence gates remain fail-closed."""
     benchmark_run = _command_text(_step_run("Run pytest-benchmark cases"))
     guard_at = benchmark_run.index(f"-p {GUARD_PLUGIN}")
     benchmark_at = benchmark_run.index("-p benchmark")
@@ -583,9 +585,14 @@ def test_workflow_enables_guard_before_benchmark_and_keeps_hotspot_fail_open() -
     assert "-p no:xdist" in hotspot_run
 
     workflow = _workflow_text()
-    assert "No hotspot observations found; skipping report." in workflow
-    assert "if [ -f reports/performance/hotspot-degradation.json ]; then" in workflow
-    assert "if-no-files-found: warn" in workflow
+    assert "No hotspot observations found; skipping report." not in workflow
+    assert (
+        "if [ -f reports/performance/hotspot-degradation.json ]; then" not in workflow
+    )
+    assert "if-no-files-found: warn" not in workflow
+    assert "if-no-files-found: error" in workflow
+    assert "gate-hotspot-report" in _step_run("Gate on degradation report")
+    assert "reduce-benchmark-evidence" in _step_run("Reduce benchmark evidence")
     assert "workflow_dispatch" in workflow
     assert "schedule:" not in workflow
     gate = _step_run("Require pytest-benchmark measurement JSON")
@@ -594,6 +601,9 @@ def test_workflow_enables_guard_before_benchmark_and_keeps_hotspot_fail_open() -
     for name in (
         "Run pytest-benchmark cases",
         "Require pytest-benchmark measurement JSON",
+        "Build hotspot degradation report",
+        "Gate on degradation report",
+        "Reduce benchmark evidence",
     ):
         step = next(item for item in _workflow_steps() if item.get("name") == name)
         assert step.get("if") == "${{ always() && !cancelled() }}"
