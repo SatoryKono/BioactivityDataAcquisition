@@ -775,6 +775,8 @@ def _measurement_context(
         (test_id, scope, dataset, "github-actions", mean)
         for test_id, scope, _dataset, _environment, mean in measurements
     ]
+    if len({item[:4] for item in bound}) != len(bound):
+        return "duplicate_measurement"
     return dataset, "github-actions", bound
 
 
@@ -809,7 +811,7 @@ def _load_baseline(payload: object) -> tuple[str, list[_Measurement]] | str:
         threshold = Decimal(str(payload.get("threshold")))
     except InvalidOperation:
         return "invalid_baseline"
-    if threshold != _REGRESSION_THRESHOLD:
+    if not threshold.is_finite() or threshold != _REGRESSION_THRESHOLD:
         return "invalid_baseline"
     baseline_sha = payload.get("baseline_sha")
     if not isinstance(baseline_sha, str) or _SHA_RE.fullmatch(baseline_sha) is None:

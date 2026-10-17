@@ -602,6 +602,34 @@ def test_non_positive_means_do_not_pass(tmp_path: Path) -> None:
     assert duplicated.returncode == 1, duplicated.stderr
     assert _gate(duplicated_gate)["reason"] == "invalid_baseline"
 
+    snan = _baseline(100)
+    snan["threshold"] = "sNaN"
+    snan_dir = tmp_path / "snan"
+    snan_dir.mkdir()
+    snan_result, snan_gate, _manifest = _invoke(
+        snan_dir, json.dumps(_measurement(90)).encode(), baseline=snan
+    )
+    assert snan_result.returncode == 1, snan_result.stderr
+    assert "InvalidOperation" not in snan_result.stderr
+    assert _gate(snan_gate)["reason"] == "invalid_baseline"
+
+    repeated = _measurement(100)
+    benchmarks = repeated["benchmarks"]
+    assert isinstance(benchmarks, list)
+    benchmarks.append(dict(benchmarks[0]))
+    repeated_dir = tmp_path / "duplicate-current"
+    repeated_dir.mkdir()
+    repeated_result, repeated_gate, _manifest = _invoke(
+        repeated_dir,
+        json.dumps(repeated).encode(),
+        baseline=_baseline(100),
+    )
+    assert repeated_result.returncode == 1, repeated_result.stderr
+    assert _gate(repeated_gate)["reason"] == "duplicate_measurement"
+    assert not any(
+        (repeated_dir / "evidence").rglob("benchmark-summary-candidate.json")
+    )
+
 
 def test_clean_checkout_accepts_boolean_dirty_false(tmp_path: Path) -> None:
     payload = _measurement(90)
