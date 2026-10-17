@@ -160,6 +160,19 @@ def build_reference_identifier_families(
     normalizers: Mapping[str, ReferenceNormalizer | None],
 ) -> tuple[ReferenceIdentifierFamily, ...]:
     """Build governed family metadata from stable normalizer keys."""
+    expected_keys = {
+        spec[3] for spec in _REFERENCE_IDENTIFIER_FAMILY_SPECS if spec[3]
+    }
+    provided_keys = set(normalizers.keys())
+
+    missing_keys = expected_keys - provided_keys
+    if missing_keys:
+        raise ValueError(f"Missing required normalizer keys: {sorted(missing_keys)}")
+
+    extra_keys = provided_keys - expected_keys
+    if extra_keys:
+        raise ValueError(f"Unexpected extra normalizer keys: {sorted(extra_keys)}")
+
     return tuple(
         ReferenceIdentifierFamily(
             name=name,
