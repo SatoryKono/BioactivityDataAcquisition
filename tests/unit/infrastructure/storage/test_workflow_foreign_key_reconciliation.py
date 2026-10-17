@@ -64,6 +64,7 @@ async def test_unbound_current_run_blocks_before_mutation(
     )
     quarantine = _Quarantine()
     adapter = SilverForeignKeyReconciliationAdapter(
+        clock=_FixedClock(),
         silver_writer=_SilverWriter(),
         gold_writer=_GoldReader(
             {"chembl.assay": [{"assay_id": "a", "target_id": "t"}]}
@@ -217,6 +218,7 @@ class _FakeGoldModule:
 async def test_gold_dry_run_does_not_mutate_or_quarantine() -> None:
     quarantine = _Quarantine()
     adapter = SilverForeignKeyReconciliationAdapter(
+        clock=_FixedClock(),
         silver_writer=_SilverWriter(),  # type: ignore[arg-type]
         gold_writer=_GoldReader(
             {
@@ -266,6 +268,7 @@ def test_gold_writer_retries_delta_commit_failures() -> None:
 async def test_gold_source_table_missing_skips_reconciliation() -> None:
     logger = _Logger()
     adapter = SilverForeignKeyReconciliationAdapter(
+        clock=_FixedClock(),
         silver_writer=_SilverWriter(),  # type: ignore[arg-type]
         gold_writer=_GoldReader(
             {
@@ -355,6 +358,7 @@ async def test_gold_expiry_retries_commit_conflict(
 @pytest.mark.asyncio
 async def test_gold_reference_table_missing_fails_fast() -> None:
     adapter = SilverForeignKeyReconciliationAdapter(
+        clock=_FixedClock(),
         silver_writer=_SilverWriter(),  # type: ignore[arg-type]
         gold_writer=_GoldReader(
             {
@@ -412,6 +416,7 @@ class _MissingSilverWriter:
 @pytest.mark.asyncio
 async def test_silver_reference_table_missing_fails_closed() -> None:
     adapter = SilverForeignKeyReconciliationAdapter(
+        clock=_FixedClock(),
         silver_writer=_MissingSilverWriter(),  # type: ignore[arg-type]
         gold_writer=None,
         logger=_Logger(),  # type: ignore[arg-type]
@@ -487,6 +492,7 @@ async def test_unproven_reference_completeness_blocks_mutation(
     )
     quarantine = _Quarantine()
     adapter = SilverForeignKeyReconciliationAdapter(
+        clock=_FixedClock(),
         silver_writer=_SilverWriter(),
         gold_writer=_GoldReader(
             {
@@ -549,6 +555,7 @@ async def test_mixed_run_mutates_only_selected_run_orphans(
         _capture,
     )
     adapter = SilverForeignKeyReconciliationAdapter(
+        clock=_FixedClock(),
         silver_writer=_SilverWriter(),
         gold_writer=_GoldReader(
             {

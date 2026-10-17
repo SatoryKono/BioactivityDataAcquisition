@@ -9,6 +9,12 @@ from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID
 
 import pytest
+
+
+class _FixedClock:
+    def now(self) -> datetime:
+        return datetime(2026, 7, 7, 12, 0, tzinfo=UTC)
+
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.medallion import SilverWriteMode
@@ -251,6 +257,7 @@ class TestForeignKeyAdapter:
                 raise FileNotFoundError(table)
 
         missing = SilverForeignKeyReconciliationAdapter(
+            clock=_FixedClock(),
             silver_writer=_MissingSilver(),  # type: ignore[arg-type]
             logger=logger,
         )
@@ -262,6 +269,7 @@ class TestForeignKeyAdapter:
                 return []
 
         empty = SilverForeignKeyReconciliationAdapter(
+            clock=_FixedClock(),
             silver_writer=_EmptySilver(),  # type: ignore[arg-type]
             logger=logger,
         )
@@ -275,6 +283,7 @@ class TestForeignKeyAdapter:
                 return [{"id": "1", "parent_id": "x"}]
 
         blocked = SilverForeignKeyReconciliationAdapter(
+            clock=_FixedClock(),
             silver_writer=_Scoped(),  # type: ignore[arg-type]
             logger=logger,
         )
@@ -288,6 +297,7 @@ class TestForeignKeyAdapter:
                 return [{"id": "present"}]
 
         unproven = SilverForeignKeyReconciliationAdapter(
+            clock=_FixedClock(),
             silver_writer=_Rows(),  # type: ignore[arg-type]
             logger=logger,
         )
@@ -295,6 +305,7 @@ class TestForeignKeyAdapter:
         assert result.mutation_blocked_reason == "reference_completeness_unproven"
 
         gold = SilverForeignKeyReconciliationAdapter(
+            clock=_FixedClock(),
             silver_writer=_Rows(),  # type: ignore[arg-type]
             logger=logger,
             gold_writer=None,
