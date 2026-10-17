@@ -19,9 +19,10 @@ ______________________________________________________________________
 ## Trigger
 
 - The legacy cadence is the first day of January, April, July, and October.
-  GitHub Actions are disabled; CircleCI `ci-lane=github-settings-review` is the
-  active manual replacement. External quarterly schedule acceptance is pending
-  in #11931; do not claim the retained Actions YAML executes.
+  The pull-request coordinator runs in GitHub Actions. This review stays
+  read-only. CircleCI `ci-lane=github-settings-review` is a manual lane, not
+  merge protection. External quarterly schedule acceptance is pending in
+  #11931; do not claim that schedule is enforced.
 - Run manually after migrations affecting rulesets, protected branches, merge
   methods, Actions policy, environments, security settings, CODEOWNERS, labels,
   Issue Forms, or Wiki ownership.
@@ -53,16 +54,13 @@ state.
 
 1. Confirm the report records the discovered repository/default branch and
    automation_mutated_github: false.
-1. Live GET of ruleset `main` (13643213) MUST be `enforcement: active` with
-   required context `ci/circleci: pr-gate-complete`. Companion
-   `root-hygiene-required-check` (15730586) MUST also be active with that context
-   and `ci/circleci: root-hygiene`. Confirm strict freshness, main-only scope and
-   no bypass actors. `GET .../rules/branches/main` MUST include both contexts.
-   This #11928 contract supersedes the #10267 state where the companion was
-   disabled. The current [JSON readback](../../../reports/governance/ruleset-11928-closeout-get-2026-10-05.json)
-   and [Markdown receipt](../../../reports/governance/ruleset-11928-closeout-get-2026-10-05.md)
-   preserve the exact settings and acceptance evidence. CircleCI uses legacy
-   commit statuses without an App identity; do not invent an integration_id.
+1. <!-- policy-anchor:deployment-provider --> Compare the read-only GET with catalog `deployment.provider=github_actions`. Do not treat `.circleci/config.yml` as current merge protection.
+   <!-- policy-anchor:ruleset-enforcement-mode --> Record `enforcement` for every ruleset returned by the paginated list. On 2026-10-16, `13643213` and `15730586` were `enforcement: disabled`.
+   <!-- policy-anchor:stored-ruleset-contexts --> Record stored contexts even when enforcement is disabled. Those rulesets store `ci/circleci: pr-gate-complete`; that stored context is not active CircleCI protection.
+   <!-- policy-anchor:target-gha-context --> Catalog target `pr-gate-complete` is not the context stored on the rulesets.
+   <!-- policy-anchor:enforcement-verified-date --> Catalog `enforcement_verified_date` `2026-10-09` is not proof of active merge protection.
+   <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge when classic branch protection is absent and the applicable rulesets are disabled. An offline catalog match does not confirm live server rulesets.
+   Do not change settings from this runbook. The 2026-10-05 receipt remains historical evidence only.
 1. Review every control: rulesets, merge settings, Actions SHA policy,
    protected environments, agent-runtime environment `copilot` (`GH-ENV-003`),
    unused `staging` (`GH-ENV-002`), Dependabot, CodeQL, secret scanning, workflow
