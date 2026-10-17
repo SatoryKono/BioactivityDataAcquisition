@@ -3,7 +3,10 @@
 Use `scripts/ops/run-coderabbit-reviews.sh changes` for one local diff review.
 CodeRabbit CLI reviews Git changes; a successful run does not establish
 coverage of unchanged project files. PR reviews use the CodeRabbit GitHub App
-and `.coderabbit.yaml` separately.
+and `.coderabbit.yaml` separately. The repository pilot uses `chill`, automatic
+incremental reviews, drafts excluded, and a pause after three reviewed commits.
+After a pause, request a final review of the latest SHA before merge. These App
+settings do not schedule local CLI reviews.
 
 ## Native Windows
 
@@ -117,8 +120,8 @@ migration from `--plain` and historical scope assumptions. Use the commands
 above for the Bash launcher; check installed CLI help before changing flags.
 
 `.github/workflows/coderabbit.yml` is separately classified `keep-disabled` in
-the repository CI map. Its tracked definition targets trusted push/manual
-events and skips review when its API secret is absent. Local setup does not
+the repository CI map. Its tracked definition exposes only `workflow_dispatch`
+and skips review when its API secret is absent. Local setup does not
 enable the workflow or make it a merge gate. Do not raise debt budgets to
 silence review issues.
 

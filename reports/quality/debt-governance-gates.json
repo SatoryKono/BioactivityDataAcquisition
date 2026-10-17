@@ -379,7 +379,7 @@
       "status": "pass"
     },
     {
-      "current": 6,
+      "current": 7,
       "limit": 21,
       "metric": "generated_at_age_days",
       "name": "observability_release_review_freshness",
@@ -415,7 +415,7 @@
       "status": "pass"
     },
     {
-      "current": "3f39d2ba39404d9a1fc84d24eade84529ca12230820e5e4820352877aa58b9d9",
+      "current": "e7eb1ccdce743fa8274c13e2fbde4afada6fb8be1625a995f27d9667a35d9b55",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
