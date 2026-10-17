@@ -2273,7 +2273,7 @@
   "source": {
     "adr_decisions_dir": "docs/02-architecture/decisions",
     "manual_exception_marker_prefix": "manual-exception:",
-    "tracked_file_discovery": "git grep --untracked with python fallback"
+    "tracked_file_discovery": "tracked_files(root)"
   },
   "summary": {
     "accepted_adr_count": 60,

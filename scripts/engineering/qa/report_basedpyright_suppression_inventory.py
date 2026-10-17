@@ -27,6 +27,8 @@ import re
 from collections import Counter
 from pathlib import Path
 
+from scripts.engineering.qa._tracked_glob import tracked_files
+
 PRODUCT_ROOT = Path("src/bioetl")
 DEFAULT_BASELINE = Path("reports/quality/basedpyright-suppression-inventory.json")
 
@@ -39,7 +41,7 @@ def collect(root: Path) -> dict[str, object]:
     mode_counts: Counter[str] = Counter()
     files_with_suppressions: set[str] = set()
 
-    for path in sorted(root.rglob("*.py")):
+    for path in tracked_files(root, "**/test_*.py", "**/*.py"):
         rel = path.as_posix()
         text = path.read_text(encoding="utf-8")
         found = False
