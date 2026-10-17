@@ -46,8 +46,8 @@ The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-lev
 |----------|-------------|---------|----------|
 | `BIOETL_METRICS_PORT` | Prometheus metrics endpoint port | `8000` | No |
 | `BIOETL_PROMETHEUS_URL` | Optional Prometheus base URL for local HTTP probes | unset (`http://localhost:9090` loopback default in health/processed-records) | No |
-| `BIOETL_OBSERVABILITY__TRACING_ENABLED` | Enable OpenTelemetry tracing | `False` | No |
-| `BIOETL_OBSERVABILITY__ALLOW_NOOP_OBSERVABILITY_IN_PROD` | Allow NoOp observability in prod | `False` | No |
+| `BIOETL_OBSERVABILITY__TRACING_ENABLED` | Enable OpenTelemetry tracing | `false` | No |
+| `BIOETL_OBSERVABILITY__ALLOW_NOOP_OBSERVABILITY_IN_PROD` | Allow NoOp observability in prod | `false` | No |
 | `BIOETL_PUSHGATEWAY_URL` | Pushgateway address for terminal metrics publication | unset | No |
 
 ## Runtime Identity
@@ -60,7 +60,7 @@ The default log level is `INFO`. Use `bioetl run --debug` or workflow `--log-lev
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
-| `BIOETL_ENFORCE_REPORT_ROOT_MARKER` | Enforce report root marker for Grafana | `True` (in docker-compose.yml) | No |
+| `BIOETL_ENFORCE_REPORT_ROOT_MARKER` | Enforce report root marker for Grafana | `true` (in docker-compose.yml) | No |
 | `BIOETL_REPORT_ROOT` | Run-report root override | unset | No |
 
 ## Windows + WSL Mixed Checkout

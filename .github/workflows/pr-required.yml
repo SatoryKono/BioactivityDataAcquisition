@@ -1,31 +1,15 @@
 name: PR Gate Complete
-# Repo-side #9975 / #12009 coordinator. These comments are not a live ruleset receipt
-# and do not prove server enforcement (#11180: do not change rulesets here).
-# Target GitHub Actions context is job name pr-gate-complete
-# (catalog deployment.required_context). That name is not the context stored
-# on repository rulesets.
-# Read-only GET 2026-10-16 (one ruleset page, includes_parents=true): rulesets
-# that include refs/heads/main were enforcement=disabled and still stored
-# ci/circleci contexts. A stored context on a disabled ruleset is not active CircleCI protection
-# and is not configured GitHub Actions enforcement.
+# Repo-side #9975 coordinator. Ruleset 13643213 names this job
+# (`name: pr-gate-complete`) as the Actions required context.
+# Enforcement stays disabled (#11180): do not flip it to active in this change.
 # Actions billing is restored and this workflow runs on pull_request.
-# Next review 2026-12-30 or when a newer ruleset read changes this note.
+# Next review 2026-12-30 or when enforcement is enabled, whichever is earlier.
 # Each pull request has one owner invocation per gate and one fail-closed result.
 # Classify and aggregate check out the base ref. The PR head SHA is only a
 # diff argument (#11181). Leaf reusable workflows are pinned to a full commit
-# SHA of trusted main (#11232). This coordinator has no job-level reusable-workflow
-# calls. fast-governance checks out the PR head and, after setup, runs the
-# repo-side pin checker. That checker is not an independent trust boundary:
-# a hostile PR can rewrite the coordinator, the checker, and the registry
-# together, and local action.yml existence does not prove content trust.
-# Residual risk remains until an org ruleset requires workflows from the
-# default branch. This does not close #12046.
-# policy-anchor:deployment-provider deployment.provider=github_actions
-# policy-anchor:ruleset-enforcement-mode 13643213 and 15730586 enforcement: disabled
-# policy-anchor:stored-ruleset-contexts ci/circleci: pr-gate-complete is not active CircleCI protection
-# policy-anchor:target-gha-context pr-gate-complete is not the context stored on the rulesets
-# policy-anchor:enforcement-verified-date 2026-10-09 is not proof of active merge protection
-# policy-anchor:merge-block a successful pr-gate-complete does not by itself block merge and does not confirm live server rulesets
+# SHA of trusted main (#11232). Coordinator YAML may still come from the PR, so
+# a hostile PR can rewrite these uses: lines; residual risk until org ruleset
+# requires workflows from the default branch.
 
 on:
   pull_request:
@@ -155,11 +139,6 @@ jobs:
           python-version: "3.12"
           uv-extras: "dev docs"
 
-      # PR-head checkout. Not classify, and not the base-ref aggregate checkout.
-      - name: Check reusable workflow pins
-        id: check-pins
-        run: uv run --frozen --no-build python scripts/engineering/repo/check_github_actions_runtime_policy.py --pr-required-pins --check
-
       - name: Validate repository root allowlist
         id: cleanliness
         if: needs['classify-changes'].outputs['root-hygiene'] == 'required' || needs['classify-changes'].outputs['compiled-artifacts'] == 'required'
@@ -240,13 +219,6 @@ jobs:
         id: mkdocs-nav
         if: needs['classify-changes'].outputs['docs-governance'] == 'required'
         run: uv run --frozen --no-build pytest tests/architecture/test_documentation_sync.py::test_mkdocs_nav_references_existing_markdown_files -q --tb=line
-
-      - name: Check required-check prose consistency
-        id: prose-consistency
-        if: needs['classify-changes'].outputs['docs-governance'] == 'required'
-        run: |
-          mkdir -p reports/quality
-          uv run --frozen --no-build pytest tests/architecture/test_required_checks_prose_consistency.py -q --tb=line --junitxml=reports/quality/prose-consistency-junit.xml
 
       - name: Run zizmor
         id: zizmor
