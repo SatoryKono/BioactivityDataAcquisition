@@ -324,26 +324,33 @@ def test_live_catalog_requires_image_verification_for_single_grafana_input(
 
 def test_check_coordinator_integrity_blocks_mutations() -> None:
     from scripts.engineering.ci.pr_gate import check_coordinator_integrity, CatalogError
+
     with pytest.raises(CatalogError, match="Hostile-PR retarget residual risk"):
         check_coordinator_integrity([".github/workflows/pr-required.yml"])
 
     with pytest.raises(CatalogError, match="Hostile-PR retarget residual risk"):
-        check_coordinator_integrity([
-            "src/bioetl/main.py",
-            "configs/quality/github_required_checks.yaml",
-            "tests/unit/test_main.py"
-        ])
+        check_coordinator_integrity(
+            [
+                "src/bioetl/main.py",
+                "configs/quality/github_required_checks.yaml",
+                "tests/unit/test_main.py",
+            ]
+        )
 
     with pytest.raises(CatalogError, match="Hostile-PR retarget residual risk"):
         check_coordinator_integrity(["scripts/engineering/ci/pr_gate.py"])
 
+
 def test_check_coordinator_integrity_allows_harmless_homoglyphs() -> None:
     from scripts.engineering.ci.pr_gate import check_coordinator_integrity
+
     # Identical filename but different path should pass
     check_coordinator_integrity(["tests/fixtures/pr-required.yml"])
     check_coordinator_integrity(["src/configs/quality/github_required_checks.yaml"])
     check_coordinator_integrity(["pr_gate.py"])
 
+
 def test_check_coordinator_integrity_allows_normal_files() -> None:
     from scripts.engineering.ci.pr_gate import check_coordinator_integrity
+
     check_coordinator_integrity(["src/bioetl/main.py", "tests/unit/test_main.py"])

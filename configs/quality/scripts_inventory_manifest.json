@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-17T11:41:54.547258+00:00",
+  "generated_at": "2026-10-17T11:50:22.656305+00:00",
   "summary": {
     "total_scripts": 648,
     "status_counts": {
@@ -10310,7 +10310,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/engineering/ci/test_pr_gate.py",
-          "line": 338,
+          "line": 341,
           "source_group": "tests",
           "text": "check_coordinator_integrity([\"scripts/engineering/ci/pr_gate.py\"])"
         }
