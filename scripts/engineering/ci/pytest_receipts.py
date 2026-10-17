@@ -33,6 +33,13 @@ _SECRET_KEY_RE = re.compile(
     r"(SECRET|TOKEN|PASSWORD|PASSWD|PWD|CREDENTIAL|PRIVATE|PAT|_KEY|AUTH|URL|DSN|URI)",
     re.IGNORECASE,
 )
+_CRASH_OBSERVATION = re.compile(
+    r"(\[gw\d+\]\s+node down:\s+not properly terminated"
+    r"|worker.+(?:crash|terminated unexpectedly)"
+    r"|xdist.+(?:internal error|Interrupted))",
+    re.IGNORECASE,
+)
+_MAXFAIL_OBSERVATION = re.compile(r"stopping after \d+ failures", re.IGNORECASE)
 _OUTPUT_PREFIXES = (
     "reports/",
     ".pytest_cache/",
@@ -276,8 +283,8 @@ def terminal_outcome(phases: Mapping[str, str | None]) -> str:
     if call == "skipped" or setup == "skipped":
         return "skipped"
     if call == "passed":
-        if teardown is None:
-            return "error"
+        if teardown in {None, "skipped", "xfailed"}:
+            return {None: "error", "skipped": "skipped", "xfailed": "xfailed"}[teardown]
         return "passed"
     return "error"
 
@@ -627,6 +634,37 @@ class ReceiptPlugin:
         write_receipt_file(target, payload)
 
 
+def validate_receipt_ids(run_id: str, attempt: str) -> None:
+    """Raise ValueError when a receipt id is not one safe path segment."""
+    _safe_id(run_id, "run_id")
+    _safe_id(attempt, "attempt")
+
+
+def _clip_observed_error(text: str, limit: int = 4000) -> str:
+    """Keep a crash line that pytest prints after a long quiet log.
+
+    The first 4000 characters of a ``-q`` run are progress marks. The node-down
+    line is at the end, so a long observation keeps that tail and any earlier
+    crash line that the tail would drop.
+    """
+    redacted = redact_secrets(text)
+    if len(redacted) <= limit:
+        return redacted
+    matched = [
+        line
+        for line in redacted.splitlines()
+        if _CRASH_OBSERVATION.search(line) and not _MAXFAIL_OBSERVATION.search(line)
+    ]
+    tail = redacted[-limit:]
+    if not matched or "\n".join(matched) in tail:
+        return tail
+    prefix = "\n".join(matched)
+    if len(prefix) >= limit:
+        return prefix[-limit:]
+    room = limit - len(prefix) - 1
+    return prefix if room <= 0 else f"{prefix}\n{redacted[-room:]}"
+
+
 def write_runner_terminal_receipt(
     *,
     receipt_dir: Path,
@@ -653,7 +691,7 @@ def write_runner_terminal_receipt(
         "exit_code": exit_code,
         "early_stop": True,
         "terminal_kind": terminal_kind,
-        "observed_error": redact_secrets(observed_error)[:4000],
+        "observed_error": _clip_observed_error(observed_error),
         "completeness": "unknown",
         "collection": {"status": "unknown"},
         "results": None,

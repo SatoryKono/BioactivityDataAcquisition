@@ -470,6 +470,14 @@ def test_terminal_outcome_matrix() -> None:
         terminal_outcome({"setup": "passed", "call": "xfailed", "teardown": "error"})
         == "teardown_error"
     )
+    assert (
+        terminal_outcome({"setup": "passed", "call": "passed", "teardown": "skipped"})
+        == "skipped"
+    )
+    assert (
+        terminal_outcome({"setup": "passed", "call": "passed", "teardown": "xfailed"})
+        == "xfailed"
+    )
 
 
 def test_partial_phases_are_incomplete() -> None:
@@ -901,6 +909,126 @@ def test_expected_sha_without_receipt_dir_is_rejected(tmp_path: Path) -> None:
     )
     assert completed.returncode == 2, completed.stderr
     assert "--receipt-dir" in completed.stderr
+    assert not (reports / "junit_parallel.xml").exists()
+
+
+def test_skip_in_finalizer_is_not_a_pass(receipts: Path, tmp_path: Path) -> None:
+    test_file = tmp_path / "test_late_skip.py"
+    _write(
+        test_file,
+        "import pytest\n\n"
+        "@pytest.fixture\n"
+        "def late():\n"
+        "    yield\n"
+        "    pytest.skip('later')\n\n"
+        "def test_body(late):\n"
+        "    assert True\n",
+    )
+    completed = _pytest(test_file, receipts)
+    assert completed.returncode == 0, completed.stderr
+    payload = _load(receipts)
+    assert set(_terminals(payload).values()) == {"skipped"}
+    assert payload["completeness"] == "complete"
+
+
+def test_xpassed_does_not_explain_a_controller_failure() -> None:
+    from scripts.engineering.ci.run_pytest_resilient import _payload_explains_failure
+
+    quiet = {
+        "exit_code": 0,
+        "completeness": "complete",
+        "results": {"t": {"terminal": "xpassed"}},
+    }
+    assert _payload_explains_failure(quiet) is False
+    failed = {
+        "exit_code": 0,
+        "completeness": "complete",
+        "results": {"t": {"terminal": "failed"}},
+    }
+    assert _payload_explains_failure(failed) is True
+
+
+def test_long_crash_log_keeps_the_terminal_line(
+    receipts: Path, tmp_path: Path
+) -> None:
+    from scripts.engineering.ci.pytest_receipts import write_runner_terminal_receipt
+
+    observed = ("." * 5000) + "\n[gw0] node down: not properly terminated\n"
+    write_runner_terminal_receipt(
+        receipt_dir=receipts,
+        run_id="runCrash",
+        attempt="1",
+        pass_name="parallel",
+        repo_root=tmp_path,
+        exit_code=1,
+        terminal_kind="worker_crash",
+        observed_error=observed,
+    )
+    payload = _load(receipts, run_id="runCrash", pass_name="parallel", worker="runner")
+    error = str(payload["observed_error"])
+    assert "node down" in error
+    assert error.rstrip().endswith("not properly terminated")
+    assert len(error) <= 4000
+    buried = "[gw0] node down: not properly terminated\n" + ("." * 5000)
+    write_runner_terminal_receipt(
+        receipt_dir=receipts,
+        run_id="runBuried",
+        attempt="1",
+        pass_name="parallel",
+        repo_root=tmp_path,
+        exit_code=1,
+        terminal_kind="worker_crash",
+        observed_error=buried,
+    )
+    buried_payload = _load(
+        receipts, run_id="runBuried", pass_name="parallel", worker="runner"
+    )
+    assert str(buried_payload["observed_error"]).startswith("[gw0] node down")
+
+
+def test_receipt_dir_given_to_workers_is_absolute(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from scripts.engineering.ci.run_pytest_resilient import ReceiptInvocation
+
+    monkeypatch.chdir(tmp_path)
+    invocation = ReceiptInvocation(
+        directory=Path("receipts"),
+        run_id="run1",
+        attempt="1",
+        expected_sha=None,
+    )
+    args = invocation.pytest_args("parallel")
+    assert args[0] == f"--receipt-dir={(tmp_path / 'receipts').resolve()}"
+
+
+def test_unsafe_receipt_id_exits_before_pytest(tmp_path: Path) -> None:
+    test_file = tmp_path / "test_ok.py"
+    _write(test_file, "def test_ok():\n    assert True\n")
+    reports = tmp_path / "reports"
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(RUNNER),
+            "--target",
+            str(test_file),
+            "--reports-dir",
+            str(reports),
+            "--receipt-dir",
+            str(tmp_path / "receipts"),
+            "--receipt-run-id",
+            "bad/id",
+            "--no-fallback",
+            "--skip-serial-pass",
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 2, completed.stderr
+    assert "run_id" in completed.stderr
+    assert "Traceback" not in completed.stderr
     assert not (reports / "junit_parallel.xml").exists()
 
 

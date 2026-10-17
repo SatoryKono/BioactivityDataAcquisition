@@ -22,6 +22,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from scripts.engineering.ci.pytest_receipts import (
+    validate_receipt_ids,
     write_runner_terminal_receipt,
 )
 
@@ -44,8 +45,9 @@ class ReceiptInvocation:
     expected_sha: str | None
 
     def pytest_args(self, pass_name: str) -> list[str]:
+        directory = self.directory.expanduser().resolve()
         args = [
-            f"--receipt-dir={self.directory}",
+            f"--receipt-dir={directory}",
             f"--receipt-run-id={self.run_id}",
             f"--receipt-attempt={self.attempt}",
             f"--receipt-pass={pass_name}",
@@ -156,7 +158,7 @@ def _result_records_failure(item: object) -> bool:
         return any(_result_records_failure(entry) for entry in item)
     if not isinstance(item, dict):
         return False
-    return item.get("terminal") not in {"passed", "skipped", "xfailed"}
+    return item.get("terminal") not in {"passed", "skipped", "xfailed", "xpassed"}
 
 
 def _payload_explains_failure(payload: object) -> bool:
@@ -579,16 +581,37 @@ def _create_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: list[str] | None = None) -> int:
-    """CLI entrypoint."""
-    parser = _create_parser()
-    args = parser.parse_args(argv)
+def _reject_unsafe_receipt_ids(args: argparse.Namespace) -> int | None:
+    """Reject ids that the receipt plugin cannot store as a path segment."""
+    if not args.receipt_dir:
+        return None
+    try:
+        validate_receipt_ids(str(args.receipt_run_id), str(args.receipt_attempt))
+    except ValueError as exc:
+        sys.stderr.write(f"[run_pytest_resilient] {exc}\n")
+        return 2
+    return None
+
+
+def _reject_invalid_invocation(args: argparse.Namespace) -> int | None:
+    rejected = _reject_sha_without_receipt_dir(args)
+    if rejected is not None:
+        return rejected
+    return _reject_unsafe_receipt_ids(args)
+
+
+def _reject_sha_without_receipt_dir(args: argparse.Namespace) -> int | None:
+    """Reject an expected SHA that nothing will enforce."""
     if args.receipt_expected_sha and not args.receipt_dir:
         sys.stderr.write(
             "[run_pytest_resilient] --receipt-expected-sha requires --receipt-dir\n"
         )
         return 2
+    return None
 
+
+def _execute_passes(args: argparse.Namespace) -> int:
+    """Run the parallel, fallback, and serial passes."""
     reports_dir = Path(args.reports_dir)
     summary_lines: list[str] = []
 
@@ -703,6 +726,16 @@ def main(argv: list[str] | None = None) -> int:
 
     _write_summary(_summary_path(reports_dir), summary_lines)
     return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    """CLI entrypoint."""
+    parser = _create_parser()
+    args = parser.parse_args(argv)
+    rejected = _reject_invalid_invocation(args)
+    if rejected is not None:
+        return rejected
+    return _execute_passes(args)
 
 
 if __name__ == "__main__":
