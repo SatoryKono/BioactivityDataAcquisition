@@ -1380,12 +1380,13 @@ def test_journal_child_env_prepends_the_repo_root(
         _journal_child_env,
     )
 
-    monkeypatch.setenv("PYTHONPATH", "C:\\already" + os.pathsep + "C:\\other")
+    already = "already-entry"
+    other = "other-entry"
+    monkeypatch.setenv("PYTHONPATH", os.pathsep.join((already, other)))
     env = _journal_child_env("parallel", "abc123")
     parts = env["PYTHONPATH"].split(os.pathsep)
     assert parts[0] == str(_REPO_ROOT)
-    assert "C:\\already" in parts
-    assert "C:\\other" in parts
+    assert parts[1:] == [already, other]
     assert env["BIOETL_JOURNAL_PASS"] == "parallel"
     assert env["BIOETL_JOURNAL_INVOCATION_ID"] == "abc123"
     monkeypatch.delenv("PYTHONPATH", raising=False)
@@ -1425,7 +1426,8 @@ def test_run_pass_forwards_repo_root_on_pythonpath(
             )
 
     monkeypatch.setattr(adapter, "PytestAbortDiagnosticAdapter", _Adapter)
-    monkeypatch.setenv("PYTHONPATH", "C:\\already")
+    already = "already-entry"
+    monkeypatch.setenv("PYTHONPATH", already)
     result = _run_pass(
         name="parallel",
         base_command=[sys.executable, "-m", "pytest"],
@@ -1440,7 +1442,9 @@ def test_run_pass_forwards_repo_root_on_pythonpath(
     assert result.invocation_id
     child_env = captured["env"]
     assert child_env is not None
-    assert child_env["PYTHONPATH"].split(os.pathsep)[0] == str(_REPO_ROOT)
-    assert "C:\\already" in child_env["PYTHONPATH"].split(os.pathsep)
+    assert child_env["PYTHONPATH"].split(os.pathsep) == [
+        str(_REPO_ROOT),
+        already,
+    ]
     assert child_env["BIOETL_JOURNAL_INVOCATION_ID"] == result.invocation_id
     assert child_env["BIOETL_JOURNAL_PASS"] == "parallel"
