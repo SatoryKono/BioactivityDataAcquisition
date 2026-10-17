@@ -6,7 +6,7 @@ summary: >
   inventory rather than hardcoding them inline.
 telemetry_rebalance:
   source_report: reports/test-telemetry/s7-governance-hotspots.json
-  source_commit: c9d639733928a2b699be2cc5031a38c4b3a3707e
+  source_commit: "40fa210b9279c5a10568783815230a8955cc1d02"
   source_run_id: local-issues-6237-6242-s7-hotspots-20260713
   refreshed_at_utc: "2026-07-13T08:58:53.124004+00:00"
   min_architecture_duration_s: 7.0

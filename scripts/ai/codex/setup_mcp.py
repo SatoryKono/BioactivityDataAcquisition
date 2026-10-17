@@ -344,7 +344,9 @@ def _local_http_server(url: str, *, startup_timeout_sec: int = 30) -> dict[str, 
 
 # Exact Agent Plugins 1.0.0 MCP schema Muse Code requires the tracked
 # project-level JSON to declare (fail-closed when absent or mismatched).
-MUSE_TRACKED_MCP_SCHEMA_URL = "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json"
+MUSE_TRACKED_MCP_SCHEMA_URL = (
+    "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json"
+)
 
 # Only vocabulary Muse's strict project-file loader accepts per MCP entry.
 # Anything outside this set (Codex ``mode``, ``startup_timeout_sec``,
