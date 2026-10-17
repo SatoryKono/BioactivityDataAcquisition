@@ -6,6 +6,13 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from datetime import datetime, UTC
+
+
+class _FixedClock:
+    def now(self) -> datetime:
+        return datetime(2026, 7, 7, 12, 0, tzinfo=UTC)
+
 
 from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
     ForeignKeyReconciliationRequest,
@@ -40,6 +47,7 @@ def _request(**overrides: object) -> ForeignKeyReconciliationRequest:
 
 def _adapter() -> SilverForeignKeyReconciliationAdapter:
     return SilverForeignKeyReconciliationAdapter(
+        clock=_FixedClock(),
         silver_writer=MagicMock(),  # type: ignore[arg-type]
         logger=MagicMock(),  # type: ignore[arg-type]
     )
@@ -99,6 +107,7 @@ async def test_reconcile_loaded_rows_dry_run_and_mutation(
 async def test_debug_artifact_sink_is_invoked() -> None:
     sink = SimpleNamespace(write_reconcile_debug_artifacts=MagicMock())
     adapter = SilverForeignKeyReconciliationAdapter(
+        clock=_FixedClock(),
         silver_writer=MagicMock(),  # type: ignore[arg-type]
         logger=MagicMock(),  # type: ignore[arg-type]
         artifact_sink=sink,  # type: ignore[arg-type]

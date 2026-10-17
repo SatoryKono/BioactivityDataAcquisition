@@ -8,7 +8,7 @@ source_commit: 8a4286d21becf1fe183acfaf3f051bc6f7916038
 source_run_id: local-pr12231-local-coverage-8a4286d
 source_event: local_coverage_verify
 source_run_url: null
-source_tree_sha256: f203beda5c98ef6de795474af3c6ffbf5f1e92923971e4b05d5613df0aa4ca67
+source_tree_sha256: e66c961aae41b59e02e9034fb5012ab53fed9ef9b4e3bc57ac322ecbe3e3302d
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45

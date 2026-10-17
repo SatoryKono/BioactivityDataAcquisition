@@ -6,6 +6,13 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 import pytest
+from datetime import datetime, UTC
+
+
+class _FixedClock:
+    def now(self) -> datetime:
+        return datetime(2026, 7, 7, 12, 0, tzinfo=UTC)
+
 
 from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
     ForeignKeyReconciliationRequest,
@@ -95,6 +102,7 @@ def test_gold_reader_port_structural_match() -> None:
 @pytest.mark.asyncio
 async def test_silver_read_applies_current_only_flag() -> None:
     adapter = SilverForeignKeyReconciliationAdapter(
+        clock=_FixedClock(),
         silver_writer=_SilverWriter(  # type: ignore[arg-type]
             rows_by_table={
                 "activity": [

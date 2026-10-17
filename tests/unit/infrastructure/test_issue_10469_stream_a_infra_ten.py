@@ -9,6 +9,13 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pyarrow as pa
 import pytest
+
+
+class _FixedClock:
+    def now(self) -> datetime:
+        return datetime(2026, 7, 7, 12, 0, tzinfo=UTC)
+
+
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.workflow import (
@@ -194,6 +201,7 @@ class TestForeignKeyAdapterLeftovers:
                 return [{"id": "p"}]
 
         adapter = SilverForeignKeyReconciliationAdapter(
+            clock=_FixedClock(),
             silver_writer=_MatchingSilver(),  # type: ignore[arg-type]
             logger=logger,
         )
@@ -215,6 +223,7 @@ class TestForeignKeyAdapterLeftovers:
                 raise ValueError("snapshot unavailable")
 
         gold_adapter = SilverForeignKeyReconciliationAdapter(
+            clock=_FixedClock(),
             silver_writer=_MatchingSilver(),  # type: ignore[arg-type]
             logger=logger,
             gold_writer=_GoldSnap(),  # type: ignore[arg-type]
@@ -242,6 +251,7 @@ class TestForeignKeyAdapterLeftovers:
                 return {"version": 3, "physical_rows": 2, "current_rows": 1}
 
         ok_adapter = SilverForeignKeyReconciliationAdapter(
+            clock=_FixedClock(),
             silver_writer=_MatchingSilver(),  # type: ignore[arg-type]
             logger=logger,
             gold_writer=_GoldOk(),  # type: ignore[arg-type]
