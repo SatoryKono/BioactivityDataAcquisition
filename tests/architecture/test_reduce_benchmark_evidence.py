@@ -57,7 +57,7 @@ def _github_env() -> dict[str, str]:
 
 
 def _measurement(
-    mean: int,
+    mean: int | float | str,
     *,
     test_id: str = _TEST_ID,
     dataset: str = "locked-nightly",
@@ -88,7 +88,10 @@ def _measurement(
 
 
 def _baseline(
-    mean: int = 100, *, test_id: str = _TEST_ID, scope: str = "tests/benchmarks/"
+    mean: int | float | str = 100,
+    *,
+    test_id: str = _TEST_ID,
+    scope: str = "tests/benchmarks/",
 ) -> dict[str, object]:
     return {
         "adoption": "measured",
@@ -753,3 +756,164 @@ def test_confined_byte_write_ignores_predictable_tmp_sibling(tmp_path: Path) -> 
     write_bytes_confined(target, b"payload", root=tmp_path)
     assert target.read_bytes() == b"payload"
     assert decoy.read_bytes() == b"keep"
+
+
+@pytest.mark.parametrize("field", ["latency_ms", "p95_latency_ms", "throughput_rps"])
+@pytest.mark.parametrize(
+    "value", [None, 0, -1, True, "1", float("nan"), float("inf"), 10**400]
+)
+def test_hotspot_rejects_unusable_metrics(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, field: str, value: object
+) -> None:
+    from scripts.engineering.common import repo_paths
+    from scripts.engineering.qa.generate_hotspot_degradation_report import (
+        hotspot_report_main,
+    )
+
+    monkeypatch.setattr(repo_paths, "REPO_ROOT", tmp_path)
+    record = {
+        "benchmark_key": "alpha",
+        "latency_ms": 1,
+        "p95_latency_ms": 1,
+        "throughput_rps": 1,
+    }
+    if value is None:
+        del record[field]
+    else:
+        record[field] = value
+    observations = tmp_path / "observations.jsonl"
+    observations.write_text(json.dumps(record) + "\n", encoding="utf-8")
+    budgets = tmp_path / "budgets.json"
+    budgets.write_text(
+        json.dumps(
+            {
+                "benchmarks": {
+                    "alpha": {
+                        "baseline_latency_ms": 1,
+                        "baseline_throughput_rps": 1,
+                        "max_regression_pct": 1.5,
+                        "p95_latency_ms": 1,
+                    }
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    report = tmp_path / "report.json"
+    assert (
+        hotspot_report_main(
+            [
+                "--observations",
+                str(observations),
+                "--budgets",
+                str(budgets),
+                "--json-out",
+                str(report),
+                "--markdown-out",
+                str(tmp_path / "report.md"),
+            ]
+        )
+        == 1
+    )
+    assert _gate(report)["reason"] == "malformed_observations"
+    assert _gate(report)["verdict"] == "failed"
+    assert _gate(report)["summary"] is None
+
+
+@pytest.mark.parametrize(
+    "mean", ["1E+1000000", "1E-1000027", "NaN", "Infinity", "0", "-1"]
+)
+@pytest.mark.parametrize("source", ["raw", "baseline"])
+def test_unrepresentable_means_fail_closed(
+    tmp_path: Path, mean: str, source: str
+) -> None:
+    raw = _measurement(mean if source == "raw" else 100)
+    baseline = _baseline(mean if source == "baseline" else 100)
+    result, gate, manifest = _invoke(
+        tmp_path, json.dumps(raw).encode(), baseline=baseline
+    )
+    assert result.returncode == 1, result.stderr
+    assert _gate(manifest) == _gate(gate)
+    assert "Traceback" not in result.stderr
+    assert _gate(gate)["status"] == "failed"
+    assert _gate(gate)["reason"] == (
+        "unusable_measurement" if source == "raw" else "invalid_baseline"
+    )
+    assert not any((tmp_path / "evidence").rglob("benchmark-summary-candidate.json"))
+
+
+@pytest.mark.parametrize(
+    "current,baseline",
+    [
+        ("1E+999999", "1E-999999"),
+        ("1", "9.9E+999999"),
+        ("1E-1000026", "1E-1000026"),
+    ],
+)
+def test_unrepresentable_comparison_fails_closed(
+    tmp_path: Path, current: str, baseline: str
+) -> None:
+    result, gate, manifest = _invoke(
+        tmp_path,
+        json.dumps(_measurement(current)).encode(),
+        baseline=_baseline(baseline),
+    )
+    assert result.returncode == 1, result.stderr
+    assert _gate(manifest) == _gate(gate)
+    assert "Traceback" not in result.stderr
+    assert _gate(gate)["reason"] == "unusable_measurement"
+    assert _gate(gate)["status"] == "failed"
+    assert not any((tmp_path / "evidence").rglob("benchmark-summary-candidate.json"))
+
+
+@pytest.mark.parametrize(
+    "current,baseline,reason",
+    [
+        ("9E+100", "1E+101", "improvement"),
+        ("1.1E-100", "1E-100", "within_threshold"),
+        ("1E+999999", "1E+999999", "within_threshold"),
+        ("1.2E-100", "1E-100", "measured_regression"),
+    ],
+)
+def test_representable_exponent_means_keep_comparison(
+    tmp_path: Path, current: str, baseline: str, reason: str
+) -> None:
+    result, gate, _manifest = _invoke(
+        tmp_path,
+        json.dumps(_measurement(current)).encode(),
+        baseline=_baseline(baseline),
+    )
+    assert result.returncode == (1 if reason == "measured_regression" else 0), (
+        result.stderr
+    )
+    assert _gate(gate)["reason"] == reason
+
+
+def test_positive_hotspot_observations_keep_budget_verdict(tmp_path: Path) -> None:
+    from scripts.engineering.qa.generate_hotspot_degradation_report import (
+        HotspotBudget,
+        _compute_degradation,
+        _load_observations,
+    )
+
+    observations = tmp_path / "observations.jsonl"
+    observations.write_text(
+        json.dumps(
+            {
+                "benchmark_key": "alpha",
+                "latency_ms": 1,
+                "p95_latency_ms": 1,
+                "throughput_rps": 1,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    budgets = {"alpha": HotspotBudget("alpha", 1, 1, 1.5, 1, 0.35)}
+    report = _compute_degradation(
+        budgets, _load_observations(observations, root=tmp_path), window_size=5
+    )
+    assert len(report) == 1
+    assert report[0].within_budget is True
+    assert report[0].window_p95_latency_ms == 1
+    assert report[0].window_throughput_rps == 1

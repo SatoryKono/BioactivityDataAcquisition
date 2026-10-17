@@ -21,7 +21,15 @@ import re
 import sys
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass
-from decimal import Decimal, InvalidOperation
+from decimal import (
+    Decimal,
+    DecimalException,
+    InvalidOperation,
+    Overflow,
+    Underflow,
+    getcontext,
+    localcontext,
+)
 from pathlib import Path
 from statistics import median
 from typing import Any
@@ -99,7 +107,10 @@ class HotspotLoadError(Exception):
 def _finite_float(value: object) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise ValueError("unusable number")
-    number = float(value)
+    try:
+        number = float(value)
+    except OverflowError as exc:
+        raise ValueError("unrepresentable number") from exc
     if not math.isfinite(number):
         raise ValueError("non-finite number")
     return number
@@ -109,16 +120,16 @@ def _observation_from_record(record: Mapping[str, Any]) -> HotspotObservation:
     latency_ms = _finite_float(record.get("latency_ms"))
     if latency_ms <= 0:
         raise ValueError("non-positive latency")
-    if "p95_latency_ms" in record:
-        p95_latency_ms = _finite_float(record.get("p95_latency_ms"))
-        if p95_latency_ms <= 0:
-            raise ValueError("non-positive p95")
-    else:
-        p95_latency_ms = 0.0
+    p95_latency_ms = _finite_float(record.get("p95_latency_ms"))
+    if p95_latency_ms <= 0:
+        raise ValueError("non-positive p95")
+    throughput_rps = _finite_float(record.get("throughput_rps"))
+    if throughput_rps <= 0:
+        raise ValueError("non-positive throughput")
     return HotspotObservation(
         latency_ms=latency_ms,
         p95_latency_ms=p95_latency_ms,
-        throughput_rps=_finite_float(record.get("throughput_rps")),
+        throughput_rps=throughput_rps,
         timestamp_unix=_finite_float(record.get("timestamp_unix", 0.0)),
     )
 
@@ -645,7 +656,10 @@ def _decimal_mean(value: object) -> Decimal | None:
         return None
     if not number.is_finite():
         return None
-    if isinstance(value, str) and value not in {str(number), format(number, "f")}:
+    context = getcontext()
+    if not context.Etiny() <= number.adjusted() <= context.Emax:
+        return None
+    if isinstance(value, str) and value != str(number) and value != format(number, "f"):
         return None
     return number
 
@@ -865,8 +879,11 @@ def _paired_comparison(
     item: _Measurement,
     base_mean: Decimal,
 ) -> tuple[dict[str, object], bool, bool]:
-    delta = (item[4] - base_mean) / base_mean
-    limit = base_mean * (Decimal(1) + _REGRESSION_THRESHOLD)
+    with localcontext() as context:
+        context.traps[Overflow] = True
+        context.traps[Underflow] = True
+        delta = (item[4] - base_mean) / base_mean
+        limit = base_mean * (Decimal(1) + _REGRESSION_THRESHOLD)
     if item[4] > limit:
         verdict = "measured_regression"
         regressed = True
@@ -962,7 +979,10 @@ def _compare_measurements(
                 )
             )
             continue
-        row, regressed, still_improved = _paired_comparison(item, base_mean)
+        try:
+            row, regressed, still_improved = _paired_comparison(item, base_mean)
+        except DecimalException:
+            return "unusable_measurement", []
         regression = regression or regressed
         improved = improved and still_improved
         rows.append(row)
