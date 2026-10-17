@@ -51,7 +51,7 @@ def test_missing_sha(tmp_path):
         validate_evidence(f, "456")
 
 
-def test_successful_validation(tmp_path):
+def test_validate_benchmark_evidence_success(tmp_path):
     f = tmp_path / "success.json"
     payload = (
         '{"benchmarks": [{"name": "test"}], '
