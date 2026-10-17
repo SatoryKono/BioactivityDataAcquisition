@@ -33,7 +33,24 @@ jobs:
             -p no:xdist \
             -v --tb=short \
             --perf-obs-out reports/performance/hotspot-observations.jsonl \
-            --junitxml=reports/performance/hotspot-budgets.xml
+            --junitxml=reports/performance/hotspot-budgets.xml \
+            -p tests.benchmarks.benchmark_vcs_guard \
+            -p benchmark \
+            --benchmark-json reports/performance/benchmark-measurements.json
+
+      - name: Validate benchmark evidence
+        if: ${{ always() && !cancelled() }}
+        run: |
+          if [ -f reports/performance/benchmark-measurements.json ]; then
+            echo "Validating evidence..."
+            uv run --frozen --no-build python scripts/engineering/qa/validate_benchmark_evidence.py \
+              --measurements reports/performance/benchmark-measurements.json \
+              --manifest-out reports/performance/benchmark-manifest.json \
+              --expected-sha "${{ github.sha }}"
+          else
+            echo "Missing benchmark measurements; benchmark validation skipped but required."
+            /bin/false
+          fi
 
       - name: Build hotspot degradation report
         if: ${{ always() && !cancelled() }}
@@ -80,5 +97,7 @@ jobs:
             reports/performance/hotspot-observations.jsonl
             reports/performance/hotspot-degradation.json
             reports/performance/hotspot-degradation.md
-          if-no-files-found: warn
+            reports/performance/benchmark-measurements.json
+            reports/performance/benchmark-manifest.json
+          if-no-files-found: error
           retention-days: 30
