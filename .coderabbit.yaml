@@ -1,11 +1,15 @@
 ---
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 # CodeRabbit configuration for BioETL project
-# Based on official CodeRabbit configuration schema (updated 03.10.2026; dead config pruned, linters enabled via reviews.tools)
+# Validated against the official CodeRabbit schema on 2026-10-16.
 # Target profile: Python, pytest, external providers, ETL/scientific pipelines
 
 # Language
 language: "ru-RU"
+
+# Canonical repository settings; do not merge repository UI exclusions.
+# Organization/workspace global overrides can still take precedence.
+inheritance: false
 
 # Language and tone
 tone_instructions: "Be concise, neutral, and evidence-based. Prioritize correctness, security, data integrity, backward compatibility, and maintainability. Avoid praise, repetition, style-only comments, and claims not supported by the diff."
@@ -19,7 +23,7 @@ reviews:
   high_level_summary_in_walkthrough: true
 
   # Review profile
-  profile: "assertive"
+  profile: "chill"
 
   # Review every changed repository path unless a future rule excludes it.
   path_filters:
@@ -31,6 +35,9 @@ reviews:
   # Auto review settings
   auto_review:
     enabled: true
+    auto_incremental_review: true
+    # After pausing, request a final review of the latest SHA before merging.
+    auto_pause_after_reviewed_commits: 3
     drafts: false
 
   # Keep assignment and label mutations disabled until pilot validation.
@@ -292,6 +299,9 @@ reviews:
 
   # Pre-merge checks
   pre_merge_checks:
+    docstrings:
+      mode: "warning"
+      threshold: 80
     title:
       requirements: |
         The title must follow <type>(<optional-scope>): <imperative summary>,
@@ -309,6 +319,10 @@ reviews:
     yamllint:
       enabled: true
     shellcheck:
+      enabled: true
+    actionlint:
+      enabled: true
+    github-checks:
       enabled: true
 
 # Code generation settings
