@@ -1129,28 +1129,39 @@ def _intact_controller_receipt(receipts: list[dict[str, Any]]) -> bool:
     return False
 
 
-def _missing_origin_workers(
-    receipts: list[dict[str, Any]], events: list[dict[str, Any]]
-) -> list[str]:
-    intact: set[str] = set()
+def _worker_ids(receipt: dict[str, Any]) -> set[str]:
+    found: set[str] = set()
+    for event in receipt["events"]:
+        identity = _event_identity(event)
+        worker = identity.get("worker_id")
+        if identity.get("role") == "worker" and isinstance(worker, str) and worker:
+            found.add(worker)
+    return found
+
+
+def _intact_worker_ids(receipts: list[dict[str, Any]]) -> set[str]:
+    found: set[str] = set()
     for receipt in receipts:
-        if not _receipt_intact(receipt):
-            continue
-        for event in receipt["events"]:
-            identity = _event_identity(event)
-            if identity.get("role") != "worker":
-                continue
-            worker = identity.get("worker_id")
-            if isinstance(worker, str) and worker:
-                intact.add(worker)
-    missing: set[str] = set()
+        if _receipt_intact(receipt):
+            found.update(_worker_ids(receipt))
+    return found
+
+
+def _outcome_origins(events: list[dict[str, Any]]) -> set[str]:
+    origins: set[str] = set()
     for event in events:
         if event.get("event") != "outcome":
             continue
         origin = event.get("origin_worker")
-        if isinstance(origin, str) and origin and origin not in intact:
-            missing.add(origin)
-    return sorted(missing)
+        if isinstance(origin, str) and origin:
+            origins.add(origin)
+    return origins
+
+
+def _missing_origin_workers(
+    receipts: list[dict[str, Any]], events: list[dict[str, Any]]
+) -> list[str]:
+    return sorted(_outcome_origins(events) - _intact_worker_ids(receipts))
 
 
 def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[str, Any]:
