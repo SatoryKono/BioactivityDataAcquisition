@@ -510,7 +510,18 @@ def judge_hotspot_report(payload: object) -> tuple[str, str]:
         return "failed", "invalid_summary"
     if failed > 0:
         return "failed", "over_budget"
+    if not _hotspot_rows_match(payload, total=total):
+        return "failed", "inconsistent_summary"
     return "passed", "within_budget"
+
+
+def _hotspot_rows_match(payload: Mapping[str, object], *, total: int) -> bool:
+    rows = payload.get("benchmarks")
+    if not isinstance(rows, list) or len(rows) != total:
+        return False
+    return all(
+        isinstance(row, dict) and row.get("within_budget") is True for row in rows
+    )
 
 
 def gate_hotspot_report_main(argv: list[str] | None = None) -> int:
@@ -901,13 +912,13 @@ def _compare_measurements(
     baseline_contexts = {(row[1], row[2], row[3]) for row in baseline}
     if not contexts or not contexts.issubset(baseline_contexts):
         return "insufficient_baseline", []
+    if not baseline_contexts.issubset(contexts):
+        return "missing_baseline_scope", []
     rows: list[dict[str, object]] = []
     missing = False
     regression = False
     improved = True
     for key, base_mean in sorted(baseline_by_key.items()):
-        if (key[1], key[2], key[3]) not in contexts:
-            continue
         if key not in current_keys:
             missing = True
             rows.append(
@@ -1013,7 +1024,30 @@ def _emit_reducer(
     text = _dump(body)
     for path in (args.gate_out, args.manifest_out):
         write_text_confined(path, text, root=root)
+    _copy_revision_evidence(args, root, body, text)
     return 0 if status == "passed" else 1
+
+
+def _copy_revision_evidence(
+    args: argparse.Namespace,
+    root: Path,
+    body: Mapping[str, object],
+    text: str,
+) -> None:
+    from scripts.engineering.common.repo_paths import write_text_confined
+
+    measured = body.get("measured_sha")
+    raw_sha = body.get("raw_sha256")
+    if (
+        not isinstance(measured, str)
+        or _SHA_RE.fullmatch(measured) is None
+        or not isinstance(raw_sha, str)
+        or len(raw_sha) != 64
+    ):
+        return
+    folder = args.evidence_dir / measured / raw_sha
+    for name in ("benchmark-gate.json", "benchmark-manifest.json"):
+        write_text_confined(folder / name, text, root=root)
 
 
 def _resolved_under_root(path: Path, root: Path) -> Path:

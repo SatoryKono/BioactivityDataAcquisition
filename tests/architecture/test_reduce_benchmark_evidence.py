@@ -319,6 +319,15 @@ def test_fifteen_percent_slowdown_fails_and_improvement_passes(tmp_path: Path) -
     assert fast_body["measured_sha"] == _HEAD
     assert "tests/performance/" not in fast_body["scopes"]
     assert json.loads(manifest.read_text(encoding="utf-8"))["reason"] == "improvement"
+    stored_gate = list((fast_dir / "evidence").rglob("benchmark-gate.json"))
+    stored_manifest = list((fast_dir / "evidence").rglob("benchmark-manifest.json"))
+    assert len(stored_gate) == 1
+    assert len(stored_manifest) == 1
+    assert (
+        json.loads(stored_gate[0].read_text(encoding="utf-8"))["reason"]
+        == "improvement"
+    )
+    assert stored_manifest[0].read_bytes() == stored_gate[0].read_bytes()
 
 
 def test_new_test_needs_a_comparable_baseline(tmp_path: Path) -> None:
@@ -363,6 +372,24 @@ def test_new_test_needs_a_comparable_baseline(tmp_path: Path) -> None:
     )
     assert other.returncode == 1, other.stderr
     assert _gate(other_gate)["reason"] == "insufficient_baseline"
+
+    both = _baseline(100)
+    both["tests"].append(
+        {
+            "dataset": "locked-nightly",
+            "environment": "github-actions",
+            "mean": 100,
+            "scope": "tests/performance/",
+            "test_id": _OTHER_SCOPE,
+        }
+    )
+    dropped_dir = tmp_path / "dropped-scope"
+    dropped_dir.mkdir()
+    dropped, dropped_gate, _manifest = _invoke(
+        dropped_dir, json.dumps(_measurement(100)).encode(), baseline=both
+    )
+    assert dropped.returncode == 1, dropped.stderr
+    assert _gate(dropped_gate)["reason"] == "missing_baseline_scope"
 
 
 def test_missing_baseline_test_fails(tmp_path: Path) -> None:
@@ -634,6 +661,20 @@ def test_hotspot_rejects_negative_failures_and_non_positive_latency(
     )
     assert status == "failed"
     assert reason == "invalid_summary"
+    empty_status, empty_reason = judge_hotspot_report(
+        {"summary": {"failed": 0, "total": 1}, "verdict": "measured"}
+    )
+    assert empty_status == "failed"
+    assert empty_reason == "inconsistent_summary"
+    contradicted, contradicted_reason = judge_hotspot_report(
+        {
+            "benchmarks": [{"within_budget": False}],
+            "summary": {"failed": 0, "total": 1},
+            "verdict": "measured",
+        }
+    )
+    assert contradicted == "failed"
+    assert contradicted_reason == "inconsistent_summary"
 
     observations = tmp_path / "observations.jsonl"
     observations.write_text(
