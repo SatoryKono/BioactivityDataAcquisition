@@ -1191,11 +1191,11 @@
     "max_group_size": 0,
     "scan_root": "tests/fixtures",
     "scope_file_counts": {
-      "fixture": 84,
+      "fixture": 85,
       "golden": 30,
       "vcr": 344
     },
-    "total_files": 458,
+    "total_files": 459,
     "tracked_extensions": [
       ".json",
       ".yaml",
@@ -2057,11 +2057,11 @@
       "max_group_size": 0,
       "scan_root": "tests/fixtures",
       "scope_file_counts": {
-        "fixture": 84,
+        "fixture": 85,
         "golden": 30,
         "vcr": 344
       },
-      "total_files": 458,
+      "total_files": 459,
       "tracked_extensions": [
         ".json",
         ".yaml",
@@ -2087,8 +2087,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 3050,
-      "test_python_file_count": 3286,
+      "test_glob_file_count": 3052,
+      "test_python_file_count": 3288,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2140,13 +2140,13 @@
         "name": "test_successful_validation"
       }
     ],
-    "total_test_files": 3050,
-    "total_test_functions": 29999,
+    "total_test_files": 3052,
+    "total_test_functions": 30026,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "39b6cd5c7653d9ba21daf94dbb24c7b9988d2b318e93eebedba714689cd11e44",
+  "source_tree_sha256": "5af463103276a23aaba354a7e1c55d1a75755e5558b9e757a97902f009d5edfb",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 85,
@@ -2166,8 +2166,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 3050,
-    "test_python_file_count": 3286,
+    "test_glob_file_count": 3052,
+    "test_python_file_count": 3288,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2219,8 +2219,8 @@
       "name": "test_successful_validation"
     }
   ],
-  "total_test_files": 3050,
-  "total_test_functions": 29999,
+  "total_test_files": 3052,
+  "total_test_functions": 30026,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
