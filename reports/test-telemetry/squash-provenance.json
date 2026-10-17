@@ -6,20 +6,20 @@
       }
     },
     "head": {
-      "sha": "142ed757ae26f72e73130289b9a4212d07377fa4"
+      "sha": "2f4fe937a5137f2feb7ec7afc7faad345a184ffe"
     },
-    "merge_commit_sha": "99563d50c6a987bffac7bdaf0cdeb5c5e6fcba05",
+    "merge_commit_sha": "51c51734d250e36b8e63d3f717606c07f873ed44",
     "merged": true,
-    "number": 12228
+    "number": 12231
   },
-  "manifest_sha256": "36214cc50ef586a2c1f93f91543f585b1dc7dc9436526e151147b2970f5048cf",
-  "merged_tree": "1a6c352e556ec9ab5d776c72e53b8c7f689ae504",
-  "metrics_sha256": "0f7debeb3142358785fc055d907f96de546f1b24f55646565326b84dbba52f84",
-  "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/12228",
+  "manifest_sha256": "ef6e4ed40c9447084ba1f2ec9368b12dc315180481244a6189712bb55da9a981",
+  "merged_tree": "10a72711e7b5f338c437d329823cbb7bbe652012",
+  "metrics_sha256": "8395931af06f5ea7a0a670aaf293705a8e6b072a8d71ae7257219e9ccd256268",
+  "retrieved_from": "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/pulls/12231",
   "schema_version": 1,
-  "source_commit": "3bb4a9fca5636f2bda77a4730090d10ffe07650a",
-  "source_run_id": "local-pr12204-combined-3bb4a9fc",
-  "source_tree_sha256": "0bc0cd037b85c107be66cb9213a2a2c1389f2ba2f28be16c76ea834bc6074f96",
+  "source_commit": "8a4286d21becf1fe183acfaf3f051bc6f7916038",
+  "source_run_id": "local-pr12231-local-coverage-8a4286d",
+  "source_tree_sha256": "b3a11bb154433ad72b2f07da87d94f02cfff5f3c2ca8a4fad4fbde96204b0aba",
   "trust_tier": "local_single_host",
-  "verification_mode": "local_capture_binding"
+  "verification_mode": "live_github"
 }
