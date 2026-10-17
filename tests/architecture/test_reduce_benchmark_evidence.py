@@ -580,6 +580,28 @@ def test_non_positive_means_do_not_pass(tmp_path: Path) -> None:
     assert raw.read_bytes() == json.dumps(_measurement(90)).encode()
     assert _gate(based_gate)["status"] == "failed"
 
+    duplicate = _baseline(100)
+    rows = duplicate["tests"]
+    assert isinstance(rows, list)
+    rows.append(
+        {
+            "dataset": "locked-nightly",
+            "environment": "github-actions",
+            "mean": 1000,
+            "scope": "tests/benchmarks/",
+            "test_id": _TEST_ID,
+        }
+    )
+    duplicate_dir = tmp_path / "duplicate-key"
+    duplicate_dir.mkdir()
+    duplicated, duplicated_gate, _manifest = _invoke(
+        duplicate_dir,
+        json.dumps(_measurement(500)).encode(),
+        baseline=duplicate,
+    )
+    assert duplicated.returncode == 1, duplicated.stderr
+    assert _gate(duplicated_gate)["reason"] == "invalid_baseline"
+
 
 def test_clean_checkout_accepts_boolean_dirty_false(tmp_path: Path) -> None:
     payload = _measurement(90)

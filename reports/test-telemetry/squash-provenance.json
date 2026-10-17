@@ -45,5 +45,6 @@
   "source_commit": "8a4286d21becf1fe183acfaf3f051bc6f7916038",
   "source_run_id": "local-pr12231-local-coverage-8a4286d",
   "source_tree_sha256": "b3a11bb154433ad72b2f07da87d94f02cfff5f3c2ca8a4fad4fbde96204b0aba",
-  "trust_tier": "local_single_host"
+  "trust_tier": "local_single_host",
+  "verification_mode": "live_github"
 }

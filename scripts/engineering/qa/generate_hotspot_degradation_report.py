@@ -817,13 +817,22 @@ def _load_baseline(payload: object) -> tuple[str, list[_Measurement]] | str:
     rows = payload.get("tests")
     if not isinstance(rows, list) or not rows:
         return "insufficient_baseline"
+    parsed = _parse_baseline_rows(rows)
+    if isinstance(parsed, str):
+        return parsed
+    return baseline_sha, parsed
+
+
+def _parse_baseline_rows(rows: list[object]) -> list[_Measurement] | str:
     parsed: list[_Measurement] = []
+    seen: set[tuple[str, str, str, str]] = set()
     for row in rows:
         measurement = _baseline_measurement(row)
-        if measurement is None:
+        if measurement is None or measurement[:4] in seen:
             return "invalid_baseline"
+        seen.add(measurement[:4])
         parsed.append(measurement)
-    return baseline_sha, parsed
+    return parsed
 
 
 def _comparison_row(
