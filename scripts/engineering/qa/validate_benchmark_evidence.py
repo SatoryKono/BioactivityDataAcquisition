@@ -3,6 +3,8 @@ import json
 import os
 import sys
 from pathlib import Path
+from scripts.engineering.common.repo_paths import confined_io_path
+
 
 def validate_evidence(measurements_path: Path, expected_sha: str | None) -> dict:
     if not measurements_path.exists():
@@ -17,7 +19,9 @@ def validate_evidence(measurements_path: Path, expected_sha: str | None) -> dict
         raise ValueError(f"Malformed JSON in {measurements_path}: {e}") from e
 
     if not isinstance(data, dict):
-        raise ValueError(f"Invalid JSON structure in {measurements_path}: expected dict")
+        raise ValueError(
+            f"Invalid JSON structure in {measurements_path}: expected dict"
+        )
 
     benchmarks = data.get("benchmarks", [])
     if not benchmarks:
@@ -31,7 +35,9 @@ def validate_evidence(measurements_path: Path, expected_sha: str | None) -> dict
     commit_info = data.get("commit_info", {})
     actual_sha = commit_info.get("id")
     if not actual_sha:
-        raise ValueError("No commit SHA found in benchmark JSON (commit_info.id missing)")
+        raise ValueError(
+            "No commit SHA found in benchmark JSON (commit_info.id missing)"
+        )
 
     if expected_sha and actual_sha != expected_sha:
         raise ValueError(f"Wrong SHA. Expected {expected_sha}, got {actual_sha}")
@@ -45,29 +51,50 @@ def validate_evidence(measurements_path: Path, expected_sha: str | None) -> dict
         "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT", "1"),
         "run_url": f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/{os.environ.get('GITHUB_REPOSITORY', 'local/repo')}/actions/runs/{os.environ.get('GITHUB_RUN_ID', 'local')}/attempts/{os.environ.get('GITHUB_RUN_ATTEMPT', '1')}",
         "environment_identity": machine_info,
-        "dataset_identity": "unknown", # default placeholder as dataset isn't explicitly bound yet
-        "benchmarks_count": len(benchmarks)
+        "dataset_identity": "unknown",  # default placeholder as dataset isn't explicitly bound yet
+        "benchmarks_count": len(benchmarks),
     }
 
     return manifest
 
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate benchmark evidence.")
-    parser.add_argument("--measurements", type=Path, default=Path("reports/performance/benchmark-measurements.json"))
-    parser.add_argument("--manifest-out", type=Path, default=Path("reports/performance/benchmark-manifest.json"))
-    parser.add_argument("--expected-sha", type=str, default=os.environ.get("GITHUB_SHA"))
+    parser.add_argument(
+        "--measurements",
+        type=Path,
+        default=Path("reports/performance/benchmark-measurements.json"),
+    )
+    parser.add_argument(
+        "--manifest-out",
+        type=Path,
+        default=Path("reports/performance/benchmark-manifest.json"),
+    )
+    parser.add_argument(
+        "--expected-sha", type=str, default=os.environ.get("GITHUB_SHA")
+    )
     args = parser.parse_args(argv)
 
     try:
-        manifest = validate_evidence(args.measurements, args.expected_sha)
+        measurements_path = confined_io_path(
+            args.measurements, allow_external_absolute=True
+        )
+        manifest_out = confined_io_path(args.manifest_out, allow_external_absolute=True)
+    except ValueError as e:
+        print(f"Path Traversal Error: {e}", file=sys.stderr)
+        return 1
+
+    try:
+        manifest = validate_evidence(measurements_path, args.expected_sha)
     except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
 
-    args.manifest_out.parent.mkdir(parents=True, exist_ok=True)
-    args.manifest_out.write_text(json.dumps(manifest, indent=2) + "\n")
-    print(f"Validation successful. Manifest written to {args.manifest_out}")
+    manifest_out.parent.mkdir(parents=True, exist_ok=True)
+    manifest_out.write_text(json.dumps(manifest, indent=2) + "\n")
+    print(f"Validation successful. Manifest written to {manifest_out}")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())
