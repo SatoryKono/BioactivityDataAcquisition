@@ -290,8 +290,8 @@ def _run_pass(
     if manifest.status == "WATCHDOG_TIMEOUT":
         elapsed = 0 if timeout_seconds is None else timeout_seconds
         output = (
-            f"{output}\n[run_pytest_resilient] pass '{name}' timed out "
-            f"after {elapsed:.0f}s."
+            f"[run_pytest_resilient] pass '{name}' timed out "
+            f"after {elapsed:.0f}s.\n{output}"
         ).lstrip("\n")
     write_text_confined(
         log_path, output, root=reports_dir, allow_external_absolute=False
