@@ -390,9 +390,7 @@ def check_library_cards(report: LintReport) -> int:
             load_registry as _load_registry,
         )
     except Exception as exc:
-        report.add_warning(
-            "library_cards_unavailable", f"card lint skipped: {exc}"
-        )
+        report.add_warning("library_cards_unavailable", f"card lint skipped: {exc}")
         return 0
     scanned = 0
     try:
@@ -411,9 +409,7 @@ def check_library_cards(report: LintReport) -> int:
         try:
             card = _load_card(entry.absolute_path)
         except Exception as exc:
-            report.add_error(
-                "library_card_parse", f"{entry.id}: {exc}", entry.path
-            )
+            report.add_error("library_card_parse", f"{entry.id}: {exc}", entry.path)
             continue
         scanned += 1
         for violation in fail_closed_violations(card):
