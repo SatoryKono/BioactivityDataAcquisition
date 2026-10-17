@@ -135,6 +135,7 @@ OWNER_STEPS: dict[str, dict[str, tuple[str, ...]]] = {
             "docs-links",
             "docs-verify",
             "mkdocs-nav",
+            "prose-consistency",
         ),
     },
     CLASS_LANE: {
@@ -168,6 +169,7 @@ OWNER_STEPS: dict[str, dict[str, tuple[str, ...]]] = {
 
 
 def _normalize_job_result(raw: str) -> str:
+    """Map a job conclusion to success, skipped, or failure."""
     value = raw.strip().lower()
     if value == SUCCESS:
         return SUCCESS
@@ -282,6 +284,7 @@ def affected_pytest_targets(
 
 
 def _deduplicate_targets(targets: list[str], root: Path) -> list[str]:
+    """Drop a test path when a selected parent directory already covers it."""
     unique = list(dict.fromkeys(targets))
     suites = {target.rstrip("/") for target in unique if (root / target).is_dir()}
     return [
@@ -292,12 +295,14 @@ def _deduplicate_targets(targets: list[str], root: Path) -> list[str]:
 
 
 def _global_dependency_lane(root: Path, dependencies: set[str]) -> bool:
+    """Return whether a dependency diff selects the full Python test lane."""
     return pytest_framework_affected(root, dependencies) or repository_cli_affected(
         root, dependencies
     )
 
 
 def _mapped_targets(path: str) -> list[str]:
+    """Return catalog-mapped tests for one changed path."""
     targets = list(AFFECTED_TESTS_BY_PATH.get(path, ()))
     for prefix, values in AFFECTED_TESTS_BY_PREFIX.items():
         if path.startswith(prefix):
@@ -306,12 +311,14 @@ def _mapped_targets(path: str) -> list[str]:
 
 
 def _require_targets(targets: list[str], root: Path) -> None:
+    """Reject mapped targets that are not files in the repository."""
     missing = sorted({target for target in targets if not (root / target).is_file()})
     if missing:
         raise ValueError("Missing mandatory mapped test targets: " + ", ".join(missing))
 
 
 def _path_targets(path: str, root: Path) -> list[str]:
+    """Return the test path or unit directory implied by one changed path."""
     if path.startswith(TESTS_PREFIX) and path.endswith(".py"):
         return [path] if (root / path).is_file() else []
     if path.startswith("src/bioetl/") and path.endswith(".py"):
@@ -324,6 +331,7 @@ def _path_targets(path: str, root: Path) -> list[str]:
 
 
 def _script_targets(path: str, root: Path) -> list[str]:
+    """Return direct or importing tests for one scripts path."""
     relative = Path(path.removeprefix("scripts/"))
     test_roots = (root / "tests/unit/scripts", root / "tests/unit/repo_backed/scripts")
     direct_dirs = [test_root / relative.parent for test_root in test_roots]
@@ -347,6 +355,7 @@ def _script_targets(path: str, root: Path) -> list[str]:
 
 
 def _importing_script_tests(roots: tuple[Path, Path], module: str) -> set[Path]:
+    """Return test files that statically import the script module."""
     return {
         test
         for root in roots
@@ -377,6 +386,7 @@ def _dependency_targets(repo_root: Path, dependencies: set[str]) -> list[str]:
 def _consumer_targets(
     consumer: str, root: Path, owners: dict[str, list[str]]
 ) -> list[str]:
+    """Return the confirmed test route for one dependency consumer."""
     if consumer in owners:
         selected = owners[consumer]
         _require_targets(selected, root)
@@ -443,6 +453,7 @@ def _matches_module_import(
 
 
 def _load_json_object(raw: str, *, label: str) -> dict[str, Any]:
+    """Parse a JSON object and reject every other JSON type."""
     payload = json.loads(raw)
     if not isinstance(payload, dict):
         raise ValueError(f"{label} must be a JSON object")
@@ -450,6 +461,7 @@ def _load_json_object(raw: str, *, label: str) -> dict[str, Any]:
 
 
 def _decision_map(matrix: dict[str, Any]) -> dict[str, Any]:
+    """Return the decisions mapping from a classifier matrix."""
     decisions = matrix.get("decisions", matrix)
     if not isinstance(decisions, dict):
         raise ValueError("decision matrix decisions must be a mapping")
@@ -457,6 +469,7 @@ def _decision_map(matrix: dict[str, Any]) -> dict[str, Any]:
 
 
 def _env_or_text(value: str, *, from_env: bool) -> str:
+    """Return the value itself or the named environment variable."""
     if from_env:
         if value not in os.environ:
             raise ValueError(f"environment variable {value} is missing")
@@ -465,6 +478,7 @@ def _env_or_text(value: str, *, from_env: bool) -> str:
 
 
 def _build_command(args: argparse.Namespace) -> int:
+    """Write the gate result map for one decision matrix."""
     matrix = _load_json_object(
         _env_or_text(args.decision_matrix, from_env=args.decision_matrix_env),
         label="decision matrix",
@@ -483,6 +497,7 @@ def _build_command(args: argparse.Namespace) -> int:
 
 
 def _assert_command(args: argparse.Namespace) -> int:
+    """Fail when a required owner step did not succeed."""
     matrix = _load_json_object(
         _env_or_text(args.decision_matrix, from_env=args.decision_matrix_env),
         label="decision matrix",
@@ -505,6 +520,7 @@ def _assert_command(args: argparse.Namespace) -> int:
 
 
 def _affected_command(args: argparse.Namespace) -> int:
+    """Print pytest targets for the changed files."""
     if args.changed_file:
         changed = list(args.changed_file)
     else:
@@ -554,6 +570,7 @@ def _affected_command(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the lane-results command parser."""
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -588,6 +605,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def _job_result_pair(raw: str) -> tuple[str, str]:
+    """Parse one owner=result argument into a pair."""
     job_name, separator, result = raw.partition("=")
     if not separator or not job_name or not result:
         raise argparse.ArgumentTypeError("expected name=result")
@@ -595,6 +613,7 @@ def _job_result_pair(raw: str) -> tuple[str, str]:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Run the selected lane-results command."""
     args = build_parser().parse_args(argv)
     return cast(int, args.handler(args))
 
