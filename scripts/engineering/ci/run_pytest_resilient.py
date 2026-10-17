@@ -11,7 +11,6 @@ from __future__ import annotations
 import argparse
 import re
 import shlex
-import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -41,6 +40,8 @@ class PassResult:
     failed_nodeids: list[str]
     worker_crash_detected: bool
     timed_out: bool
+    diagnostic_status: str = ""
+    diagnostic_manifest: Path | None = None
 
 
 def _split_args(raw_args: str) -> list[str]:
@@ -78,29 +79,26 @@ def _merge_process_output(stdout: str, stderr: str) -> str:
     return f"{stdout}\n{stderr}" if stdout else stderr
 
 
-def _decode_timeout_stream(stream: bytes | str | None) -> str:
-    if stream is None:
+def _supervised_output(reports_dir: Path, stdout_file: str, stderr_file: str) -> str:
+    """Read supervisor logs. The diagnostic manifest is not pytest output."""
+    stdout = _read_supervised_log(reports_dir, stdout_file)
+    stderr = _read_supervised_log(reports_dir, stderr_file)
+    return _merge_process_output(stdout, stderr)
+
+
+def _read_supervised_log(reports_dir: Path, relative: str) -> str:
+    from scripts.engineering.common.repo_paths import read_text_confined
+
+    if not relative:
         return ""
-    if isinstance(stream, bytes):
-        return stream.decode("utf-8", errors="replace")
-    return stream
-
-
-def _timeout_output(
-    *,
-    exc: subprocess.TimeoutExpired,
-    name: str,
-    timeout_seconds: float | None,
-) -> str:
-    output = _merge_process_output(
-        _decode_timeout_stream(exc.stdout),
-        _decode_timeout_stream(exc.stderr),
-    )
-    timeout_note = (
-        f"\n[run_pytest_resilient] pass '{name}' timed out "
-        f"after {timeout_seconds:.0f}s."
-    )
-    return f"{output}{timeout_note}" if output else timeout_note.lstrip()
+    try:
+        return read_text_confined(
+            reports_dir / relative,
+            root=reports_dir,
+            allow_external_absolute=False,
+        )
+    except (OSError, ValueError):
+        return ""
 
 
 def _run_pass(
@@ -133,44 +131,72 @@ def _run_pass(
 
     sys.stdout.write(f"\n=== Running pytest pass: {name} ===\n")
     sys.stdout.write(f"Command: {' '.join(command)}\n")
-    timed_out = False
+    from scripts.engineering.ci.pytest_abort_diagnostic_adapter import (
+        DIAGNOSTIC_DUMP_MARGIN_SECONDS,
+        PytestAbortDiagnosticAdapter,
+        child_watchdog_seconds,
+    )
+    from scripts.engineering.common.repo_paths import write_text_confined
+
     try:
-        from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
-
-        completed = (
-            subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
-                ensure_safe_cli_argv([str(token) for token in command]),
-                capture_output=True,
-                text=True,
-                check=False,
-                timeout=timeout_seconds,
-            )
+        watchdog = (
+            None if timeout_seconds is None else child_watchdog_seconds(timeout_seconds)
         )
-        return_code = completed.returncode
-        output = _merge_process_output(completed.stdout, completed.stderr)
-    except subprocess.TimeoutExpired as exc:
-        timed_out = True
-        return_code = 124
-        output = _timeout_output(
-            exc=exc,
+    except ValueError as exc:
+        output = f"[run_pytest_resilient] invalid timeout budget: {exc}\n"
+        write_text_confined(
+            log_path, output, root=reports_dir, allow_external_absolute=False
+        )
+        return PassResult(
             name=name,
-            timeout_seconds=timeout_seconds,
+            command=command,
+            return_code=2,
+            output=output,
+            junit_path=junit_path,
+            log_path=log_path,
+            failed_nodeids=[],
+            worker_crash_detected=False,
+            timed_out=False,
+            diagnostic_status="INVALID_INVOCATION",
         )
-
-    log_path.write_text(output, encoding="utf-8")
+    manifest = PytestAbortDiagnosticAdapter(
+        timeout=watchdog,
+        dump_margin=DIAGNOSTIC_DUMP_MARGIN_SECONDS,
+        base=reports_dir,
+    ).run(
+        command,
+        junit_path,
+        reports_dir / "diagnostics" / name,
+        base=reports_dir,
+    )
+    output = _supervised_output(reports_dir, manifest.stdout_file, manifest.stderr_file)
+    if manifest.status == "WATCHDOG_TIMEOUT":
+        elapsed = 0 if timeout_seconds is None else timeout_seconds
+        output = (
+            f"{output}\n[run_pytest_resilient] pass '{name}' timed out "
+            f"after {elapsed:.0f}s."
+        ).lstrip("\n")
+    write_text_confined(
+        log_path, output, root=reports_dir, allow_external_absolute=False
+    )
     if output:
         sys.stdout.write(output)
+    diagnostic_manifest = None
+    if manifest.diagnostics_persisted and manifest.manifest_file:
+        diagnostic_manifest = reports_dir / manifest.manifest_file
 
     return PassResult(
         name=name,
         command=command,
-        return_code=return_code,
+        return_code=manifest.wrapper_exit_code,
         output=output,
         junit_path=junit_path,
         log_path=log_path,
         failed_nodeids=_extract_failed_nodeids(output),
         worker_crash_detected=_detect_worker_crash(output),
-        timed_out=timed_out,
+        timed_out=manifest.status == "WATCHDOG_TIMEOUT",
+        diagnostic_status=manifest.status,
+        diagnostic_manifest=diagnostic_manifest,
     )
 
 
@@ -201,6 +227,11 @@ def _append_pass_summary(
         f"log={result.log_path} junit={result.junit_path}"
     )
     _append_failed_nodeids(summary_lines, result=result)
+    if result.diagnostic_manifest is not None:
+        summary_lines.append(
+            f"{result.name}_diagnostic: status={result.diagnostic_status} "
+            f"manifest={result.diagnostic_manifest}"
+        )
 
 
 def _summary_state_fields(result: PassResult) -> str:
@@ -337,6 +368,14 @@ def _create_parser() -> argparse.ArgumentParser:
         help="Skip dedicated serial-marker pass.",
     )
     parser.add_argument(
+        "--no-fallback",
+        action="store_true",
+        help=(
+            "Do not start a second pytest pass after a worker crash or watchdog "
+            "timeout. The parallel pass status is returned as-is."
+        ),
+    )
+    parser.add_argument(
         "--parallel-timeout-seconds",
         type=float,
         default=900.0,
@@ -363,14 +402,14 @@ def _create_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     """CLI entrypoint."""
     parser = _create_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     reports_dir = Path(args.reports_dir)
     summary_lines: list[str] = []
-    base_command = [sys.executable, "-m", "pytest"]
+    base_command = [sys.executable, "-X", "faulthandler", "-m", "pytest"]
     parallel_timeout = args.parallel_timeout_seconds or None
     fallback_timeout = args.fallback_timeout_seconds or None
     serial_timeout = args.serial_timeout_seconds or None
@@ -409,8 +448,15 @@ def main() -> int:
         _write_summary(_summary_path(reports_dir), summary_lines)
         return serial_rc
 
-    if _parallel_failure_is_stable(parallel_result):
-        summary_lines.append("parallel_failed_without_worker_crash=true")
+    if _parallel_failure_is_stable(parallel_result) or args.no_fallback:
+        if _parallel_failure_is_stable(parallel_result):
+            summary_lines.append("parallel_failed_without_worker_crash=true")
+        else:
+            _append_parallel_instability_markers(
+                summary_lines,
+                parallel_result=parallel_result,
+            )
+            summary_lines.append("fallback_skipped=true")
         _write_summary(_summary_path(reports_dir), summary_lines)
         return parallel_rc
 
