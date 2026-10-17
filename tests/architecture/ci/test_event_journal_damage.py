@@ -61,6 +61,32 @@ def test_same_classification_from_two_workers_is_not_a_conflict(
     assert "conflicting_outcome" not in verdict["reasons"]
     assert verdict["status"] == "complete"
     assert verdict["selected_count"] == 1
+    assert verdict["tests_passed"] is True
+
+
+def test_duplicate_copies_on_different_workers_stay_complete(tmp_path: Path) -> None:
+    controller = _identity(role="controller", worker_id="controller")
+    worker_a = _identity(role="worker", worker_id="gw0")
+    worker_b = _identity(role="worker", worker_id="gw1")
+    nodeid = "test_sample.py::test_a"
+    events = _finalized(
+        [
+            _start(controller),
+            _collected(controller, [nodeid, nodeid]),
+            *_phases(worker_a, nodeid, "passed"),
+            *_phases(worker_b, nodeid, "passed"),
+            {"event": "session_finish", "identity": controller, "exitstatus": 0},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert "conflicting_outcome" not in verdict["reasons"]
+    assert verdict["status"] == "complete", verdict["reasons"]
+    assert verdict["tests_passed"] is True
+    assert [item["classification"] for item in verdict["terminals"]] == [
+        "passed",
+        "passed",
+    ]
 
 
 def test_unsupported_schema_version_is_unknown(tmp_path: Path) -> None:
@@ -666,3 +692,43 @@ def test_intermediate_rerun_keeps_the_final_attempt(tmp_path: Path) -> None:
     assert verdict["status"] == "complete", verdict["reasons"]
     assert verdict["tests_passed"] is True
     assert verify_directory(tmp_path, executed_passes=["parallel"]) == 0
+
+
+def test_setup_error_copy_does_not_inherit_the_other_call(tmp_path: Path) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_a"
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid, nodeid]),
+            *_phases(identity, nodeid, "setup_error"),
+            *_phases(identity, nodeid, "passed"),
+            {"event": "session_finish", "identity": identity, "exitstatus": 1},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert "conflicting_outcome" not in verdict["reasons"]
+    assert verdict["status"] == "complete", verdict["reasons"]
+    assert verdict["tests_passed"] is False
+    assert sorted(item["classification"] for item in verdict["terminals"]) == [
+        "passed",
+        "setup_error",
+    ]
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 0
+
+
+def test_standalone_unspecified_pass_is_authoritative(tmp_path: Path) -> None:
+    result = _run_journal(
+        tmp_path,
+        "def test_ok():\n    pass\n",
+        [],
+        {"BIOETL_JOURNAL_PASS": ""},
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    journal = tmp_path / "journal"
+    verdict = reconcile_directory(journal, executed_passes=[])
+    assert verdict["authoritative_passes"] == ["unspecified"]
+    assert verdict["status"] == "complete"
+    assert verdict["tests_passed"] is True
+    assert verify_directory(journal) == 0

@@ -37,7 +37,9 @@ are keyed outside the receipt. A later session-finish hook that raises
 or changes the exit status is stored as ``hook_error`` and keeps the
 pass from being complete. An intermediate ``rerun`` report is an attempt,
 not a damaged classification. A controller ``session_finish`` counts only
-when ``exitstatus`` is an integer.
+when ``exitstatus`` is an integer. A direct pytest session without a runner
+pass name is an authoritative ``unspecified`` pass. A phase that only one
+duplicate recorded is not copied onto the other duplicate.
 """
 
 from __future__ import annotations
@@ -1068,18 +1070,17 @@ def _group_outcome_rows(
 
 
 def _phase_reports(pool: list[dict[str, Any]]) -> list[str]:
-    """One classification list per instance, without multiplying agreeing workers."""
+    """Keep one classification per copy, including copies on other workers.
+
+    Workers that report the same classification are not a conflict. Each
+    worker's rows stay in the count so ``--keep-duplicates`` across ``-n``
+    still matches the selected copies.
+    """
     by_worker: dict[str, list[str]] = defaultdict(list)
     for row in pool:
         by_worker[str(row.get("worker_id"))].append(str(row.get("classification")))
-    groups = list(by_worker.values())
-    if len(groups) <= 1:
-        return groups[0] if groups else []
-    agreed = Counter(groups[0])
-    if all(Counter(group) == agreed for group in groups[1:]):
-        return groups[0]
     merged: list[str] = []
-    for group in groups:
+    for group in by_worker.values():
         merged.extend(group)
     return merged
 
@@ -1148,6 +1149,7 @@ def _dedup_outcomes(
 def _terminal_states(
     selected: list[str],
     outcomes: dict[tuple[str, str, int], dict[str, Any]],
+    events: list[dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], list[str], list[str]]:
     by_node: dict[str, dict[int, dict[str, list[str]]]] = defaultdict(dict)
     workers: dict[tuple[str, int], str] = {}
@@ -1192,8 +1194,31 @@ def _terminal_states(
                 attempt_count=len(attempts),
             )
             continue
+        if any(len(items) != copies for items in phase_lists.values()):
+            instances = _ordered_instances(events, nodeid, retry_index)
+            if len(instances) != copies:
+                gap_reasons.append("conflicting_outcome")
+                continue
+            for phases in instances:
+                explained, classification = _explain_phases(phases)
+                if not explained:
+                    missing.append(nodeid)
+                    if classification == "missing_teardown":
+                        gap_reasons.append("missing_teardown")
+                    continue
+                _append_terminals(
+                    terminals,
+                    nodeid=nodeid,
+                    copies=1,
+                    phases=phases,
+                    classification=classification,
+                    retry_index=retry_index,
+                    worker_id=worker_id,
+                    attempt_count=len(attempts),
+                )
+            continue
         for index in range(copies):
-            phases = _bundle_at(phase_lists, index)
+            phases = _bundle_at(phase_lists, index, copies)
             explained, classification = _explain_phases(phases)
             if not explained:
                 missing.append(nodeid)
@@ -1226,16 +1251,67 @@ def _mixed_copies_conflict(phases: dict[str, list[str]], copies: int) -> bool:
     return len(set(mixed_lengths)) > 1
 
 
-def _bundle_at(phases: dict[str, list[str]], index: int) -> dict[str, str]:
+def _bundle_at(phases: dict[str, list[str]], index: int, copies: int) -> dict[str, str]:
     bundle: dict[str, str] = {}
     for when, items in phases.items():
         if not items:
             continue
-        if len(set(items)) == 1:
+        if len(set(items)) == 1 and len(items) >= copies:
             bundle[when] = items[0]
         elif index < len(items):
             bundle[when] = items[index]
     return bundle
+
+
+def _ordered_instances(
+    events: list[dict[str, Any]], nodeid: str, retry_index: int
+) -> list[dict[str, str]]:
+    """Rebuild each selected copy from event order.
+
+    A later setup starts another copy. A phase that is absent on one copy
+    stays absent instead of being copied from a shorter list.
+    """
+    rows: list[tuple[str, str, str, str]] = []
+    for event in events:
+        if event.get("event") != "outcome" or event.get("subtest") is True:
+            continue
+        if str(event.get("nodeid") or "") != nodeid:
+            continue
+        retry = event.get("retry_index", 0)
+        if retry is None:
+            retry = 0
+        if not _is_non_negative_int(retry) or retry != retry_index:
+            continue
+        identity = _event_identity(event)
+        rows.append(
+            (
+                str(identity.get("role") or ""),
+                str(identity.get("worker_id") or ""),
+                str(event.get("when") or ""),
+                str(event.get("classification") or ""),
+            )
+        )
+    workers = [row for row in rows if row[0] == "worker"]
+    chosen = workers or rows
+    by_worker: dict[str, list[tuple[str, str]]] = defaultdict(list)
+    for _role, worker, when, classification in chosen:
+        by_worker[worker].append((when, classification))
+    sequences = list(by_worker.values())
+    if not sequences:
+        return []
+    sequence = (
+        sequences[0]
+        if all(item == sequences[0] for item in sequences[1:])
+        else [item for seq in sequences for item in seq]
+    )
+    instances: list[dict[str, str]] = []
+    current: dict[str, str] | None = None
+    for when, classification in sequence:
+        if current is None or when == "setup" or when in current:
+            current = {}
+            instances.append(current)
+        current[when] = classification
+    return instances
 
 
 def _phase_copies(
@@ -1627,7 +1703,7 @@ def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[st
     terminals: list[dict[str, Any]] = []
     missing: list[str] = []
     if selected is not None:
-        terminals, missing, gap_reasons = _terminal_states(selected, outcomes)
+        terminals, missing, gap_reasons = _terminal_states(selected, outcomes, events)
         reasons.extend(gap_reasons)
     reasons.extend(
         _selection_gap_reasons(
@@ -1703,6 +1779,8 @@ def authoritative_pass_names(executed_passes: list[str]) -> tuple[list[str], lis
         authoritative.append("parallel")
     if "serial" in present:
         authoritative.append("serial")
+    if not authoritative and present == {"unspecified"}:
+        authoritative.append("unspecified")
     return authoritative, superseded
 
 
@@ -1833,10 +1911,13 @@ def reconcile_directory(
     passes = {
         name: reconcile_pass(by_pass.get(name, []), pass_name=name) for name in names
     }
-    authoritative, superseded = authoritative_pass_names(
-        [name for name in executed_passes if name in {"parallel", "fallback", "serial"}]
-        or [name for name in names if name in {"parallel", "fallback", "serial"}]
-    )
+    runner_passes = {"parallel", "fallback", "serial"}
+    authoritative_input = [name for name in executed_passes if name in runner_passes]
+    if not authoritative_input:
+        authoritative_input = [name for name in names if name in runner_passes]
+    if not authoritative_input and set(names) == {"unspecified"}:
+        authoritative_input = ["unspecified"]
+    authoritative, superseded = authoritative_pass_names(authoritative_input)
     if not authoritative:
         status = "unknown"
         reasons = ["missing_receipt"]
