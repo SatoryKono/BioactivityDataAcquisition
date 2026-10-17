@@ -35,7 +35,9 @@ or different version damages the receipt. A close-error marker that is
 empty, unreadable, or not valid UTF-8 also damages it. Redaction tokens
 are keyed outside the receipt. A later session-finish hook that raises
 or changes the exit status is stored as ``hook_error`` and keeps the
-pass from being complete.
+pass from being complete. An intermediate ``rerun`` report is an attempt,
+not a damaged classification. A controller ``session_finish`` counts only
+when ``exitstatus`` is an integer.
 """
 
 from __future__ import annotations
@@ -95,9 +97,9 @@ _CALL_CLASSIFICATIONS = frozenset({"passed", "failed", "skipped", "xfail", "xpas
 _SETUP_TERMINAL = frozenset({"setup_error", "skipped", "xfail"})
 _FAILURE_CLASSIFICATIONS = frozenset({"failed", "setup_error", "teardown_error"})
 _WHEN_CLASSIFICATIONS = {
-    "setup": frozenset({"passed", "skipped", "setup_error", "xfail"}),
-    "call": frozenset({"passed", "failed", "skipped", "xfail", "xpass"}),
-    "teardown": frozenset({"passed", "skipped", "teardown_error"}),
+    "setup": frozenset({"passed", "skipped", "setup_error", "xfail", "rerun"}),
+    "call": frozenset({"passed", "failed", "skipped", "xfail", "xpass", "rerun"}),
+    "teardown": frozenset({"passed", "skipped", "teardown_error", "rerun"}),
 }
 _TEARDOWN_SUCCESS = frozenset({"passed", "skipped"})
 _HEX_32 = re.compile(r"^[0-9a-f]{32}$")
@@ -1065,10 +1067,27 @@ def _group_outcome_rows(
     return grouped, reasons
 
 
+def _phase_reports(pool: list[dict[str, Any]]) -> list[str]:
+    """One classification list per instance, without multiplying agreeing workers."""
+    by_worker: dict[str, list[str]] = defaultdict(list)
+    for row in pool:
+        by_worker[str(row.get("worker_id"))].append(str(row.get("classification")))
+    groups = list(by_worker.values())
+    if len(groups) <= 1:
+        return groups[0] if groups else []
+    agreed = Counter(groups[0])
+    if all(Counter(group) == agreed for group in groups[1:]):
+        return groups[0]
+    merged: list[str] = []
+    for group in groups:
+        merged.extend(group)
+    return merged
+
+
 def _collapse_outcome_pool(
     pool: list[dict[str, Any]],
 ) -> dict[str, Any] | None:
-    """Merge subtest reports. Other mixed classifications stay a conflict."""
+    """Merge subtest reports. Distinct copies keep their own classifications."""
     if any(row.get("subtest") for row in pool):
         parents = [row for row in pool if not row.get("subtest")]
         if len({row["classification"] for row in parents}) > 1:
@@ -1081,17 +1100,25 @@ def _collapse_outcome_pool(
                 str(row["classification"]),
             ),
         )
+        count = len(parents) if parents else 1
         base = parents[0] if parents else pool[0]
         return {
             **base,
             "subtest": False,
             "classification": worst["classification"],
-            "count": len(parents) if parents else 1,
+            "classifications": [str(worst["classification"])] * count,
+            "count": count,
         }
-    classifications = {row["classification"] for row in pool}
-    if len(classifications) > 1:
+    reports = _phase_reports(pool)
+    if not reports:
         return None
-    return {**pool[0], "count": len(pool)}
+    unique = set(reports)
+    return {
+        **pool[0],
+        "classification": reports[0] if len(unique) == 1 else None,
+        "classifications": reports,
+        "count": len(reports),
+    }
 
 
 def _dedup_outcomes(
@@ -1101,7 +1128,8 @@ def _dedup_outcomes(
 
     Key is ``(nodeid, when, retry_index)``. A later pytest retry keeps its own
     index and is not merged into the earlier attempt. Identical reports of one
-    key count as separate item instances. Different classifications conflict.
+    key count as separate item instances. Different classifications of one
+    selected copy conflict; different copies of one nodeid stay separate.
     """
     grouped, reasons = _group_outcome_rows(events)
     chosen: dict[tuple[str, str, int], dict[str, Any]] = {}
@@ -1121,11 +1149,14 @@ def _terminal_states(
     selected: list[str],
     outcomes: dict[tuple[str, str, int], dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], list[str], list[str]]:
-    by_node: dict[str, dict[int, dict[str, str]]] = defaultdict(dict)
+    by_node: dict[str, dict[int, dict[str, list[str]]]] = defaultdict(dict)
     workers: dict[tuple[str, int], str] = {}
     for (nodeid, when, retry_index), row in outcomes.items():
         phase = by_node[nodeid].setdefault(retry_index, {})
-        phase[when] = str(row["classification"])
+        recorded = row.get("classifications")
+        if not isinstance(recorded, list) or not recorded:
+            recorded = [str(row.get("classification"))]
+        phase[when] = [str(item) for item in recorded]
         if row["role"] == "worker":
             workers[(nodeid, retry_index)] = str(row["worker_id"])
         else:
@@ -1136,26 +1167,75 @@ def _terminal_states(
     for nodeid, copies in Counter(selected).items():
         attempts = by_node.get(nodeid) or {}
         retry_index = max(attempts) if attempts else 0
-        phases = attempts.get(retry_index, {})
-        explained, classification = _explain_phases(phases)
-        available = _phase_copies(outcomes, nodeid, retry_index, phases, explained)
-        emitted = min(available, copies)
-        if available < copies:
-            missing.extend([nodeid] * (copies - available))
-            if classification == "missing_teardown":
-                gap_reasons.append("missing_teardown")
-        _append_terminals(
-            terminals,
-            nodeid=nodeid,
-            copies=emitted,
-            phases=phases,
-            classification=classification,
-            retry_index=retry_index,
-            worker_id=workers.get((nodeid, retry_index), "controller"),
-            attempt_count=len(attempts),
-        )
-    terminals.sort(key=lambda item: str(item["nodeid"]))
+        phase_lists = attempts.get(retry_index, {})
+        if _mixed_copies_conflict(phase_lists, copies):
+            gap_reasons.append("conflicting_outcome")
+            continue
+        worker_id = workers.get((nodeid, retry_index), "controller")
+        if _phases_are_uniform(phase_lists):
+            phases = {when: items[0] for when, items in phase_lists.items() if items}
+            explained, classification = _explain_phases(phases)
+            available = _phase_copies(outcomes, nodeid, retry_index, phases, explained)
+            emitted = min(available, copies)
+            if available < copies:
+                missing.extend([nodeid] * (copies - available))
+                if classification == "missing_teardown":
+                    gap_reasons.append("missing_teardown")
+            _append_terminals(
+                terminals,
+                nodeid=nodeid,
+                copies=emitted,
+                phases=phases,
+                classification=classification,
+                retry_index=retry_index,
+                worker_id=worker_id,
+                attempt_count=len(attempts),
+            )
+            continue
+        for index in range(copies):
+            phases = _bundle_at(phase_lists, index)
+            explained, classification = _explain_phases(phases)
+            if not explained:
+                missing.append(nodeid)
+                if classification == "missing_teardown":
+                    gap_reasons.append("missing_teardown")
+                continue
+            _append_terminals(
+                terminals,
+                nodeid=nodeid,
+                copies=1,
+                phases=phases,
+                classification=classification,
+                retry_index=retry_index,
+                worker_id=worker_id,
+                attempt_count=len(attempts),
+            )
+    terminals.sort(key=lambda item: (str(item["nodeid"]), str(item["classification"])))
     return terminals, missing, sorted(set(gap_reasons))
+
+
+def _phases_are_uniform(phases: dict[str, list[str]]) -> bool:
+    return all(len(set(items)) <= 1 for items in phases.values())
+
+
+def _mixed_copies_conflict(phases: dict[str, list[str]], copies: int) -> bool:
+    """Different results conflict only when they do not match selected copies."""
+    mixed_lengths = [len(items) for items in phases.values() if len(set(items)) > 1]
+    if any(length != copies for length in mixed_lengths):
+        return True
+    return len(set(mixed_lengths)) > 1
+
+
+def _bundle_at(phases: dict[str, list[str]], index: int) -> dict[str, str]:
+    bundle: dict[str, str] = {}
+    for when, items in phases.items():
+        if not items:
+            continue
+        if len(set(items)) == 1:
+            bundle[when] = items[0]
+        elif index < len(items):
+            bundle[when] = items[index]
+    return bundle
 
 
 def _phase_copies(
@@ -1291,6 +1371,18 @@ def _missing_controller_finish(events: list[dict[str, Any]]) -> list[str]:
     return []
 
 
+def _malformed_session_finish(events: list[dict[str, Any]]) -> list[str]:
+    """A controller finish proves completion only with a real integer status."""
+    for event in events:
+        if _event_identity(event).get("role") != "controller":
+            continue
+        if event.get("event") != "session_finish":
+            continue
+        if type(event.get("exitstatus")) is not int:
+            return ["malformed_session_finish"]
+    return []
+
+
 def _pytest_exit_reasons(flags: dict[str, Any]) -> list[str]:
     status = flags.get("exitstatus")
     if type(status) is not int or status in (0, 1):
@@ -1328,6 +1420,7 @@ _DAMAGE_REASONS = frozenset(
         "missing_terminal_event",
         "journal_io_error",
         "checkout_sha_unmeasured",
+        "malformed_session_finish",
     }
 )
 
@@ -1520,6 +1613,7 @@ def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[st
     reasons.extend(_checkout_reasons(flags))
     reasons.extend(_session_finish_reasons(events))
     reasons.extend(_missing_controller_finish(events))
+    reasons.extend(_malformed_session_finish(events))
     reasons.extend(_pytest_exit_reasons(flags))
     reasons.extend(_unconfigure_reasons(events))
     selected, deselected, collection_errors, collection_conflict = _selected_nodeids(

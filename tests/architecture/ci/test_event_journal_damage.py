@@ -571,3 +571,98 @@ def test_verify_reuses_the_invocation_stored_in_the_verdict(tmp_path: Path) -> N
     latest = reconcile_directory(tmp_path, executed_passes=["parallel"])
     assert latest["status"] == "complete"
     assert latest["passes"]["parallel"]["invocation_id"] == old
+
+
+@pytest.mark.parametrize("status", ["absent", "0", 1.0, True])
+def test_session_finish_without_integer_exitstatus_is_unknown(
+    tmp_path: Path, status: object
+) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_a"
+    finish: dict[str, Any] = {"event": "session_finish", "identity": identity}
+    if status != "absent":
+        finish["exitstatus"] = status
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid]),
+            *_phases(identity, nodeid, "passed"),
+            finish,
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "unknown"
+    assert verdict["tests_passed"] is not True
+    if status == "absent":
+        assert "malformed_session_finish" in verdict["reasons"]
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 4
+
+
+def test_duplicate_nodeids_keep_different_outcomes(tmp_path: Path) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_a"
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid, nodeid]),
+            *_phases(identity, nodeid, "passed"),
+            *_phases(identity, nodeid, "failed"),
+            {"event": "session_finish", "identity": identity, "exitstatus": 1},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert "conflicting_outcome" not in verdict["reasons"]
+    assert verdict["status"] == "complete"
+    assert verdict["selected_count"] == 2
+    assert verdict["tests_passed"] is False
+    assert sorted(item["classification"] for item in verdict["terminals"]) == [
+        "failed",
+        "passed",
+    ]
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 0
+
+
+def test_intermediate_rerun_keeps_the_final_attempt(tmp_path: Path) -> None:
+    from scripts.engineering.ci.pytest_event_journal import (
+        _classification_allowed,
+        _classify_report,
+    )
+
+    class _Report:
+        when = "call"
+        failed = False
+        skipped = False
+        passed = False
+        outcome = "rerun"
+
+    assert _classify_report(_Report(), None) == "rerun"
+    assert _classification_allowed({"when": "call", "classification": "rerun"}) is True
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_a"
+
+    def attempt(when: str, classification: str, retry_index: int) -> dict[str, Any]:
+        event = _outcome(identity, nodeid, when, classification)
+        event["retry_index"] = retry_index
+        return event
+
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid]),
+            attempt("setup", "passed", 0),
+            attempt("call", "rerun", 0),
+            attempt("teardown", "passed", 0),
+            attempt("setup", "passed", 1),
+            attempt("call", "passed", 1),
+            attempt("teardown", "passed", 1),
+            {"event": "session_finish", "identity": identity, "exitstatus": 0},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert "conflicting_outcome" not in verdict["reasons"]
+    assert verdict["status"] == "complete", verdict["reasons"]
+    assert verdict["tests_passed"] is True
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 0
