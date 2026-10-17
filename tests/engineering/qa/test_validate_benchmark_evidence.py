@@ -1,8 +1,7 @@
 import pytest
+from scripts.engineering.qa.validate_benchmark_evidence import validate_evidence
 
 pytestmark = pytest.mark.unit
-import pytest
-from scripts.engineering.qa.validate_benchmark_evidence import validate_evidence
 
 
 def test_missing_observations(tmp_path):

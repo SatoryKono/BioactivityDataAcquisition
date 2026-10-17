@@ -90,10 +90,10 @@ bioetl workflow status <NAME> [OPTIONS]
 | `--ignore-yaml-filter` | Игнорировать YAML filter defaults у pipeline steps |
 | `--skip-gold` | Пропустить Gold writes у pipeline steps |
 | `--execution-context` | Override execution context у pipeline steps |
-| `--use-cached-bronze / --no-cached-bronze` | Override Bronze cache usage у pipeline steps |
+| `--use-cached-bronze/--no-cached-bronze` | Override Bronze cache usage у pipeline steps |
 | `--cached-bronze-path` | Явный Bronze cache path у pipeline steps |
 | `--cached-bronze-date` | Bronze cache date filter у pipeline steps |
-| `--exact-replay / --no-exact-replay` | Override strict exact replay request у pipeline steps |
+| `--exact-replay/--no-exact-replay` | Override strict exact replay request у pipeline steps |
 | `--required-persistence-profile <profile>` | Per-run override for the control-plane persistence profile (`degraded_observable`, `replay_ready`, `forensic_grade`) |
 | `--no-control-plane-archive` | Skip local control-plane archive pack after successful pipeline steps |
 | `--replay-of-run-id` | Explicit parent `run_id` for exact replay pipeline steps |
@@ -237,18 +237,18 @@ bioetl run --pipeline <NAME> [OPTIONS]
 | `--vacuum-after-run`                     | flag   | None          | Запустить VACUUM после успешного выполнения                                               |
 | `--vacuum-retention-days`                | int    | None          | Retention для VACUUM (дней, override YAML config)                                         |
 | `--debug`                                | flag   | False         | Включить DEBUG логирование                                                                |
-| `--tracing / --no-tracing`                 | flag   | None          | Override distributed tracing for this run                                                 |
-| `--debug-export / --no-debug-export`       | flag   | False         | Persist a per-run debug audit pack with Bronze/Silver/Gold traces                         |
+| `--tracing/--no-tracing`                 | flag   | None          | Override distributed tracing for this run                                                 |
+| `--debug-export/--no-debug-export`       | flag   | False         | Persist a per-run debug audit pack with Bronze/Silver/Gold traces                         |
 | `--debug-export-format`                  | choice | `csv,xlsx`    | Repeatable debug-export formats (`csv`, `xlsx`)                                           |
 | `--debug-export-dir`                     | path   | None          | Override the debug-export root directory                                                  |
-| `--health-server / --no-health-server`     | flag   | True          | Включить HTTP health server                                                               |
+| `--health-server/--no-health-server`     | flag   | True          | Включить HTTP health server                                                               |
 | `--health-port`                          | int    | 8000          | Порт для health/metrics server (Docker main default)                                      |
-| `--ensure-observability-backend / --no-ensure-observability-backend` | flag | False | **Default off.** Opt-in auto-start of detached BioETL Ops HTTP backend (`bioetl health server`) |
+| `--ensure-observability-backend/--no-ensure-observability-backend` | flag | False | **Default off.** Opt-in auto-start of detached BioETL Ops HTTP backend (`bioetl health server`) |
 | `--observability-backend-port`           | int    | 8000          | Port for the opt-in detached Ops HTTP / health server backend                             |
-| `--use-cached-bronze / --no-cached-bronze` | flag   | False         | Читать Bronze cache вместо API                                                            |
+| `--use-cached-bronze/--no-cached-bronze` | flag   | False         | Читать Bronze cache вместо API                                                            |
 | `--cached-bronze-date`                   | str    | None          | Фильтровать Bronze cache по дате `YYYY-MM-DD`                                             |
 | `--cached-bronze-path`                   | path   | None          | Явный путь к каталогу Bronze cache                                                        |
-| `--exact-replay / --no-exact-replay`       | flag   | False         | Включить strict exact replay внутри опубликованной support boundary с fail-closed policy  |
+| `--exact-replay/--no-exact-replay`       | flag   | False         | Включить strict exact replay внутри опубликованной support boundary с fail-closed policy  |
 | `--required-persistence-profile`         | choice | None          | Per-run override для control-plane persistence profile (`degraded_observable`, `replay_ready`, `forensic_grade`) |
 | `--no-control-plane-archive`             | flag   | False         | Skip local control-plane archive pack after a successful run                              |
 | `--replay-of-run-id`                     | str    | None          | Явный parent `run_id` для exact replay                                                    |
@@ -401,9 +401,9 @@ bioetl run-all --source <PROVIDER> [OPTIONS]
 | `--yes`, `-y`                        | flag   | False         | Пропустить подтверждение                        |
 | `--list-only`                        | flag   | False         | Только показать список пайплайнов               |
 | `--debug`                            | flag   | False         | DEBUG логирование                               |
-| `--health-server / --no-health-server` | flag   | True          | Включить HTTP health server                     |
+| `--health-server/--no-health-server` | flag   | True          | Включить HTTP health server                     |
 | `--health-port`                      | int    | 8000          | Порт для health/metrics server                  |
-| `--ensure-observability-backend / --no-ensure-observability-backend` | flag | False | Opt-in detached BioETL Ops HTTP backend         |
+| `--ensure-observability-backend/--no-ensure-observability-backend` | flag | False | Opt-in detached BioETL Ops HTTP backend         |
 | `--observability-backend-port`       | int    | 8000          | Port for the opt-in Ops HTTP backend            |
 
 **Примеры:**
@@ -445,16 +445,16 @@ bioetl run-composite --composite <NAME> [OPTIONS]
 | `--enrich-only`                                                | str  | None         | Запустить только указанные enrichers (через запятую) |
 | `--required-only`                                              | flag | False        | Пропустить опциональные enrichers                    |
 | `--force-enricher`                                             | str  | None         | Принудительный перезапуск enricher                   |
-| `--use-cached-bronze / --no-cached-bronze`                       | flag | False        | Читать Bronze cache вместо API                       |
+| `--use-cached-bronze/--no-cached-bronze`                       | flag | False        | Читать Bronze cache вместо API                       |
 | `--cached-bronze-date`                                         | str  | None         | Фильтровать Bronze cache по дате `YYYY-MM-DD`        |
 | `--cached-bronze-path`                                         | path | None         | Явный путь к каталогу Bronze cache                   |
-| `--cached-bronze-enrichers / --no-cached-bronze-enrichers`       | flag | None         | Override cached Bronze только для enrichers          |
-| `--cached-bronze-dependencies / --no-cached-bronze-dependencies` | flag | False        | Override cached Bronze для dependency pipelines      |
+| `--cached-bronze-enrichers/--no-cached-bronze-enrichers`       | flag | None         | Override cached Bronze только для enrichers          |
+| `--cached-bronze-dependencies/--no-cached-bronze-dependencies` | flag | False        | Override cached Bronze для dependency pipelines      |
 | `--required-persistence-profile`                               | choice | None       | Per-run override control-plane profile (`degraded_observable`, `replay_ready`, `forensic_grade`). Composite is outside exact-replay; `replay_ready`/`forensic_grade` fail-close |
 | `--debug`                                                      | flag | False        | DEBUG логирование                                    |
-| `--health-server / --no-health-server`                           | flag | True         | Включить HTTP health server                          |
+| `--health-server/--no-health-server`                           | flag | True         | Включить HTTP health server                          |
 | `--health-port`                                                | int  | 8000         | Порт для health/metrics server                       |
-| `--ensure-observability-backend / --no-ensure-observability-backend` | flag | False    | Opt-in detached BioETL Ops HTTP backend              |
+| `--ensure-observability-backend/--no-ensure-observability-backend` | flag | False    | Opt-in detached BioETL Ops HTTP backend              |
 | `--observability-backend-port`                                 | int  | 8000         | Port for the opt-in Ops HTTP backend                 |
 
 **Примеры:**
