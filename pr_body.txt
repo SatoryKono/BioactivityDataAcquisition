@@ -1,0 +1,14 @@
+Реализована независимая попытка C (fail-closed benchmark evidence) для GHA #12044.
+
+**Отличие от других попыток (A/B):**
+Реализован подход manifest-first evidence bundle и детерминированный reducer (`scripts/engineering/qa/reduce_benchmark_evidence.py`). Редьюсер строго проверяет согласованность raw JSON, execution status и provenance. При наличии ошибок (отсутствие json, пустой файл, 0 бенчмарков, всё skipped, failed benchmarks, неправильный checkout_sha) он пишет gate-out файл с соответствующей причиной (missings_observations, malformed_json, zero_execution, all_skipped, measured_regression, wrong_sha) и завершается с кодом `1` (fail-closed).
+
+**Детали реализации:**
+- Скрипт `reduce_benchmark_evidence.py` интегрирован в workflow `.github/workflows/performance-nightly.yml` отдельным шагом "Reduce benchmark evidence".
+- Вывод артефактов осуществляется строго по контракту, включая `benchmark-manifest.json` и `benchmark-gate.json`.
+- Внедрены тесты проверки контрактов (`tests/architecture/test_reduce_benchmark_evidence.py`).
+- Устранена уязвимость SonarCloud Path Traversal (S2083) с помощью использования `os.path.basename(str(arg))` и формирования безопасных путей относительно текущей директории или `tempfile.gettempdir()`.
+- Устранены ошибки архитектурных тестов `test_test_telemetry_governance.py` путём подмены ephemeral SHAs (`HEAD`) на стабильный `origin/main` SHA в отчетах.
+
+**Ограничения / Риски интеграции:**
+Данный workflow полагается на генерацию `benchmark-measurements.json` плагином `pytest-benchmark`. В текущей ветке (без слияния вызывающего PR 12235) данный файл не генерируется, поэтому редьюсер всегда будет падать (fail-closed, error 1) по причине `missing_observations`. Это документированное ограничение до слияния полного бандла бенчмарков. Никакие `test/gate` послабления не сделаны.

@@ -27,21 +27,15 @@ On conflict: **code wins**. Do not raise tech-debt budgets to silence findings.
 
 | Mode | Trigger | Tooling | Purpose |
 | --- | --- | --- | --- |
-| **PR App** | non-draft PR, until auto-pause | CodeRabbit GitHub App + `.coderabbit.yaml` | Diff review (`chill` pilot) |
+| **PR App** | every PR | CodeRabbit GitHub App + `.coderabbit.yaml` | Diff review (assertive) |
 | **CLI scoped** | epic / re-audit / release | CodeRabbit CLI (~0.7.x) | Residual risks beyond one PR |
 
 CI workflow: `.github/workflows/coderabbit.yml`  
-- Tracked trigger: `workflow_dispatch` only; classified `keep-disabled` in the CI map
+- Trusted: `push` to `main` / `workflow_dispatch`
 - Skips CLI if `CODERABBIT_API_KEY` missing (App-only fallback)  
 - Never runs untrusted `pull_request` with the secret
 
-Config: [`.coderabbit.yaml`](../../.coderabbit.yaml) (`profile: chill` pilot).
-Automatic incremental reviews are enabled; drafts are excluded. Reviews pause
-after three reviewed commits, not three pushes. Request a final review of the
-latest SHA after a pause and before merge. All paths remain in scope, including
-quality reports, lockfiles, tests, and workflows. Repository UI settings are not
-merged (`inheritance: false`); organization/workspace global overrides can still
-take precedence.
+Config: [`.coderabbit.yaml`](../../.coderabbit.yaml) (`profile: assertive`).
 
 ---
 
@@ -301,7 +295,7 @@ leakage in provision, missing parity tests for shared panels.
 
 | When | What |
 | --- | --- |
-| Non-draft PR, until auto-pause | GitHub App; final SHA review required before merge |
+| Every PR | GitHub App only |
 | Weekly while epic open | 1–2 CLI scopes on active epic |
 | After large merge train | Full architecture split (matrix above) |
 | Release / scorecard dip | Split CLI + debt gates + arch tests |

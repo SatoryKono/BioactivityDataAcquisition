@@ -179,15 +179,13 @@ def normalize_promql(expr: str) -> str:
     and hash characters because they can change label matching.
     """
     tokens = re.findall(
-        r""""(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`[^`]*`"""
+        r'''"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`[^`]*`'''
         r"|#[^\r\n]*|\s+|[A-Za-z_][A-Za-z_0-9]*"
         r"|(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?"
         r"|==|!=|=~|!~|>=|<=|\S",
         expr,
     )
-    return " ".join(
-        token for token in tokens if not token.isspace() and not token.startswith("#")
-    )
+    return " ".join(token for token in tokens if not token.isspace() and not token.startswith("#"))
 
 
 def tracked_rules_bundle_sha256(rules_dir: Path) -> str:
