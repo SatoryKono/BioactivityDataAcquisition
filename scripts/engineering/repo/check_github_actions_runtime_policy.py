@@ -3,14 +3,17 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import math
 import os
 import re
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
+_DOCKER_SCHEME = "docker://"
 ROOT = Path(__file__).resolve().parents[3]
 WORKFLOWS_DIR = ROOT / ".github/workflows"
 COMPOSITE_ACTIONS_DIR = ROOT / ".github/actions"
@@ -227,7 +230,7 @@ def _validate_allowed_uses_ref(uses_ref: str, action: str) -> str | None:
     if "@" not in uses_ref:
         return f"external action {uses_ref} must include an immutable ref"
     _, _, ref = uses_ref.partition("@")
-    if action.startswith("docker://"):
+    if action.startswith(_DOCKER_SCHEME):
         if not FULL_SHA256_DIGEST_PATTERN.fullmatch(ref):
             return f"Docker image {uses_ref} must be pinned by full sha256 digest"
         allowed_refs = ALLOWED_DOCKER_IMAGES.get(action)
@@ -276,9 +279,7 @@ def _allowlist_sha_version_comments() -> dict[str, set[str]]:
     return comments
 
 
-def collect_version_comment_mismatches() -> list[str]:
-    """Fail when a workflow version comment disagrees with ALLOWED_USES."""
-    allowlist = _allowlist_sha_version_comments()
+def _conflicting_allowlist_comments(allowlist: dict[str, set[str]]) -> list[str]:
     violations: list[str] = []
     for sha, comments in sorted(allowlist.items()):
         if len(comments) > 1:
@@ -286,28 +287,51 @@ def collect_version_comment_mismatches() -> list[str]:
                 f"ALLOWED_USES SHA {sha} has conflicting version comments "
                 f"{sorted(comments)}"
             )
+    return violations
+
+
+def _workflow_version_comment_violation(
+    rel_path: Path,
+    line_no: int,
+    line: str,
+    allowlist: dict[str, set[str]],
+) -> str | None:
+    match = _USES_VERSION_COMMENT.search(line)
+    if match is None:
+        return None
+    sha = match.group("sha")
+    comment = match.group("comment")
+    expected = allowlist.get(sha)
+    if expected is None:
+        return (
+            f"{rel_path}:{line_no}: SHA {sha} comment {comment} has no "
+            "ALLOWED_USES version comment"
+        )
+    if comment not in expected or len(expected) != 1:
+        return (
+            f"{rel_path}:{line_no}: SHA {sha} comment {comment} != "
+            f"ALLOWED_USES {sorted(expected)}"
+        )
+    return None
+
+
+def collect_version_comment_mismatches() -> list[str]:
+    """Fail when a workflow version comment disagrees with ALLOWED_USES."""
+    allowlist = _allowlist_sha_version_comments()
+    violations = _conflicting_allowlist_comments(allowlist)
     for file_path in iter_yaml_files():
         rel_path = file_path.relative_to(ROOT)
         for line_no, line in enumerate(
             file_path.read_text(encoding="utf-8").splitlines(), 1
         ):
-            match = _USES_VERSION_COMMENT.search(line)
-            if match is None:
-                continue
-            sha = match.group("sha")
-            comment = match.group("comment")
-            expected = allowlist.get(sha)
-            if expected is None:
-                violations.append(
-                    f"{rel_path}:{line_no}: SHA {sha} comment {comment} has no "
-                    "ALLOWED_USES version comment"
-                )
-                continue
-            if comment not in expected or len(expected) != 1:
-                violations.append(
-                    f"{rel_path}:{line_no}: SHA {sha} comment {comment} != "
-                    f"ALLOWED_USES {sorted(expected)}"
-                )
+            violation = _workflow_version_comment_violation(
+                rel_path,
+                line_no,
+                line,
+                allowlist,
+            )
+            if violation is not None:
+                violations.append(violation)
     return violations
 
 
@@ -612,8 +636,342 @@ def gate_osv_json(path: Path) -> int:
     return 1
 
 
+PIN_REGISTRY_PATH = "configs/quality/reusable_action_pins.yaml"
+PIN_WORKFLOW_PATHS: tuple[str, ...] = (".github/workflows/pr-required.yml",)
+_PIN_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+_LOCAL_ACTION_PREFIX = (".github", "actions")
+
+
+def _emit_pin_errors(errors: list[str]) -> None:
+    for error in errors:
+        print(error, file=sys.stderr)
+
+
+def _read_pin_yaml(path: Path, errors: list[str]) -> object | None:
+    if not path.is_file():
+        errors.append(f"missing path: {path}")
+        return None
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        errors.append(f"unreadable path: {path}: {exc}")
+        return None
+    if not text.strip():
+        errors.append(f"empty YAML: {path}")
+        return None
+    import yaml
+
+    try:
+        return yaml.safe_load(text)
+    except yaml.YAMLError as exc:
+        errors.append(f"malformed YAML: {path}: {exc}")
+        return None
+
+
+def _pin_entry(entry: object, index: int, errors: list[str]) -> tuple[str, str] | None:
+    if not isinstance(entry, dict):
+        errors.append(f"malformed registry pin {index}: entry must be a mapping")
+        return None
+    path = entry.get("path")
+    sha = entry.get("sha")
+    if not isinstance(path, str) or not path or path != path.strip():
+        errors.append(
+            f"malformed registry pin {index}: path must be a non-empty string"
+        )
+        return None
+    if not isinstance(sha, str) or _PIN_SHA_RE.fullmatch(sha) is None:
+        errors.append(
+            f"malformed registry pin {index}: sha must be a 40-hex commit SHA"
+        )
+        return None
+    return path, sha
+
+
+def _pins_from_document(document: object, errors: list[str]) -> dict[str, str] | None:
+    if not isinstance(document, dict):
+        errors.append("malformed registry: root must be a mapping")
+        return None
+    pins = document.get("pins")
+    if not isinstance(pins, list):
+        errors.append("malformed registry: pins must be a list")
+        return None
+    resolved: dict[str, str] = {}
+    for index, entry in enumerate(pins):
+        parsed = _pin_entry(entry, index, errors)
+        if parsed is None:
+            continue
+        path, sha = parsed
+        previous = resolved.get(path)
+        if previous is None:
+            resolved[path] = sha
+            continue
+        if previous != sha:
+            errors.append(f"ambiguous duplicate registry entry: {path}")
+            continue
+        errors.append(f"duplicate registry entry: {path}")
+    return resolved
+
+
+def _load_pin_registry(path: Path, errors: list[str]) -> dict[str, str] | None:
+    before = len(errors)
+    document = _read_pin_yaml(path, errors)
+    if document is None:
+        return None
+    resolved = _pins_from_document(document, errors)
+    if len(errors) != before or resolved is None:
+        return None
+    return resolved
+
+
+def _split_pinned_ref(uses: str) -> tuple[str, str] | None:
+    if uses.count("@") != 1:
+        return None
+    path, sha = uses.split("@", 1)
+    if not path or not sha:
+        return None
+    return path, sha
+
+
+def _check_registry_pin(
+    uses: str,
+    registry: dict[str, str],
+    errors: list[str],
+    kind: str,
+) -> None:
+    parsed = _split_pinned_ref(uses)
+    if parsed is None:
+        errors.append(f"{kind} {uses} is not pinned with a single @ref")
+        return
+    path, sha = parsed
+    if _PIN_SHA_RE.fullmatch(sha) is None:
+        errors.append(f"{kind} {uses} is not pinned to a full 40-hex commit SHA")
+        return
+    expected = registry.get(path)
+    if expected is None:
+        errors.append(f"unknown {kind} path {path}")
+        return
+    if expected != sha:
+        errors.append(f"{kind} {path} SHA {sha} != registry {expected}")
+
+
+def _check_local_action(uses: str, repo_root: Path, errors: list[str]) -> None:
+    if not uses.startswith("./"):
+        errors.append(f"local action must be a ./ path: {uses}")
+        return
+    if "@" in uses:
+        errors.append(f"local action must not carry a ref: {uses}")
+        return
+    relative = Path(uses[2:])
+    if relative.is_absolute() or ".." in relative.parts:
+        errors.append(f"local action escapes the repository: {uses}")
+        return
+    if relative.parts[:2] != _LOCAL_ACTION_PREFIX or len(relative.parts) < 3:
+        errors.append(f"local action must live under ./.github/actions/: {uses}")
+        return
+    root = repo_root.resolve()
+    candidate = (root / relative).resolve()
+    try:
+        candidate.relative_to(root / ".github" / "actions")
+    except ValueError:
+        errors.append(f"local action escapes .github/actions: {uses}")
+        return
+    manifest_names = ("action.yml", "action.yaml")
+    if any((candidate / name).is_file() for name in manifest_names):
+        return
+    errors.append(f"local action {uses} has no action.yml or action.yaml")
+
+
+def _check_docker_pin(uses: str, errors: list[str]) -> None:
+    errors.append(
+        f"docker reference {uses} is not an external action or reusable workflow pin"
+    )
+
+
+def _check_step_uses(
+    uses: object,
+    where: str,
+    registry: dict[str, str],
+    repo_root: Path,
+    errors: list[str],
+) -> None:
+    if not isinstance(uses, str) or not uses or uses != uses.strip():
+        errors.append(f"{where} uses is not a non-empty string")
+        return
+    if uses.startswith(_DOCKER_SCHEME):
+        _check_docker_pin(uses, errors)
+        return
+    if uses.startswith(("./", "../")):
+        _check_local_action(uses, repo_root, errors)
+        return
+    if "/.github/workflows/" in uses:
+        errors.append(f"{where} step uses a reusable workflow; put uses on the job")
+        return
+    _check_registry_pin(uses, registry, errors, "external action")
+
+
+def _check_pin_steps(
+    steps: object,
+    job_name: str,
+    registry: dict[str, str],
+    repo_root: Path,
+    errors: list[str],
+) -> None:
+    if not isinstance(steps, list):
+        errors.append(f"job {job_name} steps must be a list")
+        return
+    for index, step in enumerate(steps):
+        if not isinstance(step, dict):
+            errors.append(f"job {job_name} step {index} must be a mapping")
+            continue
+        if "uses" not in step:
+            continue
+        _check_step_uses(
+            step.get("uses"),
+            f"job {job_name} step {index}",
+            registry,
+            repo_root,
+            errors,
+        )
+
+
+def _check_reusable_uses(
+    uses: object,
+    job_name: str,
+    registry: dict[str, str],
+    errors: list[str],
+) -> None:
+    if not isinstance(uses, str) or not uses or uses != uses.strip():
+        errors.append(f"job {job_name} uses is not a non-empty string")
+        return
+    if uses.startswith(_DOCKER_SCHEME):
+        _check_docker_pin(uses, errors)
+        return
+    if uses.startswith(("./", "../")):
+        errors.append(
+            f"job {job_name} reusable workflow {uses} must be owner/repo/.github/workflows/"
+            "file.yml@<40-hex SHA>"
+        )
+        return
+    if "/.github/workflows/" not in uses:
+        errors.append(f"job {job_name} uses is not a reusable workflow path")
+        return
+    _check_registry_pin(uses, registry, errors, "reusable workflow")
+
+
+def _check_pin_job(
+    job_name: str,
+    job: object,
+    registry: dict[str, str],
+    repo_root: Path,
+    errors: list[str],
+) -> None:
+    if not isinstance(job, dict):
+        errors.append(f"job {job_name} must be a mapping")
+        return
+    has_uses = "uses" in job
+    has_steps = "steps" in job
+    if has_uses and has_steps:
+        errors.append(f"job {job_name} mixes reusable uses with steps")
+        return
+    if has_uses:
+        _check_reusable_uses(job.get("uses"), job_name, registry, errors)
+        return
+    if not has_steps:
+        errors.append(f"job {job_name} has neither uses nor steps")
+        return
+    _check_pin_steps(job.get("steps"), job_name, registry, repo_root, errors)
+
+
+def _check_pin_workflow(
+    path: Path,
+    registry: dict[str, str],
+    repo_root: Path,
+    errors: list[str],
+) -> None:
+    document = _read_pin_yaml(path, errors)
+    if not isinstance(document, dict):
+        if document is not None:
+            errors.append(f"malformed workflow: {path} root must be a mapping")
+        return
+    jobs = document.get("jobs")
+    if not isinstance(jobs, dict):
+        errors.append(f"malformed workflow: {path} jobs must be a mapping")
+        return
+    for job_name, job in jobs.items():
+        _check_pin_job(str(job_name), job, registry, repo_root, errors)
+
+
+def allowlist_pin_disagreements(registry: dict[str, str]) -> list[str]:
+    """Fail when a pr-required registry pin is outside ALLOWED_USES."""
+    errors: list[str] = []
+    for path, sha in sorted(registry.items()):
+        allowed = ALLOWED_USES.get(path)
+        if allowed is None:
+            errors.append(f"registry path {path} is absent from ALLOWED_USES")
+            continue
+        if sha not in allowed:
+            errors.append(f"registry {path} SHA {sha} is not an ALLOWED_USES pin")
+    return errors
+
+
+def check_pins(
+    registry_path: str | Path,
+    workflow_paths: Sequence[str | Path],
+    *,
+    repo_root: Path | None = None,
+    enforce_allowed_uses: bool = False,
+) -> bool:
+    """Return whether every inspected uses reference matches the pin contract.
+
+    This check is not an independent trust boundary. fast-governance checks out
+    the PR head, so the same PR can replace the coordinator, this script, and
+    the pin registry together. Local action.yml existence does not prove the
+    action contents are trusted. #12046 stays open until workflows are forced
+    from the default branch by an org ruleset.
+    """
+    errors: list[str] = []
+    root = Path.cwd() if repo_root is None else repo_root
+    if not workflow_paths:
+        errors.append("no workflow paths to check")
+    registry = _load_pin_registry(Path(registry_path), errors)
+    if registry is not None:
+        if enforce_allowed_uses:
+            errors.extend(allowlist_pin_disagreements(registry))
+        for workflow_path in workflow_paths:
+            _check_pin_workflow(Path(workflow_path), registry, root, errors)
+    _emit_pin_errors(errors)
+    return not errors
+
+
+def pr_required_pin_main(argv: list[str] | None = None) -> int:
+    """Check pr-required pins. `--check` is the CI flag; omitting it still checks."""
+    parser = argparse.ArgumentParser(
+        description=(
+            "Fail closed unless pr-required.yml pins match the trusted registry. "
+            "This is repo-side consistency, not an independent trust boundary."
+        )
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Run the pin check. The check also runs when this flag is omitted.",
+    )
+    args = parser.parse_args(argv)
+    mode = "--check" if args.check else "default"
+    if not check_pins(
+        PIN_REGISTRY_PATH,
+        PIN_WORKFLOW_PATHS,
+        enforce_allowed_uses=True,
+    ):
+        return 1
+    print(f"Pin check passed ({mode}).")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
+    if args[:1] == ["--pr-required-pins"]:
+        return pr_required_pin_main(args[1:])
     if args[:1] == ["--osv-json"]:
         if len(args) != 2:
             sys.stderr.write(
