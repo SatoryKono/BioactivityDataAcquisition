@@ -193,8 +193,10 @@ class EnricherDeduplicatorService:
     def _build_concat_expr(self, column: str, dtype: pl.DataType) -> pl.Expr:
         """Build expression that concatenates values with |.
 
-        Note: Values are NOT sorted and duplicates are NOT removed.
-        The order is preserved from the original data.
+        Note: The resulting string consists of unique, lexicographically sorted
+        string values from the cell, with nulls explicitly represented as "null".
+        Sorting happens on the stringified cell values before joining, ensuring
+        deterministic multiset concatenation.
         """
         import polars as pl
 
@@ -203,6 +205,8 @@ class EnricherDeduplicatorService:
             pl.when(pl.col(column).is_null())
             .then(pl.lit("null"))
             .otherwise(as_string)
+            .unique()
+            .sort()
             .str.join("|")
             .alias(column)
         )
