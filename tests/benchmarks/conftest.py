@@ -29,6 +29,12 @@
 
 These fixtures provide consistent test data for reproducible benchmarks.
 All data is synthetic and deterministic to ensure stable measurements.
+
+VCS suppression for an explicit ``-p benchmark`` caller lives in
+``tests.benchmarks.benchmark_vcs_guard`` and must be loaded before that
+plugin. This conftest only skips benchmark-marked tests while the plugin
+is inactive. Wrapping ``get_project_name`` here is too late: pytest-benchmark
+5.2/5.3 calls ``get_tag()`` from ``pytest_addoption``.
 """
 
 import json
