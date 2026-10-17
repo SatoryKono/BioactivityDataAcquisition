@@ -26,7 +26,10 @@ separate instances. A complete run may still contain failures.
 runner. Reconciliation keeps the latest invocation of each pass, or the
 invocation recorded for this process, and the workers that share it. A
 damaged receipt with no authoritative pass and invocation blocks the
-whole directory. Receipt bytes must be strict UTF-8. Redaction tokens
+whole directory. Receipt bytes must be strict UTF-8. Every event must
+carry integer ``schema_version`` equal to ``SCHEMA_VERSION``; a missing
+or different version damages the receipt. A close-error marker that is
+empty, unreadable, or not valid UTF-8 also damages it. Redaction tokens
 are keyed outside the receipt. A later session-finish hook that raises
 or changes the exit status is stored as ``hook_error`` and keeps the
 pass from being complete.
@@ -48,6 +51,8 @@ from collections import Counter, defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+
+import pytest
 
 SCHEMA_VERSION = 1
 JOURNAL_COMPLETENESS_EXIT = 4
@@ -126,6 +131,18 @@ def ensure_redaction_key() -> str:
 def publish_redaction_key() -> None:
     """Expose the process key to child processes spawned after configure."""
     os.environ[_REDACTION_KEY_ENV] = ensure_redaction_key()
+
+
+def _adopt_worker_redaction_key(config: Any) -> None:
+    """Reuse the controller key shipped in xdist ``workerinput``."""
+    global _REDACTION_KEY
+    workerinput = getattr(config, "workerinput", None)
+    if not isinstance(workerinput, dict):
+        return
+    key = workerinput.get(_REDACTION_KEY_ENV)
+    if isinstance(key, str) and len(key) >= _REDACTION_KEY_MIN_LENGTH:
+        os.environ[_REDACTION_KEY_ENV] = key
+        _REDACTION_KEY = key
 
 
 def _redaction_token(secret: str) -> str:
@@ -535,7 +552,17 @@ def _register_session_finish_hook(config: Any, plugin: EventJournalPlugin) -> No
     )
 
 
+@pytest.hookimpl(optionalhook=True)
+def pytest_configure_node(node: Any) -> None:
+    """Pass one redaction key to each xdist worker before it starts."""
+    publish_redaction_key()
+    workerinput = getattr(node, "workerinput", None)
+    if isinstance(workerinput, dict):
+        workerinput[_REDACTION_KEY_ENV] = ensure_redaction_key()
+
+
 def pytest_configure(config: Any) -> None:
+    _adopt_worker_redaction_key(config)
     journal_dir = config.getoption("--event-journal-dir")
     if not journal_dir:
         return
@@ -618,9 +645,13 @@ def _marker_io_error(path: Path) -> str | None:
     if not marker.is_file():
         return None
     try:
-        text = marker.read_text(encoding="utf-8").strip()
-    except (OSError, UnicodeDecodeError):
+        raw = marker.read_bytes()
+    except OSError:
         return "close_marker_unreadable"
+    try:
+        text = raw.decode("utf-8").strip()
+    except UnicodeDecodeError:
+        return "close_marker_invalid_utf8"
     if text:
         return text
     return "close_marker_present"
