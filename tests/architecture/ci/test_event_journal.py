@@ -1090,3 +1090,357 @@ def test_serial_coverage_journal_fits_the_job_timeout() -> None:
     assert "--no-fallback" in serial
     assert "pytest-event-journal-serial-coverage" in serial
     assert "if: ${{ always() && !cancelled() }}" in serial
+
+
+def _named_receipt(
+    pass_name: str,
+    invocation: str,
+    role: str,
+    worker: str,
+    file_id: str,
+) -> str:
+    return f"receipt_{pass_name}_{invocation}_{role}_{worker}_{file_id}.jsonl"
+
+
+def test_skipped_setup_without_teardown_stays_complete(tmp_path: Path) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_skip"
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid]),
+            _outcome(identity, nodeid, "setup", "skipped"),
+            {"event": "session_finish", "identity": identity, "exitstatus": 0},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "complete"
+    assert verdict["tests_passed"] is True
+    assert verdict["terminals"][0]["classification"] == "skipped"
+
+
+def test_skipped_setup_teardown_error_is_not_a_pass(tmp_path: Path) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_skip"
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid]),
+            _outcome(identity, nodeid, "setup", "skipped"),
+            _outcome(identity, nodeid, "teardown", "teardown_error"),
+            {"event": "session_finish", "identity": identity, "exitstatus": 0},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["terminals"][0]["classification"] == "teardown_error"
+    assert verdict["tests_passed"] is not True
+    assert not (verdict["status"] == "complete" and verdict["tests_passed"] is True)
+
+
+def test_xfail_setup_teardown_error_is_not_a_pass(tmp_path: Path) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_xfail"
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid]),
+            _outcome(identity, nodeid, "setup", "xfail"),
+            _outcome(identity, nodeid, "teardown", "teardown_error"),
+            {"event": "session_finish", "identity": identity, "exitstatus": 0},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["terminals"][0]["classification"] == "teardown_error"
+    assert verdict["tests_passed"] is not True
+
+
+def test_truncated_worker_filename_blocks_its_invocation(tmp_path: Path) -> None:
+    invocation = "a" * 32
+    good = _controller_pass(
+        ["test_sample.py::test_a"],
+        {"test_sample.py::test_a": "passed"},
+        invocation_id=invocation,
+    )
+    _write_receipt(
+        tmp_path,
+        good,
+        name=_named_receipt(
+            "parallel", invocation, "controller", "controller", "b" * 32
+        ),
+    )
+    damaged = tmp_path / _named_receipt(
+        "parallel", invocation, "worker", "gw_0", "c" * 32
+    )
+    damaged.write_bytes(b"{")
+    verdict = reconcile_directory(tmp_path, executed_passes=["parallel"])
+    assert verdict["status"] == "unknown"
+    assert verdict["tests_passed"] is None
+    assert any(reason.startswith("parallel:") for reason in verdict["reasons"])
+
+
+def test_older_damaged_invocation_does_not_hide_the_latest(tmp_path: Path) -> None:
+    old_invocation = "1" * 32
+    new_invocation = "2" * 32
+    (
+        tmp_path / _named_receipt("parallel", old_invocation, "worker", "gw0", "3" * 32)
+    ).write_bytes(b"{")
+    new = _controller_pass(
+        ["test_sample.py::test_a"],
+        {"test_sample.py::test_a": "passed"},
+        invocation_id=new_invocation,
+    )
+    new[0]["timestamp"] = "2026-10-17T00:00:00+00:00"
+    _write_receipt(
+        tmp_path,
+        new,
+        name=_named_receipt(
+            "parallel", new_invocation, "controller", "controller", "4" * 32
+        ),
+    )
+    verdict = reconcile_directory(tmp_path, executed_passes=["parallel"])
+    assert verdict["status"] == "complete", verdict["reasons"]
+    assert verdict["tests_passed"] is True
+    assert verdict["passes"]["parallel"]["invocation_id"] == new_invocation
+
+
+def test_unattributed_damaged_receipt_blocks_a_complete_pass(tmp_path: Path) -> None:
+    _write_receipt(
+        tmp_path,
+        _controller_pass(
+            ["test_sample.py::test_a"],
+            {"test_sample.py::test_a": "passed"},
+        ),
+        name="receipt_new.jsonl",
+    )
+    (tmp_path / "receipt_garbage.jsonl").write_bytes(b"")
+    verdict = reconcile_directory(tmp_path, executed_passes=["parallel"])
+    assert verdict["status"] == "unknown"
+    assert verdict["tests_passed"] is None
+    assert "unattributed_receipt_damage" in verdict["reasons"]
+
+
+def test_unreadable_receipt_stays_unknown(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from scripts.engineering.ci.pytest_event_journal import _group_receipts
+
+    journal = tmp_path / "journal"
+    journal.mkdir()
+    invocation = "d" * 32
+    path = journal / _named_receipt(
+        "parallel", invocation, "controller", "controller", "e" * 32
+    )
+    path.write_bytes(b"{}\n")
+    original = Path.read_bytes
+
+    def _deny(self: Path) -> bytes:
+        if self.name == path.name:
+            raise OSError(13, "denied")
+        return original(self)
+
+    monkeypatch.setattr(Path, "read_bytes", _deny)
+    loaded = _group_receipts(journal)
+    assert loaded[0]["io_error"] == "receipt_unreadable:13"
+    assert loaded[0]["truncated"] is True
+    assert loaded[0]["finalized"] is False
+    verdict = reconcile_directory(journal, executed_passes=["parallel"])
+    assert verdict["status"] == "unknown"
+    assert verdict["tests_passed"] is None
+
+
+def test_receipt_listing_failure_is_unknown(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def _boom(self: Path, pattern: str) -> list[Path]:
+        _ = (self, pattern)
+        raise OSError(5, "io")
+
+    monkeypatch.setattr(Path, "glob", _boom)
+    verdict = reconcile_directory(tmp_path, executed_passes=["parallel"])
+    assert verdict["status"] == "unknown"
+    assert "unattributed_receipt_damage" in verdict["reasons"]
+
+
+def test_directory_receipt_path_does_not_escape(tmp_path: Path) -> None:
+    invocation = "a" * 32
+    folder = tmp_path / _named_receipt(
+        "parallel", invocation, "worker", "gw0", "b" * 32
+    )
+    folder.mkdir()
+    verdict = reconcile_directory(tmp_path, executed_passes=["parallel"])
+    assert verdict["status"] == "unknown"
+    assert any("journal_io_error" in reason for reason in verdict["reasons"])
+
+
+def test_expected_invocation_rejects_an_older_complete_receipt(tmp_path: Path) -> None:
+    _write_receipt(
+        tmp_path,
+        _controller_pass(
+            ["test_sample.py::test_a"],
+            {"test_sample.py::test_a": "passed"},
+            invocation_id="inv-old",
+        ),
+        name="receipt_old.jsonl",
+    )
+    current = "f" * 32
+    bound = reconcile_directory(
+        tmp_path,
+        executed_passes=["parallel"],
+        expected_invocations={"parallel": current},
+    )
+    assert bound["status"] == "unknown"
+    assert any("missing_receipt" in reason for reason in bound["reasons"])
+    assert bound["tests_passed"] is None
+    latest = reconcile_directory(tmp_path, executed_passes=["parallel"])
+    assert latest["status"] == "complete"
+    assert latest["passes"]["parallel"]["invocation_id"] == "inv-old"
+
+
+def test_finish_run_binds_the_current_invocation(tmp_path: Path) -> None:
+    from scripts.engineering.ci import run_pytest_resilient
+
+    journal = tmp_path / "journal"
+    _write_receipt(
+        journal,
+        _controller_pass(
+            ["test_sample.py::test_a"],
+            {"test_sample.py::test_a": "passed"},
+            invocation_id="inv-old",
+        ),
+        name="receipt_old.jsonl",
+    )
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    current = {"parallel": "f" * 32}
+    assert (
+        run_pytest_resilient._finish_run(
+            reports_dir=reports,
+            summary_lines=[],
+            journal_dir=journal,
+            executed_passes=["parallel"],
+            test_rc=0,
+            expected_invocations=current,
+        )
+        == 4
+    )
+    assert (
+        run_pytest_resilient._finish_run(
+            reports_dir=reports,
+            summary_lines=[],
+            journal_dir=journal,
+            executed_passes=["parallel"],
+            test_rc=1,
+            expected_invocations=current,
+        )
+        == 1
+    )
+
+
+def test_matrix_values_are_redacted_before_identity_and_safe_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from scripts.engineering.ci.pytest_event_journal import (
+        _identity_from_env,
+        _redaction_token,
+        _safe_env,
+        _secret_values,
+    )
+
+    password = "swordfish-secret"
+    nested = "nested-api-key-value"
+    raw = json.dumps(
+        {
+            "password": password,
+            "wrapped": {"api_key": nested, "label": "public"},
+            "note": f"token = {password}",
+        }
+    )
+    monkeypatch.setenv("BIOETL_JOURNAL_MATRIX", raw)
+    secrets = _secret_values()
+    matrix = _identity_from_env(actual_sha=None, secrets=secrets)["matrix"]
+    assert matrix["password"] == _redaction_token(password)
+    assert matrix["wrapped"]["api_key"] == _redaction_token(nested)
+    assert matrix["wrapped"]["label"] == "public"
+    assert password not in matrix["note"]
+    blob = _safe_env(secrets)["BIOETL_JOURNAL_MATRIX"]
+    assert password not in blob
+    assert nested not in blob
+    assert _redaction_token(password) in blob
+    assert _redaction_token(nested) in blob
+
+
+def test_journal_child_env_prepends_the_repo_root(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from scripts.engineering.ci.run_pytest_resilient import (
+        _REPO_ROOT,
+        _journal_child_env,
+    )
+
+    monkeypatch.setenv("PYTHONPATH", "C:\\already" + os.pathsep + "C:\\other")
+    env = _journal_child_env("parallel", "abc123")
+    parts = env["PYTHONPATH"].split(os.pathsep)
+    assert parts[0] == str(_REPO_ROOT)
+    assert "C:\\already" in parts
+    assert "C:\\other" in parts
+    assert env["BIOETL_JOURNAL_PASS"] == "parallel"
+    assert env["BIOETL_JOURNAL_INVOCATION_ID"] == "abc123"
+    monkeypatch.delenv("PYTHONPATH", raising=False)
+    assert _journal_child_env("serial", "def456")["PYTHONPATH"] == str(_REPO_ROOT)
+
+
+def test_run_pass_forwards_repo_root_on_pythonpath(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from types import SimpleNamespace
+
+    from scripts.engineering.ci import pytest_abort_diagnostic_adapter as adapter
+    from scripts.engineering.ci.run_pytest_resilient import _REPO_ROOT, _run_pass
+
+    captured: dict[str, Any] = {}
+
+    class _Adapter:
+        def __init__(self, *_args: Any, **kwargs: Any) -> None:
+            captured["env"] = kwargs.get("child_env")
+
+        def run(
+            self,
+            command: list[str],
+            junit_path: Path,
+            diagnostic_dir: Path,
+            *,
+            base: Path,
+        ) -> Any:
+            _ = (command, junit_path, diagnostic_dir, base)
+            return SimpleNamespace(
+                status="COMPLETED",
+                wrapper_exit_code=0,
+                stdout_file="",
+                stderr_file="",
+                diagnostics_persisted=False,
+                manifest_file="",
+            )
+
+    monkeypatch.setattr(adapter, "PytestAbortDiagnosticAdapter", _Adapter)
+    monkeypatch.setenv("PYTHONPATH", "C:\\already")
+    result = _run_pass(
+        name="parallel",
+        base_command=[sys.executable, "-m", "pytest"],
+        target="tests/sample.py",
+        marker_expr="not serial",
+        addopts=["-q"],
+        reports_dir=tmp_path / "reports",
+        journal_dir=tmp_path / "journal",
+        timeout_seconds=None,
+        executed_passes=[],
+    )
+    assert result.invocation_id
+    child_env = captured["env"]
+    assert child_env is not None
+    assert child_env["PYTHONPATH"].split(os.pathsep)[0] == str(_REPO_ROOT)
+    assert "C:\\already" in child_env["PYTHONPATH"].split(os.pathsep)
+    assert child_env["BIOETL_JOURNAL_INVOCATION_ID"] == result.invocation_id
+    assert child_env["BIOETL_JOURNAL_PASS"] == "parallel"

@@ -45,6 +45,7 @@ class PassResult:
     timed_out: bool
     diagnostic_status: str = ""
     diagnostic_manifest: Path | None = None
+    invocation_id: str = ""
 
 
 def _split_args(raw_args: str) -> list[str]:
@@ -104,6 +105,21 @@ def _read_supervised_log(reports_dir: Path, relative: str) -> str:
         return ""
 
 
+def _journal_child_env(pass_name: str, invocation_id: str) -> dict[str, str]:
+    """Environment for one journaled pytest child."""
+    child_env = os.environ.copy()
+    child_env["BIOETL_JOURNAL_INVOCATION_ID"] = invocation_id
+    child_env["BIOETL_JOURNAL_PASS"] = pass_name
+    root = str(_REPO_ROOT)
+    current = child_env.get("PYTHONPATH", "")
+    if current:
+        if current.split(os.pathsep)[0] != root:
+            child_env["PYTHONPATH"] = root + os.pathsep + current
+    else:
+        child_env["PYTHONPATH"] = root
+    return child_env
+
+
 def _run_pass(
     *,
     name: str,
@@ -115,6 +131,7 @@ def _run_pass(
     journal_dir: Path | None = None,
     timeout_seconds: float | None = None,
     executed_passes: list[str] | None = None,
+    expected_invocations: dict[str, str] | None = None,
 ) -> PassResult:
     """Run pytest pass and persist logs/artifacts."""
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
@@ -134,12 +151,14 @@ def _run_pass(
         *addopts,
     ]
     child_env: dict[str, str] | None = None
+    invocation_id = ""
     if journal_dir is not None:
         if executed_passes is not None:
             executed_passes.append(name)
-        child_env = os.environ.copy()
-        child_env["BIOETL_JOURNAL_INVOCATION_ID"] = uuid.uuid4().hex
-        child_env["BIOETL_JOURNAL_PASS"] = name
+        invocation_id = uuid.uuid4().hex
+        child_env = _journal_child_env(name, invocation_id)
+        if expected_invocations is not None:
+            expected_invocations[name] = invocation_id
         command.extend(
             [
                 "-p",
@@ -177,6 +196,7 @@ def _run_pass(
             worker_crash_detected=False,
             timed_out=False,
             diagnostic_status="INVALID_INVOCATION",
+            invocation_id=invocation_id,
         )
     manifest = PytestAbortDiagnosticAdapter(
         timeout=watchdog,
@@ -217,6 +237,7 @@ def _run_pass(
         timed_out=manifest.status == "WATCHDOG_TIMEOUT",
         diagnostic_status=manifest.status,
         diagnostic_manifest=diagnostic_manifest,
+        invocation_id=invocation_id,
     )
 
 
@@ -271,6 +292,7 @@ def _finish_run(
     journal_dir: Path | None,
     executed_passes: list[str],
     test_rc: int,
+    expected_invocations: dict[str, str] | None = None,
 ) -> int:
     """Persist the summary and, when enabled, a separate journal verdict.
 
@@ -283,7 +305,11 @@ def _finish_run(
             reconcile_directory,
         )
 
-        verdict = reconcile_directory(journal_dir, executed_passes=executed_passes)
+        verdict = reconcile_directory(
+            journal_dir,
+            executed_passes=executed_passes,
+            expected_invocations=expected_invocations,
+        )
         verdict["test_exit_code"] = test_rc
         destinations = (
             reports_dir / "journal-verdict.json",
@@ -356,6 +382,7 @@ def _run_named_pass(
     journal_dir: Path | None,
     timeout_seconds: float | None,
     executed_passes: list[str],
+    expected_invocations: dict[str, str] | None = None,
 ) -> PassResult:
     """Run a named pass using shell-split addopts."""
     return _run_pass(
@@ -368,6 +395,7 @@ def _run_named_pass(
         journal_dir=journal_dir,
         timeout_seconds=timeout_seconds,
         executed_passes=executed_passes,
+        expected_invocations=expected_invocations,
     )
 
 
@@ -380,6 +408,7 @@ def _run_serial_pass(
     serial_timeout: float | None,
     summary_lines: list[str],
     executed_passes: list[str],
+    expected_invocations: dict[str, str] | None = None,
 ) -> int:
     """Run dedicated serial marker pass and record the summary."""
     serial_result = _run_named_pass(
@@ -392,6 +421,7 @@ def _run_serial_pass(
         journal_dir=journal_dir,
         timeout_seconds=serial_timeout,
         executed_passes=executed_passes,
+        expected_invocations=expected_invocations,
     )
     serial_rc = _effective_exit_code(serial_result, allow_no_tests=True)
     _append_pass_summary(summary_lines, result=serial_result, effective_rc=serial_rc)
@@ -525,6 +555,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     summary_lines: list[str] = []
     executed_passes: list[str] = []
+    expected_invocations: dict[str, str] = {}
     base_command = [sys.executable, "-X", "faulthandler", "-m", "pytest"]
     parallel_timeout = args.parallel_timeout_seconds or None
     fallback_timeout = args.fallback_timeout_seconds or None
@@ -540,6 +571,7 @@ def main(argv: list[str] | None = None) -> int:
         journal_dir=journal_dir,
         timeout_seconds=parallel_timeout,
         executed_passes=executed_passes,
+        expected_invocations=expected_invocations,
     )
 
     parallel_rc = _effective_exit_code(parallel_result)
@@ -559,6 +591,7 @@ def main(argv: list[str] | None = None) -> int:
                 journal_dir=journal_dir,
                 executed_passes=executed_passes,
                 test_rc=0,
+                expected_invocations=expected_invocations,
             )
 
         serial_rc = _run_serial_pass(
@@ -569,6 +602,7 @@ def main(argv: list[str] | None = None) -> int:
             serial_timeout=serial_timeout,
             summary_lines=summary_lines,
             executed_passes=executed_passes,
+            expected_invocations=expected_invocations,
         )
         return _finish_run(
             reports_dir=reports_dir,
@@ -576,6 +610,7 @@ def main(argv: list[str] | None = None) -> int:
             journal_dir=journal_dir,
             executed_passes=executed_passes,
             test_rc=serial_rc,
+            expected_invocations=expected_invocations,
         )
 
     if _parallel_failure_is_stable(parallel_result) or args.no_fallback:
@@ -593,6 +628,7 @@ def main(argv: list[str] | None = None) -> int:
             journal_dir=journal_dir,
             executed_passes=executed_passes,
             test_rc=parallel_rc,
+            expected_invocations=expected_invocations,
         )
 
     _append_parallel_instability_markers(
@@ -613,6 +649,7 @@ def main(argv: list[str] | None = None) -> int:
         journal_dir=journal_dir,
         timeout_seconds=fallback_timeout,
         executed_passes=executed_passes,
+        expected_invocations=expected_invocations,
     )
     fallback_rc = _effective_exit_code(fallback_result)
     _append_pass_summary(
@@ -628,6 +665,7 @@ def main(argv: list[str] | None = None) -> int:
             journal_dir=journal_dir,
             executed_passes=executed_passes,
             test_rc=fallback_rc,
+            expected_invocations=expected_invocations,
         )
 
     if run_serial_pass:
@@ -639,6 +677,7 @@ def main(argv: list[str] | None = None) -> int:
             serial_timeout=serial_timeout,
             summary_lines=summary_lines,
             executed_passes=executed_passes,
+            expected_invocations=expected_invocations,
         )
         return _finish_run(
             reports_dir=reports_dir,
@@ -646,6 +685,7 @@ def main(argv: list[str] | None = None) -> int:
             journal_dir=journal_dir,
             executed_passes=executed_passes,
             test_rc=serial_rc,
+            expected_invocations=expected_invocations,
         )
 
     return _finish_run(
@@ -654,6 +694,7 @@ def main(argv: list[str] | None = None) -> int:
         journal_dir=journal_dir,
         executed_passes=executed_passes,
         test_rc=0,
+        expected_invocations=expected_invocations,
     )
 
 

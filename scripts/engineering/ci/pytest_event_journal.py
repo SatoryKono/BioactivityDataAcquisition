@@ -22,7 +22,9 @@ and an explained terminal state for every selected test. Deselected
 nodeids are removed before that match. A complete run may still contain
 failures. ``GITHUB_RUN_ATTEMPT`` is the workflow attempt, not a retry
 inside this runner. Reconciliation keeps the latest invocation of each
-pass and the workers that share it.
+pass, or the invocation recorded for this process, and the workers that
+share it. A damaged receipt with no authoritative pass and invocation
+blocks the whole directory.
 """
 
 from __future__ import annotations
@@ -74,6 +76,13 @@ _CALL_CLASSIFICATIONS = frozenset({"passed", "failed", "skipped", "xfail", "xpas
 _SETUP_TERMINAL = frozenset({"setup_error", "skipped", "xfail"})
 _FAILURE_CLASSIFICATIONS = frozenset(
     {"failed", "setup_error", "teardown_error", "xpass"}
+)
+_AUTHORITATIVE_PASS_NAMES = frozenset({"parallel", "serial", "fallback"})
+_RECEIPT_FILENAME = re.compile(
+    r"^receipt_(?P<pass_name>parallel|serial|fallback|unspecified)_"
+    r"(?P<invocation>[0-9a-f]{32})_"
+    r"(?P<role>controller|worker)_(?P<worker>.+)_"
+    r"(?P<file_id>[0-9a-f]{32})\.jsonl$"
 )
 
 
@@ -165,6 +174,62 @@ def _parse_matrix(raw: str) -> Any:
     return None
 
 
+def _redact_secret_value(value: Any) -> Any:
+    if isinstance(value, str):
+        return _redaction_token(value)
+    if isinstance(value, dict):
+        return {str(key): _redact_secret_value(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_redact_secret_value(item) for item in value]
+    if value is None:
+        return None
+    return _redaction_token(str(value))
+
+
+def _redact_structured(value: Any, secrets: tuple[str, ...]) -> Any:
+    if isinstance(value, dict):
+        redacted: dict[str, Any] = {}
+        for key, item in value.items():
+            name = str(key)
+            if _SECRET_KEY.search(name) is not None:
+                redacted[name] = _redact_secret_value(item)
+            else:
+                redacted[name] = _redact_structured(item, secrets)
+        return redacted
+    if isinstance(value, list):
+        return [_redact_structured(item, secrets) for item in value]
+    if isinstance(value, str):
+        return _redact_text(value, secrets)
+    return value
+
+
+def _redacted_matrix(raw: str, secrets: tuple[str, ...]) -> Any:
+    parsed = _parse_matrix(raw)
+    if not isinstance(parsed, dict):
+        return None
+    return _redact_structured(parsed, secrets)
+
+
+def _matrix_env_text(raw: str, secrets: tuple[str, ...]) -> str:
+    redacted = _redacted_matrix(raw, secrets)
+    if redacted is None:
+        return _redact_text(raw, secrets)
+    return json.dumps(redacted, sort_keys=True, ensure_ascii=True)
+
+
+def _safe_env(secrets: tuple[str, ...]) -> dict[str, str]:
+    redacted: dict[str, str] = {}
+    for key in sorted(_SAFE_ENV_KEYS):
+        if key not in os.environ:
+            continue
+        raw = os.environ[key]
+        if key == "BIOETL_JOURNAL_MATRIX":
+            redacted[key] = _matrix_env_text(raw, secrets)
+            continue
+        redacted[key] = _redact_text(raw, secrets)
+    return redacted
+
+
 def _identity_from_env(
     *,
     actual_sha: str | None,
@@ -179,7 +244,7 @@ def _identity_from_env(
         "workflow_run_id": os.environ.get("GITHUB_RUN_ID") or "local",
         "workflow_run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT") or "local",
         "job": _redact_text(job, secrets),
-        "matrix": _parse_matrix(matrix_raw),
+        "matrix": _redacted_matrix(matrix_raw, secrets),
         "actual_checkout_sha": actual_sha,
         "expected_checkout_sha": os.environ.get("EXPECTED_CHECKOUT_SHA") or None,
         "invocation_id": invocation,
@@ -390,11 +455,7 @@ def pytest_configure(config: Any) -> None:
         {
             "selection": _selection_from_config(config, secrets),
             "sha_error": sha_error,
-            "safe_env": {
-                key: _redact_text(os.environ[key], secrets)
-                for key in sorted(_SAFE_ENV_KEYS)
-                if key in os.environ
-            },
+            "safe_env": _safe_env(secrets),
         },
     )
     expected = identity["expected_checkout_sha"]
@@ -511,13 +572,37 @@ def _load_receipt(path: Path) -> dict[str, Any]:
     }
 
 
+def _unreadable_receipt(path: Path, errno: int | None) -> dict[str, Any]:
+    return {
+        "path": str(path),
+        "events": [],
+        "truncated": True,
+        "finalized": False,
+        "io_error": f"receipt_unreadable:{errno}",
+    }
+
+
 def _group_receipts(journal_dir: Path) -> list[dict[str, Any]]:
-    if not journal_dir.is_dir():
-        return []
+    try:
+        if not journal_dir.is_dir():
+            return []
+        paths = sorted(journal_dir.glob("receipt_*.jsonl"))
+    except OSError as exc:
+        return [_unreadable_receipt(journal_dir, exc.errno)]
     receipts: list[dict[str, Any]] = []
-    for path in sorted(journal_dir.glob("receipt_*.jsonl")):
-        receipts.append(_load_receipt(path))
+    for path in paths:
+        try:
+            receipts.append(_load_receipt(path))
+        except OSError as exc:
+            receipts.append(_unreadable_receipt(path, exc.errno))
     return receipts
+
+
+def _filename_identity(path: str) -> tuple[str, str] | None:
+    match = _RECEIPT_FILENAME.fullmatch(Path(path).name)
+    if match is None:
+        return None
+    return match.group("pass_name"), match.group("invocation")
 
 
 def _pass_of(receipt: dict[str, Any]) -> str:
@@ -526,6 +611,9 @@ def _pass_of(receipt: dict[str, Any]) -> str:
         name = identity.get("pass_name")
         if isinstance(name, str) and name:
             return name
+    parsed = _filename_identity(str(receipt.get("path") or ""))
+    if parsed is not None:
+        return parsed[0]
     return "unspecified"
 
 
@@ -714,6 +802,8 @@ def _explain_phases(phases: dict[str, str]) -> tuple[bool, str]:
             return True, "teardown_error"
         return True, call
     if setup in _SETUP_TERMINAL and call is None:
+        if teardown == "teardown_error":
+            return True, "teardown_error"
         return True, setup
     return False, "unexplained"
 
@@ -1006,7 +1096,46 @@ def _invocation_of(receipt: dict[str, Any]) -> str:
         value = identity.get("invocation_id")
         if isinstance(value, str) and value:
             return value
+    parsed = _filename_identity(str(receipt.get("path") or ""))
+    if parsed is not None:
+        return parsed[1]
     return ""
+
+
+def _receipt_is_damaged(receipt: dict[str, Any]) -> bool:
+    return bool(
+        receipt["truncated"] or not receipt["finalized"] or receipt.get("io_error")
+    )
+
+
+def _unattributed_damage(receipt: dict[str, Any]) -> bool:
+    if not _receipt_is_damaged(receipt):
+        return False
+    if _pass_of(receipt) not in _AUTHORITATIVE_PASS_NAMES:
+        return True
+    return not _invocation_of(receipt)
+
+
+def _has_unattributed_damage(receipts: list[dict[str, Any]]) -> bool:
+    return any(_unattributed_damage(item) for item in receipts)
+
+
+def _receipts_for_reconciliation(
+    receipts: list[dict[str, Any]],
+    expected_invocations: dict[str, str] | None,
+) -> list[dict[str, Any]]:
+    expected = {
+        name: invocation
+        for name, invocation in (expected_invocations or {}).items()
+        if invocation
+    }
+    if not expected:
+        return _latest_invocation_receipts(receipts)
+    return [
+        receipt
+        for receipt in receipts
+        if expected.get(_pass_of(receipt)) == _invocation_of(receipt)
+    ]
 
 
 def _session_started_at(receipt: dict[str, Any]) -> str:
@@ -1052,9 +1181,14 @@ def _latest_invocation_receipts(
 
 
 def reconcile_directory(
-    journal_dir: Path, *, executed_passes: list[str]
+    journal_dir: Path,
+    *,
+    executed_passes: list[str],
+    expected_invocations: dict[str, str] | None = None,
 ) -> dict[str, Any]:
-    receipts = _latest_invocation_receipts(_group_receipts(journal_dir))
+    loaded = _group_receipts(journal_dir)
+    unattributed = _has_unattributed_damage(loaded)
+    receipts = _receipts_for_reconciliation(loaded, expected_invocations)
     by_pass: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for receipt in receipts:
         by_pass[_pass_of(receipt)].append(receipt)
@@ -1091,6 +1225,10 @@ def reconcile_directory(
             )
         else:
             tests_passed = None
+    if unattributed:
+        status = "unknown"
+        tests_passed = None
+        reasons = sorted({*reasons, "unattributed_receipt_damage"})
     return {
         "schema_version": SCHEMA_VERSION,
         "status": status,
