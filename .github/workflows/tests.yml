@@ -1363,8 +1363,8 @@ jobs:
   serial-coverage:
     runs-on: ubuntu-latest
     # Longer than --parallel-timeout-seconds below so a hung producer exits
-    # inside the job. The journal upload then still runs; repository policy
-    # keeps `always() && !cancelled()` on that upload.
+    # inside the job. Repository policy keeps always() && !cancelled() on
+    # uploads, including the journal receipt.
     timeout-minutes: 15
     needs: dependency-preflight
     permissions:

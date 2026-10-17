@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-17T02:19:34.579724+00:00",
+  "generated_at": "2026-10-17T09:52:17.734877+00:00",
   "summary": {
     "total_scripts": 649,
     "status_counts": {
@@ -10440,13 +10440,13 @@
         },
         {
           "path": "scripts/engineering/ci/run_pytest_resilient.py",
-          "line": 172,
+          "line": 175,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.pytest_abort_diagnostic_adapter import ("
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 1401,
+          "line": 1407,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import pytest_abort_diagnostic_adapter as adapter"
         },
@@ -10473,7 +10473,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 17,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -10483,13 +10483,19 @@
         },
         {
           "path": "scripts/engineering/ci/run_pytest_resilient.py",
-          "line": 262,
+          "line": 110,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.ci.pytest_event_journal import ensure_redaction_key"
+        },
+        {
+          "path": "scripts/engineering/ci/run_pytest_resilient.py",
+          "line": 265,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.pytest_event_journal import atomic_write_json"
         },
         {
           "path": "scripts/engineering/ci/run_pytest_resilient.py",
-          "line": 303,
+          "line": 306,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci.pytest_event_journal import ("
         },
@@ -10501,27 +10507,21 @@
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 447,
+          "line": 449,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_event_journal import _group_receipts"
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 831,
+          "line": 474,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.pytest_event_journal import ensure_redaction_key"
+        },
+        {
+          "path": "tests/architecture/ci/test_event_journal.py",
+          "line": 837,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pytest_event_journal import _redact_text"
-        },
-        {
-          "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 842,
-          "source_group": "tests",
-          "text": "from scripts.engineering.ci.pytest_event_journal import _redaction_token"
-        },
-        {
-          "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 877,
-          "source_group": "tests",
-          "text": "from scripts.engineering.ci.pytest_event_journal import _redact_text, _secret_values"
         }
       ],
       "owner": "@bioetl-platform",
@@ -10769,13 +10769,13 @@
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 740,
+          "line": 746,
           "source_group": "tests",
           "text": "str(_ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"run_pytest_resilient.py\"),"
         },
         {
           "path": "tests/architecture/ci/test_event_journal.py",
-          "line": 967,
+          "line": 973,
           "source_group": "tests",
           "text": "from scripts.engineering.ci import run_pytest_resilient"
         }

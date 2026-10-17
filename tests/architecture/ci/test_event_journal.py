@@ -120,9 +120,9 @@ def _phases(
     events = [_outcome(identity, nodeid, "setup", setup, retry_index=retry_index)]
     if call not in {"setup_error", "skipped"}:
         events.append(_outcome(identity, nodeid, "call", call, retry_index=retry_index))
-        events.append(
-            _outcome(identity, nodeid, "teardown", "passed", retry_index=retry_index)
-        )
+    events.append(
+        _outcome(identity, nodeid, "teardown", "passed", retry_index=retry_index)
+    )
     return events
 
 
@@ -405,11 +405,13 @@ def test_setup_teardown_skip_and_xfail_classifications(tmp_path: Path) -> None:
         _start(identity),
         _collected(identity, nodeids),
         _outcome(identity, nodeids[0], "setup", "setup_error"),
+        _outcome(identity, nodeids[0], "teardown", "passed"),
         *_phases(identity, nodeids[1], "failed"),
         _outcome(identity, nodeids[2], "setup", "passed"),
         _outcome(identity, nodeids[2], "call", "passed"),
         _outcome(identity, nodeids[2], "teardown", "teardown_error"),
         _outcome(identity, nodeids[3], "setup", "skipped"),
+        _outcome(identity, nodeids[3], "teardown", "passed"),
         _outcome(identity, nodeids[4], "setup", "passed"),
         _outcome(identity, nodeids[4], "call", "xfail"),
         _outcome(identity, nodeids[4], "teardown", "passed"),
@@ -468,6 +470,10 @@ def _run_journal(
     child_env["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
     if env:
         child_env.update(env)
+    if not child_env.get("BIOETL_JOURNAL_REDACTION_KEY"):
+        from scripts.engineering.ci.pytest_event_journal import ensure_redaction_key
+
+        child_env["BIOETL_JOURNAL_REDACTION_KEY"] = ensure_redaction_key()
     return subprocess.run(
         [
             sys.executable,
@@ -1102,7 +1108,7 @@ def _named_receipt(
     return f"receipt_{pass_name}_{invocation}_{role}_{worker}_{file_id}.jsonl"
 
 
-def test_skipped_setup_without_teardown_stays_complete(tmp_path: Path) -> None:
+def test_skipped_setup_without_teardown_is_incomplete(tmp_path: Path) -> None:
     identity = _identity(role="controller", worker_id="controller")
     nodeid = "test_sample.py::test_skip"
     events = _finalized(
@@ -1115,9 +1121,9 @@ def test_skipped_setup_without_teardown_stays_complete(tmp_path: Path) -> None:
     )
     _write_receipt(tmp_path, events)
     verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
-    assert verdict["status"] == "complete"
-    assert verdict["tests_passed"] is True
-    assert verdict["terminals"][0]["classification"] == "skipped"
+    assert verdict["status"] == "incomplete"
+    assert verdict["tests_passed"] is None
+    assert "missing_teardown" in verdict["reasons"]
 
 
 def test_skipped_setup_teardown_error_is_not_a_pass(tmp_path: Path) -> None:
@@ -1448,3 +1454,123 @@ def test_run_pass_forwards_repo_root_on_pythonpath(
     ]
     assert child_env["BIOETL_JOURNAL_INVOCATION_ID"] == result.invocation_id
     assert child_env["BIOETL_JOURNAL_PASS"] == "parallel"
+    assert child_env.get("BIOETL_JOURNAL_REDACTION_KEY")
+
+
+def test_quoted_assignment_redacts_the_enclosed_value() -> None:
+    from scripts.engineering.ci.pytest_event_journal import _redact_text
+
+    raw = '--payload={"password":"swordfish"}'
+    redacted = _redact_text(raw, ())
+    assert "swordfish" not in redacted
+    assert "password" in redacted
+
+
+def test_redaction_token_is_not_an_unsalted_digest() -> None:
+    import hashlib
+
+    from scripts.engineering.ci.pytest_event_journal import _redaction_token
+
+    secret = "swordfish"
+    unsalted = hashlib.sha256(secret.encode("utf-8")).hexdigest()[:12]
+    token = _redaction_token(secret)
+    assert token == _redaction_token(secret)
+    assert token != f"[redacted:{unsalted}]"
+    assert secret not in token
+
+
+def test_duplicate_nodeid_is_not_reused(tmp_path: Path) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_a"
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid, nodeid]),
+            *_phases(identity, nodeid, "failed"),
+            {"event": "session_finish", "identity": identity, "exitstatus": 1},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["selected_count"] == 2
+    assert verdict["status"] == "incomplete"
+    assert "unexplained_selected_tests" in verdict["reasons"]
+
+
+def test_worker_collection_without_controller_is_unknown(tmp_path: Path) -> None:
+    worker_a = _identity(role="worker", worker_id="gw0")
+    worker_b = _identity(role="worker", worker_id="gw1")
+    node_a = "test_sample.py::test_a"
+    node_b = "test_sample.py::test_b"
+    events = _finalized(
+        [
+            _start(worker_a),
+            _collected(worker_a, [node_a, node_b]),
+            *_phases(worker_a, node_a, "passed"),
+            _start(worker_b),
+            _collected(worker_b, [node_a, node_b]),
+            *_phases(worker_b, node_b, "passed"),
+            {"event": "session_finish", "identity": worker_a, "exitstatus": 0},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "unknown"
+    assert "missing_controller_collection" in verdict["reasons"]
+
+
+def test_invalid_utf8_receipt_is_damaged(tmp_path: Path) -> None:
+    path = tmp_path / "receipt_bad.jsonl"
+    path.write_bytes(b"\xff\n")
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "unknown"
+
+
+def test_malformed_identity_does_not_escape_reconciliation(tmp_path: Path) -> None:
+    events = _finalized(
+        [
+            {"event": "session_start", "identity": "corrupted", "selection": {}},
+            {"event": "session_finish", "identity": "corrupted", "exitstatus": 0},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "unknown"
+
+
+def test_missing_origin_worker_receipt_is_unknown(tmp_path: Path) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_a"
+    outcomes = _phases(identity, nodeid, "passed")
+    for event in outcomes:
+        event["origin_worker"] = "gw0"
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid]),
+            *outcomes,
+            {"event": "session_finish", "identity": identity, "exitstatus": 0},
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "unknown"
+    assert "missing_worker_receipt" in verdict["reasons"]
+
+
+def test_checkout_sha_command_uses_repository_root(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from scripts.engineering.ci import pytest_event_journal as journal
+
+    seen: dict[str, list[str]] = {}
+
+    def _fake(argv: list[str], **_kwargs: Any) -> subprocess.CompletedProcess[str]:
+        seen["argv"] = argv
+        return subprocess.CompletedProcess(argv, 0, stdout="a" * 40 + "\n", stderr="")
+
+    monkeypatch.setattr(journal.subprocess, "run", _fake)
+    sha, error = journal.measure_checkout_sha()
+    assert error is None
+    assert sha == "a" * 40
+    assert seen["argv"][:3] == ["git", "-C", str(journal._REPO_ROOT)]

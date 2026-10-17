@@ -31,13 +31,15 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import hmac
 import json
 import os
 import re
+import secrets
 import subprocess
 import sys
 import uuid
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -53,8 +55,10 @@ _SECRET_ASSIGNMENT = re.compile(
     r"(?i)(?:^|[^A-Za-z0-9])"
     r"(token|secret|password|passwd|api[_-]?key|access[_-]?key|"
     r"authorization|credential)"
-    r"\s*[:=]\s*([^\s,;\]\"']+)"
+    r"""['"]?\s*[:=]\s*(?:"([^"]*)"|'([^']*)'|([^\s,;\]"']+))"""
 )
+_REDACTION_KEY_ENV = "BIOETL_JOURNAL_REDACTION_KEY"
+_REPO_ROOT = Path(__file__).resolve().parents[3]
 _SECRET_PREFIX = re.compile(
     r"(?:ghp_[A-Za-z0-9]+|github_pat_[A-Za-z0-9_]+|sk-[A-Za-z0-9]+|"
     r"xox[baprs]-[A-Za-z0-9-]+|AKIA[A-Z0-9]{16})"
@@ -95,15 +99,43 @@ def pytest_addoption(parser: Any) -> None:
     )
 
 
+def ensure_redaction_key() -> str:
+    """Return this process's redaction key, creating it when absent.
+
+    The key stays in the process environment and is not written into receipts.
+    A fresh key per run stops the token from being an unsalted digest of the
+    secret and from matching the same secret in another run.
+    """
+    current = os.environ.get(_REDACTION_KEY_ENV, "")
+    if len(current) >= 16:
+        return current
+    generated = secrets.token_hex(32)
+    os.environ[_REDACTION_KEY_ENV] = generated
+    return generated
+
+
 def _redaction_token(secret: str) -> str:
-    digest = hashlib.sha256(secret.encode("utf-8")).hexdigest()[:12]
+    digest = hmac.new(
+        ensure_redaction_key().encode("utf-8"),
+        secret.encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()[:12]
     return f"[redacted:{digest}]"
 
 
+def _assigned_secret(match: re.Match[str]) -> tuple[int, str]:
+    for index in (2, 3, 4):
+        value = match.group(index)
+        if value is not None:
+            return index, value
+    return 4, ""
+
+
 def _replace_assignment(match: re.Match[str]) -> str:
-    value = match.group(2)
-    prefix = match.group(0)[: match.start(2) - match.start(0)]
-    return prefix + _redaction_token(value)
+    index, value = _assigned_secret(match)
+    prefix = match.group(0)[: match.start(index) - match.start(0)]
+    suffix = match.group(0)[match.end(index) - match.start(0) :]
+    return prefix + _redaction_token(value) + suffix
 
 
 def _replace_prefix(match: re.Match[str]) -> str:
@@ -142,7 +174,7 @@ def measure_checkout_sha(
     """Return ``(sha, error)``. ``error`` is set when git does not answer."""
     try:
         completed = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
+            ["git", "-C", str(_REPO_ROOT), "rev-parse", "HEAD"],
             check=False,
             capture_output=True,
             text=True,
@@ -372,21 +404,36 @@ class EventJournalPlugin:
         retry_index = getattr(report, "rerun", None)
         if retry_index is None:
             retry_index = 0
-        self.record(
-            "outcome",
-            {
-                "nodeid": str(report.nodeid),
-                "when": str(report.when),
-                "classification": classification,
-                "retry_index": int(retry_index),
-                "wasxfail": wasxfail is not None,
-            },
-        )
+        payload: dict[str, Any] = {
+            "nodeid": str(report.nodeid),
+            "when": str(report.when),
+            "classification": classification,
+            "retry_index": int(retry_index),
+            "wasxfail": wasxfail is not None,
+        }
+        origin = _origin_worker(report)
+        if origin is not None:
+            payload["origin_worker"] = origin
+        self.record("outcome", payload)
 
     def pytest_sessionfinish(self, session: Any, exitstatus: int) -> None:
         _ = session
         self.record("session_finish", {"exitstatus": int(exitstatus)})
         self.finalize()
+
+
+def _origin_worker(report: Any) -> str | None:
+    """Worker id stamped by xdist on a controller-forwarded report."""
+    node = getattr(report, "node", None)
+    if node is None:
+        return None
+    gateway = getattr(node, "gateway", None)
+    gateway_id = getattr(gateway, "id", None)
+    if isinstance(gateway_id, str) and gateway_id:
+        return gateway_id
+    if isinstance(node, str) and node:
+        return node
+    return None
 
 
 def _classify_report(report: Any, wasxfail: Any) -> str:
@@ -540,24 +587,53 @@ def _receipt_io_error(path: Path, events: list[dict[str, Any]]) -> str | None:
     return _recorded_io_error(events)
 
 
+def _event_is_well_formed(event: dict[str, Any]) -> bool:
+    if not isinstance(event.get("event"), str):
+        return False
+    identity = event.get("identity")
+    if identity is not None and not isinstance(identity, dict):
+        return False
+    nodeids = event.get("nodeids")
+    return nodeids is None or isinstance(nodeids, list)
+
+
+def _parse_receipt_line(line: str) -> dict[str, Any] | None:
+    try:
+        parsed = json.loads(line)
+    except json.JSONDecodeError:
+        return None
+    if isinstance(parsed, dict) and _event_is_well_formed(parsed):
+        return parsed
+    return None
+
+
+def _invalid_utf8_receipt(path: Path) -> dict[str, Any]:
+    return {
+        "path": str(path),
+        "events": [],
+        "truncated": True,
+        "finalized": False,
+        "io_error": "invalid_utf8",
+    }
+
+
 def _load_receipt(path: Path) -> dict[str, Any]:
     raw = path.read_bytes()
     truncated = bool(raw) and not raw.endswith(b"\n")
-    text = raw.decode("utf-8", errors="replace")
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return _invalid_utf8_receipt(path)
     events: list[dict[str, Any]] = []
     parse_error = False
     for line in text.splitlines():
         if not line.strip():
             continue
-        try:
-            parsed = json.loads(line)
-        except json.JSONDecodeError:
+        parsed = _parse_receipt_line(line)
+        if parsed is None:
             parse_error = True
             continue
-        if isinstance(parsed, dict):
-            events.append(parsed)
-        else:
-            parse_error = True
+        events.append(parsed)
     finalized = bool(events) and events[-1].get("event") == "journal_finalized"
     prior_ok = False
     if finalized:
@@ -607,7 +683,7 @@ def _filename_identity(path: str) -> tuple[str, str] | None:
 
 def _pass_of(receipt: dict[str, Any]) -> str:
     for event in receipt["events"]:
-        identity = event.get("identity") or {}
+        identity = _event_identity(event)
         name = identity.get("pass_name")
         if isinstance(name, str) and name:
             return name
@@ -674,9 +750,11 @@ def _controller_collection(
 
 def _selected_nodeids(
     events: list[dict[str, Any]],
+    *,
+    allow_worker_collection: bool,
 ) -> tuple[list[str] | None, list[str], list[str], bool]:
     selected, deselected, errors, conflict = _controller_collection(events)
-    if selected is None:
+    if selected is None and allow_worker_collection:
         selected = _repeated_worker_collection(events)
     if selected is not None:
         selected = _drop_deselected(selected, deselected)
@@ -714,8 +792,8 @@ def _dedup_outcomes(
     """Collapse controller redelivery when the originating worker also reported.
 
     Key is ``(nodeid, when, retry_index)``. A later pytest retry keeps its own
-    index and is not merged into the earlier attempt. Two workers reporting
-    the same key is a conflict, not an extra test.
+    index and is not merged into the earlier attempt. Identical reports of one
+    key count as separate item instances. Different classifications conflict.
     """
     grouped: dict[tuple[str, str, int], list[dict[str, Any]]] = defaultdict(list)
     for event in events:
@@ -744,7 +822,7 @@ def _dedup_outcomes(
         if len(signatures) > 1:
             reasons.append("conflicting_outcome")
             continue
-        chosen[key] = pool[0]
+        chosen[key] = {**pool[0], "count": len(pool)}
     return chosen, sorted(set(reasons))
 
 
@@ -764,31 +842,64 @@ def _terminal_states(
     terminals: list[dict[str, Any]] = []
     missing: list[str] = []
     gap_reasons: list[str] = []
-    for nodeid in selected:
+    for nodeid, copies in Counter(selected).items():
         attempts = by_node.get(nodeid) or {}
-        if not attempts:
-            missing.append(nodeid)
-            continue
-        retry_index = max(attempts)
-        phases = attempts[retry_index]
+        retry_index = max(attempts) if attempts else 0
+        phases = attempts.get(retry_index, {})
         explained, classification = _explain_phases(phases)
-        if not explained:
-            missing.append(nodeid)
+        available = _phase_copies(outcomes, nodeid, retry_index, phases, explained)
+        if available < copies:
+            missing.extend([nodeid] * (copies - available))
             if classification == "missing_teardown":
                 gap_reasons.append("missing_teardown")
-            continue
-        terminals.append(
-            {
-                "nodeid": nodeid,
-                "classification": classification,
-                "call_classification": phases.get("call"),
-                "retry_index": retry_index,
-                "worker_id": workers.get((nodeid, retry_index), "controller"),
-                "attempt_count": len(attempts),
-            }
+        _append_terminals(
+            terminals,
+            nodeid=nodeid,
+            copies=available,
+            phases=phases,
+            classification=classification,
+            retry_index=retry_index,
+            worker_id=workers.get((nodeid, retry_index), "controller"),
+            attempt_count=len(attempts),
         )
     terminals.sort(key=lambda item: str(item["nodeid"]))
     return terminals, missing, sorted(set(gap_reasons))
+
+
+def _phase_copies(
+    outcomes: dict[tuple[str, str, int], dict[str, Any]],
+    nodeid: str,
+    retry_index: int,
+    phases: dict[str, str],
+    explained: bool,
+) -> int:
+    if not explained or not phases:
+        return 0
+    return min(
+        int(outcomes[(nodeid, when, retry_index)].get("count") or 0) for when in phases
+    )
+
+
+def _append_terminals(
+    terminals: list[dict[str, Any]],
+    *,
+    nodeid: str,
+    copies: int,
+    phases: dict[str, str],
+    classification: str,
+    retry_index: int,
+    worker_id: str,
+    attempt_count: int,
+) -> None:
+    row = {
+        "nodeid": nodeid,
+        "classification": classification,
+        "call_classification": phases.get("call"),
+        "retry_index": retry_index,
+        "worker_id": worker_id,
+        "attempt_count": attempt_count,
+    }
+    terminals.extend(dict(row) for _copy in range(copies))
 
 
 def _explain_phases(phases: dict[str, str]) -> tuple[bool, str]:
@@ -802,6 +913,8 @@ def _explain_phases(phases: dict[str, str]) -> tuple[bool, str]:
             return True, "teardown_error"
         return True, call
     if setup in _SETUP_TERMINAL and call is None:
+        if teardown is None:
+            return False, "missing_teardown"
         if teardown == "teardown_error":
             return True, "teardown_error"
         return True, setup
@@ -969,6 +1082,7 @@ def _verdict_status(reasons: list[str]) -> str:
         or "conflicting_outcome" in reasons
         or "conflicting_collection" in reasons
         or "missing_controller_collection" in reasons
+        or "missing_worker_receipt" in reasons
     ):
         return "unknown"
     if (
@@ -990,6 +1104,55 @@ def _tests_passed(status: str, terminals: list[dict[str, Any]]) -> bool | None:
     )
 
 
+def _event_identity(event: dict[str, Any]) -> dict[str, Any]:
+    identity = event.get("identity")
+    if isinstance(identity, dict):
+        return identity
+    return {}
+
+
+def _receipt_intact(receipt: dict[str, Any]) -> bool:
+    return not (
+        receipt.get("truncated")
+        or not receipt.get("finalized")
+        or receipt.get("io_error")
+    )
+
+
+def _intact_controller_receipt(receipts: list[dict[str, Any]]) -> bool:
+    for receipt in receipts:
+        if not _receipt_intact(receipt):
+            continue
+        for event in receipt["events"]:
+            if _event_identity(event).get("role") == "controller":
+                return True
+    return False
+
+
+def _missing_origin_workers(
+    receipts: list[dict[str, Any]], events: list[dict[str, Any]]
+) -> list[str]:
+    intact: set[str] = set()
+    for receipt in receipts:
+        if not _receipt_intact(receipt):
+            continue
+        for event in receipt["events"]:
+            identity = _event_identity(event)
+            if identity.get("role") != "worker":
+                continue
+            worker = identity.get("worker_id")
+            if isinstance(worker, str) and worker:
+                intact.add(worker)
+    missing: set[str] = set()
+    for event in events:
+        if event.get("event") != "outcome":
+            continue
+        origin = event.get("origin_worker")
+        if isinstance(origin, str) and origin and origin not in intact:
+            missing.add(origin)
+    return sorted(missing)
+
+
 def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[str, Any]:
     """Reconcile one runner pass. See module docstring for the status rules."""
     if not receipts:
@@ -1004,10 +1167,13 @@ def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[st
     flags = _session_flags(events)
     reasons.extend(_checkout_reasons(flags))
     selected, deselected, collection_errors, collection_conflict = _selected_nodeids(
-        events
+        events,
+        allow_worker_collection=_intact_controller_receipt(receipts),
     )
     outcomes, outcome_reasons = _dedup_outcomes(events)
     reasons.extend(outcome_reasons)
+    if _missing_origin_workers(receipts, events):
+        reasons.append("missing_worker_receipt")
     terminals: list[dict[str, Any]] = []
     missing: list[str] = []
     if selected is not None:
@@ -1092,7 +1258,7 @@ def authoritative_pass_names(executed_passes: list[str]) -> tuple[list[str], lis
 
 def _invocation_of(receipt: dict[str, Any]) -> str:
     for event in receipt["events"]:
-        identity = event.get("identity") or {}
+        identity = _event_identity(event)
         value = identity.get("invocation_id")
         if isinstance(value, str) and value:
             return value

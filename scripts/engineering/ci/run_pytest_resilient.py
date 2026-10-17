@@ -107,7 +107,10 @@ def _read_supervised_log(reports_dir: Path, relative: str) -> str:
 
 def _journal_child_env(pass_name: str, invocation_id: str) -> dict[str, str]:
     """Environment for one journaled pytest child."""
+    from scripts.engineering.ci.pytest_event_journal import ensure_redaction_key
+
     child_env = os.environ.copy()
+    child_env["BIOETL_JOURNAL_REDACTION_KEY"] = ensure_redaction_key()
     child_env["BIOETL_JOURNAL_INVOCATION_ID"] = invocation_id
     child_env["BIOETL_JOURNAL_PASS"] = pass_name
     root = str(_REPO_ROOT)
