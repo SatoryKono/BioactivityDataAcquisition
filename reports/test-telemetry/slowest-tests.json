@@ -5,7 +5,7 @@
   "source_event": "push",
   "source_run_url": null,
   "source_tree_sha256": "7f49ec40586784bb4cc78e19e7029db4235b0c46e0f09f800b229193602ed838",
-  "refreshed_at_utc": "2026-10-17T12:06:42.199461+00:00",
+  "refreshed_at_utc": "2026-10-17T18:37:38.133765+00:00",
   "refresh_status": "captured",
   "total_cases": 34037,
   "count_semantics": "non_skipped_junit_records",
