@@ -21,12 +21,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import zstandard as zstd
-
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+
 from tests.helpers.deterministic_ids import deterministic_batch_id, deterministic_run_id
 
 INVALID_PROVIDER_NAME = "Invalid provider name"
@@ -90,6 +90,48 @@ def sample_records() -> list[bytes]:
         {"id": 3, "name": "test3", "value": 300},
     ]
     return [json.dumps(r).encode("utf-8") + b"\n" for r in records]
+
+
+async def _expect_rejected_write_attempt(
+    tmp_path: Path,
+    logger: NoOpLogger,
+    exc: type[BaseException],
+    match: str,
+    **overrides: object,
+) -> None:
+    """Count and trace a rejected write before any bronze root mutation."""
+    payload: dict[str, object] = {
+        "records": iter((SAMPLE_JSON_RECORD,)),
+        "provider": "chembl",
+        "entity": "activity",
+        "date": datetime(2024, 1, 15, tzinfo=UTC),
+        "batch_id": _batch_id("rejected-write"),
+        "run_id": _run_id("rejected-write"),
+        "run_type": RunType.INCREMENTAL,
+        "ingestion_ts": datetime(2024, 1, 15, 12, tzinfo=UTC),
+    }
+    payload.update(overrides)
+    metrics = MagicMock()
+    tracer = MagicMock()
+    span_cm = MagicMock()
+    span_cm.__enter__.return_value = MagicMock()
+    span_cm.__exit__.return_value = False
+    tracer.start_as_current_span.return_value = span_cm
+    tracing = MagicMock()
+    tracing.get_tracer.return_value = tracer
+    writer = BronzeWriter(
+        base_path=tmp_path, logger=logger, metrics=metrics, tracing=tracing
+    )
+    rejected = cast(Callable[..., object], writer.write_bronze)
+    with pytest.raises(exc, match=match):
+        await rejected(**payload)
+    labels = {"provider": payload["provider"], "entity": payload["entity"]}
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_bronze_write_attempts_total", 1, labels
+    )
+    tracer.start_as_current_span.assert_called_once_with("write_bronze")
+    span_cm.__enter__.assert_called_once()
+    assert not any(tmp_path.iterdir())
 
 
 @pytest.mark.unit
@@ -165,65 +207,29 @@ class TestBronzeWriterNameValidation:
 
     @pytest.mark.asyncio
     async def test_write_bronze_invalid_provider_raises(
-        self,
-        tmp_path: Path,
-        noop_logger: NoOpLogger,
-        sample_records: list[bytes],
-        batch_id: BatchID,
-        run_id: RunID,
-        run_type: RunType,
-        ingestion_ts: datetime,
+        self, tmp_path: Path, noop_logger: NoOpLogger
     ) -> None:
-        """Test write_bronze raises ValueError for invalid provider."""
-        writer = BronzeWriter(
-            base_path=tmp_path,
-            logger=noop_logger,
-            metrics=NoOpMetrics(),
+        """Rejected provider names still count as one write attempt."""
+        await _expect_rejected_write_attempt(
+            tmp_path,
+            noop_logger,
+            ValueError,
+            INVALID_PROVIDER_NAME,
+            provider="invalid/provider",
         )
-        date = datetime(2024, 1, 15, tzinfo=UTC)
-
-        with pytest.raises(ValueError, match=INVALID_PROVIDER_NAME):
-            await writer.write_bronze(
-                records=iter(sample_records),
-                provider="invalid/provider",
-                entity="activity",
-                date=date,
-                batch_id=batch_id,
-                run_id=run_id,
-                run_type=run_type,
-                ingestion_ts=ingestion_ts,
-            )
 
     @pytest.mark.asyncio
     async def test_write_bronze_invalid_entity_raises(
-        self,
-        tmp_path: Path,
-        noop_logger: NoOpLogger,
-        sample_records: list[bytes],
-        batch_id: BatchID,
-        run_id: RunID,
-        run_type: RunType,
-        ingestion_ts: datetime,
+        self, tmp_path: Path, noop_logger: NoOpLogger
     ) -> None:
-        """Test write_bronze raises ValueError for invalid entity."""
-        writer = BronzeWriter(
-            base_path=tmp_path,
-            logger=noop_logger,
-            metrics=NoOpMetrics(),
+        """Rejected entity names still count as one write attempt."""
+        await _expect_rejected_write_attempt(
+            tmp_path,
+            noop_logger,
+            ValueError,
+            INVALID_ENTITY_NAME,
+            entity="invalid entity",
         )
-        date = datetime(2024, 1, 15, tzinfo=UTC)
-
-        with pytest.raises(ValueError, match=INVALID_ENTITY_NAME):
-            await writer.write_bronze(
-                records=iter(sample_records),
-                provider="chembl",
-                entity="invalid entity",
-                date=date,
-                batch_id=batch_id,
-                run_id=run_id,
-                run_type=run_type,
-                ingestion_ts=ingestion_ts,
-            )
 
     def test_validate_records_iterator_valid(
         self, tmp_path: Path, noop_logger: NoOpLogger
@@ -344,35 +350,19 @@ class TestBronzeWriterTracing:
 
     @pytest.mark.asyncio
     async def test_write_bronze_invalid_records_type_raises(
-        self,
-        tmp_path: Path,
-        noop_logger: NoOpLogger,
-        batch_id: BatchID,
-        run_id: RunID,
-        run_type: RunType,
-        ingestion_ts: datetime,
+        self, tmp_path: Path, noop_logger: NoOpLogger
     ) -> None:
-        """Test write_bronze raises TypeError for invalid records type."""
-        writer = BronzeWriter(
-            base_path=tmp_path,
-            logger=noop_logger,
-            metrics=NoOpMetrics(),
+        """Rejected records still count as one write attempt."""
+        await _expect_rejected_write_attempt(
+            tmp_path, noop_logger, TypeError, "records cannot be None", records=None
         )
-        date = datetime(2024, 1, 15, tzinfo=UTC)
-        write_bronze = cast(Callable[..., object], writer.write_bronze)
-
-        # Int is not iterable
-        with pytest.raises(TypeError, match="records must be an Iterator"):
-            await write_bronze(
-                records=123,
-                provider="chembl",
-                entity="activity",
-                date=date,
-                batch_id=batch_id,
-                run_id=run_id,
-                run_type=run_type,
-                ingestion_ts=ingestion_ts,
-            )
+        await _expect_rejected_write_attempt(
+            tmp_path,
+            noop_logger,
+            TypeError,
+            "records must be an Iterator",
+            records=123,
+        )
 
 
 @pytest.mark.unit
@@ -490,37 +480,18 @@ class TestBronzeWriterUTCValidation:
 
     @pytest.mark.asyncio
     async def test_write_bronze_non_utc_date_raises(
-        self,
-        tmp_path: Path,
-        noop_logger: NoOpLogger,
-        sample_records: list[bytes],
-        batch_id: BatchID,
-        run_id: RunID,
-        run_type: RunType,
-        ingestion_ts: datetime,
+        self, tmp_path: Path, noop_logger: NoOpLogger
     ) -> None:
-        """Test write_bronze raises ValueError for non-UTC date."""
+        """Rejected non-UTC dates still count as one write attempt."""
         from datetime import timedelta, timezone
 
-        writer = BronzeWriter(
-            base_path=tmp_path,
-            logger=noop_logger,
-            metrics=NoOpMetrics(),
+        await _expect_rejected_write_attempt(
+            tmp_path,
+            noop_logger,
+            ValueError,
+            "date must be UTC",
+            date=datetime(2024, 1, 15, tzinfo=timezone(timedelta(hours=5))),
         )
-        non_utc_tz = timezone(timedelta(hours=5))
-        non_utc_date = datetime(2024, 1, 15, tzinfo=non_utc_tz)
-
-        with pytest.raises(ValueError, match="date must be UTC"):
-            await writer.write_bronze(
-                records=iter(sample_records),
-                provider="chembl",
-                entity="activity",
-                date=non_utc_date,
-                batch_id=batch_id,
-                run_id=run_id,
-                run_type=run_type,
-                ingestion_ts=ingestion_ts,
-            )
 
 
 @pytest.mark.unit

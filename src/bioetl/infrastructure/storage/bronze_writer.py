@@ -240,7 +240,6 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
             ingestion_ts=ingestion_ts,
             source_metadata=source_metadata,
         )
-        self._validate_bronze_request_inputs(request)
         labels = {"provider": request.provider, "entity": request.entity}
         self._metrics.increment_counter("bioetl_bronze_write_attempts_total", 1, labels)
         span_context = (
@@ -253,6 +252,7 @@ class BronzeWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
             span.set_attribute("entity", request.entity)
             span.set_attribute("batch_id", str(request.batch_id))
             span.set_attribute("run_id", str(request.run_id))
+            self._validate_bronze_request_inputs(request)
             return await self._write_bronze_under_lock(request)
 
     async def _write_bronze_under_lock(
