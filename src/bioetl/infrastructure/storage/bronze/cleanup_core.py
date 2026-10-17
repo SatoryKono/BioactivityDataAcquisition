@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import errno
 import os
 import stat
 from collections.abc import Callable, Iterator
@@ -136,7 +137,6 @@ def _xattr_probe_anchor(base_path: Path) -> tuple[int, str] | None:
 
 
 def _default_temp_device() -> int | None:
-    """Device id for the default temp volume without creating a probe directory."""
     import tempfile
 
     try:
@@ -146,7 +146,7 @@ def _default_temp_device() -> int | None:
 
 
 def _run_directory_xattr_probe(probe_dir: str | None, cache_key: int) -> bool:
-    """Create one probe directory on ``probe_dir`` and cache the result by device."""
+    """Probe one directory and cache only a confirmed unsupported-xattr result."""
     import tempfile
 
     apis = _xattr_apis()
@@ -168,8 +168,9 @@ def _run_directory_xattr_probe(probe_dir: str | None, cache_key: int) -> bool:
                 return supported
             finally:
                 os.close(fd)
-    except OSError:
-        _DIR_XATTR_BY_DEV[cache_key] = False
+    except OSError as exc:
+        if exc.errno in {errno.ENOTSUP, errno.EOPNOTSUPP}:
+            _DIR_XATTR_BY_DEV[cache_key] = False
         return False
 
 

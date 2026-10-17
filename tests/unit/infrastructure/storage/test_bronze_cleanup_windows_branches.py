@@ -1164,6 +1164,75 @@ def test_directory_xattr_cache_skips_repeat_probe(
     cleanup_core._DIR_XATTR_BY_DEV.clear()
 
 
+def test_xattr_cache_keeps_only_unsupported_errno(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Only ENOTSUP and EOPNOTSUPP pin a negative directory-xattr cache."""
+    cleanup_core._DIR_XATTR_BY_DEV.clear()
+    real_open = os.open
+    real_close = os.close
+    setter_calls = 0
+    pending: OSError | None = None
+
+    def fake_open(path, flags, *args, **kwargs):
+        if isinstance(path, str) and "bioetl-xattr-probe-" in path:
+            return 7
+        return real_open(path, flags, *args, **kwargs)
+
+    def fake_close(fd, *args, **kwargs):
+        if fd == 7:
+            return None
+        return real_close(fd, *args, **kwargs)
+
+    def setter(*_args, **_kwargs) -> None:
+        nonlocal setter_calls
+        setter_calls += 1
+        if pending is not None:
+            raise pending
+
+    monkeypatch.setattr(os, "open", fake_open)
+    monkeypatch.setattr(os, "close", fake_close)
+    monkeypatch.setattr(
+        cleanup_core,
+        "_xattr_apis",
+        lambda: (setter, lambda *_args, **_kwargs: b"1", None),
+    )
+    monkeypatch.setattr(
+        cleanup_core, "_xattr_probe_anchor", lambda _path: (42, str(tmp_path))
+    )
+    try:
+        for code in (errno.EMFILE, errno.ENOSPC, errno.EACCES):
+            pending = OSError(code, "transient xattr probe")
+            before = setter_calls
+            assert cleanup_core._directory_xattr_supported(tmp_path) is False
+            assert setter_calls == before + 1
+            assert 42 not in cleanup_core._DIR_XATTR_BY_DEV
+        pending = OSError("transient xattr probe")
+        assert pending.errno is None
+        before = setter_calls
+        assert cleanup_core._directory_xattr_supported(tmp_path) is False
+        assert setter_calls == before + 1
+        assert 42 not in cleanup_core._DIR_XATTR_BY_DEV
+        pending = None
+        assert cleanup_core._directory_xattr_supported(tmp_path) is True
+        assert cleanup_core._DIR_XATTR_BY_DEV[42] is True
+        warmed = setter_calls
+        assert cleanup_core._directory_xattr_supported(tmp_path) is True
+        assert setter_calls == warmed
+        cleanup_core._DIR_XATTR_BY_DEV.clear()
+        for code in (errno.ENOTSUP, errno.EOPNOTSUPP):
+            pending = OSError(code, "xattr unsupported")
+            before = setter_calls
+            assert cleanup_core._directory_xattr_supported(tmp_path) is False
+            assert cleanup_core._DIR_XATTR_BY_DEV[42] is False
+            assert setter_calls == before + 1
+            assert cleanup_core._directory_xattr_supported(tmp_path) is False
+            assert setter_calls == before + 1
+            cleanup_core._DIR_XATTR_BY_DEV.clear()
+    finally:
+        cleanup_core._DIR_XATTR_BY_DEV.clear()
+
+
 def test_candidate_is_safe_uses_anchored_parent(tmp_path: Path, monkeypatch) -> None:
     _arm(monkeypatch)
     root = _abs(tmp_path)
