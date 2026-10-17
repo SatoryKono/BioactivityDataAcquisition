@@ -27,7 +27,7 @@ dependencies = [
     # NOTE (AUD-006): no arro3-core pin. deltalake<1.0 does not require arro3
     # and nothing in src/scripts/tests imports it (verified 2026-09-19).
     # Re-add only as part of a deltalake>=1.0 migration with Windows-CI proof.
-    "pyarrow>=15.0,<26.0",
+    "pyarrow>=15.0,<27.0",
     "zstandard>=0.22",
     # <2.3 holds back pandas 3.x behavioral breaks (CoW/strings); 2.3.x is
     # unvalidated in this repo. Reviewed 2026-09-19; re-review by 2027-03-19. (AUD-006)
