@@ -13,9 +13,11 @@ import re
 import stat
 import subprocess
 import tempfile
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from pathlib import Path
 from typing import Any
+
+import pytest
 
 ALLOWED_ENV_VARS = frozenset(
     {
@@ -68,7 +70,7 @@ def git_head(repo_root: Path) -> str:
     return output.strip() or "unknown"
 
 
-def _porcelain_entries(repo_root: Path) -> list[tuple[str, str]]:
+def _porcelain_entries(repo_root: Path) -> list[tuple[str, str]] | None:
     output = _git_output(
         repo_root,
         "status",
@@ -77,7 +79,7 @@ def _porcelain_entries(repo_root: Path) -> list[tuple[str, str]]:
         "--untracked-files=all",
     )
     if output is None:
-        return []
+        return None
     parts = output.split("\0")
     entries: list[tuple[str, str]] = []
     index = 0
@@ -133,16 +135,25 @@ def source_snapshot(repo_root: Path, receipt_dir: Path | None = None) -> dict[st
     Untracked run outputs (reports, coverage, the receipt directory) are not
     measured-source changes. A modified tracked file, including one under
     ``reports/``, stays dirty. A dirty measured tree is not a clean HEAD.
+    When git cannot read status, cleanliness stays unknown instead of true.
     """
+    head = git_head(repo_root)
+    entries = _porcelain_entries(repo_root)
+    if entries is None:
+        return {
+            "head": head,
+            "clean": None,
+            "measured_dirty_paths": None,
+        }
     dirty = sorted(
         {
             path
-            for status, path in _porcelain_entries(repo_root)
+            for status, path in entries
             if path and not _is_run_output(path, status, receipt_dir, repo_root)
         }
     )
     return {
-        "head": git_head(repo_root),
+        "head": head,
         "clean": not dirty,
         "measured_dirty_paths": dirty,
     }
@@ -269,6 +280,22 @@ def terminal_outcome(phases: Mapping[str, str | None]) -> str:
     return "error"
 
 
+def _merge_phase(existing: str | None, new: str) -> str:
+    """Keep an earlier failure when a later report for the same phase passes.
+
+    ``unittest`` subtests emit a failed call report and then a passed report
+    for the parent node. The failure stays the phase outcome.
+    """
+    if existing in {"failed", "error"} and new not in {"failed", "error"}:
+        return existing
+    return new
+
+
+def _final_exit_code(session: Any, exitstatus: Any) -> int:
+    """Return the exit code after other sessionfinish hooks have rewritten it."""
+    return int(getattr(session, "exitstatus", exitstatus))
+
+
 def _phases_finished(phases: Mapping[str, str | None]) -> bool:
     """A node is finished only after its terminal phase.
 
@@ -370,7 +397,8 @@ class ReceiptPlugin:
         if not self.write_receipt:
             return
         phases = self.results.setdefault(str(report.nodeid), _blank_phases())
-        phases[str(report.when)] = _phase_outcome(report)
+        when = str(report.when)
+        phases[when] = _merge_phase(phases.get(when), _phase_outcome(report))
 
     def _early_stop(self, session: Any) -> bool:
         if getattr(session, "shouldstop", False) or getattr(
@@ -443,7 +471,9 @@ class ReceiptPlugin:
             }
         return rendered
 
-    def pytest_sessionfinish(self, session: Any, exitstatus: Any) -> None:
+    @pytest.hookimpl(hookwrapper=True)
+    def pytest_sessionfinish(self, session: Any, exitstatus: Any) -> Iterator[None]:
+        yield
         if not self.write_receipt:
             return
         assigned = self._assigned_nodeids(session)
@@ -457,7 +487,7 @@ class ReceiptPlugin:
             "attempt": self.attempt,
             "pass": self.pass_name,
             "worker": self.worker_id,
-            "exit_code": int(exitstatus),
+            "exit_code": _final_exit_code(session, exitstatus),
             "early_stop": early_stop,
             "completeness": self._completeness(early_stop),
             "collection": self._collection_payload(),

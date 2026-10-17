@@ -115,19 +115,52 @@ def _decode_timeout_stream(stream: bytes | str | None) -> str:
 
 def _timeout_output(
     *,
-    exc: subprocess.TimeoutExpired,
+    stdout: bytes | str | None,
+    stderr: bytes | str | None,
     name: str,
     timeout_seconds: float | None,
 ) -> str:
     output = _merge_process_output(
-        _decode_timeout_stream(exc.stdout),
-        _decode_timeout_stream(exc.stderr),
+        _decode_timeout_stream(stdout),
+        _decode_timeout_stream(stderr),
     )
     timeout_note = (
         f"\n[run_pytest_resilient] pass '{name}' timed out "
         f"after {timeout_seconds:.0f}s."
     )
     return f"{output}{timeout_note}" if output else timeout_note.lstrip()
+
+
+def _popen_group_kwargs() -> dict[str, int | bool]:
+    """Start pytest in its own group so a timeout can stop its descendants."""
+    if os.name == "nt":
+        return {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP}
+    return {"start_new_session": True}
+
+
+def _terminate_process_tree(process: subprocess.Popen[str]) -> None:
+    """Stop a timed-out pytest process and the children it spawned."""
+    if process.poll() is not None:
+        return
+    if os.name == "nt":
+        subprocess.run(
+            ["taskkill", "/F", "/T", "/PID", str(process.pid)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    else:
+        import signal
+
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except (ProcessLookupError, PermissionError):
+            process.kill()
+    try:
+        process.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait(timeout=10)
 
 
 def _child_env() -> dict[str, str]:
@@ -197,7 +230,11 @@ def _run_pass(
     child_env: dict[str, str] | None = None,
 ) -> PassResult:
     """Run pytest pass and persist logs/artifacts."""
-    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+    from scripts.engineering.common.repo_paths import (
+        REPO_ROOT,
+        ensure_safe_cli_argv,
+        resolve_output_path,
+    )
 
     reports_dir = resolve_output_path(reports_dir, root=REPO_ROOT)
     reports_dir.mkdir(parents=True, exist_ok=True)
@@ -219,29 +256,36 @@ def _run_pass(
     sys.stdout.write(f"\n=== Running pytest pass: {name} ===\n")
     sys.stdout.write(f"Command: {' '.join(command)}\n")
     timed_out = False
+    process = subprocess.Popen(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
+        ensure_safe_cli_argv([str(token) for token in command]),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        env=child_env,
+        **_popen_group_kwargs(),
+    )
     try:
-        from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
-
-        completed = (
-            subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv  # nosec B603
-                ensure_safe_cli_argv([str(token) for token in command]),
-                capture_output=True,
-                text=True,
-                check=False,
-                timeout=timeout_seconds,
-                env=child_env,
-            )
-        )
-        return_code = completed.returncode
-        output = _merge_process_output(completed.stdout, completed.stderr)
+        stdout, stderr = process.communicate(timeout=timeout_seconds)
     except subprocess.TimeoutExpired as exc:
         timed_out = True
+        _terminate_process_tree(process)
+        try:
+            drained_out, drained_err = process.communicate(timeout=5)
+        except subprocess.TimeoutExpired:
+            drained_out, drained_err = None, None
+        stdout = exc.stdout or drained_out
+        stderr = exc.stderr or drained_err
+    if timed_out:
         return_code = 124
         output = _timeout_output(
-            exc=exc,
+            stdout=stdout,
+            stderr=stderr,
             name=name,
             timeout_seconds=timeout_seconds,
         )
+    else:
+        return_code = int(process.returncode if process.returncode is not None else 1)
+        output = _merge_process_output(stdout or "", stderr or "")
 
     log_path.write_text(output, encoding="utf-8")
     if output:

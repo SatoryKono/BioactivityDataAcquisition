@@ -7,6 +7,7 @@ import os
 import stat
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import pytest
@@ -18,6 +19,7 @@ from scripts.engineering.ci.pytest_receipts import (
     _phases_finished,
     dedupe_receipts,
     redact_secrets,
+    source_snapshot,
     terminal_outcome,
     write_receipt_file,
 )
@@ -488,6 +490,96 @@ def test_redact_secrets_covers_auth_and_urls() -> None:
     assert "neo4j-secret" not in text
     assert "postgres://user:pw@localhost/db" not in text
     assert "[REDACTED]" in text
+
+
+def test_git_status_failure_is_not_a_clean_tree(tmp_path: Path) -> None:
+    snapshot = source_snapshot(tmp_path)
+    assert snapshot["head"] == "unknown"
+    assert snapshot["clean"] is None
+    assert snapshot["measured_dirty_paths"] is None
+
+
+def test_failed_subtest_report_is_not_cleared_by_a_later_pass() -> None:
+    plugin = object.__new__(ReceiptPlugin)
+    plugin.write_receipt = True
+    plugin.results = {}
+    failed = type("Report", (), {"nodeid": "t", "when": "call", "outcome": "failed"})()
+    passed = type("Report", (), {"nodeid": "t", "when": "call", "outcome": "passed"})()
+    plugin.pytest_runtest_logreport(failed)
+    plugin.pytest_runtest_logreport(passed)
+    assert plugin.results["t"]["call"] == "failed"
+    assert terminal_outcome(plugin.results["t"]) == "failed"
+
+
+def test_sessionfinish_records_rewritten_exit_status(
+    receipts: Path, tmp_path: Path
+) -> None:
+    _write(
+        tmp_path / "normalize_exit.py",
+        "def pytest_sessionfinish(session, exitstatus):\n    session.exitstatus = 0\n",
+    )
+    test_file = tmp_path / "test_fail_exit.py"
+    _write(test_file, "def test_fail():\n    assert False\n")
+    env = os.environ.copy()
+    inherited = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = (
+        str(tmp_path) + os.pathsep + inherited if inherited else str(tmp_path)
+    )
+    completed = _pytest(test_file, receipts, "-p", "normalize_exit", env=env)
+    assert completed.returncode == 0, completed.stderr
+    payload = _load(receipts)
+    assert payload["exit_code"] == 0
+    assert set(_terminals(payload).values()) == {"failed"}
+
+
+def test_timeout_stops_descendant_processes(tmp_path: Path) -> None:
+    from scripts.engineering.ci.run_pytest_resilient import (
+        _popen_group_kwargs,
+        _terminate_process_tree,
+    )
+
+    pidfile = tmp_path / "child.pid"
+    script = (
+        "import pathlib, subprocess, sys, time\n"
+        "path = pathlib.Path(sys.argv[1])\n"
+        "child = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)'])\n"
+        "path.write_text(str(child.pid), encoding='utf-8')\n"
+        "time.sleep(60)\n"
+    )
+    process = subprocess.Popen(
+        [sys.executable, "-c", script, str(pidfile)],
+        **_popen_group_kwargs(),
+    )
+    try:
+        for _ in range(50):
+            if pidfile.is_file():
+                break
+            time.sleep(0.05)
+        assert pidfile.is_file()
+        child_pid = int(pidfile.read_text(encoding="utf-8"))
+        _terminate_process_tree(process)
+        assert process.poll() is not None
+        assert not _pid_is_alive(child_pid)
+    finally:
+        if process.poll() is None:
+            _terminate_process_tree(process)
+
+
+def _pid_is_alive(pid: int) -> bool:
+    if os.name == "nt":
+        import ctypes
+
+        access = 0x1000
+        handle = ctypes.windll.kernel32.OpenProcess(access, False, pid)
+        if not handle:
+            return False
+        ctypes.windll.kernel32.CloseHandle(handle)
+        return True
+    try:
+        os.kill(pid, 0)
+    except OSError:
+        return False
+    return True
 
 
 def test_hidden_receipt_dir_and_tracked_reports_stay_distinct(tmp_path: Path) -> None:
