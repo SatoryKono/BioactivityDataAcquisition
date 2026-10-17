@@ -28,13 +28,13 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `fix/12009-ruleset-contract-alignment`
-- Source commit: `313dac26224d18b7a172485c02258a8faae2699e`
-- Source run id: `local-bioetl-local-coverage-pr12234-313dac26224d18b7a172485c02258a8faae2699e`
+- Source commit: `1a5485030ae20b0f767ef4045f7287a2f090f2fc`
+- Source run id: `local-bioetl-local-coverage-pr12234-1a5485030ae20b0f767ef4045f7287a2f090f2fc`
 - Source event: `local_coverage_verify`
 - Source run URL: `pending`
-- Source tree sha256: `bb8171d6a1c104ff16b95b291e353d325011b81c720b2245e4b09b2a45dfac09`
+- Source tree sha256: `e70c02b3f855c4ca476ea85789a7e617e08c139d4353e0d69460fce434f5b818`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-10-17T11:37:49.175112+00:00`
+- Refreshed at (UTC): `2026-10-17T13:11:30.245860+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -94,7 +94,7 @@ trend evidence only.
 
 ## Duration Telemetry
 
-- Total executed test cases: `34059`
+- Total executed test cases: `34094`
 - Executed means observed non-skipped JUnit testcase records, not
   collection count or distinct logical tests. Error records can describe
   setup or collection failures rather than a test body run.
@@ -106,31 +106,31 @@ trend evidence only.
 
 | Rank | Duration (s) | Test | Source |
 |---:|---:|---|---|
-| 1 | `43.502` | `tests.unit.infrastructure.quality.test_architecture_quality_scorecard::test_architecture_quality_scorecard_has_stable_weighted_shape` | `unit-infrastructure.xml` |
-| 2 | `22.695` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `unit-scripts-tooling-debt-governance.xml` |
-| 3 | `22.191` | `tests.unit.repo_backed.scripts.test_report_observability_metric_inventory_cli::test_direct_module_entrypoint_json_bootstraps_without_circular_import` | `repo-backed-unit-tooling.xml` |
-| 4 | `17.825` | `tests.integration.test_runtime_metric_emission_consistency::test_critical_observability_metric_families_are_runtime_emitted` | `integration.xml` |
-| 5 | `15.726` | `tests.security.test_security.TestVCRCassetteSanitization::test_no_authorization_headers_with_real_values[Authorization]` | `security.xml` |
-| 6 | `13.041` | `tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts` | `integration.xml` |
-| 7 | `12.667` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale` | `unit-scripts-tooling-debt-governance.xml` |
-| 8 | `12.29` | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline::test_chembl_activity_happy_path` | `integration.xml` |
-| 9 | `12.227` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact` | `unit-scripts-tooling-debt-governance.xml` |
-| 10 | `12.044` | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline::test_chembl_target_component_happy_path` | `integration.xml` |
+| 1 | `141.106` | `tests.smoke.test_control_plane_rollout_smoke::test_control_plane_rollout_smoke_emits_artifacts_and_aggregate_metrics` | `smoke.xml` |
+| 2 | `25.693` | `tests.unit.scripts.ci.test_update_test_telemetry_baseline::test_legacy_only_refresh_rejects_before_overwriting_baseline` | `unit-scripts-tooling-other.xml` |
+| 3 | `25.321` | `tests.unit.helpers.test_vcr_config_fixture_routing::test_every_in_tree_vcr_config_fixture_routes_through_base_helper` | `unit-other.xml` |
+| 4 | `23.871` | `tests.unit.infrastructure.quality.test_architecture_quality_scorecard::test_architecture_quality_scorecard_has_stable_weighted_shape` | `unit-infrastructure.xml` |
+| 5 | `23.619` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `unit-scripts-tooling-debt-governance.xml` |
+| 6 | `22.879` | `tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures::test_cached_populated_isolated_registry_contains_pipeline_factories` | `repo-backed-unit-product.xml` |
+| 7 | `22.236` | `tests.unit.composition.bootstrap.runtime.test_composite_contract_evidence::test_composite_archive_bootstrap_imports_in_fresh_process` | `unit-other.xml` |
+| 8 | `18.159` | `tests.unit.repo_backed.scripts.ai.test_npm_runtime_contract::test_node_and_lock_parity[None]` | `repo-backed-unit-tooling.xml` |
+| 9 | `15.58` | `tests.contract.test_composite_merge_golden::test_composite_merge_golden_seed_priority_is_stable` | `contract-confidence.xml` |
+| 10 | `15.12` | `tests.smoke.test_smoke.TestRuntimeDependencies::test_runtime_dependency_importable[structlog]` | `smoke.xml` |
 
 ### Top Slow Zones
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 3 | 47.589 | 22.695 |
-| 2 | `tests.unit.infrastructure.quality.test_architecture_quality_scorecard` | 1 | 43.502 | 43.502 |
-| 3 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 3 | 28.009 | 10.524 |
-| 4 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 22.338 | 11.218 |
-| 5 | `tests.unit.repo_backed.scripts.test_report_observability_metric_inventory_cli` | 1 | 22.191 | 22.191 |
-| 6 | `tests.integration.test_runtime_metric_emission_consistency` | 1 | 17.825 | 17.825 |
-| 7 | `tests.security.test_security.TestVCRCassetteSanitization` | 1 | 15.726 | 15.726 |
-| 8 | `tests.integration.ci.test_track_d_fixture_control_plane_linkage` | 1 | 13.041 | 13.041 |
-| 9 | `tests.integration.pipelines.test_chembl_activity.TestChemblActivityPipeline` | 1 | 12.29 | 12.29 |
-| 10 | `tests.integration.pipelines.test_chembl_target_component.TestChemblTargetComponentPipeline` | 1 | 12.044 | 12.044 |
+| 1 | `tests.smoke.test_control_plane_rollout_smoke` | 1 | 141.106 | 141.106 |
+| 2 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 3 | 48.623 | 23.619 |
+| 3 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 3 | 30.134 | 10.611 |
+| 4 | `tests.unit.scripts.ci.test_update_test_telemetry_baseline` | 1 | 25.693 | 25.693 |
+| 5 | `tests.unit.helpers.test_vcr_config_fixture_routing` | 1 | 25.321 | 25.321 |
+| 6 | `tests.unit.infrastructure.quality.test_architecture_quality_scorecard` | 1 | 23.871 | 23.871 |
+| 7 | `tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures` | 1 | 22.879 | 22.879 |
+| 8 | `tests.unit.composition.bootstrap.runtime.test_composite_contract_evidence` | 1 | 22.236 | 22.236 |
+| 9 | `tests.integration.pipelines.test_chembl_cell_line.TestChemblCellLinePipeline` | 2 | 22.209 | 11.218 |
+| 10 | `tests.unit.repo_backed.scripts.ai.test_npm_runtime_contract` | 1 | 18.159 | 18.159 |
 
 ## Refresh Procedure
 
