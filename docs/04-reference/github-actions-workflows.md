@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.5
+Version: 1.0.6
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-09-17'
+  Last verified: '2026-10-16'
 
 ______________________________________________________________________
 
@@ -15,8 +15,8 @@ ______________________________________________________________________
 
 ## Current migration status
 
-GitHub Actions are disabled. The tables below retain the historical inventory and
-API-state snapshot; `active` in a historical row does not mean jobs currently run.
+The pull-request coordinator runs in GitHub Actions (`.github/workflows/pr-required.yml`). On the 2026-10-16 read-only GET, rulesets `13643213` and `15730586` are `enforcement: disabled`, so a successful `pr-gate-complete` does not by itself block merge. The tables below retain the historical inventory and API-state snapshot; `active` in a historical row does not mean that workflow currently runs.
+<!-- policy-anchor:deployment-provider --> `deployment.provider=github_actions`. <!-- policy-anchor:ruleset-enforcement-mode --> Rulesets `13643213` and `15730586` are `enforcement: disabled`. <!-- policy-anchor:stored-ruleset-contexts --> Stored `ci/circleci: pr-gate-complete` is not active CircleCI protection. <!-- policy-anchor:target-gha-context --> `pr-gate-complete` is not the context stored on the rulesets. <!-- policy-anchor:enforcement-verified-date --> `2026-10-09` is not proof of active merge protection. <!-- policy-anchor:merge-block --> A successful `pr-gate-complete` does not by itself block merge and does not confirm live server rulesets.
 CodeQL is excluded from required checks (#11929). Its workflow definition remains
 until retirement (#11930); optional analysis is a separate decision. Trivy and
 Scorecard SARIF upload functions must survive migration even though the old upload
@@ -90,7 +90,7 @@ new spend/safety decision.
 | `no-partial-tree-commits.yml` | `No partial-tree commits` | `workflow_dispatch` | `active` | `active` | Rejects partial-tree commits that would collapse history for downstream PRs (#11709) |
 | `opencode-pr-review.yml` | `opencode-pr-review` | `workflow_dispatch` | `active` | `active` | Dispatch-only stub (#11012); remote OpenCode installer removed until a digest pin exists |
 | `opencode-triage.yml` | `opencode-triage` | `workflow_dispatch` | `active` | `active` | Dispatch-only stub (#11012); remote OpenCode installer removed until a digest pin exists |
-| `pr-required.yml` | `PR Gate Complete` | `pull_request`, `workflow_dispatch` | `active` | `active` | Always-materialized fail-closed coordinator; GitHub required context is job `pr-gate-complete` (ruleset 13643213) |
+| `pr-required.yml` | `PR Gate Complete` | `pull_request`, `workflow_dispatch` | `active` | `active` | Always-materialized fail-closed coordinator; job `pr-gate-complete` is the target name while ruleset 13643213 is `enforcement: disabled` |
 | `port-contracts.yml` | `Port Contract Tests` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Port-protocol and hypothesis contract tests |
 | `provider-contract-drift.yml` | `Provider Contract Drift` | `workflow_dispatch` | `disabled_manually` | `keep-disabled` | Provider contract replay/drift gate |
 | `router-v7-bridge.yml` | `Router 7 bridge candidate` | `workflow_dispatch` | `active` | `active` | Path-filtered migration candidate tests, browser build, and dependency audit; host acceptance remains separate |
