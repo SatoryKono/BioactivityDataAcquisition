@@ -1362,7 +1362,7 @@ jobs:
 
   serial-coverage:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     needs: dependency-preflight
     permissions:
       contents: read
@@ -1391,6 +1391,8 @@ jobs:
           else
             export PYTHONPATH="$GITHUB_WORKSPACE"
           fi
+          # 660s leaves setup, dump, cleanup, and upload inside the 15-minute job.
+          # --no-fallback keeps a watchdog timeout from starting a second pytest.
           uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \
             --receipt-dir reports/pytest/receipts \
             --receipt-run-id "${{ github.run_id }}" \
@@ -1400,8 +1402,8 @@ jobs:
             --reports-dir reports/pytest/serial-coverage \
             --parallel-marker "serial and not e2e and not benchmark and not memory" \
             --parallel-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report=" \
-            --parallel-timeout-seconds 720 \
-            --fallback-timeout-seconds 180 \
+            --parallel-timeout-seconds 660 \
+            --no-fallback \
             --skip-serial-pass
           TEST_EXIT=$?
           if [ ! -s "$COVERAGE_FILE" ]; then
@@ -1423,6 +1425,15 @@ jobs:
           name: pytest-receipts-serial-coverage-${{ github.run_id }}-${{ github.run_attempt }}
           path: reports/pytest/receipts
           if-no-files-found: error
+          retention-days: 3
+
+      - name: Upload serial coverage abort diagnostics
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: serial-coverage-abort-diagnostics
+          path: reports/pytest/serial-coverage/diagnostics/
+          if-no-files-found: warn
           retention-days: 3
 
       - name: Upload serial coverage telemetry

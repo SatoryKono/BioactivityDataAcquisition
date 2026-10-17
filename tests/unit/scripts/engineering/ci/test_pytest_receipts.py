@@ -344,9 +344,9 @@ def test_timeout_writes_runner_record_without_fake_collection(
         "--fallback-addopts",
         "-q --tb=line -p no:xdist -p no:cacheprovider",
         "--parallel-timeout-seconds",
-        "1",
+        "16",
         "--fallback-timeout-seconds",
-        "1",
+        "16",
         "--skip-serial-pass",
     ]
     completed = subprocess.run(
