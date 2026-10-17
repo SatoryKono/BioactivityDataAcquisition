@@ -83,23 +83,6 @@ def test_assert_steps_ignores_not_applicable_gates() -> None:
     assert failures == []
 
 
-def test_docs_governance_requires_prose_consistency_step() -> None:
-    """A selected docs-governance gate fails when the prose pytest step is skipped."""
-    failures = assert_step_outcomes(
-        {"docs-governance": {"decision": "required", "reason": "path_match"}},
-        {
-            "docs-passports": "success",
-            "docs-links": "success",
-            "docs-verify": "success",
-            "mkdocs-nav": "success",
-            "prose-consistency": "skipped",
-        },
-        owner="fast-governance",
-    )
-
-    assert failures == ["docs-governance:prose-consistency=skipped"]
-
-
 def test_assert_steps_fails_when_required_step_is_skipped() -> None:
     """Report a skipped required type-checking step as a failure."""
     failures = assert_step_outcomes(

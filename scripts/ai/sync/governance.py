@@ -307,9 +307,9 @@ def _docs_skill_mirror_header(canonical: Path, *, present: bool) -> str:
 def _ensure_docs_skill_mirror_header(
     body: str, canonical: Path, *, present: bool
 ) -> str:
-    return _docs_skill_mirror_header(canonical, present=present) + _strip_mirror_header(
-        body
-    ).lstrip("\n")
+    return _docs_skill_mirror_header(
+        canonical, present=present
+    ) + _strip_mirror_header(body).lstrip("\n")
 
 
 def _ensure_docs_skill_governance(body: str) -> str:

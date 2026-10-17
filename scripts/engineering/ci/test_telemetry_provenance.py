@@ -415,11 +415,7 @@ def source_commit_is_reachable(payload: dict[str, Any], root: Path, head: str) -
         if not _receipt_matches_capture(receipt, payload):
             return False
         if receipt.get("verification_mode") == "live_github":
-            try:
-                receipt = _refresh_live_mapping(receipt)
-            except (OSError, ValueError, KeyError, TypeError, AttributeError):
-                if "git_object_proof" not in receipt:
-                    return False
+            receipt = _refresh_live_mapping(receipt)
         return validate_squash_bridge(payload, receipt, root, head)
     except ShallowMergeHistoryError:
         raise

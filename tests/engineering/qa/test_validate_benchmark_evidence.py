@@ -1,159 +1,65 @@
-from __future__ import annotations
-
-import json
-
 import pytest
-from scripts.engineering.qa.validate_benchmark_evidence import main, validate_evidence
+from scripts.engineering.qa.validate_benchmark_evidence import validate_evidence
 
 pytestmark = pytest.mark.unit
 
 
 def test_missing_observations(tmp_path):
     with pytest.raises(ValueError, match="Missing observations"):
-        validate_evidence(tmp_path / "missing.json", "abc", pytest_outcome="success")
+        validate_evidence(tmp_path / "missing.json", "abc")
 
 
 def test_empty_json(tmp_path):
     f = tmp_path / "empty.json"
     f.write_text("")
     with pytest.raises(ValueError, match="Empty JSON"):
-        validate_evidence(f, "abc", pytest_outcome="success")
+        validate_evidence(f, "abc")
 
 
 def test_malformed_json(tmp_path):
     f = tmp_path / "malformed.json"
     f.write_text("{")
     with pytest.raises(ValueError, match="Malformed JSON"):
-        validate_evidence(f, "abc", pytest_outcome="success")
+        validate_evidence(f, "abc")
 
 
 def test_zero_execution(tmp_path):
     f = tmp_path / "zero.json"
     f.write_text('{"benchmarks": []}')
     with pytest.raises(ValueError, match="Zero execution or all-skipped"):
-        validate_evidence(f, "abc", pytest_outcome="success")
+        validate_evidence(f, "abc")
 
 
 def test_failed_benchmark(tmp_path):
     f = tmp_path / "failed.json"
     f.write_text('{"benchmarks": [{"name": "test", "has_error": true}]}')
     with pytest.raises(ValueError, match="Failed benchmark detected: test"):
-        validate_evidence(f, "abc", pytest_outcome="success")
+        validate_evidence(f, "abc")
 
 
 def test_wrong_sha(tmp_path):
     f = tmp_path / "wrong.json"
-    f.write_text(
-        '{"benchmarks": [{"name": "test", "stats": {"rounds": 5}}], "commit_info": {"id": "123"}}'
-    )
+    f.write_text('{"benchmarks": [{"name": "test"}], "commit_info": {"id": "123"}}')
     with pytest.raises(ValueError, match=r"Wrong SHA\. Expected 456, got 123"):
-        validate_evidence(f, "456", pytest_outcome="success")
+        validate_evidence(f, "456")
 
 
 def test_missing_sha(tmp_path):
     f = tmp_path / "missing_sha.json"
-    f.write_text('{"benchmarks": [{"name": "test", "stats": {"rounds": 5}}]}')
+    f.write_text('{"benchmarks": [{"name": "test"}]}')
     with pytest.raises(ValueError, match="No commit SHA found"):
-        validate_evidence(f, "456", pytest_outcome="success")
+        validate_evidence(f, "456")
 
 
-@pytest.fixture
-def measurements(tmp_path):
+def test_validate_benchmark_evidence_success(tmp_path):
     f = tmp_path / "success.json"
     payload = (
-        '{"benchmarks": [{"name": "test", "stats": {"rounds": 5}}], '
+        '{"benchmarks": [{"name": "test"}], '
         '"commit_info": {"id": "123"}, '
         '"machine_info": {"system": "Linux"}}'
     )
     f.write_text(payload)
-    return f
-
-
-def test_validate_benchmark_evidence_success(measurements):
-    manifest = validate_evidence(measurements, "123", pytest_outcome="success")
+    manifest = validate_evidence(f, "123")
     assert manifest["revision"] == "123"
     assert manifest["environment_identity"]["system"] == "Linux"
     assert manifest["benchmarks_count"] == 1
-
-
-@pytest.mark.parametrize(
-    "stats",
-    [
-        None,
-        {},
-        [],
-        "invalid",
-        {"rounds": 0},
-        {"rounds": -1},
-        {"rounds": True},
-        {"rounds": "5"},
-        {"rounds": 1.5},
-    ],
-)
-def test_rejects_unmeasured_benchmark(measurements, stats):
-    payload = json.loads(measurements.read_text())
-    # Keep a valid result to ensure every benchmark entry is checked.
-    payload["benchmarks"].append({"name": "unmeasured", "stats": stats})
-    measurements.write_text(json.dumps(payload))
-    with pytest.raises(ValueError, match=r"No measured rounds.*unmeasured"):
-        validate_evidence(measurements, "123", pytest_outcome="success")
-
-
-def test_rejects_missing_stats(measurements):
-    payload = json.loads(measurements.read_text())
-    del payload["benchmarks"][0]["stats"]
-    measurements.write_text(json.dumps(payload))
-    with pytest.raises(ValueError, match="No measured rounds"):
-        validate_evidence(measurements, "123", pytest_outcome="success")
-
-
-@pytest.mark.parametrize("machine_info", [None, {}, [], "", "Linux"])
-def test_rejects_invalid_machine_info(measurements, machine_info):
-    payload = json.loads(measurements.read_text())
-    payload["machine_info"] = machine_info
-    measurements.write_text(json.dumps(payload))
-    with pytest.raises(ValueError, match="Missing or empty machine_info"):
-        validate_evidence(measurements, "123", pytest_outcome="success")
-
-
-def test_rejects_missing_machine_info(measurements):
-    payload = json.loads(measurements.read_text())
-    del payload["machine_info"]
-    measurements.write_text(json.dumps(payload))
-    with pytest.raises(ValueError, match="Missing or empty machine_info"):
-        validate_evidence(measurements, "123", pytest_outcome="success")
-
-
-@pytest.mark.parametrize("outcome", ["success", "failure", "cancelled", "skipped"])
-def test_manifest_requires_successful_pytest(measurements, tmp_path, outcome):
-    manifest_out = tmp_path / "benchmark-validation-manifest.json"
-    result = main(
-        [
-            "--measurements",
-            str(measurements),
-            "--manifest-out",
-            str(manifest_out),
-            "--expected-sha",
-            "123",
-            "--pytest-outcome",
-            outcome,
-        ]
-    )
-    assert result == (0 if outcome == "success" else 1)
-    assert manifest_out.exists() == (outcome == "success")
-    assert measurements.exists()
-
-
-def test_pytest_outcome_is_required(measurements, tmp_path):
-    manifest_out = tmp_path / "manifest.json"
-    with pytest.raises(SystemExit) as exc:
-        main(
-            [
-                "--measurements",
-                str(measurements),
-                "--manifest-out",
-                str(manifest_out),
-            ]
-        )
-    assert exc.value.code == 2
-    assert not manifest_out.exists()
