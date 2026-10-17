@@ -552,12 +552,28 @@ def _session_finish_payload(
 
 
 def _register_session_finish_hook(config: Any, plugin: EventJournalPlugin) -> None:
-    """Finalize only after every other session-finish hook has completed."""
+    """Record session finish, then finalize after pytest_unconfigure."""
     import pytest
 
-    class _SessionFinishHook:
+    class _UnconfigureHook:
         def __init__(self, owner: EventJournalPlugin) -> None:
             self._owner = owner
+
+        @pytest.hookimpl(hookwrapper=True, tryfirst=True)
+        def pytest_unconfigure(self, config: Any) -> Any:
+            _ = config
+            outcome = yield
+            if getattr(outcome, "excinfo", None) is not None:
+                self._owner.record("unconfigure_error", {"hook_error": True})
+            self._owner.finalize()
+            outcome.get_result()
+
+    class _SessionFinishHook:
+        def __init__(
+            self, owner: EventJournalPlugin, unconfigure: _UnconfigureHook
+        ) -> None:
+            self._owner = owner
+            self._unconfigure = unconfigure
 
         @pytest.hookimpl(hookwrapper=True, tryfirst=True)
         def pytest_sessionfinish(self, session: Any, exitstatus: int) -> Any:
@@ -566,11 +582,16 @@ def _register_session_finish_hook(config: Any, plugin: EventJournalPlugin) -> No
                 "session_finish",
                 _session_finish_payload(session, exitstatus, outcome),
             )
-            self._owner.finalize()
+            manager = session.config.pluginmanager
+            if manager.is_registered(self._unconfigure):
+                manager.unregister(self._unconfigure)
+                manager.register(self._unconfigure, "event_journal_unconfigure_hook")
             outcome.get_result()
 
+    unconfigure = _UnconfigureHook(plugin)
+    config.pluginmanager.register(unconfigure, "event_journal_unconfigure_hook")
     config.pluginmanager.register(
-        _SessionFinishHook(plugin),
+        _SessionFinishHook(plugin, unconfigure),
         "event_journal_session_finish_hook",
     )
 
@@ -642,6 +663,7 @@ def pytest_configure(config: Any) -> None:
             "selection": _selection_from_config(config, secrets),
             "sha_error": sha_error,
             "safe_env": _safe_env(secrets),
+            "allow_no_tests": os.environ.get("BIOETL_JOURNAL_ALLOW_NO_TESTS") == "1",
         },
     )
     expected = identity["expected_checkout_sha"]
@@ -1061,7 +1083,7 @@ def _collapse_outcome_pool(
             **base,
             "subtest": False,
             "classification": worst["classification"],
-            "count": 1,
+            "count": len(parents) if parents else 1,
         }
     classifications = {row["classification"] for row in pool}
     if len(classifications) > 1:
@@ -1200,6 +1222,7 @@ def _empty_session_state() -> dict[str, Any]:
         "mismatch": False,
         "actual": None,
         "expected": None,
+        "allow_no_tests": False,
     }
 
 
@@ -1224,6 +1247,7 @@ def _remember_start(
     state["sha_error"] = event.get("sha_error")
     state["actual"] = identity.get("actual_checkout_sha")
     state["expected"] = identity.get("expected_checkout_sha")
+    state["allow_no_tests"] = event.get("allow_no_tests") is True
 
 
 def _apply_session_event(event: dict[str, Any], state: dict[str, Any]) -> None:
@@ -1252,8 +1276,17 @@ def _session_finish_reasons(events: list[dict[str, Any]]) -> list[str]:
 
 def _pytest_exit_reasons(flags: dict[str, Any]) -> list[str]:
     status = flags.get("exitstatus")
-    if type(status) is int and status not in (0, 1):
-        return ["pytest_abnormal_exit"]
+    if type(status) is not int or status in (0, 1):
+        return []
+    if status == 5 and flags.get("allow_no_tests") is True:
+        return []
+    return ["pytest_abnormal_exit"]
+
+
+def _unconfigure_reasons(events: list[dict[str, Any]]) -> list[str]:
+    for event in events:
+        if event.get("event") == "unconfigure_error":
+            return ["unconfigure_error"]
     return []
 
 
@@ -1264,6 +1297,7 @@ def _session_flags(events: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "selection": state["selection"],
         "exitstatus": state["exitstatus"],
+        "allow_no_tests": state["allow_no_tests"],
         "sha_error": state["sha_error"],
         "mismatch": state["mismatch"],
         "actual_checkout_sha": state["actual"],
@@ -1379,6 +1413,7 @@ def _verdict_status(reasons: list[str]) -> str:
         or "missing_teardown" in reasons
         or "session_finish_error" in reasons
         or "pytest_abnormal_exit" in reasons
+        or "unconfigure_error" in reasons
     ):
         return "incomplete"
     return "complete"
@@ -1467,6 +1502,7 @@ def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[st
     reasons.extend(_checkout_reasons(flags))
     reasons.extend(_session_finish_reasons(events))
     reasons.extend(_pytest_exit_reasons(flags))
+    reasons.extend(_unconfigure_reasons(events))
     selected, deselected, collection_errors, collection_conflict = _selected_nodeids(
         events,
         allow_worker_collection=_intact_controller_receipt(receipts),

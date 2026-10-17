@@ -105,7 +105,9 @@ def _read_supervised_log(reports_dir: Path, relative: str) -> str:
         return ""
 
 
-def _journal_child_env(pass_name: str, invocation_id: str) -> dict[str, str]:
+def _journal_child_env(
+    pass_name: str, invocation_id: str, *, allow_no_tests: bool = False
+) -> dict[str, str]:
     """Environment for one journaled pytest child."""
     from scripts.engineering.ci.pytest_event_journal import ensure_redaction_key
 
@@ -113,6 +115,10 @@ def _journal_child_env(pass_name: str, invocation_id: str) -> dict[str, str]:
     child_env["BIOETL_JOURNAL_REDACTION_KEY"] = ensure_redaction_key()
     child_env["BIOETL_JOURNAL_INVOCATION_ID"] = invocation_id
     child_env["BIOETL_JOURNAL_PASS"] = pass_name
+    if allow_no_tests:
+        child_env["BIOETL_JOURNAL_ALLOW_NO_TESTS"] = "1"
+    else:
+        child_env.pop("BIOETL_JOURNAL_ALLOW_NO_TESTS", None)
     root = str(_REPO_ROOT)
     current = child_env.get("PYTHONPATH", "")
     if current:
@@ -135,6 +141,7 @@ def _run_pass(
     timeout_seconds: float | None = None,
     executed_passes: list[str] | None = None,
     expected_invocations: dict[str, str] | None = None,
+    allow_no_tests: bool = False,
 ) -> PassResult:
     """Run pytest pass and persist logs/artifacts."""
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
@@ -159,7 +166,9 @@ def _run_pass(
         if executed_passes is not None:
             executed_passes.append(name)
         invocation_id = uuid.uuid4().hex
-        child_env = _journal_child_env(name, invocation_id)
+        child_env = _journal_child_env(
+            name, invocation_id, allow_no_tests=allow_no_tests
+        )
         if expected_invocations is not None:
             expected_invocations[name] = invocation_id
         command.extend(
@@ -386,6 +395,7 @@ def _run_named_pass(
     timeout_seconds: float | None,
     executed_passes: list[str],
     expected_invocations: dict[str, str] | None = None,
+    allow_no_tests: bool = False,
 ) -> PassResult:
     """Run a named pass using shell-split addopts."""
     return _run_pass(
@@ -399,6 +409,7 @@ def _run_named_pass(
         timeout_seconds=timeout_seconds,
         executed_passes=executed_passes,
         expected_invocations=expected_invocations,
+        allow_no_tests=allow_no_tests,
     )
 
 
@@ -425,6 +436,7 @@ def _run_serial_pass(
         timeout_seconds=serial_timeout,
         executed_passes=executed_passes,
         expected_invocations=expected_invocations,
+        allow_no_tests=True,
     )
     serial_rc = _effective_exit_code(serial_result, allow_no_tests=True)
     _append_pass_summary(summary_lines, result=serial_result, effective_rc=serial_rc)
