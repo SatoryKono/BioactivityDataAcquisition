@@ -24,7 +24,10 @@ Deselected nodeids are removed before that match. Repeated nodeids stay
 separate instances. A complete run may still contain failures.
 ``GITHUB_RUN_ATTEMPT`` is the workflow attempt, not a retry inside this
 runner. Reconciliation keeps the latest invocation of each pass, or the
-invocation recorded for this process, and the workers that share it. A
+invocation recorded for this process, and the workers that share it.
+The verdict stores those invocation ids, and ``--verify`` uses them
+instead of ranking the directory again. A controller receipt without
+``session_finish`` is not complete. A
 damaged receipt with no authoritative pass and invocation blocks the
 whole directory. Receipt bytes must be strict UTF-8. Every event must
 carry integer ``schema_version`` equal to ``SCHEMA_VERSION``; a missing
@@ -1274,6 +1277,20 @@ def _session_finish_reasons(events: list[dict[str, Any]]) -> list[str]:
     return []
 
 
+def _missing_controller_finish(events: list[dict[str, Any]]) -> list[str]:
+    """Require a controller session_finish before a pass can be complete."""
+    saw_controller = False
+    for event in events:
+        if _event_identity(event).get("role") != "controller":
+            continue
+        saw_controller = True
+        if event.get("event") == "session_finish":
+            return []
+    if saw_controller:
+        return ["missing_session_finish"]
+    return []
+
+
 def _pytest_exit_reasons(flags: dict[str, Any]) -> list[str]:
     status = flags.get("exitstatus")
     if type(status) is not int or status in (0, 1):
@@ -1412,6 +1429,7 @@ def _verdict_status(reasons: list[str]) -> str:
         or "unexplained_selected_tests" in reasons
         or "missing_teardown" in reasons
         or "session_finish_error" in reasons
+        or "missing_session_finish" in reasons
         or "pytest_abnormal_exit" in reasons
         or "unconfigure_error" in reasons
     ):
@@ -1501,6 +1519,7 @@ def reconcile_pass(receipts: list[dict[str, Any]], *, pass_name: str) -> dict[st
     flags = _session_flags(events)
     reasons.extend(_checkout_reasons(flags))
     reasons.extend(_session_finish_reasons(events))
+    reasons.extend(_missing_controller_finish(events))
     reasons.extend(_pytest_exit_reasons(flags))
     reasons.extend(_unconfigure_reasons(events))
     selected, deselected, collection_errors, collection_conflict = _selected_nodeids(
@@ -1623,6 +1642,27 @@ def _has_unattributed_damage(receipts: list[dict[str, Any]]) -> bool:
     return any(_unattributed_damage(item) for item in receipts)
 
 
+def _pinned_invocations(
+    receipts: list[dict[str, Any]],
+    expected_invocations: dict[str, str] | None,
+) -> dict[str, str]:
+    """Return the invocation map a later verify must reuse."""
+    expected = {
+        name: invocation
+        for name, invocation in (expected_invocations or {}).items()
+        if isinstance(name, str) and isinstance(invocation, str) and invocation
+    }
+    if expected:
+        return expected
+    pinned: dict[str, str] = {}
+    for receipt in receipts:
+        name = _pass_of(receipt)
+        invocation = _invocation_of(receipt)
+        if name and invocation and name not in pinned:
+            pinned[name] = invocation
+    return pinned
+
+
 def _receipts_for_reconciliation(
     receipts: list[dict[str, Any]],
     expected_invocations: dict[str, str] | None,
@@ -1740,6 +1780,7 @@ def reconcile_directory(
         "authoritative_passes": authoritative,
         "superseded_passes": superseded,
         "executed_passes": executed_passes,
+        "expected_invocations": _pinned_invocations(receipts, expected_invocations),
         "producer_scope": (
             "resilient-runner passes started by this process; "
             "other workflow jobs are outside this receipt"
@@ -1760,8 +1801,8 @@ def atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
     os.replace(temporary, path)
 
 
-def _stored_executed_passes(path: Path) -> list[str] | None:
-    """Return stored passes, or None when the verdict cannot be trusted."""
+def _read_stored_verdict(path: Path) -> dict[str, Any] | None:
+    """Return the stored verdict object, or None when it cannot be trusted."""
     try:
         text = path.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError):
@@ -1772,10 +1813,31 @@ def _stored_executed_passes(path: Path) -> list[str] | None:
         return None
     if not isinstance(stored, dict):
         return None
-    raw = stored.get("executed_passes")
-    if not isinstance(raw, list):
-        return []
-    return [str(item) for item in raw]
+    return stored
+
+
+def _stored_expected_invocations(stored: dict[str, Any]) -> dict[str, str] | None:
+    """Return pinned invocations.
+
+    An absent field returns an empty map so verification keeps the
+    latest-invocation ranking. ``None`` means the field is malformed.
+    """
+    if "expected_invocations" not in stored:
+        return {}
+    raw = stored["expected_invocations"]
+    if not isinstance(raw, dict):
+        return None
+    parsed: dict[str, str] = {}
+    for name, invocation in raw.items():
+        if (
+            not isinstance(name, str)
+            or not name
+            or not isinstance(invocation, str)
+            or not invocation
+        ):
+            return None
+        parsed[name] = invocation
+    return parsed
 
 
 def verify_directory(
@@ -1783,19 +1845,34 @@ def verify_directory(
 ) -> int:
     verdict_path = journal_dir / "journal-verdict.json"
     executed = executed_passes
+    invocations: dict[str, str] | None = None
     if executed is None and verdict_path.exists() and not verdict_path.is_file():
         sys.stderr.write(
             "EventJournal completeness unknown: stored_verdict_unreadable\n"
         )
         return JOURNAL_COMPLETENESS_EXIT
     if executed is None and verdict_path.is_file():
-        executed = _stored_executed_passes(verdict_path)
-        if executed is None:
+        stored = _read_stored_verdict(verdict_path)
+        if stored is None:
             sys.stderr.write(
                 "EventJournal completeness unknown: stored_verdict_unreadable\n"
             )
             return JOURNAL_COMPLETENESS_EXIT
-    verdict = reconcile_directory(journal_dir, executed_passes=executed or [])
+        raw_passes = stored.get("executed_passes")
+        executed = (
+            [str(item) for item in raw_passes] if isinstance(raw_passes, list) else []
+        )
+        invocations = _stored_expected_invocations(stored)
+        if invocations is None:
+            sys.stderr.write(
+                "EventJournal completeness unknown: stored_verdict_unreadable\n"
+            )
+            return JOURNAL_COMPLETENESS_EXIT
+    verdict = reconcile_directory(
+        journal_dir,
+        executed_passes=executed or [],
+        expected_invocations=invocations,
+    )
     if verdict["status"] != "complete":
         sys.stderr.write(
             "EventJournal completeness "

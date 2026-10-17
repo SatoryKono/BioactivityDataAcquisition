@@ -14,6 +14,7 @@ import pytest
 from scripts.engineering.ci.pytest_event_journal import (
     reconcile_directory,
     reconcile_pass,
+    verify_directory,
 )
 
 _SPEC = importlib.util.spec_from_file_location(
@@ -508,3 +509,65 @@ def test_unconfigure_error_is_not_a_complete_pass(tmp_path: Path) -> None:
     verdict = _live_verdict(tmp_path / "run")
     assert verdict["status"] != "complete"
     assert verdict["tests_passed"] is not True
+
+
+def test_missing_controller_session_finish_is_incomplete(tmp_path: Path) -> None:
+    identity = _identity(role="controller", worker_id="controller")
+    nodeid = "test_sample.py::test_a"
+    events = _finalized(
+        [
+            _start(identity),
+            _collected(identity, [nodeid]),
+            *_phases(identity, nodeid, "passed"),
+        ]
+    )
+    _write_receipt(tmp_path, events)
+    verdict = reconcile_pass(_load(tmp_path), pass_name="parallel")
+    assert verdict["status"] == "incomplete"
+    assert "missing_session_finish" in verdict["reasons"]
+    assert verdict["tests_passed"] is None
+    assert verify_directory(tmp_path, executed_passes=["parallel"]) == 4
+
+
+def test_verify_reuses_the_invocation_stored_in_the_verdict(tmp_path: Path) -> None:
+    from scripts.engineering.ci import run_pytest_resilient
+
+    old = "a" * 32
+    current = "b" * 32
+    identity = _identity(role="controller", worker_id="controller", invocation_id=old)
+    nodeid = "test_sample.py::test_a"
+    start = _start(identity)
+    start["timestamp"] = "2026-10-17T00:00:00+00:00"
+    _write_receipt(
+        tmp_path,
+        _finalized(
+            [
+                start,
+                _collected(identity, [nodeid]),
+                *_phases(identity, nodeid, "passed"),
+                {"event": "session_finish", "identity": identity, "exitstatus": 0},
+            ]
+        ),
+        name=_named_receipt("parallel", old, "controller", "controller", "c" * 32),
+    )
+    damaged = _named_receipt("parallel", current, "controller", "controller", "d" * 32)
+    (tmp_path / damaged).write_bytes(b'{"event": "trunc')
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    assert (
+        run_pytest_resilient._finish_run(
+            reports_dir=reports,
+            summary_lines=[],
+            journal_dir=tmp_path,
+            executed_passes=["parallel"],
+            test_rc=0,
+            expected_invocations={"parallel": current},
+        )
+        == 4
+    )
+    stored = json.loads((tmp_path / "journal-verdict.json").read_text(encoding="utf-8"))
+    assert stored["expected_invocations"] == {"parallel": current}
+    assert verify_directory(tmp_path) == 4
+    latest = reconcile_directory(tmp_path, executed_passes=["parallel"])
+    assert latest["status"] == "complete"
+    assert latest["passes"]["parallel"]["invocation_id"] == old
