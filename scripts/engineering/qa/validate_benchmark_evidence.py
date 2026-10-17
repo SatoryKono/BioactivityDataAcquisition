@@ -1,12 +1,20 @@
+from __future__ import annotations
+
 import argparse
 import json
 import os
 import sys
 from pathlib import Path
+
 from scripts.engineering.common.repo_paths import confined_io_path
 
 
-def validate_evidence(measurements_path: Path, expected_sha: str | None) -> dict:
+def validate_evidence(
+    measurements_path: Path, expected_sha: str | None, *, pytest_outcome: str
+) -> dict:
+    if pytest_outcome != "success":
+        raise ValueError(f"Unsuccessful pytest run: {pytest_outcome}")
+
     if not measurements_path.exists():
         raise ValueError(f"Missing observations: {measurements_path} not found")
 
@@ -26,11 +34,20 @@ def validate_evidence(measurements_path: Path, expected_sha: str | None) -> dict
     benchmarks = data.get("benchmarks", [])
     if not benchmarks:
         raise ValueError("Zero execution or all-skipped (no benchmarks found)")
+    if not isinstance(benchmarks, list):
+        raise ValueError("Invalid benchmarks: expected a list")
 
     for b in benchmarks:
-        # pytest-benchmark records failures or errors
+        if not isinstance(b, dict):
+            raise ValueError("Invalid benchmark entry: expected an object")
         if b.get("has_error", False):
             raise ValueError(f"Failed benchmark detected: {b.get('name', 'unknown')}")
+        stats = b.get("stats")
+        rounds = stats.get("rounds") if isinstance(stats, dict) else None
+        if isinstance(rounds, bool) or not isinstance(rounds, int) or rounds <= 0:
+            raise ValueError(
+                f"No measured rounds for benchmark: {b.get('name', 'unknown')}"
+            )
 
     commit_info = data.get("commit_info", {})
     actual_sha = commit_info.get("id")
@@ -42,7 +59,9 @@ def validate_evidence(measurements_path: Path, expected_sha: str | None) -> dict
     if expected_sha and actual_sha != expected_sha:
         raise ValueError(f"Wrong SHA. Expected {expected_sha}, got {actual_sha}")
 
-    machine_info = data.get("machine_info", {})
+    machine_info = data.get("machine_info")
+    if not isinstance(machine_info, dict) or not machine_info:
+        raise ValueError("Missing or empty machine_info: expected a non-empty object")
 
     # Extract identity
     manifest = {
@@ -73,6 +92,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--expected-sha", type=str, default=os.environ.get("GITHUB_SHA")
     )
+    parser.add_argument(
+        "--pytest-outcome",
+        required=True,
+        choices=("success", "failure", "cancelled", "skipped"),
+        help="Outcome of the complete pytest benchmark step, not just the JSON export.",
+    )
     args = parser.parse_args(argv)
 
     try:
@@ -85,7 +110,9 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     try:
-        manifest = validate_evidence(measurements_path, args.expected_sha)
+        manifest = validate_evidence(
+            measurements_path, args.expected_sha, pytest_outcome=args.pytest_outcome
+        )
     except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1

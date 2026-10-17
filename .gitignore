@@ -466,7 +466,7 @@ reports/logs/
 reports/logs/*
 !reports/logs/.gitkeep
 reports/observability/grafana/screenshots/
-reports/performance/
+reports/performance/*
 !reports/performance/benchmark-manifest.json
 reports/quality/architecture_debt_execution_plan_*.json
 reports/quality/tasks_architecture_metric_exemptions_*.json

@@ -29,6 +29,7 @@ jobs:
       # fixtures. Their dataset id is synthetic. The reducer compares it and
       # may write a proposed candidate; CI does not adopt the baseline.
       - name: Run all performance benchmarks
+        id: benchmarks
         run: |
           mkdir -p reports/performance
           uv run --frozen --no-build pytest tests/performance/ tests/benchmarks/ \
@@ -46,9 +47,10 @@ jobs:
         run: |
           if [ -f reports/performance/benchmark-measurements.json ]; then
             echo "Validating evidence..."
-            uv run --frozen --no-build python scripts/engineering/qa/validate_benchmark_evidence.py \
+            uv run --frozen --no-build python -m scripts.engineering.qa.validate_benchmark_evidence \
               --measurements reports/performance/benchmark-measurements.json \
               --manifest-out reports/performance/benchmark-validation-manifest.json \
+              --pytest-outcome "${{ steps.benchmarks.outcome }}" \
               --expected-sha "${{ github.sha }}"
           else
             echo "Missing benchmark measurements; benchmark validation skipped but required."
@@ -90,6 +92,11 @@ jobs:
             --baseline reports/performance/benchmark-summary.json \
             --evidence-dir reports/performance/evidence \
             --checkout-sha "${{ github.sha }}"
+
+      - name: Check required performance artifacts
+        if: ${{ always() && !cancelled() }}
+        run: |
+          test -s reports/performance/benchmark-validation-manifest.json
 
       - name: Upload performance artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
