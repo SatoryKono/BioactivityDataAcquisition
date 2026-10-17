@@ -30,6 +30,7 @@ _WORKER_CRASH_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"worker.+(crash|terminated unexpectedly)", re.IGNORECASE),
     re.compile(r"xdist.+(internal error|Interrupted)", re.IGNORECASE),
 )
+_MAXFAIL_INTERRUPT = re.compile(r"stopping after \d+ failures", re.IGNORECASE)
 SUMMARY_FILENAME = "summary.txt"
 
 
@@ -90,8 +91,17 @@ def _extract_failed_nodeids(output: str) -> list[str]:
 
 
 def _detect_worker_crash(output: str) -> bool:
-    """Return True if output indicates xdist worker crash/termination."""
-    return any(pattern.search(output) for pattern in _WORKER_CRASH_PATTERNS)
+    """Return True if output indicates an xdist worker or node crash.
+
+    ``--maxfail`` stops with ``xdist.dsession.Interrupted: stopping after N
+    failures``. That line is an ordinary early stop, not a worker crash.
+    """
+    for line in output.splitlines():
+        if _MAXFAIL_INTERRUPT.search(line):
+            continue
+        if any(pattern.search(line) for pattern in _WORKER_CRASH_PATTERNS):
+            return True
+    return False
 
 
 def _effective_exit_code(result: PassResult, *, allow_no_tests: bool = False) -> int:
@@ -140,6 +150,24 @@ def _child_env() -> dict[str, str]:
     return env
 
 
+def _payload_explains_failure(payload: object) -> bool:
+    """True when one worker receipt already records why the pass failed."""
+    if not isinstance(payload, dict):
+        return False
+    if payload.get("exit_code") not in (0, None):
+        return True
+    if payload.get("completeness") != "complete":
+        return True
+    results = payload.get("results")
+    if not isinstance(results, dict):
+        return False
+    return any(
+        isinstance(item, dict)
+        and item.get("terminal") not in {"passed", "skipped", "xfailed"}
+        for item in results.values()
+    )
+
+
 def _worker_failure_is_explained(receipt: ReceiptInvocation, pass_name: str) -> bool:
     """True when a worker receipt already records the failing outcome."""
     root = receipt.directory / receipt.run_id / receipt.attempt / pass_name
@@ -152,18 +180,7 @@ def _worker_failure_is_explained(receipt: ReceiptInvocation, pass_name: str) -> 
             payload = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             return False
-        if not isinstance(payload, dict):
-            return False
-        if payload.get("exit_code") not in (0, None):
-            return True
-        if payload.get("completeness") != "complete":
-            return True
-        results = payload.get("results")
-        if isinstance(results, dict) and any(
-            isinstance(item, dict)
-            and item.get("terminal") not in {"passed", "skipped", "xfailed"}
-            for item in results.values()
-        ):
+        if _payload_explains_failure(payload):
             return True
     return False
 

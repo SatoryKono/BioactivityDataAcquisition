@@ -72,14 +72,12 @@ class _SameOriginAuthRedirectHandler(urllib.request.HTTPRedirectHandler):
         return redirected
 
 
-def _read_github_json(path: str) -> dict[str, Any]:
-    """Read the fixed repository API once; access/network failures fail closed."""
-    url = f"https://api.github.com/repos/{REPOSITORY}/{path}"
+def _request_github_json(url: str, token: str | None) -> dict[str, Any]:
+    """Read one GitHub JSON object. A scoped token is not required for public data."""
     headers = {
         "Accept": "application/vnd.github+json",
         "User-Agent": "BioETL-telemetry",
     }
-    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     if token:
         headers["Authorization"] = f"Bearer {token}"
     request = urllib.request.Request(url, headers=headers)
@@ -89,6 +87,23 @@ def _read_github_json(path: str) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError("GitHub response must be an object")
     return payload
+
+
+def _read_github_json(path: str) -> dict[str, Any]:
+    """Read the fixed repository API once; access/network failures fail closed.
+
+    ``GITHUB_TOKEN`` on a job limited to ``contents: read`` is rejected by the
+    pull-request API. Public repository data is still readable without that
+    token, so an authentication rejection retries once unauthenticated.
+    """
+    url = f"https://api.github.com/repos/{REPOSITORY}/{path}"
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    try:
+        return _request_github_json(url, token)
+    except urllib.error.HTTPError as exc:
+        if token and exc.code in {401, 403}:
+            return _request_github_json(url, None)
+        raise
 
 
 def _refresh_live_mapping(receipt: dict[str, Any]) -> dict[str, Any]:
@@ -108,7 +123,13 @@ def _refresh_live_mapping(receipt: dict[str, Any]) -> dict[str, Any]:
 
 def _git(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        ["git", *args], cwd=root, text=True, capture_output=True, check=False
+        ["git", *args],
+        cwd=root,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        check=False,
     )
 
 
@@ -364,15 +385,25 @@ def _pr_tree(root: Path, pr_head: str, *, live: bool) -> str:
     return tree
 
 
+LAST_REACHABILITY_REASON = ""
+
+
+def _reject(reason: str) -> bool:
+    """Record why a squash bridge was rejected and return False."""
+    global LAST_REACHABILITY_REASON
+    LAST_REACHABILITY_REASON = reason
+    return False
+
+
 def validate_squash_bridge(
     payload: dict[str, Any], receipt: dict[str, Any], root: Path, head: str
 ) -> bool:
     """Require merge history when HEAD is newer than a shallow squash checkout."""
     if not _receipt_matches_capture(receipt, payload):
-        return False
+        return _reject("receipt_mismatch")
     mapping = _github_mapping(receipt)
     if mapping is None:
-        return False
+        return _reject("mapping_missing")
     pr_head, merge = mapping
     if head != merge and _is_shallow(root):
         raise ShallowMergeHistoryError(
@@ -393,34 +424,38 @@ def validate_squash_bridge(
         if not related and live:
             related, _ = _source_relation(root, source, pr_head, live=True)
             tree = _pr_tree(root, pr_head, live=True)
-    if not related or not _ancestor(root, merge, head):
-        return False
+    if not related:
+        return _reject("source_unrelated")
+    if not _ancestor(root, merge, head):
+        return _reject("merge_not_ancestor")
     if not tree or tree != _tree(root, merge):
-        return False
+        return _reject("tree_mismatch")
     if not live and tree != receipt.get("merged_tree"):
-        return False
+        return _reject("merged_tree_mismatch")
     number = receipt["github_pull_request"]["number"]
     subject = _git(root, "show", "-s", "--format=%s", merge)
     if subject.returncode or f"(#{number})" not in subject.stdout:
-        return False
+        return _reject("subject_mismatch")
     return True
 
 
 def source_commit_is_reachable(payload: dict[str, Any], root: Path, head: str) -> bool:
     """Keep normal ancestry; require a reviewed bridge for a squash capture."""
+    global LAST_REACHABILITY_REASON
+    LAST_REACHABILITY_REASON = ""
     if _ancestor(root, str(payload["source_commit"]), head):
         return True
     try:
         receipt = json.loads((root / RECEIPT).read_text(encoding="utf-8"))
         if not _receipt_matches_capture(receipt, payload):
-            return False
+            return _reject("receipt_mismatch")
         if receipt.get("verification_mode") == "live_github":
             receipt = _refresh_live_mapping(receipt)
         return validate_squash_bridge(payload, receipt, root, head)
     except ShallowMergeHistoryError:
         raise
-    except (OSError, ValueError, KeyError, TypeError, AttributeError):
-        return False
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as exc:
+        return _reject(f"{type(exc).__name__}: {exc}")
 
 
 def _write_receipt_atomically(destination: Path, receipt: dict[str, Any]) -> None:

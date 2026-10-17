@@ -261,11 +261,13 @@ def terminal_outcome(phases: Mapping[str, str | None]) -> str:
     teardown = phases.get("teardown")
     if setup == "error":
         return "setup_error"
+    if teardown == "error" and (
+        call in {"xfailed", "xpassed"} or setup in {"xfailed", "xpassed"}
+    ):
+        return "teardown_error"
     if setup == "xfailed" or call == "xfailed":
         return "xfailed"
     if call == "xpassed" or setup == "xpassed":
-        if teardown == "error":
-            return "teardown_error"
         return "xpassed"
     if call == "failed":
         return "failed"
@@ -292,12 +294,36 @@ def _merge_phase(existing: str | None, new: str) -> str:
 
 
 def _source_diverged(before: Mapping[str, Any], after: Mapping[str, Any]) -> bool:
-    """True when the run dirties measured sources that were clean at start."""
+    """True when measured dirt appears or a dirty path is restored."""
     before_paths = before.get("measured_dirty_paths")
     after_paths = after.get("measured_dirty_paths")
     if isinstance(before_paths, list) and isinstance(after_paths, list):
-        return bool(set(after_paths) - set(before_paths))
+        return set(before_paths) != set(after_paths)
+    if before.get("clean") is False and after.get("clean") is not False:
+        return True
     return before.get("clean") is True and after.get("clean") is not True
+
+
+def _source_for_receipt(
+    before: Mapping[str, Any], after: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Keep the starting dirty set when the run restores tracked files.
+
+    A final clean snapshot must not replace an initial dirty one. The executed
+    nodeids would otherwise be reported as the committed HEAD.
+    """
+    before_paths = before.get("measured_dirty_paths")
+    after_paths = after.get("measured_dirty_paths")
+    if isinstance(before_paths, list) and isinstance(after_paths, list):
+        merged = dict(after)
+        paths = sorted(set(before_paths) | set(after_paths))
+        merged["measured_dirty_paths"] = paths
+        if paths:
+            merged["clean"] = False
+        return merged
+    if before.get("clean") is False and after.get("clean") is not False:
+        return dict(before)
+    return dict(after)
 
 
 def _final_exit_code(session: Any, exitstatus: Any) -> int:
@@ -434,6 +460,8 @@ class ReceiptPlugin:
             ),
             None,
         )
+        if interactor is None:
+            return sorted(self.results)
         pending: list[str] = []
         items = list(getattr(session, "items", []))
         torun = getattr(interactor, "torun", None)
@@ -442,6 +470,9 @@ class ReceiptPlugin:
                 for item in queued:
                     if isinstance(item, int) and 0 <= item < len(items):
                         pending.append(str(items[item].nodeid))
+        next_index = getattr(interactor, "nextitem_index", None)
+        if isinstance(next_index, int) and 0 <= next_index < len(items):
+            pending.append(str(items[next_index].nodeid))
         return sorted(set(self.results) | set(pending))
 
     def _completeness(self, early_stop: bool) -> str:
@@ -491,7 +522,7 @@ class ReceiptPlugin:
             self.selected_nodeids = assigned
         finished = source_snapshot(self.repo_root, self.receipt_dir)
         self.source_diverged = _source_diverged(self.source, finished)
-        self.source = finished
+        self.source = _source_for_receipt(self.source, finished)
         early_stop = self._early_stop(session)
         payload: dict[str, Any] = {
             "schema_version": _SCHEMA_VERSION,

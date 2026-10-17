@@ -13,6 +13,7 @@ import pytest
 
 from scripts.engineering.ci.pytest_receipts import (
     ReceiptPlugin,
+    _blank_phases,
     _is_run_output,
     _normalize_repo_path,
     _phases_finished,
@@ -462,6 +463,10 @@ def test_terminal_outcome_matrix() -> None:
     )
     assert terminal_outcome({"setup": "error"}) == "setup_error"
     assert terminal_outcome({"call": "xfailed"}) == "xfailed"
+    assert (
+        terminal_outcome({"setup": "passed", "call": "xfailed", "teardown": "error"})
+        == "teardown_error"
+    )
 
 
 def test_partial_phases_are_incomplete() -> None:
@@ -626,3 +631,107 @@ def test_dirty_sources_are_not_a_clean_head(receipts: Path, tmp_path: Path) -> N
     assert any(str(path).endswith("reports/quality/input.json") for path in dirty)
     assert not any(str(path).endswith("reports/noise.txt") for path in dirty)
     assert source_state["head"] != "unknown"
+
+
+def test_restored_dirty_path_stays_dirty_and_incomplete(
+    receipts: Path, tmp_path: Path
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    subprocess.run(["git", "init", "-b", "main"], cwd=repo, check=True)
+    source = repo / "src"
+    source.mkdir()
+    _write(source / "example.py", "VALUE = 1\n")
+    _write(repo / "test_restore.py", "def test_restore():\n    assert True\n")
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    subprocess.run(
+        [
+            "git",
+            "-c",
+            "user.email=receipt@example.com",
+            "-c",
+            "user.name=receipt",
+            "commit",
+            "-m",
+            "init",
+        ],
+        cwd=repo,
+        check=True,
+    )
+    _write(source / "example.py", "VALUE = 2\n")
+    _write(
+        repo / "test_restore.py",
+        "from pathlib import Path\n\n"
+        "def test_restore():\n"
+        "    Path('src/example.py').write_text('VALUE = 1\\n', encoding='utf-8')\n",
+    )
+    completed = _pytest(repo / "test_restore.py", receipts, repo_root=repo)
+    assert completed.returncode == 0, completed.stderr
+    payload = _load(receipts)
+    source_state = payload["source"]
+    assert isinstance(source_state, dict)
+    assert source_state["clean"] is False
+    dirty = source_state["measured_dirty_paths"]
+    assert isinstance(dirty, list)
+    assert any(str(path).endswith("src/example.py") for path in dirty)
+    assert payload["completeness"] == "incomplete"
+
+
+def test_assigned_shard_includes_popped_next_index() -> None:
+    plugin = object.__new__(ReceiptPlugin)
+    plugin.results = {"pkg/test_dist.py::test_fail": _blank_phases()}
+
+    class _Queue:
+        def lock(self) -> _Queue:
+            return self
+
+        def __enter__(self) -> list[int]:
+            return [2]
+
+        def __exit__(self, *_args: object) -> bool:
+            return False
+
+    class WorkerInteractor:
+        torun = _Queue()
+        nextitem_index = 1
+
+    class _Item:
+        def __init__(self, nodeid: str) -> None:
+            self.nodeid = nodeid
+
+    class _Config:
+        workerinput = {"workerid": "gw0"}
+        pluginmanager = type(
+            "PM",
+            (),
+            {"get_plugins": lambda self: [WorkerInteractor()]},
+        )()
+
+    class _Session:
+        config = _Config()
+        items = [
+            _Item("pkg/test_dist.py::test_fail"),
+            _Item("pkg/test_dist.py::test_next"),
+            _Item("pkg/test_dist.py::test_queued"),
+        ]
+
+    assigned = plugin._assigned_nodeids(_Session())
+    assert assigned == [
+        "pkg/test_dist.py::test_fail",
+        "pkg/test_dist.py::test_next",
+        "pkg/test_dist.py::test_queued",
+    ]
+
+
+def test_maxfail_interrupt_is_not_a_worker_crash() -> None:
+    from scripts.engineering.ci.run_pytest_resilient import _detect_worker_crash
+
+    assert not _detect_worker_crash(
+        "xdist.dsession.Interrupted: stopping after 1 failures\n"
+    )
+    assert _detect_worker_crash("[gw0] node down: not properly terminated\n")
+    assert _detect_worker_crash("worker gw1 terminated unexpectedly\n")
+    assert _detect_worker_crash(
+        "xdist.dsession.Interrupted: stopping after 1 failures\n"
+        "[gw0] node down: not properly terminated\n"
+    )
