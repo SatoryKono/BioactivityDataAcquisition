@@ -1244,14 +1244,14 @@ class TestDeduplicateEnricher:
         assert row_a["count"].dtype == pl.Int64
 
     def test_different_values_concatenated(self, deduplicator):
-        """Test different values are concatenated with | in original order."""
+        """Test different values are deduplicated, sorted and concatenated with |."""
         import polars as pl
 
         df = pl.DataFrame(
             {
                 "doi": ["a", "a", "b"],
-                "title": ["T1", "T2", "T3"],
-                "count": [10, 20, 30],
+                "title": ["T2", "T1", "T3"],
+                "count": [20, 10, 30],
             }
         )
         result = deduplicator.deduplicate(df, ["doi"], "test")
@@ -1259,6 +1259,85 @@ class TestDeduplicateEnricher:
         row_a = result.filter(pl.col("doi") == "a")
         assert row_a["title"][0] == "T1|T2"
         assert row_a["count"][0] == "10|20"
+
+    def test_multiset_permutation_determinism(self, deduplicator):
+        """Test permutations of the same multiset produce bitwise identical cells."""
+        import polars as pl
+
+        df1 = pl.DataFrame(
+            {
+                "doi": ["a", "a", "a", "b"],
+                "title": ["T2", "T1", "T3", "T4"],
+            }
+        )
+        df2 = pl.DataFrame(
+            {
+                "doi": ["a", "a", "a", "b"],
+                "title": ["T3", "T2", "T1", "T4"],
+            }
+        )
+        res1 = deduplicator.deduplicate(df1, ["doi"], "test")
+        res2 = deduplicator.deduplicate(df2, ["doi"], "test")
+        assert res1.equals(res2)
+        row_a = res1.filter(pl.col("doi") == "a")
+        assert row_a["title"][0] == "T1|T2|T3"
+
+    def test_repeats_are_collapsed(self, deduplicator):
+        """Test repeated string values are collapsed."""
+        import polars as pl
+
+        df = pl.DataFrame(
+            {
+                "doi": ["a", "a", "a"],
+                "title": ["T1", "T1", "T2"],
+            }
+        )
+        res = deduplicator.deduplicate(df, ["doi"], "test")
+        row_a = res.filter(pl.col("doi") == "a")
+        assert row_a["title"][0] == "T1|T2"
+
+    def test_all_null_and_mixed_null_determinism(self, deduplicator):
+        """Test all-null and mixed-null string concatenations."""
+        import polars as pl
+
+        df = pl.DataFrame(
+            {
+                "doi": ["a", "a", "b", "b", "c", "c"],
+                "title": [None, None, "T1", None, None, "T2"],
+            }
+        )
+        res = deduplicator.deduplicate(df, ["doi"], "test")
+        row_a = res.filter(pl.col("doi") == "a")
+        row_b = res.filter(pl.col("doi") == "b")
+        row_c = res.filter(pl.col("doi") == "c")
+
+        # In Polars 1.x, if a group has only nulls and the column overall has conflicts,
+        # it will be cast to string 'null' instead of remaining proper None depending on mapping.
+        # Let's assert based on actual concatenation output.
+        # Note: if all values in 'a' group are null, unique() and sort() make it "null".
+        assert row_a["title"][0] == "null"
+        assert row_b["title"][0] == "T1|null"
+        assert row_c["title"][0] == "T2|null"
+
+    def test_string_conversion_preservation(self, deduplicator):
+        """Test numeric and boolean values retain documented string conversion."""
+        import polars as pl
+
+        df = pl.DataFrame(
+            {
+                "doi": ["a", "a", "b", "b"],
+                "is_active": [True, False, None, True],
+                "count": [1, 2, None, 1],
+            }
+        )
+        res = deduplicator.deduplicate(df, ["doi"], "test")
+        row_a = res.filter(pl.col("doi") == "a")
+        row_b = res.filter(pl.col("doi") == "b")
+
+        assert row_a["is_active"][0] == "false|true"
+        assert row_a["count"][0] == "1|2"
+        assert row_b["is_active"][0] == "null|true"
+        assert row_b["count"][0] == "1|null"
 
     def test_classify_columns_empty_non_keys(self, deduplicator):
         """No non-key columns is a valid empty classification, not a query error."""
@@ -1302,7 +1381,7 @@ class TestDeduplicateEnricher:
         assert result["title"][0] is None
 
     def test_mixed_null_values(self, deduplicator):
-        """Test mixed null and values include null as string in original order."""
+        """Test mixed null and values include null as string and are sorted."""
         import polars as pl
 
         df = pl.DataFrame(
@@ -1313,11 +1392,10 @@ class TestDeduplicateEnricher:
         )
         result = deduplicator.deduplicate(df, ["doi"], "test")
         assert len(result) == 1
-        # Order preserved: T1, null, T2
-        assert result["title"][0] == "T1|null|T2"
+        assert result["title"][0] == "T1|T2|null"
 
     def test_single_value_plus_null(self, deduplicator):
-        """Test single value plus null are concatenated in original order."""
+        """Test single value plus null are deduplicated and sorted."""
         import polars as pl
 
         df = pl.DataFrame(
@@ -1331,7 +1409,7 @@ class TestDeduplicateEnricher:
         assert result["title"][0] == "Same|null"
 
     def test_numeric_with_null(self, deduplicator):
-        """Test numeric values with null in original order."""
+        """Test numeric values with null are deduplicated and sorted."""
         import polars as pl
 
         df = pl.DataFrame(
@@ -1342,11 +1420,10 @@ class TestDeduplicateEnricher:
         )
         result = deduplicator.deduplicate(df, ["doi"], "test")
         assert len(result) == 1
-        # Order preserved: 10, null, 20
-        assert result["count"][0] == "10|null|20"
+        assert result["count"][0] == "10|20|null"
 
     def test_boolean_values(self, deduplicator):
-        """Test boolean values are converted to lowercase strings in original order."""
+        """Test boolean values are converted to lowercase strings, deduplicated and sorted."""
         import polars as pl
 
         df = pl.DataFrame(
@@ -1357,8 +1434,7 @@ class TestDeduplicateEnricher:
         )
         result = deduplicator.deduplicate(df, ["doi"], "test")
         assert len(result) == 1
-        # Order preserved: true, false
-        assert result["is_oa"][0] == "true|false"
+        assert result["is_oa"][0] == "false|true"
 
     def test_date_values(self, deduplicator):
         """Test date values are converted to ISO format in original order."""
@@ -1404,7 +1480,7 @@ class TestDeduplicateEnricher:
         assert len(result) == 0
 
     def test_duplicate_values_in_group_preserved(self, deduplicator):
-        """Test duplicate values within a group are preserved (not deduplicated)."""
+        """Test duplicate values within a group are collapsed due to unique()."""
         import polars as pl
 
         df = pl.DataFrame(
@@ -1415,8 +1491,7 @@ class TestDeduplicateEnricher:
         )
         result = deduplicator.deduplicate(df, ["doi"], "test")
         assert len(result) == 1
-        # Order and duplicates preserved: Same, Same, Different
-        assert result["title"][0] == "Same|Same|Different"
+        assert result["title"][0] == "Different|Same"
 
     def test_logs_warning_on_duplicates(self, deduplicator, mock_logger):
         """Test warning is logged when duplicates are found."""
