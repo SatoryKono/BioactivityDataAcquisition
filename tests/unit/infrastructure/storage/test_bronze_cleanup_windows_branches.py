@@ -1175,7 +1175,13 @@ def test_xattr_cache_keeps_only_unsupported_errno(
     pending: OSError | None = None
 
     def fake_open(path, flags, *args, **kwargs):
-        if isinstance(path, str) and "bioetl-xattr-probe-" in path:
+        # Directory removal reopens the same prefix with different flags.
+        probe_flags = os.O_RDONLY | cleanup_core._O_DIRECTORY | cleanup_core._O_NOFOLLOW
+        if (
+            isinstance(path, str)
+            and "bioetl-xattr-probe-" in path
+            and flags == probe_flags
+        ):
             return 7
         return real_open(path, flags, *args, **kwargs)
 

@@ -477,6 +477,32 @@ def _application_core_debt_outcome(
     return "improved" if improved else "unchanged"
 
 
+def _application_core_closeout_status(
+    outcome: str, metrics: dict[str, float], baseline_covered: float
+) -> str:
+    """Local closeout follows application_core counts, not repo-wide debt."""
+    core_clear = (
+        metrics["application_core_uncovered_module_count"] == 0
+        and metrics["application_core_unmeasured_module_count"] == 0
+    )
+    closeable = (
+        outcome != "current_inventory_regressed"
+        and core_clear
+        and metrics["application_core_covered_line_percent"] > baseline_covered
+    )
+    if closeable:
+        return "validated_local_closeable"
+    return "current_inventory_regressed"
+
+
+def _closeout_predecessor(payload: dict) -> dict:
+    """Archived metrics for a binding that already matches the inventory."""
+    history = payload.get("previous_current_bindings") or []
+    if not history:
+        return {}
+    return history[-1].get("current_metrics") or {}
+
+
 def _refresh_application_core_closeout(*, check_only: bool) -> None:
     """Bind the live closeout view to inventory without inventing measurements."""
     path = ROOT / "reports/quality/issue-5272-application-core-coverage-closeout.json"
@@ -496,13 +522,30 @@ def _refresh_application_core_closeout(*, check_only: bool) -> None:
         and row["coverage_percent"] < 85
         for row in inventory["modules"]
     )
-    if (
+    baseline_covered = payload["baseline_metrics"][
+        "application_core_covered_line_percent"
+    ]
+    binding_matches = (
         payload.get("current_metrics") == metrics
         and payload["parent_epic_status"]["remaining_below_85_module_count"]
         == below_floor
         and payload.get("current_binding_refresh", {}).get("source_tree_sha256")
         == inventory["source_tree_sha256"]
-    ):
+    )
+    if binding_matches:
+        outcome = _application_core_debt_outcome(
+            metrics, _closeout_predecessor(payload), payload["baseline_metrics"]
+        )
+        status = _application_core_closeout_status(outcome, metrics, baseline_covered)
+        if payload.get("status") == status and payload.get("debt_outcome") == outcome:
+            return
+        if check_only:
+            raise SystemExit(
+                "Application-core closeout differs from accepted inventory"
+            )
+        payload["status"] = status
+        payload["debt_outcome"] = outcome
+        _write_text_atomically(path, json.dumps(payload, indent=2) + "\n")
         return
     if check_only:
         raise SystemExit("Application-core closeout differs from accepted inventory")
@@ -527,14 +570,8 @@ def _refresh_application_core_closeout(*, check_only: bool) -> None:
         "remaining_below_85_module_count": below_floor,
         "reason": "Live accepted-inventory floor count; this binding does not close the parent epic.",
     }
-    closeable = (
-        outcome != "current_inventory_regressed"
-        and not any(value for key, value in metrics.items() if key.endswith("count"))
-        and core["covered_line_percent"]
-        > payload["baseline_metrics"]["application_core_covered_line_percent"]
-    )
-    payload["status"] = (
-        "validated_local_closeable" if closeable else "current_inventory_regressed"
+    payload["status"] = _application_core_closeout_status(
+        outcome, metrics, baseline_covered
     )
     payload["debt_outcome"] = outcome
     payload["current_binding_refresh"] = {

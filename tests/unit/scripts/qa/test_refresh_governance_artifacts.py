@@ -430,3 +430,160 @@ def test_application_core_closeout_monotonic_comparison(
     refresh._refresh_application_core_closeout(check_only=True)
     refresh._refresh_application_core_closeout(check_only=False)
     assert path.read_bytes() == before
+
+
+def _core_inventory(
+    *,
+    uncovered: int,
+    unmeasured: int,
+    coverage: float,
+    source: str,
+) -> dict:
+    return {
+        "source_tree_sha256": source,
+        "summary": {
+            "status_counts": {"uncovered": uncovered},
+            "unmeasured_module_count": unmeasured,
+            "hotspot_family_coverage": {
+                "application_core": {
+                    "covered_line_percent": coverage,
+                    "status_counts": {"uncovered": 0},
+                    "unmeasured_module_count": 0,
+                }
+            },
+        },
+        "modules": [],
+    }
+
+
+def test_application_core_closeout_accepts_stable_repo_debt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import json
+
+    quality = tmp_path / "reports/quality"
+    quality.mkdir(parents=True)
+    path = quality / "issue-5272-application-core-coverage-closeout.json"
+    current = {
+        "repo_uncovered_module_count": 4,
+        "repo_unmeasured_module_count": 2,
+        "application_core_covered_line_percent": 99.79,
+        "application_core_uncovered_module_count": 0,
+        "application_core_unmeasured_module_count": 0,
+    }
+    path.write_text(
+        json.dumps(
+            {
+                "current_metrics": current,
+                "baseline_metrics": {"application_core_covered_line_percent": 49.09},
+                "parent_epic_status": {"remaining_below_85_module_count": 0},
+                "status": "current_inventory_regressed",
+                "debt_outcome": "unchanged",
+            }
+        ),
+        encoding="utf-8",
+    )
+    (quality / "module-coverage-inventory.json").write_text(
+        json.dumps(
+            _core_inventory(
+                uncovered=4, unmeasured=2, coverage=99.79, source="repo-debt"
+            )
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(refresh, "ROOT", tmp_path)
+    refresh._refresh_application_core_closeout(check_only=False)
+    updated = json.loads(path.read_text())
+    assert updated["status"] == "validated_local_closeable"
+    assert updated["debt_outcome"] == "unchanged"
+    assert updated["current_metrics"]["repo_uncovered_module_count"] == 4
+
+
+def test_application_core_closeout_repo_count_increase_stays_regressed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import json
+
+    quality = tmp_path / "reports/quality"
+    quality.mkdir(parents=True)
+    path = quality / "issue-5272-application-core-coverage-closeout.json"
+    previous = {
+        "repo_uncovered_module_count": 4,
+        "repo_unmeasured_module_count": 2,
+        "application_core_covered_line_percent": 99.79,
+        "application_core_uncovered_module_count": 0,
+        "application_core_unmeasured_module_count": 0,
+    }
+    path.write_text(
+        json.dumps(
+            {
+                "current_metrics": previous,
+                "baseline_metrics": {"application_core_covered_line_percent": 49.09},
+                "parent_epic_status": {"remaining_below_85_module_count": 0},
+            }
+        ),
+        encoding="utf-8",
+    )
+    (quality / "module-coverage-inventory.json").write_text(
+        json.dumps(
+            _core_inventory(
+                uncovered=5, unmeasured=2, coverage=99.79, source="repo-grew"
+            )
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(refresh, "ROOT", tmp_path)
+    refresh._refresh_application_core_closeout(check_only=False)
+    updated = json.loads(path.read_text())
+    assert updated["debt_outcome"] == "current_inventory_regressed"
+    assert updated["status"] == "current_inventory_regressed"
+
+
+def test_application_core_closeout_repairs_stale_status_in_place(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import json
+
+    quality = tmp_path / "reports/quality"
+    quality.mkdir(parents=True)
+    path = quality / "issue-5272-application-core-coverage-closeout.json"
+    current = {
+        "repo_uncovered_module_count": 3,
+        "repo_unmeasured_module_count": 1,
+        "application_core_covered_line_percent": 99.79,
+        "application_core_uncovered_module_count": 0,
+        "application_core_unmeasured_module_count": 0,
+    }
+    predecessor = {**current, "application_core_covered_line_percent": 90.0}
+    initial = {
+        "current_metrics": current,
+        "baseline_metrics": {"application_core_covered_line_percent": 49.09},
+        "parent_epic_status": {"remaining_below_85_module_count": 0},
+        "current_binding_refresh": {"source_tree_sha256": "bound-tree"},
+        "status": "current_inventory_regressed",
+        "debt_outcome": "improved",
+        "previous_current_bindings": [{"current_metrics": predecessor}],
+    }
+    path.write_text(json.dumps(initial), encoding="utf-8")
+    (quality / "module-coverage-inventory.json").write_text(
+        json.dumps(
+            _core_inventory(
+                uncovered=3, unmeasured=1, coverage=99.79, source="bound-tree"
+            )
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(refresh, "ROOT", tmp_path)
+    original = path.read_bytes()
+    with pytest.raises(SystemExit, match="differs from accepted inventory"):
+        refresh._refresh_application_core_closeout(check_only=True)
+    assert path.read_bytes() == original
+    refresh._refresh_application_core_closeout(check_only=False)
+    repaired = json.loads(path.read_text())
+    assert repaired["status"] == "validated_local_closeable"
+    assert repaired["debt_outcome"] == "improved"
+    assert (
+        repaired["previous_current_bindings"] == (initial["previous_current_bindings"])
+    )
+    assert repaired["current_metrics"] == current
+    refresh._refresh_application_core_closeout(check_only=True)
